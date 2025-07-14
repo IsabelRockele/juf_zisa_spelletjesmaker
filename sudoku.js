@@ -8,10 +8,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let uploadedImageData = new Set(); // Voor detectie van duplicaten bij uploads
     let currentPuzzle = [];
 
-    // NIEUW: Voor themaselectie
+    // Voor themaselectie
     let selectedTheme = null; // Houdt bij welk thema is geselecteerd (bijv. "herfst")
     let allLoadedThemeImages = []; // Array met ALLE 20 geladen Image objecten van het geselecteerde thema
-    // AANPASSING: selectedThemeImagesForSudoku kan nu > 4 afbeeldingen bevatten
     let selectedThemeImagesForSudoku = []; // Array met de daadwerkelijk door de gebruiker gekozen thema Image objecten voor de Sudoku
 
     // --- DOM-elementen ophalen ---
@@ -44,16 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
         "winter": [], "kerst": [], "lente": [], "pasen": [], "carnaval": [], "zomer": []
     };
 
-    // Functie om de afbeeldingspaden voor elk thema te vullen
     function populateThemeImagePaths() {
         for (const theme in themeImagePaths) {
-            for (let i = 1; i <= 20; i++) { // Verwacht 20 afbeeldingen per thema (01 t/m 20)
+            for (let i = 1; i <= 20; i++) {
                 const paddedIndex = i.toString().padStart(2, '0');
                 themeImagePaths[theme].push(`sudoku_afbeeldingen/${theme}/${paddedIndex}.png`);
             }
         }
     }
-    populateThemeImagePaths(); // Roep direct aan bij initialisatie
+    populateThemeImagePaths();
 
     // --- Sudoku Generatie Logica ---
     const shuffle = (array) => {
@@ -76,7 +74,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 grid[r][c] = grid[r - 1][(c + ((r % 2 === 0) ? 1 : 2)) % size];
             }
         }
-        // Extra shuffles voor meer variatie
         for (let i = 0; i < 5; i++) {
             shuffleRows(grid);
             shuffleCols(grid);
@@ -89,8 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function shuffleRows(grid) {
         const rowBlocks = [[0,1], [2,3]];
         for (const block of rowBlocks) {
-            shuffle(block);
-            const [r1, r2] = block;
+            const [r1, r2] = shuffle(block);
             [grid[r1], grid[r2]] = [grid[r2], grid[r1]];
         }
     }
@@ -98,8 +94,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function shuffleCols(grid) {
         const colBlocks = [[0,1], [2,3]];
         for (const block of colBlocks) {
-            shuffle(block);
-            const [c1, c2] = block;
+            const [c1, c2] = shuffle(block);
             for (let r = 0; r < size; r++) {
                 [grid[r][c1], grid[r][c2]] = [grid[r][c2], grid[r][c1]];
             }
@@ -107,8 +102,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function shuffleBlockRows(grid) {
-        const blocks = [0, 1]; // Block 0: rows 0,1; Block 1: rows 2,3
-        shuffle(blocks);
+        const blocks = shuffle([0, 1]);
         const newGrid = Array(size).fill(null).map(() => Array(size));
         for (let r = 0; r < size; r++) {
             const originalBlockIndex = Math.floor(r / 2);
@@ -120,8 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function shuffleBlockCols(grid) {
-        const blocks = [0, 1]; // Block 0: cols 0,1; Block 1: cols 2,3
-        shuffle(blocks);
+        const blocks = shuffle([0, 1]);
         const newGrid = Array(size).fill(null).map(() => Array(size));
         for (let r = 0; r < size; r++) {
             for (let c = 0; c < size; c++) {
@@ -139,59 +132,61 @@ document.addEventListener("DOMContentLoaded", () => {
         const difficulties = { easy: 6, medium: 8, hard: 10 };
         let cells = [];
         for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) cells.push({ r, c });
-        shuffle(cells);
         
         const cellsToRemove = Math.min(difficulties[difficulty] || 8, size * size);
-        cells.slice(0, cellsToRemove).forEach(cell => puzzle[cell.r][cell.c] = 0);
+        shuffle(cells).slice(0, cellsToRemove).forEach(cell => puzzle[cell.r][cell.c] = 0);
         return puzzle;
     }
 
-    // --- Canvas Teken Logica ---
-    function drawGrid() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // --- Canvas Teken Logica (AANGEPAST VOOR SCHALEN) ---
+    function drawGrid(ctx, x, y, size) {
+        const cellSize = size / 4;
+        ctx.save();
+        ctx.translate(x, y);
+
         ctx.fillStyle = "white";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const cellSize = canvas.width / size;
-        for (let i = 0; i <= size; i++) {
-            ctx.lineWidth = (i % 2 === 0) ? 4 : 1.5;
+        ctx.fillRect(0, 0, size, size);
+
+        for (let i = 0; i <= 4; i++) {
+            ctx.lineWidth = (i % 2 === 0) ? 2.5 : 1; // Lijnen iets dunner voor kleinere weergave
             ctx.strokeStyle = '#004080';
             ctx.beginPath();
-            ctx.moveTo(i * cellSize, 0); ctx.lineTo(i * cellSize, canvas.height); ctx.stroke();
+            ctx.moveTo(i * cellSize, 0); ctx.lineTo(i * cellSize, size); ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(0, i * cellSize); ctx.lineTo(canvas.width, i * cellSize); ctx.stroke();
+            ctx.moveTo(0, i * cellSize); ctx.lineTo(size, i * cellSize); ctx.stroke();
         }
+        ctx.restore();
     }
 
-    function drawPuzzle(puzzle, type, imagesToUse) {
-        drawGrid();
-        const cellSize = canvas.width / size;
+    function drawPuzzle(ctx, puzzle, type, imagesToUse, x, y, size) {
+        drawGrid(ctx, x, y, size);
+        const cellSize = size / 4;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        for (let r = 0; r < size; r++) {
-            for (let c = 0; c < size; c++) {
+
+        for (let r = 0; r < 4; r++) {
+            for (let c = 0; c < 4; c++) {
                 const value = puzzle[r][c];
                 if (value === 0) continue;
-                const x = c * cellSize + cellSize / 2;
-                const y = r * cellSize + cellSize / 2;
+
+                const drawX = x + c * cellSize + cellSize / 2;
+                const drawY = y + r * cellSize + cellSize / 2;
+
                 if (type === 'getallen') {
                     ctx.fillStyle = '#000';
                     ctx.font = `${cellSize * 0.6}px Arial`;
-                    ctx.fillText(value, x, y);
+                    ctx.fillText(value, drawX, drawY);
                 } else {
-                    const imgIndex = value - 1; // Waarden 1-4, array indices 0-3
-                    if (imagesToUse[imgIndex] && imagesToUse[imgIndex].complete) {
+                    const imgIndex = value - 1;
+                    if (imagesToUse && imagesToUse[imgIndex] && imagesToUse[imgIndex].complete) {
                         const margin = cellSize * 0.1;
-                        ctx.drawImage(imagesToUse[imgIndex], c * cellSize + margin, r * cellSize + margin, cellSize - 2 * margin, cellSize - 2 * margin);
-                    } else if (imagesToUse[imgIndex]) {
-                        ctx.fillStyle = '#999';
-                        ctx.font = `${cellSize * 0.4}px Arial`;
-                        ctx.fillText(`Laden ${value}`, x, y);
+                        ctx.drawImage(imagesToUse[imgIndex], x + c * cellSize + margin, y + r * cellSize + margin, cellSize - 2 * margin, cellSize - 2 * margin);
                     }
                 }
             }
         }
     }
-
+    
     // --- UI Update & Validatie Functies ---
     function getNeededImagesCount() {
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
@@ -200,145 +195,105 @@ document.addEventListener("DOMContentLoaded", () => {
         const aantal = parseInt(aantalSelect.value);
         const variety = document.querySelector('input[name="imageVariety"]:checked').value;
         
-        // 'needed' is nu het totaal aantal UNIEKE afbeeldingen dat nodig is voor het werkblad
         return (variety === 'different' && aantal > 1) ? size * aantal : size;
     }
     
     function updateUiForImageOptions() {
         const aantal = parseInt(aantalSelect.value);
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        const needed = getNeededImagesCount(); // Haal hier de "needed" op
+        const needed = getNeededImagesCount();
         
-        // Algemene afbeeldingsopties: Thema selectie en de upload/variety opties
         themeSelectionGroup.style.display = (type === 'afbeeldingen') ? 'block' : 'none';
         imageControls.style.display = (type === 'afbeeldingen') ? 'block' : 'none';
 
-        // AANPASSING: Verberg themeImageSelection expliciet als er geen thema geselecteerd is
-        // of als de bevestiging al is gedaan (wat leidt tot selectedThemeImagesForSudoku.length === needed)
         const isThemeConfirmed = (selectedTheme && selectedThemeImagesForSudoku.length === needed);
         themeImageSelection.style.display = (type === 'afbeeldingen' && selectedTheme && !isThemeConfirmed) ? 'block' : 'none';
 
-
-        // Toon/verberg user upload controls: Alleen als 'afbeeldingen' geselecteerd is EN GEEN thema
         userUploadControls.style.display = (type === 'afbeeldingen' && !selectedTheme) ? 'block' : 'none';
-        
-        // Toon/verberg "verschillende afbeeldingen" optie: Alleen als 'afbeeldingen' geselecteerd is,
-        // EN meerdere sudoku's (aantal > 1)
         imageVarietyControls.style.display = (type === 'afbeeldingen' && aantal > 1) ? 'block' : 'none';
 
-        if (aantal > 1) {
-            aantalMelding.textContent = `Het werkblad zal ${aantal} verschillende sudoku's bevatten.`;
-        } else {
-            aantalMelding.textContent = '';
-        }
+        aantalMelding.textContent = (aantal > 1) ? `Het werkblad zal ${aantal} verschillende sudoku's bevatten.` : '';
         
-        updateImageUploadLabel(); // Zorgt ervoor dat de labels worden bijgewerkt
+        updateImageUploadLabel();
         renderImagePreviews();
     }
 
     function updateImageUploadLabel() {
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        const aantal = parseInt(aantalSelect.value);
-        const variety = document.querySelector('input[name="imageVariety"]:checked').value;
-        const needed = getNeededImagesCount(); // Dynamisch benodigd aantal
-
         if (type === 'getallen') {
             meldingContainer.textContent = '';
             return;
         }
 
+        const needed = getNeededImagesCount();
         if (selectedTheme) {
-            // Label voor thema selectie is nu dynamisch en verwijst naar 'needed'
             themeImageSelectionLabel.textContent = `Kies ${needed} afbeelding(en) uit het thema:`;
-            
             const currentSelectedCount = selectedThemeImagesForSudoku.length;
-            let statusText = '';
             if (currentSelectedCount < needed) {
-                statusText = `Selecteer nog ${needed - currentSelectedCount} afbeelding(en) uit het thema.`;
+                meldingContainer.textContent = `Selecteer nog ${needed - currentSelectedCount} afbeelding(en).`;
                 meldingContainer.style.color = '#d9534f';
                 confirmThemeImagesBtn.disabled = true;
             } else if (currentSelectedCount > needed) {
-                statusText = `Je hebt teveel afbeeldingen geselecteerd (${currentSelectedCount} van ${needed}). Verwijder er ${currentSelectedCount - needed}.`;
+                meldingContainer.textContent = `Je hebt er ${currentSelectedCount - needed} te veel geselecteerd.`;
                 meldingContainer.style.color = '#d9534f';
                 confirmThemeImagesBtn.disabled = true;
-            }
-            else { // currentSelectedCount === needed
-                statusText = `Je hebt ${currentSelectedCount} afbeelding(en) geselecteerd. Klik op 'Bevestig selectie'.`;
+            } else {
+                meldingContainer.textContent = `Perfect! Klik op 'Bevestig selectie'.`;
                 meldingContainer.style.color = 'green';
                 confirmThemeImagesBtn.disabled = false;
             }
-            meldingContainer.textContent = statusText;
-            
-            // imageInputLabel is verborgen bij themaselectie, maar we houden de tekst toch correct.
-            imageInputLabel.textContent = `Kies ${needed} afbeeldingen:`;
             return;
         }
 
-        // Logica voor gebruikersuploads (wanneer geen thema is gekozen)
         const currentUploadedCount = userImages.length;
         imageInputLabel.textContent = `Kies ${needed} afbeeldingen:`;
-        let statusText = `${currentUploadedCount}/${needed} geselecteerd.`;
-        
         if (needed > 0 && currentUploadedCount < needed) {
-            statusText += ` Nog ${needed - currentUploadedCount} nodig.`;
+            meldingContainer.textContent = `${currentUploadedCount}/${needed} geselecteerd. Nog ${needed - currentUploadedCount} nodig.`;
             meldingContainer.style.color = '#d9534f';
         } else if (currentUploadedCount >= needed && needed > 0) {
+            meldingContainer.textContent = `Perfect! Je hebt ${currentUploadedCount} unieke afbeeldingen.`;
             meldingContainer.style.color = 'green';
-            statusText = `Perfect! Je hebt ${currentUploadedCount} unieke afbeeldingen geselecteerd.`;
         } else {
-            statusText = ''; // Geen melding als geen afbeeldingen nodig zijn
+            meldingContainer.textContent = '';
         }
-
-        meldingContainer.textContent = statusText;
     }
 
     function renderImagePreviews() {
-        imagePreviews.innerHTML = ''; // Leeg user uploads preview
-        selectableThemeImagePreviews.innerHTML = ''; // Leeg themapreview
+        imagePreviews.innerHTML = '';
+        selectableThemeImagePreviews.innerHTML = '';
 
-        // Check welke set afbeeldingen getoond moet worden voor previews
-        const imagesToRenderInPreviews = selectedTheme ? allLoadedThemeImages : userImages;
+        const imagesToRender = selectedTheme ? allLoadedThemeImages : userImages;
         const previewContainer = selectedTheme ? selectableThemeImagePreviews : imagePreviews;
 
-        imagesToRenderInPreviews.forEach(img => {
+        imagesToRender.forEach(img => {
             const imgWrapper = document.createElement('div');
-            imgWrapper.classList.add('theme-image-wrapper'); // Gebruik dezelfde klasse voor beide types previews
+            imgWrapper.classList.add('theme-image-wrapper');
             
             const previewImg = document.createElement('img');
             previewImg.src = img.src;
-            previewImg.dataset.src = img.src; // Sla src op om te matchen
-
-            // Voeg 'selected' klasse toe als deze afbeelding is geselecteerd (voor thema's)
-            if (selectedTheme && selectedThemeImagesForSudoku.some(selectedImg => selectedImg.src === img.src)) {
-                imgWrapper.classList.add('selected');
-            }
-
             imgWrapper.appendChild(previewImg);
             previewContainer.appendChild(imgWrapper);
 
-            // Alleen toevoegen click listener als het thema-afbeeldingen zijn
             if (selectedTheme) {
+                if (selectedThemeImagesForSudoku.some(selectedImg => selectedImg.src === img.src)) {
+                    imgWrapper.classList.add('selected');
+                }
                 imgWrapper.addEventListener('click', () => {
-                    const src = previewImg.dataset.src;
-                    const index = selectedThemeImagesForSudoku.findIndex(selectedImg => selectedImg.src === src);
-                    const needed = getNeededImagesCount(); // Haal dynamisch needed op
-
+                    const index = selectedThemeImagesForSudoku.findIndex(sImg => sImg.src === img.src);
+                    const needed = getNeededImagesCount();
                     if (index > -1) {
-                        // Deselecteren
                         selectedThemeImagesForSudoku.splice(index, 1);
                         imgWrapper.classList.remove('selected');
-                    } else if (selectedThemeImagesForSudoku.length < needed) { // AANPASSING: check tegen 'needed'
-                        // Selecteren (maximaal benodigde hoeveelheid)
+                    } else if (selectedThemeImagesForSudoku.length < needed) {
                         selectedThemeImagesForSudoku.push(img);
                         imgWrapper.classList.add('selected');
                     }
-                    updateImageUploadLabel(); // Update melding en knop status
+                    updateImageUploadLabel();
                 });
             }
         });
     }
 
-    // --- Afbeelding laad helper functie ---
     function loadImage(src) {
         return new Promise((resolve, reject) => {
             const img = new Image();
@@ -351,64 +306,81 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- Event Handlers ---
     async function generateAndDraw() {
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        let imagesToUseInCanvas = [];
+        const aantal = parseInt(aantalSelect.value);
+        const variety = document.querySelector('input[name="imageVariety"]:checked').value;
+        const useDifferentImagesPerSudoku = (type === 'afbeeldingen' && aantal > 1 && variety === 'different');
 
+        let imagesForWorksheet = [];
         if (type === 'afbeeldingen') {
-            const needed = getNeededImagesCount(); // Haal de benodigde afbeeldingen op
-            if (selectedTheme) {
-                if (selectedThemeImagesForSudoku.length !== needed) {
-                    drawGrid(); // Geen afbeeldingen om te tekenen als niet correct aantal geselecteerd
-                    return;
-                }
-                // Voor de weergave van één sudoku, pak de eerste 'size' (4) geselecteerde afbeeldingen
-                imagesToUseInCanvas = selectedThemeImagesForSudoku.slice(0, size);
-            } else {
-                // Als geen thema gekozen, gebruik de geüploade afbeeldingen
-                if (userImages.length < needed) {
-                    drawGrid();
-                    return;
-                }
-                imagesToUseInCanvas = userImages.slice(0, size); // Gebruik de eerste 4 van de geüploade
+            const needed = getNeededImagesCount();
+            const sourceImages = selectedTheme ? selectedThemeImagesForSudoku : userImages;
+            if (sourceImages.length < needed) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = "white";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                updateImageUploadLabel();
+                return;
             }
+            imagesForWorksheet = sourceImages;
         }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cols = (aantal === 2 || aantal === 4) ? 2 : 1;
+        const rows = (aantal === 3) ? 3 : (aantal === 4 ? 2 : (aantal === 1 ? 1 : (aantal === 2 ? 1 : 2)));
         
-        meldingContainer.textContent = ''; // Wis melding als alles klaar is
-        currentPuzzle = createPuzzle(generateSolvedGrid(), difficultySelect.value);
-        drawPuzzle(currentPuzzle, type, imagesToUseInCanvas); // Geef de juiste set afbeeldingen mee
+        const padding = 15;
+        const availableWidth = canvas.width - (cols + 1) * padding;
+        const availableHeight = canvas.height - (rows + 1) * padding;
+        const sudokuSize = Math.min(availableWidth / cols, availableHeight / rows);
+
+        for (let i = 0; i < aantal; i++) {
+            const puzzle = createPuzzle(generateSolvedGrid(), difficultySelect.value);
+            if (i === 0) currentPuzzle = puzzle;
+
+            let imagesForCurrentSudoku = [];
+            if (type === 'afbeeldingen') {
+                imagesForCurrentSudoku = useDifferentImagesPerSudoku ?
+                    imagesForWorksheet.slice(i * size, (i + 1) * size) :
+                    imagesForWorksheet.slice(0, size);
+                shuffle(imagesForCurrentSudoku);
+            }
+            
+            const col = i % cols;
+            const row = (cols === 1) ? i : Math.floor(i / cols);
+            const x = padding + col * (sudokuSize + padding);
+            const y = padding + row * (sudokuSize + padding);
+
+            drawPuzzle(ctx, puzzle, type, imagesForCurrentSudoku, x, y, sudokuSize);
+        }
     }
     
-    // Luister naar wijzigingen in type, aantal en imageVariety
-    [...typeRadios, ...imageVarietyRadios, aantalSelect].forEach(el => {
+    [...typeRadios, ...imageVarietyRadios, aantalSelect, difficultySelect].forEach(el => {
         el.addEventListener('change', () => {
-            clearSelectionAndResetUI();
+            if (el.name === 'sudokuType' || el.name === 'imageVariety' || el.id === 'aantalSudokus') {
+                clearSelectionAndResetUI();
+            } else {
+                generateAndDraw();
+            }
         });
     });
 
-    // NIEUW: Event listener voor thema selectie
     themeSelect.addEventListener('change', async (event) => {
         const theme = event.target.value;
-        clearSelectionAndResetUI(false); // Reset alles behalve de themeSelect zelf
-        selectedTheme = theme; // Update de globale variabele
+        clearSelectionAndResetUI(false);
+        selectedTheme = theme;
 
-        if (theme === "") {
-            // Geen thema geselecteerd, schakel terug naar user uploads
-            userImages = [];
-            uploadedImageData.clear();
-        } else {
-            // Thema geselecteerd, laad ALLE thema-afbeeldingen
-            userImages = []; // Leeg de user upload images
-            uploadedImageData.clear();
-            selectedThemeImagesForSudoku = []; // Reset selectie voor thema
-
+        if (theme) {
             meldingContainer.textContent = `Thema ${themeSelect.options[themeSelect.selectedIndex].text} laden...`;
             try {
                 allLoadedThemeImages = await Promise.all(themeImagePaths[theme].map(path => loadImage(path)));
-                meldingContainer.textContent = ''; // Wis laadmelding
+                meldingContainer.textContent = '';
             } catch (error) {
-                console.error("Fout bij laden alle thema-afbeeldingen:", error);
-                meldingContainer.textContent = "Fout bij laden thema-afbeeldingen. Controleer de afbeeldingspaden.";
+                meldingContainer.textContent = "Fout bij laden thema-afbeeldingen.";
                 allLoadedThemeImages = [];
-                selectedTheme = null; // Reset thema als er een fout is
+                selectedTheme = null;
                 themeSelect.value = "";
             }
         }
@@ -416,65 +388,36 @@ document.addEventListener("DOMContentLoaded", () => {
         generateAndDraw();
     });
 
-    // NIEUW: Event listener voor "Bevestig selectie" knop
     confirmThemeImagesBtn.addEventListener('click', async () => {
-        const needed = getNeededImagesCount(); // Haal benodigde op het moment van bevestiging
+        const needed = getNeededImagesCount();
         if (selectedThemeImagesForSudoku.length === needed) {
-            // Wacht tot alle geselecteerde afbeeldingen volledig zijn geladen
-            await Promise.all(selectedThemeImagesForSudoku.map(img => new Promise(resolve => {
-                if (img.complete) resolve();
-                else img.onload = resolve;
-            })));
-            
-            // AANPASSING: Verberg de themaselectie-UI na bevestiging
-            // Dit wordt nu afgehandeld door updateUiForImageOptions() op een meer consistente manier.
-            // themeImageSelection.style.display = 'none';
-
-            updateUiForImageOptions(); // Deze zal nu themeImageSelection verbergen
-            generateAndDraw(); // Genereer Sudoku nu de afbeeldingen klaar zijn
-        } else {
-            meldingContainer.textContent = `Selecteer precies ${needed} afbeeldingen om te bevestigen. Je hebt er ${selectedThemeImagesForSudoku.length} geselecteerd.`;
-            meldingContainer.style.color = '#d9534f';
+            await Promise.all(selectedThemeImagesForSudoku.map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; })));
+            updateUiForImageOptions();
+            generateAndDraw();
         }
     });
 
-
     imageInput.addEventListener('change', async (event) => {
-        const files = event.target.files;
-        const needed = getNeededImagesCount();
-        let duplicates = [];
-        let newImagesLoaded = [];
-
-        // Als er een thema geselecteerd is, negeer dan file input
-        if (selectedTheme) {
+        const files = Array.from(event.target.files);
+        if (selectedTheme || files.length === 0) {
             imageInput.value = null;
             return;
         }
 
+        const needed = getNeededImagesCount();
         userImages = [];
         uploadedImageData.clear();
 
-        if (files.length === 0) {
-            renderImagePreviews();
-            updateImageUploadLabel();
-            generateAndDraw();
-            return;
-        }
-
-        const readers = Array.from(files).map(file => {
-            return new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve({ dataURL: e.target.result, file: file });
-                reader.readAsDataURL(file);
-            });
-        });
+        const readers = files.map(file => new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve({ dataURL: e.target.result });
+            reader.readAsDataURL(file);
+        }));
 
         const results = await Promise.all(readers);
-
-        for (const { dataURL, file } of results) {
-            if (uploadedImageData.has(dataURL)) {
-                duplicates.push(file.name);
-            } else if (newImagesLoaded.length < needed) {
+        let newImagesLoaded = [];
+        for (const { dataURL } of results) {
+            if (!uploadedImageData.has(dataURL) && newImagesLoaded.length < needed) {
                 uploadedImageData.add(dataURL);
                 const img = new Image();
                 img.src = dataURL;
@@ -482,153 +425,65 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         userImages = newImagesLoaded;
-
-        renderImagePreviews();
-        updateImageUploadLabel();
+        
+        updateUiForImageOptions();
         generateAndDraw();
-        if(duplicates.length > 0) {
-            meldingContainer.textContent = `Waarschuwing: De volgende afbeeldingen zijn dubbel en niet toegevoegd: ${duplicates.join(', ')}`;
-            meldingContainer.style.color = '#ffc107';
-            setTimeout(() => updateImageUploadLabel(), 5000);
-        }
         imageInput.value = null;
     });
 
-    // NIEUW: Helper functie voor het resetten van de selecties en UI
     function clearSelectionAndResetUI(resetThemeDropdown = true) {
         userImages = [];
         uploadedImageData.clear();
         allLoadedThemeImages = [];
         selectedThemeImagesForSudoku = [];
-        selectedTheme = null;
         if (resetThemeDropdown) {
-            themeSelect.value = ""; // Reset thema dropdown
+            selectedTheme = null;
+            themeSelect.value = "";
         }
-        imageInput.value = null; // Wis de file input
-        updateUiForImageOptions(); // Update UI om user uploads weer te tonen of thema selectie
-        drawGrid(); // Teken een leeg raster
+        imageInput.value = null;
+        updateUiForImageOptions();
+        generateAndDraw();
     }
 
     clearImagesBtn.addEventListener('click', () => clearSelectionAndResetUI(true));
-
     generateBtn.addEventListener('click', generateAndDraw);
-    difficultySelect.addEventListener('change', generateAndDraw);
-
+    
     // --- Download Functies ---
-    async function generateWorksheet(outputType) {
+    downloadPngBtn.addEventListener('click', () => {
         const aantal = parseInt(aantalSelect.value);
-        const type = document.querySelector('input[name="sudokuType"]:checked').value;
-        const difficulty = difficultySelect.value;
-        const variety = document.querySelector('input[name="imageVariety"]:checked').value;
-        
-        // Bepaal of we voor elke Sudoku een unieke set afbeeldingen nodig hebben
-        const useDifferentImagesPerSudoku = (type === 'afbeeldingen' && aantal > 1 && variety === 'different');
-
-        let imagesForWorksheetGeneration = []; // Dit zal de totale set unieke afbeeldingen zijn
-
-        if (type === 'afbeeldingen') {
-            const needed = getNeededImagesCount();
-            if (selectedTheme) {
-                if (selectedThemeImagesForSudoku.length !== needed) {
-                    meldingContainer.textContent = `Selecteer eerst ${needed} afbeeldingen uit het thema!`;
-                    return;
-                }
-                imagesForWorksheetGeneration = selectedThemeImagesForSudoku; // Gebruik de geselecteerde set
-            } else {
-                if (userImages.length < needed) {
-                    meldingContainer.textContent = `Upload eerst ${needed} afbeeldingen!`;
-                    return;
-                }
-                imagesForWorksheetGeneration = userImages;
-            }
-        } else {
-            imagesForWorksheetGeneration = [];
-        }
-
-        meldingContainer.textContent = 'Bezig met het genereren van het werkblad...';
-        
-        let puzzles = [];
-        for (let i = 0; i < aantal; i++) {
-            puzzles.push(createPuzzle(generateSolvedGrid(), difficulty));
-        }
-
-        let cols = (aantal === 4) ? 2 : (aantal === 2 ? 2 : (aantal === 3 ? 1 : 1));
-        let rows = (aantal === 4) ? 2 : (aantal === 2 ? 1 : (aantal === 3 ? 3 : 1));
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width * cols;
-        tempCanvas.height = canvas.height * rows;
-        const tempCtx = tempCanvas.getContext('2d');
-        tempCtx.fillStyle = 'white';
-        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-        for (let i = 0; i < puzzles.length; i++) {
-            let imagesForCurrentSudoku = [];
-            if (type === 'afbeeldingen') {
-                if (useDifferentImagesPerSudoku) {
-                    // Pak de specifieke set van 4 unieke afbeeldingen voor deze sudoku
-                    imagesForCurrentSudoku = imagesForWorksheetGeneration.slice(i * size, (i + 1) * size);
-                    shuffle(imagesForCurrentSudoku); // Schud ze voor variatie
-                } else {
-                    // Gebruik dezelfde 4 basisafbeeldingen en schud die
-                    imagesForCurrentSudoku = shuffle([...imagesForWorksheetGeneration.slice(0, size)]);
-                }
-                // Controleer of de set 4 afbeeldingen bevat voor schudden
-                if (imagesForCurrentSudoku.length !== size) {
-                    console.warn(`Onvoldoende afbeeldingen voor Sudoku ${i + 1}. Verwacht ${size}, maar kreeg ${imagesForCurrentSudoku.length}.`);
-                }
-            }
-
-            drawPuzzle(puzzles[i], type, imagesForCurrentSudoku);
-            const col = (aantal === 2 || aantal === 4) ? (i % 2) : 0;
-            const row = (aantal === 3) ? i : (aantal === 4 ? Math.floor(i / 2) : 0);
-            tempCtx.drawImage(canvas, col * canvas.width, row * canvas.height);
-        }
-
-        const dataURL = tempCanvas.toDataURL("image/png");
+        const dataURL = canvas.toDataURL("image/png");
         const a = document.createElement("a");
         a.href = dataURL;
         a.download = `sudoku-werkblad-${aantal}.png`;
         a.click();
+    });
 
-        // Teken de laatst gegenereerde Sudoku terug op de canvas met de originele afbeeldingen
-        // Pak weer de eerste 4 voor de preview op de pagina
-        drawPuzzle(currentPuzzle, type, imagesForWorksheetGeneration.slice(0, size));
-        meldingContainer.textContent = '';
-        updateImageUploadLabel();
-    }
-
-    downloadPngBtn.addEventListener('click', () => generateWorksheet('png'));
-    
     downloadPdfBtn.addEventListener('click', async () => {
+        meldingContainer.textContent = 'Bezig met het genereren van de PDF...';
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
         const aantal = parseInt(aantalSelect.value);
         const type = document.querySelector('input[name="sudokuType"]:checked').value;
         const difficulty = difficultySelect.value;
         const variety = document.querySelector('input[name="imageVariety"]:checked').value;
-        
         const useDifferentImagesPerSudoku = (type === 'afbeeldingen' && aantal > 1 && variety === 'different');
 
-        let imagesForWorksheetGeneration = [];
+        let imagesForWorksheet = [];
         if (type === 'afbeeldingen') {
             const needed = getNeededImagesCount();
-            if (selectedTheme) {
-                if (selectedThemeImagesForSudoku.length !== needed) {
-                    meldingContainer.textContent = `Selecteer eerst ${needed} afbeeldingen uit het thema!`;
-                    return;
-                }
-                imagesForWorksheetGeneration = selectedThemeImagesForSudoku;
-            } else {
-                if (userImages.length < needed) {
-                    meldingContainer.textContent = `Upload eerst ${needed} afbeeldingen!`;
-                    return;
-                }
-                imagesForWorksheetGeneration = userImages;
+            const sourceImages = selectedTheme ? selectedThemeImagesForSudoku : userImages;
+            if (sourceImages.length < needed) {
+                meldingContainer.textContent = `Selecteer eerst ${needed} afbeeldingen!`;
+                setTimeout(() => updateImageUploadLabel(), 3000);
+                return;
             }
+            imagesForWorksheet = sourceImages;
         }
 
-        meldingContainer.textContent = 'Bezig met het genereren van de PDF...';
-        
+        let allMissingDataForCutout = [];
         let puzzles = [];
-        let allMissingDataForCutout = []; // Verzamel alle benodigde data voor het knipblad
 
         for (let i = 0; i < aantal; i++) {
             const solvedGrid = generateSolvedGrid();
@@ -636,109 +491,67 @@ document.addEventListener("DOMContentLoaded", () => {
             puzzles.push(puzzle);
 
             if (type === 'afbeeldingen') {
-                let imagesForCurrentSudoku = [];
-                if (useDifferentImagesPerSudoku) {
-                    imagesForCurrentSudoku = imagesForWorksheetGeneration.slice(i * size, (i + 1) * size);
-                    shuffle(imagesForCurrentSudoku);
-                } else {
-                    imagesForCurrentSudoku = shuffle([...imagesForWorksheetGeneration.slice(0, size)]);
-                }
-                // Controleer of de set 4 afbeeldingen bevat voor schudden
-                if (imagesForCurrentSudoku.length !== size) {
-                    console.warn(`Onvoldoende afbeeldingen voor Sudoku ${i + 1} knipblad. Verwacht ${size}, maar kreeg ${imagesForCurrentSudoku.length}.`);
-                }
+                let imagesForCurrentSudoku = useDifferentImagesPerSudoku ?
+                    imagesForWorksheet.slice(i * size, (i + 1) * size) :
+                    imagesForWorksheet.slice(0, size);
+                
+                // Belangrijk: maak een kopie voor het schudden om de originele array niet te beïnvloeden
+                const shuffledImages = shuffle([...imagesForCurrentSudoku]);
 
-                // Verzamel de benodigde afbeeldingen voor het knipblad
                 for (let r = 0; r < size; r++) {
                     for (let c = 0; c < size; c++) {
-                        if (puzzle[r][c] === 0) { // Als het een leeg vakje is
-                            const originalValue = solvedGrid[r][c];
-                            // Vind de bijbehorende afbeelding uit de 'imagesForCurrentSudoku' set
-                            allMissingDataForCutout.push(imagesForCurrentSudoku[originalValue - 1]);
+                        if (puzzle[r][c] === 0) {
+                            const solutionValue = solvedGrid[r][c];
+                            const imageToCut = shuffledImages[solutionValue - 1];
+                            if (imageToCut) {
+                                allMissingDataForCutout.push(imageToCut);
+                            }
                         }
                     }
                 }
             }
         }
         
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
-        const titleHeight = 15; // Deze wordt nu niet gebruikt om de titel te plaatsen
 
         let knipbladHoogte = 0;
-        let finalCellSize = 0;
-        let cutImageSize = 0;
-        let cutImagesPerRow = 0;
-
         if (type === 'afbeeldingen' && allMissingDataForCutout.length > 0) {
-            // Bereken optimale grootte voor knipafbeeldingen
-            // Maximaal aantal kolommen voor knipafbeeldingen (bv. 10 afbeeldingen naast elkaar)
-            const maxCutImagesCols = 10; 
-            cutImagesPerRow = Math.min(maxCutImagesCols, allMissingDataForCutout.length);
-            if (cutImagesPerRow === 0) cutImagesPerRow = 1; // Voorkom delen door nul
-
-            // Bepaal de grootte van een individuele knipafbeelding.
-            // Dit is afhankelijk van de breedte van de pagina en het aantal afbeeldingen per rij.
-            cutImageSize = (pageWidth - 2 * margin - (cutImagesPerRow - 1) * 2) / cutImagesPerRow; // 2mm spacing tussen afbeeldingen
-            // Zorg ervoor dat de afbeeldingen niet te klein worden
-            cutImageSize = Math.max(cutImageSize, 15); // Minimum grootte van 15mm
-
+            const cutImagesPerRow = Math.min(10, allMissingDataForCutout.length);
+            const cutImageSize = (pageWidth - 2 * margin) / cutImagesPerRow - 2;
             const numRows = Math.ceil(allMissingDataForCutout.length / cutImagesPerRow);
-            knipbladHoogte = numRows * (cutImageSize + 2) + margin; // 2mm spacing onder elke rij
+            knipbladHoogte = numRows * (cutImageSize + 2) + margin + 10;
         }
+        
+        const layouts = calculateLayouts(aantal, pageWidth, pageHeight, margin, knipbladHoogte, 0);
 
-        // AANPASSING: Gebruik 0 voor topSpace in calculateLayouts als de titel weggelaten wordt
-        const finalLayouts = calculateLayouts(aantal, pageWidth, pageHeight, margin, knipbladHoogte, 0); 
-        if (finalLayouts.length > 0) {
-            finalCellSize = finalLayouts[0].size / size; // Dit is de celgrootte van de Sudoku zelf
-        }
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = 512;
+        tempCanvas.height = 512;
+        const tempCtx = tempCanvas.getContext('2d');
 
-        // AANPASSING: Verwijder de regel die de titel tekent
-        // doc.setFontSize(18);
-        // doc.text("Sudoku Werkblad", pageWidth / 2, margin + 5, { align: 'center' });
-
-        // Teken elke sudoku op de PDF
         for (let i = 0; i < puzzles.length; i++) {
-            let imagesForCurrentSudoku = [];
-            if (type === 'afbeeldingen') {
-                 if (useDifferentImagesPerSudoku) {
-                    imagesForCurrentSudoku = imagesForWorksheetGeneration.slice(i * size, (i + 1) * size);
-                    shuffle(imagesForCurrentSudoku);
-                } else {
-                    imagesForCurrentSudoku = shuffle([...imagesForWorksheetGeneration.slice(0, size)]);
-                }
-                // Controleer of de set 4 afbeeldingen bevat voor schudden
-                if (imagesForCurrentSudoku.length !== size) {
-                    console.warn(`Onvoldoende afbeeldingen voor Sudoku ${i + 1}. Verwacht ${size}, maar kreeg ${imagesForCurrentSudoku.length}.`);
-                }
-            }
-
-            // Zorg dat alle afbeeldingen voor deze Sudoku geladen zijn voor ze getekend worden
-            await Promise.all(imagesForCurrentSudoku.map(img => new Promise(resolve => {
-                if (img.complete) resolve();
-                else img.onload = resolve;
-            })));
-
-            drawPuzzle(puzzles[i], type, imagesForCurrentSudoku);
-            const layout = finalLayouts[i];
-            doc.addImage(canvas.toDataURL('image/png'), 'PNG', layout.x, layout.y, layout.size, layout.size);
+            let imagesForCurrentSudoku = useDifferentImagesPerSudoku ?
+                imagesForWorksheet.slice(i * size, (i + 1) * size) :
+                imagesForWorksheet.slice(0, size);
+            
+            drawPuzzle(tempCtx, puzzles[i], type, shuffle([...imagesForCurrentSudoku]), 0, 0, tempCanvas.width);
+            const layout = layouts[i];
+            doc.addImage(tempCanvas.toDataURL('image/png'), 'PNG', layout.x, layout.y, layout.size, layout.size);
         }
 
-        // Teken het knipblad onderaan als het een afbeeldingen Sudoku is
         if (type === 'afbeeldingen' && allMissingDataForCutout.length > 0) {
-            const imgBoxSpacing = 2; // Spacing tussen de afbeeldingen
-            const imgPadding = 1; // Padding binnen het kader
-
-            // AANGEPASTE LOGICA VOOR CENTREREN VAN KNIPBLAD
-            const blockWidth = cutImagesPerRow * cutImageSize + Math.max(0, cutImagesPerRow - 1) * imgBoxSpacing;
-            const startX = (pageWidth - blockWidth) / 2;
-            const startY = pageHeight - knipbladHoogte + margin / 2; // Start net boven de onderkant, met wat marge
+            const cutImagesPerRow = Math.min(10, allMissingDataForCutout.length);
+            const imgBoxSpacing = 2;
+            const cutImageSize = (pageWidth - 2 * margin - (cutImagesPerRow - 1) * imgBoxSpacing) / cutImagesPerRow;
+            
+            const totalBlockWidth = cutImagesPerRow * (cutImageSize + imgBoxSpacing) - imgBoxSpacing;
+            const startX = (pageWidth - totalBlockWidth) / 2;
+            const startY = pageHeight - knipbladHoogte + margin;
 
             doc.setFontSize(14);
-            doc.text("Knip de afbeeldingen uit en plak ze op de juiste plaats:", pageWidth / 2, startY - margin / 2, { align: 'center' });
+            doc.text("Knip de afbeeldingen uit en plak ze op de juiste plaats:", pageWidth / 2, startY - 5, { align: 'center' });
 
             for(let i = 0; i < allMissingDataForCutout.length; i++){
                 const img = allMissingDataForCutout[i];
@@ -753,80 +566,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 doc.setLineDashPattern([], 0);
 
                 if (img && img.complete) {
-                    doc.addImage(img.src, 'PNG', boxX + imgPadding, boxY + imgPadding, cutImageSize - 2 * imgPadding, cutImageSize - 2 * imgPadding);
-                } else if (img) {
-                    await new Promise(resolve => { img.onload = resolve; });
-                    doc.addImage(img.src, 'PNG', boxX + imgPadding, boxY + imgPadding, cutImageSize - 2 * imgPadding, cutImageSize - 2 * imgPadding);
+                    doc.addImage(img.src, 'PNG', boxX + 1, boxY + 1, cutImageSize - 2, cutImageSize - 2);
                 }
             }
         }
         
         doc.save(`sudoku-werkblad-${aantal}.pdf`);
-        // Teken de laatst gegenereerde Sudoku terug op de canvas met de originele afbeeldingen
-        drawPuzzle(currentPuzzle, type, imagesForWorksheetGeneration.slice(0, size));
         meldingContainer.textContent = '';
-        updateImageUploadLabel();
     });
-    
-    // AANPASSING: calculateLayouts functie verbeterd voor betere schaling
+
     function calculateLayouts(aantal, pageWidth, pageHeight, margin, bottomSpace, topSpace) {
         const layouts = [];
-        const verticalPaddingBetweenSudokus = 10; // Extra padding tussen verticaal gestapelde Sudoku's
-        const horizontalPaddingBetweenSudokus = 10; // Extra padding tussen horizontaal geplaatste Sudoku's
-        const contentStartY = topSpace; // Titel is al in topSpace meegerekend (nu 0)
+        const vPadding = 10;
+        const hPadding = 10;
+        const contentStartY = topSpace + margin;
         
-        let availableHeight = pageHeight - topSpace - bottomSpace - margin; // Beschikbare hoogte voor Sudoku's
-        let availableWidth = pageWidth - 2 * margin; // Beschikbare breedte
+        let availableHeight = pageHeight - topSpace - bottomSpace - 2 * margin;
+        let availableWidth = pageWidth - 2 * margin;
         
-        let sudokuSize;
+        let sudokuSize, startX, startY, totalContentWidth, totalContentHeight;
 
         if (aantal === 1) {
             sudokuSize = Math.min(availableWidth, availableHeight);
-            // Centreer de enkele Sudoku
-            layouts.push({ 
-                x: margin + (availableWidth - sudokuSize) / 2, 
-                y: contentStartY + (availableHeight - sudokuSize) / 2, 
-                size: sudokuSize 
-            });
+            layouts.push({ x: margin + (availableWidth - sudokuSize) / 2, y: contentStartY + (availableHeight - sudokuSize) / 2, size: sudokuSize });
         } else if (aantal === 2) {
-            // Twee naast elkaar
-            sudokuSize = Math.min(
-                (availableWidth - horizontalPaddingBetweenSudokus) / 2, 
-                availableHeight
-            );
-            let totalContentWidth = 2 * sudokuSize + horizontalPaddingBetweenSudokus;
-            let startX = margin + (availableWidth - totalContentWidth) / 2;
-            let startY = contentStartY + (availableHeight - sudokuSize) / 2;
-
+            sudokuSize = Math.min((availableWidth - hPadding) / 2, availableHeight);
+            totalContentWidth = 2 * sudokuSize + hPadding;
+            startX = margin + (availableWidth - totalContentWidth) / 2;
+            startY = contentStartY + (availableHeight - sudokuSize) / 2;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX + sudokuSize + horizontalPaddingBetweenSudokus, y: startY, size: sudokuSize });
+            layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
         } else if (aantal === 3) {
-            // Drie onder elkaar
-            sudokuSize = Math.min(
-                availableWidth, 
-                (availableHeight - 2 * verticalPaddingBetweenSudokus) / 3
-            );
-            let startX = margin + (availableWidth - sudokuSize) / 2;
-            let startY = contentStartY + (availableHeight - (3 * sudokuSize + 2 * verticalPaddingBetweenSudokus)) / 2;
-
+            sudokuSize = Math.min(availableWidth, (availableHeight - 2 * vPadding) / 3);
+            totalContentHeight = 3 * sudokuSize + 2 * vPadding;
+            startX = margin + (availableWidth - sudokuSize) / 2;
+            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX, y: startY + sudokuSize + verticalPaddingBetweenSudokus, size: sudokuSize });
-            layouts.push({ x: startX, y: startY + 2 * (sudokuSize + verticalPaddingBetweenSudokus), size: sudokuSize });
+            layouts.push({ x: startX, y: startY + sudokuSize + vPadding, size: sudokuSize });
+            layouts.push({ x: startX, y: startY + 2 * (sudokuSize + vPadding), size: sudokuSize });
         } else if (aantal === 4) {
-            // Vier in een 2x2 raster
-            sudokuSize = Math.min(
-                (availableWidth - horizontalPaddingBetweenSudokus) / 2, 
-                (availableHeight - verticalPaddingBetweenSudokus) / 2
-            );
-            let totalContentWidth = 2 * sudokuSize + horizontalPaddingBetweenSudokus;
-            let totalContentHeight = 2 * sudokuSize + verticalPaddingBetweenSudokus;
-            let startX = margin + (availableWidth - totalContentWidth) / 2;
-            let startY = contentStartY + (availableHeight - totalContentHeight) / 2;
-
+            sudokuSize = Math.min((availableWidth - hPadding) / 2, (availableHeight - vPadding) / 2);
+            totalContentWidth = 2 * sudokuSize + hPadding;
+            totalContentHeight = 2 * sudokuSize + vPadding;
+            startX = margin + (availableWidth - totalContentWidth) / 2;
+            startY = contentStartY + (availableHeight - totalContentHeight) / 2;
             layouts.push({ x: startX, y: startY, size: sudokuSize });
-            layouts.push({ x: startX + sudokuSize + horizontalPaddingBetweenSudokus, y: startY, size: sudokuSize });
-            layouts.push({ x: startX, y: startY + sudokuSize + verticalPaddingBetweenSudokus, size: sudokuSize });
-            layouts.push({ x: startX + sudokuSize + horizontalPaddingBetweenSudokus, y: startY + sudokuSize + verticalPaddingBetweenSudokus, size: sudokuSize });
+            layouts.push({ x: startX + sudokuSize + hPadding, y: startY, size: sudokuSize });
+            layouts.push({ x: startX, y: startY + sudokuSize + vPadding, size: sudokuSize });
+            layouts.push({ x: startX + sudokuSize + hPadding, y: startY + sudokuSize + vPadding, size: sudokuSize });
         }
         return layouts;
     }
