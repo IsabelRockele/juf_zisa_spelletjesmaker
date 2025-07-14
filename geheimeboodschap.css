@@ -7,16 +7,17 @@ body {
 
 header {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Behoudt ruimte tussen items */
     align-items: center;
     max-width: 1200px;
     margin: 0 auto 20px auto;
 }
 
-h1 { 
+h1 {
     color: #005a9c;
-    margin-right: auto;
-    margin-left: 20px;
+    flex-grow: 1; /* Laat de h1 de resterende ruimte innemen */
+    text-align: center; /* Centreer de tekst binnen de h1 */
+    margin: 0; /* Verwijder standaard marges van h1 */
 }
 
 h2 { color: #005a9c; margin-top: 0; }
@@ -75,7 +76,7 @@ button i {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 15px;
-    max-width: 900px;
+    max-width: 1400px;
     margin: 20px auto;
     padding: 20px;
     background-color: #ffffff;
@@ -128,7 +129,7 @@ button i {
 }
 
 #naar-generator-knop:hover {
-    background-color: #003f6e; 
+    background-color: #003f6e;
 }
 
 /* Specifieke styling voor de thema-keuze knoppen (geel) */
