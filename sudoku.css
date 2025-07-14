@@ -129,7 +129,7 @@ button:hover {
     width: 100%;
 }
 
-.control-group h3 {
+.control-group h3, .control-group h4 {
     color: #004080;
     font-size: 1.3em;
     margin: 0 0 5px 0;
@@ -179,19 +179,42 @@ button:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#image-previews {
+/* Gecombineerde styling voor beide preview-containers */
+.image-previews-container {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 5px;
     margin-top: 10px;
 }
 
-#image-previews img {
+.image-previews-container img {
     width: 100%;
     height: auto;
     border-radius: 4px;
     border: 1px solid #ccc;
     box-sizing: border-box;
+}
+
+/* NIEUW: Styling voor selecteerbare thema-afbeeldingen */
+.theme-image-wrapper {
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 2px;
+}
+
+.theme-image-wrapper:hover {
+    border-color: #0056b3;
+    transform: scale(1.02);
+}
+
+.theme-image-wrapper.selected {
+    border-color: #28a745;
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.5);
+    background-color: rgba(40, 167, 69, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -219,7 +242,7 @@ button:hover {
         align-items: center;
         text-align: center;
     }
-     .control-group h3 {
+     .control-group h3, .control-group h4 {
         text-align: center;
      }
 }
