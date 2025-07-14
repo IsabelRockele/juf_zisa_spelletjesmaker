@@ -35,19 +35,44 @@
                     <small id="aantalMelding" style="color: #004080; min-height: 1.2em;"></small>
                 </div>
 
+                <div class="control-group" id="image-variety-controls" style="display: none;">
+                    <label>Gebruik voor meerdere sudoku's:</label>
+                    <label><input type="radio" name="imageVariety" value="same" checked> Dezelfde afbeeldingen</label>
+                    <label><input type="radio" name="imageVariety" value="different"> Per sudoku andere afbeeldingen</label>
+                </div>
+
+                <div class="control-group" id="themeSelectionGroup" style="display: none;">
+                    <h3>Kies een thema</h3>
+                    <select id="themeSelect">
+                        <option value="">-- Kies een thema --</option>
+                        <option value="terug_naar_school">Terug naar school</option>
+                        <option value="herfst">Herfst</option>
+                        <option value="halloween">Halloween</option>
+                        <option value="sinterklaas">Sinterklaas</option>
+                        <option value="winter">Winter</option>
+                        <option value="kerst">Kerst</option>
+                        <option value="lente">Lente</option>
+                        <option value="pasen">Pasen</option>
+                        <option value="carnaval">Carnaval</option>
+                        <option value="zomer">Zomer</option>
+                    </select>
+                </div>
+
+                <div class="control-group" id="themeImageSelection" style="display: none;">
+                    <h4>Kies 4 afbeeldingen uit het thema:</h4>
+                    <div id="selectableThemeImagePreviews" class="image-previews-container">
+                        </div>
+                    <button id="confirmThemeImagesBtn" class="small-btn" style="margin-top: 10px;">Bevestig selectie</button>
+                </div>
+
                 <div id="image-controls" style="display:none;">
-                    <div class="control-group" id="image-variety-controls" style="display: none;">
-                        <label>Gebruik voor meerdere sudoku's:</label>
-                        <label><input type="radio" name="imageVariety" value="same" checked> Dezelfde afbeeldingen</label>
-                        <label><input type="radio" name="imageVariety" value="different"> Per sudoku andere afbeeldingen</label>
-                    </div>
-                    <div class="control-group">
+                    <div class="control-group" id="userUploadControls">
                         <label for="imageInput" id="imageInputLabel">Kies 4 afbeeldingen:</label>
                         <div class="file-input-wrapper">
                             <input type="file" id="imageInput" accept="image/*" multiple>
                             <button id="clearImagesBtn" class="small-btn">Verwijder selectie</button>
                         </div>
-                        <div id="image-previews"></div>
+                        <div id="image-previews" class="image-previews-container"></div>
                     </div>
                 </div>
 
@@ -83,6 +108,5 @@
     </div>
 
     <script src="sudoku.js"></script>
-
 </body>
 </html>
