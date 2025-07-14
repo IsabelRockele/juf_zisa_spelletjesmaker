@@ -1,0 +1,21 @@
+{
+  "name": "Juf Zisa's spelletjesmaker",
+  "short_name": "Juf Zisa",
+  "description": "Maak eenvoudig diverse spelletjes voor kinderen.",
+  "start_url": "/juf_zisa_spelletjesmaker/index.html",
+  "display": "standalone",
+  "background_color": "#fefae0",
+  "theme_color": "#ffcf56",
+  "icons": [
+    {
+      "src": "/juf_zisa_spelletjesmaker/start_afbeeldingen/Zisa_spelgenerator.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/juf_zisa_spelletjesmaker/start_afbeeldingen/Zisa_spelgenerator.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
