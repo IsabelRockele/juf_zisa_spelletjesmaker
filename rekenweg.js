@@ -122,6 +122,9 @@ function createInputForCell(cellData) { removeCurrentInput(); const input = docu
 // --- MAIN FLOW FUNCTIES ---
 
 function startDrawingMode() {
+    // Verwijder de centrering-klasse
+    document.body.classList.remove('template-view-active');
+
     currentViewMode = 'drawing';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawGrid();
@@ -177,6 +180,9 @@ function showMyPathTemplate() {
 
     const createdTemplateGrid = createPathTemplateGrid(orderedPathsByBranch);
     if (createdTemplateGrid) {
+        // Voeg de centrering-klasse toe
+        document.body.classList.add('template-view-active');
+
         currentTemplateGrid = createdTemplateGrid;
         currentViewMode = 'template-canvas';
         
