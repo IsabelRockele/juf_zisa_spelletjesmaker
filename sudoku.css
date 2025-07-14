@@ -263,6 +263,58 @@ button:hover {
     width: 100%;
 }
 
+/* --- Styling voor de afbeelding-selectie-previews --- */
+
+/* De container die alle voorbeeld-afbeeldingen vasthoudt */
+.image-previews-container {
+    display: flex;
+    flex-wrap: wrap; /* Zorgt dat afbeeldingen naar de volgende regel springen als er geen plek is */
+    gap: 8px; /* Ruimte tussen de afbeeldingen */
+    padding: 10px;
+    background-color: #eaf8ff;
+    border: 1px solid #b3e0ff;
+    border-radius: 5px;
+    max-height: 300px; /* Maximale hoogte, daarna verschijnt een scrollbar */
+    overflow-y: auto; /* Maak de container verticaal scrollbaar indien nodig */
+}
+
+/* De wrapper om elke individuele afbeelding */
+.theme-image-wrapper {
+    width: 75px; /* Vaste breedte voor elke thumbnail */
+    height: 75px; /* Vaste hoogte voor elke thumbnail */
+    padding: 3px;
+    border: 2px solid transparent; /* Een onzichtbare rand om layout-verschuivingen te voorkomen */
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Styling voor de afbeelding zelf in de wrapper */
+.theme-image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; /* Zorgt dat de hele afbeelding zichtbaar is binnen de wrapper */
+    border-radius: 3px;
+}
+
+/* Visuele feedback wanneer een afbeelding wordt geselecteerd */
+.theme-image-wrapper.selected {
+    border-color: #004080; /* Duidelijke blauwe rand voor selectie */
+    background-color: #d4ebff;
+    transform: scale(1.05); /* Maak geselecteerde iets groter */
+}
+
+/* Hover-effect voor betere gebruikerservaring */
+.theme-image-wrapper:not(.selected):hover {
+    border-color: #8acfff;
+}
+
+
 /* Responsive aanpassingen voor kleinere schermen */
 @media (max-width: 768px) {
     #main-content {
