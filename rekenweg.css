@@ -105,7 +105,7 @@ button:hover {
 
 /* Linkerpaneel voor controls */
 #left-panel {
-    flex-basis: 380px;
+    flex-basis: 325px;
     flex-shrink: 0;
     padding: 15px;
     border: 1px solid #b3e0ff;
