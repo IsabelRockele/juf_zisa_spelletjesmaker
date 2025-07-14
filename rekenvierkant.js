@@ -714,165 +714,202 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
         }
     }
 
-    console.warn(`Could not generate a consistent ${cols}x${rows} grid after ${MAX_ATTEMPTS} attempts for Maal/Deel: ${typeTafeloefening}, maxUitkomst: ${maxUitkomst}, tables: ${selectedTables.join(',')}`);
+    console.warn(`Kon geen consistent ${cols}x${rows} grid genereren na ${MAX_ATTEMPTS} pogingen voor opgave: ${typeOpgave}, niveau: ${niveau}, brug: ${typeBrug}`);
     return Array(rows).fill(null).map(() => Array(cols).fill("")); // Fallback to empty grid
 }
 
 
-// Function to draw the grid
-function tekenRaster(cols, rows, vakBreedte, vakHoogte) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Leeg het canvas eerst
+// Function to draw a single grid (modified to accept offsets)
+function tekenSingleGrid(gridData, xOffset, yOffset, vakBreedte, vakHoogte, cols, rows) {
     ctx.strokeStyle = "#000";
     ctx.lineWidth = 2;
 
     for (let i = 0; i <= cols; i++) {
         ctx.beginPath();
-        ctx.moveTo(i * vakBreedte, 0);
-        ctx.lineTo(i * vakBreedte, canvas.height);
+        ctx.moveTo(xOffset + i * vakBreedte, yOffset);
+        ctx.lineTo(xOffset + i * vakBreedte, yOffset + rows * vakHoogte);
         ctx.stroke();
     }
 
     for (let j = 0; j <= rows; j++) {
         ctx.beginPath();
-        ctx.moveTo(0, j * vakHoogte);
-        ctx.lineTo(canvas.width, j * vakHoogte);
+        ctx.moveTo(xOffset, yOffset + j * vakHoogte);
+        ctx.lineTo(xOffset + cols * vakBreedte, yOffset + j * vakHoogte);
         ctx.stroke();
+    }
+
+
+    ctx.font = `${Math.min(vakHoogte * 0.5, 30)}px Arial`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            if (gridData[r][c] === "") {
+                ctx.fillStyle = "#000000";
+                ctx.fillRect(xOffset + c * vakBreedte, yOffset + r * vakHoogte, vakBreedte, vakHoogte);
+            } else {
+                ctx.fillStyle = "#000";
+                ctx.fillText(gridData[r][c], xOffset + c * vakBreedte + vakBreedte / 2, yOffset + r * vakHoogte + vakHoogte / 2);
+            }
+        }
     }
 }
 
-// Main function to fill the rekenvierkant
+// Main function to fill the rekenvierkant(en)
 function vulRekenvierkant() {
     const formaat = document.getElementById("formaat").value;
-    let cols, rows;
+    let baseCols, baseRows; // Basisafmetingen voor één raster
 
     if (formaat === "5x5") {
-        cols = 5;
-        rows = 5;
+        baseCols = 5;
+        baseRows = 5;
     } else if (formaat === "7x7") {
-        cols = 7;
-        rows = 7;
+        baseCols = 7;
+        baseRows = 7;
     }
 
-    const vakBreedte = canvas.width / cols;
-    const vakHoogte = canvas.height / rows;
+    const numGrids = parseInt(document.querySelector('input[name="numGrids"]:checked').value);
 
-    // Haal de geselecteerde opties op
+    // Pas canvasgrootte aan op basis van het aantal roosters
+    let totalCanvasWidth, totalCanvasHeight;
+    const singleGridDisplayWidth = 256; // Basisbreedte voor één rooster
+    const singleGridDisplayHeight = 256; // Basishoogte voor één rooster
+    const padding = 20; // Opvulling tussen roosters en canvasranden
+
+    if (numGrids === 1) {
+        totalCanvasWidth = singleGridDisplayWidth + 2 * padding;
+        totalCanvasHeight = singleGridDisplayHeight + 2 * padding;
+    } else if (numGrids === 2) {
+        totalCanvasWidth = (singleGridDisplayWidth * 2) + (3 * padding); // 2 roosters + 3 keer padding (links, tussen, rechts)
+        totalCanvasHeight = singleGridDisplayHeight + (2 * padding);
+    } else if (numGrids === 3 || numGrids === 4) {
+        totalCanvasWidth = (singleGridDisplayWidth * 2) + (3 * padding);
+        totalCanvasHeight = (singleGridDisplayHeight * 2) + (3 * padding);
+    }
+
+    canvas.width = totalCanvasWidth;
+    canvas.height = totalCanvasHeight;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Leeg het hele canvas
+
+    const meldingContainer = document.getElementById("meldingContainer");
+    if (meldingContainer) {
+        meldingContainer.innerHTML = ""; // Leeg eventuele vorige meldingen
+    }
+
     const soortOefening = document.querySelector('input[name="soort"]:checked').value;
     const typeOpgave = document.getElementById("typeOpgave").value;
     const niveau = document.getElementById("niveau").value;
     const typeBrugElement = document.querySelector('input[name="brug"]:checked');
     const typeBrug = typeBrugElement ? typeBrugElement.value : "beide";
 
-    // Teken raster eerst
-    tekenRaster(cols, rows, vakBreedte, vakHoogte);
-    ctx.font = `${Math.min(vakHoogte * 0.5, 30)}px Arial`;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Meldingscontainer opzoeken
-    const meldingContainer = document.getElementById("meldingContainer");
-    if (meldingContainer) {
-        meldingContainer.innerHTML = ""; // Leeg eventuele vorige meldingen
-    }
-
-    // Nieuwe specifieke aanbeveling voor 7x7 optel/aftrek
-    if (cols === 7 && soortOefening === "plusmin") { // Altijd tonen voor 7x7 optel/aftrek
+    // Nieuwe specifieke aanbeveling voor 7x7 optel/aftrek (één keer tonen)
+    if (baseCols === 7 && soortOefening === "plusmin") {
         if (meldingContainer) {
-            meldingContainer.innerHTML = `
+            meldingContainer.innerHTML += `
                 <p style="color: #004080; margin: 5px 0;"><strong>Voor 7x7 roosters (optellen/aftrekken):</strong></p>
                 <p style="color: #004080; margin: 5px 0;">Kies bij 'Type opgave': '<strong>Gemengd</strong>'</p>
                 <p style="color: #004080; margin: 5px 0;">en bij 'Soort bewerking': '<strong>Beide</strong>'</p>
                 <p style="color: #004080; margin: 5px 0;">Dit geeft de beste kans op een geldig rooster.</p>
             `;
         }
-        // We gaan NIET retourneren hier, de generator mag het proberen, maar de gebruiker is gewaarschuwd.
     }
 
+    const vakBreedte = singleGridDisplayWidth / baseCols;
+    const vakHoogte = singleGridDisplayHeight / baseRows;
 
-    let fullGridData; // Declared outside the if/else for scope
+    let allGridsSuccessfullyGenerated = true;
 
-    if (soortOefening === "plusmin") {
-        fullGridData = generateConsistentGrid(cols, rows, niveau, typeOpgave, typeBrug);
-    } else { // maaldeel
-        const typeTafeloefening = document.getElementById("typeTafeloefening").value;
-        let selectedTables = Array.from(document.querySelectorAll('#tafelKeuze input[type="checkbox"]:checked'))
-                                .filter(cb => cb.id !== 'selecteerAlles')
-                                .map(cb => parseInt(cb.value));
-        const maxUitkomst = parseInt(document.getElementById("maxUitkomst").value);
+    for (let i = 0; i < numGrids; i++) {
+        let xOffset = padding;
+        let yOffset = padding;
 
-        // Zorg ervoor dat er minstens één tafel is geselecteerd als er geen specifieke tafels zijn aangevinkt,
-        if (selectedTables.length === 0) {
-            for (let i = 1; i <= 10; i++) {
-                selectedTables.push(i);
+        if (numGrids === 2) {
+            xOffset = padding + (i * (singleGridDisplayWidth + padding));
+            yOffset = padding;
+        } else if (numGrids === 3 || numGrids === 4) {
+            if (i % 2 === 1) { // Rechterkolom
+                xOffset = padding + singleGridDisplayWidth + padding;
+            }
+            if (i >= 2) { // Onderste rij
+                yOffset = padding + singleGridDisplayHeight + padding;
             }
         }
 
-        fullGridData = generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedTables, maxUitkomst);
-    }
+        let fullGridData;
+        if (soortOefening === "plusmin") {
+            fullGridData = generateConsistentGrid(baseCols, baseRows, niveau, typeOpgave, typeBrug);
+        } else { // maaldeel
+            const typeTafeloefening = document.getElementById("typeTafeloefening").value;
+            let selectedTables = Array.from(document.querySelectorAll('#tafelKeuze input[type="checkbox"]:checked'))
+                                    .filter(cb => cb.id !== 'selecteerAlles')
+                                    .map(cb => parseInt(cb.value));
+            const maxUitkomst = parseInt(document.getElementById("maxUitkomst").value);
 
-    // Controleer of fullGridData geldig is voordat we verdergaan
-    if (!fullGridData || fullGridData.length === 0 || fullGridData[0].length === 0 || (typeof fullGridData[0][0] === 'string' && fullGridData[0][0].includes("Kon geen consistent"))) {
-        // Dit betekent dat generateConsistentGrid/MaalDeel geen geldig rooster heeft kunnen vinden
-        // Eerst het canvas leegmaken voordat de melding komt
-        tekenRaster(cols, rows, vakBreedte, vakHoogte); // Leeg en teken de lijnen opnieuw
-        ctx.fillStyle = "red";
-        ctx.fillText("Kon geen geldig rooster genereren met deze instellingen.", canvas.width / 2, canvas.height / 2 - 20);
-        ctx.fillText("Probeer nog eens?", canvas.width / 2, canvas.height / 2 + 20); // Melding "Probeer nog eens?"
-        document.getElementById("outputJson").value = "";
-        return; // Stop de functie hier
-    }
-
-
-    const displayGridData = JSON.parse(JSON.stringify(fullGridData));
-
-    // Bepaal de coördinaten van de vakjes die een getal bevatten voor de hiding logic
-    let numberCellsToHide = [];
-    if (cols === 5) {
-        numberCellsToHide = [
-            [0, 0], [0, 2], [0, 4],
-            [2, 0], [2, 2], [2, 4],
-            [4, 0], [4, 2], [4, 4]
-        ];
-    } else if (cols === 7) {
-        numberCellsToHide = [
-            [0, 0], [0, 2], [0, 4], [0, 6],
-            [2, 0], [2, 2], [2, 4], [2, 6],
-            [4, 0], [4, 2], [4, 4], [4, 6],
-            [6, 0], [6, 2], [6, 4], [6, 6]
-        ];
-    }
-
-    // Aantal getallen om te verbergen (aangepast per formaat)
-    const numToHide = getRandomInt(
-        cols === 5 ? 2 : 4,
-        cols === 5 ? 4 : 8
-    );
-
-    const shuffledCells = numberCellsToHide.sort(() => 0.5 - Math.random());
-    const cellsToHide = shuffledCells.slice(0, numToHide);
-
-    cellsToHide.forEach(coords => {
-        const r = coords[0];
-        const c = coords[1];
-        if (typeof displayGridData[r][c] === 'number') {
-            displayGridData[r][c] = "___";
-        }
-    });
-
-
-    // Teken de grid data op de canvas
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-            if (displayGridData[r][c] === "") {
-                ctx.fillStyle = "#000000";
-                ctx.fillRect(c * vakBreedte, r * vakHoogte, vakBreedte, vakHoogte);
-            } else {
-                ctx.fillStyle = "#000";
-                ctx.fillText(displayGridData[r][c], c * vakBreedte + vakBreedte / 2, r * vakHoogte + vakHoogte / 2);
+            // Zorg ervoor dat er minstens één tafel is geselecteerd als er geen specifieke tafels zijn aangevinkt,
+            if (selectedTables.length === 0) {
+                for (let j = 1; j <= 10; j++) {
+                    selectedTables.push(j);
+                }
             }
+            fullGridData = generateConsistentGridMaalDeel(baseCols, baseRows, typeTafeloefening, selectedTables, maxUitkomst);
         }
+
+        // Controleer of fullGridData geldig is voordat we verdergaan
+        if (!fullGridData || fullGridData.length === 0 || fullGridData[0].length === 0 || (typeof fullGridData[0][0] === 'string' && fullGridData[0][0].includes("Kon geen consistent"))) {
+            allGridsSuccessfullyGenerated = false;
+            if (meldingContainer) {
+                 meldingContainer.innerHTML += `<p style="color: red;">Kon geen geldig rooster ${i+1} genereren met deze instellingen. Probeer nog eens?</p>`;
+            }
+            // Teken een leeg rasterframe voor mislukte roosters om aan te geven waar het zou zijn
+            tekenSingleGrid(Array(baseRows).fill(null).map(() => Array(baseCols).fill("")), xOffset, yOffset, vakBreedte, vakHoogte, baseCols, baseRows);
+            continue; // Probeer het volgende rooster te genereren indien mogelijk
+        }
+
+        const displayGridData = JSON.parse(JSON.stringify(fullGridData));
+
+        // Bepaal de coördinaten van de vakjes die een getal bevatten voor de hiding logic
+        let numberCellsToHide = [];
+        if (baseCols === 5) {
+            numberCellsToHide = [
+                [0, 0], [0, 2], [0, 4],
+                [2, 0], [2, 2], [2, 4],
+                [4, 0], [4, 2], [4, 4]
+            ];
+        } else if (baseCols === 7) {
+            numberCellsToHide = [
+                [0, 0], [0, 2], [0, 4], [0, 6],
+                [2, 0], [2, 2], [2, 4], [2, 6],
+                [4, 0], [4, 2], [4, 4], [4, 6],
+                [6, 0], [6, 2], [6, 4], [6, 6]
+            ];
+        }
+
+        // AANGEPAST: Minimaal 4 bij 5x5, minimaal 5 bij 7x7; Maximaal 5 bij 5x5, maximaal 8 bij 7x7
+        const numToHide = getRandomInt(
+            baseCols === 5 ? 4 : 5,
+            baseCols === 5 ? 5 : 8
+        );
+
+        const shuffledCells = numberCellsToHide.sort(() => 0.5 - Math.random());
+        const cellsToHide = shuffledCells.slice(0, numToHide);
+
+        cellsToHide.forEach(coords => {
+            const r = coords[0];
+            const c = coords[1];
+            if (typeof displayGridData[r][c] === 'number') {
+                displayGridData[r][c] = "___";
+            }
+        });
+
+        tekenSingleGrid(displayGridData, xOffset, yOffset, vakBreedte, vakHoogte, baseCols, baseRows);
     }
 
+    if (!allGridsSuccessfullyGenerated && meldingContainer.innerHTML === "") {
+        // Terugvalbericht als er nog geen specifieke fout is geschreven
+        meldingContainer.innerHTML = `<p style="color: red;">Niet alle roosters konden gegenereerd worden met deze instellingen. Probeer nog eens?</p>`;
+    }
     // Maak de textarea leeg
     document.getElementById("outputJson").value = "";
 }
@@ -940,6 +977,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("formaat").addEventListener("change", vulRekenvierkant);
     document.getElementById("typeTafeloefening").addEventListener("change", vulRekenvierkant);
     document.getElementById("maxUitkomst").addEventListener("change", vulRekenvierkant);
+
+    // NIEUW: Event listeners voor aantal roosters radio buttons
+    document.querySelectorAll('input[name="numGrids"]').forEach(radio => {
+        radio.addEventListener("change", vulRekenvierkant);
+    });
 });
 
 
