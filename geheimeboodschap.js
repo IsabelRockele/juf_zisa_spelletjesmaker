@@ -27,7 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const themaKnoppen = document.querySelectorAll('.thema-knop');
     const themaNaarGeneratorKnop = document.getElementById('thema-naar-generator-knop');
     const terugNaarUploadKnop = document.getElementById('terug-naar-upload-knop');
-    const terugNaarThemasKnop = document.getElementById('terug-naar-themas-knop'); // NIEUW: Terug naar thema's knop hier toevoegen
+    const terugNaarKeuzeKnopUitUpload = document.getElementById('terug-naar-keuze-knop-uit-upload');
+    const instructieUploadKnop = document.getElementById('instructieUploadKnop'); // Haal de instructietekst op
+
 
     // --- INITIALISATIEFUNCTIE ---
     // Deze functie zorgt ervoor dat bij start of reset de juiste elementen zichtbaar zijn
@@ -39,7 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
         keuzeOptiesDiv.classList.remove('verborgen'); // Toon de initiële keuze-knoppen
         uploadSectie.classList.add('verborgen');     // Verberg de upload sectie
         themaSectie.classList.add('verborgen');      // Verberg de thema keuze sectie
-        terugNaarThemasKnop.classList.add('verborgen'); // NIEUW: Verberg deze knop bij reset
+
+        // Zorg dat de file inputs en de instructietekst zichtbaar zijn bij reset
+        document.querySelectorAll('.image-upload').forEach(input => input.classList.remove('verborgen'));
+        instructieUploadKnop.classList.remove('verborgen'); // Toon instructie bij reset
 
         // Reset sleutel en previews
         sleutel.clear();
@@ -59,42 +64,44 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadSectie.classList.remove('verborgen'); // Toon de upload sectie
         themaSectie.classList.add('verborgen');
         keuzeOptiesDiv.classList.add('verborgen'); // Verberg de keuze-knoppen container
-        terugNaarThemasKnop.classList.add('verborgen'); // NIEUW: Zorg dat deze verborgen blijft als je zelf uploadt
+        // Zorg ervoor dat de file inputs en instructie zichtbaar zijn voor 'zelf uploaden'
+        document.querySelectorAll('.image-upload').forEach(input => input.classList.remove('verborgen'));
+        instructieUploadKnop.classList.remove('verborgen'); // Toon instructie
     });
 
     themaKiezenKnop.addEventListener('click', () => {
-        themaSectie.classList.remove('verborgen'); // Toon de thema keuze sectie
-        uploadSectie.classList.add('verborgen'); // Verberg de upload sectie (wordt later getoond)
-        keuzeOptiesDiv.classList.add('verborgen'); // Verberg de keuze-knoppen container
-        terugNaarThemasKnop.classList.add('verborgen'); // NIEUW: Zorg dat deze verborgen is wanneer thema's gekozen worden
+        themaSectie.classList.remove('verborgen');
+        uploadSectie.classList.add('verborgen');
+        keuzeOptiesDiv.classList.add('verborgen');
+        // Verberg de file inputs en instructie wanneer je kiest voor een thema
+        document.querySelectorAll('.image-upload').forEach(input => input.classList.add('verborgen'));
+        instructieUploadKnop.classList.add('verborgen'); // Verberg instructie
     });
 
     terugNaarUploadKnop.addEventListener('click', () => {
         themaSectie.classList.add('verborgen');
         uploadSectie.classList.add('verborgen'); // Verberg upload sectie bij teruggaan
-        keuzeOptiesDiv.classList.remove('verborgen'); // Toon de keuze-knoppen weer
-        terugNaarThemasKnop.classList.add('verborgen'); // NIEUW: Verberg deze knop bij terug naar start
+        keuzeOptiesDiv.classList.remove('verborgen');
 
         // Reset de sleutel en previews
         sleutel.clear();
         document.querySelectorAll('.image-preview').forEach(img => img.src = '');
-        document.querySelectorAll('.image-upload').forEach(input => input.value = ''); // Maak file inputs leeg
+        document.querySelectorAll('.image-upload').forEach(input => input.value = '');
+        // Zorg dat de file inputs en instructie weer zichtbaar zijn bij terug naar keuze
+        document.querySelectorAll('.image-upload').forEach(input => input.classList.remove('verborgen'));
+        instructieUploadKnop.classList.remove('verborgen'); // Toon instructie
+
         naarGeneratorKnop.disabled = true;
         themaNaarGeneratorKnop.disabled = true;
     });
 
-    // NIEUW: Event listener voor 'Terug naar thema's' knop hier toevoegen
-    terugNaarThemasKnop.addEventListener('click', () => {
-        // Reset de sleutel en previews (optioneel, afhankelijk van gewenste user experience)
-        sleutel.clear();
-        document.querySelectorAll('.image-preview').forEach(img => img.src = '');
-        document.querySelectorAll('.image-upload').forEach(input => input.value = ''); // Maak file inputs leeg
-        naarGeneratorKnop.disabled = true; // Zorg dat de "Maak geheime boodschap" knop uitgeschakeld is
-
-        uploadSectie.classList.add('verborgen');     // Verberg de upload sectie
-        themaSectie.classList.remove('verborgen');   // Toon de thema selectie sectie
-        terugNaarThemasKnop.classList.add('verborgen'); // Verberg deze knop weer
+    // Event listener voor de 'Terug naar keuzemenu' knop uit upload
+    terugNaarKeuzeKnopUitUpload.addEventListener('click', () => {
+        if (confirm('Weet je zeker dat je terug wilt? De huidige selectie gaat verloren.')) {
+            resetSetupScherm(); // Gebruik de reset functie om terug te gaan naar de startkeuze
+        }
     });
+
 
     // 1. Maak de 23 upload-zones
     ALFABET.split('').forEach(letter => {
@@ -136,7 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Na het kiezen van een thema, toon de upload-sectie om de geladen afbeeldingen te tonen
             uploadSectie.classList.remove('verborgen');
             themaSectie.classList.add('verborgen'); // Verberg de thema-keuze knoppen
-            terugNaarThemasKnop.classList.remove('verborgen'); // NIEUW: Toon 'Terug naar thema's' knop hier toevoegen
+            // Verberg hier de file inputs en instructie direct na het kiezen van een thema
+            document.querySelectorAll('.image-upload').forEach(input => input.classList.add('verborgen'));
+            instructieUploadKnop.classList.add('verborgen'); // Verberg instructie
         });
     });
 
