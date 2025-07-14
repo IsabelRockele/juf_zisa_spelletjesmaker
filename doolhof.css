@@ -1,0 +1,212 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f2f7;
+    text-align: center;
+    padding: 20px;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+header {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+h1 {
+    color: #004080;
+    font-size: 2em;
+    text-align: left;
+    margin-right: auto;
+    margin-left: 220px; /* Aangepast voor de titel */
+}
+
+button {
+    font-family: Arial, sans-serif;
+    background-color: #004080;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+    transition: background-color 0.2s ease;
+    white-space: nowrap;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Hoofdcontainer voor de 3-kolommen lay-out */
+#main-content {
+    display: flex;
+    flex-direction: row; /* Elementen (panelen) naast elkaar */
+    align-items: flex-start; /* Lijn de bovenkant van de panelen uit */
+    width: 100%;
+    max-width: 1200px; /* Totale breedte van de interface */
+    gap: 20px; /* Ruimte tussen de panelen */
+    margin-bottom: 20px;
+}
+
+/* Linkerpaneel voor controls */
+#left-panel {
+    flex-basis: 380px; /* Vaste breedte voor linkerpaneel */
+    flex-shrink: 0; /* Voorkom krimpen */
+    padding: 15px;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    background-color: #f0faff;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-sizing: border-box;
+    margin-right: auto; /* Duw dit paneel naar links */
+    margin-left: 0;
+    text-align: left;
+}
+
+/* Middenpaneel voor canvas en textarea */
+#center-panel {
+    display: flex;
+    flex-direction: column; /* Canvas en textarea onder elkaar */
+    align-items: center; /* Centreer de inhoud (canvas, textarea) */
+    flex-grow: 1; /* Laat dit paneel de meeste resterende ruimte innemen */
+    padding: 0;
+    box-sizing: border-box;
+    gap: 20px; /* Ruimte tussen canvas en textarea */
+}
+
+/* Wrapper direct om de canvas */
+#drawingCanvasContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f8f8f8; /* Lichtere achtergrond voor raster */
+    border: 2px solid #004080; /* Duidelijke rand */
+}
+
+#mainCanvas {
+    background-color: white; /* Binnenkant van canvas is wit */
+    display: block;
+    margin: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Paneel voor de download knoppen rechts */
+#right-panel-buttons {
+    flex-basis: 200px; /* Basisbreedte voor de knoppenkolom */
+    flex-shrink: 0;
+    padding: 15px;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    background-color: #f0faff;
+    display: flex;
+    flex-direction: column; /* Knoppen onder elkaar */
+    gap: 10px; /* Ruimte tussen de knoppen */
+    box-sizing: border-box;
+    margin-left: auto; /* Duw dit paneel naar rechts */
+    margin-right: 0;
+    align-items: center; /* Centreer knoppen horizontaal in dit paneel */
+}
+
+/* Specifieke styling voor de knoppen binnen #right-panel-buttons om ze de volle breedte te geven */
+#right-panel-buttons button {
+    width: 100%; /* Knoppen nemen de volle breedte van hun container in */
+    margin: 0; /* Verwijder standaard knopmarge, gap regelt dit nu */
+}
+
+
+/* Styling voor groepen van controls binnen het linkerpaneel */
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.tool-setting {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+.tool-setting label {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+#controls {
+    width: 100%;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+#controls label {
+    font-weight: bold;
+    color: #333;
+}
+
+#controls input[type="number"],
+#controls select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #aaddff;
+    font-size: 1em;
+    width: auto; /* Laten aanpassen aan inhoud */
+}
+
+
+.control-group h3 {
+    color: #004080;
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    width: 100%;
+}
+
+/* Responsive aanpassingen voor kleinere schermen */
+@media (max-width: 768px) {
+    #main-content {
+        flex-direction: column; /* Stapel alle panelen onder elkaar */
+        align-items: center;
+        gap: 15px;
+    }
+
+    #left-panel,
+    #center-panel, /* Nu ook het middenpaneel */
+    #right-panel-buttons { /* En het knoppenpaneel */
+        flex-basis: auto;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    #controls,
+    #center-panel { /* Zorg dat de inhoud gecentreerd blijft op kleine schermen */
+        align-items: center;
+        gap: 10px;
+    }
+
+    #right-panel-buttons button { /* Knoppen in het rechterpaneel moeten ook 100% breedte zijn */
+        width: auto; /* Laat de knoppenbreedte aanpassen aan de tekst */
+        min-width: 150px; /* Geef ze een minimale breedte indien nodig */
+    }
+}

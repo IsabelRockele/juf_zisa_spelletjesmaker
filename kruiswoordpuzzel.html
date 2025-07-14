@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="utf-8"/>
+    <title>Kruiswoordpuzzel Generator</title>
+    <link href="kruiswoordpuzzel.css" rel="stylesheet"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<header>
+    <button id="menuBtn" onclick="window.location.href='keuze.html'">Keuzemenu</button>
+    <h1>Kruiswoordpuzzel Generator</h1>
+</header>
+
+<div id="main-content">
+    <div id="left-panel">
+        <div id="controls">
+            <div class="control-group">
+                <label for="woordenInput">Woorden en omschrijvingen:</label>
+                <textarea id="woordenInput" rows="12" placeholder="Typ hier je woord en als je een omschrijving wil zet je een ; achter het woord en geef je de omschrijving. Elk woord op een nieuwe regel"></textarea>
+                <div id="woordAantalMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
+            </div>
+            <div id="meldingContainer" style="color: #d9534f; margin-top: 10px; font-weight: bold; min-height: 40px;"></div>
+            <button id="genereerBtn">Genereer Kruiswoordpuzzel</button>
+        </div>
+    </div>
+
+    <div id="center-panel">
+        <div id="right-panel">
+            <canvas height="512" id="mainCanvas" width="512"></canvas>
+        </div>
+        <div id="clues-container">
+            <div id="horizontal-clues" class="clue-box">
+                <h2>Horizontaal</h2>
+                <ul id="horizontal-clues-list"></ul>
+            </div>
+            <div id="vertical-clues" class="clue-box">
+                <h2>Verticaal</h2>
+                <ul id="vertical-clues-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="right-panel-buttons">
+        <div class="control-group">
+            <button id="downloadPngBtn">Download als PNG</button>
+            <button id="downloadPdfBtn">Download als PDF</button>
+        </div>
+    </div>
+</div>
+
+<script src="kruiswoordpuzzel.js"></script>
+</body>
+</html>

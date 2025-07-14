@@ -1,0 +1,64 @@
+body {
+  margin: 0;
+  font-family: 'Comic Sans MS', sans-serif;
+  background-color: #fefae0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* Verandert de uitlijning naar de bovenkant van het scherm */
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  padding: 20px;
+  margin-top: 30px; /* Ruimte bovenaan de container om de titel boven de knoppen te plaatsen */
+}
+
+h1 {
+  color: orange;  /* Oranje kleur voor de titel */
+  font-size: 5rem;
+  margin-bottom: 80px; /* Ruimte onder de titel zodat deze niet over de knoppen heen komt */
+}
+
+.button-grid {
+  display: grid;
+  /* Pas grid-template-columns aan om de breedte te vergroten */
+  /* We kiezen nu een vaste breedte per kolom, bijvoorbeeld 220px, en laten het raster zichzelf aanpassen */
+  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); /* Verhoog de min-breedte */
+  gap: 15px;
+  /* Verhoog de max-width van het raster om de bredere knoppen te accommoderen */
+  max-width: 700px; /* Aangepaste maximale breedte van het rooster */
+  margin: 0 auto;
+}
+
+.keuze-knop {
+  background-color: #ffcf56;
+  border: none;
+  padding: 20px;
+  border-radius: 12px;
+  font-size: 1.6rem; /* Dit is de font-size voor de TEKST */
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  height: 80px; /* Stel een vaste hoogte in voor de knoppen */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* Voeg ruimte toe tussen de emoji en de tekst */
+  /* Optioneel: Voeg min-width toe aan de knop zelf voor extra zekerheid */
+  min-width: 220px; /* Zorg ervoor dat elke knop minimaal deze breedte heeft */
+  white-space: nowrap; /* Voorkomt dat de tekst naar een nieuwe regel springt */
+  overflow: hidden; /* Verbergt overlopende inhoud als de tekst toch te lang is */
+  text-overflow: ellipsis; /* Voegt stippellijn toe als tekst wordt afgesneden */
+}
+
+.keuze-knop span {
+  font-size: 3rem; /* PAS DEZE WAARDE AAN VOOR DE GROOTTE VAN DE EMOJI */
+  line-height: 1; /* Helpt bij verticale uitlijning */
+}
+
+.keuze-knop:hover {
+  transform: scale(1.05);
+  background-color: #ffd97d;
+}
+
+

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geheime Boodschap Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="geheimeboodschap.css" rel="stylesheet"/>
+</head>
+<body>
+
+    <header>
+        <button id="menuBtn" onclick="window.location.href='keuze.html'">Keuzemenu</button>
+        <h1>Geheime Boodschap Generator</h1>
+    </header>
+
+    <main>
+        <div id="setup-scherm">
+            <p class="instructie">Kies hoe je de geheime sleutel wilt instellen:</p>
+            <div class="keuze-opties">
+                <button id="zelf-uploaden-knop"><i class="fas fa-upload"></i> Zelf afbeeldingen uploaden</button>
+                <button id="thema-kiezen-knop"><i class="fas fa-palette"></i> Kies een thema</button>
+            </div>
+
+            <div id="upload-sectie" class="verborgen">
+                <p class="instructie">Upload voor elke letter van het alfabet een afbeelding.</p>
+                <div id="upload-grid">
+                    </div>
+
+                <p class="instructie-knop">Geef eerst elke letter een afbeelding.</p>
+                <div class="upload-actie-knoppen">
+                    <button id="naar-generator-knop" disabled>Maak geheime boodschap</button>
+                    <button id="terug-naar-themas-knop" class="verborgen"><i class="fas fa-arrow-left"></i> Terug naar thema's</button>
+                </div>
+            </div>
+
+            <div id="thema-sectie" class="verborgen">
+                <p class="instructie">Kies een thema:</p>
+                <div id="thema-knoppen">
+                    <button class="thema-knop" data-thema="Sinterklaas"><i class="fas fa-sleigh"></i> Sinterklaas</button>
+                    <button class="thema-knop" data-thema="herfst"><i class="fas fa-leaf"></i> Herfst</button>
+                    <button class="thema-knop" data-thema="Halloween"><i class="fas fa-ghost"></i> Halloween</button>
+                    <button class="thema-knop" data-thema="Pasen"><i class="fas fa-egg"></i> Pasen</button>
+                    <button class="thema-knop" data-thema="lente"><i class="fas fa-seedling"></i> Lente</button>
+                    <button class="thema-knop" data-thema="Carnaval"><i class="fas fa-mask"></i> Carnaval</button>
+                    <button class="thema-knop" data-thema="terug_naar_school"><i class="fas fa-school"></i> Terug naar school</button>
+                    <button class="thema-knop" data-thema="Kerst"><i class="fas fa-tree"></i> Kerst</button>
+                    <button class="thema-knop" data-thema="winter"><i class="fas fa-snowflake"></i> Winter</button>
+                </div>
+                <div class="thema-actie-knoppen">
+                    <button id="thema-naar-generator-knop" disabled>Maak geheime boodschap met thema</button>
+                    <button id="terug-naar-upload-knop"><i class="fas fa-undo"></i> Terug naar zelf uploaden</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="generator-scherm" class="verborgen">
+            <div class="generator-kolom">
+                <h2>Jouw Geheime Sleutel</h2>
+                <div id="sleutel-overzicht"></div>
+                <button id="terug-naar-setup-knop">Kies nieuwe afbeeldingen</button>
+            </div>
+            <div class="generator-kolom">
+                <h2>Geheime Boodschap</h2>
+                <textarea id="boodschap-input" rows="4" placeholder="Typ hier je boodschap..."></textarea>
+                <div class="actie-knoppen">
+                    <button id="genereer-knop">Genereer Puzzel</button>
+                    <button id="opnieuw-beginnen-knop">Nieuwe Zin</button>
+                </div>
+                <div id="download-sectie" class="verborgen">
+                    <h3>Download</h3>
+                    <button id="download-png-knop">Download als PNG</button>
+                    <button id="download-pdf-knop">Download als PDF</button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="output-container-wrapper">
+        <div id="output-container">
+            </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="geheimeboodschap.js"></script>
+</body>
+</html>

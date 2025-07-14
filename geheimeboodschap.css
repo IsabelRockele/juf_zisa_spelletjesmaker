@@ -1,0 +1,299 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f8ff;
+    text-align: center;
+    padding: 20px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+}
+
+h1 { 
+    color: #005a9c;
+    margin-right: auto;
+    margin-left: 20px;
+}
+
+h2 { color: #005a9c; margin-top: 0; }
+
+/* Algemene knopstijl (blauw) */
+button {
+    background-color: #005a9c;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    /* Zorgt ervoor dat iconen en tekst in knoppen goed staan */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+button:hover { background-color: #003f6e; }
+button:disabled { background-color: #cccccc; cursor: not-allowed; }
+
+/* Stijl voor iconen in algemene knoppen */
+button i {
+    margin-right: 8px; /* Ruimte tussen icoon en tekst */
+}
+
+
+.instructie { font-size: 1.1em; margin-bottom: 20px; }
+.verborgen { display: none !important; }
+
+.instructie-knop {
+    margin-top: 20px;
+    margin-bottom: 5px;
+    font-style: italic;
+    color: #555;
+}
+
+/* Styling voor keuze-opties (de container) */
+.keuze-opties {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center; /* Centreert de knoppen horizontaal */
+    gap: 15px; /* Voegt een opening toe tussen de knoppen */
+}
+
+.keuze-opties button {
+    padding: 12px 25px;
+    font-size: 1.1em;
+}
+
+/* Scherm 1: Setup */
+#upload-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.upload-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 5px;
+}
+
+.upload-zone .letter {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.upload-zone input[type="file"] {
+    margin: 10px 0;
+    width: 90px;
+}
+
+.image-preview {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #ccc;
+    object-fit: cover;
+    background-color: #f9f9f9;
+}
+
+/* Container voor de 'Maak geheime boodschap' knop en de instructieknop in ZELF UPLOADEN SECTIE */
+/* Deze container bevat nu ook de nieuwe 'Terug naar thema's' knop */
+.upload-actie-knoppen {
+    display: flex; /* Zorgt ervoor dat de knoppen naast elkaar staan */
+    justify-content: center; /* Centreert de knoppen horizontaal */
+    gap: 15px; /* Kleine opening tussen de knoppen */
+    margin-top: 20px; /* Ruimte boven deze knoppen */
+}
+
+/* De knop 'Maak geheime boodschap' binnen de upload-sectie */
+#naar-generator-knop {
+    font-size: 1.2em;
+    padding: 15px 25px;
+    /* Kleuren zijn al standaard blauw door algemene button stijl */
+}
+
+#naar-generator-knop:hover {
+    background-color: #003f6e; 
+}
+
+/* Specifieke styling voor de thema-keuze knoppen (geel) */
+#thema-knoppen {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.thema-knop {
+    background-color: #FFD700; /* Goudgeel */
+    color: #333; /* Donkere tekst voor contrast */
+    border: 1px solid #CCAA00; /* Donkerder gele rand */
+    padding: 10px 20px;
+    font-size: 1em;
+}
+
+.thema-knop:hover {
+    background-color: #E6C200; /* Iets donkerder geel bij hover */
+    color: #000;
+}
+
+/* Container voor de 'Maak geheime boodschap met thema' en 'Terug naar zelf uploaden' knoppen */
+.thema-actie-knoppen {
+    display: flex; /* Maak deze container flex om de knoppen naast elkaar te zetten */
+    justify-content: center; /* Centreer de knoppen horizontaal */
+    gap: 15px; /* Kleine opening tussen de twee knoppen */
+    margin-top: 20px; /* Ruimte boven deze knoppen */
+}
+
+/* Styling voor de 'Maak geheime boodschap met thema' knop */
+#thema-naar-generator-knop {
+    font-size: 1.2em;
+    padding: 15px 25px;
+    /* Kleuren zijn al standaard blauw door algemene button stijl */
+}
+
+#thema-naar-generator-knop:hover {
+    background-color: #003f6e;
+}
+
+/* Styling voor de 'Terug naar zelf uploaden' knop */
+#terug-naar-upload-knop {
+    font-size: 1.1em; /* Iets kleiner dan de 'Maak geheime boodschap' knop */
+    padding: 12px 20px;
+    /* Kleuren zijn al standaard blauw door algemene button stijl */
+}
+
+#terug-naar-upload-knop:hover {
+    background-color: #003f6e;
+}
+
+/* **NIEUW: Styling voor de 'Terug naar thema's' knop** */
+#terug-naar-themas-knop {
+    font-size: 1.1em;
+    padding: 12px 20px;
+    /* Deze knop is ook blauw door de algemene button stijl */
+}
+
+#terug-naar-themas-knop:hover {
+    background-color: #003f6e;
+}
+
+
+/* Scherm 2: Generator */
+#generator-scherm {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 20px auto;
+    justify-content: center;
+}
+
+.generator-kolom {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    flex: 1;
+    min-width: 300px;
+}
+
+#sleutel-overzicht {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.sleutel-item { text-align: center; }
+.sleutel-item img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+#boodschap-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+}
+
+.actie-knoppen {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* Output Puzzel */
+#output-container-wrapper { margin-top: 30px; }
+
+#output-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    min-height: 100px;
+}
+
+.woord-wrapper {
+    display: flex;
+    gap: 5px;
+    align-items: flex-end;
+}
+
+.letter-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.leesteken {
+    font-size: 40px;
+    font-weight: bold;
+    margin: 0 5px;
+}
+
+.hokje {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.afbeelding-hokje img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.leeg-hokje {
+    background-color: #f9f9f9;
+    border-top: none;
+}

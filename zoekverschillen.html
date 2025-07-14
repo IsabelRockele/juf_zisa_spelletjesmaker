@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Zoek de Verschillen Editor</title>
+  <link rel="stylesheet" href="zoekverschillen.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <button onclick="window.location.href='keuze.html'" id="menuBtn">Keuzemenu</button>
+    <h1>Zoek de Verschillen Editor</h1>
+  </header>
+
+  <div id="main-content">
+    <div id="left-panel">
+        <div class="control-group">
+            <h3>Bestand</h3>
+            <button id="uploadImageBtn">Upload Afbeelding</button>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+        
+        <div class="control-group">
+            <h3>Acties</h3>
+            <button id="undoBtn" disabled>Ongedaan Maken</button>
+        </div>
+
+        <div class="control-group">
+            <h3>Handmatige Tools</h3>
+            <div id="tools-container">
+                <button class="tool-btn active" data-tool="potlood">Potlood</button>
+                <button class="tool-btn" data-tool="gum">Gum</button>
+                <button class="tool-btn" data-tool="select">Selecteer</button>
+            </div>
+            <div class="tool-setting">
+                <label for="dikte">Dikte:</label>
+                <input type="number" id="dikte" value="10" min="1" max="50">
+            </div>
+            <div class="tool-setting" id="gum-settings" style="display: none;">
+                <label for="gumvorm">Gomvorm:</label>
+                <select id="gumvorm">
+                    <option value="rond">Rond</option>
+                    <option value="vierkant">Vierkant</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="control-group" id="selection-tools" style="display: none;">
+            <h3>Selectie Acties</h3>
+            <button id="copyBtn">Knip & Bewerk</button>
+            <button id="pasteBtn" disabled>Plak</button>
+            <div id="clipboard-preview-container" class="hidden">
+                <h4>Gekopieerd:</h4>
+                <canvas id="clipboardCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="center-panel">
+        <div id="puzzel-container">
+            <div class="image-wrapper">
+                <h3>Origineel</h3>
+                <canvas id="canvasOrigineel" width="400" height="600"></canvas>
+            </div>
+            <div class="image-wrapper">
+                <h3>Jouw Puzzel (Bewerken)</h3>
+                <canvas id="canvasVerschillen" width="400" height="600"></canvas>
+            </div>
+        </div>
+        <p id="status-text">Upload een afbeelding om te beginnen.</p>
+    </div>
+
+    <div id="right-panel-buttons">
+        <div class="control-group">
+            <h3>Download</h3>
+            <button id="downloadPngBtn" disabled>Download als PNG</button>
+            <button id="downloadPdfBtn" disabled>Download als PDF</button>
+        </div>
+    </div>
+  </div>
+
+  <div id="edit-modal-overlay" class="hidden">
+    <div id="edit-modal">
+      <h3>Selectie Bewerken</h3>
+      <p>Gebruik je muis om te gummen.</p>
+      <canvas id="editCanvas"></canvas>
+      <div class="edit-controls">
+  <button id="editUndoBtn" disabled>Ongedaan Maken</button>
+  <button id="editFlipHorizontalBtn">Spiegel H</button>
+  <button id="editFlipVerticalBtn">Spiegel V</button>
+  <button id="saveEditBtn">Opslaan</button>
+</div>
+    </div>
+  </div>
+
+  <script src="zoekverschillen.js"></script>
+</body>
+</html>
