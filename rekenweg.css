@@ -31,7 +31,7 @@
     text-decoration: underline;
 }
 
-/* NIEUW: Styling voor de dropdown voor takken */
+/* Styling voor de dropdown voor takken */
 .control-group #branchLetter {
     width: auto; /* Laat de breedte zich aanpassen aan de inhoud */
     padding: 8px;
@@ -50,7 +50,7 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start; /* AANGEPAST: Lijn alles links uit */
     min-height: 100vh;
 }
 
@@ -69,8 +69,7 @@ h1 {
     color: #004080;
     font-size: 2em;
     text-align: left;
-    margin-right: auto;
-    margin-left: 220px; /* Aangepast voor de titel */
+    margin: 0; /* AANGEPAST: Marge verwijderd voor correcte uitlijning */
 }
 
 button {
@@ -104,7 +103,7 @@ button:hover {
 
 /* Linkerpaneel voor controls */
 #left-panel {
-    flex-basis: 380px; /* Vaste breedte voor linkerpaneel */
+    flex-basis: 340px; /* Vaste breedte voor linkerpaneel */
     flex-shrink: 0; /* Voorkom krimpen */
     padding: 15px;
     border: 1px solid #b3e0ff;
@@ -150,7 +149,7 @@ button:hover {
 
 /* Paneel voor de download knoppen rechts */
 #right-panel-buttons {
-    flex-basis: 200px; /* Basisbreedte voor de knoppenkolom */
+    flex-basis: 300px; /* Basisbreedte voor de knoppenkolom */
     flex-shrink: 0;
     padding: 15px;
     border: 1px solid #b3e0ff;
@@ -272,4 +271,19 @@ button:hover {
         width: auto; /* Laat de knoppenbreedte aanpassen aan de tekst */
         min-width: 150px; /* Geef ze een minimale breedte indien nodig */
     }
+}
+
+/* CODE VOOR AFBEELDINGEN */
+#example-image-container {
+    width: 100%;
+    border: 1px dashed #004080;
+    padding: 5px;
+    box-sizing: border-box;
+    margin-bottom: 5px; /* Extra ruimte onder de afbeelding-container */
+}
+
+#example-image-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
 }
