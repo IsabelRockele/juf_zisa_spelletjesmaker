@@ -6,7 +6,7 @@ body {
     margin: 0;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    /* align-items: center; <- Deze is verwijderd om de inhoud niet te centreren */
     min-height: 100vh;
 }
 
@@ -14,9 +14,9 @@ header {
     width: 100%;
     max-width: 1200px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-between; /* Behoudt ruimte tussen items */
     align-items: center;
-    margin-bottom: 20px;
+    margin: 0 auto 20px 0; /* Duwt de header naar links */
     padding: 0 10px;
     box-sizing: border-box;
 }
@@ -24,9 +24,9 @@ header {
 h1 {
     color: #004080;
     font-size: 2em;
-    text-align: left;
-    margin-right: auto;
-    margin-left: 220px; /* Aangepast voor de titel */
+    text-align: center; /* Center de tekst binnen de h1 */
+    flex-grow: 1; /* Laat de h1 de resterende ruimte innemen om te centreren */
+    margin: 0; /* Verwijder alle marges om conflicten te voorkomen */
 }
 
 button {
@@ -55,7 +55,8 @@ button:hover {
     width: 100%;
     max-width: 1200px; /* Totale breedte van de interface */
     gap: 20px; /* Ruimte tussen de panelen */
-    margin-bottom: 20px;
+    margin: 0 auto 20px 0; /* Duwt de main-content naar links */
+    justify-content: flex-start; /* Lijn inhoud links uit */
 }
 
 /* Linkerpaneel voor controls */
@@ -70,7 +71,7 @@ button:hover {
     flex-direction: column;
     gap: 15px;
     box-sizing: border-box;
-    margin-right: auto; /* Duw dit paneel naar links */
+    margin-right: 0;
     margin-left: 0;
     text-align: left;
 }
@@ -116,7 +117,7 @@ button:hover {
     flex-direction: column; /* Knoppen onder elkaar */
     gap: 10px; /* Ruimte tussen de knoppen */
     box-sizing: border-box;
-    margin-left: auto; /* Duw dit paneel naar rechts */
+    margin-left: 0;
     margin-right: 0;
     align-items: center; /* Centreer knoppen horizontaal in dit paneel */
 }
@@ -188,11 +189,12 @@ button:hover {
         flex-direction: column; /* Stapel alle panelen onder elkaar */
         align-items: center;
         gap: 15px;
+        justify-content: center; /* Centreer inhoud wanneer gestapeld */
     }
 
     #left-panel,
-    #center-panel, /* Nu ook het middenpaneel */
-    #right-panel-buttons { /* En het knoppenpaneel */
+    #center-panel,
+    #right-panel-buttons {
         flex-basis: auto;
         width: 100%;
         margin-left: auto;
@@ -200,13 +202,13 @@ button:hover {
     }
 
     #controls,
-    #center-panel { /* Zorg dat de inhoud gecentreerd blijft op kleine schermen */
+    #center-panel {
         align-items: center;
         gap: 10px;
     }
 
-    #right-panel-buttons button { /* Knoppen in het rechterpaneel moeten ook 100% breedte zijn */
-        width: auto; /* Laat de knoppenbreedte aanpassen aan de tekst */
-        min-width: 150px; /* Geef ze een minimale breedte indien nodig */
+    #right-panel-buttons button {
+        width: auto;
+        min-width: 150px;
     }
 }
