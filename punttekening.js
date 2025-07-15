@@ -9,7 +9,6 @@ const gumVormSelect = document.getElementById("gumvorm");
 let gumVorm = "circle";
 
 const maxAantalInput = document.getElementById("maxAantal");
-// Verwijderde JSON-knoppen
 const clearAllBtn = document.getElementById("clearAllBtn");
 const undoBtn = document.getElementById("undoBtn");
 const fileInput = document.getElementById("fileInput");
@@ -54,7 +53,10 @@ const MIN_DISTANCE_FOR_POINT = 1;
 let startPoint = null; // Startpunt voor rechte lijn en cirkel
 
 // Variabele om de huidige muispositie vast te houden voor realtime tekenen
-let currentMousePos = { x: 0, y: 0 };
+let currentMousePos = {
+    x: 0,
+    y: 0
+};
 
 
 // --- Initialisatie en Laadlogica ---
@@ -62,13 +64,25 @@ let currentMousePos = { x: 0, y: 0 };
 document.querySelectorAll("input[name='tool']").forEach(input => {
     input.addEventListener("change", e => {
         tool = e.target.value;
-        if (tool === "gummen") {
-            canvas.style.cursor = "none";
-        } else if (tool === "bekijken" || tool === "rechteLijn" || tool === "cirkel") {
-            canvas.style.cursor = "default";
-        } else { // vrijeLijn
-            canvas.style.cursor = "crosshair";
+
+        // --- AANGEPAST BLOK VOOR CURSOR ---
+        switch (tool) {
+            case 'vrijeLijn':
+            case 'rechteLijn':
+            case 'cirkel':
+                // Gebruik een potloodicoon als cursor. Zorg dat het bestand bestaat!
+                canvas.style.cursor = "url('icons/potlood.png'), auto";
+                break;
+            case 'gummen':
+                canvas.style.cursor = "none"; // Verberg standaardcursor voor de gum
+                break;
+            case 'bekijken':
+            default:
+                canvas.style.cursor = "default"; // Standaard pijlcursor
+                break;
         }
+        // --- EINDE AANGEPAST BLOK ---
+
         tekenAlles(); // Herteken om cursor of tijdelijke elementen te resetten
     });
 });
@@ -124,9 +138,9 @@ function tekenAlles() {
     ctx.clearRect(0, 0, canvas.width, canvas.height); // Wis het hoofdcanvas
 
     // Teken de lagen in de juiste volgorde
-    ctx.drawImage(baseCanvas, 0, 0);       // De geüploade afbeelding (kan gegumd zijn)
-    ctx.drawImage(pointsCanvas, 0, 0);     // De punten (beschermd tegen gummen)
-    ctx.drawImage(drawingCanvas, 0, 0);    // De getekende lijnen
+    ctx.drawImage(baseCanvas, 0, 0); // De geüploade afbeelding (kan gegumd zijn)
+    ctx.drawImage(pointsCanvas, 0, 0); // De punten (beschermd tegen gummen)
+    ctx.drawImage(drawingCanvas, 0, 0); // De getekende lijnen
 
     // Tijdelijke weergave van de tekening op het hoofdcanvas (niet op offscreen canvassen)
     if (isDrawing && currentMousePos) { // Alleen als we tekenen en muispositie bekend is
@@ -247,7 +261,10 @@ canvas.addEventListener("mousedown", (e) => {
         return;
     }
 
-    const { x, y } = getPos(e);
+    const {
+        x,
+        y
+    } = getPos(e);
     isDrawing = true; // Algemene vlag voor muis ingedrukt
 
     if (tool === "bekijken") { // Punten plaatsen
@@ -268,23 +285,44 @@ canvas.addEventListener("mousedown", (e) => {
         applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx); // Gum op basisafbeelding
         // Lijnverwijdering gebeurt in mousemove
         tekenAlles();
-        currentStroke = [{ x: -1, y: -1 }]; // Dummy voor actieve gumsessie
+        currentStroke = [{
+            x: -1,
+            y: -1
+        }]; // Dummy voor actieve gumsessie
     } else if (tool === "vrijeLijn" || tool === "rechteLijn" || tool === "cirkel") {
         saveStateForUndo();
         if (tool === "vrijeLijn") {
-            currentStroke = [{ x, y }];
-            lastPoint = { x, y };
+            currentStroke = [{
+                x,
+                y
+            }];
+            lastPoint = {
+                x,
+                y
+            };
         } else if (tool === "rechteLijn" || tool === "cirkel") {
-            startPoint = { x, y };
+            startPoint = {
+                x,
+                y
+            };
         }
-        currentMousePos = { x, y }; // Update de startpositie voor realtime weergave
+        currentMousePos = {
+            x,
+            y
+        }; // Update de startpositie voor realtime weergave
         tekenAlles(); // Teken initiële punt/startlijn
     }
 });
 
 canvas.addEventListener("mousemove", (e) => {
-    const { x, y } = getPos(e);
-    currentMousePos = { x, y }; // Update altijd de huidige muispositie
+    const {
+        x,
+        y
+    } = getPos(e);
+    currentMousePos = {
+        x,
+        y
+    }; // Update altijd de huidige muispositie
 
     // Toon gumcursor, zelfs als muis niet ingedrukt is
     if (tool === "gummen" && afbeeldingGeladen) {
@@ -324,8 +362,14 @@ canvas.addEventListener("mousemove", (e) => {
         }
 
         if (!lastPoint || Math.sqrt(Math.pow(newX - lastPoint.x, 2) + Math.pow(newY - lastPoint.y, 2)) > MIN_DISTANCE_FOR_POINT) {
-            currentStroke.push({ x: newX, y: newY });
-            lastPoint = { x: newX, y: newY };
+            currentStroke.push({
+                x: newX,
+                y: newY
+            });
+            lastPoint = {
+                x: newX,
+                y: newY
+            };
         }
         tekenAlles(); // Zorgt voor realtime preview op hoofdcanvas
     } else if (tool === "rechteLijn" || tool === "cirkel") {
@@ -347,8 +391,14 @@ canvas.addEventListener("mouseup", (event) => {
         currentStroke = []; // Reset dummy voor gumsessie
     } else if (tool === "vrijeLijn") {
         if (currentStroke.length === 0) { // Als het een enkele klik was, voeg punt toe
-            const { x, y } = getPos(event);
-            currentStroke.push({ x, y });
+            const {
+                x,
+                y
+            } = getPos(event);
+            currentStroke.push({
+                x,
+                y
+            });
         }
         if (currentStroke.length === 1) { // Catmull-Rom heeft minstens 2 punten nodig
             currentStroke.push(currentStroke[0]);
@@ -366,12 +416,18 @@ canvas.addEventListener("mouseup", (event) => {
         currentStroke = [];
         saveStateForUndo();
     } else if (tool === "rechteLijn") {
-        const { x, y } = getPos(event);
+        const {
+            x,
+            y
+        } = getPos(event);
         if (startPoint) {
             drawnStrokes.push({
                 type: 'rechteLijn',
                 start: startPoint,
-                end: { x, y },
+                end: {
+                    x,
+                    y
+                },
                 color: "black",
                 width: parseInt(dikteInput.value)
             });
@@ -380,7 +436,10 @@ canvas.addEventListener("mouseup", (event) => {
             saveStateForUndo();
         }
     } else if (tool === "cirkel") {
-        const { x, y } = getPos(event);
+        const {
+            x,
+            y
+        } = getPos(event);
         if (startPoint) {
             const radius = Math.sqrt(Math.pow(x - startPoint.x, 2) + Math.pow(y - startPoint.y, 2));
             drawnStrokes.push({
@@ -407,7 +466,12 @@ canvas.addEventListener("mouseout", (event) => {
     // Voor andere tools, forceer mouseup als isDrawing actief is
     if ((tool === "vrijeLijn" || tool === "rechteLijn" || tool === "cirkel") && isDrawing) {
         // Dispatch mouseup om de tekenactie correct af te ronden
-        canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true, clientX: event.clientX, clientY: event.clientY }));
+        canvas.dispatchEvent(new MouseEvent('mouseup', {
+            bubbles: true,
+            cancelable: true,
+            clientX: event.clientX,
+            clientY: event.clientY
+        }));
     } else if (isDrawing) { // Als een gum-sessie wordt onderbroken door mouseout
         isDrawing = false;
         lastPoint = null;
@@ -521,26 +585,44 @@ function drawCatmullRomSpline(ctx, points, tension = 0.5, numOfSegments = 30, cl
     }
 
     function hermite(t, p0, p1, m0, m1) {
-        const t2 = t * t; const t3 = t2 * t;
-        const h1 = 2 * t3 - 3 * t2 + 1; const h2 = -2 * t3 + 3 * t2;
-        const h3 = t3 - 2 * t2 + t; const h4 = t3 - t2;
+        const t2 = t * t;
+        const t3 = t2 * t;
+        const h1 = 2 * t3 - 3 * t2 + 1;
+        const h2 = -2 * t3 + 3 * t2;
+        const h3 = t3 - 2 * t2 + t;
+        const h4 = t3 - t2;
         return h1 * p0 + h2 * p1 + h3 * m0 + h4 * m1;
     }
 
     ctx.moveTo(points[0].x, points[0].y);
 
     for (let i = 0; i < count - 1; i++) {
-        let p0 = points[i]; let p1 = points[i + 1];
+        let p0 = points[i];
+        let p1 = points[i + 1];
         let p_prev, p_next;
 
-        if (i === 0) { p_prev = { x: points[0].x - (points[1].x - points[0].x), y: points[0].y - (points[1].y - points[0].y) }; }
-        else { p_prev = points[i - 1]; }
+        if (i === 0) {
+            p_prev = {
+                x: points[0].x - (points[1].x - points[0].x),
+                y: points[0].y - (points[1].y - points[0].y)
+            };
+        } else {
+            p_prev = points[i - 1];
+        }
 
-        if (i === count - 2) { p_next = { x: points[count - 1].x + (points[count - 1].x - points[count - 2].x), y: points[count - 1].y + (points[count - 1].y - points[count - 2].y) }; }
-        else { p_next = points[i + 2]; }
+        if (i === count - 2) {
+            p_next = {
+                x: points[count - 1].x + (points[count - 1].x - points[count - 2].x),
+                y: points[count - 1].y + (points[count - 1].y - points[count - 2].y)
+            };
+        } else {
+            p_next = points[i + 2];
+        }
 
-        const m0x = tension * (p1.x - p_prev.x); const m0y = tension * (p1.y - p_prev.y);
-        const m1x = tension * (p_next.x - p0.x); const m1y = tension * (p_next.y - p0.y);
+        const m0x = tension * (p1.x - p_prev.x);
+        const m0y = tension * (p1.y - p_prev.y);
+        const m1x = tension * (p_next.x - p0.x);
+        const m1y = tension * (p_next.y - p0.y);
 
         for (let t = 0; t <= 1; t += 1 / numOfSegments) {
             const x = hermite(t, p0.x, p1.x, m0x, m1x);
@@ -549,45 +631,66 @@ function drawCatmullRomSpline(ctx, points, tension = 0.5, numOfSegments = 30, cl
         }
     }
     ctx.lineTo(points[count - 1].x, points[count - 1].y);
-    if (close) { ctx.closePath(); }
+    if (close) {
+        ctx.closePath();
+    }
 }
 
 function simplifyPolyline(points, epsilon) {
     if (points.length <= 2) return points;
 
-    let dmax = 0; let index = 0;
-    const end = points.length - 1; const start = 0;
+    let dmax = 0;
+    let index = 0;
+    const end = points.length - 1;
+    const start = 0;
 
     const lineDistance = (p1, p2, p) => {
-        const A = p.x - p1.x; const B = p.y - p1.y;
-        const C = p2.x - p1.x; const D = p2.y - p1.y;
-        const dot = A * C + B * D; const len_sq = C * C + D * D;
-        let param = -1; if (len_sq !== 0) { param = dot / len_sq; }
+        const A = p.x - p1.x;
+        const B = p.y - p1.y;
+        const C = p2.x - p1.x;
+        const D = p2.y - p1.y;
+        const dot = A * C + B * D;
+        const len_sq = C * C + D * D;
+        let param = -1;
+        if (len_sq !== 0) {
+            param = dot / len_sq;
+        }
 
         let xx, yy;
-        if (param < 0) { xx = p1.x; yy = p1.y; }
-        else if (param > 1) { xx = p2.x; yy = p2.y; }
-        else { xx = p1.x + param * C; yy = p1.y + param * D; }
-        const dx = p.x - xx; const dy = p.y - yy;
+        if (param < 0) {
+            xx = p1.x;
+            yy = p1.y;
+        } else if (param > 1) {
+            xx = p2.x;
+            yy = p2.y;
+        } else {
+            xx = p1.x + param * C;
+            yy = p1.y + param * D;
+        }
+        const dx = p.x - xx;
+        const dy = p.y - yy;
         return Math.sqrt(dx * dx + dy * dy);
     };
 
     for (let i = start + 1; i < end; i++) {
         const d = lineDistance(points[start], points[end], points[i]);
-        if (d > dmax) { index = i; dmax = d; }
+        if (d > dmax) {
+            index = i;
+            dmax = d;
+        }
     }
 
     if (dmax > epsilon) {
         const recResults1 = simplifyPolyline(points.slice(start, index + 1), epsilon);
         const recResults2 = simplifyPolyline(points.slice(index, end + 1), epsilon);
         return recResults1.slice(0, recResults1.length - 1).concat(recResults2);
-    } else { return [points[start], points[end]]; }
+    } else {
+        return [points[start], points[end]];
+    }
 }
 
 
 // --- Algemene bewerkingsknoppen ---
-
-// Event listeners voor verwijderde JSON knoppen zijn ook weggehaald
 
 undoBtn.addEventListener("click", () => {
     if (undoStack.length > 1) {
@@ -612,7 +715,7 @@ undoBtn.addEventListener("click", () => {
         if (afbeeldingGeladen && image.src) { // Check image.src om zeker te zijn
             baseCtx.drawImage(image, 0, 0, baseCanvas.width, baseCanvas.height);
         }
-        
+
         drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
         pointsCtx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
 
@@ -630,10 +733,10 @@ clearAllBtn.addEventListener("click", () => {
     saveStateForUndo();
     punten = [];
     drawnStrokes = [];
-    
+
     drawingCtx.clearRect(0, 0, drawingCanvas.width, drawingCanvas.height);
     pointsCtx.clearRect(0, 0, pointsCanvas.width, pointsCanvas.height);
-    
+
     redrawPoints();
     redrawDrawnStrokes();
     tekenAlles();
@@ -663,14 +766,16 @@ showWorksheetBtn.addEventListener("click", async () => {
     exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
     // 2. Teken de lagen eroverheen
-    exportCtx.drawImage(baseCanvas, 0, 0);    // De afbeelding met transparante (weggegumde) delen
+    exportCtx.drawImage(baseCanvas, 0, 0); // De afbeelding met transparante (weggegumde) delen
     exportCtx.drawImage(drawingCanvas, 0, 0); // De getekende lijnen
-    exportCtx.drawImage(pointsCanvas, 0, 0);  // De punten
+    exportCtx.drawImage(pointsCanvas, 0, 0); // De punten
 
     // 3. Gebruik de dataURL van dit nieuwe, samengevoegde canvas
     const dataURL = exportCanvas.toDataURL("image/png");
 
-    const { jsPDF } = window.jspdf;
+    const {
+        jsPDF
+    } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
 
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -702,7 +807,9 @@ showWorksheetBtn.addEventListener("click", async () => {
         hour: '2-digit',
         minute: '2-digit'
     });
-    doc.text(`Gegenereerd op: ${date}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+    doc.text(`Gegenereerd op: ${date}`, pageWidth / 2, pageHeight - 10, {
+        align: 'center'
+    });
 
     doc.save(`${bestandsnaam}_werkblad.pdf`);
 });
@@ -713,7 +820,7 @@ downloadEditedImageBtn.addEventListener("click", () => {
         alert("Upload eerst een afbeelding!");
         return;
     }
-    
+
     // Gebruik dezelfde methode als voor de PDF voor een consistente output
     const exportCanvas = document.createElement('canvas');
     const exportCtx = exportCanvas.getContext('2d');
@@ -731,7 +838,7 @@ downloadEditedImageBtn.addEventListener("click", () => {
 
     // 3. Genereer de dataURL
     const dataURL = exportCanvas.toDataURL("image/png");
-    
+
     const a = document.createElement("a");
     a.href = dataURL;
     a.download = bestandsnaam + "_bewerkt.png";
@@ -750,7 +857,7 @@ baseCanvas.height = VIEWER_CANVAS_HEIGHT;
 drawingCanvas.width = VIEWER_CANVAS_WIDTH;
 drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
 pointsCanvas.width = VIEWER_CANVAS_WIDTH;
-pointsCanvas.height = VIEWER_CANVAS_HEIGHT; 
+pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
 
 // Teken alles initieel leeg
 tekenAlles();
