@@ -142,11 +142,12 @@ button:hover {
 }
 
 #werkblad-container {
-    /* AANGEPAST: Gebruik een grid voor 4 kolommen */
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 15px;
-    place-items: center; /* Centreert de huisjes in hun cel */
+    /* AANGEPAST: Zorgt voor uitlijning aan de bovenkant */
+    align-items: start;
+    justify-items: center;
     font-family: 'Courier New', Courier, monospace;
     font-size: 1.2em;
 }
