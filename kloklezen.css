@@ -1,4 +1,3 @@
-
 body {
     font-family: Arial, sans-serif;
     background-color: #e0f2f7;
@@ -13,7 +12,7 @@ body {
 
 header {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px; /* Verhoogd voor meer ruimte */
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -52,8 +51,8 @@ button:hover {
     flex-direction: row;
     align-items: flex-start;
     width: 100%;
-    max-width: 1200px;
-    gap: 20px;
+    max-width: 1600px; /* Verhoogd voor meer ruimte */
+    gap: 0; /* Verwijderd, we gebruiken marges */
     margin-bottom: 20px;
     flex-wrap: wrap;
     justify-content: center;
@@ -181,8 +180,6 @@ button:hover {
     }
 }
 
-
-
 #canvas-wrapper {
     width: 100%;
     max-width: 800px;
@@ -193,49 +190,20 @@ button:hover {
 
 #mainCanvas {
     display: block;
-    border: 2px solid #004080;
-    background-color: white;
-    margin: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-
-#canvas-wrapper {
-    width: 100%;
-    max-width: 800px;
-    overflow-x: auto;
-    padding: 10px;
-    box-sizing: border-box;
-    margin-right: 10px;
-    margin-left: -20px;
-}
-
-#mainCanvas {
-    display: block;
-    border: 2px solid #004080;
-    background-color: white;
-    margin: 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-#main-content {
-    flex-wrap: nowrap;
-}
-
-#right-panel-buttons {
-    flex-basis: 180px;
-    margin-left: -10px;
-}
-
-
-#canvas-scale {
-    width: 100%;
-    max-width: 800px;
-    overflow-x: auto;
-}
-
-#canvas-scale canvas {
     width: 100%;
     height: auto;
-    display: block;
+    max-width: unset;
+    border: 2px solid #004080;
+    background-color: white;
+    margin: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Toegevoegde regels voor marges */
+#left-panel {
+    margin-right: 20px;
+}
+
+#center-panel {
+    margin-right: 10px; /* Kleinere marge om knoppen dichterbij te brengen */
 }
