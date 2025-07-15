@@ -38,7 +38,7 @@ knoppen.forEach(knop => {
       case tekst.includes('Zoek de verschillen'):
         window.location.href = 'zoekverschillen.html';
         break;
-      case tekst.includes('Werkblad Kloklezen'):
+      case tekst.includes('Werkblad kloklezen'):
         window.location.href = 'kloklezen.html';
         break;
       case tekst.includes('Werkblad bewerkingen'): // NIEUWE CODE
