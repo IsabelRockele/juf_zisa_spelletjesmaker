@@ -82,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         deel1HTML = oef.deel1;
                         deel2HTML = oef.deel2;
                     } else {
-                        // Bepaal welk deel leeg is o.b.v. de 'wissel' instelling
                         if (settings.splitsWissel) {
                             deel1HTML = wissel ? oef.deel1 : '___';
                             deel2HTML = wissel ? '___' : oef.deel2;
@@ -99,7 +98,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     wissel = !wissel;
                 } else {
-                    // Voor rekenen en tafels
                     oefeningDiv.innerHTML = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
                 }
                 werkbladContainer.appendChild(oefeningDiv);
@@ -226,7 +224,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         
-            // AANGEPAST: Spreiding van de benen verder verkleind
             const boxB = 10, boxH = 7, spreiding = 9, radius = 1; 
             const middenX = x;
 
@@ -259,46 +256,106 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.text(text, x, y, { align: 'left' });
         }
 
-        function downloadPDF() {
-            if (settings.groteSplitshuizen) {
-                alert("PDF download is niet beschikbaar voor grote splitshuizen. Gebruik de print-functie van je browser (Ctrl+P).");
-                return;
+        // NIEUWE functie voor het tekenen van een groot splitshuis
+        function drawGrootSplitshuisInPDF(doc, x, y, maxGetal, settings) {
+            const breedte = 32, hoogteDak = 8, hoogteKamer = 7, radius = 1, tekstMarge = 5;
+
+            // Teken het dak
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(51, 51, 51);
+            doc.setFillColor(224, 242, 247);
+            doc.roundedRect(x, y, breedte, hoogteDak, radius, radius, 'FD');
+            doc.setTextColor(0);
+            doc.setFont('Helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.text(String(maxGetal), x + breedte / 2, y + tekstMarge, { align: 'center' });
+
+            // Teken de kamers
+            let showLeft = true;
+            doc.setFont('Helvetica', 'normal');
+            doc.setFontSize(12);
+            for (let i = 0; i <= maxGetal; i++) {
+                const kamerY = y + hoogteDak + (i * hoogteKamer);
+                const deel1 = i;
+                const deel2 = maxGetal - i;
+
+                doc.setDrawColor(204, 204, 204);
+                doc.rect(x, kamerY, breedte, hoogteKamer, 'D');
+                doc.line(x + breedte / 2, kamerY, x + breedte / 2, kamerY + hoogteKamer);
+                
+                let deel1HTML = '___', deel2HTML = '___';
+                if (settings.splitsWissel) {
+                    if (showLeft) {
+                        deel1HTML = deel1;
+                    } else {
+                        deel2HTML = deel2;
+                    }
+                    showLeft = !showLeft;
+                } else {
+                    deel1HTML = deel1;
+                }
+                doc.text(String(deel1HTML), x + breedte / 4, kamerY + tekstMarge, { align: 'center' });
+                doc.text(String(deel2HTML), x + breedte * 0.75, kamerY + tekstMarge, { align: 'center' });
             }
-            if (laatsteOefeningen.length === 0) return;
-            
+        }
+
+        function downloadPDF() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF('p', 'mm', 'a4');
             doc.setFontSize(16);
             doc.setFont('Helvetica', 'bold');
             doc.text("Werkblad Bewerkingen", 105, 15, { align: 'center' });
 
-            // AANGEPAST: Verticale positionering verder vergroot
-            const xPosities = [35, 85, 135, 185]; 
-            const yStart = 30;
-            const yIncrement = 33; // Nog meer verticale ruimte tussen de rijen
-            const maxRijen = 8; // Minder rijen door grotere marge
-            let wissel = false;
+            // AANGEPAST: Aparte logica voor grote splitshuizen
+            if (settings.hoofdBewerking === 'splitsen' && settings.groteSplitshuizen) {
+                const xPosities = [15, 60, 105, 150];
+                let yPos = 30;
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const bottomMargin = 20;
 
-            laatsteOefeningen.forEach((oef, index) => {
-                if (index >= (maxRijen * 4)) return; 
+                for (let i = 0; i < settings.splitsGetallenArray.length; i++) {
+                    const kolom = i % 4;
+                    const maxGetal = settings.splitsGetallenArray[i];
+                    
+                    const hoogteDak = 8, hoogteKamer = 7;
+                    const huisHoogte = hoogteDak + (maxGetal + 1) * hoogteKamer;
 
-                const kolom = index % 4;
-                const rij = Math.floor(index / 4);
-                const x = xPosities[kolom];
-                const y = yStart + (rij * yIncrement);
-
-                if (oef.type === 'splitsen') {
-                    if (settings.splitsStijl === 'huisje') {
-                        drawSplitshuisInPDF(doc, x - 16, y, oef, wissel);
-                    } else { 
-                        drawSplitsbenenInPDF(doc, x, y, oef, wissel);
+                    if (yPos + huisHoogte > pageHeight - bottomMargin) {
+                        doc.addPage();
+                        yPos = 15;
                     }
-                    wissel = !wissel;
-                } else { 
-                    drawRekensomInPDF(doc, x - 15, y, oef);
-                }
-            });
 
+                    drawGrootSplitshuisInPDF(doc, xPosities[kolom], yPos, maxGetal, settings);
+                }
+
+            } else {
+                 // Bestaande logica voor andere oefeningen
+                const xPosities = [35, 85, 135, 185]; 
+                const yStart = 30;
+                const yIncrement = 33;
+                const maxRijen = 8;
+                let wissel = false;
+
+                laatsteOefeningen.forEach((oef, index) => {
+                    if (index >= (maxRijen * 4)) return; 
+
+                    const kolom = index % 4;
+                    const rij = Math.floor(index / 4);
+                    const x = xPosities[kolom];
+                    const y = yStart + (rij * yIncrement);
+
+                    if (oef.type === 'splitsen') {
+                        if (settings.splitsStijl === 'huisje') {
+                            drawSplitshuisInPDF(doc, x - 16, y, oef, wissel);
+                        } else { 
+                            drawSplitsbenenInPDF(doc, x, y, oef, wissel);
+                        }
+                        wissel = !wissel;
+                    } else { 
+                        drawRekensomInPDF(doc, x - 15, y, oef);
+                    }
+                });
+            }
             doc.save('bewerkingen_werkblad.pdf');
         }
 
