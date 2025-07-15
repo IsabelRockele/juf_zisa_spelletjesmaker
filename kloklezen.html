@@ -17,9 +17,9 @@
             <div class="control-group">
                 <label for="numClocks">Aantal klokken op werkblad:</label>
                 <select id="numClocks">
-                    <option value="4" selected>4</option>
-                    <option value="12">12</option>
-                    <option value="16">16</option>
+                    <option value="3">3</option>
+                    <option value="9" selected>9</option>
+                    <option value="18">18</option>
                 </select>
             </div>
 
@@ -44,9 +44,27 @@
             </div>
 
             <div class="control-group">
+                <label>Invulmethode:</label>
+                <div id="invulmethodeKeuze">
+                    <label><input type="radio" name="invulmethode" value="digitaal" checked/> Digitaal (wekker)</label>
+                    <label><input type="radio" name="invulmethode" value="analoog"/> Analoog (zin schrijven)</label>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="voorOverHulp">Type 'voor/over' hulp:</label>
+                <select id="voorOverHulp">
+                    <option value="geen" selected>Geen</option>
+                    <option value="hulp1">Hulp 1 (2 helften)</option>
+                    <option value="hulp2">Hulp 2 (4 kwarten)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
                 <label>Extra's:</label>
                 <label><input id="hulpminuten" type="checkbox" checked/> Toon hulpminuten (05, 10...)</label>
                 <label><input id="hulp24uur" type="checkbox"/> Toon hulp 24-uren (13, 14...)</label>
+                <label><input id="hulpAnaloog" type="checkbox"/> Toon hulp analoog (zinsdeel)</label>
             </div>
 
             <div id="meldingContainer" style="color: #c00; margin-top: 15px; font-weight: bold; min-height: 40px;"></div>
@@ -56,7 +74,9 @@
 
     <div id="center-panel">
         <div id="right-panel">
+            <div id="canvas-scale">
             <canvas id="mainCanvas" width="552" height="552"></canvas>
+        </div>
         </div>
     </div>
 
