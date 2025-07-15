@@ -38,6 +38,9 @@ knoppen.forEach(knop => {
       case tekst.includes('Zoek de verschillen'):
         window.location.href = 'zoekverschillen.html';
         break;
+      case tekst.includes('Werkblad Kloklezen'):
+        window.location.href = 'kloklezen.html';
+        break;
       default:
         alert('Deze functie is nog niet actief.');
     }
