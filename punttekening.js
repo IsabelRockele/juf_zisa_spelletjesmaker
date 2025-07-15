@@ -11,6 +11,7 @@ let gumVorm = "circle";
 const maxAantalInput = document.getElementById("maxAantal");
 const clearAllBtn = document.getElementById("clearAllBtn");
 const undoBtn = document.getElementById("undoBtn");
+const opnieuwBtn = document.getElementById("opnieuwBtn"); // NIEUWE KNOP
 const fileInput = document.getElementById("fileInput");
 const uploadImageBtn = document.getElementById("uploadImageBtn");
 const showWorksheetBtn = document.getElementById("showWorksheetBtn");
@@ -65,27 +66,27 @@ document.querySelectorAll("input[name='tool']").forEach(input => {
     input.addEventListener("change", e => {
         tool = e.target.value;
 
-        // --- AANGEPAST BLOK VOOR CURSOR ---
         switch (tool) {
             case 'vrijeLijn':
             case 'rechteLijn':
             case 'cirkel':
-                // Gebruik een potloodicoon als cursor. Zorg dat het bestand bestaat!
                 canvas.style.cursor = "url('icons/potlood.png'), auto";
                 break;
             case 'gummen':
-                canvas.style.cursor = "none"; // Verberg standaardcursor voor de gum
+                canvas.style.cursor = "none";
                 break;
             case 'bekijken':
             default:
-                canvas.style.cursor = "default"; // Standaard pijlcursor
+                canvas.style.cursor = "default";
                 break;
         }
-        // --- EINDE AANGEPAST BLOK ---
 
-        tekenAlles(); // Herteken om cursor of tijdelijke elementen te resetten
+        tekenAlles();
     });
 });
+
+// EVENT LISTENER VOOR DE NIEUWE KNOP
+opnieuwBtn.addEventListener("click", resetApplication);
 
 gumVormSelect.addEventListener("change", () => {
     gumVorm = gumVormSelect.value;
@@ -103,7 +104,7 @@ fileInput.addEventListener("change", function () {
 
     const reader = new FileReader();
     reader.onload = function (e) {
-        image = new Image(); // Maak nieuwe Image object aan om te zorgen dat onload altijd fired
+        image = new Image();
         image.onload = function () {
             afbeeldingGeladen = true;
             punten = [];
@@ -121,10 +122,10 @@ fileInput.addEventListener("change", function () {
             pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
 
             baseCtx.drawImage(image, 0, 0, baseCanvas.width, baseCanvas.height);
-            redrawPoints(); // Zorgt voor lege puntenlaag
-            redrawDrawnStrokes(); // Zorgt voor lege lijnenlaag
+            redrawPoints();
+            redrawDrawnStrokes();
 
-            saveStateForUndo(); // Sla de initiële staat van de zojuist geladen afbeelding op
+            saveStateForUndo();
             tekenAlles();
         };
         image.src = e.target.result;
@@ -132,18 +133,48 @@ fileInput.addEventListener("change", function () {
     reader.readAsDataURL(file);
 });
 
+
+// --- NIEUWE FUNCTIE OM ALLES TE RESETTEN ---
+function resetApplication() {
+    if (!confirm("Weet je zeker dat je opnieuw wilt beginnen? Alle wijzigingen gaan verloren.")) {
+        return;
+    }
+
+    afbeeldingGeladen = false;
+    punten = [];
+    drawnStrokes = [];
+    undoStack = [];
+    image = new Image();
+    bestandsnaam = "punttekening";
+
+    canvas.width = VIEWER_CANVAS_WIDTH;
+    canvas.height = VIEWER_CANVAS_HEIGHT;
+    baseCanvas.width = VIEWER_CANVAS_WIDTH;
+    baseCanvas.height = VIEWER_CANVAS_HEIGHT;
+    drawingCanvas.width = VIEWER_CANVAS_WIDTH;
+    drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
+    pointsCanvas.width = VIEWER_CANVAS_WIDTH;
+    pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
+
+    tekenAlles();
+
+    outputJson.value = "";
+    fileInput.value = ""; 
+
+    alert("De editor is gereset. Je kunt een nieuwe afbeelding uploaden.");
+}
+
+
 // --- Tekenfunctionaliteiten ---
 
 function tekenAlles() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Wis het hoofdcanvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Teken de lagen in de juiste volgorde
-    ctx.drawImage(baseCanvas, 0, 0); // De geüploade afbeelding (kan gegumd zijn)
-    ctx.drawImage(pointsCanvas, 0, 0); // De punten (beschermd tegen gummen)
-    ctx.drawImage(drawingCanvas, 0, 0); // De getekende lijnen
+    ctx.drawImage(baseCanvas, 0, 0);
+    ctx.drawImage(pointsCanvas, 0, 0);
+    ctx.drawImage(drawingCanvas, 0, 0);
 
-    // Tijdelijke weergave van de tekening op het hoofdcanvas (niet op offscreen canvassen)
-    if (isDrawing && currentMousePos) { // Alleen als we tekenen en muispositie bekend is
+    if (isDrawing && currentMousePos) {
         ctx.save();
         ctx.strokeStyle = "black";
         ctx.lineWidth = parseInt(dikteInput.value);
@@ -151,10 +182,8 @@ function tekenAlles() {
         ctx.lineJoin = "round";
 
         if (tool === "vrijeLijn" && currentStroke.length > 0) {
-            // Teken de vrije lijn, inclusief het huidige punt
             drawCatmullRomSpline(ctx, currentStroke, SPLINE_TENSION, SPLINE_SEGMENTS_PER_POINT, false);
             ctx.stroke();
-            // Teken de tip van de lijn voor betere feedback
             ctx.beginPath();
             ctx.arc(currentMousePos.x, currentMousePos.y, parseInt(dikteInput.value) / 2, 0, 2 * Math.PI);
             ctx.fillStyle = "black";
@@ -256,7 +285,7 @@ function saveStateForUndo() {
 // --- Event Listeners voor Interactie ---
 
 canvas.addEventListener("mousedown", (e) => {
-    if (!afbeeldingGeladen) { // Voorkom interactie als geen afbeelding is geladen
+    if (!afbeeldingGeladen) {
         alert("Upload eerst een afbeelding!");
         return;
     }
@@ -265,30 +294,29 @@ canvas.addEventListener("mousedown", (e) => {
         x,
         y
     } = getPos(e);
-    isDrawing = true; // Algemene vlag voor muis ingedrukt
+    isDrawing = true;
 
-    if (tool === "bekijken") { // Punten plaatsen
+    if (tool === "bekijken") {
         const maxAantal = parseInt(maxAantalInput.value);
         if (punten.length >= maxAantal) {
             alert(`Maximum aantal punten (${maxAantal}) bereikt.`);
-            isDrawing = false; // Geen doorlopende tekenactie
+            isDrawing = false;
             return;
         }
         saveStateForUndo();
         punten.push([x, y]);
         redrawPoints();
         tekenAlles();
-        isDrawing = false; // Zet direct op false, want het is een klik en geen sleep
+        isDrawing = false;
     } else if (tool === "gummen") {
-        saveStateForUndo(); // Sla staat op voor begin van gumsessie
+        saveStateForUndo();
         const gumDikte = parseInt(dikteInput.value);
-        applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx); // Gum op basisafbeelding
-        // Lijnverwijdering gebeurt in mousemove
+        applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx);
         tekenAlles();
         currentStroke = [{
             x: -1,
             y: -1
-        }]; // Dummy voor actieve gumsessie
+        }];
     } else if (tool === "vrijeLijn" || tool === "rechteLijn" || tool === "cirkel") {
         saveStateForUndo();
         if (tool === "vrijeLijn") {
@@ -309,8 +337,8 @@ canvas.addEventListener("mousedown", (e) => {
         currentMousePos = {
             x,
             y
-        }; // Update de startpositie voor realtime weergave
-        tekenAlles(); // Teken initiële punt/startlijn
+        };
+        tekenAlles();
     }
 });
 
@@ -322,18 +350,16 @@ canvas.addEventListener("mousemove", (e) => {
     currentMousePos = {
         x,
         y
-    }; // Update altijd de huidige muispositie
+    };
 
-    // Toon gumcursor, zelfs als muis niet ingedrukt is
     if (tool === "gummen" && afbeeldingGeladen) {
-        tekenAlles(); // Wis vorige tekening, inclusief de oude cursor
+        tekenAlles();
         drawGumCursor(x, y, parseInt(dikteInput.value), gumVorm);
-        if (!isDrawing) return; // Als we de muis niet ingedrukt hebben, stop hier
-    } else if (!isDrawing) { // Als geen gum en geen tekenactie actief, stop
+        if (!isDrawing) return;
+    } else if (!isDrawing) {
         return;
     }
 
-    // Vanaf hier: isDrawing is true (en/of tool is gummen)
     if (tool === "gummen") {
         const gumDikte = parseInt(dikteInput.value);
         applyGumToCanvas(x, y, gumDikte, gumVorm, baseCtx);
@@ -349,9 +375,9 @@ canvas.addEventListener("mousemove", (e) => {
         }
 
         if (linesErasedThisMove) {
-            redrawDrawnStrokes(); // Update offscreen drawingCanvas
+            redrawDrawnStrokes();
         }
-        tekenAlles(); // Render alles opnieuw op het hoofdcanvas
+        tekenAlles();
     } else if (tool === "vrijeLijn") {
         let newX = x;
         let newY = y;
@@ -371,26 +397,25 @@ canvas.addEventListener("mousemove", (e) => {
                 y: newY
             };
         }
-        tekenAlles(); // Zorgt voor realtime preview op hoofdcanvas
+        tekenAlles();
     } else if (tool === "rechteLijn" || tool === "cirkel") {
-        tekenAlles(); // Zorgt voor realtime preview op hoofdcanvas
+        tekenAlles();
     }
 });
 
 canvas.addEventListener("mouseup", (event) => {
-    // Alleen actie uitvoeren als isDrawing waar was bij mouse down
-    if (!isDrawing) return; // Voorkom actie als mousedown al isFinished (b.v. bij 'bekijken' tool)
+    if (!isDrawing) return;
 
     isDrawing = false;
-    lastPoint = null; // Reset voor vrije lijn
+    lastPoint = null;
 
     if (tool === "gummen") {
-        if (currentStroke.length > 0) { // Sla alleen op als er daadwerkelijk gegumd is
+        if (currentStroke.length > 0) {
             saveStateForUndo();
         }
-        currentStroke = []; // Reset dummy voor gumsessie
+        currentStroke = [];
     } else if (tool === "vrijeLijn") {
-        if (currentStroke.length === 0) { // Als het een enkele klik was, voeg punt toe
+        if (currentStroke.length === 0) {
             const {
                 x,
                 y
@@ -400,7 +425,7 @@ canvas.addEventListener("mouseup", (event) => {
                 y
             });
         }
-        if (currentStroke.length === 1) { // Catmull-Rom heeft minstens 2 punten nodig
+        if (currentStroke.length === 1) {
             currentStroke.push(currentStroke[0]);
         }
 
@@ -454,25 +479,22 @@ canvas.addEventListener("mouseup", (event) => {
             saveStateForUndo();
         }
     }
-    tekenAlles(); // Werk hoofdcanvas bij met de definitieve staat
+    tekenAlles();
 });
 
 canvas.addEventListener("mouseout", (event) => {
-    // Wis gumcursor als muis het canvas verlaat, zelfs zonder isDrawing
     if (tool === "gummen") {
-        tekenAlles(); // Hierdoor verdwijnt de gumcursor
+        tekenAlles();
     }
 
-    // Voor andere tools, forceer mouseup als isDrawing actief is
     if ((tool === "vrijeLijn" || tool === "rechteLijn" || tool === "cirkel") && isDrawing) {
-        // Dispatch mouseup om de tekenactie correct af te ronden
         canvas.dispatchEvent(new MouseEvent('mouseup', {
             bubbles: true,
             cancelable: true,
             clientX: event.clientX,
             clientY: event.clientY
         }));
-    } else if (isDrawing) { // Als een gum-sessie wordt onderbroken door mouseout
+    } else if (isDrawing) {
         isDrawing = false;
         lastPoint = null;
         if (currentStroke.length > 0) {
@@ -707,12 +729,12 @@ undoBtn.addEventListener("click", () => {
         redrawDrawnStrokes();
         redrawPoints();
         tekenAlles();
-    } else if (undoStack.length === 1) { // Terug naar de initiële staat van de geüploade afbeelding
+    } else if (undoStack.length === 1) {
         punten = [];
         drawnStrokes = [];
 
         baseCtx.clearRect(0, 0, baseCanvas.width, baseCanvas.height);
-        if (afbeeldingGeladen && image.src) { // Check image.src om zeker te zijn
+        if (afbeeldingGeladen && image.src) {
             baseCtx.drawImage(image, 0, 0, baseCanvas.width, baseCanvas.height);
         }
 
@@ -722,7 +744,7 @@ undoBtn.addEventListener("click", () => {
         redrawPoints();
         redrawDrawnStrokes();
         tekenAlles();
-        saveStateForUndo(); // Sla de gereset state op, zodat de undo-stack niet leeg is
+        saveStateForUndo();
     }
 });
 
@@ -755,22 +777,18 @@ showWorksheetBtn.addEventListener("click", async () => {
         return;
     }
 
-    // Creëer een tijdelijk canvas met een witte achtergrond
     const exportCanvas = document.createElement('canvas');
     const exportCtx = exportCanvas.getContext('2d');
     exportCanvas.width = canvas.width;
     exportCanvas.height = canvas.height;
 
-    // 1. Vul met een solide witte kleur
     exportCtx.fillStyle = 'white';
     exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-    // 2. Teken de lagen eroverheen
-    exportCtx.drawImage(baseCanvas, 0, 0); // De afbeelding met transparante (weggegumde) delen
-    exportCtx.drawImage(drawingCanvas, 0, 0); // De getekende lijnen
-    exportCtx.drawImage(pointsCanvas, 0, 0); // De punten
+    exportCtx.drawImage(baseCanvas, 0, 0);
+    exportCtx.drawImage(drawingCanvas, 0, 0);
+    exportCtx.drawImage(pointsCanvas, 0, 0);
 
-    // 3. Gebruik de dataURL van dit nieuwe, samengevoegde canvas
     const dataURL = exportCanvas.toDataURL("image/png");
 
     const {
@@ -821,22 +839,18 @@ downloadEditedImageBtn.addEventListener("click", () => {
         return;
     }
 
-    // Gebruik dezelfde methode als voor de PDF voor een consistente output
     const exportCanvas = document.createElement('canvas');
     const exportCtx = exportCanvas.getContext('2d');
     exportCanvas.width = canvas.width;
     exportCanvas.height = canvas.height;
 
-    // 1. Vul met wit
     exportCtx.fillStyle = 'white';
     exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
 
-    // 2. Teken de lagen
     exportCtx.drawImage(baseCanvas, 0, 0);
     exportCtx.drawImage(drawingCanvas, 0, 0);
     exportCtx.drawImage(pointsCanvas, 0, 0);
 
-    // 3. Genereer de dataURL
     const dataURL = exportCanvas.toDataURL("image/png");
 
     const a = document.createElement("a");
@@ -848,8 +862,6 @@ downloadEditedImageBtn.addEventListener("click", () => {
 });
 
 // --- Begin initiële opzet ---
-// Zorg ervoor dat de canvassen de juiste afmetingen hebben bij de start
-// (zelfs als er nog geen afbeelding is geladen)
 canvas.width = VIEWER_CANVAS_WIDTH;
 canvas.height = VIEWER_CANVAS_HEIGHT;
 baseCanvas.width = VIEWER_CANVAS_WIDTH;
@@ -859,6 +871,5 @@ drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
 pointsCanvas.width = VIEWER_CANVAS_WIDTH;
 pointsCanvas.height = VIEWER_CANVAS_HEIGHT;
 
-// Teken alles initieel leeg
 tekenAlles();
 // --- Eind initiële opzet ---
