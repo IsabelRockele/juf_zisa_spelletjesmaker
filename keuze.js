@@ -11,8 +11,8 @@ knoppen.forEach(knop => {
       case tekst.includes('Doolhof'):
         window.location.href = 'doolhof.html';
         break;
-      case tekst.includes('Woordzoeker'):  // Voeg deze lijn toe
-        window.location.href = 'woordzoeker.html';  // Verwijzing naar de woordzoekerpagina
+      case tekst.includes('Woordzoeker'):
+        window.location.href = 'woordzoeker.html';
         break;
       case tekst.includes('Punttekening'):
         window.location.href = 'punttekening.html';
@@ -41,6 +41,9 @@ knoppen.forEach(knop => {
       case tekst.includes('Werkblad Kloklezen'):
         window.location.href = 'kloklezen.html';
         break;
+      case tekst.includes('Werkblad bewerkingen'): // NIEUWE CODE
+        window.location.href = 'bewerkingen_keuze.html'; // NIEUWE CODE
+        break; // NIEUWE CODE
       default:
         alert('Deze functie is nog niet actief.');
     }
