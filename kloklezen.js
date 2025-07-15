@@ -46,54 +46,72 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const { numClocks, toonHulpminuten, toon24Uur, toonHulpAnaloog, voorOverHulpType, tijdnotatie, invulmethode, tijden } = instellingen;
 
-        // --- AANPASSING HIER: Nieuwe diameter voor de klok ---
-        const actualClockDiameter = layoutType === 'pdf' ? 250 : 150; // Groter in PDF
-        const clockVerticalOffset = 20; // De klok iets laten zakken in het vak
+        let actualClockDiameter;
+        const clockVerticalOffset = 20;
 
         let paddingBetweenClocks;
-        let wekkerDisplayWidth; // Breedte van één wekker
+        let wekkerDisplayWidth;
 
         if (layoutType === 'pdf') {
+            // Bepaal de diameter van de klok gebaseerd op de tijdnotatie voor de PDF
+            if (tijdnotatie === '24uur') {
+                actualClockDiameter = 240; // Kleinere klok voor 24-uurs oefening in PDF
+            } else {
+                actualClockDiameter = 180; // Grotere klok voor standaard oefening in PDF
+            }
+            
             paddingBetweenClocks = 30;
-            wekkerDisplayWidth = 180;
-        } else { // compact layout voor de web-weergave
+
+            // --- AANPASSING: Dynamische wekkergrootte voor PDF ---
+            if (tijdnotatie === '24uur') {
+                // Twee wekkers naast elkaar, dus maak ze kleiner
+                wekkerDisplayWidth = 160; 
+            } else {
+                // Slechts één wekker, dus deze mag groter zijn
+                wekkerDisplayWidth = 110; 
+            }
+            // --- EINDE AANPASSING ---
+
+        } else { // 'compact' layout voor de web-weergave
+            actualClockDiameter = 150; // Standaardgrootte voor de weergave op de website
             paddingBetweenClocks = 20;
-            wekkerDisplayWidth = layoutType === 'pdf' ? 160 : 130;
+            wekkerDisplayWidth = 130;
         }
 
         let answerBlockHeight = 0;
-        let minRequiredWidthForAnswerArea = actualClockDiameter; // Minimaal zo breed als de klok
+        let minRequiredWidthForAnswerArea = actualClockDiameter;
 
         const wekkerRatio = wekkerImg.height > 0 ? wekkerImg.width / wekkerImg.height : 1;
 
         if (invulmethode === 'analoog') {
-            answerBlockHeight = 60; // Ruimte voor twee tekstregels
-            minRequiredWidthForAnswerArea = actualClockDiameter; // Tekst past meestal onder de klok
-        } else { // digitaal (wekker)
+            answerBlockHeight = 60;
+            minRequiredWidthForAnswerArea = actualClockDiameter;
+        } else {
             if (tijdnotatie === '24uur') {
                 const labelHeight = 12;
                 const spacingBetweenTwoWekkers = 15;
                 const calculatedWekkerHeight = wekkerDisplayWidth / wekkerRatio;
-                
-                answerBlockHeight = (labelHeight * 2) + calculatedWekkerHeight + spacingBetweenTwoWekkers; // Hoogte voor 2 labels + 1 wekker + tussenruimte
-
-                // Voor 24uur: 2 wekkers naast elkaar plus de ruimte ertussen
+                answerBlockHeight = (labelHeight * 2) + calculatedWekkerHeight + spacingBetweenTwoWekkers;
                 minRequiredWidthForAnswerArea = (wekkerDisplayWidth * 2) + spacingBetweenTwoWekkers;
-            } else { // Standaard digitale wekker (1 wekker)
-                answerBlockHeight = wekkerDisplayWidth / wekkerRatio; // Hoogte voor 1 wekker
+            } else {
+                answerBlockHeight = wekkerDisplayWidth / wekkerRatio;
                 minRequiredWidthForAnswerArea = wekkerDisplayWidth;
             }
         }
 
-        // De uiteindelijke breedte van het 'vak' (cell) moet minstens de breedte van de klok zijn,
-        // maar ook breed genoeg om het antwoordblok (wekker/tekst) te huisvesten zonder overlapping.
-        // We voegen een extra marge toe aan de vereiste breedte voor het antwoordgebied.
-        const singleCellTotalWidth = Math.max(actualClockDiameter + 20, minRequiredWidthForAnswerArea + 20); // +20 voor extra marge in het vak
+        // --- AANPASSING: Vakbreedte voor PDF ---
+        let singleCellTotalWidth;
+        if (layoutType === 'pdf' && tijdnotatie === 'standaard') {
+            // Voor standaardoefeningen in PDF, voeg extra witruimte toe (bv. 60px)
+            // zodat de 24-uurs hulpcijfers niet tegen de rand komen.
+            singleCellTotalWidth = Math.max(actualClockDiameter + 60, minRequiredWidthForAnswerArea + 20);
+        } else {
+            // Gebruik de standaardberekening voor de web-weergave en 24u-PDF's.
+            singleCellTotalWidth = Math.max(actualClockDiameter + 20, minRequiredWidthForAnswerArea + 20);
+        }
+        // --- EINDE AANPASSING ---
 
-        // De ruimte tussen de klok en het antwoordblok
         const spacingBelowClock = (voorOverHulpType !== 'geen' || tijdnotatie === '24uur' || toon24Uur) ? 45 : 20;
-
-        // --- AANPASSING HIER: Berekening van totale hoogte met offset ---
         const singleCellTotalHeight = clockVerticalOffset + actualClockDiameter + spacingBelowClock + answerBlockHeight;
 
         const numCols = 3;
@@ -108,20 +126,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const row = Math.floor(i / numCols);
             const col = i % numCols;
 
-            // X-positie van het linkerbovenhoek van het klokvak
             const x_box_start = paddingBetweenClocks + col * (singleCellTotalWidth + paddingBetweenClocks);
-            // Y-positie van het linkerbovenhoek van het klokvak
             const y_box_start = paddingBetweenClocks + row * (singleCellTotalHeight + paddingBetweenClocks);
 
             ctx.strokeStyle = '#dddddd';
             ctx.lineWidth = 1;
-            // Teken de omringende box voor elke klok en bijbehorende antwoordvelden
             ctx.strokeRect(x_box_start, y_box_start, singleCellTotalWidth, singleCellTotalHeight);
 
-            // De werkelijke X-positie voor het tekenen van de klok (gecentreerd in het vak)
             const clockX = x_box_start + (singleCellTotalWidth - actualClockDiameter) / 2;
-            // --- AANPASSING HIER: Y-positie van de klok met offset ---
-            const clockY = y_box_start + clockVerticalOffset; // Klok zakt nu in het vak
+            const clockY = y_box_start + clockVerticalOffset;
 
             const tijd = tijden[i];
             tekenKlokSessie(clockX, clockY, actualClockDiameter, tijd, toonHulpminuten, toon24Uur, toonHulpAnaloog, voorOverHulpType, tijdnotatie, invulmethode, singleCellTotalHeight, wekkerDisplayWidth, singleCellTotalWidth, x_box_start);
@@ -148,7 +161,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return { uur, minuut };
     }
 
-    // Aangepaste functie om rekening te houden met de totale breedte van het klokvak
     function tekenKlokSessie(x_clock, y_clock, clockSize, tijd, toonHulpminuten, toon24Uur, toonHulpAnaloog, voorOverHulpType, tijdnotatie, invulmethode, totalCellHeight, wekkerDisplayWidth, totalCellWidth, x_box_start) {
         const { uur, minuut } = tijd;
         const radius = clockSize / 2;
@@ -157,19 +169,17 @@ document.addEventListener("DOMContentLoaded", () => {
         tekenKlokBasis(centerX, centerY, radius, toonHulpminuten, toon24Uur, voorOverHulpType);
         tekenWijzers(centerX, centerY, radius, uur, minuut);
 
-        // --- AANPASSING HIER: De y-positie voor het antwoordgebied moet nu rekening houden met de clockVerticalOffset (al verwerkt in y_clock) ---
         const spaceBelowClock = (voorOverHulpType !== 'geen' || tijdnotatie === '24uur' || toon24Uur) ? 45 : 20;
-        const y_answerAreaStart = y_clock + clockSize + spaceBelowClock; // Gebruik y_clock hier, omdat die al de offset bevat
+        const y_answerAreaStart = y_clock + clockSize + spaceBelowClock;
 
         if (invulmethode === 'analoog') {
-            const lineHeight = clockSize * 0.15;
+            const lineHeight = clockSize * 0.25; // Verhoogd van 0.15 voor meer ruimte
             ctx.font = `${clockSize * 0.11}px Arial`;
             ctx.fillStyle = '#333';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // Tekst centreren binnen de breedte van de hele cel (totalCellWidth)
-            const textX = x_box_start + totalCellWidth / 2; // Gecentreerd in het hele vak
+            const textX = x_box_start + totalCellWidth / 2;
 
             if (toonHulpAnaloog) {
                 let zin1 = "";
@@ -221,17 +231,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const labelHeight = 12;
                 const spacingBetweenTwoWekkers = 15;
 
-                // De totale breedte die nodig is voor de twee wekkers en de ruimte ertussen
                 const requiredWekkersTotalWidth = (currentWekkerDisplayWidth * 2) + spacingBetweenTwoWekkers;
-
-                // Bereken de start-X voor de wekkergroep, gecentreerd binnen de totale celbreedte
-                const startX_wekkerGroup = x_box_start + (totalCellWidth - requiredWekkersTotalWidth) / 2; // Gecentreerd in het hele vak
+                const startX_wekkerGroup = x_box_start + (totalCellWidth - requiredWekkersTotalWidth) / 2;
 
                 const y_labels = y_answerAreaStart;
                 const y_wekkers = y_answerAreaStart + labelHeight;
                 const wekkerDisplayHeight = currentWekkerDisplayWidth / wekkerRatio;
 
-                // Teken de eerste wekker (ochtend/voormiddag)
                 const x1_label = startX_wekkerGroup + (currentWekkerDisplayWidth / 2);
                 ctx.font = `italic ${labelHeight - 3}px Arial`;
                 ctx.fillStyle = '#555';
@@ -239,7 +245,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 ctx.fillText("ochtend/voormiddag", x1_label, y_labels);
                 ctx.drawImage(wekkerImg, startX_wekkerGroup, y_wekkers, currentWekkerDisplayWidth, wekkerDisplayHeight);
 
-                // Teken de tweede wekker (namiddag/avond)
                 const x2_wekker = startX_wekkerGroup + currentWekkerDisplayWidth + spacingBetweenTwoWekkers;
                 const x2_label = x2_wekker + (currentWekkerDisplayWidth / 2);
                 ctx.fillText("namiddag/avond", x2_label, y_labels);
@@ -247,8 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             } else {
                 const wekkerDisplayHeight = currentWekkerDisplayWidth / wekkerRatio;
-                // Centreer de enkele wekker binnen de totale celbreedte
-                const wekkerX = x_box_start + (totalCellWidth - currentWekkerDisplayWidth) / 2; // Gecentreerd in het hele vak
+                const wekkerX = x_box_start + (totalCellWidth - currentWekkerDisplayWidth) / 2;
                 ctx.drawImage(wekkerImg, wekkerX, y_answerAreaStart, currentWekkerDisplayWidth, wekkerDisplayHeight);
             }
         }
@@ -268,10 +272,23 @@ document.addEventListener("DOMContentLoaded", () => {
         if (voorOverHulpType === 'hulp1') {
             ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, klokRadius, -0.5 * Math.PI, 0.5 * Math.PI); ctx.closePath(); ctx.fillStyle = 'rgba(144, 238, 144, 0.2)'; ctx.fill();
             ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, klokRadius, 0.5 * Math.PI, 1.5 * Math.PI); ctx.closePath(); ctx.fillStyle = 'rgba(255, 182, 193, 0.2)'; ctx.fill();
-            ctx.font = `italic ${klokRadius * 0.12}px Arial`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            const textRadius = radius * 1.1;
-            ctx.fillStyle = 'darkgreen'; ctx.fillText("over", centerX + textRadius, centerY);
-            ctx.fillStyle = 'darkred'; ctx.fillText("voor", centerX - textRadius, centerY);
+            
+            // --- AANPASSING: Tekst BOVEN de klok plaatsen ---
+            ctx.font = `italic bold ${klokRadius * 0.12}px Arial`; 
+            ctx.textAlign = 'center'; 
+            ctx.textBaseline = 'middle';
+
+            // Bepaal Y-positie in de witruimte boven de klok
+            const textY = centerY - radius - 10; 
+
+            // Horizontale positie voor 'voor' en 'over'
+            const textXOffset = radius * 0.5;
+
+            ctx.fillStyle = 'darkred';
+            ctx.fillText("voor", centerX - textXOffset, textY);
+            
+            ctx.fillStyle = 'darkgreen';
+            ctx.fillText("over", centerX + textXOffset, textY);
 
         } else if (voorOverHulpType === 'hulp2') {
             const colorGreen = 'rgba(144, 238, 144, 0.3)'; const colorOrange = 'rgba(255, 165, 0, 0.3)';
@@ -285,7 +302,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
             ctx.font = `bold ${radius * 0.1}px Arial`;
             ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
-            const textRadius = radius * 1.25; const textLineHeight = radius * 0.12;
+            
+            // Plaats de tekst net buiten de klokcirkel
+            const textRadius = radius * 1.15; 
+            const textLineHeight = radius * 0.12;
 
             ctx.fillStyle = 'darkgreen';
             ctx.fillText("over", centerX + textRadius * Math.cos(-Math.PI/4), centerY + textRadius * Math.sin(-Math.PI/4));
