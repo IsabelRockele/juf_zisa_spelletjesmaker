@@ -48,8 +48,8 @@
                     <button class="thema-knop" data-thema="winter"><i class="fas fa-snowflake"></i> Winter</button>
                 </div>
                 <div class="thema-actie-knoppen">
-                    <button id="thema-naar-generator-knop" disabled>Maak geheime boodschap met thema</button>
-                    <button id="terug-naar-upload-knop"><i class="fas fa-undo"></i> Terug naar zelf uploaden</button>
+                    <button id="naar-generator-knop" disabled>Maak geheime boodschap</button>
+                    <button id="terug-naar-upload-knop"><i class="fas fa-undo"></i> Terug naar keuzemenu</button>
                 </div>
             </div>
         </div>
@@ -62,27 +62,34 @@
             </div>
             <div class="generator-kolom">
                 <h2>Geheime Boodschap</h2>
-                <textarea id="boodschap-input" rows="4" placeholder="Typ hier je boodschap..."></textarea>
+
+                <div id="generator-type-keuze">
+                    <label>
+                        <input type="radio" name="puzzeltype" value="zin" checked> Zin
+                    </label>
+                    <label>
+                        <input type="radio" name="puzzeltype" value="woorden"> Losse woorden
+                    </label>
+                </div>
+
+                <div id="zin-sectie">
+                    <textarea id="boodschap-input" rows="4" placeholder="Typ hier je boodschap..."></textarea>
+                </div>
+
+                <div id="woorden-sectie" class="verborgen">
+                    <p class="instructie">Typ maximaal 9 woorden in de vakken hieronder.</p>
+                    <div id="woorden-grid">
+                        </div>
+                </div>
+
                 <div class="actie-knoppen">
                     <button id="genereer-knop">Genereer Puzzel</button>
-                    <button id="opnieuw-beginnen-knop">Nieuwe Zin</button>
-                </div>
-                <div id="download-sectie" class="verborgen">
-                    <h3>Download</h3>
-                    <button id="download-png-knop">Download als PNG</button>
-                    <button id="download-pdf-knop">Download als PDF</button>
+                    <button id="opnieuw-beginnen-knop">Nieuwe Zin / Woorden</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="output-container-wrapper">
-        <div id="output-container">
-        </div>
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="geheimeboodschap.js"></script>
 </body>
 </html>
