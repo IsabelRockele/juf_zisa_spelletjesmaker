@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadPngBtn = document.getElementById('downloadPngBtn');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
     const undoBtn = document.getElementById('undoBtn');
+    const opnieuwBtn = document.getElementById('opnieuwBtn'); 
     
     const canvasOrigineel = document.getElementById('canvasOrigineel');
     const ctxOrigineel = canvasOrigineel.getContext('2d');
@@ -29,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveEditBtn = document.getElementById('saveEditBtn');
     const editFlipHorizontalBtn = document.getElementById('editFlipHorizontalBtn');
     const editFlipVerticalBtn = document.getElementById('editFlipVerticalBtn');
-    const editUndoBtn = document.getElementById('editUndoBtn'); // Nieuwe knop
+    const editUndoBtn = document.getElementById('editUndoBtn');
 
     // Clipboard Voorvertoning
     const clipboardPreviewContainer = document.getElementById('clipboard-preview-container');
@@ -48,11 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPasting = false;
 
     let undoStack = [];
-    let editUndoStack = []; // Nieuwe undo-stack voor de edit modal
+    let editUndoStack = [];
     const MAX_UNDO_STATES = 20;
 
     // --- EVENT LISTENERS ---
     uploadBtn.addEventListener('click', () => fileInput.click());
+    opnieuwBtn.addEventListener('click', resetApplication); // GEWIJZIGDE LISTENER
     fileInput.addEventListener('change', handleImageUpload);
     downloadPngBtn.addEventListener('click', () => downloadPuzzel('png'));
     downloadPdfBtn.addEventListener('click', () => downloadPuzzel('pdf'));
@@ -83,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Bewerkings-modal knoppen
     saveEditBtn.addEventListener('click', saveAndShowPreview);
-    editUndoBtn.addEventListener('click', doEditUndo); // Nieuwe listener
+    editUndoBtn.addEventListener('click', doEditUndo);
     editFlipHorizontalBtn.addEventListener('click', () => { transformEditCanvas(-1, 1); saveEditState(); });
     editFlipVerticalBtn.addEventListener('click', () => { transformEditCanvas(1, -1); saveEditState(); });
     
@@ -108,6 +110,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- FUNCTIES ---
+
+    // NIEUWE FUNCTIE OM DE APPLICATIE TE RESETTEN
+    function resetApplication() {
+        // Reset canvas naar de standaardgrootte en maak leeg
+        canvasOrigineel.width = 400;
+        canvasOrigineel.height = 600;
+        canvasVerschillen.width = 400;
+        canvasVerschillen.height = 600;
+        ctxOrigineel.clearRect(0, 0, canvasOrigineel.width, canvasOrigineel.height);
+        ctxVerschillen.clearRect(0, 0, canvasVerschillen.width, canvasVerschillen.height);
+
+        // Reset state variabelen
+        originalImage = null;
+        undoStack = [];
+        selectionRect = null;
+        floatingSelectionData = null;
+        isPasting = false;
+
+        // Reset UI elementen naar de beginstaat
+        statusText.textContent = 'Upload een afbeelding om te beginnen.';
+        undoBtn.disabled = true;
+        downloadPngBtn.disabled = true;
+        downloadPdfBtn.disabled = true;
+        pasteBtn.disabled = true;
+        selectionToolsDiv.style.display = 'none';
+        clipboardPreviewContainer.classList.add('hidden');
+        
+        // Reset de file input zodat dezelfde afbeelding opnieuw gekozen kan worden
+        fileInput.value = ''; 
+    }
 
     function handleImageUpload(event) {
         const file = event.target.files[0];
@@ -287,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
             editCanvas.height = selectionRect.height;
             ctxEdit.putImageData(imageData, 0, 0);
             
-            // Initialiseer de undo stack voor de modal
             editUndoStack = [];
             saveEditState();
 
