@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     resetSetupScherm();
 
-    // --- SETUP SCHERM LOGICA (Onveranderd) ---
+    // --- SETUP SCHERM LOGICA ---
     zelfUploadenKnop.addEventListener('click', () => {
         uploadSectie.classList.remove('verborgen');
         themaSectie.classList.add('verborgen');
@@ -119,6 +119,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function laadThemaAfbeeldingen(thema) {
+        // Haal de UI-elementen op voor feedback
+        const themaLaadStatus = document.getElementById('thema-laad-status');
+        const themaKnoppenContainer = document.getElementById('thema-knoppen');
+
+        // --- START LAADPROCES ---
+        // 1. Toon een laadbericht en zorg dat de "maak..." knop uit staat
+        themaLaadStatus.textContent = `Thema "${thema}" wordt geladen...`;
+        themaLaadStatus.classList.remove('verborgen');
+        naarGeneratorKnop.disabled = true;
+
+        // 2. Voorkom dat de gebruiker een ander thema kiest tijdens het laden
+        themaKnoppenContainer.style.pointerEvents = 'none';
+        themaKnoppenContainer.style.opacity = '0.5';
+        
         sleutel.clear();
         const basisPad = `thema_afbeeldingen/${thema}/`;
         const imageLoadPromises = ALFABET.split('').map(letter => {
@@ -128,16 +142,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.onload = () => {
                     sleutel.set(letter, imageUrl);
                     document.getElementById(`preview-${letter}`).src = imageUrl;
-                    resolve(true);
+                    resolve(true); // Succesvol geladen
                 };
-                img.onerror = () => { console.error(`Afbeelding niet gevonden: ${imageUrl}`); resolve(false); };
+                img.onerror = () => { 
+                    console.error(`Afbeelding niet gevonden: ${imageUrl}`); 
+                    resolve(false); // Fout bij laden
+                };
                 img.src = imageUrl;
             });
         });
+
+        // Wacht tot ALLE afbeeldingen geprobeerd zijn te laden
         Promise.all(imageLoadPromises).then(results => {
-            naarGeneratorKnop.disabled = !results.every(res => res);
-            if (naarGeneratorKnop.disabled) {
-                alert('Niet alle afbeeldingen voor dit thema konden worden geladen.');
+            // --- EINDE LAADPROCES ---
+            // 1. Verberg het laadbericht
+            themaLaadStatus.classList.add('verborgen');
+
+            // 2. Maak de themaknoppen weer klikbaar
+            themaKnoppenContainer.style.pointerEvents = 'auto';
+            themaKnoppenContainer.style.opacity = '1';
+
+            // 3. Controleer of alle afbeeldingen daadwerkelijk zijn geladen
+            const allesGeladen = results.every(res => res === true);
+            naarGeneratorKnop.disabled = !allesGeladen;
+
+            if (!allesGeladen) {
+                // Geef een duidelijkere foutmelding als er iets misgaat
+                const nietGevondenCount = results.filter(res => !res).length;
+                alert(`Kon niet alle afbeeldingen voor het thema '${thema}' laden. ${nietGevondenCount} afbeelding(en) ontbreken of er is een fout opgetreden.`);
             }
         });
     }
@@ -184,10 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             html += '<div class="woord-wrapper">';
             for (const char of woord) {
-                if (sleutel.has(char)) {
+                const upperChar = char.toUpperCase();
+                if (sleutel.has(upperChar)) {
                     html += `
                         <div class="letter-wrapper">
-                            <div class="hokje afbeelding-hokje"><img src="${sleutel.get(char)}" alt="${char}"></div>
+                            <div class="hokje afbeelding-hokje"><img src="${sleutel.get(upperChar)}" alt="${upperChar}"></div>
                             <div class="hokje leeg-hokje"></div>
                         </div>`;
                 } else {
@@ -206,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let hasContent = false;
 
         if (puzzelType === 'zin') {
-            const boodschap = boodschapInput.value.toUpperCase();
+            const boodschap = boodschapInput.value; // Niet direct naar hoofdletters om leestekens te behouden
             if (boodschap.trim() !== '') {
                 puzzelContentHTML = `<div class="zin-output">${maakPuzzelHTML(boodschap)}</div>`;
                 hasContent = true;
@@ -215,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
             puzzelContentHTML = '<div class="woorden-output-grid">';
             let woordenGevonden = 0;
             woordInputs.forEach(input => {
-                const woord = input.value.toUpperCase();
+                const woord = input.value;
                 puzzelContentHTML += '<div class="woord-input-groep-preview">';
                 if (woord.trim() !== '') {
                     woordenGevonden++;
