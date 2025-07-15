@@ -174,7 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // --- Hulpfuncties om te tekenen in de PDF ---
-        // Deze functies zijn aangepast voor een betere visuele overeenkomst met de CSS.
         
         function drawSplitshuisInPDF(doc, x, y, oef, wissel) {
             const totaalHTML = oef.isSom ? '___' : oef.totaal;
@@ -193,14 +192,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const breedte = 32, hoogteDak = 8, hoogteKamer = 8, radius = 1;
             
             doc.setLineWidth(0.5);
-            doc.setDrawColor(51, 51, 51); // #333
+            doc.setDrawColor(51, 51, 51);
             
-            // Dak
-            doc.setFillColor(224, 242, 247); // #e0f2f7
+            doc.setFillColor(224, 242, 247);
             doc.roundedRect(x, y, breedte, hoogteDak, radius, radius, 'FD');
             
-            // Kamers
-            doc.setDrawColor(204, 204, 204); // #ccc
+            doc.setDrawColor(204, 204, 204);
             doc.roundedRect(x, y + hoogteDak, breedte, hoogteKamer, radius, radius, 'D');
             doc.line(x + breedte / 2, y + hoogteDak, x + breedte / 2, y + hoogteDak + hoogteKamer);
 
@@ -229,21 +226,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         
-            const boxB = 10, boxH = 7, spreiding = 18, radius = 1;
+            // AANGEPAST: Spreiding van de benen verkleind
+            const boxB = 10, boxH = 7, spreiding = 12, radius = 1; 
             const middenX = x;
 
             doc.setLineWidth(0.5);
-            doc.setDrawColor(51, 51, 51); // #333
+            doc.setDrawColor(51, 51, 51);
             
-            // Bovenste vak
             doc.setFillColor(224, 242, 247);
             doc.roundedRect(middenX - boxB / 2, y, boxB, boxH, radius, radius, 'FD');
             doc.setFont('Helvetica', 'bold');
             doc.setFontSize(12);
             doc.text(String(totaalHTML), middenX, y + 5, { align: 'center' });
         
-            // Onderste vakken
-            const yBottom = y + boxH + 10;
+            const yBottom = y + boxH + 8; // Iets minder hoge benen
             doc.roundedRect(middenX - spreiding - boxB / 2, yBottom, boxB, boxH, radius, radius, 'D');
             doc.roundedRect(middenX + spreiding - boxB / 2, yBottom, boxB, boxH, radius, radius, 'D');
             
@@ -252,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.text(String(deel1HTML), middenX - spreiding, yBottom + 5, { align: 'center' });
             doc.text(String(deel2HTML), middenX + spreiding, yBottom + 5, { align: 'center' });
         
-            // Benen
             doc.line(middenX, y + boxH, middenX - spreiding, yBottom);
             doc.line(middenX, y + boxH, middenX + spreiding, yBottom);
         }
@@ -277,15 +272,15 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFont('Helvetica', 'bold');
             doc.text("Werkblad Bewerkingen", 105, 15, { align: 'center' });
 
-            // AANGEPAST: Uniforme grid-layout voor ALLE oefeningen
-            const xPosities = [30, 80, 130, 180]; // 4 kolommen
+            // AANGEPAST: Horizontale en verticale positionering aangepast
+            const xPosities = [35, 85, 135, 185]; 
             const yStart = 30;
-            const yIncrement = 25; // Verticale ruimte tussen rijen
-            const maxRijen = 10;
+            const yIncrement = 30; // Meer verticale ruimte tussen de rijen
+            const maxRijen = 9; // Iets minder rijen door grotere marge
             let wissel = false;
 
             laatsteOefeningen.forEach((oef, index) => {
-                if (index >= (maxRijen * 4)) return; // Max 40 oefeningen op 1 pagina
+                if (index >= (maxRijen * 4)) return; 
 
                 const kolom = index % 4;
                 const rij = Math.floor(index / 4);
@@ -294,13 +289,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (oef.type === 'splitsen') {
                     if (settings.splitsStijl === 'huisje') {
-                        // Centreer het huisje in de kolom
                         drawSplitshuisInPDF(doc, x - 16, y, oef, wissel);
                     } else { 
                         drawSplitsbenenInPDF(doc, x, y, oef, wissel);
                     }
                     wissel = !wissel;
-                } else { // 'rekenen' of 'tafels'
+                } else { 
                     drawRekensomInPDF(doc, x - 15, y, oef);
                 }
             });
