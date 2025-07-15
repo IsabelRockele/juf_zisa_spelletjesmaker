@@ -256,11 +256,9 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.text(text, x, y, { align: 'left' });
         }
 
-        // NIEUWE functie voor het tekenen van een groot splitshuis
         function drawGrootSplitshuisInPDF(doc, x, y, maxGetal, settings) {
             const breedte = 32, hoogteDak = 8, hoogteKamer = 7, radius = 1, tekstMarge = 5;
 
-            // Teken het dak
             doc.setLineWidth(0.5);
             doc.setDrawColor(51, 51, 51);
             doc.setFillColor(224, 242, 247);
@@ -270,7 +268,6 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFontSize(14);
             doc.text(String(maxGetal), x + breedte / 2, y + tekstMarge, { align: 'center' });
 
-            // Teken de kamers
             let showLeft = true;
             doc.setFont('Helvetica', 'normal');
             doc.setFontSize(12);
@@ -306,30 +303,39 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFont('Helvetica', 'bold');
             doc.text("Werkblad Bewerkingen", 105, 15, { align: 'center' });
 
-            // AANGEPAST: Aparte logica voor grote splitshuizen
             if (settings.hoofdBewerking === 'splitsen' && settings.groteSplitshuizen) {
                 const xPosities = [15, 60, 105, 150];
+                const numColumns = 4;
                 let yPos = 30;
                 const pageHeight = doc.internal.pageSize.getHeight();
                 const bottomMargin = 20;
+                const rowMargin = 15;
 
-                for (let i = 0; i < settings.splitsGetallenArray.length; i++) {
-                    const kolom = i % 4;
-                    const maxGetal = settings.splitsGetallenArray[i];
-                    
-                    const hoogteDak = 8, hoogteKamer = 7;
-                    const huisHoogte = hoogteDak + (maxGetal + 1) * hoogteKamer;
+                for (let i = 0; i < settings.splitsGetallenArray.length; i += numColumns) {
+                    const rowGetallen = settings.splitsGetallenArray.slice(i, i + numColumns);
+                    let maxHeightInRow = 0;
 
-                    if (yPos + huisHoogte > pageHeight - bottomMargin) {
+                    rowGetallen.forEach(maxGetal => {
+                        const hoogteDak = 8, hoogteKamer = 7;
+                        const huisHoogte = hoogteDak + (maxGetal + 1) * hoogteKamer;
+                        if (huisHoogte > maxHeightInRow) {
+                            maxHeightInRow = huisHoogte;
+                        }
+                    });
+
+                    if (yPos + maxHeightInRow > pageHeight - bottomMargin && yPos > 30) {
                         doc.addPage();
                         yPos = 15;
                     }
 
-                    drawGrootSplitshuisInPDF(doc, xPosities[kolom], yPos, maxGetal, settings);
+                    rowGetallen.forEach((maxGetal, index) => {
+                        drawGrootSplitshuisInPDF(doc, xPosities[index], yPos, maxGetal, settings);
+                    });
+                    
+                    yPos += maxHeightInRow + rowMargin;
                 }
 
             } else {
-                 // Bestaande logica voor andere oefeningen
                 const xPosities = [35, 85, 135, 185]; 
                 const yStart = 30;
                 const yIncrement = 33;
