@@ -226,8 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         
-            // AANGEPAST: Spreiding van de benen verkleind
-            const boxB = 10, boxH = 7, spreiding = 12, radius = 1; 
+            // AANGEPAST: Spreiding van de benen verder verkleind
+            const boxB = 10, boxH = 7, spreiding = 9, radius = 1; 
             const middenX = x;
 
             doc.setLineWidth(0.5);
@@ -239,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFontSize(12);
             doc.text(String(totaalHTML), middenX, y + 5, { align: 'center' });
         
-            const yBottom = y + boxH + 8; // Iets minder hoge benen
+            const yBottom = y + boxH + 8;
             doc.roundedRect(middenX - spreiding - boxB / 2, yBottom, boxB, boxH, radius, radius, 'D');
             doc.roundedRect(middenX + spreiding - boxB / 2, yBottom, boxB, boxH, radius, radius, 'D');
             
@@ -272,11 +272,11 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFont('Helvetica', 'bold');
             doc.text("Werkblad Bewerkingen", 105, 15, { align: 'center' });
 
-            // AANGEPAST: Horizontale en verticale positionering aangepast
+            // AANGEPAST: Verticale positionering verder vergroot
             const xPosities = [35, 85, 135, 185]; 
             const yStart = 30;
-            const yIncrement = 30; // Meer verticale ruimte tussen de rijen
-            const maxRijen = 9; // Iets minder rijen door grotere marge
+            const yIncrement = 33; // Nog meer verticale ruimte tussen de rijen
+            const maxRijen = 8; // Minder rijen door grotere marge
             let wissel = false;
 
             laatsteOefeningen.forEach((oef, index) => {
