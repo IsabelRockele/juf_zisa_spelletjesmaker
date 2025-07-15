@@ -22,13 +22,11 @@ h1 {
 
 .button-grid {
   display: grid;
-  /* Pas grid-template-columns aan om de breedte te vergroten */
-  /* We kiezen nu een vaste breedte per kolom, bijvoorbeeld 220px, en laten het raster zichzelf aanpassen */
-  grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); /* Verhoog de min-breedte */
-  gap: 15px;
-  /* Verhoog de max-width van het raster om de bredere knoppen te accommoderen */
-  max-width: 700px; /* Aangepaste maximale breedte van het rooster */
-  margin: 0 auto;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  justify-items: start;
+  max-width: 1500px; /* vergroot dit van 900 of 960 naar 1200 */
+  margin-left: 40px;
 }
 
 .keuze-knop {
@@ -45,7 +43,7 @@ h1 {
   align-items: center;
   gap: 10px; /* Voeg ruimte toe tussen de emoji en de tekst */
   /* Optioneel: Voeg min-width toe aan de knop zelf voor extra zekerheid */
-  min-width: 220px; /* Zorg ervoor dat elke knop minimaal deze breedte heeft */
+  min-width: 350px; /* Zorg ervoor dat elke knop minimaal deze breedte heeft */
   white-space: nowrap; /* Voorkomt dat de tekst naar een nieuwe regel springt */
   overflow: hidden; /* Verbergt overlopende inhoud als de tekst toch te lang is */
   text-overflow: ellipsis; /* Voegt stippellijn toe als tekst wordt afgesneden */
