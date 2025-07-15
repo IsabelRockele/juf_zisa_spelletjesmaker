@@ -9,8 +9,7 @@ const gumVormSelect = document.getElementById("gumvorm");
 let gumVorm = "circle";
 
 const maxAantalInput = document.getElementById("maxAantal");
-const exportPointsJsonBtn = document.getElementById("exportPointsJsonBtn");
-const downloadPointsJsonBtn = document.getElementById("downloadPointsJsonBtn");
+// Verwijderde JSON-knoppen
 const clearAllBtn = document.getElementById("clearAllBtn");
 const undoBtn = document.getElementById("undoBtn");
 const fileInput = document.getElementById("fileInput");
@@ -588,25 +587,7 @@ function simplifyPolyline(points, epsilon) {
 
 // --- Algemene bewerkingsknoppen ---
 
-exportPointsJsonBtn.addEventListener("click", () => {
-    outputJson.value = JSON.stringify(punten, null, 2);
-});
-
-downloadPointsJsonBtn.addEventListener("click", () => {
-    if (punten.length === 0) {
-        alert("Er zijn geen punten om te downloaden.");
-        return;
-    }
-    const blob = new Blob([JSON.stringify(punten, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = bestandsnaam + "_punten.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-});
+// Event listeners voor verwijderde JSON knoppen zijn ook weggehaald
 
 undoBtn.addEventListener("click", () => {
     if (undoStack.length > 1) {
@@ -671,7 +652,23 @@ showWorksheetBtn.addEventListener("click", async () => {
         return;
     }
 
-    const dataURL = canvas.toDataURL("image/png");
+    // Creëer een tijdelijk canvas met een witte achtergrond
+    const exportCanvas = document.createElement('canvas');
+    const exportCtx = exportCanvas.getContext('2d');
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+
+    // 1. Vul met een solide witte kleur
+    exportCtx.fillStyle = 'white';
+    exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+    // 2. Teken de lagen eroverheen
+    exportCtx.drawImage(baseCanvas, 0, 0);    // De afbeelding met transparante (weggegumde) delen
+    exportCtx.drawImage(drawingCanvas, 0, 0); // De getekende lijnen
+    exportCtx.drawImage(pointsCanvas, 0, 0);  // De punten
+
+    // 3. Gebruik de dataURL van dit nieuwe, samengevoegde canvas
+    const dataURL = exportCanvas.toDataURL("image/png");
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
@@ -697,9 +694,6 @@ showWorksheetBtn.addEventListener("click", async () => {
 
     doc.addImage(dataURL, 'PNG', xPos, yPos, pdfImgWidth, pdfImgHeight);
 
-    doc.setFontSize(22);
-    doc.text("Mijn Punttekening Werkblad", pageWidth / 2, 20, { align: 'center' });
-
     doc.setFontSize(10);
     const date = new Date().toLocaleDateString('nl-BE', {
         year: 'numeric',
@@ -719,7 +713,25 @@ downloadEditedImageBtn.addEventListener("click", () => {
         alert("Upload eerst een afbeelding!");
         return;
     }
-    const dataURL = canvas.toDataURL("image/png");
+    
+    // Gebruik dezelfde methode als voor de PDF voor een consistente output
+    const exportCanvas = document.createElement('canvas');
+    const exportCtx = exportCanvas.getContext('2d');
+    exportCanvas.width = canvas.width;
+    exportCanvas.height = canvas.height;
+
+    // 1. Vul met wit
+    exportCtx.fillStyle = 'white';
+    exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+    // 2. Teken de lagen
+    exportCtx.drawImage(baseCanvas, 0, 0);
+    exportCtx.drawImage(drawingCanvas, 0, 0);
+    exportCtx.drawImage(pointsCanvas, 0, 0);
+
+    // 3. Genereer de dataURL
+    const dataURL = exportCanvas.toDataURL("image/png");
+    
     const a = document.createElement("a");
     a.href = dataURL;
     a.download = bestandsnaam + "_bewerkt.png";
@@ -738,7 +750,7 @@ baseCanvas.height = VIEWER_CANVAS_HEIGHT;
 drawingCanvas.width = VIEWER_CANVAS_WIDTH;
 drawingCanvas.height = VIEWER_CANVAS_HEIGHT;
 pointsCanvas.width = VIEWER_CANVAS_WIDTH;
-pointsCanvas.height = VIEWER_CANVER_HEIGHT; // Fix typo VIEWER_CANVER_HEIGHT -> VIEWER_CANVAS_HEIGHT
+pointsCanvas.height = VIEWER_CANVAS_HEIGHT; 
 
 // Teken alles initieel leeg
 tekenAlles();
