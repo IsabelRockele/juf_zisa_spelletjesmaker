@@ -23,10 +23,15 @@
             </div>
 
             <div id="upload-sectie" class="verborgen">
-                <p class="instructie">Upload voor elke letter van het alfabet een afbeelding.</p>
-                <div id="upload-grid">
+                <div id="drop-zone">
+                    <p>Sleep 23 afbeeldingen hier, of upload ze hieronder per letter.</p>
                 </div>
+
+                <div id="upload-grid">
+                    </div>
+
                 <div class="upload-actie-knoppen">
+                    <button id="herschud-knop" class="secondary-knop" disabled><i class="fas fa-random"></i> Herschudden</button>
                     <button id="naar-generator-knop-upload" disabled>Maak geheime boodschap</button>
                     <button id="terug-naar-keuze-knop-uit-upload"><i class="fas fa-undo"></i> Terug</button>
                 </div>
@@ -93,7 +98,7 @@
             <div class="preview-acties">
                 <button id="print-knop"><i class="fas fa-print"></i> Print Puzzel</button>
                 <button id="download-pdf-knop"><i class="fas fa-file-pdf"></i> Download als PDF</button>
-                <button id="sluit-preview-knop"><i class="fas fa-times"></i> Sluit Voorbeeld</button>
+                <button id="sluit-preview-knop" class="secondary-knop"><i class="fas fa-times"></i> Sluit Voorbeeld</button>
             </div>
             <div id="print-container">
                 <h2 class="print-titel">Geheime Sleutel</h2>
