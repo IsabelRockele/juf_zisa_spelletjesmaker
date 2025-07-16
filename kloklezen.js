@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 wekkerDisplayWidth = 160; 
             } else {
                 // Slechts één wekker, dus deze mag groter zijn
-                wekkerDisplayWidth = 110; 
+                wekkerDisplayWidth = 140; 
             }
             // --- EINDE AANPASSING ---
 
