@@ -117,14 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
-    // AANGEPAST: Functie is terug veranderd naar de simpele versie
     const populateSleutelOverzicht = (container) => {
         container.innerHTML = '';
         const gesorteerdeSleutel = new Map([...sleutel.entries()].sort());
         for (const [letter, dataURL] of gesorteerdeSleutel.entries()) {
             const item = document.createElement('div');
             item.className = 'sleutel-item';
-            item.innerHTML = `<b>${letter}</b><br><img src="${dataURL}" alt="${letter}">`;
+            // AANGEPAST: Afbeelding komt nu voor de letter, zonder <br>
+            item.innerHTML = `<img src="${dataURL}" alt="${letter}"><b>${letter}</b>`;
             container.appendChild(item);
         }
     };
@@ -248,6 +248,8 @@ document.addEventListener('DOMContentLoaded', () => {
         boodschapInput.value = '';
         document.querySelectorAll('.woord-input').forEach(input => input.value = '');
     });
+
+
 
     printKnop.addEventListener('click', () => window.print());
     sluitPreviewKnop.addEventListener('click', () => showScreen(generatorScherm));
