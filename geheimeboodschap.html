@@ -26,11 +26,9 @@
                 <p class="instructie">Upload voor elke letter van het alfabet een afbeelding.</p>
                 <div id="upload-grid">
                 </div>
-
-                <p id="instructieUploadKnop" class="instructie-knop">Geef eerst elke letter een afbeelding.</p>
                 <div class="upload-actie-knoppen">
-                    <button id="naar-generator-knop" disabled>Maak geheime boodschap</button>
-                    <button id="terug-naar-keuze-knop-uit-upload"><i class="fas fa-undo"></i> Terug naar keuzemenu</button>
+                    <button id="naar-generator-knop-upload" disabled>Maak geheime boodschap</button>
+                    <button id="terug-naar-keuze-knop-uit-upload"><i class="fas fa-undo"></i> Terug</button>
                 </div>
             </div>
 
@@ -48,11 +46,15 @@
                     <button class="thema-knop" data-thema="winter"><i class="fas fa-snowflake"></i> Winter</button>
                 </div>
                 
-                <p id="thema-laad-status" class="instructie-knop verborgen" style="font-weight: bold;"></p>
+                <p id="thema-laad-status" class="instructie-knop verborgen"></p>
+                
+                <div id="thema-afbeeldingen-preview" class="verborgen">
+                     <div id="thema-upload-grid"></div>
+                </div>
 
                 <div class="thema-actie-knoppen">
-                    <button id="naar-generator-knop" disabled>Maak geheime boodschap</button>
-                    <button id="terug-naar-upload-knop"><i class="fas fa-undo"></i> Terug naar keuzemenu</button>
+                    <button id="naar-generator-knop-thema" disabled>Maak geheime boodschap</button>
+                    <button id="terug-naar-keuze-knop-uit-thema"><i class="fas fa-undo"></i> Terug</button>
                 </div>
             </div>
         </div>
@@ -65,34 +67,43 @@
             </div>
             <div class="generator-kolom">
                 <h2>Geheime Boodschap</h2>
-
                 <div id="generator-type-keuze">
-                    <label>
-                        <input type="radio" name="puzzeltype" value="zin" checked> Zin
-                    </label>
-                    <label>
-                        <input type="radio" name="puzzeltype" value="woorden"> Losse woorden
-                    </label>
+                    <label><input type="radio" name="puzzeltype" value="zin" checked> Zin</label>
+                    <label><input type="radio" name="puzzeltype" value="woorden"> Losse woorden</label>
                 </div>
-
                 <div id="zin-sectie">
                     <textarea id="boodschap-input" rows="4" placeholder="Typ hier je boodschap..."></textarea>
                 </div>
-
                 <div id="woorden-sectie" class="verborgen">
-                    <p class="instructie">Typ maximaal 9 woorden in de vakken hieronder.</p>
-                    <div id="woorden-grid">
-                        </div>
+                    <p class="instructie">Typ maximaal 8 woorden.</p>
+                    <div id="woorden-grid"></div>
                 </div>
-
                 <div class="actie-knoppen">
                     <button id="genereer-knop">Genereer Puzzel</button>
                     <button id="opnieuw-beginnen-knop">Nieuwe Zin / Woorden</button>
                 </div>
             </div>
         </div>
+        
+        <div id="puzzel-preview-scherm" class="verborgen">
+            <div class="preview-acties">
+                <button id="print-knop"><i class="fas fa-print"></i> Print Puzzel</button>
+                <button id="download-pdf-knop"><i class="fas fa-file-pdf"></i> Download als PDF</button>
+                <button id="sluit-preview-knop"><i class="fas fa-times"></i> Sluit Voorbeeld</button>
+            </div>
+            <div id="print-container">
+                <h2 class="print-titel">Geheime Sleutel</h2>
+                <div id="puzzel-sleutel-container"></div>
+                <hr class="print-hr">
+                <h3 class="print-titel">De Boodschap</h3>
+                <div id="puzzel-content-container"></div>
+            </div>
+        </div>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <script src="geheimeboodschap.js"></script>
 </body>
 </html>
