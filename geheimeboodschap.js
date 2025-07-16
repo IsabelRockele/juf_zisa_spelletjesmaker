@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- CONSTANTEN ---
     const ALFABET = 'ABCDEFGHIJKLMNOPRSTUVWZ';
+    const AANTAL_LETTERS = 23;
 
     // --- STATE ---
     const sleutel = new Map();
@@ -12,10 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const keuzeOptiesDiv = document.querySelector('.keuze-opties');
     const zelfUploadenKnop = document.getElementById('zelf-uploaden-knop');
     const themaKiezenKnop = document.getElementById('thema-kiezen-knop');
+
+    // Upload sectie
     const uploadSectie = document.getElementById('upload-sectie');
+    const dropZone = document.getElementById('drop-zone');
     const uploadGrid = document.getElementById('upload-grid');
+    const herschudKnop = document.getElementById('herschud-knop');
     const naarGeneratorKnopUpload = document.getElementById('naar-generator-knop-upload');
     const terugNaarKeuzeKnopUitUpload = document.getElementById('terug-naar-keuze-knop-uit-upload');
+    
+    // Thema sectie
     const themaSectie = document.getElementById('thema-sectie');
     const themaKnoppen = document.querySelectorAll('.thema-knop');
     const themaLaadStatus = document.getElementById('thema-laad-status');
@@ -23,6 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const themaUploadGrid = document.getElementById('thema-upload-grid');
     const naarGeneratorKnopThema = document.getElementById('naar-generator-knop-thema');
     const terugNaarKeuzeKnopUitThema = document.getElementById('terug-naar-keuze-knop-uit-thema');
+
+    // Generator
     const sleutelOverzicht = document.getElementById('sleutel-overzicht');
     const terugNaarSetupKnop = document.getElementById('terug-naar-setup-knop');
     const generatorTypeKeuze = document.querySelectorAll('input[name="puzzeltype"]');
@@ -33,6 +42,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const schrijflijnToggle = document.getElementById('schrijflijn-toggle-checkbox');
     const genereerKnop = document.getElementById('genereer-knop');
     const opnieuwBeginnenKnop = document.getElementById('opnieuw-beginnen-knop');
+
+    // Preview
     const puzzelContentContainer = document.getElementById('puzzel-content-container');
     const puzzelSleutelContainer = document.getElementById('puzzel-sleutel-container');
     const printKnop = document.getElementById('print-knop');
@@ -50,6 +61,34 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadSectie.classList.add('verborgen');
         themaSectie.classList.add('verborgen');
         sleutel.clear();
+        herschudKnop.disabled = true;
+        naarGeneratorKnopUpload.disabled = true;
+    };
+
+    const updateAllPreviews = () => {
+        for(const [letter, dataURL] of sleutel.entries()){
+            const imgElement = document.getElementById(`preview-upload-grid-${letter}`);
+            if(imgElement) imgElement.src = dataURL;
+        }
+    };
+    
+    const checkUploadComplete = () => {
+        if (sleutel.size === AANTAL_LETTERS) {
+            naarGeneratorKnopUpload.disabled = false;
+            herschudKnop.disabled = false;
+        }
+    };
+
+    const handleFileUpload = (event, letter) => {
+        const file = event.target.files[0];
+        if (!file || !file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            sleutel.set(letter, e.target.result);
+            updateAllPreviews();
+            checkUploadComplete();
+        };
+        reader.readAsDataURL(file);
     };
 
     const createLetterInput = (letter, container) => {
@@ -60,24 +99,97 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.addEventListener('change', (event) => handleFileUpload(event, letter));
+            input.id = `input-${container.id}-${letter}`;
             zone.appendChild(input);
         }
         container.appendChild(zone);
     };
 
-    const handleFileUpload = (event, letter) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const dataURL = e.target.result;
-            document.getElementById(`preview-upload-grid-${letter}`).src = dataURL;
-            sleutel.set(letter, dataURL);
-            naarGeneratorKnopUpload.disabled = false;
-        };
-        reader.readAsDataURL(file);
+    // --- SLEPEN EN NEERZETTEN LOGICA ---
+    const handleDrop = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        dropZone.classList.remove('dragover');
+
+        const files = [...event.dataTransfer.files].filter(f => f.type.startsWith('image/'));
+        if (files.length !== AANTAL_LETTERS) {
+            alert(`Sleep precies ${AANTAL_LETTERS} afbeeldingen naar het vak.`);
+            return;
+        }
+
+        sleutel.clear();
+        const filePromises = files.map(file => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+        });
+
+        Promise.all(filePromises).then(dataURLs => {
+            ALFABET.split('').forEach((letter, index) => {
+                sleutel.set(letter, dataURLs[index]);
+            });
+            updateAllPreviews();
+            checkUploadComplete();
+        });
     };
+
+    // --- HERSCHUDDEN LOGICA ---
+    const shuffleKey = () => {
+        if (sleutel.size < AANTAL_LETTERS) return;
+
+        const images = Array.from(sleutel.values());
+        // Fisher-Yates shuffle algoritme
+        for (let i = images.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [images[i], images[j]] = [images[j], images[i]];
+        }
+        
+        ALFABET.split('').forEach((letter, index) => {
+            sleutel.set(letter, images[index]);
+        });
+        
+        updateAllPreviews();
+    };
+
+    // --- EVENT LISTENERS ---
+    zelfUploadenKnop.addEventListener('click', () => {
+        resetKeuze();
+        keuzeOptiesDiv.classList.add('verborgen');
+        uploadSectie.classList.remove('verborgen');
+        uploadGrid.innerHTML = '';
+        ALFABET.split('').forEach(letter => {
+            createLetterInput(letter, uploadGrid);
+            // Moet na creatie de listener toevoegen
+            document.getElementById(`input-upload-grid-${letter}`).addEventListener('change', (event) => handleFileUpload(event, letter));
+        });
+    });
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', handleDrop);
+    herschudKnop.addEventListener('click', shuffleKey);
+
+    themaKiezenKnop.addEventListener('click', () => {
+        resetKeuze();
+        keuzeOptiesDiv.classList.add('verborgen');
+        themaSectie.classList.remove('verborgen');
+    });
+
+    [terugNaarKeuzeKnopUitUpload, terugNaarKeuzeKnopUitThema].forEach(btn => {
+        btn.addEventListener('click', resetKeuze);
+    });
+
+    themaKnoppen.forEach(button => {
+        button.addEventListener('click', (event) => {
+            themaAfbeeldingenPreview.classList.remove('verborgen');
+            laadThemaAfbeeldingen(event.target.dataset.thema);
+        });
+    });
 
     const laadThemaAfbeeldingen = async (thema) => {
         sleutel.clear();
@@ -123,7 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const [letter, dataURL] of gesorteerdeSleutel.entries()) {
             const item = document.createElement('div');
             item.className = 'sleutel-item';
-            // AANGEPAST: Afbeelding komt nu voor de letter, zonder <br>
             item.innerHTML = `<img src="${dataURL}" alt="${letter}"><b>${letter}</b>`;
             container.appendChild(item);
         }
@@ -137,56 +248,6 @@ document.addEventListener('DOMContentLoaded', () => {
         populateSleutelOverzicht(sleutelOverzicht);
         showScreen(generatorScherm);
     };
-
-    const maakPuzzelHTML = (tekst) => {
-        let html = '';
-        const woorden = tekst.split(/(\s+)/);
-        woorden.forEach(woord => {
-            if (woord.trim() === '') {
-                html += '<div style="width: 20px;"></div>';
-                return;
-            }
-            html += '<div class="woord-wrapper">';
-            for (const char of woord) {
-                const upperChar = char.toUpperCase();
-                if (sleutel.has(upperChar)) {
-                    html += `<div class="letter-wrapper"><div class="hokje afbeelding-hokje"><img src="${sleutel.get(upperChar)}" alt="${upperChar}"></div><div class="hokje leeg-hokje"></div></div>`;
-                } else if (char.match(/[a-zA-Z]/)) {
-                     html += `<div class="letter-wrapper"><div class="hokje leeg-hokje" style="border-top:1px solid #333; font-size:1.5em; font-weight:bold;">${char}</div></div>`;
-                } else {
-                    html += `<div class="leesteken">${char}</div>`;
-                }
-            }
-            html += '</div>';
-        });
-        return html;
-    };
-
-    // --- EVENT LISTENERS ---
-    zelfUploadenKnop.addEventListener('click', () => {
-        resetKeuze();
-        keuzeOptiesDiv.classList.add('verborgen');
-        uploadSectie.classList.remove('verborgen');
-        uploadGrid.innerHTML = '';
-        ALFABET.split('').forEach(letter => createLetterInput(letter, uploadGrid));
-    });
-
-    themaKiezenKnop.addEventListener('click', () => {
-        resetKeuze();
-        keuzeOptiesDiv.classList.add('verborgen');
-        themaSectie.classList.remove('verborgen');
-    });
-
-    [terugNaarKeuzeKnopUitUpload, terugNaarKeuzeKnopUitThema].forEach(btn => {
-        btn.addEventListener('click', resetKeuze);
-    });
-
-    themaKnoppen.forEach(button => {
-        button.addEventListener('click', (event) => {
-            themaAfbeeldingenPreview.classList.remove('verborgen');
-            laadThemaAfbeeldingen(event.target.dataset.thema);
-        });
-    });
 
     naarGeneratorKnopUpload.addEventListener('click', gaNaarGenerator);
     naarGeneratorKnopThema.addEventListener('click', gaNaarGenerator);
@@ -244,12 +305,34 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen(puzzelPreviewScherm);
     });
 
+    const maakPuzzelHTML = (tekst) => {
+        let html = '';
+        const woorden = tekst.split(/(\s+)/);
+        woorden.forEach(woord => {
+            if (woord.trim() === '') {
+                html += '<div style="width: 20px;"></div>';
+                return;
+            }
+            html += '<div class="woord-wrapper">';
+            for (const char of woord) {
+                const upperChar = char.toUpperCase();
+                if (sleutel.has(upperChar)) {
+                    html += `<div class="letter-wrapper"><div class="hokje afbeelding-hokje"><img src="${sleutel.get(upperChar)}" alt="${upperChar}"></div><div class="hokje leeg-hokje"></div></div>`;
+                } else if (char.match(/[a-zA-Z]/)) {
+                     html += `<div class="letter-wrapper"><div class="hokje leeg-hokje" style="border-top:1px solid #333; font-size:1.5em; font-weight:bold;">${char}</div></div>`;
+                } else {
+                    html += `<div class="leesteken">${char}</div>`;
+                }
+            }
+            html += '</div>';
+        });
+        return html;
+    };
+
     opnieuwBeginnenKnop.addEventListener('click', () => {
         boodschapInput.value = '';
         document.querySelectorAll('.woord-input').forEach(input => input.value = '');
     });
-
-
 
     printKnop.addEventListener('click', () => window.print());
     sluitPreviewKnop.addEventListener('click', () => showScreen(generatorScherm));
