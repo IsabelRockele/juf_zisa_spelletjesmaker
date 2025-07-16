@@ -98,7 +98,14 @@ button i { margin-right: 8px; }
 /* Preview & Print Scherm */
 #puzzel-preview-scherm { max-width: 1200px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #005a9c; border-radius: 8px; }
 .preview-acties { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
-.print-titel { color: #005a9c; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+.print-titel { 
+    color: #005a9c; 
+    border-bottom: 1px solid #eee; 
+    padding-bottom: 10px; 
+    /* AANGEPAST: Titel hoger op de pagina */
+    margin-top: 5px; 
+    margin-bottom: 15px;
+}
 .print-hr { margin: 25px 0; }
 #puzzel-content-container.schrijflijnen-verborgen .schrijflijn-container { display: none; }
 
@@ -107,29 +114,33 @@ button i { margin-right: 8px; }
     display: grid;
     grid-template-columns: repeat(8, auto);
     justify-content: center;
-    gap: 10px;
+    column-gap: 5px;
+    row-gap: 20px;
     padding: 20px;
-    border: 1px solid #ddd;
+    /* AANGEPAST: Donkerdere rand en smaller */
+    border: 1px solid #999; 
+    max-width: 700px; 
     border-radius: 8px;
-    max-width: 750px; /* Maximale breedte voor de box */
-    margin: 0 auto; /* Centreer de box */
+    margin: 0 auto;
 }
 #puzzel-sleutel-container .sleutel-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    width: 70px;
+    /* AANGEPAST: Iets grotere items */
+    width: 75px; 
+    gap: 4px;
 }
 #puzzel-sleutel-container .sleutel-item b {
-    font-size: 1.1em;
-    display: block;
-    margin-bottom: 5px;
+    /* AANGEPAST: Iets grotere letters */
+    font-size: 1.2em; 
 }
 #puzzel-sleutel-container .sleutel-item img {
-    max-width: 60px; /* Maximale breedte voor afbeelding */
-    max-height: 40px; /* Maximale hoogte voor afbeelding */
-    object-fit: contain; /* Behoudt verhoudingen, geen uitrekking */
+    /* AANGEPAST: Iets grotere afbeeldingen */
+    max-width: 65px; 
+    max-height: 45px;
+    object-fit: contain;
 }
 /* --- EINDE AANPASSINGEN --- */
 
