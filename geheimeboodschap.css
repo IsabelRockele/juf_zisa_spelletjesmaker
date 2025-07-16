@@ -4,7 +4,6 @@ body {
     text-align: center;
     padding: 20px;
 }
-
 header {
     display: flex;
     justify-content: space-between;
@@ -12,16 +11,8 @@ header {
     max-width: 1200px;
     margin: 0 auto 20px auto;
 }
-
-h1 {
-    color: #005a9c;
-    flex-grow: 1;
-    text-align: center;
-    margin: 0;
-}
-
-h2 { color: #005a9c; margin-top: 0; }
-
+h1 { color: #005a9c; flex-grow: 1; text-align: center; margin: 0; }
+h2, h3 { color: #005a9c; margin-top: 0; }
 button {
     background-color: #005a9c;
     color: white;
@@ -36,38 +27,18 @@ button {
     justify-content: center;
     text-align: center;
 }
-
 button:hover { background-color: #003f6e; }
 button:disabled { background-color: #cccccc; cursor: not-allowed; }
-
-button i {
-    margin-right: 8px;
-}
+button i { margin-right: 8px; }
 
 .instructie { font-size: 1.1em; margin-bottom: 20px; }
 .verborgen { display: none !important; }
+.instructie-knop { margin-top: 20px; margin-bottom: 5px; font-weight: bold; }
+.keuze-opties { margin-bottom: 20px; display: flex; justify-content: center; gap: 15px; }
+.keuze-opties button { padding: 12px 25px; font-size: 1.1em; }
 
-.instructie-knop {
-    margin-top: 20px;
-    margin-bottom: 5px;
-    font-style: italic;
-    color: #555;
-}
-
-.keuze-opties {
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-}
-
-.keuze-opties button {
-    padding: 12px 25px;
-    font-size: 1.1em;
-}
-
-/* Scherm 1: Setup */
-#upload-grid {
+/* Setup Schermen */
+#upload-grid, #thema-upload-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 15px;
@@ -78,266 +49,82 @@ button i {
     border: 1px solid #ddd;
     border-radius: 8px;
 }
+.upload-zone { display: flex; flex-direction: column; align-items: center; padding: 10px; border: 1px solid #eee; border-radius: 5px; }
+.upload-zone .letter { font-size: 1.5em; font-weight: bold; color: #333; }
+.upload-zone input[type="file"] { margin: 10px 0; width: 90px; }
+.image-preview { width: 60px; height: 60px; border: 1px solid #ccc; object-fit: contain; background-color: #f9f9f9; display: block; margin: auto; }
+.upload-actie-knoppen, .thema-actie-knoppen { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
+#naar-generator-knop-upload, #naar-generator-knop-thema { font-size: 1.2em; padding: 15px 25px; }
 
-.upload-zone {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 5px;
+/* Thema Specifiek */
+#thema-knoppen { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
+.thema-knop { background-color: #FFD700; color: #333; border: 1px solid #CCAA00; }
+.thema-knop:hover { background-color: #E6C200; }
+
+/* Generator Scherm */
+#generator-scherm { display: flex; flex-wrap: wrap; gap: 30px; max-width: 1200px; margin: 20px auto; justify-content: center; }
+.generator-kolom { background: #fff; padding: 20px; border-radius: 8px; border: 1px solid #ddd; flex: 1; min-width: 300px; }
+#sleutel-overzicht { display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; margin-bottom: 15px; }
+#sleutel-overzicht .sleutel-item { text-align: center; }
+#sleutel-overzicht .sleutel-item img { width: 40px; height: 40px; object-fit: contain; display: block; margin: auto; }
+#boodschap-input { width: calc(100% - 22px); padding: 10px; font-size: 1em; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 15px; }
+.actie-knoppen { display: flex; gap: 10px; justify-content: center; }
+#generator-type-keuze { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; font-size: 1.1em; }
+#woorden-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 10px; }
+.woord-input { width: 100%; padding: 8px; font-size: 1em; border: 1px solid #ccc; border-radius: 5px; }
+
+/* Puzzel Output Styling */
+.zin-output, .woorden-output-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 10px; padding: 10px; }
+.woord-wrapper { display: flex; gap: 5px; align-items: flex-end; }
+.letter-wrapper { display: flex; flex-direction: column; }
+.leesteken { font-size: 40px; font-weight: bold; align-self: flex-end; margin-bottom: 5px;}
+.hokje { width: 60px; height: 60px; border: 1px solid #333; display: flex; justify-content: center; align-items: center; }
+.afbeelding-hokje img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.leeg-hokje { background-color: #f9f9f9; border-top: none; }
+
+/* Lay-out voor de woorden-modus */
+.woorden-output-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+.woord-input-groep-preview { display: flex; flex-direction: column; align-items: center; }
+.woord-input-groep-preview .woord-wrapper { justify-content: center; }
+
+/* --- NIEUWE AANPASSINGEN --- */
+.woorden-output-grid .hokje {
+    width: 48px;
+    height: 48px;
 }
-
-.upload-zone .letter {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #333;
+.woorden-output-grid .leesteken {
+    font-size: 32px;
 }
-
-.upload-zone input[type="file"] {
-    margin: 10px 0;
-    width: 90px;
-}
-
-.image-preview {
-    width: 60px;
-    height: 60px;
-    border: 1px solid #ccc;
-    object-fit: contain;
-    background-color: #f9f9f9;
-    display: block;
-    margin: auto;
-}
-
-.upload-actie-knoppen {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-#naar-generator-knop {
-    font-size: 1.2em;
-    padding: 15px 25px;
-}
-
-#thema-knoppen {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.thema-knop {
-    background-color: #FFD700;
-    color: #333;
-    border: 1px solid #CCAA00;
-    padding: 10px 20px;
-    font-size: 1em;
-}
-
-.thema-knop:hover {
-    background-color: #E6C200;
-    color: #000;
-}
-
-.thema-actie-knoppen {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-#thema-naar-generator-knop {
-    font-size: 1.2em;
-    padding: 15px 25px;
-}
-
-#terug-naar-upload-knop {
-    font-size: 1.1em;
-    padding: 12px 20px;
-}
-
-/* Scherm 2: Generator */
-#generator-scherm {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 30px;
-    max-width: 1200px;
-    margin: 20px auto;
-    justify-content: center;
-}
-
-.generator-kolom {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    flex: 1;
-    min-width: 300px;
-}
-
-#sleutel-overzicht {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
-    gap: 10px;
-    max-height: 250px;
-    overflow-y: auto;
-    margin-bottom: 15px;
-}
-
-.sleutel-item { text-align: center; }
-.sleutel-item img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    display: block;
-    margin: auto;
-}
-
-#boodschap-input {
-    width: calc(100% - 20px);
-    padding: 10px;
-    font-size: 1em;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    margin-bottom: 15px;
-}
-
-.actie-knoppen {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-/* Output Puzzel (Zin-modus) */
-#output-container-wrapper { margin-top: 30px; }
-
-#output-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    min-height: 100px;
-}
-
-.woord-wrapper {
-    display: flex;
-    gap: 5px;
-    align-items: flex-end;
-}
-
-.letter-wrapper {
-    display: flex;
-    flex-direction: column;
-}
-
-.leesteken {
-    font-size: 40px;
-    font-weight: bold;
-    margin: 0 5px;
-}
-
-.hokje {
-    width: 60px;
-    height: 60px;
-    border: 1px solid #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.afbeelding-hokje img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    display: block;
-    margin: auto;
-}
-
-.leeg-hokje {
-    background-color: #f9f9f9;
-    border-top: none;
-}
-
-/* --- NIEUWE STYLING VOOR WOORDEN-MODUS --- */
-
-#generator-type-keuze {
-    margin-bottom: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    font-size: 1.1em;
-}
-
-#generator-type-keuze label {
-    cursor: pointer;
-}
-
-#woorden-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin-top: 10px;
-}
-
-.woord-input-groep {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 15px;
-    background-color: #f9f9f9;
-}
-
-.woord-input {
-    width: calc(100% - 20px);
-    padding: 10px;
-    font-size: 1em;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-.woord-output {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    justify-content: center;
-    align-items: flex-end;
-    min-height: 70px; /* Hoogte voor de puzzel van één woord */
-}
-
 .schrijflijn-container {
     display: flex;
     align-items: center;
-    margin-top: 10px;
+    margin-top: 25px; /* Meer ruimte om te schrijven */
     gap: 8px;
+    width: 100%;
 }
+/* --- EINDE AANPASSINGEN --- */
 
-.schrijflijn-container i {
-    color: #555;
-    font-size: 20px;
+.schrijflijn-container i { color: #555; font-size: 20px; }
+.schrijflijn { flex-grow: 1; height: 1px; border-bottom: 2px dotted #888; }
+
+/* Preview & Print Scherm */
+#puzzel-preview-scherm { max-width: 1200px; margin: 20px auto; padding: 20px; background: #fff; border: 1px solid #005a9c; border-radius: 8px; }
+.preview-acties { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; }
+.print-titel { color: #005a9c; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+#puzzel-sleutel-container { 
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 15px;
+    padding: 0 20px;
 }
+#puzzel-sleutel-container .sleutel-item { text-align: center; }
+#puzzel-sleutel-container .sleutel-item b { font-size: 1.2em; }
+#puzzel-sleutel-container .sleutel-item img { width: 50px; height: 50px; object-fit: contain; margin: 5px auto 0 auto; }
+.print-hr { margin: 25px 0; }
 
-.schrijflijn {
-    flex-grow: 1;
-    height: 1px;
-    border-bottom: 2px dotted #888;
-}
-
-/* Puzzel in de losse woorden-modus iets kleiner maken */
-.woord-output .letter-wrapper .hokje {
-    width: 45px;
-    height: 45px;
-}
-
-.woord-output .leesteken {
-    font-size: 30px;
+@media print {
+    body, header, main { margin: 0; padding: 0; background: #fff; }
+    header, #setup-scherm, #generator-scherm, .preview-acties { display: none !important; }
+    #puzzel-preview-scherm { display: block !important; border: none; max-width: 100%; margin: 0; padding: 0; }
+    .hokje { -webkit-print-color-adjust: exact; color-adjust: exact; }
 }
