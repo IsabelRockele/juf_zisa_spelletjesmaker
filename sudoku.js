@@ -169,18 +169,37 @@ document.addEventListener("DOMContentLoaded", () => {
                 const value = puzzle[r][c];
                 if (value === 0) continue;
 
-                const drawX = x + c * cellSize + cellSize / 2;
-                const drawY = y + r * cellSize + cellSize / 2;
+                const drawX_center = x + c * cellSize + cellSize / 2;
+                const drawY_center = y + r * cellSize + cellSize / 2;
 
                 if (type === 'getallen') {
                     ctx.fillStyle = '#000';
                     ctx.font = `${cellSize * 0.6}px Arial`;
-                    ctx.fillText(value, drawX, drawY);
+                    ctx.fillText(value, drawX_center, drawY_center);
                 } else {
                     const imgIndex = value - 1;
                     if (imagesToUse && imagesToUse[imgIndex] && imagesToUse[imgIndex].complete) {
+                        const img = imagesToUse[imgIndex];
                         const margin = cellSize * 0.1;
-                        ctx.drawImage(imagesToUse[imgIndex], x + c * cellSize + margin, y + r * cellSize + margin, cellSize - 2 * margin, cellSize - 2 * margin);
+                        const availableSpace = cellSize - 2 * margin;
+
+                        const aspectRatio = img.naturalWidth / img.naturalHeight;
+                        let newWidth, newHeight;
+
+                        if (aspectRatio > 1) {
+                            newWidth = availableSpace;
+                            newHeight = availableSpace / aspectRatio;
+                        } else {
+                            newHeight = availableSpace;
+                            newWidth = availableSpace * aspectRatio;
+                        }
+
+                        const cellX = x + c * cellSize;
+                        const cellY = y + r * cellSize;
+                        const drawX = cellX + (cellSize - newWidth) / 2;
+                        const drawY = cellY + (cellSize - newHeight) / 2;
+
+                        ctx.drawImage(img, drawX, drawY, newWidth, newHeight);
                     }
                 }
             }
@@ -495,7 +514,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     imagesForWorksheet.slice(i * size, (i + 1) * size) :
                     imagesForWorksheet.slice(0, size);
                 
-                // Belangrijk: maak een kopie voor het schudden om de originele array niet te beïnvloeden
                 const shuffledImages = shuffle([...imagesForCurrentSudoku]);
 
                 for (let r = 0; r < size; r++) {
