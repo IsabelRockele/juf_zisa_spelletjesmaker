@@ -9,19 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const setupScherm = document.getElementById('setup-scherm');
     const generatorScherm = document.getElementById('generator-scherm');
     const puzzelPreviewScherm = document.getElementById('puzzel-preview-scherm');
-
-    // Keuzemenu
     const keuzeOptiesDiv = document.querySelector('.keuze-opties');
     const zelfUploadenKnop = document.getElementById('zelf-uploaden-knop');
     const themaKiezenKnop = document.getElementById('thema-kiezen-knop');
-
-    // Upload sectie
     const uploadSectie = document.getElementById('upload-sectie');
     const uploadGrid = document.getElementById('upload-grid');
     const naarGeneratorKnopUpload = document.getElementById('naar-generator-knop-upload');
     const terugNaarKeuzeKnopUitUpload = document.getElementById('terug-naar-keuze-knop-uit-upload');
-    
-    // Thema sectie
     const themaSectie = document.getElementById('thema-sectie');
     const themaKnoppen = document.querySelectorAll('.thema-knop');
     const themaLaadStatus = document.getElementById('thema-laad-status');
@@ -29,8 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const themaUploadGrid = document.getElementById('thema-upload-grid');
     const naarGeneratorKnopThema = document.getElementById('naar-generator-knop-thema');
     const terugNaarKeuzeKnopUitThema = document.getElementById('terug-naar-keuze-knop-uit-thema');
-
-    // Generator
     const sleutelOverzicht = document.getElementById('sleutel-overzicht');
     const terugNaarSetupKnop = document.getElementById('terug-naar-setup-knop');
     const generatorTypeKeuze = document.querySelectorAll('input[name="puzzeltype"]');
@@ -38,10 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const boodschapInput = document.getElementById('boodschap-input');
     const woordenSectie = document.getElementById('woorden-sectie');
     const woordenGrid = document.getElementById('woorden-grid');
+    const schrijflijnToggle = document.getElementById('schrijflijn-toggle-checkbox');
     const genereerKnop = document.getElementById('genereer-knop');
     const opnieuwBeginnenKnop = document.getElementById('opnieuw-beginnen-knop');
-
-    // Preview
     const puzzelContentContainer = document.getElementById('puzzel-content-container');
     const puzzelSleutelContainer = document.getElementById('puzzel-sleutel-container');
     const printKnop = document.getElementById('print-knop');
@@ -126,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // AANGEPAST: Functie is terug veranderd naar de simpele versie
     const populateSleutelOverzicht = (container) => {
         container.innerHTML = '';
         const gesorteerdeSleutel = new Map([...sleutel.entries()].sort());
@@ -217,6 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const puzzelType = document.querySelector('input[name="puzzeltype"]:checked').value;
         let puzzelContentHTML = '';
         let hasContent = false;
+        
+        puzzelContentContainer.classList.remove('schrijflijnen-verborgen');
+
         if (puzzelType === 'zin') {
             const boodschap = boodschapInput.value;
             if (boodschap.trim() !== '') {
@@ -224,6 +219,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 hasContent = true;
             }
         } else {
+            if (!schrijflijnToggle.checked) {
+                puzzelContentContainer.classList.add('schrijflijnen-verborgen');
+            }
+            
             puzzelContentHTML = '<div class="woorden-output-grid">';
             let woordenGevonden = 0;
             document.querySelectorAll('.woord-input').forEach(input => {
@@ -259,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         actionButtons.style.display = 'none';
 
-        html2canvas(printContainer, { scale: 2 }).then(canvas => {
+        html2canvas(printContainer, { scale: 2, windowWidth: printContainer.scrollWidth, windowHeight: printContainer.scrollHeight }).then(canvas => {
             const { jsPDF } = window.jspdf;
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
