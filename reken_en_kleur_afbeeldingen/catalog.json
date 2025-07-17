@@ -19,7 +19,14 @@
       "bestandsnaam": "paddenstoel.json"
     }
   ],
-  "Sinterklaas": [],
+  "Sinterklaas": [{
+      "naam": "Sint",
+      "bestandsnaam": "Sint.json"
+    },
+    {
+      "naam": "Roetpiet",
+      "bestandsnaam": "piet.json"
+    }],
   "Winter": [],
   "Kerst": [],
   "Carnaval": [],
