@@ -30,6 +30,10 @@
     {
       "naam": "Potlood",
       "bestandsnaam": "potlood.json"
+    },
+    {
+      "naam": "Boekentas",
+      "bestandsnaam": "boekentas.json"
     }
   ]
 }
