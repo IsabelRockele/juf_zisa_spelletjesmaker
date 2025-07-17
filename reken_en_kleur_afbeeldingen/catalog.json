@@ -17,6 +17,10 @@
     {
       "naam": "Paddenstoel",
       "bestandsnaam": "paddenstoel.json"
+      },
+    {
+      "naam": "Eekhoorn en paddenstoel",
+      "bestandsnaam": "eekhoorn_paddenstoel.json"
     }
   ],
   "Sinterklaas": [{
@@ -26,7 +30,12 @@
     {
       "naam": "Roetpiet",
       "bestandsnaam": "piet.json"
-    }],
+    },
+    {
+      "naam": "Stoomboot",
+      "bestandsnaam": "stoomboot.json"
+    }
+  ],
   "Winter": [],
   "Kerst": [],
   "Carnaval": [],
