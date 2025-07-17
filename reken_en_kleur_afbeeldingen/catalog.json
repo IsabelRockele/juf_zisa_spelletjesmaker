@@ -23,7 +23,8 @@
       "bestandsnaam": "eekhoorn_paddenstoel.json"
     }
   ],
-  "Sinterklaas": [{
+  "Sinterklaas": [
+    {
       "naam": "Sint",
       "bestandsnaam": "Sint.json"
     },
@@ -37,7 +38,12 @@
     }
   ],
   "Winter": [],
-  "Kerst": [],
+  "Kerst": [
+    {
+      "naam": "Kerstboom",
+      "bestandsnaam": "kerstboom.json"
+    }
+  ],
   "Carnaval": [],
   "Pasen": [],
   "Lente": [],
