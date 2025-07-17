@@ -87,3 +87,12 @@ footer {
 }
 
 
+
+.drukknop-afbeelding {
+  width: 200px;
+  height: auto;
+  transition: transform 0.2s ease;
+}
+.drukknop-afbeelding:hover {
+  transform: scale(1.05);
+}
