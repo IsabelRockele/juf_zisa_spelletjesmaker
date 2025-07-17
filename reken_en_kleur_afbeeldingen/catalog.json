@@ -1,0 +1,30 @@
+{
+  "Halloween": [
+    {
+      "naam": "Pompoen",
+      "bestandsnaam": "pompoen.json"
+    },
+    {
+      "naam": "Monster",
+      "bestandsnaam": "monster.json"
+    }
+  ],
+  "Herfst": [
+     {
+      "naam": "Eekhoorn",
+      "bestandsnaam": "eekhoorn.json"
+    },
+    {
+      "naam": "Paddenstoel",
+      "bestandsnaam": "paddenstoel.json"
+    }
+  ],
+  "Sinterklaas": [],
+  "Winter": [],
+  "Kerst": [],
+  "Carnaval": [],
+  "Pasen": [],
+  "Lente": [],
+  "Zomer": [],
+  "Terug naar school": []
+}
