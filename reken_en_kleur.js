@@ -210,12 +210,22 @@ document.addEventListener("DOMContentLoaded", () => {
             item.innerHTML = `<div style="width: 15px; height: 15px; background-color: ${ex.colorHex}; border: 1px solid #333; margin-right: 10px;"></div><span>${ex.problem} = </span>`;
             werkbladLegendContent.appendChild(item);
         });
-        werkbladLegendContent.innerHTML += `<div style="width: 100%; margin-top: 10px;"><div style="display: flex; align-items: center;"><div style="width: 15px; height: 15px; background-color: #FFFFFF; border: 1px solid #333; margin-right: 10px;"></div><span style="font-weight: bold;">Andere getallen: WIT LATEN</span></div></div>`;
     }
 
+    // AANGEPAST: Deze functie stelt nu de grootte van het canvas dynamisch in.
     function drawWorksheetPreview() {
+        // Haal de content-wrapper op
+        const contentWrapper = document.getElementById('werkblad-content');
+        // Bereken de beschikbare breedte (wrapper breedte min padding)
+        const availableWidth = contentWrapper.clientWidth - (2 * 20); // 20px padding links en rechts
+
+        // Stel de canvas breedte in en bereken de hoogte om de verhouding te bewaren
+        werkbladCanvas.width = availableWidth;
+        werkbladCanvas.height = (availableWidth / gridWidth) * gridHeight;
+
         const { legendData, distractorNumbers } = getWorksheetData();
-        const werkbladCellSize = Math.min(werkbladCanvas.width / gridWidth, werkbladCanvas.height / gridHeight);
+        const werkbladCellSize = werkbladCanvas.width / gridWidth; // Hoogte is niet meer nodig in Math.min
+        
         drawGridLines(werkbladCtx, gridWidth, gridHeight, werkbladCellSize);
 
         werkbladCtx.textAlign = 'center';
@@ -251,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const { legendData, distractorNumbers } = getWorksheetData();
         let allExercises = [];
         legendData.forEach((exercises, name) => { const colorInfo = getColorInfoByName(name); exercises.forEach(exercise => allExercises.push({ ...exercise, colorName: name, colorHex: colorInfo.hex })); });
-        const legendLineHeight = 8; // Iets meer ruimte voor grotere letters
+        const legendLineHeight = 8;
         const legendHeight = (Math.ceil(allExercises.length / 2) * legendLineHeight) + 30;
         const availableHeight = pageHeight - 2 * margin - legendHeight;
         const pdfCellSize = Math.min((pageWidth - 2 * margin) / gridWidth, availableHeight / gridHeight);
@@ -265,7 +275,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (currentY > pageHeight - legendHeight) { doc.addPage(); currentY = margin; }
         doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text("Oefeningen", margin, currentY); currentY += 10;
         
-        // AANGEPAST: lettergrootte verhoogd van 14 naar 16
         doc.setFontSize(16); 
         doc.setFont('helvetica', 'normal');
 
@@ -274,13 +283,11 @@ document.addEventListener("DOMContentLoaded", () => {
             const xPos = index < midpoint ? margin : col2X;
             if (index === midpoint) currentY = initialY;
             const colorInfo = getColorInfoByName(exercise.colorName);
-            doc.setFillColor(colorInfo.hex); doc.rect(xPos, currentY - 4, 6, 6, 'F'); // Iets groter blokje
+            doc.setFillColor(colorInfo.hex); doc.rect(xPos, currentY - 4, 6, 6, 'F');
             doc.setTextColor(0, 0, 0);
             doc.text(`${exercise.problem} = `, xPos + 10, currentY);
             currentY += legendLineHeight;
         });
-        
-        // AANGEPAST: De "Andere getallen wit laten" regel is verwijderd.
         
         doc.save(`reken-en-kleur-werkblad.pdf`);
         meldingContainer.textContent = '';
