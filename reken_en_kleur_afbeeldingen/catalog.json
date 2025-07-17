@@ -26,5 +26,10 @@
   "Pasen": [],
   "Lente": [],
   "Zomer": [],
-  "Terug naar school": []
+  "Terug naar school": [
+    {
+      "naam": "Potlood",
+      "bestandsnaam": "potlood.json"
+    }
+  ]
 }
