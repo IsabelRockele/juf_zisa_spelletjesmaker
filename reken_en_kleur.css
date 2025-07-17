@@ -274,3 +274,22 @@ select, input[type="number"] {
     border-top: 2px solid #eee;
     padding-top: 15px;
 }
+
+/* --- AANGEPAST: Marge tussen knoppen rechterpaneel --- */
+#right-panel-buttons .control-group button {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+#right-panel-buttons .control-group button:last-child {
+    margin-bottom: 0;
+}
+
+/* --- AANGEPAST: Catalogus knop groen maken --- */
+#catalogBtn {
+    background-color: #28a745; /* Groen */
+}
+
+#catalogBtn:hover {
+    background-color: #218838; /* Donkerder groen */
+}
