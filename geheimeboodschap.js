@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const herschudKnop = document.getElementById('herschud-knop');
     const naarGeneratorKnopUpload = document.getElementById('naar-generator-knop-upload');
     const terugNaarKeuzeKnopUitUpload = document.getElementById('terug-naar-keuze-knop-uit-upload');
-    
+
     // Thema sectie
     const themaSectie = document.getElementById('thema-sectie');
     const themaKnoppen = document.querySelectorAll('.thema-knop');
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         [setupScherm, generatorScherm, puzzelPreviewScherm].forEach(s => s.classList.add('verborgen'));
         if(screen) screen.classList.remove('verborgen');
     };
-    
+
     const resetKeuze = () => {
         keuzeOptiesDiv.classList.remove('verborgen');
         uploadSectie.classList.add('verborgen');
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if(imgElement) imgElement.src = dataURL;
         }
     };
-    
+
     const checkUploadComplete = () => {
         if (sleutel.size === AANTAL_LETTERS) {
             naarGeneratorKnopUpload.disabled = false;
@@ -145,11 +145,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const j = Math.floor(Math.random() * (i + 1));
             [images[i], images[j]] = [images[j], images[i]];
         }
-        
+
         ALFABET.split('').forEach((letter, index) => {
             sleutel.set(letter, images[index]);
         });
-        
+
         updateAllPreviews();
     };
 
@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sleutel.clear();
         themaUploadGrid.innerHTML = '';
         ALFABET.split('').forEach(letter => createLetterInput(letter, themaUploadGrid));
-        
+
         themaLaadStatus.textContent = `Thema "${thema}" wordt geladen...`;
         themaLaadStatus.style.color = 'black';
         themaLaadStatus.classList.remove('verborgen');
         naarGeneratorKnopThema.disabled = true;
-        
+
         const imageLoadPromises = ALFABET.split('').map(letter => {
             return new Promise((resolve) => {
                 const imageUrl = `thema_afbeeldingen/${thema}/${letter}.png`;
@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             naarGeneratorKnopThema.disabled = true;
         }
     };
-    
+
     const populateSleutelOverzicht = (container) => {
         container.innerHTML = '';
         const gesorteerdeSleutel = new Map([...sleutel.entries()].sort());
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     naarGeneratorKnopUpload.addEventListener('click', gaNaarGenerator);
     naarGeneratorKnopThema.addEventListener('click', gaNaarGenerator);
-    
+
     terugNaarSetupKnop.addEventListener('click', () => {
         if(confirm("Weet u zeker dat u terug wilt? De puzzel gaat verloren.")) {
             showScreen(setupScherm);
@@ -270,7 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const puzzelType = document.querySelector('input[name="puzzeltype"]:checked').value;
         let puzzelContentHTML = '';
         let hasContent = false;
-        
+
         puzzelContentContainer.classList.remove('schrijflijnen-verborgen');
 
         if (puzzelType === 'zin') {
@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!schrijflijnToggle.checked) {
                 puzzelContentContainer.classList.add('schrijflijnen-verborgen');
             }
-            
+
             puzzelContentHTML = '<div class="woorden-output-grid">';
             let woordenGevonden = 0;
             document.querySelectorAll('.woord-input').forEach(input => {
@@ -295,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
             puzzelContentHTML += '</div>';
             if (woordenGevonden > 0) hasContent = true;
         }
-        
+
         if (!hasContent) {
             alert('Typ eerst een zin of een of meerdere woorden.');
             return;
@@ -336,33 +336,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
     printKnop.addEventListener('click', () => window.print());
     sluitPreviewKnop.addEventListener('click', () => showScreen(generatorScherm));
-    
+
     downloadPdfKnop.addEventListener('click', () => {
         const printContainer = document.getElementById('print-container');
         const actionButtons = document.querySelector('.preview-acties');
-        
-        actionButtons.style.display = 'none';
 
-        html2canvas(printContainer, { scale: 2, windowWidth: printContainer.scrollWidth, windowHeight: printContainer.scrollHeight }).then(canvas => {
+        actionButtons.style.display = 'none'; // Verberg de knoppen tijdens screenshot
+
+        // BELANGRIJKE AANPASSINGEN HIER
+        html2canvas(printContainer, {
+            scale: 3, // Verhoog de schaal voor betere kwaliteit in PDF
+            useCORS: true, // Belangrijk als je afbeeldingen van externe bronnen gebruikt
+            logging: true, // Schakel logging in om fouten in de console te zien
+            allowTaint: true, // Sta "tainted" canvas toe als afbeeldingen van andere domeinen komen (thema's)
+            windowWidth: printContainer.scrollWidth, // Gebruik de scrollbreedte
+            windowHeight: printContainer.scrollHeight, // Gebruik de scrollhoogte
+            x: 0, // Begin bij x-coördinaat 0 van de printContainer
+            y: 0, // Begin bij y-coördinaat 0 van de printContainer
+        }).then(canvas => {
             const { jsPDF } = window.jspdf;
             const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = pdf.internal.pageSize.getHeight();
-            const canvasRatio = canvas.width / canvas.height;
-            let imgHeight = pdfWidth / canvasRatio;
-            let imgWidth = pdfWidth;
-            if (imgHeight > pdfHeight) {
-                imgHeight = pdfHeight;
-                imgWidth = imgHeight * canvasRatio;
-            }
-            const xOffset = (pdfWidth - imgWidth) / 2;
-            const yOffset = (pdfHeight - imgHeight) / 2;
 
+            const pdfWidth = pdf.internal.pageSize.getWidth(); // Breedte van A4
+            const pdfHeight = pdf.internal.pageSize.getHeight(); // Hoogte van A4
+
+            const canvasAspectRatio = canvas.width / canvas.height;
+            let imgWidth = pdfWidth - 20; // Trek 20mm af voor 10mm marge links/rechts
+            let imgHeight = imgWidth / canvasAspectRatio;
+
+            // Als de berekende hoogte groter is dan de PDF hoogte na marges, schaal op basis van hoogte
+            if (imgHeight > pdfHeight - 20) { // Trek 20mm af voor 10mm marge boven/onder
+                imgHeight = pdfHeight - 20;
+                imgWidth = imgHeight * canvasAspectRatio;
+            }
+
+            // Bereken de positie om de afbeelding te centreren op de PDF-pagina
+            const xOffset = (pdfWidth - imgWidth) / 2;
+            // Voor yOffset, start direct bovenaan de pagina met 10mm marge
+            const yOffset = 10; // Start 10mm van de bovenkant
+
+            // BELANGRIJK: Plaats de afbeelding
             pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
             pdf.save('geheime_boodschap.pdf');
-            
-            actionButtons.style.display = 'flex';
+
+            actionButtons.style.display = 'flex'; // Toon de knoppen weer
+        }).catch(error => {
+            console.error("Fout bij genereren PDF:", error);
+            alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.");
+            actionButtons.style.display = 'flex'; // Toon de knoppen weer, zelfs bij fouten
         });
     });
 
