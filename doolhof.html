@@ -15,37 +15,38 @@
     <div id="main-content">
         <div id="left-panel">
             <div id="controls">
-                
-                <div class="control-group">
-                    <label for="gridWidth">Breedte (vakjes):</label>
-                    <input type="number" id="gridWidth" value="20" min="10" max="50">
-                </div>
-                
-                <div class="control-group">
-                    <label for="gridHeight">Hoogte (vakjes):</label>
-                    <input type="number" id="gridHeight" value="15" min="10" max="50">
-                </div>
+                <fieldset class="control-group">
+                    <legend>1. Kies een Vorm</legend>
+                    <div id="vorm-kiezer">
+                        </div>
+                </fieldset>
 
-                <p style="font-size: 0.9em; color: #004080; margin-top: 15px;">
-                    Het doolhof is rechthoekig met een vaste ingangsruimte linksboven en een uitgangsruimte rechtsonder voor afbeeldingen.
-                </p>
-                
-                <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 80px;"></div>
+                <fieldset class="control-group">
+                    <legend>2. Kies Moeilijkheid</legend>
+                    <div id="moeilijkheid-kiezer">
+                        <label><input type="radio" name="difficulty" value="easy" checked> Eenvoudig</label>
+                        <label><input type="radio" name="difficulty" value="medium"> Middelmatig</label>
+                        <label><input type="radio" name="difficulty" value="hard"> Moeilijk</label>
+                    </div>
+                </fieldset>
 
-                <button id="generateMazeBtn">Genereer Doolhof</button>
-                <button id="solveMazeBtn">Los Doolhof Op</button>
+                <button id="generateButton">Genereer Nieuwe Doolhof</button>
                 
+                <div id="instructieText" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 60px;">
+                    Klik op een muur om deze te verwijderen.
+                </div>
             </div>
         </div>
 
         <div id="center-panel">
             <div id="drawingCanvasContainer">
-                <canvas id="mainCanvas" width="800" height="600"></canvas>
+                <canvas id="mazeCanvas" width="500" height="500"></canvas>
             </div>
         </div>
 
         <div id="right-panel-buttons">
             <div class="control-group">
+                <h3>Download</h3>
                 <button id="downloadPngBtn">Download als PNG</button>
                 <button id="downloadPdfBtn">Download als PDF</button>
             </div>
