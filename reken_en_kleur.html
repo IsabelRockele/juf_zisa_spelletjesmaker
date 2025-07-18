@@ -71,7 +71,7 @@
                     <label><input type="checkbox" name="tafel" value="all" checked> Alle</label>
                 </div>
                 
-   <div class="control-group">
+               <div class="control-group">
                     <h3>Raster Grootte</h3>
                     <div style="display: flex; gap: 10px; justify-content: space-between;">
                         <div class="tool-setting" style="flex-grow: 1;">
@@ -83,13 +83,16 @@
                             <input type="number" id="gridHeight" value="20" min="10" max="60">
                         </div>
                     </div>
-                    <div style="display: flex; gap: 20px; margin-top: 15px;"> <div class="control-group" style="flex-grow: 1; padding-bottom: 0;"> <h4>Aanpasrichting Breedte</h4>
+                    <div style="display: flex; gap: 20px; margin-top: 15px;">
+                        <div class="control-group" style="flex-grow: 1; padding-bottom: 0;">
+                            <h4>Aanpasrichting Breedte</h4>
                             <div style="display: flex; gap: 10px;">
                                 <label><input type="radio" name="widthAdjustDirection" value="right" checked> Rechts</label>
                                 <label><input type="radio" name="widthAdjustDirection" value="left"> Links</label>
                             </div>
                         </div>
-                        <div class="control-group" style="flex-grow: 1; padding-bottom: 0;"> <h4>Aanpasrichting Hoogte</h4>
+                        <div class="control-group" style="flex-grow: 1; padding-bottom: 0;">
+                            <h4>Aanpasrichting Hoogte</h4>
                             <div style="display: flex; gap: 10px;">
                                 <label><input type="radio" name="heightAdjustDirection" value="bottom" checked> Onder</label>
                                 <label><input type="radio" name="heightAdjustDirection" value="top"> Boven</label>
@@ -117,6 +120,7 @@
             <div class="control-group">
                 <h3>Download</h3>
                 <button id="downloadPngBtn">Download Tekening als PNG</button>
+                <button id="downloadPdfBtn">Download Tekening als PDF</button> 
             </div>
             <div class="control-group">
                 <h3>Tekening Beheren</h3>
