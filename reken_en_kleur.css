@@ -55,7 +55,7 @@ button:disabled {
 }
 
 #left-panel {
-    flex-basis: 320px;
+    flex-basis: 400px;
     flex-shrink: 0;
     overflow-y: auto;
     background-color: #f0faff;
