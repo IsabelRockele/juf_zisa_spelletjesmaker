@@ -68,7 +68,7 @@ button {
     padding: 10px 15px;
     border-radius: 5px;
     cursor: pointer;
-    margin: 5px 0;
+    margin: 5px 2px; /* Aangepaste marge */
 }
 
 button:hover {
@@ -97,7 +97,7 @@ hr {
     border: 2px dashed #888;
     padding: 5px;
     cursor: grab;
-    display: grid; /* Maakt het makkelijk om vormen te maken */
+    display: grid;
 }
 
 /* --- Canvas Rooster --- */
@@ -106,6 +106,7 @@ hr {
     border: 2px solid #004080;
     margin-top: 15px;
     background-color: #fdfdfd;
+    width: fit-content; /* Zorgt dat de container zich aanpast aan de grid */
 }
 
 .grid-cell {
@@ -128,28 +129,33 @@ hr {
     background-color: #e0f2f7;
 }
 
-.grid-cell.drag-over {
-    background-color: #a3d9ff !important; /* Belangrijk om andere kleuren te overschrijven */
+.ghost-preview {
+    opacity: 0.5 !important;
+    border-style: dashed !important;
 }
 
-/* --- Werkblad Output --- */
+/* --- WERKBLAD OUTPUT STIJLEN (AANGEPAST) --- */
 #worksheet-controls {
     margin-top: 20px;
 }
 
 #worksheet-output {
     margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc; /* Subtiele rand rond het hele werkblad-gebied */
+    border-radius: 8px;
 }
 
 .worksheet-grid {
-    display: grid;
+    display: inline-grid; /* Zorgt dat de rand strak om de cellen zit */
     border: 2px solid black;
+    /* De breedte wordt nu door JS ingesteld, dus geen width: fit-content hier */
 }
 
 .worksheet-cell {
     width: 35px;
     height: 35px;
-    border: 1px solid #ccc;
+    border: 1px solid #999; /* Iets donkerdere rand voor duidelijkheid */
     box-sizing: border-box;
     background-color: white;
     display: flex;
@@ -159,14 +165,47 @@ hr {
 }
 
 .worksheet-pieces-container {
-    margin-top: 20px;
+    margin-top: 30px; /* Meer ruimte tussen rooster en stukken */
+    padding-top: 20px;
+    border-top: 2px dashed #ccc;
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 20px 25px; /* Meer ruimte tussen de stukken (verticaal en horizontaal) */
     align-items: flex-start;
+    justify-content: flex-start; /* Zorgt dat de stukken links beginnen */
 }
-/* VOEG DEZE KLASSE TOE AAN HET EINDE VAN JE CSS-BESTAND */
-.ghost-preview {
-    opacity: 0.5 !important;
-    border-style: dashed !important;
+/* VOEG DEZE REGELS TOE AAN HET EINDE VAN JE CSS-BESTAND */
+
+#example-image-container {
+    margin-top: 15px;
+}
+
+#example-image-container img {
+    width: 100%;
+    border-radius: 8px;
+    border: 1px solid #b3e0ff;
+}
+/* VOEG DEZE REGELS TOE AAN HET EINDE VAN JE CSS-BESTAND */
+
+.worksheet-title {
+    font-size: 1.5em; /* 24px */
+    color: #004080;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+.worksheet-subtitle {
+    font-size: 1em; /* 16px */
+    color: #555;
+    font-weight: normal;
+    margin-top: 0;
+    margin-bottom: 25px; /* Extra ruimte onder de subtitel */
+    text-align: center;
+}
+
+/* Speciale class voor een betere weergave tijdens de download */
+.print-view {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
