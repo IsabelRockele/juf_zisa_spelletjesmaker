@@ -1,365 +1,465 @@
-// Klassiek doolhof met DFS en gekleurde vakjes voor oplossing, dynamische grootte
+document.addEventListener('DOMContentLoaded', () => {
 
-// Grootte van de cellen in pixels (dynamisch aanpasbaar)
-let CELL_SIZE = 40;
-let gridWidth = 10;  // Standaard breedte
-let gridHeight = 10;  // Standaard hoogte
-const mazeGrid = [];  // Het doolhof raster
-let startPoint = { row: 0, col: 0 };  // Dynamisch startpunt
-let endPoint = { row: 0, col: 0 };    // Dynamisch eindpunt
-let solutionPath = [];  // Oplossing (pad) van het doolhof
+    const CANVAS_SIZE = 500;
+    const WALL_THICKNESS = 2;
+    const MAZE_COLOR = "#333";
 
-// Functie om een willekeurig punt aan de rand van het doolhof te kiezen
-function getRandomBorderPoint(excludePoint = null) {
-    const borderPoints = [];
+    const canvas = document.getElementById('mazeCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = CANVAS_SIZE;
+    canvas.height = CANVAS_SIZE;
+    
+    const instructieText = document.getElementById('instructieText');
 
-    // Bovenste rij
-    for (let c = 0; c < gridWidth; c++) {
-        borderPoints.push({ row: 0, col: c });
-    }
-    // Onderste rij
-    for (let c = 0; c < gridWidth; c++) {
-        borderPoints.push({ row: gridHeight - 1, col: c });
-    }
-    // Linker kolom (zonder hoeken dubbel te tellen)
-    for (let r = 1; r < gridHeight - 1; r++) {
-        borderPoints.push({ row: r, col: 0 });
-    }
-    // Rechter kolom (zonder hoeken dubbel te tellen)
-    for (let r = 1; r < gridHeight - 1; r++) {
-        borderPoints.push({ row: r, col: gridWidth - 1 });
-    }
-
-    let chosenPoint;
-    do {
-        chosenPoint = borderPoints[Math.floor(Math.random() * borderPoints.length)];
-    } while (excludePoint && chosenPoint.row === excludePoint.row && chosenPoint.col === excludePoint.col);
-
-    return chosenPoint;
-}
-
-// Functie om de gridgrootte dynamisch aan te passen
-function setGridSize(width, height) {
-    gridWidth = width;
-    gridHeight = height;
-
-    // Kies nieuwe willekeurige start- en eindpunten
-    startPoint = getRandomBorderPoint();
-    endPoint = getRandomBorderPoint(startPoint); // Zorg ervoor dat eindpunt niet hetzelfde is als startpunt
-
-    // Pas de canvasgrootte aan
-    const canvas = document.getElementById("mainCanvas");
-    canvas.width = gridWidth * CELL_SIZE;
-    canvas.height = gridHeight * CELL_SIZE;
-}
-
-// Helper functie om het doolhof raster te initialiseren
-function initializeMazeGrid() {
-    mazeGrid.length = 0;  // Reset het grid
-    for (let r = 0; r < gridHeight; r++) {
-        mazeGrid[r] = [];
-        for (let c = 0; c < gridWidth; c++) {
-            mazeGrid[r][c] = {
-                visited: false,
-                walls: { top: true, bottom: true, left: true, right: true }
-            };
-        }
-    }
-}
-
-// Diepte-eerst zoeken (DFS) om het doolhof te genereren
-function generateMazeDFS(startR, startC) {
-    const stack = [];
-    stack.push({ r: startR, c: startC });
-    mazeGrid[startR][startC].visited = true;
-
-    const getNeighbors = (r, c) => {
-        const neighbors = [
-            { r: r - 1, c: c, wallToBreak: 'top' },
-            { r: r + 1, c: c, wallToBreak: 'bottom' },
-            { r: r, c: c - 1, wallToBreak: 'left' },
-            { r: r, c: c + 1, wallToBreak: 'right' }
-        ];
-        return neighbors.filter(neighbor =>
-            neighbor.r >= 0 && neighbor.r < gridHeight &&
-            neighbor.c >= 0 && neighbor.c < gridWidth &&
-            !mazeGrid[neighbor.r][neighbor.c].visited
-        );
-    };
-
-    while (stack.length > 0) {
-        const { r, c } = stack[stack.length - 1];
-        const neighbors = getNeighbors(r, c);
-
-        if (neighbors.length > 0) {
-            const next = neighbors[Math.floor(Math.random() * neighbors.length)];
-
-            if (mazeGrid[r][c].walls[next.wallToBreak]) {
-                mazeGrid[r][c].walls[next.wallToBreak] = false;
-                mazeGrid[next.r][next.c].walls[next.wallToBreak === 'top' ? 'bottom' : next.wallToBreak === 'bottom' ? 'top' : next.wallToBreak === 'left' ? 'right' : 'left'] = false;
-            }
-
-            mazeGrid[next.r][next.c].visited = true;
-            stack.push(next);
-        } else {
-            stack.pop();
-        }
-    }
-}
-
-// Breadth-First Search (BFS) voor het oplossen van het doolhof
-function solveMazeBFS() {
-    // Reset visited state for all cells before solving
-    for (let r = 0; r < gridHeight; r++) {
-        for (let c = 0; c < gridWidth; c++) {
-            mazeGrid[r][c].visited = false;
-        }
-    }
-
-    const queue = [];
-    const parent = {};  // Opslaan van de oudercellen om het pad te reconstrueren
-    const directions = [
-        { r: -1, c: 0, wall: 'top' },
-        { r: 1, c: 0, wall: 'bottom' },
-        { r: 0, c: -1, wall: 'left' },
-        { r: 0, c: 1, wall: 'right' }
+    let currentGrid = [];
+    let activeCells = [];
+    let startMarker = null;
+    let endMarker = null;
+    let currentShape = 'worksheet';
+    
+    const shapes = [
+        { id: 'worksheet', name: 'Uitsparing', file: 'uitsparing.png' },
+        { id: 'rectangle', name: 'Rechthoek', file: 'rechthoek.png' },
+        { id: 'masked_circle', name: 'Vorm', file: 'vorm.png' },
+        { id: 'polar_circle', name: 'Cirkel', file: 'cirkel.png' }
     ];
 
-    queue.push({ row: startPoint.row, col: startPoint.col });
-    mazeGrid[startPoint.row][startPoint.col].visited = true;
+    function initialize() {
+        setupShapePicker();
+        addEventListeners();
+        generateAndDrawMaze();
+    }
 
-    while (queue.length > 0) {
-        const current = queue.shift();
-        const { row, col } = current;
+    function setupShapePicker() {
+        const pickerDiv = document.getElementById('vorm-kiezer');
+        shapes.forEach(shape => {
+            const img = document.createElement('img');
+            img.src = `start_afbeeldingen/${shape.file}`;
+            img.alt = shape.name;
+            img.dataset.shape = shape.id;
+            if (shape.id === currentShape) img.classList.add('selected');
+            pickerDiv.appendChild(img);
+        });
+    }
 
-        // Check of we het eindpunt hebben bereikt
-        if (row === endPoint.row && col === endPoint.col) {
-            let path = [];
-            let cell = current;
-            while (cell) {
-                path.unshift(cell);
-                cell = parent[`${cell.row},${cell.col}`];
+    function addEventListeners() {
+        document.getElementById('vorm-kiezer').addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                document.querySelectorAll('#vorm-kiezer img').forEach(img => img.classList.remove('selected'));
+                e.target.classList.add('selected');
+                currentShape = e.target.dataset.shape;
+                generateAndDrawMaze();
             }
-            solutionPath = path;
-            return;
-        }
+        });
+        document.querySelectorAll('input[name="difficulty"]').forEach(radio => radio.addEventListener('change', generateAndDrawMaze));
+        document.getElementById('generateButton').addEventListener('click', generateAndDrawMaze);
+        document.getElementById('downloadPdfBtn').addEventListener('click', downloadPDF);
+        document.getElementById('downloadPngBtn').addEventListener('click', downloadPNG);
+        canvas.addEventListener('click', handleEraser);
+    }
+    
+    function generateAndDrawMaze() {
+        const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+        startMarker = null;
+        endMarker = null;
+        activeCells = [];
+        
+        canvas.style.cursor = 'default';
+        instructieText.textContent = "Kies een vorm en moeilijkheid.";
 
-        for (let dir of directions) {
-            const newRow = row + dir.r;
-            const newCol = col + dir.c;
-
-            if (newRow >= 0 && newRow < gridHeight && newCol >= 0 && newCol < gridWidth &&
-                !mazeGrid[newRow][newCol].visited) {
-
-                // Controleer of de muur tussen de huidige cel en de nieuwe cel open is
-                let wallOpen = false;
-                // Voor de start- en eindpunten, behandelen we de "buitenmuur" als open
-                if ((row === startPoint.row && col === startPoint.col && dir.wall === getEntryPointWall(startPoint)) ||
-                    (row === endPoint.row && col === endPoint.col && dir.wall === getEntryPointWall(endPoint))) {
-                    wallOpen = true; // Dit is de "muur" naar buiten
-                } else if (!mazeGrid[row][col].walls[dir.wall]) {
-                    wallOpen = true;
-                }
-
-                if (wallOpen) {
-                    queue.push({ row: newRow, col: newCol });
-                    mazeGrid[newRow][newCol].visited = true;
-                    parent[`${newRow},${newCol}`] = { row, col };
-                }
-            }
+        if (currentShape === 'worksheet') {
+            generateWorksheetMaze(difficulty);
+            canvas.style.cursor = 'crosshair';
+            instructieText.textContent = "Klik op een muur om deze te verwijderen. Groene/rode bollen zijn suggesties.";
+        } else {
+            // Roep de andere functies aan voor de overige vormen
+            if (currentShape === 'rectangle') generateRectangularMaze(difficulty);
+            else if (currentShape === 'masked_circle') generateMaskedMaze(difficulty);
+            else if (currentShape === 'polar_circle') generatePolarMaze(difficulty);
         }
     }
-    solutionPath = []; // Geen oplossing gevonden
-}
+    
+    function drawAll() {
+        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        
+        if (currentShape === 'worksheet') { drawWorksheetMaze(); drawMarkers(); }
+        else if (currentShape === 'rectangle') { drawRectangularMaze(); }
+        else if (currentShape === 'masked_circle') { drawMaskedMaze(); }
+        else if (currentShape === 'polar_circle') { drawPolarMaze(); }
+    }
 
-// Helper functie om te bepalen welke muur bij een randpunt de "ingang" is
-function getEntryPointWall(point) {
-    if (point.row === 0) return 'top'; // Bovenste rij
-    if (point.row === gridHeight - 1) return 'bottom'; // Onderste rij
-    if (point.col === 0) return 'left'; // Linker kolom
-    if (point.col === gridWidth - 1) return 'right'; // Rechter kolom
-    return null; // Zou niet moeten gebeuren voor randpunten
-}
+    // --- DOOLHOF LOGICA ---
 
-// Tekent het doolhof
-// Parameter 'drawPoints' bepaalt of de start- en eindbolletjes getekend moeten worden
-function drawMaze(ctx, drawPoints = true) {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);  // Wis het canvas
+    // 1. WERKBLAD-STIJL
+    function generateWorksheetMaze(difficulty) {
+        const DIFFICULTY_LEVELS = { easy: 15, medium: 25, hard: 35 };
+        const gridSize = DIFFICULTY_LEVELS[difficulty];
+        let grid = [];
 
-    ctx.strokeStyle = "#000000";  // Kleur van de muren
-    ctx.lineWidth = 2;
+        const cutoutSize = Math.floor(gridSize * 0.25);
+        for (let y = 0; y < gridSize; y++) {
+            grid[y] = [];
+            for (let x = 0; x < gridSize; x++) {
+                const cell = { x, y, walls: { top: true, right: true, bottom: true, left: true }, visited: false };
+                grid[y][x] = cell;
+                const inTopLeft = x < cutoutSize && y < cutoutSize;
+                const inBottomRight = x >= gridSize - cutoutSize && y >= gridSize - cutoutSize;
+                if (!inTopLeft && !inBottomRight) activeCells.push(cell);
+            }
+        }
+        
+        if(activeCells.length === 0) return;
+        
+        let stack = [activeCells[0]];
+        activeCells[0].visited = true;
 
-    // Teken de muren
-    for (let r = 0; r < gridHeight; r++) {
-        for (let c = 0; c < gridWidth; c++) {
-            const x = c * CELL_SIZE;
-            const y = r * CELL_SIZE;
-            const cell = mazeGrid[r][c];
+        while (stack.length > 0) {
+            let current = stack.pop();
+            const getNeighbors = (cell) => [ grid[cell.y-1]?.[cell.x], grid[cell.y]?.[cell.x+1], grid[cell.y+1]?.[cell.x], grid[cell.y]?.[cell.x-1] ].filter(p => p && !p.visited && activeCells.includes(p));
+            const neighbors = getNeighbors(current);
+            
+            if (neighbors.length > 0) {
+                stack.push(current);
+                let chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+                if (current.x - chosen.x === 1) { current.walls.left = false; chosen.walls.right = false; }
+                else if (current.x - chosen.x === -1) { current.walls.right = false; chosen.walls.left = false; }
+                if (current.y - chosen.y === 1) { current.walls.top = false; chosen.walls.bottom = false; }
+                else if (current.y - chosen.y === -1) { current.walls.bottom = false; chosen.walls.top = false; }
+                chosen.visited = true;
+                stack.push(chosen);
+            }
+        }
+        currentGrid = grid;
+        startMarker = { cellX: cutoutSize, cellY: Math.floor(cutoutSize/2), wall: 'left' };
+        endMarker = { cellX: gridSize - cutoutSize - 1, cellY: gridSize - Math.floor(cutoutSize/2), wall: 'right' };
+        drawAll();
+    }
 
+    function drawWorksheetMaze() {
+        if (!currentGrid.length) return;
+        const gridSize = currentGrid.length;
+        const cellSize = CANVAS_SIZE / gridSize;
+        ctx.strokeStyle = MAZE_COLOR;
+        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineCap = "round";
+        for (const cell of activeCells) {
+            const gx = cell.x * cellSize, gy = cell.y * cellSize;
             ctx.beginPath();
-            // Teken bovenmuur, tenzij het de bovenkant van de start- of eindcel is
-            if (cell.walls.top && !(r === startPoint.row && c === startPoint.col && getEntryPointWall(startPoint) === 'top') &&
-                                 !(r === endPoint.row && c === endPoint.col && getEntryPointWall(endPoint) === 'top')) {
-                ctx.moveTo(x, y);
-                ctx.lineTo(x + CELL_SIZE, y);
-            }
-            // Teken ondermuur, tenzij het de onderkant van de start- of eindcel is
-            if (cell.walls.bottom && !(r === startPoint.row && c === startPoint.col && getEntryPointWall(startPoint) === 'bottom') &&
-                                    !(r === endPoint.row && c === endPoint.col && getEntryPointWall(endPoint) === 'bottom')) {
-                ctx.moveTo(x, y + CELL_SIZE);
-                ctx.lineTo(x + CELL_SIZE, y + CELL_SIZE);
-            }
-            // Teken linkermuur, tenzij het de linkerkant van de start- of eindcel is
-            if (cell.walls.left && !(r === startPoint.row && c === startPoint.col && getEntryPointWall(startPoint) === 'left') &&
-                                  !(r === endPoint.row && c === endPoint.col && getEntryPointWall(endPoint) === 'left')) {
-                ctx.moveTo(x, y);
-                ctx.lineTo(x, y + CELL_SIZE);
-            }
-            // Teken rechtermuur, tenzij het de rechterkant van de start- of eindcel is
-            if (cell.walls.right && !(r === startPoint.row && c === startPoint.col && getEntryPointWall(startPoint) === 'right') &&
-                                   !(r === endPoint.row && c === endPoint.col && getEntryPointWall(endPoint) === 'right')) {
-                ctx.moveTo(x + CELL_SIZE, y);
-                ctx.lineTo(x + CELL_SIZE, y + CELL_SIZE);
-            }
+            if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
+            if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
+            if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
+            if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
             ctx.stroke();
         }
     }
 
-    // Teken de oplossing (als een lijn)
-    if (solutionPath.length > 0) {
-        ctx.strokeStyle = "green";  // Kleur van de oplossing
-        ctx.lineWidth = 4;          // Dikte van de lijn
-        ctx.lineCap = "round";      // Afgeronde lijneinden
-
-        ctx.beginPath();
-        // Start bij het midden van de eerste cel in het pad
-        ctx.moveTo(solutionPath[0].col * CELL_SIZE + CELL_SIZE / 2,
-                   solutionPath[0].row * CELL_SIZE + CELL_SIZE / 2);
-
-        // Loop door de rest van het pad en teken lijnen
-        for (let i = 1; i < solutionPath.length; i++) {
-            ctx.lineTo(solutionPath[i].col * CELL_SIZE + CELL_SIZE / 2,
-                       solutionPath[i].row * CELL_SIZE + CELL_SIZE / 2);
+    // 2. RECHTHOEK
+    function generateRectangularMaze(difficulty) {
+        const DIFFICULTY_LEVELS = { easy: 15, medium: 25, hard: 35 };
+        const gridSize = DIFFICULTY_LEVELS[difficulty];
+        let grid = [];
+        for (let y = 0; y < gridSize; y++) {
+            grid[y] = [];
+            for (let x = 0; x < gridSize; x++) {
+                 grid[y][x] = { x, y, walls: { top: true, right: true, bottom: true, left: true }, visited: false };
+            }
         }
-        ctx.stroke();
+        let stack = [grid[0][0]];
+        grid[0][0].visited = true;
+        while (stack.length > 0) {
+            let current = stack.pop();
+            const neighbors = [grid[current.y-1]?.[current.x], grid[current.y]?.[current.x+1], grid[current.y+1]?.[current.x], grid[current.y]?.[current.x-1]].filter(n => n && !n.visited);
+            if (neighbors.length > 0) {
+                stack.push(current);
+                let chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+                if (current.x - chosen.x === 1) { current.walls.left = false; chosen.walls.right = false; }
+                else if (current.x - chosen.x === -1) { current.walls.right = false; chosen.walls.left = false; }
+                if (current.y - chosen.y === 1) { current.walls.top = false; chosen.walls.bottom = false; }
+                else if (current.y - chosen.y === -1) { current.walls.bottom = false; chosen.walls.top = false; }
+                chosen.visited = true;
+                stack.push(chosen);
+            }
+        }
+        grid[0][0].walls.top = false;
+        grid[gridSize-1][gridSize-1].walls.bottom = false;
+        currentGrid = grid;
+        drawAll();
     }
 
-    // Teken start- en eindbolletjes alleen als drawPoints true is
-    if (drawPoints) {
-        // Teken een groen bolletje bij de startpositie
-        ctx.beginPath();
-        ctx.arc(startPoint.col * CELL_SIZE + CELL_SIZE / 2, startPoint.row * CELL_SIZE + CELL_SIZE / 2, 6, 0, Math.PI * 2);
-        ctx.fillStyle = "green";
-        ctx.fill();
-
-        // Teken een rood bolletje bij de eindpositie
-        ctx.beginPath();
-        ctx.arc(endPoint.col * CELL_SIZE + CELL_SIZE / 2, endPoint.row * CELL_SIZE + CELL_SIZE / 2, 6, 0, Math.PI * 2);
-        ctx.fillStyle = "red";
-        ctx.fill();
-    }
-}
-
-// Functie voor het genereren en tekenen van het doolhof (zonder oplossing)
-function generateOnlyMaze(ctx) {
-    initializeMazeGrid();  // Initialiseer het doolhof
-    // Start de DFS vanuit het willekeurig gekozen startpunt
-    generateMazeDFS(startPoint.row, startPoint.col);
-    solutionPath = []; // Wis de oplossing wanneer een nieuw doolhof wordt gegenereerd
-    drawMaze(ctx);  // Teken alleen het doolhof
-}
-
-// Voeg de event listener toe voor het genereren van het doolhof
-document.getElementById("generateMazeBtn").addEventListener("click", function() {
-    const canvas = document.getElementById("mainCanvas");
-    const ctx = canvas.getContext("2d");
-    const width = parseInt(document.getElementById("gridWidth").value);
-    const height = parseInt(document.getElementById("gridHeight").value);
-
-    // setGridSize kiest nu ook de start- en eindpunten willekeurig
-    setGridSize(width, height);
-    generateOnlyMaze(ctx);  // Genereer en teken het doolhof zonder oplossing
-    showMelding('Nieuw doolhof gegenereerd met willekeurige ingang/uitgang.', 'info');
-});
-
-// Voeg de event listener toe voor het oplossen van het doolhof
-document.getElementById("solveMazeBtn").addEventListener("click", function() {
-    const canvas = document.getElementById("mainCanvas");
-    const ctx = canvas.getContext("2d");
-    // Alleen oplossen en tekenen, niet opnieuw genereren
-    solveMazeBFS();
-    drawMaze(ctx); // Teken het doolhof inclusief de oplossing
-    if (solutionPath.length > 0) {
-        showMelding('Doolhof oplossing getoond.', 'info');
-    } else {
-        showMelding('Geen oplossing gevonden voor dit doolhof.', 'warning');
-    }
-});
-
-// Functie voor het tonen van meldingen (bijvoorbeeld voor het genereren of oplossen van het doolhof)
-function showMelding(message, type = 'info') {
-    const meldingContainer = document.getElementById("meldingContainer");
-    let color = '#004080'; // Default info
-    if (type === 'warning') color = 'orange';
-    if (type === 'error') color = 'red';
-    meldingContainer.innerHTML = `<p style="color: ${color};">${message}</p>`;
-}
-
-// Download de doolhof als PNG
-document.getElementById("downloadPngBtn").addEventListener("click", function() {
-    const canvas = document.getElementById("mainCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // Teken het doolhof zonder start- en eindbolletjes voor de download
-    drawMaze(ctx, false); // false = teken geen bolletjes
-
-    const dataURL = canvas.toDataURL("image/png");
-    const a = document.createElement("a");
-    a.href = dataURL;
-    a.download = "doolhof.png";
-    a.click();
-
-    // Teken het doolhof direct daarna weer met start- en eindbolletjes voor de weergave op het scherm
-    drawMaze(ctx, true); // true = teken wel bolletjes
-    showMelding('Doolhof gedownload als PNG.', 'info');
-});
-
-// Download de doolhof als PDF
-document.getElementById("downloadPdfBtn").addEventListener("click", function() {
-    const canvas = document.getElementById("mainCanvas");
-    const ctx = canvas.getContext("2d");
-
-    // Teken het doolhof zonder start- en eindbolletjes voor de download
-    drawMaze(ctx, false); // false = teken geen bolletjes
-
-    const dataURL = canvas.toDataURL("image/png");
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF('p', 'mm', 'a4');
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = imgWidth / imgHeight;
-
-    let pdfImgWidth = pageWidth - 20;
-    let pdfImgHeight = pdfImgWidth / ratio;
-
-    if (pdfImgHeight > pageHeight - 40) {
-        pdfImgHeight = pageHeight - 40;
-        pdfImgWidth = pdfImgHeight * ratio;
+    function drawRectangularMaze() {
+        if (!currentGrid.length) return;
+        const gridSize = currentGrid.length;
+        const cellSize = CANVAS_SIZE / gridSize;
+        ctx.strokeStyle = MAZE_COLOR;
+        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineCap = "round";
+        for (const row of currentGrid) {
+            for (const cell of row) {
+                const gx = cell.x * cellSize, gy = cell.y * cellSize;
+                ctx.beginPath();
+                if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
+                if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
+                if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
+                if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
+                ctx.stroke();
+            }
+        }
     }
 
-    const xPos = (pageWidth - pdfImgWidth) / 2;
-    const yPos = (pageHeight - pdfImgHeight) / 2;
+    // 3. GEVORMD (MASKED CIRCLE)
+    function generateMaskedMaze(difficulty) {
+        const DIFFICULTY_LEVELS = { easy: 15, medium: 25, hard: 35 };
+        const gridSize = DIFFICULTY_LEVELS[difficulty];
+        let grid = [];
+        activeCells = [];
+        const radius = gridSize / 2;
+        for (let y = 0; y < gridSize; y++) {
+            grid[y] = [];
+            for (let x = 0; x < gridSize; x++) {
+                const cell = { x, y, walls: { top: true, right: true, bottom: true, left: true }, visited: false };
+                grid[y][x] = cell;
+                const dx = x - radius + 0.5;
+                const dy = y - radius + 0.5;
+                if (dx * dx + dy * dy < radius * radius) activeCells.push(cell);
+            }
+        }
+        if(activeCells.length === 0) return;
+        
+        let stack = [activeCells[0]];
+        activeCells[0].visited = true;
+        while (stack.length > 0) {
+            let current = stack.pop();
+            const getNeighbors = (cell) => [ grid[cell.y-1]?.[cell.x], grid[cell.y]?.[cell.x+1], grid[cell.y+1]?.[cell.x], grid[cell.y]?.[cell.x-1] ].filter(p => p && !p.visited && activeCells.includes(p));
+            const neighbors = getNeighbors(current);
+            if (neighbors.length > 0) {
+                stack.push(current);
+                let chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+                if (current.x - chosen.x === 1) { current.walls.left = false; chosen.walls.right = false; }
+                else if (current.x - chosen.x === -1) { current.walls.right = false; chosen.walls.left = false; }
+                if (current.y - chosen.y === 1) { current.walls.top = false; chosen.walls.bottom = false; }
+                else if (current.y - chosen.y === -1) { current.walls.bottom = false; chosen.walls.top = false; }
+                chosen.visited = true;
+                stack.push(chosen);
+            }
+        }
 
-    doc.addImage(dataURL, 'PNG', xPos, yPos, pdfImgWidth, pdfImgHeight);
-    doc.setFontSize(18);
-    doc.text("Doolhof", pageWidth / 2, 20, { align: 'center' });
-    doc.save("doolhof.pdf");
+        // In- en uitgang logica
+        const edgeCells = activeCells.filter(c => [ grid[c.y-1]?.[c.x], grid[c.y]?.[c.x+1], grid[c.y+1]?.[c.x], grid[c.y]?.[c.x-1] ].some(n => !n || !activeCells.includes(n)));
+        if (edgeCells.length >= 2) {
+            let startCell = edgeCells[Math.floor(Math.random() * edgeCells.length)];
+            let endCell = edgeCells.reduce((a, b) => (Math.hypot(startCell.x - a.x, startCell.y - a.y) > Math.hypot(startCell.x - b.x, startCell.y - b.y) ? a : b));
+            // Verwijder de buitenste muur
+            if (!activeCells.includes(grid[startCell.y-1]?.[startCell.x])) startCell.walls.top = false;
+            else if (!activeCells.includes(grid[startCell.y]?.[startCell.x+1])) startCell.walls.right = false;
+            else if (!activeCells.includes(grid[startCell.y+1]?.[startCell.x])) startCell.walls.bottom = false;
+            else startCell.walls.left = false;
+            
+            if (!activeCells.includes(grid[endCell.y-1]?.[endCell.x])) endCell.walls.top = false;
+            else if (!activeCells.includes(grid[endCell.y]?.[endCell.x+1])) endCell.walls.right = false;
+            else if (!activeCells.includes(grid[endCell.y+1]?.[endCell.x])) endCell.walls.bottom = false;
+            else endCell.walls.left = false;
+        }
 
-    // Teken het doolhof direct daarna weer met start- en eindbolletjes voor de weergave op het scherm
-    drawMaze(ctx, true); // true = teken wel bolletjes
-    showMelding('Doolhof gedownload als PDF.', 'info');
+        currentGrid = grid;
+        drawAll();
+    }
+
+    function drawMaskedMaze() {
+        if (!currentGrid.length) return;
+        const gridSize = currentGrid.length;
+        const cellSize = CANVAS_SIZE / gridSize;
+        ctx.strokeStyle = MAZE_COLOR;
+        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineCap = "round";
+        for (const cell of activeCells) {
+            const gx = cell.x * cellSize, gy = cell.y * cellSize;
+            ctx.beginPath();
+            if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
+            if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
+            if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
+            if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
+            ctx.stroke();
+        }
+    }
+
+    // 4. CIRKEL (POLAR MAZE)
+    function generatePolarMaze(difficulty) {
+        const DIFFICULTY_LEVELS = { easy: 8, medium: 12, hard: 18 };
+        const DONUT_HOLE_RINGS = { easy: 2, medium: 4, hard: 6 };
+        const rings = [], numRings = DIFFICULTY_LEVELS[difficulty], startRing = DONUT_HOLE_RINGS[difficulty];
+        for (let i = startRing; i < numRings; i++) {
+            const rowHeight = CANVAS_SIZE / 2 / numRings;
+            const radius = (i + 1) * rowHeight;
+            const circumference = 2 * Math.PI * radius;
+            const cellsInRing = Math.round(circumference / (rowHeight * 1.5));
+            const ring = [];
+            for (let j = 0; j < cellsInRing; j++) {
+                ring.push({ row: i, col: j, walls: { outward: true, clockwise: true }, visited: false });
+            }
+            rings.push(ring);
+        }
+        if (rings.length === 0 || rings[0].length === 0) return;
+        currentGrid = {type: 'polar', rings: rings, startRing: startRing, numRings: numRings};
+
+        const firstRing = rings[0], lastRing = rings[rings.length - 1];
+        const startCell = lastRing[Math.floor(Math.random() * lastRing.length)];
+        let stack = [startCell];
+        startCell.visited = true;
+
+        while (stack.length > 0) {
+            let current = stack.pop();
+            const neighbors = [];
+            if (current.row < numRings - 1) {
+                const nextRing = rings[current.row - startRing + 1];
+                if(nextRing) {
+                    const ratio = nextRing.length / rings[current.row - startRing].length;
+                    const neighbor = nextRing[Math.floor(current.col * ratio)];
+                    if (neighbor && !neighbor.visited) neighbors.push(neighbor);
+                }
+            }
+            if (current.row > startRing) {
+                const prevRing = rings[current.row - startRing - 1];
+                const ratio = rings[current.row - startRing].length / prevRing.length;
+                const neighbor = prevRing[Math.floor(current.col / ratio)];
+                if (neighbor && !neighbor.visited) neighbors.push(neighbor);
+            }
+            const ringCells = rings[current.row - startRing];
+            const cwNeighbor = ringCells[(current.col + 1) % ringCells.length];
+            if (cwNeighbor && !cwNeighbor.visited) neighbors.push(cwNeighbor);
+            const ccwNeighbor = ringCells[(current.col - 1 + ringCells.length) % ringCells.length];
+            if (ccwNeighbor && !ccwNeighbor.visited) neighbors.push(ccwNeighbor);
+
+            if (neighbors.length > 0) {
+                stack.push(current);
+                let chosen = neighbors[Math.floor(Math.random() * neighbors.length)];
+                if(chosen.row === current.row) { 
+                    if (chosen.col > current.col || (chosen.col === 0 && current.col > 0)) { current.walls.clockwise = false; } else { chosen.walls.clockwise = false; rings[chosen.row-startRing][(chosen.col - 1 + ringCells.length) % ringCells.length].walls.clockwise = false; }
+                } else if (chosen.row > current.row) { current.walls.outward = false; }
+                  else { chosen.walls.outward = false; }
+                chosen.visited = true;
+                stack.push(chosen);
+            }
+        }
+        startCell.walls.outward = false;
+        const endCell = firstRing[Math.floor(Math.random() * firstRing.length)];
+        endCell.isExit = true;
+        drawAll();
+    }
+    
+    function drawPolarMaze() {
+        if(!currentGrid.rings) return;
+        const {rings, startRing, numRings} = currentGrid;
+        const rowHeight = CANVAS_SIZE / 2 / numRings;
+        ctx.strokeStyle = MAZE_COLOR;
+        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineCap = "round";
+        const centerX = CANVAS_SIZE / 2, centerY = CANVAS_SIZE / 2;
+        for (const ring of rings) {
+            for (const cell of ring) {
+                const cellsInThisRing = ring.length;
+                const anglePerCell = 2 * Math.PI / cellsInThisRing;
+                const innerRadius = cell.row * rowHeight;
+                const outerRadius = (cell.row + 1) * rowHeight;
+                const angleStart = cell.col * anglePerCell;
+                const angleEnd = (cell.col + 1) * anglePerCell;
+                ctx.beginPath();
+                if (cell.row === startRing && !cell.isExit) {
+                    ctx.arc(centerX, centerY, innerRadius, angleStart, angleEnd);
+                }
+                if(cell.row > startRing) {
+                     const prevRing = rings[cell.row - startRing - 1];
+                     const ratio = ring.length / prevRing.length;
+                     const parentCell = prevRing[Math.floor(cell.col/ratio)];
+                     if(parentCell.walls.outward) {
+                        ctx.arc(centerX, centerY, innerRadius, angleStart, angleEnd);
+                     }
+                }
+                if (cell.walls.outward) {
+                    ctx.moveTo(centerX + outerRadius * Math.cos(angleStart), centerY + outerRadius * Math.sin(angleStart));
+                    ctx.arc(centerX, centerY, outerRadius, angleStart, angleEnd);
+                }
+                if (cell.walls.clockwise) {
+                    const x1 = centerX + outerRadius * Math.cos(angleEnd), y1 = centerY + outerRadius * Math.sin(angleEnd);
+                    const x2 = centerX + innerRadius * Math.cos(angleEnd), y2 = centerY + innerRadius * Math.sin(angleEnd);
+                    ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+                }
+                ctx.stroke();
+            }
+        }
+    }
+
+    // --- HELPERS & INTERACTIVITEIT ---
+    function drawMarkers() {
+        if (!startMarker || !endMarker || !currentGrid.length || !Array.isArray(currentGrid)) return;
+        const gridSize = currentGrid.length;
+        const cellSize = CANVAS_SIZE / gridSize;
+        const startCell = currentGrid[startMarker.cellY][startMarker.cellX];
+        if (startCell.walls.left) {
+            const x = startMarker.cellX * cellSize;
+            const y = (startMarker.cellY + 0.5) * cellSize;
+            ctx.fillStyle = 'green';
+            ctx.beginPath(); ctx.arc(x, y, cellSize * 0.4, 0, 2 * Math.PI); ctx.fill();
+        }
+        const endCell = currentGrid[endMarker.cellY][endMarker.cellX];
+        if (endCell.walls.right) {
+            const x = (endMarker.cellX + 1) * cellSize;
+            const y = (endMarker.cellY + 0.5) * cellSize;
+            ctx.fillStyle = 'red';
+            ctx.beginPath(); ctx.arc(x, y, cellSize * 0.4, 0, 2 * Math.PI); ctx.fill();
+        }
+    }
+    
+    function handleEraser(event) {
+        if (currentShape !== 'worksheet' || !currentGrid.length || !Array.isArray(currentGrid)) return;
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = event.clientX - rect.left;
+        const mouseY = event.clientY - rect.top;
+        const gridSize = currentGrid.length;
+        const cellSize = CANVAS_SIZE / gridSize;
+        const x = Math.floor(mouseX / cellSize);
+        const y = Math.floor(mouseY / cellSize);
+        if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
+        const dx = mouseX - x * cellSize, dy = mouseY - y * cellSize;
+        const tolerance = WALL_THICKNESS * 3;
+        const cell = currentGrid[y][x];
+        const dists = { top: dy, right: cellSize - dx, bottom: cellSize - dy, left: dx };
+        const closestWall = Object.keys(dists).reduce((a, b) => dists[a] < dists[b] ? a : b);
+        if (dists[closestWall] > tolerance) return;
+        if (closestWall === 'top' && y > 0) { cell.walls.top = false; currentGrid[y - 1][x].walls.bottom = false; }
+        else if (closestWall === 'right' && x < gridSize - 1) { cell.walls.right = false; currentGrid[y][x + 1].walls.left = false; }
+        else if (closestWall === 'bottom' && y < gridSize - 1) { cell.walls.bottom = false; currentGrid[y + 1][x].walls.top = false; }
+        else if (closestWall === 'left' && x > 0) { cell.walls.left = false; currentGrid[y][x - 1].walls.right = false; }
+        drawAll();
+    }
+
+    function downloadPDF() {
+        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+        if (currentShape === 'worksheet') drawWorksheetMaze();
+        else if (currentShape === 'rectangle') drawRectangularMaze();
+        else if (currentShape === 'masked_circle') drawMaskedMaze();
+        else if (currentShape === 'polar_circle') drawPolarMaze();
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        doc.setFontSize(22);
+        doc.text('Mijn Doolhof Werkblad', 105, 20, { align: 'center' });
+        const imageData = canvas.toDataURL('image/png');
+        const imgWidth = 180;
+        const xPos = (210 - imgWidth) / 2;
+        doc.addImage(imageData, 'PNG', xPos, 35, imgWidth, imgWidth);
+        doc.save('doolhof-werkblad.pdf');
+        drawAll();
+    }
+    
+    function downloadPNG() {
+        const link = document.createElement('a');
+        link.download = 'doolhof.png';
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    }
+
+    initialize();
 });
