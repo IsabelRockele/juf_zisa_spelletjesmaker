@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "Paars", hex: "#9932CC" },       // Medium paars
         { name: "Bruin", hex: "#A0522D" },       // Rosbruin
         { name: "Roze", hex: "#FFB6C1" },     // Levendig roze
-        { name: "Lichtgroen", hex: "#98FB98" },  // Mintgroen
+        { name: "Lichtgroen", hex: "#90EE90" },  // Mintgroen
         { name: "Lichtblauw", hex: "#87CEEB" },  // Sky blue
         { name: "Lichtbruin", hex: "#CD853F" }, // Tan
         { name: "Lichtgrijs", hex: "#D3D3D3" }, // Nieuw: Lichtgrijs
