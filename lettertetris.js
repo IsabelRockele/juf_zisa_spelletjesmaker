@@ -213,6 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (e.key === 'Delete') {
             e.preventDefault();
             currentCell.textContent = '';
+        } else if (e.key === 'Enter') {
+            // **NIEUW**: Verplaats naar begin van volgende rij
+            e.preventDefault();
+            const currentRow = parseInt(currentCell.dataset.row, 10);
+            const targetRow = currentRow + 1;
+            const targetCell = document.querySelector(`.grid-cell[data-row='${targetRow}'][data-col='0']`);
+            if (targetCell) {
+                targetCell.focus();
+            }
         }
     }
 
@@ -237,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    // --- **NIEUWE** FUNCTIE OM TERUG TE SPRINGEN ---
     function focusPreviousCell(currentCell) {
         const allCells = Array.from(gridContainer.querySelectorAll('.grid-cell'));
         const currentIndex = allCells.indexOf(currentCell);
