@@ -1,16 +1,3 @@
-// Vanwege lengtebeperking in deze chat, deel ik het bestand op in 2 delen.
-// Hier is DEEL 1: algemene setup + correcte roosteropbouw + alleen uitkomsten wissen
-
-function gcd(a, b) {
-    return b === 0 ? a : gcd(b, a % b);
-}
-function lcm(a, b) {
-    return (a * b) / gcd(a, b);
-}
-function lcmArray(arr) {
-    return arr.reduce((acc, val) => lcm(acc, val));
-}
-
 document.addEventListener("DOMContentLoaded", () => {
     const canvas = document.getElementById("roosterCanvas");
     const ctx = canvas.getContext("2d");
@@ -26,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const getalbereikGroup = document.getElementById("getalbereik-group");
     const tafelsGroup = document.getElementById("tafels-group");
     const tafelKeuzeDiv = document.getElementById("tafelKeuze");
+    const tafelHintSpan = document.getElementById("tafelHint");
     const aantalTabellenRadios = document.querySelectorAll('input[name="aantalTabellen"]');
     const legeVakkenSlider = document.getElementById("legeVakken");
     const legeVakkenLabel = document.getElementById("legeVakkenLabel");
@@ -37,132 +25,170 @@ document.addEventListener("DOMContentLoaded", () => {
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.value = i;
-        // geen standaardselectie
         const span = document.createElement('span');
         span.textContent = i;
         label.appendChild(checkbox);
         label.appendChild(span);
         tafelKeuzeDiv.appendChild(label);
     }
-
     const tafelCheckboxes = document.querySelectorAll('#tafelKeuze input[type="checkbox"]');
+
+    function updateTafelHint() {
+        const gridSize = parseInt(gridSizeSelect.value);
+        const vereistAantal = gridSize - 1;
+        tafelHintSpan.textContent = `(kies er minstens ${vereistAantal})`;
+    }
 
     function generateWorksheet() {
         const aantal = parseInt(document.querySelector('input[name="aantalTabellen"]:checked').value);
         let bewerkingen = Array.from(bewerkingCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
+        
         if (bewerkingen.length === 0) {
-            alert('Selecteer minstens één bewerking.'); return;
+            puzzles = [];
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        // VALIDATIE TOEGEVOEGD
+        if (bewerkingen.includes('x')) {
+            const gridSize = parseInt(gridSizeSelect.value);
+            const geselecteerdeTafels = Array.from(tafelCheckboxes).filter(cb => cb.checked);
+            const vereistAantal = gridSize - 1;
+
+            if (geselecteerdeTafels.length < vereistAantal) {
+                alert(`Voor een ${gridSize}x${gridSize} rooster met vermenigvuldigen, moet je minstens ${vereistAantal} verschillende tafels selecteren.`);
+                puzzles = [];
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
         }
 
         puzzles = [];
         for (let i = 0; i < aantal; i++) {
             const bewerking = bewerkingen[i % bewerkingen.length];
-            puzzles.push(generateSinglePuzzle(bewerking));
+            const puzzle = generateSinglePuzzle(bewerking);
+            if (puzzle) {
+                puzzles.push(puzzle);
+            }
         }
         drawWorksheet();
     }
 
-function generateSinglePuzzle(bewerking) {
-    const gridSize = parseInt(gridSizeSelect.value);
-    const numberRange = parseInt(numberRangeSelect.value);
-    const aantalLegeVakken = parseInt(legeVakkenSlider.value);
+    function generateSinglePuzzle(bewerking) {
+        const gridSize = parseInt(gridSizeSelect.value);
+        const numberRange = parseInt(numberRangeSelect.value);
+        const aantalLegeVakken = parseInt(legeVakkenSlider.value);
+        const geselecteerdeTafels = Array.from(tafelCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => parseInt(cb.value));
 
-    const geselecteerdeTafels = Array.from(tafelCheckboxes)
-        .filter(cb => cb.checked)
-        .map(cb => parseInt(cb.value));
-    if ((bewerking === 'x' || bewerking === ':') && geselecteerdeTafels.length === 0) {
-        geselecteerdeTafels.push(2, 5, 10); // standaard
-    }
-
-    const solutionGrid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
-    solutionGrid[0][0] = bewerking;
-
-    // kolomkoppen
-    const kolomkoppen = [];
-    while (kolomkoppen.length < gridSize - 1) {
-        let getal = (bewerking === 'x' || bewerking === ':')
-            ? geselecteerdeTafels[Math.floor(Math.random() * geselecteerdeTafels.length)]
-            : Math.floor(Math.random() * numberRange) + 1;
-        if (!kolomkoppen.includes(getal)) {
-            kolomkoppen.push(getal);
-        }
-    }
-    for (let c = 1; c < gridSize; c++) {
-        solutionGrid[0][c] = kolomkoppen[c - 1];
-    }
-
-    // rijen
-    for (let r = 1; r < gridSize; r++) {
-        const rijwaarden = [];
-        let rijkop;
-
-        if (bewerking === '+') {
-            rijkop = Math.floor(Math.random() * numberRange) + 1;
-            for (let i = 0; i < kolomkoppen.length; i++) {
-                rijwaarden.push(rijkop + kolomkoppen[i]);
-            }
-
-        } else if (bewerking === '-') {
-            rijkop = Math.floor(Math.random() * numberRange) + numberRange;
-            for (let i = 0; i < kolomkoppen.length; i++) {
-                rijwaarden.push(rijkop - kolomkoppen[i]);
-            }
-
-        } else if (bewerking === 'x') {
-            rijkop = geselecteerdeTafels[Math.floor(Math.random() * geselecteerdeTafels.length)];
-            for (let i = 0; i < kolomkoppen.length; i++) {
-                rijwaarden.push(rijkop * kolomkoppen[i]);
-            }
-
-        } else if (bewerking === ':') {
-            // juiste delingen
-            let geldigeRij = false;
-            let poging = 0;
-            while (!geldigeRij && poging < 100) {
-                poging++;
-                const quotiënt = Math.floor(Math.random() * 10) + 1;
-                rijkop = kolomkoppen[0] * quotiënt;
-                geldigeRij = kolomkoppen.every(k => rijkop % k === 0 && geselecteerdeTafels.includes(k));
-            }
-            if (!geldigeRij) {
-                rijkop = kolomkoppen[0] * 1;
-            }
-            for (let i = 0; i < kolomkoppen.length; i++) {
-                rijwaarden.push(rijkop / kolomkoppen[i]);
-            }
+        if (bewerking === 'x' && geselecteerdeTafels.length === 0) {
+            geselecteerdeTafels.push(2, 5, 10);
         }
 
-        solutionGrid[r][0] = rijkop;
+        const solutionGrid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(null));
+        solutionGrid[0][0] = bewerking;
+
+        const kolomkoppen = [];
+        let kAttempts = 0;
+        while (kolomkoppen.length < gridSize - 1 && kAttempts < 100) {
+            kAttempts++;
+            let getal;
+            
+            const maxStartGetal = (bewerking === '+') ? numberRange - 1 : numberRange;
+            
+            if (bewerking === 'x') {
+                getal = geselecteerdeTafels[Math.floor(Math.random() * geselecteerdeTafels.length)];
+            } else {
+                getal = Math.floor(Math.random() * maxStartGetal) + 1;
+                if (getal > maxStartGetal) getal = maxStartGetal;
+            }
+            if (!kolomkoppen.includes(getal)) {
+                kolomkoppen.push(getal);
+            }
+        }
+        if (kolomkoppen.length < gridSize - 1) {
+             console.error("Kon geen unieke kolomkoppen genereren.");
+             return null;
+        }
+
         for (let c = 1; c < gridSize; c++) {
-            solutionGrid[r][c] = rijwaarden[c - 1];
+            solutionGrid[0][c] = kolomkoppen[c - 1];
         }
-    }
 
-    // maak displaygrid met lege vakken
-    const displayGrid = JSON.parse(JSON.stringify(solutionGrid));
-    const mogelijkeVakken = [];
-    for (let r = 1; r < gridSize; r++) {
-        for (let c = 1; c < gridSize; c++) {
-            mogelijkeVakken.push({ r, c });
+        const rijkoppen = new Set();
+        for (let r = 1; r < gridSize; r++) {
+            let rijkop, rijwaarden;
+            let isValid = false;
+            let rowAttempts = 0;
+            while (!isValid && rowAttempts < 100) {
+                rowAttempts++;
+                if (bewerking === '+') {
+                    const maxKolomkop = Math.max(...kolomkoppen);
+                    const maxRijkop = numberRange - maxKolomkop;
+                    if (maxRijkop < 1) { break; } 
+                    
+                    rijkop = Math.floor(Math.random() * maxRijkop) + 1;
+                    if (rijkoppen.has(rijkop)) continue;
+                    
+                    rijwaarden = kolomkoppen.map(k => rijkop + k);
+                    isValid = true;
+                } else if (bewerking === '-') {
+                    const maxKolomkop = Math.max(...kolomkoppen);
+                    if (numberRange <= maxKolomkop) { break; } 
+                    rijkop = Math.floor(Math.random() * (numberRange - maxKolomkop)) + maxKolomkop + 1;
+                    if (rijkoppen.has(rijkop)) continue;
+                    rijwaarden = kolomkoppen.map(k => rijkop - k);
+                    if (rijwaarden.some(res => res <= 0)) continue;
+                    isValid = true;
+                } else if (bewerking === 'x') {
+                    rijkop = geselecteerdeTafels[Math.floor(Math.random() * geselecteerdeTafels.length)];
+                    if (rijkoppen.has(rijkop)) continue;
+                    rijwaarden = kolomkoppen.map(k => rijkop * k);
+                    isValid = true;
+                }
+            }
+
+            if (isValid) {
+                rijkoppen.add(rijkop);
+                solutionGrid[r][0] = rijkop;
+                for (let c = 1; c < gridSize; c++) {
+                    solutionGrid[r][c] = rijwaarden[c - 1];
+                }
+            } else {
+                console.error(`Kon geen geldige rij genereren voor bewerking: ${bewerking}`);
+                return null;
+            }
         }
+
+        const displayGrid = JSON.parse(JSON.stringify(solutionGrid));
+        const mogelijkeVakken = [];
+        for (let r = 1; r < gridSize; r++) {
+            for (let c = 1; c < gridSize; c++) {
+                mogelijkeVakken.push({ r, c });
+            }
+        }
+        shuffleArray(mogelijkeVakken);
+        for (let i = 0; i < Math.min(aantalLegeVakken, mogelijkeVakken.length); i++) {
+            const { r, c } = mogelijkeVakken[i];
+            displayGrid[r][c] = '';
+        }
+        return { solutionGrid, displayGrid };
     }
-    shuffleArray(mogelijkeVakken);
-    for (let i = 0; i < Math.min(aantalLegeVakken, mogelijkeVakken.length); i++) {
-        const { r, c } = mogelijkeVakken[i];
-        displayGrid[r][c] = '';
-    }
-
-    return { solutionGrid, displayGrid };
-}
-
-
-
-    // DEEL 2 volgt met drawWorksheet(), drawSolutions(), canvas logica enz.
-
+    
     function drawWorksheet() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         const aantal = puzzles.length;
-        if (aantal === 0) return;
+        if (aantal === 0) {
+             const bewerkingen = Array.from(bewerkingCheckboxes).filter(cb => cb.checked);
+             if (bewerkingen.length > 0) {
+                ctx.font = "16px Arial";
+                ctx.textAlign = 'center';
+                ctx.fillStyle = 'black';
+                ctx.fillText("Kon geen rooster genereren. Controleer de instellingen.", canvas.width / 2, canvas.height / 2);
+             }
+            return;
+        }
 
         const layout = { 1: { x: 1, y: 1 }, 2: { x: 2, y: 1 }, 4: { x: 2, y: 2 } }[aantal];
         const padding = 20;
@@ -200,7 +226,6 @@ function generateSinglePuzzle(bewerking) {
     function drawSingleGrid(gridData, x, y, width, height, isSolution = false) {
         const gridSize = gridData.length;
         const cellSize = width / gridSize;
-
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 1;
         ctx.font = `${cellSize * 0.4}px Arial`;
@@ -211,22 +236,23 @@ function generateSinglePuzzle(bewerking) {
             for (let c = 0; c < gridSize; c++) {
                 const cellX = x + c * cellSize;
                 const cellY = y + r * cellSize;
-
+                
                 if (r === 0 || c === 0) {
                     ctx.fillStyle = '#f0faff';
                     ctx.fillRect(cellX, cellY, cellSize, cellSize);
                 }
-
+                
                 ctx.strokeRect(cellX, cellY, cellSize, cellSize);
-
+                
                 if (gridData[r][c] !== null && gridData[r][c] !== '') {
-                    ctx.fillStyle = (isSolution && puzzles.some(p => p.displayGrid[r]?.[c] === '')) ? '#008000' : (r === 0 || c === 0) ? '#004080' : 'black';
+                    const isAnswerCell = isSolution && puzzles.some(p => p.displayGrid[r]?.[c] === '');
+                    ctx.fillStyle = isAnswerCell ? '#008000' : (r === 0 || c === 0) ? '#004080' : 'black';
                     ctx.fillText(gridData[r][c], cellX + cellSize / 2, cellY + cellSize / 2);
                 }
             }
         }
     }
-
+    
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -236,9 +262,8 @@ function generateSinglePuzzle(bewerking) {
 
     function updateControlsVisibility() {
         const bewerkingen = Array.from(bewerkingCheckboxes).filter(cb => cb.checked).map(cb => cb.value);
-        const showTafels = bewerkingen.includes('x') || bewerkingen.includes(':');
+        const showTafels = bewerkingen.includes('x');
         const showRange = bewerkingen.includes('+') || bewerkingen.includes('-');
-
         tafelsGroup.style.display = showTafels ? 'block' : 'none';
         getalbereikGroup.style.display = showRange ? 'block' : 'none';
     }
@@ -246,11 +271,22 @@ function generateSinglePuzzle(bewerking) {
     genereerBtn.addEventListener("click", generateWorksheet);
     oplossingBtn.addEventListener("click", drawSolutions);
 
-    [puzzelTypeSelect, gridSizeSelect, numberRangeSelect].forEach(el => el.addEventListener("change", generateWorksheet));
-    bewerkingCheckboxes.forEach(cb => cb.addEventListener("change", () => { updateControlsVisibility(); generateWorksheet(); }));
+    const controlsToListen = [puzzelTypeSelect, numberRangeSelect];
+    controlsToListen.forEach(control => control.addEventListener('change', generateWorksheet));
+    
+    gridSizeSelect.addEventListener('change', () => {
+        updateTafelHint();
+        generateWorksheet();
+    });
+
+    bewerkingCheckboxes.forEach(cb => cb.addEventListener("change", () => {
+        updateControlsVisibility();
+        generateWorksheet();
+    }));
+
     tafelCheckboxes.forEach(cb => cb.addEventListener("change", generateWorksheet));
     aantalTabellenRadios.forEach(r => r.addEventListener("change", generateWorksheet));
-
+    
     legeVakkenSlider.addEventListener("input", () => {
         legeVakkenLabel.textContent = legeVakkenSlider.value;
     });
@@ -267,31 +303,29 @@ function generateSinglePuzzle(bewerking) {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
         const dataURL = canvas.toDataURL("image/png");
-
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
-
         const imgWidth = canvas.width;
         const imgHeight = canvas.height;
         const ratio = imgWidth / imgHeight;
-
         let pdfImgWidth = pageWidth - 2 * margin;
         let pdfImgHeight = pdfImgWidth / ratio;
-
         if (pdfImgHeight > pageHeight - 2 * margin) {
             pdfImgHeight = pageHeight - 2 * margin;
             pdfImgWidth = pdfImgHeight * ratio;
         }
-
         const xPos = (pageWidth - pdfImgWidth) / 2;
         const yPos = (pageHeight - pdfImgHeight) / 2;
-
         doc.addImage(dataURL, 'PNG', xPos, yPos, pdfImgWidth, pdfImgHeight);
         doc.save("rekentabellen.pdf");
     });
 
     legeVakkenLabel.textContent = legeVakkenSlider.value;
+    if (Array.from(bewerkingCheckboxes).filter(cb => cb.checked).length === 0) {
+        document.querySelector('#bewerking-keuze input[value="+"]').checked = true;
+    }
     updateControlsVisibility();
+    updateTafelHint();
     generateWorksheet();
 });
