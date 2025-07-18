@@ -1,12 +1,12 @@
+/* --- Algemene Styling --- */
 body {
     font-family: Arial, sans-serif;
     background-color: #e0f2f7;
-    text-align: center;
-    padding: 20px;
     margin: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    /* align-items: center; <- Deze is verwijderd om de inhoud niet te centreren */
+    align-items: center; /* Centreer de hoofdcontainer */
     min-height: 100vh;
 }
 
@@ -14,201 +14,114 @@ header {
     width: 100%;
     max-width: 1200px;
     display: flex;
-    justify-content: space-between; /* Behoudt ruimte tussen items */
+    justify-content: space-between;
     align-items: center;
-    margin: 0 auto 20px 0; /* Duwt de header naar links */
-    padding: 0 10px;
-    box-sizing: border-box;
+    margin-bottom: 20px;
 }
 
 h1 {
     color: #004080;
-    font-size: 2em;
-    text-align: center; /* Center de tekst binnen de h1 */
-    flex-grow: 1; /* Laat de h1 de resterende ruimte innemen om te centreren */
-    margin: 0; /* Verwijder alle marges om conflicten te voorkomen */
+    text-align: center;
+    flex-grow: 1;
+    margin: 0;
 }
 
 button {
-    font-family: Arial, sans-serif;
     background-color: #004080;
     color: white;
     border: none;
-    padding: 12px 18px;
-    font-size: 18px;
+    padding: 10px 15px;
+    font-size: 1em;
     border-radius: 8px;
     cursor: pointer;
-    margin: 5px;
     transition: background-color 0.2s ease;
-    white-space: nowrap;
 }
+button:hover { background-color: #0056b3; }
 
-button:hover {
-    background-color: #0056b3;
-}
-
-/* Hoofdcontainer voor de 3-kolommen lay-out */
+/* --- Hoofd layout (3 kolommen) --- */
 #main-content {
     display: flex;
-    flex-direction: row; /* Elementen (panelen) naast elkaar */
-    align-items: flex-start; /* Lijn de bovenkant van de panelen uit */
     width: 100%;
-    max-width: 1200px; /* Totale breedte van de interface */
-    gap: 20px; /* Ruimte tussen de panelen */
-    margin: 0 auto 20px 0; /* Duwt de main-content naar links */
-    justify-content: flex-start; /* Lijn inhoud links uit */
+    max-width: 1200px;
+    gap: 20px;
+    align-items: flex-start;
 }
 
-/* Linkerpaneel voor controls */
 #left-panel {
-    flex-basis: 380px; /* Vaste breedte voor linkerpaneel */
-    flex-shrink: 0; /* Voorkom krimpen */
-    padding: 15px;
+    flex-basis: 300px;
+    flex-shrink: 0;
+    background-color: #f0faff;
     border: 1px solid #b3e0ff;
     border-radius: 8px;
-    background-color: #f0faff;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    box-sizing: border-box;
-    margin-right: 0;
-    margin-left: 0;
-    text-align: left;
+    padding: 15px;
 }
 
-/* Middenpaneel voor canvas en textarea */
 #center-panel {
-    display: flex;
-    flex-direction: column; /* Canvas en textarea onder elkaar */
-    align-items: center; /* Centreer de inhoud (canvas, textarea) */
-    flex-grow: 1; /* Laat dit paneel de meeste resterende ruimte innemen */
-    padding: 0;
-    box-sizing: border-box;
-    gap: 20px; /* Ruimte tussen canvas en textarea */
-}
-
-/* Wrapper direct om de canvas */
-#drawingCanvasContainer {
+    flex-grow: 1;
     display: flex;
     justify-content: center;
-    align-items: center;
-    padding: 0;
-    box-sizing: border-box;
-    background-color: #f8f8f8; /* Lichtere achtergrond voor raster */
-    border: 2px solid #004080; /* Duidelijke rand */
 }
 
-#mainCanvas {
-    background-color: white; /* Binnenkant van canvas is wit */
-    display: block;
-    margin: 0;
+#right-panel-buttons {
+    flex-basis: 200px;
+    flex-shrink: 0;
+    background-color: #f0faff;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+#drawingCanvasContainer {
+    padding: 0;
+}
+
+#mazeCanvas {
+    background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Paneel voor de download knoppen rechts */
-#right-panel-buttons {
-    flex-basis: 200px; /* Basisbreedte voor de knoppenkolom */
-    flex-shrink: 0;
-    padding: 15px;
-    border: 1px solid #b3e0ff;
-    border-radius: 8px;
-    background-color: #f0faff;
-    display: flex;
-    flex-direction: column; /* Knoppen onder elkaar */
-    gap: 10px; /* Ruimte tussen de knoppen */
-    box-sizing: border-box;
-    margin-left: 0;
-    margin-right: 0;
-    align-items: center; /* Centreer knoppen horizontaal in dit paneel */
-}
-
-/* Specifieke styling voor de knoppen binnen #right-panel-buttons om ze de volle breedte te geven */
-#right-panel-buttons button {
-    width: 100%; /* Knoppen nemen de volle breedte van hun container in */
-    margin: 0; /* Verwijder standaard knopmarge, gap regelt dit nu */
-}
-
-
-/* Styling voor groepen van controls binnen het linkerpaneel */
+/* --- Controls Styling --- */
 .control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
+    margin-bottom: 20px;
 }
-
-.tool-setting {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
+.control-group:last-child {
+    margin-bottom: 0;
 }
-.tool-setting label {
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-#controls {
-    width: 100%;
-    padding: 0;
-    border: none;
-    background-color: transparent;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-}
-
-#controls label {
+.control-group legend {
     font-weight: bold;
-    color: #333;
-}
-
-#controls input[type="number"],
-#controls select {
-    padding: 8px;
-    border-radius: 5px;
-    border: 1px solid #aaddff;
-    font-size: 1em;
-    width: auto; /* Laten aanpassen aan inhoud */
-}
-
-
-.control-group h3 {
     color: #004080;
-    font-size: 1.3em;
-    margin-top: 0;
+    padding: 0 5px;
     margin-bottom: 10px;
-    text-align: center;
-    width: 100%;
+}
+#moeilijkheid-kiezer label {
+    display: block;
+    margin: 5px 0;
 }
 
-/* Responsive aanpassingen voor kleinere schermen */
-@media (max-width: 768px) {
-    #main-content {
-        flex-direction: column; /* Stapel alle panelen onder elkaar */
-        align-items: center;
-        gap: 15px;
-        justify-content: center; /* Centreer inhoud wanneer gestapeld */
-    }
+#vorm-kiezer {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+#vorm-kiezer img {
+    width: 100%;
+    height: auto;
+    cursor: pointer;
+    border: 4px solid transparent;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+#vorm-kiezer img:hover {
+    transform: scale(1.05);
+    border-color: #ddd;
+}
+#vorm-kiezer img.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
+    transform: scale(1.1);
+}
 
-    #left-panel,
-    #center-panel,
-    #right-panel-buttons {
-        flex-basis: auto;
-        width: 100%;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    #controls,
-    #center-panel {
-        align-items: center;
-        gap: 10px;
-    }
-
-    #right-panel-buttons button {
-        width: auto;
-        min-width: 150px;
-    }
+#left-panel button, #right-panel-buttons button {
+    width: 100%;
+    margin-top: 10px;
 }
