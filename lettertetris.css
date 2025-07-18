@@ -1,0 +1,172 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0faff;
+    margin: 0;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #004080;
+}
+
+#app-container {
+    display: flex;
+    gap: 20px;
+    max-width: 1400px;
+    margin: auto;
+}
+
+#toolbox-panel {
+    flex: 1;
+    max-width: 350px;
+    padding: 15px;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    background-color: #e6f7ff;
+}
+
+#main-panel {
+    flex: 3;
+    padding: 15px;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    background-color: #fff;
+}
+
+h2 {
+    color: #004080;
+    border-bottom: 2px solid #b3e0ff;
+    padding-bottom: 5px;
+}
+
+.uitleg {
+    font-size: 0.9em;
+    color: #555;
+    margin-top: -10px;
+    margin-bottom: 15px;
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    margin-right: 5px;
+}
+
+.control-group input[type="number"] {
+    width: 60px;
+    padding: 5px;
+}
+
+button {
+    background-color: #004080;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 5px 0;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #b3e0ff;
+    margin: 20px 0;
+}
+
+/* --- Stukken Bibliotheek --- */
+#piece-library {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.piece {
+    border: 2px dashed #888;
+    padding: 5px;
+    cursor: grab;
+    display: grid; /* Maakt het makkelijk om vormen te maken */
+}
+
+/* --- Canvas Rooster --- */
+#grid-container {
+    display: grid;
+    border: 2px solid #004080;
+    margin-top: 15px;
+    background-color: #fdfdfd;
+}
+
+.grid-cell {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #d0e0e8;
+    background-color: white;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    outline: none;
+    transition: background-color 0.2s;
+}
+
+.grid-cell:focus {
+    background-color: #e0f2f7;
+}
+
+.grid-cell.drag-over {
+    background-color: #a3d9ff !important; /* Belangrijk om andere kleuren te overschrijven */
+}
+
+/* --- Werkblad Output --- */
+#worksheet-controls {
+    margin-top: 20px;
+}
+
+#worksheet-output {
+    margin-top: 20px;
+}
+
+.worksheet-grid {
+    display: grid;
+    border: 2px solid black;
+}
+
+.worksheet-cell {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.worksheet-pieces-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: flex-start;
+}
+/* VOEG DEZE KLASSE TOE AAN HET EINDE VAN JE CSS-BESTAND */
+.ghost-preview {
+    opacity: 0.5 !important;
+    border-style: dashed !important;
+}
