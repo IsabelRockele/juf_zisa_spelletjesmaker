@@ -41,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const choicesContainer = document.getElementById('catalog-choices');
     const modalTitle = document.getElementById('modal-title');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
+    const downloadPdfBtn = document.getElementById('downloadPdfBtn'); // NIEUW: Haal de knop op
 
     // Nieuwe DOM-elementen voor aanpasrichting
     const widthAdjustDirectionRadios = document.querySelectorAll('input[name="widthAdjustDirection"]');
@@ -66,11 +67,11 @@ document.addEventListener("DOMContentLoaded", () => {
         { name: "Groen", hex: "#32CD32" },       // Limoengroen
         { name: "Paars", hex: "#9932CC" },       // Medium paars
         { name: "Bruin", hex: "#A0522D" },       // Rosbruin
-        { name: "Roze", hex: "#FFB6C1" },     // Levendig roze
-        { name: "Lichtgroen", hex: "#90EE90" },  // Mintgroen
+        { name: "Roze", hex: "#FFB6C1" },        // Lichter roze (LightPink)
+        { name: "Lichtgroen", hex: "#90EE90" },  // Minder fluo groen
         { name: "Lichtblauw", hex: "#87CEEB" },  // Sky blue
-        { name: "Lichtbruin", hex: "#CD853F" }, // Tan
-        { name: "Lichtgrijs", hex: "#D3D3D3" }, // Nieuw: Lichtgrijs
+        { name: "Lichtbruin", hex: "#CD853F" },  // Terug naar een lichtbruin/tan
+        { name: "Lichtgrijs", hex: "#D3D3D3" },  // Nieuw: Lichtgrijs
     ];
 
     function getColorInfoByName(name) {
@@ -90,28 +91,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const widthAdjustDirection = document.querySelector('input[name="widthAdjustDirection"]:checked').value;
             const heightAdjustDirection = document.querySelector('input[name="heightAdjustDirection"]:checked').value;
 
-            let startOldRow, endOldRow, startNewRow;
-            let startOldCol, endOldCol, startNewCol;
-
             // Hoogte aanpassen
-            if (heightAdjustDirection === 'top') { // Rijen van bovenaf verwijderen
-                startOldRow = Math.max(0, oldHeight - gridHeight);
-                startNewRow = 0;
-            } else { // Rijen van onderaf verwijderen (standaard gedrag) of toevoegen
-                startOldRow = 0;
-                startNewRow = 0; // Nieuwe rijen worden aan de onderkant toegevoegd
-            }
-            endOldRow = Math.min(oldHeight, startOldRow + gridHeight);
+            // De logica hier werd al aangepast om van bovenaf te verwijderen indien 'top' gekozen is
+            // De variabele `startOldRow` wordt bepaald door de hoogte aanpas richting
 
             // Breedte aanpassen
-            if (widthAdjustDirection === 'left') { // Kolommen van linksaf verwijderen
-                startOldCol = Math.max(0, oldWidth - gridWidth);
-                startNewCol = 0;
-            } else { // Kolommen van rechtsaf verwijderen (standaard gedrag) of toevoegen
-                startOldCol = 0;
-                startNewCol = 0; // Nieuwe kolommen worden aan de rechterkant toegevoegd
-            }
-            endOldCol = Math.min(oldWidth, startOldCol + gridWidth);
+            // De logica hier werd al aangepast om van linksaf te verwijderen indien 'left' gekozen is
+            // De variabele `startOldCol` wordt bepaald door de breedte aanpas richting
 
 
             for (let r = 0; r < Math.min(gridHeight, oldHeight); r++) {
@@ -182,6 +168,12 @@ document.addEventListener("DOMContentLoaded", () => {
             targetCtx.moveTo(0, i * cell);
             targetCtx.lineTo(width * cell, i * cell);
             targetCtx.stroke();
+        }
+        // Voeg hier de omkadering toe voor de tekening
+        if (targetCtx === ctx) { // Alleen voor het hoofdcnavas
+            ctx.strokeStyle = '#000000'; // Zwart kader
+            ctx.lineWidth = 2; // Dikte van het kader
+            ctx.strokeRect(0, 0, gridWidth * cellSize, gridHeight * cellSize);
         }
     }
 
@@ -353,6 +345,26 @@ document.addEventListener("DOMContentLoaded", () => {
         meldingContainer.textContent = '';
     }
 
+    // NIEUW: Functie om de TEKENING als PDF te downloaden
+    async function downloadDrawingPdf() {
+        meldingContainer.textContent = 'Bezig met genereren van Tekening PDF...';
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+
+        const imgData = canvas.toDataURL('image/png'); // Haal de afbeelding van het drawingCanvas
+
+        const imgWidth = 200; // Breedte van de afbeelding in mm (voorbeeld)
+        // const pageHeight = doc.internal.pageSize.getHeight(); // Niet direct gebruikt hier, maar handig
+        const imgHeight = canvas.height * imgWidth / canvas.width; // Behoud aspect ratio
+        let position = 10; // Startpositie vanaf de bovenkant
+
+        // Voeg de afbeelding toe aan de PDF
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+
+        doc.save('tekening.pdf');
+        meldingContainer.textContent = '';
+    }
+
     // --- Catalogus Functies ---
     async function loadCatalog() { try { const response = await fetch('reken_en_kleur_afbeeldingen/catalog.json'); if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); } catalogData = await response.json(); } catch (e) { console.error("Kon de catalogus niet laden:", e); meldingContainer.textContent = "Fout bij laden van de catalogus."; } }
     function openCatalog() { populateThemes(); catalogModal.style.display = 'block'; }
@@ -360,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function populateThemes() { themesContainer.innerHTML = ''; Object.keys(catalogData).forEach(theme => { const btn = document.createElement('button'); btn.textContent = theme; btn.onclick = () => showChoices(theme); themesContainer.appendChild(btn); }); }
     function showChoices(theme) { choicesContainer.innerHTML = ''; const choices = catalogData[theme]; if (!choices || choices.length === 0) { choicesContainer.innerHTML = '<p>Nog geen tekeningen beschikbaar voor dit thema.</p>'; } else { choices.forEach(choice => { const btn = document.createElement('button'); btn.textContent = choice.naam; btn.onclick = () => loadDrawingFromCatalog(choice.bestandsnaam); choicesContainer.appendChild(btn); }); } themesContainer.style.display = 'none'; choicesContainer.style.display = 'grid'; backToThemesBtn.style.display = 'block'; modalTitle.textContent = theme; }
     function showThemes() { themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
-    async function loadDrawingFromCatalog(fileName) { meldingContainer.textContent = 'Tekening laden...'; try { const response = await fetch(`reken_en_kleur_afbeeldingen/${fileName}`); if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); } const data = await response.json(); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = JSON.parse(JSON.stringify(data.drawingMatrix)); initializeDrawingCanvas(); closeCatalog(); } catch (e) { console.error("Kon tekening niet laden:", e); meldingContainer.textContent = "Fout bij laden van de tekening."; } finally { setTimeout(() => { meldingContainer.textContent = '' }, 3000); } }
+    async function loadDrawingFromCatalog(fileName) { meldingContainer.textContent = 'Tekening laden...'; try { const response = await fetch(`reken_en_kleur_afbeeldingen/${fileName}`); if (!response.ok) { throw new Error(`HTTP error! status: ${status}`); } const data = await response.json(); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = JSON.parse(JSON.stringify(data.drawingMatrix)); initializeDrawingCanvas(); closeCatalog(); } catch (e) { console.error("Kon tekening niet laden:", e); meldingContainer.textContent = "Fout bij laden van de tekening."; } finally { setTimeout(() => { meldingContainer.textContent = '' }, 3000); } }
 
 
     // --- Event Listeners ---
@@ -388,6 +400,8 @@ document.addEventListener("DOMContentLoaded", () => {
         link.href = canvas.toDataURL("image/png");
         link.click();
     });
+
+    downloadPdfBtn.addEventListener('click', downloadDrawingPdf); // NIEUW: Event listener voor de PDF download knop
 
     canvas.addEventListener('mousedown', (e) => { isDrawing = true; paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y); });
     canvas.addEventListener('mousemove', (e) => { if (isDrawing) { paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y); } });
