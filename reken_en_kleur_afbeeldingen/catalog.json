@@ -37,11 +37,24 @@
       "bestandsnaam": "stoomboot.json"
     }
   ],
-  "Winter": [],
+  "Winter": [
+    {
+      "naam": "pinguin",
+      "bestandsnaam": "pinguin.json"
+    }
+  ],
   "Kerst": [
     {
       "naam": "Kerstboom",
       "bestandsnaam": "kerstboom.json"
+    },
+    {
+      "naam": "pakjes",
+      "bestandsnaam": "pakjes.json"
+    },
+    {
+      "naam": "Rendier",
+      "bestandsnaam": "rendier.json"
     }
   ],
   "Carnaval": [],
