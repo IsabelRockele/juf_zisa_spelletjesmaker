@@ -42,6 +42,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTitle = document.getElementById('modal-title');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
 
+    // Nieuwe DOM-elementen voor aanpasrichting
+    const widthAdjustDirectionRadios = document.querySelectorAll('input[name="widthAdjustDirection"]');
+    const heightAdjustDirectionRadios = document.querySelectorAll('input[name="heightAdjustDirection"]');
+
     // --- Werkblad Modal Elementen ---
     const werkbladModal = document.getElementById('werkblad-modal');
     const werkbladCanvas = document.getElementById('werkblad-canvas');
@@ -53,14 +57,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const COLOR_INFO_MAP = [
-        { name: "Achtergrond", hex: "#FFFFFF" }, { name: "Zwart", hex: "#000000" },
-        { name: "Geel", hex: "#FFFF00" }, { name: "Rood", hex: "#FF0000" },
-        { name: "Oranje", hex: "#FFA500" }, { name: "Blauw", hex: "#0000FF" },
-        { name: "Groen", hex: "#008000" }, { name: "Paars", hex: "#800080" },
-        { name: "Bruin", hex: "#8B4513" },
-        { name: "Roze", hex: "#FFC0CB" },
-        { name: "Lichtgroen", hex: "#90EE90" }, { name: "Lichtblauw", hex: "#ADD8E6" },
-        { name: "Lichtbruin", hex: "#CD853F" },
+        { name: "Achtergrond", hex: "#F8F8F8" }, // Iets minder fel wit
+        { name: "Zwart", hex: "#333333" },       // Zacht zwart
+        { name: "Geel", hex: "#FFD700" },        // Levendig geel
+        { name: "Rood", hex: "#FF4500" },        // Fel oranjerood
+        { name: "Oranje", hex: "#FF8C00" },      // Helderder, minder zalmkleurig oranje
+        { name: "Blauw", hex: "#1E90FF" },       // Helderder blauw
+        { name: "Groen", hex: "#32CD32" },       // Limoengroen
+        { name: "Paars", hex: "#9932CC" },       // Medium paars
+        { name: "Bruin", hex: "#A0522D" },       // Rosbruin
+        { name: "Roze", hex: "#FFB6C1" },     // Levendig roze
+        { name: "Lichtgroen", hex: "#98FB98" },  // Mintgroen
+        { name: "Lichtblauw", hex: "#87CEEB" },  // Sky blue
+        { name: "Lichtbruin", hex: "#CD853F" }, // Tan
+        { name: "Lichtgrijs", hex: "#D3D3D3" }, // Nieuw: Lichtgrijs
     ];
 
     function getColorInfoByName(name) {
@@ -72,12 +82,62 @@ document.addEventListener("DOMContentLoaded", () => {
         cellSize = Math.min(canvas.width / gridWidth, canvas.height / gridHeight);
         if (drawingMatrix.length === 0 || drawingMatrix.length !== gridHeight || (drawingMatrix.length > 0 && drawingMatrix[0].length !== gridWidth)) {
             const old = JSON.parse(JSON.stringify(drawingMatrix));
-            drawingMatrix = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill("Achtergrond"));
-            for (let r = 0; r < Math.min(old.length, gridHeight); r++) {
-                for (let c = 0; c < Math.min(old.length > 0 ? old[0].length : 0, gridWidth); c++) {
-                    drawingMatrix[r][c] = old[r][c];
+            const oldHeight = old.length;
+            const oldWidth = oldHeight > 0 ? old[0].length : 0;
+
+            const newMatrix = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill("Achtergrond"));
+
+            const widthAdjustDirection = document.querySelector('input[name="widthAdjustDirection"]:checked').value;
+            const heightAdjustDirection = document.querySelector('input[name="heightAdjustDirection"]:checked').value;
+
+            let startOldRow, endOldRow, startNewRow;
+            let startOldCol, endOldCol, startNewCol;
+
+            // Hoogte aanpassen
+            if (heightAdjustDirection === 'top') { // Rijen van bovenaf verwijderen
+                startOldRow = Math.max(0, oldHeight - gridHeight);
+                startNewRow = 0;
+            } else { // Rijen van onderaf verwijderen (standaard gedrag) of toevoegen
+                startOldRow = 0;
+                startNewRow = 0; // Nieuwe rijen worden aan de onderkant toegevoegd
+            }
+            endOldRow = Math.min(oldHeight, startOldRow + gridHeight);
+
+            // Breedte aanpassen
+            if (widthAdjustDirection === 'left') { // Kolommen van linksaf verwijderen
+                startOldCol = Math.max(0, oldWidth - gridWidth);
+                startNewCol = 0;
+            } else { // Kolommen van rechtsaf verwijderen (standaard gedrag) of toevoegen
+                startOldCol = 0;
+                startNewCol = 0; // Nieuwe kolommen worden aan de rechterkant toegevoegd
+            }
+            endOldCol = Math.min(oldWidth, startOldCol + gridWidth);
+
+
+            for (let r = 0; r < Math.min(gridHeight, oldHeight); r++) {
+                for (let c = 0; c < Math.min(gridWidth, oldWidth); c++) {
+                    let sourceRow = r;
+                    let sourceCol = c;
+                    let targetRow = r;
+                    let targetCol = c;
+
+                    // Pas de bronrij aan op basis van heightAdjustDirection
+                    if (heightAdjustDirection === 'top' && oldHeight > gridHeight) {
+                        sourceRow += (oldHeight - gridHeight);
+                    }
+
+                    // Pas de bronkolom aan op basis van widthAdjustDirection
+                    if (widthAdjustDirection === 'left' && oldWidth > gridWidth) {
+                        sourceCol += (oldWidth - gridWidth);
+                    }
+                    
+                    // Zorg ervoor dat we binnen de grenzen blijven van de oude matrix
+                    if (sourceRow < oldHeight && sourceCol < oldWidth && sourceRow >= 0 && sourceCol >= 0) {
+                        newMatrix[targetRow][targetCol] = old[sourceRow][sourceCol];
+                    }
                 }
             }
+            drawingMatrix = newMatrix;
         }
         redrawDrawing();
         saveState();
@@ -304,7 +364,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     // --- Event Listeners ---
-    updateGridSizeBtn.addEventListener('click', () => { const w = parseInt(gridWidthInput.value); const h = parseInt(gridHeightInput.value); if (w >= 10 && h >= 10 && w <= 60 && h <= 60) { gridWidth = w; gridHeight = h; initializeDrawingCanvas(); } });
+    updateGridSizeBtn.addEventListener('click', () => {
+        const w = parseInt(gridWidthInput.value);
+        const h = parseInt(gridHeightInput.value);
+        if (w >= 10 && h >= 10 && w <= 60 && h <= 60) {
+            gridWidth = w;
+            gridHeight = h;
+            initializeDrawingCanvas();
+        }
+    });
     operationTypeRadios.forEach(r => r.addEventListener('change', updateOperationControls));
     document.querySelectorAll('input[name="tafel"]').forEach(cb => { cb.addEventListener('change', () => { if (cb.value !== 'all' && cb.checked) { allTablesCheckbox.checked = false; } applyAllTablesState(); }); });
     undoBtn.addEventListener('click', undo);
