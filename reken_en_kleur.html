@@ -32,13 +32,13 @@
                     <h3>Soort Opgaven</h3>
                     <div style="display: flex; gap: 15px;">
                         <div class="operation-type-group">
-                            <h4>Optellen/Aftrekken</h4>
+                            <h4 style="margin-top: 5px; margin-bottom: 5px;">Optellen/Aftrekken</h4>
                             <label><input type="radio" name="operationType" value="optellen" checked> Optellen</label>
                             <label><input type="radio" name="operationType" value="aftrekken"> Aftrekken</label>
                             <label><input type="radio" name="operationType" value="beide_opt_aft"> Beide</label>
                         </div>
                         <div class="operation-type-group">
-                            <h4>Vermenigvuldigen/Delen</h4>
+                            <h4 style="margin-top: 5px; margin-bottom: 5px;">Vermenigvuldigen/Delen</h4>
                             <label><input type="radio" name="operationType" value="vermenigvuldigen"> Vermenigvuldigen</label>
                             <label><input type="radio" name="operationType" value="delen"> Delen</label>
                             <label><input type="radio" name="operationType" value="beide_verm_del"> Beide</label>
@@ -58,28 +58,42 @@
 
                 <div class="control-group" id="tablesControls">
                     <h3>Tafels</h3>
-                    <label><input type="checkbox" name="tafel" value="1"> Tafel van 1</label>
-                    <label><input type="checkbox" name="tafel" value="2"> Tafel van 2</label>
-                    <label><input type="checkbox" name="tafel" value="3"> Tafel van 3</label>
-                    <label><input type="checkbox" name="tafel" value="4"> Tafel van 4</label>
-                    <label><input type="checkbox" name="tafel" value="5"> Tafel van 5</label>
-                    <label><input type="checkbox" name="tafel" value="6"> Tafel van 6</label>
-                    <label><input type="checkbox" name="tafel" value="7"> Tafel van 7</label>
-                    <label><input type="checkbox" name="tafel" value="8"> Tafel van 8</label>
-                    <label><input type="checkbox" name="tafel" value="9"> Tafel van 9</label>
-                    <label><input type="checkbox" name="tafel" value="10"> Tafel van 10</label>
-                    <label><input type="checkbox" name="tafel" value="all" checked> Alle Tafels</label>
+                    <label><input type="checkbox" name="tafel" value="1"> 1</label>
+                    <label><input type="checkbox" name="tafel" value="2"> 2</label>
+                    <label><input type="checkbox" name="tafel" value="3"> 3</label>
+                    <label><input type="checkbox" name="tafel" value="4"> 4</label>
+                    <label><input type="checkbox" name="tafel" value="5"> 5</label>
+                    <label><input type="checkbox" name="tafel" value="6"> 6</label>
+                    <label><input type="checkbox" name="tafel" value="7"> 7</label>
+                    <label><input type="checkbox" name="tafel" value="8"> 8</label>
+                    <label><input type="checkbox" name="tafel" value="9"> 9</label>
+                    <label><input type="checkbox" name="tafel" value="10"> 10</label>
+                    <label><input type="checkbox" name="tafel" value="all" checked> Alle</label>
                 </div>
                 
-                <div class="control-group">
+               <div class="control-group">
                     <h3>Raster Grootte</h3>
-                    <div class="tool-setting">
-                        <label for="gridWidth">Breedte:</label>
-                        <input type="number" id="gridWidth" value="25" min="10" max="60">
+                    <div style="display: flex; gap: 10px; justify-content: space-between;">
+                        <div class="tool-setting" style="flex-grow: 1;">
+                            <label for="gridWidth">Breedte:</label>
+                            <input type="number" id="gridWidth" value="25" min="10" max="60">
+                        </div>
+                        <div class="tool-setting" style="flex-grow: 1;">
+                            <label for="gridHeight">Hoogte:</label>
+                            <input type="number" id="gridHeight" value="20" min="10" max="60">
+                        </div>
                     </div>
-                    <div class="tool-setting">
-                        <label for="gridHeight">Hoogte:</label>
-                        <input type="number" id="gridHeight" value="20" min="10" max="60">
+                    <div class="control-group">
+                        <h4>Aanpasrichting Breedte</h4>
+                        <div style="display: flex; gap: 10px;"> <label><input type="radio" name="widthAdjustDirection" value="right" checked> Rechts</label>
+                            <label><input type="radio" name="widthAdjustDirection" value="left"> Links</label>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <h4>Aanpasrichting Hoogte</h4>
+                        <div style="display: flex; gap: 10px;"> <label><input type="radio" name="heightAdjustDirection" value="bottom" checked> Onder</label>
+                            <label><input type="radio" name="heightAdjustDirection" value="top"> Boven</label>
+                        </div>
                     </div>
                     <button id="updateGridSizeBtn">Update Raster</button>
                 </div>
