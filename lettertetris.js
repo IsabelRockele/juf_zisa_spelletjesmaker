@@ -123,11 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cell.addEventListener('dragover', handleDragOver);
         cell.addEventListener('dragleave', clearGhostPiece);
         cell.addEventListener('drop', handleDrop);
-        cell.addEventListener('contextmenu', handleRightClick); // Voor verwijderen
+        cell.addEventListener('contextmenu', handleRightClick);
     }
-
-    // --- NIEUWE FUNCTIES VOOR SLEPEN & PREVIEW ---
-
+    
     function handleDragOver(e) {
         e.preventDefault();
         if (!draggedPiece) return;
@@ -135,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateGhostPiece(targetCell) {
-        clearGhostPiece(); // Verwijder eerst de oude preview
+        clearGhostPiece();
         const shape = draggedPiece.shape;
         const startRow = parseInt(targetCell.dataset.row, 10);
         const startCol = parseInt(targetCell.dataset.col, 10);
@@ -145,6 +143,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cellValue) {
                     const ghostCell = document.querySelector(`.grid-cell[data-row='${startRow + rIdx}'][data-col='${startCol + cIdx}']`);
                     if (ghostCell) {
+                        if (!ghostCell.dataset.originalColor) {
+                           ghostCell.dataset.originalColor = ghostCell.style.backgroundColor;
+                        }
                         ghostCell.classList.add('ghost-preview');
                         ghostCell.style.backgroundColor = draggedPiece.color;
                     }
@@ -156,8 +157,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearGhostPiece() {
         gridContainer.querySelectorAll('.ghost-preview').forEach(cell => {
             cell.classList.remove('ghost-preview');
-            // Reset kleur alleen als de cel niet al deel uitmaakt van een geplaatst stuk
-            if (!cell.dataset.pieceGroup) {
+            if (cell.dataset.originalColor) {
+                cell.style.backgroundColor = cell.dataset.originalColor;
+                delete cell.dataset.originalColor;
+            } else {
                 cell.style.backgroundColor = '';
             }
         });
@@ -166,14 +169,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleDrop(e) {
         e.preventDefault();
         if (!draggedPiece) return;
-
+        clearGhostPiece();
         const targetCell = e.target.closest('.grid-cell');
         const startRow = parseInt(targetCell.dataset.row, 10);
         const startCol = parseInt(targetCell.dataset.col, 10);
         const shape = draggedPiece.shape;
         const pieceGroup = draggedPiece.name + '-' + Date.now();
-
-        // Plaats het stuk op basis van de ghost-preview positie
         shape.forEach((row, rIdx) => {
             row.forEach((cellValue, cIdx) => {
                 if (cellValue) {
@@ -185,18 +186,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        
-        clearGhostPiece();
         draggedPiece = null;
     }
     
-    // --- NIEUWE FUNCTIE VOOR VERWIJDEREN ---
-    
     function handleRightClick(e) {
-        e.preventDefault(); // Voorkom dat het standaard contextmenu opent
+        e.preventDefault();
         const clickedCell = e.target.closest('.grid-cell');
         if (!clickedCell || !clickedCell.dataset.pieceGroup) return;
-
         const groupToRemove = clickedCell.dataset.pieceGroup;
         gridContainer.querySelectorAll(`[data-piece-group='${groupToRemove}']`).forEach(cell => {
             cell.style.backgroundColor = '';
@@ -204,23 +200,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- **AANGEPASTE** FUNCTIE VOOR TOETSEN ---
     function handleKeyDown(e) {
+        const currentCell = e.target;
         if (e.key === ' ') {
             e.preventDefault();
-            focusNextCell(e.target);
+            focusNextCell(currentCell);
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            currentCell.textContent = '';
+            focusPreviousCell(currentCell);
+        } else if (e.key === 'Delete') {
+            e.preventDefault();
+            currentCell.textContent = '';
         }
     }
 
     function handleInput(e) {
         const cell = e.target;
-        if (cell.textContent.length > 1) cell.textContent = cell.textContent.slice(-1);
-        if (cell.textContent.length === 1) focusNextCell(cell);
+        if (cell.textContent.length > 1) {
+            cell.textContent = cell.textContent.slice(-1).toUpperCase();
+        } else {
+            cell.textContent = cell.textContent.toUpperCase();
+        }
+
+        if (cell.textContent.length === 1 && /^[A-Z]$/.test(cell.textContent)) {
+            focusNextCell(cell);
+        }
     }
     
     function focusNextCell(currentCell) {
         const allCells = Array.from(gridContainer.querySelectorAll('.grid-cell'));
         const currentIndex = allCells.indexOf(currentCell);
-        if (currentIndex < allCells.length - 1) allCells[currentIndex + 1].focus();
+        if (currentIndex < allCells.length - 1) {
+            allCells[currentIndex + 1].focus();
+        }
+    }
+    
+    // --- **NIEUWE** FUNCTIE OM TERUG TE SPRINGEN ---
+    function focusPreviousCell(currentCell) {
+        const allCells = Array.from(gridContainer.querySelectorAll('.grid-cell'));
+        const currentIndex = allCells.indexOf(currentCell);
+        if (currentIndex > 0) {
+            allCells[currentIndex - 1].focus();
+        }
     }
     
     function clearGrid() {
@@ -233,11 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadPngBtn.disabled = true;
         downloadPdfBtn.disabled = true;
     }
-
+    
     function generateWorksheet() {
         worksheetOutput.innerHTML = '';
         const rows = parseInt(rowsInput.value, 10);
         const cols = parseInt(colsInput.value, 10);
+        
+        const title = document.createElement('h2');
+        title.className = 'worksheet-title';
+        title.textContent = 'Waar moet elke puzzel staan?';
+        worksheetOutput.appendChild(title);
+        
+        const subtitle = document.createElement('h3');
+        subtitle.className = 'worksheet-subtitle';
+        subtitle.textContent = 'Zet de letters op de juiste plaats.';
+        worksheetOutput.appendChild(subtitle);
+
         const worksheetGrid = document.createElement('div');
         worksheetGrid.className = 'worksheet-grid';
         worksheetGrid.style.gridTemplateColumns = `repeat(${cols}, 35px)`;
@@ -258,6 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     letter: canvasCell.textContent
                 });
                 worksheetCell.style.backgroundColor = '#fff';
+            } else if (canvasCell.textContent.trim() === '') {
+                worksheetCell.style.backgroundColor = '#e0e0e0';
             } else {
                 worksheetCell.textContent = canvasCell.textContent;
             }
@@ -296,36 +332,46 @@ document.addEventListener('DOMContentLoaded', () => {
                     cellDiv.style.visibility = 'hidden';
                 }
                 pieceGrid.appendChild(cellDiv);
-            });
+});
             piecesContainer.appendChild(pieceGrid);
         }
         worksheetOutput.appendChild(piecesContainer);
-
         downloadPngBtn.disabled = false;
         downloadPdfBtn.disabled = false;
     }
     
     function downloadAs(type) {
-        const originalBg = worksheetOutput.style.backgroundColor;
-        worksheetOutput.style.backgroundColor = '#ffffff';
-        worksheetOutput.style.padding = '10px';
-        html2canvas(worksheetOutput, { scale: 2 }).then(canvas => {
-            worksheetOutput.style.backgroundColor = originalBg;
-            worksheetOutput.style.padding = '0';
-            const link = document.createElement('a');
-            const fileName = `lettertetris-puzzel.${type}`;
+        const outputElement = worksheetOutput;
+        outputElement.classList.add('print-view');
+
+        html2canvas(outputElement, { 
+            scale: 3,
+            backgroundColor: '#ffffff'
+        }).then(canvas => {
+            outputElement.classList.remove('print-view');
+            const imgData = canvas.toDataURL('image/png');
+
             if (type === 'pdf') {
                 const { jsPDF } = window.jspdf;
-                const imgData = canvas.toDataURL('image/png');
                 const doc = new jsPDF('p', 'mm', 'a4');
-                const imgProps = doc.getImageProperties(imgData);
-                const pdfWidth = doc.internal.pageSize.getWidth();
-                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                doc.save(fileName);
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                const canvasAspectRatio = canvas.width / canvas.height;
+                let pdfImageWidth = pageWidth - (margin * 2);
+                let pdfImageHeight = pdfImageWidth / canvasAspectRatio;
+                if (pdfImageHeight > pageHeight - (margin * 2)) {
+                    pdfImageHeight = pageHeight - (margin * 2);
+                    pdfImageWidth = pdfImageHeight * canvasAspectRatio;
+                }
+                const x = (pageWidth - pdfImageWidth) / 2;
+                const y = margin;
+                doc.addImage(imgData, 'PNG', x, y, pdfImageWidth, pdfImageHeight);
+                doc.save('lettertetris-puzzel.pdf');
             } else {
-                link.download = fileName;
-                link.href = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = 'lettertetris-puzzel.png';
+                link.href = imgData;
                 link.click();
             }
         });
