@@ -293,3 +293,43 @@ select, input[type="number"] {
 #catalogBtn:hover {
     background-color: #218838; /* Donkerder groen */
 }
+
+/* --- AANGEPAST: Styling voor de nieuwe catalogus knoppen met afbeeldingen --- */
+.catalog-choice-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #ffffff;
+    border: 1px solid #d4eaf7;
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 150px; /* Vaste hoogte voor uniformiteit */
+}
+
+.catalog-choice-button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 64, 128, 0.15);
+}
+
+.catalog-choice-button img {
+    width: 100%;
+    height: 100px; /* Vaste hoogte voor de afbeelding */
+    object-fit: contain; /* Zorgt dat de afbeelding past zonder te vervormen */
+    margin-bottom: 8px;
+}
+
+.catalog-choice-button span {
+    font-size: 14px;
+    color: #004080;
+    font-weight: bold;
+}
+
+/* Aanpassing aan de grid-container voor een betere weergave */
+#catalog-choices.catalog-view {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
