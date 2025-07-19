@@ -223,14 +223,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Werkblad Type 3: Pixeltekening ---
-    /**
-     * AANGEPAST: Genereert nu data voor ALLE kleuren, inclusief "Achtergrond".
-     */
     function generatePixelArtData() {
         const data = [];
         for (let r = 0; r < gridHeight; r++) {
             const rowData = [];
-            // Als de rij leeg is, voeg een lege datareeks toe
             if (drawingMatrix[r].length === 0) {
                 data.push(rowData);
                 continue;
@@ -243,14 +239,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (drawingMatrix[r][c] === currentColor) {
                     currentCount++;
                 } else {
-                    // Voeg het vorige kleurenblok toe (zonder filter)
                     rowData.push({ color: currentColor, count: currentCount });
-                    // Start een nieuw kleurenblok
                     currentColor = drawingMatrix[r][c];
                     currentCount = 1;
                 }
             }
-            // Voeg het allerlaatste kleurenblok van de rij toe
             rowData.push({ color: currentColor, count: currentCount });
             data.push(rowData);
         }
@@ -275,7 +268,8 @@ document.addEventListener("DOMContentLoaded", () => {
         
         const instructionCellSize = Math.min(previewCellSize, 20);
         werkbladCtx.font = `${instructionCellSize * 0.7}px Arial`;
-        werkbladCtx.textBaseline = 'middle'; werkbladCtx.textAlign = 'center';
+        werkbladCtx.textBaseline = 'middle';
+        werkbladCtx.textAlign = 'center';
         
         for (let r = 0; r < gridHeight; r++) {
             const rowInstructions = data[r]; let currentX = 5;
@@ -293,33 +287,53 @@ document.addEventListener("DOMContentLoaded", () => {
         drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, instructionWidth, 0);
     }
     async function generatePixelArtPdf() {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF('l', 'mm', 'a4'); 
-        const pageWidth = doc.internal.pageSize.getWidth(); const pageHeight = doc.internal.pageSize.getHeight(); const margin = 10;
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF('l', 'mm', 'a4'); 
+        const pageWidth = doc.internal.pageSize.getWidth(); 
+        const pageHeight = doc.internal.pageSize.getHeight(); 
+        const margin = 10;
         const data = generatePixelArtData();
         
+        const instructionSquareSize = 5;
+
         const maxInstructions = Math.max(1, ...data.map(row => row.length));
-        const instructionCellSizeMM = 6;
-        const instructionAreaWidth = maxInstructions * (instructionCellSizeMM + 1);
-        
+        const instructionAreaWidth = maxInstructions * (instructionSquareSize + 1);
+
         const gridAreaWidth = pageWidth - instructionAreaWidth - 2 * margin;
         const pdfCellSize = Math.min(gridAreaWidth / gridWidth, (pageHeight - 2 * margin) / gridHeight);
-        
-        doc.setFontSize(pdfCellSize * 2.5);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(instructionSquareSize * 2.8);
+
         for (let r = 0; r < gridHeight; r++) {
-            const y = margin + r * pdfCellSize;
+            const y_row_top = margin + r * pdfCellSize;
             let currentX = margin;
+
+            const y_instruction_top = y_row_top + (pdfCellSize / 2) - (instructionSquareSize / 2);
+
             for (const inst of data[r]) {
                 const colorInfo = getColorInfoByName(inst.color);
                 doc.setFillColor(colorInfo.hex);
-                doc.rect(currentX, y, instructionCellSizeMM, pdfCellSize, 'F');
-                doc.setTextColor(0,0,0);
-                doc.text(String(inst.count), currentX + instructionCellSizeMM / 2, y + pdfCellSize / 2, {align: 'center', baseline: 'middle'});
-                currentX += instructionCellSizeMM + 1;
+                
+                doc.setDrawColor(0); 
+                doc.setLineWidth(0.2);
+
+                doc.rect(currentX, y_instruction_top, instructionSquareSize, instructionSquareSize, 'FD');
+
+                doc.setTextColor(0, 0, 0);
+                const textOptions = { align: 'center', baseline: 'middle' };
+                const textX = currentX + instructionSquareSize / 2;
+                const textY = y_instruction_top + instructionSquareSize / 2;
+                doc.text(String(inst.count), textX, textY, textOptions);
+
+                currentX += instructionSquareSize + 1;
             }
+
             for(let c = 0; c < gridWidth; c++) {
                 const gridX = margin + instructionAreaWidth + c * pdfCellSize;
-                doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.1);
-                doc.rect(gridX, y, pdfCellSize, pdfCellSize);
+                doc.setDrawColor(180, 180, 180); 
+                doc.setLineWidth(0.1);
+                doc.rect(gridX, y_row_top, pdfCellSize, pdfCellSize);
             }
         }
         doc.save('werkblad-pixeltekening.pdf');
@@ -414,7 +428,46 @@ document.addEventListener("DOMContentLoaded", () => {
     function openCatalog() { populateThemes(); catalogModal.style.display = 'block'; }
     function closeCatalog() { catalogModal.style.display = 'none'; themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
     function populateThemes() { themesContainer.innerHTML = ''; Object.keys(catalogData).forEach(theme => { const btn = document.createElement('button'); btn.textContent = theme; btn.onclick = () => showChoices(theme); themesContainer.appendChild(btn); }); }
-    function showChoices(theme) { choicesContainer.innerHTML = ''; const choices = catalogData[theme]; if (!choices || choices.length === 0) { choicesContainer.innerHTML = '<p>Nog geen tekeningen beschikbaar voor dit thema.</p>'; } else { choices.forEach(choice => { const btn = document.createElement('button'); btn.textContent = choice.naam; btn.onclick = () => loadDrawingFromCatalog(choice.bestandsnaam); choicesContainer.appendChild(btn); }); } themesContainer.style.display = 'none'; choicesContainer.style.display = 'grid'; backToThemesBtn.style.display = 'block'; modalTitle.textContent = theme; }
+    
+    function showChoices(theme) {
+        choicesContainer.innerHTML = ''; // Maak de container leeg
+
+        const choices = catalogData[theme];
+        if (!choices || choices.length === 0) {
+            choicesContainer.innerHTML = '<p>Nog geen tekeningen beschikbaar voor dit thema.</p>';
+        } else {
+            choices.forEach(choice => {
+                // Maak de container voor de knop
+                const btn = document.createElement('button');
+                btn.className = 'catalog-choice-button'; // Nieuwe CSS-klasse voor styling
+                btn.onclick = () => loadDrawingFromCatalog(choice.bestandsnaam);
+
+                // Maak het afbeeldingselement
+                const img = document.createElement('img');
+                // Gebruik het nieuwe 'afbeelding' veld uit de JSON
+                img.src = `reken_en_kleur_afbeeldingen/${choice.afbeelding}`; 
+                img.alt = choice.naam; // Voor toegankelijkheid
+
+                // Maak het tekstelement
+                const span = document.createElement('span');
+                span.textContent = choice.naam;
+
+                // Voeg de afbeelding en tekst toe aan de knop
+                btn.appendChild(img);
+                btn.appendChild(span);
+                
+                // Voeg de complete knop toe aan de container
+                choicesContainer.appendChild(btn);
+            });
+        }
+
+        // Wissel de zichtbaarheid van de containers
+        themesContainer.style.display = 'none';
+        choicesContainer.style.display = 'grid'; // Zorg dat het grid-layout behouden blijft
+        backToThemesBtn.style.display = 'block';
+        modalTitle.textContent = theme;
+    }
+
     function showThemes() { themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
     async function loadDrawingFromCatalog(fileName) { meldingContainer.textContent = 'Tekening laden...'; try { const response = await fetch(`reken_en_kleur_afbeeldingen/${fileName}`); if (!response.ok) { throw new Error(`HTTP error! status: ${status}`); } const data = await response.json(); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = JSON.parse(JSON.stringify(data.drawingMatrix)); initializeDrawingCanvas(); closeCatalog(); } catch (e) { console.error("Kon tekening niet laden:", e); meldingContainer.textContent = "Fout bij laden van de tekening."; } finally { setTimeout(() => { meldingContainer.textContent = '' }, 3000); } }
 
