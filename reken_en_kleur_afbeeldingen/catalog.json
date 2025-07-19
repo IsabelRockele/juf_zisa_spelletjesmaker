@@ -21,6 +21,10 @@
     {
       "naam": "Eekhoorn en paddenstoel",
       "bestandsnaam": "eekhoorn_paddenstoel.json"
+    },
+    {
+      "naam": "Uil met bril",
+      "bestandsnaam": "uil_met_bril.json"
     }
   ],
   "Sinterklaas": [
@@ -57,10 +61,29 @@
       "bestandsnaam": "rendier.json"
     }
   ],
-  "Carnaval": [],
-  "Pasen": [],
-  "Lente": [],
-  "Zomer": [],
+  "Carnaval": [
+    {
+      "naam": "Clown",
+      "bestandsnaam": "clown.json"
+    }
+  ],
+  "Pasen": [
+    {
+      "naam": "Paasei",
+      "bestandsnaam": "paasei.json"
+    }
+  ],
+  "Lente": [
+    {
+      "naam": "Vlinder",
+      "bestandsnaam": "vlinder.json"
+    }
+  ],
+  "Zomer": [{
+      "naam": "Ijslolly-01",
+      "bestandsnaam": "ijslolly01.json"
+    }
+  ],
   "Terug naar school": [
     {
       "naam": "Potlood",
@@ -69,6 +92,16 @@
     {
       "naam": "Boekentas",
       "bestandsnaam": "boekentas.json"
+    }
+  ],
+  "Allerlei": [
+    {
+      "naam": "Minion",
+      "bestandsnaam": "minion.json"
+    },
+    {
+      "naam": "Robot",
+      "bestandsnaam": "robot.json"
     }
   ]
 }
