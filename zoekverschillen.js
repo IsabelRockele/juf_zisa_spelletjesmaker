@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const editFlipHorizontalBtn = document.getElementById('editFlipHorizontalBtn');
     const editFlipVerticalBtn = document.getElementById('editFlipVerticalBtn');
     const editUndoBtn = document.getElementById('editUndoBtn');
+    const transparentBgCheckbox = document.getElementById('transparentBgCheckbox');
 
     // Clipboard
     const clipboardPreviewContainer = document.getElementById('clipboard-preview-container');
@@ -50,8 +51,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pastedObject = null;
     let isPlacingNewObject = false;
     
-    // Nieuwe state voor transformaties
-    let transformAction = 'none'; // 'none', 'move', 'scale', 'rotate'
+    let transformAction = 'none'; 
     let dragStart = { x: 0, y: 0 };
 
 
@@ -163,8 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
     }
     
-    // --- TRANSFORMATIE LOGICA ---
-
     function getTransformHandles(obj) {
         const w = obj.width * obj.scale;
         const h = obj.height * obj.scale;
@@ -285,12 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function startAction(e) {
         const pos = getMousePos(canvasVerschillen, e);
         transformAction = getActionForPoint(pos);
-
         if (transformAction !== 'none') {
             dragStart = pos;
             return;
         }
-
         stampPastedObject();
         if (!originalImage) return;
         isDrawing = true;
@@ -390,7 +386,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function saveAndPrepareForDrag() {
-        const editedImageData = ctxEdit.getImageData(0, 0, editCanvas.width, editCanvas.height);
+        let editedImageData = ctxEdit.getImageData(0, 0, editCanvas.width, editCanvas.height);
+
+        if (transparentBgCheckbox.checked) {
+            const data = editedImageData.data;
+            const bgR = data[0];
+            const bgG = data[1];
+            const bgB = data[2];
+            const tolerance = 10; // Kleine tolerantie voor lichte kleurvariaties
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+                if (Math.abs(r - bgR) < tolerance && Math.abs(g - bgG) < tolerance && Math.abs(b - bgB) < tolerance) {
+                    data[i + 3] = 0; // Alpha op 0 zetten (transparant)
+                }
+            }
+        }
+        transparentBgCheckbox.checked = false;
+
         editModalOverlay.classList.add('hidden');
         clipboardCanvas.width = editedImageData.width; clipboardCanvas.height = editedImageData.height;
         ctxClipboard.putImageData(editedImageData, 0, 0);
