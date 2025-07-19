@@ -65,7 +65,7 @@
             </div>
             <div class="image-wrapper">
                 <h3>Jouw Puzzel (Bewerken)</h3>
-                <canvas id="canvasVerschillen" width="400" height="600"></canvas>
+                <canvas id="canvasVerschillen" width="400" height="600" willReadFrequently="true"></canvas>
             </div>
         </div>
         <p id="status-text">Upload een afbeelding om te beginnen.</p>
@@ -84,7 +84,7 @@
     <div id="edit-modal">
       <h3>Selectie Bewerken</h3>
       <p>Gebruik je muis om ongewenste delen van de selectie weg te gummen.</p>
-      <canvas id="editCanvas"></canvas>
+      <canvas id="editCanvas" willReadFrequently="true"></canvas>
       <div class="edit-controls">
           <button id="editUndoBtn" disabled>Ongedaan Maken</button>
           <button id="editFlipHorizontalBtn">Spiegel H</button>
