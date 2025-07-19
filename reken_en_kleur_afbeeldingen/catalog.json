@@ -1,107 +1,128 @@
 {
   "Halloween": [
     {
-      "naam": "Pompoen",
-      "bestandsnaam": "pompoen.json"
+      "naam": "pompoen",
+      "bestandsnaam": "pompoen.json",
+      "afbeelding": "pompoen.png"
     },
     {
-      "naam": "Monster",
-      "bestandsnaam": "monster.json"
+      "naam": "monster",
+      "bestandsnaam": "monster.json",
+      "afbeelding": "monster.png"
     }
   ],
   "Herfst": [
      {
-      "naam": "Eekhoorn",
-      "bestandsnaam": "eekhoorn.json"
+      "naam": "eekhoorn",
+      "bestandsnaam": "eekhoorn.json",
+      "afbeelding": "eekhoorn.png"
     },
     {
-      "naam": "Paddenstoel",
-      "bestandsnaam": "paddenstoel.json"
+      "naam": "paddenstoel",
+      "bestandsnaam": "paddenstoel.json",
+      "afbeelding": "paddenstoel.png"
       },
     {
-      "naam": "Eekhoorn en paddenstoel",
-      "bestandsnaam": "eekhoorn_paddenstoel.json"
+      "naam": "eekhoorn en paddenstoel",
+      "bestandsnaam": "eekhoorn_paddenstoel.json",
+      "afbeelding": "eekhoorn_en_paddenstoel.png"
     },
     {
-      "naam": "Uil met bril",
-      "bestandsnaam": "uil_met_bril.json"
+      "naam": "uil met bril",
+      "bestandsnaam": "uil_met_bril.json",
+      "afbeelding": "uil_met_bril.png"
     }
   ],
   "Sinterklaas": [
     {
       "naam": "Sint",
-      "bestandsnaam": "Sint.json"
+      "bestandsnaam": "Sint.json",
+      "afbeelding": "Sint.png"
     },
     {
-      "naam": "Roetpiet",
-      "bestandsnaam": "piet.json"
+      "naam": "roetpiet",
+      "bestandsnaam": "piet.json",
+      "afbeelding": "roetpiet.png"
     },
     {
-      "naam": "Stoomboot",
-      "bestandsnaam": "stoomboot.json"
+      "naam": "stoomboot",
+      "bestandsnaam": "stoomboot.json",
+      "afbeelding": "stoomboot.png"
     }
   ],
   "Winter": [
     {
       "naam": "pinguin",
-      "bestandsnaam": "pinguin.json"
+      "bestandsnaam": "pinguin.json",
+      "afbeelding": "pinguin.png"
     }
   ],
   "Kerst": [
     {
-      "naam": "Kerstboom",
-      "bestandsnaam": "kerstboom.json"
+      "naam": "kerstboom",
+      "bestandsnaam": "kerstboom.json",
+      "afbeelding": "kerstboom.png"
     },
     {
       "naam": "pakjes",
-      "bestandsnaam": "pakjes.json"
+      "bestandsnaam": "pakjes.json",
+      "afbeelding": "pakjes.png"
     },
     {
-      "naam": "Rendier",
-      "bestandsnaam": "rendier.json"
+      "naam": "rendier",
+      "bestandsnaam": "rendier.json",
+      "afbeelding": "rendier.png"
     }
   ],
   "Carnaval": [
     {
-      "naam": "Clown",
-      "bestandsnaam": "clown.json"
+      "naam": "clown",
+      "bestandsnaam": "clown.json",
+      "afbeelding": "clown.png"
     }
   ],
   "Pasen": [
     {
-      "naam": "Paasei",
-      "bestandsnaam": "paasei.json"
+      "naam": "paasei",
+      "bestandsnaam": "paasei.json",
+      "afbeelding": "paasei.png"
     }
   ],
   "Lente": [
     {
-      "naam": "Vlinder",
-      "bestandsnaam": "vlinder.json"
+      "naam": "vlinder",
+      "bestandsnaam": "vlinder.json",
+      "afbeelding": "vlinder.png"
     }
   ],
   "Zomer": [{
-      "naam": "Ijslolly-01",
-      "bestandsnaam": "ijslolly01.json"
+      "naam": "ijslolly-01",
+      "bestandsnaam": "ijslolly01.json",
+      "afbeelding": "ijslolly-01.png"
     }
   ],
   "Terug naar school": [
     {
-      "naam": "Potlood",
-      "bestandsnaam": "potlood.json"
+      "naam": "potlood",
+      "bestandsnaam": "potlood.json",
+      "afbeelding": "potlood.png"
     },
     {
-      "naam": "Boekentas",
-      "bestandsnaam": "boekentas.json"
+      "naam": "boekentas",
+      "bestandsnaam": "boekentas.json",
+      "afbeelding": "boekentas.png"
     }
   ],
   "Allerlei": [
     {
-      "naam": "Minion",
-      "bestandsnaam": "minion.json"
+      "naam": "minion",
+      "bestandsnaam": "minion.json",
+      "afbeelding": "minion.png"
     },
     {
-      "naam": "Robot",
-      "bestandsnaam": "robot.json"
+      "naam": "robot",
+      "bestandsnaam": "robot.json",
+      "afbeelding": "robot.png"
     }
   ]
 }
