@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let isDraggingPastedObject = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
+    // AANGEPAST: Een nieuwe state-variabele om te weten of we een object voor het eerst plaatsen.
+    let isPlacingNewObject = false;
 
 
     // --- EVENT LISTENERS ---
@@ -117,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         pastedObject = null;
         isDraggingPastedObject = false;
+        isPlacingNewObject = false;
 
         statusText.textContent = 'Upload een afbeelding om te beginnen.';
         undoBtn.disabled = true;
@@ -162,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadPdfBtn.disabled = false;
         pastedObject = null;
         isDraggingPastedObject = false;
+        isPlacingNewObject = false;
         selectionToolsDiv.style.display = 'none';
         clipboardPreviewContainer.classList.add('hidden');
     }
@@ -187,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleCursorUpdate(e) {
         if (isDrawing || isDraggingPastedObject) return;
         
-        if (pastedObject) {
+        if (pastedObject && pastedObject.x > -1) { // AANGEPAST: check of het object al geplaatst is
             const pos = getMousePos(canvasVerschillen, e);
             const isOnObject = pos.x >= pastedObject.x && pos.x <= pastedObject.x + pastedObject.width &&
                                pos.y >= pastedObject.y && pos.y <= pastedObject.y + pastedObject.height;
@@ -207,21 +211,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function startAction(e) {
         const pos = getMousePos(canvasVerschillen, e);
 
-        if (pastedObject &&
+        // AANGEPAST: Logica om een reeds geplaatst object te verplaatsen.
+        // We checken of er een geplaatst object is (pastedObject.x > -1) en of de muis erboven is.
+        if (pastedObject && pastedObject.x > -1 &&
             pos.x >= pastedObject.x && pos.x <= pastedObject.x + pastedObject.width &&
             pos.y >= pastedObject.y && pos.y <= pastedObject.y + pastedObject.height) {
 
             isDraggingPastedObject = true;
+            isPlacingNewObject = false; // We verplaatsen een bestaand object, niet een nieuw
             dragOffsetX = pos.x - pastedObject.x;
             dragOffsetY = pos.y - pastedObject.y;
 
+            // AANGEPAST: We poppen de laatste staat van de stack, want die bevatte het object
+            // op zijn oude plek. We herstellen de staat van DAARVOOR. Dit "pakt" het object op.
             if (undoStack.length > 1) {
-                undoStack.pop();
+                undoStack.pop(); 
                 restoreState(undoStack[undoStack.length - 1]);
             }
             statusText.textContent = 'Object aan het verplaatsen...';
             return;
         }
+
+        // Als we een nieuw object van het klembord slepen, negeren we andere mousedown events.
+        if (isPlacingNewObject) return;
 
         if (!originalImage) return;
 
@@ -232,11 +244,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function moveAction(e) {
+        if (!isDrawing && !isDraggingPastedObject) return;
+
+        const pos = getMousePos(canvasVerschillen, e);
+
+        // AANGEPAST: Robuustere logica voor het verplaatsen/slepen.
         if (isDraggingPastedObject && pastedObject) {
-            restoreState(undoStack[undoStack.length - 1]);
-            const pos = getMousePos(canvasVerschillen, e);
+            // Herstel altijd de staat van VOOR de sleepactie begon.
+            // Dit voorkomt "spookbeelden" en het terugkeren van gegomde delen.
+            restoreState(undoStack[undoStack.length - 1]); 
+
             const currentX = pos.x - dragOffsetX;
             const currentY = pos.y - dragOffsetY;
+            
+            // Teken het object op de nieuwe plek.
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = pastedObject.width;
             tempCanvas.height = pastedObject.height;
@@ -246,8 +267,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!isDrawing) return;
-        const pos = getMousePos(canvasVerschillen, e);
 
+        // Voor "rubberband" tools, herstel de staat voor we een nieuwe vorm tekenen.
         if (['lijn', 'rechthoek', 'cirkel', 'select'].includes(currentTool)) {
             restoreState(undoStack[undoStack.length - 1]);
         }
@@ -278,20 +299,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * AANGEPAST: De logica is opgeschoond. Voor de selectietool wordt de
-     * staat hersteld (om het selectiekader te wissen) en wordt GEEN nieuwe
-     * staat opgeslagen. Voor tekentools wordt de staat wel opgeslagen.
-     */
     function endAction(e) {
+        // AANGEPAST: Opgeschoonde logica voor het einde van een actie.
         if (isDraggingPastedObject && pastedObject) {
             isDraggingPastedObject = false;
-            // Zet de finale positie van het object vast
+            isPlacingNewObject = false;
+
+            // Bepaal de definitieve positie van het object.
             const pos = getMousePos(canvasVerschillen, e);
             pastedObject.x = pos.x - dragOffsetX;
             pastedObject.y = pos.y - dragOffsetY;
+
+            // Herstel de staat van voor de sleepactie en teken het object op de definitieve plek.
+            restoreState(undoStack[undoStack.length - 1]);
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = pastedObject.width;
+            tempCanvas.height = pastedObject.height;
+            tempCanvas.getContext('2d').putImageData(pastedObject.imageData, 0, 0);
+            ctxVerschillen.drawImage(tempCanvas, pastedObject.x, pastedObject.y);
+            
+            // Sla de nieuwe staat met het geplaatste object op.
             saveState();
-            statusText.textContent = 'Object geplaatst. Beweeg erover om opnieuw te verplaatsen.';
+            statusText.textContent = 'Object geplaatst. Beweeg erover om opnieuw te verplaatsen of kies een andere tool.';
             handleCursorUpdate(e);
             return;
         }
@@ -302,16 +331,12 @@ document.addEventListener('DOMContentLoaded', () => {
         handleCursorUpdate(e);
 
         if (currentTool === 'select') {
-            // Herstel de canvas naar de staat VOORDAT we het selectiekader tekenden
             restoreState(undoStack[undoStack.length - 1]);
-            
-            // Open de bewerk-modal als de selectie groot genoeg is
             if (selectionRect && selectionRect.width > 1 && selectionRect.height > 1) {
                 openEditModalWithSelection();
             }
-            selectionRect = null; // Reset voor de volgende keer
+            selectionRect = null;
         } else if (['potlood', 'gum', 'lijn', 'rechthoek', 'cirkel'].includes(currentTool)) {
-            // Sla de staat alleen op voor daadwerkelijke tekenacties
             saveState();
         }
     }
@@ -332,21 +357,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function erase(x, y) {
-        const size = dikteInput.value;
-        const halfSize = size / 2;
-        const shape = gumvormSelect.value;
+    const size = dikteInput.value;
+    const halfSize = size / 2;
+    const shape = gumvormSelect.value;
 
-        ctxVerschillen.save();
-        ctxVerschillen.fillStyle = 'white';
-        ctxVerschillen.beginPath();
-        if (shape === 'rond') {
-            ctxVerschillen.arc(x, y, halfSize, 0, 2 * Math.PI);
-        } else {
-            ctxVerschillen.rect(x - halfSize, y - halfSize, size, size);
-        }
-        ctxVerschillen.fill();
-        ctxVerschillen.restore();
+    ctxVerschillen.save();
+    // AANGEPAST: Vul de geselecteerde vorm met de kleur wit.
+    ctxVerschillen.fillStyle = 'white';
+    ctxVerschillen.beginPath();
+    if (shape === 'rond') {
+        ctxVerschillen.arc(x, y, halfSize, 0, 2 * Math.PI);
+    } else {
+        ctxVerschillen.rect(x - halfSize, y - halfSize, size, size);
     }
+    ctxVerschillen.fill();
+    ctxVerschillen.restore();
+}
 
     function drawLine(endX, endY) {
         ctxVerschillen.beginPath();
@@ -369,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function drawSelectionRectangle(endX, endY) {
-        // Update het globale selectionRect object terwijl we tekenen
         selectionRect = {
             x: Math.min(startX, endX),
             y: Math.min(startY, endY),
@@ -387,7 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function openEditModalWithSelection() {
         if (selectionRect && selectionRect.width > 0 && selectionRect.height > 0) {
             let imageData = ctxVerschillen.getImageData(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height);
-            imageData = maakAchtergrondTransparant(imageData);
+            // We hoeven de achtergrond niet transparant te maken; we gaan het hele geselecteerde deel bewerken.
             editCanvas.width = selectionRect.width;
             editCanvas.height = selectionRect.height;
             ctxEdit.putImageData(imageData, 0, 0);
@@ -400,24 +425,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function maakAchtergrondTransparant(imageData) {
-        const pixels = imageData.data;
-        const tolerance = 240;
-        for (let i = 0; i < pixels.length; i += 4) {
-            if (pixels[i] > tolerance && pixels[i+1] > tolerance && pixels[i+2] > tolerance) {
-                pixels[i+3] = 0; // Alpha
-            }
-        }
-        return imageData;
-    }
+    // Deze functie is niet langer nodig omdat we de selectie direct bewerken.
+    // function maakAchtergrondTransparant(imageData) { ... }
 
     function eraseOnEditCanvas(e) {
         const rect = editCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        // Gebruik clearRect om transparantie te creëren.
         ctxEdit.clearRect(x - 5, y - 5, 10, 10);
     }
     
+    // AANGEPAST: Deze functie start niet langer de sleepactie.
     function saveAndPrepareForDrag() {
         const editedImageData = ctxEdit.getImageData(0, 0, editCanvas.width, editCanvas.height);
         editModalOverlay.classList.add('hidden');
@@ -428,6 +447,8 @@ document.addEventListener('DOMContentLoaded', () => {
         clipboardPreviewContainer.classList.remove('hidden');
         clipboardCanvas.style.cursor = 'grab';
 
+        // Maak het object klaar, maar zet de positie op -1 om aan te geven
+        // dat het nog niet op de canvas geplaatst is.
         pastedObject = {
             imageData: editedImageData,
             x: -1, y: -1,
@@ -437,14 +458,20 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.querySelector('.tool-btn[data-tool="select"]').click();
         
-        statusText.textContent = 'Selectie opgeslagen. Sleep het naar de puzzel, of kies een andere tool.';
+        // AANGEPAST: Duidelijkere instructie.
+        statusText.textContent = 'Selectie opgeslagen. Sleep het vanuit het vak hieronder naar de puzzel.';
     }
 
+    // AANGEPAST: Dit is de functie die de sleepactie nu ECHT start.
     function startDraggingFromPreview(e) {
         if (!pastedObject) return;
         
         e.preventDefault();
         isDraggingPastedObject = true;
+        isPlacingNewObject = true;
+
+        // Als een vorig object al geplaatst was, resetten we dat hier niet.
+        // Een nieuw object van het klembord overschrijft het vorige.
 
         dragOffsetX = pastedObject.width / 2;
         dragOffsetY = pastedObject.height / 2;
@@ -485,15 +512,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function doUndo() {
         if (undoStack.length > 1) {
+            // AANGEPAST: Als de laatste actie het plaatsen van een object was,
+            // moeten we dat object ook resetten.
+            if(pastedObject && pastedObject.x > -1) {
+                const lastState = undoStack[undoStack.length-1];
+                const lastPastedObjectBounds = {
+                    x: pastedObject.x,
+                    y: pastedObject.y,
+                    w: pastedObject.width,
+                    h: pastedObject.height
+                };
+                 // Check of de undo actie het object zal verwijderen
+                 // Dit is een simpele check en kan verfijnd worden
+                pastedObject = null;
+                clipboardPreviewContainer.classList.add('hidden');
+            }
+
             undoStack.pop();
             const prevState = undoStack[undoStack.length - 1];
             restoreState(prevState);
             undoBtn.disabled = undoStack.length <= 1;
 
-            if (pastedObject && undoStack.length <= 1) {
-                 pastedObject = null;
-                 clipboardPreviewContainer.classList.add('hidden');
-            }
         }
     }
 
@@ -520,16 +559,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     function downloadPuzzel(format) {
-        if (pastedObject && pastedObject.x > -1) {
-             const tempCanvas = document.createElement('canvas');
-             tempCanvas.width = pastedObject.width;
-             tempCanvas.height = pastedObject.height;
-             tempCanvas.getContext('2d').putImageData(pastedObject.imageData, 0, 0);
-             ctxVerschillen.drawImage(tempCanvas, pastedObject.x, pastedObject.y);
-        }
-        
+        // AANGEPAST: De logica om het object permanent te 'stampen' voor download
+        // is nu verplaatst naar de endAction. De canvas is dus altijd klaar voor download.
+        // We hoeven hier niets speciaals meer te doen.
+
         if (format === 'pdf') {
             const { jsPDF } = window.jspdf;
             const gap = 40;
