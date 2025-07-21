@@ -24,12 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let solutionPath = [];
     let currentShape = 'worksheet';
     
+    // WIJZIGING: Nieuwe huis-vorm toegevoegd
     const shapes = [
         { id: 'worksheet', name: 'Uitsparing', file: 'uitsparing.png' },
         { id: 'rectangle', name: 'Rechthoek', file: 'rechthoek.png' },
         { id: 'masked_circle', name: 'Vorm', file: 'vorm.png' },
         { id: 'polar_circle', name: 'Cirkel', file: 'cirkel.png' },
-        { id: 'polar_large_hole', name: 'Cirkel (groot gat)', file: 'cirkel_groot_gat.png' }
+        { id: 'polar_large_hole', name: 'Cirkel (groot gat)', file: 'cirkel_groot_gat.png' },
+        { id: 'house', name: 'Huis', file: 'huis.png' }
     ];
 
     function initialize() {
@@ -96,9 +98,10 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (currentShape === 'rectangle') {
             generateRectangularMaze(difficulty);
         } else if (currentShape === 'masked_circle') {
-            generateMaskedMaze(difficulty);
-        } 
-        else if (currentShape === 'polar_circle') {
+            generateMaskedMaze(difficulty, 'circle'); // Geef 'circle' als masker type
+        } else if (currentShape === 'house') { // WIJZIGING: Nieuwe case voor het huis
+            generateMaskedMaze(difficulty, 'house'); // Gebruik dezelfde functie, maar met 'house' als masker
+        } else if (currentShape === 'polar_circle') {
             generatePolarMaze(difficulty, { largeHole: false });
         } else if (currentShape === 'polar_large_hole') {
             generatePolarMaze(difficulty, { largeHole: true });
@@ -112,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (currentShape === 'worksheet') { drawWorksheetMaze(); }
         else if (currentShape === 'rectangle') { drawRectangularMaze(); }
-        else if (currentShape === 'masked_circle') { drawMaskedMaze(); }
+        else if (currentShape === 'masked_circle' || currentShape === 'house') { drawMaskedMaze(); } // WIJZIGING
         else if (currentShape === 'polar_circle' || currentShape === 'polar_large_hole') { drawPolarMaze(); }
         
         if (solutionPath.length > 0) {
@@ -247,23 +250,50 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
-    function generateMaskedMaze(difficulty) {
+    
+    // WIJZIGING: Functie accepteert nu een 'maskType' om de vorm te bepalen
+    function generateMaskedMaze(difficulty, maskType) {
         const DIFFICULTY_LEVELS = { easy: 10, medium: 15, hard: 25 };
         const gridSize = DIFFICULTY_LEVELS[difficulty];
         let grid = [];
         activeCells = [];
-        const radius = gridSize / 2;
+
         for (let y = 0; y < gridSize; y++) {
             grid[y] = [];
             for (let x = 0; x < gridSize; x++) {
                 const cell = { x, y, walls: { top: true, right: true, bottom: true, left: true }, visited: false };
                 grid[y][x] = cell;
-                const dx = x - radius + 0.5;
-                const dy = y - radius + 0.5;
-                if (dx * dx + dy * dy < radius * radius) activeCells.push(cell);
+
+                let isActive = false;
+                if (maskType === 'circle') {
+                    const radius = gridSize / 2;
+                    const dx = x - radius + 0.5;
+                    const dy = y - radius + 0.5;
+                    if (dx * dx + dy * dy < radius * radius) {
+                        isActive = true;
+                    }
+                } else if (maskType === 'house') {
+                    const baseTopY = Math.floor(gridSize / 2);
+                    // Vierkante basis van het huis (onderste helft)
+                    if (y >= baseTopY) {
+                        isActive = true;
+                    } else { // Driehoekig dak van het huis (bovenste helft)
+                        const roofHeight = baseTopY;
+                        const center = (gridSize - 1) / 2;
+                        const yInRoof = y;
+                        const allowedDist = (yInRoof / (roofHeight - 1)) * center;
+                        if (Math.abs(x - center) <= allowedDist) {
+                            isActive = true;
+                        }
+                    }
+                }
+
+                if (isActive) {
+                    activeCells.push(cell);
+                }
             }
         }
+
         if(activeCells.length === 0) return;
         
         let stack = [activeCells[0]];
@@ -390,9 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
         drawAll();
     }
     
-    // ===================================================================
-    // HIERONDER STAAT DE GECORRIGEERDE TEKENFUNCTIE VOOR CIRKELS
-    // ===================================================================
     function drawPolarMaze() {
         if(!currentGrid.rings || currentGrid.rings.length === 0) return;
         const {rings, donutHoleRings, numLevels, levelHeight} = currentGrid;
@@ -404,16 +431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.strokeStyle = MAZE_COLOR;
         ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
-        
-        // DEZE CODE IS VERWIJDERD OMDAT HET EEN DICHTE CIRKEL TEKENDE
-        // if (donutHoleRings > 0) {
-        //     const donutRadius = donutHoleRings * levelHeight * scaleFactor;
-        //     ctx.beginPath();
-        //     ctx.arc(effectiveCenter, effectiveCenter, donutRadius, 0, 2 * Math.PI);
-        //     ctx.stroke();
-        // }
 
-        // Teken de muren van de doolhof cellen
         for (let i = 0; i < rings.length; i++) {
             const ring = rings[i];
             const currentLogicalRing = i; 
@@ -427,7 +445,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const angleStart = j * anglePerCell;
                 const angleEnd = (j + 1) * anglePerCell;
 
-                // Deze 'if' zorgt nu voor het correct tekenen van de binnenste rand, inclusief de opening
                 if (cell.walls.top) {
                     ctx.beginPath();
                     ctx.arc(effectiveCenter, effectiveCenter, innerRadius, angleStart, angleEnd);
@@ -443,7 +460,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Teken de buitenste rand van het doolhof, met de ingang
         const outermostRadius = (numLevels + donutHoleRings) * levelHeight * scaleFactor;
         
         const startRingActual = rings[startCell.row];
@@ -466,19 +482,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentRing = grid[row];
         const numRings = grid.length;
 
-        // CCW neighbor
         const ccwCellCol = (col - 1 + currentRing.length) % currentRing.length;
         if (currentRing[ccwCellCol] && !currentRing[ccwCellCol].visited) {
             neighbors.push([row, currentRing[ccwCellCol]]);
         }
 
-        // CW neighbor
         const cwCellCol = (col + 1) % currentRing.length;
         if (currentRing[cwCellCol] && !currentRing[cwCellCol].visited) {
             neighbors.push([row, currentRing[cwCellCol]]);
         }
 
-        // Inward neighbor
         if (row > 0) {
             const prevRing = grid[row - 1];
             const inwardCol = Math.floor(col * (prevRing.length / currentRing.length));
@@ -487,7 +500,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Outward neighbor
         if (row < numRings - 1) {
             const nextRing = grid[row + 1];
             const outwardCol = Math.floor(col * (nextRing.length / currentRing.length));
@@ -499,14 +511,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function removePolarWall(cell1, cell2, grid) {
-        if (cell1.row !== cell2.row) { // Vertical connection
+        if (cell1.row !== cell2.row) {
             const outerCell = cell1.row > cell2.row ? cell1 : cell2;
             outerCell.walls.top = false; 
-        } else { // Horizontal connection
+        } else {
             const ringLength = grid[cell1.row].length;
-            if ((cell1.col + 1) % ringLength === cell2.col) { // cell2 is CW to cell1
+            if ((cell1.col + 1) % ringLength === cell2.col) {
                 cell1.walls.right = false;
-            } else { // cell1 is CW to cell2
+            } else {
                 cell2.walls.right = false;
             }
         }
@@ -580,7 +592,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const { row, col } = cell;
         const currentRing = rings[row];
     
-        // Buur 1: Met de klok mee (Clockwise - CW)
         if (!cell.walls.right) {
             const cwCol = (col + 1) % currentRing.length;
             const cwNeighbor = currentRing[cwCol];
@@ -589,14 +600,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     
-        // Buur 2: Tegen de klok in (Counter-Clockwise - CCW)
         const ccwCol = (col - 1 + currentRing.length) % currentRing.length;
         const ccwNeighbor = currentRing[ccwCol];
         if (ccwNeighbor && !ccwNeighbor.walls.right) {
             neighbors.push(ccwNeighbor);
         }
     
-        // Buur 3: Naar binnen
         if (row > 0) {
             if (!cell.walls.top) {
                 const innerRing = rings[row - 1];
@@ -608,7 +617,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     
-        // Buur 4: Naar buiten
         if (row < rings.length - 1) {
             const outerRing = rings[row + 1];
             const outwardCol = Math.floor(col * (outerRing.length / currentRing.length));
@@ -684,7 +692,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ctx.stroke();
     }
-
 
     // --- HELPERS & INTERACTIVITEIT ---
     
