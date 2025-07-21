@@ -6,24 +6,28 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center; /* Centreer de hoofdcontainer */
+    /* WIJZIGING: 'align-items: center;' is hier verwijderd om de hele layout links uit te lijnen */
     min-height: 100vh;
 }
 
 header {
     width: 100%;
     max-width: 1200px;
-    display: flex;
-    justify-content: space-between;
+    display: grid; 
+    grid-template-columns: 1fr auto 1fr; 
     align-items: center;
     margin-bottom: 20px;
+}
+
+header button {
+    justify-self: start; /* Lijn knop links uit */
 }
 
 h1 {
     color: #004080;
     text-align: center;
-    flex-grow: 1;
     margin: 0;
+    grid-column: 2; /* Plaats titel in de middelste kolom */
 }
 
 button {
@@ -44,12 +48,12 @@ button:disabled { background-color: #999; cursor: not-allowed; }
     display: flex;
     width: 100%;
     max-width: 1200px;
-    gap: 20px;
+    gap: 80px;
     align-items: flex-start;
 }
 
 #left-panel {
-    flex-basis: 300px;
+    flex-basis: 450px; /* Meer ruimte voor 3 afbeeldingen */
     flex-shrink: 0;
     background-color: #f0faff;
     border: 1px solid #b3e0ff;
@@ -95,7 +99,7 @@ button:disabled { background-color: #999; cursor: not-allowed; }
 
 #vorm-kiezer {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr); /* 3 kolommen */
     gap: 10px;
 }
 #vorm-kiezer img {
@@ -127,7 +131,7 @@ button:disabled { background-color: #999; cursor: not-allowed; }
 
 /* --- NIEUWE STIJLEN --- */
 .solution-buttons {
-    display: grid; /* Veranderd naar grid */
+    display: grid;
     grid-template-columns: 1fr;
     gap: 10px;
     margin-top: 10px;
@@ -149,22 +153,4 @@ button:disabled { background-color: #999; cursor: not-allowed; }
 
 .hidden {
     display: none;
-}
-#dikte-kiezer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-#thicknessSlider {
-    flex-grow: 1; /* Zorgt dat de slider de beschikbare ruimte vult */
-    cursor: pointer;
-}
-
-#thicknessValue {
-    font-weight: bold;
-    color: #004080;
-    min-width: 20px; /* Geeft wat ruimte zodat layout niet verspringt */
-    text-align: center;
 }
