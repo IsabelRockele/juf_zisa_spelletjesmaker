@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const CANVAS_SIZE = 500;
-    const WALL_THICKNESS = 2;
+    let wallThickness = 2; // WIJZIGING: Veranderd van const naar let
     const MAZE_COLOR = "#333";
     const SOLUTION_COLOR = "#007bff";
-    const MAZE_PADDING = 20; // NIEUW: Padding in pixels van de rand van de canvas
+    const MAZE_PADDING = 20;
 
     const canvas = document.getElementById('mazeCanvas');
     const ctx = canvas.getContext('2d');
@@ -14,6 +14,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const instructieText = document.getElementById('instructieText');
     const solveBtn = document.getElementById('solveMazeBtn');
     const hideBtn = document.getElementById('hideSolutionBtn');
+    
+    // WIJZIGING: Nieuwe elementen ophalen
+    const thicknessSlider = document.getElementById('thicknessSlider');
+    const thicknessValue = document.getElementById('thicknessValue');
 
     let currentGrid = [];
     let activeCells = [];
@@ -31,6 +35,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function initialize() {
         setupShapePicker();
         addEventListeners();
+        
+        // WIJZIGING: Initialiseer slider waarde
+        thicknessSlider.value = wallThickness;
+        thicknessValue.textContent = wallThickness;
+        
         generateAndDrawMaze();
     }
 
@@ -64,6 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         solveBtn.addEventListener('click', solveAndShowSolution);
         hideBtn.addEventListener('click', hideSolution);
+
+        // WIJZIGING: Event listener voor de slider toevoegen
+        thicknessSlider.addEventListener('input', () => {
+            wallThickness = parseInt(thicknessSlider.value, 10);
+            thicknessValue.textContent = wallThickness;
+            drawAll(); // Herteken het doolhof met de nieuwe dikte
+        });
     }
     
     function generateAndDrawMaze() {
@@ -157,14 +173,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawWorksheetMaze() {
         if (!currentGrid.length) return;
         const gridSize = currentGrid.length;
-        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING; // Beschikbare ruimte na padding
-        const cellSize = availableSize / gridSize; // Celgrootte aangepast aan padding
+        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING;
+        const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineWidth = wallThickness; // WIJZIGING
         ctx.lineCap = "round";
         for (const cell of activeCells) {
-            // Pas de startcoördinaten aan met padding
             const gx = MAZE_PADDING + cell.x * cellSize;
             const gy = MAZE_PADDING + cell.y * cellSize;
             ctx.beginPath();
@@ -213,15 +228,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawRectangularMaze() {
         if (!currentGrid.length) return;
         const gridSize = currentGrid.length;
-        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING; // Beschikbare ruimte na padding
-        const cellSize = availableSize / gridSize; // Celgrootte aangepast aan padding
+        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING;
+        const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineWidth = wallThickness; // WIJZIGING
         ctx.lineCap = "round";
         for (const row of currentGrid) {
             for (const cell of row) {
-                // Pas de startcoördinaten aan met padding
                 const gx = MAZE_PADDING + cell.x * cellSize;
                 const gy = MAZE_PADDING + cell.y * cellSize;
                 ctx.beginPath();
@@ -295,14 +309,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function drawMaskedMaze() {
         if (!currentGrid.length) return;
         const gridSize = currentGrid.length;
-        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING; // Beschikbare ruimte na padding
-        const cellSize = availableSize / gridSize; // Celgrootte aangepast aan padding
+        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING;
+        const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineWidth = wallThickness; // WIJZIGING
         ctx.lineCap = "round";
         for (const cell of activeCells) {
-            // Pas de startcoördinaten aan met padding
             const gx = MAZE_PADDING + cell.x * cellSize;
             const gy = MAZE_PADDING + cell.y * cellSize;
             ctx.beginPath();
@@ -382,30 +395,27 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!currentGrid.rings || currentGrid.rings.length === 0) return;
         const {rings, donutHoleRings, numLevels, levelHeight} = currentGrid;
         
-        // Cirkelvormige doolhoven centreren zichzelf al, padding via CANVAS_SIZE
         const currentCanvasSize = CANVAS_SIZE; 
         const effectiveCenter = currentCanvasSize / 2;
-        const scaleFactor = (currentCanvasSize - 2 * MAZE_PADDING) / currentCanvasSize; // Hoeveel we moeten schalen
+        const scaleFactor = (currentCanvasSize - 2 * MAZE_PADDING) / currentCanvasSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = WALL_THICKNESS;
+        ctx.lineWidth = wallThickness; // WIJZIGING
         ctx.lineCap = "round";
         
-        // Teken de binnenste "donut hole" cirkel als die bestaat
         if (donutHoleRings > 0) {
-            const donutRadius = donutHoleRings * levelHeight * scaleFactor; // Schaal de radius
+            const donutRadius = donutHoleRings * levelHeight * scaleFactor;
             ctx.beginPath();
             ctx.arc(effectiveCenter, effectiveCenter, donutRadius, 0, 2 * Math.PI);
             ctx.stroke();
         }
 
-        // Teken de muren van de doolhof cellen
         for (let i = 0; i < rings.length; i++) {
             const ring = rings[i];
             const currentLogicalRing = i; 
             
-            const innerRadius = (currentLogicalRing + donutHoleRings) * levelHeight * scaleFactor; // Schaal de radius
-            const outerRadius = (currentLogicalRing + 1 + donutHoleRings) * levelHeight * scaleFactor; // Schaal de radius
+            const innerRadius = (currentLogicalRing + donutHoleRings) * levelHeight * scaleFactor;
+            const outerRadius = (currentLogicalRing + 1 + donutHoleRings) * levelHeight * scaleFactor;
 
             for (let j = 0; j < ring.length; j++) {
                 const cell = ring[j];
@@ -428,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const outermostRadius = (numLevels + donutHoleRings) * levelHeight * scaleFactor; // Schaal de radius
+        const outermostRadius = (numLevels + donutHoleRings) * levelHeight * scaleFactor;
         
         const startRingActual = rings[startCell.row];
         const anglePerCellStart = 2 * Math.PI / startRingActual.length;
@@ -521,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
             visited.add(startCell);
         }
        
-
         while (queue.length > 0) {
             let { cell, path } = queue.shift();
 
@@ -552,7 +561,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function getGridNeighbors(cell, grid) {
         const neighbors = [];
         const {x, y} = cell;
-        // Check of de muur open is EN de buurcel bestaat
         if (!cell.walls.top && y > 0 && grid[y - 1] && grid[y - 1][x]) neighbors.push(grid[y - 1][x]);
         if (!cell.walls.right && x < grid[0].length - 1 && grid[y] && grid[y][x + 1]) neighbors.push(grid[y][x + 1]);
         if (!cell.walls.bottom && y < grid.length - 1 && grid[y + 1] && grid[y + 1][x]) neighbors.push(grid[y + 1][x]);
@@ -605,14 +613,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (solutionPath.length < 2) return;
 
         ctx.strokeStyle = SOLUTION_COLOR;
-        ctx.lineWidth = WALL_THICKNESS * 2;
+        ctx.lineWidth = wallThickness * 2; // WIJZIGING: Ook de oplossing schaalt mee
         ctx.lineCap = "round";
         ctx.beginPath();
         
         if(currentGrid.type === 'polar') {
             const { rings, donutHoleRings, numLevels, levelHeight } = currentGrid;
             const effectiveCenter = CANVAS_SIZE / 2;
-            const scaleFactor = (CANVAS_SIZE - 2 * MAZE_PADDING) / CANVAS_SIZE; // Schaal factor voor padding
+            const scaleFactor = (CANVAS_SIZE - 2 * MAZE_PADDING) / CANVAS_SIZE;
 
             for(let i=0; i<solutionPath.length; i++) {
                 const cell = solutionPath[i];
@@ -622,7 +630,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!ringData) continue;
 
                 const anglePerCell = 2 * Math.PI / ringData.length;
-                const radius = (cell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor; // Schaal de radius
+                const radius = (cell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor;
                 const angle = (cell.col + 0.5) * anglePerCell;
                 
                 const x = effectiveCenter + radius * Math.cos(angle);
@@ -635,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const lastCell = solutionPath[solutionPath.length - 1];
                 const lastRingData = rings[lastCell.row];
                 const anglePerCellLast = 2 * Math.PI / lastRingData.length;
-                const radiusLast = (lastCell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor; // Schaal de radius
+                const radiusLast = (lastCell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor;
                 const angleLast = (lastCell.col + 0.5) * anglePerCellLast;
                 
                 const xLast = effectiveCenter + radiusLast * Math.cos(angleLast);
@@ -645,12 +653,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.lineTo(effectiveCenter, effectiveCenter);
             }
 
-
-        } else { // Voor grid-gebaseerde doolhoven
+        } else {
             const gridSize = currentGrid.length;
-            const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING; // Beschikbare ruimte na padding
-            const cellSize = availableSize / gridSize; // Celgrootte aangepast aan padding
-            // getCenter functie aangepast om padding mee te nemen
+            const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING;
+            const cellSize = availableSize / gridSize;
             const getCenter = (cell) => ({ 
                 x: MAZE_PADDING + (cell.x + 0.5) * cellSize, 
                 y: MAZE_PADDING + (cell.y + 0.5) * cellSize 
@@ -667,34 +673,29 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-
     // --- HELPERS & INTERACTIVITEIT ---
     
     function handleEraser(event) {
         if (currentShape !== 'worksheet' || !currentGrid.length || !Array.isArray(currentGrid)) return;
         const rect = canvas.getBoundingClientRect();
-        // Corrigeer muispositie door padding eraf te trekken
         const mouseX = event.clientX - rect.left - MAZE_PADDING;
         const mouseY = event.clientY - rect.top - MAZE_PADDING;
 
         const gridSize = currentGrid.length;
-        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING; // Beschikbare ruimte na padding
-        const cellSize = availableSize / gridSize; // Celgrootte aangepast aan padding
+        const availableSize = CANVAS_SIZE - 2 * MAZE_PADDING;
+        const cellSize = availableSize / gridSize;
         
-        // Bereken cel X en Y op basis van gecorrigeerde muispositie
         const x = Math.floor(mouseX / cellSize);
         const y = Math.floor(mouseY / cellSize);
 
-        // Controleer of de klik binnen de doolhofgrenzen valt (na padding)
         if (x < 0 || x >= gridSize || y < 0 || y >= gridSize) return;
         
         if(currentGrid[y][x] === startCell && x === startCell.x && y === startCell.y) return;
         if(currentGrid[y][x] === endCell && x === endCell.x && y === endCell.y) return;
 
-        // dx en dy berekenen ten opzichte van de celcoördinaten
         const dx = mouseX - x * cellSize;
         const dy = mouseY - y * cellSize;
-        const tolerance = WALL_THICKNESS * 3;
+        const tolerance = wallThickness * 3; // WIJZIGING: Tolerantie schaalt mee
         const cell = currentGrid[y][x];
         const dists = { 
             top: dy, 
