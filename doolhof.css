@@ -150,3 +150,21 @@ button:disabled { background-color: #999; cursor: not-allowed; }
 .hidden {
     display: none;
 }
+#dikte-kiezer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+#thicknessSlider {
+    flex-grow: 1; /* Zorgt dat de slider de beschikbare ruimte vult */
+    cursor: pointer;
+}
+
+#thicknessValue {
+    font-weight: bold;
+    color: #004080;
+    min-width: 20px; /* Geeft wat ruimte zodat layout niet verspringt */
+    text-align: center;
+}
