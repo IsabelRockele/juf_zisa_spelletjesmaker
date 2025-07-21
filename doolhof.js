@@ -28,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'worksheet', name: 'Uitsparing', file: 'uitsparing.png' },
         { id: 'rectangle', name: 'Rechthoek', file: 'rechthoek.png' },
         { id: 'masked_circle', name: 'Vorm', file: 'vorm.png' },
-        { id: 'polar_circle', name: 'Cirkel', file: 'cirkel.png' }
+        { id: 'polar_circle', name: 'Cirkel', file: 'cirkel.png' },
+        { id: 'polar_large_hole', name: 'Cirkel (groot gat)', file: 'cirkel_groot_gat.png' }
     ];
 
     function initialize() {
@@ -92,13 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentShape === 'worksheet') {
             generateWorksheetMaze(difficulty);
             canvas.style.cursor = 'crosshair';
-        ;
         } else if (currentShape === 'rectangle') {
             generateRectangularMaze(difficulty);
         } else if (currentShape === 'masked_circle') {
             generateMaskedMaze(difficulty);
-        } else if (currentShape === 'polar_circle') {
-            generatePolarMaze(difficulty);
+        } 
+        else if (currentShape === 'polar_circle') {
+            generatePolarMaze(difficulty, { largeHole: false });
+        } else if (currentShape === 'polar_large_hole') {
+            generatePolarMaze(difficulty, { largeHole: true });
         }
     }
     
@@ -110,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentShape === 'worksheet') { drawWorksheetMaze(); }
         else if (currentShape === 'rectangle') { drawRectangularMaze(); }
         else if (currentShape === 'masked_circle') { drawMaskedMaze(); }
-        else if (currentShape === 'polar_circle') { drawPolarMaze(); }
+        else if (currentShape === 'polar_circle' || currentShape === 'polar_large_hole') { drawPolarMaze(); }
         
         if (solutionPath.length > 0) {
             drawSolution();
@@ -325,18 +328,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- CIRKEL LOGICA ---
-    function generatePolarMaze(difficulty) {
+    function generatePolarMaze(difficulty, options = {}) {
+        const { largeHole = false } = options;
+    
         const DIFFICULTY_LEVELS = {
-            easy: { levels: 6, cellsPerLevel: 18, levelHeight: 25, donutHoleRings: 0 },
-            medium: { levels: 8, cellsPerLevel: 24, levelHeight: 20, donutHoleRings: 1 },
-            hard: { levels: 12, cellsPerLevel: 32, levelHeight: 15, donutHoleRings: 2 }
+            easy:   { levels: 6,  cellsPerLevel: 18, levelHeight: 25, donutHoleRings: 0, donutHoleRings_large: 3 },
+            medium: { levels: 8,  cellsPerLevel: 24, levelHeight: 20, donutHoleRings: 1, donutHoleRings_large: 4 },
+            hard:   { levels: 12, cellsPerLevel: 32, levelHeight: 15, donutHoleRings: 2, donutHoleRings_large: 6 }
         };
 
         const settings = DIFFICULTY_LEVELS[difficulty];
         const numLevels = settings.levels;
         const cellsPerOuterRing = settings.cellsPerLevel;
         const levelHeight = settings.levelHeight;
-        const donutHoleRings = settings.donutHoleRings;
+        const donutHoleRings = largeHole ? settings.donutHoleRings_large : settings.donutHoleRings;
         
         let grid = [];
         
@@ -385,6 +390,9 @@ document.addEventListener('DOMContentLoaded', () => {
         drawAll();
     }
     
+    // ===================================================================
+    // HIERONDER STAAT DE GECORRIGEERDE TEKENFUNCTIE VOOR CIRKELS
+    // ===================================================================
     function drawPolarMaze() {
         if(!currentGrid.rings || currentGrid.rings.length === 0) return;
         const {rings, donutHoleRings, numLevels, levelHeight} = currentGrid;
@@ -397,13 +405,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
         
-        if (donutHoleRings > 0) {
-            const donutRadius = donutHoleRings * levelHeight * scaleFactor;
-            ctx.beginPath();
-            ctx.arc(effectiveCenter, effectiveCenter, donutRadius, 0, 2 * Math.PI);
-            ctx.stroke();
-        }
+        // DEZE CODE IS VERWIJDERD OMDAT HET EEN DICHTE CIRKEL TEKENDE
+        // if (donutHoleRings > 0) {
+        //     const donutRadius = donutHoleRings * levelHeight * scaleFactor;
+        //     ctx.beginPath();
+        //     ctx.arc(effectiveCenter, effectiveCenter, donutRadius, 0, 2 * Math.PI);
+        //     ctx.stroke();
+        // }
 
+        // Teken de muren van de doolhof cellen
         for (let i = 0; i < rings.length; i++) {
             const ring = rings[i];
             const currentLogicalRing = i; 
@@ -417,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const angleStart = j * anglePerCell;
                 const angleEnd = (j + 1) * anglePerCell;
 
+                // Deze 'if' zorgt nu voor het correct tekenen van de binnenste rand, inclusief de opening
                 if (cell.walls.top) {
                     ctx.beginPath();
                     ctx.arc(effectiveCenter, effectiveCenter, innerRadius, angleStart, angleEnd);
@@ -432,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Teken de buitenste rand van het doolhof, met de ingang
         const outermostRadius = (numLevels + donutHoleRings) * levelHeight * scaleFactor;
         
         const startRingActual = rings[startCell.row];
@@ -563,16 +575,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return neighbors;
     }
     
-    // ===================================================================
-    // HIERONDER STAAT DE VOLLEDIG GECORRIGEERDE FUNCTIE
-    // ===================================================================
     function getPolarNeighborsForSolution(cell, rings) {
         const neighbors = [];
         const { row, col } = cell;
         const currentRing = rings[row];
     
         // Buur 1: Met de klok mee (Clockwise - CW)
-        // De muur bevindt zich aan de 'rechterkant' van de HUIDIGE cel.
         if (!cell.walls.right) {
             const cwCol = (col + 1) % currentRing.length;
             const cwNeighbor = currentRing[cwCol];
@@ -582,7 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         // Buur 2: Tegen de klok in (Counter-Clockwise - CCW)
-        // De muur bevindt zich aan de 'rechterkant' van de CCW BUURCEL.
         const ccwCol = (col - 1 + currentRing.length) % currentRing.length;
         const ccwNeighbor = currentRing[ccwCol];
         if (ccwNeighbor && !ccwNeighbor.walls.right) {
@@ -590,8 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         // Buur 3: Naar binnen
-        // De muur bevindt zich aan de 'bovenkant' van de HUIDIGE (buitenste) cel.
-        if (row > 0) { // Kan niet naar binnen vanaf de binnenste ring (ring 0)
+        if (row > 0) {
             if (!cell.walls.top) {
                 const innerRing = rings[row - 1];
                 const inwardCol = Math.floor(col * (innerRing.length / currentRing.length));
@@ -603,8 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     
         // Buur 4: Naar buiten
-        // De muur bevindt zich aan de 'bovenkant' van de BUITENSTE BUURCEL.
-        if (row < rings.length - 1) { // Kan niet naar buiten vanaf de buitenste ring
+        if (row < rings.length - 1) {
             const outerRing = rings[row + 1];
             const outwardCol = Math.floor(col * (outerRing.length / currentRing.length));
             const outwardNeighbor = outerRing[outwardCol];
