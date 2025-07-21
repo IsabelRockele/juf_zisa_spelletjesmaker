@@ -16,13 +16,15 @@
 <div id="controls">
 <div class="control-group">
 <label for="woordenInput">Woorden (één per regel):</label>
-<textarea id="woordenInput" rows="10" placeholder="Typ hier je woorden (min. 8, max. 20 woorden, elk max. 12 letters lang)"></textarea>
+<textarea id="woordenInput" rows="10" placeholder="Typ hier je woorden (min. 6, max. 20 woorden, elk max. 12 letters lang)"></textarea>
 <div id="woordAantalMelding" style="font-size: 0.9em; color: #555; margin-top: 5px;"></div>
 </div>
 <div class="control-group">
 <label for="rasterFormaat">Raster formaat:</label>
 <select id="rasterFormaat">
     <option value="auto">Automatisch</option>
+    <option value="6x6">6 x 6</option>
+    <option value="8x8">8 x 8</option>
     <option value="10x10">10 x 10</option>
     <option value="12x12">12 x 12</option>
     <option value="15x15">15 x 15</option>
@@ -51,6 +53,7 @@
 </div>
 <div id="right-panel-buttons">
 <div class="control-group">
+<button id="toonOplossingBtn">Toon Oplossing</button>
 <button id="downloadPngBtn">Download als PNG</button>
 <button id="downloadPdfBtn">Download als PDF</button>
 </div>
