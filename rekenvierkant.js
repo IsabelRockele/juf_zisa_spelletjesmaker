@@ -600,19 +600,25 @@ function vulRekenvierkant() {
         meldingContainer.innerHTML = "";
     }
 
-    const soortOefening = document.querySelector('input[name="soort"]:checked').value;
-    const typeOpgave = document.getElementById("typeOpgave").value;
-    const niveau = document.getElementById("niveau").value;
-
-    if (baseCols === 7 && soortOefening === "plusmin") {
+    // AANGEPAST: Permanente waarschuwing voor 7x7
+    if (baseCols === 7) {
         if (meldingContainer) {
-            meldingContainer.innerHTML += `
-                <p style="color: #004080; margin: 5px 0;"><strong>Tip voor 7x7 roosters:</strong></p>
-                <p style="color: #004080; margin: 5px 0;">Kies bij 'Type opgave' voor '<strong>Gemengd</strong>'.</p>
-                <p style="color: #004080; margin: 5px 0;">Dit geeft de beste kans op een geldig rooster.</p>
+            meldingContainer.innerHTML = `
+                <p style="color: #994400; margin: 5px 0;"><strong>Let op: 7x7 is een expert-modus!</strong></p>
+                <p style="color: #004080; margin: 5px 0; font-weight: normal;">Voor de beste kans op succes:</p>
+                <ul style="text-align: left; margin: 0 auto; padding-left: 20px; font-weight: normal; color: #004080; max-width: 250px;">
+                    <li>Gebruik een <b>laag niveau</b> (bv. 'Tot 20').</li>
+                    <li>Kies 'Type opgave': <b>'Gemengd'</b>.</li>
+                    <li>Lukt het niet? Klik nogmaals op 'Genereer'.</li>
+                </ul>
             `;
         }
     }
+
+
+    const soortOefening = document.querySelector('input[name="soort"]:checked').value;
+    const typeOpgave = document.getElementById("typeOpgave").value;
+    const niveau = document.getElementById("niveau").value;
 
     const vakBreedte = singleGridDisplayWidth / baseCols;
     const vakHoogte = singleGridDisplayHeight / baseRows;
@@ -653,8 +659,9 @@ function vulRekenvierkant() {
 
         if (!fullGridData || fullGridData.length === 0 || fullGridData[0].length === 0 || (typeof fullGridData[0][0] === 'string' && fullGridData[0][0].includes("Kon geen consistent"))) {
             allGridsSuccessfullyGenerated = false;
-            if (meldingContainer) {
-                 meldingContainer.innerHTML += `<p style="color: red;">Kon geen geldig rooster ${i+1} genereren met deze instellingen. Probeer nog eens.</p>`;
+            // Toon de foutmelding niet als de expert-waarschuwing al zichtbaar is.
+            if (meldingContainer && !meldingContainer.innerHTML.includes("expert-modus")) {
+                 meldingContainer.innerHTML += `<p style="color: red;">Kon geen geldig rooster ${i+1} genereren. Probeer nog eens.</p>`;
             }
             tekenSingleGrid(Array(baseRows).fill(null).map(() => Array(baseCols).fill("")), xOffset, yOffset, vakBreedte, vakHoogte, baseCols, baseRows);
             continue;
@@ -688,7 +695,7 @@ function vulRekenvierkant() {
         tekenSingleGrid(displayGridData, xOffset, yOffset, vakBreedte, vakHoogte, baseCols, baseRows);
     }
 
-    if (!allGridsSuccessfullyGenerated && meldingContainer.innerHTML === "") {
+    if (!allGridsSuccessfullyGenerated && meldingContainer && !meldingContainer.innerHTML.includes("expert-modus")) {
         meldingContainer.innerHTML = `<p style="color: red;">Niet alle roosters konden gegenereerd worden. Probeer nog eens.</p>`;
     }
     document.getElementById("outputJson").value = "";
@@ -761,7 +768,7 @@ document.getElementById("genereerBtn").addEventListener("click", () => {
 document.getElementById("downloadPngBtn").addEventListener("click", () => {
     const dataURL = canvas.toDataURL("image/png");
     const a = document.createElement("a");
-    a.href = dataURL;
+a.href = dataURL;
     a.download = "rekenvierkant.png";
     document.body.appendChild(a);
     a.click();
