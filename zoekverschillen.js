@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const opnieuwBtn = document.getElementById('opnieuwBtn');
 
     const canvasOrigineel = document.getElementById('canvasOrigineel');
-    const ctxOrigineel = canvasOrigineel.getContext('2d');
+    const ctxOrigineel = canvasOrigineel.getContext('2d', { willReadFrequently: true });
     const canvasVerschillen = document.getElementById('canvasVerschillen');
-    const ctxVerschillen = canvasVerschillen.getContext('2d');
+    const ctxVerschillen = canvasVerschillen.getContext('2d', { willReadFrequently: true });
 
     const statusText = document.getElementById('status-text');
 
@@ -20,11 +20,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const dikteInput = document.getElementById('dikte');
     const gumvormSelect = document.getElementById('gumvorm');
     const gumSettingsDiv = document.getElementById('gum-settings');
+    const colorDisplay = document.getElementById('color-display');
 
     // Modal
     const editModalOverlay = document.getElementById('edit-modal-overlay');
     const editCanvas = document.getElementById('editCanvas');
-    const ctxEdit = editCanvas.getContext('2d');
+    const ctxEdit = editCanvas.getContext('2d', { willReadFrequently: true });
     const saveEditBtn = document.getElementById('saveEditBtn');
     const editFlipHorizontalBtn = document.getElementById('editFlipHorizontalBtn');
     const editFlipVerticalBtn = document.getElementById('editFlipVerticalBtn');
@@ -35,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const clipboardPreviewContainer = document.getElementById('clipboard-preview-container');
     const clipboardCanvas = document.getElementById('clipboardCanvas');
     const ctxClipboard = clipboardCanvas.getContext('2d');
+    // NIEUW: Koppel de plakken knop
+    const plakkenBtn = document.getElementById('plakkenBtn');
 
 
     // --- STATE VARIABELEN ---
@@ -42,17 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTool = 'potlood';
     let isDrawing = false;
     let startX, startY;
+    let currentColor = '#000000';
 
     let selectionRect = null;
     let undoStack = [];
     let editUndoStack = [];
     const MAX_UNDO_STATES = 20;
 
-    let pastedObject = null;
+    let transformableObject = null;
+    // NIEUW: Apart object voor het klembord
+    let clipboardObject = null; 
     let isPlacingNewObject = false;
     
     let transformAction = 'none'; 
     let dragStart = { x: 0, y: 0 };
+
+
+    // --- INIT ---
+    updateColorDisplay();
 
 
     // --- EVENT LISTENERS ---
@@ -65,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     toolButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-            stampPastedObject();
+            stampTransformableObject();
             document.querySelector('.tool-btn.active')?.classList.remove('active');
             btn.classList.add('active');
             currentTool = btn.dataset.tool;
@@ -74,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    saveEditBtn.addEventListener('click', saveAndPrepareForDrag);
+    // AANGEPAST: De 'save' knop in de modal slaat nu op naar het klembord.
+    saveEditBtn.addEventListener('click', saveSelectionToClipboard);
     editUndoBtn.addEventListener('click', doEditUndo);
     editFlipHorizontalBtn.addEventListener('click', () => { transformEditCanvas(-1, 1); saveEditState(); });
     editFlipVerticalBtn.addEventListener('click', () => { transformEditCanvas(1, -1); saveEditState(); });
@@ -95,24 +106,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     canvasVerschillen.addEventListener('mousemove', handleCursorUpdate);
     
-    clipboardCanvas.addEventListener('mousedown', startDraggingFromPreview);
+    // NIEUW: Event listener voor de plakken knop
+    plakkenBtn.addEventListener('click', pasteFromClipboard);
 
 
     // --- FUNCTIES ---
 
+    function updateColorDisplay() {
+        colorDisplay.style.backgroundColor = currentColor;
+    }
+    
+    function componentToHex(c) {
+        const hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
     function resetApplication() {
-        canvasOrigineel.width = 400; canvasOrigineel.height = 600;
-        canvasVerschillen.width = 400; canvasVerschillen.height = 600;
         ctxOrigineel.clearRect(0, 0, canvasOrigineel.width, canvasOrigineel.height);
         ctxVerschillen.clearRect(0, 0, canvasVerschillen.width, canvasVerschillen.height);
-
         originalImage = null; undoStack = []; selectionRect = null;
-        isDrawing = false; pastedObject = null;
+        isDrawing = false; transformableObject = null; clipboardObject = null;
         isPlacingNewObject = false; transformAction = 'none';
-
+        currentColor = '#000000'; updateColorDisplay();
         statusText.textContent = 'Upload een afbeelding om te beginnen.';
         undoBtn.disabled = true; downloadPngBtn.disabled = true; downloadPdfBtn.disabled = true;
         selectionToolsDiv.style.display = 'none';
+        plakkenBtn.disabled = true;
         clipboardPreviewContainer.classList.add('hidden');
         fileInput.value = '';
     }
@@ -144,20 +167,22 @@ document.addEventListener('DOMContentLoaded', () => {
         undoBtn.disabled = true;
         downloadPngBtn.disabled = false;
         downloadPdfBtn.disabled = false;
-        pastedObject = null; transformAction = 'none';
+        transformableObject = null; clipboardObject = null; transformAction = 'none';
         selectionToolsDiv.style.display = 'none';
+        plakkenBtn.disabled = true;
         clipboardPreviewContainer.classList.add('hidden');
     }
 
     function getCursorForTool(tool) {
         switch (tool) {
-            case 'potlood': case 'lijn': return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath fill='black' stroke='white' stroke-width='1.5' d='M26.75 5.25L22.75 1.25C22.5 1 22.25 1 22 1.25L19 4.25L23.75 9L26.75 6C27 5.75 27 5.5 26.75 5.25Z'/%3E%3Cpath fill='black' stroke='white' stroke-width='1' d='M18.25 5L3.25 20C3 20.25 3 20.5 3.25 20.75L7.25 24.75C7.5 25 7.75 25 8 24.75L23 9.75L18.25 5Z'/%3E%3Cpath fill='rgba(0,0,0,0.5)' d='M3.25 20L8 24.75L7.25 21.5L3.25 20Z'/%3E%3C/svg%3E") 4 24, auto`;
-            case 'cirkel': case 'rechthoek': return 'crosshair';
+            case 'potlood': return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath fill='black' stroke='white' stroke-width='1.5' d='M26.75 5.25L22.75 1.25C22.5 1 22.25 1 22 1.25L19 4.25L23.75 9L26.75 6C27 5.75 27 5.5 26.75 5.25Z'/%3E%3Cpath fill='black' stroke='white' stroke-width='1' d='M18.25 5L3.25 20C3 20.25 3 20.5 3.25 20.75L7.25 24.75C7.5 25 7.75 25 8 24.75L23 9.75L18.25 5Z'/%3E%3Cpath fill='rgba(0,0,0,0.5)' d='M3.25 20L8 24.75L7.25 21.5L3.25 20Z'/%3E%3C/svg%3E") 4 24, auto`;
+            case 'cirkel': case 'rechthoek': case 'lijn': return 'crosshair';
             case 'gum': return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 18 18'%3E%3Ccircle cx='9' cy='9' r='7' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 9 9, auto`;
+            case 'pipet': case 'opvulemmer': return 'crosshair';
             default: return 'default';
         }
     }
-
+    
     function getMousePos(canvas, evt) {
         const rect = canvas.getBoundingClientRect();
         return { x: evt.clientX - rect.left, y: evt.clientY - rect.top };
@@ -183,23 +208,49 @@ document.addEventListener('DOMContentLoaded', () => {
         return { corners, rotationHandle };
     }
 
-    function drawPastedObject() {
-        if (!pastedObject || pastedObject.x < 0) return;
-        const { x, y, scale, rotation, width, height, imageData } = pastedObject;
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
+    function drawTransformableObject() {
+        if (!transformableObject || transformableObject.x < 0) return;
+        const { type, x, y, scale, rotation, width, height, imageData, color, thickness } = transformableObject;
+        
         ctxVerschillen.save();
         ctxVerschillen.translate(x, y);
         ctxVerschillen.rotate(rotation);
-        ctxVerschillen.drawImage(tempCanvas, -width / 2, -height / 2, width * scale, height * scale);
+        ctxVerschillen.scale(scale, scale);
+
+        setDrawingStyle();
+        ctxVerschillen.strokeStyle = color || currentColor;
+        ctxVerschillen.lineWidth = thickness || dikteInput.value;
+
+        switch (type) {
+            case 'imageData':
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = width;
+                tempCanvas.height = height;
+                tempCanvas.getContext('2d').putImageData(imageData, 0, 0);
+                ctxVerschillen.drawImage(tempCanvas, -width / 2, -height / 2, width, height);
+                break;
+            case 'rechthoek':
+                ctxVerschillen.strokeRect(-width / 2, -height / 2, width, height);
+                break;
+            case 'cirkel':
+                ctxVerschillen.beginPath();
+                ctxVerschillen.arc(0, 0, width / 2, 0, 2 * Math.PI);
+                ctxVerschillen.stroke();
+                break;
+            case 'lijn':
+                 ctxVerschillen.beginPath();
+                 ctxVerschillen.moveTo(-width / 2, 0);
+                 ctxVerschillen.lineTo(width / 2, 0);
+                 ctxVerschillen.stroke();
+                break;
+        }
         ctxVerschillen.restore();
     }
 
+
     function drawTransformHandles() {
-        if (!pastedObject || pastedObject.x < 0) return;
-        const handles = getTransformHandles(pastedObject);
+        if (!transformableObject || transformableObject.x < 0) return;
+        const handles = getTransformHandles(transformableObject);
         ctxVerschillen.save();
         ctxVerschillen.strokeStyle = '#007bff';
         ctxVerschillen.fillStyle = 'white';
@@ -229,8 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function getActionForPoint(pos) {
-        if (!pastedObject || pastedObject.x < 0) return 'none';
-        const handles = getTransformHandles(pastedObject);
+        if (!transformableObject || transformableObject.x < 0) return 'none';
+        const handles = getTransformHandles(transformableObject);
         if (Math.hypot(pos.x - handles.rotationHandle.x, pos.y - handles.rotationHandle.y) < 10) return 'rotate';
         for(let i=0; i<handles.corners.length; i++) {
             if (Math.hypot(pos.x - handles.corners[i].x, pos.y - handles.corners[i].y) < 10) return 'scale';
@@ -258,24 +309,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function redrawCanvasWithPastedObject() {
-        if (!pastedObject) return;
+    function redrawCanvasWithTransformableObject() {
+        if (!transformableObject) return;
         restoreState(undoStack[undoStack.length - 1]);
-        drawPastedObject();
-        if (pastedObject.x > -1) {
+        drawTransformableObject();
+        if (transformableObject.x > -1) {
             drawTransformHandles();
         }
     }
 
-    function stampPastedObject() {
-        if (!pastedObject || pastedObject.x < 0) return;
+    function stampTransformableObject() {
+        if (!transformableObject || transformableObject.x < 0) return;
         restoreState(undoStack[undoStack.length - 1]);
-        drawPastedObject();
-        pastedObject = null;
+        drawTransformableObject();
+        transformableObject = null;
         transformAction = 'none';
         saveState();
-        selectionToolsDiv.style.display = 'none';
-        clipboardPreviewContainer.classList.add('hidden');
         statusText.textContent = 'Object vastgezet.';
         canvasVerschillen.style.cursor = 'default';
     }
@@ -284,47 +333,69 @@ document.addEventListener('DOMContentLoaded', () => {
         const pos = getMousePos(canvasVerschillen, e);
         transformAction = getActionForPoint(pos);
         if (transformAction !== 'none') {
-            dragStart = pos;
+            dragStart = pos; return;
+        }
+        
+        stampTransformableObject();
+        if (!originalImage) return;
+
+        if (currentTool === 'pipet') {
+            const p = ctxVerschillen.getImageData(pos.x, pos.y, 1, 1).data;
+            currentColor = rgbToHex(p[0], p[1], p[2]);
+            updateColorDisplay();
+            document.querySelector('.tool-btn[data-tool="potlood"]').click();
             return;
         }
-        stampPastedObject();
-        if (!originalImage) return;
+        
+        if (currentTool === 'opvulemmer') {
+            floodFill(pos.x, pos.y);
+            saveState();
+            return;
+        }
+
         isDrawing = true;
         startX = pos.x;
         startY = pos.y;
+        
+        if (['potlood', 'gum'].includes(currentTool)) {
+            saveState();
+        }
     }
 
     function moveAction(e) {
-        if (isPlacingNewObject && pastedObject) {
+        if (isPlacingNewObject && transformableObject) {
             const pos = getMousePos(canvasVerschillen, e);
-            pastedObject.x = pos.x;
-            pastedObject.y = pos.y;
-            redrawCanvasWithPastedObject();
+            transformableObject.x = pos.x;
+            transformableObject.y = pos.y;
+            redrawCanvasWithTransformableObject();
             return;
         }
-        if (transformAction !== 'none' && pastedObject) {
+        if (transformAction !== 'none' && transformableObject) {
             const pos = getMousePos(canvasVerschillen, e);
             if (transformAction === 'move') {
-                pastedObject.x += pos.x - dragStart.x;
-                pastedObject.y += pos.y - dragStart.y;
+                transformableObject.x += pos.x - dragStart.x;
+                transformableObject.y += pos.y - dragStart.y;
             } else if (transformAction === 'rotate') {
-                const angle = Math.atan2(pos.y - pastedObject.y, pos.x - pastedObject.x);
-                const startAngle = Math.atan2(dragStart.y - pastedObject.y, dragStart.x - pastedObject.x);
-                pastedObject.rotation += angle - startAngle;
+                const angle = Math.atan2(pos.y - transformableObject.y, pos.x - transformableObject.x);
+                const startAngle = Math.atan2(dragStart.y - transformableObject.y, dragStart.x - transformableObject.x);
+                transformableObject.rotation += angle - startAngle;
             } else if (transformAction === 'scale') {
-                const dist = Math.hypot(pos.x - pastedObject.x, pos.y - pastedObject.y);
-                const startDist = Math.hypot(dragStart.x - pastedObject.x, dragStart.y - pastedObject.y);
-                if (startDist > 0) pastedObject.scale *= dist / startDist;
+                const dist = Math.hypot(pos.x - transformableObject.x, pos.y - transformableObject.y);
+                const startDist = Math.hypot(dragStart.x - transformableObject.x, dragStart.y - transformableObject.y);
+                if (startDist > 0) transformableObject.scale *= dist / startDist;
             }
             dragStart = pos;
-            redrawCanvasWithPastedObject();
+            redrawCanvasWithTransformableObject();
             return;
         }
+
         if (!isDrawing) return;
         const pos = getMousePos(canvasVerschillen, e);
+        
         if (['lijn', 'rechthoek', 'cirkel', 'select'].includes(currentTool)) {
             restoreState(undoStack[undoStack.length - 1]);
         }
+
         setDrawingStyle();
         switch (currentTool) {
             case 'potlood': draw(pos.x, pos.y); startX = pos.x; startY = pos.y; break;
@@ -337,7 +408,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function endAction(e) {
-        if (isPlacingNewObject && pastedObject) {
+        if (isPlacingNewObject && transformableObject) {
             isPlacingNewObject = false;
             statusText.textContent = 'Object geplaatst. Verplaats, roteer of schaal het. Klik ernaast om vast te zetten.';
             handleCursorUpdate(e);
@@ -345,27 +416,137 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (transformAction !== 'none') {
             transformAction = 'none';
+            return;
         }
         if (!isDrawing) return;
         isDrawing = false;
-        if (currentTool === 'select') {
+        
+        const pos = getMousePos(canvasVerschillen, e);
+        
+        if (['potlood', 'gum'].includes(currentTool)) {
+            undoStack.pop();
+            saveState();
+        } else if (['lijn', 'rechthoek', 'cirkel'].includes(currentTool)) {
             restoreState(undoStack[undoStack.length - 1]);
+            const endX = pos.x, endY = pos.y;
+            const centerX = (startX + endX) / 2;
+            const centerY = (startY + endY) / 2;
+            let width = Math.abs(startX - endX);
+            let height = Math.abs(startY - endY);
+
+            transformableObject = {
+                type: currentTool,
+                x: centerX,
+                y: centerY,
+                scale: 1,
+                color: currentColor,
+                thickness: dikteInput.value,
+            };
+
+            if (currentTool === 'lijn') {
+                transformableObject.width = Math.hypot(endX - startX, endY - startY);
+                transformableObject.height = parseFloat(dikteInput.value);
+                transformableObject.rotation = Math.atan2(endY - startY, endX - startX);
+            } else if (currentTool === 'rechthoek') {
+                transformableObject.width = width;
+                transformableObject.height = height;
+                transformableObject.rotation = 0;
+            } else if (currentTool === 'cirkel') {
+                const radius = Math.hypot(endX - startX, endY - startY) / 2;
+                transformableObject.x = startX + (endX - startX) / 2;
+                transformableObject.y = startY + (endY - startY) / 2;
+                transformableObject.width = radius * 2;
+                transformableObject.height = radius * 2;
+                transformableObject.rotation = 0;
+            }
+            
+            saveState();
+            redrawCanvasWithTransformableObject();
+            statusText.textContent = 'Vorm geplaatst. Verplaats, roteer of schaal. Klik ernaast om vast te zetten.';
+
+        } else if (currentTool === 'select') {
+             restoreState(undoStack[undoStack.length - 1]);
             if (selectionRect && selectionRect.width > 1 && selectionRect.height > 1) {
                 openEditModalWithSelection();
             }
             selectionRect = null;
-        } else if (['potlood', 'gum', 'lijn', 'rechthoek', 'cirkel'].includes(currentTool)) {
-            saveState();
         }
     }
 
-    function setDrawingStyle() { ctxVerschillen.strokeStyle = 'black'; ctxVerschillen.lineWidth = dikteInput.value; ctxVerschillen.lineCap = 'round'; ctxVerschillen.lineJoin = 'round'; }
+    function setDrawingStyle() {
+        ctxVerschillen.strokeStyle = currentColor;
+        ctxVerschillen.fillStyle = currentColor;
+        ctxVerschillen.lineWidth = dikteInput.value;
+        ctxVerschillen.lineCap = 'round';
+        ctxVerschillen.lineJoin = 'round';
+    }
+    
     function draw(x, y) { ctxVerschillen.beginPath(); ctxVerschillen.moveTo(startX, startY); ctxVerschillen.lineTo(x, y); ctxVerschillen.stroke(); }
-    function erase(x, y) { const size = dikteInput.value; const halfSize = size / 2; const shape = gumvormSelect.value; ctxVerschillen.save(); ctxVerschillen.fillStyle = 'white'; ctxVerschillen.beginPath(); if (shape === 'rond') { ctxVerschillen.arc(x, y, halfSize, 0, Math.PI * 2); } else { ctxVerschillen.rect(x - halfSize, y - halfSize, size, size); } ctxVerschillen.fill(); ctxVerschillen.restore(); }
+
+    function erase(x, y) {
+        const size = parseFloat(dikteInput.value);
+        const halfSize = size / 2;
+        const shape = gumvormSelect.value;
+        ctxVerschillen.save();
+        ctxVerschillen.fillStyle = 'white';
+        ctxVerschillen.beginPath();
+        if (shape === 'rond') {
+            ctxVerschillen.arc(x, y, halfSize, 0, Math.PI * 2);
+        } else {
+            ctxVerschillen.rect(x - halfSize, y - halfSize, size, size);
+        }
+        ctxVerschillen.fill();
+        ctxVerschillen.restore();
+    }
+    
     function drawLine(endX, endY) { ctxVerschillen.beginPath(); ctxVerschillen.moveTo(startX, startY); ctxVerschillen.lineTo(endX, endY); ctxVerschillen.stroke(); }
     function drawRectangle(endX, endY) { ctxVerschillen.strokeRect(startX, startY, endX - startX, endY - startY); }
-    function drawCircle(endX, endY) { const radius = Math.hypot(endX - startX, endY - startY); ctxVerschillen.beginPath(); ctxVerschillen.arc(startX, startY, radius, 0, 2 * Math.PI); ctxVerschillen.stroke(); }
+    function drawCircle(endX, endY) { const radius = Math.hypot(endX - startX, endY - startY) / 2; ctxVerschillen.beginPath(); ctxVerschillen.arc(startX + (endX - startX) / 2, startY + (endY - startY) / 2, radius, 0, 2 * Math.PI); ctxVerschillen.stroke(); }
     function drawSelectionRectangle(endX, endY) { selectionRect = { x: Math.min(startX, endX), y: Math.min(startY, endY), width: Math.abs(startX - endX), height: Math.abs(startY - endY) }; ctxVerschillen.save(); ctxVerschillen.strokeStyle = '#555'; ctxVerschillen.lineWidth = 1; ctxVerschillen.setLineDash([5, 5]); ctxVerschillen.strokeRect(selectionRect.x, selectionRect.y, selectionRect.width, selectionRect.height); ctxVerschillen.restore(); }
+
+    function floodFill(startX, startY) {
+        const w = canvasVerschillen.width;
+        const h = canvasVerschillen.height;
+        const imageData = ctxVerschillen.getImageData(0, 0, w, h);
+        const data = imageData.data;
+        const stack = [[Math.floor(startX), Math.floor(startY)]];
+        const startPos = (Math.floor(startY) * w + Math.floor(startX)) * 4;
+        const startR = data[startPos];
+        const startG = data[startPos + 1];
+        const startB = data[startPos + 2];
+        const fillR = parseInt(currentColor.slice(1, 3), 16);
+        const fillG = parseInt(currentColor.slice(3, 5), 16);
+        const fillB = parseInt(currentColor.slice(5, 7), 16);
+        const tolerance = 45;
+
+        if (Math.abs(startR - fillR) < 5 && Math.abs(startG - fillG) < 5 && Math.abs(startB - fillB) < 5) {
+            return;
+        }
+
+        const visited = new Uint8Array(w * h);
+        while (stack.length > 0) {
+            const [x, y] = stack.pop();
+            const index = y * w + x;
+            if (visited[index]) {
+                continue;
+            }
+            const currentPos = index * 4;
+            if (Math.abs(data[currentPos] - startR) <= tolerance &&
+                Math.abs(data[currentPos + 1] - startG) <= tolerance &&
+                Math.abs(data[currentPos + 2] - startB) <= tolerance) {
+                data[currentPos] = fillR;
+                data[currentPos + 1] = fillG;
+                data[currentPos + 2] = fillB;
+                data[currentPos + 3] = 255;
+                visited[index] = 1;
+                if (x > 0) stack.push([x - 1, y]);
+                if (x < w - 1) stack.push([x + 1, y]);
+                if (y > 0) stack.push([x, y - 1]);
+                if (y < h - 1) stack.push([x, y + 1]);
+            }
+        }
+        ctxVerschillen.putImageData(imageData, 0, 0);
+    }
 
     function openEditModalWithSelection() {
         if (selectionRect && selectionRect.width > 0 && selectionRect.height > 0) {
@@ -377,52 +558,64 @@ document.addEventListener('DOMContentLoaded', () => {
             statusText.textContent = 'Bewerk de selectie in de pop-up.';
         }
     }
-    
+
     function eraseOnEditCanvas(e) {
         const rect = editCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         ctxEdit.clearRect(x - 5, y - 5, 10, 10);
     }
-    
-    function saveAndPrepareForDrag() {
-        let editedImageData = ctxEdit.getImageData(0, 0, editCanvas.width, editCanvas.height);
 
+    // AANGEPAST: Deze functie slaat nu op naar een apart klembord-object.
+    function saveSelectionToClipboard() {
+        let editedImageData = ctxEdit.getImageData(0, 0, editCanvas.width, editCanvas.height);
         if (transparentBgCheckbox.checked) {
             const data = editedImageData.data;
-            const bgR = data[0];
-            const bgG = data[1];
-            const bgB = data[2];
-            const tolerance = 10; // Kleine tolerantie voor lichte kleurvariaties
-
+            const bgR = data[0], bgG = data[1], bgB = data[2];
+            const tolerance = 10;
             for (let i = 0; i < data.length; i += 4) {
-                const r = data[i];
-                const g = data[i + 1];
-                const b = data[i + 2];
+                const r = data[i], g = data[i+1], b = data[i+2];
                 if (Math.abs(r - bgR) < tolerance && Math.abs(g - bgG) < tolerance && Math.abs(b - bgB) < tolerance) {
-                    data[i + 3] = 0; // Alpha op 0 zetten (transparant)
+                    data[i + 3] = 0;
                 }
             }
         }
         transparentBgCheckbox.checked = false;
-
         editModalOverlay.classList.add('hidden');
         clipboardCanvas.width = editedImageData.width; clipboardCanvas.height = editedImageData.height;
         ctxClipboard.putImageData(editedImageData, 0, 0);
+        
         selectionToolsDiv.style.display = 'flex';
         clipboardPreviewContainer.classList.remove('hidden');
-        clipboardCanvas.style.cursor = 'grab';
-        pastedObject = { imageData: editedImageData, x: -1, y: -1, width: editedImageData.width, height: editedImageData.height, scale: 1, rotation: 0 };
-        statusText.textContent = 'Sleep het object vanuit het vak hieronder naar de puzzel.';
+        plakkenBtn.disabled = false;
+        
+        clipboardObject = { 
+            type: 'imageData',
+            imageData: editedImageData, 
+            width: editedImageData.width, 
+            height: editedImageData.height
+        };
+        statusText.textContent = 'Selectie opgeslagen op klembord. Klik op "Plakken" om het in de afbeelding te plaatsen.';
     }
 
-    function startDraggingFromPreview(e) {
-        if (!pastedObject) return;
-        e.preventDefault();
-        isPlacingNewObject = true;
-        saveState();
-        statusText.textContent = 'Sleep het object naar de juiste plek en laat los.';
-        canvasVerschillen.style.cursor = 'grabbing';
+    // NIEUW: Functie om het object van het klembord op de canvas te plakken.
+    function pasteFromClipboard() {
+        if (!clipboardObject) return;
+
+        // Zet een eventueel al actief object eerst vast.
+        stampTransformableObject();
+
+        transformableObject = {
+            ...clipboardObject, // Kopieer data van klembord
+            x: canvasVerschillen.width / 2, // Start in het midden
+            y: canvasVerschillen.height / 2,
+            scale: 1,
+            rotation: 0
+        };
+
+        saveState(); // Sla staat op voor de 'plak' actie
+        redrawCanvasWithTransformableObject();
+        statusText.textContent = 'Object geplakt. Verplaats, roteer of schaal het. Klik ernaast om vast te zetten.';
     }
 
     function transformEditCanvas(scaleX, scaleY) {
@@ -447,7 +640,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function restoreState(imageData) { if (imageData) { ctxVerschillen.putImageData(imageData, 0, 0); } }
 
     function doUndo() {
-        pastedObject = null; transformAction = 'none';
+        transformableObject = null; transformAction = 'none';
         if (undoStack.length > 1) {
             undoStack.pop();
             const prevState = undoStack[undoStack.length - 1];
@@ -463,6 +656,12 @@ document.addEventListener('DOMContentLoaded', () => {
         editUndoBtn.disabled = editUndoStack.length <= 1;
     }
 
+    function restoreEditState(imageData) {
+        if (imageData) {
+            ctxEdit.putImageData(imageData, 0, 0);
+        }
+    }
+
     function doEditUndo() {
         if (editUndoStack.length > 1) {
             editUndoStack.pop();
@@ -472,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function downloadPuzzel(format) {
-        stampPastedObject();
+        stampTransformableObject();
         if (format === 'pdf') {
             const { jsPDF } = window.jspdf;
             const gap = 40, borderWidth = 4;
