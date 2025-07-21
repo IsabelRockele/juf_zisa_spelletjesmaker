@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const CANVAS_SIZE = 500;
-    let wallThickness = 2; // WIJZIGING: Veranderd van const naar let
+    let wallThickness = 2;
     const MAZE_COLOR = "#333";
     const SOLUTION_COLOR = "#007bff";
     const MAZE_PADDING = 20;
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const solveBtn = document.getElementById('solveMazeBtn');
     const hideBtn = document.getElementById('hideSolutionBtn');
     
-    // WIJZIGING: Nieuwe elementen ophalen
     const thicknessSlider = document.getElementById('thicknessSlider');
     const thicknessValue = document.getElementById('thicknessValue');
 
@@ -36,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
         setupShapePicker();
         addEventListeners();
         
-        // WIJZIGING: Initialiseer slider waarde
         thicknessSlider.value = wallThickness;
         thicknessValue.textContent = wallThickness;
         
@@ -74,11 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
         solveBtn.addEventListener('click', solveAndShowSolution);
         hideBtn.addEventListener('click', hideSolution);
 
-        // WIJZIGING: Event listener voor de slider toevoegen
         thicknessSlider.addEventListener('input', () => {
             wallThickness = parseInt(thicknessSlider.value, 10);
             thicknessValue.textContent = wallThickness;
-            drawAll(); // Herteken het doolhof met de nieuwe dikte
+            drawAll();
         });
     }
     
@@ -177,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = wallThickness; // WIJZIGING
+        ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
         for (const cell of activeCells) {
             const gx = MAZE_PADDING + cell.x * cellSize;
@@ -186,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
             if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
-            if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
+            if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
             ctx.stroke();
         }
     }
@@ -219,8 +216,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         startCell = grid[0][0];
         endCell = grid[gridSize-1][gridSize-1];
-        startCell.walls.top = false;
-        endCell.walls.bottom = false;
+        startCell.walls.left = false;
+        endCell.walls.right = false;
         currentGrid = grid;
         drawAll();
     }
@@ -232,7 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = wallThickness; // WIJZIGING
+        ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
         for (const row of currentGrid) {
             for (const cell of row) {
@@ -242,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
                 if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
                 if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
-                if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
+                if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
                 ctx.stroke();
             }
         }
@@ -313,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cellSize = availableSize / gridSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = wallThickness; // WIJZIGING
+        ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
         for (const cell of activeCells) {
             const gx = MAZE_PADDING + cell.x * cellSize;
@@ -322,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
             if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
-            if (cell.walls.left) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx, gy); }
+            if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
             ctx.stroke();
         }
     }
@@ -343,9 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let grid = [];
         
-        const maxRadius = (donutHoleRings + numLevels) * levelHeight;
-        const baseAngleStep = 2 * Math.PI / cellsPerOuterRing;
-
         for (let i = 0; i < numLevels; i++) {
             const currentRingIndex = i + donutHoleRings;
             const radiusForCells = (currentRingIndex + 0.5) * levelHeight;
@@ -371,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         while (stack.length > 0) {
             let current = stack[stack.length - 1];
-            const neighbors = getPolarNeighborsForGeneration(current, grid, donutHoleRings);
+            const neighbors = getPolarNeighborsForGeneration(current, grid);
             
             if (neighbors.length > 0) {
                 const [nLevel, nCellObj] = neighbors[Math.floor(Math.random() * neighbors.length)];
@@ -400,7 +394,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const scaleFactor = (currentCanvasSize - 2 * MAZE_PADDING) / currentCanvasSize;
         
         ctx.strokeStyle = MAZE_COLOR;
-        ctx.lineWidth = wallThickness; // WIJZIGING
+        ctx.lineWidth = wallThickness;
         ctx.lineCap = "round";
         
         if (donutHoleRings > 0) {
@@ -454,52 +448,53 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
-    function getPolarNeighborsForGeneration(cell, grid, donutHoleRings) {
+    function getPolarNeighborsForGeneration(cell, grid) {
         const neighbors = [];
         const { row, col } = cell;
         const currentRing = grid[row];
         const numRings = grid.length;
 
+        // CCW neighbor
         const ccwCellCol = (col - 1 + currentRing.length) % currentRing.length;
-        if (!currentRing[ccwCellCol].visited) {
+        if (currentRing[ccwCellCol] && !currentRing[ccwCellCol].visited) {
             neighbors.push([row, currentRing[ccwCellCol]]);
         }
 
+        // CW neighbor
         const cwCellCol = (col + 1) % currentRing.length;
-        if (!currentRing[cwCellCol].visited) {
+        if (currentRing[cwCellCol] && !currentRing[cwCellCol].visited) {
             neighbors.push([row, currentRing[cwCellCol]]);
         }
 
+        // Inward neighbor
         if (row > 0) {
             const prevRing = grid[row - 1];
             const inwardCol = Math.floor(col * (prevRing.length / currentRing.length));
-            if (inwardCol >= 0 && inwardCol < prevRing.length && !prevRing[inwardCol].visited) {
+            if (prevRing[inwardCol] && !prevRing[inwardCol].visited) {
                 neighbors.push([row - 1, prevRing[inwardCol]]);
             }
         }
 
+        // Outward neighbor
         if (row < numRings - 1) {
             const nextRing = grid[row + 1];
             const outwardCol = Math.floor(col * (nextRing.length / currentRing.length));
-            if (outwardCol >= 0 && outwardCol < nextRing.length && !nextRing[outwardCol].visited) {
+            if (nextRing[outwardCol] && !nextRing[outwardCol].visited) {
                 neighbors.push([row + 1, nextRing[outwardCol]]);
             }
         }
         return neighbors;
     }
     
-    function removePolarWall(cell1, cell2Obj, grid) {
-        const cell2 = cell2Obj;
-        
-        if (cell1.row !== cell2.row) {
+    function removePolarWall(cell1, cell2, grid) {
+        if (cell1.row !== cell2.row) { // Vertical connection
             const outerCell = cell1.row > cell2.row ? cell1 : cell2;
             outerCell.walls.top = false; 
-        } 
-        else {
+        } else { // Horizontal connection
             const ringLength = grid[cell1.row].length;
-            if ((cell1.col + 1) % ringLength === cell2.col) {
+            if ((cell1.col + 1) % ringLength === cell2.col) { // cell2 is CW to cell1
                 cell1.walls.right = false;
-            } else {
+            } else { // cell1 is CW to cell2
                 cell2.walls.right = false;
             }
         }
@@ -541,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let neighbors;
             if(currentGrid.type === 'polar') {
-                neighbors = getPolarNeighborsForSolution(cell, currentGrid.rings, currentGrid.donutHoleRings);
+                neighbors = getPolarNeighborsForSolution(cell, currentGrid.rings);
             } else {
                 neighbors = getGridNeighbors(cell, currentGrid);
             }
@@ -568,44 +563,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return neighbors;
     }
     
-    function getPolarNeighborsForSolution(cell, rings, donutHoleRings) {
+    // ===================================================================
+    // HIERONDER STAAT DE VOLLEDIG GECORRIGEERDE FUNCTIE
+    // ===================================================================
+    function getPolarNeighborsForSolution(cell, rings) {
         const neighbors = [];
         const { row, col } = cell;
-        const currentRingLogicalIndex = row;
-        const currentRing = rings[currentRingLogicalIndex];
-        if (!currentRing) return [];
-
-        const ccwCellCol = (col - 1 + currentRing.length) % currentRing.length;
-        if (!rings[currentRingLogicalIndex][ccwCellCol].walls.right) {
-            neighbors.push(rings[currentRingLogicalIndex][ccwCellCol]);
-        }
-
+        const currentRing = rings[row];
+    
+        // Buur 1: Met de klok mee (Clockwise - CW)
+        // De muur bevindt zich aan de 'rechterkant' van de HUIDIGE cel.
         if (!cell.walls.right) {
-            const cwCellCol = (col + 1) % currentRing.length;
-            neighbors.push(rings[currentRingLogicalIndex][cwCellCol]);
+            const cwCol = (col + 1) % currentRing.length;
+            const cwNeighbor = currentRing[cwCol];
+            if (cwNeighbor) {
+                neighbors.push(cwNeighbor);
+            }
         }
-
-        if (currentRingLogicalIndex > 0) {
-            const prevRingLogicalIndex = currentRingLogicalIndex - 1;
-            const prevRing = rings[prevRingLogicalIndex];
-            if (prevRing) {
-                const inwardCol = Math.floor(col * (prevRing.length / currentRing.length));
-                if (!cell.walls.top) {
-                    neighbors.push(prevRing[inwardCol]);
+    
+        // Buur 2: Tegen de klok in (Counter-Clockwise - CCW)
+        // De muur bevindt zich aan de 'rechterkant' van de CCW BUURCEL.
+        const ccwCol = (col - 1 + currentRing.length) % currentRing.length;
+        const ccwNeighbor = currentRing[ccwCol];
+        if (ccwNeighbor && !ccwNeighbor.walls.right) {
+            neighbors.push(ccwNeighbor);
+        }
+    
+        // Buur 3: Naar binnen
+        // De muur bevindt zich aan de 'bovenkant' van de HUIDIGE (buitenste) cel.
+        if (row > 0) { // Kan niet naar binnen vanaf de binnenste ring (ring 0)
+            if (!cell.walls.top) {
+                const innerRing = rings[row - 1];
+                const inwardCol = Math.floor(col * (innerRing.length / currentRing.length));
+                const inwardNeighbor = innerRing[inwardCol];
+                if (inwardNeighbor) {
+                    neighbors.push(inwardNeighbor);
                 }
             }
         }
-
-        if (currentRingLogicalIndex < rings.length - 1) {
-            const nextRingLogicalIndex = currentRingLogicalIndex + 1;
-            const nextRing = rings[nextRingLogicalIndex];
-            if (nextRing) {
-                const outwardCol = Math.floor(col * (nextRing.length / currentRing.length));
-                if (nextRing[outwardCol] && !nextRing[outwardCol].walls.top) {
-                    neighbors.push(nextRing[outwardCol]);
-                }
+    
+        // Buur 4: Naar buiten
+        // De muur bevindt zich aan de 'bovenkant' van de BUITENSTE BUURCEL.
+        if (row < rings.length - 1) { // Kan niet naar buiten vanaf de buitenste ring
+            const outerRing = rings[row + 1];
+            const outwardCol = Math.floor(col * (outerRing.length / currentRing.length));
+            const outwardNeighbor = outerRing[outwardCol];
+            if (outwardNeighbor && !outwardNeighbor.walls.top) {
+                neighbors.push(outwardNeighbor);
             }
         }
+    
         return neighbors;
     }
 
@@ -613,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (solutionPath.length < 2) return;
 
         ctx.strokeStyle = SOLUTION_COLOR;
-        ctx.lineWidth = wallThickness * 2; // WIJZIGING: Ook de oplossing schaalt mee
+        ctx.lineWidth = wallThickness * 2;
         ctx.lineCap = "round";
         ctx.beginPath();
         
@@ -673,6 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
     }
 
+
     // --- HELPERS & INTERACTIVITEIT ---
     
     function handleEraser(event) {
@@ -695,7 +703,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const dx = mouseX - x * cellSize;
         const dy = mouseY - y * cellSize;
-        const tolerance = wallThickness * 3; // WIJZIGING: Tolerantie schaalt mee
+        const tolerance = wallThickness * 3;
         const cell = currentGrid[y][x];
         const dists = { 
             top: dy, 
