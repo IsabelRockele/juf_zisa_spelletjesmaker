@@ -114,9 +114,6 @@ button.secondary:hover {
     padding: 0;
     border-radius: 0;
     box-shadow: none;
-    background-image: url('klok_afbeeldingen/aquarium.png');
-    background-size: 150%;
-    background-position: center;
 }
 
 #timerScreen .timer-container {
@@ -316,50 +313,58 @@ button.secondary:hover {
     }
 }
 
-/* --- AANPASSINGEN VOOR VOLLEDIG SCHERM LAYOUT --- */
+/* --- HIER BEGINT DE OPLOSSING --- */
 
-#timerScreen .timer-container {
+/* 1. Specifieke achtergrond ALLEEN voor de aquarium-timer */
+body.theme-aquarium #timerScreen {
+    background-image: url('klok_afbeeldingen/aquarium.png');
+    background-size: 150%;
+    background-position: center;
+}
+
+/* 2. Speciale layout ALLEEN voor de aquarium-timer */
+body.theme-aquarium #timerScreen .timer-container {
     position: relative;
 }
 
-.current-theme-display,
-.side-controls,
-.countdown,
-.timer-message {
+body.theme-aquarium .current-theme-display,
+body.theme-aquarium .side-controls,
+body.theme-aquarium .countdown,
+body.theme-aquarium .timer-message {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     width: 100%;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    z-index: 10; /* BELANGRIJK: Brengt de tekst en knoppen naar de voorgrond */
+    z-index: 10;
 }
 
-.current-theme-display {
-    top: 2%; /* Verplaatst de titel naar de bovenkant */
-    font-size: clamp(2em, 4vw, 3em); /* Iets kleiner gemaakt voor de nieuwe positie */
+body.theme-aquarium .current-theme-display {
+    top: 2%;
+    font-size: clamp(2em, 4vw, 3em);
 }
 
-.side-controls {
-    top: 10%; /* Verplaatst de knoppen net onder de titel */
+body.theme-aquarium .side-controls {
+    top: 15%;
 }
 
-.countdown {
+body.theme-aquarium .countdown {
     bottom: 10%;
     font-size: clamp(4em, 8vw, 7em);
     color: #f1c40f;
 }
 
-.timer-message {
+body.theme-aquarium .timer-message {
     bottom: 5%;
 }
 
-.main-visual-area {
+body.theme-aquarium .main-visual-area {
     position: absolute;
-    top: 0;
+    top: 25%;
+    height: 75%;
     left: 0;
     width: 100%;
-    height: 100%;
     pointer-events: none;
-    z-index: 1; /* BELANGRIJK: Plaatst het visuele gebied naar de achtergrond */
+    z-index: 1;
 }
