@@ -119,9 +119,18 @@ document.addEventListener('DOMContentLoaded', () => {
             fish.src = `klok_afbeeldingen/vis${(i % 10) + 1}.png`;
             fish.className = 'fish';
             fish.id = `fish-${i}`;
-            fish.style.top = `${Math.random() * 80}%`;
+            
+            // Logica voor diepte en grootte
+            const scale = Math.random() * 0.7 + 0.5;
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            
+            fish.style.transform = `scale(${scale}) scaleX(${direction})`;
+            fish.style.zIndex = Math.round(scale * 10);
+
+            // Positionering (met ruimte voor de schatkist)
+            fish.style.top = `${Math.random() * 70}%`; // Max 70% van boven, zodat de onderste 30% vrij blijft
             fish.style.left = `${Math.random() * 90}%`;
-            fish.style.transform = `scaleX(${Math.random() > 0.5 ? 1 : -1})`;
+            
             aquariumContainer.appendChild(fish);
             fishElements.push(fish);
         }
@@ -250,6 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
             initialTotalSeconds = minutes * 60;
             
             showVisual(currentThemeChosen);
+            document.body.className = `theme-${currentThemeChosen}`;
+            
             if(currentThemeChosen === 'rainbow') currentThemeDisplay.textContent = 'Regenboog Timer';
             if(currentThemeChosen === 'star') currentThemeDisplay.textContent = 'Groeiende Ster';
             if(currentThemeChosen === 'aquarium') currentThemeDisplay.textContent = 'Aquarium Timer';
@@ -271,6 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
     newTimerButton.addEventListener('click', () => {
         clearInterval(countdownInterval);
         initialTotalSeconds = 0;
+        document.body.className = '';
         timeButtonsContainer.style.display = 'none';
         themeSelectionScreen.querySelector('h1').textContent = "Kies een thema & tijd:";
         showScreen(themeSelectionScreen);
