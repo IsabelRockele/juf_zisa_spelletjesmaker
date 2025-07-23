@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aquarium elementen
     const treasureChestClosed = document.getElementById('treasureChestClosed');
     const treasureChestOpen = document.getElementById('treasureChestOpen');
-    const goldCoinContainer = document.getElementById('goldCoinContainer');
+    const bigGoldCoin = document.getElementById('bigGoldCoin'); // Nieuwe grote munt
     let fishElements = [];
 
     // Knoppen
@@ -114,22 +114,39 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeAquarium() {
         aquariumContainer.querySelectorAll('.fish').forEach(fish => fish.remove());
         fishElements = [];
+
+        const cols = 10;
+        const rows = 6;
+        const cellWidth = 90 / cols;
+        const cellHeight = 70 / rows;
+
+        let positions = [];
+        for (let i = 0; i < cols * rows; i++) {
+            positions.push(i);
+        }
+        positions.sort(() => Math.random() - 0.5);
+
         for (let i = 0; i < 60; i++) {
             const fish = document.createElement('img');
             fish.src = `klok_afbeeldingen/vis${(i % 10) + 1}.png`;
             fish.className = 'fish';
             fish.id = `fish-${i}`;
             
-            // Logica voor diepte en grootte
             const scale = Math.random() * 0.7 + 0.5;
             const direction = Math.random() > 0.5 ? 1 : -1;
             
             fish.style.transform = `scale(${scale}) scaleX(${direction})`;
             fish.style.zIndex = Math.round(scale * 10);
 
-            // Positionering (met ruimte voor de schatkist)
-            fish.style.top = `${Math.random() * 70}%`; // Max 70% van boven, zodat de onderste 30% vrij blijft
-            fish.style.left = `${Math.random() * 90}%`;
+            const gridIndex = positions[i];
+            const col = gridIndex % cols;
+            const row = Math.floor(gridIndex / cols);
+
+            const finalLeft = (col * cellWidth) + (Math.random() * cellWidth * 0.5);
+            const finalTop = (row * cellHeight) + (Math.random() * cellHeight * 0.5);
+
+            fish.style.top = `${finalTop}%`;
+            fish.style.left = `${finalLeft}%`;
             
             aquariumContainer.appendChild(fish);
             fishElements.push(fish);
@@ -145,17 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const fishToHide = document.getElementById(`fish-${secondsInMinute}`);
         if (fishToHide) {
             fishToHide.style.opacity = '0';
-        }
-    }
-
-    function startGoldCoinAnimation() {
-        goldCoinContainer.innerHTML = '';
-        for (let i = 0; i < 10; i++) {
-            const coin = document.createElement('div');
-            coin.className = 'gold-coin';
-            coin.style.left = `${Math.random() * 90}px`;
-            coin.style.animationDelay = `${Math.random() * 1.5}s`;
-            goldCoinContainer.appendChild(coin);
         }
     }
 
@@ -188,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentThemeChosen === 'aquarium') {
                     treasureChestClosed.style.opacity = '0';
                     treasureChestOpen.style.opacity = '1';
-                    startGoldCoinAnimation();
+                    bigGoldCoin.classList.add('visible', 'animate'); // Start de nieuwe animatie
                 }
                 
                 startButton.textContent = "Opnieuw";
@@ -235,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             fishElements.forEach(fish => fish.style.opacity = '1');
             treasureChestClosed.style.opacity = '1';
             treasureChestOpen.style.opacity = '0';
-            goldCoinContainer.innerHTML = '';
+            bigGoldCoin.classList.remove('visible', 'animate'); // Verberg de grote munt
         }
 
         startButton.textContent = "Start";
