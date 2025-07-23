@@ -84,7 +84,7 @@ button.secondary:hover {
 /* Styling voor thema/tijd keuze scherm */
 #themeSelectionScreen {
     width: 90%;
-    max-width: 600px;
+    max-width: 800px; /* Iets breder voor meer knoppen */
     min-height: 400px;
 }
 
@@ -96,14 +96,22 @@ button.secondary:hover {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 20px;
+    gap: 10px; /* Kleinere tussenruimte */
     margin: 20px 0;
 }
 
-.theme-buttons button, .time-buttons button {
+.theme-buttons button {
     padding: 12px 25px;
     font-size: 1.2em;
     min-width: 180px;
+}
+
+/* AANGEPASTE styling voor de 60 tijd-knoppen */
+.time-buttons button {
+    padding: 8px;
+    font-size: 1em;
+    min-width: 50px;
+    flex-grow: 1;
 }
 
 
@@ -259,17 +267,17 @@ button.secondary:hover {
 
 .fish {
     position: absolute;
-    width: 60px;
+    width: 80px;
     height: auto;
     transition: opacity 0.5s ease;
 }
 
 #treasureChestClosed, #treasureChestOpen {
     position: absolute;
-    bottom: 20px;
+    bottom: -60px;
     left: 50%;
     transform: translateX(-50%);
-    width: 150px;
+    width: 400px;
     height: auto;
     z-index: 10;
     transition: opacity 0.5s ease;
@@ -279,50 +287,43 @@ button.secondary:hover {
     opacity: 0;
 }
 
-#goldCoinContainer {
-    position: absolute;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 150px;
-}
-
-.gold-coin {
-    position: absolute;
-    bottom: 0;
-    width: 30px;
-    height: 30px;
-    background-image: url('klok_afbeeldingen/gouden_muntstuk.png');
-    background-size: contain;
-    animation: floatUp 2s ease-out forwards;
-    opacity: 0;
-}
-
-@keyframes floatUp {
-    from {
-        transform: translateY(0) scale(0.5);
-        opacity: 0;
-    }
-    50% {
-        opacity: 1;
-    }
-    to {
-        transform: translateY(-120px) scale(1);
-        opacity: 0;
-    }
-}
-
-/* --- HIER BEGINT DE OPLOSSING --- */
-
-/* 1. Specifieke achtergrond ALLEEN voor de aquarium-timer */
+/* Specifieke achtergrond voor de aquarium-timer */
 body.theme-aquarium #timerScreen {
     background-image: url('klok_afbeeldingen/aquarium.png');
     background-size: 150%;
     background-position: center;
+    filter: brightness(120%);
 }
 
-/* 2. Speciale layout ALLEEN voor de aquarium-timer */
+/* Roterende gouden munt */
+.big-gold-coin {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    top: 25%;
+    left: 50%;
+    z-index: 20;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.big-gold-coin.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.big-gold-coin.animate {
+    animation: rotateCoin 2s linear infinite 0.5s;
+}
+
+@keyframes rotateCoin {
+    from { transform: translate(-50%, -50%) scale(1) rotateY(0deg); }
+    to { transform: translate(-50%, -50%) scale(1) rotateY(360deg); }
+}
+
+/* --- AANPASSINGEN VOOR VOLLEDIG SCHERM LAYOUT --- */
+
 body.theme-aquarium #timerScreen .timer-container {
     position: relative;
 }
@@ -333,8 +334,7 @@ body.theme-aquarium .countdown,
 body.theme-aquarium .timer-message {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
+    width: auto;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
     z-index: 10;
@@ -342,21 +342,28 @@ body.theme-aquarium .timer-message {
 
 body.theme-aquarium .current-theme-display {
     top: 2%;
+    transform: translateX(-50%);
     font-size: clamp(2em, 4vw, 3em);
 }
 
 body.theme-aquarium .side-controls {
     top: 15%;
+    transform: translateX(-50%);
 }
 
 body.theme-aquarium .countdown {
-    bottom: 10%;
-    font-size: clamp(4em, 8vw, 7em);
-    color: #f1c40f;
+    bottom: 30px;
+    font-size: clamp(1.8em, 3vw, 2.5em);
+    color: #3498db;
+    z-index: 11;
+    transform: translateX(-80%);
 }
 
 body.theme-aquarium .timer-message {
-    bottom: 5%;
+    bottom: 30px;
+    font-size: clamp(1.5em, 2.5vw, 2em);
+    z-index: 11;
+    transform: translateX(10%);
 }
 
 body.theme-aquarium .main-visual-area {
