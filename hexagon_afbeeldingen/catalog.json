@@ -1,14 +1,14 @@
 {
   "Dieren": [
     {
-      "naam": "Krab",
+      "naam": "krab",
       "afbeelding": "krab.png",
       "bestandsnaam": "krab.json"
     },
     {
-      "naam": "Vis",
-      "afbeelding": "vis.png",
-      "bestandsnaam": "vis.json"
+      "naam": "walvis",
+      "afbeelding": "walvis.png",
+      "bestandsnaam": "walvis.json"
     }
   ],
   "Voertuigen": [
