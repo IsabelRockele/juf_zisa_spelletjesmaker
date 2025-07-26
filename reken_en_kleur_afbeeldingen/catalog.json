@@ -55,6 +55,11 @@
       "naam": "pinguin",
       "bestandsnaam": "pinguin.json",
       "afbeelding": "pinguin.png"
+    },
+    {
+      "naam": "spiegel pinguin",
+      "bestandsnaam": "spiegel_pinguin.json",
+      "afbeelding": "spiegel_pinguin.png"
     }
   ],
   "Kerst": [
