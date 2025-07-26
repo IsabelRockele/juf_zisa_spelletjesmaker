@@ -216,47 +216,58 @@ button.secondary:hover {
 .gold-image.visible { opacity: 1; }
 
 /* --- Ster Specifiek --- */
-#timerStar {
-    max-width: 450px;
+.growing-star {
+    position: absolute;
+    width: 180px;
     height: auto;
-    transform: scale(0.1); 
+    transform: translate(-50%, -50%) scale(0.1);
     opacity: 0.5;
-}
-#timerStar.animate {
-    animation-name: groei;
-    animation-timing-function: linear;
-    animation-fill-mode: forwards;
-}
-@keyframes groei {
-    from { transform: scale(0.1); opacity: 0.5; }
-    to { transform: scale(1); opacity: 1; }
+    transition: transform 0.3s ease, opacity 0.3s ease;
 }
 
-/* Container voor de vallende sterren */
-#fallingStarsContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
-    display: none;
+.growing-star.animate {
+    animation: groei-per-minuut 60s linear forwards;
 }
-.falling-star {
-    position: absolute;
-    top: -30px;
-    background-image: url('afbeeldingen klok/ster.png');
-    background-size: cover;
-    animation-name: fall;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
-}
-@keyframes fall {
-    to {
-        transform: translateY(500px) rotate(360deg);
-        opacity: 0;
+
+@keyframes groei-per-minuut {
+    from {
+        transform: translate(-50%, -50%) scale(0.1);
+        opacity: 0.5;
     }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+#finalStar {
+    position: absolute;
+    width: 800px;
+    height: 800px;
+    z-index: 20;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) scale(0);
+    transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+    left: 50%;
+    top: 50%;
+    pointer-events: none; /* Voeg deze regel toe */
+}
+
+#finalStar.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+#finalStar.animate {
+    animation: rotateFinalStar 2s linear infinite 0.5s;
+}
+
+@keyframes rotateFinalStar {
+    from { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+    to { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
 }
 
 /* --- Aquarium Specifiek --- */
@@ -374,4 +385,18 @@ body.theme-aquarium .main-visual-area {
     width: 100%;
     pointer-events: none;
     z-index: 1;
+}
+/* Specifieke achtergrond voor de regenboog-timer */
+body.theme-rainbow #timerScreen {
+    background-color: #add8e6; /* Lichtblauwe achtergrond */
+}
+/* Specifieke achtergrond voor de sterren-timer */
+body.theme-star #timerScreen {
+    background-color: #1d025c; /* Of #4B0082, of een andere kleur */
+}
+/* Maak tekst wit op de donkere achtergrond van het sterren-thema */
+body.theme-star .current-theme-display,
+body.theme-star .countdown,
+body.theme-star .timer-message {
+    color: white;
 }
