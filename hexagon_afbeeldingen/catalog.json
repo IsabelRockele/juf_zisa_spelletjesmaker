@@ -9,6 +9,11 @@
       "naam": "walvis",
       "afbeelding": "walvis.png",
       "bestandsnaam": "walvis.json"
+    },
+    {
+      "naam": "kraai",
+      "afbeelding": "kraai.png",
+      "bestandsnaam": "kraai.json"
     }
   ],
   "Voertuigen": [
@@ -16,6 +21,11 @@
       "naam": "Auto",
       "afbeelding": "auto.png",
       "bestandsnaam": "auto.json"
+    },
+    {
+      "naam": "boot",
+      "afbeelding": "boot.png",
+      "bestandsnaam": "boot.json"
     }
   ],
   "Fantasie": [
