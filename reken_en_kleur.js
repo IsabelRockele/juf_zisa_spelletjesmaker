@@ -12,6 +12,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let historyPointer = -1;
     const MAX_HISTORY_STATES = 50;
 
+    let mirrorAxisColumn = null;
+    let isAxisSelectionMode = false;
+
     let currentColorName = "Achtergrond";
     let isDrawing = false;
     let catalogData = {};
@@ -42,14 +45,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const modalTitle = document.getElementById('modal-title');
     const downloadPngBtn = document.getElementById('downloadPngBtn');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-
     const worksheetTypeRadios = document.querySelectorAll('input[name="worksheetType"]');
     const exerciseControlsContainer = document.getElementById('exerciseControlsContainer');
-
     const widthAdjustDirectionRadios = document.querySelectorAll('input[name="widthAdjustDirection"]');
     const heightAdjustDirectionRadios = document.querySelectorAll('input[name="heightAdjustDirection"]');
-
-    // --- Werkblad Modal Elementen ---
     const werkbladModal = document.getElementById('werkblad-modal');
     const werkbladCanvas = document.getElementById('werkblad-canvas');
     const werkbladCtx = werkbladCanvas.getContext('2d');
@@ -73,6 +72,19 @@ document.addEventListener("DOMContentLoaded", () => {
     ];
     function getColorInfoByName(name) { return COLOR_INFO_MAP.find(c => c.name === name); }
     
+    function showMelding(text, duration = 0) {
+        meldingContainer.textContent = text;
+        if (duration > 0) {
+            setTimeout(() => {
+                meldingContainer.textContent = '';
+            }, duration);
+        }
+    }
+    
+    function clearMelding() {
+        meldingContainer.textContent = '';
+    }
+
     // --- Functies voor de teken-modus ---
     function initializeDrawingCanvas() {
         cellSize = Math.min(canvas.width / gridWidth, canvas.height / gridHeight);
@@ -90,41 +102,134 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             drawingMatrix = newMatrix;
         }
-        redrawDrawing(); saveState(); updateUndoRedoButtons();
+        redrawDrawing(); 
+        saveState(); 
+        updateUndoRedoButtons();
     }
     function populateColorPalette() {
-        colorPaletteDiv.innerHTML = ''; COLOR_INFO_MAP.forEach((c) => {
+        colorPaletteDiv.innerHTML = ''; 
+        COLOR_INFO_MAP.forEach((c) => {
             const b = document.createElement('div'); b.className = 'color-box'; b.style.backgroundColor = c.hex; b.dataset.colorName = c.name; b.title = c.name;
-            b.addEventListener('click', () => { document.querySelectorAll('.color-box').forEach(x => x.classList.remove('selected')); b.classList.add('selected'); currentColorName = c.name; });
+            b.addEventListener('click', () => { 
+                document.querySelectorAll('.color-box').forEach(x => x.classList.remove('selected')); 
+                b.classList.add('selected'); 
+                currentColorName = c.name; 
+            });
             colorPaletteDiv.appendChild(b);
         });
-        if (colorPaletteDiv.children.length > 0) { colorPaletteDiv.children[0].click(); }
+        if (colorPaletteDiv.children.length > 0) { 
+            colorPaletteDiv.children[0].click(); 
+        }
     }
     function drawGridLines(targetCtx, width, height, cell, xOffset = 0, yOffset = 0) {
-        targetCtx.strokeStyle = '#D3D3D3'; targetCtx.lineWidth = 1;
+        targetCtx.strokeStyle = '#D3D3D3'; 
+        targetCtx.lineWidth = 1;
         for (let i = 0; i <= width; i++) { targetCtx.beginPath(); targetCtx.moveTo(xOffset + i * cell, yOffset); targetCtx.lineTo(xOffset + i * cell, yOffset + height * cell); targetCtx.stroke(); }
         for (let i = 0; i <= height; i++) { targetCtx.beginPath(); targetCtx.moveTo(xOffset, yOffset + i * cell); targetCtx.lineTo(xOffset + width * cell, yOffset + i * cell); targetCtx.stroke(); }
     }
+    
     function redrawDrawing() {
-        const totalWidth = gridWidth * cellSize; const totalHeight = gridHeight * cellSize;
-        canvas.width = totalWidth; canvas.height = totalHeight;
+        const totalWidth = gridWidth * cellSize;
+        const totalHeight = gridHeight * cellSize;
+        canvas.width = totalWidth;
+        canvas.height = totalHeight;
         ctx.clearRect(0, 0, totalWidth, totalHeight);
-        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const n = drawingMatrix[r][c]; const ci = getColorInfoByName(n); if (ci) { ctx.fillStyle = ci.hex; ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize); } } }
+        for (let r = 0; r < gridHeight; r++) {
+            for (let c = 0; c < gridWidth; c++) {
+                const n = drawingMatrix[r][c];
+                const ci = getColorInfoByName(n);
+                if (ci) {
+                    ctx.fillStyle = ci.hex;
+                    ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                }
+            }
+        }
         drawGridLines(ctx, gridWidth, gridHeight, cellSize);
-        ctx.strokeStyle = '#000000'; ctx.lineWidth = 2; ctx.strokeRect(0, 0, totalWidth, totalHeight);
+        if (mirrorAxisColumn !== null) {
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            const axisX = mirrorAxisColumn * cellSize;
+            ctx.moveTo(axisX, 0);
+            ctx.lineTo(axisX, totalHeight);
+            ctx.stroke();
+        }
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, totalWidth, totalHeight);
     }
+
     function getMousePos(canvas, evt) { const rect = canvas.getBoundingClientRect(); return { x: (evt.clientX - rect.left) * (canvas.width / rect.width), y: (evt.clientY - rect.top) * (canvas.height / rect.height) }; }
     function paintCell(x, y) { const c = Math.floor(x / cellSize); const r = Math.floor(y / cellSize); if (r >= 0 && r < gridHeight && c >= 0 && c < gridWidth) { if (drawingMatrix[r][c] !== currentColorName) { drawingMatrix[r][c] = currentColorName; redrawDrawing(); } } }
-    function saveState() { if (historyPointer < history.length - 1) { history = history.slice(0, historyPointer + 1); } history.push(JSON.parse(JSON.stringify(drawingMatrix))); if (history.length > MAX_HISTORY_STATES) { history.shift(); } historyPointer = history.length - 1; updateUndoRedoButtons(); }
-    function undo() { if (historyPointer > 0) { historyPointer--; drawingMatrix = JSON.parse(JSON.stringify(history[historyPointer])); redrawDrawing(); updateUndoRedoButtons(); } }
-    function redo() { if (historyPointer < history.length - 1) { historyPointer++; drawingMatrix = JSON.parse(JSON.stringify(history[historyPointer])); redrawDrawing(); updateUndoRedoButtons(); } }
-    function updateUndoRedoButtons() { undoBtn.disabled = historyPointer <= 0; redoBtn.disabled = historyPointer >= history.length - 1; }
-    function clearDrawing() { drawingMatrix = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill("Achtergrond")); redrawDrawing(); saveState(); }
-    function updateOperationControls() { const op = document.querySelector('input[name="operationType"]:checked').value; const isAddSub = ['optellen', 'aftrekken', 'beide_opt_aft'].includes(op); const isMulDiv = ['vermenigvuldigen', 'delen', 'beide_verm_del'].includes(op); rangeControls.style.display = isAddSub ? 'block' : 'none'; tablesControls.style.display = isMulDiv ? 'block' : 'none'; if(isMulDiv) applyAllTablesState(); }
-    function applyAllTablesState() { const all = allTablesCheckbox.checked; document.querySelectorAll('input[name="tafel"]').forEach(cb => { if (cb.value !== 'all') cb.disabled = all; }); }
-    function updateWorksheetTypeControls() { const selectedType = document.querySelector('input[name="worksheetType"]:checked').value; exerciseControlsContainer.style.display = selectedType === 'oefeningen' ? 'block' : 'none'; }
     
-    // --- Functies voor het werkblad (Routering) ---
+    // GECORRIGEERDE GESCHIEDENIS FUNCTIES
+    function saveState() { 
+        if (historyPointer < history.length - 1) { history = history.slice(0, historyPointer + 1); } 
+        const currentState = {matrix: drawingMatrix, axis: mirrorAxisColumn};
+        history.push(JSON.parse(JSON.stringify(currentState))); // Push een deep copy object
+        if (history.length > MAX_HISTORY_STATES) { history.shift(); } 
+        historyPointer = history.length - 1; 
+        updateUndoRedoButtons(); 
+    }
+    
+    function undo() { 
+        if (historyPointer > 0) { 
+            historyPointer--; 
+            const state = JSON.parse(JSON.stringify(history[historyPointer])); // Haal een deep copy op
+            drawingMatrix = state.matrix; 
+            mirrorAxisColumn = state.axis; 
+            redrawDrawing(); 
+            updateUndoRedoButtons(); 
+        } 
+    }
+    
+    function redo() { 
+        if (historyPointer < history.length - 1) { 
+            historyPointer++; 
+            const state = JSON.parse(JSON.stringify(history[historyPointer])); // Haal een deep copy op
+            drawingMatrix = state.matrix; 
+            mirrorAxisColumn = state.axis; 
+            redrawDrawing(); 
+            updateUndoRedoButtons(); 
+        } 
+    }
+    
+    function updateUndoRedoButtons() { 
+        undoBtn.disabled = historyPointer <= 0; 
+        redoBtn.disabled = historyPointer >= history.length - 1; 
+    }
+    
+    function clearDrawing() { 
+        drawingMatrix = Array(gridHeight).fill(null).map(() => Array(gridWidth).fill("Achtergrond")); 
+        mirrorAxisColumn = null; 
+        redrawDrawing(); 
+        saveState(); 
+    }
+    
+    function updateOperationControls() { const op = document.querySelector('input[name="operationType"]:checked').value; const isAddSub = ['optellen', 'aftrekken', 'beide_opt_aft'].includes(op); const isMulDiv = ['vermenigvuldigen', 'delen', 'beide_verm_del'].includes(op); rangeControls.style.display = isAddSub ? 'block' : 'none'; tablesControls.style.display = isMulDiv ? 'block' : 'none'; if(isMulDiv) applyAllTablesState(); }
+    
+    function applyAllTablesState() { const all = allTablesCheckbox.checked; document.querySelectorAll('input[name="tafel"]').forEach(cb => { if (cb.value !== 'all') cb.disabled = all; }); }
+
+    function updateWorksheetTypeControls() {
+        const selectedType = document.querySelector('input[name="worksheetType"]:checked').value;
+        exerciseControlsContainer.style.display = selectedType === 'oefeningen' ? 'block' : 'none';
+        showPreviewBtn.disabled = (selectedType === 'spiegelen');
+        
+        isAxisSelectionMode = (selectedType === 'spiegelen');
+
+        if (isAxisSelectionMode) {
+            canvas.style.cursor = 'col-resize';
+            showMelding('Klik op het raster om de spiegelas te bepalen.');
+        } else {
+            canvas.style.cursor = 'crosshair';
+            if (mirrorAxisColumn !== null) {
+                mirrorAxisColumn = null;
+                redrawDrawing();
+                saveState();
+            }
+        }
+    }
+    
     function generateWorksheetPreview() {
         const type = document.querySelector('input[name="worksheetType"]:checked').value;
         werkbladModal.style.display = 'flex';
@@ -134,212 +239,20 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'pixeltekening': drawPixelArtPreview(); break;
         }
     }
+
     async function generateWorksheetPdf() {
         const type = document.querySelector('input[name="worksheetType"]:checked').value;
-        meldingContainer.textContent = 'Bezig met genereren van PDF...';
+        showMelding('Bezig met genereren van PDF...', 0);
         try {
             switch (type) {
                 case 'oefeningen': await generateExercisesPdf(); break;
                 case 'natekenen': await generateRedrawPdf(); break;
                 case 'pixeltekening': await generatePixelArtPdf(); break;
             }
-        } catch (e) { console.error("PDF Generation Error:", e); meldingContainer.textContent = 'Fout bij het maken van de PDF.'; } 
-        finally { meldingContainer.textContent = ''; }
+        } catch (e) { console.error("PDF Generation Error:", e); showMelding('Fout bij het maken van de PDF.', 3000); } 
+        finally { clearMelding(); }
     }
-
-    // --- Werkblad Type 1: Met Oefeningen ---
-    function getWorksheetData() { /* ... (bestaande functie ongewijzigd) ... */ return { legendData: new Map(), distractorNumbers: [] }; }
-    function drawExercisesPreview() { /* ... (bestaande functie hernoemd en aangepast) ... */ }
-    async function generateExercisesPdf() { /* ... (bestaande functie hernoemd) ... */ }
-    function generateProblemForOutcome(desiredOutcome, operationType, options) { /* ... */ } 
-
-    // --- Werkblad Type 2: Natekenen ---
-    function drawRedrawPreview() {
-        werkbladTitle.textContent = "Natekenen Voorbeeld";
-        werkbladLegendContainer.style.display = 'none';
-
-        const contentWrapper = document.getElementById('werkblad-content');
-        const availableWidth = (contentWrapper.clientWidth - 40) * 0.85;
-        const previewCellSize = availableWidth / gridWidth;
-        const spacing = 15;
-        const totalHeight = (previewCellSize * gridHeight * 2) + spacing;
-
-        werkbladCanvas.width = availableWidth;
-        werkbladCanvas.height = totalHeight;
-        werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
-
-        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; const colorInfo = getColorInfoByName(colorName); if (colorInfo) { werkbladCtx.fillStyle = colorInfo.hex; werkbladCtx.fillRect(c * previewCellSize, r * previewCellSize, previewCellSize, previewCellSize); } } }
-        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, 0, 0);
-        werkbladCtx.strokeRect(0, 0, previewCellSize * gridWidth, previewCellSize * gridHeight);
-
-        const emptyGridYOffset = (previewCellSize * gridHeight) + spacing;
-        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, 0, emptyGridYOffset);
-        werkbladCtx.strokeRect(0, emptyGridYOffset, previewCellSize * gridWidth, previewCellSize * gridHeight);
-    }
-    async function generateRedrawPdf() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 10;
-        const spacing = 10;
-
-        const singleDrawingMaxWidth = pageWidth - 2 * margin;
-        const singleDrawingMaxHeight = (pageHeight - 2 * margin - spacing) / 2;
-
-        const aspectRatio = gridWidth / gridHeight;
-        let pdfDrawingWidth = singleDrawingMaxWidth;
-        let pdfDrawingHeight = pdfDrawingWidth / aspectRatio;
-
-        if (pdfDrawingHeight > singleDrawingMaxHeight) {
-            pdfDrawingHeight = singleDrawingMaxHeight;
-            pdfDrawingWidth = pdfDrawingHeight * aspectRatio;
-        }
-
-        const xOffset = (pageWidth - pdfDrawingWidth) / 2;
-
-        const imgData = canvas.toDataURL('image/png');
-        const yOffset1 = margin;
-        doc.addImage(imgData, 'PNG', xOffset, yOffset1, pdfDrawingWidth, pdfDrawingHeight);
-
-        const yOffset2 = yOffset1 + pdfDrawingHeight + spacing;
-        const pdfCellSize = pdfDrawingWidth / gridWidth;
-
-        doc.setDrawColor(180, 180, 180);
-        doc.setLineWidth(0.2);
-        for (let r = 0; r < gridHeight; r++) {
-            for (let c = 0; c < gridWidth; c++) {
-                const x = xOffset + c * pdfCellSize;
-                const y = yOffset2 + r * pdfCellSize;
-                doc.rect(x, y, pdfCellSize, pdfCellSize);
-            }
-        }
-        doc.setDrawColor(0, 0, 0);
-        doc.setLineWidth(0.4);
-        doc.rect(xOffset, yOffset2, pdfDrawingWidth, pdfDrawingHeight);
-
-        doc.save('werkblad-natekenen.pdf');
-    }
-
-    // --- Werkblad Type 3: Pixeltekening ---
-    function generatePixelArtData() {
-        const data = [];
-        for (let r = 0; r < gridHeight; r++) {
-            const rowData = [];
-            if (drawingMatrix[r].length === 0) {
-                data.push(rowData);
-                continue;
-            }
-
-            let currentCount = 1;
-            let currentColor = drawingMatrix[r][0];
-
-            for (let c = 1; c < gridWidth; c++) {
-                if (drawingMatrix[r][c] === currentColor) {
-                    currentCount++;
-                } else {
-                    rowData.push({ color: currentColor, count: currentCount });
-                    currentColor = drawingMatrix[r][c];
-                    currentCount = 1;
-                }
-            }
-            rowData.push({ color: currentColor, count: currentCount });
-            data.push(rowData);
-        }
-        return data;
-    }
-    function drawPixelArtPreview() {
-        werkbladTitle.textContent = "Pixeltekening Voorbeeld";
-        werkbladLegendContainer.style.display = 'none';
-        
-        const data = generatePixelArtData();
-        const contentWrapper = document.getElementById('werkblad-content');
-        const availableWidth = contentWrapper.clientWidth - 40;
-        
-        const instructionWidth = availableWidth * 0.4;
-        const gridWidthPx = availableWidth * 0.6;
-        const previewCellSize = gridWidthPx / gridWidth;
-        const totalHeight = previewCellSize * gridHeight;
-        
-        werkbladCanvas.width = availableWidth;
-        werkbladCanvas.height = totalHeight;
-        werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
-        
-        const instructionCellSize = Math.min(previewCellSize, 20);
-        werkbladCtx.font = `${instructionCellSize * 0.7}px Arial`;
-        werkbladCtx.textBaseline = 'middle';
-        werkbladCtx.textAlign = 'center';
-        
-        for (let r = 0; r < gridHeight; r++) {
-            const rowInstructions = data[r]; let currentX = 5;
-            const y = r * previewCellSize + (previewCellSize / 2);
-            for (const inst of rowInstructions) {
-                const colorInfo = getColorInfoByName(inst.color);
-                werkbladCtx.fillStyle = colorInfo.hex;
-                werkbladCtx.fillRect(currentX, y - instructionCellSize/2, instructionCellSize, instructionCellSize);
-                werkbladCtx.fillStyle = '#000';
-                werkbladCtx.strokeRect(currentX, y - instructionCellSize/2, instructionCellSize, instructionCellSize);
-                werkbladCtx.fillText(inst.count, currentX + instructionCellSize/2, y);
-                currentX += instructionCellSize + 2;
-            }
-        }
-        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, instructionWidth, 0);
-    }
-    async function generatePixelArtPdf() {
-        const { jsPDF } = window.jspdf; 
-        const doc = new jsPDF('l', 'mm', 'a4'); 
-        const pageWidth = doc.internal.pageSize.getWidth(); 
-        const pageHeight = doc.internal.pageSize.getHeight(); 
-        const margin = 10;
-        const data = generatePixelArtData();
-        
-        const instructionSquareSize = 5;
-
-        const maxInstructions = Math.max(1, ...data.map(row => row.length));
-        const instructionAreaWidth = maxInstructions * (instructionSquareSize + 1);
-
-        const gridAreaWidth = pageWidth - instructionAreaWidth - 2 * margin;
-        const pdfCellSize = Math.min(gridAreaWidth / gridWidth, (pageHeight - 2 * margin) / gridHeight);
-
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(instructionSquareSize * 2.8);
-
-        for (let r = 0; r < gridHeight; r++) {
-            const y_row_top = margin + r * pdfCellSize;
-            let currentX = margin;
-
-            const y_instruction_top = y_row_top + (pdfCellSize / 2) - (instructionSquareSize / 2);
-
-            for (const inst of data[r]) {
-                const colorInfo = getColorInfoByName(inst.color);
-                doc.setFillColor(colorInfo.hex);
-                
-                doc.setDrawColor(0); 
-                doc.setLineWidth(0.2);
-
-                doc.rect(currentX, y_instruction_top, instructionSquareSize, instructionSquareSize, 'FD');
-
-                doc.setTextColor(0, 0, 0);
-                const textOptions = { align: 'center', baseline: 'middle' };
-                const textX = currentX + instructionSquareSize / 2;
-                const textY = y_instruction_top + instructionSquareSize / 2;
-                doc.text(String(inst.count), textX, textY, textOptions);
-
-                currentX += instructionSquareSize + 1;
-            }
-
-            for(let c = 0; c < gridWidth; c++) {
-                const gridX = margin + instructionAreaWidth + c * pdfCellSize;
-                doc.setDrawColor(180, 180, 180); 
-                doc.setLineWidth(0.1);
-                doc.rect(gridX, y_row_top, pdfCellSize, pdfCellSize);
-            }
-        }
-        doc.save('werkblad-pixeltekening.pdf');
-    }
-
-    // --- Volledige code voor "Met Oefeningen" functies (voorheen de standaard) ---
+    
     function generateProblemForOutcome(desiredOutcome, operationType, options) {
         const maxRange = parseInt(options.numberRange) || 100; let selectedTables;
         if (options.selectedTables.includes('all')) { selectedTables = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; } 
@@ -421,74 +334,260 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         doc.save(`reken-en-kleur-werkblad.pdf`);
     }
-
-    // --- Overige functies (Opslaan, Laden, Catalogus, etc.) ---
-    async function downloadDrawingPdf() { meldingContainer.textContent = 'Bezig met genereren van Tekening PDF...'; const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4'); const imgData = canvas.toDataURL('image/png'); const imgWidth = 200; const imgHeight = canvas.height * imgWidth / canvas.width; let position = 10; doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight); doc.save('tekening.pdf'); meldingContainer.textContent = ''; }
-    async function loadCatalog() { try { const response = await fetch('reken_en_kleur_afbeeldingen/catalog.json'); if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); } catalogData = await response.json(); } catch (e) { console.error("Kon de catalogus niet laden:", e); meldingContainer.textContent = "Fout bij laden van de catalogus."; } }
+    function drawRedrawPreview() {
+        werkbladTitle.textContent = "Natekenen Voorbeeld";
+        werkbladLegendContainer.style.display = 'none';
+        const contentWrapper = document.getElementById('werkblad-content');
+        const availableWidth = (contentWrapper.clientWidth - 40) * 0.85;
+        const previewCellSize = availableWidth / gridWidth;
+        const spacing = 15;
+        const totalHeight = (previewCellSize * gridHeight * 2) + spacing;
+        werkbladCanvas.width = availableWidth;
+        werkbladCanvas.height = totalHeight;
+        werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
+        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; const colorInfo = getColorInfoByName(colorName); if (colorInfo) { werkbladCtx.fillStyle = colorInfo.hex; werkbladCtx.fillRect(c * previewCellSize, r * previewCellSize, previewCellSize, previewCellSize); } } }
+        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, 0, 0);
+        werkbladCtx.strokeRect(0, 0, previewCellSize * gridWidth, previewCellSize * gridHeight);
+        const emptyGridYOffset = (previewCellSize * gridHeight) + spacing;
+        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, 0, emptyGridYOffset);
+        werkbladCtx.strokeRect(0, emptyGridYOffset, previewCellSize * gridWidth, previewCellSize * gridHeight);
+    }
+    async function generateRedrawPdf() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+        const spacing = 10;
+        const singleDrawingMaxWidth = pageWidth - 2 * margin;
+        const singleDrawingMaxHeight = (pageHeight - 2 * margin - spacing) / 2;
+        const aspectRatio = gridWidth / gridHeight;
+        let pdfDrawingWidth = singleDrawingMaxWidth;
+        let pdfDrawingHeight = pdfDrawingWidth / aspectRatio;
+        if (pdfDrawingHeight > singleDrawingMaxHeight) {
+            pdfDrawingHeight = singleDrawingMaxHeight;
+            pdfDrawingWidth = pdfDrawingHeight * aspectRatio;
+        }
+        const xOffset = (pageWidth - pdfDrawingWidth) / 2;
+        const imgData = canvas.toDataURL('image/png');
+        const yOffset1 = margin;
+        doc.addImage(imgData, 'PNG', xOffset, yOffset1, pdfDrawingWidth, pdfDrawingHeight);
+        const yOffset2 = yOffset1 + pdfDrawingHeight + spacing;
+        const pdfCellSize = pdfDrawingWidth / gridWidth;
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.2);
+        for (let r = 0; r < gridHeight; r++) {
+            for (let c = 0; c < gridWidth; c++) {
+                const x = xOffset + c * pdfCellSize;
+                const y = yOffset2 + r * pdfCellSize;
+                doc.rect(x, y, pdfCellSize, pdfCellSize);
+            }
+        }
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.4);
+        doc.rect(xOffset, yOffset2, pdfDrawingWidth, pdfDrawingHeight);
+        doc.save('werkblad-natekenen.pdf');
+    }
+    function generatePixelArtData() {
+        const data = [];
+        for (let r = 0; r < gridHeight; r++) {
+            const rowData = [];
+            if (drawingMatrix[r].length === 0) {
+                data.push(rowData);
+                continue;
+            }
+            let currentCount = 1;
+            let currentColor = drawingMatrix[r][0];
+            for (let c = 1; c < gridWidth; c++) {
+                if (drawingMatrix[r][c] === currentColor) {
+                    currentCount++;
+                } else {
+                    rowData.push({ color: currentColor, count: currentCount });
+                    currentColor = drawingMatrix[r][c];
+                    currentCount = 1;
+                }
+            }
+            rowData.push({ color: currentColor, count: currentCount });
+            data.push(rowData);
+        }
+        return data;
+    }
+    function drawPixelArtPreview() {
+        werkbladTitle.textContent = "Pixeltekening Voorbeeld";
+        werkbladLegendContainer.style.display = 'none';
+        const data = generatePixelArtData();
+        const contentWrapper = document.getElementById('werkblad-content');
+        const availableWidth = contentWrapper.clientWidth - 40;
+        const instructionWidth = availableWidth * 0.4;
+        const gridWidthPx = availableWidth * 0.6;
+        const previewCellSize = gridWidthPx / gridWidth;
+        const totalHeight = previewCellSize * gridHeight;
+        werkbladCanvas.width = availableWidth;
+        werkbladCanvas.height = totalHeight;
+        werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
+        const instructionCellSize = Math.min(previewCellSize, 20);
+        werkbladCtx.font = `${instructionCellSize * 0.7}px Arial`;
+        werkbladCtx.textBaseline = 'middle';
+        werkbladCtx.textAlign = 'center';
+        for (let r = 0; r < gridHeight; r++) {
+            const rowInstructions = data[r]; let currentX = 5;
+            const y = r * previewCellSize + (previewCellSize / 2);
+            for (const inst of rowInstructions) {
+                const colorInfo = getColorInfoByName(inst.color);
+                werkbladCtx.fillStyle = colorInfo.hex;
+                werkbladCtx.fillRect(currentX, y - instructionCellSize/2, instructionCellSize, instructionCellSize);
+                werkbladCtx.fillStyle = '#000';
+                werkbladCtx.strokeRect(currentX, y - instructionCellSize/2, instructionCellSize, instructionCellSize);
+                werkbladCtx.fillText(inst.count, currentX + instructionCellSize/2, y);
+                currentX += instructionCellSize + 2;
+            }
+        }
+        drawGridLines(werkbladCtx, gridWidth, gridHeight, previewCellSize, instructionWidth, 0);
+    }
+    async function generatePixelArtPdf() {
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF('l', 'mm', 'a4'); 
+        const pageWidth = doc.internal.pageSize.getWidth(); 
+        const pageHeight = doc.internal.pageSize.getHeight(); 
+        const margin = 10;
+        const data = generatePixelArtData();
+        const instructionSquareSize = 5;
+        const maxInstructions = Math.max(1, ...data.map(row => row.length));
+        const instructionAreaWidth = maxInstructions * (instructionSquareSize + 1);
+        const gridAreaWidth = pageWidth - instructionAreaWidth - 2 * margin;
+        const pdfCellSize = Math.min(gridAreaWidth / gridWidth, (pageHeight - 2 * margin) / gridHeight);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(instructionSquareSize * 2.8);
+        for (let r = 0; r < gridHeight; r++) {
+            const y_row_top = margin + r * pdfCellSize;
+            let currentX = margin;
+            const y_instruction_top = y_row_top + (pdfCellSize / 2) - (instructionSquareSize / 2);
+            for (const inst of data[r]) {
+                const colorInfo = getColorInfoByName(inst.color);
+                doc.setFillColor(colorInfo.hex);
+                doc.setDrawColor(0); 
+                doc.setLineWidth(0.2);
+                doc.rect(currentX, y_instruction_top, instructionSquareSize, instructionSquareSize, 'FD');
+                doc.setTextColor(0, 0, 0);
+                const textOptions = { align: 'center', baseline: 'middle' };
+                const textX = currentX + instructionSquareSize / 2;
+                const textY = y_instruction_top + instructionSquareSize / 2;
+                doc.text(String(inst.count), textX, textY, textOptions);
+                currentX += instructionSquareSize + 1;
+            }
+            for(let c = 0; c < gridWidth; c++) {
+                const gridX = margin + instructionAreaWidth + c * pdfCellSize;
+                doc.setDrawColor(180, 180, 180); 
+                doc.setLineWidth(0.1);
+                doc.rect(gridX, y_row_top, pdfCellSize, pdfCellSize);
+            }
+        }
+        doc.save('werkblad-pixeltekening.pdf');
+    }
+    
+    async function downloadDrawingPdf() { 
+        showMelding('Bezig met genereren van PDF...', 0);
+        const { jsPDF } = window.jspdf; 
+        const doc = new jsPDF('p', 'mm', 'a4'); 
+        const imgData = canvas.toDataURL('image/png'); 
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+        const availableWidth = pageWidth - 2 * margin;
+        const aspectRatio = canvas.width / canvas.height;
+        let imgWidth = availableWidth;
+        let imgHeight = imgWidth / aspectRatio;
+        if (imgHeight > pageHeight - 2 * margin) {
+            imgHeight = pageHeight - 2 * margin;
+            imgWidth = imgHeight * aspectRatio;
+        }
+        const x = (pageWidth - imgWidth) / 2;
+        const y = (pageHeight - imgHeight) / 2;
+        doc.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight); 
+        doc.save('tekening.pdf'); 
+        clearMelding();
+    }
+    async function loadCatalog() { try { const response = await fetch('reken_en_kleur_afbeeldingen/catalog.json'); if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); } catalogData = await response.json(); } catch (e) { console.error("Kon de catalogus niet laden:", e); showMelding("Fout bij laden van de catalogus.", 3000); } }
     function openCatalog() { populateThemes(); catalogModal.style.display = 'block'; }
     function closeCatalog() { catalogModal.style.display = 'none'; themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
     function populateThemes() { themesContainer.innerHTML = ''; Object.keys(catalogData).forEach(theme => { const btn = document.createElement('button'); btn.textContent = theme; btn.onclick = () => showChoices(theme); themesContainer.appendChild(btn); }); }
-    
     function showChoices(theme) {
-        choicesContainer.innerHTML = ''; // Maak de container leeg
-
-        const choices = catalogData[theme];
-        if (!choices || choices.length === 0) {
-            choicesContainer.innerHTML = '<p>Nog geen tekeningen beschikbaar voor dit thema.</p>';
-        } else {
-            choices.forEach(choice => {
-                // Maak de container voor de knop
-                const btn = document.createElement('button');
-                btn.className = 'catalog-choice-button'; // Nieuwe CSS-klasse voor styling
-                btn.onclick = () => loadDrawingFromCatalog(choice.bestandsnaam);
-
-                // Maak het afbeeldingselement
-                const img = document.createElement('img');
-                // Gebruik het nieuwe 'afbeelding' veld uit de JSON
-                img.src = `reken_en_kleur_afbeeldingen/${choice.afbeelding}`; 
-                img.alt = choice.naam; // Voor toegankelijkheid
-
-                // Maak het tekstelement
-                const span = document.createElement('span');
-                span.textContent = choice.naam;
-
-                // Voeg de afbeelding en tekst toe aan de knop
-                btn.appendChild(img);
-                btn.appendChild(span);
-                
-                // Voeg de complete knop toe aan de container
-                choicesContainer.appendChild(btn);
-            });
-        }
-
-        // Wissel de zichtbaarheid van de containers
-        themesContainer.style.display = 'none';
-        choicesContainer.style.display = 'grid'; // Zorg dat het grid-layout behouden blijft
-        backToThemesBtn.style.display = 'block';
-        modalTitle.textContent = theme;
+        choicesContainer.innerHTML = ''; const choices = catalogData[theme];
+        if (!choices || choices.length === 0) { choicesContainer.innerHTML = '<p>Nog geen tekeningen beschikbaar voor dit thema.</p>'; } else { choices.forEach(choice => { const btn = document.createElement('button'); btn.className = 'catalog-choice-button'; btn.onclick = () => loadDrawingFromCatalog(choice.bestandsnaam); const img = document.createElement('img'); img.src = `reken_en_kleur_afbeeldingen/${choice.afbeelding}`; img.alt = choice.naam; const span = document.createElement('span'); span.textContent = choice.naam; btn.appendChild(img); btn.appendChild(span); choicesContainer.appendChild(btn); }); }
+        themesContainer.style.display = 'none'; choicesContainer.style.display = 'grid'; backToThemesBtn.style.display = 'block'; modalTitle.textContent = theme;
     }
-
     function showThemes() { themesContainer.style.display = 'grid'; choicesContainer.style.display = 'none'; backToThemesBtn.style.display = 'none'; modalTitle.textContent = 'Catalogus'; }
-    async function loadDrawingFromCatalog(fileName) { meldingContainer.textContent = 'Tekening laden...'; try { const response = await fetch(`reken_en_kleur_afbeeldingen/${fileName}`); if (!response.ok) { throw new Error(`HTTP error! status: ${status}`); } const data = await response.json(); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = JSON.parse(JSON.stringify(data.drawingMatrix)); initializeDrawingCanvas(); closeCatalog(); } catch (e) { console.error("Kon tekening niet laden:", e); meldingContainer.textContent = "Fout bij laden van de tekening."; } finally { setTimeout(() => { meldingContainer.textContent = '' }, 3000); } }
+    async function loadDrawingFromCatalog(fileName) { showMelding('Tekening laden...', 0); try { const response = await fetch(`reken_en_kleur_afbeeldingen/${fileName}`); if (!response.ok) { throw new Error(`HTTP error! status: ${status}`); } const data = await response.json(); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = JSON.parse(JSON.stringify(data.drawingMatrix)); initializeDrawingCanvas(); closeCatalog(); } catch (e) { console.error("Kon tekening niet laden:", e); showMelding("Fout bij laden van de tekening.", 3000); } finally { setTimeout(() => { clearMelding() }, 3000); } }
 
     // --- Event Listeners ---
+    canvas.addEventListener('mousedown', (e) => {
+        if (isAxisSelectionMode) {
+            const pos = getMousePos(canvas, e);
+            const clickedColumn = Math.round(pos.x / cellSize);
+
+            for (let r = 0; r < gridHeight; r++) {
+                for (let c = clickedColumn; c < gridWidth; c++) {
+                    drawingMatrix[r][c] = "Achtergrond";
+                }
+            }
+            
+            mirrorAxisColumn = clickedColumn;
+            
+            isAxisSelectionMode = false;
+            canvas.style.cursor = 'crosshair';
+            showMelding('Spiegelas geplaatst en rechterkant gewist.', 3000);
+            redrawDrawing();
+            saveState();
+        } else {
+            isDrawing = true;
+            paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y);
+        }
+    });
+    canvas.addEventListener('mousemove', (e) => { if (isDrawing) { paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y); } });
+    canvas.addEventListener('mouseup', () => { if (isDrawing) { isDrawing = false; saveState(); }});
+    canvas.addEventListener('mouseleave', () => { if (isDrawing) { isDrawing = false; saveState(); }});
     updateGridSizeBtn.addEventListener('click', () => { const w = parseInt(gridWidthInput.value); const h = parseInt(gridHeightInput.value); if (w >= 10 && h >= 10 && w <= 60 && h <= 60) { gridWidth = w; gridHeight = h; initializeDrawingCanvas(); } });
     operationTypeRadios.forEach(r => r.addEventListener('change', updateOperationControls));
     document.querySelectorAll('input[name="tafel"]').forEach(cb => { cb.addEventListener('change', () => { if (cb.value !== 'all' && cb.checked) { allTablesCheckbox.checked = false; } applyAllTablesState(); }); });
     worksheetTypeRadios.forEach(r => r.addEventListener('change', updateWorksheetTypeControls));
-    undoBtn.addEventListener('click', undo); redoBtn.addEventListener('click', redo); clearDrawingBtn.addEventListener('click', clearDrawing);
-    saveDrawingBtn.addEventListener('click', () => { if (!drawingMatrix || drawingMatrix.length === 0) { meldingContainer.textContent = "Er is geen tekening om op te slaan."; setTimeout(() => { meldingContainer.textContent = '' }, 3000); return; } try { const data = { gridWidth, gridHeight, drawingMatrix }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })); a.download = 'tekening.json'; a.click(); URL.revokeObjectURL(a.href); } catch (e) { console.error("Fout bij opslaan:", e); meldingContainer.textContent = "Kon de tekening niet opslaan."; } });
+    undoBtn.addEventListener('click', undo);
+    redoBtn.addEventListener('click', redo);
+    clearDrawingBtn.addEventListener('click', clearDrawing);
+    saveDrawingBtn.addEventListener('click', () => { if (!drawingMatrix || drawingMatrix.length === 0) { showMelding("Er is geen tekening om op te slaan.", 3000); return; } try { const data = { gridWidth, gridHeight, drawingMatrix, mirrorAxisColumn }; const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data)], { type: 'application/json' })); a.download = 'tekening.json'; a.click(); URL.revokeObjectURL(a.href); } catch (e) { console.error("Fout bij opslaan:", e); showMelding("Kon de tekening niet opslaan.", 3000); } });
     loadDrawingBtn.addEventListener('click', () => loadDrawingInput.click());
-    loadDrawingInput.addEventListener('change', (e) => { const file = e.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (ev) => { try { const data = JSON.parse(ev.target.result); gridWidthInput.value = data.gridWidth; gridHeightInput.value = data.gridHeight; gridWidth = data.gridWidth; gridHeight = data.gridHeight; drawingMatrix = data.drawingMatrix; initializeDrawingCanvas(); } catch (err) { meldingContainer.textContent = "Fout bij laden: " + err.message; console.error("Load error:", err); } finally { setTimeout(() => { meldingContainer.textContent = '' }, 3000); } }; reader.readAsText(file); });
+    loadDrawingInput.addEventListener('change', (e) => { 
+        const file = e.target.files[0]; 
+        if (!file) return; 
+        const reader = new FileReader(); 
+        reader.onload = (ev) => { 
+            try { 
+                const data = JSON.parse(ev.target.result); 
+                gridWidthInput.value = data.gridWidth; 
+                gridHeightInput.value = data.gridHeight; 
+                gridWidth = data.gridWidth; 
+                gridHeight = data.gridHeight; 
+                drawingMatrix = data.drawingMatrix; 
+                mirrorAxisColumn = data.mirrorAxisColumn || null; 
+                initializeDrawingCanvas(); 
+                if (mirrorAxisColumn) { 
+                    document.querySelector('input[name=worksheetType][value=spiegelen]').checked = true; 
+                } else { 
+                    document.querySelector('input[name=worksheetType][value=oefeningen]').checked = true;
+                } 
+                updateWorksheetTypeControls();
+            } catch (err) { 
+                showMelding("Fout bij laden: " + err.message, 3000); 
+                console.error("Load error:", err); 
+            } 
+        }; 
+        reader.readAsText(file); 
+    });
     downloadPngBtn.addEventListener('click', () => { const link = document.createElement('a'); link.download = 'tekening.png'; link.href = canvas.toDataURL("image/png"); link.click(); });
     downloadPdfBtn.addEventListener('click', downloadDrawingPdf);
-    canvas.addEventListener('mousedown', (e) => { isDrawing = true; paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y); });
-    canvas.addEventListener('mousemove', (e) => { if (isDrawing) { paintCell(getMousePos(canvas, e).x, getMousePos(canvas, e).y); } });
-    canvas.addEventListener('mouseup', () => { if (isDrawing) { isDrawing = false; saveState(); }});
-    canvas.addEventListener('mouseleave', () => { if (isDrawing) { isDrawing = false; saveState(); }});
-    catalogBtn.addEventListener('click', openCatalog); closeModalBtn.addEventListener('click', closeCatalog); backToThemesBtn.addEventListener('click', showThemes); window.addEventListener('click', (e) => { if (e.target == catalogModal) { closeCatalog(); } });
-    
-    // --- Werkblad Modal Event Listeners (NU MET ROUTING) ---
+    catalogBtn.addEventListener('click', openCatalog);
+    closeModalBtn.addEventListener('click', closeCatalog);
+    backToThemesBtn.addEventListener('click', showThemes);
+    window.addEventListener('click', (e) => { if (e.target == catalogModal) { closeCatalog(); } });
     showPreviewBtn.addEventListener('click', generateWorksheetPreview);
     sluitWerkbladBtn.addEventListener('click', () => { werkbladModal.style.display = 'none'; });
     werkbladDownloadPdfBtn.addEventListener('click', generateWorksheetPdf);
@@ -496,8 +595,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- INITIALISATIE ---
     async function init() {
-        await loadCatalog(); allTablesCheckbox.checked = false;
-        populateColorPalette(); updateOperationControls();
+        await loadCatalog();
+        allTablesCheckbox.checked = false;
+        populateColorPalette();
+        updateOperationControls();
         updateWorksheetTypeControls(); 
         initializeDrawingCanvas();
     }
