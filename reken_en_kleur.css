@@ -96,6 +96,7 @@ button:disabled {
     height: auto;
     border: 1px solid #333;
     background-color: white;
+    cursor: crosshair; /* Standaard cursor voor tekenen */
 }
 
 /* --- Controls Styling --- */
