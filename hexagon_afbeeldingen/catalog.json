@@ -1,0 +1,28 @@
+{
+  "Dieren": [
+    {
+      "naam": "Krab",
+      "afbeelding": "krab.png",
+      "bestandsnaam": "krab.json"
+    },
+    {
+      "naam": "Vis",
+      "afbeelding": "vis.png",
+      "bestandsnaam": "vis.json"
+    }
+  ],
+  "Voertuigen": [
+    {
+      "naam": "Auto",
+      "afbeelding": "auto.png",
+      "bestandsnaam": "auto.json"
+    }
+  ],
+  "Fantasie": [
+    {
+      "naam": "Raket",
+      "afbeelding": "raket.png",
+      "bestandsnaam": "raket.json"
+    }
+  ]
+}
