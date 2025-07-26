@@ -151,10 +151,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     
-    function pixelToHex(x, y) {
-        const q = (Math.sqrt(3)/3 * x - 1./3 * y) / hexSize;
-        const r = (2./3 * y) / hexSize;
-        const s = -q -r;
+    // GECORRIGEERDE FUNCTIE
+function pixelToHex(x, y) {
+    // Correcte wiskundige formule voor "pointy-topped" hexagons.
+    const q = (Math.sqrt(3)/3 * x - 1/3 * y) / hexSize;
+    const r = (2/3 * y) / hexSize;
+    return hexRound(q, r);
+}
+    
+    function hexRound(q, r) {
+        const s = -q - r;
         let rq = Math.round(q);
         let rr = Math.round(r);
         let rs = Math.round(s);
@@ -232,12 +238,16 @@ document.addEventListener("DOMContentLoaded", () => {
             y: (evt.clientY - rect.top) * (canvasEl.height / rect.height)
         };
     }
-
+    
+    // AANGEPAST: De correctie zit hier. De klikcoördinaten worden nu correct vertaald
+    // voordat ze naar de wiskundige formule worden gestuurd.
     function paintCell(x, y) {
-        const centerOffset = getHexCenter(0, 0, hexSize, hexWidth, hexVertSpacing);
-        const clickX = x - centerOffset.x + hexWidth/2;
-        const clickY = y - centerOffset.y + hexHeight/2;
-        const { col, row } = pixelToHex(clickX, clickY);
+        // De 'pixelToHex' formule verwacht coördinaten die relatief zijn aan het centrum van de hex op (0,0).
+        // Het centrum van die hex is (hexWidth / 2, hexHeight / 2). We rekenen de klik om.
+        const translatedX = x - (hexWidth / 2);
+        const translatedY = y - (hexHeight / 2);
+
+        const { col, row } = pixelToHex(translatedX, translatedY);
         
         if (row >= 0 && row < gridHeight && col >= 0 && col < gridWidth) {
             const currentCell = drawingMatrix[row][col];
@@ -377,35 +387,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // --- Preview en PDF functies (Stabiele Versie) ---
-    // AANGEPAST: Dit is de nieuwe, robuuste functie voor het bepalen van de canvasgrootte.
     function prepareWerkbladCanvas(isStacked = false) {
         const contentWrapper = document.getElementById('werkblad-content');
         const legend = document.getElementById('werkblad-legend-container');
         const buttons = document.getElementById('werkblad-knoppen');
         
-        // Bepaal beschikbare hoogte en breedte binnen de modal
         const availableWidth = contentWrapper.clientWidth;
-        let availableHeight = contentWrapper.clientHeight - (legend.clientHeight + buttons.clientHeight + 40); // 40 voor marges
+        let availableHeight = contentWrapper.clientHeight - (legend.clientHeight + buttons.clientHeight + 40);
         if (isStacked) {
-            availableHeight = (availableHeight / 2) - 15; // 15 voor de helft van de spacing
+            availableHeight = (availableHeight / 2) - 15;
         }
 
-        // Bereken de benodigde hexagon-grootte om in de breedte te passen
         const hexSizeByWidth = (availableWidth / (gridWidth + 0.5)) / Math.sqrt(3);
-        // Bereken de benodigde hexagon-grootte om in de hoogte te passen
         const hexSizeByHeight = (availableHeight / (gridHeight * 0.75 + 0.25)) / 2;
-        // De uiteindelijke grootte is de KLEINSTE van de twee, zodat het altijd past
         const finalHexSize = Math.min(hexSizeByWidth, hexSizeByHeight);
 
-        // Bereken de uiteindelijke canvas-afmetingen op basis van de gekozen hex-grootte
         const finalCanvasWidth = (gridWidth + 0.5) * (finalHexSize * Math.sqrt(3));
         const finalCanvasHeight = ((gridHeight * 0.75 + 0.25) * (2 * finalHexSize));
         const totalCanvasHeight = isStacked ? (finalCanvasHeight * 2) + 30 : finalCanvasHeight;
-
-        // Stel de interne resolutie van het canvas in
+        
         werkbladCanvas.width = finalCanvasWidth;
         werkbladCanvas.height = totalCanvasHeight;
-        // Stel de weergavegrootte in met CSS, zodat het netjes schaalt
         werkbladCanvas.style.width = `${finalCanvasWidth}px`;
         werkbladCanvas.style.height = `${totalCanvasHeight}px`;
         
