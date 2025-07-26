@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Visuele containers
     const rainbowContainer = document.getElementById('rainbowContainer');
     const starContainer = document.getElementById('starContainer');
-    const fallingStarsContainer = document.getElementById('fallingStarsContainer');
     const aquariumContainer = document.getElementById('aquariumContainer');
     
     // Regenboog elementen
@@ -25,13 +24,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const goldImage = document.getElementById('goldImage');
     let pathLengths = [];
 
-    // Ster element
-    const timerStar = document.getElementById('timerStar');
+    // Ster elementen
+    const finalStar = document.getElementById('finalStar');
+    let growingStars = [];
 
     // Aquarium elementen
     const treasureChestClosed = document.getElementById('treasureChestClosed');
     const treasureChestOpen = document.getElementById('treasureChestOpen');
-    const bigGoldCoin = document.getElementById('bigGoldCoin'); // Nieuwe grote munt
+    const bigGoldCoin = document.getElementById('bigGoldCoin');
     let fishElements = [];
 
     // Knoppen
@@ -82,72 +82,75 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Ster Specifiek ---
-    function startStarAnimation() {
-        timerStar.classList.add('animate');
-        timerStar.style.animationDuration = `${initialTotalSeconds}s`;
-        timerStar.style.animationPlayState = 'running';
+    function createNewStar() {
+        const star = document.createElement('img');
+        star.src = 'afbeeldingen klok/ster.png';
+        star.className = 'growing-star';
+
+        const starCount = growingStars.length;
+        const positions = [
+            { top: '50%', left: '50%'}, { top: '35%', left: '30%'},
+            { top: '35%', left: '70%'}, { top: '65%', left: '70%'},
+            { top: '65%', left: '30%'}, { top: '25%', left: '50%'},
+            { top: '75%', left: '50%'},
+        ];
+        const pos = positions[starCount % positions.length];
+        star.style.top = pos.top;
+        star.style.left = pos.left;
+
+        starContainer.appendChild(star);
+        growingStars.push(star);
     }
-
-    function pauseStarAnimation() {
-        timerStar.style.animationPlayState = 'paused';
-    }
-
-    function createFallingStars() {
-        fallingStarsContainer.innerHTML = '';
-        fallingStarsContainer.style.display = 'block';
-        for (let i = 0; i < 20; i++) {
-            const star = document.createElement('div');
-            star.className = 'falling-star';
-
-            const size = Math.random() * 20 + 10;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.animationDuration = `${Math.random() * 2 + 3}s`;
-            star.style.animationDelay = `${Math.random() * 4}s`;
-
-            fallingStarsContainer.appendChild(star);
+    
+    function animateLastStar(shouldAnimate) {
+        if (growingStars.length > 0) {
+            const lastStar = growingStars[growingStars.length - 1];
+            if (shouldAnimate && !lastStar.classList.contains('animate')) {
+                lastStar.classList.add('animate');
+            }
+            if (lastStar.classList.contains('animate')) {
+                 lastStar.style.animationPlayState = shouldAnimate ? 'running' : 'paused';
+            }
         }
+    }
+
+    function freezeLastStar() {
+        if (growingStars.length > 0) {
+            const lastStar = growingStars[growingStars.length - 1];
+            if (lastStar.classList.contains('animate')) {
+                const computedStyle = window.getComputedStyle(lastStar);
+                lastStar.style.transform = computedStyle.transform;
+                lastStar.style.opacity = computedStyle.opacity;
+                lastStar.classList.remove('animate');
+            }
+        }
+    }
+    
+    function clearGrowingStars() {
+        if (starContainer) starContainer.innerHTML = '';
+        growingStars = [];
     }
 
     // --- Aquarium Specifiek ---
     function initializeAquarium() {
         aquariumContainer.querySelectorAll('.fish').forEach(fish => fish.remove());
         fishElements = [];
-
-        const cols = 10;
-        const rows = 6;
-        const cellWidth = 90 / cols;
-        const cellHeight = 70 / rows;
-
-        let positions = [];
-        for (let i = 0; i < cols * rows; i++) {
-            positions.push(i);
-        }
-        positions.sort(() => Math.random() - 0.5);
+        const cols = 10, rows = 6, cellWidth = 90 / cols, cellHeight = 70 / rows;
+        let positions = Array.from({ length: cols * rows }, (_, i) => i).sort(() => Math.random() - 0.5);
 
         for (let i = 0; i < 60; i++) {
             const fish = document.createElement('img');
             fish.src = `klok_afbeeldingen/vis${(i % 10) + 1}.png`;
             fish.className = 'fish';
             fish.id = `fish-${i}`;
-            
-            const scale = Math.random() * 0.7 + 0.5;
-            const direction = Math.random() > 0.5 ? 1 : -1;
-            
+            const scale = Math.random() * 0.7 + 0.5, direction = Math.random() > 0.5 ? 1 : -1;
             fish.style.transform = `scale(${scale}) scaleX(${direction})`;
             fish.style.zIndex = Math.round(scale * 10);
-
-            const gridIndex = positions[i];
-            const col = gridIndex % cols;
-            const row = Math.floor(gridIndex / cols);
-
+            const gridIndex = positions[i], col = gridIndex % cols, row = Math.floor(gridIndex / cols);
             const finalLeft = (col * cellWidth) + (Math.random() * cellWidth * 0.5);
             const finalTop = (row * cellHeight) + (Math.random() * cellHeight * 0.5);
-
             fish.style.top = `${finalTop}%`;
             fish.style.left = `${finalLeft}%`;
-            
             aquariumContainer.appendChild(fish);
             fishElements.push(fish);
         }
@@ -160,25 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const secondsInMinute = totalSeconds % 60;
         const fishToHide = document.getElementById(`fish-${secondsInMinute}`);
-        if (fishToHide) {
-            fishToHide.style.opacity = '0';
-        }
+        if (fishToHide) fishToHide.style.opacity = '0';
     }
 
     // --- Hoofd Timer Functies ---
     function startCountdown() {
         if (isPaused) {
             isPaused = false;
-        } 
-        
-        if (currentThemeChosen === 'star') {
-            if (isPaused) {
-                timerStar.style.animationPlayState = 'running';
-            } else {
-                startStarAnimation();
-            }
         }
-
+        
+        if (currentThemeChosen === 'star') animateLastStar(true);
+        
         startButton.style.display = 'none';
         pauseButton.style.display = 'inline-block';
         
@@ -189,12 +184,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 timerMessage.textContent = "Tijd is om!";
                 timeUpSound.play();
                 
-                if (currentThemeChosen === 'rainbow') goldImage.classList.add('visible');
-                if (currentThemeChosen === 'star') createFallingStars();
+                if (currentThemeChosen === 'rainbow') {
+                    goldImage.classList.add('visible');
+                }
+                if (currentThemeChosen === 'star') {
+                    clearGrowingStars(); 
+                    finalStar.classList.add('visible', 'animate');
+                }
                 if (currentThemeChosen === 'aquarium') {
                     treasureChestClosed.style.opacity = '0';
                     treasureChestOpen.style.opacity = '1';
-                    bigGoldCoin.classList.add('visible', 'animate'); // Start de nieuwe animatie
+                    bigGoldCoin.classList.add('visible', 'animate');
                 }
                 
                 startButton.textContent = "Opnieuw";
@@ -205,16 +205,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             totalSeconds--;
             countdownDisplay.textContent = formatTime(totalSeconds);
+
             if (currentThemeChosen === 'rainbow') updateRainbow();
             if (currentThemeChosen === 'aquarium') updateAquarium();
-
+            if (currentThemeChosen === 'star') {
+                const elapsedSeconds = initialTotalSeconds - totalSeconds;
+                if (elapsedSeconds > 0 && elapsedSeconds % 60 === 0 && elapsedSeconds < initialTotalSeconds) {
+                    freezeLastStar();
+                    createNewStar();
+                    animateLastStar(true);
+                }
+            }
         }, 1000);
     }
 
     function pauseCountdown() {
         clearInterval(countdownInterval);
         isPaused = true;
-        if (currentThemeChosen === 'star') pauseStarAnimation();
+        if (currentThemeChosen === 'star') animateLastStar(false);
         
         startButton.textContent = "Hervat";
         startButton.style.display = 'inline-block';
@@ -228,21 +236,14 @@ document.addEventListener('DOMContentLoaded', () => {
         countdownDisplay.textContent = formatTime(totalSeconds);
         timerMessage.textContent = '';
         
-        if (currentThemeChosen === 'rainbow') {
-            updateRainbow();
-            goldImage.classList.remove('visible');
-        }
-        if (currentThemeChosen === 'star') {
-            timerStar.classList.remove('animate');
-            fallingStarsContainer.style.display = 'none';
-            fallingStarsContainer.innerHTML = '';
-        }
-        if (currentThemeChosen === 'aquarium') {
-            fishElements.forEach(fish => fish.style.opacity = '1');
-            treasureChestClosed.style.opacity = '1';
-            treasureChestOpen.style.opacity = '0';
-            bigGoldCoin.classList.remove('visible', 'animate'); // Verberg de grote munt
-        }
+        goldImage.classList.remove('visible');
+        clearGrowingStars();
+        if (finalStar) finalStar.classList.remove('visible', 'animate');
+        if (fishElements.length > 0) fishElements.forEach(fish => fish.style.opacity = '1');
+        treasureChestClosed.style.opacity = '1';
+        treasureChestOpen.style.opacity = '0';
+        bigGoldCoin.classList.remove('visible', 'animate');
+        updateRainbow();
 
         startButton.textContent = "Start";
         startButton.style.display = 'inline-block';
@@ -253,41 +254,52 @@ document.addEventListener('DOMContentLoaded', () => {
     themeButtons.forEach(button => {
         button.addEventListener('click', (event) => {
             currentThemeChosen = event.target.dataset.theme;
-            const themeName = event.target.textContent;
-            timeChoiceHeader.textContent = `Kies tijd voor de ${themeName}:`;
+            timeChoiceHeader.textContent = `Kies tijd voor de ${event.target.textContent}:`;
             timeButtonsContainer.style.display = 'block';
         });
     });
 
     timeButtons.forEach(button => {
         button.addEventListener('click', (event) => {
-            const minutes = parseInt(event.target.dataset.minutes);
-            initialTotalSeconds = minutes * 60;
-            
-            showVisual(currentThemeChosen);
+            initialTotalSeconds = parseInt(event.target.dataset.minutes) * 60;
             document.body.className = `theme-${currentThemeChosen}`;
+            currentThemeDisplay.textContent = {
+                rainbow: 'Regenboog Timer', star: 'Groeiende Ster', aquarium: 'Aquarium Timer'
+            }[currentThemeChosen];
             
-            if(currentThemeChosen === 'rainbow') currentThemeDisplay.textContent = 'Regenboog Timer';
-            if(currentThemeChosen === 'star') currentThemeDisplay.textContent = 'Groeiende Ster';
-            if(currentThemeChosen === 'aquarium') currentThemeDisplay.textContent = 'Aquarium Timer';
-            
-            resetTimer();
             showScreen(timerScreen);
+            showVisual(currentThemeChosen);
+            resetTimer();
+
+            if (currentThemeChosen === 'star') createNewStar();
         });
     });
 
+    // **VERBETERDE LOGICA VOOR START/OPNIEUW KNOP**
     startButton.addEventListener('click', () => {
-        if (totalSeconds <= 0) {
-             resetTimer();
+        // De 'Opnieuw' knop is alleen zichtbaar als de timer is afgelopen (totalSeconds <= 0).
+        // In alle andere gevallen is het een 'Start' of 'Hervat' actie.
+        if (startButton.textContent === 'Opnieuw') {
+            resetTimer();
+            if (currentThemeChosen === 'star') {
+                createNewStar();
+            }
         }
         startCountdown();
     });
 
     pauseButton.addEventListener('click', pauseCountdown);
 
+    // **VERBETERDE LOGICA VOOR NIEUWE TIMER KNOP**
     newTimerButton.addEventListener('click', () => {
+        // Stop de huidige timer volledig
         clearInterval(countdownInterval);
+        isPaused = false;
+        // Reset de timer variabelen voor een schone lei
         initialTotalSeconds = 0;
+        totalSeconds = 0;
+        
+        // Ga terug naar het keuzemenu
         document.body.className = '';
         timeButtonsContainer.style.display = 'none';
         themeSelectionScreen.querySelector('h1').textContent = "Kies een thema & tijd:";
