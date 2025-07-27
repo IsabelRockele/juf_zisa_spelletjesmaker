@@ -77,6 +77,11 @@
       "naam": "rendier",
       "bestandsnaam": "rendier.json",
       "afbeelding": "rendier.png"
+    },
+    {
+      "naam": "koekenmannetje",
+      "bestandsnaam": "koekenmannetje.json",
+      "afbeelding": "koekenmannetje.png"
     }
   ],
   "Carnaval": [
@@ -160,6 +165,11 @@
       "naam": "spiegel vos",
       "bestandsnaam": "vos.json",
       "afbeelding": "vos.png"
+    },
+    {
+      "naam": "hond",
+      "bestandsnaam": "hond.json",
+      "afbeelding": "hond.png"
     }
   ]
 }
