@@ -98,6 +98,11 @@
       "naam": "vlinder",
       "bestandsnaam": "vlinder.json",
       "afbeelding": "vlinder.png"
+    },
+    {
+      "naam": "kuiken",
+      "bestandsnaam": "kuiken.json",
+      "afbeelding": "kuiken.png"
     }
   ],
   "Zomer": [{
@@ -128,6 +133,33 @@
       "naam": "robot",
       "bestandsnaam": "robot.json",
       "afbeelding": "robot.png"
+    },
+    {
+      "naam": "cactus",
+      "bestandsnaam": "cactus.json",
+      "afbeelding": "cactus.png"
+    }
+  ],
+  "Dieren": [
+    {
+      "naam": "spiegel leeuw",
+      "bestandsnaam": "leeuw.json",
+      "afbeelding": "leeuw.png"
+    },
+    {
+      "naam": "spiegel lieveheersbeestje",
+      "bestandsnaam": "lieveheersbeestje.json",
+      "afbeelding": "lieveheersbeestje.png"
+    },
+    {
+      "naam": "spiegel tijger",
+      "bestandsnaam": "tijger.json",
+      "afbeelding": "tijger.png"
+    },
+    {
+      "naam": "spiegel vos",
+      "bestandsnaam": "vos.json",
+      "afbeelding": "vos.png"
     }
   ]
 }
