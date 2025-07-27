@@ -26,6 +26,11 @@
       "naam": "boot",
       "afbeelding": "boot.png",
       "bestandsnaam": "boot.json"
+    },
+    {
+      "naam": "helikopte",
+      "afbeelding": "helikopter.png",
+      "bestandsnaam": "helikopter.json"
     }
   ],
   "Fantasie": [
