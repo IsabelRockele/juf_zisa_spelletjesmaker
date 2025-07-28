@@ -15,16 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    /**
-     * Controleert of een berekening voldoet aan de brug-voorwaarde.
-     * @param {number} num1 - Eerste getal
-     * @param {number} num2 - Tweede getal
-     * @param {string} operation - '+' of '-'
-     * @param {string} brugType - 'met', 'zonder', of 'beide'
-     * @returns {boolean} - True als de voorwaarde klopt
-     */
     function checkBridging(num1, num2, operation, brugType) {
-        if (brugType === 'beide' || num1 < 10 || num2 < 10) return true; // Geen check nodig of niet relevant
+        if (brugType === 'beide' || num1 < 10 || num2 < 10) return true;
 
         const units1 = num1 % 10;
         const units2 = num2 % 10;
@@ -39,7 +31,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return (brugType === 'met' && isBridging) || (brugType === 'zonder' && !isBridging);
     }
 
-
     // --- Functies voor het genereren van oefeningen ---
 
     function generateTriangleData() {
@@ -50,55 +41,66 @@ document.addEventListener("DOMContentLoaded", () => {
         };
         
         let attempts = 0;
-        while (attempts < 20000) { // Veiligheidslimiet om oneindige loops te voorkomen
+        while (attempts < 20000) {
             attempts++;
             const maxTerm = Math.max(5, Math.floor(niveau * 0.6));
             let a = getRandomInt(1, maxTerm);
             let b = getRandomInt(1, maxTerm);
             let c = getRandomInt(1, maxTerm);
 
-            const sums = { ab: a + b, ac: a + c, bc: b + c };
+            const sums = { sumAB: a + b, sumAC: a + c, sumBC: b + c };
 
-            if (sums.ab > niveau || sums.ac > niveau || sums.bc > niveau) continue; // Probeer opnieuw
+            if (sums.sumAB > niveau || sums.sumAC > niveau || sums.sumBC > niveau) continue;
 
-            let isValid = false;
             if (typeOefening === 'zoekSom') {
-                // Alle drie de optellingen moeten aan de voorwaarde voldoen
                 const check1 = checkBridging(a, b, '+', brug);
                 const check2 = checkBridging(a, c, '+', brug);
                 const check3 = checkBridging(b, c, '+', brug);
-                if (check1 && check2 && check3) isValid = true;
+                if (check1 && check2 && check3) {
+                     const fullSolution = { a, b, c, ...sums };
+                     let displayData = { ...fullSolution, sumAB: '?', sumAC: '?', sumBC: '?' };
+                     return { display: displayData, solution: fullSolution };
+                }
             } else { // 'zoekTerm'
-                // De aftrekking die de gebruiker moet doen, moet aan de voorwaarde voldoen.
-                // We checken alle 3 mogelijke aftrekkingen en kiezen er een die klopt.
                 const possibleSolutions = [
-                    { term: 'a', sum: 'sumAC', check: checkBridging(sums.ac, c, '-', brug) },
-                    { term: 'a', sum: 'sumAB', check: checkBridging(sums.ab, b, '-', brug) },
-                    { term: 'b', sum: 'sumAB', check: checkBridging(sums.ab, a, '-', brug) },
-                    { term: 'b', sum: 'sumBC', check: checkBridging(sums.bc, c, '-', brug) },
-                    { term: 'c', sum: 'sumAC', check: checkBridging(sums.ac, a, '-', brug) },
-                    { term: 'c', sum: 'sumBC', check: checkBridging(sums.bc, b, '-', brug) },
+                    { term: 'a', sum: 'sumAC', check: checkBridging(sums.sumAC, c, '-', brug) },
+                    { term: 'a', sum: 'sumAB', check: checkBridging(sums.sumAB, b, '-', brug) },
+                    { term: 'b', sum: 'sumAB', check: checkBridging(sums.sumAB, a, '-', brug) },
+                    { term: 'b', sum: 'sumBC', check: checkBridging(sums.sumBC, c, '-', brug) },
+                    { term: 'c', sum: 'sumAC', check: checkBridging(sums.sumAC, a, '-', brug) },
+                    { term: 'c', sum: 'sumBC', check: checkBridging(sums.sumBC, b, '-', brug) },
                 ].filter(s => s.check);
 
                 if (possibleSolutions.length > 0) {
                     const chosenSolution = possibleSolutions[getRandomInt(0, possibleSolutions.length - 1)];
                     const fullSolution = { a, b, c, ...sums };
-                    let displayData = { a, b, c, sumAB: '?', sumAC: '?', sumBC: '?' };
-                    displayData[chosenSolution.term] = '?';
+                    
+                    const displayData = { a: '?', b: '?', c: '?', sumAB: '?', sumAC: '?', sumBC: '?' };
+
+                    // Toon de relevante som
                     displayData[chosenSolution.sum] = fullSolution[chosenSolution.sum];
+
+                    // Toon de twee binnentermen die nodig zijn om de puzzel volledig op te lossen
+                    if (chosenSolution.sum === 'sumAB') {
+                        displayData.c = fullSolution.c; // Extra getal
+                        if (chosenSolution.term === 'a') displayData.b = fullSolution.b;
+                        else displayData.a = fullSolution.a;
+                    } else if (chosenSolution.sum === 'sumAC') {
+                        displayData.b = fullSolution.b; // Extra getal
+                        if (chosenSolution.term === 'a') displayData.c = fullSolution.c;
+                        else displayData.a = fullSolution.a;
+                    } else if (chosenSolution.sum === 'sumBC') {
+                        displayData.a = fullSolution.a; // Extra getal
+                        if (chosenSolution.term === 'b') displayData.c = fullSolution.c;
+                        else displayData.b = fullSolution.b;
+                    }
+
                     return { display: displayData, solution: fullSolution };
                 }
             }
-            
-            if (isValid) {
-                 const fullSolution = { a, b, c, ...sums };
-                 let displayData = { ...fullSolution, sumAB: '?', sumAC: '?', sumBC: '?' };
-                 return { display: displayData, solution: fullSolution };
-            }
         }
-        // Als het niet lukt om een geldige set te vinden
         document.getElementById("meldingContainer").textContent = "Kon geen oefening maken met deze strenge eisen. Probeer een andere combinatie (bv. 'Beide').";
-        return null; // Geef null terug als het niet lukt
+        return null;
     }
 
     // --- Tekenfuncties (ongewijzigd) ---
@@ -122,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function drawSingleTriangle(data, xOffset, yOffset, width) {
-        if (!data) return; // Teken niks als er geen data is
+        if (!data) return;
         const height = width * (Math.sqrt(3) / 2);
         const p = (point) => ({ x: xOffset + point.x * width, y: yOffset + point.y * height });
         const top = { x: 0.5, y: 0 }, left = { x: 0, y: 1 }, right = { x: 1, y: 1 };
@@ -156,7 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Hoofdfunctie ---
     function generateWorksheet() {
-        document.getElementById("meldingContainer").textContent = ""; // Reset melding
+        document.getElementById("meldingContainer").textContent = "";
         const numGrids = controls.numGrids();
         let cols, rows;
         if (numGrids === 1) { cols = 1; rows = 1; } else if (numGrids === 2) { cols = 2; rows = 1; } else if (numGrids === 4) { cols = 2; rows = 2; } else if (numGrids === 6) { cols = 2; rows = 3; }
