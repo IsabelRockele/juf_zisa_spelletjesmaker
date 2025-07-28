@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let originalFiles = [];
     let generatedItems = [];
     let isMoveModeEnabled = false;
+    let selectedItem = null;
 
     // --- Element Referenties ---
     const imageUpload = document.getElementById('imageUpload');
@@ -12,12 +13,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderWorksheetBtn = document.getElementById('render-worksheet-btn');
     const werkbladWeergave = document.getElementById('werkbladWeergave');
     const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-    const downloadSvgBtn = document.getElementById('downloadSvgBtn');
     const resetBtn = document.getElementById('resetBtn');
     const hiddenCanvas = document.getElementById('hiddenCanvas');
     const werkbladTypeRadios = document.querySelectorAll('input[name="werkbladType"]');
     const editControls = document.getElementById('edit-controls');
     const enableMoveBtn = document.getElementById('enable-move-btn');
+    const resizeControls = document.getElementById('resize-controls');
+    const increaseSizeBtn = document.getElementById('increase-size-btn');
+    const decreaseSizeBtn = document.getElementById('decrease-size-btn');
+    const sizeFeedback = document.getElementById('size-feedback');
 
     // --- Hulpfuncties ---
     function createImage(src, alt) {
@@ -144,15 +148,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Drag-and-Drop Functies ---
+    // --- Verfijn-modus Functies ---
     function toggleMoveMode() {
         isMoveModeEnabled = !isMoveModeEnabled;
         werkbladWeergave.classList.toggle('move-mode-active', isMoveModeEnabled);
         enableMoveBtn.classList.toggle('active', isMoveModeEnabled);
-        enableMoveBtn.textContent = isMoveModeEnabled ? 'Klaar met verplaatsen' : 'Verplaats Schaduwen';
+        enableMoveBtn.textContent = isMoveModeEnabled ? 'Klaar met verfijnen' : 'Verplaats & Pas Grootte Aan';
+
+        if (isMoveModeEnabled) {
+            resizeControls.style.display = 'flex';
+        } else {
+            resizeControls.style.display = 'none';
+            if (selectedItem) {
+                selectedItem.classList.remove('selected-for-edit');
+                selectedItem = null;
+            }
+        }
     }
 
     function makeElementDraggable(element) {
+        element.addEventListener('click', () => {
+            if (!isMoveModeEnabled) return;
+    
+            if (selectedItem) {
+                selectedItem.classList.remove('selected-for-edit');
+            }
+    
+            selectedItem = element;
+            selectedItem.classList.add('selected-for-edit');
+    
+            const currentSize = selectedItem.offsetWidth;
+            sizeFeedback.textContent = `Grootte: ${currentSize}px`;
+        });
+
         element.addEventListener('mousedown', function(e) {
             if (!isMoveModeEnabled) return;
             e.preventDefault();
@@ -167,8 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 let newTop = e.clientY - parentRect.top - offsetY;
                 newLeft = Math.max(0, Math.min(newLeft, parentRect.width - element.offsetWidth));
                 newTop = Math.max(0, Math.min(newTop, parentRect.height - element.offsetHeight));
+                
                 element.style.left = newLeft + 'px';
                 element.style.top = newTop + 'px';
+                
                 const originalTransform = element.style.transform;
                 const rotationMatch = originalTransform.match(/rotate\((.+?)\)/);
                 element.style.transform = rotationMatch ? rotationMatch[0] : '';
@@ -229,6 +259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function downloadWorksheetAsPDF() {
         const wasMoveMode = isMoveModeEnabled;
         if (wasMoveMode) toggleMoveMode();
+        
         const worksheetElement = document.getElementById('werkbladWeergave');
         if (!worksheetElement.hasChildNodes() || worksheetElement.querySelector('.placeholder-text')) {
             alert("Genereer eerst een werkblad om te downloaden.");
@@ -236,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         try {
-            const canvas = await html2canvas(worksheetElement, { scale: 2, useCORS: true });
+            const canvas = await html2canvas(worksheetElement, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
             const imgData = canvas.toDataURL('image/png');
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
@@ -306,6 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
         originalFiles = [];
         generatedItems = [];
         isMoveModeEnabled = false;
+        selectedItem = null;
         imageUpload.value = '';
         werkbladWeergave.innerHTML = '<p class="placeholder-text">Begin bij Stap 1 om afbeeldingen te kiezen.</p>';
         werkbladWeergave.className = '';
@@ -319,7 +351,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Event Listeners (AAN HET EINDE GEKOPPELD) ---
+    // --- Functies voor Resizen ---
+    function resizeSelectedItem(amount) {
+        if (!selectedItem) {
+            alert("Selecteer eerst een schaduw door erop te klikken.");
+            return;
+        }
+
+        const currentWidth = selectedItem.offsetWidth;
+        const currentHeight = selectedItem.offsetHeight;
+        const newWidth = currentWidth + amount;
+        const newHeight = currentHeight + amount;
+
+        if (newWidth < 20 || newHeight < 20) {
+            sizeFeedback.textContent = "Minimale grootte bereikt";
+            return;
+        }
+
+        selectedItem.style.width = newWidth + 'px';
+        selectedItem.style.height = newHeight + 'px';
+        
+        sizeFeedback.textContent = `Grootte: ${newWidth}px`;
+    }
+
+    // --- Event Listeners ---
     uploadTriggerBtn.addEventListener('click', () => imageUpload.click());
     imageUpload.addEventListener('change', handleFileSelection);
     createShadowsBtn.addEventListener('click', handleShadowCreation);
@@ -327,4 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.addEventListener('click', resetGenerator);
     downloadPdfBtn.addEventListener('click', downloadWorksheetAsPDF);
     enableMoveBtn.addEventListener('click', toggleMoveMode);
+    increaseSizeBtn.addEventListener('click', () => resizeSelectedItem(10));
+    decreaseSizeBtn.addEventListener('click', () => resizeSelectedItem(-10));
 });
