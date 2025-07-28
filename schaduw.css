@@ -264,9 +264,11 @@ button:disabled {
     background-color: white; 
 }
 .werkblad-type-1-final .midden-object img { 
-    width: 150px; 
-    height: 150px; 
-    object-fit: contain; 
+    max-width: 150px;
+    max-height: 150px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
 }
 
 .werkblad-type-1-final .item-wrapper { 
@@ -281,7 +283,7 @@ button:disabled {
     transform-origin: center center;
 }
 
-/* NIEUWE STIJLEN VOOR VERPLAATS-MODUS */
+/* STIJLEN VOOR VERFIJN-MODUS */
 .werkblad-type-1-final.move-mode-active .item-wrapper {
     cursor: grab;
     border: 2px dashed #007bff;
@@ -292,6 +294,30 @@ button:disabled {
     z-index: 1000;
     border-style: solid;
 }
+
+.werkblad-type-1-final .item-wrapper.selected-for-edit {
+    border: 3px solid #28a745;
+    cursor: pointer;
+}
+
+.sub-control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+    padding: 10px;
+    border: 1px dashed #b3e0ff;
+    border-radius: 8px;
+    margin-top: 10px;
+}
+
+#size-feedback {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #004080;
+}
+
 
 canvas { display: none; }
 footer { margin-top: auto; padding: 20px; color: #555; }
