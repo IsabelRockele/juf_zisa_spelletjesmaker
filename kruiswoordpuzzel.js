@@ -29,6 +29,11 @@ document.addEventListener("DOMContentLoaded", () => {
         generatorKlassiek.classList.add('verborgen');
         generatorVerborgenWoord.classList.add('verborgen');
         terugNaarKeuzeBtn.classList.add('verborgen');
+        
+        // Verberg ook de specifieke werkruimtes
+        document.getElementById('klassiek-werkruimte').classList.add('verborgen');
+        document.getElementById('klassiek-keuzescherm').classList.remove('verborgen');
+
         keuzescherm.classList.remove('verborgen');
         resetGenerators();
     });
@@ -36,6 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function resetGenerators() {
         // Reset Klassieke generator
         document.getElementById("woordenInput").value = '';
+        document.getElementById("klassiekWoordenContainer").innerHTML = '';
+        document.getElementById("aantalWoordenInput").value = '5';
         document.getElementById("meldingContainer").textContent = '';
         const canvas = document.getElementById("mainCanvas");
         const ctx = canvas.getContext("2d");
@@ -59,24 +66,114 @@ document.addEventListener("DOMContentLoaded", () => {
     // LOGICA VOOR KLASSIEKE KRUISWOORDPUZZEL
     // ======================================================
     function initKlassiekeGenerator() {
+        // --- Referenties naar DOM elementen ---
+        const klassiekKeuzescherm = document.getElementById('klassiek-keuzescherm');
+        const klassiekWerkruimte = document.getElementById('klassiek-werkruimte');
+        const kiesSimpelBtn = document.getElementById('kies-simpel-modus');
+        const kiesOmschrijvingBtn = document.getElementById('kies-omschrijving-modus');
+
+        const simpelInvoer = document.getElementById('klassiek-simpel-invoer');
+        const omschrijvingInvoer = document.getElementById('klassiek-omschrijving-invoer');
+        
+        let actieveModus = ''; // Houdt bij welke invoermodus actief is
+
+        // --- Event Listeners voor sub-keuze ---
+        kiesSimpelBtn.addEventListener('click', () => {
+            actieveModus = 'simpel';
+            klassiekKeuzescherm.classList.add('verborgen');
+            simpelInvoer.classList.remove('verborgen');
+            omschrijvingInvoer.classList.add('verborgen');
+            klassiekWerkruimte.classList.remove('verborgen');
+        });
+
+        kiesOmschrijvingBtn.addEventListener('click', () => {
+            actieveModus = 'omschrijving';
+            klassiekKeuzescherm.classList.add('verborgen');
+            omschrijvingInvoer.classList.remove('verborgen');
+            simpelInvoer.classList.add('verborgen');
+            klassiekWerkruimte.classList.remove('verborgen');
+        });
+
+        // --- Logica voor uitgebreide invoer ---
+        const aantalWoordenInput = document.getElementById('aantalWoordenInput');
+        const genereerWoordVeldenBtn = document.getElementById('genereerWoordVeldenBtn');
+        const klassiekWoordenContainer = document.getElementById('klassiekWoordenContainer');
+
+        genereerWoordVeldenBtn.addEventListener('click', () => {
+            const aantal = parseInt(aantalWoordenInput.value, 10);
+            klassiekWoordenContainer.innerHTML = '';
+            for (let i = 1; i <= aantal; i++) {
+                const rij = document.createElement('div');
+                rij.className = 'klassiek-woord-rij';
+                rij.innerHTML = `
+                    <label>${i}.</label>
+                    <input type="text" class="klassiek-woord-input" placeholder="Woord">
+                    <input type="text" class="klassiek-omschrijving-input" placeholder="Omschrijving">
+                `;
+                klassiekWoordenContainer.appendChild(rij);
+            }
+        });
+
+        // --- Algemene generator logica ---
         const canvas = document.getElementById("mainCanvas");
         const ctx = canvas.getContext("2d");
         const generateBtn = document.getElementById("genereerBtn");
         const downloadPngBtn = document.getElementById("downloadPngBtn");
         const downloadPdfBtn = document.getElementById("downloadPdfBtn");
-        const woordenInput = document.getElementById("woordenInput");
         const meldingContainer = document.getElementById("meldingContainer");
 
         const INTERNAL_GRID_SIZE = 40;
         let grid = [];
         let placedWordsInfo = [];
 
-        function cleanGrid() {
+        function getKlassiekePuzzelData() {
+            if (actieveModus === 'simpel') {
+                const woordenInput = document.getElementById("woordenInput");
+                const rawInput = woordenInput.value.trim().split('\n');
+                return rawInput
+                    .map(line => {
+                        const parts = line.split(';');
+                        const word = (parts[0] || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+                        const clue = (parts[1] || '').trim() || word; // Gebruik woord als omschrijving als leeg
+                        return { word, clue };
+                    })
+                    .filter(item => item.word.length > 1);
+            } 
+            else if (actieveModus === 'omschrijving') {
+                const rijen = klassiekWoordenContainer.querySelectorAll('.klassiek-woord-rij');
+                const data = [];
+                rijen.forEach(rij => {
+                    const wordInput = rij.querySelector('.klassiek-woord-input');
+                    const clueInput = rij.querySelector('.klassiek-omschrijving-input');
+                    const word = (wordInput.value || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+                    const clue = (clueInput.value || '').trim();
+                    if (word.length > 1 && clue) {
+                        data.push({ word, clue });
+                    }
+                });
+                return data;
+            }
+            return []; // Geen geldige modus
+        }
+
+        function cleanGrid() { /* ... ongewijzigd ... */ }
+        function drawGrid(puzzleData) { /* ... ongewijzigd ... */ }
+        function canPlaceWord(word, r, c, direction) { /* ... ongewijzigd ... */ }
+        function placeSingleWord(wordObj, r, c, direction) { /* ... ongewijzigd ... */ }
+        function placeWords(words) { /* ... ongewijzigd ... */ }
+        function finalizeGrid() { /* ... ongewijzigd ... */ }
+        function displayClues(wordData) { /* ... ongewijzigd ... */ }
+        function wrapTextAndCalcHeight(context, text, maxWidth, lineHeight) { /* ... ongewijzigd ... */ }
+        function drawWrappedText(context, text, x, y, maxWidth, lineHeight) { /* ... ongewijzigd ... */ }
+        function downloadAs(type) { /* ... ongewijzigd ... */ }
+        
+        // ... Plak hier alle ongewijzigde functies van de klassieke generator ...
+        // (De functies hieronder zijn identiek aan de vorige versie, maar zijn hier voor de volledigheid)
+        cleanGrid = function() {
             grid = Array(INTERNAL_GRID_SIZE).fill(null).map(() => Array(INTERNAL_GRID_SIZE).fill(null));
             placedWordsInfo = [];
         }
-
-        function drawGrid(puzzleData) {
+        drawGrid = function(puzzleData) {
             const { puzzleGrid } = puzzleData;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             if (!puzzleGrid || puzzleGrid.length === 0) {
@@ -84,14 +181,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 return;
             }
-
             const gridSize = puzzleGrid.length;
             const cellSize = canvas.width / gridSize;
             ctx.strokeStyle = "#000";
             ctx.lineWidth = 1;
             ctx.fillStyle = 'white';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
             for (let r = 0; r < gridSize; r++) {
                 for (let c = 0; c < gridSize; c++) {
                     const cell = puzzleGrid[r][c];
@@ -108,8 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         }
-
-        function canPlaceWord(word, r, c, direction) {
+        canPlaceWord = function(word, r, c, direction) {
             let intersections = 0;
             if (direction === 'horizontal') {
                 if (c < 0 || r < 0 || c + word.length > INTERNAL_GRID_SIZE || r >= INTERNAL_GRID_SIZE) return false;
@@ -144,8 +238,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return intersections > 0;
         }
-
-        function placeSingleWord(wordObj, r, c, direction) {
+        placeSingleWord = function(wordObj, r, c, direction) {
             for (let i = 0; i < wordObj.word.length; i++) {
                 if (direction === 'horizontal') {
                     grid[r][c + i] = wordObj.word[i];
@@ -155,8 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             placedWordsInfo.push({ ...wordObj, row: r, col: c, direction });
         }
-
-        function placeWords(words) {
+        placeWords = function(words) {
             const firstWord = words.shift();
             if (!firstWord) return;
             const startRow = Math.floor(INTERNAL_GRID_SIZE / 2);
@@ -207,8 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 meldingContainer.style.color = '#d9534f';
             }
         }
-        
-        function finalizeGrid() {
+        finalizeGrid = function() {
             if (placedWordsInfo.length === 0) return { puzzleGrid: [], wordData: [] };
             let minR = INTERNAL_GRID_SIZE, minC = INTERNAL_GRID_SIZE, maxR = 0, maxC = 0;
             placedWordsInfo.forEach(w => {
@@ -248,8 +339,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return { puzzleGrid, wordData };
         }
-
-        function displayClues(wordData) {
+        displayClues = function(wordData) {
             const hList = document.getElementById("horizontal-clues-list");
             const vList = document.getElementById("vertical-clues-list");
             hList.innerHTML = "";
@@ -269,33 +359,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 handled.add(key);
             });
         }
-
-        function generateCrossword() {
-            cleanGrid();
-            meldingContainer.textContent = "";
-            const rawInput = woordenInput.value.trim().split('\n');
-            const words = rawInput
-                .map(line => {
-                    const parts = line.split(';');
-                    const word = parts[0].trim().toUpperCase().replace(/[^A-Z]/g, '');
-                    const clue = (parts[1] || '').trim();
-                    return { word, clue: clue || word };
-                })
-                .filter(item => item.word.length > 1)
-                .sort((a, b) => b.word.length - a.word.length);
-            if (words.length < 1 && rawInput.join("").trim() !== "") {
-                meldingContainer.textContent = "Voer geldige woorden in (minstens 2 letters).";
-                drawGrid({});
-                displayClues([]);
-                return;
-            }
-            placeWords(words);
-            const puzzleData = finalizeGrid();
-            drawGrid(puzzleData);
-            displayClues(puzzleData.wordData);
-        }
-        
-        function wrapTextAndCalcHeight(context, text, maxWidth, lineHeight) {
+        wrapTextAndCalcHeight = function(context, text, maxWidth, lineHeight) {
             const words = text.split(' ');
             let line = '';
             let lineCount = 0;
@@ -311,8 +375,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             return lineCount * lineHeight;
         }
-
-        function drawWrappedText(context, text, x, y, maxWidth, lineHeight) {
+        drawWrappedText = function(context, text, x, y, maxWidth, lineHeight) {
             const words = text.split(' ');
             let line = '';
             let currentY = y;
@@ -329,15 +392,15 @@ document.addEventListener("DOMContentLoaded", () => {
             context.fillText(line, x, currentY);
             return currentY - y + lineHeight;
         }
-
-        function downloadAs(type) {
-            const tempCanvas = document.createElement('canvas');
-            const tempCtx = tempCanvas.getContext('2d');
+        downloadAs = function(type) {
             const { puzzleGrid, wordData } = finalizeGrid();
             if (!puzzleGrid || puzzleGrid.length === 0) {
                 alert("Genereer eerst een puzzel voordat je deze downloadt.");
                 return;
             }
+
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
             const uniqueClues = new Map();
             wordData.forEach(w => {
                 const key = `${w.number}-${w.direction}`;
@@ -435,15 +498,28 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        function generateCrossword() {
+            cleanGrid();
+            meldingContainer.textContent = "";
+            
+            const words = getKlassiekePuzzelData().sort((a, b) => b.word.length - a.word.length);
+            
+            if (words.length < 1) {
+                meldingContainer.textContent = "Voer geldige woorden en omschrijvingen in (woord minstens 2 letters).";
+                drawGrid({});
+                displayClues([]);
+                return;
+            }
+
+            placeWords(words);
+            const puzzleData = finalizeGrid();
+            drawGrid(puzzleData);
+            displayClues(puzzleData.wordData);
+        }
+
         generateBtn.addEventListener("click", generateCrossword);
-        woordenInput.addEventListener("input", () => {
-            const lineCount = woordenInput.value.split('\n').filter(line => line.trim() !== '').length;
-            document.getElementById("woordAantalMelding").textContent = `Aantal woorden: ${lineCount}`;
-        });
         downloadPngBtn.addEventListener("click", () => downloadAs('png'));
         downloadPdfBtn.addEventListener("click", () => downloadAs('pdf'));
-
-        generateCrossword();
     }
 
 
@@ -571,7 +647,6 @@ document.addEventListener("DOMContentLoaded", () => {
             exportKnoppen.classList.remove('verborgen');
         }
 
-        // --- NIEUWE DOWNLOAD FUNCTIE ---
         function vwDownloadAs(type) {
             const puzzelData = verzamelPuzzelData();
             if (!puzzelData) {
@@ -582,7 +657,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const tempCanvas = document.createElement('canvas');
             const ctx = tempCanvas.getContext('2d');
             
-            // --- Layout Constanten ---
             const padding = 50;
             const contentWidth = 800;
             const titleFontSize = 32;
@@ -593,7 +667,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const numberFontSize = 16;
             const finalWordFontSize = 18;
 
-            // --- Hoogte Berekening ---
             let currentY = padding;
             ctx.font = `bold ${titleFontSize}px Arial`;
             currentY += titleFontSize + 10;
@@ -614,11 +687,9 @@ document.addEventListener("DOMContentLoaded", () => {
             tempCanvas.width = totalWidth;
             tempCanvas.height = totalHeight;
 
-            // --- Tekenen op Canvas ---
             ctx.fillStyle = "#FFF";
             ctx.fillRect(0, 0, totalWidth, totalHeight);
 
-            // Titel
             currentY = padding;
             ctx.fillStyle = "#004080";
             ctx.font = `bold ${titleFontSize}px Arial`;
@@ -626,13 +697,11 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.fillText("Verborgen Woord Puzzel", totalWidth / 2, currentY);
             currentY += titleFontSize + 10;
             
-            // Instructies
             ctx.fillStyle = "#000";
             ctx.font = `${instructionFontSize}px Arial`;
             ctx.fillText("Vul de omschrijvingen in. Schrijf het woord in het rooster. Welk woord lees je in de gekleurde vakjes?", totalWidth / 2, currentY);
             currentY += instructionFontSize + 30;
 
-            // Omschrijvingen
             ctx.textAlign = "left";
             puzzelData.forEach(item => {
                 ctx.fillText(`${item.nummer}. ${item.omschrijving}`, padding, currentY);
@@ -640,7 +709,6 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             currentY += 30;
 
-            // Rooster tekenen
             let maxVoorvoegsel = 0;
             let maxWoordLengte = 0;
             puzzelData.forEach(item => {
@@ -658,14 +726,12 @@ document.addEventListener("DOMContentLoaded", () => {
             puzzelData.forEach((item, index) => {
                 const y = gridStartY + index * gridCellSize;
                 
-                // Nummer
                 ctx.fillStyle = "#333";
                 ctx.font = `bold ${numberFontSize}px Arial`;
                 ctx.textAlign = "right";
                 ctx.textBaseline = "middle";
                 ctx.fillText(item.nummer, gridStartX - 10, y + gridCellSize / 2);
 
-                // Woord vakjes
                 const letterPositie = item.antwoord.indexOf(item.verborgenLetter);
                 for(let i = 0; i < item.antwoord.length; i++) {
                     const x = gridStartX + (maxVoorvoegsel - letterPositie + i) * gridCellSize;
@@ -678,13 +744,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             currentY += puzzelData.length * gridCellSize + 40;
 
-            // Verborgen woord
             ctx.fillStyle = "#000";
             ctx.font = `${finalWordFontSize}px Arial`;
             ctx.textAlign = "center";
             ctx.fillText(`Het verborgen woord is: ${'_ '.repeat(verborgenWoordInput.value.length)}`, totalWidth / 2, currentY);
 
-            // --- Exporteren ---
             if (type === 'png') {
                 const a = document.createElement("a");
                 a.href = tempCanvas.toDataURL("image/png");
