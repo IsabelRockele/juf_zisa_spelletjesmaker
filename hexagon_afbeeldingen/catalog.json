@@ -33,11 +33,11 @@
       "bestandsnaam": "helikopter.json"
     }
   ],
-  "Fantasie": [
+  "Kerst": [
     {
-      "naam": "Raket",
-      "afbeelding": "raket.png",
-      "bestandsnaam": "raket.json"
+      "naam": "kerstboom",
+      "afbeelding": "kerstboom.png",
+      "bestandsnaam": "kerstboom.json"
     }
   ]
 }
