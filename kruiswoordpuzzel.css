@@ -232,10 +232,11 @@ hr {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 50px;
+    gap: 100px;
     margin-top: 20px;
 }
 .puzzel-keuze {
+    width: 320px;
     cursor: pointer;
     border: 3px solid transparent;
     border-radius: 10px;
@@ -247,8 +248,9 @@ hr {
     border-color: #0056b3;
 }
 .puzzel-keuze img {
-    width: 300px;
-    height: auto;
+    width: 400px;
+    height: 400px; 
+    object-fit: contain; /* --- AANGEPAST: Zorgt dat de volledige afbeelding past --- */
     display: block;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
