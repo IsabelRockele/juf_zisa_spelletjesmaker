@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let solutionPath = [];
     let currentShape = 'worksheet';
     
-    // WIJZIGING: Nieuwe huis-vorm toegevoegd
     const shapes = [
         { id: 'worksheet', name: 'Uitsparing', file: 'uitsparing.png' },
         { id: 'rectangle', name: 'Rechthoek', file: 'rechthoek.png' },
@@ -98,13 +97,12 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (currentShape === 'rectangle') {
             generateRectangularMaze(difficulty);
         } else if (currentShape === 'masked_circle') {
-            generateMaskedMaze(difficulty, 'circle'); // Geef 'circle' als masker type
-        } else if (currentShape === 'house') { // WIJZIGING: Nieuwe case voor het huis
-            generateMaskedMaze(difficulty, 'house'); // Gebruik dezelfde functie, maar met 'house' als masker
-        } else if (currentShape === 'polar_circle') {
-            generatePolarMaze(difficulty, { largeHole: false });
-        } else if (currentShape === 'polar_large_hole') {
-            generatePolarMaze(difficulty, { largeHole: true });
+            generateMaskedMaze(difficulty, 'circle');
+        } else if (currentShape === 'house') {
+            generateMaskedMaze(difficulty, 'house');
+        } else if (currentShape === 'polar_circle' || currentShape === 'polar_large_hole') {
+            const isLarge = currentShape === 'polar_large_hole';
+            generatePolarMaze(difficulty, { largeHole: isLarge });
         }
     }
     
@@ -115,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (currentShape === 'worksheet') { drawWorksheetMaze(); }
         else if (currentShape === 'rectangle') { drawRectangularMaze(); }
-        else if (currentShape === 'masked_circle' || currentShape === 'house') { drawMaskedMaze(); } // WIJZIGING
+        else if (currentShape === 'masked_circle' || currentShape === 'house') { drawMaskedMaze(); }
         else if (currentShape === 'polar_circle' || currentShape === 'polar_large_hole') { drawPolarMaze(); }
         
         if (solutionPath.length > 0) {
@@ -123,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- DOOLHOF LOGICA ---
+    // --- RECTANGULAR/MASKED MAZE LOGIC (ORIGINAL, WORKING CODE) ---
 
     function generateWorksheetMaze(difficulty) {
         const DIFFICULTY_LEVELS = { easy: 10, medium: 15, hard: 25 };
@@ -181,17 +179,18 @@ document.addEventListener('DOMContentLoaded', () => {
         
         ctx.strokeStyle = MAZE_COLOR;
         ctx.lineWidth = wallThickness;
-        ctx.lineCap = "round";
+        ctx.lineCap = "square";
+        
+        ctx.beginPath();
         for (const cell of activeCells) {
             const gx = MAZE_PADDING + cell.x * cellSize;
             const gy = MAZE_PADDING + cell.y * cellSize;
-            ctx.beginPath();
             if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
             if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
-            ctx.stroke();
         }
+        ctx.stroke();
     }
 
     function generateRectangularMaze(difficulty) {
@@ -236,22 +235,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         ctx.strokeStyle = MAZE_COLOR;
         ctx.lineWidth = wallThickness;
-        ctx.lineCap = "round";
+        ctx.lineCap = "square";
+        
+        ctx.beginPath();
         for (const row of currentGrid) {
             for (const cell of row) {
                 const gx = MAZE_PADDING + cell.x * cellSize;
                 const gy = MAZE_PADDING + cell.y * cellSize;
-                ctx.beginPath();
                 if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
                 if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
                 if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
                 if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
-                ctx.stroke();
             }
         }
+        ctx.stroke();
     }
     
-    // WIJZIGING: Functie accepteert nu een 'maskType' om de vorm te bepalen
     function generateMaskedMaze(difficulty, maskType) {
         const DIFFICULTY_LEVELS = { easy: 10, medium: 15, hard: 25 };
         const gridSize = DIFFICULTY_LEVELS[difficulty];
@@ -274,10 +273,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else if (maskType === 'house') {
                     const baseTopY = Math.floor(gridSize / 2);
-                    // Vierkante basis van het huis (onderste helft)
                     if (y >= baseTopY) {
                         isActive = true;
-                    } else { // Driehoekig dak van het huis (bovenste helft)
+                    } else {
                         const roofHeight = baseTopY;
                         const center = (gridSize - 1) / 2;
                         const yInRoof = y;
@@ -344,188 +342,142 @@ document.addEventListener('DOMContentLoaded', () => {
         
         ctx.strokeStyle = MAZE_COLOR;
         ctx.lineWidth = wallThickness;
-        ctx.lineCap = "round";
+        ctx.lineCap = "square";
+        
+        ctx.beginPath();
         for (const cell of activeCells) {
             const gx = MAZE_PADDING + cell.x * cellSize;
             const gy = MAZE_PADDING + cell.y * cellSize;
-            ctx.beginPath();
             if (cell.walls.top) { ctx.moveTo(gx, gy); ctx.lineTo(gx + cellSize, gy); }
             if (cell.walls.right) { ctx.moveTo(gx + cellSize, gy); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.bottom) { ctx.moveTo(gx, gy + cellSize); ctx.lineTo(gx + cellSize, gy + cellSize); }
             if (cell.walls.left) { ctx.moveTo(gx, gy); ctx.lineTo(gx, gy + cellSize); }
-            ctx.stroke();
         }
+        ctx.stroke();
     }
 
-    // --- CIRKEL LOGICA ---
+    // --- POLAR MAZE LOGIC (REWRITTEN BASED ON PROEFVERSIE) ---
+
     function generatePolarMaze(difficulty, options = {}) {
         const { largeHole = false } = options;
-    
+
         const DIFFICULTY_LEVELS = {
-            easy:   { levels: 6,  cellsPerLevel: 18, levelHeight: 25, donutHoleRings: 0, donutHoleRings_large: 3 },
-            medium: { levels: 8,  cellsPerLevel: 24, levelHeight: 20, donutHoleRings: 1, donutHoleRings_large: 4 },
-            hard:   { levels: 12, cellsPerLevel: 32, levelHeight: 15, donutHoleRings: 2, donutHoleRings_large: 6 }
+            easy:   { levels: 6,  cellsPerLevel: 24, centerRings: largeHole ? 3 : 1 },
+            medium: { levels: 9,  cellsPerLevel: 32, centerRings: largeHole ? 4 : 2 },
+            hard:   { levels: 12, cellsPerLevel: 40, centerRings: largeHole ? 5 : 3 }
         };
 
         const settings = DIFFICULTY_LEVELS[difficulty];
         const numLevels = settings.levels;
-        const cellsPerOuterRing = settings.cellsPerLevel;
-        const levelHeight = settings.levelHeight;
-        const donutHoleRings = largeHole ? settings.donutHoleRings_large : settings.donutHoleRings;
-        
+        const cellsPerLevel = settings.cellsPerLevel;
+        const centerRings = settings.centerRings;
+
         let grid = [];
-        
         for (let i = 0; i < numLevels; i++) {
-            const currentRingIndex = i + donutHoleRings;
-            const radiusForCells = (currentRingIndex + 0.5) * levelHeight;
-            const circumference = 2 * Math.PI * radiusForCells;
-            const cellsInThisRing = Math.max(1, Math.round(circumference / (levelHeight * 1.5)));
-
-            const ring = [];
-            for (let j = 0; j < cellsInThisRing; j++) {
-                ring.push({ row: i, col: j, walls: { top: true, right: true }, visited: false });
-            }
-            grid.push(ring);
+            grid.push(Array(cellsPerLevel).fill(null).map(() => ({
+                visited: false,
+                walls: { top: true, right: true }
+            })));
         }
+        currentGrid = { type: 'polar', grid, numLevels, cellsPerLevel, centerRings };
 
-        if (grid.length === 0 || grid[0].length === 0) {
-            solveBtn.disabled = true;
-            return;
-        }
-
-        startCell = grid[grid.length - 1][Math.floor(Math.random() * grid[grid.length - 1].length)];
+        const stack = [];
+        const startLevel = numLevels - 1;
+        const startCellIdx = Math.floor(Math.random() * cellsPerLevel);
         
-        let stack = [startCell];
-        startCell.visited = true;
+        startCell = {level: startLevel, cell: startCellIdx};
+        stack.push(startCell);
+        grid[startLevel][startCellIdx].visited = true;
+
+        const getNeighbors = (level, cell) => {
+            const neighbors = [];
+            if (level > 0 && !grid[level - 1][cell].visited) neighbors.push({level: level - 1, cell});
+            if (level < numLevels - 1 && !grid[level + 1][cell].visited) neighbors.push({level: level + 1, cell});
+            const cwCell = (cell + 1) % cellsPerLevel;
+            if (!grid[level][cwCell].visited) neighbors.push({level, cell: cwCell});
+            const ccwCell = (cell - 1 + cellsPerLevel) % cellsPerLevel;
+            if (!grid[level][ccwCell].visited) neighbors.push({level, cell: ccwCell});
+            return neighbors;
+        };
+        
+        const removeWall = (c1, c2) => {
+            if (c1.level === c2.level) {
+                if ((c1.cell < c2.cell && !(c1.cell === 0 && c2.cell === cellsPerLevel - 1)) || (c1.cell === cellsPerLevel - 1 && c2.cell === 0)) {
+                    grid[c1.level][c1.cell].walls.right = false;
+                } else {
+                    grid[c2.level][c2.cell].walls.right = false;
+                }
+            } else {
+                const outerLevelCell = c1.level > c2.level ? c1 : c2;
+                grid[outerLevelCell.level][outerLevelCell.cell].walls.top = false;
+            }
+        };
 
         while (stack.length > 0) {
-            let current = stack[stack.length - 1];
-            const neighbors = getPolarNeighborsForGeneration(current, grid);
-            
+            const current = stack[stack.length - 1];
+            const neighbors = getNeighbors(current.level, current.cell);
+
             if (neighbors.length > 0) {
-                const [nLevel, nCellObj] = neighbors[Math.floor(Math.random() * neighbors.length)];
-                removePolarWall(current, nCellObj, grid);
-                grid[nLevel][nCellObj.col].visited = true;
-                stack.push(grid[nLevel][nCellObj.col]);
+                const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                removeWall(current, next);
+                grid[next.level][next.cell].visited = true;
+                stack.push(next);
             } else {
                 stack.pop();
             }
         }
-
-        const exitCellIndex = Math.floor(Math.random() * grid[0].length);
-        grid[0][exitCellIndex].walls.top = false;
-        endCell = grid[0][exitCellIndex];
         
-        currentGrid = {type: 'polar', rings: grid, donutHoleRings: donutHoleRings, numLevels: numLevels, levelHeight: levelHeight};
+        const exitCellIndex = Math.floor(Math.random() * cellsPerLevel);
+        grid[0][exitCellIndex].walls.top = false;
+        endCell = {level: 0, cell: exitCellIndex};
+        
         drawAll();
     }
-    
+
     function drawPolarMaze() {
-        if(!currentGrid.rings || currentGrid.rings.length === 0) return;
-        const {rings, donutHoleRings, numLevels, levelHeight} = currentGrid;
+        if (!currentGrid.grid) return;
+        const { grid, numLevels, cellsPerLevel, centerRings } = currentGrid;
         
-        const currentCanvasSize = CANVAS_SIZE; 
-        const effectiveCenter = currentCanvasSize / 2;
-        const scaleFactor = (currentCanvasSize - 2 * MAZE_PADDING) / currentCanvasSize;
-        
+        const levelHeight = (CANVAS_SIZE/2 - MAZE_PADDING) / (numLevels + centerRings);
+        const centerRadius = centerRings * levelHeight;
+
         ctx.strokeStyle = MAZE_COLOR;
         ctx.lineWidth = wallThickness;
-        ctx.lineCap = "round";
+        ctx.lineCap = 'round';
 
-        for (let i = 0; i < rings.length; i++) {
-            const ring = rings[i];
-            const currentLogicalRing = i; 
-            
-            const innerRadius = (currentLogicalRing + donutHoleRings) * levelHeight * scaleFactor;
-            const outerRadius = (currentLogicalRing + 1 + donutHoleRings) * levelHeight * scaleFactor;
+        for (let i = 0; i < numLevels; i++) {
+            const innerRadius = centerRadius + i * levelHeight;
+            const outerRadius = centerRadius + (i + 1) * levelHeight;
+            const angleStep = 2 * Math.PI / cellsPerLevel;
 
-            for (let j = 0; j < ring.length; j++) {
-                const cell = ring[j];
-                const anglePerCell = 2 * Math.PI / ring.length;
-                const angleStart = j * anglePerCell;
-                const angleEnd = (j + 1) * anglePerCell;
-
-                if (cell.walls.top) {
+            for (let j = 0; j < cellsPerLevel; j++) {
+                if (grid[i][j].walls.top) {
                     ctx.beginPath();
-                    ctx.arc(effectiveCenter, effectiveCenter, innerRadius, angleStart, angleEnd);
+                    ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, innerRadius, j * angleStep, (j + 1) * angleStep);
                     ctx.stroke();
                 }
-                
-                if (cell.walls.right) {
+                if (grid[i][j].walls.right) {
+                    const angle = (j + 1) * angleStep;
                     ctx.beginPath();
-                    ctx.moveTo(effectiveCenter + innerRadius * Math.cos(angleEnd), effectiveCenter + innerRadius * Math.sin(angleEnd));
-                    ctx.lineTo(effectiveCenter + outerRadius * Math.cos(angleEnd), effectiveCenter + outerRadius * Math.sin(angleEnd));
+                    ctx.moveTo(CANVAS_SIZE / 2 + innerRadius * Math.cos(angle), CANVAS_SIZE / 2 + innerRadius * Math.sin(angle));
+                    ctx.lineTo(CANVAS_SIZE / 2 + outerRadius * Math.cos(angle), CANVAS_SIZE / 2 + outerRadius * Math.sin(angle));
                     ctx.stroke();
                 }
             }
         }
 
-        const outermostRadius = (numLevels + donutHoleRings) * levelHeight * scaleFactor;
+        const outermostRadius = centerRadius + numLevels * levelHeight;
+        const entranceAngleStart = startCell.cell * (2 * Math.PI / cellsPerLevel);
+        const entranceAngleEnd = (startCell.cell + 1) * (2 * Math.PI / cellsPerLevel);
         
-        const startRingActual = rings[startCell.row];
-        const anglePerCellStart = 2 * Math.PI / startRingActual.length;
-        const entranceAngleStart = startCell.col * anglePerCellStart;
-        const entranceAngleEnd = (startCell.col + 1) * anglePerCellStart;
-
         ctx.beginPath();
-        ctx.arc(effectiveCenter, effectiveCenter, outermostRadius, entranceAngleEnd, 2 * Math.PI);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(effectiveCenter, effectiveCenter, outermostRadius, 0, entranceAngleStart);
+        ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, outermostRadius, entranceAngleEnd, entranceAngleStart + 2 * Math.PI);
         ctx.stroke();
     }
 
-    function getPolarNeighborsForGeneration(cell, grid) {
-        const neighbors = [];
-        const { row, col } = cell;
-        const currentRing = grid[row];
-        const numRings = grid.length;
 
-        const ccwCellCol = (col - 1 + currentRing.length) % currentRing.length;
-        if (currentRing[ccwCellCol] && !currentRing[ccwCellCol].visited) {
-            neighbors.push([row, currentRing[ccwCellCol]]);
-        }
-
-        const cwCellCol = (col + 1) % currentRing.length;
-        if (currentRing[cwCellCol] && !currentRing[cwCellCol].visited) {
-            neighbors.push([row, currentRing[cwCellCol]]);
-        }
-
-        if (row > 0) {
-            const prevRing = grid[row - 1];
-            const inwardCol = Math.floor(col * (prevRing.length / currentRing.length));
-            if (prevRing[inwardCol] && !prevRing[inwardCol].visited) {
-                neighbors.push([row - 1, prevRing[inwardCol]]);
-            }
-        }
-
-        if (row < numRings - 1) {
-            const nextRing = grid[row + 1];
-            const outwardCol = Math.floor(col * (nextRing.length / currentRing.length));
-            if (nextRing[outwardCol] && !nextRing[outwardCol].visited) {
-                neighbors.push([row + 1, nextRing[outwardCol]]);
-            }
-        }
-        return neighbors;
-    }
+    // --- SOLUTION LOGIC & HELPERS ---
     
-    function removePolarWall(cell1, cell2, grid) {
-        if (cell1.row !== cell2.row) {
-            const outerCell = cell1.row > cell2.row ? cell1 : cell2;
-            outerCell.walls.top = false; 
-        } else {
-            const ringLength = grid[cell1.row].length;
-            if ((cell1.col + 1) % ringLength === cell2.col) {
-                cell1.walls.right = false;
-            } else {
-                cell2.walls.right = false;
-            }
-        }
-    }
-
-    // --- OPLOSSING LOGICA ---
-
     function solveAndShowSolution() {
         solveMaze();
         drawSolution();
@@ -541,32 +493,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function solveMaze() {
-        let queue = [{ cell: startCell, path: [startCell] }];
-        let visited = new Set();
+        if (!startCell || !endCell) return;
         
+        let queue;
+        let visited;
+        
+        // Setup initial state based on maze type
         if (currentGrid.type === 'polar') {
-             visited.add(`${startCell.row}-${startCell.col}`);
+            queue = [{ cell: startCell, path: [startCell] }];
+            visited = new Set([`${startCell.level}-${startCell.cell}`]);
         } else {
-            visited.add(startCell);
+            queue = [{ cell: startCell, path: [startCell] }];
+            visited = new Set([startCell]);
         }
        
         while (queue.length > 0) {
             let { cell, path } = queue.shift();
 
-            if (cell === endCell) {
+            // Check for goal based on maze type
+            let isAtEnd = false;
+            if (currentGrid.type === 'polar') {
+                if (cell.level === endCell.level && cell.cell === endCell.cell) isAtEnd = true;
+            } else {
+                if (cell === endCell) isAtEnd = true;
+            }
+
+            if (isAtEnd) {
                 solutionPath = path;
                 return;
             }
             
-            let neighbors;
-            if(currentGrid.type === 'polar') {
-                neighbors = getPolarNeighborsForSolution(cell, currentGrid.rings);
+            // Get neighbors based on maze type
+            let neighbors = [];
+            if (currentGrid.type === 'polar') {
+                const grid = currentGrid.grid;
+                // Clockwise
+                const cwCellIdx = (cell.cell + 1) % currentGrid.cellsPerLevel;
+                if (!grid[cell.level][cell.cell].walls.right) neighbors.push({level: cell.level, cell: cwCellIdx});
+                // Counter-clockwise
+                const ccwCellIdx = (cell.cell - 1 + currentGrid.cellsPerLevel) % currentGrid.cellsPerLevel;
+                if (!grid[cell.level][ccwCellIdx].walls.right) neighbors.push({level: cell.level, cell: ccwCellIdx});
+                // Outward
+                if (cell.level < currentGrid.numLevels - 1 && !grid[cell.level + 1][cell.cell].walls.top) neighbors.push({level: cell.level + 1, cell: cell.cell});
+                // Inward
+                if (cell.level > 0 && !grid[cell.level][cell.cell].walls.top) neighbors.push({level: cell.level - 1, cell: cell.cell});
             } else {
-                neighbors = getGridNeighbors(cell, currentGrid);
+                const {x, y} = cell;
+                if (!cell.walls.top && y > 0 && currentGrid[y - 1]?.[x]) neighbors.push(currentGrid[y - 1][x]);
+                if (!cell.walls.right && x < currentGrid[0].length - 1 && currentGrid[y]?.[x + 1]) neighbors.push(currentGrid[y][x + 1]);
+                if (!cell.walls.bottom && y < currentGrid.length - 1 && currentGrid[y + 1]?.[x]) neighbors.push(currentGrid[y + 1][x]);
+                if (!cell.walls.left && x > 0 && currentGrid[y]?.[x - 1]) neighbors.push(currentGrid[y][x - 1]);
             }
 
             for (let neighbor of neighbors) {
-                const neighborId = currentGrid.type === 'polar' ? `${neighbor.row}-${neighbor.col}` : neighbor;
+                const neighborId = currentGrid.type === 'polar' ? `${neighbor.level}-${neighbor.cell}` : neighbor;
 
                 if (!visited.has(neighborId)) {
                     visited.add(neighborId);
@@ -577,100 +557,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function getGridNeighbors(cell, grid) {
-        const neighbors = [];
-        const {x, y} = cell;
-        if (!cell.walls.top && y > 0 && grid[y - 1] && grid[y - 1][x]) neighbors.push(grid[y - 1][x]);
-        if (!cell.walls.right && x < grid[0].length - 1 && grid[y] && grid[y][x + 1]) neighbors.push(grid[y][x + 1]);
-        if (!cell.walls.bottom && y < grid.length - 1 && grid[y + 1] && grid[y + 1][x]) neighbors.push(grid[y + 1][x]);
-        if (!cell.walls.left && x > 0 && grid[y] && grid[y][x - 1]) neighbors.push(grid[y][x - 1]);
-        return neighbors;
-    }
-    
-    function getPolarNeighborsForSolution(cell, rings) {
-        const neighbors = [];
-        const { row, col } = cell;
-        const currentRing = rings[row];
-    
-        if (!cell.walls.right) {
-            const cwCol = (col + 1) % currentRing.length;
-            const cwNeighbor = currentRing[cwCol];
-            if (cwNeighbor) {
-                neighbors.push(cwNeighbor);
-            }
-        }
-    
-        const ccwCol = (col - 1 + currentRing.length) % currentRing.length;
-        const ccwNeighbor = currentRing[ccwCol];
-        if (ccwNeighbor && !ccwNeighbor.walls.right) {
-            neighbors.push(ccwNeighbor);
-        }
-    
-        if (row > 0) {
-            if (!cell.walls.top) {
-                const innerRing = rings[row - 1];
-                const inwardCol = Math.floor(col * (innerRing.length / currentRing.length));
-                const inwardNeighbor = innerRing[inwardCol];
-                if (inwardNeighbor) {
-                    neighbors.push(inwardNeighbor);
-                }
-            }
-        }
-    
-        if (row < rings.length - 1) {
-            const outerRing = rings[row + 1];
-            const outwardCol = Math.floor(col * (outerRing.length / currentRing.length));
-            const outwardNeighbor = outerRing[outwardCol];
-            if (outwardNeighbor && !outwardNeighbor.walls.top) {
-                neighbors.push(outwardNeighbor);
-            }
-        }
-    
-        return neighbors;
-    }
-
     function drawSolution() {
         if (solutionPath.length < 2) return;
 
         ctx.strokeStyle = SOLUTION_COLOR;
-        ctx.lineWidth = wallThickness * 2;
+        ctx.lineWidth = wallThickness * 1.5;
         ctx.lineCap = "round";
         ctx.beginPath();
         
         if(currentGrid.type === 'polar') {
-            const { rings, donutHoleRings, numLevels, levelHeight } = currentGrid;
-            const effectiveCenter = CANVAS_SIZE / 2;
-            const scaleFactor = (CANVAS_SIZE - 2 * MAZE_PADDING) / CANVAS_SIZE;
+            const { numLevels, cellsPerLevel, centerRings } = currentGrid;
+            const levelHeight = (CANVAS_SIZE/2 - MAZE_PADDING) / (numLevels + centerRings);
+            const centerRadius = centerRings * levelHeight;
 
-            for(let i=0; i<solutionPath.length; i++) {
-                const cell = solutionPath[i];
-                if(!cell || cell.row === undefined) continue;
-
-                const ringData = rings[cell.row];
-                if (!ringData) continue;
-
-                const anglePerCell = 2 * Math.PI / ringData.length;
-                const radius = (cell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor;
-                const angle = (cell.col + 0.5) * anglePerCell;
-                
-                const x = effectiveCenter + radius * Math.cos(angle);
-                const y = effectiveCenter + radius * Math.sin(angle);
-                
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x,y);
-            }
-
-            if (endCell.walls.top === false && solutionPath[solutionPath.length - 1] === endCell) {
-                const lastCell = solutionPath[solutionPath.length - 1];
-                const lastRingData = rings[lastCell.row];
-                const anglePerCellLast = 2 * Math.PI / lastRingData.length;
-                const radiusLast = (lastCell.row + donutHoleRings + 0.5) * levelHeight * scaleFactor;
-                const angleLast = (lastCell.col + 0.5) * anglePerCellLast;
-                
-                const xLast = effectiveCenter + radiusLast * Math.cos(angleLast);
-                const yLast = effectiveCenter + radiusLast * Math.sin(angleLast);
-
-                ctx.moveTo(xLast, yLast);
-                ctx.lineTo(effectiveCenter, effectiveCenter);
+            solutionPath.forEach((cell, i) => {
+                const angleStep = 2 * Math.PI / cellsPerLevel;
+                const radius = centerRadius + (cell.level + 0.5) * levelHeight;
+                const angle = (cell.cell + 0.5) * angleStep;
+                const x = CANVAS_SIZE / 2 + radius * Math.cos(angle);
+                const y = CANVAS_SIZE / 2 + radius * Math.sin(angle);
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+    
+            // Extend line to the center for the exit
+            if (solutionPath[solutionPath.length - 1].level === 0) {
+                 ctx.lineTo(CANVAS_SIZE / 2, CANVAS_SIZE / 2);
             }
 
         } else {
@@ -692,8 +607,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         ctx.stroke();
     }
-
-    // --- HELPERS & INTERACTIVITEIT ---
     
     function handleEraser(event) {
         if (currentShape !== 'worksheet' || !currentGrid.length || !Array.isArray(currentGrid)) return;
