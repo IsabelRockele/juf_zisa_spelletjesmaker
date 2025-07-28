@@ -571,6 +571,7 @@ document.addEventListener("DOMContentLoaded", () => {
             doc.setFontSize(14);
             doc.text("Knip de afbeeldingen uit en plak ze op de juiste plaats:", pageWidth / 2, startY - 5, { align: 'center' });
 
+            // GECORRIGEERD BLOK BEGINT HIER
             for(let i = 0; i < allMissingDataForCutout.length; i++){
                 const img = allMissingDataForCutout[i];
                 const col = i % cutImagesPerRow;
@@ -578,15 +579,36 @@ document.addEventListener("DOMContentLoaded", () => {
                 const boxX = startX + col * (cutImageSize + imgBoxSpacing);
                 const boxY = startY + row * (cutImageSize + imgBoxSpacing);
 
+                // Teken het gestippelde vierkante kader
                 doc.setDrawColor('#004080');
                 doc.setLineDashPattern([2, 1.5], 0);
                 doc.rect(boxX, boxY, cutImageSize, cutImageSize);
                 doc.setLineDashPattern([], 0);
 
                 if (img && img.complete) {
-                    doc.addImage(img.src, 'PNG', boxX + 1, boxY + 1, cutImageSize - 2, cutImageSize - 2);
+                    const marginInBox = 1; // Kleine witte rand binnen het kader
+                    const availableSpace = cutImageSize - 2 * marginInBox;
+
+                    const aspectRatio = img.naturalWidth / img.naturalHeight;
+                    let newWidth, newHeight;
+
+                    if (aspectRatio > 1) { // Afbeelding is breder dan hoog
+                        newWidth = availableSpace;
+                        newHeight = availableSpace / aspectRatio;
+                    } else { // Afbeelding is hoger dan breed of vierkant
+                        newHeight = availableSpace;
+                        newWidth = availableSpace * aspectRatio;
+                    }
+
+                    // Centreer de afbeelding binnen het kader
+                    const drawX = boxX + (cutImageSize - newWidth) / 2;
+                    const drawY = boxY + (cutImageSize - newHeight) / 2;
+
+                    // Voeg de afbeelding toe met de correcte, berekende afmetingen
+                    doc.addImage(img.src, 'PNG', drawX, drawY, newWidth, newHeight);
                 }
             }
+            // GECORRIGEERD BLOK EINDIGT HIER
         }
         
         doc.save(`sudoku-werkblad-${aantal}.pdf`);
