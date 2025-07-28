@@ -13,23 +13,30 @@ body {
 header {
     width: 100%;
     max-width: 1200px;
-    display: flex;
-    justify-content: space-between; /* Aangepast voor correcte uitlijning */
-    align-items: center;
     margin-bottom: 20px;
     padding: 0 10px;
     box-sizing: border-box;
+    position: relative;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 h1 {
     color: #004080;
     font-size: 2em;
-    margin-right: auto; /* Aangepast voor correcte uitlijning */
+    margin: 0;
 }
 
-/* Toegevoegde stijl voor de nieuwe knop */
-header button#menuBtn {
-    margin-right: 10px;
+.header-knoppen {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 button {
@@ -205,7 +212,161 @@ textarea::placeholder {
         flex-direction: column;
         align-items: center;
     }
-    h1 {
-       margin-right: 0;
+}
+/* ===================================== */
+/* NIEUWE STIJLEN VOOR KEUZESCHERM & VW  */
+/* ===================================== */
+
+/* Keuzescherm stijlen */
+#keuzescherm {
+    text-align: center;
+    margin: 40px auto;
+}
+.puzzel-opties {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    margin-top: 20px;
+}
+.puzzel-keuze {
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    transition: transform 0.2s, border-color 0.2s;
+    text-align: center;
+}
+.puzzel-keuze:hover {
+    transform: scale(1.05);
+    border-color: #0056b3;
+}
+.puzzel-keuze img {
+    width: 300px;
+    height: auto;
+    display: block;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+.puzzel-keuze p {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+    margin-top: 10px;
+}
+
+/* Hulpklasse om elementen te verbergen */
+.verborgen {
+    display: none !important;
+}
+
+/* Stijlen voor Verborgen Woord (VW) generator */
+.vw-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+.vw-setup-paneel {
+    flex: 1;
+    max-width: 500px;
+    background: #f0faff;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #b3e0ff;
+}
+.vw-output-paneel {
+    flex: 2;
+    text-align: center;
+}
+.vw-antwoord-rij {
+    display: grid;
+    grid-template-columns: 30px 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.vw-antwoord-rij .vw-letter-indicator {
+    font-size: 1.5em;
+    font-weight: bold;
+    text-align: center;
+    color: #004080;
+}
+.vw-error {
+    border: 2px solid red !important;
+}
+#vwWerkbladContainer {
+    background: white;
+    padding: 40px;
+    border: 1px solid #b3e0ff;
+    min-height: 500px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+}
+#vwWerkbladContainer p {
+    font-size: 16px;
+    margin-bottom: 2em;
+}
+.vw-placeholder {
+    color: #999;
+}
+#vw-export-knoppen {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+.vw-puzzel-rooster {
+    border-collapse: collapse;
+    margin: 40px auto;
+}
+.vw-puzzel-rooster td {
+    width: 35px;
+    height: 35px;
+    border: 1px solid #333;
+    text-align: center;
+    font-size: 18px;
+    vertical-align: middle;
+}
+.vw-puzzel-rooster td.verborgen-letter-cel {
+    background-color: #ffeca7;
+}
+.vw-puzzel-rooster td.leeg {
+    border: none;
+}
+.vw-puzzel-rooster .nummer-cel {
+    vertical-align: middle;
+    text-align: right;
+    padding-right: 0.5em;
+    border: none;
+}
+.vw-nummer {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+.vw-omschrijvingen-lijst {
+    text-align: left;
+    max-width: 600px;
+    margin: 20px auto;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+
+@media print {
+    #keuzescherm, .generator-container:not(.vw-print-area), header, #vwPrintBtn, #vwDownloadPngBtn, #vwDownloadPdfBtn, #vw-export-knoppen {
+        display: none !important;
+    }
+    .vw-setup-paneel {
+        display: none;
+    }
+    .vw-container {
+        display: block;
+    }
+    #vwWerkbladContainer {
+        box-shadow: none;
+        border: none;
     }
 }
