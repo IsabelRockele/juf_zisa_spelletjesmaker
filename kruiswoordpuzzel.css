@@ -174,7 +174,7 @@ button:hover {
     color: #333;
 }
 
-#controls textarea {
+#controls textarea, #klassiek-omschrijving-invoer input {
     padding: 8px;
     border-radius: 5px;
     border: 1px solid #aaddff;
@@ -187,6 +187,12 @@ button:hover {
 textarea::placeholder {
     color: #aaa;
     font-style: italic;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 15px 0;
 }
 
 /* Responsive aanpassingen */
@@ -214,10 +220,10 @@ textarea::placeholder {
     }
 }
 /* ===================================== */
-/* NIEUWE STIJLEN VOOR KEUZESCHERM & VW  */
+/* STIJLEN VOOR KEUZESCHERMEN & VW       */
 /* ===================================== */
 
-/* Keuzescherm stijlen */
+/* Hoofd Keuzescherm */
 #keuzescherm {
     text-align: center;
     margin: 40px auto;
@@ -252,6 +258,37 @@ textarea::placeholder {
     font-weight: bold;
     color: #333;
     margin-top: 10px;
+}
+
+/* Sub-keuzescherm voor Klassieke puzzel */
+#klassiek-keuzescherm {
+    text-align: center;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f0faff;
+    border-radius: 8px;
+}
+.sub-keuze-opties {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+.sub-keuze-knop {
+    font-size: 1em;
+    padding: 10px 15px;
+}
+
+/* Dynamische invoer voor klassieke puzzel */
+.klassiek-woord-rij {
+    display: grid;
+    grid-template-columns: 25px 1fr 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.klassiek-woord-rij label {
+    font-weight: bold;
 }
 
 /* Hulpklasse om elementen te verbergen */
@@ -354,9 +391,8 @@ textarea::placeholder {
     line-height: 1.6;
 }
 
-
 @media print {
-    #keuzescherm, .generator-container:not(.vw-print-area), header, #vwPrintBtn, #vwDownloadPngBtn, #vwDownloadPdfBtn, #vw-export-knoppen {
+    #keuzescherm, .generator-container:not(.vw-print-area), header, #vw-export-knoppen {
         display: none !important;
     }
     .vw-setup-paneel {
