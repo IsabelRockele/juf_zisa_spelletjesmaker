@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let features = [];
     let codedPath = [];
     let freehandLines = [];
-    let startPoint = null;
+    let startPoint = null; // Wordt voornamelijk gebruikt voor initialisatie
     let isDrawing = false;
     let currentTool = 'start';
     let selectedFeature = null;
@@ -70,10 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const containerWidth = container.clientWidth - 20;
         const containerHeight = container.clientHeight - 20;
         cellSize = Math.min(containerWidth / gridWidth, containerHeight / gridHeight);
-
         drawingCanvas.width = gridWidth * cellSize;
         drawingCanvas.height = gridHeight * cellSize;
-
         redrawAll();
     }
 
@@ -131,10 +129,11 @@ document.addEventListener("DOMContentLoaded", () => {
             drawCtx.stroke();
         });
 
-        if (startPoint) {
+        if (codedPath.length > 0) {
+            const currentStartPoint = codedPath[0];
             drawCtx.fillStyle = '#ff0000';
             drawCtx.beginPath();
-            drawCtx.arc(startPoint.vx * cellSize, startPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
+            drawCtx.arc(currentStartPoint.vx * cellSize, currentStartPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
             drawCtx.fill();
         }
     }
@@ -160,7 +159,6 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.save();
         ctx.translate(feature.x, feature.y);
         ctx.rotate(feature.rotation || 0);
-
         switch (feature.type) {
             case 'eye':
                 ctx.fillStyle = '#000';
@@ -190,19 +188,16 @@ document.addEventListener("DOMContentLoaded", () => {
         ctx.save();
         ctx.translate(feature.x, feature.y);
         ctx.rotate(feature.rotation || 0);
-
         ctx.strokeStyle = '#00aaff';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 2]);
         ctx.strokeRect(-bounds.w / 2, -bounds.h / 2, bounds.w, bounds.h);
         ctx.setLineDash([]);
-
         if (feature.type === 'mouth') {
             const handleSize = 8;
             ctx.fillStyle = '#00aaff';
             ctx.fillRect(bounds.w / 2 - handleSize / 2, -handleSize / 2, handleSize, handleSize);
             ctx.fillRect(-bounds.w / 2 - handleSize / 2, -handleSize / 2, handleSize, handleSize);
-
             ctx.fillStyle = '#ff8c00';
             ctx.beginPath();
             ctx.arc(0, -bounds.h / 2 - 20, handleSize / 2, 0, Math.PI * 2);
@@ -233,7 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const pos = getMousePos(event);
         dragStartPos = pos;
         action = null;
-
         if (currentTool === 'move') {
             const clickedHandle = getClickedHandle(pos, selectedFeature);
             if (clickedHandle) {
@@ -245,7 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
         } else if (currentTool === 'line') {
-            const startVertex = codedPath.length > 0 ? codedPath[codedPath.length - 1] : startPoint;
+            const startVertex = codedPath.length > 0 ? codedPath[codedPath.length - 1] : codedPath[0];
             if (startVertex) {
                 previewLine = { start: startVertex, end: startVertex };
             } else {
@@ -262,11 +256,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleMouseMove(event) {
         if (!isDrawing) return;
         const pos = getMousePos(event);
-
         if (currentTool === 'move' && selectedFeature && action) {
             const dx = pos.x - dragStartPos.x;
             const dy = pos.y - dragStartPos.y;
-
             switch (action) {
                 case 'move':
                     selectedFeature.x += dx;
@@ -289,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (currentTool === 'eraser') {
             features = features.filter(f => Math.hypot(f.x - pos.x, f.y - pos.y) > (f.radius || f.width / 2));
             codedPath = codedPath.filter(p => Math.hypot(p.vx * cellSize - pos.x, p.vy * cellSize - pos.y) > cellSize / 2);
+            startPoint = codedPath.length > 0 ? codedPath[0] : null; 
             freehandLines = freehandLines.filter(path => !path.some(p => Math.hypot(p.x - pos.x, p.y - pos.y) < cellSize / 2));
         }
         redrawAll();
@@ -298,7 +291,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isDrawing) return;
         isDrawing = false;
         action = null;
-
         if (currentTool === 'line' && previewLine) {
             const endVertex = previewLine.end;
             let lastVertex = previewLine.start;
@@ -317,7 +309,6 @@ document.addEventListener("DOMContentLoaded", () => {
     function handleClick(event) {
         if (isDrawing) return;
         const pos = getMousePos(event);
-
         switch (currentTool) {
             case 'start':
                 startPoint = { vx: Math.round(pos.x / cellSize), vy: Math.round(pos.y / cellSize) };
@@ -357,18 +348,14 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!feature || feature.type !== 'mouth') return null;
         const bounds = getFeatureBounds(feature);
         const handleSize = 10;
-
         const worldCoord = (localX, localY) => ({
             x: feature.x + localX * Math.cos(feature.rotation) - localY * Math.sin(feature.rotation),
             y: feature.y + localX * Math.sin(feature.rotation) + localY * Math.cos(feature.rotation)
         });
-
         const resizeHandlePos = worldCoord(bounds.w / 2, 0);
         const rotateHandlePos = worldCoord(0, -bounds.h / 2 - 20);
-
         if (Math.hypot(pos.x - resizeHandlePos.x, pos.y - resizeHandlePos.y) < handleSize) return 'resize';
         if (Math.hypot(pos.x - rotateHandlePos.x, pos.y - rotateHandlePos.y) < handleSize) return 'rotate';
-
         return null;
     }
 
@@ -376,7 +363,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const oldCellSize = cellSize;
         gridWidthInput.value = ++gridWidth;
         if (atLeft) {
-            if (startPoint) startPoint.vx++;
             codedPath.forEach(p => p.vx++);
             features.forEach(f => f.x += oldCellSize);
             freehandLines.forEach(path => path.forEach(p => p.x += oldCellSize));
@@ -389,7 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const oldCellSize = cellSize;
         gridWidthInput.value = --gridWidth;
         if (atLeft) {
-            if (startPoint) startPoint.vx--;
             codedPath.forEach(p => p.vx--);
             features.forEach(f => f.x -= oldCellSize);
             freehandLines.forEach(path => path.forEach(p => p.x -= oldCellSize));
@@ -401,7 +386,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const oldCellSize = cellSize;
         gridHeightInput.value = ++gridHeight;
         if (atTop) {
-            if (startPoint) startPoint.vy++;
             codedPath.forEach(p => p.vy++);
             features.forEach(f => f.y += oldCellSize);
             freehandLines.forEach(path => path.forEach(p => p.y += oldCellSize));
@@ -414,7 +398,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const oldCellSize = cellSize;
         gridHeightInput.value = --gridHeight;
         if (atTop) {
-            if (startPoint) startPoint.vy--;
             codedPath.forEach(p => p.vy--);
             features.forEach(f => f.y -= oldCellSize);
             freehandLines.forEach(path => path.forEach(p => p.y -= oldCellSize));
@@ -423,7 +406,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function generateCode() {
-        if (!startPoint || codedPath.length <= 1) {
+        if (codedPath.length < 2) {
             meldingContainer.textContent = 'Teken eerst een volledige lijn vanaf het startpunt!';
             return;
         }
@@ -439,8 +422,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (directions.length === 0) return [];
         const instructions = [];
-        let count = 1,
-            currentDir = directions[0];
+        let count = 1, currentDir = directions[0];
         for (let i = 1; i < directions.length; i++) {
             if (directions[i] === currentDir) {
                 count++;
@@ -473,6 +455,13 @@ document.addEventListener("DOMContentLoaded", () => {
         const wsCtx = worksheetCanvas.getContext('2d');
         wsCtx.clearRect(0, 0, worksheetCanvas.width, worksheetCanvas.height);
         drawGridLines(wsCtx);
+        if (codedPath.length > 0) {
+            const currentStartPoint = codedPath[0];
+            wsCtx.fillStyle = '#ff0000';
+            wsCtx.beginPath();
+            wsCtx.arc(currentStartPoint.vx * cellSize, currentStartPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
+            wsCtx.fill();
+        }
         features.forEach(f => drawFeature(wsCtx, f));
         freehandLines.forEach(path => {
             wsCtx.strokeStyle = '#000';
@@ -484,21 +473,132 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             wsCtx.stroke()
         });
-        if (startPoint) {
-            wsCtx.fillStyle = '#ff0000';
-            wsCtx.beginPath();
-            wsCtx.arc(startPoint.vx * cellSize, startPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
-            wsCtx.fill()
-        }
     }
 
+    // --- VOLLEDIG HERWERKTE PDF FUNCTIE ---
     function downloadPdf() {
-        // Functie voor PDF downloaden (kan complex zijn, hier basis opzet)
-        alert("PDF download functionaliteit is niet volledig geïmplementeerd in dit voorbeeld.");
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const pageMargin = 15;
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const contentWidth = pageWidth - (pageMargin * 2);
+        let currentY = 20;
+
+        // Hulpfunctie om pijlen te tekenen, nu gecentreerd rond y
+        const drawArrow = (doc, x, y, size, direction) => {
+            const s = size / 2; // Werk met een halve grootte voor centreren
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(0);
+
+            switch (direction) {
+                case '⬆️': // N
+                    doc.line(x, y + s, x, y - s);
+                    doc.line(x, y - s, x - s / 2, y - s / 2);
+                    doc.line(x, y - s, x + s / 2, y - s / 2);
+                    break;
+                case '⬇️': // Z
+                    doc.line(x, y - s, x, y + s);
+                    doc.line(x, y + s, x - s / 2, y + s / 2);
+                    doc.line(x, y + s, x + s / 2, y + s / 2);
+                    break;
+                case '⬅️': // W
+                    doc.line(x + s, y, x - s, y);
+                    doc.line(x - s, y, x - s / 2, y - s / 2);
+                    doc.line(x - s, y, x - s / 2, y + s / 2);
+                    break;
+                case '➡️': // O
+                    doc.line(x - s, y, x + s, y);
+                    doc.line(x + s, y, x + s / 2, y - s / 2);
+                    doc.line(x + s, y, x + s / 2, y + s / 2);
+                    break;
+                case '↗️': // NO
+                    doc.line(x - s*0.7, y + s*0.7, x + s*0.7, y - s*0.7);
+                    doc.line(x + s*0.7, y - s*0.7, x + s*0.2, y - s*0.5);
+                    doc.line(x + s*0.7, y - s*0.7, x + s*0.5, y - s*0.2);
+                    break;
+                case '↖️': // NW
+                    doc.line(x + s*0.7, y + s*0.7, x - s*0.7, y - s*0.7);
+                    doc.line(x - s*0.7, y - s*0.7, x - s*0.2, y - s*0.5);
+                    doc.line(x - s*0.7, y - s*0.7, x - s*0.5, y - s*0.2);
+                    break;
+                case '↘️': // ZO
+                    doc.line(x - s*0.7, y - s*0.7, x + s*0.7, y + s*0.7);
+                    doc.line(x + s*0.7, y + s*0.7, x + s*0.2, y + s*0.5);
+                    doc.line(x + s*0.7, y + s*0.7, x + s*0.5, y + s*0.2);
+                    break;
+                case '↙️': // ZW
+                    doc.line(x + s*0.7, y - s*0.7, x - s*0.7, y + s*0.7);
+                    doc.line(x - s*0.7, y + s*0.7, x - s*0.2, y + s*0.5);
+                    doc.line(x - s*0.7, y + s*0.7, x - s*0.5, y + s*0.2);
+                    break;
+            }
+        };
+
+        // Titel
+        doc.setFontSize(18);
+        doc.text("Code-tekenen Werkblad", pageWidth / 2, currentY, { align: 'center' });
+        currentY += 15;
+
+        // Instructies (Code)
+        doc.setFontSize(12);
+        doc.text("Code:", pageMargin, currentY);
+        currentY += 12; // Meer ruimte voor de eerste regel
+
+        let currentX = pageMargin;
+        const numberArrowSpacing = 3; // Ruimte tussen getal en pijl
+        const itemSpacing = 12;       // Ruimte tussen code-items
+        const arrowSize = 4;          // Grootte van de pijl
+        const lineHeight = 12;        // Regelhoogte
+
+        instructionsOutput.querySelectorAll('span').forEach(span => {
+            const parts = span.textContent.trim().split(' ');
+            if (parts.length !== 2) return;
+
+            const count = parts[0];
+            const arrowEmoji = parts[1];
+            const numberWidth = doc.getTextWidth(count);
+            const currentItemWidth = numberWidth + numberArrowSpacing + arrowSize + itemSpacing;
+
+            // Ga naar de volgende regel als het niet meer past
+            if (currentX + currentItemWidth > pageWidth - pageMargin) {
+                currentX = pageMargin;
+                currentY += lineHeight;
+            }
+            
+            // Teken het getal, verticaal gecentreerd
+            doc.text(count, currentX, currentY, { baseline: 'middle' });
+            currentX += numberWidth + numberArrowSpacing;
+
+            // Teken de pijl, verticaal gecentreerd
+            drawArrow(doc, currentX, currentY, arrowSize, arrowEmoji);
+            currentX += itemSpacing; // Schuif op voor het volgende item
+        });
+        currentY += lineHeight + 5;
+
+        // Rasterafbeelding
+        try {
+            const imageData = worksheetCanvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imageData);
+            const imgRatio = imgProps.height / imgProps.width;
+            const imgWidth = contentWidth;
+            const imgHeight = imgWidth * imgRatio;
+
+            if (currentY + imgHeight > doc.internal.pageSize.getHeight() - pageMargin) {
+                doc.addPage();
+                currentY = pageMargin;
+            }
+
+            doc.addImage(imageData, 'PNG', pageMargin, currentY, imgWidth, imgHeight);
+        } catch (e) {
+            console.error("Fout bij toevoegen van canvas aan PDF:", e);
+            doc.text("Fout: Kon de tekening niet toevoegen.", pageMargin, currentY);
+        }
+        
+        doc.save('code-tekenen-werkblad.pdf');
     }
 
     function saveDrawing() {
-        const drawingData = { gridWidth, gridHeight, startPoint, codedPath, features, freehandLines };
+        const drawingData = { gridWidth, gridHeight, codedPath, features, freehandLines };
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([JSON.stringify(drawingData)], { type: 'application/json' }));
         a.download = 'tekening.json';
@@ -507,16 +607,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function loadDrawing(data) {
+        resetDrawing();
         gridWidthInput.value = data.gridWidth;
         gridHeightInput.value = data.gridHeight;
-
         gridWidth = parseInt(data.gridWidth);
         gridHeight = parseInt(data.gridHeight);
-
-        updateCanvasAndRedraw(); // Zet grid grootte eerst
-
-        startPoint = data.startPoint;
+        updateCanvasAndRedraw();
+        
         codedPath = data.codedPath || [];
+        startPoint = codedPath.length > 0 ? codedPath[0] : null;
+
         features = data.features || [];
         freehandLines = data.freehandLines || [];
         redrawAll();
@@ -529,12 +629,12 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.onload = e => {
             try {
                 const data = JSON.parse(e.target.result);
-                loadDrawing(data)
+                loadDrawing(data);
             } catch (err) {
-                meldingContainer.textContent = "Fout bij laden: " + err.message
+                meldingContainer.textContent = "Fout bij laden: " + err.message;
             }
         };
-        reader.readAsText(file)
+        reader.readAsText(file);
     }
 
     // --- Catalogus Functies ---
@@ -563,10 +663,9 @@ document.addEventListener("DOMContentLoaded", () => {
         themesContainer.style.display = 'grid';
         backToThemesBtn.style.display = 'none';
         modalTitle.textContent = 'Catalogus';
-
         for (const theme in catalogData) {
             const themeBtn = document.createElement('button');
-            themeBtn.className = 'catalog-choice-button';
+            themeBtn.className = 'catalog-theme-button';
             themeBtn.innerHTML = `<span>${theme}</span>`;
             themeBtn.onclick = () => displayChoices(theme);
             themesContainer.appendChild(themeBtn);
@@ -579,7 +678,6 @@ document.addEventListener("DOMContentLoaded", () => {
         choicesContainer.style.display = 'grid';
         backToThemesBtn.style.display = 'block';
         modalTitle.textContent = theme;
-
         const choices = catalogData[theme];
         choices.forEach(choice => {
             const choiceBtn = document.createElement('button');
@@ -594,6 +692,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function loadChoice(jsonPath) {
+        if (!jsonPath) {
+            meldingContainer.textContent = "Dit item heeft geen tekeningbestand.";
+            return;
+        }
         try {
             const response = await fetch(jsonPath);
             if (!response.ok) throw new Error(`Bestand ${jsonPath} niet gevonden!`);
@@ -605,13 +707,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-
     // --- Event Listeners ---
     resetGridBtn.addEventListener('click', initializeGrid);
-    clearBtn.addEventListener('click', () => {
-        resetDrawing();
-        initializeGrid();
-    });
+    clearBtn.addEventListener('click', resetDrawing);
     addColLeftBtn.addEventListener('click', () => addColumn(true));
     addColRightBtn.addEventListener('click', () => addColumn(false));
     removeColLeftBtn.addEventListener('click', () => removeColumn(true));
@@ -622,6 +720,7 @@ document.addEventListener("DOMContentLoaded", () => {
     removeRowBottomBtn.addEventListener('click', () => removeRow(false));
     generateBtn.addEventListener('click', generateCode);
     downloadPdfBtn.addEventListener('click', downloadPdf);
+
     toolBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             toolBtns.forEach(b => b.classList.remove('selected'));
@@ -633,10 +732,12 @@ document.addEventListener("DOMContentLoaded", () => {
             redrawAll();
         });
     });
+
     drawingCanvas.addEventListener('mousedown', handleMouseDown);
     drawingCanvas.addEventListener('mousemove', handleMouseMove);
     drawingCanvas.addEventListener('mouseup', handleMouseUp);
     drawingCanvas.addEventListener('click', handleClick);
+
     saveDrawingBtn.addEventListener('click', saveDrawing);
     loadDrawingBtn.addEventListener('click', () => loadDrawingInput.click());
     loadDrawingInput.addEventListener('change', handleFileLoad);
@@ -645,7 +746,9 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModalBtn.addEventListener('click', closeCatalog);
     backToThemesBtn.addEventListener('click', showThemes);
     window.addEventListener('click', (e) => {
-        if (e.target == catalogModal) closeCatalog();
+        if (e.target == catalogModal) {
+            closeCatalog();
+        }
     });
 
     // Initialisatie
