@@ -1,8 +1,24 @@
 {
-  "Werkstukken": [
+  "Dieren": [
     {
-      "name": "hond",
-      "image": "coderen_afbeeldingen/hond.png"
+      "name": "Hond",
+      "image": "coderen_afbeeldingen/hond.png",
+      "json": "coderen_afbeeldingen/hond.json"
     }
-  ]
+  ],
+  "Kerst": [],
+  "Halloween": [],
+  "Terug naar school": [],
+  "Pasen": [],
+  "Herfst": [],
+  "Lente": [],
+  "Zomer": [],
+  "Winter": [
+    {
+      "name": "sneeuwman",
+      "image": "coderen_afbeeldingen/sneeuwman.png",
+      "json": "coderen_afbeeldingen/sneeuwman.json"
+    }
+  ],
+  "Carnaval": []
 }
