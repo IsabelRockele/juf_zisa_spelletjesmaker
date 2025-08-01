@@ -6,8 +6,20 @@
       "json": "coderen_afbeeldingen/hond.json"
     }
   ],
-  "Kerst": [],
-  "Halloween": [],
+  "Kerst": [
+    {
+      "name": "kerstboom",
+      "image": "coderen_afbeeldingen/kerstboom.png",
+      "json": "coderen_afbeeldingen/kerstboom.json"
+    }
+  ],
+  "Halloween": [
+     {
+      "name": "pompoen",
+      "image": "coderen_afbeeldingen/pompoen.png",
+      "json": "coderen_afbeeldingen/pompoen.json"
+    }
+  ],
   "Terug naar school": [],
   "Pasen": [],
   "Herfst": [],
