@@ -102,8 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
             targetCtx.rotate(Math.PI / 2);
         }
 
-        // AANGEPAST: De schaalfactor is verlaagd van 1.60 naar 1.25.
-        // Je kunt met dit getal spelen om de overlap perfect te maken.
         const scaleFactor = 1.35;
         
         const aspectRatio = templateImage.naturalWidth / templateImage.naturalHeight;
@@ -229,6 +227,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function undo() { if (historyPointer > 0) { historyPointer--; drawingMatrix = JSON.parse(history[historyPointer]); redrawDrawing(); updateUndoRedoButtons(); } }
     function redo() { if (historyPointer < history.length - 1) { historyPointer++; drawingMatrix = JSON.parse(history[historyPointer]); redrawDrawing(); updateUndoRedoButtons(); } }
     function clearDrawing() { initializeDrawingCanvas(); }
+
+    function updateUndoRedoButtons() {
+        undoBtn.disabled = historyPointer <= 0;
+        redoBtn.disabled = historyPointer >= history.length - 1;
+    }
 
     function setupEventListeners() {
         updateGridSizeBtn.addEventListener('click', () => {
