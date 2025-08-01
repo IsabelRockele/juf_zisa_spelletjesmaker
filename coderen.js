@@ -33,21 +33,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const removeRowTopBtn = document.getElementById('removeRowTopBtn');
     const addRowBottomBtn = document.getElementById('addRowBottomBtn');
     const removeRowBottomBtn = document.getElementById('removeRowBottomBtn');
+    const lineColorInput = document.getElementById('lineColor');
+    const featureColorInput = document.getElementById('featureColor');
+    // NIEUWE ELEMENTEN
+    const fillTriangleCheckbox = document.getElementById('fillTriangleCheckbox');
+    const undoCodeBtn = document.getElementById('undoCodeBtn');
+
 
     // --- Status variabelen ---
     let gridWidth, gridHeight, cellSize;
     let features = [];
     let codedPath = [];
     let freehandLines = [];
-    let startPoint = null; // Wordt voornamelijk gebruikt voor initialisatie
+    let coloredLines = [];
+    let startPoint = null;
     let isDrawing = false;
     let currentTool = 'start';
     let selectedFeature = null;
     let action = null;
     let previewLine = null;
+    let previewColoredLine = null;
     let catalogData = {};
     let dragStartPos = null;
 
+    // --- INITIALISATIE ---
     function initializeGrid() {
         gridWidth = parseInt(gridWidthInput.value);
         gridHeight = parseInt(gridHeightInput.value);
@@ -59,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
         features = [];
         codedPath = [];
         freehandLines = [];
+        coloredLines = [];
         startPoint = null;
         selectedFeature = null;
         clearOutput();
@@ -82,6 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         meldingContainer.textContent = '';
     }
 
+    // --- TEKENFUNCTIES (HERTEKEN ALLES) ---
     function redrawAll() {
         drawCtx.clearRect(0, 0, drawCtx.canvas.width, drawCtx.canvas.height);
         drawGridLines(drawCtx);
@@ -99,17 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
             drawCtx.stroke();
         }
 
-        if (previewLine) {
-            drawCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            drawCtx.lineWidth = 1;
-            drawCtx.setLineDash([2, 3]);
-            drawCtx.beginPath();
-            drawCtx.moveTo(previewLine.start.vx * cellSize, previewLine.start.vy * cellSize);
-            drawCtx.lineTo(previewLine.end.vx * cellSize, previewLine.end.vy * cellSize);
-            drawCtx.stroke();
-            drawCtx.setLineDash([]);
-        }
-
         features.forEach(f => drawFeature(drawCtx, f));
 
         if (selectedFeature) {
@@ -121,11 +121,20 @@ document.addEventListener("DOMContentLoaded", () => {
             drawCtx.lineWidth = Math.max(1, cellSize / 10);
             drawCtx.beginPath();
             if (path.length > 0) {
-                drawCtx.moveTo(path[0].x, path[0].y);
+                drawCtx.moveTo(path[0].gridX * cellSize, path[0].gridY * cellSize);
                 for (let i = 1; i < path.length; i++) {
-                    drawCtx.lineTo(path[i].x, path[i].y);
+                    drawCtx.lineTo(path[i].gridX * cellSize, path[i].gridY * cellSize);
                 }
             }
+            drawCtx.stroke();
+        });
+        
+        coloredLines.forEach(line => {
+            drawCtx.strokeStyle = line.color;
+            drawCtx.lineWidth = Math.max(1.5, cellSize / 10);
+            drawCtx.beginPath();
+            drawCtx.moveTo(line.startGridX * cellSize, line.startGridY * cellSize);
+            drawCtx.lineTo(line.endGridX * cellSize, line.endGridY * cellSize);
             drawCtx.stroke();
         });
 
@@ -135,6 +144,26 @@ document.addEventListener("DOMContentLoaded", () => {
             drawCtx.beginPath();
             drawCtx.arc(currentStartPoint.vx * cellSize, currentStartPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
             drawCtx.fill();
+        }
+        
+        if (previewLine) {
+            drawCtx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            drawCtx.lineWidth = 1;
+            drawCtx.setLineDash([2, 3]);
+            drawCtx.beginPath();
+            drawCtx.moveTo(previewLine.start.vx * cellSize, previewLine.start.vy * cellSize);
+            drawCtx.lineTo(previewLine.end.vx * cellSize, previewLine.end.vy * cellSize);
+            drawCtx.stroke();
+            drawCtx.setLineDash([]);
+        }
+
+        if (previewColoredLine) {
+            drawCtx.strokeStyle = previewColoredLine.color;
+            drawCtx.lineWidth = Math.max(1.5, cellSize / 10);
+            drawCtx.beginPath();
+            drawCtx.moveTo(previewColoredLine.startGridX * cellSize, previewColoredLine.startGridY * cellSize);
+            drawCtx.lineTo(previewColoredLine.endGridX * cellSize, previewColoredLine.endGridY * cellSize);
+            drawCtx.stroke();
         }
     }
 
@@ -156,28 +185,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function drawFeature(ctx, feature) {
+        const pixelX = feature.gridX * cellSize;
+        const pixelY = feature.gridY * cellSize;
+        
         ctx.save();
-        ctx.translate(feature.x, feature.y);
+        ctx.translate(pixelX, pixelY);
         ctx.rotate(feature.rotation || 0);
+        
+        const featureSize = feature.sizeRatio * cellSize;
+
         switch (feature.type) {
             case 'eye':
-                ctx.fillStyle = '#000';
-                ctx.beginPath();
-                ctx.arc(0, 0, feature.radius, 0, Math.PI * 2);
-                ctx.fill();
-                break;
             case 'nose':
-                ctx.fillStyle = '#000';
+                ctx.fillStyle = feature.color || '#000000';
                 ctx.beginPath();
-                ctx.arc(0, 0, feature.radius, 0, Math.PI * 2);
+                ctx.arc(0, 0, featureSize / 2, 0, Math.PI * 2);
                 ctx.fill();
                 break;
             case 'mouth':
-                ctx.strokeStyle = '#000';
+                ctx.strokeStyle = '#000000';
                 ctx.lineWidth = Math.max(1.5, cellSize / 12);
                 ctx.beginPath();
-                ctx.arc(0, 0, feature.width / 2, 0.2 * Math.PI, 0.8 * Math.PI);
+                ctx.arc(0, 0, featureSize / 2, 0.2 * Math.PI, 0.8 * Math.PI);
                 ctx.stroke();
+                break;
+            case 'triangle':
+                ctx.beginPath();
+                ctx.moveTo(0, -featureSize / 2);
+                ctx.lineTo(featureSize / 2, featureSize / 2);
+                ctx.lineTo(-featureSize / 2, featureSize / 2);
+                ctx.closePath();
+                if (feature.isFilled) {
+                    ctx.fillStyle = feature.color || '#000000';
+                    ctx.fill();
+                } else {
+                    ctx.strokeStyle = feature.color || '#000000';
+                    ctx.lineWidth = Math.max(1.5, cellSize / 12);
+                    ctx.stroke();
+                }
                 break;
         }
         ctx.restore();
@@ -186,18 +231,20 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawSelectionBox(ctx, feature) {
         const bounds = getFeatureBounds(feature);
         ctx.save();
-        ctx.translate(feature.x, feature.y);
+        ctx.translate(feature.gridX * cellSize, feature.gridY * cellSize);
         ctx.rotate(feature.rotation || 0);
         ctx.strokeStyle = '#00aaff';
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 2]);
         ctx.strokeRect(-bounds.w / 2, -bounds.h / 2, bounds.w, bounds.h);
         ctx.setLineDash([]);
-        if (feature.type === 'mouth') {
+        
+        if (feature.type === 'mouth' || feature.type === 'triangle') {
             const handleSize = 8;
             ctx.fillStyle = '#00aaff';
             ctx.fillRect(bounds.w / 2 - handleSize / 2, -handleSize / 2, handleSize, handleSize);
             ctx.fillRect(-bounds.w / 2 - handleSize / 2, -handleSize / 2, handleSize, handleSize);
+            
             ctx.fillStyle = '#ff8c00';
             ctx.beginPath();
             ctx.arc(0, -bounds.h / 2 - 20, handleSize / 2, 0, Math.PI * 2);
@@ -211,16 +258,22 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getFeatureBounds(feature) {
-        let size = feature.radius ? feature.radius * 2 : (feature.width || cellSize);
+        const size = feature.sizeRatio * cellSize;
         if (feature.type === 'mouth') {
-            return { w: feature.width, h: feature.width * 0.8 };
+            return { w: size, h: size * 0.8 };
         }
         return { w: size, h: size };
     }
 
+    // --- INTERACTIE & GEBRUIKERSINPUT ---
     function getMousePos(event) {
         const rect = drawingCanvas.getBoundingClientRect();
-        return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        return { 
+            x: event.clientX - rect.left, 
+            y: event.clientY - rect.top,
+            gridX: (event.clientX - rect.left) / cellSize,
+            gridY: (event.clientY - rect.top) / cellSize
+        };
     }
 
     function handleMouseDown(event) {
@@ -228,6 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const pos = getMousePos(event);
         dragStartPos = pos;
         action = null;
+        
         if (currentTool === 'move') {
             const clickedHandle = getClickedHandle(pos, selectedFeature);
             if (clickedHandle) {
@@ -242,55 +296,79 @@ document.addEventListener("DOMContentLoaded", () => {
             const startVertex = codedPath.length > 0 ? codedPath[codedPath.length - 1] : codedPath[0];
             if (startVertex) {
                 previewLine = { start: startVertex, end: startVertex };
-            } else {
-                isDrawing = false;
-            }
+            } else { isDrawing = false; }
         } else if (currentTool === 'freehand') {
-            freehandLines.push([{ x: pos.x, y: pos.y }]);
+            freehandLines.push([{ gridX: pos.gridX, gridY: pos.gridY }]);
+        } else if (currentTool === 'coloredLine') {
+            previewColoredLine = { startGridX: pos.gridX, startGridY: pos.gridY, endGridX: pos.gridX, endGridY: pos.gridY, color: lineColorInput.value };
         } else {
             selectedFeature = null;
         }
         redrawAll();
     }
-
+    
     function handleMouseMove(event) {
         if (!isDrawing) return;
         const pos = getMousePos(event);
+        
         if (currentTool === 'move' && selectedFeature && action) {
             const dx = pos.x - dragStartPos.x;
             const dy = pos.y - dragStartPos.y;
-            switch (action) {
-                case 'move':
-                    selectedFeature.x += dx;
-                    selectedFeature.y += dy;
+            const gridDx = dx / cellSize;
+            const gridDy = dy / cellSize;
+
+            switch(action) {
+                case 'move': 
+                    selectedFeature.gridX += gridDx; 
+                    selectedFeature.gridY += gridDy; 
                     break;
                 case 'resize':
-                    const initialWidth = getFeatureBounds(selectedFeature).w;
-                    selectedFeature.width = Math.max(10, initialWidth + dx * 2);
+                    const initialSize = getFeatureBounds(selectedFeature).w / cellSize;
+                    selectedFeature.sizeRatio = Math.max(0.2, initialSize + (dx*2 / cellSize));
                     break;
                 case 'rotate':
-                    const angle = Math.atan2(pos.y - selectedFeature.y, pos.x - selectedFeature.x);
+                    const angle = Math.atan2(pos.y - selectedFeature.gridY * cellSize, pos.x - selectedFeature.gridX * cellSize);
                     selectedFeature.rotation = angle - Math.PI / 2;
                     break;
             }
             dragStartPos = pos;
         } else if (currentTool === 'line' && previewLine) {
-            previewLine.end = { vx: Math.round(pos.x / cellSize), vy: Math.round(pos.y / cellSize) };
+            previewLine.end = { vx: Math.round(pos.gridX), vy: Math.round(pos.gridY) };
         } else if (currentTool === 'freehand' && freehandLines.length > 0) {
-            freehandLines[freehandLines.length - 1].push({ x: pos.x, y: pos.y });
+            freehandLines[freehandLines.length - 1].push({ gridX: pos.gridX, gridY: pos.gridY });
+        } else if (currentTool === 'coloredLine' && previewColoredLine) {
+            previewColoredLine.endGridX = pos.gridX;
+            previewColoredLine.endGridY = pos.gridY;
         } else if (currentTool === 'eraser') {
-            features = features.filter(f => Math.hypot(f.x - pos.x, f.y - pos.y) > (f.radius || f.width / 2));
-            codedPath = codedPath.filter(p => Math.hypot(p.vx * cellSize - pos.x, p.vy * cellSize - pos.y) > cellSize / 2);
-            startPoint = codedPath.length > 0 ? codedPath[0] : null; 
-            freehandLines = freehandLines.filter(path => !path.some(p => Math.hypot(p.x - pos.x, p.y - pos.y) < cellSize / 2));
+            const tolerance = 0.5; // Halve cel als gumgrootte
+            const newFreehandLines = [];
+            freehandLines.forEach(path => {
+                let currentSegment = [];
+                path.forEach(point => {
+                    const dist = Math.hypot(point.gridX - pos.gridX, point.gridY - pos.gridY);
+                    if (dist > tolerance) {
+                        currentSegment.push(point);
+                    } else {
+                        if (currentSegment.length > 1) {
+                            newFreehandLines.push(currentSegment);
+                        }
+                        currentSegment = [];
+                    }
+                });
+                if (currentSegment.length > 1) {
+                    newFreehandLines.push(currentSegment);
+                }
+            });
+            freehandLines = newFreehandLines;
         }
         redrawAll();
     }
-
+    
     function handleMouseUp(event) {
         if (!isDrawing) return;
         isDrawing = false;
         action = null;
+
         if (currentTool === 'line' && previewLine) {
             const endVertex = previewLine.end;
             let lastVertex = previewLine.start;
@@ -303,41 +381,64 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             previewLine = null;
         }
+        
+        if (currentTool === 'coloredLine' && previewColoredLine) {
+            coloredLines.push(previewColoredLine);
+            previewColoredLine = null;
+        }
         redrawAll();
     }
-
+    
     function handleClick(event) {
         if (isDrawing) return;
         const pos = getMousePos(event);
+        
         switch (currentTool) {
-            case 'start':
-                startPoint = { vx: Math.round(pos.x / cellSize), vy: Math.round(pos.y / cellSize) };
+            case 'start': 
+                startPoint = { vx: Math.round(pos.gridX), vy: Math.round(pos.gridY) };
                 codedPath = [startPoint];
                 break;
-            case 'eye':
-                features.push({ type: 'eye', x: pos.x, y: pos.y, radius: cellSize / 2, rotation: 0 });
+            case 'eye': 
+                features.push({type: 'eye', gridX: pos.gridX, gridY: pos.gridY, sizeRatio: 1, rotation: 0, color: featureColorInput.value}); 
                 break;
-            case 'nose':
-                features.push({ type: 'nose', x: pos.x, y: pos.y, radius: cellSize / 1.5, rotation: 0 });
+            case 'nose': 
+                features.push({type: 'nose', gridX: pos.gridX, gridY: pos.gridY, sizeRatio: 1.2, rotation: 0, color: featureColorInput.value}); 
                 break;
-            case 'mouth':
-                features.push({ type: 'mouth', x: pos.x, y: pos.y, width: cellSize * 1.5, rotation: 0 });
+            case 'mouth': 
+                features.push({type: 'mouth', gridX: pos.gridX, gridY: pos.gridY, sizeRatio: 2, rotation: 0}); 
+                break;
+            case 'triangle': 
+                features.push({
+                    type: 'triangle', 
+                    gridX: pos.gridX, 
+                    gridY: pos.gridY, 
+                    sizeRatio: 2, 
+                    rotation: 0, 
+                    color: featureColorInput.value,
+                    isFilled: fillTriangleCheckbox.checked
+                }); 
                 break;
             case 'move':
                 selectedFeature = getFeatureAtPos(pos);
                 break;
-            case 'eraser':
-                features = features.filter(f => Math.hypot(f.x - pos.x, f.y - pos.y) > (f.radius || f.width / 2));
-                break;
         }
         redrawAll();
     }
-
+    
     function getFeatureAtPos(pos) {
         for (let i = features.length - 1; i >= 0; i--) {
             const f = features[i];
             const bounds = getFeatureBounds(f);
-            if (pos.x > f.x - bounds.w / 2 && pos.x < f.x + bounds.w / 2 && pos.y > f.y - bounds.h / 2 && pos.y < f.y + bounds.h / 2) {
+            
+            const featurePixelX = f.gridX * cellSize;
+            const featurePixelY = f.gridY * cellSize;
+
+            const dx = pos.x - featurePixelX;
+            const dy = pos.y - featurePixelY;
+            const rotatedX = dx * Math.cos(-f.rotation) - dy * Math.sin(-f.rotation);
+            const rotatedY = dx * Math.sin(-f.rotation) + dy * Math.cos(-f.rotation);
+
+            if (Math.abs(rotatedX) < bounds.w / 2 && Math.abs(rotatedY) < bounds.h / 2) {
                 return f;
             }
         }
@@ -345,64 +446,99 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function getClickedHandle(pos, feature) {
-        if (!feature || feature.type !== 'mouth') return null;
+        if (!feature || (feature.type !== 'mouth' && feature.type !== 'triangle')) return null;
+
         const bounds = getFeatureBounds(feature);
         const handleSize = 10;
-        const worldCoord = (localX, localY) => ({
-            x: feature.x + localX * Math.cos(feature.rotation) - localY * Math.sin(feature.rotation),
-            y: feature.y + localX * Math.sin(feature.rotation) + localY * Math.cos(feature.rotation)
-        });
-        const resizeHandlePos = worldCoord(bounds.w / 2, 0);
-        const rotateHandlePos = worldCoord(0, -bounds.h / 2 - 20);
-        if (Math.hypot(pos.x - resizeHandlePos.x, pos.y - resizeHandlePos.y) < handleSize) return 'resize';
-        if (Math.hypot(pos.x - rotateHandlePos.x, pos.y - rotateHandlePos.y) < handleSize) return 'rotate';
+        
+        const featurePixelX = feature.gridX * cellSize;
+        const featurePixelY = feature.gridY * cellSize;
+
+        const dx = pos.x - featurePixelX;
+        const dy = pos.y - featurePixelY;
+        const localX = dx * Math.cos(-feature.rotation) - dy * Math.sin(-feature.rotation);
+        const localY = dx * Math.sin(-feature.rotation) + dy * Math.cos(-feature.rotation);
+        
+        if (Math.abs(localX - bounds.w / 2) < handleSize/2 || Math.abs(localX + bounds.w / 2) < handleSize/2) {
+             if (Math.abs(localY) < handleSize/2) return 'resize';
+        }
+        if (Math.hypot(localX, localY - (-bounds.h / 2 - 20)) < handleSize) return 'rotate';
         return null;
     }
 
+    // --- GRID MANIPULATIE (ROBUUSTE VERSIE) ---
     function addColumn(atLeft) {
-        const oldCellSize = cellSize;
-        gridWidthInput.value = ++gridWidth;
+        gridWidth++;
+        gridWidthInput.value = gridWidth;
         if (atLeft) {
             codedPath.forEach(p => p.vx++);
-            features.forEach(f => f.x += oldCellSize);
-            freehandLines.forEach(path => path.forEach(p => p.x += oldCellSize));
+            features.forEach(f => f.gridX++);
+            freehandLines.forEach(path => path.forEach(p => p.gridX++));
+            coloredLines.forEach(l => {
+                l.startGridX++;
+                l.endGridX++;
+            });
         }
         updateCanvasAndRedraw();
     }
 
     function removeColumn(atLeft) {
         if (gridWidth <= 5) return;
-        const oldCellSize = cellSize;
-        gridWidthInput.value = --gridWidth;
+        gridWidth--;
+        gridWidthInput.value = gridWidth;
         if (atLeft) {
             codedPath.forEach(p => p.vx--);
-            features.forEach(f => f.x -= oldCellSize);
-            freehandLines.forEach(path => path.forEach(p => p.x -= oldCellSize));
+            features.forEach(f => f.gridX--);
+            freehandLines.forEach(path => path.forEach(p => p.gridX--));
+            coloredLines.forEach(l => {
+                l.startGridX--;
+                l.endGridX--;
+            });
         }
         updateCanvasAndRedraw();
     }
 
     function addRow(atTop) {
-        const oldCellSize = cellSize;
-        gridHeightInput.value = ++gridHeight;
+        gridHeight++;
+        gridHeightInput.value = gridHeight;
         if (atTop) {
             codedPath.forEach(p => p.vy++);
-            features.forEach(f => f.y += oldCellSize);
-            freehandLines.forEach(path => path.forEach(p => p.y += oldCellSize));
+            features.forEach(f => f.gridY++);
+            freehandLines.forEach(path => path.forEach(p => p.gridY++));
+            coloredLines.forEach(l => {
+                l.startGridY++;
+                l.endGridY++;
+            });
         }
         updateCanvasAndRedraw();
     }
 
     function removeRow(atTop) {
         if (gridHeight <= 5) return;
-        const oldCellSize = cellSize;
-        gridHeightInput.value = --gridHeight;
+        gridHeight--;
+        gridHeightInput.value = gridHeight;
         if (atTop) {
             codedPath.forEach(p => p.vy--);
-            features.forEach(f => f.y -= oldCellSize);
-            freehandLines.forEach(path => path.forEach(p => p.y -= oldCellSize));
+            features.forEach(f => f.gridY--);
+            freehandLines.forEach(path => path.forEach(p => p.gridY--));
+            coloredLines.forEach(l => {
+                l.startGridY--;
+                l.endGridY--;
+            });
         }
         updateCanvasAndRedraw();
+    }
+
+    // --- ACTIES & EXPORT ---
+    function undoLastCodeStep() {
+        if (codedPath.length > 1) {
+            codedPath.pop();
+            redrawAll();
+            // Werk de code bij als die al gegenereerd was
+            if (instructionsOutput.innerHTML !== '') {
+                generateCode();
+            }
+        }
     }
 
     function generateCode() {
@@ -450,10 +586,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function displayOutput(instructions) {
         instructionsOutput.innerHTML = instructions.map(instr => `<span>${instr.count} ${instr.dir}</span>`).join('');
+        
         worksheetCanvas.width = drawingCanvas.width;
         worksheetCanvas.height = drawingCanvas.height;
         const wsCtx = worksheetCanvas.getContext('2d');
         wsCtx.clearRect(0, 0, worksheetCanvas.width, worksheetCanvas.height);
+        
         drawGridLines(wsCtx);
         if (codedPath.length > 0) {
             const currentStartPoint = codedPath[0];
@@ -462,20 +600,28 @@ document.addEventListener("DOMContentLoaded", () => {
             wsCtx.arc(currentStartPoint.vx * cellSize, currentStartPoint.vy * cellSize, cellSize / 3.5, 0, Math.PI * 2);
             wsCtx.fill();
         }
+
         features.forEach(f => drawFeature(wsCtx, f));
         freehandLines.forEach(path => {
             wsCtx.strokeStyle = '#000';
             wsCtx.lineWidth = Math.max(1, cellSize / 10);
             wsCtx.beginPath();
             if (path.length > 0) {
-                wsCtx.moveTo(path[0].x, path[0].y);
-                for (let i = 1; i < path.length; i++) wsCtx.lineTo(path[i].x, path[i].y)
+                wsCtx.moveTo(path[0].gridX * cellSize, path[0].gridY * cellSize);
+                for (let i = 1; i < path.length; i++) wsCtx.lineTo(path[i].gridX * cellSize, path[i].gridY * cellSize)
             }
             wsCtx.stroke()
         });
+        coloredLines.forEach(line => {
+            wsCtx.strokeStyle = line.color;
+            wsCtx.lineWidth = Math.max(1.5, cellSize / 10);
+            wsCtx.beginPath();
+            wsCtx.moveTo(line.startGridX * cellSize, line.startGridY * cellSize);
+            wsCtx.lineTo(line.endGridX * cellSize, line.endGridY * cellSize);
+            wsCtx.stroke();
+        });
     }
 
-    // --- VOLLEDIG HERWERKTE PDF FUNCTIE ---
     function downloadPdf() {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -484,98 +630,56 @@ document.addEventListener("DOMContentLoaded", () => {
         const contentWidth = pageWidth - (pageMargin * 2);
         let currentY = 20;
 
-        // Hulpfunctie om pijlen te tekenen, nu gecentreerd rond y
         const drawArrow = (doc, x, y, size, direction) => {
-            const s = size / 2; // Werk met een halve grootte voor centreren
+            const s = size / 2;
             doc.setLineWidth(0.5);
             doc.setDrawColor(0);
-
             switch (direction) {
-                case '⬆️': // N
-                    doc.line(x, y + s, x, y - s);
-                    doc.line(x, y - s, x - s / 2, y - s / 2);
-                    doc.line(x, y - s, x + s / 2, y - s / 2);
-                    break;
-                case '⬇️': // Z
-                    doc.line(x, y - s, x, y + s);
-                    doc.line(x, y + s, x - s / 2, y + s / 2);
-                    doc.line(x, y + s, x + s / 2, y + s / 2);
-                    break;
-                case '⬅️': // W
-                    doc.line(x + s, y, x - s, y);
-                    doc.line(x - s, y, x - s / 2, y - s / 2);
-                    doc.line(x - s, y, x - s / 2, y + s / 2);
-                    break;
-                case '➡️': // O
-                    doc.line(x - s, y, x + s, y);
-                    doc.line(x + s, y, x + s / 2, y - s / 2);
-                    doc.line(x + s, y, x + s / 2, y + s / 2);
-                    break;
-                case '↗️': // NO
-                    doc.line(x - s*0.7, y + s*0.7, x + s*0.7, y - s*0.7);
-                    doc.line(x + s*0.7, y - s*0.7, x + s*0.2, y - s*0.5);
-                    doc.line(x + s*0.7, y - s*0.7, x + s*0.5, y - s*0.2);
-                    break;
-                case '↖️': // NW
-                    doc.line(x + s*0.7, y + s*0.7, x - s*0.7, y - s*0.7);
-                    doc.line(x - s*0.7, y - s*0.7, x - s*0.2, y - s*0.5);
-                    doc.line(x - s*0.7, y - s*0.7, x - s*0.5, y - s*0.2);
-                    break;
-                case '↘️': // ZO
-                    doc.line(x - s*0.7, y - s*0.7, x + s*0.7, y + s*0.7);
-                    doc.line(x + s*0.7, y + s*0.7, x + s*0.2, y + s*0.5);
-                    doc.line(x + s*0.7, y + s*0.7, x + s*0.5, y + s*0.2);
-                    break;
-                case '↙️': // ZW
-                    doc.line(x + s*0.7, y - s*0.7, x - s*0.7, y + s*0.7);
-                    doc.line(x - s*0.7, y + s*0.7, x - s*0.2, y + s*0.5);
-                    doc.line(x - s*0.7, y + s*0.7, x - s*0.5, y + s*0.2);
-                    break;
+                case '⬆️': doc.line(x, y + s, x, y - s); doc.line(x, y - s, x - s / 2, y - s / 2); doc.line(x, y - s, x + s / 2, y - s / 2); break;
+                case '⬇️': doc.line(x, y - s, x, y + s); doc.line(x, y + s, x - s / 2, y + s / 2); doc.line(x, y + s, x + s / 2, y + s / 2); break;
+                case '⬅️': doc.line(x + s, y, x - s, y); doc.line(x - s, y, x - s / 2, y - s / 2); doc.line(x - s, y, x - s / 2, y + s / 2); break;
+                case '➡️': doc.line(x - s, y, x + s, y); doc.line(x + s, y, x + s / 2, y - s / 2); doc.line(x + s, y, x + s / 2, y + s / 2); break;
+                case '↗️': doc.line(x - s*0.7, y + s*0.7, x + s*0.7, y - s*0.7); doc.line(x + s*0.7, y - s*0.7, x + s*0.2, y - s*0.5); doc.line(x + s*0.7, y - s*0.7, x + s*0.5, y - s*0.2); break;
+                case '↖️': doc.line(x + s*0.7, y + s*0.7, x - s*0.7, y - s*0.7); doc.line(x - s*0.7, y - s*0.7, x - s*0.2, y - s*0.5); doc.line(x - s*0.7, y - s*0.7, x - s*0.5, y - s*0.2); break;
+                case '↘️': doc.line(x - s*0.7, y - s*0.7, x + s*0.7, y + s*0.7); doc.line(x + s*0.7, y + s*0.7, x + s*0.2, y + s*0.5); doc.line(x + s*0.7, y + s*0.7, x + s*0.5, y + s*0.2); break;
+                case '↙️': doc.line(x + s*0.7, y - s*0.7, x - s*0.7, y + s*0.7); doc.line(x - s*0.7, y + s*0.7, x - s*0.2, y + s*0.5); doc.line(x - s*0.7, y + s*0.7, x - s*0.5, y + s*0.2); break;
             }
         };
 
-        // Titel
         doc.setFontSize(18);
         doc.text("Code-tekenen Werkblad", pageWidth / 2, currentY, { align: 'center' });
         currentY += 15;
 
-        // Instructies (Code)
         doc.setFontSize(12);
         doc.text("Code:", pageMargin, currentY);
-        currentY += 12; // Meer ruimte voor de eerste regel
+        currentY += 12;
 
         let currentX = pageMargin;
-        const numberArrowSpacing = 3; // Ruimte tussen getal en pijl
-        const itemSpacing = 12;       // Ruimte tussen code-items
-        const arrowSize = 4;          // Grootte van de pijl
-        const lineHeight = 12;        // Regelhoogte
+        const numberArrowSpacing = 3;
+        const itemSpacing = 12;
+        const arrowSize = 4;
+        const lineHeight = 12;
 
         instructionsOutput.querySelectorAll('span').forEach(span => {
             const parts = span.textContent.trim().split(' ');
             if (parts.length !== 2) return;
-
             const count = parts[0];
             const arrowEmoji = parts[1];
             const numberWidth = doc.getTextWidth(count);
             const currentItemWidth = numberWidth + numberArrowSpacing + arrowSize + itemSpacing;
 
-            // Ga naar de volgende regel als het niet meer past
             if (currentX + currentItemWidth > pageWidth - pageMargin) {
                 currentX = pageMargin;
                 currentY += lineHeight;
             }
             
-            // Teken het getal, verticaal gecentreerd
             doc.text(count, currentX, currentY, { baseline: 'middle' });
             currentX += numberWidth + numberArrowSpacing;
-
-            // Teken de pijl, verticaal gecentreerd
             drawArrow(doc, currentX, currentY, arrowSize, arrowEmoji);
-            currentX += itemSpacing; // Schuif op voor het volgende item
+            currentX += itemSpacing;
         });
         currentY += lineHeight + 5;
 
-        // Rasterafbeelding
         try {
             const imageData = worksheetCanvas.toDataURL('image/png');
             const imgProps = doc.getImageProperties(imageData);
@@ -587,7 +691,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 doc.addPage();
                 currentY = pageMargin;
             }
-
             doc.addImage(imageData, 'PNG', pageMargin, currentY, imgWidth, imgHeight);
         } catch (e) {
             console.error("Fout bij toevoegen van canvas aan PDF:", e);
@@ -597,8 +700,9 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.save('code-tekenen-werkblad.pdf');
     }
 
+    // --- BESTANDSBEHEER ---
     function saveDrawing() {
-        const drawingData = { gridWidth, gridHeight, codedPath, features, freehandLines };
+        const drawingData = { gridWidth, gridHeight, codedPath, features, freehandLines, coloredLines };
         const a = document.createElement('a');
         a.href = URL.createObjectURL(new Blob([JSON.stringify(drawingData)], { type: 'application/json' }));
         a.download = 'tekening.json';
@@ -608,17 +712,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function loadDrawing(data) {
         resetDrawing();
-        gridWidthInput.value = data.gridWidth;
-        gridHeightInput.value = data.gridHeight;
         gridWidth = parseInt(data.gridWidth);
         gridHeight = parseInt(data.gridHeight);
-        updateCanvasAndRedraw();
+        gridWidthInput.value = gridWidth;
+        gridHeightInput.value = gridHeight;
         
+        updateCanvasAndRedraw();
+
         codedPath = data.codedPath || [];
         startPoint = codedPath.length > 0 ? codedPath[0] : null;
-
         features = data.features || [];
         freehandLines = data.freehandLines || [];
+        coloredLines = data.coloredLines || [];
+        
+        const needsConversion = (features.length > 0 && features[0].x !== undefined) ||
+                                (coloredLines.length > 0 && coloredLines[0].startX !== undefined) ||
+                                (freehandLines.length > 0 && freehandLines[0].length > 0 && freehandLines[0][0].x !== undefined);
+
+        if (needsConversion) {
+            meldingContainer.textContent = "Let op: oud tekening-formaat geladen. Conversie wordt uitgevoerd.";
+            const tempCanvasWidth = gridWidth * cellSize;
+            const tempCanvasHeight = gridHeight * cellSize;
+
+            features.forEach(f => {
+                if (f.x !== undefined) {
+                    f.gridX = f.x / tempCanvasWidth * gridWidth;
+                    f.gridY = f.y / tempCanvasHeight * gridHeight;
+                    f.sizeRatio = (f.radius || f.width || f.size || cellSize) / cellSize;
+                    if (f.isFilled === undefined) f.isFilled = false;
+                    delete f.x; delete f.y; delete f.radius; delete f.width; delete f.size;
+                }
+            });
+
+            coloredLines.forEach(line => {
+                if (line.startX !== undefined) {
+                    line.startGridX = line.startX / tempCanvasWidth * gridWidth;
+                    line.startGridY = line.startY / tempCanvasHeight * gridHeight;
+                    line.endGridX = line.endX / tempCanvasWidth * gridWidth;
+                    line.endGridY = line.endY / tempCanvasHeight * gridHeight;
+                    delete line.startX; delete line.startY; delete line.endX; delete line.endY;
+                }
+            });
+
+            freehandLines.forEach(path => {
+                path.forEach(p => {
+                    if (p.x !== undefined) {
+                        p.gridX = p.x / tempCanvasWidth * gridWidth;
+                        p.gridY = p.y / tempCanvasHeight * gridHeight;
+                        delete p.x; delete p.y;
+                    }
+                });
+            });
+        }
+        
         redrawAll();
     }
 
@@ -637,7 +783,6 @@ document.addEventListener("DOMContentLoaded", () => {
         reader.readAsText(file);
     }
 
-    // --- Catalogus Functies ---
     async function openCatalog() {
         if (Object.keys(catalogData).length === 0) {
             try {
@@ -707,7 +852,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // --- Event Listeners ---
+    // --- EVENT LISTENERS ---
     resetGridBtn.addEventListener('click', initializeGrid);
     clearBtn.addEventListener('click', resetDrawing);
     addColLeftBtn.addEventListener('click', () => addColumn(true));
@@ -720,6 +865,7 @@ document.addEventListener("DOMContentLoaded", () => {
     removeRowBottomBtn.addEventListener('click', () => removeRow(false));
     generateBtn.addEventListener('click', generateCode);
     downloadPdfBtn.addEventListener('click', downloadPdf);
+    undoCodeBtn.addEventListener('click', undoLastCodeStep);
 
     toolBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -750,7 +896,15 @@ document.addEventListener("DOMContentLoaded", () => {
             closeCatalog();
         }
     });
+    
+    window.addEventListener('keydown', (e) => {
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selectedFeature) {
+            features = features.filter(f => f !== selectedFeature);
+            selectedFeature = null;
+            redrawAll();
+        }
+    });
 
-    // Initialisatie
+    // Initialisatie bij laden van de pagina
     initializeGrid();
 });
