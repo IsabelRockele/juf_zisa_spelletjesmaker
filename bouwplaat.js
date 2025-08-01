@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const CONFIG = {
         clics: {
             title: "Clics Bouwplaat Generator",
-            templateImageSrc: 'clic_template.png',
+            templateImageSrc: 'clic_template01.png',
             drawFunction: drawClic,
             colors: [
                 { name: "Achtergrond", hex: "rgba(0,0,0,0)" },
@@ -38,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 { name: "Zwart", hex: "#333333" },
                 { name: "Rood", hex: "#F44336" },
                 { name: "Licht Blauw", hex: "#03A9F4" },
-                // AANGEPAST: Donkerblauw is nu een stuk donkerder
                 { name: "Donker Blauw", hex: "#1976D2" },
                 { name: "Licht Groen", hex: "#8BC34A" },
                 { name: "Donker Groen", hex: "#4CAF50" },
@@ -93,12 +92,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (!coloredCache[colorInfo.name]) coloredCache[colorInfo.name] = createColoredVersion(colorInfo.hex);
         const imageToDraw = coloredCache[colorInfo.name];
-        const isVertical = (row + col) % 2 === 0;
+        
+        const isRotated = (row + col) % 2 !== 0;
+
         targetCtx.save();
         targetCtx.translate(x + size / 2, y + size / 2);
-        if (isVertical) targetCtx.rotate(Math.PI / 2);
-        const drawSize = size * 1.60;
-        targetCtx.drawImage(imageToDraw, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+
+        if (isRotated) {
+            targetCtx.rotate(Math.PI / 2);
+        }
+
+        // AANGEPAST: De schaalfactor is verlaagd van 1.60 naar 1.25.
+        // Je kunt met dit getal spelen om de overlap perfect te maken.
+        const scaleFactor = 1.35;
+        
+        const aspectRatio = templateImage.naturalWidth / templateImage.naturalHeight;
+        
+        let drawHeight = size * scaleFactor;
+        let drawWidth = drawHeight * aspectRatio;
+
+        targetCtx.drawImage(imageToDraw, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        
         targetCtx.restore();
     }
 
@@ -234,7 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
         downloadPngBtn.addEventListener('click', () => { const link = document.createElement('a'); link.download = `${generatorType}-tekening.png`; link.href = canvas.toDataURL("image/png"); link.click(); });
         
         downloadPdfBtn.addEventListener('click', () => {
-            const exportCellSize = 50;
+            const exportCellSize = 150;
             const pdfCanvas = document.createElement('canvas');
             pdfCanvas.width = gridWidth * exportCellSize;
             pdfCanvas.height = gridHeight * exportCellSize;
@@ -317,5 +331,3 @@ document.addEventListener("DOMContentLoaded", () => {
     menuBtn.addEventListener('click', showChoiceScreen);
     setupEventListeners();
 });
-
-
