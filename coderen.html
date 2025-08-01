@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <a href="index.html" class="back-link">&leftarrow; Keuzemenu</a>
+        <a href="index.html" class="back-link">&leftarrow; Terug naar menu</a>
         <h1>Code-tekenen Generator</h1>
     </header>
 
@@ -19,8 +19,8 @@
                 <ol>
                     <li>Gebruik 'Startpunt' 📍 om te beginnen.</li>
                     <li>Gebruik 'Lijn' om de code-route te tekenen.</li>
-                    <li>Plaats details met de Oog, Neus, en Mond tools.</li>
-                    <li>Gebruik 'Verplaats' 🖐️ om details te selecteren, verslepen, en (voor de mond) te draaien/vergroten.</li>
+                    <li>Plaats details met de andere tools.</li>
+                    <li>Gebruik 'Verplaats' 🖐️ om details te selecteren, verslepen, draaien, vergroten en verwijderen (met Delete/Backspace).</li>
                     <li>Klik op "Genereer Code".</li>
                 </ol>
             </div>
@@ -34,8 +34,22 @@
                     <button class="tool-btn" data-tool="eye">Oog 👁️</button>
                     <button class="tool-btn" data-tool="nose">Neus 👃</button>
                     <button class="tool-btn" data-tool="mouth">Mond 👄</button>
+                    <button class="tool-btn" data-tool="triangle">Driehoek △</button>
+                    <button class="tool-btn" data-tool="coloredLine">Gekleurde Lijn</button>
                     <button class="tool-btn" data-tool="move">Verplaats 🖐️</button>
                     <button class="tool-btn" data-tool="eraser">Gum 🧼</button>
+                </div>
+                <div class="tool-setting" style="margin-top: 8px;">
+                    <input type="checkbox" id="fillTriangleCheckbox" style="width: auto;">
+                    <label for="fillTriangleCheckbox">Driehoek opvullen</label>
+                </div>
+                <div class="tool-setting" style="margin-top: 15px;">
+                    <label for="lineColor">Lijnkleur:</label>
+                    <input type="color" id="lineColor" value="#E53935">
+                </div>
+                <div class="tool-setting">
+                    <label for="featureColor">Detailkleur:</label>
+                    <input type="color" id="featureColor" value="#000000">
                 </div>
             </div>
 
@@ -69,6 +83,7 @@
             <div class="control-group">
                 <h3>Acties</h3>
                 <button id="generateBtn">Genereer Code</button>
+                <button id="undoCodeBtn">Code Stap Ongedaan Maken ↩️</button>
                 <button id="clearBtn">Wis Tekening</button>
             </div>
              <div id="meldingContainer" class="melding"></div>
