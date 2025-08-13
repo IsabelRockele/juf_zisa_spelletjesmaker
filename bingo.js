@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- WOORDEN & KLANKEN ---
     const woordenLijsten = {
         "AVI-START": ["auto", "saus", "goud", "hout", "boek", "zoek", "deur", "kleur", "brief", "ziek", "trein", "klein", "dijk", "kijk", "huis", "duim", "boom", "rook", "zee", "thee", "maan", "vaas", "vuur", "muur", "sneeuw", "nieuw", "haai", "zaai", "kooi", "vlooi", "foei", "groei", "lang", "bang", "drink", "plank", "school", "schat", "schrijf", "schrik", "ik", "kim", "vis", "pen", "een", "aap", "noot", "mies"],
         "AVI-M3": ["de", "maan", "roos", "vis", "ik", "en", "een", "is", "in", "pen", "an", "doos", "doek", "buik", "ik", "hij", "zij", "wij", "nee", "ja", "sok", "boom", "boot", "vuur", "koek", "zeep", "wei", "ui", "huis", "duif", "kous", "hout", "jas", "jet", "dag", "weg", "lach", "zeg", "jij", "bij", "heuvel", "nieuw", "schip", "ring", "bank", "vang", "klink", "plank", "zon", "zee", "zus"],
@@ -12,20 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const klanken = "abcdefghijklmnopqrstuvwxyz".split('').concat(["au", "ou", "oe", "eu", "ie", "ei", "ij", "ui", "oo", "ee", "aa", "uu", "eeuw", "ieuw", "aai", "ooi", "oei", "ng", "nk", "sch", "schr"]);
     
-    // Globale staat
     let huidigeSpelItems = [];
     let teTrekkenItems = [];
     let isGetallenSpel = false;
 
-    // DOM-elementen
     const spelWrapper = document.getElementById('spel-wrapper');
     const titel = document.getElementById('huidig-niveau-titel');
     const itemsOverzichtDiv = document.getElementById('items-overzicht');
     const ballenBandDiv = document.getElementById('ballen-band');
     const startKnop = document.getElementById('start-schuiven-knop');
     const machineDiv = document.getElementById('schuif-machine');
-    const pdfKnop = document.getElementById('maak-pdf-knop');
-    const drukKnop = document.getElementById('druk-kaarten-knop');
+    const kaartenKnop = document.getElementById('maak-kaarten-knop');
     const kiesAviKnop = document.getElementById('kies-avi-knop');
     const aviSelectieDiv = document.getElementById('avi-selectie');
     const kiesGetalKnop = document.getElementById('kies-getal-knop');
@@ -39,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalOpties = document.getElementById('modal-opties');
     const modalAnnulerenKnop = document.getElementById('modal-annuleren-knop');
 
-    // --- FUNCTIES ---
     function combinations(n, k) {
         if (k < 0 || k > n) return 0;
         if (k === 0 || k === n) return 1;
@@ -53,17 +48,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function genereerPrintbarePagina(kaartGrootte = 5, vulAanMetDubbels = false) {
         const aantalVakjes = kaartGrootte * kaartGrootte;
+        const actieKnoppenHTML = `
+            <div class="actie-balk">
+                <button onclick="window.print()">🖨️ Afdrukken</button>
+                <button onclick="window.close()">❌ Sluiten</button>
+            </div>
+        `;
 
         const printStyles = `
             <style>
-                body { margin: 20px; font-family: sans-serif; }
+                body { margin: 0; font-family: sans-serif; }
+                .actie-balk { padding: 10px; text-align: center; background: #333; }
+                .actie-balk button { font-size: 16px; padding: 10px 20px; margin: 0 10px; cursor: pointer; border-radius: 5px; border: none; }
+                .kaarten-wrapper { text-align: center; padding: 20px; }
                 .bingokaart { display: inline-block; width: 48%; margin: 1%; box-sizing: border-box; border: 2px solid black; page-break-inside: avoid; vertical-align: top; }
                 .bingokaart h3 { text-align: center; font-family: Arial, sans-serif; font-size: 18pt; background-color: #ddd; margin: 0; padding: 5px; }
                 .bingo-grid { display: grid; grid-template-columns: repeat(${kaartGrootte}, 1fr); }
                 .bingo-vakje { height: ${kaartGrootte === 5 ? '80px' : '90px'}; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif; font-size: 14pt; font-weight: bold; padding: 2px; box-sizing: border-box; overflow: hidden; text-align: center; }
-            </style>
-        `;
-
+                @media print {
+                    .actie-balk { display: none; }
+                    .kaarten-wrapper { padding: 0; }
+                }
+            </style>`;
+            
         let kaartenHTML = '';
         for (let i = 0; i < 25; i++) {
             let kaartItems;
@@ -77,22 +84,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const geschuddeItems = [...huidigeSpelItems].sort(() => Math.random() - 0.5);
                 kaartItems = geschuddeItems.slice(0, aantalVakjes);
             }
-            
             kaartenHTML += `<div class="bingokaart"><h3>Bingokaart ${i + 1}</h3><div class="bingo-grid">`;
-            kaartItems.forEach(item => {
-                kaartenHTML += `<div class="bingo-vakje">${item}</div>`;
-            });
+            kaartItems.forEach(item => { kaartenHTML += `<div class="bingo-vakje">${item}</div>`; });
             kaartenHTML += `</div></div>`;
         }
-
-        return `<html><head><title>Bingokaarten</title>${printStyles}</head><body>${kaartenHTML}</body></html>`;
+        return `<html><head><title>Bingokaarten</title>${printStyles}</head><body>${actieKnoppenHTML}<div class="kaarten-wrapper">${kaartenHTML}</div></body></html>`;
     }
 
-    function toonKeuzeModal(aantalItems, actieFunctie) {
+    function toonKeuzeModal(actieFunctie) {
+        const aantalItems = huidigeSpelItems.length;
         modalTitel.textContent = 'Te weinig items geselecteerd!';
         modalTekst.textContent = `U heeft ${aantalItems} items gekozen. Dit is te weinig voor standaard 5x5 bingokaarten. Kies een oplossing:`;
         modalOpties.innerHTML = '';
-
         if (aantalItems >= 16) {
             const combos = combinations(aantalItems, 16).toLocaleString('nl-BE');
             const btn = document.createElement('button');
@@ -101,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = () => { actieFunctie(4, false); modalOverlay.classList.add('verborgen'); };
             modalOpties.appendChild(btn);
         }
-        
         if (aantalItems >= 9) {
             const combos = combinations(aantalItems, 9).toLocaleString('nl-BE');
             const btn = document.createElement('button');
@@ -110,40 +112,32 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.onclick = () => { actieFunctie(3, false); modalOverlay.classList.add('verborgen'); };
             modalOpties.appendChild(btn);
         }
-
         const btnForceer = document.createElement('button');
         btnForceer.className = 'modal-optie-knop';
         btnForceer.innerHTML = `Maak 5x5 kaarten (met dubbels)<small>Vakjes worden aangevuld met dubbele items. Er zullen waarschijnlijk meerdere winnaars zijn.</small>`;
         btnForceer.onclick = () => { actieFunctie(5, true); modalOverlay.classList.add('verborgen'); };
         modalOpties.appendChild(btnForceer);
-        
         modalOverlay.classList.remove('verborgen');
     }
 
     modalAnnulerenKnop.onclick = () => { modalOverlay.classList.add('verborgen'); };
 
-    function handleKaartCreatie(printDirect) {
+    function startKaartCreatieProces() {
         if (huidigeSpelItems.length === 0) {
             alert('Kies eerst een spelmodus en niveau.'); return;
         }
+        const actieFunctie = (kaartGrootte, vulAan) => {
+            const html = genereerPrintbarePagina(kaartGrootte, vulAan);
+            if (html) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(html);
+                printWindow.document.close();
+            }
+        };
         if (huidigeSpelItems.length < 25) {
-            toonKeuzeModal(huidigeSpelItems.length, (kaartGrootte, vulAan) => {
-                const html = genereerPrintbarePagina(kaartGrootte, vulAan);
-                if (html) openPrintVenster(html, printDirect);
-            });
+            toonKeuzeModal(actieFunctie);
         } else {
-            const html = genereerPrintbarePagina(5, false);
-            if (html) openPrintVenster(html, printDirect);
-        }
-    }
-
-    function openPrintVenster(paginaHTML, printDirect) {
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(paginaHTML);
-        printWindow.document.close();
-        if (printDirect) {
-            printWindow.focus();
-            setTimeout(() => { printWindow.print(); printWindow.close(); }, 250);
+            actieFunctie(5, false);
         }
     }
 
@@ -200,7 +194,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ballenBandDiv.style.transition = 'transform 4s cubic-bezier(0.2, 0.8, 0.2, 1)';
     }
     
-    // --- EVENT LISTENERS ---
     kiesAviKnop.addEventListener('click', () => {
         aviSelectieDiv.classList.toggle('verborgen');
         getalSelectieDiv.classList.add('verborgen');
@@ -274,8 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    pdfKnop.addEventListener('click', () => handleKaartCreatie(false));
-    drukKnop.addEventListener('click', () => handleKaartCreatie(true));
+    kaartenKnop.addEventListener('click', startKaartCreatieProces);
     
     startKnop.addEventListener('click', () => {
         if (teTrekkenItems.length === 0) { alert("Alle items zijn geweest!"); startKnop.disabled = true; return; }
