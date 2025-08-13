@@ -26,6 +26,7 @@
                 <div class="knoppen-groep">
                     <button id="kies-woorden-knop" class="type-knop">Woorden</button>
                     <button id="kies-getallen-knop" class="type-knop">Getallen</button>
+                    <button id="kies-tafels-knop" class="type-knop">Maal- en Deeltafels</button>
                 </div>
             </div>
 
@@ -45,6 +46,27 @@
                     <button class="getal-knop" data-max="42">Getallen tot 42</button>
                     <button class="getal-knop" data-max="100">Getallen tot 100</button>
                     <button class="getal-knop" data-max="1000">Getallen tot 1000</button>
+                </div>
+            </div>
+
+            <div id="tafels-opties" class="optie-groep verborgen">
+                <h2>Stap 2: Kies de Tafels (kies één of meer)</h2>
+                <div id="tafel-checkboxes"></div>
+                
+                <h2>Stap 3: Kies de Soort Oefening</h2>
+                <div id="tafel-type-radios" class="radio-groep">
+                    <div class="radio-container">
+                        <input type="radio" id="type-maal" name="tafel-type" value="maal" checked>
+                        <label for="type-maal">Enkel maal</label>
+                    </div>
+                    <div class="radio-container">
+                        <input type="radio" id="type-deel" name="tafel-type" value="deel">
+                        <label for="type-deel">Enkel deel</label>
+                    </div>
+                     <div class="radio-container">
+                        <input type="radio" id="type-beide" name="tafel-type" value="beide">
+                        <label for="type-beide">Maal en deel</label>
+                    </div>
                 </div>
             </div>
 
