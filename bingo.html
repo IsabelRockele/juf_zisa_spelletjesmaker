@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <title>Woorden & Getallen Bingo</title>
     <link rel="stylesheet" href="bingo.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
     
@@ -44,6 +46,48 @@
              <button class="getal-knop" data-max="100">Getallen tot 100</button>
              <button class="getal-knop" data-max="1000">Getallen tot 1000</button>
         </div>
+
+        <hr>
+
+        <button id="kies-tafel-knop" class="menu-knop">Start Tafelbingo</button>
+        <div id="tafel-selectie" class="verborgen">
+            <h3>Kies tafels</h3>
+            <div id="tafel-kiezer"></div>
+            <h3>Kies type</h3>
+            <div id="tafel-type-kiezer">
+                <label><input type="radio" name="tafel-type" value="maal" checked> Maal</label>
+                <label><input type="radio" name="tafel-type" value="deel"> Deel</label>
+                <label><input type="radio" name="tafel-type" value="mix"> Mix</label>
+            </div>
+            <button id="start-tafel-spel-knop">Start spel</button>
+        </div>
+        
+        <hr>
+
+        <button id="kies-reken-knop" class="menu-knop">Start Rekenbingo</button>
+        <div id="reken-selectie" class="verborgen">
+            <h3>Kies bereik</h3>
+            <div class="reken-optie-groep">
+                <label><input type="radio" name="reken-bereik" value="10" checked> Tot 10</label>
+                <label><input type="radio" name="reken-bereik" value="20"> Tot 20</label>
+                <label><input type="radio" name="reken-bereik" value="100"> Tot 100</label>
+                <label><input type="radio" name="reken-bereik" value="1000"> Tot 1000</label>
+            </div>
+            <h3>Kies type</h3>
+            <div class="reken-optie-groep">
+                <label><input type="radio" name="reken-brug" value="zonder" checked> Zonder brug</label>
+                <label><input type="radio" name="reken-brug" value="met"> Met brug</label>
+                <label><input type="radio" name="reken-brug" value="gemengd"> Gemengd</label>
+            </div>
+             <h3>Kies bewerking</h3>
+            <div class="reken-optie-groep">
+                <label><input type="radio" name="reken-bewerking" value="optellen" checked> Optellen</label>
+                <label><input type="radio" name="reken-bewerking" value="aftrekken"> Aftrekken</label>
+                <label><input type="radio" name="reken-bewerking" value="mix"> Mix</label>
+            </div>
+            <button id="start-reken-spel-knop">Start spel</button>
+        </div>
+
 
         <hr>
         <button id="maak-kaarten-knop" class="menu-knop bingokaart-knop">Maak Bingokaarten</button>
