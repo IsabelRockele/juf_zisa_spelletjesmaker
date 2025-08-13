@@ -1,0 +1,58 @@
+/* Algemene styling */
+body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f4f4f9; color: #333; padding: 20px 20px 20px 280px; }
+.verborgen { display: none !important; }
+
+/* --- Hoofdmenu links (AANGEPAST VOOR LEESBAARHEID) --- */
+.hoofd-menu { position: fixed; top: 0; left: 0; width: 260px; height: 100%; background: #2c3e50; color: #ecf0f1; padding: 20px; box-shadow: 3px 0 15px rgba(0,0,0,0.2); overflow-y: auto; text-align: center; }
+.hoofd-menu h3, .hoofd-menu p { color: white; margin-top: 15px; }
+.hoofd-menu hr { border: none; border-top: 1px solid #4a6572; margin: 20px 0; }
+
+.menu-knop { display: block; width: 100%; color: white; padding: 12px; margin-bottom: 10px; border: none; border-radius: 8px; font-size: 16px; text-decoration: none; cursor: pointer; transition: background-color 0.2s; }
+.menu-knop:hover { background-color: #4a6572; }
+#kies-avi-knop, #kies-getal-knop { background-color: #3498db; }
+.bingokaart-knop { background-color: #e74c3c; }
+
+/* Submenu's en hun knoppen (AANGEPAST VOOR MEER RUIMTE) */
+#avi-selectie, #getal-selectie, #avi-start-subkeuze, #avi-start-klankkeuze { background-color: #34495e; padding: 15px; border-radius: 8px; margin-top: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+/* Extra ruimte tussen de AVI-knoppen */
+.avi-knoppen { display: flex; flex-direction: column; gap: 10px; } /* Gap zorgt voor verticale ruimte */
+
+.avi-knop, .getal-knop, .sub-knop { 
+    background-color: #5d737e; color: white; text-align: left; 
+    padding: 12px; font-size: 14px; border: none; border-radius: 5px; cursor: pointer; 
+}
+.avi-knop:hover, .getal-knop:hover, .sub-knop:hover { background-color: #4a6572; }
+.avi-knop.active { background-color: #2ecc71; font-weight: bold; }
+
+/* Klankkiezer */
+#klank-kiezer { display: grid; grid-template-columns: repeat(auto-fill, minmax(45px, 1fr)); gap: 8px; margin: 10px 0; }
+.klank-knop { background-color: #ecf0f1; color: #333; font-weight: bold; padding: 8px 0; border: 2px solid transparent; border-radius: 5px; }
+.klank-knop.selected { background-color: #f1c40f; border-color: #f39c12; }
+#start-met-klanken-knop { width: 100%; margin-top: 10px; background-color: #f1c40f; color: #333; font-weight: bold; padding: 10px; border: none; border-radius: 5px; cursor: pointer; }
+
+/* Het Spel */
+.spel-container { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+#huidig-niveau-titel { color: #2c3e50; }
+#items-overzicht { padding: 15px; margin-bottom: 30px; border: 2px solid #e0e0e0; border-radius: 10px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+#items-overzicht span { display: inline-block; padding: 6px 12px; background-color: #ecf0f1; border-radius: 5px; font-size: 16px; transition: all 0.4s ease; }
+#items-overzicht span.is-geweest { background-color: #bdc3c7; color: #7f8c8d; text-decoration: line-through; transform: scale(0.95); }
+#schuif-machine { position: relative; width: 100%; height: 120px; margin: 20px auto; border: 4px solid #34495e; border-radius: 10px; background: linear-gradient(180deg, #abb7b7, #f0f2f2); box-shadow: inset 0 0 15px rgba(0,0,0,0.2); overflow: hidden; }
+#pijl-indicator { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font-size: 40px; color: #e74c3c; z-index: 10; text-shadow: 0 2px 3px rgba(0,0,0,0.2); }
+#ballen-band { position: absolute; top: 0; left: 0; height: 100%; display: flex; align-items: center; transition: transform 4s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.bal { flex-shrink: 0; width: 100px; height: 100px; border-radius: 50%; margin: 0 10px; display: flex; text-align: center; justify-content: center; align-items: center; color: white; font-weight: bold; font-size: 16px; box-shadow: inset -5px -5px 15px rgba(0,0,0,0.25), 0 2px 5px rgba(0,0,0,0.2); text-shadow: 1px 1px 2px rgba(0,0,0,0.4); }
+.knoppen-container { margin-top: 30px; }
+#start-schuiven-knop { background-color: #2ecc71; color: white; padding: 12px 25px; font-size: 18px; border: none; border-radius: 8px; cursor: pointer; }
+#start-schuiven-knop:hover { background-color: #27ae60; }
+#start-schuiven-knop:disabled { background-color: #95a5a6; cursor: not-allowed; }
+
+/* Print Styling */
+@media print {
+    body { padding-left: 0; }
+    .hoofd-menu, #spel-wrapper { display: none; }
+    #bingokaarten-container { display: block; }
+    .bingokaart { display: inline-block; width: 48%; margin: 1%; box-sizing: border-box; border: 2px solid black; page-break-inside: avoid; vertical-align: top; }
+    .bingokaart h3 { text-align: center; font-family: Arial, sans-serif; font-size: 18pt; background-color: #ddd; margin: 0; padding: 5px; }
+    .bingo-grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+    .bingo-vakje { height: 80px; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif; font-size: 14pt; font-weight: bold; padding: 2px; box-sizing: border-box; }
+}
