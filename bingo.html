@@ -46,7 +46,8 @@
         </div>
 
         <hr>
-        <button id="maak-bingokaarten-knop" class="menu-knop bingokaart-knop">Maak Bingokaarten</button>
+        <button id="maak-pdf-knop" class="menu-knop bingokaart-knop">Maak PDF Bingokaarten</button>
+        <button id="druk-kaarten-knop" class="menu-knop bingokaart-knop">Druk Bingokaarten af</button>
     </div>
 
     <div id="spel-wrapper" class="verborgen">
@@ -62,8 +63,17 @@
             </div>
         </div>
     </div>
-    
-    <div id="bingokaarten-container"></div>
+
+    <div id="modal-overlay" class="verborgen">
+        <div id="custom-modal">
+            <h3 id="modal-titel">Titel</h3>
+            <p id="modal-tekst">Tekst...</p>
+            <div id="modal-opties">
+                </div>
+            <button id="modal-annuleren-knop">Annuleren</button>
+        </div>
+    </div>
+
     <script src="bingo.js"></script>
 </body>
 </html>
