@@ -66,16 +66,13 @@ body {
     background-color: #e74c3c; /* Rood voor de PDF knop */
 }
 
-#druk-kaarten-knop {
-    background-color: #c0392b; /* Donkerder rood voor de print knop */
-}
-
-
 /* Submenu's en hun knoppen */
 #avi-selectie,
 #getal-selectie,
 #avi-start-subkeuze,
-#avi-start-klankkeuze {
+#avi-start-klankkeuze,
+#tafel-selectie,
+#reken-selectie {
     background-color: #34495e;
     padding: 15px;
     border-radius: 8px;
@@ -143,6 +140,85 @@ body {
     margin-top: 10px;
     background-color: #f1c40f;
     color: #333;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Stijlen voor de tafelkiezer */
+#kies-tafel-knop {
+    background-color: #16a085; /* Groene kleur */
+}
+
+#tafel-kiezer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.tafel-knop-select {
+    background-color: #ecf0f1;
+    color: #333;
+    font-weight: bold;
+    padding: 8px 0;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.tafel-knop-select.selected {
+    background-color: #1abc9c;
+    border-color: #16a085;
+    color: white;
+}
+
+#tafel-type-kiezer {
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+}
+
+#tafel-type-kiezer label,
+.reken-optie-groep label {
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#start-tafel-spel-knop {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #1abc9c;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Stijlen voor de rekenbingo */
+#kies-reken-knop {
+    background-color: #8e44ad; /* Paarse kleur */
+}
+
+.reken-optie-groep {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 5px 0;
+}
+
+#start-reken-spel-knop {
+    width: 100%;
+    margin-top: 10px;
+    background-color: #9b59b6;
+    color: white;
     font-weight: bold;
     padding: 10px;
     border: none;
@@ -264,7 +340,7 @@ body {
     cursor: not-allowed;
 }
 
-/* --- NIEUWE STIJLEN VOOR HET KEUZEMENU (MODAL) --- */
+/* --- MODAL --- */
 #modal-overlay {
     position: fixed;
     top: 0;
@@ -335,3 +411,18 @@ body {
     border-radius: 5px;
     cursor: pointer;
 }
+
+/* Stijl voor PDF knop in printvenster */
+.actie-balk button { 
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 0 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    color: white;
+}
+.actie-balk button[onclick*="print"] { background-color: #27ae60; }
+.actie-balk button[onclick*="close"] { background-color: #c0392b; }
+.actie-balk button#download-pdf-knop { background-color: #2980b9; }
+.actie-balk button:disabled { background-color: #95a5a6; cursor: not-allowed; }
