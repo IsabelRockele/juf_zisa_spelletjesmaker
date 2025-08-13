@@ -1,24 +1,21 @@
 <!DOCTYPE html>
-
 <html lang="nl">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Juf Zisa's spelletjesmaker</title>
-<link href="keuze.css" rel="stylesheet"/>
-<link href="manifest.json" rel="manifest"/>
-<link href="start_afbeeldingen/Zisa_spelgenerator.png" rel="apple-touch-icon"/>
-<meta content="yes" name="apple-mobile-web-app-capable"/>
-<meta content="black" name="apple-mobile-web-app-status-bar-style"/>
-<meta content="Juf Zisa" name="apple-mobile-web-app-title"/>
-<style>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Juf Zisa's spelletjesmaker</title>
+  <link href="keuze.css" rel="stylesheet" />
+  <link href="manifest.json" rel="manifest" />
+  <link href="start_afbeeldingen/Zisa_spelgenerator.png" rel="apple-touch-icon" />
+  <meta content="yes" name="apple-mobile-web-app-capable" />
+  <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+  <meta content="Juf Zisa" name="apple-mobile-web-app-title" />
+  <style>
     .button-grid {
       display: grid;
-      grid-template-columns: repeat(8, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       gap: 30px;
       justify-items: center;
-      
-      
     }
 
     a {
@@ -36,14 +33,13 @@
       transform: scale(1.05);
     }
 
-    /* Tooltip algemene stijl */
     a::after {
       content: attr(data-tooltip);
       position: absolute;
       top: -45px;
       left: 50%;
       transform: translateX(-50%);
-      background-color: #f9b600; /* standaard geel */
+      background-color: #f9b600;
       color: white;
       padding: 8px 14px;
       font-size: 1.4rem;
@@ -59,56 +55,60 @@
       opacity: 1;
     }
 
-    /* Specifieke tooltipkleur voor de timer */
     a[href="timer.html"]::after {
-      background-color: #9de0c4; /* mintgroen */
+      background-color: #9de0c4;
       color: #004d40;
     }
   </style>
 </head>
 <body>
-<div class="container">
-<div class="title-container">
-<h1>Juf Zisa's spelletjesmaker</h1>
-<img alt="Zisa Logo" class="title-image" src="start_afbeeldingen/zisa.png"/>
-<!-- Nieuw: mintgroene timerknop -->
-<a data-tooltip="Timer" href="timer.html">
-<img alt="Timer" class="drukknop-afbeelding" src="drukknop_afbeeldingen/timer.png"/>
-</a>
-</div>
-<div class="button-grid">
-<!-- Rij 1 -->
-<a data-tooltip="Doolhof" href="doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/doolhof.png"/></a>
-<a data-tooltip="Woordzoeker" href="woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="drukknop_afbeeldingen/woordzoeker.png"/></a>
-<a data-tooltip="Punttekening" href="punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="drukknop_afbeeldingen/punttekening.png"/></a>
-<a data-tooltip="Lettercode" href="lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettercode.png"/></a>
-<a data-tooltip="Geheime boodschap" href="geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="drukknop_afbeeldingen/geheime_boodschap.png"/></a>
-<a data-tooltip="Kruiswoordpuzzel" href="kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/kruiswoordpuzzel.png"/></a>
-<a data-tooltip="Rekenvierkant" href="rekenvierkant.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenvierkant.png"/></a>
-<!-- Rij 2 -->
-<a data-tooltip="Rekenweg" href="rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenweg.png"/></a>
-<a data-tooltip="Sudoku" href="sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="drukknop_afbeeldingen/sudoku.png"/></a>
-<a data-tooltip="Zoek de verschillen" href="zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/zoek_de_verschillen.png"/></a>
-<a data-tooltip="Werkblad kloklezen" href="kloklezen.html"><img alt="Werkblad kloklezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_kloklezen.png"/></a>
-<a data-tooltip="Werkblad bewerkingen" href="bewerkingen_keuze.html"><img alt="Werkblad bewerkingen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_bewerkingen.png"/></a>
-<a data-tooltip="Rekenpiramide" href="rekenpiramide_keuze.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenpiramide.png"/></a>
-<a data-tooltip="Reken en kleur" href="reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="drukknop_afbeeldingen/reken_en_kleur.png"/></a>
-<!-- Rij 3 -->
-<a data-tooltip="Rekenrooster" href="rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenrooster.png"/></a>
-<a data-tooltip="Rekendriehoek" href="rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekendriehoek.png"/></a>
-<a data-tooltip="Lettertetris" href="lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettertetris.png"/></a>
-<a data-tooltip="Schaduw" href="schaduw.html"><img alt="Schaduw" class="drukknop-afbeelding" src="drukknop_afbeeldingen/schaduw.png"/></a>
-<a data-tooltip="Hexagonaal raster" href="hexagon.html"><img alt="Hexagon" class="drukknop-afbeelding" src="drukknop_afbeeldingen/hexagon.png"/></a>
-<a data-tooltip="Rekencirkel" href="rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekencirkel.png"/></a>
-<a data-tooltip="Slangendoolhof" href="slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/slangendoolhof.png"/></a>
-<a data-tooltip="Coderen" href="coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/coderen.png"/></a>
-<a data-tooltip="Pixelart" href="pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="drukknop_afbeeldingen/pixelart.png"/></a>
-<a data-tooltip="Bouwplaten" href="bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="drukknop_afbeeldingen/bouwplaat.png"/></a>
-</div>
-</div>
-<footer>
-<p>© 2025 Isabel Rockelé - Juf Zisa. Alle rechten voorbehouden.</p>
-</footer>
-<script src="keuze.js"></script>
+  <div class="container">
+    <div class="title-container">
+      <h1>Juf Zisa's spelletjesmaker</h1>
+      <img alt="Zisa Logo" class="title-image" src="start_afbeeldingen/zisa.png" />
+      <a data-tooltip="Timer" href="timer.html">
+        <img alt="Timer" class="drukknop-afbeelding" src="drukknop_afbeeldingen/timer.png" />
+      </a>
+    </div>
+    <div class="button-grid">
+      <!-- Rij 1 -->
+      <a data-tooltip="Doolhof" href="doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/doolhof.png"/></a>
+      <a data-tooltip="Woordzoeker" href="woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="drukknop_afbeeldingen/woordzoeker.png"/></a>
+      <a data-tooltip="Punttekening" href="punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="drukknop_afbeeldingen/punttekening.png"/></a>
+      <a data-tooltip="Lettercode" href="lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettercode.png"/></a>
+      <a data-tooltip="Geheime boodschap" href="geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="drukknop_afbeeldingen/geheime_boodschap.png"/></a>
+      <a data-tooltip="Kruiswoordpuzzel" href="kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/kruiswoordpuzzel.png"/></a>
+      <a data-tooltip="Rekenvierkant" href="rekenvierkant.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenvierkant.png"/></a>
+
+      <!-- Rij 2 -->
+      <a data-tooltip="Rekenweg" href="rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenweg.png"/></a>
+      <a data-tooltip="Sudoku" href="sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="drukknop_afbeeldingen/sudoku.png"/></a>
+      <a data-tooltip="Zoek de verschillen" href="zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/zoek_de_verschillen.png"/></a>
+      <a data-tooltip="Werkblad kloklezen" href="kloklezen.html"><img alt="Werkblad kloklezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_kloklezen.png"/></a>
+      <a data-tooltip="Werkblad bewerkingen" href="bewerkingen_keuze.html"><img alt="Werkblad bewerkingen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_bewerkingen.png"/></a>
+      <a data-tooltip="Rekenpiramide" href="rekenpiramide_keuze.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenpiramide.png"/></a>
+      <a data-tooltip="Reken en kleur" href="reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="drukknop_afbeeldingen/reken_en_kleur.png"/></a>
+
+      <!-- Rij 3 -->
+      <a data-tooltip="Rekenrooster" href="rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenrooster.png"/></a>
+      <a data-tooltip="Rekendriehoek" href="rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekendriehoek.png"/></a>
+      <a data-tooltip="Lettertetris" href="lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettertetris.png"/></a>
+      <a data-tooltip="Schaduw" href="schaduw.html"><img alt="Schaduw" class="drukknop-afbeelding" src="drukknop_afbeeldingen/schaduw.png"/></a>
+      <a data-tooltip="Hexagonaal raster" href="hexagon.html"><img alt="Hexagon" class="drukknop-afbeelding" src="drukknop_afbeeldingen/hexagon.png"/></a>
+      <a data-tooltip="Rekencirkel" href="rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekencirkel.png"/></a>
+      <a data-tooltip="Slangendoolhof" href="slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/slangendoolhof.png"/></a>
+
+      <!-- Rij 4 -->
+      <a data-tooltip="Coderen" href="coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/coderen.png"/></a>
+      <a data-tooltip="Pixelart" href="pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="drukknop_afbeeldingen/pixelart.png"/></a>
+      <a data-tooltip="Bouwplaten" href="bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="drukknop_afbeeldingen/bouwplaat.png"/></a>
+      <a data-tooltip="Bingo" href="bingo.html"><img alt="Bingo" class="drukknop-afbeelding" src="drukknop_afbeeldingen/bingo.png"/></a>
+    </div>
+  </div>
+  <footer>
+    <p>© 2025 Isabel Rockelé - Juf Zisa. Alle rechten voorbehouden.</p>
+  </footer>
+  <script src="keuze.js"></script>
 </body>
 </html>
+
