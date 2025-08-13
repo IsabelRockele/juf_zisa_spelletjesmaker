@@ -38,129 +38,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const kiesWoordenKnop = document.getElementById('kies-woorden-knop');
     const kiesGetallenKnop = document.getElementById('kies-getallen-knop');
+    const kiesTafelsKnop = document.getElementById('kies-tafels-knop'); // Nieuw
     const woordenOptiesDiv = document.getElementById('woorden-opties');
     const getallenOptiesDiv = document.getElementById('getallen-opties');
+    const tafelsOptiesDiv = document.getElementById('tafels-opties'); // Nieuw
     const aviNiveauSelect = document.getElementById('avi-niveau');
     const moeilijkheidCheckboxesDiv = document.getElementById('moeilijkheid-checkboxes');
+    const tafelCheckboxesDiv = document.getElementById('tafel-checkboxes'); // Nieuw
     const genereerBordKnop = document.getElementById('genereer-bord-knop');
 
     function formatteerGetal(getal) {
         if (getal === 0) return '0E';
-
         const h = Math.floor(getal / 100);
         const t = Math.floor((getal % 100) / 10);
         const e = getal % 10;
-
         const parts = [];
         if (h > 0) parts.push(`${h}H`);
         if (t > 0) parts.push(`${t}T`);
         if (e > 0 || getal === 0) parts.push(`${e}E`);
-
         if (parts.length === 0) {
              if (h > 0) return `${h}H`;
              if (t > 0) return `${t}T`;
         }
-
         return parts.join(' ');
     }
 
     function genereerPrintbarePagina(bordHTML) {
-        const printStyles = `
-            <style>
-                @page { size: A4 landscape; margin: 1cm; }
-                html, body { height: 100%; margin: 0; padding: 0; font-family: sans-serif; background-color: #eee; }
-                @media screen {
-                    .actie-balk { display: block; position: fixed; top: 0; left: 0; width: 100%; padding: 10px; text-align: center; background: #333; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
-                    .actie-balk button { font-size:16px; padding:10px 20px; border-radius: 5px; border: none; background: #3498db; color: white; cursor: pointer; margin: 0 5px; }
-                    .actie-balk button#download-pdf-knop { background: #2ecc71; }
-                    .actie-balk button:last-child { background: #95a5a6; }
-                    body { display: flex; justify-content: center; align-items: center; box-sizing: border-box; padding-top: 60px; }
-                }
-                @media print {
-                    .actie-balk { display: none; }
-                    body { background-color: transparent; }
-                    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                }
-                .bord-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
-                .vier-op-rij-bord { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; aspect-ratio: 7 / 6; max-width: 100%; max-height: 100%; background-color: #005f73; padding: 10px; border-radius: 15px; border: 5px solid #0a9396; box-sizing: border-box; }
-                .spel-vakje { position: relative; width: 100%; height: 100%; background-color: #e9d8a6; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-                .spel-vakje .tekst { color: #333; font-weight: bold; font-size: clamp(8pt, 2.5vmin, 14pt); text-align: center; word-break: break-word; padding: 4px; box-sizing: border-box; }
-            </style>
-        `;
-
-        const actieKnoppenHTML = `
-            <div class="actie-balk">
-                <button onclick="window.print()">🖨️ Afdrukken</button>
-                <button id="download-pdf-knop">📄 Download als PDF</button>
-                <button onclick="window.close()">❌ Sluiten</button>
-            </div>`;
-        
-        const containerHTML = `<div class="bord-container">${bordHTML}</div>`;
-
-        const pdfScript = `
-            <script>
-                window.onload = () => {
-                    const downloadKnop = document.getElementById('download-pdf-knop');
-                    const bordElement = document.querySelector('.vier-op-rij-bord');
-
-                    downloadKnop.addEventListener('click', () => {
-                        downloadKnop.textContent = 'Bezig met genereren...';
-                        downloadKnop.disabled = true;
-
-                        html2canvas(bordElement, { scale: 3, useCORS: true })
-                            .then(canvas => {
-                                const imgData = canvas.toDataURL('image/png');
-                                const { jsPDF } = window.jspdf;
-                                const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-                                const margin = 10;
-                                const pdfWidth = pdf.internal.pageSize.getWidth();
-                                const pdfHeight = pdf.internal.pageSize.getHeight();
-                                const availableWidth = pdfWidth - (margin * 2);
-                                const availableHeight = pdfHeight - (margin * 2);
-                                
-                                const aspectRatio = 7 / 6;
-                                let imgWidth = availableWidth;
-                                let imgHeight = imgWidth / aspectRatio;
-
-                                if (imgHeight > availableHeight) {
-                                    imgHeight = availableHeight;
-                                    imgWidth = imgHeight * aspectRatio;
-                                }
-
-                                const x = margin + (availableWidth - imgWidth) / 2;
-                                const y = margin + (availableHeight - imgHeight) / 2;
-                                
-                                pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-                                pdf.save('4-op-een-rij-spelbord.pdf');
-                            })
-                            .catch(error => {
-                                console.error('Fout bij het genereren van de PDF:', error);
-                                alert('Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.');
-                            })
-                            .finally(() => {
-                                downloadKnop.textContent = '📄 Download als PDF';
-                                downloadKnop.disabled = false;
-                            });
-                    });
-                };
-            </script>
-        `;
-
-        return `
-            <html>
-                <head>
-                    <title>4-op-een-Rij Spelbord</title>
-                    ${printStyles}
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script>
-                </head>
-                <body>
-                    ${actieKnoppenHTML}
-                    ${containerHTML}
-                    ${pdfScript}
-                </body>
-            </html>`;
+        const printStyles = `<style>@page{size:A4 landscape;margin:1cm}html,body{height:100%;margin:0;padding:0;font-family:sans-serif;background-color:#eee}@media screen{.actie-balk{display:block;position:fixed;top:0;left:0;width:100%;padding:10px;text-align:center;background:#333;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,.3)}.actie-balk button{font-size:16px;padding:10px 20px;border-radius:5px;border:none;background:#3498db;color:#fff;cursor:pointer;margin:0 5px}.actie-balk button#download-pdf-knop{background:#2ecc71}.actie-balk button:last-child{background:#95a5a6}body{display:flex;justify-content:center;align-items:center;box-sizing:border-box;padding-top:60px}}@media print{.actie-balk{display:none}body{background-color:transparent}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.bord-container{width:100%;height:100%;display:flex;justify-content:center;align-items:center}.vier-op-rij-bord{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);gap:8px;aspect-ratio:7/6;max-width:100%;max-height:100%;background-color:#005f73;padding:10px;border-radius:15px;border:5px solid #0a9396;box-sizing:border-box}.spel-vakje{position:relative;width:100%;height:100%;background-color:#e9d8a6;border-radius:50%;display:flex;justify-content:center;align-items:center}.spel-vakje .tekst{color:#333;font-weight:700;font-size:clamp(8pt,2.5vmin,14pt);text-align:center;word-break:break-word;padding:4px;box-sizing:border-box}</style>`;
+        const actieKnoppenHTML = `<div class=actie-balk><button onclick=window.print()>🖨️ Afdrukken</button><button id=download-pdf-knop>📄 Download als PDF</button><button onclick=window.close()>❌ Sluiten</button></div>`;
+        const containerHTML = `<div class=bord-container>${bordHTML}</div>`;
+        const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}</script>`;
+        return `<html><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src=https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js><\/script><script src=https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`
     }
 
     function genereerSpelbord() {
@@ -186,22 +94,38 @@ document.addEventListener('DOMContentLoaded', () => {
             itemList = [...uniekeWoorden];
         } else if (gekozenSpeltype === 'getallen') {
             itemList = geselecteerdeGetallenLijst;
+        } else if (gekozenSpeltype === 'tafels') {
+            // Logica voor het genereren van tafelsommen
+            const geselecteerdeTafels = [...document.querySelectorAll('#tafel-checkboxes input:checked')].map(cb => parseInt(cb.value));
+            const tafelType = document.querySelector('input[name="tafel-type"]:checked').value;
+
+            if (geselecteerdeTafels.length === 0) {
+                alert('Kies a.u.b. minstens één tafel.');
+                return;
+            }
+
+            geselecteerdeTafels.forEach(tafel => {
+                for (let i = 1; i <= 10; i++) {
+                    if (tafelType === 'maal' || tafelType === 'beide') {
+                        itemList.push(`${i} x ${tafel}`);
+                    }
+                    if (tafelType === 'deel' || tafelType === 'beide') {
+                        itemList.push(`${i * tafel} : ${tafel}`);
+                    }
+                }
+            });
         }
 
-        // --- AANGEPAST: Controleer alleen of de lijst leeg is, niet of er 42 unieke items zijn. ---
         if (!itemList || itemList.length === 0) {
             alert(`Er zijn geen items geselecteerd. Kies een categorie of een getallenreeks.`);
             return;
         }
 
-        // --- AANGEPAST: Nieuwe logica om het bord te vullen, met herhalingen indien nodig. ---
         let teVullenItems = [];
-        // Blijf de bronlijst toevoegen totdat we zeker 42 items hebben
         while (teVullenItems.length < 42) {
             teVullenItems.push(...itemList);
         }
 
-        // Schud de volledige lijst en neem de eerste 42 items
         const geschuddeItems = teVullenItems.sort(() => Math.random() - 0.5);
         const bordItems = geschuddeItems.slice(0, 42);
         
@@ -239,12 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 }
             }
-            const checkboxHTML = `
-                <div class="checkbox-container ${!isBeschikbaar ? 'disabled' : ''}">
-                    <input type="checkbox" id="check-${moeilijkheid}" name="moeilijkheid" value="${moeilijkheid}" ${!isBeschikbaar ? 'disabled' : ''}>
-                    <label for="check-${moeilijkheid}" title="${alleMoeilijkheden[moeilijkheid]}">${leesbareNaam}</label>
-                </div>`;
+            const checkboxHTML = `<div class="checkbox-container ${!isBeschikbaar?'disabled':''}"><input type=checkbox id=check-${moeilijkheid} name=moeilijkheid value=${moeilijkheid} ${!isBeschikbaar?'disabled':''}><label for=check-${moeilijkheid} title="${alleMoeilijkheden[moeilijkheid]}">${leesbareNaam}</label></div>`;
             moeilijkheidCheckboxesDiv.innerHTML += checkboxHTML;
+        }
+    }
+
+    // Nieuwe functie om de tafel-checkboxes te vullen
+    function vulTafelCheckboxes() {
+        tafelCheckboxesDiv.innerHTML = '';
+        for (let i = 1; i <= 10; i++) {
+            const checkboxHTML = `<div class="checkbox-container"><input type=checkbox id=check-tafel-${i} name=tafel value=${i}><label for=check-tafel-${i}>Tafel van ${i}</label></div>`;
+            tafelCheckboxesDiv.innerHTML += checkboxHTML;
         }
     }
 
@@ -252,8 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
         gekozenSpeltype = 'woorden';
         kiesWoordenKnop.classList.add('active');
         kiesGetallenKnop.classList.remove('active');
+        kiesTafelsKnop.classList.remove('active');
         woordenOptiesDiv.classList.remove('verborgen');
         getallenOptiesDiv.classList.add('verborgen');
+        tafelsOptiesDiv.classList.add('verborgen');
         genereerBordKnop.classList.remove('verborgen');
     });
 
@@ -261,19 +192,31 @@ document.addEventListener('DOMContentLoaded', () => {
         gekozenSpeltype = 'getallen';
         kiesGetallenKnop.classList.add('active');
         kiesWoordenKnop.classList.remove('active');
+        kiesTafelsKnop.classList.remove('active');
         getallenOptiesDiv.classList.remove('verborgen');
         woordenOptiesDiv.classList.add('verborgen');
+        tafelsOptiesDiv.classList.add('verborgen');
         genereerBordKnop.classList.add('verborgen'); 
     });
     
+    // Nieuwe event listener voor de Tafels-knop
+    kiesTafelsKnop.addEventListener('click', () => {
+        gekozenSpeltype = 'tafels';
+        kiesTafelsKnop.classList.add('active');
+        kiesWoordenKnop.classList.remove('active');
+        kiesGetallenKnop.classList.remove('active');
+        tafelsOptiesDiv.classList.remove('verborgen');
+        woordenOptiesDiv.classList.add('verborgen');
+        getallenOptiesDiv.classList.add('verborgen');
+        genereerBordKnop.classList.remove('verborgen');
+    });
+
     document.querySelectorAll('.getal-knop').forEach(knop => {
         knop.addEventListener('click', (e) => {
             document.querySelectorAll('.getal-knop').forEach(k => k.classList.remove('active'));
             e.target.classList.add('active');
             const max = parseInt(e.target.dataset.max);
-            
             geselecteerdeGetallenLijst = Array.from({length: max}, (_, i) => formatteerGetal(i + 1));
-
             genereerBordKnop.classList.remove('verborgen');
         });
     });
@@ -281,5 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aviNiveauSelect.addEventListener('change', vulMoeilijkheidCheckboxes);
     genereerBordKnop.addEventListener('click', genereerSpelbord);
 
+    // Roep de nieuwe functies aan bij het laden van de pagina
     vulAviNiveaus();
+    vulTafelCheckboxes();
 });
