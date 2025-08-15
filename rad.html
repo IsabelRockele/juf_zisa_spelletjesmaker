@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitaal Rad van Fortuin</title>
+    <link rel="stylesheet" href="rad.css">
+</head>
+<body>
+
+    <a href="index.html" class="menu-button">Keuzemenu</a>
+
+    <div class="container">
+        <h1>Digitaal Rad van Fortuin</h1>
+
+        <div class="main-content">
+            <div class="controls">
+                <h2>Opties</h2>
+                <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
+                
+                <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
+                <input type="file" id="fileUpload" accept=".txt" style="display: none;">
+
+                <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
+                <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+
+                <h3>Kies Tafels (max. 25)</h3>
+                <div class="option-group">
+                    <label><input type="radio" name="table_type" value="maal" checked> Maal</label>
+                    <label><input type="radio" name="table_type" value="deel"> Deel</label>
+                    <label><input type="radio" name="table_type" value="beide"> Beide</label>
+                </div>
+                <div class="table-selection">
+                    <div id="maal-checkboxes" class="checkbox-grid"></div>
+                </div>
+                <button id="generateTablesBtn" class="generate-btn">Genereer Tafels</button>
+
+                <h3>Kies Rekensommen (max. 25)</h3>
+                <div class="option-group">
+                    <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder brug</label>
+                    <label><input type="checkbox" name="brug_option" value="met" checked> Met brug</label>
+                </div>
+                <div class="button-group-4-cols">
+                    <button class="preset-btn" data-type="plusmin10">+ / - tot 10</button>
+                    <button class="preset-btn" data-type="plusmin20">+ / - tot 20</button>
+                    <button class="preset-btn" data-type="plusmin100">+ / - tot 100</button>
+                    <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
+                </div>
+            </div>
+
+            <div class="wheel-wrapper">
+                <canvas id="wheelCanvas" width="650" height="650"></canvas>
+                <div class="pointer"></div>
+                <button id="spinBtn">DRAAI!</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <div id="resultOutput"></div>
+        </div>
+    </div>
+
+    <script src="rad.js"></script>
+</body>
+</html>
