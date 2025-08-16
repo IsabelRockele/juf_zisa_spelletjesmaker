@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePreviewBtn = document.getElementById('close-preview-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
     
-    // --- Spel logica ---
+    // --- Spel logica (ongewijzigd) ---
     let currentNumber, correctAnswer, mistakes, isLocked = false;
     const targetZone = document.getElementById('target-zone');
     const optionsZone = document.getElementById('options-zone');
@@ -57,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // AANGEPAST: Volledig herschreven logica voor genereren van werkblad
     function generateWorksheetPreview() {
         previewBody.innerHTML = '';
 
@@ -68,35 +69,56 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const instruction = document.createElement('p');
         instruction.className = 'opdracht';
-        instruction.textContent = 'Kleur de twee hartjes die samen 10 vormen in dezelfde kleur.';
+        instruction.textContent = 'Kleur de twee helften die samen 10 vormen in dezelfde kleur.';
         
         page.appendChild(title);
         page.appendChild(instruction);
 
-        // AANGEPAST: De paren bevatten nu ook [0, 10]
+        // Stap 1: Definieer de paren
         const pairs = [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5], [0, 10]];
-        let numbersToPlace = pairs.flat().sort(() => Math.random() - 0.5);
+        const heartElements = [];
 
-        numbersToPlace.forEach((number, i) => {
-            const side = (Math.random() < 0.5) ? 'left-half' : 'right-half';
-            const heartEl = document.createElement('div');
-            heartEl.className = `werkblad-hart ${side}`;
-            
-            const rotation = Math.random() * 50 - 25;
-            heartEl.style.transform = `rotate(${rotation}deg) scale(0.9)`;
+        // Stap 2: Maak voor elk paar een linker- en een rechterhelft met DEZELFDE rotatie
+        pairs.forEach(pair => {
+            const rotation = Math.random() * 50 - 25; // Eén rotatie voor het hele paar
 
-            const img = document.createElement('img');
-            img.src = (side === 'left-half') ? 'harten_afbeeldingen/hart01_wit.png' : 'harten_afbeeldingen/hart02_wit.png';
-            
-            const span = document.createElement('span');
-            span.textContent = number;
+            // Maak de linkerhelft
+            const leftHalf = createWorksheetHeart(pair[0], 'left-half', rotation);
+            heartElements.push(leftHalf);
 
-            heartEl.appendChild(img);
-            heartEl.appendChild(span);
+            // Maak de rechterhelft
+            const rightHalf = createWorksheetHeart(pair[1], 'right-half', rotation);
+            heartElements.push(rightHalf);
+        });
+
+        // Stap 3: Schud alle gemaakte harten door elkaar
+        heartElements.sort(() => Math.random() - 0.5);
+
+        // Stap 4: Voeg de geschudde harten toe aan de pagina
+        heartElements.forEach(heartEl => {
             page.appendChild(heartEl);
         });
 
+        // Toon het resultaat in de preview en open de modal
         previewBody.appendChild(page);
         previewModal.style.display = 'flex';
+    }
+
+    // Hulpfunctie voor het maken van een werkblad-hart
+    function createWorksheetHeart(number, side, rotation) {
+        const heartEl = document.createElement('div');
+        heartEl.className = `werkblad-hart ${side}`;
+        
+        heartEl.style.transform = `rotate(${rotation}deg) scale(0.9)`;
+
+        const img = document.createElement('img');
+        img.src = (side === 'left-half') ? 'harten_afbeeldingen/hart01_wit.png' : 'harten_afbeeldingen/hart02_wit.png';
+        
+        const span = document.createElement('span');
+        span.textContent = number;
+
+        heartEl.appendChild(img);
+        heartEl.appendChild(span);
+        return heartEl;
     }
 });
