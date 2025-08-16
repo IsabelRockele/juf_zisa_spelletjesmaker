@@ -6,15 +6,38 @@
 <title>Juf Zisa's spelletjesmaker</title>
 <link href="keuze.css" rel="stylesheet"/>
 <style>
-    /* Stijl voor de body om alles te centreren */
     body {
-      text-align: center; /* Centreert de inhoud */
+      /* text-align: center; is niet meer nodig voor de header */
     }
+
+    /* Nieuwe container voor logo en titel */
+    .header-container {
+      display: flex;
+      justify-content: center; /* Centreert de groep horizontaal */
+      align-items: center;     /* Lijnt logo en titel verticaal uit */
+      margin-bottom: 30px;     /* Ruimte onder de header */
+      margin-top: 40px;        /* Zorgt voor ruimte aan de bovenkant */
+    }
+
     .logo {
-      width: 110px; /* Pas de breedte aan naar wens */
+      width: 100px; /* Iets kleiner gemaakt voor naast de titel */
       height: auto;
-      margin-bottom: 20px; /* Ruimte tussen logo en titel */
+      margin-right: 20px; /* Ruimte tussen logo en titel */
     }
+    
+    /* Titel styling verplaatst van inline naar hier */
+    .header-container h1 {
+      font-size: 2.2rem;
+      margin: 0; /* Verwijdert standaard marges van de h1 */
+    }
+
+    .container {
+      /* Extra styling om de container op te maken */
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
     .accordion {
       margin-bottom: 20px;
     }
@@ -77,9 +100,10 @@
 <body>
 <div class="container">
 
-<img src="start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
-
-<h1 style="margin-bottom: 30px; font-size: 2.8rem;">Juf Zisa's spelletjesmaker</h1>
+<div class="header-container">
+  <img src="start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
+  <h1 style="margin-bottom: 30px; font-size: 3.5rem;">Juf Zisa's spelletjesmaker</h1>
+</div>
 
 <div class="accordion">
 <button class="accordion-header">📐 Reken-oefeningen</button>
