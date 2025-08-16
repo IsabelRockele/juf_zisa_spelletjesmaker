@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="galgje.css" />
 </head>
 <body>
-  <!-- SETUP -->
   <section class="setup">
     <a href="index.html" class="btn menu-btn">Keuzemenu</a>
     <h1>Galgje-generator (Zisa)</h1>
@@ -16,8 +15,7 @@
       <p>Vul uw zinnen in (één per veld). Klik op <strong>+</strong> voor extra zinnen.</p>
 
       <div id="sentencesList" class="sentences-list">
-        <!-- JS voegt velden toe -->
-      </div>
+        </div>
 
       <div class="row">
         <button id="addSentenceBtn" class="btn icon" title="Zin toevoegen" aria-label="Zin toevoegen">＋</button>
@@ -29,13 +27,18 @@
           <option value="12" selected>12</option>
         </select>
 
+        <label for="alphabetSelect">Alfabet:</label>
+        <select id="alphabetSelect">
+          <option value="std" selected>Standaard (A-Z)</option>
+          <option value="fr">Frans (met accenten)</option>
+        </select>
+
         <button id="startBtn" class="btn primary">Start spel</button>
         <button id="clearAllBtn" class="btn ghost">Alles leegmaken</button>
       </div>
     </div>
   </section>
 
-  <!-- GAME -->
   <section class="game" id="game">
     <div class="sky" aria-hidden="true">
       <div class="cloud c1"></div><div class="cloud c2"></div>
@@ -51,22 +54,18 @@
     </div>
 
     <div class="playwrap">
-      <!-- Links: te raden zin -->
       <div class="left">
         <div id="word" class="word"></div>
         <div id="feedback" class="status"></div>
       </div>
 
-      <!-- Rechts: Zisa-animatie -->
       <div class="stage">
         <svg id="zisaStage" viewBox="0 0 800 520">
-          <!-- lege groep; JS plaatst hier <image id="zisaImg"> in -->
           <g id="zisa" transform="translate(400,240)"></g>
         </svg>
       </div>
     </div>
 
-    <!-- Onderaan: toetsenbord + volgende spel -->
     <div id="kbbar" class="kbbar">
       <div id="keyboard" class="kb"></div>
       <div class="kb-actions">
@@ -75,7 +74,6 @@
     </div>
   </section>
 
-  <!-- Modal uitslag -->
   <div id="modal" class="modal">
     <div class="dialog">
       <h3 id="modalTitle"></h3>
