@@ -16,6 +16,9 @@
         <div class="main-content">
             <div class="controls">
                 <h2>Opties</h2>
+                <div class="option-group">
+                    <label><input type="checkbox" id="removeAfterSpin" checked> Verwijder na draai</label>
+                </div>
                 <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
                 
                 <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
@@ -46,6 +49,8 @@
                     <button class="preset-btn" data-type="plusmin100">+ / - tot 100</button>
                     <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
                 </div>
+
+                <button id="resetBtn" class="reset-btn">Reset Rad</button>
             </div>
 
             <div class="wheel-wrapper">
