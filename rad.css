@@ -4,6 +4,7 @@
     --primary-color: #2c3e50;
     --secondary-color: #3498db;
     --action-color: #2ecc71;
+    --warning-color: #e74c3c;
     --background-color: #ecf0f1;
     --text-color: #333;
     --light-color: #ffffff;
@@ -47,12 +48,11 @@ h4 { font-size: 1rem; margin-bottom: 0.5rem; }
     text-align: center;
 }
 
-/* --- BELANGRIJKE WIJZIGING HIERONDER --- */
 .main-content {
-    display: grid; /* Veranderd naar Grid */
-    grid-template-columns: max-content 1fr; /* Kolom 1: opties, Kolom 2: de rest */
-    align-items: center; /* Lijn verticaal uit */
-    gap: 50px; /* Ruimte tussen de kolommen */
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    gap: 50px;
     margin-top: 0;
 }
 
@@ -61,12 +61,12 @@ h4 { font-size: 1rem; margin-bottom: 0.5rem; }
     padding: 25px;
     border-radius: 12px;
     box-shadow: var(--shadow);
-    width: 400px; /* Vaste breedte voor de opties */
+    width: 400px;
     text-align: left;
     max-height: 650px;
     overflow-y: auto;
     padding-right: 15px;
-    justify-self: start; /* Lijn dit item links uit in zijn kolom */
+    justify-self: start;
 }
 
 textarea {
@@ -156,6 +156,21 @@ textarea {
 }
 .preset-btn:hover { background: #7f8c8d; }
 
+.reset-btn {
+    width: 100%;
+    background: var(--warning-color);
+    color: var(--light-color);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: background 0.3s ease;
+    margin-top: 1.5rem;
+}
+.reset-btn:hover { background: #c0392b; }
+
 .wheel-wrapper {
     position: relative;
     width: 650px;
@@ -163,7 +178,7 @@ textarea {
     display: flex;
     justify-content: center;
     align-items: center;
-    justify-self: center; /* Centreer het rad in zijn eigen (grotere) kolom */
+    justify-self: center;
 }
 
 #wheelCanvas {
@@ -181,7 +196,7 @@ textarea {
     height: 0;
     border-left: 20px solid transparent;
     border-right: 20px solid transparent;
-    border-top: 30px solid #e74c3c;
+    border-top: 30px solid var(--warning-color);
     z-index: 10;
 }
 
@@ -235,7 +250,7 @@ textarea {
 
 @media (max-width: 1100px) {
    .main-content {
-        display: flex; /* Terug naar flexbox op smalle schermen */
+        display: flex;
         flex-direction: column;
         align-items: center;
         gap: 30px;
