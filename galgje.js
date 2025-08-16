@@ -1,6 +1,10 @@
 // ---- Helpers
 const $ = (s) => document.querySelector(s);
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+const ALPHABETS = {
+  std: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""),
+  fr: "ABCDEFGHIJKLMNOPQRSTUVWXYZÀÂÆÇÉÈÊËÎÏÔŒÙÛÜŸ".split(""),
+};
+let LETTERS = ALPHABETS.std; // Standaard
 const strip = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 const onlyLetters = (ch) => /[A-Z]/.test(ch);
 
@@ -10,6 +14,7 @@ const addBtn = $("#addSentenceBtn");
 const startBtn = $("#startBtn");
 const clearAllBtn = $("#clearAllBtn");
 const balloonInput = $("#balloonCount"); // select met 8/10/12
+const alphabetSelect = $("#alphabetSelect"); // NIEUW
 
 const game = $("#game");
 const wordEl = $("#word");
@@ -34,13 +39,12 @@ let solutionRaw = "";
 let solution = "";
 let guessed = new Set();
 let wrong = 0;
-let maxWrong = 12;       // default = 12 (komt overeen met HTML-select)
+let maxWrong = 12; // default = 12 (komt overeen met HTML-select)
 let gameActive = false;
 
 // ====== Zisa-frames (PNG's in map 'galgje_afbeeldingen')
-// Frames lopen 12 -> 0; 12 = start, 0 = game over
+// Frames lopen van het gekozen max aantal fouten (bv. 12) terug naar 0
 const ZISA_MIN = 0;
-const ZISA_MAX = 12;
 
 // VASTE BOX om schokken te vermijden (alles even groot kadreren)
 const ZISA_BOX_W = 600;
@@ -91,7 +95,8 @@ clearAllBtn.addEventListener("click", () => {
 
 // ====== Zisa (PNG-frames) ======
 function zisaPath(frame) {
-  const n = Math.max(ZISA_MIN, Math.min(ZISA_MAX, frame));
+  // GEWIJZIGD: Zorg ervoor dat het frame nooit onder 0 gaat.
+  const n = Math.max(ZISA_MIN, frame);
   return `galgje_afbeeldingen/zisa_${String(n).padStart(2, "0")}.png`;
 }
 
@@ -127,16 +132,15 @@ function createZisa() {
 
   zisaG.appendChild(img);
   zisaImg = img;
-
-  // start op frame 12
-  setZisaFrame(ZISA_MAX);
+  
+  // GEWIJZIGD: De start-frame wordt nu ingesteld in nextRound() via updateZisaImage()
 }
 
 function updateZisaImage() {
   if (!zisaImg) return;
-  // wrong: 0..maxWrong  ⇒ frame: 12..0
-  const step = Math.min(12, Math.floor((wrong * 12) / Math.max(1, maxWrong)));
-  const frame = ZISA_MAX - step;
+  // GEWIJZIGD: De logica is nu direct gekoppeld aan het aantal fouten.
+  // Als maxWrong 8 is, start de frame op 8 en telt af naar 0.
+  const frame = Math.max(ZISA_MIN, maxWrong - wrong);
   setZisaFrame(frame);
 }
 
@@ -195,11 +199,15 @@ function setProgress() {
 
 function guess(letter, btn) {
   if (!gameActive) return;
-  if (guessed.has(letter)) return;
-  guessed.add(letter);
+  
+  // GEWIJZIGD: We strippen de letter om accenten te negeren voor de logica
+  const strippedLetter = strip(letter);
+  if (guessed.has(strippedLetter)) return;
+  guessed.add(strippedLetter);
+
   if (btn) btn.classList.add("used");
 
-  if (solution.includes(letter)) {
+  if (solution.includes(strippedLetter)) {
     renderWord();
     feedbackEl.textContent = "Goed!";
     feedbackEl.className = "status win";
@@ -213,8 +221,7 @@ function guess(letter, btn) {
     setProgress();
 
     if (wrong >= maxWrong) {
-      // forceer eindbeeld (zisa_00) en laat vallen
-      setZisaFrame(0);
+      setZisaFrame(0); // forceer eindbeeld
       endGame(false);
     }
   }
@@ -238,9 +245,11 @@ function nextRound() {
   setProgress();
 
   buildKeyboard();
-
-  // Zisa naar startframe en animatie resetten
   createZisa();
+  
+  // GEWIJZIGD: Zet de initiële afbeelding op basis van maxWrong
+  updateZisaImage(); 
+  
   nextInlineBtn.classList.add("hidden");
 
   if (queue.length === 0) {
@@ -259,6 +268,9 @@ function startGame() {
   wrong = 0;
   guessed.clear();
   gameActive = false;
+
+  // NIEUW: Stel het gekozen alfabet in
+  LETTERS = ALPHABETS[alphabetSelect.value] || ALPHABETS.std;
 
   const lines = getSentencesFromFields();
   if (lines.length === 0) {
@@ -312,9 +324,21 @@ window.addEventListener("keydown", (e) => {
   if (!gameActive || modal.style.display === "grid") return;
   const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : "";
   if (tag === "input" || tag === "textarea" || tag === "button") return;
+  
   const L = e.key.toUpperCase();
-  if (LETTERS.includes(L)) {
-    const btn = [...kb.querySelectorAll(".key")].find((b) => b.textContent === L);
-    guess(L, btn);
+  const strippedL = strip(L);
+
+  // GEWIJZIGD: Check of de (gestripte) letter in het alfabet voorkomt.
+  // Dit zorgt ervoor dat ook Franse tekens via het toetsenbord werken.
+  if (LETTERS.map(strip).includes(strippedL)) {
+      // Zoek de knop die overeenkomt met de ingedrukte toets
+      const btn = [...kb.querySelectorAll(".key")].find(
+        (b) => strip(b.textContent) === strippedL && !b.classList.contains("used")
+      );
+      // We gebruiken de originele letter (L) voor de guess-functie,
+      // zodat de juiste knop (met accent) de 'used' class krijgt.
+      if (btn) {
+        guess(btn.textContent, btn);
+      }
   }
 });
