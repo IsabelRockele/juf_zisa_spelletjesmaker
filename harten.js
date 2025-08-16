@@ -1,17 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referenties naar elementen (uitgebreid met modal-elementen) ---
+    // --- Referenties naar elementen ---
     const setupScreen = document.getElementById('setup-screen');
     const gameContainer = document.getElementById('game-container');
     const startButton = document.getElementById('start-btn');
     const stopButton = document.getElementById('stop-btn');
     const werkbladButton = document.getElementById('werkblad-btn');
-    // Nieuwe modal elementen
     const previewModal = document.getElementById('preview-modal');
     const previewBody = document.getElementById('preview-body');
     const closePreviewBtn = document.getElementById('close-preview-btn');
     const downloadPdfBtn = document.getElementById('download-pdf-btn');
     
-    // --- Spel logica (ongewijzigd) ---
+    // --- Spel logica ---
     let currentNumber, correctAnswer, mistakes, isLocked = false;
     const targetZone = document.getElementById('target-zone');
     const optionsZone = document.getElementById('options-zone');
@@ -28,19 +27,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleCorrectAnswer() { isLocked = true; feedbackEl.textContent = 'Super! ❤️'; feedbackEl.style.color = '#4CAF50'; optionsZone.innerHTML = ''; targetZone.innerHTML = ''; targetZone.style.border = 'none'; const fullHeartContainer = document.createElement('div'); fullHeartContainer.className = 'full-heart-container'; const numberTen = document.createElement('span'); numberTen.textContent = '10'; fullHeartContainer.appendChild(numberTen); targetZone.appendChild(fullHeartContainer); setTimeout(() => { newExercise(); }, 2000); }
     function handleIncorrectAnswer(draggedElement) { mistakes++; if (mistakes < 2) { feedbackEl.textContent = 'Oei, probeer het nog een keer!'; feedbackEl.style.color = '#f44336'; } else { isLocked = true; feedbackEl.textContent = 'Jammer! Het juiste hartje was...'; feedbackEl.style.color = '#f44336'; setTimeout(() => { const correctHeart = optionsZone.querySelector(`[data-number='${correctAnswer}']`); correctHeart.classList.add('show-correct-animation'); setTimeout(newExercise, 2500); }, 500); } }
 
+    // --- Logica voor het werkblad met preview ---
 
-    // --- HERSCHREVEN: Logica voor het werkblad met preview ---
-
-    // 1. Toon de preview als op de knop wordt geklikt
     werkbladButton.addEventListener('click', generateWorksheetPreview);
     
-    // 2. Sluit de preview
     closePreviewBtn.addEventListener('click', () => {
         previewModal.style.display = 'none';
-        previewBody.innerHTML = ''; // Maak de inhoud leeg
+        previewBody.innerHTML = '';
     });
 
-    // 3. Download de PDF vanuit de preview
     downloadPdfBtn.addEventListener('click', () => {
         const pageToDownload = previewBody.querySelector('.werkblad-pagina');
         if (pageToDownload) {
@@ -54,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
                 pdf.save('werkblad-verliefde-harten.pdf');
 
-                // Reset de knop en sluit de modal
                 downloadPdfBtn.textContent = 'Download als PDF';
                 downloadPdfBtn.disabled = false;
                 previewModal.style.display = 'none';
@@ -64,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function generateWorksheetPreview() {
-        // Maak de preview-body eerst leeg
         previewBody.innerHTML = '';
 
         const page = document.createElement('div');
@@ -75,13 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         const instruction = document.createElement('p');
         instruction.className = 'opdracht';
-        instruction.textContent = 'Kleur de twee helften die samen 10 vormen in dezelfde kleur.';
+        instruction.textContent = 'Kleur de twee hartjes die samen 10 vormen in dezelfde kleur.';
         
         page.appendChild(title);
         page.appendChild(instruction);
 
-        // Definieer de paren en plaats de harten
-        const pairs = [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5], [1, 9]];
+        // AANGEPAST: De paren bevatten nu ook [0, 10]
+        const pairs = [[1, 9], [2, 8], [3, 7], [4, 6], [5, 5], [0, 10]];
         let numbersToPlace = pairs.flat().sort(() => Math.random() - 0.5);
 
         numbersToPlace.forEach((number, i) => {
@@ -89,8 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const heartEl = document.createElement('div');
             heartEl.className = `werkblad-hart ${side}`;
             
-            const rotation = Math.random() * 50 - 25; // Tussen -25 en +25 graden
-            heartEl.style.transform = `rotate(${rotation}deg) scale(0.9)`; // Iets kleiner voor de zekerheid
+            const rotation = Math.random() * 50 - 25;
+            heartEl.style.transform = `rotate(${rotation}deg) scale(0.9)`;
 
             const img = document.createElement('img');
             img.src = (side === 'left-half') ? 'harten_afbeeldingen/hart01_wit.png' : 'harten_afbeeldingen/hart02_wit.png';
@@ -103,7 +96,6 @@ document.addEventListener('DOMContentLoaded', () => {
             page.appendChild(heartEl);
         });
 
-        // Toon het resultaat in de preview en open de modal
         previewBody.appendChild(page);
         previewModal.style.display = 'flex';
     }
