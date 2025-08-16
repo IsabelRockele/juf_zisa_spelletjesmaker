@@ -6,6 +6,15 @@
 <title>Juf Zisa's spelletjesmaker</title>
 <link href="keuze.css" rel="stylesheet"/>
 <style>
+    /* Stijl voor de body om alles te centreren */
+    body {
+      text-align: center; /* Centreert de inhoud */
+    }
+    .logo {
+      width: 110px; /* Pas de breedte aan naar wens */
+      height: auto;
+      margin-bottom: 20px; /* Ruimte tussen logo en titel */
+    }
     .accordion {
       margin-bottom: 20px;
     }
@@ -39,35 +48,39 @@
       transform: scale(1.05);
     }
   
-a {
-  position: relative;
-  display: inline-block;
-}
-a::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  top: -45px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #f9b600;
-  color: white;
-  padding: 8px 14px;
-  font-size: 1.4rem;
-  border-radius: 14px;
-  opacity: 0;
-  white-space: nowrap;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 10;
-}
-a:hover::after {
-  opacity: 1;
-}
+    a {
+      position: relative;
+      display: inline-block;
+    }
+    a::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: -45px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #f9b600;
+      color: white;
+      padding: 8px 14px;
+      font-size: 1.4rem;
+      border-radius: 14px;
+      opacity: 0;
+      white-space: nowrap;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 10;
+    }
+    a:hover::after {
+      opacity: 1;
+    }
 </style>
 </head>
 <body>
 <div class="container">
-<h1 style="margin-bottom: 30px;">Juf Zisa's spelletjesmaker</h1>
+
+<img src="start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
+
+<h1 style="margin-bottom: 30px; font-size: 2.8rem;">Juf Zisa's spelletjesmaker</h1>
+
 <div class="accordion">
 <button class="accordion-header">📐 Reken-oefeningen</button>
 <div class="accordion-content button-grid">
