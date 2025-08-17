@@ -26,6 +26,8 @@
 
                 <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
                 <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                
+                <a href="handleiding.pdf" download class="download-btn">Download Handleiding (PDF)</a>
 
                 <h3>Kies Tafels (max. 25)</h3>
                 <div class="option-group">
@@ -50,6 +52,18 @@
                     <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
                 </div>
 
+                <h3>Train Executieve Functies</h3>
+                <div class="option-group">
+                    <label><input type="checkbox" id="imageModeCheckbox"> Beeldmodus (voor niet-lezers)</label>
+                </div>
+                <div id="ef-selection-grid" class="ef-selection-grid">
+                    <label><input type="checkbox" name="ef_category" value="werkgeheugen"> Werkgeheugen</label>
+                    <label><input type="checkbox" name="ef_category" value="inhibitie"> Inhibitie (Stop & Denk)</label>
+                    <label><input type="checkbox" name="ef_category" value="flexibiliteit"> Flexibiliteit</label>
+                    <label><input type="checkbox" name="ef_category" value="planning"> Planning</label>
+                </div>
+                <button id="generateEfBtn" class="ef-btn">Genereer EF Opdrachten</button>
+
                 <button id="resetBtn" class="reset-btn">Reset Rad</button>
             </div>
 
@@ -65,6 +79,9 @@
         <div class="modal-content">
             <span class="close-btn">&times;</span>
             <div id="resultOutput"></div>
+            <div id="timer-bar-container" class="timer-bar-container">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
         </div>
     </div>
 
