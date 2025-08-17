@@ -285,3 +285,7 @@ body.wheel-view #wheelViewControls {
     #resultOutput { font-size: 2rem; }
     .pointer { border-left-width: 15px; border-right-width: 15px; border-top-width: 25px; }
 }
+/* 'Keuzemenu' knop verbergen in de rad-weergave */
+body.wheel-view .menu-button {
+    display: none;
+}
