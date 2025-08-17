@@ -46,14 +46,14 @@
                     
                     <h4 style="margin-top: 1.5rem;">Kies Rekensommen (max. 25)</h4>
                     <div class="option-group">
-                        <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder</label>
+                        <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder brug</label>
                         <label><input type="checkbox" name="brug_option" value="met" checked> Met brug</label>
                     </div>
                     <div class="button-group-4-cols">
-                        <button class="preset-btn" data-type="plusmin10">+ / - tot 10</button>
-                        <button class="preset-btn" data-type="plusmin20">+ / - tot 20</button>
-                        <button class="preset-btn" data-type="plusmin100">+ / - tot 100</button>
-                        <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
+                        <button class="preset-btn math-btn" data-type="plusmin10">+ / - tot 10</button>
+                        <button class="preset-btn math-btn" data-type="plusmin20">+ / - tot 20</button>
+                        <button class="preset-btn math-btn" data-type="plusmin100">+ / - tot 100</button>
+                        <button class="preset-btn math-btn" data-type="plusmin1000">+ / - tot 1000</button>
                     </div>
                 </div>
 
@@ -79,6 +79,18 @@
                     <button id="generateMovementBtn" class="movement-btn">Genereer Bewegingstaken</button>
                 </div>
 
+                <div class="column">
+                    <h3>Taal</h3>
+                    <div id="taal-selection-grid" class="ef-selection-grid">
+                        <label><input type="checkbox" name="taal_category" value="rijmen" checked> Rijmen</label>
+                        <label><input type="checkbox" name="taal_category" value="zinmaken" checked> Zin maken met...</label>
+                        <label><input type="checkbox" name="taal_category" value="noem3" checked> Noem 3...</label>
+                        <label><input type="checkbox" name="taal_category" value="grammatica" checked> Meervoud / Verkleinwoord</label>
+                        <label><input type="checkbox" name="taal_category" value="tegengestelden" checked> Tegengestelden</label>
+                    </div>
+                    <button id="generateTaalBtn" class="taal-btn">Genereer Taalopdrachten</button>
+                </div>
+
             </div>
 
             <button id="showWheelBtn" class="action-btn">Toon het Rad</button>
@@ -86,6 +98,7 @@
 
         <div id="wheelViewControls">
             <button id="restartBtn" class="preset-btn">Nog eens met dit rad</button>
+            <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;">Download Lijst</button>
             <button id="newOptionsBtn" class="warning-btn">Nieuwe opties kiezen</button>
         </div>
 
