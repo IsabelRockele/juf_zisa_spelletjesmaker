@@ -17,6 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateEfBtn = document.getElementById('generateEfBtn');
     const generateMovementBtn = document.getElementById('generateMovementBtn');
     const generateTaalBtn = document.getElementById('generateTaalBtn');
+    const timedMathCheckbox = document.getElementById('timedMathCheckbox'); 
+    
+    // Knoppen voor de 'Mix & Match' functie
+    const generateMixBtn = document.getElementById('generateMixBtn');
+    const mixCategoryCheckboxes = document.querySelectorAll('.mix-category-checkbox');
 
     // Knoppen voor weergave-wissel
     const showWheelBtn = document.getElementById('showWheelBtn');
@@ -27,11 +32,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Variabelen
     let items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
     let usedItems = [];
-    let spinHistory = []; // Houdt de geschiedenis van gedraaide rekensommen bij
+    let spinHistory = []; 
     let colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
     let currentRotation = 0;
     let isSpinning = false;
     let activeTimer = null;
+    let selectedMathLimit = 0; 
 
     // --- LOGICA VOOR WEERGAVE-WISSEL ---
     const showOptionsView = () => {
@@ -63,20 +69,31 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('input[name="table_type"][value="maal"]').checked = true;
         document.querySelector('input[name="brug_option"][value="zonder"]').checked = true;
         document.querySelector('input[name="brug_option"][value="met"]').checked = true;
+        timedMathCheckbox.checked = false; 
         document.querySelectorAll('input[name="ef_category"]').forEach(cb => cb.checked = false);
         document.getElementById('imageModeCheckbox').checked = false;
         document.querySelectorAll('input[name="taal_category"]').forEach(cb => cb.checked = true);
+        selectedMathLimit = 0;
         
         resetWheel();
-        resetSession(); // Reset ook de downloadlijst
+        resetSession(); 
         showOptionsView();
     });
 
-    restartBtn.addEventListener('click', () => {
-        resetWheel();
-        resetSession(); // Reset ook de downloadlijst
-        alert("Het rad is gereset. Je kunt opnieuw met alle opties spelen.");
-    });
+   restartBtn.addEventListener('click', () => {
+    // 1. Reset de visuele staat van het rad (maak alle segmenten weer actief).
+    resetWheel();
+    
+    // 2. Reset de sessiegegevens (verwijder de antwoordenlijst en verberg de downloadknop).
+    resetSession();
+    
+    // 3. Informeer de gebruiker dat de reset is voltooid.
+    alert("Het rad is gereset. Je kunt opnieuw met alle originele opties spelen.");
+    
+    // 4. Zorg ervoor dat de spinknop weer volledig bruikbaar is.
+    isSpinning = false;
+    spinBtn.disabled = false;
+});
     
     const efTasks = {
         werkgeheugen: [
@@ -292,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
         items = newItems;
         itemInput.value = (typeof newItems[0] === 'string') ? newItems.join('\n') : '';
         resetWheel();
+        showWheelBtn.disabled = false;
     };
 
     // --- GENERATOR FUNCTIES ---
@@ -404,6 +422,120 @@ document.addEventListener('DOMContentLoaded', () => {
         loadNewItems(shuffleArray(Array.from(sums)));
     };
 
+    // --- NIEUWE FUNCTIES VOOR MIX & MATCH ---
+    const generateMixedWheel = () => {
+        const selectedCategories = Array.from(mixCategoryCheckboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.dataset.category);
+
+        if (selectedCategories.length === 0) {
+            alert("Kies minstens één categorie voor de Mix & Match.");
+            return;
+        }
+
+        let mixedItems = [];
+        const itemsPerCategory = Math.floor(25 / selectedCategories.length);
+        
+        // Rekenen: Tafels
+        if (selectedCategories.includes('rekenen_tafels')) {
+            const tableType = document.querySelector('input[name="table_type"]:checked').value;
+            const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value));
+            if (selectedTables.length > 0) {
+                let problems = [];
+                if (tableType === 'maal' || tableType === 'beide') {
+                    selectedTables.forEach(table => {
+                        for (let i = 1; i <= 10; i++) { problems.push(`${i} × ${table}`); }
+                    });
+                }
+                if (tableType === 'deel' || tableType === 'beide') {
+                    selectedTables.forEach(table => {
+                        for (let i = 1; i <= 10; i++) { problems.push(`${i * table} ÷ ${table}`); }
+                    });
+                }
+                mixedItems = mixedItems.concat(shuffleArray(problems).slice(0, itemsPerCategory));
+            }
+        }
+
+        // Rekenen: Sommen
+        if (selectedCategories.includes('rekenen_sommen')) {
+            const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
+            const allowWithBridge = options.includes('met');
+            const allowWithoutBridge = options.includes('zonder');
+            const limit = selectedMathLimit > 0 ? selectedMathLimit : 1000;
+            
+            let sums = new Set();
+            const maxAttempts = 200;
+            let attempts = 0;
+            while (sums.size < itemsPerCategory && attempts < maxAttempts) {
+                attempts++;
+                const a = Math.floor(Math.random() * limit) + 1;
+                const b = Math.floor(Math.random() * limit) + 1;
+                const operation = Math.random() > 0.5 ? '+' : '-';
+                if (operation === '+') {
+                    if (a + b > limit) continue;
+                    const withBridge = (a % 10) + (b % 10) >= 10;
+                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) { sums.add(`${a} + ${b}`); }
+                } else {
+                    if (a - b < 0) continue;
+                    const withBridge = (a % 10) < (b % 10);
+                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) { sums.add(`${a} - ${b}`); }
+                }
+            }
+            mixedItems = mixedItems.concat(shuffleArray(Array.from(sums)).slice(0, itemsPerCategory));
+        }
+
+        // Executieve Functies
+        if (selectedCategories.includes('ef')) {
+            const selectedEfCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
+            if (selectedEfCategories.length > 0) {
+                let efItems = [];
+                selectedEfCategories.forEach(category => {
+                    efItems = efItems.concat(efTasks[category]);
+                });
+                const finalEfItems = efItems.map((task) => ({ fullTask: processDynamicTask(task) }));
+                mixedItems = mixedItems.concat(shuffleArray(finalEfItems).slice(0, itemsPerCategory));
+            }
+        }
+
+        // Beweging
+        if (selectedCategories.includes('beweging')) {
+            const movementItems = shuffleArray(movementTasks);
+            const finalMovementItems = movementItems.map((task) => ({ fullTask: task }));
+            mixedItems = mixedItems.concat(finalMovementItems.slice(0, itemsPerCategory));
+        }
+
+        // Taal
+        if (selectedCategories.includes('taal')) {
+            const selectedTaalCategories = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
+            if (selectedTaalCategories.length > 0) {
+                let taalItems = [];
+                selectedTaalCategories.forEach(category => {
+                    if (taalTasks[category]) { taalItems = taalItems.concat(taalTasks[category]); }
+                });
+                const finalTaalItems = taalItems.map((task) => ({ fullTask: task }));
+                mixedItems = mixedItems.concat(shuffleArray(finalTaalItems).slice(0, itemsPerCategory));
+            }
+        }
+        
+        // Finaliseer de lijst en zorg ervoor dat er 25 items zijn (of minder als er te weinig zijn)
+        if (mixedItems.length === 0) {
+             alert("Kon geen opdrachten genereren. Zorg dat je voor de geselecteerde categorieën ook sub-opties hebt aangevinkt.");
+             return;
+        }
+
+        const finalWheelItems = shuffleArray(mixedItems).slice(0, 25).map((item, index) => {
+            if (typeof item === 'string') {
+                return item;
+            } else {
+                return {
+                    ...item,
+                    label: `${item.fullTask.category || 'Gemengd'} ${index + 1}`
+                };
+            }
+        });
+
+        loadNewItems(finalWheelItems);
+    };
 
     // --- RAD LOGICA ---
     const spin = () => {
@@ -434,12 +566,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 drawWheel();
             }
 
-            const exercise = items[winningIndex];
-            const answer = calculateAnswer(exercise);
-            if (answer !== null) { 
-                spinHistory.push({ exercise, answer });
-                downloadListBtn.style.display = 'inline-block';
-            }
+            const winningItem = items[winningIndex];
+            const exerciseText = (typeof winningItem === 'object' && winningItem.fullTask) ? winningItem.fullTask.text || winningItem.fullTask.word : winningItem;
+            const answer = calculateAnswer(exerciseText);
+            
+            spinHistory.push({ exercise: exerciseText, answer: answer !== null ? answer : 'N/A' });
+            downloadListBtn.style.display = 'inline-block';
+            
 
             showResult(items[winningIndex]);
             isSpinning = false;
@@ -470,6 +603,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskForModal = (typeof result === 'object' && result.fullTask) ? result.fullTask : result;
         const processedTask = processDynamicTask(taskForModal);
         
+        // --- NIEUWE LOGICA VOOR GETIMEDE REKENSOMMEN ---
+        const isTimedMath = timedMathCheckbox.checked && calculateAnswer(String(result)) !== null;
+
+        if (isTimedMath) {
+            resultOutput.innerHTML = `<p>${result}</p>`; 
+            runTimer(4, () => {
+                closeModal(); 
+            });
+            resultModal.style.display = 'flex';
+            return; 
+        }
+        // --- EINDE NIEUWE LOGICA ---
+
         let resultText;
         if (typeof processedTask === 'string') {
             resultText = processedTask;
@@ -727,6 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateEfBtn.addEventListener('click', generateEfTasks);
     generateMovementBtn.addEventListener('click', generateMovementTasks);
     generateTaalBtn.addEventListener('click', generateTaalTasks);
+    generateMixBtn.addEventListener('click', generateMixedWheel);
     closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target == resultModal) closeModal(); });
 
@@ -742,13 +889,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            let limit = 0;
-            if (type === 'plusmin10') limit = 10;
-            else if (type === 'plusmin20') limit = 20;
-            else if (type === 'plusmin100') limit = 100;
-            else if (type === 'plusmin1000') limit = 1000;
+            if (type === 'plusmin10') selectedMathLimit = 10;
+            else if (type === 'plusmin20') selectedMathLimit = 20;
+            else if (type === 'plusmin100') selectedMathLimit = 100;
+            else if (type === 'plusmin1000') selectedMathLimit = 1000;
 
-            generateSums(limit, allowWithBridge, allowWithoutBridge);
+            generateSums(selectedMathLimit, allowWithBridge, allowWithoutBridge);
         });
     });
 
