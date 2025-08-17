@@ -11,20 +11,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const timerBarContainer = document.getElementById('timer-bar-container');
     const timerBar = document.getElementById('timer-bar');
     const closeBtn = document.querySelector('.close-btn');
-    const presetBtns = document.querySelectorAll('.preset-btn');
+    const mathPresetBtns = document.querySelectorAll('.math-btn');
     const generateTablesBtn = document.getElementById('generateTablesBtn');
     const maalCheckboxesContainer = document.getElementById('maal-checkboxes');
     const generateEfBtn = document.getElementById('generateEfBtn');
-    const generateMovementBtn = document.getElementById('generateMovementBtn'); // NIEUWE KNOP
+    const generateMovementBtn = document.getElementById('generateMovementBtn');
+    const generateTaalBtn = document.getElementById('generateTaalBtn');
 
-    // Nieuwe knoppen voor weergave-wissel
+    // Knoppen voor weergave-wissel
     const showWheelBtn = document.getElementById('showWheelBtn');
     const newOptionsBtn = document.getElementById('newOptionsBtn');
     const restartBtn = document.getElementById('restartBtn');
-    
+    const downloadListBtn = document.getElementById('downloadListBtn');
+
     // Variabelen
     let items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
     let usedItems = [];
+    let spinHistory = []; // Houdt de geschiedenis van gedraaide rekensommen bij
     let colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
     let currentRotation = 0;
     let isSpinning = false;
@@ -46,18 +49,35 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     showWheelBtn.addEventListener('click', showWheelView);
+    
+    const resetSession = () => {
+        spinHistory = [];
+        downloadListBtn.style.display = 'none';
+    };
+
     newOptionsBtn.addEventListener('click', () => {
         items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
         itemInput.value = '';
+        document.getElementById('removeAfterSpin').checked = true;
+        document.querySelectorAll('input[name="tafel"]').forEach(cb => cb.checked = false);
+        document.querySelector('input[name="table_type"][value="maal"]').checked = true;
+        document.querySelector('input[name="brug_option"][value="zonder"]').checked = true;
+        document.querySelector('input[name="brug_option"][value="met"]').checked = true;
+        document.querySelectorAll('input[name="ef_category"]').forEach(cb => cb.checked = false);
+        document.getElementById('imageModeCheckbox').checked = false;
+        document.querySelectorAll('input[name="taal_category"]').forEach(cb => cb.checked = true);
+        
         resetWheel();
+        resetSession(); // Reset ook de downloadlijst
         showOptionsView();
     });
+
     restartBtn.addEventListener('click', () => {
         resetWheel();
+        resetSession(); // Reset ook de downloadlijst
         alert("Het rad is gereset. Je kunt opnieuw met alle opties spelen.");
     });
-    // --- EINDE LOGICA WEERGAVE-WISSEL ---
-
+    
     const efTasks = {
         werkgeheugen: [
             { text: "Herhaal achterstevoren", gameType: "timed_hide", duration: 7, category: "Werkgeheugen", supportsImageMode: true }, 
@@ -84,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    // NIEUWE DATA VOOR BEWEGINGSTUSSENDOORTJES
     const movementTasks = [
         { text: "Doe 20 seconden jumping jacks.", gameType: "timer_only", duration: 20, category: "Beweging" },
         { text: "Loop 30 seconden ter plaatse.", gameType: "timer_only", duration: 30, category: "Beweging" },
@@ -96,13 +115,41 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: "Doe 10 ster-sprongen (star jumps).", category: "Beweging" },
         { text: "Beeld uit dat je 20 seconden een ladder beklimt.", gameType: "timer_only", duration: 20, category: "Beweging" },
         { text: "Maak jezelf zo groot als een reus en dan zo klein als een muis. Herhaal 5 keer.", category: "Beweging" },
-         // --- NIEUW TOEGEVOEGD ---
         { text: "Doe 10 'windmolens' (raak met je rechterhand je linkervoet aan en wissel af).", category: "Beweging" },
         { text: "Draai 15 seconden rondjes met je armen naar voren.", gameType: "timer_only", duration: 15, category: "Beweging" },
         { text: "Doe 10 squats (door je knieën buigen alsof je op een stoel gaat zitten).", category: "Beweging" },
         { text: "Boks 20 seconden in de lucht (links, rechts, links, rechts...).", gameType: "timer_only", duration: 20, category: "Beweging" },
         { text: "Loop 5 stappen als een ooievaar (trek je knieën zo hoog mogelijk op).", category: "Beweging" }
     ];
+
+    const taalTasks = {
+        rijmen: [
+            { type: 'rijmen', word: 'huis' }, { type: 'rijmen', word: 'kat' },
+            { type: 'rijmen', word: 'maan' }, { type: 'rijmen', word: 'school' },
+            { type: 'rijmen', word: 'boek' }, { type: 'rijmen', word: 'stoel' },
+        ],
+        zinmaken: [
+            { type: 'zinmaken', word: 'fiets' }, { type: 'zinmaken', word: 'lachen' },
+            { type: 'zinmaken', word: 'vrienden' }, { type: 'zinmaken', word: 'zon' },
+            { type: 'zinmaken', word: 'eten' }, { type: 'zinmaken', word: 'slapen' },
+        ],
+        noem3: [
+            { type: 'noem3', category: 'soorten fruit' }, { type: 'noem3', category: 'kleuren' },
+            { type: 'noem3', category: 'dieren op de boerderij' }, { type: 'noem3', category: 'dingen in een klaslokaal' },
+            { type: 'noem3', category: 'sporten' }, { type: 'noem3', category: 'vervoersmiddelen' },
+        ],
+        grammatica: [
+            { type: 'meervoud', word: 'boek', answer: 'boeken' }, { type: 'meervoud', word: 'kind', answer: 'kinderen' },
+            { type: 'meervoud', word: 'stad', answer: 'steden' }, { type: 'meervoud', word: 'ei', answer: 'eieren' },
+            { type: 'verkleinwoord', word: 'boom', answer: 'boompje' }, { type: 'verkleinwoord', word: 'bloem', answer: 'bloemetje' },
+            { type: 'verkleinwoord', word: 'ring', answer: 'ringetje' }, { type: 'verkleinwoord', word: 'koning', answer: 'koninkje' },
+        ],
+        tegengestelden: [
+            { type: 'tegengestelden', word: 'warm', answer: 'koud' }, { type: 'tegengestelden', word: 'groot', answer: 'klein' },
+            { type: 'tegengestelden', word: 'snel', answer: 'traag' }, { type: 'tegengestelden', word: 'hoog', answer: 'laag' },
+            { type: 'tegengestelden', word: 'dag', answer: 'nacht' }, { type: 'tegengestelden', word: 'blij', answer: 'boos' },
+        ]
+    };
 
     const dynamicData = {
         colorMap: { "ROOD": "#e74c3c", "GROEN": "#2ecc71", "BLAUW": "#3498db", "GEEL": "#f1c40f", "PAARS": "#9b59b6" },
@@ -134,6 +181,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     
+    // --- HULPFUNCTIES ---
+    const calculateAnswer = (exercise) => {
+        if (typeof exercise !== 'string') return null;
+        try {
+            const sanitizedExercise = exercise.replace('×', '*').replace('÷', '/');
+            return new Function('return ' + sanitizedExercise)();
+        } catch (error) {
+            console.error("Kon de som niet berekenen:", exercise, error);
+            return null;
+        }
+    };
+
     const createDiceSvg = (number) => {
         const dotPositions = {
             1: [[50, 50]], 2: [[25, 25], [75, 75]], 3: [[25, 25], [50, 50], [75, 75]],
@@ -231,9 +290,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const loadNewItems = (newItems) => {
         items = newItems;
+        itemInput.value = (typeof newItems[0] === 'string') ? newItems.join('\n') : '';
         resetWheel();
     };
 
+    // --- GENERATOR FUNCTIES ---
     const processDynamicTask = (task) => {
         if (task.type !== 'dynamic') return task;
         let text = task.template;
@@ -244,39 +305,107 @@ document.addEventListener('DOMContentLoaded', () => {
         return { ...task, text: text };
     };
     
-   const generateEfTasks = () => {
-    const selectedCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
-    if (selectedCategories.length === 0) { alert("Kies minstens één categorie."); return; }
-    let allSelectedTasks = [];
-    selectedCategories.forEach(category => { allSelectedTasks = allSelectedTasks.concat(efTasks[category]); });
-
-    const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20); // Neem max 20 taken
-
-    // Maak genummerde labels voor op het rad
-    const finalWheelItems = shuffledTasks.map((task, index) => {
-        return {
+    const generateEfTasks = () => {
+        const selectedCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
+        if (selectedCategories.length === 0) { alert("Kies minstens één categorie."); return; }
+        let allSelectedTasks = [];
+        selectedCategories.forEach(category => { allSelectedTasks = allSelectedTasks.concat(efTasks[category]); });
+        
+        const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20);
+        const finalWheelItems = shuffledTasks.map((task, index) => ({
             label: `Opdracht ${index + 1}`,
             fullTask: task
-        };
-    });
-    loadNewItems(finalWheelItems);
-};
+        }));
+        loadNewItems(finalWheelItems);
+    };
 
-    // NIEUWE FUNCTIE VOOR BEWEGINGSTAKEN
-   // AANGEPASTE FUNCTIE VOOR BEWEGINGSTAKEN
-const generateMovementTasks = () => {
-    const shuffledTasks = shuffleArray(movementTasks).slice(0, 20); // Neem max 20 taken
-
-    // Maak genummerde labels voor op het rad
-    const finalWheelItems = shuffledTasks.map((task, index) => {
-        return {
+    const generateMovementTasks = () => {
+        const shuffledTasks = shuffleArray(movementTasks).slice(0, 20);
+        const finalWheelItems = shuffledTasks.map((task, index) => ({
             label: `Opdracht ${index + 1}`,
             fullTask: task 
-        };
-    });
-    loadNewItems(finalWheelItems);
-};
+        }));
+        loadNewItems(finalWheelItems);
+    };
 
+    const generateTaalTasks = () => {
+        const selectedCategories = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
+        if (selectedCategories.length === 0) { alert("Kies minstens één taalcategorie."); return; }
+        
+        let allSelectedTasks = [];
+        selectedCategories.forEach(category => {
+            if (taalTasks[category]) {
+                allSelectedTasks = allSelectedTasks.concat(taalTasks[category]);
+            }
+        });
+
+        const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20);
+        const finalWheelItems = shuffledTasks.map((task, index) => ({
+            label: `Opdracht ${index + 1}`,
+            fullTask: task 
+        }));
+        loadNewItems(finalWheelItems);
+    };
+
+    const generateSelectedTables = () => {
+        const tableType = document.querySelector('input[name="table_type"]:checked').value;
+        const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value));
+        if (selectedTables.length === 0) {
+            alert("Selecteer minstens één tafel!");
+            return;
+        }
+        let problems = [];
+        if (tableType === 'maal' || tableType === 'beide') {
+            selectedTables.forEach(table => {
+                for (let i = 1; i <= 10; i++) {
+                    problems.push(`${i} × ${table}`);
+                }
+            });
+        }
+        if (tableType === 'deel' || tableType === 'beide') {
+            selectedTables.forEach(table => {
+                for (let i = 1; i <= 10; i++) {
+                    problems.push(`${i * table} ÷ ${table}`);
+                }
+            });
+        }
+        loadNewItems(shuffleArray(problems).slice(0, 25));
+    };
+
+    const generateSums = (limit, allowWithBridge, allowWithoutBridge) => {
+        let sums = new Set();
+        const maxAttempts = 200;
+        let attempts = 0;
+
+        while (sums.size < 25 && attempts < maxAttempts) {
+            attempts++;
+            const a = Math.floor(Math.random() * limit) + 1;
+            const b = Math.floor(Math.random() * limit) + 1;
+            const operation = Math.random() > 0.5 ? '+' : '-';
+
+            if (operation === '+') {
+                if (a + b > limit) continue;
+                const withBridge = (a % 10) + (b % 10) >= 10;
+                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) {
+                    sums.add(`${a} + ${b}`);
+                }
+            } else { // Subtraction
+                if (a - b < 0) continue;
+                const withBridge = (a % 10) < (b % 10);
+                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) {
+                    sums.add(`${a} - ${b}`);
+                }
+            }
+        }
+        if(sums.size === 0) {
+            alert("Kon geen sommen genereren met de gekozen opties. Probeer een andere combinatie (bv. met én zonder brug).");
+            return;
+        }
+        loadNewItems(shuffleArray(Array.from(sums)));
+    };
+
+
+    // --- RAD LOGICA ---
     const spin = () => {
         if (isSpinning) return;
         let winningIndex;
@@ -304,6 +433,14 @@ const generateMovementTasks = () => {
                 usedItems.push(winningIndex);
                 drawWheel();
             }
+
+            const exercise = items[winningIndex];
+            const answer = calculateAnswer(exercise);
+            if (answer !== null) { 
+                spinHistory.push({ exercise, answer });
+                downloadListBtn.style.display = 'inline-block';
+            }
+
             showResult(items[winningIndex]);
             isSpinning = false;
             spinBtn.disabled = false;
@@ -332,7 +469,25 @@ const generateMovementTasks = () => {
         resultOutput.innerHTML = '';
         const taskForModal = (typeof result === 'object' && result.fullTask) ? result.fullTask : result;
         const processedTask = processDynamicTask(taskForModal);
-        const resultText = processedTask.text || String(taskForModal);
+        
+        let resultText;
+        if (typeof processedTask === 'string') {
+            resultText = processedTask;
+        } else if (processedTask.type === 'rijmen') {
+            resultText = `Verzin een woord dat rijmt op: <strong>${processedTask.word}</strong>`;
+        } else if (processedTask.type === 'zinmaken') {
+            resultText = `Maak een mooie zin met het woord: <strong>${processedTask.word}</strong>`;
+        } else if (processedTask.type === 'noem3') {
+            resultText = `Noem 3 soorten <strong>${processedTask.category}</strong>`;
+        } else if (processedTask.type === 'meervoud' || processedTask.type === 'verkleinwoord') {
+            const question = processedTask.type === 'meervoud' ? 'Wat is het meervoud van' : 'Wat is het verkleinwoord van';
+            resultText = `${question}: <strong>${processedTask.word}</strong>?`;
+        } else if (processedTask.type === 'tegengestelden') {
+            resultText = `Wat is het tegengestelde van: <strong>${processedTask.word}</strong>?`;
+        } else {
+             resultText = processedTask.text || String(taskForModal);
+        }
+
         const DURATION = processedTask.duration || 10;
         const gameType = processedTask.gameType;
         const isImageMode = document.getElementById('imageModeCheckbox').checked;
@@ -510,6 +665,19 @@ const generateMovementTasks = () => {
                 } else {
                     resultOutput.innerHTML = `<p>${resultText}</p>`;
                 }
+
+                if (processedTask.type === 'meervoud' || processedTask.type === 'verkleinwoord' || processedTask.type === 'tegengestelden') {
+                    const showAnswerBtn = document.createElement('button');
+                    showAnswerBtn.className = 'preset-btn';
+                    showAnswerBtn.textContent = 'Toon Antwoord';
+                    showAnswerBtn.style.marginTop = '15px';
+                    resultOutput.appendChild(showAnswerBtn);
+                    showAnswerBtn.onclick = () => {
+                        resultOutput.innerHTML = `<p>${resultText}</p><p style="color: var(--action-color); font-weight: bold; margin-top: 10px;">${processedTask.answer}</p>`;
+                        showAnswerBtn.disabled = true;
+                    };
+                }
+
                 if (processedTask.requiresLeader) {
                     const tipElement = document.createElement('p');
                     tipElement.className = 'manual-tip';
@@ -524,22 +692,65 @@ const generateMovementTasks = () => {
 
     const closeModal = () => { if (activeTimer) clearTimeout(activeTimer); resultModal.style.display = 'none'; };
     
-    const generateSelectedTables = () => { let p=[];const t=document.querySelector('input[name="table_type"]:checked').value,s=Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(c=>parseInt(c.value));if(s.length===0)return void alert("Selecteer minstens één tafel!");(t==="maal"||t==="beide")&&s.forEach(t=>{for(let a=1;a<=10;a++)p.push(`${a} × ${t}`)}),(t==="deel"||t==="beide")&&s.forEach(t=>{for(let a=1;a<=10;a++)p.push(`${a*t} ÷ ${t}`)}),loadNewItems(shuffleArray(p).slice(0,25)) };
+    // --- EVENT LISTENERS ---
+    downloadListBtn.addEventListener('click', () => {
+        if (spinHistory.length === 0) {
+            alert("Er zijn nog geen oefeningen gedraaid om te downloaden.");
+            return;
+        }
+
+        let fileContent = "Overzicht van de oefeningen:\n\n";
+        spinHistory.forEach((item, index) => {
+            fileContent += `Oefening ${index + 1}: ${item.exercise} = ${item.answer}\n`;
+        });
+
+        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'oefeningen_antwoorden.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
+
     const handleImageUpload = (event) => { const f=event.target.files;if(f.length===0)return;const p=Array.from(f).map(f=>new Promise((r,j)=>{const d=new FileReader;d.onload=e=>{const i=new Image;i.onload=()=>r(i),i.onerror=j,i.src=e.target.result},d.onerror=j,d.readAsDataURL(f)}));Promise.all(p).then(loadNewItems).catch(e=>console.error("Fout bij laden afbeeldingen:",e)) };
     const updateItemsFromTextarea = () => { const n=itemInput.value.split('\n').filter(i=>i.trim()!=="");loadNewItems(n.length>0?n:[]) };
     const handleFileUpload = (event) => { const f=event.target.files[0];if(!f)return;const r=new FileReader;r.onload=e=>{itemInput.value=e.target.result,updateItemsFromTextarea()},r.readAsText(f) };
     
-    // Event listeners
     itemInput.addEventListener('input', updateItemsFromTextarea);
     fileUpload.addEventListener('change', handleFileUpload);
     imageUpload.addEventListener('change', handleImageUpload);
     spinBtn.addEventListener('click', spin);
     generateTablesBtn.addEventListener('click', generateSelectedTables);
-    presetBtns.forEach(btn => btn.addEventListener('click', () => { /* Functie voor rekenen, niet geïmplementeerd in deze context */ }));
     generateEfBtn.addEventListener('click', generateEfTasks);
-    generateMovementBtn.addEventListener('click', generateMovementTasks); // NIEUWE EVENT LISTENER
+    generateMovementBtn.addEventListener('click', generateMovementTasks);
+    generateTaalBtn.addEventListener('click', generateTaalTasks);
     closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target == resultModal) closeModal(); });
+
+    mathPresetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const type = btn.dataset.type;
+            const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
+            const allowWithBridge = options.includes('met');
+            const allowWithoutBridge = options.includes('zonder');
+
+            if (!allowWithBridge && !allowWithoutBridge) {
+                alert("Kies minstens één optie (met of zonder brug).");
+                return;
+            }
+
+            let limit = 0;
+            if (type === 'plusmin10') limit = 10;
+            else if (type === 'plusmin20') limit = 20;
+            else if (type === 'plusmin100') limit = 100;
+            else if (type === 'plusmin1000') limit = 1000;
+
+            generateSums(limit, allowWithBridge, allowWithoutBridge);
+        });
+    });
 
     // Initialisatie
     createCheckboxes();
