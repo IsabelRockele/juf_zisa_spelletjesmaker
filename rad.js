@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const generateTablesBtn = document.getElementById('generateTablesBtn');
     const maalCheckboxesContainer = document.getElementById('maal-checkboxes');
     const generateEfBtn = document.getElementById('generateEfBtn');
+    const generateMovementBtn = document.getElementById('generateMovementBtn'); // NIEUWE KNOP
 
     // Nieuwe knoppen voor weergave-wissel
     const showWheelBtn = document.getElementById('showWheelBtn');
@@ -82,6 +83,26 @@ document.addEventListener('DOMContentLoaded', () => {
             { text: "Hoe zou je je kamer opruimen? Waar begin je en wat is de volgende stap?", category: "Planning", requiresLeader: true }
         ]
     };
+
+    // NIEUWE DATA VOOR BEWEGINGSTUSSENDOORTJES
+    const movementTasks = [
+        { text: "Doe 20 seconden jumping jacks.", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Loop 30 seconden ter plaatse.", gameType: "timer_only", duration: 30, category: "Beweging" },
+        { text: "Doe 10 keer knieheffen (elke kant).", category: "Beweging" },
+        { text: "Raak 10 keer je tenen aan.", category: "Beweging" },
+        { text: "Balanceer 15 seconden op je rechterbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
+        { text: "Balanceer 15 seconden op je linkerbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
+        { text: "Doe 20 seconden de 'plank' houding.", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Doe 10 ster-sprongen (star jumps).", category: "Beweging" },
+        { text: "Beeld uit dat je 20 seconden een ladder beklimt.", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Maak jezelf zo groot als een reus en dan zo klein als een muis. Herhaal 5 keer.", category: "Beweging" },
+         // --- NIEUW TOEGEVOEGD ---
+        { text: "Doe 10 'windmolens' (raak met je rechterhand je linkervoet aan en wissel af).", category: "Beweging" },
+        { text: "Draai 15 seconden rondjes met je armen naar voren.", gameType: "timer_only", duration: 15, category: "Beweging" },
+        { text: "Doe 10 squats (door je knieën buigen alsof je op een stoel gaat zitten).", category: "Beweging" },
+        { text: "Boks 20 seconden in de lucht (links, rechts, links, rechts...).", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Loop 5 stappen als een ooievaar (trek je knieën zo hoog mogelijk op).", category: "Beweging" }
+    ];
 
     const dynamicData = {
         colorMap: { "ROOD": "#e74c3c", "GROEN": "#2ecc71", "BLAUW": "#3498db", "GEEL": "#f1c40f", "PAARS": "#9b59b6" },
@@ -223,23 +244,38 @@ document.addEventListener('DOMContentLoaded', () => {
         return { ...task, text: text };
     };
     
-    const generateEfTasks = () => {
-        const selectedCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
-        if (selectedCategories.length === 0) { alert("Kies minstens één categorie."); return; }
-        let allSelectedTasks = [];
-        selectedCategories.forEach(category => { allSelectedTasks = allSelectedTasks.concat(efTasks[category]); });
-        const shuffledTasks = shuffleArray(allSelectedTasks);
-        const categoryCounts = {};
-        const finalWheelItems = shuffledTasks.map(task => {
-            const category = task.category;
-            categoryCounts[category] = (categoryCounts[category] || 0) + 1;
-            return {
-                label: `${category} ${categoryCounts[category]}`,
-                fullTask: task
-            };
-        }).slice(0, 20);
-        loadNewItems(finalWheelItems);
-    };
+   const generateEfTasks = () => {
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
+    if (selectedCategories.length === 0) { alert("Kies minstens één categorie."); return; }
+    let allSelectedTasks = [];
+    selectedCategories.forEach(category => { allSelectedTasks = allSelectedTasks.concat(efTasks[category]); });
+
+    const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20); // Neem max 20 taken
+
+    // Maak genummerde labels voor op het rad
+    const finalWheelItems = shuffledTasks.map((task, index) => {
+        return {
+            label: `Opdracht ${index + 1}`,
+            fullTask: task
+        };
+    });
+    loadNewItems(finalWheelItems);
+};
+
+    // NIEUWE FUNCTIE VOOR BEWEGINGSTAKEN
+   // AANGEPASTE FUNCTIE VOOR BEWEGINGSTAKEN
+const generateMovementTasks = () => {
+    const shuffledTasks = shuffleArray(movementTasks).slice(0, 20); // Neem max 20 taken
+
+    // Maak genummerde labels voor op het rad
+    const finalWheelItems = shuffledTasks.map((task, index) => {
+        return {
+            label: `Opdracht ${index + 1}`,
+            fullTask: task 
+        };
+    });
+    loadNewItems(finalWheelItems);
+};
 
     const spin = () => {
         if (isSpinning) return;
@@ -296,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultOutput.innerHTML = '';
         const taskForModal = (typeof result === 'object' && result.fullTask) ? result.fullTask : result;
         const processedTask = processDynamicTask(taskForModal);
-        const resultText = processedTask.text || processedTask;
+        const resultText = processedTask.text || String(taskForModal);
         const DURATION = processedTask.duration || 10;
         const gameType = processedTask.gameType;
         const isImageMode = document.getElementById('imageModeCheckbox').checked;
@@ -501,6 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
     generateTablesBtn.addEventListener('click', generateSelectedTables);
     presetBtns.forEach(btn => btn.addEventListener('click', () => { /* Functie voor rekenen, niet geïmplementeerd in deze context */ }));
     generateEfBtn.addEventListener('click', generateEfTasks);
+    generateMovementBtn.addEventListener('click', generateMovementTasks); // NIEUWE EVENT LISTENER
     closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target == resultModal) closeModal(); });
 
