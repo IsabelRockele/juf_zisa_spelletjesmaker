@@ -13,60 +13,76 @@
     <div class="container">
         <h1>Digitaal Rad van Fortuin</h1>
 
-        <div class="main-content">
-            <div class="controls">
+        <div class="controls">
+            <div class="controls-header">
                 <h2>Opties</h2>
                 <div class="option-group">
                     <label><input type="checkbox" id="removeAfterSpin" checked> Verwijder na draai</label>
                 </div>
-                <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
-                
-                <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
-                <input type="file" id="fileUpload" accept=".txt" style="display: none;">
-
-                <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
-                <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
-                
-                <a href="handleiding.pdf" download class="download-btn">Download Handleiding (PDF)</a>
-
-                <h3>Kies Tafels (max. 25)</h3>
-                <div class="option-group">
-                    <label><input type="radio" name="table_type" value="maal" checked> Maal</label>
-                    <label><input type="radio" name="table_type" value="deel"> Deel</label>
-                    <label><input type="radio" name="table_type" value="beide"> Beide</label>
-                </div>
-                <div class="table-selection">
-                    <div id="maal-checkboxes" class="checkbox-grid"></div>
-                </div>
-                <button id="generateTablesBtn" class="generate-btn">Genereer Tafels</button>
-
-                <h3>Kies Rekensommen (max. 25)</h3>
-                <div class="option-group">
-                    <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder brug</label>
-                    <label><input type="checkbox" name="brug_option" value="met" checked> Met brug</label>
-                </div>
-                <div class="button-group-4-cols">
-                    <button class="preset-btn" data-type="plusmin10">+ / - tot 10</button>
-                    <button class="preset-btn" data-type="plusmin20">+ / - tot 20</button>
-                    <button class="preset-btn" data-type="plusmin100">+ / - tot 100</button>
-                    <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
-                </div>
-
-                <h3>Train Executieve Functies</h3>
-                <div class="option-group">
-                    <label><input type="checkbox" id="imageModeCheckbox"> Beeldmodus (voor niet-lezers)</label>
-                </div>
-                <div id="ef-selection-grid" class="ef-selection-grid">
-                    <label><input type="checkbox" name="ef_category" value="werkgeheugen"> Werkgeheugen</label>
-                    <label><input type="checkbox" name="ef_category" value="inhibitie"> Inhibitie (Stop & Denk)</label>
-                    <label><input type="checkbox" name="ef_category" value="flexibiliteit"> Flexibiliteit</label>
-                    <label><input type="checkbox" name="ef_category" value="planning"> Planning</label>
-                </div>
-                <button id="generateEfBtn" class="ef-btn">Genereer EF Opdrachten</button>
-
-                <button id="resetBtn" class="reset-btn">Reset Rad</button>
             </div>
 
+            <div class="controls-columns">
+                <div class="column">
+                    <h3>Eigen lijsten & afbeeldingen</h3>
+                    <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
+                    <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
+                    <input type="file" id="fileUpload" accept=".txt" style="display: none;">
+                    <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
+                    <input type="file" id="imageUpload" accept="image/*" multiple style="display: none;">
+                </div>
+
+                <div class="column">
+                    <h3>Rekenen</h3>
+                    <h4>Kies Tafels (max. 25)</h4>
+                    <div class="option-group">
+                        <label><input type="radio" name="table_type" value="maal" checked> Maal</label>
+                        <label><input type="radio" name="table_type" value="deel"> Deel</label>
+                        <label><input type="radio" name="table_type" value="beide"> Beide</label>
+                    </div>
+                    <div class="table-selection">
+                        <div id="maal-checkboxes" class="checkbox-grid"></div>
+                    </div>
+                    <button id="generateTablesBtn" class="generate-btn">Genereer Tafels</button>
+                    
+                    <h4 style="margin-top: 1.5rem;">Kies Rekensommen (max. 25)</h4>
+                    <div class="option-group">
+                        <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder</label>
+                        <label><input type="checkbox" name="brug_option" value="met" checked> Met brug</label>
+                    </div>
+                    <div class="button-group-4-cols">
+                        <button class="preset-btn" data-type="plusmin10">+ / - tot 10</button>
+                        <button class="preset-btn" data-type="plusmin20">+ / - tot 20</button>
+                        <button class="preset-btn" data-type="plusmin100">+ / - tot 100</button>
+                        <button class="preset-btn" data-type="plusmin1000">+ / - tot 1000</button>
+                    </div>
+                </div>
+
+                <div class="column">
+                    <h3>Executieve Functies</h3>
+                    <div class="option-group">
+                        <label><input type="checkbox" id="imageModeCheckbox"> Beeldmodus (voor niet-lezers)</label>
+                    </div>
+                    <div id="ef-selection-grid" class="ef-selection-grid">
+                        <label><input type="checkbox" name="ef_category" value="werkgeheugen"> Werkgeheugen</label>
+                        <label><input type="checkbox" name="ef_category" value="inhibitie"> Inhibitie</label>
+                        <label><input type="checkbox" name="ef_category" value="flexibiliteit"> Flexibiliteit</label>
+                        <label><input type="checkbox" name="ef_category" value="planning"> Planning</label>
+                    </div>
+                    <button id="generateEfBtn" class="ef-btn">Genereer EF Opdrachten</button>
+
+                    <a href="handleiding.pdf" download class="download-btn" style="margin-top: 1.5rem;">Download Handleiding (PDF)</a>
+                </div>
+            </div>
+
+            <button id="showWheelBtn" class="action-btn">Toon het Rad</button>
+        </div>
+
+        <div id="wheelViewControls">
+            <button id="restartBtn" class="preset-btn">Nog eens met dit rad</button>
+            <button id="newOptionsBtn" class="warning-btn">Nieuwe opties kiezen</button>
+        </div>
+
+        <div class="main-content">
             <div class="wheel-wrapper">
                 <canvas id="wheelCanvas" width="650" height="650"></canvas>
                 <div class="pointer"></div>
