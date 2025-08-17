@@ -6,6 +6,7 @@
     --action-color: #2ecc71;
     --warning-color: #e74c3c;
     --ef-color: #9b59b6; 
+    --movement-color: #f39c12; /* NIEUWE KLEUR TOEGEVOEGD */
     --background-color: #ecf0f1;
     --text-color: #333;
     --light-color: #ffffff;
@@ -66,7 +67,7 @@ h4 { font-size: 1rem; margin-bottom: 0.5rem; }
     border-radius: 12px;
     box-shadow: var(--shadow);
     width: 100%;
-    max-width: 1000px; /* Meer breedte voor de kolommen */
+    max-width: 1200px; /* Meer breedte voor de kolommen */
     text-align: left;
     margin-bottom: 20px;
 }
@@ -152,6 +153,14 @@ textarea {
     border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s ease;
 }
 .ef-btn:hover { background-color: #8e44ad; }
+
+/* NIEUWE KNOP STIJL */
+.movement-btn {
+    width: 100%; background-color: var(--movement-color); color: var(--light-color); border: none; padding: 12px;
+    border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s ease;
+}
+.movement-btn:hover { background-color: #e67e22; }
+
 
 .action-btn {
     width: 100%; background: var(--action-color); color: var(--light-color); border: none;
@@ -239,7 +248,7 @@ body.wheel-view #wheelViewControls {
 }
 /* --- EINDE STIJLEN --- */
 
-@media (max-width: 1100px) {
+@media (max-width: 1250px) { /* AANGEPAST VOOR 4 KOLOMMEN */
     .controls-columns {
         flex-direction: column;
     }
