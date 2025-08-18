@@ -7,7 +7,8 @@
     --warning-color: #e74c3c;
     --ef-color: #9b59b6; 
     --movement-color: #f39c12;
-    --taal-color: #16a085; /* NIEUWE KLEUR TOEGEVOEGD */
+    --taal-color: #16a085;
+    --tech-lezen-color: #1abc9c; 
     --background-color: #ecf0f1;
     --text-color: #333;
     --light-color: #ffffff;
@@ -68,7 +69,7 @@ h4 { font-size: 1rem; margin-bottom: 0.5rem; }
     border-radius: 12px;
     box-shadow: var(--shadow);
     width: 100%;
-    max-width: 1400px; /* Meer breedte voor de kolommen */
+    max-width: 1400px; 
     text-align: left;
     margin-bottom: 20px;
 }
@@ -139,9 +140,15 @@ textarea {
 
 .preset-btn {
     background: #95a5a6; color: var(--light-color); border: none; padding: 12px; border-radius: 8px;
-    cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.3s ease;
+    cursor: pointer; font-size: 14px; font-weight: 600; transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 .preset-btn:hover { background: #7f8c8d; }
+
+/* NIEUWE STIJL VOOR GESELECTEERDE KNOP */
+.preset-btn.selected {
+    background: var(--secondary-color);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
 
 .ef-selection-grid {
     display: grid; grid-template-columns: 1fr; gap: 10px; background-color: #f8f9f9;
@@ -161,12 +168,17 @@ textarea {
 }
 .movement-btn:hover { background-color: #e67e22; }
 
-/* NIEUWE KNOP STIJL */
 .taal-btn {
     width: 100%; background-color: var(--taal-color); color: var(--light-color); border: none; padding: 12px;
     border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s ease;
 }
 .taal-btn:hover { background-color: #117a65; }
+
+.tech-lezen-btn {
+    width: 100%; background-color: var(--tech-lezen-color); color: var(--light-color); border: none; padding: 12px;
+    border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: background-color 0.3s ease;
+}
+.tech-lezen-btn:hover { background-color: #16a085; }
 
 
 .action-btn {
@@ -259,7 +271,7 @@ body.wheel-view #wheelViewControls {
 }
 /* --- EINDE STIJLEN --- */
 
-@media (max-width: 1450px) { /* AANGEPAST VOOR 5 KOLOMMEN */
+@media (max-width: 1450px) { 
     .controls-columns {
         flex-direction: column;
     }
