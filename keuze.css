@@ -12,7 +12,7 @@ body {
   text-align: center;
   padding: 20px;
   margin-top: 25px;
-  /* NIEUW: Ruimte aan de onderkant zodat de footer de knoppen niet overlapt */
+  /* Ruimte aan de onderkant zodat de footer de knoppen niet overlapt */
   padding-bottom: 80px; 
 }
 
@@ -36,11 +36,10 @@ h1 {
 
 .button-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
-  justify-items: start;
+  justify-items: center;
   max-width: 1500px;
-  margin-left: 40px;
 }
 
 .keuze-knop {
@@ -56,14 +55,14 @@ h1 {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  min-width: 350px;
+  width: 100%; /* Vult nu de kolom */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .keuze-knop span {
-  font-size: 2,5rem;
+  font-size: 1.6rem; 
   line-height: 1;
 }
 
@@ -74,25 +73,19 @@ h1 {
 
 /* --- AANGEPASTE FOOTER STIJL --- */
 footer {
-  position: fixed; /* Plakt de footer vast aan het scherm */
-  bottom: 0;       /* Positioneert het aan de onderkant */
-  left: 0;         /* Zorgt dat het links begint */
-  width: 100%;     /* Maakt het de volledige breedte */
-  background-color: #fefae0; /* Dezelfde achtergrondkleur als de body */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fefae0;
   text-align: center;
-  padding: 15px 0; /* Een beetje ruimte boven en onder de tekst */
+  padding: 15px 0;
   color: #a9a9a9;
   font-size: 0.9rem;
-  border-top: 1px solid #e0e0e0; /* Een subtiel lijntje erboven */
+  border-top: 1px solid #e0e0e0;
 }
 
-
-
-.drukknop-afbeelding {
-  width: 200px;
-  height: auto;
-  transition: transform 0.2s ease;
-}
-.drukknop-afbeelding:hover {
-  transform: scale(1.05);
-}
+/*
+  DE REGELS VOOR .drukknop-afbeelding ZIJN HIER VERWIJDERD
+  OMDAT ZE ALLEEN IN index.html THUISHOREN.
+*/
