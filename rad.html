@@ -48,6 +48,7 @@
                         <div id="maal-checkboxes" class="checkbox-grid"></div>
                     </div>
                     <button id="generateTablesBtn" class="generate-btn">Genereer Tafels</button>
+                    
                     <h4 style="margin-top: 1.5rem;">Kies Rekensommen (max. 25)</h4>
                     <div class="option-group">
                         <label><input type="checkbox" name="brug_option" value="zonder" checked> Zonder brug</label>
@@ -59,6 +60,7 @@
                         <button class="preset-btn math-btn" data-type="plusmin100">+ / - tot 100</button>
                         <button class="preset-btn math-btn" data-type="plusmin1000">+ / - tot 1000</button>
                     </div>
+                    <button id="generateSumsBtn" class="generate-btn" style="margin-top: 10px;">Genereer Sommen</button>
                 </div>
 
                 <div class="column">
@@ -84,6 +86,7 @@
 
                 <div class="column">
                     <h3>Taal</h3>
+                    <h4>Taaldenken</h4>
                     <div id="taal-selection-grid" class="ef-selection-grid">
                         <label><input type="checkbox" name="taal_category" value="rijmen" checked> Rijmen</label>
                         <label><input type="checkbox" name="taal_category" value="zinmaken" checked> Zin maken met...</label>
@@ -92,6 +95,10 @@
                         <label><input type="checkbox" name="taal_category" value="tegengestelden" checked> Tegengestelden</label>
                     </div>
                     <button id="generateTaalBtn" class="taal-btn">Genereer Taalopdrachten</button>
+
+                    <h4 style="margin-top: 1.5rem;">Technisch Lezen</h4>
+                    <p style="font-size: 0.9rem; margin-bottom: 15px;">Genereer leuke opdrachten om een tekst (op papier) op een gekke manier te lezen.</p>
+                    <button id="generateTechLezenBtn" class="tech-lezen-btn">Genereer Leesopdrachten</button>
                 </div>
 
                 <div class="column" style="background-color: #ecf0f1; border-radius: 8px;">
@@ -102,7 +109,8 @@
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="rekenen_sommen"> Rekenen: Sommen</label>
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="ef"> Executieve Functies</label>
                         <label><input type="checkbox" class="mix-category-checkbox" data-category="beweging"> Beweging</label>
-                        <label><input type="checkbox" class="mix-category-checkbox" data-category="taal"> Taal</label>
+                        <label><input type="checkbox" class="mix-category-checkbox" data-category="taal"> Taal: Taaldenken</label>
+                        <label><input type="checkbox" class="mix-category-checkbox" data-category="taal_lezen"> Taal: Technisch Lezen</label>
                     </div>
                     <button id="generateMixBtn" class="action-btn" style="margin-top: 10px; background-color: var(--primary-color);">Genereer Gemengd Rad</button>
                 </div>
