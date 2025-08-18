@@ -13,10 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.close-btn');
     const mathPresetBtns = document.querySelectorAll('.math-btn');
     const generateTablesBtn = document.getElementById('generateTablesBtn');
+    const generateSumsBtn = document.getElementById('generateSumsBtn'); // NIEUWE KNOP
     const maalCheckboxesContainer = document.getElementById('maal-checkboxes');
     const generateEfBtn = document.getElementById('generateEfBtn');
     const generateMovementBtn = document.getElementById('generateMovementBtn');
     const generateTaalBtn = document.getElementById('generateTaalBtn');
+    const generateTechLezenBtn = document.getElementById('generateTechLezenBtn'); 
     const timedMathCheckbox = document.getElementById('timedMathCheckbox'); 
     
     // Knoppen voor de 'Mix & Match' functie
@@ -73,7 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('input[name="ef_category"]').forEach(cb => cb.checked = false);
         document.getElementById('imageModeCheckbox').checked = false;
         document.querySelectorAll('input[name="taal_category"]').forEach(cb => cb.checked = true);
+        
+        // Reset rekenkeuzes
         selectedMathLimit = 0;
+        mathPresetBtns.forEach(btn => btn.classList.remove('selected'));
         
         resetWheel();
         resetSession(); 
@@ -167,6 +172,29 @@ document.addEventListener('DOMContentLoaded', () => {
             { type: 'tegengestelden', word: 'dag', answer: 'nacht' }, { type: 'tegengestelden', word: 'blij', answer: 'boos' },
         ]
     };
+    
+    const techLezenTasks = [
+        { text: "Lees de tekst voor als een robot.", category: "Technisch Lezen" },
+        { text: "Lees de tekst terwijl je op één been staat.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met je tong uit je mond.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel droevige stem.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel blije stem.", category: "Technisch Lezen" },
+        { text: "Lees fluisterend alsof je een groot geheim vertelt.", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je een operazanger bent.", category: "Technisch Lezen" },
+        { text: "Lees elke zin met een andere emotie (boos, blij, bang...).", category: "Technisch Lezen" },
+        { text: "Lees de tekst terwijl je zachtjes op je plaats marcheert.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel hoge stem (als een muis).", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je heel erg moe bent en bijna in slaap valt.", category: "Technisch Lezen" },
+        { text: "Lees de tekst zo snel als je kan, als een raceauto.", category: "Technisch Lezen" },
+        { text: "Lees de tekst heel traag, als een slak.", category: "Technisch Lezen" },
+        { text: "Lees de tekst en klap na elke zin in je handen.", category: "Technisch Lezen" },
+        { text: "Lees de tekst voor aan een (denkbeeldige) plant of stoel.", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je een nieuwslezer op tv bent.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met je neus dichtgeknepen.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel lage stem (als een beer).", category: "Technisch Lezen" },
+        { text: "Lees de tekst en spring bij elke punt omhoog.", category: "Technisch Lezen" },
+        { text: "Lees de tekst voor aan een klasgenoot die de tekst ook heeft.", category: "Technisch Lezen" }
+    ];
 
     const dynamicData = {
         colorMap: { "ROOD": "#e74c3c", "GROEN": "#2ecc71", "BLAUW": "#3498db", "GEEL": "#f1c40f", "PAARS": "#9b59b6" },
@@ -364,6 +392,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
         loadNewItems(finalWheelItems);
     };
+    
+    const generateTechLezenTasks = () => {
+        const shuffledTasks = shuffleArray(techLezenTasks).slice(0, 20);
+        const finalWheelItems = shuffledTasks.map((task, index) => ({
+            label: `Leesopdracht ${index + 1}`,
+            fullTask: task
+        }));
+        loadNewItems(finalWheelItems);
+    };
 
     const generateSelectedTables = () => {
         const tableType = document.querySelector('input[name="table_type"]:checked').value;
@@ -422,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadNewItems(shuffleArray(Array.from(sums)));
     };
 
-    // --- NIEUWE FUNCTIES VOOR MIX & MATCH ---
+    // FUNCTIE VOOR MIX & MATCH 
     const generateMixedWheel = () => {
         const selectedCategories = Array.from(mixCategoryCheckboxes)
             .filter(cb => cb.checked)
@@ -436,7 +473,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let mixedItems = [];
         const itemsPerCategory = Math.floor(25 / selectedCategories.length);
         
-        // Rekenen: Tafels
         if (selectedCategories.includes('rekenen_tafels')) {
             const tableType = document.querySelector('input[name="table_type"]:checked').value;
             const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value));
@@ -456,12 +492,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Rekenen: Sommen
         if (selectedCategories.includes('rekenen_sommen')) {
             const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
             const allowWithBridge = options.includes('met');
             const allowWithoutBridge = options.includes('zonder');
-            const limit = selectedMathLimit > 0 ? selectedMathLimit : 1000;
+            
+            // Check if a math limit is selected
+            if (selectedMathLimit === 0) {
+                alert("Voor 'Rekenen: Sommen' in Mix & Match moet je eerst een rekenniveau kiezen (bv. tot 20).");
+                return;
+            }
+            const limit = selectedMathLimit;
             
             let sums = new Set();
             const maxAttempts = 200;
@@ -484,7 +525,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mixedItems = mixedItems.concat(shuffleArray(Array.from(sums)).slice(0, itemsPerCategory));
         }
 
-        // Executieve Functies
         if (selectedCategories.includes('ef')) {
             const selectedEfCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
             if (selectedEfCategories.length > 0) {
@@ -497,14 +537,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Beweging
         if (selectedCategories.includes('beweging')) {
             const movementItems = shuffleArray(movementTasks);
             const finalMovementItems = movementItems.map((task) => ({ fullTask: task }));
             mixedItems = mixedItems.concat(finalMovementItems.slice(0, itemsPerCategory));
         }
 
-        // Taal
         if (selectedCategories.includes('taal')) {
             const selectedTaalCategories = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
             if (selectedTaalCategories.length > 0) {
@@ -517,7 +555,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         
-        // Finaliseer de lijst en zorg ervoor dat er 25 items zijn (of minder als er te weinig zijn)
+        if (selectedCategories.includes('taal_lezen')) {
+            const techLezenItems = shuffleArray(techLezenTasks);
+            const finalTechLezenItems = techLezenItems.map((task) => ({ fullTask: task }));
+            mixedItems = mixedItems.concat(finalTechLezenItems.slice(0, itemsPerCategory));
+        }
+        
         if (mixedItems.length === 0) {
              alert("Kon geen opdrachten genereren. Zorg dat je voor de geselecteerde categorieën ook sub-opties hebt aangevinkt.");
              return;
@@ -603,7 +646,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const taskForModal = (typeof result === 'object' && result.fullTask) ? result.fullTask : result;
         const processedTask = processDynamicTask(taskForModal);
         
-        // --- NIEUWE LOGICA VOOR GETIMEDE REKENSOMMEN ---
         const isTimedMath = timedMathCheckbox.checked && calculateAnswer(String(result)) !== null;
 
         if (isTimedMath) {
@@ -614,7 +656,6 @@ document.addEventListener('DOMContentLoaded', () => {
             resultModal.style.display = 'flex';
             return; 
         }
-        // --- EINDE NIEUWE LOGICA ---
 
         let resultText;
         if (typeof processedTask === 'string') {
@@ -873,29 +914,46 @@ document.addEventListener('DOMContentLoaded', () => {
     generateEfBtn.addEventListener('click', generateEfTasks);
     generateMovementBtn.addEventListener('click', generateMovementTasks);
     generateTaalBtn.addEventListener('click', generateTaalTasks);
+    generateTechLezenBtn.addEventListener('click', generateTechLezenTasks); 
     generateMixBtn.addEventListener('click', generateMixedWheel);
     closeBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => { if (e.target == resultModal) closeModal(); });
 
+    // --- BIJGEWERKTE LOGICA VOOR REKENKNOPPEN ---
+
+    // 1. Kiezen van het rekenniveau
     mathPresetBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+            // Verwijder 'selected' van alle knoppen
+            mathPresetBtns.forEach(b => b.classList.remove('selected'));
+            // Voeg 'selected' toe aan de geklikte knop
+            btn.classList.add('selected');
+            
             const type = btn.dataset.type;
-            const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
-            const allowWithBridge = options.includes('met');
-            const allowWithoutBridge = options.includes('zonder');
-
-            if (!allowWithBridge && !allowWithoutBridge) {
-                alert("Kies minstens één optie (met of zonder brug).");
-                return;
-            }
-
             if (type === 'plusmin10') selectedMathLimit = 10;
             else if (type === 'plusmin20') selectedMathLimit = 20;
             else if (type === 'plusmin100') selectedMathLimit = 100;
             else if (type === 'plusmin1000') selectedMathLimit = 1000;
-
-            generateSums(selectedMathLimit, allowWithBridge, allowWithoutBridge);
         });
+    });
+
+    // 2. Genereren van de sommen met de gekozen opties
+    generateSumsBtn.addEventListener('click', () => {
+        if (selectedMathLimit === 0) {
+            alert("Kies eerst een rekenniveau (bv. '+ / - tot 20').");
+            return;
+        }
+
+        const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
+        const allowWithBridge = options.includes('met');
+        const allowWithoutBridge = options.includes('zonder');
+
+        if (!allowWithBridge && !allowWithoutBridge) {
+            alert("Kies minstens één optie (met of zonder brug).");
+            return;
+        }
+
+        generateSums(selectedMathLimit, allowWithBridge, allowWithoutBridge);
     });
 
     // Initialisatie
