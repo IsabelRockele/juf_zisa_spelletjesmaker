@@ -28,18 +28,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('beweging-kiezer-modal');
     const modalCloseBtn = document.querySelector('.modal-sluiten');
     const bewegingOptiesContainer = document.getElementById('beweging-opties');
+    // NIEUW: Import/Export elementen
+    const exportBtn = document.getElementById('export-knop');
+    const importInput = document.getElementById('import-input');
 
     let sequence = [];
     let currentIndex = 0;
     let timer;
 
-    // --- AANGEPAST: Logica voor de modal ---
-    
-    // Zorg ervoor dat de modal standaard verborgen is
+    // --- Logica voor de modal ---
     modal.classList.add('modal-verborgen');
 
     const showModal = () => {
-        modal.style.display = 'flex'; // Gebruik flex om te centreren
+        modal.style.display = 'flex';
         modal.classList.remove('modal-verborgen');
     };
 
@@ -73,13 +74,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- LIJSTBOUWER FUNCTIES ---
-    const addWoordItem = () => {
+    const addWoordItem = (wordValue = '') => {
         const li = document.createElement('li');
         li.classList.add('item');
+        li.dataset.itemType = 'woord'; // data-attribuut voor export
+
         const input = document.createElement('input');
         input.type = 'text';
         input.placeholder = 'Typ een woord...';
+        input.value = wordValue; // set waarde voor import
         input.addEventListener('keyup', updateWoordenOverzicht);
+        
         li.appendChild(input);
         addRemoveButton(li);
         itemList.appendChild(li);
@@ -89,7 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const addBewegingItem = (key) => {
         const li = document.createElement('li');
         li.classList.add('item');
+        li.dataset.itemType = 'beweging'; // data-attribuut voor export
         li.dataset.bewegingKey = key;
+        
         const data = bewegingen[key];
         li.innerHTML = `
             <div class="beweging-item-weergave">
@@ -198,6 +205,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startBtn.addEventListener('click', startGenerator);
     stopBtn.addEventListener('click', stopGenerator);
+
+    // --- NIEUW: IMPORT/EXPORT LOGICA ---
+    const exportSequence = () => {
+        const itemsToExport = [];
+        const listItems = itemList.querySelectorAll('.item');
+
+        listItems.forEach(item => {
+            const type = item.dataset.itemType;
+            if (type === 'woord') {
+                const value = item.querySelector('input[type="text"]').value.trim();
+                if (value) {
+                    itemsToExport.push({ type: 'woord', value: value });
+                }
+            } else if (type === 'beweging') {
+                const key = item.dataset.bewegingKey;
+                itemsToExport.push({ type: 'beweging', value: key });
+            }
+        });
+
+        if (itemsToExport.length === 0) {
+            alert("Er is niets om te exporteren!");
+            return;
+        }
+
+        const jsonString = JSON.stringify(itemsToExport, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'lees-sequentie.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
+
+    const importSequence = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const importedItems = JSON.parse(e.target.result);
+                if (!Array.isArray(importedItems)) throw new Error("JSON is geen geldige lijst.");
+
+                // Maak de huidige lijst leeg
+                itemList.innerHTML = '';
+
+                // Bouw de lijst opnieuw op
+                importedItems.forEach(item => {
+                    if (item.type === 'woord' && typeof item.value === 'string') {
+                        addWoordItem(item.value);
+                    } else if (item.type === 'beweging' && bewegingen[item.value]) {
+                        addBewegingItem(item.value);
+                    }
+                });
+                
+                updateWoordenOverzicht(); // Werk de woordenlijst bij
+
+            } catch (error) {
+                alert(`Fout bij het importeren van het bestand: ${error.message}`);
+            } finally {
+                // Reset de input zodat hetzelfde bestand opnieuw gekozen kan worden
+                importInput.value = '';
+            }
+        };
+        reader.readAsText(file);
+    };
+
+    exportBtn.addEventListener('click', exportSequence);
+    importInput.addEventListener('change', importSequence);
+
 
     // Initialiseer alles bij het laden
     populateBewegingKiezer();
