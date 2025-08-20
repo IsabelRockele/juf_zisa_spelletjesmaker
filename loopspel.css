@@ -74,7 +74,20 @@ h1 { text-align: center; color: #0056b3; }
 .obstakel img { display: block; width: 100%; height: auto; }
 .obstakel-laag { bottom: 5%; }
 .obstakel-bewegend { animation: kom-dichterbij 4s linear forwards; }
-@keyframes kom-dichterbij { from { top: -20%; width: clamp(30px, 6vw, 70px); opacity: 1; } to { top: 110%; width: clamp(100px, 20vw, 220px); opacity: 1; } }
+@keyframes kom-dichterbij {
+    from {
+        top: -20%;
+        /* Startgrootte, nu groter */
+        width: clamp(50px, 10vw, 110px);
+        opacity: 1;
+    }
+    to {
+        top: 110%;
+        /* Eindgrootte, nu een stuk groter */
+        width: clamp(180px, 30vw, 350px);
+        opacity: 1;
+    }
+}
 .obstakel-hoog { top: 5%; }
 .obstakel-hangend { width: clamp(300px, 55vw, 700px); animation: hang-en-verdwijn 4s linear forwards; }
 @keyframes hang-en-verdwijn { 0% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-50px); } }
