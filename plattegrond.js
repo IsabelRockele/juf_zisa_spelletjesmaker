@@ -74,11 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
                      <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                    </svg>`;
         } else if (type === 'schoolbord' || type === 'schoolbordFlappen') {
+            // LET OP: neutraal lichtgrijs zoals op plattegrond
             svg = `<svg viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">
-                     <rect x="10" y="10" width="100" height="10" fill="#4a536b" stroke="#000" stroke-width="2"/>
+                     <rect x="10" y="10" width="100" height="10" fill="#e6e6e6" stroke="#000" stroke-width="2"/>
                      ${type === 'schoolbordFlappen'
-                        ? `<rect x="-15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
-                           <rect x="110" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>`
+                        ? `<rect x="-15" y="10" width="25" height="10" fill="#f2f2f2" stroke="#000" stroke-width="2"/>
+                           <rect x="110" y="10" width="25" height="10" fill="#f2f2f2" stroke="#000" stroke-width="2"/>`
                         : '' }
                    </svg>`;
         } else if (type === 'muur') {
@@ -351,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.readAsText(file); e.target.value = '';
     });
 
-    // --- WISSELMODUS (ongewijzigd) ---
+    // --- WISSELMODUS ---
     function startPlaatsenWisselen() {
         const groepen = canvas.getObjects().filter(obj => obj.studentNaam);
         if (groepen.length === 0) { alert("Er zijn geen namen op de plattegrond om te wisselen."); return; }
@@ -483,7 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function schakelModus(nieuweModus) {
         modus = nieuweModus; canvas.isDrawingMode = false;
         Object.values(modusKnoppen).forEach(knop => knop.classList.remove('actief'));
-        if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].addEventListener;
         if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].classList.add('actief');
         Object.values(werkbalken).forEach(balk => balk.classList.add('verborgen'));
         if (werkbalken[nieuweModus]) werkbalken[nieuweModus].classList.remove('verborgen');
@@ -594,12 +594,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const tafel = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: 'tafel', originX: 'left', originY: 'top' });
             maakInteractief(tafel); renderCallback(tafel);
         } else if (type === 'schoolbord') {
-            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
+            // standaard zeer lichtgrijs
+            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#e6e6e6', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
             maakInteractief(bord); renderCallback(bord);
         } else if (type === 'schoolbordFlappen') {
-            const midden = new fabric.Rect({ width: 100, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2 });
-            const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: -50 });
-            const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: 100 });
+            // midden lichtgrijs, flappen nog lichter
+            const midden = new fabric.Rect({ width: 100, height: 10, fill: '#e6e6e6', stroke: 'black', strokeWidth: 2 });
+            const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', stroke: 'black', strokeWidth: 2, left: -50 });
+            const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#f2f2f2', stroke: 'black', strokeWidth: 2, left: 100 });
             const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen', originX: 'left', originY: 'top' });
             maakInteractief(bordMetFlappen); renderCallback(bordMetFlappen);
         }
@@ -637,7 +639,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const wrapper = document.getElementById('legende-weergave-wrapper');
         container.innerHTML = '';
 
-        if (gebruikteLegendeItems.size === 0) { wrapper.classList.add('verborgen'); return; }
+        if (gebruikteLegendeItems.size === 0) { 
+            wrapper.classList.add('verborgen'); 
+            return; 
+        }
         wrapper.classList.remove('verborgen');
 
         gebruikteLegendeItems.forEach((waarde, type) => {
@@ -648,19 +653,22 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'legende-weergave-item';
 
-            // kleurvakje (niet voor muur of raam)
+            // kolom 1: kleurvakje (ruimte blijft gereserveerd)
             const kleurDiv = document.createElement('div');
             kleurDiv.className = 'legende-weergave-kleur';
             if (kleur && type !== 'muur' && type !== 'raam') {
                 kleurDiv.style.backgroundColor = kleur;
                 kleurDiv.style.visibility = 'visible';
-                kleurDiv.style.display = '';
             } else {
-                kleurDiv.style.display = 'none';
+                // géén kleur voor muur/raam of niet gekleurd: kolomruimte behouden
+                kleurDiv.style.backgroundColor = 'transparent';
+                kleurDiv.style.visibility = 'hidden';
             }
 
+            // kolom 2: icoon/afbeelding (exact hetzelfde als op de plattegrond)
             const icoonEl = maakIcoonElement(type);
 
+            // kolom 3: label
             const tekstSpan = document.createElement('span');
             tekstSpan.className = 'legende-weergave-tekst';
             tekstSpan.textContent = legendeNamen[type] || type;
@@ -674,7 +682,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function rebuildLegendFromCanvas() {
         gebruikteLegendeItems.clear();
-        const defaultKleuren = ['#fff', 'transparent', '#4a536b', '#5c6784', 'darkgray', '', 'black', '#333'];
+        // Voeg de lichtgrijze standaardkleuren toe zodat ze NIET als "gekleurde legende" geteld worden
+        const defaultKleuren = [
+            '#fff', 'transparent',
+            '#4a536b', '#5c6784',           // oude bordkleuren (voor compatibiliteit)
+            '#e6e6e6', '#f2f2f2',           // nieuwe standaard lichtgrijs (bord)
+            'darkgray', '', 'black', '#333'
+        ];
 
         canvas.forEachObject(obj => {
             const type = obj.voorwerpType;
@@ -810,11 +824,12 @@ document.addEventListener('DOMContentLoaded', () => {
                       <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                     </svg>`;
         } else if (type === 'schoolbord' || type === 'schoolbordFlappen') {
+            // neutrale grijstinten i.p.v. donker
             return `<svg viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">
-                      <rect x="10" y="10" width="100" height="10" fill="#4a536b" stroke="#000" stroke-width="2"/>
+                      <rect x="10" y="10" width="100" height="10" fill="#e6e6e6" stroke="#000" stroke-width="2"/>
                       ${type === 'schoolbordFlappen'
-                        ? `<rect x="-15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
-                           <rect x="110" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>`
+                        ? `<rect x="-15" y="10" width="25" height="10" fill="#f2f2f2" stroke="#000" stroke-width="2"/>
+                           <rect x="110" y="10" width="25" height="10" fill="#f2f2f2" stroke="#000" stroke-width="2"/>`
                         : '' }
                     </svg>`;
         } else if (type === 'muur') {
@@ -920,65 +935,72 @@ document.addEventListener('DOMContentLoaded', () => {
         const y = MARGIN + 5 + (PRINT_HEIGHT - 5 - scaledHeight) / 2;
         doc.addImage(plattegrondDataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
 
+        // === LEGENDEPAGINA (3 kolommen: kleur | icoon | woord) ===
         if (toonLegende && gebruikteLegendeItems.size > 0) {
-            // Volledige A4-pagina voor legende (GROTER)
             doc.addPage();
             doc.setFontSize(18);
             doc.text("Legende", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
             doc.setFontSize(15);
 
-            // items voorbereiden: enkel types met mapping (bv. 'paal' valt weg)
             const items = Array.from(gebruikteLegendeItems.entries())
                 .filter(([type]) => !!legendeNamen[type]);
 
-            // 2 kolommen, royale ruimte
-            const colCount = 2;
-            const rowH = 22;                 // hoogte per item (groter)
-            const iconSizeMm = 16;           // kadergrootte (groter)
-            const colorBox = 9;              // kleurvakje
+            const outerColCount = 2;
+            const rowH = 22;
             const startY = MARGIN + 20;
             const startX = MARGIN;
-            const colGap = 16;
-            const colWidth = (A4_WIDTH - 2*MARGIN - colGap) / colCount;
+            const outerColGap = 16;
+            const outerColWidth = (A4_WIDTH - 2*MARGIN - outerColGap) / outerColCount;
+
+            const colorColW = 9;   // kolom 1
+            const iconColW  = 16;  // kolom 2
+            const innerGap  = 3;
+
+            const colorBox   = 9;
+            const iconSizeMm = 16;
 
             let col = 0, row = 0;
 
             for (const [type, waarde] of items) {
-                const baseX = startX + col * (colWidth + colGap);
+                const baseX = startX + col * (outerColWidth + outerColGap);
                 const baseY = startY + row * rowH;
 
-                // kleurvakje (niet voor muur/raam)
+                // kolom 1: kleur (ruimte behouden)
                 const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
                 if (kleur) {
                     let r=255,g=235,b=59;
                     if (kleur.startsWith('#')) {
                         const hex = kleur.length===4
-                          ? `#${kleur[1]}${kleur[1]}${kleur[2]}${kleur[2]}${kleur[3]}${kleur[3]}`
-                          : kleur;
+                            ? `#${kleur[1]}${kleur[1]}${kleur[2]}${kleur[2]}${kleur[3]}${kleur[3]}`
+                            : kleur;
                         r = parseInt(hex.slice(1,3),16);
                         g = parseInt(hex.slice(3,5),16);
                         b = parseInt(hex.slice(5,7),16);
                     }
+                    const colorX = baseX + (colorColW - colorBox) / 2;
+                    const colorY = baseY - colorBox + 8;
                     doc.setFillColor(r,g,b);
-                    doc.rect(baseX, baseY - colorBox + 8, colorBox, colorBox, 'F');
+                    doc.rect(colorX, colorY, colorBox, colorBox, 'F');
+                    doc.setDrawColor(51,51,51);
+                    doc.rect(colorX, colorY, colorBox, colorBox, 'S');
                 }
 
-                // icoon (exact zoals in app) als dataURL
-                const iconDataUrl = await iconToDataUrl(type, 200); // extra hoge resolutie
-                const iconX = baseX + (kleur ? colorBox + 5 : 0);
-                doc.addImage(iconDataUrl, 'PNG', iconX, baseY - iconSizeMm + 8, iconSizeMm, iconSizeMm);
+                // kolom 2: icoon
+                const iconDataUrl = await iconToDataUrl(type, 200);
+                const iconX = baseX + colorColW + innerGap + (iconColW - iconSizeMm)/2;
+                const iconY = baseY - iconSizeMm + 8;
+                doc.addImage(iconDataUrl, 'PNG', iconX, iconY, iconSizeMm, iconSizeMm);
 
-                // tekst
-                const textX = iconX + iconSizeMm + 6;
+                // kolom 3: woord
+                const textX = baseX + colorColW + innerGap + iconColW + innerGap;
                 const label = legendeNamen[type] || type;
                 doc.setTextColor(0,0,0);
                 doc.text(label, textX, baseY + 3.5);
 
-                // volgende rij/kolom
                 row++;
                 const maxRows = Math.floor((A4_HEIGHT - startY - MARGIN) / rowH);
                 if (row >= maxRows) { row = 0; col++; }
-                if (col >= colCount) {
+                if (col >= outerColCount) {
                     doc.addPage();
                     doc.setFontSize(18);
                     doc.text("Legende (vervolg)", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
@@ -994,6 +1016,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.save(`${bestandsnaam}.pdf`);
     }
 
+    // === PDF-knoppen ===
     document.getElementById('downloadPdfPlattegrondKnop').addEventListener('click', () => {
         genereerPdf({ toonNamen: false, toonLegende: false });
     });
@@ -1006,4 +1029,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     laadCanvasUitBrowser();
 });
-
