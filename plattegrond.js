@@ -11,13 +11,88 @@ document.addEventListener('DOMContentLoaded', () => {
             selectable: true,
             hasControls: true,
             hasBorders: true,
-            lockScalingFlip: true,      // voorkomt omklappen
-            lockUniScaling: false,      // NIET vast op uniforme scaling (Shift kan voor gelijkmatig)
+            lockScalingFlip: true,
+            lockUniScaling: false,
             cornerStyle: 'circle',
             transparentCorners: false,
             borderDashArray: null
         });
         return obj;
+    }
+
+    // --- PAD NAAR PNG-MEUBELS ---
+    const IMG_PATH = 'plattegrond_afbeeldingen/';
+
+    // --- HELPER: HTML-icoon (voor de legendeweergave op pagina) ---
+    function maakIcoonElement(type) {
+        // PNG-types (exact dezelfde als op de plattegrond)
+        const pngTypes = ['schoolbank','bureau','kast','wastafel'];
+        if (pngTypes.includes(type)) {
+            const wrapper = document.createElement('span');
+            wrapper.style.display = 'inline-flex';
+            wrapper.style.justifyContent = 'center';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.width = '28px';
+            wrapper.style.height = '28px';
+            wrapper.style.border = '1px solid #333';
+            wrapper.style.margin = '0 8px';
+
+            const img = document.createElement('img');
+            img.src = `${IMG_PATH}${type}.png`;
+            img.alt = type;
+            img.style.maxWidth = '22px';
+            img.style.maxHeight = '22px';
+            wrapper.appendChild(img);
+            return wrapper;
+        }
+
+        // Vector-icoontjes (aangepast aan wat op canvas gebruikt wordt)
+        let svg = '';
+        if (type === 'leerlingBureau') {
+            svg = `<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                     <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
+                     <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
+                   </svg>`;
+        } else if (type === 'tafel') {
+            svg = `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
+                     <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
+                   </svg>`;
+        } else if (type === 'schoolbord' || type === 'schoolbordFlappen') {
+            svg = `<svg viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">
+                     <rect x="10" y="10" width="100" height="10" fill="#4a536b" stroke="#000" stroke-width="2"/>
+                     ${type === 'schoolbordFlappen'
+                        ? `<rect x=" -15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
+                           <rect x="110" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>`
+                        : '' }
+                   </svg>`;
+        } else if (type === 'muur') {
+            svg = `<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg">
+                     <line x1="5" y1="10" x2="115" y2="10" stroke="#333" stroke-width="8" />
+                   </svg>`;
+        } else if (type === 'deur') {
+            svg = `<svg viewBox="0 0 50 45" xmlns="http://www.w3.org/2000/svg">
+                     <line x1="5" y1="5" x2="5" y2="40" stroke="#000" stroke-width="2"/>
+                     <path d="M5 5 Q45 5 45 40" fill="none" stroke="#000" stroke-width="2"/>
+                   </svg>`;
+        } else if (type === 'raam') {
+            svg = `<svg viewBox="0 0 84 16" xmlns="http://www.w3.org/2000/svg">
+                     <rect x="2" y="4" width="80" height="8" fill="#fff" stroke="#000" stroke-width="1.5"/>
+                     <line x1="6" y1="8" x2="78" y2="8" stroke="#6cace4" stroke-width="2.5"/>
+                   </svg>`;
+        } else {
+            svg = `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"></svg>`;
+        }
+
+        const wrapper = document.createElement('span');
+        wrapper.style.display = 'inline-flex';
+        wrapper.style.justifyContent = 'center';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.width = '28px';
+        wrapper.style.height = '28px';
+        wrapper.style.border = '1px solid #333';
+        wrapper.style.margin = '0 8px';
+        wrapper.innerHTML = svg;
+        return wrapper;
     }
 
     // --- VARIABELEN & STATUS ---
@@ -31,11 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridSize = 20;
     let actieveLegendeType = null;
     let actieveLegendeKleur = '#FFEB3B'; // Start met geel
+    // Map: type -> { kleur: string|null }
     let gebruikteLegendeItems = new Map();
     let history = [];
     let redoStack = [];
     let isUpdatingState = false;
-    const IMG_PATH = 'plattegrond_afbeeldingen/';
     const customProperties = ['studentNaam', 'voorwerpType', 'isNaam', 'gekoppeldAan'];
 
     // --- UI ELEMENTEN ---
@@ -72,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function wisselCanvasFormaat() {
         const wasRasterZichtbaar = gridVisible;
         const json = canvas.toJSON(customProperties);
-        
+
         const oldWidth = canvas.getWidth();
         const oldHeight = canvas.getHeight();
 
@@ -83,11 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         canvas.loadFromJSON(json, () => {
             canvas.renderAll();
-            if (wasRasterZichtbaar) {
-                tekenRaster();
-            }
+            if (wasRasterZichtbaar) tekenRaster();
         });
-        
+
         setTimeout(saveStateImmediate, 200);
     }
     formaatWisselKnop.addEventListener('click', wisselCanvasFormaat);
@@ -120,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-
     function laadCanvasUitBrowser() {
         const opgeslagenData = localStorage.getItem('plattegrondData');
         if (opgeslagenData) {
@@ -134,19 +206,18 @@ document.addEventListener('DOMContentLoaded', () => {
             startNieuweTekening(false);
         }
     }
-
     function startNieuweTekening(vraagBevestiging = true) {
         if (vraagBevestiging && !confirm("Weet u zeker dat u alles wilt wissen en opnieuw wilt beginnen?")) return;
         isUpdatingState = true;
         canvas.clear();
         canvas.backgroundColor = '#fff';
         isUpdatingState = false;
-        
+
         rasterToggle.checked = false;
         gridVisible = false;
         canvas.remove(gridGroup);
-        rebuildLegendFromCanvas(); 
-        
+        rebuildLegendFromCanvas();
+
         canvas.renderAll();
 
         localStorage.removeItem('plattegrondData');
@@ -157,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     nieuwKnop.addEventListener('click', () => startNieuweTekening(true));
 
-    // --- UNDO / REDO LOGICA ---
+    // --- UNDO / REDO ---
     const saveState = debounce(() => {
         if (isUpdatingState || isWisselModusActief || canvas.isDrawingMode) return;
         redoStack = [];
@@ -166,7 +237,6 @@ document.addEventListener('DOMContentLoaded', () => {
         slaCanvasOpInBrowser();
         updateUndoRedoButtons();
     }, 300);
-
     function saveStateImmediate() {
         if (isUpdatingState || isWisselModusActief || canvas.isDrawingMode) return;
         redoStack = [];
@@ -175,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
         slaCanvasOpInBrowser();
         updateUndoRedoButtons();
     }
-
     function undo() {
         if (history.length > 1) {
             isUpdatingState = true;
@@ -185,7 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateUndoRedoButtons();
     }
-
     function redo() {
         if (redoStack.length > 0) {
             isUpdatingState = true;
@@ -195,19 +263,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateUndoRedoButtons();
     }
-
     function updateUndoRedoButtons() {
         undoKnop.disabled = history.length <= 1;
         redoKnop.disabled = redoStack.length === 0;
     }
-    
     canvas.on('object:added', saveStateImmediate);
     canvas.on('object:modified', saveState);
     canvas.on('path:created', saveStateImmediate);
     undoKnop.addEventListener('click', undo);
     redoKnop.addEventListener('click', redo);
 
-    // --- IMPORTEER / EXPORTEER LOGICA ---
+    // --- JSON IMP/EXP ---
     function laadJsonData(jsonData, isUndoRedo = false) {
         isUpdatingState = true;
         canvas.clear();
@@ -230,9 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      objectsToRemove.push(obj);
                 }
             });
-            
             if (objectsToRemove.length > 0) {
-                console.log(`Automatische schoonmaak: ${objectsToRemove.length} oude rasterobjecten verwijderd.`);
                 objectsToRemove.forEach(obj => canvas.remove(obj));
             }
 
@@ -240,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isUndoRedo) {
                 history = [typeof jsonData === 'string' ? jsonData : JSON.stringify(jsonData)];
                 redoStack = [];
-                slaCanvasOpInBrowser(); 
+                slaCanvasOpInBrowser();
                 updateUndoRedoButtons();
             }
             schakelModus('meubel', true);
@@ -249,213 +313,134 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.renderAll();
         });
     }
-
     exporteerJsonKnop.addEventListener('click', () => {
         const json = canvas.toJSON(customProperties);
         json.width = canvas.getWidth();
         json.height = canvas.getHeight();
-
         const blob = new Blob([JSON.stringify(json)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = 'klasplattegrond.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        a.href = url; a.download = 'klasplattegrond.json';
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
     });
-
-    importeerJsonKnop.addEventListener('click', () => { jsonFileInput.click(); });
+    importeerJsonKnop.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const reader = new FileReader();
         reader.onload = (event) => {
-            try {
-                const json = event.target.result;
-                laadJsonData(json);
-            } catch (err) {
-                console.error("Specifieke import fout:", err);
-                alert("Fout bij het importeren. Is dit een geldig plattegrond-bestand?");
-            }
+            try { laadJsonData(event.target.result); }
+            catch { alert("Fout bij het importeren. Is dit een geldig plattegrond-bestand?"); }
         };
-        reader.readAsText(file);
-        e.target.value = '';
+        reader.readAsText(file); e.target.value = '';
     });
-    
-    // --- WISSELMODUS LOGICA ---
+
+    // --- WISSELMODUS (ongewijzigd) ---
     function startPlaatsenWisselen() {
         const groepen = canvas.getObjects().filter(obj => obj.studentNaam);
-        if (groepen.length === 0) {
-            alert("Er zijn geen namen op de plattegrond om te wisselen.");
-            return;
-        }
+        if (groepen.length === 0) { alert("Er zijn geen namen op de plattegrond om te wisselen."); return; }
+        isWisselModusActief = true; schakelModus('wissel'); modusKnoppen.wissel.textContent = 'Klaar';
 
-        isWisselModusActief = true;
-        schakelModus('wissel');
-        modusKnoppen.wissel.textContent = 'Klaar';
-
-        let clonesDone = 0;
-        const clonedMeubels = [];
-        const namenVoorWachtruimte = [];
-
+        let clonesDone = 0; const clonedMeubels = []; const namenVoorWachtruimte = [];
         groepen.forEach(groep => {
             const meubel = groep.getObjects().find(item => !item.isNaam);
             const naam = groep.studentNaam;
-
             if (meubel) {
                 meubel.clone(kloon => {
-                    kloon.set({
-                        left: groep.getCenterPoint().x, top: groep.getCenterPoint().y,
+                    kloon.set({ left: groep.getCenterPoint().x, top: groep.getCenterPoint().y,
                         angle: groep.angle, originX: 'center', originY: 'center',
-                        selectable: false, evented: false
-                    });
-                    clonedMeubels.push(kloon);
-                    namenVoorWachtruimte.push(naam);
-                    
+                        selectable: false, evented: false });
+                    clonedMeubels.push(kloon); namenVoorWachtruimte.push(naam);
                     clonesDone++;
                     if (clonesDone === groepen.length) {
                         groepen.forEach(g => canvas.remove(g));
                         clonedMeubels.forEach(m => canvas.add(m));
-
                         namenLijst.innerHTML = '';
                         namenVoorWachtruimte.forEach(n => {
-                            const schoneNaam = n.trim();
                             const naamItem = document.createElement('div');
-                            naamItem.className = 'naam-item';
-                            naamItem.draggable = true;
-                            naamItem.textContent = schoneNaam;
-                            naamItem.dataset.naam = schoneNaam;
+                            naamItem.className = 'naam-item'; naamItem.draggable = true;
+                            naamItem.textContent = n.trim(); naamItem.dataset.naam = n.trim();
                             namenLijst.appendChild(naamItem);
                         });
                         namenWachtlijstContainer.classList.remove('verborgen');
-                        
                         canvas.renderAll();
                     }
                 }, customProperties);
             } else {
-                clonesDone++;
-                if (clonesDone === groepen.length) {
-                    groepen.forEach(g => canvas.remove(g));
-                    canvas.renderAll();
-                }
+                clonesDone++; if (clonesDone === groepen.length) { groepen.forEach(g => canvas.remove(g)); canvas.renderAll(); }
             }
         });
-        
         namenLijst.addEventListener('dragstart', handleDragStart);
         canvas.upperCanvasEl.addEventListener('dragover', handleDragOver);
         canvas.upperCanvasEl.addEventListener('drop', handleDrop);
     }
-
     function stopPlaatsenWisselen() {
         if (namenLijst.children.length > 0) {
-             if (!confirm("Er staan nog namen in de wachtruimte. Weet je zeker dat je wilt stoppen? Niet-geplaatste namen worden verwijderd.")) return;
+            if (!confirm("Er staan nog namen in de wachtruimte. Stoppen? Niet-geplaatste namen worden verwijderd.")) return;
         }
-        isWisselModusActief = false;
-        modusKnoppen.wissel.textContent = 'Plaatsen Wisselen';
-
-        namenWachtlijstContainer.classList.add('verborgen');
-        namenLijst.innerHTML = '';
-
+        isWisselModusActief = false; modusKnoppen.wissel.textContent = 'Plaatsen Wisselen';
+        namenWachtlijstContainer.classList.add('verborgen'); namenLijst.innerHTML = '';
         namenLijst.removeEventListener('dragstart', handleDragStart);
         canvas.upperCanvasEl.removeEventListener('dragover', handleDragOver);
         canvas.upperCanvasEl.removeEventListener('drop', handleDrop);
 
-        let teVerwijderen = [];
-        let teGroeperen = new Map();
-
+        let teVerwijderen = []; let teGroeperen = new Map();
         canvas.forEachObject(obj => {
             if (obj.isNaam) {
                 const meubel = canvas.getObjects().find(m => m.gekoppeldAan === obj.studentNaam);
-                if (meubel) {
-                    teGroeperen.set(obj.studentNaam, { naamObj: obj, meubelObj: meubel });
-                } else {
-                    teVerwijderen.push(obj);
-                }
+                if (meubel) teGroeperen.set(obj.studentNaam, { naamObj: obj, meubelObj: meubel });
+                else teVerwijderen.push(obj);
             }
         });
-
         teGroeperen.forEach(({ naamObj, meubelObj }) => {
             groepeerNaamMetObject(naamObj.studentNaam, meubelObj);
             teVerwijderen.push(naamObj, meubelObj);
         });
-        
         teVerwijderen.forEach(obj => canvas.remove(obj));
-        
-        canvas.forEachObject(obj => {
-            if(obj.voorwerpType) obj.set({ gekkoppeldAan: null });
-            obj.set({ selectable: true, evented: true });
-        });
-
-        schakelModus('meubel');
-        saveStateImmediate();
+        canvas.forEachObject(obj => { if (obj.voorwerpType) obj.set({ gekkoppeldAan: null }); obj.set({ selectable: true, evented: true }); });
+        schakelModus('meubel'); saveStateImmediate();
     }
-
-    function handleDragStart(e) {
-        e.dataTransfer.setData('text/plain', e.target.dataset.naam);
-        e.dataTransfer.effectAllowed = 'move';
-    }
-
-    function handleDragOver(e) {
+    function handleDragStart(e){ e.dataTransfer.setData('text/plain', e.target.dataset.naam); e.dataTransfer.effectAllowed='move'; }
+    function handleDragOver(e){ e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+    function handleDrop(e){
         e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-    }
-
-    function handleDrop(e) {
-        e.preventDefault();
-        const naam = e.dataTransfer.getData('text/plain').trim();
-        if (!naam) return;
-
+        const naam = e.dataTransfer.getData('text/plain').trim(); if (!naam) return;
         const pointer = canvas.getPointer(e);
         const meubels = canvas.getObjects().filter(obj => obj.voorwerpType && !obj.isNaam);
         const doelMeubel = meubels.reverse().find(m => m.containsPoint(pointer));
+        if (!doelMeubel) return;
 
-        if (doelMeubel) {
-            const zittendeNaam = doelMeubel.gekoppeldAan;
-
-            if (zittendeNaam && zittendeNaam !== naam) {
-                const zittendeNaamObject = canvas.getObjects().find(o => o.isNaam && o.studentNaam === zittendeNaam);
-                if (zittendeNaamObject) canvas.remove(zittendeNaamObject);
-                
-                doelMeubel.set('gekoppeldAan', null);
-
-                const naamItem = document.createElement('div');
-                naamItem.className = 'naam-item';
-                naamItem.draggable = true;
-                naamItem.textContent = zittendeNaam;
-                naamItem.dataset.naam = zittendeNaam;
-                namenLijst.appendChild(naamItem);
-            }
-            
-            const gesleepteNaamElement = Array.from(namenLijst.children).find(el => el.dataset.naam === naam);
-            if (gesleepteNaamElement) gesleepteNaamElement.remove();
-
-            const alGeplaatsteNaam = canvas.getObjects().find(obj => obj.studentNaam === naam && obj.isNaam);
-            if (alGeplaatsteNaam) {
-                canvas.remove(alGeplaatsteNaam);
-            }
-
-            const tekst = new fabric.IText(naam, {
-                left: doelMeubel.getCenterPoint().x, top: doelMeubel.getCenterPoint().y,
-                fontSize: 16, fontFamily: 'Arial', originX: 'center', originY: 'center',
-                backgroundColor: 'rgba(255, 255, 255, 0.9)', padding: 4,
-                studentNaam: naam, isNaam: true, selectable: true
-            });
-            doelMeubel.set('gekoppeldAan', naam);
-            canvas.add(tekst);
-            canvas.renderAll();
+        const zittendeNaam = doelMeubel.gekoppeldAan;
+        if (zittendeNaam && zittendeNaam !== naam) {
+            const zittendeNaamObject = canvas.getObjects().find(o => o.isNaam && o.studentNaam === zittendeNaam);
+            if (zittendeNaamObject) canvas.remove(zittendeNaamObject);
+            doelMeubel.set('gekoppeldAan', null);
+            const naamItem = document.createElement('div');
+            naamItem.className = 'naam-item'; naamItem.draggable = true;
+            naamItem.textContent = zittendeNaam; naamItem.dataset.naam = zittendeNaam;
+            namenLijst.appendChild(naamItem);
         }
+        const gesleepteNaamElement = Array.from(namenLijst.children).find(el => el.dataset.naam === naam);
+        if (gesleepteNaamElement) gesleepteNaamElement.remove();
+
+        const alGeplaatsteNaam = canvas.getObjects().find(obj => obj.studentNaam === naam && obj.isNaam);
+        if (alGeplaatsteNaam) canvas.remove(alGeplaatsteNaam);
+
+        const tekst = new fabric.IText(naam, {
+            left: doelMeubel.getCenterPoint().x, top: doelMeubel.getCenterPoint().y,
+            fontSize: 16, fontFamily: 'Arial', originX: 'center', originY: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)', padding: 4,
+            studentNaam: naam, isNaam: true, selectable: true
+        });
+        doelMeubel.set('gekoppeldAan', naam);
+        canvas.add(tekst); canvas.renderAll();
     }
-    
     canvas.on('object:modified', (e) => {
         if (!isWisselModusActief || !e.target.isNaam) return;
-        
         const naamObject = e.target;
         const meubels = canvas.getObjects().filter(obj => obj.voorwerpType && !obj.isNaam);
         const vorigMeubel = meubels.find(m => m.gekoppeldAan === naamObject.studentNaam);
         const doelMeubel = meubels.find(m => m.containsPoint(naamObject.getCenterPoint()));
-
         if (doelMeubel && doelMeubel !== vorigMeubel) {
             const zittendeNaam = doelMeubel.gekoppeldAan;
             if (zittendeNaam && vorigMeubel) {
@@ -465,59 +450,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     vorigMeubel.set('gekoppeldAan', zittendeNaam);
                     zittendeNaamObject.setCoords();
                 }
-            } 
-            else if (vorigMeubel) {
+            } else if (vorigMeubel) {
                 vorigMeubel.set('gekoppeldAan', null);
             }
-
             naamObject.set({ left: doelMeubel.getCenterPoint().x, top: doelMeubel.getCenterPoint().y });
             doelMeubel.set('gekoppeldAan', naamObject.studentNaam);
-        } 
-        else if (!doelMeubel && vorigMeubel) {
+        } else if (!doelMeubel && vorigMeubel) {
             vorigMeubel.set('gekoppeldAan', null);
-        }
-        else if (vorigMeubel) {
+        } else if (vorigMeubel) {
             naamObject.set({ left: vorigMeubel.getCenterPoint().x, top: vorigMeubel.getCenterPoint().y });
         }
-
-        naamObject.setCoords();
-        canvas.requestRenderAll();
+        naamObject.setCoords(); canvas.requestRenderAll();
     });
 
     // --- MODUS SWITCHER ---
     function schakelModus(nieuweModus) {
-        modus = nieuweModus;
-        canvas.isDrawingMode = false;
-
+        modus = nieuweModus; canvas.isDrawingMode = false;
         Object.values(modusKnoppen).forEach(knop => knop.classList.remove('actief'));
         if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].classList.add('actief');
         Object.values(werkbalken).forEach(balk => balk.classList.add('verborgen'));
         if (werkbalken[nieuweModus]) werkbalken[nieuweModus].classList.remove('verborgen');
         legendeContainer.classList.toggle('verborgen', nieuweModus !== 'legende');
-        
+
         const isInteractief = !['legende', 'wissel'].includes(nieuweModus);
-        canvas.selection = isInteractief;
-        canvas.defaultCursor = 'default';
+        canvas.selection = isInteractief; canvas.defaultCursor = 'default';
 
         canvas.forEachObject(obj => {
-            if (nieuweModus === 'wissel') {
-                obj.set({ selectable: obj.isNaam });
-            } else {
-                obj.set({ selectable: isInteractief });
-            }
+            if (nieuweModus === 'wissel') obj.set({ selectable: obj.isNaam });
+            else obj.set({ selectable: isInteractief });
             if (obj.voorwerpType === 'muur') obj.set({ evented: (modus === 'bouw') });
         });
         canvas.renderAll();
     }
-
     Object.keys(modusKnoppen).forEach(key => {
-        if(key !== 'wissel') {
-            modusKnoppen[key].addEventListener('click', () => schakelModus(key));
-        } else {
-            modusKnoppen[key].addEventListener('click', () => {
-                if (isWisselModusActief) { stopPlaatsenWisselen(); } else { startPlaatsenWisselen(); }
-            });
-        }
+        if(key !== 'wissel') modusKnoppen[key].addEventListener('click', () => schakelModus(key));
+        else modusKnoppen[key].addEventListener('click', () => { if (isWisselModusActief) { stopPlaatsenWisselen(); } else { startPlaatsenWisselen(); }});
     });
 
     // --- RASTER & BOUWMODUS ---
@@ -529,158 +496,99 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let i = 0; i < (width / gridSize); i++) { lines.push(new fabric.Line([i * gridSize, 0, i * gridSize, height], lineOptions)); }
         for (let i = 0; i < (height / gridSize); i++) { lines.push(new fabric.Line([0, i * gridSize, width, i * gridSize], lineOptions)); }
         gridGroup = new fabric.Group(lines, { selectable: false, evented: false, excludeFromExport: true });
-        canvas.add(gridGroup);
-        gridGroup.moveTo(0);
-        canvas.renderAll();
+        canvas.add(gridGroup); gridGroup.moveTo(0); canvas.renderAll();
     }
     rasterToggle.addEventListener('change', (e) => {
         gridVisible = e.target.checked;
-        if (gridVisible) {
-            tekenRaster();
-        } else {
-            canvas.remove(gridGroup);
-            canvas.renderAll();
-        }
+        if (gridVisible) tekenRaster(); else { canvas.remove(gridGroup); canvas.renderAll(); }
     });
-
-    function zetBouwTool(nieuweTool) {
-        bouwTool = nieuweTool;
-        canvas.isDrawingMode = (bouwTool === 'gom');
-    }
-
+    function zetBouwTool(nieuweTool) { bouwTool = nieuweTool; canvas.isDrawingMode = (bouwTool === 'gom'); }
     document.getElementById('tekenMuurKnop').addEventListener('click', () => zetBouwTool('muur'));
-    
     document.getElementById('plaatsKlasKnop').addEventListener('click', () => {
         zetBouwTool('klas');
         const klasRechthoek = new fabric.Rect({
-            left: 100,
-            top: 100,
-            width: 400,
-            height: 300,
-            fill: 'transparent',
-            stroke: '#333',
-            strokeWidth: 8,
-            voorwerpType: 'muur',
-            originX: 'left',
-            originY: 'top'
+            left: 100, top: 100, width: 400, height: 300, fill: 'transparent',
+            stroke: '#333', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur',
+            originX: 'left', originY: 'top'
         });
-        maakInteractief(klasRechthoek);
-        canvas.add(klasRechthoek);
-        canvas.setActiveObject(klasRechthoek);
-        canvas.renderAll();
+        maakInteractief(klasRechthoek); canvas.add(klasRechthoek); canvas.setActiveObject(klasRechthoek); canvas.renderAll();
     });
-
     document.getElementById('plaatsDeurKnop').addEventListener('click', () => {
         zetBouwTool('deur');
         const deurSymbol = new fabric.Path('M 0 0 L 0 40 M 0 0 Q 40 0 40 40', { fill: '', stroke: 'black', strokeWidth: 2 });
         const achtergrond = new fabric.Rect({ width: 42, height: 8, fill: canvas.backgroundColor, originX: 'center', originY: 'center'});
         const deur = new fabric.Group([achtergrond, deurSymbol], { left: 50, top: 50, voorwerpType: 'deur', originX: 'left', originY: 'bottom' });
-        maakInteractief(deur);
-        canvas.add(deur);
-        canvas.setActiveObject(deur);
-        canvas.renderAll();
+        maakInteractief(deur); canvas.add(deur); canvas.setActiveObject(deur); canvas.renderAll();
     });
-    
     document.getElementById('plaatsRaamKnop').addEventListener('click', () => {
         zetBouwTool('raam');
-        const raamAchtergrond = new fabric.Rect({ left: 0, top: 0, width: 80, height: 8, fill: canvas.backgroundColor, stroke: 'black', strokeWidth: 1 });
-        const glas = new fabric.Line([5, 4, 75, 4], { stroke: '#6cace4', strokeWidth: 2 });
+        const raamAchtergrond = new fabric.Rect({ left: 0, top: 0, width: 80, height: 8, fill: canvas.backgroundColor, stroke: 'black', strokeWidth: 1.2 });
+        const glas = new fabric.Line([5, 4, 75, 4], { stroke: '#6cace4', strokeWidth: 2.2 });
         const raam = new fabric.Group([raamAchtergrond, glas], { left: 50, top: 100, voorwerpType: 'raam' });
-        maakInteractief(raam);
-        canvas.add(raam);
-        canvas.setActiveObject(raam);
-        canvas.renderAll();
+        maakInteractief(raam); canvas.add(raam); canvas.setActiveObject(raam); canvas.renderAll();
     });
-
     document.getElementById('plaatsGomKnop').addEventListener('click', () => {
-        zetBouwTool('gom');
-        canvas.freeDrawingBrush.color = canvas.backgroundColor;
-        canvas.freeDrawingBrush.width = 10;
-        canvas.freeDrawingCursor = 'square';
+        zetBouwTool('gom'); canvas.freeDrawingBrush.color = canvas.backgroundColor; canvas.freeDrawingBrush.width = 10; canvas.freeDrawingCursor = 'square';
     });
-
     document.getElementById('plaatsPaalKnop').addEventListener('click', () => {
         zetBouwTool('paal');
-        const paal = new fabric.Rect({ left: 100, top: 100, width: gridSize, height: gridSize, fill: 'darkgray', voorwerpType: 'paal' });
-        maakInteractief(paal);
-        canvas.add(paal);
-        canvas.setActiveObject(paal);
-        canvas.renderAll();
+        const paal = new fabric.Rect({ left: 100, top: 100, width: gridSize, height: gridSize, fill: '#333', stroke: '#333', strokeWidth: 1, voorwerpType: 'paal' });
+        maakInteractief(paal); canvas.add(paal); canvas.setActiveObject(paal); canvas.renderAll();
     });
-
     canvas.on('mouse:down', (o) => {
         if (modus === 'bouw' && bouwTool === 'muur' && !isDrawingWall) {
              isDrawingWall = true;
-             const pointer = canvas.getPointer(o.e);
-             wallStartPoint = { x: Math.round(pointer.x / gridSize) * gridSize, y: Math.round(pointer.y / gridSize) * gridSize };
+             const p = canvas.getPointer(o.e);
+             wallStartPoint = { x: Math.round(p.x / gridSize) * gridSize, y: Math.round(p.y / gridSize) * gridSize };
         }
     });
-
     canvas.on('mouse:up', (o) => {
-        if (!isDrawingWall) return;
-        isDrawingWall = false;
-        const pointer = canvas.getPointer(o.e);
-        let endX = Math.round(pointer.x / gridSize) * gridSize;
-        let endY = Math.round(pointer.y / gridSize) * gridSize;
-
+        if (!isDrawingWall) return; isDrawingWall = false;
+        const p = canvas.getPointer(o.e);
+        let endX = Math.round(p.x / gridSize) * gridSize;
+        let endY = Math.round(p.y / gridSize) * gridSize;
         if (o.e.shiftKey) {
-            const dx = Math.abs(endX - wallStartPoint.x);
-            const dy = Math.abs(endY - wallStartPoint.y);
-            if (dx > dy) {
-                endY = wallStartPoint.y;
-            } else {
-                endX = wallStartPoint.x;
-            }
+            const dx = Math.abs(endX - wallStartPoint.x), dy = Math.abs(endY - wallStartPoint.y);
+            if (dx > dy) endY = wallStartPoint.y; else endX = wallStartPoint.x;
         }
-        const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY], { stroke: '#333', strokeWidth: 8, voorwerpType: 'muur', selectable: true, evented: true });
-        maakInteractief(muur);
-        canvas.add(muur);
-        canvas.renderAll();
+        const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY],
+            { stroke: '#333', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur', selectable: true, evented: true });
+        maakInteractief(muur); canvas.add(muur); canvas.renderAll();
     });
-    
-    // --- MEUBELMODUS LOGICA ---
+
+    // --- MEUBELMODUS ---
     werkbalken.meubel.addEventListener('click', (e) => {
         if (e.target.tagName !== 'BUTTON') return;
         const type = e.target.dataset.type;
 
-        const renderCallback = (obj) => {
-            canvas.add(obj);
-            canvas.setActiveObject(obj);
-            canvas.renderAll();
-        };
+        const renderCallback = (obj) => { canvas.add(obj); canvas.setActiveObject(obj); canvas.renderAll(); };
 
-        if (['schoolbank', 'bureau', 'kast', 'wastafel'].includes(type)) {
+        if (['schoolbank','bureau','kast','wastafel'].includes(type)) {
             fabric.Image.fromURL(`${IMG_PATH}${type}.png`, (img) => {
                 img.set({ left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top' });
-                img.scaleToWidth(80);
-                maakInteractief(img);
-                renderCallback(img);
+                img.scaleToWidth(80); maakInteractief(img); renderCallback(img);
             }, { crossOrigin: 'Anonymous' });
         } else if (type === 'leerlingBureau') {
             const bureauRect = new fabric.Rect({ width: 60, height: 40, fill: 'transparent', stroke: '#333', strokeWidth: 1, originX: 'center', originY: 'center' });
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
             const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau', originX: 'left', originY: 'top' });
-            maakInteractief(leerlingBureauGroep);
-            renderCallback(leerlingBureauGroep);
+            maakInteractief(leerlingBureauGroep); renderCallback(leerlingBureauGroep);
         } else if (type === 'tafel') {
             const tafel = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: 'tafel', originX: 'left', originY: 'top' });
-            maakInteractief(tafel);
-            renderCallback(tafel);
+            maakInteractief(tafel); renderCallback(tafel);
         } else if (type === 'schoolbord') {
             const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
-            maakInteractief(bord);
-            renderCallback(bord);
+            maakInteractief(bord); renderCallback(bord);
         } else if (type === 'schoolbordFlappen') {
-             const midden = new fabric.Rect({ width: 100, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2 });
-             const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: -50 });
-             const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: 100 });
-             const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen', originX: 'left', originY: 'top' });
-             maakInteractief(bordMetFlappen);
-             renderCallback(bordMetFlappen);
+            const midden = new fabric.Rect({ width: 100, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2 });
+            const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: -50 });
+            const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: 100 });
+            const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen', originX: 'left', originY: 'top' });
+            maakInteractief(bordMetFlappen); renderCallback(bordMetFlappen);
         }
     });
 
-    // --- NAMENMODUS LOGICA ---
+    // --- NAMENMODUS ---
     function groepeerNaamMetObject(naam, object) {
         const objAngle = object.angle || 0;
         const tekst = new fabric.IText(naam, {
@@ -692,45 +600,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const objVoorwerpType = object.voorwerpType;
         object.set({ originX: 'center', originY: 'center', top: 0, left: 0, angle: 0 });
         const groep = new fabric.Group([object, tekst], {
-            left: objPos.x, top: objPos.y, angle: objAngle,
-            originX: 'center', originY: 'center',
-            voorwerpType: objVoorwerpType, studentNaam: naam,
-            subTargetCheck: true
+            left: objPos.x, top: objPos.y, angle: objAngle, originX: 'center', originY: 'center',
+            voorwerpType: objVoorwerpType, studentNaam: naam, subTargetCheck: true
         });
-        maakInteractief(groep);
-        canvas.add(groep);
+        maakInteractief(groep); canvas.add(groep);
     }
     document.getElementById('naamToevoegenKnop').addEventListener('click', () => {
         const naamInput = document.getElementById('naamInput');
         const naam = naamInput.value.trim();
         const actieveObject = canvas.getActiveObject();
         if (!actieveObject || !naam || actieveObject.studentNaam) return;
-        const origineelObject = actieveObject;
-        groepeerNaamMetObject(naam, origineelObject);
-        canvas.remove(origineelObject);
-        naamInput.value = '';
-        canvas.renderAll();
+        groepeerNaamMetObject(naam, actieveObject); canvas.remove(actieveObject);
+        naamInput.value = ''; canvas.renderAll();
     });
 
-    // --- LEGENDE MODUS & WEERGAVE LOGICA ---
+    // --- LEGENDE (HTML + detectie) ---
     function updateLegendeWeergave() {
         const container = document.getElementById('legende-weergave-container');
         const wrapper = document.getElementById('legende-weergave-wrapper');
-        container.innerHTML = ''; 
+        container.innerHTML = '';
 
-        if (gebruikteLegendeItems.size === 0) {
-            wrapper.classList.add('verborgen');
-            return;
-        }
+        if (gebruikteLegendeItems.size === 0) { wrapper.classList.add('verborgen'); return; }
         wrapper.classList.remove('verborgen');
 
-        gebruikteLegendeItems.forEach((kleur, type) => {
+        gebruikteLegendeItems.forEach((waarde, type) => {
+            if (type === 'paal') return; // paal niet tonen in legende
+            const { kleur } = waarde || {};
             const itemDiv = document.createElement('div');
             itemDiv.className = 'legende-weergave-item';
 
+            // kleurvakje (niet voor muur of raam)
             const kleurDiv = document.createElement('div');
             kleurDiv.className = 'legende-weergave-kleur';
-            kleurDiv.style.backgroundColor = kleur;
+            if (kleur && type !== 'muur' && type !== 'raam') {
+                kleurDiv.style.backgroundColor = kleur;
+                kleurDiv.style.visibility = 'visible';
+                kleurDiv.style.display = '';
+            } else {
+                kleurDiv.style.display = 'none';
+            }
+
+            const icoonEl = maakIcoonElement(type);
 
             const tekstSpan = document.createElement('span');
             tekstSpan.className = 'legende-weergave-tekst';
@@ -738,6 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tekstSpan.textContent = prettyType;
 
             itemDiv.appendChild(kleurDiv);
+            itemDiv.appendChild(icoonEl);
             itemDiv.appendChild(tekstSpan);
             container.appendChild(itemDiv);
         });
@@ -745,31 +656,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function rebuildLegendFromCanvas() {
         gebruikteLegendeItems.clear();
-        const defaultKleuren = ['#fff', 'transparent', '#4a536b', '#5c6784', 'darkgray', '', 'black'];
+        const defaultKleuren = ['#fff', 'transparent', '#4a536b', '#5c6784', 'darkgray', '', 'black', '#333'];
 
         canvas.forEachObject(obj => {
             const type = obj.voorwerpType;
             if (!type || obj.isNaam) return;
 
+            if (!gebruikteLegendeItems.has(type)) gebruikteLegendeItems.set(type, { kleur: null });
+
             let kleur = null;
-            if (obj.isType('image') && obj.filters && obj.filters.length > 0) {
+            if (obj.isType && obj.isType('image') && obj.filters && obj.filters.length > 0) {
                 const blendFilter = obj.filters.find(f => f.type === 'BlendColor');
                 if (blendFilter) kleur = blendFilter.color;
             } else if (obj.voorwerpType === 'deur') {
-                const deurSymbol = obj.getObjects().find(o => o.type === 'path');
-                if (deurSymbol && !defaultKleuren.includes(deurSymbol.stroke)) {
-                    kleur = deurSymbol.stroke;
-                }
-            } else if (obj.isType('group')) {
+                const deurSymbol = obj.getObjects && obj.getObjects().find(o => o.type === 'path');
+                if (deurSymbol && deurSymbol.stroke && !defaultKleuren.includes(deurSymbol.stroke)) kleur = deurSymbol.stroke;
+            } else if (obj.isType && obj.isType('group')) {
                 const gekleurdItem = obj.getObjects().find(item => item.fill && !defaultKleuren.includes(item.fill));
                 if (gekleurdItem) kleur = gekleurdItem.fill;
             } else if (obj.fill && !defaultKleuren.includes(obj.fill)) {
                 kleur = obj.fill;
             }
 
-            if (kleur) {
-                gebruikteLegendeItems.set(type, kleur);
-            }
+            // FORCEREN: muur en raam nooit een kleurvakje
+            if (type === 'muur' || type === 'raam') kleur = null;
+
+            if (kleur) gebruikteLegendeItems.set(type, { kleur });
         });
         updateLegendeWeergave();
     }
@@ -782,65 +694,46 @@ document.addEventListener('DOMContentLoaded', () => {
             actieveLegendeKleur = e.target.dataset.kleur;
         }
     });
-    
     legendeCategorieKnoppen.forEach(knop => {
         knop.addEventListener('click', () => {
             const vorigeActieve = document.querySelector('#legende-categorieen button.actief');
             if (vorigeActieve) vorigeActieve.classList.remove('actief');
-            if (actieveLegendeType === knop.dataset.type) {
-                actieveLegendeType = null;
-                canvas.defaultCursor = 'default';
-            } else {
-                actieveLegendeType = knop.dataset.type;
-                knop.classList.add('actief');
-                canvas.defaultCursor = 'crosshair';
-            }
+            if (actieveLegendeType === knop.dataset.type) { actieveLegendeType = null; canvas.defaultCursor = 'default'; }
+            else { actieveLegendeType = knop.dataset.type; knop.classList.add('actief'); canvas.defaultCursor = 'crosshair'; }
         });
     });
 
     canvas.on('mouse:down', (o) => {
         if (modus !== 'legende' || !actieveLegendeType || !o.target) return;
-        
         const obj = o.target.group ? o.target.group : o.target;
         const kleur = actieveLegendeKleur;
 
         let typeMatch = (obj.voorwerpType === actieveLegendeType);
-        if (actieveLegendeType === 'schoolbord' && obj.voorwerpType === 'schoolbordFlappen') {
-            typeMatch = true;
-        }
+        if (actieveLegendeType === 'schoolbord' && obj.voorwerpType === 'schoolbordFlappen') typeMatch = true;
 
         if (typeMatch) {
             const kleurItem = (item) => {
                 if (!item || item.isNaam) return;
-
-                if (item.isType('image')) {
+                if (item.isType && item.isType('image')) {
                     item.filters = [];
-                    const filter = new fabric.Image.filters.BlendColor({
-                        color: kleur, mode: 'multiply', alpha: 1.0
-                    });
-                    item.filters.push(filter);
-                    item.applyFilters();
+                    const filter = new fabric.Image.filters.BlendColor({ color: kleur, mode: 'multiply', alpha: 1.0 });
+                    item.filters.push(filter); item.applyFilters();
                 } else if (item.voorwerpType === 'deur' && actieveLegendeType === 'deur') {
-                    const deurSymbol = item.getObjects().find(o => o.type === 'path');
-                    if(deurSymbol) {
-                        deurSymbol.set('stroke', kleur);
-                    }
-                } else {
+                    const deurSymbol = item.getObjects && item.getObjects().find(o => o.type === 'path');
+                    if(deurSymbol) deurSymbol.set('stroke', kleur);
+                } else if (item.voorwerpType !== 'muur' && item.voorwerpType !== 'raam') {
                     item.set('fill', kleur);
                 }
             };
+            if (obj.isType && obj.isType('group')) {
+                if (obj.voorwerpType === 'deur' && actieveLegendeType === 'deur') kleurItem(obj);
+                else obj.getObjects().forEach(item => kleurItem(item));
+            } else kleurItem(obj);
 
-            if (obj.isType('group')) {
-                if (obj.voorwerpType === 'deur' && actieveLegendeType === 'deur') {
-                    kleurItem(obj);
-                } else {
-                    obj.getObjects().forEach(item => kleurItem(item));
-                }
-            } else {
-                kleurItem(obj);
-            }
-            
-            gebruikteLegendeItems.set(obj.voorwerpType, kleur);
+            // update legenda, maar nooit kleur tonen voor muur of raam
+            const type = obj.voorwerpType;
+            const setKleur = (type === 'muur' || type === 'raam') ? null : kleur;
+            gebruikteLegendeItems.set(type, { kleur: setKleur });
             updateLegendeWeergave();
             canvas.renderAll();
             saveStateImmediate();
@@ -849,59 +742,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- ALGEMENE FUNCTIES ---
+    // --- ALGEMEEN ---
     function setNamenZichtbaarheid(zichtbaar) {
         canvas.forEachObject(obj => {
-            if (obj.isType('group') && obj.studentNaam) {
+            if (obj.isType && obj.isType('group') && obj.studentNaam) {
                 const tekstObject = obj.getObjects().find(item => item.isNaam);
-                if (tekstObject) {
-                    tekstObject.set('visible', zichtbaar);
-                }
-            }
-            else if (obj.isNaam) {
-                obj.set('visible', zichtbaar);
-            }
+                if (tekstObject) tekstObject.set('visible', zichtbaar);
+            } else if (obj.isNaam) obj.set('visible', zichtbaar);
         });
         canvas.renderAll();
     }
-    namenTonenToggle.addEventListener('change', (e) => { setNamenZichtbaarheid(e.target.checked); });
-    
+    namenTonenToggle.addEventListener('change', (e) => setNamenZichtbaarheid(e.target.checked));
     function verwijderSelectie() {
-        const actieveObjecten = canvas.getActiveObjects();
-        if (!actieveObjecten || actieveObjecten.length === 0) return;
-        
-        actieveObjecten.forEach(obj => canvas.remove(obj));
-        canvas.discardActiveObject();
-        saveStateImmediate();
-        rebuildLegendFromCanvas();
-        canvas.renderAll();
+        const sel = canvas.getActiveObjects(); if (!sel || sel.length === 0) return;
+        sel.forEach(obj => canvas.remove(obj));
+        canvas.discardActiveObject(); saveStateImmediate(); rebuildLegendFromCanvas(); canvas.renderAll();
     }
     verwijderKnop.addEventListener('click', verwijderSelectie);
-
     function dupliceerSelectie() {
-        const actieveObject = canvas.getActiveObject();
-        if (!actieveObject) return;
-    
-        actieveObject.clone((kloon) => {
+        const obj = canvas.getActiveObject(); if (!obj) return;
+        obj.clone((kloon) => {
             canvas.discardActiveObject();
-            kloon.set({
-                left: kloon.left + gridSize,
-                top: kloon.top + gridSize,
-            });
-            if (kloon.type === 'activeSelection') {
-                kloon.canvas = canvas;
-                kloon.forEachObject(obj => canvas.add(obj));
-                kloon.setCoords();
-            } else {
-                canvas.add(kloon);
-            }
-            maakInteractief(kloon);
-            canvas.setActiveObject(kloon);
-            canvas.requestRenderAll();
+            kloon.set({ left: kloon.left + gridSize, top: kloon.top + gridSize });
+            if (kloon.type === 'activeSelection') { kloon.canvas = canvas; kloon.forEachObject(o => canvas.add(o)); kloon.setCoords(); }
+            else canvas.add(kloon);
+            maakInteractief(kloon); canvas.setActiveObject(kloon); canvas.requestRenderAll();
         }, customProperties);
     }
     dupliceerKnop.addEventListener('click', dupliceerSelectie);
-
     window.addEventListener('keydown', (e) => {
         const activeEl = document.activeElement;
         if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'SELECT')) return;
@@ -911,31 +779,115 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Delete' || e.key === 'Backspace') { verwijderSelectie(); }
     });
 
+    // --- PDF: ICONEN ALS DATAURL (PNG) ZODAT ZE IDENTIEK ZIJN AAN APP ---
+    const iconCache = new Map(); // type -> dataURL
+    function svgStringForType(type){
+        if (type === 'leerlingBureau') {
+            return `<svg viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
+                      <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
+                    </svg>`;
+        } else if (type === 'tafel') {
+            return `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
+                    </svg>`;
+        } else if (type === 'schoolbord' || type === 'schoolbordFlappen') {
+            return `<svg viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="10" y="10" width="100" height="10" fill="#4a536b" stroke="#000" stroke-width="2"/>
+                      ${type === 'schoolbordFlappen'
+                        ? `<rect x="-15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
+                           <rect x="110" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>`
+                        : '' }
+                    </svg>`;
+        } else if (type === 'muur') {
+            return `<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg">
+                      <line x1="5" y1="10" x2="115" y2="10" stroke="#333" stroke-width="8" />
+                    </svg>`;
+        } else if (type === 'deur') {
+            return `<svg viewBox="0 0 50 45" xmlns="http://www.w3.org/2000/svg">
+                      <line x1="5" y1="5" x2="5" y2="40" stroke="#000" stroke-width="2"/>
+                      <path d="M5 5 Q45 5 45 40" fill="none" stroke="#000" stroke-width="2"/>
+                    </svg>`;
+        } else if (type === 'raam') {
+            return `<svg viewBox="0 0 84 16" xmlns="http://www.w3.org/2000/svg">
+                      <rect x="2" y="4" width="80" height="8" fill="#fff" stroke="#000" stroke-width="1.5"/>
+                      <line x1="6" y1="8" x2="78" y2="8" stroke="#6cace4" stroke-width="2.5"/>
+                    </svg>`;
+        }
+        return `<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"></svg>`;
+    }
+    function loadImage(src){
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous';
+            img.onload = ()=>resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+    async function iconToDataUrl(type, sizePx=96){
+        if (iconCache.has(type)) return iconCache.get(type);
+        const pngTypes = ['schoolbank','bureau','kast','wastafel'];
+        let dataUrl;
+        if (pngTypes.includes(type)) {
+            const img = await loadImage(`${IMG_PATH}${type}.png`);
+            const c = document.createElement('canvas'); c.width = sizePx; c.height = sizePx;
+            const ctx = c.getContext('2d');
+            // teken in een kader
+            const pad = Math.round(sizePx*0.15);
+            const inner = sizePx - pad*2;
+            ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, inner, inner);
+            // afbeelding centreren
+            const max = Math.round(inner*0.8);
+            let w = img.width, h = img.height;
+            const scale = Math.min(max/w, max/h);
+            w = Math.round(w*scale); h = Math.round(h*scale);
+            const ix = pad + Math.round((inner - w)/2);
+            const iy = pad + Math.round((inner - h)/2);
+            ctx.drawImage(img, ix, iy, w, h);
+            dataUrl = c.toDataURL('image/png');
+        } else {
+            const svg = svgStringForType(type);
+            const svgBlob = new Blob([svg], {type:'image/svg+xml'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            const img = await loadImage(svgUrl);
+            const c = document.createElement('canvas'); c.width = sizePx; c.height = sizePx;
+            const ctx = c.getContext('2d');
+            const pad = Math.round(sizePx*0.15);
+            const inner = sizePx - pad*2;
+            ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, inner, inner);
+            // svg schalen
+            const max = Math.round(inner*0.8);
+            const scale = Math.min(max/img.width, max/img.height);
+            const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+            const ix = pad + Math.round((inner - w)/2);
+            const iy = pad + Math.round((inner - h)/2);
+            ctx.drawImage(img, ix, iy, w, h);
+            dataUrl = c.toDataURL('image/png');
+            URL.revokeObjectURL(svgUrl);
+        }
+        iconCache.set(type, dataUrl);
+        return dataUrl;
+    }
+
     // --- PDF GENERATIE ---
     async function genereerPdf(opties) {
         const { toonNamen, toonLegende } = opties;
         const huidigeNamenZichtbaarheid = namenTonenToggle.checked;
-        
+
         const wasRasterZichtbaar = gridVisible;
-        if (wasRasterZichtbaar) {
-            canvas.remove(gridGroup);
-            canvas.renderAll();
-        }
+        if (wasRasterZichtbaar) { canvas.remove(gridGroup); canvas.renderAll(); }
 
         setNamenZichtbaarheid(toonNamen);
         const plattegrondDataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
         setNamenZichtbaarheid(huidigeNamenZichtbaarheid);
 
-        if (wasRasterZichtbaar) {
-            canvas.add(gridGroup);
-            gridGroup.moveTo(0);
-            canvas.renderAll();
-        }
-        
+        if (wasRasterZichtbaar) { canvas.add(gridGroup); gridGroup.moveTo(0); canvas.renderAll(); }
+
         const orientation = canvas.getWidth() > canvas.getHeight() ? 'landscape' : 'portrait';
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: orientation, unit: 'mm', format: 'a4' });
-        
+
         const A4_WIDTH = (orientation === 'landscape') ? 297 : 210;
         const A4_HEIGHT = (orientation === 'landscape') ? 210 : 297;
         const MARGIN = 10;
@@ -944,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const plattegrondTitel = `Klaslokaal Plattegrond ${toonNamen ? '(met namen)' : ''}`;
         doc.text(plattegrondTitel, A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
-        
+
         const scale = Math.min(PRINT_WIDTH / canvas.getWidth(), PRINT_HEIGHT / canvas.getHeight());
         const scaledWidth = canvas.getWidth() * scale;
         const scaledHeight = canvas.getHeight() * scale;
@@ -953,17 +905,73 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.addImage(plattegrondDataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
 
         if (toonLegende && gebruikteLegendeItems.size > 0) {
+            // Volledige A4-pagina voor legende
             doc.addPage();
-            const legendeWrapper = document.getElementById('legende-weergave-wrapper');
-            
-            const legendeCanvas = await html2canvas(legendeWrapper);
-            const legendeDataUrl = legendeCanvas.toDataURL('image/png');
-
+            doc.setFontSize(16);
             doc.text("Legende", A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
-            const legendeScale = PRINT_WIDTH / legendeCanvas.width;
-            const legendeWidth = PRINT_WIDTH;
-            const legendeHeight = legendeCanvas.height * legendeScale;
-            doc.addImage(legendeDataUrl, 'PNG', MARGIN, MARGIN + 5, legendeWidth, legendeHeight);
+            doc.setFontSize(12);
+
+            // items voorbereiden, gefilterd (geen paal)
+            const items = Array.from(gebruikteLegendeItems.entries())
+                .filter(([type]) => type !== 'paal');
+
+            // 2 kolommen, royale ruimte
+            const colCount = 2;
+            const rowH = 18;                 // hoogte per item
+            const iconSizeMm = 12;           // kadergrootte
+            const colorBox = 8;              // kleurvakje
+            const startY = MARGIN + 15;
+            const startX = MARGIN;
+            const colGap = 12;
+            const colWidth = (A4_WIDTH - 2*MARGIN - colGap) / colCount;
+
+            let col = 0, row = 0;
+
+            for (const [type, waarde] of items) {
+                // positie
+                const baseX = startX + col * (colWidth + colGap);
+                const baseY = startY + row * rowH;
+
+                // kleurvakje (niet voor muur/raam)
+                const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
+                if (kleur) {
+                    // parse hex
+                    let r=255,g=235,b=59;
+                    if (kleur.startsWith('#')) {
+                        const hex = kleur.length===4
+                          ? `#${kleur[1]}${kleur[1]}${kleur[2]}${kleur[2]}${kleur[3]}${kleur[3]}`
+                          : kleur;
+                        r = parseInt(hex.slice(1,3),16);
+                        g = parseInt(hex.slice(3,5),16);
+                        b = parseInt(hex.slice(5,7),16);
+                    }
+                    doc.setFillColor(r,g,b);
+                    doc.rect(baseX, baseY - colorBox + 6.5, colorBox, colorBox, 'F');
+                }
+
+                // icoon (exact zoals in app) als dataURL
+                const iconDataUrl = await iconToDataUrl(type, 160); // hoge resolutie
+                const iconX = baseX + (kleur ? colorBox + 4 : 0);
+                doc.addImage(iconDataUrl, 'PNG', iconX, baseY - iconSizeMm + 6.5, iconSizeMm, iconSizeMm);
+
+                // tekst
+                const textX = iconX + iconSizeMm + 5;
+                const label = type.replace(/([A-Z])/g, ' $1').toLowerCase();
+                doc.setTextColor(0,0,0);
+                doc.text(label, textX, baseY + 2.5);
+
+                // volgende rij/kolom
+                row++;
+                const maxRows = Math.floor((A4_HEIGHT - startY - MARGIN) / rowH);
+                if (row >= maxRows) { row = 0; col++; }
+                if (col >= colCount) {
+                    doc.addPage();
+                    doc.setFontSize(16);
+                    doc.text("Legende (vervolg)", A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
+                    doc.setFontSize(12);
+                    col = 0; row = 0;
+                }
+            }
         }
 
         let bestandsnaam = 'klasplattegrond';
@@ -984,3 +992,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     laadCanvasUitBrowser();
 });
+
