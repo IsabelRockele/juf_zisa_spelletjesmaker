@@ -17,7 +17,8 @@ document.addEventListener('DOMContentLoaded', () => {
         schoolbordFlappen: "Schoolbord",
         deur: "Deur",
         raam: "Raam",
-        muur: "Muur"
+        muur: "Muur",
+        kring: "Kring"
         // paal bewust weggelaten
     };
 
@@ -69,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
                      <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
                    </svg>`;
-        } else if (type === 'tafel') {
+        } else if (type === 'tafel' || type === 'kring') {
             svg = `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
                      <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                    </svg>`;
@@ -591,9 +592,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
             const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau', originX: 'left', originY: 'top' });
             maakInteractief(leerlingBureauGroep); renderCallback(leerlingBureauGroep);
-        } else if (type === 'tafel') {
-            const tafel = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: 'tafel', originX: 'left', originY: 'top' });
-            maakInteractief(tafel); renderCallback(tafel);
+        } else if (type === 'tafel' || type === 'kring') {
+            const item = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: type, originX: 'left', originY: 'top' });
+            maakInteractief(item); renderCallback(item);
         } else if (type === 'schoolbord') {
             // standaard zeer lichtgrijs
             const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#e6e6e6', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
@@ -820,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
                       <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
                     </svg>`;
-        } else if (type === 'tafel') {
+        } else if (type === 'tafel' || type === 'kring') {
             return `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
                       <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                     </svg>`;
