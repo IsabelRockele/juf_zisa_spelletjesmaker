@@ -5,6 +5,21 @@ document.addEventListener('DOMContentLoaded', () => {
         preserveObjectStacking: true
     });
 
+    // --- HELPER: INTERACTIEVE OBJECTEN ---
+    function maakInteractief(obj) {
+        obj.set({
+            selectable: true,
+            hasControls: true,
+            hasBorders: true,
+            lockScalingFlip: true,      // voorkomt omklappen
+            lockUniScaling: false,      // NIET vast op uniforme scaling (Shift kan voor gelijkmatig)
+            cornerStyle: 'circle',
+            transparentCorners: false,
+            borderDashArray: null
+        });
+        return obj;
+    }
+
     // --- VARIABELEN & STATUS ---
     let modus = 'meubel';
     let isWisselModusActief = false;
@@ -61,26 +76,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const oldWidth = canvas.getWidth();
         const oldHeight = canvas.getHeight();
 
-        // Wissel de dimensies in de HTML en op de canvas
         canvas.setWidth(oldHeight);
         canvas.setHeight(oldWidth);
         canvasEl.width = oldHeight;
         canvasEl.height = oldWidth;
 
-        // Laad de objecten terug
         canvas.loadFromJSON(json, () => {
             canvas.renderAll();
-            // Herteken het raster indien nodig
             if (wasRasterZichtbaar) {
                 tekenRaster();
             }
         });
         
-        // Sla de nieuwe staat op
         setTimeout(saveStateImmediate, 200);
     }
     formaatWisselKnop.addEventListener('click', wisselCanvasFormaat);
-
 
     // --- PERFORMANCE HELPER: DEBOUNCE ---
     function debounce(func, wait) {
@@ -200,14 +210,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- IMPORTEER / EXPORTEER LOGICA ---
     function laadJsonData(jsonData, isUndoRedo = false) {
         isUpdatingState = true;
-        
         canvas.clear();
-        
         rasterToggle.checked = false;
         gridVisible = false;
 
         const data = JSON.parse(jsonData);
-        // Zet de canvasgrootte op basis van het geladen bestand
         if (data.width && data.height) {
             canvas.setWidth(data.width);
             canvas.setHeight(data.height);
@@ -239,13 +246,11 @@ document.addEventListener('DOMContentLoaded', () => {
             schakelModus('meubel', true);
             setNamenZichtbaarheid(namenTonenToggle.checked);
             rebuildLegendFromCanvas();
-            
             canvas.renderAll();
         });
     }
 
     exporteerJsonKnop.addEventListener('click', () => {
-        // Voeg de canvas dimensies toe aan de export
         const json = canvas.toJSON(customProperties);
         json.width = canvas.getWidth();
         json.height = canvas.getHeight();
@@ -280,9 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     // --- WISSELMODUS LOGICA ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige wisselmodus logica hier plakken) ...
     function startPlaatsenWisselen() {
         const groepen = canvas.getObjects().filter(obj => obj.studentNaam);
         if (groepen.length === 0) {
@@ -456,7 +458,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (doelMeubel && doelMeubel !== vorigMeubel) {
             const zittendeNaam = doelMeubel.gekoppeldAan;
-
             if (zittendeNaam && vorigMeubel) {
                 const zittendeNaamObject = canvas.getObjects().find(o => o.isNaam && o.studentNaam === zittendeNaam);
                 if (zittendeNaamObject) {
@@ -482,7 +483,6 @@ document.addEventListener('DOMContentLoaded', () => {
         naamObject.setCoords();
         canvas.requestRenderAll();
     });
-
 
     // --- MODUS SWITCHER ---
     function schakelModus(nieuweModus) {
@@ -521,9 +521,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- RASTER & BOUWMODUS ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige raster & bouwmodus logica hier plakken) ...
     function tekenRaster() {
         canvas.remove(gridGroup);
         const width = canvas.getWidth(), height = canvas.getHeight();
@@ -552,33 +549,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.getElementById('tekenMuurKnop').addEventListener('click', () => zetBouwTool('muur'));
+    
+    document.getElementById('plaatsKlasKnop').addEventListener('click', () => {
+        zetBouwTool('klas');
+        const klasRechthoek = new fabric.Rect({
+            left: 100,
+            top: 100,
+            width: 400,
+            height: 300,
+            fill: 'transparent',
+            stroke: '#333',
+            strokeWidth: 8,
+            voorwerpType: 'muur',
+            originX: 'left',
+            originY: 'top'
+        });
+        maakInteractief(klasRechthoek);
+        canvas.add(klasRechthoek);
+        canvas.setActiveObject(klasRechthoek);
+        canvas.renderAll();
+    });
+
     document.getElementById('plaatsDeurKnop').addEventListener('click', () => {
         zetBouwTool('deur');
         const deurSymbol = new fabric.Path('M 0 0 L 0 40 M 0 0 Q 40 0 40 40', { fill: '', stroke: 'black', strokeWidth: 2 });
         const achtergrond = new fabric.Rect({ width: 42, height: 8, fill: canvas.backgroundColor, originX: 'center', originY: 'center'});
         const deur = new fabric.Group([achtergrond, deurSymbol], { left: 50, top: 50, voorwerpType: 'deur', originX: 'left', originY: 'bottom' });
+        maakInteractief(deur);
         canvas.add(deur);
         canvas.setActiveObject(deur);
         canvas.renderAll();
     });
+    
     document.getElementById('plaatsRaamKnop').addEventListener('click', () => {
         zetBouwTool('raam');
         const raamAchtergrond = new fabric.Rect({ left: 0, top: 0, width: 80, height: 8, fill: canvas.backgroundColor, stroke: 'black', strokeWidth: 1 });
         const glas = new fabric.Line([5, 4, 75, 4], { stroke: '#6cace4', strokeWidth: 2 });
         const raam = new fabric.Group([raamAchtergrond, glas], { left: 50, top: 100, voorwerpType: 'raam' });
+        maakInteractief(raam);
         canvas.add(raam);
         canvas.setActiveObject(raam);
         canvas.renderAll();
     });
+
     document.getElementById('plaatsGomKnop').addEventListener('click', () => {
         zetBouwTool('gom');
         canvas.freeDrawingBrush.color = canvas.backgroundColor;
         canvas.freeDrawingBrush.width = 10;
         canvas.freeDrawingCursor = 'square';
     });
+
     document.getElementById('plaatsPaalKnop').addEventListener('click', () => {
         zetBouwTool('paal');
         const paal = new fabric.Rect({ left: 100, top: 100, width: gridSize, height: gridSize, fill: 'darkgray', voorwerpType: 'paal' });
+        maakInteractief(paal);
         canvas.add(paal);
         canvas.setActiveObject(paal);
         canvas.renderAll();
@@ -591,6 +615,7 @@ document.addEventListener('DOMContentLoaded', () => {
              wallStartPoint = { x: Math.round(pointer.x / gridSize) * gridSize, y: Math.round(pointer.y / gridSize) * gridSize };
         }
     });
+
     canvas.on('mouse:up', (o) => {
         if (!isDrawingWall) return;
         isDrawingWall = false;
@@ -608,15 +633,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY], { stroke: '#333', strokeWidth: 8, voorwerpType: 'muur', selectable: true, evented: true });
+        maakInteractief(muur);
         canvas.add(muur);
         canvas.renderAll();
     });
     
-
     // --- MEUBELMODUS LOGICA ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige meubelmodus logica hier plakken) ...
     werkbalken.meubel.addEventListener('click', (e) => {
         if (e.target.tagName !== 'BUTTON') return;
         const type = e.target.dataset.type;
@@ -629,35 +651,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (['schoolbank', 'bureau', 'kast', 'wastafel'].includes(type)) {
             fabric.Image.fromURL(`${IMG_PATH}${type}.png`, (img) => {
-                img.set({ left: 100, top: 100, voorwerpType: type });
+                img.set({ left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top' });
                 img.scaleToWidth(80);
+                maakInteractief(img);
                 renderCallback(img);
             }, { crossOrigin: 'Anonymous' });
         } else if (type === 'leerlingBureau') {
             const bureauRect = new fabric.Rect({ width: 60, height: 40, fill: 'transparent', stroke: '#333', strokeWidth: 1, originX: 'center', originY: 'center' });
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
-            const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau' });
+            const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau', originX: 'left', originY: 'top' });
+            maakInteractief(leerlingBureauGroep);
             renderCallback(leerlingBureauGroep);
         } else if (type === 'tafel') {
-            const tafel = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: 'tafel' });
+            const tafel = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: 'tafel', originX: 'left', originY: 'top' });
+            maakInteractief(tafel);
             renderCallback(tafel);
         } else if (type === 'schoolbord') {
-            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord' });
+            const bord = new fabric.Rect({ left: 150, top: 50, width: 150, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2, voorwerpType: 'schoolbord', originX: 'left', originY: 'top' });
+            maakInteractief(bord);
             renderCallback(bord);
         } else if (type === 'schoolbordFlappen') {
              const midden = new fabric.Rect({ width: 100, height: 10, fill: '#4a536b', stroke: 'black', strokeWidth: 2 });
              const flapL = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: -50 });
              const flapR = new fabric.Rect({ width: 50, height: 10, fill: '#5c6784', stroke: 'black', strokeWidth: 2, left: 100 });
-             const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen' });
+             const bordMetFlappen = new fabric.Group([midden, flapL, flapR], { left: 200, top: 100, voorwerpType: 'schoolbordFlappen', originX: 'left', originY: 'top' });
+             maakInteractief(bordMetFlappen);
              renderCallback(bordMetFlappen);
         }
     });
 
-
     // --- NAMENMODUS LOGICA ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige namenmodus logica hier plakken) ...
     function groepeerNaamMetObject(naam, object) {
         const objAngle = object.angle || 0;
         const tekst = new fabric.IText(naam, {
@@ -674,6 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
             voorwerpType: objVoorwerpType, studentNaam: naam,
             subTargetCheck: true
         });
+        maakInteractief(groep);
         canvas.add(groep);
     }
     document.getElementById('naamToevoegenKnop').addEventListener('click', () => {
@@ -688,11 +712,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvas.renderAll();
     });
 
-
     // --- LEGENDE MODUS & WEERGAVE LOGICA ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige legende logica hier plakken) ...
     function updateLegendeWeergave() {
         const container = document.getElementById('legende-weergave-container');
         const wrapper = document.getElementById('legende-weergave-wrapper');
@@ -822,20 +842,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             gebruikteLegendeItems.set(obj.voorwerpType, kleur);
             updateLegendeWeergave();
-
             canvas.renderAll();
             saveStateImmediate();
-
         } else if (obj.voorwerpType) {
             alert(`Fout! Dit is een '${obj.voorwerpType}'. Je hebt de categorie '${actieveLegendeType}' geselecteerd.`);
         }
     });
 
-
     // --- ALGEMENE FUNCTIES ---
-    // (Deze sectie blijft ongewijzigd)
-
-    // ... (volledige algemene functies logica hier plakken) ...
     function setNamenZichtbaarheid(zichtbaar) {
         canvas.forEachObject(obj => {
             if (obj.isType('group') && obj.studentNaam) {
@@ -857,13 +871,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!actieveObjecten || actieveObjecten.length === 0) return;
         
         actieveObjecten.forEach(obj => canvas.remove(obj));
-        
         canvas.discardActiveObject();
-        
         saveStateImmediate();
-        
         rebuildLegendFromCanvas();
-        
         canvas.renderAll();
     }
     verwijderKnop.addEventListener('click', verwijderSelectie);
@@ -885,6 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 canvas.add(kloon);
             }
+            maakInteractief(kloon);
             canvas.setActiveObject(kloon);
             canvas.requestRenderAll();
         }, customProperties);
@@ -899,7 +910,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); dupliceerSelectie(); }
         if (e.key === 'Delete' || e.key === 'Backspace') { verwijderSelectie(); }
     });
-
 
     // --- PDF GENERATIE ---
     async function genereerPdf(opties) {
@@ -922,7 +932,6 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.renderAll();
         }
         
-        // AANGEPAST: PDF-oriëntatie past zich aan aan het canvasformaat.
         const orientation = canvas.getWidth() > canvas.getHeight() ? 'landscape' : 'portrait';
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: orientation, unit: 'mm', format: 'a4' });
