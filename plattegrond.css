@@ -276,3 +276,30 @@ h1 {
     height: 0;
     margin: 5px 0;
 }
+/* --- Legende: 3 kolommen op het scherm --- */
+#legende-weergave-container {
+  display: grid;
+  grid-template-columns: 1fr;       /* items onder elkaar */
+  gap: 8px;
+}
+
+.legende-weergave-item {
+  display: grid;
+  grid-template-columns: 18px 34px 1fr;  /* kolom1 kleur | kolom2 icoon | kolom3 tekst */
+  align-items: center;
+  column-gap: 8px;
+}
+
+.legende-weergave-kleur {
+  width: 14px;
+  height: 14px;
+  border: 1px solid #333;    /* blijft zonder kolomlijnen; enkel het kleurvakje heeft een rand */
+  border-radius: 2px;
+}
+
+.legende-weergave-tekst {
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
