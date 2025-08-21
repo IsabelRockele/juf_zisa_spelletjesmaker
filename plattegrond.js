@@ -5,6 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
         preserveObjectStacking: true
     });
 
+    // === LEGENDE-NAAMMAPPING (bepaalt ook wat wel/niet in legende komt) ===
+    // Alles wat hier geen sleutel heeft, verschijnt NIET in de legende (bv. 'paal').
+    const legendeNamen = {
+        bureau: "Bureau juf",
+        leerlingBureau: "Bureau",
+        schoolbank: "Schoolbank",
+        kast: "Kast",
+        wastafel: "Wastafel",
+        schoolbord: "Schoolbord",
+        schoolbordFlappen: "Schoolbord",
+        deur: "Deur",
+        raam: "Raam",
+        muur: "Muur"
+        // paal bewust weggelaten
+    };
+
     // --- HELPER: INTERACTIEVE OBJECTEN ---
     function maakInteractief(obj) {
         obj.set({
@@ -32,16 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
             wrapper.style.display = 'inline-flex';
             wrapper.style.justifyContent = 'center';
             wrapper.style.alignItems = 'center';
-            wrapper.style.width = '28px';
-            wrapper.style.height = '28px';
+            wrapper.style.width = '30px';
+            wrapper.style.height = '30px';
             wrapper.style.border = '1px solid #333';
             wrapper.style.margin = '0 8px';
 
             const img = document.createElement('img');
             img.src = `${IMG_PATH}${type}.png`;
             img.alt = type;
-            img.style.maxWidth = '22px';
-            img.style.maxHeight = '22px';
+            img.style.maxWidth = '24px';
+            img.style.maxHeight = '24px';
             wrapper.appendChild(img);
             return wrapper;
         }
@@ -61,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
             svg = `<svg viewBox="0 0 120 30" xmlns="http://www.w3.org/2000/svg">
                      <rect x="10" y="10" width="100" height="10" fill="#4a536b" stroke="#000" stroke-width="2"/>
                      ${type === 'schoolbordFlappen'
-                        ? `<rect x=" -15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
+                        ? `<rect x="-15" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>
                            <rect x="110" y="10" width="25" height="10" fill="#5c6784" stroke="#000" stroke-width="2"/>`
                         : '' }
                    </svg>`;
@@ -87,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.style.display = 'inline-flex';
         wrapper.style.justifyContent = 'center';
         wrapper.style.alignItems = 'center';
-        wrapper.style.width = '28px';
-        wrapper.style.height = '28px';
+        wrapper.style.width = '30px';
+        wrapper.style.height = '30px';
         wrapper.style.border = '1px solid #333';
         wrapper.style.margin = '0 8px';
         wrapper.innerHTML = svg;
@@ -185,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.name === 'QuotaExceededError') {
                 console.error("LocalStorage quota overschreden. Automatisch opslaan is uitgeschakeld.");
                 if (!window.quotaExceededNotified) {
-                    alert("De plattegrond is te groot geworden voor automatisch opslaan in de browser. Exporteer je werk handmatig om verlies te voorkomen.");
+                    alert("De plattegrond is te groot geworden voor automatisch opslaan in de browser. Exporteer uw werk handmatig om verlies te voorkomen.");
                     window.quotaExceededNotified = true;
                 }
             } else {
@@ -467,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function schakelModus(nieuweModus) {
         modus = nieuweModus; canvas.isDrawingMode = false;
         Object.values(modusKnoppen).forEach(knop => knop.classList.remove('actief'));
+        if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].addEventListener;
         if (modusKnoppen[nieuweModus]) modusKnoppen[nieuweModus].classList.add('actief');
         Object.values(werkbalken).forEach(balk => balk.classList.add('verborgen'));
         if (werkbalken[nieuweModus]) werkbalken[nieuweModus].classList.remove('verborgen');
@@ -624,7 +641,9 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.classList.remove('verborgen');
 
         gebruikteLegendeItems.forEach((waarde, type) => {
-            if (type === 'paal') return; // paal niet tonen in legende
+            // toon enkel wanneer type in mapping staat (bv. 'paal' is niet gemapt)
+            if (!legendeNamen[type]) return;
+
             const { kleur } = waarde || {};
             const itemDiv = document.createElement('div');
             itemDiv.className = 'legende-weergave-item';
@@ -644,8 +663,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const tekstSpan = document.createElement('span');
             tekstSpan.className = 'legende-weergave-tekst';
-            const prettyType = type.replace(/([A-Z])/g, ' $1').toLowerCase();
-            tekstSpan.textContent = prettyType;
+            tekstSpan.textContent = legendeNamen[type] || type;
 
             itemDiv.appendChild(kleurDiv);
             itemDiv.appendChild(icoonEl);
@@ -825,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
             img.src = src;
         });
     }
-    async function iconToDataUrl(type, sizePx=96){
+    async function iconToDataUrl(type, sizePx=160){
         if (iconCache.has(type)) return iconCache.get(type);
         const pngTypes = ['schoolbank','bureau','kast','wastafel'];
         let dataUrl;
@@ -833,11 +851,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const img = await loadImage(`${IMG_PATH}${type}.png`);
             const c = document.createElement('canvas'); c.width = sizePx; c.height = sizePx;
             const ctx = c.getContext('2d');
-            // teken in een kader
             const pad = Math.round(sizePx*0.15);
             const inner = sizePx - pad*2;
             ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, inner, inner);
-            // afbeelding centreren
             const max = Math.round(inner*0.8);
             let w = img.width, h = img.height;
             const scale = Math.min(max/w, max/h);
@@ -856,7 +872,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const pad = Math.round(sizePx*0.15);
             const inner = sizePx - pad*2;
             ctx.strokeStyle = '#333'; ctx.lineWidth = 2; ctx.strokeRect(pad, pad, inner, inner);
-            // svg schalen
             const max = Math.round(inner*0.8);
             const scale = Math.min(max/img.width, max/img.height);
             const w = Math.round(img.width*scale), h = Math.round(img.height*scale);
@@ -895,6 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const PRINT_HEIGHT = A4_HEIGHT - (MARGIN * 2);
 
         const plattegrondTitel = `Klaslokaal Plattegrond ${toonNamen ? '(met namen)' : ''}`;
+        doc.setFontSize(14);
         doc.text(plattegrondTitel, A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
 
         const scale = Math.min(PRINT_WIDTH / canvas.getWidth(), PRINT_HEIGHT / canvas.getHeight());
@@ -905,37 +921,35 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.addImage(plattegrondDataUrl, 'PNG', x, y, scaledWidth, scaledHeight);
 
         if (toonLegende && gebruikteLegendeItems.size > 0) {
-            // Volledige A4-pagina voor legende
+            // Volledige A4-pagina voor legende (GROTER)
             doc.addPage();
-            doc.setFontSize(16);
-            doc.text("Legende", A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
-            doc.setFontSize(12);
+            doc.setFontSize(18);
+            doc.text("Legende", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
+            doc.setFontSize(15);
 
-            // items voorbereiden, gefilterd (geen paal)
+            // items voorbereiden: enkel types met mapping (bv. 'paal' valt weg)
             const items = Array.from(gebruikteLegendeItems.entries())
-                .filter(([type]) => type !== 'paal');
+                .filter(([type]) => !!legendeNamen[type]);
 
             // 2 kolommen, royale ruimte
             const colCount = 2;
-            const rowH = 18;                 // hoogte per item
-            const iconSizeMm = 12;           // kadergrootte
-            const colorBox = 8;              // kleurvakje
-            const startY = MARGIN + 15;
+            const rowH = 22;                 // hoogte per item (groter)
+            const iconSizeMm = 16;           // kadergrootte (groter)
+            const colorBox = 9;              // kleurvakje
+            const startY = MARGIN + 20;
             const startX = MARGIN;
-            const colGap = 12;
+            const colGap = 16;
             const colWidth = (A4_WIDTH - 2*MARGIN - colGap) / colCount;
 
             let col = 0, row = 0;
 
             for (const [type, waarde] of items) {
-                // positie
                 const baseX = startX + col * (colWidth + colGap);
                 const baseY = startY + row * rowH;
 
                 // kleurvakje (niet voor muur/raam)
                 const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
                 if (kleur) {
-                    // parse hex
                     let r=255,g=235,b=59;
                     if (kleur.startsWith('#')) {
                         const hex = kleur.length===4
@@ -946,19 +960,19 @@ document.addEventListener('DOMContentLoaded', () => {
                         b = parseInt(hex.slice(5,7),16);
                     }
                     doc.setFillColor(r,g,b);
-                    doc.rect(baseX, baseY - colorBox + 6.5, colorBox, colorBox, 'F');
+                    doc.rect(baseX, baseY - colorBox + 8, colorBox, colorBox, 'F');
                 }
 
                 // icoon (exact zoals in app) als dataURL
-                const iconDataUrl = await iconToDataUrl(type, 160); // hoge resolutie
-                const iconX = baseX + (kleur ? colorBox + 4 : 0);
-                doc.addImage(iconDataUrl, 'PNG', iconX, baseY - iconSizeMm + 6.5, iconSizeMm, iconSizeMm);
+                const iconDataUrl = await iconToDataUrl(type, 200); // extra hoge resolutie
+                const iconX = baseX + (kleur ? colorBox + 5 : 0);
+                doc.addImage(iconDataUrl, 'PNG', iconX, baseY - iconSizeMm + 8, iconSizeMm, iconSizeMm);
 
                 // tekst
-                const textX = iconX + iconSizeMm + 5;
-                const label = type.replace(/([A-Z])/g, ' $1').toLowerCase();
+                const textX = iconX + iconSizeMm + 6;
+                const label = legendeNamen[type] || type;
                 doc.setTextColor(0,0,0);
-                doc.text(label, textX, baseY + 2.5);
+                doc.text(label, textX, baseY + 3.5);
 
                 // volgende rij/kolom
                 row++;
@@ -966,9 +980,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (row >= maxRows) { row = 0; col++; }
                 if (col >= colCount) {
                     doc.addPage();
-                    doc.setFontSize(16);
-                    doc.text("Legende (vervolg)", A4_WIDTH / 2, MARGIN + 2, { align: 'center' });
-                    doc.setFontSize(12);
+                    doc.setFontSize(18);
+                    doc.text("Legende (vervolg)", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
+                    doc.setFontSize(15);
                     col = 0; row = 0;
                 }
             }
