@@ -571,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY],
             { stroke: '#333', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur', selectable: true, evented: true });
         maakInteractief(muur); canvas.add(muur); canvas.renderAll();
+        bouwTool = ''; // ✅ na één muur tekenen stopt het tool, opnieuw klikken om een nieuwe muur te starten
     });
 
     // --- MEUBELMODUS ---
@@ -973,50 +974,38 @@ document.addEventListener('DOMContentLoaded', () => {
                         const hex = kleur.length===4
                             ? `#${kleur[1]}${kleur[1]}${kleur[2]}${kleur[2]}${kleur[3]}${kleur[3]}`
                             : kleur;
-                        r = parseInt(hex.slice(1,3),16);
-                        g = parseInt(hex.slice(3,5),16);
-                        b = parseInt(hex.slice(5,7),16);
+                        const num = parseInt(hex.slice(1), 16);
+                        r = (num >> 16) & 255; g = (num >> 8) & 255; b = num & 255;
                     }
-                    const colorX = baseX + (colorColW - colorBox) / 2;
-                    const colorY = baseY - colorBox + 8;
                     doc.setFillColor(r,g,b);
-                    doc.rect(colorX, colorY, colorBox, colorBox, 'F');
-                    doc.setDrawColor(51,51,51);
-                    doc.rect(colorX, colorY, colorBox, colorBox, 'S');
+                    doc.rect(baseX, baseY - (colorBox/2) + (rowH/2) - (colorBox/2), colorBox, colorBox, 'F');
+                } else {
+                    // geen kleur: laat de ruimte blanco
                 }
 
-                // kolom 2: icoon
-                const iconDataUrl = await iconToDataUrl(type, 200);
-                const iconX = baseX + colorColW + innerGap + (iconColW - iconSizeMm)/2;
-                const iconY = baseY - iconSizeMm + 8;
+                // kolom 2: icoon (PNG van exact het object)
+                const iconX = baseX + colorColW + innerGap;
+                const iconY = baseY - (iconSizeMm/2) + (rowH/2) - (iconSizeMm/2);
+                const iconDataUrl = await iconToDataUrl(type, 160);
                 doc.addImage(iconDataUrl, 'PNG', iconX, iconY, iconSizeMm, iconSizeMm);
 
-                // kolom 3: woord
-                const textX = baseX + colorColW + innerGap + iconColW + innerGap;
-                const label = legendeNamen[type] || type;
-                doc.setTextColor(0,0,0);
-                doc.text(label, textX, baseY + 3.5);
+                // kolom 3: label
+                const textX = iconX + iconColW + innerGap + 1;
+                const textY = baseY + (rowH/2) + 4;
+                doc.text(legendeNamen[type] || type, textX, textY);
 
+                // volgende rij/kolom
                 row++;
                 const maxRows = Math.floor((A4_HEIGHT - startY - MARGIN) / rowH);
-                if (row >= maxRows) { row = 0; col++; }
-                if (col >= outerColCount) {
-                    doc.addPage();
-                    doc.setFontSize(18);
-                    doc.text("Legende (vervolg)", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
-                    doc.setFontSize(15);
-                    col = 0; row = 0;
-                }
+                if (row >= maxRows) { row = 0; col++; if (col >= outerColCount) { doc.addPage(); col = 0; } }
             }
         }
 
-        let bestandsnaam = 'klasplattegrond';
-        if (toonNamen) bestandsnaam += '-namen';
-        if (toonLegende && gebruikteLegendeItems.size > 0) bestandsnaam += '-legende';
-        doc.save(`${bestandsnaam}.pdf`);
+        // Opslaan
+        doc.save(`plattegrond${toonLegende ? '_met_legende' : (toonNamen ? '_met_namen' : '')}.pdf`);
     }
 
-    // === PDF-knoppen ===
+    // --- PDF knoppen ---
     document.getElementById('downloadPdfPlattegrondKnop').addEventListener('click', () => {
         genereerPdf({ toonNamen: false, toonLegende: false });
     });
@@ -1024,7 +1013,7 @@ document.addEventListener('DOMContentLoaded', () => {
         genereerPdf({ toonNamen: true, toonLegende: false });
     });
     document.getElementById('downloadPdfLegendeKnop').addEventListener('click', () => {
-        genereerPdf({ toonNamen: true, toonLegende: true });
+        genereerPdf({ toonNamen: false, toonLegende: true }); // ✅ namen uit bij legende-PDF
     });
 
     laadCanvasUitBrowser();
