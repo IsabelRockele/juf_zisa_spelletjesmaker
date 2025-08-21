@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- HELPER: HTML-icoon (voor de legendeweergave op pagina) ---
     function maakIcoonElement(type) {
         // PNG-types (exact dezelfde als op de plattegrond)
-        const pngTypes = ['schoolbank','bureau','kast','wastafel'];
+        const pngTypes = ['schoolbank','bureau','kast','wastafel', 'kring'];
         if (pngTypes.includes(type)) {
             const wrapper = document.createElement('span');
             wrapper.style.display = 'inline-flex';
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
                      <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
                    </svg>`;
-        } else if (type === 'tafel' || type === 'kring') {
+        } else if (type === 'tafel') {
             svg = `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
                      <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                    </svg>`;
@@ -582,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const renderCallback = (obj) => { canvas.add(obj); canvas.setActiveObject(obj); canvas.renderAll(); };
 
-        if (['schoolbank','bureau','kast','wastafel'].includes(type)) {
+        if (['schoolbank','bureau','kast','wastafel', 'kring'].includes(type)) {
             fabric.Image.fromURL(`${IMG_PATH}${type}.png`, (img) => {
                 img.set({ left: 100, top: 100, voorwerpType: type, originX: 'left', originY: 'top' });
                 img.scaleToWidth(80); maakInteractief(img); renderCallback(img);
@@ -592,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const stoelCirkel = new fabric.Circle({ radius: 8, fill: 'transparent', stroke: '#333', strokeWidth: 1, left: 20, top: -10, originX: 'center', originY: 'center' });
             const leerlingBureauGroep = new fabric.Group([bureauRect, stoelCirkel], { left: 100, top: 100, voorwerpType: 'leerlingBureau', originX: 'left', originY: 'top' });
             maakInteractief(leerlingBureauGroep); renderCallback(leerlingBureauGroep);
-        } else if (type === 'tafel' || type === 'kring') {
+        } else if (type === 'tafel') {
             const item = new fabric.Rect({ left: 100, top: 100, width: 80, height: 50, fill: 'transparent', stroke: '#333', strokeWidth: 1, voorwerpType: type, originX: 'left', originY: 'top' });
             maakInteractief(item); renderCallback(item);
         } else if (type === 'schoolbord') {
@@ -821,7 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       <rect x="2" y="2" width="56" height="36" fill="none" stroke="#333" stroke-width="2"/>
                       <circle cx="45" cy="20" r="6" fill="none" stroke="#333" stroke-width="2"/>
                     </svg>`;
-        } else if (type === 'tafel' || type === 'kring') {
+        } else if (type === 'tafel') {
             return `<svg viewBox="0 0 80 50" xmlns="http://www.w3.org/2000/svg">
                       <rect x="2" y="2" width="76" height="46" fill="none" stroke="#333" stroke-width="2"/>
                     </svg>`;
@@ -862,7 +862,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     async function iconToDataUrl(type, sizePx=160){
         if (iconCache.has(type)) return iconCache.get(type);
-        const pngTypes = ['schoolbank','bureau','kast','wastafel'];
+        const pngTypes = ['schoolbank','bureau','kast','wastafel', 'kring'];
         let dataUrl;
         if (pngTypes.includes(type)) {
             const img = await loadImage(`${IMG_PATH}${type}.png`);
