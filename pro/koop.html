@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Koop Zisa PRO</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;margin:0;padding:1rem;background:#f7faf9}
+    .card{max-width:560px;width:100%;background:#fff;border:1px solid #e8e8e8;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:1.2rem}
+    h1{margin:.2rem 0 1rem 0}
+    label{font-weight:600;display:block;margin:.6rem 0 .25rem}
+    input[type=email]{width:100%;padding:.7rem .8rem;border:1px solid #ddd;border-radius:.6rem;font-size:1rem}
+    .row{display:flex;gap:.6rem;align-items:center;margin-top:.8rem}
+    button{padding:.7rem 1rem;border-radius:.6rem;border:1px solid #3aa39a;background:#4db6ac;color:#fff;cursor:pointer;font-weight:700}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .muted{color:#666;font-size:.92rem}
+    .err{color:#b00020;margin-top:.6rem}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Koop Zisa PRO</h1>
+    <p class="muted">Vul uw e-mailadres in. Na betaling ontvangt u een <strong>inlogcode via e-mail</strong>. Met die code logt u in op de PRO-omgeving.</p>
+    <label for="email">E-mailadres</label>
+    <input id="email" type="email" autocomplete="email" placeholder="naam@voorbeeld.be" />
+
+    <div class="row">
+      <button id="buyBtn">Verder naar betaling (€1,00)</button>
+      <a class="muted" href="./">Annuleren</a>
+    </div>
+    <div id="msg" class="err" role="alert" aria-live="polite"></div>
+  </main>
+
+  <script>
+    const API_BASE = "https://api-xc54winygq-ew.a.run.app"; // jouw Cloud Run URL
+
+    const el = (id)=>document.getElementById(id);
+    const btn = el('buyBtn');
+    const msg = el('msg');
+
+    btn.addEventListener('click', async ()=>{
+      msg.textContent = '';
+      const email = el('email').value.trim();
+      if(!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+        msg.textContent = 'Vul een geldig e-mailadres in.'; return;
+      }
+      btn.disabled = true;
+      try{
+        // Gebruik het e-mailadres als uid (backend accepteert dit)
+        const body = {
+          uid: email,
+          email,
+          amountEur: 1.00,
+          description: 'Zisa PRO toegang',
+          // Na betaling terug naar PRO
+          redirectUrl: 'https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/'
+        };
+        const r = await fetch(`${API_BASE}/payments/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const d = await r.json();
+        if(!r.ok || !d.ok){ throw new Error(d?.error || 'SERVER_ERROR'); }
+        if(!d.checkoutUrl){ throw new Error('Geen checkoutUrl ontvangen.'); }
+        // Naar Mollie
+        location.assign(d.checkoutUrl);
+      }catch(e){
+        msg.textContent = 'Er ging iets mis. Probeer later opnieuw of contacteer ons.';
+        console.error(e);
+      }finally{
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
