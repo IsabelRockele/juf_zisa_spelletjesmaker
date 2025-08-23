@@ -1,279 +1,312 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>Juf Zisa's spelletjesmaker (PRO)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-store" />
-  <meta name="theme-color" content="#ffcf56">
-
-  <!-- Styles en app-meta (paden: één niveau omhoog vanuit /pro/) -->
-  <link rel="stylesheet" href="../keuze.css"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="../start_afbeeldingen/Zisa_spelgenerator-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
-  <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
-  <link rel="manifest" href="../manifest.json">
-
+  <title>Zisa PRO – Inloggen</title>
+  <meta name="theme-color" content="#fffbe6" />
+  <link rel="manifest" href="./manifest-pro.json" />
   <style>
-    :root { --zisa-yellow:#f9b600; --zisa-teal:#4db6ac; --fg:#111; --muted:#666; }
-    body { font-family: system-ui, Segoe UI, Arial, sans-serif; }
-    .container { max-width:1200px; margin:0 auto; padding:0 20px; }
-
-    /* Header */
-    .header-container { display:flex; justify-content:center; align-items:center; margin-bottom:30px; margin-top:40px; }
-    .logo { width:100px; height:auto; margin-right:20px; }
-    .header-container h1 { font-size:3.5rem; margin:0 0 30px 0; }
-
-    /* Accordion */
-    .accordion { margin-bottom:20px; }
-    .accordion-header { background:var(--zisa-teal); color:#fff; cursor:pointer; padding:15px; font-size:1.4rem; border:none; text-align:left; width:100%; border-radius:8px; }
-    .accordion-content { display:none; padding:15px 0; }
-    .button-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:30px; justify-items:center; }
-    .drukknop-afbeelding { width:120px; height:auto; transition: transform .2s ease; }
-    a:hover .drukknop-afbeelding { transform: scale(1.05); }
-    a { position:relative; display:inline-block; }
-    a::after { content: attr(data-tooltip); position:absolute; top:-45px; left:50%; transform:translateX(-50%); background:var(--zisa-yellow); color:#000; padding:8px 14px; font-size:1.1rem; border-radius:14px; opacity:0; white-space:nowrap; pointer-events:none; transition:opacity .2s ease; z-index:10; }
-    a:hover::after { opacity:1; }
-
-    /* Auth/uitlog */
-    .logout { position:fixed; right:12px; top:12px; background:var(--zisa-yellow); color:#000; border:none; padding:.45rem .7rem; border-radius:.5rem; cursor:pointer; font-weight:600; }
-
-    /* Login card */
-    #login { max-width:860px; margin:3rem auto; padding:1.2rem; }
-    .card { border:1px solid #eee; border-radius:14px; padding:1.2rem; box-shadow: 0 6px 18px rgba(0,0,0,.06); background:#fff; }
-    .row { display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-end; }
-    .row > * { flex: 1 1 220px; }
-    label { font-weight:600; font-size:.95rem; display:block; margin-bottom:.25rem; }
-    input[type=text], input[type=number] { width:100%; padding:.6rem .7rem; border:1px solid #ddd; border-radius:.6rem; }
-    .btn { padding:.6rem .9rem; border-radius:.6rem; border:1px solid #ddd; background:#fafafa; cursor:pointer; }
-    .btn.primary { background:var(--zisa-teal); color:#fff; border-color:var(--zisa-teal); }
-    .muted { color:var(--muted); font-size:.9rem; }
-    pre#log { background:#f6f6f6; border-radius:.6rem; padding:.8rem; max-height:320px; overflow:auto; }
-    .hidden { display:none !important; }
+    :root{
+      --bg:#fffbe6;--card:#fff;--muted:#4b5563;--primary:#f9b600;--primary-pressed:#d89c00;
+      --ring:rgba(249,182,0,.35);--border:#e5e7eb;--shadow:0 12px 28px rgba(0,0,0,.08);--radius:14px
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Arial,sans-serif;color:#111}
+    .wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
+    .card{width:100%;max-width:640px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    h1{margin:.2rem 0 8px 0;font-size:28px;color:#f0a500}
+    .muted{color:#6b7280}
+    label{font-weight:600;display:block;margin:.75rem 0 .35rem}
+    input[type=text]{width:100%;padding:.7rem .85rem;border:1px solid var(--border);border-radius:10px;outline:0;background:#fffbe6}
+    input:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
+    .row{display:flex;gap:.6rem;align-items:center;margin-top:.6rem}
+    .btn{border:1px solid var(--border);background:#f8fafc;color:#111;border-radius:10px;padding:.65rem 1rem;cursor:pointer}
+    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+    .btn.primary:active{background:var(--primary-pressed)}
+    .btn[disabled]{opacity:.65;cursor:not-allowed}
+    details{margin-top:12px}
+    pre{white-space:pre-wrap;background:#0b1220;color:#c7d2fe;padding:12px;border-radius:10px;max-height:320px;overflow:auto}
+    #otpInfo{display:none;margin:.5rem 0 0 0}
+    .inline-btn{display:inline-block;margin-left:8px;border:0;background:#ffd166;color:#3b2d00;padding:.2rem .5rem;border-radius:8px;cursor:pointer;font-size:.85rem}
   </style>
 </head>
 <body>
-  <!-- ======= Top actions (zichtbaar wanneer ingelogd) ======= -->
-  <button class="logout hidden" id="logoutBtn">Uitloggen</button>
+  <div class="wrap">
+    <main class="card" role="main" aria-labelledby="title">
+      <h1 id="title">Aanmelden</h1>
+      <p class="muted">Log in met uw gebruikers-ID. U ontvangt een 6-cijferige code (OTP).</p>
 
-  <!-- ======= LOGIN-SECTIE (OTP INGEBOUWD) ======= -->
-  <section id="login" class="card hidden" aria-label="Aanmelden">
-    <h2 style="margin:.2rem 0 1rem 0">Aanmelden</h2>
-    <p class="muted" style="margin-top:-.4rem">Log in met uw gebruikers-ID. U ontvangt een 6-cijferige code.</p>
-    <div class="row">
-      <div>
+      <section aria-label="Code aanvragen">
         <label for="uid">Gebruikers-ID</label>
-        <input id="uid" type="text" placeholder="bijv. isabel-admin" value="isabel-admin" />
-      </div>
-      <div>
-        <button class="btn" id="btnReq">Code aanvragen</button>
-      </div>
-    </div>
-
-    <div class="row" style="margin-top:.6rem">
-      <div>
-        <label for="code">6-cijferige code</label>
-        <input id="code" type="text" inputmode="numeric" pattern="[0-9]{6}" placeholder="000000" />
-      </div>
-      <div>
-        <button class="btn primary" id="btnVerify">Verifiëren & inloggen</button>
-      </div>
-    </div>
-
-    <details style="margin-top:1rem">
-      <summary>Geavanceerd / status</summary>
-      <div class="row">
-        <div>
-          <button class="btn" id="btnMe">/auth/me</button>
-          <button class="btn" id="btnClear">Lokale token wissen</button>
+        <input id="uid" type="text" autocomplete="username" placeholder="bv. jouw-UID of e-mail" />
+        <div class="row">
+          <button class="btn" id="btnReq" type="button">Code aanvragen</button>
         </div>
-      </div>
-      <pre id="log">(status verschijnt hier)</pre>
-    </details>
-  </section>
+      </section>
 
-  <!-- ======= APP-SECTIE (alleen zichtbaar na login) ======= -->
-  <section id="app" class="hidden" aria-label="App">
-    <div class="container">
-      <div class="header-container">
-        <img src="../start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
-        <h1>Juf Zisa's spelletjesmaker</h1>
-      </div>
-
-      <!-- ====== Inhoud (alle paden met ../) ====== -->
-      <div class="accordion">
-        <button class="accordion-header">📐 Reken-oefeningen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Rekenvierkant" href="../rekenvierkant.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenvierkant.png" alt="Rekenvierkant"/></a>
-          <a data-tooltip="Rekenweg" href="../rekenweg.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenweg.png" alt="Rekenweg"/></a>
-          <a data-tooltip="Rekenpiramide" href="../rekenpiramide_keuze.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenpiramide.png" alt="Rekenpiramide"/></a>
-          <a data-tooltip="Reken en kleur" href="../reken_en_kleur.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/reken_en_kleur.png" alt="Reken en kleur"/></a>
-          <a data-tooltip="Rekenrooster" href="../rekenrooster.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenrooster.png" alt="Rekenrooster"/></a>
-          <a data-tooltip="Rekendriehoek" href="../rekendriehoek.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekendriehoek.png" alt="Rekendriehoek"/></a>
-          <a data-tooltip="Rekencirkel" href="../rekencirkel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekencirkel.png" alt="Rekencirkel"/></a>
-          <a data-tooltip="Bewerkingen" href="../bewerkingen_keuze.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.png" alt="Bewerkingen"/></a>
-          <a data-tooltip="Verliefde harten" href="../harten.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/harten.png" alt="Verliefde harten"/></a>
-          <a data-tooltip="Loopspel" href="../loopspel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/loop.png" alt="Loopspel"/></a>
+      <section aria-label="OTP verifiëren" style="margin-top:.8rem">
+        <div class="row">
+          <div style="flex:1">
+            <label for="code">6-cijferige code</label>
+            <input id="code" type="text" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" />
+          </div>
+          <div>
+            <button class="btn primary" id="btnVerify" type="button">Verifiëren &amp; inloggen</button>
+          </div>
         </div>
-      </div>
+        <p id="otpInfo" class="muted" aria-live="polite"></p>
+      </section>
 
-      <div class="accordion">
-        <button class="accordion-header">🅰️ Taal en letters</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Woordzoeker" href="../woordzoeker.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/woordzoeker.png" alt="Woordzoeker"/></a>
-          <a data-tooltip="Kruiswoordpuzzel" href="../kruiswoordpuzzel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/kruiswoordpuzzel.png" alt="Kruiswoordpuzzel"/></a>
-          <a data-tooltip="Lettercode" href="../lettercode.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettercode.png" alt="Lettercode"/></a>
-          <a data-tooltip="Geheime boodschap" href="../geheimeboodschap.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geheime_boodschap.png" alt="Geheime boodschap"/></a>
-          <a data-tooltip="Lettertetris" href="../lettertetris.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettertetris.png" alt="Lettertetris"/></a>
-          <a data-tooltip="Galgje" href="../galgje.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/galgje.png" alt="Galgje"/></a>
-          <a data-tooltip="Lezen" href="../lees.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lees.png" alt="Lezen"/></a>
+      <details>
+        <summary>Geavanceerd / status</summary>
+        <div class="row" style="flex-wrap:wrap">
+          <button class="btn" id="btnMe" type="button">/auth/me</button>
+          <button class="btn" id="btnPing" type="button">/ping</button>
+          <button class="btn" id="btnClear" type="button">Log wissen</button>
         </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🧩 Puzzels &amp; logica</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Sudoku" href="../sudoku.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/sudoku.png" alt="Sudoku"/></a>
-          <a data-tooltip="Zoek de verschillen" href="../zoekverschillen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/zoek_de_verschillen.png" alt="Zoek de verschillen"/></a>
-          <a data-tooltip="Doolhof" href="../doolhof.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/doolhof.png" alt="Doolhof"/></a>
-          <a data-tooltip="Slangendoolhof" href="../slangendoolhof.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/slangendoolhof.png" alt="Slangendoolhof"/></a>
-          <a data-tooltip="Hexagonaal raster" href="../hexagon.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/hexagon.png" alt="Hexagonaal raster"/></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🎨 Creatief en bouwen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Punttekening" href="../punttekening.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/punttekening.png" alt="Punttekening"/></a>
-          <a data-tooltip="Pixelart" href="../pixelart.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/pixelart.png" alt="Pixelart"/></a>
-          <a data-tooltip="Bouwplaten" href="../bouwplaat.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bouwplaat.png" alt="Bouwplaten"/></a>
-          <a data-tooltip="Coderen" href="../coderen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/coderen.png" alt="Coderen"/></a>
-          <a data-tooltip="Plattegrond" href="../plattegrond.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/plattegrond.png" alt="Plattegrond"/></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🎲 Spelvormen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Bingo" href="../bingo.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bingo.png" alt="Bingo"/></a>
-          <a data-tooltip="Vier op een rij" href="../vieropeenrij.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/vieropeenrij.png" alt="Vier op een rij"/></a>
-          <a data-tooltip="Rad" href="../rad.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rad.png" alt="Rad"/></a>
-          <a data-tooltip="QR-generator" href="../QR.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/QR.png" alt="QR-generator"/></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">⏰ Tijd en klok</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Kloklezen" href="../kloklezen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_kloklezen.png" alt="Kloklezen"/></a>
-          <a data-tooltip="Timer" href="../timer.html"><img class="drukknop-afbeeldingen" src="../drukknop_afbeeldingen/timer.png" alt="Timer"/></a>
-        </div>
-      </div>
-    </div>
-  </section>
+        <pre id="log" aria-live="polite"></pre>
+      </details>
+    </main>
+  </div>
 
   <script>
+    /* ===== Config ===== */
     const API_BASE = "https://api-xc54winygq-ew.a.run.app";
+    const TOKEN_KEY = "zisa_token";
 
-    const el = (id) => document.getElementById(id);
-    const show = (id) => el(id).classList.remove('hidden');
-    const hide = (id) => el(id).classList.add('hidden');
-    const log = (msg) => { const x = el('log'); if (!x) return; x.textContent = (typeof msg === 'string') ? msg : JSON.stringify(msg, null, 2); };
+    // UX / regels
+    const OTP_COOLDOWN_SEC = 60;     // wachttijd bij 429 (UI)
+    const OTP_VALID_SEC    = 5 * 60; // 5 min
+    const ADMIN_UID        = "isabel-admin";
 
-    async function jsonFetch(url, opts = {}) {
-      const r = await fetch(url, {
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) },
-        ...opts,
-      });
-      let data; try { data = await r.json(); } catch { data = await r.text(); }
-      return { ok: r.ok, status: r.status, data };
+    // Admin: inline code tonen (zoals u wenst)
+    const ADMIN_INLINE_OTP = true;   // admin ziet code direct als backend 'displayCode' meegeeft
+
+    // Elements / helpers
+    const $ = id => document.getElementById(id);
+    const $uid=$('uid'), $code=$('code'), $btnReq=$('btnReq'), $btnVerify=$('btnVerify');
+    const $btnMe=$('btnMe'), $btnPing=$('btnPing'), $btnClear=$('btnClear');
+    const $log=$('log'), $otpInfo=$('otpInfo');
+    const log = (m) => { $log.textContent = (typeof m === 'string') ? m : JSON.stringify(m, null, 2); };
+
+    const now = () => Math.floor(Date.now()/1000);
+    const setInfo = html => { $otpInfo.innerHTML = html || ''; $otpInfo.style.display = html ? 'block' : 'none'; };
+
+    // Cooldown (frontend)
+    const setCooldown = (until)=> localStorage.setItem('otp_cooldown_until', String(until));
+    const getCooldownLeft = ()=> Math.max(0, Number(localStorage.getItem('otp_cooldown_until')||0) - now());
+    function syncCooldownUI(){
+      const left = getCooldownLeft();
+      if(left>0){
+        $btnReq.disabled = true;
+        $btnReq.textContent = `Code aanvragen (${left}s)`;
+        const iv = setInterval(()=>{
+          const l = getCooldownLeft();
+          if (l<=0){
+            clearInterval(iv);
+            $btnReq.disabled = false;
+            $btnReq.textContent = 'Code aanvragen';
+            setInfo('U kunt opnieuw een code aanvragen. Tip: de vorige code kan nog geldig zijn.');
+          } else {
+            $btnReq.textContent = `Code aanvragen (${l}s)`;
+          }
+        }, 1000);
+      } else {
+        $btnReq.disabled = false;
+        $btnReq.textContent = 'Code aanvragen';
+      }
     }
 
-    async function guard() {
-      const t = localStorage.getItem('zisa_token');
-      if (t) {
-        const me = await jsonFetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${t}` }});
-        if (me?.data?.ok) {
-          show('app'); show('logoutBtn'); hide('login'); return;
+    // Admin: vorige code 5 min beschikbaar (alleen lokaal in sessionStorage)
+    const ADMIN_STORE_KEY = "admin_last_code"; // {code, ts}
+    function saveAdminLastCode(code){
+      try{ sessionStorage.setItem(ADMIN_STORE_KEY, JSON.stringify({code:String(code||''), ts:now()})); }catch(_){}
+    }
+    function getAdminLastCode(){
+      try{
+        const raw = sessionStorage.getItem(ADMIN_STORE_KEY);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj?.code || !obj?.ts) return null;
+        if ((now()-obj.ts) > OTP_VALID_SEC) return null;
+        return obj;
+      }catch(_){ return null; }
+    }
+    function clearAdminLastCode(){ try{ sessionStorage.removeItem(ADMIN_STORE_KEY); }catch(_){} }
+
+    function setValidityHint(){
+      const t = Number(localStorage.getItem('otp_last_sent_ts')||0);
+      const left = Math.max(0, OTP_VALID_SEC - (now() - t));
+      const last = getAdminLastCode();
+
+      if (last && left>0){
+        const m = Math.floor(left/60), s = left%60;
+        setInfo(`Hint: uw vorige code is mogelijk nog geldig (± ${m}m ${s}s).
+                 <button type="button" id="fillPrev" class="inline-btn">Vorige code invullen</button>`);
+        setTimeout(()=>{ const btn=document.getElementById('fillPrev'); if (btn) btn.onclick=()=>{ $code.value = last.code; $code.focus(); setInfo('Vorige code ingevuld. Klik op <em>Verifiëren</em>.'); }; },0);
+      } else if (left>0){
+        setInfo(`Hint: vorige code nog ong. ${Math.floor(left/60)}m ${left%60}s geldig.`);
+      } else {
+        setInfo('');
+      }
+    }
+
+    // API helpers (oude paden die bij u werkten)
+    const reqOtp = (uid) => fetch(`${API_BASE}/otp/request`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ uid })
+    });
+    const verifyOtpCall = (uid, code) => fetch(`${API_BASE}/otp/verify`, {
+      method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+      body: JSON.stringify({ uid, code })
+    });
+
+    async function requestOtp(){
+      const uid = $uid.value.trim();
+      if (!uid){ alert('Vul uw gebruikers-ID in.'); return; }
+
+      // géén frontend-blokkade voor admin; server bewaakt echte rate-limit
+      if (uid !== ADMIN_UID){
+        const left = getCooldownLeft();
+        if (left>0){ setInfo(`Even geduld: u kunt over <strong>${left}s</strong> opnieuw een code aanvragen. Of gebruik uw vorige code zolang die nog geldig is.`); return; }
+      }
+
+      setInfo('Bezig met aanvragen…'); $btnReq.disabled = true;
+      try{
+        const r = await reqOtp(uid);
+        const txt = await r.text(); let data={}; try{ data = JSON.parse(txt); }catch(_){}
+        log({status:r.status, body:data||txt});
+
+        if (r.status === 429){
+          const ra = Number(r.headers.get('Retry-After')||OTP_COOLDOWN_SEC);
+          setCooldown(now()+ra); syncCooldownUI();
+          setInfo(`U heeft zojuist al een code aangevraagd. Wacht <strong>${ra}s</strong> of gebruik de vorige code (5 min).`);
+          setValidityHint();
+          return;
         }
+
+        if (r.ok && data?.ok){
+          localStorage.setItem('otp_last_sent_ts', String(now()));
+          setCooldown(now()+OTP_COOLDOWN_SEC); syncCooldownUI();
+
+          // ADMIN: code meteen invullen + bewaren (geen "Controleer uw e-mail"-tekst)
+          if (uid===ADMIN_UID && ADMIN_INLINE_OTP && data.displayCode){
+            $code.value = String(data.displayCode);
+            saveAdminLastCode(data.displayCode);
+            setValidityHint();
+            setInfo('Admin-code is ingevuld. Klik op <strong>Verifiëren</strong>.');
+            $code.focus();
+          } else {
+            // Niet-admin (of geen displayCode) → normale melding
+            setValidityHint();
+            setInfo('Code verzonden. <strong>Controleer uw e-mail</strong>.');
+            $code.focus();
+          }
+          return;
+        }
+
+        if (data?.alreadyIssued || data?.error==='code-still-valid'){
+          const ttl = Number(data?.ttl_left || 0);
+          const m = Math.floor(ttl/60), s = ttl%60;
+          setInfo(`Er is al een <strong>geldige code</strong> (nog ± ${m}m ${s}s). Gebruik die code opnieuw.`);
+          setValidityHint();
+          $btnReq.disabled = false;
+          return;
+        }
+
+        setInfo(`Kon geen code aanvragen. <strong>Status ${r.status}</strong>. Probeer opnieuw.`);
+        $btnReq.disabled = false;
+
+      }catch(e){
+        setInfo('Netwerkfout bij aanvragen. Controleer uw verbinding en probeer opnieuw.');
+        log(String(e));
+        $btnReq.disabled = false;
       }
-      // Niet ingelogd → login tonen
-      hide('app'); show('login'); hide('logoutBtn');
     }
 
-    // ===== OTP flow =====
-    el('btnReq').addEventListener('click', async () => {
-      const uid = el('uid').value.trim();
-      const r = await jsonFetch(`${API_BASE}/otp/request`, {
-        method: 'POST',
-        body: JSON.stringify({ uid })
-      });
-      log(r.data);
-      if (r.data?.error === 'TOO_MANY_REQUESTS' && typeof r.data?.retryInMs === 'number') {
-        const s = Math.ceil(r.data.retryInMs / 1000);
-        log({ ...r.data, hint: `Wacht ${s}s en probeer opnieuw.` });
+    async function verifyOtp(){
+      const uid = $uid.value.trim();
+      const code = $code.value.trim();
+      if (!uid || !/^[0-9]{6}$/.test(code)){ alert('Vul een geldige ID en 6-cijferige code in.'); return; }
+
+      setInfo('Bezig met verifiëren…'); $btnVerify.disabled = true;
+      try{
+        const r = await verifyOtpCall(uid, code);
+        const txt = await r.text(); let data={}; try{ data = JSON.parse(txt); }catch(_){}
+        log({status:r.status, body:data||txt});
+
+        if (r.ok && data?.ok){
+          if (data.token){ try{ localStorage.setItem(TOKEN_KEY, data.token); }catch(_){ } }
+          // admin-quick path: wis bewaarde code bij succes
+          clearAdminLastCode();
+          location.href = './app.html';
+          return;
+        }
+
+        // Code ongeldig/verlopen → duidelijke instructie + “vorige code” verwijderen
+        if (data?.error === 'invalid-code' || r.status === 400 || r.status === 401){
+          clearAdminLastCode();
+          const left = getCooldownLeft();
+          if (left>0){ setInfo(`Code onjuist of verlopen. Wacht <strong>${left}s</strong> en vraag daarna een nieuwe code aan.`); }
+          else { setInfo('Code onjuist of verlopen. Vraag een nieuwe code aan.'); }
+          $btnVerify.disabled = false;
+          $code.select();
+          return;
+        }
+
+        setInfo(`Verifiëren mislukt. <strong>Status ${r.status}</strong>. Probeer opnieuw.`);
+        $btnVerify.disabled = false; $code.select();
+
+      }catch(e){
+        setInfo('Netwerkfout bij verifiëren. Controleer uw verbinding en probeer opnieuw.');
+        log(String(e));
+        $btnVerify.disabled = false;
       }
-    });
+    }
 
-    el('btnVerify').addEventListener('click', async () => {
-      const uid = el('uid').value.trim();
-      const code = el('code').value.trim();
-      const r = await jsonFetch(`${API_BASE}/otp/verify`, {
-        method: 'POST',
-        body: JSON.stringify({ uid, code })
-      });
-      log(r.data);
-      if (r.data?.ok && r.data?.token) {
-        localStorage.setItem('zisa_token', r.data.token);
-        await guard();
-      }
-    });
+    // Extra tools
+    async function checkMe(){
+      try{
+        let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
+        const data = await resp.json().catch(()=>({}));
+        log(data);
+      }catch(e){ log({ok:false,error:String(e)}); }
+    }
+    function ping(){ fetch(`${API_BASE}/ping`).then(r=>r.json()).then(log).catch(e=>log(String(e))); }
+    function clearLog(){ $log.textContent=''; }
 
-    el('btnMe').addEventListener('click', async () => {
-      const t = localStorage.getItem('zisa_token');
-      const me = await jsonFetch(`${API_BASE}/auth/me`, { headers: t ? { Authorization: `Bearer ${t}` } : {} });
-      log(me.data);
-    });
-
-    el('btnClear').addEventListener('click', () => {
-      localStorage.removeItem('zisa_token');
-      log('Lokale token verwijderd.');
-      guard();
-    });
-
-    el('logoutBtn').addEventListener('click', async () => {
-      const t = localStorage.getItem('zisa_token');
-      try { await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include', headers: t ? { Authorization: `Bearer ${t}` } : {} }); } catch {}
-      localStorage.removeItem('zisa_token');
-      await guard();
-    });
-
-    // ===== Accordion =====
     document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const content = header.nextElementSibling;
-          const open = content.style.display === 'block';
-          document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
-          if (!open) content.style.display = 'block';
-        });
-      });
+      // na uitloggen direct opnieuw kunnen → reset UI-cooldown
+      localStorage.removeItem('otp_cooldown_until');
+
+      // handlers
+      $btnReq.onclick = requestOtp;
+      $btnVerify.onclick = verifyOtp;
+      $btnMe.onclick = checkMe;
+      $btnPing.onclick = ping;
+      $btnClear.onclick = clearLog;
+
+      // UI init
+      syncCooldownUI();
+      setValidityHint();
+
+      // Alleen lokaal (devgemak) mag het veld vooraf gevuld worden
+      if ((location.hostname==='127.0.0.1'||location.hostname==='localhost') && !$uid.value) $uid.value = ADMIN_UID;
+
+      // prettige focus
+      const sent = Number(localStorage.getItem('otp_last_sent_ts')||0);
+      (sent && (now()-sent)<OTP_VALID_SEC) ? $code.focus() : $uid.focus();
     });
-
-    // ===== Init =====
-    guard();
-
-    // Service worker registreren (pad één niveau omhoog)
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../sw.js').catch(console.error);
-      });
-    }
   </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
