@@ -1,244 +1,283 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <base href="../">
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Juf Zisa's spelletjesmaker</title>
-
-  <!-- Koppeling naar CSS -->
-  <link href="keuze.css" rel="stylesheet"/>
-
-  <!-- APP ICONS & MANIFEST -->
-  <link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-192.png" sizes="192x192" type="image/png">
-  <link rel="apple-touch-icon" href="start_afbeeldingen/Zisa_spelgenerator-192.png">
-  <link rel="manifest" href="manifest.json">
+  <meta charset="utf-8" />
+  <title>Juf Zisa's spelletjesmaker (PRO)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="Cache-Control" content="no-store" />
   <meta name="theme-color" content="#ffcf56">
 
-  <!-- iOS PWA meta -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Juf Zisa">
+  <!-- Styles en app-meta (paden: één niveau omhoog vanuit /pro/) -->
+  <link rel="stylesheet" href="../keuze.css"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="../start_afbeeldingen/Zisa_spelgenerator-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
+  <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
+  <link rel="manifest" href="../manifest.json">
 
   <style>
-    .header-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 30px;
-      margin-top: 40px;
-    }
-    .logo {
-      width: 100px;
-      height: auto;
-      margin-right: 20px;
-    }
-    .header-container h1 {
-      font-size: 3.5rem;
-      margin: 0;
-      margin-bottom: 30px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 20px;
-    }
-    .accordion { margin-bottom: 20px; }
-    .accordion-header {
-      background-color: #4db6ac;
-      color: white;
-      cursor: pointer;
-      padding: 15px;
-      font-size: 1.4rem;
-      border: none;
-      text-align: left;
-      width: 100%;
-      border-radius: 8px;
-    }
-    .accordion-content { display: none; padding: 15px 0; }
-    .button-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 30px;
-      justify-items: center;
-    }
-    .drukknop-afbeelding {
-      width: 120px;
-      height: auto;
-      transition: transform 0.2s ease;
-    }
+    :root { --zisa-yellow:#f9b600; --zisa-teal:#4db6ac; --fg:#111; --muted:#666; }
+    body { font-family: system-ui, Segoe UI, Arial, sans-serif; }
+    .container { max-width:1200px; margin:0 auto; padding:0 20px; }
+
+    /* Header */
+    .header-container { display:flex; justify-content:center; align-items:center; margin-bottom:30px; margin-top:40px; }
+    .logo { width:100px; height:auto; margin-right:20px; }
+    .header-container h1 { font-size:3.5rem; margin:0 0 30px 0; }
+
+    /* Accordion */
+    .accordion { margin-bottom:20px; }
+    .accordion-header { background:var(--zisa-teal); color:#fff; cursor:pointer; padding:15px; font-size:1.4rem; border:none; text-align:left; width:100%; border-radius:8px; }
+    .accordion-content { display:none; padding:15px 0; }
+    .button-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap:30px; justify-items:center; }
+    .drukknop-afbeelding { width:120px; height:auto; transition: transform .2s ease; }
     a:hover .drukknop-afbeelding { transform: scale(1.05); }
-    a {
-      position: relative;
-      display: inline-block;
-    }
-    a::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: -45px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #f9b600;
-      color: white;
-      padding: 8px 14px;
-      font-size: 1.4rem;
-      border-radius: 14px;
-      opacity: 0;
-      white-space: nowrap;
-      pointer-events: none;
-      transition: opacity 0.2s ease;
-      z-index: 10;
-    }
-    a:hover::after { opacity: 1; }
+    a { position:relative; display:inline-block; }
+    a::after { content: attr(data-tooltip); position:absolute; top:-45px; left:50%; transform:translateX(-50%); background:var(--zisa-yellow); color:#000; padding:8px 14px; font-size:1.1rem; border-radius:14px; opacity:0; white-space:nowrap; pointer-events:none; transition:opacity .2s ease; z-index:10; }
+    a:hover::after { opacity:1; }
+
+    /* Auth/uitlog */
+    .logout { position:fixed; right:12px; top:12px; background:var(--zisa-yellow); color:#000; border:none; padding:.45rem .7rem; border-radius:.5rem; cursor:pointer; font-weight:600; }
+
+    /* Login card */
+    #login { max-width:860px; margin:3rem auto; padding:1.2rem; }
+    .card { border:1px solid #eee; border-radius:14px; padding:1.2rem; box-shadow: 0 6px 18px rgba(0,0,0,.06); background:#fff; }
+    .row { display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-end; }
+    .row > * { flex: 1 1 220px; }
+    label { font-weight:600; font-size:.95rem; display:block; margin-bottom:.25rem; }
+    input[type=text], input[type=number] { width:100%; padding:.6rem .7rem; border:1px solid #ddd; border-radius:.6rem; }
+    .btn { padding:.6rem .9rem; border-radius:.6rem; border:1px solid #ddd; background:#fafafa; cursor:pointer; }
+    .btn.primary { background:var(--zisa-teal); color:#fff; border-color:var(--zisa-teal); }
+    .muted { color:var(--muted); font-size:.9rem; }
+    pre#log { background:#f6f6f6; border-radius:.6rem; padding:.8rem; max-height:320px; overflow:auto; }
+    .hidden { display:none !important; }
   </style>
 </head>
 <body>
+  <!-- ======= Top actions (zichtbaar wanneer ingelogd) ======= -->
+  <button class="logout hidden" id="logoutBtn">Uitloggen</button>
 
-<!-- LOGINPANEEL (PRO) -->
-<div id="loginPanel" style="max-width:420px;margin:2rem auto;padding:1rem;border:1px solid #ddd;border-radius:12px;display:block;">
-  <h1 style="margin:0 0 .5rem;">Inloggen (PRO)</h1>
-  <p>Na aankoop gebruikt u eerst de eerste code uit uw mail. Bij latere logins krijgt u telkens een nieuwe code (10 min geldig).</p>
-  <label style="display:block;margin-top:.75rem;">E-mail</label>
-  <input id="email" type="email" autocomplete="email" placeholder="juf@voorbeeld.be" style="width:100%;padding:.6rem;margin-top:.25rem;">
-  <label style="display:block;margin-top:.75rem;">Code</label>
-  <input id="code" type="text" inputmode="numeric" placeholder="6-cijferige code" style="width:100%;padding:.6rem;margin-top:.25rem;">
-  <div style="margin-top:.9rem;display:flex;gap:.5rem;flex-wrap:wrap;">
-    <button onclick="verifyOtp()" style="padding:.6rem .9rem;">Inloggen met code</button>
-    <button onclick="requestOtp()" style="padding:.6rem .9rem;">Vraag nieuwe code</button>
-  </div>
-  <p style="font-size:.9rem;color:#555;margin-top:.75rem;">Na inloggen blijft u 60 minuten ingelogd zonder opnieuw een code.</p>
-</div>
-
-<!-- UW APP -->
-<div id="app" style="display:none;">
-
-  <div class="container">
-    <div class="header-container">
-      <img src="start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
-      <h1>Juf Zisa's spelletjesmaker</h1>
-    </div>
-
-    <!-- 📐 Reken-oefeningen -->
-    <div class="accordion">
-      <button class="accordion-header">📐 Reken-oefeningen</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Rekenvierkant" href="rekenvierkant.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenvierkant.png"/></a>
-        <a data-tooltip="Rekenweg" href="rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenweg.png"/></a>
-        <a data-tooltip="Rekenpiramide" href="rekenpiramide_keuze.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenpiramide.png"/></a>
-        <a data-tooltip="Reken en kleur" href="reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="drukknop_afbeeldingen/reken_en_kleur.png"/></a>
-        <a data-tooltip="Rekenrooster" href="rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenrooster.png"/></a>
-        <a data-tooltip="Rekendriehoek" href="rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekendriehoek.png"/></a>
-        <a data-tooltip="Rekencirkel" href="rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekencirkel.png"/></a>
-        <a data-tooltip="Bewerkingen" href="bewerkingen_keuze.html"><img alt="Bewerkingen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_bewerkingen.png"/></a>
-        <a data-tooltip="Verliefde harten" href="harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="drukknop_afbeeldingen/harten.png"/></a>
-        <a data-tooltip="Loopspel" href="loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/loop.png"/></a>
+  <!-- ======= LOGIN-SECTIE (OTP INGEBOUWD) ======= -->
+  <section id="login" class="card hidden" aria-label="Aanmelden">
+    <h2 style="margin:.2rem 0 1rem 0">Aanmelden</h2>
+    <p class="muted" style="margin-top:-.4rem">Log in met uw gebruikers-ID. U ontvangt een 6-cijferige code.</p>
+    <div class="row">
+      <div>
+        <label for="uid">Gebruikers-ID</label>
+        <input id="uid" type="text" placeholder="bijv. isabel-admin" value="isabel-admin" />
+      </div>
+      <div>
+        <button class="btn" id="btnReq">Code aanvragen</button>
       </div>
     </div>
 
-    <!-- 🅰️ Taal en letters -->
-    <div class="accordion">
-      <button class="accordion-header">🅰️ Taal en letters</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Woordzoeker" href="woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="drukknop_afbeeldingen/woordzoeker.png"/></a>
-        <a data-tooltip="Kruiswoordpuzzel" href="kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/kruiswoordpuzzel.png"/></a>
-        <a data-tooltip="Lettercode" href="lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettercode.png"/></a>
-        <a data-tooltip="Geheime boodschap" href="geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="drukknop_afbeeldingen/geheime_boodschap.png"/></a>
-        <a data-tooltip="Lettertetris" href="lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettertetris.png"/></a>
-        <a data-tooltip="Galgje" href="galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="drukknop_afbeeldingen/galgje.png"/></a>
-        <a data-tooltip="Lezen" href="lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lees.png"/></a>
+    <div class="row" style="margin-top:.6rem">
+      <div>
+        <label for="code">6-cijferige code</label>
+        <input id="code" type="text" inputmode="numeric" pattern="[0-9]{6}" placeholder="000000" />
+      </div>
+      <div>
+        <button class="btn primary" id="btnVerify">Verifiëren & inloggen</button>
       </div>
     </div>
 
-    <!-- 🧩 Puzzels & logica -->
-    <div class="accordion">
-      <button class="accordion-header">🧩 Puzzels &amp; logica</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Sudoku" href="sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="drukknop_afbeeldingen/sudoku.png"/></a>
-        <a data-tooltip="Zoek de verschillen" href="zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/zoek_de_verschillen.png"/></a>
-        <a data-tooltip="Doolhof" href="doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/doolhof.png"/></a>
-        <a data-tooltip="Slangendoolhof" href="slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="drukknop_afbeeldingen/slangendoolhof.png"/></a>
-        <a data-tooltip="Hexagonaal raster" href="hexagon.html"><img alt="Hexagonaal raster" class="drukknop-afbeelding" src="drukknop_afbeeldingen/hexagon.png"/></a>
+    <details style="margin-top:1rem">
+      <summary>Geavanceerd / status</summary>
+      <div class="row">
+        <div>
+          <button class="btn" id="btnMe">/auth/me</button>
+          <button class="btn" id="btnClear">Lokale token wissen</button>
+        </div>
+      </div>
+      <pre id="log">(status verschijnt hier)</pre>
+    </details>
+  </section>
+
+  <!-- ======= APP-SECTIE (alleen zichtbaar na login) ======= -->
+  <section id="app" class="hidden" aria-label="App">
+    <div class="container">
+      <div class="header-container">
+        <img src="../start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
+        <h1>Juf Zisa's spelletjesmaker</h1>
+      </div>
+
+      <!-- ====== Inhoud (alle paden met ../) ====== -->
+      <div class="accordion">
+        <button class="accordion-header">📐 Reken-oefeningen</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Rekenvierkant" href="../rekenvierkant.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenvierkant.png" alt="Rekenvierkant"/></a>
+          <a data-tooltip="Rekenweg" href="../rekenweg.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenweg.png" alt="Rekenweg"/></a>
+          <a data-tooltip="Rekenpiramide" href="../rekenpiramide_keuze.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenpiramide.png" alt="Rekenpiramide"/></a>
+          <a data-tooltip="Reken en kleur" href="../reken_en_kleur.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/reken_en_kleur.png" alt="Reken en kleur"/></a>
+          <a data-tooltip="Rekenrooster" href="../rekenrooster.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenrooster.png" alt="Rekenrooster"/></a>
+          <a data-tooltip="Rekendriehoek" href="../rekendriehoek.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekendriehoek.png" alt="Rekendriehoek"/></a>
+          <a data-tooltip="Rekencirkel" href="../rekencirkel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekencirkel.png" alt="Rekencirkel"/></a>
+          <a data-tooltip="Bewerkingen" href="../bewerkingen_keuze.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.png" alt="Bewerkingen"/></a>
+          <a data-tooltip="Verliefde harten" href="../harten.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/harten.png" alt="Verliefde harten"/></a>
+          <a data-tooltip="Loopspel" href="../loopspel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/loop.png" alt="Loopspel"/></a>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">🅰️ Taal en letters</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Woordzoeker" href="../woordzoeker.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/woordzoeker.png" alt="Woordzoeker"/></a>
+          <a data-tooltip="Kruiswoordpuzzel" href="../kruiswoordpuzzel.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/kruiswoordpuzzel.png" alt="Kruiswoordpuzzel"/></a>
+          <a data-tooltip="Lettercode" href="../lettercode.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettercode.png" alt="Lettercode"/></a>
+          <a data-tooltip="Geheime boodschap" href="../geheimeboodschap.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geheime_boodschap.png" alt="Geheime boodschap"/></a>
+          <a data-tooltip="Lettertetris" href="../lettertetris.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettertetris.png" alt="Lettertetris"/></a>
+          <a data-tooltip="Galgje" href="../galgje.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/galgje.png" alt="Galgje"/></a>
+          <a data-tooltip="Lezen" href="../lees.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lees.png" alt="Lezen"/></a>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">🧩 Puzzels &amp; logica</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Sudoku" href="../sudoku.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/sudoku.png" alt="Sudoku"/></a>
+          <a data-tooltip="Zoek de verschillen" href="../zoekverschillen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/zoek_de_verschillen.png" alt="Zoek de verschillen"/></a>
+          <a data-tooltip="Doolhof" href="../doolhof.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/doolhof.png" alt="Doolhof"/></a>
+          <a data-tooltip="Slangendoolhof" href="../slangendoolhof.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/slangendoolhof.png" alt="Slangendoolhof"/></a>
+          <a data-tooltip="Hexagonaal raster" href="../hexagon.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/hexagon.png" alt="Hexagonaal raster"/></a>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">🎨 Creatief en bouwen</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Punttekening" href="../punttekening.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/punttekening.png" alt="Punttekening"/></a>
+          <a data-tooltip="Pixelart" href="../pixelart.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/pixelart.png" alt="Pixelart"/></a>
+          <a data-tooltip="Bouwplaten" href="../bouwplaat.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bouwplaat.png" alt="Bouwplaten"/></a>
+          <a data-tooltip="Coderen" href="../coderen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/coderen.png" alt="Coderen"/></a>
+          <a data-tooltip="Plattegrond" href="../plattegrond.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/plattegrond.png" alt="Plattegrond"/></a>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">🎲 Spelvormen</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Bingo" href="../bingo.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bingo.png" alt="Bingo"/></a>
+          <a data-tooltip="Vier op een rij" href="../vieropeenrij.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/vieropeenrij.png" alt="Vier op een rij"/></a>
+          <a data-tooltip="Rad" href="../rad.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rad.png" alt="Rad"/></a>
+          <a data-tooltip="QR-generator" href="../QR.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/QR.png" alt="QR-generator"/></a>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-header">⏰ Tijd en klok</button>
+        <div class="accordion-content button-grid">
+          <a data-tooltip="Kloklezen" href="../kloklezen.html"><img class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_kloklezen.png" alt="Kloklezen"/></a>
+          <a data-tooltip="Timer" href="../timer.html"><img class="drukknop-afbeeldingen" src="../drukknop_afbeeldingen/timer.png" alt="Timer"/></a>
+        </div>
       </div>
     </div>
+  </section>
 
-    <!-- 🎨 Creatief en bouwen -->
-    <div class="accordion">
-      <button class="accordion-header">🎨 Creatief en bouwen</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Punttekening" href="punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="drukknop_afbeeldingen/punttekening.png"/></a>
-        <a data-tooltip="Pixelart" href="pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="drukknop_afbeeldingen/pixelart.png"/></a>
-        <a data-tooltip="Bouwplaten" href="bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="drukknop_afbeeldingen/bouwplaat.png"/></a>
-        <a data-tooltip="Coderen" href="coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/coderen.png"/></a>
-        <a data-tooltip="Plattegrond" href="plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="drukknop_afbeeldingen/plattegrond.png"/></a>
-      </div>
-    </div>
+  <script>
+    const API_BASE = "https://api-xc54winygq-ew.a.run.app";
 
-    <!-- 🎲 Spelvormen -->
-    <div class="accordion">
-      <button class="accordion-header">🎲 Spelvormen</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Bingo" href="bingo.html"><img alt="Bingo" class="drukknop-afbeelding" src="drukknop_afbeeldingen/bingo.png"/></a>
-        <a data-tooltip="Vier op een rij" href="vieropeenrij.html"><img alt="Vier op een rij" class="drukknop-afbeelding" src="drukknop_afbeeldingen/vieropeenrij.png"/></a>
-        <a data-tooltip="Rad" href="rad.html"><img alt="Rad" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rad.png"/></a>
-        <a data-tooltip="QR-generator" href="QR.html"><img alt="QR-generator" class="drukknop-afbeelding" src="drukknop_afbeeldingen/QR.png"/></a>
-      </div>
-    </div>
+    const el = (id) => document.getElementById(id);
+    const show = (id) => el(id).classList.remove('hidden');
+    const hide = (id) => el(id).classList.add('hidden');
+    const log = (msg) => { const x = el('log'); if (!x) return; x.textContent = (typeof msg === 'string') ? msg : JSON.stringify(msg, null, 2); };
 
-    <!-- ⏰ Tijd en klok -->
-    <div class="accordion">
-      <button class="accordion-header">⏰ Tijd en klok</button>
-      <div class="accordion-content button-grid">
-        <a data-tooltip="Kloklezen" href="kloklezen.html"><img alt="Kloklezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_kloklezen.png"/></a>
-        <a data-tooltip="Timer" href="timer.html"><img alt="Timer" class="drukknop-afbeelding" src="drukknop_afbeeldingen/timer.png"/></a>
-      </div>
-    </div>
+    async function jsonFetch(url, opts = {}) {
+      const r = await fetch(url, {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...(opts.headers||{}) },
+        ...opts,
+      });
+      let data; try { data = await r.json(); } catch { data = await r.text(); }
+      return { ok: r.ok, status: r.status, data };
+    }
 
-  </div><!-- einde container -->
+    async function guard() {
+      const t = localStorage.getItem('zisa_token');
+      if (t) {
+        const me = await jsonFetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${t}` }});
+        if (me?.data?.ok) {
+          show('app'); show('logoutBtn'); hide('login'); return;
+        }
+      }
+      // Niet ingelogd → login tonen
+      hide('app'); show('login'); hide('logoutBtn');
+    }
 
-</div><!-- einde #app -->
+    // ===== OTP flow =====
+    el('btnReq').addEventListener('click', async () => {
+      const uid = el('uid').value.trim();
+      const r = await jsonFetch(`${API_BASE}/otp/request`, {
+        method: 'POST',
+        body: JSON.stringify({ uid })
+      });
+      log(r.data);
+      if (r.data?.error === 'TOO_MANY_REQUESTS' && typeof r.data?.retryInMs === 'number') {
+        const s = Math.ceil(r.data.retryInMs / 1000);
+        log({ ...r.data, hint: `Wacht ${s}s en probeer opnieuw.` });
+      }
+    });
 
-<script>
-  // Accordion-gedrag
-  document.addEventListener('DOMContentLoaded', () => {
-    document.querySelectorAll('.accordion-content').forEach(content => content.style.display = 'none');
-    document.querySelectorAll('.accordion-header').forEach(header => {
-      header.addEventListener('click', () => {
-        const content = header.nextElementSibling;
-        const isVisible = content.style.display === 'block';
-        document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
-        if (!isVisible) content.style.display = 'block';
+    el('btnVerify').addEventListener('click', async () => {
+      const uid = el('uid').value.trim();
+      const code = el('code').value.trim();
+      const r = await jsonFetch(`${API_BASE}/otp/verify`, {
+        method: 'POST',
+        body: JSON.stringify({ uid, code })
+      });
+      log(r.data);
+      if (r.data?.ok && r.data?.token) {
+        localStorage.setItem('zisa_token', r.data.token);
+        await guard();
+      }
+    });
+
+    el('btnMe').addEventListener('click', async () => {
+      const t = localStorage.getItem('zisa_token');
+      const me = await jsonFetch(`${API_BASE}/auth/me`, { headers: t ? { Authorization: `Bearer ${t}` } : {} });
+      log(me.data);
+    });
+
+    el('btnClear').addEventListener('click', () => {
+      localStorage.removeItem('zisa_token');
+      log('Lokale token verwijderd.');
+      guard();
+    });
+
+    el('logoutBtn').addEventListener('click', async () => {
+      const t = localStorage.getItem('zisa_token');
+      try { await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include', headers: t ? { Authorization: `Bearer ${t}` } : {} }); } catch {}
+      localStorage.removeItem('zisa_token');
+      await guard();
+    });
+
+    // ===== Accordion =====
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
+      document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+          const content = header.nextElementSibling;
+          const open = content.style.display === 'block';
+          document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
+          if (!open) content.style.display = 'block';
+        });
       });
     });
-  });
 
-  // Service worker voor PWA (pad corrigeren voor submap)
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('../sw.js').catch(console.error);
-    });
-  }
+    // ===== Init =====
+    guard();
 
-  // PRO-login logica
-  async function checkSession() {
-    // Zichtbaar loginpaneel (zolang backend nog niet actief is)
-    document.getElementById('loginPanel').style.display = 'block';
-    document.getElementById('app').style.display = 'none';
-
-    // --- TIJDELIJK: wilt u app meteen tonen? Gebruik dan de 2 regels hieronder: ---
-    // document.getElementById('loginPanel').style.display = 'none';
-    // document.getElementById('app').style.display = 'block';
-  }
-  async function requestOtp() {
-    alert('Later beschikbaar: nieuwe code aanvragen (backend komt hier).');
-  }
-  async function verifyOtp() {
-    alert('Later beschikbaar: code verifiëren (backend komt hier).');
-  }
-  document.addEventListener('DOMContentLoaded', checkSession);
-</script>
-
+    // Service worker registreren (pad één niveau omhoog)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../sw.js').catch(console.error);
+      });
+    }
+  </script>
 </body>
 </html>
+
+
+
+
+
 
 
