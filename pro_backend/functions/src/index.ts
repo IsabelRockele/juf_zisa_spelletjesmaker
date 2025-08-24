@@ -1,20 +1,6 @@
 /**
  * zisa-spelletjesmaker-pro — API (Gen2, OTP + sessie via cookie OF Bearer token)
- *
- * Endpoints:
- *  - GET  /                 : status
- *  - GET  /ping             : test
- *  - POST /otp/request      : { uid }
- *  - POST /otp/verify       : { uid, code } => zet cookie EN return { token }
- *  - GET  /auth/me          : leest cookie OF Authorization: Bearer
- *  - POST /auth/logout      : wist cookie (token moet client-side gewist worden)
- *  - POST /payments/create  : Mollie payment aanmaken
- *  - POST /payments/webhook : Mollie webhook (server-to-server)
- *  - GET  /payments/:id/status
- *
- * Belangrijk: klantvriendelijke heraanvraag — bij te snelle nieuwe aanvraag
- * krijgen klanten 200 OK met { alreadyIssued:true, expiresAt, ... } (oude code
- * blijft geldig tot expire). Admin mag ALTIJD direct nieuwe code.
+ * (Bijgewerkt: licentie-check toegevoegd en licentie activeren in webhook)
  */
 
 import * as functions from "firebase-functions/v2/https";
@@ -39,10 +25,8 @@ const ALLOWED_ORIGINS = [
   "https://isabelrockele.github.io",
   "http://127.0.0.1:5500",
   "http://localhost:5500",
-  // Voeg toe als je rechtstreeks vanaf je eigen domein requests wil doen:
   // "https://www.jufzisa.be",
 ];
-
 app.use(
   cors({
     origin: (origin, cb) => {
@@ -52,7 +36,6 @@ app.use(
     credentials: true,
   })
 );
-
 app.use((req, res, next) => {
   const origin = req.headers.origin as string | undefined;
   if (origin && ALLOWED_ORIGINS.includes(origin)) {
@@ -144,6 +127,13 @@ async function sendOtpEmail(toEmail: string, code: string) {
   await sgMail.send(msg as any);
 }
 
+/** === Licenties === */
+const LICENSES_COL = "licenses";
+async function hasActiveLicense(uid: string): Promise<boolean> {
+  const snap = await db.collection(LICENSES_COL).doc(uid).get();
+  return !!(snap.exists && (snap.data() as any)?.active === true);
+}
+
 /** ===== Testroutes ===== */
 app.get("/", (_req, res) =>
   res.json({
@@ -181,9 +171,6 @@ app.post("/otp/request", async (req, res) => {
       const prevExpiresAt = Number(data?.expiresAt ?? 0);
       const tooSoon = nowMs - lastIssuedAt < OTP_MIN_INTERVAL_MS();
 
-      // NIEUW: klantvriendelijk — bij te snelle heraanvraag:
-      // - admin: ALTIJD nieuwe code
-      // - klant: 200 OK met alreadyIssued => oude (nog geldige) code hergebruiken
       if (tooSoon && !isAdmin(uid)) {
         return res.json({
           ok: true,
@@ -202,7 +189,7 @@ app.post("/otp/request", async (req, res) => {
     await docRef.set({ uid, hash, issuedAt: nowMs, expiresAt, usedAt: null }, { merge: true });
 
     const payload: Record<string, any> = { ok: true, requestedAt: nowMs, expiresAt };
-    if (DISPLAY_OTP() || isAdmin(uid)) payload.displayCode = code; // toon code voor admin of debug
+    if (DISPLAY_OTP() || isAdmin(uid)) payload.displayCode = code;
 
     return res.json(payload);
   } catch (err: any) {
@@ -236,7 +223,9 @@ app.post("/otp/verify", async (req, res) => {
     const candidate = hashOtp(uid, code, pepper);
     if (candidate !== hash) return res.status(401).json({ ok: false, error: "OTP_MISMATCH" });
 
-    await docRef.set({ usedAt: nowMs }, { merge: true });
+    // ►►► LICENTIE-CHECK
+    const active = await hasActiveLicense(uid);
+    if (!active) return res.status(403).json({ ok:false, error:"NO_ACTIVE_LICENSE" });
 
     // Token + cookie aanmaken
     const exp = nowMs + SESSION_TTL_MS();
@@ -245,7 +234,7 @@ app.post("/otp/verify", async (req, res) => {
     res.cookie(SESSION_COOKIE_NAME, token, {
       httpOnly: true,
       secure: true,
-      sameSite: "none",
+      sameSite: "none", // nodig omdat je front-end op GitHub Pages draait (cross-site)
       path: "/",
       maxAge: SESSION_TTL_MS(),
     });
@@ -292,9 +281,7 @@ app.post("/auth/logout", (_req, res) => {
   return res.json({ ok: true });
 });
 
-/** ===== Payments: aanmaken =====
- * Body: { uid, email, amountEur, description, redirectUrl }
- */
+/** ===== Payments: aanmaken ===== */
 app.post("/payments/create", async (req, res) => {
   try {
     const { uid, email, amountEur, description, redirectUrl } = req.body ?? {};
@@ -326,9 +313,7 @@ app.post("/payments/create", async (req, res) => {
   }
 });
 
-/** ===== Payments: webhook =====
- * Mollie POST body bevat: id=<paymentId>
- */
+/** ===== Payments: webhook ===== */
 app.post("/payments/webhook", express.urlencoded({ extended: false }), async (req, res) => {
   try {
     const paymentId = (req.body?.id || req.query?.id) as string;
@@ -344,10 +329,8 @@ app.post("/payments/webhook", express.urlencoded({ extended: false }), async (re
     const snap = await docRef.get();
     const prev = snap.exists ? (snap.data() as any) : {};
 
-    // Update status
     await docRef.set({ ...(prev||{}), status: payment.status, updatedAt: now() }, { merge: true });
 
-    // Bij paid/authorized en nog niet verwerkt: OTP genereren en mailen
     if ((payment.status === "paid" || payment.status === "authorized") && !prev?.processed) {
       const uid = payment?.metadata?.uid as string;
       const email = payment?.metadata?.email as string;
@@ -358,6 +341,12 @@ app.post("/payments/webhook", express.urlencoded({ extended: false }), async (re
         const pepper = OTP_PEPPER();
         if (!pepper) throw new Error("OTP_PEPPER missing");
 
+        // ►►► LICENTIE ACTIVEREN
+        await db.collection(LICENSES_COL).doc(uid).set({
+          active: true, plan: "pro", paidAt: now()
+        }, { merge: true });
+
+        // OTP genereren + versturen
         const code = generateOtp();
         const hash = hashOtp(uid, code, pepper);
         const expiresAt = now() + OTP_TTL_MS();
@@ -411,7 +400,3 @@ export const api = functions.onRequest(
   },
   app
 );
-
-
-
-
