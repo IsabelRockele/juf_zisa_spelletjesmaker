@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Koop Zisa PRO</title>
+  <title>Koop Zisa PRO (€40)</title>
   <meta http-equiv="Cache-Control" content="no-store" />
   <style>
     body{font-family:system-ui,Segoe UI,Arial,sans-serif;display:grid;place-items:center;min-height:100dvh;margin:0;padding:1rem;background:#f7faf9}
@@ -21,23 +21,22 @@
 <body>
   <main class="card">
     <h1>Koop Zisa PRO</h1>
-    <p class="muted">Vul uw e-mailadres in. Na betaling ontvangt u een <strong>inlogcode via e-mail</strong>. Met die code logt u in op de PRO-omgeving.</p>
+    <p class="muted">Vul uw e-mailadres in. Na betaling ontvangt u een <strong>inlogcode via e-mail</strong>. Daarmee logt u in op Zisa PRO.</p>
+
     <label for="email">E-mailadres</label>
     <input id="email" type="email" autocomplete="email" placeholder="naam@voorbeeld.be" />
 
     <div class="row">
-      <button id="buyBtn">Verder naar betaling (€1,00)</button>
+      <button id="buyBtn">Verder naar betaling (€40,00)</button>
       <a class="muted" href="./">Annuleren</a>
     </div>
     <div id="msg" class="err" role="alert" aria-live="polite"></div>
   </main>
 
   <script>
-    const API_BASE = "https://api-xc54winygq-ew.a.run.app"; // jouw Cloud Run URL
-
+    const API_BASE = "https://api-xc54winygq-ew.a.run.app";
     const el = (id)=>document.getElementById(id);
-    const btn = el('buyBtn');
-    const msg = el('msg');
+    const btn = el('buyBtn'); const msg = el('msg');
 
     btn.addEventListener('click', async ()=>{
       msg.textContent = '';
@@ -47,13 +46,11 @@
       }
       btn.disabled = true;
       try{
-        // Gebruik het e-mailadres als uid (backend accepteert dit)
         const body = {
           uid: email,
           email,
-          amountEur: 1.00,
-          description: 'Zisa PRO toegang',
-          // Na betaling terug naar PRO
+          amountEur: 40.00,
+          description: 'Zisa PRO – standaard',
           redirectUrl: 'https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/'
         };
         const r = await fetch(`${API_BASE}/payments/create`, {
@@ -62,9 +59,7 @@
           body: JSON.stringify(body)
         });
         const d = await r.json();
-        if(!r.ok || !d.ok){ throw new Error(d?.error || 'SERVER_ERROR'); }
-        if(!d.checkoutUrl){ throw new Error('Geen checkoutUrl ontvangen.'); }
-        // Naar Mollie
+        if(!r.ok || !d.ok || !d.checkoutUrl) throw new Error(d?.error || 'SERVER_ERROR');
         location.assign(d.checkoutUrl);
       }catch(e){
         msg.textContent = 'Er ging iets mis. Probeer later opnieuw of contacteer ons.';
@@ -76,3 +71,4 @@
   </script>
 </body>
 </html>
+
