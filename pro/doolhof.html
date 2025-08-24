@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8"/>
+  <title>Doolhof Generator (PRO)</title>
+
+  <!-- Belangrijk: laat alle relatieve paden vanaf de site-root resolven -->
+  <base href="/">
+
+  <!-- PRO manifest & iconen -->
+  <link rel="manifest" href="/pro/manifest-pro.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/pro/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/pro/icons/icon-192.png">
+  <meta name="theme-color" content="#fffbe6">
+
+  <!-- Styles: absoluut vanaf root -->
+  <link href="/doolhof.css" rel="stylesheet"/>
+
+  <!-- jsPDF (externe lib) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <!-- === PRO bar + guard ================================================== -->
+  <div class="probar" style="position:sticky;top:0;z-index:1000;background:#fffbe6;border-bottom:1px solid #ffe08a;display:flex;gap:.6rem;justify-content:flex-end;align-items:center;padding:10px 16px">
+    <small id="who" style="color:#374151">Controleren…</small>
+    <a href="/pro/app.html" class="btn-pro" style="border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:.45rem .8rem;text-decoration:none;color:#111">Keuzemenu</a>
+    <button id="btnLogout" class="btn-pro" type="button" style="border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:.45rem .8rem;cursor:pointer;color:#111;">Uitloggen</button>
+  </div>
+
+  <script>
+    const API_BASE  = "https://api-xc54winygq-ew.a.run.app";
+    const TOKEN_KEY = "zisa_token";
+    const LOGIN_URL = "/pro/index.html";
+
+    const getToken   = ()=> localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+    const clearToken = ()=> { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); };
+    const goLogin    = ()=> location.replace(`${LOGIN_URL}?t=${Date.now()}`);
+
+    async function guard(){
+      try{
+        let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
+        if (resp.status===401 || resp.status===403){
+          const t = getToken();
+          if (t) resp = await fetch(`${API_BASE}/auth/me`, { headers:{Authorization:`Bearer ${t}`} });
+        }
+        const data = await resp.json().catch(()=>({}));
+        if (data?.ok){
+          const w = document.getElementById('who');
+          if (w) w.textContent = `Ingelogd als: ${data.uid}`;
+          return;
+        }
+      }catch(e){}
+      goLogin();
+    }
+
+    async function doLogout(){
+      try{
+        await fetch(`${API_BASE}/auth/logout`, { method:'POST', credentials:'include' });
+      }catch(e){}
+      finally{
+        localStorage.removeItem('otp_cooldown_until');
+        sessionStorage.removeItem('admin_last_code');
+        clearToken();
+        goLogin();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      const btn = document.getElementById('btnLogout');
+      if (btn) btn.addEventListener('click', doLogout);
+      guard();
+    });
+  </script>
+  <!-- === /PRO bar + guard ================================================= -->
+
+  <header>
+    <button id="menuBtn" onclick="window.location.href='/pro/app.html'">Keuzemenu</button>
+    <h1>Doolhof Generator</h1>
+  </header>
+
+  <div id="main-content">
+    <div id="left-panel">
+      <div id="controls">
+        <fieldset class="control-group">
+          <legend>1. Kies een Vorm</legend>
+          <div id="vorm-kiezer"></div>
+        </fieldset>
+
+        <fieldset class="control-group">
+          <legend>2. Kies Moeilijkheid</legend>
+          <div id="moeilijkheid-kiezer">
+            <label><input type="radio" name="difficulty" value="easy" checked> Makkelijk</label>
+            <label><input type="radio" name="difficulty" value="medium"> Middelmatig</label>
+            <label><input type="radio" name="difficulty" value="hard"> Moeilijk</label>
+          </div>
+        </fieldset>
+
+        <fieldset class="control-group">
+          <legend>3. Kies Lijndikte</legend>
+          <div id="dikte-kiezer">
+            <input type="range" id="thicknessSlider" min="1" max="10" value="2" step="1">
+            <output id="thicknessValue">2</output> px
+          </div>
+        </fieldset>
+
+        <button id="generateButton">Genereer Nieuwe Doolhof</button>
+
+        <div class="solution-buttons">
+          <button id="solveMazeBtn">Toon Oplossing</button>
+          <button id="hideSolutionBtn" class="hidden">Verberg Oplossing</button>
+        </div>
+
+        <div id="instructieText" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 60px;">
+          Kies een vorm en moeilijkheid.
+        </div>
+      </div>
+    </div>
+
+    <div id="center-panel">
+      <div id="drawingCanvasContainer">
+        <canvas id="mazeCanvas" width="500" height="500"></canvas>
+      </div>
+    </div>
+
+    <div id="right-panel-buttons">
+      <div class="control-group">
+        <h3>Download</h3>
+        <button id="downloadPngBtn">Download als PNG</button>
+        <button id="downloadPdfBtn">Download als PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts: absoluut vanaf root -->
+  <script src="/doolhof.js"></script>
+</body>
+</html>
+
+
