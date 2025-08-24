@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const woordCategorieen = {
+       const woordCategorieen = {
         "AVI-M3": {
-            "Vrije Woorden": ["maan", "roos", "vis", "pen", "sok", "boom", "boot", "vuur", "koek", "zeep", "huis", "duif", "kous", "hout", "jas", "dag", "weg", "lach", "ring", "bank", "vang", "plank", "zon", "zee", "zus", "de", "ik", "en", "een", "is", "in", "an", "doos", "doek", "buik", "hij", "zij", "wij", "nee", "ja", "jet", "zeg", "jij", "bij", "heuvel", "nieuw", "schip", "klink", "boos", "tuin", "pijn", "fijn"],
+            "Vrije Woorden": ["maan", "roos", "vis", "pen", "sok", "boom", "boot", "vuur", "koek", "zeep", "huis", "duif", "kous", "hout", "jas", "dag", "weg", "lach", "ring", "bank", "vang", "plank", "zon", "zee", "zus", "de", "ik", "en", "een", "is", "in", "an", "doos", "doek", "buik", "hij", "zij", "wij", "nee", "ja", "net", "zeg", "jij", "bij", "heuvel", "nieuw", "schip", "klink", "boos", "tuin", "pijn", "fijn"],
             "ei-ij": ["pijn", "fijn", "klein", "trein", "reis", "ijs", "bij", "tijd", "krijg", "blijf", "lijn", "mijn", "zijn", "wij", "zij", "geit", "zeil", "plein", "kei", "mei", "wei", "dweil"],
             "au-ou": ["goud", "zout", "touw", "koud", "oud", "blauw", "pauw", "saus", "touw", "vrouw", "bouw", "nou", "jou", "zou", "hout", "stout", "fout", "zout", "bout", "gauw", "klauw", "flauw", "benauwd"]
         },
         "AVI-E3": {
-            "Vrije Woorden": ["school", "vriend", "fiets", "groen", "lacht", "naar", "straat", "plant", "groeit", "vogel", "fluit", "schat", "zoekt", "onder", "steen", "vindt", "niks", "draak", "sprookje", "woont", "kasteel", "prinses", "redt", "hem", "eerst", "dan", "later", "eind", "goed", "al", "sneeuw", "wit", "koud", "winter", "schaatsen", "ijs", "pret", "warm", "chocolademelk", "koekje", "erbij", "blij", "schijnt", "lucht", "blauw", "wolk", "drijft", "zacht", "wind"],
+            "Vrije Woorden": ["school", "vriend", "fiets", "groen", "lacht", "naar", "straat", "plant", "groeit", "vogel", "fluit", "schat", "zoekt", "onder", "steen", "vindt", "niks", "draak", "sprookje", "woont", "kasteel", "prinses", "redt", "hem", "eerst", "dan", "later", "eind", "goed", "al", "sneeuw", "wit", "koud", "winter", "schaatsen", "ijs", "pret", "warm", "melk", "koekje", "erbij", "blij", "schijnt", "lucht", "blauw", "wolk", "drijft", "zacht", "wind"],
             "sch-schr": ["school", "schat", "schip", "schaap", "schuur", "schort", "schrik", "schrijf", "schram", "schrap", "schroef", "scherm", "scherf", "scherp", "schets", "scheur", "schijn", "schik", "schil", "schim", "schok", "schol", "schop", "schor", "schot", "schouw", "schub", "schud", "schuin", "schuit", "schuim", "schreeuw", "schrift"],
             "2-medeklinkers-vooraan": ["groen", "straat", "plant", "vriend", "fluit", "draak", "prinses", "sneeuw", "zwaan", "broek", "brief", "klok", "kleur", "sport", "steen", "stoel", "trein", "trots", "zwart", "zweet", "klimt", "groeit", "drijft", "vliegt", "krab", "gras", "stap", "snel", "trap", "blauw", "brand", "drink", "fruit", "glans", "knop", "plank", "snoep", "spook", "stoep", "vlecht", "zwaai"],
             "2-medeklinkers-achteraan": ["vriend", "plant", "lacht", "vindt", "eerst", "koud", "winter", "warm", "lucht", "zacht", "hond", "mand", "mond", "wind", "paard", "woord", "brood", "hand", "land", "strand", "kunst", "herfst", "post", "feest", "helpt", "werkt", "fietst", "leest", "hoest", "dorst", "worst", "hart", "kort", "sterk", "markt", "berg", "zorgt", "verft", "werpt", "durft", "erwt", "golf", "wolf"]
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
         "AVI-M4": {
             "Vrije Woorden": ["zwaaien", "leeuw", "meeuw", "sneeuw", "nieuw", "geeuw", "schreeuw", "kooi", "haai", "vlaai", "prooi", "draai", "kraai", "strooi", "mooi", "groei", "bloei", "vloei", "spring", "breng", "kring", "zing", "ding", "bang", "stang", "wang", "streng", "jong", "tong", "zong", "lang", "hang", "plank", "slank", "vonk", "dronk", "stank", "bank", "duw", "sluw", "ruw", "uw", "gloei", "foei", "boei", "ai", "ui", "ei", "eeuw", "ieuw"],
             "samenstellingen": ["leesboek", "voetbal", "zeester", "ijsbeer", "boomhut", "tuinhuis", "eetkamer", "speelgoed", "handtas", "zakdoek", "postzegel", "huisdeur", "keukenraam", "fietspad", "treinreis"],
-            "eeuw-ieuw": ["sneeuw", "meeuw", "leeuw", "geeuw", "schreeuw", "nieuw", "kieuw", "eeuwenlang", "meeuwennest", "nieuwtje", "kieuwspleet", "sneeuwwit", "leeuwenkop", "schreeuwlelijk", "spiksplinternieuw", "eeuwig", "benieuwd", "hernieuwd", "sneeuwen", "geeuwen", "schreeuwen", "vernieuwen"],
+            "eeuw-ieuw": ["sneeuw", "meeuw", "leeuw", "geeuw", "schreeuw", "nieuw", "kieuw", "nieuws", "nieuwste", "nieuwtje", "sneeuwbal", "sneeuwwit", "leeuwenkop", "meeuw", "sneeuwman", "eeuw", "benieuwd", "hernieuwd", "sneeuwen", "geeuwen", "schreeuwen", "vernieuwen"],
             "ng-nk": ["bang", "bank", "tang", "tank", "lang", "slank", "zang", "zink", "ring", "rink", "ding", "pink", "zing", "zink", "jong", "dronk", "stang", "stank", "breng", "denk", "spring", "plank", "wang", "vonk", "zong", "klonk", "hang", "hink", "kring", "wenk", "streng", "schonk", "zwenk", "drang", "dank", "flank", "jengel", "stinken", "slang", "vonken", "wrongel", "flink"],
             "3-medeklinkers-vooraan": ["straat", "stroop", "sprookje", "spring", "stroom", "schrijf", "schrik", "schram", "schrap", "schroef", "schroot", "schril", "schrob", "schrok", "schrompel", "schreeuw", "schrift", "schrijver", "spruit", "spreuk", "splinter", "strik", "streng", "strak", "strop", "spriet", "spraak", "spreken", "springen", "sproeien", "sprak", "straf", "strand", "streek", "streep", "stroef", "strook", "struik", "struis", "stropdas"],
             "verkleinwoorden-je": ["visje", "aapje", "zusje", "briefje", "koekje", "huisje", "muisje", "plantje", "kaartje", "staartje", "dingetje", "koninkje", "mannetje", "karretje", "pennetje", "zonnetje", "sterretje", "wagentje", "bloemetje", "ringetje", "kettinkje", "brilletje", "plankje", "mandje", "hondje", "paardje", "schaapje", "boekje"],
@@ -30,22 +30,40 @@ document.addEventListener('DOMContentLoaded', () => {
         "AVI-M5": { "Vrije Woorden": ["vrolijk", "moeilijk", "eerlijk", "gevaarlijk", "heerlijk", "dagelijks", "eindelijk", "vriendelijk", "lelijk", "afschuwelijk", "persoonlijk", "landelijk", "tijdelijk", "ordelijk", "duidelijk", "eigenlijk", "schadelijk", "mogelijk", "onmogelijk", "waarschijnlijk", "thee", "koffie", "taxi", "menu", "baby", "hobby", "pony", "jury", "bureau", "cadeau", "plateau", "niveau", "station", "actie", "politie", "vakantie", "informatie", "traditie", "positie", "conditie", "chauffeur", "douche", "machine", "chef", "journaal", "restaurant", "trottoir", "horloge", "garage", "bagage"] },
         "AVI-E5": { "Vrije Woorden": ["bibliotheek", "interessant", "temperatuur", "onmiddellijk", "belangrijk", "elektrisch", "verschillende", "eigenlijk", "omgeving", "gebeurtenis", "ervaring", "industrie", "internationaal", "communicatie", "organisatie", "president", "discussie", "officieel", "traditioneel", "automatisch", "fotograaf", "enthousiast", "atmosfeer", "categorie", "laboratorium", "journalist", "architect", "kampioenschap", "psycholoog", "helikopter", "paraplu", "professor", "abonnement", "encyclopedie", "ceremonie", "chocolade", "concert", "dinosaurus", "expeditie", "fantasie", "generatie", "instrument", "kritiek", "literatuur", "medicijn", "museum", "operatie", "populair", "respect", "signaal"] }
     };
-    const alleMoeilijkheden = { "Vrije Woorden": "Alle woorden van het gekozen niveau", "ei-ij": "Woorden met ei en ij", "au-ou": "Woorden met au en ou", "eeuw-ieuw": "Woorden met eeuw en ieuw", "ng-nk": "Woorden met ng en nk", "sch-schr": "Woorden met sch en schr", "2-medeklinkers-vooraan": "2 medeklinkers vooraan", "2-medeklinkers-achteraan": "2 medeklinkers achteraan", "3-medeklinkers-vooraan": "3 medeklinkers vooraan", "3-medeklinkers-achteraan": "3 medeklinkers achteraan", "samenstellingen": "Samenstellingen", "verkleinwoorden-je": "Verkleinwoorden op -je", "verkleinwoorden-tje": "Verkleinwoorden op -tje", "verkleinwoorden-pje": "Verkleinwoorden op -pje" };
-    const aviOrder = ["AVI-M3", "AVI-E3", "AVI-M4", "AVI-E4", "AVI-M5", "AVI-E5"];
-    
+
+
+    const alleMoeilijkheden = {
+        "Vrije Woorden": "Alle woorden van het gekozen niveau",
+        "ei-ij": "Woorden met ei en ij",
+        "au-ou": "Woorden met au en ou",
+        "eeuw-ieuw": "Woorden met eeuw en ieuw",
+        "ng-nk": "Woorden met ng en nk",
+        "sch-schr": "Woorden met sch en schr",
+        "2-medeklinkers-vooraan": "2 medeklinkers vooraan",
+        "2-medeklinkers-achteraan": "2 medeklinkers achteraan",
+        "3-medeklinkers-vooraan": "3 medeklinkers vooraan",
+        "3-medeklinkers-achteraan": "3 medeklinkers achteraan",
+        "samenstellingen": "Samenstellingen",
+        "verkleinwoorden-je": "Verkleinwoorden op -je",
+        "verkleinwoorden-tje": "Verkleinwoorden op -tje",
+        "verkleinwoorden-pje": "Verkleinwoorden op -pje"
+    };
+
+    const aviOrder = ["AVI-M3","AVI-E3","AVI-M4","AVI-E4","AVI-M5","AVI-E5"];
+
     let gekozenSpeltype = null;
     let geselecteerdeGetallenLijst = [];
 
-    const kiesWoordenKnop = document.getElementById('kies-woorden-knop');
-    const kiesGetallenKnop = document.getElementById('kies-getallen-knop');
-    const kiesTafelsKnop = document.getElementById('kies-tafels-knop'); // Nieuw
-    const woordenOptiesDiv = document.getElementById('woorden-opties');
+    const kiesWoordenKnop   = document.getElementById('kies-woorden-knop');
+    const kiesGetallenKnop  = document.getElementById('kies-getallen-knop');
+    const kiesTafelsKnop    = document.getElementById('kies-tafels-knop');
+    const woordenOptiesDiv  = document.getElementById('woorden-opties');
     const getallenOptiesDiv = document.getElementById('getallen-opties');
-    const tafelsOptiesDiv = document.getElementById('tafels-opties'); // Nieuw
-    const aviNiveauSelect = document.getElementById('avi-niveau');
+    const tafelsOptiesDiv   = document.getElementById('tafels-opties');
+    const aviNiveauSelect   = document.getElementById('avi-niveau');
     const moeilijkheidCheckboxesDiv = document.getElementById('moeilijkheid-checkboxes');
-    const tafelCheckboxesDiv = document.getElementById('tafel-checkboxes'); // Nieuw
-    const genereerBordKnop = document.getElementById('genereer-bord-knop');
+    const tafelCheckboxesDiv        = document.getElementById('tafel-checkboxes');
+    const genereerBordKnop  = document.getElementById('genereer-bord-knop');
 
     function formatteerGetal(getal) {
         if (getal === 0) return '0E';
@@ -57,22 +75,28 @@ document.addEventListener('DOMContentLoaded', () => {
         if (t > 0) parts.push(`${t}T`);
         if (e > 0 || getal === 0) parts.push(`${e}E`);
         if (parts.length === 0) {
-             if (h > 0) return `${h}H`;
-             if (t > 0) return `${t}T`;
+            if (h > 0) return `${h}H`;
+            if (t > 0) return `${t}T`;
         }
         return parts.join(' ');
     }
 
     function genereerPrintbarePagina(bordHTML) {
         const printStyles = `<style>@page{size:A4 landscape;margin:1cm}html,body{height:100%;margin:0;padding:0;font-family:sans-serif;background-color:#eee}@media screen{.actie-balk{display:block;position:fixed;top:0;left:0;width:100%;padding:10px;text-align:center;background:#333;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,.3)}.actie-balk button{font-size:16px;padding:10px 20px;border-radius:5px;border:none;background:#3498db;color:#fff;cursor:pointer;margin:0 5px}.actie-balk button#download-pdf-knop{background:#2ecc71}.actie-balk button:last-child{background:#95a5a6}body{display:flex;justify-content:center;align-items:center;box-sizing:border-box;padding-top:60px}}@media print{.actie-balk{display:none}body{background-color:transparent}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.bord-container{width:100%;height:100%;display:flex;justify-content:center;align-items:center}.vier-op-rij-bord{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);gap:8px;aspect-ratio:7/6;max-width:100%;max-height:100%;background-color:#005f73;padding:10px;border-radius:15px;border:5px solid #0a9396;box-sizing:border-box}.spel-vakje{position:relative;width:100%;height:100%;background-color:#e9d8a6;border-radius:50%;display:flex;justify-content:center;align-items:center}.spel-vakje .tekst{color:#333;font-weight:700;font-size:clamp(8pt,2.5vmin,14pt);text-align:center;word-break:break-word;padding:4px;box-sizing:border-box}</style>`;
-        const actieKnoppenHTML = `<div class=actie-balk><button onclick=window.print()>🖨️ Afdrukken</button><button id=download-pdf-knop>📄 Download als PDF</button><button onclick=window.close()>❌ Sluiten</button></div>`;
-        const containerHTML = `<div class=bord-container>${bordHTML}</div>`;
+        const actieKnoppenHTML = `<div class="actie-balk"><button onclick="window.print()">🖨️ Afdrukken</button><button id="download-pdf-knop">📄 Download als PDF</button><button onclick="window.close()">❌ Sluiten</button></div>`;
+        const containerHTML = `<div class="bord-container">${bordHTML}</div>`;
         const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}</script>`;
-        return `<html><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src=https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js><\/script><script src=https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`
+        return `<html><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`;
+    }
+
+    // Helper: maak veilige ID zonder spaties/accents e.d.
+    function maakIdVeilig(str) {
+        return `check-${str.replace(/[^a-zA-Z0-9_-]/g, '_')}`;
     }
 
     function genereerSpelbord() {
         let itemList = [];
+
         if (gekozenSpeltype === 'woorden') {
             const avi = aviNiveauSelect.value;
             const geselecteerdeCheckboxes = document.querySelectorAll('#moeilijkheid-checkboxes input:checked');
@@ -80,23 +104,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Kies a.u.b. een AVI-niveau en minstens één moeilijkheid.');
                 return;
             }
+
             const uniekeWoorden = new Set();
             const geselecteerdeIndex = aviOrder.indexOf(avi);
             const relevanteNiveaus = aviOrder.slice(0, geselecteerdeIndex + 1);
+
+            // 1) Als "Vrije Woorden" (Alle woorden) is aangevinkt: voeg ALLE categorieën van het GEKOZEN niveau toe
+            const vrijeGekozen = Array.from(geselecteerdeCheckboxes).some(cb => cb.value === 'Vrije Woorden');
+            if (vrijeGekozen && woordCategorieen[avi]) {
+                for (const cat in woordCategorieen[avi]) {
+                    woordCategorieen[avi][cat].forEach(woord => uniekeWoorden.add(woord));
+                }
+            }
+
+            // 2) Overige aangevinkte moeilijkheden (uitbreidend tot en met gekozen niveau)
             geselecteerdeCheckboxes.forEach(checkbox => {
                 const moeilijkheid = checkbox.value;
+                if (moeilijkheid === 'Vrije Woorden') return; // al verwerkt
                 relevanteNiveaus.forEach(niveau => {
                     if (woordCategorieen[niveau] && woordCategorieen[niveau][moeilijkheid]) {
                         woordCategorieen[niveau][moeilijkheid].forEach(woord => uniekeWoorden.add(woord));
                     }
                 });
             });
+
             itemList = [...uniekeWoorden];
+
         } else if (gekozenSpeltype === 'getallen') {
             itemList = geselecteerdeGetallenLijst;
+
         } else if (gekozenSpeltype === 'tafels') {
-            // Logica voor het genereren van tafelsommen
-            const geselecteerdeTafels = [...document.querySelectorAll('#tafel-checkboxes input:checked')].map(cb => parseInt(cb.value));
+            const geselecteerdeTafels = [...document.querySelectorAll('#tafel-checkboxes input:checked')].map(cb => parseInt(cb.value, 10));
             const tafelType = document.querySelector('input[name="tafel-type"]:checked').value;
 
             if (geselecteerdeTafels.length === 0) {
@@ -117,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!itemList || itemList.length === 0) {
-            alert(`Er zijn geen items geselecteerd. Kies een categorie of een getallenreeks.`);
+            alert('Er zijn geen items geselecteerd. Kies een categorie of een getallenreeks.');
             return;
         }
 
@@ -128,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const geschuddeItems = teVullenItems.sort(() => Math.random() - 0.5);
         const bordItems = geschuddeItems.slice(0, 42);
-        
+
         let bordHTML = '<div class="vier-op-rij-bord">';
         for (const item of bordItems) {
             bordHTML += `<div class="spel-vakje"><div class="tekst">${item}</div></div>`;
@@ -152,8 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const geselecteerdNiveau = aviNiveauSelect.value;
         moeilijkheidCheckboxesDiv.innerHTML = '';
         if (!geselecteerdNiveau) return;
+
         const geselecteerdeIndex = aviOrder.indexOf(geselecteerdNiveau);
         const relevanteNiveaus = aviOrder.slice(0, geselecteerdeIndex + 1);
+
         for (const moeilijkheid in alleMoeilijkheden) {
             const leesbareNaam = alleMoeilijkheden[moeilijkheid].split('(')[0].trim();
             let isBeschikbaar = false;
@@ -163,20 +203,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
                 }
             }
-            const checkboxHTML = `<div class="checkbox-container ${!isBeschikbaar?'disabled':''}"><input type=checkbox id=check-${moeilijkheid} name=moeilijkheid value=${moeilijkheid} ${!isBeschikbaar?'disabled':''}><label for=check-${moeilijkheid} title="${alleMoeilijkheden[moeilijkheid]}">${leesbareNaam}</label></div>`;
+            const id = maakIdVeilig(moeilijkheid);
+            const checkboxHTML =
+                `<div class="checkbox-container ${!isBeschikbaar ? 'disabled' : ''}">
+                    <input type="checkbox" id="${id}" name="moeilijkheid" value="${moeilijkheid}" ${!isBeschikbaar ? 'disabled' : ''}>
+                    <label for="${id}" title="${alleMoeilijkheden[moeilijkheid]}">${leesbareNaam}</label>
+                </div>`;
             moeilijkheidCheckboxesDiv.innerHTML += checkboxHTML;
         }
     }
 
-    // Nieuwe functie om de tafel-checkboxes te vullen
     function vulTafelCheckboxes() {
         tafelCheckboxesDiv.innerHTML = '';
         for (let i = 1; i <= 10; i++) {
-            const checkboxHTML = `<div class="checkbox-container"><input type=checkbox id=check-tafel-${i} name=tafel value=${i}><label for=check-tafel-${i}>Tafel van ${i}</label></div>`;
+            const id = `check-tafel-${i}`;
+            const checkboxHTML =
+                `<div class="checkbox-container">
+                    <input type="checkbox" id="${id}" name="tafel" value="${i}">
+                    <label for="${id}">Tafel van ${i}</label>
+                </div>`;
             tafelCheckboxesDiv.innerHTML += checkboxHTML;
         }
     }
 
+    // UI events
     kiesWoordenKnop.addEventListener('click', () => {
         gekozenSpeltype = 'woorden';
         kiesWoordenKnop.classList.add('active');
@@ -196,10 +246,9 @@ document.addEventListener('DOMContentLoaded', () => {
         getallenOptiesDiv.classList.remove('verborgen');
         woordenOptiesDiv.classList.add('verborgen');
         tafelsOptiesDiv.classList.add('verborgen');
-        genereerBordKnop.classList.add('verborgen'); 
+        genereerBordKnop.classList.add('verborgen');
     });
-    
-    // Nieuwe event listener voor de Tafels-knop
+
     kiesTafelsKnop.addEventListener('click', () => {
         gekozenSpeltype = 'tafels';
         kiesTafelsKnop.classList.add('active');
@@ -215,8 +264,8 @@ document.addEventListener('DOMContentLoaded', () => {
         knop.addEventListener('click', (e) => {
             document.querySelectorAll('.getal-knop').forEach(k => k.classList.remove('active'));
             e.target.classList.add('active');
-            const max = parseInt(e.target.dataset.max);
-            geselecteerdeGetallenLijst = Array.from({length: max}, (_, i) => formatteerGetal(i + 1));
+            const max = parseInt(e.target.dataset.max, 10);
+            geselecteerdeGetallenLijst = Array.from({ length: max }, (_, i) => formatteerGetal(i + 1));
             genereerBordKnop.classList.remove('verborgen');
         });
     });
@@ -224,7 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     aviNiveauSelect.addEventListener('change', vulMoeilijkheidCheckboxes);
     genereerBordKnop.addEventListener('click', genereerSpelbord);
 
-    // Roep de nieuwe functies aan bij het laden van de pagina
+    // Init
     vulAviNiveaus();
     vulTafelCheckboxes();
 });
+
