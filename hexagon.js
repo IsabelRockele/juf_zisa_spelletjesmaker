@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
             targetCtx.fill();
         }
 
-        if (withContent && content !== undefined) {
+        if (withContent && content !== undefined && cellData.special !== 'eye') {
              const fontSize = Math.max(8, size * 0.8);
              targetCtx.font = `${fontSize}px Arial`;
              targetCtx.fillStyle = 'black';
@@ -323,7 +323,10 @@ function pixelToHex(x, y) {
         const options = { numberRange: numberRangeSelect.value, selectedTables: Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => cb.value) };
         let colorCounts = new Map();
         let totalFigureCells = 0;
-        drawingMatrix.flat().forEach(cell => { if (cell.color !== "Achtergrond") { colorCounts.set(cell.color, (colorCounts.get(cell.color) || 0) + 1); totalFigureCells++; } });
+        drawingMatrix.flat().forEach(cell => {
+            if (cell.special === 'eye') return; // vak met oogje telt niet mee voor oefeningen/legende
+            if (cell.color !== "Achtergrond") { colorCounts.set(cell.color, (colorCounts.get(cell.color) || 0) + 1); totalFigureCells++; }
+        });
         const isMulDiv = ['vermenigvuldigen', 'delen', 'beide_verm_del'].includes(operationType);
         let maxOutcomeRange;
         if (operationType === 'delen') { maxOutcomeRange = 10; } 
@@ -446,6 +449,8 @@ function pixelToHex(x, y) {
                 const originalCell = drawingMatrix[r][c];
                 const pool = outcomePools.get(originalCell.color);
                 let displayedNumber = originalCell.color === "Achtergrond" ? (distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : '') : pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?';
+                // Geen getal tonen in een vak met oogje
+                if (originalCell.special === 'eye') { displayedNumber = ''; }
                 const cellForDrawing = { color: 'Achtergrond', special: originalCell.special };
                 drawHexagon(werkbladCtx, c, r, cellForDrawing, hexSize, hexWidth, hexVertSpacing, true, displayedNumber);
             }
@@ -478,7 +483,10 @@ function pixelToHex(x, y) {
                 const points = getHexPoints(xOffset + center.x, margin + center.y, pdfHexSize);
                 const eyeData = originalCell.special === 'eye' ? { x: xOffset + center.x, y: margin + center.y, radius: pdfHexSize * 0.4 } : null;
                 drawHexagonInPdf(doc, points, eyeData);
-                doc.text(num.toString(), xOffset + center.x, margin + center.y, { align: 'center', baseline: 'middle' });
+                // Geen getal tekenen achter een oogje
+                if (originalCell.special !== 'eye') {
+                    doc.text(num.toString(), xOffset + center.x, margin + center.y, { align: 'center', baseline: 'middle' });
+                }
             }
         }
         let currentY = margin + (gridHeight * 0.75 + 0.25) * (2 * pdfHexSize) + 10;
