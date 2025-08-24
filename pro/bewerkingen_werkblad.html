@@ -5,94 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jouw Werkblad (PRO)</title>
 
-  <!-- PRO manifest & iconen -->
   <link rel="manifest" href="/pro/manifest-pro.json">
   <link rel="icon" type="image/png" sizes="192x192" href="/pro/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/pro/icons/icon-192.png">
   <meta name="theme-color" content="#fffbe6">
 
-  <!-- Styles: bestand ligt buiten /pro/, dus één map omhoog -->
   <link rel="stylesheet" href="../bewerkingen.css">
 
-  <!-- jsPDF (zoals in originele versie) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <style>
+    .pro-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #3f7fbf;
+        padding: 8px 12px;
+        color: #fff;
+        z-index: 1000;
+        height: 48px;
+    }
+    .pro-header .back-link,
+    .pro-header #btnLogout {
+        background: #5a9fd4;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .pro-header .back-link { float: left; }
+    .pro-header #btnLogout { float: right; }
+    body { margin-top: 60px; }
+  </style>
 </head>
 <body>
-  <!-- === PRO bar + guard ================================================== -->
-  <div class="probar" style="position:sticky;top:0;z-index:1000;background:#fffbe6;border-bottom:1px solid #ffe08a;display:flex;gap:.6rem;justify-content:flex-end;align-items:center;padding:10px 16px">
-    <small id="who" style="color:#374151">Controleren…</small>
-    <a href="/pro/app.html" class="btn-pro" style="border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:.45rem .8rem;text-decoration:none;color:#111">Keuzemenu</a>
-    <button id="btnLogout" class="btn-pro" type="button" style="border:1px solid #e5e7eb;background:#f8fafc;border-radius:10px;padding:.45rem .8rem;cursor:pointer">Uitloggen</button>
-  </div>
+<header class="pro-header">
+    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
+    <button id="btnLogout">Uitloggen</button>
+</header>
 
-  <script>
-    // === Zelfde API-host als in uw pro/index.html
-    const API_BASE  = "https://api-xc54winygq-ew.a.run.app";
-    const TOKEN_KEY = "zisa_token";
-    const LOGIN_URL = "/pro/index.html";
+<script>
+  const API_BASE  = "https://api-xc54winygq-ew.a.run.app";
+  const TOKEN_KEY = "zisa_token";
+  const LOGIN_URL = "/pro/index.html";
 
-    const getToken   = ()=> localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-    const clearToken = ()=> { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); };
-    const goLogin    = ()=> location.replace(`${LOGIN_URL}?t=${Date.now()}`);
+  const getToken   = ()=> localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
+  const clearToken = ()=> { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); };
+  const goLogin    = ()=> location.replace(`${LOGIN_URL}?t=${Date.now()}`);
 
-    async function guard(){
-      try{
-        // 1) cookie-sessie
-        let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
-        // 2) bearer token als fallback
-        if (resp.status===401 || resp.status===403){
-          const t = getToken();
-          if (t) resp = await fetch(`${API_BASE}/auth/me`, { headers:{Authorization:`Bearer ${t}`} });
-        }
-        const data = await resp.json().catch(()=>({}));
-        if (data?.ok){
-          const w = document.getElementById('who');
-          if (w) w.textContent = `Ingelogd als: ${data.uid}`;
-          return; // toegang ok
-        }
-      }catch(e){}
-      goLogin(); // niet ingelogd → terug naar login
-    }
-
-    async function doLogout(){
-      try{
-        await fetch(`${API_BASE}/auth/logout`, { method:'POST', credentials:'include' });
-      }catch(e){}
-      finally{
-        // lokale restanten opruimen
-        localStorage.removeItem('otp_cooldown_until');
-        sessionStorage.removeItem('admin_last_code');
-        clearToken();
-        goLogin();
+  async function guard(){
+    try{
+      let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
+      if (resp.status===401 || resp.status===403){
+        const t = getToken();
+        if (t) resp = await fetch(`${API_BASE}/auth/me`, { headers:{Authorization:`Bearer ${t}`} });
       }
+      const data = await resp.json().catch(()=>({}));
+      if (data?.ok) return;
+    }catch(e){}
+    goLogin();
+  }
+
+  async function doLogout(){
+    try{
+      await fetch(`${API_BASE}/auth/logout`, { method:'POST', credentials:'include' });
+    }catch(e){}
+    finally{
+      localStorage.removeItem('otp_cooldown_until');
+      sessionStorage.removeItem('admin_last_code');
+      clearToken();
+      goLogin();
     }
+  }
 
-    document.addEventListener('DOMContentLoaded', ()=>{
-      const btn = document.getElementById('btnLogout');
-      if (btn) btn.addEventListener('click', doLogout);
-      guard();
-    });
-  </script>
-  <!-- === /PRO bar + guard ================================================= -->
+  document.addEventListener('DOMContentLoaded', ()=>{
+    document.getElementById('btnLogout')?.addEventListener('click', doLogout);
+    guard();
+  });
+</script>
 
-  <!-- Uw bestaande inhoud -->
-  <header>
-    <h1>Jouw Werkblad</h1>
-  </header>
+<header>
+  <h1>Jouw Werkblad</h1>
+</header>
 
-  <div class="werkblad-pagina">
-    <div id="werkblad-knoppen">
-      <button id="opnieuwBtn">Maak nieuwe oefeningen</button>
-      <button id="downloadPdfBtn">Download als PDF</button>
-      <!-- Extra: directe terugknop is niet per se nodig, PRO-balk heeft al Keuzemenu -->
-      <!-- <button onclick="location.href='/pro/app.html'">Terug naar keuzemenu</button> -->
-    </div>
-    <div id="werkblad-wrapper">
-      <div id="werkblad-container"></div>
-    </div>
+<div class="werkblad-pagina">
+  <div id="werkblad-knoppen">
+    <button id="opnieuwBtn">Maak nieuwe oefeningen</button>
+    <button id="downloadPdfBtn">Download als PDF</button>
   </div>
+  <div id="werkblad-wrapper">
+    <div id="werkblad-container"></div>
+  </div>
+</div>
 
-  <!-- Scripts: bestand ligt buiten /pro/, dus één map omhoog -->
-  <script src="../bewerkingen_werkblad.js"></script>
+<script src="../bewerkingen_werkblad.js"></script>
 </body>
 </html>
+
