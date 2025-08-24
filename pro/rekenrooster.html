@@ -3,88 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <title>Rekentabel Generator</title>
-    <link rel="stylesheet" href="rekenrooster.css">
+    <link rel="stylesheet" href="../rekenrooster.css">
+    <base href="/pro/">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        .pro-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #3f7fbf;
+            padding: 8px 12px;
+            color: #fff;
+            z-index: 1000;
+            height: 48px;
+        }
+        .pro-header .back-link,
+        .pro-header #logoutBtn {
+            background: #5a9fd4;
+            color: #fff;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+            white-space: nowrap;
+        }
+        .pro-header .back-link { float: left; }
+        .pro-header #logoutBtn { float: right; }
+        body { margin-top: 60px; }
+    </style>
 </head>
 <body>
-    <header>
-        <button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
-        <h1>Rekentabel Generator</h1>
-    </header>
+<header class="pro-header">
+    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
+    <button id="logoutBtn">Uitloggen</button>
+</header>
 
-    <div id="main-content">
-        <div id="left-panel">
-            <div class="control-group">
-                <h3>Instellingen</h3>
-                <label>Bewerking(en):</label>
-                <div id="bewerking-keuze">
-                    <label><input type="checkbox" name="bewerking" value="+" > Optellen (+)</label>
-                    <label><input type="checkbox" name="bewerking" value="-"> Aftrekken (-)</label>
-                    <label><input type="checkbox" name="bewerking" value="x"> Vermenigvuldigen (x)</label>
-                </div>
-            </div>
-            
-            <div class="control-group">
-                <label for="puzzelType">Soort Puzzel:</label>
-                <select id="puzzelType">
-                    <option value="klassiek" selected>Klassiek (vul de uitkomst in)</option>
-                    <option value="omgekeerd">Omgekeerd (vind het startgetal)</option>
-                </select>
-            </div>
+<header>
+    <h1>Rekentabel Generator</h1>
+</header>
 
-            <div class="control-group">
-                <label for="aantalTabellen">Aantal rekentabellen:</label>
-                <div>
-                    <label class="radio-inline"><input type="radio" name="aantalTabellen" value="1" checked> 1</label>
-                    <label class="radio-inline"><input type="radio" name="aantalTabellen" value="2"> 2</label>
-                    <label class="radio-inline"><input type="radio" name="aantalTabellen" value="4"> 4</label>
-                </div>
+<div id="main-content">
+    <div id="left-panel">
+        <div class="control-group">
+            <h3>Instellingen</h3>
+            <label>Bewerking(en):</label>
+            <div id="bewerking-keuze">
+                <label><input type="checkbox" name="bewerking" value="+"> Optellen (+)</label>
+                <label><input type="checkbox" name="bewerking" value="-"> Aftrekken (-)</label>
+                <label><input type="checkbox" name="bewerking" value="x"> Vermenigvuldigen (x)</label>
             </div>
+        </div>
+        
+        <div class="control-group">
+            <label for="puzzelType">Soort Puzzel:</label>
+            <select id="puzzelType">
+                <option value="klassiek" selected>Klassiek (vul de uitkomst in)</option>
+                <option value="omgekeerd">Omgekeerd (vind het startgetal)</option>
+            </select>
+        </div>
 
-            <div class="control-group">
-                <label for="gridSize">Formaat:</label>
-                <select id="gridSize">
-                    <option value="4">4x4 Rooster</option>
-                    <option value="5">5x5 Rooster</option>
-                    <option value="6">6x6 Rooster</option>
-                </select>
-            </div>
-
-            <div class="control-group" id="getalbereik-group">
-                <label for="numberRange">Max Getal (voor +/- startgetallen):</label>
-                <select id="numberRange">
-                    <option value="10">10</option>
-                    <option value="20">20</option>
-                    <option value="100">100</option>
-                    <option value="1000">1000</option>
-                </select>
-            </div>
-
-            <div class="control-group" id="tafels-group" style="display:none;">
-                <label>Tafels (voor x): <span id="tafelHint" style="font-weight: normal; font-size: 0.9em;"></span></label>
-                <div id="tafelKeuze">
-                    </div>
-            </div>
-
-             <div class="control-group">
-                <label for="legeVakken">Aantal lege vakken:</label>
-                <input type="range" id="legeVakken" min="1" max="10" value="4">
-                <span id="legeVakkenLabel">4</span>
+        <div class="control-group">
+            <label for="aantalTabellen">Aantal rekentabellen:</label>
+            <div>
+                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="1" checked> 1</label>
+                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="2"> 2</label>
+                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="4"> 4</label>
             </div>
         </div>
 
-        <div id="center-panel">
-            <canvas id="roosterCanvas" width="500" height="500"></canvas>
+        <div class="control-group">
+            <label for="gridSize">Formaat:</label>
+            <select id="gridSize">
+                <option value="4">4x4 Rooster</option>
+                <option value="5">5x5 Rooster</option>
+                <option value="6">6x6 Rooster</option>
+            </select>
         </div>
 
-        <div id="right-panel-buttons">
-            <button id="genereerBtn">Nieuwe Puzzel</button>
-            <button id="oplossingBtn">Toon Oplossing</button>
-            <button id="downloadPngBtn">Download als PNG</button>
-            <button id="downloadPdfBtn">Download als PDF</button>
+        <div class="control-group" id="getalbereik-group">
+            <label for="numberRange">Max Getal (voor +/- startgetallen):</label>
+            <select id="numberRange">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="100">100</option>
+                <option value="1000">1000</option>
+            </select>
+        </div>
+
+        <div class="control-group" id="tafels-group" style="display:none;">
+            <label>Tafels (voor x): <span id="tafelHint" style="font-weight: normal; font-size: 0.9em;"></span></label>
+            <div id="tafelKeuze"></div>
+        </div>
+
+        <div class="control-group">
+            <label for="legeVakken">Aantal lege vakken:</label>
+            <input type="range" id="legeVakken" min="1" max="10" value="4">
+            <span id="legeVakkenLabel">4</span>
         </div>
     </div>
 
-    <script src="rekenrooster.js"></script>
+    <div id="center-panel">
+        <canvas id="roosterCanvas" width="500" height="500"></canvas>
+    </div>
+
+    <div id="right-panel-buttons">
+        <button id="genereerBtn">Nieuwe Puzzel</button>
+        <button id="oplossingBtn">Toon Oplossing</button>
+        <button id="downloadPngBtn">Download als PNG</button>
+        <button id="downloadPdfBtn">Download als PDF</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#logoutBtn');
+            if (!btn) return;
+            try { localStorage.removeItem('authToken'); } catch {}
+            try { localStorage.removeItem('refreshToken'); } catch {}
+            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
+                .catch(() => {})
+                .finally(() => { window.location.href = '/login.html'; });
+        });
+    })();
+</script>
+<script src="../rekenrooster.js"></script>
 </body>
 </html>
