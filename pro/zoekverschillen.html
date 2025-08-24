@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Zoek de Verschillen Editor</title>
+  <link rel="stylesheet" href="../zoekverschillen.css">
+  <base href="/pro/">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    .pro-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background-color: #3f7fbf;
+        padding: 8px 12px;
+        color: #fff;
+        z-index: 1000;
+        height: 48px;
+    }
+    .pro-header .back-link,
+    .pro-header #logoutBtn {
+        background: #5a9fd4;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        display: inline-block;
+        white-space: nowrap;
+    }
+    .pro-header .back-link { float: left; }
+    .pro-header #logoutBtn { float: right; }
+    body { margin-top: 60px; }
+  </style>
+</head>
+<body>
+<header class="pro-header">
+  <a href="app.html" class="back-link">&larr; Terug naar menu</a>
+  <button id="logoutBtn">Uitloggen</button>
+</header>
+
+<div id="main-content">
+  <div id="left-panel">
+      <div class="control-group">
+          <h3>Bestand</h3>
+          <button id="uploadImageBtn">Upload Afbeelding</button>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
+      
+      <div class="control-group">
+          <h3>Acties</h3>
+          <button id="opnieuwBtn">Opnieuw</button>
+          <button id="undoBtn" disabled>Ongedaan Maken</button>
+      </div>
+
+      <div class="control-group">
+          <h3>Handmatige Tools</h3>
+          <div id="tools-container">
+              <!-- knoppen zoals in origineel -->
+          </div>
+          <div class="tool-setting">
+              <label for="dikte">Dikte:</label>
+              <input type="number" id="dikte" value="10" min="1" max="50">
+          </div>
+          <div class="tool-setting" id="color-selector">
+              <label>Kleur:</label>
+              <div id="color-display"></div>
+          </div>
+          <div class="tool-setting" id="gum-settings" style="display: none;">
+              <label for="gumvorm">Gomvorm:</label>
+              <select id="gumvorm">
+                  <option value="rond">Rond</option>
+                  <option value="vierkant">Vierkant</option>
+              </select>
+          </div>
+      </div>
+
+      <div class="control-group" id="selection-tools" style="display: none;">
+          <h3>Klembord</h3>
+          <div id="clipboard-preview-container" class="hidden">
+              <canvas id="clipboardCanvas"></canvas>
+          </div>
+          <button id="plakkenBtn" disabled>Plakken</button>
+      </div>
+  </div>
+
+  <div id="center-panel">
+      <div id="puzzel-container">
+          <div class="image-wrapper">
+              <h3>Origineel</h3>
+              <canvas id="canvasOrigineel" width="400" height="600"></canvas>
+          </div>
+          <div class="image-wrapper">
+              <h3>Jouw Puzzel (Bewerken)</h3>
+              <canvas id="canvasVerschillen" width="400" height="600" willReadFrequently="true"></canvas>
+          </div>
+      </div>
+      <p id="status-text">Upload een afbeelding om te beginnen.</p>
+  </div>
+
+  <div id="right-panel-buttons">
+      <div class="control-group">
+          <h3>Download</h3>
+          <button id="downloadPngBtn" disabled>Download als PNG</button>
+          <button id="downloadPdfBtn" disabled>Download als PDF</button>
+      </div>
+  </div>
+</div>
+
+<div id="edit-modal-overlay" class="hidden">
+  <div id="edit-modal">
+    <h3>Selectie Bewerken</h3>
+    <p>Gebruik je muis om ongewenste delen van de selectie weg te gummen.</p>
+    <canvas id="editCanvas" willReadFrequently="true"></canvas>
+    <div style="margin: 10px 0; text-align: left;">
+        <input type="checkbox" id="transparentBgCheckbox">
+        <label for="transparentBgCheckbox">Achtergrondkleur transparant maken</label>
+    </div>
+    <div class="edit-controls">
+        <button id="editUndoBtn" disabled>Ongedaan Maken</button>
+        <button id="editFlipHorizontalBtn">Spiegel H</button>
+        <button id="editFlipVerticalBtn">Spiegel V</button>
+        <button id="saveEditBtn">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+    (function() {
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#logoutBtn');
+            if (!btn) return;
+            try { localStorage.removeItem('authToken'); } catch {}
+            try { localStorage.removeItem('refreshToken'); } catch {}
+            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
+                .catch(() => {})
+                .finally(() => { window.location.href = '/login.html'; });
+        });
+    })();
+</script>
+<script src="../zoekverschillen.js"></script>
+</body>
+</html>
