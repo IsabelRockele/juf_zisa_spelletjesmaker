@@ -15,8 +15,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
+    /**
+     * Controleer of een oefening met/zonder brug is, en filter volgens de keuze.
+     * - operation '+' => brug indien eenheden optellen tot >= 10
+     * - operation '-' => brug indien lenen nodig is (units1 < units2)
+     * - brugType: 'met' | 'zonder' | 'beide'
+     */
     function checkBridging(num1, num2, operation, brugType) {
-        if (brugType === 'beide' || num1 < 10 || num2 < 10) return true;
+        if (brugType === 'beide') return true;
+
         const units1 = num1 % 10;
         const units2 = num2 % 10;
         let isBridging;
@@ -55,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     // Gebruiker telt op, dus we checken de optelling
                     checkIsValid = checkBridging(term1, term2, '+', brug);
                 } else { // 'zoekTerm'
-                    // Gebruiker trekt af, dus we checken de aftrekking
+                    // Gebruiker trekt af, dus we checken de aftrekking (centerNumber - term1)
                     checkIsValid = checkBridging(centerNumber, term1, '-', brug);
                 }
 
