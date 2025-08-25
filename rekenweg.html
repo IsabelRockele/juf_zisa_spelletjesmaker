@@ -8,7 +8,10 @@
 </head>
 <body>
     <header>
-        <button id="menuBtn" onclick="window.location.href='index.html'">Keuzemenu</button>
+        <div class="header-buttons">
+            <button id="menuBtn">Keuzemenu</button>
+            <button id="newPathBtn" style="display: none;">Nieuwe Rekenweg</button>
+        </div>
         <h1>Rekenweg Template Maker</h1>
     </header>
 
@@ -44,7 +47,6 @@
             </div>
 
             <div class="control-group">
-                <button id="drawNewPathBtn" style="display: none;">Teken opnieuw</button>
                 <button id="downloadPngBtn" style="display: none;">Download als PNG</button>
                 <button id="downloadPdfBtn" style="display: none;">Download als PDF</button>
             </div>
