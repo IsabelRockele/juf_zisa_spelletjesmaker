@@ -8,7 +8,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-    
+    <div id="herstel-melding" class="herstel-melding verborgen">
+        <span>Er is een vorig spel gevonden. Wilt u doorgaan?</span>
+        <button id="herstel-ja">✅ Ja, ga door</button>
+        <button id="herstel-nee">❌ Nee, start een nieuw spel</button>
+    </div>
+
     <div class="hoofd-menu">
         <a href="index.html" class="menu-knop">Keuzemenu</a>
         <hr>
@@ -88,9 +93,13 @@
             <button id="start-reken-spel-knop">Start spel</button>
         </div>
 
-
         <hr>
         <button id="maak-kaarten-knop" class="menu-knop bingokaart-knop">Maak Bingokaarten</button>
+        
+        <hr>
+        <button id="export-spel-knop" class="menu-knop">📥 Exporteer Spel</button>
+        <button id="import-spel-knop" class="menu-knop">🔄 Importeer Spel</button>
+        <input type="file" id="import-spel-input" class="verborgen" accept=".json">
     </div>
 
     <div id="spel-wrapper" class="verborgen">
