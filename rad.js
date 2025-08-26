@@ -139,38 +139,69 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: "Doe 10 keer knieheffen (elke kant).", category: "Beweging" },
         { text: "Raak 10 keer je tenen aan.", category: "Beweging" },
         { text: "Balanceer 15 seconden op je rechterbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
-        { text: "Balanceer 15 seconden op je linkerbeen.", gameType: "timer_only", duration: 15, category: "Beweging" }
+        { text: "Balanceer 15 seconden op je linkerbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
+        { text: "Doe 20 seconden de 'plank' houding.", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Doe 10 ster-sprongen (star jumps).", category: "Beweging" },
+        { text: "Beeld uit dat je 20 seconden een ladder beklimt.", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Maak jezelf zo groot als een reus en dan zo klein als een muis. Herhaal 5 keer.", category: "Beweging" },
+        { text: "Doe 10 'windmolens' (raak met je rechterhand je linkervoet aan en wissel af).", category: "Beweging" },
+        { text: "Draai 15 seconden rondjes met je armen naar voren.", gameType: "timer_only", duration: 15, category: "Beweging" },
+        { text: "Doe 10 squats (door je knieën buigen alsof je op een stoel gaat zitten).", category: "Beweging" },
+        { text: "Boks 20 seconden in de lucht (links, rechts, links, rechts...).", gameType: "timer_only", duration: 20, category: "Beweging" },
+        { text: "Loop 5 stappen als een ooievaar (trek je knieën zo hoog mogelijk op).", category: "Beweging" }
     ];
 
     const taalTasks = {
         rijmen: [
             { type: 'rijmen', word: 'huis' }, { type: 'rijmen', word: 'kat' },
-            { type: 'rijmen', word: 'maan' }, { type: 'rijmen', word: 'school' }
+            { type: 'rijmen', word: 'maan' }, { type: 'rijmen', word: 'school' },
+            { type: 'rijmen', word: 'boek' }, { type: 'rijmen', word: 'stoel' },
         ],
         zinmaken: [
             { type: 'zinmaken', word: 'fiets' }, { type: 'zinmaken', word: 'lachen' },
-            { type: 'zinmaken', word: 'vrienden' }, { type: 'zinmaken', word: 'zon' }
+            { type: 'zinmaken', word: 'vrienden' }, { type: 'zinmaken', word: 'zon' },
+            { type: 'zinmaken', word: 'eten' }, { type: 'zinmaken', word: 'slapen' },
         ],
         noem3: [
             { type: 'noem3', category: 'soorten fruit' }, { type: 'noem3', category: 'kleuren' },
-            { type: 'noem3', category: 'dieren op de boerderij' }
+            { type: 'noem3', category: 'dieren op de boerderij' }, { type: 'noem3', category: 'dingen in een klaslokaal' },
+            { type: 'noem3', category: 'sporten' }, { type: 'noem3', category: 'vervoersmiddelen' },
         ],
         grammatica: [
             { type: 'meervoud', word: 'boek', answer: 'boeken' }, { type: 'meervoud', word: 'kind', answer: 'kinderen' },
-            { type: 'verkleinwoord', word: 'boom', answer: 'boompje' }, { type: 'verkleinwoord', word: 'bloem', answer: 'bloemetje' }
+            { type: 'meervoud', word: 'stad', answer: 'steden' }, { type: 'meervoud', word: 'ei', answer: 'eieren' },
+            { type: 'verkleinwoord', word: 'boom', answer: 'boompje' }, { type: 'verkleinwoord', word: 'bloem', answer: 'bloemetje' },
+            { type: 'verkleinwoord', word: 'ring', answer: 'ringetje' }, { type: 'verkleinwoord', word: 'koning', answer: 'koninkje' },
         ],
         tegengestelden: [
             { type: 'tegengestelden', word: 'warm', answer: 'koud' }, { type: 'tegengestelden', word: 'groot', answer: 'klein' },
-            { type: 'tegengestelden', word: 'snel', answer: 'traag' }
+            { type: 'tegengestelden', word: 'snel', answer: 'traag' }, { type: 'tegengestelden', word: 'hoog', answer: 'laag' },
+            { type: 'tegengestelden', word: 'dag', answer: 'nacht' }, { type: 'tegengestelden', word: 'blij', answer: 'boos' },
         ]
     };
 
-    const techLezenTasks = [
+
+     const techLezenTasks = [
         { text: "Lees de tekst voor als een robot.", category: "Technisch Lezen" },
         { text: "Lees de tekst terwijl je op één been staat.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met je tong uit je mond.", category: "Technisch Lezen" },
         { text: "Lees de tekst met een heel droevige stem.", category: "Technisch Lezen" },
         { text: "Lees de tekst met een heel blije stem.", category: "Technisch Lezen" },
-        { text: "Lees fluisterend alsof je een groot geheim vertelt.", category: "Technisch Lezen" }
+        { text: "Lees fluisterend alsof je een groot geheim vertelt.", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je een operazanger bent.", category: "Technisch Lezen" },
+        { text: "Lees elke zin met een andere emotie (boos, blij, bang...).", category: "Technisch Lezen" },
+        { text: "Lees de tekst terwijl je zachtjes op je plaats marcheert.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel hoge stem (als een muis).", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je heel erg moe bent en bijna in slaap valt.", category: "Technisch Lezen" },
+        { text: "Lees de tekst zo snel als je kan, als een raceauto.", category: "Technisch Lezen" },
+        { text: "Lees de tekst heel traag, als een slak.", category: "Technisch Lezen" },
+        { text: "Lees de tekst en klap na elke zin in je handen.", category: "Technisch Lezen" },
+        { text: "Lees de tekst voor aan een (denkbeeldige) plant of stoel.", category: "Technisch Lezen" },
+        { text: "Lees de tekst alsof je een nieuwslezer op tv bent.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met je neus dichtgeknepen.", category: "Technisch Lezen" },
+        { text: "Lees de tekst met een heel lage stem (als een beer).", category: "Technisch Lezen" },
+        { text: "Lees de tekst en spring bij elke punt omhoog.", category: "Technisch Lezen" },
+        { text: "Lees de tekst voor aan een klasgenoot die de tekst ook heeft.", category: "Technisch Lezen" }
     ];
 
     const dynamicData = {
