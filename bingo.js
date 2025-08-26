@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const kaartenKnop = document.getElementById('maak-kaarten-knop');
     const modalOverlay = document.getElementById('modal-overlay');
     const modalTitel = document.getElementById('modal-titel');
-    const modalTekst = document.getElementById('modal-tekst');
-    const modalOpties = document.getElementById('modal-opties');
+    const modalBody = document.getElementById('modal-body');
+    const modalGenereerKnop = document.getElementById('modal-genereer-knop');
     const modalAnnulerenKnop = document.getElementById('modal-annuleren-knop');
     const kiesAviKnop = document.getElementById('kies-avi-knop');
     const aviSelectieDiv = document.getElementById('avi-selectie');
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function genereerPrintbarePagina(kaartGrootte = 5, vulAanMetDubbels = false) {
+    function genereerPrintbarePagina(aantalKaarten, kaartGrootte, vulAanMetDubbels) {
         const aantalVakjes = kaartGrootte * kaartGrootte;
         const actieKnoppenHTML = `
             <div class="actie-balk">
@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button onclick="window.close()">❌ Sluiten</button>
             </div>
         `;
-
         const printStyles = `
             <style>
                 body { margin: 0; font-family: sans-serif; background: #eee; }
@@ -106,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     .bingokaart { width: 45%; height: 45vh; margin: 2%; }
                 }
             </style>`;
-            
         const pdfScript = `
             <script>
                 document.getElementById('download-pdf-knop').addEventListener('click', async () => {
@@ -133,19 +131,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                 pdf.addPage();
                             }
                             let cursorX, cursorY;
-                            if (kaartPositieOpPagina === 0) { 
-                                cursorX = margin;
-                                cursorY = margin;
-                            } else if (kaartPositieOpPagina === 1) { 
-                                cursorX = margin * 2 + cardWidth;
-                                cursorY = margin;
-                            } else if (kaartPositieOpPagina === 2) { 
-                                cursorX = margin;
-                                cursorY = margin * 2 + cardHeight;
-                            } else { 
-                                cursorX = margin * 2 + cardWidth;
-                                cursorY = margin * 2 + cardHeight;
-                            }
+                            if (kaartPositieOpPagina === 0) { cursorX = margin; cursorY = margin; } 
+                            else if (kaartPositieOpPagina === 1) { cursorX = margin * 2 + cardWidth; cursorY = margin; } 
+                            else if (kaartPositieOpPagina === 2) { cursorX = margin; cursorY = margin * 2 + cardHeight; } 
+                            else { cursorX = margin * 2 + cardWidth; cursorY = margin * 2 + cardHeight; }
                             const canvas = await html2canvas(kaart, { scale: 2 });
                             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', cursorX, cursorY, cardWidth, cardHeight);
                         }
@@ -158,11 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         downloadBtn.textContent = '📄 Download als PDF';
                     }
                 });
-            </script>
-        `;
+            </script>`;
 
         let kaartenHTML = '';
-        for (let i = 0; i < 25; i++) {
+        for (let i = 0; i < aantalKaarten; i++) {
             let kaartItems;
             if (vulAanMetDubbels) {
                 let aangevuldeLijst = [];
@@ -180,50 +168,114 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<html><head><title>Bingokaarten</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script></head><body>${actieKnoppenHTML}<div id="kaarten-wrapper">${kaartenHTML}</div>${pdfScript}</body></html>`;
     }
 
-    function toonKeuzeModal(actieFunctie) {
+    function toonKaartOptiesModal() {
+        const MIN_KAARTEN = 4;
         const aantalItems = kaartItemsLijst.length;
-        modalTitel.textContent = 'Te weinig antwoorden!';
-        modalTekst.textContent = `Er zijn ${aantalItems} unieke antwoorden. Dit is te weinig voor standaard 5x5 bingokaarten. Kies een oplossing:`;
-        modalOpties.innerHTML = '';
-        if (aantalItems >= 16) {
-            const btn = document.createElement('button');
-            btn.className = 'modal-optie-knop';
-            btn.innerHTML = `Maak 4x4 kaarten (Aanbevolen)<small>Genereer 25 kaarten van 4x4 vakjes.</small>`;
-            btn.onclick = () => { actieFunctie(4, false); modalOverlay.classList.add('verborgen'); };
-            modalOpties.appendChild(btn);
+        
+        modalBody.innerHTML = `
+            <div class="modal-optie">
+                <label for="aantal-kaarten-input">Hoeveel kaarten wil je maken?</label>
+                <input type="number" id="aantal-kaarten-input" value="25" min="${MIN_KAARTEN}" step="1">
+            </div>
+            <div class="modal-optie">
+                <label>Kies de kaartgrootte (suggesties):</label>
+                <div id="grid-opties-wrapper"></div>
+            </div>
+        `;
+
+        const gridOptiesWrapper = document.getElementById('grid-opties-wrapper');
+        const aantalKaartenInput = document.getElementById('aantal-kaarten-input');
+
+        // --- HERSCHREVEN FUNCTIE VOOR DUIDELIJKERE SUGGESTIES ---
+        function updateGridOpties() {
+            gridOptiesWrapper.innerHTML = '';
+            let besteOptie = null;
+
+            // Bepaal de best mogelijke optie op basis van aantal items
+            if (aantalItems >= 25) besteOptie = 5;
+            else if (aantalItems >= 16) besteOptie = 4;
+            else if (aantalItems >= 9) besteOptie = 3;
+
+            // Bouw de HTML voor elke optie
+            if (aantalItems >= 9) {
+                const aanbevolen = (besteOptie === 3) ? ' <strong>(Aanbevolen)</strong>' : '';
+                gridOptiesWrapper.innerHTML += `<label><input type="radio" name="grid-grootte" value="3"> 3x3 (vereist 9 items)${aanbevolen}</label>`;
+            }
+            if (aantalItems >= 16) {
+                const aanbevolen = (besteOptie === 4) ? ' <strong>(Aanbevolen)</strong>' : '';
+                gridOptiesWrapper.innerHTML += `<label><input type="radio" name="grid-grootte" value="4"> 4x4 (vereist 16 items)${aanbevolen}</label>`;
+            }
+            if (aantalItems >= 25) {
+                const aanbevolen = (besteOptie === 5) ? ' <strong>(Aanbevolen)</strong>' : '';
+                gridOptiesWrapper.innerHTML += `<label><input type="radio" name="grid-grootte" value="5"> 5x5 (vereist 25 items)${aanbevolen}</label>`;
+            }
+            
+            // Altijd de optie met dubbels aanbieden, met extra uitleg
+            gridOptiesWrapper.innerHTML += `
+                <label>
+                    <input type="radio" name="grid-grootte" value="5-dubbel"> 5x5 (met dubbels)
+                    <small>Verhoogt de kans dat meerdere kinderen tegelijk bingo hebben.</small>
+                </label>`;
+
+            // Selecteer de best mogelijke optie automatisch
+            if (besteOptie) {
+                document.querySelector(`input[name="grid-grootte"][value="${besteOptie}"]`).checked = true;
+            } else {
+                // Als geen enkele optie kan, selecteer dan de 'met dubbels' optie
+                document.querySelector(`input[name="grid-grootte"][value="5-dubbel"]`).checked = true;
+            }
         }
-        if (aantalItems >= 9) {
-            const btn = document.createElement('button');
-            btn.className = 'modal-optie-knop';
-            btn.innerHTML = `Maak 3x3 kaarten<small>Genereer 25 kaarten van 3x3 vakjes.</small>`;
-            btn.onclick = () => { actieFunctie(3, false); modalOverlay.classList.add('verborgen'); };
-            modalOpties.appendChild(btn);
-        }
-        const btnForceer = document.createElement('button');
-        btnForceer.className = 'modal-optie-knop';
-        btnForceer.innerHTML = `Maak 5x5 kaarten (met dubbels)<small>Vakjes worden aangevuld met dubbele antwoorden.</small>`;
-        btnForceer.onclick = () => { actieFunctie(5, true); modalOverlay.classList.add('verborgen'); };
-        modalOpties.appendChild(btnForceer);
+        
+        aantalKaartenInput.addEventListener('input', updateGridOpties);
+        
+        updateGridOpties();
         modalOverlay.classList.remove('verborgen');
     }
 
+    kaartenKnop.addEventListener('click', () => {
+        if (kaartItemsLijst.length === 0) {
+            alert('Kies eerst een spelmodus en niveau.');
+            return;
+        }
+        toonKaartOptiesModal();
+    });
+
+    modalGenereerKnop.addEventListener('click', () => {
+        const aantalKaarten = parseInt(document.getElementById('aantal-kaarten-input').value);
+        const gekozenGridInput = document.querySelector('input[name="grid-grootte"]:checked');
+
+        if (!gekozenGridInput) {
+            alert('Selecteer een kaartgrootte.');
+            return;
+        }
+        const gekozenGrid = gekozenGridInput.value;
+
+        if (!aantalKaarten || aantalKaarten < 4) {
+            alert('Voer een geldig aantal kaarten in (minimaal 4).');
+            return;
+        }
+
+        let kaartGrootte;
+        let vulAanMetDubbels = false;
+
+        if (gekozenGrid === '5-dubbel') {
+            kaartGrootte = 5;
+            vulAanMetDubbels = true;
+        } else {
+            kaartGrootte = parseInt(gekozenGrid);
+        }
+
+        const html = genereerPrintbarePagina(aantalKaarten, kaartGrootte, vulAanMetDubbels);
+        if (html) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(html);
+            printWindow.document.close();
+        }
+        modalOverlay.classList.add('verborgen');
+    });
+
     modalAnnulerenKnop.onclick = () => { modalOverlay.classList.add('verborgen'); };
 
-    function startKaartCreatieProces() {
-        if (kaartItemsLijst.length === 0) { alert('Kies eerst een spelmodus en niveau.'); return; }
-        const actieFunctie = (kaartGrootte, vulAan) => {
-            const html = genereerPrintbarePagina(kaartGrootte, vulAan);
-            if (html) {
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(html);
-                printWindow.document.close();
-            }
-        };
-        if (kaartItemsLijst.length < 25) { toonKeuzeModal(actieFunctie); } 
-        else { actieFunctie(5, false); }
-    }
-
-    // --- HIER IS DE ONTBREKENDE FUNCTIE ---
     function ontleedGetal(n) {
         if (n >= 1000) return n;
         let h = Math.floor(n / 100);
@@ -440,8 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         activeerSpel(`Rekenbingo tot ${max}`, uniekeAntwoorden, false, true, nieuweOefeningen);
     });
-
-    kaartenKnop.addEventListener('click', startKaartCreatieProces);
     
     startKnop.addEventListener('click', () => {
         if (teTrekkenItems.length === 0) { alert("Alle items zijn geweest!"); startKnop.disabled = true; return; }
