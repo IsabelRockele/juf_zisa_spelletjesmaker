@@ -4,12 +4,9 @@
     <meta charset="UTF-8">
     <title>Woorden & Getallen Bingo (PRO)</title>
 
-    <!-- Styles: CSS staat één map hoger dan /pro/ -->
     <link rel="stylesheet" href="../bingo.css">
-    <!-- Base zodat interne links relatief tot /pro/ zijn -->
     <base href="/pro/">
 
-    <!-- Externe libs (ongewijzigd) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -48,13 +45,11 @@
 </head>
 <body>
 
-<!-- === PRO-header (vast bovenaan) ======================================= -->
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
     <button id="logoutBtn">Uitloggen</button>
 </header>
 
-<!-- Uitloggen (zelfde gedrag als uw andere PRO-pagina's) -->
 <script>
   (function() {
     document.addEventListener('click', (e) => {
@@ -68,9 +63,12 @@
     });
   })();
 </script>
-<!-- ===================================================================== -->
+<div id="herstel-melding" class="herstel-melding verborgen">
+    <span>Er is een vorig spel gevonden. Wilt u doorgaan?</span>
+    <button id="herstel-ja">✅ Ja, ga door</button>
+    <button id="herstel-nee">❌ Nee, start een nieuw spel</button>
+</div>
 
-<!-- Pagina-inhoud -->
 <div class="hoofd-menu">
     <hr>
 
@@ -151,6 +149,11 @@
 
     <hr>
     <button id="maak-kaarten-knop" class="menu-knop bingokaart-knop">Maak Bingokaarten</button>
+    
+    <hr>
+    <button id="export-spel-knop" class="menu-knop">📥 Exporteer Spel</button>
+    <button id="import-spel-knop" class="menu-knop">🔄 Importeer Spel</button>
+    <input type="file" id="import-spel-input" class="verborgen" accept=".json">
 </div>
 
 <div id="spel-wrapper" class="verborgen">
@@ -169,14 +172,16 @@
 
 <div id="modal-overlay" class="verborgen">
     <div id="custom-modal">
-        <h3 id="modal-titel">Titel</h3>
-        <p id="modal-tekst">Tekst...</p>
-        <div id="modal-opties"></div>
-        <button id="modal-annuleren-knop">Annuleren</button>
+        <h3 id="modal-titel">Opties voor Bingokaarten</h3>
+        <div id="modal-body">
+            </div>
+        <div id="modal-footer">
+            <button id="modal-genereer-knop" class="modal-actie-knop">Genereer Kaarten</button>
+            <button id="modal-annuleren-knop">Annuleren</button>
+        </div>
     </div>
 </div>
 
-<!-- Script-bestand staat één map hoger dan /pro/ -->
 <script src="../bingo.js"></script>
 </body>
 </html>
