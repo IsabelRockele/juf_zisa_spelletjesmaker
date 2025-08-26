@@ -39,8 +39,8 @@
 </head>
 <body class="options-view">
 <header class="pro-header">
-    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
+    <a href="app.html" class="back-link" aria-label="Terug naar menu">&larr; Terug naar menu</a>
+    <button id="logoutBtn" type="button">Uitloggen</button>
 </header>
 
 <div class="container">
@@ -80,7 +80,7 @@
                 <div class="table-selection">
                     <div id="maal-checkboxes" class="checkbox-grid"></div>
                 </div>
-                <button id="generateTablesBtn" class="generate-btn">Genereer Tafels</button>
+                <button id="generateTablesBtn" class="generate-btn" type="button">Genereer Tafels</button>
                 
                 <h4 style="margin-top: 1.5rem;">Kies Rekensommen (max. 25)</h4>
                 <div class="option-group">
@@ -88,12 +88,12 @@
                     <label><input type="checkbox" name="brug_option" value="met" checked> Met brug</label>
                 </div>
                 <div class="button-group-4-cols">
-                    <button class="preset-btn math-btn" data-type="plusmin10">+ / - tot 10</button>
-                    <button class="preset-btn math-btn" data-type="plusmin20">+ / - tot 20</button>
-                    <button class="preset-btn math-btn" data-type="plusmin100">+ / - tot 100</button>
-                    <button class="preset-btn math-btn" data-type="plusmin1000">+ / - tot 1000</button>
+                    <button class="preset-btn math-btn" data-type="plusmin10" type="button">+ / - tot 10</button>
+                    <button class="preset-btn math-btn" data-type="plusmin20" type="button">+ / - tot 20</button>
+                    <button class="preset-btn math-btn" data-type="plusmin100" type="button">+ / - tot 100</button>
+                    <button class="preset-btn math-btn" data-type="plusmin1000" type="button">+ / - tot 1000</button>
                 </div>
-                <button id="generateSumsBtn" class="generate-btn" style="margin-top: 10px;">Genereer Sommen</button>
+                <button id="generateSumsBtn" class="generate-btn" style="margin-top: 10px;" type="button">Genereer Sommen</button>
             </div>
 
             <div class="column">
@@ -107,14 +107,14 @@
                     <label><input type="checkbox" name="ef_category" value="flexibiliteit"> Flexibiliteit</label>
                     <label><input type="checkbox" name="ef_category" value="planning"> Planning</label>
                 </div>
-                <button id="generateEfBtn" class="ef-btn">Genereer EF Opdrachten</button>
+                <button id="generateEfBtn" class="ef-btn" type="button">Genereer EF Opdrachten</button>
                 <a href="handleiding.pdf" download class="download-btn" style="margin-top: 1.5rem;">Download Handleiding (PDF)</a>
             </div>
             
             <div class="column">
                 <h3>Beweging</h3>
                 <p style="font-size: 0.9rem; margin-bottom: 15px;">Genereer leuke en snelle bewegingsoefeningen.</p>
-                <button id="generateMovementBtn" class="movement-btn">Genereer Bewegingstaken</button>
+                <button id="generateMovementBtn" class="movement-btn" type="button">Genereer Bewegingstaken</button>
             </div>
 
             <div class="column">
@@ -127,11 +127,11 @@
                     <label><input type="checkbox" name="taal_category" value="grammatica" checked> Meervoud / Verkleinwoord</label>
                     <label><input type="checkbox" name="taal_category" value="tegengestelden" checked> Tegengestelden</label>
                 </div>
-                <button id="generateTaalBtn" class="taal-btn">Genereer Taalopdrachten</button>
+                <button id="generateTaalBtn" class="taal-btn" type="button">Genereer Taalopdrachten</button>
 
                 <h4 style="margin-top: 1.5rem;">Technisch Lezen</h4>
                 <p style="font-size: 0.9rem; margin-bottom: 15px;">Genereer leuke opdrachten om een tekst (op papier) op een gekke manier te lezen.</p>
-                <button id="generateTechLezenBtn" class="tech-lezen-btn">Genereer Leesopdrachten</button>
+                <button id="generateTechLezenBtn" class="tech-lezen-btn" type="button">Genereer Leesopdrachten</button>
             </div>
 
             <div class="column" style="background-color: #ecf0f1; border-radius: 8px;">
@@ -145,31 +145,32 @@
                     <label><input type="checkbox" class="mix-category-checkbox" data-category="taal"> Taal: Taaldenken</label>
                     <label><input type="checkbox" class="mix-category-checkbox" data-category="taal_lezen"> Taal: Technisch Lezen</label>
                 </div>
-                <button id="generateMixBtn" class="action-btn" style="margin-top: 10px; background-color: var(--primary-color);">Genereer Gemengd Rad</button>
+                <button id="generateMixBtn" class="action-btn" style="margin-top: 10px; background-color: var(--primary-color);" type="button">Genereer Gemengd Rad</button>
             </div>
         </div>
 
-        <button id="showWheelBtn" class="action-btn" disabled>Stap 2: Toon het Rad</button>
+        <button id="showWheelBtn" class="action-btn" disabled type="button">Stap 2: Toon het Rad</button>
     </div>
 
     <div id="wheelViewControls">
-        <button id="restartBtn" class="preset-btn">Nog eens met dit rad</button>
-        <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;">Download Lijst</button>
-        <button id="newOptionsBtn" class="warning-btn">Nieuwe opties kiezen</button>
+        <button id="restartBtn" class="preset-btn" type="button">Nog eens met dit rad</button>
+        <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;" type="button">Download Lijst</button>
+        <!-- Belangrijk: expliciet type="button" -->
+        <button id="newOptionsBtn" class="warning-btn" type="button">Nieuwe opties kiezen</button>
     </div>
 
     <div class="main-content">
         <div class="wheel-wrapper">
             <canvas id="wheelCanvas" width="650" height="650"></canvas>
             <div class="pointer"></div>
-            <button id="spinBtn">DRAAI!</button>
+            <button id="spinBtn" type="button">DRAAI!</button>
         </div>
     </div>
 </div>
 
-<div id="resultModal" class="modal">
+<div id="resultModal" class="modal" aria-modal="true" role="dialog">
     <div class="modal-content">
-        <span class="close-btn">&times;</span>
+        <span class="close-btn" aria-label="Sluiten">&times;</span>
         <div id="resultOutput"></div>
         <div id="timer-bar-container" class="timer-bar-container">
             <div id="timer-bar" class="timer-bar"></div>
@@ -193,3 +194,4 @@
 <script src="../rad.js"></script>
 </body>
 </html>
+
