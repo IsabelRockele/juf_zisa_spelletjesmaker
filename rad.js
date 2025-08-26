@@ -1,50 +1,56 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elementen
+    // ===== DOM ELEMENTEN =====
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
+
     const itemInput = document.getElementById('itemInput');
     const fileUpload = document.getElementById('fileUpload');
     const imageUpload = document.getElementById('imageUpload');
+    const exportListBtn = document.getElementById('exportListBtn'); // Nieuwe knop
+
     const resultModal = document.getElementById('resultModal');
     const resultOutput = document.getElementById('resultOutput');
     const timerBarContainer = document.getElementById('timer-bar-container');
     const timerBar = document.getElementById('timer-bar');
     const closeBtn = document.querySelector('.close-btn');
+
+    // Reken-gerelateerd
     const mathPresetBtns = document.querySelectorAll('.math-btn');
     const generateTablesBtn = document.getElementById('generateTablesBtn');
-    const generateSumsBtn = document.getElementById('generateSumsBtn'); // NIEUWE KNOP
+    const generateSumsBtn = document.getElementById('generateSumsBtn');
     const maalCheckboxesContainer = document.getElementById('maal-checkboxes');
+    const timedMathCheckbox = document.getElementById('timedMathCheckbox');
+
+    // Overige genereren-knoppen
     const generateEfBtn = document.getElementById('generateEfBtn');
     const generateMovementBtn = document.getElementById('generateMovementBtn');
     const generateTaalBtn = document.getElementById('generateTaalBtn');
-    const generateTechLezenBtn = document.getElementById('generateTechLezenBtn'); 
-    const timedMathCheckbox = document.getElementById('timedMathCheckbox'); 
-    
-    // Knoppen voor de 'Mix & Match' functie
+    const generateTechLezenBtn = document.getElementById('generateTechLezenBtn');
     const generateMixBtn = document.getElementById('generateMixBtn');
     const mixCategoryCheckboxes = document.querySelectorAll('.mix-category-checkbox');
 
-    // Knoppen voor weergave-wissel
+    // Weergave-wissel knoppen
     const showWheelBtn = document.getElementById('showWheelBtn');
     const newOptionsBtn = document.getElementById('newOptionsBtn');
     const restartBtn = document.getElementById('restartBtn');
     const downloadListBtn = document.getElementById('downloadListBtn');
 
-    // Variabelen
+    // ===== VARIABELEN =====
     let items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
     let usedItems = [];
-    let spinHistory = []; 
+    let spinHistory = [];
     let colors = ['#3498db', '#e74c3c', '#f1c40f', '#2ecc71', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
     let currentRotation = 0;
     let isSpinning = false;
     let activeTimer = null;
-    let selectedMathLimit = 0; 
+    let selectedMathLimit = 0;
 
-    // --- LOGICA VOOR WEERGAVE-WISSEL ---
+    // ===== WEERGAVE-WISSEL =====
     const showOptionsView = () => {
         document.body.classList.remove('wheel-view');
         document.body.classList.add('options-view');
+        if (downloadListBtn) downloadListBtn.style.display = 'none';
     };
 
     const showWheelView = () => {
@@ -54,58 +60,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         document.body.classList.remove('options-view');
         document.body.classList.add('wheel-view');
+        if (downloadListBtn && items.length > 0) {
+            downloadListBtn.style.display = 'inline-block';
+        }
     };
 
-    showWheelBtn.addEventListener('click', showWheelView);
-    
+    showWheelBtn?.addEventListener('click', showWheelView);
+
     const resetSession = () => {
         spinHistory = [];
-        downloadListBtn.style.display = 'none';
+        if (downloadListBtn) downloadListBtn.style.display = (items && items.length > 0 && document.body.classList.contains('wheel-view')) ? 'inline-block' : 'none';
     };
 
-    newOptionsBtn.addEventListener('click', () => {
+    newOptionsBtn?.addEventListener('click', () => {
         items = ['Typ hier', 'je opties', 'of gebruik', 'de knoppen', 'om een lijst', 'te genereren'];
-        itemInput.value = '';
-        document.getElementById('removeAfterSpin').checked = true;
-        document.querySelectorAll('input[name="tafel"]').forEach(cb => cb.checked = false);
-        document.querySelector('input[name="table_type"][value="maal"]').checked = true;
-        document.querySelector('input[name="brug_option"][value="zonder"]').checked = true;
-        document.querySelector('input[name="brug_option"][value="met"]').checked = true;
-        timedMathCheckbox.checked = false; 
-        document.querySelectorAll('input[name="ef_category"]').forEach(cb => cb.checked = false);
-        document.getElementById('imageModeCheckbox').checked = false;
-        document.querySelectorAll('input[name="taal_category"]').forEach(cb => cb.checked = true);
-        
-        // Reset rekenkeuzes
+        if (itemInput) itemInput.value = '';
+
+        const removeAfterSpin = document.getElementById('removeAfterSpin');
+        if (removeAfterSpin) removeAfterSpin.checked = true;
+        document.querySelectorAll('input[name="tafel"]')?.forEach(cb => cb.checked = false);
+        const maalRadio = document.querySelector('input[name="table_type"][value="maal"]');
+        if (maalRadio) maalRadio.checked = true;
+        const zonderBrug = document.querySelector('input[name="brug_option"][value="zonder"]');
+        const metBrug = document.querySelector('input[name="brug_option"][value="met"]');
+        if (zonderBrug) zonderBrug.checked = true;
+        if (metBrug) metBrug.checked = true;
+        if (timedMathCheckbox) timedMathCheckbox.checked = false;
+        document.querySelectorAll('input[name="ef_category"]')?.forEach(cb => cb.checked = false);
+        const imageModeCheckbox = document.getElementById('imageModeCheckbox');
+        if (imageModeCheckbox) imageModeCheckbox.checked = false;
+        document.querySelectorAll('input[name="taal_category"]')?.forEach(cb => cb.checked = true);
+
         selectedMathLimit = 0;
-        mathPresetBtns.forEach(btn => btn.classList.remove('selected'));
-        
+        mathPresetBtns?.forEach(btn => btn.classList.remove('selected'));
+
         resetWheel();
-        resetSession(); 
+        resetSession();
         showOptionsView();
     });
 
-   restartBtn.addEventListener('click', () => {
-    // 1. Reset de visuele staat van het rad (maak alle segmenten weer actief).
-    resetWheel();
-    
-    // 2. Reset de sessiegegevens (verwijder de antwoordenlijst en verberg de downloadknop).
-    resetSession();
-    
-    // 3. Informeer de gebruiker dat de reset is voltooid.
-    alert("Het rad is gereset. Je kunt opnieuw met alle originele opties spelen.");
-    
-    // 4. Zorg ervoor dat de spinknop weer volledig bruikbaar is.
-    isSpinning = false;
-    spinBtn.disabled = false;
-});
-    
+    restartBtn?.addEventListener('click', () => {
+        resetWheel();
+        alert("Het rad is gereset. Je kunt opnieuw met alle originele opties spelen.");
+        isSpinning = false;
+        if (spinBtn) spinBtn.disabled = false;
+    });
+
+    // ===== DATASETS =====
     const efTasks = {
         werkgeheugen: [
-            { text: "Herhaal achterstevoren", gameType: "timed_hide", duration: 7, category: "Werkgeheugen", supportsImageMode: true }, 
+            { text: "Herhaal achterstevoren", gameType: "timed_hide", duration: 7, category: "Werkgeheugen", supportsImageMode: true },
             { text: "Onthoud deze woorden", gameType: "timed_hide", duration: 10, category: "Werkgeheugen", supportsImageMode: true },
             { text: "Geheugenspel: Wat is er weg?", gameType: "whats_missing", duration: 10, category: "Werkgeheugen", supportsImageMode: true },
-            { text: "Geheugenspel: Spelleider doet 3 acties voor. De speler moet de volgorde exact nadoen.", category: "Werkgeheugen", requiresLeader: true }, 
+            { text: "Geheugenspel: Spelleider doet 3 acties voor. De speler moet de volgorde exact nadoen.", category: "Werkgeheugen", requiresLeader: true },
             { text: "Tel hardop van 20 terug naar 1", category: "Werkgeheugen" }
         ],
         inhibitie: [
@@ -132,90 +139,51 @@ document.addEventListener('DOMContentLoaded', () => {
         { text: "Doe 10 keer knieheffen (elke kant).", category: "Beweging" },
         { text: "Raak 10 keer je tenen aan.", category: "Beweging" },
         { text: "Balanceer 15 seconden op je rechterbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
-        { text: "Balanceer 15 seconden op je linkerbeen.", gameType: "timer_only", duration: 15, category: "Beweging" },
-        { text: "Doe 20 seconden de 'plank' houding.", gameType: "timer_only", duration: 20, category: "Beweging" },
-        { text: "Doe 10 ster-sprongen (star jumps).", category: "Beweging" },
-        { text: "Beeld uit dat je 20 seconden een ladder beklimt.", gameType: "timer_only", duration: 20, category: "Beweging" },
-        { text: "Maak jezelf zo groot als een reus en dan zo klein als een muis. Herhaal 5 keer.", category: "Beweging" },
-        { text: "Doe 10 'windmolens' (raak met je rechterhand je linkervoet aan en wissel af).", category: "Beweging" },
-        { text: "Draai 15 seconden rondjes met je armen naar voren.", gameType: "timer_only", duration: 15, category: "Beweging" },
-        { text: "Doe 10 squats (door je knieën buigen alsof je op een stoel gaat zitten).", category: "Beweging" },
-        { text: "Boks 20 seconden in de lucht (links, rechts, links, rechts...).", gameType: "timer_only", duration: 20, category: "Beweging" },
-        { text: "Loop 5 stappen als een ooievaar (trek je knieën zo hoog mogelijk op).", category: "Beweging" }
+        { text: "Balanceer 15 seconden op je linkerbeen.", gameType: "timer_only", duration: 15, category: "Beweging" }
     ];
 
     const taalTasks = {
         rijmen: [
             { type: 'rijmen', word: 'huis' }, { type: 'rijmen', word: 'kat' },
-            { type: 'rijmen', word: 'maan' }, { type: 'rijmen', word: 'school' },
-            { type: 'rijmen', word: 'boek' }, { type: 'rijmen', word: 'stoel' },
+            { type: 'rijmen', word: 'maan' }, { type: 'rijmen', word: 'school' }
         ],
         zinmaken: [
             { type: 'zinmaken', word: 'fiets' }, { type: 'zinmaken', word: 'lachen' },
-            { type: 'zinmaken', word: 'vrienden' }, { type: 'zinmaken', word: 'zon' },
-            { type: 'zinmaken', word: 'eten' }, { type: 'zinmaken', word: 'slapen' },
+            { type: 'zinmaken', word: 'vrienden' }, { type: 'zinmaken', word: 'zon' }
         ],
         noem3: [
             { type: 'noem3', category: 'soorten fruit' }, { type: 'noem3', category: 'kleuren' },
-            { type: 'noem3', category: 'dieren op de boerderij' }, { type: 'noem3', category: 'dingen in een klaslokaal' },
-            { type: 'noem3', category: 'sporten' }, { type: 'noem3', category: 'vervoersmiddelen' },
+            { type: 'noem3', category: 'dieren op de boerderij' }
         ],
         grammatica: [
             { type: 'meervoud', word: 'boek', answer: 'boeken' }, { type: 'meervoud', word: 'kind', answer: 'kinderen' },
-            { type: 'meervoud', word: 'stad', answer: 'steden' }, { type: 'meervoud', word: 'ei', answer: 'eieren' },
-            { type: 'verkleinwoord', word: 'boom', answer: 'boompje' }, { type: 'verkleinwoord', word: 'bloem', answer: 'bloemetje' },
-            { type: 'verkleinwoord', word: 'ring', answer: 'ringetje' }, { type: 'verkleinwoord', word: 'koning', answer: 'koninkje' },
+            { type: 'verkleinwoord', word: 'boom', answer: 'boompje' }, { type: 'verkleinwoord', word: 'bloem', answer: 'bloemetje' }
         ],
         tegengestelden: [
             { type: 'tegengestelden', word: 'warm', answer: 'koud' }, { type: 'tegengestelden', word: 'groot', answer: 'klein' },
-            { type: 'tegengestelden', word: 'snel', answer: 'traag' }, { type: 'tegengestelden', word: 'hoog', answer: 'laag' },
-            { type: 'tegengestelden', word: 'dag', answer: 'nacht' }, { type: 'tegengestelden', word: 'blij', answer: 'boos' },
+            { type: 'tegengestelden', word: 'snel', answer: 'traag' }
         ]
     };
-    
+
     const techLezenTasks = [
         { text: "Lees de tekst voor als een robot.", category: "Technisch Lezen" },
         { text: "Lees de tekst terwijl je op één been staat.", category: "Technisch Lezen" },
-        { text: "Lees de tekst met je tong uit je mond.", category: "Technisch Lezen" },
         { text: "Lees de tekst met een heel droevige stem.", category: "Technisch Lezen" },
         { text: "Lees de tekst met een heel blije stem.", category: "Technisch Lezen" },
-        { text: "Lees fluisterend alsof je een groot geheim vertelt.", category: "Technisch Lezen" },
-        { text: "Lees de tekst alsof je een operazanger bent.", category: "Technisch Lezen" },
-        { text: "Lees elke zin met een andere emotie (boos, blij, bang...).", category: "Technisch Lezen" },
-        { text: "Lees de tekst terwijl je zachtjes op je plaats marcheert.", category: "Technisch Lezen" },
-        { text: "Lees de tekst met een heel hoge stem (als een muis).", category: "Technisch Lezen" },
-        { text: "Lees de tekst alsof je heel erg moe bent en bijna in slaap valt.", category: "Technisch Lezen" },
-        { text: "Lees de tekst zo snel als je kan, als een raceauto.", category: "Technisch Lezen" },
-        { text: "Lees de tekst heel traag, als een slak.", category: "Technisch Lezen" },
-        { text: "Lees de tekst en klap na elke zin in je handen.", category: "Technisch Lezen" },
-        { text: "Lees de tekst voor aan een (denkbeeldige) plant of stoel.", category: "Technisch Lezen" },
-        { text: "Lees de tekst alsof je een nieuwslezer op tv bent.", category: "Technisch Lezen" },
-        { text: "Lees de tekst met je neus dichtgeknepen.", category: "Technisch Lezen" },
-        { text: "Lees de tekst met een heel lage stem (als een beer).", category: "Technisch Lezen" },
-        { text: "Lees de tekst en spring bij elke punt omhoog.", category: "Technisch Lezen" },
-        { text: "Lees de tekst voor aan een klasgenoot die de tekst ook heeft.", category: "Technisch Lezen" }
+        { text: "Lees fluisterend alsof je een groot geheim vertelt.", category: "Technisch Lezen" }
     ];
 
     const dynamicData = {
         colorMap: { "ROOD": "#e74c3c", "GROEN": "#2ecc71", "BLAUW": "#3498db", "GEEL": "#f1c40f", "PAARS": "#9b59b6" },
         woorden: ["appel", "stoel", "auto", "fiets", "wolk", "banaan", "olifant", "paraplu", "boek", "schoen"],
         emojiMap: {
-            "appel": "🍎", "stoel": "🪑", "auto": "🚗", "fiets": "🚲", 
-            "wolk": "☁️", "banaan": "🍌", "olifant": "🐘", "paraplu": "☂️", 
+            "appel": "🍎", "stoel": "🪑", "auto": "🚗", "fiets": "🚲",
+            "wolk": "☁️", "banaan": "🍌", "olifant": "🐘", "paraplu": "☂️",
             "boek": "📖", "schoen": "👟"
         },
         getColorNames: () => Object.keys(dynamicData.colorMap),
-        generateReeks: (count) => {
-            const reeks = [];
-            for (let i = 0; i < count; i++) {
-                reeks.push(Math.floor(Math.random() * 6) + 1);
-            }
-            return reeks;
-        },
-        generateWordSequence: (count) => {
-            const shuffled = shuffleArray([...dynamicData.woorden]);
-            return shuffled.slice(0, count);
-        },
+        generateReeks: (count) => Array.from({ length: count }, () => Math.floor(Math.random() * 6) + 1),
+        generateWordSequence: (count) => shuffleArray([...dynamicData.woorden]).slice(0, count),
         generateMissingGameSequence: (count) => {
             const fullSequence = shuffleArray([...dynamicData.woorden]).slice(0, count);
             const missingIndex = Math.floor(Math.random() * count);
@@ -225,68 +193,63 @@ document.addEventListener('DOMContentLoaded', () => {
             return { fullSequence, partialSequence, missingItem };
         }
     };
-    
-    // --- HULPFUNCTIES ---
+
+    // ===== HULPFUNCTIES =====
     const calculateAnswer = (exercise) => {
         if (typeof exercise !== 'string') return null;
         try {
-            const sanitizedExercise = exercise.replace('×', '*').replace('÷', '/');
-            return new Function('return ' + sanitizedExercise)();
-        } catch (error) {
-            console.error("Kon de som niet berekenen:", exercise, error);
+            const sanitized = exercise.replace('×', '*').replace('÷', '/');
+            return new Function('return ' + sanitized)();
+        } catch {
             return null;
         }
     };
 
     const createDiceSvg = (number) => {
-        const dotPositions = {
-            1: [[50, 50]], 2: [[25, 25], [75, 75]], 3: [[25, 25], [50, 50], [75, 75]],
-            4: [[25, 25], [25, 75], [75, 25], [75, 75]], 5: [[25, 25], [25, 75], [50, 50], [75, 25], [75, 75]],
-            6: [[25, 25], [25, 50], [25, 75], [75, 25], [75, 50], [75, 75]]
-        };
-        let dots = '';
-        if (dotPositions[number]) {
-            dotPositions[number].forEach(pos => {
-                dots += `<circle cx="${pos[0]}" cy="${pos[1]}" r="8" fill="black" />`;
-            });
-        }
-        return `<svg width="80" height="80" viewBox="0 0 100 100" style="margin: 0 5px;">
-                    <rect width="100" height="100" rx="15" ry="15" fill="white" stroke="black" stroke-width="4" />
-                    ${dots}
-                </svg>`;
+        const dots = { 1: [[50, 50]], 2: [[25, 25], [75, 75]], 3: [[25, 25], [50, 50], [75, 75]], 4: [[25, 25], [25, 75], [75, 25], [75, 75]], 5: [[25, 25], [25, 75], [50, 50], [75, 25], [75, 75]], 6: [[25, 25], [25, 50], [25, 75], [75, 25], [75, 50], [75, 75]] };
+        const circles = (dots[number] || []).map(([x, y]) => `<circle cx="${x}" cy="${y}" r="8" fill="black" />`).join('');
+        return `<svg width="80" height="80" viewBox="0 0 100 100" style="margin:0 5px;"><rect width="100" height="100" rx="15" ry="15" fill="white" stroke="black" stroke-width="4"/>${circles}</svg>`;
     };
 
     const createCheckboxes = () => {
+        if (!maalCheckboxesContainer) return;
+        maalCheckboxesContainer.innerHTML = '';
         for (let i = 1; i <= 10; i++) {
             maalCheckboxesContainer.innerHTML += `<label><input type="checkbox" name="tafel" value="${i}">${i}</label>`;
         }
     };
-    
+
     const wrapText = (context, text, x, y, maxWidth, lineHeight) => {
         const words = text.split(' ');
-        let line = '', lineCount = 0;
-        for(let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + ' ';
-            if (context.measureText(testLine).width > maxWidth && n > 0) { lineCount++; line = words[n] + ' '; } else { line = testLine; }
-        }
-        lineCount++;
-        let startY = y - (lineHeight * (lineCount - 1)) / 2;
-        line = '';
-        for(let n = 0; n < words.length; n++) {
-            let testLine = line + words[n] + ' ';
+        let line = '';
+        let lines = [];
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
             if (context.measureText(testLine).width > maxWidth && n > 0) {
-                context.fillText(line, x, startY);
+                lines.push(line);
                 line = words[n] + ' ';
-                startY += lineHeight;
-            } else { line = testLine; }
+            } else {
+                line = testLine;
+            }
         }
-        context.fillText(line, x, startY);
+        lines.push(line);
+        let startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach(l => {
+            context.fillText(l, x, startY);
+            startY += lineHeight;
+        });
     };
 
     const drawWheel = () => {
         const numItems = items.length;
-        if (numItems === 0) { ctx.clearRect(0, 0, canvas.width, canvas.height); return; }
-        const anglePerItem = (2 * Math.PI) / numItems, centerX = canvas.width / 2, centerY = canvas.height / 2, radius = canvas.width / 2 - 10;
+        if (numItems === 0) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+        const anglePerItem = (2 * Math.PI) / numItems;
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = canvas.width / 2 - 10;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         items.forEach((item, i) => {
             const startAngle = i * anglePerItem;
@@ -304,16 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
             ctx.rotate(startAngle + anglePerItem / 2);
             const itemText = (typeof item === 'object' && item.label) ? item.label : item;
             if (item instanceof Image) {
-                const img = item, maxW = radius * 0.8, maxH = radius * 0.4, imgRatio = img.width / img.height;
+                const img = item;
+                const maxW = radius * 0.8;
+                const maxH = radius * 0.4;
+                const imgRatio = img.width / img.height;
                 let w = maxW, h = maxH;
-                if (imgRatio > (maxW/maxH)) { h = w / imgRatio; } else { w = h * imgRatio; }
+                if (imgRatio > (maxW / maxH)) { h = w / imgRatio; } else { w = h * imgRatio; }
                 ctx.drawImage(img, radius * 0.5, -w / 2, h, w);
             } else {
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 16px Poppins, sans-serif';
                 ctx.textAlign = 'right';
-                const maxWidth = radius * 0.75, lineHeight = 18, x = radius - 15, y = 5;
-                wrapText(ctx, String(itemText), x, y, maxWidth, lineHeight);
+                wrapText(ctx, String(itemText), radius - 15, 5, radius * 0.75, 18);
             }
             ctx.restore();
         });
@@ -321,108 +286,96 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const resetWheel = () => {
         usedItems = [];
+        currentRotation = 0;
+        canvas.style.transition = 'none';
+        canvas.style.transform = 'rotate(0deg)';
         drawWheel();
     };
 
     const shuffleArray = (array) => {
-        const newArray = [...array];
-        for (let i = newArray.length - 1; i > 0; i--) {
+        const a = [...array];
+        for (let i = a.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            [a[i], a[j]] = [a[j], a[i]];
         }
-        return newArray;
+        return a;
     };
     
     const loadNewItems = (newItems) => {
-        items = newItems;
-        itemInput.value = (typeof newItems[0] === 'string') ? newItems.join('\n') : '';
+        itemInput?.removeEventListener('input', updateItemsFromTextarea);
+
+        if (!Array.isArray(newItems) || newItems.length === 0) {
+            items = [];
+            if (itemInput) itemInput.value = '';
+            showWheelBtn && (showWheelBtn.disabled = true);
+        } else {
+            items = newItems;
+            if (itemInput) {
+                const isText = typeof newItems[0] === 'string';
+                itemInput.value = isText ? newItems.join('\n') : '[Afbeeldingen succesvol geladen]';
+            }
+            showWheelBtn && (showWheelBtn.disabled = false);
+        }
+        
         resetWheel();
-        showWheelBtn.disabled = false;
+        resetSession();
+
+        itemInput?.addEventListener('input', updateItemsFromTextarea);
     };
 
-    // --- GENERATOR FUNCTIES ---
+    // ===== GENERATORS =====
     const processDynamicTask = (task) => {
-        if (task.type !== 'dynamic') return task;
+        if (task?.type !== 'dynamic') return task;
         let text = task.template;
-        if (text.includes("{kleur}")) {
+        if (text.includes('{kleur}')) {
             const randomColor = dynamicData.getColorNames()[Math.floor(Math.random() * dynamicData.getColorNames().length)];
             text = text.replace('{kleur}', randomColor.toLowerCase());
         }
-        return { ...task, text: text };
+        return { ...task, text };
     };
-    
+
     const generateEfTasks = () => {
-        const selectedCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
-        if (selectedCategories.length === 0) { alert("Kies minstens één categorie."); return; }
-        let allSelectedTasks = [];
-        selectedCategories.forEach(category => { allSelectedTasks = allSelectedTasks.concat(efTasks[category]); });
-        
-        const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20);
-        const finalWheelItems = shuffledTasks.map((task, index) => ({
-            label: `Opdracht ${index + 1}`,
-            fullTask: task
-        }));
-        loadNewItems(finalWheelItems);
+        const selected = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
+        if (selected.length === 0) { alert("Kies minstens één EF-categorie."); return; }
+        let all = [];
+        selected.forEach(cat => all = all.concat(efTasks[cat]));
+        const shuffled = shuffleArray(all).slice(0, 20);
+        const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
+        loadNewItems(finalItems);
     };
 
     const generateMovementTasks = () => {
-        const shuffledTasks = shuffleArray(movementTasks).slice(0, 20);
-        const finalWheelItems = shuffledTasks.map((task, index) => ({
-            label: `Opdracht ${index + 1}`,
-            fullTask: task 
-        }));
-        loadNewItems(finalWheelItems);
+        const shuffled = shuffleArray(movementTasks).slice(0, 20);
+        const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
+        loadNewItems(finalItems);
     };
 
     const generateTaalTasks = () => {
-        const selectedCategories = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
-        if (selectedCategories.length === 0) { alert("Kies minstens één taalcategorie."); return; }
-        
-        let allSelectedTasks = [];
-        selectedCategories.forEach(category => {
-            if (taalTasks[category]) {
-                allSelectedTasks = allSelectedTasks.concat(taalTasks[category]);
-            }
-        });
-
-        const shuffledTasks = shuffleArray(allSelectedTasks).slice(0, 20);
-        const finalWheelItems = shuffledTasks.map((task, index) => ({
-            label: `Opdracht ${index + 1}`,
-            fullTask: task 
-        }));
-        loadNewItems(finalWheelItems);
+        const selected = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
+        if (selected.length === 0) { alert("Kies minstens één taalcategorie."); return; }
+        let all = [];
+        selected.forEach(cat => { if (taalTasks[cat]) all = all.concat(taalTasks[cat]); });
+        const shuffled = shuffleArray(all).slice(0, 20);
+        const finalItems = shuffled.map((task, i) => ({ label: `Opdracht ${i + 1}`, fullTask: task }));
+        loadNewItems(finalItems);
     };
-    
+
     const generateTechLezenTasks = () => {
-        const shuffledTasks = shuffleArray(techLezenTasks).slice(0, 20);
-        const finalWheelItems = shuffledTasks.map((task, index) => ({
-            label: `Leesopdracht ${index + 1}`,
-            fullTask: task
-        }));
-        loadNewItems(finalWheelItems);
+        const shuffled = shuffleArray(techLezenTasks).slice(0, 20);
+        const finalItems = shuffled.map((task, i) => ({ label: `Leesopdracht ${i + 1}`, fullTask: task }));
+        loadNewItems(finalItems);
     };
 
     const generateSelectedTables = () => {
-        const tableType = document.querySelector('input[name="table_type"]:checked').value;
-        const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value));
-        if (selectedTables.length === 0) {
-            alert("Selecteer minstens één tafel!");
-            return;
-        }
+        const tableType = document.querySelector('input[name="table_type"]:checked')?.value || 'maal';
+        const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value, 10));
+        if (selectedTables.length === 0) { alert("Selecteer minstens één tafel!"); return; }
         let problems = [];
         if (tableType === 'maal' || tableType === 'beide') {
-            selectedTables.forEach(table => {
-                for (let i = 1; i <= 10; i++) {
-                    problems.push(`${i} × ${table}`);
-                }
-            });
+            selectedTables.forEach(t => { for (let i = 1; i <= 10; i++) problems.push(`${i} × ${t}`); });
         }
         if (tableType === 'deel' || tableType === 'beide') {
-            selectedTables.forEach(table => {
-                for (let i = 1; i <= 10; i++) {
-                    problems.push(`${i * table} ÷ ${table}`);
-                }
-            });
+            selectedTables.forEach(t => { for (let i = 1; i <= 10; i++) problems.push(`${i * t} ÷ ${t}`); });
         }
         loadNewItems(shuffleArray(problems).slice(0, 25));
     };
@@ -431,171 +384,124 @@ document.addEventListener('DOMContentLoaded', () => {
         let sums = new Set();
         const maxAttempts = 200;
         let attempts = 0;
-
         while (sums.size < 25 && attempts < maxAttempts) {
             attempts++;
             const a = Math.floor(Math.random() * limit) + 1;
             const b = Math.floor(Math.random() * limit) + 1;
-            const operation = Math.random() > 0.5 ? '+' : '-';
-
-            if (operation === '+') {
+            const op = Math.random() > 0.5 ? '+' : '-';
+            if (op === '+') {
                 if (a + b > limit) continue;
                 const withBridge = (a % 10) + (b % 10) >= 10;
-                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) {
-                    sums.add(`${a} + ${b}`);
-                }
-            } else { // Subtraction
+                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) sums.add(`${a} + ${b}`);
+            } else {
                 if (a - b < 0) continue;
                 const withBridge = (a % 10) < (b % 10);
-                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) {
-                    sums.add(`${a} - ${b}`);
-                }
+                if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) sums.add(`${a} - ${b}`);
             }
         }
-        if(sums.size === 0) {
-            alert("Kon geen sommen genereren met de gekozen opties. Probeer een andere combinatie (bv. met én zonder brug).");
+        if (sums.size === 0) {
+            alert("Kon geen sommen genereren met de gekozen opties.");
             return;
         }
-        loadNewItems(shuffleArray(Array.from(sums)));
+        loadNewItems(shuffleArray([...sums]));
     };
 
-    // FUNCTIE VOOR MIX & MATCH 
     const generateMixedWheel = () => {
-        const selectedCategories = Array.from(mixCategoryCheckboxes)
-            .filter(cb => cb.checked)
-            .map(cb => cb.dataset.category);
-
-        if (selectedCategories.length === 0) {
-            alert("Kies minstens één categorie voor de Mix & Match.");
-            return;
-        }
-
+        const selectedCategories = Array.from(mixCategoryCheckboxes).filter(cb => cb.checked).map(cb => cb.dataset.category);
+        if (selectedCategories.length === 0) { alert("Kies minstens één categorie voor de Mix & Match."); return; }
         let mixedItems = [];
         const itemsPerCategory = Math.floor(25 / selectedCategories.length);
-        
         if (selectedCategories.includes('rekenen_tafels')) {
-            const tableType = document.querySelector('input[name="table_type"]:checked').value;
-            const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value));
+            const tableType = document.querySelector('input[name="table_type"]:checked')?.value || 'maal';
+            const selectedTables = Array.from(document.querySelectorAll('input[name="tafel"]:checked')).map(cb => parseInt(cb.value, 10));
             if (selectedTables.length > 0) {
                 let problems = [];
                 if (tableType === 'maal' || tableType === 'beide') {
-                    selectedTables.forEach(table => {
-                        for (let i = 1; i <= 10; i++) { problems.push(`${i} × ${table}`); }
-                    });
+                    selectedTables.forEach(t => { for (let i = 1; i <= 10; i++) problems.push(`${i} × ${t}`); });
                 }
                 if (tableType === 'deel' || tableType === 'beide') {
-                    selectedTables.forEach(table => {
-                        for (let i = 1; i <= 10; i++) { problems.push(`${i * table} ÷ ${table}`); }
-                    });
+                    selectedTables.forEach(t => { for (let i = 1; i <= 10; i++) problems.push(`${i * t} ÷ ${t}`); });
                 }
                 mixedItems = mixedItems.concat(shuffleArray(problems).slice(0, itemsPerCategory));
             }
         }
-
         if (selectedCategories.includes('rekenen_sommen')) {
             const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
             const allowWithBridge = options.includes('met');
             const allowWithoutBridge = options.includes('zonder');
-            
-            // Check if a math limit is selected
-            if (selectedMathLimit === 0) {
-                alert("Voor 'Rekenen: Sommen' in Mix & Match moet je eerst een rekenniveau kiezen (bv. tot 20).");
-                return;
-            }
-            const limit = selectedMathLimit;
-            
+            if (selectedMathLimit === 0) { alert("Voor 'Rekenen: Sommen' kies eerst een bereik (bijv. tot 20)."); return; }
             let sums = new Set();
             const maxAttempts = 200;
             let attempts = 0;
             while (sums.size < itemsPerCategory && attempts < maxAttempts) {
                 attempts++;
-                const a = Math.floor(Math.random() * limit) + 1;
-                const b = Math.floor(Math.random() * limit) + 1;
-                const operation = Math.random() > 0.5 ? '+' : '-';
-                if (operation === '+') {
-                    if (a + b > limit) continue;
+                const a = Math.floor(Math.random() * selectedMathLimit) + 1;
+                const b = Math.floor(Math.random() * selectedMathLimit) + 1;
+                const op = Math.random() > 0.5 ? '+' : '-';
+                if (op === '+') {
+                    if (a + b > selectedMathLimit) continue;
                     const withBridge = (a % 10) + (b % 10) >= 10;
-                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) { sums.add(`${a} + ${b}`); }
+                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) sums.add(`${a} + ${b}`);
                 } else {
                     if (a - b < 0) continue;
                     const withBridge = (a % 10) < (b % 10);
-                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) { sums.add(`${a} - ${b}`); }
+                    if ((withBridge && allowWithBridge) || (!withBridge && allowWithoutBridge)) sums.add(`${a} - ${b}`);
                 }
             }
-            mixedItems = mixedItems.concat(shuffleArray(Array.from(sums)).slice(0, itemsPerCategory));
+            mixedItems = mixedItems.concat(shuffleArray([...sums]).slice(0, itemsPerCategory));
         }
-
         if (selectedCategories.includes('ef')) {
-            const selectedEfCategories = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
-            if (selectedEfCategories.length > 0) {
+            const selEf = Array.from(document.querySelectorAll('input[name="ef_category"]:checked')).map(cb => cb.value);
+            if (selEf.length > 0) {
                 let efItems = [];
-                selectedEfCategories.forEach(category => {
-                    efItems = efItems.concat(efTasks[category]);
-                });
-                const finalEfItems = efItems.map((task) => ({ fullTask: processDynamicTask(task) }));
-                mixedItems = mixedItems.concat(shuffleArray(finalEfItems).slice(0, itemsPerCategory));
+                selEf.forEach(cat => efItems = efItems.concat(efTasks[cat]));
+                const finalEf = efItems.map(task => ({ fullTask: processDynamicTask(task) }));
+                mixedItems = mixedItems.concat(shuffleArray(finalEf).slice(0, itemsPerCategory));
             }
         }
-
         if (selectedCategories.includes('beweging')) {
-            const movementItems = shuffleArray(movementTasks);
-            const finalMovementItems = movementItems.map((task) => ({ fullTask: task }));
-            mixedItems = mixedItems.concat(finalMovementItems.slice(0, itemsPerCategory));
+            const finalMov = shuffleArray(movementTasks).map(task => ({ fullTask: task }));
+            mixedItems = mixedItems.concat(finalMov.slice(0, itemsPerCategory));
         }
-
         if (selectedCategories.includes('taal')) {
-            const selectedTaalCategories = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
-            if (selectedTaalCategories.length > 0) {
+            const selTaal = Array.from(document.querySelectorAll('input[name="taal_category"]:checked')).map(cb => cb.value);
+            if (selTaal.length > 0) {
                 let taalItems = [];
-                selectedTaalCategories.forEach(category => {
-                    if (taalTasks[category]) { taalItems = taalItems.concat(taalTasks[category]); }
-                });
-                const finalTaalItems = taalItems.map((task) => ({ fullTask: task }));
-                mixedItems = mixedItems.concat(shuffleArray(finalTaalItems).slice(0, itemsPerCategory));
+                selTaal.forEach(cat => { if (taalTasks[cat]) taalItems = taalItems.concat(taalTasks[cat]); });
+                const finalTaal = taalItems.map(task => ({ fullTask: task }));
+                mixedItems = mixedItems.concat(shuffleArray(finalTaal).slice(0, itemsPerCategory));
             }
         }
-        
         if (selectedCategories.includes('taal_lezen')) {
-            const techLezenItems = shuffleArray(techLezenTasks);
-            const finalTechLezenItems = techLezenItems.map((task) => ({ fullTask: task }));
-            mixedItems = mixedItems.concat(finalTechLezenItems.slice(0, itemsPerCategory));
+            const finalTech = shuffleArray(techLezenTasks).map(task => ({ fullTask: task }));
+            mixedItems = mixedItems.concat(finalTech.slice(0, itemsPerCategory));
         }
-        
-        if (mixedItems.length === 0) {
-             alert("Kon geen opdrachten genereren. Zorg dat je voor de geselecteerde categorieën ook sub-opties hebt aangevinkt.");
-             return;
-        }
-
-        const finalWheelItems = shuffleArray(mixedItems).slice(0, 25).map((item, index) => {
-            if (typeof item === 'string') {
-                return item;
-            } else {
-                return {
-                    ...item,
-                    label: `${item.fullTask.category || 'Gemengd'} ${index + 1}`
-                };
-            }
+        if (mixedItems.length === 0) { alert("Kon geen opdrachten genereren."); return; }
+        const finalWheelItems = shuffleArray(mixedItems).slice(0, 25).map((it, idx) => {
+            if (typeof it === 'string') return it;
+            return { ...it, label: `${it.fullTask?.category || 'Gemengd'} ${idx + 1}` };
         });
-
         loadNewItems(finalWheelItems);
     };
 
-    // --- RAD LOGICA ---
+    // ===== RAD-LOGICA =====
     const spin = () => {
         if (isSpinning) return;
         let winningIndex;
-        const removeItems = document.getElementById('removeAfterSpin').checked;
+        const removeItems = document.getElementById('removeAfterSpin')?.checked ?? true;
         if (removeItems) {
-            const availableIndexes = items.map((_, i) => i).filter(i => !usedItems.includes(i));
-            if (availableIndexes.length === 0) { alert("Alle opties zijn gebruikt! Klik op 'Nog eens met dit rad' om opnieuw te beginnen."); return; }
-            const winnerFromArray = Math.floor(Math.random() * availableIndexes.length);
-            winningIndex = availableIndexes[winnerFromArray];
+            const available = items.map((_, i) => i).filter(i => !usedItems.includes(i));
+            if (available.length === 0) { alert("Alle opties zijn gebruikt! Klik op 'Nog eens met dit rad' om opnieuw te beginnen."); return; }
+            winningIndex = available[Math.floor(Math.random() * available.length)];
         } else {
             if (items.length === 0) return;
             winningIndex = Math.floor(Math.random() * items.length);
         }
         isSpinning = true;
         spinBtn.disabled = true;
+        if (restartBtn) restartBtn.disabled = true;
+        if (newOptionsBtn) newOptionsBtn.disabled = true;
+
         const anglePerItem = 360 / items.length;
         const targetAngle = (winningIndex * anglePerItem) + (anglePerItem / 2);
         const requiredRotation = 360 - targetAngle + 270;
@@ -603,26 +509,33 @@ document.addEventListener('DOMContentLoaded', () => {
         currentRotation = totalRotation;
         canvas.style.transition = 'transform 8s cubic-bezier(0.2, 0.8, 0.2, 1)';
         canvas.style.transform = `rotate(${currentRotation}deg)`;
+        
         setTimeout(() => {
-            if (removeItems) {
-                usedItems.push(winningIndex);
-                drawWheel();
+            try {
+                if (removeItems) {
+                    usedItems.push(winningIndex);
+                    drawWheel();
+                }
+                const winningItem = items[winningIndex];
+                const exerciseText = (typeof winningItem === 'object' && winningItem.fullTask) ? (winningItem.fullTask.text || winningItem.fullTask.word) : winningItem;
+                const answer = calculateAnswer(exerciseText);
+                spinHistory.push({ exercise: String(exerciseText), answer: (answer !== null ? answer : 'N/A') });
+                if (downloadListBtn) downloadListBtn.style.display = 'inline-block';
+                
+                showResult(winningItem);
+            } catch (error) {
+                console.error("Fout bij weergeven resultaat:", error);
+                alert("Er is een onverwachte fout opgetreden.");
+            } finally {
+                // Dit wordt ALTIJD uitgevoerd, zelfs na een fout.
+                isSpinning = false;
+                spinBtn.disabled = false;
+                if (restartBtn) restartBtn.disabled = false;
+                if (newOptionsBtn) newOptionsBtn.disabled = false;
             }
-
-            const winningItem = items[winningIndex];
-            const exerciseText = (typeof winningItem === 'object' && winningItem.fullTask) ? winningItem.fullTask.text || winningItem.fullTask.word : winningItem;
-            const answer = calculateAnswer(exerciseText);
-            
-            spinHistory.push({ exercise: exerciseText, answer: answer !== null ? answer : 'N/A' });
-            downloadListBtn.style.display = 'inline-block';
-            
-
-            showResult(items[winningIndex]);
-            isSpinning = false;
-            spinBtn.disabled = false;
         }, 8000);
     };
-    
+
     const runTimer = (duration, onEnd) => {
         timerBar.style.transition = 'none';
         timerBar.style.width = '100%';
@@ -634,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
         activeTimer = setTimeout(() => {
-            onEnd();
+            onEnd?.();
             timerBarContainer.style.display = 'none';
         }, duration * 1000);
     };
@@ -645,318 +558,342 @@ document.addEventListener('DOMContentLoaded', () => {
         resultOutput.innerHTML = '';
         const taskForModal = (typeof result === 'object' && result.fullTask) ? result.fullTask : result;
         const processedTask = processDynamicTask(taskForModal);
-        
-        const isTimedMath = timedMathCheckbox.checked && calculateAnswer(String(result)) !== null;
+        const isTimedMath = timedMathCheckbox?.checked && calculateAnswer(String(result)) !== null;
 
         if (isTimedMath) {
-            resultOutput.innerHTML = `<p>${result}</p>`; 
-            runTimer(4, () => {
-                closeModal(); 
-            });
+            resultOutput.innerHTML = `<p>${result}</p>`;
+            runTimer(4, () => closeModal());
             resultModal.style.display = 'flex';
-            return; 
+            return;
         }
 
         let resultText;
         if (typeof processedTask === 'string') {
             resultText = processedTask;
-        } else if (processedTask.type === 'rijmen') {
+        } else if (processedTask?.type === 'rijmen') {
             resultText = `Verzin een woord dat rijmt op: <strong>${processedTask.word}</strong>`;
-        } else if (processedTask.type === 'zinmaken') {
+        } else if (processedTask?.type === 'zinmaken') {
             resultText = `Maak een mooie zin met het woord: <strong>${processedTask.word}</strong>`;
-        } else if (processedTask.type === 'noem3') {
+        } else if (processedTask?.type === 'noem3') {
             resultText = `Noem 3 soorten <strong>${processedTask.category}</strong>`;
-        } else if (processedTask.type === 'meervoud' || processedTask.type === 'verkleinwoord') {
-            const question = processedTask.type === 'meervoud' ? 'Wat is het meervoud van' : 'Wat is het verkleinwoord van';
-            resultText = `${question}: <strong>${processedTask.word}</strong>?`;
-        } else if (processedTask.type === 'tegengestelden') {
+        } else if (processedTask?.type === 'meervoud' || processedTask?.type === 'verkleinwoord') {
+            const q = processedTask.type === 'meervoud' ? 'Wat is het meervoud van' : 'Wat is het verkleinwoord van';
+            resultText = `${q}: <strong>${processedTask.word}</strong>?`;
+        } else if (processedTask?.type === 'tegengestelden') {
             resultText = `Wat is het tegengestelde van: <strong>${processedTask.word}</strong>?`;
         } else {
-             resultText = processedTask.text || String(taskForModal);
+            resultText = processedTask?.text || String(taskForModal);
         }
 
-        const DURATION = processedTask.duration || 10;
-        const gameType = processedTask.gameType;
-        const isImageMode = document.getElementById('imageModeCheckbox').checked;
-        
+        const DURATION = processedTask?.duration || 10;
+        const gameType = processedTask?.gameType;
+        const isImageMode = document.getElementById('imageModeCheckbox')?.checked;
+
         switch (gameType) {
-            case 'whats_missing':
-                const difficultyLevelsMissing = [5, 6, 7, 8, 9, 10];
-                let selectedCountMissing = 0;
+            case 'whats_missing': {
+                const difficultyLevels = [5, 6, 7, 8, 9, 10];
+                let selectedCount = 0;
                 resultOutput.innerHTML = `<p>${resultText}</p><h4>Kies een moeilijkheidsgraad:</h4>`;
-                const difficultyContainerMissing = document.createElement('div');
-                difficultyContainerMissing.style.display = 'flex'; difficultyContainerMissing.style.gap = '10px';
-                difficultyContainerMissing.style.flexWrap = 'wrap'; difficultyContainerMissing.style.justifyContent = 'center';
-                const startGameBtnMissing = document.createElement('button');
-                startGameBtnMissing.textContent = 'Start Spel'; startGameBtnMissing.className = 'generate-btn';
-                startGameBtnMissing.disabled = true; startGameBtnMissing.style.marginTop = '20px';
-                difficultyLevelsMissing.forEach(level => {
+                const container = document.createElement('div');
+                container.style.cssText = 'display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;';
+                const startBtn = document.createElement('button');
+                startBtn.textContent = 'Start Spel';
+                startBtn.className = 'generate-btn';
+                startBtn.disabled = true;
+                startBtn.style.marginTop = '20px';
+                difficultyLevels.forEach(level => {
                     const btn = document.createElement('button');
-                    btn.textContent = level; btn.className = 'preset-btn'; btn.style.width = '60px';
+                    btn.textContent = level;
+                    btn.className = 'preset-btn';
+                    btn.style.width = '60px';
                     btn.onclick = () => {
-                        selectedCountMissing = level;
-                        startGameBtnMissing.disabled = false;
-                        difficultyContainerMissing.querySelectorAll('button').forEach(b => b.style.border = '2px solid transparent');
+                        selectedCount = level;
+                        startBtn.disabled = false;
+                        container.querySelectorAll('button').forEach(b => b.style.border = '2px solid transparent');
                         btn.style.border = '2px solid var(--action-color)';
                     };
-                    difficultyContainerMissing.appendChild(btn);
+                    container.appendChild(btn);
                 });
-                resultOutput.appendChild(difficultyContainerMissing);
-                resultOutput.appendChild(startGameBtnMissing);
-                startGameBtnMissing.onclick = () => {
-                    if (selectedCountMissing === 0) return;
-                    const gameData = dynamicData.generateMissingGameSequence(selectedCountMissing);
+                resultOutput.appendChild(container);
+                resultOutput.appendChild(startBtn);
+                startBtn.onclick = () => {
+                    if (selectedCount === 0) return;
+                    const gameData = dynamicData.generateMissingGameSequence(selectedCount);
                     const displaySequence = (sequence) => {
-                        const container = document.createElement('div');
-                        container.style.display = 'flex'; container.style.justifyContent = 'center';
-                        container.style.alignItems = 'center'; container.style.gap = '10px'; container.style.minHeight = '80px';
+                        const div = document.createElement('div');
+                        div.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; min-height: 80px;';
                         if (isImageMode) {
-                            container.innerHTML = sequence.map(item => {
-                                if (item === '___') return '<span style="font-size: 4rem;">___</span>';
-                                const emoji = dynamicData.emojiMap[item];
-                                return emoji ? `<span style="font-size: 5rem;">${emoji}</span>` : '';
-                            }).join('');
-                        } else { container.innerHTML = `<p style="font-size: 2rem;">${sequence.join(' &nbsp; ')}</p>`; }
-                        resultOutput.innerHTML = '';
-                        resultOutput.appendChild(container);
+                            div.innerHTML = sequence.map(item => (item === '___') ? '<span style="font-size:4rem;">___</span>' : `<span style="font-size:5rem;">${dynamicData.emojiMap[item] || ''}</span>`).join('');
+                        } else {
+                            div.innerHTML = `<p style="font-size:2rem;">${sequence.join(' &nbsp; ')}</p>`;
+                        }
+                        resultOutput.innerHTML = `<p>${resultText}</p>`;
+                        resultOutput.appendChild(div);
                     };
                     displaySequence(gameData.fullSequence);
                     runTimer(DURATION, () => {
                         resultOutput.innerHTML = `<p>Welk item is verdwenen?</p>`;
                         displaySequence(gameData.partialSequence);
                         const showAnswerBtn = document.createElement('button');
-                        showAnswerBtn.id = 'show-answer-btn'; showAnswerBtn.className = 'preset-btn';
-                        showAnswerBtn.textContent = 'Toon Antwoord'; resultOutput.appendChild(showAnswerBtn);
+                        showAnswerBtn.id = 'show-answer-btn';
+                        showAnswerBtn.className = 'preset-btn';
+                        showAnswerBtn.textContent = 'Toon Antwoord';
+                        resultOutput.appendChild(showAnswerBtn);
                         showAnswerBtn.onclick = () => {
-                            const finalSequenceHtml = gameData.fullSequence.map(item => {
+                            const html = gameData.fullSequence.map(item => {
                                 const isMissing = item === gameData.missingItem;
-                                if (isImageMode) {
-                                    const emoji = dynamicData.emojiMap[item];
-                                    return isMissing ? `<span style="font-size: 5rem; padding: 5px; border-radius: 10px; background-color: #2ecc7130;">${emoji}</span>` : `<span style="font-size: 5rem;">${emoji}</span>`;
-                                } else { return isMissing ? `<span style="color: #2ecc71; font-weight: bold;">${item}</span>` : item; }
+                                return isImageMode ? `<span style="font-size:5rem;${isMissing ? 'padding:5px;border-radius:10px;background-color:#2ecc7130;' : ''}">${dynamicData.emojiMap[item]}</span>` : `<span style="${isMissing ? 'color:#2ecc71;font-weight:bold;' : ''}">${item}</span>`;
                             }).join(isImageMode ? '' : ' &nbsp; ');
-                            const answerContainer = resultOutput.querySelector('div');
-                            if (answerContainer) { answerContainer.innerHTML = finalSequenceHtml; }
+                            resultOutput.querySelector('div').innerHTML = html;
                             showAnswerBtn.disabled = true;
                         };
                     });
                 };
                 break;
-
-            case 'timed_hide':
+            }
+            case 'timed_hide': {
                 const instructionText = resultText + ":";
                 const difficultyLevels = [3, 5, 6, 7, 8, 9, 10];
                 let selectedCount = 0;
                 let contentItems = [];
                 resultOutput.innerHTML = `<p>${instructionText}</p><h4>Kies een moeilijkheidsgraad:</h4>`;
-                const difficultyContainer = document.createElement('div');
-                difficultyContainer.style.display = 'flex'; difficultyContainer.style.gap = '10px';
-                difficultyContainer.style.flexWrap = 'wrap'; difficultyContainer.style.justifyContent = 'center';
-                const startGameBtn = document.createElement('button');
-                startGameBtn.textContent = 'Start Spel'; startGameBtn.className = 'generate-btn';
-                startGameBtn.disabled = true; startGameBtn.style.marginTop = '20px';
+                const container = document.createElement('div');
+                container.style.cssText = 'display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;';
+                const startBtn = document.createElement('button');
+                startBtn.textContent = 'Start Spel';
+                startBtn.className = 'generate-btn';
+                startBtn.disabled = true;
+                startBtn.style.marginTop = '20px';
                 difficultyLevels.forEach(level => {
                     const btn = document.createElement('button');
-                    btn.textContent = level; btn.className = 'preset-btn'; btn.style.width = '60px';
+                    btn.textContent = level;
+                    btn.className = 'preset-btn';
+                    btn.style.width = '60px';
                     btn.onclick = () => {
                         selectedCount = level;
-                        startGameBtn.disabled = false;
-                        difficultyContainer.querySelectorAll('button').forEach(b => b.style.border = '2px solid transparent');
+                        startBtn.disabled = false;
+                        container.querySelectorAll('button').forEach(b => b.style.border = '2px solid transparent');
                         btn.style.border = '2px solid var(--action-color)';
                     };
-                    difficultyContainer.appendChild(btn);
+                    container.appendChild(btn);
                 });
-                resultOutput.appendChild(difficultyContainer);
-                resultOutput.appendChild(startGameBtn);
-                startGameBtn.onclick = () => {
+                resultOutput.appendChild(container);
+                resultOutput.appendChild(startBtn);
+                startBtn.onclick = () => {
                     if (selectedCount === 0) return;
-                    const isBackwardsTask = instructionText.includes("achterstevoren");
-                    contentItems = isBackwardsTask ? dynamicData.generateReeks(selectedCount) : dynamicData.generateWordSequence(selectedCount);
-                    const displayContent = (isAnswerScreen = false) => {
-                        const createDisplayContainer = (sequence) => {
-                            const container = document.createElement('div');
-                            container.style.display = 'flex'; container.style.gap = '10px'; container.style.flexWrap = 'wrap';
-                            container.style.justifyContent = 'center'; container.style.alignItems = 'center'; container.style.marginTop = '15px';
+                    const isBackwards = instructionText.includes("achterstevoren");
+                    contentItems = isBackwards ? dynamicData.generateReeks(selectedCount) : dynamicData.generateWordSequence(selectedCount);
+                    const display = (isAnswer = false) => {
+                        const build = (sequence) => {
+                            const div = document.createElement('div');
+                            div.style.cssText = 'display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 15px;';
                             if (isImageMode && processedTask.supportsImageMode) {
                                 sequence.forEach(item => {
-                                    if (isBackwardsTask) {
-                                        container.innerHTML += createDiceSvg(item);
-                                    } else {
-                                        const emoji = dynamicData.emojiMap[item];
-                                        if (emoji) {
-                                            const emojiSpan = document.createElement('span'); emojiSpan.textContent = emoji;
-                                            emojiSpan.style.fontSize = '5rem'; container.appendChild(emojiSpan);
-                                        }
-                                    }
+                                    if (isBackwards) div.innerHTML += createDiceSvg(item);
+                                    else if (dynamicData.emojiMap[item]) div.innerHTML += `<span style="font-size:5rem;">${dynamicData.emojiMap[item]}</span>`;
                                 });
                             } else {
-                                const contentElement = document.createElement('p');
-                                contentElement.textContent = sequence.join(isBackwardsTask ? ' - ' : ', ');
-                                contentElement.style.color = '#2c3e50'; contentElement.style.fontSize = '3.5rem';
-                                container.appendChild(contentElement);
+                                div.innerHTML = `<p style="color:#2c3e50; font-size:3.5rem;">${sequence.join(isBackwards ? ' - ' : ', ')}</p>`;
                             }
-                            return container;
+                            return div;
                         };
                         resultOutput.innerHTML = '';
-                        const currentInstruction = (isAnswerScreen && isBackwardsTask) ? "Oorspronkelijke reeks:" : instructionText;
-                        resultOutput.appendChild(document.createElement('p')).textContent = currentInstruction;
-                        resultOutput.appendChild(createDisplayContainer(contentItems));
-                        if (isAnswerScreen && isBackwardsTask) {
-                            const answerLabel = document.createElement('p');
-                            answerLabel.textContent = "Juiste antwoord (om te zeggen):";
-                            answerLabel.style.fontSize = '1.2rem'; answerLabel.style.marginTop = '20px'; answerLabel.style.fontWeight = 'bold';
-                            resultOutput.appendChild(answerLabel);
-                            resultOutput.appendChild(createDisplayContainer([...contentItems].reverse()));
+                        resultOutput.innerHTML = `<p>${(isAnswer && isBackwards) ? "Oorspronkelijke reeks:" : instructionText}</p>`;
+                        resultOutput.appendChild(build(contentItems));
+                        if (isAnswer && isBackwards) {
+                            resultOutput.innerHTML += `<p style="font-size:1.2rem; margin-top:20px; font-weight:bold;">Juiste antwoord (om te zeggen):</p>`;
+                            resultOutput.appendChild(build([...contentItems].reverse()));
                         }
                     };
-                    displayContent();
+                    display();
                     runTimer(DURATION, () => {
-                        resultOutput.innerHTML = `<p style="font-style: italic;">Herhaal!</p><button id="show-answer-btn" class="preset-btn">Toon Antwoord</button>`;
-                        document.getElementById('show-answer-btn').onclick = () => {
-                            displayContent(true);
-                        };
+                        resultOutput.innerHTML = `<p style="font-style:italic;">Herhaal!</p><button id="show-answer-btn" class="preset-btn">Toon Antwoord</button>`;
+                        document.getElementById('show-answer-btn').onclick = () => display(true);
                     });
                 };
                 break;
-
-            case 'timer_only':
+            }
+            case 'timer_only': {
                 resultOutput.innerHTML = `<p>${resultText}</p><button id="start-timer-btn" class="generate-btn">▶️ Start</button>`;
                 document.getElementById('start-timer-btn').onclick = () => {
                     resultOutput.innerHTML = `<p>${resultText}</p>`;
-                    runTimer(DURATION, () => {
-                        resultOutput.innerHTML = `<p style="font-style: italic;">Klaar!</p>`;
-                    });
+                    runTimer(DURATION, () => { resultOutput.innerHTML = `<p style="font-style: italic;">Klaar!</p>`; });
                 };
                 break;
-            
-            case 'stroop_game':
+            }
+            case 'stroop_game': {
                 resultOutput.innerHTML = `<p>${resultText}</p>`;
-                const gameContainer = document.createElement('div');
-                gameContainer.style.display='flex'; gameContainer.style.flexWrap='wrap'; gameContainer.style.justifyContent='center'; gameContainer.style.gap='15px'; gameContainer.style.marginTop='20px';
+                const cont = document.createElement('div');
+                cont.style.cssText = 'display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px;';
                 const colorNames = dynamicData.getColorNames();
                 for (let i = 0; i < 10; i++) {
-                    const colorWord = colorNames[Math.floor(Math.random() * colorNames.length)];
-                    let colorValueKey;
-                    do { colorValueKey = colorNames[Math.floor(Math.random() * colorNames.length)]; } while (colorValueKey === colorWord);
-                    const colorHex = dynamicData.colorMap[colorValueKey];
-                    const wordSpan = document.createElement('span');
-                    wordSpan.textContent=colorWord; wordSpan.style.color=colorHex; wordSpan.style.padding='5px 10px'; wordSpan.style.fontSize='2.5rem'; wordSpan.style.fontWeight='bold';
-                    gameContainer.appendChild(wordSpan);
+                    const word = colorNames[Math.floor(Math.random() * colorNames.length)];
+                    let colorKey;
+                    do { colorKey = colorNames[Math.floor(Math.random() * colorNames.length)]; } while (colorKey === word);
+                    cont.innerHTML += `<span style="color:${dynamicData.colorMap[colorKey]}; padding:5px 10px; font-size:2.5rem; font-weight:bold;">${word}</span>`;
                 }
-                resultOutput.appendChild(gameContainer);
+                resultOutput.appendChild(cont);
                 break;
-
-            default:
+            }
+            default: {
                 if (taskForModal instanceof Image) {
                     resultOutput.appendChild(taskForModal.cloneNode());
                 } else {
                     resultOutput.innerHTML = `<p>${resultText}</p>`;
                 }
-
-                if (processedTask.type === 'meervoud' || processedTask.type === 'verkleinwoord' || processedTask.type === 'tegengestelden') {
-                    const showAnswerBtn = document.createElement('button');
-                    showAnswerBtn.className = 'preset-btn';
-                    showAnswerBtn.textContent = 'Toon Antwoord';
-                    showAnswerBtn.style.marginTop = '15px';
-                    resultOutput.appendChild(showAnswerBtn);
-                    showAnswerBtn.onclick = () => {
-                        resultOutput.innerHTML = `<p>${resultText}</p><p style="color: var(--action-color); font-weight: bold; margin-top: 10px;">${processedTask.answer}</p>`;
-                        showAnswerBtn.disabled = true;
+                if (processedTask?.answer) {
+                    const btn = document.createElement('button');
+                    btn.className = 'preset-btn';
+                    btn.textContent = 'Toon Antwoord';
+                    btn.style.marginTop = '15px';
+                    resultOutput.appendChild(btn);
+                    btn.onclick = () => {
+                        resultOutput.innerHTML = `<p>${resultText}</p><p style="color:var(--action-color);font-weight:bold;margin-top:10px;">${processedTask.answer}</p>`;
+                        btn.disabled = true;
                     };
                 }
-
-                if (processedTask.requiresLeader) {
-                    const tipElement = document.createElement('p');
-                    tipElement.className = 'manual-tip';
-                    tipElement.textContent = 'Tip: zie de handleiding (PDF) voor voorbeelden en variaties.';
-                    resultOutput.appendChild(tipElement);
+                if (processedTask?.requiresLeader) {
+                    resultOutput.innerHTML += `<p class="manual-tip">Tip: zie de handleiding (PDF) voor voorbeelden en variaties.</p>`;
                 }
                 break;
+            }
         }
-        
         resultModal.style.display = 'flex';
     };
 
-    const closeModal = () => { if (activeTimer) clearTimeout(activeTimer); resultModal.style.display = 'none'; };
-    
-    // --- EVENT LISTENERS ---
-    downloadListBtn.addEventListener('click', () => {
-        if (spinHistory.length === 0) {
-            alert("Er zijn nog geen oefeningen gedraaid om te downloaden.");
-            return;
-        }
+    const closeModal = () => {
+        if (activeTimer) clearTimeout(activeTimer);
+        resultModal.style.display = 'none';
+    };
 
-        let fileContent = "Overzicht van de oefeningen:\n\n";
-        spinHistory.forEach((item, index) => {
-            fileContent += `Oefening ${index + 1}: ${item.exercise} = ${item.answer}\n`;
+    // ===== EVENT LISTENERS =====
+    closeBtn?.addEventListener('click', closeModal);
+    resultModal?.addEventListener('click', (e) => {
+        if (e.target === resultModal) closeModal();
+    });
+
+    spinBtn?.addEventListener('click', spin);
+
+    mathPresetBtns?.forEach(btn => {
+        btn.addEventListener('click', () => {
+            mathPresetBtns.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            const type = btn.dataset.type;
+            selectedMathLimit = (type === 'plusmin10') ? 10 : (type === 'plusmin20') ? 20 : (type === 'plusmin100') ? 100 : 1000;
         });
+    });
 
-        const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+    generateTablesBtn?.addEventListener('click', generateSelectedTables);
+    generateSumsBtn?.addEventListener('click', () => {
+        if (!selectedMathLimit) { alert("Kies eerst een bereik (+/- tot 10/20/100/1000)."); return; }
+        const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
+        generateSums(selectedMathLimit, options.includes('met'), options.includes('zonder'));
+    });
+
+    generateEfBtn?.addEventListener('click', generateEfTasks);
+    generateMovementBtn?.addEventListener('click', generateMovementTasks);
+    generateTaalBtn?.addEventListener('click', generateTaalTasks);
+    generateTechLezenBtn?.addEventListener('click', generateTechLezenTasks);
+    generateMixBtn?.addEventListener('click', generateMixedWheel);
+
+    downloadListBtn?.addEventListener('click', () => {
+        if ((!items || items.length === 0) && spinHistory.length === 0) { alert("Er is nog geen inhoud om te downloaden."); return; }
+        let content = "Overzicht van de oefeningen (gedraaide resultaten):\n\n";
+        if (spinHistory.length > 0) {
+            spinHistory.forEach((it, idx) => { content += `Oefening ${idx + 1}: ${it.exercise} = ${it.answer}\n`; });
+        } else {
+            content += "Er is nog niet gedraaid met het rad.\n";
+        }
+        content += "\n\n";
+
+        if (items && items.length > 0) {
+            content += "Volledige lijst met items op het rad:\n\n";
+            content += items.map((it, idx) => {
+                if (typeof it === 'object' && it.label) {
+                    const detail = it.fullTask?.text || it.fullTask?.word || '';
+                    return detail ? `${idx + 1}: ${it.label} — ${detail}` : `${idx + 1}: ${it.label}`;
+                }
+                return `${idx + 1}: ${String(it)}`;
+            }).join('\n') + "\n";
+        }
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'oefeningen_antwoorden.txt';
+        link.download = 'rad_van_fortuin_overzicht.txt';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     });
 
-    const handleImageUpload = (event) => { const f=event.target.files;if(f.length===0)return;const p=Array.from(f).map(f=>new Promise((r,j)=>{const d=new FileReader;d.onload=e=>{const i=new Image;i.onload=()=>r(i),i.onerror=j,i.src=e.target.result},d.onerror=j,d.readAsDataURL(f)}));Promise.all(p).then(loadNewItems).catch(e=>console.error("Fout bij laden afbeeldingen:",e)) };
-    const updateItemsFromTextarea = () => { const n=itemInput.value.split('\n').filter(i=>i.trim()!=="");loadNewItems(n.length>0?n:[]) };
-    const handleFileUpload = (event) => { const f=event.target.files[0];if(!f)return;const r=new FileReader;r.onload=e=>{itemInput.value=e.target.result,updateItemsFromTextarea()},r.readAsText(f) };
+    // +++++ NIEUWE FUNCTIE VOOR EXPORTEREN +++++
+    exportListBtn?.addEventListener('click', () => {
+        const content = itemInput.value;
+        if (content.trim() === '') {
+            alert("Er is geen invoer om te bewaren.");
+            return;
+        }
+
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'mijn_lijst.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
     
-    itemInput.addEventListener('input', updateItemsFromTextarea);
-    fileUpload.addEventListener('change', handleFileUpload);
-    imageUpload.addEventListener('change', handleImageUpload);
-    spinBtn.addEventListener('click', spin);
-    generateTablesBtn.addEventListener('click', generateSelectedTables);
-    generateEfBtn.addEventListener('click', generateEfTasks);
-    generateMovementBtn.addEventListener('click', generateMovementTasks);
-    generateTaalBtn.addEventListener('click', generateTaalTasks);
-    generateTechLezenBtn.addEventListener('click', generateTechLezenTasks); 
-    generateMixBtn.addEventListener('click', generateMixedWheel);
-    closeBtn.addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => { if (e.target == resultModal) closeModal(); });
-
-    // --- BIJGEWERKTE LOGICA VOOR REKENKNOPPEN ---
-
-    // 1. Kiezen van het rekenniveau
-    mathPresetBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Verwijder 'selected' van alle knoppen
-            mathPresetBtns.forEach(b => b.classList.remove('selected'));
-            // Voeg 'selected' toe aan de geklikte knop
-            btn.classList.add('selected');
-            
-            const type = btn.dataset.type;
-            if (type === 'plusmin10') selectedMathLimit = 10;
-            else if (type === 'plusmin20') selectedMathLimit = 20;
-            else if (type === 'plusmin100') selectedMathLimit = 100;
-            else if (type === 'plusmin1000') selectedMathLimit = 1000;
-        });
-    });
-
-    // 2. Genereren van de sommen met de gekozen opties
-    generateSumsBtn.addEventListener('click', () => {
-        if (selectedMathLimit === 0) {
-            alert("Kies eerst een rekenniveau (bv. '+ / - tot 20').");
-            return;
+    // --- Functie voor handmatig typen ---
+    const updateItemsFromTextarea = () => {
+        const lines = itemInput.value.split('\n').filter(i => i.trim() !== '');
+        items = lines;
+        if (items.length > 0) {
+            showWheelBtn.disabled = false;
+            resetWheel();
+        } else {
+            showWheelBtn.disabled = true;
         }
+    };
+    
+    // --- Upload Handlers ---
+    const handleImageUpload = (event) => {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+        const promises = Array.from(files).map(f => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(f);
+        }));
+        Promise.all(promises).then(loadNewItems).catch(err => console.error("Fout bij laden afbeeldingen:", err));
+    };
 
-        const options = Array.from(document.querySelectorAll('input[name="brug_option"]:checked')).map(cb => cb.value);
-        const allowWithBridge = options.includes('met');
-        const allowWithoutBridge = options.includes('zonder');
+    const handleFileUpload = (event) => {
+        const f = event.target.files?.[0];
+        if (!f) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = String(e.target.result || '');
+            const lines = text.split(/\r\n?|\n/).map(s => s.trim()).filter(Boolean); // Robuuster gemaakt
+            loadNewItems(lines);
+        };
+        // Laat de browser zelf de codering raden voor betere compatibiliteit
+        reader.readAsText(f);
+    };
 
-        if (!allowWithBridge && !allowWithoutBridge) {
-            alert("Kies minstens één optie (met of zonder brug).");
-            return;
-        }
+    imageUpload?.addEventListener('change', handleImageUpload);
+    fileUpload?.addEventListener('change', handleFileUpload);
+    itemInput?.addEventListener('input', updateItemsFromTextarea);
 
-        generateSums(selectedMathLimit, allowWithBridge, allowWithoutBridge);
-    });
-
-    // Initialisatie
+    // Init
     createCheckboxes();
     drawWheel();
     showOptionsView();
