@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Woorden & Getallen Bingo (PRO)</title>
+    <title>Bingo Generator (PRO) - Keuzemenu</title>
 
     <link rel="stylesheet" href="../bingo.css">
     <base href="/pro/">
@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
-        /* Consistente PRO-header zoals bij de andere PRO-bestanden */
         .pro-header {
             position: fixed;
             top: 0;
@@ -39,7 +38,6 @@
         }
         .pro-header .back-link { float: left; }
         .pro-header #logoutBtn { float: right; }
-        /* Zorg dat de inhoud niet onder de header valt */
         body { margin-top: 60px; }
     </style>
 </head>
@@ -49,7 +47,6 @@
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
     <button id="logoutBtn">Uitloggen</button>
 </header>
-
 <script>
   (function() {
     document.addEventListener('click', (e) => {
@@ -63,6 +60,7 @@
     });
   })();
 </script>
+
 <div id="herstel-melding" class="herstel-melding verborgen">
     <span>Er is een vorig spel gevonden. Wilt u doorgaan?</span>
     <button id="herstel-ja">✅ Ja, ga door</button>
@@ -71,7 +69,6 @@
 
 <div class="hoofd-menu">
     <hr>
-
     <button id="kies-avi-knop" class="menu-knop">Start Woordenbingo</button>
     <div id="avi-selectie" class="verborgen">
         <h3>Kies AVI-niveau</h3>
@@ -93,11 +90,9 @@
     <div id="avi-start-klankkeuze" class="verborgen">
         <p>Duid de geleerde klanken aan:</p>
         <div id="klank-kiezer"></div>
-        <button id="start-met-klanken-knop">Start spel</button>
+        <button id="start-met-klanken-knop">Activeer Spel</button>
     </div>
-
     <hr>
-
     <button id="kies-getal-knop" class="menu-knop">Start Getallenbingo</button>
     <div id="getal-selectie" class="verborgen">
         <h3>Kies een bereik</h3>
@@ -105,9 +100,7 @@
         <button class="getal-knop" data-max="100">Getallen tot 100</button>
         <button class="getal-knop" data-max="1000">Getallen tot 1000</button>
     </div>
-
     <hr>
-
     <button id="kies-tafel-knop" class="menu-knop">Start Tafelbingo</button>
     <div id="tafel-selectie" class="verborgen">
         <h3>Kies tafels</h3>
@@ -118,11 +111,9 @@
             <label><input type="radio" name="tafel-type" value="deel"> Deel</label>
             <label><input type="radio" name="tafel-type" value="mix"> Mix</label>
         </div>
-        <button id="start-tafel-spel-knop">Start spel</button>
+        <button id="start-tafel-spel-knop">Activeer Spel</button>
     </div>
-
     <hr>
-
     <button id="kies-reken-knop" class="menu-knop">Start Rekenbingo</button>
     <div id="reken-selectie" class="verborgen">
         <h3>Kies bereik</h3>
@@ -144,28 +135,31 @@
             <label><input type="radio" name="reken-bewerking" value="aftrekken"> Aftrekken</label>
             <label><input type="radio" name="reken-bewerking" value="mix"> Mix</label>
         </div>
-        <button id="start-reken-spel-knop">Start spel</button>
+        <button id="start-reken-spel-knop">Activeer Spel</button>
     </div>
-
     <hr>
-    <button id="maak-kaarten-knop" class="menu-knop bingokaart-knop">Maak Bingokaarten</button>
-    
-    <hr>
-    <button id="export-spel-knop" class="menu-knop">📥 Exporteer Spel</button>
     <button id="import-spel-knop" class="menu-knop">🔄 Importeer Spel</button>
     <input type="file" id="import-spel-input" class="verborgen" accept=".json">
 </div>
 
-<div id="spel-wrapper" class="verborgen">
-    <div class="spel-container">
-        <h1 id="huidig-niveau-titel">Kies een spel om te starten</h1>
-        <div id="items-overzicht"></div>
-        <div id="schuif-machine">
-            <div id="pijl-indicator">▼</div>
-            <div id="ballen-band"></div>
-        </div>
-        <div class="knoppen-container">
-            <button id="start-schuiven-knop">Kies item</button>
+<div class="hoofd-content">
+    <div id="instructie-paneel">
+        <h2>Welkom bij de Bingo Generator!</h2>
+        <p>1. Kies en configureer een speltype uit het menu links.</p>
+        <p>2. Zodra uw spel klaar is, verschijnen hieronder de actieknoppen.</p>
+        <p><em>Of importeer een eerder opgeslagen spel met de knop 'Importeer Spel'.</em></p>
+    </div>
+
+    <div id="actie-paneel" class="verborgen">
+        <h3>Klaar om te Beginnen!</h3>
+        <p><strong>Gekozen spel:</strong> <span id="gekozen-spel-titel"></span></p>
+        <p>Wat wilt u nu doen?</p>
+        <a href="spel.html" id="start-spel-link" class="actie-knop">▶️ Start Spel</a>
+        <button id="maak-kaarten-knop" class="actie-knop">📄 Maak Bingokaarten</button>
+        <div class="export-container">
+            <button id="export-spel-knop" class="actie-knop">📥 Exporteer Spel (.json)</button>
+            <span class="tooltip-trigger" 
+                  data-tooltip="Sla dit exacte spel op als een klein bestandje.&#10;Waarom?&#10;• Voor een extra back-up.&#10;• Om te delen met een collega die de app ook heeft aangeschaft.&#10;• Om mee te nemen naar een andere computer (bv. van thuis naar school).">❓</span>
         </div>
     </div>
 </div>
@@ -173,8 +167,7 @@
 <div id="modal-overlay" class="verborgen">
     <div id="custom-modal">
         <h3 id="modal-titel">Opties voor Bingokaarten</h3>
-        <div id="modal-body">
-            </div>
+        <div id="modal-body"></div>
         <div id="modal-footer">
             <button id="modal-genereer-knop" class="modal-actie-knop">Genereer Kaarten</button>
             <button id="modal-annuleren-knop">Annuleren</button>
