@@ -45,16 +45,33 @@ document.addEventListener('DOMContentLoaded', () => {
     const kiesRekenKnop = document.getElementById('kies-reken-knop');
     const rekenSelectieDiv = document.getElementById('reken-selectie');
     const startRekenSpelKnop = document.getElementById('start-reken-spel-knop');
+    const herstelMelding = document.getElementById('herstel-melding');
+    const herstelJaKnop = document.getElementById('herstel-ja');
+    const herstelNeeKnop = document.getElementById('herstel-nee');
+    const exportSpelKnop = document.getElementById('export-spel-knop');
+    const importSpelKnop = document.getElementById('import-spel-knop');
+    const importSpelInput = document.getElementById('import-spel-input');
 
-    function combinations(n, k) {
-        if (k < 0 || k > n) return 0;
-        if (k === 0 || k === n) return 1;
-        if (k > n / 2) k = n - k;
-        let res = 1;
-        for (let i = 1; i <= k; i++) {
-            res = res * (n - i + 1) / i;
-        }
-        return Math.round(res);
+    const opgeslagenSpelJSON = localStorage.getItem('bingoGameState');
+    if (opgeslagenSpelJSON) {
+        herstelMelding.classList.remove('verborgen');
+        const opgeslagenSpel = JSON.parse(opgeslagenSpelJSON);
+        
+        herstelJaKnop.addEventListener('click', () => {
+            activeerSpel(
+                opgeslagenSpel.levelNaam, 
+                opgeslagenSpel.kaartItemsLijst, 
+                opgeslagenSpel.isGetallenSpel, 
+                opgeslagenSpel.isOefenSpel, 
+                opgeslagenSpel.oefeningenLijst
+            );
+            herstelMelding.classList.add('verborgen');
+        });
+
+        herstelNeeKnop.addEventListener('click', () => {
+            localStorage.removeItem('bingoGameState');
+            herstelMelding.classList.add('verborgen');
+        });
     }
 
     function genereerPrintbarePagina(kaartGrootte = 5, vulAanMetDubbels = false) {
@@ -77,15 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .actie-balk button[onclick*="close"] { background-color: #c0392b; }
                 .actie-balk button:disabled { background-color: #95a5a6; cursor: not-allowed; }
                 #kaarten-wrapper { text-align: center; padding: 20px; background: white; }
-                .bingokaart { 
-                    display: inline-block; 
-                    width: 48%; 
-                    margin: 1%; 
-                    box-sizing: border-box; 
-                    border: 2px solid black; 
-                    page-break-inside: avoid; 
-                    vertical-align: top; 
-                }
+                .bingokaart { display: inline-block; width: 48%; margin: 1%; box-sizing: border-box; border: 2px solid black; page-break-inside: avoid; vertical-align: top; }
                 .bingokaart h3 { text-align: center; font-family: Arial, sans-serif; font-size: 18pt; background-color: #ddd; margin: 0; padding: 5px; }
                 .bingo-grid { display: grid; grid-template-columns: repeat(${kaartGrootte}, 1fr); }
                 .bingo-vakje { height: ${kaartGrootte === 5 ? '80px' : '90px'}; border: 1px solid #ccc; display: flex; justify-content: center; align-items: center; font-family: Arial, sans-serif; font-size: 14pt; font-weight: bold; padding: 2px; box-sizing: border-box; overflow: hidden; text-align: center; }
@@ -93,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     body { background: white; }
                     .actie-balk { display: none; }
                     #kaarten-wrapper { padding: 0; }
-                    @page { size: landscape; } /* Forceer printen naar liggend formaat */
+                    @page { size: landscape; }
                     .bingokaart { width: 45%; height: 45vh; margin: 2%; }
                 }
             </style>`;
@@ -104,58 +113,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     const downloadBtn = document.getElementById('download-pdf-knop');
                     downloadBtn.disabled = true;
                     downloadBtn.textContent = 'Bezig met genereren...';
-
                     const { jsPDF } = window.jspdf;
                     const bingoKaarten = document.querySelectorAll('.bingokaart');
-                    
                     try {
-                        // --- DEFINITIEVE COMPROMIS: 4 KAARTEN OP LIGGEND BLAD ---
                         const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
                         const pageW = pdf.internal.pageSize.getWidth();
                         const pageH = pdf.internal.pageSize.getHeight();
                         const margin = 10;
-
                         if (bingoKaarten.length === 0) {
                             alert("Geen kaarten om te genereren.");
                             return;
                         }
-                        
-                        // Bepaal de maximale afmetingen voor 4 kaarten (2x2) op een liggende pagina
                         const cardWidth = (pageW - 3 * margin) / 2;
                         const cardHeight = (pageH - 3 * margin) / 2;
-
                         for (let i = 0; i < bingoKaarten.length; i++) {
                             const kaart = bingoKaarten[i];
                             const kaartPositieOpPagina = i % 4;
-
                             if (i > 0 && kaartPositieOpPagina === 0) {
                                 pdf.addPage();
                             }
-
                             let cursorX, cursorY;
-
-                            if (kaartPositieOpPagina === 0) { // Links-boven
+                            if (kaartPositieOpPagina === 0) { 
                                 cursorX = margin;
                                 cursorY = margin;
-                            } else if (kaartPositieOpPagina === 1) { // Rechts-boven
+                            } else if (kaartPositieOpPagina === 1) { 
                                 cursorX = margin * 2 + cardWidth;
                                 cursorY = margin;
-                            } else if (kaartPositieOpPagina === 2) { // Links-onder
+                            } else if (kaartPositieOpPagina === 2) { 
                                 cursorX = margin;
                                 cursorY = margin * 2 + cardHeight;
-                            } else { // Rechts-onder
+                            } else { 
                                 cursorX = margin * 2 + cardWidth;
                                 cursorY = margin * 2 + cardHeight;
                             }
-                            
                             const canvas = await html2canvas(kaart, { scale: 2 });
-                            // Forceer de afbeelding in de berekende afmetingen, ook als dit vervorming geeft
                             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', cursorX, cursorY, cardWidth, cardHeight);
                         }
-                        // --- EINDE AANPASSING ---
-
                         pdf.save('bingokaarten.pdf');
-
                     } catch (error) {
                         console.error('Fout bij het genereren van de PDF:', error);
                         alert('Er is een fout opgetreden bij het maken van de PDF.');
@@ -183,19 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             kaartenHTML += `</div></div>`;
         }
         
-        return `<html>
-                    <head>
-                        <title>Bingokaarten</title>
-                        ${printStyles}
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-                        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-                    </head>
-                    <body>
-                        ${actieKnoppenHTML}
-                        <div id="kaarten-wrapper">${kaartenHTML}</div>
-                        ${pdfScript}
-                    </body>
-                </html>`;
+        return `<html><head><title>Bingokaarten</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" integrity="sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" integrity="sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script></head><body>${actieKnoppenHTML}<div id="kaarten-wrapper">${kaartenHTML}</div>${pdfScript}</body></html>`;
     }
 
     function toonKeuzeModal(actieFunctie) {
@@ -214,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const btn = document.createElement('button');
             btn.className = 'modal-optie-knop';
             btn.innerHTML = `Maak 3x3 kaarten<small>Genereer 25 kaarten van 3x3 vakjes.</small>`;
-            btn.onclick = () => { actieFuncien(3, false); modalOverlay.classList.add('verborgen'); };
+            btn.onclick = () => { actieFunctie(3, false); modalOverlay.classList.add('verborgen'); };
             modalOpties.appendChild(btn);
         }
         const btnForceer = document.createElement('button');
@@ -241,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else { actieFunctie(5, false); }
     }
 
+    // --- HIER IS DE ONTBREKENDE FUNCTIE ---
     function ontleedGetal(n) {
         if (n >= 1000) return n;
         let h = Math.floor(n / 100);
@@ -254,13 +237,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function activeerSpel(levelNaam, itemsVoorKaart, isGetal = false, isOefening = false, oefeningen = {}) {
+        const gameState = {
+            levelNaam: levelNaam,
+            kaartItemsLijst: itemsVoorKaart,
+            isGetallenSpel: isGetal,
+            isOefenSpel: isOefening,
+            oefeningenLijst: oefeningen
+        };
+        localStorage.setItem('bingoGameState', JSON.stringify(gameState));
+
         isGetallenSpel = isGetal;
         isOefenSpel = isOefening;
         spelWrapper.classList.remove('verborgen');
         titel.textContent = levelNaam;
-
         kaartItemsLijst = [...itemsVoorKaart]; 
-
         if (isOefening) {
             oefeningenLijst = { ...oefeningen };
             teTrekkenItems = Object.keys(oefeningenLijst);
@@ -329,8 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         knop.addEventListener('click', (e) => {
             document.querySelectorAll('.avi-knop').forEach(k => k.classList.remove('active'));
             e.target.classList.add('active');
-            aviStartSubkeuzeDiv.classList.add('verborgen');
-            aviStartKlankkeuzeDiv.classList.add('verborgen');
             const level = e.target.dataset.level;
             if (level === 'AVI-START') {
                 aviStartSubkeuzeDiv.classList.remove('verborgen');
@@ -352,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         aviStartKlankkeuzeDiv.classList.remove('verborgen');
     }
-
+    
     document.getElementById('start-met-letters').addEventListener('click', () => { toonKlankKiezer("letters"); });
     document.getElementById('start-met-woorden').addEventListener('click', () => { toonKlankKiezer("woorden"); });
     document.getElementById('start-met-klanken-knop').addEventListener('click', () => {
@@ -490,5 +478,55 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("Alle items van dit niveau zijn geweest!"); 
             }
         }, 4000);
+    });
+
+    exportSpelKnop.addEventListener('click', () => {
+        const opgeslagenSpel = localStorage.getItem('bingoGameState');
+        if (!opgeslagenSpel) {
+            alert('Er is geen actief spel om te exporteren. Start eerst een spel.');
+            return;
+        }
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(opgeslagenSpel);
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href", dataStr);
+        downloadAnchorNode.setAttribute("download", "bingo-spel.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+    });
+
+    importSpelKnop.addEventListener('click', () => {
+        importSpelInput.click(); 
+    });
+
+    importSpelInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const geimporteerdSpel = JSON.parse(e.target.result);
+                if (geimporteerdSpel.levelNaam && geimporteerdSpel.kaartItemsLijst) {
+                    activeerSpel(
+                        geimporteerdSpel.levelNaam,
+                        geimporteerdSpel.kaartItemsLijst,
+                        geimporteerdSpel.isGetallenSpel,
+                        geimporteerdSpel.isOefenSpel,
+                        geimporteerdSpel.oefeningenLijst
+                    );
+                    alert('Spel succesvol geïmporteerd!');
+                } else {
+                    alert('Fout: Het gekozen bestand is geen geldig bingospel-bestand.');
+                }
+            } catch (error) {
+                alert('Fout bij het lezen van het bestand. Is het een geldig JSON-bestand?');
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';
     });
 });
