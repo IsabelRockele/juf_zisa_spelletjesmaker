@@ -25,6 +25,8 @@
                 <div class="column">
                     <h3>Eigen lijsten & afbeeldingen</h3>
                     <textarea id="itemInput" placeholder="Typ hier elke optie op een nieuwe regel..." rows="4"></textarea>
+                    <button id="exportListBtn" class="preset-btn" style="width:100%; margin-bottom: 10px; background-color: #16a085;">Bewaar Invoer als .txt</button>
+                    
                     <label for="fileUpload" class="upload-label">Upload Klaslijst (.txt)</label>
                     <input type="file" id="fileUpload" accept=".txt" style="display: none;">
                     <label for="imageUpload" class="upload-label">Upload Afbeeldingen</label>
@@ -122,8 +124,8 @@
 
         <div id="wheelViewControls">
             <button id="restartBtn" class="preset-btn">Nog eens met dit rad</button>
-            <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;">Download Lijst</button>
-            <button id="newOptionsBtn" class="warning-btn">Nieuwe opties kiezen</button>
+            <button id="downloadListBtn" class="preset-btn" style="background-color: #16a085;">Download Overzicht</button>
+            <button id="newOptionsBtn" type="button" class="warning-btn">Nieuwe opties kiezen</button>
         </div>
 
         <div class="main-content">
