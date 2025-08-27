@@ -17,10 +17,78 @@
 <meta name="apple-mobile-web-app-title" content="Juf Zisa">
 
 <style>
-  .probar { position:sticky; top:0; z-index:1000; background:#fffbe6; display:flex; justify-content:flex-end; align-items:center; gap:.6rem; padding:10px 20px; border-bottom:1px solid #ffe08a; }
-  .probar small { color:#374151; }
-  .btn-logout { border:1px solid #e5e7eb; background:#f8fafc; border-radius:10px; padding:.45rem .8rem; cursor:pointer; }
+  /* Bovenbalk */
+  .probar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: #fffbe6;
+    display: flex;
+    justify-content: space-between; /* links 'who' — rechts kolom met knoppen */
+    align-items: flex-start;
+    gap: .6rem;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ffe08a;
+  }
+  .probar small { color: #374151; }
 
+  /* Rechterzijde van de bovenbalk: Uitloggen-container + (eronder) handleiding-container */
+  .bar-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;  /* "links onder" de Uitloggen-knop */
+    gap: 8px;
+  }
+
+  .btn-logout {
+    border: 1px solid #e5e7eb;
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: .45rem .8rem;
+    cursor: pointer;
+  }
+
+  /* ===== HANDLEIDING (zelfde lay-out en tooltip als index.html) ===== */
+  .handleiding-container { /* aparte container onder de uitloggen-container */ }
+  .download-knop {
+    background-color: #e74c3c;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    white-space: nowrap;
+    display: inline-block;
+    position: relative; /* referentie voor tooltip */
+  }
+  .download-knop:hover {
+    background-color: #c0392b;
+    transform: scale(1.05);
+  }
+  .download-knop::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #e74c3c;
+    color: white;
+    padding: 8px 10px;
+    font-size: 1rem;
+    border-radius: 14px;
+    opacity: 0;
+    white-space: normal;
+    width: 220px;
+    text-align: center;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 10;
+  }
+  .download-knop:hover::after { opacity: 1; }
+
+  /* Pagina lay-out en knoppenraster – ongewijzigd */
   .header-container { display:flex; justify-content:center; align-items:center; margin:40px 0 30px; }
   .logo { width:100px; height:auto; margin-right:20px; }
   .header-container h1 { font-size:3.5rem; margin:0 0 30px 0; }
@@ -31,15 +99,53 @@
   .button-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(120px,1fr)); gap:30px; justify-items:center; }
   .drukknop-afbeelding { width:120px; height:auto; transition:transform .2s ease; }
   a:hover .drukknop-afbeelding { transform:scale(1.05); }
+
+  /* Tooltip voor links: zelfde als uw bestand, maar zonder invloed op .download-knop */
   a { position:relative; display:inline-block; }
-  a::after { content:attr(data-tooltip); position:absolute; top:-45px; left:50%; transform:translateX(-50%); background:#f9b600; color:#fff; padding:8px 14px; font-size:1.4rem; border-radius:14px; opacity:0; white-space:nowrap; pointer-events:none; transition:opacity .2s ease; z-index:10; }
-  a:hover::after { opacity:1; }
+  a:not(.download-knop)::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #f9b600;
+    color: #fff;
+    padding: 8px 14px;
+    font-size: 1.4rem;
+    border-radius: 14px;
+    opacity: 0;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 10;
+  }
+  a:not(.download-knop):hover::after { opacity: 1; }
 </style>
 </head>
 <body>
 <div class="probar">
   <small id="who">Controleren…</small>
-  <button id="btnLogout" class="btn-logout" type="button">Uitloggen</button>
+
+  <!-- Rechter kolom in de bovenbalk -->
+  <div class="bar-right">
+    <!-- Container van uitloggen (ongewijzigd qua knop) -->
+    <div class="logout-container">
+      <button id="btnLogout" class="btn-logout" type="button">Uitloggen</button>
+    </div>
+
+    <!-- NIEUWE aparte container ONDER uitloggen: zelfde layout als index.html -->
+    <div class="handleiding-container">
+      <a
+        href="./Handleiding spelletjesmaker.pdf"
+        class="download-knop"
+        download
+        data-tooltip="Hulp nodig? Geen probleem, hier kan je de handleiding downloaden van deze spelgenerator."
+        aria-label="Handleiding downloaden (PDF)"
+      >
+        Handleiding
+      </a>
+    </div>
+  </div>
 </div>
 
 <div class="container">
@@ -182,9 +288,4 @@
 </script>
 </body>
 </html>
-
-
-
-
-
 
