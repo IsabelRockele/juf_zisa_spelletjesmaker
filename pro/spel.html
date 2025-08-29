@@ -17,8 +17,7 @@
             z-index: 1000;
             height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
+        .pro-header .back-link{
             background: #5a9fd4;
             color: #fff;
             border: none;
@@ -30,9 +29,8 @@
             cursor: pointer;
             display: inline-block;
             white-space: nowrap;
+            float: left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
         body { margin-top: 60px; }
         .spel-pagina-body {
             padding: 20px;
@@ -45,22 +43,8 @@
 <body class="spel-pagina-body">
 
 <header class="pro-header">
-    <a href="bingo.html" class="back-link">&larr; Terug naar Keuzemenu</a>
-    <button id="logoutBtn">Uitloggen</button>
+    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
 </header>
-<script>
-  (function() {
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('#logoutBtn');
-      if (!btn) return;
-      try { localStorage.removeItem('authToken'); } catch {}
-      try { localStorage.removeItem('refreshToken'); } catch {}
-      fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-        .catch(() => {})
-        .finally(() => { window.location.href = '/login.html'; });
-    });
-  })();
-</script>
 
 <div id="spel-wrapper">
     <div class="spel-container">
@@ -72,7 +56,7 @@
         </div>
         <div class="knoppen-container">
             <button id="start-schuiven-knop">Kies item</button>
-            <a href="bingo.html" class="sluiten-knop">Spel Sluiten</a>
+            <a href="app.html" class="sluiten-knop">Spel Sluiten</a>
         </div>
     </div>
 </div>
@@ -80,9 +64,15 @@
 <div id="geen-spel-melding" class="verborgen">
     <h2>Geen spel gevonden!</h2>
     <p>Er is geen spel geconfigureerd. Ga terug naar het keuzemenu om een spel te starten.</p>
-    <a href="bingo.html" class="actie-knop">Terug naar Keuzemenu</a>
+    <a href="app.html" class="actie-knop">Terug naar menu</a>
 </div>
 
 <script src="../bingo.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
