@@ -9,38 +9,21 @@
     <style>
         .pro-header {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+            top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
+            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
         body { margin-top: 60px; }
     </style>
 </head>
 <body>
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
 </header>
 
 <header>
@@ -119,19 +102,15 @@
     </div>
 </div>
 
-<script>
-    (function() {
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('#logoutBtn');
-            if (!btn) return;
-            try { localStorage.removeItem('authToken'); } catch {}
-            try { localStorage.removeItem('refreshToken'); } catch {}
-            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                .catch(() => {})
-                .finally(() => { window.location.href = '/login.html'; });
-        });
-    })();
-</script>
+<!-- Oude uitlogknop + logout-script verwijderd -->
+
 <script src="../rekenrooster.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
+
