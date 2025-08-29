@@ -4,299 +4,164 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zisa PRO – Inloggen</title>
-  <meta name="theme-color" content="#fffbe6" />
-  <link rel="manifest" href="./manifest-pro.json" />
   <style>
-    :root{
-      --bg:#fffbe6;--card:#fff;--muted:#4b5563;--primary:#f9b600;--primary-pressed:#d89c00;
-      --ring:rgba(249,182,0,.35);--border:#e5e7eb;--shadow:0 12px 28px rgba(0,0,0,.08);--radius:14px
-    }
-    *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);font-family:system-ui,Segoe UI,Arial,sans-serif;color:#111}
-    .wrap{min-height:100dvh;display:grid;place-items:center;padding:24px}
-    .card{width:100%;max-width:640px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
-    h1{margin:.2rem 0 8px 0;font-size:28px;color:#f0a500}
-    .muted{color:#6b7280}
-    label{font-weight:600;display:block;margin:.75rem 0 .35rem}
-    input[type=text]{width:100%;padding:.7rem .85rem;border:1px solid var(--border);border-radius:10px;outline:0;background:#fffbe6}
-    input:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--ring)}
-    .row{display:flex;gap:.6rem;align-items:center;margin-top:.6rem}
-    .btn{border:1px solid var(--border);background:#f8fafc;color:#111;border-radius:10px;padding:.65rem 1rem;cursor:pointer}
-    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .btn.primary:active{background:var(--primary-pressed)}
-    .btn[disabled]{opacity:.65;cursor:not-allowed}
-    details{margin-top:12px}
-    pre{white-space:pre-wrap;background:#0b1220;color:#c7d2fe;padding:12px;border-radius:10px;max-height:320px;overflow:auto}
-    #otpInfo{display:none;margin:.5rem 0 0 0}
-    .inline-btn{display:inline-block;margin-left:8px;border:0;background:#ffd166;color:#3b2d00;padding:.2rem .5rem;border-radius:8px;cursor:pointer;font-size:.85rem}
+    :root { --bg:#fff9e8; --card:#ffffff; --text:#1a1a1a; --muted:#555; --btn:#f9b233; --btnText:#222; }
+    body{margin:0;background:var(--bg);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);}
+    .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
+    .card{background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:24px;}
+    h1{margin:0 0 16px}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
+    button{appearance:none;border:0;border-radius:10px;padding:12px 16px;background:var(--btn);color:var(--btnText);font-weight:600;cursor:pointer}
+    button.secondary{background:#e5e7eb}
+    .muted{color:var(--muted);font-size:14px}
+    .status{margin-top:12px;padding:12px;border-radius:10px;background:#f3f4f6}
+    .log{margin-top:16px;background:#0b1020;color:#d8e1ff;border-radius:10px;padding:12px;white-space:pre-wrap;min-height:120px;font:13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+    code{background:#f3f4f6;padding:2px 6px;border-radius:6px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:720px){ .grid{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <main class="card" role="main" aria-labelledby="title">
-      <h1 id="title">Aanmelden</h1>
-      <p class="muted">Log in met uw gebruikers-ID. U ontvangt een 6-cijferige code (OTP).</p>
+    <div class="card">
+      <h1>Zisa PRO – inloggen</h1>
+      <p class="muted">
+        Log in met hetzelfde e-mailadres als bij de aankoop. De PRO-rechten worden automatisch herkend (geen codes intypen).
+      </p>
 
-      <section aria-label="Code aanvragen">
-        <label for="uid">Gebruikers-ID</label>
-        <input id="uid" type="text" autocomplete="username" placeholder="bv. jouw-UID of e-mail" />
-        <div class="row">
-          <button class="btn" id="btnReq" type="button">Code aanvragen</button>
-        </div>
-      </section>
+      <div class="row">
+        <button id="btnLogin">Inloggen met Google</button>
+        <button id="btnLogout" class="secondary">Uitloggen</button>
+      </div>
 
-      <section aria-label="OTP verifiëren" style="margin-top:.8rem">
-        <div class="row">
-          <div style="flex:1">
-            <label for="code">6-cijferige code</label>
-            <input id="code" type="text" inputmode="numeric" pattern="[0-9]{6}" autocomplete="one-time-code" placeholder="000000" />
+      <div class="grid">
+        <div class="card" style="padding:16px">
+          <h3 style="margin:6px 0 8px">PRO-beheer</h3>
+          <div class="row">
+            <button id="btnRegister">Registreer apparaat</button>
+            <button id="btnProAction" class="secondary">Voer PRO-actie (demo)</button>
           </div>
-          <div>
-            <button class="btn primary" id="btnVerify" type="button">Verifiëren &amp; inloggen</button>
-          </div>
+          <div class="status" id="status">Niet ingelogd.</div>
+          <div class="muted">Huidige gebruiker: <code id="who">—</code></div>
         </div>
-        <p id="otpInfo" class="muted" aria-live="polite"></p>
-      </section>
 
-      <details>
-        <summary>Geavanceerd / status</summary>
-        <div class="row" style="flex-wrap:wrap">
-          <button class="btn" id="btnMe" type="button">/auth/me</button>
-          <button class="btn" id="btnPing" type="button">/ping</button>
-          <button class="btn" id="btnClear" type="button">Log wissen</button>
+        <div class="card" style="padding:16px">
+          <h3 style="margin:6px 0 8px">Uitleg</h3>
+          <ul class="muted" style="margin:0 0 8px 18px">
+            <li>Na inloggen registreert u dit apparaat (max. 2 standaard).</li>
+            <li>De app vraagt intern een <em>sessiecode</em> op voor elke PRO-actie en verifieert die server-side.</li>
+            <li>De licentie-code uit de e-mail (<code>ZISA-…</code>) is een referentie, <b>niet</b> om in te typen.</li>
+          </ul>
+          <div class="muted">App-link: <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/" target="_blank">GitHub Pages</a></div>
         </div>
-        <pre id="log" aria-live="polite"></pre>
-      </details>
-    </main>
+      </div>
+
+      <div class="log" id="log"></div>
+    </div>
   </div>
 
-  <script>
-    /* ===== Config ===== */
-    const API_BASE = "https://api-xc54winygq-ew.a.run.app";
-    const TOKEN_KEY = "zisa_token";
+  <!-- Firebase Web SDK (modular) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
 
-    // UX / regels
-    const OTP_COOLDOWN_SEC = 60;     // wachttijd bij 429 (UI)
-    const OTP_VALID_SEC    = 5 * 60; // 5 min
-    const ADMIN_UID        = "isabel-admin";
+    // === Firebase config van uw project ===
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
+      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
+      projectId: "zisa-spelletjesmaker-pro",
+      storageBucket: "zisa-spelletjesmaker-pro.firebasestorage.app",
+      messagingSenderId: "828063957776",
+      appId: "1:828063957776:web:8d8686b478846fe980db95",
+      measurementId: "G-9LHNLFHSXX"
+    };
 
-    // Admin: inline code tonen (zoals u wenst)
-    const ADMIN_INLINE_OTP = true;   // admin ziet code direct als backend 'displayCode' meegeeft
+    // === Init ===
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const functions = getFunctions(app, "europe-west1");
+    const provider = new GoogleAuthProvider();
 
-    // Elements / helpers
-    const $ = id => document.getElementById(id);
-    const $uid=$('uid'), $code=$('code'), $btnReq=$('btnReq'), $btnVerify=$('btnVerify');
-    const $btnMe=$('btnMe'), $btnPing=$('btnPing'), $btnClear=$('btnClear');
-    const $log=$('log'), $otpInfo=$('otpInfo');
-    const log = (m) => { $log.textContent = (typeof m === 'string') ? m : JSON.stringify(m, null, 2); };
+    const el = (id) => document.getElementById(id);
+    const log = (msg) => { el("log").textContent += (typeof msg === "string" ? msg : JSON.stringify(msg, null, 2)) + "\n"; };
 
-    const now = () => Math.floor(Date.now()/1000);
-    const setInfo = html => { $otpInfo.innerHTML = html || ''; $otpInfo.style.display = html ? 'block' : 'none'; };
+    // DeviceId vasthouden in de browser
+    function getDeviceId() {
+      let id = localStorage.getItem("zisa_device_id");
+      if (!id) { id = crypto.randomUUID(); localStorage.setItem("zisa_device_id", id); }
+      return id;
+    }
 
-    // Cooldown (frontend)
-    const setCooldown = (until)=> localStorage.setItem('otp_cooldown_until', String(until));
-    const getCooldownLeft = ()=> Math.max(0, Number(localStorage.getItem('otp_cooldown_until')||0) - now());
-    function syncCooldownUI(){
-      const left = getCooldownLeft();
-      if(left>0){
-        $btnReq.disabled = true;
-        $btnReq.textContent = `Code aanvragen (${left}s)`;
-        const iv = setInterval(()=>{
-          const l = getCooldownLeft();
-          if (l<=0){
-            clearInterval(iv);
-            $btnReq.disabled = false;
-            $btnReq.textContent = 'Code aanvragen';
-            setInfo('U kunt opnieuw een code aanvragen. Tip: de vorige code kan nog geldig zijn.');
-          } else {
-            $btnReq.textContent = `Code aanvragen (${l}s)`;
-          }
-        }, 1000);
+    function setStatus(text) { el("status").textContent = text; }
+
+    // === Auth UI ===
+    el("btnLogin").onclick = async () => {
+      try { await signInWithPopup(auth, provider); }
+      catch (e) { log("Login fout: " + e.message); }
+    };
+
+    el("btnLogout").onclick = async () => {
+      try { await signOut(auth); }
+      catch (e) { log("Logout fout: " + e.message); }
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        el("who").textContent = `${user.email} (uid: ${user.uid})`;
+        setStatus("Ingelogd. Registreer dit apparaat om PRO te activeren.");
       } else {
-        $btnReq.disabled = false;
-        $btnReq.textContent = 'Code aanvragen';
+        el("who").textContent = "—";
+        setStatus("Niet ingelogd.");
       }
-    }
-
-    // Admin: vorige code 5 min beschikbaar (alleen lokaal in sessionStorage)
-    const ADMIN_STORE_KEY = "admin_last_code"; // {code, ts}
-    function saveAdminLastCode(code){
-      try{ sessionStorage.setItem(ADMIN_STORE_KEY, JSON.stringify({code:String(code||''), ts:now()})); }catch(_){}
-    }
-    function getAdminLastCode(){
-      try{
-        const raw = sessionStorage.getItem(ADMIN_STORE_KEY);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        if (!obj?.code || !obj?.ts) return null;
-        if ((now()-obj.ts) > OTP_VALID_SEC) return null;
-        return obj;
-      }catch(_){ return null; }
-    }
-    function clearAdminLastCode(){ try{ sessionStorage.removeItem(ADMIN_STORE_KEY); }catch(_){} }
-
-    function setValidityHint(){
-      const t = Number(localStorage.getItem('otp_last_sent_ts')||0);
-      const left = Math.max(0, OTP_VALID_SEC - (now() - t));
-      const last = getAdminLastCode();
-
-      if (last && left>0){
-        const m = Math.floor(left/60), s = left%60;
-        setInfo(`Hint: uw vorige code is mogelijk nog geldig (± ${m}m ${s}s).
-                 <button type="button" id="fillPrev" class="inline-btn">Vorige code invullen</button>`);
-        setTimeout(()=>{ const btn=document.getElementById('fillPrev'); if (btn) btn.onclick=()=>{ $code.value = last.code; $code.focus(); setInfo('Vorige code ingevuld. Klik op <em>Verifiëren</em>.'); }; },0);
-      } else if (left>0){
-        setInfo(`Hint: vorige code nog ong. ${Math.floor(left/60)}m ${left%60}s geldig.`);
-      } else {
-        setInfo('');
-      }
-    }
-
-    // API helpers (oude paden die bij u werkten)
-    const reqOtp = (uid) => fetch(`${API_BASE}/otp/request`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ uid })
-    });
-    const verifyOtpCall = (uid, code) => fetch(`${API_BASE}/otp/verify`, {
-      method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
-      body: JSON.stringify({ uid, code })
     });
 
-    async function requestOtp(){
-      const uid = $uid.value.trim();
-      if (!uid){ alert('Vul uw gebruikers-ID in.'); return; }
+    // === PRO: apparaat registreren ===
+    el("btnRegister").onclick = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) { setStatus("Niet ingelogd."); return; }
+        const deviceId = getDeviceId();
 
-      // géén frontend-blokkade voor admin; server bewaakt echte rate-limit
-      if (uid !== ADMIN_UID){
-        const left = getCooldownLeft();
-        if (left>0){ setInfo(`Even geduld: u kunt over <strong>${left}s</strong> opnieuw een code aanvragen. Of gebruik uw vorige code zolang die nog geldig is.`); return; }
-      }
-
-      setInfo('Bezig met aanvragen…'); $btnReq.disabled = true;
-      try{
-        const r = await reqOtp(uid);
-        const txt = await r.text(); let data={}; try{ data = JSON.parse(txt); }catch(_){}
-        log({status:r.status, body:data||txt});
-
-        if (r.status === 429){
-          const ra = Number(r.headers.get('Retry-After')||OTP_COOLDOWN_SEC);
-          setCooldown(now()+ra); syncCooldownUI();
-          setInfo(`U heeft zojuist al een code aangevraagd. Wacht <strong>${ra}s</strong> of gebruik de vorige code (5 min).`);
-          setValidityHint();
-          return;
+        const call = httpsCallable(functions, "registerDevice");
+        const resp = await call({ deviceId });
+        log({ registerDevice: resp.data });
+        if (resp.data?.ok) {
+          const exp = resp.data.expiresAt ? new Date(resp.data.expiresAt).toISOString().slice(0,10) : "onbekend";
+          setStatus(`PRO actief. Geldig tot: ${exp}. (maxDevices: ${resp.data.maxDevices})`);
+        } else {
+          setStatus(`Geen PRO: ${resp.data?.reason || "onbekend"}`);
         }
+      } catch (e) { log("registerDevice fout: " + e.message); }
+    };
 
-        if (r.ok && data?.ok){
-          localStorage.setItem('otp_last_sent_ts', String(now()));
-          setCooldown(now()+OTP_COOLDOWN_SEC); syncCooldownUI();
+    // === Demo: PRO-actie aanroepen ===
+    el("btnProAction").onclick = async () => {
+      try {
+        const user = auth.currentUser;
+        if (!user) { log("Niet ingelogd."); return; }
+        const deviceId = getDeviceId();
 
-          // ADMIN: code meteen invullen + bewaren (geen "Controleer uw e-mail"-tekst)
-          if (uid===ADMIN_UID && ADMIN_INLINE_OTP && data.displayCode){
-            $code.value = String(data.displayCode);
-            saveAdminLastCode(data.displayCode);
-            setValidityHint();
-            setInfo('Admin-code is ingevuld. Klik op <strong>Verifiëren</strong>.');
-            $code.focus();
-          } else {
-            // Niet-admin (of geen displayCode) → normale melding
-            setValidityHint();
-            setInfo('Code verzonden. <strong>Controleer uw e-mail</strong>.');
-            $code.focus();
-          }
-          return;
-        }
+        // 1) sessiecode opvragen
+        const issue = httpsCallable(functions, "issueSessionCode");
+        const r1 = await issue({ deviceId });
+        log({ issueSessionCode: r1.data });
+        if (!r1.data?.ok) { setStatus(`Geen sessiecode: ${r1.data?.reason || "onbekend"}`); return; }
+        const code = r1.data.code;
 
-        if (data?.alreadyIssued || data?.error==='code-still-valid'){
-          const ttl = Number(data?.ttl_left || 0);
-          const m = Math.floor(ttl/60), s = ttl%60;
-          setInfo(`Er is al een <strong>geldige code</strong> (nog ± ${m}m ${s}s). Gebruik die code opnieuw.`);
-          setValidityHint();
-          $btnReq.disabled = false;
-          return;
-        }
-
-        setInfo(`Kon geen code aanvragen. <strong>Status ${r.status}</strong>. Probeer opnieuw.`);
-        $btnReq.disabled = false;
-
-      }catch(e){
-        setInfo('Netwerkfout bij aanvragen. Controleer uw verbinding en probeer opnieuw.');
-        log(String(e));
-        $btnReq.disabled = false;
-      }
-    }
-
-    async function verifyOtp(){
-      const uid = $uid.value.trim();
-      const code = $code.value.trim();
-      if (!uid || !/^[0-9]{6}$/.test(code)){ alert('Vul een geldige ID en 6-cijferige code in.'); return; }
-
-      setInfo('Bezig met verifiëren…'); $btnVerify.disabled = true;
-      try{
-        const r = await verifyOtpCall(uid, code);
-        const txt = await r.text(); let data={}; try{ data = JSON.parse(txt); }catch(_){}
-        log({status:r.status, body:data||txt});
-
-        if (r.ok && data?.ok){
-          if (data.token){ try{ localStorage.setItem(TOKEN_KEY, data.token); }catch(_){ } }
-          // admin-quick path: wis bewaarde code bij succes
-          clearAdminLastCode();
-          location.href = './app.html';
-          return;
-        }
-
-        // Code ongeldig/verlopen → duidelijke instructie + “vorige code” verwijderen
-        if (data?.error === 'invalid-code' || r.status === 400 || r.status === 401){
-          clearAdminLastCode();
-          const left = getCooldownLeft();
-          if (left>0){ setInfo(`Code onjuist of verlopen. Wacht <strong>${left}s</strong> en vraag daarna een nieuwe code aan.`); }
-          else { setInfo('Code onjuist of verlopen. Vraag een nieuwe code aan.'); }
-          $btnVerify.disabled = false;
-          $code.select();
-          return;
-        }
-
-        setInfo(`Verifiëren mislukt. <strong>Status ${r.status}</strong>. Probeer opnieuw.`);
-        $btnVerify.disabled = false; $code.select();
-
-      }catch(e){
-        setInfo('Netwerkfout bij verifiëren. Controleer uw verbinding en probeer opnieuw.');
-        log(String(e));
-        $btnVerify.disabled = false;
-      }
-    }
-
-    // Extra tools
-    async function checkMe(){
-      try{
-        let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
-        const data = await resp.json().catch(()=>({}));
-        log(data);
-      }catch(e){ log({ok:false,error:String(e)}); }
-    }
-    function ping(){ fetch(`${API_BASE}/ping`).then(r=>r.json()).then(log).catch(e=>log(String(e))); }
-    function clearLog(){ $log.textContent=''; }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // na uitloggen direct opnieuw kunnen → reset UI-cooldown
-      localStorage.removeItem('otp_cooldown_until');
-
-      // handlers
-      $btnReq.onclick = requestOtp;
-      $btnVerify.onclick = verifyOtp;
-      $btnMe.onclick = checkMe;
-      $btnPing.onclick = ping;
-      $btnClear.onclick = clearLog;
-
-      // UI init
-      syncCooldownUI();
-      setValidityHint();
-
-      // Alleen lokaal (devgemak) mag het veld vooraf gevuld worden
-      if ((location.hostname==='127.0.0.1'||location.hostname==='localhost') && !$uid.value) $uid.value = ADMIN_UID;
-
-      // prettige focus
-      const sent = Number(localStorage.getItem('otp_last_sent_ts')||0);
-      (sent && (now()-sent)<OTP_VALID_SEC) ? $code.focus() : $uid.focus();
-    });
+        // 2) server-endpoint aanroepen (server valideert code)
+        const r = await fetch("https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/proDoSomething", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.uid, deviceId, code, payload: { demo: "ok" } })
+        });
+        const j = await r.json();
+        log({ proDoSomething: j });
+        if (j.ok) setStatus("PRO-actie uitgevoerd.");
+        else setStatus("PRO-actie geweigerd.");
+      } catch (e) { log("PRO actie fout: " + e.message); }
+    };
   </script>
 </body>
 </html>
+
