@@ -1,42 +1,37 @@
+// functions/src/index.ts
+
 import { onRequest, onCall } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 
 // Admin SDK v12 – modulaire imports
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
+import { getAuth } from "firebase-admin/auth";
 
 import fetch from "node-fetch";
 import { z } from "zod";
 import { randomUUID } from "node:crypto";
 
-// ---------- Init ----------
 initializeApp();
 const db = getFirestore();
 
 const REGION = "europe-west1";
 const MOLLIE_API_KEY = defineSecret("MOLLIE_API_KEY");
 
-// Wijzig dit naar een eigen lange, geheime waarde
-const DEV_TOKEN = "c5a4f5e5-1a8b-4f4e-9ad4-3b1b8b2c5d2e";
+// ====== Pas deze 2 URLs aan indien nodig ======
+const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/";
+const SUPPORT_EMAIL = "zebraklas@jufzisa.be";
 
+// ====== Instellingen ======
+const DEV_TOKEN = "c5a4f5e5-1a8b-4f4e-9ad4-3b1b8b2c5d2e";
 const DEFAULT_MAX_DEVICES = 2;
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+
 const now = () => Timestamp.now();
 
-// Link naar uw app (GitHub Pages)
-const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/";
-
-// Abonnement: 1 jaar geldig
-const SUBSCRIPTION_YEARS = 1;
-function oneYearFrom(base?: Timestamp | null) {
-  // verlengen vanaf de langste resterende looptijd
-  const start = base && base.toMillis() > Date.now() ? new Date(base.toMillis()) : new Date();
-  start.setFullYear(start.getFullYear() + SUBSCRIPTION_YEARS);
-  return Timestamp.fromDate(start);
-}
-
 // ---------- Helpers ----------
-async function generateAndStoreLicense(params: { email: string; productId: string; orderId: string }) {
-  const { email, productId, orderId } = params;
+async function generateAndStoreLicense(params: { email: string; productId: string; orderId: string; expiresAt?: Timestamp }) {
+  const { email, productId, orderId, expiresAt } = params;
 
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   const chunk = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
@@ -52,7 +47,7 @@ async function generateAndStoreLicense(params: { email: string; productId: strin
     email,
     status: "active",
     issuedAt: FieldValue.serverTimestamp(),
-    expiresAt: oneYearFrom(null), // licentie-record: 1 jaar vanaf nu
+    expiresAt: expiresAt ?? null,
   });
 
   return { licenseId, code };
@@ -67,61 +62,110 @@ async function enqueueMail(params: { to: string; subject: string; text: string; 
   await db.collection("mail").add(payload);
 }
 
-async function updateOrderAfterPaid(
-  orderId: string,
-  paymentId: string,
-  email: string,
-  productId: string,
-  entitlementExpiresAt?: Timestamp | null
-) {
-  const orderRef = db.collection("orders").doc(orderId);
-  const { licenseId, code } = await generateAndStoreLicense({ email, productId, orderId });
+/**
+ * Zorg dat de gebruiker in Auth bestaat en geef een password-reset link terug.
+ * Dit laat de klant zélf een wachtwoord instellen (geen magic link).
+ */
+async function ensureAuthUserAndInvite(email: string, displayName?: string): Promise<string> {
+  const auth = getAuth();
+  try {
+    await auth.getUserByEmail(email);
+  } catch (e: any) {
+    // Niet gevonden -> aanmaken
+    await auth.createUser({
+      email,
+      emailVerified: false,
+      displayName: displayName || email.split("@")[0],
+      disabled: false,
+    });
+  }
+  // Genereer reset link (kan ook gebruikt worden als “stel je wachtwoord in”)
+  const link = await auth.generatePasswordResetLink(email, {
+    url: APP_URL, // na instellen wachtwoord hierheen terug
+    handleCodeInApp: false,
+  });
+  return link;
+}
 
-  await orderRef.set(
-    {
-      status: "paid",
-      paymentId,
-      licenseId,
-      updatedAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  );
+/**
+ * Zet of verlengt entitlement (1 jaar) op userId of (tijdelijk) op e-mail.
+ */
+async function upsertEntitlement(params: {
+  userId?: string | null;
+  email?: string;
+  orderId: string;
+  maxDevices?: number;
+  fromEmail?: string | null;
+  extendMs?: number; // default 1 jaar
+}) {
+  const extend = params.extendMs ?? ONE_YEAR_MS;
+  const newExpires = Timestamp.fromMillis(Date.now() + extend);
 
-  const exp = entitlementExpiresAt ?? oneYearFrom(null);
-  const expDate = exp.toDate().toISOString().slice(0, 10); // YYYY-MM-DD
+  if (params.userId) {
+    await db.collection("entitlements").doc(params.userId).set(
+      {
+        pro: true,
+        maxDevices: params.maxDevices ?? DEFAULT_MAX_DEVICES,
+        lastOrderId: params.orderId,
+        setAt: FieldValue.serverTimestamp(),
+        expiresAt: newExpires,
+        claimedFromEmail: params.fromEmail ?? null,
+      },
+      { merge: true }
+    );
+  }
 
-  const subject = "Jouw licentie voor Zisa Spelletjesmaker PRO";
-  const text = `Dag,
+  if (params.email) {
+    const emailKey = params.email.trim().toLowerCase();
+    await db.collection("entitlements_by_email").doc(emailKey).set(
+      {
+        pro: true,
+        maxDevices: params.maxDevices ?? DEFAULT_MAX_DEVICES,
+        lastOrderId: params.orderId,
+        setAt: FieldValue.serverTimestamp(),
+        expiresAt: newExpires,
+      },
+      { merge: true }
+    );
+  }
 
-Bedankt voor je aankoop! Hier is je licentiecode:
+  return newExpires;
+}
 
-${code}
+/**
+ * Controleer entitlement voor userId of e-mail, en geef {pro,maxDevices,expiresAt} of reden terug.
+ */
+async function readEntitlementFor(uid: string, email?: string) {
+  // 1) userId
+  const entDoc = await db.collection("entitlements").doc(uid).get();
+  if (entDoc.exists) {
+    const d = entDoc.data()!;
+    const expiresAt = d.expiresAt as Timestamp | null | undefined;
+    if (expiresAt && expiresAt.toMillis() < Date.now()) {
+      return { ok: false as const, reason: "EXPIRED_SUBSCRIPTION", expiresAt: expiresAt.toMillis() };
+    }
+    if (d.pro === true) {
+      return { ok: true as const, pro: true, maxDevices: d.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: expiresAt?.toMillis() ?? null };
+    }
+  }
 
-Product: ${productId}
-Order: ${orderId}
-Geldig tot: ${expDate}
+  // 2) tijdelijk via e-mail (kan geclaimd worden door registerDevice)
+  if (email) {
+    const emailKey = email.trim().toLowerCase();
+    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
+    if (byMail.exists) {
+      const d = byMail.data()!;
+      const expiresAt = d.expiresAt as Timestamp | null | undefined;
+      if (expiresAt && expiresAt.toMillis() < Date.now()) {
+        return { ok: false as const, reason: "EXPIRED_SUBSCRIPTION", expiresAt: expiresAt.toMillis() };
+      }
+      if (d.pro === true) {
+        return { ok: true as const, pro: true, maxDevices: d.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: expiresAt?.toMillis() ?? null };
+      }
+    }
+  }
 
-➡ Open de app: ${APP_URL}
-
-Gebruik deze code om je PRO-functies te activeren. Bewaar deze mail goed.
-
-Vriendelijke groet,
-Zebraklas`;
-
-  const html = `<p>Dag,</p>
-<p>Bedankt voor je aankoop! Hier is je licentiecode:</p>
-<p style="font-size:18px;font-weight:bold;letter-spacing:1px">${code}</p>
-<p>Product: <b>${productId}</b><br/>Order: <b>${orderId}</b><br/>Geldig tot: <b>${expDate}</b></p>
-<p>
-  <a href="${APP_URL}" style="display:inline-block;background:#0d6efd;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:600">
-    Open Zisa Spelletjesmaker PRO
-  </a>
-</p>
-<p>Gebruik deze code om je PRO-functies te activeren. Bewaar deze mail goed.</p>
-<p>Vriendelijke groet,<br/>Zebraklas</p>`;
-
-  await enqueueMail({ to: email, subject, text, html });
-  return { licenseId, code };
+  return { ok: false as const, reason: "NO_PRO", expiresAt: null };
 }
 
 async function getMolliePayment(paymentId: string, apiKey: string) {
@@ -132,43 +176,113 @@ async function getMolliePayment(paymentId: string, apiKey: string) {
   return res.json() as Promise<any>;
 }
 
-// Entitlement helpers (zetten/verlengen)
-async function upsertEntitlementForUserId(userId: string, orderId: string) {
-  const ref = db.collection("entitlements").doc(userId);
-  const snap = await ref.get();
-  const currentExp = snap.exists ? (snap.get("expiresAt") as Timestamp | null) : null;
-  const newExp = oneYearFrom(currentExp ?? null);
+/**
+ * Stuurt de aankoopmail met wachtwoord-instellink + licentiecode + app-link.
+ */
+async function sendPurchaseMail(params: {
+  email: string;
+  productId: string;
+  orderId: string;
+  licenseCode: string;
+  resetLink: string;
+  expiresAt: Timestamp;
+}) {
+  const { email, productId, orderId, licenseCode, resetLink, expiresAt } = params;
+  const subject = "Jouw Zisa PRO staat klaar – stel je wachtwoord in";
+  const expiresFmt = new Date(expiresAt.toMillis()).toLocaleDateString("nl-BE");
 
-  await ref.set(
-    {
-      pro: true,
-      maxDevices: DEFAULT_MAX_DEVICES,
-      lastOrderId: orderId,
-      expiresAt: newExp,
-      setAt: FieldValue.serverTimestamp(),
-    },
-    { merge: true }
-  );
-  return newExp;
+  const text = `Dag,
+
+Bedankt voor je aankoop! Je PRO-abonnement is actief t.e.m. ${expiresFmt}.
+Stel nu je wachtwoord in en start meteen:
+
+Wachtwoord instellen: ${resetLink}
+
+Referentie-licentiecode: ${licenseCode}
+Product: ${productId}
+Order: ${orderId}
+
+Start de app: ${APP_URL}
+Vragen? Mail ons via ${SUPPORT_EMAIL}
+
+Vriendelijke groet,
+Zebraklas
+`;
+
+  const html = `
+  <p>Dag,</p>
+  <p>Bedankt voor je aankoop! Je PRO-abonnement is actief t.e.m. <b>${expiresFmt}</b>.</p>
+  <p><a href="${resetLink}" style="display:inline-block;padding:10px 14px;background:#f5b300;color:#000;border-radius:8px;text-decoration:none;font-weight:600">Wachtwoord instellen</a></p>
+  <p style="margin-top:14px">Referentie-licentiecode: <b>${licenseCode}</b><br/>
+  Product: <b>${productId}</b><br/>
+  Order: <b>${orderId}</b></p>
+  <p><a href="${APP_URL}">Start de app</a></p>
+  <p>Vragen? <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
+  <p>Vriendelijke groet,<br/>Zebraklas</p>
+  `;
+
+  await enqueueMail({ to: email, subject, text, html });
 }
 
-async function upsertEntitlementForEmail(emailLower: string, orderId: string) {
-  const ref = db.collection("entitlements_by_email").doc(emailLower);
-  const snap = await ref.get();
-  const currentExp = snap.exists ? (snap.get("expiresAt") as Timestamp | null) : null;
-  const newExp = oneYearFrom(currentExp ?? null);
+/**
+ * Voltooi order: licentie genereren, entitlement zetten/verlengen (1 jaar),
+ * Auth-gebruiker uitnodigen, aankoopmail sturen.
+ */
+async function completeOrder({
+  orderId,
+  paymentId,
+  email,
+  productId,
+  userId,
+}: {
+  orderId: string;
+  paymentId: string;
+  email: string;
+  productId: string;
+  userId?: string | null;
+}) {
+  const orderRef = db.collection("orders").doc(orderId);
 
-  await ref.set(
+  // 1) Bereken vervaldatum
+  const expiresAt = Timestamp.fromMillis(Date.now() + ONE_YEAR_MS);
+
+  // 2) Licentie
+  const { licenseId, code } = await generateAndStoreLicense({ email, productId, orderId, expiresAt });
+
+  // 3) Order updaten
+  await orderRef.set(
     {
-      pro: true,
-      maxDevices: DEFAULT_MAX_DEVICES,
-      lastOrderId: orderId,
-      expiresAt: newExp,
-      setAt: FieldValue.serverTimestamp(),
+      status: "paid",
+      paymentId,
+      licenseId,
+      updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true }
   );
-  return newExp;
+
+  // 4) Entitlement (userId of e-mail)
+  const entExpires = await upsertEntitlement({
+    userId: userId ?? null,
+    email,
+    orderId,
+    maxDevices: DEFAULT_MAX_DEVICES,
+    fromEmail: userId ? email : null,
+  });
+
+  // 5) Auth-gebruiker + reset link
+  const resetLink = await ensureAuthUserAndInvite(email);
+
+  // 6) Mail
+  await sendPurchaseMail({
+    email,
+    productId,
+    orderId,
+    licenseCode: code,
+    resetLink,
+    expiresAt: entExpires,
+  });
+
+  return { licenseId, code, expiresAt: entExpires.toMillis() };
 }
 
 // ---------- DEV: simulate paid ----------
@@ -216,14 +330,15 @@ export const devSimulatePaid = onRequest({ region: REGION, cors: true }, async (
       });
     }
 
-    const emailKey = email.trim().toLowerCase();
-    // entitlement eerst zetten/verlengen → einddatum meenemen in mail
-    const newExp = await upsertEntitlementForEmail(emailKey, orderId);
-
     const fakePaymentId = paymentId || `test_${randomUUID()}`;
-    const result = await updateOrderAfterPaid(orderId, fakePaymentId, email, productId, newExp);
+    const result = await completeOrder({
+      orderId,
+      paymentId: fakePaymentId,
+      email,
+      productId,
+    });
 
-    res.status(200).json({ ok: true, ...result, expiresAt: newExp.toMillis() });
+    res.status(200).json({ ok: true, ...result });
   } catch (e: any) {
     console.error(e);
     res.status(500).send(`ERR: ${e.message || e}`);
@@ -258,15 +373,7 @@ export const mollieWebhook = onRequest(
       if (!orderId || !email) throw new Error("Missing orderId or email in payment.metadata");
 
       if (payment.status === "paid") {
-        let newExp: Timestamp;
-        if (userId) {
-          newExp = await upsertEntitlementForUserId(userId, orderId);
-        } else {
-          const emailKey = String(email).trim().toLowerCase();
-          newExp = await upsertEntitlementForEmail(emailKey, orderId);
-        }
-
-        await updateOrderAfterPaid(orderId, payment.id, email, productId, newExp);
+        await completeOrder({ orderId, paymentId: payment.id, email, productId, userId });
       } else {
         await db.collection("orders").doc(orderId).set(
           { status: payment.status, updatedAt: FieldValue.serverTimestamp() },
@@ -296,37 +403,10 @@ export const registerDevice = onCall({ region: REGION }, async (req) => {
     throw new Error("INVALID_ARGUMENT: deviceId");
   }
 
-  // 1) entitlement op userId?
-  const ent = await db.collection("entitlements").doc(ctx.uid).get();
-
-  let pro = ent.exists && ent.get("pro") === true;
-  let maxDevices = ent.exists ? (ent.get("maxDevices") ?? DEFAULT_MAX_DEVICES) : DEFAULT_MAX_DEVICES;
-  let exp: Timestamp | null = ent.exists ? (ent.get("expiresAt") as Timestamp | null) : null;
-
-  // 2) of tijdelijk entitlement op e-mail (als u e-mail login gebruikt)
-  if (!pro && req.auth?.token?.email) {
-    const emailKey = String(req.auth.token.email).trim().toLowerCase();
-    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
-    const mailPro = byMail.exists && byMail.get("pro") === true;
-    const mailMax = byMail.exists ? (byMail.get("maxDevices") ?? DEFAULT_MAX_DEVICES) : DEFAULT_MAX_DEVICES;
-    const mailExp = byMail.exists ? (byMail.get("expiresAt") as Timestamp | null) : null;
-
-    if (mailPro) {
-      pro = true;
-      maxDevices = mailMax;
-      exp = mailExp;
-      // Claim naar entitlements/{uid}
-      await db.collection("entitlements").doc(ctx.uid).set(
-        { pro: true, maxDevices, claimedFromEmail: emailKey, expiresAt: mailExp ?? oneYearFrom(null), setAt: FieldValue.serverTimestamp() },
-        { merge: true }
-      );
-    }
-  }
-
-  const isExpired = !exp || exp.toMillis() <= Date.now();
-  if (!pro || isExpired) {
-    return { ok: false, reason: isExpired ? "EXPIRED_SUBSCRIPTION" : "NO_PRO", expiresAt: exp ? exp.toMillis() : null };
-  }
+  // entitlement (ook vervaldatum checken)
+  const userEmail = (req.auth?.token?.email as string | undefined) ?? undefined;
+  const ent = await readEntitlementFor(ctx.uid, userEmail);
+  if (!ent.ok) return { ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null };
 
   // apparaten tellen
   const activeQuery = await db
@@ -340,8 +420,8 @@ export const registerDevice = onCall({ region: REGION }, async (req) => {
   const current = await deviceRef.get();
 
   if (!current.exists) {
-    if (activeQuery.size >= maxDevices) {
-      return { ok: false, reason: "DEVICE_LIMIT", maxDevices };
+    if (activeQuery.size >= (ent.maxDevices ?? DEFAULT_MAX_DEVICES)) {
+      return { ok: false, reason: "DEVICE_LIMIT", maxDevices: ent.maxDevices ?? DEFAULT_MAX_DEVICES };
     }
     await deviceRef.set({
       userId: ctx.uid,
@@ -354,7 +434,26 @@ export const registerDevice = onCall({ region: REGION }, async (req) => {
     await deviceRef.set({ lastSeenAt: now(), active: true }, { merge: true });
   }
 
-  return { ok: true, maxDevices, expiresAt: exp!.toMillis() };
+  // Claim entitlement_by_email → entitlements/{uid} (eenmalig)
+  if (userEmail) {
+    const emailKey = userEmail.trim().toLowerCase();
+    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
+    if (byMail.exists) {
+      const data = byMail.data()!;
+      await db.collection("entitlements").doc(ctx.uid).set(
+        {
+          pro: true,
+          maxDevices: data.maxDevices ?? DEFAULT_MAX_DEVICES,
+          setAt: FieldValue.serverTimestamp(),
+          claimedFromEmail: emailKey,
+          expiresAt: data.expiresAt ?? null,
+        },
+        { merge: true }
+      );
+    }
+  }
+
+  return { ok: true, maxDevices: ent.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: ent.expiresAt ?? null };
 });
 
 export const issueSessionCode = onCall({ region: REGION }, async (req) => {
@@ -363,12 +462,10 @@ export const issueSessionCode = onCall({ region: REGION }, async (req) => {
   const { deviceId } = (req.data || {}) as { deviceId?: string };
   if (!deviceId) throw new Error("INVALID_ARGUMENT: deviceId");
 
-  // entitlement check + vervaldatum
-  const ent = await db.collection("entitlements").doc(ctx.uid).get();
-  const exp = ent.exists ? (ent.get("expiresAt") as Timestamp | null) : null;
-  if (!ent.exists || ent.get("pro") !== true || !exp || exp.toMillis() <= Date.now()) {
-    return { ok: false, reason: (!exp || exp.toMillis() <= Date.now()) ? "EXPIRED_SUBSCRIPTION" : "NO_PRO" };
-  }
+  // entitlement check + verval
+  const userEmail = (req.auth?.token?.email as string | undefined) ?? undefined;
+  const ent = await readEntitlementFor(ctx.uid, userEmail);
+  if (!ent.ok) return { ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null };
 
   // device check
   const deviceDoc = await db.collection("devices").doc(`${ctx.uid}_${deviceId}`).get();
@@ -406,31 +503,7 @@ export const issueSessionCode = onCall({ region: REGION }, async (req) => {
   return { ok: true, code, expiresAt: expiresAt.toMillis(), id: docRef.id };
 });
 
-// Voorbeeld: PRO-actie beveiligen met code-validatie (server-side)
-async function validateSessionCode(userId: string, deviceId: string, code: string) {
-  const q = await db
-    .collection("sessionCodes")
-    .where("userId", "==", userId)
-    .where("deviceId", "==", deviceId)
-    .where("code", "==", code)
-    .where("used", "==", false)
-    .limit(1)
-    .get();
-
-  if (q.empty) return { ok: false, reason: "INVALID_OR_USED" };
-
-  const doc = q.docs[0];
-  const data = doc.data();
-  const expired = (data.expiresAt as Timestamp).toMillis() < Date.now();
-  if (expired) {
-    await doc.ref.update({ used: true });
-    return { ok: false, reason: "EXPIRED" };
-  }
-
-  await doc.ref.update({ used: true }); // eenmalig
-  return { ok: true };
-}
-
+// Server-side voorbeeldactie
 export const verifySessionCode = onRequest({ region: REGION, cors: true }, async (req, res) => {
   try {
     if (req.method !== "POST") {
@@ -443,11 +516,36 @@ export const verifySessionCode = onRequest({ region: REGION, cors: true }, async
       return;
     }
 
-    const check = await validateSessionCode(String(userId), String(deviceId), String(code));
-    if (!check.ok) {
-      res.status(401).json(check);
+    // check entitlement + vervaldatum
+    const ent = await readEntitlementFor(userId);
+    if (!ent.ok) {
+      res.status(401).json({ ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null });
       return;
     }
+
+    const q = await db
+      .collection("sessionCodes")
+      .where("userId", "==", userId)
+      .where("deviceId", "==", deviceId)
+      .where("code", "==", code)
+      .where("used", "==", false)
+      .limit(1)
+      .get();
+
+    if (q.empty) {
+      res.status(401).json({ ok: false, reason: "INVALID_OR_USED" });
+      return;
+    }
+    const doc = q.docs[0];
+    const data = doc.data();
+    const expired = (data.expiresAt as Timestamp).toMillis() < Date.now();
+    if (expired) {
+      await doc.ref.update({ used: true });
+      res.status(401).json({ ok: false, reason: "EXPIRED" });
+      return;
+    }
+
+    await doc.ref.update({ used: true });
     res.status(200).json({ ok: true });
   } catch (e: any) {
     console.error(e);
@@ -455,20 +553,47 @@ export const verifySessionCode = onRequest({ region: REGION, cors: true }, async
   }
 });
 
-// Voorbeeld-PRO-endpoint (laat zien hoe u server-side verifieert en dan pas iets doet)
+// Klein demo-endpoint dat verifySessionCode intern gebruikt
 export const proDoSomething = onRequest({ region: REGION, cors: true }, async (req, res) => {
   try {
-    if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
-    const { userId, deviceId, code, payload } = req.body || {};
-    if (!userId || !deviceId || !code) { res.status(400).send("Missing userId/deviceId/code"); return; }
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+    const { userId, deviceId, code } = req.body || {};
 
-    const check = await validateSessionCode(String(userId), String(deviceId), String(code));
-    if (!check.ok) { res.status(401).json(check); return; }
+    // roep lokale verify-logica direct aan i.p.v. HTTP
+    const ent = await readEntitlementFor(userId);
+    if (!ent.ok) {
+      res.status(401).json({ ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null });
+      return;
+    }
+    const q = await db
+      .collection("sessionCodes")
+      .where("userId", "==", userId)
+      .where("deviceId", "==", deviceId)
+      .where("code", "==", code)
+      .where("used", "==", false)
+      .limit(1)
+      .get();
+    if (q.empty) {
+      res.status(401).json({ ok: false, reason: "INVALID_OR_USED" });
+      return;
+    }
+    const doc = q.docs[0];
+    const data = doc.data();
+    if ((data.expiresAt as Timestamp).toMillis() < Date.now()) {
+      await doc.ref.update({ used: true });
+      res.status(401).json({ ok: false, reason: "EXPIRED" });
+      return;
+    }
+    await doc.ref.update({ used: true });
 
-    await db.collection("pro_actions").add({ userId, deviceId, at: now(), payload: payload ?? null });
+    // hier je PRO-actie
     res.status(200).json({ ok: true, message: "PRO-actie uitgevoerd" });
   } catch (e: any) {
     console.error(e);
     res.status(500).send(`ERR: ${e.message || e}`);
   }
 });
+
