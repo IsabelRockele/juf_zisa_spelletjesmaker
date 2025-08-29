@@ -4,58 +4,42 @@
     <meta charset="utf-8"/>
     <title>Rekenweg Template Maker</title>
 
-    <!-- Laadt de gedeelde styles van rekenweg (1 niveau hoger) -->
+    <!-- Styles liggen buiten /pro/ -->
     <link href="../rekenweg.css" rel="stylesheet"/>
 
-    <!-- PRO: alle relatieve paden resolven vanaf /pro/ -->
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-    <!-- PRO-bovenbalk -->
     <style>
-        .pro-header {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+        /* Vaste PRO-header met alleen 'Terug naar menu' */
+        .pro-header{
+            position: fixed; top: 0; left: 0; width: 100%;
+            background:#3f7fbf; color:#fff; padding:8px 12px; z-index:1000; height:48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background:#5a9fd4; color:#fff; border:none; padding:6px 10px; border-radius:6px;
+            font-size:14px; font-weight:600; text-decoration:none; cursor:pointer;
+            display:inline-block; white-space:nowrap; float:left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
-        body { margin-top: 60px; }
+        /* voorkom overlappen met de vaste header */
+        body{ margin-top:60px; }
     </style>
 </head>
 <body>
 
-<!-- PRO-topbar: we vervangen de <a> door echte knoppen die JS kan togglen -->
+<!-- PRO-header -->
 <header class="pro-header">
-    <!-- Deze twee knoppen worden door rekenweg.js getoggeld -->
-    <button id="menuBtn" class="back-link">&larr; Terug naar menu</button>
-    <button id="newPathBtn" class="back-link" style="display: none;">Nieuwe Rekenweg</button>
-
-    <button id="logoutBtn">Uitloggen</button>
+    <a href="app.html" class="back-link" aria-label="Terug naar menu">&larr; Terug naar menu</a>
 </header>
 
-<!-- Interne header met titel (blijft zoals voorheen) -->
 <header>
+    <div class="header-buttons">
+        <!-- laat ook deze knop naar het PRO-keuzemenu gaan -->
+        <button id="menuBtn" onclick="window.location.href='app.html'">Keuzemenu</button>
+        <button id="newPathBtn" style="display: none;">Nieuwe Rekenweg</button>
+    </div>
     <h1>Rekenweg Template Maker</h1>
 </header>
 
@@ -77,7 +61,7 @@
                 </select>
             </div>
 
-            <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 80px;"></div>
+            <div id="meldingContainer" style="color:#004080; margin-top:15px; font-weight:bold; min-height:80px;"></div>
 
             <button id="clearPathBtn">Wissen</button>
             <button id="undoLastCellBtn">Laatste vakje wissen</button>
@@ -107,22 +91,14 @@
     </div>
 </div>
 
-<!-- PRO: logout blijft identiek -->
-<script>
-    (function() {
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('#logoutBtn');
-            if (!btn) return;
-            try { localStorage.removeItem('authToken'); } catch {}
-            try { localStorage.removeItem('refreshToken'); } catch {}
-            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                .catch(() => {})
-                .finally(() => { window.location.href = '/login.html'; });
-        });
-    })();
-</script>
-
-<!-- Laadt de gedeelde logica -->
+<!-- Projectscript (buiten /pro/) -->
 <script src="../rekenweg.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
+
