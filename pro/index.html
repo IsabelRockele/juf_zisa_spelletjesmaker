@@ -2,71 +2,54 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Zisa PRO – Inloggen</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zisa PRO – inloggen</title>
   <style>
-    :root { --bg:#fff9e8; --card:#ffffff; --text:#1a1a1a; --muted:#555; --btn:#f9b233; --btnText:#222; }
-    body{margin:0;background:var(--bg);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:var(--text);}
-    .wrap{max-width:900px;margin:40px auto;padding:0 16px;}
-    .card{background:var(--card);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.06);padding:24px;}
-    h1{margin:0 0 16px}
-    .row{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0}
-    button{appearance:none;border:0;border-radius:10px;padding:12px 16px;background:var(--btn);color:var(--btnText);font-weight:600;cursor:pointer}
-    button.secondary{background:#e5e7eb}
-    .muted{color:var(--muted);font-size:14px}
-    .status{margin-top:12px;padding:12px;border-radius:10px;background:#f3f4f6}
-    .log{margin-top:16px;background:#0b1020;color:#d8e1ff;border-radius:10px;padding:12px;white-space:pre-wrap;min-height:120px;font:13px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-    code{background:#f3f4f6;padding:2px 6px;border-radius:6px}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+    :root { --accent:#f9b233; --bg:#fff7e8; --text:#1f2937; --muted:#6b7280; }
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;}
+    .wrap{max-width:880px;margin:48px auto;padding:0 16px;}
+    .card{background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.07);padding:24px;}
+    h1{font-size:32px;margin:0 0 10px}
+    p.small{color:var(--muted);margin:.5rem 0 0}
+    .actions{margin-top:18px;display:flex;gap:12px;flex-wrap:wrap}
+    button{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:600;cursor:pointer}
+    .btn{background:var(--accent)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn-outline{background:#fff;border:2px solid #e5e7eb}
+    .status{margin-top:16px;padding:14px;border-radius:12px;background:#fff7da;border:1px dashed #f1c86a;color:#3a3a20}
+    .ok{background:#e8fbe8;border-color:#97e197}
+    .err{background:#ffecec;border-color:#ffb3b3}
+    .hide{display:none}
+    .muted{color:var(--muted)}
+    .spinner{width:16px;height:16px;border:3px solid #fff;border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite;margin-left:8px;vertical-align:-2px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{margin:28px 0;color:var(--muted);font-size:14px;text-align:center}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
       <h1>Zisa PRO – inloggen</h1>
-      <p class="muted">
-        Log in met hetzelfde e-mailadres als bij de aankoop. De PRO-rechten worden automatisch herkend (geen codes intypen).
-      </p>
+      <p class="small">Log in met <strong>hetzelfde e-mailadres als bij de aankoop</strong>. PRO-rechten worden automatisch geactiveerd.</p>
 
-      <div class="row">
-        <button id="btnLogin">Inloggen met Google</button>
-        <button id="btnLogout" class="secondary">Uitloggen</button>
+      <div class="actions" id="loginRow">
+        <button id="btnGoogle" class="btn">Inloggen met Google</button>
+        <button id="btnLogout" class="btn-outline hide">Uitloggen</button>
       </div>
 
-      <div class="grid">
-        <div class="card" style="padding:16px">
-          <h3 style="margin:6px 0 8px">PRO-beheer</h3>
-          <div class="row">
-            <button id="btnRegister">Registreer apparaat</button>
-            <button id="btnProAction" class="secondary">Voer PRO-actie (demo)</button>
-          </div>
-          <div class="status" id="status">Niet ingelogd.</div>
-          <div class="muted">Huidige gebruiker: <code id="who">—</code></div>
-        </div>
-
-        <div class="card" style="padding:16px">
-          <h3 style="margin:6px 0 8px">Uitleg</h3>
-          <ul class="muted" style="margin:0 0 8px 18px">
-            <li>Na inloggen registreert u dit apparaat (max. 2 standaard).</li>
-            <li>De app vraagt intern een <em>sessiecode</em> op voor elke PRO-actie en verifieert die server-side.</li>
-            <li>De licentie-code uit de e-mail (<code>ZISA-…</code>) is een referentie, <b>niet</b> om in te typen.</li>
-          </ul>
-          <div class="muted">App-link: <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/" target="_blank">GitHub Pages</a></div>
-        </div>
-      </div>
-
-      <div class="log" id="log"></div>
+      <div id="status" class="status hide"></div>
+      <p id="currentUser" class="small muted" aria-live="polite"></p>
     </div>
+
+    <footer>Heeft u vragen? Mail ons gerust: <a href="mailto:zebraklas@jufzisa.be">zebraklas@jufzisa.be</a></footer>
   </div>
 
-  <!-- Firebase Web SDK (modular) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-functions.js";
+    // ------------------ instellingen ------------------
+    // Waarheen de klant na succesvol inloggen moet gaan:
+    const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/"; // bv. jouw app-startpagina
 
-    // === Firebase config van uw project ===
+    // Firebase config (jouw project)
     const firebaseConfig = {
       apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
       authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
@@ -77,91 +60,112 @@
       measurementId: "G-9LHNLFHSXX"
     };
 
-    // === Init ===
+    // ------------------ imports ------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {
+      getFunctions, httpsCallable
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+    // ------------------ init ------------------
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const functions = getFunctions(app, "europe-west1");
-    const provider = new GoogleAuthProvider();
-
     const el = (id) => document.getElementById(id);
-    const log = (msg) => { el("log").textContent += (typeof msg === "string" ? msg : JSON.stringify(msg, null, 2)) + "\n"; };
+    const statusBox = el("status");
+    const userLine = el("currentUser");
+    const btnGoogle = el("btnGoogle");
+    const btnLogout = el("btnLogout");
 
-    // DeviceId vasthouden in de browser
-    function getDeviceId() {
-      let id = localStorage.getItem("zisa_device_id");
-      if (!id) { id = crypto.randomUUID(); localStorage.setItem("zisa_device_id", id); }
+    // Hulpfuncties UI
+    function showStatus(msg, kind="info"){
+      statusBox.textContent = "";
+      statusBox.classList.remove("hide","ok","err");
+      if(kind==="ok") statusBox.classList.add("ok");
+      if(kind==="err") statusBox.classList.add("err");
+      statusBox.innerHTML = msg;
+      statusBox.classList.remove("hide");
+    }
+    function hideStatus(){ statusBox.classList.add("hide"); }
+
+    // Uniek apparaat-id (wordt 1x aangemaakt en hergebruikt)
+    function getDeviceId(){
+      const KEY = "zisa_device_id";
+      let id = localStorage.getItem(KEY);
+      if(!id){
+        id = (self.crypto?.randomUUID?.() || String(Date.now())+Math.random().toString(16).slice(2));
+        localStorage.setItem(KEY, id);
+      }
       return id;
     }
 
-    function setStatus(text) { el("status").textContent = text; }
+    async function registerCurrentDevice(){
+      const deviceId = getDeviceId();
+      const call = httpsCallable(functions, "registerDevice");
+      const res = await call({ deviceId });
+      return res.data; // { ok, reason?, maxDevices?, expiresAt? }
+    }
 
-    // === Auth UI ===
-    el("btnLogin").onclick = async () => {
-      try { await signInWithPopup(auth, provider); }
-      catch (e) { log("Login fout: " + e.message); }
-    };
+    async function handleLoginSuccess(user){
+      userLine.textContent = `Ingelogd als ${user.email}`;
+      showStatus(`Een ogenblikje… we activeren PRO op dit apparaat <span class="spinner"></span>`);
+      try {
+        const reg = await registerCurrentDevice();
+        if (reg.ok) {
+          // Klaar → door naar de app
+          showStatus("PRO geactiveerd. U wordt doorgestuurd…", "ok");
+          window.location.href = APP_URL;
+          return;
+        }
+        // Afhandeling fouten
+        if (reg.reason === "EXPIRED_SUBSCRIPTION") {
+          showStatus("Uw PRO-abonnement is verlopen. Verlengen kan via uw bevestigingsmail of neem contact op.", "err");
+        } else if (reg.reason === "DEVICE_LIMIT") {
+          showStatus(`Apparaatlimiet bereikt (max ${reg.maxDevices || 2}). Verwijder een oud apparaat of neem contact op.`, "err");
+        } else {
+          showStatus("Kon PRO niet activeren. Probeer opnieuw of neem contact op.", "err");
+        }
+      } catch (e){
+        console.error(e);
+        showStatus("Er ging iets mis bij het activeren. Probeer opnieuw.", "err");
+      }
+    }
 
-    el("btnLogout").onclick = async () => {
-      try { await signOut(auth); }
-      catch (e) { log("Logout fout: " + e.message); }
-    };
-
+    // Auth events
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        el("who").textContent = `${user.email} (uid: ${user.uid})`;
-        setStatus("Ingelogd. Registreer dit apparaat om PRO te activeren.");
+        btnLogout.classList.remove("hide");
+        btnGoogle.disabled = true;
+        handleLoginSuccess(user);
       } else {
-        el("who").textContent = "—";
-        setStatus("Niet ingelogd.");
+        btnLogout.classList.add("hide");
+        btnGoogle.disabled = false;
+        userLine.textContent = "";
+        hideStatus();
       }
     });
 
-    // === PRO: apparaat registreren ===
-    el("btnRegister").onclick = async () => {
+    // Knoppen
+    btnGoogle.addEventListener("click", async () => {
+      btnGoogle.disabled = true;
+      btnGoogle.innerHTML = 'Inloggen… <span class="spinner"></span>';
       try {
-        const user = auth.currentUser;
-        if (!user) { setStatus("Niet ingelogd."); return; }
-        const deviceId = getDeviceId();
+        await signInWithPopup(auth, new GoogleAuthProvider());
+      } catch (e){
+        console.error(e);
+        showStatus("Inloggen is afgebroken of mislukt. Probeer opnieuw.", "err");
+        btnGoogle.disabled = false;
+        btnGoogle.textContent = "Inloggen met Google";
+      }
+    });
 
-        const call = httpsCallable(functions, "registerDevice");
-        const resp = await call({ deviceId });
-        log({ registerDevice: resp.data });
-        if (resp.data?.ok) {
-          const exp = resp.data.expiresAt ? new Date(resp.data.expiresAt).toISOString().slice(0,10) : "onbekend";
-          setStatus(`PRO actief. Geldig tot: ${exp}. (maxDevices: ${resp.data.maxDevices})`);
-        } else {
-          setStatus(`Geen PRO: ${resp.data?.reason || "onbekend"}`);
-        }
-      } catch (e) { log("registerDevice fout: " + e.message); }
-    };
-
-    // === Demo: PRO-actie aanroepen ===
-    el("btnProAction").onclick = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) { log("Niet ingelogd."); return; }
-        const deviceId = getDeviceId();
-
-        // 1) sessiecode opvragen
-        const issue = httpsCallable(functions, "issueSessionCode");
-        const r1 = await issue({ deviceId });
-        log({ issueSessionCode: r1.data });
-        if (!r1.data?.ok) { setStatus(`Geen sessiecode: ${r1.data?.reason || "onbekend"}`); return; }
-        const code = r1.data.code;
-
-        // 2) server-endpoint aanroepen (server valideert code)
-        const r = await fetch("https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/proDoSomething", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: user.uid, deviceId, code, payload: { demo: "ok" } })
-        });
-        const j = await r.json();
-        log({ proDoSomething: j });
-        if (j.ok) setStatus("PRO-actie uitgevoerd.");
-        else setStatus("PRO-actie geweigerd.");
-      } catch (e) { log("PRO actie fout: " + e.message); }
-    };
+    btnLogout.addEventListener("click", async () => {
+      await signOut(auth);
+      btnGoogle.textContent = "Inloggen met Google";
+      showStatus("U bent uitgelogd.","ok");
+    });
   </script>
 </body>
 </html>
-
