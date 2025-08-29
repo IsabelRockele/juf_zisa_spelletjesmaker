@@ -4,45 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juf Zisa's Schaduw Match Generator</title>
+
+    <!-- Styles liggen buiten /pro/ -->
     <link rel="stylesheet" href="../schaduw.css">
+
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
+
+    <!-- Externe libs (ongewijzigd) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         .pro-header {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+            top: 0; left: 0; width: 100%;
             background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+            padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
+            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
         body { margin-top: 60px; }
     </style>
 </head>
 <body>
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
 </header>
 
 <header>
@@ -115,19 +106,14 @@
 
 <canvas id="hiddenCanvas"></canvas>
 
-<script>
-    (function() {
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('#logoutBtn');
-            if (!btn) return;
-            try { localStorage.removeItem('authToken'); } catch {}
-            try { localStorage.removeItem('refreshToken'); } catch {}
-            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                .catch(() => {})
-                .finally(() => { window.location.href = '/login.html'; });
-        });
-    })();
-</script>
+<!-- Oude logout-script en knop verwijderd -->
+
 <script src="../schaduw.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
