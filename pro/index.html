@@ -2,68 +2,52 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Zisa PRO – inloggen</title>
-  <meta name="robots" content="noindex" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <style>
-    :root { --bg:#fff3e0; --card:#fff; --txt:#222; --muted:#666; --accent:#0b57d0; --ok:#0a7d33; --err:#b00020; --rad:14px; --shadow:0 8px 24px rgba(0,0,0,.12); }
-    html,body{height:100%}
-    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);display:grid;place-items:start center}
-    .wrap{width:min(920px,94vw);margin:42px 0 80px}
-    .card{background:var(--card);border-radius:var(--rad);box-shadow:var(--shadow);padding:28px}
-    h1{margin:0 0 10px;font-size:clamp(24px,3.2vw,34px)}
-    p{margin:6px 0 0;color:var(--muted)}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
-    input{border:1px solid #e0e0e0;border-radius:10px;padding:12px;font-size:15px;outline:none;width:clamp(240px,40vw,360px)}
-    input:focus{border-color:#c2c2c2}
-    button{appearance:none;border:0;border-radius:10px;padding:12px 16px;font-weight:600;cursor:pointer}
-    .btn{background:#ffd54f}
-    .btn-outline{background:#fff;border:1px solid #e0e0e0}
-    .link{color:var(--accent);background:none;border:0;padding:0;cursor:pointer;font:inherit}
-    .msg{margin-top:12px;font-size:14px}
-    .ok{color:var(--ok)} .err{color:var(--err)} .muted{color:var(--muted);font-size:13px}
-    .hidden{display:none!important}
-    .spinner{width:16px;height:16px;border:3px solid currentColor;border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:spin .8s linear infinite;vertical-align:-2px;margin-left:6px}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    :root { --bg:#fff3e0; --card:#fff; --shadow:0 8px 28px rgba(0,0,0,.08); --btn:#fbbf24; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);margin:0}
+    .card{max-width:780px;margin:64px auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:28px}
+    h1{margin:0 0 16px 0;font-size:28px}
+    label{display:block;font-weight:600;margin:16px 0 6px}
+    input{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:10px;font-size:16px}
+    .row{display:grid;grid-template-columns:1fr 160px;gap:12px;margin-top:10px}
+    button{appearance:none;border:0;background:var(--btn);color:#000;font-weight:700;padding:12px 16px;border-radius:10px;cursor:pointer}
+    .muted{color:#666;font-size:14px;margin-top:8px}
+    .error{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:10px 12px;border-radius:10px;margin-top:12px}
+    .ok{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px 12px;border-radius:10px;margin-top:12px}
+    a{color:#2563eb;text-decoration:none}
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <h1>Zisa PRO – inloggen</h1>
-      <p>Log in met <strong>hetzelfde e-mailadres als bij de aankoop</strong>. Na inloggen activeren we PRO op dit toestel en sturen we je door naar de app.</p>
+  <div class="card">
+    <h1>Zisa PRO – inloggen</h1>
+    <p>Log in met <b>hetzelfde e-mailadres als bij de aankoop</b>. Na inloggen activeren we PRO op dit toestel en sturen we je door naar de app.</p>
 
-      <!-- E-mail + wachtwoord -->
-      <div class="row">
-        <input id="email" type="email" placeholder="E-mailadres" autocomplete="email" />
-        <input id="password" type="password" placeholder="Wachtwoord" autocomplete="current-password" />
-        <button id="btnLogin" class="btn">Inloggen</button>
-        <button id="btnLogout" class="btn btn-outline hidden">Uitloggen</button>
-      </div>
+    <label for="email">E-mail</label>
+    <input id="email" type="email" autocomplete="username" placeholder="jouw@email.be" />
 
-      <div class="row">
-        <button id="btnForgot" class="link">Wachtwoord vergeten / instellen?</button>
-      </div>
+    <div class="row">
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Wachtwoord" />
+      <button id="loginBtn">Inloggen</button>
+    </div>
 
-      <div id="status" class="msg" aria-live="polite"></div>
-      <p class="muted">Hulp nodig? <a class="link" href="mailto:zebraklas@jufzisa.be">zebraklas@jufzisa.be</a></p>
-    </section>
-  </main>
+    <div class="muted">
+      <a id="resetLink" href="#">Wachtwoord vergeten / instellen?</a>
+    </div>
 
+    <div id="msg"></div>
+
+    <p class="muted" style="margin-top:18px">Hulp nodig? Mail ons gerust: <a href="mailto:zebraklas@jufzisa.be">zebraklas@jufzisa.be</a></p>
+  </div>
+
+  <!-- Firebase (modular SDK) -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getAuth, setPersistence, browserLocalPersistence,
-      signInWithEmailAndPassword, sendPasswordResetEmail,
-      onAuthStateChanged, signOut
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // 👉 Waarheen na succesvolle activatie
-    const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/"; 
-    // bv: "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/app.html"
-
-    // 👉 Firebase config (jouw project)
+    // Jouw Firebase-config
     const firebaseConfig = {
       apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
       authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
@@ -73,116 +57,57 @@
       appId: "1:828063957776:web:8d8686b478846fe980db95",
       measurementId: "G-9LHNLFHSXX"
     };
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    setPersistence(auth, browserLocalPersistence);
-    const functions = getFunctions(app, "europe-west1");
 
-    const $ = s => document.querySelector(s);
-    const elEmail = $('#email');
-    const elPass  = $('#password');
-    const elLogin = $('#btnLogin');
-    const elForgot= $('#btnForgot');
-    const elLogout= $('#btnLogout');
-    const elStatus= $('#status');
-    const msg = (t, cls='') => { elStatus.textContent = t || ''; elStatus.className = 'msg ' + cls; };
+    // ➜ Bepaal het basismapje dynamisch (werkt in /pro/, /pr/, …)
+    const HERE = new URL(location.href);
+    const APP_URL = new URL("app.html", HERE); // zelfde map + app.html
 
-    // Test-haak: hard uitloggen met ?logout=1 (handig bij testen)
-    (async () => {
-      const p = new URLSearchParams(location.search);
-      if (p.get('logout') === '1') {
-        try { await signOut(auth); } catch {}
-        try { localStorage.removeItem('zisa_device_id'); } catch {}
-        location.replace(location.origin + location.pathname);
-      }
-    })();
+    const email = document.getElementById('email');
+    const pw    = document.getElementById('pw');
+    const btn   = document.getElementById('loginBtn');
+    const msg   = document.getElementById('msg');
+    const reset = document.getElementById('resetLink');
 
-    function getDeviceId(){
-      const KEY = "zisa_device_id";
-      let id = localStorage.getItem(KEY);
-      if(!id){
-        id = (self.crypto?.randomUUID?.() || String(Date.now())+Math.random().toString(16).slice(2));
-        localStorage.setItem(KEY, id);
-      }
-      return id;
+    function show(type, text){
+      msg.className = type === 'error' ? 'error' : 'ok';
+      msg.textContent = text;
     }
 
-    async function activateProOnThisDevice(){
-      const deviceId = getDeviceId();
-      const call = httpsCallable(functions, "registerDevice");
-      const res = await call({ deviceId });
-      return res.data; // { ok, reason?, maxDevices?, expiresAt? }
-    }
-
-    async function afterLogin(user){
-      msg("Ingelogd, activatie van PRO op dit toestel…", "ok");
-      try {
-        const reg = await activateProOnThisDevice();
-        if (reg.ok) {
-          msg("PRO actief. Doorsturen…", "ok");
-          setTimeout(()=> location.href = APP_URL, 400);
-          return;
-        }
-        if (reg.reason === "EXPIRED_SUBSCRIPTION") {
-          msg("Uw PRO-abonnement is verlopen. Verlengen kan via de bevestigingsmail of neem contact op.", "err");
-        } else if (reg.reason === "DEVICE_LIMIT") {
-          msg(`Apparaatlimiet bereikt (max ${reg.maxDevices || 2}). Verwijder een oud apparaat of neem contact op.`, "err");
-        } else if (reg.reason === "NO_PRO") {
-          msg("Geen PRO voor dit e-mailadres. Log uit en gebruik het adres waarmee u kocht.", "err");
-        } else {
-          msg("Kon PRO niet activeren. Probeer opnieuw of neem contact op.", "err");
-        }
-      } catch (e){ console.error(e); msg("Er ging iets mis bij activeren. Probeer opnieuw.", "err"); }
-    }
-
+    // Al ingelogd? -> meteen door (respecteer optionele ?r= retourlink)
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        elLogout.classList.remove('hidden');
-        elLogin.disabled = true; elForgot.disabled = true;
-        afterLogin(user);
-      } else {
-        elLogout.classList.add('hidden');
-        elLogin.disabled = false; elForgot.disabled = false;
+        const params = new URLSearchParams(location.search);
+        const r = params.get("r");
+        const target = r ? new URL(r, HERE) : APP_URL;
+        location.replace(target);
       }
     });
 
-    elLogin.addEventListener('click', async () => {
-      msg('');
-      const email = elEmail.value.trim();
-      const pass  = elPass.value;
-      if (!email || !pass) { msg('Vul e-mail en wachtwoord in.', 'err'); return; }
-      elLogin.disabled = true;
-      elLogin.textContent = 'Inloggen…';
+    btn.onclick = async () => {
+      msg.textContent = "";
       try {
-        await signInWithEmailAndPassword(auth, email, pass);
-        // onAuthStateChanged doet de rest
+        await signInWithEmailAndPassword(auth, email.value.trim(), pw.value);
+        // onAuthStateChanged doet de redirect
       } catch (e) {
-        console.error(e);
-        msg('Inloggen mislukt. Controleer je gegevens of klik op “Wachtwoord vergeten / instellen?”.', 'err');
-        elLogin.disabled = false; elLogin.textContent = 'Inloggen';
+        show('error', e.message.replace('Firebase:', '').trim());
       }
-    });
+    };
 
-    elForgot.addEventListener('click', async () => {
-      msg('');
-      const email = (elEmail.value || '').trim();
-      if (!email) { msg('Vul je e-mail in en klik nogmaals.', 'err'); elEmail.focus(); return; }
+    reset.onclick = async (e) => {
+      e.preventDefault();
+      if (!email.value.trim()) return show('error', "Vul eerst je e-mail in en klik dan op deze link.");
       try {
-        await sendPasswordResetEmail(auth, email, { url: location.origin + location.pathname });
-        msg(`We hebben een link gestuurd naar ${email} om je wachtwoord in te stellen of te resetten.`, 'ok');
+        await sendPasswordResetEmail(auth, email.value.trim());
+        show('ok', "We hebben je een e-mail gestuurd om je wachtwoord in te stellen/wijzigen.");
       } catch (e) {
-        console.error(e);
-        msg('Kon geen e-mail verzenden. Controleer het adres en probeer opnieuw.', 'err');
+        show('error', e.message.replace('Firebase:', '').trim());
       }
-    });
-
-    elLogout.addEventListener('click', async () => {
-      try { await signOut(auth); } catch {}
-      msg('Uitgelogd.', 'ok');
-    });
+    };
   </script>
 </body>
 </html>
+
 
 
