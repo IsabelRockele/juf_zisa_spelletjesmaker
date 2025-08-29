@@ -3,50 +3,33 @@
 <head>
     <meta charset="utf-8"/>
     <title>Kruiswoordpuzzel Generator</title>
+
+    <!-- Styles liggen buiten /pro/ -->
     <link href="../kruiswoordpuzzel.css" rel="stylesheet"/>
+
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
+
+    <!-- Externe lib (zoals origineel) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
     <style>
         .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background:#5a9fd4; color:#fff; border:none; padding:6px 10px;
+            border-radius:6px; font-size:14px; font-weight:600; text-decoration:none;
+            cursor:pointer; display:inline-block; white-space:nowrap; float:left;
         }
-        .pro-header .back-link {
-            float: left;
-        }
-        .pro-header #logoutBtn {
-            float: right;
-        }
-        body {
-            margin-top: 60px;
-        }
+        body { margin-top: 60px; }
     </style>
 </head>
 <body>
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
 </header>
 
 <header>
@@ -90,7 +73,7 @@
                     </div>
                 </div>
                 <div id="klassiek-omschrijving-invoer" class="invoer-modus verborgen">
-                     <div class="control-group">
+                    <div class="control-group">
                         <label for="aantalWoordenInput">Hoeveel woorden wil je invoeren?</label>
                         <input type="number" id="aantalWoordenInput" min="2" max="50" value="5">
                         <button id="genereerWoordVeldenBtn">Maak invulvelden</button>
@@ -98,13 +81,13 @@
                     <hr>
                     <div id="klassiekWoordenContainer"></div>
                 </div>
-                 <div id="meldingContainer" style="color: #d9534f; margin-top: 10px; font-weight: bold; min-height: 40px;"></div>
+                <div id="meldingContainer" style="color: #d9534f; margin-top: 10px; font-weight: bold; min-height: 40px;"></div>
                 <button id="genereerBtn">Genereer Kruiswoordpuzzel</button>
             </div>
-            
+
             <div id="center-panel">
                 <div id="right-panel">
-                    <canvas height="512" id="mainCanvas" width="512"></canvas>
+                    <canvas id="mainCanvas" width="512" height="512"></canvas>
                 </div>
                 <div id="clues-container">
                     <div id="horizontal-clues" class="clue-box">
@@ -117,6 +100,7 @@
                     </div>
                 </div>
             </div>
+
             <div id="right-panel-buttons">
                 <div class="control-group">
                     <button id="downloadPngBtn">Download als PNG</button>
@@ -158,19 +142,14 @@
     </div>
 </div>
 
-<script>
-    (function() {
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('#logoutBtn');
-            if (!btn) return;
-            try { localStorage.removeItem('authToken'); } catch {}
-            try { localStorage.removeItem('refreshToken'); } catch {}
-            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                .catch(() => {})
-                .finally(() => { window.location.href = '/login.html'; });
-        });
-    })();
-</script>
+<!-- Oude logout/guard verwijderd (was: #logoutBtn + fetch naar /auth/logout) -->
+
 <script src="../kruiswoordpuzzel.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+    import { guardProPage } from "./guard.js";
+    await guardProPage();
+</script>
 </body>
 </html>
