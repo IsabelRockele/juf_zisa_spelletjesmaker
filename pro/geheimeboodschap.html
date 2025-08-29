@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geheime Boodschap Generator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Externe iconen (ongewijzigd) -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Stijlen liggen buiten /pro/ -->
     <link href="../geheimeboodschap.css" rel="stylesheet"/>
+
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
+
     <style>
         .pro-header {
             position: relative;
@@ -43,28 +53,13 @@
             white-space: nowrap;
             pointer-events: none;
         }
-        .pro-header #logoutBtn {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            cursor: pointer;
-            width: auto !important;
-            white-space: nowrap;
-        }
     </style>
 </head>
 <body>
+    <!-- PRO-header: enkel 'Terug naar menu' -->
     <header class="pro-header">
         <a href="app.html" class="back-link">&larr; Terug naar menu</a>
         <h1 class="title">Geheime Boodschap Generator</h1>
-        <button id="logoutBtn">Uitloggen</button>
     </header>
 
     <main>
@@ -103,9 +98,9 @@
                     <button class="thema-knop" data-thema="Kerst"><i class="fas fa-tree"></i> Kerst</button>
                     <button class="thema-knop" data-thema="winter"><i class="fas fa-snowflake"></i> Winter</button>
                 </div>
-                
+
                 <p id="thema-laad-status" class="instructie-knop verborgen"></p>
-                
+
                 <div id="thema-afbeeldingen-preview" class="verborgen">
                      <div id="thema-upload-grid"></div>
                 </div>
@@ -146,7 +141,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div id="puzzel-preview-scherm" class="verborgen">
             <div class="preview-acties">
                 <button id="print-knop"><i class="fas fa-print"></i> Print Puzzel</button>
@@ -163,21 +158,19 @@
         </div>
     </main>
 
+    <!-- Externe libs (ongewijzigd) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script>
-        (function() {
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('#logoutBtn');
-                if (!btn) return;
-                try { localStorage.removeItem('authToken'); } catch {}
-                try { localStorage.removeItem('refreshToken'); } catch {}
-                fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                    .catch(() => {})
-                    .finally(() => { window.location.href = '/login.html'; });
-            });
-        })();
-    </script>
+
+    <!-- Oude logout/guard verwijderd -->
+
+    <!-- Projectscript (buiten /pro/) -->
     <script src="../geheimeboodschap.js"></script>
+
+    <!-- Uniforme Firebase-guard -->
+    <script type="module">
+        import { guardProPage } from "./guard.js";
+        await guardProPage();
+    </script>
 </body>
 </html>
