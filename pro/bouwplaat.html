@@ -18,102 +18,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        /* Nieuwe PRO-header */
+        /* PRO-header: alleen terug naar menu */
         .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #btnLogout {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background:#5a9fd4; color:#fff; border:none; padding:6px 10px;
+            border-radius:6px; font-size:14px; font-weight:600; text-decoration:none;
+            cursor:pointer; display:inline-block; white-space:nowrap; float:left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #btnLogout { float: right; }
         body { margin-top: 60px; }
     </style>
 </head>
 <body>
+
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="btnLogout">Uitloggen</button>
 </header>
 
-<script>
-  const API_BASE  = "https://api-xc54winygq-ew.a.run.app";
-  const TOKEN_KEY = "zisa_token";
-  const LOGIN_URL = "/pro/index.html";
-
-  const getToken   = ()=> localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY);
-  const clearToken = ()=> { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); };
-  const goLogin    = ()=> location.replace(`${LOGIN_URL}?t=${Date.now()}`);
-
-  async function guard(){
-    try{
-      let resp = await fetch(`${API_BASE}/auth/me`, { credentials:'include' });
-      if (resp.status===401 || resp.status===403){
-        const t = getToken();
-        if (t) resp = await fetch(`${API_BASE}/auth/me`, { headers:{Authorization:`Bearer ${t}`} });
-      }
-      const data = await resp.json().catch(()=>({}));
-      if (data?.ok){
-        return;
-      }
-    }catch(e){}
-    goLogin();
-  }
-
-  async function doLogout(){
-    try{
-      await fetch(`${API_BASE}/auth/logout`, { method:'POST', credentials:'include' });
-    }catch(e){}
-    finally{
-      localStorage.removeItem('otp_cooldown_until');
-      sessionStorage.removeItem('admin_last_code');
-      clearToken();
-      goLogin();
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', ()=>{
-    document.getElementById('btnLogout')?.addEventListener('click', doLogout);
-    guard();
-  });
-</script>
-
+<!-- Keuzescherm -->
 <div id="choice-screen">
     <div id="choice-container">
         <h1>Kies je Bouwplaat</h1>
         <p>Waar wil je vandaag mee bouwen?</p>
         <div class="choice-grid">
             <div class="choice-button" data-type="clics">
-                <img src="../start_afbeeldingen/clics.png" alt="Clics blokje" onerror="this.onerror=null;this.src='https://placehold.co/150x150/27ae60/ffffff?text=Clics';">
+                <img src="../start_afbeeldingen/clics.png" alt="Clics blokje"
+                     onerror="this.onerror=null;this.src='https://placehold.co/150x150/27ae60/ffffff?text=Clics';">
                 <span>Clics</span>
             </div>
             <div class="choice-button" data-type="linkin_cubes">
-                <img src="../start_afbeeldingen/linkincubes.png" alt="Linkin Cube" onerror="this.onerror=null;this.src='https://placehold.co/150x150/3498db/ffffff?text=Linkin+Cubes';">
+                <img src="../start_afbeeldingen/linkincubes.png" alt="Linkin Cube"
+                     onerror="this.onerror=null;this.src='https://placehold.co/150x150/3498db/ffffff?text=Linkin+Cubes';">
                 <span>Linkin Cubes</span>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Generator -->
 <div id="generator-screen" class="hidden">
     <header>
         <button id="menuBtn">Kies bouwmateriaal</button>
@@ -173,9 +118,13 @@
     </div>
 </div>
 
+<!-- Projectscript -->
 <script src="../bouwplaat.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
-
-
-
