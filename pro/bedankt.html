@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Zisa PRO – Bedankt</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <style>
+    :root{--bg:#f7faf9;--card:#fff;--txt:#0f172a;--muted:#475569;--btn:#111827}
+    body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);margin:0;min-height:100dvh;display:flex;align-items:center;justify-content:center}
+    .card{max-width:720px;width:100%;background:var(--card);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:24px}
+    h1{margin:.2rem 0 1rem 0;color:var(--txt)}
+    p{color:var(--muted);margin:.5rem 0 1rem}
+    .row{display:flex;gap:.8rem;flex-wrap:wrap;margin-top:1rem}
+    a.button{padding:.8rem 1.1rem;border-radius:.6rem;border:1px solid #0f1729;background:var(--btn);color:#fff;text-decoration:none;font-weight:700;display:inline-block}
+    .oid{font-family:ui-monospace,Consolas,monospace;color:#334155;background:#f1f5f9;border-radius:.4rem;padding:.2rem .4rem}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Bedankt voor uw betaling</h1>
+    <p>Uw betaling werd ontvangen. Uw PRO-licentie wordt nu automatisch geactiveerd. U ontvangt zo dadelijk een e-mail met <strong>“Wachtwoord instellen”</strong> en de link naar de app.</p>
+    <p id="oidWrap" style="display:none">Bestelnummer: <span id="oid" class="oid"></span></p>
+
+    <p>Ga verder:</p>
+    <div class="row">
+      <a class="button" href="./index.html">Inloggen</a>
+      <a class="button" href="./app.html">Open Zisa PRO</a>
+    </div>
+
+    <p style="margin-top:1rem">Werkt iets nog niet meteen? Geef het enkele seconden: de licentie-activatie gebeurt via de betalingswebhook.</p>
+  </main>
+
+  <script>
+    // Toon het orderId (oid) uit de URL als referentie
+    const params = new URLSearchParams(location.search);
+    const oid = params.get('oid');
+    if (oid) {
+      document.getElementById('oid').textContent = oid;
+      document.getElementById('oidWrap').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
