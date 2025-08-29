@@ -1,599 +1,547 @@
 // functions/src/index.ts
-
+import * as admin from "firebase-admin";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { onRequest, onCall } from "firebase-functions/v2/https";
+import * as logger from "firebase-functions/logger";
 import { defineSecret } from "firebase-functions/params";
 
-// Admin SDK v12 – modulaire imports
-import { initializeApp } from "firebase-admin/app";
-import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
-import { getAuth } from "firebase-admin/auth";
+admin.initializeApp();
+const db = admin.firestore();
+const storage = admin.storage().bucket();
 
-import fetch from "node-fetch";
-import { z } from "zod";
-import { randomUUID } from "node:crypto";
+const REGION = "europe-west1" as const;
 
-initializeApp();
-const db = getFirestore();
+// ✅ Door u bevestigd — eindigt op slash
+const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/";
 
-const REGION = "europe-west1";
+// --- Vul uw afzender-/factuurgegevens aan ---
+const SELLER = {
+  name: "Zisa Spelletjesmaker PRO",
+  address1: "Maasfortbaan 108",          // bv. Straat 1
+  address2: "2500 Lier, België",          // bv. 2500 Lier, België
+  email: "isabel.rockele@gmail.com",
+  vatNote: "BTW niet van toepassing.", // of bv. "BTW 21% BE0xxx..."
+  iban: "",              // optioneel
+  bic: ""                // optioneel
+};
+
+// Secrets
 const MOLLIE_API_KEY = defineSecret("MOLLIE_API_KEY");
 
-// ====== Pas deze 2 URLs aan indien nodig ======
-const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/";
-const SUPPORT_EMAIL = "zebraklas@jufzisa.be";
-
-// ====== Instellingen ======
-const DEV_TOKEN = "c5a4f5e5-1a8b-4f4e-9ad4-3b1b8b2c5d2e";
-const DEFAULT_MAX_DEVICES = 2;
-const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
-
-const now = () => Timestamp.now();
-
 // ---------- Helpers ----------
-async function generateAndStoreLicense(params: { email: string; productId: string; orderId: string; expiresAt?: Timestamp }) {
-  const { email, productId, orderId, expiresAt } = params;
-
+function toEmailLower(email: string) {
+  return (email || "").trim().toLowerCase();
+}
+function addDays(base: Date, days: number) {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+function pad4(n: number) {
+  return n.toString().padStart(4, "0");
+}
+function generateLicenseCode(): string {
+  // ZISA-XXXX-XXXX-XXXX (zonder verwarrende tekens)
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const chunk = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-  const code = `ZISA-${chunk(4)}-${chunk(4)}-${chunk(4)}`;
-
-  const { ulid } = await import("ulid");
-  const licenseId = ulid();
-
-  await db.collection("licenses").doc(licenseId).set({
-    code,
-    productId,
-    orderId,
-    email,
-    status: "active",
-    issuedAt: FieldValue.serverTimestamp(),
-    expiresAt: expiresAt ?? null,
-  });
-
-  return { licenseId, code };
+  const block = (n = 4) =>
+    Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  return `ZISA-${block()}-${block()}-${block()}`;
 }
 
-async function enqueueMail(params: { to: string; subject: string; text: string; html?: string }) {
-  const payload: any = {
-    to: params.to,
-    message: { subject: params.subject, text: params.text },
-  };
-  if (params.html) payload.message.html = params.html;
-  await db.collection("mail").add(payload);
+// Mail helper met bijlagen (Base64)
+async function sendMail(
+  to: string,
+  subject: string,
+  html: string,
+  text?: string,
+  attachments?: Array<{ filename: string; content: string; encoding: "base64" }>
+) {
+  const message: any = { subject, html };
+  if (text) message.text = text;
+  if (attachments?.length) message.attachments = attachments;
+  await db.collection("mail").add({ to: [to], message });
 }
 
-/**
- * Zorg dat de gebruiker in Auth bestaat en geef een password-reset link terug.
- * Dit laat de klant zélf een wachtwoord instellen (geen magic link).
- */
-async function ensureAuthUserAndInvite(email: string, displayName?: string): Promise<string> {
-  const auth = getAuth();
+async function ensureAuthUserAndInvite(email: string, continueUrl?: string) {
+  const em = toEmailLower(email);
   try {
-    await auth.getUserByEmail(email);
-  } catch (e: any) {
-    // Niet gevonden -> aanmaken
-    await auth.createUser({
-      email,
-      emailVerified: false,
-      displayName: displayName || email.split("@")[0],
-      disabled: false,
-    });
+    await admin.auth().getUserByEmail(em);
+  } catch {
+    await admin.auth().createUser({ email: em });
   }
-  // Genereer reset link (kan ook gebruikt worden als “stel je wachtwoord in”)
-  const link = await auth.generatePasswordResetLink(email, {
-    url: APP_URL, // na instellen wachtwoord hierheen terug
+  const link = await admin.auth().generatePasswordResetLink(em, {
+    url: continueUrl ?? `${APP_URL}index.html`,
     handleCodeInApp: false,
   });
   return link;
 }
 
-/**
- * Zet of verlengt entitlement (1 jaar) op userId of (tijdelijk) op e-mail.
- */
-async function upsertEntitlement(params: {
-  userId?: string | null;
-  email?: string;
-  orderId: string;
-  maxDevices?: number;
-  fromEmail?: string | null;
-  extendMs?: number; // default 1 jaar
-}) {
-  const extend = params.extendMs ?? ONE_YEAR_MS;
-  const newExpires = Timestamp.fromMillis(Date.now() + extend);
-
-  if (params.userId) {
-    await db.collection("entitlements").doc(params.userId).set(
-      {
-        pro: true,
-        maxDevices: params.maxDevices ?? DEFAULT_MAX_DEVICES,
-        lastOrderId: params.orderId,
-        setAt: FieldValue.serverTimestamp(),
-        expiresAt: newExpires,
-        claimedFromEmail: params.fromEmail ?? null,
-      },
-      { merge: true }
-    );
-  }
-
-  if (params.email) {
-    const emailKey = params.email.trim().toLowerCase();
-    await db.collection("entitlements_by_email").doc(emailKey).set(
-      {
-        pro: true,
-        maxDevices: params.maxDevices ?? DEFAULT_MAX_DEVICES,
-        lastOrderId: params.orderId,
-        setAt: FieldValue.serverTimestamp(),
-        expiresAt: newExpires,
-      },
-      { merge: true }
-    );
-  }
-
-  return newExpires;
-}
-
-/**
- * Controleer entitlement voor userId of e-mail, en geef {pro,maxDevices,expiresAt} of reden terug.
- */
-async function readEntitlementFor(uid: string, email?: string) {
-  // 1) userId
-  const entDoc = await db.collection("entitlements").doc(uid).get();
-  if (entDoc.exists) {
-    const d = entDoc.data()!;
-    const expiresAt = d.expiresAt as Timestamp | null | undefined;
-    if (expiresAt && expiresAt.toMillis() < Date.now()) {
-      return { ok: false as const, reason: "EXPIRED_SUBSCRIPTION", expiresAt: expiresAt.toMillis() };
-    }
-    if (d.pro === true) {
-      return { ok: true as const, pro: true, maxDevices: d.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: expiresAt?.toMillis() ?? null };
-    }
-  }
-
-  // 2) tijdelijk via e-mail (kan geclaimd worden door registerDevice)
-  if (email) {
-    const emailKey = email.trim().toLowerCase();
-    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
-    if (byMail.exists) {
-      const d = byMail.data()!;
-      const expiresAt = d.expiresAt as Timestamp | null | undefined;
-      if (expiresAt && expiresAt.toMillis() < Date.now()) {
-        return { ok: false as const, reason: "EXPIRED_SUBSCRIPTION", expiresAt: expiresAt.toMillis() };
-      }
-      if (d.pro === true) {
-        return { ok: true as const, pro: true, maxDevices: d.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: expiresAt?.toMillis() ?? null };
-      }
-    }
-  }
-
-  return { ok: false as const, reason: "NO_PRO", expiresAt: null };
-}
-
-async function getMolliePayment(paymentId: string, apiKey: string) {
-  const res = await fetch(`https://api.mollie.com/v2/payments/${encodeURIComponent(paymentId)}`, {
-    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+async function upsertEntitlement(email: string, expiresAt: Timestamp, source: any) {
+  const em = toEmailLower(email);
+  // Audit trail
+  await db.collection("entitlements").doc().set({
+    email: em,
+    type: "pro",
+    active: true,
+    expiresAt,
+    source,
+    createdAt: FieldValue.serverTimestamp(),
   });
-  if (!res.ok) throw new Error(`Mollie GET failed (${res.status}): ${await res.text()}`);
-  return res.json() as Promise<any>;
+  // Snelle lookup
+  await db
+    .collection("entitlements_by_email")
+    .doc(em)
+    .set(
+      {
+        active: true,
+        expiresAt,
+        lastUpdated: FieldValue.serverTimestamp(),
+        maxDevices: 2 // standaardlimiet
+      },
+      { merge: true }
+    );
 }
 
-/**
- * Stuurt de aankoopmail met wachtwoord-instellink + licentiecode + app-link.
- */
-async function sendPurchaseMail(params: {
-  email: string;
-  productId: string;
-  orderId: string;
-  licenseCode: string;
-  resetLink: string;
-  expiresAt: Timestamp;
-}) {
-  const { email, productId, orderId, licenseCode, resetLink, expiresAt } = params;
-  const subject = "Jouw Zisa PRO staat klaar – stel je wachtwoord in";
-  const expiresFmt = new Date(expiresAt.toMillis()).toLocaleDateString("nl-BE");
+// ---- Mollie REST (zonder SDK) ----
+const MOLLIE_API = "https://api.mollie.com/v2";
 
-  const text = `Dag,
-
-Bedankt voor je aankoop! Je PRO-abonnement is actief t.e.m. ${expiresFmt}.
-Stel nu je wachtwoord in en start meteen:
-
-Wachtwoord instellen: ${resetLink}
-
-Referentie-licentiecode: ${licenseCode}
-Product: ${productId}
-Order: ${orderId}
-
-Start de app: ${APP_URL}
-Vragen? Mail ons via ${SUPPORT_EMAIL}
-
-Vriendelijke groet,
-Zebraklas
-`;
-
-  const html = `
-  <p>Dag,</p>
-  <p>Bedankt voor je aankoop! Je PRO-abonnement is actief t.e.m. <b>${expiresFmt}</b>.</p>
-  <p><a href="${resetLink}" style="display:inline-block;padding:10px 14px;background:#f5b300;color:#000;border-radius:8px;text-decoration:none;font-weight:600">Wachtwoord instellen</a></p>
-  <p style="margin-top:14px">Referentie-licentiecode: <b>${licenseCode}</b><br/>
-  Product: <b>${productId}</b><br/>
-  Order: <b>${orderId}</b></p>
-  <p><a href="${APP_URL}">Start de app</a></p>
-  <p>Vragen? <a href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a></p>
-  <p>Vriendelijke groet,<br/>Zebraklas</p>
-  `;
-
-  await enqueueMail({ to: email, subject, text, html });
+// Gebruik globalThis.fetch via any (geen DOM-typings nodig)
+async function httpFetch(url: string, init: any) {
+  const f = (globalThis as any).fetch;
+  if (typeof f !== "function") throw new Error("Global fetch is not available at runtime.");
+  return (f as (u: string, i?: any) => Promise<any>)(url, init);
+}
+async function mollieGetPayment(paymentId: string): Promise<any> {
+  const res = await httpFetch(`${MOLLIE_API}/payments/${encodeURIComponent(paymentId)}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${MOLLIE_API_KEY.value()}` },
+  });
+  if (!res.ok) throw new Error(`Mollie GET failed ${res.status}: ${await res.text()}`);
+  return await res.json();
+}
+async function mollieCreatePayment(body: any): Promise<any> {
+  const res = await httpFetch(`${MOLLIE_API}/payments`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${MOLLIE_API_KEY.value()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`Mollie POST failed ${res.status}: ${await res.text()}`);
+  return await res.json();
 }
 
-/**
- * Voltooi order: licentie genereren, entitlement zetten/verlengen (1 jaar),
- * Auth-gebruiker uitnodigen, aankoopmail sturen.
- */
-async function completeOrder({
-  orderId,
-  paymentId,
-  email,
-  productId,
-  userId,
-}: {
+// ---------- Factuurnummer + PDF ----------
+async function nextInvoiceNumber(): Promise<{ number: string; seq: number; year: number }> {
+  const year = new Date().getFullYear();
+  const ref = db.collection("counters").doc("invoices");
+  const seq = await db.runTransaction(async (t) => {
+    const snap = await t.get(ref);
+    let s = 0;
+    if (snap.exists) {
+      const docYear = snap.get("year") as number | undefined;
+      const docSeq = snap.get("seq") as number | undefined;
+      if (docYear === year && typeof docSeq === "number") s = docSeq;
+    }
+    s += 1;
+    t.set(ref, { year, seq: s, updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+    return s;
+  });
+  return { number: `ZISA-${year}-${pad4(seq)}`, seq, year };
+}
+
+function centsToEuro(cents: number): string {
+  return (cents / 100).toFixed(2).replace(".", ",");
+}
+
+async function buildInvoicePdfBuffer(params: {
+  invoiceNumber: string;
+  invoiceDate: Date;
+  buyerEmail: string;
+  description: string;
+  amountCents: number;
+}): Promise<Buffer> {
+  // Dynamische import via require om typings-troubles te vermijden
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const PDFDocument = require("pdfkit");
+  const doc = new PDFDocument({ size: "A4", margin: 50 });
+
+  const chunks: Buffer[] = [];
+  doc.on("data", (c: Buffer) => chunks.push(c));
+
+  const done = new Promise<Buffer>((resolve, reject) => {
+    doc.on("end", () => resolve(Buffer.concat(chunks)));
+    doc.on("error", reject);
+  });
+
+  const { invoiceNumber, invoiceDate, buyerEmail, description, amountCents } = params;
+
+  // Header
+  doc.fontSize(16).text(SELLER.name, { continued: false });
+  if (SELLER.address1) doc.fontSize(10).text(SELLER.address1);
+  if (SELLER.address2) doc.text(SELLER.address2);
+  if (SELLER.email) doc.text(SELLER.email);
+  if (SELLER.iban) doc.text(`IBAN: ${SELLER.iban}${SELLER.bic ? ` • BIC: ${SELLER.bic}` : ""}`);
+  doc.moveDown();
+
+  doc.fontSize(18).text("Factuur", { align: "right" });
+  doc.fontSize(10).text(`Factuurnummer: ${invoiceNumber}`, { align: "right" });
+  doc.text(`Datum: ${invoiceDate.toLocaleDateString("nl-BE")}`, { align: "right" });
+  doc.moveDown();
+
+  // Klant
+  doc.fontSize(12).text("Aan:", { underline: false });
+  doc.fontSize(10).text(buyerEmail);
+  doc.moveDown();
+
+  // Tabeltje (1 regel)
+  doc.fontSize(11).text("Omschrijving");
+  doc.moveDown(0.2);
+  doc.fontSize(10).text(description);
+  doc.moveDown();
+
+  // Bedrag
+  const amount = centsToEuro(amountCents);
+  doc.moveDown();
+  doc.fontSize(12).text(`Totaal: € ${amount}`, { align: "right" });
+  if (SELLER.vatNote) {
+    doc.fontSize(9).text(SELLER.vatNote, { align: "right" });
+  }
+
+  doc.moveDown();
+  doc.fontSize(9).fillColor("#555").text(
+    "Deze factuur werd automatisch aangemaakt na uw betaling. Bewaar dit document voor uw administratie.",
+    { align: "left" }
+  );
+
+  doc.end();
+  return done;
+}
+
+// ---------- Orderverwerking na "paid" ----------
+async function completeOrder(params: {
   orderId: string;
   paymentId: string;
   email: string;
   productId: string;
-  userId?: string | null;
+  tier?: "waitlist" | "general";
 }) {
+  const { orderId, paymentId, email, productId, tier } = params;
+  const em = toEmailLower(email);
+
   const orderRef = db.collection("orders").doc(orderId);
+  const existing = await orderRef.get();
+  // 🔁 Idempotentie
+  if (existing.exists && existing.get("status") === "paid") {
+    logger.info(`Order ${orderId} already paid; skipping`);
+    return existing.data();
+  }
 
-  // 1) Bereken vervaldatum
-  const expiresAt = Timestamp.fromMillis(Date.now() + ONE_YEAR_MS);
+  const now = new Date();
+  const expiresAtJS = addDays(now, 365);
+  const expiresAt = Timestamp.fromDate(expiresAtJS);
 
-  // 2) Licentie
-  const { licenseId, code } = await generateAndStoreLicense({ email, productId, orderId, expiresAt });
+  // 1) Licentie
+  const licenseCode = generateLicenseCode();
+  const licenseRef = db.collection("licenses").doc();
+  await licenseRef.set({
+    email: em,
+    code: licenseCode,
+    productId,
+    paymentId,
+    createdAt: FieldValue.serverTimestamp(),
+    expiresAt,
+    orderId,
+    tier: tier ?? null,
+  });
 
-  // 3) Order updaten
+  // 2) Entitlement
+  await upsertEntitlement(em, expiresAt, {
+    kind: "mollie",
+    paymentId,
+    productId,
+    orderId,
+    tier: tier ?? null,
+  });
+
+  // 3) Order bijwerken
   await orderRef.set(
     {
+      email: em,
+      productId,
       status: "paid",
+      licenseId: licenseRef.id,
       paymentId,
-      licenseId,
+      updatedAt: FieldValue.serverTimestamp(),
+      expiresAt,
+      tier: tier ?? null,
+    },
+    { merge: true }
+  );
+
+  // ---- Factuur opmaken ----
+  const orderAmountCents =
+    (existing.exists && typeof existing.get("amountCents") === "number"
+      ? existing.get("amountCents")
+      : productId.includes("waitlist")
+      ? 3500
+      : 4000) as number;
+
+  const { number: invoiceNumber } = await nextInvoiceNumber();
+  const invoiceDate = now;
+  const description = productId.includes("waitlist")
+    ? "Zisa PRO – 1 jaar (wachtlijst)"
+    : "Zisa PRO – 1 jaar";
+
+  const pdfBuffer = await buildInvoicePdfBuffer({
+    invoiceNumber,
+    invoiceDate,
+    buyerEmail: em,
+    description,
+    amountCents: orderAmountCents,
+  });
+
+  // Upload naar Storage
+  const invoiceId = `${orderId}`;
+  const filePath = `invoices/${invoiceId}.pdf`;
+  const file = storage.file(filePath);
+  await file.save(pdfBuffer, {
+    contentType: "application/pdf",
+    resumable: false,
+    metadata: { cacheControl: "private, max-age=0" },
+  });
+
+  // Log naar Firestore (invoices)
+  await db.collection("invoices").doc(invoiceId).set(
+    {
+      invoiceNumber,
+      orderId,
+      paymentId,
+      email: em,
+      amountCents: orderAmountCents,
+      currency: "EUR",
+      description,
+      createdAt: FieldValue.serverTimestamp(),
+      filePath,
+    },
+    { merge: true }
+  );
+
+  // 4) Resetlink + mail (met PDF-bijlage)
+  const resetLink = await ensureAuthUserAndInvite(em, `${APP_URL}index.html`);
+  const expStr = expiresAtJS.toLocaleDateString("nl-BE");
+
+  const base64pdf = pdfBuffer.toString("base64");
+  const attachments = [
+    {
+      filename: `Factuur_${invoiceNumber}.pdf`,
+      content: base64pdf,
+      encoding: "base64" as const,
+    },
+  ];
+
+  const html = `
+    <p>Beste,</p>
+    <p>Hartelijk dank voor uw aankoop. Uw PRO-licentiecode: <strong>${licenseCode}</strong><br>
+    <em>Geldig t.e.m. ${expStr}</em>.</p>
+    <p>
+      <a href="${resetLink}" style="text-decoration:none;background:#4a67ff;color:#fff;padding:12px 18px;border-radius:8px;display:inline-block">Wachtwoord instellen</a>
+      &nbsp;
+      <a href="${APP_URL}index.html" style="text-decoration:none;background:#111827;color:#fff;padding:12px 18px;border-radius:8px;display:inline-block">Open Zisa PRO</a>
+    </p>
+    <p>In de bijlage vindt u <strong>uw factuur ${invoiceNumber}</strong> in PDF-formaat.</p>
+    <p>Vriendelijke groet,<br>${SELLER.name}</p>
+  `;
+
+  await sendMail(
+    em,
+    `Zisa PRO – licentie & factuur ${invoiceNumber}`,
+    html,
+    undefined,
+    attachments
+  );
+
+  return { ok: true, orderId, licenseId: licenseRef.id, expiresAt, invoiceNumber };
+}
+
+// ---------- Callables / HTTPS ----------
+
+// PRO-status check
+export const checkEntitlement = onCall({ region: REGION }, async (req) => {
+  const email = (req.auth?.token.email as string) || (req.data?.email as string);
+  if (!email) throw new Error("Geen e-mail.");
+  const em = toEmailLower(email);
+  const snap = await db.collection("entitlements_by_email").doc(em).get();
+  const data = snap.data();
+  const now = Timestamp.now();
+  const active =
+    !!data && data.active === true && data.expiresAt && data.expiresAt.toMillis() > now.toMillis();
+  return { active, expiresAt: data?.expiresAt || null, maxDevices: data?.maxDevices ?? 2 };
+});
+
+// ✅ Toestel registreren + limiet afdwingen
+export const registerDevice = onCall({ region: REGION }, async (req) => {
+  const email = (req.auth?.token.email as string) || (req.data?.email as string);
+  const userId = req.auth?.uid || null;
+  const { deviceId, ua } = (req.data || {}) as { deviceId: string; ua?: string };
+  if (!email) throw new Error("Geen e-mail.");
+  if (!deviceId) throw new Error("deviceId vereist");
+
+  const em = toEmailLower(email);
+  const entSnap = await db.collection("entitlements_by_email").doc(em).get();
+  const ent = entSnap.data();
+  if (!ent || ent.active !== true || !ent.expiresAt) throw new Error("no_entitlement");
+  const now = Timestamp.now();
+  if (ent.expiresAt.toMillis() <= now.toMillis()) throw new Error("expired");
+  const maxDevices = ent.maxDevices ?? 2;
+
+  const thisRef = db.collection("devices").doc(`${em}__${deviceId}`);
+  const thisDoc = await thisRef.get();
+  if (!thisDoc.exists) {
+    const q = await db.collection("devices").where("email", "==", em).get();
+    const count = q.size;
+    if (count >= maxDevices) throw new Error("device_limit");
+    await thisRef.set({
+      email: em,
+      userId,
+      deviceId,
+      ua: ua || "",
+      createdAt: FieldValue.serverTimestamp(),
+    });
+  }
+  return { ok: true, maxDevices };
+});
+
+// Toestellen bekijken
+export const listDevices = onCall({ region: REGION }, async (req) => {
+  const email = (req.auth?.token.email as string) || (req.data?.email as string);
+  if (!email) throw new Error("Geen e-mail.");
+  const em = toEmailLower(email);
+  const q = await db.collection("devices").where("email", "==", em).get();
+  return q.docs.map((d) => ({ id: d.id, ...d.data() }));
+});
+
+// Toestel afmelden
+export const deactivateDevice = onCall({ region: REGION }, async (req) => {
+  const email = (req.auth?.token.email as string) || (req.data?.email as string);
+  const { deviceId } = (req.data || {}) as { deviceId: string };
+  if (!email || !deviceId) throw new Error("email en deviceId vereist");
+  const em = toEmailLower(email);
+  const ref = db.collection("devices").doc(`${em}__${deviceId}`);
+  const snap = await ref.get();
+  if (!snap.exists || snap.get("email") !== em) throw new Error("Onbevoegd of onbekend toestel");
+  await ref.delete();
+  return { ok: true };
+});
+
+// 🟢 Betaling aanmaken – met server-side wachtlijstcontrole (REST)
+export const createPayment = onCall({ region: REGION, secrets: [MOLLIE_API_KEY] }, async (req) => {
+  const email = (req.auth?.token.email as string) || (req.data?.email as string);
+  if (!email) throw new Error("Login of e-mail vereist.");
+  const em = toEmailLower(email);
+
+  // ---- Server-side prijsbepaling ----
+  const waitDoc = await db.collection("waitlist").doc(em).get();
+  const tier: "waitlist" | "general" = waitDoc.exists ? "waitlist" : "general";
+
+  const currency = "EUR";
+  const productId = tier === "waitlist" ? "zisa-pro-annual-waitlist" : "zisa-pro-annual";
+  const amount = tier === "waitlist" ? "35.00" : "40.00";
+
+  // Order initialiseren
+  const orderId = db.collection("orders").doc().id;
+  await db.collection("orders").doc(orderId).set(
+    {
+      status: "open",
+      email: em,
+      productId,
+      amountCents: Math.round(parseFloat(amount) * 100),
+      currency,
+      tier,
+      createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     },
     { merge: true }
   );
 
-  // 4) Entitlement (userId of e-mail)
-  const entExpires = await upsertEntitlement({
-    userId: userId ?? null,
-    email,
+  // Mollie payment via REST
+  const body = {
+    amount: { currency, value: amount },
+    description: tier === "waitlist" ? "Zisa PRO – 1 jaar (wachtlijst)" : "Zisa PRO – 1 jaar",
+    redirectUrl: `${APP_URL}bedankt.html?oid=${orderId}`,
+    webhookUrl: `https://${REGION}-${process.env.GCLOUD_PROJECT}.cloudfunctions.net/mollieWebhook`,
+    metadata: { orderId, email: em, productId, tier },
+    locale: "nl_BE",
+  };
+  const payment = await mollieCreatePayment(body);
+
+  return {
     orderId,
-    maxDevices: DEFAULT_MAX_DEVICES,
-    fromEmail: userId ? email : null,
-  });
-
-  // 5) Auth-gebruiker + reset link
-  const resetLink = await ensureAuthUserAndInvite(email);
-
-  // 6) Mail
-  await sendPurchaseMail({
-    email,
-    productId,
-    orderId,
-    licenseCode: code,
-    resetLink,
-    expiresAt: entExpires,
-  });
-
-  return { licenseId, code, expiresAt: entExpires.toMillis() };
-}
-
-// ---------- DEV: simulate paid ----------
-const SimPayload = z.object({
-  orderId: z.string(),
-  email: z.string().email(),
-  productId: z.string(),
-  paymentId: z.string().optional(),
+    paymentId: payment.id,
+    checkoutUrl: payment?._links?.checkout?.href || null,
+    tier,
+  };
 });
 
-export const devSimulatePaid = onRequest({ region: REGION, cors: true }, async (req, res) => {
-  try {
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
-    }
-    const token =
-      (req.query["token"] as string) ||
-      (req.headers["x-dev-token"] as string) ||
-      "";
-    if (token !== DEV_TOKEN) {
-      res.status(401).send("Unauthorized");
-      return;
-    }
-
-    const parsed = SimPayload.safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json(parsed.error.flatten());
-      return;
-    }
-    const { orderId, email, productId, paymentId } = parsed.data;
-
-    // Order aanmaken indien niet bestaat
-    const orderRef = db.collection("orders").doc(orderId);
-    const snap = await orderRef.get();
-    if (!snap.exists) {
-      await orderRef.set({
-        status: "open",
-        email,
-        productId,
-        amount: 3500,
-        currency: "EUR",
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-    }
-
-    const fakePaymentId = paymentId || `test_${randomUUID()}`;
-    const result = await completeOrder({
-      orderId,
-      paymentId: fakePaymentId,
-      email,
-      productId,
-    });
-
-    res.status(200).json({ ok: true, ...result });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).send(`ERR: ${e.message || e}`);
-  }
-});
-
-// ---------- Mollie webhook ----------
+// 🌐 Webhook – verwerk enkel "paid" (REST)
 export const mollieWebhook = onRequest(
-  { region: REGION, secrets: [MOLLIE_API_KEY], cors: true },
+  { region: REGION, secrets: [MOLLIE_API_KEY] },
   async (req, res) => {
     try {
-      if (req.method !== "POST") {
-        res.status(405).send("Method Not Allowed");
-        return;
-      }
-
-      const paymentId = (req.body?.id as string) || (req.body?.paymentId as string) || (req.query["id"] as string);
+      const paymentId = (req.body?.id || req.query?.id) as string;
       if (!paymentId) {
-        res.status(400).send("Missing payment id");
+        res.status(400).send("missing id");
         return;
       }
 
-      const payment = await getMolliePayment(paymentId, MOLLIE_API_KEY.value());
+      const payment = await mollieGetPayment(paymentId);
 
-      // metadata bij aanmaken betaling meesturen:
-      // { orderId, email, productId, userId? }
-      const orderId = payment?.metadata?.orderId || payment?.orderId || payment?.metadata?.order_id;
-      const email = payment?.metadata?.email || payment?.metadata?.customerEmail;
-      const userId = payment?.metadata?.userId || null;
-      const productId = payment?.metadata?.productId || payment?.description || "unknown";
-
-      if (!orderId || !email) throw new Error("Missing orderId or email in payment.metadata");
-
-      if (payment.status === "paid") {
-        await completeOrder({ orderId, paymentId: payment.id, email, productId, userId });
-      } else {
-        await db.collection("orders").doc(orderId).set(
-          { status: payment.status, updatedAt: FieldValue.serverTimestamp() },
-          { merge: true }
-        );
+      if (payment.status !== "paid") {
+        logger.info(`Webhook for ${paymentId} with status ${payment.status} (ignored)`);
+        res.status(200).send("ignored");
+        return;
       }
 
-      res.status(200).send("OK");
+      const md = (payment.metadata || {}) as any;
+      const orderId = md.orderId || db.collection("orders").doc().id;
+      const email = md.email as string;
+      const productId = (md.productId as string) ?? "zisa-pro-annual";
+      const tier = (md.tier as "waitlist" | "general") ?? undefined;
+
+      // Idempotentie
+      const orderRef = db.collection("orders").doc(orderId);
+      const orderSnap = await orderRef.get();
+      if (orderSnap.exists && orderSnap.get("status") === "paid") {
+        logger.info(`Order ${orderId} already paid (idempotent)`);
+        res.status(200).send("already");
+        return;
+      }
+
+      await completeOrder({ orderId, paymentId, email, productId, tier });
+      logger.info(`Order ${orderId} processed for ${email} (tier=${tier || "n/a"})`);
+      res.status(200).send("processed");
     } catch (e: any) {
-      console.error(e);
-      res.status(500).send(`ERR: ${e.message || e}`);
+      logger.error(e);
+      // Mollie verwacht 200, ook bij interne fout; wij loggen het
+      res.status(200).send("ok");
     }
   }
 );
 
-// ---------- Anti-delen laag ----------
-// /entitlements/{userId} -> { pro: true, maxDevices, expiresAt }
-// /entitlements_by_email/{emailLower}
-// /devices/{userId}_{deviceId} -> { userId, deviceId, createdAt, lastSeenAt, active }
-// /sessionCodes/{autoId} -> { userId, deviceId, code, issuedAt, expiresAt, used }
+// 🧪 Dev/test: activeer PRO zonder Mollie
+export const devSimulatePaid = onCall({ region: REGION }, async (req) => {
+  const email = (req.data?.email as string) || (req.auth?.token.email as string);
+  if (!email) throw new Error("email vereist");
+  const em = toEmailLower(email);
+  const waitDoc = await db.collection("waitlist").doc(em).get();
+  const tier: "waitlist" | "general" = waitDoc.exists ? "waitlist" : "general";
+  const productId = tier === "waitlist" ? "zisa-pro-annual-waitlist" : "zisa-pro-annual";
 
-export const registerDevice = onCall({ region: REGION }, async (req) => {
-  const ctx = req.auth;
-  if (!ctx?.uid) throw new Error("UNAUTHENTICATED");
-  const { deviceId } = (req.data || {}) as { deviceId?: string };
-  if (!deviceId || typeof deviceId !== "string" || deviceId.length < 8) {
-    throw new Error("INVALID_ARGUMENT: deviceId");
-  }
-
-  // entitlement (ook vervaldatum checken)
-  const userEmail = (req.auth?.token?.email as string | undefined) ?? undefined;
-  const ent = await readEntitlementFor(ctx.uid, userEmail);
-  if (!ent.ok) return { ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null };
-
-  // apparaten tellen
-  const activeQuery = await db
-    .collection("devices")
-    .where("userId", "==", ctx.uid)
-    .where("active", "==", true)
-    .get();
-
-  const id = `${ctx.uid}_${deviceId}`;
-  const deviceRef = db.collection("devices").doc(id);
-  const current = await deviceRef.get();
-
-  if (!current.exists) {
-    if (activeQuery.size >= (ent.maxDevices ?? DEFAULT_MAX_DEVICES)) {
-      return { ok: false, reason: "DEVICE_LIMIT", maxDevices: ent.maxDevices ?? DEFAULT_MAX_DEVICES };
-    }
-    await deviceRef.set({
-      userId: ctx.uid,
-      deviceId,
-      createdAt: now(),
-      lastSeenAt: now(),
-      active: true,
-    });
-  } else {
-    await deviceRef.set({ lastSeenAt: now(), active: true }, { merge: true });
-  }
-
-  // Claim entitlement_by_email → entitlements/{uid} (eenmalig)
-  if (userEmail) {
-    const emailKey = userEmail.trim().toLowerCase();
-    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
-    if (byMail.exists) {
-      const data = byMail.data()!;
-      await db.collection("entitlements").doc(ctx.uid).set(
-        {
-          pro: true,
-          maxDevices: data.maxDevices ?? DEFAULT_MAX_DEVICES,
-          setAt: FieldValue.serverTimestamp(),
-          claimedFromEmail: emailKey,
-          expiresAt: data.expiresAt ?? null,
-        },
-        { merge: true }
-      );
-    }
-  }
-
-  return { ok: true, maxDevices: ent.maxDevices ?? DEFAULT_MAX_DEVICES, expiresAt: ent.expiresAt ?? null };
+  const orderId = db.collection("orders").doc().id;
+  const paymentId = `dev_${Date.now()}`;
+  await completeOrder({ orderId, paymentId, email: em, productId, tier });
+  return { ok: true, orderId, paymentId, tier };
 });
 
-export const issueSessionCode = onCall({ region: REGION }, async (req) => {
-  const ctx = req.auth;
-  if (!ctx?.uid) throw new Error("UNAUTHENTICATED");
-  const { deviceId } = (req.data || {}) as { deviceId?: string };
-  if (!deviceId) throw new Error("INVALID_ARGUMENT: deviceId");
-
-  // entitlement check + verval
-  const userEmail = (req.auth?.token?.email as string | undefined) ?? undefined;
-  const ent = await readEntitlementFor(ctx.uid, userEmail);
-  if (!ent.ok) return { ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null };
-
-  // device check
-  const deviceDoc = await db.collection("devices").doc(`${ctx.uid}_${deviceId}`).get();
-  if (!deviceDoc.exists || deviceDoc.get("active") !== true) {
-    return { ok: false, reason: "DEVICE_NOT_REGISTERED" };
-  }
-
-  // invalideer oude ongebruikte codes
-  const old = await db
-    .collection("sessionCodes")
-    .where("userId", "==", ctx.uid)
-    .where("deviceId", "==", deviceId)
-    .where("used", "==", false)
-    .get();
-  const batch = db.batch();
-  old.forEach((d) => batch.update(d.ref, { used: true }));
-  await batch.commit();
-
-  // nieuwe code
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const rand = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-  const code = `${rand(4)}-${rand(4)}-${rand(4)}`;
-
-  const expiresAt = Timestamp.fromMillis(Date.now() + 15 * 60 * 1000); // 15 min
-
-  const docRef = await db.collection("sessionCodes").add({
-    userId: ctx.uid,
-    deviceId,
-    code,
-    issuedAt: now(),
-    expiresAt,
-    used: false,
-  });
-
-  return { ok: true, code, expiresAt: expiresAt.toMillis(), id: docRef.id };
-});
-
-// Server-side voorbeeldactie
-export const verifySessionCode = onRequest({ region: REGION, cors: true }, async (req, res) => {
-  try {
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
-    }
-    const { userId, deviceId, code } = req.body || {};
-    if (!userId || !deviceId || !code) {
-      res.status(400).send("Missing userId/deviceId/code");
-      return;
-    }
-
-    // check entitlement + vervaldatum
-    const ent = await readEntitlementFor(userId);
-    if (!ent.ok) {
-      res.status(401).json({ ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null });
-      return;
-    }
-
-    const q = await db
-      .collection("sessionCodes")
-      .where("userId", "==", userId)
-      .where("deviceId", "==", deviceId)
-      .where("code", "==", code)
-      .where("used", "==", false)
-      .limit(1)
-      .get();
-
-    if (q.empty) {
-      res.status(401).json({ ok: false, reason: "INVALID_OR_USED" });
-      return;
-    }
-    const doc = q.docs[0];
-    const data = doc.data();
-    const expired = (data.expiresAt as Timestamp).toMillis() < Date.now();
-    if (expired) {
-      await doc.ref.update({ used: true });
-      res.status(401).json({ ok: false, reason: "EXPIRED" });
-      return;
-    }
-
-    await doc.ref.update({ used: true });
-    res.status(200).json({ ok: true });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).send(`ERR: ${e.message || e}`);
-  }
-});
-
-// Klein demo-endpoint dat verifySessionCode intern gebruikt
-export const proDoSomething = onRequest({ region: REGION, cors: true }, async (req, res) => {
-  try {
-    if (req.method !== "POST") {
-      res.status(405).send("Method Not Allowed");
-      return;
-    }
-    const { userId, deviceId, code } = req.body || {};
-
-    // roep lokale verify-logica direct aan i.p.v. HTTP
-    const ent = await readEntitlementFor(userId);
-    if (!ent.ok) {
-      res.status(401).json({ ok: false, reason: ent.reason, expiresAt: ent.expiresAt ?? null });
-      return;
-    }
-    const q = await db
-      .collection("sessionCodes")
-      .where("userId", "==", userId)
-      .where("deviceId", "==", deviceId)
-      .where("code", "==", code)
-      .where("used", "==", false)
-      .limit(1)
-      .get();
-    if (q.empty) {
-      res.status(401).json({ ok: false, reason: "INVALID_OR_USED" });
-      return;
-    }
-    const doc = q.docs[0];
-    const data = doc.data();
-    if ((data.expiresAt as Timestamp).toMillis() < Date.now()) {
-      await doc.ref.update({ used: true });
-      res.status(401).json({ ok: false, reason: "EXPIRED" });
-      return;
-    }
-    await doc.ref.update({ used: true });
-
-    // hier je PRO-actie
-    res.status(200).json({ ok: true, message: "PRO-actie uitgevoerd" });
-  } catch (e: any) {
-    console.error(e);
-    res.status(500).send(`ERR: ${e.message || e}`);
-  }
-});
 
