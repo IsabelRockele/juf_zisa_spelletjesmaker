@@ -13,7 +13,7 @@
   <!-- Belangrijk: alle relatieve paden resolven nu naar /pro/ -->
   <base href="/pro/">
 
-  <!-- Header-overrides zodat titel altijd gecentreerd staat en knoppen smal blijven -->
+  <!-- Header-overrides: titel gecentreerd, back-link links -->
   <style>
     .pro-header {
       position: relative;
@@ -36,7 +36,6 @@
       padding: 6px 10px;
       border-radius: 6px;
       display: inline-block;
-      width: auto !important;
       white-space: nowrap;
     }
     .pro-header .title {
@@ -52,30 +51,12 @@
       white-space: nowrap;
       pointer-events: none; /* voorkomt klik-issues bij overlappende zones */
     }
-    .pro-header #logoutBtn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #5a9fd4;
-      color: #fff;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      display: inline-block;
-      width: auto !important;
-      max-width: none !important;
-      white-space: nowrap;
-    }
   </style>
 </head>
 <body>
   <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
     <h1 class="title">Code-tekenen Generator</h1>
-    <button id="logoutBtn">Uitloggen</button>
   </header>
 
   <div id="main-content">
@@ -236,28 +217,16 @@
         }
       });
       mo.observe(document.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['src'] });
-
-      // Uitloggen: lokale tokens wissen + serverlogout, daarna naar login
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('#logoutBtn');
-        if (!btn) return;
-        try { localStorage.removeItem('authToken'); } catch {}
-        try { localStorage.removeItem('refreshToken'); } catch {}
-        fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-          .catch(() => {})
-          .finally(() => { window.location.href = '/login.html'; });
-      });
     })();
   </script>
 
   <!-- Bestaande logica blijft buiten /pro/, dus één niveau hoger -->
   <script src="../coderen.js"></script>
+
+  <!-- Uniforme Firebase-guard -->
+  <script type="module">
+    import { guardProPage } from "./guard.js";
+    await guardProPage();
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
