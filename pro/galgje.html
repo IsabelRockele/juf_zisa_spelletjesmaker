@@ -30,7 +30,6 @@
       padding: 6px 10px;
       border-radius: 6px;
       display: inline-block;
-      width: auto !important;
       white-space: nowrap;
     }
     .pro-header .title {
@@ -45,28 +44,12 @@
       white-space: nowrap;
       pointer-events: none;
     }
-    .pro-header #logoutBtn {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #5a9fd4;
-      color: #fff;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      font-size: 14px;
-      cursor: pointer;
-      width: auto !important;
-      white-space: nowrap;
-    }
   </style>
 </head>
 <body>
   <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
     <h1 class="title">Galgje-generator (Zisa)</h1>
-    <button id="logoutBtn">Uitloggen</button>
   </header>
 
   <section class="setup">
@@ -143,21 +126,14 @@
     </div>
   </div>
 
-  <script>
-    (function() {
-      document.addEventListener('click', (e) => {
-        const btn = e.target.closest('#logoutBtn');
-        if (!btn) return;
-        try { localStorage.removeItem('authToken'); } catch {}
-        try { localStorage.removeItem('refreshToken'); } catch {}
-        fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-          .catch(() => {})
-          .finally(() => { window.location.href = '/login.html'; });
-      });
-    })();
-  </script>
+  <!-- Oude logout/guard verwijderd -->
 
   <script src="../galgje.js"></script>
+
+  <!-- Uniforme Firebase-guard -->
+  <script type="module">
+    import { guardProPage } from "./guard.js";
+    await guardProPage();
+  </script>
 </body>
 </html>
-
