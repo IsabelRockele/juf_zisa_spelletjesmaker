@@ -4,51 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verliefde Harten (Vriendjes van 10)</title>
+
+    <!-- Stijlen liggen buiten /pro/ -->
     <link rel="stylesheet" href="../harten.css">
+
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
+
     <style>
-        /* Losstaande, vaste header bovenaan */
+        /* Vaste PRO-header met alleen 'Terug naar menu' */
         .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
-        }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
         .pro-header .back-link {
-            float: left;
+            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
+            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
         }
-        .pro-header #logoutBtn {
-            float: right;
-        }
-        /* Zorg dat de rest van de pagina niet achter de header zit */
-        body {
-            margin-top: 60px;
-        }
+        /* Zorg dat de inhoud niet achter de header valt */
+        body { margin-top: 60px; }
     </style>
 </head>
 <body>
     <header class="pro-header">
         <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-        <button id="logoutBtn">Uitloggen</button>
     </header>
 
     <section id="setup-screen" class="screen">
@@ -84,22 +65,17 @@
         </div>
     </div>
 
+    <!-- Externe libs (ongewijzigd) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        (function() {
-            document.addEventListener('click', (e) => {
-                const btn = e.target.closest('#logoutBtn');
-                if (!btn) return;
-                try { localStorage.removeItem('authToken'); } catch {}
-                try { localStorage.removeItem('refreshToken'); } catch {}
-                fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                    .catch(() => {})
-                    .finally(() => { window.location.href = '/login.html'; });
-            });
-        })();
-    </script>
+
+    <!-- Projectscript (buiten /pro/) -->
     <script src="../harten.js"></script>
+
+    <!-- Uniforme Firebase-guard -->
+    <script type="module">
+        import { guardProPage } from "./guard.js";
+        await guardProPage();
+    </script>
 </body>
 </html>
-
