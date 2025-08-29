@@ -4,69 +4,42 @@
     <meta charset="UTF-8">
     <title>Bingo Generator (PRO) - Keuzemenu</title>
 
+    <!-- CSS blijft buiten /pro/, dus met <base> werkt ../ naar de root -->
     <link rel="stylesheet" href="../bingo.css">
     <base href="/pro/">
 
+    <!-- Externe libs (ongewijzigd) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <style>
-        .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+        .pro-header{
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background:#5a9fd4; color:#fff; border:none; padding:6px 10px;
+            border-radius:6px; font-size:14px; font-weight:600; text-decoration:none;
+            cursor:pointer; display:inline-block; white-space:nowrap; float:left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
-        body { margin-top: 60px; }
+        body{ margin-top:60px; }
     </style>
 </head>
 <body>
 
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
 </header>
-<script>
-  (function() {
-    document.addEventListener('click', (e) => {
-      const btn = e.target.closest('#logoutBtn');
-      if (!btn) return;
-      try { localStorage.removeItem('authToken'); } catch {}
-      try { localStorage.removeItem('refreshToken'); } catch {}
-      fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-        .catch(() => {})
-        .finally(() => { window.location.href = '/login.html'; });
-    });
-  })();
-</script>
 
+<!-- Herstelmelding (ongewijzigd) -->
 <div id="herstel-melding" class="herstel-melding verborgen">
     <span>Er is een vorig spel gevonden. Wilt u doorgaan?</span>
     <button id="herstel-ja">✅ Ja, ga door</button>
     <button id="herstel-nee">❌ Nee, start een nieuw spel</button>
 </div>
 
+<!-- Hoofdmenu (ongewijzigd) -->
 <div class="hoofd-menu">
     <hr>
     <button id="kies-avi-knop" class="menu-knop">Start Woordenbingo</button>
@@ -142,6 +115,7 @@
     <input type="file" id="import-spel-input" class="verborgen" accept=".json">
 </div>
 
+<!-- Hoofdcontent (ongewijzigd) -->
 <div class="hoofd-content">
     <div id="instructie-paneel">
         <h2>Welkom bij de Bingo Generator!</h2>
@@ -164,6 +138,7 @@
     </div>
 </div>
 
+<!-- Modal (ongewijzigd) -->
 <div id="modal-overlay" class="verborgen">
     <div id="custom-modal">
         <h3 id="modal-titel">Opties voor Bingokaarten</h3>
@@ -175,9 +150,13 @@
     </div>
 </div>
 
+<!-- JS van de bingo-module (blijft buiten /pro/) -->
 <script src="../bingo.js"></script>
+
+<!-- Uniforme Firebase-guard (één lijn, geen logout op spelpagina) -->
+<script type="module">
+  import { guardProPage } from "./guard.js";
+  await guardProPage();
+</script>
 </body>
 </html>
-
-
-
