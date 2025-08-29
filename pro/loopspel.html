@@ -4,56 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rekenen Loopspel</title>
+
+    <!-- Styles liggen buiten /pro/ -->
     <link rel="stylesheet" href="../loopspel.css">
+
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
     <base href="/pro/">
+
     <style>
         .pro-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #3f7fbf;
-            padding: 8px 12px;
-            color: #fff;
-            z-index: 1000;
-            height: 48px;
+            position: fixed; top: 0; left: 0; width: 100%;
+            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
+            z-index: 1000; height: 48px;
         }
-        .pro-header .back-link,
-        .pro-header #logoutBtn {
-            background: #5a9fd4;
-            color: #fff;
-            border: none;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            white-space: nowrap;
+        .pro-header .back-link{
+            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
+            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
+            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
         }
-        .pro-header .back-link { float: left; }
-        .pro-header #logoutBtn { float: right; }
         body { margin-top: 60px; }
     </style>
 </head>
 <body>
 <header class="pro-header">
     <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-    <button id="logoutBtn">Uitloggen</button>
 </header>
 
 <div id="instellingen-scherm">
     <h1>Stel je rekenspel in</h1>
-    
+
     <div class="instelling-groep">
         <label>Tijd per oefening (seconden):</label>
         <input type="number" id="tijd-oefening" value="5" min="2">
     </div>
+
     <div class="instelling-groep operatie-kiezer">
         <label><input type="radio" name="operatie-type" value="maal-deel" checked> Maal & Deel</label>
         <label><input type="radio" name="operatie-type" value="plus-min"> Plus & Min</label>
     </div>
+
     <div id="maal-deel-opties" class="optie-container">
         <div class="instelling-groep">
             <p>Kies de bewerking:</p>
@@ -68,10 +57,11 @@
             <div id="tafel-selectie" class="tafel-grid"></div>
         </div>
     </div>
+
     <div id="plus-min-opties" class="optie-container verborgen">
-         <div class="instelling-groep">
+        <div class="instelling-groep">
             <p>Kies de bewerking:</p>
-             <div class="radio-groep">
+            <div class="radio-groep">
                 <label><input type="radio" name="plus-min-bewerking" value="plus"> Alleen Optellen</label>
                 <label><input type="radio" name="plus-min-bewerking" value="min"> Alleen Aftrekken</label>
                 <label><input type="radio" name="plus-min-bewerking" value="beide" checked> Beide gemixt</label>
@@ -120,19 +110,16 @@
     <button id="stop-knop">■ Stop</button>
 </div>
 
-<script>
-    (function() {
-        document.addEventListener('click', (e) => {
-            const btn = e.target.closest('#logoutBtn');
-            if (!btn) return;
-            try { localStorage.removeItem('authToken'); } catch {}
-            try { localStorage.removeItem('refreshToken'); } catch {}
-            fetch('/auth/logout', { method: 'POST', credentials: 'include' })
-                .catch(() => {})
-                .finally(() => { window.location.href = '/login.html'; });
-        });
-    })();
-</script>
+<!-- Oude uitlogknop en logout-script verwijderd -->
+
+<!-- Projectscript (buiten /pro/) -->
 <script src="../loopspel.js"></script>
+
+<!-- Uniforme Firebase-guard -->
+<script type="module">
+    import { guardProPage } from "./guard.js";
+    await guardProPage();
+</script>
 </body>
 </html>
+
