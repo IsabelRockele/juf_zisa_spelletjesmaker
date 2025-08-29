@@ -78,14 +78,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         
-        // De validatie voor de UI zit nu in drawWorksheet. Hier genereren we enkel.
         for (let i = 0; i < aantal; i++) {
             const bewerking = bewerkingen[i % bewerkingen.length];
             const puzzle = generateSinglePuzzle(bewerking);
             
-            // --- DE CORRECTIE ZIT HIER ---
-            // Voeg de puzzel alleen toe als hij succesvol is gemaakt.
-            // Gooi niet langer de hele set weg als er één mislukt.
             if (puzzle) {
                 puzzles.push(puzzle);
             }
@@ -135,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!rowHeaders) return null;
         }
 
-        if (!colHeaders || !rowHeaders) return null; // Extra veiligheidscheck
+        if (!colHeaders || !rowHeaders) return null;
 
         for (let c = 0; c < colHeaders.length; c++) {
             solutionGrid[0][c + 1] = colHeaders[c];
@@ -155,17 +151,82 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         
         const displayGrid = JSON.parse(JSON.stringify(solutionGrid));
-        const mogelijkeVakken = [];
-        for (let r = 1; r < gridSize; r++) {
-            for (let c = 1; c < gridSize; c++) {
-                mogelijkeVakken.push({ r, c });
+        const puzzelType = puzzelTypeSelect.value;
+
+        // --- START VAN DE AANGEPASTE LOGICA ---
+        if (puzzelType === 'klassiek') {
+            // Klassiek: maak alleen de binnenste cellen (resultaten) leeg.
+            const mogelijkeVakken = [];
+            for (let r = 1; r < gridSize; r++) {
+                for (let c = 1; c < gridSize; c++) {
+                    mogelijkeVakken.push({ r, c });
+                }
+            }
+            const shuffledEmptyCells = shuffleArray(mogelijkeVakken);
+            for (let i = 0; i < Math.min(aantalLegeVakken, shuffledEmptyCells.length); i++) {
+                const { r, c } = shuffledEmptyCells[i];
+                displayGrid[r][c] = '';
+            }
+        } else { // Omgekeerd: maak startgetallen en resultaten leeg, maar zorg voor oplosbaarheid.
+            const allHeaders = [];
+            for (let i = 1; i < gridSize; i++) {
+                allHeaders.push({ r: 0, c: i }); // Bovenste rij
+                allHeaders.push({ r: i, c: 0 }); // Linker kolom
+            }
+
+            const allResults = [];
+            for (let r = 1; r < gridSize; r++) {
+                for (let c = 1; c < gridSize; c++) {
+                    allResults.push({ r, c });
+                }
+            }
+
+            const protectedCells = new Set(); // Sla cellen op die niet leeg mogen worden gemaakt.
+            let emptyCount = 0;
+
+            // 1. Bepaal welke startgetallen we leegmaken en bescherm een "hint"-cel.
+            const shuffledHeaders = shuffleArray(allHeaders);
+            // Maak maximaal 1/3 van de lege vakken een startgetal, of minder als er niet genoeg zijn.
+            const numHeadersToEmpty = Math.min(shuffledHeaders.length, Math.ceil(aantalLegeVakken / 3));
+            const headersToEmpty = shuffledHeaders.slice(0, numHeadersToEmpty);
+
+            headersToEmpty.forEach(headerPos => {
+                let cluePos;
+                if (headerPos.r === 0) { // Startgetal in bovenste rij
+                    // Bescherm een willekeurige cel in dezelfde kolom
+                    const randomRow = Math.floor(Math.random() * (gridSize - 1)) + 1;
+                    cluePos = { r: randomRow, c: headerPos.c };
+                } else { // Startgetal in linker kolom
+                    // Bescherm een willekeurige cel in dezelfde rij
+                    const randomCol = Math.floor(Math.random() * (gridSize - 1)) + 1;
+                    cluePos = { r: headerPos.r, c: randomCol };
+                }
+                // Voeg de "hint"-cel toe aan de beschermde set. De key is een string "rij,kolom".
+                protectedCells.add(`${cluePos.r},${cluePos.c}`);
+            });
+
+            // 2. Maak de geselecteerde startgetallen leeg.
+            headersToEmpty.forEach(({ r, c }) => {
+                if (emptyCount < aantalLegeVakken) {
+                    displayGrid[r][c] = '';
+                    emptyCount++;
+                }
+            });
+
+            // 3. Maak de overige lege vakken op uit de resultaatcellen, maar respecteer de beschermde cellen.
+            const shuffledResults = shuffleArray(allResults);
+            for (const resultPos of shuffledResults) {
+                if (emptyCount >= aantalLegeVakken) break;
+
+                const posKey = `${resultPos.r},${resultPos.c}`;
+                if (!protectedCells.has(posKey)) {
+                    displayGrid[resultPos.r][resultPos.c] = '';
+                    emptyCount++;
+                }
             }
         }
-        const shuffledEmptyCells = shuffleArray(mogelijkeVakken);
-        for (let i = 0; i < Math.min(aantalLegeVakken, shuffledEmptyCells.length); i++) {
-            const { r, c } = shuffledEmptyCells[i];
-            displayGrid[r][c] = '';
-        }
+        // --- EINDE VAN DE AANGEPASTE LOGICA ---
+
         return { solutionGrid, displayGrid };
     }
     
@@ -200,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const layout = { 1: { x: 1, y: 1 }, 2: { x: 2, y: 1 }, 4: { x: 2, y: 2 } }[puzzles.length];
+        const layout = { 1: { x: 1, y: 1 }, 2: { x: 2, y: 1 }, 4: { x: 2, y: 2 } }[puzzles.length] || { x: 1, y: 1 };
         const padding = 20;
         const totalWidth = canvas.width - padding * (layout.x + 1);
         const totalHeight = canvas.height - padding * (layout.y + 1);
@@ -219,7 +280,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const aantal = puzzles.length;
         if (aantal === 0) return;
 
-        const layout = { 1: { x: 1, y: 1 }, 2: { x: 2, y: 1 }, 4: { x: 2, y: 2 } }[puzzles.length];
+        const layout = { 1: { x: 1, y: 1 }, 2: { x: 2, y: 1 }, 4: { x: 2, y: 2 } }[puzzles.length] || { x: 1, y: 1 };
         const padding = 20;
         const totalWidth = canvas.width - padding * (layout.x + 1);
         const totalHeight = canvas.height - padding * (layout.y + 1);
@@ -235,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function drawSingleGrid(gridData, x, y, width, height, isSolution = false) {
         const gridSize = gridData.length;
-        const cellSize = width / gridSize;
+        const cellSize = Math.min(width / gridSize, height / gridSize);
         ctx.strokeStyle = "#333";
         ctx.lineWidth = 1;
         ctx.font = `${cellSize * 0.4}px Arial`;
@@ -247,6 +308,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 const cellX = x + c * cellSize;
                 const cellY = y + r * cellSize;
                 
+                // Bepaal of de cel in de originele puzzel leeg was
+                const wasEmpty = puzzles.some(p => p.displayGrid[r]?.[c] === '');
+
                 if (r === 0 || c === 0) {
                     ctx.fillStyle = '#f0faff';
                     ctx.fillRect(cellX, cellY, cellSize, cellSize);
@@ -255,7 +319,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 ctx.strokeRect(cellX, cellY, cellSize, cellSize);
                 
                 if (gridData[r][c] !== null && gridData[r][c] !== '') {
-                    const isAnswerCell = isSolution && puzzles.some(p => p.displayGrid[r]?.[c] === '');
+                    // Een cel is een "antwoord" als we de oplossing tonen én de cel oorspronkelijk leeg was.
+                    const isAnswerCell = isSolution && wasEmpty;
                     ctx.fillStyle = isAnswerCell ? '#008000' : (r === 0 || c === 0) ? '#004080' : 'black';
                     ctx.fillText(gridData[r][c], cellX + cellSize / 2, cellY + cellSize / 2);
                 }
