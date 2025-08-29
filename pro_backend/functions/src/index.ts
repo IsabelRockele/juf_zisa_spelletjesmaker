@@ -1,402 +1,474 @@
-/**
- * zisa-spelletjesmaker-pro — API (Gen2, OTP + sessie via cookie OF Bearer token)
- * (Bijgewerkt: licentie-check toegevoegd en licentie activeren in webhook)
- */
+import { onRequest, onCall } from "firebase-functions/v2/https";
+import { defineSecret } from "firebase-functions/params";
 
-import * as functions from "firebase-functions/v2/https";
-import * as admin from "firebase-admin";
-import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import crypto from "crypto";
+// Admin SDK v12 – modulaire imports
+import { initializeApp } from "firebase-admin/app";
+import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 
-// Mollie + mail
-import createMollieClient from "@mollie/api-client";
-import sgMail from "@sendgrid/mail";
+import fetch from "node-fetch";
+import { z } from "zod";
+import { randomUUID } from "node:crypto";
 
-admin.initializeApp();
-const db = admin.firestore();
+// ---------- Init ----------
+initializeApp();
+const db = getFirestore();
 
-const app = express();
-app.use(express.json());
+const REGION = "europe-west1";
+const MOLLIE_API_KEY = defineSecret("MOLLIE_API_KEY");
 
-/** ===== CORS ===== */
-const ALLOWED_ORIGINS = [
-  "https://isabelrockele.github.io",
-  "http://127.0.0.1:5500",
-  "http://localhost:5500",
-  // "https://www.jufzisa.be",
-];
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-      return cb(new Error(`Not allowed by CORS: ${origin}`));
-    },
-    credentials: true,
-  })
-);
-app.use((req, res, next) => {
-  const origin = req.headers.origin as string | undefined;
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    res.header("Access-Control-Allow-Origin", origin);
-  }
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  if (req.method === "OPTIONS") return res.sendStatus(204);
-  return next();
-});
+// Wijzig dit naar een eigen lange, geheime waarde
+const DEV_TOKEN = "c5a4f5e5-1a8b-4f4e-9ad4-3b1b8b2c5d2e";
 
-/** ===== Config & helpers ===== */
-const num = (v: string | undefined, d: number) =>
-  Number.isFinite(Number(v)) ? Number(v) : d;
-const bool = (v: string | undefined, d: boolean) =>
-  v === undefined ? d : String(v).toLowerCase() === "true";
+const DEFAULT_MAX_DEVICES = 2;
+const now = () => Timestamp.now();
 
-const OTP_TTL_MS = () => num(process.env.OTP_TTL_MS, 5 * 60 * 1000);           // 5 min
-const OTP_MIN_INTERVAL_MS = () => num(process.env.OTP_MIN_INTERVAL_MS, 60_000); // 60 s
-const DISPLAY_OTP = () => bool(process.env.DISPLAY_OTP, false);
+// Link naar uw app (GitHub Pages)
+const APP_URL = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/";
 
-const OTP_PEPPER = () => String(process.env.OTP_PEPPER ?? "");
-const SESSION_SECRET = () => String(process.env.SESSION_SECRET ?? "");
-const SESSION_TTL_MS = () => num(process.env.SESSION_TTL_MS, 24 * 60 * 60 * 1000); // 24 u
-
-const MOLLIE_API_KEY = () => String(process.env.MOLLIE_API_KEY ?? "");
-const SENDGRID_API_KEY = () => String(process.env.SENDGRID_API_KEY ?? "");
-const SENDER_EMAIL = () => String(process.env.SENDER_EMAIL ?? "");
-
-const SESSION_COOKIE_NAME = "zisa_session";
-
-app.use(cookieParser());
-
-function now() { return Date.now(); }
-function isAdmin(uid: string) { return uid === "isabel-admin"; }
-
-function generateOtp(): string {
-  const n = crypto.randomInt(0, 1_000_000);
-  return n.toString().padStart(6, "0");
-}
-function hashOtp(uid: string, code: string, pepper: string): string {
-  return crypto.createHash("sha256").update(`${uid}:${code}:${pepper}`).digest("hex");
-}
-function isValidUid(uid: unknown): uid is string {
-  return typeof uid === "string" && uid.trim().length >= 3 && uid.length <= 128;
-}
-function isValidCode(code: unknown): code is string {
-  return typeof code === "string" && /^[0-9]{6}$/.test(code);
+// Abonnement: 1 jaar geldig
+const SUBSCRIPTION_YEARS = 1;
+function oneYearFrom(base?: Timestamp | null) {
+  // verlengen vanaf de langste resterende looptijd
+  const start = base && base.toMillis() > Date.now() ? new Date(base.toMillis()) : new Date();
+  start.setFullYear(start.getFullYear() + SUBSCRIPTION_YEARS);
+  return Timestamp.fromDate(start);
 }
 
-// Sessie/token signeren met HMAC-SHA256
-type SessionPayload = { uid: string; exp: number };
-function signToken(p: SessionPayload, secret: string): string {
-  const body = Buffer.from(JSON.stringify(p)).toString("base64url");
-  const sig = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  return `${body}.${sig}`;
-}
-function verifyToken(token: string, secret: string): SessionPayload | null {
-  const parts = token.split(".");
-  if (parts.length !== 2) return null;
-  const [body, sig] = parts;
-  const expect = crypto.createHmac("sha256", secret).update(body).digest("base64url");
-  if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null;
-  const payload = JSON.parse(Buffer.from(body, "base64url").toString("utf8")) as SessionPayload;
-  if (payload.exp < now()) return null;
-  return payload;
-}
+// ---------- Helpers ----------
+async function generateAndStoreLicense(params: { email: string; productId: string; orderId: string }) {
+  const { email, productId, orderId } = params;
 
-// Mollie client & mail init
-const mollie = () => createMollieClient({ apiKey: MOLLIE_API_KEY() });
-function initMailer() {
-  const key = SENDGRID_API_KEY();
-  if (!key) return false;
-  sgMail.setApiKey(key);
-  return true;
-}
-async function sendOtpEmail(toEmail: string, code: string) {
-  const from = SENDER_EMAIL();
-  if (!from) throw new Error("SENDER_EMAIL missing");
-  const minutes = Math.round(OTP_TTL_MS() / 60000);
-  const msg = {
-    to: toEmail,
-    from,
-    subject: "Juf Zisa – jouw inlogcode",
-    text: `Je code is ${code}. Geldig gedurende ${minutes} minuten.`,
-    html: `<p>Je code is <strong>${code}</strong>. Geldig gedurende ${minutes} minuten.</p>`,
-  };
-  await sgMail.send(msg as any);
-}
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const chunk = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  const code = `ZISA-${chunk(4)}-${chunk(4)}-${chunk(4)}`;
 
-/** === Licenties === */
-const LICENSES_COL = "licenses";
-async function hasActiveLicense(uid: string): Promise<boolean> {
-  const snap = await db.collection(LICENSES_COL).doc(uid).get();
-  return !!(snap.exists && (snap.data() as any)?.active === true);
-}
+  const { ulid } = await import("ulid");
+  const licenseId = ulid();
 
-/** ===== Testroutes ===== */
-app.get("/", (_req, res) =>
-  res.json({
-    ok: true,
-    endpoints: [
-      "/ping",
-      "/otp/request",
-      "/otp/verify",
-      "/auth/me",
-      "/auth/logout",
-      "/payments/create",
-      "/payments/webhook",
-      "/payments/:id/status",
-    ],
-  })
-);
-app.get("/ping", (_req, res) => res.json({ ok: true, msg: "pong" }));
-
-/** ===== OTP aanvragen ===== */
-app.post("/otp/request", async (req, res) => {
-  try {
-    const { uid } = req.body ?? {};
-    if (!isValidUid(uid)) return res.status(400).json({ ok: false, error: "INVALID_UID" });
-
-    const pepper = OTP_PEPPER();
-    if (!pepper) return res.status(500).json({ ok: false, error: "SERVER_MISSING_PEPPER" });
-
-    const docRef = db.collection("otp").doc(uid);
-    const snap = await docRef.get();
-    const nowMs = now();
-
-    if (snap.exists) {
-      const data = snap.data() as any;
-      const lastIssuedAt = Number(data?.issuedAt ?? 0);
-      const prevExpiresAt = Number(data?.expiresAt ?? 0);
-      const tooSoon = nowMs - lastIssuedAt < OTP_MIN_INTERVAL_MS();
-
-      if (tooSoon && !isAdmin(uid)) {
-        return res.json({
-          ok: true,
-          alreadyIssued: true,
-          requestedAt: lastIssuedAt,
-          expiresAt: prevExpiresAt,
-          retryInMs: OTP_MIN_INTERVAL_MS() - (nowMs - lastIssuedAt),
-        });
-      }
-    }
-
-    const code = generateOtp();
-    const hash = hashOtp(uid, code, pepper);
-    const expiresAt = nowMs + OTP_TTL_MS();
-
-    await docRef.set({ uid, hash, issuedAt: nowMs, expiresAt, usedAt: null }, { merge: true });
-
-    const payload: Record<string, any> = { ok: true, requestedAt: nowMs, expiresAt };
-    if (DISPLAY_OTP() || isAdmin(uid)) payload.displayCode = code;
-
-    return res.json(payload);
-  } catch (err: any) {
-    return res.status(500).json({ ok: false, error: "SERVER_ERROR", detail: err?.message ?? String(err) });
-  }
-});
-
-/** ===== OTP verifiëren (zet cookie EN return token) ===== */
-app.post("/otp/verify", async (req, res) => {
-  try {
-    const { uid, code } = req.body ?? {};
-    if (!isValidUid(uid)) return res.status(400).json({ ok: false, error: "INVALID_UID" });
-    if (!isValidCode(code)) return res.status(400).json({ ok: false, error: "INVALID_CODE" });
-
-    const pepper = OTP_PEPPER();
-    const secret = SESSION_SECRET();
-    if (!pepper || !secret) return res.status(500).json({ ok: false, error: "SERVER_SECRETS_MISSING" });
-
-    const docRef = db.collection("otp").doc(uid);
-    const snap = await docRef.get();
-    if (!snap.exists) return res.status(404).json({ ok: false, error: "OTP_NOT_FOUND" });
-
-    const data = snap.data() as any;
-    const { hash, expiresAt, usedAt } = data ?? {};
-    if (usedAt) return res.status(410).json({ ok: false, error: "OTP_ALREADY_USED" });
-    if (!hash || typeof hash !== "string") return res.status(500).json({ ok: false, error: "OTP_INVALID_STATE" });
-
-    const nowMs = now();
-    if (Number(expiresAt ?? 0) < nowMs) return res.status(410).json({ ok: false, error: "OTP_EXPIRED" });
-
-    const candidate = hashOtp(uid, code, pepper);
-    if (candidate !== hash) return res.status(401).json({ ok: false, error: "OTP_MISMATCH" });
-
-    // ►►► LICENTIE-CHECK
-    const active = await hasActiveLicense(uid);
-    if (!active) return res.status(403).json({ ok:false, error:"NO_ACTIVE_LICENSE" });
-
-    // Token + cookie aanmaken
-    const exp = nowMs + SESSION_TTL_MS();
-    const token = signToken({ uid, exp }, secret);
-
-    res.cookie(SESSION_COOKIE_NAME, token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none", // nodig omdat je front-end op GitHub Pages draait (cross-site)
-      path: "/",
-      maxAge: SESSION_TTL_MS(),
-    });
-
-    return res.json({ ok: true, token, exp, uid });
-  } catch (err: any) {
-    return res.status(500).json({ ok: false, error: "SERVER_ERROR", detail: err?.message ?? String(err) });
-  }
-});
-
-/** ===== Auth status (cookie OF Authorization: Bearer) ===== */
-app.get("/auth/me", (req, res) => {
-  try {
-    const secret = SESSION_SECRET();
-    if (!secret) return res.status(500).json({ ok: false, error: "SERVER_SECRETS_MISSING" });
-
-    // 1) Probeer cookie
-    let raw = req.cookies?.[SESSION_COOKIE_NAME] as string | undefined;
-
-    // 2) Of Bearer token
-    if (!raw) {
-      const auth = req.header("authorization") || req.header("Authorization");
-      if (auth && auth.startsWith("Bearer ")) {
-        raw = auth.slice("Bearer ".length).trim();
-      }
-    }
-
-    if (!raw) return res.status(401).json({ ok: false, error: "NO_SESSION" });
-
-    const payload = verifyToken(raw, secret);
-    if (!payload) return res.status(401).json({ ok: false, error: "INVALID_SESSION" });
-
-    return res.json({ ok: true, uid: payload.uid, exp: payload.exp });
-  } catch (err: any) {
-    return res.status(500).json({ ok: false, error: "SERVER_ERROR", detail: err?.message ?? String(err) });
-  }
-});
-
-/** ===== Logout ===== */
-app.post("/auth/logout", (_req, res) => {
-  res.clearCookie(SESSION_COOKIE_NAME, {
-    httpOnly: true, secure: true, sameSite: "none", path: "/",
+  await db.collection("licenses").doc(licenseId).set({
+    code,
+    productId,
+    orderId,
+    email,
+    status: "active",
+    issuedAt: FieldValue.serverTimestamp(),
+    expiresAt: oneYearFrom(null), // licentie-record: 1 jaar vanaf nu
   });
-  return res.json({ ok: true });
+
+  return { licenseId, code };
+}
+
+async function enqueueMail(params: { to: string; subject: string; text: string; html?: string }) {
+  const payload: any = {
+    to: params.to,
+    message: { subject: params.subject, text: params.text },
+  };
+  if (params.html) payload.message.html = params.html;
+  await db.collection("mail").add(payload);
+}
+
+async function updateOrderAfterPaid(
+  orderId: string,
+  paymentId: string,
+  email: string,
+  productId: string,
+  entitlementExpiresAt?: Timestamp | null
+) {
+  const orderRef = db.collection("orders").doc(orderId);
+  const { licenseId, code } = await generateAndStoreLicense({ email, productId, orderId });
+
+  await orderRef.set(
+    {
+      status: "paid",
+      paymentId,
+      licenseId,
+      updatedAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+
+  const exp = entitlementExpiresAt ?? oneYearFrom(null);
+  const expDate = exp.toDate().toISOString().slice(0, 10); // YYYY-MM-DD
+
+  const subject = "Jouw licentie voor Zisa Spelletjesmaker PRO";
+  const text = `Dag,
+
+Bedankt voor je aankoop! Hier is je licentiecode:
+
+${code}
+
+Product: ${productId}
+Order: ${orderId}
+Geldig tot: ${expDate}
+
+➡ Open de app: ${APP_URL}
+
+Gebruik deze code om je PRO-functies te activeren. Bewaar deze mail goed.
+
+Vriendelijke groet,
+Zebraklas`;
+
+  const html = `<p>Dag,</p>
+<p>Bedankt voor je aankoop! Hier is je licentiecode:</p>
+<p style="font-size:18px;font-weight:bold;letter-spacing:1px">${code}</p>
+<p>Product: <b>${productId}</b><br/>Order: <b>${orderId}</b><br/>Geldig tot: <b>${expDate}</b></p>
+<p>
+  <a href="${APP_URL}" style="display:inline-block;background:#0d6efd;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;font-weight:600">
+    Open Zisa Spelletjesmaker PRO
+  </a>
+</p>
+<p>Gebruik deze code om je PRO-functies te activeren. Bewaar deze mail goed.</p>
+<p>Vriendelijke groet,<br/>Zebraklas</p>`;
+
+  await enqueueMail({ to: email, subject, text, html });
+  return { licenseId, code };
+}
+
+async function getMolliePayment(paymentId: string, apiKey: string) {
+  const res = await fetch(`https://api.mollie.com/v2/payments/${encodeURIComponent(paymentId)}`, {
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+  });
+  if (!res.ok) throw new Error(`Mollie GET failed (${res.status}): ${await res.text()}`);
+  return res.json() as Promise<any>;
+}
+
+// Entitlement helpers (zetten/verlengen)
+async function upsertEntitlementForUserId(userId: string, orderId: string) {
+  const ref = db.collection("entitlements").doc(userId);
+  const snap = await ref.get();
+  const currentExp = snap.exists ? (snap.get("expiresAt") as Timestamp | null) : null;
+  const newExp = oneYearFrom(currentExp ?? null);
+
+  await ref.set(
+    {
+      pro: true,
+      maxDevices: DEFAULT_MAX_DEVICES,
+      lastOrderId: orderId,
+      expiresAt: newExp,
+      setAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+  return newExp;
+}
+
+async function upsertEntitlementForEmail(emailLower: string, orderId: string) {
+  const ref = db.collection("entitlements_by_email").doc(emailLower);
+  const snap = await ref.get();
+  const currentExp = snap.exists ? (snap.get("expiresAt") as Timestamp | null) : null;
+  const newExp = oneYearFrom(currentExp ?? null);
+
+  await ref.set(
+    {
+      pro: true,
+      maxDevices: DEFAULT_MAX_DEVICES,
+      lastOrderId: orderId,
+      expiresAt: newExp,
+      setAt: FieldValue.serverTimestamp(),
+    },
+    { merge: true }
+  );
+  return newExp;
+}
+
+// ---------- DEV: simulate paid ----------
+const SimPayload = z.object({
+  orderId: z.string(),
+  email: z.string().email(),
+  productId: z.string(),
+  paymentId: z.string().optional(),
 });
 
-/** ===== Payments: aanmaken ===== */
-app.post("/payments/create", async (req, res) => {
+export const devSimulatePaid = onRequest({ region: REGION, cors: true }, async (req, res) => {
   try {
-    const { uid, email, amountEur, description, redirectUrl } = req.body ?? {};
-    if (!isValidUid(uid)) return res.status(400).json({ ok:false, error:"INVALID_UID" });
-    if (typeof email !== "string" || !email.includes("@")) return res.status(400).json({ ok:false, error:"INVALID_EMAIL" });
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+    const token =
+      (req.query["token"] as string) ||
+      (req.headers["x-dev-token"] as string) ||
+      "";
+    if (token !== DEV_TOKEN) {
+      res.status(401).send("Unauthorized");
+      return;
+    }
 
-    const apiKey = MOLLIE_API_KEY();
-    if (!apiKey) return res.status(500).json({ ok:false, error:"SERVER_MISSING_MOLLIE_KEY" });
+    const parsed = SimPayload.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json(parsed.error.flatten());
+      return;
+    }
+    const { orderId, email, productId, paymentId } = parsed.data;
 
-    const amountStr = (Number(amountEur) > 0 ? Number(amountEur).toFixed(2) : "1.00");
-    const mollieClient = mollie();
+    // Order aanmaken indien niet bestaat
+    const orderRef = db.collection("orders").doc(orderId);
+    const snap = await orderRef.get();
+    if (!snap.exists) {
+      await orderRef.set({
+        status: "open",
+        email,
+        productId,
+        amount: 3500,
+        currency: "EUR",
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
 
-    const payment: any = await mollieClient.payments.create({
-      amount: { currency: "EUR", value: amountStr },
-      description: description || "Zisa PRO toegang",
-      redirectUrl: redirectUrl || "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/",
-      webhookUrl: `${req.protocol}://${req.get("host")}/payments/webhook`,
-      metadata: { uid, email },
-    });
+    const emailKey = email.trim().toLowerCase();
+    // entitlement eerst zetten/verlengen → einddatum meenemen in mail
+    const newExp = await upsertEntitlementForEmail(emailKey, orderId);
 
-    await db.collection("payments").doc(payment.id).set({
-      uid, email, status: payment.status, amount: amountStr,
-      createdAt: now(), processed: false,
-    });
+    const fakePaymentId = paymentId || `test_${randomUUID()}`;
+    const result = await updateOrderAfterPaid(orderId, fakePaymentId, email, productId, newExp);
 
-    return res.json({ ok:true, paymentId: payment.id, checkoutUrl: payment?._links?.checkout?.href || null });
-  } catch (err:any) {
-    return res.status(500).json({ ok:false, error:"SERVER_ERROR", detail: err?.message ?? String(err) });
+    res.status(200).json({ ok: true, ...result, expiresAt: newExp.toMillis() });
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).send(`ERR: ${e.message || e}`);
   }
 });
 
-/** ===== Payments: webhook ===== */
-app.post("/payments/webhook", express.urlencoded({ extended: false }), async (req, res) => {
-  try {
-    const paymentId = (req.body?.id || req.query?.id) as string;
-    if (!paymentId) return res.status(400).send("missing id");
+// ---------- Mollie webhook ----------
+export const mollieWebhook = onRequest(
+  { region: REGION, secrets: [MOLLIE_API_KEY], cors: true },
+  async (req, res) => {
+    try {
+      if (req.method !== "POST") {
+        res.status(405).send("Method Not Allowed");
+        return;
+      }
 
-    const apiKey = MOLLIE_API_KEY();
-    if (!apiKey) return res.status(500).send("missing mollie key");
+      const paymentId = (req.body?.id as string) || (req.body?.paymentId as string) || (req.query["id"] as string);
+      if (!paymentId) {
+        res.status(400).send("Missing payment id");
+        return;
+      }
 
-    const mollieClient = mollie();
-    const payment: any = await mollieClient.payments.get(paymentId);
+      const payment = await getMolliePayment(paymentId, MOLLIE_API_KEY.value());
 
-    const docRef = db.collection("payments").doc(payment.id);
-    const snap = await docRef.get();
-    const prev = snap.exists ? (snap.data() as any) : {};
+      // metadata bij aanmaken betaling meesturen:
+      // { orderId, email, productId, userId? }
+      const orderId = payment?.metadata?.orderId || payment?.orderId || payment?.metadata?.order_id;
+      const email = payment?.metadata?.email || payment?.metadata?.customerEmail;
+      const userId = payment?.metadata?.userId || null;
+      const productId = payment?.metadata?.productId || payment?.description || "unknown";
 
-    await docRef.set({ ...(prev||{}), status: payment.status, updatedAt: now() }, { merge: true });
+      if (!orderId || !email) throw new Error("Missing orderId or email in payment.metadata");
 
-    if ((payment.status === "paid" || payment.status === "authorized") && !prev?.processed) {
-      const uid = payment?.metadata?.uid as string;
-      const email = payment?.metadata?.email as string;
+      if (payment.status === "paid") {
+        let newExp: Timestamp;
+        if (userId) {
+          newExp = await upsertEntitlementForUserId(userId, orderId);
+        } else {
+          const emailKey = String(email).trim().toLowerCase();
+          newExp = await upsertEntitlementForEmail(emailKey, orderId);
+        }
 
-      if (!isValidUid(uid) || !email) {
-        await docRef.set({ ...(prev||{}), processed: true, processError: "missing uid/email" }, { merge: true });
+        await updateOrderAfterPaid(orderId, payment.id, email, productId, newExp);
       } else {
-        const pepper = OTP_PEPPER();
-        if (!pepper) throw new Error("OTP_PEPPER missing");
-
-        // ►►► LICENTIE ACTIVEREN
-        await db.collection(LICENSES_COL).doc(uid).set({
-          active: true, plan: "pro", paidAt: now()
-        }, { merge: true });
-
-        // OTP genereren + versturen
-        const code = generateOtp();
-        const hash = hashOtp(uid, code, pepper);
-        const expiresAt = now() + OTP_TTL_MS();
-        await db.collection("otp").doc(uid).set(
-          { uid, hash, issuedAt: now(), expiresAt, usedAt: null },
+        await db.collection("orders").doc(orderId).set(
+          { status: payment.status, updatedAt: FieldValue.serverTimestamp() },
           { merge: true }
         );
-
-        if (!initMailer()) throw new Error("SENDGRID_API_KEY missing");
-        await sendOtpEmail(email, code);
-
-        await docRef.set({ ...(prev||{}), processed: true, processedAt: now() }, { merge: true });
       }
+
+      res.status(200).send("OK");
+    } catch (e: any) {
+      console.error(e);
+      res.status(500).send(`ERR: ${e.message || e}`);
+    }
+  }
+);
+
+// ---------- Anti-delen laag ----------
+// /entitlements/{userId} -> { pro: true, maxDevices, expiresAt }
+// /entitlements_by_email/{emailLower}
+// /devices/{userId}_{deviceId} -> { userId, deviceId, createdAt, lastSeenAt, active }
+// /sessionCodes/{autoId} -> { userId, deviceId, code, issuedAt, expiresAt, used }
+
+export const registerDevice = onCall({ region: REGION }, async (req) => {
+  const ctx = req.auth;
+  if (!ctx?.uid) throw new Error("UNAUTHENTICATED");
+  const { deviceId } = (req.data || {}) as { deviceId?: string };
+  if (!deviceId || typeof deviceId !== "string" || deviceId.length < 8) {
+    throw new Error("INVALID_ARGUMENT: deviceId");
+  }
+
+  // 1) entitlement op userId?
+  const ent = await db.collection("entitlements").doc(ctx.uid).get();
+
+  let pro = ent.exists && ent.get("pro") === true;
+  let maxDevices = ent.exists ? (ent.get("maxDevices") ?? DEFAULT_MAX_DEVICES) : DEFAULT_MAX_DEVICES;
+  let exp: Timestamp | null = ent.exists ? (ent.get("expiresAt") as Timestamp | null) : null;
+
+  // 2) of tijdelijk entitlement op e-mail (als u e-mail login gebruikt)
+  if (!pro && req.auth?.token?.email) {
+    const emailKey = String(req.auth.token.email).trim().toLowerCase();
+    const byMail = await db.collection("entitlements_by_email").doc(emailKey).get();
+    const mailPro = byMail.exists && byMail.get("pro") === true;
+    const mailMax = byMail.exists ? (byMail.get("maxDevices") ?? DEFAULT_MAX_DEVICES) : DEFAULT_MAX_DEVICES;
+    const mailExp = byMail.exists ? (byMail.get("expiresAt") as Timestamp | null) : null;
+
+    if (mailPro) {
+      pro = true;
+      maxDevices = mailMax;
+      exp = mailExp;
+      // Claim naar entitlements/{uid}
+      await db.collection("entitlements").doc(ctx.uid).set(
+        { pro: true, maxDevices, claimedFromEmail: emailKey, expiresAt: mailExp ?? oneYearFrom(null), setAt: FieldValue.serverTimestamp() },
+        { merge: true }
+      );
+    }
+  }
+
+  const isExpired = !exp || exp.toMillis() <= Date.now();
+  if (!pro || isExpired) {
+    return { ok: false, reason: isExpired ? "EXPIRED_SUBSCRIPTION" : "NO_PRO", expiresAt: exp ? exp.toMillis() : null };
+  }
+
+  // apparaten tellen
+  const activeQuery = await db
+    .collection("devices")
+    .where("userId", "==", ctx.uid)
+    .where("active", "==", true)
+    .get();
+
+  const id = `${ctx.uid}_${deviceId}`;
+  const deviceRef = db.collection("devices").doc(id);
+  const current = await deviceRef.get();
+
+  if (!current.exists) {
+    if (activeQuery.size >= maxDevices) {
+      return { ok: false, reason: "DEVICE_LIMIT", maxDevices };
+    }
+    await deviceRef.set({
+      userId: ctx.uid,
+      deviceId,
+      createdAt: now(),
+      lastSeenAt: now(),
+      active: true,
+    });
+  } else {
+    await deviceRef.set({ lastSeenAt: now(), active: true }, { merge: true });
+  }
+
+  return { ok: true, maxDevices, expiresAt: exp!.toMillis() };
+});
+
+export const issueSessionCode = onCall({ region: REGION }, async (req) => {
+  const ctx = req.auth;
+  if (!ctx?.uid) throw new Error("UNAUTHENTICATED");
+  const { deviceId } = (req.data || {}) as { deviceId?: string };
+  if (!deviceId) throw new Error("INVALID_ARGUMENT: deviceId");
+
+  // entitlement check + vervaldatum
+  const ent = await db.collection("entitlements").doc(ctx.uid).get();
+  const exp = ent.exists ? (ent.get("expiresAt") as Timestamp | null) : null;
+  if (!ent.exists || ent.get("pro") !== true || !exp || exp.toMillis() <= Date.now()) {
+    return { ok: false, reason: (!exp || exp.toMillis() <= Date.now()) ? "EXPIRED_SUBSCRIPTION" : "NO_PRO" };
+  }
+
+  // device check
+  const deviceDoc = await db.collection("devices").doc(`${ctx.uid}_${deviceId}`).get();
+  if (!deviceDoc.exists || deviceDoc.get("active") !== true) {
+    return { ok: false, reason: "DEVICE_NOT_REGISTERED" };
+  }
+
+  // invalideer oude ongebruikte codes
+  const old = await db
+    .collection("sessionCodes")
+    .where("userId", "==", ctx.uid)
+    .where("deviceId", "==", deviceId)
+    .where("used", "==", false)
+    .get();
+  const batch = db.batch();
+  old.forEach((d) => batch.update(d.ref, { used: true }));
+  await batch.commit();
+
+  // nieuwe code
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const rand = (n: number) => Array.from({ length: n }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
+  const code = `${rand(4)}-${rand(4)}-${rand(4)}`;
+
+  const expiresAt = Timestamp.fromMillis(Date.now() + 15 * 60 * 1000); // 15 min
+
+  const docRef = await db.collection("sessionCodes").add({
+    userId: ctx.uid,
+    deviceId,
+    code,
+    issuedAt: now(),
+    expiresAt,
+    used: false,
+  });
+
+  return { ok: true, code, expiresAt: expiresAt.toMillis(), id: docRef.id };
+});
+
+// Voorbeeld: PRO-actie beveiligen met code-validatie (server-side)
+async function validateSessionCode(userId: string, deviceId: string, code: string) {
+  const q = await db
+    .collection("sessionCodes")
+    .where("userId", "==", userId)
+    .where("deviceId", "==", deviceId)
+    .where("code", "==", code)
+    .where("used", "==", false)
+    .limit(1)
+    .get();
+
+  if (q.empty) return { ok: false, reason: "INVALID_OR_USED" };
+
+  const doc = q.docs[0];
+  const data = doc.data();
+  const expired = (data.expiresAt as Timestamp).toMillis() < Date.now();
+  if (expired) {
+    await doc.ref.update({ used: true });
+    return { ok: false, reason: "EXPIRED" };
+  }
+
+  await doc.ref.update({ used: true }); // eenmalig
+  return { ok: true };
+}
+
+export const verifySessionCode = onRequest({ region: REGION, cors: true }, async (req, res) => {
+  try {
+    if (req.method !== "POST") {
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+    const { userId, deviceId, code } = req.body || {};
+    if (!userId || !deviceId || !code) {
+      res.status(400).send("Missing userId/deviceId/code");
+      return;
     }
 
-    return res.status(200).send("ok");
-  } catch (_err:any) {
-    return res.status(500).send("error");
+    const check = await validateSessionCode(String(userId), String(deviceId), String(code));
+    if (!check.ok) {
+      res.status(401).json(check);
+      return;
+    }
+    res.status(200).json({ ok: true });
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).send(`ERR: ${e.message || e}`);
   }
 });
 
-/** ===== Payments: status ophalen ===== */
-app.get("/payments/:id/status", async (req, res) => {
+// Voorbeeld-PRO-endpoint (laat zien hoe u server-side verifieert en dan pas iets doet)
+export const proDoSomething = onRequest({ region: REGION, cors: true }, async (req, res) => {
   try {
-    const paymentId = req.params.id;
-    const apiKey = MOLLIE_API_KEY();
-    if (!apiKey) return res.status(500).json({ ok:false, error:"SERVER_MISSING_MOLLIE_KEY" });
+    if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+    const { userId, deviceId, code, payload } = req.body || {};
+    if (!userId || !deviceId || !code) { res.status(400).send("Missing userId/deviceId/code"); return; }
 
-    const mollieClient = mollie();
-    const payment: any = await mollieClient.payments.get(paymentId);
-    return res.json({ ok:true, id: payment.id, status: payment.status });
-  } catch (err:any) {
-    return res.status(500).json({ ok:false, error:"SERVER_ERROR", detail: err?.message ?? String(err) });
+    const check = await validateSessionCode(String(userId), String(deviceId), String(code));
+    if (!check.ok) { res.status(401).json(check); return; }
+
+    await db.collection("pro_actions").add({ userId, deviceId, at: now(), payload: payload ?? null });
+    res.status(200).json({ ok: true, message: "PRO-actie uitgevoerd" });
+  } catch (e: any) {
+    console.error(e);
+    res.status(500).send(`ERR: ${e.message || e}`);
   }
 });
-
-export const api = functions.onRequest(
-  {
-    region: "europe-west1",
-    secrets: [
-      "OTP_PEPPER",
-      "DISPLAY_OTP",
-      "OTP_TTL_MS",
-      "OTP_MIN_INTERVAL_MS",
-      "SESSION_SECRET",
-      "SESSION_TTL_MS",
-      "MOLLIE_API_KEY",
-      "SENDGRID_API_KEY",
-      "SENDER_EMAIL",
-    ],
-  },
-  app
-);
