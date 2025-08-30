@@ -1,6 +1,8 @@
 {
   "projects": {
-    "default": "zisa-spelletjesmaker-pro"
-  }
+    "default": "zisa-spelletjesmaker-pro",
+    "zisa": "zisa-spelletjesmaker-pro"
+  },
+  "targets": {},
+  "etags": {}
 }
-
