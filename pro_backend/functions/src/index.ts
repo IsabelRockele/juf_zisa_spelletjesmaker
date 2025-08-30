@@ -1,5 +1,3 @@
-/* pro_backend/functions/src/index.ts */
-
 import * as admin from "firebase-admin";
 import { onCall, HttpsError, onRequest } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
@@ -158,14 +156,17 @@ async function queueEmail(
   invoicePath: string,
   factuurNummer: string
 ) {
-  const bucketName = bucket.name; // bv. zisa-spelletjesmaker-pro.appspot.com
+  const bucketName = bucket.name; // Naam van de bucket
   await db.collection(MAIL_COLLECTION).add({
     to: [email],
-    message: { subject, html },
+    message: {
+      subject,
+      html,
+    },
     attachments: [
       {
-        filename: `${factuurNummer}.pdf`,
-        path: `gs://${bucketName}/${invoicePath}`,
+        filename: `${factuurNummer}.pdf`, // Factuur als PDF bijlage
+        path: `gs://${bucketName}/${invoicePath}`, // Het pad naar de PDF in Firebase Storage
       },
     ],
   });
@@ -259,34 +260,36 @@ async function completeOrderById(orderId: string) {
   if (!snapshot.exists) return;
 
   const data = snapshot.data() as OrderData;
-  if (data.status === "betaald") return; // al afgewerkt
+  if (data.status === "betaald") return; // De bestelling is al verwerkt
 
   const email = data["E-mail"];
   const bedrag = data.aantal;
-  const label =
-    data.rang === "wachtlijst" ? "Zisa PRO – jaarlicentie (wachtlijst)" : "Zisa PRO – jaarlicentie";
+  const label = data.rang === "wachtlijst" ? "Zisa PRO – jaarlicentie (wachtlijst)" : "Zisa PRO – jaarlicentie";
 
-  // Factuurnummer & PDF
+  // Genereer factuurnummer en upload de factuur
   const factuurNummer = await volgendeFactuurnummer();
   const invoicePath = await maakEnUploadFactuur(orderId, factuurNummer, email, label, bedrag);
 
-  // Password-resetlink
+  // Reset wachtwoordlink genereren
   const resetLink = await admin.auth().generatePasswordResetLink(email);
 
-  // E-mail (HTML)
+  // E-mailtekst voor de gebruiker
   const html = `
-<p>Beste,</p>
-<p>Bedankt voor uw aankoop van <strong>${label}</strong>.</p>
-<p>U kunt uw wachtwoord instellen via deze link:<br>
-  <a href="${resetLink}">${resetLink}</a>
-</p>
-<p>In de bijlage vindt u uw factuur (<strong>${factuurNummer}</strong>).</p>
-<p>Vriendelijke groeten,<br/>Juf Zisa</p>`;
+    <p>Beste,</p>
+    <p>Bedankt voor je aankoop van <strong>${label}</strong>.</p>
+    <p>Je kunt nu je wachtwoord instellen via deze link:<br>
+      <a href="${resetLink}">${resetLink}</a>
+    </p>
+    <p>In de bijlage vindt je jouw factuur. Je kunt de app altijd openen via deze link: <br>
+      <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/">Open Zisa PRO</a>
+    </p>
+    <p>Vriendelijke groeten,<br/>Juf Zisa</p>
+  `;
 
-  // Mail in wachtrij zetten
-  await queueEmail(email, `Zisa PRO – licentie & factuur ${factuurNummer}`, html, invoicePath, factuurNummer);
+  // Verstuur e-mail met factuur als bijlage
+  await queueEmail(email, `Jouw factuur voor ${label}`, html, invoicePath, factuurNummer);
 
-  // Order bijwerken
+  // Update de orderstatus naar 'betaald'
   await ref.set(
     {
       factuurnummer: factuurNummer,
@@ -436,3 +439,4 @@ export const devSimulatePaid = onCall({ region: REGION }, async (req) => {
 
   return { ok: true, orderId: orderRef.id, paymentId, tier };
 });
+
