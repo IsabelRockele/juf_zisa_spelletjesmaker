@@ -2,84 +2,90 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pre-sale: Zisa PRO voor wachtlijst (€35/jaar)</title>
-  <meta http-equiv="Cache-Control" content="no-store" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Zisa PRO – Wachtlijst (35 €)</title>
   <style>
-    :root { --bg:#f7faf9; --card:#fff; --txt:#0f172a; --muted:#475569; --btn:#111827; }
-    body{font-family:system-ui,Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100dvh;margin:0;background:var(--bg)}
-    .card{max-width:720px;width:100%;background:var(--card);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:24px}
-    h1{margin:.2rem 0 1rem 0;color:var(--txt);font-size:2rem}
-    p{color:var(--muted);margin:.4rem 0 1rem}
-    label{font-weight:600;display:block;margin:.6rem 0 .25rem;color:var(--txt)}
-    input[type=email]{width:100%;padding:.8rem;border:1px solid #d1d5db;border-radius:.6rem;font-size:1rem}
-    .row{display:flex;gap:.8rem;align-items:center;margin-top:1rem;flex-wrap:wrap}
-    button{padding:.8rem 1.1rem;border-radius:.6rem;border:1px solid #0f1729;background:var(--btn);color:#fff;cursor:pointer;font-weight:700}
-    button[disabled]{opacity:.65;cursor:not-allowed}
-    .muted{color:var(--muted);text-decoration:none}
-    .price{display:inline-block;background:#dcfce7;color:#14532d;border-radius:.6rem;padding:.25rem .6rem;font-weight:700}
-    .err{color:#b91c1c;margin-top:.6rem;min-height:1.2em}
+    :root { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { background:#f7faf9; margin:0; display:grid; place-items:center; min-height:100dvh; }
+    .card { width:min(680px,92vw); background:#fff; border:1px solid #e5e7eb; border-radius:16px; box-shadow:0 10px 24px rgba(0,0,0,.06); padding:24px 20px; }
+    h1 { margin:0 0 8px; font-size:1.4rem; }
+    p.lead { margin:0 0 14px; color:#334155; }
+    label { display:block; margin:.6rem 0 .3rem; }
+    input[type=email]{ width:100%; padding:.7rem .8rem; border:1px solid #cbd5e1; border-radius:12px; font-size:1rem; }
+    button{ margin-top:12px; padding:.75rem 1rem; border:0; border-radius:12px; background:#111827; color:#fff; font-weight:600; cursor:pointer; }
+    button[disabled]{ opacity:.6; cursor:not-allowed; }
+    .note{ background:#f1f5f9; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; font-size:.95rem; color:#334155; }
+    #err{ color:#b91c1c; margin-top:8px; white-space:pre-wrap; }
+    #ok{ color:#065f46; margin-top:8px; }
+    .foot{ margin-top:12px; font-size:.9rem; color:#475569; }
   </style>
 </head>
 <body>
-  <main class="card" role="main">
+  <main class="card">
     <h1>Zisa PRO – Wachtlijst</h1>
-    <p><span class="price">€35,00 / jaar (pre-sale)</span></p>
-    <p>Deze pagina is enkel bedoeld voor wachtlijst-geïnteresseerden. Vul uw e-mailadres (hetzelfde als op de wachtlijst) in.</p>
+    <p class="lead">Als uw e-mailadres op de wachtlijst staat, betaalt u <strong>€35</strong>. Anders is de prijs <strong>€40</strong>.</p>
+    <div class="note">
+      <strong>Let op:</strong> de wachtlijstkorting is <strong>7 dagen geldig</strong> vanaf uw uitnodiging. Niet (meer) op de wachtlijst? Dan rekent de kassa automatisch €40 aan.
+    </div>
 
-    <label for="email">E-mail op de wachtlijst</label>
+    <label for="email">E-mailadres</label>
     <input id="email" type="email" placeholder="naam@school.be" autocomplete="email" required />
 
-    <div class="row">
-      <button id="buyBtn">Verder naar betaling (€35,00)</button>
-      <a class="muted" href="./">Annuleren</a>
-    </div>
-    <div id="msg" class="err" role="alert" aria-live="polite"></div>
+    <button id="buy">Ga naar veilige betaling</button>
+    <div id="err"></div>
+    <div id="ok"></div>
+
+    <p class="foot">Na betaling krijgt u een e-mail met een wachtwoordlink en uw factuur in bijlage (PDF).</p>
   </main>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
 
-    // 1) Firebase init – VUL HIER UW CONFIG IN
-    const firebaseConfig = {
-  apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-  authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-  projectId: "zisa-spelletjesmaker-pro",
-  storageBucket: "zisa-spelletjesmaker-pro.firebasestorage.app", // ok; we gebruiken Storage hier niet
-  messagingSenderId: "828063957776",
-  appId: "1:828063957776:web:8d8686b478846fe980db95",
-  measurementId: "G-9LHNLFHSXX" // optioneel, mag blijven staan
-};
-    const app = initializeApp(firebaseConfig);
-    const functions = getFunctions(app, "europe-west1");
+    const app = initializeApp({
+      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
+      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
+      projectId: "zisa-spelletjesmaker-pro",
+    });
+    const fns = getFunctions(app, "europe-west1");
+    const createPayment = httpsCallable(fns, "createPayment");
 
-    // 2) UI
-    const $ = (id)=>document.getElementById(id);
-    const btn = $("buyBtn"), msg = $("msg");
+    const $ = (id) => document.getElementById(id);
+    const emailEl = $("email");
+    const buyBtn = $("buy");
+    const errEl = $("err");
+    const okEl = $("ok");
 
-    // 3) Betaalflow – server bepaalt prijs obv wachtlijst
-    btn.addEventListener("click", async () => {
-      msg.textContent = "";
-      const email = $("email").value.trim().toLowerCase();
-      if (!email) { msg.textContent = "Vul uw e-mailadres in."; return; }
-      btn.disabled = true;
+    function validEmail(s) {
+      return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
+    }
+
+    buyBtn.addEventListener("click", async () => {
+      errEl.textContent = "";
+      okEl.textContent = "";
+      const email = (emailEl.value || "").trim().toLowerCase();
+      if (!validEmail(email)) {
+        errEl.textContent = "Geef een geldig e-mailadres in.";
+        emailEl.focus();
+        return;
+      }
+      buyBtn.disabled = true;
+      buyBtn.textContent = "Bezig…";
       try {
-        const createPayment = httpsCallable(functions, "createPayment");
-        const { data } = await createPayment({ email });
-        if (data?.checkoutUrl) {
-          location.assign(data.checkoutUrl);
-        } else {
-          msg.textContent = "Geen checkout-URL ontvangen. Probeer later opnieuw.";
-        }
+        const resp = await createPayment({ email });
+        const data = resp?.data || {};
+        if (!data.checkoutUrl) throw new Error("Kon geen betaal-URL ontvangen.");
+        okEl.textContent = "Doorschakelen naar veilige betaalpagina…";
+        location.href = data.checkoutUrl;
       } catch (e) {
+        errEl.textContent = "Er ging iets mis. Probeer later opnieuw of mail naar zebrapost@jufzisa.be.";
         console.error(e);
-        // In de browser is dit een FirebaseError: e.code en e.message zijn beschikbaar
-        msg.textContent = (e && e.message) ? e.message : "Er ging iets mis. Probeer opnieuw.";
       } finally {
-        btn.disabled = false;
+        buyBtn.disabled = false;
+        buyBtn.textContent = "Ga naar veilige betaling";
       }
     });
   </script>
 </body>
 </html>
+
