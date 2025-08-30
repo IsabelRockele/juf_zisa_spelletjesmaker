@@ -3,7 +3,9 @@
   "private": true,
   "type": "commonjs",
   "main": "lib/index.js",
-  "engines": { "node": "20" },
+  "engines": {
+    "node": "20"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib",
@@ -21,5 +23,3 @@
     "typescript": "^5.5.4"
   }
 }
-
-
