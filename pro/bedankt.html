@@ -19,26 +19,10 @@
 <body>
   <main class="card">
     <h1>Bedankt voor uw betaling</h1>
-    <p>Uw betaling werd ontvangen. Uw PRO-licentie wordt nu automatisch geactiveerd. U ontvangt zo dadelijk een e-mail met <strong>“Wachtwoord instellen”</strong> en de link naar de app.</p>
-    <p id="oidWrap" style="display:none">Bestelnummer: <span id="oid" class="oid"></span></p>
+    <p>Uw betaling is succesvol ontvangen. Uw PRO-licentie wordt nu geactiveerd. Binnen enkele momenten ontvangt u een e-mail met daarin de instructies om uw wachtwoord in te stellen en de link naar de app.</p>
 
-    <p>Ga verder:</p>
-    <div class="row">
-      <a class="button" href="./index.html">Inloggen</a>
-      <a class="button" href="./app.html">Open Zisa PRO</a>
-    </div>
-
-    <p style="margin-top:1rem">Werkt iets nog niet meteen? Geef het enkele seconden: de licentie-activatie gebeurt via de betalingswebhook.</p>
+    <p style="margin-top:1rem">Werkt iets nog niet meteen? Geef het enkele seconden: de licentie-activatie wordt via de betalingswebhook verwerkt.</p>
   </main>
-
-  <script>
-    // Toon het orderId (oid) uit de URL als referentie
-    const params = new URLSearchParams(location.search);
-    const oid = params.get('oid');
-    if (oid) {
-      document.getElementById('oid').textContent = oid;
-      document.getElementById('oidWrap').style.display = 'block';
-    }
-  </script>
 </body>
 </html>
+
