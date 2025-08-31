@@ -3,6 +3,7 @@
    - Webhook (idempotent) → licentie +1 jaar, mail met reset-link + app-link + PDF-factuur
    - Device-callables (limiet 2)
    - Access-check callable (guard.js)
+   - CORS + alias: /createPaymentKoop én /createPayment (voor oudere front-ends)
 */
 
 import { onRequest, onCall, HttpsError } from "firebase-functions/v2/https";
@@ -22,16 +23,23 @@ const auth = getAuth();
 
 // ================== CONSTANTEN ==================
 const REGION = "europe-west1";
-const FRONTEND_ORIGIN = "https://isabelrockele.github.io";
-const FRONTEND_REPO = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/index.html";
 
-// ► App-link in mail (uw gevraagde URL):
+// Frontend origins (CORS)
+const ALLOWED_ORIGINS = [
+  "https://isabelrockele.github.io", // productie (GitHub Pages)
+  // onderstaande 2 enkel gebruiken als u lokaal wil testen:
+  "http://127.0.0.1:5500",
+  "http://localhost:5500",
+];
+
+const FRONTEND_REPO = "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/index.html";
+// ► App-link in mail (zoals gevraagd):
 const APP_URL = `${FRONTEND_REPO}/pro/`;
-const LOGIN_URL = `${FRONTEND_REPO}/pro/index.html`;
+
 const MAIL_COLLECTION = "post";
 
 // ► Verkoopgegevens (factuurkop)
-const SELLER_NAME  = "Juf Zisa";
+const SELLER_NAME = "Juf Zisa";
 const SELLER_EMAIL = "zebrapost@jufzisa.be";
 const SELLER_ADDR1 = "Maasfortbaan 108";
 const SELLER_ADDR2 = "2500 Lier";
@@ -47,8 +55,10 @@ const ENTITLEMENT_ID = "zisa-pro-1y";
 const MOLLIE_API_URL = "https://api.mollie.com/v2";
 
 // ================== HULPFUNCTIES ==================
-function setCors(res: any) {
-  res.set("Access-Control-Allow-Origin", FRONTEND_ORIGIN);
+function setCors(res: any, origin?: string) {
+  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  res.set("Access-Control-Allow-Origin", allow);
+  res.set("Vary", "Origin");
   res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 }
@@ -311,11 +321,11 @@ async function mollieGetPayment(id: string) {
   return await r.json();
 }
 
-// ================== HTTP ENDPOINTS ==================
-export const createPaymentKoop = onRequest({ region: REGION }, async (req: any, res: any) => {
-  setCors(res);
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  if (req.method !== "POST") { res.set("Allow", "POST, OPTIONS"); return res.status(405).send("Method Not Allowed"); }
+// ================== HANDLERS (los) ==================
+const handleCreatePaymentKoop = async (req: any, res: any) => {
+  setCors(res, req.headers.origin as string | undefined);
+  if (req.method === "OPTIONS") return res.status(204).send(""); // preflight OK
+  if (req.method !== "POST") { res.set("Allow","POST, OPTIONS"); return res.status(405).send("Method Not Allowed"); }
 
   const email = (req.body?.email || "").toString().trim().toLowerCase();
   if (!email) return res.status(400).json({ error: "email verplicht" });
@@ -337,12 +347,12 @@ export const createPaymentKoop = onRequest({ region: REGION }, async (req: any, 
   await setPaymentId(orderId, payment.id);
   const checkoutUrl = payment._links?.checkout?.href;
   return res.status(200).json({ checkoutUrl, orderId, paymentId: payment.id });
-});
+};
 
-export const createPaymentWaitlist = onRequest({ region: REGION }, async (req: any, res: any) => {
-  setCors(res);
-  if (req.method === "OPTIONS") return res.status(204).send("");
-  if (req.method !== "POST") { res.set("Allow", "POST, OPTIONS"); return res.status(405).send("Method Not Allowed"); }
+const handleCreatePaymentWaitlist = async (req: any, res: any) => {
+  setCors(res, req.headers.origin as string | undefined);
+  if (req.method === "OPTIONS") return res.status(204).send(""); // preflight OK
+  if (req.method !== "POST") { res.set("Allow","POST, OPTIONS"); return res.status(405).send("Method Not Allowed"); }
 
   const email = (req.body?.email || "").toString().trim().toLowerCase();
   if (!email) return res.status(400).json({ error: "email verplicht" });
@@ -372,7 +382,12 @@ export const createPaymentWaitlist = onRequest({ region: REGION }, async (req: a
   await setPaymentId(orderId, payment.id);
   const checkoutUrl = payment._links?.checkout?.href;
   return res.status(200).json({ checkoutUrl, orderId, paymentId: payment.id });
-});
+};
+
+// ================== HTTP EXPORTS (incl. alias) ==================
+export const createPaymentKoop     = onRequest({ region: REGION }, handleCreatePaymentKoop);
+export const createPayment         = onRequest({ region: REGION }, handleCreatePaymentKoop); // ← alias voor oude front-ends
+export const createPaymentWaitlist = onRequest({ region: REGION }, handleCreatePaymentWaitlist);
 
 export const mollieWebhook = onRequest({ region: REGION }, async (req: any, res: any) => {
   if (req.method !== "POST") { res.set("Allow", "POST"); return res.status(405).send("Method Not Allowed"); }
@@ -390,7 +405,7 @@ export const mollieWebhook = onRequest({ region: REGION }, async (req: any, res:
   }
 });
 
-// Dev/test helper (privé gebruiken)
+// ================== Dev/test helper (privé gebruiken) ==================
 export const devSimulatePaid = onRequest({ region: REGION }, async (req: any, res: any) => {
   const paymentId = (req.query.paymentId || req.body?.paymentId || "").toString();
   const source = (req.query.source || req.body?.source || "koop").toString();
@@ -417,6 +432,7 @@ export const registerDevice = onCall({ region: REGION, enforceAppCheck: true }, 
 
   const userDevicesRef = db.collection("users").doc(uid).collection("devices");
 
+  // idempotent
   const existing = await userDevicesRef.where("deviceId", "==", deviceId).limit(1).get();
   if (!existing.empty) return { ok: true };
 
