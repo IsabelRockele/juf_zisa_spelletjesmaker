@@ -1,15 +1,17 @@
 // pro/js/guard.js
-// Centrale PRO-guard voor alle spelpagina's in /pro.
+// Centrale PRO-guard voor /pro/* pagina’s.
 // - Controleert login
-// - Registreert stabiele deviceId via Cloud Function registerDevice
-// - Checkt licentie (entitlement + vervaldatum) via getAccessStatus
-// - Stuurt bij apparaatlimiet meteen naar apparaten.html
+// - Initieert App Check (v3)
+// - Registreert stabiele deviceId via callable registerDevice
+// - Checkt licentie via getAccessStatus
+// - Stuurt bij limiet naar apparaten.html, zonder licentie naar koop.html
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
-// Fallback: als device-id.js niet geladen werd, zorg toch voor een stabiele ID.
+// --- Stabiele deviceId (fallback als device-id.js ontbreekt) -----------------
 (function ensureDeviceId(){
   if (window.ZisaDevice && typeof window.ZisaDevice.getOrCreateDeviceId === "function") return;
   window.ZisaDevice = {
@@ -30,6 +32,7 @@ import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/
   };
 })();
 
+// --- Firebase config ----------------------------------------------------------
 const firebaseConfig = {
   apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
   authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
@@ -40,75 +43,68 @@ const firebaseConfig = {
   measurementId: "G-9LHNLFHSXX"
 };
 
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const fns  = getFunctions(app, "europe-west1");
 
-function goLogin(){ window.location.href = "./index.html"; }
-function goApp(reason){
-  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
-  window.location.href = "./app.html" + q;
-}
-function goDevices(){ window.location.href = "./apparaten.html"; }
-function goKoop(reason){
-  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
-  window.location.href = "./koop.html" + q;
-}
+// --- App Check (verplicht voor callables met enforceAppCheck: true) -----------
+// VERVANG HIERONDER door jouw reCAPTCHA v3 site key uit Firebase App Check.
+initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider("6Lf5e7krAAAAANpJ4drwF380rsbSr4WlsuOtYMnT"),
+  isTokenAutoRefreshEnabled: true,
+});
 
+// --- Navigatie helpers --------------------------------------------------------
+function go(path, reason){
+  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
+  window.location.href = path + q;
+}
+const goLogin    = () => go("./index.html");
+const goApp      = (r) => go("./app.html", r);
+const goDevices  = () => go("./apparaten.html");
+const goKoop     = (r) => go("./koop.html", r);
+
+// --- Guard -------------------------------------------------------------------
 onAuthStateChanged(auth, async (user) => {
   if (!user) { goLogin(); return; }
 
   try {
-    // 1) Apparaat registreren (idempotent)
+    // 1) Apparaat registreren (idempotent in backend)
     const deviceId = window.ZisaDevice.getOrCreateDeviceId();
     const registerDevice = httpsCallable(fns, "registerDevice");
     try {
-      const reg = await registerDevice({ deviceId });
-      // oudere versies konden {ok:false, reason} teruggeven; hou dit aan boord:
-      if (reg?.data && reg.data.ok === false && reg.data.reason === "DEVICE_LIMIT") {
-        goDevices(); return;
-      }
+      await registerDevice({ deviceId });
     } catch (e) {
-      // Nieuwere backend gooit HttpsError('resource-exhausted') bij limiet
-      if (e && e.code === "resource-exhausted") { goDevices(); return; }
-      // andere fouten → naar app met reden
+      // Bij limiet gooit backend 'resource-exhausted'
+      if (e?.code === "resource-exhausted") { goDevices(); return; }
       console.error("registerDevice error:", e);
-      goApp("guard_register_error");
-      return;
+      goApp("device_register_error"); return;
     }
 
-    // 2) Licentie en vervaldatum controleren (callable)
+    // 2) PRO-status ophalen
+    const getAccessStatus = httpsCallable(fns, "getAccessStatus");
     try {
-      const getAccessStatus = httpsCallable(fns, "getAccessStatus");
-      const { data: access } = await getAccessStatus({});
-      if (!access || access.allowed !== true) {
-        // redenen: 'expired', 'no_license', ...
-        const reason = access?.reason || "no_access";
-        // bij verlopen of geen licentie → naar koop
-        goKoop(reason);
+      const res  = await getAccessStatus({});
+      const data = res?.data || {};
+      if (data.allowed) {
+        // Laat de pagina weten dat alles ok is
+        if (typeof window.onProReady === "function") {
+          window.onProReady({ user, expiresAt: data.expiresAt, limit: data.deviceLimit ?? 2 });
+        }
         return;
       }
-
-      // 3) Toegang verlenen
-      if (typeof window.onProReady === "function") {
-        // geef expiresAt (ISO) door indien beschikbaar
-        window.onProReady({ user, expiresAt: access.expiresAt || null, max: access.deviceLimit || 2 });
-      }
+      // Niet toegestaan → naar koop
+      goKoop(data?.reason || "no_access");
+      return;
     } catch (e) {
-      // Als callable nog niet bestaat (not-found) → backward compatible: laat voorlopig door
-      if (e && (e.code === "not-found" || e.message?.includes("function not found"))) {
-        console.warn("getAccessStatus niet gevonden; laat voorlopig door");
-        if (typeof window.onProReady === "function") window.onProReady({ user, expiresAt: null, max: 2 });
-      } else {
-        console.error("getAccessStatus error:", e);
-        goApp("license_check_error");
-      }
+      console.error("getAccessStatus error:", e);
+      goApp("license_check_error"); return;
     }
-
   } catch (err) {
     console.error("Guard error:", err);
     goApp("guard_error");
   }
 });
+
 
 
