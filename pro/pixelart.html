@@ -119,16 +119,18 @@
     </div>
 </div>
 
-<!-- Oude uitlogknop + logout-script verwijderd -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
 
-<!-- Projectscript (buiten /pro/) -->
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Projectscript (pas na de guard laden) -->
 <script src="../pixelart.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-  import { guardProPage } from "./guard.js";
-  await guardProPage();
-</script>
 </body>
 </html>
+
 
