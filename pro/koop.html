@@ -37,44 +37,49 @@
     <div id="msg" class="err" role="alert" aria-live="polite"></div>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
+  <script>
+    const ENDPOINTS = [
+      "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/createPaymentKoop",
+      // fallback als u een alias hebt aangemaakt:
+      "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/createPayment"
+    ];
 
-    // 1) Firebase init – VUL HIER UW CONFIG IN
-    const firebaseConfig = {
-  apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-  authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-  projectId: "zisa-spelletjesmaker-pro",
-  storageBucket: "zisa-spelletjesmaker-pro.firebasestorage.app", // ok; we gebruiken Storage hier niet
-  messagingSenderId: "828063957776",
-  appId: "1:828063957776:web:8d8686b478846fe980db95",
-  measurementId: "G-9LHNLFHSXX" // optioneel, mag blijven staan
-};
-    const app = initializeApp(firebaseConfig);
-    const functions = getFunctions(app, "europe-west1");
-
-    // 2) UI
     const $ = (id)=>document.getElementById(id);
-    const btn = $("buyBtn"), msg = $("msg");
+    const btn = $("buyBtn"), msg = $("msg"), emailEl = $("email");
 
-    // 3) Betaalflow – server bepaalt prijs (meestal €40)
+    function validEmail(s){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s); }
+
     btn.addEventListener("click", async () => {
       msg.textContent = "";
-      const email = $("email").value.trim().toLowerCase();
-      if (!email) { msg.textContent = "Vul uw e-mailadres in."; return; }
+      const email = (emailEl.value || "").trim().toLowerCase();
+      if (!validEmail(email)) { msg.textContent = "Geef een geldig e-mailadres in."; emailEl.focus(); return; }
+
       btn.disabled = true;
       try {
-        const createPayment = httpsCallable(functions, "createPayment");
-        const { data } = await createPayment({ email });
-        if (data?.checkoutUrl) {
+        let data = null, lastErr = null;
+        for (const url of ENDPOINTS) {
+          try {
+            const r = await fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ email })
+            });
+            if (!r.ok) { lastErr = await r.text(); continue; }
+            data = await r.json();
+            break;
+          } catch (e) {
+            lastErr = e?.message || String(e);
+          }
+        }
+        if (data && data.checkoutUrl) {
           location.assign(data.checkoutUrl);
         } else {
-          msg.textContent = "Geen checkout-URL ontvangen. Probeer later opnieuw.";
+          msg.textContent = "Kon geen betaal-URL ontvangen. Probeer later opnieuw.";
+          if (lastErr) console.error(lastErr);
         }
       } catch (e) {
         console.error(e);
-        msg.textContent = (e && e.message) ? e.message : "Er ging iets mis. Probeer opnieuw.";
+        msg.textContent = "Er ging iets mis. Probeer later opnieuw.";
       } finally {
         btn.disabled = false;
       }
@@ -82,6 +87,7 @@
   </script>
 </body>
 </html>
+
 
 
 
