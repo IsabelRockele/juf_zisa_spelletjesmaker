@@ -2,7 +2,8 @@
 // Centrale PRO-guard voor alle spelpagina's in /pro.
 // - Controleert login
 // - Registreert stabiele deviceId via Cloud Function registerDevice
-// - Verleent toegang of stuurt door (bij apparaatlimiet meteen naar apparaten.html)
+// - Checkt licentie (entitlement + vervaldatum) via getAccessStatus
+// - Stuurt bij apparaatlimiet meteen naar apparaten.html
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -48,29 +49,60 @@ function goApp(reason){
   const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
   window.location.href = "./app.html" + q;
 }
+function goDevices(){ window.location.href = "./apparaten.html"; }
+function goKoop(reason){
+  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
+  window.location.href = "./koop.html" + q;
+}
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) { goLogin(); return; }
 
   try {
+    // 1) Apparaat registreren (idempotent)
     const deviceId = window.ZisaDevice.getOrCreateDeviceId();
     const registerDevice = httpsCallable(fns, "registerDevice");
-    const { data } = await registerDevice({ deviceId });
-
-    if (!data?.ok) {
-      // ✅ Nieuw: bij apparaatlimiet meteen naar beheerpagina leiden
-      if (data.reason === "DEVICE_LIMIT") {
-        window.location.href = "./apparaten.html";
-        return;
+    try {
+      const reg = await registerDevice({ deviceId });
+      // oudere versies konden {ok:false, reason} teruggeven; hou dit aan boord:
+      if (reg?.data && reg.data.ok === false && reg.data.reason === "DEVICE_LIMIT") {
+        goDevices(); return;
       }
-      // Voor alle andere redenen naar app.html met reden
-      goApp(data?.reason || "unknown");
+    } catch (e) {
+      // Nieuwere backend gooit HttpsError('resource-exhausted') bij limiet
+      if (e && e.code === "resource-exhausted") { goDevices(); return; }
+      // andere fouten → naar app met reden
+      console.error("registerDevice error:", e);
+      goApp("guard_register_error");
       return;
     }
 
-    // ✅ Toegang verlenen: pagina mag starten.
-    if (typeof window.onProReady === "function") {
-      window.onProReady({ user, expiresAt: data.expiresAt, max: data.max ?? 2 });
+    // 2) Licentie en vervaldatum controleren (callable)
+    try {
+      const getAccessStatus = httpsCallable(fns, "getAccessStatus");
+      const { data: access } = await getAccessStatus({});
+      if (!access || access.allowed !== true) {
+        // redenen: 'expired', 'no_license', ...
+        const reason = access?.reason || "no_access";
+        // bij verlopen of geen licentie → naar koop
+        goKoop(reason);
+        return;
+      }
+
+      // 3) Toegang verlenen
+      if (typeof window.onProReady === "function") {
+        // geef expiresAt (ISO) door indien beschikbaar
+        window.onProReady({ user, expiresAt: access.expiresAt || null, max: access.deviceLimit || 2 });
+      }
+    } catch (e) {
+      // Als callable nog niet bestaat (not-found) → backward compatible: laat voorlopig door
+      if (e && (e.code === "not-found" || e.message?.includes("function not found"))) {
+        console.warn("getAccessStatus niet gevonden; laat voorlopig door");
+        if (typeof window.onProReady === "function") window.onProReady({ user, expiresAt: null, max: 2 });
+      } else {
+        console.error("getAccessStatus error:", e);
+        goApp("license_check_error");
+      }
     }
 
   } catch (err) {
@@ -78,4 +110,5 @@ onAuthStateChanged(auth, async (user) => {
     goApp("guard_error");
   }
 });
+
 
