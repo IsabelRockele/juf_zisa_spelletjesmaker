@@ -162,15 +162,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    <!-- Oude logout/guard verwijderd -->
+    <!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
+    <!-- 1) Stabiele device-id (localStorage + cookie) -->
+    <script src="./js/device-id.js"></script>
 
-    <!-- Projectscript (buiten /pro/) -->
+    <!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+    <script type="module" src="./js/guard.js"></script>
+
+    <!-- 3) Projectscript (pas na de guard laden) -->
     <script src="../geheimeboodschap.js"></script>
-
-    <!-- Uniforme Firebase-guard -->
-    <script type="module">
-        import { guardProPage } from "./guard.js";
-        await guardProPage();
-    </script>
 </body>
 </html>
+
