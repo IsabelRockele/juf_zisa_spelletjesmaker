@@ -99,15 +99,11 @@
     </div>
 </div>
 
-<!-- Oude uitlogknop + logout-script verwijderd -->
+<!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
+<script src="./js/device-id.js"></script>
+<script type="module" src="./js/guard.js"></script>
 
+<!-- Paginascript NA de guard, eenmalig laden -->
 <script src="../rekencirkel.js"></script>
-
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-    import { guardProPage } from "./guard.js";
-    await guardProPage();
-</script>
 </body>
 </html>
-
