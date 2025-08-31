@@ -77,15 +77,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- Oude uitlogknop + logout-script verwijderd -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
 
-<!-- Projectscript (buiten /pro/) -->
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Uw eigen paginacode (pas na de guard laden) -->
 <script src="../lettertetris.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-  import { guardProPage } from "./guard.js";
-  await guardProPage();
-</script>
 </body>
 </html>
