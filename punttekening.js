@@ -537,9 +537,10 @@ canvas.addEventListener("mouseout", (event) => {
 
 // --- Helper functies ---
 
+// GECORRIGEERDE FUNCTIE:
 function applyGumToCanvas(x, y, size, form, targetCtx) {
     targetCtx.save();
-    targetCtx.globalCompositeOperation = 'destination-out'; // Gumt alleen de inhoud van deze laag
+    targetCtx.fillStyle = 'white';
     targetCtx.beginPath();
     if (form === "circle") {
         targetCtx.arc(x, y, size / 2, 0, 2 * Math.PI);
