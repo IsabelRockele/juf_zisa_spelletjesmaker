@@ -1,8 +1,9 @@
 ﻿{
   "functions": [
     {
-      "source": "pro_backend/functions",
+      "source": "pro_backend",
       "codebase": "default",
+      "runtime": "nodejs20",
       "ignore": [
         "node_modules",
         ".git",
@@ -16,8 +17,7 @@
     }
   ],
   "emulators": {
-    "functions": {
-      "port": 5001
-    }
+    "functions": { "port": 5001 }
   }
 }
+
