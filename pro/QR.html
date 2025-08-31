@@ -91,7 +91,14 @@
   </form>
 </div>
 
+<!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
+<script src="./js/device-id.js"></script>
+<script type="module" src="./js/guard.js"></script>
+
+<!-- Externe QR-bibliotheek -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+
+<!-- Paginascript: draait pas na guard -->
 <script>
   (function() {
     const urlEl = document.getElementById('url');
@@ -104,26 +111,97 @@
     const errEl = document.getElementById('error');
 
     const QUIET_ZONE = 4;
-    function validURL(value){ try { const v = value.trim(); if (!v) return false; const hasScheme = /^https?:\/\//i.test(v); const toTest = new URL(hasScheme ? v : `https://${v}`); return !!toTest.hostname; } catch { return false; } }
+    function validURL(value){
+      try {
+        const v = value.trim(); if (!v) return false;
+        const hasScheme = /^https?:\/\//i.test(v);
+        const toTest = new URL(hasScheme ? v : `https://${v}`);
+        return !!toTest.hostname;
+      } catch { return false; }
+    }
     function eccMap(level){ return { L:'L', M:'M', Q:'Q', H:'H' }[level] || 'M'; }
     function buildQR(text, ecc){ const qr = qrcode(0, eccMap(ecc)); qr.addData(text); qr.make(); return qr; }
-    function makeSVG(qr, pixelSize){ const count = qr.getModuleCount(); const totalModules = count + 2*QUIET_ZONE; const cell = Math.floor(pixelSize / totalModules) || 1; const size = totalModules * cell; const inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false }).replace('<svg', `<svg width="${size}" height="${size}"`).replace('</svg>', ''); const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`; const translate = QUIET_ZONE * cell; const wrapped = inner.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>'; const finalSVG = wrapped.replace(/<svg[^>]*>/, m => m + bg); const parser = new DOMParser(); return parser.parseFromString(finalSVG, "image/svg+xml").documentElement; }
-    function makeCanvasFromQR(qr, pixelSize){ const count = qr.getModuleCount(); const totalModules = count + 2*QUIET_ZONE; const cell = Math.floor(pixelSize / totalModules) || 1; const size = totalModules * cell; const cvs = document.createElement('canvas'); cvs.width = size; cvs.height = size; const ctx = cvs.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size); ctx.fillStyle = '#000000'; for (let r = 0; r < count; r++){ for (let c = 0; c < count; c++){ if (qr.isDark(r, c)){ const x = (c + QUIET_ZONE) * cell; const y = (r + QUIET_ZONE) * cell; ctx.fillRect(x, y, cell, cell); } } } return cvs; }
+    function makeSVG(qr, pixelSize){
+      const count = qr.getModuleCount();
+      const totalModules = count + 2*QUIET_ZONE;
+      const cell = Math.floor(pixelSize / totalModules) || 1;
+      const size = totalModules * cell;
+      const inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false })
+                       .replace('<svg', `<svg width="${size}" height="${size}"`)
+                       .replace('</svg>', '');
+      const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`;
+      const translate = QUIET_ZONE * cell;
+      const wrapped = inner.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>';
+      const finalSVG = wrapped.replace(/<svg[^>]*>/, m => m + bg);
+      const parser = new DOMParser();
+      return parser.parseFromString(finalSVG, "image/svg+xml").documentElement;
+    }
+    function makeCanvasFromQR(qr, pixelSize){
+      const count = qr.getModuleCount();
+      const totalModules = count + 2*QUIET_ZONE;
+      const cell = Math.floor(pixelSize / totalModules) || 1;
+      const size = totalModules * cell;
+      const cvs = document.createElement('canvas'); cvs.width = size; cvs.height = size;
+      const ctx = cvs.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
+      ctx.fillStyle = '#000000';
+      for (let r = 0; r < count; r++){
+        for (let c = 0; c < count; c++){
+          if (qr.isDark(r, c)){
+            const x = (c + QUIET_ZONE) * cell;
+            const y = (r + QUIET_ZONE) * cell;
+            ctx.fillRect(x, y, cell, cell);
+          }
+        }
+      }
+      return cvs;
+    }
+
     let currentSVG = null; let currentCanvas = null;
-    function makeQR(){ const raw = urlEl.value.trim(); if (!validURL(raw)){ errEl.textContent = 'Geef een geldige link op (bijv. https://voorbeeld.be).'; dlPNGBtn.disabled = true; dlSVGBtn.disabled = true; qrBox.innerHTML = ''; currentSVG = null; currentCanvas = null; return; } errEl.textContent = ''; const value = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`; const size = parseInt(sizeEl.value, 10); const ecc  = eccEl.value; const qr = buildQR(value, ecc); qrBox.innerHTML = ''; currentSVG = makeSVG(qr, Math.max(size, 320)); qrBox.appendChild(currentSVG); currentCanvas = makeCanvasFromQR(qr, size); dlPNGBtn.disabled = false; dlSVGBtn.disabled = false; }
-    function downloadPNG(){ if (!currentCanvas) return; const a = document.createElement('a'); a.href = currentCanvas.toDataURL('image/png'); a.download = 'qr-code.png'; document.body.appendChild(a); a.click(); a.remove(); }
-    function downloadSVG(){ if (!currentSVG) return; const svgStr = new XMLSerializer().serializeToString(currentSVG); const blob = new Blob([svgStr], { type: 'image/svg+xml' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'qr-code.svg'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
-    makeBtn.addEventListener('click', makeQR);
-    dlPNGBtn.addEventListener('click', downloadPNG);
-    dlSVGBtn.addEventListener('click', downloadSVG);
+
+    function makeQR(){
+      const raw = urlEl.value.trim();
+      if (!validURL(raw)){
+        errEl.textContent = 'Geef een geldige link op (bijv. https://voorbeeld.be).';
+        dlPNGBtn.disabled = true; dlSVGBtn.disabled = true;
+        qrBox.innerHTML = ''; currentSVG = null; currentCanvas = null;
+        return;
+      }
+      errEl.textContent = '';
+      const value = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+      const size = parseInt(sizeEl.value, 10);
+      const ecc  = eccEl.value;
+
+      const qr = buildQR(value, ecc);
+      qrBox.innerHTML = '';
+      currentSVG = makeSVG(qr, Math.max(size, 320));
+      qrBox.appendChild(currentSVG);
+      currentCanvas = makeCanvasFromQR(qr, size);
+      dlPNGBtn.disabled = false; dlSVGBtn.disabled = false;
+    }
+
+    function downloadPNG(){
+      if (!currentCanvas) return;
+      const a = document.createElement('a');
+      a.href = currentCanvas.toDataURL('image/png');
+      a.download = 'qr-code.png';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+
+    function downloadSVG(){
+      if (!currentSVG) return;
+      const svgStr = new XMLSerializer().serializeToString(currentSVG);
+      const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'qr-code.svg';
+      document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('make').addEventListener('click', makeQR);
+    document.getElementById('download-png').addEventListener('click', downloadPNG);
+    document.getElementById('download-svg').addEventListener('click', downloadSVG);
     urlEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); makeQR(); } });
   })();
-</script>
-
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-  import { guardProPage } from "./guard.js";
-  await guardProPage();
 </script>
 
 </body>
