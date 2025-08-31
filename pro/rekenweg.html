@@ -91,14 +91,11 @@
     </div>
 </div>
 
-<!-- Projectscript (buiten /pro/) -->
-<script src="../rekenweg.js"></script>
+<!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
+<script src="./js/device-id.js"></script>
+<script type="module" src="./js/guard.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-  import { guardProPage } from "./guard.js";
-  await guardProPage();
-</script>
+<!-- Paginascript NA de guard -->
+<script src="../rekenweg.js"></script>
 </body>
 </html>
-
