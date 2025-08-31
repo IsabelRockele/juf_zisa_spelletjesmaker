@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beheer apparaten – Zisa PRO</title>
+  <link rel="icon" href="../start_afbeeldingen/Zisa_spelgenerator-32.png" type="image/png">
+  <meta name="theme-color" content="#ffcf56">
+  <style>
+    body{margin:0;background:#fff4df;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    .wrap{max-width:900px;margin:30px auto;padding:0 16px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .card{background:#fff;border:1px solid #eee;border-radius:12px;padding:16px}
+    .pill{background:#fff;padding:6px 10px;border-radius:999px;border:1px solid #eee}
+    .btn{background:#ffd159;border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}
+    .btn:hover{filter:brightness(.97)}
+    .list{margin:0;padding:0;list-style:none}
+    .row{display:flex;gap:12px;align-items:center;justify-content:space-between;border-bottom:1px dashed #eee;padding:10px 0}
+    .id{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; font-size:.9rem;word-break:break-all}
+    .tag{font-size:.75rem;background:#eef;border-radius:6px;padding:3px 6px}
+    .warn{color:#b0413e}
+    .ok{color:#2e7d32}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="btn" href="./app.html">← Terug naar keuzemenu</a>
+    <span id="user-pill" class="pill">-</span>
+  </div>
+
+  <div class="card" id="panel">
+    <h2>Apparaten beheren</h2>
+    <p>U kunt maximaal <b>2 toestellen</b> gebruiken. Verwijder hieronder een oud toestel om ruimte te maken.</p>
+    <p class="ok">Huidig toestel-ID: <span id="currentId" class="id">-</span></p>
+    <ul id="list" class="list"></ul>
+    <p id="msg" class="warn"></p>
+  </div>
+</div>
+
+<script src="./js/device-id.js"></script>
+<script type="module">
+  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
+    authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
+    projectId: "zisa-spelletjesmaker-pro",
+    storageBucket: "zisa-spelletjesmaker-pro.firebasestorage.app",
+    messagingSenderId: "828063957776",
+    appId: "1:828063957776:web:8d8686b478846fe980db95",
+    measurementId: "G-9LHNLFHSXX"
+  };
+
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const fns  = getFunctions(app, "europe-west1");
+
+  const userPill  = document.getElementById("user-pill");
+  const listEl    = document.getElementById("list");
+  const currentEl = document.getElementById("currentId");
+  const msgEl     = document.getElementById("msg");
+
+  const currentId = window.ZisaDevice.getOrCreateDeviceId();
+  currentEl.textContent = currentId;
+
+  function row(deviceId){
+    const li = document.createElement("li");
+    li.className = "row";
+
+    const left = document.createElement("div");
+    left.innerHTML = `<span class="id">${deviceId}</span> ${deviceId === currentId ? '<span class="tag">dit toestel</span>' : ''}`;
+
+    const btn = document.createElement("button");
+    btn.className = "btn";
+    btn.textContent = "Verwijder";
+    btn.onclick = async () => {
+      if (!confirm("Dit toestel verwijderen?")) return;
+      btn.disabled = true;
+      try {
+        const removeDevice = httpsCallable(fns, "removeDevice");
+        await removeDevice({ deviceId });
+        await load();
+        msgEl.textContent = "";
+      } catch (e) {
+        console.error(e);
+        msgEl.textContent = "Verwijderen mislukt. Probeer opnieuw.";
+      } finally {
+        btn.disabled = false;
+      }
+    };
+
+    li.append(left, btn);
+    return li;
+  }
+
+  async function load(){
+    listEl.innerHTML = "";
+    const listDevices = httpsCallable(fns, "listDevices");
+    const { data } = await listDevices();
+    const devices = Array.isArray(data.devices) ? data.devices : [];
+    if (devices.length === 0) {
+      listEl.innerHTML = "<li>(Geen geregistreerde toestellen)</li>";
+      return;
+    }
+    devices.forEach((id) => listEl.appendChild(row(id)));
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "./index.html"; return; }
+    userPill.textContent = user.email || user.uid;
+    await load();
+  });
+</script>
+</body>
+</html>
