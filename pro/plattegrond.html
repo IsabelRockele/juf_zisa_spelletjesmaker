@@ -152,17 +152,21 @@
 
 <input type="file" id="json-file-input" accept=".json" style="display:none"/>
 
+<!-- Externe libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-<!-- Oude logout-script verwijderd -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
 
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Projectscript (pas na de guard laden) -->
 <script src="../plattegrond.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-    import { guardProPage } from "./guard.js";
-    await guardProPage();
-</script>
 </body>
 </html>
+
