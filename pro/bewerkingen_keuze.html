@@ -58,8 +58,6 @@
   <a href="./app.html" class="back-link">Keuzemenu</a>
 </header>
 
-<!-- (Overige inhoud/HTML van uw keuzescherm blijft hieronder zoals in uw bestand) -->
-
 <header>
   <h1>Generator voor Bewerkingen</h1>
 </header>
@@ -199,15 +197,19 @@
   </div>
 </div>
 
-<!-- JS-bestand ligt buiten /pro/, dus één map omhoog -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
+
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Uw eigen paginacode (pas na de guard laden) -->
 <script src="../bewerkingen_keuze.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-  import { guardProPage } from "./guard.js";
-  await guardProPage();
-</script>
 </body>
 </html>
+
 
 
