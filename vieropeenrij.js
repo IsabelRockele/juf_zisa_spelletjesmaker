@@ -82,11 +82,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function genereerPrintbarePagina(bordHTML) {
-        const printStyles = `<style>@page{size:A4 landscape;margin:1cm}html,body{height:100%;margin:0;padding:0;font-family:sans-serif;background-color:#eee}@media screen{.actie-balk{display:block;position:fixed;top:0;left:0;width:100%;padding:10px;text-align:center;background:#333;z-index:10;box-shadow:0 2px 5px rgba(0,0,0,.3)}.actie-balk button{font-size:16px;padding:10px 20px;border-radius:5px;border:none;background:#3498db;color:#fff;cursor:pointer;margin:0 5px}.actie-balk button#download-pdf-knop{background:#2ecc71}.actie-balk button:last-child{background:#95a5a6}body{display:flex;justify-content:center;align-items:center;box-sizing:border-box;padding-top:60px}}@media print{.actie-balk{display:none}body{background-color:transparent}*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}.bord-container{width:100%;height:100%;display:flex;justify-content:center;align-items:center}.vier-op-rij-bord{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,1fr);gap:8px;aspect-ratio:7/6;max-width:100%;max-height:100%;background-color:#005f73;padding:10px;border-radius:15px;border:5px solid #0a9396;box-sizing:border-box}.spel-vakje{position:relative;width:100%;height:100%;background-color:#e9d8a6;border-radius:50%;display:flex;justify-content:center;align-items:center}.spel-vakje .tekst{color:#333;font-weight:700;font-size:clamp(8pt,2.5vmin,14pt);text-align:center;word-break:break-word;padding:4px;box-sizing:border-box}</style>`;
+        // --- AANGEPASTE STYLES ---
+        const printStyles = `<style>
+            @page { size: A4 landscape; margin: 1cm }
+            html, body { height: 100%; margin: 0; padding: 0; font-family: sans-serif; background-color: #eee }
+            
+            /* Actiebalk (voor schermweergave) */
+            @media screen {
+                .actie-balk { display: block; position: fixed; top: 0; left: 0; width: 100%; padding: 10px; text-align: center; background: #333; z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,.3) }
+                .actie-balk button { font-size: 16px; padding: 10px 20px; border-radius: 5px; border: none; background: #3498db; color: #fff; cursor: pointer; margin: 0 5px }
+                .actie-balk button#download-pdf-knop { background: #2ecc71 }
+                .actie-balk button:last-child { background: #95a5a6 }
+                body { display: flex; justify-content: center; align-items: center; box-sizing: border-box; padding-top: 60px }
+            }
+            
+            /* Printweergave */
+            @media print {
+                .actie-balk { display: none }
+                body { background-color: transparent }
+                * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            }
+            
+            .bord-container { width: 100%; height: 100%; display: flex; justify-content: center; align-items: center }
+            .vier-op-rij-bord { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(6, 1fr); gap: 8px; aspect-ratio: 7 / 6; max-width: 100%; max-height: 100%; background-color: #005f73; padding: 10px; border-radius: 15px; border: 5px solid #0a9396; box-sizing: border-box }
+            .spel-vakje { position: relative; width: 100%; height: 100%; background-color: #e9d8a6; border-radius: 50%; display: flex; justify-content: center; align-items: center }
+            
+            .spel-vakje .tekst {
+                color: #333;
+                font-weight: 700;
+                font-size: clamp(8pt, 2.5vmin, 14pt); /* Standaard lettergrootte */
+                text-align: center;
+                /* Verwijder word-break, dit veroorzaakte het probleem */
+                /* word-break: break-word; */ 
+                overflow-wrap: break-word; /* Een betere manier van afbreken, indien nodig */
+                padding: 4px;
+                box-sizing: border-box;
+                line-height: 1.1; /* Zorgt voor betere leesbaarheid bij meerdere regels */
+            }
+    
+            /* NIEUWE REGELS VOOR DYNAMISCHE LETTERGROOTTE */
+            .vier-op-rij-bord.font-small .tekst {
+                font-size: clamp(7pt, 2.2vmin, 12pt); /* Iets kleiner */
+            }
+            .vier-op-rij-bord.font-x-small .tekst {
+                font-size: clamp(6pt, 1.9vmin, 10pt); /* Nog kleiner voor de allerlangste woorden */
+            }
+        </style>`;
+        
         const actieKnoppenHTML = `<div class="actie-balk"><button onclick="window.print()">🖨️ Afdrukken</button><button id="download-pdf-knop">📄 Download als PDF</button><button onclick="window.close()">❌ Sluiten</button></div>`;
         const containerHTML = `<div class="bord-container">${bordHTML}</div>`;
-        const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}</script>`;
-        return `<html><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`;
+        const pdfScript = `<script>window.onload=()=>{const e=document.getElementById("download-pdf-knop"),t=document.querySelector(".vier-op-rij-bord");e.addEventListener("click",()=>{e.textContent="Bezig met genereren...",e.disabled=!0,html2canvas(t,{scale:3,useCORS:!0}).then(t=>{const n=t.toDataURL("image/png"),{jsPDF:o}=window.jspdf,d=new o({orientation:"landscape",unit:"mm",format:"a4"}),a=10,l=d.internal.pageSize.getWidth(),s=d.internal.pageSize.getHeight(),i=l-2*a,c=s-2*a;let r=i,u=r/1.1666666666666667;u>c&&(u=c,r=u*1.1666666666666667);const p=a+(i-r)/2,m=a+(c-u)/2;d.addImage(n,"PNG",p,m,r,u),d.save("4-op-een-rij-spelbord.pdf")}).catch(t=>{console.error("Fout bij het genereren van de PDF:",t),alert("Er is een fout opgetreden bij het genereren van de PDF. Controleer de console voor details.")}).finally(()=>{e.textContent="📄 Download als PDF",e.disabled=!1})})}<\/script>`;
+        
+        // Voeg lang="nl" toe voor eventuele automatische woordafbreking door de browser
+        return `<html lang="nl"><head><title>4-op-een-Rij Spelbord</title>${printStyles}<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"><\/script><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"><\/script></head><body>${actieKnoppenHTML}${containerHTML}${pdfScript}</body></html>`;
     }
 
     // Helper: maak veilige ID zonder spaties/accents e.d.
@@ -96,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function genereerSpelbord() {
         let itemList = [];
-
+    
         if (gekozenSpeltype === 'woorden') {
             const avi = aviNiveauSelect.value;
             const geselecteerdeCheckboxes = document.querySelectorAll('#moeilijkheid-checkboxes input:checked');
@@ -104,44 +152,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Kies a.u.b. een AVI-niveau en minstens één moeilijkheid.');
                 return;
             }
-
+    
             const uniekeWoorden = new Set();
             const geselecteerdeIndex = aviOrder.indexOf(avi);
             const relevanteNiveaus = aviOrder.slice(0, geselecteerdeIndex + 1);
-
-            // 1) Als "Vrije Woorden" (Alle woorden) is aangevinkt: voeg ALLE categorieën van het GEKOZEN niveau toe
+    
             const vrijeGekozen = Array.from(geselecteerdeCheckboxes).some(cb => cb.value === 'Vrije Woorden');
             if (vrijeGekozen && woordCategorieen[avi]) {
                 for (const cat in woordCategorieen[avi]) {
                     woordCategorieen[avi][cat].forEach(woord => uniekeWoorden.add(woord));
                 }
             }
-
-            // 2) Overige aangevinkte moeilijkheden (uitbreidend tot en met gekozen niveau)
+    
             geselecteerdeCheckboxes.forEach(checkbox => {
                 const moeilijkheid = checkbox.value;
-                if (moeilijkheid === 'Vrije Woorden') return; // al verwerkt
+                if (moeilijkheid === 'Vrije Woorden') return;
                 relevanteNiveaus.forEach(niveau => {
                     if (woordCategorieen[niveau] && woordCategorieen[niveau][moeilijkheid]) {
                         woordCategorieen[niveau][moeilijkheid].forEach(woord => uniekeWoorden.add(woord));
                     }
                 });
             });
-
+    
             itemList = [...uniekeWoorden];
-
+    
         } else if (gekozenSpeltype === 'getallen') {
             itemList = geselecteerdeGetallenLijst;
-
+    
         } else if (gekozenSpeltype === 'tafels') {
             const geselecteerdeTafels = [...document.querySelectorAll('#tafel-checkboxes input:checked')].map(cb => parseInt(cb.value, 10));
             const tafelType = document.querySelector('input[name="tafel-type"]:checked').value;
-
+    
             if (geselecteerdeTafels.length === 0) {
                 alert('Kies a.u.b. minstens één tafel.');
                 return;
             }
-
+    
             geselecteerdeTafels.forEach(tafel => {
                 for (let i = 1; i <= 10; i++) {
                     if (tafelType === 'maal' || tafelType === 'beide') {
@@ -153,26 +199,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
-
+    
         if (!itemList || itemList.length === 0) {
             alert('Er zijn geen items geselecteerd. Kies een categorie of een getallenreeks.');
             return;
         }
-
+    
         let teVullenItems = [];
         while (teVullenItems.length < 42) {
             teVullenItems.push(...itemList);
         }
-
+    
         const geschuddeItems = teVullenItems.sort(() => Math.random() - 0.5);
         const bordItems = geschuddeItems.slice(0, 42);
-
-        let bordHTML = '<div class="vier-op-rij-bord">';
+    
+        // --- START AANPASSING ---
+        // 1. Vind de maximale lengte van een item op het bord.
+        const maxLength = Math.max(...bordItems.map(item => String(item).length));
+        
+        // 2. Bepaal een extra CSS-klasse als de maximale lengte een drempel overschrijdt.
+        // We gebruiken 'font-small' voor lange woorden en 'font-x-small' voor extreem lange woorden.
+        let extraKlasse = '';
+        if (maxLength > 12) {
+            extraKlasse = 'font-x-small';
+        } else if (maxLength > 8) {
+            extraKlasse = 'font-small';
+        }
+        
+        // 3. Voeg de klasse toe aan de HTML van het bord.
+        let bordHTML = `<div class="vier-op-rij-bord ${extraKlasse}">`;
+        // --- EINDE AANPASSING ---
+    
         for (const item of bordItems) {
             bordHTML += `<div class="spel-vakje"><div class="tekst">${item}</div></div>`;
         }
         bordHTML += '</div>';
-
+    
         const printPagina = genereerPrintbarePagina(bordHTML);
         const printWindow = window.open('', '_blank');
         printWindow.document.write(printPagina);
