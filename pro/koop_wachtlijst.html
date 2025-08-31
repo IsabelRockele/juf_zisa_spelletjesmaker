@@ -32,60 +32,51 @@
     <input id="email" type="email" placeholder="naam@school.be" autocomplete="email" required />
 
     <button id="buy">Ga naar veilige betaling</button>
-    <div id="err"></div>
+    <div id="err" role="alert" aria-live="polite"></div>
     <div id="ok"></div>
 
     <p class="foot">Na betaling krijgt u een e-mail met een wachtwoordlink en uw factuur in bijlage (PDF).</p>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
-
-    const app = initializeApp({
-      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-      projectId: "zisa-spelletjesmaker-pro",
-    });
-    const fns = getFunctions(app, "europe-west1");
-    const createPayment = httpsCallable(fns, "createPayment");
-
+  <script>
+    const ENDPOINT = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/createPaymentWaitlist";
     const $ = (id) => document.getElementById(id);
     const emailEl = $("email");
     const buyBtn = $("buy");
     const errEl = $("err");
     const okEl = $("ok");
 
-    function validEmail(s) {
-      return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s);
-    }
+    function validEmail(s) { return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s); }
 
     buyBtn.addEventListener("click", async () => {
-      errEl.textContent = "";
-      okEl.textContent = "";
+      errEl.textContent = ""; okEl.textContent = "";
       const email = (emailEl.value || "").trim().toLowerCase();
-      if (!validEmail(email)) {
-        errEl.textContent = "Geef een geldig e-mailadres in.";
-        emailEl.focus();
-        return;
-      }
-      buyBtn.disabled = true;
-      buyBtn.textContent = "Bezig…";
+      if (!validEmail(email)) { errEl.textContent = "Geef een geldig e-mailadres in."; emailEl.focus(); return; }
+
+      buyBtn.disabled = true; buyBtn.textContent = "Bezig…";
       try {
-        const resp = await createPayment({ email, forceTier: "wachtlijst" });
-        const data = resp?.data || {};
+        const r = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email })
+        });
+        if (!r.ok) {
+          const t = await r.text();
+          throw new Error(t || ("HTTP " + r.status));
+        }
+        const data = await r.json();
         if (!data.checkoutUrl) throw new Error("Kon geen betaal-URL ontvangen.");
         okEl.textContent = "Doorschakelen naar veilige betaalpagina…";
         location.href = data.checkoutUrl;
       } catch (e) {
-        errEl.textContent = "Er ging iets mis. Probeer later opnieuw of mail naar zebrapost@jufzisa.be.";
         console.error(e);
+        errEl.textContent = "Er ging iets mis. Probeer later opnieuw of mail naar zebrapost@jufzisa.be.";
       } finally {
-        buyBtn.disabled = false;
-        buyBtn.textContent = "Ga naar veilige betaling";
+        buyBtn.disabled = false; buyBtn.textContent = "Ga naar veilige betaling";
       }
     });
   </script>
 </body>
 </html>
+
 
