@@ -8,9 +8,6 @@
    - devSimulatePaid                                 → test-helper; zet licentie + mail met PDF
    - registerDevice / listDevices / unregisterDevice → apparaatlimiet (2)
    - getAccessStatus                                 → controle op licentie + vervaldatum
-
-   E-mail: schrijft naar collecties ["mail","post"] (Trigger Email-extensie)
-   Bijlage: attachments[].{ filename, content(base64), encoding:"base64", contentType:"application/pdf" }
 */
 
 import { onRequest, onCall, HttpsError } from "firebase-functions/v2/https";
@@ -132,6 +129,16 @@ async function findLicenseByUid(uid: string) {
   return null;
 }
 
+// NIEUW: fallback-lookup op e-mail
+async function findLicenseByEmail(emailLower: string) {
+  const e = (emailLower || "").trim().toLowerCase();
+  for (const col of LICENSE_COLLECTIONS) {
+    const qs = await db.collection(col).where("email", "==", e).limit(1).get();
+    if (!qs.empty) return qs.docs[0].data();
+  }
+  return null;
+}
+
 function makeLicenseCode(): string {
   const s = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let out = "";
@@ -191,6 +198,7 @@ async function makeInvoicePdfBase64(params: {
 }
 
 // ------------------------------ Mail helper ----------------------------------
+// AANGEPAST: attachments zitten nu onder message.attachments
 async function queueEmail(
   toEmail: string,
   subject: string,
@@ -200,17 +208,23 @@ async function queueEmail(
   const normAtt = (attachments ?? []).map((a) => ({
     filename: a.filename,
     content: a.content,                 // base64
-    encoding: "base64",                 // nodig voor Nodemailer/Extensie
+    encoding: "base64",                 // vereist
     contentType: a.type ?? "application/pdf",
   }));
 
   const doc = {
     to: [toEmail],
-    message: { subject, html, text: "Klik op de knop in deze mail om verder te gaan." },
-    attachments: normAtt,
+    message: {
+      subject,
+      html,
+      text: "Klik op de knop in deze mail om verder te gaan.",
+      attachments: normAtt,             // ← juiste plaats voor bijlagen
+    },
   };
 
-  await Promise.all(MAIL_COLLECTIONS.map((col) => db.collection(col).add(doc).catch(() => null)));
+  await Promise.all(
+    MAIL_COLLECTIONS.map((col) => db.collection(col).add(doc).catch(() => null))
+  );
 }
 
 function emailHtml(opts: { name: string; passwordLink: string }) {
@@ -481,11 +495,17 @@ export const unregisterDevice = onCall({ region: REGION, enforceAppCheck: true }
   return { ok: true };
 });
 
+// AANGEPAST: val terug op e-mail wanneer licentie niet op uid staat
 export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
   const uid = req.auth.uid;
+  const tokenEmail = (req.auth.token as any)?.email
+    ? String((req.auth.token as any).email).toLowerCase()
+    : "";
 
-  const lic: any = await findLicenseByUid(uid);
+  let lic: any = await findLicenseByUid(uid);
+  if (!lic && tokenEmail) lic = await findLicenseByEmail(tokenEmail);
+
   if (!lic) return { allowed: false, reason: "no_license" };
 
   const now = Timestamp.now();
