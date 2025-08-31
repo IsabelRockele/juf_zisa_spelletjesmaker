@@ -1,17 +1,20 @@
 {
   "compilerOptions": {
     "module": "NodeNext",
-    "esModuleInterop": true,
     "moduleResolution": "nodenext",
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
+    "target": "es2017",
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017"
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+
+    // Belangrijk voor 3rd-party packages zoals @mollie/api-client:
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true
   },
   "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
+
