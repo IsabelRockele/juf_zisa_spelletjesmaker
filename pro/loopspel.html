@@ -89,15 +89,15 @@
         <h2>Speluitleg</h2>
         <div class="uitleg-item">
             <img src="loopspel_afbeeldingen/steen.png" alt="Steen">
-            <span>**Spring** over de stenen!</span>
+            <span><strong>Spring</strong> over de stenen!</span>
         </div>
         <div class="uitleg-item">
             <img src="loopspel_afbeeldingen/tak.png" alt="Tak">
-            <span>**Buk** voor de takken!</span>
+            <span><strong>Buk</strong> voor de takken!</span>
         </div>
         <div class="uitleg-item">
             <span class="uitleg-icoon">🧮</span>
-            <span>**Roep** het antwoord op de som!</span>
+            <span><strong>Roep</strong> het antwoord op de som!</span>
         </div>
         <button id="start-na-uitleg-knop">Begrepen, start!</button>
     </div>
@@ -110,16 +110,16 @@
     <button id="stop-knop">■ Stop</button>
 </div>
 
-<!-- Oude uitlogknop en logout-script verwijderd -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
 
-<!-- Projectscript (buiten /pro/) -->
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Uw eigen paginacode (pas na de guard laden) -->
 <script src="../loopspel.js"></script>
 
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-    import { guardProPage } from "./guard.js";
-    await guardProPage();
-</script>
 </body>
 </html>
-
