@@ -142,14 +142,16 @@
     </div>
 </div>
 
-<!-- Oude logout/guard verwijderd (was: #logoutBtn + fetch naar /auth/logout) -->
+<!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
 
+<!-- 1) Stabiele device-id (localStorage + cookie) -->
+<script src="./js/device-id.js"></script>
+
+<!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+<script type="module" src="./js/guard.js"></script>
+
+<!-- 3) Uw eigen paginacode (pas na de guard laden) -->
 <script src="../kruiswoordpuzzel.js"></script>
-
-<!-- Uniforme Firebase-guard -->
-<script type="module">
-    import { guardProPage } from "./guard.js";
-    await guardProPage();
-</script>
 </body>
 </html>
+
