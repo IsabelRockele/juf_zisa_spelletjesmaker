@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "outDir": "lib",
-    "rootDir": "src",
+    "module": "NodeNext",
     "esModuleInterop": true,
+    "moduleResolution": "nodenext",
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "outDir": "lib",
+    "sourceMap": true,
     "strict": true,
-    "types": ["node"]
+    "target": "es2017"
   },
-  "include": ["src/**/*.ts"]
+  "compileOnSave": true,
+  "include": [
+    "src"
+  ]
 }
-

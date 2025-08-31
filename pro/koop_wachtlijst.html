@@ -72,7 +72,7 @@
       buyBtn.disabled = true;
       buyBtn.textContent = "Bezig…";
       try {
-        const resp = await createPayment({ email });
+        const resp = await createPayment({ email, forceTier: "wachtlijst" });
         const data = resp?.data || {};
         if (!data.checkoutUrl) throw new Error("Kon geen betaal-URL ontvangen.");
         okEl.textContent = "Doorschakelen naar veilige betaalpagina…";

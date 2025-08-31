@@ -1,21 +1,17 @@
 import * as admin from "firebase-admin";
 import { onCall, HttpsError, onRequest } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 
 // PDFKit (CommonJS import is het meest compatibel)
 const PDFDocument = require("pdfkit");
 
-// -------- Init & secrets -----------------------------------------------------
-
+// -------- Init ---------------------------------------------------------------
 admin.initializeApp();
 
-const MOLLIE_API_KEY = defineSecret("MOLLIE_API_KEY");
 const REGION = "europe-west1";
 const PROJECT_ID = process.env.GCLOUD_PROJECT || "zisa-spelletjesmaker-pro";
-
-// E-mail: extensie luistert op deze collectie
 const MAIL_COLLECTION = "post";
 
 // Globale helpers
@@ -23,35 +19,19 @@ const db = admin.firestore();
 const bucket = admin.storage().bucket();
 
 // -----------------------------------------------------------------------------
-// Types
+// Diverse helpers (valuta, datum, enz.)
 // -----------------------------------------------------------------------------
-
-type Tier = "wachtlijst" | "algemeen";
-
-interface OrderData {
-  "E-mail": string;
-  Productid: string;
-  aantal: number;               // in EUR (35 / 40)
-  rang: Tier;
-  status: "gemaakt" | "betaald";
-  betalingId: string;
-  paymentMode: "test" | "live";
-  paymentStatusHint?: string;
-  factuurnummer?: string;
-  invoicePath?: string;
-  gemaaktOp?: FirebaseFirestore.FieldValue;
-  betaaldBij?: FirebaseFirestore.FieldValue;
+function eur(amount: number): string {
+  return amount.toFixed(2);
 }
 
-// -----------------------------------------------------------------------------
-// Wachtlijst: 7-dagen geldigheid
-// -----------------------------------------------------------------------------
+type Tier = "wachtlijst" | "algemeen";
 
 async function bepaalTier(email: string): Promise<{ tier: Tier; prijs: number; productId: string }> {
   const docIds = [
     db.collection("Wachtlijst").doc(email),
-    db.collection("waitlist").doc(email),   // tolerantie voor oudere naam
-    db.collection("wachtlijst").doc(email), // idem
+    db.collection("waitlist").doc(email),
+    db.collection("wachtlijst").doc(email),
   ];
 
   for (const ref of docIds) {
@@ -67,57 +47,26 @@ async function bepaalTier(email: string): Promise<{ tier: Tier; prijs: number; p
   return { tier: "algemeen", prijs: 40, productId: "zisa-pro-jaarlijks" };
 }
 
-// -----------------------------------------------------------------------------
-// Factuurnummer generator: ZISA-YYYY-0001  (collectie: Facturen/facturen-YYYY)
-// -----------------------------------------------------------------------------
-
 async function volgendeFactuurnummer(): Promise<string> {
   const jaar = new Date().getFullYear();
   const ref = db.collection("Facturen").doc(`facturen-${jaar}`);
   const nr = await db.runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    let seq = 0;
-    if (snap.exists) {
-      seq = (snap.get("Seq") as number) ?? 0;
-    }
+    let seq = snap.exists ? (snap.get("Seq") as number) ?? 0 : 0;
     seq += 1;
-    tx.set(
-      ref,
-      {
-        jaar,
-        Seq: seq,
-        bijgewerktOp: admin.firestore.FieldValue.serverTimestamp(),
-      },
-      { merge: true }
-    );
+    tx.set(ref, { jaar, Seq: seq, bijgewerktOp: admin.firestore.FieldValue.serverTimestamp() }, { merge: true });
     return seq;
   });
-  return `ZISA-${jaar}-${String(nr).padStart(4, "0")}`;
+  return `${jaar}-${String(nr).padStart(4, "0")}`;
 }
 
 // -----------------------------------------------------------------------------
-// Mollie helpers (Node 20 heeft fetch ingebouwd)
+// Mollie API helpers
 // -----------------------------------------------------------------------------
-
-function eur(v: number): string {
-  // Mollie verwacht string met 2 decimalen
-  return v.toFixed(2);
-}
-
-async function mollieCreatePayment(
-  apiKey: string,
-  amount: number,
-  description: string,
-  redirectUrl: string,
-  webhookUrl: string,
-  metadata: Record<string, any>
-) {
+async function mollieCreatePayment(apiKey: string, amount: number, description: string, redirectUrl: string, webhookUrl: string, metadata: Record<string, any>) {
   const res = await fetch("https://api.mollie.com/v2/payments", {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       amount: { currency: "EUR", value: eur(amount) },
       description,
@@ -126,7 +75,6 @@ async function mollieCreatePayment(
       metadata,
     }),
   });
-
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`Mollie createPayment failed: ${res.status} ${text}`);
@@ -146,282 +94,178 @@ async function mollieGetPayment(apiKey: string, id: string) {
 }
 
 // -----------------------------------------------------------------------------
-// E-mail in juiste schema naar extensie-collectie "post"
+// E-mail helpers
 // -----------------------------------------------------------------------------
 
+// >>> NIEUW: helper om een Storage-bestand als base64-bijlage te maken
+async function storageFileAsBase64Attachment(filePath: string, filename: string) {
+  const bucket = admin.storage().bucket();
+  const file = bucket.file(filePath);
+  const [bytes] = await file.download();
+  return {
+    filename,
+    content: bytes.toString("base64"),
+    encoding: "base64" as const,
+  };
+}
+
+// >>> Aangepaste queueEmail: bijlagen binnen message.attachments
 async function queueEmail(
   email: string,
   subject: string,
   html: string,
-  invoicePath: string,
-  factuurNummer: string
+  attachments?: Array<{ filename: string; content?: string; encoding?: "base64"; path?: string }>
 ) {
-  const bucketName = bucket.name; // Naam van de bucket
   await db.collection(MAIL_COLLECTION).add({
     to: [email],
     message: {
       subject,
       html,
+      attachments: attachments ?? [],
     },
-    attachments: [
-      {
-        filename: `${factuurNummer}.pdf`, // Factuur als PDF bijlage
-        path: `gs://${bucketName}/${invoicePath}`, // Het pad naar de PDF in Firebase Storage
-      },
-    ],
   });
 }
 
 // -----------------------------------------------------------------------------
-// PDF maken en uploaden naar Storage/Facturen/<orderId>.pdf
+// Factuur genereren en uploaden
 // -----------------------------------------------------------------------------
-
-async function maakEnUploadFactuur(
-  orderId: string,
-  factuurNummer: string,
-  email: string,
-  productLabel: string,
-  totaal: number
-): Promise<string> {
+async function maakEnUploadFactuur(orderId: string, factuurNummer: string, email: string, productLabel: string, totaal: number): Promise<string> {
   const tmpFile = path.join("/tmp", `${orderId}.pdf`);
   const doc = new PDFDocument({ size: "A4", margin: 50 });
-
   const writeStream = fs.createWriteStream(tmpFile);
   doc.pipe(writeStream);
 
   const today = new Date();
   const datum = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
 
-  // Header
   doc.fontSize(22).text("Factuur", { align: "left" }).moveDown(0.2);
-  doc
-    .moveTo(50, doc.y)
-    .lineTo(545, doc.y)
-    .lineWidth(0.5)
-    .stroke();
+  doc.moveTo(50, doc.y).lineTo(545, doc.y).lineWidth(0.5).stroke();
 
-  // Verkoper
-  doc.moveDown().fontSize(11);
-  doc.text("Juf Zisa");
-  doc.text("Maasfortbaan 108");
-  doc.text("2500 Lier, België");
-  doc.text("zebrapost@jufzisa.be");
+  doc.moveDown().fontSize(11)
+    .text("Juf Zisa")
+    .text("Maasfortbaan 108")
+    .text("2500 Lier, België")
+    .text("zebrapost@jufzisa.be");
 
-  // Factuurinfo rechts
-  doc
-    .fontSize(11)
+  doc.fontSize(11)
     .text(`Factuurnr: ${factuurNummer}`, 350, 85, { align: "left" })
     .text(`Datum: ${datum}`, 350, doc.y + 5, { align: "left" });
 
-  // Klant
-  doc.moveDown().moveDown();
-  doc.fontSize(12).text("Klant", { underline: false }).moveDown(0.2);
-  doc.fontSize(11).text(email);
+  doc.moveDown(2).fontSize(12).text("Klant").moveDown(0.2).fontSize(11).text(email);
 
-  // Omschrijving
-  doc.moveDown().fontSize(12).text("Omschrijving").moveDown(0.2);
-  doc.fontSize(11).text(productLabel);
+  doc.moveDown().fontSize(12).text("Omschrijving").moveDown(0.2).fontSize(11).text(productLabel);
 
-  // Totaal
-  doc.moveDown().fontSize(12).text("Totaal").moveDown(0.2);
-  doc.fontSize(16).text(`€ ${totaal.toFixed(2)}`);
+  doc.moveDown().fontSize(12).text("Totaal").moveDown(0.2).fontSize(16).text(`€ ${totaal.toFixed(2)}`);
 
-  // Footer
-  doc.moveDown(1.2).fontSize(9).text(
-    "Ondernemingsnummer: 1026.769.348 — Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen. BTW niet van toepassing."
-  );
+  doc.moveDown(1.2).fontSize(9)
+    .text("Ondernemingsnummer: 1026.7xx.xxx")
+    .text("Kleineondernemingsregeling – vrijstellingsregel voor kleine ondernemingen. BTW niet van toepassing.");
 
   doc.end();
   await new Promise<void>((resolve, reject) => {
-    writeStream.on("finish", () => resolve());
+    writeStream.on("finish", resolve);
     writeStream.on("error", reject);
   });
 
   const destination = `Facturen/${orderId}.pdf`;
-  await bucket.upload(tmpFile, {
-    destination,
-    contentType: "application/pdf",
-  });
+  await bucket.upload(tmpFile, { destination, contentType: "application/pdf" });
+  fs.unlinkSync(tmpFile);
 
-  try {
-    fs.unlinkSync(tmpFile);
-  } catch {}
-
-  return destination; // invoicePath
+  return destination; // Storage pad relatief aan de bucket
 }
 
 // -----------------------------------------------------------------------------
-// Complete order: factuur, mail, status bijwerken
+// Orderverwerking na betaling
 // -----------------------------------------------------------------------------
-
 async function completeOrderById(orderId: string) {
   const ref = db.collection("Orders").doc(orderId);
-  const snapshot = await ref.get();
-  if (!snapshot.exists) return;
+  const snap = await ref.get();
+  if (!snap.exists) {
+    console.error(`Order ${orderId} niet gevonden.`);
+    return;
+  }
+  const order = snap.data()!;
+  const email = (order["E-mail"] || order.email || "").toLowerCase().trim();
+  const label = "Zisa PRO – licentie 1 jaar";
+  const bedrag = Number(order.aantal || 40);
 
-  const data = snapshot.data() as OrderData;
-  if (data.status === "betaald") return; // De bestelling is al verwerkt
+  // wachtwoord-resetlink (voor eerste login)
+  const actionCodeSettings = {
+    url: "https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/",
+    handleCodeInApp: false,
+  } as any;
+  const resetLink = await admin.auth().generatePasswordResetLink(email, actionCodeSettings);
 
-  const email = data["E-mail"];
-  const bedrag = data.aantal;
-  const label = data.rang === "wachtlijst" ? "Zisa PRO – jaarlicentie (wachtlijst)" : "Zisa PRO – jaarlicentie";
+  try {
+    const factuurNummer = await volgendeFactuurnummer();
+    const invoicePath = await maakEnUploadFactuur(orderId, factuurNummer, email, label, bedrag);
 
-  // Genereer factuurnummer en upload de factuur
-  const factuurNummer = await volgendeFactuurnummer();
-  const invoicePath = await maakEnUploadFactuur(orderId, factuurNummer, email, label, bedrag);
+    // E-mail met PDF-bijlage (base64)
+    const html = `
+<p>Beste,</p>
+<p>Bedankt voor uw aankoop van <strong>${label}</strong>.</p>
+<p>U kunt uw wachtwoord instellen via deze link:<br>
+  <a href="${resetLink}">${resetLink}</a>
+</p>
+<p>Na het instellen van uw wachtwoord kunt u inloggen op de app via:<br>
+  <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/">Log in op de app</a>
+</p>
+<p>In de bijlage vindt u uw factuur (<strong>${factuurNummer}</strong>).</p>
+<p>Vriendelijke groeten,<br/>Juf Zisa</p>
+`;
 
-  // Reset wachtwoordlink genereren
-  const resetLink = await admin.auth().generatePasswordResetLink(email);
+    const attachment = await storageFileAsBase64Attachment(
+      invoicePath,
+      `${factuurNummer}.pdf`
+    );
+    await queueEmail(
+      email,
+      `Zisa PRO – licentie & factuur ${factuurNummer}`,
+      html,
+      [attachment]
+    );
 
-  // E-mailtekst voor de gebruiker
-  const html = `
-    <p>Beste,</p>
-    <p>Bedankt voor je aankoop van <strong>${label}</strong>.</p>
-    <p>Je kunt nu je wachtwoord instellen via deze link:<br>
-      <a href="${resetLink}">${resetLink}</a>
-    </p>
-    <p>In de bijlage vindt je jouw factuur. Je kunt de app altijd openen via deze link: <br>
-      <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/">Open Zisa PRO</a>
-    </p>
-    <p>Vriendelijke groeten,<br/>Juf Zisa</p>
-  `;
-
-  // Verstuur e-mail met factuur als bijlage
-  await queueEmail(email, `Jouw factuur voor ${label}`, html, invoicePath, factuurNummer);
-
-  // Update de orderstatus naar 'betaald'
-  await ref.set(
-    {
+    await ref.set({
       factuurnummer: factuurNummer,
       invoicePath,
       betaaldBij: admin.firestore.FieldValue.serverTimestamp(),
       status: "betaald",
-    } as Partial<OrderData>,
-    { merge: true }
-  );
-}
+    }, { merge: true });
 
-async function completeOrderByPaymentId(paymentId: string, mollieApiKey: string) {
-  // Probeer via metadata.orderId (indien aanwezig)
-  try {
-    const payment = await mollieGetPayment(mollieApiKey, paymentId);
-    const metaOrderId = payment?.metadata?.orderId as string | undefined;
-    if (metaOrderId) {
-      await completeOrderById(metaOrderId);
-      return;
-    }
-  } catch {
-    // fall-through naar query op betalingId
-  }
-
-  // Fallback: zoek in Orders op betalingId
-  const snap = await db
-    .collection("Orders")
-    .where("betalingId", "==", paymentId)
-    .limit(1)
-    .get();
-
-  if (!snap.empty) {
-    await completeOrderById(snap.docs[0].id);
+  } catch (error) {
+    console.error(`FATALE FOUT bij afhandelen order ${orderId}:`, error);
   }
 }
 
 // -----------------------------------------------------------------------------
-// Functions
+// EXPORTED CLOUD FUNCTIONS
 // -----------------------------------------------------------------------------
 
-export const createPayment = onCall(
-  { region: REGION, secrets: [MOLLIE_API_KEY] },
-  async (req) => {
-    const emailRaw = (req.data?.email as string | undefined) || "";
-    const email = emailRaw.trim().toLowerCase();
-    if (!email || !email.includes("@")) {
-      throw new HttpsError("invalid-argument", "Ongeldig e-mailadres.");
-    }
-
-    const { tier, prijs, productId } = await bepaalTier(email);
-    const apiKey = MOLLIE_API_KEY.value();
-    const mode: "test" | "live" = apiKey.startsWith("live_") ? "live" : "test";
-
-    // Maak order (status: gemaakt)
-    const orderRef = await db.collection("Orders").add({
-      "E-mail": email,
-      Productid: productId,
-      aantal: prijs,
-      rang: tier,
-      status: "gemaakt",
-      betalingId: "", // volgt na Mollie create
-      paymentMode: mode,
-      paymentStatusHint: "open",
-      gemaaktOp: admin.firestore.FieldValue.serverTimestamp(),
-    } satisfies OrderData);
-
-    const redirectUrl = `https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/bedankt.html?oid=${orderRef.id}`;
-    const webhookUrl = `https://${REGION}-${PROJECT_ID}.cloudfunctions.net/mollieWebhook`;
-
-    // Mollie betaling aanmaken
-    const payment = await mollieCreatePayment(apiKey, prijs, "Zisa PRO – jaarlicentie", redirectUrl, webhookUrl, {
-      orderId: orderRef.id,
-      email,
-      tier,
-    });
-
-    const checkoutUrl = payment?._links?.checkout?.href as string | undefined;
-    const paymentId = payment?.id as string | undefined;
-    if (!checkoutUrl || !paymentId) {
-      throw new HttpsError("internal", "Kon Mollie-betaling niet aanmaken.");
-    }
-
-    // Order aanvullen met betalingId
-    await orderRef.set({ betalingId: paymentId } as Partial<OrderData>, { merge: true });
-
-    return { ok: true, orderId: orderRef.id, checkoutUrl, tier };
-  }
-);
-
-// Mollie webhook (GET/POST) → ?id=<paymentId>
-export const mollieWebhook = onRequest(
-  { region: REGION, secrets: [MOLLIE_API_KEY] },
-  async (req, res) => {
-    try {
-      const id =
-        (req.method === "POST" ? (req.body?.id as string | undefined) : undefined) ||
-        (req.query?.id as string | undefined);
-
-      if (!id) {
-        res.status(400).send("missing id");
-        return;
-      }
-
-      const apiKey = MOLLIE_API_KEY.value();
-      const payment = await mollieGetPayment(apiKey, id);
-
-      // Alleen betalen/authorized afwerken
-      const status = String(payment?.status || "");
-      if (!["paid", "authorized"].includes(status)) {
-        res.status(200).send(`ignored (${status})`);
-        return;
-      }
-
-      await completeOrderByPaymentId(id, apiKey);
-      res.status(200).send("OK");
-    } catch (e: any) {
-      console.error("webhook error", e);
-      res.status(500).send("ERR");
-    }
-  }
-);
-
-// Snelle test: zet een "betaald" order neer zonder Mollie, maakt PDF + mail
-export const devSimulatePaid = onCall({ region: REGION }, async (req) => {
+// Publieke functie voor het aanmaken van Mollie-betalingen
+export const createPayment = onCall({ region: REGION }, async (req) => {
   const emailRaw = (req.data?.email as string | undefined) || "";
   const email = emailRaw.trim().toLowerCase();
+  const forceTier = req.data?.forceTier as Tier | undefined;
+
   if (!email || !email.includes("@")) {
     throw new HttpsError("invalid-argument", "Ongeldig e-mailadres.");
   }
 
-  const { tier, prijs, productId } = await bepaalTier(email);
-  const paymentId = `dev_${Date.now()}`;
+  let tierData;
+  if (forceTier === "wachtlijst") {
+    tierData = { tier: "wachtlijst" as Tier, prijs: 35, productId: "zisa-pro-jaarlijks-wachtlijst" };
+  } else {
+    tierData = await bepaalTier(email);
+  }
+
+  const { tier, prijs, productId } = tierData;
+
+  const apiKey = process.env.MOLLIE_API_KEY;
+  if (!apiKey) {
+    console.error("MOLLIE_API_KEY is not set in environment variables");
+    throw new HttpsError("internal", "Server configuratiefout.");
+  }
+  const mode: "test" | "live" = apiKey.startsWith("live_") ? "live" : "test";
 
   const orderRef = await db.collection("Orders").add({
     "E-mail": email,
@@ -429,14 +273,142 @@ export const devSimulatePaid = onCall({ region: REGION }, async (req) => {
     aantal: prijs,
     rang: tier,
     status: "gemaakt",
-    betalingId: paymentId,
-    paymentMode: "test",
+    betalingId: "",
+    paymentMode: mode,
     paymentStatusHint: "open",
     gemaaktOp: admin.firestore.FieldValue.serverTimestamp(),
-  } satisfies OrderData);
+  });
 
-  await completeOrderById(orderRef.id);
+  const redirectUrl = `https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/bedankt.html?oid=${orderRef.id}`;
+  const webhookUrl = `https://${REGION}-${PROJECT_ID}.cloudfunctions.net/mollieWebhook`;
 
-  return { ok: true, orderId: orderRef.id, paymentId, tier };
+  const payment = await mollieCreatePayment(
+    apiKey,
+    prijs,
+    `Zisa PRO – ${tier === "wachtlijst" ? "wachtlijst" : "jaarlicentie"}`,
+    redirectUrl,
+    webhookUrl,
+    { orderId: orderRef.id }
+  );
+
+  const checkoutUrl = payment?._links?.checkout?.href as string | undefined;
+  const paymentId = payment?.id as string | undefined;
+  if (!checkoutUrl || !paymentId) {
+    throw new HttpsError("internal", "Kon Mollie-betaling niet aanmaken.");
+  }
+
+  await orderRef.set({ betalingId: paymentId }, { merge: true });
+
+  return { ok: true, orderId: orderRef.id, checkoutUrl, tier };
 });
 
+export const mollieWebhook = onRequest({ region: REGION }, async (req, res) => {
+  const paymentId = req.body.id as string | undefined;
+  if (!paymentId) {
+    res.status(400).send("Bad Request: Missing payment ID.");
+    return;
+  }
+
+  try {
+    const apiKey = process.env.MOLLIE_API_KEY;
+    if (!apiKey) {
+      console.error("MOLLIE_API_KEY is not set in environment variables");
+      res.status(500).send("Internal Server Error: Missing server configuration.");
+      return;
+    }
+    const payment = await mollieGetPayment(apiKey, paymentId);
+
+    if (payment?.status === "paid") {
+      const orderId = payment.metadata?.orderId as string | undefined;
+      if (orderId) {
+        await completeOrderById(orderId);
+      } else {
+        console.error(`FATAL: Payment ${paymentId} is paid but has no orderId in metadata.`);
+      }
+    }
+    res.status(200).send("OK");
+  } catch (error) {
+    console.error(`Error processing webhook for payment ${paymentId}:`, error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+// Apparaatregistratie met limiet 2 toestellen
+export const registerDevice = onCall({ region: REGION }, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Je moet ingelogd zijn om dit te doen.");
+  }
+  const uid = request.auth.uid;
+  const email = request.auth.token.email;
+  const deviceId = request.data.deviceId as string | undefined;
+
+  if (!email || !deviceId) {
+    throw new HttpsError("invalid-argument", "Verzoek is onvolledig.");
+  }
+
+  const ordersQuery = db.collection("Orders")
+    .where("E-mail", "==", email)
+    .where("status", "==", "betaald")
+    .orderBy("betaaldBij", "desc")
+    .limit(1);
+
+  const orderSnapshot = await ordersQuery.get();
+  if (orderSnapshot.empty) {
+    return { ok: false, reason: "NO_PRO" };
+  }
+
+  const lastOrder = orderSnapshot.docs[0].data();
+  const purchaseDate = (lastOrder.betaaldBij as admin.firestore.Timestamp).toDate();
+  const expiryDate = new Date(purchaseDate.getTime());
+  expiryDate.setDate(expiryDate.getDate() + 366);
+
+  if (expiryDate < new Date()) {
+    return { ok: false, reason: "EXPIRED_SUBSCRIPTION", expiresAt: expiryDate.getTime() };
+  }
+
+  const userRef = db.collection("Users").doc(uid);
+  const userDoc = await userRef.get();
+  const userData = userDoc.data() || {};
+  const registeredDevices: string[] = userData.devices || [];
+  const maxDevices = 2;
+
+  if (registeredDevices.includes(deviceId)) {
+    return { ok: true, expiresAt: expiryDate.getTime() };
+  }
+
+  if (registeredDevices.length >= maxDevices) {
+    return { ok: false, reason: "DEVICE_LIMIT", max: maxDevices };
+  }
+
+  await userRef.set({ devices: [...registeredDevices, deviceId] }, { merge: true });
+  return { ok: true, expiresAt: expiryDate.getTime() };
+});
+
+// Eenvoudige maandelijkse herinnering (voorbeeld)
+export const sendExpiryReminders = onSchedule(
+  { region: REGION, schedule: "0 9 1 * *" }, // elke 1e van de maand om 09:00
+  async () => {
+    const now = new Date();
+    const soon = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // binnen 14 dagen
+    const orders = await db.collection("Orders")
+      .where("status", "==", "betaald")
+      .get();
+
+    for (const doc of orders.docs) {
+      const orderData = doc.data();
+      const betaaldBij = orderData.betaaldBij as admin.firestore.Timestamp | undefined;
+      if (!betaaldBij) continue;
+      const expiry = new Date(betaaldBij.toDate().getTime() + 366 * 24 * 60 * 60 * 1000);
+      if (expiry > now && expiry <= soon) {
+        const userEmail = orderData["E-mail"];
+        const html = `
+          <p>Beste klant,</p>
+          <p>Dit is een herinnering dat uw Zisa PRO-abonnement binnenkort verloopt op ${expiry.toLocaleDateString()}.</p>
+          <p>Verleng nu om te blijven genieten van alle functies!</p>
+          <p>Met vriendelijke groeten,<br/>Juf Zisa</p>
+        `;
+        await queueEmail(userEmail, "Herinnering: Uw Zisa PRO-abonnement verloopt binnenkort!", html);
+      }
+    }
+  }
+);
