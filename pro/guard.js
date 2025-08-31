@@ -50,7 +50,7 @@ const fns  = getFunctions(app, "europe-west1");
 // --- App Check (verplicht voor callables met enforceAppCheck: true) -----------
 // VERVANG HIERONDER door jouw reCAPTCHA v3 site key uit Firebase App Check.
 initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider("6Lf5e7krAAAAANpJ4drwF380rsbSr4WlsuOtYMnT"),
+  provider: new ReCaptchaV3Provider("6Lf5e7krAAAAAA1xV5_tz_Xickk-m6BRIMd_BzTO"),
   isTokenAutoRefreshEnabled: true,
 });
 
