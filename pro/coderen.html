@@ -2,18 +2,18 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <title>Code-tekenen Generator</title>
+  <title>Code-tekenen Generator (PRO)</title>
 
-  <!-- Bestaande CSS blijft buiten /pro/, dus één niveau hoger -->
+  <!-- Bestaande CSS ligt buiten /pro/, dus één niveau hoger -->
   <link rel="stylesheet" href="../coderen.css" />
 
   <!-- jsPDF (zoals origineel) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- Belangrijk: alle relatieve paden resolven nu naar /pro/ -->
+  <!-- Belangrijk: alle relatieve paden resolven naar /pro/ -->
   <base href="/pro/">
 
-  <!-- Header-overrides: titel gecentreerd, back-link links -->
+  <!-- Header-styling -->
   <style>
     .pro-header {
       position: relative;
@@ -24,32 +24,15 @@
       border-bottom: 0;
     }
     .pro-header .back-link {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      text-decoration: none;
-      color: #fff;
-      font-weight: 700;
-      font-size: 14px;
-      background: #5a9fd4;
-      padding: 6px 10px;
-      border-radius: 6px;
-      display: inline-block;
-      white-space: nowrap;
+      position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+      text-decoration: none; color: #fff; font-weight: 700; font-size: 14px;
+      background: #5a9fd4; padding: 6px 10px; border-radius: 6px;
+      display: inline-block; white-space: nowrap;
     }
     .pro-header .title {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      margin: 0;
-      text-align: center;
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: .2px;
-      white-space: nowrap;
-      pointer-events: none; /* voorkomt klik-issues bij overlappende zones */
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      margin: 0; text-align: center; font-size: 26px; font-weight: 800; letter-spacing: .2px;
+      white-space: nowrap; pointer-events: none;
     }
   </style>
 </head>
@@ -176,10 +159,9 @@
     </div>
   </div>
 
-  <!-- PRO-mapper: herschrijft alle 'catalogus/' verwijzingen naar 'coderen_afbeeldingen/' -->
+  <!-- PRO-mapper: herschrijft 'catalogus/' naar 'coderen_afbeeldingen/' -->
   <script>
     (function () {
-      // Intercept fetch() en herschrijf paden
       const origFetch = window.fetch;
       window.fetch = function(input, init) {
         let url = typeof input === 'string' ? input : (input && input.url);
@@ -190,22 +172,18 @@
         return origFetch.call(this, input, init);
       };
 
-      // Herschrijf <img src> voor bestaande, nieuwe én gewijzigde nodes
       function remapSrcIfNeeded(imgEl) {
         if (!imgEl) return;
         const src = imgEl.getAttribute && imgEl.getAttribute('src');
-        if (!src) return;
-        if (src.includes('catalogus/')) {
+        if (src && src.includes('catalogus/')) {
           imgEl.setAttribute('src', src.replace(/(^|\/)catalogus\//g, '$1coderen_afbeeldingen/'));
         }
       }
-
       document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('img').forEach(remapSrcIfNeeded);
       });
-
-      const mo = new MutationObserver((mutations) => {
-        for (const m of mutations) {
+      const mo = new MutationObserver((mut) => {
+        for (const m of mut) {
           if (m.type === 'attributes' && m.attributeName === 'src' && m.target.tagName === 'IMG') {
             remapSrcIfNeeded(m.target);
           }
@@ -220,13 +198,15 @@
     })();
   </script>
 
-  <!-- Bestaande logica blijft buiten /pro/, dus één niveau hoger -->
-  <script src="../coderen.js"></script>
+  <!-- ===== SCRIPT-ORDE: device-id.js → guard.js → paginacode ===== -->
+  <!-- 1) Stabiele device-id (localStorage + cookie) -->
+  <script src="./js/device-id.js"></script>
 
-  <!-- Uniforme Firebase-guard -->
-  <script type="module">
-    import { guardProPage } from "./guard.js";
-    await guardProPage();
-  </script>
+  <!-- 2) Centrale PRO-guard (registreert device en verleent/weigert toegang) -->
+  <script type="module" src="./js/guard.js"></script>
+
+  <!-- 3) Uw eigen paginacode (pas na de guard laden) -->
+  <script src="../coderen.js"></script>
 </body>
 </html>
+
