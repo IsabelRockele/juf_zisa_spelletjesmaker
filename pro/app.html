@@ -211,80 +211,43 @@
     });
   </script>
 
-  <!-- Device-ID helper MOET vóór de module geladen worden -->
+  <!-- Device-ID helper MOET vóór de guard geladen worden -->
   <script src="./js/device-id.js"></script>
 
-  <!-- Firebase + PRO-check -->
+  <!-- ★ Laad de centrale guard (regelt App Check, device-registratie, licentie) -->
+  <script type="module" src="./js/guard.js?v=now"></script>
+
+  <!-- Dun app-script: toont UI wanneer PRO klaar is; geen callables hier -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-      projectId: "zisa-spelletjesmaker-pro",
-      storageBucket: "zisa-spelletjesmaker-pro.firebasestorage.app",
-      messagingSenderId: "828063957776",
-      appId: "1:828063957776:web:8d8686b478846fe980db95",
-      measurementId: "G-9LHNLFHSXX"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const fns  = getFunctions(app, "europe-west1");
 
     const $ = (s)=>document.querySelector(s);
     const statusEl  = $("#status");
     const contentEl = $("#content");
     const userPill  = $("#user-pill");
 
-    // ✅ STABIELE DEVICE-ID
-    const deviceId  = window.ZisaDevice.getOrCreateDeviceId();
-
+    const auth = getAuth();
     $("#logout").onclick = ()=> signOut(auth);
 
-    function fmt(tsMillis){
-      try { return new Date(tsMillis).toLocaleDateString("nl-BE", { year:'numeric', month:'2-digit', day:'2-digit' }); }
-      catch { return "-"; }
-    }
-
-    async function ensurePro(u){
-      const registerDevice = httpsCallable(fns, "registerDevice");
-      const { data } = await registerDevice({ deviceId });
-      // data: { ok, reason?, max?, expiresAt? }
-      if (data.ok) {
-        let extra = data.expiresAt
-          ? `Geldig tot: ${fmt(data.expiresAt)}. (maxDevices: ${data.max ?? 2})`
-          : `(maxDevices: ${data.max ?? 2})`;
-        statusEl.className = "status good";
-        statusEl.textContent = `PRO actief. ${extra}`;
-        contentEl.style.display = "block";
-      } else {
-        contentEl.style.display = "none";
-        statusEl.className = "status err";
-        const map = {
-          "NO_PRO": "Je PRO-abonnement is niet (meer) actief voor dit account.",
-          "DEVICE_LIMIT": "Apparaatlimiet bereikt. Verwijder een oud apparaat of beheer je toestellen.",
-          "EXPIRED_SUBSCRIPTION": "Je PRO-abonnement is verlopen.",
-          "DEVICE_NOT_REGISTERED": "Dit apparaat is niet geregistreerd."
-        };
-        const extraLink = (data.reason === "DEVICE_LIMIT") ? ' | <a href="./apparaten.html">Beheer apparaten</a>' : "";
-        statusEl.innerHTML = `${map[data.reason] ?? "Geen toegang tot PRO."}
-          <br/>Huidige gebruiker: <b>${u.email}</b>. <a href="../pro/">Terug naar inloggen</a>${extraLink}`;
+    // Guard roept dit aan zodra PRO is vrijgegeven
+    window.onProReady = ({ user, expiresAt, limit }) => {
+      try { userPill.textContent = user.email ?? user.uid; } catch {}
+      statusEl.className = "status good";
+      try {
+        const datum = new Date(expiresAt).toLocaleDateString("nl-BE",{year:'numeric',month:'2-digit',day:'2-digit'});
+        statusEl.textContent = `PRO actief. Geldig tot: ${datum}. (maxDevices: ${limit ?? 2})`;
+      } catch {
+        statusEl.textContent = `PRO actief. (maxDevices: ${limit ?? 2})`;
       }
-    }
+      contentEl.style.display = "block";
+    };
 
-    onAuthStateChanged(auth, async (u) => {
-      if (!u) { location.href = "../pro/"; return; }
-      userPill.textContent = u.email ?? u.uid;
-      try { await ensurePro(u); }
-      catch(e){
-        console.error(e);
-        statusEl.className = "status err";
-        statusEl.textContent = "Kon PRO-status niet ophalen. Probeer opnieuw.";
-      }
+    // Fallback: niet ingelogd → terug naar login
+    onAuthStateChanged(auth, (u) => {
+      if (!u) { location.href = "../pro/"; }
+      else { userPill.textContent = u.email ?? u.uid; }
     });
   </script>
 </body>
 </html>
+
