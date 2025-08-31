@@ -10,8 +10,6 @@
   <meta name="theme-color" content="#ffcf56">
 
   <style>
-    /* ======= Stijlen overgenomen/afgestemd op gratis index.html (zonder externe keuze.css) ======= */
-    /* VASTE (FIXED) KNOP RECHTSBOVEN IN HET SCHERM */
     .download-knop {
       position: fixed; top: 20px; right: 20px; z-index: 1000;
       background-color: #e74c3c; color: white; padding: 12px 20px; border-radius: 8px;
@@ -27,17 +25,14 @@
     }
     .download-knop:hover::after { opacity: 1; }
 
-    /* Pagina-opmaak (zelfde look & feel) */
     html, body { margin:0; background:#fff4df; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    /* PRO-topbar (rechts: e-mail + Uitloggen) */
     .topbar { display:flex; justify-content:flex-end; align-items:center; gap:12px; padding-top:16px; }
     .pill { font-size:.95rem; background:#fff; padding:6px 10px; border-radius:999px; border:1px solid #eee; }
     .btn-logout { background:#ffd159; border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
     .btn-logout:hover { filter: brightness(.97); }
 
-    /* Header met logo + titel (met extra top-margin i.v.m. fixed knop) */
     .header-container {
       display:flex; justify-content:center; align-items:center;
       margin-bottom:30px; margin-top:60px; width:100%; gap:20px;
@@ -45,13 +40,11 @@
     .logo { width:100px; height:auto; }
     .header-container h1 { font-size:3.5rem; margin:0 0 30px 0; text-align:center; }
 
-    /* PRO-statuskaart (groene balk bij OK) */
     .status { margin:0 0 24px 0; padding:12px 14px; border-radius:12px; background:#fff; border:1px solid #eee; }
     .status.good { border-color:#bfe3bf; background:#f5fff5; }
     .status.warn { border-color:#ffd6a8; background:#fff7ec; }
     .status.err  { border-color:#f1c0c0; background:#fff5f5; }
 
-    /* Accordions en knoppen – identiek aan gratis index */
     .accordion { margin-bottom: 20px; }
     .accordion-header {
       background-color: #4db6ac; color: white; cursor: pointer; padding: 15px;
@@ -69,7 +62,6 @@
       width: 120px; height: auto; transition: transform .2s ease;
     }
 
-    /* Algemene link-styling + tooltips (behalve de download-knop) */
     a { position: relative; display: inline-block; }
     a:hover .drukknop-afbeelding { transform: scale(1.05); }
     a:not(.download-knop)::after {
@@ -79,7 +71,6 @@
     }
     a:not(.download-knop):hover::after { opacity: 1; }
 
-    /* Responsief – titel/knop schalen op small screens */
     @media (max-width: 600px) {
       .header-container h1 { font-size: 2.6rem; }
       .logo { width: 80px; }
@@ -89,7 +80,6 @@
 </head>
 <body>
 
-  <!-- Handleiding-knop identiek aan gratis index -->
   <a href="../Handleiding spelletjesmaker.pdf"
      class="download-knop"
      data-tooltip="Hulp nodig? Geen probleem, hier kan je de handleiding downloaden van deze spelgenerator."
@@ -99,25 +89,20 @@
 
   <div class="container">
 
-    <!-- PRO-topbalk -->
     <div class="topbar">
       <span id="user-pill" class="pill">-</span>
       <button id="logout" class="btn-logout">Uitloggen</button>
     </div>
 
-    <!-- Header zoals gratis index -->
     <div class="header-container">
       <img src="../start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
       <h1>Zisa PRO</h1>
     </div>
 
-    <!-- PRO-statuskaart -->
     <div id="status" class="status">Status laden…</div>
 
-    <!-- Inhoud (zichtbaar zodra PRO in orde is) -->
     <main id="content" style="display:none;">
 
-      <!-- 📐 Reken-oefeningen -->
       <div class="accordion">
         <button class="accordion-header">📐 Reken-oefeningen</button>
         <div class="accordion-content button-grid">
@@ -134,7 +119,6 @@
         </div>
       </div>
 
-      <!-- 🅰️ Taal en letters -->
       <div class="accordion">
         <button class="accordion-header">🅰️ Taal en letters</button>
         <div class="accordion-content button-grid">
@@ -148,7 +132,6 @@
         </div>
       </div>
 
-      <!-- 🧩 Puzzels & logica -->
       <div class="accordion">
         <button class="accordion-header">🧩 Puzzels &amp; logica</button>
         <div class="accordion-content button-grid">
@@ -161,7 +144,6 @@
         </div>
       </div>
 
-      <!-- 🎨 Creatief en bouwen -->
       <div class="accordion">
         <button class="accordion-header">🎨 Creatief en bouwen</button>
         <div class="accordion-content button-grid">
@@ -173,7 +155,6 @@
         </div>
       </div>
 
-      <!-- 🎲 Spelvormen -->
       <div class="accordion">
         <button class="accordion-header">🎲 Spelvormen</button>
         <div class="accordion-content button-grid">
@@ -184,7 +165,6 @@
         </div>
       </div>
 
-      <!-- ⏰ Tijd en klok -->
       <div class="accordion">
         <button class="accordion-header">⏰ Tijd en klok</button>
         <div class="accordion-content button-grid">
@@ -196,7 +176,6 @@
     </main>
   </div>
 
-  <!-- Accordion-gedrag: identiek aan gratis index -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.accordion-content').forEach(content => { content.style.display = 'none'; });
@@ -211,13 +190,36 @@
     });
   </script>
 
-  <!-- Device-ID helper MOET vóór de guard geladen worden -->
+  <!-- Device-ID helper moet vóór de guard -->
   <script src="./js/device-id.js"></script>
 
-  <!-- ★ Laad de centrale guard (regelt App Check, device-registratie, licentie) -->
-  <script type="module" src="./js/guard.js?v=now"></script>
+  <!-- Dynamische loader: probeer 2 mogelijke paden voor guard.js -->
+  <script type="module">
+    const statusEl = document.querySelector('#status');
+    async function loadGuard() {
+      const paths = ["./guard.js?v=now", "./js/guard.js?v=now"];
+      for (const p of paths) {
+        try {
+          await import(p);
+          return p;
+        } catch (e) {
+          // probeer volgende pad
+        }
+      }
+      return null;
+    }
+    const loaded = await loadGuard();
+    if (!loaded) {
+      statusEl.className = "status err";
+      statusEl.textContent = "Kon beveiliging (guard.js) niet laden. Plaats guard.js in /pro/ of /pro/js/ en laad de pagina opnieuw.";
+      console.error("guard.js niet gevonden op ./guard.js of ./js/guard.js");
+    } else {
+      // klein logje om te zien welk pad werkt
+      console.log("guard geladen via:", loaded);
+    }
+  </script>
 
-  <!-- Dun app-script: toont UI wanneer PRO klaar is; geen callables hier -->
+  <!-- Dun app-script: toont UI wanneer PRO klaar is -->
   <script type="module">
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -229,7 +231,6 @@
     const auth = getAuth();
     $("#logout").onclick = ()=> signOut(auth);
 
-    // Guard roept dit aan zodra PRO is vrijgegeven
     window.onProReady = ({ user, expiresAt, limit }) => {
       try { userPill.textContent = user.email ?? user.uid; } catch {}
       statusEl.className = "status good";
@@ -242,7 +243,6 @@
       contentEl.style.display = "block";
     };
 
-    // Fallback: niet ingelogd → terug naar login
     onAuthStateChanged(auth, (u) => {
       if (!u) { location.href = "../pro/"; }
       else { userPill.textContent = u.email ?? u.uid; }
@@ -250,4 +250,3 @@
   </script>
 </body>
 </html>
-
