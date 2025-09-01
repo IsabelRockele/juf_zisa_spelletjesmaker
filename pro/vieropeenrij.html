@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>4-op-een-Rij Spelbord Maker</title>
+    <meta name="google" content="notranslate">
+
+    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
 
     <!-- Styles liggen buiten /pro/ -->
     <link rel="stylesheet" href="../vieropeenrij.css">
-
-    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
-    <base href="/pro/">
 
     <style>
         .pro-header {
@@ -21,7 +22,8 @@
         .pro-header .back-link{
             background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
             border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
-            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
+            cursor: pointer; display: inline-block; white-space: nowrap;
+            /* float:left; verwijderd i.v.m. console-waarschuwing */
         }
         body { margin-top: 60px; }
     </style>
@@ -99,8 +101,6 @@
     </div>
 </div>
 
-<!-- Oude uitlogknop en logout-script verwijderd -->
-
 <!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
 <script src="./js/device-id.js"></script>
 <script type="module" src="./js/guard.js"></script>
@@ -109,3 +109,5 @@
 <script src="../vieropeenrij.js"></script>
 </body>
 </html>
+
+
