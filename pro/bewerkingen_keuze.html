@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generator voor Bewerkingen - Keuzemenu (PRO)</title>
 
-    <!-- PRO manifest & iconen -->
-    <link rel="manifest" href="/pro/manifest-pro.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="/pro/icons/icon-192.png">
-    <link rel="apple-touch-icon" href="/pro/icons/icon-192.png">
+    <!-- PRO manifest & iconen (relatief maken voor GitHub Pages) -->
+    <link rel="manifest" href="manifest-pro.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
     <meta name="theme-color" content="#fffbe6">
+    <!-- voorkom Google-Translate overlay (CSP-consolemelding) -->
+    <meta name="google" content="notranslate">
 
     <!-- Styles: CSS ligt buiten /pro/, dus één map omhoog -->
     <link rel="stylesheet" href="../bewerkingen.css">
@@ -55,6 +57,7 @@
 <body>
 
 <header class="pro-header">
+  <!-- Terug naar het PRO-keuzemenu -->
   <a href="./app.html" class="back-link">Keuzemenu</a>
 </header>
 
@@ -210,6 +213,3 @@
 
 </body>
 </html>
-
-
-
