@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jouw Rekenpiramide Werkblad</title>
+    <meta name="google" content="notranslate">
+
+    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
+
+    <!-- Styles liggen buiten /pro/ -->
     <link rel="stylesheet" href="../rekenpiramide.css">
-    <base href="/pro/">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .pro-header {
@@ -31,7 +37,7 @@
             cursor: pointer;
             display: inline-block;
             white-space: nowrap;
-            float: left;
+            /* float:left; verwijderd om console-waarschuwing te vermijden */
         }
         body { margin-top: 60px; }
     </style>
@@ -63,4 +69,5 @@
 <script src="../rekenpiramide_werkblad.js"></script>
 </body>
 </html>
+
 
