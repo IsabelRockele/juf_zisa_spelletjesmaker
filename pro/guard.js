@@ -3,8 +3,8 @@
 // - wacht op login
 // - initialiseert App Check met reCAPTCHA v3 (SITE KEY)
 // - WACHT op App Check token + VERS ID-TOKEN
-// - registreert device
-// - checkt licentie en roept window.onProReady(...)
+// - checkt licentie (eerst) en registreert pas daarna het device
+// - roept window.onProReady(...) met { user, expiresAt, limit }
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -47,9 +47,9 @@ const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const fns  = getFunctions(app, "europe-west1");
 
-// --- App Check (gebruik HIER je reCAPTCHA v3 **SITE KEY**) -------------------
+// --- App Check (plaats hier uw reCAPTCHA v3 SITE KEY) ------------------------
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider("6Lf5e7krAAAAAA1xV5_tz_Xickk-m6BRIMd_BzTO"), // <-- jouw SITE KEY
+  provider: new ReCaptchaV3Provider("6Lf5e7krAAAAAA1xV5_tz_Xickk-m6BRIMd_BzTO"),
   isTokenAutoRefreshEnabled: true,
 });
 
@@ -74,7 +74,24 @@ onAuthStateChanged(auth, async (user) => {
       user.getIdToken(true) // forceer vers ID-token -> voorkomt 401 op eerste callable
     ]);
 
-    // 1) Apparaat registreren (idempotent)
+    // 1) EERST licentie/status controleren
+    const getAccessStatus = httpsCallable(fns, "getAccessStatus");
+    let status;
+    try {
+      const res  = await getAccessStatus({});
+      status = res?.data || {};
+    } catch (e) {
+      console.error("getAccessStatus error:", e);
+      goApp("license_check_error"); return;
+    }
+
+    if (!status.allowed) {
+      // redenen: "no_license", "expired", ...
+      goKoop(status?.reason || "no_access");
+      return;
+    }
+
+    // 2) Pas DAN toestel registreren (idempotent in backend)
     const deviceId = window.ZisaDevice.getOrCreateDeviceId();
     const registerDevice = httpsCallable(fns, "registerDevice");
     try {
@@ -85,22 +102,13 @@ onAuthStateChanged(auth, async (user) => {
       goApp("device_register_error"); return;
     }
 
-    // 2) PRO-status ophalen
-    const getAccessStatus = httpsCallable(fns, "getAccessStatus");
-    try {
-      const res  = await getAccessStatus({});
-      const data = res?.data || {};
-      if (data.allowed) {
-        if (typeof window.onProReady === "function") {
-          window.onProReady({ user, expiresAt: data.expiresAt, limit: data.deviceLimit ?? 2 });
-        }
-        return;
-      }
-      goKoop(data?.reason || "no_access");
-      return;
-    } catch (e) {
-      console.error("getAccessStatus error:", e);
-      goApp("license_check_error"); return;
+    // 3) Klaar voor PRO: pagina-specifieke init laten starten
+    if (typeof window.onProReady === "function") {
+      window.onProReady({
+        user,
+        expiresAt: status.expiresAt,
+        limit: status.deviceLimit ?? 2
+      });
     }
   } catch (err) {
     console.error("Guard error:", err);
