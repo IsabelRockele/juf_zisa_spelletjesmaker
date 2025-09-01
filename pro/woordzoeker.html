@@ -4,13 +4,10 @@
   <meta charset="utf-8"/>
   <title>Woordzoeker Generator</title>
   <meta name="google" content="notranslate">
-  <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
   <base href="/juf_zisa_spelletjesmaker/pro/">
 
-  <!-- Styles liggen buiten /pro/ -->
   <link href="../woordzoeker.css" rel="stylesheet"/>
 
-  <!-- Externe lib (ongewijzigd) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
@@ -29,7 +26,6 @@
 </head>
 <body>
 
-  <!-- PRO-header -->
   <header class="pro-header">
     <a href="app.html" class="back-link" aria-label="Terug naar menu">&larr; Terug naar menu</a>
   </header>
@@ -63,13 +59,13 @@
 
         <div class="control-group">
           <label>Richting:</label>
-          <label><input type="checkbox" name="direction" value="horizontal" checked> Horizontaal</label>
-          <label><input type="checkbox" name="direction" value="vertical" checked> Verticaal</label>
-          <label><input type="checkbox" name="direction" value="diagonal" checked> Diagonaal</label>
+          <label><input type="checkbox" name="richting" value="horizontaal" checked> Horizontaal</label>
+          <label><input type="checkbox" name="richting" value="verticaal" checked> Verticaal</label>
+          <label><input type="checkbox" name="richting" value="diagonaal" checked> Diagonaal</label>
         </div>
 
         <div id="meldingContainer" style="color: #004080; margin-top: 15px; font-weight: bold; min-height: 80px;"></div>
-        <button id="generateBtn">Genereer Woordzoeker</button>
+        <button id="genereerBtn">Genereer Woordzoeker</button>
       </div>
     </div>
 
@@ -86,28 +82,28 @@
 
     <div id="right-panel-buttons">
       <div class="control-group">
+        <button id="toonOplossingBtn">Toon Oplossing</button>
         <button id="downloadPngBtn">Download als PNG</button>
         <button id="downloadPdfBtn">Download als PDF</button>
       </div>
     </div>
   </div>
 
-  <!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
   <script src="./js/device-id.js"></script>
   <script type="module" src="./js/guard.js"></script>
 
-  <!-- ID/selector “shim”: mapt Engelstalige ID’s naar NL-elementen (geen wijziging aan woordzoeker.js nodig) -->
   <script>
     (function() {
       const map = {
         wordsInput: 'woordenInput',
         gridSize: 'rasterFormaat',
-        generateBtn: 'generateBtn',
+        generateBtn: 'genereerBtn', // Aangepast om te matchen
         wordList: 'woordenLijst',
         mainCanvas: 'mainCanvas',
         downloadPngBtn: 'downloadPngBtn',
         downloadPdfBtn: 'downloadPdfBtn',
-        messageBox: 'meldingContainer'
+        messageBox: 'meldingContainer',
+        // Shim is niet nodig voor de ontbrekende knoppen, omdat die direct worden toegevoegd met het juiste ID
       };
       const origGet = document.getElementById.bind(document);
       document.getElementById = function(id){
@@ -116,7 +112,6 @@
     })();
   </script>
 
-  <!-- Paginascript NA de guard, eenmalig laden -->
   <script src="../woordzoeker.js"></script>
 </body>
 </html>
