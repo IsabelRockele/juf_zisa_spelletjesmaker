@@ -5,14 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Jouw Werkblad (PRO)</title>
 
-<link rel="manifest" href="manifest-pro.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+  <!-- PRO manifest & iconen (reeds relatief, goed voor GitHub Pages) -->
+  <link rel="manifest" href="manifest-pro.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
   <meta name="theme-color" content="#fffbe6">
+  <!-- voorkom Google-Translate overlay (CSP-consolemelding) -->
+  <meta name="google" content="notranslate">
 
+  <!-- Styles: CSS ligt buiten /pro/, dus één map omhoog -->
   <link rel="stylesheet" href="../bewerkingen.css">
 
+  <!-- Base zodat interne links relatief tot /pro/ zijn -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
+
+  <!-- Externe lib (zoals u had) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
   <style>
 /* Consistente PRO-header */
 .pro-header{
@@ -62,5 +71,3 @@ body{ margin-top:60px; }
 
 </body>
 </html>
-
-
