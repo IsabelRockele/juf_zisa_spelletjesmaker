@@ -15,7 +15,6 @@ import * as logger from "firebase-functions/logger";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
-import { getStorage } from "firebase-admin/storage";          // ← NIEUW: Storage
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 
@@ -43,11 +42,11 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
 ];
 
-const SELLER_NAME       = "Juf Zisa";
+const SELLER_NAME       = "Juf Zisa (Isabel Rockelé)";
 const SELLER_EMAIL      = "zebrapost@jufzisa.be";
 const SELLER_ADDR1      = "Maasfortbaan 108";
 const SELLER_ADDR2      = "2500 Lier";
-const SELLER_ENTERPRISE = "Ondernemingsnummer 1026.769.348";
+const SELLER_ENTERPRISE = "Ondernemingsnummer 1026.769.348 _ BTW BE1026769348";
 const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen.";
 
 const PRICE_EUR_KOOP     = "40.00";
@@ -60,14 +59,7 @@ const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY || "";
 
 // ------------------------------ Types ----------------------------------------
 type MollieLinks = { checkout?: { href?: string } };
-// AANGEPAST: 'mode' toegevoegd zodat we test/live kunnen onderscheiden
-type MolliePayment = { id: string; status?: string; metadata?: any; _links?: MollieLinks; mode?: "test" | "live" };
-
-// === Factuurnummering: types ===
-type Series = "live" | "test";
-function seriesFromMollieMode(mode?: string): Series {
-  return mode === "live" ? "live" : "test";
-}
+type MolliePayment = { id: string; status?: string; metadata?: any; _links?: MollieLinks };
 
 // ------------------------------ Helpers --------------------------------------
 function setCors(res: Response, origin?: string) {
@@ -129,22 +121,40 @@ async function writeLicenseAll(licenseCode: string, data: any) {
   );
 }
 
+/* ────────────────────────────────────────────────────────────────────────────
+   AANGEPAST: bij meerdere licenties (bv. na verlenging) pak altijd de nieuwste
+   (hoogste expiresAt). Dit is een veilige read-only wijziging; geen index vereist.
+────────────────────────────────────────────────────────────────────────────── */
 async function findLicenseByUid(uid: string) {
+  // Kies altijd de licentie met de meest toekomstige vervaldatum (verlengingen eerst)
+  let best: any = null;
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col).where("uid", "==", uid).limit(1).get();
-    if (!qs.empty) return qs.docs[0].data();
+    const qs = await db.collection(col).where("uid", "==", uid).get();
+    for (const d of qs.docs) {
+      const lic = d.data();
+      const t   = lic?.expiresAt?.toMillis ? lic.expiresAt.toMillis() : 0;
+      const bt  = best?.expiresAt?.toMillis ? best.expiresAt.toMillis() : 0;
+      if (!best || t > bt) best = lic;
+    }
   }
-  return null;
+  return best;
 }
 
-// NIEUW: fallback-lookup op e-mail
+// NIEUW: fallback-lookup op e-mail (ook hier de meest recente nemen)
 async function findLicenseByEmail(emailLower: string) {
+  // Kies altijd de licentie met de meest toekomstige vervaldatum (verlengingen eerst)
   const e = (emailLower || "").trim().toLowerCase();
+  let best: any = null;
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col).where("email", "==", e).limit(1).get();
-    if (!qs.empty) return qs.docs[0].data();
+    const qs = await db.collection(col).where("email", "==", e).get();
+    for (const d of qs.docs) {
+      const lic = d.data();
+      const t   = lic?.expiresAt?.toMillis ? lic.expiresAt.toMillis() : 0;
+      const bt  = best?.expiresAt?.toMillis ? best.expiresAt.toMillis() : 0;
+      if (!best || t > bt) best = lic;
+    }
   }
-  return null;
+  return best;
 }
 
 function makeLicenseCode(): string {
@@ -158,46 +168,6 @@ function calcExpiry(): Timestamp {
   const d = new Date();
   d.setFullYear(d.getFullYear() + 1);
   return Timestamp.fromDate(d);
-}
-
-// === Factuurnummering: helper (TEST/LIVE) ===================================
-// Idempotent + atomisch toekennen; reset naar 1 bij jaarwissel
-async function assignInvoiceNumber(
-  orderRef: FirebaseFirestore.DocumentReference,
-  series: Series
-): Promise<string> {
-  const countersRef = db.doc(`counters/${series}_invoice_seq`);
-  return await db.runTransaction(async (tx) => {
-    // 1) Idempotentie
-    const orderSnap = await tx.get(orderRef);
-    const existing = orderSnap.exists ? (orderSnap.get("invoiceNumber") as string | undefined) : undefined;
-    if (existing) return existing;
-
-    // 2) Teller lezen/init
-    const now  = new Date();
-    const year = now.getFullYear();
-    const counterSnap = await tx.get(countersRef);
-    const data = counterSnap.exists
-      ? (counterSnap.data() as { next: number; year: number })
-      : { next: 1, year };
-    const next = (data.year === year) ? data.next : 1;
-
-    // 3) Nummer opbouwen
-    const invoiceNumber = (series === "live")
-      ? `${year}-${String(next).padStart(4, "0")}`
-      : `TEST-${String(next).padStart(4, "0")}`;
-
-    // 4) Teller + order updaten
-    tx.set(countersRef, { next: next + 1, year }, { merge: true });
-    tx.set(orderRef, {
-      invoiceNumber,
-      invoiceSeries: series,
-      invoiceYear: year,
-      invoiceAssignedAt: now,
-    }, { merge: true });
-
-    return invoiceNumber;
-  });
 }
 
 // ------------------------------ PDF Factuur ----------------------------------
@@ -368,17 +338,10 @@ async function completeOrderByPayment(payment: MolliePayment) {
   await writeLicenseAll(licenseCode, licenseDoc);
   await writeOrderAll(orderId, { status: "betaald", licenseCode, paidAt: FieldValue.serverTimestamp() });
 
-  // === Factuurnummer: TEST/LIVE bepalen + nummer toekennen (idempotent) ===
-  const series: Series = seriesFromMollieMode(payment?.mode);
-  const orderRef = orderRes.ref;
-  const invoiceNumber = await assignInvoiceNumber(orderRef, series);
-  // (optioneel) propagate naar alle order-collecties zodat overal zichtbaar:
-  await writeOrderAll(orderId, { invoiceNumber, invoiceSeries: series });
-
-  // Mail + factuur (PDF)
+  // Mail + factuur
   const passwordLink  = await generatePasswordLink(email);
   const invoiceBase64 = await makeInvoicePdfBase64({
-    invoiceNumber, // <-- teller (TEST-0001 of 2025-0001, ...)
+    invoiceNumber: `ZISA-${orderId.slice(0, 8)}`,
     dateISO: new Date().toISOString().slice(0, 10),
     toEmail: email,
     product: order.description || "Zisa PRO – jaarlicentie",
@@ -386,30 +349,11 @@ async function completeOrderByPayment(payment: MolliePayment) {
     paymentId,
   });
 
-  // === NIEUW: PDF ook bewaren in Storage ====================================
-  const year = new Date().getFullYear();
-  const storagePath = series === "live"
-    ? `Facturen/live/${year}/${invoiceNumber}.pdf`
-    : `Facturen/test/${year}/${invoiceNumber}.pdf`;
-
-  await getStorage().bucket().file(storagePath).save(
-    Buffer.from(invoiceBase64, "base64"),
-    {
-      contentType: "application/pdf",
-      resumable: false,
-      metadata: { cacheControl: "private, max-age=0" },
-    }
-  );
-
-  // Pad opslaan bij order (handig voor boekhouding/overzicht)
-  await writeOrderAll(orderId, { invoiceStoragePath: storagePath });
-
-  // E-mail met bijlage (blijft zoals voordien, maar nu juiste bestandsnaam)
   await queueEmail(
     email,
     "Uw Zisa PRO – toegang & factuur",
     emailHtml({ name: email, passwordLink }),
-    [{ filename: `factuur-${invoiceNumber}.pdf`, content: invoiceBase64, type: "application/pdf" }]
+    [{ filename: `factuur-${orderId}.pdf`, content: invoiceBase64, type: "application/pdf" }]
   );
 }
 
@@ -518,7 +462,6 @@ export const devSimulatePaid = onRequest({ region: REGION }, async (req: Request
     paymentId,
   });
 
-  // Let op: hier zetten we geen payment.mode; in completeOrderByPayment valt dit standaard op 'test'
   const fakePayment: MolliePayment = { id: paymentId, status: "paid" };
   await completeOrderByPayment(fakePayment);
 
@@ -591,4 +534,3 @@ export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true },
 
   return { allowed: true, expiresAt: exp.toDate().toISOString(), deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT };
 });
-
