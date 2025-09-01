@@ -3,8 +3,16 @@
 <head>
     <meta charset="utf-8"/>
     <title>Doolhof Generator</title>
+
+    <!-- Optioneel: niet vertalen door Google -->
+    <meta name="google" content="notranslate">
+
+    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
+
+    <!-- Styles liggen buiten /pro/ -->
     <link href="../slangendoolhof.css" rel="stylesheet"/>
-    <base href="/pro/">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .pro-header {
@@ -28,9 +36,9 @@
             font-weight: 600;
             text-decoration: none;
             cursor: pointer;
-            display: inline-block; /* laten zoals u eerder wenste */
+            display: inline-block;
             white-space: nowrap;
-            float: left;
+            /* float:left; verwijderd i.v.m. console-waarschuwing */
         }
         body { margin-top: 60px; }
     </style>
@@ -138,8 +146,6 @@
     </div>
 </div>
 
-<!-- Oude logout-script en -knop verwijderd -->
-
 <!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
 <script src="./js/device-id.js"></script>
 <script type="module" src="./js/guard.js"></script>
@@ -148,3 +154,4 @@
 <script src="../slangendoolhof.js"></script>
 </body>
 </html>
+
