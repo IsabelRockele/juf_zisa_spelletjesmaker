@@ -3,8 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <title>Rekenvierkant Generator</title>
+<meta name="google" content="notranslate">
+
+<!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+<base href="/juf_zisa_spelletjesmaker/pro/">
+
 <link href="../rekenvierkant.css" rel="stylesheet"/>
-<base href="/pro/">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
     .pro-header {
@@ -30,7 +34,7 @@
         cursor: pointer;
         display: inline-block;
         white-space: nowrap;
-        float: left;
+        /* float:left; verwijderd i.v.m. console-waarschuwing */
     }
     body { margin-top: 60px; }
 </style>
@@ -146,8 +150,6 @@
   </div>
 </div>
 
-<!-- Oude uitlogknop + logout-script verwijderd -->
-
 <!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
 <script src="./js/device-id.js"></script>
 <script type="module" src="./js/guard.js"></script>
@@ -156,3 +158,4 @@
 <script src="../rekenvierkant.js"></script>
 </body>
 </html>
+
