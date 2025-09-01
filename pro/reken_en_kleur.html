@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Reken & Kleur Generator (PRO)</title>
-  <base href="/pro/">
+  <meta name="google" content="notranslate">
+  <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
   <link rel="stylesheet" href="../reken_en_kleur.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -16,9 +18,10 @@
     .pro-header .back-link {
       background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
       border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
-      cursor: pointer; display: inline-block; white-space: nowrap; float: left;
+      cursor: pointer; display: inline-block; white-space: nowrap;
+      /* float:left; verwijderd om console-waarschuwing te vermijden */
     }
-    body { margin: 0; padding-top: 60px; }
+    body { margin: 0; margin-top: 60px; }
   </style>
 </head>
 <body>
@@ -203,5 +206,6 @@
   <script src="../reken_en_kleur.js"></script>
 </body>
 </html>
+
 
 
