@@ -48,7 +48,7 @@ const SELLER_EMAIL      = "zebrapost@jufzisa.be";
 const SELLER_ADDR1      = "Maasfortbaan 108";
 const SELLER_ADDR2      = "2500 Lier";
 const SELLER_ENTERPRISE = "Ondernemingsnummer 1026.769.348";
-const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE1026.769.348"
+const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE0123.456.789"
 const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen.";
 
 const PRICE_EUR_KOOP     = "40.00";
@@ -124,18 +124,28 @@ async function writeLicenseAll(licenseCode: string, data: any) {
     LICENSE_COLLECTIONS.map((col) => db.collection(col).doc(licenseCode).set(data, { merge: true }))
   );
 }
+
+// ⬇️ AANGEPAST: pak altijd de meest recente licentie (belangrijk bij hernieuwing)
 async function findLicenseByUid(uid: string) {
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col).where("uid", "==", uid).limit(1).get();
+    const qs = await db.collection(col)
+      .where("uid", "==", uid)
+      .orderBy("expiresAt", "desc")
+      .limit(1)
+      .get();
     if (!qs.empty) return qs.docs[0].data();
   }
   return null;
 }
-// Fallback-lookup op e-mail
+// ⬇️ AANGEPAST: idem voor lookup op e-mail
 async function findLicenseByEmail(emailLower: string) {
   const e = (emailLower || "").trim().toLowerCase();
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col).where("email", "==", e).limit(1).get();
+    const qs = await db.collection(col)
+      .where("email", "==", e)
+      .orderBy("expiresAt", "desc")
+      .limit(1)
+      .get();
     if (!qs.empty) return qs.docs[0].data();
   }
   return null;
