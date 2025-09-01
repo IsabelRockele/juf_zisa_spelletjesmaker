@@ -7,7 +7,12 @@
 
   <!-- CSS en JS blijven buiten /pro/, dus één niveau hoger -->
   <link rel="stylesheet" href="../galgje.css" />
-  <base href="/pro/">
+
+  <!-- Alle relatieve paden laten resolven t.o.v. /pro/ op GitHub Pages -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
+
+  <!-- voorkom Google-Translate overlay / CSP-consolemelding -->
+  <meta name="google" content="notranslate">
 
   <style>
     .pro-header {
@@ -138,4 +143,5 @@
   <script src="../galgje.js"></script>
 </body>
 </html>
+
 
