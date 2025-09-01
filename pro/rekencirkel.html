@@ -2,9 +2,11 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
+    <meta name="google" content="notranslate">
     <title>Rekencirkel Generator</title>
     <link href="../rekencirkel.css" rel="stylesheet"/>
-    <base href="/pro/">
+    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         .pro-header {
@@ -30,7 +32,7 @@
             cursor: pointer;
             display: inline-block;
             white-space: nowrap;
-            float: left;
+            /* float:left; verwijderd om console-waarschuwing te vermijden */
         }
         body { margin-top: 60px; }
     </style>
@@ -107,3 +109,4 @@
 <script src="../rekencirkel.js"></script>
 </body>
 </html>
+
