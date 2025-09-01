@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8"/>
 <title>Woordzoeker Generator</title>
+<meta name="google" content="notranslate">
+
+<!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+<base href="/juf_zisa_spelletjesmaker/pro/">
 
 <!-- Styles liggen buiten /pro/ -->
 <link href="../woordzoeker.css" rel="stylesheet"/>
-
-<!-- Alle relatieve paden resolven t.o.v. /pro/ -->
-<base href="/pro/">
 
 <!-- Externe lib (ongewijzigd) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -24,7 +25,8 @@
     .pro-header .back-link{
         background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
         border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
-        cursor: pointer; display: inline-block; white-space: nowrap; float: left;
+        cursor: pointer; display: inline-block; white-space: nowrap;
+        /* float:left; verwijderd i.v.m. console-waarschuwing */
     }
     /* verwijdert de oude logout-knop stijl */
     /* .pro-header #logoutBtn { ... }  — volledig verwijderd */
@@ -106,3 +108,4 @@
 <script src="../woordzoeker.js"></script>
 </body>
 </html>
+
