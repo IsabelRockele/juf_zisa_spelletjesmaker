@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Punttekening Bewerken & Bekijken</title>
+  <meta name="google" content="notranslate">
   <link rel="stylesheet" href="../punttekening.css">
-  <base href="/pro/">
+  <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     .pro-header {
@@ -30,7 +32,7 @@
         cursor: pointer;
         display: inline-block;
         white-space: nowrap;
-        float: left;
+        /* float:left; verwijderd i.v.m. console-waarschuwing */
     }
     body { margin-top: 60px; }
   </style>
@@ -124,4 +126,5 @@
 <script src="../punttekening.js"></script>
 </body>
 </html>
+
 
