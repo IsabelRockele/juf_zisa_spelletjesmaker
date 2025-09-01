@@ -193,31 +193,8 @@
   <!-- Device-ID helper moet vóór de guard -->
   <script src="./js/device-id.js"></script>
 
-  <!-- Dynamische loader: probeer 2 mogelijke paden voor guard.js -->
-  <script type="module">
-    const statusEl = document.querySelector('#status');
-    async function loadGuard() {
-      const paths = ["./guard.js?v=now", "./js/guard.js?v=now"];
-      for (const p of paths) {
-        try {
-          await import(p);
-          return p;
-        } catch (e) {
-          // probeer volgende pad
-        }
-      }
-      return null;
-    }
-    const loaded = await loadGuard();
-    if (!loaded) {
-      statusEl.className = "status err";
-      statusEl.textContent = "Kon beveiliging (guard.js) niet laden. Plaats guard.js in /pro/ of /pro/js/ en laad de pagina opnieuw.";
-      console.error("guard.js niet gevonden op ./guard.js of ./js/guard.js");
-    } else {
-      // klein logje om te zien welk pad werkt
-      console.log("guard geladen via:", loaded);
-    }
-  </script>
+  <!-- ★ Laad guard.js rechtstreeks vanaf Pages (voorkomt 404 door querystrings/paden) -->
+  <script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
 
   <!-- Dun app-script: toont UI wanneer PRO klaar is -->
   <script type="module">
@@ -231,6 +208,7 @@
     const auth = getAuth();
     $("#logout").onclick = ()=> signOut(auth);
 
+    // Guard roept dit zodra PRO oké is
     window.onProReady = ({ user, expiresAt, limit }) => {
       try { userPill.textContent = user.email ?? user.uid; } catch {}
       statusEl.className = "status good";
@@ -243,6 +221,7 @@
       contentEl.style.display = "block";
     };
 
+    // Fallback: niet ingelogd → terug naar login
     onAuthStateChanged(auth, (u) => {
       if (!u) { location.href = "../pro/"; }
       else { userPill.textContent = u.email ?? u.uid; }
@@ -250,3 +229,4 @@
   </script>
 </body>
 </html>
+
