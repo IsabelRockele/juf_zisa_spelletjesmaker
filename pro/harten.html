@@ -8,8 +8,11 @@
     <!-- Stijlen liggen buiten /pro/ -->
     <link rel="stylesheet" href="../harten.css">
 
-    <!-- Alle relatieve paden resolven t.o.v. /pro/ -->
-    <base href="/pro/">
+    <!-- Alle relatieve paden resolven t.o.v. /pro/ op GitHub Pages -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
+
+    <!-- voorkom Google-Translate overlay / CSP-consolemelding -->
+    <meta name="google" content="notranslate">
 
     <style>
         /* Vaste PRO-header met alleen 'Terug naar menu' */
@@ -21,7 +24,8 @@
         .pro-header .back-link {
             background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
             border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
-            cursor: pointer; display: inline-block; white-space: nowrap; float: left;
+            cursor: pointer; display: inline-block; white-space: nowrap;
+            /* float:left;  ← overbodig en negeert display:inline-block, daarom verwijderd */
         }
         /* Zorg dat de inhoud niet achter de header valt */
         body { margin-top: 60px; }
@@ -81,4 +85,5 @@
     <script src="../harten.js"></script>
 </body>
 </html>
+
 
