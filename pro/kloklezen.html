@@ -3,9 +3,16 @@
 <head>
 <meta charset="utf-8"/>
 <title>Kloklezen Werkblad Generator</title>
+
+<!-- Alle relatieve paden laten resolven t.o.v. /pro/ op GitHub Pages -->
+<base href="/juf_zisa_spelletjesmaker/pro/">
+
+<!-- voorkom Google-Translate overlay / CSP-consolemelding -->
+<meta name="google" content="notranslate">
+
 <link href="../kloklezen.css" rel="stylesheet"/>
-<base href="/pro/">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <style>
   .pro-header {
     position: fixed; top: 0; left: 0; width: 100%;
@@ -15,7 +22,8 @@
   .pro-header .back-link{
     background:#5a9fd4; color:#fff; border:none; padding:6px 10px;
     border-radius:6px; font-size:14px; font-weight:600; text-decoration:none;
-    cursor:pointer; display:inline-block; white-space:nowrap; float:left;
+    cursor:pointer; display:inline-block; white-space:nowrap;
+    /* float:left;  ← verwijderd (was overbodig en gaf waarschuwing) */
   }
   body { margin-top:60px; }
 </style>
@@ -114,4 +122,3 @@
 <script src="../kloklezen.js"></script>
 </body>
 </html>
-
