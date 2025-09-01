@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kindvriendelijke Aftelklokken</title>
+    <meta name="google" content="notranslate">
+
+    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+    <base href="/juf_zisa_spelletjesmaker/pro/">
+
     <!-- CSS staat buiten /pro/, dus één map omhoog -->
     <link rel="stylesheet" href="../timer.css">
-    <!-- Zet de basis op /pro/ zodat navigatielinks kloppen -->
-    <base href="/pro/">
+
     <style>
         /* Consistente PRO-header (zoals de andere PRO-pagina's) */
         .pro-header {
@@ -31,7 +35,7 @@
             cursor: pointer;
             display: inline-block;
             white-space: nowrap;
-            float: left;
+            /* float:left; verwijderd i.v.m. console-waarschuwing */
         }
         /* voorkom overlap met de vaste header */
         body { margin-top: 60px; }
@@ -170,3 +174,6 @@
 <script src="../timer.js"></script>
 </body>
 </html>
+
+
+
