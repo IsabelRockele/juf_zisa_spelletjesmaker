@@ -4,9 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Rekenen Loopspel (PRO)</title>
+  <meta name="google" content="notranslate">
 
   <!-- Gedeelde styles liggen buiten /pro/ -->
   <link rel="stylesheet" href="../loopspel.css?v=2025-08-31"/>
+
+  <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
 
   <style>
     .pro-header {
@@ -18,9 +22,9 @@
       background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
       border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
       cursor: pointer; display: inline-block; white-space: nowrap;
+      /* geen float:left; */
     }
-    body { margin: 0; }
-    main { margin-top: 60px; }
+    body { margin-top: 60px; }
   </style>
 </head>
 <body>
@@ -128,11 +132,14 @@
 
 <script>
   // Zet pas hier de afbeeldingen, zodat paden altijd juist zijn (na DOM beschikbaar)
-  document.querySelectorAll('img[data-src]').forEach(img => {
-    img.setAttribute('src', img.getAttribute('data-src'));
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('img[data-src]').forEach(img => {
+      img.setAttribute('src', img.getAttribute('data-src'));
+    });
   });
 </script>
 
 </body>
 </html>
+
 
