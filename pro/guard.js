@@ -1,46 +1,46 @@
-// pro/guard.js — versterkte versie (self-redirect fix + apparaten.html skip + guard=off)
+// pro/js/guard.js — stabiele PRO-guard
+// - eerst licentie controleren, dan pas registreren
+// - GEEN registratie op apparaten.html
+// - herkent DEVICE_LIMIT (429/resource-exhausted) en stuurt naar apparaten.html
+// - safeGo voorkomt self-redirects
+// - ?guard=off of localStorage['zisa_guard_off']='1' om tijdelijk uit te schakelen
 
-// ====== Noodschakelaar om flitsen te stoppen (debug) =========================
+// ===== Noodschakelaar ========================================================
 const GUARD_OFF = (() => {
   try {
     const p = new URLSearchParams(location.search);
-    return p.get('guard') === 'off' || localStorage.getItem('zisa_guard_off') === '1';
+    return p.get("guard") === "off" || localStorage.getItem("zisa_guard_off") === "1";
   } catch { return false; }
 })();
 if (GUARD_OFF) {
-  console.warn('[GUARD] Uitgeschakeld via ?guard=off of localStorage');
-  // Niets doen: hiermee kunt u rustig Network/Console inspecteren.
+  console.warn("[GUARD] UIT: ?guard=off of localStorage");
+  // niets doen; zo kunt u in alle rust debuggen
 }
 
-// ====== Huidige paginanaam & helpers =========================================
+// ===== Huidige paginanaam + helpers =========================================
 const CURRENT_PAGE = (() => {
-  const f = (location.pathname.split('/').pop() || '').toLowerCase();
-  return f || 'index.html';
+  const f = (location.pathname.split("/").pop() || "").toLowerCase();
+  return f || "index.html";
 })();
+const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html"]); // publiek
 
-// Pagina’s waar de guard NIET hoeft te forceren (login/koop/bedankt kunnen publiek zijn)
-const SKIP_PAGES = new Set(['index.html','koop.html','bedankt.html']);
-
-// Veilige redirect: voorkom ‘naar jezelf’ sturen (self-redirect).
 function safeGo(to, reason) {
   try {
-    const dest = (to.split('/').pop() || '').toLowerCase();
+    const dest = (to.split("/").pop() || "").toLowerCase();
     if (dest === CURRENT_PAGE) {
-      console.warn('[GUARD] Self-redirect voorkomen:', to, reason);
+      console.warn("[GUARD] Self-redirect voorkomen:", to, reason);
       return;
     }
   } catch {}
-  const q = reason ? (`?reason=${encodeURIComponent(reason)}`) : '';
+  const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
   location.href = to + q;
 }
+const goLogin   = () => safeGo("./index.html");
+const goApp     = (r) => safeGo("./app.html", r);
+const goDevices = () => safeGo("./apparaten.html");
+const goKoop    = (r) => safeGo("./koop.html", r);
 
-// Navigatie
-const goLogin   = () => safeGo('./index.html');
-const goApp     = (r) => safeGo('./app.html', r);
-const goDevices = () => safeGo('./apparaten.html');
-const goKoop    = (r) => safeGo('./koop.html', r);
-
-// ====== Uw bestaande Firebase imports/config =================================
+// ===== Firebase + App Check ==================================================
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
@@ -87,25 +87,25 @@ const appCheck = initializeAppCheck(app, {
   isTokenAutoRefreshEnabled: true,
 });
 
-// ====== Hoofd-guard ===========================================================
+// ===== Hoofd-guard ===========================================================
 if (!GUARD_OFF) {
   onAuthStateChanged(auth, async (user) => {
-    // Publieke pagina’s: guard niet forceren
+    // publiek laten passeren
     if (SKIP_PAGES.has(CURRENT_PAGE)) return;
 
     if (!user) { goLogin(); return; }
 
-    // NB: apparaten.html mag geladen worden om slots te beheren → we doen daar géén registerDevice
-    const IS_DEVICES_PAGE = CURRENT_PAGE === 'apparaten.html';
+    // Op apparaten.html géén registratie doen (bewust)
+    const IS_DEVICES_PAGE = CURRENT_PAGE === "apparaten.html";
 
     try {
-      // ★ Wacht op App Check + vers ID-token (voorkomt 401/403 op eerste callable)
+      // 0) Eerst tokens klaarzetten (minder 401/403 bij eerste callable)
       await Promise.all([
-        getAppCheckToken(appCheck, /* forceRefresh */ false),
-        user.getIdToken(true)
+        getAppCheckToken(appCheck, /*forceRefresh*/ false),
+        user.getIdToken(true) // vers ID-token
       ]);
 
-      // 1) Licentiecontrole eerst
+      // 1) Licentie eerst controleren
       const getAccessStatus = httpsCallable(fns, "getAccessStatus");
       let status;
       try {
@@ -113,26 +113,31 @@ if (!GUARD_OFF) {
         status = res?.data || {};
       } catch (e) {
         console.error("getAccessStatus error:", e);
-        goApp("license_check_error"); return;
+        goLogin(); return; // veiliger dan naar app.html (geen self-redirect)
       }
       if (!status.allowed) { goKoop(status?.reason || "no_access"); return; }
 
-      // 2) Alleen registreren op NIET-apparatenpagina's
+      // 2) Alleen registreren als we NIET op apparaten.html zitten
       if (!IS_DEVICES_PAGE) {
         const deviceId = window.ZisaDevice.getOrCreateDeviceId();
         const registerDevice = httpsCallable(fns, "registerDevice");
         try {
           await registerDevice({ deviceId });
         } catch (e) {
-          if (e?.code === "resource-exhausted") { goDevices(); return; }
           console.error("registerDevice error:", e);
-          goApp("device_register_error"); return;
+          const msg = (e && (e.details || e.code || e.message || "")).toString();
+          const limitHit =
+            msg.includes("DEVICE_LIMIT") ||
+            msg.includes("resource-exhausted") ||
+            msg.includes("429");
+          if (limitHit) { goDevices(); return; }
+          goLogin(); return;
         }
       } else {
-        console.info('[GUARD] apparaten.html: registratie overgeslagen (bewust).');
+        console.info("[GUARD] apparaten.html: registratie overgeslagen (bewust).");
       }
 
-      // 3) Klaar voor PRO
+      // 3) Klaar — pagina mag initialiseren
       if (typeof window.onProReady === "function") {
         window.onProReady({
           user,
@@ -142,8 +147,9 @@ if (!GUARD_OFF) {
       }
     } catch (err) {
       console.error("Guard error:", err);
-      goApp("guard_error");
+      goLogin();
     }
   });
 }
+
 
