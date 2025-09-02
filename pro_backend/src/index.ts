@@ -6,8 +6,9 @@
    - createPaymentWaitlist                           → Mollie €35 (checkt waitlist)
    - mollieWebhook                                   → verwerkt betaalstatus
    - devSimulatePaid                                 → test-helper; zet licentie + mail met PDF
-   - registerDevice / listDevices / unregisterDevice → apparaatlimiet (licentie-afhankelijk)
+   - registerDevice / listDevices / unregisterDevice → apparaatlimiet (2)
    - getAccessStatus                                 → controle op licentie + vervaldatum
+   - listDevicesHttp / unregisterDeviceHttp          → HTTP wrappers (CORS + Bearer) voor apparaten.html
 */
 
 import { onRequest, onCall, HttpsError } from "firebase-functions/v2/https";
@@ -19,6 +20,7 @@ import { getStorage } from "firebase-admin/storage";
 import type { Request, Response } from "express";
 import PDFDocument from "pdfkit";
 
+// ------------------------------ Init -----------------------------------------
 const REGION = "europe-west1";
 initializeApp();
 
@@ -42,13 +44,14 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3000",
 ];
 
-// Factuur/verkoper
+// ——— Verkoop/Factuurkop
 const SELLER_NAME       = "Juf Zisa (Isabel Rockelé)";
 const SELLER_EMAIL      = "zebrapost@jufzisa.be";
 const SELLER_ADDR1      = "Maasfortbaan 108";
 const SELLER_ADDR2      = "2500 Lier";
+// Opm: vul je uiteindelijke BTW-nummer hieronder in (of via secret/ENV)
+const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE 0123.456.789"
 const SELLER_ENTERPRISE = "Ondernemingsnummer 1026.769.348";
-const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE0123.456.789"
 const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen.";
 
 const PRICE_EUR_KOOP     = "40.00";
@@ -61,7 +64,7 @@ const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY || "";
 
 // ------------------------------ Types ----------------------------------------
 type MollieLinks = { checkout?: { href?: string } };
-// 'mode' zodat we test/live kunnen onderscheiden
+// 'mode' toegevoegd zodat we test/live kunnen onderscheiden
 type MolliePayment = { id: string; status?: string; metadata?: any; _links?: MollieLinks; mode?: "test" | "live" };
 
 // === Factuurnummering: types ===
@@ -75,7 +78,8 @@ function setCors(res: Response, origin?: string) {
   const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
   res.setHeader("Access-Control-Allow-Origin", allow);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  // Authorization toegevoegd voor Bearer-token
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 }
 
 function badRequest(res: Response, msg = "Bad Request") {
@@ -84,6 +88,7 @@ function badRequest(res: Response, msg = "Bad Request") {
 function forbidden(res: Response, msg = "Forbidden") {
   res.status(403).json({ error: msg });
 }
+
 function toLowerEmail(x: string) {
   return (x || "").trim().toLowerCase();
 }
@@ -124,28 +129,18 @@ async function writeLicenseAll(licenseCode: string, data: any) {
     LICENSE_COLLECTIONS.map((col) => db.collection(col).doc(licenseCode).set(data, { merge: true }))
   );
 }
-
-// ⬇️ AANGEPAST: pak altijd de meest recente licentie (belangrijk bij hernieuwing)
 async function findLicenseByUid(uid: string) {
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col)
-      .where("uid", "==", uid)
-      .orderBy("expiresAt", "desc")
-      .limit(1)
-      .get();
+    const qs = await db.collection(col).where("uid", "==", uid).limit(1).get();
     if (!qs.empty) return qs.docs[0].data();
   }
   return null;
 }
-// ⬇️ AANGEPAST: idem voor lookup op e-mail
+// Fallback-lookup op e-mail
 async function findLicenseByEmail(emailLower: string) {
   const e = (emailLower || "").trim().toLowerCase();
   for (const col of LICENSE_COLLECTIONS) {
-    const qs = await db.collection(col)
-      .where("email", "==", e)
-      .orderBy("expiresAt", "desc")
-      .limit(1)
-      .get();
+    const qs = await db.collection(col).where("email", "==", e).limit(1).get();
     if (!qs.empty) return qs.docs[0].data();
   }
   return null;
@@ -164,7 +159,6 @@ function calcExpiry(): Timestamp {
 }
 
 // === Factuurnummering: helper (TEST/LIVE) ===================================
-// Idempotent + atomisch toekennen; reset naar 1 bij jaarwissel
 async function assignInvoiceNumber(
   orderRef: FirebaseFirestore.DocumentReference,
   series: Series
@@ -203,13 +197,6 @@ async function assignInvoiceNumber(
   });
 }
 
-// ============ Device-limit helper (licentie > fallback) ======================
-async function resolveDeviceLimit(uid: string, tokenEmail?: string): Promise<number> {
-  let lic: any = await findLicenseByUid(uid);
-  if (!lic && tokenEmail) lic = await findLicenseByEmail(String(tokenEmail).toLowerCase());
-  return lic?.deviceLimit ?? DEVICE_LIMIT;
-}
-
 // ------------------------------ PDF Factuur ----------------------------------
 async function makeInvoicePdfBase64(params: {
   invoiceNumber: string;
@@ -233,8 +220,8 @@ async function makeInvoicePdfBase64(params: {
     doc.fontSize(12).text(SELLER_NAME);
     doc.text(`Contact: ${SELLER_EMAIL}`);
     doc.text(`Adres: ${SELLER_ADDR1}, ${SELLER_ADDR2}`);
-    doc.text(SELLER_ENTERPRISE);
     if (SELLER_VAT_NUMBER) doc.text(`BTW-nummer: ${SELLER_VAT_NUMBER}`);
+    doc.text(SELLER_ENTERPRISE);
     doc.moveDown();
 
     doc.text(`Factuurnummer: ${params.invoiceNumber}`);
@@ -257,7 +244,6 @@ async function makeInvoicePdfBase64(params: {
 }
 
 // ------------------------------ Mail helper ----------------------------------
-// attachments onder message.attachments (base64)
 async function queueEmail(
   toEmail: string,
   subject: string,
@@ -266,8 +252,8 @@ async function queueEmail(
 ) {
   const normAtt = (attachments ?? []).map((a) => ({
     filename: a.filename,
-    content: a.content,                 // base64
-    encoding: "base64",                 // vereist
+    content: a.content,
+    encoding: "base64",
     contentType: a.type ?? "application/pdf",
   }));
 
@@ -396,7 +382,7 @@ async function completeOrderByPayment(payment: MolliePayment) {
     paymentId,
   });
 
-  // === PDF bewaren in Storage ================================================
+  // === PDF ook bewaren in Storage ==========================================
   const year = new Date().getFullYear();
   const storagePath = series === "live"
     ? `Facturen/live/${year}/${invoiceNumber}.pdf`
@@ -526,7 +512,6 @@ export const devSimulatePaid = onRequest({ region: REGION }, async (req: Request
     paymentId,
   });
 
-  // Let op: geen payment.mode; seriesFromMollieMode() → "test"
   const fakePayment: MolliePayment = { id: paymentId, status: "paid" };
   await completeOrderByPayment(fakePayment);
 
@@ -536,59 +521,37 @@ export const devSimulatePaid = onRequest({ region: REGION }, async (req: Request
 // ------------------------------ Callables (App Check) ------------------------
 export const registerDevice = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist");
-
   const uid      = req.auth.uid;
   const deviceId = String((req.data as any)?.deviceId || "").trim();
   if (!deviceId) throw new HttpsError("invalid-argument", "deviceId ontbreekt");
 
-  const colRef = db.collection("users").doc(uid).collection("devices");
-  const docRef = colRef.doc(deviceId); // idempotent: doc-ID = deviceId
+  const col = db.collection("users").doc(uid).collection("devices");
 
-  const userAgent  = (req.rawRequest?.headers?.["user-agent"] as string) || "";
-  const tokenEmail = (req.auth.token as any)?.email || undefined;
-  const limit      = await resolveDeviceLimit(uid, tokenEmail);
+  // Idempotent: bestaat dit deviceId al?
+  const exists = await col.where("deviceId", "==", deviceId).limit(1).get();
+  if (!exists.empty) return { ok: true };
 
-  // Transactie voorkomt race-conditie
-  await db.runTransaction(async (tx) => {
-    const existing = await tx.get(docRef);
-    if (existing.exists) {
-      return; // al geregistreerd → geen extra quota
-    }
+  const countSnap = await col.count().get();
+  const n = Number(countSnap.data().count || 0);
+  if (n >= DEVICE_LIMIT) {
+    throw new HttpsError("resource-exhausted", "DEVICE_LIMIT");
+  }
 
-    // Aggregates zijn niet beschikbaar in transacties → tel tot 'limit'
-    const snap = await tx.get(colRef.limit(limit));
-    if (snap.size >= limit) {
-      throw new HttpsError("resource-exhausted", "DEVICE_LIMIT");
-    }
-
-    tx.set(docRef, {
-      deviceId,
-      createdAt: FieldValue.serverTimestamp(),
-      userAgent,
-      email: tokenEmail ?? null,
-    });
+  await col.add({
+    deviceId,
+    createdAt: FieldValue.serverTimestamp(),
+    userAgent: (req.rawRequest?.headers?.["user-agent"] as string) || "",
+    email: (req.auth.token as any)?.email || null,
   });
-
   return { ok: true };
 });
 
 export const listDevices = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist");
   const uid = req.auth.uid;
-
-  const qs = await db
-    .collection("users").doc(uid)
-    .collection("devices")
-    .orderBy("createdAt", "asc")
-    .get();
-
+  const qs  = await db.collection("users").doc(uid).collection("devices").orderBy("createdAt", "asc").get();
   const items = qs.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
-
-  // Toon de effectieve limiet (licentie > fallback)
-  const tokenEmail = (req.auth.token as any)?.email || undefined;
-  const limit = await resolveDeviceLimit(uid, tokenEmail);
-
-  return { devices: items, limit };
+  return { devices: items, limit: DEVICE_LIMIT };
 });
 
 export const unregisterDevice = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
@@ -596,12 +559,11 @@ export const unregisterDevice = onCall({ region: REGION, enforceAppCheck: true }
   const uid         = req.auth.uid;
   const deviceDocId = String((req.data as any)?.deviceDocId || "").trim();
   if (!deviceDocId) throw new HttpsError("invalid-argument", "deviceDocId ontbreekt");
-
   await db.collection("users").doc(uid).collection("devices").doc(deviceDocId).delete();
   return { ok: true };
 });
 
-// Val terug op e-mail wanneer licentie niet op uid staat
+// AANGEPAST: val terug op e-mail wanneer licentie niet op uid staat
 export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
   const uid = req.auth.uid;
@@ -620,6 +582,50 @@ export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true },
     return { allowed: false, reason: "expired", expiresAt: exp ? exp.toDate().toISOString() : null };
   }
 
-  const deviceLimit = lic.deviceLimit ?? DEVICE_LIMIT;
-  return { allowed: true, expiresAt: exp.toDate().toISOString(), deviceLimit };
+  return { allowed: true, expiresAt: exp.toDate().toISOString(), deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT };
 });
+
+// --------------------------- HTTP wrappers (CORS) -----------------------------
+export const listDevicesHttp = onRequest({ region: REGION }, async (req: Request, res: Response) => {
+  setCors(res, req.headers.origin as string | undefined);
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  try {
+    const authHeader = String(req.headers.authorization || "");
+    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!idToken) { forbidden(res, "Missing Bearer token"); return; }
+
+    const decoded = await auth.verifyIdToken(idToken, true);
+    const uid = decoded.uid;
+
+    const qs = await db.collection("users").doc(uid).collection("devices")
+      .orderBy("createdAt", "asc").get();
+    const items = qs.docs.map((d) => ({ id: d.id, ...(d.data() as any) }));
+    res.status(200).json({ devices: items, limit: DEVICE_LIMIT });
+  } catch (e: any) {
+    logger.error("listDevicesHttp error", { error: e?.message || String(e) });
+    res.status(500).json({ error: "internal" });
+  }
+});
+
+export const unregisterDeviceHttp = onRequest({ region: REGION }, async (req: Request, res: Response) => {
+  setCors(res, req.headers.origin as string | undefined);
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  try {
+    const authHeader = String(req.headers.authorization || "");
+    const idToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+    if (!idToken) { forbidden(res, "Missing Bearer token"); return; }
+
+    const decoded = await auth.verifyIdToken(idToken, true);
+    const uid = decoded.uid;
+
+    const deviceDocId = String((req.body as any)?.deviceDocId || "").trim();
+    if (!deviceDocId) { badRequest(res, "deviceDocId ontbreekt"); return; }
+
+    await db.collection("users").doc(uid).collection("devices").doc(deviceDocId).delete();
+    res.status(200).json({ ok: true });
+  } catch (e: any) {
+    logger.error("unregisterDeviceHttp error", { error: e?.message || String(e) });
+    res.status(500).json({ error: "internal" });
+  }
+});
+
