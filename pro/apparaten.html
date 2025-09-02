@@ -60,143 +60,138 @@
   </footer>
 
   <!-- 1) Stabiel lokaal toestel-ID -->
-<script src="./device-id.js"></script>
+  <script src="./device-id.js"></script>
 
-<!-- 2) Guard via absolute URL (voorkomt pad/cache-issues) -->
-<script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
+  <!-- 2) Guard via absolute URL (voorkomt pad/cache-issues) -->
+  <script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
 
-<!-- 3) Paginascript -->
-<script type="module">
-  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getAppCheck, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+  <!-- 3) Paginascript -->
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  const API_BASE = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net";
+    const API_BASE = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-    authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-    projectId: "zisa-spelletjesmaker-pro",
-    storageBucket: "zisa-spelletjesmaker-pro.appspot.com",
-    messagingSenderId: "828063957776",
-    appId: "1:828063957776:web:8d8686b478846fe980db95",
-    measurementId: "G-9LHNLFHSXX"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
+      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
+      projectId: "zisa-spelletjesmaker-pro",
+      storageBucket: "zisa-spelletjesmaker-pro.appspot.com",
+      messagingSenderId: "828063957776",
+      appId: "1:828063957776:web:8d8686b478846fe980db95",
+      measurementId: "G-9LHNLFHSXX"
+    };
 
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  const userPill   = document.getElementById("user-pill");
-  const listEl     = document.getElementById("list");
-  const currentEl  = document.getElementById("currentId");
-  const msgEl      = document.getElementById("msg");
-  const limitEl    = document.getElementById("limit");
-  const refreshBtn = document.getElementById("refreshBtn");
+    const userPill   = document.getElementById("user-pill");
+    const listEl     = document.getElementById("list");
+    const currentEl  = document.getElementById("currentId");
+    const msgEl      = document.getElementById("msg");
+    const limitEl    = document.getElementById("limit");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-  // Huidige device-id tonen (met veilige fallback)
-  let currentId = "—";
-  try {
-    currentId = window.ZisaDevice.getOrCreateDeviceId();
-  } catch { /* negeer; guard/device-id.js vult dit later wel */ }
-  currentEl.textContent = currentId;
+    // Huidige device-id tonen (met veilige fallback)
+    let currentId = "—";
+    try { currentId = window.ZisaDevice.getOrCreateDeviceId(); } catch {}
+    currentEl.textContent = currentId;
 
-  async function ensureTokensReady() {
-    const ac = getAppCheck(app);
-    const u  = auth.currentUser;
-    await Promise.all([
-      getAppCheckToken(ac, false),
-      u ? u.getIdToken(true) : Promise.resolve()
-    ]);
-  }
+    // Voor HTTP-wrappers is enkel een vers ID-token nodig
+    async function ensureTokensReady() {
+      const u = auth.currentUser;
+      if (u) { await u.getIdToken(true); }
+    }
 
-  async function apiFetch(path, body) {
-    await ensureTokensReady();
-    const u = auth.currentUser;
-    if (!u) throw new Error("not signed in");
-    const idToken = await u.getIdToken(false);
-    const r = await fetch(`${API_BASE}/${path}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${idToken}`
-      },
-      body: JSON.stringify(body || {})
-    });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    return await r.json();
-  }
+    async function apiFetch(path, body) {
+      await ensureTokensReady();
+      const u = auth.currentUser;
+      if (!u) throw new Error("not signed in");
+      const idToken = await u.getIdToken(false);
+      const r = await fetch(`${API_BASE}/${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify(body || {})
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    }
 
-  function row(item){
-    const li = document.createElement("li");
-    li.className = "row";
-    const isCurrent = item.id === currentId;
-    li.innerHTML = `
-      <div><span class="id">${item.id}</span> ${isCurrent ? '<span class="tag">dit toestel</span>' : ''}</div>
-      <button class="btn danger">Verwijder</button>
-    `;
-    li.querySelector("button").onclick = async () => {
-      if (!confirm("Dit toestel verwijderen?")) return;
-      li.querySelector("button").disabled = true;
+    function row(item){
+      const li = document.createElement("li");
+      li.className = "row";
+      const isCurrent = item.id === currentId;
+      li.innerHTML = `
+        <div><span class="id">${item.id}</span> ${isCurrent ? '<span class="tag">dit toestel</span>' : ''}</div>
+        <button class="btn danger">Verwijder</button>
+      `;
+      li.querySelector("button").onclick = async () => {
+        if (!confirm("Dit toestel verwijderen?")) return;
+        li.querySelector("button").disabled = true;
+        try {
+          await apiFetch("unregisterDeviceHttp", { deviceDocId: item.id });
+          await load();
+          msgEl.textContent = "";
+        } catch (e) {
+          console.error(e);
+          msgEl.textContent = "Verwijderen mislukt. Probeer opnieuw.";
+        } finally {
+          li.querySelector("button").disabled = false;
+        }
+      };
+      return li;
+    }
+
+    async function load(){
+      listEl.innerHTML = '<li class="muted">(Laden…)</li>';
       try {
-        await apiFetch("unregisterDeviceHttp", { deviceDocId: item.id });
-        await load();
-        msgEl.textContent = "";
+        const data = await apiFetch("listDevicesHttp", {});
+        const devices = Array.isArray(data?.devices) ? data.devices : [];
+        const limit = typeof data?.limit === "number" ? data.limit : 2;
+        limitEl.textContent = String(limit);
+
+        listEl.innerHTML = "";
+        if (devices.length === 0) {
+          listEl.innerHTML = "<li class='muted'>(Geen geregistreerde toestellen)</li>";
+          return;
+        }
+        devices.forEach((it) => listEl.appendChild(row(it)));
       } catch (e) {
         console.error(e);
-        msgEl.textContent = "Verwijderen mislukt. Probeer opnieuw.";
-      } finally {
-        li.querySelector("button").disabled = false;
+        msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
+        listEl.innerHTML = "";
       }
-    };
-    return li;
-  }
-
-  async function load(){
-    listEl.innerHTML = '<li class="muted">(Laden…)</li>';
-    try {
-      const data = await apiFetch("listDevicesHttp", {});
-      const devices = Array.isArray(data?.devices) ? data.devices : [];
-      const limit = typeof data?.limit === "number" ? data.limit : 2;
-      limitEl.textContent = String(limit);
-
-      listEl.innerHTML = "";
-      if (devices.length === 0) {
-        listEl.innerHTML = "<li class='muted'>(Geen geregistreerde toestellen)</li>";
-        return;
-      }
-      devices.forEach((it) => listEl.appendChild(row(it)));
-    } catch (e) {
-      console.error(e);
-      msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
-      listEl.innerHTML = "";
     }
-  }
 
-  // Fallback-vlag + fallback-loader
-  let PRO_READY = false;
+    // Fallback-vlag + fallback-loader
+    let PRO_READY = false;
 
-  // ❶ Alleen redirecten als er géén user is
-  onAuthStateChanged(auth, (user) => {
-    if (!user) { window.location.href = "./index.html"; return; }
-    userPill.textContent = user.email || user.uid;
-    // Fallback: als guard niet binnen 2s vuurt, toch proberen te laden
-    setTimeout(() => { if (!PRO_READY) load(); }, 2000);
-  });
-
-  // ❷ Wachten op de guard; daarna laden we definitief
-  window.onProReady = ({ user, expiresAt, limit }) => {
-    PRO_READY = true;
-    try {
+    // ❶ Alleen redirecten als er géén user is
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { window.location.href = "./index.html"; return; }
       userPill.textContent = user.email || user.uid;
-      // indien device-id pas nu beschikbaar, update weergave
-      if (window.ZisaDevice) {
-        currentId = window.ZisaDevice.getOrCreateDeviceId();
-        currentEl.textContent = currentId;
-      }
-    } catch {}
-    if (typeof limit === "number") limitEl.textContent = String(limit);
-    load();
-  };
+      // Fallback: als guard niet binnen 2s vuurt, toch proberen te laden
+      setTimeout(() => { if (!PRO_READY) load(); }, 2000);
+    });
 
-  refreshBtn.addEventListener("click", load);
-</script>
+    // ❷ Wachten op de guard; daarna laden we definitief
+    window.onProReady = ({ user, expiresAt, limit }) => {
+      PRO_READY = true;
+      try {
+        userPill.textContent = user.email || user.uid;
+        if (window.ZisaDevice) {
+          currentId = window.ZisaDevice.getOrCreateDeviceId();
+          currentEl.textContent = currentId;
+        }
+      } catch {}
+      if (typeof limit === "number") limitEl.textContent = String(limit);
+      load();
+    };
+
+    refreshBtn.addEventListener("click", load);
+  </script>
+</body>
+</html>
