@@ -5,7 +5,6 @@
 // - safeGo voorkomt self-redirects
 // - ?guard=off of localStorage['zisa_guard_off']='1' om tijdelijk uit te schakelen
 
-// ===== Noodschakelaar ========================================================
 const GUARD_OFF = (() => {
   try {
     const p = new URLSearchParams(location.search);
@@ -14,10 +13,8 @@ const GUARD_OFF = (() => {
 })();
 if (GUARD_OFF) {
   console.warn("[GUARD] UIT: ?guard=off of localStorage");
-  // niets doen; zo kunt u in alle rust debuggen
 }
 
-// ===== Huidige paginanaam + helpers =========================================
 const CURRENT_PAGE = (() => {
   const f = (location.pathname.split("/").pop() || "").toLowerCase();
   return f || "index.html";
@@ -40,13 +37,11 @@ const goApp     = (r) => safeGo("./app.html", r);
 const goDevices = () => safeGo("./apparaten.html");
 const goKoop    = (r) => safeGo("./koop.html", r);
 
-// ===== Firebase + App Check ==================================================
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import { initializeAppCheck, ReCaptchaV3Provider, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
-// Stabiele deviceId (ongewijzigd)
 (function ensureDeviceId(){
   if (window.ZisaDevice && typeof window.ZisaDevice.getOrCreateDeviceId === "function") return;
   window.ZisaDevice = {
@@ -81,31 +76,25 @@ const app  = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const fns  = getFunctions(app, "europe-west1");
 
-// App Check (uw bestaande site key)
 const appCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider("6Lf5e7krAAAAAA1xV5_tz_Xickk-m6BRIMd_BzTO"),
   isTokenAutoRefreshEnabled: true,
 });
 
-// ===== Hoofd-guard ===========================================================
 if (!GUARD_OFF) {
   onAuthStateChanged(auth, async (user) => {
-    // publiek laten passeren
     if (SKIP_PAGES.has(CURRENT_PAGE)) return;
 
     if (!user) { goLogin(); return; }
 
-    // Op apparaten.html géén registratie doen (bewust)
     const IS_DEVICES_PAGE = CURRENT_PAGE === "apparaten.html";
 
     try {
-      // 0) Eerst tokens klaarzetten (minder 401/403 bij eerste callable)
       await Promise.all([
         getAppCheckToken(appCheck, /*forceRefresh*/ false),
-        user.getIdToken(true) // vers ID-token
+        user.getIdToken(true)
       ]);
 
-      // 1) Licentie eerst controleren
       const getAccessStatus = httpsCallable(fns, "getAccessStatus");
       let status;
       try {
@@ -113,11 +102,10 @@ if (!GUARD_OFF) {
         status = res?.data || {};
       } catch (e) {
         console.error("getAccessStatus error:", e);
-        goLogin(); return; // veiliger dan naar app.html (geen self-redirect)
+        goLogin(); return;
       }
       if (!status.allowed) { goKoop(status?.reason || "no_access"); return; }
 
-      // 2) Alleen registreren als we NIET op apparaten.html zitten
       if (!IS_DEVICES_PAGE) {
         const deviceId = window.ZisaDevice.getOrCreateDeviceId();
         const registerDevice = httpsCallable(fns, "registerDevice");
@@ -137,7 +125,6 @@ if (!GUARD_OFF) {
         console.info("[GUARD] apparaten.html: registratie overgeslagen (bewust).");
       }
 
-      // 3) Klaar — pagina mag initialiseren
       if (typeof window.onProReady === "function") {
         window.onProReady({
           user,
@@ -151,5 +138,6 @@ if (!GUARD_OFF) {
     }
   });
 }
+
 
 
