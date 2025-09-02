@@ -21,9 +21,11 @@
     .btn { padding:8px 12px; border-radius:8px; border:1px solid #d1d5db; background:#fff; cursor:pointer; }
     .btn:hover { background:#f9fafb; }
     .btn[disabled] { opacity:.6; cursor:not-allowed; }
-    .actions { display:flex; gap:10px; align-items:center; }
+    .btn.primary { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+    .btn.primary:hover { background:#1e40af; color:#fff; }
     .danger { border-color:#ef4444; color:#991b1b; }
     .note { font-size:.9rem; margin-top:8px; color:#6b7280; }
+    .hint { margin-top:12px; padding:12px; border-radius:10px; background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
     #msg { margin-top:8px; color:#b91c1c; }
     footer { padding: 24px; text-align:center; color:#9ca3af; font-size:.85rem; }
   </style>
@@ -38,6 +40,7 @@
     <div class="card">
       <div><strong>Huidig toestel-ID:</strong> <span class="id" id="currentId">—</span></div>
       <div class="note">U kunt maximaal <strong id="limit">—</strong> toestellen koppelen aan uw PRO-licentie.</div>
+      <div id="hint" class="hint" style="display:none"></div>
       <div id="msg"></div>
     </div>
 
@@ -91,8 +94,8 @@
     const msgEl      = document.getElementById("msg");
     const limitEl    = document.getElementById("limit");
     const refreshBtn = document.getElementById("refreshBtn");
+    const hintEl     = document.getElementById("hint");
 
-    // Huidige device-id tonen (met veilige fallback)
     let currentId = "—";
     try { currentId = window.ZisaDevice.getOrCreateDeviceId(); } catch {}
     currentEl.textContent = currentId;
@@ -120,6 +123,18 @@
       return await r.json();
     }
 
+    function showHint(message) {
+      hintEl.innerHTML = `
+        <span>${message}</span>
+        <a class="btn primary" href="./app.html">Open Zisa PRO</a>
+      `;
+      hintEl.style.display = "";
+    }
+    function hideHint() {
+      hintEl.style.display = "none";
+      hintEl.innerHTML = "";
+    }
+
     function row(item){
       const li = document.createElement("li");
       li.className = "row";
@@ -133,7 +148,7 @@
         li.querySelector("button").disabled = true;
         try {
           await apiFetch("unregisterDeviceHttp", { deviceDocId: item.id });
-          await load();
+          await load(/*fromRemoval=*/true);
           msgEl.textContent = "";
         } catch (e) {
           console.error(e);
@@ -145,8 +160,9 @@
       return li;
     }
 
-    async function load(){
+    async function load(fromRemoval = false){
       listEl.innerHTML = '<li class="muted">(Laden…)</li>';
+      hideHint();
       try {
         const data = await apiFetch("listDevicesHttp", {});
         const devices = Array.isArray(data?.devices) ? data.devices : [];
@@ -156,9 +172,17 @@
         listEl.innerHTML = "";
         if (devices.length === 0) {
           listEl.innerHTML = "<li class='muted'>(Geen geregistreerde toestellen)</li>";
-          return;
+        } else {
+          devices.forEach((it) => listEl.appendChild(row(it)));
         }
-        devices.forEach((it) => listEl.appendChild(row(it)));
+
+        const isCurrentRegistered = devices.some(d => d.id === currentId);
+        const roomAvailable = devices.length < limit;
+
+        // Toon duidelijke hint wanneer er opnieuw plaats is of na verwijderen
+        if ((fromRemoval && roomAvailable) || (!isCurrentRegistered && roomAvailable)) {
+          showHint("Er is terug plaats vrij voor dit toestel. Open de PRO-app om verder te gaan.");
+        }
       } catch (e) {
         console.error(e);
         msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
@@ -169,15 +193,12 @@
     // Fallback-vlag + fallback-loader
     let PRO_READY = false;
 
-    // ❶ Alleen redirecten als er géén user is
     onAuthStateChanged(auth, (user) => {
       if (!user) { window.location.href = "./index.html"; return; }
       userPill.textContent = user.email || user.uid;
-      // Fallback: als guard niet binnen 2s vuurt, toch proberen te laden
       setTimeout(() => { if (!PRO_READY) load(); }, 2000);
     });
 
-    // ❷ Wachten op de guard; daarna laden we definitief
     window.onProReady = ({ user, expiresAt, limit }) => {
       PRO_READY = true;
       try {
@@ -191,9 +212,10 @@
       load();
     };
 
-    refreshBtn.addEventListener("click", load);
+    refreshBtn.addEventListener("click", () => load(false));
   </script>
 </body>
 </html>
+
 
 
