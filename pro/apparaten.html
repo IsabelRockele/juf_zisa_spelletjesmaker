@@ -59,116 +59,130 @@
     Zisa PRO — toestellenbeheer
   </footer>
 
-<!-- 1) Stabiel lokaal toestel-ID -->
-<script src="./device-id.js"></script>
+  <!-- 1) Stabiel lokaal toestel-ID -->
+  <script src="./device-id.js"></script>
 
-<!-- 2) Guard (auth + licentie + App Check; registreert NIET op apparaten.html) -->
-<script type="module" src="./guard.js"></script>
+  <!-- 2) Guard (auth + licentie + App Check; registreert NIET op apparaten.html) -->
+  <script type="module" src="./guard.js"></script>
 
-<!-- 3) Paginascript -->
-<script type="module">
-  import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
-  import { getAppCheck, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+  <!-- 3) Paginascript -->
+  <script type="module">
+    import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getAppCheck, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
-    authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
-    projectId: "zisa-spelletjesmaker-pro",
-    storageBucket: "zisa-spelletjesmaker-pro.appspot.com",
-    messagingSenderId: "828063957776",
-    appId: "1:828063957776:web:8d8686b478846fe980db95",
-    measurementId: "G-9LHNLFHSXX"
-  };
+    const API_BASE = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net";
 
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const fns  = getFunctions(app, "europe-west1");
+    const firebaseConfig = {
+      apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
+      authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
+      projectId: "zisa-spelletjesmaker-pro",
+      storageBucket: "zisa-spelletjesmaker-pro.appspot.com",
+      messagingSenderId: "828063957776",
+      appId: "1:828063957776:web:8d8686b478846fe980db95",
+      measurementId: "G-9LHNLFHSXX"
+    };
 
-  const userPill   = document.getElementById("user-pill");
-  const listEl     = document.getElementById("list");
-  const currentEl  = document.getElementById("currentId");
-  const msgEl      = document.getElementById("msg");
-  const limitEl    = document.getElementById("limit");
-  const refreshBtn = document.getElementById("refreshBtn");
+    const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
 
-  const currentId = window.ZisaDevice.getOrCreateDeviceId();
-  currentEl.textContent = currentId;
+    const userPill   = document.getElementById("user-pill");
+    const listEl     = document.getElementById("list");
+    const currentEl  = document.getElementById("currentId");
+    const msgEl      = document.getElementById("msg");
+    const limitEl    = document.getElementById("limit");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-  function row(item){
-    const li = document.createElement("li");
-    li.className = "row";
-    const isCurrent = item.id === currentId;
-    li.innerHTML = `
-      <div><span class="id">${item.id}</span> ${isCurrent ? '<span class="tag">dit toestel</span>' : ''}</div>
-      <button class="btn danger">Verwijder</button>
-    `;
-    li.querySelector("button").onclick = async () => {
-      if (!confirm("Dit toestel verwijderen?")) return;
-      li.querySelector("button").disabled = true;
+    const currentId = window.ZisaDevice.getOrCreateDeviceId();
+    currentEl.textContent = currentId;
+
+    async function ensureTokensReady() {
+      const ac = getAppCheck(app);
+      const u  = auth.currentUser;
+      await Promise.all([
+        getAppCheckToken(ac, /*forceRefresh*/ false),
+        u ? u.getIdToken(true) : Promise.resolve()
+      ]);
+    }
+
+    async function apiFetch(path, body) {
+      await ensureTokensReady(); // zekerheid
+      const u = auth.currentUser;
+      if (!u) throw new Error("not signed in");
+      const idToken = await u.getIdToken(/*forceRefresh*/ false);
+      const r = await fetch(`${API_BASE}/${path}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify(body || {})
+      });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    }
+
+    function row(item){
+      const li = document.createElement("li");
+      li.className = "row";
+      const isCurrent = item.id === currentId;
+      li.innerHTML = `
+        <div><span class="id">${item.id}</span> ${isCurrent ? '<span class="tag">dit toestel</span>' : ''}</div>
+        <button class="btn danger">Verwijder</button>
+      `;
+      li.querySelector("button").onclick = async () => {
+        if (!confirm("Dit toestel verwijderen?")) return;
+        li.querySelector("button").disabled = true;
+        try {
+          await apiFetch("unregisterDeviceHttp", { deviceDocId: item.id });
+          await load();
+          msgEl.textContent = "";
+        } catch (e) {
+          console.error(e);
+          msgEl.textContent = "Verwijderen mislukt. Probeer opnieuw.";
+        } finally {
+          li.querySelector("button").disabled = false;
+        }
+      };
+      return li;
+    }
+
+    async function load(){
+      listEl.innerHTML = '<li class="muted">(Laden…)</li>';
       try {
-        // Tokens nog eens verifiëren (zekerheid)
-        await ensureTokensReady();
-        const unregisterDevice = httpsCallable(fns, "unregisterDevice");
-        await unregisterDevice({ deviceDocId: item.id });
-        await load();
-        msgEl.textContent = "";
+        const data = await apiFetch("listDevicesHttp", {});
+        const devices = Array.isArray(data?.devices) ? data.devices : [];
+        const limit = typeof data?.limit === "number" ? data.limit : 2;
+        limitEl.textContent = String(limit);
+
+        listEl.innerHTML = "";
+        if (devices.length === 0) {
+          listEl.innerHTML = "<li class='muted'>(Geen geregistreerde toestellen)</li>";
+          return;
+        }
+        devices.forEach((it) => listEl.appendChild(row(it)));
       } catch (e) {
         console.error(e);
-        msgEl.textContent = "Verwijderen mislukt. Probeer opnieuw.";
-      } finally {
-        li.querySelector("button").disabled = false;
+        msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
+        listEl.innerHTML = "";
       }
-    };
-    return li;
-  }
-
-  async function ensureTokensReady() {
-    // Zorgt dat App Check + vers ID-token klaar staan vóór iedere callable
-    const ac = getAppCheck(app);
-    const u  = auth.currentUser;
-    await Promise.all([
-      getAppCheckToken(ac, /*forceRefresh*/ false),
-      u ? u.getIdToken(true) : Promise.resolve()
-    ]);
-  }
-
-  async function load(){
-    listEl.innerHTML = '<li class="muted">(Laden…)</li>';
-    try {
-      await ensureTokensReady(); // ← kritieke stap tegen CORS/preflight issues
-      const listDevices = httpsCallable(fns, "listDevices");
-      const { data } = await listDevices();
-      const devices = Array.isArray(data?.devices) ? data.devices : [];
-      const limit = typeof data?.limit === "number" ? data.limit : 2;
-      limitEl.textContent = String(limit);
-
-      listEl.innerHTML = "";
-      if (devices.length === 0) {
-        listEl.innerHTML = "<li class='muted'>(Geen geregistreerde toestellen)</li>";
-        return;
-      }
-      devices.forEach((it) => listEl.appendChild(row(it)));
-    } catch (e) {
-      console.error(e);
-      msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
-      listEl.innerHTML = "";
     }
-  }
 
-  // Alleen redirecten als er géén user is
-  onAuthStateChanged(auth, (user) => {
-    if (!user) { window.location.href = "./index.html"; return; }
-    userPill.textContent = user.email || user.uid;
-  });
+    // Alleen redirecten als er géén user is
+    onAuthStateChanged(auth, (user) => {
+      if (!user) { window.location.href = "./index.html"; return; }
+      userPill.textContent = user.email || user.uid;
+    });
 
-  // Wacht op de guard; pas dan laden (App Check + ID-token zijn dan zeker klaar)
-  window.onProReady = ({ user, expiresAt, limit }) => {
-    try { userPill.textContent = user.email || user.uid; } catch {}
-    if (typeof limit === "number") limitEl.textContent = String(limit);
-    load();
-  };
+    // Wacht op de guard; pas dan lijst laden
+    window.onProReady = ({ user, expiresAt, limit }) => {
+      try { userPill.textContent = user.email || user.uid; } catch {}
+      if (typeof limit === "number") limitEl.textContent = String(limit);
+      load();
+    };
 
-  refreshBtn.addEventListener("click", load);
-</script>
+    refreshBtn.addEventListener("click", load);
+  </script>
+</body>
+</html>
+
