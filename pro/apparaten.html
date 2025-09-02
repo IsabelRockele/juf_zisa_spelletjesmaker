@@ -59,17 +59,18 @@
     Zisa PRO — toestellenbeheer
   </footer>
 
-  <!-- 1) Stabiel lokaal toestel-ID -->
+<!-- 1) Stabiel lokaal toestel-ID -->
 <script src="./device-id.js"></script>
 
 <!-- 2) Guard (auth + licentie + App Check; registreert NIET op apparaten.html) -->
-<script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
+<script type="module" src="./guard.js"></script>
 
 <!-- 3) Paginascript -->
 <script type="module">
   import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+  import { getAppCheck, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
@@ -85,11 +86,11 @@
   const auth = getAuth(app);
   const fns  = getFunctions(app, "europe-west1");
 
-  const userPill  = document.getElementById("user-pill");
-  const listEl    = document.getElementById("list");
-  const currentEl = document.getElementById("currentId");
-  const msgEl     = document.getElementById("msg");
-  const limitEl   = document.getElementById("limit");
+  const userPill   = document.getElementById("user-pill");
+  const listEl     = document.getElementById("list");
+  const currentEl  = document.getElementById("currentId");
+  const msgEl      = document.getElementById("msg");
+  const limitEl    = document.getElementById("limit");
   const refreshBtn = document.getElementById("refreshBtn");
 
   const currentId = window.ZisaDevice.getOrCreateDeviceId();
@@ -107,6 +108,8 @@
       if (!confirm("Dit toestel verwijderen?")) return;
       li.querySelector("button").disabled = true;
       try {
+        // Tokens nog eens verifiëren (zekerheid)
+        await ensureTokensReady();
         const unregisterDevice = httpsCallable(fns, "unregisterDevice");
         await unregisterDevice({ deviceDocId: item.id });
         await load();
@@ -121,9 +124,20 @@
     return li;
   }
 
+  async function ensureTokensReady() {
+    // Zorgt dat App Check + vers ID-token klaar staan vóór iedere callable
+    const ac = getAppCheck(app);
+    const u  = auth.currentUser;
+    await Promise.all([
+      getAppCheckToken(ac, /*forceRefresh*/ false),
+      u ? u.getIdToken(true) : Promise.resolve()
+    ]);
+  }
+
   async function load(){
     listEl.innerHTML = '<li class="muted">(Laden…)</li>';
     try {
+      await ensureTokensReady(); // ← kritieke stap tegen CORS/preflight issues
       const listDevices = httpsCallable(fns, "listDevices");
       const { data } = await listDevices();
       const devices = Array.isArray(data?.devices) ? data.devices : [];
@@ -143,17 +157,17 @@
     }
   }
 
-  // ❶ Alleen redirecten als er géén user is
+  // Alleen redirecten als er géén user is
   onAuthStateChanged(auth, (user) => {
     if (!user) { window.location.href = "./index.html"; return; }
     userPill.textContent = user.email || user.uid;
   });
 
-  // ❷ Wachten op de guard: pas na App Check + tokenrefesh laden we de lijst
+  // Wacht op de guard; pas dan laden (App Check + ID-token zijn dan zeker klaar)
   window.onProReady = ({ user, expiresAt, limit }) => {
     try { userPill.textContent = user.email || user.uid; } catch {}
     if (typeof limit === "number") limitEl.textContent = String(limit);
-    load(); // <-- nu zijn App Check en ID-token zeker klaar
+    load();
   };
 
   refreshBtn.addEventListener("click", load);
