@@ -19,13 +19,18 @@
     .muted{color:var(--muted);text-decoration:none}
     .price{display:inline-block;background:#e0f2fe;color:#075985;border-radius:.6rem;padding:.25rem .6rem;font-weight:700}
     .err{color:#b91c1c;margin-top:.6rem;min-height:1.2em}
+    /* melding bij verlopen/ontbrekende licentie */
+    .alert{display:none;background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;padding:12px;border-radius:10px;margin-bottom:12px;font-size:.95rem}
   </style>
 </head>
 <body>
   <main class="card" role="main">
     <h1>Zisa PRO</h1>
     <p><span class="price">Jaarabonnement</span></p>
-    <p>Vul uw e-mailadres in. Na de betaling wordt uw PRO-licentie automatisch geactiveerd en ontvangt u de mail “Wachtwoord instellen”.</p>
+    <p>Vul uw e-mailadres in. Na de betaling wordt uw PRO-licentie automatisch geactiveerd en ontvangt u de mail “Wachtwoord instellen”. (Het kan enkele minuten duren. Kijk ook uw spammap na.)</p>
+
+    <!-- Melding bij verlopen/ontbrekende licentie -->
+    <div id="renewAlert" class="alert" role="status" aria-live="polite"></div>
 
     <label for="email">E-mail voor uw licentie</label>
     <input id="email" type="email" placeholder="naam@school.be" autocomplete="email" required />
@@ -45,9 +50,27 @@
     ];
 
     const $ = (id)=>document.getElementById(id);
-    const btn = $("buyBtn"), msg = $("msg"), emailEl = $("email");
+    const btn = $("buyBtn"), msg = $("msg"), emailEl = $("email"), alertBox = $("renewAlert");
+
+    // Toon nette melding bij redirect reasons (expired / no_license / no_access)
+    (function showReason(){
+      const r = new URLSearchParams(location.search).get("reason");
+      if (!alertBox) return;
+      if (r === "expired") {
+        alertBox.innerHTML = "<strong>Uw PRO-licentie is verlopen.</strong> Verleng hieronder om verder te gebruiken.";
+        alertBox.style.display = "";
+      } else if (r === "no_license" || r === "no_access") {
+        alertBox.innerHTML = "<strong>Geen geldige PRO-licentie gevonden.</strong> Koop hieronder uw jaarlicentie om toegang te krijgen.";
+        alertBox.style.display = "";
+      }
+    })();
 
     function validEmail(s){ return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s); }
+
+    // Enter-toets activeert ook de knop
+    emailEl.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { btn.click(); }
+    });
 
     btn.addEventListener("click", async () => {
       msg.textContent = "";
@@ -87,7 +110,3 @@
   </script>
 </body>
 </html>
-
-
-
-
