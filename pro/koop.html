@@ -58,10 +58,10 @@
       if (!alertBox) return;
       if (r === "expired") {
         alertBox.innerHTML = "<strong>Uw PRO-licentie is verlopen.</strong> Verleng hieronder om verder te gebruiken.";
-        alertBox.style.display = "";
+        alertBox.style.display = "block";
       } else if (r === "no_license" || r === "no_access") {
         alertBox.innerHTML = "<strong>Geen geldige PRO-licentie gevonden.</strong> Koop hieronder uw jaarlicentie om toegang te krijgen.";
-        alertBox.style.display = "";
+        alertBox.style.display = "block";
       }
     })();
 
