@@ -97,7 +97,7 @@
     try { currentId = window.ZisaDevice.getOrCreateDeviceId(); } catch {}
     currentEl.textContent = currentId;
 
-    // Voor HTTP-wrappers is enkel een vers ID-token nodig
+    // Voor de HTTP-wrappers is alleen een vers ID-token nodig
     async function ensureTokensReady() {
       const u = auth.currentUser;
       if (u) { await u.getIdToken(true); }
@@ -195,4 +195,5 @@
   </script>
 </body>
 </html>
+
 
