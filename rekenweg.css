@@ -1,3 +1,8 @@
+/* --- NIEUW: Zorgt voor een consistente layout in alle browsers --- */
+* {
+  box-sizing: border-box;
+}
+
 /* Eerdere CSS blijft hetzelfde */
 #textualOutput{width:100%;max-width:800px;min-height:600px;border:2px solid #004080;background-color:white;padding:20px;box-sizing:border-box;overflow-y:auto;text-align:left;font-family:monospace;font-size:20px;line-height:1.8}
 .exercise-line{margin-bottom:10px;white-space:nowrap}
