@@ -5,10 +5,8 @@
     <title>Rekenweg Template Maker</title>
     <meta name="google" content="notranslate">
 
-    <!-- Styles liggen buiten /pro/ -->
     <link href="../rekenweg.css" rel="stylesheet"/>
 
-    <!-- Alle relatieve paden resolven t.o.v. /juf_zisa_spelletjesmaker/pro/ -->
     <base href="/juf_zisa_spelletjesmaker/pro/">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -25,20 +23,23 @@
             display:inline-block; white-space:nowrap;
             /* float:left; verwijderd i.v.m. console-waarschuwing */
         }
-        /* voorkom overlappen met de vaste header */
-        body{ margin-top:60px; }
+        
+        /* --- AANGEPAST --- */
+        /* voorkom overlappen met de vaste header door padding te gebruiken i.p.v. margin */
+        body { 
+            padding-top: 60px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-<!-- PRO-header -->
 <header class="pro-header">
     <a href="app.html" class="back-link" aria-label="Terug naar menu">&larr; Terug naar menu</a>
 </header>
 
 <header>
     <div class="header-buttons">
-        <!-- laat ook deze knop naar het PRO-keuzemenu gaan -->
         <button id="menuBtn" onclick="window.location.href='app.html'">Keuzemenu</button>
         <button id="newPathBtn" style="display: none;">Nieuwe Rekenweg</button>
     </div>
@@ -93,12 +94,9 @@
     </div>
 </div>
 
-<!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
 <script src="./device-id.js"></script>
 <script type="module" src="./guard.js"></script>
 
-<!-- Paginascript NA de guard -->
 <script src="../rekenweg.js"></script>
 </body>
 </html>
-
