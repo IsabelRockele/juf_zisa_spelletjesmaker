@@ -1,4 +1,5 @@
-// DEFINITIEVE VERSIE - 3 september - Oplossing voor closure-probleem in keydown listener
+// DEFINITIEVE VERSIE - 3 september 2025
+// Fix: typvakje correct in vak (schaal + scroll) en behoud van alle bestaande functionaliteit
 
 // Globale variabelen
 const CELL_SIZE = 40; // Grootte van een cel in pixels
@@ -172,6 +173,7 @@ function removeCurrentInput() {
   }
 }
 
+// --------- BELANGRIJKE FIX: typvakje correct positioneren (schaal + scroll) ---------
 function createInputForCell(cellData) {
   removeCurrentInput();
   if (!cellData || cellData.type !== 'empty_slot') return;
@@ -179,53 +181,64 @@ function createInputForCell(cellData) {
   const input = document.createElement('input');
   input.type = 'text';
   input.value = cellData.value || '';
+
+  // Basisstijl – exacte grootte/positie zetten we in reposition()
   input.style.position = 'absolute';
-  input.style.width = CELL_SIZE + 'px';
-  input.style.height = CELL_SIZE + 'px';
   input.style.border = '2px solid blue';
   input.style.textAlign = 'center';
-  input.style.font = `bold ${CELL_SIZE * 0.5}px Arial`;
   input.style.boxSizing = 'border-box';
+  input.style.fontWeight = 'bold';
+  input.style.background = 'white';
+  input.style.zIndex = '9999';
 
+  // Navigatie tussen lege vakjes met pijltjes/space
   input.addEventListener('keydown', (e) => {
     const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
     if (!navKeys.includes(e.key)) return;
     e.preventDefault();
-    
-    // --- DE OPLOSSING: Gebruik de lokale 'cellData' in plaats van de globale 'editedCell' ---
-    const { row, col } = cellData;
-    
-    let targetRow = row;
-    let targetCol = col;
-    if (e.key === 'ArrowUp') {
-        targetRow--;
-    } else if (e.key === 'ArrowDown') {
-        targetRow++;
-    } else if (e.key === 'ArrowLeft') {
-        targetCol--;
-    } else if (e.key === 'ArrowRight' || e.key === ' ') {
-        targetCol++;
-    }
+    const { row, col } = editedCell.cellData;
+    let targetRow = row, targetCol = col;
+    if (e.key === 'ArrowUp') targetRow--;
+    else if (e.key === 'ArrowDown') targetRow++;
+    else if (e.key === 'ArrowLeft') targetCol--;
+    else if (e.key === 'ArrowRight' || e.key === ' ') targetCol++;
     const targetCell = currentTemplateData.find(cell =>
-        cell.type === 'empty_slot' && cell.row === targetRow && cell.col === targetCol
+      cell.type === 'empty_slot' && cell.row === targetRow && cell.col === targetCol
     );
     if (targetCell) {
-        saveCellValue(cellData, input.value);
-        createInputForCell(targetCell);
+      saveCellValue(editedCell.cellData, input.value);
+      createInputForCell(targetCell);
     }
   });
 
   input.addEventListener('blur', () => { saveCellValue(cellData, input.value); removeCurrentInput(); });
-  input.addEventListener('keypress', (e) => { if (e.key === 'Enter') { saveCellValue(cellData, input.value); removeCurrentInput(); } });
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') { saveCellValue(cellData, input.value); removeCurrentInput(); }
+  });
 
-  editedCell = { cellData, inputElement: input };
+  // Positie & grootte corrigeren voor responsieve schaal + scroll
+  const reposition = () => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = rect.width  / canvas.width;
+    const scaleY = rect.height / canvas.height;
 
+    input.style.left   = (rect.left + window.scrollX + cellData.col * CELL_SIZE * scaleX) + 'px';
+    input.style.top    = (rect.top  + window.scrollY + cellData.row * CELL_SIZE * scaleY) + 'px';
+    input.style.width  = (CELL_SIZE * scaleX) + 'px';
+    input.style.height = (CELL_SIZE * scaleY) + 'px';
+
+    // Lettergrootte: halve celhoogte; schaalt mee. Vaste waarde? Gebruik CELL_SIZE*0.5.
+    input.style.font = `bold ${Math.max(12, CELL_SIZE * 0.5 * scaleY)}px Arial`;
+    input.style.lineHeight = (CELL_SIZE * scaleY) + 'px';
+  };
+
+  editedCell = { cellData, inputElement: input, reposition };
+
+  // Eerst toevoegen en dan positioneren (zeker dat rect klopt)
   requestAnimationFrame(() => {
     if (editedCell && editedCell.inputElement === input) {
-      const rect = canvas.getBoundingClientRect();
-      input.style.left = (rect.left + cellData.col * CELL_SIZE) + 'px';
-      input.style.top = (rect.top + cellData.row * CELL_SIZE) + 'px';
       document.body.appendChild(input);
+      reposition();
       input.focus();
     }
   });
@@ -322,6 +335,7 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.width = GRID_COLS * CELL_SIZE;
   canvas.height = GRID_ROWS * CELL_SIZE;
   startDrawingMode();
+
   canvas.addEventListener('mousedown',(e)=>{
     if (currentViewMode!=='drawing') return;
     isDrawing = true;
@@ -330,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const col=Math.floor(x/CELL_SIZE), row=Math.floor(y/CELL_SIZE);
     addCellToPath(row,col,activeBranchLetter);
   });
+  
   canvas.addEventListener('mousemove',(e)=>{
     if (!isDrawing || currentViewMode!=='drawing') return;
     const rect=canvas.getBoundingClientRect();
@@ -337,8 +352,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const col=Math.floor(x/CELL_SIZE), row=Math.floor(y/CELL_SIZE);
     addCellToPath(row,col,activeBranchLetter);
   });
+
   canvas.addEventListener('mouseup',()=>{ isDrawing=false; lastDrawnCell=null; });
   canvas.addEventListener('mouseleave',()=>{ isDrawing=false; lastDrawnCell=null; });
+
   canvas.addEventListener('click',(e)=>{
     if (currentViewMode==='template-canvas') {
       const rect=canvas.getBoundingClientRect();
@@ -352,12 +369,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
   document.getElementById("clearPathBtn").addEventListener("click", ()=>{
     removeCurrentInput();
     currentDrawnPath=[];
     lastDrawnCell=null;
     drawDrawnPath();
   });
+
   document.getElementById("undoLastCellBtn").addEventListener("click", ()=>{
     if (currentDrawnPath.length>0){
       const removed=currentDrawnPath.pop();
@@ -373,7 +392,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentDrawnPath.length<1) startDrawingMode();
     }
   });
+
   document.getElementById("showMyPathBtn").addEventListener("click", showMyPathTemplate);
+
   document.getElementById("downloadPngBtn").addEventListener("click", ()=>{
     if (currentViewMode!=='template-canvas' || !currentTemplateGrid) { alert("Er is geen template om te downloaden."); return; }
     removeCurrentInput();
@@ -402,7 +423,15 @@ document.addEventListener("DOMContentLoaded", () => {
     doc.text("Rekenweg Template", pageWidth/2, 20, { align:'center' });
     doc.save("rekenweg_template.pdf");
   });
+}); // ← Einde DOMContentLoaded
+
+// Zorg dat het typvakje correct blijft bij resizen/scrollen (PRO-header, body-padding, etc.)
+window.addEventListener('resize', () => {
+  if (editedCell && editedCell.reposition) editedCell.reposition();
 });
+window.addEventListener('scroll', () => {
+  if (editedCell && editedCell.reposition) editedCell.reposition();
+}, true);
 
 function addCellToPath(row,col,branchLetter){
   if (row<0||row>=GRID_ROWS||col<0||col>=GRID_COLS) return;
