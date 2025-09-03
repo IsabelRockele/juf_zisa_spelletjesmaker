@@ -174,30 +174,24 @@ function createInputForCell(cellData) {
   removeCurrentInput();
   if (!cellData || cellData.type !== 'empty_slot') return;
 
-  const input=document.createElement('input');
-  input.type='text';
-  input.value=cellData.value || '';
-  const rect=canvas.getBoundingClientRect();
-  input.style.position='absolute';
-  input.style.left = (rect.left + cellData.col * CELL_SIZE) + 'px';
-  input.style.top = (rect.top + cellData.row * CELL_SIZE) + 'px';
-  input.style.width=CELL_SIZE+'px';
-  input.style.height=CELL_SIZE+'px';
-  input.style.border='2px solid blue';
-  input.style.textAlign='center';
-  input.style.font=`bold ${CELL_SIZE*0.5}px Arial`;
-  input.style.boxSizing='border-box';
-  
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.value = cellData.value || '';
+  input.style.position = 'absolute';
+  input.style.width = CELL_SIZE + 'px';
+  input.style.height = CELL_SIZE + 'px';
+  input.style.border = '2px solid blue';
+  input.style.textAlign = 'center';
+  input.style.font = `bold ${CELL_SIZE * 0.5}px Arial`;
+  input.style.boxSizing = 'border-box';
+
   input.addEventListener('keydown', (e) => {
     const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
     if (!navKeys.includes(e.key)) return;
-
     e.preventDefault();
-
     const { row, col } = editedCell.cellData;
     let targetRow = row;
     let targetCol = col;
-
     if (e.key === 'ArrowUp') {
         targetRow--;
     } else if (e.key === 'ArrowDown') {
@@ -207,22 +201,30 @@ function createInputForCell(cellData) {
     } else if (e.key === 'ArrowRight' || e.key === ' ') {
         targetCol++;
     }
-
     const targetCell = currentTemplateData.find(cell =>
         cell.type === 'empty_slot' && cell.row === targetRow && cell.col === targetCol
     );
-
     if (targetCell) {
         saveCellValue(editedCell.cellData, input.value);
         createInputForCell(targetCell);
     }
   });
 
-  document.body.appendChild(input);
-  input.focus();
-  editedCell={ cellData, inputElement: input };
-  input.addEventListener('blur', ()=>{ saveCellValue(cellData,input.value); removeCurrentInput(); });
-  input.addEventListener('keypress',(e)=>{ if(e.key==='Enter'){ saveCellValue(cellData,input.value); removeCurrentInput(); }});
+  input.addEventListener('blur', () => { saveCellValue(cellData, input.value); removeCurrentInput(); });
+  input.addEventListener('keypress', (e) => { if (e.key === 'Enter') { saveCellValue(cellData, input.value); removeCurrentInput(); } });
+
+  editedCell = { cellData, inputElement: input };
+
+  // --- AANGEPAST: Positionering uitgesteld tot de browser klaar is met renderen ---
+  requestAnimationFrame(() => {
+    if (editedCell && editedCell.inputElement === input) {
+      const rect = canvas.getBoundingClientRect();
+      input.style.left = (rect.left + cellData.col * CELL_SIZE) + 'px';
+      input.style.top = (rect.top + cellData.row * CELL_SIZE) + 'px';
+      document.body.appendChild(input);
+      input.focus();
+    }
+  });
 }
 
 function resetAndStartOver() {
@@ -378,14 +380,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
 
-  // --- OPGELOST: PDF Download functie ---
   document.getElementById("downloadPdfBtn").addEventListener("click", async ()=>{
     if (currentViewMode!=='template-canvas' || !currentTemplateGrid) { alert("Er is geen template om te downloaden."); return; }
     removeCurrentInput();
     drawPathTemplateOnCanvas(currentTemplateGrid);
-
-    const dataURL = canvas.toDataURL("image/png"); // DEZE REGEL ONTBRAK
-
+    const dataURL = canvas.toDataURL("image/png");
     const { jsPDF } = window.jspdf;
     const doc=new jsPDF('p','mm','a4');
     const pageWidth=doc.internal.pageSize.getWidth();
