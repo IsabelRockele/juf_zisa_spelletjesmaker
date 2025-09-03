@@ -13,6 +13,9 @@ let currentViewMode = 'drawing'; // 'drawing' | 'template-canvas'
 let currentTemplateGrid = null; // Grid met lege/vulling-vakjes
 let currentTemplateData = []; // Tekstuele data van slots
 
+// Variabelen voor toetsenbordnavigatie
+let editedCell = null;
+
 // Regels voor takken
 const branchRules = {
   'A': { count: 5, next: 'B' }, 'B': { count: 4, next: 'C' }, 'C': { count: 4, next: 'D' },
@@ -29,7 +32,6 @@ const branchRules = {
 const branchLettersOrder = Object.keys(branchRules);
 let activeBranchIndex = 0;
 let activeBranchLetter = branchLettersOrder[activeBranchIndex];
-let editedCell = null;
 
 // --- HELPER FUNCTIES ---
 function getBranchColor(letter) {
@@ -105,7 +107,6 @@ function createPathTemplateGrid(pathsByBranch) {
   return grid;
 }
 
-// --- CANVAS TEKEN ---
 function drawGrid() {
   ctx.strokeStyle = "#DDD"; ctx.lineWidth = 1;
   for (let i=0;i<=GRID_COLS;i++){ ctx.beginPath(); ctx.moveTo(i*CELL_SIZE,0); ctx.lineTo(i*CELL_SIZE,canvas.height); ctx.stroke(); }
@@ -158,28 +159,65 @@ function saveCellValue(cellData, value) {
 
 function removeCurrentInput() {
   if (editedCell && editedCell.inputElement) {
-    document.body.removeChild(editedCell.inputElement);
+    try {
+      document.body.removeChild(editedCell.inputElement);
+    } catch (e) {
+      if (e.name !== 'NotFoundError') {
+        throw e;
+      }
+    }
     editedCell = null;
   }
 }
 
 function createInputForCell(cellData) {
   removeCurrentInput();
+  if (!cellData || cellData.type !== 'empty_slot') return;
+
   const input=document.createElement('input');
   input.type='text';
   input.value=cellData.value || '';
   const rect=canvas.getBoundingClientRect();
   input.style.position='absolute';
-  input.style.left=(rect.left+cellData.col*CELL_SIZE)+'px';
-  input.style.top=(rect.top+cellData.row*CELL_SIZE)+'px';
+  input.style.left = (rect.left + cellData.col * CELL_SIZE) + 'px';
+  input.style.top = (rect.top + cellData.row * CELL_SIZE) + 'px';
   input.style.width=CELL_SIZE+'px';
   input.style.height=CELL_SIZE+'px';
-  input.style.border='1px solid blue';
+  input.style.border='2px solid blue';
   input.style.textAlign='center';
   input.style.font=`bold ${CELL_SIZE*0.5}px Arial`;
   input.style.boxSizing='border-box';
-  input.style.padding='2px';
-  input.style.margin='0';
+  
+  input.addEventListener('keydown', (e) => {
+    const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
+    if (!navKeys.includes(e.key)) return;
+
+    e.preventDefault();
+
+    const { row, col } = editedCell.cellData;
+    let targetRow = row;
+    let targetCol = col;
+
+    if (e.key === 'ArrowUp') {
+        targetRow--;
+    } else if (e.key === 'ArrowDown') {
+        targetRow++;
+    } else if (e.key === 'ArrowLeft') {
+        targetCol--;
+    } else if (e.key === 'ArrowRight' || e.key === ' ') {
+        targetCol++;
+    }
+
+    const targetCell = currentTemplateData.find(cell =>
+        cell.type === 'empty_slot' && cell.row === targetRow && cell.col === targetCol
+    );
+
+    if (targetCell) {
+        saveCellValue(editedCell.cellData, input.value);
+        createInputForCell(targetCell);
+    }
+  });
+
   document.body.appendChild(input);
   input.focus();
   editedCell={ cellData, inputElement: input };
@@ -187,7 +225,6 @@ function createInputForCell(cellData) {
   input.addEventListener('keypress',(e)=>{ if(e.key==='Enter'){ saveCellValue(cellData,input.value); removeCurrentInput(); }});
 }
 
-// --- RESET & MODUSWISSEL ---
 function resetAndStartOver() {
   removeCurrentInput();
   currentDrawnPath = [];
@@ -197,41 +234,36 @@ function resetAndStartOver() {
 }
 
 function startDrawingMode() {
-  document.body.classList.remove('template-view-active'); // centrering uit
+  document.body.classList.remove('template-view-active');
   currentViewMode = 'drawing';
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawGrid(); drawDrawnPath(); removeCurrentInput();
-
-  // Teken-UI
   document.getElementById("left-panel").style.display='flex';
   document.getElementById("showMyPathBtn").style.display='block';
-
-  // Template-UI verbergen
   document.getElementById("downloadPngBtn").style.display='none';
   document.getElementById("downloadPdfBtn").style.display='none';
   document.getElementById("edit-instructions").style.display='none';
-
-  // Afbeeldingen
   document.getElementById('drawing-example-img').style.display='block';
   document.getElementById('template-example-img').style.display='none';
-
-  // Tak reset
   activeBranchIndex = 0;
   activeBranchLetter = branchLettersOrder[activeBranchIndex];
-  document.getElementById("branchLetter").value = activeBranchLetter;
-
-  // --- KNOPPEN (zichtbaarheid + gedrag) ---
+  if (document.getElementById("branchLetter")) {
+    document.getElementById("branchLetter").value = activeBranchLetter;
+  }
   const menuBtn = document.getElementById("menuBtn");
   const newPathBtn = document.getElementById("newPathBtn");
-
   if (menuBtn) {
-    menuBtn.style.display = 'inline-block';       // Keuzemenu AAN
-    menuBtn.textContent = 'Keuzemenu';
-    menuBtn.onclick = () => { window.location.href = 'index.html'; };
+    menuBtn.style.display = 'inline-block';
+    const proHeaderLink = document.querySelector('.pro-header .back-link');
+    if (proHeaderLink) {
+         menuBtn.onclick = () => { window.location.href = proHeaderLink.href; };
+    } else {
+         menuBtn.onclick = () => { window.location.href = 'index.html'; };
+    }
   }
   if (newPathBtn) {
-    newPathBtn.style.display = 'none';            // Nieuwe rekenweg UIT
-    newPathBtn.onclick = resetAndStartOver;       // alvast binden
+    newPathBtn.style.display = 'none';
+    newPathBtn.onclick = resetAndStartOver;
   }
 }
 
@@ -239,20 +271,15 @@ function showMyPathTemplate() {
   removeCurrentInput();
   const melding = document.getElementById("meldingContainer");
   melding.innerHTML='';
-
   if (currentDrawnPath.length < 1) {
     melding.innerHTML = '<p style="color:red;">Teken minimaal één vakje voor de template.</p>';
     return;
   }
-
-  // Groeperen per tak
   const byBranch = {};
   currentDrawnPath.forEach(c=>{
     if(!byBranch[c.branchLetter]) byBranch[c.branchLetter]=[];
     byBranch[c.branchLetter].push(c);
   });
-
-  // Ordenen + valideren
   const orderedByBranch = {};
   let invalid=false;
   Object.keys(byBranch).forEach(L=>{
@@ -261,52 +288,34 @@ function showMyPathTemplate() {
     orderedByBranch[L]=ord;
   });
   if (invalid) return;
-
   const grid = createPathTemplateGrid(orderedByBranch);
   if (!grid) { melding.innerHTML = '<p style="color:red;">Kon geen template aanmaken.</p>'; return; }
-
-  // Template-view
   document.body.classList.add('template-view-active');
   currentTemplateGrid = grid;
   currentViewMode = 'template-canvas';
-
-  // UI wissel
   document.getElementById("left-panel").style.display='none';
   document.getElementById("downloadPngBtn").style.display='block';
   document.getElementById("downloadPdfBtn").style.display='block';
   document.getElementById("edit-instructions").style.display='block';
-
-  // Afbeeldingen
   document.getElementById('drawing-example-img').style.display='none';
   document.getElementById('template-example-img').style.display='block';
-
-  // --- KNOPPEN (zichtbaarheid + gedrag) ---
   const menuBtn = document.getElementById("menuBtn");
   const newPathBtn = document.getElementById("newPathBtn");
-
-  if (menuBtn) {
-    menuBtn.style.display = 'none';               // Keuzemenu UIT
-    menuBtn.onclick = null;                       // geen actie in deze modus
-  }
+  if (menuBtn) menuBtn.style.display = 'none';
   if (newPathBtn) {
-    newPathBtn.style.display = 'inline-block';    // Nieuwe rekenweg AAN
-    newPathBtn.textContent = 'Nieuwe Rekenweg';   // label forceren
-    newPathBtn.onclick = resetAndStartOver;       // reset naar start tekenen
+    newPathBtn.style.display = 'inline-block';
+    newPathBtn.textContent = 'Nieuwe Rekenweg';
+    newPathBtn.onclick = resetAndStartOver;
   }
-
   drawPathTemplateOnCanvas(currentTemplateGrid);
 }
 
-// --- INITIALISATIE & EVENTS ---
 document.addEventListener("DOMContentLoaded", () => {
   canvas = document.getElementById("mainCanvas");
   ctx = canvas.getContext("2d");
   canvas.width = GRID_COLS * CELL_SIZE;
   canvas.height = GRID_ROWS * CELL_SIZE;
-
-  startDrawingMode(); // begin in tekenmodus
-
-  // Tekenen
+  startDrawingMode();
   canvas.addEventListener('mousedown',(e)=>{
     if (currentViewMode!=='drawing') return;
     isDrawing = true;
@@ -324,35 +333,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   canvas.addEventListener('mouseup',()=>{ isDrawing=false; lastDrawnCell=null; });
   canvas.addEventListener('mouseleave',()=>{ isDrawing=false; lastDrawnCell=null; });
-
   canvas.addEventListener('click',(e)=>{
     if (currentViewMode==='template-canvas') {
       const rect=canvas.getBoundingClientRect();
       const x=e.clientX-rect.left, y=e.clientY-rect.top;
       const col=Math.floor(x/CELL_SIZE), row=Math.floor(y/CELL_SIZE);
       if (currentTemplateGrid && currentTemplateGrid[row] && currentTemplateGrid[row][col]) {
-        const cellData=currentTemplateGrid[row][col];
+        const cellData = currentTemplateGrid[row][col];
         createInputForCell(cellData);
       } else {
         removeCurrentInput();
       }
     }
   });
-
-  // 'Wissen' = pad leegmaken maar in tekenmodus blijven
   document.getElementById("clearPathBtn").addEventListener("click", ()=>{
     removeCurrentInput();
     currentDrawnPath=[];
     lastDrawnCell=null;
     drawDrawnPath();
   });
-
   document.getElementById("undoLastCellBtn").addEventListener("click", ()=>{
     if (currentDrawnPath.length>0){
       const removed=currentDrawnPath.pop();
       drawDrawnPath();
       lastDrawnCell = currentDrawnPath.length>0 ? currentDrawnPath[currentDrawnPath.length-1] : null;
-
       const inRemovedBranch = currentDrawnPath.filter(c=>c.branchLetter===removed.branchLetter).length;
       const rule = branchRules[removed.branchLetter];
       if (rule && inRemovedBranch < rule.count) {
@@ -363,9 +367,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (currentDrawnPath.length<1) startDrawingMode();
     }
   });
-
   document.getElementById("showMyPathBtn").addEventListener("click", showMyPathTemplate);
-
   document.getElementById("downloadPngBtn").addEventListener("click", ()=>{
     if (currentViewMode!=='template-canvas' || !currentTemplateGrid) { alert("Er is geen template om te downloaden."); return; }
     removeCurrentInput();
@@ -376,17 +378,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
   });
 
+  // --- OPGELOST: PDF Download functie ---
   document.getElementById("downloadPdfBtn").addEventListener("click", async ()=>{
     if (currentViewMode!=='template-canvas' || !currentTemplateGrid) { alert("Er is geen template om te downloaden."); return; }
     removeCurrentInput();
     drawPathTemplateOnCanvas(currentTemplateGrid);
 
-    const dataURL=canvas.toDataURL("image/png");
+    const dataURL = canvas.toDataURL("image/png"); // DEZE REGEL ONTBRAK
+
     const { jsPDF } = window.jspdf;
     const doc=new jsPDF('p','mm','a4');
     const pageWidth=doc.internal.pageSize.getWidth();
     const pageHeight=doc.internal.pageSize.getHeight();
-
     const imgWidth=canvas.width, imgHeight=canvas.height, ratio=imgWidth/imgHeight;
     let pdfImgWidth=pageWidth-20, pdfImgHeight=pdfImgWidth/ratio;
     if (pdfImgHeight>pageHeight-40){ pdfImgHeight=pageHeight-40; pdfImgWidth=pdfImgHeight*ratio; }
@@ -398,7 +401,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// --- Interne helper ---
 function addCellToPath(row,col,branchLetter){
   if (row<0||row>=GRID_ROWS||col<0||col>=GRID_COLS) return;
   const newCell={row,col,branchLetter};
@@ -412,7 +414,6 @@ function addCellToPath(row,col,branchLetter){
   currentDrawnPath.push(newCell);
   drawDrawnPath();
   lastDrawnCell=newCell;
-
   const countInBranch=currentDrawnPath.filter(c=>c.branchLetter===activeBranchLetter).length;
   const rule=branchRules[activeBranchLetter];
   if (rule && countInBranch>=rule.count){
