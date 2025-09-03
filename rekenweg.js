@@ -215,7 +215,7 @@ function createInputForCell(cellData) {
 
   editedCell = { cellData, inputElement: input };
 
-  // --- AANGEPAST: Positionering uitgesteld tot de browser klaar is met renderen ---
+  // --- OPGELOST: Positionering uitgesteld tot de browser klaar is met renderen ---
   requestAnimationFrame(() => {
     if (editedCell && editedCell.inputElement === input) {
       const rect = canvas.getBoundingClientRect();
