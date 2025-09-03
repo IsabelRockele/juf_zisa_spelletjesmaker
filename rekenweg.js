@@ -1,4 +1,4 @@
-// DEFINITIEVE VERSIE - 1 september 2025 - Bevat de requestAnimationFrame-oplossing
+// DEFINITIEVE VERSIE - 3 september - Oplossing voor closure-probleem in keydown listener
 
 // Globale variabelen
 const CELL_SIZE = 40; // Grootte van een cel in pixels
@@ -191,7 +191,10 @@ function createInputForCell(cellData) {
     const navKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '];
     if (!navKeys.includes(e.key)) return;
     e.preventDefault();
-    const { row, col } = editedCell.cellData;
+    
+    // --- DE OPLOSSING: Gebruik de lokale 'cellData' in plaats van de globale 'editedCell' ---
+    const { row, col } = cellData;
+    
     let targetRow = row;
     let targetCol = col;
     if (e.key === 'ArrowUp') {
@@ -207,7 +210,7 @@ function createInputForCell(cellData) {
         cell.type === 'empty_slot' && cell.row === targetRow && cell.col === targetCol
     );
     if (targetCell) {
-        saveCellValue(editedCell.cellData, input.value);
+        saveCellValue(cellData, input.value);
         createInputForCell(targetCell);
     }
   });
@@ -217,7 +220,6 @@ function createInputForCell(cellData) {
 
   editedCell = { cellData, inputElement: input };
 
-  // Positionering uitgesteld tot de browser klaar is met renderen
   requestAnimationFrame(() => {
     if (editedCell && editedCell.inputElement === input) {
       const rect = canvas.getBoundingClientRect();
