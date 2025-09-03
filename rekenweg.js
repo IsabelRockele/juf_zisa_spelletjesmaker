@@ -1,3 +1,5 @@
+// DEFINITIEVE VERSIE - 1 september 2025 - Bevat de requestAnimationFrame-oplossing
+
 // Globale variabelen
 const CELL_SIZE = 40; // Grootte van een cel in pixels
 const GRID_COLS = 20; // Aantal kolommen
@@ -215,7 +217,7 @@ function createInputForCell(cellData) {
 
   editedCell = { cellData, inputElement: input };
 
-  // --- OPGELOST: Positionering uitgesteld tot de browser klaar is met renderen ---
+  // Positionering uitgesteld tot de browser klaar is met renderen
   requestAnimationFrame(() => {
     if (editedCell && editedCell.inputElement === input) {
       const rect = canvas.getBoundingClientRect();
