@@ -197,17 +197,48 @@ function setProgress() {
   progressEl.textContent = `Fouten: ${wrong}/${maxWrong}`;
 }
 
+// NIEUWE, GECORRIGEERDE CODE
+// DEFINITIEVE, GECORRIGEERDE CODE
 function guess(letter, btn) {
-  if (!gameActive) return;
-  
-  // GEWIJZIGD: We strippen de letter om accenten te negeren voor de logica
+  // Stop als het spel niet actief is of de knop al gebruikt is.
+  if (!gameActive || (btn && btn.classList.contains("used"))) {
+    return;
+  }
+
+  // 1. Maak de knop meteen grijs voor directe visuele feedback.
+  if (btn) {
+    btn.classList.add("used");
+  }
+
   const strippedLetter = strip(letter);
-  if (guessed.has(strippedLetter)) return;
+
+  // 2. Controleer of de basisletter al geraden was om dubbele straf te voorkomen.
+  if (guessed.has(strippedLetter)) {
+    return;
+  }
+
+  // 3. Voeg de basisletter toe aan de geraden set.
   guessed.add(strippedLetter);
 
-  if (btn) btn.classList.add("used");
-
+  // 4. Bepaal of de gok een "hit" is met de nieuwe, slimmere logica.
+  let isCorrect = false;
+  // Bestaat de basisletter überhaupt in het woord?
   if (solution.includes(strippedLetter)) {
+    const isGuessedLetterPlain = (letter.toUpperCase() === strippedLetter);
+    // Als de gok een normale letter is ('u'), is het altijd goed.
+    if (isGuessedLetterPlain) {
+      isCorrect = true;
+    } else {
+      // Als de gok een accentletter is ('ü'),
+      // moet die exacte letter in het woord voorkomen.
+      if (solutionRaw.toUpperCase().includes(letter.toUpperCase())) {
+        isCorrect = true;
+      }
+    }
+  }
+
+  // 5. Handel de gok af op basis van of het een "hit" was.
+  if (isCorrect) {
     renderWord();
     feedbackEl.textContent = "Goed!";
     feedbackEl.className = "status win";
