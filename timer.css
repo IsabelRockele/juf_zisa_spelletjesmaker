@@ -362,12 +362,25 @@ body.theme-aquarium .side-controls {
     transform: translateX(-50%);
 }
 
+/* NIEUWE STIJL VOOR DIGITALE KLOK IN AQUARIUM THEMA */
 body.theme-aquarium .countdown {
-    bottom: 30px;
-    font-size: clamp(1.8em, 3vw, 2.5em);
-    color: #3498db;
-    z-index: 11;
-    transform: translateX(-80%);
+    top: 75%; /* Boven positie, pas aan indien nodig */
+    left: 50%; /* Om te centreren */
+    transform: translateX(-50%); /* Houdt de klok gecentreerd */
+
+    background-color: rgba(255, 255, 255, 0.9); /* Witte box met lichte transparantie */
+    color: #3498db; /* Blauwe cijfers */
+    padding: 8px 18px; /* Ruimte binnen de box */
+    border-radius: 15px; /* Afgeronde hoeken */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Lichte schaduw voor diepte */
+    
+    font-size: clamp(2.5em, 5vw, 4em); /* Groter lettertype */
+    font-weight: bold; /* Vetgedrukte cijfers */
+    text-align: center; /* Zorgt ervoor dat de cijfers in het midden van de box staan */
+    
+    z-index: 11; /* Zorg ervoor dat het bovenaan andere elementen blijft */
+    width: fit-content; /* De breedte past zich aan de inhoud aan */
+    white-space: nowrap; /* Voorkomt dat de tijd op meerdere regels springt */
 }
 
 body.theme-aquarium .timer-message {
