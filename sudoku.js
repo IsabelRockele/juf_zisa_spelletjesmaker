@@ -39,8 +39,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // --- Thema Afbeeldingen Configuratie ---
     const themeImagePaths = {
-        "terug_naar_school": [], "herfst": [], "halloween": [], "sinterklaas": [],
-        "winter": [], "kerst": [], "lente": [], "pasen": [], "carnaval": [], "zomer": []
+        "terug_naar_school": [], "herfst": [], "Halloween": [], "Sinterklaas": [],
+        "winter": [], "Kerst": [], "lente": [], "Pasen": [], "Carnaval": [], "zomer": []
     };
 
     function populateThemeImagePaths() {
