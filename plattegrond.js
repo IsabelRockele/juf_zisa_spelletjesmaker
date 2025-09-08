@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         raam: "Raam",
         muur: "Muur",
         kring: "Kring",
-        tafel: "Tafel" // <-- DEZE REGEL IS TOEGEVOEGD
+        tafel: "Tafel"
     };
 
     // --- HELPER: INTERACTIEVE OBJECTEN ---
@@ -41,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HELPER: HTML-icoon (voor de legendeweergave op pagina) ---
     function maakIcoonElement(type) {
-        // ... (geen wijzigingen in deze functie)
         const pngTypes = ['schoolbank','bureau','kast','wastafel', 'kring'];
         if (pngTypes.includes(type)) {
             const wrapper = document.createElement('span');
@@ -244,12 +243,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- HELPER OM KLEUREN AAN TE ZETTEN VOOR OPSLAAN ---
-    function withColorsOn(func) {
+    async function withColorsOn(func) {
         const colorsWereOff = !legendeTonenToggle.checked;
         if (colorsWereOff) {
             setCanvasColorsFromLegend(true);
         }
-        func();
+        await func();
         if (colorsWereOff) {
             setCanvasColorsFromLegend(false);
         }
@@ -356,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     undoKnop.addEventListener('click', undo);
     redoKnop.addEventListener('click', redo);
 
-    // --- JSON IMP/EXP ---
+    // --- JSON IMP/EXP (gecorrigeerd) ---
     function laadJsonData(jsonData, isUndoRedo = false) {
         isUpdatingState = true;
         canvas.clear();
@@ -376,12 +375,10 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             objectsToRemove.forEach(obj => canvas.remove(obj));
 
-            isUpdatingState = false;
             if (!isUndoRedo) {
                 const stateToStore = JSON.stringify(canvas.toJSON(customProperties));
                 history = [stateToStore];
                 redoStack = [];
-                slaCanvasOpInBrowser();
                 updateUndoRedoButtons();
             }
             schakelModus('meubel', true);
@@ -389,6 +386,10 @@ document.addEventListener('DOMContentLoaded', () => {
             rebuildLegendFromCanvas();
             setCanvasColorsFromLegend(legendeTonenToggle.checked);
             canvas.renderAll();
+
+            // --- DE FIX ---
+            // De veiligheidsvlag wordt pas hier uitgezet, nadat ALLE operaties klaar zijn.
+            isUpdatingState = false;
         });
     }
     exporteerJsonKnop.addEventListener('click', () => {
@@ -575,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('tekenMuurKnop').addEventListener('click', () => zetBouwTool('muur'));
     document.getElementById('plaatsKlasKnop').addEventListener('click', () => {
         zetBouwTool('klas');
-        const klasRechthoek = new fabric.Rect({ left: 100, top: 100, width: 400, height: 300, fill: 'transparent', stroke: '#333', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur', originX: 'left', originY: 'top' });
+        const klasRechthoek = new fabric.Rect({ left: 100, top: 100, width: 400, height: 300, fill: 'transparent', stroke: 'black', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur', originX: 'left', originY: 'top' });
         maakInteractief(klasRechthoek); canvas.add(klasRechthoek); canvas.setActiveObject(klasRechthoek); canvas.renderAll();
     });
     document.getElementById('plaatsDeurKnop').addEventListener('click', () => {
@@ -607,19 +608,47 @@ document.addEventListener('DOMContentLoaded', () => {
              wallStartPoint = { x: Math.round(p.x / gridSize) * gridSize, y: Math.round(p.y / gridSize) * gridSize };
         }
     });
+
+    // ##################################################################
+    // ### START VAN DE CORRECTIE VOOR "MUUR PER MUUR" ###
+    // ##################################################################
     canvas.on('mouse:up', (o) => {
-        if (!isDrawingWall) return; isDrawingWall = false;
+        if (!isDrawingWall) return;
+        isDrawingWall = false;
         const p = canvas.getPointer(o.e);
         let endX = Math.round(p.x / gridSize) * gridSize;
         let endY = Math.round(p.y / gridSize) * gridSize;
+
         if (o.e.shiftKey) {
-            const dx = Math.abs(endX - wallStartPoint.x), dy = Math.abs(endY - wallStartPoint.y);
-            if (dx > dy) endY = wallStartPoint.y; else endX = wallStartPoint.x;
+            const dx = Math.abs(endX - wallStartPoint.x);
+            const dy = Math.abs(endY - wallStartPoint.y);
+            if (dx > dy) {
+                endY = wallStartPoint.y;
+            } else {
+                endX = wallStartPoint.x;
+            }
         }
-        const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY], { stroke: '#333', strokeWidth: 8, strokeUniform: true, voorwerpType: 'muur', selectable: true, evented: true });
-        maakInteractief(muur); canvas.add(muur); canvas.renderAll();
+
+        const muur = new fabric.Line([wallStartPoint.x, wallStartPoint.y, endX, endY], {
+            stroke: 'black',
+            strokeWidth: 8,
+            strokeUniform: true,
+            voorwerpType: 'muur',
+            originX: 'center',
+            originY: 'center',
+            lockScalingFlip: true
+        });
+
+        maakInteractief(muur);
+        canvas.add(muur);
+        canvas.setActiveObject(muur);
+        canvas.renderAll();
         bouwTool = '';
     });
+    // ##################################################################
+    // ### EINDE VAN DE CORRECTIE ###
+    // ##################################################################
+
     werkbalken.meubel.addEventListener('click', (e) => {
         if (e.target.tagName !== 'BUTTON') return;
         const type = e.target.dataset.type;
@@ -900,17 +929,27 @@ document.addEventListener('DOMContentLoaded', () => {
         return dataUrl;
     }
     async function genereerPdf(opties) {
-        const { toonNamen, toonLegende } = opties;
-        const huidigeNamenZichtbaarheid = namenTonenToggle.checked;
+        const { toonNamen, toonLegende, toonKleuren } = opties;
+
+        const originalColorState = legendeTonenToggle.checked;
+        const originalNameState = namenTonenToggle.checked;
         const wasRasterZichtbaar = gridVisible;
-        if (wasRasterZichtbaar) { canvas.remove(gridGroup); canvas.renderAll(); }
 
-        setNamenZichtbaarheid(toonNamen);
+        try {
+            setCanvasColorsFromLegend(toonKleuren);
+            setNamenZichtbaarheid(toonNamen);
+            if (wasRasterZichtbaar) {
+                canvas.remove(gridGroup);
+                canvas.renderAll();
+            }
+            
+            // BELANGRIJKE FIX: Zorg ervoor dat de legendelijst is bijgewerkt
+            // met de staat van het canvas ZOALS HET IN DE PDF ZAL VERSCHIJNEN.
+            if (toonKleuren) {
+                rebuildLegendFromCanvas();
+            }
 
-        withColorsOn(async () => {
             const plattegrondDataUrl = canvas.toDataURL({ format: 'png', quality: 1.0 });
-            setNamenZichtbaarheid(huidigeNamenZichtbaarheid);
-            if (wasRasterZichtbaar) { canvas.add(gridGroup); gridGroup.moveTo(0); canvas.renderAll(); }
 
             const orientation = canvas.getWidth() > canvas.getHeight() ? 'landscape' : 'portrait';
             const { jsPDF } = window.jspdf;
@@ -934,15 +973,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 doc.addPage();
                 doc.setFontSize(18);
                 doc.text("Legende", A4_WIDTH / 2, MARGIN + 6, { align: 'center' });
-                doc.setFontSize(15);
+
+                const FONT_SIZE_PT = 16;
+                const PT_TO_MM = 0.352778;
+
+                doc.setFont("Arial", "normal");
+                doc.setFontSize(FONT_SIZE_PT);
+
                 const items = Array.from(gebruikteLegendeItems.entries()).filter(([type]) => !!legendeNamen[type]);
-                const outerColCount = 2; const rowH = 22; const startY = MARGIN + 20; const startX = MARGIN;
-                const outerColGap = 16; const outerColWidth = (A4_WIDTH - 2*MARGIN - outerColGap) / outerColCount;
-                const colorColW = 9; const iconColW  = 16; const innerGap  = 3; const colorBox   = 9; const iconSizeMm = 16;
+
+                const outerColCount = 2;
+                const rowH = 25;
+                const startY = MARGIN + 20;
+                const startX = MARGIN;
+                const outerColGap = 16;
+                const outerColWidth = (A4_WIDTH - 2*MARGIN - outerColGap) / outerColCount;
+                const colorColW = 12;
+                const iconColW  = 20;
+                const innerGap  = 4;
+                const colorBox   = 10;
+                const iconSizeMm = 18;
                 let col = 0, row = 0;
+
                 for (const [type, waarde] of items) {
                     const baseX = startX + col * (outerColWidth + outerColGap);
                     const baseY = startY + row * rowH;
+                    const centerY = baseY + (rowH / 2);
+
                     const kleur = (waarde && waarde.kleur && type !== 'muur' && type !== 'raam') ? waarde.kleur : null;
                     if (kleur) {
                         let r=255,g=235,b=59;
@@ -952,31 +1009,48 @@ document.addEventListener('DOMContentLoaded', () => {
                             r = (num >> 16) & 255; g = (num >> 8) & 255; b = num & 255;
                         }
                         doc.setFillColor(r,g,b);
-                        doc.rect(baseX, baseY - (colorBox/2) + (rowH/2) - (colorBox/2), colorBox, colorBox, 'F');
+                        doc.rect(baseX, centerY - (colorBox / 2), colorBox, colorBox, 'F');
                     }
+
                     const iconX = baseX + colorColW + innerGap;
-                    const iconY = baseY - (iconSizeMm/2) + (rowH/2) - (iconSizeMm/2);
+                    const iconY = centerY - (iconSizeMm / 2);
                     const iconDataUrl = await iconToDataUrl(type, 160);
                     doc.addImage(iconDataUrl, 'PNG', iconX, iconY, iconSizeMm, iconSizeMm);
-                    const textX = iconX + iconColW + innerGap + 1;
-                    const textY = baseY + (rowH/2) + 4;
+
+                    const textX = iconX + iconColW + innerGap;
+                    const textY = centerY + (FONT_SIZE_PT * PT_TO_MM) / 3.5;
                     doc.text(legendeNamen[type] || type, textX, textY);
+                    
                     row++;
                     const maxRows = Math.floor((A4_HEIGHT - startY - MARGIN) / rowH);
                     if (row >= maxRows) { row = 0; col++; if (col >= outerColCount) { doc.addPage(); col = 0; } }
                 }
             }
             doc.save(`plattegrond${toonLegende ? '_met_legende' : (toonNamen ? '_met_namen' : '')}.pdf`);
-        });
+
+        } catch (error) {
+            console.error("Er is een fout opgetreden bij het genereren van de PDF:", error);
+            alert("Er is een onverwachte fout opgetreden bij het maken van de PDF. Controleer de console voor meer details.");
+        } finally {
+            // Herstel ALTIJD de originele visuele staat van het canvas
+            setCanvasColorsFromLegend(originalColorState);
+            setNamenZichtbaarheid(originalNameState);
+            if (wasRasterZichtbaar) {
+                tekenRaster();
+            }
+            rebuildLegendFromCanvas();
+        }
     }
+
+    // --- PDF knoppen ---
     document.getElementById('downloadPdfPlattegrondKnop').addEventListener('click', () => {
-        genereerPdf({ toonNamen: false, toonLegende: false });
+        genereerPdf({ toonNamen: false, toonLegende: false, toonKleuren: false });
     });
     document.getElementById('downloadPdfNamenKnop').addEventListener('click', () => {
-        genereerPdf({ toonNamen: true, toonLegende: false });
+        genereerPdf({ toonNamen: true, toonLegende: false, toonKleuren: false });
     });
     document.getElementById('downloadPdfLegendeKnop').addEventListener('click', () => {
-        genereerPdf({ toonNamen: false, toonLegende: true });
+        genereerPdf({ toonNamen: false, toonLegende: true, toonKleuren: true });
     });
 
     laadCanvasUitBrowser();
