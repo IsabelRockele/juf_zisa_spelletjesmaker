@@ -88,9 +88,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 
   <!-- Aanroep naar je Cloud Function 'createKidLink' — NA guard.js! -->
- <script type="module">
+<script type="module">
   import { getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
   import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+  async function waitForFirebaseReady(timeoutMs=6000){
+    const t0 = Date.now();
+    while (!getApps().length && Date.now()-t0 < timeoutMs) { await sleep(150); }
+    return getApps().length > 0;
+  }
 
   window.addEventListener('load', () => {
     const genBtn = document.getElementById("gen-qr");
@@ -101,38 +108,32 @@
     if (!genBtn) return;
 
     genBtn.addEventListener("click", async () => {
-      // voorkomt “No Firebase App '[DEFAULT]'…”
-      if (!getApps().length) {
-        alert("PRO-initialisatie is nog niet klaar (of u bent niet aangemeld). Herlaad de pagina en probeer opnieuw.");
-        return;
-      }
-
       const prev = genBtn.textContent;
       genBtn.disabled = true; genBtn.textContent = "Bezig…";
       try {
+        const ready = await waitForFirebaseReady();
+        if (!ready) { alert("PRO-initialisatie is nog niet klaar (of u bent niet aangemeld). Herlaad en probeer opnieuw."); return; }
+
         const fns = getFunctions(undefined, "europe-west1");
         const createKidLink = httpsCallable(fns, "createKidLink");
         const { data } = await createKidLink({ target: "kid-start", range: "100" });
 
-        const url = data.url;
-        const expires = new Date(data.expiresAt);
-
         wrap.style.display = "block";
         box.innerHTML = "";
-        new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+        new QRCode(box, { text: data.url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
 
         setTimeout(() => {
           const img = box.querySelector("img"); if (!img) return;
-          const canvas = document.createElement("canvas");
-          canvas.width = img.width; canvas.height = img.height;
-          const ctx = canvas.getContext("2d");
-          ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
-          const ph = new Image(); ph.crossOrigin = "anonymous";
-          ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = canvas.toDataURL("image/png"); };
+          const c = document.createElement("canvas");
+          c.width = img.width; c.height = img.height;
+          const ctx = c.getContext("2d");
+          ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+          const ph = new Image(); ph.crossOrigin="anonymous";
+          ph.onload = () => { ctx.drawImage(ph,0,0); dl.href = c.toDataURL("image/png"); };
           ph.src = img.src;
         }, 80);
 
-        exp.textContent = "Geldig t/m: " + expires.toLocaleDateString("nl-BE");
+        exp.textContent = "Geldig t/m: " + new Date(data.expiresAt).toLocaleDateString("nl-BE");
       } catch (e) {
         alert("Kon geen QR maken: " + (e.message || e));
       } finally {
@@ -141,5 +142,6 @@
     });
   });
 </script>
+
 </body>
 </html>
