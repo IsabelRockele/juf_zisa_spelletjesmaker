@@ -142,52 +142,53 @@
   // A4 liggend
   const pageW = 297, pageH = 210;
 
-  // Raster: 2 kolommen × 4 rijen  →  8 kaartjes per pagina
+  // Raster: 3 kolommen × 3 rijen  →  9 kaartjes per pagina
   const margin   = 10;
-  const cols     = 2;
-  const rows     = 4;
-  const gutterX  = 8;
-  const gutterY  = 10;
+  const cols     = 3;
+  const rows     = 3;
+  const gutterX  = 8;    // ruimte tussen kolommen
+  const gutterY  = 10;   // ruimte tussen rijen
 
-  // Kaart/vak
-  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;   // ≈ 134.5 mm
-  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;   // ≈ 41.5 mm
+  // Kaart/vak afmetingen
+  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;   // ≈ 87 mm
+  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;   // ≈ 56.7 mm
 
   const title = 'Hulpschema rekenen';
 
-  // Binnenmarges in elk vak
-  const padTop    = 7;    // boven titel
-  const padSides  = 8;    // links/rechts
-  const padUnderT = 4;    // tussen titel en QR
-  const padBottom = 8;    // onderaan
+  // Binnenmarges in elk vak (ruim genoeg voor volledige QR)
+  const padTop    = 5;   // boven de titel
+  const padSides  = 6;   // links/rechts
+  const padUnderT = 2;   // tussen titel en QR
+  const padBottom = 5;   // onderaan
 
-  // Titel (pt → we plaatsen op vaste y, niet meerekenen als mm-hoogte)
-  const titlePt = 11;
-  doc.setFont('helvetica','bold');
-  doc.setFontSize(titlePt);
+  // Titelhoogte (visueel) in mm – we tekenen met fontSize in pt,
+  // maar rekenen hier met een conservatieve 4.5 mm voor de zone.
+  const titleZone = 4.5;
 
   // Beschikbare ruimte voor QR
-  const availW = cardW - 2*padSides;
-  const availH = cardH - padTop - 5 /*titelzone*/ - padUnderT - padBottom;
+  const availW = cardW - 2*padSides;                                   // ≈ 75 mm
+  const availH = cardH - padTop - titleZone - padUnderT - padBottom;   // ≈ 40+ mm
 
-  // QR-maat: passend binnen het vak, met veiligheidsmarge
-  const safety  = 2; // mm
-  const qrSize  = Math.max(32, Math.min(46, Math.min(availW, availH) - safety));
+  // Veiligheidsmarge zodat QR nooit “aanraakt”
+  const safety  = 1.5; // mm
+
+  // QR-maat: zo groot mogelijk, maar netjes binnen het vak
+  // 34–44 mm scant comfortabel; we kiezen de min van breedte/hoogte minus safety.
+  const qrSize  = Math.max(34, Math.min(44, Math.min(availW, availH) - safety));
 
   // Eén hoge-res QR genereren en hergebruiken
   const qrPng = await makeQrDataUrl(url, 1000);
 
   // Bovenaan elke pagina een korte instructie
-  const instruct = "Druk af (liggend, 2 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
+  const instruct = "Druk af (liggend, 3 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
   const drawPageHeader = () => {
     doc.setFont('helvetica','normal');
     doc.setFontSize(9);
     doc.text(instruct, pageW/2, 7, { align: 'center' });
   };
-
   drawPageHeader();
 
-  // Lijndikte vakken
+  // Vakken tekenen
   doc.setDrawColor(60);
   doc.setLineWidth(0.25);
 
@@ -197,8 +198,6 @@
       drawPageHeader();
       doc.setDrawColor(60);
       doc.setLineWidth(0.25);
-      doc.setFont('helvetica','bold');
-      doc.setFontSize(titlePt);
     }
 
     const slot = i % (cols*rows);
@@ -207,19 +206,21 @@
 
     const x = margin + c * (cardW + gutterX);
     const y = margin + r * (cardH + gutterY);
+    const centerX = x + cardW / 2;
 
     // 1) Vak (wit + rand)
     doc.setFillColor(255,255,255);
     doc.rect(x, y, cardW, cardH, 'FD');
 
-    // 2) Titel (boven in vak, centreren)
-    const centerX = x + cardW / 2;
-    const titleY  = y + padTop; // we tekenen met baseline 'alphabetic' – deze positie geeft mooi ruimte erboven
+    // 2) Titel
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(11);
+    const titleY = y + padTop + 3.2; // ≈ baselinepositie zodat er ruimte boven/onder is
     doc.text(title, centerX, titleY, { align: 'center' });
 
-    // 3) QR – gecentreerd horizontaal, netjes onder de titel
+    // 3) QR (gecentreerd)
     const qrX = centerX - qrSize / 2;
-    const qrY = titleY + 5 /*titelzone*/ + padUnderT;
+    const qrY = y + padTop + titleZone + padUnderT;
     doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
   }
 
