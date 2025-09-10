@@ -26,6 +26,10 @@ p { color: #333; font-size: 1.1em; max-width: 400px; }
 .right-half span { left: 55%; transform: translate(-50%, -50%); }
 .full-heart-container { width: 400px; height: 380px; background-image: url('harten_afbeeldingen/hart_volledig.png'); background-size: contain; background-position: center; background-repeat: no-repeat; display: flex; justify-content: center; align-items: center; animation: flash-together 1s ease-in-out; }
 .full-heart-container span { font-size: 100px; font-weight: bold; color: white; text-shadow: -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000, 3px 3px 0 #000; }
+/* TOEGEVOEGD: Maak duidelijker dat de opties klikbaar zijn */
+.options-container .heart-half {
+    cursor: pointer;
+}
 @keyframes flash-together { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); filter: drop-shadow(0 0 15px white) brightness(1.5); } }
 .game-footer { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
 .feedback { font-size: 24px; min-height: 30px; font-weight: bold; flex-grow: 1; text-align: center; }
