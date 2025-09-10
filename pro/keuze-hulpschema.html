@@ -89,30 +89,31 @@
 
   <!-- Aanroep naar je Cloud Function 'createKidLink' — NA guard.js! -->
 <script type="module">
-  import { getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
+  // Let op: versie 10.12.2 — gelijk aan guard.js
+  import { getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-  async function waitForFirebaseReady(timeoutMs=6000){
+  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+  async function waitReady(maxMs=12000){
     const t0 = Date.now();
-    while (!getApps().length && Date.now()-t0 < timeoutMs) { await sleep(150); }
+    while (!getApps().length && Date.now()-t0 < maxMs) { await sleep(100); }
     return getApps().length > 0;
   }
 
   window.addEventListener('load', () => {
-    const genBtn = document.getElementById("gen-qr");
-    const wrap   = document.getElementById("qr-wrap");
-    const box    = document.getElementById("qr-box");
-    const dl     = document.getElementById("qr-dl");
-    const exp    = document.getElementById("qr-exp");
-    if (!genBtn) return;
+    const btn  = document.getElementById("gen-qr");
+    const wrap = document.getElementById("qr-wrap");
+    const box  = document.getElementById("qr-box");
+    const dl   = document.getElementById("qr-dl");
+    const exp  = document.getElementById("qr-exp");
+    if (!btn) return;
 
-    genBtn.addEventListener("click", async () => {
-      const prev = genBtn.textContent;
-      genBtn.disabled = true; genBtn.textContent = "Bezig…";
+    btn.addEventListener("click", async () => {
+      const prev = btn.textContent;
+      btn.disabled = true; btn.textContent = "Bezig…";
       try {
-        const ready = await waitForFirebaseReady();
-        if (!ready) { alert("PRO-initialisatie is nog niet klaar (of u bent niet aangemeld). Herlaad en probeer opnieuw."); return; }
+        const ready = await waitReady();
+        if (!ready) { btn.textContent = "Niet gelukt"; return; }
 
         const fns = getFunctions(undefined, "europe-west1");
         const createKidLink = httpsCallable(fns, "createKidLink");
@@ -122,14 +123,15 @@
         box.innerHTML = "";
         new QRCode(box, { text: data.url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
 
+        // Download als PNG
         setTimeout(() => {
           const img = box.querySelector("img"); if (!img) return;
           const c = document.createElement("canvas");
           c.width = img.width; c.height = img.height;
           const ctx = c.getContext("2d");
           ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
-          const ph = new Image(); ph.crossOrigin="anonymous";
-          ph.onload = () => { ctx.drawImage(ph,0,0); dl.href = c.toDataURL("image/png"); };
+          const ph = new Image(); ph.crossOrigin = "anonymous";
+          ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = c.toDataURL("image/png"); };
           ph.src = img.src;
         }, 80);
 
@@ -137,7 +139,7 @@
       } catch (e) {
         alert("Kon geen QR maken: " + (e.message || e));
       } finally {
-        genBtn.textContent = prev; genBtn.disabled = false;
+        btn.textContent = prev; btn.disabled = false;
       }
     });
   });
