@@ -61,28 +61,39 @@
   <script type="module" src="./guard.js"></script>
 
   <!-- QR-paneel voor leerkracht (compact, rechtsonder) -->
-  <div id="kid-qr-panel" style="
-    position:fixed; right:14px; bottom:14px; z-index:9999;
-    background:#fff; border:1px solid #e3e8f5; border-radius:12px;
-    box-shadow:0 6px 20px rgba(0,0,0,.08); padding:12px; width: 280px;">
-    <div style="font:600 14px system-ui; color:#123b72; margin-bottom:8px;">
-      QR voor thuisgebruik
-    </div>
-    <button id="gen-qr"
-      style="width:100%; padding:10px; border-radius:9px; border:2px solid #3f7fbf; background:#fff; color:#275ea8; font-weight:800; cursor:pointer;">
-      Maak QR
-    </button>
-    <div id="qr-wrap" style="display:none; margin-top:10px; text-align:center;">
-      <div id="qr-box" style="display:inline-block; padding:6px; background:#fff; border:1px solid #eef3ff;"></div>
-      <a id="qr-dl" download="hulpschema-qr.png"
-         style="display:block; margin-top:8px; font:600 13px system-ui; color:#275ea8; text-decoration:underline; cursor:pointer;">
-         Download als PNG
-      </a>
-      <div id="qr-exp" style="margin-top:6px; font:12px system-ui; color:#566;">
-        Geldig t/m: …
-      </div>
+<!-- QR-paneel voor leerkracht (compact, rechtsonder) -->
+<div id="kid-qr-panel" style="
+  position:fixed; right:14px; bottom:14px; z-index:9999;
+  background:#fff; border:1px solid #e3e8f5; border-radius:12px;
+  box-shadow:0 6px 20px rgba(0,0,0,.08); padding:12px; width: 280px;">
+  <div style="font:600 14px system-ui; color:#123b72; margin-bottom:8px;">
+    QR voor thuisgebruik
+  </div>
+  <button id="gen-qr"
+    style="width:100%; padding:10px; border-radius:9px; border:2px solid #3f7fbf; background:#fff; color:#275ea8; font-weight:800; cursor:pointer;">
+    Maak QR
+  </button>
+
+  <div id="qr-wrap" style="display:none; margin-top:10px; text-align:center;">
+    <div id="qr-box" style="display:inline-block; padding:6px; background:#fff; border:1px solid #eef3ff;"></div>
+    <a id="qr-dl" download="hulpschema-qr.png"
+       style="display:block; margin-top:8px; font:600 13px system-ui; color:#275ea8; text-decoration:underline; cursor:pointer;">
+       Download als PNG
+    </a>
+    <div id="qr-exp" style="margin-top:6px; font:12px system-ui; color:#566;">
+      Geldig t/m: …
     </div>
   </div>
+
+  <!-- ⬇️ UITLEG HIER PLAKKEN (onder het QR-blok) -->
+  <div id="qr-uitleg" style="display:none; margin-top:8px; font-size:0.95rem; line-height:1.35;">
+    <strong>Tip voor leerkrachten</strong><br>
+    Druk de QR-code af en hang ze zichtbaar op in de klas en/of kleef ze in de klasagenda.<br>
+    De QR blijft <em>één jaar</em> geldig.<br>
+    (Een nieuwe QR aanmaken maakt de vorige <em>niet</em> onbruikbaar.)
+  </div>
+</div>
+
 
     <!-- QR generator lib (lichtgewicht) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
