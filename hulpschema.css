@@ -1,14 +1,16 @@
+/* --- LAYOUT AANPASSINGEN --- */
+.content-wrapper {
+  display: flex;
+}
+
 body {
   font-family: sans-serif;
   background-color: #eef;
   padding: 20px;
-  display: flex;
   margin: 0;
   box-sizing: border-box;
 }
-h1 {
-  margin-bottom: 20px;
-}
+
 #sidebar {
   width: 200px;
   flex-shrink: 0;
@@ -18,7 +20,12 @@ h1 {
   flex-direction: column;
   gap: 10px;
   position: relative;
-  margin-top: 200px;
+  margin-top: 0; /* Verwijderd de oude grote marge */
+}
+
+/* --- OORSPRONKELIJKE CSS --- */
+h1 {
+  margin-bottom: 20px;
 }
 #main {
   flex-grow: 1;
@@ -216,12 +223,15 @@ button:disabled {
   color: white;
   margin-bottom: 8px;
   transition: transform 0.2s;
+  cursor: pointer;
 }
 #sidebar button.knop:hover {
   transform: scale(1.05);
 }
 .knop.reset { background-color: #4caf50; }
 .knop.terug { background-color: #f44336; }
+.knop.wissel { background-color: #2196f3; }
+
 #schema-min {
   margin-top: 40px;
 }
@@ -319,7 +329,7 @@ button:disabled {
   display: inline-block;
 }
 @media (max-width: 900px) {
-  body { flex-direction: column; }
+  .content-wrapper { flex-direction: column; } /* Zorgt dat de layout op mobiel goed blijft */
   #main { order: 1; padding-left: 0; width: 100%; }
   #sidebar { width: 100%; margin-top: 0; order: 2; }
   #schema, #schema-min { max-width: calc(100vw - 20px); }
