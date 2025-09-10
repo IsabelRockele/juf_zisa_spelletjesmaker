@@ -84,66 +84,153 @@
     </div>
   </div>
 
-  <!-- QR generator lib (lichtgewicht) -->
+    <!-- QR generator lib (lichtgewicht) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <!-- jsPDF voor PDF-export -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
   <!-- Aanroep naar je Cloud Function 'createKidLink' — NA guard.js! -->
-<script type="module">
-  // Let op: versie 10.12.2 — gelijk aan guard.js
-  import { getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+  <script type="module">
+    // Let op: versie 10.12.2 — gelijk aan guard.js
+    import { getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-  async function waitReady(maxMs=12000){
-    const t0 = Date.now();
-    while (!getApps().length && Date.now()-t0 < maxMs) { await sleep(100); }
-    return getApps().length > 0;
-  }
+    // PDF helpers
+    const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+    async function waitReady(maxMs=12000){
+      const t0 = Date.now();
+      while (!getApps().length && Date.now()-t0 < maxMs) { await sleep(100); }
+      return getApps().length > 0;
+    }
 
-  window.addEventListener('load', () => {
-    const btn  = document.getElementById("gen-qr");
-    const wrap = document.getElementById("qr-wrap");
-    const box  = document.getElementById("qr-box");
-    const dl   = document.getElementById("qr-dl");
-    const exp  = document.getElementById("qr-exp");
-    if (!btn) return;
+    // Hoge-res QR als dataURL (PNG) — één keer genereren en hergebruiken
+    function makeQrDataUrl(text, sizePx = 800) {
+      return new Promise((resolve) => {
+        const tmp = document.createElement('div');
+        tmp.style.position = 'fixed';
+        tmp.style.left = '-10000px';
+        document.body.appendChild(tmp);
 
-    btn.addEventListener("click", async () => {
-      const prev = btn.textContent;
-      btn.disabled = true; btn.textContent = "Bezig…";
-      try {
-        const ready = await waitReady();
-        if (!ready) { btn.textContent = "Niet gelukt"; return; }
+        new QRCode(tmp, { text, width: sizePx, height: sizePx, correctLevel: QRCode.CorrectLevel.M });
 
-        const fns = getFunctions(undefined, "europe-west1");
-        const createKidLink = httpsCallable(fns, "createKidLink");
-        const { data } = await createKidLink({ target: "kid-start", range: "100" });
-
-        wrap.style.display = "block";
-        box.innerHTML = "";
-        new QRCode(box, { text: data.url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
-
-        // Download als PNG
         setTimeout(() => {
-          const img = box.querySelector("img"); if (!img) return;
-          const c = document.createElement("canvas");
-          c.width = img.width; c.height = img.height;
-          const ctx = c.getContext("2d");
-          ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
-          const ph = new Image(); ph.crossOrigin = "anonymous";
-          ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = c.toDataURL("image/png"); };
-          ph.src = img.src;
-        }, 80);
+          const img = tmp.querySelector('img');
+          const canvas = tmp.querySelector('canvas');
+          const dataUrl = img?.src || canvas?.toDataURL('image/png') || '';
+          document.body.removeChild(tmp);
+          resolve(dataUrl);
+        }, 30);
+      });
+    }
 
-        exp.textContent = "Geldig t/m: " + new Date(data.expiresAt).toLocaleDateString("nl-BE");
-      } catch (e) {
-        alert("Kon geen QR maken: " + (e.message || e));
-      } finally {
-        btn.textContent = prev; btn.disabled = false;
+    async function makePdfFromQr(url, copies = 20) {
+      if (!url) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+      // A4 landscape: 297 × 210 mm
+      const pageW = 297, pageH = 210;
+      const margin = 10;
+      const cols = 2, rows = 5;          // 2 kolommen × 5 rijen = 10 kaartjes/pagina
+      const colGap = 10;
+      const colW = (pageW - 2*margin - colGap) / cols;
+      const rowStep = (pageH - 2*margin) / rows;
+      const title = 'Hulpschema rekenen';
+      const qrSize = 42;                 // ≈ 42 mm: goed scanbaar, niet reusachtig
+
+      const qrPng = await makeQrDataUrl(url, 900);
+
+      for (let i = 0; i < copies; i++) {
+        if (i > 0 && i % (cols*rows) === 0) doc.addPage();
+
+        const slot = i % (cols*rows);
+        const r = Math.floor(slot / cols);
+        const c = slot % cols;
+
+        const colX = margin + c * (colW + colGap);
+        const yTop = margin + r * rowStep;
+        const centerX = colX + colW / 2;
+
+        // Titel
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(title, centerX, yTop + 5, { align: 'center' });
+
+        // QR
+        const xImg = centerX - qrSize / 2;
+        const yImg = yTop + 8;
+        doc.addImage(qrPng, 'PNG', xImg, yImg, qrSize, qrSize);
       }
-    });
-  });
-</script>
 
+      doc.save('hulpschema-qr.pdf');
+    }
+
+    window.addEventListener('load', () => {
+      const btn  = document.getElementById("gen-qr");
+      const wrap = document.getElementById("qr-wrap");
+      const box  = document.getElementById("qr-box");
+      const dl   = document.getElementById("qr-dl");
+      const exp  = document.getElementById("qr-exp");
+
+      // PDF-knop toevoegen (in je bestaande panel)
+      let pdfBtn = document.getElementById('qr-pdf');
+      if (!pdfBtn) {
+        pdfBtn = document.createElement('button');
+        pdfBtn.id = 'qr-pdf';
+        pdfBtn.textContent = 'Download als PDF (2 kolommen)';
+        pdfBtn.style.cssText = 'width:100%; margin-top:8px; padding:10px; border-radius:9px; border:2px solid #3f7fbf; background:#fff; color:#275ea8; font-weight:800; cursor:pointer;';
+        pdfBtn.disabled = true; // wordt pas actief na QR
+        wrap.appendChild(pdfBtn);
+      }
+
+      if (!btn) return;
+
+      let lastUrl = null; // onthoud de laatste QR-URL voor PDF
+
+      btn.addEventListener("click", async () => {
+        const prev = btn.textContent;
+        btn.disabled = true; btn.textContent = "Bezig…";
+        try {
+          const ready = await waitReady();
+          if (!ready) { btn.textContent = "Niet gelukt"; return; }
+
+          const fns = getFunctions(undefined, "europe-west1");
+          const createKidLink = httpsCallable(fns, "createKidLink");
+          const { data } = await createKidLink({ target: "kid-start", range: "100" });
+
+          lastUrl = data.url;                 // << nodig voor PDF
+          wrap.style.display = "block";
+          box.innerHTML = "";
+          new QRCode(box, { text: data.url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+
+          // Download als PNG
+          setTimeout(() => {
+            const img = box.querySelector("img"); if (!img) return;
+            const c = document.createElement("canvas");
+            c.width = img.width; c.height = img.height;
+            const ctx = c.getContext("2d");
+            ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+            const ph = new Image(); ph.crossOrigin = "anonymous";
+            ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = c.toDataURL("image/png"); };
+            ph.src = img.src;
+          }, 80);
+
+          exp.textContent = "Geldig t/m: " + new Date(data.expiresAt).toLocaleDateString("nl-BE");
+          pdfBtn.disabled = false;            // PDF-knop activeren
+        } catch (e) {
+          alert("Kon geen QR maken: " + (e.message || e));
+        } finally {
+          btn.textContent = prev; btn.disabled = false;
+        }
+      });
+
+      // PDF-knop: vraag aantal kaartjes (default 20 = 2 pagina’s)
+      pdfBtn.addEventListener('click', async () => {
+        if (!lastUrl) { alert('Maak eerst een QR.'); return; }
+        const n = parseInt(prompt('Aantal kaartjes (10 per pagina)?', '20') || '20', 10);
+        await makePdfFromQr(lastUrl, (isFinite(n) && n > 0) ? n : 20);
+      });
+    });
+  </script>
 </body>
 </html>
