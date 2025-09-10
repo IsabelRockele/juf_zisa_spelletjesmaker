@@ -134,81 +134,94 @@
     }
 
     // PDF: A4 liggend, 2 kolommen × 5 rijen; elk in een eigen vak, titel erboven
-    async function makePdfFromQr(url, copies = 20) {
-      if (!url) return;
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+   async function makePdfFromQr(url, copies = 20) {
+  if (!url) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-      const pageW = 297, pageH = 210;
-      const margin   = 10;
-      const cols     = 2;
-      const rows     = 5;
-      const gutterX  = 8;
-      const gutterY  = 6;
+  // Pagina (A4 liggend)
+  const pageW = 297, pageH = 210;
 
-      const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;
-      const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;
+  // Raster: 2 kolommen × 5 rijen
+  const margin   = 10;   // buitenmarge
+  const cols     = 2;
+  const rows     = 5;
+  const gutterX  = 8;    // tussen kolommen
+  const gutterY  = 8;    // tussen rijen  (iets ruimer)
 
-      const title = 'Hulpschema rekenen';
+  // Kaart/vak afmetingen
+  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;
+  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;
 
-      const padTop    = 6;
-      const padSides  = 6;
-      const padUnderT = 4;
+  const title = 'Hulpschema rekenen';
 
-      const titleSize = 11;
-      const titleLine = 5;
+  // Binnenmarges in elk vak (ruimer dan voorheen)
+  const padTop    = 8;   // boven de titel
+  const padSides  = 8;   // links/rechts
+  const padUnderT = 6;   // tussen titel en QR
+  const padBottom = 8;   // onderaan
 
-      const availW = cardW - 2*padSides;
-      const availH = cardH - padTop - titleLine - padUnderT - 6;
+  // Titel
+  const titleSize = 11;
+  const titleLine = titleSize * 0.9; // visuele hoogte van de titelregel
 
-      const qrSize = Math.max(36, Math.min(48, Math.min(availW, availH)));
+  // Beschikbare ruimte voor de QR
+  const availW = cardW - 2*padSides;
+  const availH = cardH - padTop - titleLine - padUnderT - padBottom;
 
-      const qrPng = await makeQrDataUrl(url, 900);
+  // Veiligheidsmarge zodat hij zeker binnen het vak blijft
+  const safety  = 4; // mm
+  const qrSize  = Math.max(32, Math.min(46, Math.min(availW, availH) - safety));
 
-      // optionele bovenregel voor leerkracht
-      const instruct = "Druk af (liggend, 2 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
-      doc.setFont('helvetica','normal'); 
+  // Eén hoge-res QR genereren en hergebruiken
+  const qrPng = await makeQrDataUrl(url, 1000);
+
+  // Korte instructie bovenaan elke pagina
+  const instruct = "Druk af (liggend, 2 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.text(instruct, pageW/2, 7, { align: 'center' });
+
+  // Vak-randen
+  doc.setDrawColor(60);
+  doc.setLineWidth(0.25);
+
+  for (let i = 0; i < copies; i++) {
+    if (i > 0 && i % (cols*rows) === 0) {
+      doc.addPage();
+      doc.setFont('helvetica','normal');
       doc.setFontSize(9);
-      doc.text(instruct, pageW/2, 8, { align: 'center' });
-
+      doc.text(instruct, pageW/2, 7, { align: 'center' });
       doc.setDrawColor(60);
-      doc.setLineWidth(0.2);
-
-      for (let i = 0; i < copies; i++) {
-        if (i > 0 && i % (cols*rows) === 0) {
-          doc.addPage();
-          doc.setFont('helvetica','normal'); 
-          doc.setFontSize(9);
-          doc.text(instruct, pageW/2, 8, { align: 'center' });
-          doc.setDrawColor(60);
-          doc.setLineWidth(0.2);
-        }
-
-        const slot = i % (cols*rows);
-        const r = Math.floor(slot / cols);
-        const c = slot % cols;
-
-        const x = margin + c * (cardW + gutterX);
-        const y = margin + r * (cardH + gutterY);
-
-        // Vak
-        doc.setFillColor(255, 255, 255);
-        doc.rect(x, y, cardW, cardH, 'FD');
-
-        // Titel
-        const centerX = x + cardW / 2;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(titleSize);
-        doc.text(title, centerX, y + padTop + titleSize*0.35, { align: 'center' });
-
-        // QR
-        const qrX = centerX - qrSize / 2;
-        const qrY = y + padTop + titleLine + padUnderT;
-        doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
-      }
-
-      doc.save('hulpschema-qr.pdf');
+      doc.setLineWidth(0.25);
     }
+
+    const slot = i % (cols*rows);
+    const r = Math.floor(slot / cols);
+    const c = slot % cols;
+
+    const x = margin + c * (cardW + gutterX);
+    const y = margin + r * (cardH + gutterY);
+
+    // 1) Vak met rand (witte achtergrond)
+    doc.setFillColor(255,255,255);
+    doc.rect(x, y, cardW, cardH, 'FD');
+
+    // 2) Titel
+    const centerX = x + cardW / 2;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(titleSize);
+    const titleY = y + padTop + titleLine;  // ruim boven de QR
+    doc.text(title, centerX, titleY, { align: 'center' });
+
+    // 3) QR gecentreerd in het vak
+    const qrX = centerX - qrSize / 2;
+    const qrY = titleY + padUnderT;
+    doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
+  }
+
+  doc.save('hulpschema-qr.pdf');
+}
 
     // UI-koppeling
     window.addEventListener('load', () => {
