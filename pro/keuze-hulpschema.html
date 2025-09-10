@@ -134,66 +134,71 @@
     }
 
     // PDF: A4 liggend, 2 kolommen × 5 rijen; elk in een eigen vak, titel erboven
-   async function makePdfFromQr(url, copies = 20) {
+ async function makePdfFromQr(url, copies = 20) {
   if (!url) return;
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-  // Pagina (A4 liggend)
+  // A4 liggend
   const pageW = 297, pageH = 210;
 
-  // Raster: 2 kolommen × 5 rijen
-  const margin   = 10;   // buitenmarge
+  // Raster: 2 kolommen × 4 rijen  →  8 kaartjes per pagina
+  const margin   = 10;
   const cols     = 2;
-  const rows     = 5;
-  const gutterX  = 8;    // tussen kolommen
-  const gutterY  = 8;    // tussen rijen  (iets ruimer)
+  const rows     = 4;
+  const gutterX  = 8;
+  const gutterY  = 10;
 
-  // Kaart/vak afmetingen
-  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;
-  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;
+  // Kaart/vak
+  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;   // ≈ 134.5 mm
+  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;   // ≈ 41.5 mm
 
   const title = 'Hulpschema rekenen';
 
-  // Binnenmarges in elk vak (ruimer dan voorheen)
-  const padTop    = 8;   // boven de titel
-  const padSides  = 8;   // links/rechts
-  const padUnderT = 6;   // tussen titel en QR
-  const padBottom = 8;   // onderaan
+  // Binnenmarges in elk vak
+  const padTop    = 7;    // boven titel
+  const padSides  = 8;    // links/rechts
+  const padUnderT = 4;    // tussen titel en QR
+  const padBottom = 8;    // onderaan
 
-  // Titel
-  const titleSize = 11;
-  const titleLine = titleSize * 0.9; // visuele hoogte van de titelregel
+  // Titel (pt → we plaatsen op vaste y, niet meerekenen als mm-hoogte)
+  const titlePt = 11;
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(titlePt);
 
-  // Beschikbare ruimte voor de QR
+  // Beschikbare ruimte voor QR
   const availW = cardW - 2*padSides;
-  const availH = cardH - padTop - titleLine - padUnderT - padBottom;
+  const availH = cardH - padTop - 5 /*titelzone*/ - padUnderT - padBottom;
 
-  // Veiligheidsmarge zodat hij zeker binnen het vak blijft
-  const safety  = 4; // mm
+  // QR-maat: passend binnen het vak, met veiligheidsmarge
+  const safety  = 2; // mm
   const qrSize  = Math.max(32, Math.min(46, Math.min(availW, availH) - safety));
 
   // Eén hoge-res QR genereren en hergebruiken
   const qrPng = await makeQrDataUrl(url, 1000);
 
-  // Korte instructie bovenaan elke pagina
+  // Bovenaan elke pagina een korte instructie
   const instruct = "Druk af (liggend, 2 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
-  doc.setFont('helvetica','normal');
-  doc.setFontSize(9);
-  doc.text(instruct, pageW/2, 7, { align: 'center' });
+  const drawPageHeader = () => {
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(9);
+    doc.text(instruct, pageW/2, 7, { align: 'center' });
+  };
 
-  // Vak-randen
+  drawPageHeader();
+
+  // Lijndikte vakken
   doc.setDrawColor(60);
   doc.setLineWidth(0.25);
 
   for (let i = 0; i < copies; i++) {
     if (i > 0 && i % (cols*rows) === 0) {
       doc.addPage();
-      doc.setFont('helvetica','normal');
-      doc.setFontSize(9);
-      doc.text(instruct, pageW/2, 7, { align: 'center' });
+      drawPageHeader();
       doc.setDrawColor(60);
       doc.setLineWidth(0.25);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(titlePt);
     }
 
     const slot = i % (cols*rows);
@@ -203,20 +208,18 @@
     const x = margin + c * (cardW + gutterX);
     const y = margin + r * (cardH + gutterY);
 
-    // 1) Vak met rand (witte achtergrond)
+    // 1) Vak (wit + rand)
     doc.setFillColor(255,255,255);
     doc.rect(x, y, cardW, cardH, 'FD');
 
-    // 2) Titel
+    // 2) Titel (boven in vak, centreren)
     const centerX = x + cardW / 2;
-    doc.setFont('helvetica','bold');
-    doc.setFontSize(titleSize);
-    const titleY = y + padTop + titleLine;  // ruim boven de QR
+    const titleY  = y + padTop; // we tekenen met baseline 'alphabetic' – deze positie geeft mooi ruimte erboven
     doc.text(title, centerX, titleY, { align: 'center' });
 
-    // 3) QR gecentreerd in het vak
+    // 3) QR – gecentreerd horizontaal, netjes onder de titel
     const qrX = centerX - qrSize / 2;
-    const qrY = titleY + padUnderT;
+    const qrY = titleY + 5 /*titelzone*/ + padUnderT;
     doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
   }
 
@@ -295,7 +298,7 @@
       // PDF-download
       pdfBtn.addEventListener('click', async () => {
         if (!lastUrl) { alert('Maak eerst een QR.'); return; }
-        const n = parseInt(prompt('Aantal kaartjes (10 per pagina)?', '20') || '20', 10);
+        const n = parseInt(prompt('Voor hoeveel leerlingen kaartjes nodig?', '20') || '20', 10);
         await makePdfFromQr(lastUrl, (isFinite(n) && n > 0) ? n : 20);
       });
     });
