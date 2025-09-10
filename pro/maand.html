@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Zisa PRO – €6 per maand</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:#f7faf9;display:grid;place-items:center;min-height:100dvh;margin:0}
+    .card{width:min(680px,92vw);background:#fff;border:1px solid #e5e7eb;border-radius:16px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:24px 20px}
+    h1{margin:0 0 8px;font-size:1.4rem}
+    label{display:block;margin:.6rem 0 .3rem}
+    input[type=email]{width:100%;padding:.7rem .8rem;border:1px solid #cbd5e1;border-radius:12px;font-size:1rem}
+    button{margin-top:12px;padding:.75rem 1rem;border:0;border-radius:12px;background:#111827;color:#fff;font-weight:600;cursor:pointer}
+    #err{color:#b91c1c;margin-top:8px;white-space:pre-wrap}
+    #ok{color:#065f46;margin-top:8px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Zisa PRO – Maandabonnement</h1>
+    <p>Flexibel plan: <strong>€6/maand</strong> (maandelijks opzegbaar). Jaarplan <strong>€40/jaar</strong> blijft voordeliger.</p>
+
+    <label for="email">E-mailadres</label>
+    <input id="email" type="email" placeholder="naam@school.be" autocomplete="email" required>
+    <button id="start">Start maandelijks abonnement</button>
+    <div id="err" role="alert"></div>
+    <div id="ok"></div>
+  </main>
+
+  <script>
+    const ENDPOINT = "https://europe-west1-<jouw-project>.cloudfunctions.net/createMonthlyFirstPayment";
+    const $ = id => document.getElementById(id);
+    const emailEl = $("email"), startBtn = $("start"), errEl = $("err"), okEl = $("ok");
+    const valid = s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s||"");
+
+    startBtn.addEventListener("click", async () => {
+      errEl.textContent = ""; okEl.textContent = "";
+      const email = (emailEl.value||"").trim().toLowerCase();
+      if(!valid(email)){ errEl.textContent = "Geef een geldig e-mailadres in."; emailEl.focus(); return; }
+      startBtn.disabled = true; startBtn.textContent = "Bezig…";
+      try {
+        const r = await fetch(ENDPOINT, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ email })
+        });
+        if(!r.ok) throw new Error(await r.text() || ("HTTP "+r.status));
+        const data = await r.json();
+        if(!data.checkoutUrl) throw new Error("Geen betaal-URL ontvangen.");
+        location.href = data.checkoutUrl; // naar Mollie
+      } catch(e) {
+        console.error(e); errEl.textContent = "Er ging iets mis. Probeer later opnieuw.";
+      } finally {
+        startBtn.disabled = false; startBtn.textContent = "Start maandelijks abonnement";
+      }
+    });
+  </script>
+</body>
+</html>
