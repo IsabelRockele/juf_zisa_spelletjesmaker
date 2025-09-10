@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hulpschema – Kindmodus</title>
+
+  <!-- STAGING base; voor live vervangen door /juf_zisa_spelletjesmaker/pro/ -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
+
+  <!-- Zelfde layout als keuze-hulpschema.html -->
+  <link rel="stylesheet" href="../keuze-hulpschema.css">
+
+  <meta name="google" content="notranslate">
+  <style>
+    /* Kleine aanvullingen: titels centreren zoals op jouw keuze-scherm */
+    .panel { max-width: 900px; margin: 0 auto; }
+    .panel h1 { text-align: center; }
+    /* Verberg eventuele “menu”/terug-achtige elementen: deze kindpagina heeft die niet nodig */
+    .menu-btn.top, .terug-knoop { display:none !important; }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <!-- STAP 1: bereik kiezen (zelfde knoppen-stijl: choice-btn) -->
+    <div id="stap1" class="stap">
+      <h1>Kies bereik</h1>
+      <div class="button-container">
+        <button id="bereik-100" class="choice-btn">Tot 100</button>
+        <button id="bereik-1000" class="choice-btn">Tot 1000</button>
+      </div>
+    </div>
+
+    <!-- STAP 2: bewerking kiezen in gekozen bereik (zelfde knoppen-stijl + / -) -->
+    <div id="stap2" class="stap" style="display:none;">
+      <button id="terug-naar-stap1" class="menu-btn">Terug</button>
+      <h1 id="stap2-titel">Oefenen</h1>
+      <div class="button-container">
+        <!-- Zelfde class-namen als in keuze-hulpschema.html -->
+        <a id="link-plus" class="choice-btn plus" href="#">+</a>
+        <a id="link-min"  class="choice-btn min"  href="#">-</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Zelfde "stap"-aanpak als in keuze-hulpschema.html, maar minimalistisch
+    const stap1 = document.getElementById('stap1');
+    const stap2 = document.getElementById('stap2');
+    const bereik100Btn  = document.getElementById('bereik-100');
+    const bereik1000Btn = document.getElementById('bereik-1000');
+    const terugBtn      = document.getElementById('terug-naar-stap1');
+    const titelStap2    = document.getElementById('stap2-titel');
+    const linkPlus      = document.getElementById('link-plus');
+    const linkMin       = document.getElementById('link-min');
+
+    // Houd bereik bij en bouw de links (altijd in kindmodus: ?kid=1)
+    let bereik = '100';
+
+    function toonStap1(){
+      stap1.style.display = 'block';
+      stap2.style.display = 'none';
+      // Verwijder # uit URL
+      history.pushState('', document.title, location.pathname + location.search);
+    }
+    function toonStap2(){
+      stap1.style.display = 'none';
+      stap2.style.display = 'block';
+      location.hash = '#stap2';
+      titelStap2.textContent = (bereik === '100') ? 'Oefenen tot 100' : 'Oefenen tot 1000';
+
+      // Bouw de juiste links:
+      if (bereik === '100') {
+        linkPlus.href = './plus100.html?kid=1&range=100';
+        linkMin.href  = './min100.html?kid=1&range=100';
+      } else {
+        // Deze werken zodra plus1000.html / min1000.html bestaan
+        linkPlus.href = './plus1000.html?kid=1&range=1000';
+        linkMin.href  = './min1000.html?kid=1&range=1000';
+      }
+    }
+
+    // Event handlers
+    bereik100Btn.addEventListener('click', () => { bereik = '100';  toonStap2(); });
+    bereik1000Btn.addEventListener('click', () => {
+  window.location.href = './Tot_1000.html';
+});
+    terugBtn.addEventListener('click', toonStap1);
+
+    // Als iemand met #stap2 komt: respecteer ook de query ?range
+    document.addEventListener('DOMContentLoaded', () => {
+      const qp = new URLSearchParams(location.search);
+      const rangeParam = qp.get('range');
+      if (rangeParam === '1000') bereik = '1000';
+      if (location.hash === '#stap2') { toonStap2(); }
+    });
+  </script>
+
+  <!-- PRO-beveiliging (zoals elders): device-id → guard -->
+  <script src="./js/device-id.js"></script>
+  <script type="module" src="./js/guard.js"></script>
+</body>
+</html>
