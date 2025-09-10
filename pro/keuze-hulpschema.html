@@ -100,87 +100,192 @@
   <!-- jsPDF voor PDF-export -->
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
-  <!-- Aanroep naar je Cloud Function 'createKidLink' — NA guard.js! -->
-<script type="module">
-// --- VERVANG ALLEEN DE FUNCTIE makePdfFromQr DOOR DEZE ---
+  <!-- QR & PDF logica — NA guard.js! -->
+  <script type="module">
+    // Zelfde Firebase versie als guard.js
+    import { getApps } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
-async function makePdfFromQr(url, copies = 20) {
-  if (!url) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-
-  // Pagina-afmetingen (A4 liggend)
-  const pageW = 297, pageH = 210;
-
-  // Layoutinstellingen
-  const margin   = 10;   // buitenmarge rondom
-  const cols     = 2;
-  const rows     = 5;    // 10 kaartjes per pagina
-  const gutterX  = 8;    // horizontale ruimte tussen kolommen
-  const gutterY  = 6;    // verticale ruimte tussen rijen
-
-  // Kaartafmetingen (vak)
-  const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;
-  const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;
-
-  const title = 'Hulpschema rekenen';
-
-  // Binnenmarges in elk vak
-  const padTop    = 6;   // ruimte boven titel
-  const padSides  = 6;   // links/rechts
-  const padUnderT = 4;   // ruimte tussen titel en QR
-
-  // Tekst-instelling voor titel
-  const titleSize = 11;  // niet te groot
-  const titleLine = 5;   // visuele lijnhoogte (mm)
-
-  // Bepaal beschikbare ruimte voor QR in het vak
-  const availW = cardW - 2*padSides;
-  const availH = cardH - padTop - titleLine - padUnderT - 6; // 6mm bodemruimte
-
-  // QR-zijde: kies de kleinste van (beschikbare breedte/hoogte)
-  // en clamp tussen 36–48 mm: goed scanbaar, niet reusachtig.
-  const qrSize = Math.max(36, Math.min(48, Math.min(availW, availH)));
-
-  // Hoge-res QR één keer genereren en hergebruiken
-  const qrPng = await makeQrDataUrl(url, 900);
-
-  // Dunne lijn voor de vakranden
-  doc.setDrawColor(60);
-  doc.setLineWidth(0.2);
-
-  for (let i = 0; i < copies; i++) {
-    if (i > 0 && i % (cols*rows) === 0) {
-      doc.addPage();
+    const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
+    async function waitReady(maxMs=12000){
+      const t0 = Date.now();
+      while (!getApps().length && Date.now()-t0 < maxMs) { await sleep(100); }
+      return getApps().length > 0;
     }
 
-    const slot = i % (cols*rows);
-    const r = Math.floor(slot / cols);
-    const c = slot % cols;
+    // Hoge-res QR (PNG dataURL) — gebruikt door PDF
+    function makeQrDataUrl(text, sizePx = 900) {
+      return new Promise((resolve) => {
+        const tmp = document.createElement('div');
+        tmp.style.position = 'fixed';
+        tmp.style.left = '-10000px';
+        document.body.appendChild(tmp);
 
-    const x = margin + c * (cardW + gutterX);
-    const y = margin + r * (cardH + gutterY);
+        new QRCode(tmp, { text, width: sizePx, height: sizePx, correctLevel: QRCode.CorrectLevel.M });
 
-    // 1) VAK: wit opvullen + rand
-    doc.setFillColor(255, 255, 255);
-    doc.rect(x, y, cardW, cardH, 'FD'); // Fill & Draw
+        setTimeout(() => {
+          const img = tmp.querySelector('img');
+          const canvas = tmp.querySelector('canvas');
+          const dataUrl = img?.src || canvas?.toDataURL('image/png') || '';
+          document.body.removeChild(tmp);
+          resolve(dataUrl);
+        }, 30);
+      });
+    }
 
-    // 2) TITEL
-    const centerX = x + cardW / 2;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(titleSize);
-    doc.text(title, centerX, y + padTop + titleSize*0.35, { align: 'center' });
+    // PDF: A4 liggend, 2 kolommen × 5 rijen; elk in een eigen vak, titel erboven
+    async function makePdfFromQr(url, copies = 20) {
+      if (!url) return;
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    // 3) QR in het vak, gecentreerd
-    const qrX = centerX - qrSize / 2;
-    const qrY = y + padTop + titleLine + padUnderT;
-    doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
-  }
+      const pageW = 297, pageH = 210;
+      const margin   = 10;
+      const cols     = 2;
+      const rows     = 5;
+      const gutterX  = 8;
+      const gutterY  = 6;
 
-  doc.save('hulpschema-qr.pdf');
-}
-// --- EINDE vervanging ---
-</script>
+      const cardW = (pageW - 2*margin - gutterX*(cols-1)) / cols;
+      const cardH = (pageH - 2*margin - gutterY*(rows-1)) / rows;
 
+      const title = 'Hulpschema rekenen';
+
+      const padTop    = 6;
+      const padSides  = 6;
+      const padUnderT = 4;
+
+      const titleSize = 11;
+      const titleLine = 5;
+
+      const availW = cardW - 2*padSides;
+      const availH = cardH - padTop - titleLine - padUnderT - 6;
+
+      const qrSize = Math.max(36, Math.min(48, Math.min(availW, availH)));
+
+      const qrPng = await makeQrDataUrl(url, 900);
+
+      // optionele bovenregel voor leerkracht
+      const instruct = "Druk af (liggend, 2 kolommen). Hang op in de klas of kleef in de agenda. QR blijft een schooljaar geldig.";
+      doc.setFont('helvetica','normal'); 
+      doc.setFontSize(9);
+      doc.text(instruct, pageW/2, 8, { align: 'center' });
+
+      doc.setDrawColor(60);
+      doc.setLineWidth(0.2);
+
+      for (let i = 0; i < copies; i++) {
+        if (i > 0 && i % (cols*rows) === 0) {
+          doc.addPage();
+          doc.setFont('helvetica','normal'); 
+          doc.setFontSize(9);
+          doc.text(instruct, pageW/2, 8, { align: 'center' });
+          doc.setDrawColor(60);
+          doc.setLineWidth(0.2);
+        }
+
+        const slot = i % (cols*rows);
+        const r = Math.floor(slot / cols);
+        const c = slot % cols;
+
+        const x = margin + c * (cardW + gutterX);
+        const y = margin + r * (cardH + gutterY);
+
+        // Vak
+        doc.setFillColor(255, 255, 255);
+        doc.rect(x, y, cardW, cardH, 'FD');
+
+        // Titel
+        const centerX = x + cardW / 2;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(titleSize);
+        doc.text(title, centerX, y + padTop + titleSize*0.35, { align: 'center' });
+
+        // QR
+        const qrX = centerX - qrSize / 2;
+        const qrY = y + padTop + titleLine + padUnderT;
+        doc.addImage(qrPng, 'PNG', qrX, qrY, qrSize, qrSize);
+      }
+
+      doc.save('hulpschema-qr.pdf');
+    }
+
+    // UI-koppeling
+    window.addEventListener('load', () => {
+      const btn   = document.getElementById("gen-qr");
+      const wrap  = document.getElementById("qr-wrap");
+      const box   = document.getElementById("qr-box");
+      const dl    = document.getElementById("qr-dl");
+      const exp   = document.getElementById("qr-exp");
+      const uitleg= document.getElementById("qr-uitleg");
+
+      if (!btn || !wrap || !box) return;
+
+      // PDF-knop bij het QR-panel toevoegen (éénmalig)
+      let pdfBtn = document.getElementById('qr-pdf');
+      if (!pdfBtn) {
+        pdfBtn = document.createElement('button');
+        pdfBtn.id = 'qr-pdf';
+        pdfBtn.textContent = 'Download als PDF (2 kolommen)';
+        pdfBtn.style.cssText = 'width:100%; margin-top:8px; padding:10px; border-radius:9px; border:2px solid #3f7fbf; background:#fff; color:#275ea8; font-weight:800; cursor:pointer;';
+        pdfBtn.disabled = true;
+        wrap.appendChild(pdfBtn);
+      }
+
+      let lastUrl = null;
+
+      btn.addEventListener("click", async () => {
+        const prev = btn.textContent;
+        btn.disabled = true; btn.textContent = "Bezig…";
+        try {
+          const ready = await waitReady();
+          if (!ready) { btn.textContent = "Niet gelukt"; console.error('Firebase niet klaar'); return; }
+          if (typeof window.QRCode !== 'function') { alert('QR-bibliotheek niet geladen.'); return; }
+
+          const fns = getFunctions(undefined, "europe-west1");
+          const createKidLink = httpsCallable(fns, "createKidLink");
+          const { data } = await createKidLink({ target: "kid-start", range: "100" });
+          if (!data || !data.url) throw new Error('Onverwachte response (geen url).');
+
+          lastUrl = data.url;
+
+          wrap.style.display = "block";
+          box.innerHTML = "";
+          new QRCode(box, { text: data.url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+
+          // PNG-download
+          setTimeout(() => {
+            const img = box.querySelector("img"); if (!img) return;
+            const c = document.createElement("canvas");
+            c.width = img.width; c.height = img.height;
+            const ctx = c.getContext("2d");
+            ctx.fillStyle = "#fff"; ctx.fillRect(0,0,c.width,c.height);
+            const ph = new Image(); ph.crossOrigin = "anonymous";
+            ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = c.toDataURL("image/png"); };
+            ph.src = img.src;
+          }, 80);
+
+          if (exp && data.expiresAt) {
+            exp.textContent = "Geldig t/m: " + new Date(data.expiresAt).toLocaleDateString("nl-BE");
+          }
+          if (uitleg) uitleg.style.display = 'block';
+          pdfBtn.disabled = false;
+
+        } catch (e) {
+          console.error(e);
+          alert("Kon geen QR maken: " + (e.message || e));
+        } finally {
+          btn.textContent = prev; btn.disabled = false;
+        }
+      });
+
+      // PDF-download
+      pdfBtn.addEventListener('click', async () => {
+        if (!lastUrl) { alert('Maak eerst een QR.'); return; }
+        const n = parseInt(prompt('Aantal kaartjes (10 per pagina)?', '20') || '20', 10);
+        await makePdfFromQr(lastUrl, (isFinite(n) && n > 0) ? n : 20);
+      });
+    });
+  </script>
 </body>
 </html>
