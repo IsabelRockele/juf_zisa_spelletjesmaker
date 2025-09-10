@@ -88,50 +88,58 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
 
   <!-- Aanroep naar je Cloud Function 'createKidLink' — NA guard.js! -->
-  <script type="module">
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
-    // wachten tot de pagina + guard init klaar zijn
-    window.addEventListener('load', () => {
-      const fns = getFunctions(undefined, "europe-west1");
+ <script type="module">
+  import { getApps } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-app.js";
+  import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.4/firebase-functions.js";
 
-      const genBtn = document.getElementById("gen-qr");
-      const wrap   = document.getElementById("qr-wrap");
-      const box    = document.getElementById("qr-box");
-      const dl     = document.getElementById("qr-dl");
-      const exp    = document.getElementById("qr-exp");
+  window.addEventListener('load', () => {
+    const genBtn = document.getElementById("gen-qr");
+    const wrap   = document.getElementById("qr-wrap");
+    const box    = document.getElementById("qr-box");
+    const dl     = document.getElementById("qr-dl");
+    const exp    = document.getElementById("qr-exp");
+    if (!genBtn) return;
 
-      genBtn.addEventListener("click", async () => {
-        const old = genBtn.textContent;
-        genBtn.disabled = true; genBtn.textContent = "Bezig…";
-        try {
-          const { data } = await httpsCallable(fns, "createKidLink")({ target: "kid-start", range: "100" });
-          const url = data.url;
-          const expires = new Date(data.expiresAt);
+    genBtn.addEventListener("click", async () => {
+      // voorkomt “No Firebase App '[DEFAULT]'…”
+      if (!getApps().length) {
+        alert("PRO-initialisatie is nog niet klaar (of u bent niet aangemeld). Herlaad de pagina en probeer opnieuw.");
+        return;
+      }
 
-          wrap.style.display = "block";
-          box.innerHTML = "";
-          new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+      const prev = genBtn.textContent;
+      genBtn.disabled = true; genBtn.textContent = "Bezig…";
+      try {
+        const fns = getFunctions(undefined, "europe-west1");
+        const createKidLink = httpsCallable(fns, "createKidLink");
+        const { data } = await createKidLink({ target: "kid-start", range: "100" });
 
-          setTimeout(() => {
-            const img = box.querySelector("img");
-            if (!img) return;
-            const canvas = document.createElement("canvas");
-            canvas.width = img.width; canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
-            const ph = new Image(); ph.crossOrigin = "anonymous";
-            ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = canvas.toDataURL("image/png"); };
-            ph.src = img.src;
-          }, 80);
+        const url = data.url;
+        const expires = new Date(data.expiresAt);
 
-          exp.textContent = "Geldig t/m: " + expires.toLocaleDateString("nl-BE");
-        } catch (e) {
-          alert("Kon geen QR maken: " + (e.message || e));
-        } finally {
-          genBtn.textContent = old; genBtn.disabled = false;
-        }
-      });
+        wrap.style.display = "block";
+        box.innerHTML = "";
+        new QRCode(box, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
+
+        setTimeout(() => {
+          const img = box.querySelector("img"); if (!img) return;
+          const canvas = document.createElement("canvas");
+          canvas.width = img.width; canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#fff"; ctx.fillRect(0,0,canvas.width,canvas.height);
+          const ph = new Image(); ph.crossOrigin = "anonymous";
+          ph.onload = () => { ctx.drawImage(ph, 0, 0); dl.href = canvas.toDataURL("image/png"); };
+          ph.src = img.src;
+        }, 80);
+
+        exp.textContent = "Geldig t/m: " + expires.toLocaleDateString("nl-BE");
+      } catch (e) {
+        alert("Kon geen QR maken: " + (e.message || e));
+      } finally {
+        genBtn.textContent = prev; genBtn.disabled = false;
+      }
     });
-  </script>
+  });
+</script>
 </body>
 </html>
