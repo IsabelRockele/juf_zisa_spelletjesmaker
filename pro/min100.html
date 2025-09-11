@@ -18,11 +18,12 @@
 
   <div class="content-wrapper">
     <div id="sidebar">
-      <!-- AANGEPAST: Terug-knop via helper -->
+      <!-- Terug-knop via helper (kidmodus-veilig) -->
       <button onclick="__goBackHulpschema()" class="knop terug">Terug</button>
       <button id="reset" class="knop reset">Opnieuw</button>
-      <!-- AANGEPAST: Wissel-knop via helper (behoudt ?kid en ?range) -->
+      <!-- Wissel-knop via helper (behoudt ?kid en ?range) -->
       <button onclick="__wisselHulpschema('plus100.html')" class="knop wissel">Wissel naar +</button>
+
       <div id="vuilbak-container">
         <img id="vuilbak" src="../afbeeldingen_hulpschema/vuilbak.png" alt="vuilbak">
         <div id="vuilbak-teller">
@@ -101,9 +102,24 @@
     }
   </script>
 
-  <!-- PRO scripts -->
-  <script src="./device-id.js"></script>
-  <script type="module" src="./guard.js"></script>
+  <!-- PRO-laag conditioneel laden: alleen in leerkrachtmodus (géén kid=1) -->
+  <script>
+    (function () {
+      const isKid = new URLSearchParams(location.search).get('kid') === '1';
+      if (!isKid) {
+        const s1 = document.createElement('script');
+        s1.src = './device-id.js';
+        document.head.appendChild(s1);
+
+        const s2 = document.createElement('script');
+        s2.type = 'module';
+        s2.src = './guard.js';
+        document.head.appendChild(s2);
+      }
+    })();
+  </script>
+
+  <!-- Eigen logica (blijft altijd geladen) -->
   <script src="../hulpschema.js"></script>
 </body>
 </html>
