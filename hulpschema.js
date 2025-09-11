@@ -70,8 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const tool = e.target.closest('.tool');
         if (!tool) return;
 
-        e.preventDefault();
-        
+        // Belangrijk voor touch: voorkom scroll/zoom tijdens drag
+        if (e.cancelable) e.preventDefault();
+
         const isClone = tool.closest('#toolbar') !== null;
         
         if (isClone) {
@@ -85,21 +86,31 @@ document.addEventListener('DOMContentLoaded', () => {
         offsetX = e.clientX - rect.left;
         offsetY = e.clientY - rect.top;
 
-        // AANGEPAST: Neutraliseer transformatie voor soepel oppakken
+        // Neutraliseer transformatie voor soepel oppakken
         actiefElement.style.transform = 'none';
         actiefElement.style.position = 'absolute';
         actiefElement.style.zIndex = 1000;
         actiefElement.style.left = `${rect.left}px`;
         actiefElement.style.top = `${rect.top}px`;
+
+        // Zorg dat tekst niet geselecteerd wordt tijdens drag
+        document.body.style.userSelect = 'none';
+
+        // Pointer capture: alle bewegingen blijven bij ons
+        if (actiefElement.setPointerCapture && e.pointerId != null) {
+            try { actiefElement.setPointerCapture(e.pointerId); } catch {}
+        }
         
         document.body.appendChild(actiefElement);
 
-        document.addEventListener('pointermove', dragMove);
-        document.addEventListener('pointerup', dragEnd, { once: true });
+        // Zet listeners (niet-passive zodat preventDefault blijft werken)
+        document.addEventListener('pointermove', dragMove, { passive: false });
+        document.addEventListener('pointerup', dragEnd, { once: true, passive: false });
     }
 
     function dragMove(e) {
         if (!actiefElement) return;
+        if (e.cancelable) e.preventDefault(); // blijf scroll/zoom tegenhouden
         actiefElement.style.left = `${e.clientX - offsetX}px`;
         actiefElement.style.top = `${e.clientY - offsetY}px`;
     }
@@ -107,7 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function dragEnd(e) {
         document.removeEventListener('pointermove', dragMove);
 
-        if (!actiefElement) return;
+        if (!actiefElement) {
+            document.body.style.userSelect = '';
+            return;
+        }
+
+        // Release pointer capture
+        if (actiefElement.releasePointerCapture && e.pointerId != null) {
+            try { actiefElement.releasePointerCapture(e.pointerId); } catch {}
+        }
 
         actiefElement.style.visibility = 'hidden';
         const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
@@ -137,10 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             actiefElement.remove();
         }
+
         actiefElement = null;
+        document.body.style.userSelect = ''; // herstel selectie
     }
     
-    document.body.addEventListener('pointerdown', startDragPointer);
+    // Let op: we luisteren op body voor alle pointerdowns
+    document.body.addEventListener('pointerdown', startDragPointer, { passive: false });
 
     // --- PAGINA-SPECIFIEKE LOGICA ---
     let wisselKnopPlus = null;
