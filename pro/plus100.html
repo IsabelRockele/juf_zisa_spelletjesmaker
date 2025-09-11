@@ -106,9 +106,24 @@
     }
   </script>
 
-  <!-- PRO scripts (ongewijzigd) -->
-  <script src="./device-id.js"></script>
-  <script type="module" src="./guard.js"></script>
+  <!-- PRO-laag conditioneel laden: alleen in leerkrachtmodus (géén kid=1) -->
+  <script>
+    (function () {
+      const isKid = new URLSearchParams(location.search).get('kid') === '1';
+      if (!isKid) {
+        const s1 = document.createElement('script');
+        s1.src = './device-id.js';
+        document.head.appendChild(s1);
+
+        const s2 = document.createElement('script');
+        s2.type = 'module';
+        s2.src = './guard.js';
+        document.head.appendChild(s2);
+      }
+    })();
+  </script>
+
+  <!-- Eigen logica (blijft altijd geladen) -->
   <script src="../hulpschema.js"></script>
 </body>
 </html>
