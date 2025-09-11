@@ -327,9 +327,26 @@
       }
     </script>
 
-    <!-- PRO guard-laag -->
-    <script src="./device-id.js"></script>
-    <script type="module" src="./guard.js"></script>
+    <!-- PRO-laag conditioneel laden: alleen in leerkrachtmodus -->
+    <script>
+      (function () {
+        const qp = new URLSearchParams(location.search);
+        const isKid = qp.get('kid') === '1';
+        const ref = document.referrer || '';
+        const cameFromKid = /hulpschema-kid\.html/i.test(ref);
+        // Alleen guard laden als dit géén kid-flow is
+        if (!(isKid || cameFromKid)) {
+          const s1 = document.createElement('script');
+          s1.src = './device-id.js';
+          document.head.appendChild(s1);
+
+          const s2 = document.createElement('script');
+          s2.type = 'module';
+          s2.src = './guard.js';
+          document.head.appendChild(s2);
+        }
+      })();
+    </script>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
