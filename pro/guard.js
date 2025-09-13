@@ -19,7 +19,7 @@ const CURRENT_PAGE = (() => {
   const f = (location.pathname.split("/").pop() || "").toLowerCase();
   return f || "index.html";
 })();
-const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html"]); // publiek
+const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html", "maand.html"]); // publiek
 
 function safeGo(to, reason) {
   try {
@@ -138,6 +138,3 @@ if (!GUARD_OFF) {
     }
   });
 }
-
-
-
