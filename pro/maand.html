@@ -21,14 +21,14 @@
     <p>Flexibel plan: <strong>€6/maand</strong> (maandelijks opzegbaar). Jaarplan <strong>€40/jaar</strong> blijft voordeliger.</p>
 
     <label for="email">E-mailadres</label>
-    <input id="email" type="email" placeholder="naam@school.be" autocomplete="email" required>
+    <input id="email" type="email" placeholder="je e-mailadres" autocomplete="email" required>
     <button id="start">Start maandelijks abonnement</button>
     <div id="err" role="alert"></div>
     <div id="ok"></div>
   </main>
 
   <script>
-    const ENDPOINT = "https://europe-west1-<jouw-project>.cloudfunctions.net/createMonthlyFirstPayment";
+    const ENDPOINT = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/createMonthlyFirstPayment";
     const $ = id => document.getElementById(id);
     const emailEl = $("email"), startBtn = $("start"), errEl = $("err"), okEl = $("ok");
     const valid = s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s||"");
