@@ -32,7 +32,7 @@ const FRONTEND_REPO   = "https://isabelrockele.github.io/juf_zisa_spelletjesmake
 const APP_INDEX_URL   = `${FRONTEND_REPO}/pro/index.html`;
 const THANKYOU_URL    = `${FRONTEND_REPO}/pro/bedankt.html`;
 
-const MAIL_COLLECTIONS     = ["mail", "post"];
+const MAIL_COLLECTIONS     = ["post"];
 const ORDER_COLLECTIONS    = ["orders", "Orders", "Bestellingen"];
 const LICENSE_COLLECTIONS  = ["licenses", "Licenties"];
 
@@ -51,16 +51,17 @@ const SELLER_ADDR1      = "Maasfortbaan 108";
 const SELLER_ADDR2      = "2500 Lier";
 // Opm: vul je uiteindelijke BTW-nummer hieronder in (of via secret/ENV)
 const SELLER_VAT_NUMBER = process.env.SELLER_VAT_NUMBER || ""; // bv. "BE 0123.456.789"
-const SELLER_ENTERPRISE = "Ondernemingsnummer 1026.769.348";
+const SELLER_ENTERPRISE = "Ondernemingsnummer (KBO): 1026.769.348   BTW-nummer: BE1026.769.348";
 const SELLER_VAT_EXEMPT = "Onderneming onderworpen aan de vrijstellingsregel voor kleine ondernemingen.";
 
 const PRICE_EUR_KOOP     = "40.00";
 const PRICE_EUR_WAITLIST = "35.00";
+const PRICE_EUR_MONTH    = "6.00";
 const DEVICE_LIMIT       = 2;
 const ENTITLEMENT_ID     = "zisa-pro-1y";
 
 const MOLLIE_API_URL = "https://api.mollie.com/v2";
-const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY || "";
+const MOLLIE_API_KEY = (process.env.MOLLIE_LIVE_KEY || process.env.MOLLIE_API_KEY || "");
 
 // ------------------------------ Types ----------------------------------------
 type MollieLinks = { checkout?: { href?: string } };
@@ -146,6 +147,40 @@ async function findLicenseByEmail(emailLower: string) {
   return null;
 }
 
+// ---- Helpers voor licentie-selectie -----------------------------------------
+async function fetchLicensesBy(field: "uid" | "email", value: string, limit = 20) {
+  const out: any[] = [];
+  for (const col of LICENSE_COLLECTIONS) {
+    const qs = await db.collection(col).where(field, "==", value).limit(limit).get();
+    qs.forEach((d) => out.push(d.data()));
+  }
+  return out;
+}
+
+function pickLatest(list: any[]) {
+  let best: any | null = null;
+  let bestMs = -Infinity;
+  for (const it of list) {
+    const t = it?.expiresAt as Timestamp | undefined;
+    const ms = t ? t.toMillis() : 0;
+    if (ms > bestMs) { best = it; bestMs = ms; }
+  }
+  return best;
+}
+
+function pickLatestValid(list: any[], nowMs: number) {
+  let best: any | null = null;
+  let bestMs = -Infinity;
+  for (const it of list) {
+    const t = it?.expiresAt as Timestamp | undefined;
+    if (t) {
+      const ms = t.toMillis();
+      if (ms > nowMs && ms > bestMs) { best = it; bestMs = ms; }
+    }
+  }
+  return best;
+}
+
 function makeLicenseCode(): string {
   const s = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let out = "";
@@ -157,6 +192,12 @@ function calcExpiry(): Timestamp {
   d.setFullYear(d.getFullYear() + 1);
   return Timestamp.fromDate(d);
 }
+function calcExpiryMonthly(prev?: Timestamp): Timestamp {
+  const base = (prev && prev.toMillis() > Date.now()) ? new Date(prev.toMillis()) : new Date();
+  base.setMonth(base.getMonth() + 1);
+  return Timestamp.fromDate(base);
+}
+
 
 // === Factuurnummering: helper (TEST/LIVE) ===================================
 async function assignInvoiceNumber(
@@ -243,6 +284,20 @@ async function makeInvoicePdfBase64(params: {
   });
 }
 
+// --------------------------- Mail routing ------------------------------------
+// Microsoft-domeinen => via Brevo (collection: post_msft). Alles anders => bestaande route.
+const MSF_DOMAINS = new Set<string>([
+  "hotmail.com", "hotmail.be", "hotmail.nl",
+  "outlook.com", "outlook.be", "outlook.nl",
+  "live.com", "live.be", "live.nl",
+  "msn.com", "windowslive.com",
+]);
+
+function pickMailCollections(toEmail: string): string[] {
+  const domain = (toEmail || "").toLowerCase().split("@")[1]?.trim() ?? "";
+  return MSF_DOMAINS.has(domain) ? ["post_msft"] : MAIL_COLLECTIONS;
+}
+
 // ------------------------------ Mail helper ----------------------------------
 async function queueEmail(
   toEmail: string,
@@ -267,8 +322,11 @@ async function queueEmail(
     },
   };
 
+  // NIEUW: routeer op domein
+  const cols = pickMailCollections(toEmail);
+
   await Promise.all(
-    MAIL_COLLECTIONS.map((col) => db.collection(col).add(doc).catch(() => null))
+    cols.map((col) => db.collection(col).add(doc).catch(() => null))
   );
 }
 
@@ -406,6 +464,90 @@ async function completeOrderByPayment(payment: MolliePayment) {
     [{ filename: `factuur-${invoiceNumber}.pdf`, content: invoiceBase64, type: "application/pdf" }]
   );
 }
+async function completeMonthlyPayment(
+  payment: MolliePayment,
+  orderRes: { ref: FirebaseFirestore.DocumentReference, data: any }
+) {
+  const paymentId = String(payment.id);
+  const orderId   = orderRes.ref.id;
+  const order     = orderRes.data as any;
+
+  if (order.status === "betaald") { 
+    logger.info("Order reeds betaald", { orderId }); 
+    return; 
+  }
+
+  const email = String(order.email);
+  const uid   = await ensureUser(email);
+
+  // Bestaande licentie zoeken en verlengen; anders nieuw aanmaken
+  const list   = await fetchLicensesBy("uid", uid, 5);
+  const latest = pickLatest(list) || null;
+
+  let licenseCode: string;
+  let newExpires: Timestamp;
+
+  if (latest && latest.code) {
+    licenseCode = String(latest.code);
+    const prev  = latest.expiresAt as Timestamp | undefined;
+    newExpires  = calcExpiryMonthly(prev);
+    await writeLicenseAll(licenseCode, { expiresAt: newExpires, status: "active", uid, email });
+  } else {
+    licenseCode = makeLicenseCode();
+    newExpires  = calcExpiryMonthly();
+    const licenseDoc = {
+      code: licenseCode,
+      uid, email,
+      productId: "zisa-pro-maand",
+      deviceLimit: DEVICE_LIMIT,
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt: newExpires,
+      orderId,
+      status: "active",
+    };
+    await writeLicenseAll(licenseCode, licenseDoc);
+  }
+
+  // Orderstatus bijwerken
+  await writeOrderAll(orderId, { status: "betaald", licenseCode, paidAt: FieldValue.serverTimestamp() });
+
+  // Factuur: nummer toekennen + PDF + mail (zelfde flow als jaar)
+  const series: Series = seriesFromMollieMode(payment?.mode);
+  const orderRef = orderRes.ref;
+  const invoiceNumber = await assignInvoiceNumber(orderRef, series);
+  await writeOrderAll(orderId, { invoiceNumber, invoiceSeries: series });
+
+  const passwordLink  = await generatePasswordLink(email);
+  const invoiceBase64 = await makeInvoicePdfBase64({
+    invoiceNumber,
+    dateISO: new Date().toISOString().slice(0, 10),
+    toEmail: email,
+    product: order.description || "Zisa PRO – maand (prepaid)",
+    amountEUR: order.amountEUR || PRICE_EUR_MONTH,
+    paymentId,
+  });
+
+  // PDF opslaan in Storage
+  const year = new Date().getFullYear();
+  const storagePath = series === "live"
+    ? `Facturen/live/${year}/${invoiceNumber}.pdf`
+    : `Facturen/test/${year}/${invoiceNumber}.pdf`;
+
+  await getStorage().bucket().file(storagePath).save(
+    Buffer.from(invoiceBase64, "base64"),
+    { contentType: "application/pdf", resumable: false, metadata: { cacheControl: "private, max-age=0" } }
+  );
+
+  await writeOrderAll(orderId, { invoiceStoragePath: storagePath });
+
+  // Mail met wachtwoordlink + factuur
+  await queueEmail(
+    email,
+    "Uw Zisa PRO – toegang & factuur",
+    emailHtml({ name: email, passwordLink }),
+    [{ filename: `factuur-${invoiceNumber}.pdf`, content: invoiceBase64, type: "application/pdf" }]
+  );
+}
 
 // ------------------------------ HTTP Handlers --------------------------------
 async function handleCreatePaymentKoop(req: Request, res: Response): Promise<void> {
@@ -468,55 +610,186 @@ async function handleCreatePaymentWaitlist(req: Request, res: Response): Promise
   res.status(200).json({ checkoutUrl, orderId, paymentId: payment.id });
 }
 
+async function handleCreateMonthlyPurchase(req: Request, res: Response): Promise<void> {
+  setCors(res, req.headers.origin as string | undefined);
+  if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+  if (req.method !== "POST")     { res.status(405).send("Method Not Allowed"); return; }
+
+  const emailRaw = (req.body as any)?.email ?? "";
+  const email    = toLowerEmail(String(emailRaw));
+  if (!email) { badRequest(res, "email ontbreekt"); return; }
+
+  // Order vastleggen (bron = monthly)
+  const orderId = newOrderId();
+  await writeOrderAll(orderId, {
+    orderId, email, source: "monthly",
+    amountEUR: PRICE_EUR_MONTH, description: "Zisa PRO – maand (prepaid)",
+    status: "open", createdAt: FieldValue.serverTimestamp(),
+  });
+
+  // Mollie betaling aanmaken (géén mandaat; gewoon éénmalig €6)
+  const payment: MolliePayment = await mollieCreatePayment({
+    amountEUR: PRICE_EUR_MONTH,
+    description: "Zisa PRO – maand (prepaid)",
+    metadata: { source: "monthly", orderId },
+  });
+
+  await setPaymentId(orderId, payment.id);
+  const checkoutUrl = payment._links?.checkout?.href ?? null;
+  res.status(200).json({ checkoutUrl, orderId, paymentId: payment.id });
+}
+
+
 // ------------------------------ Exports (HTTP) -------------------------------
-export const createPaymentKoop     = onRequest({ region: REGION }, handleCreatePaymentKoop);
-export const createPayment         = onRequest({ region: REGION }, handleCreatePaymentKoop); // alias
-export const createPaymentWaitlist = onRequest({ region: REGION }, handleCreatePaymentWaitlist);
+export const createPaymentKoop     =
+  onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreatePaymentKoop);
 
-export const mollieWebhook = onRequest({ region: REGION }, async (req: Request, res: Response): Promise<void> => {
-  if (req.method !== "POST") { res.setHeader("Allow", "POST"); res.status(405).send("Method Not Allowed"); return; }
-  const id = (req.body as any)?.id || (req.query as any)?.id;
-  const paymentId = String(id || "").trim();
-  if (!paymentId) { res.status(400).send("Missing id"); return; }
+export const createPayment         =
+  onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreatePaymentKoop); // alias
 
-  try {
-    const payment: MolliePayment = await mollieGetPayment(paymentId);
-    if (payment.status === "paid") {
-      await completeOrderByPayment(payment);
-    } else {
-      logger.info("Webhook received non-paid status", { paymentId, status: payment.status });
+export const createPaymentWaitlist =
+  onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreatePaymentWaitlist);
+
+export const createMonthlyFirstPayment =
+  onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreateMonthlyPurchase);
+
+export const createMonthlyPurchase =
+  onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreateMonthlyPurchase);
+
+export const mollieWebhook = onRequest(
+  { region: REGION, secrets: ["MOLLIE_LIVE_KEY"] },
+  async (req: Request, res: Response): Promise<void> => {
+    if (req.method !== "POST") { res.setHeader("Allow", "POST"); res.status(405).send("Method Not Allowed"); return; }
+    const id = (req.body as any)?.id || (req.query as any)?.id;
+    const paymentId = String(id || "").trim();
+    if (!paymentId) { res.status(400).send("Missing id"); return; }
+
+    try {
+      const payment: MolliePayment = await mollieGetPayment(paymentId);
+            // --- Maand (prepaid): eigen afhandeling -------------------------------------
+      const orderRes = await findOrderByPaymentId(paymentId);
+      if (orderRes) {
+        const order = orderRes.data as any;
+        if (order.source === "monthly" && payment.status === "paid") {
+          await completeMonthlyPayment(payment, orderRes);
+          res.status(200).send("OK");
+          return; // => voorkom dat de jaar-logica hieronder nog loopt
+        }
+      }
+
+      if (payment.status === "paid") {
+        await completeOrderByPayment(payment);
+      } else {
+        logger.info("Webhook received non-paid status", { paymentId, status: payment.status });
+      }
+      res.status(200).send("OK");
+    } catch (e: any) {
+      logger.error("Webhook error", { paymentId, error: e?.message || String(e) });
+      res.status(500).send("ERROR");
     }
-    res.status(200).send("OK");
+  }
+);
+export const importWaitlist = onRequest(
+  { region: REGION },
+  async (req: Request, res: Response): Promise<void> => {
+    // CORS & method
+    setCors(res, req.headers.origin as string | undefined);
+    if (req.method === "OPTIONS") { res.status(204).send(""); return; }
+    if (req.method !== "POST")     { res.status(405).send("Method Not Allowed"); return; }
+
+    // eenvoudige bescherming met sleutel (mag hardcoded of via secret/ENV)
+    const IMPORT_KEY = process.env.IMPORT_KEY || "zet-hier-een-sterke-eenmalige-sleutel";
+    const key = String((req.query as any).key || (req.headers as any)["x-admin-key"] || "");
+    if (key !== IMPORT_KEY) { res.status(403).send("forbidden"); return; }
+
+    // input
+    const emailsRaw = (req.body as any)?.emails ?? [];
+    const emails: string[] = (Array.isArray(emailsRaw) ? emailsRaw : [])
+      .map((e: any) => toLowerEmail(String(e)))
+      .filter(Boolean);
+
+    const eligibleDays = Number((req.body as any)?.eligibleDays ?? 7);
+    const until = Timestamp.fromMillis(Date.now() + eligibleDays * 24 * 60 * 60 * 1000);
+
+    // batch write
+    let batch = db.batch(); let n = 0;
+    for (const email of emails) {
+      const ref = db.collection("waitlist").doc(email);
+      batch.set(ref, {
+        eligibleUntil: until,
+        addedAt: FieldValue.serverTimestamp(),
+        source: "csv-import",
+      }, { merge: true });
+      n++;
+      if (n % 400 === 0) { await batch.commit(); batch = db.batch(); }
+    }
+    if (n % 400 !== 0) await batch.commit();
+
+    res.status(200).json({ ok: true, count: n, eligibleUntil: until.toDate().toISOString() });
+  }
+);
+// ------------------------------ Test-helper ----------------------------------
+// ------------------------------ Test-helper ----------------------------------
+// ------------------------------ Test-helper ----------------------------------
+export const devSimulatePaid = onRequest({ region: REGION }, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const q = req.query as any;
+    const b = (req.body as any) || {};
+
+    const rawEmail = (q.email ?? b.email ?? "").toString().trim();
+    const email = toLowerEmail(rawEmail);
+    if (!email) { badRequest(res, "email ontbreekt"); return; }
+
+    // Bron bepalen (robuust: accepteert 'monthly', 'maandelijks' of monthly=1/true)
+    const sRaw = (q.source ?? b.source ?? q.bron ?? b.bron ?? "").toString().trim().toLowerCase();
+    const monthlyFlag = (q.monthly ?? b.monthly ?? "").toString().trim().toLowerCase();
+    const isMonthly   = sRaw === "monthly" || sRaw === "maandelijks" || monthlyFlag === "1" || monthlyFlag === "true";
+    const isWaitlist  = sRaw === "wachtlijst" || sRaw === "waitlist";
+
+    const source = isMonthly ? "monthly" : (isWaitlist ? "wachtlijst" : "koop");
+
+    const orderId   = newOrderId();
+    const paymentId = "SIM-" + Date.now();
+
+    // Bedrag + omschrijving volgens bron
+    let amountEUR   = PRICE_EUR_KOOP;
+    let description = "Zisa PRO – jaarlicentie";
+    if (source === "wachtlijst") {
+      amountEUR   = PRICE_EUR_WAITLIST;
+      description = "Zisa PRO – jaarlicentie (wachtlijst)";
+    }
+    if (source === "monthly") {
+      amountEUR   = PRICE_EUR_MONTH;          // "6.00"
+      description = "Zisa PRO – maand (prepaid)";
+    }
+
+    // Order registreren
+    await writeOrderAll(orderId, {
+      orderId, email, source,
+      amountEUR, description,
+      status: "open",
+      createdAt: FieldValue.serverTimestamp(),
+      paymentId,
+    });
+
+    // 'Betaald' simuleren in TEST-modus (dus testfactuur + opslag in /Facturen/test/)
+    const fakePayment: MolliePayment = { id: paymentId, status: "paid", mode: "test" as const };
+
+    if (source === "monthly") {
+      const orderRes = await findOrderByPaymentId(paymentId);
+      if (!orderRes) { badRequest(res, "order niet gevonden"); return; }
+      await completeMonthlyPayment(fakePayment, orderRes);   // ==> maandflow: +1 maand, factuur, mail
+    } else {
+      await completeOrderByPayment(fakePayment);             // ==> jaar/wachtlijst: bestaande flow
+    }
+
+    res.status(200).json({ ok: true, orderId, paymentId, source, amountEUR });
   } catch (e: any) {
-    logger.error("Webhook error", { paymentId, error: e?.message || String(e) });
-    res.status(500).send("ERROR");
+    logger.error("devSimulatePaid error", { error: e?.message || String(e) });
+    res.status(500).send("devSimulatePaid error");
   }
 });
 
-// ------------------------------ Test-helper ----------------------------------
-export const devSimulatePaid = onRequest({ region: REGION }, async (req: Request, res: Response): Promise<void> => {
-  const raw = (req.query as any)?.email || (req.body as any)?.email || "";
-  const email = toLowerEmail(String(raw));
-  if (!email) { badRequest(res, "email ontbreekt"); return; }
-
-  const source    = String((req.query as any)?.source || (req.body as any)?.source || "koop");
-  const paymentId = String((req.query as any)?.paymentId || (req.body as any)?.paymentId || ("SIM-" + Date.now()));
-  const orderId   = newOrderId();
-
-  await writeOrderAll(orderId, {
-    orderId, email, source,
-    amountEUR: source === "wachtlijst" ? PRICE_EUR_WAITLIST : PRICE_EUR_KOOP,
-    description: source === "wachtlijst" ? "Zisa PRO – jaarlicentie (wachtlijst)" : "Zisa PRO – jaarlicentie",
-    status: "open",
-    createdAt: FieldValue.serverTimestamp(),
-    paymentId,
-  });
-
-  const fakePayment: MolliePayment = { id: paymentId, status: "paid" };
-  await completeOrderByPayment(fakePayment);
-
-  res.status(200).json({ ok: true, orderId, paymentId });
-});
 
 // ------------------------------ Callables (App Check) ------------------------
 export const registerDevice = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
@@ -571,19 +844,44 @@ export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true },
     ? String((req.auth.token as any).email).toLowerCase()
     : "";
 
-  let lic: any = await findLicenseByUid(uid);
-  if (!lic && tokenEmail) lic = await findLicenseByEmail(tokenEmail);
+  const nowMs = Timestamp.now().toMillis();
 
-  if (!lic) return { allowed: false, reason: "no_license" };
+  // 1) Zoek licenties op uid; zo niet, val terug op e-mail
+  let list = await fetchLicensesBy("uid", uid);
+  let lic  = pickLatestValid(list, nowMs);
 
-  const now = Timestamp.now();
-  const exp: Timestamp | undefined = lic.expiresAt;
-  if (!exp || exp.toMillis() <= now.toMillis()) {
-    return { allowed: false, reason: "expired", expiresAt: exp ? exp.toDate().toISOString() : null };
+  if (!lic && tokenEmail) {
+    const byEmail = await fetchLicensesBy("email", tokenEmail);
+    const validE  = pickLatestValid(byEmail, nowMs);
+    if (validE) lic = validE;
+    list = list.concat(byEmail); // voor nette "expired"-melding
   }
 
-  return { allowed: true, expiresAt: exp.toDate().toISOString(), deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT };
+  // 2) Geldige licentie → toegang
+  if (lic) {
+    const exp = lic.expiresAt as Timestamp;
+    return {
+      allowed: true,
+      expiresAt: exp.toDate().toISOString(),
+      deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT,
+    };
+  }
+
+  // 3) Alles verlopen? Meld "expired" met laatste vervaldatum
+  const latest = pickLatest(list);
+  if (latest) {
+    const exp = latest.expiresAt as Timestamp | undefined;
+    return {
+      allowed: false,
+      reason: "expired",
+      expiresAt: exp ? exp.toDate().toISOString() : null,
+    };
+  }
+
+  // 4) Helemaal niets gevonden
+  return { allowed: false, reason: "no_license" };
 });
+
 
 // --------------------------- HTTP wrappers (CORS) -----------------------------
 export const listDevicesHttp = onRequest({ region: REGION }, async (req: Request, res: Response) => {
@@ -626,6 +924,109 @@ export const unregisterDeviceHttp = onRequest({ region: REGION }, async (req: Re
   } catch (e: any) {
     logger.error("unregisterDeviceHttp error", { error: e?.message || String(e) });
     res.status(500).json({ error: "internal" });
+  }
+});
+// ===== KidLinks (QR die vervalt met licentie) =================================
+
+// Korte, niet-raadbare code (zonder i, l, 0, 1)
+function mkCode(len = 9) {
+  const abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let s = "";
+  for (let i = 0; i < len; i++) s += abc[Math.floor(Math.random() * abc.length)];
+  return s;
+}
+
+/**
+ * Maakt een kind-link (QR) aan voor de ingelogde leerkracht.
+ * target: "kid-start" | "plus100" | "min100" | "plus1000" | "min1000"
+ * range:  "100" | "1000"
+ */
+export const createKidLink = onCall({ region: REGION, cors: true }, async (req) => {
+  if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+  const uid = req.auth.uid;
+  const { target = "kid-start", range = "100" } = (req.data || {}) as {
+    target?: string; range?: "100" | "1000";
+  };
+
+  // ——— Pak jouw nieuwste geldige licentie (je helpers bestaan al)
+  const nowMs = Timestamp.now().toMillis();
+  const list = await fetchLicensesBy("uid", uid);
+  const lic  = pickLatestValid(list, nowMs);
+  if (!lic) throw new HttpsError("failed-precondition", "Geen (geldige) licentie gevonden.");
+
+  const expiresAt = lic.expiresAt as Timestamp;
+  if (!expiresAt || expiresAt.toMillis() <= nowMs) {
+    throw new HttpsError("failed-precondition", "Licentie is verlopen.");
+  }
+
+  // ——— Maak code en bewaar
+  const code = mkCode(9);
+  await db.collection("kidLinks").doc(code).set({
+    uid,
+    licenseId: lic.licenseId || lic.id || null,   // optioneel; afhankelijk van je model
+    target,                                       // bv. 'kid-start'
+    range,                                        // '100' | '1000'
+    expiresAt,
+    createdAt: Timestamp.now(),
+    disabled: false,
+  });
+
+  const proj   = process.env.GCLOUD_PROJECT!;
+  const region = REGION;
+  const url    = `https://${region}-${proj}.cloudfunctions.net/proLink/${code}`;
+
+  return { url, code, expiresAt: expiresAt.toDate().toISOString() };
+});
+
+/**
+ * Publieke redirect: valideert code + geldigheid en stuurt door naar PRO.
+ * Bij verlopen link: toont nette melding met link naar je site.
+ */
+export const proLink = onRequest({ region: REGION }, async (req, res) => {
+  try {
+    const code = (req.path || req.url).split("/").pop()!.trim();
+    if (!code) { res.status(400).send("Code ontbreekt."); return; }
+
+    const ref = db.collection("kidLinks").doc(code);
+    const doc = await ref.get();
+    if (!doc.exists) { res.status(404).send("Link niet gevonden."); return; }
+
+    const data = doc.data()!;
+    if (data.disabled) { res.status(410).send("Link is ingetrokken."); return; }
+
+    const expMs = (data.expiresAt as Timestamp).toMillis();
+    if (Date.now() >= expMs) {
+      res.status(410).send(`
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <div style="font-family:system-ui;max-width:640px;margin:40px auto;line-height:1.5">
+          <h2>Licentie verlopen</h2>
+          <p>Deze QR is niet meer geldig omdat de licentie vervallen is.</p>
+          <p><a href="${FRONTEND_REPO}" style="font-weight:700">Koop of verleng je licentie</a></p>
+        </div>`);
+      return;
+    }
+
+    // Bepaal je PRO-basis aan de hand van FRONTEND_REPO
+    // LIVE:
+    const base = `${FRONTEND_REPO}/pro/`;
+    // STAGING (tijdelijk testen)? Zet FRONTEND_REPO even naar je staging-repo,
+    // of dupliceer deze function met een andere base.
+
+    const t = encodeURIComponent(Date.now().toString(36)); // mini-nonce tegen caching
+    let dest = "";
+    switch (data.target) {
+      case "plus100":  dest = `${base}plus100.html?kid=1&range=100&t=${t}`;   break;
+      case "min100":   dest = `${base}min100.html?kid=1&range=100&t=${t}`;    break;
+      case "plus1000": dest = `${base}plus1000.html?kid=1&range=1000&t=${t}`; break;
+      case "min1000":  dest = `${base}min1000.html?kid=1&range=1000&t=${t}`;  break;
+      default:         dest = `${base}hulpschema-kid.html?kid=1&range=${data.range || "100"}&t=${t}`;
+    }
+
+    res.setHeader("Cache-Control", "no-store, private, max-age=0");
+    res.redirect(302, dest);
+  } catch (e: any) {
+    logger.error("proLink error", { error: e?.message || String(e) });
+    res.status(500).send("Interne fout.");
   }
 });
 
