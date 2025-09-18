@@ -591,27 +591,47 @@ document.addEventListener("DOMContentLoaded", () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageHeight = doc.internal.pageSize.getHeight();
+      // ondermarge voor printers/afdrukgebied iets royaler houden
       const bottomMargin = 20;
+      const BOTTOM_SAFE = 26; // veilige ondergrens (mm): niets tekenen onder pageHeight - BOTTOM_SAFE
 
-      // Titel
-      doc.setFont('Helvetica', 'bold'); doc.setFontSize(14);
-      doc.text("Werkblad Bewerkingen", 105, 15, { align: 'center' });
+      // ==== NIEUW: Header met NAAM + TITEL (elk blad) ====
+      function pdfHeader(titleText) {
+        // Naam linksboven, uitgelijnd met perforatiemarge
+        const xName = LEFT_PUNCH_MARGIN; // respecteer perforatiemarge
+        const yName = 15;
+        doc.setFont('Helvetica', 'normal'); doc.setFontSize(12);
+        doc.text('Naam:', xName, yName, { align: 'left' });
+        const wNaam = doc.getTextWidth('Naam:');
+        const gap = 3;
+        const lineStart = xName + wNaam + gap;
+        const lineEnd = Math.min(200, lineStart + 80); // schrijflijn (±80mm), veilig tot rechts
+        doc.setDrawColor(51,51,51);
+        doc.line(lineStart, yName, lineEnd, yName);
+
+        // Titel onder de naamregel
+        doc.setFont('Helvetica', 'bold'); doc.setFontSize(16);
+        doc.text(titleText, 105, 25, { align: 'center' });
+      }
+
+      // Eerste paginakop
+      pdfHeader('Werkblad Bewerkingen');
 
       if (settings.hoofdBewerking === 'splitsen' && settings.groteSplitshuizen) {
         // Grote splitshuizen (masonry), met perforatiemarge
         const xCols = [LEFT_PUNCH_MARGIN + 5, LEFT_PUNCH_MARGIN + 75, LEFT_PUNCH_MARGIN + 145];
-        const startY = 30, vGap = 8;
+        const startY = 40; // was 30, ruimte voor header
+        const vGap = 8;
         const yCols = [startY, startY, startY];
         const lijst = settings.splitsGetallenArray || [10];
 
         for (let i = 0; i < lijst.length; i++) {
           const h = getGrootSplitshuisHeight(lijst[i]);
 
-          const kolomMetPlaats = yCols.findIndex(y => y + h <= pageHeight - bottomMargin);
+          const kolomMetPlaats = yCols.findIndex(y => y + h <= pageHeight - BOTTOM_SAFE);
           if (kolomMetPlaats === -1) {
             doc.addPage();
-            doc.setFont('Helvetica','bold'); doc.setFontSize(14);
-            doc.text("Werkblad Bewerkingen (vervolg)", 105, 15, { align:'center' });
+            pdfHeader('Werkblad Bewerkingen (vervolg)');
             yCols.fill(startY);
           }
 
@@ -631,16 +651,17 @@ document.addEventListener("DOMContentLoaded", () => {
           LEFT_PUNCH_MARGIN + 115,
           LEFT_PUNCH_MARGIN + 165
         ];
-        const yStart = 30;
+        const yStart = 40; // was 30
         const yIncrement = 36;
+        const itemHeight = 32; // realistische hoogte die één item inneemt
         const kolommen = xPosities.length;
 
         let row = 0, col = 0, y = yStart;
         laatsteOefeningen.forEach((oef) => {
-          if (y > pageHeight - bottomMargin) {
+          // Past dit item nog boven de veilige ondergrens?
+          if (y + itemHeight > pageHeight - BOTTOM_SAFE) {
             doc.addPage();
-            doc.setFont('Helvetica', 'bold'); doc.setFontSize(14);
-            doc.text("Werkblad Bewerkingen (vervolg)", 105, 15, { align: 'center' });
+            pdfHeader('Werkblad Bewerkingen (vervolg)');
             row = 0; col = 0; y = yStart;
           }
           const x = xPosities[col];
@@ -660,17 +681,18 @@ document.addEventListener("DOMContentLoaded", () => {
           : [LEFT_PUNCH_MARGIN + 5, LEFT_PUNCH_MARGIN + 50, LEFT_PUNCH_MARGIN + 95, LEFT_PUNCH_MARGIN + 140];
 
         const colWidth  = hulpGlobaal ? 85 : 40;
-        const yStart = 30;
+        const yStart = 45; // was 30
         const yIncrement = hulpGlobaal ? 58 : 30;
+        const itemHeight = (hulpGlobaal ? 52 : 26); // iets kleiner dan increment = speling
         const kolommen = xPosities.length;
 
         let row = 0, col = 0, y = yStart;
 
         laatsteOefeningen.forEach((oef) => {
-          if (y > pageHeight - bottomMargin) {
+          // Past dit item nog boven de veilige ondergrens?
+          if (y + itemHeight > pageHeight - BOTTOM_SAFE) {
             doc.addPage();
-            doc.setFont('Helvetica', 'bold'); doc.setFontSize(14);
-            doc.text("Werkblad Bewerkingen (vervolg)", 105, 15, { align: 'center' });
+            pdfHeader('Werkblad Bewerkingen (vervolg)');
             row = 0; col = 0; y = yStart;
           }
           const x = xPosities[col];
