@@ -836,50 +836,93 @@ export const unregisterDevice = onCall({ region: REGION, enforceAppCheck: true }
   return { ok: true };
 });
 
-// AANGEPAST: val terug op e-mail wanneer licentie niet op uid staat
+// Altijd de meest recente licentie kiezen (eerst op uid, anders op e-mail)
 export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true }, async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Login vereist.");
+
   const uid = req.auth.uid;
   const tokenEmail = (req.auth.token as any)?.email
     ? String((req.auth.token as any).email).toLowerCase()
     : "";
 
-  const nowMs = Timestamp.now().toMillis();
+  const nowMs = Date.now();
 
-  // 1) Zoek licenties op uid; zo niet, val terug op e-mail
-  let list = await fetchLicensesBy("uid", uid);
-  let lic  = pickLatestValid(list, nowMs);
+  // helper: haal per collectie de nieuwste licentie op (orderBy expiresAt desc)
+  const newestBy = async (field: "uid" | "email", value: string) => {
+    let best: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+    for (const col of LICENSE_COLLECTIONS) {
+      const qs = await db
+        .collection(col)
+        .where(field, "==", value)
+        .orderBy("expiresAt", "desc")
+        .limit(1)
+        .get();
 
-  if (!lic && tokenEmail) {
-    const byEmail = await fetchLicensesBy("email", tokenEmail);
-    const validE  = pickLatestValid(byEmail, nowMs);
-    if (validE) lic = validE;
-    list = list.concat(byEmail); // voor nette "expired"-melding
+      if (!qs.empty) {
+        const d = qs.docs[0];
+        if (!best) best = d;
+        else {
+          const a = (best.data() as any)?.expiresAt;
+          const b = (d.data() as any)?.expiresAt;
+          const ams = a?.toMillis?.() ?? 0;
+          const bms = b?.toMillis?.() ?? 0;
+          if (bms > ams) best = d;
+        }
+      }
+    }
+    return best;
+  };
+
+  // 1) Probeer op uid
+  let doc = await newestBy("uid", uid);
+
+  // 2) Zoniet, val terug op e-mail
+  if (!doc && tokenEmail) {
+    doc = await newestBy("email", tokenEmail);
   }
 
-  // 2) Geldige licentie → toegang
-  if (lic) {
-    const exp = lic.expiresAt as Timestamp;
-    return {
-      allowed: true,
-      expiresAt: exp.toDate().toISOString(),
-      deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT,
-    };
+  // 3) Geen licentie gevonden
+  if (!doc) {
+    logger.info("[getAccessStatus] Geen licentie", { uid, email: tokenEmail });
+    return { allowed: false, reason: "no_license" };
   }
 
-  // 3) Alles verlopen? Meld "expired" met laatste vervaldatum
-  const latest = pickLatest(list);
-  if (latest) {
-    const exp = latest.expiresAt as Timestamp | undefined;
-    return {
-      allowed: false,
-      reason: "expired",
-      expiresAt: exp ? exp.toDate().toISOString() : null,
-    };
+  // 4) Controleer status en vervaldatum
+  const lic = doc.data() as any;
+  const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+  const expIso =
+    lic.expiresAt?.toDate?.() ? lic.expiresAt.toDate().toISOString() : null;
+
+  logger.info("[getAccessStatus] Gekozen licentie", {
+    uid,
+    email: tokenEmail,
+    id: doc.id,
+    path: doc.ref.path,
+    status: lic.status,
+    expiresAtMs: expMs,
+    entitlement: lic.entitlement,
+    deviceLimit: lic.deviceLimit,
+  });
+
+  const isActive =
+  String(lic.status || "").toLowerCase() === "actief" ||
+  String(lic.status || "").toLowerCase() === "active";
+
+if (!isActive) {
+  return { allowed: false, reason: "inactive", expiresAt: expIso };
+}
+
+  if (expMs && expMs < nowMs) {
+    return { allowed: false, reason: "expired", expiresAt: expIso };
   }
 
-  // 4) Helemaal niets gevonden
-  return { allowed: false, reason: "no_license" };
+  return {
+    allowed: true,
+    reason: "ok",
+    expiresAt: expIso,
+    entitlement: lic.entitlement || ENTITLEMENT_ID,
+    deviceLimit: lic.deviceLimit ?? DEVICE_LIMIT,
+  };
 });
 
 
@@ -1029,4 +1072,3 @@ export const proLink = onRequest({ region: REGION }, async (req, res) => {
     res.status(500).send("Interne fout.");
   }
 });
-
