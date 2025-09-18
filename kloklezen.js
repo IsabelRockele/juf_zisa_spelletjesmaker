@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
             paddingBetweenClocks = 30;
 
-            // --- AANPASSING: Dynamische wekkergrootte voor PDF ---
+            // Dynamische wekkergrootte voor PDF
             if (tijdnotatie === '24uur') {
                 // Twee wekkers naast elkaar, dus maak ze kleiner
                 wekkerDisplayWidth = 160; 
@@ -70,7 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Slechts één wekker, dus deze mag groter zijn
                 wekkerDisplayWidth = 140; 
             }
-            // --- EINDE AANPASSING ---
 
         } else { // 'compact' layout voor de web-weergave
             actualClockDiameter = 150; // Standaardgrootte voor de weergave op de website
@@ -99,17 +98,13 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        // --- AANPASSING: Vakbreedte voor PDF ---
+        // Extra witruimte in PDF voor standaardoefeningen
         let singleCellTotalWidth;
         if (layoutType === 'pdf' && tijdnotatie === 'standaard') {
-            // Voor standaardoefeningen in PDF, voeg extra witruimte toe (bv. 60px)
-            // zodat de 24-uurs hulpcijfers niet tegen de rand komen.
             singleCellTotalWidth = Math.max(actualClockDiameter + 60, minRequiredWidthForAnswerArea + 20);
         } else {
-            // Gebruik de standaardberekening voor de web-weergave en 24u-PDF's.
             singleCellTotalWidth = Math.max(actualClockDiameter + 20, minRequiredWidthForAnswerArea + 20);
         }
-        // --- EINDE AANPASSING ---
 
         const spacingBelowClock = (voorOverHulpType !== 'geen' || tijdnotatie === '24uur' || toon24Uur) ? 45 : 20;
         const singleCellTotalHeight = clockVerticalOffset + actualClockDiameter + spacingBelowClock + answerBlockHeight;
@@ -173,7 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const y_answerAreaStart = y_clock + clockSize + spaceBelowClock;
 
         if (invulmethode === 'analoog') {
-            const lineHeight = clockSize * 0.25; // Verhoogd van 0.15 voor meer ruimte
+            const lineHeight = clockSize * 0.25; // Verhoogd voor meer ruimte
             ctx.font = `${clockSize * 0.11}px Arial`;
             ctx.fillStyle = '#333';
             ctx.textAlign = 'center';
@@ -273,16 +268,13 @@ document.addEventListener("DOMContentLoaded", () => {
             ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, klokRadius, -0.5 * Math.PI, 0.5 * Math.PI); ctx.closePath(); ctx.fillStyle = 'rgba(144, 238, 144, 0.2)'; ctx.fill();
             ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, klokRadius, 0.5 * Math.PI, 1.5 * Math.PI); ctx.closePath(); ctx.fillStyle = 'rgba(255, 182, 193, 0.2)'; ctx.fill();
             
-            // --- AANPASSING: Tekst BOVEN de klok plaatsen ---
+            // Tekst BOVEN de klok plaatsen
             ctx.font = `italic bold ${klokRadius * 0.12}px Arial`; 
             ctx.textAlign = 'center'; 
             ctx.textBaseline = 'middle';
 
-            // Bepaal Y-positie in de witruimte boven de klok
             const textY = centerY - radius - 10; 
-
-            // Horizontale positie voor 'voor' en 'over'
-            const textXOffset = radius * 0.5;
+            const textXOffset = radius * 0.80;
 
             ctx.fillStyle = 'darkred';
             ctx.fillText("voor", centerX - textXOffset, textY);
@@ -328,7 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
             for (let uur = 1; uur <= 12; uur++) {
                 const label = uur + 12;
                 const hoek = (uur - 3) * (Math.PI / 6);
-                const buitenRadius = radius * 1.05;
+                const buitenRadius = radius * 1.10;
                 const x = centerX + buitenRadius * Math.cos(hoek);
                 const y = centerY + buitenRadius * Math.sin(hoek);
                 ctx.fillText(label.toString(), x, y);
@@ -421,8 +413,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 tijden: pageTijden
             };
 
+            // Canvas opbouwen in PDF-layout
             tekenCanvas(pageInstellingen, 'pdf');
 
+            // Afbeelding voorbereiden
             const dataURL = canvas.toDataURL("image/png");
             const pageWidth = doc.internal.pageSize.getWidth();
             const pageHeight = doc.internal.pageSize.getHeight();
@@ -440,10 +434,23 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const xPos = (pageWidth - pdfImgWidth) / 2;
-            const yPos = (pageHeight - pdfImgHeight) / 2;
+            let yPos = (pageHeight - pdfImgHeight) / 2;
+
+            // --- Nieuw: Naam + schrijflijn links boven en titel eronder ---
+            const naamY = 14;      // ~14 mm van de bovenrand
+            const titelY = 24;     // titel onder de naam
+            doc.setFontSize(12);
+            doc.text("Naam: _______________________", margin, naamY, { align: 'left' });
 
             const headerText = numPages > 1 ? `Kloklezen Oefening (Pagina ${page + 1}/${numPages})` : "Kloklezen Oefening";
-            doc.text(headerText, pageWidth / 2, margin, { align: 'center' });
+            doc.setFontSize(14);
+            doc.text(headerText, pageWidth / 2, titelY, { align: 'center' });
+
+            // Zorg dat het werkblad niet tegen de titel aan komt
+            const extraTopOffset = 4; // duwt de afbeelding iets naar beneden
+            yPos = yPos + extraTopOffset;
+
+            // Werkblad plaatsen
             doc.addImage(dataURL, 'PNG', xPos, yPos, pdfImgWidth, pdfImgHeight);
         }
 
