@@ -11,12 +11,17 @@ document.addEventListener("DOMContentLoaded", () => {
             checkbox.type = 'checkbox';
             checkbox.name = 'tafelNummer';
             checkbox.value = i;
-            if (i <= 10) checkbox.checked = true;
+            // NIEUW: standaard NIET aangevinkt
+            checkbox.checked = false;
+
             label.appendChild(checkbox);
             label.appendChild(document.createTextNode(` ${i}`));
             tafelKeuzeDiv.appendChild(label);
         }
     }
+    // Zorg dat "Alles selecteren" bij start ook uit staat
+    if (selectAllTafelsCheckbox) selectAllTafelsCheckbox.checked = false;
+
     const tafelCheckboxes = document.querySelectorAll('input[name="tafelNummer"]');
     if (selectAllTafelsCheckbox) {
         selectAllTafelsCheckbox.addEventListener('change', (e) => {
@@ -157,6 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 numOefeningen: parseInt((document.getElementById('numOefeningen_tafel') || { value: 20 }).value),
                 tafelType: (document.querySelector('input[name="tafelType"]:checked') || { value: 'maal' }).value,
                 gekozenTafels: gekozenTafels,
+                // --- Volgorde & 0-toelating (komen uit de HTML die we net toevoegden) ---
+                tafelsVolgorde: (document.querySelector('input[name="tafelsVolgorde"]:checked') || { value: 'links' }).value,
+                tafelsMetNul: !!(document.getElementById('tafelsMetNul') && document.getElementById('tafelsMetNul').checked),
             };
             stuurDoor(settings);
         });
