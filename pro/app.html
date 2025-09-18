@@ -10,28 +10,40 @@
   <meta name="theme-color" content="#ffcf56">
 
   <style>
-    .download-knop {
-      position: fixed; top: 20px; right: 20px; z-index: 1000;
-      background-color: #e74c3c; color: white; padding: 12px 20px; border-radius: 8px;
-      text-decoration: none; font-size: 1.2rem; font-weight: bold; white-space: nowrap;
-      display: inline-block; transition: background-color .2s ease, transform .2s ease;
-    }
-    .download-knop:hover { background-color: #c0392b; transform: scale(1.05); }
-    .download-knop::after {
-      content: attr(data-tooltip); position: absolute; top: 110%; left: 50%; transform: translateX(-50%);
-      background-color: #e74c3c; color: white; padding: 8px 10px; font-size: 1rem; border-radius: 14px;
-      opacity: 0; white-space: normal; width: 220px; text-align: center; pointer-events: none;
-      transition: opacity .2s ease;
-    }
-    .download-knop:hover::after { opacity: 1; }
-
     html, body { margin:0; background:#fff4df; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
 
-    .topbar { display:flex; justify-content:flex-end; align-items:center; gap:12px; padding-top:16px; }
+    .topbar { display:flex; justify-content:flex-end; align-items:flex-start; gap:12px; padding-top:16px; }
     .pill { font-size:.95rem; background:#fff; padding:6px 10px; border-radius:999px; border:1px solid #eee; }
-    .btn-logout { background:#ffd159; border:0; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
-    .btn-logout:hover { filter: brightness(.97); }
+
+    .top-actions {
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+    }
+    .btn-logout,
+    .btn-handleiding {
+      border:0;
+      border-radius:10px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-block;
+    }
+    .btn-logout {
+      background:#ffd159;
+      color:#000;
+    }
+    .btn-handleiding {
+      background:#e74c3c;
+      color:#fff;
+    }
+    .btn-logout:hover,
+    .btn-handleiding:hover {
+      filter: brightness(.97);
+    }
 
     .header-container {
       display:flex; justify-content:center; align-items:center;
@@ -64,34 +76,35 @@
 
     a { position: relative; display: inline-block; }
     a:hover .drukknop-afbeelding { transform: scale(1.05); }
-    a:not(.download-knop)::after {
+    a:not(.btn-handleiding)::after {
       content: attr(data-tooltip); position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
       background-color: #f9b600; color: white; padding: 8px 14px; font-size: 1.4rem; border-radius: 14px;
       opacity: 0; white-space: nowrap; pointer-events: none; transition: opacity .2s ease; z-index: 10;
     }
-    a:not(.download-knop):hover::after { opacity: 1; }
+    a:not(.btn-handleiding):hover::after { opacity: 1; }
 
     @media (max-width: 600px) {
       .header-container h1 { font-size: 2.6rem; }
       .logo { width: 80px; }
-      .download-knop { top: 12px; right: 12px; font-size: 1rem; padding: 10px 14px; }
+      .btn-logout, .btn-handleiding { font-size: 1rem; padding: 10px 14px; }
     }
   </style>
 </head>
 <body>
 
-  <a href="../Handleiding spelletjesmaker.pdf"
-     class="download-knop"
-     data-tooltip="Hulp nodig? Geen probleem, hier kan je de handleiding downloaden van deze spelgenerator."
-     download>
-     Handleiding
-  </a>
-
   <div class="container">
 
     <div class="topbar">
       <span id="user-pill" class="pill">-</span>
-      <button id="logout" class="btn-logout">Uitloggen</button>
+      <div class="top-actions">
+        <button id="logout" class="btn-logout">Uitloggen</button>
+        <a href="../Handleiding spelletjesmaker.pdf"
+           class="btn-handleiding"
+           data-tooltip="Hulp nodig? Hier kan je de handleiding downloaden."
+           download>
+           Handleiding
+        </a>
+      </div>
     </div>
 
     <div class="header-container">
@@ -103,6 +116,7 @@
 
     <main id="content" style="display:none;">
 
+      <!-- Alle accordion-secties ongewijzigd -->
       <div class="accordion">
         <button class="accordion-header">📐 Reken-oefeningen</button>
         <div class="accordion-content button-grid">
@@ -191,13 +205,9 @@
     });
   </script>
 
-  <!-- Device-ID helper moet vóór de guard -->
   <script src="./device-id.js"></script>
-
-  <!-- ★ Laad guard.js rechtstreeks vanaf Pages (voorkomt 404 door querystrings/paden) -->
   <script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
 
-  <!-- Dun app-script: toont UI wanneer PRO klaar is -->
   <script type="module">
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
@@ -209,7 +219,6 @@
     const auth = getAuth();
     $("#logout").onclick = ()=> signOut(auth);
 
-    // Guard roept dit zodra PRO oké is
     window.onProReady = ({ user, expiresAt, limit }) => {
       try { userPill.textContent = user.email ?? user.uid; } catch {}
       statusEl.className = "status good";
@@ -222,7 +231,6 @@
       contentEl.style.display = "block";
     };
 
-    // Fallback: niet ingelogd → terug naar login
     onAuthStateChanged(auth, (u) => {
       if (!u) { location.href = "../pro/"; }
       else { userPill.textContent = u.email ?? u.uid; }
@@ -230,4 +238,3 @@
   </script>
 </body>
 </html>
-
