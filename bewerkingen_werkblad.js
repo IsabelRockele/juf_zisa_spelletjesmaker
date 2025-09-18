@@ -410,13 +410,40 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function genereerTafelsom() {
-      const tafel = settings.gekozenTafels?.[Math.floor(Math.random() * (settings.gekozenTafels?.length || 1))] ?? 1;
-      let op = settings.tafelType === 'maal' ? 'x' : ':';
-      if (settings.tafelType === 'beide') op = Math.random() < 0.5 ? 'x' : ':';
-      if (op === 'x') return { type: 'tafels', getal1: tafel, getal2: Math.floor(Math.random() * 10) + 1, operator: 'x' };
-      const g2 = tafel; const g1 = g2 * (Math.floor(Math.random() * 10) + 1);
-      return { type: 'tafels', getal1: g1, getal2: g2, operator: ':' };
+  const tafel = settings.gekozenTafels?.[Math.floor(Math.random() * (settings.gekozenTafels?.length || 1))] ?? 1;
+
+  // Operator-keuze (maal / deel / beide)
+  let op = settings.tafelType === 'maal' ? 'x' : ':';
+  if (settings.tafelType === 'beide') op = Math.random() < 0.5 ? 'x' : ':';
+
+  // Nieuw: volgorde (links/rechts/mix) en 0-toelating voor MAAL
+  const volgorde = settings.tafelsVolgorde || 'links';  // 'links' | 'rechts' | 'mix'
+  const metNul   = !!settings.tafelsMetNul;             // true => 0..10, false => 1..10
+  const randFactor = () => metNul
+    ? Math.floor(Math.random() * 11)        // 0..10
+    : (Math.floor(Math.random() * 10) + 1); // 1..10
+
+  if (op === 'x') {
+    // Bepaal oriëntatie: vaste keuze of per opgave willekeurig bij 'mix'
+    let orient = volgorde;
+    if (volgorde === 'mix') orient = (Math.random() < 0.5 ? 'links' : 'rechts');
+
+    if (orient === 'links') {
+      // tafel links: 2 × n
+      return { type: 'tafels', getal1: tafel, getal2: randFactor(), operator: 'x' };
+    } else {
+      // tafel rechts: n × 2
+      return { type: 'tafels', getal1: randFactor(), getal2: tafel, operator: 'x' };
     }
+  }
+
+  // Deeltafels: oriëntatie blijft g1 : g2 (dividend : divisor)
+  // Let op: delen door 0 vermijden → factor minimaal 1, ook als tafelsMetNul aan staat.
+  const g2 = tafel;
+  const factor = Math.max(1, randFactor());  // 1..10
+  const g1 = g2 * factor;
+  return { type: 'tafels', getal1: g1, getal2: g2, operator: ':' };
+}
 
     // --------------------------------
     // PDF-helpers (incl. lagere baselines)
