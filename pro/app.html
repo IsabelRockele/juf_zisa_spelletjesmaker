@@ -39,11 +39,33 @@
     .btn-handleiding {
       background:#e74c3c;
       color:#fff;
+      position: relative; /* nodig voor tooltip */
     }
     .btn-logout:hover,
     .btn-handleiding:hover {
       filter: brightness(.97);
     }
+
+    /* Tooltip voor handleiding-knop */
+    .btn-handleiding::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      top: 110%;
+      right: 0;
+      background-color: #e74c3c;
+      color: white;
+      padding: 8px 10px;
+      font-size: 1rem;
+      border-radius: 14px;
+      opacity: 0;
+      white-space: normal;
+      width: 220px;
+      text-align: right;
+      pointer-events: none;
+      transition: opacity .2s ease;
+      z-index: 1000;
+    }
+    .btn-handleiding:hover::after { opacity: 1; }
 
     .header-container {
       display:flex; justify-content:center; align-items:center;
@@ -116,7 +138,6 @@
 
     <main id="content" style="display:none;">
 
-      <!-- Alle accordion-secties ongewijzigd -->
       <div class="accordion">
         <button class="accordion-header">📐 Reken-oefeningen</button>
         <div class="accordion-content button-grid">
