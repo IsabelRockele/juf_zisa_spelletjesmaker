@@ -82,15 +82,14 @@
                 <label><input type="radio" name="rekenType" value="beide"> Beide</label>
             </div>
             <div class="control-group">
-                <label class="group-title">Type sommen (kies minstens één):</label>
-                <label><input type="checkbox" name="somType" value="E+E" checked> E + E</label>
-                <label><input type="checkbox" name="somType" value="T+E"> T + E</label>
-                <label><input type="checkbox" name="somType" value="T+T"> T + T</label>
-                <label><input type="checkbox" name="somType" value="TE+E"> TE + E</label>
-                <label><input type="checkbox" name="somType" value="TE+TE"> TE + TE</label>
-                <label><input type="checkbox" name="somType" value="H+H"> H + H</label>
-                <label><input type="checkbox" name="somType" value="HT+HT"> HT + HT</label>
-                <label><input type="checkbox" name="somType" value="HTE+HTE"> HTE + HTE</label>
+                <label><input type="checkbox" name="somType" value="E+E" checked> E + E / E - E</label>
+  <label><input type="checkbox" name="somType" value="T+E"> T + E / T - E</label>
+  <label><input type="checkbox" name="somType" value="T+T"> T + T / T - T</label>
+  <label><input type="checkbox" name="somType" value="TE+E"> TE + E / TE - E</label>
+  <label><input type="checkbox" name="somType" value="TE+TE"> TE + TE / TE - TE</label>
+  <label><input type="checkbox" name="somType" value="H+H"> H + H / H - H</label>
+  <label><input type="checkbox" name="somType" value="HT+HT"> HT + HT / HT - HT</label>
+  <label><input type="checkbox" name="somType" value="HTE+HTE"> HTE + HTE / HTE - HTE</label>
             </div>
             <div class="control-group">
                 <label class="group-title" for="rekenBrug">Brug:</label>
@@ -100,6 +99,33 @@
                     <option value="beide" selected>Beide</option>
                 </select>
             </div>
+
+            <!-- NIEUW: hulpmiddelen -->
+            <div class="control-group">
+              <label>
+                <input type="checkbox" id="rekenHulpCheckbox">
+                Hulpmiddelen en tussenstappen tonen (alleen bij brug)
+              </label>
+            </div>
+
+            <div class="control-group" id="rekenHulpDetail" style="display:none">
+              <label class="group-title">Instellingen hulpmiddelen:</label>
+              <div id="optellenHint" style="font-size:0.95em;color:#555;margin-bottom:6px;">
+                Bij optellen komen <b>splitsbenen onder de tweede term</b>.
+              </div>
+              <div id="aftrekkenHint" style="margin-bottom:6px;display:none;">
+                <div style="font-size:0.95em;color:#555;margin-bottom:6px;">
+                  Kies waar de <b>splitsbenen</b> staan bij aftrekken:
+                </div>
+                <label><input type="radio" name="splitsPlaatsAftrekken" value="onderAftrektal" checked> Onder het aftrektal</label>
+                <label style="margin-left:12px;"><input type="radio" name="splitsPlaatsAftrekken" value="onderAftrekker"> Onder de aftrekker</label>
+              </div>
+              <label style="margin-top:6px;">
+                <input type="checkbox" id="rekenHulpSchrijflijnen" checked>
+                Twee schrijflijnen rechts voor tussenstappen
+              </label>
+            </div>
+
             <button id="maakRekenBtn" class="maak-werkblad-btn">Maak Reken-Werkblad</button>
         </div>
 
@@ -124,8 +150,7 @@
             <div class="control-group">
                 <label class="group-title">Kies tafels:</label>
                 <label><input type="checkbox" id="selectAllTafels"> Alles selecteren</label>
-                <div id="tafelKeuze">
-                    </div>
+                <div id="tafelKeuze"></div>
             </div>
             <button id="maakTafelBtn" class="maak-werkblad-btn">Maak Tafel-Werkblad</button>
         </div>
