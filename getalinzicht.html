@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator v9.0.8 – volledig</title>
+  <title>Werkblad-generator v9.0.9 – volledig</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -216,13 +216,17 @@
 
 <script>
 (function(){
-  if (window.__WG_V908_BOUND__) return;   // dubbele init vermijden
-  window.__WG_V908_BOUND__ = true;
+  if (window.__WG_V909_BOUND__) return;   // dubbele init vermijden
+  window.__WG_V909_BOUND__ = true;
 
   const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const sheet = $('#sheet');
   const previewSvg = $('#previewSvg');
+
+  /* --- gedeelde marges van de getallenlijn (ook gebruikt bij centreren kaartjes) --- */
+  const PAD_L = 40;
+  const PAD_R = 30;
 
   /* Titels slechts één keer per soort */
   let addedTitles = new Set();
@@ -280,7 +284,7 @@
     svgEl.innerHTML = '';
 
     const baseY = Math.round(height * 0.44);
-    const padL=40, padR=30;
+    const padL = PAD_L, padR = PAD_R;
     const units=o.end-o.start; if(units<=0) return {ticks:[],baseY:baseY,g:null,width:width,height:height};
     const pxPerUnit=(width-padL-padR)/units;
 
@@ -323,17 +327,37 @@
     if(o.mode==='drag') ex.classList.add('drag'); if(o.mode==='blanks') ex.classList.add('blanks');
 
     const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); ex.appendChild(svg); sheet.appendChild(ex);
-    const {ticks, baseY, g, width, height}=drawRuler(svg, o);
+    const res=drawRuler(svg, o); const {ticks, baseY, g}=res;
 
     if (o.mode==='drag') {
       let values = o.dragValues.filter(Number.isFinite);
       if (!values.length) { values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6); }
-      const cardWidth=52,gap=14,n=values.length,totalWidth=n*cardWidth+(n-1)*gap;
-      const leftPad = 12;
-      const startX = Math.max(0, (svg.clientWidth - totalWidth)/2);
-      const exBox=ex.getBoundingClientRect(), svgBox=svg.getBoundingClientRect(), DRAW_GAP=70, relTop=(svgBox.top-exBox.top)+baseY+DRAW_GAP;
-      values.forEach((val,i)=>{ const c=document.createElement('div'); c.className='card'; c.textContent=val; c.style.position='absolute';
-        c.style.left=(leftPad + startX + i*(cardWidth+gap))+'px'; c.style.top=relTop+'px'; ex.appendChild(c); });
+
+      const cardWidth=52, gap=14, n=values.length;
+      const totalWidth = n*cardWidth+(n-1)*gap;
+
+      // positie van de effectieve lijn binnen de oefening
+      const svgRect = svg.getBoundingClientRect();
+      const exRect  = ex.getBoundingClientRect();
+      const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
+      const rulerRight = (svgRect.right - exRect.left) - PAD_R;
+      const rulerWidth = rulerRight - rulerLeft;
+
+      // fijn afstellen naar links/rechts indien gewenst
+      const DRAG_X_SHIFT = 0;
+
+      const startX = rulerLeft + (rulerWidth - totalWidth)/2 + DRAG_X_SHIFT;
+
+      const DRAW_GAP = 70;
+      const topPos = (svgRect.top - exRect.top) + baseY + DRAW_GAP;
+
+      values.forEach((val,i)=>{
+        const c=document.createElement('div'); c.className='card'; c.textContent=val;
+        c.style.position='absolute';
+        c.style.left = Math.round(startX + i*(cardWidth+gap)) + 'px';
+        c.style.top  = Math.round(topPos) + 'px';
+        ex.appendChild(c);
+      });
     }
 
     if(o.mode==='blanks'){
@@ -345,8 +369,8 @@
       const svgRect=svg.getBoundingClientRect(), pageX=window.scrollX, pageY=window.scrollY;
       picked.forEach(t=>{
         const xC=t.x, x=xC-bw/2; let y; const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
-        if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,height-margin)); }
-        else{ y=baseY+(offB+14); if(y+bh>height-margin) y=height-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
+        if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,svg.height.baseVal.value-margin)); }
+        else{ y=baseY+(offB+14); if(y+bh>svg.height.baseVal.value-margin) y=svg.height.baseVal.value-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
         conn.setAttribute('marker-end','url(#arrowhead)');
         const rect=document.createElementNS('http://www.w3.org/2000/svg','rect'); rect.setAttribute('x',x); rect.setAttribute('y',y);
         rect.setAttribute('width',bw); rect.setAttribute('height',bh); rect.setAttribute('rx',9); rect.setAttribute('fill','#fff'); rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2'); g.appendChild(rect);
@@ -358,8 +382,7 @@
     }
   }
 
-  /* ---- Sprongen tellen – bogen exact van midden-naar-midden; labels als HTML (PDF-proof)
-         START NU VANAF HET ÉÉRSTE ELEMENT (ook als dat het startgetal is) ---- */
+  /* ---- Sprongen tellen – bogen van MIDDEN naar MIDDEN, beginnend bij het ALLEREERSTE element ---- */
   function drawJumpArcsInline(row, labels){
   const ex = row.parentElement;
   const old = ex.querySelector('.jump-arc-wrapper'); 
@@ -455,7 +478,7 @@
       if (includeStart) indices.add(0);
       if (includeEnd)   indices.add(count-1);
 
-      // bouw de rij: startgetal ALTIJD eerst
+      // rij altijd met startgetal eerst
       const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=seq[0]; row.appendChild(startEl);
       for(let i=1;i<count;i++){
         if (indices.has(i)){ const g=document.createElement('div'); g.className='jump-given'; g.textContent=seq[i]; row.appendChild(g); }
