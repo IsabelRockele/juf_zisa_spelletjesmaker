@@ -21,14 +21,17 @@
     .btn.ghost:hover{box-shadow: inset 0 0 0 2px #1e88e5;}
     #previewBox{border:1px solid #d9e2ec;border-radius:12px;background:#eef6ff;padding:12px}
     #previewSvg{display:block;width:100%;height:160px}
-    #sheet{border:1px solid #d9e2ec;border-radius:12px;background:#fff;padding:14px}
+    #sheet{position:relative;border:1px solid #d9e2ec;border-radius:12px;background:#fff;padding:14px}
     .sheetHeader{margin:4px 0 8px 0; border-bottom: 2px solid #334; padding-bottom: 8px;}
 
     /* Opdrachtblokken */
     .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block {
       position:relative;margin:14px 0 20px 0;padding:10px 12px 20px 12px;border:1px solid #d9e2ec;border-radius:10px;background:#fff;page-break-inside: avoid;overflow: visible;
     }
-    .exercise-title{font-weight:600;color:#334;margin:0 0 8px 0;font-size:15px; page-break-after: avoid;}
+    .title-row{display:flex;align-items:center;gap:8px;margin:6px 0 8px 0}
+    .exercise-title{font-weight:600;color:#334;margin:0;font-size:15px; page-break-after: avoid;}
+    .title-delete-btn{width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold}
+    .title-delete-btn:hover{background:#ffe9e9}
     .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
     
     /* Honderdveld */
@@ -52,7 +55,7 @@
 
     /* MAB Materiaal */
     .mab-grid-layout{display:grid; grid-template-columns: 1fr 1fr; gap: 20px;}
-    .mab-grid-layout > * { min-height: 280px; align-items: flex-start;} /* Zorgt voor gelijke hoogte */
+    .mab-grid-layout > * { min-height: 280px; align-items: flex-start;}
     .mab-tellen-container{display:flex; flex-direction:column; align-items:center; gap: 8px;}
     .mab-labeled-container{display:flex; border: 1.5px solid #334; border-radius: 4px;}
     .mab-column{display:flex; flex-direction:column; align-items:center; padding: 4px;}
@@ -79,12 +82,14 @@
 
     /* Andere stijlen */
     .menu-btn{ position:fixed; top:10px; left:10px; z-index:20; display:inline-block; padding:8px 14px; border-radius:999px; background:#0d47a1; color:#fff; text-decoration:none; font-weight:700; border:1px solid #0a3a85; } .menu-btn:focus{outline:2px solid #fff; outline-offset:2px}
-    .exercise.drag{ padding-bottom:36px; } .exercise svg{display:block;width:100%;height:220px;} .exercise.drag svg { margin-top:12px } .exercise.blanks svg { margin-top:22px } .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700} .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%} .print-overlay-input{ position:absolute; background:transparent; }
+    .exercise.drag{ padding-bottom:36px; } .exercise svg{display:block;width:100%;height:220px;} .exercise.drag svg { margin-top:12px } .exercise.blanks svg { margin-top:22px } .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700} .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
+    /* Belangrijk: HTML-invulvakjes zonder rand/achtergrond (anders “dubbele” hokjes) */
+    .print-overlay-input{ position:absolute; background:transparent; border:0; outline:none; z-index:2; }
     .jump-exercise{padding:12px 8px 8px 8px} .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px} .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box} .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0} .jump-arc-wrapper{position:relative;height:28px} .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0} .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2} .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none} .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
     .mixed-grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr));gap:8px 10px} .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:hidden;white-space:nowrap} .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center} .mix-label{font-weight:700;font-size:16px} .mix-eq{font-weight:700;margin:0 2px} .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box} .mix-box.small{width:40px}
     .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px} .seq-num{min-width:42px;text-align:center;font-weight:700} .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
     
-    @media print{ header,#controls,#previewTitle,.delete-btn{display:none !important} #sheet{border:0;padding:0} .print-overlay-input{ display:none !important; } }
+    @media print{ header,#controls,#previewTitle,.title-delete-btn,.delete-btn{display:none !important} #sheet{border:0;padding:0} .print-overlay-input{ display:none !important; } }
     @page{ margin:12mm 12mm 12mm 22mm; }
   </style>
 </head>
@@ -208,7 +213,7 @@
         <div class="row">
             <label>Soort:
               <select id="honderdveldType" style="width:260px">
-                <option value="veld-naar-getal">Veld → Getal (inkvullen)</option>
+                <option value="veld-naar-getal">Veld → Getal (invullen)</option>
                 <option value="getal-naar-veld">Getal → Veld (kleuren)</option>
                 <option value="aanvullen-tiental">Aanvullen tot volgend tiental</option>
               </select>
@@ -271,13 +276,31 @@
   const PAD_R = 30;
 
   let addedTitles = new Set();
+
+  /* Titel + verwijderknop */
   function ensureTitleOnce(container, key, text){
     if (!addedTitles.has(key)) {
+      const row = document.createElement('div');
+      row.className = 'title-row';
       const h = document.createElement('h4');
       h.className = 'exercise-title';
       h.dataset.titleKey = key;
       h.textContent = text;
-      container.appendChild(h);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'title-delete-btn';
+      btn.innerHTML = '&times;';
+      btn.addEventListener('click', () => {
+        document.querySelectorAll(`[data-title-key="${key}"]:not(.exercise-title)`).forEach(el => el.remove());
+        document.querySelectorAll('.honderdveld-row').forEach(r => { if (!r.children.length) r.remove(); });
+        row.remove();
+        addedTitles.delete(key);
+      });
+
+      row.appendChild(h);
+      row.appendChild(btn);
+      container.appendChild(row);
       addedTitles.add(key);
     }
   }
@@ -288,21 +311,16 @@
     btn.addEventListener('click', () => {
         const titleKey = target.dataset.titleKey;
         const parent = target.parentElement;
-        
+
         target.remove();
 
-        if (titleKey) {
-            const remainingBlocks = document.querySelector(`[data-title-key="${titleKey}"]`);
-            if (!remainingBlocks) {
-                const titleElement = document.querySelector(`.exercise-title[data-title-key="${titleKey}"]`);
-                if (titleElement) {
-                    titleElement.remove();
-                }
-                addedTitles.delete(titleKey);
-            }
+        const remainingBlock = document.querySelector(`[data-title-key="${titleKey}"]:not(.exercise-title)`);
+        if (!remainingBlock) {
+            const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${titleKey}"]`)?.parentElement;
+            if (titleRow) titleRow.remove();
+            addedTitles.delete(titleKey);
         }
-        
-        if (parent.classList.contains('honderdveld-row') && parent.children.length === 0) {
+        if (parent?.classList?.contains('honderdveld-row') && parent.children.length === 0) {
             parent.remove();
         }
     }, {once:true});
@@ -384,44 +402,53 @@
     if(o.mode==='drag') ex.classList.add('drag'); if(o.mode==='blanks') ex.classList.add('blanks');
     const svg=document.createElementNS(NS,'svg'); ex.appendChild(svg); sheet.appendChild(ex);
     const res=drawRuler(svg, o); const {ticks, baseY, g}=res;
+
     if (o.mode==='drag') {
       let values = o.dragValues.filter(Number.isFinite);
       if (!values.length) { values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6); }
-      const cardWidth=52, gap=14, n=values.length;
-      const totalWidth = n*cardWidth+(n-1)*gap;
-      const svgRect = svg.getBoundingClientRect();
-      const exRect  = ex.getBoundingClientRect();
-      const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
-      const rulerRight = (svgRect.right - exRect.left) - PAD_R;
-      const rulerWidth = rulerRight - rulerLeft;
-      const DRAG_X_SHIFT = 0;
-      const startX = rulerLeft + (rulerWidth - totalWidth)/2 + DRAG_X_SHIFT;
-      const DRAW_GAP = 70;
-      const topPos = (svgRect.top - exRect.top) + baseY + DRAW_GAP;
-      values.forEach((val,i)=>{
-        const c=document.createElement('div'); c.className='card'; c.textContent=val;
-        c.style.position='absolute';
-        c.style.left = Math.round(startX + i*(cardWidth+gap)) + 'px';
-        c.style.top  = Math.round(topPos) + 'px';
-        ex.appendChild(c);
+
+      requestAnimationFrame(() => {
+        const cardWidth=52, gap=14, n=values.length;
+        const totalWidth = n*cardWidth+(n-1)*gap;
+
+        const svgRect = svg.getBoundingClientRect();
+        const exRect  = ex.getBoundingClientRect();
+
+        const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
+        const innerWidth = svgRect.width - PAD_L - PAD_R;
+        const startX = Math.round(rulerLeft + (innerWidth - totalWidth)/2);
+
+        const DRAW_GAP = 40;
+        const topPos = Math.round((svgRect.top - exRect.top) + baseY + DRAW_GAP);
+
+        values.forEach((val,i)=>{
+          const c=document.createElement('div'); c.className='card'; c.textContent=val;
+          c.style.position='absolute';
+          c.style.left = (startX + i*(cardWidth+gap)) + 'px';
+          c.style.top  = topPos + 'px';
+          ex.appendChild(c);
+        });
       });
     }
+
     if(o.mode==='blanks'){
       const all=ticks.filter(t=>!wantLabel(t.v,o)).sort(()=>Math.random()-0.5);
       const minGap=36, picked=[]; for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
       picked.sort((a,b)=>a.x-b.x);
       let above=true; const bw=46,bh=34, offA=40, offB=32, margin=10;
-      const svgRect=svg.getBoundingClientRect(), pageX=window.scrollX, pageY=window.scrollY;
+      const svgRect=svg.getBoundingClientRect(), exRect=ex.getBoundingClientRect();
       picked.forEach(t=>{
-        const xC=t.x, x=xC-bw/2; let y; const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
+        const xC=t.x, x=(svgRect.left - exRect.left) + (xC-bw/2); let y;
+        const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
         if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,svg.height.baseVal.value-margin)); }
         else{ y=baseY+(offB+14); if(y+bh>svg.height.baseVal.value-margin) y=svg.height.baseVal.value-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
         conn.setAttribute('marker-end','url(#arrowhead)');
-        const rect=document.createElementNS(NS,'rect'); rect.setAttribute('x',x); rect.setAttribute('y',y);
+        const rect=document.createElementNS(NS,'rect'); rect.setAttribute('x',xC-bw/2); rect.setAttribute('y',y);
         rect.setAttribute('width',bw); rect.setAttribute('height',bh); rect.setAttribute('rx',9); rect.setAttribute('fill','#fff'); rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2'); g.appendChild(rect);
         const htmlBox=document.createElement('input'); htmlBox.type='text'; htmlBox.className='print-overlay-input';
-        htmlBox.style.left=(svgRect.left+pageX+x)+'px'; htmlBox.style.top=(svgRect.top+pageY+y)+'px'; htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
-        htmlBox.style.border='2px solid #c9d6ea'; htmlBox.style.borderRadius='9px'; htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
+        htmlBox.style.left=(x)+'px'; htmlBox.style.top=((svgRect.top - exRect.top) + y)+'px'; htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
+        htmlBox.style.border='0'; htmlBox.style.outline='none'; htmlBox.style.background='transparent'; htmlBox.style.zIndex='2';
+        htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
         ex.appendChild(htmlBox); above=!above;
       });
     }
@@ -889,34 +916,47 @@
 
   $('#btnClearSheet').addEventListener('click',()=>{ sheet.innerHTML=''; addedTitles.clear(); renderSheetHeader(); });
   $('#btnDownloadPdf').addEventListener('click',()=>{
-    const { jsPDF } = window.jspdf;
-    const el=$('#sheet');
-    const del=$$('.delete-btn');
-    const overlay=$$('.print-overlay-input');
-    del.forEach(b=>b.style.display='none');
-    overlay.forEach(i=>i.style.visibility='hidden');
-    const blocks=Array.from(el.querySelectorAll('.exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-row, .honderdveld-exercise-block:not(.honderdveld-row .honderdveld-exercise-block), .mab-exercise-block'));
-    const rect=el.getBoundingClientRect();
-    html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
-      del.forEach(b=>b.style.display='block');
-      overlay.forEach(i=>i.style.visibility='visible');
-      const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
-      const pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight();
-      const pxPerMm=canvas.width/pageW;
-      const slices=buildPageSlices(canvas,rect,blocks,pxPerMm,pageW,pageH);
-      const leftMargin=15, rightMargin=10, topMargin=8;
-      const usableW = pageW - leftMargin - rightMargin;
-      slices.forEach((sl,i)=>{
-        const c=document.createElement('canvas'); c.width=canvas.width; c.height=sl.h;
-        c.getContext('2d').drawImage(canvas,0,sl.y,canvas.width,sl.h,0,0,canvas.width,sl.h);
-        const img=c.toDataURL('image/jpeg',0.9);
-        if(i>0) pdf.addPage();
-        const imgH=(sl.h*usableW)/canvas.width;
-        pdf.addImage(img,'JPEG',leftMargin,topMargin,usableW,imgH);
-      });
-      pdf.save('werkblad.pdf');
+  const { jsPDF } = window.jspdf;
+  const el = $('#sheet');
+
+  // Verberg alle UI-elementen die niet in de PDF horen
+  const delBlocks  = $$('.delete-btn');
+  const delTitles  = $$('.title-delete-btn');
+  const overlays   = $$('.print-overlay-input');
+  [...delBlocks, ...delTitles].forEach(b => b.style.visibility = 'hidden');
+  overlays.forEach(i => i.style.visibility = 'hidden');
+
+  const blocks = Array.from(el.querySelectorAll(
+    '.exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, ' +
+    '.honderdveld-row, .honderdveld-exercise-block:not(.honderdveld-row .honderdveld-exercise-block), .mab-exercise-block'
+  ));
+  const rect = el.getBoundingClientRect();
+
+  html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
+    // Herstel zichtbaarheid na de snapshot
+    [...delBlocks, ...delTitles].forEach(b => b.style.visibility = 'visible');
+    overlays.forEach(i => i.style.visibility = 'visible');
+
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+    const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
+    const pxPerMm = canvas.width / pageW;
+
+    const slices = buildPageSlices(canvas, rect, blocks, pxPerMm, pageW, pageH);
+    const leftMargin = 15, rightMargin = 10, topMargin = 8;
+    const usableW = pageW - leftMargin - rightMargin;
+
+    slices.forEach((sl, i) => {
+      const c = document.createElement('canvas'); c.width = canvas.width; c.height = sl.h;
+      c.getContext('2d').drawImage(canvas, 0, sl.y, canvas.width, sl.h, 0, 0, canvas.width, sl.h);
+      const img = c.toDataURL('image/jpeg', 0.9);
+      if (i > 0) pdf.addPage();
+      const imgH = (sl.h * usableW) / canvas.width;
+      pdf.addImage(img, 'JPEG', leftMargin, topMargin, usableW, imgH);
     });
+    pdf.save('werkblad.pdf');
   });
+});
+
 
   renderSheetHeader(); renderPreview(); updateDragSuggestions(); $$('input[name=mode]')[0].dispatchEvent(new Event('change'));
 })();
