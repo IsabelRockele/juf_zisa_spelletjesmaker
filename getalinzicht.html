@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator v8.9.1 – volledig</title>
+  <title>Werkblad-generator v9.0.8 – volledig</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -49,19 +49,17 @@
     .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
 
     /* Sprongen tellen */
-    .jump-exercise-block{ position:relative; }
-    .jump-exercise{display:flex;align-items:center;gap:8px;padding:30px 8px 14px 8px;min-height:40px}
+    .jump-exercise{padding:12px 8px 8px 8px}
+    .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px}
     .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
-    .jump-box-wrapper{position:relative}
     .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
 
-    /* overlay SVG met bogen tussen hokjes – exact boven de hokjes */
-    .jump-arcs{ position:absolute; left:12px; pointer-events:none; }
-    .jump-arcs path{ fill:none; stroke:#1e88e5; stroke-width:2; }
-    .jump-arcs text{ fill:#1e88e5; font-size:11px; font-weight:700; dominant-baseline:hanging; text-anchor:middle; }
-
-    .discover-jump-prompt{font-weight:600;margin:8px 0}
-    .discover-jump-prompt input{width:46px;font-weight:bold;font-size:15px;padding:3px;text-align:center}
+    /* Bogen inline (PDF-proof) – exact boven de rij; labels als HTML voor html2canvas */
+    .jump-arc-wrapper{position:relative;height:28px}
+    .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0}
+    .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2}
+    .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none}
+    .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
 
     /* 3-koloms gemengde oefeningen (compact) */
     .mixed-grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr));gap:8px 10px}
@@ -79,11 +77,7 @@
 
     /* Overlay inputs enkel bij getallenlijn-blanks op scherm */
     .print-overlay-input{ position:absolute; background:transparent; }
-    @media print{
-      header,#controls,#previewTitle,.delete-btn{display:none !important}
-      #sheet{border:0;padding:0}
-      .print-overlay-input{ display:none !important; }
-    }
+    @media print{ header,#controls,#previewTitle,.delete-btn{display:none !important} #sheet{border:0;padding:0} .print-overlay-input{ display:none !important; } }
     @page{ margin:12mm 12mm 12mm 22mm; }
   </style>
 </head>
@@ -144,7 +138,7 @@
           <label>Aantal lege hokjes <input id="blankCount" type="number" value="5" min="1" style="width:56px"></label>
         </div>
       </fieldset>
-      <div class="row"><button class="btn" id="btnAddToSheet">Voeg getallenlijn toe</button></div>
+      <div class="row"><button class="btn" id="btnAddToSheet" type="button">Voeg getallenlijn toe</button></div>
     </fieldset>
 
     <!-- 2. Sprongen tellen -->
@@ -168,7 +162,7 @@
           <label><input id="jumpIncludeEnd" type="checkbox"> Eind invullen</label>
         </div>
       </div>
-      <button class="btn" id="btnAddJumpExercise">Voeg sprong-oefening toe</button>
+      <button class="btn" id="btnAddJumpExercise" type="button">Voeg sprong-oefening toe</button>
     </fieldset>
 
     <!-- 3. Gemengde oefeningen -->
@@ -189,7 +183,7 @@
         <label>Getallen tot <input id="mixedMax" type="number" value="100" style="width:74px"></label>
         <label>Aantal <input id="mixedCount" type="number" value="9" min="1" max="60" style="width:74px"></label>
       </div>
-      <button class="btn" id="btnAddMixed">Voeg oefeningen toe</button>
+      <button class="btn" id="btnAddMixed" type="button">Voeg oefeningen toe</button>
     </fieldset>
 
     <!-- 4. Getallenrij (vooruit/achteruit) -->
@@ -203,12 +197,12 @@
       <div class="row">
         <label><input id="seqLockEnds" type="checkbox" checked> Start en eind vooraf invullen</label>
       </div>
-      <button class="btn" id="btnAddSequence">Voeg getallenrij toe</button>
+      <button class="btn" id="btnAddSequence" type="button">Voeg getallenrij toe</button>
     </fieldset>
 
     <div style="margin-top:18px">
-      <button class="btn ghost" id="btnDownloadPdf">Download als PDF</button>
-      <button class="btn ghost" id="btnClearSheet">Werkblad leegmaken</button>
+      <button class="btn ghost" id="btnDownloadPdf" type="button">Download als PDF</button>
+      <button class="btn ghost" id="btnClearSheet" type="button">Werkblad leegmaken</button>
     </div>
   </section>
 
@@ -222,6 +216,9 @@
 
 <script>
 (function(){
+  if (window.__WG_V908_BOUND__) return;   // dubbele init vermijden
+  window.__WG_V908_BOUND__ = true;
+
   const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
   const sheet = $('#sheet');
@@ -242,8 +239,8 @@
   /* Helpers */
   const createDeleteButton = (target) => {
     const btn = document.createElement('button');
-    btn.className = 'delete-btn'; btn.innerHTML = '&times;';
-    btn.addEventListener('click', () => target.remove());
+    btn.className = 'delete-btn'; btn.innerHTML = '&times;'; btn.type='button';
+    btn.addEventListener('click', () => target.remove(), {once:true});
     return btn;
   };
   const group = (p) => { const g=document.createElementNS('http://www.w3.org/2000/svg','g'); p.appendChild(g); return g; };
@@ -331,9 +328,12 @@
     if (o.mode==='drag') {
       let values = o.dragValues.filter(Number.isFinite);
       if (!values.length) { values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6); }
-      const cardWidth=52,gap=14,n=values.length,totalWidth=n*cardWidth+(n-1)*gap,startX=Math.max(0,(svg.clientWidth-totalWidth)/2);
+      const cardWidth=52,gap=14,n=values.length,totalWidth=n*cardWidth+(n-1)*gap;
+      const leftPad = 12;
+      const startX = Math.max(0, (svg.clientWidth - totalWidth)/2);
       const exBox=ex.getBoundingClientRect(), svgBox=svg.getBoundingClientRect(), DRAW_GAP=70, relTop=(svgBox.top-exBox.top)+baseY+DRAW_GAP;
-      values.forEach((val,i)=>{ const c=document.createElement('div'); c.className='card'; c.textContent=val; c.style.position='absolute'; c.style.left=(startX+i*(cardWidth+gap))+'px'; c.style.top=relTop+'px'; ex.appendChild(c); });
+      values.forEach((val,i)=>{ const c=document.createElement('div'); c.className='card'; c.textContent=val; c.style.position='absolute';
+        c.style.left=(leftPad + startX + i*(cardWidth+gap))+'px'; c.style.top=relTop+'px'; ex.appendChild(c); });
     }
 
     if(o.mode==='blanks'){
@@ -358,51 +358,66 @@
     }
   }
 
-  /* ---- Sprongen tellen (bogen: midden-naar-midden, vlak boven de hokjes) ---- */
-  function drawJumpArcs(block, ex, labels){
-    const anchors = Array.from(ex.querySelectorAll('.jump-start, .jump-given, .jump-box'));
-    if (anchors.length < 2) return;
+  /* ---- Sprongen tellen – bogen exact van midden-naar-midden; labels als HTML (PDF-proof)
+         START NU VANAF HET ÉÉRSTE ELEMENT (ook als dat het startgetal is) ---- */
+  function drawJumpArcsInline(row, labels){
+  const ex = row.parentElement;
+  const old = ex.querySelector('.jump-arc-wrapper'); 
+  if (old) old.remove();
 
-    const exRect = ex.getBoundingClientRect();
-    const blockRect = block.getBoundingClientRect();
-    const firstRect = anchors[0].getBoundingClientRect();
+  const items = Array.from(row.children);
+  if (items.length < 2) return;
 
-    // top van de bovenrand van de hokjes t.o.v. het blok
-    const yBoxesTop = firstRect.top - blockRect.top;
+  // Posities t.o.v. de rij zelf (stabieler) 
+  const rowRect = row.getBoundingClientRect();
 
-    // hoogte van de boog (h) en bovenmarge (2px)
-    const h = 18;
-    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.classList.add('jump-arcs');
-    svg.setAttribute('width', Math.max(0, ex.clientWidth - 24)); // padding compenseren
-    svg.setAttribute('height', String(h+6));
-    // plaats de SVG zó dat y = h gelijk valt met net boven de hokjes
-    svg.style.top = Math.max(0, yBoxesTop - (h + 4)) + 'px';
-    block.appendChild(svg);
+  // <<< HIER REGELT U DE VERSCHUIVING >>>
+  const SHIFT_ALL_PX   = -18;   // globale verschuiving voor ALLE eindpunten
+  const SHIFT_START_PX = -3;  // extra verschuiving voor het EERSTE punt (startgetal)
 
-    // middenpunten van de hokjes
-    const centers = anchors.map(el=>{
-      const r = el.getBoundingClientRect();
-      return (r.left - exRect.left) + r.width/2;
-    });
+  // Middenpunten van elk element (startgetal + alle hokjes)
+  const centers = items.map(el =>
+    (el.getBoundingClientRect().left - rowRect.left) + el.offsetWidth/2
+  );
 
-    centers.forEach((x,i)=>{
-      if(i >= centers.length - 1) return;
-      const x1 = centers[i];
-      const x2 = centers[i+1];
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      // boog van onder (y=h) naar onder (y=h) met top rond y=4
-      const d = `M ${x1},${h} C ${x1},4 ${x2},4 ${x2},${h}`;
-      path.setAttribute('d', d);
-      svg.appendChild(path);
+  // Pas de verschuiving toe – begin van de eerste boog echt links in het eerste element
+  const pts = centers.map((c, i) => c + SHIFT_ALL_PX + (i===0 ? SHIFT_START_PX : 0));
 
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x', (x1+x2)/2);
-      t.setAttribute('y', 1);
-      t.textContent = labels[i] || '';
-      svg.appendChild(t);
-    });
+  const width = Math.round(rowRect.width);
+  const wrap = document.createElement('div');
+  wrap.className = 'jump-arc-wrapper';
+  wrap.style.width = width + 'px';
+  wrap.style.marginLeft = row.offsetLeft + 'px';
+  ex.insertBefore(wrap, row);
+
+  const h = 18; // basislijn bogen
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.classList.add('jump-arcs-inline');
+  svg.setAttribute('viewBox', `0 0 ${width} ${h+12}`);
+  svg.style.width  = width + 'px';
+  svg.style.height = (h+12) + 'px';
+  wrap.appendChild(svg);
+
+  const labelsLayer = document.createElement('div');
+  labelsLayer.className = 'arc-labels';
+  wrap.appendChild(labelsLayer);
+
+  for (let i=0; i<pts.length-1; i++){
+    const x1 = pts[i], x2 = pts[i+1];
+
+    // boog van midden naar midden
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', `M ${x1},${h} C ${x1},6 ${x2},6 ${x2},${h}`);
+    svg.appendChild(path);
+
+    // label exact boven de boog (iets hoger zodat het de boog niet raakt)
+    const span = document.createElement('span');
+    span.className = 'arc-label';
+    span.style.left = ((x1 + x2)/2) + 'px';
+    span.textContent = labels[i] || '';
+    labelsLayer.appendChild(span);
   }
+}
 
   function addJumpExercise() {
     const start=parseInt($('#jumpStart').value,10);
@@ -421,6 +436,8 @@
     }
 
     const ex=document.createElement('div'); ex.className='jump-exercise';
+    const row=document.createElement('div'); row.className='jump-row';
+
     const seq=Array.from({length:count},(_,i)=>start+i*step);
 
     if (discover) {
@@ -438,23 +455,23 @@
       if (includeStart) indices.add(0);
       if (includeEnd)   indices.add(count-1);
 
-      seq.forEach((num,i)=>{
-        const wrap=document.createElement('div'); wrap.style.position='relative';
-        if (indices.has(i)){ const given=document.createElement('div'); given.className='jump-given'; given.textContent=num; wrap.appendChild(given); }
-        else { const w=document.createElement('div'); w.className='jump-box-wrapper'; const box=document.createElement('input'); box.className='jump-box'; w.appendChild(box); wrap.appendChild(w); }
-        ex.appendChild(wrap);
-      });
+      // bouw de rij: startgetal ALTIJD eerst
+      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=seq[0]; row.appendChild(startEl);
+      for(let i=1;i<count;i++){
+        if (indices.has(i)){ const g=document.createElement('div'); g.className='jump-given'; g.textContent=seq[i]; row.appendChild(g); }
+        else { const b=document.createElement('input'); b.className='jump-box'; row.appendChild(b); }
+      }
 
-      block.appendChild(ex);
-      sheet.appendChild(block);
-      drawJumpArcs(block, ex, Array(count-1).fill('?'));
+      ex.appendChild(row);
+      block.appendChild(ex); sheet.appendChild(block);
+      requestAnimationFrame(()=>drawJumpArcsInline(row, Array(count-1).fill('?')));
 
     } else {
-      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; ex.appendChild(startEl);
-      for(let i=0;i<count-1;i++){ const w=document.createElement('div'); w.className='jump-box-wrapper';
-        const box=document.createElement('input'); box.className='jump-box'; w.appendChild(box); ex.appendChild(w); }
+      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; row.appendChild(startEl);
+      for(let i=0;i<count-1;i++){ const box=document.createElement('input'); box.className='jump-box'; row.appendChild(box); }
+      ex.appendChild(row);
       block.appendChild(ex); sheet.appendChild(block);
-      drawJumpArcs(block, ex, Array(count-1).fill('+'+step));
+      requestAnimationFrame(()=>drawJumpArcsInline(row, Array(count-1).fill('+'+step)));
     }
   }
 
@@ -485,7 +502,7 @@
     }
   }
 
-  /* Gemengde oefeningen – incl. T/E-varianten en '=' bij “Vul het getal in” */
+  /* Gemengde oefeningen */
   function addMixedExercises() {
     const type=$('#mixedType').value;
     const max=parseInt($('#mixedMax').value,10)||100;
@@ -657,7 +674,7 @@
       const pxPerMm=canvas.width/pageW;
       const slices=buildPageSlices(canvas,rect,blocks,pxPerMm,pageW,pageH);
 
-      const leftMargin=15, rightMargin=10, topMargin=8; // extra linkerrand voor perforatie
+      const leftMargin=15, rightMargin=10, topMargin=8;
       const usableW = pageW - leftMargin - rightMargin;
 
       slices.forEach((sl,i)=>{
