@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator v9.2.9 – Finale Versie</title>
+  <title>Werkblad-generator – Finale Pijl-uitlijning</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -25,7 +25,7 @@
     .sheetHeader{margin:4px 0 8px 0; border-bottom: 2px solid #334; padding-bottom: 8px;}
 
     /* Opdrachtblokken */
-    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block {
+    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
       position:relative;margin:14px 0 20px 0;padding:10px 12px 20px 12px;border:1px solid #d9e2ec;border-radius:10px;background:#fff;page-break-inside: avoid;overflow: visible;
     }
     .title-row{display:flex;align-items:center;gap:8px;margin:6px 0 8px 0}
@@ -33,64 +33,168 @@
     .title-delete-btn{width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold}
     .title-delete-btn:hover{background:#ffe9e9}
     .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
-    
+
     /* Honderdveld */
-    .honderdveld-container{display:flex;align-items:center;gap:16px; flex-wrap: wrap;}
-    .honderdveld-grid{display:grid;grid-template-columns:repeat(10, 20px);grid-template-rows:repeat(10, 20px);border-top:1px solid #ccc;border-left:1px solid #ccc;width:201px;height:201px;box-sizing:content-box; flex-shrink: 0;}
+    .honderdveld-container{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .honderdveld-grid{display:grid;grid-template-columns:repeat(10, 20px);grid-template-rows:repeat(10, 20px);border-top:1px solid #ccc;border-left:1px solid #ccc;width:201px;height:201px;box-sizing:content-box;flex-shrink:0}
     .honderdveld-cell{border-right:1px solid #ccc;border-bottom:1px solid #ccc;box-sizing:border-box}
-    .honderdveld-cell.filled-ten { background-color: #4caf50; }
-    .honderdveld-cell.filled-unit { background-color: #ffeb3b; }
+    .honderdveld-cell.filled-ten{background:#4caf50}
+    .honderdveld-cell.filled-unit{background:#ffeb3b}
     .honderdveld-cell:nth-child(10n+5){border-right:2px solid #334}
     .honderdveld-cell:nth-child(n+41):nth-child(-n+50){border-bottom:2px solid #334}
     .honderdveld-task{display:flex;align-items:center;gap:12px}
     .honderdveld-te-table{border-collapse:collapse;text-align:center;font-weight:bold}
     .honderdveld-te-table td{border:1px solid #334;width:40px;height:36px}
     .honderdveld-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:16px;box-sizing:border-box}
-    .honderdveld-num-box{width: 50px; height: 44px; border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
-    .honderdveld-row { display: flex; gap: 16px; align-items: flex-start; page-break-inside: avoid; }
-    .honderdveld-row > .honderdveld-exercise-block { flex: 1; margin-top: 0; }
-    .aanvul-vragen{display:flex;flex-direction:column;gap:10px; font-size: 16px;}
-    .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap;}
-    .aanvul-input{width:40px;height:30px;border:1px solid #ccc; border-radius: 6px; text-align:center; font:inherit; font-size:15px;}
+    .honderdveld-num-box{width:50px;height:44px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
+    .honderdveld-row{display:flex;gap:16px;align-items:flex-start;page-break-inside:avoid}
+    .honderdveld-row>.honderdveld-exercise-block{flex:1;margin-top:0}
+    .aanvul-vragen{display:flex;flex-direction:column;gap:10px;font-size:16px}
+    .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .aanvul-input{width:40px;height:30px;border:1px solid #ccc;border-radius:6px;text-align:center;font:inherit;font-size:15px}
 
     /* MAB Materiaal */
-    .mab-grid-layout{display:grid; grid-template-columns: 1fr 1fr; gap: 20px;}
-    .mab-grid-layout > * { min-height: 280px; align-items: flex-start;}
-    .mab-tellen-container{display:flex; flex-direction:column; align-items:center; gap: 8px;}
-    .mab-labeled-container{display:flex; border: 1.5px solid #334; border-radius: 4px;}
-    .mab-column{display:flex; flex-direction:column; align-items:center; padding: 4px;}
-    .mab-column-tens{ border-right: 1.5px solid #334; }
-    .mab-header{font-weight:bold; font-size:18px; margin-bottom:4px; min-height: 22px; width: 100%; text-align: center; border-bottom: 1.5px solid #334; padding-bottom: 4px;}
-    .mab-blocks-wrapper{display:flex; flex-wrap:wrap; gap:4px; min-height:170px; align-content: flex-start; padding-top: 4px;}
-    .mab-tens-wrapper { width:96px;}
-    .mab-units-wrapper{width:96px;}
-    .mab-blocks-wrapper svg{height: 80px;}
-    .mab-blocks-wrapper svg.unit{height: 16px; width: 16px;}
-    .mab-te-table{border-collapse:collapse;text-align:center;font-weight:bold; margin-top: 8px;}
-    .mab-te-table td{border:1px solid #334;width:44px;height:40px}
-    .mab-te-table .te-label{background-color:#4caf50; color:white; font-size:18px;}
-    .mab-te-table .te-label.e{background-color:#ffeb3b; color:#333;}
+    .mab-grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .mab-grid-layout>*{min-height:240px;align-items:flex-start}
+    .mab-tellen-container{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .mab-labeled-container{display:flex;border:1.5px solid #334;border-radius:4px}
+    .mab-column{display:flex;flex-direction:column;align-items:center;padding:4px}
+    .mab-column-tens{border-right:1.5px solid #334}
+    .mab-header{font-weight:bold;font-size:16px;margin-bottom:4px;min-height:20px;width:100%;text-align:center;border-bottom:1.5px solid #334;padding-bottom:4px}
+    .mab-blocks-wrapper{display:flex;flex-wrap:wrap;gap:4px;min-height:150px;align-content:flex-start;padding-top:4px}
+    .mab-tens-wrapper{width:76px}
+    .mab-units-wrapper{width:76px}
+    .mab-blocks-wrapper svg{height:60px}
+    .mab-blocks-wrapper svg.unit{height:12px;width:12px}
+    .mab-te-table{border-collapse:collapse;text-align:center;font-weight:bold;margin-top:6px}
+    .mab-te-table td{border:1px solid #334;width:40px;height:36px}
+    .mab-te-table .te-label{background:#4caf50;color:#fff;font-size:16px}
+    .mab-te-table .te-label.e{background:#ffeb3b;color:#333}
     .mab-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:18px;box-sizing:border-box}
-    .mab-connect-layout{display:flex; justify-content:space-between; align-items:center; gap:20px;}
-    .mab-connect-col{display:flex; flex-direction:column; gap: 40px;}
-    .mab-connect-row{display:flex; align-items:center; gap:8px;}
-    .mab-connect-item{border: 1px solid #d9e2ec; border-radius: 8px; padding: 10px;}
-    .connect-dot{width:10px; height:10px; background-color:black; border-radius:50%;}
-    .mab-connect-num{font-size:24px; font-weight:bold; border:2px solid #ccc; border-radius:10px; width:60px; height:50px; display:flex; justify-content:center; align-items:center;}
-    .mab-color-layout{display:flex; align-items:center; gap:20px;}
-    .mab-color-num{font-size:36px;font-weight:bold;min-width:60px;text-align:center}
 
-    /* Andere stijlen */
-    .menu-btn{ position:fixed; top:10px; left:10px; z-index:20; display:inline-block; padding:8px 14px; border-radius:999px; background:#0d47a1; color:#fff; text-decoration:none; font-weight:700; border:1px solid #0a3a85; } .menu-btn:focus{outline:2px solid #fff; outline-offset:2px}
-    .exercise.drag{ padding-bottom:36px; } .exercise svg{display:block;width:100%;height:220px;} .exercise.drag svg { margin-top:12px } .exercise.blanks svg { margin-top:22px } .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700} .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
-    /* Belangrijk: HTML-invulvakjes zonder rand/achtergrond (anders “dubbele” hokjes) */
-    .print-overlay-input{ position:absolute; background:transparent; border:0; outline:none; z-index:2; }
-    .jump-exercise{padding:12px 8px 8px 8px} .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px} .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box} .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0} .jump-arc-wrapper{position:relative;height:28px} .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0} .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2} .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none} .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
-    .mixed-grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr));gap:8px 10px} .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:hidden;white-space:nowrap} .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center} .mix-label{font-weight:700;font-size:16px} .mix-eq{font-weight:700;margin:0 2px} .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box} .mix-box.small{width:40px}
-    .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px} .seq-num{min-width:42px;text-align:center;font-weight:700} .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+    /* Verbinden (MAB) */
+    .mab-connect-2row{display:flex;flex-direction:column;gap:84px;padding:8px 4px 16px 4px}
+    .mab-connect-row-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:end}
+    .mab-connect-card{position:relative;display:flex;justify-content:center}
+    .connect-dot{position:absolute;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:50%}
+    .connect-dot.bottom{bottom:-16px}
+    .connect-dot.top{top:-16px}
+    .mab-connect-num{font-size:22px;font-weight:bold;border:2px solid #ccc;border-radius:10px;width:60px;height:48px;display:flex;justify-content:center;align-items:center;margin:0 auto}
+
+    /* Getallenlijn */
+    .exercise.drag{padding-bottom:100px}
+    .exercise svg{display:block;width:100%;height:220px}
+    .exercise.drag svg{margin-top:12px}
+    .exercise.blanks svg{margin-top:22px}
+    .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700}
+    .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
+    .print-overlay-input{
+        position:absolute;
+        background:transparent;
+        border:0;
+        outline:none;
+        z-index:2;
+    }
+
+    /* Sprongen */
+    .jump-exercise{padding:12px 8px 8px 8px}
+    .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px}
+    .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
+    .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
+    .jump-arc-wrapper{position:relative;height:28px}
+    .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0}
+    .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2}
+    .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none}
+    .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
+
+    /* Gemengd */
+    .mixed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
+    .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:hidden;white-space:nowrap}
+    .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center}
+    .mix-label{font-weight:700;font-size:16px}
+    .mix-eq{font-weight:700;margin:0 2px}
+    .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+    .mix-box.small{width:40px}
+
+    /* Getallenrij */
+    .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px}
+    .seq-num{min-width:42px;text-align:center;font-weight:700}
+    .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+
+    /* ---- Waarde per cijfer ---- */
+    .pv-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    .pv-item {
+      position: relative;
+      padding: 8px;
+      border: 1px dashed #d9e2ec;
+      border-radius: 8px;
+      min-height: 130px;
+    }
+    .pv-number {
+      display: flex;
+    }
+    .pv-digit {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 2px solid #c9d6ea;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    .pv-digit.tens {
+      background: #4caf50;
+      color: #fff;
+    }
+    .pv-digit.units {
+      background: #ffeb3b;
+      color: #333;
+    }
+    .pv-arrows {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none; 
+    }
+    .pv-answers {
+      position: absolute;
+      left: 85px; 
+      top: 50px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pv-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    .pv-box, .pv-small {
+      border: 2px solid #c9d6ea;
+      border-radius: 6px;
+      text-align: center;
+      font: inherit;
+      height: 28px;
+    }
+    .pv-small { width: 22px; }
+    .pv-box { width: 22px; }
+    .pv-label { font-weight: 700; }
     
-    @media print{ header,#controls,#previewTitle,.title-delete-btn,.delete-btn{display:none !important} #sheet{border:0;padding:0} .print-overlay-input{ display:none !important; } }
-    @page{ margin:12mm 12mm 12mm 22mm; }
+    /* Menu */
+    .menu-btn{position:fixed;top:10px;left:10px;z-index:20;display:inline-block;padding:8px 14px;border-radius:999px;background:#0d47a1;color:#fff;text-decoration:none;font-weight:700;border:1px solid #0a3a85}
+    .menu-btn:focus{outline:2px solid #fff;outline-offset:2px}
+
+    @media print{header,#controls,#previewTitle,.title-delete-btn,.delete-btn,.print-overlay-input{display:none!important}#sheet{border:0;padding:0}}
+    @page{margin:12mm 12mm 12mm 22mm}
   </style>
 </head>
 <body>
@@ -209,42 +313,50 @@
     </fieldset>
     
     <fieldset>
-        <legend>5. Honderdveld</legend>
-        <div class="row">
-            <label>Soort:
-              <select id="honderdveldType" style="width:260px">
-                <option value="veld-naar-getal">Veld → Getal (invullen)</option>
-                <option value="getal-naar-veld">Getal → Veld (kleuren)</option>
-                <option value="aanvullen-tiental">Aanvullen tot volgend tiental</option>
-              </select>
-            </label>
-        </div>
-        <div class="row">
-            <label>Getallen tot <input id="honderdveldMax" type="number" value="100" min="1" max="100" style="width:74px"></label>
-            <label>Aantal <input id="honderdveldCount" type="number" value="2" min="1" max="20" style="width:74px"></label>
-        </div>
-        <div class="row" style="border-top:1px solid #d9e2ec;margin-top:6px;padding-top:6px">
-             <label><input id="honderdveldTwoColumns" type="checkbox"> 2 oefeningen per rij</label>
-        </div>
-        <button class="btn" id="btnAddHonderdveld" type="button">Voeg honderdveld-oefening toe</button>
+      <legend>5. Honderdveld</legend>
+      <div class="row">
+        <label>Soort:
+          <select id="honderdveldType" style="width:260px">
+            <option value="veld-naar-getal">Veld → Getal (invullen)</option>
+            <option value="getal-naar-veld">Getal → Veld (kleuren)</option>
+            <option value="aanvullen-tiental">Aanvullen tot volgend tiental</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Getallen tot <input id="honderdveldMax" type="number" value="100" min="1" max="100" style="width:74px"></label>
+        <label>Aantal <input id="honderdveldCount" type="number" value="2" min="1" max="20" style="width:74px"></label>
+      </div>
+      <div class="row" style="border-top:1px solid #d9e2ec;margin-top:6px;padding-top:6px">
+        <label><input id="honderdveldTwoColumns" type="checkbox"> 2 oefeningen per rij</label>
+      </div>
+      <button class="btn" id="btnAddHonderdveld" type="button">Voeg honderdveld-oefening toe</button>
     </fieldset>
 
     <fieldset>
-        <legend>6. MAB-Materiaal (blokken)</legend>
-        <div class="row">
-            <label>Soort:
-              <select id="mabType" style="width:260px">
-                <option value="tellen">Hoeveel tel je? (invullen)</option>
-                <option value="verbinden">Wat is evenveel? (verbinden)</option>
-                <option value="kleuren">Kleur de hoeveelheid</option>
-              </select>
-            </label>
-        </div>
-        <div class="row">
-            <label>Getallen tot <input id="mabMax" type="number" value="99" min="1" max="99" style="width:74px"></label>
-            <label>Aantal <input id="mabCount" type="number" value="4" min="1" max="10" style="width:74px"></label>
-        </div>
-        <button class="btn" id="btnAddMab" type="button">Voeg MAB-oefening toe</button>
+      <legend>6. MAB-Materiaal (blokken)</legend>
+      <div class="row">
+        <label>Soort:
+          <select id="mabType" style="width:260px">
+            <option value="tellen">Hoeveel tel je? (invullen)</option>
+            <option value="verbinden">Wat is evenveel? (verbinden)</option>
+            <option value="kleuren">Kleur de hoeveelheid</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Getallen tot <input id="mabMax" type="number" value="99" min="1" max="99" style="width:74px"></label>
+        <label>Aantal <input id="mabCount" type="number" value="4" min="1" max="10" style="width:74px"></label>
+      </div>
+      <button class="btn" id="btnAddMab" type="button">Voeg MAB-oefening toe</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>7. Waarde per cijfer</legend>
+      <div class="row">
+        <label>Aantal <input id="pvCount" type="number" value="6" min="3" max="12" style="width:74px"></label>
+      </div>
+      <button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
     </fieldset>
 
     <div style="margin-top:18px">
@@ -263,8 +375,8 @@
 
 <script>
 (function(){
-  if (window.__WG_V929_BOUND__) return;
-  window.__WG_V929_BOUND__ = true;
+  if (window.__WG_V93_BOUND__) return;
+  window.__WG_V93_BOUND__ = true;
 
   const $  = s => document.querySelector(s);
   const $$ = s => Array.from(document.querySelectorAll(s));
@@ -272,12 +384,10 @@
   const previewSvg = $('#previewSvg');
   const NS = 'http://www.w3.org/2000/svg';
 
-  const PAD_L = 40;
-  const PAD_R = 30;
-
+  const PAD_L = 40, PAD_R = 30;
   let addedTitles = new Set();
 
-  /* Titel + verwijderknop */
+  /* ---------- helpers ---------- */
   function ensureTitleOnce(container, key, text){
     if (!addedTitles.has(key)) {
       const row = document.createElement('div');
@@ -304,53 +414,35 @@
       addedTitles.add(key);
     }
   }
-
   const createDeleteButton = (target) => {
     const btn = document.createElement('button');
     btn.className = 'delete-btn'; btn.innerHTML = '&times;'; btn.type='button';
     btn.addEventListener('click', () => {
-        const titleKey = target.dataset.titleKey;
-        const parent = target.parentElement;
-
-        target.remove();
-
-        const remainingBlock = document.querySelector(`[data-title-key="${titleKey}"]:not(.exercise-title)`);
-        if (!remainingBlock) {
-            const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${titleKey}"]`)?.parentElement;
-            if (titleRow) titleRow.remove();
-            addedTitles.delete(titleKey);
-        }
-        if (parent?.classList?.contains('honderdveld-row') && parent.children.length === 0) {
-            parent.remove();
-        }
+      const titleKey = target.dataset.titleKey;
+      const parent = target.parentElement;
+      target.remove();
+      const remainingBlock = document.querySelector(`[data-title-key="${titleKey}"]:not(.exercise-title)`);
+      if (!remainingBlock) {
+        const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${titleKey}"]`)?.parentElement;
+        if (titleRow) titleRow.remove();
+        addedTitles.delete(titleKey);
+      }
+      if (parent?.classList?.contains('honderdveld-row') && parent.children.length === 0) parent.remove();
     }, {once:true});
     return btn;
   };
-  
-  const group = (p) => { const g=document.createElementNS(NS,'g'); p.appendChild(g); return g; };
-  const line  = (p,x1,y1,x2,y2,str,w) => { const l=document.createElementNS(NS,'line');
-    l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2);
-    l.setAttribute('stroke',str||'#6b879a'); l.setAttribute('stroke-width',w||'2'); p.appendChild(l); return l;};
-  const label = (p,x,y,txt) => {
-    const g=group(p);
-    const r=document.createElementNS(NS,'rect');
-    r.setAttribute('x',x-16); r.setAttribute('y',y-24);
-    r.setAttribute('width',32); r.setAttribute('height',22);
-    r.setAttribute('fill','#fff'); r.setAttribute('stroke','#6b879a'); r.setAttribute('stroke-width','2'); r.setAttribute('rx',6);
-    g.appendChild(r);
-    const t=document.createElementNS(NS,'text');
-    t.setAttribute('x',x); t.setAttribute('y',y-8); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','13'); t.setAttribute('font-weight','700');
-    t.textContent=String(txt);
-    g.appendChild(t);
-  };
+  const group = p => { const g=document.createElementNS(NS,'g'); p.appendChild(g); return g; };
+  const line  = (p,x1,y1,x2,y2,str,w) => { const l=document.createElementNS(NS,'line'); l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2); l.setAttribute('stroke',str||'#6b879a'); l.setAttribute('stroke-width',w||'2'); p.appendChild(l); return l; };
+  const label = (p,x,y,txt) => { const g=group(p); const r=document.createElementNS(NS,'rect'); r.setAttribute('x',x-16); r.setAttribute('y',y-24); r.setAttribute('width',32); r.setAttribute('height',22); r.setAttribute('fill','#fff'); r.setAttribute('stroke','#6b879a'); r.setAttribute('stroke-width','2'); r.setAttribute('rx',6); g.appendChild(r); const t=document.createElementNS(NS,'text'); t.setAttribute('x',x); t.setAttribute('y',y-8); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','13'); t.setAttribute('font-weight','700'); t.textContent=String(txt); g.appendChild(t); };
 
+  /* ---------- getallenlijn ---------- */
   function getRulerOpts() {
     return {
       start: parseInt($('#start').value,10), end: parseInt($('#end').value,10), unit: Math.max(1, parseInt($('#unit').value,10)),
       showZero: $('#showZero').checked, showEnds: $('#showEnds').checked, showTens: $('#showTens').checked,
       showFives: $('#showFives').checked, showOnes: $('#showOnes').checked, majorStep: parseInt($('#majorStep').value,10),
       mode: $$('input[name=mode]:checked')[0].value,
-      dragValues: $('#dragList').value.split(/[ ,;]+/).map(s=>s.trim()).filter(s=>s.length>0).map(s=>parseInt(s,10)),
+      dragValues: $('#dragList').value.split(/[ ,;]+/).map(s=>s.trim()).filter(Boolean).map(s=>parseInt(s,10)),
       blankCount: parseInt($('#blankCount').value,10)
     };
   }
@@ -359,31 +451,28 @@
   function drawRuler(svgEl, o) {
     const width = svgEl.clientWidth || 1000;
     const height = 220;
-    svgEl.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svgEl.innerHTML = '';
     const baseY = Math.round(height * 0.44);
     const padL = PAD_L, padR = PAD_R;
-    const units=o.end-o.start; if(units<=0) return {ticks:[],baseY:baseY,g:null,width:width,height:height};
+    const units=o.end-o.start; if(units<=0) return {ticks:[],baseY,g:null,width,height};
     const pxPerUnit=(width-padL-padR)/units;
     const g=group(svgEl);
     const defs = document.createElementNS(NS,'defs');
     const marker = document.createElementNS(NS,'marker');
-    marker.setAttribute('id','arrowhead'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8');
-    marker.setAttribute('refX','4'); marker.setAttribute('refY','4'); marker.setAttribute('orient','auto');
-    const tip = document.createElementNS(NS,'path');
-    tip.setAttribute('d','M0,0 L8,4 L0,8 Z'); tip.setAttribute('fill','#1e88e5');
-    marker.appendChild(tip); defs.appendChild(marker); g.appendChild(defs);
+    marker.setAttribute('id','arrowhead'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8'); marker.setAttribute('refX','4'); marker.setAttribute('refY','4'); marker.setAttribute('orient','auto');
+    const tip = document.createElementNS(NS,'path'); tip.setAttribute('d','M0,0 L8,4 L0,8 Z'); tip.setAttribute('fill','#1e88e5'); marker.appendChild(tip); defs.appendChild(marker); g.appendChild(defs);
     line(g,padL,baseY,width-padR+5,baseY);
     const ticks=[];
     for(let v=o.start; v<=o.end; v+=o.unit){
-        const x=padL+(v-o.start)*pxPerUnit;
-        const isMajor=(v%o.majorStep===0);
-        const h=isMajor?18: (v%5===0?12:9);
-        line(g,x,baseY,x,baseY-h);
-        ticks.push({v:v,x:x,isMajor:isMajor});
+      const x=padL+(v-o.start)*pxPerUnit;
+      const isMajor=(v%o.majorStep===0);
+      const h=isMajor?18: (v%5===0?12:9);
+      line(g,x,baseY,x,baseY-h);
+      ticks.push({v,x,isMajor});
     }
-    ticks.forEach(t=>{if(wantLabel(t.v, o))label(g,t.x,baseY-(t.isMajor?24:18),t.v);});
-    return {ticks:ticks, baseY:baseY, g:g, width: width, height: height};
+    ticks.forEach(t=>{ if(wantLabel(t.v,o)) label(g,t.x,baseY-(t.isMajor?24:18),t.v); });
+    return {ticks, baseY, g, width, height};
   }
 
   function renderPreview(){ const o=getRulerOpts(); if(o.end<=o.start) return; drawRuler(previewSvg, o); }
@@ -395,32 +484,27 @@
     if (o.mode==='blanks'){ titleKey='ruler_blanks'; titleText='Vul de ontbrekende getallen in.'; }
     if (titleKey) ensureTitleOnce(sheet, titleKey, titleText);
 
-    const ex=document.createElement('div'); ex.className='exercise'; 
+    const ex=document.createElement('div'); ex.className='exercise';
     if(titleKey) ex.dataset.titleKey = titleKey;
     ex.appendChild(createDeleteButton(ex));
-    
+
     if(o.mode==='drag') ex.classList.add('drag'); if(o.mode==='blanks') ex.classList.add('blanks');
     const svg=document.createElementNS(NS,'svg'); ex.appendChild(svg); sheet.appendChild(ex);
-    const res=drawRuler(svg, o); const {ticks, baseY, g}=res;
+    const {ticks, baseY, g}=drawRuler(svg, o);
 
     if (o.mode==='drag') {
       let values = o.dragValues.filter(Number.isFinite);
-      if (!values.length) { values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6); }
+      if (!values.length) values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6);
 
       requestAnimationFrame(() => {
         const cardWidth=52, gap=14, n=values.length;
         const totalWidth = n*cardWidth+(n-1)*gap;
-
-        const svgRect = svg.getBoundingClientRect();
-        const exRect  = ex.getBoundingClientRect();
-
+        const svgRect = svg.getBoundingClientRect(), exRect  = ex.getBoundingClientRect();
         const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
         const innerWidth = svgRect.width - PAD_L - PAD_R;
         const startX = Math.round(rulerLeft + (innerWidth - totalWidth)/2);
-
-        const DRAW_GAP = 40;
+        const DRAW_GAP = 80;
         const topPos = Math.round((svgRect.top - exRect.top) + baseY + DRAW_GAP);
-
         values.forEach((val,i)=>{
           const c=document.createElement('div'); c.className='card'; c.textContent=val;
           c.style.position='absolute';
@@ -433,7 +517,8 @@
 
     if(o.mode==='blanks'){
       const all=ticks.filter(t=>!wantLabel(t.v,o)).sort(()=>Math.random()-0.5);
-      const minGap=36, picked=[]; for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
+      const minGap=36, picked=[];
+      for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
       picked.sort((a,b)=>a.x-b.x);
       let above=true; const bw=46,bh=34, offA=40, offB=32, margin=10;
       const svgRect=svg.getBoundingClientRect(), exRect=ex.getBoundingClientRect();
@@ -443,57 +528,57 @@
         if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,svg.height.baseVal.value-margin)); }
         else{ y=baseY+(offB+14); if(y+bh>svg.height.baseVal.value-margin) y=svg.height.baseVal.value-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
         conn.setAttribute('marker-end','url(#arrowhead)');
-        const rect=document.createElementNS(NS,'rect'); rect.setAttribute('x',xC-bw/2); rect.setAttribute('y',y);
-        rect.setAttribute('width',bw); rect.setAttribute('height',bh); rect.setAttribute('rx',9); rect.setAttribute('fill','#fff'); rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2'); g.appendChild(rect);
-        const htmlBox=document.createElement('input'); htmlBox.type='text'; htmlBox.className='print-overlay-input';
-        htmlBox.style.left=(x)+'px'; htmlBox.style.top=((svgRect.top - exRect.top) + y)+'px'; htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
-        htmlBox.style.border='0'; htmlBox.style.outline='none'; htmlBox.style.background='transparent'; htmlBox.style.zIndex='2';
-        htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
-        ex.appendChild(htmlBox); above=!above;
+        
+        // Hersteld: SVG <rect> voor de PDF/print versie
+        const rect=document.createElementNS(NS,'rect'); 
+        rect.setAttribute('x',xC-bw/2); 
+        rect.setAttribute('y',y);
+        rect.setAttribute('width',bw); 
+        rect.setAttribute('height',bh); 
+        rect.setAttribute('rx',9); 
+        rect.setAttribute('fill','#fff'); 
+        rect.setAttribute('stroke','#c9d6ea'); 
+        rect.setAttribute('stroke-width','2'); 
+        g.appendChild(rect);
+
+        // De HTML <input> voor interactie op het scherm
+        const htmlBox=document.createElement('input'); 
+        htmlBox.type='text'; 
+        htmlBox.className='print-overlay-input';
+        htmlBox.style.left= (x) +'px'; 
+        htmlBox.style.top = ((svgRect.top - exRect.top) + y) + 'px'; 
+        htmlBox.style.width=bw+'px'; 
+        htmlBox.style.height=bh+'px';
+        htmlBox.style.textAlign='center'; 
+        htmlBox.style.fontWeight='700'; 
+        htmlBox.style.font='inherit';
+        ex.appendChild(htmlBox); 
+        above=!above;
       });
     }
   }
 
+  /* ---------- sprongen tellen ---------- */
   function drawJumpArcsInline(row, labels){
-      const ex = row.parentElement;
-      const old = ex.querySelector('.jump-arc-wrapper'); 
-      if (old) old.remove();
-      const items = Array.from(row.children);
-      if (items.length < 2) return;
-      const rowRect = row.getBoundingClientRect();
-      const SHIFT_ALL_PX   = -18;
-      const SHIFT_START_PX = -3;
-      const centers = items.map(el => (el.getBoundingClientRect().left - rowRect.left) + el.offsetWidth/2);
-      const pts = centers.map((c, i) => c + SHIFT_ALL_PX + (i===0 ? SHIFT_START_PX : 0));
-      const width = Math.round(rowRect.width);
-      const wrap = document.createElement('div');
-      wrap.className = 'jump-arc-wrapper';
-      wrap.style.width = width + 'px';
-      wrap.style.marginLeft = row.offsetLeft + 'px';
-      ex.insertBefore(wrap, row);
-      const h = 18;
-      const svg = document.createElementNS(NS,'svg');
-      svg.classList.add('jump-arcs-inline');
-      svg.setAttribute('viewBox', `0 0 ${width} ${h+12}`);
-      svg.style.width  = width + 'px';
-      svg.style.height = (h+12) + 'px';
-      wrap.appendChild(svg);
-      const labelsLayer = document.createElement('div');
-      labelsLayer.className = 'arc-labels';
-      wrap.appendChild(labelsLayer);
-      for (let i=0; i<pts.length-1; i++){
-        const x1 = pts[i], x2 = pts[i+1];
-        const path = document.createElementNS(NS,'path');
-        path.setAttribute('d', `M ${x1},${h} C ${x1},6 ${x2},6 ${x2},${h}`);
-        svg.appendChild(path);
-        const span = document.createElement('span');
-        span.className = 'arc-label';
-        span.style.left = ((x1 + x2)/2) + 'px';
-        span.textContent = labels[i] || '';
-        labelsLayer.appendChild(span);
-      }
+    const ex = row.parentElement;
+    const old = ex.querySelector('.jump-arc-wrapper'); if (old) old.remove();
+    const items = Array.from(row.children); if (items.length < 2) return;
+    const rowRect = row.getBoundingClientRect();
+    const SHIFT_ALL_PX = -18, SHIFT_START_PX = -3;
+    const centers = items.map(el => (el.getBoundingClientRect().left - rowRect.left) + el.offsetWidth/2);
+    const pts = centers.map((c,i)=>c + SHIFT_ALL_PX + (i===0?SHIFT_START_PX:0));
+    const width = Math.round(rowRect.width);
+    const wrap = document.createElement('div'); wrap.className='jump-arc-wrapper'; wrap.style.width = width + 'px'; wrap.style.marginLeft = row.offsetLeft + 'px';
+    ex.insertBefore(wrap, row);
+    const h = 18;
+    const svg = document.createElementNS(NS,'svg'); svg.classList.add('jump-arcs-inline'); svg.setAttribute('viewBox', `0 0 ${width} ${h+12}`); svg.style.width=width+'px'; svg.style.height=(h+12)+'px'; wrap.appendChild(svg);
+    const labelsLayer = document.createElement('div'); labelsLayer.className='arc-labels'; wrap.appendChild(labelsLayer);
+    for (let i=0;i<pts.length-1;i++){
+      const x1=pts[i], x2=pts[i+1];
+      const path = document.createElementNS(NS,'path'); path.setAttribute('d', `M ${x1},${h} C ${x1},6 ${x2},6 ${x2},${h}`); svg.appendChild(path);
+      const span = document.createElement('span'); span.className='arc-label'; span.style.left = ((x1+x2)/2)+'px'; span.textContent = labels[i] || ''; labelsLayer.appendChild(span);
+    }
   }
-
   function addJumpExercise() {
     const start=parseInt($('#jumpStart').value,10);
     const step=parseInt($('#jumpStep').value,10);
@@ -539,56 +624,35 @@
     requestAnimationFrame(()=>drawJumpArcsInline(row, Array(count-1).fill(discover? '?': ('+'+step))));
   }
 
-  function rnd(max){ return Math.floor(Math.random()*(max+1)); }
-  function makeTE(max){
-    const maxT = Math.min(9, Math.floor(max/10));
-    const patterns = ['T','E','TE'];
-    const p = patterns[Math.floor(Math.random()*patterns.length)];
-    let t=0, e=0, text='';
-    if(p==='T'){ t = Math.max(1, rnd(maxT)); text = `${t}T`; }
-    else if(p==='E'){ e = Math.max(1, Math.min(9,rnd(max))); text = `${e}E`; }
-    else{
-      t = Math.max(1,rnd(maxT));
-      const maxE = Math.min(9, Math.max(0, max - t*10));
-      e = rnd(maxE);
-      const order = Math.random()<0.5 ? 'TE' : 'ET';
-      text = order==='TE' ? `${t}T en ${e}E` : `${e}E en ${t}T`;
-    }
-    return { text, value: t*10 + e };
-  }
-  function makeSideTEorNumber(max){
-    if(Math.random()<0.5){ return { isTE:true, ...makeTE(max) }; }
-    else{ const v = rnd(max); return { isTE:false, text:String(v), value:v }; }
-  }
-
-  function addMixedExercises() {
+  /* ---------- gemengde ---------- */
+  function rnd(max){return Math.floor(Math.random()*(max+1))}
+  function makeTE(max){const maxT=Math.min(9,Math.floor(max/10));const patterns=['T','E','TE'];const p=patterns[Math.floor(Math.random()*patterns.length)];let t=0,e=0,text='';if(p==='T'){t=Math.max(1,rnd(maxT));text=`${t}T`;}else if(p==='E'){e=Math.max(1,Math.min(9,rnd(max)));text=`${e}E`;}else{t=Math.max(1,rnd(maxT));const maxE=Math.min(9,Math.max(0,max-t*10));e=rnd(maxE);const order=Math.random()<0.5?'TE':'ET';text=order==='TE'?`${t}T en ${e}E`:`${e}E en ${t}T`;}return {text,value:t*10+e};}
+  function makeSideTEorNumber(max){if(Math.random()<0.5){return{isTE:true,...makeTE(max)}}else{const v=rnd(max);return{isTE:false,text:String(v),value:v}}}
+  function addMixedExercises(){
     const type=$('#mixedType').value;
     const max=parseInt($('#mixedMax').value,10)||100;
     const n=parseInt($('#mixedCount').value,10)||9;
-    
     const titles={'neighbors':'Vul de buurgetallen in.','neighborTens':'Vul de buurtientallen in.','composeTE':'Vul het getal in.','compare':'Vergelijk de getallen (vul <, = of > in).','compareTE':'Vergelijk de getallen (vul <, = of > in).'};
     const key={'neighbors':'mixed_neighbors','neighborTens':'mixed_neighborTens','composeTE':'mixed_compose_te','compare':'mixed_compare_any','compareTE':'mixed_compare_any'}[type];
     ensureTitleOnce(sheet, key, titles[type]);
-    
-    const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block));
-    block.dataset.titleKey = key;
+    const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
     const grid=document.createElement('div'); grid.className='mixed-grid';
-    function box(cls=''){ const i=document.createElement('input'); i.type='text'; i.className='mix-box'+(cls?(' '+cls):''); return i; }
-    function makeNum(n){ const d=document.createElement('div'); d.className='mix-num'; d.textContent=n; return d; }
-    function makeLabel(txt){ const s=document.createElement('span'); s.className='mix-label'; s.textContent=txt; return s; }
+    function box(cls=''){const i=document.createElement('input');i.type='text';i.className='mix-box'+(cls?(' '+cls):'');return i}
+    function makeNum(n){const d=document.createElement('div');d.className='mix-num';d.textContent=n;return d}
+    function makeLabel(txt){const s=document.createElement('span');s.className='mix-label';s.textContent=txt;return s}
     for(let i=0;i<n;i++){
       const item=document.createElement('div'); item.className='mix-item';
-      if(type==='neighbors'){ const x=rnd(max); item.append(box(), makeNum(x), box()); }
-      else if(type==='neighborTens'){ const x=rnd(max); item.append(box(), makeNum(x), box()); }
-      else if(type==='composeTE'){ const te = makeTE(max); const eq = document.createElement('span'); eq.className='mix-eq'; eq.textContent='='; item.append(makeLabel(te.text), eq, box()); }
-      else if(type==='compare'){ const a=rnd(max), b=rnd(max); const mid=box('small'); item.append(makeNum(a), mid, makeNum(b)); }
-      else if(type==='compareTE'){ const left=makeSideTEorNumber(max); const right=makeSideTEorNumber(max); const mid=box('small'); const leftEl=left.isTE?makeLabel(left.text):makeNum(left.value); const rightEl=right.isTE?makeLabel(right.text):makeNum(right.value); item.append(leftEl, mid, rightEl); }
+      if(type==='neighbors'){const x=rnd(max);item.append(box(),makeNum(x),box());}
+      else if(type==='neighborTens'){const x=rnd(max);item.append(box(),makeNum(x),box());}
+      else if(type==='composeTE'){const te=makeTE(max);const eq=document.createElement('span');eq.className='mix-eq';eq.textContent='=';item.append(makeLabel(te.text),eq,box());}
+      else if(type==='compare'){const a=rnd(max),b=rnd(max);const mid=box('small');item.append(makeNum(a),mid,makeNum(b));}
+      else if(type==='compareTE'){const left=makeSideTEorNumber(max);const right=makeSideTEorNumber(max);const mid=box('small');const leftEl=left.isTE?makeLabel(left.text):makeNum(left.value);const rightEl=right.isTE?makeLabel(right.text):makeNum(right.value);item.append(leftEl,mid,rightEl);}
       grid.appendChild(item);
     }
-    block.appendChild(grid); 
-    sheet.appendChild(block);
+    block.appendChild(grid); sheet.appendChild(block);
   }
 
+  /* ---------- getallenrij ---------- */
   function addSequenceExercise(){
     const start=parseInt($('#seqStart').value,10);
     const end=parseInt($('#seqEnd').value,10);
@@ -600,280 +664,218 @@
     const length=seq.length;
     const maxBlanks=lockEnds?Math.max(0,length-2):length;
     const blanks=Math.min(blanksWanted, maxBlanks);
-    const allIdx=[...seq.keys()];
-    if(lockEnds){ allIdx.shift(); allIdx.pop(); }
-    const blankSet=new Set();
-    while(blankSet.size<blanks && allIdx.length){ const k=Math.floor(Math.random()*allIdx.length); blankSet.add(allIdx.splice(k,1)[0]); }
-    
-    const key = 'seq_fill';
-    ensureTitleOnce(sheet, key, 'Vul de getallenrij verder aan.');
-    const block=document.createElement('div'); block.className='sequence-exercise-block'; block.appendChild(createDeleteButton(block));
-    block.dataset.titleKey = key;
+    const allIdx=[...seq.keys()]; if(lockEnds){ allIdx.shift(); allIdx.pop(); }
+    const blankSet=new Set(); while(blankSet.size<blanks && allIdx.length){ const k=Math.floor(Math.random()*allIdx.length); blankSet.add(allIdx.splice(k,1)[0]); }
+    const key='seq_fill'; ensureTitleOnce(sheet,key,'Vul de getallenrij verder aan.');
+    const block=document.createElement('div'); block.className='sequence-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
     const row=document.createElement('div'); row.className='seq-row';
-    seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box'; row.appendChild(inp); } else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d); } });
-    block.appendChild(row); 
-    sheet.appendChild(block);
+    seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box'; row.appendChild(inp);} else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d);} });
+    block.appendChild(row); sheet.appendChild(block);
   }
 
+  /* ---------- honderdveld ---------- */
   function addHonderdveldExercise() {
     const type = $('#honderdveldType').value;
     const max = parseInt($('#honderdveldMax').value, 10) || 100;
     const count = parseInt($('#honderdveldCount').value, 10) || 2;
     const twoColumns = $('#honderdveldTwoColumns').checked;
 
-    const titles = {
-        'veld-naar-getal': 'Hoeveel is het? Vul in.',
-        'getal-naar-veld': 'Kleur het juiste aantal vakjes.',
-        'aanvullen-tiental': 'Vul aan tot het volgend tiental.'
-    };
+    const titles = {'veld-naar-getal':'Hoeveel is het? Vul in.','getal-naar-veld':'Kleur het juiste aantal vakjes.','aanvullen-tiental':'Vul aan tot het volgend tiental.'};
     const key = `honderdveld_${type}`;
     ensureTitleOnce(sheet, key, titles[type]);
 
     let rowContainer = null;
     for (let i = 0; i < count; i++) {
-        const block = document.createElement('div');
-        block.className = 'honderdveld-exercise-block';
-        block.dataset.titleKey = key;
-        block.appendChild(createDeleteButton(block));
-        
-        const container = document.createElement('div');
-        container.className = 'honderdveld-container';
+      const block = document.createElement('div'); block.className = 'honderdveld-exercise-block'; block.dataset.titleKey = key; block.appendChild(createDeleteButton(block));
+      const container = document.createElement('div'); container.className = 'honderdveld-container';
 
-        let num;
-        if (type === 'aanvullen-tiental') {
-            do { num = Math.floor(Math.random() * (max - 1)) + 1; } while (num % 10 === 0);
-        } else {
-            num = Math.floor(Math.random() * max) + 1;
+      let num; if (type === 'aanvullen-tiental') { do { num = Math.floor(Math.random() * (max - 1)) + 1; } while (num % 10 === 0); } else { num = Math.floor(Math.random() * max) + 1; }
+      const tens = Math.floor(num / 10);
+
+      const grid = document.createElement('div'); grid.className = 'honderdveld-grid';
+      for (let j = 1; j <= 100; j++) {
+        const cell = document.createElement('div'); cell.className = 'honderdveld-cell';
+        if (type === 'veld-naar-getal' || type === 'aanvullen-tiental') {
+          if (j <= tens * 10) cell.classList.add('filled-ten');
+          else if (j <= num) cell.classList.add('filled-unit');
         }
-        const tens = Math.floor(num / 10);
+        grid.appendChild(cell);
+      }
 
-        const grid = document.createElement('div');
-        grid.className = 'honderdveld-grid';
-        for (let j = 1; j <= 100; j++) {
-            const cell = document.createElement('div');
-            cell.className = 'honderdveld-cell';
-            if (type === 'veld-naar-getal' || type === 'aanvullen-tiental') {
-                if (j <= tens * 10) { cell.classList.add('filled-ten'); } 
-                else if (j <= num) { cell.classList.add('filled-unit'); }
-            }
-            grid.appendChild(cell);
-        }
+      if (type === 'veld-naar-getal') {
+        const task = document.createElement('div'); task.className = 'honderdveld-task';
+        const table = document.createElement('table'); table.className = 'honderdveld-te-table';
+        table.innerHTML = `<tr><td style="background:#4caf50;color:#fff">T</td><td style="background:#ffeb3b">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
+        const numBox = document.createElement('input'); numBox.type='text'; numBox.className='honderdveld-num-box';
+        task.append(table,numBox); container.append(grid,task);
+      } else if (type === 'getal-naar-veld') {
+        const givenNum = document.createElement('div'); givenNum.className='honderdveld-given-num'; givenNum.textContent = num;
+        container.append(givenNum, grid);
+      } else if (type === 'aanvullen-tiental') {
+        const task = document.createElement('div'); task.className='aanvul-vragen';
+        task.innerHTML = `<div class="aanvul-rij">Dit is <input type="text" class="aanvul-input"> T en <input type="text" class="aanvul-input"> E = <input type="text" class="aanvul-input"></div><div class="aanvul-rij">Ik vul aan tot <input type="text" class="aanvul-input"> T = <input type="text" class="aanvul-input"></div><div class="aanvul-rij">Dat zijn <input type="text" class="aanvul-input"> E erbij.</div>`;
+        container.append(grid,task);
+      }
 
-        const task = document.createElement('div');
-        task.className = 'honderdveld-task';
-
-        if (type === 'veld-naar-getal') {
-            const table = document.createElement('table');
-            table.className = 'honderdveld-te-table';
-            table.innerHTML = `<tr><td style="background-color: #4caf50; color:white;">T</td><td style="background-color: #ffeb3b;">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
-            const numBox = document.createElement('input');
-            numBox.type = 'text';
-            numBox.className = 'honderdveld-num-box';
-            task.append(table, numBox);
-            container.append(grid, task);
-        } else if (type === 'getal-naar-veld') {
-            const givenNum = document.createElement('div');
-            givenNum.className = 'honderdveld-given-num';
-            givenNum.textContent = num;
-            container.append(givenNum, grid);
-        } else if (type === 'aanvullen-tiental') {
-            task.className = 'aanvul-vragen';
-            task.innerHTML = `<div class="aanvul-rij">Dit is <input type="text" class="aanvul-input"> T en <input type="text" class="aanvul-input"> E = <input type="text" class="aanvul-input"></div><div class="aanvul-rij">Ik vul aan tot <input type="text" class="aanvul-input"> T = <input type="text" class="aanvul-input"></div><div class="aanvul-rij">Dat zijn <input type="text" class="aanvul-input"> E erbij.</div>`;
-            container.append(grid, task);
-        }
-        
-        block.appendChild(container);
-
-        if (twoColumns) {
-            if (i % 2 === 0) {
-                rowContainer = document.createElement('div');
-                rowContainer.className = 'honderdveld-row';
-                sheet.appendChild(rowContainer);
-            }
-            rowContainer.appendChild(block);
-        } else {
-            sheet.appendChild(block);
-        }
+      block.appendChild(container);
+      if (twoColumns) {
+        if (i % 2 === 0) { rowContainer = document.createElement('div'); rowContainer.className='honderdveld-row'; sheet.appendChild(rowContainer); }
+        rowContainer.appendChild(block);
+      } else sheet.appendChild(block);
     }
   }
-  
-  function createTenRodSVG(isWhite) {
-      const svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('viewBox', '0 0 20 100');
-      const rect = document.createElementNS(NS, 'rect');
-      rect.setAttribute('width', '20');
-      rect.setAttribute('height', '100');
-      rect.setAttribute('fill', isWhite ? '#fff' : '#4caf50');
-      rect.setAttribute('stroke', isWhite ? '#888' : '#2e7d32');
-      rect.setAttribute('stroke-width', '1');
-      svg.appendChild(rect);
-      for (let i = 1; i < 10; i++) {
-          const line = document.createElementNS(NS, 'line');
-          line.setAttribute('x1', '0');
-          line.setAttribute('y1', i * 10);
-          line.setAttribute('x2', '20');
-          line.setAttribute('y2', i * 10);
-          line.setAttribute('stroke', isWhite ? '#ccc' : '#2e7d32');
-          line.setAttribute('stroke-width', '0.5');
-          svg.appendChild(line);
-      }
-      return svg;
-  }
 
-  function createUnitCubeSVG(isWhite) {
-      const svg = document.createElementNS(NS, 'svg');
-      svg.setAttribute('viewBox', '0 0 20 20');
-      svg.classList.add('unit');
-      const rect = document.createElementNS(NS, 'rect');
-      rect.setAttribute('width', '20');
-      rect.setAttribute('height', '20');
-      rect.setAttribute('fill', isWhite ? '#fff' : '#ffeb3b');
-      rect.setAttribute('stroke', isWhite ? '#888' : '#fbc404');
-      rect.setAttribute('stroke-width', '1');
-      svg.appendChild(rect);
-      return svg;
-  }
-  
-  function createMabRepresentation(tens, units, isWhite) {
-      const container = document.createElement('div');
-      container.className = 'mab-labeled-container';
+  /* ---------- MAB ---------- */
+  function createTenRodSVG(isWhite){const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 20 100');const rect=document.createElementNS(NS,'rect');rect.setAttribute('width','20');rect.setAttribute('height','100');rect.setAttribute('fill',isWhite?'#fff':'#4caf50');rect.setAttribute('stroke',isWhite?'#888':'#2e7d32');rect.setAttribute('stroke-width','1');svg.appendChild(rect);for(let i=1;i<10;i++){const line=document.createElementNS(NS,'line');line.setAttribute('x1','0');line.setAttribute('y1',i*10);line.setAttribute('x2','20');line.setAttribute('y2',i*10);line.setAttribute('stroke',isWhite?'#ccc':'#2e7d32');line.setAttribute('stroke-width','0.5');svg.appendChild(line);}return svg;}
+  function createUnitCubeSVG(isWhite){const svg=document.createElementNS(NS,'svg');svg.setAttribute('viewBox','0 0 20 20');svg.classList.add('unit');const rect=document.createElementNS(NS,'rect');rect.setAttribute('width','20');rect.setAttribute('height','20');rect.setAttribute('fill',isWhite?'#fff':'#ffeb3b');rect.setAttribute('stroke',isWhite?'#888':'#fbc404');rect.setAttribute('stroke-width','1');svg.appendChild(rect);return svg;}
+  function createMabRepresentation(tens, units, isWhite){const c=document.createElement('div');c.className='mab-labeled-container';const colT=document.createElement('div');colT.className='mab-column mab-column-tens';colT.innerHTML=`<div class="mab-header">T</div>`;const wrapT=document.createElement('div');wrapT.className='mab-blocks-wrapper mab-tens-wrapper';for(let t=0;t<tens;t++) wrapT.appendChild(createTenRodSVG(isWhite));colT.appendChild(wrapT);const colE=document.createElement('div');colE.className='mab-column';colE.innerHTML=`<div class="mab-header">E</div>`;const wrapE=document.createElement('div');wrapE.className='mab-blocks-wrapper mab-units-wrapper';for(let u=0;u<units;u++) wrapE.appendChild(createUnitCubeSVG(isWhite));colE.appendChild(wrapE);c.append(colT,colE);return c;}
 
-      const tensCol = document.createElement('div');
-      tensCol.className = 'mab-column mab-column-tens';
-      tensCol.innerHTML = `<div class="mab-header">T</div>`;
-      const tensWrapper = document.createElement('div');
-      tensWrapper.className = 'mab-blocks-wrapper mab-tens-wrapper';
-      for (let t = 0; t < tens; t++) {
-          tensWrapper.appendChild(createTenRodSVG(isWhite));
-      }
-      tensCol.appendChild(tensWrapper);
+  function addMabExercise(){
+    const type=$('#mabType').value;
+    const max=parseInt($('#mabMax').value,10)||99;
+    const count=parseInt($('#mabCount').value,10)||4;
+    const key=`mab_${type}`;
+    const titles={'tellen':'Hoeveel tel je? Vul in.','verbinden':'Wat is evenveel? Verbind.','kleuren':'Kleur de hoeveelheid.'};
+    ensureTitleOnce(sheet,key,titles[type]);
 
-      const unitsCol = document.createElement('div');
-      unitsCol.className = 'mab-column';
-      unitsCol.innerHTML = `<div class="mab-header">E</div>`;
-      const unitsWrapper = document.createElement('div');
-      unitsWrapper.className = 'mab-blocks-wrapper mab-units-wrapper';
-      for (let u = 0; u < units; u++) {
-          unitsWrapper.appendChild(createUnitCubeSVG(isWhite));
-      }
-      unitsCol.appendChild(unitsWrapper);
+    const block=document.createElement('div'); block.className='mab-exercise-block'; block.dataset.titleKey=key; block.appendChild(createDeleteButton(block));
 
-      container.append(tensCol, unitsCol);
-      return container;
-  }
-
-  function addMabExercise() {
-    const type = $('#mabType').value;
-    const max = parseInt($('#mabMax').value, 10) || 99;
-    const count = parseInt($('#mabCount').value, 10) || 4;
-    const key = `mab_${type}`;
-
-    const titles = {
-        'tellen': 'Hoeveel tel je? Vul in.',
-        'verbinden': 'Wat is evenveel? Verbind.',
-        'kleuren': 'Kleur de hoeveelheid.'
-    };
-    ensureTitleOnce(sheet, key, titles[type]);
-
-    const block = document.createElement('div');
-    block.className = 'mab-exercise-block';
-    block.dataset.titleKey = key;
-    block.appendChild(createDeleteButton(block));
-    
-    if (type === 'tellen' || type === 'kleuren') {
-        const grid = document.createElement('div');
-        grid.className = 'mab-grid-layout';
-        
-        for (let i = 0; i < count; i++) {
-            const num = Math.floor(Math.random() * max) + 1;
-            const isWhite = (type === 'kleuren');
-            
-            const container = document.createElement('div');
-            
-            const mabVisual = createMabRepresentation(isWhite ? 9 : Math.floor(num/10), isWhite ? 9 : num % 10, isWhite);
-            
-            if(isWhite) {
-                container.className = 'mab-color-layout';
-                const numDiv = document.createElement('div');
-                numDiv.className = 'mab-color-num';
-                numDiv.textContent = num;
-                container.append(numDiv, mabVisual);
-            } else {
-                container.className = 'mab-tellen-container';
-                const table = document.createElement('table');
-                table.className = 'mab-te-table';
-                table.innerHTML = `<tr><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
-                container.append(mabVisual, table);
-            }
-            grid.appendChild(container);
+    if (type==='tellen' || type==='kleuren'){
+      const grid=document.createElement('div'); grid.className='mab-grid-layout';
+      for (let i=0;i<count;i++){
+        const num=Math.floor(Math.random()*max)+1; const isWhite=(type==='kleuren');
+        const container=document.createElement('div'); container.className='mab-tellen-container';
+        const visual=createMabRepresentation(isWhite?9:Math.floor(num/10), isWhite?9:num%10, isWhite);
+        if(isWhite){
+          const numDiv=document.createElement('div'); numDiv.className='mab-connect-num'; numDiv.textContent=num;
+          container.append(numDiv, visual);
+        }else{
+          const table=document.createElement('table'); table.className='mab-te-table';
+          table.innerHTML=`<tr><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
+          container.append(visual, table);
         }
-        block.appendChild(grid);
-    } else if (type === 'verbinden') {
-        const layout = document.createElement('div');
-        layout.className = 'mab-connect-layout';
-        const colBlocks = document.createElement('div');
-        colBlocks.className = 'mab-connect-col';
-        const colNums = document.createElement('div');
-        colNums.className = 'mab-connect-col';
-        
-        let numbers = new Set();
-        while (numbers.size < count) {
-            numbers.add(Math.floor(Math.random() * max) + 1);
-        }
-        const numbersArr = Array.from(numbers);
-        const shuffledNumbers = [...numbersArr].sort(() => Math.random() - 0.5);
+        grid.appendChild(container);
+      }
+      block.appendChild(grid);
+    } else if (type==='verbinden'){
+      let numbers=new Set(); while(numbers.size<count) numbers.add(Math.floor(Math.random()*max)+1);
+      const arr=Array.from(numbers), shuffled=[...arr].sort(()=>Math.random()-0.5);
+      for (let off=0; off<arr.length; off+=4){
+        const topGroup=arr.slice(off, off+4);
+        const bottomGroup=shuffled.slice(off, off+4);
+        const layout=document.createElement('div'); layout.className='mab-connect-2row';
 
-        for (let i = 0; i < count; i++) {
-            const num = numbersArr[i];
-            const mabVisual = createMabRepresentation(Math.floor(num/10), num % 10, false);
-            const itemBox = document.createElement('div');
-            itemBox.className = 'mab-connect-item';
-            itemBox.appendChild(mabVisual);
-            
-            const blockRow = document.createElement('div');
-            blockRow.className = 'mab-connect-row';
-            const dotLeft = document.createElement('div');
-            dotLeft.className = 'connect-dot';
-            blockRow.appendChild(itemBox);
-            blockRow.appendChild(dotLeft);
-            colBlocks.appendChild(blockRow);
+        const gridTop=document.createElement('div'); gridTop.className='mab-connect-row-grid'; gridTop.style.gridTemplateColumns=`repeat(${topGroup.length},minmax(0,1fr))`;
+        topGroup.forEach(n=>{ const card=document.createElement('div'); card.className='mab-connect-card'; const vis=createMabRepresentation(Math.floor(n/10), n%10, false); const dot=document.createElement('div'); dot.className='connect-dot bottom'; card.append(vis,dot); gridTop.appendChild(card); });
 
-            const numBox = document.createElement('div');
-            numBox.className = 'mab-connect-num';
-            numBox.textContent = shuffledNumbers[i];
-            
-            const numRow = document.createElement('div');
-            numRow.className = 'mab-connect-row';
-            const dotRight = document.createElement('div');
-            dotRight.className = 'connect-dot';
-            numRow.appendChild(dotRight);
-            numRow.appendChild(numBox);
-            colNums.appendChild(numRow);
-        }
-        layout.append(colBlocks, colNums);
+        const gridBottom=document.createElement('div'); gridBottom.className='mab-connect-row-grid'; gridBottom.style.gridTemplateColumns=`repeat(${bottomGroup.length},minmax(0,1fr))`;
+        bottomGroup.forEach(n=>{ const card=document.createElement('div'); card.className='mab-connect-card'; const dot=document.createElement('div'); dot.className='connect-dot top'; const numBox=document.createElement('div'); numBox.className='mab-connect-num'; numBox.textContent=n; card.append(dot,numBox); gridBottom.appendChild(card); });
+
+        layout.append(gridTop, gridBottom);
         block.appendChild(layout);
+      }
     }
     sheet.appendChild(block);
   }
 
-  /* Header + suggesties */
-  function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
-    const h=document.createElement('div'); h.className='sheetHeader';
-    h.innerHTML=`
-        <div style="margin-bottom: 16px;">
-            <strong>Naam:</strong> <span style="display:inline-block;border-bottom:1px solid #333;min-width:200px;">&nbsp;</span>
-        </div>
-        <h2 style="text-align: center; margin: 0 0 10px 0; font-size: 22px; font-weight: 600;">Extra oefenen op getalinzicht</h2>
-    `;
-    sheet.insertBefore(h, sheet.firstChild);
-  }
-  function updateDragSuggestions() {
-    const start=parseInt($('#start').value,10), end=parseInt($('#end').value,10); if(end<=start) return;
-    const set=new Set(); while(set.size<3){ set.add(Math.floor(Math.random()*(end-start+1))+start); }
-    $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', ');
+  /* ---------- Waarde per cijfer ---------- */
+  function addPlaceValueExercise() {
+    const count = parseInt($('#pvCount').value, 10) || 6;
+    const key = 'place_value';
+    ensureTitleOnce(sheet, key, 'Schrijf de waarde van elk cijfer.');
+
+    const block = document.createElement('div');
+    block.className = 'placevalue-exercise-block';
+    block.dataset.titleKey = key;
+    block.appendChild(createDeleteButton(block));
+
+    const grid = document.createElement('div');
+    grid.className = 'pv-grid';
+
+    for (let i = 0; i < count; i++) {
+      const t = 1 + Math.floor(Math.random() * 9);
+      const u = 1 + Math.floor(Math.random() * 9);
+
+      const item = document.createElement('div');
+      item.className = 'pv-item';
+
+      const num = document.createElement('div');
+      num.className = 'pv-number';
+      const dt = document.createElement('div'); dt.className = 'pv-digit tens'; dt.textContent = t;
+      const du = document.createElement('div'); du.className = 'pv-digit units'; du.textContent = u;
+      num.append(dt, du);
+
+      const ans = document.createElement('div');
+      ans.className = 'pv-answers';
+      
+      const rowE = document.createElement('div'); rowE.className = 'pv-row';
+      const eSmall = document.createElement('input'); eSmall.type = 'text'; eSmall.className = 'pv-small';
+      const eLab = document.createElement('span'); eLab.className = 'pv-label'; eLab.textContent = 'E =';
+      const eBox = document.createElement('input'); eBox.type = 'text'; eBox.className = 'pv-box';
+      rowE.append(eSmall, eLab, eBox);
+
+      const rowT = document.createElement('div'); rowT.className = 'pv-row';
+      const tSmall = document.createElement('input'); tSmall.type = 'text'; tSmall.className = 'pv-small';
+      const tLab = document.createElement('span'); tLab.className = 'pv-label'; tLab.textContent = 'T =';
+      const tBox = document.createElement('input'); tBox.type = 'text'; tBox.className = 'pv-box';
+      const tLabE = document.createElement('span'); tLabE.className = 'pv-label'; tLabE.textContent = 'E =';
+      const tBoxE = document.createElement('input'); tBoxE.type = 'text'; tBoxE.className = 'pv-box';
+      rowT.append(tSmall, tLab, tBox, tLabE, tBoxE);
+      
+      ans.append(rowE, rowT);
+
+      const svg = document.createElementNS(NS, 'svg');
+      svg.classList.add('pv-arrows');
+      
+      const defs = document.createElementNS(NS, 'defs');
+      const marker = document.createElementNS(NS, 'marker');
+      marker.setAttribute('id', 'pvArrowL');
+      marker.setAttribute('viewBox', '0 0 8 8');
+      marker.setAttribute('refX', '7');
+      marker.setAttribute('refY', '4');
+      marker.setAttribute('markerWidth', '6');
+      marker.setAttribute('markerHeight', '6');
+      marker.setAttribute('orient', 'auto-start-reverse');
+      const tip = document.createElementNS(NS, 'path');
+      tip.setAttribute('d', 'M 0 0 L 8 4 L 0 8 Z');
+      tip.setAttribute('fill', '#333');
+      marker.appendChild(tip);
+      defs.appendChild(marker);
+      svg.appendChild(defs);
+      
+      const T_START_X = 26, U_START_X = 62;
+      const START_Y = 44;
+      const ANS_X = 82;
+      const E_ROW_Y = 68, T_ROW_Y = 120; // Verlaagd voor betere uitlijning
+
+      const ePath = document.createElementNS(NS,'path');
+      ePath.setAttribute('d',`M ${U_START_X} ${START_Y} V ${E_ROW_Y} H ${ANS_X}`);
+      ePath.setAttribute('fill','none'); ePath.setAttribute('stroke','#333'); ePath.setAttribute('stroke-width','1.5');
+      ePath.setAttribute('marker-end','url(#pvArrowL)');
+
+      const tPath = document.createElementNS(NS,'path');
+      tPath.setAttribute('d',`M ${T_START_X} ${START_Y} V ${T_ROW_Y} H ${ANS_X}`);
+      tPath.setAttribute('fill','none'); tPath.setAttribute('stroke','#333'); tPath.setAttribute('stroke-width','1.5');
+      tPath.setAttribute('marker-end','url(#pvArrowL)');
+      
+      svg.append(ePath, tPath);
+
+      item.append(num, ans, svg);
+      grid.appendChild(item);
+    }
+
+    block.appendChild(grid);
+    sheet.appendChild(block);
   }
 
-  /* PDF slicing */
+  /* ---------- header, pdf, events ---------- */
+  function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
+    const h=document.createElement('div'); h.className='sheetHeader';
+    h.innerHTML=`<div style="margin-bottom:16px;"><strong>Naam:</strong> <span style="display:inline-block;border-bottom:1px solid #333;min-width:200px;">&nbsp;</span></div><h2 style="text-align:center;margin:0 0 10px 0;font-size:22px;font-weight:600;">Extra oefenen op getalinzicht</h2>`;
+    sheet.insertBefore(h, sheet.firstChild);
+  }
+  function updateDragSuggestions(){ const start=parseInt($('#start').value,10), end=parseInt($('#end').value,10); if(end<=start) return; const set=new Set(); while(set.size<3){ set.add(Math.floor(Math.random()*(end-start+1))+start); } $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', '); }
+
   function buildPageSlices(canvas, sheetRect, domBlocks, pxPerMm, pageW, pageH){
     const factor = canvas.width / sheetRect.width;
     const pageHeightPx = pageH * pxPerMm;
@@ -896,7 +898,7 @@
       cursor = b.bottom;
     }
     const totalHeight = canvas.height;
-    if (totalHeight - startY > 1) { slices.push({ y: startY, h: totalHeight - startY }); }
+    if (totalHeight - startY > 1) slices.push({ y: startY, h: totalHeight - startY });
     return slices;
   }
 
@@ -913,50 +915,46 @@
   $('#btnAddSequence').addEventListener('click', addSequenceExercise);
   $('#btnAddHonderdveld').addEventListener('click', addHonderdveldExercise);
   $('#btnAddMab').addEventListener('click', addMabExercise);
+  $('#btnAddPlaceValue').addEventListener('click', addPlaceValueExercise);
 
   $('#btnClearSheet').addEventListener('click',()=>{ sheet.innerHTML=''; addedTitles.clear(); renderSheetHeader(); });
   $('#btnDownloadPdf').addEventListener('click',()=>{
-  const { jsPDF } = window.jspdf;
-  const el = $('#sheet');
+    const { jsPDF } = window.jspdf;
+    const el = $('#sheet');
 
-  // Verberg alle UI-elementen die niet in de PDF horen
-  const delBlocks  = $$('.delete-btn');
-  const delTitles  = $$('.title-delete-btn');
-  const overlays   = $$('.print-overlay-input');
-  [...delBlocks, ...delTitles].forEach(b => b.style.visibility = 'hidden');
-  overlays.forEach(i => i.style.visibility = 'hidden');
+    const delBlocks  = $$('.delete-btn, .title-delete-btn');
+    const overlays   = $$('.print-overlay-input');
+    [...delBlocks].forEach(b => b.style.visibility = 'hidden');
+    
+    overlays.forEach(i => i.style.visibility = 'hidden');
 
-  const blocks = Array.from(el.querySelectorAll(
-    '.exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, ' +
-    '.honderdveld-row, .honderdveld-exercise-block:not(.honderdveld-row .honderdveld-exercise-block), .mab-exercise-block'
-  ));
-  const rect = el.getBoundingClientRect();
+    const blocks = Array.from(el.querySelectorAll(
+      '.exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, ' +
+      '.honderdveld-row, .honderdveld-exercise-block:not(.honderdveld-row .honderdveld-exercise-block), .mab-exercise-block, .placevalue-exercise-block'
+    ));
+    const rect = el.getBoundingClientRect();
 
-  html2canvas(el, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-    // Herstel zichtbaarheid na de snapshot
-    [...delBlocks, ...delTitles].forEach(b => b.style.visibility = 'visible');
-    overlays.forEach(i => i.style.visibility = 'visible');
+    html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
+      [...delBlocks, ...overlays].forEach(b => b.style.visibility = 'visible');
 
-    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    const pageW = pdf.internal.pageSize.getWidth(), pageH = pdf.internal.pageSize.getHeight();
-    const pxPerMm = canvas.width / pageW;
+      const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+      const pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight();
+      const pxPerMm=canvas.width/pageW;
+      const slices=buildPageSlices(canvas,rect,blocks,pxPerMm,pageW,pageH);
+      const leftMargin=15, rightMargin=10, topMargin=8;
+      const usableW = pageW - leftMargin - rightMargin;
 
-    const slices = buildPageSlices(canvas, rect, blocks, pxPerMm, pageW, pageH);
-    const leftMargin = 15, rightMargin = 10, topMargin = 8;
-    const usableW = pageW - leftMargin - rightMargin;
-
-    slices.forEach((sl, i) => {
-      const c = document.createElement('canvas'); c.width = canvas.width; c.height = sl.h;
-      c.getContext('2d').drawImage(canvas, 0, sl.y, canvas.width, sl.h, 0, 0, canvas.width, sl.h);
-      const img = c.toDataURL('image/jpeg', 0.9);
-      if (i > 0) pdf.addPage();
-      const imgH = (sl.h * usableW) / canvas.width;
-      pdf.addImage(img, 'JPEG', leftMargin, topMargin, usableW, imgH);
+      slices.forEach((sl,i)=>{
+        const c=document.createElement('canvas'); c.width=canvas.width; c.height=sl.h;
+        c.getContext('2d').drawImage(canvas,0,sl.y,canvas.width,sl.h,0,0,canvas.width,sl.h);
+        const img=c.toDataURL('image/jpeg',0.9);
+        if(i>0) pdf.addPage();
+        const imgH=(sl.h*usableW)/canvas.width;
+        pdf.addImage(img,'JPEG',leftMargin,topMargin,usableW,imgH);
+      });
+      pdf.save('werkblad.pdf');
     });
-    pdf.save('werkblad.pdf');
   });
-});
-
 
   renderSheetHeader(); renderPreview(); updateDragSuggestions(); $$('input[name=mode]')[0].dispatchEvent(new Event('change'));
 })();
