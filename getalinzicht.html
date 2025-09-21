@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator v8.8 – volledig</title>
+  <title>Werkblad-generator v8.9.1 – volledig</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -49,12 +49,17 @@
     .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
 
     /* Sprongen tellen */
-    .jump-exercise{display:flex;align-items:center;gap:8px;padding:24px 8px 14px 8px;min-height:40px}
+    .jump-exercise-block{ position:relative; }
+    .jump-exercise{display:flex;align-items:center;gap:8px;padding:30px 8px 14px 8px;min-height:40px}
     .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
     .jump-box-wrapper{position:relative}
     .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
-    .jump-arc{position:absolute;bottom:100%;left:0;width:100%;height:18px;border-top:2px solid #1e88e5;border-left:2px solid #1e88e5;border-right:2px solid #1e88e5;border-radius:26px 26px 0 0;text-align:center;margin-bottom:2px}
-    .jump-arc span{font-size:11px;color:#1e88e5;font-weight:600;position:relative;top:-1px}
+
+    /* overlay SVG met bogen tussen hokjes – exact boven de hokjes */
+    .jump-arcs{ position:absolute; left:12px; pointer-events:none; }
+    .jump-arcs path{ fill:none; stroke:#1e88e5; stroke-width:2; }
+    .jump-arcs text{ fill:#1e88e5; font-size:11px; font-weight:700; dominant-baseline:hanging; text-anchor:middle; }
+
     .discover-jump-prompt{font-weight:600;margin:8px 0}
     .discover-jump-prompt input{width:46px;font-weight:bold;font-size:15px;padding:3px;text-align:center}
 
@@ -63,6 +68,7 @@
     .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:hidden;white-space:nowrap}
     .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center}
     .mix-label{font-weight:700;font-size:16px}
+    .mix-eq{font-weight:700;margin:0 2px}
     .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
     .mix-box.small{width:40px}
 
@@ -170,7 +176,7 @@
       <legend>3. Gemengde Rekoefeningen</legend>
       <div class="row">
         <label>Soort:
-          <select id="mixedType" style="width:230px">
+          <select id="mixedType" style="width:260px">
             <option value="neighbors">Buurgetallen</option>
             <option value="neighborTens">Buurtientallen</option>
             <option value="composeTE">Vul het getal in (T/E → getal)</option>
@@ -352,7 +358,52 @@
     }
   }
 
-  /* Sprongen tellen */
+  /* ---- Sprongen tellen (bogen: midden-naar-midden, vlak boven de hokjes) ---- */
+  function drawJumpArcs(block, ex, labels){
+    const anchors = Array.from(ex.querySelectorAll('.jump-start, .jump-given, .jump-box'));
+    if (anchors.length < 2) return;
+
+    const exRect = ex.getBoundingClientRect();
+    const blockRect = block.getBoundingClientRect();
+    const firstRect = anchors[0].getBoundingClientRect();
+
+    // top van de bovenrand van de hokjes t.o.v. het blok
+    const yBoxesTop = firstRect.top - blockRect.top;
+
+    // hoogte van de boog (h) en bovenmarge (2px)
+    const h = 18;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.classList.add('jump-arcs');
+    svg.setAttribute('width', Math.max(0, ex.clientWidth - 24)); // padding compenseren
+    svg.setAttribute('height', String(h+6));
+    // plaats de SVG zó dat y = h gelijk valt met net boven de hokjes
+    svg.style.top = Math.max(0, yBoxesTop - (h + 4)) + 'px';
+    block.appendChild(svg);
+
+    // middenpunten van de hokjes
+    const centers = anchors.map(el=>{
+      const r = el.getBoundingClientRect();
+      return (r.left - exRect.left) + r.width/2;
+    });
+
+    centers.forEach((x,i)=>{
+      if(i >= centers.length - 1) return;
+      const x1 = centers[i];
+      const x2 = centers[i+1];
+      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+      // boog van onder (y=h) naar onder (y=h) met top rond y=4
+      const d = `M ${x1},${h} C ${x1},4 ${x2},4 ${x2},${h}`;
+      path.setAttribute('d', d);
+      svg.appendChild(path);
+
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', (x1+x2)/2);
+      t.setAttribute('y', 1);
+      t.textContent = labels[i] || '';
+      svg.appendChild(t);
+    });
+  }
+
   function addJumpExercise() {
     const start=parseInt($('#jumpStart').value,10);
     const step=parseInt($('#jumpStep').value,10);
@@ -394,46 +445,47 @@
         ex.appendChild(wrap);
       });
 
-      ex.childNodes.forEach((el,i)=>{ if(i<count-1){ const arc=document.createElement('div'); arc.className='jump-arc'; arc.innerHTML='<span>?</span>'; el.prepend(arc);} });
+      block.appendChild(ex);
+      sheet.appendChild(block);
+      drawJumpArcs(block, ex, Array(count-1).fill('?'));
 
     } else {
       const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; ex.appendChild(startEl);
       for(let i=0;i<count-1;i++){ const w=document.createElement('div'); w.className='jump-box-wrapper';
-        const arc=document.createElement('div'); arc.className='jump-arc'; arc.innerHTML=`<span>+${step}</span>`; w.appendChild(arc);
         const box=document.createElement('input'); box.className='jump-box'; w.appendChild(box); ex.appendChild(w); }
+      block.appendChild(ex); sheet.appendChild(block);
+      drawJumpArcs(block, ex, Array(count-1).fill('+'+step));
     }
-    block.appendChild(ex); sheet.appendChild(block);
   }
 
-  /* Helpers voor T/E-expressies */
+  /* ----------- Helpers voor T/E-expressies ----------- */
   function rnd(max){ return Math.floor(Math.random()*(max+1)); }
   function makeTE(max){
     const maxT = Math.min(9, Math.floor(max/10));
-    // kies patroon: alleen T, alleen E, of T+E (in willekeurige volgorde)
     const patterns = ['T','E','TE'];
     const p = patterns[Math.floor(Math.random()*patterns.length)];
     let t=0, e=0, text='';
-    if(p==='T'){ t = rnd(Math.max(1,maxT)); text = `${t}T`; }
-    else if(p==='E'){ e = rnd(Math.min(9,max)); if(e===0) e=1; text = `${e}E`; }
+    if(p==='T'){ t = Math.max(1, rnd(maxT)); text = `${t}T`; }
+    else if(p==='E'){ e = Math.max(1, Math.min(9,rnd(max))); text = `${e}E`; }
     else{
-      t = rnd(maxT); if(t===0) t=1;
-      const maxE = Math.min(9, max - t*10);
-      e = rnd(maxE); // mag 0 zijn
+      t = Math.max(1,rnd(maxT));
+      const maxE = Math.min(9, Math.max(0, max - t*10));
+      e = rnd(maxE);
       const order = Math.random()<0.5 ? 'TE' : 'ET';
       text = order==='TE' ? `${t}T en ${e}E` : `${e}E en ${t}T`;
     }
     return { text, value: t*10 + e };
   }
   function makeSideTEorNumber(max){
-    if(Math.random()<0.5){ // TE
+    if(Math.random()<0.5){
       return { isTE:true, ...makeTE(max) };
-    }else{ // number
+    }else{
       const v = rnd(max);
       return { isTE:false, text:String(v), value:v };
     }
   }
 
-  /* Gemengde oefeningen – 3 kolommen incl. T/E-varianten */
+  /* Gemengde oefeningen – incl. T/E-varianten en '=' bij “Vul het getal in” */
   function addMixedExercises() {
     const type=$('#mixedType').value;
     const max=parseInt($('#mixedMax').value,10)||100;
@@ -441,7 +493,6 @@
 
     const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block));
 
-    // Titelkeys: vergelijk (getal of TE) delen dezelfde key, zodat de opdrachtzin maar 1x verschijnt
     const titles={
       neighbors:'Vul de buurgetallen in.',
       neighborTens:'Vul de buurtientallen in.',
@@ -459,7 +510,6 @@
     ensureTitleOnce(sheet, keys[type], titles[type]);
 
     const grid=document.createElement('div'); grid.className='mixed-grid';
-
     function box(cls=''){ const i=document.createElement('input'); i.type='text'; i.className='mix-box'+(cls?(' '+cls):''); return i; }
     function makeNum(n){ const d=document.createElement('div'); d.className='mix-num'; d.textContent=n; return d; }
     function makeLabel(txt){ const s=document.createElement('span'); s.className='mix-label'; s.textContent=txt; return s; }
@@ -468,21 +518,19 @@
       const item=document.createElement('div'); item.className='mix-item';
 
       if(type==='neighbors'){
-        const x=rnd(max);
-        item.append(box(), makeNum(x), box());
+        const x=rnd(max); item.append(box(), makeNum(x), box());
 
       } else if(type==='neighborTens'){
-        const x=rnd(max);
-        item.append(box(), makeNum(x), box());
+        const x=rnd(max); item.append(box(), makeNum(x), box());
 
       } else if(type==='composeTE'){
         const te = makeTE(max);
-        item.append(makeLabel(te.text), box());
+        const eq = document.createElement('span'); eq.className='mix-eq'; eq.textContent='=';
+        item.append(makeLabel(te.text), eq, box());
 
       } else if(type==='compare'){
         const a=rnd(max), b=rnd(max);
-        const mid=box('small');
-        item.append(makeNum(a), mid, makeNum(b));
+        const mid=box('small'); item.append(makeNum(a), mid, makeNum(b));
 
       } else if(type==='compareTE'){
         const left  = makeSideTEorNumber(max);
@@ -540,7 +588,7 @@
     $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', ');
   }
 
-  /* PDF slicing (meerdere pagina's) */
+  /* PDF slicing (meerdere pagina's) + extra linkermarge */
   function buildPageSlices(canvas, sheetRect, domBlocks, pxPerMm, pageW, pageH){
     const factor = canvas.width / sheetRect.width;
     const pageHeightPx = pageH * pxPerMm;
@@ -609,13 +657,16 @@
       const pxPerMm=canvas.width/pageW;
       const slices=buildPageSlices(canvas,rect,blocks,pxPerMm,pageW,pageH);
 
+      const leftMargin=15, rightMargin=10, topMargin=8; // extra linkerrand voor perforatie
+      const usableW = pageW - leftMargin - rightMargin;
+
       slices.forEach((sl,i)=>{
         const c=document.createElement('canvas'); c.width=canvas.width; c.height=sl.h;
         c.getContext('2d').drawImage(canvas,0,sl.y,canvas.width,sl.h,0,0,canvas.width,sl.h);
         const img=c.toDataURL('image/jpeg',0.9);
         if(i>0) pdf.addPage();
-        const imgH=(sl.h*pageW)/canvas.width;
-        pdf.addImage(img,'JPEG',0,0,pageW,imgH);
+        const imgH=(sl.h*usableW)/canvas.width;
+        pdf.addImage(img,'JPEG',leftMargin,topMargin,usableW,imgH);
       });
       pdf.save('werkblad.pdf');
     });
