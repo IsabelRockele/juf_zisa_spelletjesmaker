@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Werkblad-generator v8.8 – volledig</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#fffdfa;color:#222}
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #d9e2ec;z-index:10}
+    .wrap{max-width:1060px;margin:0 auto;padding:14px}
+    .layout{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start}
+    fieldset{border:1px solid #d9e2ec;border-radius:10px;padding:10px;background:#fff;margin-bottom:12px}
+    legend{padding:0 6px;color:#334;font-weight:600}
+    label{display:inline-flex;align-items:center;gap:8px;margin:4px 10px 4px 0}
+    input[type=number],input[type=text],select{border:1px solid #d9e2ec;border-radius:9px;padding:5px 9px;font-size:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+    .btn{appearance:none;border:1px solid #1e88e5;background:#1e88e5;color:#fff;border-radius:999px;padding:7px 12px;cursor:pointer;font-weight:600}
+    .btn.ghost{background:#fff;color:#1e88e5}
+    .btn.ghost:hover{box-shadow: inset 0 0 0 2px #1e88e5;}
+    #previewBox{border:1px solid #d9e2ec;border-radius:12px;background:#eef6ff;padding:12px}
+    #previewSvg{display:block;width:100%;height:160px}
+    #sheet{border:1px solid #d9e2ec;border-radius:12px;background:#fff;padding:14px}
+    .sheetHeader{display:flex;justify-content:space-between;align-items:center;margin:4px 0 8px 0}
+
+    /* Linker bovenknop */
+    .menu-btn{
+      position:fixed; top:10px; left:10px; z-index:20;
+      display:inline-block; padding:8px 14px; border-radius:999px;
+      background:#0d47a1; color:#fff; text-decoration:none; font-weight:700; border:1px solid #0a3a85;
+    }
+    .menu-btn:focus{outline:2px solid #fff; outline-offset:2px}
+
+    /* Opdrachtblokken */
+    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block{
+      position:relative;margin:14px 0 20px 0;padding:10px 12px 20px 12px;border:1px solid #d9e2ec;border-radius:10px;background:#fff;page-break-inside: avoid;overflow: visible;
+    }
+    .exercise.drag{ padding-bottom:36px; }
+    .exercise-title{font-weight:600;color:#334;margin:0 0 8px 0;font-size:15px}
+
+    /* Getallenlijn */
+    .exercise svg{display:block;width:100%;height:220px;}
+    .exercise.drag svg { margin-top:12px }
+    .exercise.blanks svg { margin-top:22px }
+
+    .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700}
+    .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
+    .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
+
+    /* Sprongen tellen */
+    .jump-exercise{display:flex;align-items:center;gap:8px;padding:24px 8px 14px 8px;min-height:40px}
+    .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
+    .jump-box-wrapper{position:relative}
+    .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
+    .jump-arc{position:absolute;bottom:100%;left:0;width:100%;height:18px;border-top:2px solid #1e88e5;border-left:2px solid #1e88e5;border-right:2px solid #1e88e5;border-radius:26px 26px 0 0;text-align:center;margin-bottom:2px}
+    .jump-arc span{font-size:11px;color:#1e88e5;font-weight:600;position:relative;top:-1px}
+    .discover-jump-prompt{font-weight:600;margin:8px 0}
+    .discover-jump-prompt input{width:46px;font-weight:bold;font-size:15px;padding:3px;text-align:center}
+
+    /* 3-koloms gemengde oefeningen (compact) */
+    .mixed-grid{display:grid;grid-template-columns: repeat(3, minmax(0,1fr));gap:8px 10px}
+    .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:hidden;white-space:nowrap}
+    .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center}
+    .mix-label{font-weight:700;font-size:16px}
+    .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+    .mix-box.small{width:40px}
+
+    /* Getallenrij (vooruit/achteruit) */
+    .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px}
+    .seq-num{min-width:42px;text-align:center;font-weight:700}
+    .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+
+    /* Overlay inputs enkel bij getallenlijn-blanks op scherm */
+    .print-overlay-input{ position:absolute; background:transparent; }
+    @media print{
+      header,#controls,#previewTitle,.delete-btn{display:none !important}
+      #sheet{border:0;padding:0}
+      .print-overlay-input{ display:none !important; }
+    }
+    @page{ margin:12mm 12mm 12mm 22mm; }
+  </style>
+</head>
+<body>
+  <a class="menu-btn" href="index.html">Keuzemenu</a>
+
+<header>
+  <div class="wrap"><h1>Werkblad-generator</h1></div>
+</header>
+
+<main class="wrap layout">
+  <section id="controls">
+    <!-- 1. Getallenlijn -->
+    <fieldset>
+      <legend>1. Getallenlijn Instellen</legend>
+      <fieldset><legend>Bereik</legend>
+        <div class="row">
+          <label><input type="radio" name="preset" value="0-10"> 0-10</label>
+          <label><input type="radio" name="preset" value="0-20"> 0-20</label>
+          <label><input type="radio" name="preset" value="0-100"> 0-100</label>
+        </div>
+        <div class="row">
+          <label>Van <input id="start" type="number" value="0" style="width:68px"></label>
+          <label>Tot <input id="end" type="number" value="100" style="width:68px"></label>
+          <label>Stap <input id="unit" type="number" value="1" min="1" style="width:48px"></label>
+        </div>
+      </fieldset>
+      <fieldset><legend>Labels en streepjes</legend>
+        <div class="row">
+          <label><input id="showZero" type="checkbox" checked> 0 tonen</label>
+          <label><input id="showEnds" type="checkbox" checked> Uiteinden</label>
+        </div>
+        <div class="row">
+          <label><input id="showTens" type="checkbox" checked> Tientallen</label>
+          <label><input id="showFives" type="checkbox"> Vijftallen</label>
+          <label><input id="showOnes" type="checkbox"> Eenheden</label>
+        </div>
+        <div class="row">
+          <label>Grote streep bij
+            <select id="majorStep" style="width:68px">
+              <option value="10">10</option>
+              <option value="5">5</option>
+              <option value="1">1</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+      <fieldset><legend>Opdracht</legend>
+        <div class="row">
+          <label><input type="radio" name="mode" value="none" checked> Geen</label>
+          <label><input type="radio" name="mode" value="drag"> Verbind getallen</label>
+          <label><input type="radio" name="mode" value="blanks"> Vul hokjes in</label>
+        </div>
+        <div id="mode-drag" style="display:none">
+          <label>Getallen <input id="dragList" type="text" value="" style="width:100%"></label>
+        </div>
+        <div id="mode-blanks" style="display:none">
+          <label>Aantal lege hokjes <input id="blankCount" type="number" value="5" min="1" style="width:56px"></label>
+        </div>
+      </fieldset>
+      <div class="row"><button class="btn" id="btnAddToSheet">Voeg getallenlijn toe</button></div>
+    </fieldset>
+
+    <!-- 2. Sprongen tellen -->
+    <fieldset>
+      <legend>2. Sprongen Tellen</legend>
+      <div class="row">
+        <label>Startgetal <input id="jumpStart" type="number" value="31" style="width:74px"></label>
+        <label>Sprong van <input id="jumpStep" type="number" value="10" style="width:74px"></label>
+        <label>Aantal hokjes <input id="jumpCount" type="number" value="5" min="1" max="12" style="width:74px"></label>
+      </div>
+      <div class="row" style="border-top:1px solid #d9e2ec;margin-top:6px;padding-top:6px">
+        <label><input id="jumpDiscover" type="checkbox"> Laat de sprong ontdekken</label>
+      </div>
+      <div id="jumpDiscoverOptions" style="display:none">
+        <div class="row">
+          <label>Aantal ingevuld <input id="jumpGivenCount" type="number" value="2" min="0" style="width:64px"></label>
+          <label>Vaste posities (1..N, komma’s) <input id="jumpGivenPositions" type="text" placeholder="bv. 1,3,5" style="width:160px"></label>
+        </div>
+        <div class="row">
+          <label><input id="jumpIncludeStart" type="checkbox" checked> Start invullen</label>
+          <label><input id="jumpIncludeEnd" type="checkbox"> Eind invullen</label>
+        </div>
+      </div>
+      <button class="btn" id="btnAddJumpExercise">Voeg sprong-oefening toe</button>
+    </fieldset>
+
+    <!-- 3. Gemengde oefeningen -->
+    <fieldset>
+      <legend>3. Gemengde Rekoefeningen</legend>
+      <div class="row">
+        <label>Soort:
+          <select id="mixedType" style="width:230px">
+            <option value="neighbors">Buurgetallen</option>
+            <option value="neighborTens">Buurtientallen</option>
+            <option value="composeTE">Vul het getal in (T/E → getal)</option>
+            <option value="compare">Vergelijken (getal ↔ getal)</option>
+            <option value="compareTE">Vergelijken (T/E ↔ getal/T&E)</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Getallen tot <input id="mixedMax" type="number" value="100" style="width:74px"></label>
+        <label>Aantal <input id="mixedCount" type="number" value="9" min="1" max="60" style="width:74px"></label>
+      </div>
+      <button class="btn" id="btnAddMixed">Voeg oefeningen toe</button>
+    </fieldset>
+
+    <!-- 4. Getallenrij (vooruit/achteruit) -->
+    <fieldset>
+      <legend>4. Getallenrij (vooruit/achteruit)</legend>
+      <div class="row">
+        <label>Start <input id="seqStart" type="number" value="22" style="width:74px"></label>
+        <label>Eind <input id="seqEnd" type="number" value="40" style="width:74px"></label>
+        <label>Aantal lege hokjes <input id="seqBlankCount" type="number" value="5" min="0" style="width:74px"></label>
+      </div>
+      <div class="row">
+        <label><input id="seqLockEnds" type="checkbox" checked> Start en eind vooraf invullen</label>
+      </div>
+      <button class="btn" id="btnAddSequence">Voeg getallenrij toe</button>
+    </fieldset>
+
+    <div style="margin-top:18px">
+      <button class="btn ghost" id="btnDownloadPdf">Download als PDF</button>
+      <button class="btn ghost" id="btnClearSheet">Werkblad leegmaken</button>
+    </div>
+  </section>
+
+  <section>
+    <h3 id="previewTitle" style="margin:6px 0 6px 0;color:#334">Voorbeeld Getallenlijn</h3>
+    <div id="previewBox"><svg id="previewSvg" viewBox="0 0 1000 150" xmlns="http://www.w3.org/2000/svg"></svg></div>
+    <h3 style="margin:14px 0 6px 0;color:#334">Werkblad</h3>
+    <div id="sheet"></div>
+  </section>
+</main>
+
+<script>
+(function(){
+  const $  = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const sheet = $('#sheet');
+  const previewSvg = $('#previewSvg');
+
+  /* Titels slechts één keer per soort */
+  let addedTitles = new Set();
+  function ensureTitleOnce(container, key, text){
+    if (!addedTitles.has(key)) {
+      const h = document.createElement('h4');
+      h.className = 'exercise-title';
+      h.textContent = text;
+      container.appendChild(h);
+      addedTitles.add(key);
+    }
+  }
+
+  /* Helpers */
+  const createDeleteButton = (target) => {
+    const btn = document.createElement('button');
+    btn.className = 'delete-btn'; btn.innerHTML = '&times;';
+    btn.addEventListener('click', () => target.remove());
+    return btn;
+  };
+  const group = (p) => { const g=document.createElementNS('http://www.w3.org/2000/svg','g'); p.appendChild(g); return g; };
+  const line  = (p,x1,y1,x2,y2,str,w) => { const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke',str||'#6b879a'); l.setAttribute('stroke-width',w||'2'); p.appendChild(l); return l;};
+  const label = (p,x,y,txt) => {
+    const g=group(p);
+    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x',x-16); r.setAttribute('y',y-24);
+    r.setAttribute('width',32); r.setAttribute('height',22);
+    r.setAttribute('fill','#fff'); r.setAttribute('stroke','#6b879a'); r.setAttribute('stroke-width','2'); r.setAttribute('rx',6);
+    g.appendChild(r);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',x); t.setAttribute('y',y-8); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','13'); t.setAttribute('font-weight','700');
+    t.textContent=String(txt);
+    g.appendChild(t);
+  };
+
+  function getRulerOpts() {
+    return {
+      start: parseInt($('#start').value,10), end: parseInt($('#end').value,10), unit: Math.max(1, parseInt($('#unit').value,10)),
+      showZero: $('#showZero').checked, showEnds: $('#showEnds').checked, showTens: $('#showTens').checked,
+      showFives: $('#showFives').checked, showOnes: $('#showOnes').checked, majorStep: parseInt($('#majorStep').value,10),
+      mode: $$('input[name=mode]:checked')[0].value,
+      dragValues: $('#dragList').value.split(/[ ,;]+/).map(s=>s.trim()).filter(s=>s.length>0).map(s=>parseInt(s,10)),
+      blankCount: parseInt($('#blankCount').value,10)
+    };
+  }
+  const wantLabel = (val, o) => o.showOnes || (o.showTens&&val%10===0) || (o.showFives&&val%5===0) || (o.showZero&&val===0) || (o.showEnds&&(val===o.start||val===o.end));
+
+  /* Getallenlijn tekenen */
+  function drawRuler(svgEl, o) {
+    const width = svgEl.clientWidth || 1000;
+    const height = 220;
+    svgEl.setAttribute('viewBox', '0 0 ' + width + ' ' + height);
+    svgEl.innerHTML = '';
+
+    const baseY = Math.round(height * 0.44);
+    const padL=40, padR=30;
+    const units=o.end-o.start; if(units<=0) return {ticks:[],baseY:baseY,g:null,width:width,height:height};
+    const pxPerUnit=(width-padL-padR)/units;
+
+    const g=group(svgEl);
+
+    // marker voor pijlpunt
+    const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+    const marker = document.createElementNS('http://www.w3.org/2000/svg','marker');
+    marker.setAttribute('id','arrowhead'); marker.setAttribute('markerWidth','8'); marker.setAttribute('markerHeight','8');
+    marker.setAttribute('refX','4'); marker.setAttribute('refY','4'); marker.setAttribute('orient','auto');
+    const tip = document.createElementNS('http://www.w3.org/2000/svg','path');
+    tip.setAttribute('d','M0,0 L8,4 L0,8 Z'); tip.setAttribute('fill','#1e88e5');
+    marker.appendChild(tip); defs.appendChild(marker); g.appendChild(defs);
+
+    line(g,padL,baseY,width-padR+5,baseY);
+
+    const ticks=[];
+    for(let v=o.start; v<=o.end; v+=o.unit){
+        const x=padL+(v-o.start)*pxPerUnit;
+        const isMajor=(v%o.majorStep===0);
+        const h=isMajor?18: (v%5===0?12:9);
+        line(g,x,baseY,x,baseY-h);
+        ticks.push({v:v,x:x,isMajor:isMajor});
+    }
+    ticks.forEach(t=>{if(wantLabel(t.v, o))label(g,t.x,baseY-(t.isMajor?24:18),t.v);});
+    return {ticks:ticks, baseY:baseY, g:g, width: width, height: height};
+  }
+
+  function renderPreview(){ const o=getRulerOpts(); if(o.end<=o.start) return; drawRuler(previewSvg, o); }
+
+  /* Oefening: getallenlijn */
+  function addExerciseToSheet(){
+    const o=getRulerOpts(); if(o.end<=o.start){alert('Tot en met moet groter zijn dan Van.');return;}
+    const ex=document.createElement('div'); ex.className='exercise'; ex.appendChild(createDeleteButton(ex));
+
+    let titleKey=null, titleText=null;
+    if (o.mode==='drag'){ titleKey='ruler_drag'; titleText='Verbind de getallen met de getallenlijn.'; }
+    if (o.mode==='blanks'){ titleKey='ruler_blanks'; titleText='Vul de ontbrekende getallen in.'; }
+    if (titleKey) ensureTitleOnce(sheet, titleKey, titleText);
+    if(o.mode==='drag') ex.classList.add('drag'); if(o.mode==='blanks') ex.classList.add('blanks');
+
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); ex.appendChild(svg); sheet.appendChild(ex);
+    const {ticks, baseY, g, width, height}=drawRuler(svg, o);
+
+    if (o.mode==='drag') {
+      let values = o.dragValues.filter(Number.isFinite);
+      if (!values.length) { values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6); }
+      const cardWidth=52,gap=14,n=values.length,totalWidth=n*cardWidth+(n-1)*gap,startX=Math.max(0,(svg.clientWidth-totalWidth)/2);
+      const exBox=ex.getBoundingClientRect(), svgBox=svg.getBoundingClientRect(), DRAW_GAP=70, relTop=(svgBox.top-exBox.top)+baseY+DRAW_GAP;
+      values.forEach((val,i)=>{ const c=document.createElement('div'); c.className='card'; c.textContent=val; c.style.position='absolute'; c.style.left=(startX+i*(cardWidth+gap))+'px'; c.style.top=relTop+'px'; ex.appendChild(c); });
+    }
+
+    if(o.mode==='blanks'){
+      const all=ticks.filter(t=>!wantLabel(t.v,o)).sort(()=>Math.random()-0.5);
+      const minGap=36, picked=[]; for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
+      picked.sort((a,b)=>a.x-b.x);
+
+      let above=true; const bw=46,bh=34, offA=40, offB=32, margin=10;
+      const svgRect=svg.getBoundingClientRect(), pageX=window.scrollX, pageY=window.scrollY;
+      picked.forEach(t=>{
+        const xC=t.x, x=xC-bw/2; let y; const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
+        if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,height-margin)); }
+        else{ y=baseY+(offB+14); if(y+bh>height-margin) y=height-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
+        conn.setAttribute('marker-end','url(#arrowhead)');
+        const rect=document.createElementNS('http://www.w3.org/2000/svg','rect'); rect.setAttribute('x',x); rect.setAttribute('y',y);
+        rect.setAttribute('width',bw); rect.setAttribute('height',bh); rect.setAttribute('rx',9); rect.setAttribute('fill','#fff'); rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2'); g.appendChild(rect);
+        const htmlBox=document.createElement('input'); htmlBox.type='text'; htmlBox.className='print-overlay-input';
+        htmlBox.style.left=(svgRect.left+pageX+x)+'px'; htmlBox.style.top=(svgRect.top+pageY+y)+'px'; htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
+        htmlBox.style.border='2px solid #c9d6ea'; htmlBox.style.borderRadius='9px'; htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
+        ex.appendChild(htmlBox); above=!above;
+      });
+    }
+  }
+
+  /* Sprongen tellen */
+  function addJumpExercise() {
+    const start=parseInt($('#jumpStart').value,10);
+    const step=parseInt($('#jumpStep').value,10);
+    const count=Math.max(1, parseInt($('#jumpCount').value,10));
+    const discover=$('#jumpDiscover').checked;
+
+    const block=document.createElement('div'); block.className='jump-exercise-block'; block.appendChild(createDeleteButton(block));
+    ensureTitleOnce(sheet, discover?'jump_discover':'jump_fixed',
+      discover?'Welke sprong wordt er gemaakt? Vul de rij verder aan.':'Tel met sprongen.');
+
+    if (discover) {
+      const p=document.createElement('div'); p.className='discover-jump-prompt';
+      p.innerHTML='De sprong is + <input type="text" class="jump-box" style="width:46px;height:34px;display:inline-block;vertical-align:middle;">';
+      block.appendChild(p);
+    }
+
+    const ex=document.createElement('div'); ex.className='jump-exercise';
+    const seq=Array.from({length:count},(_,i)=>start+i*step);
+
+    if (discover) {
+      const givenPosText=($('#jumpGivenPositions').value||'').trim();
+      const includeStart=$('#jumpIncludeStart').checked;
+      const includeEnd=$('#jumpIncludeEnd').checked;
+      const wantCount=Math.max(0, parseInt($('#jumpGivenCount').value,10)||0);
+
+      let indices=new Set();
+      if (givenPosText.length){
+        givenPosText.split(/[ ,;]+/).forEach(s=>{ const k=parseInt(s,10); if(Number.isFinite(k)&&k>=1&&k<=count) indices.add(k-1); });
+      } else {
+        while(indices.size<Math.min(wantCount,count)){ indices.add(Math.floor(Math.random()*count)); }
+      }
+      if (includeStart) indices.add(0);
+      if (includeEnd)   indices.add(count-1);
+
+      seq.forEach((num,i)=>{
+        const wrap=document.createElement('div'); wrap.style.position='relative';
+        if (indices.has(i)){ const given=document.createElement('div'); given.className='jump-given'; given.textContent=num; wrap.appendChild(given); }
+        else { const w=document.createElement('div'); w.className='jump-box-wrapper'; const box=document.createElement('input'); box.className='jump-box'; w.appendChild(box); wrap.appendChild(w); }
+        ex.appendChild(wrap);
+      });
+
+      ex.childNodes.forEach((el,i)=>{ if(i<count-1){ const arc=document.createElement('div'); arc.className='jump-arc'; arc.innerHTML='<span>?</span>'; el.prepend(arc);} });
+
+    } else {
+      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; ex.appendChild(startEl);
+      for(let i=0;i<count-1;i++){ const w=document.createElement('div'); w.className='jump-box-wrapper';
+        const arc=document.createElement('div'); arc.className='jump-arc'; arc.innerHTML=`<span>+${step}</span>`; w.appendChild(arc);
+        const box=document.createElement('input'); box.className='jump-box'; w.appendChild(box); ex.appendChild(w); }
+    }
+    block.appendChild(ex); sheet.appendChild(block);
+  }
+
+  /* Helpers voor T/E-expressies */
+  function rnd(max){ return Math.floor(Math.random()*(max+1)); }
+  function makeTE(max){
+    const maxT = Math.min(9, Math.floor(max/10));
+    // kies patroon: alleen T, alleen E, of T+E (in willekeurige volgorde)
+    const patterns = ['T','E','TE'];
+    const p = patterns[Math.floor(Math.random()*patterns.length)];
+    let t=0, e=0, text='';
+    if(p==='T'){ t = rnd(Math.max(1,maxT)); text = `${t}T`; }
+    else if(p==='E'){ e = rnd(Math.min(9,max)); if(e===0) e=1; text = `${e}E`; }
+    else{
+      t = rnd(maxT); if(t===0) t=1;
+      const maxE = Math.min(9, max - t*10);
+      e = rnd(maxE); // mag 0 zijn
+      const order = Math.random()<0.5 ? 'TE' : 'ET';
+      text = order==='TE' ? `${t}T en ${e}E` : `${e}E en ${t}T`;
+    }
+    return { text, value: t*10 + e };
+  }
+  function makeSideTEorNumber(max){
+    if(Math.random()<0.5){ // TE
+      return { isTE:true, ...makeTE(max) };
+    }else{ // number
+      const v = rnd(max);
+      return { isTE:false, text:String(v), value:v };
+    }
+  }
+
+  /* Gemengde oefeningen – 3 kolommen incl. T/E-varianten */
+  function addMixedExercises() {
+    const type=$('#mixedType').value;
+    const max=parseInt($('#mixedMax').value,10)||100;
+    const n=parseInt($('#mixedCount').value,10)||9;
+
+    const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block));
+
+    // Titelkeys: vergelijk (getal of TE) delen dezelfde key, zodat de opdrachtzin maar 1x verschijnt
+    const titles={
+      neighbors:'Vul de buurgetallen in.',
+      neighborTens:'Vul de buurtientallen in.',
+      composeTE:'Vul het getal in.',
+      compare:'Vergelijk de getallen (vul <, = of > in).',
+      compareTE:'Vergelijk de getallen (vul <, = of > in).'
+    };
+    const keys={
+      neighbors:'mixed_neighbors',
+      neighborTens:'mixed_neighborTens',
+      composeTE:'mixed_compose_te',
+      compare:'mixed_compare_any',
+      compareTE:'mixed_compare_any'
+    };
+    ensureTitleOnce(sheet, keys[type], titles[type]);
+
+    const grid=document.createElement('div'); grid.className='mixed-grid';
+
+    function box(cls=''){ const i=document.createElement('input'); i.type='text'; i.className='mix-box'+(cls?(' '+cls):''); return i; }
+    function makeNum(n){ const d=document.createElement('div'); d.className='mix-num'; d.textContent=n; return d; }
+    function makeLabel(txt){ const s=document.createElement('span'); s.className='mix-label'; s.textContent=txt; return s; }
+
+    for(let i=0;i<n;i++){
+      const item=document.createElement('div'); item.className='mix-item';
+
+      if(type==='neighbors'){
+        const x=rnd(max);
+        item.append(box(), makeNum(x), box());
+
+      } else if(type==='neighborTens'){
+        const x=rnd(max);
+        item.append(box(), makeNum(x), box());
+
+      } else if(type==='composeTE'){
+        const te = makeTE(max);
+        item.append(makeLabel(te.text), box());
+
+      } else if(type==='compare'){
+        const a=rnd(max), b=rnd(max);
+        const mid=box('small');
+        item.append(makeNum(a), mid, makeNum(b));
+
+      } else if(type==='compareTE'){
+        const left  = makeSideTEorNumber(max);
+        const right = makeSideTEorNumber(max);
+        const mid=box('small');
+        const leftEl  = left.isTE  ? makeLabel(left.text)  : makeNum(left.value);
+        const rightEl = right.isTE ? makeLabel(right.text) : makeNum(right.value);
+        item.append(leftEl, mid, rightEl);
+      }
+
+      grid.appendChild(item);
+    }
+    block.appendChild(grid); sheet.appendChild(block);
+  }
+
+  /* Getallenrij – “Vul de getallenrij verder aan.” */
+  function addSequenceExercise(){
+    const start=parseInt($('#seqStart').value,10);
+    const end=parseInt($('#seqEnd').value,10);
+    if(!Number.isFinite(start)||!Number.isFinite(end)||start===end){ alert('Start en eind moeten verschillend zijn.'); return; }
+    const lockEnds=$('#seqLockEnds').checked;
+    const blanksWanted=Math.max(0, parseInt($('#seqBlankCount').value,10)||0);
+
+    const step=start<end?1:-1;
+    const seq=[]; for(let v=start; (step>0? v<=end : v>=end); v+=step) seq.push(v);
+
+    const length=seq.length;
+    const maxBlanks=lockEnds?Math.max(0,length-2):length;
+    const blanks=Math.min(blanksWanted, maxBlanks);
+
+    const allIdx=[...seq.keys()];
+    if(lockEnds){ allIdx.shift(); allIdx.pop(); }
+    const blankSet=new Set();
+    while(blankSet.size<blanks && allIdx.length){ const k=Math.floor(Math.random()*allIdx.length); blankSet.add(allIdx.splice(k,1)[0]); }
+
+    const block=document.createElement('div'); block.className='sequence-exercise-block'; block.appendChild(createDeleteButton(block));
+    ensureTitleOnce(sheet,'seq_fill','Vul de getallenrij verder aan.');
+
+    const row=document.createElement('div'); row.className='seq-row';
+    seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box'; row.appendChild(inp); }
+                          else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d); } });
+
+    block.appendChild(row); sheet.appendChild(block);
+  }
+
+  /* Header + suggesties */
+  function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
+    const h=document.createElement('div'); h.className='sheetHeader';
+    h.innerHTML=`<div><strong>Naam:</strong> <span style="display:inline-block;border-bottom:1px solid #333;min-width:200px;">&nbsp;</span></div>`;
+    sheet.insertBefore(h, sheet.firstChild);
+  }
+  function updateDragSuggestions() {
+    const start=parseInt($('#start').value,10), end=parseInt($('#end').value,10); if(end<=start) return;
+    const set=new Set(); while(set.size<3){ set.add(Math.floor(Math.random()*(end-start+1))+start); }
+    $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', ');
+  }
+
+  /* PDF slicing (meerdere pagina's) */
+  function buildPageSlices(canvas, sheetRect, domBlocks, pxPerMm, pageW, pageH){
+    const factor = canvas.width / sheetRect.width;
+    const pageHeightPx = pageH * pxPerMm;
+    const safety = 10 * pxPerMm;
+
+    const blocks = domBlocks.map(el => {
+      const r = el.getBoundingClientRect();
+      const top  = (r.top  - sheetRect.top) * factor;
+      const bottom = (r.bottom - sheetRect.top) * factor;
+      return { top, bottom, height: bottom-top };
+    }).sort((a,b)=>a.top-b.top);
+
+    const slices = [];
+    let startY = 0;
+    let cursor = 0;
+
+    for (let i=0;i<blocks.length;i++){
+      const b = blocks[i];
+      if ((b.bottom - startY) > (pageHeightPx - safety)) {
+        if (cursor > startY) { slices.push({ y: startY, h: cursor - startY }); startY = cursor; }
+        else { slices.push({ y: startY, h: pageHeightPx }); startY = startY + pageHeightPx; }
+      }
+      cursor = b.bottom;
+    }
+
+    const totalHeight = canvas.height;
+    if (totalHeight - startY > 1) {
+      slices.push({ y: startY, h: totalHeight - startY });
+    }
+    return slices;
+  }
+
+  /* Events */
+  $$('#controls fieldset:first-of-type input, #controls fieldset:first-of-type select').forEach(el=>el.addEventListener('input',renderPreview));
+  $$('input[name=preset], input#start, input#end').forEach(el=>el.addEventListener('change',updateDragSuggestions));
+  $$('input[name=preset]').forEach(r=>r.addEventListener('change',e=>{ const ab=e.target.value.split('-').map(Number); $('#start').value=ab[0]; $('#end').value=ab[1]; renderPreview(); updateDragSuggestions(); }));
+  $$('input[name=mode]').forEach(r=>r.addEventListener('change',()=>{ const v=$$('input[name=mode]:checked')[0].value; $('#mode-drag').style.display=(v==='drag')?'block':'none'; $('#mode-blanks').style.display=(v==='blanks')?'block':'none'; }));
+
+  $('#jumpDiscover').addEventListener('change',e=>{ $('#jumpDiscoverOptions').style.display = e.target.checked ? 'block' : 'none'; });
+
+  $('#btnAddToSheet').addEventListener('click', addExerciseToSheet);
+  $('#btnAddJumpExercise').addEventListener('click', addJumpExercise);
+  $('#btnAddMixed').addEventListener('click', addMixedExercises);
+  $('#btnAddSequence').addEventListener('click', addSequenceExercise);
+
+  $('#btnClearSheet').addEventListener('click',()=>{ sheet.innerHTML=''; addedTitles.clear(); renderSheetHeader(); });
+
+  $('#btnDownloadPdf').addEventListener('click',()=>{
+    const { jsPDF } = window.jspdf;
+    const el=$('#sheet');
+    const del=$$('.delete-btn');
+    const overlay=$$('.print-overlay-input');
+
+    del.forEach(b=>b.style.display='none');
+    overlay.forEach(i=>i.style.visibility='hidden');
+
+    const blocks=Array.from(el.querySelectorAll('.exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block'));
+    const rect=el.getBoundingClientRect();
+
+    html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
+      del.forEach(b=>b.style.display='block');
+      overlay.forEach(i=>i.style.visibility='visible');
+
+      const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+      const pageW=pdf.internal.pageSize.getWidth(), pageH=pdf.internal.pageSize.getHeight();
+      const pxPerMm=canvas.width/pageW;
+      const slices=buildPageSlices(canvas,rect,blocks,pxPerMm,pageW,pageH);
+
+      slices.forEach((sl,i)=>{
+        const c=document.createElement('canvas'); c.width=canvas.width; c.height=sl.h;
+        c.getContext('2d').drawImage(canvas,0,sl.y,canvas.width,sl.h,0,0,canvas.width,sl.h);
+        const img=c.toDataURL('image/jpeg',0.9);
+        if(i>0) pdf.addPage();
+        const imgH=(sl.h*pageW)/canvas.width;
+        pdf.addImage(img,'JPEG',0,0,pageW,imgH);
+      });
+      pdf.save('werkblad.pdf');
+    });
+  });
+
+  /* Init */
+  function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
+    const h=document.createElement('div'); h.className='sheetHeader';
+    h.innerHTML=`<div><strong>Naam:</strong> <span style="display:inline-block;border-bottom:1px solid #333;min-width:200px;">&nbsp;</span></div>`;
+    sheet.insertBefore(h, sheet.firstChild);
+  }
+  function updateDragSuggestions(){ const start=parseInt($('#start').value,10), end=parseInt($('#end').value,10); if(end<=start) return;
+    const set=new Set(); while(set.size<3){ set.add(Math.floor(Math.random()*(end-start+1))+start); } $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', '); }
+
+  renderSheetHeader(); renderPreview(); updateDragSuggestions(); $$('input[name=mode]')[0].dispatchEvent(new Event('change'));
+})();
+</script>
+</body>
+</html>
