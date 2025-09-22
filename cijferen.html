@@ -1,383 +1,351 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cijferen Werkblad Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        body {
-            font-family: sans-serif;
-            background-color: #f0f2f5;
-            margin: 0; /* Reset default margin */
-        }
-        .menu-knop {
-            display: inline-block;
-            background-color: #002d62; /* Donkerblauw */
-            color: white;
-            padding: 12px 22px;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-            margin: 20px;
-        }
-        .main-container {
-            display: flex;
-            align-items: flex-start;
-            gap: 30px;
-            padding: 0 20px 20px 20px; 
-        }
-        .controls {
-            flex: 0 0 380px; 
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #ffffff;
-            position: sticky;
-            top: 20px; 
-        }
-        .pagina {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 10mm 15mm; 
-            box-sizing: border-box;
-            border: 1px solid #ddd;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            background: white;
-            margin: 0; 
-        }
-        .controls-grid {
-            display: grid;
-            grid-template-columns: 1fr; 
-            gap: 15px;
-        }
-        .control-group {
-            padding: 10px;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
-        }
-        .control-group h4 { margin-top: 0; margin-bottom: 10px; }
-        
-        .setting-item {
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .setting-item:last-child {
-            margin-bottom: 0;
-        }
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cijferen Werkblad Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    body{
+      font-family:sans-serif;
+      background:#f0f2f5;
+      margin:0;
+    }
+    .menu-knop{
+      display:inline-block;background:#002d62;color:#fff;
+      padding:12px 22px;border-radius:6px;font-weight:bold;margin:20px;text-decoration:none;
+    }
+    .main-container{display:flex;align-items:flex-start;gap:30px;padding:0 20px 20px;}
+    .controls{
+      flex:0 0 380px;padding:20px;border:1px solid #ccc;border-radius:8px;background:#fff;position:sticky;top:20px;
+    }
+    .controls-grid{display:grid;grid-template-columns:1fr;gap:15px}
+    .control-group{padding:10px;border:1px solid #e0e0e0;border-radius:5px}
+    .control-group h4{margin:0 0 10px}
+    .setting-item{margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+    .setting-item:last-child{margin-bottom:0}
+    .controls label{font-size:16px;margin:0}
+    .oefentype-lijst div{display:block;margin-bottom:5px}
+    .actie-knoppen{margin-top:20px;display:flex;gap:10px}
+    .actie-knoppen button{flex:1;padding:12px;font-size:16px;border:none;border-radius:5px;cursor:pointer;color:#fff}
+    #genereer-knop{background:#007bff}
+    #download-pdf{background:#28a745}
 
-        .controls label { font-size: 16px; margin: 0; }
-        .oefentype-lijst div {
-            display: block; 
-            margin-bottom: 5px;
-        }
-        .actie-knoppen {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
-        .actie-knoppen button {
-            flex-grow: 1;
-            padding: 12px;
-            font-size: 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: white;
-        }
-        #genereer-knop { background-color: #007bff; }
-        #download-pdf { background-color: #28a745; }
+    /* --- Pagina’s --- */
+    .pagina{
+      width:210mm;
+      height:297mm;                 /* VASTE hoogte i.p.v. min-height */
+      padding:10mm 15mm 10mm 22mm;  /* links 22mm perforatie */
+      box-sizing:border-box;
+      border:1px solid #ddd;
+      box-shadow:0 0 10px rgba(0,0,0,.1);
+      background:#fff;
+      margin:0;
+      page-break-after:always;
+      overflow:hidden;              /* zo kunnen we hoogte betrouwbaar meten */
+    }
+    .pagina:last-child{page-break-after:auto}
 
-        /* --- Werkblad stijlen --- */
-        .werkblad-header { 
-            margin-bottom: 25px; /* AANPASSING: Iets minder marge */
-        }
-        .werkblad-header .naam { font-size: 16px; }
-        .werkblad-header .titel { font-size: 24px; font-weight: bold; text-align: center; margin-top: 10px; }
-        .werkblad {
-            display: flex; flex-wrap: wrap; 
-            gap: 25px 40px; /* AANPASSING: Iets minder verticale ruimte */
-            justify-content: flex-start;
-        }
-        .oefening {
-            position: relative; 
-            padding: 15px;
-            padding-top: 50px; /* AANPASSING: Iets minder ruimte boven de som */
-            border: 1px solid #cccccc; 
-            border-radius: 8px;
-        }
-        .vraag {
-            font-size: 20px; 
-            font-weight: bold; text-align: center; position: absolute; 
-            top: 15px; 
-            left: 50%; transform: translateX(-50%); width: 100%;
-        }
-        .schema-container {
-            display: flex; align-items: flex-start; position: relative;
-        }
-        .operator {
-            font-size: 26px; 
-            font-weight: bold; position: absolute; 
-            top: 167px; 
-            left: -28px;
-        }
-        .schema { border-collapse: collapse; }
-        .schema td {
-            width: 45px; height: 45px; 
-            border: 2px solid #999 !important; text-align: center; 
-            font-size: 20px; 
-            font-weight: bold; position: relative;
-            vertical-align: bottom; 
-            padding-bottom: 4px; 
-            box-sizing: border-box;
-        }
-        .header {
-            color: white; font-size: 22px; border-width: 2px !important;
-            vertical-align: middle; 
-            padding-bottom: 0;
-        }
-        .start-pijl {
-            content: ''; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 0; height: 0; 
-            border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 12px solid #f1c40f;
-        }
-        .honderd { background-color: #2980b9; }
-        .tien { background-color: #27ae60; }
-        .een { background-color: #f1c40f; }
-        .onthoud-cel {
-             vertical-align: middle !important; 
-        }
-        .onthoud-cel.honderd { background-color: #a9cce3; }
-        .onthoud-cel.tien { background-color: #a3e4d7; }
-        .onthoud-cel.een { background-color: #f9e79f; }
-        .getal-cel { background-color: #fdfdfd; }
-        
-        .schema .oplossing-cel {
-            background-color: #ffffff; border-top: 4px solid black !important;
-        }
-        .header, .onthoud-cel {
-            -webkit-print-color-adjust: exact; print-color-adjust: exact;
-        }
-        
-        @media (max-width: 1200px) {
-            .main-container {
-                flex-direction: column;
-            }
-            .controls {
-                position: static;
-                width: 100%;
-                box-sizing: border-box;
-            }
-        }
-    </style>
+    .werkblad-header{margin-bottom:25px}
+    .werkblad-header .naam{font-size:16px}
+    .werkblad-header .titel{font-size:24px;font-weight:bold;text-align:center;margin-top:10px}
+
+    /* Werkblad = stapel rijen; elke rij bevat 4 of 3 kaarten */
+    .werkblad{display:block}
+    .rij{
+      --gap-x:40px; --gap-y:25px;
+      display:flex; gap:var(--gap-y) var(--gap-x);
+      margin-bottom:var(--gap-y);
+      page-break-inside:avoid; break-inside:avoid;
+    }
+    .werkblad.cols-4 .rij .oefening{flex:0 0 calc((100% - 3*var(--gap-x))/4)}
+    .werkblad.cols-3 .rij .oefening{flex:0 0 calc((100% - 2*var(--gap-x))/3)}
+
+    .oefening{
+      position:relative;padding:15px;padding-top:50px;border:1px solid #ccc;border-radius:8px;box-sizing:border-box;
+      page-break-inside:avoid; break-inside:avoid;
+    }
+    .vraag{
+      font-size:20px;font-weight:bold;text-align:center;position:absolute;top:15px;left:50%;transform:translateX(-50%);width:100%;
+    }
+    .schema-container{display:flex;align-items:flex-start;position:relative}
+    .operator{font-size:26px;font-weight:bold;position:absolute;top:167px;left:-28px}
+    .schema{border-collapse:collapse}
+    .schema td{
+      width:45px;height:45px;border:2px solid #999 !important;text-align:center;font-size:20px;font-weight:bold;position:relative;
+      vertical-align:bottom;padding-bottom:4px;box-sizing:border-box;
+    }
+    .header{color:#fff;font-size:22px;border-width:2px !important;vertical-align:middle;padding-bottom:0;
+            -webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .start-pijl{
+      content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:0;height:0;
+      border-left:10px solid transparent;border-right:10px solid transparent;border-top:12px solid #f1c40f;
+    }
+    .honderd{background:#2980b9}.tien{background:#27ae60}.een{background:#f1c40f}
+    .onthoud-cel{vertical-align:middle !important}
+    .onthoud-cel.honderd{background:#a9cce3}.onthoud-cel.tien{background:#a3e4d7}.onthoud-cel.een{background:#f9e79f}
+    .getal-cel{background:#fdfdfd}
+    .schema .oplossing-cel{background:#fff;border-top:4px solid #000 !important}
+
+    @media (max-width:1200px){
+      .main-container{flex-direction:column}
+      .controls{position:static;width:100%;box-sizing:border-box}
+    }
+  </style>
 </head>
 <body>
 
-    <a href="index.html" class="menu-knop">Keuzemenu</a>
+  <a href="index.html" class="menu-knop">Keuzemenu</a>
 
-    <div class="main-container">
-        <div class="controls">
-            <h2>Instellingen</h2>
-            <div class="controls-grid">
-                <div class="control-group">
-                    <h4>Algemeen</h4>
-                    <div class="setting-item">
-                        <label for="type">Soort som:</label>
-                        <select id="type">
-                            <option value="plus">+</option>
-                            <option value="min">-</option>
-                            <option value="gemengd">Gemengd</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label for="brug">Brug:</label>
-                        <select id="brug">
-                            <option value="beide">Beide</option>
-                            <option value="met">Met brug</option>
-                            <option value="zonder">Zonder brug</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label for="invulling">Schema:</label>
-                        <select id="invulling">
-                            <option value="ingevuld">Ingevuld</option>
-                            <option value="leeg">Leeg</option>
-                        </select>
-                    </div>
-                    <div class="setting-item">
-                        <label for="aantal">Aantal:</label>
-                        <input type="number" id="aantal" value="12" min="1" max="24" style="width: 80px;">
-                    </div>
-                </div>
-                <div class="control-group">
-                    <h4>Kies Oefentypes (meerdere mogelijk)</h4>
-                    <div class="oefentype-lijst">
-                        <div><input type="checkbox" id="E_E" name="oefentype" value="E_E"> <label for="E_E">E &pm; E</label></div>
-                        <div><input type="checkbox" id="TE_E" name="oefentype" value="TE_E" checked> <label for="TE_E">TE &pm; E</label></div>
-                        <div><input type="checkbox" id="TE_T" name="oefentype" value="TE_T"> <label for="TE_T">TE &pm; T</label></div>
-                        <div><input type="checkbox" id="TE_TE" name="oefentype" value="TE_TE"> <label for="TE_TE">TE &pm; TE</label></div>
-                        <div><input type="checkbox" id="HTE_E" name="oefentype" value="HTE_E"> <label for="HTE_E">HTE &pm; E</label></div>
-                        <div><input type="checkbox" id="HTE_T" name="oefentype" value="HTE_T"> <label for="HTE_T">HTE &pm; T</label></div>
-                        <div><input type="checkbox" id="HTE_TE" name="oefentype" value="HTE_TE"> <label for="HTE_TE">HTE &pm; TE</label></div>
-                        <div><input type="checkbox" id="HTE_HTE" name="oefentype" value="HTE_HTE"> <label for="HTE_HTE">HTE &pm; HTE</label></div>
-                    </div>
-                </div>
-            </div>
-            <div class="actie-knoppen">
-                <button id="genereer-knop" onclick="genereerWerkblad()">Genereer Werkblad</button>
-                <button id="download-pdf" onclick="downloadPDF()">Download als PDF</button>
-            </div>
+  <div class="main-container">
+    <div class="controls">
+      <h2>Instellingen</h2>
+      <div class="controls-grid">
+        <div class="control-group">
+          <h4>Algemeen</h4>
+          <div class="setting-item">
+            <label for="type">Soort som:</label>
+            <select id="type">
+              <option value="plus">+</option>
+              <option value="min">-</option>
+              <option value="gemengd">Gemengd</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="brug">Brug:</label>
+            <select id="brug">
+              <option value="beide">Beide</option>
+              <option value="met">Met brug</option>
+              <option value="zonder">Zonder brug</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="invulling">Schema:</label>
+            <select id="invulling">
+              <option value="ingevuld">Ingevuld</option>
+              <option value="leeg">Leeg</option>
+            </select>
+          </div>
+          <div class="setting-item">
+            <label for="aantal">Aantal:</label>
+            <input type="number" id="aantal" value="12" min="1" max="24" style="width:80px;">
+          </div>
         </div>
+        <div class="control-group">
+          <h4>Kies Oefentypes (meerdere mogelijk)</h4>
+          <div class="oefentype-lijst">
+            <div><input type="checkbox" id="E_E" name="oefentype" value="E_E"> <label for="E_E">E &pm; E</label></div>
+            <div><input type="checkbox" id="TE_E" name="oefentype" value="TE_E" checked> <label for="TE_E">TE &pm; E</label></div>
+            <div><input type="checkbox" id="TE_T" name="oefentype" value="TE_T"> <label for="TE_T">TE &pm; T</label></div>
+            <div><input type="checkbox" id="TE_TE" name="oefentype" value="TE_TE"> <label for="TE_TE">TE &pm; TE</label></div>
+            <div><input type="checkbox" id="HTE_E" name="oefentype" value="HTE_E"> <label for="HTE_E">HTE &pm; E</label></div>
+            <div><input type="checkbox" id="HTE_T" name="oefentype" value="HTE_T"> <label for="HTE_T">HTE &pm; T</label></div>
+            <div><input type="checkbox" id="HTE_TE" name="oefentype" value="HTE_TE"> <label for="HTE_TE">HTE &pm; TE</label></div>
+            <div><input type="checkbox" id="HTE_HTE" name="oefentype" value="HTE_HTE"> <label for="HTE_HTE">HTE &pm; HTE</label></div>
+          </div>
+        </div>
+      </div>
 
-        <div id="print-area" class="pagina">
-            <div class="werkblad-header">
-                <div class="naam">Naam: _________________________</div>
-                <div class="titel">Extra oefenen op cijferen</div>
-            </div>
-            <div id="werkblad" class="werkblad"></div>
-        </div>
+      <div class="actie-knoppen">
+        <button id="genereer-knop" onclick="genereerWerkblad()">Genereer Werkblad</button>
+        <button id="download-pdf" onclick="downloadPDF()">Download als PDF</button>
+      </div>
     </div>
 
-    <script>
-        function downloadPDF() {
-            const element = document.getElementById('print-area');
-            const opt = {
-                margin:       0,
-                filename:     'cijferen_werkblad.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-            html2pdf().from(element).set(opt).save();
+    <!-- Meerdere pagina's komen hier in -->
+    <div id="print-root"></div>
+  </div>
+
+  <script>
+    function downloadPDF(){
+      const element = document.getElementById('print-root');
+      const opt = {
+        margin:[0,0,0,0],
+        filename:'cijferen_werkblad.pdf',
+        image:{type:'jpeg', quality:0.98},
+        html2canvas:{scale:2, useCORS:true},
+        jsPDF:{unit:'mm', format:'a4', orientation:'portrait'},
+        pagebreak:{mode:['css']}
+      };
+      html2pdf().from(element).set(opt).save();
+    }
+
+    function getRandomNumber(min,max){
+      return Math.floor(Math.random()*(max-min+1))+min;
+    }
+
+    function maakPagina(colsClass){
+      const pagina=document.createElement('div');
+      pagina.className='pagina';
+
+      const header=document.createElement('div');
+      header.className='werkblad-header';
+      header.innerHTML=`
+        <div class="naam">Naam: _________________________</div>
+        <div class="titel">Extra oefenen op cijferen</div>
+      `;
+      pagina.appendChild(header);
+
+      const werkblad=document.createElement('div');
+      werkblad.className='werkblad '+colsClass;
+      pagina.appendChild(werkblad);
+
+      return {pagina, header, werkblad};
+    }
+
+    function genereerWerkblad(){
+      const type=document.getElementById('type').value;
+      const brug=document.getElementById('brug').value;
+      const invulling=document.getElementById('invulling').value;
+      const aantal=parseInt(document.getElementById('aantal').value,10);
+      const root=document.getElementById('print-root');
+      root.innerHTML='';
+
+      const geselecteerdeTypes=Array
+        .from(document.querySelectorAll('input[name="oefentype"]:checked'))
+        .map(cb=>cb.value);
+
+      if(!geselecteerdeTypes.length){
+        alert('Kies minstens één oefentype.');
+        return;
+      }
+
+      const bevatHonderden=geselecteerdeTypes.some(t=>t.includes('H'));
+      const cols=bevatHonderden?3:4;
+      const colsClass=bevatHonderden?'cols-3':'cols-4';
+
+      // Eerste pagina
+      let {pagina, header, werkblad}=maakPagina(colsClass);
+      root.appendChild(pagina);
+
+      // rij-helper
+      const nieuweRij=()=>{ const r=document.createElement('div'); r.className='rij'; return r; };
+
+      // capaciteit berekenen (beschikbare hoogte = pagina.clientHeight - header.offsetHeight)
+      const beschikbareHoogte=()=>pagina.clientHeight - header.offsetHeight;
+
+      let rij=nieuweRij(), inRij=0;
+      werkblad.appendChild(rij);
+
+      const plaatsRijMetPaginering=(rijEl)=>{
+        werkblad.appendChild(rijEl);
+        // Als de werkblad-hoogte boven de beschikbare hoogte komt, maak nieuwe pagina
+        if(werkblad.scrollHeight > beschikbareHoogte()){
+          werkblad.removeChild(rijEl);
+          ({pagina, header, werkblad}=maakPagina(colsClass));
+          root.appendChild(pagina);
+          werkblad.appendChild(rijEl);
+        }
+      };
+
+      for(let i=0;i<aantal;i++){
+        const willekeurigType=geselecteerdeTypes[Math.floor(Math.random()*geselecteerdeTypes.length)];
+        const currentType=(type==='gemengd')?(Math.random()<0.5?'plus':'min'):type;
+
+        let getal1, getal2;
+        let isMetBrug= brug==='met' ? true : brug==='zonder' ? false : Math.random()<0.5;
+
+        let attempts=0;
+        while(attempts<100){
+          const [type1,type2]=willekeurigType.split('_');
+          const ranges={E:[1,9], T:[1,9], TE:[10,99], HTE:[100,999]};
+          const g1=(type1==='T')? getRandomNumber(ranges[type1][0],ranges[type1][1])*10 : getRandomNumber(ranges[type1][0],ranges[type1][1]);
+          const g2=(type2==='T')? getRandomNumber(ranges[type2][0],ranges[type2][1])*10 : getRandomNumber(ranges[type2][0],ranges[type2][1]);
+
+          if(currentType==='plus'){ getal1=g1; getal2=g2; }
+          else { getal1=Math.max(g1,g2); getal2=Math.min(g1,g2); if(getal1===getal2) getal1++; }
+
+          const eenheden1=getal1%10, eenheden2=getal2%10;
+          const tientallen1=Math.floor(getal1/10)%10, tientallen2=Math.floor(getal2/10)%10;
+
+          let actueleBrug=false;
+          if(currentType==='plus'){
+            if(eenheden1+eenheden2>=10) actueleBrug=true;
+            if(willekeurigType.includes('H') && (tientallen1+tientallen2)>=10) actueleBrug=true;
+          }else{
+            if(eenheden1<eenheden2) actueleBrug=true;
+            if(willekeurigType.includes('H') && (tientallen1<tientallen2)) actueleBrug=true;
+          }
+          if(actueleBrug===isMetBrug || brug==='beide') break;
+          attempts++;
         }
 
-        function getRandomNumber(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+        const max=willekeurigType.includes('H')?1000:100;
+        const kaartHTML=createOefeningHTML(getal1,getal2,currentType,max,invulling);
+
+        if(inRij===cols){
+          plaatsRijMetPaginering(rij);
+          rij=nieuweRij(); inRij=0;
         }
 
-        function genereerWerkblad() {
-            let type = document.getElementById('type').value;
-            const brug = document.getElementById('brug').value;
-            const invulling = document.getElementById('invulling').value;
-            const aantal = parseInt(document.getElementById('aantal').value);
-            const werkblad = document.getElementById('werkblad');
-            
-            const geselecteerdeTypes = Array.from(document.querySelectorAll('input[name="oefentype"]:checked')).map(cb => cb.value);
-            if (geselecteerdeTypes.length === 0) {
-                alert("Kies minstens één oefentype.");
-                return;
-            }
-            
-            werkblad.innerHTML = '';
+        const holder=document.createElement('div');
+        holder.innerHTML=kaartHTML.trim();
+        rij.appendChild(holder.firstElementChild);
+        inRij++;
+      }
 
-            for (let i = 0; i < aantal; i++) {
-                const willekeurigType = geselecteerdeTypes[Math.floor(Math.random() * geselecteerdeTypes.length)];
-                const currentType = (type === 'gemengd') ? (Math.random() < 0.5 ? 'plus' : 'min') : type;
-                let getal1, getal2;
-                
-                let isMetBrug;
-                if (brug === 'met') isMetBrug = true;
-                else if (brug === 'zonder') isMetBrug = false;
-                else isMetBrug = Math.random() < 0.5;
+      if(rij.children.length){
+        plaatsRijMetPaginering(rij);
+      }
+    }
 
-                let attempts = 0;
-                while (attempts < 100) {
-                    const [type1, type2] = willekeurigType.split('_');
-                    const ranges = { E: [1, 9], T: [1, 9], TE: [10, 99], HTE: [100, 999] };
+    function createOefeningHTML(g1,g2,type,max,invulling){
+      const op= type==='plus' ? '+' : '-';
+      const vraag=`${g1} ${op} ${g2} = ?`;
+      let H1='',T1='',E1='',H2='',T2='',E2='';
 
-                    let g1 = (type1 === 'T') ? getRandomNumber(ranges[type1][0], ranges[type1][1]) * 10 : getRandomNumber(ranges[type1][0], ranges[type1][1]);
-                    let g2 = (type2 === 'T') ? getRandomNumber(ranges[type2][0], ranges[type2][1]) * 10 : getRandomNumber(ranges[type2][0], ranges[type2][1]);
-                    
-                    if (currentType === 'plus') {
-                        getal1 = g1; getal2 = g2;
-                    } else {
-                        getal1 = Math.max(g1, g2); getal2 = Math.min(g1, g2);
-                        if (getal1 === getal2) getal1++;
-                    }
+      if(invulling==='ingevuld'){
+        const pad = max===1000 ? 3 : 2;
+        const g1_str=g1.toString().padStart(pad,' ');
+        const g2_str=g2.toString().padStart(pad,' ');
+        if(max===1000){ [H1,T1,E1]=g1_str.split(''); [H2,T2,E2]=g2_str.split(''); }
+        else{ [T1,E1]=g1_str.split(''); [T2,E2]=g2_str.split(''); }
+        [H1,T1,E1,H2,T2,E2]=[H1,T1,E1,H2,T2,E2].map(v=>v.trim());
+      }
 
-                    const eenheden1 = getal1 % 10, eenheden2 = getal2 % 10;
-                    const tientallen1 = Math.floor(getal1 / 10) % 10, tientallen2 = Math.floor(getal2 / 10) % 10;
-                    
-                    let actueleBrug = false;
-                    if (currentType === 'plus') {
-                         if (eenheden1 + eenheden2 >= 10) actueleBrug = true;
-                         if (willekeurigType.includes('H') && tientallen1 + tientallen2 >= 10) actueleBrug = true;
-                    } else {
-                         if (eenheden1 < eenheden2) actueleBrug = true;
-                         if (willekeurigType.includes('H') && tientallen1 < tientallen2) actueleBrug = true;
-                    }
+      const showH=max===1000;
+      return `
+        <div class="oefening">
+          <div class="vraag">${vraag}</div>
+          <div class="schema-container">
+            <div class="operator">${op}</div>
+            <table class="schema">
+              <thead>
+                <tr>
+                  ${showH?'<td class="header honderd">H</td>':''}
+                  <td class="header tien">T</td>
+                  <td class="header een">E<div class="start-pijl"></div></td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  ${showH?'<td class="onthoud-cel honderd"></td>':''}
+                  <td class="onthoud-cel tien"></td>
+                  <td class="onthoud-cel een"></td>
+                </tr>
+                <tr>
+                  ${showH?`<td class="getal-cel">${H1}</td>`:''}
+                  <td class="getal-cel">${T1}</td>
+                  <td class="getal-cel">${E1}</td>
+                </tr>
+                <tr>
+                  ${showH?`<td class="getal-cel">${H2}</td>`:''}
+                  <td class="getal-cel">${T2}</td>
+                  <td class="getal-cel">${E2}</td>
+                </tr>
+                <tr>
+                  ${showH?'<td class="oplossing-cel"></td>':''}
+                  <td class="oplossing-cel"></td>
+                  <td class="oplossing-cel"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
 
-                    if (actueleBrug === isMetBrug || brug === 'beide') break; 
-                    attempts++;
-                }
-                
-                const max = willekeurigType.includes('H') ? 1000 : 100;
-                werkblad.innerHTML += createOefeningHTML(getal1, getal2, currentType, max, invulling);
-            }
-        }
-
-        function createOefeningHTML(g1, g2, type, max, invulling) {
-            const op = type === 'plus' ? '+' : '-';
-            const vraag = `${g1} ${op} ${g2} = ?`;
-            let H1 = '', T1 = '', E1 = '', H2 = '', T2 = '', E2 = '';
-            
-            if (invulling === 'ingevuld') {
-                const pad = max === 1000 ? 3 : 2;
-                const g1_str = g1.toString().padStart(pad, ' ');
-                const g2_str = g2.toString().padStart(pad, ' ');
-                if (max === 1000) {
-                    [H1, T1, E1] = g1_str.split(''); [H2, T2, E2] = g2_str.split('');
-                } else {
-                    [T1, E1] = g1_str.split(''); [T2, E2] = g2_str.split('');
-                }
-                [H1, T1, E1, H2, T2, E2] = [H1, T1, E1, H2, T2, E2].map(v => v.trim());
-            }
-
-            const showH = max === 1000;
-            return `
-                <div class="oefening">
-                    <div class="vraag">${vraag}</div>
-                    <div class="schema-container">
-                        <div class="operator">${op}</div>
-                        <table class="schema">
-                            <thead>
-                                <tr>
-                                    ${showH ? '<td class="header honderd">H</td>' : ''}
-                                    <td class="header tien">T</td>
-                                    <td class="header een">E<div class="start-pijl"></div></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    ${showH ? '<td class="onthoud-cel honderd"></td>' : ''}
-                                    <td class="onthoud-cel tien"></td>
-                                    <td class="onthoud-cel een"></td>
-                                </tr>
-                                <tr>
-                                    ${showH ? `<td class="getal-cel">${H1}</td>` : ''}
-                                    <td class="getal-cel">${T1}</td>
-                                    <td class="getal-cel">${E1}</td>
-                                </tr>
-                                <tr>
-                                    ${showH ? `<td class="getal-cel">${H2}</td>` : ''}
-                                    <td class="getal-cel">${T2}</td>
-                                    <td class="getal-cel">${E2}</td>
-                                </tr>
-                                <tr>
-                                    ${showH ? '<td class="oplossing-cel"></td>' : ''}
-                                    <td class="oplossing-cel"></td>
-                                    <td class="oplossing-cel"></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            `;
-        }
-        
-        window.onload = genereerWerkblad;
-    </script>
-
+    window.onload=genereerWerkblad;
+  </script>
 </body>
 </html>
