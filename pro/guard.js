@@ -38,7 +38,7 @@ const goDevices = () => safeGo("./apparaten.html");
 const goKoop    = (r) => safeGo("./koop.html", r);
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, onAuthStateChanged, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import { initializeAppCheck, ReCaptchaV3Provider, getToken as getAppCheckToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
@@ -87,6 +87,14 @@ if (!GUARD_OFF) {
 
     if (!user) { goLogin(); return; }
 
+    // ✅ Nieuw: ingelogde user maar URL staat op resetPassword → meteen naar app
+    const mode = new URLSearchParams(location.search).get("mode");
+    if (mode === "resetPassword") {
+      console.warn("[GUARD] User ingelogd maar op resetPassword, stuur door naar app.");
+      goApp();
+      return;
+    }
+
     const IS_DEVICES_PAGE = CURRENT_PAGE === "apparaten.html";
 
     try {
@@ -134,6 +142,14 @@ if (!GUARD_OFF) {
       }
     } catch (err) {
       console.error("Guard error:", err);
+      goLogin();
+    }
+  });
+
+  // ✅ Nieuw: extra vangnet – als token vervalt, stuur naar login
+  onIdTokenChanged(auth, (user) => {
+    if (!user && !SKIP_PAGES.has(CURRENT_PAGE)) {
+      console.warn("[GUARD] Sessie verlopen → terug naar login");
       goLogin();
     }
   });
