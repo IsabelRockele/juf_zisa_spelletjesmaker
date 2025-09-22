@@ -9,35 +9,46 @@
         body {
             font-family: sans-serif;
             background-color: #f0f2f5;
+            margin: 0; /* Reset default margin */
+        }
+        .menu-knop {
+            display: inline-block;
+            background-color: #002d62; /* Donkerblauw */
+            color: white;
+            padding: 12px 22px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px;
         }
         .main-container {
             display: flex;
             align-items: flex-start;
             gap: 30px;
-            padding: 20px;
+            padding: 0 20px 20px 20px; 
         }
         .controls {
-            flex: 0 0 380px; /* Vaste breedte voor het controlepaneel */
+            flex: 0 0 380px; 
             padding: 20px;
             border: 1px solid #ccc;
             border-radius: 8px;
             background-color: #ffffff;
             position: sticky;
-            top: 20px; /* Maakt het menu "plakkerig" bij het scrollen */
+            top: 20px; 
         }
         .pagina {
             width: 210mm;
             min-height: 297mm;
-            padding: 20mm;
+            padding: 10mm 15mm; 
             box-sizing: border-box;
             border: 1px solid #ddd;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             background: white;
-            margin: 0; /* Verwijder auto margin */
+            margin: 0; 
         }
         .controls-grid {
             display: grid;
-            grid-template-columns: 1fr; /* Alles onder elkaar */
+            grid-template-columns: 1fr; 
             gap: 15px;
         }
         .control-group {
@@ -47,7 +58,6 @@
         }
         .control-group h4 { margin-top: 0; margin-bottom: 10px; }
         
-        /* --- NIEUW: Ruimte tussen keuzes --- */
         .setting-item {
             margin-bottom: 12px;
             display: flex;
@@ -60,7 +70,7 @@
 
         .controls label { font-size: 16px; margin: 0; }
         .oefentype-lijst div {
-            display: block; /* Zorgt dat elke checkbox op een nieuwe lijn staat */
+            display: block; 
             margin-bottom: 5px;
         }
         .actie-knoppen {
@@ -80,19 +90,21 @@
         #genereer-knop { background-color: #007bff; }
         #download-pdf { background-color: #28a745; }
 
-        /* --- LAYOUT AANPASSINGEN --- */
-        .werkblad-header { margin-bottom: 30px; }
+        /* --- Werkblad stijlen --- */
+        .werkblad-header { 
+            margin-bottom: 25px; /* AANPASSING: Iets minder marge */
+        }
         .werkblad-header .naam { font-size: 16px; }
         .werkblad-header .titel { font-size: 24px; font-weight: bold; text-align: center; margin-top: 10px; }
         .werkblad {
             display: flex; flex-wrap: wrap; 
-            gap: 30px 40px; 
+            gap: 25px 40px; /* AANPASSING: Iets minder verticale ruimte */
             justify-content: flex-start;
         }
         .oefening {
             position: relative; 
             padding: 15px;
-            padding-top: 55px; 
+            padding-top: 50px; /* AANPASSING: Iets minder ruimte boven de som */
             border: 1px solid #cccccc; 
             border-radius: 8px;
         }
@@ -108,7 +120,7 @@
         .operator {
             font-size: 26px; 
             font-weight: bold; position: absolute; 
-            top: 167px; /* --- CORRECTIE: Lagere positie --- */
+            top: 167px; 
             left: -28px;
         }
         .schema { border-collapse: collapse; }
@@ -161,6 +173,8 @@
     </style>
 </head>
 <body>
+
+    <a href="index.html" class="menu-knop">Keuzemenu</a>
 
     <div class="main-container">
         <div class="controls">
