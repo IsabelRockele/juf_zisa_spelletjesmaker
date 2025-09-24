@@ -1,0 +1,242 @@
+html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#fffdfa;color:#222}
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #d9e2ec;z-index:10}
+    .wrap{max-width:1060px;margin:0 auto;padding:14px}
+    .layout{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start}
+    fieldset{border:1px solid #d9e2ec;border-radius:10px;padding:10px;background:#fff;margin-bottom:12px}
+    legend{padding:0 6px;color:#334;font-weight:600}
+    label{display:inline-flex;align-items:center;gap:8px;margin:4px 10px 4px 0}
+    input[type=number],input[type=text],select{border:1px solid #d9e2ec;border-radius:9px;padding:5px 9px;font-size:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+    .btn{appearance:none;border:1px solid #1e88e5;background:#1e88e5;color:#fff;border-radius:999px;padding:7px 12px;cursor:pointer;font-weight:600}
+    .btn.ghost{background:#fff;color:#1e88e5}
+    .btn.ghost:hover{box-shadow: inset 0 0 0 2px #1e88e5;}
+    #previewBox{border:1px solid #d9e2ec;border-radius:12px;background:#eef6ff;padding:12px}
+    #previewSvg{display:block;width:100%;height:160px}
+    #sheet{position:relative;border:1px solid #d9e2ec;border-radius:12px;background:#fff;padding:14px}
+    .sheetHeader{margin:4px 0 8px 0; border-bottom: 2px solid #334; padding-bottom: 8px;}
+
+    /* Opdrachtblokken */
+    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
+      position:relative;margin:14px 0 20px 0;padding:10px 12px 20px 12px;border:1px solid #d9e2ec;border-radius:10px;background:#fff;page-break-inside: avoid;overflow: visible;
+    }
+    .title-row{display:flex;align-items:center;gap:8px;margin:6px 0 8px 0}
+    .exercise-title{font-weight:600;color:#334;margin:0;font-size:15px; page-break-after: avoid;}
+    .title-delete-btn{width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold}
+    .title-delete-btn:hover{background:#ffe9e9}
+    .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
+
+    /* Honderdveld */
+    .honderdveld-container{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+    .honderdveld-grid{display:grid;grid-template-columns:repeat(10, 20px);grid-template-rows:repeat(10, 20px);border-top:1px solid #ccc;border-left:1px solid #ccc;width:201px;height:201px;box-sizing:content-box;flex-shrink:0}
+    .honderdveld-cell{border-right:1px solid #ccc;border-bottom:1px solid #ccc;box-sizing:border-box}
+    .honderdveld-cell.filled-ten{background:#4caf50}
+    .honderdveld-cell.filled-unit{background:#ffeb3b}
+    .honderdveld-cell:nth-child(10n+5){border-right:2px solid #334}
+    .honderdveld-cell:nth-child(n+41):nth-child(-n+50){border-bottom:2px solid #334}
+    .honderdveld-task{display:flex;align-items:center;gap:12px}
+    .honderdveld-te-table{border-collapse:collapse;text-align:center;font-weight:bold}
+    .honderdveld-te-table td{border:1px solid #334;width:40px;height:36px}
+    .honderdveld-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:16px;box-sizing:border-box}
+    .honderdveld-num-box{width:50px;height:44px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
+    .honderdveld-row{display:flex;gap:16px;align-items:flex-start;page-break-inside:avoid}
+    .honderdveld-row>.honderdveld-exercise-block{flex:1;margin-top:0}
+    .aanvul-vragen{display:flex;flex-direction:column;gap:10px;font-size:16px}
+    .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .aanvul-input{width:40px;height:30px;border:1px solid #ccc;border-radius:6px;text-align:center;font:inherit;font-size:15px}
+
+    /* MAB Materiaal */
+    .mab-grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .mab-grid-layout>*{min-height:240px;align-items:flex-start}
+    .mab-tellen-container{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .mab-labeled-container{display:flex;border:1.5px solid #334;border-radius:4px}
+    .mab-column{display:flex;flex-direction:column;align-items:center;padding:4px}
+    .mab-column-tens{border-right:1.5px solid #334}
+    .mab-header{font-weight:bold;font-size:16px;margin-bottom:4px;min-height:20px;width:100%;text-align:center;border-bottom:1.5px solid #334;padding-bottom:4px}
+    .mab-blocks-wrapper{display:flex;flex-wrap:wrap;gap:4px;min-height:150px;align-content:flex-start;padding-top:4px}
+    /* Honderden-kolom: breed genoeg zodat 2 kleinere honderdvelden naast elkaar passen */
+    .mab-hundreds-wrapper{width:110px}
+    .mab-tens-wrapper{width:76px}
+    .mab-units-wrapper{width:76px}
+    .mab-blocks-wrapper svg{height:60px}
+    .mab-blocks-wrapper svg.unit{height:12px;width:12px}
+    /* NIEUW: kleinere blauwe honderdvelden + 2 per rij */
+    .mab-blocks-wrapper svg.hundred{height:48px;width:48px}
+
+    .mab-te-table{border-collapse:collapse;text-align:center;font-weight:bold;margin-top:6px}
+    .mab-te-table td{border:1px solid #334;width:40px;height:36px}
+    .mab-te-table .te-label{background:#4caf50;color:#fff;font-size:16px}
+    .mab-te-table .te-label.e{background:#ffeb3b;color:#333}
+    .mab-te-table .te-label.h{background:#42a5f5;color:#fff}
+    .mab-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:18px;box-sizing:border-box}
+
+    /* Verbinden (MAB) */
+    .mab-connect-2row{display:flex;flex-direction:column;gap:84px;padding:8px 4px 16px 4px}
+    .mab-connect-row-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:end}
+    .mab-connect-card{position:relative;display:flex;justify-content:center}
+    .connect-dot{position:absolute;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:50%}
+    .connect-dot.bottom{bottom:-16px}
+    .connect-dot.top{top:-16px}
+    .mab-connect-num{font-size:22px;font-weight:bold;border:2px solid #ccc;border-radius:10px;width:60px;height:48px;display:flex;justify-content:center;align-items:center;margin:0 auto}
+
+    /* Getallenlijn */
+    .exercise.drag{padding-bottom:100px}
+    .exercise svg{display:block;width:100%;height:220px}
+    .exercise.drag svg{margin-top:12px}
+    .exercise.blanks svg{margin-top:22px}
+    .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700}
+    .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
+    .print-overlay-input{position:absolute;background:transparent;border:0;outline:none;z-index:2;}
+
+    /* Sprongen */
+    .jump-exercise{padding:12px 8px 8px 8px}
+    .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px}
+    .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
+    .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
+    .jump-arc-wrapper{position:relative;height:28px}
+    .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0}
+    .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2}
+    .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none}
+    .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
+
+    /* Gemengd */
+    .mixed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
+    /* bij HTE 2 per rij */
+    .mixed-grid.hte-2col{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:visible;white-space:nowrap}
+    .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center}
+    .mix-label{font-weight:700;font-size:16px}
+    .mix-eq{font-weight:700;margin:0 2px}
+    .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+    .mix-box.small{width:40px}
+
+    /* Getallenrij */
+    .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px}
+    .seq-num{min-width:42px;text-align:center;font-weight:700}
+    .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+
+    /* ---- Waarde per cijfer (TE, behoud) ---- */
+    .pv-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .pv-item { position:relative; padding:8px; border:1px dashed #d9e2ec; border-radius:8px; min-height:130px; }
+    .pv-number { display:flex; }
+    .pv-digit { width:36px; height:36px; border-radius:6px; border:2px solid #c9d6ea; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+    .pv-digit.tens { background:#4caf50; color:#fff; }
+    .pv-digit.units{ background:#ffeb3b; color:#333; }
+    .pv-arrows { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .pv-answers { position:absolute; left:130px; top:50px; display:flex; flex-direction:column; gap:12px; }
+    .pv-row { display:flex; align-items:center; gap:4px; white-space:nowrap; }
+    .pv-box, .pv-small { border:2px solid #c9d6ea; border-radius:6px; text-align:center; font:inherit; height:28px; }
+    .pv-small { width:22px; }
+    .pv-box { width:22px; }
+    .pv-label { font-weight:700; }
+
+    /* ---- Waarde per cijfer (HTE, nieuw) ---- */
+    .pv3-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:24px; }
+    .pv3-grid.one-col{ grid-template-columns:1fr; }
+    .pv3-item { position:relative; padding:8px; border:1px dashed #d9e2ec; border-radius:8px; min-height:190px; }
+    .pv3-number{ display:flex; }
+    .pv3-digit{ width:36px; height:36px; border-radius:6px; border:2px solid #c9d6ea; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+    .pv3-digit.hundreds{ background:#42a5f5; color:#fff; }
+    .pv3-digit.tens{ background:#4caf50; color:#fff; }
+    .pv3-digit.units{ background:#ffeb3b; color:#333; }
+    .pv3-answers{ position:absolute; left:130px; top:48px; display:flex; flex-direction:column; gap:16px; }
+    .pv3-row{ display:flex; align-items:center; gap:4px; white-space:nowrap;}
+    .pv3-box,.pv3-small{ border:2px solid #c9d6ea; border-radius:6px; text-align:center; font:inherit; height:28px; }
+    .pv3-small{ width:22px; }
+    .pv3-box{ width:22px; }
+    .pv3-label{ font-weight:700; }
+
+    /* Menu */
+    .menu-btn{position:fixed;top:10px;left:10px;z-index:20;display:inline-block;padding:8px 14px;border-radius:999px;background:#0d47a1;color:#fff;text-decoration:none;font-weight:700;border:1px solid #0a3a85}
+    .menu-btn:focus{outline:2px solid #fff;outline-offset:2px}
+
+    @media print{header,#controls,#previewTitle,.title-delete-btn,.delete-btn,.print-overlay-input{display:none!important}#sheet{border:0;padding:0}}
+    @page{margin:12mm 12mm 12mm 22mm}
+
+/* === PATCH: Plaatswaarde TE / HTE en Verbinden (overlap fix) === */
+
+/* Waarde per cijfer tot 100 (TE) */
+.pv-answers{
+  position:absolute;
+  left:130px;   /* uitlijnen met pijl-einde */
+  top:50px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* Waarde per cijfer tot 1000 (HTE) */
+.pv3-answers{
+  position:absolute;
+  left:130px;
+  top:52px;     /* iets lager voor nette landing */
+  display:flex;
+  flex-direction:column;
+  gap:16px;     /* meer ruimte tussen rijen */
+}
+
+/* Verbinden 'Wat is evenveel?' */
+.mab-connect-2row{
+  display:flex;
+  flex-direction:column;
+  gap:68px;          /* ruimte tussen boven- en onderrij */
+  padding:8px 6px 18px 6px;
+}
+.mab-connect-row-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:18px 22px;     /* horizontaal x verticaal */
+  align-items:start; /* voorkomt in elkaar schuiven */
+}
+.mab-connect-card{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:visible;
+  min-height:160px;  /* vaste hoogte voorkomt overlap */
+}
+/* schaal H/T/E iets kleiner in verbinden */
+.mab-connect-row-grid .mab-labeled-container{
+  transform:scale(0.88);
+  transform-origin:top center;
+}
+/* compacter blokjes in verbinden */
+.mab-connect-row-grid .mab-blocks-wrapper svg.hundred{ width:44px; height:44px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg{ height:54px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.unit{ width:12px; height:12px; }
+.connect-dot{ position:absolute; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#000; border-radius:50%; }
+.connect-dot.bottom{ bottom:-16px; }
+.connect-dot.top{ top:-16px; }
+/* --- Extra ruimte tussen rijen bij 'Hoeveel tel je?' --- */
+.mab-grid-layout{ gap:26px 16px; } /* rij-gap ↑, kolom-gap gelijk */
+
+/* --- Verbinden: 3 per rij + veilige kaartgrootte --- */
+.mab-connect-2row{
+  display:flex; flex-direction:column;
+  gap:72px;               /* verticale ruimte tussen boven- en onderrij */
+  padding:8px 6px 18px 6px;
+}
+.mab-connect-row-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr)); /* 3 per rij */
+  gap:20px 24px;           /* h × v */
+  align-items:start;
+}
+.mab-connect-card{
+  position:relative;
+  display:flex; justify-content:center; align-items:flex-start;
+  min-height:170px;        /* vaste hoogte voorkomt inzakken/overlap */
+  overflow:visible;
+}
+/* H/T/E-visual in verbinden iets compacter */
+.mab-connect-row-grid .mab-labeled-container{ transform:scale(.9); transform-origin:top center; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.hundred{ width:44px; height:44px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg{ height:54px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.unit{ width:12px; height:12px; }
+
+/* --- Plaatswaarde: antwoordkolommen blijven leidend --- */
+.pv-answers{ left:130px; }   /* TE */
+.pv3-answers{ left:130px; }  /* HTE */
+.mab-connect-num { min-width: 64px; }
+.mab-connector { pointer-events: none; }
+
