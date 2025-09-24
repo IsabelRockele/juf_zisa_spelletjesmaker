@@ -8,6 +8,15 @@
   const sheet = $('#sheet');
   const previewSvg = $('#previewSvg');
   const NS = 'http://www.w3.org/2000/svg';
+  function bindThrottled(el, fn, delay=350){
+  if (!el) return;
+  let lock = false;
+  el.addEventListener('click', () => {
+    if (lock) return;
+    lock = true;
+    try { fn(); } finally { setTimeout(()=>lock=false, delay); }
+  });
+}
 
   /* =====================  HULPJES  ===================== */
   function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
@@ -62,6 +71,27 @@
       addedTitles.add(key);
     }
   }
+
+  // Bevries de renderbreedte van een blok en bijbehorend SVG
+function freezeBlockWidth(block, svg){
+  const w = Math.round(svg.getBoundingClientRect().width || block.getBoundingClientRect().width);
+  block.style.width = w + 'px';
+  svg.style.width = w + 'px';
+  svg.style.maxWidth = 'none';
+}
+
+  // Zet een nieuw blok direct na de laatste oefening met dezelfde titleKey.
+// Bestaat er nog geen? Plaats het blok dan direct na de titelrij (of anders onderaan).
+function placeAfterLastOfKey(el, key){
+  const list = sheet.querySelectorAll(`[data-title-key="${key}"]:not(.exercise-title)`);
+  if (list.length) { list[list.length - 1].after(el); return; }
+
+  const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${key}"]`)?.parentElement;
+  if (titleRow) { titleRow.after(el); return; }
+
+  sheet.appendChild(el);
+}
+
   const createDeleteButton = (target) => {
     const btn = document.createElement('button');
     btn.className = 'delete-btn'; btn.innerHTML = '&times;'; btn.type='button';
@@ -97,7 +127,7 @@
   const wantLabel = (val, o) => o.showOnes || (o.showTens&&val%10===0) || (o.showFives&&val%5===0) || (o.showZero&&val===0) || (o.showEnds&&(val===o.start||val===o.end));
 
   function drawRuler(svgEl, o) {
-    const width = svgEl.clientWidth || 1000;
+    const width = svgEl.clientWidth || 1400;
     const height = 220;
     svgEl.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svgEl.innerHTML = '';
@@ -147,64 +177,75 @@
     if(titleKey) ex.dataset.titleKey = titleKey;
     ex.appendChild(createDeleteButton(ex));
     if(o.mode==='drag') ex.classList.add('drag'); if(o.mode==='blanks') ex.classList.add('blanks');
-    const svg=document.createElementNS(NS,'svg'); ex.appendChild(svg); sheet.appendChild(ex);
+    const svg=document.createElementNS(NS,'svg'); ex.appendChild(svg); if (titleKey) placeAfterLastOfKey(ex, titleKey); else sheet.appendChild(ex);
     const {ticks, baseY, g}=drawRuler(svg, o);
 
-    if (o.mode==='drag') {
-      let values = (o.dragValues && o.dragValues.length) ? o.dragValues.filter(Number.isFinite) : [];
-      if (!values.length) values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6);
+    // Bevries eerst de breedte, dán pas overlays plaatsen
+requestAnimationFrame(() => {
+  freezeBlockWidth(ex, svg);
 
-      requestAnimationFrame(() => {
-        const cardWidth=52, gap=14, n=values.length;
-        const totalWidth = n*cardWidth+(n-1)*gap;
-        const svgRect = svg.getBoundingClientRect(), exRect  = ex.getBoundingClientRect();
-        const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
-        const innerWidth = svgRect.width - PAD_L - PAD_R;
-        const startX = Math.round(rulerLeft + (innerWidth - totalWidth)/2);
-        const DRAW_GAP = 80;
-        const topPos = Math.round((svgRect.top - exRect.top) + baseY + DRAW_GAP);
-        values.forEach((val,i)=>{
-          const c=document.createElement('div'); c.className='card'; c.textContent=val;
-          c.style.position='absolute';
-          c.style.left = (startX + i*(cardWidth+gap)) + 'px';
-          c.style.top  = topPos + 'px';
-          ex.appendChild(c);
-        });
-      });
-    }
+  if (o.mode==='drag') {
+    let values = (o.dragValues && o.dragValues.length)
+      ? o.dragValues.filter(Number.isFinite)
+      : [];
+    if (!values.length) values = ticks.filter(t=>t.isMajor).map(t=>t.v).slice(0,6);
 
-    if(o.mode==='blanks'){
-      const all = ticks.filter(t=>!wantLabel(t.v,o)).sort(()=>Math.random()-0.5);
-      const minGap = 36, picked = [];
-      for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
-      picked.sort((a,b)=>a.x-b.x);
-      let above=true; const bw=46,bh=34, offA=40, offB=32, margin=10;
-      const svgRect=svg.getBoundingClientRect(), exRect=ex.getBoundingClientRect();
-      picked.forEach(t=>{
-        const xC=t.x, x=(svgRect.left - exRect.left) + (xC-bw/2); let y;
-        const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
-        if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,svg.height.baseVal.value-margin)); }
-        else{ y=baseY+(offB+14); if(y+bh>svg.height.baseVal.value-margin) y=svg.height.baseVal.value-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
-        conn.setAttribute('marker-end','url(#arrowhead)');
+    const cardWidth=52, gap=14, n=values.length;
+    const totalWidth = n*cardWidth+(n-1)*gap;
+    const svgRect = svg.getBoundingClientRect(), exRect  = ex.getBoundingClientRect();
+    const rulerLeft  = (svgRect.left - exRect.left) + PAD_L;
+    const innerWidth = svgRect.width - PAD_L - PAD_R;
+    const startX = Math.round(rulerLeft + (innerWidth - totalWidth)/2);
+    const DRAW_GAP = 80;
+    const topPos = Math.round((svgRect.top - exRect.top) + baseY + DRAW_GAP);
 
-        const rect=document.createElementNS(NS,'rect');
-        rect.setAttribute('x',xC-bw/2); rect.setAttribute('y',y);
-        rect.setAttribute('width',bw); rect.setAttribute('height',bh);
-        rect.setAttribute('rx',9); rect.setAttribute('fill','#fff');
-        rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2');
-        g.appendChild(rect);
-
-        const htmlBox=document.createElement('input');
-        htmlBox.type='text'; htmlBox.className='print-overlay-input';
-        htmlBox.style.left= (x) +'px';
-        htmlBox.style.top = ((svgRect.top - exRect.top) + y) + 'px';
-        htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
-        htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
-        ex.appendChild(htmlBox);
-        above=!above;
-      });
-    }
+    values.forEach((val,i)=>{
+      const c=document.createElement('div'); c.className='card'; c.textContent=val;
+      c.style.position='absolute';
+      c.style.left = (startX + i*(cardWidth+gap)) + 'px';
+      c.style.top  = topPos + 'px';
+      ex.appendChild(c);
+    });
   }
+
+  if (o.mode==='blanks'){
+    const all = ticks.filter(t=>!wantLabel(t.v,o)).sort(()=>Math.random()-0.5);
+    const minGap = 36, picked = [];
+    for(const t of all){ if(picked.length>=o.blankCount) break; if(picked.every(p=>Math.abs(p.x-t.x)>=minGap)) picked.push(t); }
+    picked.sort((a,b)=>a.x-b.x);
+
+    let above=true; const bw=46,bh=34, offA=40, offB=32, margin=10;
+    const svgRect=svg.getBoundingClientRect(), exRect=ex.getBoundingClientRect();
+
+    picked.forEach(t=>{
+      const xC=t.x, x=(svgRect.left - exRect.left) + (xC-bw/2); let y;
+      const conn=line(g,xC,baseY,xC,0,'#1e88e5','1.6');
+
+      if(above){ y=baseY-(offA+12)-bh; if(y<margin) y=margin; conn.setAttribute('y2',Math.min(y+bh+2,svg.height.baseVal.value-margin)); }
+      else     { y=baseY+(offB+14);    if(y+bh>svg.height.baseVal.value-margin) y=svg.height.baseVal.value-margin-bh; conn.setAttribute('y2',Math.max(y-2,margin)); }
+      conn.setAttribute('marker-end','url(#arrowhead)');
+
+      const rect=document.createElementNS(NS,'rect');
+      rect.setAttribute('x',xC-bw/2); rect.setAttribute('y',y);
+      rect.setAttribute('width',bw); rect.setAttribute('height',bh);
+      rect.setAttribute('rx',9); rect.setAttribute('fill','#fff');
+      rect.setAttribute('stroke','#c9d6ea'); rect.setAttribute('stroke-width','2');
+      g.appendChild(rect);
+
+      const htmlBox=document.createElement('input');
+      htmlBox.type='text'; htmlBox.className='print-overlay-input';
+      htmlBox.style.left= (x) +'px';
+      htmlBox.style.top = ((svgRect.top - exRect.top) + y) + 'px';
+      htmlBox.style.width=bw+'px'; htmlBox.style.height=bh+'px';
+      htmlBox.style.textAlign='center'; htmlBox.style.fontWeight='700'; htmlBox.style.font='inherit';
+      ex.appendChild(htmlBox);
+
+      above=!above;
+    });
+  }
+});
+
+}  // ← NIEUW: sluit function addExerciseToSheet()
 
   /* =====================  SPRONGEN  ===================== */
   function drawJumpArcsInline(row, labels){
@@ -267,7 +308,7 @@
       for(let i=0;i<count-1;i++){ const box=document.createElement('input'); box.className='jump-box'; row.appendChild(box); }
       ex.appendChild(row); block.appendChild(ex);
     }
-    sheet.appendChild(block);
+    placeAfterLastOfKey(block, key);
     requestAnimationFrame(()=>drawJumpArcsInline(row, Array(count-1).fill(discover? '?': ('+'+step))));
   }
 
@@ -358,7 +399,7 @@
       else if(type==='compareHTE'){const left=makeSideHTEorNumber(max);const right=makeSideHTEorNumber(max);const mid=box('small');const leftEl=left.isHTE?makeLabel(left.text):makeNum(left.value);const rightEl=right.isHTE?makeLabel(right.text):makeNum(right.value);item.append(leftEl,mid,rightEl);}
       grid.appendChild(item);
     }
-    block.appendChild(grid); sheet.appendChild(block);
+    block.appendChild(grid); placeAfterLastOfKey(block, key);
   }
 
   /* =====================  GETALLENRIJ  ===================== */
@@ -379,7 +420,7 @@
     const block=document.createElement('div'); block.className='sequence-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
     const row=document.createElement('div'); row.className='seq-row';
     seq.forEach((n,i)=>{ if(blankSet.has(i)){ const inp=document.createElement('input'); inp.type='text'; inp.className='seq-box'; row.appendChild(inp);} else { const d=document.createElement('div'); d.className='seq-num'; d.textContent=n; row.appendChild(d);} });
-    block.appendChild(row); sheet.appendChild(block);
+    block.appendChild(row); placeAfterLastOfKey(block, key);
   }
 
   /* =====================  Honderdveld / MAB  ===================== */
@@ -533,18 +574,37 @@ function addHonderdveldExercise() {
     }
 
     block.appendChild(container);
+    
+if (twoColumns) {
+  // alle bestaande rijen die al Honderdveld-blokken van deze sectie bevatten
+  const rows = Array.from(sheet.querySelectorAll('.honderdveld-row'))
+    .filter(r => r.querySelector(`.honderdveld-exercise-block[data-title-key="${key}"]`));
+  let lastRow = rows[rows.length - 1];
 
-    // Optioneel 2-koloms lay-out
-    if (twoColumns) {
-      if (i % 2 === 0) {
-        rowContainer = document.createElement('div');
-        rowContainer.className = 'honderdveld-row';
-        sheet.appendChild(rowContainer);
-      }
-      rowContainer.appendChild(block);
+  // helper: tel alléén Honderdveld-blokken (geen andere kinderen)
+  const countIn = row =>
+    row ? row.querySelectorAll(`.honderdveld-exercise-block[data-title-key="${key}"]`).length : 0;
+
+  // is er nog geen rij, of laatste is vol (2)? → nieuwe rij buiten/na de vorige rij zetten
+  if (!lastRow || countIn(lastRow) >= 2) {
+    const newRow = document.createElement('div');
+    newRow.className = 'honderdveld-row';
+
+    if (lastRow) {
+      // **belangrijk**: ná de hele rij plaatsen (niet na het laatste blok)
+      lastRow.after(newRow);
     } else {
-      sheet.appendChild(block);
+      // eerste rij: direct na de titel zetten
+      const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${key}"]`)?.parentElement;
+      if (titleRow) titleRow.after(newRow); else sheet.appendChild(newRow);
     }
+    lastRow = newRow;
+  }
+
+  lastRow.appendChild(block);
+} else {
+  placeAfterLastOfKey(block, key);
+}
   }
 }
 
@@ -585,7 +645,7 @@ function addHonderdveldExercise() {
         grid.appendChild(container);
       }
       block.appendChild(grid);
-      sheet.appendChild(block);
+      placeAfterLastOfKey(block, key);
       return;
     }
 
@@ -628,7 +688,7 @@ function addHonderdveldExercise() {
         });
 
         wrap.append(topRow, document.createElement('div'), botRow);
-        block.appendChild(wrap); sheet.appendChild(block);
+        block.appendChild(wrap); placeAfterLastOfKey(block, key);
         return;
       }
 
@@ -681,13 +741,13 @@ function addHonderdveldExercise() {
           card.append(dot, num); rightCol.appendChild(card);
         });
 
-        block.appendChild(wrap); sheet.appendChild(block);
+        block.appendChild(wrap); placeAfterLastOfKey(block, key);
         return;
       }
     }
 
     // fallback
-    sheet.appendChild(block);
+    placeAfterLastOfKey(block, key);
   }
 
   /* =====================  WAARDE PER CIJFER  ===================== */
@@ -810,7 +870,7 @@ function alignPlaceValueHTE(item){
       }
 
       block.appendChild(grid);
-      sheet.appendChild(block);
+      placeAfterLastOfKey(block, key);
       return;
     }
 
@@ -907,7 +967,7 @@ ans.style.transform = `translateX(${SHIFT_TE_LEFT}px)`;
 }
 
 block.appendChild(grid);
-sheet.appendChild(block);
+placeAfterLastOfKey(block, key);
 }
 
   /* =====================  HEADER / PDF / EVENTS  ===================== */
@@ -958,13 +1018,13 @@ sheet.appendChild(block);
   $$('input[name=mode]').forEach(r=>r.addEventListener('change',()=>{ const v=$$('input[name=mode]:checked')[0].value; $('#mode-drag').style.display=(v==='drag')?'block':'none'; $('#mode-blanks').style.display=(v==='blanks')?'block':'none'; }));
   $('#jumpDiscover').addEventListener('change',e=>{ $('#jumpDiscoverOptions').style.display = e.target.checked ? 'block' : 'none'; });
 
-  $('#btnAddToSheet').addEventListener('click', addExerciseToSheet);
-  $('#btnAddJumpExercise').addEventListener('click', addJumpExercise);
-  $('#btnAddMixed').addEventListener('click', addMixedExercises);
-  $('#btnAddSequence').addEventListener('click', addSequenceExercise);
-  $('#btnAddHonderdveld').addEventListener('click', addHonderdveldExercise);
-  $('#btnAddMab').addEventListener('click', addMabExercise);
-  $('#btnAddPlaceValue').addEventListener('click', addPlaceValueExercise);
+bindThrottled($('#btnAddToSheet'),      addExerciseToSheet);
+bindThrottled($('#btnAddJumpExercise'), addJumpExercise);
+bindThrottled($('#btnAddMixed'),        addMixedExercises);
+bindThrottled($('#btnAddSequence'),     addSequenceExercise);
+bindThrottled($('#btnAddHonderdveld'),  addHonderdveldExercise);
+bindThrottled($('#btnAddMab'),          addMabExercise);
+bindThrottled($('#btnAddPlaceValue'),   addPlaceValueExercise);
 
   $('#btnClearSheet').addEventListener('click',()=>{ sheet.innerHTML=''; addedTitles.clear(); renderSheetHeader(); });
 
