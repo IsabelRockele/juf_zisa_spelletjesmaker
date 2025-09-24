@@ -7,20 +7,46 @@ document.addEventListener("DOMContentLoaded", () => {
   const LEFT_PUNCH_MARGIN = 22; // mm – perforatiemarge links
 
   // Navigatie terug naar keuzes
-  opnieuwBtn.addEventListener('click', () => {
+  opnieuwBtn?.addEventListener('click', () => {
     window.location.href = 'bewerkingen_keuze.html';
   });
 
   // PDF-knop initieel uit tot we succesvol gerenderd hebben
-  downloadPdfBtn.disabled = true;
-  downloadPdfBtn.style.backgroundColor = '#aaa';
-  downloadPdfBtn.style.cursor = 'not-allowed';
+  if (downloadPdfBtn) {
+    downloadPdfBtn.disabled = true;
+    downloadPdfBtn.style.backgroundColor = '#aaa';
+    downloadPdfBtn.style.cursor = 'not-allowed';
+  }
 
   try {
     let laatsteOefeningen = [];
-    let settings = JSON.parse(localStorage.getItem('werkbladSettings') || '{}');
+
+    // ===== Instellingen ophalen (met Fallback) =====
+    let settings = {};
+    try {
+      settings = JSON.parse(localStorage.getItem('werkbladSettings') || '{}');
+    } catch (_) {
+      settings = {};
+    }
     if (!settings || !settings.hoofdBewerking) {
-      throw new Error("Geen instellingen gevonden. Ga terug en maak eerst je keuzes.");
+      // Fallback zodat er altijd oefeningen verschijnen
+      settings = {
+        hoofdBewerking: 'splitsen',      // 'splitsen' | 'rekenen' | 'tafels'
+        splitsStijl: 'benen',            // 'benen' | 'huisje'
+        splitsGetallenArray: [10],
+        splitsSom: false,                // som-variant af en toe tonen? (bovenaan ___)
+        numOefeningen: 12,
+
+        rekenMaxGetal: 100,
+        somTypes: ['E+E','T+E','T+T','TE+E','TE+TE'],
+        rekenType: 'optellen',           // '+', '-', 'beide'
+        rekenHulp: { inschakelen: false },
+
+        gekozenTafels: [1,2,3,4,5,6,7,8,9,10],
+        tafelType: 'maal',               // 'maal' | 'delen' | 'beide'
+        tafelsVolgorde: 'links',         // 'links' | 'rechts' | 'mix'
+        tafelsMetNul: false
+      };
     }
 
     // --------------------------------
@@ -89,8 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
       svg.appendChild(el('rect', { x: anchorX + horiz - boxW / 2, y: bottomTopY, width: boxW, height: boxH, rx: r, ry: r, fill: '#fff', stroke: '#ddd', 'stroke-width': 2 }));
 
       const t1 = el('text', { x: anchorX - horiz, y: bottomTopY + boxH - 6, 'text-anchor': 'middle', 'font-family': 'Arial,Helvetica,sans-serif', 'font-size': '14' });
-      t1.textContent = '___';
       const t2 = el('text', { x: anchorX + horiz, y: bottomTopY + boxH - 6, 'text-anchor': 'middle', 'font-family': 'Arial,Helvetica,sans-serif', 'font-size': '14' });
+
+      // inline splits-hulp gebruikt altijd lege vakjes
+      t1.textContent = '___';
       t2.textContent = '___';
       svg.appendChild(t1); svg.appendChild(t2);
 
@@ -112,9 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
       laatsteOefeningen = [];
 
       // Kolommen op SCHERM:
-      // - Splitsingen: 4 naast elkaar
-      // - Tafels:      4 naast elkaar
-      // - Bewerkingen: 2 naast elkaar ALS hulpmiddelen actief, anders 4
       const hulpGlobaal = !!(settings.rekenHulp && settings.rekenHulp.inschakelen);
       let kolommen = 4;
       if (settings.hoofdBewerking === 'rekenen' && hulpGlobaal) kolommen = 2;
@@ -129,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       werkbladContainer.style.alignItems = 'start';
       werkbladContainer.style.justifyItems = 'center';
 
-      // ======= GROTE SPLITSHUIZEN (SCHERM) – VERBETERD UITZICHT =======
+      // ======= GROTE SPLITSHUIZEN (SCHERM) =======
       if (settings.hoofdBewerking === 'splitsen' && settings.groteSplitshuizen) {
         const lijst = settings.splitsGetallenArray || [10];
 
@@ -150,9 +175,9 @@ document.addEventListener("DOMContentLoaded", () => {
           header.style.borderBottom = '1px solid #c7c7c7';
           header.style.textAlign = 'center';
           header.style.fontWeight = '700';
-          header.style.height = '36px';               // vaste hoogte
+          header.style.height = '36px';
           header.style.display = 'flex';
-          header.style.alignItems = 'center';         // verticaal centreren
+          header.style.alignItems = 'center';
           header.style.justifyContent = 'center';
           header.style.fontSize = '16px';
           kaart.appendChild(header);
@@ -168,14 +193,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const left = document.createElement('div');
             const right = document.createElement('div');
 
-            // <<< BELANGRIJK: nette uitlijning in elke cel >>>
             [left, right].forEach(cell => {
-              cell.style.height = '28px';                 // vaste celhoogte
+              cell.style.height = '28px';
               cell.style.display = 'flex';
-              cell.style.alignItems = 'flex-end';         // onderaan
-              cell.style.justifyContent = 'center';       // midden
-              cell.style.paddingBottom = '4px';           // vlak boven de lijn
-              cell.style.borderBottom = '2px solid #333'; // schrijflijn
+              cell.style.alignItems = 'flex-end';
+              cell.style.justifyContent = 'center';
+              cell.style.paddingBottom = '4px';
+              cell.style.borderBottom = '2px solid #333';
               cell.style.fontSize = '16px';
               cell.style.lineHeight = '1';
             });
@@ -184,7 +208,6 @@ document.addEventListener("DOMContentLoaded", () => {
               left.textContent = r;
               right.textContent = '';
             } else {
-              // afwisselend links/rechts invullen
               if (r % 2 === 0) { left.textContent = r; right.textContent = ''; }
               else { left.textContent = ''; right.textContent = (maxGetal - r); }
             }
@@ -202,10 +225,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         return;
       }
-      // ======= EINDE GROTE SPLITSHUIZEN (SCHERM) =======
+      // ======= EINDE GROTE SPLITSHUIZEN =======
 
       // Standard lijsten genereren
-      for (let i = 0; i < (settings.numOefeningen || 20); i++) {
+      const N = settings.numOefeningen ?? 20;
+      for (let i = 0; i < N; i++) {
         if (settings.hoofdBewerking === 'rekenen') laatsteOefeningen.push(genereerRekensom());
         else if (settings.hoofdBewerking === 'splitsen') laatsteOefeningen.push(genereerSplitsing());
         else if (settings.hoofdBewerking === 'tafels') laatsteOefeningen.push(genereerTafelsom());
@@ -281,10 +305,17 @@ document.addEventListener("DOMContentLoaded", () => {
             kamers1.className = 'kamers';
             const k1a = document.createElement('div');
             k1a.className = 'kamer';
-            k1a.textContent = isSom ? String(oef.deel1) : '___';
             const k1b = document.createElement('div');
             k1b.className = 'kamer';
-            k1b.textContent = isSom ? String(oef.deel2) : '___';
+
+            if (isSom) {
+              k1a.textContent = String(oef.deel1);
+              k1b.textContent = String(oef.deel2);
+            } else {
+              k1a.textContent = (oef.prefill === 'links')  ? String(oef.deel1) : '___';
+              k1b.textContent = (oef.prefill === 'rechts') ? String(oef.deel2) : '___';
+            }
+
             kamers1.appendChild(k1a); kamers1.appendChild(k1b);
             huis.appendChild(kamers1);
 
@@ -294,7 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
             werkbladContainer.appendChild(oefDiv);
 
           } else {
-            // Splits-benen met CSS-structuur .splitsbenen (benen onder het getal)
+            // Splits-benen
             const wrap = document.createElement('div');
             wrap.className = 'splitsbenen';
             wrap.style.overflow = 'visible';
@@ -318,10 +349,16 @@ document.addEventListener("DOMContentLoaded", () => {
             bottom.className = 'bottom';
             const b1 = document.createElement('div');
             b1.className = 'bottom-deel';
-            b1.textContent = isSom ? String(oef.deel1) : '___';
             const b2 = document.createElement('div');
             b2.className = 'bottom-deel';
-            b2.textContent = isSom ? String(oef.deel2) : '___';
+
+            if (isSom) {
+              b1.textContent = String(oef.deel1);
+              b2.textContent = String(oef.deel2);
+            } else {
+              b1.textContent = (oef.prefill === 'links')  ? String(oef.deel1) : '___';
+              b2.textContent = (oef.prefill === 'rechts') ? String(oef.deel2) : '___';
+            }
             bottom.appendChild(b1); bottom.appendChild(b2);
 
             wrap.appendChild(top);
@@ -355,7 +392,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const totaal = Math.floor(Math.random() * gekozenGetal) + 1;
         const deel1 = Math.floor(Math.random() * (totaal + 1));
-        return { type: 'splitsen', isSom: false, totaal, deel1, deel2: totaal - deel1 };
+        const deel2 = totaal - deel1;
+        const prefill = Math.random() < 0.5 ? 'links' : 'rechts'; // <<< één been vooraf ingevuld
+        return { type: 'splitsen', isSom: false, totaal, deel1, deel2, prefill };
       }
     }
 
@@ -410,43 +449,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function genereerTafelsom() {
-  const tafel = settings.gekozenTafels?.[Math.floor(Math.random() * (settings.gekozenTafels?.length || 1))] ?? 1;
+      const tafel = settings.gekozenTafels?.[Math.floor(Math.random() * (settings.gekozenTafels?.length || 1))] ?? 1;
 
-  // Operator-keuze (maal / deel / beide)
-  let op = settings.tafelType === 'maal' ? 'x' : ':';
-  if (settings.tafelType === 'beide') op = Math.random() < 0.5 ? 'x' : ':';
+      // Operator-keuze (maal / deel / beide)
+      let op = settings.tafelType === 'maal' ? 'x' : ':';
+      if (settings.tafelType === 'beide') op = Math.random() < 0.5 ? 'x' : ':';
 
-  // Nieuw: volgorde (links/rechts/mix) en 0-toelating voor MAAL
-  const volgorde = settings.tafelsVolgorde || 'links';  // 'links' | 'rechts' | 'mix'
-  const metNul   = !!settings.tafelsMetNul;             // true => 0..10, false => 1..10
-  const randFactor = () => metNul
-    ? Math.floor(Math.random() * 11)        // 0..10
-    : (Math.floor(Math.random() * 10) + 1); // 1..10
+      // Volgorde en 0-toelating voor MAAL
+      const volgorde = settings.tafelsVolgorde || 'links';  // 'links' | 'rechts' | 'mix'
+      const metNul   = !!settings.tafelsMetNul;             // true => 0..10, false => 1..10
+      const randFactor = () => metNul
+        ? Math.floor(Math.random() * 11)        // 0..10
+        : (Math.floor(Math.random() * 10) + 1); // 1..10
 
-  if (op === 'x') {
-    // Bepaal oriëntatie: vaste keuze of per opgave willekeurig bij 'mix'
-    let orient = volgorde;
-    if (volgorde === 'mix') orient = (Math.random() < 0.5 ? 'links' : 'rechts');
+      if (op === 'x') {
+        let orient = volgorde;
+        if (volgorde === 'mix') orient = (Math.random() < 0.5 ? 'links' : 'rechts');
 
-    if (orient === 'links') {
-      // tafel links: 2 × n
-      return { type: 'tafels', getal1: tafel, getal2: randFactor(), operator: 'x' };
-    } else {
-      // tafel rechts: n × 2
-      return { type: 'tafels', getal1: randFactor(), getal2: tafel, operator: 'x' };
+        if (orient === 'links') {
+          return { type: 'tafels', getal1: tafel, getal2: randFactor(), operator: 'x' };
+        } else {
+          return { type: 'tafels', getal1: randFactor(), getal2: tafel, operator: 'x' };
+        }
+      }
+
+      // Deeltafels (geen delen door 0)
+      const g2 = tafel;
+      const factor = Math.max(1, randFactor());  // 1..10
+      const g1 = g2 * factor;
+      return { type: 'tafels', getal1: g1, getal2: g2, operator: ':' };
     }
-  }
-
-  // Deeltafels: oriëntatie blijft g1 : g2 (dividend : divisor)
-  // Let op: delen door 0 vermijden → factor minimaal 1, ook als tafelsMetNul aan staat.
-  const g2 = tafel;
-  const factor = Math.max(1, randFactor());  // 1..10
-  const g1 = g2 * factor;
-  return { type: 'tafels', getal1: g1, getal2: g2, operator: ':' };
-}
 
     // --------------------------------
-    // PDF-helpers (incl. lagere baselines)
+    // PDF-helpers
     // --------------------------------
     function drawRekensomInPDF(doc, x, y, oef) {
       const text = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
@@ -462,9 +497,11 @@ document.addEventListener("DOMContentLoaded", () => {
             hoogteKamer = 14;
       const left = centerX - breedte/2;
 
-      const topText   = oef.isSom ? '___' : String(oef.totaal);
-      const leftText  = oef.isSom ? String(oef.deel1) : '___';
-      const rightText = oef.isSom ? String(oef.deel2) : '___';
+      const topText = oef.isSom ? '___' : String(oef.totaal);
+      let leftText, rightText;
+      if (oef.isSom) { leftText = String(oef.deel1); rightText = String(oef.deel2); }
+      else { leftText = (oef.prefill === 'links') ? String(oef.deel1) : '___';
+             rightText = (oef.prefill === 'rechts') ? String(oef.deel2) : '___'; }
 
       // Baselines (lager in vakje)
       const dakBaseline = y + hoogteDak - 3;
@@ -481,7 +518,7 @@ document.addEventListener("DOMContentLoaded", () => {
       doc.line(centerX, yKamers, centerX, yKamers + hoogteKamer);
 
       doc.setFont('Helvetica','bold'); doc.setFontSize(14);
-      doc.text(topText, centerX, dakBaseline, { align: 'center' }); // lager in dak
+      doc.text(topText, centerX, dakBaseline, { align: 'center' });
       doc.setFont('Helvetica','normal'); doc.setFontSize(14);
       doc.text(leftText,  centerX - breedte/4, kamerBaseline(yKamers), { align: 'center' });
       doc.text(rightText, centerX + breedte/4, kamerBaseline(yKamers), { align: 'center' });
@@ -490,9 +527,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // BENEN-variant — onderboxen baseline laag
     function drawSplitsBenenPDF(doc, centerX, y, oef) {
       const r = 1.2, topW = 14, topH = 10, horiz = 7, boxW = 12, boxH = 11;
-      const topText   = oef.isSom ? '___' : String(oef.totaal);
-      const leftText  = oef.isSom ? String(oef.deel1) : '___';
-      const rightText = oef.isSom ? String(oef.deel2) : '___';
+      const topText = oef.isSom ? '___' : String(oef.totaal);
+      let leftText, rightText;
+      if (oef.isSom) { leftText = String(oef.deel1); rightText = String(oef.deel2); }
+      else { leftText = (oef.prefill === 'links') ? String(oef.deel1) : '___';
+             rightText = (oef.prefill === 'rechts') ? String(oef.deel2) : '___'; }
 
       doc.setFillColor(224,242,247);
       doc.setDrawColor(51,51,51);
@@ -546,13 +585,12 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Moet EXACT overeenkomen met drawGrootSplitshuisInPDF
     function getGrootSplitshuisHeight(maxGetal) {
       const hoogteDak = 12, hoogteKamer = 9;
       return hoogteDak + (maxGetal + 1) * hoogteKamer + 6; // +6 marge onderaan
     }
 
-    // Brug-hulplijnen (PDF) — met extra rechtermarge
+    // Brug-hulplijnen (PDF)
     function drawBrugHulpInPDF(doc, x, y, oef, settings, colWidth) {
       doc.setFont('Helvetica', 'normal'); doc.setFontSize(14);
 
@@ -594,7 +632,6 @@ document.addEventListener("DOMContentLoaded", () => {
       doc.roundedRect(centerX - horiz - boxW/2, bottomTopY, boxW, boxH, r, r, 'D');
       doc.roundedRect(centerX + horiz - boxW/2, bottomTopY, boxW, boxH, r, r, 'D');
       doc.setFont('Helvetica','normal'); doc.setFontSize(14);
-      // Baseline lager in de box
       doc.text('___', centerX - horiz, bottomTopY + boxH - 2, { align: 'center' });
       doc.text('___', centerX + horiz, bottomTopY + boxH - 2, { align: 'center' });
 
@@ -618,36 +655,29 @@ document.addEventListener("DOMContentLoaded", () => {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
       const pageHeight = doc.internal.pageSize.getHeight();
-      // ondermarge voor printers/afdrukgebied iets royaler houden
-      const bottomMargin = 20;
-      const BOTTOM_SAFE = 26; // veilige ondergrens (mm): niets tekenen onder pageHeight - BOTTOM_SAFE
+      const BOTTOM_SAFE = 26;
 
-      // ==== NIEUW: Header met NAAM + TITEL (elk blad) ====
       function pdfHeader(titleText) {
-        // Naam linksboven, uitgelijnd met perforatiemarge
-        const xName = LEFT_PUNCH_MARGIN; // respecteer perforatiemarge
+        const xName = LEFT_PUNCH_MARGIN;
         const yName = 15;
         doc.setFont('Helvetica', 'normal'); doc.setFontSize(12);
         doc.text('Naam:', xName, yName, { align: 'left' });
         const wNaam = doc.getTextWidth('Naam:');
         const gap = 3;
         const lineStart = xName + wNaam + gap;
-        const lineEnd = Math.min(200, lineStart + 80); // schrijflijn (±80mm), veilig tot rechts
+        const lineEnd = Math.min(200, lineStart + 80);
         doc.setDrawColor(51,51,51);
         doc.line(lineStart, yName, lineEnd, yName);
 
-        // Titel onder de naamregel
         doc.setFont('Helvetica', 'bold'); doc.setFontSize(16);
         doc.text(titleText, 105, 25, { align: 'center' });
       }
 
-      // Eerste paginakop
       pdfHeader('Werkblad Bewerkingen');
 
       if (settings.hoofdBewerking === 'splitsen' && settings.groteSplitshuizen) {
-        // Grote splitshuizen (masonry), met perforatiemarge
         const xCols = [LEFT_PUNCH_MARGIN + 5, LEFT_PUNCH_MARGIN + 75, LEFT_PUNCH_MARGIN + 145];
-        const startY = 40; // was 30, ruimte voor header
+        const startY = 40;
         const vGap = 8;
         const yCols = [startY, startY, startY];
         const lijst = settings.splitsGetallenArray || [10];
@@ -662,7 +692,6 @@ document.addEventListener("DOMContentLoaded", () => {
             yCols.fill(startY);
           }
 
-          // Plaats in de kolom met de laagste huidige y (masonry-stijl)
           let col = 0;
           for (let c = 1; c < xCols.length; c++) if (yCols[c] < yCols[col]) col = c;
 
@@ -671,21 +700,19 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
       } else if (settings.hoofdBewerking === 'splitsen') {
-        // KLEINE splitshuisjes / benen
         const xPosities = [
           LEFT_PUNCH_MARGIN + 15,
           LEFT_PUNCH_MARGIN + 65,
           LEFT_PUNCH_MARGIN + 115,
           LEFT_PUNCH_MARGIN + 165
         ];
-        const yStart = 40; // was 30
+        const yStart = 40;
         const yIncrement = 36;
-        const itemHeight = 32; // realistische hoogte die één item inneemt
+        const itemHeight = 32;
         const kolommen = xPosities.length;
 
         let row = 0, col = 0, y = yStart;
         laatsteOefeningen.forEach((oef) => {
-          // Past dit item nog boven de veilige ondergrens?
           if (y + itemHeight > pageHeight - BOTTOM_SAFE) {
             doc.addPage();
             pdfHeader('Werkblad Bewerkingen (vervolg)');
@@ -701,22 +728,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
       } else {
-        // GEWONE BEWERKINGEN / TAFELS
         const hulpGlobaal = !!(settings.rekenHulp && settings.rekenHulp.inschakelen);
         const xPosities = hulpGlobaal
           ? [LEFT_PUNCH_MARGIN + 5, LEFT_PUNCH_MARGIN + 100]
           : [LEFT_PUNCH_MARGIN + 5, LEFT_PUNCH_MARGIN + 50, LEFT_PUNCH_MARGIN + 95, LEFT_PUNCH_MARGIN + 140];
 
         const colWidth  = hulpGlobaal ? 85 : 40;
-        const yStart = 45; // was 30
+        const yStart = 45;
         const yIncrement = hulpGlobaal ? 58 : 30;
-        const itemHeight = (hulpGlobaal ? 52 : 26); // iets kleiner dan increment = speling
+        const itemHeight = (hulpGlobaal ? 52 : 26);
         const kolommen = xPosities.length;
 
         let row = 0, col = 0, y = yStart;
 
         laatsteOefeningen.forEach((oef) => {
-          // Past dit item nog boven de veilige ondergrens?
           if (y + itemHeight > pageHeight - BOTTOM_SAFE) {
             doc.addPage();
             pdfHeader('Werkblad Bewerkingen (vervolg)');
@@ -747,10 +772,12 @@ document.addEventListener("DOMContentLoaded", () => {
     // Start
     // ---------------------------
     genereerWerkblad();
-    downloadPdfBtn.addEventListener('click', downloadPDF);
-    downloadPdfBtn.disabled = false;
-    downloadPdfBtn.style.backgroundColor = '';
-    downloadPdfBtn.style.cursor = 'pointer';
+    downloadPdfBtn?.addEventListener('click', downloadPDF);
+    if (downloadPdfBtn) {
+      downloadPdfBtn.disabled = false;
+      downloadPdfBtn.style.backgroundColor = '';
+      downloadPdfBtn.style.cursor = 'pointer';
+    }
 
   } catch (error) {
     if (werkbladContainer) {
