@@ -212,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Render per oefening
+      let splitsCounter = 0;
       laatsteOefeningen.forEach(oef => {
         const oefDiv = document.createElement('div');
         oefDiv.className = 'oefening';
@@ -264,7 +265,24 @@ document.addEventListener("DOMContentLoaded", () => {
           }
 
         } else if (oef.type === 'splitsen') {
+          splitsCounter++;
           const isSom = !!oef.isSom;
+          
+          let topText = isSom ? '___' : String(oef.totaal);
+          let leftText, rightText;
+
+          if (isSom) {
+              leftText = String(oef.deel1);
+              rightText = String(oef.deel2);
+          } else {
+              if (settings.splitsWissel && splitsCounter % 2 === 0) {
+                  leftText = '___';
+                  rightText = String(oef.deel2);
+              } else {
+                  leftText = String(oef.deel1);
+                  rightText = '___';
+              }
+          }
 
           if (settings.splitsStijl === 'huisje') {
             const huis = document.createElement('div');
@@ -274,17 +292,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const dak = document.createElement('div');
             dak.className = 'dak';
-            dak.textContent = isSom ? '___' : String(oef.totaal);
+            dak.textContent = topText;
             huis.appendChild(dak);
 
             const kamers1 = document.createElement('div');
             kamers1.className = 'kamers';
             const k1a = document.createElement('div');
             k1a.className = 'kamer';
-            k1a.textContent = isSom ? String(oef.deel1) : '___';
+            k1a.textContent = leftText;
             const k1b = document.createElement('div');
             k1b.className = 'kamer';
-            k1b.textContent = isSom ? String(oef.deel2) : '___';
+            k1b.textContent = rightText;
             kamers1.appendChild(k1a); kamers1.appendChild(k1b);
             huis.appendChild(kamers1);
 
@@ -301,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const top = document.createElement('div');
             top.className = 'top';
-            top.textContent = isSom ? '___' : String(oef.totaal);
+            top.textContent = topText;
 
             const benenC = document.createElement('div');
             benenC.className = 'benen-container';
@@ -318,10 +336,10 @@ document.addEventListener("DOMContentLoaded", () => {
             bottom.className = 'bottom';
             const b1 = document.createElement('div');
             b1.className = 'bottom-deel';
-            b1.textContent = isSom ? String(oef.deel1) : '___';
+            b1.textContent = leftText;
             const b2 = document.createElement('div');
             b2.className = 'bottom-deel';
-            b2.textContent = isSom ? String(oef.deel2) : '___';
+            b2.textContent = rightText;
             bottom.appendChild(b1); bottom.appendChild(b2);
 
             wrap.appendChild(top);
@@ -455,16 +473,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // KLEIN SPLITSHUISJE — hoogtes & baselines
-    function drawSplitsHuisPDF(doc, centerX, y, oef) {
+    function drawSplitsHuisPDF(doc, centerX, y, oef, counter = 1) {
       const r = 1,
             breedte = 36,
             hoogteDak = 12,
             hoogteKamer = 14;
       const left = centerX - breedte/2;
 
-      const topText   = oef.isSom ? '___' : String(oef.totaal);
-      const leftText  = oef.isSom ? String(oef.deel1) : '___';
-      const rightText = oef.isSom ? String(oef.deel2) : '___';
+      const topText = oef.isSom ? '___' : String(oef.totaal);
+      let leftText, rightText;
+
+      if (oef.isSom) {
+        leftText = String(oef.deel1);
+        rightText = String(oef.deel2);
+      } else {
+        if (settings.splitsWissel && counter % 2 === 0) {
+            leftText = '___';
+            rightText = String(oef.deel2);
+        } else {
+            leftText = String(oef.deel1);
+            rightText = '___';
+        }
+      }
 
       // Baselines (lager in vakje)
       const dakBaseline = y + hoogteDak - 3;
@@ -488,11 +518,23 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // BENEN-variant — onderboxen baseline laag
-    function drawSplitsBenenPDF(doc, centerX, y, oef) {
+    function drawSplitsBenenPDF(doc, centerX, y, oef, counter = 1) {
       const r = 1.2, topW = 14, topH = 10, horiz = 7, boxW = 12, boxH = 11;
-      const topText   = oef.isSom ? '___' : String(oef.totaal);
-      const leftText  = oef.isSom ? String(oef.deel1) : '___';
-      const rightText = oef.isSom ? String(oef.deel2) : '___';
+      const topText = oef.isSom ? '___' : String(oef.totaal);
+      let leftText, rightText;
+
+      if (oef.isSom) {
+        leftText = String(oef.deel1);
+        rightText = String(oef.deel2);
+      } else {
+        if (settings.splitsWissel && counter % 2 === 0) {
+            leftText = '___';
+            rightText = String(oef.deel2);
+        } else {
+            leftText = String(oef.deel1);
+            rightText = '___';
+        }
+      }
 
       doc.setFillColor(224,242,247);
       doc.setDrawColor(51,51,51);
@@ -683,8 +725,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const itemHeight = 32; // realistische hoogte die één item inneemt
         const kolommen = xPosities.length;
 
-        let row = 0, col = 0, y = yStart;
+        let row = 0, col = 0, y = yStart, splitsCounter = 0;
         laatsteOefeningen.forEach((oef) => {
+          splitsCounter++;
           // Past dit item nog boven de veilige ondergrens?
           if (y + itemHeight > pageHeight - BOTTOM_SAFE) {
             doc.addPage();
@@ -693,8 +736,8 @@ document.addEventListener("DOMContentLoaded", () => {
           }
           const x = xPosities[col];
 
-          if (settings.splitsStijl === 'huisje') drawSplitsHuisPDF(doc, x, y, oef);
-          else drawSplitsBenenPDF(doc, x, y, oef);
+          if (settings.splitsStijl === 'huisje') drawSplitsHuisPDF(doc, x, y, oef, splitsCounter);
+          else drawSplitsBenenPDF(doc, x, y, oef, splitsCounter);
 
           col++;
           if (col >= kolommen) { col = 0; row++; y = yStart + row * yIncrement; }
@@ -729,8 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (hulpGlobaal && isBrugSom) drawBrugHulpInPDF(doc, x, y, oef, settings, colWidth);
             else drawRekensomInPDF(doc, x, y, oef);
           } else if (oef.type === 'splitsen') {
-            if (settings.splitsStijl === 'huisje') drawSplitsHuisPDF(doc, x, y, oef);
-            else drawSplitsBenenPDF(doc, x, y, oef);
+            // This part is now handled by the generic 'splitsen' block above
           } else if (oef.type === 'tafels') {
             drawRekensomInPDF(doc, x, y, { getal1: oef.getal1, operator: oef.operator, getal2: oef.getal2 });
           }
