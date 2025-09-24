@@ -332,8 +332,8 @@
       'composeTE':'Vul het getal in.',
       'compare':'Vergelijk de getallen (vul <, = of > in).',
       'compareTE':'Vergelijk de getallen (vul <, = of > in).',
-      'composeHTE':'Vul het getal in (H/T/E).',
-      'compareHTE':'Vergelijk de getallen (HTE ↔ getal/HTE).'
+      'composeHTE':'Vul het getal in.',
+      'compareHTE':'Vergelijk de getallen (vul <, = of > in).'
     };
     const keyMap={
       'neighbors':'mixed_neighbors','neighborTens':'mixed_neighborTens','composeTE':'mixed_compose_te',
