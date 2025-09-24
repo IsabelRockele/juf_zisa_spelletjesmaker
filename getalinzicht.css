@@ -240,3 +240,20 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
 .mab-connect-num { min-width: 64px; }
 .mab-connector { pointer-events: none; }
 
+/* Isoleer rendering per blok; voorkomt doorwaaien bij massaal toevoegen */
+.exercise,
+.jump-exercise-block,
+.mixed-exercise-block,
+.sequence-exercise-block,
+.mab-exercise-block,
+.placevalue-exercise-block {
+  contain: layout paint;
+}
+.honderdveld-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* precies 2 per rij */
+  column-gap: 24px;   /* horizontale ruimte tussen de 2 blokken */
+  row-gap: 24px;      /* verticale ruimte binnen deze container */
+  align-items: start;
+  margin: 12px 0;     /* ruimte tussen opeenvolgende rijen */
+}
