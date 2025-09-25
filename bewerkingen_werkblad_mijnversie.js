@@ -4,8 +4,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const werkbladContainer = document.getElementById('werkblad-container');
 
   // ==== PDF marges ====
-  const LEFT_PUNCH_MARGIN = 22; // mm – perforatiemarge links
-  const PDF_BOTTOM_SAFE = 26;
+  // ==== PDF marges ====
+const LEFT_PUNCH_MARGIN = 16; // mm – perforatiemarge links
+const PDF_BOTTOM_SAFE = 20;
+
+// vaste breedte voor de kaders van 'rekenen zonder hulp' (mm)
+const BOXED_REKEN_W = 50;
+
+// ==== specifieke inspringingen per oefeningstype (mm) ====
+const PAD_HUISJE     = 14;
+const PAD_BENEN      = 10;
+const PAD_PUNTOEF    = 10;   // mag wat kleiner zodat ze beter in kolomkaders vallen
+const PAD_BEWERKING4 = 6;   // iets naar rechts, maar niet zo ver als huisjes
+
 
   opnieuwBtn?.addEventListener('click', () => {
     window.location.href = 'bewerkingen_keuze.html';
@@ -60,21 +71,57 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ========= GENERATOREN =========
-  function genereerSplitsing(cfg) {
-    const arr = cfg.splitsGetallenArray?.length ? cfg.splitsGetallenArray : [10];
-    const gekozenGetal = arr[Math.floor(Math.random() * arr.length)];
-    if (cfg.splitsSom && Math.random() < 0.3) {
-      const d1 = rnd(1, Math.max(1, Math.floor(gekozenGetal / 2)));
-      const d2 = rnd(1, Math.max(1, Math.floor(gekozenGetal / 2)));
-      return { type: 'splitsen', isSom: true, deel1: d1, deel2: d2, totaal: d1 + d2 };
-    } else {
-      const totaal = rnd(1, gekozenGetal);
-      const deel1 = rnd(0, totaal);
-      const deel2 = totaal - deel1;
-      const prefill = Math.random() < 0.5 ? 'links' : 'rechts'; // één been vooraf ingevuld
-      return { type: 'splitsen', isSom: false, totaal, deel1, deel2, prefill };
+// --- VERVANG HELE FUNCTIE ---
+function genereerSplitsing(settings) {
+  const fijn = settings.splitsFijn || {};
+  const totalen = new Set();
+
+  // Vinkjes vertalen naar toegestane totalen
+  if (fijn.tot5) [1,2,3,4,5].forEach(n => totalen.add(n));
+  if (fijn.van6)  totalen.add(6);
+  if (fijn.van7)  totalen.add(7);
+  if (fijn.van8)  totalen.add(8);
+  if (fijn.van9)  totalen.add(9);
+  if (fijn.van10) totalen.add(10);
+  if (fijn.van10tot20) for (let n = 10; n <= 20; n++) totalen.add(n);
+
+  // Fallback als er niets aangevinkt is: gebruik je oude instelling
+  if (totalen.size === 0) {
+    const arr = settings.splitsGetallenArray?.length ? settings.splitsGetallenArray : [10];
+    const g = arr[Math.floor(Math.random() * arr.length)];
+    totalen.add(Math.max(1, Math.floor(Math.random() * g) + 1));
+  }
+
+  // Kies totaal
+  const lijst = Array.from(totalen);
+  const totaal = lijst[Math.floor(Math.random() * lijst.length)];
+
+  // Kies een splitsing (deel1 + deel2 = totaal)
+  let d1 = Math.floor(Math.random() * (totaal + 1));
+  let d2 = totaal - d1;
+
+  // Brug-filter enkel voor 10..20 wanneer gekozen
+  const brugKeuze =
+    (fijn.van10tot20 && totaal >= 10 && totaal <= 20) ? (fijn.brug10tot20 || 'beide') : 'beide';
+  const metBrug = (x, y) => ((x % 10) + (y % 10)) > 9;
+
+  if ((brugKeuze === 'met' || brugKeuze === 'zonder') && totaal >= 10 && totaal <= 20) {
+    const wilMet = brugKeuze === 'met';
+    let tries = 0;
+    while (tries++ < 60 && (metBrug(d1, d2) !== wilMet)) {
+      d1 = Math.floor(Math.random() * (totaal + 1));
+      d2 = totaal - d1;
     }
   }
+
+  // 1 been vooraf invullen (de andere blijft ___)
+  const prefill = Math.random() < 0.5 ? 'links' : 'rechts';
+
+  // optioneel: som-opgave (als je optie aanstaat)
+  const isSom = !!settings.splitsSom && Math.random() < 0.3;
+
+  return { type: 'splitsen', isSom, totaal, deel1: d1, deel2: d2, prefill };
+}
 
   function genereerRekensom(cfg) {
     const types = cfg.somTypes?.length ? cfg.somTypes : ['E+E'];
@@ -372,40 +419,61 @@ document.addEventListener("DOMContentLoaded", () => {
     doc.text(`${oef.getal1} ${oef.operator} ${oef.getal2} = ___`, x, y);
   }
   function drawSplitsHuisPDF(doc, centerX, y, oef) {
-    const r=1, breedte=36, hoogteDak=12, hoogteKamer=14;
-    const left = centerX - breedte/2;
-    const topText = oef.isSom ? '___' : String(oef.totaal);
-    const L = oef.isSom ? String(oef.deel1) : (oef.prefill==='links' ? String(oef.deel1) : '___');
-    const R = oef.isSom ? String(oef.deel2) : (oef.prefill==='rechts'? String(oef.deel2) : '___');
-    const dakBaseline = y + hoogteDak - 3, kamerBaseline = yy => yy + hoogteKamer - 2;
-    doc.setLineWidth(0.5); doc.setDrawColor(51,51,51); doc.setFillColor(224,242,247);
-    doc.roundedRect(left, y, breedte, hoogteDak, r, r, 'FD');
-    const yKamers = y + hoogteDak;
-    doc.setDrawColor(204,204,204); doc.roundedRect(left, yKamers, breedte, hoogteKamer, r, r, 'D');
-    doc.line(centerX, yKamers, centerX, yKamers + hoogteKamer);
-    doc.setFont('Helvetica','bold'); doc.setFontSize(14); doc.text(topText, centerX, dakBaseline, {align:'center'});
-    doc.setFont('Helvetica','normal'); doc.setFontSize(14);
-    doc.text(L, centerX - breedte/4, kamerBaseline(yKamers), {align:'center'});
-    doc.text(R, centerX + breedte/4, kamerBaseline(yKamers), {align:'center'});
-  }
+  // compacter huisje
+  const r = 1, breedte = 32, hoogteDak = 10, hoogteKamer = 12;
+  const left = centerX - breedte / 2;
+  const topText = oef.isSom ? '___' : String(oef.totaal);
+  const L = oef.isSom ? String(oef.deel1) : (oef.prefill === 'links'  ? String(oef.deel1) : '___');
+  const R = oef.isSom ? String(oef.deel2) : (oef.prefill === 'rechts' ? String(oef.deel2) : '___');
+
+  const dakBaseline   = y + hoogteDak - 2;
+  const kamerBaseline = (yy) => yy + hoogteKamer - 2;
+
+  doc.setLineWidth(0.5);
+  doc.setDrawColor(51, 51, 51);
+  doc.setFillColor(224, 242, 247);
+  doc.roundedRect(left, y, breedte, hoogteDak, r, r, 'FD');
+
+  const yKamers = y + hoogteDak;
+  doc.setDrawColor(204, 204, 204);
+  doc.roundedRect(left, yKamers, breedte, hoogteKamer, r, r, 'D');
+  doc.line(centerX, yKamers, centerX, yKamers + hoogteKamer);
+
+  doc.setFont('Helvetica', 'bold'); doc.setFontSize(13);
+  doc.text(topText, centerX, dakBaseline, { align: 'center' });
+
+  doc.setFont('Helvetica', 'normal'); doc.setFontSize(13);
+  doc.text(L, centerX - breedte / 4, kamerBaseline(yKamers), { align: 'center' });
+  doc.text(R, centerX + breedte / 4, kamerBaseline(yKamers), { align: 'center' });
+}
+
   function drawSplitsBenenPDF(doc, centerX, y, oef) {
-    const r=1.2, topW=14, topH=10, horiz=7, boxW=12, boxH=11;
-    const topText = oef.isSom ? '___' : String(oef.totaal);
-    const L = oef.isSom ? String(oef.deel1) : (oef.prefill==='links' ? String(oef.deel1) : '___');
-    const R = oef.isSom ? String(oef.deel2) : (oef.prefill==='rechts'? String(oef.deel2) : '___');
-    doc.setFillColor(224,242,247); doc.setDrawColor(51,51,51);
-    doc.roundedRect(centerX-topW/2, y, topW, topH, r, r, 'FD');
-    doc.setFont('Helvetica','bold'); doc.setFontSize(14); doc.text(topText, centerX, y+topH-3, {align:'center'});
-    const bottomTopY = y + topH + 8;
-    doc.line(centerX, y+topH, centerX-horiz, bottomTopY);
-    doc.line(centerX, y+topH, centerX+horiz, bottomTopY);
-    doc.setDrawColor(204,204,204);
-    doc.roundedRect(centerX-horiz-boxW/2, bottomTopY, boxW, boxH, r, r, 'D');
-    doc.roundedRect(centerX+horiz-boxW/2, bottomTopY, boxW, boxH, r, r, 'D');
-    doc.setFont('Helvetica','normal'); doc.setFontSize(14);
-    doc.text(L, centerX-horiz, bottomTopY+boxH-2, {align:'center'});
-    doc.text(R, centerX+horiz, bottomTopY+boxH-2, {align:'center'});
-  }
+  // compacter benen
+  const r = 1.2, topW = 12, topH = 9, horiz = 6, boxW = 11, boxH = 10;
+  const topText = oef.isSom ? '___' : String(oef.totaal);
+  const L = oef.isSom ? String(oef.deel1) : (oef.prefill === 'links'  ? String(oef.deel1) : '___');
+  const R = oef.isSom ? String(oef.deel2) : (oef.prefill === 'rechts' ? String(oef.deel2) : '___');
+
+  doc.setFillColor(224, 242, 247);
+  doc.setDrawColor(51, 51, 51);
+  doc.roundedRect(centerX - topW / 2, y, topW, topH, r, r, 'FD');
+
+  doc.setFont('Helvetica', 'bold'); doc.setFontSize(13);
+  doc.text(topText, centerX, y + topH - 2, { align: 'center' });
+
+  const bottomTopY = y + topH + 7;
+  doc.line(centerX, y + topH, centerX - horiz, bottomTopY);
+  doc.line(centerX, y + topH, centerX + horiz, bottomTopY);
+
+  doc.setDrawColor(204, 204, 204);
+  doc.roundedRect(centerX - horiz - boxW / 2, bottomTopY, boxW, boxH, r, r, 'D');
+  doc.roundedRect(centerX + horiz - boxW / 2, bottomTopY, boxW, boxH, r, r, 'D');
+
+  doc.setFont('Helvetica', 'normal'); doc.setFontSize(13);
+  doc.text(L, centerX - horiz, bottomTopY + boxH - 2, { align: 'center' });
+  doc.text(R, centerX + horiz, bottomTopY + boxH - 2, { align: 'center' });
+}
+
   function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
     doc.setFont('Helvetica','normal'); doc.setFontSize(14);
     const s1=String(oef.getal1), s2=String(oef.getal2);
@@ -425,29 +493,70 @@ document.addEventListener("DOMContentLoaded", () => {
     doc.roundedRect(centerX+horiz-boxW/2, bottomTopY, boxW, boxH, r, r, 'D');
     doc.text('___', centerX-horiz, bottomTopY+boxH-2, {align:'center'});
     doc.text('___', centerX+horiz, bottomTopY+boxH-2, {align:'center'});
-    if (cfg.rekenHulp?.schrijflijnen) {
-      const RIGHT_SAFETY_GAP = 10;
-      const startX = ansX + ansW/2 + 6;
-      const maxRight = x + (colWidth || 92) - RIGHT_SAFETY_GAP;
-      const lengte = Math.max(22, maxRight - startX);
-      doc.setDrawColor(51,51,51);
-      doc.line(startX, y+10, startX+lengte, y+10);
-      doc.line(startX, y+22, startX+lengte, y+22);
-    }
+ if (cfg.rekenHulp?.schrijflijnen) {
+  const RIGHT_SAFETY_GAP = 16;   // meer marge rechts
+  const MAX_LEN          = 46;   // max. lijnlengte
+  const startX = ansX + ansW/2 + 6;
+  const maxRight = x + (colWidth || 92) - RIGHT_SAFETY_GAP;
+  const lengte = Math.max(22, Math.min(MAX_LEN, maxRight - startX));
+  doc.setDrawColor(51,51,51);
+  doc.line(startX, y+10, startX+lengte, y+10);
+  doc.line(startX, y+22, startX+lengte, y+22);
+}
+// Subtiel kader rond de volledige brug-oefening (links uitgelijnd)
+// Subtiel kader rond de volledige brug-oefening (links uitgelijnd)
+{
+  const left   = x - 12;                  // iets minder naar links
+  const top    = y - 12;                 // iets hoger geplaatst
+  const width  = (colWidth || 92) + 0;  // vaste breedte
+  const height = 38;                     // iets ruimer in de hoogte
+  doc.setDrawColor(179, 224, 255);
+  doc.roundedRect(left, top, width, height, 2, 2, 'D');
+}
   }
 
   // bewerkingen4 – minisplitsing + 4 BLANCO bewerkingen (ruim)
-  function drawB4ItemPDF(doc, centerX, y, oef) {
-    // mini-splitsing
-    drawSplitsBenenPDF(doc, centerX, y, { ...oef, isSom: false });
-    // bewerkingen – starten duidelijk lager
-    const startY = y + 24, lh = 9; // ruimer dan voorheen
-    doc.setFont('Courier','normal'); doc.setFontSize(12);
-    doc.text(`___ + ___ = ___`, centerX, startY + 0*lh, {align:'center'});
-    doc.text(`___ + ___ = ___`, centerX, startY + 1*lh, {align:'center'});
-    doc.text(`___ - ___ = ___`, centerX, startY + 2*lh, {align:'center'});
-    doc.text(`___ - ___ = ___`, centerX, startY + 3*lh, {align:'center'});
-  }
+function drawB4ItemPDF(doc, centerX, y, oef) {
+  // 1) teken eerst de minisplitsing bovenaan
+  drawSplitsBenenPDF(doc, centerX, y, { ...oef, isSom: false });
+
+  // 2) lijnen duidelijk lager + extra tussenruimte
+  const startY = y + 42;   // lager starten onder de minisplitsing
+  const lh = 13;           // meer verticale ruimte tussen de regels
+
+  doc.setFont('Courier', 'normal');
+  doc.setFontSize(12);
+  doc.text('___ + ___ = ___', centerX, startY + 0*lh, { align: 'center' });
+  doc.text('___ + ___ = ___', centerX, startY + 1*lh, { align: 'center' });
+  doc.text('___ - ___ = ___', centerX, startY + 2*lh, { align: 'center' });
+  doc.text('___ - ___ = ___', centerX, startY + 3*lh, { align: 'center' });
+}
+
+function drawPuntKolomPDF(doc, xCenter, y, tekst) {
+  const boxW = 45, boxH = 12, r = 3;
+  const left = xCenter - boxW/2;
+  doc.setDrawColor(200, 225, 245);
+  doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
+  doc.setFont('Courier', 'normal');
+  doc.setFontSize(14);
+  doc.text(tekst, xCenter, y, { align: 'center' });
+}
+// Tekent één som in een compact kader
+// Tekent één som in een compact kader met vaste breedte
+function drawRekenItemBoxed(doc, xCenter, y, oef) {
+  const text = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
+  const boxW  = BOXED_REKEN_W; // vaste breedte
+  const boxH  = 12;
+  const r     = 2;
+  const left  = xCenter - boxW / 2;
+
+  doc.setDrawColor(200, 225, 245);
+  doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
+
+  doc.setFont('Courier', 'normal');
+  doc.setFontSize(14);
+  doc.text(text, xCenter, y, { align: 'center' });
+}
 
   // ========= PDF-GENERATOR met nette segment-kaders =========
   function downloadPDF() {
@@ -470,37 +579,75 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // lay-out per type
     function layoutVoor(cfg) {
-      const insetX = LEFT_PUNCH_MARGIN + 16; // veilige binnenmarge t.o.v. kader
-      // default (huisje/benen)
-      let xCols = [insetX, insetX + 50, insetX + 100, insetX + 150];
-      let yInc = 36, itemH = 32, colWidth = 44;
+  // iets dichter bij de papierkant maar perforatieveilig
+  const insetX = LEFT_PUNCH_MARGIN + 8;   // was vaak 16 → 8 (meer bruikbare breedte)
 
-      if (cfg.hoofdBewerking === 'rekenen' && cfg.rekenHulp?.inschakelen) {
-        xCols = [insetX, insetX + 100];
-        yInc = 60; itemH = 54; colWidth = 92;
-      }
-      if (cfg.hoofdBewerking === 'splitsen') {
-        if (cfg.splitsStijl === 'puntoefening') {
-          // 3 per rij
-          xCols = [insetX, insetX + 70, insetX + 140];
-          yInc = 20; itemH = 16; colWidth = 60;
-        } else if (cfg.splitsStijl === 'bewerkingen4') {
-          xCols = [insetX + 15, insetX + 75, insetX + 135];
-          yInc = 68; itemH = 64; // ruim – voorkomt overlap
-        }
-      }
-      return { xCols, yInc, itemH, colWidth, insetX };
+  // Default (huisje/benen) – compacter
+  let xCols   = [insetX, insetX + 48, insetX + 96, insetX + 144];
+  let yInc    = 34;   // was 36
+  let itemH   = 30;   // was 32
+  let colWidth = 44;
+
+  // Rekenen met hulp (ongewijzigd)
+  if (cfg.hoofdBewerking === 'rekenen' && cfg.rekenHulp?.inschakelen) {
+    xCols   = [insetX, insetX + 100];
+    yInc    = 45;
+    itemH   = 54;
+    colWidth = 92;
+  }
+  
+// Rekenen zonder hulp: 3 per rij, iets weg van de linkerrand
+else if (cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) {
+  const pad = 16; // mm
+  xCols   = [insetX + pad, insetX + pad + 64, insetX + pad + 128]; // 3 kolommen
+  yInc    = 24;   // dichter op elkaar
+  itemH   = 20;   // compacter
+  colWidth = 60;  // referentiebreedte
+}
+
+  if (cfg.hoofdBewerking === 'splitsen') {
+    if (cfg.splitsStijl === 'puntoefening') {
+      // 3 per rij, met kolomkader per item
+      xCols   = [insetX + 8, insetX + 76, insetX + 144];
+      yInc    = 18;  // dichter
+      itemH   = 16;
+      colWidth = 60;
+    } else if (cfg.splitsStijl === 'bewerkingen4') {
+      // ruimer i.v.m. 4 bewerkingslijnen
+      xCols   = [insetX + 14, insetX + 80, insetX + 146];
+      yInc    = 84;  // iets ruimer
+      itemH   = 88;
     }
+  }
+
+  return { xCols, yInc, itemH, colWidth, insetX };
+}
+
 
     // Kader per segment – ruimere padding
-    function tekenSegmentKader(topY, bottomY) {
-      const x = LEFT_PUNCH_MARGIN + 6;               // linker binnenmarge
-      const w = 210 - LEFT_PUNCH_MARGIN - 16;        // rechter binnenmarge
-      doc.setDrawColor(179,224,255);
-      doc.roundedRect(x, topY, w, Math.max(8, bottomY - topY), 3, 3, 'D');
-    }
+   function tekenSegmentKader(topY, bottomY) {
+  const x = LEFT_PUNCH_MARGIN + 2;                 // was +6/+4 → nu +2
+  const w = 210 - (LEFT_PUNCH_MARGIN + 2) - 6;     // iets breder
+  const h = Math.max(10, bottomY - topY + 6);      // iets meer bodem
+  doc.setDrawColor(179, 224, 255);
+  doc.roundedRect(x, topY, w, h, 3, 3, 'D');
+}
+// Verschuif het segmentkader zonder de afmetingen te veranderen
+function tekenSegmentKaderMetOffset(cfg, topY, bottomY) {
+  if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'puntoefening') return;
+  if (cfg.hoofdBewerking === 'rekenen') return;
+
+  let offY = 0;
+  if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'benen') {
+    offY = -3; // 3 mm hoger
+  }
+
+  tekenSegmentKader(topY + offY, bottomY + offY);
+}
 
     let yCursor = 35;
+    let brugTitelGeprintOpPagina = false;
+
 
     // Per blok
     for (let i = 0; i < bundel.length; i++) {
@@ -537,28 +684,57 @@ document.addEventListener("DOMContentLoaded", () => {
       doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
       yCursor += 14;
 
-      let topSegment = yCursor + 2;        // extra bovenmarge binnen het kader
-      let row = 0, col = 0, y = yCursor + 6;
-      let lastYPlaced = y;                 // voor correcte onderrand
+     let topSegment = yCursor + 2;        // extra bovenmarge binnen het kader
+let row = 0, col = 0;
+
+// Eén vaste baseline voor alle rijen in dit blok
+let yStart = yCursor + ((cfg.hoofdBewerking === 'rekenen' && cfg.rekenHulp?.inschakelen) ? 12 : 6);
+let y = yStart;
+
+let lastYPlaced = y;                 // voor correcte onderrand
 
       const plaatsItem = (oef) => {
-        const x = xCols[col];
-        if (cfg.hoofdBewerking === 'rekenen') {
-          const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
-          const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
-          if (hulp && isBrugSom) drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth);
-          else drawRekensomInPDF(doc, x, y, oef);
-        } else if (cfg.hoofdBewerking === 'splitsen') {
-          if (cfg.splitsStijl === 'puntoefening') {
-            doc.setFont('Courier','normal'); doc.setFontSize(14);
-            doc.text(`${oef.totaal} = ___ + ___`, x - 4, y);
-          } else if (cfg.splitsStijl === 'bewerkingen4') {
-            drawB4ItemPDF(doc, x, y, oef);
-          } else if (cfg.splitsStijl === 'huisje') {
-            drawSplitsHuisPDF(doc, x, y, oef);
-          } else {
-            drawSplitsBenenPDF(doc, x, y, oef);
-          }
+        let pad = 0;
+if (cfg.hoofdBewerking === 'splitsen') {
+  switch (cfg.splitsStijl) {
+    case 'huisje':      pad = PAD_HUISJE; break;
+    case 'benen':       pad = PAD_BENEN; break;
+    case 'puntoefening':pad = PAD_PUNTOEF; break;
+    case 'bewerkingen4':pad = PAD_BEWERKING4; break;
+  }
+}
+const x = xCols[col] + pad;
+
+    if (cfg.hoofdBewerking === 'rekenen') {
+  const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
+  const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+
+  if (hulp && isBrugSom) {
+    // brug-hulp blijft zoals was
+    drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth);
+  } else {
+    // NORMALE som: nu met eigen kadertje
+    drawRekenItemBoxed(doc, x, y, oef);
+  }
+  } else if (cfg.hoofdBewerking === 'splitsen') {
+       if (cfg.splitsStijl === 'puntoefening') {
+  // teken de puntoefening in een kolomkader
+  let pText;
+  if (oef.prefill === 'links') {
+    pText = `${oef.totaal} = ${oef.deel1} + ___`;
+  } else if (oef.prefill === 'rechts') {
+    pText = `${oef.totaal} = ___ + ${oef.deel2}`;
+  } else {
+    pText = `${oef.totaal} = ___ + ___`;
+  }
+  drawPuntKolomPDF(doc, x, y, pText);   // <— vervangt doc.text(...)
+} else if (cfg.splitsStijl === 'bewerkingen4') {
+  drawB4ItemPDF(doc, x, y, oef);
+} else if (cfg.splitsStijl === 'huisje') {
+  drawSplitsHuisPDF(doc, x, y, oef);
+} else {
+  drawSplitsBenenPDF(doc, x, y, oef);
+}
         } else if (cfg.hoofdBewerking === 'tafels') {
           drawRekensomInPDF(doc, x, y, { getal1: oef.getal1, operator: oef.operator, getal2: oef.getal2 });
         }
@@ -569,7 +745,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // paginawissel?
         if (y + itemH > pageHeight - PDF_BOTTOM_SAFE) {
           // sluit huidig segment
-          tekenSegmentKader(topSegment, lastYPlaced + itemH - 2);
+          tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+
           // nieuwe pagina + titel + nieuw segment
           nieuwePagina();
           topSegment = yCursor + 2;
@@ -577,11 +754,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         plaatsItem(oefeningen[idx]);
         col++;
-        if (col >= xCols.length) { col = 0; row++; y = yCursor + 6 + row * yInc; }
+if (col >= xCols.length) { 
+  col = 0; 
+  row++; 
+  y = yStart + row * yInc;   // altijd vanaf dezelfde baseline
+}
       }
 
       // sluit laatste segment van dit blok
-      tekenSegmentKader(topSegment, lastYPlaced + itemH - 2);
+      tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+
 
       // ruimte vóór volgend blok
       yCursor = lastYPlaced + itemH + 10;
