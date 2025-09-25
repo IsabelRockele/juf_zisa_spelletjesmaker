@@ -138,8 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
                                 alert("Geen kaarten om te genereren.");
                                 return;
                             }
-                            const cardWidth = (pageW - 3 * margin) / 2;
-                            const cardHeight = (pageH - 3 * margin) / 2;
+                            // Bepaal de maximale afmetingen voor een kaart (een kwadrant van de pagina)
+                            const maxCardWidth = (pageW - 3 * margin) / 2;
+                            const maxCardHeight = (pageH - 3 * margin) / 2;
                             for (let i = 0; i < bingoKaarten.length; i++) {
                                 const kaart = bingoKaarten[i];
                                 const kaartPositieOpPagina = i % 4;
@@ -148,11 +149,31 @@ document.addEventListener('DOMContentLoaded', () => {
                                 }
                                 let cursorX, cursorY;
                                 if (kaartPositieOpPagina === 0) { cursorX = margin; cursorY = margin; } 
-                                else if (kaartPositieOpPagina === 1) { cursorX = margin * 2 + cardWidth; cursorY = margin; } 
-                                else if (kaartPositieOpPagina === 2) { cursorX = margin; cursorY = margin * 2 + cardHeight; } 
-                                else { cursorX = margin * 2 + cardWidth; cursorY = margin * 2 + cardHeight; }
+                                else if (kaartPositieOpPagina === 1) { cursorX = margin * 2 + maxCardWidth; cursorY = margin; } 
+                                else if (kaartPositieOpPagina === 2) { cursorX = margin; cursorY = margin * 2 + maxCardHeight; } 
+                                else { cursorX = margin * 2 + maxCardWidth; cursorY = margin * 2 + maxCardHeight; }
+                                
                                 const canvas = await html2canvas(kaart, { scale: 2 });
-                                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', cursorX, cursorY, cardWidth, cardHeight);
+                                const canvasAspectRatio = canvas.width / canvas.height;
+                                
+                                let finalWidth, finalHeight;
+
+                                // Bepaal de uiteindelijke afmetingen met behoud van aspect ratio
+                                if ((maxCardWidth / canvasAspectRatio) <= maxCardHeight) {
+                                    // Schalen op basis van de breedte past binnen de hoogte
+                                    finalWidth = maxCardWidth;
+                                    finalHeight = maxCardWidth / canvasAspectRatio;
+                                } else {
+                                    // Schalen op basis van de hoogte, omdat de breedte te hoog zou worden
+                                    finalHeight = maxCardHeight;
+                                    finalWidth = maxCardHeight * canvasAspectRatio;
+                                }
+
+                                // Centreer de kaart binnen zijn toegewezen kwadrant
+                                const centeredX = cursorX + (maxCardWidth - finalWidth) / 2;
+                                const centeredY = cursorY + (maxCardHeight - finalHeight) / 2;
+
+                                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', centeredX, centeredY, finalWidth, finalHeight);
                             }
                             pdf.save('bingokaarten.pdf');
                         } catch (error) {
