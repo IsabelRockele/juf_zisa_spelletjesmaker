@@ -47,21 +47,36 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
 
-  if (voegSplitsToeBtn) {
+ if (voegSplitsToeBtn) {
   voegSplitsToeBtn.addEventListener('click', () => {
     if (splitsMelding) splitsMelding.textContent = '';
-    const splitsFijn = leesSplitsFijnVanUI();
-    if (!splitsFijn || !(splitsFijn.tot5 || splitsFijn.van6 || splitsFijn.van7 || splitsFijn.van8 || splitsFijn.van9 || splitsFijn.van10 || splitsFijn.van10tot20)) {
+
+    // 1) fijnmazige selectie verplicht (maakt niet uit welke stijl je kiest)
+    const fijn = (typeof leesSplitsFijnVanUI === 'function') ? leesSplitsFijnVanUI() : null;
+    const ietsAangevinkt = fijn && (fijn.tot5 || fijn.van6 || fijn.van7 || fijn.van8 || fijn.van9 || fijn.van10 || fijn.van10tot20);
+    if (!ietsAangevinkt) {
       if (splitsMelding) splitsMelding.textContent = "Vink minstens één splits-optie aan.";
       return;
     }
 
-    let settings = bouwSplitsSettings([]);
-    settings = verrijkSplitsSettingsMetFijn(settings);
+    // 2) bouw settings — stijl komt uit je select/radio, fijnkeuze wordt toegevoegd
+    let settings = bouwSplitsSettings([]);               // jouw bestaande functie
+    settings = verrijkSplitsSettingsMetFijn(settings);   // zorgt voor settings.splitsFijn
 
-    bundel.push({ titel: 'Splitsen', settings });
-    localStorage.setItem('werkbladBundel', JSON.stringify(bundel));
-    // (laat uw bestaande bundel-render of melding staan)
+    // 3) nette ondertitel voor de bundellijst
+    const f = settings.splitsFijn || {};
+    const stukjes = [];
+    if (f.tot5) stukjes.push('≤5');
+    ['6','7','8','9','10'].forEach(n => { if (f['van'+n]) stukjes.push(n); });
+    if (f.van10tot20) stukjes.push(`10–20 (${f.brug10tot20||'beide'})`);
+    const sub = `${settings.splitsStijl} • aant.: ${settings.numOefeningen}` + (stukjes.length ? ` • tot.: ${stukjes.join(', ')}` : '');
+
+    // 4) BELANGRIJK: bundelPush opslaan + direct hertekenen
+    bundelPush({
+      titel: 'Splitsen',
+      subtitle: sub,
+      settings
+    });
   });
 }
 
