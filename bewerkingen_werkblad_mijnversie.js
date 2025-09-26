@@ -6,7 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // ==== PDF marges ====
   // ==== PDF marges ====
 const LEFT_PUNCH_MARGIN = 16; // mm – perforatiemarge links
-const PDF_BOTTOM_SAFE = 20;
+const INNER_PAD = 12;
+const PDF_BOTTOM_SAFE = 2;
+const SEGMENT_GAP = 2; // verticale ruimte tussen 2 opdrachten/segmenten
+
 
 // vaste breedte voor de kaders van 'rekenen zonder hulp' (mm)
 const BOXED_REKEN_W = 50;
@@ -131,7 +134,9 @@ function genereerSplitsing(settings) {
 
     do {
       pogingen++;
-      if (pogingen > 120) throw new Error(`Kon geen som genereren voor ${gekozenType} tot ${maxGetal}.`);
+      if (pogingen > 120) {
+  throw new Error(`Kon geen som genereren voor type ${gekozenType} met operator ${op} en brug-keuze "${cfg.rekenBrug}".`);
+}
       switch (gekozenType) {
         case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
         case 'T+E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
@@ -557,6 +562,21 @@ function drawRekenItemBoxed(doc, xCenter, y, oef) {
   doc.setFontSize(14);
   doc.text(text, xCenter, y, { align: 'center' });
 }
+// Kleiner kadertje specifiek voor maal- en deeltafels
+function drawTafelItemBoxed(doc, xCenter, y, oef) {
+  const text = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
+  const boxW = 46;    // kleiner dan zonder-brug (bijv. 52 mm)
+  const boxH = 12;
+  const r    = 2;
+  const left = xCenter - boxW / 2;
+
+  doc.setDrawColor(200, 225, 245);
+  doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
+
+  doc.setFont('Courier', 'normal');
+  doc.setFontSize(14);
+  doc.text(text, xCenter, y, { align: 'center' });
+}
 
   // ========= PDF-GENERATOR met nette segment-kaders =========
   function downloadPDF() {
@@ -598,11 +618,18 @@ function drawRekenItemBoxed(doc, xCenter, y, oef) {
   
 // Rekenen zonder hulp: 3 per rij, iets weg van de linkerrand
 else if (cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) {
-  const pad = 16; // mm
+  const pad = 20; // mm
   xCols   = [insetX + pad, insetX + pad + 64, insetX + pad + 128]; // 3 kolommen
   yInc    = 24;   // dichter op elkaar
   itemH   = 20;   // compacter
   colWidth = 60;  // referentiebreedte
+}
+else if (cfg.hoofdBewerking === 'tafels') {
+  const pad = 20; // was bv. 6 → schuift alles iets naar rechts
+  xCols   = [insetX + pad, insetX + pad + 64, insetX + pad + 128]; // 3 per rij
+  yInc    = 20;  // was 24 → minder verticale witruimte
+  itemH   = 18;  // compacter item-height
+  colWidth = 56; // interne kolombreedte; klein genoeg voor boxW=52
 }
 
   if (cfg.hoofdBewerking === 'splitsen') {
@@ -636,6 +663,7 @@ else if (cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) {
 function tekenSegmentKaderMetOffset(cfg, topY, bottomY) {
   if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'puntoefening') return;
   if (cfg.hoofdBewerking === 'rekenen') return;
+  if (cfg.hoofdBewerking === 'tafels') return;   // ← NIEUW: geen groot kader voor tafels
 
   let offY = 0;
   if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'benen') {
@@ -646,6 +674,9 @@ function tekenSegmentKaderMetOffset(cfg, topY, bottomY) {
 }
 
     let yCursor = 35;
+    // Titel: slechts 1x per segmentsoort, niet opnieuw op volgende pagina's
+let lastSegmentKey = null;
+let titlePrintedForCurrentSegment = false;
     let brugTitelGeprintOpPagina = false;
 
 
@@ -669,20 +700,35 @@ function tekenSegmentKaderMetOffset(cfg, topY, bottomY) {
       }
 
       // Titel + start segment
-      function nieuwePagina(metTitel=true) {
-        doc.addPage(); pdfHeader('Werkblad Bewerkingen (vervolg)');
-        yCursor = 35;
-        if (metTitel) {
-          doc.setFont('Helvetica','bold'); doc.setFontSize(14);
-          doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
-          yCursor += 14; // iets meer ruimte onder titel
-        }
-      }
-      // plaats titel
-      if (yCursor + 14 > pageHeight - PDF_BOTTOM_SAFE) nieuwePagina();
-      doc.setFont('Helvetica','bold'); doc.setFontSize(14);
-      doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
-      yCursor += 14;
+function nieuwePagina() {
+  doc.addPage();
+  pdfHeader('Werkblad Bewerkingen (vervolg)');
+  yCursor = 35; // reset cursor, maar GEEN titel hier
+}
+
+// Titel alleen printen wanneer segmentsoort wijzigt
+function ensureTitelVoorSegment(cfg) {
+  // Bepaal 'soort' segment: hoofdBewerking + (brug/nobrug) + splitsStijl + tafelType
+  const segmentKey =
+    (cfg.hoofdBewerking || '') + '|' +
+    (cfg.rekenHulp?.inschakelen ? 'brug' : 'nobrug') + '|' +
+    (cfg.splitsStijl || '') + '|' +
+    (cfg.tafelType || '');
+
+  if (segmentKey !== lastSegmentKey) {
+    // Nieuwe soort → titel 1x printen (en onthouden)
+    if (yCursor + 14 > pageHeight - PDF_BOTTOM_SAFE) nieuwePagina();
+    doc.setFont('Helvetica','bold'); 
+    doc.setFontSize(14);
+    doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
+    yCursor += 14;
+    lastSegmentKey = segmentKey;
+  }
+}
+
+// --- aanroep vlak voordat je de oefeningen van dit segment gaat plaatsen:
+ensureTitelVoorSegment(cfg);
+
 
      let topSegment = yCursor + 2;        // extra bovenmarge binnen het kader
 let row = 0, col = 0;
@@ -735,39 +781,68 @@ const x = xCols[col] + pad;
 } else {
   drawSplitsBenenPDF(doc, x, y, oef);
 }
-        } else if (cfg.hoofdBewerking === 'tafels') {
-          drawRekensomInPDF(doc, x, y, { getal1: oef.getal1, operator: oef.operator, getal2: oef.getal2 });
-        }
+        } else if (oef.type === 'tafels') {
+  // Tafels in een klein kader, net zoals 'zonder brug'
+  drawTafelItemBoxed(doc, x, y, { getal1: oef.getal1, operator: oef.operator, getal2: oef.getal2 });
+}
         lastYPlaced = y; // onthoud laatst geplaatste y
       };
 
-      for (let idx = 0; idx < oefeningen.length; idx++) {
-        // paginawissel?
-        if (y + itemH > pageHeight - PDF_BOTTOM_SAFE) {
-          // sluit huidig segment
-          tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+      // teller voor strakke rasterplaatsing (alleen gebruikt bij 'rekenen' zonder hulp en 'tafels')
+let placedCount = 0;
 
-          // nieuwe pagina + titel + nieuw segment
-          nieuwePagina();
-          topSegment = yCursor + 2;
-          row = 0; col = 0; y = yCursor + 6; lastYPlaced = y;
-        }
-        plaatsItem(oefeningen[idx]);
-        col++;
-if (col >= xCols.length) { 
+      for (let idx = 0; idx < oefeningen.length; idx++) {
+// paginawissel?
+if (y + itemH > pageHeight - PDF_BOTTOM_SAFE) {
+  // sluit huidig segment
+  tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+
+  // nieuwe pagina + titel + nieuw segment
+  nieuwePagina();
+  topSegment = yCursor + 2;
+
+  // baseline opnieuw bepalen (12mm na titel bij rekenen + hulp; anders 6mm)
+  row = 0; 
   col = 0; 
-  row++; 
-  y = yStart + row * yInc;   // altijd vanaf dezelfde baseline
+  yStart = yCursor + ((cfg.hoofdBewerking === 'rekenen' && cfg.rekenHulp?.inschakelen) ? 12 : 6);
+  y      = yStart; 
+  lastYPlaced = y;
+
+  // rasterteller resetten voor 'zonder brug' en 'tafels'
+  if ((cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) || cfg.hoofdBewerking === 'tafels') {
+    placedCount = 0;
+  }
 }
-      }
+
+// teken de oefening
+plaatsItem(oefeningen[idx]);
+
+// rasterlogica
+if ((cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) || cfg.hoofdBewerking === 'tafels') {
+  // Strakke 3-per-rij rasterplaatsing
+  placedCount = (placedCount || 0) + 1;
+  row = Math.floor(placedCount / xCols.length);
+  col = placedCount % xCols.length;
+  y   = yStart + row * yInc;
+} else {
+  // Bestaand gedrag voor andere segmenten
+  col++;
+  if (col >= xCols.length) { 
+    col = 0; 
+    row++; 
+    y = yStart + row * yInc; 
+  }
+}
+}
 
       // sluit laatste segment van dit blok
       tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
 
 
-      // ruimte vóór volgend blok
-      yCursor = lastYPlaced + itemH + 10;
-      if (yCursor > pageHeight - PDF_BOTTOM_SAFE) nieuwePagina(false);
+     // ruimte vóór volgende opdracht (segment)
+yCursor = lastYPlaced + itemH + SEGMENT_GAP;
+if (yCursor > pageHeight - PDF_BOTTOM_SAFE) nieuwePagina(false);
+
     }
 
     doc.save('bewerkingen_werkblad.pdf');
