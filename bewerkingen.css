@@ -141,15 +141,33 @@ button:hover {
     padding: 20px;
 }
 
+/* Voorbeeld: opdrachten onder elkaar i.p.v. 4 kolommen */
 #werkblad-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    /* AANGEPAST: Zorgt voor uitlijning aan de bovenkant */
-    align-items: start;
-    justify-items: center;
+    display: flex;
+    flex-direction: column;   /* onder elkaar */
+    gap: 24px;                /* ruimte tussen opdrachten */
+    align-items: stretch;     /* blokken over volle breedte */
     font-family: 'Courier New', Courier, monospace;
     font-size: 1.2em;
+}
+
+/* (optioneel) interne grid binnen één opdrachtblok */
+#werkblad-container .preview-grid{
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), minmax(0,1fr));
+    gap: 16px;
+}
+
+/* Zorg dat oefeningen binnen het blok blijven en niet overlopen */
+#werkblad-container .oefening{
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* hulplijnen in voorbeeld iets korter */
+#werkblad-container .lijnenrechts > div{
+    width: 220px;
+    max-width: 100%;
 }
 
 .oefening-kolom {
