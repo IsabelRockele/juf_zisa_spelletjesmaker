@@ -17,10 +17,24 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
 
     /* Opdrachtblokken */
     .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
-      position:relative;margin:14px 0 20px 0;padding:10px 12px 20px 12px;border:1px solid #d9e2ec;border-radius:10px;background:#fff;page-break-inside: avoid;overflow: visible;
-    }
+  position:relative;
+  margin:14px 0 20px 0;
+  padding:10px 12px 20px 12px;
+  border:1px solid #d9e2ec;
+  border-radius:10px;
+  background:#fff;
+  overflow: visible;
+}
     .title-row{display:flex;align-items:center;gap:8px;margin:6px 0 8px 0}
-    .exercise-title{font-weight:600;color:#334;margin:0;font-size:15px; page-break-after: avoid;}
+   .exercise-title{
+  font-family: Arial, sans-serif;
+  font-size: 14pt;
+  font-weight: 600;
+  color: #334;
+  margin: 0;
+  page-break-after: avoid;
+}
+
     .title-delete-btn{width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold}
     .title-delete-btn:hover{background:#ffe9e9}
     .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
@@ -38,7 +52,6 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .honderdveld-te-table td{border:1px solid #334;width:40px;height:36px}
     .honderdveld-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:16px;box-sizing:border-box}
     .honderdveld-num-box{width:50px;height:44px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
-    .honderdveld-row{display:flex;gap:16px;align-items:flex-start;page-break-inside:avoid}
     .honderdveld-row>.honderdveld-exercise-block{flex:1;margin-top:0}
     .aanvul-vragen{display:flex;flex-direction:column;gap:10px;font-size:16px}
     .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap}
@@ -69,14 +82,6 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .mab-te-table .te-label.h{background:#42a5f5;color:#fff}
     .mab-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:18px;box-sizing:border-box}
 
-    /* Verbinden (MAB) */
-    .mab-connect-2row{display:flex;flex-direction:column;gap:84px;padding:8px 4px 16px 4px}
-    .mab-connect-row-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;align-items:end}
-    .mab-connect-card{position:relative;display:flex;justify-content:center}
-    .connect-dot{position:absolute;left:50%;transform:translateX(-50%);width:10px;height:10px;background:#000;border-radius:50%}
-    .connect-dot.bottom{bottom:-16px}
-    .connect-dot.top{top:-16px}
-    .mab-connect-num{font-size:22px;font-weight:bold;border:2px solid #ccc;border-radius:10px;width:60px;height:48px;display:flex;justify-content:center;align-items:center;margin:0 auto}
 
     /* Getallenlijn */
     .exercise.drag{padding-bottom:100px}
@@ -100,6 +105,145 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
 
     /* Gemengd */
     .mixed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
+    /* === Plaatswaarde – “match”-oefeningen (verbind / kleur) === */
+.pv-match-grid{ display:grid; grid-template-columns: 1fr; gap:10px; }
+.pv-first{ margin-bottom:10px; }                 /* ruimte tussen 1e en 2e rij */
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+.pv-match-row,
+.pv-color-row{
+  border:1px dashed #d9e2ec; border-radius:9px;
+  padding:10px; overflow:visible;
+}
+
+.pv-row-top, .pv-row-bottom{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  flex-wrap:nowrap;
+}
+.pv-card{
+  min-width:52px; min-height:34px; padding:4px 8px;
+  border:2px solid #c9d6ea; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+}
+.pv-dot{
+  width:7px; height:7px; border-radius:50%; background:#111;
+  margin:4px auto 0 auto;
+}
+
+/* “Kleur dezelfde waarde” – 2 x 5 raster binnen één rij */
+.pv-color-grid{
+  display:grid; grid-template-columns: repeat(5, minmax(0,1fr));
+  gap:6px; justify-items:stretch; align-items:stretch;
+}
+.pv-color-cell{
+  border:1.6px solid #c9d6ea; border-radius:8px; min-height:34px;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+  padding:4px;
+}
+/* === Plaatswaarde — Verbind in 3 banden (boven → midden → onder) === */
+/* === PV verbinden in 3 banden: rijkader + ruimte === */
+.pv-connect3-row{
+  border:1px dashed #d9e2ec;
+  border-radius:9px;
+  padding:12px;
+  margin:0;                 /* geen extra buitenmarge */
+  overflow:visible;
+}
+
+/* de 3 banden onder elkaar met extra verticale ruimte */
+.pv-connect3{
+  display:flex;
+  flex-direction:column;
+  gap:22px;                 /* MEER ruimte tussen boven/midden/onder */
+}
+
+/* 5 kolommen per band + ruimere horizontale/verticale gap */
+/* — meer verticale ruimte tussen de 3 banden — */
+.pv-connect3{
+  display:flex;
+  flex-direction:column;
+  gap:60px;                 /* was 22 → ruimer */
+}
+
+/* — ruimer binnen elke band, vooral verticaal — */
+.pv-band{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap:18px 30px;            /* was 16px 22px → ruimer (horizontaal, verticaal) */
+  align-items:start;
+}
+
+/* — cell stapelt: (dot boven) kaartje (dot onder), geen extra gaten ertussen — */
+.pv-cell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:0;                    /* expliciet geen interne gap */
+}
+
+/* — kaartje blijft iets groter voor leesbaarheid — */
+.pv-card{
+  min-width:56px;
+  min-height:40px;          /* iets hoger */
+  padding:4px 10px;
+  border:2px solid #c9d6ea;
+  border-radius:9px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+}
+
+/* — dots tegen het kaartkader laten “raken” — */
+.pv-dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background:#111;
+  flex:0 0 8px;
+  line-height:0;
+}
+
+/* BELANGRIJK: geen marge tussen dot en kaartje */
+.pv-dot.top{    margin:0 0 0 0 !important; }   /* direct boven het kaartje  */
+.pv-dot.bottom{ margin:0 0 0 0 !important; }   /* direct onder het kaartje  */
+
+
+/* titel blijft aan eerste rij + nette opening tussen 1e en 2e rij */
+.pv-first{ margin-bottom:12px; }
+.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+
+
+/* titel vast bij rij 1 + ruimte naar rij 2 */
+.pv-first{ margin-bottom:10px; }
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+    /* Zorg voor ruimte tussen de 1e rij (bij de titel) en de rest */
+.mixed-first{ margin-bottom: 10px; }              /* opening onder rij 1 */
+.mixed-exercise-block > .mixed-grid{ margin-top: 0; } /* geen dubbele marge */
+
+/* (optioneel, maar nuttig): voorkom dat rij 1 gebroken wordt over pagina's */
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+    /* === Mixed: één oefening per rij (voor rangschikken) === */
+/* Eén oefening per rij (rangschikken): grotere verticale gap */
+.mixed-grid.one-col{
+  grid-template-columns: 1fr;
+  gap: 20px;                 /* ↑↑ maak dit groter/kleiner naar wens (bv. 22px) */
+}
+
+/* Extra ruimte tussen 1e rij (bij de titel) en de rest */
+.mixed-first{ margin-bottom: 18px; }     /* was 10px; pas aan naar smaak */
+
+
+/* Lay-out voor rangschikken (nummers boven, invullijn eronder) */
+.mix-order-wrap{ display:flex; flex-direction:column; gap:6px; width:100%; }
+.mix-order-top{ display:flex; justify-content:center; gap:10px; font-weight:700; font-size:17px; flex-wrap:wrap; }
+.mix-order-bottom{ display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:nowrap; }
+.mix-order-symbol{ font-weight:700; font-size:18px; padding:0 2px; }
+
     /* bij HTE 2 per rij */
     .mixed-grid.hte-2col{grid-template-columns:repeat(2,minmax(0,1fr))}
     .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:visible;white-space:nowrap}
@@ -138,18 +282,24 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .pv3-digit.hundreds{ background:#42a5f5; color:#fff; }
     .pv3-digit.tens{ background:#4caf50; color:#fff; }
     .pv3-digit.units{ background:#ffeb3b; color:#333; }
-    .pv3-answers{ position:absolute; left:130px; top:48px; display:flex; flex-direction:column; gap:16px; }
-    .pv3-row{ display:flex; align-items:center; gap:4px; white-space:nowrap;}
+
+
+    .pv3-row{ display:flex; align-items:center; gap:3px; white-space:nowrap;}
     .pv3-box,.pv3-small{ border:2px solid #c9d6ea; border-radius:6px; text-align:center; font:inherit; height:28px; }
     .pv3-small{ width:22px; }
-    .pv3-box{ width:22px; }
+    .pv3-box{ width:21px; }
     .pv3-label{ font-weight:700; }
+    
 
     /* Menu */
     .menu-btn{position:fixed;top:10px;left:10px;z-index:20;display:inline-block;padding:8px 14px;border-radius:999px;background:#0d47a1;color:#fff;text-decoration:none;font-weight:700;border:1px solid #0a3a85}
     .menu-btn:focus{outline:2px solid #fff;outline-offset:2px}
 
-    @media print{header,#controls,#previewTitle,.title-delete-btn,.delete-btn,.print-overlay-input{display:none!important}#sheet{border:0;padding:0}}
+   @media print {
+  header, #controls, #previewTitle, .title-delete-btn, .delete-btn, .print-overlay-input { display: none !important; }
+  #sheet { border: 0; padding: 0; }
+}
+
     @page{margin:12mm 12mm 12mm 22mm}
 
 /* === PATCH: Plaatswaarde TE / HTE en Verbinden (overlap fix) === */
@@ -164,15 +314,23 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
   gap:12px;
 }
 
-/* Waarde per cijfer tot 1000 (HTE) */
+/* Plaatswaarde tot 1000: antwoorden volledig onder de cijfers */
 .pv3-answers{
   position:absolute;
-  left:130px;
-  top:52px;     /* iets lager voor nette landing */
-  display:flex;
-  flex-direction:column;
-  gap:16px;     /* meer ruimte tussen rijen */
+  left:0;            /* volle breedte van item */
+  right:0;
+  top:0;             /* exacte top-positie wordt in JS gezet per rij */
+  height:180px;      /* speelruimte voor 3 rijen */
 }
+.pv3-answers .pv3-row{
+  position:absolute; /* we plaatsen elke rij onder zijn pijl */
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+  min-height:32px;  
+}
+
 
 /* Verbinden 'Wat is evenveel?' */
 .mab-connect-2row{
@@ -236,7 +394,6 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
 
 /* --- Plaatswaarde: antwoordkolommen blijven leidend --- */
 .pv-answers{ left:130px; }   /* TE */
-.pv3-answers{ left:130px; }  /* HTE */
 .mab-connect-num { min-width: 64px; }
 .mab-connector { pointer-events: none; }
 
@@ -256,4 +413,331 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
   row-gap: 24px;      /* verticale ruimte binnen deze container */
   align-items: start;
   margin: 12px 0;     /* ruimte tussen opeenvolgende rijen */
+}
+/* ===== Pagineringslogica: titel+eerste rij bij elkaar, overige rijen vrij ===== */
+.title-row { page-break-after: avoid; break-after: avoid; }
+
+.keep-with-title { 
+  break-inside: avoid; 
+  page-break-inside: avoid;
+}
+
+/* Voor volledige blokken die nooit gesplitst mogen worden (bv. verbinden) */
+.keep-together { 
+  break-inside: avoid; 
+  page-break-inside: avoid; 
+}
+
+/* Veilig per-rij niet knippen (toegepast op 'body'-rijen) */
+.row-block { 
+  break-inside: avoid; 
+  page-break-inside: avoid; 
+}
+/* — MAB Tellen/Kleuren: extra verticale ademruimte — */
+.mab-first{               /* de eerste rij onder de titel */
+  margin-bottom: 18px;
+}
+.mab-grid-layout{         /* de overige rijen (body) */
+  row-gap: 28px;          /* was kleiner → rijen plakten tegen elkaar */
+}
+
+/* wat extra marge onder het invultabelletje zelf */
+.mab-te-table{
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+@media print{
+  /* Hou HTE consequent 2 kolommen met iets kleinere gaten/ruimte */
+  .pv3-grid{
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    column-gap: 12px;   /* was groter → maakte de breedte krapper */
+    row-gap: 14px;      /* iets compacter tussen rijen */
+  }
+  .pv3-item{
+    box-sizing: border-box;
+    padding: 10px 10px 12px;  /* subtiel smaller dan op scherm */
+  }
+  .pv3-row{
+    column-gap: 8px;    /* minder ruimte tussen label en vakje */
+    row-gap: 6px;
+  }
+  .pv3-box{
+    width: 22px;        /* smal genoeg voor 2-up op A4 */
+    min-width: 22px;
+  }
+  .pv3-small{
+    width: 18px;
+    min-width: 18px;
+  }
+}
+/* — HTE: neerwaartse pijlen naar eerste invulvak — */
+.pv3-arrow-down{
+  position: absolute;
+  width: 0;
+  border-left: 2px solid #222;      /* verticale lijn */
+  pointer-events: none;
+  z-index: 2;
+}
+.pv3-arrow-down::after{             /* pijlpunt (driehoek) */
+  content: "";
+  position: absolute;
+  left: -5px;                       /* centreren op de lijn */
+  bottom: -2px;
+  border: 6px solid transparent;
+  border-top-color: #222;           /* pijl naar beneden */
+}
+/* --- Uniforme layout voor oefenroosters --- */
+.pv3-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 22px;   /* horizontale afstand tussen de 2 kolommen */
+  row-gap: 22px;      /* verticale afstand tussen ALLE rijen */
+}
+
+/* alle kaarten: geen eigen (boven)margin meer, gap bepaalt alles */
+.pv3-grid > .pv3-item{
+  margin: 0 !important;
+}
+
+/* als er ooit styles op '3e rij' stonden, maak die onschadelijk */
+.pv3-grid > .pv3-item:nth-child(3),
+.pv3-grid > .pv3-item:nth-child(4){
+  margin-top: 0 !important;
+}
+/* === OVERRIDE v2: verwijder de grote kaders rond elk oefeningsblok === */
+.exercise,
+.jump-exercise-block,
+.mixed-exercise-block,
+.sequence-exercise-block,
+.honderdveld-exercise-block,
+.mab-exercise-block,
+.placevalue-exercise-block{
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Zorg dat dit ook bij print en html2canvas geldt */
+@media screen, print {
+  .exercise,
+  .jump-exercise-block,
+  .mixed-exercise-block,
+  .sequence-exercise-block,
+  .honderdveld-exercise-block,
+  .mab-exercise-block,
+  .placevalue-exercise-block{
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+/* === OVERRIDE v3: verwijder de buitenkader rond het volledige werkblad === */
+#sheet {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important; /* laat witte achtergrond van pagina zelf gelden */
+}
+
+/* ook bij print of html2canvas export */
+@media screen, print {
+  #sheet {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+}
+/* — per-rij verwijderknop — */
+.row-delete-btn{
+  position:absolute;
+  top:-10px; right:-10px;
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:0 0 0 2px #fff;   /* witte ring zodat hij los komt van kader */
+}
+.row-delete-wrap{ position:relative; }  /* hulklasse om de knop te positioneren */
+/* — rij-kruisje altijd BINNEN de rij en nooit mee naar PDF — */
+.row-delete-wrap{ position: relative; }
+
+.row-delete-btn{
+  position:absolute;
+  /* binnen het kader i.p.v. negatieve offset buiten het kader */
+  top:4px; 
+  right:4px;
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:none;           /* geen buitenste schaduw die de breedte kan beïnvloeden */
+}
+
+/* Verberg ALLE delete-knoppen bij print en PDF-export */
+@media print{
+  .row-delete-btn,
+  .block-delete-btn,
+  [class*="delete-btn"]{ display:none !important; }
+}
+
+/* extra vlag voor html2canvas: wanneer we tijdelijk 'exporting' zetten */
+html.exporting .row-delete-btn,
+html.exporting .block-delete-btn,
+html.exporting [class*="delete-btn"]{ display:none !important; }
+/* Plaats het rij-kruisje BINNEN het kader, niet erbuiten */
+.row-delete-wrap{ position:relative; }
+.row-delete-btn{
+  position:absolute;
+  top:4px; right:4px;          /* binnen het kader */
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:none;             /* geen schaduw die het blad “breder” maakt */
+}
+.jump-arcs-svg{ overflow:visible; pointer-events:none; }
+.jump-path{ stroke:#1e88e5; stroke-width:3; fill:none; stroke-linecap:round; }
+.jump-label{ fill:#1e88e5; font-weight:700; font-size:14px; }
+/* Sprongen: rechts ruimte voor het rij-kruisje zodat het niet over het laatste hokje valt */
+.jump-row.row-delete-wrap{ padding-right: 28px; position: relative; }
+
+/* (laat je algemene rijknop staan) */
+.row-delete-btn{ top:4px; right:4px; }   /* dit heb je al */
+/* Sprongen: ruimte bovenaan voor bogen + labels, en rechts voor het kruisje */
+.jump-row{ position:relative; padding-top:25px; overflow:visible; }
+.jump-row.row-delete-wrap{ padding-right:28px; } /* zodat het kruisje niet over het laatste vakje valt */
+/* Extra verticale ruimte tussen rijen bij rangschikoefeningen */
+.sort-row {
+  margin-bottom: 16px;      /* afstand tussen rijen */
+  padding-bottom: 4px;      /* optisch wat lucht binnen de rand */
+}
+/* Meer kopruimte voor sprongen bij export/print zodat bogen/labels nooit afvallen */
+@media print{
+  .jump-row{ padding-top: 44px !important; }
+}
+
+/* idem tijdens html2canvas-export (we zetten 'exporting' in JS) */
+html.exporting .jump-row{ padding-top: 44px !important; }
+/* SPRONGEN – kopruimte boven de hokjes */
+.jump-row{
+  position: relative;
+  padding-top: 34px;   /* ruimte op SCHERM voor bogen/labels */
+  overflow: visible;
+}
+
+/* Extra kopruimte bij PDF/print en tijdens html2canvas-export */
+/* Alleen tijdens print/export: bogen lager (dichter bij de hokjes) */
+@media print{
+  .jump-row .jump-arcs-svg{ top: 10px !important; }   /* was -32 of 0 op scherm */
+  .jump-row{ padding-top: 48px !important; }           /* iets minder kopruimte */
+}
+html.exporting .jump-row .jump-arcs-svg{ top: 10px !important; }
+html.exporting .jump-row{ padding-top: 48px !important; }
+
+/* (al aanwezig, maar voor de zekerheid) bogen/labels-stijl */
+.jump-arcs-svg{ overflow: visible; pointer-events: none; }
+.jump-path{ stroke:#1e88e5; stroke-width:3; fill:none; stroke-linecap:round; }
+.jump-label{ fill:#1e88e5; font-weight:700; font-size:14px; }
+/* PDF/export: til ALLEEN de labels boven de boog */
+
+@media print {
+  /* Til de spronglabels iets hoger in de PDF */
+  .jump-row .jump-arcs-svg {
+    top: 10px !important;        /* boog iets lager t.o.v. hokjes */
+  }
+  .jump-row .jump-arcs-svg text.jump-label {
+    transform: translateY(-6px); /* label iets hoger boven de boog */
+  }
+}
+
+/* Ook bij HTML-export voor PDF-knop (indien die klasse gebruikt wordt) */
+html.exporting .jump-row .jump-arcs-svg {
+  top: 10px !important;
+}
+html.exporting .jump-row .jump-arcs-svg text.jump-label {
+  transform: translateY(-8px);
+}
+/* === SPRONGEN — verbeterde hoogte en labelpositie in PDF/export === */
+@media print {
+  .jump-exercise, .jump-row { overflow: visible !important; }
+  .jump-row { padding-top: 48px !important; }
+
+  /* SVG-hoogte vergroten zodat label niet wordt afgesneden */
+  .jump-row .jump-arc-wrapper,
+  .jump-row .jump-arcs-inline,
+  .jump-row .jump-arcs-svg {
+    height: 40px !important;
+  }
+
+  /* boog iets lager, label hoger */
+  .jump-row .jump-arcs-svg { top: 6px !important; }
+  .jump-row .jump-arcs-svg text.jump-label { transform: translateY(-8px); }
+}
+
+/* ook bij html2canvas-export */
+html.exporting .jump-exercise, 
+html.exporting .jump-row { overflow: visible !important; }
+html.exporting .jump-row { padding-top: 48px !important; }
+html.exporting .jump-row .jump-arc-wrapper,
+html.exporting .jump-row .jump-arcs-inline,
+html.exporting .jump-row .jump-arcs-svg { height: 40px !important; }
+html.exporting .jump-row .jump-arcs-svg { top: 6px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label { transform: translateY(-8px); }
+@media print{
+  .jump-row { padding-top: 48px !important; }        /* kopruimte blijft */
+  .jump-row .jump-arcs-svg { top: 6px !important; }  /* boog iets lager */
+  .jump-row .jump-arcs-svg text.jump-label { 
+    transform: none !important;                      /* geen extra shift meer */
+  }
+}
+html.exporting .jump-row { padding-top: 48px !important; }
+html.exporting .jump-row .jump-arcs-svg { top: 6px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label { transform: none !important; }
+/* Kader rond elke sprongen-rij */
+.jump-row.row-delete-wrap{
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 12px 14px;
+  padding-top: 34px;     /* kopruimte op scherm */
+  overflow: visible;
+}
+
+/* In PDF/export: extra kopruimte; geen extra transform nodig */
+@media print{
+  .jump-row.row-delete-wrap{ padding-top: 48px !important; }
+  .jump-row .jump-arcs-svg{ top: 10px !important; } /* was 6px → iets lager */
+  .jump-row .jump-arcs-svg text.jump-label{ transform: none !important; }
+}
+html.exporting .jump-row.row-delete-wrap{ padding-top: 48px !important; }
+html.exporting .jump-row .jump-arcs-svg{ top: 10px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !important; }
+/* --- Rangschikken: meer ruimte tussen getallen en hogere invulvakjes --- */
+.mix-order-top {
+  gap: 20px; /* was 10px; meer ruimte tussen getallen */
+}
+
+.mix-order-top div::after {
+  content: " -";           /* optioneel: voeg streepje tussen getallen */
+  color: #666;
+  font-weight: normal;
+  margin-left: 2px;
+}
+.mix-order-top div:last-child::after {
+  content: "";             /* geen streepje na het laatste getal */
+}
+
+.mix-box {
+  height: 42px !important; /* iets hogere invulhokjes */
+  line-height: 42px;       /* tekst beter gecentreerd */
+}
+/* --- Extra ruimte tussen getallenrij en invulrij bij rangschikken --- */
+.mix-order-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;   /* was 6px; verhoog naar wens (bv. 18px voor meer) */
 }
