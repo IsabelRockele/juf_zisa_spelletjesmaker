@@ -103,6 +103,9 @@
           <select id="mixedType" style="width:280px">
             <option value="neighbors">Buurgetallen</option>
             <option value="neighborTens">Buurtientallen</option>
+            <option value="neighborHundreds">Buurhonderdtallen</option>
+<option value="orderAsc">Rangschik van klein naar groot</option>
+<option value="orderDesc">Rangschik van groot naar klein</option>
             <option value="composeTE">Vul het getal in (T/E → getal)</option>
             <option value="compare">Vergelijken (getal ↔ getal)</option>
             <option value="compareTE">Vergelijken (T/E ↔ getal/T&E)</option>
@@ -177,18 +180,29 @@
     <!-- 7. WAARDE PER CIJFER (keuze tot 20/100/1000) -->
     <fieldset>
       <legend>7. Waarde per cijfer</legend>
-      <div class="row">
-        <label>Bereik
-          <select id="pvRange" style="width:140px">
-            <option value="20">tot 20</option>
-            <option value="100" selected>tot 100</option>
-            <option value="1000">tot 1000</option>
-          </select>
-        </label>
-        <label>Aantal <input id="pvCount" type="number" value="6" min="3" max="12" style="width:74px"></label>
-      </div>
-      <button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
-    </fieldset>
+      <div class="row"> 
+  <label>Bereik
+    <select id="pvRange" style="width:140px">
+      <option value="20">tot 20</option>
+      <option value="100" selected>tot 100</option>
+      <option value="1000">tot 1000</option>
+    </select>
+  </label>
+  <label>Aantal <input id="pvCount" type="number" value="6" min="3" max="12" style="width:74px"></label>
+</div>
+
+<div class="row">
+  <label>Soort
+    <select id="pvMode" style="width:260px">
+      <option value="standard" selected>Standaard (waarde per cijfer)</option>
+      <option value="connect">Verbind wat evenveel is</option>
+      <option value="color">Kleur dezelfde waarde</option>
+    </select>
+  </label>
+</div>
+
+<button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
+</fieldset>
 
     <div style="margin-top:18px">
       <button class="btn ghost" id="btnDownloadPdf" type="button">Download als PDF</button>
@@ -203,9 +217,6 @@
     <div id="sheet"></div>
   </section>
 </main>
-
-
-
  <script src="getalinzicht.js"></script>
 </body>
 </html>
