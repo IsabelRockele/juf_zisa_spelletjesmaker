@@ -741,3 +741,26 @@ html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !import
   flex-direction: column;
   gap: 16px;   /* was 6px; verhoog naar wens (bv. 18px voor meer) */
 }
+/* --- Rangschikken: streepjes mooi centreren tussen getallen --- */
+.mix-order-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;            /* horizontale afstand tussen getallen */
+  position: relative;
+}
+
+.mix-order-top div {
+  position: relative;
+}
+
+.mix-order-top div:not(:last-child)::after {
+  content: "-";
+  position: absolute;
+  right: -18px;         /* verschuif naar links/rechts tot mooi in midden */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-weight: 600;
+  font-size: 16px;
+}
