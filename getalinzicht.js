@@ -537,18 +537,39 @@ function placeAfterLastOfKey(el, key){
   const line  = (p,x1,y1,x2,y2,str,w) => { const l=document.createElementNS(NS,'line'); l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2); l.setAttribute('stroke',str||'#6b879a'); l.setAttribute('stroke-width',w||'2'); p.appendChild(l); return l; };
   const label = (p,x,y,txt) => { const g=group(p); const r=document.createElementNS(NS,'rect'); r.setAttribute('x',x-16); r.setAttribute('y',y-24); r.setAttribute('width',32); r.setAttribute('height',22); r.setAttribute('fill','#fff'); r.setAttribute('stroke','#6b879a'); r.setAttribute('stroke-width','2'); r.setAttribute('rx',6); g.appendChild(r); const t=document.createElementNS(NS,'text'); t.setAttribute('x',x); t.setAttribute('y',y-8); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','13'); t.setAttribute('font-weight','700'); t.textContent=String(txt); g.appendChild(t); };
 // Per-rij delete
+// Per-rij delete (robuust)
 function createRowDeleteButton(target){
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'row-delete-btn';
   btn.textContent = '×';
-  btn.addEventListener('click', () => {
-    // verwijder de hele rij/oefening
+
+  btn.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+
+    // Verwijder de rij/kaart zelf
+    const parentBefore = target.parentElement;
+    const titleKey = target.dataset.titleKey; // meestal niet gezet op rij, wel op blok
+
     target.remove();
-    // als in een container (grid/row) niets meer overblijft → container opruimen
-    const p = btn.closest('.honderdveld-row, .mixed-grid, .pv-match-grid, .mab-grid-layout, .seq-row, .jump-exercise, .pv-connect3-row, .pv-color-row, .placevalue-grid');
-    if (p && p.children && p.children.length === 0) p.remove();
-  }, { once:true });
+
+    // Als de container leeg is, ruim ze op (werkt voor zowel head als grid)
+    const p = parentBefore;
+    if (p && p.children && p.children.length === 0) {
+      p.remove();
+    }
+
+    // Als er helemaal geen blokken meer zijn met dit titleKey, verwijder de titel
+    if (titleKey){
+      const remaining = document.querySelector(`[data-title-key="${titleKey}"]:not(.exercise-title)`);
+      if (!remaining){
+        const titleRow = document.querySelector(`.title-row .exercise-title[data-title-key="${titleKey}"]`)?.parentElement;
+        if (titleRow) titleRow.remove();
+      }
+    }
+  });
+
   return btn;
 }
 
