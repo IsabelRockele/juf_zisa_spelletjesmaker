@@ -764,3 +764,71 @@ html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !import
   font-weight: 600;
   font-size: 16px;
 }
+/* --- Vul aan tot volgend T/H --- */
+.fillnext-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px 16px;                  /* rij × kolom */
+}
+.fillnext-card{
+  border:1px solid #d9e2ec;        /* kader rond elke oefening */
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+  min-height:88px;
+  display:flex; flex-direction:column; gap:6px;
+  overflow:visible;
+}
+.fillnext-top{
+  display:flex; align-items:center; gap:10px;
+}
+.fillnext-num{
+  min-width:56px; height:36px;
+  border:2px solid #c9d6ea; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+  background:#eef6ff;
+}
+.fillnext-line{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  font-weight:600;
+}
+.fillnext-box{
+  width:64px; height:34px;         /* HOGER, niet breder */
+  border:2px solid #c9d6ea; border-radius:9px;
+  text-align:center; font:inherit; box-sizing:border-box;
+}
+
+.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+/* eerste rij bij de titel houden */
+.fillnext-first{ margin-bottom:10px; }
+
+/* bij print: elke grid-rij mag afbreken per rij */
+@media print{
+  .fillnext-grid{ break-inside:auto; }
+}
+/* Voorbeeldkader bij 'Vul aan tot'-oefening */
+.fillnext-card.example {
+  border: 3px solid #ffa726;          /* oranje rand */
+  background-color: #fff8e1;          /* zacht oranjegeel */
+  box-shadow: 0 0 6px rgba(255,167,38,0.3);
+}
+/* Rijcontainer voor 'Vul aan' (2 per rij) */
+.fillnext-row{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px 16px;      /* zelfde gap als .fillnext-grid */
+  margin-bottom: 12px; /* extra tussenruimte per rij */
+}
+
+@media print{
+  /* Elke rij blijft bij elkaar op de pagina */
+  .fillnext-row{
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+/* Rij neemt volledige breedte van de grid in (span beide kolommen) */
+.fillnext-row{
+  grid-column: 1 / -1;   /* ← NIEUW: één rij per lijn */
+}
