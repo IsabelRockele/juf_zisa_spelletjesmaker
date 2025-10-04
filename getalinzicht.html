@@ -204,6 +204,38 @@
 <button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
 </fieldset>
 
+<fieldset>
+  <legend>8. Vul aan tot...</legend>
+
+  <label>
+    Bereik
+    <select id="fillNextRange">
+      <option value="100">tot 100</option>
+      <option value="1000">tot 1000</option>
+    </select>
+  </label>
+
+  <label>
+    Aantal
+    <input type="number" id="fillNextCount" value="1" min="1" max="10">
+  </label>
+
+  <label>
+    Soort
+    <select id="fillNextType">
+      <option value="nextTen">Tot het eerstvolgende tiental</option>
+      <option value="nextHundred">Tot het eerstvolgende honderdtal</option>
+    </select>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+    <input type="checkbox" id="fillNextExample">
+    Voorbeeld tonen (alleen de eerste oefening ingevuld)
+  </label>
+
+  <button id="btnAddFillNext" class="btn">Voeg 'Vul aan'-oefeningen toe</button>
+</fieldset>
+
     <div style="margin-top:18px">
       <button class="btn ghost" id="btnDownloadPdf" type="button">Download als PDF</button>
       <button class="btn ghost" id="btnClearSheet" type="button">Werkblad leegmaken</button>
