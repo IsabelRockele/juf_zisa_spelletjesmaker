@@ -221,9 +221,16 @@ function iconPool(theme){
   if (theme === 'letters'){
     return ['A','B','C','D','E','F','G','H'];
   }
+
+  if (theme === 'vrij'){
+    // vrije pictogrammen
+    return ['😊','❤️','☁️','⭐','🌈','🌻','🎈','🎵'];
+  }
+
   // default: herfst-emoji’s (veilig, geen assets nodig)
   return ['🍁','🍄','🐿️','🦔','🌰','🎃','🍂','👨‍🌾'];
 }
+
 
 // Zet pictogrammen ín de juiste cellen (geen absolute positie meer)
 function placeIcons(boardEl, count, theme, showNumbers){
