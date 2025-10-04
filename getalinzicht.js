@@ -493,6 +493,9 @@ function neighborHundredsFor(x){
   const upper = Math.min(1000, base+100);
   return [lower, x, upper];
 }
+function nextTen(n){ return Math.floor(n/10)*10 + 10; }
+function nextHundred(n){ return Math.floor(n/100)*100 + 100; }
+function isCleanTen(n){ return n % 10 === 0; }
 
   function makeTE(max){
     const maxT = Math.min(9, Math.floor(max/10));
@@ -547,35 +550,54 @@ function neighborHundredsFor(x){
     const type=$('#mixedType').value;
     const max=parseInt($('#mixedMax').value,10)||100;
     const n=parseInt($('#mixedCount').value,10)||9;
-    const titles={
-      'neighbors':'Vul de buurgetallen in.',
-      'neighborTens':'Vul de buurtientallen in.',
-      'composeTE':'Vul het getal in.',
-      'compare':'Vergelijk de getallen (vul <, = of > in).',
-      'compareTE':'Vergelijk de getallen (vul <, = of > in).',
-      'composeHTE':'Vul het getal in.',
-      'compareHTE':'Vergelijk de getallen (vul <, = of > in).',
-'neighborHundreds':'Vul de buurhonderdtallen in.',
-'orderAsc':'Rangschik van klein naar groot.',
-'orderDesc':'Rangschik van groot naar klein.'
+    const titles = {
+  neighbors: 'Vul de buurgetallen in.',
+  neighborTens: 'Vul de buurtientallen in.',
+  neighborHundreds: 'Vul de buurhonderdtallen in.',
+  orderAsc: 'Rangschik van klein naar groot.',
+  orderDesc: 'Rangschik van groot naar klein.',
+  composeTE: 'Vul het getal in.',
+  compare: 'Vergelijk de getallen (vul <, = of > in).',
+  compareTE: 'Vergelijk de getallen (vul <, = of > in).',
+  composeHTE: 'Vul het getal in.',
+  compareHTE: 'Vergelijk de getallen (vul <, = of > in).',
+  nextTen: 'Vul aan tot het eerstvolgende tiental.',
+  nextHundred: 'Vul aan tot het eerstvolgende honderdtal.'
+};
 
-    };
-    const keyMap={
-      'neighbors':'mixed_neighbors','neighborTens':'mixed_neighborTens','composeTE':'mixed_compose_te',
-     'compare':'mixed_compare_any','compareTE':'mixed_compare_any','composeHTE':'mixed_compose_hte','compareHTE':'mixed_compare_hte',
-'neighborHundreds':'mixed_neighborHundreds',
-'orderAsc':'mixed_order_asc',
-'orderDesc':'mixed_order_desc'
-    };
+    const keyMap = {
+  neighbors: 'mixed_neighbors',
+  neighborTens: 'mixed_neighborTens',
+  neighborHundreds: 'mixed_neighborHundreds',
+  orderAsc: 'mixed_order_asc',
+  orderDesc: 'mixed_order_desc',
+  composeTE: 'mixed_compose_te',
+  compare: 'mixed_compare_any',
+  compareTE: 'mixed_compare_any',
+  composeHTE: 'mixed_compose_hte',
+  compareHTE: 'mixed_compare_hte',
+  nextTen: 'mixed_next_ten',
+  nextHundred: 'mixed_next_hundred'
+};
+
     const key=keyMap[type]; ensureTitleOnce(sheet, key, titles[type]);
     const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
-    const grid=document.createElement('div'); grid.className='mixed-grid';
-    if (type==='composeHTE' || type==='compareHTE') grid.classList.add('hte-2col');
-    if (type==='orderAsc' || type==='orderDesc') grid.classList.add('one-col');
+    let grid = document.createElement('div');
+if (type==='nextTen' || type==='nextHundred') {
+  grid.className = 'fillnext-grid';
+} else {
+  grid.className = 'mixed-grid';
+  if (type==='composeHTE' || type==='compareHTE') grid.classList.add('hte-2col');
+  if (type==='orderAsc' || type==='orderDesc') grid.classList.add('one-col');
+}
 // neighborHundreds blijft standaard 3 per rij
     function box(cls=''){const i=document.createElement('input');i.type='text';i.className='mix-box'+(cls?(' '+cls):'');return i}
     function makeNum(n){const d=document.createElement('div');d.className='mix-num';d.textContent=n;return d}
     function makeLabel(txt){const s=document.createElement('span');s.className='mix-label';s.textContent=txt;return s}
+
+    // Alleen voor 'nextHundred': hoogstens één startgetal onder 100
+const limitUnder100 = (type === 'nextHundred');
+let under100Used = false;
 
     for(let i=0;i<n;i++){
         const item = document.createElement('div');
@@ -608,6 +630,72 @@ else if(type==='orderAsc' || type==='orderDesc'){
   wrap.appendChild(bottom);
   item.appendChild(wrap);
 }
+else if (type==='nextTen'){
+  const showExample = document.getElementById('fillNextExample')?.checked;
+  const x = Math.max(0, rnd(Math.min(999, max)));
+  const target = nextTen(x);
+  const diff = target - x;
+
+  const card = document.createElement('div');
+  card.className = 'fillnext-card' + ((showExample && i===0) ? ' example' : '');
+  card.innerHTML = `
+    <div class="fillnext-top"><div class="fillnext-num">${x}</div></div>
+    <div class="fillnext-line">Het volgende <strong>T</strong> is
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box">`}.
+    </div>
+    <div class="fillnext-line">Dat is
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box">`} erbij.
+    </div>`;
+  item.appendChild(card);
+  grid.appendChild(item);            // ← NIEUW
+}
+else if (type==='nextHundred'){
+  const showExample = document.getElementById('fillNextExample')?.checked;
+
+  // Kies vooral tientallen boven 100; hoogstens één onder 100
+  const cap = Math.min(990, max);
+  let x, tries = 0;
+
+  // Bepaal of we deze oefening <100 mogen/ willen nemen
+  const canUseUnder100 = (cap >= 10) && (!limitUnder100 || !under100Used);
+  const wantUnder100   = (cap < 110) ? true                   // als >100 niet kan
+                                     : (canUseUnder100 && Math.random() < 0.20); // 20% kans
+
+  if (!wantUnder100 && cap >= 110) {
+    // Kies boven 100 → 110..cap per 10 (geen zuiver honderdtal)
+    do {
+      const tensCount = Math.floor((cap - 110) / 10) + 1;     // 110,120,...,cap
+      x = 110 + 10 * Math.floor(Math.random() * tensCount);
+      tries++;
+      if (tries > 200) break;
+    } while (x % 100 === 0);
+  } else {
+    // Kies onder 100 → 10..90 (geen 100)
+    do {
+      x = 10 + 10 * Math.floor(Math.random() * 9);            // 10,20,...,90
+      tries++;
+      if (tries > 200) break;
+    } while (x % 100 === 0);
+    if (limitUnder100) under100Used = true;                   // markeer dat we <100 al gebruikt hebben
+  }
+
+  const target = nextHundred(x);
+  const diff = target - x;
+
+  const card = document.createElement('div');
+  card.className = 'fillnext-card' + ((showExample && i===0) ? ' example' : '');
+  card.innerHTML = `
+    <div class="fillnext-top"><div class="fillnext-num">${x}</div></div>
+    <div class="fillnext-line">Het volgende <strong>H</strong> is
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${target}</span>` : `<input type="text" class="fillnext-box">`} .
+    </div>
+    <div class="fillnext-line">Dat is
+      ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box">`} erbij.
+    </div>`;
+  item.appendChild(card);
+  grid.appendChild(item);
+}
+
 else
 
       if(type==='neighbors'){const x=rnd(max);item.append(box(),makeNum(x),box());}
@@ -618,33 +706,77 @@ else
       else if(type==='composeHTE'){const hte=makeHTE(max);const eq=document.createElement('span');eq.className='mix-eq';eq.textContent='=';item.append(makeLabel(hte.text),eq,box());}
       else if(type==='compareHTE'){const left=makeSideHTEorNumber(max);const right=makeSideHTEorNumber(max);const mid=box('small');const leftEl=left.isHTE?makeLabel(left.text):makeNum(left.value);const rightEl=right.isHTE?makeLabel(right.text):makeNum(right.value);item.append(leftEl,mid,rightEl);}
       grid.appendChild(item);
+      grid.appendChild(item); 
     }
 
 // --- Eerste rij bij de titel houden ---
+// --- Eerste rij bij de titel houden ---
 const isHTE    = grid.classList.contains('hte-2col');
-const isOneCol = grid.classList.contains('one-col');   // rangschikken
-const cols     = isOneCol ? 1 : (isHTE ? 2 : 3);
+const isOneCol = grid.classList.contains('one-col');
+const isFill   = grid.classList.contains('fillnext-grid');
+const cols     = isOneCol ? 1 : (isHTE ? 2 : (isFill ? 2 : 3));
 
 const head = document.createElement('div');
-head.className = 'mixed-first keep-with-title';
+head.className = (isFill ? 'fillnext-first' : 'mixed-first') + ' keep-with-title';
 head.style.display = 'grid';
 head.style.gridTemplateColumns = isOneCol
   ? 'repeat(1, minmax(0,1fr))'
-  : (isHTE ? 'repeat(2, minmax(0,1fr))' : 'repeat(3, minmax(0,1fr))');
+  : (isHTE ? 'repeat(2, minmax(0,1fr))'
+           : (isFill ? 'repeat(2, minmax(0,1fr))' : 'repeat(3, minmax(0,1fr))'));
 head.style.gap = getComputedStyle(grid).gap || '8px 10px';
 
 for (let i = 0; i < cols && grid.firstChild; i++) {
   head.appendChild(grid.firstChild);
 }
 
+/* ▼▼ NIEUW: bij 'Vul aan' de overige kaarten per 2 in .fillnext-row steken ▼▼ */
+if (isFill && grid.children.length){
+  const cards = Array.from(grid.children);
+  grid.innerHTML = '';
+  for (let i = 0; i < cards.length; i += 2){
+    const row = document.createElement('div');
+    row.className = 'fillnext-row';
+    row.appendChild(cards[i]);
+    if (cards[i+1]) row.appendChild(cards[i+1]);
+    grid.appendChild(row);
+  }
+}
+/* ▲▲ EINDE NIEUW ▲▲ */
 
-// Injecteer head vóór de rest van het grid
 block.appendChild(head);
-
-// Body (overige rijen) mag per rij pagineren
 block.appendChild(grid);
 placeAfterLastOfKey(block, key);
   }
+
+  (function(){
+  const btn = document.getElementById('btnAddFillNext');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    const range = document.getElementById('fillNextRange').value;
+    const count = parseInt(document.getElementById('fillNextCount').value,10) || 1;
+    const type  = document.getElementById('fillNextType').value;
+    const showExample = document.getElementById('fillNextExample').checked;
+
+    const max = range === '100' ? 100 : 1000;
+    $('#mixedMax').value = max;
+    $('#mixedCount').value = count;
+    // ▼▼ NIEUW: zorg dat de optie in #mixedType bestaat, anders blijft .value leeg ▼▼
+    const mixedSel = document.querySelector('#mixedType');
+    if (mixedSel && !mixedSel.querySelector(`option[value="${type}"]`)) {
+      const opt = document.createElement('option');
+      opt.value = type;
+      opt.textContent = '(intern: Vul aan)';
+      opt.hidden = true;                // niet zichtbaar voor de gebruiker
+      mixedSel.appendChild(opt);
+    }
+    $('#mixedType').value = type;
+    $('#fillNextExample').checked = showExample;
+
+    // hergebruik de bestaande gemengde generator
+    addMixedExercises();
+  });
+})();
 
   /* =====================  GETALLENRIJ  ===================== */
   function addSequenceExercise(){
@@ -1641,6 +1773,10 @@ function rowsFromGrid(grid){
 
   // honderveld: per rij (al goed)
   '.honderdveld-row',
+
+    // 'Vul aan tot' → eerste rij als geheel + elke volgende rij als geheel (2 per rij)
+  '.fillnext-first',
+  '.fillnext-row',
 
   // MAB tellen/kleuren: eerste rij + het EINDE van elke volgende rij (2 per rij)
   '.mab-first',
