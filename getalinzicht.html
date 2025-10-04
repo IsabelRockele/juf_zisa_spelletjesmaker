@@ -3,14 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator – Getalinzicht (tot 1000, HTE & compacte honderdvelden)</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
+  <title>Werkblad-generator – Getalinzicht...</title>
+  <!-- juist -->
+   <!-- buitenaf laden (UMD builds) -->
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
+<!-- jouw code als laatste -->
+<script defer src="getalinzicht.js"></script>
+
+<script defer src="getalinzicht.js"></script>
   <link rel="stylesheet" href="getalinzicht.css">
+
+  <style>
+   .menu-btn {
+  display: block;
+  position: static;  /* <-- DEZE REGEL IS DE OPLOSSING */
+  width: fit-content;
+  margin-bottom: 8px;
+}
+  </style>
 </head>
 <body>
+  <a class="menu-btn" href="getalkeuze.html">Keuze leerjaar</a>
   <a class="menu-btn" href="index.html">Keuzemenu</a>
 
 <header>
@@ -234,6 +249,61 @@
   </label>
 
   <button id="btnAddFillNext" class="btn">Voeg 'Vul aan'-oefeningen toe</button>
+</fieldset>
+
+<!-- 9. Getalbeelden tot 1000 -->
+<fieldset class="section">
+  <legend>9. Getalbeelden tot 1000</legend>
+
+  <label for="gb1000Count">Aantal</label>
+  <input id="gb1000Count" type="number" min="1" value="4" style="width: 70px;">
+
+  <button class="btn" id="btnAddGB1000" type="button">Voeg getalbeelden toe</button>
+</fieldset>
+
+<!-- 10. 100-veld met pictogrammen -->
+<fieldset class="section">
+  <legend>10. 100-veld met pictogrammen</legend>
+  <div class="row">
+    <label for="hvIconsCount">Aantal</label>
+    <input id="hvIconsCount" type="number" min="1" value="2" style="width:70px">
+    <label for="hvIconsPerCard" style="margin-left:12px;">Pictogrammen per oef.</label>
+    <input id="hvIconsPerCard" type="number" min="2" max="8" value="6" style="width:70px">
+    <button class="btn" id="btnAddHvIcons" type="button">Voeg pictogram-oefeningen toe</button>
+</label>
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <label style="margin-left:12px;">
+  <input id="hvIconsShowNumbers" type="checkbox" checked>
+  Toon overige getallen
+</label>
+    <label>Thema</label>
+    <select id="hvIconsTheme" style="width:170px;">
+      <option value="herfst">Herfst (emoji)</option>
+      <option value="letters">Letters A..H</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 11. 100-veld – Puzzelstukken -->
+<fieldset class="section">
+  <legend>11. 100-veld – Puzzelstukken</legend>
+  <div class="row">
+    <label for="hvpCount">Aantal</label>
+    <input id="hvpCount" type="number" min="1" value="4" style="width:70px">
+
+    <label for="hvpGiven" style="margin-left:12px;">Gegeven cijfers per puzzel</label>
+    <input id="hvpGiven" type="number" min="2" max="6" value="3" style="width:70px">
+
+    <label for="hvpSize" style="margin-left:12px;">Grootte</label>
+    <select id="hvpSize">
+      <option value="small">klein</option>
+      <option value="medium" selected>middel</option>
+      <option value="large">groot</option>
+    </select>
+
+    <button class="btn" id="btnAddHvPuzzle" type="button">Voeg puzzelstukken toe</button>
+  </div>
 </fieldset>
 
     <div style="margin-top:18px">
