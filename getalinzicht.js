@@ -20,6 +20,430 @@
 
   /* =====================  HULPJES  ===================== */
   function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+// ===== 100-veld met pictogrammen (keuze 10) =====
+
+// === 11. 100-veld – Puzzelstukken =========================================
+
+// sjablonen (x = vakje van het puzzelstuk)
+const HVP_TEMPLATES = {
+  small: [
+    ["xxx","..x","..x"],            // 5
+    ["xxxx","x..."],                // 5
+    ["xxx",".x.",".x."]            // 5
+  ],
+  medium: [
+    ["xxxx","xx.."],                // 6
+    ["xxx.",".xx.","..x."],         // 6
+    ["xxxx",".xx."]                 // 6
+  ],
+  large: [
+    ["xxxx","xxx."],                // 7
+    ["xxx.","xxx.",".x.."],         // 7
+    ["xxxxx",".xxx."]               // 8
+  ]
+};
+
+// helpers
+const hvpRand   = n   => Math.floor(Math.random() * n);
+const hvpChoice = arr => arr[hvpRand(arr.length)];
+
+// roteer/spiegel sjabloon
+function hvpTransform(shape){
+  let m = shape.map(r => r.split(''));
+  const k = hvpRand(4);                         // 0–3 rotaties
+  for (let r = 0; r < k; r++){
+    const R = m[0].length, C = m.length;
+    const rot = Array.from({length:R}, () => Array(C).fill('.'));
+    for (let i=0;i<C;i++) for (let j=0;j<R;j++) rot[j][C-1-i] = m[i][j];
+    m = rot;
+  }
+  if (Math.random() < .5) m = m.map(row => row.slice().reverse()); // 50% flip
+  return m.map(r => r.join(''));
+}
+
+// cellenlijst opbouwen
+function hvpBuildPieceRowsCols(transformed){
+  const rows = transformed.length;
+  const cols = transformed[0].length;
+  const cells = [];
+  for (let r=0;r<rows;r++){
+    for (let c=0;c<cols;c++){
+      if (transformed[r][c] === 'x') cells.push([r,c]);
+    }
+  }
+  return {rows, cols, cells};
+}
+
+// één puzzelkaart maken
+// één puzzelkaart maken — respecteert exact het gekozen # gegeven getallen
+// Toon exact 'revealExact' gegeven cijfers; de rest blanco
+function createHvPuzzleCard(revealExact, sizeKey){
+  const shape = hvpChoice(HVP_TEMPLATES[sizeKey]);
+  const sh = hvpTransform(shape);
+  const {rows, cols, cells} = hvpBuildPieceRowsCols(sh);
+
+  // anker binnen 10x10
+  const r0 = hvpRand(10 - rows + 1);
+  const c0 = hvpRand(10 - cols + 1);
+
+  // getallen van het 100-veld
+  const numbers = cells.map(([dr,dc]) => r0*10 + c0 + 1 + dr*10 + dc);
+
+  // exact aantal zichtbare vakjes (= gegeven cijfers)
+const total  = numbers.length;
+const reveal = Math.max(1, Math.min(Number.isFinite(revealExact) ? revealExact : 3, total - 1));
+
+// Kies exact 'reveal' indices via shuffle (robuust tegen “dubbele picks”)
+const allIdx = Array.from({length: total}, (_, i) => i);
+for (let i = allIdx.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [allIdx[i], allIdx[j]] = [allIdx[j], allIdx[i]];
+}
+const revealIdx = new Set(allIdx.slice(0, reveal));
+
+// DOM
+const card = document.createElement('div');
+card.className = 'hvp-card row-delete-wrap';
+card.appendChild(createRowDeleteButton(card));
+card.dataset.reveal = String(reveal);
+card.dataset.total  = String(total);
+
+const piece = document.createElement('div');
+piece.className = 'hvp-piece';
+piece.style.gridTemplateColumns = `repeat(${cols}, 34px)`;
+piece.style.gridAutoRows = '34px';
+
+// (vul de cellen zoals u al deed…)
+
+  for (let r=0;r<rows;r++){
+    for (let c=0;c<cols;c++){
+      if (sh[r][c] !== 'x'){
+        const hole = document.createElement('div');
+        hole.style.width = '34px'; hole.style.height = '34px';
+        piece.appendChild(hole);
+        continue;
+      }
+      const idx = cells.findIndex(([rr,cc]) => rr===r && cc===c);
+      const n   = numbers[idx];
+
+      const cell = document.createElement('div');
+      const isGiven = revealIdx.has(idx);
+      cell.className   = 'hvp-cell ' + (isGiven ? 'given' : 'blank');
+      cell.textContent = isGiven ? n : '';
+      piece.appendChild(cell);
+    }
+  }
+
+  card.appendChild(piece);
+  return card;
+}
+
+// max #vakjes voor gekozen grootte
+function hvpMaxCellsForSize(sizeKey){
+  const shapes = HVP_TEMPLATES[sizeKey] || [];
+  return Math.max(1, ...shapes.map(s => s.join('').split('').filter(ch => ch === 'x').length));
+}
+
+// generator
+function addHvPuzzleExercises(){
+  const nCards  = parseInt(document.getElementById('hvpCount').value, 10) || 4;
+  const sizeKey = (document.getElementById('hvpSize').value || 'medium');
+
+  // Zorg dat #hvpGiven altijd een geldig getal is binnen 1..(max - 1)
+const field = document.getElementById('hvpGiven');
+const maxAllowed = Math.max(1, hvpMaxCellsForSize(sizeKey) - 1);
+if (field) {
+  field.setAttribute('type','number');
+  field.setAttribute('min','1');
+  field.setAttribute('max', String(maxAllowed));
+}
+
+  // UI-waarde begrenzen: min 1, max (vakjes-1)
+  const rawGiven = parseInt(document.getElementById('hvpGiven').value, 10);
+  const maxGiven = Math.max(1, hvpMaxCellsForSize(sizeKey) - 1);
+  const given    = Math.max(1, Math.min(Number.isFinite(rawGiven) ? rawGiven : 3, maxGiven));
+  document.getElementById('hvpGiven').value = String(given);  // toon effectieve waarde
+
+  const key = 'hvpuzzle';
+  ensureTitleOnce(sheet, key, 'Vul de ontbrekende getallen in.');
+
+  const block = document.createElement('div');
+  block.className = 'hvp-block';
+  block.dataset.titleKey = key;
+  block.appendChild(createDeleteButton(block));
+
+  const grid = document.createElement('div');
+  grid.className = 'hvp-grid';
+
+  for (let i=0; i<nCards; i++){
+    grid.appendChild(createHvPuzzleCard(given, sizeKey));
+  }
+
+  // eerste rij (3 kaarten) aan de titel vast
+  const head = document.createElement('div');
+  head.className = 'hvp-first keep-with-title';
+  head.style.display = 'grid';
+  head.style.gridTemplateColumns = 'repeat(3, minmax(0,1fr))';
+  head.style.gap = getComputedStyle(grid).gap || '18px';
+  for (let i=0; i<3 && grid.firstChild; i++) head.appendChild(grid.firstChild);
+
+  block.appendChild(head);
+  block.appendChild(grid);
+  placeAfterLastOfKey(block, key);
+}
+
+// knop
+(function(){
+  const btn = document.getElementById('btnAddHvPuzzle');
+  if (btn) btn.addEventListener('click', addHvPuzzleExercises);
+})();
+
+function buildHundredGrid(){
+  // maakt een DOM-100-veld (10x10) met nummers 1..100 en returnt {wrap, grid}
+  const wrap = document.createElement('div');
+  wrap.className = 'hvicons-board';
+
+  const grid = document.createElement('div');
+  grid.className = 'honderdveld-grid';    // gebruikt uw bestaande cell-stijl
+
+  for (let n = 1; n <= 100; n++){
+    const cell = document.createElement('div');
+    cell.className = 'honderdveld-cell';
+    cell.textContent = n;
+    cell.dataset.n = n;
+    grid.appendChild(cell);
+  }
+  wrap.appendChild(grid);
+  return { wrap, grid };
+}
+
+function iconPool(theme){
+  if (theme === 'letters'){
+    return ['A','B','C','D','E','F','G','H'];
+  }
+  // default: herfst-emoji’s (veilig, geen assets nodig)
+  return ['🍁','🍄','🐿️','🦔','🌰','🎃','🍂','👨‍🌾'];
+}
+
+// Zet pictogrammen ín de juiste cellen (geen absolute positie meer)
+function placeIcons(boardEl, count, theme, showNumbers){
+  const icons = iconPool(theme).slice(0, Math.max(2, Math.min(count, 8)));
+  const grid  = boardEl.querySelector('.honderdveld-grid');
+  const chosen = new Set();
+  const used = [];
+
+  // Eerst: vul (of wis) de nummers in alle cellen
+  Array.from(grid.children).forEach((cell, idx) => {
+    cell.classList.remove('no-number');
+    cell.textContent = showNumbers ? (idx+1) : '';  // overige getallen tonen of niet
+  });
+
+  // Daarna: zet pictogrammen in enkele cellen
+  while (used.length < icons.length){
+    const pos = 1 + Math.floor(Math.random() * 100);   // 1..100
+    if (chosen.has(pos)) continue;
+    chosen.add(pos);
+
+    const cell = grid.children[pos-1];
+    if (!cell) continue;
+
+    // In pictogram-cellen verbergen we het getal
+    cell.classList.add('no-number');
+    cell.textContent = '';
+
+    const span = document.createElement('span');
+    span.className = 'hv-icon-in-cell';
+    span.textContent = icons[used.length];
+    cell.appendChild(span);
+
+    used.push({ icon: icons[used.length], n: pos });
+  }
+  return used; // voor de legenda
+}
+
+function buildLegend(items){
+  const legend = document.createElement('div');
+  legend.className = 'hvicons-legend';
+
+  items.forEach(({icon}) => {
+    const row = document.createElement('div');
+    row.className = 'hvicons-legend-item';
+
+    const ico = document.createElement('div');
+    ico.className = 'hvicons-legend-icon';
+    ico.textContent = icon;
+
+    const input = document.createElement('input'); // leerling schrijft getal
+    row.append(ico, input);
+    legend.appendChild(row);
+  });
+  return legend;
+}
+
+function addHvIconsExercises(){
+  const nCards   = parseInt(document.getElementById('hvIconsCount').value, 10) || 2;
+  const perCard  = parseInt(document.getElementById('hvIconsPerCard').value, 10) || 6;
+  const theme    = document.getElementById('hvIconsTheme').value || 'herfst';
+  const showNumbers = !!document.getElementById('hvIconsShowNumbers')?.checked;   // ← NIEUW
+
+  const key = 'hvicons';
+  ensureTitleOnce(sheet, key, 'Schrijf de getallen op bij elk pictogram.');
+
+ const block = document.createElement('div');
+block.className = 'hvicons-block';                 // niet alles samen vastzetten
+
+block.dataset.titleKey = key;
+block.appendChild(createDeleteButton(block));
+
+  const grid = document.createElement('div');
+  grid.className = 'hvicons-grid';
+
+  for (let i = 0; i < nCards; i++){
+    const card = document.createElement('div');
+    card.className = 'hvicons-card row-delete-wrap';
+    card.appendChild(createRowDeleteButton(card));
+
+    // 100-veld
+    const { wrap } = buildHundredGrid();
+    card.appendChild(wrap);
+
+    // pictogrammen plaatsen (na append zodat posities kloppen)
+    const items = placeIcons(wrap, perCard, theme, showNumbers);  
+
+    // legenda met invulvakjes
+    card.appendChild(buildLegend(items));
+
+    grid.appendChild(card);
+  }
+
+  // eerste rij (1 kaart) bij de titel houden
+const head = document.createElement('div');
+head.className = 'hvicons-first keep-with-title';
+head.style.display = 'grid';
+head.style.gridTemplateColumns = '1fr';            // 1 kaart per rij
+head.style.gap = getComputedStyle(grid).gap || '20px';
+for (let i=0; i<1 && grid.firstChild; i++) head.appendChild(grid.firstChild);
+
+
+  block.appendChild(head);
+  block.appendChild(grid);
+  placeAfterLastOfKey(block, key);
+}
+
+// knop
+(function(){
+  const btn = document.getElementById('btnAddHvIcons');
+  if (btn) btn.addEventListener('click', addHvIconsExercises);
+})();
+
+// --- Getalbeelden tot 1000 ---
+// Bouw het visuele H/T/E-beeld in één vlak (zoals in de voorbeelden)
+// vervanging: compacte honderdvelden-weergave
+function createGetalbeeld1000Visual(num){
+  const h = Math.floor(num / 100);       // volle honderden
+  const rest = num % 100;                // remainder 0..99
+  const tens = Math.floor(rest / 10);
+  const ones = rest % 10;
+
+  const wrap = document.createElement('div');
+  wrap.className = 'gb1000-visual';      // gebruikt het NIEUWE CSS-blok
+
+  // 1) Volle honderdvakken, volledig blauw
+  for (let i = 0; i < h; i++) {
+    wrap.appendChild(createHundredSquareSVG(false));
+  }
+
+  // 2) Eén resterend honderdveld met groene tientallen + gele eenheden
+  if (rest > 0) {
+    const hv = document.createElement('div');
+    hv.className = 'gb1000-hvwrap';
+
+    const grid = document.createElement('div');
+    grid.className = 'honderdveld-grid';
+
+    for (let j = 1; j <= 100; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'honderdveld-cell';
+      if (j <= tens * 10) cell.classList.add('filled-ten');
+      else if (j <= rest) cell.classList.add('filled-unit');
+      grid.appendChild(cell);
+    }
+    hv.appendChild(grid);
+    wrap.appendChild(hv);
+  }
+
+  return wrap;
+}
+
+function addGetalbeelden1000(){
+  const count = parseInt(document.getElementById('gb1000Count').value, 10) || 4;
+  const key   = 'gb1000';
+  ensureTitleOnce(sheet, key, 'Hoeveel tel je? Vul in.');
+
+  const block = document.createElement('div');
+  block.className = 'gb1000-exercise-block';
+  block.dataset.titleKey = key;
+  block.appendChild(createDeleteButton(block));
+
+  const grid = document.createElement('div');
+  grid.className = 'gb1000-grid';
+
+  for(let i=0;i<count;i++){
+    const num  = Math.floor(Math.random()*999) + 1; // 1..999 (visueel netjes)
+    const card = document.createElement('div');
+    card.className = 'gb1000-card row-delete-wrap';
+    card.appendChild(createRowDeleteButton(card));
+
+    card.appendChild(createGetalbeeld1000Visual(num));
+
+// invulschema zoals honderdveld, met H/T/E + totaal
+const task = document.createElement('div');
+task.className = 'honderdveld-task';
+
+const table = document.createElement('table');
+table.className = 'honderdveld-te-table';
+table.innerHTML = `
+  <tr>
+    <td class="te-label" style="background:#42a5f5;color:#fff">H</td>
+    <td class="te-label" style="background:#4caf50;color:#fff">T</td>
+    <td class="te-label" style="background:#ffeb3b">E</td>
+  </tr>
+  <tr>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+  </tr>`;
+
+const numBox = document.createElement('input');
+numBox.type = 'text';
+numBox.className = 'honderdveld-num-box';
+
+task.append(table, numBox);
+card.appendChild(task);
+
+    grid.appendChild(card);
+  }
+
+  // Eerste rij (2 kaarten) bij de titel houden
+  const head = document.createElement('div');
+  head.className = 'gb1000-first keep-with-title';
+  head.style.display = 'grid';
+  head.style.gridTemplateColumns = 'repeat(2, minmax(0,1fr))';
+  head.style.gap = getComputedStyle(grid).gap || '16px';
+  for(let i=0;i<2 && grid.firstChild;i++){ head.appendChild(grid.firstChild); }
+
+  block.appendChild(head);
+  block.appendChild(grid);
+  placeAfterLastOfKey(block, key);
+}
+
+// knop activeren
+(function(){
+  const btn = document.getElementById('btnAddGB1000');
+  if(!btn) return;
+  btn.addEventListener('click', addGetalbeelden1000);
+})();
+
 
   function _mkArrowMarker(defs, color='#333'){
     const m=document.createElementNS(NS,'marker');
@@ -1778,6 +2202,14 @@ function rowsFromGrid(grid){
   '.fillnext-first',
   '.fillnext-row',
 
+  // 10. Honderdveld met pictogrammen – per kaart (1 per rij)
+  '.hvicons-first',
+  '.hvicons-grid .hvicons-card',
+
+// 11. 100-veld – Puzzelstukken
+'.hvp-first',
+'.hvp-grid .hvp-card:nth-child(2n)',
+
   // MAB tellen/kleuren: eerste rij + het EINDE van elke volgende rij (2 per rij)
   '.mab-first',
   '.mab-grid-layout .mab-tellen-container:nth-child(2n)',
@@ -1788,7 +2220,13 @@ function rowsFromGrid(grid){
   '.pv3-grid .pv3-item',               // HTE: 1 per rij
 
   // volledige blokken die nooit gesplitst mogen worden (bv. verbinden)
-  '.keep-together'
+  '.keep-together',
+
+    // Getalbeelden tot 1000: eerste rij + het EINDE van elke volgende rij (2 per rij)
+  '.gb1000-first',
+  '.gb1000-grid .gb1000-card:nth-child(2n)',
+
+
 ].join(', ')));
 
 
@@ -1866,4 +2304,54 @@ el.style.width = _oldSheetW || '';
   });
    });
   renderSheetHeader(); renderPreview(); updateDragSuggestions(); $$('input[name=mode]')[0].dispatchEvent(new Event('change'));
+
+  // === PDF-export: rij-bewust, geen snijpunten meer ===
+(function () {
+  const btn = document.querySelector('#btnDownloadPdf');
+  if (!btn) return;
+
+  btn.addEventListener('click', async () => {
+    const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+    if (!jsPDF || !window.html2canvas) {
+      alert('PDF-module ontbreekt. Controleer of html2canvas en jsPDF geladen zijn.');
+      return;
+    }
+
+    const pdf    = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageW  = pdf.internal.pageSize.getWidth();
+    const pageH  = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    let y        = margin;
+
+    const SHEET = document.getElementById('sheet');
+
+    // Elementen die nooit gesplitst mogen worden
+    const CHUNKS = SHEET ? Array.from(SHEET.querySelectorAll(
+      '.title-row, .hvp-card, .fillnext-row, .mixed-grid > .mix-item, .seq-row, .jump-row, .gb1000-card, .honderdveld-exercise-block'
+    )) : [];
+
+    async function snap(el){
+      const canvas = await html2canvas(el, {
+        scale: Math.min(2, window.devicePixelRatio || 1.5),
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        windowWidth: document.documentElement.scrollWidth
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const imgW = pageW - 2*margin;
+      const imgH = canvas.height * (imgW / canvas.width);
+      return { imgData, imgW, imgH };
+    }
+
+    for (const el of CHUNKS){
+      const { imgData, imgW, imgH } = await snap(el);
+      if (y + imgH > pageH - margin){ pdf.addPage(); y = margin; }
+      pdf.addImage(imgData, 'PNG', margin, y, imgW, imgH);
+      y += imgH + 4;
+    }
+
+    pdf.save('werkblad.pdf');
+  });
+})();
+
 })();
