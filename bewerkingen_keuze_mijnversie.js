@@ -81,36 +81,38 @@ document.addEventListener("DOMContentLoaded", () => {
 }
 
   function bouwSplitsSettings(gekozenGetallen){
-  // nieuwe: lees de fijnmazige keuzes uit de UI (als het blok aanwezig is)
   const fijn = (typeof leesSplitsFijnVanUI === 'function') ? leesSplitsFijnVanUI() : null;
+
+  // 1) start van wat er al stond…
+  const grote = !!(typeof groteSplitshuizenCheckbox !== 'undefined' && groteSplitshuizenCheckbox && groteSplitshuizenCheckbox.checked);
+
+  // 2) bepaal de lijst totalen
+  let splitsGetallenArray = Array.isArray(gekozenGetallen) ? gekozenGetallen.slice() : [];
+
+  // Als er niets expliciet werd doorgegeven én het om grote splitshuizen gaat:
+  if (splitsGetallenArray.length === 0 && grote && fijn) {
+    // Bouw de lijst vanuit de fijnkeuze
+    if (fijn.van6)  splitsGetallenArray.push(6);
+    if (fijn.van7)  splitsGetallenArray.push(7);
+    if (fijn.van8)  splitsGetallenArray.push(8);
+    if (fijn.van9)  splitsGetallenArray.push(9);
+    if (fijn.van10) splitsGetallenArray.push(10);
+    if (fijn.van10tot20) {
+      for (let n = 10; n <= 20; n++) if (!splitsGetallenArray.includes(n)) splitsGetallenArray.push(n);
+    }
+    // Fallback (niets aangevinkt): blijf compatibel met oude gedrag
+    if (splitsGetallenArray.length === 0) splitsGetallenArray = [10];
+  }
 
   return {
     hoofdBewerking: 'splitsen',
-
-    // aantal blijft zoals u had
-    numOefeningen: Math.max(
-      1,
-      parseInt((document.getElementById('numOefeningen_splits') || { value: 20 }).value)
-    ),
-
-    // stijl blijft zoals u had
+    numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_splits') || { value: 20 }).value)),
     splitsStijl: (document.querySelector('input[name="splitsStijl"]:checked') || { value: 'huisje' }).value,
-
-    // uw bestaande vlaggen blijven werken
-    groteSplitshuizen: !!(typeof groteSplitshuizenCheckbox !== 'undefined' && groteSplitshuizenCheckbox && groteSplitshuizenCheckbox.checked),
-
-    // laat dit staan: oude mechaniek; we geven hier vaak [] door,
-    // maar andere code kan het nog gebruiken als u dat wenst
-    splitsGetallenArray: Array.isArray(gekozenGetallen) ? gekozenGetallen : [],
-
+    groteSplitshuizen: grote,
+    splitsGetallenArray,  // ← gebruik de zojuist berekende lijst
     splitsWissel: !!(document.getElementById('splitsWisselCheckbox') && document.getElementById('splitsWisselCheckbox').checked),
     splitsSom:   !!(document.getElementById('splitsSomCheckbox')   && document.getElementById('splitsSomCheckbox').checked),
-
-    // NIEUW: voeg de fijnmazige selectie toe wanneer beschikbaar
-    // (doet niets als het blok niet bestaat)
     ...(fijn ? { splitsFijn: fijn } : {}),
-
-    // uw bestaande opdracht-automatiek
     opdracht: (() => {
       const vrij = (document.getElementById('opdracht_splits') || {}).value?.trim();
       if (vrij) return vrij;
@@ -181,6 +183,23 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+  // toon het juiste opdrachtveld volgens gekozen bewerking
+function updateOpdrachtVeld() {
+  const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value;
+  const opt = document.getElementById('opdracht_optellen');
+  const aft = document.getElementById('opdracht_aftrekken');
+  if (!opt || !aft) return;
+  if (type === 'aftrekken') {
+    opt.style.display = 'none';
+    aft.style.display = 'block';
+  } else {
+    opt.style.display = 'block';
+    aft.style.display = 'none';
+  }
+}
+document.querySelectorAll('input[name="rekenType"]').forEach(r => r.addEventListener('change', updateOpdrachtVeld));
+updateOpdrachtVeld();
+
   function bouwRekenSettings(somTypes){
     const rekenHulp = {
       inschakelen: !!(rekenHulpCheckbox && rekenHulpCheckbox.checked && rekenBrugSelect && rekenBrugSelect.value !== 'zonder'),
@@ -196,7 +215,10 @@ document.addEventListener("DOMContentLoaded", () => {
       rekenBrug: rekenBrugSelect ? rekenBrugSelect.value : 'beide',
       rekenHulp,
       opdracht: (() => {
-        const vrij = (document.getElementById('opdracht_reken') || {}).value?.trim();
+        const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value;
+const veldId = (type === 'aftrekken') ? 'opdracht_aftrekken' : 'opdracht_optellen';
+const vrij = (document.getElementById(veldId) || {}).value?.trim();
+
         if (vrij) return vrij;
         if (rekenBrugSelect?.value === 'met')    return 'Los de sommen op met brug.';
         if (rekenBrugSelect?.value === 'zonder') return 'Los de sommen op zonder brug.';
