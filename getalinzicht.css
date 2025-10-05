@@ -1358,3 +1358,37 @@ html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !import
   border-radius: 50%;
   pointer-events: auto;     /* expliciet klikbaar */
 }
+/* Zorg voor gelijke afstand tussen rijen MAB-schema's */
+.mab-grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;          /* afstand horizontaal + verticaal tussen kaarten */
+}
+
+/* Extra marge tussen elke rij als flex niet volstaat */
+.mab-tellen-container {
+  margin-bottom: 20px;
+}
+/* Hoeveel tel je? / Kleur bij MAB-materiaal — altijd 2 naast elkaar */
+.mab-grid-layout{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* precies 2 kolommen */
+  column-gap: 28px;  /* horizontale afstand tussen de twee oefeningen */
+  row-gap: 24px;     /* verticale afstand tussen de rijen */
+  align-items: start; /* geen verticale “uitrekken” verschillen */
+}
+
+/* Zorg dat elk kaartje de volle kolombreedte gebruikt */
+.mab-grid-layout > .mab-tellen-container{
+  width: 100%;
+  /* verwijder lokale margins als die er stonden; gap regelt de afstand */
+  margin: 0 !important;
+}
+
+/* (optioneel) op smalle schermen 1 kolom */
+@media (max-width: 680px){
+  .mab-grid-layout{
+    grid-template-columns: 1fr;
+  }
+}
+
