@@ -2086,30 +2086,73 @@ placeAfterLastOfKey(block, key);
   function updateDragSuggestions(){ const start=parseInt($('#start').value,10), end=parseInt($('#end').value,10); if(end<=start) return; const set=new Set(); while(set.size<3){ set.add(Math.floor(Math.random()*(end-start+1))+start); } $('#dragList').value=Array.from(set).sort((a,b)=>a-b).join(', '); }
 
   function buildPageSlices(canvas, sheetRect, domBlocks, pxPerMm, pageW, pageH){
-    const factor = canvas.width / sheetRect.width;
-    const pageHeightPx = pageH * pxPerMm;
-    const safety = 3 * pxPerMm;
-    const blocks = domBlocks.map(el => {
-      const r = el.getBoundingClientRect();
-      const top  = (r.top  - sheetRect.top) * factor;
-      const bottom = (r.bottom - sheetRect.top) * factor;
-      return { top, bottom, height: bottom-top };
-    }).sort((a,b)=>a.top-b.top);
-    const slices = [];
-    let startY = 0;
-    let cursor = 0;
-    for (let i=0;i<blocks.length;i++){
-      const b = blocks[i];
-      if ((b.bottom - startY) > (pageHeightPx - safety)) {
-        if (cursor > startY) { slices.push({ y: startY, h: cursor - startY }); startY = cursor; }
-        else { slices.push({ y: startY, h: pageHeightPx }); startY = startY + pageHeightPx; }
-      }
-      cursor = b.bottom;
-    }
-    const totalHeight = canvas.height;
-    if (totalHeight - startY > 1) slices.push({ y: startY, h: totalHeight - startY });
-    return slices;
+  const factor = canvas.width / sheetRect.width;
+  const pageHeightPx = pageH * pxPerMm;
+
+  // Bewaar ook het element zelf, zodat we per type een lokale safety kunnen toepassen
+  const blocks = domBlocks.map(el => {
+    const r = el.getBoundingClientRect();
+    const top    = (r.top    - sheetRect.top) * factor;
+    const bottom = (r.bottom - sheetRect.top) * factor;
+    return { el, top, bottom, height: bottom - top };
+  }).sort((a,b)=>a.top-b.top);
+
+  // Oefeningen waarvoor de marge kleiner mag (zodat een tweede rij nog net past)
+  const SOFT_SELECTOR = '.honderdveld-exercise-block, .fillnext-row, .fillnext-first';
+
+  // basisveiligheid (±1 mm), en zachter (±0,2 mm) voor de twee probleemtypes
+  const BASE_SAFETY = 1 * pxPerMm;
+  const SOFT_SAFETY = 0.2 * pxPerMm;
+
+  function safetyFor(block){
+    return block.el.matches(SOFT_SELECTOR) ? SOFT_SAFETY : BASE_SAFETY;
   }
+
+  const slices = [];
+  let startY = 0;   // begin van de huidige pagina-slice in canvaspx
+  let cursor = 0;   // onderkant van het laatst verwerkte block
+
+  for (let i = 0; i < blocks.length; i++){
+    const b = blocks[i];
+    const localSafety = safetyFor(b);
+
+    // Overschrijdt dit block de beschikbare hoogte?
+    if ((b.bottom - startY) > (pageHeightPx - localSafety)) {
+
+      if (cursor > startY) {
+        // Extra check: past dit block toch nog in de resterende ruimte
+        // als we tot nu toe "doorpakken" (zonder te knippen)?
+        const usedOnPage = (cursor - startY);
+        const remaining  = pageHeightPx - usedOnPage;
+        if ((b.height + localSafety) <= remaining) {
+          // Het past toch → neem dit block nog mee op deze pagina
+          cursor = b.bottom;
+          continue;
+        }
+
+        // Past écht niet → knip tot aan 'cursor' (nette rand)
+        slices.push({ y: startY, h: cursor - startY });
+        startY = cursor;
+      } else {
+        // Eerste block op de pagina is te hoog → harde knip op volle pagina
+        slices.push({ y: startY, h: pageHeightPx });
+        startY += pageHeightPx;
+      }
+    }
+
+    // schuif cursor door tot onderkant van dit block
+    cursor = b.bottom;
+  }
+
+  // laatste slice
+  const totalHeight = canvas.height;
+  if (totalHeight - startY > 1) {
+    slices.push({ y: startY, h: totalHeight - startY });
+  }
+
+  return slices;
+}
+
 
   // Re-align pijlen bij resize/layout-verandering
   function realignAllPlaceValues(){
@@ -2135,9 +2178,25 @@ bindThrottled($('#btnAddPlaceValue'),   addPlaceValueExercise);
 
   $('#btnClearSheet').addEventListener('click',()=>{ sheet.innerHTML=''; addedTitles.clear(); renderSheetHeader(); });
 
+  
   // PDF
   $('#btnDownloadPdf').addEventListener('click',()=>{
     document.documentElement.classList.add('exporting');   // verberg delete-knoppen tijdens export
+      // --- Toon melding dat PDF wordt aangemaakt ---
+  let overlay = document.getElementById('pdfOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'pdfOverlay';
+    overlay.style.cssText = `
+      position:fixed; inset:0; background:rgba(255,255,255,0.85);
+      display:flex; align-items:center; justify-content:center;
+      font-family:Arial,sans-serif; font-size:20px; font-weight:bold;
+      color:#000; z-index:9999;
+    `;
+    overlay.textContent = 'PDF wordt aangemaakt… even geduld a.u.b.';
+    document.body.appendChild(overlay);
+  }
+
     const jsPDF = window.jspdf.jsPDF;
     const el = $('#sheet');
 
@@ -2145,6 +2204,7 @@ bindThrottled($('#btnAddPlaceValue'),   addPlaceValueExercise);
     const overlays   = $$('.print-overlay-input');
     [...delBlocks].forEach(b => b.style.visibility = 'hidden');
     overlays.forEach(i => i.style.visibility = 'hidden');
+
     // --- SPRONGEN: labels alleen tijdens export hoger plaatsen ---
 const __jumpLabels = Array.from(document.querySelectorAll('.jump-arcs-svg .jump-label'));
 
@@ -2225,6 +2285,7 @@ function rowsFromGrid(grid){
 
   // honderveld: per rij (al goed)
   '.honderdveld-row',
+  '.honderdveld-exercise-block',  
 
     // 'Vul aan tot' → eerste rij als geheel + elke volgende rij als geheel (2 per rij)
   '.fillnext-first',
@@ -2260,7 +2321,12 @@ function rowsFromGrid(grid){
 
     const rect = el.getBoundingClientRect();
 
-    html2canvas(el,{scale:2,backgroundColor:'#ffffff'}).then(canvas=>{
+    html2canvas(el, {
+  scale: 2,
+  backgroundColor: '#ffffff',
+  ignoreElements: (node) => node && (node.id === 'pdfOverlay')
+}).then(canvas=>{
+
       [...delBlocks, ...overlays].forEach(b => b.style.visibility = 'visible');
 
       const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
@@ -2270,7 +2336,7 @@ function rowsFromGrid(grid){
 
       const slices = buildPageSlices(canvas, rect, blocks, pxPerMm, pageW, pageH);
 
-      const leftMargin=15, rightMargin=10, topMargin=8;
+      const leftMargin=15, rightMargin=10, topMargin=6;
       const usableW = pageW - leftMargin - rightMargin;
 
       slices.forEach((sl,i)=>{
@@ -2284,6 +2350,8 @@ function rowsFromGrid(grid){
         pdf.addImage(img,'JPEG',leftMargin,topMargin,usableW,imgH);
       });
       pdf.save('werkblad.pdf');
+        // --- Verberg overlay zodra PDF klaar is ---
+  if (overlay) overlay.remove();
     })
     .finally(()=>{
       // --- herstel label-positie na export ---
@@ -2337,6 +2405,7 @@ el.style.width = _oldSheetW || '';
 (function () {
   const btn = document.querySelector('#btnDownloadPdf');
   if (!btn) return;
+  return; // UITGESCHAKELD: we gebruiken de originele // PDF-handler hierboven
 
   btn.addEventListener('click', async () => {
     const jsPDF = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
