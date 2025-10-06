@@ -3,14 +3,27 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Werkblad-generator – Getalinzicht (tot 1000, HTE & compacte honderdvelden)</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
+  <title>Werkblad-generator – Getalinzicht...</title>
+  <!-- juist -->
+   <!-- buitenaf laden (UMD builds) -->
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 
+<!-- jouw code als laatste -->
+<script defer src="getalinzicht.js"></script>
   <link rel="stylesheet" href="getalinzicht.css">
+
+  <style>
+   .menu-btn {
+  display: block;
+  position: static;  /* <-- DEZE REGEL IS DE OPLOSSING */
+  width: fit-content;
+  margin-bottom: 8px;
+}
+  </style>
 </head>
 <body>
+  <a class="menu-btn" href="getalkeuze.html">Keuze leerjaar</a>
   <a class="menu-btn" href="index.html">Keuzemenu</a>
 
 <header>
@@ -103,6 +116,9 @@
           <select id="mixedType" style="width:280px">
             <option value="neighbors">Buurgetallen</option>
             <option value="neighborTens">Buurtientallen</option>
+            <option value="neighborHundreds">Buurhonderdtallen</option>
+<option value="orderAsc">Rangschik van klein naar groot</option>
+<option value="orderDesc">Rangschik van groot naar klein</option>
             <option value="composeTE">Vul het getal in (T/E → getal)</option>
             <option value="compare">Vergelijken (getal ↔ getal)</option>
             <option value="compareTE">Vergelijken (T/E ↔ getal/T&E)</option>
@@ -127,6 +143,9 @@
         <label>Eind <input id="seqEnd" type="number" value="40" min="0" max="1000" style="width:74px"></label>
         <label>Aantal lege hokjes <input id="seqBlankCount" type="number" value="5" min="0" style="width:74px"></label>
       </div>
+     <div class="form-tip" id="seq-tip" style="margin-top:6px; color:#2e7d32; font-weight:600;">
+  Tip: <strong>niet meer dan +12</strong> voor het <em>eindgetal</em>, anders wordt de rij te lang om op één pagina te passen.
+</div>
       <div class="row">
         <label><input id="seqLockEnds" type="checkbox" checked> Start en eind vooraf invullen</label>
       </div>
@@ -177,18 +196,117 @@
     <!-- 7. WAARDE PER CIJFER (keuze tot 20/100/1000) -->
     <fieldset>
       <legend>7. Waarde per cijfer</legend>
-      <div class="row">
-        <label>Bereik
-          <select id="pvRange" style="width:140px">
-            <option value="20">tot 20</option>
-            <option value="100" selected>tot 100</option>
-            <option value="1000">tot 1000</option>
-          </select>
-        </label>
-        <label>Aantal <input id="pvCount" type="number" value="6" min="3" max="12" style="width:74px"></label>
-      </div>
-      <button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
-    </fieldset>
+      <div class="row"> 
+  <label>Bereik
+    <select id="pvRange" style="width:140px">
+      <option value="20">tot 20</option>
+      <option value="100" selected>tot 100</option>
+      <option value="1000">tot 1000</option>
+    </select>
+  </label>
+  <label>Aantal <input id="pvCount" type="number" value="6" min="3" max="12" style="width:74px"></label>
+</div>
+
+<div class="row">
+  <label>Soort
+    <select id="pvMode" style="width:260px">
+      <option value="standard" selected>Standaard (waarde per cijfer)</option>
+      <option value="connect">Verbind wat evenveel is</option>
+      <option value="color">Kleur dezelfde waarde</option>
+    </select>
+  </label>
+</div>
+
+<button class="btn" id="btnAddPlaceValue" type="button">Voeg waarde-oefeningen toe</button>
+</fieldset>
+
+<fieldset>
+  <legend>8. Vul aan tot...</legend>
+
+  <label>
+    Bereik
+    <select id="fillNextRange">
+      <option value="100">tot 100</option>
+      <option value="1000">tot 1000</option>
+    </select>
+  </label>
+
+  <label>
+    Aantal
+    <input type="number" id="fillNextCount" value="1" min="1" max="10">
+  </label>
+
+  <label>
+    Soort
+    <select id="fillNextType">
+      <option value="nextTen">Tot het eerstvolgende tiental</option>
+      <option value="nextHundred">Tot het eerstvolgende honderdtal</option>
+    </select>
+  </label>
+
+  <label style="display:flex;align-items:center;gap:6px;margin-top:6px;">
+    <input type="checkbox" id="fillNextExample">
+    Voorbeeld tonen (alleen de eerste oefening ingevuld)
+  </label>
+
+  <button id="btnAddFillNext" class="btn">Voeg 'Vul aan'-oefeningen toe</button>
+</fieldset>
+
+<!-- 9. Getalbeelden tot 1000 -->
+<fieldset class="section">
+  <legend>9. Getalbeelden tot 1000</legend>
+
+  <label for="gb1000Count">Aantal</label>
+  <input id="gb1000Count" type="number" min="1" value="4" style="width: 70px;">
+
+  <button class="btn" id="btnAddGB1000" type="button">Voeg getalbeelden toe</button>
+</fieldset>
+
+<!-- 10. 100-veld met pictogrammen -->
+<fieldset class="section">
+  <legend>10. 100-veld met pictogrammen</legend>
+  <div class="row">
+    <label for="hvIconsCount">Aantal</label>
+    <input id="hvIconsCount" type="number" min="1" value="2" style="width:70px">
+    <label for="hvIconsPerCard" style="margin-left:12px;">Pictogrammen per oef.</label>
+    <input id="hvIconsPerCard" type="number" min="2" max="8" value="6" style="width:70px">
+    <button class="btn" id="btnAddHvIcons" type="button">Voeg pictogram-oefeningen toe</button>
+</label>
+  </div>
+  <div class="row" style="margin-top:6px;">
+    <label style="margin-left:12px;">
+  <input id="hvIconsShowNumbers" type="checkbox" checked>
+  Toon overige getallen
+</label>
+    <label>Thema</label>
+    <select id="hvIconsTheme" style="width:170px;">
+      <option value="herfst">Herfst (emoji)</option>
+      <option value="letters">Letters A..H</option>
+      <option value="vrij">Vrije pictogrammen</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 11. 100-veld – Puzzelstukken -->
+<fieldset class="section">
+  <legend>11. 100-veld – Puzzelstukken</legend>
+  <div class="row">
+    <label for="hvpCount">Aantal</label>
+    <input id="hvpCount" type="number" min="1" value="4" style="width:70px">
+
+    <label for="hvpGiven" style="margin-left:12px;">Gegeven cijfers per puzzel</label>
+    <input id="hvpGiven" type="number" min="2" max="6" value="3" style="width:70px">
+
+    <label for="hvpSize" style="margin-left:12px;">Grootte</label>
+    <select id="hvpSize">
+      <option value="small">klein</option>
+      <option value="medium" selected>middel</option>
+      <option value="large">groot</option>
+    </select>
+
+    <button class="btn" id="btnAddHvPuzzle" type="button">Voeg puzzelstukken toe</button>
+  </div>
+</fieldset>
 
     <div style="margin-top:18px">
       <button class="btn ghost" id="btnDownloadPdf" type="button">Download als PDF</button>
@@ -204,8 +322,5 @@
   </section>
 </main>
 
-
-
- <script src="getalinzicht.js"></script>
 </body>
 </html>

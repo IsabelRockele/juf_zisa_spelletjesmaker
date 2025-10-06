@@ -178,10 +178,22 @@
         </label>
       </div>
 
-      <div class="control-group">
-        <label class="group-title" for="opdracht_reken">Opdrachtzin (optioneel):</label>
-        <input id="opdracht_reken" type="text" placeholder="vb. Los de sommen op met brug." style="width:100%;" />
-      </div>
+     <div class="control-group">
+  <label class="group-title">Opdrachtzin (optioneel):</label>
+
+  <!-- veld voor optellen -->
+  <input id="opdracht_optellen"
+         type="text"
+         placeholder="vb. Zoek de som."
+         style="width:100%;" />
+
+  <!-- veld voor aftrekken -->
+  <input id="opdracht_aftrekken"
+         type="text"
+         placeholder="vb. Zoek het verschil."
+         style="width:100%; display:none; margin-top:6px;" />
+</div>
+
 
       <div class="btn-row">
         <button id="maakRekenBtn" class="btn btn--primary">Maak werkblad</button>

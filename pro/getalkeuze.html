@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>Getalinzicht — keuze leerjaren (PRO)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- PRO-basics -->
+  <base href="/juf_zisa_spelletjesmaker/pro/">
+  <meta name="google" content="notranslate">
+  <link rel="manifest" href="manifest-pro.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#fffbe6">
+
+  <style>
+    :root{
+      --bg:#f6fafc; --ink:#0f172a; --muted:#556070; --blue:#1976d2;
+      --ring:#a7d3ff; --card:#ffffff; --border:#e2e8f0;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      color:var(--ink); background:var(--bg);
+    }
+
+    /* PRO-header (alleen Keuzemenu) */
+    .pro-header{
+      position:fixed; inset:0 auto auto 0; width:100%;
+      background:#3f7fbf; color:#fff; padding:8px 12px; z-index:1000; height:48px;
+      display:flex; align-items:center;
+      box-shadow:0 2px 10px rgba(2,25,55,.12);
+    }
+    .pro-header .back-link{
+      background:#5a9fd4; color:#fff; border:none; padding:6px 10px; border-radius:6px;
+      font-size:14px; font-weight:600; text-decoration:none; cursor:pointer; white-space:nowrap;
+    }
+    body{ margin-top:60px; }
+
+    .wrap{max-width:960px; margin:28px auto; padding:0 16px;}
+    h1{font-size:28px; margin:0 0 8px}
+    p.lead{margin:0 0 28px; color:#475569}
+    .grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px}
+    @media (max-width:720px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background:var(--card); border:1px solid var(--border); border-radius:16px;
+      padding:22px; box-shadow:0 4px 18px rgba(2,25,55,.06);
+      display:flex; flex-direction:column; gap:12px; min-height:190px;
+    }
+    .card h2{font-size:22px; margin:0}
+    .card p{margin:0; color:var(--muted)}
+    .sub{font-size:13px; color:#64748b}
+    .btn{
+      display:inline-block; padding:10px 16px; border-radius:999px;
+      background:var(--blue); color:#fff; border:0; font-weight:600;
+      text-decoration:none; text-align:center; cursor:pointer; width:fit-content;
+    }
+    .btn:focus{outline:3px solid var(--ring); outline-offset:2px}
+    .btn.secondary{ background:#e2e8f0; color:#0f172a }
+
+    /* Modal (WIP) */
+    .modal{ position:fixed; inset:0; display:none; place-items:center;
+      background:rgba(15,23,42,.55); z-index:1001; }
+    .modal.open{ display:grid }
+    .modal-card{
+      background:#fff; border-radius:14px; border:1px solid var(--border);
+      padding:22px 20px; max-width:460px; width:92%;
+      box-shadow:0 18px 40px rgba(2,25,55,.18);
+    }
+    .modal-card h3{margin:0 0 8px; font-size:20px}
+    .modal-card p{margin:0 0 16px; color:#475569}
+    .modal-actions{display:flex; gap:10px; justify-content:flex-end}
+  </style>
+</head>
+<body>
+
+  <!-- PRO-header -->
+  <div class="pro-header">
+    <a href="app.html" class="back-link">&larr; Keuzemenu</a>
+  </div>
+
+  <div class="wrap">
+    <h1>Getalinzicht (PRO)</h1>
+    <p class="lead">Kies de bouwsteen. U kunt later altijd terug naar deze pagina.</p>
+
+    <div class="grid">
+      <div class="card">
+        <div>
+          <h2>1ste t/m 3de leerjaar</h2>
+          <p>Getalinzicht tot 20, 100 en 1000, plaatswaarde, honderdveld, MAB, …</p>
+          <div class="sub">groep 3 t/m 5</div>
+        </div>
+        <!-- Linkt naar de PRO-variant hieronder -->
+        <a class="btn" href="getalinzicht.html">Open 1–3</a>
+      </div>
+
+      <div class="card">
+        <div>
+          <h2>4de t/m 5de leerjaar</h2>
+          <p>Getalinzicht tot 10 000, 100 000 en kommagetallen, …</p>
+          <div class="sub">groep 6 t/m 8</div>
+        </div>
+        <button class="btn" id="btnWip" type="button">Open 4–5</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal" id="wipModal" role="dialog" aria-modal="true" aria-labelledby="wipTitle" aria-describedby="wipDesc">
+    <div class="modal-card">
+      <h3 id="wipTitle">Even geduld…</h3>
+      <p id="wipDesc">Hier wordt nog aan gewerkt. Deze module komt binnenkort beschikbaar.</p>
+      <div class="modal-actions">
+        <button class="btn secondary" id="closeWip" type="button">Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRO-guard (altijd onderaan body plaatsen) -->
+  <script src="./js/device-id.js"></script>
+  <script type="module" src="./js/guard.js"></script>
+
+  <script>
+    (function(){
+      const btn = document.getElementById('btnWip');
+      const modal = document.getElementById('wipModal');
+      const close = document.getElementById('closeWip');
+      if(!btn || !modal || !close) return;
+
+      function openModal(){ modal.classList.add('open'); close.focus(); }
+      function closeModal(){ modal.classList.remove('open'); btn.focus(); }
+
+      btn.addEventListener('click', openModal);
+      close.addEventListener('click', closeModal);
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && modal.classList.contains('open')) closeModal(); });
+      modal.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
+    })();
+  </script>
+</body>
+</html>
