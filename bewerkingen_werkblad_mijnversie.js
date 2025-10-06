@@ -234,7 +234,180 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
       (cfg.hoofdBewerking || '') + '|' +
       (cfg.rekenHulp?.inschakelen ? 'brug' : 'nobrug') + '|' +
       (cfg.splitsStijl || '') + '|' +
-      (cfg.tafelType || '');
+      (cfg.tafelType || '') + '|' +
+  (cfg.groteSplitshuizen ? 'GROOT' : 'NORMAAL');
+
+function renderOefeningInGrid(grid, cfg, oef) {
+  const div = document.createElement('div');
+  div.className = 'oefening';
+  div.style.width = '100%';
+  div.style.fontFamily = 'Arial,Helvetica,sans-serif';
+  div.style.fontSize = '14px';
+  div.style.overflow = 'visible';
+
+  if (oef.type === 'rekenen') {
+    const hulpActief = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
+    const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+    if (hulpActief && isBrugSom) {
+      div.style.display='grid'; div.style.gridTemplateColumns='auto 1fr'; div.style.columnGap='24px'; div.style.alignItems='start';
+      const links = document.createElement('div'); links.style.position='relative'; links.style.display='inline-block'; links.style.overflow='visible';
+      links.innerHTML = `
+        <span class="term1">${oef.getal1}</span>
+        <span class="op"> ${oef.operator} </span>
+        <span class="term2">${oef.getal2}</span>
+        <span> = </span>
+        <span class="ansbox" style="display:inline-block;width:46px;height:30px;border:2px solid #333;border-radius:8px;vertical-align:middle;margin-left:6px;"></span>
+      `;
+      const rechts = document.createElement('div'); rechts.className='lijnenrechts'; rechts.style.overflow='visible';
+      rechts.innerHTML = `
+        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
+        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
+      `;
+      div.append(links, rechts);
+      appendWithDelete(grid, div, cfg, oef);
+      requestAnimationFrame(() => tekenInlineSplitsOnderTerm(links, oef, rechts, cfg));
+    } else {
+      div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
+      appendWithDelete(grid, div, cfg, oef);
+    }
+    return;
+  }
+
+  if (oef.type === 'splitsen') {
+    const isSom = !!oef.isSom;
+
+    if (cfg.splitsStijl === 'puntoefening') {
+      div.style.fontFamily = "'Courier New', Courier, monospace";
+      div.style.fontSize = '1.2em';
+      div.style.textAlign = 'center';
+      let pText;
+      if (oef.prefill === 'links')      pText = `${oef.totaal} = ${oef.deel1} + ___`;
+      else if (oef.prefill === 'rechts')pText = `${oef.totaal} = ___ + ${oef.deel2}`;
+      else                               pText = `${oef.totaal} = ___ + ___`;
+      div.textContent = pText;
+      appendWithDelete(grid, div, cfg, oef);
+      return;
+    }
+
+    if (cfg.splitsStijl === 'bewerkingen4') {
+      const wrap = document.createElement('div');
+      wrap.style.display = 'grid';
+      wrap.style.gridTemplateColumns = '1fr';
+      wrap.style.rowGap = '14px';
+      wrap.style.overflow = 'visible';
+
+      const mini = document.createElement('div');
+      mini.style.position = 'relative';
+      mini.style.width = '160px';
+      mini.style.height = '60px';
+      mini.style.margin = '0 auto';
+      mini.style.overflow = 'visible';
+
+      const top = document.createElement('div');
+      top.style.position = 'absolute';
+      top.style.left = '50%';
+      top.style.transform = 'translateX(-50%)';
+      top.style.top = '0';
+      top.style.width = '60px';
+      top.style.height = '24px';
+      top.style.border = '2px solid #333';
+      top.style.borderRadius = '8px';
+      top.style.background = '#e0f2f7';
+      top.style.display = 'flex';
+      top.style.alignItems = 'center';
+      top.style.justifyContent = 'center';
+      top.style.fontWeight = '700';
+      top.textContent = (oef.isSom ? '___' : String(oef.totaal));
+      mini.appendChild(top);
+
+      const legLeft  = document.createElement('div');
+      const legRight = document.createElement('div');
+      [legLeft, legRight].forEach(l => { l.style.position='absolute'; l.style.width='2px'; l.style.background='#333'; l.style.height='28px'; l.style.top='24px'; });
+      legLeft.style.left = 'calc(50% - 18px)'; legLeft.style.transform = 'skewX(-18deg)';
+      legRight.style.left = 'calc(50% + 16px)';legRight.style.transform = 'skewX(18deg)';
+      mini.appendChild(legLeft); mini.appendChild(legRight);
+
+      const boxL = document.createElement('div'); const boxR = document.createElement('div');
+      [boxL, boxR].forEach(b => { b.style.position='absolute'; b.style.width='44px'; b.style.height='24px'; b.style.border='2px solid #bbb'; b.style.borderRadius='8px'; b.style.bottom='0';
+        b.style.display='flex'; b.style.alignItems='center'; b.style.justifyContent='center'; b.style.fontFamily="'Courier New', Courier, monospace"; b.style.fontSize='1.05em'; b.style.background='#fff';});
+      boxL.style.left = 'calc(50% - 58px)'; boxR.style.left = 'calc(50% + 14px)';
+      const L = oef.isSom ? String(oef.deel1) : (oef.prefill==='links' ? String(oef.deel1) : '___');
+      const R = oef.isSom ? String(oef.deel2) : (oef.prefill==='rechts'? String(oef.deel2) : '___');
+      boxL.textContent = L; boxR.textContent = R;
+      mini.appendChild(boxL); mini.appendChild(boxR);
+
+      wrap.appendChild(mini);
+
+      const eq = document.createElement('div');
+      eq.style.fontFamily = "'Courier New', Courier, monospace";
+      eq.style.fontSize = '1.08em';
+      eq.style.lineHeight = '2.8';
+      eq.style.textAlign = 'center';
+      eq.innerHTML = `___ + ___ = ___<br>___ + ___ = ___<br>___ - ___ = ___<br>___ - ___ = ___`;
+      wrap.appendChild(eq);
+
+      div.appendChild(wrap);
+      appendWithDelete(grid, div, cfg, oef);
+      return;
+    }
+
+    if (cfg.splitsStijl === 'huisje') {
+      const huis = document.createElement('div');
+      huis.className = 'splitshuis';
+      huis.style.display = 'inline-grid';
+      huis.style.gridTemplateColumns = '1fr 1fr';
+      huis.style.border = '2px solid #333';
+      huis.style.borderRadius = '6px';
+      huis.style.overflow = 'hidden';
+      huis.style.background = '#e0f2f7';
+      huis.style.width = '72px';
+      huis.style.textAlign = 'center';
+      huis.style.fontWeight = '700';
+      huis.style.fontSize = '15px';
+      const top = document.createElement('div');
+      top.style.gridColumn = '1 / span 2';
+      top.style.borderBottom = '1px solid #999';
+      top.style.padding = '2px 0';
+      top.textContent = oef.isSom ? '___' : oef.totaal;
+      huis.appendChild(top);
+      const left = document.createElement('div');
+      const right = document.createElement('div');
+      left.textContent  = oef.isSom ? oef.deel1 : (oef.prefill==='links'?oef.deel1:'___');
+      right.textContent = oef.isSom ? oef.deel2 : (oef.prefill==='rechts'?oef.deel2:'___');
+      [left,right].forEach(c=>{ c.style.padding='4px 0'; c.style.borderTop='1px solid #ccc'; c.style.background='#fff';});
+      huis.append(left,right);
+      div.style.display='flex'; div.style.justifyContent='center';
+      div.appendChild(huis);
+      appendWithDelete(grid, div, cfg, oef);
+      return;
+    }
+
+    // --- standaard: SPLITSBENEN ---
+{
+  const wrap = document.createElement('div');
+  wrap.className = 'splitsbenen';
+  wrap.style.overflow = 'visible';
+  wrap.innerHTML = `
+    <div class="top">${isSom ? '___' : String(oef.totaal)}</div>
+    <div class="benen-container"><div class="been links"></div><div class="been rechts"></div></div>
+    <div class="bottom">
+      <div class="bottom-deel">${isSom ? String(oef.deel1) : (oef.prefill==='links' ? String(oef.deel1) : '___')}</div>
+      <div class="bottom-deel">${isSom ? String(oef.deel2) : (oef.prefill==='rechts'? String(oef.deel2) : '___')}</div>
+    </div>
+  `;
+  const div = document.createElement('div');
+  div.style.display = 'flex';
+  div.style.justifyContent = 'center';
+  div.appendChild(wrap);
+  appendWithDelete(grid, div, cfg, oef);
+  return;
+}
+  }
+
+  // tafels
+  div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
+  appendWithDelete(grid, div, cfg, oef);
+}
 
     // 2) Bestaat dit segment al? -> append aan bestaand grid
     let card = werkbladContainer.querySelector(`section.preview-segment[data-segment-key="${segKey}"]`);
@@ -252,65 +425,130 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
       card.style.margin = '12px 0';
 
       // Titel + tools
-      const header = document.createElement('div');
-      header.style.position = 'relative';
+      // ── Header + tools altijd zichtbaar ─────────────────────────────
+const header = document.createElement('div');
+header.className = 'seg-header';
+Object.assign(header.style, {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
+  padding: '6px 8px 2px 8px',
+  position: 'relative',
+  zIndex: '10',
+});
 
-      const title = document.createElement('h3');
-      title.textContent = titelVoor(cfg);
-      title.style.margin = '0 0 10px';
-      title.style.color = '#003e7e';
-      title.style.fontFamily = 'Arial,Helvetica,sans-serif';
-      title.style.fontSize = '16px';
-      title.style.fontWeight = '700';
+const title = document.createElement('h3');
+title.textContent = titelVoor(cfg);
+Object.assign(title.style, {
+  margin: '0',
+  fontSize: '18px',
+  fontWeight: '700',
+  color: '#0b4d7a',
+});
 
-      const tools = document.createElement('div');
-      tools.className = 'segment-tools';
-      tools.innerHTML = `
-        <button data-act="gap-dec">− ruimte</button>
-        <button data-act="gap-inc">+ ruimte</button>
-        <button data-act="edit">Titel</button>
-        <button data-act="del">Verwijder</button>
-      `;
-      tools.addEventListener('click', (e)=>{
-        const btn = e.target.closest('button'); if(!btn) return;
-        const act = btn.dataset.act;
-        if (act === 'edit') {
-          const nieuw = prompt('Opdrachtzin aanpassen:', title.textContent || '');
-          if (nieuw !== null) title.textContent = nieuw.trim();
-          paginatePreview();
-        } else if (act === 'del') {
-          card.remove();
-          paginatePreview();
-        } else if (act === 'gap-inc') {
-          PREVIEW_SEG_GAP_PX = Math.min(PREVIEW_SEG_GAP_PX + 4, 64);
-          card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px';
-          paginatePreview();
-        } else if (act === 'gap-dec') {
-          PREVIEW_SEG_GAP_PX = Math.max(PREVIEW_SEG_GAP_PX - 4, 0);
-          card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px';
-          paginatePreview();
-        }
-      });
+// tools rechts van de titel
+let tools = card.querySelector('.tools');
+if (!tools) {
+  tools = document.createElement('div');
+  tools.className = 'tools';
+  Object.assign(tools.style, {
+    display: 'flex',
+    gap: '6px',
+    flexWrap: 'wrap',
+    marginLeft: 'auto',
+    position: 'relative',
+    zIndex: '2000',
+  });
+  tools.innerHTML = `
+    <button data-act="gap-dec">− ruimte</button>
+    <button data-act="gap-inc">+ ruimte</button>
+    <button data-act="edit">Titel</button>
+    <button data-act="add">Voeg toe</button>
+    <button data-act="del">Verwijder</button>
+  `;
+  // basisstijl zodat ze niet “verdwijnen”
+  tools.querySelectorAll('button').forEach(b=>{
+    Object.assign(b.style, {
+      background:'#e0f2f7', border:'1px solid #ccd4da',
+      borderRadius:'6px', padding:'4px 8px', fontSize:'13px', cursor:'pointer'
+    });
+    b.addEventListener('mouseenter',()=> b.style.background='#cfe8f2');
+    b.addEventListener('mouseleave',()=> b.style.background='#e0f2f7');
+  });
+}
 
-      header.appendChild(title);
-      header.appendChild(tools);
-      card.appendChild(header);
+// acties
+tools.addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const act = btn.dataset.act;
+
+  if (act === 'edit') {
+    const nieuw = prompt('Opdrachtzin aanpassen:', title.textContent || '');
+    if (nieuw !== null) { title.textContent = nieuw.trim(); cfg.opdracht = title.textContent; }
+    paginatePreview();
+
+  } else if (act === 'add') {
+    if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
+      alert('Bij grote splitshuizen wordt het aantal kolommen bepaald door je gekozen getallenlijst.');
+      return;
+    }
+    const invoer = prompt('Hoeveel oefeningen wil je toevoegen?', '4');
+    const extra = Math.max(1, parseInt(invoer, 10) || 0);
+    if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
+    for (let i = 0; i < extra; i++) {
+      let oef;
+      if (cfg.hoofdBewerking === 'rekenen') oef = genereerRekensom(cfg);
+      else if (cfg.hoofdBewerking === 'splitsen') { oef = genereerSplitsing(cfg);
+        if (cfg.splitsStijl === 'puntoefening')  oef._p = true;
+        if (cfg.splitsStijl === 'bewerkingen4')  oef._b4 = true;
+      } else if (cfg.hoofdBewerking === 'tafels') oef = genereerTafelsom(cfg);
+      if (oef) { cfg._oefeningen.push(oef); renderOefeningInGrid(grid, cfg, oef); }
+    }
+    paginatePreview();
+
+  } else if (act === 'del') {
+    card.remove(); paginatePreview();
+
+  } else if (act === 'gap-inc') {
+    PREVIEW_SEG_GAP_PX = Math.min(PREVIEW_SEG_GAP_PX + 4, 64);
+    card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px'; paginatePreview();
+
+  } else if (act === 'gap-dec') {
+    PREVIEW_SEG_GAP_PX = Math.max(PREVIEW_SEG_GAP_PX - 4, 0);
+    card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px'; paginatePreview();
+  }
+});
+
+card.style.overflow = 'visible';
+header.append(title, tools);
+card.prepend(header);
 
       // Grid binnen segment
       grid = document.createElement('div');
-      grid.className = 'preview-grid';
-      grid.style.alignItems = 'start';
-      grid.style.justifyItems = 'center';
+grid.className = 'preview-grid';
+grid.style.alignItems = 'start';
+grid.style.justifyItems = 'center';
 
-      const hulpGlobaal = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
-      let kolommen = 4, colGap = '24px', rowGap = '24px';
-      if (cfg.hoofdBewerking === 'rekenen' && hulpGlobaal) { kolommen = 2; colGap = '48px'; rowGap = '36px'; }
-      if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'bewerkingen4') { kolommen = 3; colGap = '40px'; rowGap = '56px'; }
-      if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'puntoefening') { kolommen = 3; colGap = '30px'; rowGap = '22px'; }
+const hulpGlobaal = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
+let kolommen = 4, colGap = '24px', rowGap = '24px';
 
-      grid.style.gridTemplateColumns = `repeat(${kolommen}, minmax(0, 1fr))`;
-      grid.style.columnGap = colGap; grid.style.rowGap = rowGap;
-      card.appendChild(grid);
+// Rekenen met hulp = 2 brede kolommen (ongewijzigd)
+if (cfg.hoofdBewerking === 'rekenen' && hulpGlobaal) {
+  kolommen = 2; colGap = '48px'; rowGap = '36px';
+// Rekenen zonder hulp = 3 per rij (zoals PDF)
+} else if (cfg.hoofdBewerking === 'rekenen' && !hulpGlobaal) {
+  kolommen = 3; colGap = '32px'; rowGap = '20px';
+}
+
+// Splitsen varianten (ongewijzigd)
+if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'bewerkingen4') { kolommen = 3; colGap = '40px'; rowGap = '56px'; }
+if (cfg.hoofdBewerking === 'splitsen' && cfg.splitsStijl === 'puntoefening') { kolommen = 3; colGap = '30px'; rowGap = '22px'; }
+
+grid.style.gridTemplateColumns = `repeat(${kolommen}, minmax(0, 1fr))`;
+grid.style.columnGap = colGap;
+grid.style.rowGap = rowGap;
+card.appendChild(grid);
+
 
       // marge onder segment in UI (komt overeen met SEGMENT_GAP in PDF)
       card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px';
@@ -329,9 +567,11 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     // ---- Oefeningen tekenen ----
     if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
   const lijst = cfg.splitsGetallenArray?.length ? cfg.splitsGetallenArray : [10];
+  cfg._oefeningen = lijst.map(max => ({ type: 'GROOT', max }));
   grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
 
-  lijst.forEach(maxGetal => {
+  lijst.forEach((maxGetal, i) => {
+    const oef = cfg._oefeningen[i];   // gebruik het bijbehorende object uit de dataset
     const kaart = document.createElement('div');
     kaart.style.fontFamily = 'Arial,Helvetica,sans-serif';
     kaart.style.border = '1px solid #e5e5e5';
@@ -395,7 +635,7 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     cell.className = 'oefening';
     cell.style.overflow = 'visible';
     cell.appendChild(kaart);
-    appendWithDelete(grid, cell);
+    appendWithDelete(grid, cell, cfg, oef);  // geef dezelfde referentie door
   });
 
   return;
@@ -415,119 +655,9 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     // ✅ voeg deze regel exact hier toe:
 cfg._oefeningen = oefeningen;
 
-    oefeningen.forEach(oef => {
-      const div = document.createElement('div');
-      div.className = 'oefening';
-      div.style.width = '100%';
-      div.style.fontFamily = 'Arial,Helvetica,sans-serif';
-      div.style.fontSize = '14px';
-      div.style.overflow = 'visible';
+  // Nieuwe, korte versie
+oefeningen.forEach(oef => renderOefeningInGrid(grid, cfg, oef));
 
-      if (oef.type === 'rekenen') {
-        const hulpActief = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
-        const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
-        if (hulpActief && isBrugSom) {
-          div.style.display='grid'; div.style.gridTemplateColumns='auto 1fr'; div.style.columnGap='24px'; div.style.alignItems='start';
-          const links = document.createElement('div'); links.style.position='relative'; links.style.display='inline-block'; links.style.overflow='visible';
-          links.innerHTML = `
-            <span class="term1">${oef.getal1}</span>
-            <span class="op"> ${oef.operator} </span>
-            <span class="term2">${oef.getal2}</span>
-            <span> = </span>
-            <span class="ansbox" style="display:inline-block;width:46px;height:30px;border:2px solid #333;border-radius:8px;vertical-align:middle;margin-left:6px;"></span>
-          `;
-          const rechts = document.createElement('div'); rechts.className='lijnenrechts'; rechts.style.overflow='visible';
-          rechts.innerHTML = `
-            <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
-            <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
-          `;
-          div.append(links, rechts);
-          appendWithDelete(grid, div, cfg, oef);
-          requestAnimationFrame(() => tekenInlineSplitsOnderTerm(links, oef, rechts, cfg));
-        } else {
-          div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
-          appendWithDelete(grid, div, cfg, oef);
-        }
-
-      } else if (oef.type === 'splitsen') {
-        const isSom = !!oef.isSom;
-
-        if (cfg.splitsStijl === 'puntoefening') {
-  div.style.fontFamily = "'Courier New', Courier, monospace";
-  div.style.fontSize = '1.2em';
-  div.style.textAlign = 'center';
-
-  let pText;
-  if (oef.prefill === 'links') {
-    pText = `${oef.totaal} = ${oef.deel1} + ___`;
-  } else if (oef.prefill === 'rechts') {
-    pText = `${oef.totaal} = ___ + ${oef.deel2}`;
-  } else {
-    pText = `${oef.totaal} = ___ + ___`;
-  }
-
-  div.textContent = pText;
-  appendWithDelete(grid, div, cfg, oef);
-
-        } else if (cfg.splitsStijl === 'bewerkingen4') {
-          const wrap = document.createElement('div');
-          wrap.style.display = 'grid';
-          wrap.style.gridTemplateColumns = '1fr';
-          wrap.style.rowGap = '14px'; // extra ruimte
-
-          const top = document.createElement('div');
-          const L = isSom ? oef.deel1 : (oef.prefill==='links'?oef.deel1:'___');
-          const R = isSom ? oef.deel2 : (oef.prefill==='rechts'?oef.deel2:'___');
-          const T = isSom ? '___' : oef.totaal;
-          top.style.textAlign = 'center';
-          top.innerHTML = `<span style="background:#e0f2f7;border:1px solid #9cc; padding:2px 8px; border-radius:8px; font-weight:700">${T}</span>
-                           <span style="display:inline-block; width:28px"></span>
-                           <span style="border:1px solid #ddd; padding:2px 8px; border-radius:6px">${L}</span>
-                           <span style="display:inline-block; width:10px"></span>
-                           <span style="border:1px solid #ddd; padding:2px 8px; border-radius:6px">${R}</span>`;
-          wrap.appendChild(top);
-
-          const eq = document.createElement('div');
-          eq.style.fontFamily = "'Courier New', Courier, monospace";
-          eq.style.fontSize = '1.08em';
-          eq.style.lineHeight = '2.8'; // ruimer
-          eq.style.textAlign = 'center';
-          eq.innerHTML = `___ + ___ = ___<br>___ + ___ = ___<br>___ - ___ = ___<br>___ - ___ = ___`;
-          wrap.appendChild(eq);
-
-          div.appendChild(wrap);
-         appendWithDelete(grid, div, cfg, oef);
-
-        } else if (cfg.splitsStijl === 'huisje') {
-          const huis = document.createElement('div'); huis.className='splitshuis'; huis.style.margin='6px'; huis.style.overflow='visible';
-          huis.innerHTML = `
-            <div class="dak">${isSom ? '___' : oef.totaal}</div>
-            <div class="kamers"><div class="kamer">${isSom ? oef.deel1 : (oef.prefill==='links'?oef.deel1:'___')}</div>
-            <div class="kamer">${isSom ? oef.deel2 : (oef.prefill==='rechts'?oef.deel2:'___')}</div></div>
-          `;
-          div.style.display='flex'; div.style.justifyContent='center';
-          div.appendChild(huis);
-         appendWithDelete(grid, div, cfg, oef);
-
-        } else { // benen
-          const wrap = document.createElement('div'); wrap.className='splitsbenen'; wrap.style.overflow='visible';
-          wrap.innerHTML = `
-            <div class="top">${isSom ? '___' : oef.totaal}</div>
-            <div class="benen-container"><div class="been links"></div><div class="been rechts"></div></div>
-            <div class="bottom">
-              <div class="bottom-deel">${isSom ? oef.deel1 : (oef.prefill==='links'?oef.deel1:'___')}</div>
-              <div class="bottom-deel">${isSom ? oef.deel2 : (oef.prefill==='rechts'?oef.deel2:'___')}</div>
-            </div>`;
-          div.style.display='flex'; div.style.justifyContent='center';
-          div.appendChild(wrap);
-          appendWithDelete(grid, div, cfg, oef);
-        }
-
-      } else { // tafels
-        div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
-        appendWithDelete(grid, div, cfg, oef);
-      }
-    });
   }
 
   // ====== BENEN tekenen onder term (scherm) ======
@@ -865,8 +995,8 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
         } else if (cfg.splitsStijl === 'bewerkingen4') {
           // ruimer i.v.m. 4 bewerkingslijnen
           xCols   = [insetX + 14, insetX + 80, insetX + 146];
-          yInc    = 84;  // iets ruimer
-          itemH   = 88;
+          yInc    = 92;  // iets ruimer
+          itemH   = 96;
         }
       }
 
@@ -909,18 +1039,31 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
 
 // --- SPECIALE TAK: GROTE SPLITSHUIZEN IN PDF ---
 if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
-  // Titel (zoals bij andere segmenten)
-  doc.setFont('Helvetica','bold'); 
-  doc.setFontSize(14);
-  if (yCursor + 16 > pageHeight - PDF_BOTTOM_SAFE) { 
-    nieuwePagina(); 
-  }
-  doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
-  yCursor += 14;
+ // Dataset voor PDF: volg de preview als die bestaat
+const lijst = Array.isArray(cfg._oefeningen) && cfg._oefeningen.length
+  ? cfg._oefeningen.map(o => o.max)   // preview-aanpassingen volgen
+  : ((cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
+      ? cfg.splitsGetallenArray
+      : [10]);
 
-  const lijst = (cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
-                  ? cfg.splitsGetallenArray
-                  : [10];
+// 1) bereken hoogte van de EERSTE RIJ (max van de eerste 3 kolommen)
+const hKolom = (maxGetal) => 15 + (maxGetal + 1) * 10.5 + 2; // zelfde als drawGrootSplitshuisKolomPDF
+const firstRowHeights = lijst.slice(0, 3).map(hKolom);
+const firstRowH = firstRowHeights.length ? Math.max(...firstRowHeights) : hKolom(10);
+const TITLE_H = 14;
+const needed = TITLE_H + firstRowH + 6; // 6mm lucht
+
+// 2) past titel + 1e rij niet meer? → eerst nieuwe pagina
+if (yCursor + needed > pageHeight - PDF_BOTTOM_SAFE) {
+  nieuwePagina();
+}
+
+// 3) T I T E L
+doc.setFont('Helvetica','bold');
+doc.setFontSize(14);
+doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
+yCursor += 14;
+
 
   // SMALLER kolomraster: max 3 kolommen, stap 56 mm (past mooi bij bodyW = 40)
   const insetX = LEFT_PUNCH_MARGIN + 8;
