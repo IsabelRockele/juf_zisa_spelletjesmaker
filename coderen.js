@@ -168,21 +168,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function drawGridLines(ctx) {
-        ctx.strokeStyle = '#e0e0e0';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= gridWidth; i++) {
-            ctx.beginPath();
-            ctx.moveTo(i * cellSize, 0);
-            ctx.lineTo(i * cellSize, gridHeight * cellSize);
-            ctx.stroke();
-        }
-        for (let i = 0; i <= gridHeight; i++) {
-            ctx.beginPath();
-            ctx.moveTo(0, i * cellSize);
-            ctx.lineTo(gridWidth * cellSize, i * cellSize);
-            ctx.stroke();
-        }
+    const w = gridWidth * cellSize;
+    const h = gridHeight * cellSize;
+
+    // Zwart raster, iets dikker en pixel-crisp
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.2;
+
+    // Verticale lijnen
+    for (let i = 0; i <= gridWidth; i++) {
+        let x = Math.round(i * cellSize) + 0.5;
+        if (i === gridWidth) x = w - 0.5;              // klem de laatste lijn binnen het canvas
+        ctx.beginPath();
+        ctx.moveTo(x, 0.5);
+        ctx.lineTo(x, h - 0.5);
+        ctx.stroke();
     }
+
+    // Horizontale lijnen
+    for (let i = 0; i <= gridHeight; i++) {
+        let y = Math.round(i * cellSize) + 0.5;
+        if (i === gridHeight) y = h - 0.5;             // klem de laatste lijn binnen het canvas
+        ctx.beginPath();
+        ctx.moveTo(0.5, y);
+        ctx.lineTo(w - 0.5, y);
+        ctx.stroke();
+    }
+}
+
 
     function drawFeature(ctx, feature) {
         const pixelX = feature.gridX * cellSize;

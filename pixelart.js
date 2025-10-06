@@ -67,8 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const colorInfo = getColorInfoByName(cellData.color);
 
         targetCtx.fillStyle = colorInfo ? colorInfo.hex : '#FFFFFF';
-        targetCtx.strokeStyle = '#CCCCCC';
-        targetCtx.lineWidth = 1;
+        targetCtx.strokeStyle = '#000000';
+        targetCtx.lineWidth = 1.2;
 
         targetCtx.beginPath();
         targetCtx.arc(centerX, centerY, currentRadius, 0, 2 * Math.PI);
@@ -350,8 +350,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const centerX = xOffset + (c + 0.5) * pdfCellSize;
                 const centerY = yOffset + (r + 0.5) * pdfCellSize;
                 doc.setFillColor(colorInfo.hex.substring(1));
-                doc.setDrawColor(204, 204, 204);
-                doc.setLineWidth(0.1);
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.25);
                 doc.circle(centerX, centerY, pdfRadius, 'FD');
             }
         }
@@ -387,8 +387,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const cx = xOffset + (c + 0.5) * pdfCellSize;
                 const cy = margin + (r + 0.5) * pdfCellSize;
                 doc.setFillColor(color.hex.substring(1));
-                doc.setDrawColor(204, 204, 204);
-                doc.setLineWidth(0.1);
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.25);
                 doc.circle(cx, cy, pdfRadius, 'FD');
             }
         }
@@ -399,8 +399,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const cx = xOffset + (c + 0.5) * pdfCellSize;
                 const cy = yOffset2 + (r + 0.5) * pdfCellSize;
                 doc.setFillColor(whiteColor.hex.substring(1));
-                doc.setDrawColor(204, 204, 204);
-                doc.setLineWidth(0.1);
+                doc.setDrawColor(0, 0, 0);
+                doc.setLineWidth(0.25);
                 doc.circle(cx, cy, pdfRadius, 'FD');
             }
         }

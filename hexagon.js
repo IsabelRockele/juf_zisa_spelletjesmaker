@@ -122,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const colorInfo = getColorInfoByName(cellData.color);
 
         targetCtx.fillStyle = colorInfo ? colorInfo.hex : '#FFFFFF';
-        targetCtx.strokeStyle = '#D3D3D3';
-        targetCtx.lineWidth = 1;
+        targetCtx.strokeStyle = '#000000';
+        targetCtx.lineWidth = 1.2;
         
         const hexPath = getHexPath(x, y, size);
         targetCtx.fill(hexPath);
@@ -424,7 +424,7 @@ function pixelToHex(x, y) {
     }
     
     function drawHexagonInPdf(doc, points, eyeData) {
-        doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.1);
+        doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.25);
         for (let i = 0; i < points.length; i++) {
             const p1 = points[i]; const p2 = points[(i + 1) % points.length];
             if (!isNaN(p1[0]) && !isNaN(p1[1]) && !isNaN(p2[0]) && !isNaN(p2[1])) {
@@ -516,7 +516,7 @@ function pixelToHex(x, y) {
             for (let c = 0; c < gridWidth; c++) {
                  const center = getHexCenter(c, r, hexSize, hexWidth, hexVertSpacing);
                  const path = getHexPath(center.x, center.y + emptyGridYOffset, hexSize);
-                 werkbladCtx.strokeStyle = '#333'; werkbladCtx.stroke(path);
+                 werkbladCtx.strokeStyle = '#000'; werkbladCtx.stroke(path);
                  if(drawingMatrix[r][c].special === 'eye') {
                     werkbladCtx.fillStyle = '#000'; werkbladCtx.beginPath();
                     werkbladCtx.arc(center.x, center.y + emptyGridYOffset, hexSize * 0.4, 0, 2*Math.PI);
