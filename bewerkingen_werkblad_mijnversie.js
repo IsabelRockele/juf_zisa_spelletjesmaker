@@ -67,21 +67,29 @@ document.addEventListener("DOMContentLoaded", () => {
     return (brugType === 'met' && heeftBrug) || (brugType === 'zonder' && !heeftBrug);
   }
   function titelVoor(cfg) {
-    if (cfg.opdracht && cfg.opdracht.trim()) return cfg.opdracht.trim();
-    if (cfg.hoofdBewerking === 'splitsen') {
-      if (cfg.splitsStijl === 'puntoefening') return 'Vul de splitsing aan.';
-      if (cfg.splitsStijl === 'bewerkingen4') return 'Splits en maak de 4 bewerkingen.';
-      if (cfg.splitsStijl === 'huisje') return 'Vul het splitshuis correct in.';
-      return 'Vul de splitsbenen correct in.';
-    }
-    if (cfg.hoofdBewerking === 'tafels') return 'Los de tafel-oefeningen op.';
-    if (cfg.hoofdBewerking === 'rekenen') {
-      if (cfg.rekenBrug === 'met') return 'Los de sommen op met brug.';
-      if (cfg.rekenBrug === 'zonder') return 'Los de sommen op zonder brug.';
-      return 'Los de sommen op.';
-    }
-    return 'Oefeningen';
+  // Handmatige opdrachtzin heeft altijd voorrang
+  if (cfg.opdracht && cfg.opdracht.trim()) return cfg.opdracht.trim();
+
+  if (cfg.hoofdBewerking === 'splitsen') {
+    if (cfg.splitsStijl === 'puntoefening') return 'Vul de splitsing aan.';
+    if (cfg.splitsStijl === 'bewerkingen4') return 'Splits en maak de 4 bewerkingen.';
+    if (cfg.splitsStijl === 'huisje') return 'Vul het splitshuis correct in.';
+    return 'Vul de splitsbenen correct in.';
   }
+
+  if (cfg.hoofdBewerking === 'tafels') return 'Los de tafel-oefeningen op.';
+
+  if (cfg.hoofdBewerking === 'rekenen') {
+    const type = cfg.rekenType || 'beide';     // 'optellen' | 'aftrekken' | 'beide'
+    const brug = cfg.rekenBrug || 'beide';     // 'met' | 'zonder' | 'beide'
+    const brugTxt = brug === 'met' ? ' met brug' : (brug === 'zonder' ? ' zonder brug' : '');
+    if (type === 'optellen')  return 'Los de optelsommen op'  + brugTxt + '.';
+    if (type === 'aftrekken') return 'Los de aftreksommen op' + brugTxt + '.';
+    return 'Los de sommen (optellen en aftrekken) op' + brugTxt + '.';
+  }
+
+  return 'Oefeningen';
+}
 
   // ========= GENERATOREN =========
   function genereerSplitsing(settings) {
@@ -188,19 +196,36 @@ document.addEventListener("DOMContentLoaded", () => {
     return { type: 'tafels', getal1: g1, getal2: g2, operator: ':' };
   }
 
-  function appendWithDelete(grid, oefDiv){
-    const del = document.createElement('div');
-    del.className = 'del';
-    del.textContent = '×';
-    del.title = 'Verwijder oefening';
-    del.addEventListener('click', (ev)=>{
-      ev.stopPropagation();
-      oefDiv.remove();
-      if (typeof paginatePreview === 'function') paginatePreview();
-    });
-    oefDiv.appendChild(del);
-    grid.appendChild(oefDiv);
-  }
+ // grid = container in preview
+// oefDiv = het DOM-blokje
+// cfg    = settings van dit segment
+// oef    = het oefening-object (kan null zijn bij "grote splitshuizen")
+function appendWithDelete(grid, oefDiv, cfg, oef) {
+  const del = document.createElement('div');
+  del.className = 'del';
+  del.textContent = '×';
+  del.title = 'Verwijder oefening';
+
+  del.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+
+    // 1) uit de dataset (voor PDF)
+    if (oef && Array.isArray(cfg._oefeningen)) {
+      const i = cfg._oefeningen.indexOf(oef);
+      if (i > -1) cfg._oefeningen.splice(i, 1);
+    }
+
+    // 2) uit de preview
+    oefDiv.remove();
+
+    // 3) paginering bijwerken
+    if (typeof paginatePreview === 'function') paginatePreview();
+  });
+
+  oefDiv.appendChild(del);
+  grid.appendChild(oefDiv);
+}
+
 
   // ========= SCHERM-RENDER =========
   function renderBlokOpScherm(cfg) {
@@ -387,6 +412,9 @@ document.addEventListener("DOMContentLoaded", () => {
       } else if (cfg.hoofdBewerking === 'tafels') oefeningen.push(genereerTafelsom(cfg));
     }
 
+    // ✅ voeg deze regel exact hier toe:
+cfg._oefeningen = oefeningen;
+
     oefeningen.forEach(oef => {
       const div = document.createElement('div');
       div.className = 'oefening';
@@ -414,11 +442,11 @@ document.addEventListener("DOMContentLoaded", () => {
             <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
           `;
           div.append(links, rechts);
-          appendWithDelete(grid, div);
+          appendWithDelete(grid, div, cfg, oef);
           requestAnimationFrame(() => tekenInlineSplitsOnderTerm(links, oef, rechts, cfg));
         } else {
           div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
-          appendWithDelete(grid, div);
+          appendWithDelete(grid, div, cfg, oef);
         }
 
       } else if (oef.type === 'splitsen') {
@@ -439,7 +467,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   div.textContent = pText;
-  appendWithDelete(grid, div);
+  appendWithDelete(grid, div, cfg, oef);
 
         } else if (cfg.splitsStijl === 'bewerkingen4') {
           const wrap = document.createElement('div');
@@ -468,7 +496,7 @@ document.addEventListener("DOMContentLoaded", () => {
           wrap.appendChild(eq);
 
           div.appendChild(wrap);
-          appendWithDelete(grid, div);
+         appendWithDelete(grid, div, cfg, oef);
 
         } else if (cfg.splitsStijl === 'huisje') {
           const huis = document.createElement('div'); huis.className='splitshuis'; huis.style.margin='6px'; huis.style.overflow='visible';
@@ -479,7 +507,7 @@ document.addEventListener("DOMContentLoaded", () => {
           `;
           div.style.display='flex'; div.style.justifyContent='center';
           div.appendChild(huis);
-          appendWithDelete(grid, div);
+         appendWithDelete(grid, div, cfg, oef);
 
         } else { // benen
           const wrap = document.createElement('div'); wrap.className='splitsbenen'; wrap.style.overflow='visible';
@@ -492,12 +520,12 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>`;
           div.style.display='flex'; div.style.justifyContent='center';
           div.appendChild(wrap);
-          appendWithDelete(grid, div);
+          appendWithDelete(grid, div, cfg, oef);
         }
 
       } else { // tafels
         div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
-        appendWithDelete(grid, div);
+        appendWithDelete(grid, div, cfg, oef);
       }
     });
   }
@@ -951,17 +979,23 @@ if (!isLaatste && rijTopY + expectedNextH > pageHeight - PDF_BOTTOM_SAFE) {
 }
 
       // Oefeningen genereren
-      const N = cfg.numOefeningen ?? 20;
-      const oefeningen = [];
-      for (let k = 0; k < N; k++) {
-        if (cfg.hoofdBewerking === 'rekenen') oefeningen.push(genereerRekensom(cfg));
-        else if (cfg.hoofdBewerking === 'splitsen') {
-          const s = genereerSplitsing(cfg);
-          s._p = cfg.splitsStijl === 'puntoefening';
-          s._b4 = cfg.splitsStijl === 'bewerkingen4';
-          oefeningen.push(s);
-        } else if (cfg.hoofdBewerking === 'tafels') oefeningen.push(genereerTafelsom(cfg));
-      }
+      // ✅ Gebruik dezelfde oefeningen als in de preview als ze bestaan
+let oefeningen;
+if (Array.isArray(cfg._oefeningen)) {
+  oefeningen = cfg._oefeningen;
+} else {
+  const N = cfg.numOefeningen ?? 20;
+  oefeningen = [];
+  for (let k = 0; k < N; k++) {
+    if (cfg.hoofdBewerking === 'rekenen') oefeningen.push(genereerRekensom(cfg));
+    else if (cfg.hoofdBewerking === 'splitsen') {
+      const s = genereerSplitsing(cfg);
+      s._p = cfg.splitsStijl === 'puntoefening';
+      s._b4 = cfg.splitsStijl === 'bewerkingen4';
+      oefeningen.push(s);
+    } else if (cfg.hoofdBewerking === 'tafels') oefeningen.push(genereerTafelsom(cfg));
+  }
+}
 
       // Nieuwe pagina helper
       function nieuwePagina() {
