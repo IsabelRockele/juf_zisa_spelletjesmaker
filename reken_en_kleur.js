@@ -122,8 +122,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
     function drawGridLines(targetCtx, width, height, cell, xOffset = 0, yOffset = 0) {
-        targetCtx.strokeStyle = '#D3D3D3'; 
-        targetCtx.lineWidth = 1;
+        targetCtx.strokeStyle = '#000000'; 
+        targetCtx.lineWidth = 1.2;
         for (let i = 0; i <= width; i++) { targetCtx.beginPath(); targetCtx.moveTo(xOffset + i * cell, yOffset); targetCtx.lineTo(xOffset + i * cell, yOffset + height * cell); targetCtx.stroke(); }
         for (let i = 0; i <= height; i++) { targetCtx.beginPath(); targetCtx.moveTo(xOffset, yOffset + i * cell); targetCtx.lineTo(xOffset + width * cell, yOffset + i * cell); targetCtx.stroke(); }
     }
@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const pdfCellSize = Math.min((pageWidth - 2 * margin) / gridWidth, availableHeight / gridHeight); const textFontSize = Math.max(4, Math.min(12, pdfCellSize * 2.8));
         doc.setFontSize(textFontSize); const outcomePools = new Map();
         legendData.forEach((exercises, name) => outcomePools.set(name, exercises.map(e => e.outcome))); let currentY = margin;
-        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; let num; if (colorName === "Achtergrond") { num = distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : ''; } else { const pool = outcomePools.get(colorName); num = pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?'; } const x = margin + c * pdfCellSize; const y = currentY + r * pdfCellSize; doc.setDrawColor(180, 180, 180); doc.setLineWidth(0.1); doc.rect(x, y, pdfCellSize, pdfCellSize); doc.text(num.toString(), x + pdfCellSize / 2, y + pdfCellSize / 2, { align: 'center', baseline: 'middle' }); } }
+        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; let num; if (colorName === "Achtergrond") { num = distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : ''; } else { const pool = outcomePools.get(colorName); num = pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?'; } const x = margin + c * pdfCellSize; const y = currentY + r * pdfCellSize; doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.25); doc.rect(x, y, pdfCellSize, pdfCellSize); doc.text(num.toString(), x + pdfCellSize / 2, y + pdfCellSize / 2, { align: 'center', baseline: 'middle' }); } }
         currentY += gridHeight * pdfCellSize + 10;
         if (currentY > pageHeight - legendHeight) { doc.addPage(); currentY = margin; }
         doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text("Oefeningen", margin, currentY); currentY += 10;
@@ -374,8 +374,8 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.addImage(imgData, 'PNG', xOffset, yOffset1, pdfDrawingWidth, pdfDrawingHeight);
         const yOffset2 = yOffset1 + pdfDrawingHeight + spacing;
         const pdfCellSize = pdfDrawingWidth / gridWidth;
-        doc.setDrawColor(180, 180, 180);
-        doc.setLineWidth(0.2);
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.25);
         for (let r = 0; r < gridHeight; r++) {
             for (let c = 0; c < gridWidth; c++) {
                 const x = xOffset + c * pdfCellSize;
@@ -477,8 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             for(let c = 0; c < gridWidth; c++) {
                 const gridX = margin + instructionAreaWidth + c * pdfCellSize;
-                doc.setDrawColor(180, 180, 180); 
-                doc.setLineWidth(0.1);
+                doc.setDrawColor(0, 0, 0); 
+                doc.setLineWidth(0.25);
                 doc.rect(gridX, y_row_top, pdfCellSize, pdfCellSize);
             }
         }
