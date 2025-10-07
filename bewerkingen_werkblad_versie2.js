@@ -35,7 +35,7 @@ let PREVIEW_SEG_GAP_PX = 24;
 
 
   opnieuwBtn?.addEventListener('click', () => {
-    window.location.href = 'bewerkingen_keuze.html';
+    window.location.href = 'bewerkingen_keuze_versie2.html';
   });
 
   if (downloadPdfBtn) {
@@ -146,7 +146,96 @@ let PREVIEW_SEG_GAP_PX = 24;
     return { type: 'splitsen', isSom, totaal, deel1: d1, deel2: d2, prefill };
   }
 
+// --- NIEUW: 3-termen generator met "eerst 10 vormen" (optellen én aftrekken) ---
+// --- 3-TERMEN-GENERATOR: "eerst 10 vormen" ---
+// Geeft { type:'rekenen3', operator:'+'|'-', termen:[a,b,c] }
+function genereerRekensom3Termen(cfg) {
+  const max = Math.min(cfg.rekenMaxGetal || 20, 20); // bewust op 20 beperken
+  const opKeuze = (cfg.rekenType === 'optellen') ? '+'
+                : (cfg.rekenType === 'aftrekken') ? '-'
+                : (Math.random() < 0.5 ? '+' : '-');
+
+  if (opKeuze === '+') {
+    // Kies een partnerpaar dat 10 vormt + een derde term c (0..(20-10))
+    const a = Math.floor(Math.random() * 9) + 1; // 1..9
+    const b = 10 - a;                            // partner tot 10
+    const cMax = Math.max(0, max - 10);
+    const c = Math.floor(Math.random() * (cMax + 1)); // 0..cMax
+
+    // De 10-makers niet altijd naast elkaar zetten
+    const arr = [a, b, c];
+    if (Math.random() < 0.5) arr.splice(1, 0, arr.pop()); // b,c of c,b
+
+    return { type: 'rekenen3', operator: '+', termen: arr };
+    } else {
+    // --- AFTREKKEN: eerst 10 vormen ---
+    // Kies een minuend tussen 11 en 20 (of max, als kleiner ingesteld)
+    const g1 = Math.floor(Math.random() * (Math.min(max, 20) - 10)) + 11; // 11–20
+
+    // 1️⃣ Stap 1: bepaal hoeveel eraf moet om tot 10 te gaan
+    const naarTien = g1 - 10; // bv. 17 → 7, 15 → 5
+
+    // 2️⃣ Stap 2: kies nog een extra aftrekgetal tussen 1 en (naarTien + 3)
+    // zo blijven de getallen klein en realistisch
+    const extra = Math.floor(Math.random() * Math.max(1, Math.min(naarTien + 3, 9))) + 1;
+
+    // 3️⃣ Soms omgekeerd: 17 - 7 - 5 ↔ 17 - 5 - 7
+    const subs = (Math.random() < 0.5) ? [naarTien, extra] : [extra, naarTien];
+
+    return { type: 'rekenen3', operator: '-', termen: [g1, ...subs] };
+  }
+}
+
   function genereerRekensom(cfg) {
+  // NIEUW: bij 3-termenmodus meteen de 3-termen generator gebruiken
+  if (cfg.drieTermenEerst10 === true) {
+    return genereerRekensom3Termen(cfg);
+  }
+
+  // === SNELKEUZE: tot 5 / tot 10 — alleen E+E/E−E, zonder brug ===
+if (cfg.rekenSnel === 'tot5' || cfg.rekenSnel === 'tot10') {
+  const max = (cfg.rekenSnel === 'tot5') ? 5 : 10;
+
+  // operator volgens rekenType
+  const op = (cfg.rekenType === 'aftrekken')
+    ? '-' : (cfg.rekenType === 'optellen') ? '+' : (Math.random() < 0.5 ? '+' : '-');
+
+  let g1, g2;
+  if (op === '+') {
+    // beide termen 1..max-1, som ≤ max
+    g1 = Math.max(1, Math.floor(Math.random() * (max)) );
+    const rest = Math.max(1, max - g1);
+    g2 = Math.max(1, Math.floor(Math.random() * rest) );
+    if (g1 + g2 > max) g2 = Math.max(1, max - g1);
+  } else {
+  // Aftrekken: gevarieerde pool binnen 1..max, g1 >= g2, geen negatieven, geen 0
+  // Pool per segment (cfg) zodat elke volgende oefening uit een andere combinatie komt
+  if (!cfg._subPool || cfg._subPoolMax !== max || cfg._subPool.length === 0) {
+    const pool = [];
+    for (let a = 1; a <= max; a++) {
+      for (let b = 1; b <= a; b++) {            // b ≥ 1 → geen 0 meer
+        pool.push([a, b]);                      // geordende paren, dus 7-4 en 8-3 etc. zitten erin
+      }
+    }
+    // Fisher–Yates shuffle
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    cfg._subPool = pool;
+    cfg._subPoolMax = max;
+  }
+
+  const pair = cfg._subPool.pop();
+  let [g1, g2] = pair || [max, 1];             // fallback, zou zelden nodig zijn
+  if (g2 > g1) [g1, g2] = [g2, g1];
+
+  return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+}
+}
+
+  // (rest van uw functie ongewijzigd) ...
+
     const types = cfg.somTypes?.length ? cfg.somTypes : ['E+E'];
     const gekozenType = types[Math.floor(Math.random() * types.length)];
     const maxGetal = cfg.rekenMaxGetal || 100;
@@ -214,7 +303,19 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
 
     // 1) uit de dataset (voor PDF)
     if (oef && Array.isArray(cfg._oefeningen)) {
-      const i = cfg._oefeningen.indexOf(oef);
+      // probeer referentie-match
+      let i = cfg._oefeningen.indexOf(oef);
+
+      // val terug op inhoudelijke match
+      if (i === -1) {
+        const oefKey = (x) => [
+          x.type, x.operator, x.getal1, x.getal2, x.getal3,
+          Array.isArray(x.termen) ? x.termen.join(',') : ''
+        ].join('|');
+        const key = oefKey(oef);
+        i = cfg._oefeningen.findIndex(x => oefKey(x) === key);
+      }
+
       if (i > -1) cfg._oefeningen.splice(i, 1);
     }
 
@@ -224,6 +325,7 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     // 3) paginering bijwerken
     if (typeof paginatePreview === 'function') paginatePreview();
   });
+
 
   oefDiv.appendChild(del);
   grid.appendChild(oefDiv);
@@ -264,6 +366,20 @@ function renderOefeningInGrid(grid, cfg, oef) {
   div.style.fontSize = '14px';
   div.style.overflow = 'visible';
 
+// --- NIEUW: 3-termen opgave op scherm ---
+if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length === 3) {
+  const [a, b, c] = oef.termen;
+  const op = oef.operator || '+';
+  const div = document.createElement('div');
+  div.className = 'oefening';
+  div.style.width = '100%';
+  div.style.fontFamily = 'Arial,Helvetica,sans-serif';
+  div.style.fontSize = '14px';
+  div.textContent = `${a} ${op} ${b} ${op} ${c} = ___`;
+  appendWithDelete(grid, div, cfg, oef);
+  return;
+}
+
   if (oef.type === 'rekenen') {
     const hulpActief = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
     const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
@@ -286,6 +402,19 @@ function renderOefeningInGrid(grid, cfg, oef) {
       appendWithDelete(grid, div, cfg, oef);
       requestAnimationFrame(() => tekenInlineSplitsOnderTerm(links, oef, rechts, cfg));
     } else {
+      // --- NIEUW: 3-termen in de preview ---
+if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length === 3) {
+  const [p, q, r] = oef.termen;
+  const op = oef.operator || '+';
+
+  const div = document.createElement('div');
+  div.className = 'oefening';
+  div.style.width = '100%';
+  div.textContent = `${p} ${op} ${q} ${op} ${r} = ___`;
+
+  appendWithDelete(grid, div, cfg, oef); // zelfde helper als 2-termen
+  return; // klaar, niet verder door de 2-termen-tak
+}
       div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
       appendWithDelete(grid, div, cfg, oef);
     }
@@ -506,29 +635,68 @@ tools.addEventListener('click', (e) => {
     if (nieuw !== null) { title.textContent = nieuw.trim(); cfg.opdracht = title.textContent; }
     paginatePreview();
 
-  } else if (act === 'add') {
-    if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
-      alert('Bij grote splitshuizen wordt het aantal kolommen bepaald door je gekozen getallenlijst.');
-      return;
+ } else if (act === 'add') {
+  if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
+    alert('Bij grote splitshuizen wordt het aantal kolommen bepaald door je gekozen getallenlijst.');
+    return;
+  }
+
+  const invoer = prompt('Hoeveel oefeningen wil je toevoegen?', '4');
+  const extra = Math.max(1, parseInt(invoer, 10) || 0);
+  if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
+
+  for (let i = 0; i < extra; i++) {
+    // === NIEUW: uniform aanmaken + toevoegen aan dataset + preview ===
+    const nieuw = (cfg.hoofdBewerking === 'rekenen')
+      ? genereerRekensom(cfg)
+      : (cfg.hoofdBewerking === 'splitsen')
+        ? genereerSplitsing(cfg)
+        : genereerTafelsom(cfg);
+
+    if (cfg.hoofdBewerking === 'splitsen') {
+      if (cfg.splitsStijl === 'puntoefening') nieuw._p = true;
+      if (cfg.splitsStijl === 'bewerkingen4') nieuw._b4 = true;
     }
-    const invoer = prompt('Hoeveel oefeningen wil je toevoegen?', '4');
-    const extra = Math.max(1, parseInt(invoer, 10) || 0);
-    if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
-    for (let i = 0; i < extra; i++) {
-      let oef;
-      if (cfg.hoofdBewerking === 'rekenen') oef = genereerRekensom(cfg);
-      else if (cfg.hoofdBewerking === 'splitsen') { oef = genereerSplitsing(cfg);
-        if (cfg.splitsStijl === 'puntoefening')  oef._p = true;
-        if (cfg.splitsStijl === 'bewerkingen4')  oef._b4 = true;
-      } else if (cfg.hoofdBewerking === 'tafels') oef = genereerTafelsom(cfg);
-      if (oef) { cfg._oefeningen.push(oef); renderOefeningInGrid(grid, cfg, oef); }
+
+    if (nieuw) {
+      cfg._oefeningen.push(nieuw);                     // dataset bijwerken
+      renderOefeningInGrid(grid, cfg, nieuw);          // zichtbaar in preview
     }
-    paginatePreview();
+  }
+
+  if (typeof paginatePreview === 'function') paginatePreview();
+
 
   } else if (act === 'del') {
-    card.remove(); paginatePreview();
+  // 1) Verwijder ook uit de bundel (PDF leest bundel)
+  try {
+    const key = card.dataset.segmentKey || (typeof segmentKey === 'function' ? segmentKey(cfg) : '');
+    if (Array.isArray(bundel)) {
+      const idx = bundel.findIndex(b => {
+        const s = b && (b.settings || b);
+        return (typeof segmentKey === 'function') ? segmentKey(s) === key : false;
+      });
+      if (idx > -1) {
+        bundel.splice(idx, 1);
+        try { localStorage.setItem('werkbladBundel', JSON.stringify(bundel)); } catch {}
+      }
+    }
+  } catch (e) { /* stil houden in UI */ }
 
-  } else if (act === 'gap-inc') {
+  // 2) Uit de preview
+  card.remove();
+
+  // 3) Paginering + knopstatus
+  if (typeof paginatePreview === 'function') paginatePreview();
+
+  const rest = document.querySelectorAll('section.preview-segment').length;
+  if (downloadPdfBtn) {
+    downloadPdfBtn.disabled = (rest === 0);
+    downloadPdfBtn.style.backgroundColor = rest ? '' : '#aaa';
+    downloadPdfBtn.style.cursor = rest ? 'pointer' : 'not-allowed';
+  }
+
+} else if (act === 'gap-inc') {
     PREVIEW_SEG_GAP_PX = Math.min(PREVIEW_SEG_GAP_PX + 4, 64);
     card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px'; paginatePreview();
 
@@ -584,10 +752,24 @@ card.appendChild(grid);
     }
 
     // ---- Oefeningen tekenen ----
-    if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
-  const lijst = cfg.splitsGetallenArray?.length ? cfg.splitsGetallenArray : [10];
-  cfg._oefeningen = lijst.map(max => ({ type: 'GROOT', max }));
-  grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
+    if (
+  cfg.hoofdBewerking === 'splitsen' &&
+  cfg.groteSplitshuizen === true &&
+  cfg.splitsStijl !== 'puntoefening' &&
+  cfg.splitsStijl !== 'bewerkingen4'
+) {
+  
+  // Dataset & lijst opbouwen voor grote splitshuizen (preview)
+  if (!Array.isArray(cfg._oefeningen) || cfg._oefeningen.length === 0) {
+    const bron = (cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
+      ? cfg.splitsGetallenArray
+      : [10];
+    cfg._oefeningen = bron.map(max => ({ type: 'GROOT', max }));
+  }
+  const lijst = cfg._oefeningen
+    .map(o => o && o.max)
+    .filter(v => v !== undefined);
+
 
   lijst.forEach((maxGetal, i) => {
     const oef = cfg._oefeningen[i];   // gebruik het bijbehorende object uit de dataset
@@ -733,6 +915,19 @@ oefeningen.forEach(oef => renderOefeningInGrid(grid, cfg, oef));
   }
 
   // ========= PDF HELPERS =========
+  // --- NIEUW: 3-termen in hetzelfde compacte kader ---
+function drawReken3ItemBoxed(doc, xCenter, y, oef) {
+  const [a,b,c] = oef.termen || [];
+  const op = oef.operator || '+';
+  const text = `${a} ${op} ${b} ${op} ${c} = ___`;
+  const boxW = 50;  // zelfde breedte als 2-termen
+  const boxH = 12, r = 2, left = xCenter - boxW/2;
+  doc.setDrawColor(200,225,245);
+  doc.roundedRect(left, y-9, boxW, boxH, r, r, 'D');
+  doc.setFont('Courier', 'normal'); doc.setFontSize(14);
+  doc.text(text, xCenter, y, { align: 'center' });
+}
+
   function drawRekensomInPDF(doc, x, y, oef) {
     doc.setFont('Helvetica','normal'); doc.setFontSize(14);
     doc.text(`${oef.getal1} ${oef.operator} ${oef.getal2} = ___`, x, y);
@@ -935,6 +1130,21 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
     doc.text(text, xCenter, y, { align: 'center' });
   }
 
+function drawReken3ItemBoxed(doc, xCenter, y, oef) {
+  const [p, q, r] = oef.termen || [];
+  const op = oef.operator || '+';
+  const text = `${p} ${op} ${q} ${op} ${r} = ___`;
+
+  const boxW = 50, boxH = 12, rad = 2;
+  const left = xCenter - boxW / 2;
+
+  doc.setDrawColor(200, 225, 245);
+  doc.roundedRect(left, y - 9, boxW, boxH, rad, rad, 'D');
+  doc.setFont('Courier', 'normal'); 
+  doc.setFontSize(14);
+  doc.text(text, xCenter, y, { align: 'center' });
+}
+
   // Kleiner kadertje specifiek voor maal- en deeltafels
   function drawTafelItemBoxed(doc, xCenter, y, oef) {
     const text = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
@@ -1057,13 +1267,19 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
       const { xCols, yInc, itemH, colWidth } = layoutVoor(cfg);
 
 // --- SPECIALE TAK: GROTE SPLITSHUIZEN IN PDF ---
-if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
+if (
+  cfg.hoofdBewerking === 'splitsen' &&
+  cfg.groteSplitshuizen === true &&
+  cfg.splitsStijl !== 'puntoefening' &&
+  cfg.splitsStijl !== 'bewerkingen4'
+) {
+
  // Dataset voor PDF: volg de preview als die bestaat
-const lijst = Array.isArray(cfg._oefeningen) && cfg._oefeningen.length
-  ? cfg._oefeningen.map(o => o.max)   // preview-aanpassingen volgen
-  : ((cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
-      ? cfg.splitsGetallenArray
-      : [10]);
+const lijst = Array.isArray(cfg._oefeningen)
+  ? cfg._oefeningen.map(o => o.max).filter(v => v !== undefined)
+  : [];
+if (!lijst.length) continue; // niets tekenen als alles verwijderd werd
+
 
 // 1) bereken hoogte van de EERSTE RIJ (max van de eerste 3 kolommen)
 const hKolom = (maxGetal) => 15 + (maxGetal + 1) * 10.5 + 2; // zelfde als drawGrootSplitshuisKolomPDF
@@ -1236,16 +1452,20 @@ if (Array.isArray(cfg._oefeningen)) {
         const x = xCols[col] + pad;
 
         if (cfg.hoofdBewerking === 'rekenen') {
-          const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
-          const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+  // --- NIEUW: 3-termen eerst tekenen ---
+  if (oef.type === 'rekenen3') {
+    drawReken3ItemBoxed(doc, x, y, oef);
+  } else {
+    // bestaande 2-termenlogica blijft identiek
+    const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
+    const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
-          if (hulp && isBrugSom) {
-            // brug-hulp blijft zoals was
-            drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth);
-          } else {
-            // NORMALE som: nu met eigen kadertje
-            drawRekenItemBoxed(doc, x, y, oef);
-          }
+    if (hulp && isBrugSom) {
+      drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth);
+    } else {
+      drawRekenItemBoxed(doc, x, y, oef);
+    }
+  }
         } else if (cfg.hoofdBewerking === 'splitsen') {
           if (cfg.splitsStijl === 'puntoefening') {
             // teken de puntoefening in een kolomkader
