@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Uniek ID per selectie (zorgt dat elk blok z'n eigen titel krijgt)
+
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
   const opnieuwBtn = document.getElementById('opnieuwBtn');
   const werkbladContainer = document.getElementById('werkblad-container');
@@ -24,12 +26,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const PAGE_W_PX = 210 * MM2PX;   // 794 px
   const PAGE_H_PX = 297 * MM2PX;   // 1122 px
 
-  // Zet marges op de pagina in px (houd in de buurt van je PDF marges)
-  const PREVIEW_TOP_PX = 90;       // ~24 mm
-  const PREVIEW_BOTTOM_PX = 90;    // ~24 mm
+  // Zet marges op de pagina in px (houd in de buurt van je PDF marges) – globaal nodig voor paginatePreview()
+window.PREVIEW_TOP_PX    = (typeof window.PREVIEW_TOP_PX    === 'number') ? window.PREVIEW_TOP_PX    : 90; // ~24 mm
+window.PREVIEW_BOTTOM_PX = (typeof window.PREVIEW_BOTTOM_PX === 'number') ? window.PREVIEW_BOTTOM_PX : 90; // ~24 mm
 
-  // standaard ruimte tussen segmenten (komt overeen met SEGMENT_GAP voor PDF)
-  let PREVIEW_SEG_GAP_PX = 24;
+// standaard ruimte tussen segmenten (mag lokaal blijven)
+let PREVIEW_SEG_GAP_PX = 24;
+
 
   opnieuwBtn?.addEventListener('click', () => {
     window.location.href = 'bewerkingen_keuze.html';
@@ -230,12 +233,28 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
   // ========= SCHERM-RENDER =========
   function renderBlokOpScherm(cfg) {
     // 1) Unieke sleutel per segmentsoort (gelijk aan PDF-logica)
-    const segKey =
-      (cfg.hoofdBewerking || '') + '|' +
-      (cfg.rekenHulp?.inschakelen ? 'brug' : 'nobrug') + '|' +
-      (cfg.splitsStijl || '') + '|' +
-      (cfg.tafelType || '') + '|' +
-  (cfg.groteSplitshuizen ? 'GROOT' : 'NORMAAL');
+    function segmentKey(c){
+  return [
+    // Uniek per keuze (als het meegegeven wordt vanuit het keuzescherm)
+    c.segmentId || '',
+    // Hoofdtype
+    c.hoofdBewerking || '',
+    // Rekenen: type én brug-keuze expliciet onderscheiden
+    // - rekenType: 'optellen' | 'aftrekken' | 'beide'
+    // - rekenBrug: 'met' | 'zonder' | 'beide'
+    (c.isGemengd ? 'MIX' : (c.rekenType || c.operator || '')),
+    c.rekenBrug || '',
+    c.rekenStijl || '',     // bv. 'eerst10', 'compenseren' (voor later)
+    // Splits/Tafels varianten
+    c.splitsStijl || '',
+    c.tafelType || '',
+    // Groot/klein
+    (c.groteSplitshuizen ? 'GROOT' : 'NORMAAL')
+  ].join('|');
+}
+const segKey = segmentKey(cfg);
+
+
 
 function renderOefeningInGrid(grid, cfg, oef) {
   const div = document.createElement('div');
@@ -1150,11 +1169,16 @@ if (Array.isArray(cfg._oefeningen)) {
       // Titel alleen printen wanneer segmentsoort wijzigt
       function ensureTitelVoorSegment(cfg) {
         // Bepaal 'soort' segment
-        const segmentKey =
-          (cfg.hoofdBewerking || '') + '|' +
-          (cfg.rekenHulp?.inschakelen ? 'brug' : 'nobrug') + '|' +
-          (cfg.splitsStijl || '') + '|' +
-          (cfg.tafelType || '');
+        const segmentKey = [
+  cfg.segmentId || '',
+  cfg.hoofdBewerking || '',
+  (cfg.isGemengd ? 'MIX' : (cfg.rekenType || cfg.operator || '')),
+  (cfg.rekenBrug || ''),
+  (cfg.rekenStijl || ''),
+  (cfg.splitsStijl || ''),
+  (cfg.tafelType || ''),
+  (cfg.groteSplitshuizen ? 'GROOT' : 'NORMAAL')
+].join('|');
 
         if (segmentKey !== lastSegmentKey) {
           // --- Zorg dat titel + MINSTENS 1e rij samen passen ---
