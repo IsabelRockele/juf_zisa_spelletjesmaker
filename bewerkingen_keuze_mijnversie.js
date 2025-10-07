@@ -1,4 +1,15 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Uniek ID per selectie (zorgt dat elk blok z'n eigen titel krijgt)
+function nieuwSegmentId() {
+  return 'seg_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,6);
+}
+
+  // --- Preview-marges (failsafe) ---  PLAK DIT OP REGEL 1
+if (typeof window !== 'undefined') {
+  if (typeof window.PREVIEW_TOP_PX !== 'number') window.PREVIEW_TOP_PX = 8;    // bovenmarge in preview
+  if (typeof window.PREVIEW_SEG_GAP_PX !== 'number') window.PREVIEW_SEG_GAP_PX = 12; // ruimte tussen segmenten
+}
+
   // ===== Tafels opties opbouwen =====
   const selectAllTafelsCheckbox = document.getElementById('selectAllTafels');
   const tafelKeuzeDiv           = document.getElementById('tafelKeuze');
@@ -105,6 +116,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   return {
+    segmentId: nieuwSegmentId(),          // ⇦ NIEUW
     hoofdBewerking: 'splitsen',
     numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_splits') || { value: 20 }).value)),
     splitsStijl: (document.querySelector('input[name="splitsStijl"]:checked') || { value: 'huisje' }).value,
@@ -207,6 +219,7 @@ updateOpdrachtVeld();
       splitsPlaatsAftrekken: (document.querySelector('input[name="splitsPlaatsAftrekken"]:checked') ? document.querySelector('input[name="splitsPlaatsAftrekken"]:checked').value : 'onderAftrektal')
     };
     return {
+      segmentId: nieuwSegmentId(),          // ⇦ NIEUW
       hoofdBewerking: 'rekenen',
       numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_reken') || { value: 20 }).value)),
       rekenMaxGetal: parseInt((document.getElementById('rekenMaxGetal') || { value: 100 }).value),
@@ -257,6 +270,7 @@ const vrij = (document.getElementById(veldId) || {}).value?.trim();
   }
   function bouwTafelSettings(gekozenTafels){
     return {
+      segmentId: nieuwSegmentId(),          // ⇦ NIEUW
       hoofdBewerking: 'tafels',
       numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_tafel') || { value: 20 }).value)),
       tafelType: (document.querySelector('input[name="tafelType"]:checked') || { value: 'maal' }).value,
