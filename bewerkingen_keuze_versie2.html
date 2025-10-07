@@ -1,15 +1,12 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Generator voor Bewerkingen (versie 2) - Keuzemenu</title>
-
-  <!-- Hergebruik uw bestaande CSS -->
-  <link rel="stylesheet" href="bewerkingen.css"/>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generator voor Bewerkingen - Keuzemenu</title>
+  <link rel="stylesheet" href="bewerkingen.css">
   <style>
-    /* Kleine, nette knoppen en rijen (in lijn met uw huidige stijl) */
+    /* Kleine, nette knoppen en rijen */
     .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
     .btn{appearance:none;-webkit-appearance:none;border:1px solid #c8d9ea;background:#f5faff;
       color:#0d3b66;padding:8px 12px;border-radius:8px;font:600 14px/1.1 system-ui,Arial;cursor:pointer}
@@ -23,7 +20,6 @@
     .group-title{font-weight:700;display:block;margin-bottom:4px}
     header{display:flex;align-items:center;gap:12px;padding:10px 12px}
     header h1{margin:0;font-size:20px}
-
     /* Bundelkaart */
     #bundelOverzicht{background:#f8fcff;border:1px solid #b3e0ff;border-radius:10px;padding:12px 14px;min-height:48px}
     .bundel-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid #e6f2ff}
@@ -32,12 +28,11 @@
     .bundel-title{font-weight:700}
     .bundel-sub{font-size:.94em;color:#555}
     .bundel-actions{display:flex;gap:6px}
+    /* Kleinere onderknoppen */
     .bundel-bottom{display:flex;gap:10px;justify-content:center;margin-top:10px}
-
-    /* Smalle invoervelden */
+    /* Smalle number inputs */
     input[type="number"]{width:110px;padding:6px 8px}
     input[type="text"]{padding:6px 8px}
-
     /* Checkboxblokken */
     #tafelKeuze label, #splitsGetalKeuze label{margin-right:12px;display:inline-block;margin-bottom:6px}
   </style>
@@ -45,7 +40,7 @@
 <body>
   <header>
     <button class="btn btn--ghost" onclick="window.location.href='index.html'">Keuzemenu</button>
-    <h1>Generator voor Bewerkingen — versie 2</h1>
+    <h1>Generator voor Bewerkingen</h1>
   </header>
 
   <div id="main-content">
@@ -71,27 +66,30 @@
         <label><input type="checkbox" id="groteSplitshuizenCheckbox"> Maak grote splitshuizen</label>
       </div>
 
-      <div class="control-group">
-        <label class="group-title">Kies de totalen (meerdere mogelijk):</label>
-        <div id="splitsGetalKeuze" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:center">
-          <label><input type="checkbox" id="sp_tot5"> tot 5</label>
-          <label><input type="checkbox" id="sp_van6"> van 6</label>
-          <label><input type="checkbox" id="sp_van7"> van 7</label>
-          <label><input type="checkbox" id="sp_van8"> van 8</label>
-          <label><input type="checkbox" id="sp_van9"> van 9</label>
-          <label><input type="checkbox" id="sp_van10"> van 10</label>
+    <div class="control-group">
+  <label class="group-title">Kies de totalen (meerdere mogelijk):</label>
+  <div id="splitsGetalKeuze" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:center">
+    <label><input type="checkbox" id="sp_tot5"> tot 5</label>
+    <label><input type="checkbox" id="sp_van6"> van 6</label>
+    <label><input type="checkbox" id="sp_van7"> van 7</label>
+    <label><input type="checkbox" id="sp_van8"> van 8</label>
+    <label><input type="checkbox" id="sp_van9"> van 9</label>
+    <label><input type="checkbox" id="sp_van10"> van 10</label>
 
-          <label style="grid-column:1 / -1;display:flex;gap:8px;align-items:center">
-            <input type="checkbox" id="sp_10_20"> van 10 tot 20
-            <select id="sp_10_20_brug" style="margin-left:auto">
-              <option value="beide">Brug: beide toegestaan</option>
-              <option value="met">Brug: met</option>
-              <option value="zonder">Brug: zonder</option>
-            </select>
-          </label>
-        </div>
-        <div class="help">U mag meerdere opties samen aanvinken.</div>
-      </div>
+    <label style="grid-column:1 / -1;display:flex;gap:8px;align-items:center">
+      <input type="checkbox" id="sp_10_20"> van 10 tot 20
+      <select id="sp_10_20_brug" style="margin-left:auto">
+        <option value="beide">Brug: beide toegestaan</option>
+        <option value="met">Brug: met</option>
+        <option value="zonder">Brug: zonder</option>
+      </select>
+    </label>
+  </div>
+  <div style="font-size:12px;color:#456;margin-top:6px">
+    U mag meerdere opties samen aanvinken.
+  </div>
+</div>
+
 
       <div class="control-group">
         <label class="group-title">Extra opties:</label>
@@ -122,23 +120,20 @@
 
       <div class="control-group">
         <label class="group-title" for="rekenMaxGetal">Oefenen tot:</label>
-        <select id="rekenMaxGetal">
-          <option value="5">5</option>
+        <select id="rekenMaxGetal" onchange="window.updateDrieTermenUI && updateDrieTermenUI()">
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="100" selected>100</option>
           <option value="1000">1000</option>
         </select>
       </div>
+      <!-- SNELKEUZE: tot 5 of tot 10 (alleen E+E / E−E, zonder brug) -->
+<div class="control-group" id="rekenSnelkeuze">
+  <label class="group-title">Snelkeuze:</label>
+  <label><input type="checkbox" id="rk_tot5"> Alleen tot 5 (E+E / E−E, zonder brug)</label>
+  <label style="margin-left:12px;"><input type="checkbox" id="rk_tot10"> Alleen tot 10 (E+E / E−E, zonder brug)</label>
+</div>
 
-      <!-- Nieuw paneel: 3 termen (eerst 10) -->
-      <div class="control-group" id="drieTermenPaneel" style="display:none">
-        <label>
-          <input type="checkbox" id="drieTermenEerst10" />
-          3 termen (eerst 10 vormen) — enkel bij optellen tot 20
-        </label>
-        <div class="help">Voorbeeld: 7 + 3 + c = ___ (eerst 7+3=10, dan +c)</div>
-      </div>
 
       <div class="control-group">
         <label class="group-title">Type bewerking:</label>
@@ -162,11 +157,22 @@
       <div class="control-group">
         <label class="group-title" for="rekenBrug">Brug:</label>
         <select id="rekenBrug">
-          <option value="beide" selected>Beide toegestaan</option>
-          <option value="met">Enkel mét brug</option>
-          <option value="zonder">Enkel zónder brug</option>
-        </select>
+  <option value="zonder">Zonder brug</option>
+  <option value="met-splits" selected>Met brug (splitsing)</option>
+  <option value="met-comp">Met brug (compenseren)</option>
+  <option value="beide-splits">Beide (brug met splitsing)</option>
+  <option value="beide-comp">Beide (brug met compenseren)</option>
+</select>
       </div>
+
+<!-- 3 TERMEN (eerst 10 vormen) — zichtbaar bij 'tot 20' (optellen én aftrekken) -->
+<div class="control-group" id="drieTermenPaneel" style="display:none">
+  <label>
+    <input type="checkbox" id="drieTermenEerst10">
+    3 termen (eerst 10 vormen)
+  </label>
+  <div id="drieTermenVoorbeeld" style="font-size:0.95em;color:#555;margin-top:4px;"></div>
+</div>
 
       <div class="control-group">
         <label><input type="checkbox" id="rekenHulpCheckbox"> Hulpmiddelen tonen (alleen bij brug)</label>
@@ -189,22 +195,37 @@
           Twee schrijflijnen rechts voor tussenstappen
         </label>
       </div>
+      
+<!-- Hulp voor compenseren -->
+<div id="compenseerHint" style="margin-top:6px; display:none;">
+  <div style="font-size:0.95em;color:#555;margin-bottom:6px;">
+    Compenseren toont een kleine witte doos met twee stapjes, bv. <b>+20 − 1</b> of <b>−20 + 2</b>.
+  </div>
+  <label><input type="checkbox" id="compHulpToonPlusMin" checked>
+    Zet de <b>+</b> en <b>−</b> alvast in het doosje</label>
+</div>
 
-      <div class="control-group">
-        <label class="group-title">Opdrachtzin (optioneel):</label>
+<!-- Voorbeeldkader (oranje) -->
+<div style="margin-top:8px;">
+  <label><input type="checkbox" id="rekenVoorbeeld"> Toon een voorbeeldoefening bovenaan (oranje kader)</label>
+</div>
 
-        <!-- veld voor optellen -->
-        <input id="opdracht_optellen"
-               type="text"
-               placeholder="vb. Zoek de som."
-               style="width:100%;" />
+     <div class="control-group">
+  <label class="group-title">Opdrachtzin (optioneel):</label>
 
-        <!-- veld voor aftrekken -->
-        <input id="opdracht_aftrekken"
-               type="text"
-               placeholder="vb. Zoek het verschil."
-               style="width:100%; display:none; margin-top:6px;" />
-      </div>
+  <!-- veld voor optellen -->
+  <input id="opdracht_optellen"
+         type="text"
+         placeholder="vb. Zoek de som."
+         style="width:100%;" />
+
+  <!-- veld voor aftrekken -->
+  <input id="opdracht_aftrekken"
+         type="text"
+         placeholder="vb. Zoek het verschil."
+         style="width:100%; display:none; margin-top:6px;" />
+</div>
+
 
       <div class="btn-row">
         <button id="maakRekenBtn" class="btn btn--primary">Maak werkblad</button>
@@ -269,7 +290,6 @@
     </div>
   </div>
 
-  <!-- Verwijs naar de nieuwe JS-naam -->
   <script src="bewerkingen_keuze_versie2.js"></script>
 </body>
 </html>
