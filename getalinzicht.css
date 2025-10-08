@@ -1391,4 +1391,589 @@ html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !import
     grid-template-columns: 1fr;
   }
 }
+/* === PRINTVERBETERING: donkere lijnen voor PDF === */
+.honderdveld-grid,
+.honderdveld-cell,
+.honderdveld-te-table td,
+.mab-labeled-container,
+.mab-column-tens,
+.mab-header,
+.mab-te-table td,
+.mab-blocks-wrapper svg rect,
+.seq-box,
+.mix-box,
+.pv-card,
+.pv3-digit,
+.pv3-box,
+.pv3-small {
+  border-color: #000 !important;
+  stroke: #000 !important;
+}
 
+/* iets dikkere lijnbreedte bij rasters en hokjes */
+.honderdveld-grid,
+.honderdveld-cell {
+  border-width: 1.4px !important;
+}
+
+.mab-labeled-container,
+.mab-column-tens,
+.mab-header {
+  border-width: 2px !important;
+}
+
+.mab-te-table td,
+.honderdveld-te-table td,
+.seq-box,
+.mix-box,
+.pv-box,
+.pv3-box {
+  border-width: 1.8px !important;
+}
+
+/* ook pictogramraster en blanco MAB-materiaal in zwart */
+/* Goed: randen duidelijk zwart, maar vulling respecteren */
+.mab-blocks-wrapper svg path,
+.mab-blocks-wrapper svg rect {
+  stroke: #000 !important;
+  /* géén fill hier, laat JS/CSS de kleur bepalen */
+  vector-effect: non-scaling-stroke; /* randen blijven mooi bij schalen */
+}
+
+/* 100-veld cellen duidelijk zwart omlijnd */
+.honderdveld-cell {
+  border: 1.2px solid #000 !important;
+}
+
+/* getallenlijn-streepjes donkerder */
+line, path {
+  stroke: #000 !important;
+}
+
+/* bij print alle lijnen zwart */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+/* === INVULHOKJES: altijd duidelijke zwarte lijnen === */
+
+/* 1) Getallenlijn – lege hokjes (de SVG-omranding én de overlay-input) */
+.exercise.blanks svg rect {
+  stroke: #000 !important;          /* rand van het hokje in SVG */
+  stroke-width: 2 !important;
+  fill: #fff !important;            /* wit invulvlak */
+}
+
+.print-overlay-input {
+  border: 2px solid #000 !important; /* zichtbare rand bovenop de SVG */
+  border-radius: 9px !important;
+  background: #fff !important;
+  color: #000 !important;
+  box-shadow: none !important;       /* geen wazige rand bij print */
+}
+
+/* 2) Waarde per cijfer – TE/HTE invulvakjes */
+.pv-box, .pv-small,
+.pv3-box, .pv3-small {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* 3) Gemengd / getallenrij-varianten die ook vakjes gebruiken */
+.mix-box, .seq-box {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* 4) T/E/H-tabellen (cells en inputs) onder honderdveld/MAB */
+.honderdveld-te-table td,
+.mab-te-table td {
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input,
+.mab-te-table input {
+  border: 2px solid #000 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* 5) Print – behoud kleuren, maar maak invulhokjes extra duidelijk */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .print-overlay-input { box-shadow: none !important; }
+}
+/* === 1) Overlay-inputs boven de lijn: transparant, géén rand === */
+.print-overlay-input{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #000 !important;            /* intypen blijft zichtbaar */
+}
+
+/* Verberg de overlay-rand expliciet tijdens export/print indien toegepast */
+/* op scherm tijdens export */
+.pdf-mode .print-overlay-input { 
+  opacity: 0 !important; 
+}
+
+/* bij afdruk/PDF */
+@media print {
+  .print-overlay-input { 
+    opacity: 0 !important; 
+  }
+}
+
+/* === 2) Onderliggende SVG-hokjes (die op papier moeten) duidelijk zwart === */
+.exercise.blanks svg rect{
+  stroke: #000 !important;
+  stroke-width: 2.2px !important;
+  fill: #fff !important;
+}
+
+/* Getallenlijntje zelf ook stevig zwart */
+.exercise svg line,
+.exercise svg path{
+  stroke: #000 !important;
+}
+
+/* === 3) ‘Vul aan tot volgend tiental/honderdtal’ (honderdveld-varianten) === */
+.aanvul-input{                    /* de kleine invulvakjes in die oefening */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+}
+.honderdveld-te-table td{         /* TE/HTE tabelranden onderaan sommige kaarten */
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+}
+
+/* === 4) Waarde per cijfer (TE/HTE) – donkere vakjes === */
+.pv-box, .pv-small,
+.pv3-box, .pv3-small{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* === 5) Andere oefenvakjes die ingevuld worden === */
+.seq-box, .mix-box{               /* getallenrij & gemengd */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* --- ZWARTE, DUIDELIJKE HOKJES (print-vriendelijk) ------------------ */
+
+/* 1) Leeg antwoordvak bij H/T/E-schema (naast het schema) */
+.honderdveld-num-box {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 9px !important;
+  height: 44px !important;     /* mag blijven zoals u wenst */
+  width: 58px !important;      /* idem */
+  box-shadow: none !important;
+}
+
+/* 2) “Vul aan tot …” – invulvakjes in de zinnen */
+.aanvul-input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* 3) Consistentie voor TE/HTE tabellen die u onderaan soms gebruikt */
+.honderdveld-te-table td,
+.mab-te-table td {
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input,
+.mab-te-table input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* 4) Bij print blijven kleuren en zwarte lijnen exact behouden */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+/* === PATCH — Zwarte invulhokjes + 5-structuur 100-veld ================== */
+
+/* 1) Invulhokjes overal duidelijk zwart */
+#sheet input.aanvul-input,
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input,
+#sheet .seq-box,                /* getallenrij */
+#sheet .mix-box,                /* gemengd */
+#sheet .pv-box, #sheet .pv-small,
+#sheet .pv3-box, #sheet .pv3-small,
+#sheet .honderdveld-num-box {   /* leeg vak naast TE/HTE-schema */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* 2) Overlay-inputs boven getallenlijn laten verdwijnen (papier toont SVG) */
+#sheet .print-overlay-input{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+}
+@media print { #sheet .print-overlay-input { opacity: 0 !important; } }
+
+/* 3) 100-veld: alle lijnen zwart + 5-structuur terug dikker */
+#sheet .honderdveld-grid{
+  border-top: 1.2px solid #000 !important;
+  border-left: 1.2px solid #000 !important;
+}
+#sheet .honderdveld-cell{
+  border-right: 1.2px solid #000 !important;
+  border-bottom: 1.2px solid #000 !important;
+}
+/* verticale dikkere lijn na elke 5e kolom */
+#sheet .honderdveld-cell:nth-child(10n+5){
+  border-right: 2.4px solid #000 !important;
+}
+/* horizontale dikkere lijn onder rij 5 (cellen 41..50) */
+#sheet .honderdveld-cell:nth-child(n+41):nth-child(-n+50){
+  border-bottom: 2.4px solid #000 !important;
+}
+
+/* 4) TE/HTE tabelranden zelf ook zwart */
+#sheet .honderdveld-te-table td,
+#sheet .mab-te-table td{
+  border: 2px solid #000 !important;
+}
+
+/* 5) Print: kleuren niet laten “verbleken” */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === ZWARTE INVULHOKKEN — VUL AAN + 100-VELD-PICTOGRAMMEN =============== */
+
+/* 1) “Vul aan tot …” (zinnen) */
+#sheet input.aanvul-input,
+#sheet .aanvul-rij input,
+#sheet .aanvul-vragen input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;           /* pill/innershadow weg */
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* 2) 100-veld met pictogrammen – legenda-invulvakjes */
+#sheet .hvicons-legend input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* Extra: TE/HTE-invulvakjes die in dezelfde kaarten staan, voor consistentie */
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* Print behoudt kleuren en lijnen */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 8: ZWARTE, DUIDELIJKE RANDEN ==================== */
+#sheet .fillnext-box,            /* de invulhokjes */
+#sheet .fillnext-num {           /* het getal-kadertje linksboven */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* optioneel: de omlijsting van het kaartje zelf iets donkerder */
+#sheet .fillnext-card {
+  border-color: #000 !important;
+}
+
+/* bij print kleuren niet laten verbleken */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 11: Puzzelstukken – duidelijke zwarte randen ================= */
+
+/* Lege vakjes (waar leerlingen getal invullen) */
+#sheet .hvp-cell.blank {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  box-shadow: none !important;
+}
+
+/* Gegeven cijfers – behouden rand, maar iets lichter grijs of zwart */
+#sheet .hvp-cell.given {
+  border: 2px solid #000 !important;
+  background: #f2f2f2 !important; /* mag ook wit blijven */
+  color: #000 !important;
+}
+
+/* Kaart- en rasterrand licht zwart omkaderen */
+#sheet .hvp-piece {
+  border: 2px solid #000 !important;
+  border-radius: 6px;
+}
+
+/* Print behoud kleuren en contrast */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 11 — Puzzelstukken: netjes gecentreerd en los van de randen === */
+
+/* Het kaartje zelf: altijd ruimte tot de rand + centreren van de inhoud */
+#sheet .hvp-card{
+  display: grid;               /* eenvoudig centreren op beide assen */
+  place-items: center;         /* horizontaal + verticaal */
+  padding: 18px !important;    /* ruimte tussen puzzel en kaartkader */
+  box-sizing: border-box;
+  min-height: 180px;           /* voel je vrij dit te tweaken (160–200) */
+}
+
+/* Het “kader” rond het puzzelstuk (rechthoek binnen het kaartje) */
+#sheet .hvp-piece{
+  padding: 10px !important;    /* puzzel raakt het kader boven/onder niet meer */
+  margin: 0 auto !important;   /* extra zeker gecentreerd */
+  display: grid;
+  gap: 6px;                    /* wat lucht tussen de vierkantjes */
+  border: 2px solid #000;      /* kader zelf duidelijk zwart (laat weg als je dat niet wil) */
+  border-radius: 6px;
+}
+
+/* De vakjes van het puzzelstuk (zowel lege als gegeven) */
+#sheet .hvp-cell{
+  width: 34px; height: 34px;             /* fallback als inline style verandert */
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+#sheet .hvp-cell.blank{ background: #fff; }
+#sheet .hvp-cell.given{ background: #f2f2f2; color: #000; }
+
+/* Hou het geheel contrastrijk bij print */
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === SPRONGEN EN INVULSCHEMA'S: HELDERE STIJL =========================== */
+
+/* 1) SPRONGEN – invulvakjes zwart omlijnd */
+#sheet .jump-exercise input[type="text"],
+#sheet .jump-exercise input[type="number"] {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  color: #000 !important;
+}
+
+/* 2) INVULSCHEMA'S (TE/HTE) – enkel de letters T/E/H tonen, 
+   GEEN extra lege invulhokjes tekenen */
+#sheet .mab-te-table input,
+#sheet .honderdveld-te-table input {
+  display: none !important;   /* verbergt de onnodige inputvakjes */
+}
+
+#sheet .mab-te-table td,
+#sheet .honderdveld-te-table td {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 3) Print – behoud kleur en contrast */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === Puzzelstukken: cellen raken elkaar (geen gaps), midden in het kaartje === */
+
+/* kaartje blijft met marge en mooi gecentreerd */
+#sheet .hvp-card{
+  display: grid;
+  place-items: center;
+  padding: 18px !important;     /* afstand tot de buitenrand van de kaart */
+  box-sizing: border-box;
+  min-height: 180px;
+}
+
+/* het puzzelraster zelf */
+#sheet .hvp-piece{
+  display: grid;
+  gap: 0 !important;            /* <<< géén ruimte tussen de vakjes */
+  padding: 10px !important;     /* los van het binnenkader */
+  margin: 0 auto !important;
+  border: 2px solid #000;       /* binnenkader (verwijderen als je dat niet wil) */
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* de afzonderlijke vakjes: strakke zwarte lijnen, geen afgeronde hoeken */
+#sheet .hvp-cell{
+  width: 34px; height: 34px;
+  border: 1.2px solid #000;     /* dunner zodat binnenlijnen niet te zwaar ogen */
+  border-radius: 0 !important;  /* rechte hoeken zodat cellen naadloos aansluiten */
+  box-sizing: border-box;
+}
+
+#sheet .hvp-cell.blank{ background: #fff; }
+#sheet .hvp-cell.given{ background: #f2f2f2; color: #000; }
+
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === HERSTEL TE/HTE-KLEUREN + DONKERE SPRONGEN-HOKJES ================== */
+
+/* 1) Sprongen tellen – invulhokjes echt zwart */
+#sheet .jump-box{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+  color: #000 !important;
+}
+
+/* 2) TE/HTE-invulschema's: labels terug met kleur (T groen, E geel, H blauw) */
+#sheet .honderdveld-te-table .te-label,
+#sheet .mab-te-table .te-label{
+  background: #4caf50 !important;  /* T */
+  color: #fff !important;
+  font-weight: 700;
+}
+#sheet .honderdveld-te-table .te-label.e,
+#sheet .mab-te-table .te-label.e{
+  background: #ffeb3b !important;  /* E */
+  color: #333 !important;
+}
+#sheet .honderdveld-te-table .te-label.h,
+#sheet .mab-te-table .te-label.h{
+  background: #42a5f5 !important;  /* H */
+  color: #fff !important;
+}
+
+/* Randen van de cellen zwart, maar alleen niet-labelcellen wit */
+#sheet .honderdveld-te-table td,
+#sheet .mab-te-table td{
+  border: 2px solid #000 !important;
+}
+#sheet .honderdveld-te-table td:not(.te-label),
+#sheet .mab-te-table td:not(.te-label){
+  background: #fff !important;   /* labels behouden hun kleur */
+}
+
+/* Inputs in het schema verbergen (zoals u wenst: geen extra hokjes in het raster) */
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input{
+  display: none !important;
+}
+
+/* 3) Print: kleuren en contrast behouden */
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* PUZZELSTUKKEN: micro-gap om dubbele randen te vermijden */
+#sheet .hvp-piece{
+  display: grid;
+  gap: 0.6px !important;   /* heel klein spleetje: voorkomt “dubbele” dikke lijn */
+  padding: 10px !important;
+  margin: 0 auto !important;
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+#sheet .hvp-cell{
+  width: 34px; height: 34px;
+  border: 1px solid #000;  /* 1px + 0.6px gap geeft optisch fijne lijnen */
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+/* === Puzzelstukken – micro-gap overal consistent ======================= */
+
+/* 1) Raster van het puzzelstuk: dwing micro-gap af */
+#sheet .hvp-piece{
+  display: grid !important;
+  gap: 0.8px !important;            /* klein spleetje → geen dubbele “dikke” naad */
+  padding: 10px !important;         /* los van kaartkader */
+  margin: 0 auto !important;
+  border: 2px solid #000;           /* (optioneel) binnenkader */
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* 2) Cellen: overal exact dezelfde rand, geen afgeronde hoeken of schaduw */
+#sheet .hvp-piece .hvp-cell,
+#sheet .hvp-piece .hvp-cell.blank,
+#sheet .hvp-piece .hvp-cell.given{
+  display: block !important;
+  margin: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid #000 !important;    /* uniforme dunne binnenrand */
+  border-radius: 0 !important;          /* rechte hoeken → naad sluit aan */
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  background-clip: padding-box;         /* voorkomt “verdikking” langs de randen */
+}
+
+/* (optioneel) visueel verschil tussen leeg en gegeven */
+#sheet .hvp-piece .hvp-cell.blank { background: #fff !important; }
+#sheet .hvp-piece .hvp-cell.given { background: #f2f2f2 !important; color:#000 !important; }
+/* === PUZZELSTUKKEN — cijfers terug mooi gecentreerd ==================== */
+#sheet .hvp-piece .hvp-cell,
+#sheet .hvp-piece .hvp-cell.blank,
+#sheet .hvp-piece .hvp-cell.given{
+  display: flex !important;              /* i.p.v. block */
+  align-items: center !important;        /* verticaal centreren */
+  justify-content: center !important;    /* horizontaal centreren */
+  text-align: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;             /* geen extra verticale schuiving */
+  width: 34px !important;
+  height: 34px !important;
+  box-sizing: border-box !important;
+}
