@@ -53,7 +53,7 @@ if (typeof window !== 'undefined') {
     // geef [] door want gekozenGetallen gebruiken we niet meer
     let settings = bouwSplitsSettings([]);
     localStorage.setItem('werkbladSettings', JSON.stringify(settings));
-    window.location.href = 'bewerkingen_werkblad.html';
+    window.location.href = 'bewerkingen_werkblad_versie2.html';
   });
 }
 
@@ -148,12 +148,17 @@ if (typeof window !== 'undefined') {
   const rekenHulpDetail   = document.getElementById('rekenHulpDetail');
   const aftrekkenHint     = document.getElementById('aftrekkenHint');
   const optellenHint      = document.getElementById('optellenHint');
-  function updateHulpWeergave() {
+  
+function updateHulpWeergave() {
+
     if (!rekenBrugSelect || !rekenHulpCheckbox || !rekenHulpDetail) return;
     const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value || 'optellen';
     const brug = rekenBrugSelect.value;
     const hulpMogelijk = brug !== 'zonder' && rekenHulpCheckbox.checked;
     rekenHulpDetail.style.display = hulpMogelijk ? '' : 'none';
+    const hulpStijl = (document.querySelector('input[name="hulpStijl"]:checked')||{}).value || 'splitsbenen';
+    const compBox = document.getElementById('compenseerOpties');
+    if (compBox) compBox.style.display = (hulpMogelijk && hulpStijl === 'compenseren') ? '' : 'none';
     if (hulpMogelijk) {
       if (type === 'aftrekken') {
         if (aftrekkenHint) aftrekkenHint.style.display = '';
@@ -170,6 +175,7 @@ if (typeof window !== 'undefined') {
   if (rekenHulpCheckbox) rekenHulpCheckbox.addEventListener('change', updateHulpWeergave);
   if (rekenBrugSelect)   rekenBrugSelect.addEventListener('change', updateHulpWeergave);
   document.querySelectorAll('input[name="rekenType"]').forEach(r => r.addEventListener('change', updateHulpWeergave));
+  document.querySelectorAll('input[name="hulpStijl"]').forEach(r => r.addEventListener('change', updateHulpWeergave));
   updateHulpWeergave();
 
   if (maakRekenBtn) {
@@ -179,7 +185,7 @@ if (typeof window !== 'undefined') {
       if (!somTypes.length) { if (rekenMelding) rekenMelding.textContent = 'Kies minstens één type som!'; return; }
       const settings = bouwRekenSettings(somTypes);
       localStorage.setItem('werkbladSettings', JSON.stringify(settings));
-      window.location.href = 'bewerkingen_werkblad.html';
+      window.location.href = 'bewerkingen_werkblad_versie2.html';
     });
   }
   if (voegRekenToeBtn) {
@@ -200,177 +206,48 @@ function updateOpdrachtVeld() {
   const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value;
   const opt = document.getElementById('opdracht_optellen');
   const aft = document.getElementById('opdracht_aftrekken');
-  if (!opt || !aft) return;
-  if (type === 'aftrekken') {
-    opt.style.display = 'none';
-    aft.style.display = 'block';
-  } else {
-    opt.style.display = 'block';
-    aft.style.display = 'none';
-  }
+  const beide = document.getElementById('opdracht_beide');
+  if (!opt || !aft || !beide) return;
+  opt.style.display = (type === 'optellen') ? 'block' : 'none';
+  aft.style.display = (type === 'aftrekken') ? 'block' : 'none';
+  beide.style.display = (type === 'beide') ? 'block' : 'none';
 }
-// RekenType: bij wijziging beide functies aanroepen
-document.querySelectorAll('input[name="rekenType"]').forEach((r) => {
-  r.addEventListener('change', () => {
-    updateOpdrachtVeld();   // stond er al
-    updateDrieTermenUI();   // laat dit staan
-  });
-});
-document.getElementById('rekenMaxGetal')?.addEventListener('change', updateDrieTermenUI);
+document.querySelectorAll('input[name="rekenType"]').forEach(r => r.addEventListener('change', updateOpdrachtVeld));
+updateOpdrachtVeld();
 
-// 100% zeker bij laden goed zetten:
-updateDrieTermenUI();
-// extra failsafe: na 0ms nog eens (mocht iets later binden)
-setTimeout(updateDrieTermenUI, 0);
-
-// === SNELKEUZE "tot 5 / tot 10" ===
-const rk5  = document.getElementById('rk_tot5');
-const rk10 = document.getElementById('rk_tot10');
-const maxSel = document.getElementById('rekenMaxGetal');
-
-function applySnelkeuze() {
-  const act5  = !!(rk5 && rk5.checked);
-  const act10 = !!(rk10 && rk10.checked);
-
-  // exclusief maken
-  if (act5 && act10) { rk10.checked = false; }
-
-  const actief = !!(rk5?.checked || rk10?.checked);
-  const doelMax = rk5?.checked ? 5 : (rk10?.checked ? 10 : null);
-
-  // 1) Max select zetten
-  if (actief && maxSel) {
-    maxSel.value = String(doelMax);
-    updateDrieTermenUI && updateDrieTermenUI();
-  }
-
-  // 2) Brug afdwingen: zonder
-  const brugSel = document.getElementById('rekenBrug');
-  if (brugSel) {
-    brugSel.value = actief ? 'zonder' : brugSel.value;
-    // hulp uit als brug 'zonder' is
-    const hulp = document.getElementById('rekenHulpCheckbox');
-    if (actief && hulp) { hulp.checked = false; }
-    // bestaande helper tonen/verbergen
-    if (typeof updateHulpWeergave === 'function') updateHulpWeergave();
-  }
-
-  // 3) Somtypes locken naar alleen E+E (UI)
-  const somCbs = Array.from(document.querySelectorAll('input[name="somType"]'));
-  somCbs.forEach(cb => {
-    if (cb.value === 'E+E') {
-      cb.checked = true; cb.disabled = false;
-    } else {
-      cb.checked = false; cb.disabled = actief;
-    }
-  });
-
-  // 4) 3-termen uit bij snelkeuze
-  const drieChk = document.getElementById('drieTermenEerst10');
-  const driePaneel = document.getElementById('drieTermenPaneel');
-  if (drieChk) drieChk.checked = false;
-  if (driePaneel) driePaneel.style.opacity = actief ? '0.6' : '';
-}
-
-rk5  && rk5 .addEventListener('change', applySnelkeuze);
-rk10 && rk10.addEventListener('change', applySnelkeuze);
-
-
-// === 3 TERMEN UI ===
-// Paneel tonen bij 'tot 20' (voor optellen én aftrekken) en voorbeeldtekst aanpassen
-function updateDrieTermenUI() {
-  const maxSel = document.getElementById('rekenMaxGetal');
-  const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value || 'optellen';
-  const paneel = document.getElementById('drieTermenPaneel');
-  const vb = document.getElementById('drieTermenVoorbeeld');
-  const chk = document.getElementById('drieTermenEerst10');
-  if (!maxSel || !paneel || !vb || !chk) return;
-
-  // 1) Paneel ALTIJD tonen (geen display:none meer)
-  paneel.style.display = '';
-
-  // 2) Alleen actief bij 'tot 20' – anders disabled + lichte uitfading
-  const max = parseInt(maxSel.value || '100', 10);
-  const actief = (max === 20);
-  chk.disabled = !actief;
-  vb.style.opacity = actief ? '1' : '0.6';
-  paneel.style.opacity = actief ? '1' : '0.6';
-  if (!actief) chk.checked = false;
-
-  // 3) Voorbeeldtekst
-  vb.textContent = (type === 'aftrekken')
-    ? 'Voorbeeld: 17 − 7 − c of 17 − c − 7 (één subtrahend is het eenhedengetal, zodat je eerst naar 10 kan).'
-    : 'Voorbeeld: 7 + 3 + c = ___ (eerst 7+3=10, dan +c).';
-}
-
-// Zorg dat HTML of inline events deze functie altijd kan vinden
-window.updateDrieTermenUI = updateDrieTermenUI;
+document.querySelectorAll('input[name="rekenType"]').forEach(r => r.addEventListener('change', updateOpdrachtVeld));
+updateOpdrachtVeld();
 
   function bouwRekenSettings(somTypes){
-    const rekenHulp = {
-      inschakelen: !!(rekenHulpCheckbox && rekenHulpCheckbox.checked && rekenBrugSelect && rekenBrugSelect.value !== 'zonder'),
-      schrijflijnen: !!(document.getElementById('rekenHulpSchrijflijnen') && document.getElementById('rekenHulpSchrijflijnen').checked),
-      splitsPlaatsAftrekken: (document.querySelector('input[name="splitsPlaatsAftrekken"]:checked') ? document.querySelector('input[name="splitsPlaatsAftrekken"]:checked').value : 'onderAftrektal')
-    };
-   return {
-  segmentId: nieuwSegmentId(),
-  hoofdBewerking: 'rekenen',
-  numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_reken') || { value: 20 }).value)),
-
-  // ⇨ Snelkeuze forceert max 5/10
-  rekenMaxGetal: (() => {
-    const r5  = document.getElementById('rk_tot5')?.checked;
-    const r10 = document.getElementById('rk_tot10')?.checked;
-    if (r5)  return 5;
-    if (r10) return 10;
-    return parseInt((document.getElementById('rekenMaxGetal') || { value: 100 }).value);
-  })(),
-
-  rekenType: (document.querySelector('input[name="rekenType"]:checked') || { value: 'optellen' }).value,
-
-  // ⇨ Snelkeuze dwingt alleen E+E/E−E
-  somTypes: (() => {
-    const r5  = document.getElementById('rk_tot5')?.checked;
-    const r10 = document.getElementById('rk_tot10')?.checked;
-    return (r5 || r10) ? ['E+E'] : somTypes;
-  })(),
-
-  // ⇨ 3-termen uit in snelkeuze
-  drieTermenEerst10: !!(document.getElementById('drieTermenEerst10')?.checked) &&
-                     parseInt((document.getElementById('rekenMaxGetal')||{value:'100'}).value,10) === 20 &&
-                     !(document.getElementById('rk_tot5')?.checked || document.getElementById('rk_tot10')?.checked),
-
-  // ⇨ Brug ‘zonder’ bij snelkeuze
-  rekenBrug: (() => {
-    const r5  = document.getElementById('rk_tot5')?.checked;
-    const r10 = document.getElementById('rk_tot10')?.checked;
-    if (r5 || r10) return 'zonder';
-    return rekenBrugSelect ? rekenBrugSelect.value : 'beide';
-  })(),
-
-  // ⇨ Hulp uit wanneer ‘zonder brug’
-  rekenHulp: {
-    inschakelen: false,
+    const hulpStijl = (document.querySelector('input[name="hulpStijl"]:checked')||{}).value || 'splitsbenen';
+  const rekenHulp = {
+    inschakelen: !!(rekenHulpCheckbox && rekenHulpCheckbox.checked && rekenBrugSelect && rekenBrugSelect.value !== 'zonder'),
     schrijflijnen: !!(document.getElementById('rekenHulpSchrijflijnen') && document.getElementById('rekenHulpSchrijflijnen').checked),
-    splitsPlaatsAftrekken: (document.querySelector('input[name="splitsPlaatsAftrekken"]:checked') ? document.querySelector('input[name="splitsPlaatsAftrekken"]:checked').value : 'onderAftrektal')
-  },
+    splitsPlaatsAftrekken: (document.querySelector('input[name="splitsPlaatsAftrekken"]:checked') ? document.querySelector('input[name="splitsPlaatsAftrekken"]:checked').value : 'onderAftrektal'),
+    stijl: hulpStijl,
+    compSigns: !!(document.getElementById('compSigns') && document.getElementById('compSigns').checked),
+    voorbeeld: !!(document.getElementById('rekenVoorbeeld') && document.getElementById('rekenVoorbeeld').checked)
+  };
+    return {
+      segmentId: nieuwSegmentId(),          // ⇦ NIEUW
+      hoofdBewerking: 'rekenen',
+      numOefeningen: Math.max(1, parseInt((document.getElementById('numOefeningen_reken') || { value: 20 }).value)),
+      rekenMaxGetal: parseInt((document.getElementById('rekenMaxGetal') || { value: 100 }).value),
+      rekenType: (document.querySelector('input[name="rekenType"]:checked') || { value: 'optellen' }).value,
+      somTypes,
+      rekenBrug: rekenBrugSelect ? rekenBrugSelect.value : 'beide',
+      rekenHulp,
+      opdracht: (() => {
+        const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value;
+const veldId = (type === 'aftrekken') ? 'opdracht_aftrekken' : (type === 'beide' ? 'opdracht_beide' : 'opdracht_optellen');
+const vrij = (document.getElementById(veldId) || {}).value?.trim();
 
-  opdracht: (() => {
-    const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value;
-    const veldId = (type === 'aftrekken') ? 'opdracht_aftrekken' : 'opdracht_optellen';
-    const vrij = (document.getElementById(veldId) || {}).value?.trim();
-    if (vrij) return vrij;
-    if (document.getElementById('rk_tot5')?.checked || document.getElementById('rk_tot10')?.checked)
-      return 'Los de sommen op (eenheden, zonder brug).';
-    if (rekenBrugSelect?.value === 'met')    return 'Los de sommen op met brug.';
-    if (rekenBrugSelect?.value === 'zonder') return 'Los de sommen op zonder brug.';
-    return 'Los de sommen op.';
-  })(),
-
-  // ⇨ extra vlaggetje voor de generator
-  rekenSnel: (document.getElementById('rk_tot5')?.checked ? 'tot5' :
-             (document.getElementById('rk_tot10')?.checked ? 'tot10' : null))
-};
+        if (vrij) return vrij;
+        if (rekenBrugSelect?.value === 'met')    return 'Los de sommen op met brug.';
+        if (rekenBrugSelect?.value === 'zonder') return 'Los de sommen op zonder brug.';
+        return 'Los de sommen op.';
+      })()
+    };
   }
 
   // ====== TAFELS ======
@@ -385,7 +262,7 @@ window.updateDrieTermenUI = updateDrieTermenUI;
       if (!gekozenTafels.length) { if (tafelMelding) tafelMelding.textContent = 'Kies minstens één tafel!'; return; }
       const settings = bouwTafelSettings(gekozenTafels);
       localStorage.setItem('werkbladSettings', JSON.stringify(settings));
-      window.location.href = 'bewerkingen_werkblad.html';
+      window.location.href = 'bewerkingen_werkblad_versie2.html';
     });
   }
   if (voegTafelToeBtn) {
@@ -487,7 +364,7 @@ window.updateDrieTermenUI = updateDrieTermenUI;
     maakBundelBtn.addEventListener('click', () => {
       if (!bundel.length) { alert('Je bundel is leeg. Voeg eerst sets toe.'); return; }
       bundelOpslaan();
-      window.location.href = 'bewerkingen_werkblad.html';
+      window.location.href = 'bewerkingen_werkblad_versie2.html';
     });
   }
   if (leegBundelBtn) leegBundelBtn.addEventListener('click', () => {
