@@ -33,16 +33,10 @@ window.PREVIEW_BOTTOM_PX = (typeof window.PREVIEW_BOTTOM_PX === 'number') ? wind
 // standaard ruimte tussen segmenten (mag lokaal blijven)
 let PREVIEW_SEG_GAP_PX = 24;
 
-
   opnieuwBtn?.addEventListener('click', () => {
     window.location.href = 'bewerkingen_keuze_versie2.html';
   });
 
-  if (downloadPdfBtn) {
-    downloadPdfBtn.disabled = true;
-    downloadPdfBtn.style.backgroundColor = '#aaa';
-    downloadPdfBtn.style.cursor = 'not-allowed';
-  }
 
   // ====== Lees bundel of single set ======
   let bundel = [];
@@ -62,8 +56,11 @@ let PREVIEW_SEG_GAP_PX = 24;
   const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
   function somHeeftBrug(g1, g2, op) {
-    return op === '+' ? ((g1 % 10) + (g2 % 10) > 9) : ((g1 % 10) < (g2 % 10));
-  }
+  return op === '+'
+    ? ((g1 % 10) + (g2 % 10) > 10)   // ← was > 9, nu strikt OVER het tiental
+    : ((g1 % 10) < (g2 % 10));
+}
+
   function checkBrug(g1, g2, op, brugType) {
     if (brugType === 'beide') return true;
     const heeftBrug = somHeeftBrug(g1, g2, op);
@@ -146,96 +143,7 @@ let PREVIEW_SEG_GAP_PX = 24;
     return { type: 'splitsen', isSom, totaal, deel1: d1, deel2: d2, prefill };
   }
 
-// --- NIEUW: 3-termen generator met "eerst 10 vormen" (optellen én aftrekken) ---
-// --- 3-TERMEN-GENERATOR: "eerst 10 vormen" ---
-// Geeft { type:'rekenen3', operator:'+'|'-', termen:[a,b,c] }
-function genereerRekensom3Termen(cfg) {
-  const max = Math.min(cfg.rekenMaxGetal || 20, 20); // bewust op 20 beperken
-  const opKeuze = (cfg.rekenType === 'optellen') ? '+'
-                : (cfg.rekenType === 'aftrekken') ? '-'
-                : (Math.random() < 0.5 ? '+' : '-');
-
-  if (opKeuze === '+') {
-    // Kies een partnerpaar dat 10 vormt + een derde term c (0..(20-10))
-    const a = Math.floor(Math.random() * 9) + 1; // 1..9
-    const b = 10 - a;                            // partner tot 10
-    const cMax = Math.max(0, max - 10);
-    const c = Math.floor(Math.random() * (cMax + 1)); // 0..cMax
-
-    // De 10-makers niet altijd naast elkaar zetten
-    const arr = [a, b, c];
-    if (Math.random() < 0.5) arr.splice(1, 0, arr.pop()); // b,c of c,b
-
-    return { type: 'rekenen3', operator: '+', termen: arr };
-    } else {
-    // --- AFTREKKEN: eerst 10 vormen ---
-    // Kies een minuend tussen 11 en 20 (of max, als kleiner ingesteld)
-    const g1 = Math.floor(Math.random() * (Math.min(max, 20) - 10)) + 11; // 11–20
-
-    // 1️⃣ Stap 1: bepaal hoeveel eraf moet om tot 10 te gaan
-    const naarTien = g1 - 10; // bv. 17 → 7, 15 → 5
-
-    // 2️⃣ Stap 2: kies nog een extra aftrekgetal tussen 1 en (naarTien + 3)
-    // zo blijven de getallen klein en realistisch
-    const extra = Math.floor(Math.random() * Math.max(1, Math.min(naarTien + 3, 9))) + 1;
-
-    // 3️⃣ Soms omgekeerd: 17 - 7 - 5 ↔ 17 - 5 - 7
-    const subs = (Math.random() < 0.5) ? [naarTien, extra] : [extra, naarTien];
-
-    return { type: 'rekenen3', operator: '-', termen: [g1, ...subs] };
-  }
-}
-
   function genereerRekensom(cfg) {
-  // NIEUW: bij 3-termenmodus meteen de 3-termen generator gebruiken
-  if (cfg.drieTermenEerst10 === true) {
-    return genereerRekensom3Termen(cfg);
-  }
-
-  // === SNELKEUZE: tot 5 / tot 10 — alleen E+E/E−E, zonder brug ===
-if (cfg.rekenSnel === 'tot5' || cfg.rekenSnel === 'tot10') {
-  const max = (cfg.rekenSnel === 'tot5') ? 5 : 10;
-
-  // operator volgens rekenType
-  const op = (cfg.rekenType === 'aftrekken')
-    ? '-' : (cfg.rekenType === 'optellen') ? '+' : (Math.random() < 0.5 ? '+' : '-');
-
-  let g1, g2;
-  if (op === '+') {
-    // beide termen 1..max-1, som ≤ max
-    g1 = Math.max(1, Math.floor(Math.random() * (max)) );
-    const rest = Math.max(1, max - g1);
-    g2 = Math.max(1, Math.floor(Math.random() * rest) );
-    if (g1 + g2 > max) g2 = Math.max(1, max - g1);
-  } else {
-  // Aftrekken: gevarieerde pool binnen 1..max, g1 >= g2, geen negatieven, geen 0
-  // Pool per segment (cfg) zodat elke volgende oefening uit een andere combinatie komt
-  if (!cfg._subPool || cfg._subPoolMax !== max || cfg._subPool.length === 0) {
-    const pool = [];
-    for (let a = 1; a <= max; a++) {
-      for (let b = 1; b <= a; b++) {            // b ≥ 1 → geen 0 meer
-        pool.push([a, b]);                      // geordende paren, dus 7-4 en 8-3 etc. zitten erin
-      }
-    }
-    // Fisher–Yates shuffle
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = (Math.random() * (i + 1)) | 0;
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-    cfg._subPool = pool;
-    cfg._subPoolMax = max;
-  }
-
-  const pair = cfg._subPool.pop();
-  let [g1, g2] = pair || [max, 1];             // fallback, zou zelden nodig zijn
-  if (g2 > g1) [g1, g2] = [g2, g1];
-
-  return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
-}
-}
-
-  // (rest van uw functie ongewijzigd) ...
-
     const types = cfg.somTypes?.length ? cfg.somTypes : ['E+E'];
     const gekozenType = types[Math.floor(Math.random() * types.length)];
     const maxGetal = cfg.rekenMaxGetal || 100;
@@ -265,8 +173,31 @@ if (cfg.rekenSnel === 'tot5' || cfg.rekenSnel === 'tot10') {
       }
     } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
 
+    // EXTRA FILTER: voor compenseren enkel wanneer eenheden van de 2e term 7/8/9 zijn (en tot 100)
+    if (cfg.rekenHulp && cfg.rekenHulp.inschakelen && cfg.rekenHulp.stijl === 'compenseren' && (cfg.rekenBrug || 'beide') !== 'zonder') {
+      const eenheden2 = g2 % 10;
+      const ok = (eenheden2 === 7 || eenheden2 === 8 || eenheden2 === 9);
+      if (!ok || g1 > 100 || g2 > 100 || (op === '+' && (g1 + g2) > 100)) {
+        // probeer opnieuw met dezelfde cfg
+        return genereerRekensom(cfg);
+      }
+    }
+
     return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
   }
+
+// Helper: maak enkel sommen geschikt voor compenseren (eenheden 7/8/9 in 2e term)
+function genereerRekensomMetCompenseren(cfg){
+  let tries = 0;
+  while (tries++ < 500){
+    const oef = genereerRekensom(cfg);
+    const e2 = Math.abs(oef.getal2) % 10;
+    if (e2===7 || e2===8 || e2===9) return oef;
+  }
+  return genereerRekensom(cfg);
+}
+
+
 
   function genereerTafelsom(cfg) {
     const lijst = cfg.gekozenTafels?.length ? cfg.gekozenTafels : [1];
@@ -303,19 +234,7 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
 
     // 1) uit de dataset (voor PDF)
     if (oef && Array.isArray(cfg._oefeningen)) {
-      // probeer referentie-match
-      let i = cfg._oefeningen.indexOf(oef);
-
-      // val terug op inhoudelijke match
-      if (i === -1) {
-        const oefKey = (x) => [
-          x.type, x.operator, x.getal1, x.getal2, x.getal3,
-          Array.isArray(x.termen) ? x.termen.join(',') : ''
-        ].join('|');
-        const key = oefKey(oef);
-        i = cfg._oefeningen.findIndex(x => oefKey(x) === key);
-      }
-
+      const i = cfg._oefeningen.indexOf(oef);
       if (i > -1) cfg._oefeningen.splice(i, 1);
     }
 
@@ -326,11 +245,9 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     if (typeof paginatePreview === 'function') paginatePreview();
   });
 
-
   oefDiv.appendChild(del);
   grid.appendChild(oefDiv);
 }
-
 
   // ========= SCHERM-RENDER =========
   function renderBlokOpScherm(cfg) {
@@ -356,8 +273,6 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
 }
 const segKey = segmentKey(cfg);
 
-
-
 function renderOefeningInGrid(grid, cfg, oef) {
   const div = document.createElement('div');
   div.className = 'oefening';
@@ -366,26 +281,15 @@ function renderOefeningInGrid(grid, cfg, oef) {
   div.style.fontSize = '14px';
   div.style.overflow = 'visible';
 
-// --- NIEUW: 3-termen opgave op scherm ---
-if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length === 3) {
-  const [a, b, c] = oef.termen;
-  const op = oef.operator || '+';
-  const div = document.createElement('div');
-  div.className = 'oefening';
-  div.style.width = '100%';
-  div.style.fontFamily = 'Arial,Helvetica,sans-serif';
-  div.style.fontSize = '14px';
-  div.textContent = `${a} ${op} ${b} ${op} ${c} = ___`;
-  appendWithDelete(grid, div, cfg, oef);
-  return;
-}
-
   if (oef.type === 'rekenen') {
     const hulpActief = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
     const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
     if (hulpActief && isBrugSom) {
-      div.style.display='grid'; div.style.gridTemplateColumns='auto 1fr'; div.style.columnGap='24px'; div.style.alignItems='start';
-      const links = document.createElement('div'); links.style.position='relative'; links.style.display='inline-block'; links.style.overflow='visible';
+      div.style.display='grid'; div.style.gridTemplateColumns='max-content 1fr'; div.style.columnGap='24px'; div.style.alignItems='start';
+      const links = document.createElement('div'); links.style.whiteSpace = 'nowrap';     // alles op 1 regel houden
+links.style.wordBreak  = 'normal';     // geen hard breken binnen woorden/cijfers
+links.style.width      = 'max-content';
+links.style.position='relative'; links.style.display='inline-block'; links.style.overflow='visible';
       links.innerHTML = `
         <span class="term1">${oef.getal1}</span>
         <span class="op"> ${oef.operator} </span>
@@ -395,26 +299,13 @@ if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length ==
       `;
       const rechts = document.createElement('div'); rechts.className='lijnenrechts'; rechts.style.overflow='visible';
       rechts.innerHTML = `
-        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
-        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:260px;max-width:100%"></div>
+        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
+        <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
       `;
       div.append(links, rechts);
       appendWithDelete(grid, div, cfg, oef);
-      requestAnimationFrame(() => tekenInlineSplitsOnderTerm(links, oef, rechts, cfg));
+      requestAnimationFrame(() => { const stijl = (cfg.rekenHulp&&cfg.rekenHulp.stijl)||'splitsbenen'; if (stijl==='compenseren'){tekenCompenseerOnderTerm(links,oef,rechts,cfg);} else {tekenInlineSplitsOnderTerm(links,oef,rechts,cfg);} });
     } else {
-      // --- NIEUW: 3-termen in de preview ---
-if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length === 3) {
-  const [p, q, r] = oef.termen;
-  const op = oef.operator || '+';
-
-  const div = document.createElement('div');
-  div.className = 'oefening';
-  div.style.width = '100%';
-  div.textContent = `${p} ${op} ${q} ${op} ${r} = ___`;
-
-  appendWithDelete(grid, div, cfg, oef); // zelfde helper als 2-termen
-  return; // klaar, niet verder door de 2-termen-tak
-}
       div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} = ___`;
       appendWithDelete(grid, div, cfg, oef);
     }
@@ -544,11 +435,13 @@ if (oef.type === 'rekenen3' && Array.isArray(oef.termen) && oef.termen.length ==
     </div>
   `;
   const div = document.createElement('div');
-  div.style.display = 'flex';
-  div.style.justifyContent = 'center';
-  div.appendChild(wrap);
-  appendWithDelete(grid, div, cfg, oef);
-  return;
+div.className = 'oefening';                     // ← belangrijk voor ronde X-knop
+div.style.display = 'flex';
+div.style.justifyContent = 'center';
+div.style.overflow = 'visible';
+div.appendChild(wrap);
+appendWithDelete(grid, div, cfg, oef);
+return;
 }
   }
 
@@ -635,68 +528,29 @@ tools.addEventListener('click', (e) => {
     if (nieuw !== null) { title.textContent = nieuw.trim(); cfg.opdracht = title.textContent; }
     paginatePreview();
 
- } else if (act === 'add') {
-  if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
-    alert('Bij grote splitshuizen wordt het aantal kolommen bepaald door je gekozen getallenlijst.');
-    return;
-  }
-
-  const invoer = prompt('Hoeveel oefeningen wil je toevoegen?', '4');
-  const extra = Math.max(1, parseInt(invoer, 10) || 0);
-  if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
-
-  for (let i = 0; i < extra; i++) {
-    // === NIEUW: uniform aanmaken + toevoegen aan dataset + preview ===
-    const nieuw = (cfg.hoofdBewerking === 'rekenen')
-      ? genereerRekensom(cfg)
-      : (cfg.hoofdBewerking === 'splitsen')
-        ? genereerSplitsing(cfg)
-        : genereerTafelsom(cfg);
-
-    if (cfg.hoofdBewerking === 'splitsen') {
-      if (cfg.splitsStijl === 'puntoefening') nieuw._p = true;
-      if (cfg.splitsStijl === 'bewerkingen4') nieuw._b4 = true;
+  } else if (act === 'add') {
+    if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
+      alert('Bij grote splitshuizen wordt het aantal kolommen bepaald door je gekozen getallenlijst.');
+      return;
     }
-
-    if (nieuw) {
-      cfg._oefeningen.push(nieuw);                     // dataset bijwerken
-      renderOefeningInGrid(grid, cfg, nieuw);          // zichtbaar in preview
+    const invoer = prompt('Hoeveel oefeningen wil je toevoegen?', '4');
+    const extra = Math.max(1, parseInt(invoer, 10) || 0);
+    if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
+    for (let i = 0; i < extra; i++) {
+      let oef;
+      if (cfg.hoofdBewerking === 'rekenen') oef = genereerRekensom(cfg);
+      else if (cfg.hoofdBewerking === 'splitsen') { oef = genereerSplitsing(cfg);
+        if (cfg.splitsStijl === 'puntoefening')  oef._p = true;
+        if (cfg.splitsStijl === 'bewerkingen4')  oef._b4 = true;
+      } else if (cfg.hoofdBewerking === 'tafels') oef = genereerTafelsom(cfg);
+      if (oef) { cfg._oefeningen.push(oef); renderOefeningInGrid(grid, cfg, oef); }
     }
-  }
-
-  if (typeof paginatePreview === 'function') paginatePreview();
-
+    paginatePreview();
 
   } else if (act === 'del') {
-  // 1) Verwijder ook uit de bundel (PDF leest bundel)
-  try {
-    const key = card.dataset.segmentKey || (typeof segmentKey === 'function' ? segmentKey(cfg) : '');
-    if (Array.isArray(bundel)) {
-      const idx = bundel.findIndex(b => {
-        const s = b && (b.settings || b);
-        return (typeof segmentKey === 'function') ? segmentKey(s) === key : false;
-      });
-      if (idx > -1) {
-        bundel.splice(idx, 1);
-        try { localStorage.setItem('werkbladBundel', JSON.stringify(bundel)); } catch {}
-      }
-    }
-  } catch (e) { /* stil houden in UI */ }
+    card.remove(); paginatePreview();
 
-  // 2) Uit de preview
-  card.remove();
-
-  // 3) Paginering + knopstatus
-  if (typeof paginatePreview === 'function') paginatePreview();
-
-  const rest = document.querySelectorAll('section.preview-segment').length;
-  if (downloadPdfBtn) {
-    downloadPdfBtn.disabled = (rest === 0);
-    downloadPdfBtn.style.backgroundColor = rest ? '' : '#aaa';
-    downloadPdfBtn.style.cursor = rest ? 'pointer' : 'not-allowed';
-  }
-
-} else if (act === 'gap-inc') {
+  } else if (act === 'gap-inc') {
     PREVIEW_SEG_GAP_PX = Math.min(PREVIEW_SEG_GAP_PX + 4, 64);
     card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px'; paginatePreview();
 
@@ -736,7 +590,6 @@ grid.style.columnGap = colGap;
 grid.style.rowGap = rowGap;
 card.appendChild(grid);
 
-
       // marge onder segment in UI (komt overeen met SEGMENT_GAP in PDF)
       card.style.marginBottom = PREVIEW_SEG_GAP_PX + 'px';
 
@@ -752,24 +605,10 @@ card.appendChild(grid);
     }
 
     // ---- Oefeningen tekenen ----
-    if (
-  cfg.hoofdBewerking === 'splitsen' &&
-  cfg.groteSplitshuizen === true &&
-  cfg.splitsStijl !== 'puntoefening' &&
-  cfg.splitsStijl !== 'bewerkingen4'
-) {
-  
-  // Dataset & lijst opbouwen voor grote splitshuizen (preview)
-  if (!Array.isArray(cfg._oefeningen) || cfg._oefeningen.length === 0) {
-    const bron = (cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
-      ? cfg.splitsGetallenArray
-      : [10];
-    cfg._oefeningen = bron.map(max => ({ type: 'GROOT', max }));
-  }
-  const lijst = cfg._oefeningen
-    .map(o => o && o.max)
-    .filter(v => v !== undefined);
-
+    if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
+  const lijst = cfg.splitsGetallenArray?.length ? cfg.splitsGetallenArray : [10];
+  cfg._oefeningen = lijst.map(max => ({ type: 'GROOT', max }));
+  grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
 
   lijst.forEach((maxGetal, i) => {
     const oef = cfg._oefeningen[i];   // gebruik het bijbehorende object uit de dataset
@@ -845,7 +684,7 @@ card.appendChild(grid);
     const N = cfg.numOefeningen ?? 20;
     const oefeningen = [];
     for (let i = 0; i < N; i++) {
-      if (cfg.hoofdBewerking === 'rekenen') oefeningen.push(genereerRekensom(cfg));
+      if (cfg.hoofdBewerking === 'rekenen') { const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren'); oefeningen.push(comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg)); }
       else if (cfg.hoofdBewerking === 'splitsen') {
         if (cfg.splitsStijl === 'puntoefening') { const s = genereerSplitsing(cfg); s._p = true; oefeningen.push(s); }
         else if (cfg.splitsStijl === 'bewerkingen4') { const s = genereerSplitsing(cfg); s._b4 = true; oefeningen.push(s); }
@@ -855,14 +694,23 @@ card.appendChild(grid);
 
     // ✅ voeg deze regel exact hier toe:
 cfg._oefeningen = oefeningen;
+  if (cfg.rekenHulp && cfg.rekenHulp.voorbeeld && Array.isArray(cfg._oefeningen) && cfg._oefeningen.length) { cfg._oefeningen[0]._voorbeeld = true; }
 
   // Nieuwe, korte versie
 oefeningen.forEach(oef => renderOefeningInGrid(grid, cfg, oef));
 
   }
 
-  // ====== BENEN tekenen onder term (scherm) ======
-  function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+ // ===== PREVIEW: BENEN tekenen onder juiste term (optellen/aftrekken) =====
+// - Optellen: altijd onder term2
+// - Aftrekken: onder aftrektal (term1), behalve als cfg.rekenHulp.splitsPlaatsAftrekken expliciet 'onderAftrekker' is
+// - Antwoordvak blijft naast '=' (we positioneren absoluut, dus niet in de inline flow)
+// - Werkt ook netjes bij ééncijferige termen (niet meer onder het '='-gedeelte)
+// - Blauwe kaartkader pakt de benen mee door minHeight-reservering
+// ===== PREVIEW: BENEN onder juiste term met offsetLeft/offsetTop =====
+// ===== PREVIEW: BENEN onder juiste term, correct bij 1-cijferige termen =====
+// ===== PREVIEW: BENEN onder juiste term (robuust, ook bij 1-cijferige termen) =====
+function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     const span1 = exprWrap.querySelector('.term1');
     const span2 = exprWrap.querySelector('.term2');
     const ansBox = exprWrap.querySelector('.ansbox');
@@ -914,20 +762,8 @@ oefeningen.forEach(oef => renderOefeningInGrid(grid, cfg, oef));
     }
   }
 
-  // ========= PDF HELPERS =========
-  // --- NIEUW: 3-termen in hetzelfde compacte kader ---
-function drawReken3ItemBoxed(doc, xCenter, y, oef) {
-  const [a,b,c] = oef.termen || [];
-  const op = oef.operator || '+';
-  const text = `${a} ${op} ${b} ${op} ${c} = ___`;
-  const boxW = 50;  // zelfde breedte als 2-termen
-  const boxH = 12, r = 2, left = xCenter - boxW/2;
-  doc.setDrawColor(200,225,245);
-  doc.roundedRect(left, y-9, boxW, boxH, r, r, 'D');
-  doc.setFont('Courier', 'normal'); doc.setFontSize(14);
-  doc.text(text, xCenter, y, { align: 'center' });
-}
 
+  // ========= PDF HELPERS =========
   function drawRekensomInPDF(doc, x, y, oef) {
     doc.setFont('Helvetica','normal'); doc.setFontSize(14);
     doc.text(`${oef.getal1} ${oef.operator} ${oef.getal2} = ___`, x, y);
@@ -989,7 +825,6 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
   return roofH + bodyH + 2; // totale hoogte die we gebruikt hebben
 }
 
-
   function drawSplitsHuisPDF(doc, centerX, y, oef) {
     // compacter huisje
     const r = 1, breedte = 32, hoogteDak = 10, hoogteKamer = 12;
@@ -1046,7 +881,7 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
     doc.text(R, centerX + horiz, bottomTopY + boxH - 2, { align: 'center' });
   }
 
-  function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
+function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
     doc.setFont('Helvetica','normal'); doc.setFontSize(14);
     const s1=String(oef.getal1), s2=String(oef.getal2);
     const w1=doc.getTextWidth(s1), w1sp=doc.getTextWidth(`${s1} `), wop=doc.getTextWidth(`${oef.operator} `), w2=doc.getTextWidth(s2);
@@ -1096,7 +931,7 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
     const startY = y + 42;   // lager starten onder de minisplitsing
     const lh = 13;           // meer verticale ruimte tussen de regels
 
-    doc.setFont('Courier', 'normal');
+    doc.setFont('Helvetica', 'normal');
     doc.setFontSize(12);
     doc.text('___ + ___ = ___', centerX, startY + 0*lh, { align: 'center' });
     doc.text('___ + ___ = ___', centerX, startY + 1*lh, { align: 'center' });
@@ -1109,7 +944,7 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
     const left = xCenter - boxW/2;
     doc.setDrawColor(200, 225, 245);
     doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
-    doc.setFont('Courier', 'normal');
+    doc.setFont('Helvetica', 'normal');
     doc.setFontSize(14);
     doc.text(tekst, xCenter, y, { align: 'center' });
   }
@@ -1125,25 +960,10 @@ function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal, startLinks = tr
     doc.setDrawColor(200, 225, 245);
     doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
 
-    doc.setFont('Courier', 'normal');
+    doc.setFont('Helvetica', 'normal');
     doc.setFontSize(14);
     doc.text(text, xCenter, y, { align: 'center' });
   }
-
-function drawReken3ItemBoxed(doc, xCenter, y, oef) {
-  const [p, q, r] = oef.termen || [];
-  const op = oef.operator || '+';
-  const text = `${p} ${op} ${q} ${op} ${r} = ___`;
-
-  const boxW = 50, boxH = 12, rad = 2;
-  const left = xCenter - boxW / 2;
-
-  doc.setDrawColor(200, 225, 245);
-  doc.roundedRect(left, y - 9, boxW, boxH, rad, rad, 'D');
-  doc.setFont('Courier', 'normal'); 
-  doc.setFontSize(14);
-  doc.text(text, xCenter, y, { align: 'center' });
-}
 
   // Kleiner kadertje specifiek voor maal- en deeltafels
   function drawTafelItemBoxed(doc, xCenter, y, oef) {
@@ -1156,7 +976,7 @@ function drawReken3ItemBoxed(doc, xCenter, y, oef) {
     doc.setDrawColor(200, 225, 245);
     doc.roundedRect(left, y - 9, boxW, boxH, r, r, 'D');
 
-    doc.setFont('Courier', 'normal');
+    doc.setFont('Helvetica', 'normal');
     doc.setFontSize(14);
     doc.text(text, xCenter, y, { align: 'center' });
   }
@@ -1267,19 +1087,13 @@ function drawReken3ItemBoxed(doc, xCenter, y, oef) {
       const { xCols, yInc, itemH, colWidth } = layoutVoor(cfg);
 
 // --- SPECIALE TAK: GROTE SPLITSHUIZEN IN PDF ---
-if (
-  cfg.hoofdBewerking === 'splitsen' &&
-  cfg.groteSplitshuizen === true &&
-  cfg.splitsStijl !== 'puntoefening' &&
-  cfg.splitsStijl !== 'bewerkingen4'
-) {
-
+if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
  // Dataset voor PDF: volg de preview als die bestaat
-const lijst = Array.isArray(cfg._oefeningen)
-  ? cfg._oefeningen.map(o => o.max).filter(v => v !== undefined)
-  : [];
-if (!lijst.length) continue; // niets tekenen als alles verwijderd werd
-
+const lijst = Array.isArray(cfg._oefeningen) && cfg._oefeningen.length
+  ? cfg._oefeningen.map(o => o.max)   // preview-aanpassingen volgen
+  : ((cfg.splitsGetallenArray && cfg.splitsGetallenArray.length)
+      ? cfg.splitsGetallenArray
+      : [10]);
 
 // 1) bereken hoogte van de EERSTE RIJ (max van de eerste 3 kolommen)
 const hKolom = (maxGetal) => 15 + (maxGetal + 1) * 10.5 + 2; // zelfde als drawGrootSplitshuisKolomPDF
@@ -1299,7 +1113,6 @@ doc.setFontSize(14);
 doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
 yCursor += 14;
 
-
   // SMALLER kolomraster: max 3 kolommen, stap 56 mm (past mooi bij bodyW = 40)
   const insetX = LEFT_PUNCH_MARGIN + 8;
   const xCols3 = [insetX, insetX + 56, insetX + 112]; // 3 kolommen zonder overlap
@@ -1318,7 +1131,6 @@ if (colIdx === 0 && rijTopY + expectedH > pageHeight - PDF_BOTTOM_SAFE) {
   nieuwePagina();
   rijTopY = yCursor + 6;
 }
-
 
     // Kolom tekenen
     const x = xCols3[colIdx];
@@ -1365,7 +1177,7 @@ if (Array.isArray(cfg._oefeningen)) {
   const N = cfg.numOefeningen ?? 20;
   oefeningen = [];
   for (let k = 0; k < N; k++) {
-    if (cfg.hoofdBewerking === 'rekenen') oefeningen.push(genereerRekensom(cfg));
+    if (cfg.hoofdBewerking === 'rekenen') { const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren'); oefeningen.push(comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg)); }
     else if (cfg.hoofdBewerking === 'splitsen') {
       const s = genereerSplitsing(cfg);
       s._p = cfg.splitsStijl === 'puntoefening';
@@ -1406,7 +1218,7 @@ if (Array.isArray(cfg._oefeningen)) {
             firstRowHeight = 18;
           } else if (cfg.hoofdBewerking === 'splitsen') {
             if (cfg.splitsStijl === 'puntoefening')      firstRowHeight = 16;
-            else if (cfg.splitsStijl === 'bewerkingen4') firstRowHeight = 88;
+            else if (cfg.splitsStijl === 'bewerkingen4') firstRowHeight = 92;
             else                                         firstRowHeight = 30; // huisje/benen
           }
 
@@ -1452,20 +1264,16 @@ if (Array.isArray(cfg._oefeningen)) {
         const x = xCols[col] + pad;
 
         if (cfg.hoofdBewerking === 'rekenen') {
-  // --- NIEUW: 3-termen eerst tekenen ---
-  if (oef.type === 'rekenen3') {
-    drawReken3ItemBoxed(doc, x, y, oef);
-  } else {
-    // bestaande 2-termenlogica blijft identiek
-    const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
-    const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+          const hulp = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
+          const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
-    if (hulp && isBrugSom) {
-      drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth);
-    } else {
-      drawRekenItemBoxed(doc, x, y, oef);
-    }
-  }
+          if (hulp && isBrugSom) {
+            // brug-hulp blijft zoals was
+            if (cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren') { drawCompenseerInPDF(doc, x, y, oef, cfg, colWidth); } else { drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth); }
+          } else {
+            // NORMALE som: nu met eigen kadertje
+            drawRekenItemBoxed(doc, x, y, oef);
+          }
         } else if (cfg.hoofdBewerking === 'splitsen') {
           if (cfg.splitsStijl === 'puntoefening') {
             // teken de puntoefening in een kolomkader
@@ -1597,3 +1405,290 @@ function paginatePreview(){
   cont.appendChild(page);
   segments.forEach(seg => page.appendChild(seg));
 }
+
+// ===== PREVIEW: compenseren netjes als in PDF =====
+function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+  try {
+    const span1  = exprWrap.querySelector('.term1');
+    const opEl   = exprWrap.querySelector('.op');
+    const span2  = exprWrap.querySelector('.term2');
+    const ansBox = exprWrap.querySelector('.ansbox');
+    if (!span1 || !span2 || !ansBox) return;
+
+    // Zorg dat de som in één regel blijft
+    exprWrap.style.whiteSpace = 'nowrap';
+    exprWrap.style.position   = 'relative';
+    exprWrap.style.overflow   = 'visible';
+
+    // Afmetingen
+    const wr  = exprWrap.getBoundingClientRect();
+    const r2  = span2.getBoundingClientRect();
+    const a   = Number(oef.getal1), b = Number(oef.getal2);
+    const isMin = (oef.operator === '-');
+
+    // --- OVAAL rond het 2e getal (transparant) ---
+    const NS  = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.classList.add('comp-overlay');
+    svg.setAttribute('width',  Math.ceil(wr.width));
+    svg.setAttribute('height', Math.ceil(wr.height));
+    Object.assign(svg.style, {position:'absolute', left:'0', top:'0', pointerEvents:'none', overflow:'visible'});
+
+    const cx = r2.left - wr.left + r2.width/2;      // midden term2
+    const cy = r2.top  - wr.top  + r2.height*0.55;  // optisch midden op baseline
+    const rx = r2.width/2 + 6;                      // beetje marge
+    const ry = r2.height*0.65;
+
+    const ellipse = document.createElementNS(NS,'ellipse');
+    ellipse.setAttribute('cx', cx); ellipse.setAttribute('cy', cy);
+    ellipse.setAttribute('rx', rx); ellipse.setAttribute('ry', ry);
+    ellipse.setAttribute('fill', 'none');
+    ellipse.setAttribute('stroke', '#333'); ellipse.setAttribute('stroke-width', '2');
+    svg.appendChild(ellipse);
+
+    // --- Pijl vanaf de rand van de ovaal ---
+    const tailY = cy + ry + 3;
+    const tipY  = tailY + 16;
+    const shaft = document.createElementNS(NS,'line');
+    shaft.setAttribute('x1', cx); shaft.setAttribute('y1', tailY);
+    shaft.setAttribute('x2', cx); shaft.setAttribute('y2', tipY);
+    shaft.setAttribute('stroke', '#333'); shaft.setAttribute('stroke-width', '2');
+    svg.appendChild(shaft);
+    const a1 = document.createElementNS(NS,'line');
+    a1.setAttribute('x1', cx); a1.setAttribute('y1', tipY);
+    a1.setAttribute('x2', cx-8); a1.setAttribute('y2', tipY-6);
+    a1.setAttribute('stroke', '#333'); a1.setAttribute('stroke-width', '2');
+    const a2 = document.createElementNS(NS,'line');
+    a2.setAttribute('x1', cx); a2.setAttribute('y1', tipY);
+    a2.setAttribute('x2', cx+8); a2.setAttribute('y2', tipY-6);
+    a2.setAttribute('stroke', '#333'); a2.setAttribute('stroke-width', '2');
+    svg.appendChild(a1); svg.appendChild(a2);
+
+    exprWrap.appendChild(svg); // overlay beïnvloedt de layout niet
+
+    // --- Compenseerbox (absoluut gepositioneerd onder de pijl) ---
+    const box = document.createElement('div');
+    box.className = 'comp-box';
+    Object.assign(box.style, {
+      position: 'absolute',
+      left: (cx - 70/2) + 'px',        // box midden onder de pijl
+      top:  (tipY + 6) + 'px',
+      width: '70px', height: '32px',
+      border: '2px solid #888', borderRadius: '10px',
+      background: '#fff',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-evenly',
+      fontFamily: 'Arial,Helvetica,sans-serif'
+    });
+
+    const L = document.createElement('span');
+    const R = document.createElement('span');
+    L.style.fontSize = R.style.fontSize = '16px';
+    const plus  = (t) => { const s=document.createElement('span'); s.style.color='#c00000'; s.textContent='+'; return s; };
+    const minus = (t) => { const s=document.createElement('span'); s.style.color='#0058c0'; s.textContent='-'; return s; };
+    const fill  = (txt)=>{ const s=document.createElement('span'); s.textContent=txt; s.style.color='#000'; return s; };
+
+    if (isMin) {  // aftrekken: -___ +___
+      L.appendChild(minus()); L.appendChild(fill(' ___'));
+      R.appendChild(plus());  R.appendChild(fill(' ___'));
+    } else {      // optellen: +___ -___
+      L.appendChild(plus());  L.appendChild(fill(' ___'));
+      R.appendChild(minus()); R.appendChild(fill(' ___'));
+    }
+    box.append(L,R);
+
+  // — Hoogte reserveren zodat de blauwe kader (op .oefening::after) de box meeneemt —
+const BOX_H = 32;                 // hoogte van de compenseerbox (zoals ingesteld)
+const MARGIN_BELOW = 8;           // extra lucht onder de box
+const neededInside = (tipY + 6) + BOX_H + MARGIN_BELOW;   // totale benodigde hoogte binnen exprWrap
+
+// a) exprWrap: maak ruimte onderaan
+const extra = Math.max(0, neededInside - exprWrap.clientHeight);
+exprWrap.style.paddingBottom = extra ? `${extra}px` : exprWrap.style.paddingBottom;
+
+// b) container .oefening: zorg dat de hele kaart meegroeit
+const oefDiv = exprWrap.closest('.oefening');
+if (oefDiv) {
+  // hoogte van linkerkolom t.o.v. container
+  const topInParent = exprWrap.offsetTop;
+  const neededForParent = topInParent + neededInside + 4; // kleine speling
+  const curMin = parseFloat(getComputedStyle(oefDiv).minHeight || '0');
+  if (neededForParent > curMin) {
+    oefDiv.style.minHeight = `${neededForParent}px`;
+  }
+}
+
+
+    exprWrap.appendChild(box);
+
+    // --- Lijnen rechts blijven staan: we verschuiven niets meer dynamisch ---
+    // (de oude paddingLeft-aanpassing veroorzaakte sprongen; laten we weg)
+
+  } catch (e) {
+    console.warn('tekenCompenseerOnderTerm (preview) error:', e);
+  }
+}
+
+
+
+
+// === PDF: COMPENSEREN — definitieve versie ===
+function drawCompenseerInPDF(doc, x, y, oef, cfg, colWidth) {
+  const a  = Number(oef.getal1);
+  const b  = Number(oef.getal2);
+  const op = (oef.operator === '-') ? '-' : '+';
+
+  // --- is dit de voorbeeldsom? ---
+  const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef._voorbeeld);
+
+  // --- eerst het ORANJE KADER tekenen (anders bedekt het tekst) ---
+  if (isVoorbeeld) {
+  // Iets compacter dan voorheen en met duidelijkere rand
+  const left   = x - 10;
+  const width  = (colWidth || 92) + 4;
+  const top    = y - 10;
+  const height = 38;
+
+  // vulling: licht oranje, rand: iets donkerder oranje
+  doc.setFillColor(255, 228, 181);    // #FFE4B5
+  doc.setDrawColor(224, 152, 66);     // #E09842 (donkerder rand)
+  doc.roundedRect(left, top, width, height, 3, 3, 'FD'); // Fill + Stroke
+}
+
+
+  // --- som bovenaan + antwoordvak ---
+  doc.setFont('Helvetica','normal'); doc.setFontSize(14); doc.setTextColor(0,0,0);
+  const somTxt = `${a} ${op} ${b} =`;
+  doc.text(somTxt, x, y);
+
+  const ansX = x + doc.getTextWidth(somTxt) + 2;
+  const ansW = 16, ansH = 12;
+  doc.setDrawColor(51,51,51);
+  doc.roundedRect(ansX, y - (ansH - 2), ansW, ansH, 1.5, 1.5, 'D');
+
+  // --- kring rond het 2e getal (transparant), pijl vanaf rand ---
+  const bStr = String(b);
+  const term2Left = x + doc.getTextWidth(`${a} ${op} `); // links van term2
+  const term2CenterX = term2Left + doc.getTextWidth(bStr) / 2;
+  const rX = doc.getTextWidth(bStr) / 2 + 1.2;           // klein beetje marge
+  const rY = 5;
+  const cy = y - 3;
+  doc.setDrawColor(51,51,51); doc.setLineWidth(0.4);
+  doc.ellipse(term2CenterX, cy, rX, rY, 'D');            // alleen contour (geen vulling)
+  const tailY = cy + rY + 0.8, tipY = tailY + 7;
+  doc.line(term2CenterX, tailY, term2CenterX, tipY);
+  doc.line(term2CenterX, tipY, term2CenterX - 2, tipY - 1.5);
+  doc.line(term2CenterX, tipY, term2CenterX + 2, tipY - 1.5);
+
+  // --- compenseerbox ---
+  const boxW = 28, boxH = 9, rad = 1.5, boxY = tipY + 2;
+  const boxLeft = term2CenterX - boxW / 2;
+  doc.setDrawColor(51,51,51);
+  doc.roundedRect(boxLeft, boxY, boxW, boxH, rad, rad, 'D');
+  const leftX  = boxLeft + 7;
+  const rightX = boxLeft + boxW - 7;
+  const baseY  = boxY + boxH - 3;
+
+  // --- hulplijnen rechts ---
+  const RIGHT_SAFETY_GAP = 16, MAX_LEN = 46;
+  const startX = ansX + ansW/2 + 6;
+  const maxRight = x + (colWidth || 92) - RIGHT_SAFETY_GAP;
+  const lijnLen = Math.max(22, Math.min(MAX_LEN, maxRight - startX));
+  doc.setDrawColor(51,51,51);
+  doc.line(startX, y + 10, startX + lijnLen, y + 10);
+  doc.line(startX, y + 22, startX + lijnLen, y + 22);
+
+  // --- delta berekenen (alleen voor box & stappen) ---
+  const e2 = b % 10;
+  const delta = (10 - e2) % 10;
+  const b10 = b + delta; // naar volgend tiental
+
+  // helper voor gekleurde tekens
+  function teken(sign, num, cx, by){
+    if (sign === '+') doc.setTextColor(200,0,0); else doc.setTextColor(0,90,200);
+    doc.text(sign, cx - 5, by);
+    doc.setTextColor(0,0,0);
+    doc.text(String(num), cx - 1, by);
+  }
+
+  // --- voorbeeld volledig invullen ---
+  if (isVoorbeeld) {
+    doc.setFont('Helvetica','normal'); doc.setFontSize(12);
+    if (op === '+') {
+      // box: + (b+Δ)   - Δ
+      teken('+', b10,  leftX,  baseY);
+      teken('-', delta, rightX, baseY);
+
+      // Lijn 1: a + (b+Δ) = tussen
+      const tussen   = a + b10;
+      const uitkomst = tussen - delta;
+      doc.text(`${a} + ${b10} = ${tussen}`,          startX, y + 9.2);
+      // Lijn 2: tussen − Δ = uitkomst
+      doc.text(`${tussen} - ${delta} = ${uitkomst}`,  startX, y + 21.2);
+
+      // Antwoord in het vak – hoger en groter, exact gecentreerd
+const boxTop = y - (ansH - 2);          // bovenrand van het vak
+const midY   = boxTop + ansH / 2 + 1.8;  // kleine optische correctie
+doc.setFont('Helvetica', 'bold');
+doc.setFontSize(16);                     // groter dan standaard 14
+doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
+doc.setFontSize(14);                     // (optioneel) terug naar standaard
+
+
+    } else {
+      // box: - (b+Δ)   + Δ
+      teken('-', b10,  leftX,  baseY);
+      teken('+', delta, rightX, baseY);
+
+      // Lijn 1: a − (b+Δ) = stap1
+      const stap1    = a - b10;
+      const uitkomst = stap1 + delta;
+      doc.text(`${a} - ${b10} = ${stap1}`,            startX, y + 9.2);
+      // Lijn 2: stap1 + Δ = uitkomst
+      doc.text(`${stap1} + ${delta} = ${uitkomst}`,   startX, y + 21.2);
+
+      // Antwoord in het vak – hoger en groter, exact gecentreerd
+const boxTop = y - (ansH - 2);          // bovenrand van het vak
+const midY   = boxTop + ansH / 2 + 1.8;  // kleine optische correctie
+doc.setFont('Helvetica', 'bold');
+doc.setFontSize(16);                     // groter dan standaard 14
+doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
+doc.setFontSize(14);                     // (optioneel) terug naar standaard
+    }
+  } else {
+    // niet-voorbeeld: alleen lege streepjes met juiste volgorde en kleuren
+    if (op === '+') {
+      doc.setTextColor(200,0,0); doc.text('+', leftX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
+      doc.setTextColor(0,90,200);doc.text('-', rightX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+    } else {
+      doc.setTextColor(0,90,200);doc.text('-', leftX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
+      doc.setTextColor(200,0,0); doc.text('+', rightX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+    }
+  }
+/// --- Blauwe kader rond de oefening (niet bij voorbeeld) ---
+const W = (colWidth || 92);
+
+const FRAME_H     = 36;  // hoogte (2 hulplijnen)
+const FRAME_TOP   = 11;  // bovenmarge
+const LEFT_PAD    = 6;   // extra ruimte links (kader buiten de inhoud)
+const RIGHT_MARGIN = 12;  // afstand tot de RECHTER kolomrand (→ korter rechts)
+
+if (!isVoorbeeld) {
+  doc.setDrawColor(191,219,254);
+  doc.setLineWidth(0.6);
+
+  // links en rechts expliciet bepalen
+  const left  = x - LEFT_PAD;
+  const right = x + W - RIGHT_MARGIN;
+  const width = Math.max(10, right - left); // veiligheid
+
+  doc.roundedRect(left, y - FRAME_TOP, width, FRAME_H, 3, 3, 'D');
+}
+  // reset kleur
+  doc.setTextColor(0,0,0);
+}
+
+
