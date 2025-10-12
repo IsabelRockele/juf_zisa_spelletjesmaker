@@ -1218,7 +1218,7 @@ if (Array.isArray(cfg._oefeningen)) {
             firstRowHeight = 18;
           } else if (cfg.hoofdBewerking === 'splitsen') {
             if (cfg.splitsStijl === 'puntoefening')      firstRowHeight = 16;
-            else if (cfg.splitsStijl === 'bewerkingen4') firstRowHeight = 92;
+            else if (cfg.splitsStijl === 'bewerkingen4') firstRowHeight = 96;
             else                                         firstRowHeight = 30; // huisje/benen
           }
 
@@ -1304,15 +1304,19 @@ if (Array.isArray(cfg._oefeningen)) {
       // teller voor strakke rasterplaatsing (alleen gebruikt bij 'rekenen' zonder hulp en 'tafels')
       let placedCount = 0;
 
+      let itemsOnCurrentPage = 0;   // << nieuw
+
       for (let idx = 0; idx < oefeningen.length; idx++) {
         // paginawissel?
         if (y + itemH > pageHeight - PDF_BOTTOM_SAFE) {
-          // sluit huidig segment
-          tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+          // sluit huidig segment alléén als er iets stond
+if (itemsOnCurrentPage > 0) {
+  tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+}
+nieuwePagina();
+topSegment = yCursor + 2;
+itemsOnCurrentPage = 0;  // reset voor nieuwe pagina
 
-          // nieuwe pagina + titel + nieuw segment
-          nieuwePagina();
-          topSegment = yCursor + 2;
 
           // baseline opnieuw bepalen (12mm na titel bij rekenen + hulp; anders 6mm)
           row = 0; 
@@ -1329,6 +1333,8 @@ if (Array.isArray(cfg._oefeningen)) {
 
         // teken de oefening
         plaatsItem(oefeningen[idx]);
+        itemsOnCurrentPage++;    // << nieuw
+
 
         // rasterlogica
         if ((cfg.hoofdBewerking === 'rekenen' && !cfg.rekenHulp?.inschakelen) || cfg.hoofdBewerking === 'tafels') {
@@ -1349,7 +1355,9 @@ if (Array.isArray(cfg._oefeningen)) {
       }
 
       // sluit laatste segment van dit blok
-      tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+     if (itemsOnCurrentPage > 0) {
+  tekenSegmentKaderMetOffset(cfg, topSegment, lastYPlaced + itemH - 2);
+}
 
       // ruimte vóór volgende opdracht (segment)
       yCursor = lastYPlaced + itemH + SEGMENT_GAP;
