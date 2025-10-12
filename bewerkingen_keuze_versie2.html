@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Generator voor Bewerkingen - Keuzemenu</title>
-  <link rel="stylesheet" href="bewerkingen.css">
+  <link rel="stylesheet" href="bewerkingen_versie2.css">
   <style>
     /* Kleine, nette knoppen en rijen */
     .btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
@@ -120,20 +120,13 @@
 
       <div class="control-group">
         <label class="group-title" for="rekenMaxGetal">Oefenen tot:</label>
-        <select id="rekenMaxGetal" onchange="window.updateDrieTermenUI && updateDrieTermenUI()">
+        <select id="rekenMaxGetal">
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="100" selected>100</option>
           <option value="1000">1000</option>
         </select>
       </div>
-      <!-- SNELKEUZE: tot 5 of tot 10 (alleen E+E / E−E, zonder brug) -->
-<div class="control-group" id="rekenSnelkeuze">
-  <label class="group-title">Snelkeuze:</label>
-  <label><input type="checkbox" id="rk_tot5"> Alleen tot 5 (E+E / E−E, zonder brug)</label>
-  <label style="margin-left:12px;"><input type="checkbox" id="rk_tot10"> Alleen tot 10 (E+E / E−E, zonder brug)</label>
-</div>
-
 
       <div class="control-group">
         <label class="group-title">Type bewerking:</label>
@@ -157,22 +150,11 @@
       <div class="control-group">
         <label class="group-title" for="rekenBrug">Brug:</label>
         <select id="rekenBrug">
-  <option value="zonder">Zonder brug</option>
-  <option value="met-splits" selected>Met brug (splitsing)</option>
-  <option value="met-comp">Met brug (compenseren)</option>
-  <option value="beide-splits">Beide (brug met splitsing)</option>
-  <option value="beide-comp">Beide (brug met compenseren)</option>
-</select>
+          <option value="beide" selected>Beide toegestaan</option>
+          <option value="met">Enkel mét brug</option>
+          <option value="zonder">Enkel zónder brug</option>
+        </select>
       </div>
-
-<!-- 3 TERMEN (eerst 10 vormen) — zichtbaar bij 'tot 20' (optellen én aftrekken) -->
-<div class="control-group" id="drieTermenPaneel" style="display:none">
-  <label>
-    <input type="checkbox" id="drieTermenEerst10">
-    3 termen (eerst 10 vormen)
-  </label>
-  <div id="drieTermenVoorbeeld" style="font-size:0.95em;color:#555;margin-top:4px;"></div>
-</div>
 
       <div class="control-group">
         <label><input type="checkbox" id="rekenHulpCheckbox"> Hulpmiddelen tonen (alleen bij brug)</label>
@@ -194,20 +176,20 @@
           <input type="checkbox" id="rekenHulpSchrijflijnen" checked>
           Twee schrijflijnen rechts voor tussenstappen
         </label>
-      </div>
       
-<!-- Hulp voor compenseren -->
-<div id="compenseerHint" style="margin-top:6px; display:none;">
-  <div style="font-size:0.95em;color:#555;margin-bottom:6px;">
-    Compenseren toont een kleine witte doos met twee stapjes, bv. <b>+20 − 1</b> of <b>−20 + 2</b>.
-  </div>
-  <label><input type="checkbox" id="compHulpToonPlusMin" checked>
-    Zet de <b>+</b> en <b>−</b> alvast in het doosje</label>
-</div>
+        <!-- HULPMIDDEL-STIJL -->
+        <div class="veldgroep" id="hulpStijlGroep" style="margin-top:8px">
+          <label style="font-weight:600;display:block;margin-bottom:4px;">Hulpmiddel-stijl</label>
+          <label><input type="radio" name="hulpStijl" value="splitsbenen" checked> Splitsbenen</label>
+          <label style="margin-left:12px;"><input type="radio" name="hulpStijl" value="compenseren"> Compenseren (7/8/9)</label>
+        </div>
 
-<!-- Voorbeeldkader (oranje) -->
-<div style="margin-top:8px;">
-  <label><input type="checkbox" id="rekenVoorbeeld"> Toon een voorbeeldoefening bovenaan (oranje kader)</label>
+        <!-- OPTIES VOOR COMPENSEREN -->
+        <div id="compenseerOpties" style="margin-top:6px;display:none">
+          <label><input type="checkbox" id="rekenVoorbeeld"> Voorbeeldoefening (oranje kader)</label><br>
+          <label><input type="checkbox" id="compSigns"> Toon in compenseerbox: <span style="color:#c00">+</span>___ <span style="color:#06c">-</span>___</label><br>
+          <label><input type="checkbox" id="rekenHulpSchrijflijnen"> 2 hulplijnen rechts</label>
+        </div>
 </div>
 
      <div class="control-group">
@@ -224,6 +206,9 @@
          type="text"
          placeholder="vb. Zoek het verschil."
          style="width:100%; display:none; margin-top:6px;" />
+  <!-- veld voor beide -->
+  <input id="opdracht_beide" type="text" placeholder="vb. Los de sommen op." style="width:100%; display:none; margin-top:6px;" />
+
 </div>
 
 
