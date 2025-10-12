@@ -1,0 +1,524 @@
+/* --- Algemene Styling (voor beide pagina's) --- */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e0f2f7;
+    padding: 20px;
+    margin: 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+h1 {
+    color: #004080;
+    font-size: 2em;
+    text-align: center;
+    margin: 0 auto;
+}
+
+button {
+    background-color: #004080;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    font-weight: normal;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.group-title {
+    font-weight: bold;
+}
+
+.control-group select, .control-group input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #aaddff;
+    font-size: 1em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.control-group input[type="radio"],
+.control-group input[type="checkbox"] {
+    width: auto;
+    margin-right: 8px;
+}
+
+/* --- Lay-out voor Keuzepagina (3 kolommen) --- */
+#main-content {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.keuzevak {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 20px;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    background-color: #f0faff;
+    display: flex;
+    flex-direction: column;
+}
+
+.keuzevak h2 {
+    margin-top: 0;
+    text-align: center;
+    color: #004080;
+    border-bottom: 2px solid #b3e0ff;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.maak-werkblad-btn {
+    margin-top: auto;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.melding {
+    color: #c00;
+    font-weight: bold;
+    min-height: 20px;
+    text-align: center;
+}
+
+#tafelKeuze, #splitsGetalKeuze {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+}
+
+/* --- Lay-out voor Werkbladpagina --- */
+.werkblad-pagina {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#werkblad-knoppen {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+#werkblad-wrapper {
+    background-color: #ffffff;
+    border: 1px solid #b3e0ff;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+/* Voorbeeld: opdrachten onder elkaar i.p.v. 4 kolommen */
+#werkblad-container {
+    display: flex;
+    flex-direction: column;   /* onder elkaar */
+    gap: 24px;                /* ruimte tussen opdrachten */
+    align-items: stretch;     /* blokken over volle breedte */
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.2em;
+}
+
+/* (optioneel) interne grid binnen één opdrachtblok */
+#werkblad-container .preview-grid{
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), minmax(0,1fr));
+    gap: 16px;
+}
+
+/* Zorg dat oefeningen binnen het blok blijven en niet overlopen */
+#werkblad-container .oefening{
+    max-width: 100%;
+    overflow: hidden;
+}
+
+/* Rechter kolom begrenzen + klassenaam voor schrijflijnen gebruiken */
+#werkblad-container .lijnenrechts{
+  max-width: 320px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#werkblad-container .schrijflijn{
+  border-bottom: 2px solid #333;
+  height: 18px;
+  margin: 10px 0;
+  width: clamp(140px, 90%, 320px);
+  box-sizing: border-box;
+}
+#werkblad-container .schrijflijn + .schrijflijn{
+  margin-top: 12px;
+}
+
+
+
+.oefening-kolom {
+    /* Deze wordt nu alleen nog voor bewerkingen en tafels gebruikt */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 150px;
+}
+
+.oefening {
+    padding: 4px;
+}
+
+/* --- Styling voor Splits-oefeningen --- */
+.splitshuis {
+    border: 2px solid #333;
+    border-radius: 5px;
+    width: 120px;
+    text-align: center;
+    margin: 10px;
+    background-color: white;
+    overflow: hidden;
+}
+.splitshuis .dak {
+    background-color: #e0f2f7;
+    border-bottom: 2px solid #333;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.splitshuis .kamers {
+    display: flex;
+    border-top: 1px solid #ccc;
+}
+.splitshuis .kamers:first-of-type {
+    border-top: none;
+}
+.splitshuis .kamer {
+    width: 50%;
+    padding: 5px;
+}
+.splitshuis .kamer:first-child {
+    border-right: 1px solid #ccc;
+}
+
+.splitsbenen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+    margin: 0 auto;
+}
+.splitsbenen .top {
+    font-weight: bold;
+    padding: 5px;
+    border: 2px solid #333;
+    background-color: #e0f2f7;
+    border-radius: 5px;
+    min-width: 30px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+.splitsbenen .benen-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    height: 30px;
+    margin-top: -2px;
+}
+.splitsbenen .been {
+    position: absolute;
+    height: 25px;
+    width: 2px;
+    background: #333;
+    top: 0;
+    transform-origin: top center;
+}
+.splitsbenen .links {
+    transform: rotate(-35deg);
+}
+.splitsbenen .rechts {
+    transform: rotate(35deg);
+}
+.splitsbenen .bottom {
+    display: flex;
+    width: 140%;
+    justify-content: space-between;
+    margin-top: 5px;
+}
+.splitsbenen .bottom-deel {
+     border: 2px solid #333;
+     border-radius: 5px;
+     padding: 5px;
+     min-width: 30px;
+     text-align: center;
+}
+
+/* Media Query voor smalle schermen */
+@media (max-width: 1000px) {
+    #main-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    #werkblad-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 kolommen op smallere schermen */
+    }
+}
+/* --- Pagina-simulator (A4 portret, 96dpi ~ 794x1122 px) --- */
+.preview-page{
+  width: 794px;
+  min-height: 1122px;
+  margin: 0 auto 24px auto;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+  position: relative;
+  padding: var(--top-pad, 96px) 48px var(--bottom-pad, 96px) 48px; /* top/right/bottom/left (px) */
+  box-sizing: border-box;
+}
+.preview-segment{
+  margin-bottom: var(--seg-gap, 24px);
+}
+.preview-segment .segment-title{
+  margin: 0 0 8px 0;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Grid binnen een segment (je had dit al – nog even borgen) */
+.preview-grid{
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0,1fr));
+  gap: 16px;
+}
+
+/* Tools (bewerken/verwijderen/afstand) rechtsboven het segment */
+.segment-tools{
+  display:flex; gap:6px; align-items:center;
+  position:absolute; right:8px; margin-top:-4px;
+  opacity:.65;
+}
+.segment-tools button{
+  border:1px solid #cbd5e1; background:#f8fafc; border-radius:6px;
+  padding:2px 6px; font-size:12px; cursor:pointer;
+}
+.segment-tools button:hover{ background:#eef2f7; }
+
+/* Oefening verwijderen-knopje */
+.oefening .del{
+  position:absolute; top:4px; right:4px;
+  width:18px; height:18px; line-height:18px;
+  border-radius:50%; text-align:center; font-size:12px;
+  background: #fff; border:1px solid #cbd5e1; color:#64748b;
+  cursor:pointer;
+}
+.oefening{ position:relative; }
+/* Preview moet niet afknippen */
+.preview-page{
+  height: auto !important;      /* niet vastzetten op 1 paginahoogte */
+  min-height: 1122px;           /* A4-gevoel behouden (≈ PAGE_H_PX) */
+  overflow: visible !important; /* niets verbergen */
+}
+/* Kader weg rond kleine splitshuizen (alleen preview) */
+.preview-segment[data-segment-key*="|huisje|"]{
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  /* laat de bestaande padding staan; wil je die ook weg? voeg toe:
+     padding: 0 !important;
+  */
+}
+.tools {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 6px;
+  z-index: 5;
+}
+
+.tools button {
+  background: #e0f2f7;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.tools button:hover {
+  background: #cce7f0;
+}
+/* --- COMPENSEREN-STIJL --- */
+.oefening.compenseren {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+/* Cirkel rond het getal */
+.comp-cirkel {
+  display: inline-block;
+  border: 2px solid #333;
+  border-radius: 50%;
+  width: 38px;
+  height: 28px;
+  text-align: center;
+  font-weight: 700;
+  line-height: 28px;
+  background: #fff;
+  position: relative;
+}
+
+/* Pijl naar beneden */
+.comp-cirkel::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -8px;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 12px;
+  background: #333;
+}
+.comp-cirkel::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  transform: translateX(-50%) rotate(45deg);
+  width: 6px;
+  height: 6px;
+  border-left: 2px solid #333;
+  border-bottom: 2px solid #333;
+}
+
+/* Oranje voorbeeldkaart */
+.oefening.voorbeeld {
+  background: #fff3e0;
+  border: 2px solid #f3c18a;
+  border-radius: 12px;
+  padding: 10px;
+  overflow: hidden;
+}
+/* meer ruimte rond operator en '=' in de som */
+.oefening .op { margin: 0 8px; display:inline-block; }
+.oefening .eq { margin: 0 8px; display:inline-block; }
+
+
+/* cirkel/pijl netjes (je had deze al, laat staan) */
+/* Cirkel rond het getal – NETJES GECENTREERD */
+/* oude pseudo-elementen weg:
+.comp-cirkel::after{...}
+.comp-cirkel::before{...}
+*/
+
+.comp-cirkel{display:inline-flex;align-items:center;justify-content:center;width:38px;height:28px;border:2px solid #333;border-radius:50%;line-height:28px;font-weight:700;background:#fff;vertical-align:middle;margin-left:6px;}
+.comp-wrap{display:inline-flex;align-items:flex-start;gap:8px;position:relative;z-index:2;}
+.comp-pijl{display:inline-block;width:34px;height:16px;margin-top:6px;}
+.comp-box{display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border:2px solid #333;border-radius:8px;min-height:28px;background:#fff;}
+.comp-label{font-family:'Courier New',Courier,monospace;font-size:1.05em;line-height:1;}
+.comp-voorbeeld{background:#ffe4b5;box-shadow:0 0 0 2px #ffc98a inset;border-color:#cc7a00;}
+
+
+/* voorbeeldkaart duidelijker */
+.oefening.voorbeeld{background:#fff3e0;border:2px solid #f3c18a;border-radius:12px;padding:10px;overflow:hidden}
+/* meer ruimte rond operator en '=' in de som */
+.oefening .op {
+  margin: 0 8px;
+  display: inline-block;
+}
+.oefening .eq {
+  margin: 0 8px;
+  display: inline-block;
+}
+/* meer ruimte rond operator en '=' in de som */
+.oefening .op, .oefening .eq { margin: 0 8px; display:inline-block; }
+
+/* zorg dat term-spans strak rond hun tekst zitten (cirkel vangt niets mee) */
+.oefening .term1, .oefening .term2 { display:inline-block; }
+
+/* voorbeeldkaart */
+.oefening.voorbeeld{background:#fff3e0;border:2px solid #f3c18a;border-radius:12px;padding:10px;overflow:hidden}
+/* Compenseerbox – breedte/hoogte definitief (preview) */
+.comp-box{
+  border:2px solid #333; border-radius:10px;
+  min-width:130px; height:38px;         /* iets breder + hoger */
+  display:flex; align-items:center; justify-content:center;
+  gap:8px; font-size:16px; background:#fff; padding:0 12px;
+}
+.comp-box .lijn{ border-bottom:2px solid #333; width:30px; height:1px; margin-left:2px; }
+
+/* rechterkolom naast de som in preview */
+.lijnenrechts{
+  width: 300px;      /* vaste werkbare kolombreedte */
+  max-width: 300px;
+  box-sizing: border-box;
+}
+/* één schrijflijn */
+.schrijflijn{
+  width: 100%;
+  height: 18px;
+  border-bottom: 2px solid #333;
+  margin: 10px 0;
+  line-height: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+/* pijl mag NOOIT in de cirkel starten */
+.comp-pijl{
+  display:inline-block;
+  width:34px;
+  height:16px;
+  margin-top:6px;
+  margin-left:6px; /* ← belangrijk: duwt de pijl van de cirkelrand */
+}
+
+/* volledige voorbeeld-oefening licht oranje in eigen kader */
+.oefening.voorbeeld-oranje{
+  background:#ffe4b5;              /* zacht oranje */
+  box-shadow:0 0 0 2px #ffc98a inset;
+  border-color:#cc7a00;
+}
+/* Blauwe kader rond elke oefening (preview) */
+.oefening {
+  position: relative;
+}
+.oefening::after {
+  content: "";
+  position: absolute;
+  inset: -6px;                 /* klein beetje buitenruimte */
+  border: 2px solid #3b82f6;   /* blauw */
+  border-radius: 12px;
+  pointer-events: none;        /* geen klikproblemen */
+}
