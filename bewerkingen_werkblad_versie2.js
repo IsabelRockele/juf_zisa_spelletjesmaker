@@ -312,6 +312,12 @@ function renderOefeningInGrid(grid, cfg, oef) {
   div.style.fontSize = '14px';
   div.style.overflow = 'visible';
 
+  // markeer voorbeeld in preview (optioneel voor styling/onderscheiding)
+  if (cfg?.rekenHulp?.voorbeeld && oef?._voorbeeld) {
+    div.classList.add('voorbeeld');
+  }
+
+
   if (oef.type === 'rekenen') {
     const hulpActief = !!(cfg.rekenHulp && cfg.rekenHulp.inschakelen);
     const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
@@ -1465,6 +1471,10 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     const a   = Number(oef.getal1), b = Number(oef.getal2);
     const isMin = (oef.operator === '-');
 
+// voorbeeldflag + operator (zonder a/b opnieuw te declareren)
+const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef && oef._voorbeeld);
+const op = isMin ? '-' : '+';
+
     // --- OVAAL rond het 2e getal (transparant) ---
     const NS  = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
@@ -1534,6 +1544,43 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
       R.appendChild(minus()); R.appendChild(fill(' ___'));
     }
     box.append(L,R);
+if (isVoorbeeld) {
+  // Zelfde compensatieregels als in PDF
+  function compPair(op, bVal) {
+    const absB = Math.abs(bVal);
+    if (op === '+') {
+      if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:+up, second: -(up - absB) }; } // bv. 190 → +200 −10
+      else                 { const up = Math.ceil(absB / 10) * 10;   return { first:+up, second: -(up - absB) }; } // bv. 27 → +30 −3
+    } else { // '-'
+      if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:-up, second:+(up - absB) }; } // bv. 270 → −300 +30
+      else                 { const up = Math.ceil(absB / 10) * 10;   return { first:-up, second:+(up - absB) }; } // bv. 29 → −30 +1
+    }
+  }
+
+  const pair = compPair(op, b);
+
+  // Zet de twee getallen in de linkse/rechtse box (rood voor +, blauw voor −/+)
+  L.innerHTML = `<span style="color:#c00000">${pair.first >= 0 ? '+' : ''}${Math.abs(pair.first)}</span>`;
+  R.innerHTML = `<span style="color:#0058c0">${pair.second >= 0 ? '+' : ''}${Math.abs(pair.second)}</span>`;
+
+  // Hulplijnen rechts invullen
+  const t1 = a + pair.first;
+  const t2 = t1 + pair.second;
+  if (rechtsKolom) {
+    rechtsKolom.innerHTML = '';
+    const stap = document.createElement('div');
+    stap.style.fontSize = '12px';
+    stap.style.lineHeight = '1.25';
+    stap.style.marginTop = '4px';
+    const s1 = `${a} ${pair.first >= 0 ? '+' : '-'} ${Math.abs(pair.first)} = ${t1}`;
+    const s2 = `${t1} ${pair.second >= 0 ? '+' : '-'} ${Math.abs(pair.second)} = ${t2}`;
+    stap.innerHTML = `${s1}<br>${s2}`;
+    rechtsKolom.appendChild(stap);
+  }
+
+  // Antwoord in het vakje
+  if (ansBox) ansBox.textContent = String(t2);
+}
 
   // — Hoogte reserveren zodat de blauwe kader (op .oefening::after) de box meeneemt —
 const BOX_H = 32;                 // hoogte van de compenseerbox (zoals ingesteld)
