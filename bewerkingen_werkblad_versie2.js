@@ -56,10 +56,19 @@ let PREVIEW_SEG_GAP_PX = 24;
   const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
   function somHeeftBrug(g1, g2, op) {
-  return op === '+'
-    ? ((g1 % 10) + (g2 % 10) > 10)   // ← was > 9, nu strikt OVER het tiental
-    : ((g1 % 10) < (g2 % 10));
+  const e1 = g1 % 10, e2 = g2 % 10;
+  const t1 = Math.floor(g1 / 10) % 10;
+  const t2 = Math.floor(g2 / 10) % 10;
+
+  if (op === '+') {
+    // Brug bij optellen: als E over 9 gaan, OF (bij E=0) de T over 9 gaan (HT+HT)
+    return (e1 + e2 > 9) || (e1 === 0 && e2 === 0 && (t1 + t2 > 9));
+  } else {
+    // Brug bij aftrekken: als E1 < E2, OF (bij gelijke E=0) T1 < T2 (lenen uit honderdtal)
+    return (e1 < e2) || (e1 === e2 && e1 === 0 && t1 < t2);
+  }
 }
+
 
   function checkBrug(g1, g2, op, brugType) {
     if (brugType === 'beide') return true;
@@ -173,31 +182,53 @@ let PREVIEW_SEG_GAP_PX = 24;
       }
     } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
 
-    // EXTRA FILTER: voor compenseren enkel wanneer eenheden van de 2e term 7/8/9 zijn (en tot 100)
-    if (cfg.rekenHulp && cfg.rekenHulp.inschakelen && cfg.rekenHulp.stijl === 'compenseren' && (cfg.rekenBrug || 'beide') !== 'zonder') {
-      const eenheden2 = g2 % 10;
-      const ok = (eenheden2 === 7 || eenheden2 === 8 || eenheden2 === 9);
-      if (!ok || g1 > 100 || g2 > 100 || (op === '+' && (g1 + g2) > 100)) {
-        // probeer opnieuw met dezelfde cfg
-        return genereerRekensom(cfg);
-      }
-    }
+    // EXTRA FILTER: Compenseren tot 1000
+if (cfg.rekenHulp && cfg.rekenHulp.inschakelen && cfg.rekenHulp.stijl === 'compenseren' && (cfg.rekenBrug || 'beide') !== 'zonder') {
+  let ok = false;
+
+  if ((g1 % 10 === 0) && (g2 % 10 === 0)) {
+    // HT ± HT: tweede term heeft tiental 7/8/9
+    const t2 = Math.floor(g2 / 10) % 10;
+    ok = (t2 === 7 || t2 === 8 || t2 === 9);
+  } else {
+    // TE-gevallen: tweede term heeft eenheden 7/8/9
+    const e2 = g2 % 10;
+    ok = (e2 === 7 || e2 === 8 || e2 === 9);
+  }
+
+  // Resultaat moet binnen ingestelde limiet blijven (tot 1000 mogelijk)
+  const max = cfg.rekenMaxGetal || 100;
+  if (!ok || g1 > max || g2 > max || (op === '+' && (g1 + g2) > max)) {
+    return genereerRekensom(cfg);
+  }
+}
+
 
     return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
   }
 
 // Helper: maak enkel sommen geschikt voor compenseren (eenheden 7/8/9 in 2e term)
+// Helper: compenseren geschikt maken voor TE én HT (7/8/9 op E of T in 2e term)
 function genereerRekensomMetCompenseren(cfg){
   let tries = 0;
-  while (tries++ < 500){
+  const max = cfg.rekenMaxGetal || 1000;
+  while (tries++ < 600){
     const oef = genereerRekensom(cfg);
-    const e2 = Math.abs(oef.getal2) % 10;
-    if (e2===7 || e2===8 || e2===9) return oef;
+    if (!oef || oef.type !== 'rekenen') continue;
+
+    const g2 = Math.abs(oef.getal2);
+    const e2 = g2 % 10;
+    const t2 = Math.floor(g2 / 10) % 10;
+
+    const okTE = (e2 === 7 || e2 === 8 || e2 === 9);
+    const okHT = (e2 === 0) && (t2 === 7 || t2 === 8 || t2 === 9);
+
+    if ((okTE || okHT) && Math.abs(oef.getal1) <= max && g2 <= max && (oef.operator === '+' ? (oef.getal1 + oef.getal2) <= max : true)) {
+      return oef;
+    }
   }
   return genereerRekensom(cfg);
 }
-
-
 
   function genereerTafelsom(cfg) {
     const lijst = cfg.gekozenTafels?.length ? cfg.gekozenTafels : [1];
@@ -1537,8 +1568,6 @@ if (oefDiv) {
 }
 
 
-
-
 // === PDF: COMPENSEREN — definitieve versie ===
 function drawCompenseerInPDF(doc, x, y, oef, cfg, colWidth) {
   const a  = Number(oef.getal1);
@@ -1605,77 +1634,81 @@ function drawCompenseerInPDF(doc, x, y, oef, cfg, colWidth) {
   doc.line(startX, y + 10, startX + lijnLen, y + 10);
   doc.line(startX, y + 22, startX + lijnLen, y + 22);
 
-  // --- delta berekenen (alleen voor box & stappen) ---
-  const e2 = b % 10;
-  const delta = (10 - e2) % 10;
-  const b10 = b + delta; // naar volgend tiental
+  // --- compensatiepaar berekenen (tot 1000): TE → naar tiental; HT (E=0) → naar honderd ---
+const absB = Math.abs(b);
+let first, second;
+if (op === '+') {
+  if (absB % 10 === 0) { const up = Math.ceil(absB/100)*100; first = +up; second = -(up - absB); }  // bv. 190→+200 −10; 680→+700 −20
+  else                 { const up = Math.ceil(absB/10)*10;   first = +up; second = -(up - absB); }  // bv. 27→+30 −3
+} else { // '-'
+  if (absB % 10 === 0) { const up = Math.ceil(absB/100)*100; first = -up; second = +(up - absB); }  // bv. 270→−300 +30
+  else                 { const up = Math.ceil(absB/10)*10;   first = -up; second = +(up - absB); }  // bv. 29→−10 +1
+}
 
-  // helper voor gekleurde tekens
-  function teken(sign, num, cx, by){
-    if (sign === '+') doc.setTextColor(200,0,0); else doc.setTextColor(0,90,200);
-    doc.text(sign, cx - 5, by);
-    doc.setTextColor(0,0,0);
-    doc.text(String(num), cx - 1, by);
-  }
+// helper voor gekleurde tekens blijft identiek
+function teken(sign, num, cx, by){
+  if (sign === '+') doc.setTextColor(200,0,0); else doc.setTextColor(0,90,200);
+  doc.text(sign, cx - 5, by);
+  doc.setTextColor(0,0,0);
+  doc.text(String(num), cx - 1, by);
+}
 
-  // --- voorbeeld volledig invullen ---
-  if (isVoorbeeld) {
-    doc.setFont('Helvetica','normal'); doc.setFontSize(12);
-    if (op === '+') {
-      // box: + (b+Δ)   - Δ
-      teken('+', b10,  leftX,  baseY);
-      teken('-', delta, rightX, baseY);
+// --- voorbeeld volledig invullen (enkel tekst; layout blijft ongewijzigd) ---
+if (isVoorbeeld) {
+  doc.setFont('Helvetica','normal'); doc.setFontSize(12);
+  if (op === '+') {
+    // box: +first   -|second|
+    teken('+', Math.abs(first),  leftX,  baseY);
+    teken('-', Math.abs(second), rightX, baseY);
 
-      // Lijn 1: a + (b+Δ) = tussen
-      const tussen   = a + b10;
-      const uitkomst = tussen - delta;
-      doc.text(`${a} + ${b10} = ${tussen}`,          startX, y + 9.2);
-      // Lijn 2: tussen − Δ = uitkomst
-      doc.text(`${tussen} - ${delta} = ${uitkomst}`,  startX, y + 21.2);
+    // Lijn 1 en 2
+    const tussen   = a + first;
+    const uitkomst = tussen + second;
+    doc.text(`${a} + ${Math.abs(first)} = ${tussen}`,           startX, y + 9.2);
+    doc.text(`${tussen} - ${Math.abs(second)} = ${uitkomst}`,   startX, y + 21.2);
 
-      // Antwoord in het vak – hoger en groter, exact gecentreerd
-const boxTop = y - (ansH - 2);          // bovenrand van het vak
-const midY   = boxTop + ansH / 2 + 1.8;  // kleine optische correctie
-doc.setFont('Helvetica', 'bold');
-doc.setFontSize(16);                     // groter dan standaard 14
-doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
-doc.setFontSize(14);                     // (optioneel) terug naar standaard
+    // Antwoord in het vak
+    const boxTop = y - (ansH - 2);
+    const midY   = boxTop + ansH / 2 + 1.8;
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
+    doc.setFontSize(14);
 
-
-    } else {
-      // box: - (b+Δ)   + Δ
-      teken('-', b10,  leftX,  baseY);
-      teken('+', delta, rightX, baseY);
-
-      // Lijn 1: a − (b+Δ) = stap1
-      const stap1    = a - b10;
-      const uitkomst = stap1 + delta;
-      doc.text(`${a} - ${b10} = ${stap1}`,            startX, y + 9.2);
-      // Lijn 2: stap1 + Δ = uitkomst
-      doc.text(`${stap1} + ${delta} = ${uitkomst}`,   startX, y + 21.2);
-
-      // Antwoord in het vak – hoger en groter, exact gecentreerd
-const boxTop = y - (ansH - 2);          // bovenrand van het vak
-const midY   = boxTop + ansH / 2 + 1.8;  // kleine optische correctie
-doc.setFont('Helvetica', 'bold');
-doc.setFontSize(16);                     // groter dan standaard 14
-doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
-doc.setFontSize(14);                     // (optioneel) terug naar standaard
-    }
   } else {
-    // niet-voorbeeld: alleen lege streepjes met juiste volgorde en kleuren
-    if (op === '+') {
-      doc.setTextColor(200,0,0); doc.text('+', leftX - 5, baseY);
-      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
-      doc.setTextColor(0,90,200);doc.text('-', rightX - 5, baseY);
-      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
-    } else {
-      doc.setTextColor(0,90,200);doc.text('-', leftX - 5, baseY);
-      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
-      doc.setTextColor(200,0,0); doc.text('+', rightX - 5, baseY);
-      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
-    }
+    // box: -|first|   +second
+    teken('-', Math.abs(first),  leftX,  baseY);
+    teken('+', Math.abs(second), rightX, baseY);
+
+    const stap1    = a + first;          // first is negatief
+    const uitkomst = stap1 + second;     // second is positief
+    doc.text(`${a} - ${Math.abs(first)} = ${stap1}`,            startX, y + 9.2);
+    doc.text(`${stap1} + ${Math.abs(second)} = ${uitkomst}`,    startX, y + 21.2);
+
+    const boxTop = y - (ansH - 2);
+    const midY   = boxTop + ansH / 2 + 1.8;
+    doc.setFont('Helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(String(uitkomst), ansX + ansW / 2, midY, { align: 'center' });
+    doc.setFontSize(14);
   }
+
+} else {
+  // niet-voorbeeld: laat uw huidige underscores/strepen en kleuren zoals u ze had
+  // (alleen de tekens aanpassen op basis van op, zonder b10/delta te gebruiken)
+  if (op === '+') {
+    doc.setTextColor(200,0,0); doc.text('+', leftX - 5, baseY);
+    doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
+    doc.setTextColor(0,90,200);doc.text('-', rightX - 5, baseY);
+    doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+  } else {
+    doc.setTextColor(0,90,200);doc.text('-', leftX - 5, baseY);
+    doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
+    doc.setTextColor(200,0,0); doc.text('+', rightX - 5, baseY);
+    doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+  }
+}
+
 /// --- Blauwe kader rond de oefening (niet bij voorbeeld) ---
 const W = (colWidth || 92);
 
