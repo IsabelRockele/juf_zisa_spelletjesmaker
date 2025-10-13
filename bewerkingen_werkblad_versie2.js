@@ -401,10 +401,7 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
   grid.appendChild(oefDiv);
 }
 
-  // ========= SCHERM-RENDER =========
-  function renderBlokOpScherm(cfg) {
-    // 1) Unieke sleutel per segmentsoort (gelijk aan PDF-logica)
-    function segmentKey(c){
+function segmentKey(c){
   return [
     // Uniek per keuze (als het meegegeven wordt vanuit het keuzescherm)
     c.segmentId || '',
@@ -423,6 +420,11 @@ function appendWithDelete(grid, oefDiv, cfg, oef) {
     (c.groteSplitshuizen ? 'GROOT' : 'NORMAAL')
   ].join('|');
 }
+
+  // ========= SCHERM-RENDER =========
+  function renderBlokOpScherm(cfg) {
+    // 1) Unieke sleutel per segmentsoort (gelijk aan PDF-logica)
+    
 const segKey = segmentKey(cfg);
 
 function renderOefeningInGrid(grid, cfg, oef) {
@@ -615,6 +617,8 @@ return;
     if (!card) {
       // NIEUW segment
       card = document.createElement('section');
+      // koppel de live cfg aan deze kaart (zodat PDF-export de actuele dataset kan lezen)
+card.__cfg = cfg;
       card.className = 'preview-segment';
       card.dataset.segmentKey = segKey;
       card.style.border = '1px solid #b3e0ff';
@@ -705,8 +709,22 @@ tools.addEventListener('click', (e) => {
     }
     paginatePreview();
 
-  } else if (act === 'del') {
-    card.remove(); paginatePreview();
+ } else if (act === 'del') {
+  // markeer als verwijderd en verwijder dit segment ook uit de bundel zodat PDF het niet meer tekent
+  try {
+    cfg._deleted = true;
+    const key = (typeof segmentKey === 'function') ? segmentKey(cfg) : null;
+    if (key && Array.isArray(bundel)) {
+      const idx = bundel.findIndex(it => {
+        const c = it.settings || it;
+        return (typeof segmentKey === 'function') ? segmentKey(c) === key : false;
+      });
+      if (idx > -1) bundel.splice(idx, 1);
+    }
+  } catch {}
+  card.remove();
+  paginatePreview();
+
 
   } else if (act === 'gap-inc') {
     PREVIEW_SEG_GAP_PX = Math.min(PREVIEW_SEG_GAP_PX + 4, 64);
@@ -755,6 +773,8 @@ card.appendChild(grid);
     } else {
       // BESTAAND segment: pak het bestaande grid
       grid = card.querySelector('.preview-grid');
+      // houd de link naar de actuele cfg ook bij bestaande segmenten up-to-date
+card.__cfg = cfg;
       if (!grid) {
         grid = document.createElement('div');
         grid.className = 'preview-grid';
@@ -1144,6 +1164,38 @@ function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
     const pageHeight = doc.internal.pageSize.getHeight();
+      // --- FILTER: behoud alleen segmenten die nog in de preview aanwezig zijn ---
+  const domKeys = new Set(Array.from(document.querySelectorAll('section.preview-segment'))
+    .map(seg => seg.dataset.segmentKey));
+  if (Array.isArray(bundel) && domKeys.size) {
+    bundel = bundel.filter(it => {
+      const cfg = it.settings || it;
+      const key = (typeof segmentKey === 'function') ? segmentKey(cfg) : null;
+      return key && domKeys.has(key);
+    });
+  }
+
+    // --- SYNC: bundel bijwerken met de live (na-verwijderen) oefeningen uit de preview ---
+// bouw een map van segmentKey -> live cfg via de DOM-kaarten
+const liveCfgByKey = {};
+document.querySelectorAll('section.preview-segment').forEach(seg => {
+  const key = seg.dataset.segmentKey;
+  if (seg.__cfg) liveCfgByKey[key] = seg.__cfg;
+});
+
+// loop door bundel en vervang _oefeningen door de live versie indien beschikbaar
+if (Array.isArray(bundel)) {
+  bundel.forEach((item, idx) => {
+    const cfg = item.settings || item;
+    // segmentKey-functie bestaat al in dit bestand
+    const key = (typeof segmentKey === 'function') ? segmentKey(cfg) : null;
+if (key && liveCfgByKey[key] && Array.isArray(liveCfgByKey[key]._oefeningen)) {
+  cfg._oefeningen = [...liveCfgByKey[key]._oefeningen];
+}
+  });
+}
+// --- EINDE SYNC ---
+
 
     function pdfHeader(titleText) {
       const xName = LEFT_PUNCH_MARGIN, yName = 15;
