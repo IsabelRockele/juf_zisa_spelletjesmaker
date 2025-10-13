@@ -157,6 +157,127 @@ let PREVIEW_SEG_GAP_PX = 24;
     const gekozenType = types[Math.floor(Math.random() * types.length)];
     const maxGetal = cfg.rekenMaxGetal || 100;
     let g1, g2, op, pogingen = 0;
+// --- SPECIAL CASE: bereik tot 5 (1e leerjaar) ---
+if ((cfg.rekenMaxGetal || 100) <= 5) {
+  // === VOLLEDIGE VARIATIE ≤5 met gescheiden pools: PLUS en MIN ===
+  const allowZero = true;                        // zet op false als je geen 0 wil
+  const inRange = v => allowZero ? (v >= 0 && v <= 5) : (v >= 1 && v <= 5);
+
+  const wantPlus = (cfg.rekenType === 'beide' || cfg.rekenType === 'optellen');
+  const wantMin  = (cfg.rekenType === 'beide' || cfg.rekenType === 'aftrekken');
+
+  // Unieke sleutel voor de configuratie van de pools
+  const poolKey = JSON.stringify({ allowZero, wantPlus, wantMin });
+
+  // Helper om te schudden (Fisher–Yates)
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  // Pools bouwen/verniewen wanneer leeg of configuratie gewijzigd
+  if (!cfg._pool5Key || cfg._pool5Key !== poolKey || (!cfg._pool5Plus && !cfg._pool5Minus)) {
+    cfg._pool5Key   = poolKey;
+    cfg._pool5Plus  = [];
+    cfg._pool5Minus = [];
+
+    const start = allowZero ? 0 : 1;
+
+    if (wantPlus) {
+      // Alle a,b met a+b ≤ 5 (beide orden komen erin → 2+3 én 3+2)
+      const plus = [];
+      for (let a = start; a <= 5; a++) {
+        for (let b = start; b <= 5; b++) {
+          const s = a + b;
+          if (inRange(s)) plus.push({ getal1:a, getal2:b, operator:'+' });
+        }
+      }
+      cfg._pool5Plus = shuffle(plus);
+    }
+
+    if (wantMin) {
+      // Alle a,b met a-b in [0..5]
+      const minus = [];
+      for (let a = start; a <= 5; a++) {
+        for (let b = start; b <= 5; b++) {
+          const d = a - b;
+          if (inRange(d)) minus.push({ getal1:a, getal2:b, operator:'-' });
+        }
+      }
+      cfg._pool5Minus = shuffle(minus);
+    }
+
+    // Toggle voor eerlijke afwisseling wanneer beide gevraagd zijn
+    cfg._lastOp5 = '-'; // start zodat eerste keuze '+' wordt
+  }
+
+  // Functie om één item uit een pool te nemen; als leeg → pool heropbouwen en schudden
+  function takeFrom(poolName) {
+    let pool = cfg[poolName];
+    if (!pool || pool.length === 0) {
+      // heropbouwen op basis van huidige key
+      const saveKey = cfg._pool5Key;
+      cfg._pool5Key = null; // force rebuild
+      // Recursief: roep de hele tak nog eens aan om pools te heropbouwen
+      // (veilig omdat het meteen hieronder weer returnt met een item)
+      return (function regenerate() {
+        // herbouw
+        const res = (function(){ /* no-op; we laten het ‘boven’ heropbouwen */ })();
+        // we forceren rebuild door simpelweg opnieuw deze if-tak te laten uitvoeren
+        // maar dat is niet ideaal — beter: rebuild precies die pool:
+
+        const allowZero = JSON.parse(saveKey).allowZero;
+        const start = allowZero ? 0 : 1;
+
+        if (poolName === '_pool5Plus') {
+          const plus = [];
+          for (let a = start; a <= 5; a++) {
+            for (let b = start; b <= 5; b++) {
+              const s = a + b;
+              if ((allowZero ? (s >= 0 && s <= 5) : (s >= 1 && s <= 5))) {
+                plus.push({ getal1:a, getal2:b, operator:'+' });
+              }
+            }
+          }
+          cfg._pool5Plus = shuffle(plus);
+        } else {
+          const minus = [];
+          for (let a = start; a <= 5; a++) {
+            for (let b = start; b <= 5; b++) {
+              const d = a - b;
+              if ((allowZero ? (d >= 0 && d <= 5) : (d >= 1 && d <= 5))) {
+                minus.push({ getal1:a, getal2:b, operator:'-' });
+              }
+            }
+          }
+          cfg._pool5Minus = shuffle(minus);
+        }
+        pool = cfg[poolName];
+        return pool.pop();
+      })();
+    }
+    return pool.pop();
+  }
+
+  // Kies operator en neem zonder herhaling uit de juiste pool
+  let pick;
+  if (wantPlus && wantMin) {
+    // Afwisselen: +, -, +, -, …
+    const nextOp = (cfg._lastOp5 === '+') ? '-' : '+';
+    cfg._lastOp5 = nextOp;
+    pick = (nextOp === '+') ? takeFrom('_pool5Plus') : takeFrom('_pool5Minus');
+  } else if (wantPlus) {
+    pick = takeFrom('_pool5Plus');
+  } else {
+    pick = takeFrom('_pool5Minus');
+  }
+
+  return { type:'rekenen', getal1: pick.getal1, getal2: pick.getal2, operator: pick.operator };
+}
+
 
     do {
       pogingen++;
