@@ -1256,6 +1256,9 @@ function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
   function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('p', 'mm', 'a4');
+      window.__HEADER_BOTTOM_BY_PAGE = {};  // reset header-cache per pagina
+  window.__LOG = [];                    // (optioneel) reset debuglog
+
     const pageHeight = doc.internal.pageSize.getHeight();
       // --- FILTER: behoud alleen segmenten die nog in de preview aanwezig zijn ---
   const domKeys = new Set(Array.from(document.querySelectorAll('section.preview-segment'))
@@ -1361,12 +1364,11 @@ let __segIndex = 0;                           // telt segmenten voor scheidingsl
 
 
 function drawSegmentDivider() {
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.2);
-  doc.line(LEFT_PUNCH_MARGIN + 2, yCursor - 6, 210 - 6, yCursor - 6);
-  yCursor += 4;
-  doc.setLineWidth(0.4);
+  // Lijn verwijderd en geen extra ruimte.
+  // yCursor blijft ongewijzigd.
 }
+
+
 
     // lay-out per type
     function layoutVoor(cfg) {
@@ -1413,7 +1415,7 @@ function drawSegmentDivider() {
           // ruimer i.v.m. 4 bewerkingslijnen
           xCols   = [insetX + 14, insetX + 80, insetX + 146];
           yInc    = 92;  // iets ruimer
-          itemH   = 96;
+          itemH   = 90;
         }
       }
 
@@ -1424,10 +1426,11 @@ function drawSegmentDivider() {
     function tekenSegmentKader(topY, bottomY) {
       const x = LEFT_PUNCH_MARGIN + 2;                 // was +6/+4 → nu +2
       const w = 210 - (LEFT_PUNCH_MARGIN + 2) - 6;     // iets breder
-      const h = Math.max(10, bottomY - topY + 6);      // iets meer bodem
+      const h = Math.max(10, bottomY - topY + 2);      // iets meer bodem
       doc.setDrawColor(179, 224, 255);
       doc.roundedRect(x, topY, w, h, 3, 3, 'D');
     }
+
     // Verschuif het segmentkader zonder de afmetingen te veranderen
     function tekenSegmentKaderMetOffset(cfg, topY, bottomY) {
       if (cfg.hoofdBewerking === 'splitsen' && (cfg.splitsStijl === 'puntoefening' || cfg.splitsStijl === 'huisje')) return;
@@ -1449,12 +1452,10 @@ function drawSegmentDivider() {
 let __isFirstSegment = true;
 
 function drawSegmentDivider() {
-  // dunne scheidingslijn net boven de volgende opdracht
-  doc.setDrawColor(200, 200, 200);
-  doc.setLineWidth(0.2);
-  doc.line(LEFT_PUNCH_MARGIN + 2, yCursor - 6, 210 - 6, yCursor - 6);
-  yCursor += 4; // klein beetje lucht
+  // Lijn verwijderd (op vraag): enkel mini-ruimte behouden voor rust.
+  yCursor += 0;   // of zet op 0 als je zelfs dit niet wil
 }
+
 
     // Per blok
     for (let i = 0; i < bundel.length; i++) {
