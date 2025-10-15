@@ -42,6 +42,12 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     /* Honderdveld */
     .honderdveld-container{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
     .honderdveld-grid{display:grid;grid-template-columns:repeat(10, 20px);grid-template-rows:repeat(10, 20px);border-top:1px solid #ccc;border-left:1px solid #ccc;width:201px;height:201px;box-sizing:content-box;flex-shrink:0}
+    /* Honderdveld centreren in het oefen-kader (display:grid blijft onaangeroerd) */
+.honderdveld-exercise-block .honderdveld-grid{
+  margin-left: auto;
+  margin-right: auto;
+}
+
     .honderdveld-cell{border-right:1px solid #ccc;border-bottom:1px solid #ccc;box-sizing:border-box}
     .honderdveld-cell.filled-ten{background:#4caf50}
     .honderdveld-cell.filled-unit{background:#ffeb3b}
@@ -51,11 +57,39 @@ html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sa
     .honderdveld-te-table{border-collapse:collapse;text-align:center;font-weight:bold}
     .honderdveld-te-table td{border:1px solid #334;width:40px;height:36px}
     .honderdveld-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:16px;box-sizing:border-box}
+    /* --- AANPASSING: aanvullen tot volgend tiental --- */
+
+/* smallere T/E-vakjes */
+.honderdveld-exercise-block .honderdveld-te-table td:nth-child(1) input,
+.honderdveld-exercise-block .honderdveld-te-table td:nth-child(2) input {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 15px;
+}
+
+/* kader rond elke oefening bij aanvullen tot volgend tiental */
+.honderdveld-exercise-block {
+  border: 2px solid #c9d6ea;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
     .honderdveld-num-box{width:50px;height:44px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
     .honderdveld-row>.honderdveld-exercise-block{flex:1;margin-top:0}
     .aanvul-vragen{display:flex;flex-direction:column;gap:10px;font-size:16px}
     .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap}
     .aanvul-input{width:40px;height:30px;border:1px solid #ccc;border-radius:6px;text-align:center;font:inherit;font-size:15px}
+    
+    /* — Aanvullen tot volgend tiental: smalle 1-cijfervakjes — */
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:first-child input:nth-of-type(-n+2),
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:nth-child(2) input:first-of-type,
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:nth-child(3) input:first-of-type {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 15px;
+}
 
     /* MAB Materiaal */
     .mab-grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -1999,3 +2033,14 @@ line, path {
 #sheet .mab-te-table td:not(.te-label){
   background:#fff !important;
 }
+/* — Duidelijk kader rond elke 100-veld-oefening — */
+/* — Duidelijk kader rond elke 100-veld-oefening — */
+#sheet .honderdveld-exercise-block {
+  border: 2px solid #000 !important;
+  border-radius: 10px;
+  padding: 12px 18px 12px 12px;  /* rechter padding iets groter */
+  background: #fff;
+  box-sizing: border-box;
+  position: relative;
+}
+
