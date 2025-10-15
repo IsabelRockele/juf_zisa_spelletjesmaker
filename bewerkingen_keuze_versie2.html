@@ -43,6 +43,19 @@
     <h1>Generator voor Bewerkingen</h1>
   </header>
 
+<!-- VASTE TITEL WERKBLAD -->
+<div class="keuzevak">
+  <h2>Werkbladtitel</h2>
+  <div class="control-group">
+    <label for="werkbladTitel"><span class="group-title">Titel bovenaan het werkblad:</span></label>
+    <input id="werkbladTitel" type="text" value="Werkblad Bewerkingen" placeholder="Schrijf hier de titel..." />
+  </div>
+  <div class="control-group">
+    <label><input type="radio" name="titelPlaats" value="elke" checked> Toon op elke pagina</label>
+    <label><input type="radio" name="titelPlaats" value="eerste"> Enkel op eerste pagina</label>
+  </div>
+</div>
+
   <div id="main-content">
     <!-- VAK 1: SPLITSEN -->
     <div class="keuzevak">
@@ -99,7 +112,7 @@
 
       <div class="control-group">
         <label class="group-title" for="opdracht_splits">Opdrachtzin (optioneel):</label>
-        <input id="opdracht_splits" type="text" placeholder="vb. Vul de splitsbenen correct in." style="width:100%;" />
+        <textarea id="opdracht_splits" rows="2" placeholder="vb. Vul de splitsbenen correct in." style="width:100%;resize:vertical"></textarea>>
       </div>
 
       <div class="btn-row">
@@ -200,19 +213,14 @@
   <label class="group-title">Opdrachtzin (optioneel):</label>
 
   <!-- veld voor optellen -->
-  <input id="opdracht_optellen"
-         type="text"
-         placeholder="vb. Zoek de som."
-         style="width:100%;" />
+  <textarea id="opdracht_optellen" rows="2" placeholder="vb. Zoek de som." style="width:100%;resize:vertical"></textarea>
+
 
   <!-- veld voor aftrekken -->
-  <input id="opdracht_aftrekken"
-         type="text"
-         placeholder="vb. Zoek het verschil."
-         style="width:100%; display:none; margin-top:6px;" />
-  <!-- veld voor beide -->
-  <input id="opdracht_beide" type="text" placeholder="vb. Los de sommen op." style="width:100%; display:none; margin-top:6px;" />
+  <textarea id="opdracht_aftrekken" rows="2" placeholder="vb. Zoek het verschil." style="width:100%;display:none;margin-top:6px;resize:vertical"></textarea>
 
+  <!-- veld voor beide -->
+ <textarea id="opdracht_beide" rows="2" placeholder="vb. Los de sommen op." style="width:100%;display:none;margin-top:6px;resize:vertical"></textarea>
 </div>
 
 
@@ -258,7 +266,7 @@
 
       <div class="control-group">
         <label class="group-title" for="opdracht_tafel">Opdrachtzin (optioneel):</label>
-        <input id="opdracht_tafel" type="text" placeholder="vb. Los de tafel-oefeningen op." style="width:100%;" />
+        <textarea id="opdracht_tafel" rows="2" placeholder="vb. Los de tafel-oefeningen op." style="width:100%;resize:vertical"></textarea>
       </div>
 
       <div class="btn-row">
