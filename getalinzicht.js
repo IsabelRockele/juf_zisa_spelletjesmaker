@@ -949,44 +949,49 @@ function nextHundred(n){ return Math.floor(n/100)*100 + 100; }
 function isCleanTen(n){ return n % 10 === 0; }
 
   function makeTE(max){
-    const maxT = Math.min(9, Math.floor(max/10));
-    const patterns = ['T','E','TE'];
-    const p = patterns[Math.floor(Math.random()*patterns.length)];
-    let t = 0, e = 0, text = '';
+  // Meer variatie: T, E, TE, ET + grotere E-waarden mogelijk (zoals 12E of 51E)
+  const patterns = ['T', 'E', 'TE', 'ET', 'TE', 'ET']; // evenveel kans op TE als ET
+  const p = patterns[Math.floor(Math.random() * patterns.length)];
+  let t = 0, e = 0, text = '';
 
-    if (p === 'T') {
-      t = Math.max(1, rnd(maxT));
-      text = `${t}T`;
-    } else if (p === 'E') {
-      e = Math.max(1, Math.min(9, rnd(max)));
-      text = `${e}E`;
-    } else {
-      t = Math.max(1, rnd(maxT));
-      const maxE = Math.min(9, Math.max(0, max - t*10));
-      e = rnd(maxE);
-      const order = Math.random() < 0.5 ? 'TE' : 'ET';
-      text = order === 'TE' ? `${t}T en ${e}E` : `${e}E en ${t}T`;
-    }
-    return { text, value: t*10 + e };
+  if (p === 'T') {
+    t = 1 + Math.floor(Math.random() * 9);
+    text = `${t}T`;
+    return { text, value: t * 10 };
   }
-  function makeHTE(max){
-    const h = 1 + Math.floor(Math.random()*9);
-    const t = Math.floor(Math.random()*10);
-    const e = Math.floor(Math.random()*10);
-    const orderPick = [['H','T','E'],['T','E','H'],['E','T','H'],['H','E','T']];
-    const order = orderPick[Math.floor(Math.random()*orderPick.length)];
-    const parts = order.map(k => k==='H'?`${h}H`:k==='T'?`${t}T`:`${e}E`);
-    return { text: parts.join(' en '), value: h*100 + t*10 + e, h,t,e };
+
+  if (p === 'E') {
+    // ook eens waarden boven 9E, bv. 12E of 18E
+    e = 1 + Math.floor(Math.random() * Math.min(20, max));
+    text = `${e}E`;
+    return { text, value: e };
   }
-  function makeSideHTEorNumber(max){
-    if (Math.random() < 0.5) {
-      const hte = makeHTE(max);
-      return { isHTE: true, text: hte.text, value: hte.value };
-    } else {
-      const v = Math.max(100, rnd(Math.min(1000, max)));
-      return { isHTE: false, text: String(v), value: v };
-    }
+
+  // gecombineerde vormen (TE of ET)
+  t = 1 + Math.floor(Math.random() * 9);
+  e = Math.floor(Math.random() * 10);
+  const value = t * 10 + e;
+
+  if (p === 'TE') {
+    // klassieke volgorde
+    text = Math.random() < 0.5
+      ? `${t}T en ${e}E`
+      : `${t}T ${e}E`;
+    return { text, value };
   }
+
+  if (p === 'ET') {
+    // omgekeerde volgorde om te verwarren (E voor T)
+    text = Math.random() < 0.5
+      ? `${e}E en ${t}T`
+      : `${e}E ${t}T`;
+    return { text, value };
+  }
+
+  // fallback
+  return { text: String(value), value };
+}
+  
   function makeSideTEorNumber(max){
     if (Math.random() < 0.5) {
       const te = makeTE(max);
