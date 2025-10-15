@@ -50,7 +50,92 @@ let PREVIEW_SEG_GAP_PX = 24;
       return;
     }
     bundel = [{ titel: 'Werkblad', settings: single }];
+ 
   }
+   // ==== GLOBALE WERKBLAD-TITEL (preview + PDF) ====
+// LocalStorage-sleutels
+const LS_KEY_TITLE  = 'werkbladTitel';
+const LS_KEY_REPEAT = 'werkbladTitelElkePagina';
+
+// Defaults uit bundel (1e segment) – géén fallback meer uit LocalStorage
+const _s = bundel?.[0]?.settings || {};
+let globaleTitel = (_s.werkbladTitel && _s.werkbladTitel.trim()) || 'Werkblad Bewerkingen';
+let titelElkePagina = (_s.titelPlaats === 'elke'); // enkel bundel bepaalt dit
+
+
+// Maak beschikbaar voor PDF
+window.__WERKBLAD_TITEL__ = globaleTitel;
+window.__WERKBLAD_TITEL_PLAATS__ = titelElkePagina ? 'elke' : 'eerste';
+
+// Kleine UI-balk boven de preview
+(function bouwTitelBar(){
+  const wrapper = document.getElementById('werkblad-wrapper');
+  if (!wrapper) return;
+
+  // bar-element vóór de container zetten
+  const bar = document.createElement('div');
+  bar.id = 'globaleTitelBar';
+  bar.style.cssText = 'max-width:1100px;margin:0 auto 6px auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between';
+
+  // links: titelweergave
+  const left = document.createElement('div');
+  left.style.cssText = 'display:flex;gap:10px;align-items:center';
+  const h = document.createElement('h2');
+  h.textContent = globaleTitel;
+  h.style.cssText = 'margin:0;color:#004080;font-size:20px';
+  left.appendChild(h);
+
+  // rechts: acties
+  const right = document.createElement('div');
+  right.className = 'tools';
+  right.style.marginTop = '0';
+
+  const btnWijzig = document.createElement('button');
+  btnWijzig.textContent = 'Wijzig titel';
+  btnWijzig.onclick = () => {
+    const nieuw = prompt('Werkblad-titel:', h.textContent || globaleTitel);
+    if (nieuw !== null) {
+      globaleTitel = (nieuw || '').trim() || 'Werkblad Bewerkingen';
+      h.textContent = globaleTitel;
+      localStorage.setItem(LS_KEY_TITLE, globaleTitel);
+      if (bundel?.[0]?.settings) bundel[0].settings.werkbladTitel = globaleTitel;
+window.__WERKBLAD_TITEL__ = globaleTitel;
+
+    }
+  };
+
+  const lbl = document.createElement('label');
+  lbl.style.display = 'inline-flex';
+  lbl.style.alignItems = 'center';
+  lbl.style.gap = '6px';
+ const chk = document.createElement('input');
+chk.type = 'checkbox';
+chk.checked = titelElkePagina;
+
+// Laat de gebruiker dit hier corrigeren; stuur PDF-variabelen direct aan
+chk.disabled = false;
+chk.onchange = () => {
+  titelElkePagina = !!chk.checked;
+  if (bundel?.[0]?.settings) bundel[0].settings.titelPlaats = chk.checked ? 'elke' : 'eerste';
+  window.__WERKBLAD_TITEL_PLAATS__ = chk.checked ? 'elke' : 'eerste';
+};
+
+
+  lbl.appendChild(chk);
+  lbl.appendChild(document.createTextNode('Op elke pagina'));
+
+  right.appendChild(btnWijzig);
+  right.appendChild(lbl);
+
+  bar.appendChild(left);
+  bar.appendChild(right);
+
+  // vóór de container plaatsen
+  const container = document.getElementById('werkblad-container');
+  if (container && container.parentNode) {
+    container.parentNode.insertBefore(bar, container);
+  }
+})();
 
   // ========= HULPFUNCTIES =========
   const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
@@ -648,6 +733,8 @@ Object.assign(title.style, {
   fontWeight: '700',
   color: '#0b4d7a',
 });
+title.style.whiteSpace = 'pre-wrap';
+
 
 // tools rechts van de titel
 let tools = card.querySelector('.tools');
@@ -687,7 +774,12 @@ tools.addEventListener('click', (e) => {
 
   if (act === 'edit') {
     const nieuw = prompt('Opdrachtzin aanpassen:', title.textContent || '');
-    if (nieuw !== null) { title.textContent = nieuw.trim(); cfg.opdracht = title.textContent; }
+    if (nieuw !== null) { 
+  const withBreaks = (nieuw || '').replaceAll('\\n', '\n').trim();
+  title.textContent = withBreaks; 
+  cfg.opdracht = withBreaks; 
+}
+
     paginatePreview();
 
   } else if (act === 'add') {
@@ -1159,6 +1251,7 @@ function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
     doc.text(text, xCenter, y, { align: 'center' });
   }
 
+
   // ========= PDF-GENERATOR met nette segment-kaders =========
   function downloadPDF() {
     const { jsPDF } = window.jspdf;
@@ -1195,20 +1288,85 @@ if (key && liveCfgByKey[key] && Array.isArray(liveCfgByKey[key]._oefeningen)) {
   });
 }
 // --- EINDE SYNC ---
+function pdfHeader(titleText) {
+  // --- Beschermers: teken max. 1 header per pagina, en respecteer "alleen eerste pagina" ---
+  const pageNo = (doc.internal.getCurrentPageInfo?.().pageNumber) || 1;
+  const plaats = window.__WERKBLAD_TITEL_PLAATS__ || 'eerste';
+  if (!window.__HEADER_BOTTOM_BY_PAGE) window.__HEADER_BOTTOM_BY_PAGE = {};
+
+  // 1) Als je "alleen eerste pagina" koos en we zijn NIET op p.1 → géén groot titel-kader
+  if (plaats !== 'elke' && pageNo > 1) {
+    // enkel Naam-lijn + baseline retourneren
+    const xName = LEFT_PUNCH_MARGIN, yName = 15;
+    doc.setFont('Helvetica','normal'); doc.setFontSize(12);
+    doc.text('Naam:', xName, yName);
+    const wNaam = doc.getTextWidth('Naam:');
+    doc.setDrawColor(51, 51, 51);
+    doc.line(xName + wNaam + 3, yName, xName + wNaam + 83, yName);
+
+    const bottom = 24; // nette start nét onder de naam-lijn
+    window.__HEADER_BOTTOM_BY_PAGE[pageNo] = bottom;
+    return bottom;
+  }
+
+  // 2) Al een header gezet op deze pagina? → hergebruik onderrand
+  if (window.__HEADER_BOTTOM_BY_PAGE[pageNo]) {
+    return window.__HEADER_BOTTOM_BY_PAGE[pageNo];
+  }
+
+  // 3) Normale header (met kader + titel)
+  const xName = LEFT_PUNCH_MARGIN, yName = 15;
+  doc.setFont('Helvetica','normal'); doc.setFontSize(12);
+  doc.text('Naam:', xName, yName);
+  const wNaam = doc.getTextWidth('Naam:');
+  doc.setDrawColor(51, 51, 51);
+  doc.line(xName + wNaam + 3, yName, xName + wNaam + 83, yName);
+
+  doc.setFont('Helvetica', 'bold'); doc.setFontSize(20);
+
+  const textWidth = doc.getTextWidth(titleText);
+  const paddingX = 10, paddingY = 2;
+  const boxWidth  = textWidth + paddingX * 2;
+  const boxHeight = 20;             // iets ruimer voor mooie centering
+  const boxX = 105 - boxWidth / 2;
+  const topY = 22;
+
+  doc.setDrawColor(0, 0, 0); doc.setLineWidth(1.2);
+  doc.roundedRect(boxX, topY, boxWidth, boxHeight, 4, 4);
+
+  // tekst visueel gecentreerd
+  const textBaseline = topY + (boxHeight / 2) + 3;
+  doc.text(titleText, 105, textBaseline, { align: 'center' });
+
+  doc.setLineWidth(0.4);
+
+  const bottom = topY + boxHeight + 6;  // onderrand + marge
+  window.__HEADER_BOTTOM_BY_PAGE[pageNo] = bottom;
+  return bottom;
+}
 
 
-    function pdfHeader(titleText) {
-      const xName = LEFT_PUNCH_MARGIN, yName = 15;
-      doc.setFont('Helvetica','normal'); doc.setFontSize(12);
-      doc.text('Naam:', xName, yName);
-      const wNaam = doc.getTextWidth('Naam:');
-      doc.setDrawColor(51,51,51);
-      doc.line(xName + wNaam + 3, yName, xName + wNaam + 83, yName);
-      doc.setFont('Helvetica','bold'); doc.setFontSize(16);
-      doc.text(titleText, 105, 25, { align: 'center' });
-    }
 
-    pdfHeader('Werkblad Bewerkingen');
+// ——— Plaats direct onder pdfHeader() ———
+function nieuwePagina() {
+  doc.addPage();
+  // Eén uniform pad: pdfHeader beslist zelf of het een groot kader tekent of enkel de naam-lijn
+  const basis = window.__WERKBLAD_TITEL__ || 'Werkblad Bewerkingen';
+  yCursor = pdfHeader(basis + ' (vervolg)');
+}
+
+  const headerBottom = pdfHeader(globaleTitel); // tekent header en geeft onderrand terug
+let yCursor = headerBottom;                   // start net onder het kader
+let __segIndex = 0;                           // telt segmenten voor scheidingslijnen
+
+
+function drawSegmentDivider() {
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.2);
+  doc.line(LEFT_PUNCH_MARGIN + 2, yCursor - 6, 210 - 6, yCursor - 6);
+  yCursor += 4;
+  doc.setLineWidth(0.4);
+}
 
     // lay-out per type
     function layoutVoor(cfg) {
@@ -1284,17 +1442,36 @@ if (key && liveCfgByKey[key] && Array.isArray(liveCfgByKey[key]._oefeningen)) {
       tekenSegmentKader(topY + offY, bottomY + offY);
     }
 
-    let yCursor = 35;
     // Titel: slechts 1x per segmentsoort, niet opnieuw op volgende pagina's
     let lastSegmentKey = null;
     let titlePrintedForCurrentSegment = false;
     let brugTitelGeprintOpPagina = false;
+let __isFirstSegment = true;
+
+function drawSegmentDivider() {
+  // dunne scheidingslijn net boven de volgende opdracht
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.2);
+  doc.line(LEFT_PUNCH_MARGIN + 2, yCursor - 6, 210 - 6, yCursor - 6);
+  yCursor += 4; // klein beetje lucht
+}
 
     // Per blok
     for (let i = 0; i < bundel.length; i++) {
       const cfg = bundel[i].settings || bundel[i];
 
-      const { xCols, yInc, itemH, colWidth } = layoutVoor(cfg);
+    const { xCols, yInc, itemH, colWidth } = layoutVoor(cfg);
+
+// scheidingslijn vanaf 2e segment
+if (!__isFirstSegment) {
+  drawSegmentDivider();
+}
+__isFirstSegment = false;
+
+// titel of opdrachtzin boven de eerste rij oefeningen
+ensureTitelVoorSegment(cfg);
+
+
 
 // --- SPECIALE TAK: GROTE SPLITSHUIZEN IN PDF ---
 if (cfg.hoofdBewerking === 'splitsen' && cfg.groteSplitshuizen) {
@@ -1320,8 +1497,17 @@ if (yCursor + needed > pageHeight - PDF_BOTTOM_SAFE) {
 // 3) T I T E L
 doc.setFont('Helvetica','bold');
 doc.setFontSize(14);
-doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
-yCursor += 14;
+
+// laat echte regeleinden toe en wrap ze binnen de beschikbare breedte
+const opdracht = (titelVoor(cfg) || '').replaceAll('\\n', '\n');
+const wrapped  = doc.splitTextToSize(opdracht, 180); // pas 180 aan indien je kolombreedte anders is
+doc.text(wrapped, LEFT_PUNCH_MARGIN + 8, yCursor + 6);
+
+// hoogte reserveren op basis van aantal regels
+const lineH = 7; // ≈ regelhoogte bij 14pt
+const usedH = Math.max(14, wrapped.length * lineH);
+yCursor += usedH;
+
 
   // SMALLER kolomraster: max 3 kolommen, stap 56 mm (past mooi bij bodyW = 40)
   const insetX = LEFT_PUNCH_MARGIN + 8;
@@ -1398,11 +1584,24 @@ if (Array.isArray(cfg._oefeningen)) {
 }
 
       // Nieuwe pagina helper
-      function nieuwePagina() {
-        doc.addPage();
-        pdfHeader('Werkblad Bewerkingen (vervolg)');
-        yCursor = 35; // reset cursor, maar GEEN titel hier
-      }
+    function nieuwePagina(printTitel = true) {
+  doc.addPage();
+  // Toon grote titel alleen als 'Op elke pagina' aan staat
+  if (printTitel && window.__WERKBLAD_TITEL_PLAATS__ === 'elke') {
+    pdfHeader(window.__WERKBLAD_TITEL__ + ' (vervolg)');
+  } else {
+    // Alleen de 'Naam:'-lijn
+    const xName = LEFT_PUNCH_MARGIN, yName = 15;
+    doc.setFont('Helvetica','normal'); doc.setFontSize(12);
+    doc.text('Naam:', xName, yName);
+    const wNaam = doc.getTextWidth('Naam:');
+    doc.setDrawColor(51,51,51);
+    doc.line(xName + wNaam + 3, yName, xName + wNaam + 83, yName);
+  }
+  const headerBottom = pdfHeader(window.__WERKBLAD_TITEL__ || 'Werkblad Bewerkingen');
+yCursor = headerBottom;
+
+}
 
       // Titel alleen printen wanneer segmentsoort wijzigt
       function ensureTitelVoorSegment(cfg) {
@@ -1440,10 +1639,19 @@ if (Array.isArray(cfg._oefeningen)) {
             nieuwePagina();
           }
           // Titel tekenen
-          doc.setFont('Helvetica','bold'); 
-          doc.setFontSize(14);
-          doc.text(titelVoor(cfg), LEFT_PUNCH_MARGIN + 8, yCursor + 6);
-          yCursor += 14;
+          doc.setFont('Helvetica','bold');
+doc.setFontSize(14);
+
+// laat \n én automatische afbreking toe
+const opdracht = (titelVoor(cfg) || '').replaceAll('\\n', '\n');
+const wrapped  = doc.splitTextToSize(opdracht, 180);  // ≈ breedte; pas aan indien nodig
+doc.text(wrapped, LEFT_PUNCH_MARGIN + 8, yCursor + 6);
+
+// hoogte berekenen op basis van aantal regels (≈ 6pt per regel bij 14pt)
+const extra = (wrapped.length === 1) ? 14 : Math.max(18, wrapped.length * 7);
+yCursor += extra;
+
+
 
           lastSegmentKey = segmentKey;
         }
@@ -1709,13 +1917,23 @@ const op = isMin ? '-' : '+';
     const minus = (t) => { const s=document.createElement('span'); s.style.color='#0058c0'; s.textContent='-'; return s; };
     const fill  = (txt)=>{ const s=document.createElement('span'); s.textContent=txt; s.style.color='#000'; return s; };
 
-    if (isMin) {  // aftrekken: -___ +___
-      L.appendChild(minus()); L.appendChild(fill(' ___'));
-      R.appendChild(plus());  R.appendChild(fill(' ___'));
-    } else {      // optellen: +___ -___
-      L.appendChild(plus());  L.appendChild(fill(' ___'));
-      R.appendChild(minus()); R.appendChild(fill(' ___'));
-    }
+   // Toon +/- alleen als dat in de keuzes aangevinkt is
+const showSigns = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.compSigns);
+
+if (showSigns) {
+  if (isMin) {  // aftrekken: -___ +___
+    L.appendChild(minus()); L.appendChild(fill(' ___'));
+    R.appendChild(plus());  R.appendChild(fill(' ___'));
+  } else {      // optellen: +___ -___
+    L.appendChild(plus());  L.appendChild(fill(' ___'));
+    R.appendChild(minus()); R.appendChild(fill(' ___'));
+  }
+} else {
+  // Enkel blanco lijntjes (geen +/-)
+  L.appendChild(fill(' ___'));
+  R.appendChild(fill(' ___'));
+}
+
     box.append(L,R);
 if (isVoorbeeld) {
   // Zelfde compensatieregels als in PDF
@@ -1796,6 +2014,9 @@ function drawCompenseerInPDF(doc, x, y, oef, cfg, colWidth) {
 
   // --- is dit de voorbeeldsom? ---
   const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef._voorbeeld);
+  // +/- tonen in de PDF-compensatiebox?
+const showSigns = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.compSigns);
+
 
   // --- eerst het ORANJE KADER tekenen (anders bedekt het tekst) ---
   if (isVoorbeeld) {
@@ -1913,21 +2134,31 @@ if (isVoorbeeld) {
     doc.setFontSize(14);
   }
 
-} else {
-  // niet-voorbeeld: laat uw huidige underscores/strepen en kleuren zoals u ze had
-  // (alleen de tekens aanpassen op basis van op, zonder b10/delta te gebruiken)
-  if (op === '+') {
-    doc.setTextColor(200,0,0); doc.text('+', leftX - 5, baseY);
-    doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
-    doc.setTextColor(0,90,200);doc.text('-', rightX - 5, baseY);
-    doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
   } else {
-    doc.setTextColor(0,90,200);doc.text('-', leftX - 5, baseY);
-    doc.setTextColor(0,0,0);   doc.line(boxLeft + 8, baseY, boxLeft + 14, baseY);
-    doc.setTextColor(200,0,0); doc.text('+', rightX - 5, baseY);
-    doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+  // niet-voorbeeld
+  const compSignsAan = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.compSigns);
+
+  if (compSignsAan) {
+    // toon + en −
+    if (op === '+') {
+      doc.setTextColor(200,0,0); doc.text('+', leftX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8,  baseY, boxLeft + 14, baseY);
+      doc.setTextColor(0,90,200);doc.text('-', rightX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+    } else {
+      doc.setTextColor(0,90,200);doc.text('-', leftX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 8,  baseY, boxLeft + 14, baseY);
+      doc.setTextColor(200,0,0); doc.text('+', rightX - 5, baseY);
+      doc.setTextColor(0,0,0);   doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
+    }
+  } else {
+    // géén +/− tonen: enkel de twee lijntjes
+    doc.setTextColor(0,0,0);
+    doc.line(boxLeft + 6,  baseY, boxLeft + 14,  baseY);
+    doc.line(boxLeft + 18.5, baseY, boxLeft + 26, baseY);
   }
 }
+
 
 /// --- Blauwe kader rond de oefening (niet bij voorbeeld) ---
 const W = (colWidth || 92);
