@@ -1977,3 +1977,25 @@ line, path {
   height: 34px !important;
   box-sizing: border-box !important;
 }
+/* TE/HTE-labels: T groen, E geel, H blauw (laatste wint) */
+#sheet .honderdveld-te-table .te-label,
+#sheet .mab-te-table .te-label{
+  background:#4caf50 !important;  /* T */
+  color:#fff !important;
+  font-weight:700;
+}
+#sheet .honderdveld-te-table .te-label.e,
+#sheet .mab-te-table .te-label.e{
+  background:#ffeb3b !important;  /* E */
+  color:#333 !important;
+}
+#sheet .honderdveld-te-table .te-label.h,
+#sheet .mab-te-table .te-label.h{
+  background:#42a5f5 !important;  /* H */
+  color:#fff !important;
+}
+/* Alleen niet-labelcellen wit houden */
+#sheet .honderdveld-te-table td:not(.te-label),
+#sheet .mab-te-table td:not(.te-label){
+  background:#fff !important;
+}
