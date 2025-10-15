@@ -133,9 +133,11 @@ if (typeof window !== 'undefined') {
       if (s === 'bewerkingen4') return 'Splits en maak de 4 bewerkingen.';
       if (s === 'huisje')       return 'Vul het splitshuis correct in.';
       return 'Vul de splitsbenen correct in.';
-    })()
+          })(),
+      werkbladTitel: (document.getElementById('werkbladTitel')?.value || 'Werkblad Bewerkingen'),
+      titelPlaats: (document.querySelector('input[name="titelPlaats"]:checked')?.value || 'elke')
+    };
   };
-}
 
   // ====== BEWERKINGEN ======
   const maakRekenBtn    = document.getElementById('maakRekenBtn');
@@ -246,9 +248,11 @@ const vrij = (document.getElementById(veldId) || {}).value?.trim();
         if (rekenBrugSelect?.value === 'met')    return 'Los de sommen op met brug.';
         if (rekenBrugSelect?.value === 'zonder') return 'Los de sommen op zonder brug.';
         return 'Los de sommen op.';
-      })()
+            })(),
+      werkbladTitel: (document.getElementById('werkbladTitel')?.value || 'Werkblad Bewerkingen'),
+      titelPlaats: (document.querySelector('input[name="titelPlaats"]:checked')?.value || 'elke')
     };
-  }
+    };
 
   // ====== TAFELS ======
   const maakTafelBtn    = document.getElementById('maakTafelBtn');
@@ -290,9 +294,12 @@ const vrij = (document.getElementById(veldId) || {}).value?.trim();
       opdracht: (() => {
         const vrij = (document.getElementById('opdracht_tafel') || {}).value?.trim();
         return vrij || 'Los de tafel-oefeningen op.';
-      })()
+           })(),
+      werkbladTitel: (document.getElementById('werkbladTitel')?.value || 'Werkblad Bewerkingen'),
+      titelPlaats: (document.querySelector('input[name="titelPlaats"]:checked')?.value || 'elke')
     };
-  }
+    };
+  
 
   // ====== BUNDEL-STATE & RENDER ======
   let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
