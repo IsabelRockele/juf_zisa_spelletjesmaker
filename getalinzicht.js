@@ -411,15 +411,14 @@ const table = document.createElement('table');
 table.className = 'honderdveld-te-table';
 table.innerHTML = `
   <tr>
-    <td class="te-label" style="background:#42a5f5;color:#fff">H</td>
-    <td class="te-label" style="background:#4caf50;color:#fff">T</td>
-    <td class="te-label" style="background:#ffeb3b">E</td>
+    <td class="te-label t">T</td>
+    <td class="te-label e">E</td>
   </tr>
   <tr>
     <td><input type="text"></td>
     <td><input type="text"></td>
-    <td><input type="text"></td>
   </tr>`;
+
 
 const numBox = document.createElement('input');
 numBox.type = 'text';
@@ -1361,15 +1360,16 @@ function addHonderdveldExercise() {
       task.className = 'honderdveld-task';
       const table = document.createElement('table');
       table.className = 'honderdveld-te-table';
-      table.innerHTML =
-        `<tr>
-           <td class="te-label" style="background:#4caf50;color:#fff">T</td>
-           <td class="te-label" style="background:#ffeb3b">E</td>
-         </tr>
-         <tr>
-           <td><input type="text"></td>
-           <td><input type="text"></td>
-         </tr>`;
+table.innerHTML = `
+  <tr>
+    <td class="te-label t">T</td>
+    <td class="te-label e">E</td>
+  </tr>
+  <tr>
+    <td><input type="text"></td>
+    <td><input type="text"></td>
+  </tr>`;
+
       const numBox = document.createElement('input');
       numBox.type = 'text';
       numBox.className = 'honderdveld-num-box';
