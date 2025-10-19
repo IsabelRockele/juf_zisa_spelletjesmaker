@@ -33,10 +33,10 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        for (let i = 0; i < instellingen.numClocks; i++) {
-            instellingen.tijden.push(genereerTijd(instellingen.moeilijkheden));
-        }
+        // NIEUW – slim: (a) evenwichtig verdelen bij 2–3 keuzes, (b) 5-min echt 5-min, (c) uniek zolang mogelijk
+instellingen.tijden = genereerTijdenSlim(instellingen.moeilijkheden, instellingen.numClocks);
 
+        
         laatsteInstellingen = instellingen;
         tekenCanvas(laatsteInstellingen, 'compact');
     }
@@ -155,6 +155,134 @@ document.addEventListener("DOMContentLoaded", () => {
         let minuut = minutenArray[Math.floor(Math.random() * minutenArray.length)];
         return { uur, minuut };
     }
+
+/* ===== Slimme tijdengenerator: evenwichtig + 5-min voorkeurslogica ===== */
+
+function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+/** Bouw de minuten-set(s) volgens voorkeursregels:
+ *  - Als 'minuut' gekozen is: volledige granulariteit (0..59) — andere keuzes worden genegeerd.
+ *  - Anders als '5minuten' gekozen is:
+ *      • Alleen '5minuten' → {0,5,10,...,55} (inclusief 00 en 30).
+ *      • '5minuten' + (uur/half/kwartier) → {5,10,15,20,25,35,40,45,50,55}  // ⬅️ 00 en 30 bewust weggelaten
+ *        (zodat hele/halve uren "niet te vaak" voorkomen bij 5-min oefening).
+ *  - Anders (geen minuut of 5-min): maak categorieën per keuze:
+ *      • 'uur'      → [0]
+ *      • 'halfuur'  → [30]
+ *      • 'kwartier' → [15, 45]
+ */
+function buildMinuteSets(moeilijkheden) {
+    const set = new Set(moeilijkheden);
+
+    if (set.has('minuut')) {
+        return { mode: 'single', minutes: Array.from({length: 60}, (_, i) => i) };
+    }
+
+    if (set.has('5minuten')) {
+        if (set.size > 1) {
+            // 5-minuten + iets anders: 5-minuten maar zonder 00 en 30  // ⬅️ kern van uw vraag
+            const mins = [5,10,15,20,25,35,40,45,50,55];
+            return { mode: 'single', minutes: mins };
+        } else {
+            // Alleen 5-minuten
+            const mins = [];
+            for (let m = 0; m < 60; m += 5) mins.push(m);
+            return { mode: 'single', minutes: mins };
+        }
+    }
+
+    // Multi-categorie (uur/half/kwartier) → evenwichtig verdelen
+    const cats = [];
+    if (set.has('uur'))      cats.push({ label: 'uur',      minutes: [0] });
+    if (set.has('halfuur'))  cats.push({ label: 'halfuur',  minutes: [30] });
+    if (set.has('kwartier')) cats.push({ label: 'kwartier', minutes: [15, 45] });
+
+    return { mode: 'multi', cats };
+}
+
+/** Uniek kiezen uit alle (uur, minuut)-paren t/m 'aantal'.
+ *  Deze variant neemt een expliciete 'minutes'-lijst voor de pool. */
+function genereerTijdenUniekMetMinuten(minutes, aantal) {
+    const pool = [];
+    for (let uur = 1; uur <= 12; uur++) {
+        for (const minuut of minutes) pool.push({ uur, minuut });
+    }
+    if (pool.length === 0) return [];
+
+    shuffleInPlace(pool);
+    if (aantal <= pool.length) return pool.slice(0, aantal);
+
+    const result = [...pool];
+    let i = 0;
+    while (result.length < aantal) {
+        if (i % pool.length === 0) shuffleInPlace(pool);
+        result.push(pool[i % pool.length]);
+        i++;
+    }
+    return result;
+}
+
+/** Evenwichtig verdelen over categorieën (uur / half / kwartier) wanneer van toepassing.
+ *  Voor 'minuut' of (5minuten ± andere) valt dit terug op één enkele minutenpool. */
+function genereerTijdenSlim(moeilijkheden, aantal) {
+    const spec = buildMinuteSets(moeilijkheden);
+
+    // 1) Eén enkele minutenpool (minuut of 5-minuten-variant)
+    if (spec.mode === 'single') {
+        return genereerTijdenUniekMetMinuten(spec.minutes, aantal);
+    }
+
+    // 2) Meerdere categorieën → evenwichtig verdelen
+    const cats = spec.cats;
+    if (cats.length === 0) {
+        // Fallback (zou niet moeten gebeuren)
+        const fallback = [];
+        for (let i = 0; i < aantal; i++) fallback.push(genereerTijd(moeilijkheden));
+        return fallback;
+    }
+
+    // Bereken doel-aantallen per categorie
+    const k = cats.length;
+    const basis = Math.floor(aantal / k);
+    let rest = aantal % k;
+
+    // Maak per categorie een pool en trek zonder herhaling (zolang mogelijk)
+    const perCatSelected = [];
+    for (let idx = 0; idx < k; idx++) {
+        const need = basis + (rest > 0 ? 1 : 0);
+        if (rest > 0) rest--;
+
+        const minutes = cats[idx].minutes;
+        const pool = [];
+        for (let uur = 1; uur <= 12; uur++) {
+            for (const minuut of minutes) pool.push({ uur, minuut });
+        }
+
+        shuffleInPlace(pool);
+        if (need <= pool.length) {
+            perCatSelected.push(...pool.slice(0, need));
+        } else {
+            // meer nodig dan unieke combinaties → vul bij door te cyclen
+            perCatSelected.push(...pool);
+            let i = 0;
+            while (perCatSelected.length < (basis * (idx + 1)) + (idx < (aantal % k) ? (idx + 1) : 0)) {
+                if (i % pool.length === 0) shuffleInPlace(pool);
+                perCatSelected.push(pool[i % pool.length]);
+                i++;
+            }
+        }
+    }
+
+    // Mix alle gekozen tijden door elkaar zodat de categorieën visueel verspreid staan
+    return shuffleInPlace(perCatSelected);
+}
+
 
     function tekenKlokSessie(x_clock, y_clock, clockSize, tijd, toonHulpminuten, toon24Uur, toonHulpAnaloog, voorOverHulpType, tijdnotatie, invulmethode, totalCellHeight, wekkerDisplayWidth, totalCellWidth, x_box_start) {
         const { uur, minuut } = tijd;
