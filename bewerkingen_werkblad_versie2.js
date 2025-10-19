@@ -996,18 +996,40 @@ card.__cfg = cfg;
 }
 
     const N = cfg.numOefeningen ?? 20;
-    const oefeningen = [];
-    for (let i = 0; i < N; i++) {
-      if (cfg.hoofdBewerking === 'rekenen') { const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren'); oefeningen.push(comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg)); }
-      else if (cfg.hoofdBewerking === 'splitsen') {
-        if (cfg.splitsStijl === 'puntoefening') { const s = genereerSplitsing(cfg); s._p = true; oefeningen.push(s); }
-        else if (cfg.splitsStijl === 'bewerkingen4') { const s = genereerSplitsing(cfg); s._b4 = true; oefeningen.push(s); }
-        else oefeningen.push(genereerSplitsing(cfg));
-      } else if (cfg.hoofdBewerking === 'tafels') oefeningen.push(genereerTafelsom(cfg));
-    }
+const oefeningen = [];
+const seen = new Set();
 
-    // ✅ voeg deze regel exact hier toe:
+const keyOf = (o) => {
+  if (!o) return '';
+  if (o.getal1 !== undefined && o.getal2 !== undefined && o.operator) {
+    return `${o.operator}|${o.getal1},${o.getal2}`;  // exacte oefening, volgorde telt
+  }
+  return JSON.stringify(o);
+};
+
+let guard = 0;
+while (oefeningen.length < N && guard++ < N * 25) {
+  let oef;
+  if (cfg.hoofdBewerking === 'rekenen') {
+    const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
+    oef = comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg);
+  } else if (cfg.hoofdBewerking === 'splitsen') {
+    oef = genereerSplitsing(cfg);
+    if (cfg.splitsStijl === 'puntoefening')  oef._p  = true;
+    if (cfg.splitsStijl === 'bewerkingen4')  oef._b4 = true;
+  } else if (cfg.hoofdBewerking === 'tafels') {
+    oef = genereerTafelsom(cfg);
+  }
+
+  const key = keyOf(oef);
+  if (!seen.has(key)) {
+    seen.add(key);
+    oefeningen.push(oef);
+  }
+}
+
 cfg._oefeningen = oefeningen;
+
   if (cfg.rekenHulp && cfg.rekenHulp.voorbeeld && Array.isArray(cfg._oefeningen) && cfg._oefeningen.length) { cfg._oefeningen[0]._voorbeeld = true; }
 
   // Nieuwe, korte versie
@@ -1617,16 +1639,58 @@ if (Array.isArray(cfg._oefeningen)) {
 } else {
   const N = cfg.numOefeningen ?? 20;
   oefeningen = [];
-  for (let k = 0; k < N; k++) {
-    if (cfg.hoofdBewerking === 'rekenen') { const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren'); oefeningen.push(comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg)); }
-    else if (cfg.hoofdBewerking === 'splitsen') {
-      const s = genereerSplitsing(cfg);
-      s._p = cfg.splitsStijl === 'puntoefening';
-      s._b4 = cfg.splitsStijl === 'bewerkingen4';
-      oefeningen.push(s);
-    } else if (cfg.hoofdBewerking === 'tafels') oefeningen.push(genereerTafelsom(cfg));
+  const seen = new Set();
+
+  const keyOf = (o) => {
+    if (!o) return '';
+    // Enkel exacte dubbels blokkeren (volgorde telt)
+    if (o.getal1 !== undefined && o.getal2 !== undefined && o.operator) {
+      return `${o.operator}|${o.getal1},${o.getal2}`;
+    }
+    return JSON.stringify(o);
+  };
+
+  let guard = 0;
+  while (oefeningen.length < N && guard++ < N * 25) {
+    let oef;
+    if (cfg.hoofdBewerking === 'rekenen') {
+      const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
+      oef = comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg);
+    } else if (cfg.hoofdBewerking === 'splitsen') {
+      oef = genereerSplitsing(cfg);
+      oef._p  = cfg.splitsStijl === 'puntoefening';
+      oef._b4 = cfg.splitsStijl === 'bewerkingen4';
+    } else if (cfg.hoofdBewerking === 'tafels') {
+      oef = genereerTafelsom(cfg);
+    }
+
+    const key = keyOf(oef);
+    if (!seen.has(key)) {
+      seen.add(key);
+      oefeningen.push(oef);
+    }
+  }
+
+  // (optioneel) fallback om altijd N te halen als er te weinig unieke combinaties zijn:
+  if (oefeningen.length < N) {
+    const rest = N - oefeningen.length;
+    for (let i = 0; i < rest; i++) {
+      let oef;
+      if (cfg.hoofdBewerking === 'rekenen') {
+        const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
+        oef = comp ? genereerRekensomMetCompenseren(cfg) : genereerRekensom(cfg);
+      } else if (cfg.hoofdBewerking === 'splitsen') {
+        oef = genereerSplitsing(cfg);
+        oef._p  = cfg.splitsStijl === 'puntoefening';
+        oef._b4 = cfg.splitsStijl === 'bewerkingen4';
+      } else if (cfg.hoofdBewerking === 'tafels') {
+        oef = genereerTafelsom(cfg);
+      }
+      oefeningen.push(oef); // hier laten we dubbels toe als noodopvulling
+    }
   }
 }
+
 
       // Nieuwe pagina helper
     function nieuwePagina(printTitel = true) {
