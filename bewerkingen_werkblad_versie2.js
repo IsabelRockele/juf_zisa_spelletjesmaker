@@ -1691,7 +1691,6 @@ if (Array.isArray(cfg._oefeningen)) {
   }
 }
 
-
       // Nieuwe pagina helper
     function nieuwePagina(printTitel = true) {
   doc.addPage();
