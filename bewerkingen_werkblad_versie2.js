@@ -386,6 +386,50 @@ if ((cfg.rekenMaxGetal || 100) <= 5) {
         if (g1 < g2) [g1, g2] = [g2, g1];
         while (g1 > maxGetal) { g1 = Math.floor(g1 / 2); if (g1 < g2) [g1, g2] = [g2, g1]; }
       }
+
+      // === NORMALISATIE vóór de while-check ==================================
+// Alleen toepassen bij brugoefeningen.
+// Doel A (OPTELLEN): geen uitkomst die exact een veelvoud van 10 is (…=10,20,30,…)
+// Doel B (AFTREKKEN + benen onder AFTREKKER): aftrektal (g1) mag geen zuiver tiental zijn (10,20,30,…)
+if (somHeeftBrug(g1, g2, op)) {
+
+  // A) Optellen: vermijd uitkomst 10/20/30/…
+  if (op === '+' && ((g1 + g2) % 10) === 0) {
+    const max = maxGetal;
+
+    // probeer g2 +1 (brug behouden en binnen max)
+    if ((g1 + g2 + 1) <= max && ((g1 % 10) + ((g2 + 1) % 10) > 9)) {
+      g2 += 1;
+    }
+    // anders g2 −1
+    else if (g2 > 1 && ((g1 % 10) + ((g2 - 1) % 10) > 9)) {
+      g2 -= 1;
+    }
+    // anders g1 +1
+    else if ((g1 + 1 + g2) <= max && (((g1 + 1) % 10) + (g2 % 10) > 9)) {
+      g1 += 1;
+    }
+    // anders g1 −1 (als kan)
+    else if (g1 > 1 && (((g1 - 1) % 10) + (g2 % 10) > 9)) {
+      g1 -= 1;
+    }
+  }
+
+  // B) Aftrekken + “benen onder aftrekker”: g1 mag geen zuiver tiental zijn
+  if (
+    op === '-' &&
+    cfg?.rekenHulp?.inschakelen &&
+    cfg.rekenHulp.splitsPlaatsAftrekken === 'onderAftrekker' &&
+    (g1 % 10 === 0)
+  ) {
+    // Maak van T0 → TE met e1 < e2 zodat de brug visueel klopt
+    let e2 = g2 % 10;
+    if (e2 <= 1) { g2 += (2 - e2); }   // zorg dat e2 ≥ 2
+    g1 += 1;                           // e1 = 1 → g1 geen zuiver tiental meer
+  }
+}
+// === EINDE NORMALISATIE ================================================
+
     } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
 
     // EXTRA FILTER: Compenseren tot 1000
