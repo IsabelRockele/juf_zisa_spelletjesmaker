@@ -181,19 +181,19 @@
       margin:0 auto !important;
     }
 
-    .page-inner{
-      position:absolute;
+    .page-inner {
+  position: absolute;
+  /* vaste marges binnen A4, overal hetzelfde */
+  top: 12mm;
+  right: 15mm;
+  bottom: 10mm;
+  left: 22mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 26px; /* afstand tussen titel en oefeningen */
+}
 
-      /* zo hoog mogelijk naar boven trekken,
-         met marge links (22mm) voor perforatie */
-      inset:-15mm 15mm 10mm 22mm;
-      box-sizing:border-box;
-
-      display:flex;
-      flex-direction:column;
-      /* meer afstand tussen titelblok en eerste rij oefeningen */
-      gap:26px;
-    }
 
     .werkblad-header{
       margin:0;
@@ -488,23 +488,30 @@
 
   <!-- ===== Uw bestaande logica blijft hieronder integraal ===== -->
   <script>
-    function downloadPDF(){
-      const element = document.getElementById('print-area');
-      element.classList.add('pdf-mode');
+    function downloadPDF() {
+  const element = document.getElementById('print-area');
+  element.classList.add('pdf-mode');
 
-      const opt = {
-        margin:[0,0,0,0],
-        filename:'cijferen_werkblad.pdf',
-        image:{type:'jpeg',quality:0.98},
-        html2canvas:{scale:2,useCORS:true},
-        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-        pagebreak:{mode:['css']}
-      };
-
-      html2pdf().from(element).set(opt).save().then(()=>{
-        element.classList.remove('pdf-mode');
-      });
+  const opt = {
+    margin: [0, 0, 0, 0], // geen extra marge meer
+    filename: 'cijferen_werkblad.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: {
+      mode: ['css'],
+      avoid: ['.pagina *']
     }
+  };
+
+  html2pdf()
+    .from(element)
+    .set(opt)
+    .save()
+    .then(() => {
+      element.classList.remove('pdf-mode');
+    });
+}
 
     function getRandomNumber(min, max){
       return Math.floor(Math.random()*(max-min+1))+min;
