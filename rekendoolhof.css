@@ -1,0 +1,359 @@
+/* ===== PAGINA ===== */
+
+body {
+  font-family: Arial, sans-serif;
+  background: #fff;
+  color: #000;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  margin: 0;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+  align-items: flex-end;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  margin: 0 auto 2rem;
+  max-width: 800px;
+  background: #f8f8f8;
+  font-size: 0.9rem;
+}
+.controls label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.9rem;
+  gap: 0.25rem;
+}
+.controls select {
+  font-size: 1rem;
+  padding: 0.25rem 0.5rem;
+}
+.controls button {
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+/* ===== WERKBLADKADER ===== */
+
+.worksheet {
+  max-width: 800px;
+  margin: 0 auto;
+  border: 1px solid #999;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.sheet-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  row-gap: 1rem;
+  margin-bottom: 1rem;
+}
+.titles {
+  line-height: 1.4;
+}
+.titles .mainTitle {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+.titles .subTitle {
+  font-size: 1rem;
+}
+.titles .explain {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: #444;
+  max-width: 480px;
+}
+
+.legendBox {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  min-width: 110px;
+  height: fit-content;
+}
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.arrow-strip {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+.arrow-label {
+  font-size: 0.8rem;
+  color: #444;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+.arrows {
+  font-size: 1.1rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+  line-height: 1.6rem;
+}
+
+/* ===== GRID ===== */
+
+.gridRowWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  column-gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 60px);
+  grid-template-rows: repeat(5, 60px);
+  position: relative;
+  background: #fff;
+  border: 2px solid #9da7ad;
+}
+
+/* Elke cel */
+.cellSprong,
+/* Maze-cel: leeg vakje met muurtjes. Geen plusje meer. */
+.cellMaze {
+  position: relative;
+  background: #fff;
+  border: 1px solid #9da7ad;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: transparent; /* leeg: geen plusje zichtbaar */
+  font-weight: normal;
+  box-sizing: border-box;
+}
+
+/* We tonen geen plusje meer. */
+.cellMazePlus {
+  display: none;
+}
+
+
+/* Getal-cel */
+.cellSprongNumber {
+  position: relative;
+  z-index: 10;
+  font-size: 1rem;
+  line-height: 1rem;
+  font-weight: normal;
+  color: #000;
+}
+
+/* Maze-cel (plusje) */
+.cellMazePlus {
+  position: relative;
+  z-index: 10;
+  font-size: 1rem;
+  line-height: 1rem;
+  color: #9da7ad;
+}
+
+/* Start/eindcel markeren */
+.cellSprong.startCell,
+.cellSprong.endCell {
+  background: #f7f2e9;
+  font-weight: bold;
+}
+
+/* ===== POORTJES VIA ECHTE ELEMENTEN =====
+   We plaatsen in elke cel vier kleine spans:
+   - .gate.gate-top
+   - .gate.gate-bottom
+   - .gate.gate-left
+   - .gate.gate-right
+
+   Elk "poortje" is gewoon een klein wit rechthoekje dat exact over de rand ligt.
+   Zo krijg je visueel een opening in de lijn.
+*/
+
+.gate {
+  position: absolute;
+  background: #fff;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* boven & onder zijn horizontale hapjes (14px breed, 4px hoog) */
+.gate-top {
+  width: 14px;
+  height: 4px;
+  left: 50%;
+  top: -2px;           /* half over de rand */
+  transform: translateX(-50%);
+}
+.gate-bottom {
+  width: 14px;
+  height: 4px;
+  left: 50%;
+  bottom: -2px;
+  transform: translateX(-50%);
+}
+
+/* links & rechts zijn verticale hapjes (4px breed, 14px hoog) */
+.gate-left {
+  width: 4px;
+  height: 14px;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.gate-right {
+  width: 4px;
+  height: 14px;
+  right: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* aan de buitenrand van de grid willen we GEEN opening naar buiten.
+   We schakelen die gates gewoon uit met display:none, o.b.v. data-r en data-c.
+*/
+
+/* bovenste rij: geen gate-top */
+.cellSprong[data-r="0"] .gate-top,
+.cellMaze[data-r="0"] .gate-top {
+  display: none;
+}
+
+/* onderste rij (r=4): geen gate-bottom */
+.cellSprong[data-r="4"] .gate-bottom,
+.cellMaze[data-r="4"] .gate-bottom {
+  display: none;
+}
+
+/* eerste kolom (c=0): geen gate-left */
+.cellSprong[data-c="0"] .gate-left,
+.cellMaze[data-c="0"] .gate-left {
+  display: none;
+}
+
+/* laatste kolom (c=4): geen gate-right */
+.cellSprong[data-c="4"] .gate-right,
+.cellMaze[data-c="4"] .gate-right {
+  display: none;
+}
+
+/* ===== ICONEN START / EINDE ===== */
+
+.pathIcon {
+  position: absolute;
+  font-size: 1.3rem;
+  line-height: 1.3rem;
+  pointer-events: none;
+}
+/* Startlabel en eindlabel bij maze:
+   we zetten icoon + pijltje + woord "start"/"einde" net buiten de rand.
+   We tekenen ze absoluut binnen .oefgrid.
+*/
+.mazeStartLabel,
+.mazeEndLabel {
+  position: absolute;
+  font-size: 0.95rem;
+  line-height: 1.2rem;
+  background: transparent;
+  color: #000;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+
+/* Tekst in label */
+.mazeLabelText {
+  font-size: 0.9rem;
+  color: #000;
+}
+
+.startIconCanvas { }
+.endIconCanvas   { }
+
+/* Maze-ingang en -uitgang op de buitenrand:
+   Normaal sluiten we de buitenrand (gate-left bij c=0 verdwijnt, enz.).
+   Maar voor de echte start en echte eind willen we WEL een gat naar buiten.
+   We doen dat door een extra class op die cel: .mazeEntry of .mazeExit.
+*/
+
+/* ingang links (typisch start [4,0]): laat gate-left toch zien */
+.mazeEntry[data-c="0"] .gate-left {
+  display: block !important;
+}
+
+/* uitgang rechts (typisch eind [0,4]): laat gate-right toch zien */
+.mazeExit[data-c="4"] .gate-right {
+  display: block !important;
+}
+
+/* standaard stond gate-left/gate-right wel op display:block.
+   Maar voor buitenrand hadden we display:none gezet via
+   .cellMaze[data-c="0"] .gate-left {display:none;} enz.
+   Dit !important herstelt het specifiek voor die ene cel.
+*/
+/* -----------  INGANG & UITGANG  ----------- */
+
+/* Ingang aan de linkerzijde: open buitenmuur links */
+.cellMaze.mazeEntry[data-c="0"] .gate-left {
+  display: block !important;
+  background: #fff;
+}
+
+/* Uitgang aan de rechterzijde: open buitenmuur rechts */
+.cellMaze.mazeExit[data-c="4"] .gate-right {
+  display: block !important;
+  background: #fff;
+}
+
+/* Start- en eindlabels iets duidelijker positioneren */
+.mazeStartLabel, .mazeEndLabel {
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  position: absolute;
+  white-space: nowrap;
+  color: #000;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  body {
+    padding: 0;
+  }
+  .worksheet {
+    border: none;
+    border-radius: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 1rem 1.5rem 1.5rem;
+  }
+}
