@@ -132,7 +132,7 @@
   </div>
 
   <!-- qrcode-generator (browser) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" integrity="sha512-qe9qpvQfT6sD0sNDw3+ZqvO2xPB0w8Xk0oWgZCwCkz8F3FNF7PpP3Bq1T7b6N8gkW8k0lZz5J7J1x1n3q1fFUA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+ <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
   <script>
     const urlEl = document.getElementById('url');
@@ -165,23 +165,39 @@
       return qr;
     }
 
-    function makeSVG(qr, pixelSize){
-      const count = qr.getModuleCount();
-      const totalModules = count + 2*QUIET_ZONE;
-      const cell = Math.floor(pixelSize / totalModules) || 1;
-      const size = totalModules * cell;
+   function makeSVG(qr, pixelSize){
+    const count = qr.getModuleCount();
+    const totalModules = count + 2 * QUIET_ZONE;
+    const cell = Math.floor(pixelSize / totalModules) || 1;
+    const size = totalModules * cell;
 
-      const inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false })
-                      .replace('<svg', `<svg width="${size}" height="${size}"`)
-                      .replace('</svg>', '');
-      const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`;
-      const translate = QUIET_ZONE * cell;
-      const wrapped = inner.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>';
-      const finalSVG = wrapped.replace(/<svg[^>]*>/, m => m + bg);
+    // Basis-SVG laten genereren
+    let inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false });
 
-      const parser = new DOMParser();
-      return parser.parseFromString(finalSVG, "image/svg+xml").documentElement;
-    }
+    // Eventuele bestaande width/height verwijderen en onze eigen zetten
+    inner = inner
+      .replace(/width="[^"]*"/, '')
+      .replace(/height="[^"]*"/, '')
+      .replace('<svg', `<svg width="${size}" height="${size}"`);
+
+    // Witte achtergrond + rustige zone (quiet zone) via translate
+    const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`;
+    const translate = QUIET_ZONE * cell;
+
+    // QR in een groep verschuiven zodat de quiet zone rondom zit
+    // De originele SVG afsluiting verwijderen, dan correct terug toevoegen
+let withGroup = inner.replace('</svg>', '');
+withGroup = withGroup.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>';
+
+
+    // Achtergrond net na de <svg ...> openen invoegen
+    const finalSVG = withGroup.replace(/<svg[^>]*>/, m => m + bg);
+
+    // Als DOM-element teruggeven
+    const parser = new DOMParser();
+    return parser.parseFromString(finalSVG, 'image/svg+xml').documentElement;
+  }
+
 
     function makeCanvasFromQR(qr, pixelSize){
       const count = qr.getModuleCount();

@@ -126,21 +126,35 @@
     }
     function eccMap(level){ return { L:'L', M:'M', Q:'Q', H:'H' }[level] || 'M'; }
     function buildQR(text, ecc){ const qr = qrcode(0, eccMap(ecc)); qr.addData(text); qr.make(); return qr; }
-    function makeSVG(qr, pixelSize){
-      const count = qr.getModuleCount();
-      const totalModules = count + 2*QUIET_ZONE;
-      const cell = Math.floor(pixelSize / totalModules) || 1;
-      const size = totalModules * cell;
-      const inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false })
-                       .replace('<svg', `<svg width="${size}" height="${size}"`)
-                       .replace('</svg>', '');
-      const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`;
-      const translate = QUIET_ZONE * cell;
-      const wrapped = inner.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>';
-      const finalSVG = wrapped.replace(/<svg[^>]*>/, m => m + bg);
-      const parser = new DOMParser();
-      return parser.parseFromString(finalSVG, "image/svg+xml").documentElement;
-    }
+  function makeSVG(qr, pixelSize){
+  const count = qr.getModuleCount();
+  const totalModules = count + 2 * QUIET_ZONE;
+  const cell = Math.floor(pixelSize / totalModules) || 1;
+  const size = totalModules * cell;
+
+  // 1) Laat de lib de basis-SVG maken
+  let inner = qr.createSvgTag({ cellSize: cell, margin: 0, scalable: false });
+
+  // 2) Verwijder eventuele bestaande width/height en zet onze eigen
+  inner = inner
+    .replace(/width="[^"]*"/, '')
+    .replace(/height="[^"]*"/, '')
+    .replace('<svg', `<svg width="${size}" height="${size}"`);
+
+  // 3) Verwijder de bestaande </svg>, open een <g> met verschuiving (quiet zone), sluit dan weer netjes
+  const translate = QUIET_ZONE * cell;
+  let withGroup = inner.replace('</svg>', '');
+  withGroup = withGroup.replace('>', `><g transform="translate(${translate},${translate})">`) + '</g></svg>';
+
+  // 4) Voeg een witte achtergrond toe (handig voor printen)
+  const bg = `<rect width="${size}" height="${size}" fill="#ffffff" />`;
+  const finalSVG = withGroup.replace(/<svg[^>]*>/, m => m + bg);
+
+  // 5) Geef een DOM-element terug
+  const parser = new DOMParser();
+  return parser.parseFromString(finalSVG, 'image/svg+xml').documentElement;
+}
+
     function makeCanvasFromQR(qr, pixelSize){
       const count = qr.getModuleCount();
       const totalModules = count + 2*QUIET_ZONE;
