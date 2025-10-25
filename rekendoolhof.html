@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekendoolhof</title>
+  <link rel="stylesheet" href="rekendoolhof.css">
+  <meta name="google" content="notranslate">
+</head>
+<body>
+
+  <!-- Paneel voor de leerkracht (wordt niet geprint) -->
+<div class="controls no-print">
+  <!-- Soort oefening -->
+  <div>
+    <label>Type oefening:
+      <select id="typeSelect">
+        <option value="sprongen" selected>Sprongen-doolhof (rekenen)</option>
+        <option value="maze">Leeg doolhof (pijlen volgen)</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- Instellingen voor sprongen -->
+ <div id="sprongSettings">
+    <label>Sprong:
+      <select id="sprongSelect">
+        <option value="2">+2</option>
+        <option value="5" selected>+5</option>
+        <option value="10">+10</option>
+      </select>
+    </label>
+
+    <label>Bereik:
+      <select id="bereikSelect">
+        <option value="20">tot 20</option>
+        <option value="100" selected>tot 100</option>
+      </select>
+    </label>
+
+    <label>Startgetal:
+      <select id="startModeSelect">
+        <option value="mooi" selected>mooi (bv. 20, 22, 24)</option>
+        <option value="vrij">vrij (bv. 7, 9, 11)</option>
+      </select>
+    </label>
+</div>
+
+
+  <!-- Thema -->
+  <div>
+    <label>Thema:
+      <select id="themaSelect">
+        <option value="herfst" selected>Herfst (🐿️ → 🌰)</option>
+        <option value="sint">Sint (🎅 → 🎁)</option>
+        <option value="pasen">Pasen (🐰 → 🥚)</option>
+        <option value="lente">Lente (🐦 → 🌸)</option>
+        <option value="zomer">Zomer (🏖️ → 🍦)</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- Nieuw: grootte -->
+  <div>
+    <label>Grootte:
+      <select id="sizeSelect">
+        <option value="5" selected>5 × 5</option>
+        <option value="7">7 × 7</option>
+        <option value="10">10 × 10</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- Acties -->
+  <div style="display:flex; flex-direction:column; gap:0.5rem;">
+    <button id="addExerciseBtn">➕ Voeg oefening toe</button>
+    <button id="clearWorksheetBtn">🗑️ Leeg werkblad</button>
+  </div>
+
+</div>
+
+  <!-- Hier komen één of meerdere oefeningen -->
+  <div class="worksheet" id="worksheet">
+    <!-- JS vult dit -->
+  </div>
+
+  <script src="rekendoolhof.js"></script>
+</body>
+</html>
