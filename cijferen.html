@@ -29,41 +29,73 @@
     #download-pdf{background-color:#28a745;}
 
     #print-area{display:block;width:210mm;margin:0 auto;padding:0;}
-    .pagina{
-      width:210mm;
-      height:296.5mm;
-      position:relative;
-      background:#fff;
-      border:1px solid #ddd;
-      box-shadow:0 0 10px rgba(0,0,0,.1);
-      margin:0 auto;
-      break-inside:avoid-page; page-break-inside:avoid;
-    }
-    .page-inner{
-      position: absolute;
-      inset: 5mm 15mm 10mm 22mm;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-    .page-split{ page-break-before: always; }
-    .pdf-mode .pagina{ border:none !important; box-shadow:none !important; margin:0 auto !important; }
+ .pagina{
+  width:210mm;
+  height:296.5mm;
+  position:relative;
+  background:#fff;
+  border:1px solid #ddd;
+  box-shadow:0 0 10px rgba(0,0,0,.1);
+  margin:0 auto;
 
-    .werkblad-header{
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      padding-top: 4mm;
-    }
-    .werkblad-header .naam{ font-size:16px; line-height:1.25; }
-    .werkblad-header .titel{
-      font-size:24px;
-      font-weight:bold;
-      text-align:center;
-      line-height:1.2;
-    }
+  /* belangrijk voor pdf */
+  break-inside: avoid-page;
+  page-break-inside: avoid;
+  page-break-after: always;   /* nieuwe pagina NA deze */
+}
+
+.pagina:last-child{
+  page-break-after: auto;     /* géén lege extra pagina meer op het einde */
+}
+
+/* verwijder volledig: .pagina:first-of-type {...} */
+
+
+.pdf-mode .pagina{
+  border:none !important;
+  box-shadow:none !important;
+  margin:0 auto !important;
+}
+
+
+ .page-inner{
+  position: absolute;
+  /* zo hoog mogelijk tegen de bovenrand */
+  inset: -15mm 15mm 10mm 22mm;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 26px; /* meer afstand tussen titel en oefeningen */
+}
+
+.pdf-mode .pagina{
+  border:none !important;
+  box-shadow:none !important;
+  margin:0 auto !important;
+}
+
+.werkblad-header{
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;        /* meer ruimte tussen Naam en titel */
+  padding-top: 0;   /* geen extra wit bovenaan */
+}
+
+.werkblad-header .naam{
+  font-size:16px;
+  line-height:1.1;
+  margin: 0;
+}
+
+.werkblad-header .titel{
+  font-size:24px;
+  font-weight:bold;
+  text-align:center;
+  line-height:1.1;
+  margin: 0;
+}
+
     .werkblad{display:block;break-inside:avoid-page;page-break-inside:avoid;}
     .rij{
       --gap-x:36px;
@@ -218,259 +250,317 @@
   </div>
 
   <script>
-    function downloadPDF(){
-      const element = document.getElementById('print-area');
-      element.classList.add('pdf-mode');
+function downloadPDF(){
+  const element = document.getElementById('print-area');
+  element.classList.add('pdf-mode');
 
-      const opt = {
-        margin:[0,0,0,0],
-        filename:'cijferen_werkblad.pdf',
-        image:{type:'jpeg',quality:0.98},
-        html2canvas:{scale:2,useCORS:true},
-        jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-        pagebreak:{mode:['css']}
-      };
+  const opt = {
+    margin:[0,0,0,0],
+    filename:'cijferen_werkblad.pdf',
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css']}
+  };
 
-      html2pdf().from(element).set(opt).save().then(()=>{
-        element.classList.remove('pdf-mode');
-      });
+  html2pdf().from(element).set(opt).save().then(()=>{
+    element.classList.remove('pdf-mode');
+  });
+}
+
+function getRandomNumber(min, max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function createPagina(titelText='Extra oefenen op cijferen'){
+  const pagina=document.createElement('div');
+  pagina.className='pagina';
+
+  const inner=document.createElement('div');
+  inner.className='page-inner';
+
+  const header=document.createElement('div');
+  header.className='werkblad-header';
+  header.innerHTML = `
+    <div class="naam">Naam: _________________________</div>
+    <div class="titel">${titelText}</div>
+  `;
+
+  const werkblad=document.createElement('div');
+  werkblad.className='werkblad';
+
+  inner.appendChild(header);
+  inner.appendChild(werkblad);
+  pagina.appendChild(inner);
+
+  return {pagina, werkblad, inner};
+}
+
+function genereerWerkblad(){
+  const type=document.getElementById('type').value;
+  const brug=document.getElementById('brug').value;
+  const invulling=document.getElementById('invulling').value;
+  const bereik=parseInt(document.getElementById('bereik').value,10);
+  const aantal=parseInt(document.getElementById('aantal').value,10);
+  const metSchatting = document.getElementById('schatting').checked;
+  const metStartpijl = document.getElementById('startpijl').checked;
+
+  const printArea=document.getElementById('print-area');
+  printArea.innerHTML='';
+
+  const geselecteerdeTypes=Array
+    .from(document.querySelectorAll('input[name="oefentype"]:checked'))
+    .map(cb=>cb.value);
+
+  if(geselecteerdeTypes.length===0){
+    alert("Kies minstens één oefentype.");
+    return;
+  }
+
+  // bereik 100: geen H-types
+  const toegestaneTypes = (bereik===100)
+    ? geselecteerdeTypes.filter(t=>!t.includes('H'))
+    : geselecteerdeTypes.slice();
+
+  if(toegestaneTypes.length===0){
+    alert("In 'tot 100' zijn H-oefentypes niet toegestaan. Vink minstens één E/TE-type aan.");
+    return;
+  }
+
+  // kolommen bepalen
+  let cols;
+  if (bereik === 1000) {
+    cols = 3;
+  } else { 
+    if (metSchatting) {
+      cols = 3; 
+    } else {
+      cols = 4; 
     }
+  }
 
-    function getRandomNumber(min, max){
-      return Math.floor(Math.random()*(max-min+1))+min;
-    }
+  // *** NIEUW: vaste max kaarten per pagina ***
+  // U gaf aan dat u 12 oefeningen op 1 blad wil (3 rijen x 4 kolommen).
+  // Bij 3 kolommen (of met schatting) zijn de kaarten hoger, dus nemen we 6 per blad.
+  // vaste max kaarten per pagina
+let maxPerPagina;
+if (cols === 4) {
+  // bereik tot 100 zonder schatting → 4 kolommen → 3 rijen
+  maxPerPagina = 12; // 3 rijen x 4 kolommen
+} else {
+  // 3 kolommen (of schatting aan, of bereik 1000)
+  // standaard stond dit op 6 = 2 rijen, maar we willen 3 rijen als er plaats is
+  maxPerPagina = 9; // 3 rijen x 3 kolommen
+}
 
-    function createPagina(titelText='Extra oefenen op cijferen'){
-      const pagina=document.createElement('div');
-      pagina.className='pagina';
-      const inner=document.createElement('div');
-      inner.className='page-inner';
-      const header=document.createElement('div');
-      header.className='werkblad-header';
-      header.innerHTML = `
-        <div class="naam">Naam: _________________________</div>
-        <div class="titel">${titelText}</div>
-      `;
-      const werkblad=document.createElement('div');
-      werkblad.className='werkblad';
-      inner.appendChild(header);
-      inner.appendChild(werkblad);
-      pagina.appendChild(inner);
-      return {pagina, werkblad, inner};
-    }
 
-    function genereerWerkblad(){
-      const type=document.getElementById('type').value;
-      const brug=document.getElementById('brug').value;
-      const invulling=document.getElementById('invulling').value;
-      const bereik=parseInt(document.getElementById('bereik').value,10);
-      const aantal=parseInt(document.getElementById('aantal').value,10);
-      const metSchatting = document.getElementById('schatting').checked;
-      const metStartpijl = document.getElementById('startpijl').checked; // Lees de nieuwe checkbox
-      const printArea=document.getElementById('print-area');
-      printArea.innerHTML='';
+  // start eerste pagina
+  let {pagina, werkblad} = createPagina();
+  printArea.appendChild(pagina);
 
-      const geselecteerdeTypes=Array.from(document.querySelectorAll('input[name="oefentype"]:checked')).map(cb=>cb.value);
-      if(geselecteerdeTypes.length===0){ alert("Kies minstens één oefentype."); return; }
-      
-      const toegestaneTypes = (bereik===100)
-        ? geselecteerdeTypes.filter(t=>!t.includes('H'))
-        : geselecteerdeTypes.slice();
+  // kolomklasse toepassen
+  werkblad.classList.add(cols===3?'cols-3':'cols-4');
 
-      if(toegestaneTypes.length===0){
-        alert("In 'tot 100' zijn H-oefentypes niet toegestaan. Vink minstens één E/TE-type aan.");
-        return;
-      }
+  // we bouwen rijen per pagina opnieuw op
+  let rijDiv = null;
+  let inRij = 0;
+  let kaartenOpDezePagina = 0;
 
-      let cols;
-      if (bereik === 1000) {
-        cols = 3;
-      } else { 
-        if (metSchatting) {
-          cols = 3; 
-        } else {
-          cols = 4; 
-        }
-      }
-
-      let {pagina, werkblad, inner}=createPagina();
+  for(let i=0;i<aantal;i++){
+    // als pagina vol is → nieuwe pagina aanmaken
+    if (kaartenOpDezePagina >= maxPerPagina){
+      ({pagina, werkblad} = createPagina());
       printArea.appendChild(pagina);
       werkblad.classList.add(cols===3?'cols-3':'cols-4');
-      let rijDiv=null, inRij=0;
-      
-      let isEersteRij = true;
+      rijDiv = null;
+      inRij = 0;
+      kaartenOpDezePagina = 0;
+    }
 
-      const beginNieuwePagina = () => {
-        const split=document.createElement('div');
-        split.className='page-split';
-        printArea.appendChild(split);
-        ({pagina, werkblad, inner}=createPagina());
-        printArea.appendChild(pagina);
-        werkblad.classList.add(cols===3?'cols-3':'cols-4');
-        rijDiv=null; inRij=0;
+    // willekeurige oefening genereren
+    const willekeurigType=toegestaneTypes[Math.floor(Math.random()*toegestaneTypes.length)];
+    const currentType=(type==='gemengd')?(Math.random()<0.5?'plus':'min'):type;
+
+    let getal1,getal2;
+    let isMetBrug;
+    if(brug==='met') isMetBrug=true;
+    else if(brug==='zonder') isMetBrug=false;
+    else isMetBrug=Math.random()<0.5;
+
+    let attempts=0;
+    while(attempts<200){
+      const [type1,type2]=willekeurigType.split('_');
+      const ranges={
+        E:[1,9],
+        T:[1,9],
+        TE:[10,99],
+        HTE:[100,999]
       };
 
-      const pastRijOpPagina = () => inner.scrollHeight <= inner.clientHeight;
+      let g1=(type1==='T')
+        ? getRandomNumber(ranges[type1][0],ranges[type1][1]) * 10
+        : getRandomNumber(ranges[type1][0],ranges[type1][1]);
 
-      for(let i=0;i<aantal;i++){
-        const willekeurigType=toegestaneTypes[Math.floor(Math.random()*toegestaneTypes.length)];
-        const currentType=(type==='gemengd')?(Math.random()<0.5?'plus':'min'):type;
+      let g2=(type2==='T')
+        ? getRandomNumber(ranges[type2][0],ranges[type2][1]) * 10
+        : getRandomNumber(ranges[type2][0],ranges[type2][1]);
 
-        let getal1,getal2;
-        let isMetBrug;
-        if(brug==='met') isMetBrug=true;
-        else if(brug==='zonder') isMetBrug=false;
-        else isMetBrug=Math.random()<0.5;
-
-        let attempts=0;
-        while(attempts<200){
-          const [type1,type2]=willekeurigType.split('_');
-          const ranges={E:[1,9],T:[1,9],TE:[10,99],HTE:[100,999]};
-          let g1=(type1==='T') ? getRandomNumber(ranges[type1][0],ranges[type1][1]) * 10 : getRandomNumber(ranges[type1][0],ranges[type1][1]);
-          let g2=(type2==='T') ? getRandomNumber(ranges[type2][0],ranges[type2][1]) * 10 : getRandomNumber(ranges[type2][0],ranges[type2][1]);
-
-          if(bereik===100){ g1=Math.min(g1,99); g2=Math.min(g2,99); }
-          if(currentType==='plus'){ getal1=g1; getal2=g2; }
-          else{
-            getal1=Math.max(g1,g2); getal2=Math.min(g1,g2);
-            if(getal1===getal2) getal1++;
-          }
-
-          const e1=getal1%10, e2=getal2%10;
-          const t1=Math.floor(getal1/10)%10, t2=Math.floor(getal2/10)%10;
-
-          let actueleBrug=false;
-          if(currentType==='plus'){
-            if(e1+e2>=10) actueleBrug=true;
-            if((bereik===1000 || willekeurigType.includes('H')) && t1+t2>=10) actueleBrug=true;
-          }else{
-            if(e1<e2) actueleBrug=true;
-            if((bereik===1000 || willekeurigType.includes('H')) && t1<t2) actueleBrug=true;
-          }
-
-          const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
-          if(bereik===100 && result>100){ attempts++; continue; }
-          if(actueleBrug===isMetBrug || brug==='beide') break;
-          attempts++;
-        }
-
-        if(!rijDiv || inRij===cols){
-          rijDiv=document.createElement('div');
-          rijDiv.className='rij';
-          werkblad.appendChild(rijDiv);
-          
-          if(!isEersteRij && !pastRijOpPagina()){
-            rijDiv.remove();
-            beginNieuwePagina();
-            rijDiv=document.createElement('div');
-            rijDiv.className='rij';
-            werkblad.appendChild(rijDiv);
-          }
-          inRij=0;
-          isEersteRij = false;
-        }
-
-        const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
-        const showH = (bereik===1000) && (getal1>=100 || getal2>=100 || (currentType==='plus' && result>=100) || (currentType==='min'  && getal1>=100));
-        
-        // Geef de keuze voor de startpijl mee
-        const kaartHTML = createOefeningHTML(getal1,getal2,currentType,showH,invulling,metSchatting, metStartpijl);
-        
-        const temp = document.createElement('div');
-        temp.innerHTML = kaartHTML.trim();
-        const kaart = temp.firstElementChild;
-        rijDiv.appendChild(kaart);
-
-        if(!isEersteRij && !pastRijOpPagina()){
-          kaart.remove();
-          if(rijDiv.children.length===0){
-            rijDiv.remove();
-          }
-          beginNieuwePagina();
-          rijDiv=document.createElement('div');
-          rijDiv.className='rij';
-          werkblad.appendChild(rijDiv);
-          rijDiv.appendChild(kaart);
-        }
-        inRij++;
+      if(bereik===100){
+        g1=Math.min(g1,99);
+        g2=Math.min(g2,99);
       }
+
+      if(currentType==='plus'){
+        getal1=g1; getal2=g2;
+      }else{
+        getal1=Math.max(g1,g2);
+        getal2=Math.min(g1,g2);
+        if(getal1===getal2) getal1++;
+      }
+
+      const e1=getal1%10, e2=getal2%10;
+      const t1=Math.floor(getal1/10)%10, t2=Math.floor(getal2/10)%10;
+
+      let actueleBrug=false;
+      if(currentType==='plus'){
+        if(e1+e2>=10) actueleBrug=true;
+        if((bereik===1000 || willekeurigType.includes('H')) && t1+t2>=10) actueleBrug=true;
+      }else{
+        if(e1<e2) actueleBrug=true;
+        if((bereik===1000 || willekeurigType.includes('H')) && t1<t2) actueleBrug=true;
+      }
+
+      const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
+
+      if(bereik===100 && result>100){
+        attempts++;
+        continue;
+      }
+
+      if(actueleBrug===isMetBrug || brug==='beide'){
+        break;
+      }
+      attempts++;
     }
 
-    // Functie accepteert nu 'metStartpijl'
-    function createOefeningHTML(g1,g2,type,showH,invulling,metSchatting, metStartpijl){
-      const op = type==='plus'?'+':'-';
-      const vraag = `${g1} ${op} ${g2} = ?`;
-      let H1='',T1='',E1='',H2='',T2='',E2='';
+    const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
+    const showH = (
+      bereik===1000 &&
+      ( getal1>=100 || getal2>=100 ||
+        (currentType==='plus' && result>=100) ||
+        (currentType==='min'  && getal1>=100)
+      )
+    );
 
-      if(invulling==='ingevuld'){
-        const pad = showH?3:2;
-        const g1_str = g1.toString().padStart(pad,' ');
-        const g2_str = g2.toString().padStart(pad,' ');
-        if(showH){ [H1,T1,E1]=g1_str.split(''); [H2,T2,E2]=g2_str.split(''); }
-        else     { [T1,E1]=g1_str.split('');    [T2,E2]=g2_str.split('');    }
-        [H1,T1,E1,H2,T2,E2]=[H1,T1,E1,H2,T2,E2].map(v=>v.trim());
-      }
-      
-      let schattingHTML = '';
-      if (metSchatting) {
-        schattingHTML = `
-          <div class="schatting">
-            <div>Ik schat:</div>
-            <div>__________________</div>
-          </div>
-        `;
-      }
-      
-      // Maak de HTML voor de pijl alleen aan als de optie is aangevinkt
-      let pijlHTML = '';
-      if (metStartpijl) {
-        pijlHTML = '<div class="start-pijl"></div>';
-      }
+    const kaartHTML = createOefeningHTML(
+      getal1,
+      getal2,
+      currentType,
+      showH,
+      invulling,
+      metSchatting,
+      metStartpijl
+    );
 
-      return `
-        <div class="oefening">
-          <div class="vraag">${vraag}</div>
-          ${schattingHTML} 
-          <div class="schema-container">
-            <div class="operator">${op}</div>
-            <table class="schema">
-              <thead>
-                <tr>
-                  ${showH?'<td class="header honderd">H</td>':''}
-                  <td class="header tien">T</td>
-                  <td class="header een">E${pijlHTML}</td>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  ${showH?'<td class="onthoud-cel honderd"></td>':''}
-                  <td class="onthoud-cel tien"></td>
-                  <td class="onthoud-cel een"></td>
-                </tr>
-                <tr>
-                  ${showH?`<td class="getal-cel">${H1}</td>`:''}
-                  <td class="getal-cel">${T1}</td>
-                  <td class="getal-cel">${E1}</td>
-                </tr>
-                <tr>
-                  ${showH?`<td class="getal-cel">${H2}</td>`:''}
-                  <td class="getal-cel">${T2}</td>
-                  <td class="getal-cel">${E2}</td>
-                </tr>
-                <tr>
-                  ${showH?'<td class="oplossing-cel"></td>':''}
-                  <td class="oplossing-cel"></td>
-                  <td class="oplossing-cel"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
+    // nieuwe rij starten indien nodig
+    if(!rijDiv || inRij === (cols)){
+      rijDiv = document.createElement('div');
+      rijDiv.className='rij';
+      werkblad.appendChild(rijDiv);
+      inRij = 0;
     }
 
-    window.onload=genereerWerkblad;
-  </script>
+    // kaart toevoegen
+    const temp = document.createElement('div');
+    temp.innerHTML = kaartHTML.trim();
+    const kaart = temp.firstElementChild;
+    rijDiv.appendChild(kaart);
+
+    inRij++;
+    kaartenOpDezePagina++;
+  }
+}
+
+// zelfde als bij u, enkel naam aangepast in paramlijst
+function createOefeningHTML(g1,g2,type,showH,invulling,metSchatting,metStartpijl){
+  const op = type==='plus'?'+':'-';
+  const vraag = `${g1} ${op} ${g2} = ?`;
+  let H1='',T1='',E1='',H2='',T2='',E2='';
+
+  if(invulling==='ingevuld'){
+    const pad = showH?3:2;
+    const g1_str = g1.toString().padStart(pad,' ');
+    const g2_str = g2.toString().padStart(pad,' ');
+    if(showH){
+      [H1,T1,E1]=g1_str.split('');
+      [H2,T2,E2]=g2_str.split('');
+    }else{
+      [T1,E1]=g1_str.split('');
+      [T2,E2]=g2_str.split('');
+    }
+    [H1,T1,E1,H2,T2,E2]=[H1,T1,E1,H2,T2,E2].map(v=>v.trim());
+  }
+
+  let schattingHTML = '';
+  if (metSchatting) {
+    schattingHTML = `
+      <div class="schatting">
+        <div>Ik schat:</div>
+        <div>__________________</div>
+      </div>
+    `;
+  }
+
+  let pijlHTML = '';
+  if (metStartpijl) {
+    pijlHTML = '<div class="start-pijl"></div>';
+  }
+
+  return `
+    <div class="oefening">
+      <div class="vraag">${vraag}</div>
+      ${schattingHTML}
+      <div class="schema-container">
+        <div class="operator">${op}</div>
+        <table class="schema">
+          <thead>
+            <tr>
+              ${showH?'<td class="header honderd">H</td>':''}
+              <td class="header tien">T</td>
+              <td class="header een">E${pijlHTML}</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              ${showH?'<td class="onthoud-cel honderd"></td>':''}
+              <td class="onthoud-cel tien"></td>
+              <td class="onthoud-cel een"></td>
+            </tr>
+            <tr>
+              ${showH?`<td class="getal-cel">${H1}</td>`:''}
+              <td class="getal-cel">${T1}</td>
+              <td class="getal-cel">${E1}</td>
+            </tr>
+            <tr>
+              ${showH?`<td class="getal-cel">${H2}</td>`:''}
+              <td class="getal-cel">${T2}</td>
+              <td class="getal-cel">${E2}</td>
+            </tr>
+            <tr>
+              ${showH?'<td class="oplossing-cel"></td>':''}
+              <td class="oplossing-cel"></td>
+              <td class="oplossing-cel"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+window.onload = genereerWerkblad;
+</script>
+
 
 </body>
 </html>
