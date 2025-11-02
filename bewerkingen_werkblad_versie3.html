@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jouw Werkblad</title>
+  <link rel="stylesheet" href="bewerkingen_versie2.css">
+  <!-- eerst html2canvas, dan jsPDF -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Fallbacks: zorgen dat de variabelen altijd bestaan -->
+  <script>
+    window.PREVIEW_TOP_PX     ??= 90;
+    window.PREVIEW_BOTTOM_PX  ??= 90;
+    window.PREVIEW_SEG_GAP_PX ??= 24;
+
+    window.MM2PX     ??= 3.78;                 // 96dpi ≈ 3.78 px/mm
+    window.PAGE_W_PX ??= 210 * window.MM2PX;   // ≈ 794 px
+    window.PAGE_H_PX ??= 297 * window.MM2PX;   // ≈ 1122 px
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Jouw Werkblad</h1>
+  </header>
+
+  <div class="werkblad-pagina">
+    <div id="werkblad-knoppen">
+      <button id="opnieuwBtn">Maak nieuwe oefeningen</button>
+      <button id="downloadPdfBtn">Download als PDF</button>
+    </div>
+
+    <div id="werkblad-wrapper">
+      <div id="werkblad-container"></div>
+    </div>
+  </div>
+
+  <!-- Cache-buster om verouderde JS te vermijden -->
+   <script>console.log('Werkblad JS geladen: 2025-10-12d');</script>
+  <script src="tafels_inzicht_v3.js"></script>
+<script src="bewerkingen_werkblad_versie3.js"></script>
+</body>
+</html>
