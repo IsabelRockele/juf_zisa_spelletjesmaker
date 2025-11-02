@@ -256,11 +256,13 @@
   </div>
 
   <div class="control-group">
-    <label class="group-title">Wat wil je oefenen?</label>
-    <label><input type="radio" name="ti_type" value="maal" checked> Vermenigvuldigen</label>
-    <label><input type="radio" name="ti_type" value="delen"> Delen</label>
-    <label><input type="radio" name="ti_type" value="beide"> Beide</label>
-  </div>
+  <label class="group-title">Type bewerking:</label>
+  <label><input type="radio" name="tafelType" value="maal" checked> Maal</label>
+  <label><input type="radio" name="tafelType" value="delen" checked> Delen</label>
+  <label><input type="radio" name="tafelType" value="delen-ijsberg"> Delen (ijsberg)</label>
+  <label><input type="radio" name="tafelType" value="delen-ijsberg-rest"> Delen met rest (ijsberg)</label>
+</div>
+
 
   <div class="control-group">
   <label class="group-title">Tot waar mag het?</label>
@@ -293,6 +295,19 @@
     <button id="ti_maakBtn" class="btn btn--primary">Maak werkblad</button>
     <button id="ti_voegToeBtn" class="btn">Voeg toe aan bundel</button>
   </div>
+  <!-- EXTRA (voor later): Tafels-inzicht met sprongen -->
+<div class="control-group" style="margin-top:10px;padding-top:8px;border-top:1px dashed #e5eef9">
+  <label class="group-title">Tafels-inzicht – met sprongen (voor later):</label>
+  <label><input type="checkbox" id="tiSprongenAan"> Gebruik sprongen in tafels-inzicht</label>
+  <div id="tiSprongenGroep" style="margin-top:6px;opacity:.85">
+    <label><input type="radio" name="tiSprongenType" value="maal" checked> Maal</label>
+    <label><input type="radio" name="tiSprongenType" value="delen-ijsberg"> Delen (ijsberg)</label>
+    <label><input type="radio" name="tiSprongenType" value="delen-ijsberg-rest"> Delen met rest (ijsberg)</label>
+  </div>
+  <div style="font-size:12px;color:#666;margin-top:4px">
+    Opmerking: deze keuze wordt al bewaard; de weergave bouwen we later.
+  </div>
+</div>
 </div>
 
     <!-- VAK 3: TAFELS -->
