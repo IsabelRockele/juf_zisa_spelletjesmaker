@@ -4,15 +4,20 @@
 window.TI = (function () {
 
   // 1) hulpfunctie: hoeveel keer mag ik deze tafel nemen?
-  function maxFactorVoor(tafel, cfg) {
-    const bereik = cfg.bereik || '12';   // '12' of 'volledig'
-    if (bereik === 'volledig') {
-      return 10;                        // 1 t.e.m. 10
-    }
-    // bereik === '12'
-    const mf = Math.floor(12 / tafel);   // bv. 12 / 5 = 2 → 5×1 en 5×2
-    return Math.max(1, Math.min(10, mf));
+ function maxFactorVoor(tafel, cfg) {
+  const bereik = cfg.bereik || '12';   // '12' of 'volledig'
+
+  // volledig = alle tafels t.e.m. 10
+  if (bereik === 'volledig') {
+    return 10;
   }
+
+  // NIEUW: bij "tot 12" zorgen we dat er max. 12 voorwerpen in totaal zijn
+  const maxVoorwerpen = 12;
+  const mf = Math.floor(maxVoorwerpen / tafel); // bv. 12 / 5 = 2 → 5×1 en 5×2
+  return Math.max(1, Math.min(10, mf));
+}
+
 
   // 2) maak één oefening
   function maakOefening(cfg) {
@@ -20,13 +25,54 @@ window.TI = (function () {
       ? cfg.gekozenTafels
       : [1];
 
-    const tafel = tafels[Math.floor(Math.random() * tafels.length)];
-    const typeKeuze = cfg.tafelType || 'maal';   // 'maal' | 'delen' | 'beide'
+const tafel = tafels[Math.floor(Math.random() * tafels.length)];
 
-    let op = typeKeuze;
-    if (typeKeuze === 'beide') {
-      op = Math.random() < 0.5 ? 'maal' : 'delen';
-    }
+// 1) ruwe waarde uit UI of uit localStorage
+const rawType = (cfg.tafelType || 'maal').trim();
+
+// 2) ALLE mogelijke schrijfwijzen naar onze 4 bekende types mappen
+let typeKeuze;
+switch (rawType) {
+  case 'maal':
+    typeKeuze = 'maal';
+    break;
+
+  // gewone delen (we bouwen later)
+  case 'delen':
+  case 'delen-gewoon':
+    typeKeuze = 'delen';
+    break;
+
+  // jouw nieuwe keuzes uit de HTML
+  case 'delen-ijsberg':
+  case 'delen ijsbergversie':
+  case 'delen-ijsberg-versie':
+    typeKeuze = 'delen';
+    break;
+
+  case 'delen-ijsberg-rest':
+  case 'delen met rest (ijsberg)':
+    typeKeuze = 'delen';
+    break;
+
+  // oude werkbladen
+  case 'beide':
+    typeKeuze = 'beide';
+    break;
+
+  default:
+    // veiligheid: als we iets geks krijgen, doe dan maar maal
+    typeKeuze = 'maal';
+    break;
+}
+
+// 3) “beide” blijft werken voor oude bestanden
+let op = typeKeuze;
+if (typeKeuze === 'beide') {
+  op = Math.random() < 0.5 ? 'maal' : 'delen';
+}
+
+
 
     if (op === 'maal') {
       const mf = maxFactorVoor(tafel, cfg);
@@ -57,14 +103,47 @@ window.TI = (function () {
   }
 
   // 3) lijst met oefeningen
-  function genereer(cfg) {
-    const n = cfg.numOefeningen || 8;
-    const lijst = [];
-    for (let i = 0; i < n; i++) {
-      lijst.push(maakOefening(cfg));
+function genereer(cfg) {
+  const n = cfg.numOefeningen || 8;
+  const lijst = [];
+  let tries = 0;
+  const maxTries = n * 5; // veiligheidsrem
+
+  while (lijst.length < n && tries < maxTries) {
+    const oef = maakOefening(cfg);
+    tries++;
+
+    // check op dubbels
+    const bestaatAl = lijst.some((bestaande) => isZelfdeOefening(bestaande, oef));
+    if (!bestaatAl) {
+      lijst.push(oef);
     }
-    return lijst;
+    // anders: gewoon nog eens proberen
   }
+
+  return lijst;
+}
+
+// vergelijkt 2 tafels-inzicht-oefeningen op inhoud
+function isZelfdeOefening(a, b) {
+  if (!a || !b) return false;
+
+  // verschillend type → nooit hetzelfde
+  if (a.op !== b.op) return false;
+
+  // maal: zelfde tafel & zelfde aantal groepen = zelfde oefening
+  if (a.op === 'maal') {
+    return a.tafel === b.tafel && a.groepen === b.groepen;
+  }
+
+  // delen (ijsberg): zelfde totaal en zelfde groepsgrootte = zelfde oefening
+  if (a.op === 'delen') {
+    return a.totaal === b.totaal && a.grootte === b.grootte;
+  }
+
+  return false;
+}
+
 
  // 4) PREVIEW – één kaartje tekenen
 function renderPreview(grid, cfg, oef, oefIndex = 0) {
@@ -109,56 +188,107 @@ function renderPreview(grid, cfg, oef, oefIndex = 0) {
   card.style.minHeight = '250px';
   card.style.boxSizing = 'border-box';
 
-  // --- GROEPEN BOVENAAN ---
-  const plaat = document.createElement('div');
+  // --- GROEPEN / TEKENING BOVENAAN ---
+const plaat = document.createElement('div');
+plaat.style.marginBottom = '10px';
+
+if (oef.op === 'maal') {
+  // bij maal tonen we de voorwerpen
   plaat.style.display = 'flex';
   plaat.style.flexWrap = 'wrap';
   plaat.style.gap = '8px';
-  plaat.style.marginBottom = '10px';
-
-  const groepen = oef.groepen || oef.tafel || 1;
-  const grootte = oef.grootte || oef.factor || 1;
-
-  for (let g = 0; g < groepen; g++) {
+  for (let g = 0; g < oef.groepen; g++) {
     const groep = document.createElement('div');
-    groep.style.display = 'grid';
-    groep.style.placeItems = 'center';
-    groep.style.gap = '4px';
-    groep.style.padding = '6px';
-    groep.style.minWidth = '76px';
     groep.style.border = '2px solid #b6cfff';
     groep.style.borderRadius = '10px';
-    groep.style.background = '#f8fbff';
-
-    // kolommen bepalen zoals u vroeg
-    let cols = 1;
-    if (grootte === 4) cols = 2;         // 2x2
-    else if (grootte === 5) cols = 3;    // 3 + 2
-    else if (grootte === 6) cols = 3;    // 2 rijen van 3
-    else if (grootte >= 7) cols = 4;
-
-    groep.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-
-    for (let b = 0; b < grootte; b++) {
+    groep.style.padding = '6px';
+    groep.style.display = 'grid';
+    groep.style.placeItems = 'center';
+    for (let b = 0; b < oef.grootte; b++) {
       const item = document.createElement('div');
       item.textContent = icoon;
       item.style.fontSize = '28px';
-      item.style.width = '32px';
-      item.style.height = '32px';
-      item.style.display = 'flex';
-      item.style.alignItems = 'center';
-      item.style.justifyContent = 'center';
       groep.appendChild(item);
     }
-
     plaat.appendChild(groep);
   }
+} else {
+  // IJSBERG-VERSIE DELEN: toon alle voorwerpen los
+  const totaal = oef.totaal || (oef.groepen * oef.grootte);
+  const max = Math.min(12, totaal);
 
-  card.appendChild(plaat);
+  plaat.style.display = 'flex';
+  plaat.style.flexWrap = 'wrap';
+  plaat.style.gap = '6px';
+  plaat.style.marginBottom = '10px';
 
-  // --- ZINNEN MET MEER WITRUIMTE ---
-  // --- ZINNEN MET MEER WITRUIMTE ---
+  for (let i = 0; i < max; i++) {
+    const item = document.createElement('div');
+    item.textContent = icoon;
+    item.style.fontSize = '30px';
+    item.style.width = '32px';
+    item.style.height = '32px';
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.justifyContent = 'center';
+    plaat.appendChild(item);
+  }
+}
+
+
+card.appendChild(plaat);
+
+// HIER TOEVOEGEN  ⬇️
+const groepen = oef.groepen || oef.tafel || 1;
+const grootte = oef.grootte || oef.factor || 1;
+
+// --- ZINNEN MET MEER WITRUIMTE ---
 const tekstContainer = document.createElement('div');
+if (oef.op === 'delen') {
+  const totaal  = oef.totaal  || (oef.groepen * oef.grootte);
+  const perGroep = oef.grootte || 1;
+  const groepen = oef.groepen || 1;
+
+  // maak “8 - ____ - ____ = 0”
+  const aftrekStukken = Array.from({ length: groepen }, () => '_____').join(' - ');
+  const aftrekLijn = `${totaal} - ${aftrekStukken} = 0`;
+
+  tekstContainer.innerHTML = `
+    <p>Er zijn _____ ${woord}.</p>
+    <p>Ik verdeel in groepen van ${perGroep}.</p>
+    <p>${aftrekLijn}</p>
+    <p>Ik kan _____ groepen van ${perGroep} maken.</p>
+    <p>${totaal} : ${perGroep} = _____</p>
+  `;
+
+  card.appendChild(tekstContainer);
+  // kaart tonen
+  const cell = document.createElement('div');
+  cell.className = 'oefening';
+  cell.style.overflow = 'visible';
+  cell.appendChild(card);
+
+  if (typeof appendWithDelete === 'function') {
+    appendWithDelete(grid, cell, cfg, oef);
+  } else {
+    grid.appendChild(cell);
+  }
+  return; // heel belangrijk: MAAL-zinnen niet meer tekenen
+}
+
+if (oef.op === 'delen') {
+  // aangepaste invulzinnen voor DEEL-oefeningen
+  tekstContainer.innerHTML = `
+    <p>Ik heb _____ ${woord}.</p>
+    <p>Ik deel ze in _____ groepjes.</p>
+    <p>In elk groepje komen _____ ${woord}.</p>
+  `;
+  card.appendChild(tekstContainer);
+  grid.appendChild(card);
+  return;
+}
+
+
 tekstContainer.style.display = 'flex';
 tekstContainer.style.flexDirection = 'column';
 tekstContainer.style.gap = '4px';
@@ -226,16 +356,39 @@ tekstContainer.appendChild(zMaal);
 
 
   // 5) PDF – zelfde zinnen, geen emoji
-  function tekenPdf(doc, x, y, oef) {
-    const h = 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text('Ik zie ______ groepen.', x, y);
-    doc.text('In elke groep zie ik ______ voorwerpen.', x, y + h);
-    doc.text('Dat is ______ + ______ + ______ .', x, y + 2 * h);
-    doc.text('Dat is ______ keer ______ .', x, y + 3 * h);
-    doc.text('Dat is ______ × ______ .', x, y + 4 * h);
+ function tekenPdf(doc, x, y, oef) {
+  const h = 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+
+  if (oef.op === 'delen') {
+    const totaal   = oef.totaal  || (oef.groepen * oef.grootte);
+    const perGroep = oef.grootte || 1;
+    const groepen  = oef.groepen || 1;
+
+    // lijn “8 - ____ - ____ = 0”
+    let lijn = `${totaal}`;
+    for (let i = 0; i < groepen; i++) {
+      lijn += ' - ______';
+    }
+    lijn += ' = 0';
+
+    doc.text('Er zijn ______ voorwerpen.', x, y);
+    doc.text(`Ik verdeel in groepen van ${perGroep}.`, x, y + h);
+    doc.text(lijn, x, y + 2 * h);
+    doc.text(`Ik kan ______ groepen van ${perGroep} maken.`, x, y + 3 * h);
+    doc.text(`${totaal} : ${perGroep} = ______`, x, y + 4 * h);
+    return;
   }
+
+  // MAAL (blijft zoals het was)
+  doc.text('Ik zie ______ groepen.', x, y);
+  doc.text('In elke groep zie ik ______ voorwerpen.', x, y + h);
+  doc.text('Dat is ______ + ______ + ______ .', x, y + 2 * h);
+  doc.text('Dat is ______ keer ______ .', x, y + 3 * h);
+  doc.text('Dat is ______ × ______ .', x, y + 4 * h);
+}
+
 
   return {
     genereer,
