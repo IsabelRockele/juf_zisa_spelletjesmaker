@@ -249,16 +249,16 @@ if (oef.op === 'delen') {
   const perGroep = oef.grootte || 1;
   const groepen = oef.groepen || 1;
 
-  // maak “8 - ____ - ____ = 0”
-  const aftrekStukken = Array.from({ length: groepen }, () => '_____').join(' - ');
+  // maak “8 - ___ - ___ = 0”
+  const aftrekStukken = Array.from({ length: groepen }, () => '__').join(' - ');
   const aftrekLijn = `${totaal} - ${aftrekStukken} = 0`;
 
   tekstContainer.innerHTML = `
-    <p>Er zijn _____ ${woord}.</p>
+    <p>Er zijn ____ ${woord}.</p>
     <p>Ik verdeel in groepen van ${perGroep}.</p>
     <p>${aftrekLijn}</p>
-    <p>Ik kan _____ groepen van ${perGroep} maken.</p>
-    <p>${totaal} : ${perGroep} = _____</p>
+    <p>Ik kan ____ groepen van ${perGroep} maken.</p>
+    <p>${totaal} : ${perGroep} = ____</p>
   `;
 
   card.appendChild(tekstContainer);
@@ -268,20 +268,53 @@ if (oef.op === 'delen') {
   cell.style.overflow = 'visible';
   cell.appendChild(card);
 
-  if (typeof appendWithDelete === 'function') {
-    appendWithDelete(grid, cell, cfg, oef);
-  } else {
-    grid.appendChild(cell);
-  }
+const delFn =
+  (window && typeof window.appendWithDelete === 'function')
+    ? window.appendWithDelete
+    : (typeof appendWithDelete === 'function' ? appendWithDelete : null);
+
+if (delFn) {
+  // gebruik de standaard delete uit bewerkingen_werkblad_versie3.js
+  delFn(grid, cell, cfg, oef);
+} else {
+  // ❗ fallback: zelf een kruisje maken
+  const btn = document.createElement('button');
+  btn.textContent = '×';
+  btn.className = 'ti-del-btn';
+  btn.style.position = 'absolute';
+  btn.style.top = '4px';
+  btn.style.right = '4px';
+  btn.style.border = 'none';
+  btn.style.background = 'transparent';
+  btn.style.fontSize = '16px';
+  btn.style.cursor = 'pointer';
+
+  btn.addEventListener('click', () => {
+    // uit de dataset halen
+    if (Array.isArray(cfg._oefeningen)) {
+      const ix = cfg._oefeningen.indexOf(oef);
+      if (ix > -1) cfg._oefeningen.splice(ix, 1);
+    }
+    cell.remove();
+    if (typeof window.paginatePreview === 'function') {
+      window.paginatePreview();
+    }
+  });
+
+  cell.style.position = 'relative';
+  cell.appendChild(btn);
+  grid.appendChild(cell);
+}
+
   return; // heel belangrijk: MAAL-zinnen niet meer tekenen
 }
 
 if (oef.op === 'delen') {
   // aangepaste invulzinnen voor DEEL-oefeningen
   tekstContainer.innerHTML = `
-    <p>Ik heb _____ ${woord}.</p>
-    <p>Ik deel ze in _____ groepjes.</p>
-    <p>In elk groepje komen _____ ${woord}.</p>
+    <p>Ik heb ____ ${woord}.</p>
+    <p>Ik deel ze in ___ groepjes.</p>
+    <p>In elk groepje komen ___ ${woord}.</p>
   `;
   card.appendChild(tekstContainer);
   grid.appendChild(card);
@@ -296,30 +329,30 @@ tekstContainer.style.gap = '4px';
 // 1. groep/groepen
 const z1 = document.createElement('p');
 z1.style.margin = '0';
-z1.textContent = `Ik zie _____ ${groepen === 1 ? 'groep' : 'groepen'}.`;
+z1.textContent = `Ik zie ____ ${groepen === 1 ? 'groep' : 'groepen'}.`;
 tekstContainer.appendChild(z1);
 
 // 2. in elke groep ...
 const z2 = document.createElement('p');
 z2.style.margin = '0';
-z2.textContent = `In elke groep zie ik _____ ${woord}.`;
+z2.textContent = `In elke groep zie ik ____ ${woord}.`;
 tekstContainer.appendChild(z2);
 
 // 3. plus-lijn: aantal-afhankelijk
 if (groepen <= 4) {
-  const stukjes = Array.from({ length: groepen }, () => '_____');
+  const stukjes = Array.from({ length: groepen }, () => '___');
   const z3 = document.createElement('p');
   z3.style.margin = '0';
   z3.textContent = 'Dat is ' + stukjes.join(' + ') + ' .';
   tekstContainer.appendChild(z3);
 } else {
-  const eerste = Array.from({ length: 4 }, () => '_____').join(' + ');
+  const eerste = Array.from({ length: 4 }, () => '___').join(' + ');
   const z3 = document.createElement('p');
   z3.style.margin = '0';
   z3.textContent = 'Dat is ' + eerste + ' +';
   tekstContainer.appendChild(z3);
 
-  const rest = Array.from({ length: groepen - 4 }, () => '_____').join(' + ');
+  const rest = Array.from({ length: groepen - 4 }, () => '___').join(' + ');
   const z4 = document.createElement('p');
   z4.style.margin = '0';
   z4.textContent = rest + ' .';
@@ -329,12 +362,12 @@ if (groepen <= 4) {
 // 4. keer- en maal-lijn met echte groepsgrootte
 const zKeer = document.createElement('p');
 zKeer.style.margin = '0';
-zKeer.textContent = `Dat is _____ keer ${grootte} .`;
+zKeer.textContent = `Dat is ____ keer ${grootte} .`;
 tekstContainer.appendChild(zKeer);
 
 const zMaal = document.createElement('p');
 zMaal.style.margin = '0';
-zMaal.textContent = `Dat is _____ × ${grootte} .`;
+zMaal.textContent = `Dat is ____ × ${grootte} .`;
 tekstContainer.appendChild(zMaal);
 
   card.appendChild(tekstContainer);
