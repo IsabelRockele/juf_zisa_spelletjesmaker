@@ -717,12 +717,15 @@ tools.addEventListener('click', (e) => {
         if (cfg.splitsStijl === 'bewerkingen4')  oef._b4 = true;
       } else if (cfg.hoofdBewerking === 'tafels') oef = genereerTafelsom(cfg);
 
-    else if (cfg.hoofdBewerking === 'tafels-inzicht') {
-  // genereer precies 1 “tafels-inzicht”-oefening per iteratie
+   else if (cfg.hoofdBewerking === 'tafels-inzicht') {
+  // 1 oefening tafels-inzicht bijmaken
   const lijstje = (window.TI && typeof TI.genereer === 'function')
     ? TI.genereer({ ...cfg, numOefeningen: 1 })
     : [];
-  if (lijstje.length) oefeningen.push(lijstje[0]);
+
+  if (Array.isArray(lijstje) && lijstje.length) {
+    oef = lijstje[0];   // 👉 laat het algemene stuk hieronder het werk doen
+  }
 }
 
 
