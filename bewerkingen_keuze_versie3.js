@@ -270,7 +270,14 @@ function bouwTafelsInzichtSettings() {
     .map(cb => parseInt(cb.value, 10))
     .filter(n => !isNaN(n));
 
-  const type = (document.querySelector('input[name="ti_type"]:checked') || {}).value || 'maal';
+  // eerst kijken of we de nieuwe groep hebben (maal / delen-ijsberg / delen-ijsberg-rest)
+let typeEl = document.querySelector('input[name="tafelType"]:checked');
+// zo niet: terugvallen op de oude (maal / delen / beide)
+if (!typeEl) {
+  typeEl = document.querySelector('input[name="ti_type"]:checked');
+}
+const type = (typeEl && typeEl.value) ? typeEl.value : 'maal';
+
   const bereikKeuze = (document.querySelector('input[name="ti_bereik"]:checked') || {}).value || '12';
 // deze wordt niet meer gebruikt, maar laat ze desnoods staan voor later gebruik:
 const maxUitkomst = (bereikKeuze === 'volledig') ? 'volledig' : 12;
