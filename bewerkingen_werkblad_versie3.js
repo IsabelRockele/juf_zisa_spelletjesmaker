@@ -1174,17 +1174,23 @@ function drawBrugHulpInPDF(doc, x, y, oef, cfg, colWidth) {
  
 // Tafels-inzicht: PDF-versie met vaste hoogte (90 mm) en vaste tekststart
 function drawTafelsInzichtPDF(doc, xLeft, yTop, oef, oefIndex = 0) {
-  const boxW      = 90;   // moet overeenkomen met layout
-  const boxH      = 90;   // ← VASTE HOOGTE, hier zit de oplossing
-  const marginTop = 8;
-  const left      = xLeft;
+  const boxW = 90;
+let boxH   = 110; // standaard voor maal
+
+if (oef.op === 'delen') {
+  boxH = 92;      // korter kader bij delen
+}
+
+const marginTop = 8;
+const left      = xLeft;
 
   // ----- data -----
-  const groepen  = oef.groepen || oef.tafel || 1;
-  const perGroep = oef.grootte || oef.factor || 1;
+  const groepen   = oef.groepen || oef.tafel || 1;
+  const perGroep  = oef.grootte || oef.factor || 1;
+  const totaal    = oef.totaal || (groepen * perGroep);
   const woordGroep = (groepen === 1) ? 'groep' : 'groepen';
 
-  // ----- emoji + woord (zelfde als preview) -----
+  // ----- emoji + woord (zelfde volgorde als in preview) -----
   const emojiLijst = [
     '🚗', '🚙',
     '⚽', '🏐', '🔵',
@@ -1205,96 +1211,196 @@ function drawTafelsInzichtPDF(doc, xLeft, yTop, oef, oefIndex = 0) {
   const woord = woorden[oefIndex % woorden.length];
   const img   = __tiEmojiToPng(emoji, 50);
 
-  // ----- GROEPVAKJES BOVENIN -----
-  // We laten de groepjes gewoon tekenen, maar we beperken ons tot een zone van ±36 mm hoog.
-  const maxPerRij   = 3;
-  const grpGapX     = 3;
-  const grpStartX   = left + 4;
-  const groepTopY   = yTop + 2;     // vaste start
-  let   groepBottom = groepTopY;    // om toch te weten hoe hoog ze worden
+  // ----------------------------------------------------------
+  // 1) DELEN – IJSBERGVERSIE
+  // ----------------------------------------------------------
+  if (oef.op === 'delen') {
+    // 1a. bovenaan: enkel de voorwerpen tonen (max. 12), wat ruimer
+    const maxItems = Math.min(12, totaal);
+    const startX   = left + 4;
+    const startY   = yTop + 2;     // hoog in het kader
+    const itemW    = 12;           // mm
+    const itemH    = 12;
+    const perRij   = 6;            // 2 rijen van 6 = 12
+    let rowBottom  = startY;
 
-  for (let g = 0; g < groepen; g++) {
-    const rij = Math.floor(g / maxPerRij);
-    const kol = g % maxPerRij;
+    for (let i = 0; i < maxItems; i++) {
+      const rij = Math.floor(i / perRij);
+      const kol = i % perRij;
+      const ix  = startX + kol * (itemW + 1.4);
+      const iy  = startY + rij * (itemH + 1.4);
 
-    const emojiPerRij = 2;
-    const emojiRijen  = Math.ceil(perGroep / emojiPerRij);
-
-    const grpW = 24;
-    const grpH = 4 + emojiRijen * 6.6 + 3;
-
-    const gx = grpStartX + kol * (grpW + grpGapX);
-    const gy = groepTopY + rij * (grpH + 3);
-
-    doc.setDrawColor(0, 0, 0);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(gx, gy, grpW, grpH, 3, 3, 'D');
-
-    for (let b = 0; b < perGroep; b++) {
-      const rI = Math.floor(b / emojiPerRij);
-      const cI = b % emojiPerRij;
-      const ix = gx + 3 + cI * 9;
-      const iy = gy + 2 + rI * 6.5;
       try {
-        doc.addImage(img, 'PNG', ix, iy, 8, 8);
+        doc.addImage(img, 'PNG', ix, iy, 10, 10);
       } catch (e) {
-        doc.setFont('Helvetica', '');
-        doc.setFontSize(9);
+        doc.setFont('Helvetica', 'normal');
+        doc.setFontSize(12);
         doc.text(emoji, ix, iy + 4);
       }
+      const btm = iy + itemH;
+      if (btm > rowBottom) rowBottom = btm;
     }
 
-    const bottom = gy + grpH;
-    if (bottom > groepBottom) groepBottom = bottom;
-  }
+    // 1b. EXTRA WITRUIMTE vóór de zinnen
+    //    → zodat kinderen in de pdf rondom de voorwerpen kunnen tekenen
+    const tekstX  = left + 3;
+    const tekstY0 = yTop + 38;   // ← hoger dan bij maal (meer lege ruimte)
+    const lineH   = 10.5;
 
-  // ----- TEKST ONDERIN: VASTE START -----
-  // i.p.v. "groepBottom + 6" nemen we een vaste plek, bv. 46 mm onder de top van het kader.
-  const tekstX  = left + 3;
-  const tekstY0 = yTop + 46;   // ← ALTIJD HIER BEGINNEN
-  const lineH   = 10.5;
+    // 1c. zinnen zoals op uw voorbeeld
+    const regels = [];
+    regels.push(`Er zijn _____ ${woord}.`);
+    regels.push(`Ik verdeel in groepen van ${perGroep}.`);
 
-  const regels = [];
-  regels.push(`Ik zie _____ ${woordGroep}.`);
-  regels.push(`In elke groep zie ik _____ ${woord}.`);
-
-  // plus-lijn volgens aantal groepen
-  if (groepen <= 4) {
-    const stukjes = Array.from({ length: groepen }, () => '_____');
-    regels.push('Dat is ' + stukjes.join(' + ') + ' .');
-  } else {
-    const eerste = Array.from({ length: 4 }, () => '_____').join(' + ');
-    const rest   = Array.from({ length: groepen - 4 }, () => '_____').join(' + ');
-    regels.push('Dat is ' + eerste + ' +');
-    regels.push(rest + ' .');
-  }
-
-  // keer / maal met echte groepsgrootte
-  regels.push(`Dat is _____ keer ${perGroep} .`);
-  regels.push(`Dat is _____ × ${perGroep} .`);
-
-  doc.setFont('Helvetica', '');
-  doc.setFontSize(10);
-  regels.forEach((zin, j) => {
-    // alleen tekenen zolang we binnen het kader blijven
-    const yy = tekstY0 + j * lineH;
-    if (yy < yTop + boxH - 4) {
-      doc.text(zin, tekstX, yy);
+    // “8 - ____ - ____ = 0” → evenveel streepjes als er groepen zijn
+    let aftrekLijn = `${totaal}`;
+    for (let i = 0; i < groepen; i++) {
+      aftrekLijn += ' - ___';
     }
-  });
+    aftrekLijn += ' = 0';
+    regels.push(aftrekLijn);
 
-  // ----- BUITENKADER: ALTIJD EVEN GROOT -----
-  doc.setDrawColor(166, 205, 236);
-  doc.setLineWidth(0.75);
-  doc.roundedRect(left, yTop - marginTop, boxW, boxH, 4, 4, 'D');
-  doc.setLineWidth(0.2);
+    regels.push(`Ik kan ____ groepen van ${perGroep} maken.`);
+    regels.push(`${totaal} : ${perGroep} = ____`);
 
-  // aan de caller melden: ik heb 90 mm nodig (en we hebben ook 90 getekend)
-  return boxH;
+    doc.setFont('Helvetica', 'normal');
+doc.setFontSize(12);
+    regels.forEach((zin, j) => {
+      const yy = tekstY0 + j * lineH;
+      if (yy < yTop + boxH - 4) {
+        doc.text(zin, tekstX, yy);
+      }
+    });
+
+    // 1d. buitenkader (altijd even groot)
+    doc.setDrawColor(166, 205, 236);
+    doc.setLineWidth(0.75);
+    doc.roundedRect(left, yTop - marginTop, boxW, boxH, 4, 4, 'D');
+    doc.setLineWidth(0.2);
+
+    return boxH;
+  }
+
+  // ----------------------------------------------------------
+// 2) MAAL – vaste hoogte gebruiken
+let boxHmaal = boxH;   // bij jou: 110 mm, altijd hetzelfde
+const heeftVeelGroepen = groepen > 5;   // we gebruiken dit verderop voor tekstY0 en lineH
+
+
+
+// ----- GROEPVAKJES BOVENIN (zoals u had) -----
+const maxPerRij   = 3;
+const grpGapX     = 3;
+const grpStartX   = left + 4;
+const groepTopY   = yTop + 2;     // vaste start
+let   groepBottom = groepTopY;
+
+for (let g = 0; g < groepen; g++) {
+  const rij = Math.floor(g / maxPerRij);
+  const kol = g % maxPerRij;
+
+  const emojiPerRij = 2;
+  const emojiRijen  = Math.ceil(perGroep / emojiPerRij);
+
+  const grpW = 24;
+  const grpH = 4 + emojiRijen * 6.6 + 3;
+
+  const gx = grpStartX + kol * (grpW + grpGapX);
+  const gy = groepTopY + rij * (grpH + 3);
+
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(gx, gy, grpW, grpH, 3, 3, 'D');
+
+  for (let b = 0; b < perGroep; b++) {
+    const rI = Math.floor(b / emojiPerRij);
+    const cI = b % emojiPerRij;
+    const ix = gx + 3 + cI * 9;
+    const iy = gy + 2 + rI * 6.5;
+    try {
+      doc.addImage(img, 'PNG', ix, iy, 8, 8);
+    } catch (e) {
+      doc.setFont('Helvetica', 'normal');
+      doc.setFontSize(10);
+      doc.text(emoji, ix, iy + 4);
+    }
+  }
+
+  const bottom = gy + grpH;
+  if (bottom > groepBottom) groepBottom = bottom;
 }
 
+// ----- TEKST ONDERIN: VASTE START -----
+const tekstX  = left + 3;
+// bij veel groepen beginnen we 2 mm hoger
+const tekstY0 = heeftVeelGroepen ? (yTop + 42) : (yTop + 46);
+// bij veel groepen iets kleinere regelafstand
+const lineH   = heeftVeelGroepen ? 9.2 : 10.5;
+
+const regels = [];
+regels.push(`Ik zie _____ ${woordGroep}.`);
+regels.push(`In elke groep zie ik _____ ${woord}.`);
+
+// OPTELLING
+// ----------------------------------------------------------
+// OPTELLING: ALTIJD ALLE BLANKS, GEEN "..." MEER
+// we maken max. 5 blanks per regel en lopen dan door op volgende regel
+// ----------------------------------------------------------
+const maxPerRegel = 5;
+const optelRegels = [];
+
+if (groepen > 0) {
+  // eerste regel: alleen "Dat is"
+  optelRegels.push('Dat is');
+
+  let resterend = groepen;  // aantal groepjes dat nog moet
+  while (resterend > 0) {
+    const opDezeRegel = Math.min(maxPerRegel, resterend);
+    const stukjes = Array.from({ length: opDezeRegel }, () => '___');
+    optelRegels.push(stukjes.join(' + '));
+    resterend -= opDezeRegel;
+  }
+
+  // laatste regel krijgt het "= _____"
+  const laatsteIndex = optelRegels.length - 1;
+  optelRegels[laatsteIndex] = optelRegels[laatsteIndex] + ' = ___';
+} else {
+  // veiligheidsval
+  optelRegels.push('Dat is ____ = ____');
+}
+
+// deze 2 MOETEN altijd mee
+optelRegels.push(`Dat is ___ keer ${perGroep} .`);
+optelRegels.push(`___ × ${perGroep} = ___`);
+
+// optelRegels toevoegen aan "regels"
+regels.push(...optelRegels);
 
 
+doc.setFont('Helvetica', 'normal');
+doc.setFontSize(12);
+regels.forEach((zin, j) => {
+  const yy = tekstY0 + j * lineH;
+  // gebruik de lokale hoogte (boxHmaal) i.p.v. vaste boxH
+  if (yy < yTop + boxHmaal - 4) {
+    doc.text(zin, tekstX, yy);
+  }
+});
+// hoogte bijsturen op basis van aantal regels
+const basisRegels = 6;              // wat normaal binnen 90 mm past
+const extraRegels = Math.max(0, regels.length - basisRegels);
+if (extraRegels > 0) {
+  boxHmaal = boxH + extraRegels * 10;    // per extra regel 10 mm erbij
+}
+
+// ----- BUITENKADER: ALTIJD EVEN GROOT (maar hier met boxHmaal) -----
+doc.setDrawColor(166, 205, 236);
+doc.setLineWidth(0.75);
+doc.roundedRect(left, yTop - marginTop, boxW, boxHmaal, 4, 4, 'D');
+doc.setLineWidth(0.2);
+
+return boxHmaal;
+}
 
   // ========= PDF-GENERATOR met nette segment-kaders =========
   function downloadPDF() {
@@ -1351,15 +1457,16 @@ function drawTafelsInzichtPDF(doc, xLeft, yTop, oef, oefIndex = 0) {
 
 // Tafels-inzicht → 2 kolommen, iets smaller zodat alles binnen A4 blijft
 if (cfg.hoofdBewerking === 'tafels-inzicht') {
-  const eersteX  = LEFT_PUNCH_MARGIN + 2;
-  const kolBreed = 90;
+  const eersteX   = LEFT_PUNCH_MARGIN + 2;
+  const kolBreed  = 90;
+  // onderscheid tussen maal en delen
+  const kaartHoog = cfg.bewerking === 'delen' ? 92 : 110;
 
-  xCols    = [eersteX, eersteX + kolBreed + 6]; // 2 kolommen
-  itemH    = 90;    // hoogte van 1 kader
-  yInc     = itemH + 8;  // 8 mm extra witruimte tussen boven/onder
+  xCols    = [eersteX, eersteX + kolBreed + 6];
+  itemH    = kaartHoog;
+  yInc     = kaartHoog + 8;     // 8 mm witruimte tussen boven/onder
   colWidth = kolBreed;
 }
-
 
       if (cfg.hoofdBewerking === 'splitsen') {
         if (cfg.splitsStijl === 'puntoefening') {
@@ -1395,6 +1502,7 @@ if (cfg.hoofdBewerking === 'tafels-inzicht') {
   const h = Math.max(10, bottomY - topY + 6);
   doc.setDrawColor(179, 224, 255);
   doc.roundedRect(x, topY, w, h, 3, 3, 'D');
+   return boxH; // ← belangrijk: altijd 110 teruggeven
 }
 
     // Verschuif het segmentkader zonder de afmetingen te veranderen
@@ -2162,8 +2270,8 @@ const woorden = [
     'Dat is _____ × _____ .'
   ];
 
-  doc.setFont('Helvetica', '');
-  doc.setFontSize(10);
+  doc.setFont('Helvetica', 'normal');
+doc.setFontSize(12); // zelfde grootte als bij maal
   regels.forEach((zin, j) => {
     doc.text(zin, x, y + 14 + j * 6);
   });
