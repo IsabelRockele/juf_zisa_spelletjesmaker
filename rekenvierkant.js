@@ -242,53 +242,74 @@ function generateConsistentGrid(cols, rows, niveau, typeOpgave) {
 
 
 /**
- * Generates a consistent grid for multiplication/division.
- * @param {number} cols Number of columns (5 or 7).
- * @param {number} rows Number of rows (5 or 7).
- * @param {string} typeTafeloefening Type of table exercise ("maal", "delen", "gemengd").
- * @param {Array<number>} selectedTables Array of selected multiplication tables (e.g., [2, 5, 10]).
- * @param {number} maxUitkomst Maximum allowed outcome for results.
- * @returns {Array<Array<any>>} A 2D array representing the consistent grid.
+ * Genereert een consistent rooster voor vermenigvuldigen/delen.
+ * - Bij opgegeven tafels:
+ *   • factoren (linker en rechter getal) zijn 1 t.e.m. 10
+ *   • uitkomsten horen bij één van de gekozen tafels (t × 1..10) en ≤ maxUitkomst
+ *   • bij MAAL zit minstens één factor in de gekozen tafels
+ *   • bij DELEN is de deler een gekozen tafel en het deeltal een tafelproduct
+ * - Zonder tafels: klassiek gedrag, enkel binnen maxUitkomst blijven.
  */
 function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedTables, maxUitkomst) {
     let grid = Array(rows).fill(null).map(() => Array(cols).fill(""));
 
     let attempts = 0;
     const MAX_ATTEMPTS = 500000;
+    const maxVal = parseInt(maxUitkomst, 10);
+    const hasTables = Array.isArray(selectedTables) && selectedTables.length > 0;
+
+    const inRange = (val) => Number.isInteger(val) && val >= 0 && val <= maxVal;
+
+    // Is dit getal een geldig tafelproduct (t × 1..10) binnen maxVal?
+    const isTafelProduct = (val) => {
+        if (!hasTables) return inRange(val);
+        if (!inRange(val)) return false;
+        for (const t of selectedTables) {
+            if (val % t === 0) {
+                const k = val / t;
+                if (k >= 1 && k <= 10) return true;
+            }
+        }
+        return false;
+    };
+
+    // Vermenigvuldiging met tafelregels
+    const maal = (a, b) => {
+        const r = a * b;
+        if (!inRange(r)) return null;
+        if (hasTables) {
+            // minstens één factor is een gekozen tafel
+            if (!selectedTables.includes(a) && !selectedTables.includes(b)) return null;
+            if (!isTafelProduct(r)) return null;
+        }
+        return r;
+    };
+
+    // Deling met tafelregels: (t × k) : t = k
+    const deel = (a, b) => {
+        if (b === 0 || a % b !== 0) return null;
+        const q = a / b;
+        if (!inRange(q)) return null;
+
+        if (hasTables) {
+            // deler is een gekozen tafel, deeltal is tafelproduct
+            if (!selectedTables.includes(b)) return null;
+            if (!isTafelProduct(a)) return null;
+        }
+        return q;
+    };
 
     const performMaalDeelOp = (a, b, sign) => {
-        if (sign === "x") {
-            return a * b;
-        } else if (sign === ":") {
-            if (b === 0 || a % b !== 0) {
-                return null;
-            }
-            return a / b;
-        }
+        if (sign === "x") return maal(a, b);
+        if (sign === ":") return deel(a, b);
         return null;
     };
 
     const performMaalDeelTripleOp = (a, b, c, sign1, sign2) => {
-        let intermediateResult;
-        if (sign1 === "x") {
-            intermediateResult = a * b;
-        } else if (sign1 === ":") {
-            if (b === 0 || a % b !== 0) { return null; }
-            intermediateResult = a / b;
-        } else { return null; }
-
-        if (intermediateResult === null || !Number.isInteger(intermediateResult) || intermediateResult < 0 || intermediateResult > maxUitkomst) {
-             return null;
-        }
-
-        if (sign2 === "x") {
-            return intermediateResult * c;
-        } else if (sign2 === ":") {
-            if (c === 0 || intermediateResult % c !== 0) { return null; }
-            return intermediateResult / c;
-        } else { return null; }
+        const intermediate = performMaalDeelOp(a, b, sign1);
+        if (intermediate === null) return null;
+        return performMaalDeelOp(intermediate, c, sign2);
     };
-
 
     while (attempts < MAX_ATTEMPTS) {
         attempts++;
@@ -297,68 +318,12 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
 
         const numBaseInputs = (cols === 5) ? 4 : 9;
 
+        // BASISGETALLEN: gewoon 1 t.e.m. 10 (factoren), NIET beperkt tot tafelproducten
         for (let i = 0; i < numBaseInputs; i++) {
-            let num1, num2;
-            let foundValidPair = false;
-            let innerAttempts = 0;
-            const MAX_INNER_ATTEMPTS = 500;
-
-            while (!foundValidPair && innerAttempts < MAX_INNER_ATTEMPTS) {
-                innerAttempts++;
-
-                if (selectedTables.length > 0) {
-                    const tableNum = selectedTables[getRandomInt(0, selectedTables.length - 1)];
-
-                    if (typeTafeloefening === "maal" || typeTafeloefening === "gemengd") {
-                        let factor1 = getRandomInt(1, Math.min(10, maxUitkomst / (tableNum || 1)));
-                        num1 = factor1;
-                        num2 = tableNum;
-
-                        if (num1 * num2 <= maxUitkomst) {
-                            foundValidPair = true;
-                        }
-                    }
-
-                    if (!foundValidPair && (typeTafeloefening === "delen" || typeTafeloefening === "gemengd")) {
-                        let quotient = getRandomInt(1, Math.min(10, maxUitkomst / (tableNum || 1)));
-                        num1 = quotient * tableNum;
-                        num2 = tableNum;
-
-                        if (num1 > 0 && num2 > 0 && num1 % num2 === 0 && num1 <= maxUitkomst) {
-                            foundValidPair = true;
-                        }
-                    }
-
-                } else {
-                    if (typeTafeloefening === "maal" || typeTafeloefening === "gemengd") {
-                        num1 = getRandomInt(1, Math.min(10, Math.floor(Math.sqrt(maxUitkomst))));
-                        num2 = getRandomInt(1, Math.min(10, Math.floor(maxUitkomst / (num1 || 1))));
-                        if (num1 * num2 <= maxUitkomst) {
-                            foundValidPair = true;
-                        }
-                    }
-                    if (!foundValidPair && (typeTafeloefening === "delen" || typeTafeloefening === "gemengd")) {
-                        let tempNum2 = getRandomInt(1, Math.min(10, maxUitkomst));
-                        let tempQuotient = getRandomInt(1, Math.min(10, Math.floor(maxUitkomst / (tempNum2 || 1))));
-                        num1 = tempQuotient * tempNum2;
-                        num2 = tempNum2;
-
-                        if (num1 > 0 && num2 > 0 && num1 % num2 === 0 && num1 <= maxUitkomst) {
-                            foundValidPair = true;
-                        }
-                    }
-                }
-            }
-
-            if (!foundValidPair) {
-                isValidCombination = false;
-                break;
-            }
-            generatedBaseNumbers.push(num1, num2);
+            generatedBaseNumbers.push(getRandomInt(1, 10));
         }
 
-        if (!isValidCombination) continue;
-
+        // Basiscellen invullen
         if (cols === 5) {
             grid[0][0] = generatedBaseNumbers[0]; grid[0][2] = generatedBaseNumbers[1];
             grid[2][0] = generatedBaseNumbers[2]; grid[2][2] = generatedBaseNumbers[3];
@@ -368,12 +333,14 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
             grid[4][0] = generatedBaseNumbers[6]; grid[4][2] = generatedBaseNumbers[7]; grid[4][4] = generatedBaseNumbers[8];
         }
 
+        // Geen nul in basiscellen
         for (let r = 0; r < rows; r += 2) {
             for (let c = 0; c < cols; c += 2) {
                 if (grid[r][c] === 0) grid[r][c] = 1;
             }
         }
 
+        // Operatoren instellen
         let opSymbols = ["x", ":"];
         if (typeTafeloefening === "gemengd") {
             if (cols === 5) {
@@ -386,12 +353,12 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
                 grid[1][4] = opSymbols[getRandomInt(0, 1)];
             } else if (cols === 7) {
                 grid[0][1] = opSymbols[getRandomInt(0, 1)]; grid[0][3] = opSymbols[getRandomInt(0, 1)];
-                grid[2][1] = "x"; grid[2][3] = "x";
+                grid[2][1] = opSymbols[getRandomInt(0, 1)]; grid[2][3] = opSymbols[getRandomInt(0, 1)];
                 grid[4][1] = opSymbols[getRandomInt(0, 1)]; grid[4][3] = opSymbols[getRandomInt(0, 1)];
                 grid[6][1] = opSymbols[getRandomInt(0, 1)]; grid[6][3] = opSymbols[getRandomInt(0, 1)];
 
                 grid[1][0] = opSymbols[getRandomInt(0, 1)]; grid[1][2] = opSymbols[getRandomInt(0, 1)]; grid[1][4] = opSymbols[getRandomInt(0, 1)];
-                grid[3][0] = opSymbols[getRandomInt(0, 1)]; grid[3][2] = "x"; grid[3][4] = "x";
+                grid[3][0] = opSymbols[getRandomInt(0, 1)]; grid[3][2] = opSymbols[getRandomInt(0, 1)]; grid[3][4] = opSymbols[getRandomInt(0, 1)];
                 grid[5][0] = opSymbols[getRandomInt(0, 1)]; grid[5][2] = opSymbols[getRandomInt(0, 1)]; grid[5][4] = opSymbols[getRandomInt(0, 1)];
             }
         } else {
@@ -401,21 +368,19 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
                 grid[1][0] = fixedOp; grid[1][2] = fixedOp; grid[1][4] = fixedOp;
             } else if (cols === 7) {
                 if (fixedOp === ":") {
-                     console.warn("Delen in 7x7 roosters kan zeer complex zijn; de generator zal proberen, maar kan vaker falen.");
-                     const allX = "x";
-                     grid[0][1] = allX; grid[0][3] = allX; grid[2][1] = allX; grid[2][3] = allX;
-                     grid[4][1] = allX; grid[4][3] = allX; grid[6][1] = allX; grid[6][3] = allX;
-                     grid[1][0] = allX; grid[1][2] = allX; grid[1][4] = allX; grid[3][0] = allX;
-                     grid[3][2] = allX; grid[3][4] = allX; grid[5][0] = allX; grid[5][2] = allX; grid[5][4] = allX;
-                } else {
-                    grid[0][1] = fixedOp; grid[0][3] = fixedOp; grid[2][1] = fixedOp; grid[2][3] = fixedOp;
-                    grid[4][1] = fixedOp; grid[4][3] = fixedOp; grid[6][1] = fixedOp; grid[6][3] = fixedOp;
-                    grid[1][0] = fixedOp; grid[1][2] = fixedOp; grid[1][4] = fixedOp; grid[3][0] = fixedOp;
-                    grid[3][2] = fixedOp; grid[3][4] = fixedOp; grid[5][0] = fixedOp; grid[5][2] = fixedOp; grid[5][4] = fixedOp;
+                    console.warn("Delen in 7x7 roosters kan complex zijn; de generator kan vaker falen.");
                 }
+                grid[0][1] = fixedOp; grid[0][3] = fixedOp;
+                grid[2][1] = fixedOp; grid[2][3] = fixedOp;
+                grid[4][1] = fixedOp; grid[4][3] = fixedOp;
+                grid[6][1] = fixedOp; grid[6][3] = fixedOp;
+                grid[1][0] = fixedOp; grid[1][2] = fixedOp; grid[1][4] = fixedOp;
+                grid[3][0] = fixedOp; grid[3][2] = fixedOp; grid[3][4] = fixedOp;
+                grid[5][0] = fixedOp; grid[5][2] = fixedOp; grid[5][4] = fixedOp;
             }
         }
 
+        // "="-tekens
         if (cols === 5) {
             grid[0][3] = "="; grid[2][3] = "="; grid[4][3] = "=";
             grid[3][0] = "="; grid[3][2] = "="; grid[3][4] = "=";
@@ -426,13 +391,15 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
 
         let derivedValues = {};
 
+        // Waarden afleiden met tafellogica
         if (cols === 5) {
             derivedValues.r0c4 = performMaalDeelOp(grid[0][0], grid[0][2], grid[0][1]);
             derivedValues.r2c4 = performMaalDeelOp(grid[2][0], grid[2][2], grid[2][1]);
             derivedValues.r4c0 = performMaalDeelOp(grid[0][0], grid[2][0], grid[1][0]);
             derivedValues.r4c2 = performMaalDeelOp(grid[0][2], grid[2][2], grid[1][2]);
 
-            if (derivedValues.r0c4 === null || derivedValues.r2c4 === null || derivedValues.r4c0 === null || derivedValues.r4c2 === null) {
+            if (derivedValues.r0c4 === null || derivedValues.r2c4 === null ||
+                derivedValues.r4c0 === null || derivedValues.r4c2 === null) {
                 isValidCombination = false;
             } else {
                 derivedValues.r4c4_from_h = performMaalDeelOp(derivedValues.r4c0, derivedValues.r4c2, grid[4][1]);
@@ -456,11 +423,13 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
             }
         }
 
-        if (!isValidCombination || (cols === 5 && (derivedValues.r4c4_from_h === null || derivedValues.r4c4_from_v === null)) ||
+        if (!isValidCombination ||
+            (cols === 5 && (derivedValues.r4c4_from_h === null || derivedValues.r4c4_from_v === null)) ||
             (cols === 7 && (derivedValues.r6c6_from_h === null || derivedValues.r6c6_from_v === null))) {
             continue;
         }
 
+        // Laatste consistentie-check
         let finalConsistencyCheck = false;
         let finalResult = null;
 
@@ -472,58 +441,60 @@ function generateConsistentGridMaalDeel(cols, rows, typeTafeloefening, selectedT
             finalResult = derivedValues.r6c6_from_h;
         }
 
+        if (!finalConsistencyCheck || !inRange(finalResult)) {
+            continue;
+        }
+
+        // Controleer enkel of alle getallen binnen 0..maxVal liggen
         let allNumbersValid = true;
         const allNumbersInGrid = [];
         if (cols === 5) {
-            allNumbersInGrid.push(grid[0][0], grid[0][2], derivedValues.r0c4,
-                                   grid[2][0], grid[2][2], derivedValues.r2c4,
-                                   derivedValues.r4c0, derivedValues.r4c2, finalResult);
+            allNumbersInGrid.push(
+                grid[0][0], grid[0][2], derivedValues.r0c4,
+                grid[2][0], grid[2][2], derivedValues.r2c4,
+                derivedValues.r4c0, derivedValues.r4c2, finalResult
+            );
         } else if (cols === 7) {
-            allNumbersInGrid.push(grid[0][0], grid[0][2], grid[0][4], derivedValues.r0c6,
-                                   grid[2][0], grid[2][2], grid[2][4], derivedValues.r2c6,
-                                   grid[4][0], grid[4][2], grid[4][4], derivedValues.r4c6,
-                                   derivedValues.r6c0, derivedValues.r6c2, derivedValues.r6c4, finalResult);
+            allNumbersInGrid.push(
+                grid[0][0], grid[0][2], grid[0][4], derivedValues.r0c6,
+                grid[2][0], grid[2][2], grid[2][4], derivedValues.r2c6,
+                grid[4][0], grid[4][2], grid[4][4], derivedValues.r4c6,
+                derivedValues.r6c0, derivedValues.r6c2, derivedValues.r6c4, finalResult
+            );
         }
 
         for (const num of allNumbersInGrid) {
-            if (num === null || !Number.isInteger(num) || num < 0 || num > maxUitkomst) {
+            if (!inRange(num)) {
                 allNumbersValid = false;
                 break;
             }
         }
+        if (!allNumbersValid) continue;
 
-        if (finalConsistencyCheck && allNumbersValid) {
-            if (cols === 5) {
-                grid[0][0] = generatedBaseNumbers[0]; grid[0][2] = generatedBaseNumbers[1];
-                grid[2][0] = generatedBaseNumbers[2]; grid[2][2] = generatedBaseNumbers[3];
-            } else if (cols === 7) {
-                grid[0][0] = generatedBaseNumbers[0]; grid[0][2] = generatedBaseNumbers[1]; grid[0][4] = generatedBaseNumbers[2];
-                grid[2][0] = generatedBaseNumbers[3]; grid[2][2] = generatedBaseNumbers[4]; grid[2][4] = generatedBaseNumbers[5];
-                grid[4][0] = generatedBaseNumbers[6]; grid[4][2] = generatedBaseNumbers[7]; grid[4][4] = generatedBaseNumbers[8];
-            }
-
-            if (cols === 5) {
-                grid[0][4] = derivedValues.r0c4;
-                grid[2][4] = derivedValues.r2c4;
-                grid[4][0] = derivedValues.r4c0;
-                grid[4][2] = derivedValues.r4c2;
-                grid[4][4] = finalResult;
-            } else if (cols === 7) {
-                grid[0][6] = derivedValues.r0c6;
-                grid[2][6] = derivedValues.r2c6;
-                grid[4][6] = derivedValues.r4c6;
-                grid[6][0] = derivedValues.r6c0;
-                grid[6][2] = derivedValues.r6c2;
-                grid[6][4] = derivedValues.r6c4;
-                grid[6][6] = finalResult;
-            }
-            return grid;
+        // Alles ok: schrijf de afgeleide waarden naar het rooster
+        if (cols === 5) {
+            grid[0][4] = derivedValues.r0c4;
+            grid[2][4] = derivedValues.r2c4;
+            grid[4][0] = derivedValues.r4c0;
+            grid[4][2] = derivedValues.r4c2;
+            grid[4][4] = finalResult;
+        } else if (cols === 7) {
+            grid[0][6] = derivedValues.r0c6;
+            grid[2][6] = derivedValues.r2c6;
+            grid[4][6] = derivedValues.r4c6;
+            grid[6][0] = derivedValues.r6c0;
+            grid[6][2] = derivedValues.r6c2;
+            grid[6][4] = derivedValues.r6c4;
+            grid[6][6] = finalResult;
         }
+
+        return grid;
     }
 
     console.warn(`Kon geen consistent ${cols}x${rows} grid genereren voor ${typeTafeloefening} met max. uitkomst ${maxUitkomst}`);
     return Array(rows).fill(null).map(() => Array(cols).fill(""));
 }
+
 
 
 function tekenSingleGrid(gridData, xOffset, yOffset, vakBreedte, vakHoogte, cols, rows) {
