@@ -240,6 +240,17 @@
             <div><input type="checkbox" id="HTE_T" name="oefentype" value="HTE_T">    <label for="HTE_T">HTE &pm; T</label></div>
             <div><input type="checkbox" id="HTE_TE" name="oefentype" value="HTE_TE">  <label for="HTE_TE">HTE &pm; TE</label></div>
             <div><input type="checkbox" id="HTE_HTE" name="oefentype" value="HTE_HTE"><label for="HTE_HTE">HTE &pm; HTE</label></div>
+            <!-- NIEUW 1: nul-moeilijkheid binnen HTE–HTE -->
+<div><input type="checkbox" id="HTE0_HTE" name="oefentype" value="HTE0_HTE">
+     <label for="HTE0_HTE">HTE – HTE (met 0 in T en/of E)</label></div>
+
+<!-- NIEUW 2: H – TE -->
+<div><input type="checkbox" id="H_TE" name="oefentype" value="H_TE">
+     <label for="H_TE">H – TE</label></div>
+
+<!-- NIEUW 3: H – HTE -->
+<div><input type="checkbox" id="H_HTE" name="oefentype" value="H_HTE">
+     <label for="H_HTE">H – HTE</label></div>
           </div>
         </div>
       </div>
@@ -401,59 +412,98 @@ if (cols === 4) {
 
     let attempts=0;
     while(attempts<200){
-      const [type1,type2]=willekeurigType.split('_');
-      const ranges={
-        E:[1,9],
-        T:[1,9],
-        TE:[10,99],
-        HTE:[100,999]
-      };
+      const rawType = willekeurigType;
 
-      let g1=(type1==='T')
-        ? getRandomNumber(ranges[type1][0],ranges[type1][1]) * 10
-        : getRandomNumber(ranges[type1][0],ranges[type1][1]);
+// Nul-type behandelen als “gewoon” HTE bij de getalrange
+const cleanedType = rawType.replace('0', '');
+const [type1, type2] = cleanedType.split('_');
 
-      let g2=(type2==='T')
-        ? getRandomNumber(ranges[type2][0],ranges[type2][1]) * 10
-        : getRandomNumber(ranges[type2][0],ranges[type2][1]);
+const ranges = {
+  E:[1,9],
+  T:[1,9],
+  TE:[10,99],
+  H:[100,999],
+  HTE:[100,999]
+};
 
-      if(bereik===100){
-        g1=Math.min(g1,99);
-        g2=Math.min(g2,99);
+
+            let g1, g2;
+
+      // Specifieke patronen voor de nieuwe types
+      if (rawType === 'H_TE') {
+        // H – TE  (bv. 300 – 48)
+        g1 = getRandomNumber(1, 9) * 100;   // 100, 200, ..., 900
+        g2 = getRandomNumber(10, 99);       // twee-cijferig getal
+      } else if (rawType === 'H_HTE') {
+        // H – HTE (bv. 500 – 263)
+        g1 = getRandomNumber(1, 9) * 100;   // 100, 200, ..., 900
+        g2 = getRandomNumber(100, 999);     // drie-cijferig getal
+      } else {
+        // standaard-gedrag voor E, T, TE, HTE en HTE0_HTE
+        g1 = (type1 === 'T')
+          ? getRandomNumber(ranges[type1][0], ranges[type1][1]) * 10
+          : getRandomNumber(ranges[type1][0], ranges[type1][1]);
+
+        g2 = (type2 === 'T')
+          ? getRandomNumber(ranges[type2][0], ranges[type2][1]) * 10
+          : getRandomNumber(ranges[type2][0], ranges[type2][1]);
       }
 
-      if(currentType==='plus'){
-        getal1=g1; getal2=g2;
-      }else{
-        getal1=Math.max(g1,g2);
-        getal2=Math.min(g1,g2);
-        if(getal1===getal2) getal1++;
+      if (bereik === 100) {
+        g1 = Math.min(g1, 99);
+        g2 = Math.min(g2, 99);
       }
 
-      const e1=getal1%10, e2=getal2%10;
-      const t1=Math.floor(getal1/10)%10, t2=Math.floor(getal2/10)%10;
 
-      let actueleBrug=false;
-      if(currentType==='plus'){
-        if(e1+e2>=10) actueleBrug=true;
-        if((bereik===1000 || willekeurigType.includes('H')) && t1+t2>=10) actueleBrug=true;
-      }else{
-        if(e1<e2) actueleBrug=true;
-        if((bereik===1000 || willekeurigType.includes('H')) && t1<t2) actueleBrug=true;
+        if (currentType === 'plus') {
+        getal1 = g1;
+        getal2 = g2;
+      } else {
+        getal1 = Math.max(g1, g2);
+        getal2 = Math.min(g1, g2);
+        if (getal1 === getal2) getal1++;
       }
 
-      const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
+      const e1 = getal1 % 10,  e2 = getal2 % 10;
+      const t1 = Math.floor(getal1 / 10) % 10, t2 = Math.floor(getal2 / 10) % 10;
+      const h1 = Math.floor(getal1 / 100) % 10, h2 = Math.floor(getal2 / 100) % 10;
 
-      if(bereik===100 && result>100){
+      let actueleBrug = false;
+      if (currentType === 'plus') {
+        if (e1 + e2 >= 10) actueleBrug = true;
+        if ((bereik === 1000 || willekeurigType.includes('H')) && t1 + t2 >= 10) actueleBrug = true;
+      } else {
+        if (e1 < e2) actueleBrug = true;
+        if ((bereik === 1000 || willekeurigType.includes('H')) && t1 < t2) actueleBrug = true;
+      }
+const tussenResultaat = (currentType === 'plus') ? (getal1 + getal2) : (getal1 - getal2);
+
+if (bereik === 100 && tussenResultaat > 100) {
+  attempts++;
+  continue;
+}
+
+      // EXTRA VOORWAARDE: bij HTE0_HTE, - tot 1000 moet er 0 staan in T en/of E
+      let nulVoorwaardeOk = true;
+      if (
+        rawType === 'HTE0_HTE' &&
+        bereik === 1000 &&
+        currentType === 'min'
+      ) {
+          const heeftNul = [t1, e1].includes(0);
+        nulVoorwaardeOk = heeftNul;
+      }
+
+      if (!nulVoorwaardeOk) {
         attempts++;
         continue;
       }
 
-      if(actueleBrug===isMetBrug || brug==='beide'){
+      if (actueleBrug === isMetBrug || brug === 'beide') {
         break;
       }
       attempts++;
-    }
+}
 
     const result = (currentType==='plus') ? (getal1+getal2) : (getal1-getal2);
     const showH = (
