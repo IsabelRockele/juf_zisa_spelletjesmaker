@@ -717,6 +717,11 @@
         attempts++;
         continue;
       }
+// NIEUW: bij bereik 1000 mag optellen nooit boven 999 gaan
+if (bereik === 1000 && currentType === 'plus' && tussenResultaat > 999) {
+  attempts++;
+  continue;
+}
 
       // EXTRA: bij HTE0_HTE, - tot 1000 moet er 0 staan in T en/of E
       // van het BOVENSTE getal (getal1 = aftrektal)
