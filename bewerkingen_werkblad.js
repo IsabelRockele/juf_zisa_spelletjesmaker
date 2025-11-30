@@ -441,12 +441,35 @@ if (g1 > maxGetal || g2 > maxGetal) continue;
     }
 
     function checkBrug(g1, g2, op, brugType) {
-      if (brugType === 'beide') return true;
-      const heeftBrug = op === '+'
-        ? (g1 % 10) + (g2 % 10) > 9
-        : (g1 % 10) < (g2 % 10);
-      return (brugType === 'met' && heeftBrug) || (brugType === 'zonder' && !heeftBrug);
+  if (brugType === 'beide') return true;
+
+  // Splits getallen per plaatswaarde
+  function digits(n) {
+    return String(n).split('').reverse().map(d => parseInt(d));
+  }
+
+  const d1 = digits(g1);
+  const d2 = digits(g2);
+  const maxLen = Math.max(d1.length, d2.length);
+
+  let heeftBrug = false;
+
+  for (let i = 0; i < maxLen; i++) {
+    const a = d1[i] || 0; // cijfer op plaats i
+    const b = d2[i] || 0;
+
+    if (op === '+') {
+      if (a + b > 9) { heeftBrug = true; break; }
+    } else { // aftrekken
+      if (a < b) { heeftBrug = true; break; }
     }
+  }
+
+  // BrugType verwerken
+  return (brugType === 'met' && heeftBrug) ||
+         (brugType === 'zonder' && !heeftBrug);
+}
+
 
     function genereerTafelsom() {
       const tafel = settings.gekozenTafels?.[Math.floor(Math.random() * (settings.gekozenTafels?.length || 1))] ?? 1;
