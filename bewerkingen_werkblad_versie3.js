@@ -71,10 +71,35 @@ let PREVIEW_SEG_GAP_PX = 24;
 
 
   function checkBrug(g1, g2, op, brugType) {
-    if (brugType === 'beide') return true;
-    const heeftBrug = somHeeftBrug(g1, g2, op);
-    return (brugType === 'met' && heeftBrug) || (brugType === 'zonder' && !heeftBrug);
+  if (brugType === 'beide') return true;
+
+  // Splits getallen per plaatswaarde
+  function digits(n) {
+    return String(n).split('').reverse().map(d => parseInt(d));
   }
+
+  const d1 = digits(g1);
+  const d2 = digits(g2);
+  const maxLen = Math.max(d1.length, d2.length);
+
+  let heeftBrug = false;
+
+  for (let i = 0; i < maxLen; i++) {
+    const a = d1[i] || 0; // cijfer op plaats i
+    const b = d2[i] || 0;
+
+    if (op === '+') {
+      if (a + b > 9) { heeftBrug = true; break; }
+    } else { // aftrekken
+      if (a < b) { heeftBrug = true; break; }
+    }
+  }
+
+  // BrugType verwerken
+  return (brugType === 'met' && heeftBrug) ||
+         (brugType === 'zonder' && !heeftBrug);
+}
+
   function titelVoor(cfg) {
   // Handmatige opdrachtzin heeft altijd voorrang
   if (cfg.opdracht && cfg.opdracht.trim()) return cfg.opdracht.trim();
@@ -291,7 +316,16 @@ if ((cfg.rekenMaxGetal || 100) <= 5) {
         case 'TE+E': g1 = rnd(11, 99); g2 = rnd(1, 9); break;
         case 'TE+TE': g1 = rnd(11, 99); g2 = rnd(11, 99); break;
         case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
-        case 'HT+HT': g1 = rnd(10, 99) * 10; g2 = rnd(10, 99) * 10; break;
+        case 'HT+HT':
+    // tientallen genereren zonder brug
+    do {
+        const t1 = rnd(1, 9);
+        const t2 = rnd(1, 9);
+        g1 = t1 * 10 * 10; // honderdtallen + tientallen
+        g2 = t2 * 10 * 10;
+    } while (cfg.rekenBrug === 'zonder' && ( (g1/10)%10 + (g2/10)%10 > 9 ));
+    break;
+
         case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
       }
       op = cfg.rekenType === 'beide' ? (Math.random() < 0.5 ? '+' : '-') : (cfg.rekenType === 'optellen' ? '+' : '-');
