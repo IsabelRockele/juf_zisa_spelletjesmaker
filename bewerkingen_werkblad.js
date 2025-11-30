@@ -415,7 +415,14 @@ document.addEventListener("DOMContentLoaded", () => {
           case 'TE+E': g1 = rnd(11, 99); g2 = rnd(1, 9); break;
           case 'TE+TE': g1 = rnd(11, 99); g2 = rnd(11, 99); break;
           case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
-          case 'HT+HT': g1 = rnd(10, 99) * 10; g2 = rnd(10, 99) * 10; break;
+          case 'HT+HT':
+    // enkel honderdtallen + tientallen, GEEN eenheden
+    g1 = rnd(10, 99) * 10;   // bv. 23 → 230
+    g2 = rnd(10, 99) * 10;
+    // absolute garantie dat eenheden 0 zijn
+    g1 = Math.floor(g1 / 10) * 10;
+    g2 = Math.floor(g2 / 10) * 10;
+    break;
           case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
         }
 
@@ -423,18 +430,11 @@ document.addEventListener("DOMContentLoaded", () => {
           ? (Math.random() < 0.5 ? '+' : '-')
           : (settings.rekenType === 'optellen' ? '+' : '-');
 
-        if (op === '+') {
-          while (g1 + g2 > maxGetal) {
-            if (g1 > g2) g1 = Math.floor(g1 / 2);
-            else g2 = Math.floor(g2 / 2);
-          }
-        } else {
-          if (g1 < g2) [g1, g2] = [g2, g1];
-          while (g1 > maxGetal) {
-            g1 = Math.floor(g1 / 2);
-            if (g1 < g2) [g1, g2] = [g2, g1];
-          }
-        }
+      // Nieuwe beveiliging: geen getallen schalen, maar opnieuw proberen
+if (op === '+' && g1 + g2 > maxGetal) continue;
+if (op === '-' && g1 < g2) continue;
+if (g1 > maxGetal || g2 > maxGetal) continue;
+
       } while (!checkBrug(g1, g2, op, settings.rekenBrug || 'beide'));
 
       return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
