@@ -186,9 +186,10 @@ function buildMinuteSets(moeilijkheden) {
 
     if (set.has('5minuten')) {
         if (set.size > 1) {
-            // 5-minuten + iets anders: 5-minuten maar zonder 00 en 30  // ⬅️ kern van uw vraag
-            const mins = [5,10,15,20,25,35,40,45,50,55];
-            return { mode: 'single', minutes: mins };
+            // 5-minuten + (uur/half/kwartier): NIET schrappen — gewoon alle 5-minuten gebruiken
+const mins = [];
+for (let m = 0; m < 60; m += 5) mins.push(m);
+return { mode: 'single', minutes: mins };
         } else {
             // Alleen 5-minuten
             const mins = [];
