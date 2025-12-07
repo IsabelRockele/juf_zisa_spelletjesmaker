@@ -405,252 +405,167 @@ let TT_10_10_count = 0;
 let TT_same_minus_count = 0;
 
 
-    function genereerRekensom() {
+ function genereerRekensom() {
 
-    const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+    const rnd = (min, max) =>
+        Math.floor(Math.random() * (max - min + 1)) + min;
 
     const maxGetal = settings.rekenMaxGetal || 100;
-    const somTypes = settings.somTypes || ['E+E'];
-    let op;
+    const op =
+        settings.rekenType === 'beide'
+            ? (Math.random() < 0.5 ? '+' : '-')
+            : (settings.rekenType === 'optellen' ? '+' : '-');
 
-    // operator bepalen
-    op = settings.rekenType === 'beide'
-        ? (Math.random() < 0.5 ? '+' : '-')
-        : (settings.rekenType === 'optellen' ? '+' : '-');
+    const brug = settings.rekenBrug || 'beide';
 
-    // willekeurig somtype uit jouw selectie
-    const gekozenType = somTypes[Math.floor(Math.random() * somTypes.length)];
+    let somTypes = [...settings.somTypes];
 
-    let g1, g2;
+    // Brugcontrole
+    function heeftBrug(g1, g2, op) {
+        const e1 = g1 % 10;
+        const e2 = g2 % 10;
+        if (op === '+') return (e1 + e2 > 9);
+        return (e1 < e2);
+    }
+
+    function brugOK(g1, g2, op) {
+        const b = heeftBrug(g1, g2, op);
+        if (brug === 'met') return b;
+        if (brug === 'zonder') return !b;
+        return true;
+    }
 
     let pogingen = 0;
+
     while (true) {
         pogingen++;
-        if (pogingen > 200) {
+        if (pogingen > 500) {
             throw new Error("Kon geen som genereren binnen de voorwaarden.");
         }
 
-        switch (gekozenType) {
+        const type = somTypes[Math.floor(Math.random() * somTypes.length)];
 
-            /* --------------------------
-                 E + E   |   E – E 
-               -------------------------- */
-            case 'E+E':
-            case 'E-E':
-                g1 = rnd(1, 9);
-                g2 = rnd(1, 9);
-                break;
+        let g1 = 0, g2 = 0;
 
-            /* --------------------------
-                 T + E   |   T – E
-                 tientallen 10,20,30...
-               -------------------------- */
-            case 'T+E':
-            case 'T-E': {
-                const tientallen = [];
-                for (let t = 10; t <= maxGetal; t += 10) tientallen.push(t);
+        /* -----------------------------------------------------------------
+           TE + E specifiek binnen 20 (deze codewerkt ALTIJD)
+        ----------------------------------------------------------------- */
+        if ((type === 'TE+E' || type === 'TE-E') && maxGetal === 20) {
 
-                const t = tientallen[rnd(0, tientallen.length - 1)];
-                g1 = t;
-                g2 = rnd(1, 9);
-                break;
-            }
+            const lijst = [];
 
-            /* --------------------------
-                 T + T   |   T – T
-                 binnen 20: 10 en 20
-                 (beperking toegepast!)
-               -------------------------- */
-            case 'T+T':
-            case 'T-T': {
+            for (let t = 11; t <= 19; t++) {
+                for (let e = 1; e <= 9; e++) {
 
-                let TT = [];
-                if (maxGetal === 20) {
-                    TT = [10, 20];
-                } else {
-                    for (let t = 10; t <= maxGetal; t += 10) TT.push(t);
+                    const uit = (op === '+') ? t + e : t - e;
+                    if (uit < 0 || uit > 20) continue;
+
+                    const b = heeftBrug(t, e, op);
+                    if (brug === 'met' && !b) continue;
+                    if (brug === 'zonder' && b) continue;
+
+                    lijst.push([t, e]);
                 }
-
-                g1 = TT[rnd(0, TT.length - 1)];
-                g2 = TT[rnd(0, TT.length - 1)];
-                break;
             }
 
-            /* --------------------------
-                TE + E   |   TE – E
-                11..99 maar binnen maxGetal
-               -------------------------- */
-            case 'TE+E':
-            case 'TE-E': {
-                const minTE = (maxGetal === 20 ? 11 : 10);
-                const maxTE = Math.min(maxGetal, 99);
-                g1 = rnd(minTE, maxTE);
-                g2 = rnd(1, 9);
-                break;
+            if (lijst.length === 0) continue;
+
+            const paar = lijst[rnd(0, lijst.length - 1)];
+            g1 = paar[0];
+            g2 = paar[1];
+
+        } else {
+
+            /* -----------------------------------------------------------------
+               NORMALE SOMTYPES
+            ----------------------------------------------------------------- */
+            switch (type) {
+                case 'E+E':
+                case 'E-E':
+                    g1 = rnd(1, 9);
+                    g2 = rnd(1, 9);
+                    break;
+
+                case 'T+E':
+                case 'T-E':
+                    g1 = 10;
+                    g2 = rnd(1, 9);
+                    break;
+
+                case 'T+T':
+                case 'T-T':
+                    g1 = 10;
+                    g2 = 10;
+                    break;
+
+                case 'TE+E':
+                case 'TE-E':
+                    g1 = rnd(10, 99);
+                    g2 = rnd(1, 9);
+                    break;
             }
-
-            /* --------------------------
-                TE + TE  |  TE – TE
-                10..19 bij tot 20
-                11..99 bij grotere bereiken
-               -------------------------- */
-            case 'TE+TE':
-            case 'TE-TE': {
-                const minTE = (maxGetal === 20 ? 10 : 11);
-                const maxTE = (maxGetal === 20 ? 19 : 99);
-                g1 = rnd(minTE, maxTE);
-                g2 = rnd(minTE, maxTE);
-                break;
-            }
-
-            /* --------------------------
-                H + H   |   HT+HT | HTE+HTE
-                laten zoals vroeger
-               -------------------------- */
-            case 'H+H':
-                g1 = rnd(1, 9) * 100;
-                g2 = rnd(1, 9) * 100;
-                break;
-
-            case 'HT+HT':
-                g1 = rnd(10, 99) * 10;
-                g2 = rnd(10, 99) * 10;
-                break;
-
-            case 'HTE+HTE':
-                g1 = rnd(100, 999);
-                g2 = rnd(100, 999);
-                break;
         }
 
-        // -----------------------------------------
-        // ALGEMENE REGELS VOOR + / -
-        // -----------------------------------------
-
-        // binnen maxGetal blijven
+        // BASISREGELS
         if (g1 > maxGetal || g2 > maxGetal) continue;
-
-        // geen negatieve uitkomst
         if (op === '-' && g1 < g2) continue;
-
-        // geen uitkomst groter dan bereik
         if (op === '+' && g1 + g2 > maxGetal) continue;
 
-// --------------------------------------------------------------
-// EXTRA BRUGCHECK: bij MET BRUG moet de eenhedenbrug verplicht zijn
-// --------------------------------------------------------------
-if (settings.rekenBrug === 'met' && op === '+') {
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
+        if (!brugOK(g1, g2, op)) continue;
+// --------------------------------------------------
+// 10 + 10 (binnen bereik 20) maximaal 1 keer toelaten
+// --------------------------------------------------
+if (maxGetal === 20 && op === '+' && g1 === 10 && g2 === 10) {
 
-    // geen brug → weigeren
-    if (e1 + e2 <= 10) continue;
+    // teller in global scope bewaren
+    if (typeof window._tienTienCount === 'undefined') {
+        window._tienTienCount = 0;
+    }
+
+    // als 10+10 al eens gebruikt is → opnieuw zoeken
+    if (window._tienTienCount >= 1) {
+        continue; 
+    }
+
+    // anders deze eerste 10+10 aanvaarden
+    window._tienTienCount++;
 }
 
-// --------------------------------------------------------------
-// EXTRA BRUGCHECK AFTREKKEN: bij MET BRUG moet lenen verplicht zijn
-// --------------------------------------------------------------
-if (settings.rekenBrug === 'met' && op === '-') {
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
-    if (e1 >= e2) continue;   // geen lenen → weigeren
-}
-// --------------------------------------------------------------
-// EXTRA BRUGCHECK AFTREKKEN: bij MET BRUG moet lenen verplicht zijn
-// --------------------------------------------------------------
-if (settings.rekenBrug === 'met' && op === '-') {
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
-    if (e1 >= e2) continue;   // geen lenen → weigeren
-}
-
-// --------------------------------------------------------------
-// DIDACTISCHE CORRECTIE: TE - E sommen zoals 80-3 zijn GEEN brugoefening
-// --------------------------------------------------------------
-if (settings.rekenBrug === 'met' && op === '-' && g1 >= 20 && g1 < 100 && g2 < 10) {
-    const t1 = Math.floor(g1 / 10) % 10;
-    const t2 = Math.floor(g2 / 10) % 10;
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
-    if (t1 > t2 && e1 < e2) continue;
-}
-
-// Somtypes zonder eenhedenbrug uitsluiten bij 'met brug'
-if (settings.rekenBrug === 'met') {
-
-// TE+E: blokkeren als er geen eenhedenbrug is
-if (gekozenType === 'TE+E' && op === '+') {
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
-    if (e1 + e2 <= 9) continue;         // geen brug → weigeren
-    if (e1 + e2 === 10) continue;       // zuiver tiental → ook weigeren
-}
-
-    // Tientallen- en honderdentypes kunnen nooit brug geven → meteen blokkeren
-    if (['T+T','T-T','H+H','HT+HT'].includes(gekozenType)) continue;
-
-    // TE+TE moet selectief behandeld worden:
-    // GEEN brug als de eenheden een zuiver tiental vormen (bij optellen)
-    if (gekozenType === 'TE+TE' && op === '+') {
-        const e1 = g1 % 10;
-        const e2 = g2 % 10;
-        if (e1 + e2 === 10) continue;   // <--- zuiver tiental → blokkeren
+        return {
+            type: 'rekenen',
+            getal1: g1,
+            getal2: g2,
+            operator: op
+        };
     }
 }
 
-        // bij T-T binnen 20 niet te vaak 10+10 / 10–10 / 20–20
-        if (maxGetal === 20 && (gekozenType === 'T+T' || gekozenType === 'T-T')) {
-
-            if (op === '+' && g1 === 10 && g2 === 10) {
-                if (typeof TT_10_10_count === 'undefined') TT_10_10_count = 0;
-                if (TT_10_10_count >= 1) continue;
-                TT_10_10_count++;
-            }
-
-            if (op === '-' && g1 === g2) {
-                if (typeof TT_same_minus_count === 'undefined') TT_same_minus_count = 0;
-                if (TT_same_minus_count >= 1) continue;
-                TT_same_minus_count++;
-            }
-        }
-
-        // als we hier geraken is som geldig
-        break;
-    }
-
-    return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
-}
 
 
-    function checkBrug(g1, g2, op, brugType) {
-  if (brugType === 'beide') return true;
+/* ============================================
+   JUISTE BRUGFUNCTIE
+============================================ */
+function checkBrug(g1, g2, op, brugType) {
 
-  // Splits getallen per plaatswaarde
-  function digits(n) {
-    return String(n).split('').reverse().map(d => parseInt(d));
-  }
+    if (!brugType || brugType === 'beide') return true;
 
-  const d1 = digits(g1);
-  const d2 = digits(g2);
-  const maxLen = Math.max(d1.length, d2.length);
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
 
-  let heeftBrug = false;
-
-  for (let i = 0; i < maxLen; i++) {
-    const a = d1[i] || 0; // cijfer op plaats i
-    const b = d2[i] || 0;
+    let heeftBrug = false;
 
     if (op === '+') {
-      if (a + b > 9) { heeftBrug = true; break; }
+        heeftBrug = (e1 + e2 > 9);
     } else { // aftrekken
-      if (a < b) { heeftBrug = true; break; }
+        heeftBrug = (e1 < e2);
     }
-  }
 
-  // BrugType verwerken
-  return (brugType === 'met' && heeftBrug) ||
-         (brugType === 'zonder' && !heeftBrug);
+    if (brugType === 'met') return heeftBrug;
+    if (brugType === 'zonder') return !heeftBrug;
+
+    return true;
 }
+
 
 
     function genereerTafelsom() {
