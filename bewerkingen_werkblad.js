@@ -408,6 +408,11 @@ document.addEventListener("DOMContentLoaded", () => {
         pogingen++;
         if (pogingen > 120) throw new Error(`Kon geen som genereren voor ${gekozenType} tot ${maxGetal}.`);
 
+        // Operator eerst bepalen — dit moet gebeuren vóór de switch!
+op = settings.rekenType === 'beide'
+  ? (Math.random() < 0.5 ? '+' : '-')
+  : (settings.rekenType === 'optellen' ? '+' : '-');
+
         switch (gekozenType) {
           case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
           case 'T+E': {
@@ -515,10 +520,6 @@ case 'T-T': {
     break;
           case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
         }
-
-        op = settings.rekenType === 'beide'
-          ? (Math.random() < 0.5 ? '+' : '-')
-          : (settings.rekenType === 'optellen' ? '+' : '-');
 
       // Nieuwe beveiliging: geen getallen schalen, maar opnieuw proberen
 if (op === '+' && g1 + g2 > maxGetal) continue;
