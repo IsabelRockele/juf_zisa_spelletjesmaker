@@ -410,9 +410,99 @@ document.addEventListener("DOMContentLoaded", () => {
 
         switch (gekozenType) {
           case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
-          case 'T+E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
-          case 'T+T': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9) * 10; break;
-          case 'TE+E': g1 = rnd(11, 99); g2 = rnd(1, 9); break;
+          case 'T+E': {
+    const tientallen = [];
+    for (let t = 10; t <= maxGetal; t += 10) {
+        tientallen.push(t);
+    }
+
+    const geldigeT = tientallen.filter(t => t + 1 <= maxGetal);
+    if (geldigeT.length === 0) throw new Error("Geen T+E mogelijk binnen bereik");
+
+    g1 = geldigeT[Math.floor(Math.random() * geldigeT.length)];
+
+    if (op === '+') {
+        g2 = rnd(1, Math.min(9, maxGetal - g1));
+    } else {
+        g2 = rnd(1, Math.min(9, g1));
+    }
+    break;
+}
+
+         case 'T+T':
+case 'T-T': {
+    // beschikbare tientallen: 10, 20, 30, ... tot maxGetal
+    const tt = [];
+    for (let t = 10; t <= maxGetal; t += 10) {
+        tt.push(t);
+    }
+
+    const TTparen = [];
+
+    tt.forEach(a => {
+        tt.forEach(b => {
+
+            // OPTELLEN (T+T)
+            if (op === '+' && a + b <= maxGetal) {
+                TTparen.push([a, b]);
+            }
+
+            // AFTREKKEN (T-T)
+            if (op === '-' && a - b >= 0) {
+                // moet binnen maxGetal blijven (is altijd zo bij aftrekken)
+                TTparen.push([a, b]);
+            }
+
+        });
+    });
+
+    // Speciale bescherming voor maxGetal = 20
+    if (maxGetal === 20 && TTparen.length === 0) {
+        if (op === '+') {
+            g1 = 10; g2 = 10;
+            break;
+        }
+        if (op === '-') {
+            // twee geldige opties: 20-10 of 10-10
+            const opties = [[20,10], [10,10]];
+            const paar = opties[Math.floor(Math.random() * opties.length)];
+            g1 = paar[0];
+            g2 = paar[1];
+            break;
+        }
+    }
+
+    if (TTparen.length === 0) {
+        throw new Error("Geen T+T mogelijk binnen bereik");
+    }
+
+    // kies random geldig paar
+    const paar = TTparen[Math.floor(Math.random() * TTparen.length)];
+    g1 = paar[0];
+    g2 = paar[1];
+    break;
+}
+
+
+          case 'TE+E':
+    // Eerste term moet minstens 10 zijn
+    const minTE = 10;
+    const maxTE = Math.min(maxGetal, 99);
+
+    // g1 moet een tiental of twee-cijferig getal zijn
+    g1 = rnd(minTE, maxTE);
+
+    // g2 moet zo gekozen worden dat g1 + g2 ≤ maxGetal
+    if (op === '+') {
+        const maxEenheden = Math.max(1, maxGetal - g1);
+        g2 = rnd(1, Math.min(9, maxEenheden));
+    } 
+    // voor aftrekken: g1 moet groter blijven dan g2
+    else {
+        g2 = rnd(1, Math.min(9, g1));
+    }
+    break;
+
           case 'TE+TE': g1 = rnd(11, 99); g2 = rnd(11, 99); break;
           case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
           case 'HT+HT':
