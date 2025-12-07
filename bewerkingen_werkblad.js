@@ -415,24 +415,50 @@ op = settings.rekenType === 'beide'
 
         switch (gekozenType) {
           case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
-          case 'T+E': {
+          case 'T+E':
+case 'T-E': {
+
+    // beschikbare tientallen: 10, 20, 30 ... tot maxGetal
     const tientallen = [];
     for (let t = 10; t <= maxGetal; t += 10) {
         tientallen.push(t);
     }
 
-    const geldigeT = tientallen.filter(t => t + 1 <= maxGetal);
-    if (geldigeT.length === 0) throw new Error("Geen T+E mogelijk binnen bereik");
+    const TEparen = [];
 
-    g1 = geldigeT[Math.floor(Math.random() * geldigeT.length)];
-
+    // OPTELLEN
     if (op === '+') {
-        g2 = rnd(1, Math.min(9, maxGetal - g1));
-    } else {
-        g2 = rnd(1, Math.min(9, g1));
+        tientallen.forEach(t => {
+            for (let e = 1; e <= 9; e++) {
+                if (t + e <= maxGetal) {
+                    TEparen.push([t, e]);
+                }
+            }
+        });
     }
+
+    // AFTREKKEN
+    if (op === '-') {
+        tientallen.forEach(t => {
+            for (let e = 1; e <= 9; e++) {
+                if (t - e >= 0) {
+                    TEparen.push([t, e]);
+                }
+            }
+        });
+    }
+
+    if (TEparen.length === 0) {
+        throw new Error(`Geen T±E mogelijk binnen ${maxGetal}.`);
+    }
+
+    // kies eerlijk 1 paar
+    const paar = TEparen[Math.floor(Math.random() * TEparen.length)];
+    g1 = paar[0];
+    g2 = paar[1];
     break;
 }
+
 
          case 'T+T':
 case 'T-T': {
