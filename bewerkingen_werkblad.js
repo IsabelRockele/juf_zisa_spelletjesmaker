@@ -405,7 +405,7 @@ let TT_10_10_count = 0;
 let TT_same_minus_count = 0;
 
 
- function genereerRekensom() {
+function genereerRekensom() {
 
     const rnd = (min, max) =>
         Math.floor(Math.random() * (max - min + 1)) + min;
@@ -420,19 +420,54 @@ let TT_same_minus_count = 0;
 
     let somTypes = [...settings.somTypes];
 
-    // Brugcontrole
-    function heeftBrug(g1, g2, op) {
-        const e1 = g1 % 10;
-        const e2 = g2 % 10;
-        if (op === '+') return (e1 + e2 > 9);
-        return (e1 < e2);
+    // -------------------------------
+    // Brugcontrole op eenheden
+    // -------------------------------
+ function heeftBrug(g1, g2, op) {
+
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+
+    /* ----------------------------------------------------
+       OPTELLEN – echte brug
+       e1 + e2 > 10  (10 = geen brug)
+    ---------------------------------------------------- */
+    if (op === '+') {
+        return (e1 + e2 > 10);
     }
+
+    /* ----------------------------------------------------
+       AFTREKKEN – echte brug
+       MAAR:
+       - zuivere tientallen (10,20,...,90) → NOOIT brug
+       - zuivere honderdtallen (100,200,...900) → NOOIT brug
+       - zuivere duizendtallen (1000...) → NOOIT brug
+    ---------------------------------------------------- */
+
+    // Tientallen blokkeren
+    if (g1 % 10 === 0 && g1 < 100) {
+        return false;             // bv. 80 - 3 → GEEN brug
+    }
+
+    // Honderdtallen blokkeren
+    if (g1 % 100 === 0 && g1 < 1000) {
+        return false;             // bv. 300 - 8 → GEEN brug
+    }
+
+    // Duizendtallen blokkeren indien u ooit tot 10000 zou gaan
+    if (g1 % 1000 === 0) {
+        return false;             // bv. 1000 - 9 → GEEN brug
+    }
+
+    // Normaal lenen
+    return (e1 < e2);
+}
 
     function brugOK(g1, g2, op) {
         const b = heeftBrug(g1, g2, op);
         if (brug === 'met') return b;
         if (brug === 'zonder') return !b;
-        return true;
+        return true; // 'beide'
     }
 
     let pogingen = 0;
@@ -444,11 +479,10 @@ let TT_same_minus_count = 0;
         }
 
         const type = somTypes[Math.floor(Math.random() * somTypes.length)];
-
         let g1 = 0, g2 = 0;
 
         /* -----------------------------------------------------------------
-           TE + E specifiek binnen 20 (deze codewerkt ALTIJD)
+           TE + E SPECIFIEK BINNEN 20
         ----------------------------------------------------------------- */
         if ((type === 'TE+E' || type === 'TE-E') && maxGetal === 20) {
 
@@ -477,60 +511,150 @@ let TT_same_minus_count = 0;
         } else {
 
             /* -----------------------------------------------------------------
-               NORMALE SOMTYPES
+               NORMALE SOMTYPES + TE+TE / TE-TE + H/HT/HTE
             ----------------------------------------------------------------- */
             switch (type) {
+
+                // ----------------- E + E / E - E -----------------
                 case 'E+E':
                 case 'E-E':
                     g1 = rnd(1, 9);
                     g2 = rnd(1, 9);
                     break;
 
+                // ----------------- T + E / T - E -----------------
                 case 'T+E':
-                case 'T-E':
-                    g1 = 10;
+                case 'T-E': {
+                    const ts = [];
+                    for (let t = 10; t <= maxGetal; t += 10) ts.push(t);
+                    const idx = rnd(0, ts.length - 1);
+                    g1 = ts[idx];
                     g2 = rnd(1, 9);
                     break;
+                }
 
+                // ----------------- T + T / T - T -----------------
                 case 'T+T':
-                case 'T-T':
-                    g1 = 10;
-                    g2 = 10;
+                case 'T-T': {
+                    const ts = [];
+                    for (let t = 10; t <= maxGetal; t += 10) ts.push(t);
+                    const i1 = rnd(0, ts.length - 1);
+                    const i2 = rnd(0, ts.length - 1);
+                    g1 = ts[i1];
+                    g2 = ts[i2];
                     break;
+                }
 
+                // ----------------- TE + E / TE - E (algemeen) ----
                 case 'TE+E':
                 case 'TE-E':
-                    g1 = rnd(10, 99);
+                    g1 = rnd(10, Math.min(99, maxGetal));
                     g2 = rnd(1, 9);
+                    break;
+
+                // ----------------- TE + TE / TE - TE --------------
+                case 'TE+TE':
+                case 'TE-TE': {
+
+                    if (maxGetal === 20) {
+                        // speciale lijst binnen 20
+                        const lijst = [];
+
+                        for (let a = 10; a <= 19; a++) {
+                            for (let b = 10; b <= 19; b++) {
+
+                                let uit = (op === '+') ? a + b : a - b;
+                                if (uit < 0 || uit > 20) continue;
+
+                                const e1 = a % 10;
+                                const e2 = b % 10;
+                                const isBrug = op === '+'
+                                    ? (e1 + e2 > 9)
+                                    : (e1 < e2);
+
+                                if (brug === 'met' && !isBrug) continue;
+                                if (brug === 'zonder' && isBrug) continue;
+
+                                if (op === '-' && a < b) continue;
+
+                                lijst.push([a, b]);
+                            }
+                        }
+
+                        if (lijst.length === 0) continue;
+
+                        const paar = lijst[rnd(0, lijst.length - 1)];
+                        g1 = paar[0];
+                        g2 = paar[1];
+
+                    } else {
+                        // algemeen: tot 100 of 1000
+                        g1 = rnd(10, Math.min(99, maxGetal));
+                        g2 = rnd(10, Math.min(99, maxGetal));
+                    }
+
+                    break;
+                }
+
+                // ----------------- H + H / H - H ------------------
+                case 'H+H':
+                case 'H-H': {
+                    const maxH = Math.min(9, Math.floor(maxGetal / 100));
+                    g1 = rnd(1, maxH) * 100;
+                    g2 = rnd(1, maxH) * 100;
+                    break;
+                }
+
+                // ----------------- HT + HT / HT - HT --------------
+                case 'HT+HT':
+                case 'HT-HT': {
+                    const minT = 10;
+                    const maxT = Math.min(99, Math.floor(maxGetal / 10));
+                    const t1 = rnd(minT, maxT);
+                    const t2 = rnd(minT, maxT);
+                    g1 = t1 * 10;
+                    g2 = t2 * 10;
+                    break;
+                }
+
+                // ----------------- HTE + HTE / HTE - HTE ----------
+                case 'HTE+HTE':
+                case 'HTE-HTE':
+                    g1 = rnd(100, Math.min(999, maxGetal));
+                    g2 = rnd(100, Math.min(999, maxGetal));
                     break;
             }
         }
 
-        // BASISREGELS
+        // ---------------- BASISREGELS ----------------
+
+        // binnen bereik blijven
         if (g1 > maxGetal || g2 > maxGetal) continue;
+
+        // geen negatieve uitkomst
         if (op === '-' && g1 < g2) continue;
+
+        // optellen: uitkomst binnen bereik
         if (op === '+' && g1 + g2 > maxGetal) continue;
 
+        // brugfilter toepassen
         if (!brugOK(g1, g2, op)) continue;
-// --------------------------------------------------
-// 10 + 10 (binnen bereik 20) maximaal 1 keer toelaten
-// --------------------------------------------------
-if (maxGetal === 20 && op === '+' && g1 === 10 && g2 === 10) {
 
-    // teller in global scope bewaren
-    if (typeof window._tienTienCount === 'undefined') {
-        window._tienTienCount = 0;
-    }
+        // 10 + 10 binnen 20 maximaal 1 keer
+        if (maxGetal === 20 && op === '+' && g1 === 10 && g2 === 10) {
 
-    // als 10+10 al eens gebruikt is → opnieuw zoeken
-    if (window._tienTienCount >= 1) {
-        continue; 
-    }
+            if (typeof window._tienTienCount === 'undefined') {
+                window._tienTienCount = 0;
+            }
 
-    // anders deze eerste 10+10 aanvaarden
-    window._tienTienCount++;
-}
+            if (window._tienTienCount >= 1) {
+                continue;
+            }
 
+            window._tienTienCount++;
+        }
+
+        // geldige som gevonden
         return {
             type: 'rekenen',
             getal1: g1,
@@ -539,7 +663,6 @@ if (maxGetal === 20 && op === '+' && g1 === 10 && g2 === 10) {
         };
     }
 }
-
 
 
 /* ============================================
