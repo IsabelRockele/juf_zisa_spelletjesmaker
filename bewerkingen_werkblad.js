@@ -53,7 +53,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Hulpfuncties (scherm & logica)
     // --------------------------------
     function somHeeftBrug(g1, g2, op) {
-      return op === '+' ? ((g1 % 10) + (g2 % 10) > 9) : ((g1 % 10) < (g2 % 10));
+      return op === '+' ? ((g1 % 10) + (g2 % 10) >= 11): ((g1 % 10) < (g2 % 10));
     }
 
     // SVG-benen en ondervakjes tekenen onder de juiste term (schermvoorbeeld)
@@ -536,14 +536,48 @@ let TT_same_minus_count = 0;
         // geen uitkomst groter dan bereik
         if (op === '+' && g1 + g2 > maxGetal) continue;
 
-        // brugcontrole respecteren
-        if (settings.rekenBrug === 'zonder') {
-            const e1 = g1 % 10;
-            const e2 = g2 % 10;
+// --------------------------------------------------------------
+// EXTRA BRUGCHECK: bij MET BRUG moet de eenhedenbrug verplicht zijn
+// --------------------------------------------------------------
+if (settings.rekenBrug === 'met' && op === '+') {
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
 
-            if (op === '+' && (e1 + e2 > 9)) continue;  // brug bij optellen
-            if (op === '-' && (e1 < e2)) continue;      // brug bij aftrekken
-        }
+    // geen brug → weigeren
+    if (e1 + e2 <= 10) continue;
+}
+
+// --------------------------------------------------------------
+// EXTRA BRUGCHECK AFTREKKEN: bij MET BRUG moet lenen verplicht zijn
+// --------------------------------------------------------------
+if (settings.rekenBrug === 'met' && op === '-') {
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+    if (e1 >= e2) continue;   // geen lenen → weigeren
+}
+
+// Somtypes zonder eenhedenbrug uitsluiten bij 'met brug'
+if (settings.rekenBrug === 'met') {
+
+// TE+E: blokkeren als er geen eenhedenbrug is
+if (gekozenType === 'TE+E' && op === '+') {
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+    if (e1 + e2 <= 9) continue;         // geen brug → weigeren
+    if (e1 + e2 === 10) continue;       // zuiver tiental → ook weigeren
+}
+
+    // Tientallen- en honderdentypes kunnen nooit brug geven → meteen blokkeren
+    if (['T+T','T-T','H+H','HT+HT'].includes(gekozenType)) continue;
+
+    // TE+TE moet selectief behandeld worden:
+    // GEEN brug als de eenheden een zuiver tiental vormen (bij optellen)
+    if (gekozenType === 'TE+TE' && op === '+') {
+        const e1 = g1 % 10;
+        const e2 = g2 % 10;
+        if (e1 + e2 === 10) continue;   // <--- zuiver tiental → blokkeren
+    }
+}
 
         // bij T-T binnen 20 niet te vaak 10+10 / 10–10 / 20–20
         if (maxGetal === 20 && (gekozenType === 'T+T' || gekozenType === 'T-T')) {
