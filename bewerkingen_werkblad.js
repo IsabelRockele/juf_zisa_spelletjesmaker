@@ -555,6 +555,25 @@ if (settings.rekenBrug === 'met' && op === '-') {
     const e2 = g2 % 10;
     if (e1 >= e2) continue;   // geen lenen → weigeren
 }
+// --------------------------------------------------------------
+// EXTRA BRUGCHECK AFTREKKEN: bij MET BRUG moet lenen verplicht zijn
+// --------------------------------------------------------------
+if (settings.rekenBrug === 'met' && op === '-') {
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+    if (e1 >= e2) continue;   // geen lenen → weigeren
+}
+
+// --------------------------------------------------------------
+// DIDACTISCHE CORRECTIE: TE - E sommen zoals 80-3 zijn GEEN brugoefening
+// --------------------------------------------------------------
+if (settings.rekenBrug === 'met' && op === '-' && g1 >= 20 && g1 < 100 && g2 < 10) {
+    const t1 = Math.floor(g1 / 10) % 10;
+    const t2 = Math.floor(g2 / 10) % 10;
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+    if (t1 > t2 && e1 < e2) continue;
+}
 
 // Somtypes zonder eenhedenbrug uitsluiten bij 'met brug'
 if (settings.rekenBrug === 'met') {
@@ -936,7 +955,7 @@ if (gekozenType === 'TE+E' && op === '+') {
           const x = xPosities[col];
 
           if (oef.type === 'rekenen') {
-            const isBrugSom = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+            const isBrugSom = checkBrug(oef.getal1, oef.getal2, oef.operator, 'met');
             if (hulpGlobaal && isBrugSom) drawBrugHulpInPDF(doc, x, y, oef, settings, colWidth);
             else drawRekensomInPDF(doc, x, y, oef);
           } else if (oef.type === 'splitsen') {
