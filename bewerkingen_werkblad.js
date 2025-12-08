@@ -411,14 +411,54 @@ function genereerRekensom() {
         Math.floor(Math.random() * (max - min + 1)) + min;
 
     const maxGetal = settings.rekenMaxGetal || 100;
-    const op =
-        settings.rekenType === 'beide'
-            ? (Math.random() < 0.5 ? '+' : '-')
-            : (settings.rekenType === 'optellen' ? '+' : '-');
+    // Operator eerst kiezen — blijft dezelfde tijdens het zoeken
+// Operator VERPLICHT 50/50 verdelen
+let op;
 
-    const brug = settings.rekenBrug || 'beide';
+if (settings.rekenType === 'beide') {
 
-    let somTypes = [...settings.somTypes];
+    // Tel hoeveel we al hebben
+    if (!window._countPlus) window._countPlus = 0;
+    if (!window._countMin) window._countMin = 0;
+
+    // Halvering van totaal aantal oefeningen
+    const half = Math.floor((settings.numOefeningen || 20) / 2);
+
+    if (window._countPlus < half) {
+        op = '+';
+        window._countPlus++;
+    } else {
+        op = '-';
+        window._countMin++;
+    }
+
+} else {
+    op = (settings.rekenType === 'optellen' ? '+' : '-');
+}
+
+let somTypes = [...settings.somTypes];
+
+const brug = settings.rekenBrug || 'beide';
+
+if (settings.rekenMaxGetal === 20) {
+    const geldigeBinnen20 = ['E+E','E-E','TE+E','TE-E'];
+    somTypes = somTypes.filter(t => geldigeBinnen20.includes(t));
+}
+
+// ----------------------------------------
+// SOMTYPES FILTEREN OP BASIS VAN OPERATOR
+// ----------------------------------------
+let typesVoorOp = somTypes.filter(t => {
+    if (op === '+') return t.includes('+');
+    if (op === '-') return t.includes('-');
+    return false;
+});
+
+// Indien niets gevonden → fallback op alle types
+if (typesVoorOp.length === 0) typesVoorOp = somTypes;
+
+// Gebruik voortaan typesVoorOp i.p.v. somTypes
+somTypes = typesVoorOp;
 
     // -------------------------------
     // Brugcontrole op eenheden
@@ -428,40 +468,62 @@ function genereerRekensom() {
     const e1 = g1 % 10;
     const e2 = g2 % 10;
 
-    /* ----------------------------------------------------
-       OPTELLEN – echte brug
-       e1 + e2 > 10  (10 = geen brug)
-    ---------------------------------------------------- */
+    /* ============================
+       SPECIALE REGEL: TOT 20
+       ============================ */
+    if (settings.rekenMaxGetal === 20) {
+
+        if (op === '+') {
+            // Brug pas als som van eenheden > 10
+            return (e1 + e2 > 10);
+        }
+
+        if (op === '-') {
+            // NOOIT brug wanneer je van een zuiver tiental vertrekt
+            if (g1 === 10 || g1 === 20) return false;
+
+            // Brug wanneer lenen nodig is
+            return (e1 < e2);
+        }
+    }
+
+    /* ============================
+       NORMAAL (tot 100 en tot 1000)
+       ONGEWIJZIGD LATEN
+       ============================ */
+
     if (op === '+') {
         return (e1 + e2 > 10);
     }
 
-    /* ----------------------------------------------------
-       AFTREKKEN – echte brug
-       MAAR:
-       - zuivere tientallen (10,20,...,90) → NOOIT brug
-       - zuivere honderdtallen (100,200,...900) → NOOIT brug
-       - zuivere duizendtallen (1000...) → NOOIT brug
-    ---------------------------------------------------- */
+    // aftrekken
+    if (g1 % 10 === 0 && g1 < 100) return false;
+    if (g1 % 100 === 0 && g1 < 1000) return false;
+    if (g1 % 1000 === 0) return false;
 
-    // Tientallen blokkeren
-    if (g1 % 10 === 0 && g1 < 100) {
-        return false;             // bv. 80 - 3 → GEEN brug
-    }
-
-    // Honderdtallen blokkeren
-    if (g1 % 100 === 0 && g1 < 1000) {
-        return false;             // bv. 300 - 8 → GEEN brug
-    }
-
-    // Duizendtallen blokkeren indien u ooit tot 10000 zou gaan
-    if (g1 % 1000 === 0) {
-        return false;             // bv. 1000 - 9 → GEEN brug
-    }
-
-    // Normaal lenen
     return (e1 < e2);
 }
+// EXTRA correcties specifiek voor max 20
+function isBrugBinnen20(g1, g2, op) {
+
+    if (op === '+') {
+        // Som van éénheden moet > 10 zijn
+        const e1 = g1 % 10;
+        const e2 = g2 % 10;
+        return (e1 + e2 > 10);
+    }
+
+    if (op === '-') {
+        // Nooit brug wanneer startgetal zuiver tiental is
+        if (g1 === 10 || g1 === 20) return false;
+
+        // Brug bij lenen
+        return ((g1 % 10) < (g2 % 10));
+    }
+
+    return false;
+}
+
 
     function brugOK(g1, g2, op) {
         const b = heeftBrug(g1, g2, op);
@@ -478,8 +540,10 @@ function genereerRekensom() {
             throw new Error("Kon geen som genereren binnen de voorwaarden.");
         }
 
-        const type = somTypes[Math.floor(Math.random() * somTypes.length)];
+        // KIES SOMTYPE UIT DE OPERATOR-SPECIFIEKE LIJST
+const type = typesVoorOp[Math.floor(Math.random() * typesVoorOp.length)];
         let g1 = 0, g2 = 0;
+        
 
         /* -----------------------------------------------------------------
            TE + E SPECIFIEK BINNEN 20
@@ -547,10 +611,19 @@ function genereerRekensom() {
 
                 // ----------------- TE + E / TE - E (algemeen) ----
                 case 'TE+E':
-                case 'TE-E':
-                    g1 = rnd(10, Math.min(99, maxGetal));
-                    g2 = rnd(1, 9);
-                    break;
+case 'TE-E':
+
+    if (maxGetal === 20) {
+        // Binnen 20: alleen TE (11–19), nooit 10 of 20
+        g1 = rnd(11, 19);
+        g2 = rnd(1, 9);
+    } else {
+        // Normaal gedrag voor 100 en 1000
+        g1 = rnd(10, Math.min(99, maxGetal));
+        g2 = rnd(1, 9);
+    }
+    break;
+
 
                 // ----------------- TE + TE / TE - TE --------------
                 case 'TE+TE':
@@ -566,11 +639,8 @@ function genereerRekensom() {
                                 let uit = (op === '+') ? a + b : a - b;
                                 if (uit < 0 || uit > 20) continue;
 
-                                const e1 = a % 10;
-                                const e2 = b % 10;
-                                const isBrug = op === '+'
-                                    ? (e1 + e2 > 9)
-                                    : (e1 < e2);
+                                const isBrug = heeftBrug(a, b, op);
+
 
                                 if (brug === 'met' && !isBrug) continue;
                                 if (brug === 'zonder' && isBrug) continue;
@@ -633,6 +703,9 @@ function genereerRekensom() {
 
         // geen negatieve uitkomst
         if (op === '-' && g1 < g2) continue;
+        // TOT 20: nooit aftrekken vanaf een zuiver tiental (10 of 20)
+if (maxGetal === 20 && op === '-' && (g1 === 10 || g1 === 20)) continue;
+
 
         // optellen: uitkomst binnen bereik
         if (op === '+' && g1 + g2 > maxGetal) continue;
