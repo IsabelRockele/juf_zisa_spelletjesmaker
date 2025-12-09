@@ -305,11 +305,9 @@ button:disabled {
   background-color: #0056b3;
 }
 #vuilbak-container {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  text-align: center;
-  z-index: 10;
+    position: relative;
+    margin-top: 40px;     /* afstand onder de ‘Schrijfvlak’-knop */
+    text-align: center;
 }
 #vuilbak {
   width: 160px;
@@ -358,22 +356,6 @@ button:disabled {
    SCHRIJFVLAK STYLING
    =========================== */
 
-#schrijfvlak-container {
-    position: absolute;
-    left: 220px;              /* naast sidebar */
-    top: 120px;
-    width: 30%;
-    height: 75%;
-    background: #ffffff;
-    border: 2px solid #ccc;
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
-    display: none;
-    z-index: 2000;
-    box-sizing: border-box;
-}
-
 #schrijfvlak-header {
     display: flex;
     gap: 10px;
@@ -416,59 +398,40 @@ button:disabled {
 .kleurbol.rood  { background: #d40000; }
 .kleurbol.blauw { background: #004de8; }
 .kleurbol.groen { background: #009944; }
-/* =======================================
-   SCHRIJFVLAK LINKS (30%) + MAIN OPSCHUIVEN
-   ======================================= */
 
-/* Container voor schema en schrijfvlak */
+/* =========================================
+   LAYOUT STRUCTUUR
+   sidebar | schrijfvlak | main
+========================================= */
+
 .content-wrapper {
     display: flex;
     flex-direction: row;
-}
-
-/* Sidebar blijft links */
-#sidebar {
-    flex-shrink: 0;
-}
-
-/* Schrijfvlak links */
-#schrijfvlak-container {
-    position: relative !important;
-    display: none;
-    width: 30%;
-    min-width: 280px;         /* zodat het op tablets niet te klein wordt */
-    height: calc(100vh - 140px);
-    margin-left: 20px;
-    background: #ffffff;
-    border: 2px solid #ccc;
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.15);
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
     box-sizing: border-box;
 }
 
-/* Als schrijfvlak open is: main naar rechts duwen */
-body.schrijfvlak-open #main {
-    margin-left: 2%;
-    width: calc(68% - 20px); /* 100% - sidebar - schrijfvlak */
+/* Sidebar links */
+#sidebar {
+    width: 180px;
+    flex-shrink: 0;
 }
 
-body.schrijfvlak-open #vuilbak-container {
-    margin-left: 2%;
-}
-
+/* Main rechts – neemt rest van de ruimte */
 #main {
-    transition: margin-left 0.3s ease, width 0.3s ease;
-}
-.content-wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
+    flex: 1;
+    transition: width 0.3s ease;
 }
 
-/* Schrijfvlak links */
+/* =========================================
+   SCHRIJFVLAK PANEEL (links)
+========================================= */
+
 #schrijfvlak-container {
-    display: none;
+    display: none;          /* standaard uit */
+    flex-shrink: 0;         /* niet kleiner worden */
     width: 30%;
     min-width: 260px;
     height: calc(100vh - 150px);
@@ -477,90 +440,72 @@ body.schrijfvlak-open #vuilbak-container {
     border-radius: 15px;
     padding: 10px;
     box-shadow: 0 0 12px rgba(0,0,0,0.15);
+    box-sizing: border-box;
+    overflow: hidden;       /* canvas altijd binnen rand */
 }
 
-/* Wanneer open */
+/* Bij openen */
 body.schrijfvlak-open #schrijfvlak-container {
     display: block;
 }
 
-/* Main rechts ervan */
-#main {
-    flex: 1;
-    transition: width 0.3s ease;
-}
-
+/* Main wordt smaller zodra schrijfvlak zichtbaar is */
 body.schrijfvlak-open #main {
-    width: 70%;
-}
-/* ============================
-   DRAGGABLE SCHRIJFVLAK
-============================ */
-
-#schrijfvlak-container {
-    position: absolute;
-    top: 140px;
-    left: 250px;
-    width: 350px;
-    height: 500px;
-
-    background: #fff;
-    border: 2px solid #ccc;
-    border-radius: 15px;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
-
-    display: none;
-    z-index: 3000;
+    width: 68%;
 }
 
-/* Header is de sleep-zone */
+/* =========================================
+   CANVAS binnen schrijfvlak
+========================================= */
+
 #schrijfvlak-header {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    background: #f8f8f8;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-    cursor: move;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
-#schrijfvlak-container.pinned #schrijfvlak-header {
-    cursor: default;
-}
-
-/* Canvas */
 #schrijf-canvas {
     width: 100%;
     height: calc(100% - 60px);
-    border: none;
-    display: block;
+    border-radius: 10px;
+    background: white;
+    border: 1px solid #ccc;
 }
 
-/* Resize handle rechtsonder */
-#resize-handle {
-    width: 22px;
-    height: 22px;
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    cursor: nwse-resize;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><line x1="0" y1="22" x2="22" y2="0" stroke="%23aaa" stroke-width="2"/></svg>') no-repeat center;
+/* =========================================
+   Vuilbak mee laten opschuiven
+========================================= */
+
+body.schrijfvlak-open #vuilbak-container {
+    margin-left: 0;
 }
 
-/* PINNED MODE: niet versleepbaar, niet resizebaar */
-#schrijfvlak-container.pinned {
-    pointer-events: auto;
+/* =========================================
+   KIND-MODE (voor later)
+========================================= */
+
+body.kid #schrijfvlak-container {
+    display: none !important;
 }
 
-#schrijfvlak-container.pinned #schrijfvlak-header {
-    pointer-events: auto;
+body.kid #main {
+    width: 100% !important;
 }
 
-#schrijfvlak-container.pinned #resize-handle {
-    display: none; /* geen resize als pinned */
+#sidebar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+/* MIN (–) versie: geef het schema meer ruimte */
+body.schrijfvlak-open.min-variant #main {
+    width: 82%;   /* voldoende ruimte voor volledige cirkeldoos */
 }
 
-/* Unpinned: wel resizebaar */
-#schrijfvlak-container.unpinned {
-    pointer-events: auto;
+/* MIN-versie: schrijfvlak smaller zodat het schema blijft passen */
+body.schrijfvlak-open.min-variant #schrijfvlak-container {
+    width: 28%;
+}
+body.schrijfvlak-open.min-variant #main {
+    width: 75%;
 }
