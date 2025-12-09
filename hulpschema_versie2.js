@@ -279,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
         tool.remove();
     }
 });
+
 /* ===============================
    SCHRIJFVLAK / CANVAS TEKENTOOL
    =============================== */
@@ -314,17 +315,14 @@ document.addEventListener("DOMContentLoaded", () => {
     canvasGrootteInstellen();
     window.addEventListener("resize", canvasGrootteInstellen);
 
-    /* === Schrijfvlak openen === */
+    /* === Schrijfvlak openen/sluiten === */
     openBtn?.addEventListener("click", () => {
-    container.style.display = "block";
-    document.body.classList.add("schrijfvlak-open");
-});
+        document.body.classList.add("schrijfvlak-open");
+    });
 
-closeBtn?.addEventListener("click", () => {
-    container.style.display = "none";
-    document.body.classList.remove("schrijfvlak-open");
-});
-
+    closeBtn?.addEventListener("click", () => {
+        document.body.classList.remove("schrijfvlak-open");
+    });
 
     /* === Pen = tekenen === */
     penBtn?.addEventListener("click", () => {
@@ -354,7 +352,7 @@ closeBtn?.addEventListener("click", () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
     });
 
-    /* === Tekenen === */
+    /* === Tekenen met muis === */
     function startTekenen(e) {
         tekenen = true;
         ctx.beginPath();
@@ -370,7 +368,6 @@ closeBtn?.addEventListener("click", () => {
 
         ctx.lineWidth = lijndikte;
         ctx.lineCap = "round";
-
         ctx.strokeStyle = gommen ? "#ffffff" : huidigeKleur;
 
         ctx.lineTo(e.offsetX, e.offsetY);
@@ -379,9 +376,10 @@ closeBtn?.addEventListener("click", () => {
 
     canvas.addEventListener("mousedown", startTekenen);
     canvas.addEventListener("mouseup", eindeTekenen);
+    canvas.addEventListener("mouseleave", eindeTekenen);
     canvas.addEventListener("mousemove", tekenenBeweging);
 
-    /* Touch support */
+    /* === Tekenen met touch (smartboard) === */
     canvas.addEventListener("touchstart", (e) => {
         e.preventDefault();
         const rect = canvas.getBoundingClientRect();
@@ -398,87 +396,4 @@ closeBtn?.addEventListener("click", () => {
 
     canvas.addEventListener("touchend", eindeTekenen);
 
-});
-/* ========================================
-   DRAG, PIN & RESIZE SCHRIJFVLAK
-======================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const container = document.getElementById("schrijfvlak-container");
-    const openBtn  = document.getElementById("schrijfvlak-open");
-    const closeBtn = document.getElementById("close-schrijfvlak");
-    const pinBtn   = document.getElementById("pin-toggle");
-    const header   = document.getElementById("schrijfvlak-header");
-    const handle   = document.getElementById("resize-handle");
-    const canvas   = document.getElementById("schrijf-canvas");
-    const ctx      = canvas.getContext("2d");
-
-    let dragging = false;
-    let resizing = false;
-    let offsetX, offsetY;
-
-    // Open
-    openBtn.addEventListener("click", () => {
-        container.style.display = "block";
-    });
-
-    // Close
-    closeBtn.addEventListener("click", () => {
-        container.style.display = "none";
-    });
-
-    // Pin toggle
-    pinBtn.addEventListener("click", () => {
-        if (container.classList.contains("pinned")) {
-            container.classList.remove("pinned");
-            container.classList.add("unpinned");
-            pinBtn.textContent = "📌";
-        } else {
-            container.classList.add("pinned");
-            container.classList.remove("unpinned");
-            pinBtn.textContent = "📍";
-        }
-    });
-
-    // DRAGGING
-    header.addEventListener("mousedown", (e) => {
-        if (container.classList.contains("pinned")) return;
-
-        dragging = true;
-        offsetX = e.clientX - container.offsetLeft;
-        offsetY = e.clientY - container.offsetTop;
-    });
-
-    document.addEventListener("mousemove", (e) => {
-        if (!dragging || container.classList.contains("pinned")) return;
-
-        container.style.left = (e.clientX - offsetX) + "px";
-        container.style.top  = (e.clientY - offsetY) + "px";
-    });
-
-    document.addEventListener("mouseup", () => {
-        dragging = false;
-        resizing = false;
-    });
-
-    // RESIZING
-    handle.addEventListener("mousedown", () => {
-        if (container.classList.contains("pinned")) return;
-        resizing = true;
-    });
-
-    document.addEventListener("mousemove", (e) => {
-        if (!resizing || container.classList.contains("pinned")) return;
-
-        let newWidth  = e.clientX - container.offsetLeft;
-        let newHeight = e.clientY - container.offsetTop;
-
-        container.style.width = newWidth + "px";
-        container.style.height = newHeight + "px";
-
-        // Canvas aanpassen
-        canvas.width  = canvas.clientWidth;
-        canvas.height = canvas.clientHeight;
-    });
 });
