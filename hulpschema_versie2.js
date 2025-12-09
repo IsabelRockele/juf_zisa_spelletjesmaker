@@ -285,6 +285,28 @@ document.addEventListener('DOMContentLoaded', () => {
    =============================== */
 
 document.addEventListener("DOMContentLoaded", () => {
+    let lijnen = [];   
+let huidigeLijn = null;
+
+function afstandPuntTotSegment(px, py, x1, y1, x2, y2) {
+    const A = px - x1;
+    const B = py - y1;
+    const C = x2 - x1;
+    const D = y2 - y1;
+
+    const dot = A*C + B*D;
+    const len = C*C + D*D;
+    let t = dot / len;
+    t = Math.max(0, Math.min(1, t));
+
+    const xx = x1 + t*C;
+    const yy = y1 + t*D;
+
+    const dx = px - xx;
+    const dy = py - yy;
+    return Math.sqrt(dx*dx + dy*dy);
+}
+
 
     const openBtn = document.getElementById("schrijfvlak-open");
     const container = document.getElementById("schrijfvlak-container");
@@ -305,29 +327,29 @@ document.addEventListener("DOMContentLoaded", () => {
     let tekenen = false;
     let huidigeKleur = "#000000";
     let lijndikte = 3;
-    let gommen = false;
 
     function canvasGrootteInstellen() {
         canvas.width = canvas.clientWidth;
         canvas.height = canvas.clientHeight;
     }
 
-    canvasGrootteInstellen();
-    window.addEventListener("resize", canvasGrootteInstellen);
 
     /* === Schrijfvlak openen/sluiten === */
     openBtn?.addEventListener("click", () => {
-        document.body.classList.add("schrijfvlak-open");
-    });
+    document.body.classList.add("schrijfvlak-open");
+
+    // BELANGRIJK: canvas pas schalen ALS het zichtbaar is
+    setTimeout(() => {
+        canvasGrootteInstellen();
+    }, 50);
+});
 
     closeBtn?.addEventListener("click", () => {
         document.body.classList.remove("schrijfvlak-open");
     });
 
     /* === Pen = tekenen === */
-    penBtn?.addEventListener("click", () => {
-        gommen = false;
-    });
+    
 
     /* === Kleurenset openen === */
     colorBtn?.addEventListener("click", () => {
@@ -338,41 +360,102 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".kleurbol").forEach(bol => {
         bol.addEventListener("click", () => {
             huidigeKleur = bol.dataset.kleur;
-            gommen = false;
         });
     });
 
     /* === Gommen === */
-    eraserBtn?.addEventListener("click", () => {
-        gommen = true;
-    });
+    let gommodus = false;
+
+eraserBtn?.addEventListener("click", () => {
+    gommodus = true;
+});
+
+penBtn?.addEventListener("click", () => {
+    gommodus = false;
+});
+
 
     /* === Alles wissen === */
-    clearBtn?.addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
+   clearBtn?.addEventListener("click", () => {
+    lijnen = [];  // <<< BELANGRIJK! Alle opgeslagen lijnen wissen
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+});
+
 
     /* === Tekenen met muis === */
     function startTekenen(e) {
-        tekenen = true;
+    const x = e.offsetX;
+    const y = e.offsetY;
+
+    if (gommodus) {
+        verwijderLijnBijKlik(x, y);
+        return;
+    }
+
+    tekenen = true;
+    huidigeLijn = {
+        punten: [{x, y}],
+        kleur: huidigeKleur,
+        dikte: lijndikte
+    };
+    lijnen.push(huidigeLijn);
+}
+
+function tekenenBeweging(e) {
+    if (!tekenen || gommodus) return;
+    const x = e.offsetX;
+    const y = e.offsetY;
+    huidigeLijn.punten.push({x, y});
+    tekenAllesOpnieuw();
+}
+
+function eindeTekenen() {
+    tekenen = false;
+    huidigeLijn = null;
+}
+function verwijderLijnBijKlik(x, y) {
+    let besteIndex = -1;
+    let besteAfstand = Infinity;
+    const drempel = 15;
+
+    lijnen.forEach((lijn, index) => {
+        for (let i = 1; i < lijn.punten.length; i++) {
+            const p1 = lijn.punten[i-1];
+            const p2 = lijn.punten[i];
+            const afstand = afstandPuntTotSegment(x, y, p1.x, p1.y, p2.x, p2.y);
+
+            if (afstand < besteAfstand) {
+                besteAfstand = afstand;
+                besteIndex = index;
+            }
+        }
+    });
+
+    if (besteIndex !== -1 && besteAfstand < drempel) {
+        lijnen.splice(besteIndex, 1);
+        tekenAllesOpnieuw();
+    }
+}
+function tekenAllesOpnieuw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    lijnen.forEach(lijn => {
         ctx.beginPath();
-        ctx.moveTo(e.offsetX, e.offsetY);
-    }
-
-    function eindeTekenen() {
-        tekenen = false;
-    }
-
-    function tekenenBeweging(e) {
-        if (!tekenen) return;
-
-        ctx.lineWidth = lijndikte;
         ctx.lineCap = "round";
-        ctx.strokeStyle = gommen ? "#ffffff" : huidigeKleur;
+        ctx.strokeStyle = lijn.kleur;
+        ctx.lineWidth = lijn.dikte;
 
-        ctx.lineTo(e.offsetX, e.offsetY);
+        const pts = lijn.punten;
+        ctx.moveTo(pts[0].x, pts[0].y);
+
+        for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i].x, pts[i].y);
+        }
+
         ctx.stroke();
-    }
+    });
+}
+
 
     canvas.addEventListener("mousedown", startTekenen);
     canvas.addEventListener("mouseup", eindeTekenen);
