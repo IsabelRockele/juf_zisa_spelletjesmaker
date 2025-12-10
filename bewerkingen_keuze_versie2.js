@@ -367,9 +367,29 @@ const vrij = (document.getElementById(veldId) || {}).value?.trim();
   // Bundelknoppen onderaan
   const maakBundelBtn = document.getElementById('maakBundelBtn');
   const leegBundelBtn = document.getElementById('leegBundelBtn');
-  if (maakBundelBtn) {
+    if (maakBundelBtn) {
     maakBundelBtn.addEventListener('click', () => {
-      if (!bundel.length) { alert('Je bundel is leeg. Voeg eerst sets toe.'); return; }
+      if (!bundel.length) {
+        alert('Je bundel is leeg. Voeg eerst sets toe.');
+        return;
+      }
+
+      // Lees de huidige titel en titel-plaats uit het vaste blok bovenaan
+      const titelInput   = document.getElementById('werkbladTitel');
+      const nieuweTitel  = (titelInput?.value || 'Werkblad Bewerkingen').trim() || 'Werkblad Bewerkingen';
+      const nieuwePlaats = (document.querySelector('input[name="titelPlaats"]:checked')?.value || 'elke');
+
+      // Werk voor álle items in de bundel de titel & titelPlaats bij
+      bundel = bundel.map(item => ({
+        ...item,
+        settings: {
+          ...(item.settings || {}),
+          werkbladTitel: nieuweTitel,
+          titelPlaats: nieuwePlaats
+        }
+      }));
+
+      // Opslaan en naar het werkblad gaan
       bundelOpslaan();
       window.location.href = 'bewerkingen_werkblad_versie2.html';
     });
