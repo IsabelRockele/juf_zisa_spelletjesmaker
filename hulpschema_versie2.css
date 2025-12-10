@@ -429,6 +429,10 @@ button:disabled {
    SCHRIJFVLAK PANEEL (links)
 ========================================= */
 
+/* =========================================
+   SCHRIJFVLAK PANEEL (links)
+========================================= */
+
 #schrijfvlak-container {
     display: none;          /* standaard uit */
     flex-shrink: 0;         /* niet kleiner worden */
@@ -442,6 +446,9 @@ button:disabled {
     box-shadow: 0 0 12px rgba(0,0,0,0.15);
     box-sizing: border-box;
     overflow: hidden;       /* canvas altijd binnen rand */
+    
+    /* NIEUW: Dit zorgt dat het schrijfvlak HELEMAAL LINKS komt te staan */
+    order: -1; 
 }
 
 /* Bij openen */
