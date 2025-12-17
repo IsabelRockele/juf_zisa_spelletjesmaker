@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Bekijk bundel</title>
+
+  <!-- zelfde CSS als vroeger -->
+  <link rel="stylesheet" href="../bewerkingen_versie2.css">
+
+  <!-- libraries voor preview + pdf -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <!-- fallback-variabelen (zoals vroeger) -->
+  <script>
+    window.PREVIEW_TOP_PX     ??= 90;
+    window.PREVIEW_BOTTOM_PX  ??= 90;
+    window.PREVIEW_SEG_GAP_PX ??= 24;
+  </script>
+</head>
+
+<body>
+
+<header>
+  <h1>Jouw bundel</h1>
+</header>
+
+<div class="werkblad-pagina">
+  <div id="werkblad-knoppen">
+    <button onclick="window.location.href='../dashboard/dashboard.html'">
+      Terug naar dashboard
+    </button>
+    <button id="downloadPdfBtn">
+      Download als PDF
+    </button>
+  </div>
+
+  <div id="werkblad-wrapper">
+    <div id="werkblad-container"></div>
+  </div>
+</div>
+
+<!-- 👉 DIT IS DE BELANGRIJKE KOPPELING 👇 -->
+<script type="module" src="./bundel_preview.js"></script>
+<script type="module" src="./bundel_pdf.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+
+</body>
+</html>
