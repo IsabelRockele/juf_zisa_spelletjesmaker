@@ -107,3 +107,84 @@ export function drawSplitsPDF(doc, cfg, oef, layout) {
 
   // bewerkingen4 later
 }
+
+/* =========================================================
+   SPLITS + 4 BEWERKINGEN — PDF (oude stijl + lichtblauw kader per oefening)
+   ========================================================= */
+export function drawSplitsPlusVierPDF(doc, oef, layout) {
+  const { x, y, w } = layout;   // w = kaartbreedte
+
+  const h = 92;                 // kaart-hoogte (compact zoals vroeger)
+  const pad = 4;
+
+  // lichtblauwe kader per oefening
+  doc.setDrawColor(190, 220, 245);
+  doc.setLineWidth(0.6);
+  doc.roundedRect(x, y, w, h, 3, 3);
+
+  const midX = x + w / 2;
+
+  // ---- mini "benen"-huisje (oude look: geen felblauw, grijs/zwart) ----
+  const topW = 12, topH = 12;
+  const boxW = 12, boxH = 12;
+  const horiz = 12;
+
+  // bovenste vak (lichtblauw gevuld zoals uw andere splitstypes)
+  doc.setFillColor(224, 242, 247);
+  doc.setDrawColor(51, 51, 51);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(midX - topW / 2, y + pad, topW, topH, 2, 2, 'FD');
+
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text(String(oef.totaal), midX, y + pad + topH - 2, { align: 'center' });
+
+  // benen
+  const legTopY = y + pad + topH;
+  const legBotY = legTopY + 10;
+  doc.setDrawColor(80, 80, 80);
+  doc.setLineWidth(0.6);
+  doc.line(midX, legTopY, midX - horiz, legBotY);
+  doc.line(midX, legTopY, midX + horiz, legBotY);
+
+  // onderste vakjes (lichtgrijze rand)
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(midX - horiz - boxW / 2, legBotY, boxW, boxH, 2, 2, 'D');
+  doc.roundedRect(midX + horiz - boxW / 2, legBotY, boxW, boxH, 2, 2, 'D');
+
+  doc.setFont('Helvetica', 'normal');
+  doc.setFontSize(12);
+  if (oef.prefill === 'links')  doc.text(String(oef.deel1), midX - horiz, legBotY + boxH - 2, { align: 'center' });
+  if (oef.prefill === 'rechts') doc.text(String(oef.deel2), midX + horiz, legBotY + boxH - 2, { align: 'center' });
+
+  // ---- 4 bewerkingen (zoals vroeger: lijntjes, geen rare “−” tekens) ----
+  // Gebruik gewone '-' i.p.v. '−' om font-problemen te vermijden
+  const ops = ['+', '+', '-', '-'];
+
+  // helper: schrijf-lijntje
+  function lijn(cx, yy, len) {
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.4);
+    doc.line(cx - len / 2, yy, cx + len / 2, yy);
+  }
+
+  doc.setFontSize(12);
+  const startY = y + 48;
+  const rowGap = 13;
+
+  for (let i = 0; i < 4; i++) {
+    const yy = startY + i * rowGap;
+
+    // __ + __ = __
+    lijn(midX - 18, yy, 8);
+    doc.text(ops[i], midX - 6, yy + 1, { align: 'center' });
+    lijn(midX + 6, yy, 8);
+    doc.text('=', midX + 18, yy + 1, { align: 'center' });
+    lijn(midX + 28, yy, 8);
+  }
+
+  // kaarthoogte teruggeven (voor y-stap in bundel_pdf.js)
+  return h;
+}
+
