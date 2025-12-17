@@ -754,11 +754,33 @@ function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1
       [4,0],[4,1],[3,1],[3,2],[3,3],[4,3],[4,4],[3,4],[2,4],[1,4],[1,3],[0,3],[0,4]
     ]
   ];
-
-  // Kies willekeurig één van deze paden
-  const pad = PAD_VARIANTEN_5X5[
-    Math.floor(Math.random()*PAD_VARIANTEN_5X5.length)
+  // Kortere paden speciaal voor sprong 10 (max. 9 getallen op het pad)
+  const PAD_VARIANTEN_5X5_SPRONG10 = [
+    // variant 1: recht omhoog, dan naar rechts
+    [
+      [4,0],[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 2: via kolom 1 naar boven
+    [
+      [4,0],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 3: kleine kronkel in het midden
+    [
+      [4,0],[3,0],[3,1],[3,2],[2,2],[1,2],[0,2],[0,3],[0,4]
+    ]
   ];
+
+   // Kies passende padvariant (korter pad voor sprong 10)
+  const padVarianten = (sprong === 10)
+    ? PAD_VARIANTEN_5X5_SPRONG10
+    : PAD_VARIANTEN_5X5;
+
+  let padIndex;
+  do {
+    padIndex = Math.floor(Math.random() * padVarianten.length);
+  } while (padIndex === avoidIdx && padVarianten.length > 1);
+
+  const pad = padVarianten[padIndex];
 
   // Limiet = min(100, bereikMax)
   const limiet = (bereikMax < 100 ? bereikMax : 100);
@@ -785,7 +807,7 @@ function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1
       endCell: [0,4],
       startIcon: themaInfo.startIcon,
       endIcon: themaInfo.endIcon,
-      padIndex: -1
+          padIndex
     };
   }
 
@@ -823,7 +845,7 @@ function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1
       endCell: [0,4],
       startIcon: themaInfo.startIcon,
       endIcon: themaInfo.endIcon,
-      padIndex: -1
+          padIndex
     };
   }
 
@@ -886,7 +908,7 @@ function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1
     endCell,
     startIcon: themaInfo.startIcon,
     endIcon: themaInfo.endIcon,
-    padIndex: -1
+        padIndex
   };
 }
 
@@ -945,7 +967,7 @@ function buildMazeOefening(themaInfo, size, avoidIdx = -1){
       endCell: [0,4],
       startIcon: themaInfo.startIcon,
       endIcon: themaInfo.endIcon,
-      padIndex: -1
+          padIndex
     };
   }
 
