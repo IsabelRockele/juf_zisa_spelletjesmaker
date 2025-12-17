@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard – Werkbladen</title>
+
+  <link rel="stylesheet" href="../bewerkingen_versie2.css">
+
+  <style>
+    body { padding: 20px; }
+    .blok {
+      border: 2px solid #0d3b66;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      cursor: pointer;
+      background: #f5faff;
+      font-size: 20px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .blok:hover {
+      background: #e6f2ff;
+    }
+    .bundel {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px dashed #999;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Werkbladen samenstellen</h1>
+
+<div class="blok" onclick="window.location.href='../splitsen/splitsen.html'">
+  Splitsen
+</div>
+
+<div class="blok" onclick="alert('Hoofdrekenen komt straks')">
+  Hoofdrekenen
+</div>
+
+<div class="blok" onclick="alert('Tafels inzichtelijk komt straks')">
+  Tafels inzichtelijk
+</div>
+
+<div class="blok" onclick="alert('Tafels komt straks')">
+  Tafels
+</div>
+
+<div class="bundel">
+  <h2>Huidige bundel</h2>
+  <ul id="bundelLijst"></ul>
+
+  <button onclick="window.location.href='../bundel/bundel.html'">
+    Bekijk bundel
+  </button>
+</div>
+
+<script>
+  const lijst = document.getElementById('bundelLijst');
+  const bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
+
+  if (bundel.length === 0) {
+    lijst.innerHTML = '<li>Nog niets toegevoegd</li>';
+  } else {
+    bundel.forEach(item => {
+      const li = document.createElement('li');
+      li.textContent = item.titel + ' – ' + (item.subtitle || '');
+      lijst.appendChild(li);
+    });
+  }
+</script>
+
+</body>
+</html>
