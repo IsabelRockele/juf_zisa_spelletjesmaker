@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generator Bewerkingen – optellen en aftrekken</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+  <header>
+   <button class="btn btn--ghost" onclick="window.location.href='../bewerkingenbundel.html'">Terug naar Menu</button>
+      Terug naar bundel
+    </button>
+    <h1>Generator voor Bewerkingen</h1>
+  </header>
+
+  <div id="main-content">
+    <!-- VAK: BEWERKINGEN -->
+    <div class="keuzevak">
+      <h2>Bewerkingen (+, −)</h2>
+      <div id="rekenMelding" class="melding"></div>
+
+      <div class="control-group">
+        <label class="group-title" for="numOefeningen_reken">Aantal oefeningen:</label>
+        <input id="numOefeningen_reken" type="number" min="1" max="200" value="20" />
+      </div>
+
+      <div class="control-group">
+        <label class="group-title" for="rekenMaxGetal">Oefenen tot:</label>
+        <select id="rekenMaxGetal">
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="100" selected>100</option>
+          <option value="1000">1000</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Type bewerking:</label>
+        <label><input type="radio" name="rekenType" value="optellen" checked> Optellen</label>
+        <label><input type="radio" name="rekenType" value="aftrekken"> Aftrekken</label>
+        <label><input type="radio" name="rekenType" value="beide"> Beide</label>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Somtypes:</label>
+        <label><input type="checkbox" name="somType" value="E+E" checked> E + E / E − E</label>
+        <label><input type="checkbox" name="somType" value="T+E"> T + E / T − E</label>
+        <label><input type="checkbox" name="somType" value="T+T"> T + T / T − T</label>
+        <label><input type="checkbox" name="somType" value="TE+E"> TE + E / TE − E</label>
+        <label><input type="checkbox" name="somType" value="TE+TE"> TE + TE / TE − TE</label>
+        <label><input type="checkbox" name="somType" value="H+H"> H + H / H − H</label>
+        <label><input type="checkbox" name="somType" value="HT+HT"> HT + HT / HT − HT</label>
+        <label><input type="checkbox" name="somType" value="HTE+HTE"> HTE + HTE / HTE − HTE</label>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title" for="rekenBrug">Brug:</label>
+        <select id="rekenBrug">
+          <option value="beide" selected>Beide toegestaan</option>
+          <option value="met">Enkel mét brug</option>
+          <option value="zonder">Enkel zónder brug</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>
+          <input type="checkbox" id="rekenHulpCheckbox">
+          Hulpmiddelen tonen (alleen bij brug)
+        </label>
+      </div>
+
+      <div class="control-group" id="rekenHulpDetail" style="display:none">
+        <label class="group-title">Instellingen hulpmiddelen:</label>
+
+        <div id="optellenHint" style="font-size:0.95em;color:#555;margin-bottom:6px;">
+          Bij optellen komen <b>splitsbenen onder de tweede term</b>.
+        </div>
+
+        <div id="aftrekkenHint" style="margin-bottom:6px;display:none;">
+          <div style="font-size:0.95em;color:#555;margin-bottom:6px;">
+            Kies waar de <b>splitsbenen</b> staan bij aftrekken:
+          </div>
+          <label>
+            <input type="radio" name="splitsPlaatsAftrekken" value="onderAftrektal" checked>
+            Onder het aftrektal
+          </label>
+          <label style="margin-left:12px;">
+            <input type="radio" name="splitsPlaatsAftrekken" value="onderAftrekker">
+            Onder de aftrekker
+          </label>
+        </div>
+
+        <label style="margin-top:6px;">
+          <input type="checkbox" id="rekenHulpSchrijflijnen" checked>
+          Twee schrijflijnen rechts voor tussenstappen
+        </label>
+
+        <!-- HULPMIDDEL-STIJL -->
+        <div class="veldgroep" id="hulpStijlGroep" style="margin-top:8px">
+          <label style="font-weight:600;display:block;margin-bottom:4px;">Hulpmiddel-stijl</label>
+          <label>
+            <input type="radio" name="hulpStijl" value="splitsbenen" checked>
+            Splitsbenen
+          </label>
+          <label style="margin-left:12px;">
+            <input type="radio" name="hulpStijl" value="compenseren">
+            Compenseren (E=7/8/9 of T=70/80/90)
+          </label>
+        </div>
+
+        <!-- OPTIES VOOR COMPENSEREN -->
+        <div id="compenseerOpties" style="margin-top:6px;display:none">
+          <label>
+            <input type="checkbox" id="rekenVoorbeeld">
+            Voorbeeldoefening (oranje kader)
+          </label><br>
+          <label>
+            <input type="checkbox" id="compSigns">
+            Toon in compenseerbox:
+            <span style="color:#c00">+</span>___
+            <span style="color:#06c">-</span>___
+          </label><br>
+          <label>
+            <input type="checkbox" id="rekenHulpSchrijflijnen">
+            2 hulplijnen rechts
+          </label>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="group-title">Opdrachtzin (optioneel):</label>
+
+        <!-- veld voor optellen -->
+        <input
+          id="opdracht_optellen"
+          type="text"
+          placeholder="vb. Zoek de som."
+          style="width:100%;"
+        />
+
+        <!-- veld voor aftrekken -->
+        <input
+          id="opdracht_aftrekken"
+          type="text"
+          placeholder="vb. Zoek het verschil."
+          style="width:100%; display:none; margin-top:6px;"
+        />
+
+        <!-- veld voor beide -->
+        <input
+          id="opdracht_beide"
+          type="text"
+          placeholder="vb. Los de sommen op."
+          style="width:100%; display:none; margin-top:6px;"
+        />
+      </div>
+
+      <div class="btn-row">
+        <button id="maakRekenBtn" class="btn btn--primary">Maak werkblad</button>
+        <button id="voegRekenToeBtn" class="btn">Voeg toe aan bundel</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="rekenen/rekenen.js"></script>
+</body>
+</html>
