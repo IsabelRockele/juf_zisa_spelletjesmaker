@@ -2,9 +2,22 @@
    BUNDEL – PDF ENGINE (ALLEEN SPLITSBENEN)
    ========================================================= */
 
-import { drawSplitsPDF } from '../splitsen/splits.pdf.js';
+import {
+  drawSplitsPDF,
+  drawSplitsPlusVierPDF
+} from '../splitsen/splits.pdf.js';
+
 
 const { jsPDF } = window.jspdf;
+
+// ===== SPLITS + 4 BEWERKINGEN (vaste kaartmaten) =====
+// ===== SPLITS + 4 BEWERKINGEN (vaste kaartmaten – 2 per rij) =====
+const SPLITS4_KAART_W = 85;   // bredere kaart
+const SPLITS4_KAART_H = 84;   // iets hoger voor schrijfruimte
+const SPLITS4_GAP_X  = 14;
+const SPLITS4_GAP_Y  = 14;
+
+
 
 function tekenBundelKop(doc, bundelMeta, layout, isEerstePagina) {
   if (!bundelMeta) return 0;
@@ -114,8 +127,14 @@ y += extraOffset;
       const cfg = item.settings;
       if (!cfg) return;
       if (cfg.hoofdBewerking !== 'splitsen') return;
-      if (cfg.splitsStijl !== 'benen' && cfg.splitsStijl !== 'huisje' && cfg.splitsStijl !== 'puntoefening') return;
-      if (!Array.isArray(cfg._oefeningen)) return;
+     if (!cfg) return;
+if (cfg.hoofdBewerking !== 'splitsen') return;
+if (cfg.splitsStijl !== 'benen'
+ && cfg.splitsStijl !== 'huisje'
+ && cfg.splitsStijl !== 'puntoefening'
+ && cfg.splitsStijl !== 'bewerkingen4') return;
+if (!Array.isArray(cfg._oefeningen)) return;
+
 
       // Nieuwe pagina vanaf tweede segment
       if (index > 0) {
@@ -149,18 +168,23 @@ doc.setTextColor(0);
 doc.text(titelTekst, kaderX + 4, y);
 
 // ruimte onder het kader
-y += kaderHoogte + 6;
+y += kaderHoogte + 4;   // iets compacter
 
 // font terug normaal voor oefeningen
 doc.setFont(undefined, 'normal');
 doc.setFontSize(12);
 
-
-if (cfg.splitsStijl === 'puntoefening') {
-  y += 12;   // genoeg ruimte zodat titel NOOIT in kader loopt
-} else {
+// beperkte extra marge, voor alle splits
+if (cfg.hoofdBewerking === 'splitsen') {
+  y += 4;
+} else if (cfg.splitsStijl === 'puntoefening') {
   y += 10;
+} else {
+  y += 8;
 }
+
+// bij bewerkingen4 géén extra y → eerste rij schuift omhoog
+
 
 
       doc.setFontSize(12);
@@ -172,14 +196,46 @@ col = 0;
 
       cfg._oefeningen.forEach((oef, i) => {
 
-        drawSplitsPDF(doc, cfg, oef, {
-          x,
-          y,
-          colWidth: layout.colWidth,
-          lineHeight: layout.lineHeight
-        });
+  // === SPLITS + 4 BEWERKINGEN ===
+  if (cfg.splitsStijl === 'bewerkingen4') {
 
-        col++;
+  // pagina-afbreking VOOR de kaart (zoals oude versie)
+  if (col === 0 && y + SPLITS4_KAART_H > 260) {
+    doc.addPage();
+    x = layout.marginLeft;
+    y = layout.marginTop;
+    col = 0;
+  }
+
+  drawSplitsPlusVierPDF(doc, oef, {
+    x,
+    y,
+    w: SPLITS4_KAART_W
+  });
+
+  col++;
+
+  if (col >= 2) {
+    col = 0;
+    x = layout.marginLeft;
+    y += SPLITS4_KAART_H + SPLITS4_GAP_Y;
+  } else {
+    x += SPLITS4_KAART_W + SPLITS4_GAP_X;
+  }
+
+  return;
+}
+
+  // === ANDERE SPLITS-OEFENINGEN ===
+  drawSplitsPDF(doc, cfg, oef, {
+    x,
+    y,
+    colWidth: layout.colWidth,
+    lineHeight: layout.lineHeight
+  });
+
+  col++;
+
         if (col >= maxCols) {
           col = 0;
           x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
