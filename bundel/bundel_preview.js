@@ -5,8 +5,10 @@
 import {
   renderSplitsBenentraining,
   renderSplitsHuisje,
-  renderSplitsPuntoefening
+  renderSplitsPuntoefening,
+  renderSplitsPlusVier
 } from '../splitsen/splits.preview.js';
+
 
 import { genereerSplitsing } from '../splitsen/splits.generator.js';
 
@@ -127,7 +129,7 @@ container.appendChild(metaBox);
   bundel.forEach(item => {
     const cfg = item.settings;
     if (!cfg || cfg.hoofdBewerking !== 'splitsen') return;
- if (cfg.splitsStijl !== 'benen' && cfg.splitsStijl !== 'huisje' && cfg.splitsStijl !== 'puntoefening') return;
+  if (cfg.splitsStijl !== 'benen' && cfg.splitsStijl !== 'huisje' && cfg.splitsStijl !== 'puntoefening' && cfg.splitsStijl !== 'bewerkingen4') return;
 
     // --- segment ---
     const segment = document.createElement('section');
@@ -262,10 +264,17 @@ addBtn.addEventListener('click', () => {
   if (!Array.isArray(cfg._oefeningen)) cfg._oefeningen = [];
 
   // voeg placeholders toe (volgende stap koppelen we dit aan echte generator)
- for (let i = 0; i < n; i++) {
- const nieuweOef = genereerSplitsing(cfg);
-cfg._oefeningen.push(nieuweOef);
+for (let i = 0; i < n; i++) {
+  const nieuweOef = genereerSplitsing(cfg);
+
+  // 👇 vlaggen exact zoals in de oude versie
+  nieuweOef._p  = (cfg.splitsStijl === 'puntoefening');
+  nieuweOef._b4 = (cfg.splitsStijl === 'bewerkingen4');
+  nieuweOef._h  = (cfg.splitsStijl === 'huisje');
+
+  cfg._oefeningen.push(nieuweOef);
 }
+
 
 
   const bundelNu = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
@@ -296,6 +305,11 @@ if (cfg.splitsStijl === 'huisje') {
 if (cfg.splitsStijl === 'puntoefening') {
   renderSplitsPuntoefening(cfg, grid);
 }
+
+if (cfg.splitsStijl === 'bewerkingen4') {
+  renderSplitsPlusVier(cfg, grid);
+}
+
 
 }); // <-- sluit bundel.forEach af
 }); // <-- sluit DOMContentLoaded af
