@@ -706,6 +706,10 @@ case 'TE-E':
         // TOT 20: nooit aftrekken vanaf een zuiver tiental (10 of 20)
 if (maxGetal === 20 && op === '-' && (g1 === 10 || g1 === 20)) continue;
 
+// EXTRA STRIKTE REGEL: bij max 20 mag startgetal nooit boven 20 zijn
+if (maxGetal === 20 && op === '-' && g1 > 20) continue;
+
+
 
         // optellen: uitkomst binnen bereik
         if (op === '+' && g1 + g2 > maxGetal) continue;
