@@ -94,10 +94,15 @@ export function renderSplitsBenentraining(cfg, grid) {
    ========================================================= */
 
 export function renderSplitsHuisje(cfg, grid) {
+  // ❌ Geen kleine splitshuizen tekenen voor grote splitshuizen
+if (cfg.groteSplitshuizen) return;
+
 
   if (!Array.isArray(cfg._oefeningen)) return;
 
   cfg._oefeningen.forEach(oef => {
+    if (oef.type !== 'splitsen') return;
+
 
     const huis = document.createElement('div');
     huis.className = 'splitshuis';
@@ -183,7 +188,14 @@ export function renderSplitsPlusVier(cfg, grid) {
 
   // 3 per rij zoals in de oude versie
   grid.style.display = 'grid';
-  grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
+  // max 3 grote splitshuizen per rij
+grid.style.display = 'grid';
+grid.style.gridTemplateColumns = 'repeat(3, minmax(0, 1fr))';
+grid.style.columnGap = '22px';
+grid.style.rowGap = '18px';
+grid.style.justifyItems = 'center';
+
+
   grid.style.columnGap = '22px';
   grid.style.rowGap = '18px';
   grid.style.justifyItems = 'center';
@@ -314,4 +326,150 @@ export function renderSplitsPlusVier(cfg, grid) {
     // delete per oefening (kleine X, via helper)
     appendWithDelete(grid, kaart, cfg, oef);
   });
+}
+/* =========================================================
+   SPLITSEN – PREVIEW (GROTE SPLITSHUIZEN)
+   ========================================================= */
+export function renderGroteSplitshuizen(cfg, grid) {
+    // altijd eerst leegmaken
+  grid.innerHTML = '';
+
+  // 3 kolommen zoals in je oude versie
+  grid.style.display = 'grid';
+
+  grid.style.columnGap = '24px';
+  grid.style.rowGap = '24px';
+  grid.style.justifyItems = 'center';
+  grid.style.alignItems = 'start';
+
+      // ===== PREVIEW: grote splitshuizen opbouwen uit UI-keuze =====
+  const fijn =
+  cfg.splitsFijn ||
+  cfg.settings?.splitsFijn ||
+  cfg.settings?.settings?.splitsFijn ||
+  {};
+
+  const getallen = [];
+
+  if (fijn.tot5) getallen.push(5);
+  if (fijn.van6) getallen.push(6);
+  if (fijn.van7) getallen.push(7);
+  if (fijn.van8) getallen.push(8);
+  if (fijn.van9) getallen.push(9);
+  if (fijn.van10) getallen.push(10);
+  if (fijn.van10tot20) getallen.push(20);
+// ===== aantal kolommen bepalen voor preview =====
+const aantal = getallen.length;
+
+if (aantal <= 4) {
+  // 1 rij (1–4 huizen)
+  grid.style.gridTemplateColumns = `repeat(${aantal}, 140px)`;
+} else {
+  // meerdere rijen, max 3 per rij (bv. 5 → 3 + 2)
+  grid.style.gridTemplateColumns = 'repeat(3, 140px)';
+}
+
+  getallen.forEach(maxGetal => {
+
+
+    const kaart = document.createElement('div');
+    kaart.style.fontFamily = 'Arial,Helvetica,sans-serif';
+    kaart.style.border = '1px solid #e5e5e5';
+    kaart.style.borderRadius = '12px';
+    kaart.style.overflow = 'hidden';
+    kaart.style.width = '140px';
+    kaart.style.background = '#fff';
+    kaart.style.boxShadow = '0 1px 2px rgba(0,0,0,0.06)';
+
+    const header = document.createElement('div');
+    header.textContent = String(maxGetal);
+    header.style.background = '#e0f2f7';
+    header.style.borderBottom = '1px solid #c7c7c7';
+    header.style.textAlign = 'center';
+    header.style.fontWeight = '700';
+    header.style.height = '36px';
+    header.style.display = 'flex';
+    header.style.alignItems = 'center';
+    header.style.justifyContent = 'center';
+    header.style.fontSize = '16px';
+    kaart.appendChild(header);
+
+    // Afwisselend links/rechts invullen
+    let fillLeft = true;
+    for (let r = 0; r <= maxGetal; r++) {
+      const row = document.createElement('div');
+      row.style.display = 'grid';
+      row.style.gridTemplateColumns = '1fr 1fr';
+      row.style.columnGap = '8px';
+      row.style.padding = '0 10px';
+
+      const left = document.createElement('div');
+      const right = document.createElement('div');
+      [left, right].forEach(cell => {
+        cell.style.height = '28px';
+        cell.style.display = 'flex';
+        cell.style.alignItems = 'center';
+        cell.style.justifyContent = 'center';
+        cell.style.borderBottom = '1px solid #ededed';
+        cell.style.fontWeight = '600';
+      });
+
+      const a = r;
+      const b = maxGetal - r;
+
+      if (fillLeft) {
+        left.textContent = String(a);
+        right.textContent = '___';
+      } else {
+        left.textContent = '___';
+        right.textContent = String(b);
+      }
+      fillLeft = !fillLeft;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      kaart.appendChild(row);
+    }
+
+    const oefDiv = document.createElement('div');
+    oefDiv.className = 'oefening';
+    oefDiv.style.display = 'flex';
+    oefDiv.style.justifyContent = 'center';
+    oefDiv.style.overflow = 'visible';
+    oefDiv.appendChild(kaart);
+
+    appendWithDelete(grid, oefDiv, cfg, { type: 'splitsen_groot', max: maxGetal });
+  });
+
+}
+/* =========================================================
+   SPLITSEN – PREVIEW DISPATCHER
+   ========================================================= */
+export function renderSplitsPreview(cfg, grid) {
+  if (!cfg || !grid) return;
+
+  // Prioriteit: grote splitshuizen
+  if (cfg.groteSplitshuizen) {
+    renderGroteSplitshuizen(cfg, grid);
+    return;
+  }
+
+  // Anders: stijl kiezen
+  const stijl = cfg.splitsStijl || 'benen';
+
+  if (stijl === 'huisje') {
+    renderSplitsHuisje(cfg, grid);
+    return;
+  }
+  if (stijl === 'puntoefening') {
+    renderSplitsPuntoefening(cfg, grid);
+    return;
+  }
+  if (stijl === 'bewerkingen4') {
+    renderSplitsPlusVier(cfg, grid);
+    return;
+  }
+
+  // default
+  renderSplitsBenentraining(cfg, grid);
 }
