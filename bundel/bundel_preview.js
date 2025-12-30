@@ -6,8 +6,10 @@ import {
   renderSplitsBenentraining,
   renderSplitsHuisje,
   renderSplitsPuntoefening,
-  renderSplitsPlusVier
+  renderSplitsPlusVier,
+  renderGroteSplitshuizen
 } from '../splitsen/splits.preview.js';
+
 
 
 import { genereerSplitsing } from '../splitsen/splits.generator.js';
@@ -128,8 +130,7 @@ container.appendChild(metaBox);
 
   bundel.forEach(item => {
     const cfg = item.settings;
-    if (!cfg || cfg.hoofdBewerking !== 'splitsen') return;
-  if (cfg.splitsStijl !== 'benen' && cfg.splitsStijl !== 'huisje' && cfg.splitsStijl !== 'puntoefening' && cfg.splitsStijl !== 'bewerkingen4') return;
+   if (!cfg || cfg.hoofdBewerking !== 'splitsen') return;
 
     // --- segment ---
     const segment = document.createElement('section');
@@ -268,9 +269,22 @@ for (let i = 0; i < n; i++) {
   const nieuweOef = genereerSplitsing(cfg);
 
   // 👇 vlaggen exact zoals in de oude versie
-  nieuweOef._p  = (cfg.splitsStijl === 'puntoefening');
-  nieuweOef._b4 = (cfg.splitsStijl === 'bewerkingen4');
-  nieuweOef._h  = (cfg.splitsStijl === 'huisje');
+    // 👇 vlaggen (compatibel met oude én nieuwe opslag)
+  nieuweOef._p = (cfg.splitsStijl === 'puntoefening');
+  nieuweOef._h = (cfg.splitsStijl === 'huisje');
+
+  // SPLITS + 4 BEWERKINGEN:
+  // 1) als stijl nog zo heet: splitsStijl === 'bewerkingen4'
+  // 2) of als dit segment expliciet als "4 bewerkingen" is aangeduid
+  // 3) of als opdrachtzin overeenkomt (fallback, zodat dit nooit terug stuk gaat)
+  const isPlusVier =
+    (cfg.splitsStijl === 'bewerkingen4') ||
+    (cfg.splitsPlusVier === true) ||
+    (typeof cfg.opdracht === 'string' &&
+      cfg.opdracht.toLowerCase().includes('4 bewerkingen'));
+
+  nieuweOef._b4 = isPlusVier;
+
 
   cfg._oefeningen.push(nieuweOef);
 }
@@ -294,21 +308,34 @@ segment.appendChild(addWrap);
     container.appendChild(segment);
 
    // --- render splitsen ---
-if (cfg.splitsStijl === 'benen') {
-  renderSplitsBenentraining(cfg, grid);
+  // --- render splitsen (exact één pad per segment) ---
+
+if (cfg.groteSplitshuizen) {
+  renderGroteSplitshuizen(cfg, grid);
+  return;
 }
+
+if (cfg.splitsStijl === 'bewerkingen4') {
+  console.log('▶ PREVIEW: bwerkingen4 segment gevonden', cfg.segmentId);
+  console.log('▶ _oefeningen:', cfg._oefeningen);
+  renderSplitsPlusVier(cfg, grid);
+  return;
+}
+
+
 
 if (cfg.splitsStijl === 'huisje') {
   renderSplitsHuisje(cfg, grid);
+  return;
 }
 
 if (cfg.splitsStijl === 'puntoefening') {
   renderSplitsPuntoefening(cfg, grid);
+  return;
 }
 
-if (cfg.splitsStijl === 'bewerkingen4') {
-  renderSplitsPlusVier(cfg, grid);
-}
+// default
+renderSplitsBenentraining(cfg, grid);
 
 
 }); // <-- sluit bundel.forEach af
