@@ -75,7 +75,7 @@ function drawPuntKolomPDF(doc, xCenter, y, tekst) {
 /* =========================================================
    GROTE SPLITSHUIS-KOLOM — PDF
    ========================================================= */
-function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal) {
+export function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal) {
   const w = 38;         // kolombreedte
   const headerH = 12;
   const rowH = 11;     // rijhoogte (compact, past mooi in 3 kolommen)
