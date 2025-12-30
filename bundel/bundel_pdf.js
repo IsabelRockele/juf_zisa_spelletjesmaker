@@ -17,6 +17,8 @@ const SPLITS4_KAART_H = 84;   // iets hoger voor schrijfruimte
 const SPLITS4_GAP_X  = 14;
 const SPLITS4_GAP_Y  = 14;
 
+// ===== PAGINA-MARGES =====
+const PAGE_BOTTOM_LIMIT = 279; // 18 mm ondermarge (297 - 18)
 
 
 function tekenBundelKop(doc, bundelMeta, layout, isEerstePagina) {
@@ -272,11 +274,19 @@ if (cfg.groteSplitshuizen) {
   if (cfg.splitsStijl === 'bewerkingen4') {
 
   // pagina-afbreking VOOR de kaart (zoals oude versie)
-  if (col === 0 && y + SPLITS4_KAART_H > 260) {
+  if (col === 0 && y + SPLITS4_KAART_H > PAGE_BOTTOM_LIMIT) {
     doc.addPage();
-    x = layout.marginLeft;
-    y = layout.marginTop;
-    col = 0;
+col = 0;
+
+// x opnieuw correct per oefentype
+if (cfg.splitsStijl === 'puntoefening') {
+  x = layout.marginLeft + 16;
+} else {
+  x = layout.marginLeft;
+}
+
+y = layout.marginTop;
+
   }
 
   drawSplitsPlusVierPDF(doc, oef, {
@@ -325,11 +335,19 @@ if (cfg.groteSplitshuizen) {
 
 
         // Nieuwe pagina indien nodig
-        if (y > (cfg.splitsStijl === 'puntoefening' ? 275 : 260)) {
+        if (y > PAGE_BOTTOM_LIMIT) {
           doc.addPage();
-          x = layout.marginLeft;
-          y = layout.marginTop;
-          col = 0;
+col = 0;
+
+// x opnieuw correct per oefentype
+if (cfg.splitsStijl === 'puntoefening') {
+  x = layout.marginLeft + 16;
+} else {
+  x = layout.marginLeft;
+}
+
+y = layout.marginTop;
+
         }
       });
 
