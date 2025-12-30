@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       splitsWissel: document.getElementById('splitsWisselCheckbox').checked,
       splitsSom: document.getElementById('splitsSomCheckbox').checked,
       splitsFijn: leesSplitsFijnVanUI(),
+      splitsGetallenArray: [],
       opdracht: document.getElementById('opdracht_splits').value
     };
   }
@@ -46,14 +47,49 @@ document.addEventListener("DOMContentLoaded", () => {
         'Kies minstens één splitsoptie.';
       return;
     }
+const cfg = bouwSplitsSettings();
+// ❌ Grote splitshuizen + splits + 4 bewerkingen mag niet
+if (cfg.groteSplitshuizen && cfg.splitsStijl === 'bewerkingen4') {
+  document.getElementById('splitsMelding').textContent =
+    'Grote splitshuizen kunnen niet gecombineerd worden met splits + 4 bewerkingen.';
+  return;
+}
 
-    const cfg = bouwSplitsSettings();
 
-    // 🔑 HIER ZAT HET PROBLEEM → oefeningen ontbraken
-    cfg._oefeningen = [];
-    for (let i = 0; i < cfg.numOefeningen; i++) {
-      cfg._oefeningen.push(genereerSplitsing(cfg));
-    }
+ // ===============================
+// Oefeningen opbouwen
+// ===============================
+cfg._oefeningen = [];
+
+// 👉 GROTE SPLITSHUIZEN: exact 1 per gekozen getal
+if (cfg.groteSplitshuizen && cfg.splitsStijl === 'benen') {
+
+
+  const arr = [];
+
+  if (fijn.van6) arr.push(6);
+  if (fijn.van7) arr.push(7);
+  if (fijn.van8) arr.push(8);
+  if (fijn.van9) arr.push(9);
+  if (fijn.van10) arr.push(10);
+  if (fijn.van10tot20) arr.push(20);
+
+  arr.forEach(getal => {
+    cfg._oefeningen.push({
+      type: 'splitsen_groot',
+      max: getal
+    });
+  });
+
+} else {
+
+  // 👉 NORMALE SPLITS-OEFENINGEN
+  const n = parseInt(cfg.numOefeningen, 10) || 0;
+  for (let i = 0; i < n; i++) {
+    cfg._oefeningen.push(genereerSplitsing(cfg));
+  }
+
+}
 
     bundelPush({
       titel: 'Splitsen',
