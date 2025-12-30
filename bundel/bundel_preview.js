@@ -268,6 +268,12 @@ addBtn.addEventListener('click', () => {
 for (let i = 0; i < n; i++) {
   const nieuweOef = genereerSplitsing(cfg);
 
+// 🔴 CRUCIAAL: type correct zetten voor grote splitshuizen
+if (cfg.groteSplitshuizen) {
+  nieuweOef.type = 'splitsen_groot';
+}
+
+
   // 👇 vlaggen exact zoals in de oude versie
     // 👇 vlaggen (compatibel met oude én nieuwe opslag)
   nieuweOef._p = (cfg.splitsStijl === 'puntoefening');
