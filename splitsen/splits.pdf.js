@@ -72,6 +72,68 @@ function drawPuntKolomPDF(doc, xCenter, y, tekst) {
   doc.text(tekst, xCenter, y, { align: 'center' });
 }
 
+/* =========================================================
+   GROTE SPLITSHUIS-KOLOM — PDF
+   ========================================================= */
+function drawGrootSplitshuisKolomPDF(doc, xLeft, yTop, maxGetal) {
+  const w = 38;         // kolombreedte
+  const headerH = 12;
+  const rowH = 11;     // rijhoogte (compact, past mooi in 3 kolommen)
+  const padX = 2;
+
+  const rows = maxGetal + 1;
+  const h = headerH + rows * rowH;
+
+  // buitenkader
+  doc.setDrawColor(190, 220, 245);
+  doc.setLineWidth(0.6);
+  doc.roundedRect(xLeft, yTop, w, h, 2, 2);
+
+  // header
+  doc.setFillColor(224, 242, 247);
+  doc.setDrawColor(160, 160, 160);
+  doc.rect(xLeft, yTop, w, headerH, 'FD');
+
+  doc.setFont('Helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(20, 20, 20);
+  doc.text(String(maxGetal), xLeft + w / 2, yTop + 8.5, { align: 'center' });
+
+  // rijen (afwisselend links/rechts ingevuld)
+  let fillLeft = true;
+  doc.setFont('Helvetica', 'normal');
+  doc.setFontSize(12);
+
+  for (let r = 0; r <= maxGetal; r++) {
+    const y = yTop + headerH + r * rowH;
+
+    // scheidingslijn rij
+    doc.setDrawColor(235, 235, 235);
+    doc.setLineWidth(0.4);
+    doc.line(xLeft, y, xLeft + w, y);
+
+    // middenlijn
+    const mid = xLeft + w / 2;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(mid, y, mid, y + rowH);
+
+    const a = r;
+    const b = maxGetal - r;
+
+    // tekstposities
+    const yText = y + rowH - 2.2;
+
+    if (fillLeft) {
+      doc.text(String(a), xLeft + padX + 4, yText, { align: 'left' });
+      doc.text('___', mid + padX + 1, yText, { align: 'left' });
+    } else {
+      doc.text('___', xLeft + padX + 1, yText, { align: 'left' });
+      doc.text(String(b), mid + padX + 4, yText, { align: 'left' });
+    }
+    fillLeft = !fillLeft;
+  }
+}
+
 /**
  * Publieke functie die bundel_pdf.js aanroept
  * layout: { x, y, colWidth, lineHeight }
@@ -81,6 +143,18 @@ export function drawSplitsPDF(doc, cfg, oef, layout) {
 
   // centerX zoals in de oude PDF-plaatsing
   const centerX = x + (colWidth / 2);
+
+  // Grote splitshuizen: render als kolom
+  if (cfg.groteSplitshuizen || (oef && oef.type === 'splitsen_groot')) {
+    const maxGetal = Number((oef && oef.max) || 10);
+
+    // kolom gecentreerd binnen de beschikbare kolombreedte
+    const wKolom = 38;
+    const xLeft = centerX - (wKolom / 2);
+
+    drawGrootSplitshuisKolomPDF(doc, xLeft, y, maxGetal);
+    return;
+  }
 
   if (cfg.splitsStijl === 'benen') {
     drawSplitsBenenPDF(doc, centerX, y, oef);
