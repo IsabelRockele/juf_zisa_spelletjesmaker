@@ -131,20 +131,25 @@ document.addEventListener('DOMContentLoaded', () => {
       // Grote splitshuizen hebben geen cfg._oefeningen nodig in jouw systeem
       if (!cfg.groteSplitshuizen && !Array.isArray(cfg._oefeningen)) return;
 
-      /* =====================================================
-         CENTRALE CHECK — OPDRACHT + EERSTE RIJ
-         (incl. extra start-offset voor puntoefening)
-         ===================================================== */
 
-      const eersteRijHoogte = rijHoogteVoor(cfg, layout);
-      const opdrachtHoogte = 12 + 4;
-      const extraStartOnderTitel = (cfg.splitsStijl === 'puntoefening') ? 6 : 0;
+  /* =====================================================
+   OPDRACHT-CHECK (GEEN CHECK VOOR PUNTOEFENINGEN)
+   ===================================================== */
 
-      if (y + opdrachtHoogte + extraStartOnderTitel + eersteRijHoogte > PAGE_BOTTOM_LIMIT) {
-        y = newPage(doc, bundelMeta, layout);
-        x = layout.marginLeft;
-        col = 0;
-      }
+if (cfg.splitsStijl !== 'puntoefening') {
+
+  const opdrachtHoogte = 12 + 4;
+  const rijHoogteCheck = rijHoogteVoor(cfg, layout);
+
+  const checkHoogte = opdrachtHoogte + rijHoogteCheck;
+
+  if (y + checkHoogte > PAGE_BOTTOM_LIMIT) {
+    y = newPage(doc, bundelMeta, layout);
+    x = layout.marginLeft;
+    col = 0;
+  }
+}
+
 
       /* ================= OPDRACHTZIN ================= */
 
@@ -230,14 +235,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const rijHoogte = rijHoogteVoor(cfg, layout);
 
-      cfg._oefeningen.forEach(oef => {
+      cfg._oefeningen.forEach((oef, i) => {
 
         // pagina-afbreking bij rijstart
-        if (col === 0 && y + rijHoogte > PAGE_BOTTOM_LIMIT) {
-          y = newPage(doc, bundelMeta, layout);
-          x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
-          col = 0;
-        }
+const isLaatsteOefening = (i === cfg._oefeningen.length - 1);
+const extraSpeling = isLaatsteOefening ? 14 : 0;
+
+if (
+  col === 0 &&
+  y + rijHoogte - extraSpeling > PAGE_BOTTOM_LIMIT &&
+  !(cfg.splitsStijl === 'puntoefening' && i < maxCols)
+) {
+  y = newPage(doc, bundelMeta, layout);
+
+// extra topmarge voor puntoefeningen op vervolgpagina
+if (cfg.splitsStijl === 'puntoefening') {
+  y += 12;
+}
+
+  x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
+  col = 0;
+}
+
 
         if (cfg.splitsStijl === 'bewerkingen4') {
 
