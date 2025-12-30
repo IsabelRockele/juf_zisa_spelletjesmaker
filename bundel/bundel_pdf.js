@@ -207,6 +207,11 @@ if (cfg.hoofdBewerking === 'splitsen') {
       doc.setFontSize(12);
 
 const maxCols = (cfg.splitsStijl === 'puntoefening') ? 3 : layout.cols;
+// 🔴 CRUCIAAL: puntoefeningen hebben extra verticale start nodig
+if (cfg.splitsStijl === 'puntoefening') {
+  y += 12;   // exact éénmalige correctie voor overlap met opdrachtzin
+}
+
 // startpositie voor eerste rij (ook verschuiven bij puntoefeningen)
 x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
 col = 0;
@@ -303,10 +308,17 @@ if (cfg.groteSplitshuizen) {
 
   col++;
 
-        if (col >= maxCols) {
-          col = 0;
-          x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
-         y += layout.lineHeight + (cfg.splitsStijl === 'puntoefening' ? 2 : 18);
+       if (col >= maxCols) {
+  col = 0;
+  x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
+
+  // 🔴 VERTICALE AFSTAND PER TYPE
+  if (cfg.splitsStijl === 'puntoefening') {
+    y += layout.lineHeight + 2;   // compact
+  } else {
+    y += layout.lineHeight + 16;  // originele ruimte
+  }
+
         } else {
   x += layout.colWidth + (cfg.splitsStijl === 'puntoefening' ? 18 : 10);
 }
