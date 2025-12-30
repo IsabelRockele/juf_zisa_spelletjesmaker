@@ -53,7 +53,7 @@ doc.rect(
   doc.text(titel, paginaBreedte / 2, kaderY + 10, { align: 'center' });
 
   // Hoeveel extra ruimte we innemen t.o.v. de start
-  return 26; // vaste offset is hier prima (naam + kader)
+  return 12; // vaste offset is hier prima (naam + kader)
 }
 
 
@@ -116,9 +116,14 @@ let x = layout.marginLeft;
 let y = layout.marginTop;
 let col = 0;
 
-// Bundelkop op eerste pagina
-const extraOffset = tekenBundelKop(doc, bundelMeta, layout, true);
-y += extraOffset;
+
+const isEerstePagina = true;
+const extraOffset = tekenBundelKop(doc, bundelMeta, layout, isEerstePagina);
+
+// 🔴 ALS er GEEN titel/naam is: start hoger
+y = layout.marginTop + extraOffset + (extraOffset === 0 ? -10 : 0);
+
+
 
 
 
@@ -139,49 +144,61 @@ if (!Array.isArray(cfg._oefeningen)) return;
       // Nieuwe pagina vanaf tweede segment
       if (index > 0) {
   doc.addPage();
-  x = layout.marginLeft;
-  y = layout.marginTop;
-  col = 0;
+x = layout.marginLeft;
+col = 0;
 
-  const extraOffset = tekenBundelKop(doc, bundelMeta, layout, false);
-  y += extraOffset;
+const isEerstePagina = false;
+const extraOffset = tekenBundelKop(doc, bundelMeta, layout, isEerstePagina);
+
+// 🔴 CRUCIAAL: andere start-Y afhankelijk van titel
+y = layout.marginTop + extraOffset + (extraOffset === 0 ? -10 : 0);
+
 }
 
+// 👇 EXPLICIET bijhouden of deze pagina een bundelkop heeft
+const isEerstePagina =
+  index === 0 || bundelMeta.toonTitelOpElkePagina;
 
-      // Titel
-     // Opdrachtzin in kader (volledige breedte)
+
+// ================================
+// OPDRACHTZIN (correcte verticale flow)
+// ================================
+
 const titelTekst = titelVoor(cfg);
 
+const heeftTitelBoven =
+  bundelMeta.toonTitelOpElkePagina || isEerstePagina;
+
+// 🔴 HIER zit het verschil:
+// als er GEEN grote titel is → y omhoog halen
+if (!heeftTitelBoven) {
+  y -= 10;
+}
+
 const kaderX = layout.marginLeft;
-const kaderY = y - 6;
-const kaderBreedte = doc.internal.pageSize.getWidth() - layout.marginLeft * 2;
+const kaderY = y;
+const kaderBreedte =
+  doc.internal.pageSize.getWidth() - layout.marginLeft * 2;
 const kaderHoogte = 12;
 
-// lichtgrijs kader
+// kader
 doc.setFillColor(245, 245, 245);
 doc.rect(kaderX, kaderY, kaderBreedte, kaderHoogte, 'F');
 
-// opdrachtzin
+// tekst
 doc.setFont(undefined, 'bold');
 doc.setFontSize(14);
 doc.setTextColor(0);
-doc.text(titelTekst, kaderX + 4, y);
+doc.text(titelTekst, kaderX + 4, kaderY + 9);
 
-// ruimte onder het kader
-y += kaderHoogte + 4;   // iets compacter
+// 🔴 NU PAS y verhogen → dit stuurt ALLES eronder
+y += kaderHoogte + 4;
 
-// font terug normaal voor oefeningen
-doc.setFont(undefined, 'normal');
-doc.setFontSize(12);
-
-// beperkte extra marge, voor alle splits
+// iets compacter voor splits
 if (cfg.hoofdBewerking === 'splitsen') {
-  y += 4;
-} else if (cfg.splitsStijl === 'puntoefening') {
-  y += 10;
-} else {
-  y += 8;
+  y += 2;
 }
+
 
 // bij bewerkingen4 géén extra y → eerste rij schuift omhoog
 
@@ -193,6 +210,56 @@ const maxCols = (cfg.splitsStijl === 'puntoefening') ? 3 : layout.cols;
 // startpositie voor eerste rij (ook verschuiven bij puntoefeningen)
 x = layout.marginLeft + (cfg.splitsStijl === 'puntoefening' ? 16 : 0);
 col = 0;
+
+// ================================
+// GROTE SPLITSHUIZEN – eigen layout
+// ================================
+if (cfg.groteSplitshuizen) {
+
+  const fijn = cfg.splitsFijn || {};
+  const getallen = [];
+
+  if (fijn.tot5) getallen.push(5);
+  if (fijn.van6) getallen.push(6);
+  if (fijn.van7) getallen.push(7);
+  if (fijn.van8) getallen.push(8);
+  if (fijn.van9) getallen.push(9);
+  if (fijn.van10) getallen.push(10);
+  if (fijn.van10tot20) getallen.push(20);
+
+  if (!getallen.length) return;
+
+  const perRij = getallen.length >= 5 ? 3 : getallen.length;
+
+  const startX = layout.marginLeft + 12; // perforatiemarge
+  let curX = startX;
+  let curY = y;
+  let col = 0;
+
+  getallen.forEach(max => {
+
+    drawSplitsPDF(doc, cfg, { type: 'splitsen_groot', max }, {
+      x: curX,
+      y: curY,
+      colWidth: 50,
+      lineHeight: layout.lineHeight
+    });
+
+    col++;
+
+    if (col >= perRij) {
+      col = 0;
+      curX = startX;
+      curY += 128; // volgende rij
+    } else {
+      curX += 50;  // volgende kolom
+    }
+
+  });
+
+  return; // 🔴 ZEER BELANGRIJK
+}
+
 
       cfg._oefeningen.forEach((oef, i) => {
 
