@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hoofdrekenen – Preview</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Zelfde basisstijl als andere previews -->
+  <link rel="stylesheet" href="../bewerkingen_versie2.css" />
+
+  <style>
+    /* Preview = rustige werkweergave */
+    body {
+      margin: 0;
+      padding: 16px;
+      background: #fafafa;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+
+    #werkblad-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="werkblad-wrapper">
+    <div id="werkblad-container"></div>
+  </div>
+
+  <!-- Bundel-state (leest werkbladBundel uit localStorage) -->
+  <script src="../bundel/bundel_store.js"></script>
+
+  <!-- Bundel-preview-engine (rendert segmenten) -->
+  <script type="module">
+    import { renderHoofdrekenenSegment } from './hoofdrekenen.preview.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('werkblad-container');
+      if (!container) return;
+
+      const bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
+
+      if (!bundel.length) {
+        container.innerHTML = '<p>Er staan nog geen oefeningen in deze bundel.</p>';
+        return;
+      }
+
+      bundel.forEach(segment => {
+        // Enkel hoofdrekenen tonen in deze preview
+        if (segment.settings?.hoofdBewerking === 'rekenen') {
+          renderHoofdrekenenSegment(container, segment);
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
