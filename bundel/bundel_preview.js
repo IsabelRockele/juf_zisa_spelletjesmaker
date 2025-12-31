@@ -45,81 +45,86 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const container = document.getElementById('werkblad-container');
   if (!container) return;
+
 // ================================
-// BUNDELINSTELLINGEN (PDF)
+// BUNDELINSTELLINGEN (PDF) – ALLEEN EIND_BUNDEL
 // ================================
 
-let bundelMeta = {};
-try {
-  bundelMeta = JSON.parse(localStorage.getItem('bundelMeta') || '{}');
-} catch {
-  bundelMeta = {};
+if (window.IS_EIND_BUNDEL === true) {
+
+  let bundelMeta = {};
+  try {
+    bundelMeta = JSON.parse(localStorage.getItem('bundelMeta') || '{}');
+  } catch {
+    bundelMeta = {};
+  }
+
+  const metaBox = document.createElement('div');
+  metaBox.style.marginBottom = '20px';
+  metaBox.style.padding = '14px';
+  metaBox.style.border = '2px solid #0b4d7a';
+  metaBox.style.borderRadius = '12px';
+  metaBox.style.background = '#f7fbff';
+
+  const metaTitel = document.createElement('div');
+  metaTitel.textContent = 'Bundelinstellingen (PDF)';
+  metaTitel.style.fontWeight = '700';
+  metaTitel.style.fontSize = '16px';
+  metaTitel.style.marginBottom = '10px';
+  metaTitel.style.color = '#0b4d7a';
+
+  const titelLabel = document.createElement('label');
+  titelLabel.textContent = 'Grote titel van de bundel:';
+  titelLabel.style.display = 'block';
+  titelLabel.style.fontWeight = '600';
+  titelLabel.style.marginBottom = '6px';
+
+  const titelInput = document.createElement('input');
+  titelInput.type = 'text';
+  titelInput.placeholder = 'Herhalingsbundel bewerkingen';
+  titelInput.value = bundelMeta.titel || '';
+  titelInput.style.width = '100%';
+  titelInput.style.padding = '8px';
+  titelInput.style.border = '1px solid #cfd8dc';
+  titelInput.style.borderRadius = '8px';
+  titelInput.style.marginBottom = '10px';
+
+  titelInput.addEventListener('input', () => {
+    bundelMeta.titel = titelInput.value;
+    localStorage.setItem('bundelMeta', JSON.stringify(bundelMeta));
+  });
+
+  const checkboxLabel = document.createElement('label');
+  checkboxLabel.style.display = 'flex';
+  checkboxLabel.style.alignItems = 'center';
+  checkboxLabel.style.gap = '8px';
+  checkboxLabel.style.fontWeight = '600';
+  checkboxLabel.style.color = '#0b4d7a';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = !!bundelMeta.toonTitelOpElkePagina;
+
+  checkbox.addEventListener('change', () => {
+    bundelMeta.toonTitelOpElkePagina = checkbox.checked;
+    localStorage.setItem('bundelMeta', JSON.stringify(bundelMeta));
+  });
+
+  checkboxLabel.appendChild(checkbox);
+  checkboxLabel.appendChild(
+    document.createTextNode(
+      'Toon grote titel + naam op elke pagina (uit = enkel eerste pagina)'
+    )
+  );
+
+  metaBox.appendChild(metaTitel);
+  metaBox.appendChild(titelLabel);
+  metaBox.appendChild(titelInput);
+  metaBox.appendChild(checkboxLabel);
+
+  container.appendChild(metaBox);
 }
 
-const metaBox = document.createElement('div');
-metaBox.style.marginBottom = '20px';
-metaBox.style.padding = '14px';
-metaBox.style.border = '2px solid #0b4d7a';
-metaBox.style.borderRadius = '12px';
-metaBox.style.background = '#f7fbff';
-
-const metaTitel = document.createElement('div');
-metaTitel.textContent = 'Bundelinstellingen (PDF)';
-metaTitel.style.fontWeight = '700';
-metaTitel.style.fontSize = '16px';
-metaTitel.style.marginBottom = '10px';
-metaTitel.style.color = '#0b4d7a';
-
-const titelLabel = document.createElement('label');
-titelLabel.textContent = 'Grote titel van de bundel:';
-titelLabel.style.display = 'block';
-titelLabel.style.fontWeight = '600';
-titelLabel.style.marginBottom = '6px';
-
-const titelInput = document.createElement('input');
-titelInput.type = 'text';
-titelInput.placeholder = 'Herhalingsbundel bewerkingen';
-titelInput.value = bundelMeta.titel || '';
-titelInput.style.width = '100%';
-titelInput.style.padding = '8px';
-titelInput.style.border = '1px solid #cfd8dc';
-titelInput.style.borderRadius = '8px';
-titelInput.style.marginBottom = '10px';
-
-titelInput.addEventListener('input', () => {
-  bundelMeta.titel = titelInput.value;
-  localStorage.setItem('bundelMeta', JSON.stringify(bundelMeta));
-});
-
-const checkboxLabel = document.createElement('label');
-checkboxLabel.style.display = 'flex';
-checkboxLabel.style.alignItems = 'center';
-checkboxLabel.style.gap = '8px';
-checkboxLabel.style.fontWeight = '600';
-checkboxLabel.style.color = '#0b4d7a';
-
-const checkbox = document.createElement('input');
-checkbox.type = 'checkbox';
-checkbox.checked = !!bundelMeta.toonTitelOpElkePagina;
-
-checkbox.addEventListener('change', () => {
-  bundelMeta.toonTitelOpElkePagina = checkbox.checked;
-  localStorage.setItem('bundelMeta', JSON.stringify(bundelMeta));
-});
-
-checkboxLabel.appendChild(checkbox);
-checkboxLabel.appendChild(
-  document.createTextNode(
-    'Toon grote titel + naam op elke pagina (uit = enkel eerste pagina)'
-  )
-);
-
-metaBox.appendChild(metaTitel);
-metaBox.appendChild(titelLabel);
-metaBox.appendChild(titelInput);
-metaBox.appendChild(checkboxLabel);
-
-container.appendChild(metaBox);
 
   const bundel = leesBundel();
 
