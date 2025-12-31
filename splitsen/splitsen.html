@@ -1,75 +1,132 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Splitsen</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Splitsen – samenstellen</title>
 
-  <!-- jouw bestaande stijl -->
-  <link rel="stylesheet" href="../bewerkingen_versie2.css">
+  <link rel="stylesheet" href="../bewerkingen_versie2.css" />
+
+  <style>
+    body { background:#f4f6f8; }
+    .page-wrap{ max-width:1300px; margin:0 auto; padding:16px; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; gap:12px; }
+    .layout{ display:grid; grid-template-columns:420px 1fr; gap:16px; align-items:start; }
+    @media (max-width:900px){ .layout{ grid-template-columns:1fr; } }
+    .panel{ background:#fff; border:1px solid #e2e2e2; border-radius:14px; padding:16px; }
+    h1{ margin:0; font-size:22px; }
+    h2{ margin:0 0 12px 0; font-size:18px; }
+    .block{ margin-bottom:14px; }
+    .divider{ height:1px; background:#eee; margin:14px 0; }
+
+    .btn{ padding:12px 16px; border-radius:12px; border:none; font-weight:700; font-size:14px; cursor:pointer; background:#e6e9ee; color:#222; }
+    .btn:hover{ filter:brightness(0.95); }
+    .btn.primary{ background:#2c7be5; color:#fff; }
+    .btn.secondary{ background:#6c757d; color:#fff; }
+
+    .muted{ font-size:13px; color:#666; }
+    input[type="number"], input[type="text"], select{ padding:6px 8px; border-radius:6px; border:1px solid #ccc; }
+
+    /* preview */
+    .iframe-wrap{ border:1px dashed #bbb; border-radius:12px; background:#fafafa; overflow:hidden; height:640px; }
+    #bundelFrame{ width:100%; height:100%; border:0; background:#fafafa; }
+  </style>
 </head>
+
 <body>
+<div class="page-wrap">
 
-<header>
-  <button onclick="window.location.href='../dashboard/dashboard.html'">
-    Terug naar dashboard
-  </button>
-  <h1>Splitsen</h1>
-</header>
+  <div class="topbar">
+    <h1>Splitsen – samenstellen</h1>
+    <button class="btn secondary" onclick="window.location.href='../dashboard/dashboard.html'">Ga naar dashboard</button>
+  </div>
 
-<div class="keuzevak">
+  <div class="layout">
 
-  <h2>Splitsen</h2>
-  <div id="splitsMelding" class="melding"></div>
+    <!-- INSTELLINGEN -->
+    <section class="panel">
+      <h2>Instellingen</h2>
+      <div id="splitsMelding" class="muted"></div>
 
-  <label>Aantal oefeningen:
-    <input id="numOefeningen_splits" type="number" value="20">
-  </label>
+      <div class="block">
+        <label>Aantal oefeningen:
+          <input id="numOefeningen_splits" type="number" value="20">
+        </label>
+      </div>
 
-  <h3>Stijl</h3>
-  <label><input type="radio" name="splitsStijl" value="huisje" checked> Huisje (4 huisjes per rij)</label>
-  <label><input type="radio" name="splitsStijl" value="benen"> Splitsbenen (4 splitsingen per rij)</label>
-  <label><input type="radio" name="splitsStijl" value="puntoefening"> Puntoefening (3 oefeningen per rij)</label>
-  <label><input type="radio" name="splitsStijl" value="bewerkingen4"> Splitsing + 4 bewerkingen (2 oefeningen per rij)</label>
+      <div class="divider"></div>
 
-  <p>
-    <label><input type="checkbox" id="groteSplitshuizenCheckbox"> Grote splitshuizen (per totaal 1 groot splitshuis)</label>
-  </p>
+      <div class="block">
+        <strong>Soort oefening</strong><br>
+        <label><input type="radio" name="splitsStijl" value="huisje" checked> Splitshuisjes <span class="muted">– 4 per rij</span></label><br>
+        <label><input type="radio" name="splitsStijl" value="benen"> Splitsbenen <span class="muted">– 4 per rij</span></label><br>
+        <label><input type="radio" name="splitsStijl" value="puntoefening"> Puntoefeningen <span class="muted">– 3 per rij</span></label><br>
+        <label><input type="radio" name="splitsStijl" value="bewerkingen4"> Splits + 4 bewerkingen <span class="muted">– 2 per rij</span></label>
+      </div>
 
-  <h3>Kies totalen</h3>
-  <label><input type="checkbox" id="sp_tot5"> tot 5</label>
-  <label><input type="checkbox" id="sp_van6"> 6</label>
-  <label><input type="checkbox" id="sp_van7"> 7</label>
-  <label><input type="checkbox" id="sp_van8"> 8</label>
-  <label><input type="checkbox" id="sp_van9"> 9</label>
-  <label><input type="checkbox" id="sp_van10"> 10</label>
+      <div class="block">
+        <label><input type="checkbox" id="groteSplitshuizenCheckbox"> Grote splitshuizen <span class="muted">– 1 per gekozen totaal</span></label>
+      </div>
 
-  <p>
-    <label>
-      <input type="checkbox" id="sp_10_20"> van 10 tot 20
-      <select id="sp_10_20_brug">
-        <option value="beide">brug: beide</option>
-        <option value="met">met brug</option>
-        <option value="zonder">zonder brug</option>
-      </select>
-    </label>
-  </p>
+      <div class="divider"></div>
 
-  <p>
-    <label><input type="checkbox" id="splitsWisselCheckbox"> Wissel links/rechts</label>
-    <label><input type="checkbox" id="splitsSomCheckbox"> Vraag soms de som</label>
-  </p>
+      <div class="block">
+        <strong>Extra instellingen</strong><br>
+        <label><input type="checkbox" id="splitsWisselCheckbox"> Wissel links en rechts af</label><br>
+        <label><input type="checkbox" id="splitsSomCheckbox"> Vul soms de som in</label>
+      </div>
 
-  <p>
-    <input id="opdracht_splits" type="text" placeholder="Opdrachtzin (optioneel)" style="width:100%">
-  </p>
+      <div class="divider"></div>
 
-  <button id="voegSplitsToeBtn">Voeg toe aan bundel</button>
+      <div class="block">
+        <strong>Totalen</strong><br>
+        <label><input type="checkbox" id="sp_tot5"> tot 5</label>
+        <label><input type="checkbox" id="sp_van6"> 6</label>
+        <label><input type="checkbox" id="sp_van7"> 7</label>
+        <label><input type="checkbox" id="sp_van8"> 8</label>
+        <label><input type="checkbox" id="sp_van9"> 9</label>
+        <label><input type="checkbox" id="sp_van10"> 10</label>
+      </div>
 
+      <div class="block">
+        <label><input type="checkbox" id="sp_10_20"> 10 tot 20
+          <select id="sp_10_20_brug">
+            <option value="beide">brug: beide</option>
+            <option value="met">met brug</option>
+            <option value="zonder">zonder brug</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="block">
+        <input id="opdracht_splits" type="text" placeholder="Opdrachtzin" style="width:100%">
+      </div>
+
+      <div class="block">
+        <button id="genereerSplitsBtn" class="btn">Voeg oefeningen toe</button>
+      </div>
+
+      <div class="block">
+        <button id="voegSplitsToeBtn" class="btn primary">Plaats alles in bundel</button>
+      </div>
+
+      <div class="muted">Rechts ziet u **alleen de oefeningen** (PDF-identieke layout), zonder eindknoppen.</div>
+    </section>
+
+    <!-- PREVIEW -->
+    <section class="panel">
+      <h2>Live bundel-preview</h2>
+      <div class="iframe-wrap">
+        <iframe id="bundelFrame" src="./splitsen_preview.html"></iframe>
+      </div>
+    </section>
+
+  </div>
 </div>
 
 <script src="../bundel/bundel_store.js"></script>
-<script type="module" src="splitsen.js"></script>
-
-
+<script type="module" src="./splitsen.js"></script>
 </body>
 </html>
