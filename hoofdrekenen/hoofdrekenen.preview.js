@@ -221,21 +221,70 @@ title.addEventListener('input', () => {
   titleRow.appendChild(title);
   titleRow.appendChild(delSeg);
   card.appendChild(titleRow);
-// ➕ Oefening toevoegen
-const addBtn = document.createElement('button');
-addBtn.textContent = '+ oefening toevoegen';
-addBtn.style.marginBottom = '12px';
+
+// ➕ Oefeningen toevoegen (met aantal)
+const addWrap = document.createElement('div');
+addWrap.style.display = 'flex';
+addWrap.style.alignItems = 'center';
+addWrap.style.gap = '6px';
+addWrap.style.marginBottom = '10px';
+
+// knop
+const addBtn = document.createElement('input');
+addBtn.type = 'button';
+addBtn.value = '+ oefening';
+addBtn.style.padding = '6px 8px';
+addBtn.style.fontSize = '12px';
+addBtn.style.borderRadius = '6px';
+addBtn.style.border = '1px solid #bbb';
+addBtn.style.background = '#e6e6e6';
+addBtn.style.color = '#222';
 addBtn.style.cursor = 'pointer';
 
-addBtn.addEventListener('click', () => {
-  const oef = voegOefeningToe(cfg);
-  if (!oef) return;
 
-  renderOefening(grid, cfg, oef);
+// invoerveld aantal
+const addAantal = document.createElement('input');
+addAantal.type = 'number';
+addAantal.min = '1';
+addAantal.max = '50';
+addAantal.value = '1';
+addAantal.title = 'Aantal oefeningen toevoegen';
+addAantal.style.width = '52px';
+addAantal.style.padding = '6px 6px';
+addAantal.style.fontSize = '12px';
+addAantal.style.borderRadius = '6px';
+addAantal.style.border = '1px solid #bbb';
+addAantal.style.textAlign = 'center';
+
+// infotekst
+const addInfo = document.createElement('span');
+addInfo.textContent = 'Typ het aantal oefeningen dat u wil toevoegen.';
+addInfo.style.fontSize = '12px';
+addInfo.style.color = '#555';
+addInfo.style.marginLeft = '6px';
+
+// klikgedrag
+addBtn.addEventListener('click', () => {
+  const n = Math.max(1, Number(addAantal.value) || 1);
+
+  for (let i = 0; i < n; i++) {
+    const oef = voegOefeningToe(cfg);
+    if (!oef) break;
+    renderOefening(grid, cfg, oef);
+  }
+
   if (typeof paginatePreview === 'function') paginatePreview();
 });
 
-card.appendChild(addBtn);
+// samenstellen
+// samenstellen
+addWrap.appendChild(addBtn);
+addWrap.appendChild(addAantal);
+addWrap.appendChild(addInfo);
+card.appendChild(addWrap);
+
+
+
 
   /* grid */
   const grid = document.createElement('div');
