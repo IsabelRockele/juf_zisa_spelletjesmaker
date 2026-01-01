@@ -12,6 +12,8 @@ import {
    NO-OP paginering (compat)
    ================================ */
 function paginatePreview(){}
+const werkbladContainer =
+  document.getElementById('werkblad-container') || document.body;
 
 /* ================================
    TITEL
@@ -48,31 +50,228 @@ function voegOefeningToe(cfg) {
 /* ================================
    HULPMIDDELEN
    ================================ */
-function tekenInlineSplitsOnderTerm(wrapper, term) {
-  const tens = Math.floor(term / 10) * 10;
-  const ones = term % 10;
+function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+  const span1 = exprWrap.querySelector('.term1');
+  const span2 = exprWrap.querySelector('.term2');
+  const ansBox = exprWrap.querySelector('.ansbox');
 
-  const box = document.createElement('div');
-  box.style.display = 'grid';
-  box.style.gridTemplateColumns = '1fr 1fr';
-  box.style.gap = '10px';
-  box.style.marginTop = '8px';
+  let target = span2; // optellen: onder tweede term
+  if (oef.operator === '-') {
+    const plaats = (cfg.rekenHulp?.splitsPlaatsAftrekken || 'onderAftrektal');
+    target = (plaats === 'onderAftrekker') ? span2 : span1;
+  }
 
-  const vak = (t) => {
-    const d = document.createElement('div');
-    d.textContent = t;
-    d.style.border = '1px solid #bbb';
-    d.style.borderRadius = '10px';
-    d.style.padding = '8px';
-    d.style.minWidth = '50px';
-    d.style.textAlign = 'center';
-    return d;
+  const oefDiv = exprWrap.closest('.oefening');
+  if (oefDiv) { oefDiv.style.overflow = 'visible'; oefDiv.style.position = 'relative'; }
+  exprWrap.style.overflow = 'visible'; exprWrap.style.position = 'relative';
+  werkbladContainer.style.overflow = 'visible';
+
+  const wrapRect = exprWrap.getBoundingClientRect();
+  const tRect = target.getBoundingClientRect();
+  const aRect = ansBox.getBoundingClientRect();
+
+  const anchorX = tRect.left + tRect.width / 2 - wrapRect.left;
+  const apexY = tRect.bottom - wrapRect.top + 3;
+
+  const horiz = 14, boxW = 26, boxH = 22, r = 6;
+  const bottomTopY = apexY + 12;
+  const svgH = Math.ceil(bottomTopY + boxH + 6);
+  const baseW = Math.max(exprWrap.clientWidth, exprWrap.scrollWidth);
+  const svgW = Math.max(baseW, anchorX + horiz + boxW / 2 + 4);
+
+  if (parseFloat(getComputedStyle(exprWrap).minHeight || '0') < svgH) exprWrap.style.minHeight = `${svgH}px`;
+  exprWrap.style.paddingBottom = '2px';
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', svgW);
+  svg.setAttribute('height', svgH);
+  svg.style.position = 'absolute';
+  svg.style.left = '0';
+  svg.style.top = '0';
+  svg.style.pointerEvents = 'none';
+  svg.style.overflow = 'visible';
+
+  const el = (n, a) => {
+    const e = document.createElementNS(NS, n);
+    for (const k in a) e.setAttribute(k, a[k]);
+    return e;
   };
 
-  box.appendChild(vak(tens));
-  box.appendChild(vak(ones));
-  wrapper.appendChild(box);
+  svg.appendChild(el('line', { x1: anchorX, y1: apexY, x2: anchorX - horiz, y2: bottomTopY, stroke: '#333', 'stroke-width': 2 }));
+  svg.appendChild(el('line', { x1: anchorX, y1: apexY, x2: anchorX + horiz, y2: bottomTopY, stroke: '#333', 'stroke-width': 2 }));
+  svg.appendChild(el('rect', { x: anchorX - horiz - boxW / 2, y: bottomTopY, width: boxW, height: boxH, rx: r, ry: r, fill: '#fff', stroke: '#ddd', 'stroke-width': 2 }));
+  svg.appendChild(el('rect', { x: anchorX + horiz - boxW / 2, y: bottomTopY, width: boxW, height: boxH, rx: r, ry: r, fill: '#fff', stroke: '#ddd', 'stroke-width': 2 }));
+
+  const t1 = el('text', { x: anchorX - horiz, y: bottomTopY + boxH - 6, 'text-anchor': 'middle', 'font-family': 'Arial,Helvetica,sans-serif', 'font-size': '14' });
+  t1.textContent = '___';
+  const t2 = el('text', { x: anchorX + horiz, y: bottomTopY + boxH - 6, 'text-anchor': 'middle', 'font-family': 'Arial,Helvetica,sans-serif', 'font-size': '14' });
+  t2.textContent = '___';
+
+  svg.appendChild(t1);
+  svg.appendChild(t2);
+
+  // oude overlays opruimen (zodat her-renderen niet stapelt)
+  const old = exprWrap.querySelector('svg._splitsbenen');
+  if (old) old.remove();
+  svg.classList.add('_splitsbenen');
+
+  exprWrap.appendChild(svg);
 }
+
+function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+  try {
+    const span1  = exprWrap.querySelector('.term1');
+    const opEl   = exprWrap.querySelector('.op');
+    const span2  = exprWrap.querySelector('.term2');
+    const ansBox = exprWrap.querySelector('.ansbox');
+    if (!span1 || !span2 || !ansBox) return;
+
+    exprWrap.style.whiteSpace = 'nowrap';
+    exprWrap.style.position   = 'relative';
+    exprWrap.style.overflow   = 'visible';
+
+    const wr = exprWrap.getBoundingClientRect();
+    const r2 = span2.getBoundingClientRect();
+    const a  = Number(oef.getal1), b = Number(oef.getal2);
+    const isMin = (oef.operator === '-');
+    const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef && oef._voorbeeld);
+    const op = isMin ? '-' : '+';
+
+    // overlay opruimen
+    exprWrap.querySelectorAll('svg.comp-overlay, .comp-box').forEach(n => n.remove());
+
+    const NS  = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    svg.classList.add('comp-overlay');
+    svg.setAttribute('width',  Math.ceil(wr.width));
+    svg.setAttribute('height', Math.ceil(wr.height));
+    Object.assign(svg.style, { position:'absolute', left:'0', top:'0', pointerEvents:'none', overflow:'visible' });
+
+    const cx = r2.left - wr.left + r2.width/2;
+    const cy = r2.top  - wr.top  + r2.height*0.55;
+    const rx = r2.width/2 + 6;
+    const ry = r2.height*0.65;
+
+    const ellipse = document.createElementNS(NS,'ellipse');
+    ellipse.setAttribute('cx', cx); ellipse.setAttribute('cy', cy);
+    ellipse.setAttribute('rx', rx); ellipse.setAttribute('ry', ry);
+    ellipse.setAttribute('fill', 'none');
+    ellipse.setAttribute('stroke', '#333'); ellipse.setAttribute('stroke-width', '2');
+    svg.appendChild(ellipse);
+
+    const tailY = cy + ry + 3;
+    const tipY  = tailY + 16;
+
+    const shaft = document.createElementNS(NS,'line');
+    shaft.setAttribute('x1', cx); shaft.setAttribute('y1', tailY);
+    shaft.setAttribute('x2', cx); shaft.setAttribute('y2', tipY);
+    shaft.setAttribute('stroke', '#333'); shaft.setAttribute('stroke-width', '2');
+    svg.appendChild(shaft);
+
+    const headL = document.createElementNS(NS,'line');
+    headL.setAttribute('x1', cx); headL.setAttribute('y1', tipY);
+    headL.setAttribute('x2', cx-6); headL.setAttribute('y2', tipY-6);
+    headL.setAttribute('stroke', '#333'); headL.setAttribute('stroke-width', '2');
+    svg.appendChild(headL);
+
+    const headR = document.createElementNS(NS,'line');
+    headR.setAttribute('x1', cx); headR.setAttribute('y1', tipY);
+    headR.setAttribute('x2', cx+6); headR.setAttribute('y2', tipY-6);
+    headR.setAttribute('stroke', '#333'); headR.setAttribute('stroke-width', '2');
+    svg.appendChild(headR);
+
+    exprWrap.appendChild(svg);
+
+    // compenseerbox
+    const box = document.createElement('div');
+    box.className = 'comp-box';
+    box.style.position = 'absolute';
+    box.style.left = `${Math.max(0, cx - 64)}px`;
+    box.style.top  = `${tipY + 6}px`;
+    box.style.width = '128px';
+    box.style.height = '32px';
+    box.style.border = '2px solid #333';
+    box.style.borderRadius = '10px';
+    box.style.display = 'grid';
+    box.style.gridTemplateColumns = '1fr 1fr';
+    box.style.gap = '8px';
+    box.style.padding = '6px 8px';
+    box.style.background = '#fff';
+
+    const vak = () => {
+      const d = document.createElement('div');
+      d.style.border = '1px solid #bbb';
+      d.style.borderRadius = '8px';
+      d.style.display = 'flex';
+      d.style.alignItems = 'center';
+      d.style.justifyContent = 'center';
+      d.style.fontWeight = '700';
+      d.style.fontSize = '14px';
+      d.textContent = ' ___';
+      return d;
+    };
+
+    const L = vak();
+    const R = vak();
+    box.append(L, R);
+
+    // voorbeeld: vul de compensatie zoals in versie2 (met kleuren + stappen rechts)
+    if (isVoorbeeld) {
+      function compPair(op, bVal) {
+        const absB = Math.abs(bVal);
+        if (op === '+') {
+          if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:+up, second: -(up - absB) }; }
+          else                 { const up = Math.ceil(absB / 10) * 10;   return { first:+up, second: -(up - absB) }; }
+        } else {
+          if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:-up, second:+(up - absB) }; }
+          else                 { const up = Math.ceil(absB / 10) * 10;   return { first:-up, second:+(up - absB) }; }
+        }
+      }
+      const pair = compPair(op, b);
+      L.innerHTML = `<span style="color:#c00000">${pair.first >= 0 ? '+' : ''}${Math.abs(pair.first)}</span>`;
+      R.innerHTML = `<span style="color:#0058c0">${pair.second >= 0 ? '+' : ''}${Math.abs(pair.second)}</span>`;
+
+      const t1 = a + pair.first;
+      const t2 = t1 + pair.second;
+
+      if (rechtsKolom) {
+        rechtsKolom.innerHTML = '';
+        const stap = document.createElement('div');
+        stap.style.fontSize = '12px';
+        stap.style.lineHeight = '1.25';
+        stap.style.marginTop = '4px';
+        const s1 = `${a} ${pair.first >= 0 ? '+' : '-'} ${Math.abs(pair.first)} = ${t1}`;
+        const s2 = `${t1} ${pair.second >= 0 ? '+' : '-'} ${Math.abs(pair.second)} = ${t2}`;
+        stap.innerHTML = `${s1}<br>${s2}`;
+        rechtsKolom.appendChild(stap);
+      }
+
+      ansBox.textContent = String(t2);
+    }
+
+    // hoogte reserveren (zoals versie2)
+    const BOX_H = 32;
+    const MARGIN_BELOW = 8;
+    const neededInside = (tipY + 6) + BOX_H + MARGIN_BELOW;
+    const extra = Math.max(0, neededInside - exprWrap.clientHeight);
+    exprWrap.style.paddingBottom = extra ? `${extra}px` : exprWrap.style.paddingBottom;
+
+    const oefDiv = exprWrap.closest('.oefening');
+    if (oefDiv) {
+      const topInParent = exprWrap.offsetTop;
+      const neededForParent = topInParent + neededInside + 4;
+      const curMin = parseFloat(getComputedStyle(oefDiv).minHeight || '0');
+      if (neededForParent > curMin) oefDiv.style.minHeight = `${neededForParent}px`;
+    }
+
+    exprWrap.appendChild(box);
+
+  } catch (e) {
+    console.warn('tekenCompenseerOnderTerm (preview) error:', e);
+  }
+}
+
 
 /* ================================
    OEFENING RENDER
@@ -105,27 +304,62 @@ function appendWithDelete(grid, cfg, oef, div) {
 
 function renderOefening(grid, cfg, oef) {
   const div = document.createElement('div');
+  div.className = 'oefening';
   div.style.whiteSpace = 'nowrap';
+  div.style.position = 'relative';
+  div.style.overflow = 'visible';
+  div.style.border = '1px solid #ddd';
+  div.style.borderRadius = '12px';
+  div.style.padding = '10px';
+  div.style.background = '#fff';
+
 
   const hulp = cfg.rekenHulp?.inschakelen;
   const brug = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
   if (hulp && brug) {
-    div.style.display = 'grid';
-    div.style.gridTemplateColumns = 'max-content 1fr';
-    div.style.columnGap = '20px';
+  div.style.display = 'grid';
+  div.style.gridTemplateColumns = 'max-content 1fr';
+  div.style.columnGap = '20px';
 
-    const links = document.createElement('div');
-    links.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} =`;
+  const links = document.createElement('div');
+  links.className = 'exprwrap';
+  links.style.display = 'inline-block';
+  links.style.overflow = 'visible';
+  links.innerHTML = `
+    <span class="term1">${oef.getal1}</span>
+    <span class="op"> ${oef.operator} </span>
+    <span class="term2">${oef.getal2}</span>
+    <span> = </span>
+    <span class="ansbox" style="display:inline-block;width:46px;height:30px;border:2px solid #333;border-radius:8px;vertical-align:middle;margin-left:6px;"></span>
+  `;
 
-    const rechts = document.createElement('div');
-    if (cfg.rekenHulp.stijl === 'splitsbenen') {
-      tekenInlineSplitsOnderTerm(rechts, oef.getal2);
+  const rechts = document.createElement('div');
+  rechts.style.overflow = 'visible';
+
+  // Schrijflijnen rechts (zoals versie2), maar alleen als aangevinkt
+  if (cfg.rekenHulp?.schrijflijnen) {
+    rechts.innerHTML = `
+      <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
+      <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
+    `;
+  }
+
+  div.appendChild(links);
+  div.appendChild(rechts);
+
+  // teken pas na layout (anders kloppen rects niet)
+  requestAnimationFrame(() => {
+    const stijl = (cfg.rekenHulp && cfg.rekenHulp.stijl) || 'splitsbenen';
+    if (stijl === 'compenseren') {
+      tekenCompenseerOnderTerm(links, oef, rechts, cfg);
+    } else {
+      tekenInlineSplitsOnderTerm(links, oef, rechts, cfg);
     }
+  });
 
-    div.appendChild(links);
-    div.appendChild(rechts);
-  } else {
+} else {
+
     div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} =`;
   }
 
@@ -152,7 +386,7 @@ if (max <= 10) {
 
 if (max <= 20) {
   cfg.somTypes = (cfg.somTypes || []).filter(t =>
-    ['E+E', 'TE+E'].includes(t)
+    ['E+E', 'TE+E', 'T-E', 'T+TE'].includes(t)
   );
 }
 
@@ -276,14 +510,13 @@ addBtn.addEventListener('click', () => {
   if (typeof paginatePreview === 'function') paginatePreview();
 });
 
+
 // samenstellen
 // samenstellen
 addWrap.appendChild(addBtn);
 addWrap.appendChild(addAantal);
 addWrap.appendChild(addInfo);
 card.appendChild(addWrap);
-
-
 
 
   /* grid */
