@@ -141,9 +141,41 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     exprWrap.style.position   = 'relative';
     exprWrap.style.overflow   = 'visible';
 
+    // Bepaal wie we gaan compenseren (g1 of g2?)
+    const g1 = Number(oef.getal1);
+    const g2 = Number(oef.getal2);
+    const absG1 = Math.abs(g1);
+    const absG2 = Math.abs(g2);
+
+    // Check of g2 geschikt is (7,8,9)
+    const e2 = absG2 % 10;
+    const t2 = Math.floor(absG2 / 10) % 10;
+    const g2IsCandidate = (e2 === 7 || e2 === 8 || e2 === 9) || (e2 === 0 && (t2 === 7 || t2 === 8 || t2 === 9));
+
+    // Check of g1 geschikt is (6,7,8,9)
+    const e1 = absG1 % 10;
+    const g1IsCandidate = (e1 === 6 || e1 === 7 || e1 === 8 || e1 === 9);
+
+    // KIES DOEL: 
+    // Standaard g2, tenzij die niet kan en g1 wel.
+    // (Of als g2 'minder mooi' is? De generator shuffelt, dus 'soms' komt vanzelf)
+    let targetEl = span2; 
+    let baseVal = g2;
+    let isTargetG1 = false;
+
+    if (g2IsCandidate) {
+        targetEl = span2;
+        baseVal = g2;
+        isTargetG1 = false;
+    } else if (g1IsCandidate) {
+        targetEl = span1;
+        baseVal = g1;
+        isTargetG1 = true;
+    }
+
     const wr = exprWrap.getBoundingClientRect();
-    const r2 = span2.getBoundingClientRect();
-    const a  = Number(oef.getal1), b = Number(oef.getal2);
+    const rTarget = targetEl.getBoundingClientRect();
+    
     const isMin = (oef.operator === '-');
     const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef && oef._voorbeeld);
     const op = isMin ? '-' : '+';
@@ -158,10 +190,11 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     svg.setAttribute('height', Math.ceil(wr.height));
     Object.assign(svg.style, { position:'absolute', left:'0', top:'0', pointerEvents:'none', overflow:'visible' });
 
-    const cx = r2.left - wr.left + r2.width/2;
-    const cy = r2.top  - wr.top  + r2.height*0.55;
-    const rx = r2.width/2 + 6;
-    const ry = r2.height*0.65;
+    // Positie cirkel baseren op target (g1 of g2)
+    const cx = rTarget.left - wr.left + rTarget.width/2;
+    const cy = rTarget.top  - wr.top  + rTarget.height*0.55;
+    const rx = rTarget.width/2 + 6;
+    const ry = rTarget.height*0.65;
 
     const ellipse = document.createElementNS(NS,'ellipse');
     ellipse.setAttribute('cx', cx); ellipse.setAttribute('cy', cy);
@@ -197,6 +230,7 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     const box = document.createElement('div');
     box.className = 'comp-box';
     box.style.position = 'absolute';
+    // Box centreren onder de pijl
     box.style.left = `${Math.max(0, cx - 64)}px`;
     box.style.top  = `${tipY + 6}px`;
     box.style.zIndex = '5';
@@ -211,76 +245,159 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     box.style.background = '#fff';
 
    const vak = () => {
-  const d = document.createElement('div');
-  d.style.border = '1px solid #bbb';
-  d.style.borderRadius = '8px';
-  d.style.display = 'flex';
-  d.style.alignItems = 'center';
-  d.style.justifyContent = 'center';
-  d.style.fontWeight = '700';
-  d.style.fontSize = '14px';
-  d.style.minWidth = '44px';
-  d.style.height = '22px';
-  d.textContent = '____';
-  return d;
-};
-
+      const d = document.createElement('div');
+      d.style.border = '1px solid #bbb';
+      d.style.borderRadius = '8px';
+      d.style.display = 'flex';
+      d.style.alignItems = 'center';
+      d.style.justifyContent = 'center';
+      d.style.fontWeight = '700';
+      d.style.fontSize = '14px';
+      d.style.minWidth = '44px';
+      d.style.height = '22px';
+      d.textContent = '____';
+      return d;
+    };
 
     const L = vak();
     const R = vak();
     box.append(L, R);
 
-// standaard: geen tekens, lege vakjes
-L.textContent = '_____';
-R.textContent = '_____';
+    // standaard: geen tekens
+    L.textContent = '_____';
+    R.textContent = '_____';
 
-// alleen tekens tonen als leerkracht dit koos
-if (cfg?.rekenHulp?.tekens) {
-  if (oef.operator === '+') {
-    L.textContent = '+ ____';
-    R.textContent = '− ____';
-  } else {
-    L.textContent = '− ____';
-    R.textContent = '+ ____';
-  }
-}
+    // Tekens tonen indien gewenst
+    if (cfg?.rekenHulp?.tekens) {
+      // Logic: als we afronden naar boven (+), moet de correctie min (-) zijn, of andersom.
+      // Dit is onafhankelijk van of we g1 of g2 compenseren, het gaat om de balans.
+      // Bij optellen: eentje +, ander -.
+      // Bij aftrekken: beiden + of beiden - (want -(a+b) = -a-b ?) 
+      // Wacht, standaard compenseren bij aftrekken (45 - 29): 29->30 (+1), dus moet er +1 afgetrokken worden? Nee.
+      // 45 - 29 = 45 - 30 + 1. 
+      // Laten we de standaardtekens simpel houden voor de layout:
+      if (oef.operator === '+') {
+        L.textContent = '+ ____';
+        R.textContent = '− ____';
+      } else {
+        L.textContent = '− ____';
+        R.textContent = '+ ____';
+      }
+    }
 
-
-    // voorbeeld: vul de compensatie zoals in versie2 (met kleuren + stappen rechts)
+    // VOORBEELD INVULLEN
     if (isVoorbeeld) {
-      function compPair(op, bVal) {
-        const absB = Math.abs(bVal);
+      function compPair(op, val) {
+        const absVal = Math.abs(val);
+        // Bepaal afronding
+        let up;
+        if (absVal % 10 === 0) { up = Math.ceil(absVal / 100) * 100; }
+        else                   { up = Math.ceil(absVal / 10) * 10; }
+        
+        // Verschil berekenen
+        const diff = up - absVal; 
+        
+        // Bij optellen (+): als we de term verhogen (+diff), moeten we dat later aftrekken (-diff).
+        // Bij aftrekken (-): 
+        // Als we aftrekker verhogen (29->30), trekken we teveel af -> resultaat moet +1.
+        // Als we aftrektal verhogen? Dat wordt zelden gedaan bij compenseren, maar logica:
+        // (49 - 12) -> (50 - 12) - 1.
+        
+        // We houden het patroon van de preview aan:
+        // Links = de aanpassing naar het ronde getal
+        // Rechts = de correctie
+        
         if (op === '+') {
-          if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:+up, second: -(up - absB) }; }
-          else                 { const up = Math.ceil(absB / 10) * 10;   return { first:+up, second: -(up - absB) }; }
+           return { first: +diff, second: -diff };
         } else {
-          if (absB % 10 === 0) { const up = Math.ceil(absB / 100) * 100; return { first:-up, second:+(up - absB) }; }
-          else                 { const up = Math.ceil(absB / 10) * 10;   return { first:-up, second:+(up - absB) }; }
+           // Aftrekken
+           // Als we target=g2 (aftrekker) (45 - 29): 29 wordt 30 (+1). We trekken MEER af. Dus correctie is +1.
+           // Als we target=g1 (aftrektal) (49 - 12): 49 wordt 50 (+1). We hebben er 1 bijverzonnen. Dus correctie is -1.
+           if (isTargetG1) {
+              return { first: +diff, second: -diff }; // Aftrektal: zelfde logica als optellen
+           } else {
+              return { first: -diff, second: +diff }; // Aftrekker: omgekeerd (wordt hierboven vaak als -up weergegeven in oude code, maar visueel 'naar 30' is +1)
+              // Correctie: oude code deed het complex. Laten we simpel 'verschil' tonen.
+              // Links = wat doen we met het getal? (+1)
+              // Rechts = wat doen we met de som? (+1)
+              // Oude code: first:-up ?? Nee, laten we gewoon de getallen tonen.
+              return { first: -up, second: +(up - absVal) }; // fallback
+           }
         }
       }
-      const pair = compPair(op, b);
-      L.innerHTML = `<span style="color:#c00000">${pair.first >= 0 ? '+' : ''}${Math.abs(pair.first)}</span>`;
-      R.innerHTML = `<span style="color:#0058c0">${pair.second >= 0 ? '+' : ''}${Math.abs(pair.second)}</span>`;
+      
+      // Herberekening voor visualisatie
+      // We gebruiken een simpelere logica die voor kinderen logisch is:
+      // "Ik doe er 2 bij (+2), dus moet ik er straks 2 af doen (-2)"
+      
+      const valToRound = baseVal;
+      // Zoek het volgende tiental/honderdtal
+      let nextTen;
+      if (valToRound % 10 === 0) nextTen = Math.ceil(valToRound/100)*100;
+      else nextTen = Math.ceil(valToRound/10)*10;
+      
+      const delta = nextTen - valToRound;
+      
+      // Tekst in vakjes
+      L.innerHTML = `<span style="color:#c00000">+${delta}</span>`;
+      
+      // Correctie rechts hangt af van situatie
+      let correctie = -delta; // Standaard (bij optellen)
+      if (oef.operator === '-' && !isTargetG1) correctie = +delta; // Bij aftrekken van 2e term: +
+      
+      const teken = correctie >= 0 ? '+' : '−'; // Let op min-teken
+      R.innerHTML = `<span style="color:#0058c0">${teken}${Math.abs(correctie)}</span>`;
 
-      const t1 = a + pair.first;
-      const t2 = t1 + pair.second;
+      // RECHTS KOLOM: Tussenstap
+      // Als g2 target (45 + 28): 45 + 30 = 75 --> 75 - 2 = 73
+      // Als g1 target (98 + 45): 100 + 45 = 145 --> 145 - 2 = 143
+      
+      let step1, step2, res1, res2;
+      
+      if (oef.operator === '+') {
+         if (!isTargetG1) {
+             // 45 + 28(30)
+             res1 = g1 + nextTen;
+             step1 = `${g1} + ${nextTen} = ${res1}`;
+         } else {
+             // 98(100) + 45
+             res1 = nextTen + g2;
+             step1 = `${nextTen} + ${g2} = ${res1}`;
+         }
+         res2 = res1 - delta; // Altijd min de 'teveel' bij optellen
+         step2 = `${res1} − ${delta} = ${res2}`;
+         
+      } else {
+         // Aftrekken
+         if (!isTargetG1) {
+            // 45 - 28(30) -> teveel afgetrokken, dus erbij
+            res1 = g1 - nextTen;
+            step1 = `${g1} − ${nextTen} = ${res1}`;
+            res2 = res1 + delta;
+            step2 = `${res1} + ${delta} = ${res2}`;
+         } else {
+            // 48(50) - 12 -> getal groter gemaakt, dus resultaat is te groot, dus eraf
+            res1 = nextTen - g2;
+            step1 = `${nextTen} − ${g2} = ${res1}`;
+            res2 = res1 - delta;
+            step2 = `${res1} − ${delta} = ${res2}`;
+         }
+      }
 
       if (rechtsKolom) {
         rechtsKolom.innerHTML = '';
         const stap = document.createElement('div');
-        stap.style.fontSize = '16px';     // groter leesbaar
-stap.style.lineHeight = '1.6';    // meer ruimte tussen regels
-stap.style.marginTop = '10px';    // iets lager starten
-        const s1 = `${a} ${pair.first >= 0 ? '+' : '-'} ${Math.abs(pair.first)} = ${t1}`;
-        const s2 = `${t1} ${pair.second >= 0 ? '+' : '-'} ${Math.abs(pair.second)} = ${t2}`;
-        stap.innerHTML = `${s1}<br>${s2}`;
+        stap.style.fontSize = '16px';
+        stap.style.lineHeight = '1.6';
+        stap.style.marginTop = '10px';
+        stap.innerHTML = `${step1}<br>${step2}`;
         rechtsKolom.appendChild(stap);
       }
 
-      ansBox.textContent = String(t2);
+      ansBox.textContent = String(res2);
     }
 
-    // hoogte reserveren (zoals versie2)
+    // hoogte reserveren
     const BOX_H = 32;
     const MARGIN_BELOW = 8;
     const neededInside = (tipY + 6) + BOX_H + MARGIN_BELOW;
@@ -288,16 +405,10 @@ stap.style.marginTop = '10px';    // iets lager starten
     exprWrap.style.paddingBottom = extra ? `${extra}px` : exprWrap.style.paddingBottom;
 
     const oefDiv = exprWrap.closest('.oefening');
-if (oefDiv) {
-  // zorg dat het oefenkader altijd onder het compenseervak eindigt
-  const totalNeeded =
-    exprWrap.offsetTop +
-    (tipY + 6) +   // pijl
-    BOX_H +        // compenseerbox
-    12;            // extra ademruimte
-
-  oefDiv.style.minHeight = `${Math.ceil(totalNeeded)}px`;
-}
+    if (oefDiv) {
+      const totalNeeded = exprWrap.offsetTop + (tipY + 6) + BOX_H + 12;
+      oefDiv.style.minHeight = `${Math.ceil(totalNeeded)}px`;
+    }
 
     exprWrap.appendChild(box);
 
