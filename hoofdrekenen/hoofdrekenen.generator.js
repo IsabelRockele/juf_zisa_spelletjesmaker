@@ -72,10 +72,16 @@ if (cfg.rekenType === 'beide') {
 // DIDACTISCHE AFBENING KLEINE BEREIKEN
 // Tot 5 en tot 10: alleen E+E / E-E, nooit brug
 // =====================================================
-if (cfg.rekenMaxGetal <= 10) {
+if (cfg.rekenMaxGetal <= 5) {
   cfg.somTypes = ['E+E'];
   cfg.rekenBrug = 'zonder';
 }
+
+if (cfg.rekenMaxGetal > 5 && cfg.rekenMaxGetal <= 10) {
+  cfg.somTypes = ['E+E', 'T-E'];
+  cfg.rekenBrug = 'zonder';
+}
+
 
   let types = cfg.somTypes?.length ? [...cfg.somTypes] : ['E+E'];
 let gekozenType;
@@ -106,8 +112,7 @@ do {
   if (!cfg._typePool || cfg._typePool.length === 0) {
   cfg._typePool = shuffle([...types]);
 }
-gekozenType = cfg._typePool.pop();
-
+gekozenType = cfg._typePool.shift();
 
 
   // ❌ Brug = met → E-E is onmogelijk
@@ -125,6 +130,7 @@ gekozenType = cfg._typePool.pop();
     gekozenType = null;
     continue;
   }
+
 
 } while (!gekozenType);
 
@@ -147,7 +153,11 @@ if (cfg.rekenType === 'optellen') {
 // =====================================
 if (op === '-') {
   if (gekozenType === 'T+TE') gekozenType = 'T-TE';
+  if (gekozenType === 'T+E')  gekozenType = 'T-E';
+  if (gekozenType === 'TE-TE') gekozenType = 'TE+TE'; // ✅ DIT ONTBRAK
 }
+
+
 
   // --- SPECIAL CASE: bereik tot 5 (1e leerjaar) ---
   if ((cfg.rekenMaxGetal || 100) <= 5) {
@@ -295,28 +305,71 @@ if (cfg.rekenMaxGetal <= 100) {
 
     switch (gekozenType) {
       case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
-      case 'T+E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
-      case 'T-E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
+      case 'T+E': {
+  if (cfg.rekenMaxGetal === 20) {
+    g1 = 10;               // 👈 alleen 10 bij tot 20
+  } else {
+    g1 = rnd(1, 9) * 10;   // 👈 10,20,30,…90 bij tot 100/1000
+  }
+
+  g2 = rnd(1, 9);
+  break;
+}
+
+      case 'T-E': {
+  if (cfg.rekenMaxGetal === 20) {
+    // bij tot 20: enkel 10 of 20
+    g1 = rnd(1, 2) * 10;   // 10 of 20
+  } else {
+    g1 = rnd(1, 9) * 10;  // 10..90
+  }
+
+  g2 = rnd(1, 9);
+  break;
+}
+
 case 'T-TE': {
-  // g1 = zuiver tiental (20..100) binnen maxGetal
+  // 🔹 speciaal voor tot 20
+  if (cfg.rekenMaxGetal === 20) {
+    g1 = 20;
+    g2 = rnd(11, 19);   // echte TE
+    break;
+  }
+
+  // 🔹 bestaand gedrag voor grotere bereiken
   const maxT = Math.min(10, Math.floor((cfg.rekenMaxGetal || 100) / 10));
   if (maxT < 2) continue;
 
-  g1 = rnd(2, maxT) * 10; // 20..100
+  g1 = rnd(2, maxT) * 10;
 
-  // g2 = TE (minstens 20), géén zuiver tiental, én kleiner dan g1
   const g2max = Math.min(99, g1 - 1);
   if (g2max < 20) continue;
 
   do {
     g2 = rnd(20, g2max);
-  } while (g2 % 10 === 0); // TE ≠ zuiver tiental
+  } while (g2 % 10 === 0);
 
   break;
 }
 
 
-      case 'T+T': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9) * 10; break;
+
+      case 'T+T': {
+  const t1 = rnd(1, 9);
+  const t2 = rnd(1, 9);
+
+  g1 = t1 * 10;
+  g2 = t2 * 10;
+
+  // MET brug: tientallen samen moeten >= 10 zijn
+  if (cfg.rekenBrug === 'met' && (t1 + t2 < 10)) continue;
+
+  // ZONDER brug: tientallen samen moeten < 10 zijn
+  if (cfg.rekenBrug === 'zonder' && (t1 + t2 >= 10)) continue;
+
+  break;
+}
+
       case 'T+TE':
   g1 = rnd(1, 9) * 10;
   g2 = rnd(11, 99);
@@ -343,35 +396,119 @@ case 'TE+T':
 
   break;
 
-case 'TE+TE':
-  g1 = rnd(11, 99);
-  g2 = rnd(11, 99);
+case 'TE+TE': {
+
+  // 🔹 bereik beperken voor tot 20
+  if (cfg.rekenMaxGetal === 20) {
+    g1 = rnd(11, 19);
+    g2 = rnd(11, 19);
+  } else {
+    g1 = rnd(11, 99);
+    g2 = rnd(11, 99);
+  }
 
   // ❌ geen zuivere tientallen (moeten echte TE zijn)
   if (g1 % 10 === 0 || g2 % 10 === 0) continue;
 
+  // ❌ TE-TE tot 20 kan NOOIT met brug
+  if (cfg.rekenMaxGetal === 20 && cfg.rekenBrug === 'met') continue;
+
   // ❌ bij tot 100: som mag niet boven 100 uitkomen
   if (cfg.rekenMaxGetal <= 100 && (g1 + g2) > 100) continue;
 
-  // ❌ bij met brug: effectieve eenhedenbrug verplicht
-  if (cfg.rekenBrug === 'met' && ((g1 % 10) + (g2 % 10) <= 9)) continue;
+  // ✅ bij tot 100 + met brug: eenheden moeten samen > 10
+  if (
+    cfg.rekenMaxGetal <= 100 &&
+    cfg.rekenBrug === 'met' &&
+    ((g1 % 10) + (g2 % 10) <= 10)
+  ) continue;
+
+  break;
+}
+
+
+
+      case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
+      case 'HT+T': {
+  const h = rnd(1, 9);
+  const t1 = rnd(1, 9);
+  const t2 = rnd(1, 9);
+
+  g1 = h * 100 + t1 * 10; // HT
+  g2 = t2 * 10;          // T
+
+  // MET brug: tientallen samen moeten >= 10 zijn
+  if (cfg.rekenBrug === 'met' && (t1 + t2 < 10)) continue;
+
+  // ZONDER brug: tientallen samen moeten < 10 zijn
+  if (cfg.rekenBrug === 'zonder' && (t1 + t2 >= 10)) continue;
+
+  break;
+}
+
+      case 'HT+HT': {
+  const h1 = rnd(1, 9);
+  const t1 = rnd(1, 9);
+  const h2 = rnd(1, 9);
+  const t2 = rnd(1, 9);
+
+  g1 = h1 * 100 + t1 * 10;   // HT
+  g2 = h2 * 100 + t2 * 10;   // HT
+
+  // zonder brug: tientallen mogen samen geen brug maken
+  if (cfg.rekenBrug === 'zonder' && (t1 + t2 > 9)) continue;
+
+  break;
+}
+case 'HTE+HT':
+  g1 = rnd(100, 999);              // HTE
+  g2 = rnd(1, 9) * 100 + rnd(1, 9) * 10; // HT
+
+  // zonder brug: eenheden + 0 mag geen brug geven
+  if (cfg.rekenBrug === 'zonder' && (g1 % 10) > 9) continue;
 
   break;
 
 
-      case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
-      case 'HT+HT':
-        // tientallen genereren zonder brug
-        do {
-          const t1 = rnd(1, 9);
-          const t2 = rnd(1, 9);
-          g1 = t1 * 10 * 10; // honderdtallen + tientallen
-          g2 = t2 * 10 * 10;
-        } while (cfg.rekenBrug === 'zonder' && ( (g1/10)%10 + (g2/10)%10 > 9 ));
-        break;
+case 'HTE+H':
+  g1 = rnd(100, 999);        // HTE
+  g2 = rnd(1, 9) * 100;     // H
+
+  // zonder brug: eenheden + 0 mag nooit > 9
+  if (cfg.rekenBrug === 'zonder' && (g1 % 10) > 9) continue;
+
+  break;
 
       case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
     }
+
+// =========================================================
+// HARDE TYPE-AFBAKENING — gekozen somtypes respecteren
+// =========================================================
+if (
+  cfg.somTypes &&
+  cfg.somTypes.includes('TE+TE') &&
+  gekozenType === 'T+T'
+) {
+  continue;
+}
+
+    // =========================================================
+// TYPE-AFBAKENING — brug naar honderdtal (TOT 1000)
+// =========================================================
+if (
+  op === '+' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoorten?.honderdtal &&
+  !cfg.brugSoorten.meervoudig
+) {
+  // ❌ T + T niet toelaten bij honderdtalbrug
+  if (gekozenType === 'T+T') {
+    continue;
+  }
+}
+
 
 // ✅ AFTREKKEN ZONDER BRUG – expliciet toelaten van T−E
 if (
@@ -385,30 +522,40 @@ if (
     // =====================================
 // OPERATORKEUZE (EVENWICHT BIJ "BEIDE")
 // =====================================
-// 🔒 Aftrekken: aftrektal moet altijd groter zijn dan aftrekker
-if (op === '-' && g1 <= g2) {
+// 🔒 Aftrekken: aftrektal moet groter zijn dan aftrekker
+// ❗ behalve bij TE-TE (heeft eigen logica)
+if (
+  op === '-' &&
+  g1 <= g2 &&
+  gekozenType !== 'TE+TE'
+) {
   continue;
 }
+
 // ================================
 // AFTREKKEN MET BRUG – TYPE TE − TE
 // ================================
 if (
   op === '-' &&
-  cfg.rekenBrug === 'met' &&
   gekozenType === 'TE-TE'
 ) {
   const e1 = g1 % 10;
   const e2 = g2 % 10;
 
-  // beide moeten echte TE-getallen zijn
-  if (e1 === 0 || e2 === 0) continue;
-
-  // aftrektal moet groter zijn
   if (g1 <= g2) continue;
 
-  // brug vereist
-  if (e1 >= e2) continue;
+  // bij tot 20: GEEN brug afdwingen
+  if (cfg.rekenMaxGetal === 20) {
+    if (e1 === 0 || e2 === 0) continue;
+    if (e1 < e2) continue; // zonder brug
+  }
+
+  // bij grotere bereiken: bruglogica behouden
+  if (cfg.rekenMaxGetal > 20 && cfg.rekenBrug === 'met') {
+    if (e1 >= e2) continue;
+  }
 }
+
 
 // ================================
 // AFTREKKEN MET BRUG – TYPE TE − E
@@ -433,26 +580,37 @@ if (
 
 // 🔒 FINALE TYPE-GARANTIE: TE − TE met brug
 if (
+  cfg.rekenMaxGetal !== 20 &&
   op === '-' &&
   cfg.rekenBrug === 'met' &&
   gekozenType === 'TE+TE'
 ) {
+
   const e1 = g1 % 10;
   const e2 = g2 % 10;
 
   // aftrektal moet > 20 en geen tiental zijn
   if (g1 <= 20 || e1 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // aftrekker moet ≥ 20 en geen tiental zijn
   if (g2 < 20 || e2 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // brug moet verplicht aanwezig zijn
   if (e1 >= e2) {
-    return genereerRekensom(cfg);
+   return null;
+  }
+}
+
+// =====================================
+// ABSOLUTE GRENS VOOR TOT 20 (NA GENERATIE)
+// =====================================
+if (cfg.rekenMaxGetal === 20) {
+  if (g1 > 20 || g2 > 20) {
+    return null;
   }
 }
 
@@ -549,14 +707,58 @@ if (
       }
     }
 
-    // 🔒 OPTELLEN MET BRUG: brug moet effectief aanwezig zijn
+    // =========================================================
+// BRUGSOORT – OPTELLEN – ALLEEN TE+TE – ALLEEN TOT 1000
+// =========================================================
+if (
+  op === '+' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoorten &&
+  gekozenType === 'TE+TE'
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+
+  const t1 = Math.floor((g1 % 100) / 10);
+  const t2 = Math.floor((g2 % 100) / 10);
+
+  const eenhedenBrug   = (e1 + e2) >= 10;
+  const tientallenBrug = (t1 + t2) >= 10;
+
+  // 👉 enkel brug naar honderdtal
+  if (cfg.brugSoorten.honderdtal && !cfg.brugSoorten.tiental && !cfg.brugSoorten.meervoudig) {
+    if (!tientallenBrug) continue;
+    if (eenhedenBrug) continue;
+  }
+
+  // 👉 enkel brug naar tiental
+  if (cfg.brugSoorten.tiental && !cfg.brugSoorten.honderdtal && !cfg.brugSoorten.meervoudig) {
+    if (!eenhedenBrug) continue;
+    if (tientallenBrug) continue;
+  }
+
+  // 👉 meervoudige brug
+  if (cfg.brugSoorten.meervoudig) {
+    if (!(eenhedenBrug && tientallenBrug)) continue;
+  }
+}
+
+// 🔒 OPTELLEN MET BRUG
+// Bij tot 1000 + brugsoort gekozen: brugsoort-filter is leidend
 if (
   op === '+' &&
   cfg.rekenBrug === 'met' &&
+  !(
+    cfg.rekenMaxGetal === 1000 &&
+    cfg.brugSoorten &&
+    (cfg.brugSoorten.tiental || cfg.brugSoorten.honderdtal || cfg.brugSoorten.meervoudig)
+  ) &&
   !somHeeftBrug(g1, g2, '+')
 ) {
   continue;
 }
+
 
     // === EINDE NORMALISATIE ================================================
 
@@ -580,7 +782,7 @@ if (
     // Resultaat moet binnen ingestelde limiet blijven (tot 1000 mogelijk)
     const max = cfg.rekenMaxGetal || 100;
     if (!ok || g1 > max || g2 > max || (op === '+' && (g1 + g2) > max)) {
-      return genereerRekensom(cfg);
+      return null;
     }
   }
 
@@ -599,26 +801,28 @@ if (
 
 // 🔒 FINALE TYPE-GARANTIE (NA SWAP): TE − TE met brug
 if (
+  cfg.rekenMaxGetal !== 20 &&
   op === '-' &&
   cfg.rekenBrug === 'met' &&
   gekozenType === 'TE+TE'
 ) {
+
   const e1 = g1 % 10;
   const e2 = g2 % 10;
 
   // aftrektal moet > 20 en geen tiental zijn
   if (g1 <= 20 || e1 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // aftrekker moet ≥ 20 en geen tiental zijn
   if (g2 < 20 || e2 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // brug moet verplicht aanwezig zijn
   if (e1 >= e2) {
-    return genereerRekensom(cfg);
+    return null;
   }
 }
 
@@ -630,52 +834,54 @@ if (
 ) {
   // aftrektal moet effectief TE zijn
   if (g1 % 10 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // aftrekker moet effectief E zijn
   if (g2 < 1 || g2 > 9) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // brug moet effectief aanwezig zijn
   if ((g1 % 10) >= (g2 % 10)) {
-    return genereerRekensom(cfg);
+   return null;
   }
 }
 // 🔒 ABSOLUTE FINALE GARANTIE: T − TE met brug
-if (
+  if (
+  cfg.rekenMaxGetal !== 20 &&
   op === '-' &&
   cfg.rekenBrug === 'met' &&
   gekozenType === 'T-TE'
 ) {
+
   const e1 = g1 % 10;
   const e2 = g2 % 10;
 
   // aftrektal MOET zuiver tiental zijn
   if (e1 !== 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // aftrektal moet minstens 20 zijn
   if (g1 < 20) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // aftrekker MOET TE zijn (≥ 20 en geen tiental)
   if (g2 < 20 || e2 === 0) {
-    return genereerRekensom(cfg);
+    return null;
   }
 
   // brug is verplicht
   if (e1 >= e2) {
-    return genereerRekensom(cfg);
+    return null;
   }
 }
 
 // 🔒 ABSOLUTE GRENS: optellen mag nooit boven maxGetal uitkomen
 if (op === '+' && (g1 + g2) > maxGetal) {
-  return genereerRekensom(cfg);
+  return null;
 }
 
 // 🔒 ABSOLUTE GARANTIE: optellen met brug = echte brug
@@ -684,7 +890,40 @@ if (
   cfg.rekenBrug === 'met' &&
   !somHeeftBrug(g1, g2, '+')
 ) {
-  return genereerRekensom(cfg);
+ return null;
+}
+
+// =========================================================
+// FINALE BRUGSOORT-CHECK (NA normalisatie) — ALLEEN TE+TE
+// =========================================================
+if (
+  op === '+' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoorten &&
+  gekozenType === 'TE+TE'
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+  const t1 = Math.floor((g1 % 100) / 10);
+  const t2 = Math.floor((g2 % 100) / 10);
+
+  const eenhedenBrug   = (e1 + e2) >= 10;
+  const tientallenBrug = (t1 + t2) >= 10;
+
+  // enkel brug naar honderdtal → GEEN meervoudige brug
+  if (cfg.brugSoorten.honderdtal && !cfg.brugSoorten.meervoudig) {
+    if (!tientallenBrug || eenhedenBrug) {
+     return null;
+    }
+  }
+
+  // enkel brug naar tiental → GEEN meervoudige brug
+  if (cfg.brugSoorten.tiental && !cfg.brugSoorten.meervoudig) {
+    if (!eenhedenBrug || tientallenBrug) {
+     return null;
+    }
+  }
 }
 
 
@@ -711,7 +950,8 @@ function genereerRekensomMetCompenseren(cfg){
       return oef;
     }
   }
-  return genereerRekensom(cfg);
+  return null;
+
 }
 
 export {
