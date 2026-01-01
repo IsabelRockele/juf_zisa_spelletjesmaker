@@ -270,6 +270,26 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
           </select>
         </div>
 
+<!-- Soort brug (alleen bij tot 1000 + met brug) -->
+<div class="group" id="brugSoortWrap" style="display:none;">
+  <div class="group-title">Soort brug</div>
+
+  <label style="display:flex;gap:8px;align-items:center;">
+    <input type="checkbox" id="brugTiental" checked>
+    Brug naar het tiental
+  </label>
+
+  <label style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+    <input type="checkbox" id="brugHonderdtal" checked>
+    Brug naar het honderdtal
+  </label>
+
+  <label style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+    <input type="checkbox" id="brugMeervoudig">
+    Meervoudige brug (gevorderd)
+  </label>
+</div>
+
         <!-- Hulpmiddelen -->
         <div class="group">
           <label style="display:flex;gap:8px;align-items:center;">
@@ -336,15 +356,38 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
           <summary>Somtypes</summary>
 
           <!-- Tot 20 -->
-          <div class="group" data-somgroep="20">
-            <div class="group-title">Tot 20</div>
-            <div class="checks">
-              <label><input type="checkbox" name="somType" value="E+E" checked> E + E / E − E</label>
-              <label><input type="checkbox" name="somType" value="T+E"> T + E / T − E</label>
-              <label><input type="checkbox" name="somType" value="TE+E"> TE + E / TE − E</label>
-           
-            </div>
-          </div>
+<div class="group" data-somgroep="20">
+  <div class="group-title">Tot 20</div>
+  <div class="checks">
+
+    <label>
+      <input type="checkbox" name="somType" value="E+E" checked>
+      E + E / E − E
+    </label>
+
+    <label>
+      <input type="checkbox" name="somType" value="T+E">
+      T + E / T − E
+    </label>
+
+    <label>
+      <input type="checkbox" name="somType" value="TE+E">
+      TE + E / TE - E
+    </label>
+
+    <label>
+      <input type="checkbox" name="somType" value="TE-TE">
+      TE − TE
+    </label>
+
+    <label>
+      <input type="checkbox" name="somType" value="T-TE">
+      T − TE
+    </label>
+
+  </div>
+</div>
+
 
           <!-- Tot 100 -->
           <div class="group" data-somgroep="100">
@@ -395,6 +438,11 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
           <button id="voegRekenToeBtn" class="btn-secondary">Voeg toe aan bundel</button>
           <button id="wisRekenPreviewBtn" class="btn-secondary" title="Maakt het overzicht terug leeg (alleen preview-stand)">Wis preview (leeg)</button>
         </div>
+        <div id="brugInfoOnder"
+     class="melding"
+     style="display:none; margin-top:8px;">
+</div>
+
 
         <div class="subhint" style="margin-top:10px;">
           In de preview kunt u per opdracht een 🗑 verwijderen (volledige opdracht/segment),
@@ -429,6 +477,8 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
       const aftrekHint = document.getElementById('aftrekkenHint');
       const optelHint = document.getElementById('optellenHint');
       const maxSel = document.getElementById('rekenMaxGetal');
+      const brugSel = document.getElementById('rekenBrug');
+
 
       function updateHulpUI(){
   const aan = !!hulpCb.checked;
@@ -519,20 +569,55 @@ function updateBrugInfo() {
   const heeftTE = aangeklikt.includes('T+E');
   const heeftTTE = aangeklikt.includes('T+TE');
 
-  const info = document.getElementById('brugInfo');
-  if (!info) return;
+  const boven = document.getElementById('brugInfo');
+  const onder = document.getElementById('brugInfoOnder');
 
-  if (type === 'aftrekken' && brug === 'zonder' && (heeftTE || heeftTTE)) {
-    info.style.display = 'block';
-  } else {
-    info.style.display = 'none';
+  const tonen =
+    type === 'aftrekken' &&
+    brug === 'zonder' &&
+    (heeftTE || heeftTTE);
+
+  if (boven) boven.style.display = tonen ? 'block' : 'none';
+
+  if (onder) {
+    onder.innerHTML =
+      '⚠️ <strong>Let op:</strong><br>' +
+      'Oefeningen van het type <strong>T − E</strong> en <strong>T − TE</strong> ' +
+      'zijn <strong>brugoefeningen</strong>.<br>' +
+      'Kies <strong>‘met brug’</strong> of <strong>‘beide’</strong> om ze te gebruiken.';
+    onder.style.display = tonen ? 'block' : 'none';
+
+    if (tonen) {
+      onder.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 }
+
 
 
       updateHulpUI();
       filterSomgroepen();
       updateBrugInfo();
+      // === Soort brug tonen/verbergen (alleen bij tot 1000 + met brug)
+const brugSoortWrap = document.getElementById('brugSoortWrap');
+
+function updateBrugSoortUI() {
+  const max = parseInt(maxSel.value, 10);
+  const brug = brugSel.value;
+
+  if (max === 1000 && brug === 'met') {
+    brugSoortWrap.style.display = '';
+  } else {
+    brugSoortWrap.style.display = 'none';
+  }
+}
+
+maxSel.addEventListener('change', updateBrugSoortUI);
+brugSel.addEventListener('change', updateBrugSoortUI);
+
+// init bij laden
+updateBrugSoortUI();
+
     })();
   </script>
 </body>
