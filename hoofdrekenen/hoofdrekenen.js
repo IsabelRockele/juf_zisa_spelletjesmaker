@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ? [...groep.querySelectorAll('input[name="somType"]:checked')].map(cb => cb.value)
     : [];
 
+// ✅ Aftrekken zonder brug: T−E en T−TE zijn onmogelijk (altijd brug)
+const rekenType = document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
+const rekenBrug = document.getElementById('rekenBrug').value;
+
+let somTypesGefilterd = somTypes;
+
+if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
+  somTypesGefilterd = somTypes.filter(t => t !== 'T+E' && t !== 'T+TE');
+}
+
   // ✅ 2. Daarna pas: cfg-object opbouwen
   const cfg = {
     segmentId: 'rekenen_' + Date.now(),
@@ -37,7 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
     rekenBrug: document.getElementById('rekenBrug').value,
 
     // ✅ DIT is wat eerder ontbrak
-    somTypes: somTypes,
+    somTypes: somTypesGefilterd,
+
 
     opdracht: document.getElementById('opdracht_reken').value || ''
   };
