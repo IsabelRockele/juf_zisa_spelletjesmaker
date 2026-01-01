@@ -32,8 +32,22 @@ const rekenBrug = document.getElementById('rekenBrug').value;
 let somTypesGefilterd = somTypes;
 
 if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
-  somTypesGefilterd = somTypes.filter(t => t !== 'T+E' && t !== 'T+TE');
+
+  const heeftOnmogelijkeTypes = somTypes.some(t =>
+    t === 'T-E' || t === 'T-TE'
+  );
+
+  if (heeftOnmogelijkeTypes && max === 20) {
+    melding.textContent =
+      'Kies "met brug" om oefeningen met T − E of T − TE te krijgen.';
+    return null;
+  }
+
+  // toegelaten types blijven
+  somTypesGefilterd = somTypes;
 }
+
+
 
   // ✅ 2. Daarna pas: cfg-object opbouwen
   const cfg = {
@@ -52,6 +66,15 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
 
     opdracht: document.getElementById('opdracht_reken').value || ''
   };
+
+  // === Brugsoorten (alleen relevant bij tot 1000)
+if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
+  cfg.brugSoorten = {
+    tiental: document.getElementById('brugTiental')?.checked || false,
+    honderdtal: document.getElementById('brugHonderdtal')?.checked || false,
+    meervoudig: document.getElementById('brugMeervoudig')?.checked || false
+  };
+}
 
   // ✅ 3. Hulpmiddelen (ongewijzigd)
   const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
@@ -78,10 +101,11 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
   function renderPreview(append = false) {
     const cfg = verzamelConfiguratie();
 
-    if (!cfg.somTypes.length) {
-      melding.textContent = 'Kies minstens één somtype.';
-      return;
-    }
+    if (!cfg.somTypes.length && cfg.rekenMaxGetal > 10) {
+  melding.textContent = 'Kies minstens één somtype.';
+  return;
+}
+
 
     let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
 
@@ -103,8 +127,9 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
 
   // 👁️ Maak preview (vervangt vorige hoofdreken-opdrachten)
   btnMaak.addEventListener('click', () => {
-    renderPreview(false);
-  });
+  renderPreview(true);
+});
+
 
   // ➕ Voeg toe aan bundel (blijft staan, meerdere opdrachten mogelijk)
   btnToevoegen.addEventListener('click', () => {
