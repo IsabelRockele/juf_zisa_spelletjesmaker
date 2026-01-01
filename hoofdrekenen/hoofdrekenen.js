@@ -57,15 +57,19 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
   const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
 
   if (hulpAan) {
-    cfg.rekenHulp = {
-      inschakelen: true,
-      stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
-      schrijflijnen: document.getElementById('rekenHulpSchrijflijnen').checked,
-      splitsPlaatsAftrekken:
-        document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
-        || 'onderAftrektal'
-    };
-  }
+  cfg.rekenHulp = {
+    inschakelen: true,
+    stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
+    schrijflijnen: document.getElementById('rekenHulpSchrijflijnen').checked,
+    splitsPlaatsAftrekken:
+      document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
+      || 'onderAftrektal',
+
+    // 👇 NIEUW
+    voorbeeld: document.getElementById('rekenHulpVoorbeeld')?.checked || false,
+    tekens: document.getElementById('rekenHulpTekens')?.checked || false
+  };
+}
 
   return cfg;
 }
