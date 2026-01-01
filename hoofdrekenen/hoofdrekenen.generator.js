@@ -924,26 +924,49 @@ if (
   } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
   
 
-  // EXTRA FILTER: Compenseren tot 1000
-  if (cfg.rekenHulp && cfg.rekenHulp.inschakelen && cfg.rekenHulp.stijl === 'compenseren' && (cfg.rekenBrug || 'beide') !== 'zonder') {
-    let ok = false;
+// EXTRA FILTER: Compenseren tot 1000
+if (
+  cfg.rekenHulp &&
+  cfg.rekenHulp.inschakelen &&
+  cfg.rekenHulp.stijl === 'compenseren' &&
+  (cfg.rekenBrug || 'beide') !== 'zonder'
+) {
+  const max = cfg.rekenMaxGetal || 100;
+  let ok = false;
 
-    if ((g1 % 10 === 0) && (g2 % 10 === 0)) {
-      // HT ± HT: tweede term heeft tiental 7/8/9
-      const t2 = Math.floor(g2 / 10) % 10;
-      ok = (t2 === 7 || t2 === 8 || t2 === 9);
-    } else {
-      // TE-gevallen: tweede term heeft eenheden 7/8/9
-      const e2 = g2 % 10;
-      ok = (e2 === 7 || e2 === 8 || e2 === 9);
-    }
+  // ===============================
+  // BRUG NAAR HONDERDTAL = UITKOMST ≥ 100
+  // (zoals 48 + 61 → 50 + 59)
+  // ===============================
+  if (
+    cfg.brugSoorten &&
+    cfg.brugSoorten.honderdtal &&
+    (g1 + g2) >= 100
+  ) {
+    ok = true;
+  }
 
-    // Resultaat moet binnen ingestelde limiet blijven (tot 1000 mogelijk)
-    const max = cfg.rekenMaxGetal || 100;
-    if (!ok || g1 > max || g2 > max || (op === '+' && (g1 + g2) > max)) {
-      return null;
+  // ===============================
+  // BRUG NAAR TIENtal (klassiek)
+  // ===============================
+  if (
+    !ok &&
+    cfg.brugSoorten &&
+    cfg.brugSoorten.tiental
+  ) {
+    const e1 = g1 % 10;
+    const e2 = g2 % 10;
+    if ((e1 + e2) >= 10) {
+      ok = true;
     }
   }
+
+  if (!ok || g1 > max || g2 > max || (op === '+' && (g1 + g2) > max)) {
+    return null;
+  }
+}
+
+
 
 // 🔒 FINALE VEILIGHEID: bij aftrekken nooit een negatief resultaat
 // ❗ Behalve bij T − TE: daar mag nooit geswapt worden
