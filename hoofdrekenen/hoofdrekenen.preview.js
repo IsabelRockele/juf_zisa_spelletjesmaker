@@ -132,7 +132,6 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
 function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   try {
     const span1  = exprWrap.querySelector('.term1');
-    const opEl   = exprWrap.querySelector('.op');
     const span2  = exprWrap.querySelector('.term2');
     const ansBox = exprWrap.querySelector('.ansbox');
     if (!span1 || !span2 || !ansBox) return;
@@ -141,61 +140,72 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     exprWrap.style.position   = 'relative';
     exprWrap.style.overflow   = 'visible';
 
-    // Bepaal wie we gaan compenseren (g1 of g2?)
     const g1 = Number(oef.getal1);
     const g2 = Number(oef.getal2);
-    const absG1 = Math.abs(g1);
-    const absG2 = Math.abs(g2);
 
-    // Check of g2 geschikt is (7,8,9)
-    const e2 = absG2 % 10;
-    const t2 = Math.floor(absG2 / 10) % 10;
-    const g2IsCandidate = (e2 === 7 || e2 === 8 || e2 === 9) || (e2 === 0 && (t2 === 7 || t2 === 8 || t2 === 9));
+    // --- SLIMME KANDIDAAT KEUZE ---
+    const getDist = (val) => {
+       const abs = Math.abs(val);
+       // Volgend tiental vinden
+       let next = Math.ceil(abs/10)*10;
+       if (abs % 10 === 0) next += 10; 
+       
+       // Als we heel dicht bij 100 zitten (bv 98), is dat vaak het doel
+       const nextHonderd = Math.ceil(abs/100)*100;
+       if (nextHonderd - abs <= 3) next = nextHonderd;
 
-    // Check of g1 geschikt is (6,7,8,9)
-    const e1 = absG1 % 10;
-    const g1IsCandidate = (e1 === 6 || e1 === 7 || e1 === 8 || e1 === 9);
+       return { 
+         dist: next - abs, 
+         nextVal: next, 
+         isCandidate: (abs%10 >= 6 || abs%10 === 0 && (abs/10)%10 >= 7) 
+       }; 
+    };
 
-    // KIES DOEL: 
-    // Standaard g2, tenzij die niet kan en g1 wel.
-    // (Of als g2 'minder mooi' is? De generator shuffelt, dus 'soms' komt vanzelf)
-    let targetEl = span2; 
-    let baseVal = g2;
+    const d1 = getDist(g1);
+    const d2 = getDist(g2);
+
     let isTargetG1 = false;
 
-    if (g2IsCandidate) {
-        targetEl = span2;
-        baseVal = g2;
-        isTargetG1 = false;
-    } else if (g1IsCandidate) {
-        targetEl = span1;
-        baseVal = g1;
+    // Logica: wie is de beste kandidaat?
+    if (d1.isCandidate && !d2.isCandidate) {
         isTargetG1 = true;
+    } else if (!d1.isCandidate && d2.isCandidate) {
+        isTargetG1 = false;
+    } else if (d1.isCandidate && d2.isCandidate) {
+        if (d1.dist < d2.dist) isTargetG1 = true;
+        else isTargetG1 = false;
+    } else {
+        // Fallback: kleinste afstand
+        if (d1.dist < d2.dist) isTargetG1 = true;
     }
 
+    const targetEl = isTargetG1 ? span1 : span2;
+    
+    // POSITIE BEPALEN
     const wr = exprWrap.getBoundingClientRect();
     const rTarget = targetEl.getBoundingClientRect();
     
-    const isMin = (oef.operator === '-');
-    const isVoorbeeld = !!(cfg && cfg.rekenHulp && cfg.rekenHulp.voorbeeld && oef && oef._voorbeeld);
-    const op = isMin ? '-' : '+';
-
-    // overlay opruimen
+    // Oude zooi opruimen
     exprWrap.querySelectorAll('svg.comp-overlay, .comp-box').forEach(n => n.remove());
 
     const NS  = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(NS, 'svg');
     svg.classList.add('comp-overlay');
+    // SVG groot genoeg maken
     svg.setAttribute('width',  Math.ceil(wr.width));
-    svg.setAttribute('height', Math.ceil(wr.height));
+    svg.setAttribute('height', Math.ceil(wr.height + 100)); 
     Object.assign(svg.style, { position:'absolute', left:'0', top:'0', pointerEvents:'none', overflow:'visible' });
 
-    // Positie cirkel baseren op target (g1 of g2)
+    // Cirkel positie
     const cx = rTarget.left - wr.left + rTarget.width/2;
     const cy = rTarget.top  - wr.top  + rTarget.height*0.55;
     const rx = rTarget.width/2 + 6;
     const ry = rTarget.height*0.65;
 
+    const tailY = cy + ry + 3;
+    const tipY  = tailY + 16;
+
+    // Tekenen
     const ellipse = document.createElementNS(NS,'ellipse');
     ellipse.setAttribute('cx', cx); ellipse.setAttribute('cy', cy);
     ellipse.setAttribute('rx', rx); ellipse.setAttribute('ry', ry);
@@ -203,217 +213,142 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     ellipse.setAttribute('stroke', '#333'); ellipse.setAttribute('stroke-width', '2');
     svg.appendChild(ellipse);
 
-    const tailY = cy + ry + 3;
-    const tipY  = tailY + 16;
-
     const shaft = document.createElementNS(NS,'line');
     shaft.setAttribute('x1', cx); shaft.setAttribute('y1', tailY);
     shaft.setAttribute('x2', cx); shaft.setAttribute('y2', tipY);
     shaft.setAttribute('stroke', '#333'); shaft.setAttribute('stroke-width', '2');
     svg.appendChild(shaft);
 
-    const headL = document.createElementNS(NS,'line');
-    headL.setAttribute('x1', cx); headL.setAttribute('y1', tipY);
-    headL.setAttribute('x2', cx-6); headL.setAttribute('y2', tipY-6);
-    headL.setAttribute('stroke', '#333'); headL.setAttribute('stroke-width', '2');
-    svg.appendChild(headL);
+    const p1 = document.createElementNS(NS,'line');
+    p1.setAttribute('x1', cx); p1.setAttribute('y1', tipY);
+    p1.setAttribute('x2', cx-6); p1.setAttribute('y2', tipY-6);
+    p1.setAttribute('stroke', '#333'); p1.setAttribute('stroke-width', '2');
+    svg.appendChild(p1);
 
-    const headR = document.createElementNS(NS,'line');
-    headR.setAttribute('x1', cx); headR.setAttribute('y1', tipY);
-    headR.setAttribute('x2', cx+6); headR.setAttribute('y2', tipY-6);
-    headR.setAttribute('stroke', '#333'); headR.setAttribute('stroke-width', '2');
-    svg.appendChild(headR);
+    const p2 = document.createElementNS(NS,'line');
+    p2.setAttribute('x1', cx); p2.setAttribute('y1', tipY);
+    p2.setAttribute('x2', cx+6); p2.setAttribute('y2', tipY-6);
+    p2.setAttribute('stroke', '#333'); p2.setAttribute('stroke-width', '2');
+    svg.appendChild(p2);
 
     exprWrap.appendChild(svg);
 
-    // compenseerbox
+    // VAKJES (BOX)
     const box = document.createElement('div');
     box.className = 'comp-box';
-    box.style.position = 'absolute';
-    // Box centreren onder de pijl
-    box.style.left = `${Math.max(0, cx - 64)}px`;
-    box.style.top  = `${tipY + 6}px`;
-    box.style.zIndex = '5';
-    box.style.width = '128px';
-    box.style.height = '32px';
-    box.style.border = '2px solid #333';
-    box.style.borderRadius = '10px';
-    box.style.display = 'grid';
-    box.style.gridTemplateColumns = '1fr 1fr';
-    box.style.gap = '8px';
-    box.style.padding = '6px 8px';
-    box.style.background = '#fff';
+    Object.assign(box.style, {
+        position: 'absolute',
+        left: `${Math.max(0, cx - 64)}px`,
+        top:  `${tipY + 6}px`,
+        zIndex: '5',
+        width: '128px',
+        height: '34px', // Iets hoger voor zekerheid
+        border: '2px solid #333',
+        borderRadius: '10px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '8px',
+        padding: '6px 8px',
+        background: '#fff'
+    });
 
-   const vak = () => {
+    const vak = (txt) => {
       const d = document.createElement('div');
-      d.style.border = '1px solid #bbb';
-      d.style.borderRadius = '8px';
-      d.style.display = 'flex';
-      d.style.alignItems = 'center';
-      d.style.justifyContent = 'center';
-      d.style.fontWeight = '700';
-      d.style.fontSize = '14px';
-      d.style.minWidth = '44px';
-      d.style.height = '22px';
-      d.textContent = '____';
+      Object.assign(d.style, {
+          border: '1px solid #bbb', borderRadius: '8px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontWeight: '700', fontSize: '14px', minWidth: '44px', height: '22px'
+      });
+      d.textContent = txt || '____';
       return d;
     };
 
-    const L = vak();
-    const R = vak();
+    let L, R;
+    if (cfg?.rekenHulp?.tekens) {
+      if (oef.operator === '+') {
+         L = vak('+ ____'); R = vak('− ____');
+      } else {
+         L = vak('− ____'); R = vak('+ ____');
+      }
+    } else {
+      L = vak('_____'); R = vak('_____');
+    }
     box.append(L, R);
 
-    // standaard: geen tekens
-    L.textContent = '_____';
-    R.textContent = '_____';
+    // EERST TOEVOEGEN aan DOM
+    exprWrap.appendChild(box);
 
-    // Tekens tonen indien gewenst
-    if (cfg?.rekenHulp?.tekens) {
-      // Logic: als we afronden naar boven (+), moet de correctie min (-) zijn, of andersom.
-      // Dit is onafhankelijk van of we g1 of g2 compenseren, het gaat om de balans.
-      // Bij optellen: eentje +, ander -.
-      // Bij aftrekken: beiden + of beiden - (want -(a+b) = -a-b ?) 
-      // Wacht, standaard compenseren bij aftrekken (45 - 29): 29->30 (+1), dus moet er +1 afgetrokken worden? Nee.
-      // 45 - 29 = 45 - 30 + 1. 
-      // Laten we de standaardtekens simpel houden voor de layout:
-      if (oef.operator === '+') {
-        L.textContent = '+ ____';
-        R.textContent = '− ____';
-      } else {
-        L.textContent = '− ____';
-        R.textContent = '+ ____';
-      }
+    // --- RUIMTE MAKEN (FIX) ---
+    // We berekenen hoe diep de box komt.
+    // tipY = punt van de pijl. +6px margin + 34px box hoogte + 12px padding box + marge onder.
+    // Laten we zeggen: box stopt op tipY + 60px.
+    const bottomOfTool = tipY + 65; 
+    
+    // We moeten zorgen dat exprWrap deze hoogte 'voelt'. 
+    // De tekst zelf is ongeveer 30px hoog.
+    const textHeight = 30;
+    
+    // Voeg padding toe aan de wrapper zodat de parent div (het kader) mee rekt
+    if (bottomOfTool > textHeight) {
+        exprWrap.style.paddingBottom = `${bottomOfTool - textHeight}px`;
+    }
+
+    // Voor de zekerheid ook de parent .oefening expliciet zetten
+    const oefDiv = exprWrap.closest('.oefening');
+    if (oefDiv) {
+        oefDiv.style.minHeight = `${bottomOfTool + 20}px`; // 20px extra buffer onderaan
     }
 
     // VOORBEELD INVULLEN
-    if (isVoorbeeld) {
-      function compPair(op, val) {
-        const absVal = Math.abs(val);
-        // Bepaal afronding
-        let up;
-        if (absVal % 10 === 0) { up = Math.ceil(absVal / 100) * 100; }
-        else                   { up = Math.ceil(absVal / 10) * 10; }
+    if (oef._voorbeeld) {
+        const info = isTargetG1 ? d1 : d2;
+        const delta = info.dist;
         
-        // Verschil berekenen
-        const diff = up - absVal; 
-        
-        // Bij optellen (+): als we de term verhogen (+diff), moeten we dat later aftrekken (-diff).
-        // Bij aftrekken (-): 
-        // Als we aftrekker verhogen (29->30), trekken we teveel af -> resultaat moet +1.
-        // Als we aftrektal verhogen? Dat wordt zelden gedaan bij compenseren, maar logica:
-        // (49 - 12) -> (50 - 12) - 1.
-        
-        // We houden het patroon van de preview aan:
-        // Links = de aanpassing naar het ronde getal
-        // Rechts = de correctie
-        
-        if (op === '+') {
-           return { first: +diff, second: -diff };
-        } else {
-           // Aftrekken
-           // Als we target=g2 (aftrekker) (45 - 29): 29 wordt 30 (+1). We trekken MEER af. Dus correctie is +1.
-           // Als we target=g1 (aftrektal) (49 - 12): 49 wordt 50 (+1). We hebben er 1 bijverzonnen. Dus correctie is -1.
-           if (isTargetG1) {
-              return { first: +diff, second: -diff }; // Aftrektal: zelfde logica als optellen
-           } else {
-              return { first: -diff, second: +diff }; // Aftrekker: omgekeerd (wordt hierboven vaak als -up weergegeven in oude code, maar visueel 'naar 30' is +1)
-              // Correctie: oude code deed het complex. Laten we simpel 'verschil' tonen.
-              // Links = wat doen we met het getal? (+1)
-              // Rechts = wat doen we met de som? (+1)
-              // Oude code: first:-up ?? Nee, laten we gewoon de getallen tonen.
-              return { first: -up, second: +(up - absVal) }; // fallback
-           }
+        L.innerHTML = `<span style="color:#c00000">+${delta}</span>`;
+
+        let corrVal = -delta; 
+        if (oef.operator === '-') {
+            if (!isTargetG1) corrVal = +delta; 
+            else corrVal = -delta;
         }
-      }
-      
-      // Herberekening voor visualisatie
-      // We gebruiken een simpelere logica die voor kinderen logisch is:
-      // "Ik doe er 2 bij (+2), dus moet ik er straks 2 af doen (-2)"
-      
-      const valToRound = baseVal;
-      // Zoek het volgende tiental/honderdtal
-      let nextTen;
-      if (valToRound % 10 === 0) nextTen = Math.ceil(valToRound/100)*100;
-      else nextTen = Math.ceil(valToRound/10)*10;
-      
-      const delta = nextTen - valToRound;
-      
-      // Tekst in vakjes
-      L.innerHTML = `<span style="color:#c00000">+${delta}</span>`;
-      
-      // Correctie rechts hangt af van situatie
-      let correctie = -delta; // Standaard (bij optellen)
-      if (oef.operator === '-' && !isTargetG1) correctie = +delta; // Bij aftrekken van 2e term: +
-      
-      const teken = correctie >= 0 ? '+' : '−'; // Let op min-teken
-      R.innerHTML = `<span style="color:#0058c0">${teken}${Math.abs(correctie)}</span>`;
-
-      // RECHTS KOLOM: Tussenstap
-      // Als g2 target (45 + 28): 45 + 30 = 75 --> 75 - 2 = 73
-      // Als g1 target (98 + 45): 100 + 45 = 145 --> 145 - 2 = 143
-      
-      let step1, step2, res1, res2;
-      
-      if (oef.operator === '+') {
-         if (!isTargetG1) {
-             // 45 + 28(30)
-             res1 = g1 + nextTen;
-             step1 = `${g1} + ${nextTen} = ${res1}`;
-         } else {
-             // 98(100) + 45
-             res1 = nextTen + g2;
-             step1 = `${nextTen} + ${g2} = ${res1}`;
-         }
-         res2 = res1 - delta; // Altijd min de 'teveel' bij optellen
-         step2 = `${res1} − ${delta} = ${res2}`;
-         
-      } else {
-         // Aftrekken
-         if (!isTargetG1) {
-            // 45 - 28(30) -> teveel afgetrokken, dus erbij
-            res1 = g1 - nextTen;
-            step1 = `${g1} − ${nextTen} = ${res1}`;
-            res2 = res1 + delta;
-            step2 = `${res1} + ${delta} = ${res2}`;
-         } else {
-            // 48(50) - 12 -> getal groter gemaakt, dus resultaat is te groot, dus eraf
-            res1 = nextTen - g2;
-            step1 = `${nextTen} − ${g2} = ${res1}`;
-            res2 = res1 - delta;
-            step2 = `${res1} − ${delta} = ${res2}`;
-         }
-      }
-
-      if (rechtsKolom) {
-        rechtsKolom.innerHTML = '';
-        const stap = document.createElement('div');
-        stap.style.fontSize = '16px';
-        stap.style.lineHeight = '1.6';
-        stap.style.marginTop = '10px';
-        stap.innerHTML = `${step1}<br>${step2}`;
-        rechtsKolom.appendChild(stap);
-      }
-
-      ansBox.textContent = String(res2);
+        
+        const teken = corrVal >= 0 ? '+' : '−';
+        R.innerHTML = `<span style="color:#0058c0">${teken}${Math.abs(corrVal)}</span>`;
+        
+        if (rechtsKolom) {
+             const rounded = info.nextVal;
+             let s1, s2, res1, res2;
+             
+             if (oef.operator === '+') {
+                 if (isTargetG1) { 
+                     res1 = rounded + g2; s1 = `${rounded} + ${g2} = ${res1}`;
+                 } else { 
+                     res1 = g1 + rounded; s1 = `${g1} + ${rounded} = ${res1}`;
+                 }
+                 res2 = res1 - delta; s2 = `${res1} − ${delta} = ${res2}`;
+             } else {
+                 if (isTargetG1) { 
+                     res1 = rounded - g2; s1 = `${rounded} − ${g2} = ${res1}`;
+                     res2 = res1 - delta; s2 = `${res1} − ${delta} = ${res2}`;
+                 } else { 
+                     res1 = g1 - rounded; s1 = `${g1} − ${rounded} = ${res1}`;
+                     res2 = res1 + delta; s2 = `${res1} + ${delta} = ${res2}`;
+                 }
+             }
+             
+             ansBox.textContent = res2; 
+             rechtsKolom.innerHTML = '';
+             const stapDiv = document.createElement('div');
+             stapDiv.style.marginTop = '10px';
+             stapDiv.style.lineHeight = '1.5';
+             stapDiv.style.fontSize = '16px';
+             stapDiv.innerHTML = `${s1}<br>${s2}`;
+             rechtsKolom.appendChild(stapDiv);
+        }
     }
-
-    // hoogte reserveren
-    const BOX_H = 32;
-    const MARGIN_BELOW = 8;
-    const neededInside = (tipY + 6) + BOX_H + MARGIN_BELOW;
-    const extra = Math.max(0, neededInside - exprWrap.clientHeight);
-    exprWrap.style.paddingBottom = extra ? `${extra}px` : exprWrap.style.paddingBottom;
-
-    const oefDiv = exprWrap.closest('.oefening');
-    if (oefDiv) {
-      const totalNeeded = exprWrap.offsetTop + (tipY + 6) + BOX_H + 12;
-      oefDiv.style.minHeight = `${Math.ceil(totalNeeded)}px`;
-    }
-
-    exprWrap.appendChild(box);
 
   } catch (e) {
-    console.warn('tekenCompenseerOnderTerm (preview) error:', e);
+    console.warn('tekenCompenseerOnderTerm error:', e);
   }
 }
 
