@@ -258,12 +258,17 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     exprWrap.style.paddingBottom = extra ? `${extra}px` : exprWrap.style.paddingBottom;
 
     const oefDiv = exprWrap.closest('.oefening');
-    if (oefDiv) {
-      const topInParent = exprWrap.offsetTop;
-      const neededForParent = topInParent + neededInside + 4;
-      const curMin = parseFloat(getComputedStyle(oefDiv).minHeight || '0');
-      if (neededForParent > curMin) oefDiv.style.minHeight = `${neededForParent}px`;
-    }
+if (oefDiv) {
+  // zorg dat het oefenkader altijd onder het compenseervak eindigt
+  const totalNeeded =
+    exprWrap.offsetTop +
+    (tipY + 6) +   // pijl
+    BOX_H +        // compenseerbox
+    12;            // extra ademruimte
+
+  oefDiv.style.minHeight = `${Math.ceil(totalNeeded)}px`;
+}
+ta
 
     exprWrap.appendChild(box);
 
@@ -277,10 +282,20 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
    OEFENING RENDER
    ================================ */
 function appendWithDelete(grid, cfg, oef, div) {
-  const del = document.createElement('button');
-  del.textContent = '🗑';
-  del.style.marginLeft = '8px';
-  del.style.cursor = 'pointer';
+const del = document.createElement('button');
+del.textContent = '🗑';
+del.style.position = 'absolute';
+del.style.top = '8px';
+del.style.right = '8px';
+del.style.cursor = 'pointer';
+del.style.zIndex = '10';
+del.style.background = '#0b4d7a';
+del.style.color = '#fff';
+del.style.border = '0';
+del.style.borderRadius = '8px';
+del.style.width = '32px';
+del.style.height = '32px';
+
 
   del.onclick = () => {
     const i = cfg._oefeningen.indexOf(oef);
