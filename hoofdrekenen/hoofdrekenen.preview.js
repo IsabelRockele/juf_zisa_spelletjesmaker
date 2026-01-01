@@ -31,6 +31,16 @@ function voegOefeningToe(cfg) {
     : genereerRekensom(cfg);
 
   if (!oef || oef.getal1 == null || oef.getal2 == null) return null;
+  // 👉 markeer ALLEEN de eerste oefening van deze opdracht/dit segment als voorbeeld
+if (
+  comp &&
+  cfg?.rekenHulp?.voorbeeld === true &&
+  Array.isArray(cfg._oefeningen) &&
+  cfg._oefeningen.length === 0
+) {
+  oef._voorbeeld = true;
+}
+
 
   cfg._oefeningen.push(oef);
 
@@ -189,6 +199,7 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     box.style.position = 'absolute';
     box.style.left = `${Math.max(0, cx - 64)}px`;
     box.style.top  = `${tipY + 6}px`;
+    box.style.zIndex = '5';
     box.style.width = '128px';
     box.style.height = '32px';
     box.style.border = '2px solid #333';
@@ -199,22 +210,41 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     box.style.padding = '6px 8px';
     box.style.background = '#fff';
 
-    const vak = () => {
-      const d = document.createElement('div');
-      d.style.border = '1px solid #bbb';
-      d.style.borderRadius = '8px';
-      d.style.display = 'flex';
-      d.style.alignItems = 'center';
-      d.style.justifyContent = 'center';
-      d.style.fontWeight = '700';
-      d.style.fontSize = '14px';
-      d.textContent = ' ___';
-      return d;
-    };
+   const vak = () => {
+  const d = document.createElement('div');
+  d.style.border = '1px solid #bbb';
+  d.style.borderRadius = '8px';
+  d.style.display = 'flex';
+  d.style.alignItems = 'center';
+  d.style.justifyContent = 'center';
+  d.style.fontWeight = '700';
+  d.style.fontSize = '14px';
+  d.style.minWidth = '44px';
+  d.style.height = '22px';
+  d.textContent = '____';
+  return d;
+};
+
 
     const L = vak();
     const R = vak();
     box.append(L, R);
+
+// standaard: geen tekens, lege vakjes
+L.textContent = '_____';
+R.textContent = '_____';
+
+// alleen tekens tonen als leerkracht dit koos
+if (cfg?.rekenHulp?.tekens) {
+  if (oef.operator === '+') {
+    L.textContent = '+ ____';
+    R.textContent = '− ____';
+  } else {
+    L.textContent = '− ____';
+    R.textContent = '+ ____';
+  }
+}
+
 
     // voorbeeld: vul de compensatie zoals in versie2 (met kleuren + stappen rechts)
     if (isVoorbeeld) {
@@ -268,7 +298,6 @@ if (oefDiv) {
 
   oefDiv.style.minHeight = `${Math.ceil(totalNeeded)}px`;
 }
-ta
 
     exprWrap.appendChild(box);
 
@@ -328,6 +357,11 @@ function renderOefening(grid, cfg, oef) {
   div.style.padding = '10px';
   div.style.background = '#fff';
 
+// 🟧 Voorbeeldoefening visueel markeren
+if (oef._voorbeeld === true) {
+  div.style.border = '2px solid #f59e0b';   // oranje rand
+  div.style.background = '#fff7ed';         // licht oranje achtergrond
+}
 
   const hulp = cfg.rekenHulp?.inschakelen;
   const brug = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
@@ -559,12 +593,23 @@ card.appendChild(addWrap);
         ? genereerRekensomMetCompenseren(cfg)
         : genereerRekensom(cfg);
 
+
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
 
       const key = `${oef.operator}|${oef.getal1},${oef.getal2}`;
       if (!seen.has(key)) {
         seen.add(key);
-        oefeningen.push(oef);
+        // 👉 eerste oefening van deze opdracht = voorbeeldoefening
+if (
+  cfg?.rekenHulp?.stijl === 'compenseren' &&
+  cfg?.rekenHulp?.voorbeeld === true &&
+  oefeningen.length === 0
+) {
+  oef._voorbeeld = true;
+}
+
+oefeningen.push(oef);
+
       }
     }
 
