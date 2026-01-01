@@ -429,16 +429,16 @@ if (!cfg.rekenMaxGetal) return;
 // Somtypes beperken volgens bereik
 const max = cfg.rekenMaxGetal;
 
-if (max <= 10) {
+if (max <= 5) {
   cfg.somTypes = ['E+E'];
   cfg.rekenBrug = 'zonder';
 }
 
-if (max <= 20) {
-  cfg.somTypes = (cfg.somTypes || []).filter(t =>
-    ['E+E', 'TE+E', 'T-E', 'T+TE'].includes(t)
-  );
+if (max > 5 && max <= 10) {
+  cfg.somTypes = ['E+E', 'T-E'];
+  cfg.rekenBrug = 'zonder';
 }
+
 
 // Als alles eruit gefilterd is → veilige fallback
 if (!cfg.somTypes || cfg.somTypes.length === 0) {
@@ -446,7 +446,7 @@ if (!cfg.somTypes || cfg.somTypes.length === 0) {
 }
 
 // Oefeningen die niet meer passen → weg
-cfg._oefeningen = null;
+
 
   if (!cfg || cfg.hoofdBewerking !== 'rekenen') return;
 
