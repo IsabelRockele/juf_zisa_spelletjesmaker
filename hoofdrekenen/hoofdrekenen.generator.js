@@ -51,7 +51,7 @@ function checkBrug(g1, g2, op, brugType) {
 }
 
 function genereerRekensom(cfg) {
-    
+
     // ================================
 // FAILSAFE: nooit blokkeren
 // ================================
@@ -62,7 +62,7 @@ if (!cfg || !cfg.rekenMaxGetal) {
     // =====================================
 // EVENWICHT OPTELLEN / AFTREKKEN
 // =====================================
-if (cfg.typeBewerking === 'beide') {
+if (cfg.rekenType === 'beide') {
   if (!cfg._verdeling) {
     cfg._verdeling = { plus: 0, min: 0 };
   }
@@ -77,10 +77,48 @@ if (cfg.rekenMaxGetal <= 10) {
   cfg.rekenBrug = 'zonder';
 }
 
-  const types = cfg.somTypes?.length ? cfg.somTypes : ['E+E'];
-  const gekozenType = types[Math.floor(Math.random() * types.length)];
+  let types = cfg.somTypes?.length ? [...cfg.somTypes] : ['E+E'];
+let gekozenType;
+let safety = 0;
+
+do {
+  if (++safety > 80) {
+    return null;
+  }
+
+  gekozenType = types[Math.floor(Math.random() * types.length)];
+
+  // ❌ Brug = met → E-E is onmogelijk
+  if (cfg.rekenBrug === 'met' && gekozenType === 'E-E') {
+    gekozenType = null;
+    continue;
+  }
+
+  // ❌ Brug = met + AFTREKKEN → E+E is ook onmogelijk
+  if (
+    cfg.rekenBrug === 'met' &&
+    cfg.rekenType === 'aftrekken' &&
+    gekozenType === 'E+E'
+  ) {
+    gekozenType = null;
+    continue;
+  }
+
+} while (!gekozenType);
+
+
   const maxGetal = cfg.rekenMaxGetal || 100;
   let g1, g2, op, pogingen = 0;
+
+  // 🔒 Operator altijd vooraf zetten (voorkomt undefined in errors)
+if (cfg.rekenType === 'optellen') {
+  op = '+';
+} else if (cfg.rekenType === 'aftrekken') {
+  op = '-';
+} else {
+  // bij "beide" voorlopig + als default
+  op = '+';
+}
 
   // --- SPECIAL CASE: bereik tot 5 (1e leerjaar) ---
   if ((cfg.rekenMaxGetal || 100) <= 5) {
@@ -208,12 +246,69 @@ if (cfg.rekenMaxGetal <= 10) {
     if (pogingen > 120) {
       throw new Error(`Kon geen som genereren voor type ${gekozenType} met operator ${op} en brug-keuze "${cfg.rekenBrug}".`);
     }
+    // ❌ Somtypes die nooit mogen bij tot 100
+if (cfg.rekenMaxGetal <= 100) {
+  if (
+    gekozenType === 'H+H' ||
+    gekozenType === 'HT+HT' ||
+    gekozenType === 'HTE+H' ||
+    gekozenType === 'HTE+HT' ||
+    gekozenType === 'HTE+HTE'
+  ) {
+       // Kies onmiddellijk een nieuw type, anders blijf je 120x hangen
+    gekozenType = types[Math.floor(Math.random() * types.length)];
+    continue;
+
+  }
+}
+
     switch (gekozenType) {
       case 'E+E': g1 = rnd(1, 9); g2 = rnd(1, 9); break;
       case 'T+E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
+      case 'T-E': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9); break;
       case 'T+T': g1 = rnd(1, 9) * 10; g2 = rnd(1, 9) * 10; break;
-      case 'TE+E': g1 = rnd(11, 99); g2 = rnd(1, 9); break;
-      case 'TE+TE': g1 = rnd(11, 99); g2 = rnd(11, 99); break;
+      case 'T+TE':
+  g1 = rnd(1, 9) * 10;
+  g2 = rnd(11, 99);
+  if (g2 % 10 === 0) continue; // TE ≠ zuiver tiental
+  break;
+     case 'TE+E':
+  g1 = rnd(11, 99);
+  if (g1 % 10 === 0) continue;   // ❌ geen zuiver tiental
+  g2 = rnd(1, 9);
+  break;
+  
+case 'TE+T':
+  g1 = rnd(11, 99);
+  g2 = rnd(1, 9) * 10;
+
+  // ❌ bij tot 100: som moet ≤ 100
+  if (cfg.rekenMaxGetal <= 100 && (g1 + g2) > 100) continue;
+
+  // ❌ zonder brug: E + 0 mag geen brug geven
+  if (cfg.rekenBrug === 'zonder' && (g1 % 10) > 9) continue;
+
+  // ❌ met brug: TE + T geeft nooit brug → dus verbieden
+  if (cfg.rekenBrug === 'met') continue;
+
+  break;
+
+case 'TE+TE':
+  g1 = rnd(11, 99);
+  g2 = rnd(11, 99);
+
+  // ❌ geen zuivere tientallen (moeten echte TE zijn)
+  if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+
+  // ❌ bij tot 100: som mag niet boven 100 uitkomen
+  if (cfg.rekenMaxGetal <= 100 && (g1 + g2) > 100) continue;
+
+  // ❌ bij met brug: effectieve eenhedenbrug verplicht
+  if (cfg.rekenBrug === 'met' && ((g1 % 10) + (g2 % 10) <= 9)) continue;
+
+  break;
+
+
       case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
       case 'HT+HT':
         // tientallen genereren zonder brug
@@ -247,6 +342,19 @@ if (cfg.rekenType === 'optellen') {
     cfg._verdeling.min++;
   }
 }
+// 🔒 Bewerkingskeuze afdwingen
+if (cfg.rekenType === 'aftrekken' && op !== '-') continue;
+if (cfg.rekenType === 'optellen' && op !== '+') continue;
+
+// 🔒 Optellen met brug: geen T+T met 0+0 (20+80, 30+70, …)
+if (
+  cfg.rekenBrug === 'met' &&
+  op === '+' &&
+  g1 % 10 === 0 &&
+  g2 % 10 === 0
+) {
+  continue;
+}
 
 
     if (op === '+') {
@@ -255,6 +363,16 @@ if (cfg.rekenType === 'optellen') {
       if (g1 < g2) [g1, g2] = [g2, g1];
       while (g1 > maxGetal) { g1 = Math.floor(g1 / 2); if (g1 < g2) [g1, g2] = [g2, g1]; }
     }
+
+// ❌ TE − E met brug: aftrektal mag geen zuiver tiental zijn
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'met' &&
+  gekozenType === 'TE+E' &&
+  (g1 % 10 === 0)
+) {
+  continue;
+}
 
     // === NORMALISATIE vóór de while-check ==================================
     // Alleen toepassen bij brugoefeningen.
