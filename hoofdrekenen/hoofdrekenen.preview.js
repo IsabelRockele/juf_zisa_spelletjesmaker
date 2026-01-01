@@ -268,9 +268,9 @@ if (cfg?.rekenHulp?.tekens) {
       if (rechtsKolom) {
         rechtsKolom.innerHTML = '';
         const stap = document.createElement('div');
-        stap.style.fontSize = '12px';
-        stap.style.lineHeight = '1.25';
-        stap.style.marginTop = '4px';
+        stap.style.fontSize = '16px';     // groter leesbaar
+stap.style.lineHeight = '1.6';    // meer ruimte tussen regels
+stap.style.marginTop = '10px';    // iets lager starten
         const s1 = `${a} ${pair.first >= 0 ? '+' : '-'} ${Math.abs(pair.first)} = ${t1}`;
         const s2 = `${t1} ${pair.second >= 0 ? '+' : '-'} ${Math.abs(pair.second)} = ${t2}`;
         stap.innerHTML = `${s1}<br>${s2}`;
@@ -388,11 +388,12 @@ if (oef._voorbeeld === true) {
 
   // Schrijflijnen rechts (zoals versie2), maar alleen als aangevinkt
   if (cfg.rekenHulp?.schrijflijnen) {
-    rechts.innerHTML = `
-      <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
-      <div style="border-bottom:2px solid #333;height:18px;margin:8px 0;width:160px;max-width:100%"></div>
-    `;
-  }
+  rechts.innerHTML = `
+    <div style="border-bottom:2px solid #333;height:18px;margin:14px 0;width:160px;max-width:100%"></div>
+    <div style="border-bottom:2px solid #333;height:18px;margin:14px 0;width:160px;max-width:100%"></div>
+  `;
+}
+
 
   div.appendChild(links);
   div.appendChild(rechts);
