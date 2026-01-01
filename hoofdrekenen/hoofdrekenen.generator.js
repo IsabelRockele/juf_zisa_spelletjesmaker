@@ -562,7 +562,68 @@ case 'HTE+H':
 
   break;
 
-      case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
+      case 'HTE+HTE': {
+         // === HTE + HTE SPECIFIEK VOOR BRUGSOORTEN (TOT 1000) ===
+         let subSafety = 0;
+         let gevonden = false;
+
+         while (subSafety++ < 50) {
+            // Basisgeneratie: zorg dat som <= 1000 en het HTE zijn (>=100)
+            g1 = rnd(100, 899); 
+            g2 = rnd(100, 1000 - g1);
+
+            // Moeten HTE blijven (geen 0xx)
+            if (g1 < 100 || g2 < 100) continue; 
+
+            const e1 = g1 % 10, e2 = g2 % 10;
+            const t1 = Math.floor(g1/10)%10, t2 = Math.floor(g2/10)%10;
+
+            // Situatie 1: ZONDER BRUG
+            if (cfg.rekenBrug === 'zonder') {
+               if (e1 + e2 >= 10) continue; // geen eenhedenbrug
+               if (t1 + t2 >= 10) continue; // geen tientallenbrug
+               gevonden = true; break;
+            }
+
+            // Situatie 2: MET BRUG
+            if (cfg.rekenBrug === 'met') {
+               const types = [];
+               if (cfg.brugSoorten?.tiental) types.push('tiental');
+               if (cfg.brugSoorten?.honderdtal) types.push('honderdtal');
+               if (cfg.brugSoorten?.meervoudig) types.push('meervoudig');
+               
+               // Fallback
+               if (types.length === 0) types.push('tiental', 'honderdtal', 'meervoudig');
+
+               const doel = types[Math.floor(Math.random() * types.length)];
+
+               const unitSum = e1 + e2;
+               // Bij de tientallen moeten we de eventuele carry meerekenen
+               // Als unitSum >= 10, komt er +1 bij de tientallen
+               const carryNaarT = (unitSum >= 10) ? 1 : 0;
+               const tenSum = t1 + t2 + carryNaarT;
+
+               if (doel === 'tiental') {
+                  // Wel E-brug, Geen T-brug
+                  if (unitSum >= 10 && tenSum < 10) { gevonden = true; break; }
+               } 
+               else if (doel === 'honderdtal') {
+                  // Geen E-brug, Wel T-brug
+                  if (unitSum < 10 && tenSum >= 10) { gevonden = true; break; }
+               }
+               else if (doel === 'meervoudig') {
+                  // Wel E-brug, Wel T-brug
+                  if (unitSum >= 10 && tenSum >= 10) { gevonden = true; break; }
+               }
+            } else {
+               // Als brug 'beide' is, gewoon accepteren
+               gevonden = true; break;
+            }
+         }
+         // Fallback als het niet lukt: resetten (wordt opgevangen door main loop)
+         if (!gevonden) { g1 = 0; g2 = 0; }
+         break;
+      }
     }
 
 // =========================================================
