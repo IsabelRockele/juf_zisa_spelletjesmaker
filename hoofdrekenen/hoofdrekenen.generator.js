@@ -404,49 +404,105 @@ case 'TE+T': {
 }
 
 case 'TE+TE': {
+        // We gebruiken een interne lus om zeker te zijn dat we een geldige combinatie vinden
+        // voordat we doorgaan. Dit voorkomt dat de algemene brug-check foute sommen goedkeurt.
+        let subSafety = 0;
+        let gevonden = false;
 
-  // 🔹 bereik beperken voor tot 20
-  if (cfg.rekenMaxGetal === 20) {
-    g1 = rnd(11, 19);
-    g2 = rnd(11, 19);
-  } else {
-    g1 = rnd(11, 99);
-    g2 = rnd(11, 99);
-  }
+        while (subSafety++ < 50) { // Probeer max 50 keer intern
+          
+          // 1. Genereren
+          if (cfg.rekenMaxGetal === 20) {
+            g1 = rnd(11, 19);
+            g2 = rnd(11, 19);
+          } else {
+            g1 = rnd(11, 99);
+            g2 = rnd(11, 99);
+          }
 
-  // ❌ geen zuivere tientallen (moeten echte TE zijn)
-  if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+          // 2. Basis checks
+          if (g1 % 10 === 0 || g2 % 10 === 0) continue; // Geen tientallen
 
-  // ❌ TE-TE tot 20 kan NOOIT met brug
-  if (cfg.rekenMaxGetal === 20 && cfg.rekenBrug === 'met') continue;
+          // Tot 20 specifiek
+          if (cfg.rekenMaxGetal === 20) {
+             if (cfg.rekenBrug === 'met') continue; // Kan niet
+             // Tot 20 is altijd max 20
+             if (g1 + g2 > 20) continue;
+          }
 
-  // ❌ bij tot 100: som mag niet boven 100 uitkomen
-  if (cfg.rekenMaxGetal <= 100 && (g1 + g2) > 100) continue;
+          // Tot 100 en hoger
+          if (cfg.rekenMaxGetal > 20) {
+             // Somgrens checken
+             if (g1 + g2 > (cfg.rekenMaxGetal || 100)) continue;
+          }
 
-  // ✅ bij tot 100 + met brug: eenheden moeten samen > 10
-  if (
-    cfg.rekenMaxGetal <= 100 &&
-    cfg.rekenBrug === 'met' &&
-    ((g1 % 10) + (g2 % 10) <= 10)
-  ) continue;
-  // 🔹 tot 1000: grens + brugcontrole
-if (cfg.rekenMaxGetal > 100) {
+          // 3. Bruglogica checken
+          if (cfg.rekenMaxGetal <= 100) {
+             // ... (oude logica voor tot 100 blijft hier gelijk) ...
+             if (cfg.rekenBrug === 'met' && ((g1 % 10) + (g2 % 10) <= 10)) continue;
+             if (cfg.rekenBrug === 'zonder' && ((g1 % 10) + (g2 % 10) >= 10)) continue;
+          } 
+          else if (cfg.rekenMaxGetal > 100) {
+             // === DE NIEUWE LOGICA VOOR TOT 1000 ===
+             
+             // Zonder brug
+             if (cfg.rekenBrug === 'zonder') {
+               if ((g1 % 10) + (g2 % 10) >= 10) continue;
+             }
+             
+             // Met brug
+             if (cfg.rekenBrug === 'met') {
+                const types = [];
+                // Kijk welke vinkjes aan staan
+                if (cfg.brugSoorten?.tiental) types.push('tiental');
+                if (cfg.brugSoorten?.honderdtal) types.push('honderdtal');
+                if (cfg.brugSoorten?.meervoudig) types.push('meervoudig');
+                
+                // Fallback
+                if (types.length === 0) types.push('tiental', 'honderdtal');
 
-  // som mag niet boven 1000 uitkomen
-  if (g1 + g2 > cfg.rekenMaxGetal) continue;
+                // Kies één specifiek doel voor deze poging
+                const doel = types[Math.floor(Math.random() * types.length)];
 
-  // brugcontrole op eenheden
-  if (cfg.rekenBrug === 'met') {
-    if ((g1 % 10) + (g2 % 10) < 10) continue;
-  }
+                const e1 = g1 % 10;
+                const e2 = g2 % 10;
+                const t1 = Math.floor(g1 / 10);
+                const t2 = Math.floor(g2 / 10);
 
-  if (cfg.rekenBrug === 'zonder') {
-    if ((g1 % 10) + (g2 % 10) >= 10) continue;
-  }
-}
+                // Check 1: Brug naar TIENTAL (45 + 28)
+                // Eis: Eenheden > 9, Tientallen < 10 (geen honderdtal)
+                if (doel === 'tiental') {
+                   if (e1 + e2 < 10) continue;  
+                   if (t1 + t2 >= 10) continue; 
+                }
 
-  break;
-}
+                // Check 2: Brug naar HONDERDTAL (82 + 45)
+                // Eis: Eenheden < 10 (GEEN brug), Tientallen >= 10 (WEL brug)
+                if (doel === 'honderdtal') {
+                   if (e1 + e2 >= 10) continue; // Dit blokkeert nu effectief de meervoudige brug
+                   if (t1 + t2 < 10) continue;
+                }
+
+                // Check 3: MEERVOUDIGE BRUG (88 + 44)
+                if (doel === 'meervoudig') {
+                   if (e1 + e2 < 10) continue;
+                   if (t1 + t2 < 10) continue;
+                }
+             }
+          }
+
+          // Als we hier komen, is de som geldig!
+          gevonden = true;
+          break; // Breek uit de interne while-lus
+        }
+
+        // Als na 50 pogingen niks gevonden is, reset g1/g2 om de buitenste lus te dwingen opnieuw te proberen
+        if (!gevonden) {
+           g1 = 0; 
+           g2 = 0;
+        }
+        break; // Breek uit de switch
+      }
 
 
 
@@ -733,7 +789,7 @@ if (
         g1 += 1;                           // e1 = 1 → g1 geen zuiver tiental meer
       }
     }
-
+/*
     // =========================================================
 // BRUGSOORT – OPTELLEN – ALLEEN TE+TE – ALLEEN TOT 1000
 // =========================================================
@@ -770,7 +826,7 @@ if (
     if (!(eenhedenBrug && tientallenBrug)) continue;
   }
 }
-
+*/
 // 🔒 OPTELLEN MET BRUG
 // Bij tot 1000 + brugsoort gekozen: brugsoort-filter is leidend
 if (
@@ -788,6 +844,25 @@ if (
 
 
     // === EINDE NORMALISATIE ================================================
+// 🔒 LAATSTE FILTER — TE+TE tot 1000 met enkel honderdtalbrug
+if (
+  op === '+' &&
+  gekozenType === 'TE+TE' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoorten?.honderdtal &&
+  !cfg.brugSoorten?.meervoudig
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+  const t1 = Math.floor((g1 % 100) / 10);
+  const t2 = Math.floor((g2 % 100) / 10);
+
+  // ❌ meervoudige brug definitief weigeren
+  if ((e1 + e2 >= 10) && (t1 + t2 >= 10)) {
+    continue; // ⛔ opnieuw genereren
+  }
+}
 
   } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
   
@@ -912,45 +987,17 @@ if (op === '+' && (g1 + g2) > maxGetal) {
 }
 
 // 🔒 ABSOLUTE GARANTIE: optellen met brug = echte brug
+// FIX: Bij tot 1000 vertrouwen we op de eerdere logica, want somHeeftBrug
+// herkent de 'tientalbrug bij TE+TE' (bv 82+45) niet correct als brug.
+const isTot1000 = (cfg.rekenMaxGetal === 1000);
+
 if (
   op === '+' &&
   cfg.rekenBrug === 'met' &&
+  !isTot1000 && 
   !somHeeftBrug(g1, g2, '+')
 ) {
  return null;
-}
-
-// =========================================================
-// FINALE BRUGSOORT-CHECK (NA normalisatie) — ALLEEN TE+TE
-// =========================================================
-if (
-  op === '+' &&
-  cfg.rekenMaxGetal === 1000 &&
-  cfg.rekenBrug === 'met' &&
-  cfg.brugSoorten &&
-  gekozenType === 'TE+TE'
-) {
-  const e1 = g1 % 10;
-  const e2 = g2 % 10;
-  const t1 = Math.floor((g1 % 100) / 10);
-  const t2 = Math.floor((g2 % 100) / 10);
-
-  const eenhedenBrug   = (e1 + e2) >= 10;
-  const tientallenBrug = (t1 + t2) >= 10;
-
-  // enkel brug naar honderdtal → GEEN meervoudige brug
-  if (cfg.brugSoorten.honderdtal && !cfg.brugSoorten.meervoudig) {
-    if (!tientallenBrug || eenhedenBrug) {
-     return null;
-    }
-  }
-
-  // enkel brug naar tiental → GEEN meervoudige brug
-  if (cfg.brugSoorten.tiental && !cfg.brugSoorten.meervoudig) {
-    if (!eenhedenBrug || tientallenBrug) {
-     return null;
-    }
-  }
 }
 
 
