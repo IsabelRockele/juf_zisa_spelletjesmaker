@@ -88,6 +88,7 @@ do {
 
   gekozenType = types[Math.floor(Math.random() * types.length)];
 
+
   // ❌ Brug = met → E-E is onmogelijk
   if (cfg.rekenBrug === 'met' && gekozenType === 'E-E') {
     gekozenType = null;
@@ -243,9 +244,11 @@ if (cfg.rekenType === 'optellen') {
 
   do {
     pogingen++;
-    if (pogingen > 120) {
-      throw new Error(`Kon geen som genereren voor type ${gekozenType} met operator ${op} en brug-keuze "${cfg.rekenBrug}".`);
-    }
+   if (pogingen > 120) {
+  // ❗ Onmogelijke combinatie → deze oefening overslaan
+  return null;
+}
+
     // ❌ Somtypes die nooit mogen bij tot 100
 if (cfg.rekenMaxGetal <= 100) {
   if (
@@ -277,7 +280,7 @@ if (cfg.rekenMaxGetal <= 100) {
   if (g1 % 10 === 0) continue;   // ❌ geen zuiver tiental
   g2 = rnd(1, 9);
   break;
-  
+
 case 'TE+T':
   g1 = rnd(11, 99);
   g2 = rnd(1, 9) * 10;
@@ -323,6 +326,15 @@ case 'TE+TE':
       case 'HTE+HTE': g1 = rnd(100, 999); g2 = rnd(100, 999); break;
     }
 
+// ✅ AFTREKKEN ZONDER BRUG – expliciet toelaten van T−E
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  gekozenType === 'T+E'
+) {
+  // niets doen → deze combinatie is geldig
+}
+
     // =====================================
 // OPERATORKEUZE (EVENWICHT BIJ "BEIDE")
 // =====================================
@@ -359,10 +371,8 @@ if (
 
     if (op === '+') {
       while (g1 + g2 > maxGetal) { if (g1 > g2) g1 = Math.floor(g1 / 2); else g2 = Math.floor(g2 / 2); }
-    } else {
-      if (g1 < g2) [g1, g2] = [g2, g1];
-      while (g1 > maxGetal) { g1 = Math.floor(g1 / 2); if (g1 < g2) [g1, g2] = [g2, g1]; }
-    }
+  }
+
 
 // ❌ TE − E met brug: aftrektal mag geen zuiver tiental zijn
 if (
