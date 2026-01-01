@@ -6,48 +6,44 @@
 
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// HULPFUNCTIE: Bepaalt of er visueel een 'brug' is.
 function somHeeftBrug(g1, g2, op) {
-  const e1 = g1 % 10, e2 = g2 % 10;
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
   const t1 = Math.floor(g1 / 10) % 10;
   const t2 = Math.floor(g2 / 10) % 10;
 
   if (op === '+') {
-    // Brug bij optellen: als E over 9 gaan, OF (bij E=0) de T over 9 gaan (HT+HT)
-    return (e1 + e2 > 9) || (e1 === 0 && e2 === 0 && (t1 + t2 > 9));
+    // 1. Eenhedenbrug: 8 + 7 > 9
+    if (e1 + e2 >= 10) return true;
+
+    // 2. Tientallenbrug (bij getallen < 100 die samen > 100 gaan)
+    // Bv. 51 + 87 -> 50 + 80 = 130 (brug over 100)
+    // DIT is de regel die ervoor zorgt dat je vakjes krijgt bij 51+87
+    if (g1 < 100 && g2 < 100 && (g1 + g2) >= 100) return true;
+
+    // 3. HT + HT brug (20 + 90)
+    if (e1 === 0 && e2 === 0 && (t1 + t2 >= 10)) return true;
+
+    return false;
   } else {
-    // Brug bij aftrekken: als E1 < E2, OF (bij gelijke E=0) T1 < T2 (lenen uit honderdtal)
-    return (e1 < e2) || (e1 === e2 && e1 === 0 && t1 < t2);
+    // AFTREKKEN
+    // 1. Eenhedenbrug: 5 - 8
+    if (e1 < e2) return true;
+
+    // 2. Tientallenbrug: 130 - 80 (lenen bij honderdtal)
+    if (g1 >= 100 && g2 >= 10 && t1 < t2) return true;
+
+    return false;
   }
 }
 
 function checkBrug(g1, g2, op, brugType) {
-  if (brugType === 'beide') return true;
-
-  // Splits getallen per plaatswaarde
-  function digits(n) {
-    return String(n).split('').reverse().map(d => parseInt(d));
-  }
-
-  const d1 = digits(g1);
-  const d2 = digits(g2);
-  const maxLen = Math.max(d1.length, d2.length);
-
-  let heeftBrug = false;
-
-  for (let i = 0; i < maxLen; i++) {
-    const a = d1[i] || 0; // cijfer op plaats i
-    const b = d2[i] || 0;
-
-    if (op === '+') {
-      if (a + b > 9) { heeftBrug = true; break; }
-    } else { // aftrekken
-      if (a < b) { heeftBrug = true; break; }
-    }
-  }
-
-  // BrugType verwerken
-  return (brugType === 'met' && heeftBrug) ||
-         (brugType === 'zonder' && !heeftBrug);
+  if (!brugType || brugType === 'beide') return true;
+  const heeft = somHeeftBrug(g1, g2, op);
+  if (brugType === 'met') return heeft;
+  if (brugType === 'zonder') return !heeft;
+  return true;
 }
 
 function genereerRekensom(cfg) {
@@ -1066,27 +1062,31 @@ return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
 
 }
 
-// Helper: compenseren geschikt maken voor TE én HT (7/8/9 op E of T in 2e term)
-function genereerRekensomMetCompenseren(cfg){
+// Helper: compenseren geschikt maken voor TE én HT
+// Nu ook geldig als g1 (het eerste getal) eindigt op 6, 7, 8 of 9
+function genereerRekensomMetCompenseren(cfg) {
   let tries = 0;
-  const max = cfg.rekenMaxGetal || 1000;
-  while (tries++ < 600){
+  // Veel pogingen toestaan voor lastige combinaties
+  while (tries++ < 2000) {
     const oef = genereerRekensom(cfg);
-    if (!oef || oef.type !== 'rekenen') continue;
+    if (!oef) continue;
 
-    const g2 = Math.abs(oef.getal2);
-    const e2 = g2 % 10;
-    const t2 = Math.floor(g2 / 10) % 10;
+    const g1 = oef.getal1;
+    const g2 = oef.getal2;
+    const e1 = Math.abs(g1) % 10;
+    const e2 = Math.abs(g2) % 10;
+    const t1 = Math.floor(Math.abs(g1)/10)%10;
+    const t2 = Math.floor(Math.abs(g2)/10)%10;
 
-    const okTE = (e2 === 7 || e2 === 8 || e2 === 9);
-    const okHT = (e2 === 0) && (t2 === 7 || t2 === 8 || t2 === 9);
+    // Is G1 of G2 geschikt? (eindigt op 7,8,9 OF tiental is 7,8,9)
+    const g1Ok = (e1 >= 7) || (e1 === 0 && t1 >= 7);
+    const g2Ok = (e2 >= 7) || (e2 === 0 && t2 >= 7);
 
-    if ((okTE || okHT) && Math.abs(oef.getal1) <= max && g2 <= max && (oef.operator === '+' ? (oef.getal1 + oef.getal2) <= max : true)) {
-      return oef;
+    if (g1Ok || g2Ok) {
+        return oef;
     }
   }
   return null;
-
 }
 
 export {
