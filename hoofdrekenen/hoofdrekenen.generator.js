@@ -381,20 +381,27 @@ case 'T-TE': {
   g2 = rnd(1, 9);
   break;
 
-case 'TE+T':
+case 'TE+T': {
+  // TE: 11–99, geen tientallen
   g1 = rnd(11, 99);
+  if (g1 % 10 === 0) continue;
+
+  // T: 10–90
   g2 = rnd(1, 9) * 10;
 
-  // ❌ bij tot 100: som moet ≤ 100
-  if (cfg.rekenMaxGetal <= 100 && (g1 + g2) > 100) continue;
+  // grens tot 1000
+  if (g1 + g2 > cfg.rekenMaxGetal) continue;
 
-  // ❌ zonder brug: E + 0 mag geen brug geven
-  if (cfg.rekenBrug === 'zonder' && (g1 % 10) > 9) continue;
-
-  // ❌ met brug: TE + T geeft nooit brug → dus verbieden
-  if (cfg.rekenBrug === 'met') continue;
+  // brugcontrole (eenhedenbrug)
+  if (cfg.rekenBrug === 'met') {
+    if ((g1 % 10) + (g2 % 10) < 10) continue;
+  }
+  if (cfg.rekenBrug === 'zonder') {
+    if ((g1 % 10) + (g2 % 10) >= 10) continue;
+  }
 
   break;
+}
 
 case 'TE+TE': {
 
@@ -422,6 +429,21 @@ case 'TE+TE': {
     cfg.rekenBrug === 'met' &&
     ((g1 % 10) + (g2 % 10) <= 10)
   ) continue;
+  // 🔹 tot 1000: grens + brugcontrole
+if (cfg.rekenMaxGetal > 100) {
+
+  // som mag niet boven 1000 uitkomen
+  if (g1 + g2 > cfg.rekenMaxGetal) continue;
+
+  // brugcontrole op eenheden
+  if (cfg.rekenBrug === 'met') {
+    if ((g1 % 10) + (g2 % 10) < 10) continue;
+  }
+
+  if (cfg.rekenBrug === 'zonder') {
+    if ((g1 % 10) + (g2 % 10) >= 10) continue;
+  }
+}
 
   break;
 }
@@ -429,22 +451,27 @@ case 'TE+TE': {
 
 
       case 'H+H': g1 = rnd(1, 9) * 100; g2 = rnd(1, 9) * 100; break;
-      case 'HT+T': {
-  const h = rnd(1, 9);
-  const t1 = rnd(1, 9);
-  const t2 = rnd(1, 9);
+case 'HT+T': {
+  // HT: 110–990, geen tientallen
+  g1 = rnd(11, 99) * 10;
+  if (g1 % 100 === 0) continue;
 
-  g1 = h * 100 + t1 * 10; // HT
-  g2 = t2 * 10;          // T
+  // T: 10–90
+  g2 = rnd(1, 9) * 10;
 
-  // MET brug: tientallen samen moeten >= 10 zijn
-  if (cfg.rekenBrug === 'met' && (t1 + t2 < 10)) continue;
+  if (g1 + g2 > cfg.rekenMaxGetal) continue;
 
-  // ZONDER brug: tientallen samen moeten < 10 zijn
-  if (cfg.rekenBrug === 'zonder' && (t1 + t2 >= 10)) continue;
+  // brugcontrole (tientallenbrug)
+  if (cfg.rekenBrug === 'met') {
+    if (((g1 % 100) / 10) + ((g2 % 100) / 10) < 10) continue;
+  }
+  if (cfg.rekenBrug === 'zonder') {
+    if (((g1 % 100) / 10) + ((g2 % 100) / 10) >= 10) continue;
+  }
 
   break;
 }
+
 
       case 'HT+HT': {
   const h1 = rnd(1, 9);
