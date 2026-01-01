@@ -315,6 +315,21 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
               <label><input type="radio" name="rekenHulpStijl" value="compenseren"> Compenseren</label>
             </div>
           </div>
+
+          <div id="compenseerVoorbeeldWrap" style="display:none; margin-top:8px;">
+  <label style="display:flex;gap:8px;align-items:center;">
+    <input type="checkbox" id="rekenHulpVoorbeeld">
+    Voorbeeldoefening tonen (eerste oefening uitgewerkt)
+  </label>
+</div>
+
+<div id="compenseerTekensWrap" style="display:none; margin-top:6px;">
+  <label style="display:flex;gap:8px;align-items:center;">
+    <input type="checkbox" id="rekenHulpTekens">
+    + en − tonen bij compenseren
+  </label>
+</div>
+
         </div>
      <!-- Somtypes (zoals versie 2), maar overzichtelijk per bereik -->
         <details open>
@@ -416,10 +431,23 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
       const maxSel = document.getElementById('rekenMaxGetal');
 
       function updateHulpUI(){
-        const aan = !!hulpCb.checked;
-        hulpDetail.style.display = aan ? '' : 'none';
-        updateBewerkingHint();
-      }
+  const aan = !!hulpCb.checked;
+  hulpDetail.style.display = aan ? '' : 'none';
+
+  const stijl =
+    document.querySelector('input[name="rekenHulpStijl"]:checked')?.value;
+
+  const voorbeeldWrap = document.getElementById('compenseerVoorbeeldWrap');
+  const tekensWrap = document.getElementById('compenseerTekensWrap');
+
+  const toonComp = aan && stijl === 'compenseren';
+
+  if (voorbeeldWrap) voorbeeldWrap.style.display = toonComp ? '' : 'none';
+  if (tekensWrap) tekensWrap.style.display = toonComp ? '' : 'none';
+
+  updateBewerkingHint();
+}
+
 
       function updateBewerkingHint(){
         const type = (document.querySelector('input[name="rekenType"]:checked') || {}).value || 'optellen';
@@ -454,13 +482,19 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
         });
       }
 
-      hulpCb?.addEventListener('change', updateHulpUI);
-      document.addEventListener('change', updateBrugInfo);
+     hulpCb?.addEventListener('change', updateHulpUI);
 
-      document.querySelectorAll('input[name="rekenType"]').forEach(r => {
-        r.addEventListener('change', updateBewerkingHint);
-      });
-      maxSel?.addEventListener('change', filterSomgroepen);
+document
+  .querySelectorAll('input[name="rekenHulpStijl"]')
+  .forEach(r => r.addEventListener('change', updateHulpUI));
+
+document.addEventListener('change', updateBrugInfo);
+
+document.querySelectorAll('input[name="rekenType"]').forEach(r => {
+  r.addEventListener('change', updateBewerkingHint);
+});
+maxSel?.addEventListener('change', filterSomgroepen);
+
 
       // Wis preview: dit is enkel een “UI-hulpknop”.
       // Je hoofdrekenen.js mag dit overschrijven als jij het anders wil aanpakken.
