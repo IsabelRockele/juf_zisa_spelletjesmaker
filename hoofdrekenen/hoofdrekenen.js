@@ -15,38 +15,50 @@ document.addEventListener('DOMContentLoaded', () => {
     return;
   }
 
-  function verzamelConfiguratie() {
-    const cfg = {
-      segmentId: 'rekenen_' + Date.now(),
-      hoofdBewerking: 'rekenen',
+ function verzamelConfiguratie() {
 
-      numOefeningen: parseInt(document.getElementById('numOefeningen_reken').value, 10) || 20,
-      rekenMaxGetal: parseInt(document.getElementById('rekenMaxGetal').value, 10),
+  // ✅ 1. Eerst: actieve somtypes bepalen
+  const max = parseInt(document.getElementById('rekenMaxGetal').value, 10);
+  const groep = document.querySelector(`[data-somgroep="${max}"]`);
 
-      rekenType: document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen',
-      rekenBrug: document.getElementById('rekenBrug').value,
+  const somTypes = groep
+    ? [...groep.querySelectorAll('input[name="somType"]:checked')].map(cb => cb.value)
+    : [];
 
-      somTypes: [...document.querySelectorAll('input[name="somType"]:checked')]
-        .map(cb => cb.value),
+  // ✅ 2. Daarna pas: cfg-object opbouwen
+  const cfg = {
+    segmentId: 'rekenen_' + Date.now(),
+    hoofdBewerking: 'rekenen',
 
-      opdracht: document.getElementById('opdracht_reken').value || ''
+    numOefeningen: parseInt(document.getElementById('numOefeningen_reken').value, 10) || 20,
+    rekenMaxGetal: max,
+
+    rekenType: document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen',
+    rekenBrug: document.getElementById('rekenBrug').value,
+
+    // ✅ DIT is wat eerder ontbrak
+    somTypes: somTypes,
+
+    opdracht: document.getElementById('opdracht_reken').value || ''
+  };
+
+  // ✅ 3. Hulpmiddelen (ongewijzigd)
+  const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
+
+  if (hulpAan) {
+    cfg.rekenHulp = {
+      inschakelen: true,
+      stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
+      schrijflijnen: document.getElementById('rekenHulpSchrijflijnen').checked,
+      splitsPlaatsAftrekken:
+        document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
+        || 'onderAftrektal'
     };
-
-    const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
-
-    if (hulpAan) {
-      cfg.rekenHulp = {
-        inschakelen: true,
-        stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
-        schrijflijnen: document.getElementById('rekenHulpSchrijflijnen').checked,
-        splitsPlaatsAftrekken:
-          document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
-          || 'onderAftrektal'
-      };
-    }
-
-    return cfg;
   }
+
+  return cfg;
+}
+
 
   function renderPreview(append = false) {
     const cfg = verzamelConfiguratie();
