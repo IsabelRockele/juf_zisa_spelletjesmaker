@@ -612,6 +612,41 @@ case 'HTE+H':
   break;
 
       case 'HTE+HTE': {
+              // ✅ AFTREKKEN: HTE − HTE (zonder/ met brug) correct genereren
+      if (op === '-') {
+        // g1 en g2 moeten echte HTE zijn (100–999, geen tientallen/ honderdtallen)
+        // en bij "zonder brug" mag er nergens geleend worden.
+        let sub = 0;
+        while (sub++ < 80) {
+          g1 = rnd(100, 999);
+          g2 = rnd(100, 999);
+
+          // echte HTE (eenheden ≠ 0)
+          if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+
+          // nooit negatief
+          if (g1 <= g2) continue;
+
+          if (cfg.rekenBrug === 'zonder') {
+            const e1 = g1 % 10, e2 = g2 % 10;
+            const t1 = Math.floor(g1 / 10) % 10, t2 = Math.floor(g2 / 10) % 10;
+            const h1 = Math.floor(g1 / 100), h2 = Math.floor(g2 / 100);
+
+            // geen lenen
+            if (e1 < e2) continue;
+            if (t1 < t2) continue;
+            if (h1 < h2) continue;
+          }
+
+          // geldig gevonden
+          break;
+        }
+
+        // als het niet lukt: forceer hergeneratie via de buitenste lus
+        if (sub >= 80) { g1 = 0; g2 = 0; }
+        break;
+      }
+
          // === HTE + HTE SPECIFIEK VOOR BRUGSOORTEN (TOT 1000) ===
          let subSafety = 0;
          let gevonden = false;
@@ -877,10 +912,17 @@ if (
     // Alleen toepassen bij brugoefeningen.
     // Doel A (OPTELLEN): geen uitkomst die exact een veelvoud van 10 is (…=10,20,30,…)
     // Doel B (AFTREKKEN + benen onder AFTREKKER): aftrektal (g1) mag geen zuiver tiental zijn (10,20,30,…)
-    if (
+if (
+  op === '+' &&
   somHeeftBrug(g1, g2, op) &&
-  !(op === '-' && cfg.rekenBrug === 'zonder')
+  !(
+    cfg.rekenType === 'aftrekken' &&
+    cfg.rekenBrug === 'zonder' &&
+    cfg.rekenMaxGetal === 1000
+  )
 ) {
+
+
 
 
       // A) Optellen: vermijd uitkomst 10/20/30/…
@@ -1093,18 +1135,15 @@ if (max <= 100 && e1 >= 8) return null;
 
 
 
-
-// 🔒 FINALE VEILIGHEID: bij aftrekken nooit een negatief resultaat
-// ❗ Behalve bij T − TE: daar mag nooit geswapt worden
+// 🔒 FINALE VEILIGHEID: bij aftrekken zonder brug NOOIT swappen
 if (
   op === '-' &&
-  g1 < g2 &&
-  gekozenType !== 'T-TE'
+  cfg.rekenBrug === 'zonder' &&
+  g1 < g2
 ) {
-  const tmp = g1;
-  g1 = g2;
-  g2 = tmp;
+  return null;
 }
+
 
 
 // 🔒 FINALE TYPE-GARANTIE (NA SWAP): TE − TE met brug
@@ -1233,6 +1272,112 @@ if (
   }
 }
 
+// =====================================================
+// 🔒 FINALE BRUGLOOSHEID — AFTREKKEN ZONDER BRUG (TOT 1000)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+  const t1 = Math.floor(g1 / 10) % 10;
+  const t2 = Math.floor(g2 / 10) % 10;
+  const h1 = Math.floor(g1 / 100);
+  const h2 = Math.floor(g2 / 100);
+
+  // ❌ lenen bij eenheden
+  if (e1 < e2) return null;
+
+  // ❌ lenen bij tientallen
+  if (t1 < t2) return null;
+
+  // ❌ lenen bij honderdtallen
+  if (h1 < h2) return null;
+}
+
+// =====================================================
+// 🔒 TYPEGARANTIE — TE − TE (aftrekken zonder brug)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'TE-TE'
+) {
+  // beide < 100
+  if (g1 >= 100 || g2 >= 100) return null;
+
+  // beide echte TE (geen tientallen)
+  if (g1 % 10 === 0 || g2 % 10 === 0) return null;
+}
+
+// =====================================================
+// 🔒 TYPEGARANTIE — TE − T (aftrekken zonder brug)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'TE-T'
+) {
+  // g1 = TE
+  if (g1 >= 100 || g1 % 10 === 0) return null;
+
+  // g2 = T
+  if (g2 >= 100 || g2 % 10 !== 0) return null;
+}
+
+// =====================================================
+// 🔒 TYPEGARANTIE — HT − HT (aftrekken zonder brug)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'HT-HT'
+) {
+  // beide zuivere honderdtallen
+  if (g1 % 100 !== 0 || g2 % 100 !== 0) return null;
+}
+
+// =====================================================
+// 🔒 TYPEGARANTIE — HTE − HT (aftrekken zonder brug)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'HTE-HT'
+) {
+  // g1 = HTE
+  if (g1 < 100 || g1 % 10 === 0) return null;
+
+  // g2 = HT
+  if (g2 % 100 !== 0) return null;
+}
+
+// =====================================================
+// 🔒 DEFINITIEVE TYPEGARANTIE — HTE − HTE (aftrekken zonder brug)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+    (cfg.somTypes[0] === 'HTE+HTE' || cfg.somTypes[0] === 'HTE-HTE')
+) {
+  // beide moeten 3-cijferig zijn
+  if (g1 < 100 || g2 < 100) return null;
+
+  // beide moeten echte HTE blijven
+  if (g1 % 10 === 0 || g2 % 10 === 0) return null;
+}
 
 
 
