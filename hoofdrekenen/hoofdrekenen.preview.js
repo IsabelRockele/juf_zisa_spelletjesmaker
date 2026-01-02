@@ -19,10 +19,24 @@ const werkbladContainer =
    TITEL
    ================================ */
 function titelVoor(cfg) {
-  if (cfg.opdracht && String(cfg.opdracht).trim()) return String(cfg.opdracht).trim();
-  if (cfg.hoofdBewerking === 'rekenen') return 'Los de sommen op.';
-  return 'Maak de oefeningen.';
+  if (cfg.opdracht && String(cfg.opdracht).trim()) {
+    return String(cfg.opdracht).trim();
+  }
+
+  if (cfg?.rekenHulp?.stijl === 'compenseren') {
+    switch (cfg.rekenHulp.compenseerModus) {
+      case 'begeleid':
+        return 'Reken handig door te compenseren. Gebruik het omcirkelde getal en het hulpkader.';
+      case 'half':
+        return 'Reken handig door te compenseren. Kies zelf welk getal je aanpast en gebruik het hulpkader.';
+      case 'zelfstandig':
+        return 'Zoek zelf een handig getal om te compenseren. Omcirkel het getal en reken met tussenstappen.';
+    }
+  }
+
+  return 'Los de sommen op.';
 }
+
 
 function voegOefeningToe(cfg) {
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
@@ -126,10 +140,17 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   if (old) old.remove();
   svg.classList.add('_splitsbenen');
 
+  if (cfg?.rekenHulp?.compenseerModus === 'begeleid') {
   exprWrap.appendChild(svg);
+}
 }
 
 function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+    // ❌ Bij zelfstandig compenseren: geen enkele visuele hulp
+  if (cfg?.rekenHulp?.compenseerModus === 'zelfstandig') {
+    return;
+  }
+
   try {
     const span1  = exprWrap.querySelector('.term1');
     const span2  = exprWrap.querySelector('.term2');
@@ -231,7 +252,10 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     p2.setAttribute('stroke', '#333'); p2.setAttribute('stroke-width', '2');
     svg.appendChild(p2);
 
-    exprWrap.appendChild(svg);
+    if (cfg?.rekenHulp?.compenseerModus === 'begeleid') {
+  exprWrap.appendChild(svg);
+}
+
 
     // VAKJES (BOX)
     const box = document.createElement('div');
@@ -276,7 +300,10 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
     box.append(L, R);
 
     // EERST TOEVOEGEN aan DOM
-    exprWrap.appendChild(box);
+    if (cfg?.rekenHulp?.compenseerModus !== 'zelfstandig') {
+  exprWrap.appendChild(box);
+}
+
 
     // --- RUIMTE MAKEN (FIX) ---
     // We berekenen hoe diep de box komt.
@@ -391,6 +418,57 @@ del.style.height = '32px';
   div.appendChild(del);
   grid.appendChild(div);
 }
+function isGeschiktVoorCompenseren(oef, cfg) {
+  const g1 = oef.getal1;
+  const g2 = oef.getal2;
+  const op = oef.operator;
+
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+
+  // =====================
+  // AFTREKKEN
+  // =====================
+  if (op === '-') {
+    // brug nodig
+    if (e1 >= e2) return false;
+
+    // aftrekker moet 6–9 hebben
+    if (![6, 7, 8, 9].includes(e2)) return false;
+
+    // tot 100: tientallen aftrekker ≤ aftrektal
+    if (cfg.rekenMaxGetal <= 100) {
+      const t1 = Math.floor(g1 / 10);
+      const t2 = Math.floor(g2 / 10);
+      if (t2 > t1) return false;
+    }
+
+    return true;
+  }
+
+  // =====================
+  // OPTELLEN
+  // =====================
+  if (op === '+') {
+    // B1: tweede getal compenseerbaar
+    if (
+      [6, 7, 8, 9].includes(e2) &&
+      e1 + e2 >= 10
+    ) {
+      return true;
+    }
+
+    // B2: eerste getal compenseerbaar
+    if ([6, 7, 8, 9].includes(e1)) {
+      const rest = 10 - e1;
+      if (e2 >= rest) return true;
+    }
+
+    return false;
+  }
+
+  return false;
+}
 
 function renderOefening(grid, cfg, oef) {
   const div = document.createElement('div');
@@ -409,10 +487,18 @@ if (oef._voorbeeld === true) {
   div.style.background = '#fff7ed';         // licht oranje achtergrond
 }
 
-  const hulp = cfg.rekenHulp?.inschakelen;
-  const brug = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
+ const hulp  = cfg.rekenHulp?.inschakelen;
+const stijl = cfg.rekenHulp?.stijl;
+const brug  = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
-  if (hulp && brug) {
+const toonHulpmiddel =
+  hulp && (
+    (stijl === 'splitsbenen' && brug) ||
+    (stijl === 'compenseren' && isGeschiktVoorCompenseren(oef, cfg))
+  );
+
+if (toonHulpmiddel) {
+
   div.style.display = 'grid';
   div.style.gridTemplateColumns = 'max-content 1fr';
   div.style.columnGap = '20px';
