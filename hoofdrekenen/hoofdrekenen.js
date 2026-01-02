@@ -48,22 +48,20 @@ function updateSomtypesZichtbaarheid() {
   const rekenType =
     document.querySelector('input[name="rekenType"]:checked')?.value;
 
-  const optellen = document.querySelector('.somtypes-optellen');
-  const aftrekken = document.querySelector('.somtypes-aftrekken');
+  const optellen = document.querySelectorAll('.somtypes-optellen');
+const aftrekken = document.querySelectorAll('.somtypes-aftrekken');
 
-  if (!optellen || !aftrekken) return;
-
-  if (rekenType === 'optellen') {
-    optellen.style.display = 'block';
-    aftrekken.style.display = 'none';
-  } else if (rekenType === 'aftrekken') {
-    optellen.style.display = 'none';
-    aftrekken.style.display = 'block';
-  } else {
-    // beide
-    optellen.style.display = 'block';
-    aftrekken.style.display = 'block';
-  }
+if (rekenType === 'optellen') {
+  optellen.forEach(el => el.style.display = 'block');
+  aftrekken.forEach(el => el.style.display = 'none');
+} else if (rekenType === 'aftrekken') {
+  optellen.forEach(el => el.style.display = 'none');
+  aftrekken.forEach(el => el.style.display = 'block');
+} else {
+  // beide
+  optellen.forEach(el => el.style.display = 'block');
+  aftrekken.forEach(el => el.style.display = 'block');
+}
 }
 
 // reageren op wisselen van bewerking
