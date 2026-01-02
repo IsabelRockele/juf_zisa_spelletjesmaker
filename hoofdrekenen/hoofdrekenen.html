@@ -373,79 +373,143 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
         <details open>
           <summary>Somtypes</summary>
 
-          <!-- Tot 20 -->
+        <!-- Tot 20 -->
 <div class="group" data-somgroep="20">
   <div class="group-title">Tot 20</div>
-  <div class="checks">
 
-    <label>
-      <input type="checkbox" name="somType" value="E+E" checked>
-      E + E / E − E
-    </label>
+  <!-- OPTELLEN -->
+  <div class="somtypes-optellen">
+    <h4>Optellen</h4>
+    <div class="checks">
 
-    <label>
-      <input type="checkbox" name="somType" value="T+E">
-      T + E / T − E
-    </label>
+      <label>
+        <input type="checkbox" name="somType" value="E+E">
+        E + E
+      </label>
 
-    <label>
-      <input type="checkbox" name="somType" value="TE+E">
-      TE + E / TE - E
-    </label>
+      <label>
+        <input type="checkbox" name="somType" value="T+E">
+        T + E
+      </label>
 
-    <label>
-      <input type="checkbox" name="somType" value="TE-TE">
-      TE − TE
-    </label>
+      <label>
+        <input type="checkbox" name="somType" value="TE+E">
+        TE + E
+      </label>
 
-    <label>
-      <input type="checkbox" name="somType" value="T-TE">
-      T − TE
-    </label>
+    </div>
+  </div>
 
+  <!-- AFTREKKEN -->
+  <div class="somtypes-aftrekken">
+    <h4>Aftrekken</h4>
+    <div class="checks">
+
+      <label>
+        <input type="checkbox" name="somType" value="E-E">
+        E − E
+      </label>
+
+      <label>
+        <input type="checkbox" name="somType" value="T-E">
+        T − E
+      </label>
+
+      <label>
+        <input type="checkbox" name="somType" value="T-TE">
+        T − TE
+      </label>
+
+      <label>
+        <input type="checkbox" name="somType" value="TE-E">
+        TE − E
+      </label>
+
+      <label>
+        <input type="checkbox" name="somType" value="TE-TE">
+        TE − TE
+      </label>
+
+    </div>
   </div>
 </div>
 
 
-          <!-- Tot 100 -->
-          <div class="group" data-somgroep="100">
-            <div class="group-title">Tot 100</div>
-            <div class="checks">
-              <label><input type="checkbox" name="somType" value="E+E" checked> E + E / E − E</label>
-              <label><input type="checkbox" name="somType" value="T+E" checked> T + E / T − E</label>
-              <label><input type="checkbox" name="somType" value="T+T" checked> T + T / T − T</label>
-              <label><input type="checkbox" name="somType" value="TE+E" checked> TE + E / TE − E</label>
-              <label><input type="checkbox" name="somType" value="TE+T" checked> TE + T / TE − T</label>
-              <label><input type="checkbox" name="somType" value="TE+TE" checked> TE + TE / TE − TE</label>
-           <label>
-  <input type="checkbox" name="somType" value="T+TE">
-  T + TE / T − TE
+<div class="group" data-somgroep="100">
+  <div class="group-title">Tot 100</div>
+
+  <!-- OPTELLEN -->
+  <div class="somtypes-optellen">
+    <h4>Optellen</h4>
+    <div class="checks">
+
+      <label><input type="checkbox" name="somType" value="E+E"> E + E</label>
+      <label><input type="checkbox" name="somType" value="T+T"> T + T</label>
+      <label><input type="checkbox" name="somType" value="T+E"> T + E</label>
+      <label><input type="checkbox" name="somType" value="T+TE"> T + TE</label>
+      <label><input type="checkbox" name="somType" value="TE+E"> TE + E</label>
+      <label><input type="checkbox" name="somType" value="TE+T"> TE + T</label>
+      <label><input type="checkbox" name="somType" value="TE+TE"> TE + TE</label>
+
+    </div>
+  </div>
+
+  <!-- AFTREKKEN -->
+  <div class="somtypes-aftrekken">
+    <h4>Aftrekken</h4>
+    <div class="checks">
+
+      <label><input type="checkbox" name="somType" value="E-E"> E − E</label>
+      <label><input type="checkbox" name="somType" value="T-T"> T − T</label>
+      <label><input type="checkbox" name="somType" value="T-E"> T − E</label>
+      <label><input type="checkbox" name="somType" value="T-TE"> T − TE</label>
+      <label><input type="checkbox" name="somType" value="TE-E"> TE − E</label>
+      <label>
+  <input type="checkbox" name="somType" value="TE-TE">
+  TE − TE
 </label>
 
-            </div>
-          </div>
+</div> <!-- .checks -->
+  </div> <!-- .somtypes-aftrekken -->
+</div> <!-- .group Tot 100 -->
 
           <!-- Tot 1000 -->
           <div class="group" data-somgroep="1000">
-            <div class="group-title">Tot 1000</div>
-            <div class="checks">
-              <label><input type="checkbox" name="somType" value="T+T" checked> T + T / T − T</label>
-              <label>
-  <input type="checkbox" name="somType" value="TE+T">
-  TE + T / TE - T
-</label>
-              <label><input type="checkbox" name="somType" value="TE+TE" checked> TE + TE / TE − TE</label>
-              <label><input type="checkbox" name="somType" value="H+H" checked> H + H / H − H</label>
-              <label>
-  <input type="checkbox" name="somType" value="HT+T">
-  HT + T / HT - T
-</label>
-              <label><input type="checkbox" name="somType" value="HT+HT" checked> HT + HT / HT − HT</label>
-              <label><input type="checkbox" name="somType" value="HTE+H"> HTE + H / HTE − H</label>
-              <label><input type="checkbox" name="somType" value="HTE+HT"> HTE + HT / HTE − HT</label>
-              <label><input type="checkbox" name="somType" value="HTE+HTE" checked> HTE + HTE / HTE − HTE</label>
-            </div>
-          </div>
+<div class="group-title">Tot 1000</div>
+
+<div class="somtypes-optellen">
+  <h4>Optellen</h4>
+  <div class="checks">
+
+    <label><input type="checkbox" name="somType" value="T+T"> T + T</label>
+    <label><input type="checkbox" name="somType" value="T+TE"> T + TE</label>
+    <label><input type="checkbox" name="somType" value="H+H"> H + H</label>
+    <label><input type="checkbox" name="somType" value="H+T"> H + T</label>
+    <label><input type="checkbox" name="somType" value="H+TE"> H + TE</label>
+    <label><input type="checkbox" name="somType" value="HT+HT"> HT + HT</label>
+    <label><input type="checkbox" name="somType" value="HTE+H"> HTE + H</label>
+    <label><input type="checkbox" name="somType" value="HTE+HT"> HTE + HT</label>
+    <label><input type="checkbox" name="somType" value="HTE+HTE"> HTE + HTE</label>
+
+  </div>
+</div>
+
+<div class="somtypes-aftrekken">
+  <h4>Aftrekken</h4>
+  <div class="checks">
+
+    <label><input type="checkbox" name="somType" value="T-T"> T − T</label>
+    <label><input type="checkbox" name="somType" value="T-TE"> T − TE</label>
+    <label><input type="checkbox" name="somType" value="H-H"> H − H</label>
+    <label><input type="checkbox" name="somType" value="H-T"> H − T</label>
+    <label><input type="checkbox" name="somType" value="H-TE"> H − TE</label>
+    <label><input type="checkbox" name="somType" value="HT-HT"> HT − HT</label>
+    <label><input type="checkbox" name="somType" value="HTE-H"> HTE − H</label>
+    <label><input type="checkbox" name="somType" value="HTE-HT"> HTE − HT</label>
+    <label><input type="checkbox" name="somType" value="HTE-HTE"> HTE − HTE</label>
+
+  </div>
+</div>
 
           <div class="subhint">
             Tip: u hoeft niet alles aan te vinken. Minder somtypes = meer consistentie in het werkblad.
