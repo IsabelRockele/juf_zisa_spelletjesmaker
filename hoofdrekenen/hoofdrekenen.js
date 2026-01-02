@@ -14,6 +14,33 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Knoppen voor hoofdrekenen niet gevonden');
     return;
   }
+  // ================================
+  // Compenseren – begeleiding tonen/verbergen
+  // ================================
+  const compenseerModusWrap = document.getElementById('compenseerModusWrap');
+
+  function updateCompenseerModusZichtbaarheid() {
+    if (!compenseerModusWrap) return;
+
+    const stijl =
+      document.querySelector('input[name="rekenHulpStijl"]:checked')?.value;
+
+    if (stijl === 'compenseren') {
+      compenseerModusWrap.style.display = 'block';
+    } else {
+      compenseerModusWrap.style.display = 'none';
+    }
+  }
+
+  // reageren op wisselen van hulmiddel-stijl
+  document
+    .querySelectorAll('input[name="rekenHulpStijl"]')
+    .forEach(radio => {
+      radio.addEventListener('change', updateCompenseerModusZichtbaarheid);
+    });
+
+  // initieel correct zetten bij laden
+  updateCompenseerModusZichtbaarheid();
 
  function verzamelConfiguratie() {
 
@@ -90,7 +117,10 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
 
     // 👇 NIEUW
     voorbeeld: document.getElementById('rekenHulpVoorbeeld')?.checked || false,
-    tekens: document.getElementById('rekenHulpTekens')?.checked || false
+    tekens: document.getElementById('rekenHulpTekens')?.checked || false,
+    compenseerModus: document.querySelector('input[name="compenseerModus"]:checked')?.value || 'begeleid',
+
+
   };
 }
 
