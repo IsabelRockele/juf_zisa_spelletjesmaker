@@ -76,6 +76,47 @@ document
 // initieel correct zetten bij laden
 updateSomtypesZichtbaarheid();
 
+// =====================================
+// Soort brug: alleen bij optellen tot 1000
+// =====================================
+function updateBrugSoortZichtbaarheid() {
+  const rekenType =
+    document.querySelector('input[name="rekenType"]:checked')?.value;
+
+  const rekenBrug =
+    document.getElementById('rekenBrug')?.value;
+
+  const max =
+    parseInt(document.getElementById('rekenMaxGetal')?.value, 10);
+
+  const wrap = document.getElementById('brugSoortWrap');
+  if (!wrap) return;
+
+  const tonen =
+    rekenType === 'optellen' &&
+    max === 1000 &&
+    rekenBrug !== 'zonder';
+
+  wrap.style.display = tonen ? 'block' : 'none';
+}
+// reageren op wijzigingen
+document
+  .querySelectorAll('input[name="rekenType"]')
+  .forEach(r =>
+    r.addEventListener('change', updateBrugSoortZichtbaarheid)
+  );
+
+document
+  .getElementById('rekenBrug')
+  ?.addEventListener('change', updateBrugSoortZichtbaarheid);
+
+document
+  .getElementById('rekenMaxGetal')
+  ?.addEventListener('change', updateBrugSoortZichtbaarheid);
+
+// initieel correct zetten
+updateBrugSoortZichtbaarheid();
+
 
  function verzamelConfiguratie() {
 
