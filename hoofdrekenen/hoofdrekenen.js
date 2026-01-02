@@ -41,6 +41,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // initieel correct zetten bij laden
   updateCompenseerModusZichtbaarheid();
+  // ================================
+// Somtypes tonen/verbergen volgens bewerking
+// ================================
+function updateSomtypesZichtbaarheid() {
+  const rekenType =
+    document.querySelector('input[name="rekenType"]:checked')?.value;
+
+  const optellen = document.querySelector('.somtypes-optellen');
+  const aftrekken = document.querySelector('.somtypes-aftrekken');
+
+  if (!optellen || !aftrekken) return;
+
+  if (rekenType === 'optellen') {
+    optellen.style.display = 'block';
+    aftrekken.style.display = 'none';
+  } else if (rekenType === 'aftrekken') {
+    optellen.style.display = 'none';
+    aftrekken.style.display = 'block';
+  } else {
+    // beide
+    optellen.style.display = 'block';
+    aftrekken.style.display = 'block';
+  }
+}
+
+// reageren op wisselen van bewerking
+document
+  .querySelectorAll('input[name="rekenType"]')
+  .forEach(radio => {
+    radio.addEventListener('change', updateSomtypesZichtbaarheid);
+  });
+
+// initieel correct zetten bij laden
+updateSomtypesZichtbaarheid();
+
 
  function verzamelConfiguratie() {
 
