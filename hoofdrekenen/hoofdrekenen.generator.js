@@ -6,6 +6,41 @@
 
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+// =====================================================
+// AFTREKKEN ZONDER BRUG — TE-TE — TOT 100 (APARTE ROUTE)
+// =====================================================
+function genereerAftrekkenZonderBrug_TE_TE_tot100(aantal = 20) {
+  console.log('>>> APARTE TE-TE ZONDER BRUG WORDT GEBRUIKT');
+
+  const oefeningen = [];
+  let safety = 0;
+
+  while (oefeningen.length < aantal && safety < 10000) {
+    safety++;
+
+    // twee echte TE-getallen
+    const g1 = Math.floor(Math.random() * 89) + 11; // 11..99
+    const g2 = Math.floor(Math.random() * 89) + 11;
+
+    // geen zuivere tientallen
+    if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+
+    // aftrektal moet groter zijn
+    if (g1 <= g2) continue;
+
+    // ZONDER BRUG: geen lenen bij eenheden
+    if ((g1 % 10) < (g2 % 10)) continue;
+
+    oefeningen.push({
+      getal1: g1,
+      getal2: g2,
+      operator: '-'
+    });
+  }
+
+  return oefeningen;
+}
+
 // HULPFUNCTIE: Bepaalt of er visueel een 'brug' is.
 function somHeeftBrug(g1, g2, op) {
   const e1 = g1 % 10;
@@ -47,6 +82,23 @@ function checkBrug(g1, g2, op, brugType) {
 }
 
 function genereerRekensom(cfg) {
+// =====================================================
+// EARLY EXIT: AFTREKKEN ZONDER BRUG — TE+TE — TOT 100
+// =====================================================
+if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenBrug === 'zonder' &&
+  cfg.rekenMaxGetal <= 100 &&
+  Array.isArray(cfg.somTypes) &&
+  cfg.somTypes.length === 1 &&
+  cfg.somTypes[0] === 'TE+TE'
+) {
+  const aantal = cfg.aantalOefeningen || 20;
+  const lijst = genereerAftrekkenZonderBrug_TE_TE_tot100(aantal);
+  return lijst[Math.floor(Math.random() * lijst.length)];
+}
+
+
 
     // ================================
 // FAILSAFE: nooit blokkeren
@@ -150,7 +202,6 @@ if (cfg.rekenType === 'optellen') {
 if (op === '-') {
   if (gekozenType === 'T+TE') gekozenType = 'T-TE';
   if (gekozenType === 'T+E')  gekozenType = 'T-E';
-  if (gekozenType === 'TE-TE') gekozenType = 'TE+TE'; // ✅ DIT ONTBRAK
 }
 
 
@@ -667,7 +718,7 @@ if (
 if (
   op === '-' &&
   g1 <= g2 &&
-  gekozenType !== 'TE+TE'
+  gekozenType !== 'TE-TE'
 ) {
   continue;
 }
@@ -807,7 +858,11 @@ if (
     // Alleen toepassen bij brugoefeningen.
     // Doel A (OPTELLEN): geen uitkomst die exact een veelvoud van 10 is (…=10,20,30,…)
     // Doel B (AFTREKKEN + benen onder AFTREKKER): aftrektal (g1) mag geen zuiver tiental zijn (10,20,30,…)
-    if (somHeeftBrug(g1, g2, op)) {
+    if (
+  somHeeftBrug(g1, g2, op) &&
+  !(op === '-' && cfg.rekenBrug === 'zonder')
+) {
+
 
       // A) Optellen: vermijd uitkomst 10/20/30/…
       if (op === '+' && ((g1 + g2) % 10) === 0) {
@@ -921,10 +976,37 @@ if (
   }
 }
 
-  } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
+// =====================================================
+// 🔒 AFTREKKEN ZONDER BRUG — TE-TE (laatste vangnet)
+// =====================================================
+if (
+  op === '-' &&
+  cfg.rekenBrug === 'zonder' &&
+  gekozenType === 'TE+TE'
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+
+  // geen lenen toegestaan
+  if (e1 < e2) {
+    continue;
+  }
+}
+
+
+  } while (
+  !(
+    op === '-' &&
+    cfg.rekenBrug === 'zonder' &&
+    gekozenType === 'TE+TE'
+  ) &&
+  !checkBrug(g1, g2, op, cfg.rekenBrug || 'beide')
+);
+
   
 
-// EXTRA FILTER: Compenseren tot 1000
+// EXTRA FILTER: Compenseren (alleen wanneer hulpmiddel = compenseren)
+// Belangrijk: dit mag NIET aftrekken blokkeren met optel-criteria.
 if (
   cfg.rekenHulp &&
   cfg.rekenHulp.inschakelen &&
@@ -932,39 +1014,58 @@ if (
   (cfg.rekenBrug || 'beide') !== 'zonder'
 ) {
   const max = cfg.rekenMaxGetal || 100;
-  let ok = false;
 
-  // ===============================
-  // BRUG NAAR HONDERDTAL = UITKOMST ≥ 100
-  // (zoals 48 + 61 → 50 + 59)
-  // ===============================
-  if (
-    cfg.brugSoorten &&
-    cfg.brugSoorten.honderdtal &&
-    (g1 + g2) >= 100
-  ) {
-    ok = true;
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+
+  // ---------------------------
+  // OPTELLEN: compenseren mag als:
+  // - tweede getal eindigt op 6/7/8/9 én eenhedenbrug,
+  //   OF eerste getal eindigt op 6/7/8/9 én tweede getal “maakt het tiental vol”
+  // ---------------------------
+  if (op === '+') {
+    const tweedeIsComp = [6, 7, 8, 9].includes(e2) && (e1 + e2 >= 10);
+    const eersteIsComp = [6, 7, 8, 9].includes(e1) && (e2 >= (10 - e1));
+
+    // ❗ exact één compensatiegetal toelaten
+if ((tweedeIsComp && eersteIsComp) || (!tweedeIsComp && !eersteIsComp)) {
+  return null;
+}
+
+
+    // grens bewaken
+    if ((g1 + g2) > max) return null;
   }
 
-  // ===============================
-  // BRUG NAAR TIENtal (klassiek)
-  // ===============================
-  if (
-    !ok &&
-    cfg.brugSoorten &&
-    cfg.brugSoorten.tiental
-  ) {
-    const e1 = g1 % 10;
-    const e2 = g2 % 10;
-    if ((e1 + e2) >= 10) {
-      ok = true;
+  // ---------------------------
+  // AFTREKKEN: compenseren mag als:
+  // - er is brug (lenen): e1 < e2
+  // - aftrekker (g2) eindigt op 6/7/8/9
+  // - tot 100: tientallen van aftrekker ≤ tientallen van aftrektal
+  // ---------------------------
+  if (op === '-') {
+    if (!(e1 < e2)) return null;                 // brug verplicht
+    if (![6, 7, 8, 9].includes(e2)) return null; // aftrekker-eenheden 6–9
+
+    if (max <= 100) {
+      const t1 = Math.floor(g1 / 10);
+      const t2 = Math.floor(g2 / 10);
+      if (t2 > t1) return null;
     }
-  }
 
-  if (!ok || g1 > max || g2 > max || (op === '+' && (g1 + g2) > max)) {
-    return null;
+    // nooit negatief
+    if (g1 <= g2) return null;
+    // ❗ DIDACTISCHE AFBENING:
+// aftrektal mag zelf GEEN compensatiegetal zijn
+// anders is de oefening dubbelzinnig (bv. 98 − 9)
+if ([6, 7, 8, 9].includes(e1)) return null;
+
+// ❗ extra zekerheid: vermijd afronden naar 100 (98, 99)
+if (max <= 100 && e1 >= 8) return null;
+
   }
 }
+
 
 
 
