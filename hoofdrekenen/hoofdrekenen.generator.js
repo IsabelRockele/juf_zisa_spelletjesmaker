@@ -577,6 +577,31 @@ case 'HT+T': {
   break;
 }
 
+case 'H-T': {
+  // H = 100,200,…900
+  g1 = rnd(1, 9) * 100;
+
+  // T = 10,20,…90
+  g2 = rnd(1, 9) * 10;
+
+  // altijd brug → geen extra check nodig
+  break;
+}
+
+case 'HT-T': {
+  let h, t1, t2;
+
+  do {
+    h  = rnd(1, 9) * 100; // honderdtal
+    t1 = rnd(1, 9) * 10;  // tiental van HT
+    t2 = rnd(1, 9) * 10;  // aftrekker T
+  } while (t1 >= t2);     // 👉 alleen MET brug
+
+  g1 = h + t1; // HT
+  g2 = t2;     // T
+  break;
+}
+
 // =====================================================
 // OPTELLEN TOT 1000 — ZONDER BRUG — NIEUWE TYPES
 // H = zuiver honderdtal (100,200,…)
@@ -619,6 +644,40 @@ case 'H+TE':
 
   break;
 }
+case 'HT-HT': {
+  // HT = honderdtal + tiental (bv. 960, 710) — eenheden altijd 0
+  // MET brug: tiental van g1 < tiental van g2 (ontlenen uit honderdtal)
+  // ZONDER brug: tiental van g1 >= tiental van g2
+  let h1, t1, h2, t2;
+
+  do {
+    h1 = rnd(1, 9);   // 1..9 honderdtallen
+    t1 = rnd(1, 9);   // 1..9 tientallen (HT, geen zuiver honderdtal)
+
+    h2 = rnd(1, 9);
+    t2 = rnd(1, 9);
+
+    g1 = h1 * 100 + t1 * 10;  // HT
+    g2 = h2 * 100 + t2 * 10;  // HT
+
+    // altijd positief resultaat
+    if (g1 <= g2) continue;
+
+    if (cfg.rekenBrug === 'met') {
+      // brug nodig: tientallen van g1 kleiner dan tientallen van g2
+      if (t1 >= t2) continue;
+    } else if (cfg.rekenBrug === 'zonder') {
+      // geen brug: tientallen van g1 groot genoeg
+      if (t1 < t2) continue;
+    }
+
+    // (bij rekenBrug === 'beide' laten we beide toe)
+    break;
+  } while (true);
+
+  break;
+}
+
 case 'HTE+HT':
   g1 = rnd(100, 999);              // HTE
   g2 = rnd(1, 9) * 100 + rnd(1, 9) * 10; // HT
