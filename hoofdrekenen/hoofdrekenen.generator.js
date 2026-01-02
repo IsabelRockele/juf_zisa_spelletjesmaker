@@ -162,7 +162,6 @@ do {
 }
 gekozenType = cfg._typePool.shift();
 
-
   // ❌ Brug = met → E-E is onmogelijk
   if (cfg.rekenBrug === 'met' && gekozenType === 'E-E') {
     gekozenType = null;
@@ -519,9 +518,12 @@ case 'TE+TE': {
                 // Check 1: Brug naar TIENTAL (45 + 28)
                 // Eis: Eenheden > 9, Tientallen < 10 (geen honderdtal)
                 if (doel === 'tiental') {
-                   if (e1 + e2 < 10) continue;  
-                   if (t1 + t2 >= 10) continue; 
-                }
+  if (e1 + e2 < 10) continue;
+
+  const carry = (e1 + e2 >= 10) ? 1 : 0;
+  if (t1 + t2 + carry >= 10) continue;
+}
+
 
                 // Check 2: Brug naar HONDERDTAL (82 + 45)
                 // Eis: Eenheden < 10 (GEEN brug), Tientallen >= 10 (WEL brug)
@@ -655,9 +657,15 @@ case 'HTE+H':
                   if (unitSum >= 10 && tenSum < 10) { gevonden = true; break; }
                } 
                else if (doel === 'honderdtal') {
-                  // Geen E-brug, Wel T-brug
-                  if (unitSum < 10 && tenSum >= 10) { gevonden = true; break; }
-               }
+  // Brug naar honderdtal:
+  // - GEEN eenhedenbrug
+  // - WEL tientallencarry (met of zonder carry uit eenheden)
+  if (unitSum < 10 && (t1 + t2) >= 10) {
+    gevonden = true;
+    break;
+  }
+}
+
                else if (doel === 'meervoudig') {
                   // Wel E-brug, Wel T-brug
                   if (unitSum >= 10 && tenSum >= 10) { gevonden = true; break; }
@@ -680,6 +688,17 @@ if (
   cfg.somTypes &&
   cfg.somTypes.includes('TE+TE') &&
   gekozenType === 'T+T'
+) {
+  continue;
+}
+
+
+// HARDE TYPE-AFBAKENING — HTE+HTE moet ook écht HTE+HTE blijven
+if (
+  cfg.somTypes &&
+  cfg.somTypes.length === 1 &&
+  cfg.somTypes[0] === 'HTE+HTE' &&
+  gekozenType !== 'HTE+HTE'
 ) {
   continue;
 }
@@ -994,11 +1013,17 @@ if (
 }
 
 
-  } while (
+ } while (
   !(
     op === '-' &&
     cfg.rekenBrug === 'zonder' &&
     gekozenType === 'TE+TE'
+  ) &&
+  !(
+    cfg.rekenMaxGetal === 1000 &&
+    cfg.rekenBrug === 'met' &&
+    cfg.brugSoorten &&
+    (cfg.brugSoorten.tiental || cfg.brugSoorten.honderdtal || cfg.brugSoorten.meervoudig)
   ) &&
   !checkBrug(g1, g2, op, cfg.rekenBrug || 'beide')
 );
@@ -1180,6 +1205,35 @@ if (
 ) {
  return null;
 }
+
+
+// =====================================================
+// FINALE TYPE-GARANTIE — HTE+HTE (optellen tot 1000)
+// =====================================================
+if (
+  op === '+' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes &&
+  cfg.somTypes.length === 1 &&
+  cfg.somTypes[0] === 'HTE+HTE'
+) {
+  // beide getallen moeten 3-cijferig zijn (100–999)
+  if (g1 < 100 || g2 < 100) {
+    return genereerRekensom(cfg);
+  }
+
+  // geen zuivere honderdtallen (100, 200, ...)
+  if (g1 % 100 === 0 || g2 % 100 === 0) {
+    return genereerRekensom(cfg);
+  }
+
+  // ❌ geen zuivere tientallen → geen HT + HT
+  if (g1 % 10 === 0 || g2 % 10 === 0) {
+    return genereerRekensom(cfg);
+  }
+}
+
+
 
 
 return { type: 'rekenen', getal1: g1, getal2: g2, operator: op };
