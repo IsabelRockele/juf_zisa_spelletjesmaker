@@ -1101,6 +1101,26 @@ if (
   continue;
 }
 
+// ================================
+// COMPENSEREN – VROEGE DIDACTISCHE FILTER (OPTELLEN)
+// exact één getal moet geschikt zijn
+// ================================
+if (
+  cfg.rekenHulp?.inschakelen &&
+  cfg.rekenHulp.stijl === 'compenseren' &&
+  op === '+'
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+
+  const eersteIsComp = [6,7,8,9].includes(e1);
+  const tweedeIsComp = [6,7,8,9].includes(e2);
+
+  if ((eersteIsComp && tweedeIsComp) || (!eersteIsComp && !tweedeIsComp)) {
+    continue; // 👈 vroeg verwerpen, niet return null
+  }
+}
+
 
     // === EINDE NORMALISATIE ================================================
 // 🔒 LAATSTE FILTER — TE+TE tot 1000 met enkel honderdtalbrug
@@ -1179,11 +1199,6 @@ if (
   if (op === '+') {
     const tweedeIsComp = [6, 7, 8, 9].includes(e2) && (e1 + e2 >= 10);
     const eersteIsComp = [6, 7, 8, 9].includes(e1) && (e2 >= (10 - e1));
-
-    // ❗ exact één compensatiegetal toelaten
-if ((tweedeIsComp && eersteIsComp) || (!tweedeIsComp && !eersteIsComp)) {
-  return null;
-}
 
 
     // grens bewaken
