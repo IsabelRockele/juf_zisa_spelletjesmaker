@@ -577,6 +577,33 @@ case 'HT+T': {
   break;
 }
 
+// =====================================================
+// OPTELLEN TOT 1000 — ZONDER BRUG — NIEUWE TYPES
+// H = zuiver honderdtal (100,200,…)
+// =====================================================
+
+case 'H+T':
+  // H = 100,200,…900
+  g1 = rnd(1, 9) * 100;
+
+  // T = 10,20,…90
+  g2 = rnd(1, 9) * 10;
+
+  // geen enkele brug mogelijk bij H + T
+  break;
+
+case 'H+TE':
+  // H = 100,200,…900
+  g1 = rnd(1, 9) * 100;
+
+  // TE = 11–99, geen zuiver tiental
+  do {
+    g2 = rnd(11, 99);
+  } while (g2 % 10 === 0);
+
+  // ook hier: nooit brug mogelijk
+  break;
+
 
       case 'HT+HT': {
   const h1 = rnd(1, 9);
