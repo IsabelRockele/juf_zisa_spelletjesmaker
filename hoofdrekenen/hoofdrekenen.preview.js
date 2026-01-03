@@ -1,6 +1,7 @@
 /* =========================================================
    HOOFDREKENEN – PREVIEW (EXACTE OVERNAME – GEFIXT)
    ========================================================= */
+import { genereerHoofdrekenenV2 } from '../hoofdrekenen_versie2/hoofdrekenen_v2.generator.js';
 
 import {
   genereerRekensom,
@@ -467,6 +468,7 @@ function isGeschiktVoorCompenseren(oef, cfg) {
     return false;
   }
 
+
   return false;
 }
 
@@ -487,14 +489,14 @@ if (oef._voorbeeld === true) {
   div.style.background = '#fff7ed';         // licht oranje achtergrond
 }
 
- const hulp  = cfg.rekenHulp?.inschakelen;
+const hulp = (cfg.rekenHulp?.inschakelen !== false);
 const stijl = cfg.rekenHulp?.stijl;
 const brug  = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
 const toonHulpmiddel =
   hulp && (
-    (stijl === 'splitsbenen' && brug) ||
-    (stijl === 'compenseren' && isGeschiktVoorCompenseren(oef, cfg))
+    stijl === 'splitsbenen' ||
+    stijl === 'compenseren'
   );
 
 if (toonHulpmiddel) {
@@ -722,9 +724,19 @@ card.appendChild(addWrap);
     let guard = 0;
 
     while (oefeningen.length < N && guard++ < N * 25) {
-      const oef = cfg.rekenHulp?.stijl === 'compenseren'
-        ? genereerRekensomMetCompenseren(cfg)
-        : genereerRekensom(cfg);
+      let oef;
+
+if (cfg.rekenMaxGetal === 20) {
+  // 👉 versie 2 voor tot 20
+  const res = genereerHoofdrekenenV2(cfg);
+  oef = Array.isArray(res) ? res[0] : res;
+} else {
+  // 👉 oude generator blijft voor alle andere bereiken
+  oef = cfg.rekenHulp?.stijl === 'compenseren'
+    ? genereerRekensomMetCompenseren(cfg)
+    : genereerRekensom(cfg);
+}
+
 
 
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
