@@ -1,3 +1,5 @@
+import { genereerHoofdrekenenV2 } from '../hoofdrekenen_versie2/hoofdrekenen_v2.generator.js';
+
 /* =========================================================
    HOOFDREKENEN – KEUZE → PREVIEW → BUNDEL
    Afgeleid uit bewerkingen_keuze_versie2.js
@@ -126,6 +128,12 @@ updateBrugSoortZichtbaarheid();
     ? [...groep.querySelectorAll('input[name="somType"]:checked')].map(cb => cb.value)
     : [];
 
+    // 🔁 AFTREKKEN: UI-type TE-TE omzetten naar generator-type TE+TE
+const somTypesGen = somTypes.map(t =>
+  t === 'TE-TE' ? 'TE+TE' : t
+);
+
+
 // ✅ Aftrekken zonder brug: T−E en T−TE zijn onmogelijk (altijd brug)
 const rekenType = document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
 const rekenBrug = document.getElementById('rekenBrug').value;
@@ -162,8 +170,7 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
     rekenBrug: document.getElementById('rekenBrug').value,
 
     // ✅ DIT is wat eerder ontbrak
-    somTypes: somTypesGefilterd,
-
+   somTypes: somTypesGen,
 
     opdracht: document.getElementById('opdracht_reken').value || ''
   };
@@ -180,7 +187,7 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
   // ✅ 3. Hulpmiddelen (ongewijzigd)
   const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
 
-  if (hulpAan) {
+ if (hulpAan) {
   cfg.rekenHulp = {
     inschakelen: true,
     stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
@@ -189,14 +196,16 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
       document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
       || 'onderAftrektal',
 
-    // 👇 NIEUW
+    // 👇 TOEVOEGEN (DIT IS DE BELANGRIJKE REGEL)
+    actief: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value === 'compenseren',
+
+    // bestaande opties
     voorbeeld: document.getElementById('rekenHulpVoorbeeld')?.checked || false,
     tekens: document.getElementById('rekenHulpTekens')?.checked || false,
     compenseerModus: document.querySelector('input[name="compenseerModus"]:checked')?.value || 'begeleid',
-
-
   };
 }
+
 
   return cfg;
 }
