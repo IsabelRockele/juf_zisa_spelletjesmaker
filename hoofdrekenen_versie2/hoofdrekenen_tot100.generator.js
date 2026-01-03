@@ -211,6 +211,95 @@ function rnd(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// =====================================================
+// AFTREKKEN ZONDER BRUG — TOT 100
+// =====================================================
+export function genereerAftrekkenZonderBrugTot100(cfg) {
+  const max = 100;
+const toegelaten = ['E-E', 'T-T', 'TE-E', 'TE-TE'];
+
+const types = (cfg.somTypes || [])
+  .map(t => t.replace(/\s+/g, '').replace('–', '-'))
+  .filter(t => toegelaten.includes(t));
+
+if (types.length === 0) {
+  return null;
+}
+
+  const allowZero = Math.random() < 0.10; // -0 zeldzaam
+
+  let g1, g2;
+  let safety = 0;
+
+  while (safety++ < 120) {
+    const gekozenType = types[Math.floor(Math.random() * types.length)];
+
+    switch (gekozenType) {
+
+      // -----------------------------
+      // E − E
+      // -----------------------------
+      case 'E-E': {
+        g1 = allowZero ? rnd(0, 9) : rnd(1, 9);
+        g2 = allowZero ? rnd(0, g1) : rnd(1, g1);
+        break;
+      }
+
+      // -----------------------------
+      // T − T
+      // -----------------------------
+      case 'T-T': {
+        g1 = rnd(1, 9) * 10;
+        g2 = rnd(1, g1 / 10) * 10;
+        break;
+      }
+
+      // -----------------------------
+      // TE − E (zonder brug)
+      // -----------------------------
+      case 'TE-E': {
+        g1 = rnd(11, 99);
+        if (g1 % 10 === 0) continue;
+
+        g2 = allowZero ? rnd(0, g1 % 10) : rnd(1, g1 % 10);
+        break;
+      }
+
+      // -----------------------------
+      // TE − TE (zonder brug)
+      // -----------------------------
+  case 'TE-TE': {
+  g1 = rnd(11, 99);
+  if (g1 % 10 === 0) continue;
+
+  const e1 = g1 % 10;
+  const minE2 = 1;
+  const maxE2 = e1;
+
+  const t2 = rnd(1, Math.floor(g1 / 10)) * 10;
+  const e2 = rnd(minE2, maxE2);
+  g2 = t2 + e2;
+
+  if (g2 >= g1) continue;
+  break;
+}
+
+      default:
+        continue;
+    }
+
+    if (g1 < g2) continue;
+
+    return {
+      type: 'rekenen',
+      getal1: g1,
+      getal2: g2,
+      operator: '-'
+    };
+  }
+
+  return null;
+}
 
 // =====================================================
 // TIJDELIJKE WRAPPER — V2 COMPATIBILITEIT
@@ -225,14 +314,19 @@ export function genereerTot100_V2(cfg) {
     let oef = null;
 
     if (cfg.rekenType === 'optellen') {
-      if (cfg.rekenBrug === 'zonder') {
-        oef = genereerOptellenZonderBrugTot100(cfg);
-      }
+  if (cfg.rekenBrug === 'zonder') {
+    oef = genereerOptellenZonderBrugTot100(cfg);
+  }
+  if (cfg.rekenBrug === 'met') {
+    oef = genereerOptellenMetBrugTot100(cfg);
+  }
+}
 
-      if (cfg.rekenBrug === 'met') {
-        oef = genereerOptellenMetBrugTot100(cfg);
-      }
-    }
+if (cfg.rekenType === 'aftrekken') {
+  if (cfg.rekenBrug === 'zonder') {
+    oef = genereerAftrekkenZonderBrugTot100(cfg);
+  }
+}
 
     if (oef) lijst.push(oef);
   }
