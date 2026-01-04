@@ -35,8 +35,21 @@ return Array.isArray(res) ? res[0] : res;
     case 100:
       return genereerTot100_V2(cfg);
 
-      case 1000:
-  return genereerTot1000_V2(cfg);
+ case 1000: {
+  const res = genereerTot1000_V2(cfg);
+
+  // 🔒 zonder brug: behoud bestaand gedrag
+  if (cfg.rekenBrug === 'zonder') {
+    return Array.isArray(res) ? res[0] : res;
+  }
+
+  // 🔓 met brug: eerste geldige oefening zoeken
+  if (Array.isArray(res)) {
+    return res.find(o => o !== null) || null;
+  }
+
+  return res;
+}
 
     default:
       console.error('Versie 2: bereik niet ondersteund', cfg.rekenMaxGetal);
