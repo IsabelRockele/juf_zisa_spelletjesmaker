@@ -43,15 +43,18 @@ function voegOefeningToe(cfg) {
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
   let oef;
 
-if (cfg.rekenMaxGetal === 20 || cfg.rekenMaxGetal === 100) {
-  const res = genereerHoofdrekenenV2(cfg);
+if (cfg.rekenMaxGetal === 20 || cfg.rekenMaxGetal === 100 || cfg.rekenMaxGetal === 1000) {
+  const res = genereerHoofdrekenenV2({
+    ...cfg,
+    aantalOefeningen: 1,
+    _seed: Math.random()
+  });
   oef = Array.isArray(res) ? res[0] : res;
 } else {
   oef = cfg.rekenHulp?.stijl === 'compenseren'
     ? genereerRekensomMetCompenseren(cfg)
     : genereerRekensom(cfg);
 }
-
 
   if (!oef || oef.getal1 == null || oef.getal2 == null) return null;
   // 👉 markeer ALLEEN de eerste oefening van deze opdracht/dit segment als voorbeeld
@@ -781,11 +784,19 @@ if (cfg.rekenMaxGetal === 20) {
   });
   oef = Array.isArray(res) ? res[0] : res;
 
+} else if (cfg.rekenMaxGetal === 1000) {
+  const res = genereerHoofdrekenenV2({
+    ...cfg,
+    aantalOefeningen: 1,
+    _seed: Math.random()
+  });
+  oef = Array.isArray(res) ? res[0] : res;
 } else {
   oef = cfg.rekenHulp?.stijl === 'compenseren'
     ? genereerRekensomMetCompenseren(cfg)
     : genereerRekensom(cfg);
 }
+
 
 
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
