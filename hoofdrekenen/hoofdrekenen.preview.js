@@ -43,18 +43,12 @@ function voegOefeningToe(cfg) {
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
   let oef;
 
-if (cfg.rekenMaxGetal === 20 || cfg.rekenMaxGetal === 100 || cfg.rekenMaxGetal === 1000) {
-  const res = genereerHoofdrekenenV2({
-    ...cfg,
-    aantalOefeningen: 1,
-    _seed: Math.random()
-  });
-  oef = Array.isArray(res) ? res[0] : res;
-} else {
-  oef = cfg.rekenHulp?.stijl === 'compenseren'
-    ? genereerRekensomMetCompenseren(cfg)
-    : genereerRekensom(cfg);
-}
+const res = genereerHoofdrekenenV2({
+  ...cfg,
+  aantalOefeningen: 1,
+  _seed: Math.random()
+});
+oef = Array.isArray(res) ? res[0] : res;
 
   if (!oef || oef.getal1 == null || oef.getal2 == null) return null;
   // 👉 markeer ALLEEN de eerste oefening van deze opdracht/dit segment als voorbeeld
@@ -791,6 +785,10 @@ if (cfg._dirty === true) {
     const seen = new Set();
     let guard = 0;
 
+    let telPlus = 0;
+let telMin  = 0;
+const maxPerSoort = Math.ceil(N / 2);
+
     while (oefeningen.length < N && guard++ < N * 25) {
       let oef;
 
@@ -827,6 +825,12 @@ if (cfg.rekenMaxGetal === 20) {
 
 
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
+      // 🔁 Bij "beide": ongeveer evenwicht + / −
+if (cfg.rekenType === 'beide') {
+  if (oef.operator === '+' && telPlus >= maxPerSoort) continue;
+  if (oef.operator === '-' && telMin  >= maxPerSoort) continue;
+}
+
 
       const key = `${oef.operator}|${oef.getal1},${oef.getal2}`;
       if (!seen.has(key)) {
@@ -841,6 +845,9 @@ if (
 }
 
 oefeningen.push(oef);
+if (oef.operator === '+') telPlus++;
+if (oef.operator === '-') telMin++;
+
 
       }
     }
