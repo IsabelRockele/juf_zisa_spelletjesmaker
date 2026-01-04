@@ -41,9 +41,17 @@ function titelVoor(cfg) {
 
 function voegOefeningToe(cfg) {
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
-  const oef = comp
+  let oef;
+
+if (cfg.rekenMaxGetal === 20 || cfg.rekenMaxGetal === 100) {
+  const res = genereerHoofdrekenenV2(cfg);
+  oef = Array.isArray(res) ? res[0] : res;
+} else {
+  oef = cfg.rekenHulp?.stijl === 'compenseren'
     ? genereerRekensomMetCompenseren(cfg)
     : genereerRekensom(cfg);
+}
+
 
   if (!oef || oef.getal1 == null || oef.getal2 == null) return null;
   // 👉 markeer ALLEEN de eerste oefening van deze opdracht/dit segment als voorbeeld
@@ -554,7 +562,27 @@ if (toonHulpmiddel) {
    SEGMENT RENDER
    ========================================================= */
 export function renderHoofdrekenenSegment(container, segment) {
-  const cfg = segment?.settings || segment;
+ // 🔒 Clone: preview mag settings niet muteren
+const cfg = JSON.parse(JSON.stringify(segment?.settings || segment));
+
+// 🔁 rekenType → operator (nodig voor V2)
+if (!cfg.operator && cfg.rekenType) {
+  if (cfg.rekenType === 'aftrekken') cfg.operator = '-';
+  if (cfg.rekenType === 'optellen')  cfg.operator = '+';
+}
+
+// 🔁 UI-somTypes → generator-somTypes (alleen bij aftrekken)
+if (cfg.operator === '-' && Array.isArray(cfg.somTypes)) {
+  cfg.somTypes = cfg.somTypes.map(t => {
+    if (t === 'TE+TE') return 'TE-TE';
+    if (t === 'TE+E')  return 'TE-E';
+    if (t === 'T+TE')  return 'T-TE';
+    if (t === 'T+E')   return 'T-E';
+    if (t === 'E+E')   return 'E-E';
+    return t;
+  });
+}
+
   // =====================================
 // AUTO-SANERING VAN OUDE / ONGELDIGE SEGMENTEN
 // =====================================
@@ -566,23 +594,28 @@ const max = cfg.rekenMaxGetal;
 if (max <= 5) {
   cfg.somTypes = ['E+E'];
   cfg.rekenBrug = 'zonder';
-}
-
-if (max > 5 && max <= 10) {
+} else if (max <= 10) {
   cfg.somTypes = ['E+E', 'T-E'];
   cfg.rekenBrug = 'zonder';
 }
+// ⛔ niets doen voor 20 en hoger
+
 
 
 // Als alles eruit gefilterd is → veilige fallback
 if (!cfg.somTypes || cfg.somTypes.length === 0) {
-  cfg.somTypes = ['E+E'];
+  // alleen fallback bij <= 10
+  if (cfg.rekenMaxGetal <= 10) {
+    cfg.somTypes = ['E+E'];
+  }
 }
+
 
 // Oefeningen die niet meer passen → weg
 
 
-  if (!cfg || cfg.hoofdBewerking !== 'rekenen') return;
+  if (!cfg) return;
+
 
   if (!cfg.segmentId) cfg.segmentId = 'rekenen_' + Date.now();
 
@@ -717,6 +750,11 @@ card.appendChild(addWrap);
   let oefeningen;
 
   const N = Number(cfg.numOefeningen || cfg.aantal || 20);
+  // 🔄 cache resetten bij wijziging instellingen
+if (cfg._dirty === true) {
+  cfg._oefeningen = null;
+  cfg._dirty = false;
+}
 
   if (!Array.isArray(cfg._oefeningen)) {
     oefeningen = [];
@@ -727,16 +765,27 @@ card.appendChild(addWrap);
       let oef;
 
 if (cfg.rekenMaxGetal === 20) {
-  // 👉 versie 2 voor tot 20
-  const res = genereerHoofdrekenenV2(cfg);
+  // 🔁 Tot 20: elke keer een nieuwe oefening genereren
+  const res = genereerHoofdrekenenV2({
+    ...cfg,
+    _seed: Math.random()
+  });
   oef = Array.isArray(res) ? res[0] : res;
+
+} else if (cfg.rekenMaxGetal === 100) {
+  // 🔁 Tot 100: ook V2 gebruiken (anders val je terug op oude generator)
+  const res = genereerHoofdrekenenV2({
+    ...cfg,
+    aantalOefeningen: 1,   // V2-wrapper maakt standaard 6, wij willen 1
+    _seed: Math.random()
+  });
+  oef = Array.isArray(res) ? res[0] : res;
+
 } else {
-  // 👉 oude generator blijft voor alle andere bereiken
   oef = cfg.rekenHulp?.stijl === 'compenseren'
     ? genereerRekensomMetCompenseren(cfg)
     : genereerRekensom(cfg);
 }
-
 
 
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
