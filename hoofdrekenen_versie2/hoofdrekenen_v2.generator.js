@@ -14,6 +14,11 @@ export function genereerHoofdrekenenV2(cfg) {
     return [];
   }
 
+  // 🔁 Normalisatie: rekenType afdwingen
+if (!cfg.rekenType && cfg.operator) {
+  cfg.rekenType = (cfg.operator === '-') ? 'aftrekken' : 'optellen';
+}
+
   switch (cfg.rekenMaxGetal) {
     case 5:
       return genereerTot5_V2(cfg);
@@ -22,7 +27,9 @@ export function genereerHoofdrekenenV2(cfg) {
       return genereerTot10_V2(cfg);
 
     case 20:
-      return genereerTot20_V2(cfg);
+      const res = genereerTot20_V2(cfg);
+return Array.isArray(res) ? res[0] : res;
+
 
     case 100:
       return genereerTot100_V2(cfg);
@@ -33,4 +40,16 @@ export function genereerHoofdrekenenV2(cfg) {
   }
 }
 
+// ===== TESTBLOK (tijdelijk) =====
+console.log('--- TEST TE-TE TOT 20 ---');
+for (let i = 0; i < 20; i++) {
+  const oef = genereerHoofdrekenenV2({
+    rekenMaxGetal: 20,
+    hoofdBewerking: 'rekenen',
+    operator: '-',
+    rekenBrug: 'zonder',
+    somTypes: ['TE-TE']
+  });
+  console.log(oef);
+}
 
