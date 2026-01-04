@@ -107,12 +107,13 @@ if (
 }
 
 
-    return {
-      type: 'rekenen',
-      getal1: g1,
-      getal2: g2,
-      operator: '+'
-    };
+  return {
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '+',
+  somType: gekozenType
+};
   }
 
   return null;
@@ -123,8 +124,15 @@ if (
 // OPTELLEN MET BRUG — TOT 100
 // =====================================================
 export function genereerOptellenMetBrugTot100(cfg) {
+    // ❗ geen somtypes gekozen → geen oefeningen
+  if (!cfg.somTypes || cfg.somTypes.length === 0) {
+    return null;
+  }
+
   const max = 100;
-  const types = cfg.somTypes || ['TE+E', 'TE+TE'];
+ const types = cfg.somTypes || [];
+
+
   const compenserenActief =
     cfg.rekenHulp?.inschakelen === true &&
     cfg.rekenHulp?.stijl === 'compenseren';
@@ -132,7 +140,7 @@ export function genereerOptellenMetBrugTot100(cfg) {
   let g1, g2;
   let safety = 0;
 
-  while (safety++ < 120) {
+  while (safety++ < 300) {
     const gekozenType = types[Math.floor(Math.random() * types.length)];
 
     switch (gekozenType) {
@@ -152,6 +160,21 @@ export function genereerOptellenMetBrugTot100(cfg) {
         if (g1 + g2 > max) continue;
         break;
       }
+
+      // -----------------------------
+// E + E  (met brug)
+// -----------------------------
+case 'E+E': {
+  g1 = rnd(1, 9);
+  g2 = rnd(1, 9);
+
+  // brug verplicht: over het tiental
+  if (g1 + g2 <= 10) continue;
+
+  if (g1 + g2 > max) continue;
+
+  break;
+}
 
       // -----------------------------
       // TE + TE  (met brug)
@@ -196,12 +219,13 @@ if (k2 && [6, 7, 8, 9].includes(e1)) continue;
 
     }
 
-    return {
-      type: 'rekenen',
-      getal1: g1,
-      getal2: g2,
-      operator: '+'
-    };
+  return {
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '+',
+  somType: gekozenType
+};
   }
 
   return null;
@@ -323,6 +347,47 @@ export function genereerAftrekkenMetBrugTot100(cfg) {
     const gekozenType = types[Math.floor(Math.random() * types.length)];
 
     switch (gekozenType) {
+
+      // -----------------------------
+// T − E (met brug)
+// -----------------------------
+case 'T-E': {
+  g1 = rnd(1, 9) * 10;
+  g2 = rnd(6, 9);
+
+  if (g2 >= g1) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: g1,
+    getal2: g2,
+    operator: '-',
+    somType: 'T-E'
+  };
+}
+
+
+// -----------------------------
+// T − TE (met brug)
+// -----------------------------
+case 'T-TE': {
+  g1 = rnd(2, 9) * 10;
+
+  const tientallen = rnd(1, Math.floor(g1 / 10) - 1);
+  const eenheden = rnd(6, 9);
+  g2 = tientallen * 10 + eenheden;
+
+  if (g2 >= g1) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: g1,
+    getal2: g2,
+    operator: '-',
+    somType: 'T-TE'
+  };
+}
+
 
       // -----------------------------
       // TE − E (met brug)
