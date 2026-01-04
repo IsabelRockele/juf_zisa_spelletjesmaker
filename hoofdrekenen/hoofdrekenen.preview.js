@@ -484,6 +484,7 @@ function isGeschiktVoorCompenseren(oef, cfg) {
 }
 
 function renderOefening(grid, cfg, oef) {
+  
   const div = document.createElement('div');
   div.className = 'oefening';
   div.style.whiteSpace = 'nowrap';
@@ -565,8 +566,29 @@ if (toonHulpmiddel) {
    SEGMENT RENDER
    ========================================================= */
 export function renderHoofdrekenenSegment(container, segment) {
+  
  // 🔒 Clone: preview mag settings niet muteren
 const cfg = JSON.parse(JSON.stringify(segment?.settings || segment));
+// 🔁 FIX: voorkom vastgelopen lege cache bij aftrekken tot 100
+if (cfg.rekenMaxGetal === 100 && cfg.rekenType === 'aftrekken') {
+  cfg._oefeningen = null;
+  cfg._dirty = true;
+}
+
+// 🔁 Zorg dat operator altijd correct gezet is
+if (!cfg.operator && cfg.rekenType) {
+  if (cfg.rekenType === 'aftrekken') cfg.operator = '-';
+  if (cfg.rekenType === 'optellen')  cfg.operator = '+';
+}
+
+console.log(
+  'PREVIEW START',
+  'operator=', cfg.operator,
+  'rekenType=', cfg.rekenType,
+  'rekenMaxGetal=', cfg.rekenMaxGetal,
+  'somTypes=', cfg.somTypes
+);
+
 
 // 🔁 rekenType → operator (nodig voor V2)
 if (!cfg.operator && cfg.rekenType) {
@@ -574,35 +596,39 @@ if (!cfg.operator && cfg.rekenType) {
   if (cfg.rekenType === 'optellen')  cfg.operator = '+';
 }
 
-// 🔁 UI-somTypes → generator-somTypes (alleen bij aftrekken)
-if (cfg.operator === '-' && Array.isArray(cfg.somTypes)) {
-  cfg.somTypes = cfg.somTypes.map(t => {
-    if (t === 'TE+TE') return 'TE-TE';
-    if (t === 'TE+E')  return 'TE-E';
-    if (t === 'T+TE')  return 'T-TE';
-    if (t === 'T+E')   return 'T-E';
-    if (t === 'E+E')   return 'E-E';
-    return t;
-  });
+// 🔁 somTypes normaliseren voor generator (optellen én aftrekken)
+// "TE + TE" → "TE+TE"
+if (Array.isArray(cfg.somTypes)) {
+  cfg.somTypes = cfg.somTypes.map(t => t.replace(/\s+/g, ''));
 }
 
-  // =====================================
-// AUTO-SANERING VAN OUDE / ONGELDIGE SEGMENTEN
-// =====================================
-if (!cfg.rekenMaxGetal) return;
+// 🔁 brugSoort afleiden uit UI-structuur (enkel nodig vanaf tot 1000)
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenMaxGetal >= 1000 &&
+  cfg.brugSoorten &&
+  typeof cfg.brugSoorten === 'object'
+) {
+  const actief = Object.entries(cfg.brugSoorten)
+    .filter(([, v]) => v === true)
+    .map(([k]) => k);
 
-// Somtypes beperken volgens bereik
-const max = cfg.rekenMaxGetal;
-
-if (max <= 5) {
-  cfg.somTypes = ['E+E'];
-  cfg.rekenBrug = 'zonder';
-} else if (max <= 10) {
-  cfg.somTypes = ['E+E', 'T-E'];
-  cfg.rekenBrug = 'zonder';
+  // als er exact één brugsoort actief is → doorgeven aan generator
+  if (actief.length === 1) {
+    cfg.brugSoort = actief[0]; // 'tiental' | 'honderdtal' | 'meervoudig'
+  }
 }
-// ⛔ niets doen voor 20 en hoger
 
+// ✅ Optellen met brug tot 1000 expliciet toelaten (preview)
+// (tot 100 blijft ongewijzigd: daar is brug altijd naar tiental)
+if (
+  cfg.operator === '+' &&
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenMaxGetal === 1000
+) {
+  // niets filteren of herschrijven
+  // generator bepaalt geldigheid
+}
 
 
 // Als alles eruit gefilterd is → veilige fallback
@@ -725,6 +751,7 @@ addBtn.addEventListener('click', () => {
     const oef = voegOefeningToe(cfg);
     if (!oef) break;
     renderOefening(grid, cfg, oef);
+    
   }
 
   if (typeof paginatePreview === 'function') paginatePreview();
