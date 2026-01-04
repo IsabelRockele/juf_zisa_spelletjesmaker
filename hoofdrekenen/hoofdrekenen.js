@@ -122,6 +122,9 @@ updateBrugSoortZichtbaarheid();
 
   // ✅ 1. Eerst: actieve somtypes bepalen
   const max = parseInt(document.getElementById('rekenMaxGetal').value, 10);
+  const rekenType =
+  document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
+
   const groep = document.querySelector(`[data-somgroep="${max}"]`);
 
   const somTypes = groep
@@ -129,33 +132,21 @@ updateBrugSoortZichtbaarheid();
     : [];
 
     // 🔁 AFTREKKEN: UI-type TE-TE omzetten naar generator-type TE+TE
-const somTypesGen = somTypes.map(t =>
-  t === 'TE-TE' ? 'TE+TE' : t
-);
-
-
-// ✅ Aftrekken zonder brug: T−E en T−TE zijn onmogelijk (altijd brug)
-const rekenType = document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
 const rekenBrug = document.getElementById('rekenBrug').value;
 
-let somTypesGefilterd = somTypes;
+// 🔁 somTypes alleen herschrijven bij OPTELLEN
+let somTypesGen = somTypes;
 
-if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
-
-  const heeftOnmogelijkeTypes = somTypes.some(t =>
-    t === 'T-E' || t === 'T-TE'
-  );
-
-  if (heeftOnmogelijkeTypes && max === 20) {
-    melding.textContent =
-      'Kies "met brug" om oefeningen met T − E of T − TE te krijgen.';
-    return null;
-  }
-
-  // toegelaten types blijven
-  somTypesGefilterd = somTypes;
+if (rekenType === 'optellen') {
+  somTypesGen = somTypes.map(t => {
+    if (t === 'TE-TE') return 'TE+TE';
+    return t;
+  });
 }
 
+
+// ✅ AFTREKKEN: somTypes exact doorgeven (geen omzetting)
+let somTypesGefilterd = somTypes;
 
 
   // ✅ 2. Daarna pas: cfg-object opbouwen
@@ -166,11 +157,15 @@ if (rekenType === 'aftrekken' && rekenBrug === 'zonder') {
     numOefeningen: parseInt(document.getElementById('numOefeningen_reken').value, 10) || 20,
     rekenMaxGetal: max,
 
-    rekenType: document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen',
+   rekenType,
     rekenBrug: document.getElementById('rekenBrug').value,
 
     // ✅ DIT is wat eerder ontbrak
-   somTypes: somTypesGen,
+  somTypes: (rekenType === 'optellen')
+  ? somTypesGen
+  : somTypesGefilterd,
+
+
 
     opdracht: document.getElementById('opdracht_reken').value || ''
   };
@@ -214,10 +209,6 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
   function renderPreview(append = false) {
     const cfg = verzamelConfiguratie();
 
-    if (!cfg.somTypes.length && cfg.rekenMaxGetal > 10) {
-  melding.textContent = 'Kies minstens één somtype.';
-  return;
-}
 
 
     let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
