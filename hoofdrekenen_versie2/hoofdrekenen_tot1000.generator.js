@@ -97,6 +97,24 @@ if (!types.length) {
         break;
 
         // -----------------------------
+// TE + TE (zonder brug)
+// -----------------------------
+case 'TE+TE':
+  a = rnd(11, 99);
+  b = rnd(11, 99);
+
+  // beide moeten echte TE zijn (geen tientallen)
+  if (a % 10 === 0 || b % 10 === 0) continue;
+
+  // geen brug bij eenheden
+  if ((a % 10) + (b % 10) >= 10) continue;
+
+  // geen brug bij tientallen
+  if (((Math.floor(a / 10) * 10) + (Math.floor(b / 10) * 10)) >= 100) continue;
+
+  break;
+
+        // -----------------------------
 // H + TE
 // -----------------------------
 case 'H+TE':
@@ -118,11 +136,12 @@ case 'H+TE':
       // HTE + H
       // -----------------------------
       case 'HTE+H':
-        a = rnd(101, 999);
-        b = rnd(1, 9) * 100;
-        if ((a % 100) >= 100) continue;
-        if (a + b > 1000) continue;
-        break;
+  a = rnd(101, 999);
+  if (a % 10 === 0) continue; // 🔒 echt HTE afdwingen
+  b = rnd(1, 9) * 100;
+  if (a + b >= 1000) continue;
+  break;
+
 
       // -----------------------------
       // HTE + HT
@@ -147,13 +166,16 @@ case 'HT+HT':
       // -----------------------------
       // HTE + HTE
       // -----------------------------
-      case 'HTE+HTE':
-        a = rnd(101, 999);
-        b = rnd(101, 999);
-        if ((a % 10) + (b % 10) >= 10) continue;
-        if (((a % 100) + (b % 100)) >= 100) continue;
-        if (a + b > 1000) continue;
-        break;
+     case 'HTE+HTE':
+  a = rnd(101, 999);
+  if (a % 10 === 0) continue; // 🔒 HTE
+  b = rnd(101, 999);
+  if (b % 10 === 0) continue; // 🔒 HTE
+  if ((a % 10) + (b % 10) >= 10) continue;
+  if (((a % 100) + (b % 100)) >= 100) continue;
+  if (a + b >= 1000) continue;
+  break;
+
 
       default:
         continue;
