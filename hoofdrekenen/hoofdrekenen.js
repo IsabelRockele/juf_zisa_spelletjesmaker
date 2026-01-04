@@ -140,9 +140,12 @@ let somTypesGen = somTypes;
 if (rekenType === 'optellen') {
   somTypesGen = somTypes.map(t => {
     if (t === 'TE-TE') return 'TE+TE';
+    if (t === 'TE-T')  return 'TE+T';
+    if (t === 'HT-T')  return 'HT+T';
     return t;
   });
 }
+
 
 
 // ✅ AFTREKKEN: somTypes exact doorgeven (geen omzetting)
