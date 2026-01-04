@@ -33,10 +33,19 @@ if (op === '+') {
     }
 
   } else {
-    // beide termen minstens 1
-    g1 = rnd(1, 4);
-    g2 = rnd(1, 5 - g1);
+  // beide termen minstens 1 — betere spreiding
+  g1 = rnd(1, 4);
+  const max2 = 5 - g1;
+
+  if (max2 <= 1) {
+    g2 = max2;
+  } else {
+    // liever 2 of 3 dan altijd 1
+    g2 = Math.random() < 0.7
+      ? rnd(2, max2)
+      : 1;
   }
+}
 
   return {
     type: 'rekenen',
