@@ -792,36 +792,12 @@ const maxPerSoort = Math.ceil(N / 2);
     while (oefeningen.length < N && guard++ < N * 25) {
       let oef;
 
-if (cfg.rekenMaxGetal === 20) {
-  // 🔁 Tot 20: elke keer een nieuwe oefening genereren
-  const res = genereerHoofdrekenenV2({
-    ...cfg,
-    _seed: Math.random()
-  });
-  oef = Array.isArray(res) ? res[0] : res;
-
-} else if (cfg.rekenMaxGetal === 100) {
-  // 🔁 Tot 100: ook V2 gebruiken (anders val je terug op oude generator)
-  const res = genereerHoofdrekenenV2({
-    ...cfg,
-    aantalOefeningen: 1,   // V2-wrapper maakt standaard 6, wij willen 1
-    _seed: Math.random()
-  });
-  oef = Array.isArray(res) ? res[0] : res;
-
-} else if (cfg.rekenMaxGetal === 1000) {
-  const res = genereerHoofdrekenenV2({
-    ...cfg,
-    aantalOefeningen: 1,
-    _seed: Math.random()
-  });
-  oef = Array.isArray(res) ? res[0] : res;
-} else {
-  oef = cfg.rekenHulp?.stijl === 'compenseren'
-    ? genereerRekensomMetCompenseren(cfg)
-    : genereerRekensom(cfg);
-}
-
+const res = genereerHoofdrekenenV2({
+  ...cfg,
+  aantalOefeningen: 1,
+  _seed: Math.random()
+});
+oef = Array.isArray(res) ? res[0] : res;
 
 
       if (!oef || oef.getal1 == null || oef.getal2 == null) continue;
