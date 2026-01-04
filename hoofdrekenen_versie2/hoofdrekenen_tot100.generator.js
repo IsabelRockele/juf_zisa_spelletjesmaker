@@ -20,6 +20,7 @@ export function genereerOptellenZonderBrugTot100(cfg) {
 
   while (safety++ < 100) {
     const gekozenType = types[Math.floor(Math.random() * types.length)];
+console.log('AFTREK ZONDER BRUG – gekozenType:', gekozenType);
 
     switch (gekozenType) {
 
@@ -216,15 +217,12 @@ function rnd(min, max) {
 // =====================================================
 export function genereerAftrekkenZonderBrugTot100(cfg) {
   const max = 100;
-const toegelaten = ['E-E', 'T-T', 'TE-E', 'TE-TE'];
 
-const types = (cfg.somTypes || [])
-  .map(t => t.replace(/\s+/g, '').replace('–', '-'))
-  .filter(t => toegelaten.includes(t));
+// V2-principe: aftrekken zonder brug heeft vaste somtypes
+const types = cfg.somTypes && cfg.somTypes.length
+  ? cfg.somTypes
+  : ['E-E', 'T-T', 'TE-E', 'TE-TE'];
 
-if (types.length === 0) {
-  return null;
-}
 
   const allowZero = Math.random() < 0.10; // -0 zeldzaam
 
@@ -290,16 +288,129 @@ if (types.length === 0) {
 
     if (g1 < g2) continue;
 
-    return {
-      type: 'rekenen',
-      getal1: g1,
-      getal2: g2,
-      operator: '-'
-    };
+   return {
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-',
+  somType: gekozenType   // ✅ NIEUW
+};
   }
 
   return null;
 }
+
+// =====================================================
+// AFTREKKEN MET BRUG — TOT 100
+// (incl. compenseren)
+// =====================================================
+export function genereerAftrekkenMetBrugTot100(cfg) {
+
+  const compenserenActief =
+    cfg.rekenHulp?.inschakelen === true &&
+    cfg.rekenHulp?.stijl === 'compenseren';
+
+  // Respecteer aangevinkte types (fallback als leeg)
+  const types = (cfg.somTypes && cfg.somTypes.length)
+    ? cfg.somTypes
+    : ['TE-E', 'TE-TE'];
+
+  let g1, g2;
+  let safety = 0;
+
+  while (safety++ < 160) {
+
+    const gekozenType = types[Math.floor(Math.random() * types.length)];
+
+    switch (gekozenType) {
+
+      // -----------------------------
+      // TE − E (met brug)
+      // -----------------------------
+      case 'TE-E': {
+        g1 = rnd(11, 99);
+        if (g1 % 10 === 0) continue;
+
+        g2 = rnd(1, 9);
+
+        // brug verplicht (lenen): eenheden g1 < g2
+        if ((g1 % 10) >= g2) continue;
+
+        if (g1 - g2 <= 0) continue;
+
+        // =============================
+        // EXTRA FILTER — COMPENSEREN
+        // =============================
+        if (compenserenActief) {
+          const e1 = g1 % 10;   // eenheden van TE
+          const e2 = g2;        // E zelf
+
+          const k1 = [6, 7, 8, 9].includes(e1);
+          const k2 = [6, 7, 8, 9].includes(e2);
+
+          // exact één compenseerbaar getal
+          if (k1 === k2) continue;
+        }
+
+        return {
+          type: 'rekenen',
+          getal1: g1,
+          getal2: g2,
+          operator: '-',
+          somType: gekozenType
+        };
+      }
+
+      // -----------------------------
+      // TE − TE (met brug)
+      // -----------------------------
+      case 'TE-TE': {
+        g1 = rnd(11, 99);
+        g2 = rnd(11, 99);
+
+        if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+
+        // brug verplicht: eenheden g1 < eenheden g2
+        if ((g1 % 10) >= (g2 % 10)) continue;
+
+        // resultaat positief
+        if (g2 >= g1) continue;
+
+        // =============================
+        // EXTRA FILTER — COMPENSEREN
+        // =============================
+        if (compenserenActief) {
+          const e1 = g1 % 10;
+          const e2 = g2 % 10;
+
+          const k1 = [6, 7, 8, 9].includes(e1);
+          const k2 = [6, 7, 8, 9].includes(e2);
+
+          // exact één compenseerbaar getal
+          if (k1 === k2) continue;
+
+          // niet-compenseerbare term mag géén 6/7/8/9 hebben
+          if (k1 && [6, 7, 8, 9].includes(e2)) continue;
+          if (k2 && [6, 7, 8, 9].includes(e1)) continue;
+        }
+
+        return {
+          type: 'rekenen',
+          getal1: g1,
+          getal2: g2,
+          operator: '-',
+          somType: gekozenType
+        };
+      }
+
+      default:
+        continue;
+    }
+  }
+
+  return null;
+}
+
 
 // =====================================================
 // TIJDELIJKE WRAPPER — V2 COMPATIBILITEIT
@@ -325,6 +436,9 @@ export function genereerTot100_V2(cfg) {
 if (cfg.rekenType === 'aftrekken') {
   if (cfg.rekenBrug === 'zonder') {
     oef = genereerAftrekkenZonderBrugTot100(cfg);
+  }
+  if (cfg.rekenBrug === 'met') {
+    oef = genereerAftrekkenMetBrugTot100(cfg);
   }
 }
 
