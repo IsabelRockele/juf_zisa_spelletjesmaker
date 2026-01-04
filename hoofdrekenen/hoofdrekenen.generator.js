@@ -98,6 +98,24 @@ if (
   return lijst[Math.floor(Math.random() * lijst.length)];
 }
 
+// =====================================================
+// EARLY EXIT: AFTREKKEN MET COMPENSEREN — TOT 1000
+// TYPES: HT-HT en HT-T
+// =====================================================
+if (
+  cfg.rekenHulp?.inschakelen &&
+  cfg.rekenHulp.stijl === 'compenseren' &&
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenMaxGetal === 1000 &&
+  Array.isArray(cfg.somTypes) &&
+  cfg.somTypes.some(t => t === 'HT-HT' || t === 'HT-T')
+) {
+  const oef = genereerAftrekkenMetCompenserenTot1000(cfg);
+  if (oef) return oef;
+  // als het uitzonderlijk niet lukt → gewone generator
+}
+
 
 
     // ================================
@@ -909,32 +927,6 @@ if (
   if (e1 >= e2) continue;
 }
 
-// 🔒 FINALE TYPE-GARANTIE: TE − TE met brug
-if (
-  cfg.rekenMaxGetal !== 20 &&
-  op === '-' &&
-  cfg.rekenBrug === 'met' &&
-  gekozenType === 'TE+TE'
-) {
-
-  const e1 = g1 % 10;
-  const e2 = g2 % 10;
-
-  // aftrektal moet > 20 en geen tiental zijn
-  if (g1 <= 20 || e1 === 0) {
-    return null;
-  }
-
-  // aftrekker moet ≥ 20 en geen tiental zijn
-  if (g2 < 20 || e2 === 0) {
-    return null;
-  }
-
-  // brug moet verplicht aanwezig zijn
-  if (e1 >= e2) {
-   return null;
-  }
-}
 
 // =====================================
 // ABSOLUTE GRENS VOOR TOT 20 (NA GENERATIE)
@@ -1161,20 +1153,7 @@ if (
 }
 
 
- } while (
-  !(
-    op === '-' &&
-    cfg.rekenBrug === 'zonder' &&
-    gekozenType === 'TE+TE'
-  ) &&
-  !(
-    cfg.rekenMaxGetal === 1000 &&
-    cfg.rekenBrug === 'met' &&
-    cfg.brugSoorten &&
-    (cfg.brugSoorten.tiental || cfg.brugSoorten.honderdtal || cfg.brugSoorten.meervoudig)
-  ) &&
-  !checkBrug(g1, g2, op, cfg.rekenBrug || 'beide')
-);
+ } while (!checkBrug(g1, g2, op, cfg.rekenBrug || 'beide'));
 
   
 
@@ -1182,10 +1161,11 @@ if (
 // Belangrijk: dit mag NIET aftrekken blokkeren met optel-criteria.
 if (
   cfg.rekenHulp &&
-  cfg.rekenHulp.inschakelen &&
+  cfg.rekenHulp.inschakelen === true &&
   cfg.rekenHulp.stijl === 'compenseren' &&
-  (cfg.rekenBrug || 'beide') !== 'zonder'
+  cfg.rekenHulp.actief === true
 ) {
+
   const max = cfg.rekenMaxGetal || 100;
 
   const e1 = g1 % 10;
@@ -1227,9 +1207,6 @@ if (
 // aftrektal mag zelf GEEN compensatiegetal zijn
 // anders is de oefening dubbelzinnig (bv. 98 − 9)
 if ([6, 7, 8, 9].includes(e1)) return null;
-
-// ❗ extra zekerheid: vermijd afronden naar 100 (98, 99)
-if (max <= 100 && e1 >= 8) return null;
 
   }
 }
@@ -1513,10 +1490,85 @@ function genereerRekensomMetCompenseren(cfg) {
   return null;
 }
 
+// =====================================================
+// AFTREKKEN MET COMPENSEREN — TOT 1000
+// TYPES: HT − HT en HT − T
+// DIDACTIEK:
+// - met brug (lenen bij honderdtal)
+// - aftrekker is het compensatiegetal
+// - aftrekker = zuiver tiental met tiental 7, 8 of 9
+// =====================================================
+function genereerAftrekkenMetCompenserenTot1000(cfg) {
+  let safety = 0;
+
+  while (safety++ < 500) {
+
+    // --- Kies type ---
+    const type = Math.random() < 0.5 ? 'HT-HT' : 'HT-T';
+
+    let g1, g2;
+
+    if (type === 'HT-T') {
+      // bv. 430 − 90
+
+      const honderdtal = rnd(2, 9) * 100;      // 200..900
+      const t1 = rnd(1, 6) * 10;               // 10..60
+      const t2 = [7, 8, 9][rnd(0, 2)] * 10;    // 70, 80, 90
+
+      // brug verplicht: tiental van g1 < tiental van g2
+      if (t1 >= t2) continue;
+
+      g1 = honderdtal + t1;
+      g2 = t2;
+
+    } else {
+      // HT − HT, bv. 450 − 270
+
+      const h1 = rnd(3, 9);
+      const h2 = rnd(1, h1 - 1);
+
+      const t1 = rnd(1, 6);                    // 10..60
+      const t2 = [7, 8, 9][rnd(0, 2)];          // 70,80,90
+
+      // brug verplicht
+      if (t1 >= t2) continue;
+
+      g1 = h1 * 100 + t1 * 10;
+      g2 = h2 * 100 + t2 * 10;
+    }
+
+    // --- veiligheidschecks ---
+    if (g1 <= g2) continue;
+    if (g1 > 1000 || g2 > 1000) continue;
+
+    // ✔️ geldige compenseeroefening
+  return {
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-',
+
+  // 👇 dit is de sleutel voor de preview
+  rekenHulp: {
+    stijl: 'compenseren',
+    richting: 'aftrekken',
+    compensatieGetal: g2,   // aftrekker wordt omcirkeld
+    toonPlusMin: true       // + en − tonen
+  }
+};
+
+  }
+
+  // als het uitzonderlijk niet lukt
+  return null;
+}
+
+
 export {
   rnd,
   somHeeftBrug,
   checkBrug,
   genereerRekensom,
-  genereerRekensomMetCompenseren
+  genereerRekensomMetCompenseren,
+  genereerAftrekkenMetCompenserenTot1000
 };
