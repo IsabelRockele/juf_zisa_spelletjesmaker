@@ -7,7 +7,9 @@
 const rnd = (min, max) =>
   Math.floor(Math.random() * (max - min + 1)) + min;
 
-export function genereerTot20_V2(cfg) {
+    export function genereerTot20_V2(cfg) {
+
+  // 👇 HIER GAAT UW BESTAANDE CODE VERDER
 
   let g1, g2, op;
   let safety = 0;
@@ -15,9 +17,16 @@ export function genereerTot20_V2(cfg) {
   // -----------------------------
   // TYPE BEWERKING
   // -----------------------------
-  if (cfg.rekenType === 'optellen') op = '+';
-  else if (cfg.rekenType === 'aftrekken') op = '-';
-  else op = Math.random() < 0.5 ? '+' : '-';
+if (cfg.operator) {
+  op = cfg.operator;
+} else if (cfg.rekenType === 'optellen') {
+  op = '+';
+} else if (cfg.rekenType === 'aftrekken') {
+  op = '-';
+} else {
+  op = Math.random() < 0.5 ? '+' : '-';
+}
+
 
   while (safety++ < 300) {
     // -----------------------------
@@ -73,7 +82,13 @@ if (gekozenType === 'TE+E') {
   g2 = rnd(1, 20 - g1);
 }
 
-return { type: 'rekenen', getal1: g1, getal2: g2, operator: '+' };
+return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '+'
+}];
+
       }
 
       // -----------------------------
@@ -86,7 +101,13 @@ return { type: 'rekenen', getal1: g1, getal2: g2, operator: '+' };
 g2 = rnd(10 - g1 + 1, 9); // +1 → vermijdt exact 10
 
 if (g1 + g2 > 10 && g1 + g2 <= 20) {
-  return { type: 'rekenen', getal1: g1, getal2: g2, operator: '+' };
+  return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '+'
+}];
+
 }
       }
 
@@ -102,6 +123,23 @@ if (op === '-') {
   // E−E, TE−E, TE−TE
   // -----------------------------
   if (effectieveBrug === 'zonder') {
+    // ✅ PRIORITEIT: TE−TE zonder brug als enige keuze
+if (
+  cfg.somTypes &&
+  cfg.somTypes.length === 1 &&
+  cfg.somTypes[0] === 'TE-TE'
+) {
+  const e1 = rnd(2, 9);
+  const e2 = rnd(1, e1 - 1);
+
+  return [{
+    type: 'rekenen',
+    getal1: 10 + e1,
+    getal2: 10 + e2,
+    operator: '-'
+  }];
+}
+
 
     // bepaal toegestane types vanuit UI
     let toegestaneTypes = [];
@@ -120,14 +158,26 @@ if (op === '-') {
     if (gekozenType === 'E-E') {
       g1 = rnd(2, 9);
       g2 = rnd(1, g1 - 1);
-      return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+      return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
     }
 
     // TE − E
     if (gekozenType === 'TE-E') {
       g1 = rnd(11, 19);
       g2 = rnd(1, g1 % 10); // geen lenen
-      return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+      return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
     }
 
     // TE − TE
@@ -139,7 +189,13 @@ if (gekozenType === 'TE-TE') {
   g1 = 10 + e1;                // bv. 15
   g2 = 10 + e2;                // bv. 13
 
-  return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+ return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
 }
   }
 
@@ -171,22 +227,45 @@ if (gekozenType === 'TE-E') {
   g1 = 10 + e1;                  // 11–18
   g2 = e2;                       // 2–9
 
-  return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+ return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
 }
 
 
   // T − E  (20 − 7)
   if (gekozenType === 'T-E') {
     g1 = 20;
-    g2 = rnd(1, 9);
-    return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+    g2 = rnd(1, 9);return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
   }
 
   // T − TE (20 − 14)
   if (gekozenType === 'T-TE') {
     g1 = 20;
     g2 = rnd(11, 19);
-    return { type: 'rekenen', getal1: g1, getal2: g2, operator: '-' };
+   return [{
+  type: 'rekenen',
+  getal1: g1,
+  getal2: g2,
+  operator: '-'
+}];
+
   }
 }
   }
