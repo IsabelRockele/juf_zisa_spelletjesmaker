@@ -2,6 +2,7 @@ import { genereerTot20_V2 } from './hoofdrekenen_tot20.generator.js';
 import { genereerTot5_V2 } from './hoofdrekenen_tot5.generator.js';
 import { genereerTot10_V2 } from './hoofdrekenen_tot10.generator.js';
 import { genereerTot100_V2 } from './hoofdrekenen_tot100.generator.js';
+import { genereerTot1000_V2 } from './hoofdrekenen_tot1000.generator.js';
 
 // =====================================================
 // HOOFDREKENEN – GENERATOR VERSIE 2
@@ -33,6 +34,9 @@ return Array.isArray(res) ? res[0] : res;
 
     case 100:
       return genereerTot100_V2(cfg);
+
+      case 1000:
+  return genereerTot1000_V2(cfg);
 
     default:
       console.error('Versie 2: bereik niet ondersteund', cfg.rekenMaxGetal);
