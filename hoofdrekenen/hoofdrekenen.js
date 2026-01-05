@@ -182,6 +182,29 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
   };
 }
 
+// 🔒 Meervoudige brug kan alleen met honderdtal
+if (cfg.brugSoorten?.meervoudig && !cfg.brugSoorten?.honderdtal) {
+  cfg.brugSoorten.honderdtal = true;
+}
+
+// 🔒 Meervoudige brug impliceert altijd: met brug
+if (cfg.brugSoorten?.meervoudig) {
+  cfg.rekenBrug = 'met';
+}
+
+// 👉 extra flag voor generatoren
+cfg.meervoudigeBrug = cfg.brugSoorten?.meervoudig || false;
+
+
+// ✅ BrugSoort bepalen (enkelvoud) op basis van keuzes
+if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
+  if (cfg.brugSoorten?.honderdtal) {
+    cfg.brugSoort = 'honderdtal';
+  } else if (cfg.brugSoorten?.tiental) {
+    cfg.brugSoort = 'tiental';
+  }
+}
+
   // ✅ 3. Hulpmiddelen (ongewijzigd)
   const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
 
