@@ -17,17 +17,17 @@ export function genereerTot1000_V2(cfg) {
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
+  cfg.rekenHulp?.stijl !== 'compenseren' &&   // 👈 cruciaal
   Array.isArray(cfg.somTypes) &&
   cfg.somTypes.length > 1
 ) {
-  // geef voorrang aan HT+T bij brug naar honderdtal
-if (cfg.somTypes.includes('HT+T')) {
-  cfg.somTypes = ['HT+T'];
-} else {
-  cfg.somTypes = [cfg.somTypes[0]];
+  if (cfg.somTypes.includes('HT+T')) {
+    cfg.somTypes = ['HT+T'];
+  } else {
+    cfg.somTypes = [cfg.somTypes[0]];
+  }
 }
 
-}
 
       // 🔁 normaliseer somTypes: "TE + TE" → "TE+TE"
   if (Array.isArray(cfg.somTypes)) {
@@ -41,6 +41,20 @@ if (cfg.somTypes.includes('HT+T')) {
     let oef = null;
 
    if (cfg.rekenType === 'optellen') {
+
+  // ================================
+// COMPENSEREN — TE+TE — tot 1000
+// ================================
+if (
+  cfg.rekenBrug === 'met' &&
+   cfg.brugSoort === 'honderdtal' &&
+  cfg.rekenHulp?.stijl === 'compenseren' &&
+  cfg.somTypes?.includes('TE+TE')
+) {
+  const oef = genereerOptellenCompenseren_TE_TE_Tot1000(cfg);
+  if (oef) lijst.push(oef);
+  continue;   // ⬅️ DIT IS DE SLEUTEL
+}
 
   if (cfg.rekenBrug === 'zonder') {
     oef = genereerOptellenZonderBrugTot1000(cfg);
@@ -89,14 +103,6 @@ if (
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('TE+TE')
-) {
-  oef = genereerOptellenMetBrugHonderdtal_TE_TE(cfg);
-}
-
-if (
-  cfg.rekenBrug === 'met' &&
-  cfg.brugSoort === 'honderdtal' &&
   cfg.somTypes?.includes('HTE+HT')
 ) {
   oef = genereerOptellenMetBrugHonderdtal_HTE_HT(cfg);
@@ -110,12 +116,14 @@ if (
   oef = genereerOptellenMetBrugHonderdtal_HTE_HTE(cfg);
 }
 
-    if (oef) lijst.push(oef);
-  }
-
-  return lijst;
+if (oef) {
+  lijst.push(oef);
 }
 
+  }
+}
+
+return lijst;
 // -----------------------------------------------------
 // Optellen zonder brug — tot 1000
 // -----------------------------------------------------
@@ -533,6 +541,12 @@ function genereerOptellenMetBrugHonderdtal_HT_T(cfg) {
 // Brug naar HONDERDTAL — TE + TE
 // -----------------------------------------------------
 function genereerOptellenMetBrugHonderdtal_TE_TE(cfg) {
+ console.log('CHECK:', {
+  rekenBrug: cfg.rekenBrug,
+  brugSoort: cfg.brugSoort,
+  meervoudigeBrug: cfg.meervoudigeBrug
+});
+
 
   let safety = 0;
 
@@ -543,9 +557,19 @@ function genereerOptellenMetBrugHonderdtal_TE_TE(cfg) {
     const t2 = rnd(1, 9);
     if (t1 + t2 <= 10) continue;
 
-    // 2️⃣ eenheden veilig kiezen (GEEN brug naar tiental)
-    const e1 = rnd(1, 8);
-    const e2 = rnd(1, 9 - e1); // zorgt: e1 + e2 < 10
+   let e1, e2;
+
+if (cfg.meervoudigeBrug) {
+  // 👉 meervoudige brug: WEL brug naar tiental
+  e1 = rnd(1, 9);
+  e2 = rnd(1, 9);
+  if (e1 + e2 < 10) continue;
+} else {
+  // 👉 gewone brug: GEEN brug naar tiental
+  e1 = rnd(1, 8);
+  e2 = rnd(1, 9 - e1); // e1 + e2 < 10
+}
+
 
     const a = t1 * 10 + e1;
     const b = t2 * 10 + e2;
@@ -622,9 +646,20 @@ function genereerOptellenMetBrugHonderdtal_HTE_HTE(cfg) {
     const t2 = rnd(1, 9);
     if (t1 + t2 <= 10) continue;
 
-    // 2️⃣ eenheden veilig (geen brug naar tiental)
-    const e1 = rnd(1, 8);
-    const e2 = rnd(1, 9 - e1);
+    // 2️⃣ eenheden kiezen (afhankelijk van meervoudige brug)
+let e1, e2;
+
+if (cfg.meervoudigeBrug) {
+  // 👉 meervoudige brug: WEL brug naar tiental
+  e1 = rnd(0, 9);
+  e2 = rnd(0, 9);
+  if (e1 + e2 < 10) continue;
+} else {
+  // 👉 gewone brug: GEEN brug naar tiental
+  e1 = rnd(1, 8);
+  e2 = rnd(1, 9 - e1); // e1 + e2 < 10
+}
+
 
     // 3️⃣ honderdtallen vrij kiezen
     const h1 = rnd(1, 9);
@@ -651,3 +686,48 @@ function genereerOptellenMetBrugHonderdtal_HTE_HTE(cfg) {
   return null;
 }
 
+function genereerOptellenCompenseren_TE_TE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    // 1️⃣ tientallen kiezen → brug naar honderdtal
+    const t1 = rnd(1, 9);
+    const t2 = rnd(1, 9);
+    if (t1 + t2 <= 10) continue;
+
+    // 2️⃣ eenheden kiezen → EXACT één compenseerbaar (7–8–9)
+    const e1 = rnd(1, 9);
+    const e2 = rnd(1, 9);
+
+    const comp1 = [7, 8, 9].includes(e1);
+    const comp2 = [7, 8, 9].includes(e2);
+    if (comp1 === comp2) continue;
+
+    // 3️⃣ bij compenseren: WEL brug naar tiental
+    if (e1 + e2 <= 10) continue;
+
+    // 4️⃣ getallen opbouwen
+    const a = t1 * 10 + e1;
+    const b = t2 * 10 + e2;
+
+    const som = a + b;
+
+    // 5️⃣ veiligheidschecks
+    if (som <= 100) continue;
+    if (som % 100 === 0) continue;
+
+    return {
+      type: 'rekenen',
+      getal1: a,
+      getal2: b,
+      operator: '+',
+      somType: 'TE+TE',
+      brugSoort: 'honderdtal',
+      stijl: 'compenseren'
+    };
+  }
+
+  return null;
+}
