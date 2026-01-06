@@ -35,9 +35,13 @@ function titelVoor(cfg) {
     }
   }
 
-  return 'Los de sommen op.';
+  if (cfg?.rekenHulp?.stijl === 'aanvullen') {
+  return 'Los op door aan te vullen.';
 }
 
+return 'Los de sommen op.';
+
+}
 
 function voegOefeningToe(cfg) {
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
@@ -385,6 +389,213 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   }
 }
 
+/* ================================
+   AANVULLEN – PREVIEW HULP
+   ================================ */
+  function renderAanvullenSchijfjesAftrekker(container, aftrekker) {
+  const h = Math.floor(aftrekker / 100);
+  const t = Math.floor((aftrekker % 100) / 10);
+  const e = aftrekker % 10;
+
+  const model = document.createElement('div');
+  model.style.border = '1px solid #cfcfcf';
+  model.style.borderRadius = '12px';
+  model.style.marginBottom = '10px';
+  model.style.overflow = 'hidden';
+  model.style.fontFamily = 'Arial, sans-serif';
+
+  const grid = document.createElement('div');
+  grid.style.display = 'grid';
+  grid.style.gridTemplateColumns = '1fr 1fr 1fr';
+
+  const maakKolom = (label, aantal, kleur, waarde) => {
+    const col = document.createElement('div');
+    col.style.padding = '0';
+    col.style.textAlign = 'center';
+    col.style.borderRight = '1px solid #ddd';
+
+    // titelvak (zoals werkboek)
+    const titelVak = document.createElement('div');
+    titelVak.textContent = label;
+    titelVak.style.background = kleur;
+    titelVak.style.color = '#000';
+    titelVak.style.fontWeight = '700';
+    titelVak.style.padding = '6px 0';
+    titelVak.style.borderBottom = '2px solid #333';
+    titelVak.style.fontFamily = 'Arial, sans-serif';
+
+    col.appendChild(titelVak);
+
+    const rij = document.createElement('div');
+    rij.style.display = 'flex';
+    rij.style.flexWrap = 'wrap';
+    rij.style.justifyContent = 'center';
+    rij.style.gap = '6px';
+    rij.style.padding = '8px';
+
+    for (let i = 0; i < aantal; i++) {
+      const schijf = document.createElement('div');
+      schijf.textContent = waarde;
+      schijf.style.width = '30px';
+      schijf.style.height = '30px';
+      schijf.style.borderRadius = '50%';
+      schijf.style.background = kleur;
+      schijf.style.color = '#000';
+      schijf.style.fontSize = '12px';
+      schijf.style.display = 'flex';
+      schijf.style.alignItems = 'center';
+      schijf.style.justifyContent = 'center';
+      schijf.style.fontWeight = '700';
+      schijf.style.fontFamily = 'Arial, sans-serif';
+      rij.appendChild(schijf);
+    }
+
+    col.appendChild(rij);
+    return col;
+  };
+
+  // H – blauw
+  grid.appendChild(maakKolom('H', h, '#93c5fd', '100'));
+
+  // T – groen
+  grid.appendChild(maakKolom('T', t, '#86efac', '10'));
+
+  // E – geel (leeg bij HT–HT)
+  const eKolom = document.createElement('div');
+  eKolom.style.textAlign = 'center';
+  eKolom.style.borderRight = 'none';
+
+  const eTitel = document.createElement('div');
+  eTitel.textContent = 'E';
+  eTitel.style.background = '#fde047';
+  eTitel.style.color = '#000';
+  eTitel.style.fontWeight = '700';
+  eTitel.style.padding = '6px 0';
+  eTitel.style.borderBottom = '2px solid #333';
+  eTitel.style.fontFamily = 'Arial, sans-serif';
+
+  eKolom.appendChild(eTitel);
+
+  // bewust geen schijfjes bij E (HT–HT)
+  const eLeeg = document.createElement('div');
+  eLeeg.style.height = '46px';
+  eKolom.appendChild(eLeeg);
+
+  grid.appendChild(eKolom);
+
+  model.appendChild(grid);
+  container.appendChild(model);
+}
+
+
+function _blankBox(width = 54, height = 22) {
+  const b = document.createElement('span');
+  b.style.display = 'inline-block';
+  b.style.width = width + 'px';
+  b.style.height = height + 'px';
+  b.style.border = '2px solid #333';
+  b.style.borderRadius = '8px';
+  b.style.verticalAlign = 'middle';
+  b.style.marginLeft = '6px';
+  return b;
+}
+
+function _renderAanvullenInOefening(div, cfg, oef) {
+  const g1 = Number(oef.getal1);
+  const g2 = Number(oef.getal2);
+  const diff = g1 - g2;
+
+  // fallback: als iets vreemd is, toon gewoon de som
+  if (!Number.isFinite(g1) || !Number.isFinite(g2) || diff < 0) {
+    div.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2} =`;
+    return;
+  }
+
+  div.style.whiteSpace = 'normal';
+
+  // buitenkader (zoals voorbeeldkaart)
+  const box = document.createElement('div');
+  box.style.border = '1px solid #cfcfcf';
+  box.style.borderRadius = '14px';
+  box.style.padding = '10px';
+  box.style.background = '#fff';
+
+  const vorm = (cfg?.rekenHulp?.vormAanvullen || 'schema'); // komt uit de UI/cfg
+
+  if (vorm === 'schema') {
+    // schema/balkjes
+    const model = document.createElement('div');
+    model.style.border = '1px solid #e2e2e2';
+    model.style.borderRadius = '10px';
+    model.style.overflow = 'hidden';
+    model.style.marginBottom = '10px';
+
+    // bovenbalk
+    const top = document.createElement('div');
+    top.style.height = '34px';
+    top.style.display = 'flex';
+    top.style.alignItems = 'center';
+    top.style.justifyContent = 'center';
+    top.style.fontWeight = '700';
+    top.style.background = '#dbeafe'; // lichtblauw
+    top.textContent = String(g1);
+
+    // onderbalk: groen + geel "?"
+    const bottom = document.createElement('div');
+    bottom.style.display = 'grid';
+    bottom.style.gridTemplateColumns = '1fr auto';
+
+    const left = document.createElement('div');
+    left.style.height = '34px';
+    left.style.display = 'flex';
+    left.style.alignItems = 'center';
+    left.style.justifyContent = 'center';
+    left.style.fontWeight = '700';
+    left.style.background = '#dcfce7'; // lichtgroen
+    left.textContent = String(g2);
+
+    const right = document.createElement('div');
+    right.style.height = '34px';
+    right.style.minWidth = '52px';
+    right.style.display = 'flex';
+    right.style.alignItems = 'center';
+    right.style.justifyContent = 'center';
+    right.style.fontWeight = '700';
+    right.style.background = '#fef9c3'; // lichtgeel
+    right.textContent = '?';
+
+    bottom.appendChild(left);
+    bottom.appendChild(right);
+
+    model.appendChild(top);
+    model.appendChild(bottom);
+    box.appendChild(model);
+  }
+  
+if (vorm === 'schijfjes') {
+  renderAanvullenSchijfjesAftrekker(box, g2);
+}
+
+  // rekenregels (zoals voorbeeld)
+  const regels = document.createElement('div');
+  regels.style.fontSize = '18px';
+  regels.style.lineHeight = '1.9';
+
+  const r1 = document.createElement('div');
+  r1.textContent = `${g1} − ${g2} = `;
+  r1.appendChild(_blankBox());
+
+  const r2 = document.createElement('div');
+  r2.textContent = `${g2} + `;
+  r2.appendChild(_blankBox());
+  r2.appendChild(document.createTextNode(` = ${g1}`));
+
+  regels.appendChild(r1);
+  regels.appendChild(r2);
+
+  box.appendChild(regels);
+  div.appendChild(box);
+}
 
 /* ================================
    OEFENING RENDER
@@ -499,6 +710,17 @@ const hulp = (cfg.rekenHulp?.inschakelen !== false);
 const stijl = cfg.rekenHulp?.stijl;
 const brug  = somHeeftBrug(oef.getal1, oef.getal2, oef.operator);
 
+const isAanvullen =
+  hulp &&
+  stijl === 'aanvullen' &&
+  oef.operator === '-';
+
+if (isAanvullen) {
+  _renderAanvullenInOefening(div, cfg, oef);
+  appendWithDelete(grid, cfg, oef, div);
+  return;
+}
+
 const toonHulpmiddel =
   hulp && (
     stijl === 'splitsbenen' ||
@@ -506,6 +728,7 @@ const toonHulpmiddel =
   );
 
 if (toonHulpmiddel) {
+  
 
   div.style.display = 'grid';
   div.style.gridTemplateColumns = 'max-content 1fr';
