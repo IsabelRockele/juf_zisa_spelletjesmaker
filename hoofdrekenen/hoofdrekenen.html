@@ -333,8 +333,32 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
             <div class="inline">
               <label><input type="radio" name="rekenHulpStijl" value="splitsbenen" checked> Splitsbenen</label>
               <label><input type="radio" name="rekenHulpStijl" value="compenseren"> Compenseren</label>
+                  <label><input type="radio" name="rekenHulpStijl" value="aanvullen"> Aanvullen</label>
             </div>
           </div>
+          
+         <!-- Vorm bij aanvullen -->
+<div class="group" id="aanvulVormKeuze" style="margin-top:8px; display:none;">
+  <div class="subhint" style="margin-bottom:6px;">
+    Kies hoe het <b>aanvullen</b> wordt voorgesteld:
+  </div>
+  <div class="inline">
+    <label>
+      <input type="radio" name="aanvulVorm" value="schema" checked>
+      Schema / balkjes
+    </label>
+    <label>
+      <input type="radio" name="aanvulVorm" value="schijfjes">
+      Schijfjes
+    </label>
+    <label>
+      <input type="radio" name="aanvulVorm" value="zonder">
+      Zonder hulpmiddel
+    </label>
+  </div>
+</div>
+
+
 <div class="group" id="compenseerModusWrap" style="display:none; margin-top:8px;">
   <div class="group-title">Compenseren – begeleiding</div>
 
