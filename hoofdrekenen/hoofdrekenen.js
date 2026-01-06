@@ -34,15 +34,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // reageren op wisselen van hulmiddel-stijl
-  document
-    .querySelectorAll('input[name="rekenHulpStijl"]')
-    .forEach(radio => {
-      radio.addEventListener('change', updateCompenseerModusZichtbaarheid);
-    });
+  // ================================
+// Aanvullen – vormkeuze tonen/verbergen
+// ================================
+const aanvulVormKeuze = document.getElementById('aanvulVormKeuze');
 
-  // initieel correct zetten bij laden
-  updateCompenseerModusZichtbaarheid();
+function updateAanvulVormZichtbaarheid() {
+  if (!aanvulVormKeuze) return;
+
+  const stijl =
+    document.querySelector('input[name="rekenHulpStijl"]:checked')?.value;
+
+  if (stijl === 'aanvullen') {
+    aanvulVormKeuze.style.display = 'block';
+  } else {
+    aanvulVormKeuze.style.display = 'none';
+  }
+}
+
+  // reageren op wisselen van hulmiddel-stijl
+document
+  .querySelectorAll('input[name="rekenHulpStijl"]')
+  .forEach(radio => {
+    radio.addEventListener('change', updateCompenseerModusZichtbaarheid);
+    radio.addEventListener('change', updateAanvulVormZichtbaarheid);
+  });
+
+// initieel correct zetten bij laden
+updateCompenseerModusZichtbaarheid();
+updateAanvulVormZichtbaarheid();
+
   // ================================
 // Somtypes tonen/verbergen volgens bewerking
 // ================================
@@ -208,22 +229,30 @@ if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
   // ✅ 3. Hulpmiddelen (ongewijzigd)
   const hulpAan = document.getElementById('rekenHulpCheckbox').checked;
 
- if (hulpAan) {
+if (hulpAan) {
   cfg.rekenHulp = {
     inschakelen: true,
+
+    // STRATEGIE
     stijl: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen',
+
+    // 👇 NIEUW — ALLEEN DOORGEVEN
+    vormAanvullen:
+      document.querySelector('input[name="aanvulVorm"]:checked')?.value
+      || 'schema',
+
     schrijflijnen: document.getElementById('rekenHulpSchrijflijnen').checked,
+
     splitsPlaatsAftrekken:
       document.querySelector('input[name="splitsPlaatsAftrekken"]:checked')?.value
       || 'onderAftrektal',
 
-    // 👇 TOEVOEGEN (DIT IS DE BELANGRIJKE REGEL)
+    // bestaande (laat staan)
     actief: document.querySelector('input[name="rekenHulpStijl"]:checked')?.value === 'compenseren',
-
-    // bestaande opties
     voorbeeld: document.getElementById('rekenHulpVoorbeeld')?.checked || false,
     tekens: document.getElementById('rekenHulpTekens')?.checked || false,
-    compenseerModus: document.querySelector('input[name="compenseerModus"]:checked')?.value || 'begeleid',
+    compenseerModus:
+      document.querySelector('input[name="compenseerModus"]:checked')?.value || 'begeleid',
   };
 }
 
