@@ -121,9 +121,29 @@ if (oef) {
 }
 
   }
-}
+
+  // ================================
+  // AFTREKKEN — TOT 1000
+  // ================================
+  if (cfg.rekenType === 'aftrekken') {
+
+    if (cfg.rekenBrug === 'zonder') {
+      oef = genereerAftrekkenZonderBrugTot1000(cfg);
+    }
+
+    if (cfg.rekenBrug === 'met') {
+      oef = genereerAftrekkenMetBrugTot1000(cfg);
+    }
+
+    if (oef) {
+      lijst.push(oef);
+    }
+  }
+
+}   // ← EINDE for-lus
 
 return lijst;
+
 // -----------------------------------------------------
 // Optellen zonder brug — tot 1000
 // -----------------------------------------------------
@@ -727,6 +747,304 @@ function genereerOptellenCompenseren_TE_TE_Tot1000(cfg) {
       brugSoort: 'honderdtal',
       stijl: 'compenseren'
     };
+  }
+
+  return null;
+}
+// =====================================================
+// AFTREKKEN ZONDER BRUG — TOT 1000
+// Types: T-T, H-H, HT-T
+// =====================================================
+function genereerAftrekkenZonderBrugTot1000(cfg) {
+
+  const types = Array.isArray(cfg.somTypes)
+    ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
+    : [];
+
+  // alleen de types die we ondersteunen
+  const toegelaten = types.filter(
+    t => t === 'T-T' || t === 'H-H' || t === 'HT-T' || t === 'HT-HT' || t === 'HTE-HT' || t === 'HTE-H' || t === 'HTE-HTE'
+  );
+  if (toegelaten.length === 0) return null;
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    // kies willekeurig één van de toegelaten types
+    const gekozen = toegelaten[rnd(0, toegelaten.length - 1)];
+
+    // -------------------------
+    // T - T
+    // -------------------------
+    if (gekozen === 'T-T') {
+      const a = rnd(1, 9) * 10;
+      const b = rnd(1, 9) * 10;
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'T-T'
+      };
+    }
+
+    // -------------------------
+    // H - H
+    // -------------------------
+    if (gekozen === 'H-H') {
+      const a = rnd(1, 9) * 100;
+      const b = rnd(1, 9) * 100;
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'H-H'
+      };
+    }
+
+    // -------------------------
+    // HT - T
+    // -------------------------
+    if (gekozen === 'HT-T') {
+      const a = rnd(11, 99) * 10;   // 110..990
+      if (a % 100 === 0) continue;
+
+      const b = rnd(1, 9) * 10;    // 10..90
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'HT-T'
+      };
+    }
+
+    // -------------------------
+// HT - HT
+// -------------------------
+if (gekozen === 'HT-HT') {
+
+  const a = rnd(11, 99) * 10;     // 110..990
+  if (a % 100 === 0) continue;
+
+  const b = rnd(11, 99) * 10;     // 110..990
+  if (b % 100 === 0) continue;
+
+  if (b >= a) continue;
+
+  const ta = (a % 100) / 10;
+  const tb = (b % 100) / 10;
+  if (tb > ta) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-HT'
+  };
+}
+// -------------------------
+// HTE - HT
+// -------------------------
+if (gekozen === 'HTE-HT') {
+
+  // aftrektal: HTE (101..999), geen zuiver tiental
+  const a = rnd(101, 999);
+  if (a % 10 === 0) continue;   // geen ...0
+
+  // aftrekker: HT (110..990), geen zuiver honderdtal
+  const b = rnd(11, 99) * 10;
+  if (b % 100 === 0) continue;
+
+  // geen negatieve uitkomst
+  if (b >= a) continue;
+
+  // geen lenen bij tientallen
+  const ta = Math.floor((a % 100) / 10);
+  const tb = (b % 100) / 10;
+  if (tb > ta) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HT'
+  };
+}
+
+// -------------------------
+// HTE - H
+// -------------------------
+if (gekozen === 'HTE-H') {
+
+  // aftrektal: HTE (101..999), geen zuiver tiental
+  const a = rnd(101, 999);
+  if (a % 10 === 0) continue;
+
+  // aftrekker: H (100..900)
+  const b = rnd(1, 9) * 100;
+
+  // geen negatieve uitkomst
+  if (b >= a) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-H'
+  };
+}
+
+// -------------------------
+// HTE - HTE
+// -------------------------
+if (gekozen === 'HTE-HTE') {
+
+  // aftrektal: HTE
+  const a = rnd(101, 999);
+  if (a % 10 === 0) continue;
+
+  // aftrekker: HTE
+  const b = rnd(101, 999);
+  if (b % 10 === 0) continue;
+
+  // geen negatieve uitkomst
+  if (b >= a) continue;
+
+  // geen lenen bij eenheden
+  const ea = a % 10;
+  const eb = b % 10;
+  if (eb > ea) continue;
+
+  // geen lenen bij tientallen
+  const ta = Math.floor((a % 100) / 10);
+  const tb = Math.floor((b % 100) / 10);
+  if (tb > ta) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HTE'
+  };
+}
+
+
+  }
+  return null;
+}
+
+// =====================================================
+// AFTREKKEN MET BRUG — TOT 1000
+// =====================================================
+function genereerAftrekkenMetBrugTot1000(cfg) {
+  const types = Array.isArray(cfg.somTypes)
+    ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
+    : [];
+
+  // we starten met H-T
+  const toegelaten = types.filter(
+  t => t === 'H-T' || t === 'HT-T' || t === 'HT-HT'
+);
+
+  if (toegelaten.length === 0) return null;
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+    const gekozen = toegelaten[rnd(0, toegelaten.length - 1)];
+
+    // -------------------------
+    // H - T  (MET BRUG)
+    // -------------------------
+    if (gekozen === 'H-T') {
+
+      const a = rnd(1, 9) * 100;   // 100..900
+      const b = rnd(1, 9) * 10;    // 10..90
+
+      // H-T met brug: altijd lenen (a % 100 === 0 en b > 0)
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'H-T'
+      };
+    }
+
+    // -------------------------
+// HT - T  (MET BRUG)
+// -------------------------
+if (gekozen === 'HT-T') {
+
+  // aftrektal: HT (110..990), geen zuiver honderdtal
+  const a = rnd(11, 99) * 10;
+  if (a % 100 === 0) continue;
+
+  // aftrekker: T (10..90)
+  const b = rnd(1, 9) * 10;
+
+  // positief resultaat
+  if (b >= a) continue;
+
+  // MET BRUG: tientallen van b > tientallen van a
+  const ta = (a % 100) / 10;
+  const tb = b / 10;
+  if (tb <= ta) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-T'
+  };
+}
+
+// -------------------------
+// HT - HT  (MET BRUG)
+// -------------------------
+if (gekozen === 'HT-HT') {
+
+  // aftrektal: HT (110..990), geen zuiver honderdtal
+  const a = rnd(11, 99) * 10;
+  if (a % 100 === 0) continue;
+
+  // aftrekker: HT (110..990), geen zuiver honderdtal
+  const b = rnd(11, 99) * 10;
+  if (b % 100 === 0) continue;
+
+  // uitkomst positief
+  if (b >= a) continue;
+
+  // MET BRUG: tientallen van b > tientallen van a
+  const ta = (a % 100) / 10;
+  const tb = (b % 100) / 10;
+  if (tb <= ta) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-HT'
+  };
+}
+
   }
 
   return null;
