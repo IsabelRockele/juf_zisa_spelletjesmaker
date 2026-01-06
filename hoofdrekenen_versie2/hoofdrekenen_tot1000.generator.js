@@ -122,23 +122,40 @@ if (oef) {
 
   }
 
-  // ================================
-  // AFTREKKEN — TOT 1000
-  // ================================
-  if (cfg.rekenType === 'aftrekken') {
+// ================================
+// AFTREKKEN — TOT 1000
+// ================================
+if (cfg.rekenType === 'aftrekken') {
 
-    if (cfg.rekenBrug === 'zonder') {
-      oef = genereerAftrekkenZonderBrugTot1000(cfg);
-    }
-
-    if (cfg.rekenBrug === 'met') {
-      oef = genereerAftrekkenMetBrugTot1000(cfg);
-    }
-
-    if (oef) {
-      lijst.push(oef);
-    }
+  // 1️⃣ eerst ZONDER brug
+  if (cfg.rekenBrug === 'zonder') {
+    oef = genereerAftrekkenZonderBrugTot1000(cfg);
   }
+
+  // 2️⃣ AANVULLEN (EXCLUSIEF, nieuw)
+  else if (
+    cfg.rekenBrug === 'met' &&
+    cfg.rekenHulp?.stijl === 'aanvullen'
+  ) {
+    oef = genereerAftrekkenAanvullenTot1000(cfg);
+  }
+
+  // 3️⃣ COMPENSEREN (EXCLUSIEF)
+  else if (
+    cfg.rekenBrug === 'met' &&
+    cfg.rekenHulp?.stijl === 'compenseren'
+  ) {
+    oef = genereerAftrekkenCompenserenTot1000(cfg);
+  }
+
+  // 4️⃣ PAS DAARNA gewone MET BRUG
+  else if (cfg.rekenBrug === 'met') {
+    oef = genereerAftrekkenMetBrugTot1000(cfg);
+  }
+
+  if (oef) lijst.push(oef);
+}
+
 
 }   // ← EINDE for-lus
 
@@ -1049,3 +1066,116 @@ if (gekozen === 'HT-HT') {
 
   return null;
 }
+
+// =====================================================
+// AFTREKKEN MET BRUG — COMPENSEREN — TOT 1000
+// Types: HT-T, HT-HT
+// =====================================================
+function genereerAftrekkenCompenserenTot1000(cfg) {
+
+  const types = Array.isArray(cfg.somTypes)
+    ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
+    : [];
+
+  const toegelaten = types.filter(
+    t => t === 'HT-T' || t === 'HT-HT'
+  );
+  if (toegelaten.length === 0) return null;
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    const gekozen = toegelaten[rnd(0, toegelaten.length - 1)];
+
+    // =========================
+    // HT - T  (COMPENSEREN)
+    // =========================
+    if (gekozen === 'HT-T') {
+
+      const a = rnd(11, 69) * 10;   // tientallen 1..6 (GEEN 7,8,9)
+      if (a % 100 === 0) continue;
+
+      const t = rnd(7, 9);          // compenseertiental
+      const b = t * 10;             // 70, 80, 90
+
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'HT-T',
+        strategie: 'compenseren'
+      };
+    }
+
+    // =========================
+    // HT - HT  (COMPENSEREN)
+    // =========================
+    if (gekozen === 'HT-HT') {
+
+      const a = rnd(11, 69) * 10;   // tientallen 1..6
+      if (a % 100 === 0) continue;
+
+      const bT = rnd(7, 9);
+      const bH = rnd(1, 9);
+      const b = bH * 100 + bT * 10;
+
+      if (b >= a) continue;
+
+      return {
+        type: 'rekenen',
+        getal1: a,
+        getal2: b,
+        operator: '-',
+        somType: 'HT-HT',
+        strategie: 'compenseren'
+      };
+    }
+  }
+
+  return null;
+}
+
+// =====================================================
+// AFTREKKEN MET BRUG — AANVULLEN — TOT 1000
+// TIJDELIJKE BASISIMPLEMENTATIE
+// =====================================================
+function genereerAftrekkenAanvullenTot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    const oef = genereerAftrekkenMetBrugTot1000(cfg);
+    if (!oef) continue;
+
+    const g1 = oef.getal1;
+    const g2 = oef.getal2;
+    const type = oef.somType;
+
+    // =====================================
+    // AANVULLEN – HT-HT
+    // - verplicht brug
+    // - verschil ≤ 40
+    // =====================================
+    if (type === 'HT-HT') {
+
+      const verschil = g1 - g2;
+      if (verschil > 40) continue;
+
+      // 🔒 brug check zonder somHeeftBrug
+      const t1 = (g1 % 100) / 10;
+      const t2 = (g2 % 100) / 10;
+      if (t2 <= t1) continue; // geen brug → weg
+    }
+
+    return oef;
+  }
+
+  return null;
+}
+
+
