@@ -197,6 +197,30 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
 
     let isTargetG1 = false;
 
+    // ✅ OVERRIDE (tot 100): bij optellen moet exact één term eindigen op 6/7/8/9
+if (
+  oef.operator === '+' &&
+  cfg?.rekenMaxGetal <= 100 &&
+  cfg?.rekenHulp?.stijl === 'compenseren'
+) {
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+  const c1 = [6, 7, 8, 9].includes(e1);
+  const c2 = [6, 7, 8, 9].includes(e2);
+
+  // brug moet er zijn
+  const heeftBrug = (e1 + e2 >= 10);
+
+  if (heeftBrug && c1 !== c2) {
+    // exact één kandidaat → geen twijfel
+    isTargetG1 = c1; // als g1 kandidaat is: true, anders g2
+  } else {
+    // fallback: je bestaande logica mag het beslissen
+    // (laat je oude if/else blok hieronder dus gewoon staan)
+  }
+}
+
+
     // Logica: wie is de beste kandidaat?
     if (d1.isCandidate && !d2.isCandidate) {
         isTargetG1 = true;
@@ -209,6 +233,15 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
         // Fallback: kleinste afstand
         if (d1.dist < d2.dist) isTargetG1 = true;
     }
+
+    // ✅ AFTREKKEN: compenseer ALTIJD de aftrekker (2de term)
+if (
+  oef.operator === '-' &&
+  cfg?.rekenMaxGetal === 1000 &&
+  cfg?.rekenHulp?.stijl === 'compenseren'
+) {
+  isTargetG1 = false; // dus target = span2
+}
 
     const targetEl = isTargetG1 ? span1 : span2;
     
@@ -338,10 +371,95 @@ function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
 
     // VOORBEELD INVULLEN
     if (oef._voorbeeld) {
+      // ===============================================
+// OVERRIDE – AFTREKKEN + COMPENSEREN (TOT 100)
+// Werkboekmodel: 72 − 9 → −10 +1
+// ===============================================
+if (
+  oef.operator === '-' &&
+  cfg?.rekenMaxGetal <= 100 &&
+  cfg?.rekenHulp?.stijl === 'compenseren'
+) {
+  // afronden aftrekker naar volgend tiental
+  const doel = Math.ceil(g2 / 10) * 10;
+  const delta = doel - g2;
+
+  // vakjes onder de aftrekker
+  L.innerHTML = `<span style="color:#c00000">−${doel}</span>`;
+  R.innerHTML = `<span style="color:#0058c0">+${delta}</span>`;
+
+  if (rechtsKolom) {
+    const tussen = g1 - doel;
+    const eind = tussen + delta;
+
+    ansBox.textContent = eind;
+
+    rechtsKolom.innerHTML = '';
+    const stapDiv = document.createElement('div');
+    stapDiv.style.marginTop = '10px';
+    stapDiv.style.lineHeight = '1.5';
+    stapDiv.style.fontSize = '16px';
+    stapDiv.innerHTML =
+      `${g1} − ${doel} = ${tussen}<br>` +
+      `${tussen} + ${delta} = ${eind}`;
+
+    rechtsKolom.appendChild(stapDiv);
+  }
+
+  // ⚠️ ZEER BELANGRIJK:
+  // stop hier, zodat de oude logica NIET meer loopt
+  return;
+}
+
+// ===============================================
+// OVERRIDE – AFTREKKEN + COMPENSEREN (TOT 1000)
+// Werkboekmodel: 320 − 180 → −200 +20
+// ===============================================
+if (
+  oef.operator === '-' &&
+  cfg?.rekenMaxGetal === 1000 &&
+  cfg?.rekenHulp?.stijl === 'compenseren'
+) {
+  // afronden aftrekker naar volgend honderdtal
+  const doel = Math.ceil(g2 / 100) * 100;
+  const delta = doel - g2;
+
+  // vakjes onder de aftrekker
+  L.innerHTML = `<span style="color:#c00000">−${doel}</span>`;
+  R.innerHTML = `<span style="color:#0058c0">+${delta}</span>`;
+
+  if (rechtsKolom) {
+    const tussen = g1 - doel;
+    const eind = tussen + delta;
+
+    ansBox.textContent = eind;
+
+    rechtsKolom.innerHTML = '';
+    const stapDiv = document.createElement('div');
+    stapDiv.style.marginTop = '10px';
+    stapDiv.style.lineHeight = '1.5';
+    stapDiv.style.fontSize = '16px';
+    stapDiv.innerHTML =
+      `${g1} − ${doel} = ${tussen}<br>` +
+      `${tussen} + ${delta} = ${eind}`;
+
+    rechtsKolom.appendChild(stapDiv);
+  }
+
+  // zeer belangrijk: oude logica niet laten doorlopen
+  return;
+}
+
         const info = isTargetG1 ? d1 : d2;
         const delta = info.dist;
         
-        L.innerHTML = `<span style="color:#c00000">+${delta}</span>`;
+       // ✅ Optellen: toon het afgeronde doelgetal (bv. 9 → 10), niet de afstand (+1)
+if (oef.operator === '+') {
+  L.innerHTML = `<span style="color:#c00000">+${info.nextVal}</span>`;
+} else {
+  L.innerHTML = `<span style="color:#c00000">+${delta}</span>`;
+}
+
 
         let corrVal = -delta; 
         if (oef.operator === '-') {
