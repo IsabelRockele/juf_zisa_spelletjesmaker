@@ -13,6 +13,17 @@ function rnd(min, max) {
 // Hoofdingang
 // -----------------------------------------------------
 export function genereerTot1000_V2(cfg) {
+
+  // ========================================
+// FIX: 'beide toegestaan' intern splitsen
+// ========================================
+if (cfg.rekenBrug === 'beide') {
+  cfg = {
+    ...cfg,
+    rekenBrug: Math.random() < 0.5 ? 'zonder' : 'met'
+  };
+}
+
     // 🔒 Bij brug naar honderdtal: slechts één somtype tegelijk
 if (
   cfg.rekenBrug === 'met' &&
@@ -1078,8 +1089,9 @@ function genereerAftrekkenCompenserenTot1000(cfg) {
     : [];
 
   const toegelaten = types.filter(
-    t => t === 'HT-T' || t === 'HT-HT'
-  );
+  t => t === 'HT-HT' || t === 'HTE-HT'
+);
+
   if (toegelaten.length === 0) return null;
 
   let safety = 0;
@@ -1134,6 +1146,41 @@ function genereerAftrekkenCompenserenTot1000(cfg) {
         strategie: 'compenseren'
       };
     }
+
+    // =========================
+// HTE - HT  (COMPENSEREN)
+// =========================
+if (gekozen === 'HTE-HT') {
+
+  // g2 (aftrekker) = HT met tiental 6/7/8/9, geen zuiver honderdtal
+  const bH = rnd(1, 9);
+  const bT = rnd(6, 9);
+  const b  = bH * 100 + bT * 10; // ...60/70/80/90
+
+  // g1 (aftrektal) = HTE, maar tiental NIET 6..9 (om geen twijfel te hebben)
+  const aH = rnd(bH, 9);         // zodat a meestal groter is
+  const aT = rnd(0, 5);          // tiental 0..5
+  const aE = rnd(1, 9);          // eenheden 1..9 (HTE)
+  const a  = aH * 100 + aT * 10 + aE;
+
+  // g1 moet groter zijn dan g2
+  if (a <= b) continue;
+
+  // brugoefening naar honderdtal: laatste 2 cijfers van a < laatste 2 cijfers van b
+  // (b eindigt op 0, maar b%100 is bv 80/90)
+  if ((a % 100) >= (b % 100)) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HT',
+    strategie: 'compenseren'
+  };
+}
+
+
   }
 
   return null;
