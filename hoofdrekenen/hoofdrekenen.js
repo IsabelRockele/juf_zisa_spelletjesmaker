@@ -138,6 +138,159 @@ document
 // initieel correct zetten
 updateBrugSoortZichtbaarheid();
 
+// ================================
+// Somtypes filter live updaten
+// ================================
+document.getElementById('rekenMaxGetal')
+  ?.addEventListener('change', updateSomtypesFilter);
+
+document.getElementById('rekenBrug')
+  ?.addEventListener('change', updateSomtypesFilter);
+
+document.getElementById('rekenHulpCheckbox')
+  ?.addEventListener('change', updateSomtypesFilter);
+
+document.querySelectorAll('input[name="rekenType"]').forEach(radio => {
+  radio.addEventListener('change', updateSomtypesFilter);
+});
+
+document.querySelectorAll('input[name="rekenHulpStijl"]').forEach(radio => {
+  radio.addEventListener('change', updateSomtypesFilter);
+});
+
+// ook meteen toepassen bij laden
+updateSomtypesFilter();
+
+
+// ================================
+// Somtypes filteren (UI) — tot 1000
+// ================================
+function setSomtypeVisibilityForGroup(max, rekenType, rekenBrug, hulpAan, hulpStijl) {
+  const groep = document.querySelector(`[data-somgroep="${max}"]`);
+  if (!groep) return;
+
+  const optelWrap = groep.querySelector('.somtypes-optellen');
+  if (!optelWrap) return;
+
+  // Alleen optellen filteren (nu). Aftrekken volgt later.
+  // Alleen relevant bij tot 1000
+if (max !== 1000) return;
+
+// ================================
+// OPTELLEN (bestond al)
+// ================================
+if (rekenType === 'optellen') {
+
+  if (rekenBrug !== 'met') return;
+
+  let allowed = ['T+T', 'TE+TE', 'HT+T', 'TE+T', 'HTE+HTE', 'HTE+HT'];
+
+  if (hulpAan && hulpStijl === 'compenseren') {
+    allowed = ['TE+TE', 'HT+T', 'TE+T', 'HTE+HT'];
+  }
+
+  optelWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
+    const label = cb.closest('label');
+    if (!label) return;
+
+    const ok = allowed.includes(cb.value);
+    label.style.display = ok ? '' : 'none';
+    if (!ok) cb.checked = false;
+  });
+
+  return;
+}
+
+// ================================
+// AFTREKKEN — NIEUW
+// ================================
+if (rekenType === 'aftrekken') {
+
+  const aftrekWrap = groep.querySelector('.somtypes-aftrekken');
+  if (!aftrekWrap) return;
+
+  let allowed = [];
+
+  // 🔹 ZONDER brug
+  if (rekenBrug === 'zonder') {
+    allowed = [
+      'T-T',
+      'H-H',
+      'HT-T',
+      'HT-HT',
+      'HTE-H',
+      'HTE-HT',
+      'HTE-HTE'
+    ];
+  }
+
+  // 🔹 MET brug
+  if (rekenBrug === 'met') {
+    allowed = [
+      'HT-T',
+      'HT-HT',
+      'HTE-HT',
+      'T-TE',
+      'H-T',
+      'H-TE'
+    ];
+
+    // 🔹 MET brug + compenseren
+    if (hulpAan && hulpStijl === 'compenseren') {
+      allowed = [
+        'HT-HT',
+        'HTE-HT'
+      ];
+    }
+  }
+
+  aftrekWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
+    const label = cb.closest('label');
+    if (!label) return;
+
+    const ok = allowed.includes(cb.value);
+    label.style.display = ok ? '' : 'none';
+    if (!ok) cb.checked = false;
+  });
+}
+
+
+  // Alleen relevant bij tot 1000 én wanneer er “met brug” gekozen is.
+  // (Bij 'beide' laten we voorlopig alles staan, anders wordt het verwarrend.)
+  if (max !== 1000) return;
+  if (rekenBrug !== 'met') return;
+
+  // Basis: optellen met brug → deze somtypes tonen
+  let allowed = ['T+T', 'TE+TE', 'HT+T', 'TE+T', 'HTE+HTE', 'HTE+HT'];
+
+  // Optellen met brug + compenseren → beperk lijst
+  if (hulpAan && hulpStijl === 'compenseren') {
+    allowed = ['TE+TE', 'HT+T', 'TE+T', 'HTE+HT'];
+  }
+
+  // Toon/verberg labels per checkbox + vink verborgen types uit
+  optelWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
+    const label = cb.closest('label');
+    if (!label) return;
+
+    const ok = allowed.includes(cb.value);
+
+    label.style.display = ok ? '' : 'none';
+    if (!ok) cb.checked = false;
+  });
+}
+
+function updateSomtypesFilter() {
+  const max = parseInt(document.getElementById('rekenMaxGetal')?.value || '20', 10);
+  const rekenType = document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
+  const rekenBrug = document.getElementById('rekenBrug')?.value || 'beide';
+
+  const hulpAan = !!document.getElementById('rekenHulpCheckbox')?.checked;
+  const hulpStijl = document.querySelector('input[name="rekenHulpStijl"]:checked')?.value || 'splitsbenen';
+
+  setSomtypeVisibilityForGroup(max, rekenType, rekenBrug, hulpAan, hulpStijl);
+}
+
 
  function verzamelConfiguratie() {
 
