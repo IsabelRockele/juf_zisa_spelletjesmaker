@@ -421,8 +421,27 @@ if (
   cfg?.rekenHulp?.stijl === 'compenseren'
 ) {
   // afronden aftrekker naar volgend honderdtal
-  const doel = Math.ceil(g2 / 100) * 100;
-  const delta = doel - g2;
+let doel;
+
+// HT-HT & HTE-HT: afronden naar honderdtal (zoals werkboek 320 − 180)
+if (oef.somType === 'HT-HT' || oef.somType === 'HTE-HT') {
+  doel = Math.ceil(g2 / 100) * 100;
+}
+
+// HT-TE: werkboekregel
+else if (oef.somType === 'HT-TE') {
+  if (g2 >= 96 && g2 <= 99) {
+    doel = 100;
+  } else {
+    doel = Math.ceil(g2 / 10) * 10;
+  }
+} else {
+  // andere types: laat uw bestaande logica verder werken
+  return;
+}
+
+const delta = doel - g2;
+
 
   // vakjes onder de aftrekker
   L.innerHTML = `<span style="color:#c00000">−${doel}</span>`;
