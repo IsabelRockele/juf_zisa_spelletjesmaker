@@ -88,6 +88,19 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   const span1 = exprWrap.querySelector('.term1');
   const span2 = exprWrap.querySelector('.term2');
   const ansBox = exprWrap.querySelector('.ansbox');
+  // ==========================================
+// SPECIAAL: HTE + HTE met brug → 3 splitsbenen
+// ==========================================
+if (
+  oef.operator === '+' &&
+  oef.somType === 'HTE+HTE' &&
+  cfg?.rekenMaxGetal === 1000
+) {
+  tekenDrieSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg);
+  return;
+}
+
+
 
   let target = span2; // optellen: onder tweede term
   if (oef.operator === '-') {
@@ -104,11 +117,15 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   const tRect = target.getBoundingClientRect();
   const aRect = ansBox.getBoundingClientRect();
 
-  const anchorX = tRect.left + tRect.width / 2 - wrapRect.left;
-  const apexY = tRect.bottom - wrapRect.top + 3;
+ // STANDAARD SPLITSBENEN (2) — afgestemd op TOT 100
+const anchorX = tRect.left + tRect.width / 2 - wrapRect.left;
 
-  const horiz = 14, boxW = 26, boxH = 22, r = 6;
-  const bottomTopY = apexY + 12;
+// compact houden voor kleine kaarten
+const apexY = tRect.bottom - wrapRect.top + 2;
+
+const horiz = 14, boxW = 26, boxH = 22, r = 6;
+const bottomTopY = apexY + 10;
+
   const svgH = Math.ceil(bottomTopY + boxH + 6);
   const baseW = Math.max(exprWrap.clientWidth, exprWrap.scrollWidth);
   const svgW = Math.max(baseW, anchorX + horiz + boxW / 2 + 4);
@@ -153,6 +170,76 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   if (cfg?.rekenHulp?.compenseerModus === 'begeleid') {
   exprWrap.appendChild(svg);
 }
+}
+
+function tekenDrieSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
+  const span2 = exprWrap.querySelector('.term2');
+  if (!span2) return;
+
+  const wrapRect = exprWrap.getBoundingClientRect();
+  const tRect = span2.getBoundingClientRect();
+
+  // HTE + HTE — ALLEEN tot 1000
+// optisch iets meer naar rechts centreren onder HTE
+const anchorX = tRect.left + tRect.width * 0.8 - wrapRect.left;
+
+// meer lucht onder het getal (tot 1000)
+const apexY = tRect.bottom - wrapRect.top + 10;
+
+// bredere, rustigere spreiding
+const horiz = 38;
+const boxW = 26, boxH = 22, r = 6;
+
+// vakjes iets lager plaatsen
+const bottomTopY = apexY + 20;
+
+
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.classList.add('_splitsbenen');
+
+  svg.setAttribute('width', exprWrap.clientWidth);
+  svg.setAttribute('height', bottomTopY + boxH + 10);
+  svg.style.position = 'absolute';
+  svg.style.left = '0';
+  svg.style.top = '0';
+  svg.style.pointerEvents = 'none';
+  svg.style.overflow = 'visible';
+
+  const el = (n, a) => {
+    const e = document.createElementNS(NS, n);
+    for (const k in a) e.setAttribute(k, a[k]);
+    return e;
+  };
+
+  // 3 lijnen
+  [-horiz, 0, horiz].forEach(dx => {
+    svg.appendChild(el('line', {
+      x1: anchorX, y1: apexY,
+      x2: anchorX + dx, y2: bottomTopY,
+      stroke: '#333', 'stroke-width': 2
+    }));
+  });
+
+  // 3 vakjes (H – T – E)
+  [-horiz, 0, horiz].forEach(dx => {
+    svg.appendChild(el('rect', {
+      x: anchorX + dx - boxW / 2,
+      y: bottomTopY,
+      width: boxW,
+      height: boxH,
+      rx: r, ry: r,
+      fill: '#fff',
+      stroke: '#ddd',
+      'stroke-width': 2
+    }));
+  });
+
+  // oude overlays verwijderen
+  const old = exprWrap.querySelector('svg._splitsbenen');
+  if (old) old.remove();
+
+  exprWrap.appendChild(svg);
 }
 
 function tekenCompenseerOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
