@@ -183,10 +183,19 @@ if (rekenType === 'optellen') {
 
   if (rekenBrug !== 'met') return;
 
-  let allowed = ['T+T', 'TE+TE', 'HT+T', 'TE+T', 'HTE+HTE', 'HTE+HT'];
+  let allowed = [
+  'T+T',
+  'TE+TE',
+  'HT+T',
+  'HT+TE',   // ✅ HIER hoort hij
+  'TE+T',
+  'HTE+HTE',
+  'HTE+HT'
+];
+
 
   if (hulpAan && hulpStijl === 'compenseren') {
-    allowed = ['TE+TE', 'HT+T', 'TE+T', 'HTE+HT'];
+    allowed = ['TE+TE', 'HT+T', 'HT+TE', 'TE+T', 'HTE+HT'];
   }
 
   optelWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
@@ -229,6 +238,7 @@ if (rekenType === 'aftrekken') {
     allowed = [
       'HT-T',
       'HT-HT',
+      'HT-TE',
       'HTE-HT',
       'T-TE',
       'H-T',
@@ -239,6 +249,7 @@ if (rekenType === 'aftrekken') {
     if (hulpAan && hulpStijl === 'compenseren') {
       allowed = [
         'HT-HT',
+        'HT-TE',
         'HTE-HT'
       ];
     }
@@ -260,8 +271,6 @@ if (rekenType === 'aftrekken') {
   if (max !== 1000) return;
   if (rekenBrug !== 'met') return;
 
-  // Basis: optellen met brug → deze somtypes tonen
-  let allowed = ['T+T', 'TE+TE', 'HT+T', 'TE+T', 'HTE+HTE', 'HTE+HT'];
 
   // Optellen met brug + compenseren → beperk lijst
   if (hulpAan && hulpStijl === 'compenseren') {
