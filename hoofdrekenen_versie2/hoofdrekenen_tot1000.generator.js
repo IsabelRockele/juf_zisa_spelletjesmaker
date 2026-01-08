@@ -114,6 +114,24 @@ if (
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
+  cfg.rekenHulp?.stijl === 'compenseren' &&
+  cfg.somTypes?.includes('HT+TE')
+) {
+  oef = genereerOptellenCompenseren_HT_TE_Tot1000(cfg);
+}
+
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoort === 'honderdtal' &&
+  cfg.somTypes?.includes('HT+TE')
+) {
+  oef = genereerOptellenMetBrugHonderdtal_HT_TE(cfg);
+}
+
+
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoort === 'honderdtal' &&
   cfg.somTypes?.includes('HTE+HT')
 ) {
   oef = genereerOptellenMetBrugHonderdtal_HTE_HT(cfg);
@@ -266,6 +284,16 @@ case 'HT+T': {
   break;
 }
 
+// -----------------------------------------------------
+// Optellen zonder brug — tot 1000
+// HT + TE
+// Regels:
+// - HT: 110..990, geen zuiver honderdtal
+// - TE: 11..99, geen tiental
+// - GEEN brug bij eenheden (0 + E < 10)
+// - GEEN brug bij tientallen
+// - som < 1000
+// -----------------------------------------------------
         // -----------------------------
 // TE + TE (zonder brug)
 // -----------------------------
@@ -291,6 +319,24 @@ case 'H+TE':
   a = rnd(1, 9) * 100;
   b = rnd(11, 99);
   if (a + b >= 1000) continue;
+  break;
+
+  // -----------------------------
+// HT + TE  (zonder brug)
+// -----------------------------
+case 'HT+TE':
+  a = rnd(1, 9) * 100 + rnd(1, 9) * 10; // HT
+  b = rnd(11, 99);                      // TE
+
+  // echte TE afdwingen
+  if (b % 10 === 0) continue;
+
+  // geen brug bij tientallen
+  if (((a % 100) + (b % 100)) >= 100) continue;
+
+  // grens
+  if (a + b >= 1000) continue;
+
   break;
 
       // -----------------------------
@@ -375,6 +421,7 @@ case 'HT+HT':
     };
   }
 
+  
   return null;
 }
 
@@ -549,7 +596,6 @@ function genereerOptellenMetBrugHonderdtal_TE_T(cfg) {
 // Brug naar HONDERDTAL — HT + T
 // -----------------------------------------------------
 function genereerOptellenMetBrugHonderdtal_HT_T(cfg) {
-
   let safety = 0;
 
   while (safety++ < 300) {
@@ -577,6 +623,63 @@ function genereerOptellenMetBrugHonderdtal_HT_T(cfg) {
       getal2: t,
       operator: '+',
       somType: 'HT+T',
+      brugSoort: 'honderdtal'
+    };
+  }
+
+  return null;
+}
+
+  // -----------------------------------------------------
+// Optellen met brug — tot 1000
+// Brug naar HONDERDTAL — HT + TE
+// Regels:
+// - HT is 110..990, geen zuiver honderdtal
+// - TE is 11..99, geen tiental
+// - GEEN brug bij eenheden (0 + E < 10)
+// - WEL brug bij tientallen
+// - uitkomst < 1000
+// - uitkomst is GEEN exact honderdtal
+// -----------------------------------------------------
+function genereerOptellenMetBrugHonderdtal_HT_TE(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    // HT: honderdtal + tiental
+    const ht = rnd(11, 99) * 10;       // 110..990
+    if (ht % 100 === 0) continue;      // geen zuiver honderdtal
+
+    // TE: twee cijfers, geen tiental
+    const te = rnd(11, 99);
+    if (te % 10 === 0) continue;
+
+    // ❌ geen brug bij eenheden
+    if (te % 10 !== 0) {
+      // eenheden: 0 + E → altijd ok
+    }
+
+    // ✔ brug bij tientallen:
+    const tientallenHT = (ht % 100) / 10;
+    const tientallenTE = Math.floor(te / 10);
+
+    if (tientallenHT + tientallenTE <= 9) continue;
+
+    const som = ht + te;
+
+    // ❌ te groot
+    if (som >= 1000) continue;
+
+    // ❌ geen exact honderdtal als resultaat
+    if (som % 100 === 0) continue;
+
+    return {
+      type: 'rekenen',
+      getal1: ht,
+      getal2: te,
+      operator: '+',
+      somType: 'HT+TE',
       brugSoort: 'honderdtal'
     };
   }
@@ -779,6 +882,51 @@ function genereerOptellenCompenseren_TE_TE_Tot1000(cfg) {
 
   return null;
 }
+
+// -----------------------------------------------------
+// Optellen met brug + compenseren — tot 1000
+// HT + TE  (TE is compenseergetal)
+// Voorbeeld: 870 + 67 → +70 − 3
+// -----------------------------------------------------
+function genereerOptellenCompenseren_HT_TE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 300) {
+
+    // HT: honderdtal + tiental
+    const ht = rnd(1, 9) * 100 + rnd(1, 9) * 10;
+
+    // TE: compenseerbaar getal
+    const e = rnd(6, 9);           // 👈 verplicht compenseerbaar
+    const t = rnd(1, 9);
+    const te = t * 10 + e;
+
+    // brug naar honderdtal afdwingen
+    const tientallenHT = (ht % 100) / 10;
+    if (tientallenHT + t < 10) continue;
+
+    const som = ht + te;
+
+    // grenzen
+    if (som >= 1000) continue;
+    if (som % 100 === 0) continue;
+
+    return {
+      type: 'rekenen',
+      operator: '+',
+      getal1: ht,
+      getal2: te,
+      somType: 'HT+TE',
+      brugSoort: 'honderdtal',
+      stijl: 'compenseren',
+      compenseerGetal: te
+    };
+  }
+
+  return null;
+}
+
 // =====================================================
 // AFTREKKEN ZONDER BRUG — TOT 1000
 // Types: T-T, H-H, HT-T
@@ -880,6 +1028,8 @@ if (gekozen === 'HT-HT') {
     somType: 'HT-HT'
   };
 }
+
+
 // -------------------------
 // HTE - HT
 // -------------------------
@@ -983,9 +1133,14 @@ function genereerAftrekkenMetBrugTot1000(cfg) {
     : [];
 
   // we starten met H-T
-  const toegelaten = types.filter(
-  t => t === 'H-T' || t === 'HT-T' || t === 'HT-HT'
+ const toegelaten = types.filter(
+  t =>
+    t === 'H-T'  ||
+    t === 'HT-T' ||
+    t === 'HT-HT'||
+    t === 'HT-TE'   // 👈 DEZE REGEL TOEVOEGEN
 );
+
 
   if (toegelaten.length === 0) return null;
 
@@ -1044,6 +1199,41 @@ if (gekozen === 'HT-T') {
 }
 
 // -------------------------
+// HT - TE  (MET BRUG)
+// Voorwaarde:
+// tiental aftrekker < tiental aftrektal
+// -------------------------
+if (gekozen === 'HT-TE') {
+
+  // aftrektal: HT (110..990), geen zuiver honderdtal
+  const a = rnd(11, 99) * 10;
+  if (a % 100 === 0) continue;
+
+  // aftrekker: TE (11..99), geen tiental
+  const t2 = rnd(1, 8);   // tiental aftrekker
+  const e2 = rnd(1, 9);
+  const b = t2 * 10 + e2;
+
+  if (b % 10 === 0) continue;
+
+  // 🔒 brug afdwingen:
+  // tiental van aftrekker < tiental van aftrektal
+  const ta = (a % 100) / 10;
+  if (t2 >= ta) continue;
+
+  // geen negatieve uitkomst
+  if (b >= a) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-TE'
+  };
+}
+
+// -------------------------
 // HT - HT  (MET BRUG)
 // -------------------------
 if (gekozen === 'HT-HT') {
@@ -1088,9 +1278,13 @@ function genereerAftrekkenCompenserenTot1000(cfg) {
     ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
     : [];
 
-  const toegelaten = types.filter(
-  t => t === 'HT-HT' || t === 'HTE-HT'
+ const toegelaten = types.filter(
+  t =>
+    t === 'HT-HT' ||
+    t === 'HTE-HT' ||
+    t === 'HT-TE'   // 👈 DEZE TOEVOEGEN
 );
+
 
   if (toegelaten.length === 0) return null;
 
@@ -1122,6 +1316,36 @@ function genereerAftrekkenCompenserenTot1000(cfg) {
         strategie: 'compenseren'
       };
     }
+
+    // -------------------------
+// HT - TE  (MET BRUG + COMPENSEREN)
+// Voorbeelden:
+// 420 - 98  → -100 + 2
+// 420 - 38  → -40 + 2
+// -------------------------
+if (gekozen === 'HT-TE') {
+
+  // aftrektal: HT
+  const a = rnd(11, 99) * 10;   // 110..990
+  if (a % 100 === 0) continue;  // geen zuiver honderdtal
+
+  // aftrekker: TE, compenseerbaar
+  const e = rnd(6, 9);          // 👈 verplicht compenseerbaar
+  const t = rnd(1, 9);
+  const b = t * 10 + e;
+
+  // resultaat moet positief blijven
+  if (b >= a) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-TE',
+    stijl: 'compenseren'
+  };
+}
 
     // =========================
     // HT - HT  (COMPENSEREN)
