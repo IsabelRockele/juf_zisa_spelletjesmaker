@@ -67,6 +67,26 @@ if (
   continue;   // ⬅️ DIT IS DE SLEUTEL
 }
 
+// =====================================================
+// COMPENSEREN — HTE+HTE — tot 1000
+// Werkboek: afronden naar honderdtal
+// =====================================================
+if (
+  cfg.rekenBrug === 'met' &&
+  (cfg.brugSoort === 'tiental' || cfg.brugSoort === 'honderdtal' || cfg.brugSoort === 'meervoudig') &&
+  cfg.rekenHulp?.stijl === 'compenseren' &&
+  cfg.somTypes?.includes('HTE+HTE')
+) {
+  const oef = genereerOptellenCompenseren_HTE_HTE_Tot1000({
+  ...cfg,
+  _isVoorbeeld: i === 0   // 👈 DIT is de sleutel
+});
+
+  if (oef) lijst.push(oef);
+  continue;
+}
+
+
   if (cfg.rekenBrug === 'zonder') {
     oef = genereerOptellenZonderBrugTot1000(cfg);
   }
@@ -882,6 +902,66 @@ function genereerOptellenCompenseren_TE_TE_Tot1000(cfg) {
 
   return null;
 }
+
+// =====================================================
+// COMPENSEREN — HTE + HTE — tot 1000
+// Werkboekmodel: afronden naar honderdtal
+// Voorbeelden: 297 + 165, 682 + 196
+// =====================================================
+function genereerOptellenCompenseren_HTE_HTE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 400) {
+
+    // 🔹 Kies compenseerterm: tiental = 9, eenheden 6–9
+    const h1 = rnd(1, 9);
+    const t1 = 9;
+    // compenseergetal: 6–9 EVENWICHTIG
+const e1 = [6, 7, 8, 9][rnd(0, 3)];
+
+
+    const comp = h1 * 100 + t1 * 10 + e1;
+
+    // 🔹 Andere term: GEEN tiental 9
+    const h2 = rnd(1, 9);
+    const t2 = rnd(0, 8);          // expliciet geen 9
+    // kies e2 zó dat er zeker brug is, maar niet aantrekkelijk om te compenseren
+// e2 bewust kiezen zodat er ALTIJD brug is
+let e2;
+if (e1 === 6) e2 = 4;
+else if (e1 === 7) e2 = rnd(3, 4);
+else if (e1 === 8) e2 = rnd(2, 4);
+else e2 = rnd(1, 4); // e1 === 9
+
+
+    const other = h2 * 100 + t2 * 10 + e2;
+
+    // 🔒 Grenzen
+    if (comp + other >= 1000) continue;
+
+    // 🔒 Meervoudige brug afdwingen
+    const eenhedenBrug = (e1 + e2) >= 10;
+   if (!eenhedenBrug) continue;
+
+
+    // 🔁 Afwisselend links / rechts
+    const wissel = Math.random() < 0.5;
+
+   return {
+  type: 'rekenen',
+  getal1: comp,     // ✅ compenseergetal altijd eerst (wordt omcirkeld)
+  getal2: other,
+  operator: '+',
+  somType: 'HTE+HTE',
+  brugSoort: 'honderdtal',
+  meervoudigeBrug: true
+};
+  }
+
+  return null;
+}
+
 
 // -----------------------------------------------------
 // Optellen met brug + compenseren — tot 1000
