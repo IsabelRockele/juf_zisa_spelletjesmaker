@@ -195,7 +195,7 @@ if (rekenType === 'optellen') {
 
 
   if (hulpAan && hulpStijl === 'compenseren') {
-    allowed = ['TE+TE', 'HT+T', 'HT+TE', 'TE+T', 'HTE+HT'];
+    allowed = ['TE+TE', 'HT+T', 'HT+TE', 'TE+T', 'HTE+HT', 'HTE+HTE'];
   }
 
   optelWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
@@ -274,7 +274,7 @@ if (rekenType === 'aftrekken') {
 
   // Optellen met brug + compenseren → beperk lijst
   if (hulpAan && hulpStijl === 'compenseren') {
-    allowed = ['TE+TE', 'HT+T', 'TE+T', 'HTE+HT'];
+    allowed = ['TE+TE', 'HT+T', 'TE+T', 'HTE+HT', 'HTE+HTE'];
   }
 
   // Toon/verberg labels per checkbox + vink verborgen types uit
