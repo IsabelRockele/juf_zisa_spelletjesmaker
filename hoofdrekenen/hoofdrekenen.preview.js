@@ -88,7 +88,7 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   const span1 = exprWrap.querySelector('.term1');
   const span2 = exprWrap.querySelector('.term2');
   const ansBox = exprWrap.querySelector('.ansbox');
-  
+
 // ==========================================
 // SPECIAAL: HTE ± HTE (tot 1000) → 3 splitsbenen
 // ==========================================
@@ -515,7 +515,12 @@ if (
 let doel;
 
 // HT-HT & HTE-HT: afronden naar honderdtal (zoals werkboek 320 − 180)
-if (oef.somType === 'HT-HT' || oef.somType === 'HTE-HT') {
+if (
+  oef.somType === 'HT-HT' ||
+  oef.somType === 'HTE-HT' ||
+  oef.somType === 'HTE-HTE'
+) {
+
   doel = Math.ceil(g2 / 100) * 100;
 }
 
