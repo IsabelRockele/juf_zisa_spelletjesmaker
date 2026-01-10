@@ -240,6 +240,7 @@ if (rekenType === 'aftrekken') {
       'HT-HT',
       'HT-TE',
       'HTE-HT',
+      'HTE-HTE',
       'T-TE',
       'H-T',
       'H-TE'
