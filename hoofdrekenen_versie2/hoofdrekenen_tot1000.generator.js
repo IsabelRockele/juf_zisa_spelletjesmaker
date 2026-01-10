@@ -175,6 +175,20 @@ if (oef) {
 // AFTREKKEN — TOT 1000
 // ================================
 if (cfg.rekenType === 'aftrekken') {
+
+  // =====================================================
+// TYPE-GARANTIE — AFTREKKEN HTE − HTE MET COMPENSEREN
+// =====================================================
+if (
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenHulp?.stijl === 'compenseren' &&
+  cfg.somTypes?.includes('HTE-HTE')
+) {
+  const oef = genereerAftrekkenCompenseren_HTE_HTE_Tot1000(cfg);
+  if (oef) lijst.push(oef);
+  continue; // 🔒 niets anders mag nog door
+}
+
   
 // =====================================================
 // DEFINITIEVE TYPE-GARANTIE — AFTREKKEN HTE − HTE
@@ -1628,6 +1642,69 @@ if (gekozen === 'HTE-HT') {
 }
 
 
+  }
+
+  return null;
+}
+
+// -----------------------------------------------------
+// AFTREKKEN — COMPENSEREN — HTE − HTE (tot 1000)
+// -----------------------------------------------------
+function genereerAftrekkenCompenseren_HTE_HTE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 400) {
+
+    // -------------------------------------------------
+    // 1️⃣ Kies compenseergetal (ENKEL aftrekker)
+    //    tiental = 9
+    //    eenheden = 6–9
+    // -------------------------------------------------
+    const h2 = rnd(1, 8); // 🔒 nooit 9 → afronden max 900
+    const t2 = 9;
+    const e2 = rnd(6, 9);
+
+    const aftrekker = h2 * 100 + t2 * 10 + e2;
+
+    // -------------------------------------------------
+    // 2️⃣ Afronden naar honderdtal
+    //    297 → 300 − 3
+    // -------------------------------------------------
+    const afgerond = (h2 + 1) * 100;
+    const correctie = afgerond - aftrekker; // +3, +4, ...
+
+    // -------------------------------------------------
+    // 3️⃣ Kies eerste getal (moet groot genoeg zijn)
+    // -------------------------------------------------
+    const h1 = rnd(h2 + 1, 9);
+    const t1 = rnd(0, 9);
+    const e1 = rnd(0, 9);
+
+    const minuend = h1 * 100 + t1 * 10 + e1;
+
+    // -------------------------------------------------
+    // 4️⃣ Veiligheden
+    // -------------------------------------------------
+    if (minuend <= aftrekker) continue;
+    if (minuend - aftrekker < 0) continue;
+    if (minuend % 100 === 0) continue;
+
+    // -------------------------------------------------
+    // 5️⃣ Klaar
+    // -------------------------------------------------
+    return {
+      type: 'rekenen',
+      getal1: minuend,
+      getal2: aftrekker,
+      operator: '-',
+      somType: 'HTE-HTE',
+      brugSoort: 'compenseren',
+      compenseer: {
+        afgerondNaar: afgerond,
+        correctie: correctie
+      }
+    };
   }
 
   return null;
