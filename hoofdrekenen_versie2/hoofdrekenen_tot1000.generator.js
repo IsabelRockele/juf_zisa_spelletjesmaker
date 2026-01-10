@@ -175,6 +175,34 @@ if (oef) {
 // AFTREKKEN — TOT 1000
 // ================================
 if (cfg.rekenType === 'aftrekken') {
+  
+// =====================================================
+// DEFINITIEVE TYPE-GARANTIE — AFTREKKEN HTE − HTE
+// =====================================================
+if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.includes('HTE-HTE')
+) {
+  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfg);
+  if (oef) lijst.push(oef);
+  continue; // 🔒 voorkomt ELKE andere aftrekvorm
+}
+
+
+  // =====================================================
+// AFTREKKEN — HTE − HTE — met brug (intern gemengd)
+// =====================================================
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.includes('HTE-HTE')
+) {
+  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfg);
+  if (oef) lijst.push(oef);
+  continue; // 🔒 voorkomt doorvallen naar andere aftrektypes
+}
+
 
   // 1️⃣ eerst ZONDER brug
   if (cfg.rekenBrug === 'zonder') {
@@ -1340,6 +1368,121 @@ if (gekozen === 'HT-HT') {
     getal2: b,
     operator: '-',
     somType: 'HT-HT'
+  };
+}
+
+  }
+
+  return null;
+}
+
+// -----------------------------------------------------
+// Aftrekken met brug — tot 1000
+// HTE − HTE (mix van brugtypes)
+// -----------------------------------------------------
+function genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 400) {
+
+    // 🔀 Kies intern het brugtype
+    const type = rnd(1, 3);
+
+    if (type === 1 || cfg._brugSubtype === 'tiental') {
+
+  // 1️⃣ Eenheden: brug nodig
+  const e1 = rnd(0, 8);
+  const e2 = rnd(e1 + 1, 9);
+
+  // 2️⃣ Tientallen: GEEN brug naar honderdtal
+  // na lenen moet T1 - 1 ≥ T2
+  const t2 = rnd(0, 8);
+  const t1 = rnd(t2 + 1, 9);
+
+  // 3️⃣ Honderdtallen: stabiel
+  const h2 = rnd(0, 8);
+  const h1 = rnd(h2, 9);
+
+  const a = h1 * 100 + t1 * 10 + e1;
+  const b = h2 * 100 + t2 * 10 + e2;
+
+  // 🔒 Veiligheden
+  if (a <= b) continue;        // geen negatief
+  if (a % 100 === 0) continue; // geen zuiver honderdtal
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HTE',
+    brugSoort: 'tiental'
+  };
+}
+
+
+    if (type === 2 || cfg._brugSubtype === 'honderdtal') {
+
+  // 1️⃣ Eenheden: GEEN brug
+  const e2 = rnd(0, 9);
+  const e1 = rnd(e2, 9);
+
+  // 2️⃣ Tientallen: WEL brug naar honderdtal
+  // T1 < T2
+  const t1 = rnd(0, 8);
+  const t2 = rnd(t1 + 1, 9);
+
+  // 3️⃣ Honderdtallen: voldoende groot om te lenen
+  const h2 = rnd(0, 8);
+  const h1 = rnd(h2 + 1, 9);
+
+  const a = h1 * 100 + t1 * 10 + e1;
+  const b = h2 * 100 + t2 * 10 + e2;
+
+  // 🔒 Veiligheden
+  if (a <= b) continue;        // geen negatief
+  if (a % 100 === 0) continue; // geen zuiver honderdtal
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HTE',
+    brugSoort: 'honderdtal'
+  };
+}
+
+   if (type === 3 || cfg._brugSubtype === 'meervoudig') {
+
+  // 1️⃣ Eenheden: brug nodig
+  const e1 = rnd(0, 8);
+  const e2 = rnd(e1 + 1, 9);
+
+  // 2️⃣ Tientallen: door lenen ook brug nodig
+  // T1 - 1 < T2  → dus T1 ≤ T2
+  const t2 = rnd(1, 9);
+  const t1 = rnd(0, t2);
+
+  // 3️⃣ Honderdtallen: voldoende groot
+  const h2 = rnd(0, 8);
+  const h1 = rnd(h2 + 1, 9);
+
+  const a = h1 * 100 + t1 * 10 + e1;
+  const b = h2 * 100 + t2 * 10 + e2;
+
+  // 🔒 Veiligheden
+  if (a <= b) continue;
+  if (a % 100 === 0) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HTE',
+    brugSoort: 'meervoudig'
   };
 }
 
