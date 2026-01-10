@@ -233,27 +233,29 @@ if (rekenType === 'aftrekken') {
     ];
   }
 
-  // 🔹 MET brug
-  if (rekenBrug === 'met') {
+  // 🔹 AFTREKKEN — MET brug OF compenseren
+if (rekenBrug === 'met' || (hulpAan && hulpStijl === 'compenseren')) {
+
+  allowed = [
+    'HT-T',
+    'HT-HT',
+    'HT-TE',
+    'HTE-HT',
+    'HTE-HTE',
+    'T-TE',
+    'H-T',
+    'H-TE'
+  ];
+
+  // 🔹 COMpenseren (beperkte set)
+  if (hulpAan && hulpStijl === 'compenseren') {
     allowed = [
-      'HT-T',
       'HT-HT',
       'HT-TE',
       'HTE-HT',
-      'HTE-HTE',
-      'T-TE',
-      'H-T',
-      'H-TE'
+      'HTE-HTE'
     ];
-
-    // 🔹 MET brug + compenseren
-    if (hulpAan && hulpStijl === 'compenseren') {
-      allowed = [
-        'HT-HT',
-        'HT-TE',
-        'HTE-HT'
-      ];
-    }
+  }
   }
 
   aftrekWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
