@@ -177,6 +177,25 @@ if (oef) {
 if (cfg.rekenType === 'aftrekken') {
 
   // =====================================================
+// TYPE-GARANTIE — AANVULLEN — HTE − HTE (tot 1000)
+// verschil ≤ 8, echte brugoefening (aanvullen)
+// =====================================================
+if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenHulp?.stijl === 'aanvullen' &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'HTE-HTE'
+) {
+
+
+  const oef = genereerAftrekkenAanvullen_HTE_HTE_Tot1000(cfg);
+  if (oef) lijst.push(oef);
+  continue; // 🔒 niets anders mag nog door
+}
+
+
+  // =====================================================
 // TYPE-GARANTIE — AFTREKKEN HTE − HTE MET COMPENSEREN
 // =====================================================
 if (
@@ -1743,7 +1762,87 @@ function genereerAftrekkenAanvullenTot1000(cfg) {
       if (t2 <= t1) continue; // geen brug → weg
     }
 
+// =====================================
+// AANVULLEN – HTE-HTE
+// - VERPLICHT verschil ≤ 8
+// - VERPLICHT brug
+// =====================================
+if (type === 'HTE-HTE') {
+
+  const verschil = g1 - g2;
+  if (verschil > 8) continue;
+
+  const e1 = g1 % 10;
+  const e2 = g2 % 10;
+  const t1 = Math.floor((g1 % 100) / 10);
+  const t2 = Math.floor((g2 % 100) / 10);
+
+  const brugEenheden = e2 > e1;
+  const brugTientallen = (!brugEenheden && t2 > t1);
+
+  if (!brugEenheden && !brugTientallen) continue;
+
+}
+// ⛔ ALS het HTE-HTE is maar niet voldoet,
+// ⛔ mag het NIET doorvallen
+else if (type === 'HTE-HTE') {
+  continue;
+}
+
+
     return oef;
+  }
+
+  return null;
+}
+
+// -----------------------------------------------------
+// AFTREKKEN — AANVULLEN — HTE − HTE (tot 1000)
+// verschil max 8, altijd brug
+// -----------------------------------------------------
+function genereerAftrekkenAanvullen_HTE_HTE_Tot1000(cfg) {
+
+  let safety = 0;
+
+  while (safety++ < 500) {
+
+    const verschil = rnd(1, 8);
+
+    // forceer eenhedenbrug
+    const e2min = 10 - verschil;
+    if (e2min > 9) continue;
+
+    const e2 = rnd(e2min, 9);
+    const t2 = rnd(0, 9);
+    const h2 = rnd(1, 9);
+
+   const g2 = h2 * 100 + t2 * 10 + e2;
+const g1 = g2 + verschil;
+
+// ❗ VERPLICHT HTE-HTE (eenheden mogen NIET 0 zijn)
+if (g2 < 100 || g1 < 100) continue;
+
+const e1 = g1 % 10;
+const e2_check = g2 % 10;
+
+if (e1 === 0 || e2_check === 0) continue;
+
+// ❗ MAX 3 cijfers
+if (g1 > 999) continue;
+
+// ❗ VERPLICHT BRUG VIA EENHEDEN
+if (e2_check <= e1) continue;
+
+
+
+    return {
+      type: 'rekenen',
+      getal1: g1,
+      getal2: g2,
+      operator: '-',
+      somType: 'HTE-HTE',
+      strategie: 'aanvullen'
+    };
   }
 
   return null;
