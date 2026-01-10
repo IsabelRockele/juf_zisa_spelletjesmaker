@@ -88,17 +88,21 @@ function tekenInlineSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg) {
   const span1 = exprWrap.querySelector('.term1');
   const span2 = exprWrap.querySelector('.term2');
   const ansBox = exprWrap.querySelector('.ansbox');
-  // ==========================================
-// SPECIAAL: HTE + HTE met brug → 3 splitsbenen
+  
+// ==========================================
+// SPECIAAL: HTE ± HTE (tot 1000) → 3 splitsbenen
 // ==========================================
 if (
-  oef.operator === '+' &&
-  oef.somType === 'HTE+HTE' &&
-  cfg?.rekenMaxGetal === 1000
+  cfg?.rekenMaxGetal === 1000 &&
+  (
+    (oef.operator === '+' && oef.somType === 'HTE+HTE') ||
+    (oef.operator === '-' && oef.somType === 'HTE-HTE')
+  )
 ) {
   tekenDrieSplitsOnderTerm(exprWrap, oef, rechtsKolom, cfg);
   return;
 }
+
 
 
 
