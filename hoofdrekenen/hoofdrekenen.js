@@ -161,6 +161,51 @@ document.querySelectorAll('input[name="rekenHulpStijl"]').forEach(radio => {
 // ook meteen toepassen bij laden
 updateSomtypesFilter();
 
+// ================================
+// Oefenvorm (alleen zichtbaar bij tot 100)
+// ================================
+const oefenvormWrap = document.getElementById('oefenvormWrap');
+
+function updateOefenvormZichtbaarheid() {
+  if (!oefenvormWrap) return;
+  const max = parseInt(document.getElementById('rekenMaxGetal')?.value || '20', 10);
+  oefenvormWrap.style.display = (max === 100) ? 'block' : 'none';
+
+  // als je wegschakelt van 100: terug naar klassiek zetten
+  if (max !== 100) {
+    const klassiek = document.querySelector('input[name="rekenOefenvorm"][value="klassiek"]');
+    if (klassiek) klassiek.checked = true;
+  }
+
+  // ================================
+// Brug herkennen → somtypes verbergen
+// ================================
+const brugUitleg = document.getElementById('brugHerkennenUitleg');
+const somtypesBlok = document.querySelector('details'); // dit is het hele "Somtypes"-blok
+
+const gekozenVorm =
+  document.querySelector('input[name="rekenOefenvorm"]:checked')?.value;
+
+const isBrugHerkennen = (max === 100 && gekozenVorm === 'brugHerkennen100');
+
+if (somtypesBlok) {
+  somtypesBlok.style.display = isBrugHerkennen ? 'none' : 'block';
+}
+
+if (brugUitleg) {
+  brugUitleg.style.display = isBrugHerkennen ? 'block' : 'none';
+}
+
+}
+
+document.getElementById('rekenMaxGetal')?.addEventListener('change', updateOefenvormZichtbaarheid);
+document
+  .querySelectorAll('input[name="rekenOefenvorm"]')
+  .forEach(radio => {
+    radio.addEventListener('change', updateOefenvormZichtbaarheid);
+  });
+
+updateOefenvormZichtbaarheid();
 
 // ================================
 // Somtypes filteren (UI) — tot 1000
@@ -319,6 +364,45 @@ function updateSomtypesFilter() {
   const max = parseInt(document.getElementById('rekenMaxGetal').value, 10);
   const rekenType =
   document.querySelector('input[name="rekenType"]:checked')?.value || 'optellen';
+
+    // ================================
+  // NIEUW — Oefenvorm bepalen
+  // ================================
+  const oefenvorm =
+    document.querySelector('input[name="rekenOefenvorm"]:checked')?.value
+    || 'klassiek';
+
+  // ================================
+  // Brug herkennen (tot 100) — VROEGE EXIT
+  // ================================
+  if (max === 100 && oefenvorm === 'brugHerkennen100') {
+
+    const cfg = {
+      segmentId: 'rekenen_' + Date.now(),
+      hoofdBewerking: 'rekenen',
+
+      variant: 'brugHerkennen100',   // 🔑 belangrijk
+      rekenMaxGetal: 100,
+      rekenType,
+
+      numOefeningen:
+        parseInt(document.getElementById('numOefeningen_reken').value, 10) || 20,
+
+      opdracht:
+        document.getElementById('opdracht_reken').value
+        || 'Kleur het lampje als de som een brugoefening is.'
+    };
+
+    // 🔒 GEEN somTypes
+    // 🔒 GEEN rekenBrug
+    // 🔒 GEEN hulpmiddelen
+    // 🔒 GEEN bestaande generatoren
+
+      cfg._oefeningen = null;
+
+    return cfg;
+  }
+
 
   const groep = document.querySelector(`[data-somgroep="${max}"]`);
 
