@@ -248,6 +248,35 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
             De somtypes hieronder worden automatisch gefilterd op basis van “Oefenen tot”.
           </div>
         </div>
+        
+<!-- Oefenvorm (enkel bij tot 100) -->
+<div class="group" id="oefenvormWrap" style="display:none;">
+  <div class="group-title">Oefenvorm (tot 100)</div>
+  <div class="inline">
+    <label><input type="radio" name="rekenOefenvorm" value="klassiek" checked> Klassiek hoofdrekenen</label>
+    <label><input type="radio" name="rekenOefenvorm" value="brugHerkennen100"> Brug herkennen (lampje kleuren)</label>
+  </div>
+  <div class="subhint">
+    Bij “Brug herkennen” rekenen kinderen niet: ze kleuren enkel het lampje als de som een brugoefening is.
+  </div>
+</div>
+
+<p id="brugHerkennenUitleg"
+   style="
+     display:none;
+     font-size:13px;
+     background:#eef6ff;
+     border-left:4px solid #4a90e2;
+     padding:8px 10px;
+     margin:8px 0 12px 0;
+     color:#1f3b5c;
+   ">
+  <strong>Brug herkennen</strong> is een gerichte oefenvorm.<br>
+  • Kies <strong>optellen</strong> of <strong>aftrekken</strong>.<br>
+  • Je hoeft <strong>geen somtypes</strong> te kiezen.<br>
+  • De oefeningen staan <strong>per 4 op één rij</strong>.<br>
+  Klik daarna gewoon op <strong>Maak preview</strong>.
+</p>
 
         <!-- Type bewerking -->
         <div class="group">
@@ -587,6 +616,8 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
   </div>
 
   <!-- Je bestaande JS in /hoofdrekenen -->
+   <script src="./brug_herkennen_tot100.js"></script>
+
   <script type="module" src="./hoofdrekenen.js"></script>
 
 
