@@ -3,6 +3,7 @@
    ========================================================= */
 import { genereerHoofdrekenenV2 } from '../hoofdrekenen_versie2/hoofdrekenen_v2.generator.js';
 
+
 import {
   genereerRekensom,
   genereerRekensomMetCompenseren,
@@ -20,6 +21,20 @@ const werkbladContainer =
    TITEL
    ================================ */
 function titelVoor(cfg) {
+
+  // ⭐ Brug herkennen (tot 100): ALTIJD eigen logica
+  if (cfg.variant === 'brugHerkennen100') {
+    if (cfg.rekenType === 'aftrekken') {
+      return 'Kleur het lampje als de aftrekking een brugoefening is.';
+    }
+    if (cfg.rekenType === 'beide') {
+      return 'Kleur het lampje als de oefening een brugoefening is.';
+    }
+    // optellen (default)
+    return 'Kleur het lampje als de optelling een brugoefening is.';
+  }
+
+  // 🔹 andere oefenvormen: bewaarde opdrachtzin mag blijven
   if (cfg.opdracht && String(cfg.opdracht).trim()) {
     return String(cfg.opdracht).trim();
   }
@@ -36,14 +51,54 @@ function titelVoor(cfg) {
   }
 
   if (cfg?.rekenHulp?.stijl === 'aanvullen') {
-  return 'Los op door aan te vullen.';
+    return 'Los op door aan te vullen.';
+  }
+
+  return 'Los de sommen op.';
 }
 
-return 'Los de sommen op.';
-
-}
 
 function voegOefeningToe(cfg) {
+
+  // ⭐ Brug herkennen: + oefening = 1 extra gegenereerde oefening
+if (cfg.variant === 'brugHerkennen100') {
+
+  const type = (cfg.rekenType === 'aftrekken') ? 'min' : 'plus';
+
+  // genereer precies 1 nieuwe oefening
+  const [oef] = genereerBrugHerkennenTot100(type, 1);
+  if (!oef) return null;
+
+  const nieuw = {
+    getal1: oef.a,
+    getal2: oef.b,
+    operator: oef.op,
+    heeftBrug: oef.heeftBrug
+  };
+
+  // voorkom duplicaat
+  const key = `${nieuw.getal1}${nieuw.operator}${nieuw.getal2}`;
+  const bestaatAl = (cfg._oefeningen || []).some(o =>
+    `${o.getal1}${o.operator}${o.getal2}` === key
+  );
+  if (bestaatAl) return null;
+
+  // toevoegen
+  cfg._oefeningen.push(nieuw);
+
+  // opslaan in bundel
+  let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
+  bundel = bundel.map(seg => {
+    if (seg.settings?.segmentId === cfg.segmentId) {
+      seg.settings._oefeningen = cfg._oefeningen;
+    }
+    return seg;
+  });
+  localStorage.setItem('werkbladBundel', JSON.stringify(bundel));
+
+  return nieuw;
+}
+
   const comp = !!(cfg.rekenHulp && cfg.rekenHulp.stijl === 'compenseren');
   let oef;
 
@@ -933,6 +988,51 @@ function renderOefening(grid, cfg, oef) {
   div.style.padding = '10px';
   div.style.background = '#fff';
 
+  // ================================
+// BRUG HERKENNEN — SPECIALE WEERGAVE
+// ================================
+if (cfg.variant === 'brugHerkennen100') {
+  console.log('👉 IN BRUG HERKENNEN BLOK', cfg.rekenType);
+
+
+  div.style.display = 'flex';
+  div.style.flexDirection = 'column';
+  div.style.alignItems = 'center';
+  div.style.gap = '12px';
+  div.style.fontSize = '20px';
+
+  // lampje
+  const lampVak = document.createElement('div');
+  lampVak.style.width = '64px';
+lampVak.style.height = '64px';
+lampVak.style.border = '2px solid #555';
+lampVak.style.borderRadius = '14px';
+  lampVak.style.display = 'flex';
+  lampVak.style.alignItems = 'center';
+  lampVak.style.justifyContent = 'center';
+
+  const img = document.createElement('img');
+  img.src = '../afbeeldingen_hoofdrekenen/zisa_lamp.png';
+  img.style.width = '52px';
+  img.style.marginTop = '8px';
+  img.style.marginLeft = '-4px';
+
+
+  lampVak.appendChild(img);
+
+  // som (zonder =)
+  const som = document.createElement('div');
+  som.textContent = `${oef.getal1} ${oef.operator} ${oef.getal2}`;
+  som.style.fontWeight = '700';
+
+  div.appendChild(lampVak);
+  div.appendChild(som);
+
+  appendWithDelete(grid, cfg, oef, div);
+  return;
+}
+
+
 // 🟧 Voorbeeldoefening visueel markeren
 if (oef._voorbeeld === true) {
   div.style.border = '2px solid #f59e0b';   // oranje rand
@@ -1019,6 +1119,8 @@ export function renderHoofdrekenenSegment(container, segment) {
   
  // 🔒 Clone: preview mag settings niet muteren
 const cfg = JSON.parse(JSON.stringify(segment?.settings || segment));
+
+
 // 🔁 FIX: voorkom vastgelopen lege cache bij aftrekken tot 100
 if (cfg.rekenMaxGetal === 100 && cfg.rekenType === 'aftrekken') {
   cfg._oefeningen = null;
@@ -1221,7 +1323,14 @@ card.appendChild(addWrap);
   grid.style.display = 'grid';
 
   const hulp = cfg.rekenHulp?.inschakelen;
+
+// ⭐ ALLEEN bij brug herkennen: 4 per rij
+if (cfg.variant === 'brugHerkennen100') {
+  grid.style.gridTemplateColumns = 'repeat(4,1fr)';
+} else {
   grid.style.gridTemplateColumns = hulp ? 'repeat(2,1fr)' : 'repeat(3,1fr)';
+}
+
   grid.style.gap = hulp ? '32px' : '20px';
 
   /* ================================
@@ -1234,6 +1343,33 @@ card.appendChild(addWrap);
 if (cfg._dirty === true) {
   cfg._oefeningen = null;
   cfg._dirty = false;
+}
+
+
+  // ✅ Brug herkennen: genereer eigen oefeningen (en voorkom V2-generator)
+if (cfg.variant === 'brugHerkennen100' && !Array.isArray(cfg._oefeningen)) {
+
+  const N = Number(cfg.numOefeningen || cfg.aantal || 20);
+  let oefeningen = [];
+
+  if (cfg.rekenType === 'beide') {
+    const half = Math.ceil(N / 2);
+
+    const plus = genereerBrugHerkennenTot100('plus', half);
+    const min = genereerBrugHerkennenTot100('min', N - half);
+
+    oefeningen = [...plus, ...min];
+  } else {
+    const type = (cfg.rekenType === 'aftrekken') ? 'min' : 'plus';
+    oefeningen = genereerBrugHerkennenTot100(type, N);
+  }
+
+  cfg._oefeningen = oefeningen.map(oef => ({
+    getal1: oef.a,
+    getal2: oef.b,
+    operator: oef.op,
+    heeftBrug: oef.heeftBrug
+  }));
 }
 
   if (!Array.isArray(cfg._oefeningen)) {
@@ -1303,3 +1439,4 @@ if (oef.operator === '-') telMin++;
   card.appendChild(grid);
   container.appendChild(card);
 }
+
