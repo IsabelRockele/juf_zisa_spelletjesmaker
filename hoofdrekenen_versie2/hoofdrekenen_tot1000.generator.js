@@ -14,6 +14,35 @@ function rnd(min, max) {
 // -----------------------------------------------------
 export function genereerTot1000_V2(cfg) {
 
+ // 🔁 normaliseer somTypes: "TE + TE" → "TE+TE"
+let somTypesNorm = Array.isArray(cfg.somTypes)
+  ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
+  : [];
+
+const somTypesPlus = somTypesNorm.filter(t => t.includes('+'));
+const somTypesMin  = somTypesNorm.filter(t => t.includes('-'));
+
+  // ========================================
+// VERDELING bij rekenType = 'beide'
+// ========================================
+let beideTeller = 0;
+
+function bepaalRekenTypeEvenwichtig() {
+  if (cfg.rekenType !== 'beide') return cfg.rekenType;
+
+  // Als één van beide niet mogelijk is (geen somtypes), forceer de andere.
+  const kanPlus = somTypesPlus.length > 0;
+  const kanMin  = somTypesMin.length > 0;
+
+  if (kanPlus && !kanMin) return 'optellen';
+  if (!kanPlus && kanMin) return 'aftrekken';
+
+  // Beide kan: afwisselend (+ − + − …) = eerlijke verdeling
+  const type = (beideTeller % 2 === 0) ? 'optellen' : 'aftrekken';
+  beideTeller++;
+  return type;
+}
+
   // ========================================
 // FIX: 'beide toegestaan' intern splitsen
 // ========================================
@@ -40,18 +69,27 @@ if (
 }
 
 
-      // 🔁 normaliseer somTypes: "TE + TE" → "TE+TE"
-  if (Array.isArray(cfg.somTypes)) {
-    cfg.somTypes = cfg.somTypes.map(t => t.replace(/\s+/g, ''));
-  }
+// bewaak: we laten cfg.somTypes bestaan voor bestaande code,
+// maar we gebruiken intern per bewerking de juiste lijst.
+
 
   const lijst = [];
   const aantal = cfg.aantalOefeningen || 6;
 
-  for (let i = 0; i < aantal; i++) {
-    let oef = null;
+  let safety = 0;
 
-   if (cfg.rekenType === 'optellen') {
+while (lijst.length < aantal && safety < aantal * 20) {
+  safety++;
+
+  let oef = null;
+  const actiefType = bepaalRekenTypeEvenwichtig();
+  // Gebruik per bewerking de juiste somtypes (plus of min)
+const cfgActief = {
+  ...cfg,
+  somTypes: (actiefType === 'optellen') ? somTypesPlus : somTypesMin
+};
+
+   if (actiefType === 'optellen') {
 
   // ================================
 // COMPENSEREN — TE+TE — tot 1000
@@ -60,7 +98,7 @@ if (
   cfg.rekenBrug === 'met' &&
    cfg.brugSoort === 'honderdtal' &&
   cfg.rekenHulp?.stijl === 'compenseren' &&
-  cfg.somTypes?.includes('TE+TE')
+  cfgActief.somTypes?.includes('TE+TE')
 ) {
   const oef = genereerOptellenCompenseren_TE_TE_Tot1000(cfg);
   if (oef) lijst.push(oef);
@@ -75,11 +113,11 @@ if (
   cfg.rekenBrug === 'met' &&
   (cfg.brugSoort === 'tiental' || cfg.brugSoort === 'honderdtal' || cfg.brugSoort === 'meervoudig') &&
   cfg.rekenHulp?.stijl === 'compenseren' &&
-  cfg.somTypes?.includes('HTE+HTE')
+  cfgActief.somTypes?.includes('HTE+HTE')
 ) {
   const oef = genereerOptellenCompenseren_HTE_HTE_Tot1000({
   ...cfg,
-  _isVoorbeeld: i === 0   // 👈 DIT is de sleutel
+  _isVoorbeeld: lijst.length === 0  // 👈 DIT is de sleutel
 });
 
   if (oef) lijst.push(oef);
@@ -88,81 +126,81 @@ if (
 
 
   if (cfg.rekenBrug === 'zonder') {
-    oef = genereerOptellenZonderBrugTot1000(cfg);
+    oef = genereerOptellenZonderBrugTot1000(cfgActief);
   }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'tiental' &&
-  cfg.somTypes?.includes('TE+TE')
+  cfgActief.somTypes?.includes('TE+TE')
 ) {
-  oef = genereerOptellenMetBrugTot1000(cfg);
+  oef = genereerOptellenMetBrugTot1000(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'tiental' &&
-  cfg.somTypes?.includes('HTE+HTE')
+  cfgActief.somTypes?.includes('HTE+HTE')
 ) {
-  oef = genereerOptellenMetBrugHTE_HTETot1000(cfg);
+  oef = genereerOptellenMetBrugHTE_HTETot1000(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('T+T')
+  cfgActief.somTypes?.includes('T+T')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_T_T(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_T_T(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('TE+T')
+  cfgActief.somTypes?.includes('TE+T')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_TE_T(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_TE_T(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('HT+T')
+  cfgActief.somTypes?.includes('HT+T')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_HT_T(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_HT_T(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
   cfg.rekenHulp?.stijl === 'compenseren' &&
-  cfg.somTypes?.includes('HT+TE')
+  cfgActief.somTypes?.includes('HT+TE')
 ) {
-  oef = genereerOptellenCompenseren_HT_TE_Tot1000(cfg);
+  oef = genereerOptellenCompenseren_HT_TE_Tot1000(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('HT+TE')
+  cfgActief.somTypes?.includes('HT+TE')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_HT_TE(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_HT_TE(cfgActief);
 }
 
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('HTE+HT')
+  cfgActief.somTypes?.includes('HTE+HT')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_HTE_HT(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_HTE_HT(cfgActief);
 }
 
 if (
   cfg.rekenBrug === 'met' &&
   cfg.brugSoort === 'honderdtal' &&
-  cfg.somTypes?.includes('HTE+HTE')
+ cfgActief.somTypes?.includes('HTE+HTE')
 ) {
-  oef = genereerOptellenMetBrugHonderdtal_HTE_HTE(cfg);
+  oef = genereerOptellenMetBrugHonderdtal_HTE_HTE(cfgActief);
 }
 
 if (oef) {
@@ -174,22 +212,22 @@ if (oef) {
 // ================================
 // AFTREKKEN — TOT 1000
 // ================================
-if (cfg.rekenType === 'aftrekken') {
+if (actiefType === 'aftrekken') {
 
   // =====================================================
 // TYPE-GARANTIE — AANVULLEN — HTE − HTE (tot 1000)
 // verschil ≤ 8, echte brugoefening (aanvullen)
 // =====================================================
 if (
-  cfg.rekenType === 'aftrekken' &&
+  actiefType === 'aftrekken' &&
   cfg.rekenMaxGetal === 1000 &&
   cfg.rekenHulp?.stijl === 'aanvullen' &&
-  cfg.somTypes?.length === 1 &&
-  cfg.somTypes[0] === 'HTE-HTE'
+  cfgActief.somTypes?.length === 1 &&
+  cfgActief.somTypes[0] === 'HTE-HTE'
 ) {
 
 
-  const oef = genereerAftrekkenAanvullen_HTE_HTE_Tot1000(cfg);
+  const oef = genereerAftrekkenAanvullen_HTE_HTE_Tot1000(cfgActief);
   if (oef) lijst.push(oef);
   continue; // 🔒 niets anders mag nog door
 }
@@ -201,9 +239,9 @@ if (
 if (
   cfg.rekenMaxGetal === 1000 &&
   cfg.rekenHulp?.stijl === 'compenseren' &&
-  cfg.somTypes?.includes('HTE-HTE')
+  cfgActief.somTypes?.includes('HTE-HTE')
 ) {
-  const oef = genereerAftrekkenCompenseren_HTE_HTE_Tot1000(cfg);
+  const oef = genereerAftrekkenCompenseren_HTE_HTE_Tot1000(cfgActief);
   if (oef) lijst.push(oef);
   continue; // 🔒 niets anders mag nog door
 }
@@ -213,11 +251,11 @@ if (
 // DEFINITIEVE TYPE-GARANTIE — AFTREKKEN HTE − HTE
 // =====================================================
 if (
-  cfg.rekenType === 'aftrekken' &&
+  actiefType === 'aftrekken' &&
   cfg.rekenMaxGetal === 1000 &&
-  cfg.somTypes?.includes('HTE-HTE')
+  cfgActief.somTypes?.includes('HTE-HTE')
 ) {
-  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfg);
+  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfgActief);
   if (oef) lijst.push(oef);
   continue; // 🔒 voorkomt ELKE andere aftrekvorm
 }
@@ -229,9 +267,9 @@ if (
 if (
   cfg.rekenBrug === 'met' &&
   cfg.rekenMaxGetal === 1000 &&
-  cfg.somTypes?.includes('HTE-HTE')
+  cfgActief.somTypes?.includes('HTE-HTE')
 ) {
-  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfg);
+  const oef = genereerAftrekkenMetBrugHTE_HTE_Tot1000(cfgActief);
   if (oef) lijst.push(oef);
   continue; // 🔒 voorkomt doorvallen naar andere aftrektypes
 }
@@ -239,7 +277,7 @@ if (
 
   // 1️⃣ eerst ZONDER brug
   if (cfg.rekenBrug === 'zonder') {
-    oef = genereerAftrekkenZonderBrugTot1000(cfg);
+    oef = genereerAftrekkenZonderBrugTot1000(cfgActief);
   }
 
   // 2️⃣ AANVULLEN (EXCLUSIEF, nieuw)
@@ -247,7 +285,7 @@ if (
     cfg.rekenBrug === 'met' &&
     cfg.rekenHulp?.stijl === 'aanvullen'
   ) {
-    oef = genereerAftrekkenAanvullenTot1000(cfg);
+    oef = genereerAftrekkenAanvullenTot1000(cfgActief);
   }
 
   // 3️⃣ COMPENSEREN (EXCLUSIEF)
@@ -255,19 +293,19 @@ if (
     cfg.rekenBrug === 'met' &&
     cfg.rekenHulp?.stijl === 'compenseren'
   ) {
-    oef = genereerAftrekkenCompenserenTot1000(cfg);
+    oef = genereerAftrekkenCompenserenTot1000(cfgActief);
   }
 
   // 4️⃣ PAS DAARNA gewone MET BRUG
   else if (cfg.rekenBrug === 'met') {
-    oef = genereerAftrekkenMetBrugTot1000(cfg);
+    oef = genereerAftrekkenMetBrugTot1000(cfgActief);
   }
 
   if (oef) lijst.push(oef);
 }
 
 
-}   // ← EINDE for-lus
+}   // ← EINDE while-lus
 
 return lijst;
 
@@ -1072,7 +1110,52 @@ function genereerOptellenCompenseren_HT_TE_Tot1000(cfg) {
 // AFTREKKEN ZONDER BRUG — TOT 1000
 // Types: T-T, H-H, HT-T
 // =====================================================
-function genereerAftrekkenZonderBrugTot1000(cfg) {
+export function genereerAftrekkenZonderBrugTot1000(cfg) {
+  console.error('🔥 AFTREKKEN ZONDER BRUG TOT 1000 WORDT UITGEVOERD');
+
+
+  // =====================================================
+// 🔒 HARD AFGEDWONGEN: HTE-HTE zonder brug
+// =====================================================
+if (
+  Array.isArray(cfg.somTypes) &&
+  cfg.somTypes.length === 1 &&
+  cfg.somTypes[0] === 'HTE-HTE'
+) {
+  console.error('🔥 HARD HTE-HTE ZONDER BRUG PAD');
+  let safety = 0;
+
+  while (safety++ < 500) {
+
+    const a = rnd(101, 999);
+    if (a % 10 === 0) continue;
+
+    const b = rnd(101, 999);
+    if (b % 10 === 0) continue;
+
+    if (b >= a) continue;
+
+    // geen lenen bij eenheden
+    if ((b % 10) > (a % 10)) continue;
+
+    // geen lenen bij tientallen
+    if (Math.floor((b % 100) / 10) > Math.floor((a % 100) / 10)) continue;
+
+    // geen brug naar honderdtal
+    if ((b % 100) > (a % 100)) continue;
+
+    return {
+      type: 'rekenen',
+      getal1: a,
+      getal2: b,
+      operator: '-',
+      somType: 'HTE-HTE'
+    };
+  }
+
+  return null;
+}
+
 
   const types = Array.isArray(cfg.somTypes)
     ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
@@ -1083,6 +1166,12 @@ function genereerAftrekkenZonderBrugTot1000(cfg) {
     t => t === 'T-T' || t === 'H-H' || t === 'HT-T' || t === 'HT-HT' || t === 'HTE-HT' || t === 'HTE-H' || t === 'HTE-HTE'
   );
   if (toegelaten.length === 0) return null;
+
+  // ❗ ZONDER BRUG: als slechts één somtype gekozen is,
+// ❗ mag ENKEL dat type gegenereerd worden
+if (toegelaten.length === 1 && toegelaten[0] !== 'HTE-HTE') {
+  return null;
+}
 
   let safety = 0;
 
@@ -1187,6 +1276,9 @@ if (gekozen === 'HTE-HT') {
   // geen negatieve uitkomst
   if (b >= a) continue;
 
+  // ❗ GEEN brug naar honderdtal
+if ((b % 100) > (a % 100)) continue;
+
   // geen lenen bij tientallen
   const ta = Math.floor((a % 100) / 10);
   const tb = (b % 100) / 10;
@@ -1224,42 +1316,6 @@ if (gekozen === 'HTE-H') {
     somType: 'HTE-H'
   };
 }
-
-// -------------------------
-// HTE - HTE
-// -------------------------
-if (gekozen === 'HTE-HTE') {
-
-  // aftrektal: HTE
-  const a = rnd(101, 999);
-  if (a % 10 === 0) continue;
-
-  // aftrekker: HTE
-  const b = rnd(101, 999);
-  if (b % 10 === 0) continue;
-
-  // geen negatieve uitkomst
-  if (b >= a) continue;
-
-  // geen lenen bij eenheden
-  const ea = a % 10;
-  const eb = b % 10;
-  if (eb > ea) continue;
-
-  // geen lenen bij tientallen
-  const ta = Math.floor((a % 100) / 10);
-  const tb = Math.floor((b % 100) / 10);
-  if (tb > ta) continue;
-
-  return {
-    type: 'rekenen',
-    getal1: a,
-    getal2: b,
-    operator: '-',
-    somType: 'HTE-HTE'
-  };
-}
-
 
   }
   return null;
