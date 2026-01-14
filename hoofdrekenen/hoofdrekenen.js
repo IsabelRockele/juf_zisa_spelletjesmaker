@@ -217,6 +217,76 @@ function setSomtypeVisibilityForGroup(max, rekenType, rekenBrug, hulpAan, hulpSt
   const optelWrap = groep.querySelector('.somtypes-optellen');
   if (!optelWrap) return;
 
+  // ================================
+// TOT 100 — SOMTYPES FILTEREN (UI)
+// ================================
+if (max === 100) {
+
+  const groep = document.querySelector('[data-somgroep="100"]');
+  if (!groep) return;
+
+  const optelWrap = groep.querySelector('.somtypes-optellen');
+  const aftrekWrap = groep.querySelector('.somtypes-aftrekken');
+
+  // --- OPTELLEN ---
+  if (rekenType === 'optellen' || rekenType === 'beide') {
+    optelWrap.style.display = 'block';
+
+    let allowed = [];
+
+    if (rekenBrug === 'zonder') {
+      allowed = ['E+E', 'T+T', 'T+E', 'TE+T'];
+    }
+
+    if (rekenBrug === 'met') {
+      allowed = ['E+E', 'TE+E', 'TE+TE'];
+    }
+
+    if (rekenBrug === 'beide') {
+      allowed = ['E+E', 'T+T', 'T+E', 'TE+T', 'TE+E', 'TE+TE'];
+    }
+
+    optelWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
+      const label = cb.closest('label');
+      const ok = allowed.includes(cb.value);
+      label.style.display = ok ? '' : 'none';
+      if (!ok) cb.checked = false;
+    });
+  } else {
+    optelWrap.style.display = 'none';
+  }
+
+  // --- AFTREKKEN ---
+  if (rekenType === 'aftrekken' || rekenType === 'beide') {
+    aftrekWrap.style.display = 'block';
+
+    let allowed = [];
+
+    if (rekenBrug === 'zonder') {
+      allowed = ['E-E', 'T-T', 'TE-E', 'TE-TE'];
+    }
+
+    if (rekenBrug === 'met') {
+      allowed = ['T-E', 'T-TE', 'TE-E', 'TE-TE'];
+    }
+
+    if (rekenBrug === 'beide') {
+      allowed = ['E-E', 'T-T', 'T-E', 'T-TE', 'TE-E', 'TE-TE'];
+    }
+
+    aftrekWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
+      const label = cb.closest('label');
+      const ok = allowed.includes(cb.value);
+      label.style.display = ok ? '' : 'none';
+      if (!ok) cb.checked = false;
+    });
+  } else {
+    aftrekWrap.style.display = 'none';
+  }
+
+  return;
+}
+
   // Alleen optellen filteren (nu). Aftrekken volgt later.
   // Alleen relevant bij tot 1000
 if (max !== 1000) return;
