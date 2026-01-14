@@ -499,13 +499,25 @@ export function genereerTot100_V2(cfg) {
 }
 
 if (cfg.rekenType === 'aftrekken') {
+
   if (cfg.rekenBrug === 'zonder') {
     oef = genereerAftrekkenZonderBrugTot100(cfg);
   }
-  if (cfg.rekenBrug === 'met') {
+
+  else if (cfg.rekenBrug === 'met') {
     oef = genereerAftrekkenMetBrugTot100(cfg);
   }
+
+  else if (cfg.rekenBrug === 'beide') {
+    // 🎯 mix van met en zonder brug
+    if (Math.random() < 0.5) {
+      oef = genereerAftrekkenZonderBrugTot100(cfg);
+    } else {
+      oef = genereerAftrekkenMetBrugTot100(cfg);
+    }
+  }
 }
+
 
     if (oef) lijst.push(oef);
   }
