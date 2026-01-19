@@ -235,7 +235,7 @@ if (max === 100) {
     let allowed = [];
 
     if (rekenBrug === 'zonder') {
-      allowed = ['E+E', 'T+T', 'T+E', 'TE+T'];
+      allowed = ['E+E', 'T+T', 'T+E', 'TE+T', 'TE+TE'];
     }
 
     if (rekenBrug === 'met') {
