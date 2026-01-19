@@ -953,8 +953,26 @@ function isGeschiktVoorCompenseren(oef, cfg) {
   // AFTREKKEN
   // =====================
   if (op === '-') {
-    // brug nodig
-    if (e1 >= e2) return false;
+   // ---------------------------------
+// AFTREKKEN — BRUGCHECK
+// ---------------------------------
+
+// tot 100: klassieke eenhedenbrug
+if (cfg.rekenMaxGetal <= 100) {
+  if (e1 >= e2) return false;
+}
+
+// tot 1000: compenseren = toegestaan via tiental/honderdtal
+if (cfg.rekenMaxGetal === 1000) {
+  // expliciet OK voor compenseren
+  if (cfg.rekenHulp?.stijl === 'compenseren') {
+    return true;
+  }
+
+  // anders: klassieke check
+  if (e1 >= e2) return false;
+}
+
 
     // aftrekker moet 6–9 hebben
     if (![6, 7, 8, 9].includes(e2)) return false;
