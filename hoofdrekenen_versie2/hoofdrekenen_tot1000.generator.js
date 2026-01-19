@@ -78,7 +78,9 @@ if (
 
   let safety = 0;
 
-while (lijst.length < aantal && safety < aantal * 20) {
+const maxTries = Math.max(200, aantal * 200);
+while (lijst.length < aantal && safety < maxTries) {
+
   safety++;
 
   let oef = null;
@@ -159,6 +161,23 @@ if (
   cfgActief.somTypes?.includes('TE+T')
 ) {
   oef = genereerOptellenMetBrugHonderdtal_TE_T(cfgActief);
+}
+
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoort === 'honderdtal' &&
+  cfgActief.somTypes?.includes('TE+TE')
+) {
+  oef = genereerOptellenMetBrugHonderdtal_TE_TE(cfgActief);
+}
+
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.brugSoort === 'honderdtal' &&
+  !cfg.rekenHulp?.stijl &&
+  cfgActief.somTypes?.includes('HTE+HTE')
+) {
+  oef = genereerOptellenMetBrugHonderdtal_HTE_HTE(cfgActief);
 }
 
 if (
