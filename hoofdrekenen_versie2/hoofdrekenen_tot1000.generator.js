@@ -1683,14 +1683,18 @@ if (gekozen === 'HT-TE') {
 
       if (b >= a) continue;
 
-      return {
-        type: 'rekenen',
-        getal1: a,
-        getal2: b,
-        operator: '-',
-        somType: 'HT-HT',
-        strategie: 'compenseren'
-      };
+ return {
+  type: 'rekenen',
+  getal1: a,
+  getal2: b,
+  operator: '-',
+  somType: 'HT-HT',
+
+  rekenHulp: {
+    stijl: 'compenseren'
+  }
+};
+
     }
 
     // =========================
