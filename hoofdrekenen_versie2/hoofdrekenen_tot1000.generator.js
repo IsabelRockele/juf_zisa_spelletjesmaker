@@ -307,18 +307,27 @@ if (
     oef = genereerAftrekkenAanvullenTot1000(cfgActief);
   }
 
-  // 3️⃣ COMPENSEREN (EXCLUSIEF)
-  else if (
-    cfg.rekenBrug === 'met' &&
-    cfg.rekenHulp?.stijl === 'compenseren'
-  ) {
-    oef = genereerAftrekkenCompenserenTot1000(cfgActief);
-  }
+ // 3️⃣ COMPENSEREN (EXCLUSIEF)
+// 🔒 Alleen compenseren als het écht expliciet gekozen is.
+// (Brug ≠ compenseren)
+else if (
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenHulp?.stijl === 'compenseren' &&
+  cfg.rekenHulp?.inschakelen === true
+) {
+  oef = genereerAftrekkenCompenserenTot1000(cfgActief);
+}
 
-  // 4️⃣ PAS DAARNA gewone MET BRUG
-  else if (cfg.rekenBrug === 'met') {
-    oef = genereerAftrekkenMetBrugTot1000(cfgActief);
-  }
+// 4️⃣ AFTREKKEN — HT-HT — MET BRUG (ZONDER COMPENSEREN)
+else if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenHulp?.stijl !== 'compenseren' &&
+  cfgActief.somTypes?.includes('HT-HT')
+
+) {
+ oef = genereerAftrekkenMetBrugTot1000(cfgActief);
+}
 
   if (oef) lijst.push(oef);
 }
