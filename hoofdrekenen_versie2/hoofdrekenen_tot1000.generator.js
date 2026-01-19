@@ -1176,15 +1176,8 @@ if (
 }
 
 
-  const types = Array.isArray(cfg.somTypes)
-    ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
-    : [];
+ const toegelaten = ['H-T', 'HT-T'];
 
-  // alleen de types die we ondersteunen
-  const toegelaten = types.filter(
-    t => t === 'T-T' || t === 'H-H' || t === 'HT-T' || t === 'HT-HT' || t === 'HTE-HT' || t === 'HTE-H' || t === 'HTE-HTE'
-  );
-  if (toegelaten.length === 0) return null;
 
   // ❗ ZONDER BRUG: als slechts één somtype gekozen is,
 // ❗ mag ENKEL dat type gegenereerd worden
