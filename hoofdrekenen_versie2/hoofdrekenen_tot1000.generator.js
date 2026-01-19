@@ -1169,9 +1169,7 @@ if (
 
   // ❗ ZONDER BRUG: als slechts één somtype gekozen is,
 // ❗ mag ENKEL dat type gegenereerd worden
-if (toegelaten.length === 1 && toegelaten[0] !== 'HTE-HTE') {
-  return null;
-}
+
 
   let safety = 0;
 
