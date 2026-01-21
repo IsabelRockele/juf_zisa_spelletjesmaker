@@ -1358,8 +1358,6 @@ if (gekozen === 'HTE-H') {
 // =====================================================
 export function genereerAftrekkenMetBrugTot1000(cfg) {
 
-  console.log('🔵 aftrekken met brug — somTypes =', cfg.somTypes);
-
   const types = Array.isArray(cfg.somTypes)
     ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
     : [];
@@ -1372,6 +1370,7 @@ export function genereerAftrekkenMetBrugTot1000(cfg) {
     t === 'HT-T' ||
     t === 'HT-HT'||
     t === 'HTE-HT'||
+    t === 'HTE-HTE' ||
     t === 'HT-TE'||
     t === 'H-TE'
 );
@@ -1511,6 +1510,71 @@ if (gekozen === 'HTE-HT') {
     somType: 'HTE-HT'
   };
 }
+
+/// -------------------------
+// HTE - HTE  (MET BRUG)
+// brugSoortHTE: 'eenheden' | 'tientallen' | 'beide'
+// -------------------------
+if (gekozen === 'HTE-HTE') {
+
+  const keuze = cfg.brugSoortHTE || 'eenheden';
+
+  // We bouwen a en b gericht zodat de brug exact klopt
+  // en er niets kan "doorsijpelen".
+
+  // Honderdtallen: aH altijd groter dan bH (geen honderdtallenbrug)
+  const aH = rnd(2, 9);          // 200..900
+  let bH = rnd(1, aH - 1);       // altijd < aH
+
+  let aT, aE, bT, bE;
+
+  if (keuze === 'eenheden') {
+    // ✅ E-brug, ❌ T-brug
+    // bE > aE  → lenen bij E
+    // bT <= aT - 1 → na lenen géén T-brug
+
+    aT = rnd(1, 9);              // niet 0, zodat lenen kan
+    aE = rnd(0, 8);
+    bE = rnd(aE + 1, 9);         // E-brug
+    bT = rnd(0, aT - 1);         // géén T-brug
+
+  } else if (keuze === 'tientallen') {
+    // ❌ E-brug, ✅ T-brug
+    // bE <= aE → geen lenen bij E
+    // bT > aT  → T-brug
+
+    aT = rnd(0, 8);
+    aE = rnd(0, 9);
+    bE = rnd(0, aE);             // géén E-brug
+    bT = rnd(aT + 1, 9);         // T-brug
+
+  } else { // 'beide'
+    // ✅ E-brug én ✅ T-brug
+    // bE > aE  → E-brug
+    // bT > aT - 1 → T-brug na lenen bij E
+
+    aT = rnd(1, 8);              // niet 0
+    aE = rnd(0, 8);
+    bE = rnd(aE + 1, 9);         // E-brug
+    bT = rnd(aT, 9);             // T-brug na lenen (aT - 1)
+  }
+
+  const a = aH * 100 + aT * 10 + aE;
+  const b = bH * 100 + bT * 10 + bE;
+
+  // Veiligheid (zou altijd oké moeten zijn)
+  if (b >= a) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HTE'
+  };
+}
+
+
 
 // -------------------------
 // HT - TE  (MET BRUG)
