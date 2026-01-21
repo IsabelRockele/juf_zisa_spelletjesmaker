@@ -120,6 +120,45 @@ function updateBrugSoortZichtbaarheid() {
 
   wrap.style.display = tonen ? 'block' : 'none';
 }
+
+// ==================================================
+// Brugsoort HTE-HTE (aftrekken tot 1000) — zichtbaarheid
+// ==================================================
+function updateBrugSoortHTEZichtbaarheid() {
+  // max-getal
+  const max = parseInt(
+    document.getElementById('rekenMaxGetal')?.value || '0',
+    10
+  );
+
+  // bewerking
+  const rekenType =
+    document.querySelector('input[name="rekenType"]:checked')?.value;
+
+  // brug aan/uit
+  const rekenBrug =
+    document.getElementById('rekenBrug')?.value;
+
+  // is HTE-HTE aangevinkt?
+  const hteChecked =
+    document.querySelector(
+      '[data-somgroep="1000"] input[name="somType"][value="HTE-HTE"]'
+    )?.checked;
+
+  // ons HTML-blok
+  const wrap = document.getElementById('brugSoortHTEWrap');
+  if (!wrap) return;
+
+  // voorwaarden
+  const tonen =
+    max === 1000 &&
+    rekenType === 'aftrekken' &&
+    rekenBrug === 'met' &&
+    hteChecked === true;
+
+  wrap.style.display = tonen ? 'block' : 'none';
+}
+
 // reageren op wijzigingen
 document
   .querySelectorAll('input[name="rekenType"]')
@@ -160,6 +199,32 @@ document.querySelectorAll('input[name="rekenHulpStijl"]').forEach(radio => {
 
 // ook meteen toepassen bij laden
 updateSomtypesFilter();
+
+// --------------------------------------------------
+// Brugsoort HTE-HTE — events
+// --------------------------------------------------
+document
+  .getElementById('rekenMaxGetal')
+  ?.addEventListener('change', updateBrugSoortHTEZichtbaarheid);
+
+document
+  .getElementById('rekenBrug')
+  ?.addEventListener('change', updateBrugSoortHTEZichtbaarheid);
+
+document
+  .querySelectorAll('input[name="rekenType"]')
+  .forEach(r =>
+    r.addEventListener('change', updateBrugSoortHTEZichtbaarheid)
+  );
+
+document
+  .querySelectorAll('[data-somgroep="1000"] input[name="somType"]')
+  .forEach(cb =>
+    cb.addEventListener('change', updateBrugSoortHTEZichtbaarheid)
+  );
+
+// initieel bij laden
+updateBrugSoortHTEZichtbaarheid();
 
 // ================================
 // Oefenvorm (alleen zichtbaar bij tot 100)
@@ -518,10 +583,25 @@ let somTypesGefilterd = somTypes;
   ? somTypesGen
   : somTypesGefilterd,
 
-
-
     opdracht: document.getElementById('opdracht_reken').value || ''
   };
+
+  // -----------------------------------------------
+// Brugsoort specifiek voor HTE-HTE (aftrekken)
+// -----------------------------------------------
+if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenBrug === 'met' &&
+  Array.isArray(cfg.somTypes) &&
+  cfg.somTypes.includes('HTE-HTE')
+) {
+  cfg.brugSoortHTE =
+    document.querySelector('input[name="brugSoortHTE"]:checked')?.value
+    || 'eenheden';
+} else {
+  delete cfg.brugSoortHTE;
+}
 
   // === Brugsoorten (alleen relevant bij tot 1000)
 if (cfg.rekenMaxGetal === 1000 && cfg.rekenBrug === 'met') {
