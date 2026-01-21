@@ -234,6 +234,21 @@ if (oef) {
 if (actiefType === 'aftrekken') {
 
   // =====================================================
+// AFTREKKEN — HT-HT — AANVULLEN (PRIORITAIR)
+// =====================================================
+if (
+  cfg.rekenBrug === 'met' &&
+  cfg.rekenHulp?.stijl === 'aanvullen' &&
+  cfgActief.somTypes?.length === 1 &&
+  cfgActief.somTypes[0] === 'HT-HT'
+) {
+  const oef = genereerAftrekkenAanvullen_HT_HT_Tot1000(cfgActief);
+  if (oef) lijst.push(oef);
+  continue; // 🔒 niets anders mag nog door
+}
+
+
+  // =====================================================
 // TYPE-GARANTIE — AANVULLEN — HTE − HTE (tot 1000)
 // verschil ≤ 8, echte brugoefening (aanvullen)
 // =====================================================
@@ -299,13 +314,6 @@ if (
     oef = genereerAftrekkenZonderBrugTot1000(cfgActief);
   }
 
-  // 2️⃣ AANVULLEN (EXCLUSIEF, nieuw)
-  else if (
-    cfg.rekenBrug === 'met' &&
-    cfg.rekenHulp?.stijl === 'aanvullen'
-  ) {
-    oef = genereerAftrekkenAanvullenTot1000(cfgActief);
-  }
 
  // 3️⃣ COMPENSEREN (EXCLUSIEF)
 // 🔒 Alleen compenseren als het écht expliciet gekozen is.
@@ -1808,72 +1816,6 @@ function genereerAftrekkenCompenseren_HTE_HTE_Tot1000(cfg) {
   return null;
 }
 
-// =====================================================
-// AFTREKKEN MET BRUG — AANVULLEN — TOT 1000
-// TIJDELIJKE BASISIMPLEMENTATIE
-// =====================================================
-function genereerAftrekkenAanvullenTot1000(cfg) {
-
-  let safety = 0;
-
-  while (safety++ < 300) {
-
-    const oef = genereerAftrekkenMetBrugTot1000(cfg);
-    if (!oef) continue;
-
-    const g1 = oef.getal1;
-    const g2 = oef.getal2;
-    const type = oef.somType;
-
-    // =====================================
-    // AANVULLEN – HT-HT
-    // - verplicht brug
-    // - verschil ≤ 40
-    // =====================================
-    if (type === 'HT-HT') {
-
-      const verschil = g1 - g2;
-      if (verschil > 40) continue;
-
-      // 🔒 brug check zonder somHeeftBrug
-      const t1 = (g1 % 100) / 10;
-      const t2 = (g2 % 100) / 10;
-      if (t2 <= t1) continue; // geen brug → weg
-    }
-
-// =====================================
-// AANVULLEN – HTE-HTE
-// - VERPLICHT verschil ≤ 8
-// - VERPLICHT brug
-// =====================================
-if (type === 'HTE-HTE') {
-
-  const verschil = g1 - g2;
-  if (verschil > 8) continue;
-
-  const e1 = g1 % 10;
-  const e2 = g2 % 10;
-  const t1 = Math.floor((g1 % 100) / 10);
-  const t2 = Math.floor((g2 % 100) / 10);
-
-  const brugEenheden = e2 > e1;
-  const brugTientallen = (!brugEenheden && t2 > t1);
-
-  if (!brugEenheden && !brugTientallen) continue;
-
-}
-// ⛔ ALS het HTE-HTE is maar niet voldoet,
-// ⛔ mag het NIET doorvallen
-else if (type === 'HTE-HTE') {
-  continue;
-}
-
-
-    return oef;
-  }
-
-  return null;
-}
 
 // -----------------------------------------------------
 // AFTREKKEN — AANVULLEN — HTE − HTE (tot 1000)
@@ -1925,6 +1867,46 @@ if (e2_check <= e1) continue;
   }
 
   return null;
+}
+
+// -----------------------------------------------------
+// AFTREKKEN — AANVULLEN — HT − HT (tot 1000)
+// Werkboekstijl:
+// - beide getallen HT
+// - verschil 10 t.e.m. 60
+// - geen zoeklus, maar constructie (stabiel)
+// Voorbeelden:
+// 720 − 680
+// 810 − 770
+// 620 − 590
+// -----------------------------------------------------
+function genereerAftrekkenAanvullen_HT_HT_Tot1000(cfg) {
+
+  console.log('🔥 HT-HT AANVULLEN WORDT AANGEROEPEN');
+
+  // 1️⃣ kies verschil (10, 20, 30, 40, 50, 60)
+  const verschil = [10, 20, 30, 40, 50, 60][rnd(0, 5)];
+
+  // 2️⃣ kies aftrekker (HT)
+  const h = rnd(1, 8);          // honderdtal
+  const t = rnd(1, 8);          // tiental
+  const b = h * 100 + t * 10;   // bv. 680
+
+  // 3️⃣ construeer aftrektal
+  const a = b + verschil;
+
+  // 4️⃣ veiligheidschecks
+  if (a >= 1000) return null;
+  if (a % 100 === 0) return null;   // geen zuiver honderdtal
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HT-HT',
+    strategie: 'aanvullen'
+  };
 }
 
 
