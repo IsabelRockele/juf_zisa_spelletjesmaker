@@ -7,9 +7,11 @@ import {
   genereerAftrekkenZonderBrugTot1000
 } from '../../hoofdrekenen_versie2/hoofdrekenen_tot1000.generator.js';
 import { genereerBrugHerkennenTot100 } from '../../hoofdrekenen_versie2/brug_herkennen_tot100.js';
-
+import { genereerAftrekkenAanvullenTot1000_N } 
+from '../../hoofdrekenen_versie2/aftrekken_aanvullen_tot1000.generator.js';
 
 export function generateOefeningen(cfg, grid, renderOefening) {
+
     console.log(
   'GEN START',
   'max=', cfg.rekenMaxGetal,
@@ -19,6 +21,11 @@ export function generateOefeningen(cfg, grid, renderOefening) {
   'somTypes=', cfg.somTypes,
   'variant=', cfg.variant
 );
+
+// 🔧 FIX: aanvullen expliciet als variant markeren
+if (cfg.rekenHulp?.stijl === 'aanvullen') {
+  cfg.variant = 'aanvullen';
+}
 
 
   /* ================================
@@ -33,6 +40,31 @@ export function generateOefeningen(cfg, grid, renderOefening) {
     cfg._oefeningen = null;
     cfg._dirty = false;
   }
+
+  // ✅ AANVULLEN — AFTREKKEN TOT 1000 (eigen generator, V2-router vermijden)
+if (
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.rekenHulp?.stijl === 'aanvullen' &&
+  !Array.isArray(cfg._oefeningen)
+) {
+  const N = Number(cfg.numOefeningen || cfg.aantal || 20);
+
+  // verwacht exact 1 somtype
+  const somType =
+    Array.isArray(cfg.somTypes) && cfg.somTypes.length === 1
+      ? cfg.somTypes[0]
+      : 'HTE-HTE';
+
+  cfg._oefeningen =
+    genereerAftrekkenAanvullenTot1000_N(N, somType);
+
+  cfg._oefeningen.forEach(oef =>
+    renderOefening(grid, cfg, oef)
+  );
+
+  return; // ⛔ STOP: niets mag verder doorlopen
+}
 
   // ✅ Brug herkennen: genereer eigen oefeningen (en voorkom V2-generator)
   if (cfg.variant === 'brugHerkennen100' && !Array.isArray(cfg._oefeningen)) {
@@ -58,6 +90,25 @@ export function generateOefeningen(cfg, grid, renderOefening) {
       heeftBrug: oef.heeftBrug
     }));
   }
+
+// ✅ Aanvullen — HT-HT (rechtstreeks, stabiel)
+if (
+  cfg.variant === 'aanvullen' &&
+  cfg.rekenType === 'aftrekken' &&
+  cfg.rekenMaxGetal === 1000 &&
+  cfg.somTypes?.length === 1 &&
+  cfg.somTypes[0] === 'HT-HT' &&
+  !Array.isArray(cfg._oefeningen)
+) {
+  const N = Number(cfg.aantal || cfg.numOefeningen || 20);
+  cfg._oefeningen = [];
+
+  for (let i = 0; i < N; i++) {
+    const oef = genereerAftrekkenAanvullen_HT_HT_Tot1000(cfg);
+    if (oef) cfg._oefeningen.push(oef);
+  }
+}
+
 
 // ================================
 // BEIDE: meerdere oefeningen per operator
