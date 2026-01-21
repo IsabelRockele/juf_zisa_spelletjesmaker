@@ -326,16 +326,21 @@ else if (
   oef = genereerAftrekkenCompenserenTot1000(cfgActief);
 }
 
-// 4️⃣ AFTREKKEN — HT-HT — MET BRUG (ZONDER COMPENSEREN)
+// 4️⃣ AFTREKKEN — MET BRUG (ZONDER COMPENSEREN)
+// HT-HT, HT-TE, H-TE
 else if (
   cfg.rekenType === 'aftrekken' &&
   cfg.rekenBrug === 'met' &&
   cfg.rekenHulp?.stijl !== 'compenseren' &&
-  cfgActief.somTypes?.includes('HT-HT')
-
+  (
+    cfgActief.somTypes?.includes('HT-HT') ||
+    cfgActief.somTypes?.includes('HT-TE') ||
+    cfgActief.somTypes?.includes('H-TE')
+  )
 ) {
- oef = genereerAftrekkenMetBrugTot1000(cfgActief);
+  oef = genereerAftrekkenMetBrugTot1000(cfgActief);
 }
+
 
   if (oef) lijst.push(oef);
 }
@@ -1351,7 +1356,10 @@ if (gekozen === 'HTE-H') {
 // =====================================================
 // AFTREKKEN MET BRUG — TOT 1000
 // =====================================================
-function genereerAftrekkenMetBrugTot1000(cfg) {
+export function genereerAftrekkenMetBrugTot1000(cfg) {
+
+  console.log('🔵 aftrekken met brug — somTypes =', cfg.somTypes);
+
   const types = Array.isArray(cfg.somTypes)
     ? cfg.somTypes.map(t => t.replace(/\s+/g, ''))
     : [];
@@ -1359,11 +1367,15 @@ function genereerAftrekkenMetBrugTot1000(cfg) {
   // we starten met H-T
  const toegelaten = types.filter(
   t =>
+    t === 'T-TE' ||
     t === 'H-T'  ||
     t === 'HT-T' ||
     t === 'HT-HT'||
-    t === 'HT-TE'   // 👈 DEZE REGEL TOEVOEGEN
+    t === 'HTE-HT'||
+    t === 'HT-TE'||
+    t === 'H-TE'
 );
+
 
 
   if (toegelaten.length === 0) return null;
@@ -1394,6 +1406,37 @@ function genereerAftrekkenMetBrugTot1000(cfg) {
     }
 
     // -------------------------
+// T - TE  (MET BRUG)
+// Brug ALLEEN in eenheden
+// Voorbeelden: 70 - 28 ✔️ | 70 - 58 ❌
+// -------------------------
+if (gekozen === 'T-TE') {
+
+  // aftrektal: T (20..90)
+  const a = rnd(2, 9) * 10;
+
+  // aftrekker: TE
+  const e = rnd(1, 9);      // eenheden → brug
+  const t = rnd(1, 7);      // tiental kleiner dan a
+  const b = t * 10 + e;
+
+  // veiligheid: geen negatieve uitkomst
+  if (b >= a) continue;
+
+  // 🔒 géén tientalbrug
+  if (t >= (a / 10)) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'T-TE'
+  };
+}
+
+
+    // -------------------------
 // HT - T  (MET BRUG)
 // -------------------------
 if (gekozen === 'HT-T') {
@@ -1419,6 +1462,53 @@ if (gekozen === 'HT-T') {
     getal2: b,
     operator: '-',
     somType: 'HT-T'
+  };
+}
+
+// -------------------------
+// HTE - HT  (MET BRUG)
+// Exact één brug (tientallen OF honderden)
+// Voorbeelden: 742 - 480 ✔️ | 942 - 850 ✔️
+// -------------------------
+if (gekozen === 'HTE-HT') {
+
+  // aftrektal: HTE (100..999)
+  const a = rnd(100, 999);
+
+  // aftrekker: HT (10..990), geen eenheden
+  let b = rnd(1, 99) * 10;
+
+  // veiligheid
+  if (b >= a) continue;
+
+  // cijfers van a
+  const aH = Math.floor(a / 100);
+  const aT = Math.floor((a % 100) / 10);
+  const aE = a % 10;
+
+  // cijfers van b (E is 0)
+  const bH = Math.floor(b / 100);
+  const bT = Math.floor((b % 100) / 10);
+
+  // ---- brugdetectie ----
+  // tientallenbrug: bT > aT
+  const brugT = bT > aT;
+
+  // honderdenbrug: bH > aH
+  const brugH = bH > aH;
+
+  // exact één brug afdwingen
+  if ((brugT && brugH) || (!brugT && !brugH)) continue;
+
+  // geen eenhedenbrug (aftrekker heeft E=0)
+  // (aE mag alles zijn)
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'HTE-HT'
   };
 }
 
@@ -1454,6 +1544,37 @@ if (gekozen === 'HT-TE') {
     getal2: b,
     operator: '-',
     somType: 'HT-TE'
+  };
+}
+
+// -------------------------
+// H - TE  (MET BRUG)
+// Brug ALLEEN via eenheden
+// Voorbeelden: 700 - 42 ✔️ | 700 - 52 ❌
+// -------------------------
+if (gekozen === 'H-TE') {
+
+  // aftrektal: H (100..900)
+  const a = rnd(1, 9) * 100;
+
+  // aftrekker: TE (11..99), geen tiental
+  const e = rnd(1, 9);
+  const t = rnd(1, 8);
+  const b = t * 10 + e;
+
+  // geen negatieve uitkomst
+  if (b >= a) continue;
+
+  // 🔒 brug ALLEEN via eenheden
+  // eenheden aftrekker > 0, aftrektal eindigt op 0 → altijd lenen
+  if (e === 0) continue;
+
+  return {
+    type: 'rekenen',
+    getal1: a,
+    getal2: b,
+    operator: '-',
+    somType: 'H-TE'
   };
 }
 
