@@ -374,13 +374,14 @@ if (rekenBrug === 'met' || (hulpAan && hulpStijl === 'compenseren')) {
   }
   
 // 🔹 AFTREKKEN — AANVULLEN (beperkte set)
-if (hulpAan && hulpStijl === 'aanvullen') {
-  allowed = [
-    'HT-HT',
-    'HT-TE',
-    'HTE-HTE'
-  ];
-}
+// if (hulpAan && hulpStijl === 'aanvullen') {
+//   allowed = [
+//     'HT-HT',
+//     'HT-TE',
+//     'HTE-HTE'
+//   ];
+// }
+
 
   aftrekWrap.querySelectorAll('input[name="somType"]').forEach(cb => {
     const label = cb.closest('label');
