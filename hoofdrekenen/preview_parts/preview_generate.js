@@ -4,8 +4,10 @@
 
 import { genereerHoofdrekenenV2 } from '../../hoofdrekenen_versie2/hoofdrekenen_v2.generator.js';
 import {
-  genereerAftrekkenZonderBrugTot1000
+  genereerAftrekkenZonderBrugTot1000,
+  genereerAftrekkenMetBrugTot1000
 } from '../../hoofdrekenen_versie2/hoofdrekenen_tot1000.generator.js';
+
 import { genereerBrugHerkennenTot100 } from '../../hoofdrekenen_versie2/brug_herkennen_tot100.js';
 import { genereerAftrekkenAanvullenTot1000_N } 
 from '../../hoofdrekenen_versie2/aftrekken_aanvullen_tot1000.generator.js';
@@ -236,14 +238,31 @@ if (cfg.rekenType === 'aftrekken' && Array.isArray(somTypesVoorDezeOef)) {
   // deze laten beide toe → verdeling blijft gelden
   // (TE-E, TE-TE → niets forceren)
 }
+let res;
 
-const res = genereerHoofdrekenenV2({
-  ...cfg,
-  rekenBrug: brugVoorDezeOef,
-  somTypes: somTypesVoorDezeOef,
-  aantalOefeningen: 1,
-  _seed: Math.random()
-});
+if (cfg.rekenType === 'aftrekken' && cfg.rekenMaxGetal === 1000) {
+  if (brugVoorDezeOef === 'met') {
+    res = genereerAftrekkenMetBrugTot1000({
+      ...cfg,
+      rekenBrug: 'met',
+      somTypes: somTypesVoorDezeOef
+    });
+  } else {
+    res = genereerAftrekkenZonderBrugTot1000({
+      ...cfg,
+      somTypes: somTypesVoorDezeOef
+    });
+  }
+} else {
+  res = genereerHoofdrekenenV2({
+    ...cfg,
+    rekenBrug: brugVoorDezeOef,
+    somTypes: somTypesVoorDezeOef,
+    aantalOefeningen: 1,
+    _seed: Math.random()
+  });
+}
+
 
 
         oef = Array.isArray(res) ? res[0] : res;
