@@ -763,10 +763,23 @@ if (oef.operator === '+') {
 
     const rij = document.createElement('div');
     rij.style.display = 'flex';
-    rij.style.flexWrap = 'wrap';
-    rij.style.justifyContent = 'center';
-    rij.style.gap = '6px';
-    rij.style.padding = '8px';
+rij.style.flexWrap = 'wrap';
+
+// ❌ GEEN vertical centering meer
+// rij.style.justifyContent = 'center';
+
+// ✅ schijfjes blijven bovenaan gegroepeerd
+rij.style.alignContent = 'flex-start';
+
+// horizontaal blijven centreren
+rij.style.justifyContent = 'center';
+
+rij.style.gap = '6px';
+rij.style.padding = '8px';
+
+// ✅ lege ruimte ONDERAAN om bij te tekenen
+rij.style.minHeight = '140px';
+
 
     for (let i = 0; i < aantal; i++) {
       const schijf = document.createElement('div');
@@ -795,14 +808,15 @@ if (oef.operator === '+') {
   // T – groen
   grid.appendChild(maakKolom('T', t, '#86efac', '10'));
 
-  // E – eenheden
-// TE-TE → eenheden tonen
-// HT-HT → géén eenheden (zoals vroeger)
-if (aftrekker < 100) {
-  // TE-TE (tot 100)
+// E – eenheden
+// TE-TE (tot 100) → eenheden tonen
+// HTE-HTE (tot 1000) → eenheden tonen
+// HT-HT (tot 1000) → geen eenheden
+if (aftrekker < 100 || aftrekker % 10 !== 0) {
+  // TE-TE of HTE-HTE
   grid.appendChild(maakKolom('E', e, '#fde047', '1'));
 } else {
-  // HT-HT (tot 1000): bewust geen eenheden
+  // HT-HT: geen eenheden, wel lege kolom
   const eKolom = document.createElement('div');
   eKolom.style.textAlign = 'center';
   eKolom.style.borderRight = 'none';
@@ -825,10 +839,10 @@ if (aftrekker < 100) {
   grid.appendChild(eKolom);
 }
 
+// ⬇️ DIT MOET ERNA KOMEN (en was nu onbereikbaar)
 model.appendChild(grid);
 container.appendChild(model);
 }
-
 
 
 function _blankBox(width = 54, height = 22) {
