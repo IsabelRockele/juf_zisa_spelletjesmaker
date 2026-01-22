@@ -10,6 +10,7 @@ import {
 import { normalizePreviewCfg } from './preview_parts/preview_config.js';
 import { generateOefeningen } from './preview_parts/preview_generate.js';
 import { renderOefening } from './preview_parts/preview_render.js';
+import { genereerBrugHerkennenTot100 } from '../../hoofdrekenen_versie2/brug_herkennen_tot100.js';
 
 
 import {
@@ -217,12 +218,6 @@ export function renderHoofdrekenenSegment(container, segment) {
   
  // 🔒 Clone: preview mag settings niet muteren
 const cfg = normalizePreviewCfg(segment);
-
-// 🔁 FIX: voorkom vastgelopen lege cache bij aftrekken tot 100
-if (cfg.rekenMaxGetal === 100 && cfg.rekenType === 'aftrekken') {
-  cfg._oefeningen = null;
-  cfg._dirty = true;
-}
 
 // 🔁 Zorg dat operator correct gezet is
 if (!cfg.operator && cfg.rekenType) {
@@ -441,8 +436,16 @@ if (cfg.variant === 'brugHerkennen100') {
 
   grid.style.gap = hulp ? '32px' : '20px';
 
-// ✅ Oefeningen genereren + renderen in het grid
-generateOefeningen(cfg, grid, renderOefening);
+// ⭐ Brug herkennen = editor-gestuurd → NOOIT hergenereren
+if (cfg.variant === 'brugHerkennen100' && Array.isArray(cfg._oefeningen)) {
+  cfg._oefeningen.forEach(oef => {
+    renderOefening(grid, cfg, oef);
+  });
+} else {
+  // alle andere oefenvormen: generator blijft leidend
+  generateOefeningen(cfg, grid, renderOefening);
+}
+
 
 
   card.appendChild(grid);
