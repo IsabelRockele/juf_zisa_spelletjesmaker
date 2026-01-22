@@ -12,7 +12,43 @@ import { genereerBrugHerkennenTot100 } from '../../hoofdrekenen_versie2/brug_her
 import { genereerAftrekkenAanvullenTot1000_N } 
 from '../../hoofdrekenen_versie2/aftrekken_aanvullen_tot1000.generator.js';
 
+import { genereerBrugBeide as genereerBrugBeideTot20 } 
+from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot20_beide.generator.js';
+
+import { genereerBrugBeide as genereerBrugBeideTot100 } 
+from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot100_beide.generator.js';
+
+import { genereerBrugBeide as genereerBrugBeideTot1000 }
+from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot1000_beide.generator.js';
+
+
 export function generateOefeningen(cfg, grid, renderOefening) {
+
+    // 🔀 Brug = beide toegestaan → aparte generator
+if (cfg.rekenBrug === 'beide') {
+
+  if (!Array.isArray(cfg._oefeningen)) {
+
+    if (Number(cfg.rekenMaxGetal) === 20) {
+      cfg._oefeningen = genereerBrugBeideTot20(cfg).oefeningen;
+    }
+
+    if (Number(cfg.rekenMaxGetal) === 100) {
+      cfg._oefeningen = genereerBrugBeideTot100(cfg).oefeningen;
+    }
+
+    if (Number(cfg.rekenMaxGetal) === 1000) {
+  cfg._oefeningen = genereerBrugBeideTot1000(cfg).oefeningen;
+}
+
+  }
+
+  cfg._oefeningen.forEach(oef =>
+    renderOefening(grid, cfg, oef)
+  );
+
+  return;
+}
 
     console.log(
   'GEN START',
@@ -200,7 +236,8 @@ const maxPerBrug = Math.ceil(N / 2);
       } else {
        // ✅ Brug = "beide": per oefening kiezen we met/zonder (generator verwacht geen 'beide')
 
-if (cfg.rekenBrug === 'beide') {
+if (false && cfg.rekenBrug === 'beide') {
+
   if (telBrugMet >= maxPerBrug) {
     brugVoorDezeOef = 'zonder';
   } else if (telBrugZonder >= maxPerBrug) {
