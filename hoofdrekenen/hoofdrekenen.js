@@ -361,7 +361,8 @@ if (max !== 1000) return;
 // ================================
 if (rekenType === 'optellen') {
 
-  if (rekenBrug !== 'met') return;
+  if (rekenBrug !== 'met' && rekenBrug !== 'beide') return;
+
 
   let allowed = [
   'T+T',
@@ -413,6 +414,26 @@ if (rekenType === 'aftrekken') {
     ];
   }
 
+    // 🔹 BEIDE toegestaan (mix van zonder + met brug)
+  if (rekenBrug === 'beide') {
+    allowed = [
+      // zonder brug
+      'T-T',
+      'H-H',
+      'HT-T',
+      'HT-HT',
+      'HTE-H',
+      'HTE-HT',
+      'HTE-HTE',
+
+      // met brug (en varianten die jij toelaat)
+      'HT-TE',
+      'T-TE',
+      'H-T',
+      'H-TE'
+    ];
+  }
+
   // 🔹 AFTREKKEN — MET brug OF compenseren
 if (rekenBrug === 'met' || (hulpAan && hulpStijl === 'compenseren')) {
 
@@ -458,11 +479,6 @@ if (rekenBrug === 'met' || (hulpAan && hulpStijl === 'compenseren')) {
   });
 }
 
-
-  // Alleen relevant bij tot 1000 én wanneer er “met brug” gekozen is.
-  // (Bij 'beide' laten we voorlopig alles staan, anders wordt het verwarrend.)
-  if (max !== 1000) return;
-  if (rekenBrug !== 'met') return;
 
 
   // Optellen met brug + compenseren → beperk lijst
@@ -693,15 +709,189 @@ if (hulpAan) {
     melding.textContent = '';
   }
 
-  // 👁️ Maak preview (vervangt vorige hoofdreken-opdrachten)
-  btnMaak.addEventListener('click', () => {
+  // 👁️ Maak preview (brug herkennen krijgt eigen flow)
+btnMaak.addEventListener('click', () => {
+
+  const max =
+    parseInt(document.getElementById('rekenMaxGetal')?.value || '0', 10);
+
+  const oefenvorm =
+    document.querySelector('input[name="rekenOefenvorm"]:checked')?.value;
+
+  // 🔑 OPTIE B — Brug herkennen (eigen preview)
+  if (max === 100 && oefenvorm === 'brugHerkennen100') {
+
+    const cfg = verzamelBrugHerkennenConfiguratie();
+    // 👉 OEFENINGEN GENEREREN (nieuw)
+if (cfg.rekenType === 'beide') {
+  const half = Math.ceil(cfg.numOefeningen / 2);
+
+  const plus = genereerBrugHerkennenTot100('plus', half);
+  const min  = genereerBrugHerkennenTot100('min', cfg.numOefeningen - half);
+
+  cfg._oefeningen = [...plus, ...min].map(oef => ({
+    getal1: oef.a,
+    getal2: oef.b,
+    operator: oef.op,
+    heeftBrug: oef.heeftBrug
+  }));
+} else {
+  const type = (cfg.rekenType === 'aftrekken') ? 'min' : 'plus';
+
+  cfg._oefeningen = genereerBrugHerkennenTot100(type, cfg.numOefeningen)
+    .map(oef => ({
+      getal1: oef.a,
+      getal2: oef.b,
+      operator: oef.op,
+      heeftBrug: oef.heeftBrug
+    }));
+}
+
+
+    let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
+
+
+    bundel.push({ settings: cfg });
+
+    localStorage.setItem('werkbladBundel', JSON.stringify(bundel));
+
+    if (previewFrame) {
+      previewFrame.src = previewFrame.src;
+    }
+
+    melding.textContent = '';
+    return;
+  }
+
+  // ✅ ALLES ANDERS: bestaand gedrag
   renderPreview(true);
 });
 
 
-  // ➕ Voeg toe aan bundel (blijft staan, meerdere opdrachten mogelijk)
-  btnToevoegen.addEventListener('click', () => {
-    renderPreview(true);
-  });
+
+  // ➕ Voeg toe aan bundel
+btnToevoegen.addEventListener('click', () => {
+
+  let bundel = JSON.parse(localStorage.getItem('werkbladBundel') || '[]');
+  if (!bundel.length) return;
+
+  const laatste = bundel[bundel.length - 1];
+  const cfg = laatste.settings;
+
+  // ==============================
+  // OPTIE B — Brug herkennen
+  // ==============================
+  if (cfg?.variant === 'brugHerkennen100') {
+
+    const extra =
+      parseInt(document.getElementById('numOefeningen_reken')?.value, 10) || 0;
+
+    if (extra <= 0) return;
+
+    let nieuw = [];
+
+    if (cfg.rekenType === 'beide') {
+      const half = Math.ceil(extra / 2);
+      const plus = genereerBrugHerkennenTot100('plus', half);
+      const min  = genereerBrugHerkennenTot100('min', extra - half);
+      nieuw = [...plus, ...min];
+    } else {
+      const type = (cfg.rekenType === 'aftrekken') ? 'min' : 'plus';
+      nieuw = genereerBrugHerkennenTot100(type, extra);
+    }
+
+    cfg._oefeningen = [
+      ...(cfg._oefeningen || []),
+      ...nieuw.map(oef => ({
+        getal1: oef.a,
+        getal2: oef.b,
+        operator: oef.op,
+        heeftBrug: oef.heeftBrug
+      }))
+    ];
+
+    // bundel opslaan
+    bundel[bundel.length - 1].settings = cfg;
+    localStorage.setItem('werkbladBundel', JSON.stringify(bundel));
+
+    // preview herladen (ZONDER renderPreview)
+    if (previewFrame) {
+      previewFrame.src = previewFrame.src;
+    }
+
+    return;
+  }
+
+  // ==============================
+  // ALLES ANDERS: bestaand gedrag
+  // ==============================
+  renderPreview(true);
+});
+
+
+
+  // ===================================================
+// OPTIE B — Brug herkennen: eigen configuratie
+// ===================================================
+function verzamelBrugHerkennenConfiguratie() {
+
+  const rekenType =
+    document.querySelector('input[name="rekenType"]:checked')?.value
+    || 'optellen';
+
+  const aantal =
+    parseInt(document.getElementById('numOefeningen_reken')?.value, 10)
+    || 20;
+
+  return {
+    segmentId: 'brugherkennen_' + Date.now(),
+    hoofdBewerking: 'rekenen',
+
+    variant: 'brugHerkennen100',
+
+    rekenMaxGetal: 100,
+    rekenType,
+
+    numOefeningen: aantal,
+
+    opdracht:
+      document.getElementById('opdracht_reken')?.value
+      || 'Kleur het lampje als de som een brugoefening is.',
+
+    _oefeningen: []
+  };
+}
+
+// ===================================================
+// Brug herkennen — oefeninggenerator (lokale kopie)
+// ===================================================
+function genereerBrugHerkennenTot100(type, aantal) {
+
+  const oefeningen = [];
+
+  while (oefeningen.length < aantal) {
+
+    let a, b, heeftBrug;
+
+    if (type === 'plus') {
+      a = Math.floor(Math.random() * 90) + 10;
+      b = Math.floor(Math.random() * 90) + 1;
+      heeftBrug = ((a % 10) + (b % 10)) >= 10;
+    } else {
+      a = Math.floor(Math.random() * 90) + 10;
+      b = Math.floor(Math.random() * (a % 10));
+      heeftBrug = (b % 10) > (a % 10);
+    }
+
+    oefeningen.push({
+      a,
+      b,
+      op: type === 'plus' ? '+' : '-',
+      heeftBrug
+    });
+  }
+
+  return oefeningen;
+}
 
 });
