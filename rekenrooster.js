@@ -111,10 +111,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (required <= 0) return null;
 
-        if (bewerking === 'x') {
-            if (geselecteerdeTafels.length < required) return null;
-            colHeaders = shuffleArray(geselecteerdeTafels).slice(0, required);
-            rowHeaders = shuffleArray(geselecteerdeTafels).slice(0, required);
+       if (bewerking === 'x') {
+    if (geselecteerdeTafels.length < required) return null;
+
+    // 👉 Tafels die geoefend worden
+    rowHeaders = shuffleArray(geselecteerdeTafels).slice(0, required);
+
+    // 👉 Vermenigvuldigers (altijd 1 t.e.m. 10, maar niet de tafels zelf)
+    const mogelijkeKolommen = getUniqueRandomNumbers(1, 10, required);
+    if (!mogelijkeKolommen) return null;
+
+    colHeaders = mogelijkeKolommen;
+
         } else if (bewerking === '+') {
             const midPoint = Math.floor(numberRange / 2);
             if((midPoint) < required) return null; 
