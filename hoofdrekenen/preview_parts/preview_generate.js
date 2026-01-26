@@ -18,10 +18,6 @@ from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot20_beide.generator.js';
 import { genereerBrugBeide as genereerBrugBeideTot100 } 
 from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot100_beide.generator.js';
 
-import { genereerBrugBeide as genereerBrugBeideTot1000 }
-from '../../hoofdrekenen_versie2/hoofdrekenen_brugtot1000_beide.generator.js';
-
-
 export function generateOefeningen(cfg, grid, renderOefening) {
 
     // 🔀 Brug = beide toegestaan → aparte generator
