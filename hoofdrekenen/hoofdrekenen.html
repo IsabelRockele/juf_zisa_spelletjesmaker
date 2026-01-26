@@ -655,6 +655,26 @@ Wilt u deze oefeningen gebruiken? Kies dan <strong>‘met brug’</strong> of
       const maxSel = document.getElementById('rekenMaxGetal');
       const brugSel = document.getElementById('rekenBrug');
 
+      // 🔒 Bij tot 1000: optie "Beide toegestaan" verbergen (betrouwbaar)
+      const optieBeide = brugSel.querySelector('option[value="beide"]');
+
+      function updateBrugKeuzeVoorMax() {
+        const max = parseInt(maxSel.value, 10);
+        if (!optieBeide) return;
+
+        if (max === 1000) {
+          optieBeide.hidden = true;
+          optieBeide.disabled = true;
+
+          // als "beide" geselecteerd was: zet naar "met"
+          if (brugSel.value === 'beide') {
+            brugSel.value = 'met';
+          }
+        } else {
+          optieBeide.hidden = false;
+          optieBeide.disabled = false;
+        }
+      }
 
       function updateHulpUI(){
   const aan = !!hulpCb.checked;
@@ -778,6 +798,8 @@ function updateBrugInfo() {
 const brugSoortWrap = document.getElementById('brugSoortWrap');
 
 function updateBrugSoortUI() {
+  updateBrugKeuzeVoorMax();   // ✅ voeg deze regel toe
+
   const max = parseInt(maxSel.value, 10);
   const brug = brugSel.value;
 
