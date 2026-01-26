@@ -500,7 +500,12 @@ export function genereerTot100_V2(cfg) {
 
 if (cfg.rekenType === 'aftrekken') {
 
-  if (cfg.rekenBrug === 'zonder') {
+  // ✅ AANVULLEN heeft altijd eigen generator
+  if (cfg.variant === 'aanvullen') {
+    oef = genereerAanvullenTot100(cfg);
+  }
+
+  else if (cfg.rekenBrug === 'zonder') {
     oef = genereerAftrekkenZonderBrugTot100(cfg);
   }
 
@@ -509,7 +514,6 @@ if (cfg.rekenType === 'aftrekken') {
   }
 
   else if (cfg.rekenBrug === 'beide') {
-    // 🎯 mix van met en zonder brug
     if (Math.random() < 0.5) {
       oef = genereerAftrekkenZonderBrugTot100(cfg);
     } else {
@@ -518,9 +522,56 @@ if (cfg.rekenType === 'aftrekken') {
   }
 }
 
-
     if (oef) lijst.push(oef);
   }
 
   return lijst;
 }
+// =====================================================
+// AANVULLEN TOT 100 — AFTREKKEN (ALTIJD MET BRUG)
+// verschil (uitkomst) = 1..8
+// voorbeelden: 43-37, 31-28
+// =====================================================
+export function genereerAanvullenTot100(cfg) {
+
+  const types = cfg.somTypes || ['TE-TE'];
+
+  let g1, g2;
+  let safety = 0;
+
+  while (safety++ < 500) {
+
+    // aftrekker: TE (geen tiental)
+    g2 = rnd(11, 99);
+    if (g2 % 10 === 0) continue;
+
+    // verschil: 1..8
+    const verschil = rnd(1, 8);
+
+    g1 = g2 + verschil;
+    if (g1 > 99) continue;
+
+    // altijd brug
+    if ((g1 % 10) >= (g2 % 10)) continue;
+
+    // ============================
+    // 🔒 SOMTYPE-FILTER
+    // ============================
+    if (types.includes('TE-TE')) {
+      // beide moeten TE zijn → geen tientallen
+      if (g1 % 10 === 0 || g2 % 10 === 0) continue;
+    }
+
+    return {
+      type: 'rekenen',
+      getal1: g1,
+      getal2: g2,
+      operator: '-',
+      somType: 'TE-TE'
+    };
+  }
+
+  return null;
+}
+
+
