@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Getallenas Generator</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #f0f7ff;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 20px;
+  }
+
+  h1 { font-size: 1.7rem; font-weight: 800; color: #1a4e8a; margin-bottom: 4px; }
+  .subtitle { color: #5a7fa8; font-size: 0.9rem; margin-bottom: 24px; }
+
+  /* ── Configuratie paneel ── */
+  .config-panel {
+    background: white; border-radius: 16px; padding: 22px 28px;
+    box-shadow: 0 4px 20px rgba(26,78,138,0.10);
+    width: 100%; max-width: 960px; margin-bottom: 16px;
+  }
+  .panel-title {
+    font-weight: 800; font-size: 1rem; color: #1a4e8a;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ── Lijsten van toe te voegen getallenlijnen ── */
+  .line-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+
+  .line-row {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+    background: #f5f9ff; border: 1.5px solid #d0e6f8; border-radius: 12px;
+    padding: 12px 14px;
+  }
+  .line-row.dragging { opacity: 0.4; }
+
+  .field { display: flex; flex-direction: column; gap: 3px; }
+  .field-label { font-weight: 700; font-size: 0.72rem; color: #1a4e8a; text-transform: uppercase; letter-spacing: 0.3px; }
+
+  input[type="number"] {
+    padding: 7px 10px; border: 2px solid #c8dff5; border-radius: 8px;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700;
+    color: #1a4e8a; outline: none; width: 72px;
+  }
+  input[type="number"]:focus { border-color: #1a7fdd; }
+
+  select {
+    padding: 7px 10px; border: 2px solid #c8dff5; border-radius: 8px;
+    font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 700;
+    color: #1a4e8a; background: white; outline: none; cursor: pointer;
+  }
+  select:focus { border-color: #1a7fdd; }
+
+  .qty-field input { width: 52px; }
+
+  .btn-remove {
+    padding: 6px 10px; border: none; border-radius: 8px;
+    background: #fdecea; color: #c0392b; font-size: 1rem;
+    cursor: pointer; font-weight: 800; align-self: flex-end;
+    transition: background 0.15s;
+  }
+  .btn-remove:hover { background: #f5c6c2; }
+
+  /* ── Buttons ── */
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button {
+    padding: 10px 18px; border: none; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800;
+    cursor: pointer; transition: transform 0.1s;
+  }
+  button:active { transform: scale(0.97); }
+  .btn-add  { background: #e8f3fd; color: #1a4e8a; border: 2px solid #c8dff5; }
+  .btn-add:hover { background: #d0e8fb; }
+  .btn-gen  { background: #1a7fdd; color: white; box-shadow: 0 4px 12px rgba(26,127,221,.3); }
+  .btn-gen:hover { background: #1568bb; }
+  .btn-pdf  { background: #e84c4c; color: white; box-shadow: 0 4px 12px rgba(232,76,76,.25); }
+  .btn-pdf:hover { background: #c73a3a; }
+  .btn-png  { background: #22b573; color: white; box-shadow: 0 4px 12px rgba(34,181,115,.3); }
+  .btn-png:hover { background: #1a9660; }
+
+  /* ── Werkruimte instelling ── */
+  .spacing-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid #e5eff8;
+    flex-wrap: wrap;
+  }
+  .spacing-row label { font-weight: 700; font-size: 0.82rem; color: #1a4e8a; white-space: nowrap; }
+
+  /* ── Preview ── */
+  #preview-area {
+    background: white; border-radius: 16px;
+    padding: 20px 28px;
+    box-shadow: 0 4px 20px rgba(26,78,138,0.10);
+    width: 100%; max-width: 960px;
+    min-height: 100px;
+  }
+  .empty-msg { color: #aac3df; font-size: 1rem; font-weight: 600; text-align: center; padding: 20px; }
+
+  /* ── Print ── */
+  @media print {
+    @page { margin: 10mm; size: A4 portrait; }
+    body { background: white; padding: 0; margin: 0; }
+    .config-panel, h1, .subtitle { display: none !important; }
+    #preview-area {
+      box-shadow: none; padding: 0; border-radius: 0;
+      width: 100%; max-width: 100%;
+    }
+    .print-line-wrap { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<h1>📏 Getallenas Generator</h1>
+<p class="subtitle">Meerdere getallenlijnen op één pagina · werkruimte voor leerlingen</p>
+
+<div class="config-panel">
+  <div class="panel-title">➕ Getallenlijnen samenstellen</div>
+
+  <div class="line-list" id="line-list"></div>
+
+  <div class="actions">
+    <button class="btn-add" onclick="addLine()">+ Getallenlijn toevoegen</button>
+    <button class="btn-gen" onclick="generateAll()">▶ Genereer overzicht</button>
+    <button class="btn-pdf" onclick="window.print()">🖨 PDF afdrukken</button>
+  </div>
+
+  <div class="spacing-row">
+    <label>Werkruimte tussen lijnen:</label>
+    <select id="spacing-size">
+      <option value="40">Klein (weinig ruimte)</option>
+      <option value="70" selected>Normaal</option>
+      <option value="100">Groot (veel ruimte)</option>
+      <option value="140">Extra groot</option>
+    </select>
+    <label style="margin-left:12px;">Aantal kopieën per lijn:</label>
+    <input type="number" id="global-copies" value="1" min="1" max="10" style="width:60px;">
+    <span style="font-size:0.78rem;color:#7fa0c0;font-weight:600;">(overschrijft individuele aantallen)</span>
+    <button class="btn-add" style="padding:6px 12px;font-size:0.82rem;" onclick="resetCopies()">Individueel</button>
+  </div>
+</div>
+
+<div id="preview-area">
+  <div class="empty-msg">Voeg getallenlijnen toe en klik op "Genereer".</div>
+</div>
+
+<script>
+// ── Line template ──────────────────────────────────────
+let lineId = 0;
+
+function addLine(defaults = {}) {
+  const id = ++lineId;
+  const d = {
+    start: defaults.start ?? 0,
+    end:   defaults.end   ?? 20,
+    step:  defaults.step  ?? 1,
+    mid:   defaults.mid   ?? 5,
+    big:   defaults.big   ?? 10,
+    mode:  defaults.mode  ?? 'all',
+    qty:   defaults.qty   ?? 1,
+  };
+
+  const row = document.createElement('div');
+  row.className = 'line-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <div class="field qty-field">
+      <span class="field-label">Aantal</span>
+      <input type="number" class="f-qty" value="${d.qty}" min="1" max="20">
+    </div>
+    <div class="field">
+      <span class="field-label">Van</span>
+      <input type="number" class="f-start" value="${d.start}">
+    </div>
+    <div class="field">
+      <span class="field-label">Tot en met</span>
+      <input type="number" class="f-end" value="${d.end}">
+    </div>
+    <div class="field">
+      <span class="field-label">Stap</span>
+      <input type="number" class="f-step" value="${d.step}" min="1">
+    </div>
+    <div class="field">
+      <span class="field-label">Middel per</span>
+      <input type="number" class="f-mid" value="${d.mid}" min="1">
+    </div>
+    <div class="field">
+      <span class="field-label">Groot per</span>
+      <input type="number" class="f-big" value="${d.big}" min="1">
+    </div>
+    <div class="field">
+      <span class="field-label">Vakjes bij</span>
+      <select class="f-mode">
+        <option value="all"   ${d.mode==='all'   ?'selected':''}>Elk getal</option>
+        <option value="big"   ${d.mode==='big'   ?'selected':''}>Grote stap</option>
+        <option value="none"  ${d.mode==='none'  ?'selected':''}>Geen vakjes</option>
+        <option value="empty" ${d.mode==='empty' ?'selected':''}>Lege vakjes</option>
+      </select>
+    </div>
+    <button class="btn-remove" onclick="removeLine(${id})" title="Verwijder">✕</button>
+  `;
+  document.getElementById('line-list').appendChild(row);
+}
+
+function removeLine(id) {
+  const el = document.querySelector(`.line-row[data-id="${id}"]`);
+  if (el) el.remove();
+}
+
+function resetCopies() {
+  document.getElementById('global-copies').value = 1;
+}
+
+function getLineConfigs() {
+  const rows = document.querySelectorAll('.line-row');
+  const globalCopies = parseInt(document.getElementById('global-copies').value) || 1;
+  const useGlobal = globalCopies > 1;
+  const configs = [];
+  rows.forEach(row => {
+    const start   = parseInt(row.querySelector('.f-start').value);
+    const end     = parseInt(row.querySelector('.f-end').value);
+    const step    = Math.max(1, parseInt(row.querySelector('.f-step').value) || 1);
+    const midStep = Math.max(1, parseInt(row.querySelector('.f-mid').value)  || 5);
+    const bigStep = Math.max(1, parseInt(row.querySelector('.f-big').value)  || 10);
+    const mode    = row.querySelector('.f-mode').value;
+    const qty     = useGlobal ? globalCopies : Math.max(1, parseInt(row.querySelector('.f-qty').value) || 1);
+    if (!isNaN(start) && !isNaN(end) && start < end) {
+      for (let q = 0; q < qty; q++) {
+        configs.push({ start, end, step, midStep, bigStep, mode });
+      }
+    }
+  });
+  return configs;
+}
+
+// ── Draw a single number line onto a canvas ───────────
+function drawLine(cfg) {
+  const { start, end, step, midStep, bigStep, mode } = cfg;
+
+  const A4_W = 690;
+
+  function isMult(n, s) {
+    return Math.round(Math.abs((n - start) % s)) === 0;
+  }
+
+  const ticks = [];
+  for (let n = start; n <= end; n += step) ticks.push(n);
+  const N = ticks.length;
+
+  const useLevels = (mode === 'big' || mode === 'none');
+
+  const BOX_H     = 20;
+  const BOX_PAD_X = 6;
+  const GAP       = 3;
+  const TICK_UNIFORM = 8;
+  const TICK_BIG   = 16;
+  const TICK_MID   = 10;
+  const TICK_SMALL = 5;
+  const LINE_W  = 2;
+  const PAD_TOP = 6;
+  const PAD_BOT = 6;
+  const ARROW_W = 22;
+
+  const tallestTick = useLevels ? TICK_BIG : TICK_UNIFORM;
+  const lineY   = PAD_TOP + BOX_H + GAP + tallestTick;
+  const canvasH = lineY + LINE_W / 2 + PAD_BOT;
+
+  const maxAbs  = Math.max(Math.abs(start), Math.abs(end));
+  const digits  = String(maxAbs).length + (start < 0 ? 1 : 0);
+  const fontSize = digits <= 2 ? 13 : digits <= 3 ? 11 : 9;
+  const fontStr  = `bold ${fontSize}px Nunito, Arial, sans-serif`;
+
+  const tmp = document.createElement('canvas').getContext('2d');
+  tmp.font = fontStr;
+  let maxTW = 0;
+  ticks.forEach(n => { const w = tmp.measureText(String(n)).width; if (w > maxTW) maxTW = w; });
+  const BOX_W = Math.ceil(maxTW) + BOX_PAD_X * 2 + 2;
+
+  let minSpacing;
+  if (mode === 'all' || mode === 'empty') {
+    minSpacing = BOX_W + 1;
+  } else if (mode === 'big') {
+    const intervalsPerBig = Math.max(1, bigStep / step);
+    minSpacing = Math.max(2, Math.ceil((BOX_W + 2) / intervalsPerBig));
+  } else {
+    minSpacing = 4;
+  }
+  let spacing = Math.floor((A4_W - BOX_W - ARROW_W) / Math.max(1, N - 1));
+  spacing = Math.max(spacing, minSpacing);
+  const totalW = (N - 1) * spacing + BOX_W + ARROW_W;
+
+  const dpr = window.devicePixelRatio || 1;
+  const canvas = document.createElement('canvas');
+  canvas.width  = Math.ceil(totalW) * dpr;
+  canvas.height = Math.ceil(canvasH) * dpr;
+  canvas.style.width  = Math.ceil(totalW) + 'px';
+  canvas.style.height = Math.ceil(canvasH) + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, totalW, canvasH);
+
+  const INK = '#1a4e8a';
+  ctx.font = fontStr;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const cx = i => i * spacing + BOX_W / 2;
+
+  ctx.strokeStyle = INK;
+  ctx.lineWidth   = LINE_W;
+  ctx.lineCap     = 'butt';
+  ctx.beginPath();
+  ctx.moveTo(cx(0),     lineY);
+  ctx.lineTo(cx(N - 1), lineY);
+  ctx.stroke();
+
+  const axEnd = cx(N - 1) + ARROW_W;
+  ctx.beginPath();
+  ctx.moveTo(cx(N - 1), lineY);
+  ctx.lineTo(axEnd - 8,  lineY);
+  ctx.stroke();
+  ctx.fillStyle = INK;
+  ctx.beginPath();
+  ctx.moveTo(axEnd - 9, lineY - 5);
+  ctx.lineTo(axEnd,     lineY);
+  ctx.lineTo(axEnd - 9, lineY + 5);
+  ctx.closePath();
+  ctx.fill();
+
+  ticks.forEach((n, i) => {
+    const x      = cx(i);
+    const isBig  = isMult(n, bigStep);
+    const isMidT = !isBig && isMult(n, midStep);
+    const level  = isBig ? 'big' : isMidT ? 'mid' : 'small';
+    const hasBox = (mode === 'all' || mode === 'empty') || (mode === 'big' && isBig);
+
+    ctx.strokeStyle = INK;
+    ctx.fillStyle   = INK;
+    ctx.lineCap     = 'butt';
+
+    if (hasBox) {
+      const tickH = useLevels ? TICK_BIG : TICK_UNIFORM;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x, lineY);
+      ctx.lineTo(x, lineY - tickH);
+      ctx.stroke();
+      const bx = Math.round(x - BOX_W / 2);
+      const by = lineY - tickH - GAP - BOX_H;
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(bx + 0.75, by + 0.75, BOX_W - 1.5, BOX_H - 1.5);
+      if (mode !== 'empty') {
+        ctx.fillText(String(n), x, by + BOX_H / 2);
+      }
+    } else {
+      let tickH, lw;
+      if (useLevels) {
+        tickH = level === 'big' ? TICK_BIG : level === 'mid' ? TICK_MID : TICK_SMALL;
+        lw    = level === 'big' ? 1.8 : level === 'mid' ? 1.5 : 1.2;
+      } else {
+        tickH = TICK_UNIFORM; lw = 1.5;
+      }
+      ctx.lineWidth = lw;
+      ctx.beginPath();
+      ctx.moveTo(x, lineY);
+      ctx.lineTo(x, lineY - tickH);
+      ctx.stroke();
+    }
+  });
+
+  return canvas;
+}
+
+// ── Generate all lines into preview ──────────────────
+function generateAll() {
+  const configs = getLineConfigs();
+  if (configs.length === 0) {
+    alert('Voeg eerst getallenlijnen toe.');
+    return;
+  }
+
+  const workSpace = parseInt(document.getElementById('spacing-size').value) || 70;
+  const area = document.getElementById('preview-area');
+  area.innerHTML = '';
+
+  configs.forEach((cfg, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'print-line-wrap';
+    wrap.style.cssText = `
+      padding-top: 10px;
+      padding-bottom: ${workSpace}px;
+      border-bottom: ${idx < configs.length - 1 ? '1px dashed #d0e0f0' : 'none'};
+      margin-bottom: ${idx < configs.length - 1 ? '4px' : '0'};
+    `;
+
+    const canvas = drawLine(cfg);
+    wrap.appendChild(canvas);
+    area.appendChild(wrap);
+  });
+}
+
+// ── Init with two default lines ──────────────────────
+addLine({ start: 0, end: 20, step: 1, mid: 5, big: 10, mode: 'all',  qty: 1 });
+addLine({ start: 0, end: 20, step: 1, mid: 5, big: 10, mode: 'empty', qty: 1 });
+generateAll();
+</script>
+</body>
+</html>
