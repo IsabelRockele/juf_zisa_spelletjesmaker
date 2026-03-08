@@ -1297,7 +1297,7 @@ function buildRekenpad(steps, opKey, range, mode) {
             if (cur % step.operand !== 0) continue;
             next = cur / step.operand;
           }
-          if (next < 1 || next > range * 2) continue;
+          if (next < 1 || next > range) continue;
           ops.push(step);
           values.push(next);
           found = true;
