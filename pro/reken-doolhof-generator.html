@@ -1720,7 +1720,9 @@ function getRoosterConfigData(id) {
   } else {
     // Brugcheck op eenheidscijfers
     function eenheid(n) { return n % 10; }
-    function heeftBrug(rij, kol) { return eenheid(rij) < eenheid(kol); }
+    function heeftBrug(rij, kol) {
+  return op === 'sub' ? eenheid(rij) < eenheid(kol) : eenheid(rij) + eenheid(kol) > 9;
+}
 
     if (op === 'sub') {
       // Genereer geldige KOLOMMEN op basis van brugkeuze
