@@ -759,10 +759,28 @@ function buildMaze(rows,cols,sums){
     if(r2<rows-1&&c2<cols-1&&Math.random()<.5){const to=idx(r2+1,c2+1);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'d'});}
     if(r2<rows-1&&c2>0&&Math.random()<.4){const to=idx(r2+1,c2-1);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'d2'});}
   }
+  // Verzamel alle correcte antwoorden in het doolhof (om conflicten te vermijden)
+  const allCorrectAns=new Set(nodes.map(n=>n.sum.ans));
   conns.forEach(conn=>{
     const ca=nodes[conn.from].sum.ans;
     if(conn.isCorrect){conn.label=ca;}
-    else{let w,t=0;do{w=ca+rnd(1,6)*(Math.random()<.5?1:-1);t++;}while((w===ca||w<=0)&&t<50);conn.label=w>0?w:ca+rnd(1,4);}
+   else{
+      const toAns=nodes[conn.to].sum.ans;
+      const isDeel=document.getElementById('op').value==='div';
+      const upto=isDeel?(parseInt(document.getElementById('table-upto').value)||10):999;
+      const maxVal=isDeel?upto:ca+10;
+      const pool=[];
+      for(let v=1;v<=maxVal;v++){
+        if(v!==ca&&v!==toAns)pool.push(v);
+      }
+      let w;
+      if(pool.length>0){
+        w=pool[rnd(0,pool.length-1)];
+      }else{
+        w=ca===1?2:ca-1;
+      }
+      conn.label=w;
+    }
   });
   return{nodes,conns,path,rows,cols};
 }
