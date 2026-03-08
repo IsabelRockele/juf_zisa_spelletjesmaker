@@ -53,6 +53,21 @@ button:active{transform:scale(.97);}
 .btn-dl-png{background:#22b573;color:white;}
 .btn-dl-png:hover{background:#1a9660;}
 .dl-spinner{display:none;font-size:.8rem;color:#5a7fa8;font-weight:700;margin-top:6px;}
+
+/* PDF LOADING OVERLAY */
+#pdf-overlay{display:none;position:fixed;inset:0;background:rgba(10,30,70,.72);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:18px;}
+#pdf-overlay.active{display:flex;}
+.pdf-overlay-box{background:white;border-radius:18px;padding:32px 44px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.3);min-width:280px;}
+.pdf-overlay-title{font-size:1.1rem;font-weight:900;color:#1a4e8a;margin-bottom:6px;}
+.pdf-overlay-sub{font-size:.82rem;color:#5a7fa8;font-weight:700;margin-bottom:18px;}
+.pdf-progress-bar{width:100%;height:10px;background:#e0ecf8;border-radius:10px;overflow:hidden;}
+.pdf-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#1a7fdd,#22b8f0);border-radius:10px;transition:width .3s ease;}
+
+/* WORKFLOW TIP */
+.workflow-tip{display:flex;align-items:flex-start;gap:10px;background:#fff8e6;border:2px solid #f0c040;border-radius:11px;padding:10px 14px;margin-top:14px;font-size:.82rem;color:#7a5000;font-weight:700;line-height:1.5;}
+.workflow-tip .tip-icon{font-size:1.2rem;flex-shrink:0;margin-top:1px;}
+.workflow-tip ol{margin:4px 0 0 14px;padding:0;}
+.workflow-tip ol li{margin-bottom:2px;}
 .btn-add:hover{background:#d0f0e0;}
 
 .err{color:#c00;font-weight:700;font-size:.85rem;margin-top:8px;display:none;background:#fff0f0;padding:7px 12px;border-radius:8px;border:1px solid #fcc;}
@@ -64,7 +79,7 @@ button:active{transform:scale(.97);}
 
 /* PRINT OUTPUT */
 #print-output{width:100%;max-width:860px;margin-top:0;}
-.worksheet{background:white;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(26,78,138,.1);margin-bottom:18px;overflow:hidden;}
+.worksheet{background:white;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(26,78,138,.1);margin-bottom:18px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
 .worksheet svg{display:block;width:100%;height:auto;}
 .empty-msg{color:#aac3df;font-size:1rem;font-weight:600;text-align:center;padding:28px;}
 
@@ -78,8 +93,12 @@ button:active{transform:scale(.97);}
   html,body{background:white!important;padding:0!important;margin:0!important;display:block!important;}
   h1,p.subtitle,.tabs,.panel,.dl-spinner,#bundel-bar,#preview-area,.combo-bar{display:none!important;}
   #print-output{max-width:100%!important;margin:0!important;padding:0!important;width:100%!important;display:block!important;}
-  .worksheet{box-shadow:none!important;border-radius:0!important;margin:0 0 6mm 0!important;padding:0!important;width:100%!important;}
+  .worksheet{box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;width:100%!important;page-break-before:always!important;break-before:page!important;page-break-inside:avoid!important;break-inside:avoid!important;}
+  .worksheet:first-child{page-break-before:auto!important;break-before:auto!important;}
   .worksheet:last-child{margin-bottom:0!important;}
+  .maze-worksheet{page-break-before:always!important;break-before:page!important;}
+  #print-output .maze-worksheet:first-child,
+  #preview-area .maze-worksheet:first-child{page-break-before:auto!important;break-before:auto!important;}
   .ans-key,.no-print{display:none!important;}
 }
 </style>
@@ -220,6 +239,10 @@ button:active{transform:scale(.97);}
     <button class="btn-sec" onclick="previewDoolhof()">🔀 Nieuwe variant</button>
     <button class="btn-add-d" onclick="addPreviewToBundel()" id="btn-voeg-d" style="display:none;">✅ Voeg toe aan bundel</button>
   </div>
+  <div class="workflow-tip">
+    <span class="tip-icon">💡</span>
+    <div>Zo maak je een PDF:<ol><li>Stel je opties in en klik <strong>Genereer preview</strong></li><li>Klik <strong>Voeg toe aan bundel</strong> (knop verschijnt na preview)</li><li>Herhaal voor elk werkblad dat je wil toevoegen</li><li>Klik <strong>⬇ PDF</strong> in de bundelbalk om te downloaden</li></ol></div>
+  </div>
   <div class="dl-spinner" id="dl-spin">⏳ Bezig met genereren…</div>
   <div class="err" id="d-err"></div>
 </div>
@@ -321,6 +344,7 @@ button:active{transform:scale(.97);}
     <button class="btn-sec" onclick="previewInUit()">🔀 Nieuwe variant</button>
     <button class="btn-add-iu" onclick="addPreviewToBundel()" id="btn-voeg-iu" style="display:none;">✅ Voeg toe aan bundel</button>
   </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ REKENPAD PANEL -->
@@ -425,6 +449,7 @@ button:active{transform:scale(.97);}
     <button class="btn-sec" onclick="previewRekenpad()">🔀 Nieuwe variant</button>
     <button class="btn-add-iu" onclick="addPreviewToBundel()" id="btn-voeg-rp" style="display:none;background:#9b59b6;border-color:#8e44ad;">✅ Voeg toe aan bundel</button>
   </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
 </div>
 
 
@@ -468,6 +493,17 @@ button:active{transform:scale(.97);}
     <button class="btn-gen" onclick="previewRooster()">▶ Genereer preview</button>
     <button class="btn-sec" onclick="previewRooster()">🔀 Nieuwe variant</button>
     <button style="background:#e8a030;color:white;border:2px solid #c07820;border-radius:10px;padding:9px 18px;font-weight:800;font-size:.88rem;cursor:pointer;" onclick="addPreviewToBundel()" id="btn-voeg-ro">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+
+</div><!-- /panel-rooster -->
+
+<!-- PDF LOADING OVERLAY -->
+<div id="pdf-overlay">
+  <div class="pdf-overlay-box">
+    <div class="pdf-overlay-title">⏳ PDF wordt aangemaakt…</div>
+    <div class="pdf-overlay-sub" id="pdf-overlay-sub">Werkblad 1 van 1 verwerken…</div>
+    <div class="pdf-progress-bar"><div class="pdf-progress-fill" id="pdf-progress-fill"></div></div>
   </div>
 </div>
 
@@ -800,7 +836,7 @@ function generateDoolhof(){
   const errEl=document.getElementById('d-err');
   errEl.style.display='none';
 
-  const output=document.getElementById('print-output');
+  const output=document.getElementById('preview-area');
   output.innerHTML='';
 
   for(let n=0;n<aantal;n++){
@@ -811,7 +847,7 @@ function generateDoolhof(){
     const maze=buildMaze(rows,cols,sums.slice(0,needed));
 
     const div=document.createElement('div');
-    div.className='worksheet';
+    div.className='worksheet maze-worksheet';
 
     // Werkblad kop
     const titel=`🌀 Doolhof${aantal>1?' '+(n+1):''}`;
@@ -1826,7 +1862,7 @@ function generateRooster() {
 
   const cols = roosterConfigs.length <= 2 ? roosterConfigs.length : 2;
   const grid = document.createElement('div');
-  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},auto);gap:14px;padding:8px 16px 16px;justify-content:center;`;
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},auto);gap:70px;padding:8px 16px 16px;justify-content:center;`;
 
   roosterConfigs.forEach(cfg => {
     const data = getRoosterConfigData(cfg.id);
@@ -1942,66 +1978,53 @@ async function captureWorksheets() {
   if (!sheets.length) {
     sheets = [...document.querySelectorAll('#preview-area .worksheet')];
   }
-  const realSheets = sheets;
-  if (!realSheets.length) { alert('Genereer eerst een werkblad via "Genereer preview".'); return null; }
-  const spinner = document.getElementById('dl-spin');
-  if (spinner) spinner.style.display = 'block';
+  if (!sheets.length) { alert('Genereer eerst een werkblad en voeg het toe aan de bundel.'); return null; }
+
+  // Toon overlay
+  const overlay = document.getElementById('pdf-overlay');
+  const overlaySub = document.getElementById('pdf-overlay-sub');
+  const progressFill = document.getElementById('pdf-progress-fill');
+  overlay.classList.add('active');
+  progressFill.style.width = '0%';
 
   const canvases = [];
-  for (const sheet of realSheets) {
-    // Verberg tijdelijk alles behalve dit werkblad
-    const allSiblings = [...document.body.children];
-    const origDisplay = allSiblings.map(el => el.style.display);
-    allSiblings.forEach(el => { if (!el.contains(sheet)) el.style.display = 'none'; });
+  for (let idx = 0; idx < sheets.length; idx++) {
+    const sheet = sheets[idx];
 
-    // Reset stijl van het werkblad zelf
-    const orig = {
-      shadow: sheet.style.boxShadow,
-      radius: sheet.style.borderRadius,
-      margin: sheet.style.margin,
-      padding: sheet.style.padding,
-    };
-    sheet.style.boxShadow = 'none';
-    sheet.style.borderRadius = '0';
-    sheet.style.margin = '0';
-    sheet.style.padding = '0';
+    // Update overlay tekst en progress
+    overlaySub.textContent = `Werkblad ${idx + 1} van ${sheets.length} verwerken…`;
+    progressFill.style.width = Math.round((idx / sheets.length) * 85) + '%';
 
-    // Reset body/wrapper stijl tijdelijk
-    const origBody = document.body.style.cssText;
-    document.body.style.cssText = 'margin:0;padding:0;background:white;display:block;';
+    // Maak een off-screen clone zodat het scherm niet verspringt
+    const clone = sheet.cloneNode(true);
+    // Verberg no-print elementen in clone
+    clone.querySelectorAll('.no-print').forEach(el => el.style.display = 'none');
 
-    const printOutput = document.getElementById('print-output');
-    const origPO = printOutput.style.cssText;
-    printOutput.style.cssText = 'margin:0;padding:0;width:100%;';
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:' + sheet.offsetWidth + 'px;background:white;z-index:-1;';
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
 
-    // Verberg no-print elementen (zoals verwijder-knoppen) tijdens capture
-    const noPrints = sheet.querySelectorAll('.no-print');
-    noPrints.forEach(el => el.style.display = 'none');
+    await new Promise(r => setTimeout(r, 40));
 
-    await new Promise(r => setTimeout(r, 30));
-
-    const canvas = await html2canvas(sheet, {
+    const canvas = await html2canvas(clone, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       logging: false,
+      width: sheet.offsetWidth,
     });
 
-    // Herstel no-print elementen
-    noPrints.forEach(el => el.style.display = '');
-
-    // Herstel alles
-    document.body.style.cssText = origBody;
-    printOutput.style.cssText = origPO;
-    sheet.style.boxShadow = orig.shadow;
-    sheet.style.borderRadius = orig.radius;
-    sheet.style.margin = orig.margin;
-    sheet.style.padding = orig.padding;
-    allSiblings.forEach((el, i) => { el.style.display = origDisplay[i]; });
-
+    document.body.removeChild(wrapper);
     canvases.push(canvas);
   }
-  if (spinner) spinner.style.display = 'none';
+
+  // Progress naar 100%
+  progressFill.style.width = '100%';
+  await new Promise(r => setTimeout(r, 300));
+  overlay.classList.remove('active');
+  progressFill.style.width = '0%';
+
   return canvases;
 }
 
