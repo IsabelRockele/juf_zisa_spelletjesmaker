@@ -1749,15 +1749,31 @@ function getRoosterConfigData(id) {
       }
 
     } else {
-      // Optellen en gemengd: gewoon willekeurig
-      const pool = [];
-      for (let i = 1; i <= range; i++) pool.push(i);
-      shuffle(pool);
-      colNums = pool.slice(0, nCols);
-      const pool2 = [];
-      for (let i = 1; i <= range; i++) pool2.push(i);
-      shuffle(pool2);
-      rowNums = pool2.slice(0, nRows);
+      // Optellen en gemengd: som rij+kolom mag nooit > range uitkomen
+      // Kies eerst kolomgetallen (klein houden zodat rijgetallen ook passen)
+      const colPool = [];
+      for (let i = 1; i <= Math.floor(range / 2); i++) colPool.push(i);
+      shuffle(colPool);
+      colNums = colPool.slice(0, nCols);
+
+      // Rijgetallen: kies zodat rij + elk kolomgetal <= range
+      // en brugkeuze wordt gerespecteerd
+      const maxKolom = Math.max(...colNums);
+      const rowPool = [];
+      for (let i = 1; i <= range - maxKolom; i++) {
+        const voldoet = brug === 'mix' || colNums.every(k =>
+          brug === 'no' ? !heeftBrug(i, k) : heeftBrug(i, k)
+        );
+        if (voldoet) rowPool.push(i);
+      }
+      // Fallback zonder brugeis als te weinig gevonden
+      if (rowPool.length < nRows) {
+        for (let i = 1; i <= range - maxKolom; i++) {
+          if (!rowPool.includes(i)) rowPool.push(i);
+        }
+      }
+      shuffle(rowPool);
+      rowNums = rowPool.slice(0, nRows);
     }
   }
 
