@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekenbundel Generator — jufzisa.be</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ── HEADER ──────────────────────────────────────────────── -->
+<header>
+  <div class="logo">🧮 Reken<span>bundel</span></div>
+  <div class="subtitle">— jufzisa.be</div>
+  <div class="spacer"></div>
+  <div class="badge">BETA</div>
+</header>
+
+<div class="main">
+
+  <!-- ── SIDEBAR ───────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-tabs">
+      <div class="sidebar-tab active" onclick="App.toonBewerking('optellen',this)">➕ Optellen</div>
+      <div class="sidebar-tab" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
+      <div class="sidebar-tab" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug</div>
+      <div class="sidebar-tab" style="opacity:.4;cursor:not-allowed">✂️ Splits</div>
+      <div class="sidebar-tab" style="opacity:.4;cursor:not-allowed">✖️ Tafels</div>
+    </div>
+
+    <div class="sidebar-content" id="tab-hoofdrekenen">
+
+      <!-- Bundel titel -->
+      <div class="bundel-info">
+        <label>Naam bundel / grote titel</label>
+        <input type="text" id="bundel-titel" placeholder="Bv: Herhaling optellen tot 100" />
+      </div>
+
+      <div class="sectie-titel" id="sectie-titel">Configureer een optelblok</div>
+
+      <!-- Niveau -->
+      <div class="config-kaart" id="kaart-niveau">
+        <div class="kaart-titel">
+          <div class="icon">🎯</div>
+          Niveau kiezen
+        </div>
+        <div class="form-rij">
+          <label>Rekenen tot</label>
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerRadio('niveau','5',this)">
+              <input type="radio" name="niveau" value="5">Tot 5
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('niveau','10',this)">
+              <input type="radio" name="niveau" value="10">Tot 10
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('niveau','20',this)">
+              <input type="radio" name="niveau" value="20" checked>Tot 20
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('niveau','100',this)">
+              <input type="radio" name="niveau" value="100">Tot 100
+            </label>
+            <label class="radio-chip" style="opacity:.4;pointer-events:none">
+              <input type="radio" name="niveau" value="1000">Tot 1000
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brug -->
+      <div class="config-kaart" id="kaart-brug">
+        <div class="kaart-titel">
+          <div class="icon">🌉</div>
+          Bruglogica
+        </div>
+        <div class="form-rij">
+          <label>Met of zonder brug?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('brug','zonder',this)">
+              <input type="radio" name="brug" value="zonder" checked>Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('brug','met',this)">
+              <input type="radio" name="brug" value="met">Met brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('brug','gemengd',this)">
+              <input type="radio" name="brug" value="gemengd">Gemengd
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Oefeningstypes (dynamisch gevuld door app.js) -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Oefeningstypes
+        </div>
+        <div class="form-rij">
+          <label>Kies types (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-types">
+            <!-- gevuld door app.js op basis van gekozen niveau -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Hulpmiddelen (enkel bij met brug) -->
+      <div class="config-kaart" id="kaart-hulpmiddelen" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">🛠️</div>
+          Hulpmiddelen
+        </div>
+        <div class="form-rij">
+          <label>Hulpmiddelen toevoegen</label>
+          <div class="checkbox-groep" id="cg-hulpmiddelen">
+            <label class="vink-chip" id="chip-splitsbeen" onclick="App.toggleHulpmiddel(this,'splitsbeen')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="hulpmiddelen" value="splitsbeen" style="display:none">
+              <span>Splitsbeen</span>
+            </label>
+            <label class="vink-chip" id="chip-schrijflijnen" onclick="App.toggleHulpmiddel(this,'schrijflijnen')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="hulpmiddelen" value="schrijflijnen" style="display:none">
+              <span>Schrijflijnen</span>
+            </label>
+            <label class="vink-chip" id="chip-aanvullen" onclick="App.toggleHulpmiddel(this,'aanvullen')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="hulpmiddelen" value="aanvullen" style="display:none">
+              <span>Aanvullen</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Splitspositie: enkel bij aftrekken -->
+        <div class="form-rij" id="rij-splitspositie" style="display:none">
+          <label>Splitsbeen onder welk getal?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('splitspositie','aftrekker',this)">
+              <input type="radio" name="splitspositie" value="aftrekker" checked>Aftrekker (bv. 12-6: onder 6)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('splitspositie','aftrektal',this)">
+              <input type="radio" name="splitspositie" value="aftrektal">Aftrektal (bv. 12-6: onder 12)
+            </label>
+          </div>
+        </div>
+
+        <!-- Aanvullen sub-opties: enkel zichtbaar als aanvullen aangevinkt -->
+        <div class="form-rij" id="rij-aanvullen" style="display:none">
+          <label>Aanvullen weergeven als</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('aanvullen-variant','zonder-schema',this)">
+              <input type="radio" name="aanvullen-variant" value="zonder-schema" checked>Zonder schema
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('aanvullen-variant','met-schema',this)">
+              <input type="radio" name="aanvullen-variant" value="met-schema">Met schema
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('aanvullen-variant','met-schijfjes',this)">
+              <input type="radio" name="aanvullen-variant" value="met-schijfjes">Met schijfjes
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opdrachtzin & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📝</div>
+          Opdracht & hoeveelheid
+        </div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin" value="Reken vlug uit." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal">
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12" selected>12</option>
+            <option value="16">16</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegBlokToe()">
+        ＋ Voeg blok toe aan bundel
+      </button>
+
+    </div><!-- /sidebar-content -->
+  </aside>
+
+  <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
+  <section class="preview-zone">
+
+    <div class="preview-toolbar">
+      <div class="toolbar-titel">📄 Bundel preview</div>
+      <div class="bundel-teller" id="blok-teller">0 blokken</div>
+      <button class="btn-genereer" id="btn-genereer"
+        onclick="App.genereerPreview()" disabled>▶ Genereer preview</button>
+      <button class="btn-pdf" id="btn-pdf"
+        onclick="App.downloadPDF()" disabled>⬇ Download PDF</button>
+    </div>
+
+    <div class="preview-inhoud" id="preview-inhoud">
+      <!-- gevuld door preview.js -->
+    </div>
+
+  </section>
+
+</div><!-- /main -->
+
+<!-- ── TOAST ─────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="modules/optellen-tot20.js"></script>
+<script src="modules/optellen-tot100.js"></script>
+<script src="modules/aftrekken-tot20.js"></script>
+<script src="modules/aftrekken-tot100.js"></script>
+<script src="modules/herken-brug-tot100.js"></script>
+<script src="modules/aanvullen-tot100.js"></script>
+<script src="hulpmiddelen.js"></script>
+<script src="generator.js"></script>
+<script src="preview.js"></script>
+<script src="pdf-engine.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
