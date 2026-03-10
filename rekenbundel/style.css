@@ -742,13 +742,17 @@ header .badge {
   padding: 3px 0;
   border-bottom: 1.5px solid #aaa;
 }
+.schijfjes-kop-h {
+  background: #85C1E9;
+  color: #1A3A6B;
+}
 .schijfjes-kop-t {
-  background: #ABEBC6;
-  color: #1E8449;
+  background: #52BE80;
+  color: #0B5A2A;
 }
 .schijfjes-kop-e {
-  background: #FEF9E7;
-  color: #9A7D0A;
+  background: #F9CA3F;
+  color: #6B4F00;
 }
 .schijfjes-rij {
   display: flex;
@@ -766,15 +770,20 @@ header .badge {
   font-size: 9px;
   font-weight: 700;
 }
+.schijfje-h {
+  background: #5DADE2;
+  border: 1.5px solid #1A5276;
+  color: #0A2A5C;
+}
 .schijfje-t {
-  background: #ABEBC6;
-  border: 1.5px solid #27AE60;
-  color: #1E8449;
+  background: #27AE60;
+  border: 1.5px solid #0B5A2A;
+  color: #072A13;
 }
 .schijfje-e {
-  background: #FEF9E7;
-  border: 1.5px solid #F1C40F;
-  color: #9A7D0A;
+  background: #F4D03F;
+  border: 1.5px solid #9A7D0A;
+  color: #6B4F00;
 }
 .schijfje-leeg {
   background: white;
