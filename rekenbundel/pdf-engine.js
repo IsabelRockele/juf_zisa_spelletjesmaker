@@ -316,72 +316,91 @@ const PdfEngine = (() => {
   }
 
   function _tekenAanvulSchijfjes(ox, oy, kadW, marge, somY2, groot, klein) {
-    const tKlein = Math.floor(klein / 10);
+    const hKlein = Math.floor(klein / 100);
+    const tKlein = Math.floor((klein % 100) / 10);
     const eKlein = klein % 10;
+    const hGroot = Math.floor(groot / 100);
+    const metH   = hGroot > 0;  // H-kolom enkel bij tot 1000
     const TOTAAL  = 10;
-    const schY    = somY2 + 4;
-    const kolW    = (kadW - marge * 2) / 2;
+    const schY    = somY2 + 9;
+    const aantalKol = metH ? 3 : 2;
+    const kolW    = (kadW - marge * 2) / aantalKol;
     const kopH    = 5;
-    const schijfD = 6.0;   // diameter schijfje — groter voor inkleuren
-    const gap     = 1.2;
+    const schijfD = aantalKol === 3 ? 4.2 : 5.2;  // kleiner bij 3 kolommen
+    const gap     = 0.9;
     const rijH    = schijfD + gap;
 
-    // Headers
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
+    doc.setDrawColor(170, 170, 170);
+    doc.setLineWidth(0.4);
+
+    // H header — blauw (enkel bij tot 1000)
+    if (metH) {
+      doc.setFillColor(214, 234, 248);
+      doc.rect(ox + marge, schY, kolW, kopH, 'FD');
+      doc.setTextColor(26, 82, 118);
+      doc.text('H', ox + marge + kolW / 2, schY + kopH - 1, { align: 'center' });
+    }
 
     // T header — groen
+    const tKolX = ox + marge + (metH ? kolW : 0);
     doc.setFillColor(171, 235, 198);
-    doc.setDrawColor(170, 170, 170);
-    doc.setLineWidth(0.4);
-    doc.rect(ox + marge, schY, kolW, kopH, 'FD');
+    doc.rect(tKolX, schY, kolW, kopH, 'FD');
     doc.setTextColor(30, 132, 73);
-    doc.text('T', ox + marge + kolW / 2, schY + kopH - 1, { align: 'center' });
+    doc.text('T', tKolX + kolW / 2, schY + kopH - 1, { align: 'center' });
 
     // E header — geel
+    const eKolX = tKolX + kolW;
     doc.setFillColor(254, 249, 231);
-    doc.rect(ox + marge + kolW, schY, kolW, kopH, 'FD');
+    doc.rect(eKolX, schY, kolW, kopH, 'FD');
     doc.setTextColor(154, 125, 10);
-    doc.text('E', ox + marge + kolW + kolW / 2, schY + kopH - 1, { align: 'center' });
+    doc.text('E', eKolX + kolW / 2, schY + kopH - 1, { align: 'center' });
 
-    // Kader rondom beide kolommen
+    // Kader rondom alle kolommen
+    const totW = kolW * aantalKol;
     doc.setDrawColor(170, 170, 170);
     doc.setLineWidth(0.4);
-    doc.rect(ox + marge, schY, kolW * 2, kopH + rijH * 2 + gap);
-    doc.line(ox + marge + kolW, schY, ox + marge + kolW, schY + kopH + rijH * 2 + gap);
+    doc.rect(ox + marge, schY, totW, kopH + rijH * 2 + gap);
+    if (metH) doc.line(ox + marge + kolW, schY, ox + marge + kolW, schY + kopH + rijH * 2 + gap);
+    doc.line(tKolX + kolW, schY, tKolX + kolW, schY + kopH + rijH * 2 + gap);
 
-    // Schijfjes tekenen (5 per rij, 2 rijen = 10)
     const rij1Y = schY + kopH + gap;
     const rij2Y = rij1Y + rijH;
 
-    function tekenSchijfjesRij(rijY, startIdx, eindIdx, kolX, aantalVoorgetekend, groeneKleur, getalStr) {
+    function tekenRij(rijY, startIdx, eindIdx, kolX, aantalVoor, kleur, tekst, tekstKleur) {
       for (let i = startIdx; i < eindIdx; i++) {
         const sx = kolX + gap + (i - startIdx) * (schijfD + gap) + schijfD / 2;
         const sy = rijY + schijfD / 2;
-        if (i < aantalVoorgetekend) {
-          doc.setFillColor(...groeneKleur);
-          doc.setDrawColor(groeneKleur[0] - 40, groeneKleur[1] - 40, groeneKleur[2] - 40);
+        if (i < aantalVoor) {
+          doc.setFillColor(...kleur);
+          doc.setDrawColor(kleur[0]-40, kleur[1]-40, kleur[2]-40);
         } else {
           doc.setFillColor(255, 255, 255);
           doc.setDrawColor(180, 180, 180);
         }
         doc.setLineWidth(0.3);
         doc.circle(sx, sy, schijfD / 2, 'FD');
-        if (i < aantalVoorgetekend) {
+        if (i < aantalVoor) {
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(5);
-          doc.setTextColor(30, 100, 50);
-          doc.text(getalStr, sx, sy + 1, { align: 'center' });
+          doc.setTextColor(...tekstKleur);
+          doc.text(tekst, sx, sy + 1, { align: 'center' });
         }
       }
     }
 
+    // H kolom: blauw
+    if (metH) {
+      tekenRij(rij1Y, 0, 5, ox + marge, hKlein, [100, 160, 210], '100', [10, 50, 100]);
+      tekenRij(rij2Y, 5, 10, ox + marge, hKlein, [100, 160, 210], '100', [10, 50, 100]);
+    }
     // T kolom: groen
-    tekenSchijfjesRij(rij1Y, 0, 5, ox + marge, tKlein, [171, 235, 198], '10');
-    tekenSchijfjesRij(rij2Y, 5, 10, ox + marge, tKlein, [171, 235, 198], '10');
+    tekenRij(rij1Y, 0, 5, tKolX, tKlein, [80, 190, 130], '10', [10, 80, 40]);
+    tekenRij(rij2Y, 5, 10, tKolX, tKlein, [80, 190, 130], '10', [10, 80, 40]);
     // E kolom: geel
-    tekenSchijfjesRij(rij1Y, 0, 5, ox + marge + kolW, eKlein, [254, 249, 231], '1');
-    tekenSchijfjesRij(rij2Y, 5, 10, ox + marge + kolW, eKlein, [254, 249, 231], '1');
+    tekenRij(rij1Y, 0, 5, eKolX, eKlein, [245, 210, 100], '1', [100, 75, 0]);
+    tekenRij(rij2Y, 5, 10, eKolX, eKlein, [245, 210, 100], '1', [100, 75, 0]);
   }
 
 
