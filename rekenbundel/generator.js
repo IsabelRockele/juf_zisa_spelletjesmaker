@@ -61,12 +61,13 @@ const Generator = (() => {
 
     // Genereer oefeningen
     let oefeningen;
-    if (isSplitsingen)      oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus });
+    if (isSplitsingen)      oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus, brug });
     else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
     else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
-    if (oefeningen.length < 2) return null;
+    const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
+    if (oefeningen.length < 2 && !wilGroot) return null;
 
     const defaultZin = isCompenseren ? 'Compenseer.' :
                        isSplitsingen ? 'Splits het getal.' :
@@ -124,9 +125,9 @@ const Generator = (() => {
   }
 
   /* ── Geef beschikbare types terug ────────────────────────── */
-  function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = []) {
+  function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = [], splitsModus = 'tot') {
     if (bewerking === 'herken-brug')  return _getModule(bewerking, niveau)?.getTypes() || [];
-    if (bewerking === 'splitsingen')  return Splitsingen.getTypes();
+    if (bewerking === 'splitsingen')  return Splitsingen.getTypes(null, splitsModus, niveau);
 
     const isCompenseren = hulpmiddelen.includes('compenseren');
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
