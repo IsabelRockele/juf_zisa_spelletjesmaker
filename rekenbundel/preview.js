@@ -46,8 +46,10 @@ const Preview = (() => {
     const badgeTxt  = isSplitsingen ? '✂️ Splits' :
                       isHerken ? '🔦 Herken brug' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
+    const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
-    if (isSplitsingen)                                                     gridKlasse = 'splits-grid';
+    if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
+    else if (isSplitsingen)                                                gridKlasse = 'splits-grid';
     else if (isHerken)                                                     gridKlasse = 'herken-grid';
     else if (heeftAanvullen && blok.aanvullenVariant === 'met-schijfjes') gridKlasse = 'aanvullen-grid-2';
     else if (heeftAanvullen)                                               gridKlasse = 'aanvullen-grid-3';
@@ -378,7 +380,30 @@ const Preview = (() => {
     if (oef.type === 'splitsbeen')             return _splitsbeenHTML(blokId, oef, idx, del);
     if (oef.type === 'groot-splitshuis')       return _grootsplitshuisHTML(blokId, oef, idx, del);
     if (oef.type === 'splitsbeen-bewerkingen') return _splitsbeenBewerkingHTML(blokId, oef, idx, del);
+    if (oef.type === 'puntoefening')           return _puntoefHTML(blokId, oef, idx, del);
     return '';
+  }
+
+  /* ── Puntoefening ────────────────────────────────────────────
+     1 + ___ = 5   of   ___ + 3 = 5   etc.
+     null in tekst = schrijflijn
+  ────────────────────────────────────────────────────────── */
+  function _puntoefHTML(blokId, oef, idx, del) {
+    const delen = (oef.tekst || []).map((d, i) => {
+      if (typeof d === 'string') {
+        return `<span class="punt-teken">${d}</span>`;
+      }
+      if (d === null) {
+        return `<span class="punt-lijn"></span>`;
+      }
+      return `<span class="punt-getal">${d}</span>`;
+    }).join('');
+
+    return `
+      <div class="oefening-item oefening-splits oefening-punt">
+        <div class="punt-rij">${delen}</div>
+        ${del}
+      </div>`;
   }
 
   /* ── Klein splitshuis ───────────────────────────────────────
