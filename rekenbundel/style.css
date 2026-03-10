@@ -1285,3 +1285,58 @@ header .badge {
   border-bottom: 1.5px solid #1A3A5C;
   margin-bottom: 3px;
 }
+
+/* ── Tafels grid ────────────────────────────────────────────── */
+.tafels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px 12px;
+  padding: 8px 0;
+}
+
+.tafel-oef {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  border-radius: 6px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  min-height: 38px;
+}
+
+.tafel-oef:hover { background: #eef2f7; }
+
+.tafel-som {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A3A5C;
+}
+
+.tafel-term {
+  min-width: 18px;
+  text-align: center;
+}
+
+.tafel-op {
+  color: #E67E22;
+  font-size: 16px;
+}
+
+.tafel-is {
+  color: #666;
+}
+
+.tafel-vak {
+  display: inline-block;
+  width: 32px;
+  height: 28px;
+  border: 2px solid #1A3A5C;
+  border-radius: 4px;
+  background: #fff;
+  vertical-align: middle;
+}
