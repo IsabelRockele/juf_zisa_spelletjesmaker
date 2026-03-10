@@ -1095,3 +1095,96 @@ header .badge {
   font-weight: 700;
   color: #1A3A5C;
 }
+
+/* ─────────────────────────────────────────
+   GROOT SPLITSHUIS
+───────────────────────────────────────── */
+/* Grid: 4 per rij, align top zodat verschillende hoogtes niet overlappen */
+.splits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px 10px;
+  align-items: start;  /* crucciaal: elk huis start bovenaan, geen overlap */
+}
+
+.oefening-grootsplitshuis {
+  padding: 6px 8px 28px;
+}
+
+/* Muur met meerdere verdiepen */
+.sh-muur-groot {
+  display: flex;
+  flex-direction: column;
+  width: 88px;
+}
+
+.sh-muur-rij {
+  display: flex;
+  align-items: stretch;
+  min-height: 30px;
+  border-bottom: 1px solid #B0C8E8;
+}
+
+.sh-muur-rij:last-child {
+  border-bottom: none;
+}
+
+/* ─────────────────────────────────────────
+   SPLITSBEEN + BEWERKINGEN
+───────────────────────────────────────── */
+/* Grid: 3 per rij voor dit type */
+.splits-grid:has(.oefening-sbw) {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.oefening-sbw {
+  padding: 4px 6px 28px;
+}
+
+/* Kader rond de hele oefening */
+.sbw-kader {
+  border: 2px solid #4A90D9;
+  border-radius: 8px;
+  padding: 10px 10px 8px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Splitsbeen iets compacter in kader */
+.sbw-been {
+  padding-bottom: 0;
+}
+
+/* Bewerkingen sectie */
+.sbw-bewerkingen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid #D0E4F5;
+}
+
+.sbw-bewerking {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  justify-content: center;
+}
+
+.sbw-vak {
+  display: inline-block;
+  width: 28px;
+  height: 20px;
+  border-bottom: 1.5px solid #1A3A5C;
+  flex-shrink: 0;
+}
+
+.sbw-op, .sbw-is {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1A3A5C;
+  flex-shrink: 0;
+  padding-bottom: 1px;
+}
