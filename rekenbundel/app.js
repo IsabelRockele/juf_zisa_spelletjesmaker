@@ -294,6 +294,9 @@ const App = (() => {
     const kaart = document.getElementById('kaart-hulpmiddelen');
     if (!kaart) return;
 
+    // Hulpmiddelen zijn niet van toepassing bij splitsen
+    if (actieveBewerking === 'splitsingen') { kaart.style.display = 'none'; return; }
+
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
@@ -381,9 +384,21 @@ const App = (() => {
     const wilGroot = types.some(t => t.includes('Groot'));
     // Bij groot splitshuis: gebruik de aparte getallenkeuze
     const grootGetallen = wilGroot ? _getGrootGetallen() : null;
-    const effectiefGetallen = wilGroot && grootGetallen ? grootGetallen : splitsConfig?.getallen || null;
+    if (wilGroot && (!grootGetallen || grootGetallen.length === 0)) {
+      toonToast('⚠️ Kies minstens één getal voor het groot splitshuis!', '#E74C3C');
+      return;
+    }
+    const effectiefGetallen = wilGroot ? grootGetallen : splitsConfig?.getallen || null;
     const effectiefModus    = wilGroot ? 'specifiek' : splitsConfig?.mode || 'tot';
-    const effectiefNiveau   = wilGroot ? Math.max(...(grootGetallen || [10])) : (splitsConfig?.niveau || 10);
+    const effectiefNiveau   = wilGroot ? Math.max(...grootGetallen) : (splitsConfig?.niveau || 10);
+    // Bij groot splitshuis: aantal = aantal gekozen getallen
+    const effectiefAantal   = wilGroot ? grootGetallen.length : aantal;
+
+    const wilPunt        = types.some(t => t.includes('Punt'));
+    const wilSplitsBrug  = wilPunt || types.some(t => t.includes('Klein') || (t.includes('Splitsbeen') && !t.includes('bewerkingen')) || t.includes('bewerkingen'));
+    const effectiefBrug  = (isSplitsingen && wilSplitsBrug && effectiefNiveau > 10)
+      ? _puntBrug
+      : (isHerken || isSplitsingen) ? 'zonder' : brug;
 
     const blok = Generator.maakBlok({
       bewerking: actieveBewerking,
@@ -391,8 +406,8 @@ const App = (() => {
       splitsGetallen: effectiefGetallen,
       splitsModus:    effectiefModus,
       oefeningstypes: types,
-      brug:      (isHerken || isSplitsingen) ? 'zonder' : brug,
-      aantalOefeningen: aantal,
+      brug:      effectiefBrug,
+      aantalOefeningen: effectiefAantal,
       opdrachtzin: zin,
       hulpmiddelen,
       splitspositie,
@@ -490,17 +505,26 @@ const App = (() => {
   function _updateSplitsKaarten() {
     if (actieveBewerking !== 'splitsingen') return;
     const gekozen = [...document.querySelectorAll('#cg-types input:checked')].map(c => c.value);
-    const wilKleinOfBeen = gekozen.some(t => t.includes('Klein') || t.includes('Splitsbeen') && !t.includes('bewerkingen'));
+    const wilKleinOfBeen = gekozen.some(t => t.includes('Klein') || (t.includes('Splitsbeen') && !t.includes('bewerkingen')));
     const wilBewerkingen = gekozen.some(t => t.includes('bewerkingen'));
+    const wilPunt        = gekozen.some(t => t.includes('Punt'));
     const wilGroot       = gekozen.some(t => t.includes('Groot'));
 
-    document.getElementById('kaart-splits-variant').style.display  = (wilKleinOfBeen || wilBewerkingen) ? 'block' : 'none';
-    document.getElementById('kaart-splits-niveau').style.display   = (wilKleinOfBeen || wilBewerkingen) ? 'block' : 'none';
-    document.getElementById('kaart-groot-getallen').style.display  = wilGroot ? 'block' : 'none';
+    const toonNiveau   = wilKleinOfBeen || wilBewerkingen || wilPunt;
+    const toonVariant  = wilKleinOfBeen || wilBewerkingen || wilPunt;
+    const toonPuntBrug = (wilPunt || wilKleinOfBeen || wilBewerkingen) && _splitsTot > 10;
+
+    document.getElementById('kaart-splits-variant').style.display = toonVariant  ? 'block' : 'none';
+    document.getElementById('kaart-splits-niveau').style.display  = toonNiveau   ? 'block' : 'none';
+    document.getElementById('kaart-groot-getallen').style.display = wilGroot     ? 'block' : 'none';
+    const kb = document.getElementById('kaart-punt-brug');
+    if (kb) kb.style.display = toonPuntBrug ? 'block' : 'none';
+    const ra = document.getElementById('rij-aantal');
+    if (ra) ra.style.display = wilGroot ? 'none' : 'block';
   }
 
   // Groot splitshuis getallenkeuze
-  let _grootGetallen = [3, 4, 5, 6, 7, 8, 9, 10]; // standaard alle aangevinkt
+  let _grootGetallen = []; // standaard niets aangevinkt
 
   function toggleGrootGetal(label, getal) {
     const cb  = label.querySelector('input');
@@ -516,7 +540,7 @@ const App = (() => {
   }
 
   function _getGrootGetallen() {
-    return _grootGetallen.length > 0 ? [..._grootGetallen].sort((a,b) => a-b) : [3,4,5,6,7,8,9,10];
+    return [..._grootGetallen].sort((a, b) => a - b);
   }
   let _splitsMode    = 'tot';
   let _splitsTot     = 10;
@@ -535,6 +559,15 @@ const App = (() => {
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     _updateTypesUI(waarde, 'zonder');
+    _updateSplitsKaarten();
+  }
+
+  let _puntBrug = 'zonder';
+  function selecteerPuntBrug(waarde, el) {
+    _puntBrug = waarde;
+    document.querySelectorAll('[name="punt-brug"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
   }
 
   function toggleSplitsGetal(label, getal) {
@@ -599,7 +632,7 @@ const App = (() => {
 
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
-    selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal,
+    selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
