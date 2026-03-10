@@ -26,7 +26,7 @@
   <div class="sidebar-tab tab-aftrekken" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
   <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
-  <div class="sidebar-tab" style="opacity:.4;cursor:not-allowed">✖️ Tafels</div>
+  <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
 </div>
 
     <div class="sidebar-content" id="tab-hoofdrekenen">
@@ -373,6 +373,148 @@
       </button>
 
     </div><!-- /sidebar-content -->
+
+    <!-- ── TAFELS SIDEBAR CONTENT ──────────────────────────── -->
+    <div class="sidebar-content" id="tab-tafels" style="display:none">
+
+      <div class="sectie-titel">Configureer een tafelblok</div>
+
+      <!-- Welke tafels -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">✖️</div>
+          Welke tafels?
+        </div>
+        <div class="form-rij">
+          <label>Kies tafels (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-tafels">
+            <label class="vink-chip" onclick="App.toggleTafel(this,1)">
+              <span class="vink-box"></span><input type="checkbox" value="1" style="display:none"><span>× 1</span>
+            </label>
+            <label class="vink-chip geselecteerd" onclick="App.toggleTafel(this,2)">
+              <span class="vink-box">✓</span><input type="checkbox" value="2" checked style="display:none"><span>× 2</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,3)">
+              <span class="vink-box"></span><input type="checkbox" value="3" style="display:none"><span>× 3</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,4)">
+              <span class="vink-box"></span><input type="checkbox" value="4" style="display:none"><span>× 4</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,5)">
+              <span class="vink-box"></span><input type="checkbox" value="5" style="display:none"><span>× 5</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,6)">
+              <span class="vink-box"></span><input type="checkbox" value="6" style="display:none"><span>× 6</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,7)">
+              <span class="vink-box"></span><input type="checkbox" value="7" style="display:none"><span>× 7</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,8)">
+              <span class="vink-box"></span><input type="checkbox" value="8" style="display:none"><span>× 8</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,9)">
+              <span class="vink-box"></span><input type="checkbox" value="9" style="display:none"><span>× 9</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafel(this,10)">
+              <span class="vink-box"></span><input type="checkbox" value="10" style="display:none"><span>× 10</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Oefeningstypes -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Oefeningstypes
+        </div>
+        <div class="form-rij">
+          <label>Kies types (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-tafels-types">
+            <label class="vink-chip geselecteerd" onclick="App.toggleTafelType(this,'Vermenigvuldigen')">
+              <span class="vink-box">✓</span><input type="checkbox" value="Vermenigvuldigen" checked style="display:none"><span>Vermenigvuldigen (a × b = ___)</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafelType(this,'Gedeeld door')">
+              <span class="vink-box"></span><input type="checkbox" value="Gedeeld door" style="display:none"><span>Gedeeld door (a : b = ___)</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafelType(this,'Ontbrekende factor')">
+              <span class="vink-box"></span><input type="checkbox" value="Ontbrekende factor" style="display:none"><span>Ontbrekende factor (___ × b = c)</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafelType(this,'Gemengd')">
+              <span class="vink-box"></span><input type="checkbox" value="Gemengd" style="display:none"><span>Gemengd</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tot hoeveel (×10 of ×12) -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Tot hoeveel rekenen?
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerTafelMax(10,this)">
+              <input type="radio" name="tafel-max" value="10" checked>Tot × 10
+            </label>
+            <label class="radio-chip" onclick="App.selecteerTafelMax(12,this)">
+              <input type="radio" name="tafel-max" value="12">Tot × 12
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Positie tafelterm -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔀</div>
+          Positie tafelterm
+        </div>
+        <div class="form-rij">
+          <label>Staat de tafel vooraan of achteraan?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerTafelPositie('vooraan',this)">
+              <input type="radio" name="tafel-positie" value="vooraan" checked>Vooraan (2 × …)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerTafelPositie('achteraan',this)">
+              <input type="radio" name="tafel-positie" value="achteraan">Achteraan (… × 2)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerTafelPositie('beide',this)">
+              <input type="radio" name="tafel-positie" value="beide">Beide
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opdracht & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📝</div>
+          Opdracht & hoeveelheid
+        </div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-tafels" value="Reken de tafels." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-tafels">
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12" selected>12</option>
+            <option value="16">16</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegTafelBlokToe()">
+        ＋ Voeg blok toe aan bundel
+      </button>
+
+    </div><!-- /tab-tafels -->
   </aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
@@ -401,6 +543,7 @@
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
+<script src="modules/tafels.js?v=1"></script>
 <script src="modules/optellen-tot20.js?v=3"></script>
 <script src="modules/optellen-tot100.js?v=3"></script>
 <script src="modules/aftrekken-tot20.js?v=3"></script>
