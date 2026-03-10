@@ -25,6 +25,7 @@ const Generator = (() => {
     }
     if (bewerking === 'herken-brug') return HerkenBrugTot100;
     if (bewerking === 'splitsingen') return Splitsingen;
+    if (bewerking === 'tafels')      return Tafels;
     return null;
   }
 
@@ -35,9 +36,10 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot' }) {
+  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10 }) {
     const isHerken      = bewerking === 'herken-brug';
     const isSplitsingen = bewerking === 'splitsingen';
+    const isTafels      = bewerking === 'tafels';
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
     const isCompenseren = hulpmiddelen.includes('compenseren');
 
@@ -50,6 +52,7 @@ const Generator = (() => {
     const aanvulModule = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const module = isAanvullen   ? aanvulModule :
                    isCompenseren ? compModule :
+                   isTafels      ? Tafels :
                    _getModule(bewerking, niveau);
     if (!module) {
       console.warn(`Geen module voor ${bewerking} tot ${niveau}`);
@@ -61,7 +64,8 @@ const Generator = (() => {
 
     // Genereer oefeningen
     let oefeningen;
-    if (isSplitsingen)      oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus, brug });
+    if (isTafels)           oefeningen = Tafels.genereer({ tafels, oefeningstypes, aantalOefeningen, tafelPositie, tafelMax });
+    else if (isSplitsingen) oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus, brug });
     else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
     else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
@@ -71,6 +75,7 @@ const Generator = (() => {
 
     const defaultZin = isCompenseren ? 'Compenseer.' :
                        isSplitsingen ? 'Splits het getal.' :
+                       isTafels      ? 'Reken de tafels.' :
                        isHerken      ? 'Kleur Zisa groen bij elke brugoefening.' :
                        bewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.';
 
@@ -89,7 +94,10 @@ const Generator = (() => {
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant },
+      tafels,
+      tafelPositie,
+      tafelMax,
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, tafels, tafelPositie, tafelMax },
       oefeningen,
     };
   }
@@ -128,6 +136,7 @@ const Generator = (() => {
   function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = [], splitsModus = 'tot') {
     if (bewerking === 'herken-brug')  return _getModule(bewerking, niveau)?.getTypes() || [];
     if (bewerking === 'splitsingen')  return Splitsingen.getTypes(null, splitsModus, niveau);
+    if (bewerking === 'tafels')       return Tafels.getTypes();
 
     const isCompenseren = hulpmiddelen.includes('compenseren');
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
