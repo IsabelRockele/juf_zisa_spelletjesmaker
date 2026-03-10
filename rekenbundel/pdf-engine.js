@@ -452,13 +452,14 @@ const PdfEngine = (() => {
         const kringPad  = zelfKringen ? 0 : 1.5;
         const kringTxtX = somX + prefixB + kringPad;
         const kringMidX = somX + prefixB + kringPad + kringB / 2;
-        const kringMidY = somY - 2.5;
-        const kringR    = Math.max(kringB / 2 + kringPad + 1, 5);
+        const kringMidY = somY - 1.5;
+        const kringRx   = Math.max(kringB / 2 + kringPad + 1.5, 6);  // horizontale straal
+        const kringRy   = Math.max(kringRx * 0.55, 3.5);              // ovaal: platter
 
         if (!zelfKringen) {
           doc.setDrawColor(44, 62, 80);
           doc.setLineWidth(0.6);
-          doc.circle(kringMidX, kringMidY, kringR, 'S');
+          doc.ellipse(kringMidX, kringMidY, kringRx, kringRy, 'S');
         }
         doc.text(kringTxt, kringTxtX, somY);
 
@@ -477,7 +478,7 @@ const PdfEngine = (() => {
         doc.roundedRect(avX, avY, avW, avH, 1.5, 1.5, 'FD');
 
         // Pijl: alleen tekenen als niet zelf-kringen
-        const pijlTopY = kringMidY + kringR;
+        const pijlTopY = kringMidY + kringRy;  // onderkant ovaal
         const pijlBotY = pijlTopY + 4;
         if (!zelfKringen) {
           doc.setDrawColor(44, 62, 80);
