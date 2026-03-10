@@ -592,6 +592,7 @@ const PdfEngine = (() => {
   function _tekenBlok(blok) {
     if (blok.bewerking === 'herken-brug')  { _tekenHerkenBlok(blok); return; }
     if (blok.bewerking === 'splitsingen')  { _tekenSplitsingenBlok(blok); return; }
+    if (blok.bewerking === 'tafels')       { _tekenTafelsBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
@@ -1162,6 +1163,89 @@ const PdfEngine = (() => {
     bundelData.forEach(blok => _tekenBlok(blok));
 
     doc.save(`${(titel || 'rekenbundel').replace(/\s+/g, '-').toLowerCase()}.pdf`);
+  }
+
+  /* ── Tafels blok tekenen ─────────────────────────────────── */
+  function _tekenTafelsBlok(blok) {
+    const KOLS     = 3;
+    const RH       = 20;    // rij-hoogte per oefening
+    const GAP      = 4;
+    const ZINR     = ZINRUIMTE;
+    const HOK_W    = 14;    // breedte invulhokje (mm)
+    const HOK_H    = 11;    // hoogte invulhokje (mm) — iets groter
+    const rijCount = Math.ceil(blok.oefeningen.length / KOLS);
+    const nodig    = ZINR + rijCount * (RH + GAP);
+    checkRuimte(nodig);
+
+    // Opdrachtzin
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y + 5);
+    y += ZINR;
+
+    const colW = CW / KOLS;
+
+    blok.oefeningen.forEach((oef, i) => {
+      const col = i % KOLS;
+      const row = Math.floor(i / KOLS);
+      const x   = ML + col * colW;
+      const ry  = y + row * (RH + GAP);
+
+      // Buitenste kader (wit, lichte rand)
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(180, 180, 180);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(x + 1, ry, colW - 2, RH, 2, 2, 'FD');
+
+      // Som opbouwen als losse onderdelen zodat we het hokje exact kunnen plaatsen
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(14);
+      doc.setTextColor(26, 58, 92);
+
+      // Bepaal de som-onderdelen: [tekst|hokje, tekst|hokje, ...]
+      // Elke oefening heeft 1 invulhokje
+      let delen = [];
+      if (oef.type === 'vermenigvuldigen') {
+        delen = [`${oef.a}`, ' × ', `${oef.b}`, ' = ', 'HOK'];
+      } else if (oef.type === 'gedeeld') {
+        delen = [`${oef.a}`, ' : ', `${oef.b}`, ' = ', 'HOK'];
+      } else if (oef.type === 'ontbrekende-factor') {
+        if (oef.positie === 'links') {
+          delen = ['HOK', ' × ', `${oef.b}`, ' = ', `${oef.product}`];
+        } else {
+          delen = [`${oef.a}`, ' × ', 'HOK', ' = ', `${oef.product}`];
+        }
+      }
+
+      // Meet totale breedte om te centreren
+      let totaalB = 0;
+      delen.forEach(d => {
+        totaalB += d === 'HOK' ? HOK_W : doc.getTextWidth(d);
+      });
+
+      const cy   = ry + RH / 2;          // verticaal midden van kader
+      const textY = cy + 2.5;            // basislijn tekst (iets onder midden)
+      let curX = x + (colW - totaalB) / 2;
+
+      delen.forEach(d => {
+        if (d === 'HOK') {
+          // Teken invulhokje: wit met donkere rand
+          const hokY = cy - HOK_H / 2;
+          doc.setFillColor(255, 255, 255);
+          doc.setDrawColor(26, 58, 92);
+          doc.setLineWidth(0.6);
+          doc.roundedRect(curX, hokY, HOK_W, HOK_H, 2, 2, 'FD');
+          curX += HOK_W;
+        } else {
+          doc.setTextColor(26, 58, 92);
+          doc.text(d, curX, textY);
+          curX += doc.getTextWidth(d);
+        }
+      });
+    });
+
+    y += rijCount * (RH + GAP) + NABLOK;
   }
 
   return { genereer };
