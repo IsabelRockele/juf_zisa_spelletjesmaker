@@ -25,7 +25,7 @@
       <div class="sidebar-tab active" onclick="App.toonBewerking('optellen',this)">➕ Optellen</div>
       <div class="sidebar-tab" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
       <div class="sidebar-tab" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug</div>
-      <div class="sidebar-tab" style="opacity:.4;cursor:not-allowed">✂️ Splits</div>
+      <div class="sidebar-tab" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
       <div class="sidebar-tab" style="opacity:.4;cursor:not-allowed">✖️ Tafels</div>
     </div>
 
@@ -205,6 +205,83 @@
 
 
 
+      <!-- Splitshuis variant (enkel zichtbaar bij Splits-tab) -->
+      <div class="config-kaart" id="kaart-splits-variant" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">🏠</div>
+          Invulvarianten
+        </div>
+        <div class="form-rij">
+          <label>Welk vakje vult het kind in?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('splits-variant','afwisselend',this)">
+              <input type="radio" name="splits-variant" value="afwisselend" checked>Afwisselend links/rechts
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('splits-variant','dak-leeg',this)">
+              <input type="radio" name="splits-variant" value="dak-leeg">Totaal invullen (dak leeg)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('splits-variant','gemengd',this)">
+              <input type="radio" name="splits-variant" value="gemengd">Beide gemengd
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Splits-niveau: specifieke getallen (enkel bij Splits-tab) -->
+      <div class="config-kaart" id="kaart-splits-niveau" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">🎯</div>
+          Welk getal splitsen?
+        </div>
+        <div class="form-rij">
+          <label>Tot (alle splitsingen)</label>
+          <div class="radio-groep" id="rg-splits-tot">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSplitsNiveau('tot',5,this)">
+              <input type="radio" name="splits-niveau" value="tot-5" checked>Tot 5
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',10,this)">
+              <input type="radio" name="splits-niveau" value="tot-10">Tot 10
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',20,this)">
+              <input type="radio" name="splits-niveau" value="tot-20">Tot 20
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSplitsNiveau('tot',100,this)">
+              <input type="radio" name="splits-niveau" value="tot-100">Tot 100
+            </label>
+          </div>
+        </div>
+        <div class="form-rij">
+          <label>Specifiek getal (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-splits-getallen">
+            <label class="vink-chip" onclick="App.toggleSplitsGetal(this,6)">
+              <span class="vink-box"></span>
+              <input type="checkbox" value="6" style="display:none">
+              <span>6</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleSplitsGetal(this,7)">
+              <span class="vink-box"></span>
+              <input type="checkbox" value="7" style="display:none">
+              <span>7</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleSplitsGetal(this,8)">
+              <span class="vink-box"></span>
+              <input type="checkbox" value="8" style="display:none">
+              <span>8</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleSplitsGetal(this,9)">
+              <span class="vink-box"></span>
+              <input type="checkbox" value="9" style="display:none">
+              <span>9</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleSplitsGetal(this,10)">
+              <span class="vink-box"></span>
+              <input type="checkbox" value="10" style="display:none">
+              <span>10</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Oefeningstypes (dynamisch gevuld door app.js) -->
       <div class="config-kaart">
         <div class="kaart-titel">
@@ -275,6 +352,7 @@
 
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="modules/splitsingen.js?v=1"></script>
 <script src="modules/optellen-tot20.js?v=3"></script>
 <script src="modules/optellen-tot100.js?v=3"></script>
 <script src="modules/aftrekken-tot20.js?v=3"></script>
