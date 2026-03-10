@@ -98,6 +98,7 @@ const Preview = (() => {
     const heeftAanvullen = hulp.includes('aanvullen');
     const splitspositie = blok.splitspositie || 'aftrekker';
     const bewerking     = blok.bewerking || 'optellen';
+    const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
 
     /* ── Herken-brug ─────────────────────────────────────── */
@@ -153,28 +154,31 @@ const Preview = (() => {
     ).join(' ') + ' =';
     const isAftrektal = heeftSplits && bewerking === 'aftrekken' && splitspositie === 'aftrektal';
 
+    // Bereken splitsbeen info voor HTML én positionering
+    const splDelen   = oef.vraag.replace(' =','').trim().split(' ');
+    const splDoelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
+    const splGetal   = parseInt(splDelen[splDoelIdx]) || 0;
+    const splIsHTE   = splGetal >= 100 && splGetal % 100 !== 0 && splGetal % 10 !== 0;
+    const splAantal  = heeftSplits ? (splIsHTE ? 3 : 2) : 0;
+    const boomKlasse = splAantal === 3 ? 'splitsbeen-boom splitsbeen-3' : 'splitsbeen-boom';
+    const vakjesHTML = splAantal > 0 ? Array(splAantal).fill('<div class="splits-vak"></div>').join('') : '';
+
     return `
       <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
-        </div>
-        <div class="hulp-rechts">
-          <span class="antwoord-vak"></span>
+          <span class="antwoord-vak" style="margin-left:4px;"></span>
         </div>
         ${heeftSplits ? `
-        <div class="hulp-splits-rij">
+        <div class="hulp-splits-rij" data-splits="${splAantal}">
           <div class="splitsbeen-anker">
-            <div class="splitsbeen-boom"></div>
-            <div class="splitsbeen-vakjes">
-              <div class="splits-vak"></div>
-              <div class="splits-vak"></div>
-            </div>
+            <div class="${boomKlasse}"></div>
+            <div class="splitsbeen-vakjes">${vakjesHTML}</div>
           </div>
         </div>` : ''}
         ${heeftLijnen ? `
         <div class="hulp-schrijflijnen">
-          <div class="schrijflijn"></div>
-          <div class="schrijflijn"></div>
+          ${Array(schrijflijnenAantal).fill('<div class="schrijflijn"></div>').join('')}
         </div>` : ''}
         <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
       </div>`;
@@ -276,26 +280,40 @@ const Preview = (() => {
     const compGetal   = oef.compenseerGetal;
     const compIsLinks = (a === compGetal);
 
-    // Kring met uniek id voor positionering
+    // Bij zelf-kringen: geen cirkel, geen pijl — kind doet alles zelf
+    const zelfKringen = (variant === 'zelf-kringen') && !isVoorbeeldOef;
+
+    // Kring of gewone tekst
     const kringId = `kring-${blokId}-${idx}`;
-    const kring = `<span class="comp-kring" id="${kringId}">${esc(String(compGetal))}</span>`;
+    const kringSpan = zelfKringen
+      ? `<span>${esc(String(compGetal))}</span>`
+      : `<span class="comp-kring" id="${kringId}">${esc(String(compGetal))}</span>`;
 
-    // Som: kring op juiste positie
-    const somDeel = compIsLinks
-      ? `${kring} + ${esc(String(oef.andereGetal))}`
-      : `${esc(String(oef.andereGetal))} + ${kring}`;
+    // Bewerking
+    const isAftrekken = oef.vraag.includes(' - ');
 
-    // Pijlrichting: 1e getal → ↓, 2e getal → ↙ (als HTML entity om encoding-problemen te vermijden)
-    const pijlChar = compIsLinks ? '&darr;' : '&#x2199;';
+    // Pijl: verborgen bij zelf-kringen
+    // Bij aftrekken altijd recht naar beneden (kring staat rechts, blokje links)
+    const pijlChar = (compIsLinks || isAftrekken) ? '&darr;' : '&#x2199;';
+    const pijlTonen = !zelfKringen;
 
-    // Compenseerblokje
+    // Compenseerblokje — volgorde afhankelijk van bewerking
     let blokjeInhoud;
     if (isVoorbeeldOef) {
-      blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-getal">${oef.tiental}</span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-getal">${oef.compenseerDelta}</span>`;
+      if (isAftrekken) {
+        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-getal">${oef.tiental}</span><span class="comp-blokje-teken">+</span><span class="comp-blokje-getal">${oef.compenseerDelta}</span>`;
+      } else {
+        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-getal">${oef.tiental}</span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-getal">${oef.compenseerDelta}</span>`;
+      }
     } else if (variant === 'met-tekens') {
-      blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje"></span>`;
+      if (isAftrekken) {
+        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje"></span><span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje"></span>`;
+      } else {
+        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje"></span>`;
+      }
     } else {
-      blokjeInhoud = `<span class="comp-blokje-hokje"></span><span class="comp-blokje-hokje"></span><span class="comp-blokje-hokje"></span><span class="comp-blokje-hokje"></span>`;
+      // zonder-tekens én zelf-kringen: 2 lege brede hokjes
+      blokjeInhoud = `<span class="comp-blokje-hokje comp-blokje-hokje-breed"></span><span class="comp-blokje-hokje comp-blokje-hokje-breed"></span>`;
     }
 
     const antw  = isVoorbeeldOef ? String(oef.antwoord) : '';
@@ -303,25 +321,29 @@ const Preview = (() => {
     const lijn1tekst = isVoorbeeldOef ? esc(oef.schrijflijn1) : '';
     const lijn2tekst = isVoorbeeldOef ? esc(oef.schrijflijn2) : '';
 
-    // Structuur:
-    // - comp-som-wrapper: som + antwoordvak op 1 lijn (flex row)
-    // - comp-onder-wrapper: position:relative, bevat pijl-blokje (absoluut) + schrijflijnen
-    // - pijl-blokje wordt via JS uitgelijnd onder de kring (zoals splitsbeen)
+    // Layout:
+    // - Som en pijl in een 2-kolom grid zodat pijl exact onder kring staat
+    // - Bij compIsLinks: kring in kol1, rest in kol2 → pijl in kol1
+    // - Bij !compIsLinks: prefix in kol1, kring+rest in kol2 → pijl in kol2
+    // - Blokje staat altijd links op vaste plek (onder de pijl maar los ervan)
+    // Bewerkingsteken: + bij optellen, − bij aftrekken
+    const teken = isAftrekken ? ' - ' : ' + ';
+    const somPrefix = compIsLinks ? '' : `${esc(String(oef.andereGetal))}${teken}`;
+    const somSuffix = compIsLinks ? `${teken}${esc(String(oef.andereGetal))}` : '';
+
     return `
-      <div class="oefening-item oefening-comp${isVoorbeeldOef ? ' comp-voorbeeld' : ''}" data-comp-links="${compIsLinks}">
-        <div class="comp-som-wrapper">
-          <span class="oef-tekst comp-som">${somDeel} =</span>
-          <span class="antwoord-vak${isVoorbeeldOef ? ' antwoord-ingevuld' : ''}">${antw}</span>
+      <div class="oefening-item oefening-comp${isVoorbeeldOef ? ' comp-voorbeeld' : ''}">
+        <div class="comp-grid">
+          <div class="cg-pre">${somPrefix}</div>
+          <div class="cg-k">${kringSpan}</div>
+          <div class="cg-suf">${somSuffix} =</div>
+          <div class="cg-av"><span class="antwoord-vak${isVoorbeeldOef ? ' antwoord-ingevuld' : ''}">${antw}</span></div>
+          <div class="cg-pijl">${pijlTonen ? pijlChar : ''}</div>
+          <div class="cg-blok"><div class="comp-blokje">${blokjeInhoud}</div></div>
         </div>
-        <div class="comp-onder-wrapper">
-          <div class="comp-pijl-blokje" data-kring-id="${kringId}">
-            <span class="comp-pijl">${pijlChar}</span>
-            <div class="comp-blokje">${blokjeInhoud}</div>
-          </div>
-          <div class="comp-schrijf">
-            <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn1tekst}</span></div>
-            <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn2tekst}</span></div>
-          </div>
+        <div class="comp-schrijf">
+          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn1tekst}</span></div>
+          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn2tekst}</span></div>
         </div>
         ${del}
       </div>`;
@@ -330,12 +352,29 @@ const Preview = (() => {
 
   function _positioneerSplitsbenen() {
     document.querySelectorAll('.splitsbeen-anker').forEach(anker => {
-      const doelEl = anker.closest('.oefening-hulp')?.querySelector('.splits-doel');
-      const somRij = anker.closest('.oefening-hulp')?.querySelector('.hulp-som-rij');
-      if (!doelEl || !somRij) return;
-      const doelLinks  = doelEl.getBoundingClientRect().left - somRij.getBoundingClientRect().left;
-      const doelMidden = doelLinks + doelEl.offsetWidth / 2;
-      anker.style.left = Math.round(doelMidden - 26) + 'px';
+      const oefening  = anker.closest('.oefening-hulp');
+      const doelEl    = oefening?.querySelector('.splits-doel');
+      if (!doelEl) return;
+
+      // Meet midden van splits-doel t.o.v. oefening-hulp (inclusief padding)
+      const doelRect = doelEl.getBoundingClientRect();
+      const oefRect  = oefening.getBoundingClientRect();
+      const doelMidden = doelRect.left - oefRect.left + doelRect.width / 2;
+
+      const boom   = anker.querySelector('.splitsbeen-boom');
+      const isDrie = boom?.classList.contains('splitsbeen-3');
+      const boomB  = isDrie ? 80 : 52;  // iets groter dan werkelijke breedte → schuift links
+
+      // Zet anker absoluut t.o.v. hulp-splits-rij (die is position:relative)
+      // splits-rij heeft dezelfde left als oefening (minus padding)
+      // → gebruik dezelfde doelMidden maar corrigeer voor padding van oefening
+      const splitsRij = anker.closest('.hulp-splits-rij');
+      if (!splitsRij) return;
+      const splitsRect = splitsRij.getBoundingClientRect();
+      const links = doelRect.left - splitsRect.left + doelRect.width / 2 - boomB / 2;
+
+      anker.style.position = 'relative';
+      anker.style.marginLeft = Math.round(links) + 'px';
     });
   }
 
