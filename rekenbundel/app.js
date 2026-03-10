@@ -227,7 +227,7 @@ const App = (() => {
 
     // Aanvullen: verbergen boven 100
     if (chipAanv) {
-      const verbergAanv = niveau <= 20 || niveau > 100;
+      const verbergAanv = niveau <= 20 || (niveau > 100 && niveau < 1000);
       chipAanv.style.display = verbergAanv ? 'none' : '';
       if (verbergAanv) {
         const cb = chipAanv.querySelector('input');
