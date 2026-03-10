@@ -66,7 +66,11 @@ const App = (() => {
     el.classList.add('geselecteerd');
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    if (naam === 'niveau') _updateTypesUI(parseInt(waarde), null);
+    if (naam === 'niveau') {
+      _updateTypesUI(parseInt(waarde), null);
+      const huidigeBrug = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
+      _updateHulpmiddelenUI(huidigeBrug);
+    }
     if (naam === 'brug') {
       _updateTypesUI(niveau, waarde);
       _updateHulpmiddelenUI(waarde);
@@ -124,6 +128,46 @@ const App = (() => {
     const kaartBrug = document.getElementById('kaart-brug');
     if (kaartBrug) kaartBrug.style.display = (niveau <= 10) ? 'none' : 'block';
     if (niveau <= 10) _updateHulpmiddelenUI('zonder');
+
+    // Bij niveau <= 100: enkel 'zonder' en 'naar-tiental' tonen, rest verbergen
+    const alleenTiental = niveau <= 100;
+    ['naar-honderdtal','beide'].forEach(val => {
+      const chip = document.querySelector(`[name="brug"][value="${val}"]`)?.closest('.radio-chip');
+      if (chip) chip.style.display = alleenTiental ? 'none' : '';
+    });
+    // Als verborgen optie geselecteerd is, reset naar 'zonder' en herlaad types
+    if (alleenTiental) {
+      const huidigeBrug = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
+      if (['naar-honderdtal','beide'].includes(huidigeBrug)) {
+        document.querySelector('[name="brug"][value="zonder"]').checked = true;
+        document.querySelectorAll('[name="brug"]').forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+        document.querySelector('[name="brug"][value="zonder"]')?.closest('.radio-chip')?.classList.add('geselecteerd');
+        _updateHulpmiddelenUI('zonder');
+        _updateTypesUI(niveau, 'zonder');
+      }
+    }
+
+    // Aanvullen en compenseren enkel beschikbaar tot 100
+    const chipComp = document.getElementById('chip-compenseren');
+    const chipAanv = document.getElementById('chip-aanvullen');
+    [chipComp, chipAanv].forEach(chip => {
+      if (!chip) return;
+      const verberg = niveau > 100;
+      chip.style.display = verberg ? 'none' : '';
+      if (verberg) {
+        const cb = chip.querySelector('input');
+        if (cb) cb.checked = false;
+        chip.classList.remove('geselecteerd');
+        const vb = chip.querySelector('.vink-box');
+        if (vb) vb.textContent = '';
+      }
+    });
+    if (niveau > 100) {
+      const rijComp = document.getElementById('rij-compenseren');
+      if (rijComp) rijComp.style.display = 'none';
+      const rijAanv = document.getElementById('rij-aanvullen');
+      if (rijAanv) rijAanv.style.display = 'none';
+    }
   }
 
   /* ── Hulpmiddelen UI ────────────────────────────────────── */
@@ -131,8 +175,12 @@ const App = (() => {
     const kaart = document.getElementById('kaart-hulpmiddelen');
     if (!kaart) return;
 
-    // Enkel tonen bij "met brug" en niet bij herken-brug tab
-    const toon = (brug === 'met') && (actieveBewerking !== 'herken-brug');
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const isBrug = ['naar-tiental','naar-honderdtal','beide','met'].includes(brug);
+    const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
+
+    // Toon bij brug (alle niveaus) of bij zonder+tot1000
+    const toon = (isBrug || isZonderTot1000) && (actieveBewerking !== 'herken-brug');
     kaart.style.display = toon ? 'block' : 'none';
 
     if (!toon) {
@@ -148,11 +196,42 @@ const App = (() => {
       if (rijAanv) rijAanv.style.display = 'none';
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = 'none';
+      const rijLijnen = document.getElementById('rij-schrijflijnen-aantal');
+      if (rijLijnen) rijLijnen.style.display = 'none';
+    }
+
+    // Bij zonder+tot1000: enkel splitsbeen tonen, rest verbergen
+    const chipSplits    = document.getElementById('chip-splitsbeen');
+    const chipLijnen    = document.getElementById('chip-schrijflijnen');
+    const chipAanvullen = document.getElementById('chip-aanvullen');
+    const chipComp      = document.getElementById('chip-compenseren');
+
+    if (isZonderTot1000) {
+      // Splitsbeen en schrijflijnen beschikbaar, rest niet
+      if (chipSplits)    chipSplits.style.display    = '';
+      if (chipLijnen)    chipLijnen.style.display    = '';
+      if (chipAanvullen) { chipAanvullen.style.display = 'none'; _resetChip(chipAanvullen, 'rij-aanvullen'); }
+      if (chipComp)      { chipComp.style.display      = 'none'; _resetChip(chipComp, 'rij-compenseren'); }
+    } else if (isBrug) {
+      // Alle chips zichtbaar (niveau-filter doet de rest)
+      if (chipSplits) chipSplits.style.display = '';
+      if (chipLijnen) chipLijnen.style.display = '';
     }
 
     // Splitspositie enkel bij aftrekken
     const rijPos = document.getElementById('rij-splitspositie');
-    if (rijPos) rijPos.style.display = (actieveBewerking === 'aftrekken') ? 'block' : 'none';
+    if (rijPos) rijPos.style.display = (toon && actieveBewerking === 'aftrekken') ? 'block' : 'none';
+  }
+
+  function _resetChip(chip, rijId) {
+    if (!chip) return;
+    const cb = chip.querySelector('input');
+    if (cb) cb.checked = false;
+    chip.classList.remove('geselecteerd');
+    const vb = chip.querySelector('.vink-box');
+    if (vb) vb.textContent = '';
+    const rij = document.getElementById(rijId);
+    if (rij) rij.style.display = 'none';
   }
 
   /* ── Blok toevoegen ──────────────────────────────────────── */
@@ -170,11 +249,12 @@ const App = (() => {
     }
 
     const isHerken = actieveBewerking === 'herken-brug';
-    const hulpmiddelen       = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
-    const splitspositie      = document.querySelector('[name="splitspositie"]:checked')?.value || 'aftrekker';
-    const aanvullenVariant   = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
-    const compenserenVariant = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
-    const metVoorbeeld       = document.getElementById('cb-metvoorbeeld')?.checked || false;
+    const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    const splitspositie       = document.querySelector('[name="splitspositie"]:checked')?.value || 'aftrekker';
+    const aanvullenVariant    = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
+    const compenserenVariant  = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
+    const schrijflijnenAantal = parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
+    const metVoorbeeld        = document.getElementById('cb-metvoorbeeld')?.checked || false;
     const blok = Generator.maakBlok({
       bewerking: actieveBewerking,
       niveau:    isHerken ? 100 : niveau,
@@ -186,6 +266,7 @@ const App = (() => {
       splitspositie,
       aanvullenVariant,
       compenserenVariant,
+      schrijflijnenAantal,
       metVoorbeeld,
     });
 
@@ -250,6 +331,10 @@ const App = (() => {
     if (waarde === 'splitsbeen') {
       const rijPos = document.getElementById('rij-splitspositie');
       if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken') ? 'block' : 'none';
+    }
+    if (waarde === 'schrijflijnen') {
+      const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
+      if (rijAantal) rijAantal.style.display = !was ? 'block' : 'none';
     }
     if (waarde === 'aanvullen') {
       const rijAanvullen = document.getElementById('rij-aanvullen');
