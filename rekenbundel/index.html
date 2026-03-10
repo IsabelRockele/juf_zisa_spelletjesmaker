@@ -76,37 +76,34 @@
         <div class="form-rij">
           <label>Met of zonder brug?</label>
           <div class="radio-groep">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('brug','zonder',this)">
-              <input type="radio" name="brug" value="zonder" checked>Zonder brug
+            <label class="radio-chip geselecteerd" onclick="App.selecteerBrugHoofd('zonder',this)">
+              <input type="radio" name="brug-hoofd" value="zonder" checked>Zonder brug
             </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('brug','naar-tiental',this)">
-              <input type="radio" name="brug" value="naar-tiental">Brug → tiental
+            <label class="radio-chip" onclick="App.selecteerBrugHoofd('met',this)">
+              <input type="radio" name="brug-hoofd" value="met">Met brug
             </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('brug','naar-honderdtal',this)">
-              <input type="radio" name="brug" value="naar-honderdtal">Brug → honderdtal
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('brug','beide',this)">
-              <input type="radio" name="brug" value="beide">Beide bruggen
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('brug','gemengd',this)">
-              <input type="radio" name="brug" value="gemengd">Gemengd
+            <label class="radio-chip" onclick="App.selecteerBrugHoofd('beide',this)">
+              <input type="radio" name="brug-hoofd" value="beide">Beide
             </label>
           </div>
         </div>
-      </div>
-
-      <!-- Oefeningstypes (dynamisch gevuld door app.js) -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🔢</div>
-          Oefeningstypes
-        </div>
-        <div class="form-rij">
-          <label>Kies types (meerdere mogelijk)</label>
-          <div class="checkbox-groep" id="cg-types">
-            <!-- gevuld door app.js op basis van gekozen niveau -->
+        <!-- Subkeuze brug: enkel bij tot 1000 + met/beide -->
+        <div class="form-rij" id="rij-brug-sub" style="display:none">
+          <label>Welke brug?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerBrugSub('naar-tiental',this)">
+              <input type="radio" name="brug-sub" value="naar-tiental" checked>→ tiental
+            </label>
+            <label class="radio-chip" onclick="App.selecteerBrugSub('naar-honderdtal',this)">
+              <input type="radio" name="brug-sub" value="naar-honderdtal">→ honderdtal
+            </label>
+            <label class="radio-chip" onclick="App.selecteerBrugSub('beide',this)">
+              <input type="radio" name="brug-sub" value="beide">Beide
+            </label>
           </div>
         </div>
+        <!-- Verborgen input die de echte brugwaarde bijhoudt voor rest van de app -->
+        <input type="radio" name="brug" value="zonder" checked style="display:none">
       </div>
 
       <!-- Hulpmiddelen (enkel bij met brug) -->
@@ -206,6 +203,22 @@
         </div>
       </div>
 
+
+
+      <!-- Oefeningstypes (dynamisch gevuld door app.js) -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Oefeningstypes
+        </div>
+        <div class="form-rij">
+          <label>Kies types (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-types">
+            <!-- gevuld door app.js op basis van gekozen niveau -->
+          </div>
+        </div>
+      </div>
+
       <!-- Opdrachtzin & aantal -->
       <div class="config-kaart">
         <div class="kaart-titel">
@@ -269,14 +282,16 @@
 <script src="modules/herken-brug-tot100.js?v=3"></script>
 <script src="modules/aanvullen-tot100.js?v=3"></script>
 <script src="modules/compenseren-optellen.js?v=3"></script>
+<script src="modules/compenseren-optellen-tot1000.js?v=7"></script>
+<script src="modules/compenseren-aftrekken-tot1000.js?v=1"></script>
 <script src="modules/compenseren-aftrekken.js?v=2"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
 <script src="hulpmiddelen.js?v=3"></script>
-<script src="generator.js?v=7"></script>
+<script src="generator.js?v=10"></script>
 <script src="preview.js?v=30"></script>
-<script src="pdf-engine.js?v=35"></script>
-<script src="app.js?v=9"></script>
+<script src="pdf-engine.js?v=36"></script>
+<script src="app.js?v=13"></script>
 
 </body>
 </html>
