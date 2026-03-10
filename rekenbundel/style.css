@@ -901,3 +901,136 @@ header .badge {
   font-weight: 700 !important;
 }
 .oefening-comp .btn-del-oef { position: absolute !important; top: 6px; right: 6px; }
+/* ══════════════════════════════════════════════════════════
+   SPLITSINGEN — preview stijlen
+══════════════════════════════════════════════════════════ */
+
+/* Grid: 4 per rij voor klein splitshuis */
+.splits-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 10px;
+  align-items: start;
+}
+
+/* Basis override */
+.oefening-splits {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 6px 8px 28px;
+  min-height: 90px;
+}
+
+/* ─────────────────────────────────────────
+   KLEIN SPLITSHUIS
+   Visueel huisje: driehoekig dak + 2 kamers
+───────────────────────────────────────── */
+.splitshuis-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+/* DAK: driehoek via clip-path + inhoud gecentreerd */
+.sh-dak {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sh-dak-driehoek {
+  width: 0;
+  height: 0;
+  border-left: 44px solid transparent;
+  border-right: 44px solid transparent;
+  border-bottom: 34px solid #4A90D9;
+  position: relative;
+}
+
+.sh-dak-driehoek::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: -38px;
+  width: 0;
+  height: 0;
+  border-left: 38px solid transparent;
+  border-right: 38px solid transparent;
+  border-bottom: 28px solid #EAF4FB;
+}
+
+.sh-dak-inhoud {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* MUUR: rechthoek met 2 kamers en scheidingswand */
+.sh-muur {
+  width: 88px;
+  border: 2px solid #4A90D9;
+  border-top: none;
+  border-radius: 0 0 5px 5px;
+  background: white;
+  display: flex;
+  align-items: stretch;
+  min-height: 38px;
+}
+
+.sh-kamer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+}
+
+.sh-scheidingswand {
+  width: 2px;
+  background: #4A90D9;
+  flex-shrink: 0;
+}
+
+/* Getallen in het huis */
+.sh-dak-getal {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1A3A5C;
+  line-height: 1;
+}
+
+.sh-kamer-getal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  line-height: 1;
+}
+
+/* Invulvakjes */
+.sh-vakje {
+  display: inline-block;
+  border: 1.5px solid #1A3A5C;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.sh-vakje-dak {
+  width: 28px;
+  height: 20px;
+}
+
+.sh-vakje-kamer {
+  width: 28px;
+  height: 22px;
+}
