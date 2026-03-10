@@ -63,15 +63,14 @@ const Tafels = (() => {
           }
         }
         if (wilFactor) {
-          // ___ × b = product  of  a × ___ = product, afhankelijk van positie
-          if (voegVooraan) {
-            pool.push({ type: 'ontbrekende-factor', positie: 'links', a: null, b: multiplier, antwoord: tafel,
-              product, sleutel: `f-l-${tafel}-${multiplier}` });
-          }
-          if (voegAchteraan && tafel !== multiplier) {
-            pool.push({ type: 'ontbrekende-factor', positie: 'rechts', a: multiplier, b: null, antwoord: tafel,
-              product, sleutel: `f-r-${multiplier}-${tafel}` });
-          }
+          // Ontbrekende factor: altijd beide posities (links én rechts) aanbieden,
+          // ongeacht tafelPositie — zodat het invulvakje afwisselend 1e of 2e factor is.
+          // ___ × multiplier = product  (tafel is de ontbrekende 1e factor)
+          pool.push({ type: 'ontbrekende-factor', positie: 'links', a: null, b: multiplier, antwoord: tafel,
+            product, sleutel: `f-l-${tafel}-${multiplier}` });
+          // tafel × ___ = product  (multiplier is de ontbrekende 2e factor)
+          pool.push({ type: 'ontbrekende-factor', positie: 'rechts', a: tafel, b: null, antwoord: multiplier,
+            product, sleutel: `f-r-${tafel}-${multiplier}` });
         }
       }
     }
