@@ -227,7 +227,7 @@ const App = (() => {
 
     // Aanvullen: verbergen boven 100
     if (chipAanv) {
-      const verbergAanv = niveau > 100;
+      const verbergAanv = niveau <= 20 || niveau > 100;
       chipAanv.style.display = verbergAanv ? 'none' : '';
       if (verbergAanv) {
         const cb = chipAanv.querySelector('input');
@@ -242,7 +242,7 @@ const App = (() => {
 
     // Compenseren: beschikbaar tot 100 (optellen+aftrekken) en tot 1000 (enkel optellen)
     if (chipComp) {
-      const verbergComp = niveau > 100 && niveau < 1000;
+      const verbergComp = niveau <= 20 || (niveau > 100 && niveau < 1000);
       chipComp.style.display = verbergComp ? 'none' : '';
       if (verbergComp) {
         const cb = chipComp.querySelector('input');
@@ -264,6 +264,7 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const isBrug = ['naar-tiental','naar-honderdtal','beide','met'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
+    if (niveau < 20) { kaart.style.display = 'none'; return; }
 
     // Toon bij brug (alle niveaus) of bij zonder+tot1000
     const toon = (isBrug || isZonderTot1000) && (actieveBewerking !== 'herken-brug');
