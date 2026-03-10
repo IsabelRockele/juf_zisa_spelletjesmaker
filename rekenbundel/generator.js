@@ -24,6 +24,7 @@ const Generator = (() => {
       if (niveau <= 1000) return AftrekkenTot1000;
     }
     if (bewerking === 'herken-brug') return HerkenBrugTot100;
+    if (bewerking === 'splitsingen') return Splitsingen;
     return null;
   }
 
@@ -34,8 +35,9 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', schrijflijnenAantal = 2, metVoorbeeld = false }) {
+  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot' }) {
     const isHerken      = bewerking === 'herken-brug';
+    const isSplitsingen = bewerking === 'splitsingen';
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
     const isCompenseren = hulpmiddelen.includes('compenseren');
 
@@ -59,13 +61,15 @@ const Generator = (() => {
 
     // Genereer oefeningen
     let oefeningen;
-    if (isHerken)           oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
+    if (isSplitsingen)      oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus });
+    else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
     else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
     if (oefeningen.length < 2) return null;
 
     const defaultZin = isCompenseren ? 'Compenseer.' :
+                       isSplitsingen ? 'Splits het getal.' :
                        isHerken      ? 'Kleur Zisa groen bij elke brugoefening.' :
                        bewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.';
 
@@ -83,7 +87,8 @@ const Generator = (() => {
       compenserenVariant,
       schrijflijnenAantal,
       metVoorbeeld,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld },
+      splitsVariant,
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant },
       oefeningen,
     };
   }
@@ -120,7 +125,8 @@ const Generator = (() => {
 
   /* ── Geef beschikbare types terug ────────────────────────── */
   function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = []) {
-    if (bewerking === 'herken-brug') return _getModule(bewerking, niveau)?.getTypes() || [];
+    if (bewerking === 'herken-brug')  return _getModule(bewerking, niveau)?.getTypes() || [];
+    if (bewerking === 'splitsingen')  return Splitsingen.getTypes();
 
     const isCompenseren = hulpmiddelen.includes('compenseren');
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
