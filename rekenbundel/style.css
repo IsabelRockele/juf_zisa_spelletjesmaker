@@ -93,6 +93,56 @@ header .badge {
   border-bottom-color: var(--lichtblauw);
   background: var(--wit);
 }
+/* --- NIEUWE STIJL VOOR DE TABBLADEN --- */
+
+/* Basis instelling voor alle tabs zodat de transitie vloeiend is */
+.sidebar-tab {
+  transition: all 0.2s ease;
+  border-bottom: 4px solid transparent;
+  opacity: 1 !important;
+  font-size: 13px;
+  padding: 14px 8px;
+}
+
+/* 1. Optellen (Blauw) */
+.sidebar-tab.tab-optellen { background-color: #A2D2FF; color: #1A3A5C; }
+.sidebar-tab.tab-optellen:hover { background-color: #8ECAFF; }
+.sidebar-tab.tab-optellen.active { 
+  background-color: #4A90D9 !important; 
+  color: #ffffff;
+  border-bottom-color: #1A3A5C !important;
+  font-weight: 800;
+}
+
+/* 2. Aftrekken (Rood/Roze) */
+.sidebar-tab.tab-aftrekken { background-color: #FFB3B3; color: #1A3A5C; }
+.sidebar-tab.tab-aftrekken:hover { background-color: #FF9999; }
+.sidebar-tab.tab-aftrekken.active { 
+  background-color: #E74C3C !important; 
+  color: #ffffff;
+  border-bottom-color: #B71C1C !important;
+  font-weight: 800;
+}
+
+/* 3. Herken Brug (Geel/Oranje) */
+.sidebar-tab.tab-brug { background-color: #FFE082; color: #1A3A5C; }
+.sidebar-tab.tab-brug:hover { background-color: #FFD54F; }
+.sidebar-tab.tab-brug.active { 
+  background-color: #F0A500 !important; 
+  color: #ffffff;
+  border-bottom-color: #E67E22 !important;
+  font-weight: 800;
+}
+
+/* 4. Splitsen (Groen) */
+.sidebar-tab.tab-splits { background-color: #A5D6A7; color: #1A3A5C; }
+.sidebar-tab.tab-splits:hover { background-color: #81C784; }
+.sidebar-tab.tab-splits.active { 
+  background-color: #27AE60 !important; 
+  color: #ffffff;
+  border-bottom-color: #1B5E20 !important;
+  font-weight: 800;
+}
 .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
 
 /* ── BUNDEL INFO ───────────────────────────────────────────── */
