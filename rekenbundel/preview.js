@@ -38,13 +38,17 @@ const Preview = (() => {
 
   function _maakBlokElement(blok) {
     const isHerken       = blok.bewerking === 'herken-brug';
-    const heeftAanvullen   = !isHerken && blok.hulpmiddelen?.includes('aanvullen');
-    const heeftCompenseren = !isHerken && blok.hulpmiddelen?.includes('compenseren');
-    const heeftHulp        = !isHerken && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
+    const isSplitsingen  = blok.bewerking === 'splitsingen';
+    const heeftAanvullen   = !isHerken && !isSplitsingen && blok.hulpmiddelen?.includes('aanvullen');
+    const heeftCompenseren = !isHerken && !isSplitsingen && blok.hulpmiddelen?.includes('compenseren');
+    const heeftHulp        = !isHerken && !isSplitsingen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
     const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
-    const badgeTxt  = isHerken ? '🔦 Herken brug' : blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
+    const badgeTxt  = isSplitsingen ? '✂️ Splits' :
+                      isHerken ? '🔦 Herken brug' :
+                      blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     let gridKlasse;
-    if (isHerken)                                                          gridKlasse = 'herken-grid';
+    if (isSplitsingen)                                                     gridKlasse = 'splits-grid';
+    else if (isHerken)                                                     gridKlasse = 'herken-grid';
     else if (heeftAanvullen && blok.aanvullenVariant === 'met-schijfjes') gridKlasse = 'aanvullen-grid-2';
     else if (heeftAanvullen)                                               gridKlasse = 'aanvullen-grid-3';
     else if (heeftCompenseren)                                             gridKlasse = 'comp-grid';
@@ -59,7 +63,7 @@ const Preview = (() => {
       <div class="preview-blok-header">
         <span class="blok-type-badge">${badgeTxt}</span>
         <span class="blok-niveau">Tot ${blok.niveau}</span>
-        <span style="color:rgba(255,255,255,.6);font-size:12px;margin-left:4px;">${brugLabel}</span>
+        <span style="color:rgba(255,255,255,.6);font-size:12px;margin-left:4px;">${isSplitsingen ? '' : brugLabel}</span>
         <div class="spacer"></div>
         <div class="blok-acties">
           <button class="btn-blok-actie verwijder"
@@ -100,6 +104,11 @@ const Preview = (() => {
     const bewerking     = blok.bewerking || 'optellen';
     const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
+
+    /* ── Splitsingen ─────────────────────────────────────── */
+    if (blok.bewerking === 'splitsingen') {
+      return _splitsingHTML(blok.id, oef, idx);
+    }
 
     /* ── Herken-brug ─────────────────────────────────────── */
     if (isHerken) {
@@ -358,6 +367,58 @@ const Preview = (() => {
       </div>`;
   }
 
+
+  /* ══════════════════════════════════════════════════════════
+     SPLITSINGEN HTML RENDERERS
+  ══════════════════════════════════════════════════════════ */
+
+  function _splitsingHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
+    if (oef.type === 'klein-splitshuis') return _kleinsplitshuisHTML(blokId, oef, idx, del);
+    return '';
+  }
+
+  /* ── Klein splitshuis ───────────────────────────────────────
+     Visueel:
+                  ╱╲
+                 / N \      ← dak: totaal (of leeg vakje)
+                /____\
+               |  a |+| b | ← kamers: één gegeven, één leeg
+               |____|_|____|
+  ────────────────────────────────────────────────────────── */
+  function _kleinsplitshuisHTML(blokId, oef, idx, del) {
+    const dakGegeven   = oef.totaal !== null;
+    const linksGegeven = oef.links  !== null;
+    const rechtsGegeven= oef.rechts !== null;
+
+    const dakHTML = dakGegeven
+      ? `<span class="sh-dak-getal">${oef.totaal}</span>`
+      : `<span class="sh-vakje sh-vakje-dak"></span>`;
+
+    const linksHTML = linksGegeven
+      ? `<span class="sh-kamer-getal">${oef.links}</span>`
+      : `<span class="sh-vakje sh-vakje-kamer"></span>`;
+
+    const rechtsHTML = rechtsGegeven
+      ? `<span class="sh-kamer-getal">${oef.rechts}</span>`
+      : `<span class="sh-vakje sh-vakje-kamer"></span>`;
+
+    return `
+      <div class="oefening-item oefening-splits oefening-kleinsplitshuis">
+        <div class="splitshuis-wrap">
+          <div class="sh-dak">
+            <div class="sh-dak-driehoek"></div>
+            <div class="sh-dak-inhoud">${dakHTML}</div>
+          </div>
+          <div class="sh-muur">
+            <div class="sh-kamer sh-kamer-l">${linksHTML}</div>
+            <div class="sh-scheidingswand"></div>
+            <div class="sh-kamer sh-kamer-r">${rechtsHTML}</div>
+          </div>
+        </div>
+        ${del}
+      </div>`;
+  }
 
   function _positioneerSplitsbenen() {
     document.querySelectorAll('.splitsbeen-anker').forEach(anker => {
