@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
-  <link rel="stylesheet" href="style.css?v=13">
+  <link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
 
@@ -60,7 +60,7 @@
             <label class="radio-chip" onclick="App.selecteerRadio('niveau','100',this)">
               <input type="radio" name="niveau" value="100">Tot 100
             </label>
-            <label class="radio-chip" style="opacity:.4;pointer-events:none">
+            <label class="radio-chip" onclick="App.selecteerRadio('niveau','1000',this)">
               <input type="radio" name="niveau" value="1000">Tot 1000
             </label>
           </div>
@@ -79,8 +79,14 @@
             <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('brug','zonder',this)">
               <input type="radio" name="brug" value="zonder" checked>Zonder brug
             </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('brug','met',this)">
-              <input type="radio" name="brug" value="met">Met brug
+            <label class="radio-chip" onclick="App.selecteerRadio('brug','naar-tiental',this)">
+              <input type="radio" name="brug" value="naar-tiental">Brug → tiental
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('brug','naar-honderdtal',this)">
+              <input type="radio" name="brug" value="naar-honderdtal">Brug → honderdtal
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('brug','beide',this)">
+              <input type="radio" name="brug" value="beide">Beide bruggen
             </label>
             <label class="radio-chip" onclick="App.selecteerRadio('brug','gemengd',this)">
               <input type="radio" name="brug" value="gemengd">Gemengd
@@ -135,6 +141,19 @@
           </div>
         </div>
 
+        <!-- Aantal schrijflijnen: zichtbaar als schrijflijnen aangevinkt -->
+        <div class="form-rij" id="rij-schrijflijnen-aantal" style="display:none">
+          <label>Aantal schrijflijnen</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('schrijflijnen-aantal','2',this)">
+              <input type="radio" name="schrijflijnen-aantal" value="2" checked>2 lijnen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('schrijflijnen-aantal','3',this)">
+              <input type="radio" name="schrijflijnen-aantal" value="3">3 lijnen
+            </label>
+          </div>
+        </div>
+
         <!-- Splitspositie: enkel bij aftrekken -->
         <div class="form-rij" id="rij-splitspositie" style="display:none">
           <label>Splitsbeen onder welk getal?</label>
@@ -172,6 +191,9 @@
             </label>
             <label class="radio-chip" onclick="App.selecteerRadio('compenseren-variant','zonder-tekens',this)">
               <input type="radio" name="compenseren-variant" value="zonder-tekens">Kind vult zelf in
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('compenseren-variant','zelf-kringen',this)">
+              <input type="radio" name="compenseren-variant" value="zelf-kringen">Kind kringt zelf + tekent pijl
             </label>
           </div>
           <div style="margin-top:8px">
@@ -247,11 +269,14 @@
 <script src="modules/herken-brug-tot100.js?v=3"></script>
 <script src="modules/aanvullen-tot100.js?v=3"></script>
 <script src="modules/compenseren-optellen.js?v=3"></script>
+<script src="modules/compenseren-aftrekken.js?v=2"></script>
+<script src="modules/optellen-tot1000.js?v=8"></script>
+<script src="modules/aftrekken-tot1000.js?v=8"></script>
 <script src="hulpmiddelen.js?v=3"></script>
-<script src="generator.js?v=3"></script>
-<script src="preview.js?v=13"></script>
-<script src="pdf-engine.js?v=3"></script>
-<script src="app.js?v=3"></script>
+<script src="generator.js?v=7"></script>
+<script src="preview.js?v=30"></script>
+<script src="pdf-engine.js?v=35"></script>
+<script src="app.js?v=9"></script>
 
 </body>
 </html>
