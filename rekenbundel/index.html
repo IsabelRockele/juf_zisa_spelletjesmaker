@@ -205,7 +205,21 @@
 
 
 
-      <!-- Splitshuis variant (enkel zichtbaar bij Splits-tab) -->
+      <!-- Oefeningstypes EERST (dynamisch gevuld door app.js) -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Oefeningstypes
+        </div>
+        <div class="form-rij">
+          <label>Kies types (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-types">
+            <!-- gevuld door app.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Splitshuis variant (enkel bij Klein splitshuis / Splitsbeen) -->
       <div class="config-kaart" id="kaart-splits-variant" style="display:none">
         <div class="kaart-titel">
           <div class="icon">🏠</div>
@@ -227,7 +241,7 @@
         </div>
       </div>
 
-      <!-- Splits-niveau: specifieke getallen (enkel bij Splits-tab) -->
+      <!-- Splits-niveau: voor Klein splitshuis / Splitsbeen -->
       <div class="config-kaart" id="kaart-splits-niveau" style="display:none">
         <div class="kaart-titel">
           <div class="icon">🎯</div>
@@ -254,44 +268,57 @@
           <label>Specifiek getal (meerdere mogelijk)</label>
           <div class="checkbox-groep" id="cg-splits-getallen">
             <label class="vink-chip" onclick="App.toggleSplitsGetal(this,6)">
-              <span class="vink-box"></span>
-              <input type="checkbox" value="6" style="display:none">
-              <span>6</span>
+              <span class="vink-box"></span><input type="checkbox" value="6" style="display:none"><span>6</span>
             </label>
             <label class="vink-chip" onclick="App.toggleSplitsGetal(this,7)">
-              <span class="vink-box"></span>
-              <input type="checkbox" value="7" style="display:none">
-              <span>7</span>
+              <span class="vink-box"></span><input type="checkbox" value="7" style="display:none"><span>7</span>
             </label>
             <label class="vink-chip" onclick="App.toggleSplitsGetal(this,8)">
-              <span class="vink-box"></span>
-              <input type="checkbox" value="8" style="display:none">
-              <span>8</span>
+              <span class="vink-box"></span><input type="checkbox" value="8" style="display:none"><span>8</span>
             </label>
             <label class="vink-chip" onclick="App.toggleSplitsGetal(this,9)">
-              <span class="vink-box"></span>
-              <input type="checkbox" value="9" style="display:none">
-              <span>9</span>
+              <span class="vink-box"></span><input type="checkbox" value="9" style="display:none"><span>9</span>
             </label>
             <label class="vink-chip" onclick="App.toggleSplitsGetal(this,10)">
-              <span class="vink-box"></span>
-              <input type="checkbox" value="10" style="display:none">
-              <span>10</span>
+              <span class="vink-box"></span><input type="checkbox" value="10" style="display:none"><span>10</span>
             </label>
           </div>
         </div>
       </div>
 
-      <!-- Oefeningstypes (dynamisch gevuld door app.js) -->
-      <div class="config-kaart">
+      <!-- Groot splitshuis: getallenkeuze (van 3 t/m 10) -->
+      <div class="config-kaart" id="kaart-groot-getallen" style="display:none">
         <div class="kaart-titel">
-          <div class="icon">🔢</div>
-          Oefeningstypes
+          <div class="icon">🎯</div>
+          Welke getallen oefenen?
         </div>
         <div class="form-rij">
-          <label>Kies types (meerdere mogelijk)</label>
-          <div class="checkbox-groep" id="cg-types">
-            <!-- gevuld door app.js op basis van gekozen niveau -->
+          <label>Kies getallen (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-groot-getallen">
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,3)">
+              <span class="vink-box"></span><input type="checkbox" value="3" style="display:none"><span>van 3</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,4)">
+              <span class="vink-box"></span><input type="checkbox" value="4" style="display:none"><span>van 4</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,5)">
+              <span class="vink-box"></span><input type="checkbox" value="5" style="display:none"><span>van 5</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,6)">
+              <span class="vink-box"></span><input type="checkbox" value="6" style="display:none"><span>van 6</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,7)">
+              <span class="vink-box"></span><input type="checkbox" value="7" style="display:none"><span>van 7</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,8)">
+              <span class="vink-box"></span><input type="checkbox" value="8" style="display:none"><span>van 8</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,9)">
+              <span class="vink-box"></span><input type="checkbox" value="9" style="display:none"><span>van 9</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleGrootGetal(this,10)">
+              <span class="vink-box"></span><input type="checkbox" value="10" style="display:none"><span>van 10</span>
+            </label>
           </div>
         </div>
       </div>
