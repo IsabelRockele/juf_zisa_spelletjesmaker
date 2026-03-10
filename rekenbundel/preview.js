@@ -39,16 +39,19 @@ const Preview = (() => {
   function _maakBlokElement(blok) {
     const isHerken       = blok.bewerking === 'herken-brug';
     const isSplitsingen  = blok.bewerking === 'splitsingen';
-    const heeftAanvullen   = !isHerken && !isSplitsingen && blok.hulpmiddelen?.includes('aanvullen');
-    const heeftCompenseren = !isHerken && !isSplitsingen && blok.hulpmiddelen?.includes('compenseren');
-    const heeftHulp        = !isHerken && !isSplitsingen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
+    const isTafels       = blok.bewerking === 'tafels';
+    const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && blok.hulpmiddelen?.includes('aanvullen');
+    const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && blok.hulpmiddelen?.includes('compenseren');
+    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
     const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
-    const badgeTxt  = isSplitsingen ? '✂️ Splits' :
+    const badgeTxt  = isTafels      ? '✖️ Tafels' :
+                      isSplitsingen ? '✂️ Splits' :
                       isHerken ? '🔦 Herken brug' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
     if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
+    else if (isTafels)                                                     gridKlasse = 'tafels-grid';
     else if (isSplitsingen)                                                gridKlasse = 'splits-grid';
     else if (isHerken)                                                     gridKlasse = 'herken-grid';
     else if (heeftAanvullen && blok.aanvullenVariant === 'met-schijfjes') gridKlasse = 'aanvullen-grid-2';
@@ -106,6 +109,11 @@ const Preview = (() => {
     const bewerking     = blok.bewerking || 'optellen';
     const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
+
+    /* ── Tafels ──────────────────────────────────────────── */
+    if (blok.bewerking === 'tafels') {
+      return _tafelOefeningHTML(blok.id, oef, idx);
+    }
 
     /* ── Splitsingen ─────────────────────────────────────── */
     if (blok.bewerking === 'splitsingen') {
@@ -597,6 +605,45 @@ const Preview = (() => {
       <input class="opdrachtzin-input" id="zin-inp-${blokId}" value="${esc(huidigeZin)}" />
       <button class="btn-bewerk-zin" onclick="App.slaZinOp('${blokId}')">✅</button>`;
     document.getElementById(`zin-inp-${blokId}`).focus();
+  }
+
+  /* ── Tafels oefening HTML ───────────────────────────────── */
+  function _tafelOefeningHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
+    let somHTML = '';
+
+    if (oef.type === 'vermenigvuldigen') {
+      somHTML = `<span class="tafel-term">${oef.a}</span>
+                 <span class="tafel-op">×</span>
+                 <span class="tafel-term">${oef.b}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak"></span>`;
+    } else if (oef.type === 'gedeeld') {
+      somHTML = `<span class="tafel-term">${oef.a}</span>
+                 <span class="tafel-op">:</span>
+                 <span class="tafel-term">${oef.b}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak"></span>`;
+    } else if (oef.type === 'ontbrekende-factor') {
+      if (oef.positie === 'links') {
+        somHTML = `<span class="tafel-vak"></span>
+                   <span class="tafel-op">×</span>
+                   <span class="tafel-term">${oef.b}</span>
+                   <span class="tafel-is">=</span>
+                   <span class="tafel-term">${oef.product}</span>`;
+      } else {
+        somHTML = `<span class="tafel-term">${oef.a}</span>
+                   <span class="tafel-op">×</span>
+                   <span class="tafel-vak"></span>
+                   <span class="tafel-is">=</span>
+                   <span class="tafel-term">${oef.product}</span>`;
+      }
+    }
+
+    return `<div class=tafel-oef data-blok=${blokId} data-idx=${idx}>
+      ${del}
+      <div class=tafel-som>${somHTML}</div>
+    </div>`;
   }
 
   return { render, toonZinEditor };
