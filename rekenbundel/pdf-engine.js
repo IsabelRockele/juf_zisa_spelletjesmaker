@@ -763,6 +763,7 @@ const PdfEngine = (() => {
     if (oef.type === 'splitsbeen')             _tekenSplitsbeen(oef, ox, oy);
     if (oef.type === 'groot-splitshuis')       _tekenGrootSplitshuis(oef, ox, oy);
     if (oef.type === 'splitsbeen-bewerkingen') _tekenSplitsbeenBewerkingen(oef, ox, oy);
+    if (oef.type === 'puntoefening')           _tekenPuntoefening(oef, ox, oy);
   }
 
   // Hoogte van één groot splitshuis (mm)
@@ -773,18 +774,24 @@ const PdfEngine = (() => {
 
   // Constanten voor splitsbeen-bewerkingen
   const SBW_PER_RIJ  = 3;
-  const SBW_BREEDTE  = 52;   // breedte van het kader (mm)
-  const SBW_BEEN_H   = 36;   // hoogte splitsbeen deel
-  const SBW_BEW_H    = 10;   // hoogte per bewerkingrij
-  const SBW_TOT_H    = SBW_BEEN_H + 4 * SBW_BEW_H + 16; // totale kaderhoogte
+  const SBW_BREEDTE  = 52;
+  const SBW_BEEN_H   = 36;
+  const SBW_BEW_H    = 10;
+  const SBW_TOT_H    = SBW_BEEN_H + 4 * SBW_BEW_H + 16;
+  const PUNT_PER_RIJ = 3;
+  const PUNT_KADER_H = 20;
+  const PUNT_RIJ_H   = PUNT_KADER_H + 7;
 
   function _tekenSplitsingenBlok(blok) {
-    const isBewerkingen = blok.oefeningen[0]?.type === 'splitsbeen-bewerkingen';
-    const perRij     = isBewerkingen ? SBW_PER_RIJ : SPL_PER_RIJ;
-    const aantalRijen = Math.ceil(blok.oefeningen.length / perRij);
-    const kolBreedte  = CW / perRij;
+    const type0         = blok.oefeningen[0]?.type;
+    const isBewerkingen = type0 === 'splitsbeen-bewerkingen';
+    const isPunt        = type0 === 'puntoefening';
+    const perRij        = isBewerkingen ? SBW_PER_RIJ : isPunt ? PUNT_PER_RIJ : SPL_PER_RIJ;
+    const aantalRijen   = Math.ceil(blok.oefeningen.length / perRij);
+    const kolBreedte    = CW / perRij;
+    const rijH          = isBewerkingen ? SBW_TOT_H + 8 : isPunt ? PUNT_RIJ_H : SH_RIJ_H;
 
-    checkRuimte(SPL_ZINR + (isBewerkingen ? SBW_TOT_H : SH_RIJ_H));
+    checkRuimte(SPL_ZINR + rijH);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(26, 58, 92);
@@ -792,7 +799,7 @@ const PdfEngine = (() => {
     y += SPL_ZINR;
 
     for (let rij = 0; rij < aantalRijen; rij++) {
-      let maxH = isBewerkingen ? SBW_TOT_H + 8 : SH_RIJ_H;
+      let maxH = rijH;
       for (let kol = 0; kol < perRij; kol++) {
         const oef = blok.oefeningen[rij * perRij + kol];
         if (oef?.type === 'groot-splitshuis') {
@@ -805,8 +812,10 @@ const PdfEngine = (() => {
         if (!oef) continue;
         const isGroot = oef.type === 'groot-splitshuis';
         const isBew   = oef.type === 'splitsbeen-bewerkingen';
-        const breedte = isGroot ? GS_BREEDTE : isBew ? SBW_BREEDTE : SH_BREEDTE;
-        const ox = ML + kol * kolBreedte + (kolBreedte - breedte) / 2;
+        // Puntoefening: vul volledige kolombreedte - kleine marge
+        const ox = isPunt
+          ? ML + kol * kolBreedte
+          : ML + kol * kolBreedte + (kolBreedte - (isGroot ? GS_BREEDTE : isBew ? SBW_BREEDTE : SH_BREEDTE)) / 2;
         _tekenSplitsOefening(oef, ox, y);
       }
       y += maxH;
@@ -1081,6 +1090,65 @@ const PdfEngine = (() => {
       doc.setLineWidth(0.5);
       doc.line(x, baseY, x + vakB, baseY);
     }
+  }
+
+  /* ── Puntoefening ────────────────────────────────────────────
+     Kader per oefening, invulhokje voor null, 3 per rij.
+     tekst = [getal|null, '+'/'-', getal|null, '=', getal|null]
+  ─────────────────────────────────────────────────────────── */
+  function _tekenPuntoefening(oef, ox, oy) {
+    const DONKER  = [26, 58, 92];
+    const GAP     = 2;    // marge tussen kaders (2mm aan elke kant = 4mm tussenruimte)
+    const MARGE   = 5;   // min. marge links/rechts binnen kader
+    const B       = CW / PUNT_PER_RIJ - GAP * 2;
+    const H       = PUNT_KADER_H;
+    const kx      = ox + GAP;
+    const ky      = oy;
+
+    // Kader
+    doc.setDrawColor(...DONKER);
+    doc.setLineWidth(0.5);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(kx, ky, B, H, 2, 2, 'FD');
+
+    // Afmetingen elementen
+    const midY   = ky + H / 2;
+    const hokjeH = 9;
+    const hokjeB = 12;
+    const opW    = 5;
+    const getalW = 8;
+    // tekstbaseline: operator-tekst verticaal centreren naast hokje
+    const tekstY = midY + hokjeH / 2 - 1;
+
+    const totW = (oef.tekst || []).reduce((acc, d) => {
+      if (d === null)            return acc + hokjeB + 3;
+      if (typeof d === 'string') return acc + opW + 3;
+      return acc + getalW + 3;
+    }, 0);
+
+    // Centreren, maar minimum MARGE vanaf kaderbegrenzing
+    let x = kx + Math.max(MARGE, (B - totW) / 2);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    doc.setTextColor(...DONKER);
+
+    (oef.tekst || []).forEach(d => {
+      if (d === null) {
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...DONKER);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(x, midY - hokjeH / 2, hokjeB, hokjeH, 1, 1, 'FD');
+        x += hokjeB + 3;
+      } else if (typeof d === 'string') {
+        doc.text(d, x + opW / 2, tekstY, { align: 'center' });
+        x += opW + 3;
+      } else {
+        const str = String(d);
+        doc.text(str, x + getalW / 2, tekstY, { align: 'center' });
+        x += getalW + 3;
+      }
+    });
   }
 
   /* ── Publieke API ────────────────────────────────────────── */
