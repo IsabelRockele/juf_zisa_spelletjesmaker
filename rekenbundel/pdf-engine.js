@@ -755,7 +755,12 @@ const PdfEngine = (() => {
   const SH_DAK_H     = 14;   // hoogte driehoekig dak
   const SH_MUUR_H    = 14;   // hoogte muur met kamers
   const SH_TOT_H     = SH_DAK_H + SH_MUUR_H;
-  const SH_RIJ_H     = SH_TOT_H + 10;  // + ruimte onder
+  const SH_RIJ_H     = SH_TOT_H + 20;
+
+  function _tekenSplitsOefening(oef, ox, oy) {
+    if (oef.type === 'klein-splitshuis') _tekenKleinSplitshuis(oef, ox, oy);
+    if (oef.type === 'splitsbeen')       _tekenSplitsbeen(oef, ox, oy);
+  }
 
   function _tekenSplitsingenBlok(blok) {
     const aantalRijen = Math.ceil(blok.oefeningen.length / SPL_PER_RIJ);
@@ -775,7 +780,7 @@ const PdfEngine = (() => {
         const oef = blok.oefeningen[rij * SPL_PER_RIJ + kol];
         if (!oef) continue;
         const ox = ML + kol * kolBreedte + (kolBreedte - SH_BREEDTE) / 2;
-        _tekenKleinSplitshuis(oef, ox, y);
+        _tekenSplitsOefening(oef, ox, y);
       }
       y += SH_RIJ_H;
     }
@@ -849,6 +854,46 @@ const PdfEngine = (() => {
       doc.text(String(oef.rechts), kamRechtsX, kamMidY, { align: 'center' });
     }
     // leeg → niets tekenen
+  }
+
+  /* ── Splitsbeen tekenen ──────────────────────────────────────
+     Omgekeerde V:  totaal bovenaan, twee benen naar links/rechts vakje
+     ox, oy = linksboven van de beschikbare cel
+  ─────────────────────────────────────────────────────────── */
+  function _tekenSplitsbeen(oef, ox, oy) {
+    const BLAUW   = [74, 144, 217];
+    const vakW    = 12, vakH = 9;
+    const midX    = ox + SH_BREEDTE / 2;
+    const spreiding = 9;   // mm van midden naar links/rechts vakjemidden
+    const linksX  = midX - spreiding;
+    const rechtsX = midX + spreiding;
+
+    const topY   = oy + 1;
+    const beenY1 = topY + vakH + 1;
+    const beenY2 = beenY1 + 10;
+    const vakY   = beenY2 + 1;
+
+    function hokje(cx, cy, waarde) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(26, 58, 92);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(cx - vakW / 2, cy, vakW, vakH, 1.5, 1.5, 'FD');
+      if (waarde !== null) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(13);
+        doc.setTextColor(26, 58, 92);
+        // Verticaal centreren: baseline = cy + vakH/2 + ~1/3 van capheight (≈ fontSize*0.35/2.83)
+        doc.text(String(waarde), cx, cy + vakH / 2 + 2.3, { align: 'center' });
+      }
+    }
+
+    hokje(midX, topY, oef.totaal);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.6);
+    doc.line(midX, beenY1, linksX,  beenY2);
+    doc.line(midX, beenY1, rechtsX, beenY2);
+    hokje(linksX,  vakY, oef.links);
+    hokje(rechtsX, vakY, oef.rechts);
   }
 
   /* ── Publieke API ────────────────────────────────────────── */
