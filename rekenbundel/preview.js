@@ -220,11 +220,13 @@ const Preview = (() => {
     }
 
     if (variant === 'met-schijfjes') {
-      const tKlein = Math.floor(klein / 10);
+      const hKlein = Math.floor(klein / 100);
+      const tKlein = Math.floor((klein % 100) / 10);
       const eKlein = klein % 10;
-      const tGroot = Math.floor(groot / 10);
+      const hGroot = Math.floor(groot / 100);
+      const tGroot = Math.floor((groot % 100) / 10);
       const eGroot = groot % 10;
-      const schijfjesHTML = _schijfjesHTML(tKlein, eKlein, tGroot, eGroot);
+      const schijfjesHTML = _schijfjesHTML(hKlein, tKlein, eKlein, hGroot, tGroot, eGroot);
       return `
         <div class="oefening-item oefening-aanvullen aanvullen-schijfjes">
           <div class="aanvullen-sommen">
@@ -239,10 +241,11 @@ const Preview = (() => {
     return '';
   }
 
-  function _schijfjesHTML(tKlein, eKlein, tGroot, eGroot) {
+  function _schijfjesHTML(hKlein, tKlein, eKlein, hGroot, tGroot, eGroot) {
     // Altijd 10 schijfjes per kolom
     // Voorgetekend (klein getal) = ingekleurd, rest = wit (kind kleurt bij)
     const TOTAAL = 10;
+    const metH = hGroot > 0;  // H-kolom enkel bij tot 1000
 
     function schijfjesVoorKolom(aantalVoorgetekend, klas, getal) {
       const items = [];
@@ -251,7 +254,6 @@ const Preview = (() => {
           ? `<div class="schijfje ${klas}">${getal}</div>`
           : `<div class="schijfje schijfje-leeg"></div>`);
       }
-      // 5 per rij
       const rijen = [];
       for (let r = 0; r < items.length; r += 5) {
         rijen.push(`<div class="schijfjes-rij">${items.slice(r, r + 5).join('')}</div>`);
@@ -259,7 +261,14 @@ const Preview = (() => {
       return rijen.join('');
     }
 
+    const hKolom = metH ? `
+      <div class="schijfjes-kolom schijfjes-kolom-h">
+        <div class="schijfjes-kop schijfjes-kop-h">H</div>
+        ${schijfjesVoorKolom(hKlein, 'schijfje-h', 100)}
+      </div>` : '';
+
     return `
+      ${hKolom}
       <div class="schijfjes-kolom schijfjes-kolom-t">
         <div class="schijfjes-kop schijfjes-kop-t">T</div>
         ${schijfjesVoorKolom(tKlein, 'schijfje-t', 10)}
