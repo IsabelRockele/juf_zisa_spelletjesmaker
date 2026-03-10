@@ -12,7 +12,7 @@ const Generator = (() => {
 
   /* ── Kies de juiste module op basis van bewerking + niveau ── */
   function _getModule(bewerking, niveau) {
-    if (bewerking === 'aanvullen') return AanvullenTot100;
+    if (bewerking === 'aanvullen') return niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     if (bewerking === 'optellen') {
       if (niveau <= 20)   return OptellenTot20;
       if (niveau <= 100)  return OptellenTot100;
@@ -45,7 +45,8 @@ const Generator = (() => {
           ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
           : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
-    const module = isAanvullen   ? AanvullenTot100 :
+    const aanvulModule = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+    const module = isAanvullen   ? aanvulModule :
                    isCompenseren ? compModule :
                    _getModule(bewerking, niveau);
     if (!module) {
@@ -59,7 +60,7 @@ const Generator = (() => {
     // Genereer oefeningen
     let oefeningen;
     if (isHerken)           oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
-    else if (isAanvullen)   oefeningen = AanvullenTot100.genereer({ aantalOefeningen });
+    else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
     if (oefeningen.length < 2) return null;
@@ -96,13 +97,14 @@ const Generator = (() => {
           ? (blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
           : (blok.niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
-    const module = isAanvullen   ? AanvullenTot100 :
+    const aanvulModule2 = blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+    const module = isAanvullen   ? aanvulModule2 :
                    isCompenseren ? compModule :
                    _getModule(blok.bewerking, blok.niveau);
     if (!module) return false;
 
     const brugVoorModule = blok.niveau <= 100 ? _brugVoor100(blok.config.brug) : blok.config.brug;
-    const nieuweOef = isAanvullen    ? AanvullenTot100.genereer({ aantalOefeningen: 5 }) :
+    const nieuweOef = isAanvullen    ? aanvulModule2.genereer({ aantalOefeningen: 5, oefeningstypes: blok.config.oefeningstypes }) :
                       isCompenseren  ? compModule.genereer({ aantalOefeningen: 5 }) :
                       module.genereer({ ...blok.config, brug: brugVoorModule, niveau: blok.niveau, aantalOefeningen: 5 });
     const bestaandeSleutels = new Set(blok.oefeningen.map(o => o.sleutel));
@@ -129,7 +131,7 @@ const Generator = (() => {
         ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
         : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen);
     } else if (isAanvullen) {
-      module = AanvullenTot100;
+      module = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     } else {
       module = _getModule(bewerking, niveau);
     }
