@@ -286,6 +286,27 @@
         </div>
       </div>
 
+      <!-- Puntoefening brug (enkel bij Tot 20 / Tot 100) -->
+      <div class="config-kaart" id="kaart-punt-brug" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">🌉</div>
+          Met of zonder brug?
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerPuntBrug('zonder',this)">
+              <input type="radio" name="punt-brug" value="zonder" checked>Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerPuntBrug('met-brug',this)">
+              <input type="radio" name="punt-brug" value="met-brug">Met brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerPuntBrug('gemengd',this)">
+              <input type="radio" name="punt-brug" value="gemengd">Beide
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Groot splitshuis: getallenkeuze (van 3 t/m 10) -->
       <div class="config-kaart" id="kaart-groot-getallen" style="display:none">
         <div class="kaart-titel">
@@ -333,7 +354,7 @@
           <label>Opdrachtzin</label>
           <input type="text" id="inp-opdrachtzin" value="Reken vlug uit." />
         </div>
-        <div class="form-rij">
+        <div class="form-rij" id="rij-aantal">
           <label>Aantal oefeningen</label>
           <select id="inp-aantal">
             <option value="4">4</option>
