@@ -375,6 +375,7 @@ const Preview = (() => {
   function _splitsingHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
     if (oef.type === 'klein-splitshuis') return _kleinsplitshuisHTML(blokId, oef, idx, del);
+    if (oef.type === 'splitsbeen')       return _splitsbeenHTML(blokId, oef, idx, del);
     return '';
   }
 
@@ -414,6 +415,34 @@ const Preview = (() => {
             <div class="sh-kamer sh-kamer-l">${linksHTML}</div>
             <div class="sh-scheidingswand"></div>
             <div class="sh-kamer sh-kamer-r">${rechtsHTML}</div>
+          </div>
+        </div>
+        ${del}
+      </div>`;
+  }
+
+  /* ── Splitsbeen ─────────────────────────────────────────────
+     Omgekeerde V:
+          [ totaal ]        ← invulvakje of getal bovenaan
+           /      \
+       [links]  [rechts]   ← invulvakje of getal onderaan
+  ────────────────────────────────────────────────────────── */
+  function _splitsbeenHTML(blokId, oef, idx, del) {
+    const top    = `<span class="sb-hokje">${oef.totaal !== null ? oef.totaal : ''}</span>`;
+    const links  = `<span class="sb-hokje">${oef.links  !== null ? oef.links  : ''}</span>`;
+    const rechts = `<span class="sb-hokje">${oef.rechts !== null ? oef.rechts : ''}</span>`;
+
+    return `
+      <div class="oefening-item oefening-splits oefening-splitsbeen">
+        <div class="splitsbeen-wrap">
+          <div class="sb-top">${top}</div>
+          <svg class="sb-v-svg" viewBox="0 0 60 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <line x1="30" y1="0" x2="4" y2="24" stroke="#4A90D9" stroke-width="1.5"/>
+            <line x1="30" y1="0" x2="56" y2="24" stroke="#4A90D9" stroke-width="1.5"/>
+          </svg>
+          <div class="sb-onder">
+            <div class="sb-cel">${links}</div>
+            <div class="sb-cel">${rechts}</div>
           </div>
         </div>
         ${del}
