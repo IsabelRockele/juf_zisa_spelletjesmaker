@@ -750,24 +750,41 @@ const PdfEngine = (() => {
   const SPL_PER_RIJ  = 4;
   const SPL_ZINR     = 9;
   const SPL_NABLOK   = 10;
-  // Huisje afmetingen (mm)
-  const SH_BREEDTE   = 26;   // breedte muur
-  const SH_DAK_H     = 14;   // hoogte driehoekig dak
-  const SH_MUUR_H    = 14;   // hoogte muur met kamers
+  const SH_BREEDTE   = 26;
+  const SH_DAK_H     = 14;
+  const SH_MUUR_H    = 14;
   const SH_TOT_H     = SH_DAK_H + SH_MUUR_H;
   const SH_RIJ_H     = SH_TOT_H + 20;
+  const GS_BREEDTE   = 34;   // groot splitshuis iets breder
+  const GS_RIJ_H     = 10;   // hoogte per verdiep in groot huis
 
   function _tekenSplitsOefening(oef, ox, oy) {
-    if (oef.type === 'klein-splitshuis') _tekenKleinSplitshuis(oef, ox, oy);
-    if (oef.type === 'splitsbeen')       _tekenSplitsbeen(oef, ox, oy);
+    if (oef.type === 'klein-splitshuis')       _tekenKleinSplitshuis(oef, ox, oy);
+    if (oef.type === 'splitsbeen')             _tekenSplitsbeen(oef, ox, oy);
+    if (oef.type === 'groot-splitshuis')       _tekenGrootSplitshuis(oef, ox, oy);
+    if (oef.type === 'splitsbeen-bewerkingen') _tekenSplitsbeenBewerkingen(oef, ox, oy);
   }
 
+  // Hoogte van één groot splitshuis (mm)
+  function _grootHuisHoogte(oef) {
+    const aantalRijen = oef.rijen?.length || 1;
+    return SH_DAK_H + aantalRijen * GS_RIJ_H + 2;
+  }
+
+  // Constanten voor splitsbeen-bewerkingen
+  const SBW_PER_RIJ  = 3;
+  const SBW_BREEDTE  = 52;   // breedte van het kader (mm)
+  const SBW_BEEN_H   = 36;   // hoogte splitsbeen deel
+  const SBW_BEW_H    = 10;   // hoogte per bewerkingrij
+  const SBW_TOT_H    = SBW_BEEN_H + 4 * SBW_BEW_H + 16; // totale kaderhoogte
+
   function _tekenSplitsingenBlok(blok) {
-    const aantalRijen = Math.ceil(blok.oefeningen.length / SPL_PER_RIJ);
-    const kolBreedte  = CW / SPL_PER_RIJ;
+    const isBewerkingen = blok.oefeningen[0]?.type === 'splitsbeen-bewerkingen';
+    const perRij     = isBewerkingen ? SBW_PER_RIJ : SPL_PER_RIJ;
+    const aantalRijen = Math.ceil(blok.oefeningen.length / perRij);
+    const kolBreedte  = CW / perRij;
 
-    checkRuimte(SPL_ZINR + SH_RIJ_H);
-
+    checkRuimte(SPL_ZINR + (isBewerkingen ? SBW_TOT_H : SH_RIJ_H));
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(26, 58, 92);
@@ -775,14 +792,24 @@ const PdfEngine = (() => {
     y += SPL_ZINR;
 
     for (let rij = 0; rij < aantalRijen; rij++) {
-      if (rij > 0) checkRuimte(SH_RIJ_H);
-      for (let kol = 0; kol < SPL_PER_RIJ; kol++) {
-        const oef = blok.oefeningen[rij * SPL_PER_RIJ + kol];
+      let maxH = isBewerkingen ? SBW_TOT_H + 8 : SH_RIJ_H;
+      for (let kol = 0; kol < perRij; kol++) {
+        const oef = blok.oefeningen[rij * perRij + kol];
+        if (oef?.type === 'groot-splitshuis') {
+          maxH = Math.max(maxH, _grootHuisHoogte(oef) + 12);
+        }
+      }
+      if (rij > 0) checkRuimte(maxH);
+      for (let kol = 0; kol < perRij; kol++) {
+        const oef = blok.oefeningen[rij * perRij + kol];
         if (!oef) continue;
-        const ox = ML + kol * kolBreedte + (kolBreedte - SH_BREEDTE) / 2;
+        const isGroot = oef.type === 'groot-splitshuis';
+        const isBew   = oef.type === 'splitsbeen-bewerkingen';
+        const breedte = isGroot ? GS_BREEDTE : isBew ? SBW_BREEDTE : SH_BREEDTE;
+        const ox = ML + kol * kolBreedte + (kolBreedte - breedte) / 2;
         _tekenSplitsOefening(oef, ox, y);
       }
-      y += SH_RIJ_H;
+      y += maxH;
     }
 
     y += SPL_NABLOK;
@@ -894,6 +921,166 @@ const PdfEngine = (() => {
     doc.line(midX, beenY1, rechtsX, beenY2);
     hokje(linksX,  vakY, oef.links);
     hokje(rechtsX, vakY, oef.rechts);
+  }
+
+  /* ── Groot splitshuis ────────────────────────────────────────
+     Één huis, dak = totaal, alle splitsingen als verdiepen.
+     Afwisselend links/rechts leeg. Dak altijd ingevuld.
+  ─────────────────────────────────────────────────────────── */
+  function _tekenGrootSplitshuis(oef, ox, oy) {
+    const B      = GS_BREEDTE;
+    const midX   = ox + B / 2;
+    const BLAUW  = [74, 144, 217];
+    const rijen  = oef.rijen || [];
+    const muurH  = rijen.length * GS_RIJ_H;
+
+    // ── Dak ───────────────────────────────────────────────────
+    const dakTop   = oy;
+    const dakBodem = oy + SH_DAK_H;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.6);
+    doc.triangle(midX, dakTop, ox, dakBodem, ox + B, dakBodem, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 58, 92);
+    doc.text(String(oef.totaal), midX, dakTop + SH_DAK_H * 0.64 + 2, { align: 'center' });
+
+    // ── Muur ──────────────────────────────────────────────────
+    const muurY = dakBodem;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.6);
+    doc.roundedRect(ox, muurY, B, muurH, 1, 1, 'FD');
+
+    // Scheidingswand midden
+    doc.setLineWidth(0.4);
+    doc.line(midX, muurY, midX, muurY + muurH);
+
+    // Verdiepen: horizontale lijnen + getallen of lege kamers
+    const kamLinksX  = ox + B / 4;
+    const kamRechtsX = ox + 3 * B / 4;
+    const vW = B / 2 - 2, vH = GS_RIJ_H - 2;
+
+    rijen.forEach((rij, i) => {
+      const rijY    = muurY + i * GS_RIJ_H;
+      const rijMidY = rijY + GS_RIJ_H / 2 + 2;
+
+      // Horizontale scheidingslijn tussen verdiepen (niet na laatste)
+      if (i > 0) {
+        doc.setDrawColor(...BLAUW);
+        doc.setLineWidth(0.3);
+        doc.line(ox + 0.5, rijY, ox + B - 0.5, rijY);
+      }
+
+      // Links
+      if (rij.links !== null) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(26, 58, 92);
+        doc.text(String(rij.links), kamLinksX, rijMidY, { align: 'center' });
+      }
+      // Rechts
+      if (rij.rechts !== null) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(26, 58, 92);
+        doc.text(String(rij.rechts), kamRechtsX, rijMidY, { align: 'center' });
+      }
+    });
+  }
+
+  /* ── Splitsbeen + 4 bewerkingen ─────────────────────────────
+     Kader met splitsbeen bovenaan + 4 lege bewerkingen eronder.
+     Kind schrijft zelf: ___ + ___ = ___ (4x)
+  ─────────────────────────────────────────────────────────── */
+  function _tekenSplitsbeenBewerkingen(oef, ox, oy) {
+    const B      = SBW_BREEDTE;
+    const BLAUW  = [74, 144, 217];
+    const DONKER = [26, 58, 92];
+    const PAD    = 4;   // padding binnen kader
+
+    // ── Kader ─────────────────────────────────────────────────
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.7);
+    doc.roundedRect(ox, oy, B, SBW_TOT_H, 2, 2, 'FD');
+
+    // ── Splitsbeen ────────────────────────────────────────────
+    const vakW   = 12, vakH = 9;
+    const midX   = ox + B / 2;
+    const spreiding = 11;
+    const linksX  = midX - spreiding;
+    const rechtsX = midX + spreiding;
+
+    const topY   = oy + PAD + 1;
+    const beenY1 = topY + vakH + 1;
+    const beenY2 = beenY1 + 9;
+    const vakY   = beenY2 + 1;
+
+    function hokje(cx, cy, waarde) {
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(...DONKER);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(cx - vakW / 2, cy, vakW, vakH, 1.5, 1.5, 'FD');
+      if (waarde !== null) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...DONKER);
+        doc.text(String(waarde), cx, cy + vakH / 2 + 2.3, { align: 'center' });
+      }
+    }
+
+    hokje(midX, topY, oef.totaal);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.6);
+    doc.line(midX, beenY1, linksX, beenY2);
+    doc.line(midX, beenY1, rechtsX, beenY2);
+    hokje(linksX,  vakY, oef.links);
+    hokje(rechtsX, vakY, oef.rechts);
+
+    // ── Scheidingslijn tussen been en bewerkingen ─────────────
+    const scheidY = oy + SBW_BEEN_H + 2;
+    doc.setDrawColor(200, 220, 240);
+    doc.setLineWidth(0.4);
+    doc.line(ox + 3, scheidY, ox + B - 3, scheidY);
+
+    const bewStartY = scheidY + 5;
+    const vakB      = 10;
+    const ops       = ['+', '+', '-', '-'];
+    const rijB   = 3 * vakB + 11;
+    const startX = ox + (B - rijB) / 2;
+
+    for (let i = 0; i < 4; i++) {
+      const baseY = bewStartY + i * (SBW_BEW_H + 3) + SBW_BEW_H - 3;
+      let x = startX;
+
+      doc.setDrawColor(...DONKER);
+      doc.setLineWidth(0.5);
+      doc.line(x, baseY, x + vakB, baseY);
+      x += vakB + 1;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...DONKER);
+      doc.text(ops[i], x + 2, baseY, { align: 'center' });
+      x += 5;
+
+      doc.setDrawColor(...DONKER);
+      doc.setLineWidth(0.5);
+      doc.line(x, baseY, x + vakB, baseY);
+      x += vakB + 1;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...DONKER);
+      doc.text('=', x + 2, baseY, { align: 'center' });
+      x += 5;
+
+      doc.setDrawColor(...DONKER);
+      doc.setLineWidth(0.5);
+      doc.line(x, baseY, x + vakB, baseY);
+    }
   }
 
   /* ── Publieke API ────────────────────────────────────────── */
