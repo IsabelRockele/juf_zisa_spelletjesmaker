@@ -57,18 +57,22 @@ const App = (() => {
     const kaartHulp = document.getElementById('kaart-hulpmiddelen');
     if (kaartHulp) kaartHulp.style.display = isSplitsingen ? 'none' : '';
 
-    // Splits-variantkaart + splits-niveaukaart tonen bij splitsingen
+    // Splits-kaarten standaard verbergen — worden getoond via _updateSplitsKaarten()
     const kaartSplitsVariant = document.getElementById('kaart-splits-variant');
-    if (kaartSplitsVariant) kaartSplitsVariant.style.display = isSplitsingen ? 'block' : 'none';
-    const kaartSplitsNiveau = document.getElementById('kaart-splits-niveau');
-    if (kaartSplitsNiveau) kaartSplitsNiveau.style.display = isSplitsingen ? 'block' : 'none';
-    // Gewone niveaukaart verbergen bij splitsingen (splits heeft eigen niveaukeuze)
+    const kaartSplitsNiveau  = document.getElementById('kaart-splits-niveau');
+    const kaartGrootGetallen = document.getElementById('kaart-groot-getallen');
+    if (kaartSplitsVariant) kaartSplitsVariant.style.display = 'none';
+    if (kaartSplitsNiveau)  kaartSplitsNiveau.style.display  = 'none';
+    if (kaartGrootGetallen) kaartGrootGetallen.style.display  = 'none';
+    // Gewone niveaukaart verbergen bij splitsingen
     if (kaartNiveau) kaartNiveau.style.display = (isHerken || isSplitsingen) ? 'none' : 'block';
 
     _updateHulpmiddelenUI(isHerken || isSplitsingen ? 'zonder' : _getBrugWaarde());
 
     // Types laden
-    const niveau = (isHerken || isSplitsingen) ? 100 : parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const niveau = isHerken ? 100
+      : isSplitsingen ? 10
+      : parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const brug   = isHerken ? 'gemengd' : 'zonder';
     _updateTypesUI(niveau, brug);
   }
@@ -176,16 +180,26 @@ const App = (() => {
     if (!brug) brug = _getBrugWaarde();
 
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
-    const beschikbaar = Generator.getTypes(actieveBewerking, niveau, brug, hulpmiddelen);
+    const splitsModus  = actieveBewerking === 'splitsingen' ? (_splitsMode || 'tot') : 'tot';
+    const beschikbaar = Generator.getTypes(actieveBewerking, niveau, brug, hulpmiddelen, splitsModus);
     const container   = document.getElementById('cg-types');
+
+    // Onthoud huidige selectie vóór herbouw
+    const vorigeSelectie = [...container.querySelectorAll('input:checked')].map(c => c.value);
+
     container.innerHTML = '';
 
     beschikbaar.forEach((type, i) => {
+      // Herstel vorige selectie indien mogelijk, anders eerste chip standaard
+      const wasGeselecteerd = vorigeSelectie.length > 0
+        ? vorigeSelectie.includes(type)
+        : i === 0;
+
       const label = document.createElement('label');
-      label.className = 'vink-chip' + (i === 0 ? ' geselecteerd' : '');
+      label.className = 'vink-chip' + (wasGeselecteerd ? ' geselecteerd' : '');
       label.innerHTML = `
-        <span class="vink-box">${i === 0 ? '✓' : ''}</span>
-        <input type="checkbox" name="types" value="${type}" ${i === 0 ? 'checked' : ''} style="display:none">
+        <span class="vink-box">${wasGeselecteerd ? '✓' : ''}</span>
+        <input type="checkbox" name="types" value="${type}" ${wasGeselecteerd ? 'checked' : ''} style="display:none">
         <span>${type}</span>`;
 
       label.onclick = (e) => {
@@ -214,6 +228,7 @@ const App = (() => {
           label.classList.toggle('geselecteerd', !wasChecked);
           label.querySelector('.vink-box').textContent = !wasChecked ? '✓' : '';
         }
+        _updateSplitsKaarten();
       };
 
       container.appendChild(label);
@@ -223,6 +238,9 @@ const App = (() => {
     const kaartBrug = document.getElementById('kaart-brug');
     if (kaartBrug) kaartBrug.style.display = (niveau <= 10) ? 'none' : 'block';
     if (niveau <= 10) _updateHulpmiddelenUI('zonder');
+
+    // Splits-kaarten updaten op basis van standaard geselecteerd type
+    _updateSplitsKaarten();
 
     // Bij niveau <= 100: enkel 'zonder' en 'naar-tiental' tonen, rest verbergen
     const alleenTiental = niveau <= 100;
@@ -360,11 +378,18 @@ const App = (() => {
     const metVoorbeeld        = document.getElementById('cb-metvoorbeeld')?.checked || false;
     const splitsVariant       = document.querySelector('[name="splits-variant"]:checked')?.value || 'afwisselend';
     const splitsConfig  = isSplitsingen ? _getSplitsConfig() : null;
+    const wilGroot = types.some(t => t.includes('Groot'));
+    // Bij groot splitshuis: gebruik de aparte getallenkeuze
+    const grootGetallen = wilGroot ? _getGrootGetallen() : null;
+    const effectiefGetallen = wilGroot && grootGetallen ? grootGetallen : splitsConfig?.getallen || null;
+    const effectiefModus    = wilGroot ? 'specifiek' : splitsConfig?.mode || 'tot';
+    const effectiefNiveau   = wilGroot ? Math.max(...(grootGetallen || [10])) : (splitsConfig?.niveau || 10);
+
     const blok = Generator.maakBlok({
       bewerking: actieveBewerking,
-      niveau:    (isHerken || isSplitsingen) ? (isSplitsingen ? (splitsConfig.niveau || 10) : 100) : niveau,
-      splitsGetallen: splitsConfig?.getallen || null,
-      splitsModus:    splitsConfig?.mode || 'tot',
+      niveau:    (isHerken || isSplitsingen) ? (isSplitsingen ? effectiefNiveau : 100) : niveau,
+      splitsGetallen: effectiefGetallen,
+      splitsModus:    effectiefModus,
       oefeningstypes: types,
       brug:      (isHerken || isSplitsingen) ? 'zonder' : brug,
       aantalOefeningen: aantal,
@@ -461,25 +486,55 @@ const App = (() => {
   }
 
   /* ── Splits: niveau en specifieke getallen ───────────────── */
-  // _splitsMode: 'tot' of 'specifiek'
+  // Toont de juiste kaarten op basis van gekozen oefeningstypes bij splitsingen
+  function _updateSplitsKaarten() {
+    if (actieveBewerking !== 'splitsingen') return;
+    const gekozen = [...document.querySelectorAll('#cg-types input:checked')].map(c => c.value);
+    const wilKleinOfBeen = gekozen.some(t => t.includes('Klein') || t.includes('Splitsbeen') && !t.includes('bewerkingen'));
+    const wilBewerkingen = gekozen.some(t => t.includes('bewerkingen'));
+    const wilGroot       = gekozen.some(t => t.includes('Groot'));
+
+    document.getElementById('kaart-splits-variant').style.display  = (wilKleinOfBeen || wilBewerkingen) ? 'block' : 'none';
+    document.getElementById('kaart-splits-niveau').style.display   = (wilKleinOfBeen || wilBewerkingen) ? 'block' : 'none';
+    document.getElementById('kaart-groot-getallen').style.display  = wilGroot ? 'block' : 'none';
+  }
+
+  // Groot splitshuis getallenkeuze
+  let _grootGetallen = [3, 4, 5, 6, 7, 8, 9, 10]; // standaard alle aangevinkt
+
+  function toggleGrootGetal(label, getal) {
+    const cb  = label.querySelector('input');
+    const was = cb.checked;
+    cb.checked = !was;
+    label.classList.toggle('geselecteerd', !was);
+    label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+    if (!was) {
+      if (!_grootGetallen.includes(getal)) _grootGetallen.push(getal);
+    } else {
+      _grootGetallen = _grootGetallen.filter(g => g !== getal);
+    }
+  }
+
+  function _getGrootGetallen() {
+    return _grootGetallen.length > 0 ? [..._grootGetallen].sort((a,b) => a-b) : [3,4,5,6,7,8,9,10];
+  }
   let _splitsMode    = 'tot';
-  let _splitsTot     = 5;
+  let _splitsTot     = 10;
   let _splitsGetallen = [];  // geselecteerde specifieke getallen
 
   function selecteerSplitsNiveau(mode, waarde, el) {
     _splitsMode = 'tot';
     _splitsTot  = waarde;
     _splitsGetallen = [];
-    // Deselect alle specifieke getallen
     document.querySelectorAll('#cg-splits-getallen .vink-chip').forEach(l => {
       l.classList.remove('geselecteerd');
       l.querySelector('.vink-box').textContent = '';
       l.querySelector('input').checked = false;
     });
-    // Highlight gekozen tot-chip
     document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+    _updateTypesUI(waarde, 'zonder');
   }
 
   function toggleSplitsGetal(label, getal) {
@@ -490,7 +545,6 @@ const App = (() => {
     label.querySelector('.vink-box').textContent = !was ? '✓' : '';
 
     if (!was) {
-      // Specifiek getal aangevinkt → deselecteer de tot-radio's
       _splitsMode = 'specifiek';
       document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
         r.closest('.radio-chip')?.classList.remove('geselecteerd'));
@@ -498,12 +552,13 @@ const App = (() => {
     } else {
       _splitsGetallen = _splitsGetallen.filter(g => g !== getal);
       if (_splitsGetallen.length === 0) {
-        // Geen specifiek meer → terug naar tot-modus
         _splitsMode = 'tot';
         const eerste = document.querySelector('[name="splits-niveau"]');
         eerste?.closest('.radio-chip')?.classList.add('geselecteerd');
       }
     }
+    const maxN = _splitsGetallen.length > 0 ? Math.max(..._splitsGetallen) : _splitsTot;
+    _updateTypesUI(maxN, 'zonder');
   }
 
   function _getSplitsConfig() {
@@ -544,7 +599,7 @@ const App = (() => {
 
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
-    selecteerSplitsNiveau, toggleSplitsGetal,
+    selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
