@@ -41,7 +41,9 @@ const Generator = (() => {
 
     // Kies module
     const compModule = isCompenseren
-      ? (bewerking === 'aftrekken' ? CompenserenAftrekken : CompenserenOptellen)
+      ? (bewerking === 'aftrekken'
+          ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+          : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const module = isAanvullen   ? AanvullenTot100 :
                    isCompenseren ? compModule :
@@ -90,7 +92,9 @@ const Generator = (() => {
     const isAanvullen   = blok.hulpmiddelen?.includes('aanvullen');
     const isCompenseren = blok.hulpmiddelen?.includes('compenseren');
     const compModule = isCompenseren
-      ? (blok.bewerking === 'aftrekken' ? CompenserenAftrekken : CompenserenOptellen)
+      ? (blok.bewerking === 'aftrekken'
+          ? (blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+          : (blok.niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const module = isAanvullen   ? AanvullenTot100 :
                    isCompenseren ? compModule :
@@ -113,10 +117,23 @@ const Generator = (() => {
   }
 
   /* ── Geef beschikbare types terug ────────────────────────── */
-  function getTypes(bewerking, niveau, brug = 'zonder') {
-    const module = _getModule(bewerking, niveau);
+  function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = []) {
+    if (bewerking === 'herken-brug') return _getModule(bewerking, niveau)?.getTypes() || [];
+
+    const isCompenseren = hulpmiddelen.includes('compenseren');
+    const isAanvullen   = hulpmiddelen.includes('aanvullen');
+
+    let module;
+    if (isCompenseren) {
+      module = bewerking === 'aftrekken'
+        ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+        : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen);
+    } else if (isAanvullen) {
+      module = AanvullenTot100;
+    } else {
+      module = _getModule(bewerking, niveau);
+    }
     if (!module) return [];
-    if (bewerking === 'herken-brug') return module.getTypes();
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
     return module.getTypes(niveau, brugVoorModule);
   }
