@@ -1,15 +1,30 @@
 /* ══════════════════════════════════════════════════════════════
    modules/splitsingen.js
    Oefenvormen:
-     klein-splitshuis : huisje, dak = totaal, 2 kamers
-     splitsbeen       : omgekeerde V, totaal bovenaan, 2 vakjes onderaan
-   Niveaus: tot 5, 10, 20, 100 — of specifieke getallen
+     klein-splitshuis       : 1 huisje, 1 kamer leeg of dak leeg
+     splitsbeen             : omgekeerde V, hokjes voor alle 3 waarden
+     groot-splitshuis       : 1 huis met alle splitsingen gestapeld
+     splitsbeen-bewerkingen : splitsbeen + 4 lege bewerkingen (a+b=, b+a=, n-a=, n-b=)
    ══════════════════════════════════════════════════════════════ */
 
 const Splitsingen = (() => {
 
-  function getTypes() {
-    return ['Klein splitshuis', 'Splitsbeen'];
+  function getTypes(splitsGetallen, splitsModus, niveau) {
+    return ['Klein splitshuis', 'Splitsbeen', 'Groot splitshuis', 'Splitsbeen + bewerkingen'];
+  }
+
+  // Alle paren a+b=n, a>=1, b>=1, inclusief omgekeerd, afwisselend l/r leeg
+  function _grootSplitsParen(n) {
+    const paren = [];
+    for (let a = 1; a < n; a++) {
+      // Afwisselend: even index → links leeg, oneven → rechts leeg
+      if (paren.length % 2 === 0) {
+        paren.push({ links: null, rechts: n - a }); // links invullen
+      } else {
+        paren.push({ links: a, rechts: null });      // rechts invullen
+      }
+    }
+    return paren;
   }
 
   function _splits(n) {
@@ -34,66 +49,113 @@ const Splitsingen = (() => {
     return a;
   }
 
-  /* ─────────────────────────────────────────────────────────
-     GENEREER
-     splitsVariant:
-       'afwisselend' → links of rechts leeg (totaal bovenaan gegeven)
-       'dak-leeg'    → beide kamers/benen gegeven, totaal leeg
-       'gemengd'     → mix van beide
-     oefeningstypes: ['Klein splitshuis'] en/of ['Splitsbeen']
-  ───────────────────────────────────────────────────────── */
   function genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot' }) {
     const pool = (splitsModus === 'specifiek' && splitsGetallen?.length > 0)
       ? splitsGetallen
       : _getallen(niveau);
 
-    const wilHuis = (oefeningstypes || []).some(t => t.toLowerCase().includes('huis'));
-    const wilBeen = (oefeningstypes || []).some(t => t.toLowerCase().includes('been'));
+    const wilKlein      = (oefeningstypes || []).some(t => t.toLowerCase().includes('klein'));
+    const wilBeen       = (oefeningstypes || []).some(t => t.toLowerCase().includes('been') && !t.toLowerCase().includes('bewerkingen'));
+    const wilGroot      = (oefeningstypes || []).some(t => t.toLowerCase().includes('groot'));
+    const wilBewerkingen = (oefeningstypes || []).some(t => t.toLowerCase().includes('bewerkingen'));
 
-    const oef      = [];
-    const gebruikt = new Set();
+    const oef = [];
+
+    // ── Groot splitshuis: 1 blok per getal, bevat alle splitsingen ──
+    if (wilGroot) {
+      // Groot splitshuis werkt alleen zinvol voor getallen 3–10
+      // Filter pool automatisch, ongeacht wat de leerkracht als niveau koos
+      const grootPool = pool.filter(n => n >= 3 && n <= 10);
+      if (grootPool.length === 0) {
+        // Fallback: gebruik standaard getallen tot 10
+        grootPool.push(...[3,4,5,6,7,8,9,10]);
+      }
+      for (const n of grootPool) {
+        const rijen = _grootSplitsParen(n);
+        oef.push({
+          type:   'groot-splitshuis',
+          totaal: n,
+          rijen,
+          sleutel: `groot-${n}`,
+          vraag:  `groot splitshuis ${n}`,
+        });
+      }
+      return oef;
+    }
+
+    // ── Splitsbeen + bewerkingen ──────────────────────────────────
+    // Totaal staat bovenaan, één been gegeven, kind vult ander been in.
+    // Daarna 4 lege bewerkingen: a+b=, b+a=, n-a=, n-b=
+    if (wilBewerkingen) {
+      const gebruikt2 = new Set();
+      const kandidaten2 = [];
+      for (const n of _shuffle(pool)) {
+        for (const [a, b] of _shuffle(_splits(n))) {
+          kandidaten2.push({ totaal: n, links: a,    rechts: null, leeg: 'rechts' });
+          kandidaten2.push({ totaal: n, links: null, rechts: b,    leeg: 'links'  });
+        }
+      }
+      for (const k of _shuffle(kandidaten2)) {
+        if (oef.length >= aantalOefeningen) break;
+        const sleutel = `bew-${k.totaal}-${k.links}-${k.rechts}`;
+        if (gebruikt2.has(sleutel)) continue;
+        gebruikt2.add(sleutel);
+        // Bepaal de bekende en onbekende waarden
+        const bekend  = k.links !== null ? k.links  : k.rechts;
+        const onbekend = k.totaal - bekend;
+        oef.push({
+          type:    'splitsbeen-bewerkingen',
+          totaal:  k.totaal,
+          links:   k.links,
+          rechts:  k.rechts,
+          leeg:    k.leeg,
+          bekend,
+          onbekend,
+          sleutel,
+          vraag:   'splitsbeen-bewerkingen',
+        });
+      }
+      return oef;
+    }
+    const gebruikt  = new Set();
     const kandidaten = [];
 
     for (const n of _shuffle(pool)) {
       const paren = _splits(n);
       for (const [a, b] of _shuffle(paren)) {
-        if (wilHuis) {
+        if (wilKlein) {
           if (splitsVariant === 'afwisselend' || splitsVariant === 'gemengd') {
-            kandidaten.push({ vorm: 'huis', totaal: n,    links: null, rechts: b,    leeg: 'links'  });
-            kandidaten.push({ vorm: 'huis', totaal: n,    links: a,    rechts: null,  leeg: 'rechts' });
+            kandidaten.push({ vorm: 'huis', totaal: n,    links: null, rechts: b,   leeg: 'links'  });
+            kandidaten.push({ vorm: 'huis', totaal: n,    links: a,    rechts: null, leeg: 'rechts' });
           }
           if (splitsVariant === 'dak-leeg' || splitsVariant === 'gemengd') {
-            kandidaten.push({ vorm: 'huis', totaal: null, links: a,    rechts: b,    leeg: 'dak'    });
+            kandidaten.push({ vorm: 'huis', totaal: null, links: a,    rechts: b,   leeg: 'dak'    });
           }
         }
         if (wilBeen) {
           if (splitsVariant === 'afwisselend' || splitsVariant === 'gemengd') {
-            kandidaten.push({ vorm: 'been', totaal: n,    links: null, rechts: b,    leeg: 'links'  });
-            kandidaten.push({ vorm: 'been', totaal: n,    links: a,    rechts: null,  leeg: 'rechts' });
+            kandidaten.push({ vorm: 'been', totaal: n,    links: null, rechts: b,   leeg: 'links'  });
+            kandidaten.push({ vorm: 'been', totaal: n,    links: a,    rechts: null, leeg: 'rechts' });
           }
           if (splitsVariant === 'dak-leeg' || splitsVariant === 'gemengd') {
-            kandidaten.push({ vorm: 'been', totaal: null, links: a,    rechts: b,    leeg: 'top'    });
+            kandidaten.push({ vorm: 'been', totaal: null, links: a,    rechts: b,   leeg: 'top'    });
           }
         }
       }
     }
 
-    // Wissel vormen af als beide actief
     const vormen = [];
-    if (wilHuis) vormen.push('huis');
-    if (wilBeen) vormen.push('been');
+    if (wilKlein) vormen.push('huis');
+    if (wilBeen)  vormen.push('been');
 
-    // Splits kandidaten per vorm en wissel af
-    const perVorm = {};
-    vormen.forEach(v => perVorm[v] = _shuffle(kandidaten.filter(k => k.vorm === v)));
+    const perVorm    = {};
     const gebrPerVorm = {};
-    vormen.forEach(v => gebrPerVorm[v] = new Set());
+    vormen.forEach(v => { perVorm[v] = _shuffle(kandidaten.filter(k => k.vorm === v)); gebrPerVorm[v] = new Set(); });
 
-    let idx = 0;
-    let pogingen = 0;
+    let idx = 0, pogingen = 0;
     while (oef.length < aantalOefeningen && pogingen < aantalOefeningen * 8) {
       pogingen++;
-      const vorm = vormen[idx % vormen.length];
+      const vorm  = vormen[idx % vormen.length];
       const pool2 = perVorm[vorm];
       const gebr  = gebrPerVorm[vorm];
       const k = pool2.find(k => !gebr.has(`${k.totaal}-${k.links}-${k.rechts}-${k.leeg}`));
@@ -104,12 +166,8 @@ const Splitsingen = (() => {
           gebr.add(`${k.totaal}-${k.links}-${k.rechts}-${k.leeg}`);
           oef.push({
             type:   k.vorm === 'huis' ? 'klein-splitshuis' : 'splitsbeen',
-            totaal: k.totaal,
-            links:  k.links,
-            rechts: k.rechts,
-            leeg:   k.leeg,
-            sleutel,
-            vraag:  k.vorm,
+            totaal: k.totaal, links: k.links, rechts: k.rechts, leeg: k.leeg,
+            sleutel, vraag: k.vorm,
           });
         }
       }
