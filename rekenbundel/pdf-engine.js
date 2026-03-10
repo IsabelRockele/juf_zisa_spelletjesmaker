@@ -590,7 +590,8 @@ const PdfEngine = (() => {
   }
 
   function _tekenBlok(blok) {
-    if (blok.bewerking === 'herken-brug') { _tekenHerkenBlok(blok); return; }
+    if (blok.bewerking === 'herken-brug')  { _tekenHerkenBlok(blok); return; }
+    if (blok.bewerking === 'splitsingen')  { _tekenSplitsingenBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
@@ -739,6 +740,115 @@ const PdfEngine = (() => {
     });
 
     y += HRK_RIJ_H;
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     SPLITSINGEN PDF — Klein splitshuis
+     4 huisjes per rij, elk ~42mm breed
+  ══════════════════════════════════════════════════════════ */
+
+  const SPL_PER_RIJ  = 4;
+  const SPL_ZINR     = 9;
+  const SPL_NABLOK   = 10;
+  // Huisje afmetingen (mm)
+  const SH_BREEDTE   = 26;   // breedte muur
+  const SH_DAK_H     = 14;   // hoogte driehoekig dak
+  const SH_MUUR_H    = 14;   // hoogte muur met kamers
+  const SH_TOT_H     = SH_DAK_H + SH_MUUR_H;
+  const SH_RIJ_H     = SH_TOT_H + 10;  // + ruimte onder
+
+  function _tekenSplitsingenBlok(blok) {
+    const aantalRijen = Math.ceil(blok.oefeningen.length / SPL_PER_RIJ);
+    const kolBreedte  = CW / SPL_PER_RIJ;
+
+    checkRuimte(SPL_ZINR + SH_RIJ_H);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += SPL_ZINR;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      if (rij > 0) checkRuimte(SH_RIJ_H);
+      for (let kol = 0; kol < SPL_PER_RIJ; kol++) {
+        const oef = blok.oefeningen[rij * SPL_PER_RIJ + kol];
+        if (!oef) continue;
+        const ox = ML + kol * kolBreedte + (kolBreedte - SH_BREEDTE) / 2;
+        _tekenKleinSplitshuis(oef, ox, y);
+      }
+      y += SH_RIJ_H;
+    }
+
+    y += SPL_NABLOK;
+    lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
+  }
+
+  /* ── Klein splitshuis tekenen ────────────────────────────────
+     ox, oy = linksboven van het huisje
+     Dak = driehoek via 3 lijnen
+     Muur = rechthoek met verticale scheidingswand midden
+  ─────────────────────────────────────────────────────────── */
+  function _tekenKleinSplitshuis(oef, ox, oy) {
+    const B  = SH_BREEDTE;
+    const midX = ox + B / 2;
+
+    const BLAUW  = [74, 144, 217];
+    const LIJN   = 0.6;   // dunne buitenrand dak + muur
+    const SCHW   = 0.4;   // scheidingswand nog dunner
+    const VAKL   = 0.4;   // invulvakje in dak
+
+    // ── DAK: lijnwerk, witte vulling ──────────────────────────
+    const dakTop   = oy;
+    const dakBodem = oy + SH_DAK_H;
+
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(LIJN);
+    doc.triangle(midX, dakTop, ox, dakBodem, ox + B, dakBodem, 'FD');
+
+    // Inhoud dak: getal of leeg (driehoek zelf is het invulvak)
+    const dakMidY = dakTop + SH_DAK_H * 0.64;
+    if (oef.totaal !== null) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(String(oef.totaal), midX, dakMidY + 2, { align: 'center' });
+    }
+    // leeg → niets tekenen
+
+    // ── MUUR: witte rechthoek met blauwe rand ─────────────────
+    const muurY = dakBodem;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(LIJN);
+    doc.roundedRect(ox, muurY, B, SH_MUUR_H, 1, 1, 'FD');
+
+    // Scheidingswand midden
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(SCHW);
+    doc.line(midX, muurY + 1, midX, muurY + SH_MUUR_H - 1);
+
+    // Kamers: getal of leeg (lege kamer = de kamer zelf is het hokje, geen extra rect)
+    const kamMidY    = muurY + SH_MUUR_H / 2 + 1.5;
+    const kamLinksX  = ox + B / 4;
+    const kamRechtsX = ox + 3 * B / 4;
+
+    if (oef.links !== null) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(String(oef.links), kamLinksX, kamMidY, { align: 'center' });
+    }
+    // leeg → niets tekenen, de kamer is zelf het invulvak
+
+    if (oef.rechts !== null) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(String(oef.rechts), kamRechtsX, kamMidY, { align: 'center' });
+    }
+    // leeg → niets tekenen
   }
 
   /* ── Publieke API ────────────────────────────────────────── */
