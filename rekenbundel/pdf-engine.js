@@ -53,8 +53,8 @@ const PdfEngine = (() => {
   }
 
   /* ── Gewone oefeningen rij ───────────────────────────────── */
-  function _tekenRij(oefeningen) {
-    const kolB = CW / KOLOMMEN;
+  function _tekenRij(oefeningen, aantalKolommen = KOLOMMEN) {
+    const kolB = CW / aantalKolommen;
     const kadW = kolB - 4;
     const kadH = RIJHOOGTE - 1;
 
@@ -73,7 +73,8 @@ const PdfEngine = (() => {
       doc.text(oef.vraag, ox + 3, oy + kadH / 2 + 2);
 
       const vakW = 16, vakH = kadH - 5;
-      const vakX = ox + kadW - vakW - 3;
+      const tekstB = doc.getTextWidth(oef.vraag);
+      const vakX = ox + 3 + tekstB + 2;
       const vakY = oy + (kadH - vakH) / 2;
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(26, 58, 92);
@@ -87,32 +88,43 @@ const PdfEngine = (() => {
   /* ── Hulpmiddelen rij (2 per rij) ────────────────────────── */
   const HULP_SPLITS_H = 24;  // hoogte splitsbeen-zone (been + vakjes)
   const HULP_LIJN_W   = 24;  // breedte schrijflijnen
-  const HULP_KAD_H    = RIJHOOGTE + HULP_SPLITS_H + 6;
+  const HULP_KAD_H    = RIJHOOGTE + HULP_SPLITS_H + 6;  // basis (2 lijnen)
   const HULP_RIJ_H    = HULP_KAD_H + 6;
 
-  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie) {
+  function _hulpKadH(schrijflijnenAantal) {
+    // Elke extra lijn (boven 2) voegt 8mm toe
+    return HULP_KAD_H + Math.max(0, schrijflijnenAantal - 2) * 8;
+  }
+
+  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2) {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
     const beenSpan = 6;
     const vakjW = 9, vakjH = 7;
+    const kadH   = _hulpKadH(schrijflijnenAantal);
+    const rijH   = kadH + 6;
 
     oefeningen.forEach((oef, kol) => {
       const oy     = y;
       const ox     = ML + kol * kolB + 3;   // kader altijd op vaste positie
       const kadEindX = ox + kadW;
 
-      // Bij aftrektal: som iets naar rechts zodat linkervakje splitsbeen in kader valt
-      // Extra ruimte = beenSpan + vakjW/2 + marge - (breedte 1e getal / 2)
-      // Eenvoudiger: vaste extra marge van 7mm bij aftrektal
-      const somMarge = (heeftSplits && bewerking === 'aftrekken' && splitspositie === 'aftrektal')
-        ? marge + 6
-        : marge;
-      const somStartX = ox + somMarge;
-
-      // Bereken centreX voor splitsbeen
+      // Bereken centreX voor splitsbeen — moet vóór somMarge want doelGetal nodig
       const delen   = oef.vraag.replace(' =', '').trim().split(' ');
       const doelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
+      const doelGetal = parseInt(delen[doelIdx]) || 0;
+      const isHTE = doelGetal >= 100 && doelGetal % 100 !== 0 && doelGetal % 10 !== 0;
+      const aantalTakken = isHTE ? 3 : 2;
+      const beenSpanW = aantalTakken === 3 ? 10 : beenSpan;
+
+      // Bij aftrektal: som naar rechts zodat linkervakje splitsbeen in kader valt
+      // Bij 3 takken is de boom breder → meer marge nodig
+      const isAftrektal = heeftSplits && bewerking === 'aftrekken' && splitspositie === 'aftrektal';
+      const extraMarge = isAftrektal ? (aantalTakken === 3 ? 13 : 6) : 0;
+      const somMarge = marge + extraMarge;
+      const somStartX = ox + somMarge;
+
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
       let xOff = somStartX;
@@ -124,7 +136,7 @@ const PdfEngine = (() => {
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(180, 200, 225);
       doc.setLineWidth(0.6);
-      doc.roundedRect(ox, oy, kadW, HULP_KAD_H, 2, 2, 'FD');
+      doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
 
       // Somtekst
       doc.setFont('helvetica', 'normal');
@@ -143,39 +155,56 @@ const PdfEngine = (() => {
       doc.setLineWidth(0.5);
       doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'FD');
 
-      // Schrijflijnen — korter, eindigen vroeger
+      // Schrijflijnen — onder splitsbenen of antwoordvak
       if (heeftLijnen) {
-        const lX1 = vakX + vakW + 2;
-        const lX2 = ox + kadW - marge - 4;   // 4mm voor kaderrand stoppen
-        const lY1 = vakY + vakH + 5;
-        const lY2 = lY1 + 9;
+        const lX1 = ox + marge;
+        const lX2 = ox + kadW - marge - 2;
+        // beenZone: top(somY+3) + beenH(6) + gap(1) + vakjH(7) = 17mm na somY
+        const lY1 = heeftSplits
+          ? somY + 3 + 6 + 1 + 7 + 10   // onder splitsbeen-vakjes + 10mm spatie
+          : vakY + vakH + 7;              // onder antwoordvak + 7mm
+        const lijnGap = 8;
         if (lX2 > lX1 + 5) {
           doc.setDrawColor(160, 185, 210);
           doc.setLineWidth(0.4);
-          doc.line(lX1, lY1, lX2, lY1);
-          doc.line(lX1, lY2, lX2, lY2);
+          for (let li = 0; li < schrijflijnenAantal; li++) {
+            doc.line(lX1, lY1 + li * lijnGap, lX2, lY1 + li * lijnGap);
+          }
         }
       }
 
-      // Splitsbeen — centreX is al berekend bovenaan
+      // Splitsbeen: 2 of 3 takken (doelGetal/isHTE/aantalTakken/beenSpanW al berekend bovenaan)
       if (heeftSplits) {
         const beenTop = somY + 3;
         const beenH   = 6;
         doc.setDrawColor(26, 58, 92);
         doc.setLineWidth(0.6);
-        doc.line(centreX, beenTop, centreX - beenSpan, beenTop + beenH);
-        doc.line(centreX, beenTop, centreX + beenSpan, beenTop + beenH);
+
+        if (aantalTakken === 3) {
+          doc.line(centreX, beenTop, centreX - beenSpanW, beenTop + beenH);
+          doc.line(centreX, beenTop, centreX,              beenTop + beenH);
+          doc.line(centreX, beenTop, centreX + beenSpanW, beenTop + beenH);
+        } else {
+          doc.line(centreX, beenTop, centreX - beenSpan, beenTop + beenH);
+          doc.line(centreX, beenTop, centreX + beenSpan, beenTop + beenH);
+        }
 
         const vakjY = beenTop + beenH + 1;
         doc.setFillColor(255, 255, 255);
         doc.setDrawColor(26, 58, 92);
         doc.setLineWidth(0.5);
-        doc.roundedRect(centreX - beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
-        doc.roundedRect(centreX + beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+        if (aantalTakken === 3) {
+          doc.roundedRect(centreX - beenSpanW - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX - vakjW / 2,              vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX + beenSpanW - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+        } else {
+          doc.roundedRect(centreX - beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX + beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+        }
       }
     });
 
-    y += HULP_RIJ_H;
+    y += rijH;
   }
 
   /* ── Aanvullen constanten ────────────────────────────────── */
@@ -356,12 +385,199 @@ const PdfEngine = (() => {
   }
 
 
+  /* ── Compenseren blok ───────────────────────────────────────── */
+  function _tekenCompenserenBlok(blok) {
+    const variant     = blok.compenserenVariant || 'met-tekens';
+    const metVoorbeeld = blok.metVoorbeeld !== false;
+
+    // Afmetingen kader: 2 per rij
+    const COMP_KAD_H  = 38;   // hoog genoeg voor som + pijl + blokje
+    const COMP_RIJ_H  = COMP_KAD_H + 6;
+    const kolB        = CW / 2;
+    const kadW        = kolB - 6;
+    const marge       = 3;
+
+    const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
+    checkRuimte(ZINRUIMTE + COMP_RIJ_H);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += ZINRUIMTE;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      if (rij > 0) checkRuimte(COMP_RIJ_H);
+      const rijOef = blok.oefeningen.slice(rij * 2, (rij + 1) * 2);
+
+      rijOef.forEach((oef, kol) => {
+        const isVoorbeeld = metVoorbeeld && (rij === 0) && (kol === 0);
+        const oy = y;
+        const ox = ML + kol * kolB + 3;
+
+        // Kader
+        doc.setFillColor(isVoorbeeld ? 255 : 255, isVoorbeeld ? 243 : 255, isVoorbeeld ? 205 : 255);
+        doc.setDrawColor(180, 200, 225);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(ox, oy, kadW, COMP_KAD_H, 2, 2, 'FD');
+
+        const zelfKringen = (variant === 'zelf-kringen') && !isVoorbeeld;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(12);
+        doc.setTextColor(44, 62, 80);
+
+        // Bereken positie kring (compenseerGetal)
+        const compGetal   = oef.compenseerGetal;
+        const andereGetal = oef.andereGetal;
+        const compIsLinks = oef.vraag.replace(' =','').trim().startsWith(String(compGetal));
+
+        const somX    = ox + marge;
+        const somY    = oy + 8;
+
+        const isAftrekken = oef.vraag.includes(' - ');
+        const teken = isAftrekken ? '  -  ' : '  +  ';
+
+        const prefix  = compIsLinks ? '' : `${andereGetal}${teken}`;
+        const suffix  = compIsLinks ? `${teken}${andereGetal}  =` : `  =`;
+        const kringTxt = String(compGetal);
+
+        const prefixB = doc.getTextWidth(prefix);
+        const kringB  = doc.getTextWidth(kringTxt);
+
+        // Prefix
+        if (prefix) doc.text(prefix, somX, somY);
+
+        // Kring: cirkel of gewone tekst afhankelijk van variant
+        const kringPad  = zelfKringen ? 0 : 1.5;
+        const kringTxtX = somX + prefixB + kringPad;
+        const kringMidX = somX + prefixB + kringPad + kringB / 2;
+        const kringMidY = somY - 2.5;
+        const kringR    = Math.max(kringB / 2 + kringPad + 1, 5);
+
+        if (!zelfKringen) {
+          doc.setDrawColor(44, 62, 80);
+          doc.setLineWidth(0.6);
+          doc.circle(kringMidX, kringMidY, kringR, 'S');
+        }
+        doc.text(kringTxt, kringTxtX, somY);
+
+        // Suffix
+        const suffixX = somX + prefixB + kringPad + kringB + kringPad;
+        doc.text(suffix, suffixX, somY);
+
+        // Antwoordvak
+        const somTotaalB = prefixB + kringPad + kringB + kringPad + doc.getTextWidth(suffix);
+        const avX = somX + somTotaalB + 2;
+        const avW = 10, avH = 9;
+        const avY = oy + 2;
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(26, 58, 92);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(avX, avY, avW, avH, 1.5, 1.5, 'FD');
+
+        // Pijl: alleen tekenen als niet zelf-kringen
+        const pijlTopY = kringMidY + kringR;
+        const pijlBotY = pijlTopY + 4;
+        if (!zelfKringen) {
+          doc.setDrawColor(44, 62, 80);
+          doc.setLineWidth(0.5);
+          doc.line(kringMidX, pijlTopY, kringMidX, pijlBotY);
+          doc.setFillColor(44, 62, 80);
+          const ph = 1.2;
+          doc.triangle(kringMidX, pijlBotY, kringMidX - ph, pijlBotY - ph * 2, kringMidX + ph, pijlBotY - ph * 2, 'F');
+        }
+
+        // Compenseervak: [ + ] [ hokje ] [ - ] [ hokje ]
+        // Bij zelf-kringen: geen pijl getekend, blokY start iets hoger
+        const blokY  = (zelfKringen ? pijlTopY : pijlBotY) + 2;
+        const hokH   = 8;
+        const tekenW = 5;    // breedte van + of - teken
+        const getalW = 11;   // breedte invulhokje getal
+        const padW   = 2;    // padding links/rechts in blokje
+        const gapW   = 3;    // ruimte tussen de twee teken+hokje paren
+        const blokTotW = padW + tekenW + 1 + getalW + gapW + tekenW + 1 + getalW + padW;
+        const hokX   = ox + marge;
+
+        // Achtergrond blokje
+        doc.setFillColor(234, 244, 251);
+        doc.setDrawColor(26, 58, 92);
+        doc.setLineWidth(0.5);
+        doc.roundedRect(hokX, blokY, blokTotW, hokH + 2, 2, 2, 'FD');
+
+        doc.setFontSize(9);
+        doc.setTextColor(26, 58, 92);
+
+        // X-posities van de 4 elementen
+        const teken1X = hokX + padW;                          // '+' teken
+        const hokje1X = teken1X + tekenW + 1;                 // 1e invulhokje
+        const teken2X = hokje1X + getalW + gapW;              // '-' teken
+        const hokje2X = teken2X + tekenW + 1;                 // 2e invulhokje
+
+        // Teken1 en teken2 afhankelijk van bewerking
+        const teken1 = isAftrekken ? '-' : '+';
+        const teken2 = isAftrekken ? '+' : '-';
+
+        if (isVoorbeeld) {
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+          doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+          doc.setTextColor(26, 58, 92);
+          doc.text(teken1, teken1X, blokY + 6);
+          doc.text(String(oef.tiental), hokje1X + 1, blokY + 6);
+          doc.text(teken2, teken2X, blokY + 6);
+          doc.text(String(oef.compenseerDelta), hokje2X + 1, blokY + 6);
+          doc.setTextColor(44, 62, 80);
+        } else if (variant === 'met-tekens') {
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+          doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+          doc.setTextColor(26, 58, 92);
+          doc.text(teken1, teken1X, blokY + 6);
+          doc.text(teken2, teken2X, blokY + 6);
+        } else {
+          // Alles zelf: 2 lege hokjes breed genoeg voor teken+getal
+          const breedHokW = tekenW + 1 + getalW;
+          doc.setFillColor(255, 255, 255);
+          doc.roundedRect(teken1X, blokY + 1, breedHokW, hokH, 1, 1, 'FD');
+          doc.roundedRect(teken2X, blokY + 1, breedHokW, hokH, 1, 1, 'FD');
+        }
+
+        // Schrijflijnen rechts van het compenseervak
+        const lijnStartX = hokX + blokTotW + 3;
+        const lijnEindX  = ox + kadW - marge - 3;
+        if (lijnEindX > lijnStartX + 5) {
+          doc.setDrawColor(160, 185, 210);
+          doc.setLineWidth(0.4);
+          const lY1 = blokY + 3;
+          const lY2 = blokY + hokH + 4;
+          doc.line(lijnStartX, lY1, lijnEindX, lY1);
+          doc.line(lijnStartX, lY2, lijnEindX, lY2);
+          // Bij voorbeeld: tussenstappen schrijven op de lijnen
+          if (isVoorbeeld) {
+            doc.setFontSize(10);
+            doc.setTextColor(80, 80, 80);
+            doc.text(oef.schrijflijn1, lijnStartX, lY1 - 1);
+            doc.text(oef.schrijflijn2, lijnStartX, lY2 - 1);
+          }
+        }
+      });
+
+      y += COMP_RIJ_H;
+    }
+    y += NABLOK;
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
   function _tekenBlok(blok) {
     if (blok.bewerking === 'herken-brug') { _tekenHerkenBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
+    if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
-    const _rijGr      = (blok.hulpmiddelen?.includes('splitsbeen') || blok.hulpmiddelen?.includes('schrijflijnen')) ? 2 : KOLOMMEN;
-    const aantalRijen = Math.ceil(blok.oefeningen.length / _rijGr);
+    const isTot1000    = blok.niveau >= 1000;
+    const _kolommen    = isTot1000 ? 3 : KOLOMMEN;
+    const _rijGr       = (blok.hulpmiddelen?.includes('splitsbeen') || blok.hulpmiddelen?.includes('schrijflijnen')) ? 2 : _kolommen;
+    const aantalRijen  = Math.ceil(blok.oefeningen.length / _rijGr);
     checkRuimte(MIN_RUIMTE);
 
     doc.setFont('helvetica', 'bold');
@@ -372,17 +588,18 @@ const PdfEngine = (() => {
 
     const heeftSplits  = blok.hulpmiddelen?.includes('splitsbeen');
     const heeftLijnen  = blok.hulpmiddelen?.includes('schrijflijnen');
+    const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
     const heeftHulp    = heeftSplits || heeftLijnen;
-    const rijGrootte   = heeftHulp ? 2 : KOLOMMEN;
-    const rijH         = heeftHulp ? HULP_RIJ_H : (RIJHOOGTE + RIJ_GAP);
+    const rijGrootte   = heeftHulp ? 2 : _kolommen;
+    const rijH         = heeftHulp ? (_hulpKadH(schrijflijnenAantal) + 6) : (RIJHOOGTE + RIJ_GAP);
 
     for (let rij = 0; rij < aantalRijen; rij++) {
       if (rij > 0) checkRuimte(rijH);
       const rijOef = blok.oefeningen.slice(rij * rijGrootte, (rij + 1) * rijGrootte);
       if (heeftHulp) {
-        _tekenHulpRij(rijOef, heeftSplits, heeftLijnen, blok.bewerking, blok.splitspositie || 'aftrekker');
+        _tekenHulpRij(rijOef, heeftSplits, heeftLijnen, blok.bewerking, blok.splitspositie || 'aftrekker', blok.schrijflijnenAantal || 2);
       } else {
-        _tekenRij(rijOef);
+        _tekenRij(rijOef, _kolommen);
       }
     }
     y += NABLOK;
