@@ -374,8 +374,10 @@ const Preview = (() => {
 
   function _splitsingHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
-    if (oef.type === 'klein-splitshuis') return _kleinsplitshuisHTML(blokId, oef, idx, del);
-    if (oef.type === 'splitsbeen')       return _splitsbeenHTML(blokId, oef, idx, del);
+    if (oef.type === 'klein-splitshuis')       return _kleinsplitshuisHTML(blokId, oef, idx, del);
+    if (oef.type === 'splitsbeen')             return _splitsbeenHTML(blokId, oef, idx, del);
+    if (oef.type === 'groot-splitshuis')       return _grootsplitshuisHTML(blokId, oef, idx, del);
+    if (oef.type === 'splitsbeen-bewerkingen') return _splitsbeenBewerkingHTML(blokId, oef, idx, del);
     return '';
   }
 
@@ -443,6 +445,78 @@ const Preview = (() => {
           <div class="sb-onder">
             <div class="sb-cel">${links}</div>
             <div class="sb-cel">${rechts}</div>
+          </div>
+        </div>
+        ${del}
+      </div>`;
+  }
+
+  /* ── Groot splitshuis ───────────────────────────────────────
+     Één huis met alle splitsingen gestapeld als verdiepen.
+     Afwisselend links/rechts leeg. Dak altijd ingevuld.
+  ────────────────────────────────────────────────────────── */
+  function _grootsplitshuisHTML(blokId, oef, idx, del) {
+    const rijenHTML = (oef.rijen || []).map(rij => {
+      const linksHTML  = rij.links  !== null ? `<span class="sh-kamer-getal">${rij.links}</span>`  : ``;
+      const rechtsHTML = rij.rechts !== null ? `<span class="sh-kamer-getal">${rij.rechts}</span>` : ``;
+      return `
+        <div class="sh-muur-rij">
+          <div class="sh-kamer sh-kamer-l">${linksHTML}</div>
+          <div class="sh-scheidingswand"></div>
+          <div class="sh-kamer sh-kamer-r">${rechtsHTML}</div>
+        </div>`;
+    }).join('');
+
+    return `
+      <div class="oefening-item oefening-splits oefening-grootsplitshuis">
+        <div class="splitshuis-wrap">
+          <div class="sh-dak">
+            <div class="sh-dak-driehoek"></div>
+            <div class="sh-dak-inhoud"><span class="sh-dak-getal">${oef.totaal}</span></div>
+          </div>
+          <div class="sh-muur sh-muur-groot">
+            ${rijenHTML}
+          </div>
+        </div>
+        ${del}
+      </div>`;
+  }
+
+  /* ── Splitsbeen + 4 bewerkingen ─────────────────────────────
+     Splitsbeen bovenaan, daarna 4 lege bewerkingen in kader.
+     Kind vult alles zelf in.
+  ────────────────────────────────────────────────────────── */
+  function _splitsbeenBewerkingHTML(blokId, oef, idx, del) {
+    const top    = `<span class="sb-hokje">${oef.totaal}</span>`;
+    const links  = `<span class="sb-hokje">${oef.links  !== null ? oef.links  : ''}</span>`;
+    const rechts = `<span class="sb-hokje">${oef.rechts !== null ? oef.rechts : ''}</span>`;
+
+    const ops  = ['+', '+', '−', '−'];
+    const rijenHTML = ops.map(op => `
+      <div class="sbw-bewerking">
+        <span class="sbw-vak"></span>
+        <span class="sbw-op">${op}</span>
+        <span class="sbw-vak"></span>
+        <span class="sbw-is">=</span>
+        <span class="sbw-vak"></span>
+      </div>`).join('');
+
+    return `
+      <div class="oefening-item oefening-splits oefening-sbw">
+        <div class="sbw-kader">
+          <div class="splitsbeen-wrap sbw-been">
+            <div class="sb-top">${top}</div>
+            <svg class="sb-v-svg" viewBox="0 0 60 24" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+              <line x1="30" y1="0" x2="4" y2="24" stroke="#4A90D9" stroke-width="1.5"/>
+              <line x1="30" y1="0" x2="56" y2="24" stroke="#4A90D9" stroke-width="1.5"/>
+            </svg>
+            <div class="sb-onder">
+              <div class="sb-cel">${links}</div>
+              <div class="sb-cel">${rechts}</div>
+            </div>
+          </div>
+          <div class="sbw-bewerkingen">
+            ${rijenHTML}
           </div>
         </div>
         ${del}
