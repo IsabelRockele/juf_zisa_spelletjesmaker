@@ -50,15 +50,97 @@ const App = (() => {
     const kaartBrug   = document.getElementById('kaart-brug');
     if (kaartNiveau) kaartNiveau.style.display = isHerken ? 'none' : 'block';
     if (kaartBrug)   kaartBrug.style.display   = isHerken ? 'none' : 'block';
-    _updateHulpmiddelenUI(isHerken ? 'zonder' : (document.querySelector('[name="brug"]:checked')?.value || 'zonder'));
+    _updateHulpmiddelenUI(isHerken ? 'zonder' : _getBrugWaarde());
 
     // Types laden
     const niveau = isHerken ? 100 : parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    const brug   = isHerken ? 'gemengd' : (document.querySelector('[name="brug"]:checked')?.value || 'zonder');
+    const brug   = isHerken ? 'gemengd' : _getBrugWaarde();
     _updateTypesUI(niveau, brug);
   }
 
-  /* ── Radio selecteren ────────────────────────────────────── */
+  /* ── Brug: hoofd- en subkeuze ───────────────────────────── */
+  // Berekent de effectieve brugwaarde die de rest van de app gebruikt
+  function _getBrugWaarde() {
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const hoofd  = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
+    if (hoofd === 'zonder') return 'zonder';
+    // Tot 1000: subkeuze bepaalt de exacte brugwaarde
+    if (niveau >= 1000) {
+      const sub = document.querySelector('[name="brug-sub"]:checked')?.value || 'naar-tiental';
+      if (hoofd === 'met')  return sub;          // naar-tiental / naar-honderdtal / beide
+      if (hoofd === 'beide') return 'gemengd';   // zonder én met brug door elkaar
+    }
+    // Tot 100: met brug = 'met', beide = 'gemengd'
+    if (hoofd === 'met')   return 'met';
+    if (hoofd === 'beide') return 'gemengd';
+    return 'zonder';
+  }
+
+  // Schrijft de effectieve waarde terug naar het verborgen [name="brug"] input
+  function _syncBrugInput() {
+    const waarde = _getBrugWaarde();
+    const verborgen = document.querySelector('[name="brug"]');
+    if (verborgen) verborgen.value = waarde;
+    return waarde;
+  }
+
+  function selecteerBrugHoofd(waarde, el) {
+    document.querySelectorAll('[name="brug-hoofd"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    _updateBrugSubUI();
+    const brug = _syncBrugInput();
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    _updateTypesUI(niveau, brug);
+    _updateHulpmiddelenUI(brug);
+  }
+
+  function selecteerBrugSub(waarde, el) {
+    document.querySelectorAll('[name="brug-sub"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    const brug = _syncBrugInput();
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    _updateTypesUI(niveau, brug);
+    _updateHulpmiddelenUI(brug);
+  }
+
+  // Toont/verbergt de subkeuze-rij + past beschikbare sub-opties aan bij compenseren
+  function _updateBrugSubUI(compenseren = false) {
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const hoofd  = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
+    const rijSub = document.getElementById('rij-brug-sub');
+    if (!rijSub) return;
+
+    // Subkeuze enkel bij tot 1000 + met brug (niet bij 'beide' = gemengd)
+    const toonSub = niveau >= 1000 && hoofd === 'met';
+    rijSub.style.display = toonSub ? 'block' : 'none';
+
+    if (toonSub && compenseren) {
+      // Compenseren aftrekken tot 1000: enkel HT-HT → enkel naar-honderdtal
+      // Compenseren optellen tot 1000: alle bruggen mogelijk
+      const bewerking = actieveBewerking;
+      const chipHond = rijSub.querySelector('[value="naar-honderdtal"]')?.closest('.radio-chip');
+      const chipTien = rijSub.querySelector('[value="naar-tiental"]')?.closest('.radio-chip');
+      const chipBeide = rijSub.querySelector('[value="beide"]')?.closest('.radio-chip');
+      if (bewerking === 'aftrekken') {
+        // Enkel naar-honderdtal beschikbaar
+        if (chipTien)  chipTien.style.display  = 'none';
+        if (chipBeide) chipBeide.style.display = 'none';
+        if (chipHond)  { chipHond.style.display = ''; chipHond.click(); }
+      } else {
+        // Alle opties
+        if (chipTien)  chipTien.style.display  = '';
+        if (chipBeide) chipBeide.style.display = '';
+        if (chipHond)  chipHond.style.display  = '';
+      }
+    } else if (toonSub) {
+      // Alle sub-opties zichtbaar
+      rijSub.querySelectorAll('.radio-chip').forEach(c => c.style.display = '');
+    }
+  }
+
+  /* ── Radio selecteren (niet-brug) ───────────────────────── */
   function selecteerRadio(naam, waarde, el) {
     document.querySelectorAll(`[name="${naam}"]`).forEach(r => {
       r.closest('.radio-chip')?.classList.remove('geselecteerd');
@@ -68,20 +150,18 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     if (naam === 'niveau') {
       _updateTypesUI(parseInt(waarde), null);
-      const huidigeBrug = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
-      _updateHulpmiddelenUI(huidigeBrug);
-    }
-    if (naam === 'brug') {
-      _updateTypesUI(niveau, waarde);
-      _updateHulpmiddelenUI(waarde);
+      _updateBrugSubUI();
+      const brug = _syncBrugInput();
+      _updateHulpmiddelenUI(brug);
     }
   }
 
   /* ── Types UI opbouwen ───────────────────────────────────── */
   function _updateTypesUI(niveau, brug) {
-    if (!brug) brug = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
+    if (!brug) brug = _getBrugWaarde();
 
-    const beschikbaar = Generator.getTypes(actieveBewerking, niveau, brug);
+    const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    const beschikbaar = Generator.getTypes(actieveBewerking, niveau, brug, hulpmiddelen);
     const container   = document.getElementById('cg-types');
     container.innerHTML = '';
 
@@ -135,38 +215,44 @@ const App = (() => {
       const chip = document.querySelector(`[name="brug"][value="${val}"]`)?.closest('.radio-chip');
       if (chip) chip.style.display = alleenTiental ? 'none' : '';
     });
-    // Als verborgen optie geselecteerd is, reset naar 'zonder' en herlaad types
+    // Bij niveau ≤ 100: brug-sub verbergen, hoofd-brug naar 'zonder' resetten indien nodig
     if (alleenTiental) {
-      const huidigeBrug = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
-      if (['naar-honderdtal','beide'].includes(huidigeBrug)) {
-        document.querySelector('[name="brug"][value="zonder"]').checked = true;
-        document.querySelectorAll('[name="brug"]').forEach(r => r.closest('.radio-chip')?.classList.remove('geselecteerd'));
-        document.querySelector('[name="brug"][value="zonder"]')?.closest('.radio-chip')?.classList.add('geselecteerd');
-        _updateHulpmiddelenUI('zonder');
-        _updateTypesUI(niveau, 'zonder');
+      const rijSub = document.getElementById('rij-brug-sub');
+      if (rijSub) rijSub.style.display = 'none';
+    }
+
+    // Aanvullen: enkel tot 100. Compenseren: tot 100 én tot 1000 (optellen)
+    const chipComp = document.getElementById('chip-compenseren');
+    const chipAanv = document.getElementById('chip-aanvullen');
+
+    // Aanvullen: verbergen boven 100
+    if (chipAanv) {
+      const verbergAanv = niveau > 100;
+      chipAanv.style.display = verbergAanv ? 'none' : '';
+      if (verbergAanv) {
+        const cb = chipAanv.querySelector('input');
+        if (cb) cb.checked = false;
+        chipAanv.classList.remove('geselecteerd');
+        const vb = chipAanv.querySelector('.vink-box');
+        if (vb) vb.textContent = '';
+        const rijAanv = document.getElementById('rij-aanvullen');
+        if (rijAanv) rijAanv.style.display = 'none';
       }
     }
 
-    // Aanvullen en compenseren enkel beschikbaar tot 100
-    const chipComp = document.getElementById('chip-compenseren');
-    const chipAanv = document.getElementById('chip-aanvullen');
-    [chipComp, chipAanv].forEach(chip => {
-      if (!chip) return;
-      const verberg = niveau > 100;
-      chip.style.display = verberg ? 'none' : '';
-      if (verberg) {
-        const cb = chip.querySelector('input');
+    // Compenseren: beschikbaar tot 100 (optellen+aftrekken) en tot 1000 (enkel optellen)
+    if (chipComp) {
+      const verbergComp = niveau > 100 && niveau < 1000;
+      chipComp.style.display = verbergComp ? 'none' : '';
+      if (verbergComp) {
+        const cb = chipComp.querySelector('input');
         if (cb) cb.checked = false;
-        chip.classList.remove('geselecteerd');
-        const vb = chip.querySelector('.vink-box');
+        chipComp.classList.remove('geselecteerd');
+        const vb = chipComp.querySelector('.vink-box');
         if (vb) vb.textContent = '';
+        const rijComp = document.getElementById('rij-compenseren');
+        if (rijComp) rijComp.style.display = 'none';
       }
-    });
-    if (niveau > 100) {
-      const rijComp = document.getElementById('rij-compenseren');
-      if (rijComp) rijComp.style.display = 'none';
-      const rijAanv = document.getElementById('rij-aanvullen');
-      if (rijAanv) rijAanv.style.display = 'none';
     }
   }
 
@@ -237,7 +323,7 @@ const App = (() => {
   /* ── Blok toevoegen ──────────────────────────────────────── */
   function voegBlokToe() {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    const brug   = document.querySelector('[name="brug"]:checked')?.value || 'zonder';
+    const brug   = _getBrugWaarde();
     const types  = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const aantal = parseInt(document.getElementById('inp-aantal').value);
     const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
@@ -339,10 +425,16 @@ const App = (() => {
     if (waarde === 'aanvullen') {
       const rijAanvullen = document.getElementById('rij-aanvullen');
       if (rijAanvullen) rijAanvullen.style.display = !was ? 'block' : 'none';
+      const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+      _updateTypesUI(niveau, _getBrugWaarde());
     }
     if (waarde === 'compenseren') {
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = !was ? 'block' : 'none';
+      // Pas brug-subkeuze aan en herlaad types voor compenseren-module
+      _updateBrugSubUI(!was);
+      const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+      _updateTypesUI(niveau, _getBrugWaarde());
     }
   }
 
@@ -376,7 +468,7 @@ const App = (() => {
   }
 
   return {
-    init, toonBewerking, selecteerRadio, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
+    init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
