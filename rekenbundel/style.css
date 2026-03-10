@@ -1188,3 +1188,50 @@ header .badge {
   flex-shrink: 0;
   padding-bottom: 1px;
 }
+
+/* ─────────────────────────────────────────
+   PUNTOEFENING
+───────────────────────────────────────── */
+/* Grid: 4 per rij */
+.splits-grid:has(.oefening-punt),
+.punt-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.oefening-punt {
+  padding: 8px 6px 12px;
+  display: flex;
+  align-items: center;
+  border: 1.5px solid #1A3A5C;
+  border-radius: 6px;
+  min-height: 48px;
+}
+
+.punt-rij {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  width: 100%;
+  justify-content: center;
+}
+
+.punt-getal {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  padding-bottom: 2px;
+}
+
+.punt-teken {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1A3A5C;
+  padding-bottom: 2px;
+}
+
+.punt-lijn {
+  display: inline-block;
+  width: 30px;
+  border-bottom: 1.5px solid #1A3A5C;
+  margin-bottom: 3px;
+}
