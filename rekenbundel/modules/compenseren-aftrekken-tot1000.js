@@ -10,8 +10,10 @@
    - Bv. 820 − 490 → −500 +10 → 820−500=320 → 320+10=330
    - Som (verschil) > 0, nooit een veelvoud van 100 (minder interessant)
 
-   Types (worden uitgebreid naargelang werkboek):
-   - HT-HT
+   Types:
+   - HT-HT  : bv. 820-490 → -500+10
+   - HT-TE  : bv. 320-38  → -40+2  (aftrekker t=9, e=6-9)
+   - HTE-HTE: bv. 545-197 → -200+3 (aftrekker t=9, e=6-9)
    ══════════════════════════════════════════════════════════════ */
 
 const CompenserenAftrekkenTot1000 = (() => {
@@ -55,7 +57,8 @@ const CompenserenAftrekkenTot1000 = (() => {
 
         const eindResultaat = tussenResultaat + compenseerDelta;
         if (eindResultaat !== verschil) continue;
-        if (eindResultaat % 100 === 0) continue;
+        if (eindResultaat % 100 === 0 || eindResultaat <= 0) continue;
+        if (tussenResultaat <= 0) continue;
 
         return {
           a: aftrektal, b: aftrekker, verschil, type,
@@ -67,16 +70,84 @@ const CompenserenAftrekkenTot1000 = (() => {
           schrijflijn1: `${aftrektal} - ${honderdtal} = ${tussenResultaat}`,
           schrijflijn2: `${tussenResultaat} + ${compenseerDelta} = ${eindResultaat}`,
         };
+
+      } else if (type === 'HT-TE') {
+        // Aftrekker: TE met tientallen=9, eenheden 6-9
+        const eAftr = rand(6, 9);
+        const hAftr = rand(1, 8);
+        const aftrekker = hAftr * 100 + 9 * 10 + eAftr;  // bv. 196, 298, 397
+
+        const honderdtal      = volgendHonderdtal(aftrekker);
+        const compenseerDelta = honderdtal - aftrekker;
+
+        // Aftrektal: HT, honderden strikt groter dan aftrekker honderden
+        const hAftt = rand(hAftr + 1, 9);
+        const tAftt = rand(0, 5);
+        const aftrektal = hAftt * 100 + tAftt * 10;
+        if (aftrektal >= 1000 || aftrektal <= aftrekker) continue;
+
+        const verschil = aftrektal - aftrekker;
+        if (verschil <= 0 || verschil % 100 === 0) continue;
+
+        const tussenResultaat = aftrektal - honderdtal;
+        if (tussenResultaat < 0) continue;
+
+        const eindResultaat = tussenResultaat + compenseerDelta;
+        if (eindResultaat !== verschil || eindResultaat % 100 === 0 || eindResultaat <= 0) continue;
+        if (tussenResultaat <= 0) continue;
+
+        return {
+          a: aftrektal, b: aftrekker, verschil, type,
+          compenseerGetal:  aftrekker,
+          andereGetal:      aftrektal,
+          honderdtal, compenseerDelta, tussenResultaat,
+          schrijflijn1: `${aftrektal} - ${honderdtal} = ${tussenResultaat}`,
+          schrijflijn2: `${tussenResultaat} + ${compenseerDelta} = ${eindResultaat}`,
+        };
+
+      } else if (type === 'HTE-HTE') {
+        // Aftrekker: HTE met tientallen=9, eenheden 6-9
+        const eAftr = rand(6, 9);
+        const hAftr = rand(1, 7);
+        const aftrekker = hAftr * 100 + 9 * 10 + eAftr;  // bv. 197, 298, 396
+
+        const honderdtal      = volgendHonderdtal(aftrekker);
+        const compenseerDelta = honderdtal - aftrekker;
+
+        // Aftrektal: HTE, honderden strikt groter dan aftrekker honderden, eenheden 0-5
+        const hAftt = rand(hAftr + 1, 9);
+        const tAftt = rand(0, 9);
+        const eAftt = rand(0, 5);
+        const aftrektal = hAftt * 100 + tAftt * 10 + eAftt;
+        if (aftrektal >= 1000 || aftrektal <= aftrekker) continue;
+
+        const verschil = aftrektal - aftrekker;
+        if (verschil <= 0 || verschil % 100 === 0) continue;
+
+        const tussenResultaat = aftrektal - honderdtal;
+        if (tussenResultaat < 0) continue;
+
+        const eindResultaat = tussenResultaat + compenseerDelta;
+        if (eindResultaat !== verschil || eindResultaat % 100 === 0 || eindResultaat <= 0) continue;
+        if (tussenResultaat <= 0) continue;
+
+        return {
+          a: aftrektal, b: aftrekker, verschil, type,
+          compenseerGetal:  aftrekker,
+          andereGetal:      aftrektal,
+          honderdtal, compenseerDelta, tussenResultaat,
+          schrijflijn1: `${aftrektal} - ${honderdtal} = ${tussenResultaat}`,
+          schrijflijn2: `${tussenResultaat} + ${compenseerDelta} = ${eindResultaat}`,
+        };
       }
 
-      // Andere types volgen later
       return null;
     }
     return null;
   }
 
-  function genereer({ aantalOefeningen = 8, brug = 'beide', oefeningstypes = ['HT-HT'] } = {}) {
-    const beschikbareTypes = ['HT-HT'];
+  function genereer({ aantalOefeningen = 8, brug = 'beide', oefeningstypes = ['Gemengd'] } = {}) {
+    const beschikbareTypes = ['HT-HT', 'HT-TE', 'HTE-HTE'];
     const gebruikTypes = oefeningstypes.includes('Gemengd')
       ? beschikbareTypes
       : oefeningstypes.filter(t => beschikbareTypes.includes(t));
@@ -112,7 +183,7 @@ const CompenserenAftrekkenTot1000 = (() => {
     return oefeningen;
   }
 
-  function getTypes() { return ['HT-HT']; }
+  function getTypes() { return ['Gemengd', 'HT-HT', 'HT-TE', 'HTE-HTE']; }
 
   return { genereer, getTypes };
 })();
