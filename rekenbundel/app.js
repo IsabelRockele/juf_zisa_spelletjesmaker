@@ -27,8 +27,16 @@ const App = (() => {
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
 
-    const isHerken     = bewerking === 'herken-brug';
+    const isHerken      = bewerking === 'herken-brug';
     const isSplitsingen = bewerking === 'splitsingen';
+    const isTafels      = bewerking === 'tafels';
+
+    // Schakel tussen hoofdrekenen-content en tafels-content
+    const tabHoofd  = document.getElementById('tab-hoofdrekenen');
+    const tabTafels = document.getElementById('tab-tafels');
+    if (tabHoofd)  tabHoofd.style.display  = isTafels ? 'none' : 'block';
+    if (tabTafels) tabTafels.style.display = isTafels ? 'block' : 'none';
+    if (isTafels) return; // eigen UI; rest niet nodig
 
     // Sectietitel
     const titel = document.getElementById('sectie-titel');
@@ -609,6 +617,104 @@ const App = (() => {
     label.querySelector('.vink-box').textContent = !was ? '\u2713' : '';
   }
 
+  /* ── Tafels: tafelkeuze en types ────────────────────────── */
+  let _tafelsKeuze = [2]; // standaard tafel van 2
+  let _tafelPositie = 'vooraan';
+  let _tafelMax = 10;
+
+  function toggleTafel(label, tafel) {
+    const cb  = label.querySelector('input');
+    const was = cb.checked;
+    cb.checked = !was;
+    label.classList.toggle('geselecteerd', !was);
+    label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+    if (!was) {
+      if (!_tafelsKeuze.includes(tafel)) _tafelsKeuze.push(tafel);
+    } else {
+      _tafelsKeuze = _tafelsKeuze.filter(t => t !== tafel);
+    }
+  }
+
+  function toggleTafelType(label, type) {
+    const cb  = label.querySelector('input');
+    const was = cb.checked;
+
+    if (type === 'Gemengd') {
+      // Gemengd: alle andere uitvinken
+      document.querySelectorAll('#cg-tafels-types .vink-chip').forEach(l => {
+        l.classList.remove('geselecteerd');
+        l.querySelector('input').checked = false;
+        l.querySelector('.vink-box').textContent = '';
+      });
+      cb.checked = true;
+      label.classList.add('geselecteerd');
+      label.querySelector('.vink-box').textContent = '✓';
+    } else {
+      // Gemengd uitvinken als ander type gekozen
+      const gemengdLabel = [...document.querySelectorAll('#cg-tafels-types .vink-chip')]
+        .find(l => l.querySelector('input').value === 'Gemengd');
+      if (gemengdLabel) {
+        gemengdLabel.classList.remove('geselecteerd');
+        gemengdLabel.querySelector('input').checked = false;
+        gemengdLabel.querySelector('.vink-box').textContent = '';
+      }
+      cb.checked = !was;
+      label.classList.toggle('geselecteerd', !was);
+      label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+    }
+  }
+
+  function selecteerTafelMax(waarde, el) {
+    _tafelMax = waarde;
+    document.querySelectorAll('[name="tafel-max"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerTafelPositie(waarde, el) {
+    _tafelPositie = waarde;
+    document.querySelectorAll('[name="tafel-positie"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function voegTafelBlokToe() {
+    const tafels = [..._tafelsKeuze].sort((a, b) => a - b);
+    if (tafels.length === 0) {
+      toonToast('⚠️ Kies minstens één tafel!', '#E74C3C');
+      return;
+    }
+    const types = [...document.querySelectorAll('#cg-tafels-types input:checked')].map(c => c.value);
+    if (types.length === 0) {
+      toonToast('⚠️ Kies minstens één oefentype!', '#E74C3C');
+      return;
+    }
+    const aantal = parseInt(document.getElementById('inp-aantal-tafels').value);
+    const zin    = document.getElementById('inp-opdrachtzin-tafels').value.trim() || 'Reken de tafels.';
+
+    const blok = Generator.maakBlok({
+      bewerking: 'tafels',
+      niveau: Math.max(...tafels) * 10,
+      oefeningstypes: types,
+      brug: 'zonder',
+      aantalOefeningen: aantal,
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      tafels,
+      tafelPositie: _tafelPositie,
+      tafelMax: _tafelMax,
+    });
+
+    if (!blok) {
+      toonToast('⚠️ Te weinig oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Tafelblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#27AE60');
+  }
+
   /* ── Preview en PDF ──────────────────────────────────────── */
   function genereerPreview() {
     Preview.render(bundelData);
@@ -633,6 +739,7 @@ const App = (() => {
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
+    toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
