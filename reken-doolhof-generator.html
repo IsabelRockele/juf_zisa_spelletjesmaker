@@ -234,6 +234,15 @@ button:active{transform:scale(.97);}
     </div>
   </div>
 
+<div class="sub-block hidden" id="b-tafelvolgorde">
+  <div class="sub-block-title">Volgorde van de tafel</div>
+  <div class="radio-group">
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="fixed" checked> Tafel vooraan (2 × ..)</label>
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="flipped"> Tafel achteraan (.. × 2)</label>
+    <label class="radio-item"><input type="radio" name="d-tafelpos" value="mix"> Gemengd</label>
+  </div>
+</div>
+
   <div class="actions">
     <button class="btn-gen" onclick="previewDoolhof()">▶ Genereer preview</button>
     <button class="btn-sec" onclick="previewDoolhof()">🔀 Nieuwe variant</button>
@@ -553,6 +562,7 @@ function updateUI(){
   const showSoort=!isMul&&range>=50;
   show('b-soort',showSoort);
   if(showSoort) buildSoortGrid(op,range);
+  show('b-tafelvolgorde', op === 'mul');
 }
 
 function buildSoortGrid(op,range){
@@ -653,10 +663,17 @@ function makeSums(count){
   if(isMul){
     const upto=parseInt(document.getElementById('table-upto').value)||10;
     const tables=[...document.querySelectorAll('.mix-cb:checked')].map(c=>parseInt(c.value));
+    const tafelPos=document.querySelector('input[name="d-tafelpos"]:checked')?.value || 'fixed';
     if(!tables.length)return[];
     const pool=[];
     for(const t of tables)for(let i=1;i<=upto;i++){
-      if(op==='mul')pool.push({label:`${t} × ${i}`,ans:t*i});
+      if(op==='mul') {
+        let lbl;
+        if(tafelPos === 'fixed') lbl = `${t} × ${i}`;
+        else if(tafelPos === 'flipped') lbl = `${i} × ${t}`;
+        else lbl = Math.random() < 0.5 ? `${t} × ${i}` : `${i} × ${t}`;
+        pool.push({label: lbl, ans: t*i});
+      }
       else pool.push({label:`${t*i} ÷ ${t}`,ans:i});
     }
     return shuffle(pool).slice(0,count);
