@@ -700,7 +700,7 @@ function makeSums(count){
     ?([...document.querySelectorAll('.soort-cb:checked')].map(i=>i.value)||['TETE'])
     :['any'];
   if(soortKeys.length===0)soortKeys=['any'];
-  const seen=new Set(), seenAns=new Set(), result=[];
+  const seen=new Set(), result=[];
   let tries=0;
   while(result.length<count&&tries++<count*300){
     const isAdd=useAdd[rnd(0,useAdd.length-1)];
@@ -720,8 +720,8 @@ function makeSums(count){
     }else{
       som=makeSomBySoort(key,range,isAdd,brug);
     }
-    if(!som||seen.has(som.label)||seenAns.has(som.ans))continue;
-    seen.add(som.label); seenAns.add(som.ans); result.push(som);
+    if(!som||seen.has(som.label))continue;
+    seen.add(som.label); result.push(som);
   }
   return result;
 }
@@ -1049,11 +1049,19 @@ function generateDoolhof(){
   output.innerHTML='';
 
   for(let n=0;n<aantal;n++){
-    const sums=makeSums(needed+8);
+    const sums=makeSums(needed+16);
     if(!sums.length&&isMul){errEl.textContent='Vink minstens één tafel aan!';errEl.style.display='block';return;}
     if(sums.length<needed){errEl.textContent=`Niet genoeg unieke sommen (${sums.length}/${needed}). Probeer meer soorten of een groter bereik.`;errEl.style.display='block';return;}
     shuffle(sums);
-    const maze=buildMaze(rows,cols,sums.slice(0,needed));
+    // Probeer sommen met unieke uitkomsten te kiezen (voorkomt verwarring in het doolhof)
+    // Val terug op gewone shuffle als er niet genoeg unieke uitkomsten zijn (bv. brug tot 20)
+    const uniqueAnsSums = [];
+    const usedAns = new Set();
+    for (const s of sums) {
+      if (!usedAns.has(s.ans)) { usedAns.add(s.ans); uniqueAnsSums.push(s); }
+    }
+    const finalSums = uniqueAnsSums.length >= needed ? uniqueAnsSums : sums;
+    const maze=buildMaze(rows,cols,finalSums.slice(0,needed));
 
     const div=document.createElement('div');
     div.className='worksheet maze-worksheet';
@@ -1748,7 +1756,7 @@ function renderRoosterConfigs() {
     }
 
     const opSel = mkField('Bewerking', 'ro-op-' + id, [
-      ['add','Optellen (+)'],['sub','Aftrekken (−)'],
+      ['add','Optellen (+)'],['sub','Aftrekken (−)'],['addsub','Gemengd +/−'],
       ['mul','× vermenigvuldigen'],['div','÷ delen']
     ], 'mul');
     opSel.querySelector('select').onchange = () => toggleRoosterOpties(id);
