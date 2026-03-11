@@ -39,6 +39,16 @@
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 </div>
 
+<div class="tabs-scroll-hint">
+
+  <button class="tabs-scroll-btn" onclick="scrollTabsLeft()">←</button>
+
+  Scroll opzij voor meer keuzes
+
+  <button class="tabs-scroll-btn" onclick="scrollTabsRight()">→</button>
+
+</div>
+
     <div class="sidebar-content" id="tab-hoofdrekenen">
 
       <!-- Bundel titel -->
@@ -779,6 +789,26 @@ helpBtn.onclick = () => {
 
 closeHelp.onclick = () => {
   helpModal.style.display = "none";
+}
+
+</script>
+
+<script>
+
+function scrollTabsRight(){
+  const tabs = document.querySelector(".sidebar-tabs");
+  tabs.scrollBy({
+    left: 200,
+    behavior: "smooth"
+  });
+}
+
+function scrollTabsLeft(){
+  const tabs = document.querySelector(".sidebar-tabs");
+  tabs.scrollBy({
+    left: -200,
+    behavior: "smooth"
+  });
 }
 
 </script>
