@@ -104,6 +104,16 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    // Cijferen: gebruik de Cijferen module
+    if (blok.bewerking === 'cijferen') {
+      const nieuweOef = Cijferen.genereer({ ...blok.config, aantalOefeningen: 5 });
+      const bestaand  = new Set(blok.oefeningen.map(o => o.sleutel));
+      for (const oef of nieuweOef) {
+        if (!bestaand.has(oef.sleutel)) { blok.oefeningen.push(oef); return true; }
+      }
+      return false;
+    }
+
     // Speciale afhandeling voor inzicht en getallenlijn
     if (blok.bewerking === 'tafels-inzicht') {
       const nieuweOef = TafelsInzicht.genereer({ ...blok.config, aantalOefeningen: 5 });
