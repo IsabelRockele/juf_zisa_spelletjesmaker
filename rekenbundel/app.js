@@ -29,14 +29,17 @@ const App = (() => {
 
     const isHerken      = bewerking === 'herken-brug';
     const isSplitsingen = bewerking === 'splitsingen';
-    const isTafels      = bewerking === 'tafels';
+    const isTafels       = bewerking === 'tafels';
+    const isInzicht      = bewerking === 'tafels-inzicht';
 
-    // Schakel tussen hoofdrekenen-content en tafels-content
-    const tabHoofd  = document.getElementById('tab-hoofdrekenen');
-    const tabTafels = document.getElementById('tab-tafels');
-    if (tabHoofd)  tabHoofd.style.display  = isTafels ? 'none' : 'block';
-    if (tabTafels) tabTafels.style.display = isTafels ? 'block' : 'none';
-    if (isTafels) return; // eigen UI; rest niet nodig
+    // Schakel tussen de sidebar-content blokken
+    const tabHoofd   = document.getElementById('tab-hoofdrekenen');
+    const tabTafels  = document.getElementById('tab-tafels');
+    const tabInzicht = document.getElementById('tab-tafels-inzicht');
+    if (tabHoofd)   tabHoofd.style.display   = (!isTafels && !isInzicht) ? 'block' : 'none';
+    if (tabTafels)  tabTafels.style.display  = isTafels  ? 'block' : 'none';
+    if (tabInzicht) tabInzicht.style.display = isInzicht ? 'block' : 'none';
+    if (isTafels || isInzicht) return;
 
     // Sectietitel
     const titel = document.getElementById('sectie-titel');
@@ -715,6 +718,140 @@ const App = (() => {
     toonToast(`✅ Tafelblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#27AE60');
   }
 
+  /* ── Tafels inzicht ─────────────────────────────────────── */
+  let _inzichtType       = 'afbeeldingen';  // 'afbeeldingen' of 'getallenlijn'
+  let _inzichtModus      = 'per-tafel';
+  let _inzichtTafel      = [2];  // array — meerdere tafels mogelijk
+  let _inzichtTafelMax   = 10;
+  let _inzichtMaxUitkomst = 24;
+  let _inzichtEmoji      = 'afwisselend';
+
+  function selecteerInzichtType(waarde, el) {
+    _inzichtType = waarde;
+    document.querySelectorAll('[name="inzicht-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    document.getElementById('inzicht-emoji-kaart').style.display = waarde === 'afbeeldingen' ? 'block' : 'none';
+    document.getElementById('inzicht-gl-kaart').style.display    = waarde === 'getallenlijn'  ? 'block' : 'none';
+  }
+
+  function selecteerInzichtModus(waarde, el) {
+    _inzichtModus = waarde;
+    document.querySelectorAll('[name="inzicht-modus"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    document.getElementById('inzicht-per-tafel').style.display  = waarde === 'per-tafel'   ? 'block' : 'none';
+    document.getElementById('inzicht-tot-uitkomst').style.display = waarde === 'tot-uitkomst' ? 'block' : 'none';
+  }
+
+  function selecteerInzichtTafel(waarde, el) {
+    const idx = _inzichtTafel.indexOf(waarde);
+    if (idx === -1) {
+      _inzichtTafel.push(waarde);
+      el.classList.add('geselecteerd');
+    } else {
+      if (_inzichtTafel.length === 1) return; // altijd minstens 1
+      _inzichtTafel.splice(idx, 1);
+      el.classList.remove('geselecteerd');
+    }
+  }
+
+  function selecteerInzichtTafelMax(waarde, el) {
+    _inzichtTafelMax = waarde;
+    document.querySelectorAll('[name="inzicht-tafel-max"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerInzichtMaxUitkomst(waarde, el) {
+    _inzichtMaxUitkomst = waarde;
+    document.querySelectorAll('[name="inzicht-max-uitkomst"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerInzichtEmoji(waarde, el) {
+    _inzichtEmoji = waarde;
+    document.querySelectorAll('[name="inzicht-emoji"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function voegInzichtBlokToe() {
+    const aantal = parseInt(document.getElementById('inp-aantal-inzicht').value);
+
+    if (_inzichtType === 'getallenlijn') {
+      // Getallenlijn via eigen generator
+      const zin = document.getElementById('inp-opdrachtzin-inzicht').value.trim()
+                  || (_glVariant === 'getekend'
+                      ? 'Kijk naar de getallenlijn. Schrijf de herhaalde optelling en de vermenigvuldiging.'
+                      : 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.');
+      const oefeningen = TafelsGetallenlijn.genereer({
+        modus:            _inzichtModus,
+        tafels:           _inzichtTafel,
+        maxUitkomst:      _inzichtMaxUitkomst,
+        tafelMax:         _inzichtTafelMax,
+        aantalOefeningen: aantal,
+        variant:          _glVariant,
+        positie:          _glPositie,
+      });
+      if (!oefeningen || oefeningen.length === 0) {
+        toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+        return;
+      }
+      const blok = {
+        id:          `blok-gl-${Date.now()}`,
+        bewerking:   'tafels-getallenlijn',
+        subtype:     _glVariant,
+        niveau:      Math.max(..._inzichtTafel) * _inzichtTafelMax,
+        opdrachtzin: zin,
+        hulpmiddelen: [],
+        oefeningen,
+        config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+                  maxUitkomst: _inzichtMaxUitkomst, variant: _glVariant },
+      };
+      bundelData.push(blok);
+      Preview.render(bundelData);
+      toonToast(`✅ Getallenlijn toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+      return;
+    }
+
+    // Standaard afbeeldingen
+    const zin = document.getElementById('inp-opdrachtzin-inzicht').value.trim()
+                || 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
+    const oefeningen = TafelsInzicht.genereer({
+      modus:           _inzichtModus,
+      tafels:          _inzichtTafel,
+      maxUitkomst:     _inzichtMaxUitkomst,
+      tafelMax:        _inzichtTafelMax,
+      aantalOefeningen: aantal,
+      emojiSet:        _inzichtEmoji,
+    });
+
+    if (!oefeningen || oefeningen.length === 0) {
+      toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    let _teller2 = bundelData.length + 1;
+    const blok = {
+      id:          `blok-inzicht-${Date.now()}-${_teller2}`,
+      bewerking:   'tafels-inzicht',
+      subtype:     'groepjes',
+      niveau:      Math.max(..._inzichtTafel) * (_inzichtTafelMax || 10),
+      brug:        'zonder',
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      oefeningen,
+      config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+                maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji, aantalOefeningen: aantal },
+    };
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Inzichtblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+  }
+
   /* ── Preview en PDF ──────────────────────────────────────── */
   function genereerPreview() {
     Preview.render(bundelData);
@@ -736,10 +873,105 @@ const App = (() => {
 
   }
 
+  /* ── Tafels getallenlijn ─────────────────────────────────── */
+  let _glVariant     = 'getekend';
+  let _glModus       = 'per-tafel';
+  let _glTafel       = 2;
+  let _glTafelMax    = 5;
+  let _glMaxUitkomst = 30;
+  let _glPositie     = 'vooraan';
+
+  function selecteerGlVariant(waarde, el) {
+    _glVariant = waarde;
+    document.querySelectorAll('[name="gl-variant"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    const positieRij = document.getElementById('gl-positie-rij');
+    if (positieRij) positieRij.style.display = waarde === 'zelf' ? 'block' : 'none';
+  }
+
+  function selecteerGlPositie(waarde, el) {
+    _glPositie = waarde;
+    document.querySelectorAll('[name="gl-positie"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerGlModus(waarde, el) {
+    _glModus = waarde;
+    document.querySelectorAll('[name="gl-modus"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    document.getElementById('gl-per-tafel').style.display    = waarde === 'per-tafel'    ? 'block' : 'none';
+    document.getElementById('gl-tot-uitkomst').style.display = waarde === 'tot-uitkomst' ? 'block' : 'none';
+  }
+
+  function selecteerGlTafel(waarde, el) {
+    _glTafel = waarde;
+    document.querySelectorAll('[name="gl-tafel"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerGlTafelMax(waarde, el) {
+    _glTafelMax = waarde;
+    document.querySelectorAll('[name="gl-tafel-max"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerGlMaxUitkomst(waarde, el) {
+    _glMaxUitkomst = waarde;
+    document.querySelectorAll('[name="gl-max-uitkomst"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function voegGlBlokToe() {
+    const aantal = parseInt(document.getElementById('inp-aantal-gl').value) || 4;
+    const zin    = document.getElementById('inp-opdrachtzin-gl').value.trim()
+                   || (_glVariant === 'getekend'
+                       ? 'Kijk naar de getallenlijn. Schrijf de herhaalde optelling en de vermenigvuldiging.'
+                       : 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.');
+
+    const oefeningen = TafelsGetallenlijn.genereer({
+      modus:            _glModus,
+      tafel:            _glTafel,
+      maxUitkomst:      _glMaxUitkomst,
+      tafelMax:         _glTafelMax,
+      aantalOefeningen: aantal,
+      variant:          _glVariant,
+    });
+
+    if (!oefeningen || oefeningen.length === 0) {
+      toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    const blok = {
+      id:          `blok-gl-${Date.now()}`,
+      bewerking:   'tafels-getallenlijn',
+      subtype:     _glVariant,
+      niveau:      _glTafel * _glTafelMax,
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      oefeningen,
+      config: { modus: _glModus, tafel: _glTafel, tafelMax: _glTafelMax,
+                maxUitkomst: _glMaxUitkomst, variant: _glVariant, aantalOefeningen: aantal },
+    };
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Getallenlijn toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+  }
+
+
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
+    selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, voegInzichtBlokToe,
+    selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
