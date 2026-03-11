@@ -31,15 +31,18 @@ const App = (() => {
     const isSplitsingen = bewerking === 'splitsingen';
     const isTafels       = bewerking === 'tafels';
     const isInzicht      = bewerking === 'tafels-inzicht';
+    const isCijferen     = bewerking === 'cijferen';
 
     // Schakel tussen de sidebar-content blokken
-    const tabHoofd   = document.getElementById('tab-hoofdrekenen');
-    const tabTafels  = document.getElementById('tab-tafels');
-    const tabInzicht = document.getElementById('tab-tafels-inzicht');
-    if (tabHoofd)   tabHoofd.style.display   = (!isTafels && !isInzicht) ? 'block' : 'none';
-    if (tabTafels)  tabTafels.style.display  = isTafels  ? 'block' : 'none';
-    if (tabInzicht) tabInzicht.style.display = isInzicht ? 'block' : 'none';
-    if (isTafels || isInzicht) return;
+    const tabHoofd    = document.getElementById('tab-hoofdrekenen');
+    const tabTafels   = document.getElementById('tab-tafels');
+    const tabInzicht  = document.getElementById('tab-tafels-inzicht');
+    const tabCijferen = document.getElementById('tab-cijferen');
+    if (tabHoofd)    tabHoofd.style.display    = (!isTafels && !isInzicht && !isCijferen) ? 'block' : 'none';
+    if (tabTafels)   tabTafels.style.display   = isTafels   ? 'block' : 'none';
+    if (tabInzicht)  tabInzicht.style.display  = isInzicht  ? 'block' : 'none';
+    if (tabCijferen) tabCijferen.style.display = isCijferen ? 'block' : 'none';
+    if (isTafels || isInzicht || isCijferen) return;
 
     // Sectietitel
     const titel = document.getElementById('sectie-titel');
@@ -966,6 +969,193 @@ const App = (() => {
   }
 
 
+  /* ══════════════════════════════════════════════════════════════
+     CIJFEREN
+     ══════════════════════════════════════════════════════════════ */
+
+  let _cijferBewerking      = 'optellen';
+  let _cijferBereik         = 100;
+  let _cijferBrug           = 'beide';
+  let _cijferTafels         = [2, 3, 4, 5];
+  let _cijferVermPositie    = 'tafel-links';
+  let _cijferVermType       = 'TxE';       // T×E, TE×E, beide
+  let _cijferVermBrug       = 'zonder';    // zonder, E, T, ET, met
+  let _cijferDeelType       = 'TE:E';      // TE÷E (uitbreidbaar)
+  let _cijferDeelRest       = 'nee';       // nee = zonder rest
+  let _cijferInvulling      = 'ingevuld';
+  let _cijferStartpijl      = true;
+  let _cijferSchatting      = false;
+
+  function selecteerCijferBewerking(waarde, el) {
+    _cijferBewerking = waarde;
+    document.querySelectorAll('[name="cijfer-bewerking"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+
+    const isKeer    = waarde === 'vermenigvuldigen';
+    const isDeel    = waarde === 'delen';
+    const isPlusMin = !isKeer && !isDeel;
+
+    const kaartBereik = document.getElementById('kaart-cijfer-bereik');
+    const kaartBrug   = document.getElementById('kaart-cijfer-brug');
+    const kaartVerm   = document.getElementById('kaart-cijfer-verm');
+    const kaartDeel   = document.getElementById('kaart-cijfer-deel');
+
+    if (kaartBereik) kaartBereik.style.display = isPlusMin ? 'block' : 'none';
+    if (kaartBrug)   kaartBrug.style.display   = isPlusMin ? 'block' : 'none';
+    if (kaartVerm)   kaartVerm.style.display   = isKeer    ? 'block' : 'none';
+    if (kaartDeel)   kaartDeel.style.display   = isDeel    ? 'block' : 'none';
+
+    const zinInp = document.getElementById('inp-opdrachtzin-cijferen');
+    if (zinInp) {
+      if (isKeer)       zinInp.value = 'Vermenigvuldig met cijferen.';
+      else if (isDeel)  zinInp.value = 'Deel met cijferen.';
+      else              zinInp.value = 'Reken met cijferen.';
+    }
+  }
+
+  function selecteerCijferVermType(waarde, el) {
+    _cijferVermType = waarde;
+    document.querySelectorAll('[name="cijfer-verm-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferVermBrug(waarde, el) {
+    _cijferVermBrug = waarde;
+    document.querySelectorAll('[name="cijfer-verm-brug"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferBereik(waarde, el) {
+    _cijferBereik = parseInt(waarde);
+    ['cijfer-bereik', 'cijfer-bereik-t'].forEach(naam => {
+      document.querySelectorAll(`[name="${naam}"]`).forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    });
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferBrug(waarde, el) {
+    _cijferBrug = waarde;
+    document.querySelectorAll('[name="cijfer-brug"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function toggleCijferTafel(el, tafel) {
+    const cb  = el.querySelector('input[type="checkbox"]');
+    const box = el.querySelector('.vink-box');
+    const idx = _cijferTafels.indexOf(tafel);
+    if (idx === -1) {
+      _cijferTafels.push(tafel);
+      el.classList.add('geselecteerd');
+      if (box) box.textContent = '✓';
+      if (cb)  cb.checked = true;
+    } else {
+      if (_cijferTafels.length <= 1) return;
+      _cijferTafels.splice(idx, 1);
+      el.classList.remove('geselecteerd');
+      if (box) box.textContent = '';
+      if (cb)  cb.checked = false;
+    }
+  }
+
+  function selecteerCijferVermPositie(waarde, el) {
+    _cijferVermPositie = waarde;
+    document.querySelectorAll('[name="cijfer-verm-positie"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferInvulling(waarde, el) {
+    _cijferInvulling = waarde;
+    document.querySelectorAll('[name="cijfer-invulling"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferStartpijl(waarde, el) {
+    _cijferStartpijl = waarde;
+    document.querySelectorAll('[name="cijfer-startpijl"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferSchatting(waarde, el) {
+    _cijferSchatting = waarde;
+    document.querySelectorAll('[name="cijfer-schatting"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferDeelType(waarde, el) {
+    _cijferDeelType = waarde;
+    document.querySelectorAll('[name="cijfer-deel-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferDeelRest(waarde, el) {
+    _cijferDeelRest = waarde;
+    document.querySelectorAll('[name="cijfer-deel-rest"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function voegCijferenBlokToe() {
+    const aantal = parseInt(document.getElementById('inp-aantal-cijferen').value) || 12;
+    const zin    = document.getElementById('inp-opdrachtzin-cijferen').value.trim()
+                   || 'Reken met cijferen.';
+
+    const oefeningen = Cijferen.genereer({
+      bewerking:             _cijferBewerking,
+      bereik:                _cijferBereik,
+      brug:                  _cijferBrug,
+      aantalOefeningen:      aantal,
+      tafels:                _cijferTafels,
+      vermType:              _cijferVermType,
+      vermBrug:              _cijferVermBrug,
+      deelType:              _cijferDeelType,
+      metRest:               _cijferDeelRest === 'ja',
+    });
+
+    if (!oefeningen || oefeningen.length === 0) {
+      toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    const blok = {
+      id:          `blok-cijferen-${Date.now()}`,
+      bewerking:   'cijferen',
+      subtype:     _cijferBewerking,
+      niveau:      _cijferBereik,
+      brug:        _cijferBrug,
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      oefeningen,
+      config: {
+        bewerking:             _cijferBewerking,
+        bereik:                _cijferBereik,
+        brug:                  _cijferBrug,
+        tafels:                [..._cijferTafels],
+        vermType:              _cijferVermType,
+        vermBrug:              _cijferVermBrug,
+        deelType:              _cijferDeelType,
+        metRest:               _cijferDeelRest === 'ja',
+        invulling:             _cijferInvulling,
+        startpijl:             _cijferStartpijl,
+        schatting:             _cijferSchatting,
+        aantalOefeningen:      aantal,
+      },
+    };
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Cijferblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+  }
+
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
@@ -975,6 +1165,12 @@ const App = (() => {
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
     genereerPreview, downloadPDF,
+    selecteerCijferBewerking, selecteerCijferBereik, selecteerCijferBrug,
+    selecteerCijferVermType, selecteerCijferVermBrug,
+    selecteerCijferDeelType, selecteerCijferDeelRest,
+    toggleCijferTafel, selecteerCijferVermPositie,
+    selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
+    voegCijferenBlokToe,
   };
 })();
 
