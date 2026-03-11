@@ -181,10 +181,10 @@ header .badge {
 }
 
 /* 3. Herken Brug (Geel/Oranje) */
-.sidebar-tab.tab-brug { background-color: #FFE082; color: #1A3A5C; }
-.sidebar-tab.tab-brug:hover { background-color: #FFD54F; }
+.sidebar-tab.tab-brug { background-color: #ffe595; color: #1A3A5C; }
+.sidebar-tab.tab-brug:hover { background-color: #fcde7e; }
 .sidebar-tab.tab-brug.active { 
-  background-color: #F0A500 !important; 
+  background-color: #ecdc5f !important; 
   color: #ffffff;
   border-bottom-color: #E67E22 !important;
   font-weight: 800;
@@ -192,7 +192,7 @@ header .badge {
 
 /* 4. Splitsen (Groen) */
 .sidebar-tab.tab-splits { background-color: #A5D6A7; color: #1A3A5C; }
-.sidebar-tab.tab-splits:hover { background-color: #81C784; }
+.sidebar-tab.tab-splits:hover { background-color: #60b064; }
 .sidebar-tab.tab-splits.active { 
   background-color: #27AE60 !important; 
   color: #ffffff;
@@ -202,7 +202,7 @@ header .badge {
 .sidebar-tab.tab-tafels { background-color: #E1BEE7; color: #1A3A5C; }
 .sidebar-tab.tab-tafels:hover { background-color: #CE93D8; }
 .sidebar-tab.tab-tafels.active { 
-  background-color: #8E24AA !important; 
+  background-color: #9733b3 !important; 
   color: #ffffff;
   border-bottom-color: #4A148C !important;
   font-weight: 800;
@@ -1409,7 +1409,7 @@ header .badge {
 .sidebar-tab.tab-tafels-inzicht { background-color: #FFCCBC; color: #1A3A5C; }
 .sidebar-tab.tab-tafels-inzicht:hover { background-color: #FFAB91; }
 .sidebar-tab.tab-tafels-inzicht.active {
-  background-color: #E64A19 !important;
+  background-color: #ed7551 !important;
   color: #ffffff;
   border-bottom-color: #BF360C !important;
   font-weight: 800;
@@ -1626,7 +1626,7 @@ header .badge {
   margin-right:15px;
 }
 .help-knop{
-  background:#138442;
+  background:#51ad77;
   color:white;
   border:none;
   padding:8px 16px;
@@ -1639,7 +1639,7 @@ header .badge {
 }
 
 .help-knop:hover{
-  background:#0e6a34;
+  background:#3ab06b;
   transform:translateY(-1px);
 }
 
