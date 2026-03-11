@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
-  <link rel="stylesheet" href="style.css?v=28">
+  <link rel="stylesheet" href="style.css?v=29">
 </head>
 <body>
 
@@ -37,6 +37,7 @@
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
+<div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
 </div>
 
 <div class="tabs-scroll-hint">
@@ -696,6 +697,224 @@
 
     </div><!-- /tab-tafels-inzicht -->
 
+    <!-- ── CIJFEREN SIDEBAR CONTENT ─────────────────────────── -->
+    <div class="sidebar-content" id="tab-cijferen" style="display:none">
+
+      <div class="sectie-titel">Configureer een cijferblok</div>
+
+      <!-- Bewerking -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🧮</div>
+          Bewerking
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferBewerking('optellen',this)">
+              <input type="radio" name="cijfer-bewerking" value="optellen" checked>➕ Optellen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBewerking('aftrekken',this)">
+              <input type="radio" name="cijfer-bewerking" value="aftrekken">➖ Aftrekken
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBewerking('gemengd',this)">
+              <input type="radio" name="cijfer-bewerking" value="gemengd">🔀 Gemengd +/−
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBewerking('vermenigvuldigen',this)">
+              <input type="radio" name="cijfer-bewerking" value="vermenigvuldigen">✖️ Vermenigvuldigen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBewerking('delen',this)">
+              <input type="radio" name="cijfer-bewerking" value="delen">➗ Delen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bereik: bij +/−/gemengd -->
+      <div class="config-kaart" id="kaart-cijfer-bereik">
+        <div class="kaart-titel">
+          <div class="icon">🎯</div>
+          Bereik
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferBereik(100,this)">
+              <input type="radio" name="cijfer-bereik" value="100" checked>Tot 100
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBereik(1000,this)">
+              <input type="radio" name="cijfer-bereik" value="1000">Tot 1000
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brug: bij +/−/gemengd -->
+      <div class="config-kaart" id="kaart-cijfer-brug">
+        <div class="kaart-titel">
+          <div class="icon">🌉</div>
+          Brug
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferBrug('beide',this)">
+              <input type="radio" name="cijfer-brug" value="beide" checked>Beide
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('met',this)">
+              <input type="radio" name="cijfer-brug" value="met">Met brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('zonder',this)">
+              <input type="radio" name="cijfer-brug" value="zonder">Zonder brug
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vermenigvuldig-type: enkel bij × -->
+      <div class="config-kaart" id="kaart-cijfer-verm" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">✖️</div>
+          Type oefening
+        </div>
+        <div class="form-rij">
+          <label>Vorm</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferVermType('TxE',this)">
+              <input type="radio" name="cijfer-verm-type" value="TxE" checked>T × E
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermType('TExE',this)">
+              <input type="radio" name="cijfer-verm-type" value="TExE">TE × E
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermType('beide',this)">
+              <input type="radio" name="cijfer-verm-type" value="beide">Beide
+            </label>
+          </div>
+        </div>
+        <div class="form-rij">
+          <label>Brug</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferVermBrug('zonder',this)">
+              <input type="radio" name="cijfer-verm-brug" value="zonder" checked>Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermBrug('E',this)">
+              <input type="radio" name="cijfer-verm-brug" value="E">Brug over E
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermBrug('T',this)">
+              <input type="radio" name="cijfer-verm-brug" value="T">Brug over T
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermBrug('ET',this)">
+              <input type="radio" name="cijfer-verm-brug" value="ET">Brug over E én T
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferVermBrug('met',this)">
+              <input type="radio" name="cijfer-verm-brug" value="met">Alle met brug
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Deling-type: enkel bij ÷ -->
+      <div class="config-kaart" id="kaart-cijfer-deel" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">➗</div>
+          Type deling
+        </div>
+        <div class="form-rij">
+          <label>Vorm</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferDeelType('TE:E',this)">
+              <input type="radio" name="cijfer-deel-type" value="TE:E" checked>TE ÷ E
+            </label>
+          </div>
+        </div>
+        <div class="form-rij">
+          <label>Rest toegestaan?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferDeelRest('nee',this)">
+              <input type="radio" name="cijfer-deel-rest" value="nee" checked>Zonder rest
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferDeelRest('ja',this)">
+              <input type="radio" name="cijfer-deel-rest" value="ja">Met rest
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schema-invulling -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📊</div>
+          Schema
+        </div>
+        <div class="form-rij">
+          <label>Getallen in schema</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferInvulling('ingevuld',this)">
+              <input type="radio" name="cijfer-invulling" value="ingevuld" checked>Ingevuld
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferInvulling('leeg',this)">
+              <input type="radio" name="cijfer-invulling" value="leeg">Leeg (enkel som)
+            </label>
+          </div>
+        </div>
+        <div class="form-rij">
+          <label>Startpijl tonen</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferStartpijl(true,this)">
+              <input type="radio" name="cijfer-startpijl" value="ja" checked>Ja
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferStartpijl(false,this)">
+              <input type="radio" name="cijfer-startpijl" value="nee">Nee
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schatting -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔮</div>
+          Schatting
+        </div>
+        <div class="form-rij">
+          <label>Schatting invulvak</label>
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerCijferSchatting(true,this)">
+              <input type="radio" name="cijfer-schatting" value="ja">Ja
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferSchatting(false,this)">
+              <input type="radio" name="cijfer-schatting" value="nee" checked>Nee
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opdracht & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📝</div>
+          Opdracht & hoeveelheid
+        </div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-cijferen" value="Reken met cijferen." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-cijferen">
+            <option value="4">4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="12" selected>12</option>
+            <option value="16">16</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegCijferenBlokToe()">
+        ＋ Voeg blok toe aan bundel
+      </button>
+
+    </div><!-- /tab-cijferen -->
+
 </aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
@@ -724,6 +943,7 @@
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
+<script src="modules/cijferen.js?v=1"></script>
 <script src="modules/tafels.js?v=1"></script>
 <script src="modules/tafels-inzicht.js?v=1"></script>
 <script src="modules/tafels-getallenlijn.js?v=1"></script>
@@ -742,9 +962,9 @@
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
-<script src="preview.js?v=33"></script>
-<script src="pdf-engine.js?v=41"></script>
-<script src="app.js?v=16"></script>
+<script src="preview.js?v=34"></script>
+<script src="pdf-engine.js?v=42"></script>
+<script src="app.js?v=17"></script>
 
 <div id="helpModal" class="help-modal">
 
