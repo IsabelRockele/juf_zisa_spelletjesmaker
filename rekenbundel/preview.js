@@ -37,20 +37,26 @@ const Preview = (() => {
   }
 
   function _maakBlokElement(blok) {
-    const isHerken       = blok.bewerking === 'herken-brug';
-    const isSplitsingen  = blok.bewerking === 'splitsingen';
-    const isTafels       = blok.bewerking === 'tafels';
-    const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && blok.hulpmiddelen?.includes('aanvullen');
-    const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && blok.hulpmiddelen?.includes('compenseren');
-    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
+    const isHerken        = blok.bewerking === 'herken-brug';
+    const isSplitsingen   = blok.bewerking === 'splitsingen';
+    const isTafels        = blok.bewerking === 'tafels';
+    const isTafelsInzicht = blok.bewerking === 'tafels-inzicht';
+    const isGetallenlijn  = blok.bewerking === 'tafels-getallenlijn';
+    const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && blok.hulpmiddelen?.includes('aanvullen');
+    const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && blok.hulpmiddelen?.includes('compenseren');
+    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
     const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
-    const badgeTxt  = isTafels      ? '✖️ Tafels' :
+    const badgeTxt  = isGetallenlijn  ? '〰️ Getallenlijn' :
+                      isTafelsInzicht ? '🔍 Inzicht' :
+                      isTafels      ? '✖️ Tafels' :
                       isSplitsingen ? '✂️ Splits' :
                       isHerken ? '🔦 Herken brug' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
     if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
+    else if (isGetallenlijn)                                               gridKlasse = 'gl-grid';
+    else if (isTafelsInzicht)                                              gridKlasse = 'inzicht-grid';
     else if (isTafels)                                                     gridKlasse = 'tafels-grid';
     else if (isSplitsingen)                                                gridKlasse = 'splits-grid';
     else if (isHerken)                                                     gridKlasse = 'herken-grid';
@@ -85,7 +91,7 @@ const Preview = (() => {
       </div>
       <div class="preview-blok-footer">
         <span class="footer-info">
-          ${blok.oefeningen.length} oefeningen · ${blok.config.oefeningstypes.join(', ')}
+          ${blok.oefeningen.length} oefeningen · ${((blok.config?.oefeningstypes) || []).join(', ')}
         </span>
         <button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button>
       </div>`;
@@ -109,6 +115,16 @@ const Preview = (() => {
     const bewerking     = blok.bewerking || 'optellen';
     const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
+
+    /* ── Tafels inzicht ──────────────────────────────────── */
+    if (blok.bewerking === 'tafels-inzicht') {
+      return _inzichtOefeningHTML(blok.id, oef, idx);
+    }
+
+    /* ── Tafels getallenlijn ─────────────────────────────── */
+    if (blok.bewerking === 'tafels-getallenlijn') {
+      return _getallenlijnHTML(blok.id, oef, idx);
+    }
 
     /* ── Tafels ──────────────────────────────────────────── */
     if (blok.bewerking === 'tafels') {
@@ -607,6 +623,74 @@ const Preview = (() => {
     document.getElementById(`zin-inp-${blokId}`).focus();
   }
 
+  /* ── Inzicht oefening HTML ──────────────────────────────── */
+  function _inzichtOefeningHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
+
+    // Emoji-kolommen: zo vierkant mogelijk, max 5 per rij
+    function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
+
+    // LINKS: groepjes, max 4 per rij
+    const MAX_PER_RIJ = 3;  // max 3 groepjes naast elkaar
+    let rijHTML = '';
+    for (let start = 0; start < oef.groepen; start += MAX_PER_RIJ) {
+      const n = Math.min(MAX_PER_RIJ, oef.groepen - start);
+      let vakjes = '';
+      for (let g = 0; g < n; g++) {
+        const cols = emoKols(oef.groepGrootte);
+        let emojis = '';
+        for (let b = 0; b < oef.groepGrootte; b++) {
+          emojis += `<span class="inzicht-emoji">${oef.emoji}</span>`;
+        }
+        vakjes += `<div class="inzicht-vakje" style="grid-template-columns:repeat(${cols},1fr)">${emojis}</div>`;
+      }
+      rijHTML += `<div class="inzicht-groepjes-rij">${vakjes}</div>`;
+    }
+
+    // Vaste korte lijnbreedte — altijd gelijk, ongeacht aantal groepen
+    const lijnW = 20;
+    const lijnStyle = `style="width:${lijnW}px"`;
+    const lijnStyleSmal = `style="width:${lijnW}px"`;
+
+    // Rij 1: lijn + lijn + ... = lijn(breed)
+    const delen = Array(oef.groepen)
+      .fill(`<span class="inzicht-lijn" ${lijnStyle}></span>`)
+      .join('<span class="inzicht-plus">+</span>');
+    const optelRij = `<div class="inzicht-optel-rij">${delen}<span class="inzicht-is">=</span><span class="inzicht-lijn breed"></span></div>`;
+
+    // Rij 2: lijn groepen van lijn = lijn
+    const groepVanRij = `<div class="inzicht-tekst-rij">
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-tekst">groepen van</span>
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-is">=</span>
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+    </div>`;
+
+    // Rij 3: lijn × lijn = lijn
+    const vermRij = `<div class="inzicht-tekst-rij">
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-op">×</span>
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-is">=</span>
+      <span class="inzicht-lijn" ${lijnStyle}></span>
+    </div>`;
+
+    return `<div class="inzicht-oef" data-blok="${blokId}" data-idx="${idx}">
+      ${del}
+      <div class="inzicht-inner">
+        <div class="inzicht-links">
+          <div class="inzicht-groepjes-wrap">${rijHTML}</div>
+        </div>
+        <div class="inzicht-rechts">
+          ${optelRij}
+          ${groepVanRij}
+          ${vermRij}
+        </div>
+      </div>
+    </div>`;
+  }
+
   /* ── Tafels oefening HTML ───────────────────────────────── */
   function _tafelOefeningHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
@@ -644,6 +728,92 @@ const Preview = (() => {
       ${del}
       <div class=tafel-som>${somHTML}</div>
     </div>`;
+  }
+
+  /* ── Getallenlijn preview HTML ───────────────────────────── */
+  function _getallenlijnHTML(blokId, oef, idx) {
+    const { groepen, stap, uitkomst, variant, positie } = oef;
+    const max = uitkomst;
+
+    // Bepaal breedte per vakje op basis van max getal
+    const vakjeW = Math.max(20, Math.min(30, Math.floor(560 / (max + 2))));
+    const lijnW  = (max + 1) * vakjeW;
+    const boogH  = variant === 'getekend' ? 44 : 0;
+    const svgH   = boogH + 28; // bogen + vakjes
+    const totaalW = lijnW + 20; // +20 voor pijl
+
+    // SVG getallenlijn opbouwen
+    const vakjeY = boogH; // y-positie bovenkant vakjes
+
+    let svgInhoud = '';
+
+    // Vakjes 0 t/m max
+    for (let n = 0; n <= max; n++) {
+      const x = n * vakjeW;
+      svgInhoud += `<rect x="${x}" y="${vakjeY}" width="${vakjeW}" height="22" fill="white" stroke="#5B9BD5" stroke-width="0.8"/>`;
+      const fs = vakjeW < 24 ? 9 : 11;
+      svgInhoud += `<text x="${x + vakjeW/2}" y="${vakjeY + 15}" text-anchor="middle" font-size="${fs}" font-family="helvetica,arial" font-weight="600" fill="#1a3a5c">${n}</text>`;
+    }
+
+    // Pijl rechts
+    const pijlX = (max + 1) * vakjeW;
+    svgInhoud += `<line x1="${pijlX}" y1="${vakjeY + 11}" x2="${pijlX + 14}" y2="${vakjeY + 11}" stroke="#5B9BD5" stroke-width="1.5"/>`;
+    svgInhoud += `<polygon points="${pijlX+14},${vakjeY+11} ${pijlX+9},${vakjeY+8} ${pijlX+9},${vakjeY+14}" fill="#5B9BD5"/>`;
+
+    // Boogjes (alleen bij 'getekend')
+    if (variant === 'getekend') {
+      for (let g = 0; g < groepen; g++) {
+        const x1 = g * stap * vakjeW;
+        const x2 = (g + 1) * stap * vakjeW;
+        const midX = (x1 + x2) / 2;
+        const boogTop = 4;
+        const boogBot = boogH - 4;
+        const ctrl = boogTop + 4;
+        // Boog als kubische bezier
+        svgInhoud += `<path d="M ${x1} ${boogBot} C ${x1} ${ctrl}, ${x2} ${ctrl}, ${x2} ${boogBot}" stroke="#E64A19" stroke-width="2" fill="none"/>`;
+        // Kleine streepjes
+        svgInhoud += `<line x1="${x1}" y1="${boogBot}" x2="${x1}" y2="${boogBot-5}" stroke="#E64A19" stroke-width="1.5"/>`;
+        svgInhoud += `<line x1="${x2}" y1="${boogBot}" x2="${x2}" y2="${boogBot-5}" stroke="#E64A19" stroke-width="1.5"/>`;
+        // Getal boven boog
+        svgInhoud += `<text x="${midX}" y="${boogTop + 12}" text-anchor="middle" font-size="11" font-family="helvetica,arial" font-weight="700" fill="#E64A19">${stap}</text>`;
+      }
+    }
+
+    // Formules
+    let formules = '';
+    if (variant === 'getekend') {
+      const delen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-plus">+</span>`);
+      formules = `
+        <div class="gl-formule-rij">${delen}<span class="gl-eq">=</span><span class="gl-lijn breed"></span></div>
+        <div class="gl-formule-rij">
+          <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
+          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
+        </div>`;
+    } else {
+      // Zelf tekenen: positie bepaalt of stap vooraan of achteraan staat
+      if (positie === 'achteraan') {
+        formules = `<div class="gl-formule-rij">
+          <span class="gl-lijn"></span><span class="gl-maal">×</span>
+          <span class="gl-getal-vast">${stap}</span>
+          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
+        </div>`;
+      } else {
+        // vooraan (default)
+        formules = `<div class="gl-formule-rij">
+          <span class="gl-getal-vast">${stap}</span><span class="gl-maal">×</span>
+          <span class="gl-lijn"></span>
+          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
+        </div>`;
+      }
+    }
+
+    return `
+      <div class="gl-oefening">
+        <div class="gl-svg-wrapper">
+          <svg width="${totaalW}" height="${svgH}" viewBox="0 0 ${totaalW} ${svgH}">${svgInhoud}</svg>
+        </div>
+        <div class="gl-formules">${formules}</div>
+      </div>`;
   }
 
   return { render, toonZinEditor };
