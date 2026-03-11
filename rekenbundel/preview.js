@@ -731,90 +731,98 @@ const Preview = (() => {
   }
 
   /* ── Getallenlijn preview HTML ───────────────────────────── */
-  function _getallenlijnHTML(blokId, oef, idx) {
-    const { groepen, stap, uitkomst, variant, positie } = oef;
-    const max = uitkomst;
+ function _getallenlijnHTML(blokId, oef, idx) {
+  const { groepen, stap, uitkomst, variant, positie } = oef;
+  const max = Math.max(uitkomst, 20);
 
-    // Bepaal breedte per vakje op basis van max getal
-    const vakjeW = Math.max(20, Math.min(30, Math.floor(560 / (max + 2))));
-    const lijnW  = (max + 1) * vakjeW;
-    const boogH  = variant === 'getekend' ? 44 : 0;
-    const svgH   = boogH + 28; // bogen + vakjes
-    const totaalW = lijnW + 20; // +20 voor pijl
+  const vakjeW  = Math.max(18, Math.min(24, Math.floor(540 / (max + 2))));
+  const lijnW   = (max + 1) * vakjeW;
+  const boogH   = variant === 'getekend' ? 34 : 0;
+  const svgH    = boogH + 44;
+  const totaalW = lijnW + 34;
 
-    // SVG getallenlijn opbouwen
-    const vakjeY = boogH; // y-positie bovenkant vakjes
+  const vakjeY = boogH + 8;
+  const vakjeH = 22;
+  const asY    = vakjeY + vakjeH + 7;
 
-    let svgInhoud = '';
+  function middenVanGetal(n) {
+    return n * vakjeW + vakjeW / 2;
+  }
 
-    // Vakjes 0 t/m max
-    for (let n = 0; n <= max; n++) {
-      const x = n * vakjeW;
-      svgInhoud += `<rect x="${x}" y="${vakjeY}" width="${vakjeW}" height="22" fill="white" stroke="#5B9BD5" stroke-width="0.8"/>`;
-      const fs = vakjeW < 24 ? 9 : 11;
-      svgInhoud += `<text x="${x + vakjeW/2}" y="${vakjeY + 15}" text-anchor="middle" font-size="${fs}" font-family="helvetica,arial" font-weight="600" fill="#1a3a5c">${n}</text>`;
+  let svgInhoud = '';
+
+  // vakjes
+  for (let n = 0; n <= max; n++) {
+    const x = n * vakjeW;
+    svgInhoud += `<rect x="${x}" y="${vakjeY}" width="${vakjeW - 1}" height="${vakjeH}" rx="1.5" ry="1.5" fill="#ffffff" stroke="#85B0C6" stroke-width="1"/>`;
+    svgInhoud += `<text x="${x + (vakjeW - 1) / 2}" y="${vakjeY + 14}" text-anchor="middle" font-size="10" font-family="Arial, sans-serif" fill="#333333">${n}</text>`;
+  }
+
+  // onderlijn + pijl
+  svgInhoud += `<line x1="${vakjeW / 2}" y1="${asY}" x2="${lijnW + 18}" y2="${asY}" stroke="#85B0C6" stroke-width="1.4"/>`;
+  svgInhoud += `<polygon points="${lijnW + 24},${asY} ${lijnW + 17},${asY - 4} ${lijnW + 17},${asY + 4}" fill="#85B0C6"/>`;
+
+  // boogjes bij getekend
+  if (variant === 'getekend') {
+    const boogBasisY = vakjeY - 2;
+    const ctrlLift   = 18;
+
+    for (let g = 0; g < groepen; g++) {
+      const startGetal = g * stap;
+      const eindGetal  = (g + 1) * stap;
+      const x1 = middenVanGetal(startGetal);
+      const x2 = middenVanGetal(eindGetal);
+      const midX = (x1 + x2) / 2;
+      const ctrlY = boogBasisY - ctrlLift;
+
+      svgInhoud += `<path d="M ${x1} ${boogBasisY} C ${x1 + (x2 - x1) * 0.22} ${ctrlY}, ${x1 + (x2 - x1) * 0.78} ${ctrlY}, ${x2} ${boogBasisY}" stroke="#444444" stroke-width="1.6" fill="none"/>`;
+      svgInhoud += `<text x="${midX}" y="${ctrlY - 4}" text-anchor="middle" font-size="10" font-family="Arial, sans-serif" font-weight="700" fill="#333333">${stap}</text>`;
     }
+  }
 
-    // Pijl rechts
-    const pijlX = (max + 1) * vakjeW;
-    svgInhoud += `<line x1="${pijlX}" y1="${vakjeY + 11}" x2="${pijlX + 14}" y2="${vakjeY + 11}" stroke="#5B9BD5" stroke-width="1.5"/>`;
-    svgInhoud += `<polygon points="${pijlX+14},${vakjeY+11} ${pijlX+9},${vakjeY+8} ${pijlX+9},${vakjeY+14}" fill="#5B9BD5"/>`;
+  let inhoudOnderaan = '';
 
-    // Boogjes (alleen bij 'getekend')
-    if (variant === 'getekend') {
-      for (let g = 0; g < groepen; g++) {
-        const x1 = g * stap * vakjeW;
-        const x2 = (g + 1) * stap * vakjeW;
-        const midX = (x1 + x2) / 2;
-        const boogTop = 4;
-        const boogBot = boogH - 4;
-        const ctrl = boogTop + 4;
-        // Boog als kubische bezier
-        svgInhoud += `<path d="M ${x1} ${boogBot} C ${x1} ${ctrl}, ${x2} ${ctrl}, ${x2} ${boogBot}" stroke="#E64A19" stroke-width="2" fill="none"/>`;
-        // Kleine streepjes
-        svgInhoud += `<line x1="${x1}" y1="${boogBot}" x2="${x1}" y2="${boogBot-5}" stroke="#E64A19" stroke-width="1.5"/>`;
-        svgInhoud += `<line x1="${x2}" y1="${boogBot}" x2="${x2}" y2="${boogBot-5}" stroke="#E64A19" stroke-width="1.5"/>`;
-        // Getal boven boog
-        svgInhoud += `<text x="${midX}" y="${boogTop + 12}" text-anchor="middle" font-size="11" font-family="helvetica,arial" font-weight="700" fill="#E64A19">${stap}</text>`;
-      }
-    }
-
-    // Formules
-    let formules = '';
-    if (variant === 'getekend') {
-      const delen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-plus">+</span>`);
-      formules = `
-        <div class="gl-formule-rij">${delen}<span class="gl-eq">=</span><span class="gl-lijn breed"></span></div>
+  if (variant === 'getekend') {
+    const delen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-plus">+</span>`);
+    inhoudOnderaan = `
+      <div class="gl-zin">
+        <span>Ik zie</span>
+        <span class="gl-lijn kort"></span>
+        <span>sprongen van</span>
+        <span class="gl-lijn kort"></span>
+        <span>.</span>
+      </div>
+      <div class="gl-formule-rij">${delen}<span class="gl-eq">=</span><span class="gl-lijn breed"></span></div>
+      <div class="gl-formule-rij">
+        <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
+        <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
+      </div>`;
+  } else {
+    if (positie === 'achteraan') {
+      inhoudOnderaan = `
         <div class="gl-formule-rij">
-          <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
-          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
-        </div>`;
-    } else {
-      // Zelf tekenen: positie bepaalt of stap vooraan of achteraan staat
-      if (positie === 'achteraan') {
-        formules = `<div class="gl-formule-rij">
           <span class="gl-lijn"></span><span class="gl-maal">×</span>
           <span class="gl-getal-vast">${stap}</span>
           <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
         </div>`;
-      } else {
-        // vooraan (default)
-        formules = `<div class="gl-formule-rij">
+    } else {
+      inhoudOnderaan = `
+        <div class="gl-formule-rij">
           <span class="gl-getal-vast">${stap}</span><span class="gl-maal">×</span>
           <span class="gl-lijn"></span>
           <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
         </div>`;
-      }
     }
-
-    return `
-      <div class="gl-oefening">
-        <div class="gl-svg-wrapper">
-          <svg width="${totaalW}" height="${svgH}" viewBox="0 0 ${totaalW} ${svgH}">${svgInhoud}</svg>
-        </div>
-        <div class="gl-formules">${formules}</div>
-      </div>`;
   }
+
+  return `
+    <div class="gl-oefening">
+      <div class="gl-svg-wrapper">
+        <svg width="${totaalW}" height="${svgH}" viewBox="0 0 ${totaalW} ${svgH}">${svgInhoud}</svg>
+      </div>
+      <div class="gl-formules">${inhoudOnderaan}</div>
+    </div>`;
+}
 
   return { render, toonZinEditor };
 })();
