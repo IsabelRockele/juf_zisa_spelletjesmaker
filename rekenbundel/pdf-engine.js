@@ -1188,12 +1188,12 @@ const avX = somX + somTotaalB + 4.5;
 
     // Bereken hoogte van één oefening
  function oefHoogte(oef) {
-  if (oef.variant === 'getekend') {
-    // bogen + getallenlijn + zin + 2 formulelijnen
-    return 56;
-  }
-  // voorlopig voor "zelf tekenen" nog compact houden
-  return 28;
+ if (oef.variant === 'getekend') {
+  // bogen + getallenlijn + zin + 2 formulelijnen
+  return 56;
+}
+// getallenlijn + formule eronder binnen het vak
+return 36;
 }
 
     checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
@@ -1412,57 +1412,84 @@ lijnB(fx2, tweedeRijY);
     return;
   }
 
-  // ── Voorlopige eenvoudige versie voor "zelf tekenen" ─────
-  const formY = asY + 8;
-  const LS = 10;
-  const LB = 12;
-  const BL = 6;
+  // ── Variant "zelf tekenen" ────────────────────────────────
+// Onder de getallenlijn komt:
+// 4 × 2 = ____________________ = ___
 
-  function lijnS(fx, fy) {
-    doc.setDrawColor(...INVULGRIJS);
-    doc.setLineWidth(0.25);
-    doc.line(fx, fy + BL, fx + LS, fy + BL);
-  }
+const formY = asY + 4;
+const korteLijn = 14;
+const langeLijn = 48;
+const BL = 6.5;
 
-  function lijnB(fx, fy) {
-    doc.setDrawColor(...INVULGRIJS);
-    doc.setLineWidth(0.25);
-    doc.line(fx, fy + BL, fx + LB, fy + BL);
-  }
+function lijnKort(fx, fy) {
+  doc.setDrawColor(...INVULGRIJS);
+  doc.setLineWidth(0.25);
+  doc.line(fx, fy + BL, fx + korteLijn, fy + BL);
+}
 
-  function sym(fx, fy, t) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...TEKSTDONKER);
-    doc.text(t, fx, fy + BL);
-  }
+function lijnLang(fx, fy) {
+  doc.setDrawColor(...INVULGRIJS);
+  doc.setLineWidth(0.25);
+  doc.line(fx, fy + BL, fx + langeLijn, fy + BL);
+}
 
-  let fx = lijnX1;
-  if (positie === 'achteraan') {
-    lijnS(fx, formY);
-    fx += LS + 1.5;
-    sym(fx, formY, '×');
-    fx += doc.getTextWidth('×') + 2.2;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(String(stap), fx, formY + BL);
-    fx += doc.getTextWidth(String(stap)) + 2.2;
-    sym(fx, formY, '=');
-    fx += doc.getTextWidth('=') + 2.2;
-    lijnB(fx, formY);
-  } else {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(String(stap), fx, formY + BL);
-    fx += doc.getTextWidth(String(stap)) + 2.2;
-    sym(fx, formY, '×');
-    fx += doc.getTextWidth('×') + 2.2;
-    lijnS(fx, formY);
-    fx += LS + 1.5;
-    sym(fx, formY, '=');
-    fx += doc.getTextWidth('=') + 2.2;
-    lijnB(fx, formY);
-  }
+function sym(fx, fy, t) {
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...TEKSTDONKER);
+  doc.text(t, fx, fy + BL);
+}
+
+let fx = lijnX1;
+
+doc.setFont('helvetica', 'bold');
+doc.setFontSize(10);
+doc.setTextColor(...TEKSTDONKER);
+
+if (positie === 'achteraan') {
+  // ___ × 2 = ____________________ = ___
+  lijnKort(fx, formY);
+  fx += korteLijn + 2.5;
+
+  sym(fx, formY, '×');
+  fx += doc.getTextWidth('×') + 2.5;
+
+  doc.text(String(stap), fx, formY + BL);
+  fx += doc.getTextWidth(String(stap)) + 3;
+
+  sym(fx, formY, '=');
+  fx += doc.getTextWidth('=') + 3;
+
+  lijnLang(fx, formY);
+  fx += langeLijn + 3;
+
+  sym(fx, formY, '=');
+  fx += doc.getTextWidth('=') + 3;
+
+  lijnKort(fx, formY);
+
+} else {
+  // 4 × ___ = ____________________ = ___
+  doc.text(String(stap), fx, formY + BL);
+  fx += doc.getTextWidth(String(stap)) + 2.5;
+
+  sym(fx, formY, '×');
+  fx += doc.getTextWidth('×') + 2.5;
+
+  lijnKort(fx, formY);
+  fx += korteLijn + 3;
+
+  sym(fx, formY, '=');
+  fx += doc.getTextWidth('=') + 3;
+
+  lijnLang(fx, formY);
+  fx += langeLijn + 3;
+
+  sym(fx, formY, '=');
+  fx += doc.getTextWidth('=') + 3;
+
+  lijnKort(fx, formY);
+}
 }
 
   /* ── Publieke API ────────────────────────────────────────── */
