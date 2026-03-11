@@ -549,23 +549,40 @@ const avX = somX + somTotaalB + 4.5;
         const teken2 = isAftrekken ? '+' : '-';
 
         if (isVoorbeeld) {
-          doc.setFillColor(255, 255, 255);
-          doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
-          doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
-          doc.setTextColor(26, 58, 92);
-          doc.text(teken1, teken1X, blokY + 6);
-          doc.text(String(oef.tiental), hokje1X + 1, blokY + 6);
-          doc.text(teken2, teken2X, blokY + 6);
-          doc.text(String(oef.compenseerDelta), hokje2X + 1, blokY + 6);
-          doc.setTextColor(44, 62, 80);
-        } else if (variant === 'met-tekens') {
-          doc.setFillColor(255, 255, 255);
-          doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
-          doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
-          doc.setTextColor(26, 58, 92);
-          doc.text(teken1, teken1X, blokY + 6);
-          doc.text(teken2, teken2X, blokY + 6);
-        } else {
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+  doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+
+  doc.setTextColor(26, 58, 92);
+
+  doc.setFontSize(12);
+  doc.text(teken1, teken1X, blokY + 6);
+
+  doc.setFontSize(13);
+  const txt1 = String(oef.tiental);
+  const txt1W = doc.getTextWidth(txt1);
+  const txt1X = hokje1X + (getalW - txt1W) / 2;
+  doc.text(txt1, txt1X, blokY + 6);
+
+  doc.setFontSize(12);
+  doc.text(teken2, teken2X, blokY + 6);
+
+  doc.setFontSize(13);
+  const txt2 = String(oef.compenseerDelta);
+  const txt2W = doc.getTextWidth(txt2);
+  const txt2X = hokje2X + (getalW - txt2W) / 2;
+  doc.text(txt2, txt2X, blokY + 6);
+
+  doc.setFontSize(12);
+  doc.setTextColor(44, 62, 80);
+} else if (variant === 'met-tekens') {
+  doc.setFillColor(255, 255, 255);
+  doc.roundedRect(hokje1X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+  doc.roundedRect(hokje2X, blokY + 1, getalW, hokH, 1, 1, 'FD');
+  doc.setTextColor(26, 58, 92);
+  doc.text(teken1, teken1X, blokY + 6);
+  doc.text(teken2, teken2X, blokY + 6);
+} else {
           // Alles zelf: 2 lege hokjes breed genoeg voor teken+getal
           const breedHokW = tekenW + 1 + getalW;
           doc.setFillColor(255, 255, 255);
