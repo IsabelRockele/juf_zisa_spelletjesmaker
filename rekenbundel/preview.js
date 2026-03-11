@@ -797,22 +797,22 @@ const Preview = (() => {
         <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
         <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
       </div>`;
-  } else {
-    if (positie === 'achteraan') {
-      inhoudOnderaan = `
-        <div class="gl-formule-rij">
-          <span class="gl-lijn"></span><span class="gl-maal">×</span>
-          <span class="gl-getal-vast">${stap}</span>
-          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
-        </div>`;
-    } else {
-      inhoudOnderaan = `
-        <div class="gl-formule-rij">
-          <span class="gl-getal-vast">${stap}</span><span class="gl-maal">×</span>
-          <span class="gl-lijn"></span>
-          <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
-        </div>`;
-    }
+   } else {
+    const factor1 = positie === 'achteraan' ? groepen : stap;
+    const factor2 = positie === 'achteraan' ? stap : groepen;
+    const plusSlots = Math.max(groepen, 5);
+    const langeLijnPx = Math.min(220, 110 + plusSlots * 18);
+
+    inhoudOnderaan = `
+      <div class="gl-formule-rij">
+        <span class="gl-getal-vast">${factor1}</span>
+        <span class="gl-maal">×</span>
+        <span class="gl-getal-vast">${factor2}</span>
+        <span class="gl-eq">=</span>
+        <span class="gl-lijn breed" style="width:${langeLijnPx}px"></span>
+        <span class="gl-eq">=</span>
+        <span class="gl-lijn breed" style="width:34px"></span>
+      </div>`;
   }
 
   return `
