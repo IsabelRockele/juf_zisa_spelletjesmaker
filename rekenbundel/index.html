@@ -725,6 +725,9 @@
             <label class="radio-chip" onclick="App.selecteerCijferBewerking('delen',this)">
               <input type="radio" name="cijfer-bewerking" value="delen">➗ Delen
             </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBewerking('komma',this)">
+              <input type="radio" name="cijfer-bewerking" value="komma">🔢 Kommagetallen
+            </label>
           </div>
         </div>
       </div>
@@ -763,6 +766,42 @@
             </label>
             <label class="radio-chip" onclick="App.selecteerCijferBrug('zonder',this)">
               <input type="radio" name="cijfer-brug" value="zonder">Zonder brug
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Komma-type: enkel bij kommagetallen -->
+      <div class="config-kaart" id="kaart-cijfer-komma" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Type kommasom
+        </div>
+        <div class="form-rij">
+          <label>Vorm</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferKommaType('Et_plus_Et',this)">
+              <input type="radio" name="cijfer-komma-type" value="Et_plus_Et" checked>E,t + E,t
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferKommaType('Et_min_Et',this)">
+              <input type="radio" name="cijfer-komma-type" value="Et_min_Et">E,t − E,t
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferKommaType('Et_gemengd',this)">
+              <input type="radio" name="cijfer-komma-type" value="Et_gemengd">Gemengd +/−
+            </label>
+          </div>
+        </div>
+        <div class="form-rij">
+          <label>Brug</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerCijferKommaBrug('beide',this)">
+              <input type="radio" name="cijfer-komma-brug" value="beide" checked>Beide
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferKommaBrug('met',this)">
+              <input type="radio" name="cijfer-komma-brug" value="met">Met brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferKommaBrug('zonder',this)">
+              <input type="radio" name="cijfer-komma-brug" value="zonder">Zonder brug
             </label>
           </div>
         </div>
