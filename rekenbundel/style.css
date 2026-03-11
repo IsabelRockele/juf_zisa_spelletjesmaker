@@ -108,12 +108,12 @@ header .badge {
 }
 
 .sidebar-tabs::-webkit-scrollbar-thumb {
-  background: #ef4d4d;
+  background: #be66b5;
   border-radius: 999px;
 }
 
 .sidebar-tabs::-webkit-scrollbar-thumb:hover {
-  background: #ef4d4d;
+  background: #be66b5;
 }
 
 .sidebar-tab {
@@ -139,7 +139,7 @@ header .badge {
   margin-left:8px;
   padding:2px 8px;
   border:none;
-  background:#ef4d4d;
+  background:#be66b5;
   color:white;
   border-radius:6px;
   cursor:pointer;
@@ -147,7 +147,7 @@ header .badge {
 }
 
 .tabs-scroll-btn:hover{
-  background:#ef4d4d;
+  background:#be66b5;
 }
 /* --- NIEUWE STIJL VOOR DE TABBLADEN --- */
 
