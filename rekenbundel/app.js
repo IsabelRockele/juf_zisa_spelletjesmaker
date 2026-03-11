@@ -982,6 +982,8 @@ const App = (() => {
   let _cijferVermBrug       = 'zonder';    // zonder, E, T, ET, met
   let _cijferDeelType       = 'TE:E';      // TE÷E (uitbreidbaar)
   let _cijferDeelRest       = 'nee';       // nee = zonder rest
+  let _cijferKommaType      = 'Et_plus_Et'; // Et_plus_Et, Et_min_Et, Et_gemengd
+  let _cijferKommaBrug      = 'beide';     // beide, met, zonder
   let _cijferInvulling      = 'ingevuld';
   let _cijferStartpijl      = true;
   let _cijferSchatting      = false;
@@ -994,22 +996,26 @@ const App = (() => {
 
     const isKeer    = waarde === 'vermenigvuldigen';
     const isDeel    = waarde === 'delen';
-    const isPlusMin = !isKeer && !isDeel;
+    const isKomma   = waarde === 'komma';
+    const isPlusMin = !isKeer && !isDeel && !isKomma;
 
     const kaartBereik = document.getElementById('kaart-cijfer-bereik');
     const kaartBrug   = document.getElementById('kaart-cijfer-brug');
     const kaartVerm   = document.getElementById('kaart-cijfer-verm');
     const kaartDeel   = document.getElementById('kaart-cijfer-deel');
+    const kaartKomma  = document.getElementById('kaart-cijfer-komma');
 
     if (kaartBereik) kaartBereik.style.display = isPlusMin ? 'block' : 'none';
     if (kaartBrug)   kaartBrug.style.display   = isPlusMin ? 'block' : 'none';
     if (kaartVerm)   kaartVerm.style.display   = isKeer    ? 'block' : 'none';
     if (kaartDeel)   kaartDeel.style.display   = isDeel    ? 'block' : 'none';
+    if (kaartKomma)  kaartKomma.style.display  = isKomma   ? 'block' : 'none';
 
     const zinInp = document.getElementById('inp-opdrachtzin-cijferen');
     if (zinInp) {
       if (isKeer)       zinInp.value = 'Vermenigvuldig met cijferen.';
       else if (isDeel)  zinInp.value = 'Deel met cijferen.';
+      else if (isKomma) zinInp.value = 'Reken met kommagetallen.';
       else              zinInp.value = 'Reken met cijferen.';
     }
   }
@@ -1090,6 +1096,20 @@ const App = (() => {
     if (el) el.classList.add('geselecteerd');
   }
 
+  function selecteerCijferKommaType(waarde, el) {
+    _cijferKommaType = waarde;
+    document.querySelectorAll('[name="cijfer-komma-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerCijferKommaBrug(waarde, el) {
+    _cijferKommaBrug = waarde;
+    document.querySelectorAll('[name="cijfer-komma-brug"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
   function selecteerCijferDeelType(waarde, el) {
     _cijferDeelType = waarde;
     document.querySelectorAll('[name="cijfer-deel-type"]').forEach(r =>
@@ -1119,6 +1139,8 @@ const App = (() => {
       vermBrug:              _cijferVermBrug,
       deelType:              _cijferDeelType,
       metRest:               _cijferDeelRest === 'ja',
+      kommaType:             _cijferKommaType,
+      kommaBrug:             _cijferKommaBrug,
     });
 
     if (!oefeningen || oefeningen.length === 0) {
@@ -1144,6 +1166,8 @@ const App = (() => {
         vermBrug:              _cijferVermBrug,
         deelType:              _cijferDeelType,
         metRest:               _cijferDeelRest === 'ja',
+        kommaType:             _cijferKommaType,
+        kommaBrug:             _cijferKommaBrug,
         invulling:             _cijferInvulling,
         startpijl:             _cijferStartpijl,
         schatting:             _cijferSchatting,
@@ -1168,6 +1192,7 @@ const App = (() => {
     selecteerCijferBewerking, selecteerCijferBereik, selecteerCijferBrug,
     selecteerCijferVermType, selecteerCijferVermBrug,
     selecteerCijferDeelType, selecteerCijferDeelRest,
+    selecteerCijferKommaType, selecteerCijferKommaBrug,
     toggleCijferTafel, selecteerCijferVermPositie,
     selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
     voegCijferenBlokToe,
