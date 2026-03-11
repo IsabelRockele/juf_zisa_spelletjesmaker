@@ -2061,3 +2061,59 @@ header .badge {
   color: #e74c3c;
   font-weight: bold;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   KOMMASCHEMA (E,t cijferen)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Smalle kommakolom (grijs) */
+.komma-kolom {
+  width: 10px !important;
+  min-width: 10px !important;
+  max-width: 10px !important;
+  background-color: #e0e0e0 !important;
+  border-color: #bbb !important;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+  vertical-align: middle;
+  padding: 0 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Kommakolom header */
+.komma-hdr {
+  background-color: #bbb !important;
+  color: #fff !important;
+}
+
+/* Komma-dot in datarijen */
+.komma-dot {
+  font-size: 14px;
+  font-weight: bold;
+  color: #555;
+}
+
+/* t-kolom header (lichtgeel, iets donkerder dan E) */
+.komma-tien {
+  background-color: #e8b400 !important;
+  color: #fff !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+/* Pijltje boven kommaschema */
+.komma-schema thead {
+  position: relative;
+}
+
+/* Onthoud-rij in kommaschema: lichtgrijs, kleiner */
+.komma-onthoud {
+  height: 18px !important;
+  background-color: #e8e8e8 !important;
+  border-color: #ccc !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
