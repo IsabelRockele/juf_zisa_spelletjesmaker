@@ -187,8 +187,81 @@ const Cijferen = (() => {
     return oefeningen;
   }
 
+  /* ── Kommagetallen E,t ────────────────────────────────────── */
+  function _genKomma(kommaType, kommaBrug, aantalOefeningen) {
+    // g1 en g2 zijn tienden (integers): bijv. 45 = 4,5
+    // brug = of de optelling/aftrekking de komma overschrijdt (tienden ≥ 10)
+    const oefeningen = [], gebruikt = new Set();
+    let pogingen = 0;
+    while (oefeningen.length < aantalOefeningen && pogingen < 5000) {
+      pogingen++;
+      // Genereer twee getallen in tienden: 11-99 (= 1,1 t/m 9,9)
+      const a = _rnd(11, 89);  // eerste getal in tienden
+      const b = _rnd(11, 89);  // tweede getal in tienden
+
+      const isPlus = kommaType === 'Et_plus_Et' ||
+                     (kommaType === 'Et_gemengd' && Math.random() < 0.5);
+      const isMinus = !isPlus;
+
+      let g1t, g2t, rest;
+      if (isPlus) {
+        g1t = a; g2t = b;
+        rest = g1t + g2t;
+        if (rest > 199) continue;  // max 19,9
+      } else {
+        g1t = Math.max(a, b); g2t = Math.min(a, b);
+        rest = g1t - g2t;
+        if (rest < 0) continue;
+      }
+
+      // Brugcheck: brug = tienden-deel overschrijdt 10
+      const g1E = Math.floor(g1t / 10), g1t_ = g1t % 10;
+      const g2E = Math.floor(g2t / 10), g2t_ = g2t % 10;
+      let heeftBrug;
+      if (isPlus) {
+        heeftBrug = (g1t_ + g2t_) >= 10;
+      } else {
+        heeftBrug = g1t_ < g2t_;
+      }
+
+      if (kommaBrug === 'met'    && !heeftBrug) continue;
+      if (kommaBrug === 'zonder' &&  heeftBrug) continue;
+
+      const op = isPlus ? '+' : '\u2212';
+      const sleutel = g1t + op + g2t;
+      if (gebruikt.has(sleutel)) continue;
+      gebruikt.add(sleutel);
+
+      const restE = Math.floor(rest / 10);
+      const restt = rest % 10;
+
+      oefeningen.push({
+        sleutel,
+        isKomma: true,
+        operator: op,
+        // Waarden in tienden (integer)
+        g1t, g2t, rest,
+        // Componenten
+        g1E, g1t_, g2E, g2t_,
+        restE, restt,
+        heeftBrug,
+        // Display strings (met komma)
+        g1Str:   g1E + ',' + g1t_,
+        g2Str:   g2E + ',' + g2t_,
+        restStr: restE + ',' + restt,
+        // Dummy velden voor compatibiliteit
+        g1: g1t, g2: g2t, result: rest,
+        showH: false,
+        H1:'', T1: String(g1E), E1: String(g1t_),
+        H2:'', T2: String(g2E), E2: String(g2t_),
+      });
+    }
+    return oefeningen;
+  }
+
   function genereer({ bewerking, bereik, brug, aantalOefeningen, tafels,
-                      vermType, vermBrug, deelType, metRest }) {
+                      vermType, vermBrug, deelType, metRest,
+                      kommaType, kommaBrug }) {
     bereik = bereik || 100;
     aantalOefeningen = aantalOefeningen || 12;
     const actieveTafels = (tafels && tafels.length) ? tafels : [2, 3, 4, 5];
@@ -198,6 +271,8 @@ const Cijferen = (() => {
         vermBrug  || 'zonder',
         aantalOefeningen
       );
+    if (bewerking === 'komma')
+      return _genKomma(kommaType || 'Et_plus_Et', kommaBrug || 'beide', aantalOefeningen);
     if (bewerking === 'delen')
       return _genDelen(actieveTafels, metRest || false, aantalOefeningen);
     return _genPlusMin(bewerking, bereik, brug || 'beide', aantalOefeningen);
