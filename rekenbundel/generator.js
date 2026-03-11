@@ -104,6 +104,31 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    // Speciale afhandeling voor inzicht en getallenlijn
+    if (blok.bewerking === 'tafels-inzicht') {
+      const nieuweOef = TafelsInzicht.genereer({ ...blok.config, aantalOefeningen: 5 });
+      const bestaand  = new Set(blok.oefeningen.map(o => o.sleutel));
+      for (const oef of nieuweOef) {
+        if (!bestaand.has(oef.sleutel)) { blok.oefeningen.push(oef); return true; }
+      }
+      return false;
+    }
+    if (blok.bewerking === 'tafels-getallenlijn') {
+      const nieuweOef = TafelsGetallenlijn.genereer({
+        modus: blok.config?.modus || 'per-tafel',
+        tafels: blok.config?.tafels || [2],
+        maxUitkomst: blok.config?.maxUitkomst || 30,
+        tafelMax: blok.config?.tafelMax || 5,
+        aantalOefeningen: 5,
+        variant: blok.subtype || 'getekend',
+      });
+      const bestaand = new Set(blok.oefeningen.map(o => o.sleutel));
+      for (const oef of nieuweOef) {
+        if (!bestaand.has(oef.sleutel)) { blok.oefeningen.push(oef); return true; }
+      }
+      return false;
+    }
+
     const isAanvullen   = blok.hulpmiddelen?.includes('aanvullen');
     const isCompenseren = blok.hulpmiddelen?.includes('compenseren');
     const compModule = isCompenseren
