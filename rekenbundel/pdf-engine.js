@@ -815,6 +815,173 @@ doc.setTextColor(30, 30, 30);
 
 
   /* ══════════════════════════════════════════════════════════════
+     KOMMAGETALLEN — PDF functies
+     ══════════════════════════════════════════════════════════════ */
+
+  function _tekenKommaBlok(blok) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+    const startpijl = cfg.startpijl !== false;
+    const aantalKol = (cfg.schatting) ? 3 : 4;
+    const kolB      = CW / aantalKol;
+
+    // Kaarthoogte: zelfde als normaal cijferschema (4 rijen: onthoud+g1+g2+oplossing+res)
+    const c = CIJ_CEL;
+    const kadH = CIJ_KAD_BASIS + (cfg.schatting ? CIJ_SCHAT_H : 0);
+    const rijH  = kadH + 6;
+    const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
+
+    checkRuimte(VOOR_ZIN + rijH + 4);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(30, 30, 30);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += 6;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      checkRuimte(rijH);
+      const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
+      for (let k = 0; k < rijOef.length; k++) {
+        const ox = ML + k * kolB + 2;
+        _tekenKommaKaart(rijOef[k], ox, y, kolB - 4, kadH, ingevuld, startpijl);
+      }
+      y += rijH;
+    }
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
+  function _tekenKommaKaart(oef, ox, oy, kadW, kadH, ingevuld, startpijl) {
+    const c = CIJ_CEL;
+    // Kolombreedte: T=c, E=c, komma=4, t=c
+    const kW = 4;  // kommakolom breedte in mm
+    const schemaB = 3 * c + kW;
+
+    // Kader
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
+
+    // Vraag
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text(oef.g1Str + ' ' + oef.operator + ' ' + oef.g2Str + ' =', ox+4, oy+6.5);
+
+    // Startpijl
+    const schemaX = ox + kadW/2 - schemaB/2;  // gecentreerd
+    const sy = oy + CIJ_VRAAG_H + (startpijl ? CIJ_PIJL_H : 2);
+
+    if (startpijl) {
+      // Pijl boven t-kolom
+      const pijlX = schemaX + 2*c + kW + c/2;
+      doc.setFillColor(255,165,0);
+      doc.setDrawColor(255,165,0);
+      // Staaltje
+      doc.rect(pijlX-1, oy+CIJ_VRAAG_H+1, 2, 4, 'F');
+      // Driehoek
+      doc.triangle(pijlX-3.5, oy+CIJ_VRAAG_H+5, pijlX+3.5, oy+CIJ_VRAAG_H+5, pijlX, oy+CIJ_VRAAG_H+9, 'F');
+    }
+
+    // Operator links van g2-rij
+    // Operator links van de onderste dikke lijn
+doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+doc.text(oef.operator === '−' ? '-' : '+', schemaX - 4, sy + (4 * c) - 2);
+
+    // Helperfuncties cellen
+    const klT = [34, 139, 34];   // groen (T)
+    const klE = [240, 200, 0];   // geel (E)
+    const klK = [180, 180, 180]; // grijs (komma)
+    const klt = [220, 165, 0];   // donkerder geel (t)
+
+    function hdr(x, y2, tekst, bg, fg) {
+      doc.setFillColor(...bg); doc.setDrawColor(...bg); doc.setLineWidth(0.3);
+      doc.rect(x, y2, x===schemaX+2*c ? kW : c, c, 'FD');
+      doc.setFontSize(9); doc.setFont('helvetica','bold');
+      doc.setTextColor(...(fg||[255,255,255]));
+      const breedte = (x === schemaX+2*c) ? kW : c;
+      doc.text(tekst, x+breedte/2, y2+c-2.5, {align:'center'});
+    }
+
+    function cel(x, y2, tekst, breedte, dikBoven) {
+      const b = breedte || c;
+      doc.setFillColor(255,255,255); doc.setDrawColor(180,180,180); doc.setLineWidth(0.35);
+      doc.rect(x, y2, b, c, 'FD');
+      if (dikBoven) { doc.setDrawColor(30,30,30); doc.setLineWidth(0.9); doc.line(x, y2, x+b, y2); }
+      if (tekst !== null && tekst !== undefined && String(tekst) !== '') {
+        doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+        doc.text(String(tekst), x+b/2, y2+c-2.5, {align:'center'});
+      }
+    }
+
+    function kommacel(x, y2, bg) {
+      doc.setFillColor(...(bg||[220,220,220]));
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.35);
+      doc.rect(x, y2, kW, c, 'FD');
+      doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(80,80,80);
+      doc.text(',', x+kW/2, y2+c-2.5, {align:'center'});
+    }
+function kommavakLeeg(x, y2, bg) {
+  doc.setFillColor(...(bg || [220,220,220]));
+  doc.setDrawColor(180,180,180);
+  doc.setLineWidth(0.35);
+  doc.rect(x, y2, kW, c, 'FD');
+}
+    // Header rij
+    hdr(schemaX,          sy, 'T', klT);
+    hdr(schemaX+c,        sy, 'E', klE, [50,50,50]);
+    hdr(schemaX+2*c,      sy, ',', klK, [100,100,100]);
+    hdr(schemaX+2*c+kW,   sy, 't', klt, [50,50,50]);
+
+  // Onthoud-rij: even hoog als de gewone cellen
+const onthoudH = c;
+    function onthoudCel(x, breedte) {
+      doc.setFillColor(230,230,230); doc.setDrawColor(200,200,200); doc.setLineWidth(0.3);
+      doc.rect(x, sy+c, breedte||c, onthoudH, 'FD');
+    }
+    onthoudCel(schemaX,        c);
+    onthoudCel(schemaX+c,      c);
+    onthoudCel(schemaX+2*c,    kW);
+    onthoudCel(schemaX+2*c+kW, c);
+
+    // g1 rij (start na onthoud-rij)
+    const r1y = sy + c + onthoudH;
+    cel(schemaX,          r1y, ingevuld ? (oef.g1E >= 10 ? String(Math.floor(oef.g1E/10)) : '') : null);
+  cel(schemaX+c, r1y, ingevuld ? oef.g1E % 10 : null);
+
+if (ingevuld) {
+  kommacel(schemaX+2*c, r1y);
+} else {
+  kommavakLeeg(schemaX+2*c, r1y, [220,220,220]);
+}
+
+cel(schemaX+2*c+kW, r1y, ingevuld ? oef.g1t_ : null);
+
+    // g2 rij
+    const r2y = r1y + c;
+    cel(schemaX,          r2y, ingevuld ? (oef.g2E >= 10 ? String(Math.floor(oef.g2E/10)) : '') : null);
+    cel(schemaX+c, r2y, ingevuld ? oef.g2E % 10 : null);
+
+if (ingevuld) {
+  kommacel(schemaX+2*c, r2y);
+} else {
+  kommavakLeeg(schemaX+2*c, r2y, [220,220,220]);
+}
+
+cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
+
+    // Oplossingsrij: dikke bovenlijn, 1 lege rij
+    const r3y = r2y + c;
+    cel(schemaX,          r3y, null, c, true);
+    cel(schemaX+c,        r3y, null, c, true);
+   if (ingevuld) {
+  kommacel(schemaX+2*c, r3y, [200,200,200]);
+} else {
+  kommavakLeeg(schemaX+2*c, r3y, [200,200,200]);
+}
+    cel(schemaX+2*c+kW,   r3y, null, c, true);
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════
      STAARTDELING — PDF functies
      ══════════════════════════════════════════════════════════════ */
   const DEEL_CEL   = 10;   // celbreedte/-hoogte in mm
@@ -969,8 +1136,9 @@ doc.setTextColor(30, 30, 30);
   }
 
   function _tekenBlok(blok) {
-    if (blok.bewerking === 'cijferen' && blok.config?.bewerking !== 'delen') { _tekenCijferenBlok(blok); return; }
-    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen') { _tekenDeelBlok(blok); return; }
+    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'komma')  { _tekenKommaBlok(blok); return; }
+    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen')  { _tekenDeelBlok(blok); return; }
+    if (blok.bewerking === 'cijferen') { _tekenCijferenBlok(blok); return; }
     if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
     if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
     if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
