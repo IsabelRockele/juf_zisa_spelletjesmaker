@@ -1187,13 +1187,14 @@ const avX = somX + somTotaalB + 4.5;
     const OEF_GAP = 6;
 
     // Bereken hoogte van één oefening
-    function oefHoogte(oef) {
-      // getallenlijn: bogen (14mm) + lijn (6mm) + formules
-      const boogH    = oef.variant === 'getekend' ? 14 : 0;
-      const lijnH    = 7;
-      const formsH   = oef.variant === 'getekend' ? 22 : 12; // 2 rijen vs 1 rij
-      return boogH + lijnH + formsH + 10; // + padding
-    }
+ function oefHoogte(oef) {
+  if (oef.variant === 'getekend') {
+    // bogen + getallenlijn + zin + 2 formulelijnen
+    return 56;
+  }
+  // voorlopig voor "zelf tekenen" nog compact houden
+  return 28;
+}
 
     checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
 
@@ -1214,144 +1215,255 @@ const avX = somX + somTotaalB + 4.5;
     lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
   }
 
-  function _tekenGetallenlijnOef(oef, oh) {
-    const { groepen, stap, uitkomst, variant } = oef;
-    const max    = uitkomst;
-    const ox     = ML + 2;
-    const oy     = y;
-    const oefW   = CW - 4;
+ function _tekenGetallenlijnOef(oef, oh) {
+  const { groepen, stap, uitkomst, variant, positie } = oef;
+  const max = Math.max(uitkomst, 20);
 
-    // Kader
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(200, 200, 200);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(ox, oy, oefW, oh, 3, 3, 'FD');
+  const ox   = ML + 2;
+  const oy   = y;
+  const oefW = CW - 4;
 
-    const PAD    = 5;
-    const BLAUW  = [74, 144, 217];
-    const ORANJE = [230, 74, 25];
-    const DONKER = [26, 58, 92];
+  // buitenkader
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(200, 200, 200);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(ox, oy, oefW, oh, 3, 3, 'FD');
 
-    // Getallenlijn posities
-    const lijnY    = oy + PAD + (variant === 'getekend' ? 16 : 4);
-    const lijnX1   = ox + PAD;
-    const lijnX2   = ox + oefW - PAD - 6;  // -6 voor pijl
-    const vakjeW   = Math.min(8, (lijnX2 - lijnX1) / (max + 1));
-    const vakjeH   = 6;
+  const PAD          = 5;
+  const KADERBLAUW   = [133, 176, 198];
+  const TEKSTDONKER  = [40, 40, 40];
+  const LIJNGRIJS    = [70, 70, 70];
+  const INVULGRIJS   = [110, 110, 110];
 
-    // Boogjes tekenen (alleen bij 'getekend')
-    if (variant === 'getekend') {
-      const boogTop = oy + PAD;
-      const boogH   = 12;
+  const lijnX1 = ox + PAD;
+  const lijnX2 = ox + oefW - PAD - 10;   // extra ruimte voor pijl
+  const vakjeW = (lijnX2 - lijnX1) / (max + 1);
+  const vakjeH = 6.8;
+  const vakjeY = oy + 12;
+  const asY    = vakjeY + vakjeH + 2.2;
 
-      for (let g = 0; g < groepen; g++) {
-        const xVan  = lijnX1 + g * stap * vakjeW;
-        const xNaar = lijnX1 + (g + 1) * stap * vakjeW;
-        const midX  = (xVan + xNaar) / 2;
-        const boogBodem = boogTop + boogH;
+  function middenVanGetal(n) {
+  return lijnX1 + n * vakjeW + vakjeBinnenW / 2;
+}
 
-        // Boog als kwartellips (via bezier-achtige benadering)
-        doc.setDrawColor(...ORANJE);
-        doc.setLineWidth(0.6);
-        // Teken boog: curve van xVan naar xNaar
-        doc.lines(
-          [
-            [(xNaar - xVan) * 0.3, -boogH * 0.9],
-            [(xNaar - xVan) * 0.4, 0],
-            [(xNaar - xVan) * 0.3, boogH * 0.9],
-          ],
-          xVan, boogBodem, [1, 1], 'S', false
-        );
+  function tekenBoog(x1, x2, yBasis, hoogte) {
+    const stappen = 32;
+    let prevX = x1;
+    let prevY = yBasis;
 
-        // Getal erboven
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
-        doc.setTextColor(...ORANJE);
-        doc.text(String(stap), midX, boogTop + 1, { align: 'center' });
+    doc.setDrawColor(...LIJNGRIJS);
+    doc.setLineWidth(0.45);
 
-        // Kleine streepjes aan begin en einde
-        doc.setDrawColor(...ORANJE);
-        doc.setLineWidth(0.4);
-        doc.line(xVan,  boogBodem - 2, xVan,  boogBodem + 2);
-        doc.line(xNaar, boogBodem - 2, xNaar, boogBodem + 2);
-      }
+    for (let i = 1; i <= stappen; i++) {
+      const t = i / stappen;
+      const x = x1 + (x2 - x1) * t;
+      const y = yBasis - Math.sin(Math.PI * t) * hoogte;
+      doc.line(prevX, prevY, x, y);
+      prevX = x;
+      prevY = y;
+    }
+  }
+
+  // ── Getallenlijn zoals werkboekopbouw ───────────────────
+  const vakjeGap = 1.2;              // kleine opening tussen de vakjes
+const vakjeBinnenW = vakjeW - vakjeGap;
+
+for (let n = 0; n <= max; n++) {
+  const vx = lijnX1 + n * vakjeW;
+
+  doc.setFillColor(255, 255, 255);
+  doc.setDrawColor(...KADERBLAUW);
+  doc.setLineWidth(0.35);
+  doc.roundedRect(vx, vakjeY, vakjeBinnenW, vakjeH, 0.8, 0.8, 'FD');
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(max >= 20 ? 7 : 8);
+  doc.setTextColor(...TEKSTDONKER);
+  doc.text(String(n), vx + vakjeBinnenW / 2, vakjeY + 4.8, { align: 'center' });
+
+  // klein verticaal verbindingsstreepje naar de getallenlijn
+  const middenX = vx + vakjeBinnenW / 2;
+  doc.setDrawColor(...KADERBLAUW);
+  doc.setLineWidth(0.35);
+  doc.line(middenX, vakjeY + vakjeH, middenX, asY);
+}
+
+  // onderlijn + duidelijke pijl
+ doc.setDrawColor(...KADERBLAUW);
+doc.setLineWidth(0.45);
+
+const lijnStartX = lijnX1 + (vakjeW - vakjeGap) / 2;
+const lijnEindeX = lijnX1 + max * vakjeW + (vakjeW - vakjeGap) / 2 + 4;
+
+doc.line(lijnStartX, asY, lijnEindeX, asY);
+
+doc.setFillColor(...KADERBLAUW);
+doc.triangle(
+  lijnEindeX + 2.2, asY,
+  lijnEindeX - 0.8, asY - 1.7,
+  lijnEindeX - 0.8, asY + 1.7,
+  'F'
+);
+
+  // ── Variant met al getekende sprongen ───────────────────
+  if (variant === 'getekend') {
+    const boogBasisY = vakjeY - 0.6;
+    const boogH      = 4.6;
+
+    for (let g = 0; g < groepen; g++) {
+      const startGetal = g * stap;
+      const eindGetal  = (g + 1) * stap;
+
+      const xVan  = middenVanGetal(startGetal);
+      const xNaar = middenVanGetal(eindGetal);
+      const midX  = (xVan + xNaar) / 2;
+
+      tekenBoog(xVan, xNaar, boogBasisY, boogH);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...TEKSTDONKER);
+      doc.text(String(stap), midX, boogBasisY - boogH - 1.1, { align: 'center' });
     }
 
-    // Vakjes tekenen (0 t/m max)
-    doc.setDrawColor(...BLAUW);
-    doc.setLineWidth(0.4);
-    doc.setFillColor(255, 255, 255);
-    for (let n = 0; n <= max; n++) {
-      const vx = lijnX1 + n * vakjeW;
-      doc.rect(vx, lijnY, vakjeW, vakjeH, 'FD');
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(Math.max(5, Math.min(7, vakjeW - 1)));
-      doc.setTextColor(...DONKER);
-      doc.text(String(n), vx + vakjeW / 2, lijnY + vakjeH - 1, { align: 'center' });
-    }
+    // zin: Ik zie ___ sprongen van ___.
+    const zinY = asY + 9;
+    let zx = lijnX1;
 
-    // Pijl rechts van getallenlijn
-    const pijlX = lijnX1 + (max + 1) * vakjeW + 1;
-    const pijlY = lijnY + vakjeH / 2;
-    doc.setDrawColor(...BLAUW);
-    doc.setLineWidth(0.5);
-    doc.line(lijnX1 + (max + 1) * vakjeW, pijlY, pijlX + 3, pijlY);
-    doc.setFillColor(...BLAUW);
-    doc.triangle(pijlX + 4, pijlY, pijlX + 1, pijlY - 1.2, pijlX + 1, pijlY + 1.2, 'F');
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(...TEKSTDONKER);
+    doc.text('Ik zie', zx, zinY);
+    zx += doc.getTextWidth('Ik zie') + 2.2;
 
-    // Formules
-    const formY  = lijnY + vakjeH + 5;
-    const fxBase = ox + PAD;
-    const LS     = 20;  // lijn-lengte
-    const LB     = 25;  // uitkomst-lijn breed
-    const LH     = 10;  // rij-hoogte
-    const BL     = LH - 2;
+    doc.setDrawColor(...INVULGRIJS);
+    doc.setLineWidth(0.25);
+    doc.line(zx, zinY + 0.6, zx + 10, zinY + 0.6);
+    zx += 12;
+
+    doc.text('sprongen van', zx, zinY);
+    zx += doc.getTextWidth('sprongen van') + 2.2;
+
+    doc.line(zx, zinY + 0.6, zx + 10, zinY + 0.6);
+    zx += 11.5;
+
+    doc.text('.', zx, zinY);
+
+    // formules
+    const LS = 9;
+const LB = 12;
+const LH = 10;
+const BL = LH - 2;
+const formY = zinY + 4;
+    const fxBase = lijnX1;
 
     function lijnS(fx, fy) {
-      doc.setDrawColor(100, 100, 100);
+      doc.setDrawColor(...INVULGRIJS);
       doc.setLineWidth(0.25);
       doc.line(fx, fy + BL, fx + LS, fy + BL);
     }
-    function sym(fx, fy, t, kleur) {
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(...kleur);
-      doc.text(t, fx, fy + BL);
-    }
+
     function lijnB(fx, fy) {
-      doc.setDrawColor(100, 100, 100);
+      doc.setDrawColor(...INVULGRIJS);
       doc.setLineWidth(0.25);
       doc.line(fx, fy + BL, fx + LB, fy + BL);
     }
 
-    if (variant === 'getekend') {
-      // Rij 1: ___ + ___ + ... = ___
-      let fx = fxBase;
-      for (let g = 0; g < groepen; g++) {
-        lijnS(fx, formY); fx += LS + 1;
-        if (g < groepen - 1) { sym(fx, formY, '+', ORANJE); doc.setFontSize(10); fx += doc.getTextWidth('+') + 2; }
-      }
-      sym(fx, formY, '=', [50, 50, 50]); doc.setFontSize(10); fx += doc.getTextWidth('=') + 2;
-      lijnB(fx, formY);
-
-      // Rij 2: ___ × ___ = ___
-      let fx2 = fxBase;
-      lijnS(fx2, formY + LH); fx2 += LS + 1;
-      sym(fx2, formY + LH, '×', ORANJE); doc.setFontSize(10); fx2 += doc.getTextWidth('×') + 2;
-      lijnS(fx2, formY + LH); fx2 += LS + 1;
-      sym(fx2, formY + LH, '=', [50, 50, 50]); doc.setFontSize(10); fx2 += doc.getTextWidth('=') + 2;
-      lijnB(fx2, formY + LH);
-
-    } else {
-      // Variant 'zelf': enkel ___ × ___ = ___
-      let fx = fxBase;
-      lijnS(fx, formY); fx += LS + 1;
-      sym(fx, formY, '×', ORANJE); doc.setFontSize(10); fx += doc.getTextWidth('×') + 2;
-      lijnS(fx, formY); fx += LS + 1;
-      sym(fx, formY, '=', [50, 50, 50]); doc.setFontSize(10); fx += doc.getTextWidth('=') + 2;
-      lijnB(fx, formY);
+    function sym(fx, fy, t) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...TEKSTDONKER);
+      doc.text(t, fx, fy + BL);
     }
+
+    // rij 1: ___ + ___ + ___ = ___
+    let fx = fxBase;
+    for (let g = 0; g < groepen; g++) {
+      lijnS(fx, formY);
+      fx += LS + 1.5;
+
+      if (g < groepen - 1) {
+        sym(fx, formY, '+');
+        fx += doc.getTextWidth('+') + 2.2;
+      }
+    }
+    sym(fx, formY, '=');
+    fx += doc.getTextWidth('=') + 2.2;
+    lijnB(fx, formY);
+
+    // rij 2: ___ × ___ = ___
+const tweedeRijY = formY + 10.5;
+
+let fx2 = fxBase;
+lijnS(fx2, tweedeRijY);
+fx2 += LS + 1.5;
+
+sym(fx2, tweedeRijY, '×');
+fx2 += doc.getTextWidth('×') + 2.2;
+
+lijnS(fx2, tweedeRijY);
+fx2 += LS + 1.5;
+
+sym(fx2, tweedeRijY, '=');
+fx2 += doc.getTextWidth('=') + 2.2;
+
+lijnB(fx2, tweedeRijY);
+
+    return;
   }
+
+  // ── Voorlopige eenvoudige versie voor "zelf tekenen" ─────
+  const formY = asY + 8;
+  const LS = 10;
+  const LB = 12;
+  const BL = 6;
+
+  function lijnS(fx, fy) {
+    doc.setDrawColor(...INVULGRIJS);
+    doc.setLineWidth(0.25);
+    doc.line(fx, fy + BL, fx + LS, fy + BL);
+  }
+
+  function lijnB(fx, fy) {
+    doc.setDrawColor(...INVULGRIJS);
+    doc.setLineWidth(0.25);
+    doc.line(fx, fy + BL, fx + LB, fy + BL);
+  }
+
+  function sym(fx, fy, t) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...TEKSTDONKER);
+    doc.text(t, fx, fy + BL);
+  }
+
+  let fx = lijnX1;
+  if (positie === 'achteraan') {
+    lijnS(fx, formY);
+    fx += LS + 1.5;
+    sym(fx, formY, '×');
+    fx += doc.getTextWidth('×') + 2.2;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(String(stap), fx, formY + BL);
+    fx += doc.getTextWidth(String(stap)) + 2.2;
+    sym(fx, formY, '=');
+    fx += doc.getTextWidth('=') + 2.2;
+    lijnB(fx, formY);
+  } else {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.text(String(stap), fx, formY + BL);
+    fx += doc.getTextWidth(String(stap)) + 2.2;
+    sym(fx, formY, '×');
+    fx += doc.getTextWidth('×') + 2.2;
+    lijnS(fx, formY);
+    fx += LS + 1.5;
+    sym(fx, formY, '=');
+    fx += doc.getTextWidth('=') + 2.2;
+    lijnB(fx, formY);
+  }
+}
 
   /* ── Publieke API ────────────────────────────────────────── */
   function genereer(bundelData, titel) {
