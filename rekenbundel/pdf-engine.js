@@ -13,6 +13,7 @@ const PdfEngine = (() => {
   const ZINRUIMTE  = 9;
   const RIJ_GAP    = 3;
   const NABLOK     = 10;
+  const VOOR_ZIN   = 7;  // extra ruimte boven opdrachtzin (na scheidingslijn)
   const MIN_RUIMTE = ZINRUIMTE + RIJHOOGTE + RIJ_GAP + 4;
 
   // Herken-brug: één groot kader per oefening
@@ -419,9 +420,10 @@ const PdfEngine = (() => {
     const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
     checkRuimte(ZINRUIMTE + COMP_RIJ_H + 4);
 
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y);
     y += ZINRUIMTE;
 
@@ -616,7 +618,359 @@ const avX = somX + somTotaalB + 4.5;
     lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
   }
 
+  /* ══════════════════════════════════════════════════════════════
+     CIJFEREN — PDF functies
+     ══════════════════════════════════════════════════════════════ */
+  const CIJ_CEL        = 10;    // breedte/hoogte van 1 cel in mm
+  const CIJ_VRAAG_H    = 10;   // hoogte vraag-zone boven schatting/schema
+  const CIJ_PIJL_H     = 8;    // extra lucht tussen schatting/vraag en schema (pijl)
+  const CIJ_SCHEMA_H   = 5 * CIJ_CEL; // 5 rijen: header+onthoud+g1+g2+oplossing
+  const CIJ_SCHAT_H    = 16;   // hoogte schatting-vak (groter = meer schrijfruimte)
+  const CIJ_KAD_BASIS  = CIJ_VRAAG_H + CIJ_PIJL_H + CIJ_SCHEMA_H + 8;
+
+  function _tekenCijferenBlok(blok) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+    const metPijl  = cfg.startpijl !== false;
+    const metSchat = cfg.schatting === true;
+    const bereik   = cfg.bereik || 100;
+
+    const aantalKol = (bereik >= 1000 || metSchat) ? 3 : 4;
+    const extraH    = metSchat ? CIJ_SCHAT_H : 0;
+    const kadH      = CIJ_KAD_BASIS + extraH;
+    const kolB      = CW / aantalKol;
+    const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
+    const rijH      = kadH + 6;
+
+    const CIJ_NA_ZIN   = 5;  // ruimte tussen opdrachtzin en eerste kaart
+    checkRuimte(VOOR_ZIN + CIJ_NA_ZIN + rijH + 4);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+doc.setTextColor(30, 30, 30);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += CIJ_NA_ZIN;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      checkRuimte(rijH);
+      const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
+      for (let k = 0; k < rijOef.length; k++) {
+        const oef  = rijOef[k];
+        const ox   = ML + k * kolB + 2;
+        const oy   = y;
+        const kadW = kolB - 4;
+        _tekenCijferKaart(oef, ox, oy, kadW, kadH, ingevuld, metPijl, metSchat);
+      }
+      y += rijH;
+    }
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
+  function _tekenCijferKaart(oef, ox, oy, kadW, kadH, ingevuld, metPijl, metSchat) {
+    const showH = oef.showH;
+    const op    = oef.operator;
+    const opTekst = op === '\u2212' ? '-' : op;
+
+    // Buitenste kader
+    doc.setDrawColor(180, 180, 180);
+    doc.setLineWidth(0.4);
+    doc.setFillColor(255, 255, 255);
+    doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
+
+    // Vraag bovenaan
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(`${oef.g1} ${opTekst} ${oef.g2} = ?`, ox + kadW / 2, oy + 6.5, { align: 'center' });
+
+    let schemaY = oy + CIJ_VRAAG_H;
+
+    // Schatting-vak: eigen afgerond vak met lichtgrijs
+    if (metSchat) {
+      const vakX = ox + 3;
+      const vakY = schemaY + 1;
+      const vakW = kadW - 6;
+      const vakH = CIJ_SCHAT_H - 2;
+
+      // Lichtgrijs afgerond vak
+      doc.setFillColor(245, 245, 245);
+      doc.setDrawColor(210, 210, 210);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'FD');
+
+      // "Ik schat:" tekst iets groter
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(60, 60, 60);
+      doc.text('Ik schat:', vakX + 2, vakY + vakH / 2 + 1.5);
+
+      // Schrijflijn rechts van de tekst, ruim genoeg
+      const lijnStart = vakX + 18;
+      const lijnEind  = vakX + vakW - 3;
+      const lijnY     = vakY + vakH - 3;
+      doc.setDrawColor(160, 160, 160);
+      doc.setLineWidth(0.4);
+      doc.line(lijnStart, lijnY, lijnEind, lijnY);
+
+      schemaY += CIJ_SCHAT_H;
+    }
+
+    // Lucht tussen schatting/vraag en schema (pijl-zone)
+    schemaY += CIJ_PIJL_H;
+
+    // Schema horizontaal centreren in kaart
+    const aantalCols = showH ? 3 : 2;
+    const schemaW    = aantalCols * CIJ_CEL;
+    const schemaX    = ox + (kadW - schemaW) / 2 + 4;
+    const opX        = schemaX - 5;
+
+    // Operator naast g2-rij (rij index 3, direct boven dikke lijn)
+    const c = CIJ_CEL;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(30, 30, 30);
+    doc.text(opTekst, opX, schemaY + 3 * c + c / 2 + 3, { align: 'right' });
+
+    _tekenCijferSchema(oef, schemaX, schemaY, showH, ingevuld, metPijl);
+  }
+
+  function _tekenCijferSchema(oef, sx, sy, showH, ingevuld, metPijl) {
+    const c    = CIJ_CEL;
+    const cols = showH ? ['H', 'T', 'E'] : ['T', 'E'];
+
+    const kleur = {
+      H: { bg: [41, 128, 185],  fg: [255,255,255], licht: [169,204,227] },
+      T: { bg: [39, 174, 96],   fg: [255,255,255], licht: [163,228,215] },
+      E: { bg: [241, 196, 15],  fg: [50,50,50],    licht: [249,231,159] },
+    };
+
+    for (let ri = 0; ri < 5; ri++) {
+      for (let ci = 0; ci < cols.length; ci++) {
+        const col = cols[ci];
+        const cx  = sx + ci * c;
+        const cy  = sy + ri * c;
+        const k   = kleur[col];
+
+        doc.setLineWidth(0.5);
+        doc.setDrawColor(120, 120, 120);
+
+        if (ri === 0) {
+          // Header
+          doc.setFillColor(...k.bg);
+          doc.rect(cx, cy, c, c, 'FD');
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(...k.fg);
+          doc.text(col, cx + c / 2, cy + 6.5, { align: 'center' });
+
+          // Startpijl boven E-kolom: klein staaltje + driehoekpunt
+          if (metPijl && col === 'E') {
+            const px      = cx + c / 2;
+            const staart  = 2;    // korter staaltje
+            const breedte = 3.5;
+            const hoogte  = 4;
+            const puntBot = cy;
+            const puntTop = puntBot - hoogte;
+            const staaltTop = puntTop - staart;
+
+            doc.setFillColor(241, 196, 15);
+            doc.setDrawColor(241, 196, 15);
+            // Staaltje
+            doc.rect(px - 1.2, staaltTop, 2.4, staart, 'F');
+            // Pijlpunt
+            doc.triangle(px - breedte, puntTop, px + breedte, puntTop, px, puntBot, 'F');
+          }
+        } else if (ri === 1) {
+          doc.setFillColor(...k.licht);
+          doc.rect(cx, cy, c, c, 'FD');
+        } else if (ri === 4) {
+          doc.setFillColor(255, 255, 255);
+          doc.rect(cx, cy, c, c, 'FD');
+          doc.setLineWidth(1.2);
+          doc.setDrawColor(30, 30, 30);
+          doc.line(cx, cy, cx + c, cy);
+          doc.setLineWidth(0.5);
+          doc.setDrawColor(120, 120, 120);
+          doc.line(cx, cy, cx, cy + c);
+          doc.line(cx + c, cy, cx + c, cy + c);
+          doc.line(cx, cy + c, cx + c, cy + c);
+        } else {
+          doc.setFillColor(253, 253, 253);
+          doc.rect(cx, cy, c, c, 'FD');
+          if (ingevuld) {
+            let txt = '';
+            if (ri === 2) txt = col === 'H' ? (oef.H1 || '') : col === 'T' ? (oef.T1 || '') : (oef.E1 || '');
+            else          txt = col === 'H' ? (oef.H2 || '') : col === 'T' ? (oef.T2 || '') : (oef.E2 || '');
+            if (txt) {
+              doc.setFontSize(12);
+              doc.setFont('helvetica', 'bold');
+              doc.setTextColor(30, 30, 30);
+              doc.text(txt, cx + c / 2, cy + c - 2, { align: 'center' });
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════
+     STAARTDELING — PDF functies
+     ══════════════════════════════════════════════════════════════ */
+  const DEEL_CEL   = 10;   // celbreedte/-hoogte in mm
+  const DEEL_NRIJ  = 8;    // 8 rijen: header + 7 data
+  const DEEL_KAD_H = DEEL_NRIJ * DEEL_CEL + 14;  // hoogte kaart (schema + vraag)
+  const DEEL_KAD_W_BASIS = 3 * DEEL_CEL + 20;    // 2 TE-kolommen + deler-tekst + quotiënt-TE
+
+  function _tekenDeelBlok(blok) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+    const aantalKol = 3;
+    const kolB      = CW / aantalKol;
+    const kadW      = kolB - 4;
+    const kadH      = DEEL_KAD_H;
+    const rijH      = kadH + 6;
+    const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
+
+    checkRuimte(VOOR_ZIN + aantalKol + rijH + 4);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(30, 30, 30);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += 6;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      checkRuimte(rijH);
+      const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
+      for (let k = 0; k < rijOef.length; k++) {
+        const ox  = ML + k * kolB + 2;
+        _tekenDeelKaart(rijOef[k], ox, y, kadW, kadH, ingevuld);
+      }
+      y += rijH;
+    }
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
+  function _tekenDeelKaart(oef, ox, oy, kadW, kadH, ingevuld) {
+    const c = DEEL_CEL;
+
+    // Kader
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+    doc.setFillColor(255,255,255);
+    doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
+
+    // Vraag: deeltal : deler = ___ (R ___)
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    let lx = ox + 4;
+    const vraagTxt = oef.deeltal + ' : ' + oef.deler + ' =';
+    doc.text(vraagTxt, lx, oy + 6.5);
+    lx += doc.getTextWidth(vraagTxt) + 2;
+    doc.setDrawColor(50,50,50); doc.setLineWidth(0.5);
+    doc.line(lx, oy+6.7, lx+12, oy+6.7);
+    if (oef.restE > 0) {
+      lx += 14;
+      doc.text('R', lx, oy+6.5);
+      lx += doc.getTextWidth('R') + 2;
+      doc.line(lx, oy+6.7, lx+10, oy+6.7);
+    }
+
+    const sy = oy + 11;   // schema start Y
+    const sx = ox + 9;    // ruimte voor minteken links
+    const klT = [39,174,96], klE = [241,196,15];
+
+    function cel(x, y2, tekst, bg, fg, dikBoven) {
+      doc.setFillColor(...(bg||[255,255,255]));
+      doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+      doc.rect(x, y2, c, c, 'FD');
+      if (dikBoven) {
+        doc.setDrawColor(30,30,30); doc.setLineWidth(1.4);
+        doc.line(x, y2, x+c, y2);
+      }
+      if (tekst !== null && tekst !== undefined && String(tekst) !== '') {
+        doc.setFontSize(10); doc.setFont('helvetica','bold');
+        doc.setTextColor(...(fg||[30,30,30]));
+        doc.text(String(tekst), x+c/2, y2+c-2.5, {align:'center'});
+      }
+    }
+
+    // Minteken: net BOVEN de dikke lijn (= onderkant vorige rij)
+    function minteken(x, y2) {
+      doc.setFontSize(11); doc.setFont('helvetica','bold');
+      doc.setTextColor(30,30,30);
+      // y2 is TOP van de aftrekrij, minteken staat net erboven
+      doc.text('-', x-5.5, y2 - 1);
+    }
+
+    // Rij 0: header T|E
+    cel(sx,   sy,     'T', klT, [255,255,255]);
+    cel(sx+c, sy,     'E', klE, [50,50,50]);
+
+    // Rij 1: deeltal (ingevuld indien iv)
+    cel(sx,   sy+1*c, ingevuld ? oef.T : null);
+    cel(sx+c, sy+1*c, ingevuld ? oef.E : null);
+
+    // Rij 2: leeg
+    cel(sx,   sy+2*c, null);
+    cel(sx+c, sy+2*c, null);
+
+    // Rij 3: dikke lijn + MIN boven die lijn
+    minteken(sx, sy+3*c);
+    cel(sx,   sy+3*c, null, null, null, true);
+    cel(sx+c, sy+3*c, null, null, null, true);
+
+    // Rij 4: leeg
+    cel(sx,   sy+4*c, null);
+    cel(sx+c, sy+4*c, null);
+
+    // Rij 5: leeg
+    cel(sx,   sy+5*c, null);
+    cel(sx+c, sy+5*c, null);
+
+    // Rij 6: dikke lijn + MIN boven die lijn
+    minteken(sx, sy+6*c);
+    cel(sx,   sy+6*c, null, null, null, true);
+    cel(sx+c, sy+6*c, null, null, null, true);
+
+    // Rij 7: eindrest
+    cel(sx,   sy+7*c, null);
+    cel(sx+c, sy+7*c, null);
+
+    // Verticale dikke lijn rechts van linkerschema (van header t.e.m. rij 7)
+    const vlx = sx + 2*c + 1.5;
+    doc.setDrawColor(30,30,30); doc.setLineWidth(1.4);
+    doc.line(vlx, sy, vlx, sy+8*c);
+
+    // Rechterschema: schrijflijn op hoogte rij 1 (= deeltal), TE-header op rij 2
+    const qx = vlx + 2;
+    const slY = sy + 1*c;  // hoogte van deeltal-rij = schrijflijn-rij
+    const qy  = sy + 2*c;  // TE-header van rechterschema (1 rij onder schrijflijn)
+
+    // Schrijflijn onderaan rij 1 (deler op zelfde hoogte als deeltal)
+    doc.setDrawColor(160,160,160); doc.setLineWidth(0.5);
+    doc.line(qx, slY + c - 1, qx + 2*c, slY + c - 1);
+
+    // Deler op schrijflijn indien ingevuld
+    if (ingevuld) {
+      doc.setFontSize(10); doc.setFont('helvetica','bold');
+      doc.setTextColor(30,30,30);
+      doc.text(String(oef.deler), qx + c, slY + c - 3, { align: 'center' });
+    }
+
+    // Dikke bovenlijn van rechterschema + header T|E
+    doc.setDrawColor(30,30,30); doc.setLineWidth(1.4);
+    doc.line(qx, qy, qx+2*c, qy);
+    cel(qx,   qy,   'T', klT, [255,255,255]);
+    cel(qx+c, qy,   'E', klE, [50,50,50]);
+
+    // 1 datarij leeg
+    cel(qx,   qy+c, null);
+    cel(qx+c, qy+c, null);
+  }
+
   function _tekenBlok(blok) {
+    if (blok.bewerking === 'cijferen' && blok.config?.bewerking !== 'delen') { _tekenCijferenBlok(blok); return; }
+    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen') { _tekenDeelBlok(blok); return; }
     if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
     if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
     if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
@@ -631,9 +985,10 @@ const avX = somX + somTotaalB + 4.5;
     const aantalRijen  = Math.ceil(blok.oefeningen.length / _rijGr);
     checkRuimte(MIN_RUIMTE);
 
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y);
     y += ZINRUIMTE;
 
@@ -665,9 +1020,10 @@ const avX = somX + somTotaalB + 4.5;
     const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
    checkRuimte(ZINRUIMTE + rijH + 4);
 
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y);
     y += ZINRUIMTE;
 
@@ -700,9 +1056,10 @@ const avX = somX + somTotaalB + 4.5;
     const lamp = _getLamp();
     checkRuimte(HRK_MIN);
 
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y);
     y += ZINRUIMTE;
 
@@ -822,9 +1179,10 @@ const avX = somX + somTotaalB + 4.5;
     const rijH          = isBewerkingen ? SBW_TOT_H + 8 : isPunt ? PUNT_RIJ_H : SH_RIJ_H;
 
     checkRuimte(SPL_ZINR + rijH);
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y);
     y += SPL_ZINR;
 
@@ -1198,9 +1556,10 @@ return 36;
 
     checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
 
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y + 5);
     y += ZINR;
 
@@ -1505,9 +1864,10 @@ lijnKort(fx, formY);
     checkRuimte(nodig);
 
     // Opdrachtzin
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y + 5);
     y += ZINR;
 
@@ -1638,9 +1998,10 @@ lijnKort(fx, formY);
     }
 
     checkRuimte(ZINRUIMTE + _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
+    y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(26, 58, 92);
+    doc.setFontSize(12);
+doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y + 5);
     y += ZINRUIMTE;
 
