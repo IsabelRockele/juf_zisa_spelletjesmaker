@@ -1412,14 +1412,18 @@ lijnB(fx2, tweedeRijY);
     return;
   }
 
-  // ── Variant "zelf tekenen" ────────────────────────────────
-// Onder de getallenlijn komt:
-// 4 × 2 = ____________________ = ___
+ // ── Variant "zelf tekenen" ────────────────────────────────
+// Volledig ingevulde maalsom + lange lijn voor herhaalde optelling + korte lijn voor resultaat
 
 const formY = asY + 4;
-const korteLijn = 14;
-const langeLijn = 48;
 const BL = 6.5;
+
+// lange lijn laten meegroeien:
+// tot 5 termen = basislengte
+// vanaf meer dan 5 termen = extra lengte
+const plusSlots = Math.max(groepen, 5);
+const langeLijn = Math.min(72, 28 + plusSlots * 5.5);
+const korteLijn = 14;
 
 function lijnKort(fx, fy) {
   doc.setDrawColor(...INVULGRIJS);
@@ -1446,50 +1450,33 @@ doc.setFont('helvetica', 'bold');
 doc.setFontSize(10);
 doc.setTextColor(...TEKSTDONKER);
 
-if (positie === 'achteraan') {
-  // ___ × 2 = ____________________ = ___
-  lijnKort(fx, formY);
-  fx += korteLijn + 2.5;
+// factoren volledig invullen
+const factor1 = positie === 'achteraan' ? groepen : stap;
+const factor2 = positie === 'achteraan' ? stap : groepen;
 
-  sym(fx, formY, '×');
-  fx += doc.getTextWidth('×') + 2.5;
+// Altijd volledig ingevulde maalsom:
+// bv. 2 × 8 = ______ = ___
+// of 8 × 2 = ______ = ___
 
-  doc.text(String(stap), fx, formY + BL);
-  fx += doc.getTextWidth(String(stap)) + 3;
+doc.text(String(factor1), fx, formY + BL);
+fx += doc.getTextWidth(String(factor1)) + 2.5;
 
-  sym(fx, formY, '=');
-  fx += doc.getTextWidth('=') + 3;
+sym(fx, formY, '×');
+fx += doc.getTextWidth('×') + 2.5;
 
-  lijnLang(fx, formY);
-  fx += langeLijn + 3;
+doc.text(String(factor2), fx, formY + BL);
+fx += doc.getTextWidth(String(factor2)) + 3;
 
-  sym(fx, formY, '=');
-  fx += doc.getTextWidth('=') + 3;
+sym(fx, formY, '=');
+fx += doc.getTextWidth('=') + 3;
 
-  lijnKort(fx, formY);
+lijnLang(fx, formY);
+fx += langeLijn + 3;
 
-} else {
-  // 4 × ___ = ____________________ = ___
-  doc.text(String(stap), fx, formY + BL);
-  fx += doc.getTextWidth(String(stap)) + 2.5;
+sym(fx, formY, '=');
+fx += doc.getTextWidth('=') + 3;
 
-  sym(fx, formY, '×');
-  fx += doc.getTextWidth('×') + 2.5;
-
-  lijnKort(fx, formY);
-  fx += korteLijn + 3;
-
-  sym(fx, formY, '=');
-  fx += doc.getTextWidth('=') + 3;
-
-  lijnLang(fx, formY);
-  fx += langeLijn + 3;
-
-  sym(fx, formY, '=');
-  fx += doc.getTextWidth('=') + 3;
-
-  lijnKort(fx, formY);
-}
+lijnKort(fx, formY);
 }
 
   /* ── Publieke API ────────────────────────────────────────── */
