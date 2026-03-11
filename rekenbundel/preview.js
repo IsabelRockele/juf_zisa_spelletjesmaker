@@ -42,11 +42,13 @@ const Preview = (() => {
     const isTafels        = blok.bewerking === 'tafels';
     const isTafelsInzicht = blok.bewerking === 'tafels-inzicht';
     const isGetallenlijn  = blok.bewerking === 'tafels-getallenlijn';
-    const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && blok.hulpmiddelen?.includes('aanvullen');
-    const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && blok.hulpmiddelen?.includes('compenseren');
-    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
+    const isCijferen      = blok.bewerking === 'cijferen';
+    const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
+    const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('compenseren');
+    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
     const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
     const badgeTxt  = isGetallenlijn  ? '〰️ Getallenlijn' :
+                      isCijferen      ? `🧮 Cijferen` :
                       isTafelsInzicht ? '🔍 Inzicht' :
                       isTafels      ? '✖️ Tafels' :
                       isSplitsingen ? '✂️ Splits' :
@@ -64,6 +66,7 @@ const Preview = (() => {
     else if (heeftAanvullen)                                               gridKlasse = 'aanvullen-grid-3';
     else if (heeftCompenseren)                                             gridKlasse = 'comp-grid';
     else if (heeftHulp)                                                    gridKlasse = 'hulp-grid';
+    else if (isCijferen)                                                   gridKlasse = (blok.config?.bewerking === 'delen' || blok.config?.bereik >= 1000 || blok.config?.schatting) ? 'cijferen-grid-3' : 'cijferen-grid';
     else                                                                   gridKlasse = '';
 
     const div = document.createElement('div');
@@ -91,7 +94,7 @@ const Preview = (() => {
       </div>
       <div class="preview-blok-footer">
         <span class="footer-info">
-          ${blok.oefeningen.length} oefeningen · ${((blok.config?.oefeningstypes) || []).join(', ')}
+          ${blok.oefeningen.length} oefeningen · ${blok.config?.bewerking ? blok.config.bewerking : ((blok.config?.oefeningstypes) || []).join(', ')}
         </span>
         <button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button>
       </div>`;
@@ -124,6 +127,12 @@ const Preview = (() => {
     /* ── Tafels getallenlijn ─────────────────────────────── */
     if (blok.bewerking === 'tafels-getallenlijn') {
       return _getallenlijnHTML(blok.id, oef, idx);
+    }
+
+    /* ── Cijferen ────────────────────────────────────────── */
+    if (blok.bewerking === 'cijferen') {
+      if (blok.config?.bewerking === 'delen') return _deelOefHTML(blok, oef);
+      return _cijferenOefHTML(blok, oef);
     }
 
     /* ── Tafels ──────────────────────────────────────────── */
@@ -823,6 +832,134 @@ const Preview = (() => {
       <div class="gl-formules">${inhoudOnderaan}</div>
     </div>`;
 }
+
+  /* ── Deelschema HTML (staartdeling TE÷E) ─────────────────── */
+  function _deelOefHTML(blok, oef) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+    const T = (ingevuld && oef.T !== undefined) ? esc(String(oef.T)) : '';
+    const E = (ingevuld && oef.E !== undefined) ? esc(String(oef.E)) : '';
+    const delerTxt = esc(String(oef.deler));
+    const metRest = oef.restE > 0;
+    const deeltal = esc(String(oef.deeltal));
+
+    // Vraag bovenaan (zonder R bij zonder rest)
+    const vraagHTML = metRest
+      ? '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt + ' = <span class="deel-lijn-antw"></span> R <span class="deel-lijn-antw"></span></div>'
+      : '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt + ' = <span class="deel-lijn-antw"></span></div>';
+
+    const hdrT = '<td class="deel-hdr deel-T">T</td>';
+    const hdrE = '<td class="deel-hdr deel-E">E</td>';
+    const leeg = '<td class="deel-cel"></td>';
+    const rij1T = ingevuld ? '<td class="deel-cel">' + T + '</td>' : leeg;
+    const rij1E = ingevuld ? '<td class="deel-cel">' + E + '</td>' : leeg;
+
+    // Links schema — 7 datarijen:
+    // rij1: deeltal
+    // rij2: leeg
+    // rij3: eerste aftrek (dikke bovenlijn, min BOVEN die lijn)
+    // rij4: leeg
+    // rij5: leeg
+    // rij6: tweede aftrek (dikke bovenlijn, min BOVEN die lijn)
+    // rij7: eindrest
+    const schema = (
+      '<div class="deel-links">' +
+        '<table class="deel-tabel">' +
+          '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
+          '<tbody>' +
+            '<tr>' + rij1T + rij1E + '</tr>' +
+            '<tr>' + leeg + leeg + '</tr>' +
+            '<tr class="deel-aftrek-rij"><td class="deel-cel deel-min"></td>' + leeg + '</tr>' +
+            '<tr>' + leeg + leeg + '</tr>' +
+            '<tr>' + leeg + leeg + '</tr>' +
+            '<tr class="deel-aftrek-rij"><td class="deel-cel deel-min"></td>' + leeg + '</tr>' +
+            '<tr>' + leeg + leeg + '</tr>' +
+          '</tbody>' +
+        '</table>' +
+      '</div>'
+    );
+
+    // Rechterschema: margin-top = 3 rijen (header+rij1+rij2)
+    // schrijflijn op hoogte rij1 (deeltal) — met deler ingevuld indien nodig
+    const schrijfInhoud = ingevuld ? delerTxt : '';
+    const quotSchema = (
+      '<div class="deel-rechts">' +
+        '<div class="deel-schrijflijn"><span class="deel-deler-val">' + schrijfInhoud + '</span></div>' +
+        '<table class="deel-tabel">' +
+          '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
+          '<tbody><tr>' + leeg + leeg + '</tr></tbody>' +
+        '</table>' +
+      '</div>'
+    );
+
+    return (
+      '<div class="deel-oefening">' +
+        vraagHTML +
+        '<div class="deel-schema-wrap">' +
+          schema +
+          quotSchema +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  /* ── Cijferschema HTML ────────────────────────────────────── */
+  function _cijferenOefHTML(blok, oef) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+    const metPijl  = cfg.startpijl !== false;
+    const metSchat = cfg.schatting === true;
+    const showH    = oef.showH;
+    const op       = oef.operator;
+
+    const vraag = `${oef.g1} ${op} ${oef.g2} = ?`;
+
+    const schattingHTML = metSchat ? `
+      <div class="cij-schatting-vak">
+        <span class="cij-schat-label">Ik schat:</span>
+        <span class="cij-schat-lijn"></span>
+      </div>` : '';
+
+    const pijlHTML = metPijl ? `<div class="cij-startpijl"></div>` : '';
+
+    const hCelH = showH ? `<td class="cij-header cij-honderd">H</td>` : '';
+    const hCelT = `<td class="cij-header cij-tien">T</td>`;
+    const hCelE = `<td class="cij-header cij-een">E${pijlHTML}</td>`;
+
+    const oCelH = showH ? `<td class="cij-onthoud cij-honderd"></td>` : '';
+    const oCelT = `<td class="cij-onthoud cij-tien"></td>`;
+    const oCelE = `<td class="cij-onthoud cij-een"></td>`;
+
+    const g1H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H1) : ''}</td>` : '';
+    const g1T = `<td class="cij-getal">${ingevuld ? esc(oef.T1) : ''}</td>`;
+    const g1E = `<td class="cij-getal">${ingevuld ? esc(oef.E1) : ''}</td>`;
+
+    const g2H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H2) : ''}</td>` : '';
+    const g2T = `<td class="cij-getal">${ingevuld ? esc(oef.T2) : ''}</td>`;
+    const g2E = `<td class="cij-getal">${ingevuld ? esc(oef.E2) : ''}</td>`;
+
+    const opH = showH ? `<td class="cij-oplossing"></td>` : '';
+    const opT = `<td class="cij-oplossing"></td>`;
+    const opE = `<td class="cij-oplossing"></td>`;
+
+    return `
+      <div class="cij-oefening">
+        <div class="cij-vraag">${esc(vraag)}</div>
+        ${schattingHTML}
+        <div class="cij-schema-wrap">
+          <div class="cij-operator">${esc(op)}</div>
+          <table class="cij-schema">
+            <thead><tr>${hCelH}${hCelT}${hCelE}</tr></thead>
+            <tbody>
+              <tr>${oCelH}${oCelT}${oCelE}</tr>
+              <tr>${g1H}${g1T}${g1E}</tr>
+              <tr>${g2H}${g2T}${g2E}</tr>
+              <tr>${opH}${opT}${opE}</tr>
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  }
 
   return { render, toonZinEditor };
 })();
