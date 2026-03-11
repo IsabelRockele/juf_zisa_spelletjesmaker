@@ -91,12 +91,35 @@ header .badge {
 }
 .sidebar-tabs {
   display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
   border-bottom: 2px solid var(--border);
   background: #ffffff;
+  scrollbar-gutter: stable;
 }
+
+.sidebar-tabs::-webkit-scrollbar {
+  height: 14px;
+}
+
+.sidebar-tabs::-webkit-scrollbar-track {
+  background: #eaf2fb;
+}
+
+.sidebar-tabs::-webkit-scrollbar-thumb {
+  background: #ef4d4d;
+  border-radius: 999px;
+}
+
+.sidebar-tabs::-webkit-scrollbar-thumb:hover {
+  background: #ef4d4d;
+}
+
 .sidebar-tab {
-  flex: 1;
-  padding: 12px 8px;
+  flex: 0 0 auto;
+  min-width: 120px;
+  padding: 12px 10px;
   font-size: 12px;
   font-weight: 600;
   text-align: center;
@@ -105,11 +128,26 @@ header .badge {
   border-bottom: 3px solid transparent;
   margin-bottom: -2px;
   transition: all .2s;
+  white-space: nowrap;
 }
 .sidebar-tab.active {
   color: var(--lichtblauw);
   border-bottom-color: var(--lichtblauw);
   background: var(--wit);
+}
+.tabs-scroll-btn{
+  margin-left:8px;
+  padding:2px 8px;
+  border:none;
+  background:#ef4d4d;
+  color:white;
+  border-radius:6px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.tabs-scroll-btn:hover{
+  background:#ef4d4d;
 }
 /* --- NIEUWE STIJL VOOR DE TABBLADEN --- */
 
