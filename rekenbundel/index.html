@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="style.css?v=28">
 </head>
 <body>
 
@@ -27,6 +27,7 @@
   <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
+  <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 </div>
 
     <div class="sidebar-content" id="tab-hoofdrekenen">
@@ -515,7 +516,168 @@
       </button>
 
     </div><!-- /tab-tafels -->
-  </aside>
+      <!-- ── TAFELS INZICHT SIDEBAR CONTENT ───────────────────── -->
+    <div class="sidebar-content" id="tab-tafels-inzicht" style="display:none">
+
+      <div class="sectie-titel">Inzicht in vermenigvuldigen</div>
+
+      <!-- Type oefening -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🖼️</div>Type oefening</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtType('afbeeldingen',this)">
+              <input type="radio" name="inzicht-type" value="afbeeldingen" checked>🐾 Afbeeldingen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerInzichtType('getallenlijn',this)">
+              <input type="radio" name="inzicht-type" value="getallenlijn">〰️ Getallenlijn
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modus -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🎯</div>
+          Welke oefeningen?
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtModus('per-tafel',this)">
+              <input type="radio" name="inzicht-modus" value="per-tafel" checked>Per maaltafel
+            </label>
+            <label class="radio-chip" onclick="App.selecteerInzichtModus('tot-uitkomst',this)">
+              <input type="radio" name="inzicht-modus" value="tot-uitkomst">Tot uitkomst
+            </label>
+          </div>
+        </div>
+
+        <!-- Per maaltafel: welke tafel + tot x10 of x12 -->
+        <div id="inzicht-per-tafel">
+          <div class="form-rij">
+            <label>Welke maaltafel?</label>
+            <div class="radio-groep" id="rg-inzicht-tafel">
+              <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtTafel(2,this)">× 2</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(3,this)">× 3</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(4,this)">× 4</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(5,this)">× 5</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(6,this)">× 6</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(7,this)">× 7</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(8,this)">× 8</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(9,this)">× 9</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafel(10,this)">× 10</label>
+            </div>
+          </div>
+          <div class="form-rij">
+            <label>Tot hoeveel keer?</label>
+            <div class="radio-groep">
+              <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtTafelMax(5,this)">
+                <input type="radio" name="inzicht-tafel-max" value="5" checked>Tot × 5
+              </label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafelMax(7,this)">
+                <input type="radio" name="inzicht-tafel-max" value="7">Tot × 7
+              </label>
+              <label class="radio-chip" onclick="App.selecteerInzichtTafelMax(10,this)">
+                <input type="radio" name="inzicht-tafel-max" value="10">Tot × 10
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tot uitkomst -->
+        <div id="inzicht-tot-uitkomst" style="display:none">
+          <div class="form-rij">
+            <label>Maximale uitkomst</label>
+            <div class="radio-groep">
+              <label class="radio-chip" onclick="App.selecteerInzichtMaxUitkomst(12,this)"><input type="radio" name="inzicht-max-uitkomst" value="12">Tot 12</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtMaxUitkomst(20,this)"><input type="radio" name="inzicht-max-uitkomst" value="20">Tot 20</label>
+              <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtMaxUitkomst(24,this)"><input type="radio" name="inzicht-max-uitkomst" value="24" checked>Tot 24</label>
+              <label class="radio-chip" onclick="App.selecteerInzichtMaxUitkomst(36,this)"><input type="radio" name="inzicht-max-uitkomst" value="36">Tot 36</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emoji kiezen — alleen bij afbeeldingen -->
+      <div class="config-kaart" id="inzicht-emoji-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🎨</div>
+          Afbeelding in de vakjes
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep" id="rg-inzicht-emoji">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtEmoji('afwisselend',this)"><input type="radio" name="inzicht-emoji" value="afwisselend" checked>🔀 Afwisselend</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('auto',this)"><input type="radio" name="inzicht-emoji" value="auto">🚗 Auto</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('ster',this)"><input type="radio" name="inzicht-emoji" value="ster">⭐ Ster</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('bloem',this)"><input type="radio" name="inzicht-emoji" value="bloem">🌸 Bloem</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('bal',this)"><input type="radio" name="inzicht-emoji" value="bal">🏀 Bal</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('vis',this)"><input type="radio" name="inzicht-emoji" value="vis">🐟 Vis</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('hart',this)"><input type="radio" name="inzicht-emoji" value="hart">❤️ Hart</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('appel',this)"><input type="radio" name="inzicht-emoji" value="appel">🍎 Appel</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('vlinder',this)"><input type="radio" name="inzicht-emoji" value="vlinder">🦋 Vlinder</label>
+            <label class="radio-chip" onclick="App.selecteerInzichtEmoji('ijs',this)"><input type="radio" name="inzicht-emoji" value="ijs">🍦 Ijs</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Getallenlijn variant — alleen bij getallenlijn -->
+      <div class="config-kaart" id="inzicht-gl-kaart" style="display:none">
+        <div class="kaart-titel"><div class="icon">✏️</div>Variant getallenlijn</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGlVariant('getekend',this)">
+              <input type="radio" name="gl-variant" value="getekend" checked>Sprongen getekend
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGlVariant('zelf',this)">
+              <input type="radio" name="gl-variant" value="zelf">Zelf tekenen
+            </label>
+          </div>
+        </div>
+        <!-- Positie maaltafelgetal — alleen bij zelf tekenen -->
+        <div id="gl-positie-rij" style="display:none">
+          <div class="form-rij">
+            <label>Positie maaltafelgetal</label>
+            <div class="radio-groep">
+              <label class="radio-chip geselecteerd" onclick="App.selecteerGlPositie('vooraan',this)">
+                <input type="radio" name="gl-positie" value="vooraan" checked>2 × ___ = ___
+              </label>
+              <label class="radio-chip" onclick="App.selecteerGlPositie('achteraan',this)">
+                <input type="radio" name="gl-positie" value="achteraan">___ × 2 = ___
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opdrachtzin & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📝</div>
+          Opdracht & hoeveelheid
+        </div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-inzicht" value="Schrijf de herhaalde optelling en de vermenigvuldiging." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-inzicht">
+            <option value="2">2</option>
+            <option value="4" selected>4</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegInzichtBlokToe()">
+        ＋ Voeg blok toe aan bundel
+      </button>
+
+    </div><!-- /tab-tafels-inzicht -->
+
+</aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
   <section class="preview-zone">
@@ -544,6 +706,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
 <script src="modules/tafels.js?v=1"></script>
+<script src="modules/tafels-inzicht.js?v=1"></script>
+<script src="modules/tafels-getallenlijn.js?v=1"></script>
 <script src="modules/optellen-tot20.js?v=3"></script>
 <script src="modules/optellen-tot100.js?v=3"></script>
 <script src="modules/aftrekken-tot20.js?v=3"></script>
@@ -559,8 +723,8 @@
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
-<script src="preview.js?v=31"></script>
-<script src="pdf-engine.js?v=39"></script>
+<script src="preview.js?v=33"></script>
+<script src="pdf-engine.js?v=41"></script>
 <script src="app.js?v=16"></script>
 
 </body>
