@@ -13,7 +13,7 @@ const PdfEngine = (() => {
   const ZINRUIMTE  = 9;
   const RIJ_GAP    = 3;
   const NABLOK     = 10;
-  const MIN_RUIMTE = ZINRUIMTE + RIJHOOGTE + RIJ_GAP;
+  const MIN_RUIMTE = ZINRUIMTE + RIJHOOGTE + RIJ_GAP + 4;
 
   // Herken-brug: één groot kader per oefening
   // bovenzijde = Zisa, onderzijde = som + invulvakje
@@ -21,7 +21,7 @@ const PdfEngine = (() => {
   const HRK_SOM_H  = 12;   // hoogte som-zone in kader (mm)
   const HRK_KAD_H  = HRK_IMG_H + HRK_SOM_H + 4; // totale kaderhoogte
   const HRK_RIJ_H  = HRK_KAD_H + 8;  // rij hoogte incl. ruimte eronder
-  const HRK_MIN    = ZINRUIMTE + HRK_RIJ_H;
+ const HRK_MIN    = ZINRUIMTE + HRK_RIJ_H + 4;
 
   let doc, y, _lampBase64Cache;
 
@@ -417,7 +417,7 @@ const PdfEngine = (() => {
     const marge       = 3;
 
     const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
-    checkRuimte(ZINRUIMTE + COMP_RIJ_H);
+    checkRuimte(ZINRUIMTE + COMP_RIJ_H + 4);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
@@ -451,44 +451,54 @@ const PdfEngine = (() => {
         const andereGetal = oef.andereGetal;
         const compIsLinks = oef.vraag.replace(' =','').trim().startsWith(String(compGetal));
 
-        const somX    = ox + marge;
+        const somX    = ox + marge + 1;
         const somY    = oy + 8;
 
-        const isAftrekken = oef.vraag.includes(' - ');
-        const teken = isAftrekken ? '  -  ' : '  +  ';
+const isAftrekken = oef.vraag.includes(' - ');
+const teken = isAftrekken ? ' - ' : ' + ';
 
-        const prefix  = compIsLinks ? '' : `${andereGetal}${teken}`;
-        const suffix  = compIsLinks ? `${teken}${andereGetal}  =` : `  =`;
-        const kringTxt = String(compGetal);
+const prefix   = compIsLinks ? '' : `${andereGetal}${teken}`;
+const suffix   = compIsLinks ? `${teken}${andereGetal} =` : ` =`;
+const kringTxt = String(compGetal);
 
-        const prefixB = doc.getTextWidth(prefix);
-        const kringB  = doc.getTextWidth(kringTxt);
+const prefixB = doc.getTextWidth(prefix);
+const kringB  = doc.getTextWidth(kringTxt);
 
-        // Prefix
-        if (prefix) doc.text(prefix, somX, somY);
+// Prefix eerst tekenen
+if (prefix) doc.text(prefix, somX, somY);
 
-        // Kring: cirkel of gewone tekst afhankelijk van variant
-        const kringPad  = zelfKringen ? 0 : 1.5;
-        const kringTxtX = somX + prefixB + kringPad;
-        const kringMidX = somX + prefixB + kringPad + kringB / 2;
-        const kringMidY = somY - 1.5;
-        const kringRx   = Math.max(kringB / 2 + kringPad + 1.5, 6);  // horizontale straal
-        const kringRy   = Math.max(kringRx * 0.55, 3.5);              // ovaal: platter
+// Alleen het getal in de kring
+const kringPadL = zelfKringen ? 0 : 0.8;
+const kringPadR = zelfKringen ? 0 : 0.8;
+const kringBinnenW = kringB + kringPadL + kringPadR;
 
-        if (!zelfKringen) {
-          doc.setDrawColor(44, 62, 80);
-          doc.setLineWidth(0.6);
-          doc.ellipse(kringMidX, kringMidY, kringRx, kringRy, 'S');
-        }
-        doc.text(kringTxt, kringTxtX, somY);
+// Smallere ovaal, enkel rond het getal
+const kringRx = zelfKringen ? 0 : Math.max(kringBinnenW / 2, 4.6);
+const kringRy = zelfKringen ? 0 : 3.2;
 
-        // Suffix
-        const suffixX = somX + prefixB + kringPad + kringB + kringPad;
-        doc.text(suffix, suffixX, somY);
+// Middelpunt en tekstpositie van alleen het kringgetal
+const kringMidX = somX + prefixB + kringRx;
+const kringMidY = somY - 1.5;
+const kringTxtX = kringMidX - (kringB / 2);
 
-        // Antwoordvak
-        const somTotaalB = prefixB + kringPad + kringB + kringPad + doc.getTextWidth(suffix);
-        const avX = somX + somTotaalB + 2;
+// Kring tekenen
+if (!zelfKringen) {
+  doc.setDrawColor(120, 120, 120);
+  doc.setLineWidth(0.35);
+  doc.ellipse(kringMidX, kringMidY, kringRx, kringRy, 'S');
+}
+
+// Getal in de kring
+doc.text(kringTxt, kringTxtX, somY);
+
+// Suffix pas NA de volledige ovaal
+const suffixGap = zelfKringen ? 0 : (compIsLinks ? 0.8 : 2.2);
+const suffixX = somX + prefixB + (kringRx * 2) + suffixGap;
+doc.text(suffix, suffixX, somY);
+
+// Antwoordvak nog iets verder
+const somTotaalB = prefixB + (kringRx * 2) + suffixGap + doc.getTextWidth(suffix);
+const avX = somX + somTotaalB + 4.5;
         const avW = 10, avH = 9;
         const avY = oy + 2;
         doc.setFillColor(255, 255, 255);
@@ -590,9 +600,11 @@ const PdfEngine = (() => {
   }
 
   function _tekenBlok(blok) {
-    if (blok.bewerking === 'herken-brug')  { _tekenHerkenBlok(blok); return; }
-    if (blok.bewerking === 'splitsingen')  { _tekenSplitsingenBlok(blok); return; }
-    if (blok.bewerking === 'tafels')       { _tekenTafelsBlok(blok); return; }
+    if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
+    if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
+    if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
+    if (blok.bewerking === 'tafels-inzicht')  { _tekenInzichtBlok(blok); return; }
+    if (blok.bewerking === 'tafels-getallenlijn') { _tekenGetallenlijnBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
     if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
@@ -634,7 +646,7 @@ const PdfEngine = (() => {
     const kadH        = _aanvulKadH(variant);
     const rijH        = kadH + 5;
     const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
-    checkRuimte(ZINRUIMTE + rijH);
+   checkRuimte(ZINRUIMTE + rijH + 4);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
@@ -1152,6 +1164,178 @@ const PdfEngine = (() => {
     });
   }
 
+  /* ── Getallenlijn blok ───────────────────────────────────── */
+  function _tekenGetallenlijnBlok(blok) {
+    const ZINR    = ZINRUIMTE;
+    const OEF_GAP = 6;
+
+    // Bereken hoogte van één oefening
+    function oefHoogte(oef) {
+      // getallenlijn: bogen (14mm) + lijn (6mm) + formules
+      const boogH    = oef.variant === 'getekend' ? 14 : 0;
+      const lijnH    = 7;
+      const formsH   = oef.variant === 'getekend' ? 22 : 12; // 2 rijen vs 1 rij
+      return boogH + lijnH + formsH + 10; // + padding
+    }
+
+    checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y + 5);
+    y += ZINR;
+
+    blok.oefeningen.forEach((oef, oefIdx) => {
+      const oh = oefHoogte(oef);
+      if (oefIdx > 0) checkRuimte(oh + OEF_GAP);
+      _tekenGetallenlijnOef(oef, oh);
+      y += oh + OEF_GAP;
+    });
+
+    y += NABLOK;
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
+  function _tekenGetallenlijnOef(oef, oh) {
+    const { groepen, stap, uitkomst, variant } = oef;
+    const max    = uitkomst;
+    const ox     = ML + 2;
+    const oy     = y;
+    const oefW   = CW - 4;
+
+    // Kader
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(ox, oy, oefW, oh, 3, 3, 'FD');
+
+    const PAD    = 5;
+    const BLAUW  = [74, 144, 217];
+    const ORANJE = [230, 74, 25];
+    const DONKER = [26, 58, 92];
+
+    // Getallenlijn posities
+    const lijnY    = oy + PAD + (variant === 'getekend' ? 16 : 4);
+    const lijnX1   = ox + PAD;
+    const lijnX2   = ox + oefW - PAD - 6;  // -6 voor pijl
+    const vakjeW   = Math.min(8, (lijnX2 - lijnX1) / (max + 1));
+    const vakjeH   = 6;
+
+    // Boogjes tekenen (alleen bij 'getekend')
+    if (variant === 'getekend') {
+      const boogTop = oy + PAD;
+      const boogH   = 12;
+
+      for (let g = 0; g < groepen; g++) {
+        const xVan  = lijnX1 + g * stap * vakjeW;
+        const xNaar = lijnX1 + (g + 1) * stap * vakjeW;
+        const midX  = (xVan + xNaar) / 2;
+        const boogBodem = boogTop + boogH;
+
+        // Boog als kwartellips (via bezier-achtige benadering)
+        doc.setDrawColor(...ORANJE);
+        doc.setLineWidth(0.6);
+        // Teken boog: curve van xVan naar xNaar
+        doc.lines(
+          [
+            [(xNaar - xVan) * 0.3, -boogH * 0.9],
+            [(xNaar - xVan) * 0.4, 0],
+            [(xNaar - xVan) * 0.3, boogH * 0.9],
+          ],
+          xVan, boogBodem, [1, 1], 'S', false
+        );
+
+        // Getal erboven
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.setTextColor(...ORANJE);
+        doc.text(String(stap), midX, boogTop + 1, { align: 'center' });
+
+        // Kleine streepjes aan begin en einde
+        doc.setDrawColor(...ORANJE);
+        doc.setLineWidth(0.4);
+        doc.line(xVan,  boogBodem - 2, xVan,  boogBodem + 2);
+        doc.line(xNaar, boogBodem - 2, xNaar, boogBodem + 2);
+      }
+    }
+
+    // Vakjes tekenen (0 t/m max)
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.4);
+    doc.setFillColor(255, 255, 255);
+    for (let n = 0; n <= max; n++) {
+      const vx = lijnX1 + n * vakjeW;
+      doc.rect(vx, lijnY, vakjeW, vakjeH, 'FD');
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(Math.max(5, Math.min(7, vakjeW - 1)));
+      doc.setTextColor(...DONKER);
+      doc.text(String(n), vx + vakjeW / 2, lijnY + vakjeH - 1, { align: 'center' });
+    }
+
+    // Pijl rechts van getallenlijn
+    const pijlX = lijnX1 + (max + 1) * vakjeW + 1;
+    const pijlY = lijnY + vakjeH / 2;
+    doc.setDrawColor(...BLAUW);
+    doc.setLineWidth(0.5);
+    doc.line(lijnX1 + (max + 1) * vakjeW, pijlY, pijlX + 3, pijlY);
+    doc.setFillColor(...BLAUW);
+    doc.triangle(pijlX + 4, pijlY, pijlX + 1, pijlY - 1.2, pijlX + 1, pijlY + 1.2, 'F');
+
+    // Formules
+    const formY  = lijnY + vakjeH + 5;
+    const fxBase = ox + PAD;
+    const LS     = 20;  // lijn-lengte
+    const LB     = 25;  // uitkomst-lijn breed
+    const LH     = 10;  // rij-hoogte
+    const BL     = LH - 2;
+
+    function lijnS(fx, fy) {
+      doc.setDrawColor(100, 100, 100);
+      doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL, fx + LS, fy + BL);
+    }
+    function sym(fx, fy, t, kleur) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(...kleur);
+      doc.text(t, fx, fy + BL);
+    }
+    function lijnB(fx, fy) {
+      doc.setDrawColor(100, 100, 100);
+      doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL, fx + LB, fy + BL);
+    }
+
+    if (variant === 'getekend') {
+      // Rij 1: ___ + ___ + ... = ___
+      let fx = fxBase;
+      for (let g = 0; g < groepen; g++) {
+        lijnS(fx, formY); fx += LS + 1;
+        if (g < groepen - 1) { sym(fx, formY, '+', ORANJE); doc.setFontSize(10); fx += doc.getTextWidth('+') + 2; }
+      }
+      sym(fx, formY, '=', [50, 50, 50]); doc.setFontSize(10); fx += doc.getTextWidth('=') + 2;
+      lijnB(fx, formY);
+
+      // Rij 2: ___ × ___ = ___
+      let fx2 = fxBase;
+      lijnS(fx2, formY + LH); fx2 += LS + 1;
+      sym(fx2, formY + LH, '×', ORANJE); doc.setFontSize(10); fx2 += doc.getTextWidth('×') + 2;
+      lijnS(fx2, formY + LH); fx2 += LS + 1;
+      sym(fx2, formY + LH, '=', [50, 50, 50]); doc.setFontSize(10); fx2 += doc.getTextWidth('=') + 2;
+      lijnB(fx2, formY + LH);
+
+    } else {
+      // Variant 'zelf': enkel ___ × ___ = ___
+      let fx = fxBase;
+      lijnS(fx, formY); fx += LS + 1;
+      sym(fx, formY, '×', ORANJE); doc.setFontSize(10); fx += doc.getTextWidth('×') + 2;
+      lijnS(fx, formY); fx += LS + 1;
+      sym(fx, formY, '=', [50, 50, 50]); doc.setFontSize(10); fx += doc.getTextWidth('=') + 2;
+      lijnB(fx, formY);
+    }
+  }
+
   /* ── Publieke API ────────────────────────────────────────── */
   function genereer(bundelData, titel) {
     const { jsPDF } = window.jspdf;
@@ -1246,6 +1430,194 @@ const PdfEngine = (() => {
     });
 
     y += rijCount * (RH + GAP) + NABLOK;
+  }
+
+  /* ── Tafels inzicht blok tekenen ────────────────────────── */
+  /* ── Canvas-helper: emoji → PNG data-URL (gecached) ──────── */
+  const _emojiCache = {};
+  function _emojiPng(emoji, px = 32) {
+    const key = emoji + px;
+    if (_emojiCache[key]) return _emojiCache[key];
+    const canvas = document.createElement('canvas');
+    canvas.width  = px;
+    canvas.height = px;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, px, px);
+    ctx.font = `${Math.round(px * 0.75)}px serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(emoji, px / 2, px / 2);
+    const url = canvas.toDataURL('image/png');
+    _emojiCache[key] = url;
+    return url;
+  }
+
+  function _tekenInzichtBlok(blok) {
+    const MAX_GPER_RIJ = 3;    // max 3 groepjes naast elkaar → linkerkolom smaller → meer ruimte rechts
+    const VAKJE_GAP    = 3;
+    const OEF_PAD_V    = 6;
+    const OEF_PAD_H    = 5;
+    const OEF_GAP      = 8;
+    const LINKS_FRAC   = 0.38; // 38% links zodat rechts meer ademruimte heeft
+    const LIJN_DIKTE   = 0.25;
+    const LIJN_BREED   = 12;
+    const PLUS_GAP     = 3.2;
+    const EQ_GAP       = 4.0;
+    const RIJ_H        = 10;
+    const FS           = 11;
+
+    const oefW    = CW - 4;
+    const linksW  = oefW * LINKS_FRAC;
+    const rechtsW = oefW - linksW - 8;
+
+    // Vaste lijnbreedte: altijd kort, ongeacht het aantal groepen
+    function lijnBreedte(groepen) {
+      return 7;
+    }
+
+    function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
+
+    function vakjeAfm(groepGrootte, vakjeB) {
+      const cols  = emoKols(groepGrootte);
+      const rows  = Math.ceil(groepGrootte / cols);
+      const emoMm = Math.min((vakjeB - 3) / cols, 5.5);
+      return { cols, rows, emoMm, h: Math.max(10, 2.5 + rows * emoMm + (rows - 1) * 1 + 2.5) };
+    }
+
+    function _oefHoogte(oef) {
+      const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
+      const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
+      const { h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
+      const gRijen   = Math.ceil(oef.groepen / MAX_GPER_RIJ);
+      const linksH   = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
+      const rechtsH  = RIJ_H * 3 + 10;
+      return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
+    }
+
+    checkRuimte(ZINRUIMTE + _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y + 5);
+    y += ZINRUIMTE;
+
+    const rechtsX = ML + 2 + linksW + 6;
+
+    blok.oefeningen.forEach((oef, oefIdx) => {
+      const oh = _oefHoogte(oef);
+      if (oefIdx > 0) checkRuimte(oh + OEF_GAP);
+
+      const ox = ML + 2, oy = y;
+
+      // Kader
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(200,200,200);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(ox, oy, oefW, oh, 3, 3, 'FD');
+
+      // Scheidingslijn
+      doc.setDrawColor(225,225,225);
+      doc.setLineWidth(0.2);
+      doc.line(ox + linksW + 2, oy + OEF_PAD_V, ox + linksW + 2, oy + oh - OEF_PAD_V);
+
+      // ── LINKS: groepjes ──────────────────────────────────
+      const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
+      const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
+      const { cols: emoKolsN, rows: emoRijenN, emoMm, h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
+      const gRijen       = Math.ceil(oef.groepen / MAX_GPER_RIJ);
+      const emojiDataUrl = _emojiPng(oef.emoji, 120);
+      const linksH       = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
+      const linksOY      = oy + (oh - linksH) / 2;
+
+      for (let gr = 0; gr < gRijen; gr++) {
+        const groepInRij = Math.min(MAX_GPER_RIJ, oef.groepen - gr * MAX_GPER_RIJ);
+        const totB = groepInRij * vakjeB + (groepInRij - 1) * VAKJE_GAP;
+        let vx     = ox + OEF_PAD_H + (linksW - OEF_PAD_H - totB) / 2;
+        const vy   = linksOY + gr * (vH + VAKJE_GAP);
+
+        for (let g = 0; g < groepInRij; g++) {
+          doc.setFillColor(255, 255, 255);
+          doc.setDrawColor(230,74,25);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(vx, vy, vakjeB, vH, 1.5, 1.5, 'FD');
+          const colW_e = (vakjeB - 2.5) / emoKolsN;
+          const rowH_e = (vH - 2.5) / emoRijenN;
+          for (let b = 0; b < oef.groepGrootte; b++) {
+            const ec = b % emoKolsN, er = Math.floor(b / emoKolsN);
+            const ex = vx + 1.25 + ec * colW_e + (colW_e - emoMm) / 2;
+            const ey = vy + 1.25 + er * rowH_e + (rowH_e - emoMm) / 2;
+            doc.addImage(emojiDataUrl, 'PNG', ex, ey, emoMm, emoMm);
+          }
+          vx += vakjeB + VAKJE_GAP;
+        }
+      }
+
+      // ── RECHTS: invullijntjes ─────────────────────────────
+      const lijnW   = lijnBreedte(oef.groepen);  // dynamisch, altijd passend
+      const rechtsH = RIJ_H * 3 + 10;
+      let fy = oy + (oh - rechtsH) / 2;
+      const BL = RIJ_H - 2;
+
+      function lijn(lx, ly, w) {
+        doc.setDrawColor(100,100,100);
+        doc.setLineWidth(LIJN_DIKTE);
+        doc.line(lx, ly + BL, lx + w, ly + BL);
+      }
+      function bold(tx, ty, t, oranje) {
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        doc.setTextColor(...(oranje ? [230,74,25] : [50,50,50]));
+        doc.text(t, tx, ty + BL);
+      }
+      function italic(tx, ty, t) {
+        doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        doc.setTextColor(70,70,70);
+        doc.text(t, tx, ty + BL - 0.5);
+      }
+
+      // Rij 1: lijn + lijn + ... = lijn(breed)  — altijd 1 rij
+      let lx = rechtsX;
+      for (let g = 0; g < oef.groepen; g++) {
+        lijn(lx, fy, lijnW); lx += lijnW;
+        if (g < oef.groepen - 1) {
+          bold(lx + 0.5, fy, '+', true);
+          doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+          lx += doc.getTextWidth('+') + PLUS_GAP;
+        }
+      }
+      bold(lx + 0.5, fy, '=', false);
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      lx += doc.getTextWidth('=') + 1.5;
+      lijn(lx, fy, LIJN_BREED);
+      fy += RIJ_H + 1;
+
+      // Rij 2: lijn groepen van lijn = lijn
+      let lx2 = rechtsX;
+      lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+      italic(lx2, fy, 'groepen van'); 
+      doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+      lx2 += doc.getTextWidth('groepen van') + 1;
+      lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+      bold(lx2, fy, '=', false);
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      lx2 += doc.getTextWidth('=') + 1.5;
+      lijn(lx2, fy, lijnW);
+      fy += RIJ_H + 1;
+
+      // Rij 3: lijn × lijn = lijn
+      let lx3 = rechtsX;
+      lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+      bold(lx3, fy, '×', true);
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      lx3 += doc.getTextWidth('×') + 1;
+      lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+      bold(lx3, fy, '=', false);
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      lx3 += doc.getTextWidth('=') + 1.5;
+      lijn(lx3, fy, lijnW);
+
+      y += oh + OEF_GAP;
+    });
+    y += NABLOK;
   }
 
   return { genereer };
