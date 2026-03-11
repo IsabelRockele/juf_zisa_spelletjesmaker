@@ -16,9 +16,12 @@
   <div class="logo">🧮 Reken<span>bundel</span></div>
   <div class="subtitle">— jufzisa.be</div>
 
+<button id="helpBtn" class="help-knop">❓ Uitleg</button>
+
   <div class="spacer"></div>
 
   <div class="badge">BETA</div>
+
 
 </header>
 
@@ -733,5 +736,51 @@
 <script src="pdf-engine.js?v=41"></script>
 <script src="app.js?v=16"></script>
 
+<div id="helpModal" class="help-modal">
+
+  <div class="help-content">
+
+    <h2>Hoe werkt de rekenbundel?</h2>
+
+    <p><b>1. Kies links een soort oefening.</b><br>
+    Klik op een tabblad in de keuzelijst om oefeningen te maken.</p>
+
+    <p><b>2. Titel en opdrachtzin aanpassen.</b><br>
+    Dit kan:
+    <br>• links in de keuzelijst
+    <br>• of in de preview via het potloodje.</p>
+
+    <p><b>3. Opslaan.</b><br>
+    Heb je gewijzigd in preview? Klik dan op de groene ✔ om de wijziging op te slaan.</p>
+
+    <p><b>4. Oefeningen toevoegen.</b><br>
+    Klik op <b>+ oefening</b> in de preview.</p>
+
+    <p><b>5. Oefeningen verwijderen.</b><br>
+    Klik op het rode <b>X</b> naast een oefening.</p>
+
+    <p><b>6. Klaar?</b><br>
+    Download je werkblad als PDF.</p>
+
+    <button id="closeHelp" class="sluit-knop">Sluiten</button>
+
+  </div>
+
+</div>
+<script>
+
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeHelp = document.getElementById("closeHelp");
+
+helpBtn.onclick = () => {
+  helpModal.style.display = "flex";
+}
+
+closeHelp.onclick = () => {
+  helpModal.style.display = "none";
+}
+
+</script>
 </body>
 </html>
