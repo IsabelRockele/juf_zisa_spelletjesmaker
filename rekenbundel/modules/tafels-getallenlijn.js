@@ -14,12 +14,13 @@ const TafelsGetallenlijn = (() => {
     const pool = [];
 
     if (modus === 'per-tafel') {
-      for (const t of tafelsLijst) {
-        for (let m = 1; m <= Math.min(tafelMax, 10); m++) {
-          pool.push({ groepen: m, stap: t });
-        }
-      }
-    } else {
+  for (const t of tafelsLijst) {
+    const maxGroepen = Math.min(tafelMax, 10, Math.floor(maxUitkomst / t));
+    for (let m = 1; m <= maxGroepen; m++) {
+      pool.push({ groepen: m, stap: t });
+    }
+  }
+} else {
       for (let a = 1; a <= maxUitkomst; a++) {
         for (let b = 2; b <= maxUitkomst; b++) {
           if (a * b <= maxUitkomst && a >= 1 && b >= 2) {
