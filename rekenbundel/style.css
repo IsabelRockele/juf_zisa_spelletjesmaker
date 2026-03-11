@@ -207,6 +207,22 @@ header .badge {
   border-bottom-color: #4A148C !important;
   font-weight: 800;
 }
+.tab-cijferen {
+  background: #f4e8fb;
+  color: #1A3A5C;
+}
+
+.tab-cijferen:hover {
+  background: #ead7f6;
+  color: #fcfcf8;
+  font-weight: 800;
+}
+
+.tab-cijferen.active {
+  background: #8e44ad;
+  color: #ffffff;
+  border-bottom-color: #8e44ad;
+}
 .sidebar-content { flex: 1; overflow-y: auto; padding: 20px; }
 
 /* ── BUNDEL INFO ───────────────────────────────────────────── */
@@ -1677,4 +1693,371 @@ header .badge {
   padding:8px 16px;
   border-radius:8px;
   cursor:pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CIJFEREN — preview stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+.cijferen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 18px;
+}
+
+.cijferen-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px 18px;
+}
+
+.cij-oefening {
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 8px 10px 10px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.cij-vraag {
+  font-size: 14px;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+/* Schatting: eigen afgerond grijs vak */
+.cij-schatting-vak {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 6px 8px 5px 8px;
+  box-sizing: border-box;
+  margin-bottom: 2px;
+}
+.cij-schat-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  white-space: nowrap;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.cij-schat-lijn {
+  flex: 1;
+  border-bottom: 1.5px solid #aaa;
+  display: inline-block;
+  min-width: 40px;
+  margin-bottom: 1px;
+}
+
+.cij-schema-wrap {
+  position: relative;
+  margin-left: 26px;
+  margin-top: 18px;   /* ruimte voor de pijl die boven de header uitsteekt */
+}
+
+/* Operator naast de g2-rij (direct boven de dikke oplossings-lijn).
+   Rij 0=header(34) + rij1=onthoud(34) + rij2=g1(34) = 102px, dan midden g2-rij = +17px */
+.cij-operator {
+  position: absolute;
+  left: -22px;
+  font-size: 18px;
+  font-weight: bold;
+  top: calc(3 * 34px + 17px);
+  transform: translateY(-50%);
+}
+
+.cij-schema {
+  border-collapse: collapse;
+}
+
+.cij-schema td {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #999;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  vertical-align: bottom;
+  padding-bottom: 3px;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.cij-header {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  vertical-align: middle !important;
+  padding-bottom: 0 !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.cij-honderd { background-color: #2980b9; }
+.cij-tien    { background-color: #27ae60; }
+.cij-een     { background-color: #f1c40f; color: #333 !important; }
+
+.cij-onthoud { vertical-align: middle !important; padding-bottom: 0 !important; }
+.cij-onthoud.cij-honderd { background-color: #a9cce3; }
+.cij-onthoud.cij-tien    { background-color: #a3e4d7; }
+.cij-onthoud.cij-een     { background-color: #f9e79f; }
+
+.cij-getal    { background-color: #fdfdfd; }
+.cij-oplossing {
+  background-color: #fff;
+  border-top: 3px solid #000 !important;
+}
+
+/* ── Startpijl: driehoek + kort staaltje ── */
+.cij-startpijl {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+
+/* staaltje boven de punt — kort */
+.cij-startpijl::before {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 5px;
+  background-color: #f1c40f;
+  border-radius: 1px 1px 0 0;
+}
+
+/* pijlpunt (driehoek naar beneden) */
+.cij-startpijl::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 9px solid #f1c40f;
+}
+
+@media (max-width: 900px) {
+  .cijferen-grid   { grid-template-columns: repeat(3, 1fr); }
+  .cijferen-grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* Deler-cel: geen border, tekst rechts van header */
+.deel-deler-cel {
+  border: none !important;
+  background: transparent !important;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  padding-left: 6px;
+  vertical-align: middle;
+  width: auto !important;
+  white-space: nowrap;
+}
+
+.deel-hdr {
+  color: #fff;
+  font-weight: bold;
+  vertical-align: middle !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.deel-T { background-color: #27ae60; }
+.deel-E { background-color: #f1c40f; color: #333 !important; }
+
+.deel-cel {
+  background-color: #fdfdfd;
+}
+.deel-leeg {
+  background-color: #fdfdfd;
+}
+
+/* Aftrek-rijen: minteken links, dunne bovenlijn */
+.deel-aftrek-rij td {
+  border-top: 2px solid #333 !important;
+}
+.deel-aftrek {
+  position: relative;
+}
+.deel-aftrek::before {
+  content: '−';
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Quotiënt-cellen rood */
+.deel-quot {
+  color: #e74c3c !important;
+  font-size: 15px;
+}
+
+/* Quotiënt-tabel: plakt aan de onderkant van deel-rechts */
+.deel-quot-tabel {
+  margin-left: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STAARTDELING SCHEMA
+   ══════════════════════════════════════════════════════════════ */
+
+.deel-oefening {
+  border: 1.5px solid #ccc;
+  border-radius: 10px;
+  padding: 10px 12px 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.deel-vraag {
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* Schrijflijnen in de vraag (voor deler en antwoord) */
+.deel-lijn-deler,
+.deel-lijn-antw {
+  display: inline-block;
+  border-bottom: 2px solid #333;
+  min-width: 36px;
+  vertical-align: bottom;
+}
+
+/* Schema-wrap: links + rechts naast elkaar, geen gap */
+.deel-schema-wrap {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  position: relative;
+}
+
+/* Linkerschema */
+.deel-links {
+  position: relative;
+}
+
+/* Verticale dikke lijn rechts van linkerschema */
+.deel-links::after {
+  content: '';
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background-color: #222;
+  z-index: 2;
+}
+
+/* Rechterschema: margin-top = 1 rij (na header only)
+   Schrijflijn staat op hoogte van rij 1 = deeltal, zodat deler naast deeltal geschreven wordt */
+.deel-rechts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: calc(1 * 34px);
+  margin-left: 2px;
+}
+
+/* Schrijflijn = 1 cel hoog, lijn onderaan, deler-waarde rechts uitlijnen */
+.deel-schrijflijn {
+  width: calc(2 * 34px);
+  height: 34px;
+  border-bottom: 1.5px solid #999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+  padding-right: 4px;
+  box-sizing: border-box;
+}
+
+.deel-deler-val {
+  font-size: 14px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Gedeelde tabelstijl */
+.deel-tabel {
+  border-collapse: collapse;
+}
+
+.deel-tabel td {
+  width: 34px;
+  height: 34px;
+  border: 2px solid #bbb;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  vertical-align: middle;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+/* Gekleurde headers */
+.deel-hdr {
+  color: #fff;
+  font-weight: bold;
+  vertical-align: middle !important;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.deel-T { background-color: #27ae60 !important; }
+.deel-E { background-color: #f1c40f !important; color: #333 !important; }
+
+/* Gewone invulcellen */
+.deel-cel {
+  background-color: #fff;
+}
+
+/* Aftrekrijen: dikke bovenlijn */
+.deel-aftrek-rij td {
+  border-top: 3px solid #222 !important;
+}
+
+/* Minteken: verschijnt net BOVEN de dikke lijn van de aftrekrij */
+.deel-min {
+  position: relative;
+}
+.deel-min::before {
+  content: '−';
+  position: absolute;
+  left: -15px;
+  top: -10px;   /* boven de dikke bovenlijn */
+  font-size: 15px;
+  font-weight: bold;
+  color: #222;
+}
+
+/* Quotiëntcellen rood */
+.deel-rechts .deel-cel {
+  color: #e74c3c;
+  font-weight: bold;
 }
