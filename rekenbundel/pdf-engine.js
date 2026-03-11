@@ -1136,49 +1136,58 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   }
 
   function _tekenBlok(blok) {
-    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'komma')  { _tekenKommaBlok(blok); return; }
-    if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen')  { _tekenDeelBlok(blok); return; }
-    if (blok.bewerking === 'cijferen') { _tekenCijferenBlok(blok); return; }
-    if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
-    if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
-    if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
-    if (blok.bewerking === 'tafels-inzicht')  { _tekenInzichtBlok(blok); return; }
-    if (blok.bewerking === 'tafels-getallenlijn') { _tekenGetallenlijnBlok(blok); return; }
-    if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
-    if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
+  if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'komma')  { _tekenKommaBlok(blok); return; }
+  if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen')  { _tekenDeelBlok(blok); return; }
+  if (blok.bewerking === 'cijferen') { _tekenCijferenBlok(blok); return; }
+  if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
+  if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
+  if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
+  if (blok.bewerking === 'tafels-inzicht')  { _tekenInzichtBlok(blok); return; }
+  if (blok.bewerking === 'tafels-getallenlijn') { _tekenGetallenlijnBlok(blok); return; }
+  if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
+  if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
-    const isTot1000    = blok.niveau >= 1000;
-    const _kolommen    = isTot1000 ? 3 : KOLOMMEN;
-    const _rijGr       = (blok.hulpmiddelen?.includes('splitsbeen') || blok.hulpmiddelen?.includes('schrijflijnen')) ? 2 : _kolommen;
-    const aantalRijen  = Math.ceil(blok.oefeningen.length / _rijGr);
-    checkRuimte(MIN_RUIMTE);
+  const isTot1000 = blok.niveau >= 1000;
+  const _kolommen = isTot1000 ? 3 : KOLOMMEN;
 
-    y += VOOR_ZIN;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
-    doc.text(blok.opdrachtzin, ML, y);
-    y += ZINRUIMTE;
+  const heeftSplits = blok.hulpmiddelen?.includes('splitsbeen');
+  const heeftLijnen = blok.hulpmiddelen?.includes('schrijflijnen');
+  const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
+  const heeftHulp = heeftSplits || heeftLijnen;
 
-    const heeftSplits  = blok.hulpmiddelen?.includes('splitsbeen');
-    const heeftLijnen  = blok.hulpmiddelen?.includes('schrijflijnen');
-    const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
-    const heeftHulp    = heeftSplits || heeftLijnen;
-    const rijGrootte   = heeftHulp ? 2 : _kolommen;
-    const rijH         = heeftHulp ? (_hulpKadH(schrijflijnenAantal) + 6) : (RIJHOOGTE + RIJ_GAP);
+  const rijGrootte = heeftHulp ? 2 : _kolommen;
+  const aantalRijen = Math.ceil(blok.oefeningen.length / rijGrootte);
+  const rijH = heeftHulp ? (_hulpKadH(schrijflijnenAantal) + 6) : (RIJHOOGTE + RIJ_GAP);
 
-    for (let rij = 0; rij < aantalRijen; rij++) {
-      if (rij > 0) checkRuimte(rijH);
-      const rijOef = blok.oefeningen.slice(rij * rijGrootte, (rij + 1) * rijGrootte);
-      if (heeftHulp) {
-        _tekenHulpRij(rijOef, heeftSplits, heeftLijnen, blok.bewerking, blok.splitspositie || 'aftrekker', blok.schrijflijnenAantal || 2);
-      } else {
-        _tekenRij(rijOef, _kolommen);
-      }
+  checkRuimte(VOOR_ZIN + ZINRUIMTE + rijH + 4);
+
+  y += VOOR_ZIN;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(26, 58, 92);
+  doc.text(blok.opdrachtzin, ML, y);
+  y += ZINRUIMTE;
+
+  for (let rij = 0; rij < aantalRijen; rij++) {
+    if (rij > 0) checkRuimte(rijH);
+    const rijOef = blok.oefeningen.slice(rij * rijGrootte, (rij + 1) * rijGrootte);
+    if (heeftHulp) {
+      _tekenHulpRij(
+        rijOef,
+        heeftSplits,
+        heeftLijnen,
+        blok.bewerking,
+        blok.splitspositie || 'aftrekker',
+        schrijflijnenAantal
+      );
+    } else {
+      _tekenRij(rijOef, _kolommen);
     }
-    y += NABLOK;
-    lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
   }
+
+  y += NABLOK;
+  lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
+}
 
   function _tekenAanvullenBlok(blok) {
     const variant     = blok.aanvullenVariant || 'zonder-schema';
