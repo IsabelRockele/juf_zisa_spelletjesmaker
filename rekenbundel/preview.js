@@ -132,6 +132,7 @@ const Preview = (() => {
     /* ── Cijferen ────────────────────────────────────────── */
     if (blok.bewerking === 'cijferen') {
       if (blok.config?.bewerking === 'delen') return _deelOefHTML(blok, oef);
+      if (blok.config?.bewerking === 'komma') return _kommaOefHTML(blok, oef);
       return _cijferenOefHTML(blok, oef);
     }
 
@@ -832,6 +833,63 @@ const Preview = (() => {
       <div class="gl-formules">${inhoudOnderaan}</div>
     </div>`;
 }
+
+  /* ── Kommaschema HTML (E,t cijferen) ───────────────────────── */
+  function _kommaOefHTML(blok, oef) {
+    const cfg      = blok.config || {};
+    const ingevuld = cfg.invulling === 'ingevuld';
+
+    const g1E = ingevuld ? esc(String(oef.g1E))  : '';
+    const g1t = ingevuld ? esc(String(oef.g1t_)) : '';
+    const g2E = ingevuld ? esc(String(oef.g2E))  : '';
+    const g2t = ingevuld ? esc(String(oef.g2t_)) : '';
+
+    const op     = esc(oef.operator);
+    const g1Str  = esc(oef.g1Str);
+    const g2Str  = esc(oef.g2Str);
+    const startpijl = cfg.startpijl !== false;
+
+    // Schema kolommen: T(groen) | E(geel) | komma(grijs smal) | t(lichtgeel)
+    const hdrT    = '<td class="cij-hdr cij-tien">T</td>';
+    const hdrE    = '<td class="cij-hdr cij-een">E</td>';
+    const hdrKomma= '<td class="komma-kolom komma-hdr">,</td>';
+    const hdrT2   = '<td class="cij-hdr komma-tien">t</td>';
+    const leeg    = '<td class="cij-getal"></td>';
+    const leegK   = '<td class="komma-kolom"></td>';
+
+    function rij(tVal, eVal, tachtVal) {
+      return '<tr>' +
+        '<td class="cij-getal">' + tVal + '</td>' +
+        '<td class="cij-getal">' + eVal + '</td>' +
+        '<td class="komma-kolom komma-dot">,</td>' +
+        '<td class="cij-getal">' + tachtVal + '</td>' +
+      '</tr>';
+    }
+
+    const pijlHTML = startpijl
+      ? '<div class="cij-startpijl"></div>'
+      : '';
+
+    return (
+      '<div class="cij-oefening">' +
+        '<div class="cij-vraag">' + g1Str + ' ' + op + ' ' + g2Str + ' =</div>' +
+        '<div class="cij-schema-wrap">' +
+          (oef.operator === '+' || oef.operator === '−'
+            ? '<span class="cij-operator">' + op + '</span>' : '') +
+          pijlHTML +
+          '<table class="cij-schema komma-schema">' +
+            '<thead><tr>' + hdrT + hdrE + hdrKomma + hdrT2 + '</tr></thead>' +
+            '<tbody>' +
+              '<tr><td class="komma-onthoud"></td><td class="komma-onthoud"></td><td class="komma-onthoud komma-kolom"></td><td class="komma-onthoud"></td></tr>' +
+              rij('', g1E, g1t) +
+              rij('', g2E, g2t) +
+              '<tr><td class="cij-oplossing" colspan="4"></td></tr>' +
+            '</tbody>' +
+          '</table>' +
+        '</div>' +
+      '</div>'
+    );
+  }
 
   /* ── Deelschema HTML (staartdeling TE÷E) ─────────────────── */
   function _deelOefHTML(blok, oef) {
