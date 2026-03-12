@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juf Zisa - Bundel Maker Pro</title>
     <link rel="stylesheet" href="style.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -70,10 +71,11 @@
             <button id="addSectieBtn" class="primary-btn">Sectie Toevoegen +</button>
         </div>
 
-        <div class="control-group">
-            <button onclick="window.print()" class="print-btn">🖨️ Afdrukken / PDF</button>
-            <button onclick="location.reload()" class="clear-btn">Alles wissen</button>
-        </div>
+       <div class="control-group action-group">
+    <button onclick="window.print()" class="print-btn">🖨️ Rechtstreeks afdrukken</button>
+    <button onclick="downloadAlsPdf()" class="download-btn">📄 Downloaden als PDF</button>
+    <button onclick="location.reload()" class="clear-btn">Alles wissen</button>
+</div>
     </aside>
 
     <main id="preview">
@@ -87,6 +89,18 @@
         </div>
     </main>
 
-    <script src="script.js"></script>
+    <div id="pdf-loading" class="pdf-loading hidden">
+    <div class="pdf-loading-box">
+        <div class="pdf-loading-title">PDF wordt gemaakt...</div>
+        <div class="pdf-loading-text">Even wachten, je download start zo meteen.</div>
+        <div class="pdf-loading-bar">
+            <div class="pdf-loading-fill"></div>
+        </div>
+    </div>
+</div>
+
+    <script src="pdf-engine.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
