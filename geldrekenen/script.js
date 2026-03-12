@@ -12,21 +12,22 @@ const moneyConfig = [
 
 const winkelData = {
     supermarkt: [
-        { naam: "Appel", prijs: 0.40, img: "appel.png" }, { naam: "Banaan", prijs: 0.60, img: "banaan.png" },
-        { naam: "Melk", prijs: 1.20, img: "melk.png" }, { naam: "Brood", prijs: 2.30, img: "brood.png" },
-        { naam: "Kaas", prijs: 4.50, img: "kaas.png" }, { naam: "Eieren", prijs: 3.10, img: "eieren.png" },
-        { naam: "Pasta", prijs: 1.15, img: "pasta.png" }, { naam: "Saus", prijs: 1.95, img: "saus.png" }
+        /* Pas hier de 'scale' aan voor grootte en 'moveY' om te laten zakken (positief getal is omlaag) */
+        { naam: "Zak appelen", prijs: 2.50, img: "appelen.png", scale: 1.2 }, 
+        { naam: "Eieren", prijs: 3.20, img: "eieren.png", scale: 1.3, moveY: 8 }, // moveY toegevoegd om te laten zakken
+        { naam: "Melk", prijs: 1.45, img: "melk.png", scale: 1.1 }, 
+        { naam: "Pasta", prijs: 0.95, img: "pasta.png", scale: 1.0 }, 
+        { naam: "Pot saus", prijs: 1.80, img: "potsaus.png", scale: 0.9 }, 
+        { naam: "Bananen", prijs: 1.10, img: "trosbananen.png", scale: 0.9 }, 
+        { naam: "Keukenrol", prijs: 3.00, img: "keukenrol.png", scale: 1.2 },
+        { naam: "Afwasmiddel", prijs: 2.00, img: "afwasmiddel.png", scale: 1.2 },
+        { naam: "Choco", prijs: 2.80, img: "choco.png", scale: 1.2 },
+        { naam: "Koekjes", prijs: 1.50, img: "koekjes.png", scale: 0.9 },
+        { naam: "Sap", prijs: 2.10, img: "sap.png", scale: 1.0 },
+        { naam: "Kaas", prijs: 4.20, img: "kaas.png", scale: 1.1 }
     ],
-    speelgoed: [
-        { naam: "Bal", prijs: 4.00, img: "bal.png" }, { naam: "Auto", prijs: 2.50, img: "auto.png" },
-        { naam: "Pop", prijs: 15.00, img: "pop.png" }, { naam: "Puzzel", prijs: 8.00, img: "puzzel.png" },
-        { naam: "Beer", prijs: 12.00, img: "beer.png" }, { naam: "Blokken", prijs: 19.95, img: "blokken.png" }
-    ],
-    bakker: [
-        { naam: "Croissant", prijs: 1.10, img: "croissant.png" }, { naam: "Taartje", prijs: 3.50, img: "taart.png" },
-        { naam: "Pistolet", prijs: 0.45, img: "pistolet.png" }, { naam: "Eclair", prijs: 2.20, img: "eclair.png" },
-        { naam: "Stokbrood", prijs: 1.80, img: "stokbrood.png" }, { naam: "Donut", prijs: 1.25, img: "donut.png" }
-    ]
+    bakker: [],
+    speelgoed: []
 };
 
 let gebruikteBedragen = new Set();
@@ -43,11 +44,17 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     const container = document.getElementById('secties-container');
     const type = activeTab === 'vaardigheden' ? document.getElementById('type-vaardigheden').value : document.getElementById('type-winkel').value;
     const aantal = parseInt(document.getElementById('aantalOefeningen').value);
+    const centen = document.getElementById('checkCenten').checked;
+    const winkelType = document.getElementById('winkelSelect').value;
     
     let titel = "Oefening: Tel het geld.";
-    if(type === 'twee_manieren') titel = "Oefening: Omkring het bedrag op 2 manieren.";
-    if(type === 'weinig_mogelijk') titel = "Oefening: Betaal met zo weinig mogelijk munten/briefjes.";
-    if(type.startsWith('winkel')) titel = "Winkeltje: " + document.getElementById('winkelSelect').options[document.getElementById('winkelSelect').selectedIndex].text;
+    if(type === 'twee_manieren') titel = "Oefening: Leg het bedrag op 2 verschillende manieren.";
+    if(type === 'weinig_mogelijk') titel = "Oefening: Betaal met zo weinig mogelijk munten en briefjes.";
+    if(type === 'gepast_betalen') titel = "Oefening: Leg het juiste bedrag klaar.";
+    if(type.startsWith('winkel')) {
+        const winkelNaam = document.getElementById('winkelSelect').options[document.getElementById('winkelSelect').selectedIndex].text;
+        titel = `Winkeltje: ${winkelNaam}`;
+    }
 
     const sectie = document.createElement('div');
     sectie.className = "oefening-sectie";
@@ -56,17 +63,44 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     let html = `<span contenteditable="true" class="sectie-titel">${titel}</span>`;
     
     if (activeTab === 'winkel') {
-        const winkel = document.getElementById('winkelSelect').value;
-        html += `<div class="winkel-poster">${winkelData[winkel].map(i => `<div class="poster-item"><img src="assets/producten/${i.img}" class="poster-img"><br><span class="poster-prijs">€${i.prijs.toFixed(2).replace('.',',')}</span></div>`).join('')}</div>`;
+        const producten = winkelData[winkelType];
+        const rij1 = producten.slice(0, 6);
+        const rij2 = producten.slice(6, 12);
+
+        html += `<div class="winkel-poster ${winkelType}-stijl">
+            <div class="plank-rij">
+                ${rij1.map(i => genereerPosterItemHtml(i, centen)).join('')}
+            </div>
+            <div class="plank-rij">
+                ${rij2.map(i => genereerPosterItemHtml(i, centen)).join('')}
+            </div>
+        </div>`;
     }
 
     html += `<div class="kaders-grid"></div>
-             <div class="sectie-controls no-print"><button class="btn-plus" onclick="voegKadersToeManual(this.parentElement.parentElement, 1)">+ Oefening</button></div>`;
+             <div class="sectie-controls no-print">
+                <button class="btn-plus" onclick="voegKadersToeManual(this.parentElement.parentElement, 1)">+ Oefening</button>
+             </div>`;
     
     sectie.innerHTML = html;
     container.appendChild(sectie);
     for(let i=0; i<aantal; i++) voegKaderToe(sectie);
 });
+
+/* moveY wordt hier toegepast via translateY */
+function genereerPosterItemHtml(item, centen) {
+    const toonPrijs = centen ? item.prijs : Math.ceil(item.prijs);
+    const scale = item.scale || 1.0;
+    const moveY = item.moveY || 0; // Standaard 0 als moveY niet bestaat
+    return `
+        <div class="poster-item">
+            <img src="assets/producten/supermarkt/${item.img}" 
+                 class="poster-img" 
+                 style="transform: scale(${scale}) translateY(${moveY}px); transform-origin: bottom center;"
+                 onerror="this.src='assets/producten/${item.img}'">
+            <div class="prijskaartje">€ ${toonPrijs.toFixed(centen ? 2 : 0).replace('.',',')}</div>
+        </div>`;
+}
 
 function voegKadersToeManual(node, n) { for(let i=0; i<n; i++) voegKaderToe(node); }
 
@@ -79,7 +113,6 @@ function getUniekBedrag(max, centen, klein) {
         else if (!klein) bedrag = Math.round(bedrag * 20) / 20;
         else bedrag = Math.round(bedrag * 100) / 100;
         pogingen++;
-        if (bedrag <= 0) bedrag = centen ? 0.05 : 1;
     } while (gebruikteBedragen.has(bedrag) && pogingen < 100);
     gebruikteBedragen.add(bedrag);
     return bedrag;
@@ -91,58 +124,55 @@ function voegKaderToe(sectieNode) {
     const max = parseFloat(document.getElementById('maxBedrag').value);
     const centen = document.getElementById('checkCenten').checked;
     const klein = document.getElementById('checkKleineCenten').checked;
-    const schatten = document.getElementById('checkSchatten').checked;
-    const winkel = document.getElementById('winkelSelect').value;
+    const nItems = parseInt(document.getElementById('aantalItems').value);
 
     const kader = document.createElement('div');
     kader.className = "oefening-kader";
     let html = `<button class="btn-x-kader no-print" onclick="this.parentElement.remove()">X</button>`;
 
     if (type.startsWith('winkel')) {
-        const nItems = parseInt(document.getElementById('aantalItems').value);
-        let alleItems = [...winkelData[winkel]];
-        if (!centen) alleItems = alleItems.filter(i => i.prijs % 1 === 0);
-        
-        let items = alleItems.sort(() => 0.5 - Math.random()).slice(0, nItems);
+        let items = [...winkelData.supermarkt].sort(() => 0.5 - Math.random()).slice(0, nItems);
+        items = items.map(i => ({...i, prijs: centen ? i.prijs : Math.ceil(i.prijs)}));
         const totaal = items.reduce((a, b) => a + b.prijs, 0);
 
-        html += `<div class="winkel-container"><div class="winkel-lijstje"><strong>Lijstje:</strong><br>`;
-        items.forEach(i => html += `• ${i.naam}<br>`);
-        html += `</div><div class="winkel-opdracht">`;
-        if (schatten) html += `<div class="invul-lijn">Ik schat: € ________</div>`;
-        
-        if (type === 'winkel_totaal') {
-            html += `<div class="invul-lijn">Totaal: € ________</div><div class="geld-vak">${genereerMix(totaal, max, centen, klein)}</div>`;
-        } else if (type === 'winkel_terug') {
-            const betaald = [5, 10, 20, 50].find(v => v >= totaal) || 50;
-            html += `Betaald met: <img src="assets/${betaald}euro.png" style="height:25px; vertical-align:middle;">`;
-            html += `<div class="invul-lijn">Terug: € ________</div><div class="geld-vak">${genereerMix(betaald - totaal, betaald, centen, klein)}</div>`;
-        } else if (type === 'winkel_kiezen' || type === 'winkel_exact') {
-            const budget = getUniekBedrag(max, centen, klein);
-            html = `<button class="btn-x-kader no-print" onclick="this.parentElement.remove()">X</button>`;
-            html += `Mijn budget: <strong>€${budget.toFixed(2).replace('.',',')}</strong><br><br>`;
-            html += `<div class="winkel-keuze-grid">${alleItems.slice(0,6).map(i => `<div class="keuze-item"><img src="assets/producten/${i.img}" style="height:30px;"><br>€${i.prijs.toFixed(2).replace('.',',')}</div>`).join('')}</div>`;
-            html += `<div class="invul-lijn" style="margin-top:10px;">Ik koop: ___________________________</div>`;
-        }
-        html += `</div></div>`;
-    } 
-    else if (type === 'twee_manieren') {
-        let bedrag = getUniekBedrag(max, centen, klein);
-        if (!centen && bedrag < 5) bedrag = 5;
-        html += `Bedrag: <strong>€${bedrag.toFixed(2).replace('.',',')}</strong>`;
-        html += `<div class="manieren-grid">
-                    <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>
-                    <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>
+        html += `<div class="winkel-container">
+                    <div class="winkel-lijstje">
+                        <div class="label-groep">Mijn mandje:</div>
+                        <div class="mandje-grid">
+                            ${items.map(i => {
+                                const scale = i.scale || 1.0;
+                                const moveY = i.moveY || 0;
+                                return `<img src="assets/producten/supermarkt/${i.img}" 
+                                             class="product-img-mandje" 
+                                             style="transform: scale(${scale}) translateY(${moveY}px);"
+                                             onerror="this.src='assets/producten/${i.img}'">`;
+                            }).join('')}
+                        </div>
+                    </div>
+                    <div class="winkel-opdracht">
+                        <div class="opdracht-blok">
+                            <div class="label-groep">Bewerking:</div>
+                            <div class="lange-invul-lijn"></div>
+                        </div>
+                        <div class="opdracht-blok">
+                            <div class="label-groep">Totaal te betalen: € ________</div>
+                        </div>
+                        <div class="geld-vak">${genereerMix(totaal, max, centen, klein)}</div>
+                    </div>
                  </div>`;
-    }
-    else {
+    } else {
         let bedrag = getUniekBedrag(max, centen, klein);
-        if (type === 'tellen') {
+        if (type === 'twee_manieren') {
+            html += `Bedrag: <strong>€${bedrag.toFixed(centen ? 2 : 0).replace('.',',')}</strong>
+                     <div class="manieren-grid">
+                        <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>
+                        <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>
+                     </div>`;
+        } else if (type === 'tellen') {
             html += `<div class="geld-vak">${genereerGeldSimpel(bedrag, centen, klein)}</div>
-                     <div class="antwoord-box">Totaal: € <div style="flex-grow:1; border-bottom:1px solid #ccc; height:15px;"></div></div>`;
+                     <div class="antwoord-box">Totaal: € <div class="lijn-invul" style="flex-grow:1; border-bottom:1px solid #333; height:18px;"></div></div>`;
         } else {
-            // Dit is 'weinig_mogelijk'
-            html += `Bedrag: <strong>€${bedrag.toFixed(2).replace('.',',')}</strong>
+            html += `Bedrag: <strong>€${bedrag.toFixed(centen ? 2 : 0).replace('.',',')}</strong>
                      <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>`;
         }
     }
