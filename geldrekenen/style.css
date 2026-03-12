@@ -1,96 +1,213 @@
 :root { 
-    --primary: #2c3e50; 
-    --accent: #27ae60; 
-    --border: #333; 
+    --primary: #6b7280;
+    --accent: #8ec5b6;
+    --accent-dark: #6ea999;
+    --pastel-pink: #f6d8e6;
+    --pastel-blue: #dbeafe;
+    --pastel-yellow: #fdf4c8;
+    --pastel-green: #dff4e4;
+    --pastel-lilac: #e9ddff;
+    --panel-bg: #fffdfd;
+    --border: #b7b7c9;
+    --text: #4b5563;
+    --shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
 body { 
     display: flex; 
     font-family: 'Arial', sans-serif; 
     margin: 0; 
-    background-color: #333; 
+    background: linear-gradient(180deg, #f8f7fb 0%, #eef3f7 100%);
 }
 
 /* ══════════════════════════════════════════════════════════
    DASHBOARD & NAVIGATIE
    ══════════════════════════════════════════════════════════ */
 #dashboard { 
-    width: 300px; 
+    width: 340px; 
     height: 100vh; 
-    background: #fff; 
-    padding: 20px; 
+    background: var(--panel-bg);
+    padding: 22px; 
     position: fixed; 
-    box-shadow: 5px 0 15px rgba(0,0,0,0.5); 
+    box-shadow: var(--shadow);
     overflow-y: auto; 
     z-index: 10; 
     box-sizing: border-box; 
+    border-right: 1px solid #ece8f3;
+}
+
+.brand {
+    background: linear-gradient(135deg, var(--pastel-lilac), var(--pastel-pink));
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    border: 1px solid #eadff4;
 }
 
 .brand h1 { 
     margin: 0; 
-    color: var(--accent); 
-    font-size: 1.4rem; 
+    color: #5a6170;
+    font-size: 1.35rem; 
     text-transform: uppercase; 
+    letter-spacing: 0.5px;
+}
+
+.brand p {
+    margin: 6px 0 0 0;
+    color: #7a7f8d;
+    font-size: 0.92rem;
 }
 
 .tab-nav { 
     display: flex; 
-    margin: 20px -20px; 
-    border-bottom: 2px solid #eee; 
+    gap: 10px;
+    margin: 0 0 18px 0;
 }
 
 .tab-btn { 
     flex: 1; 
-    border: none; 
-    background: #f8f9fa; 
-    padding: 12px; 
+    border: 1px solid #e7e3ef; 
+    background: #ffffff; 
+    padding: 12px 10px; 
     cursor: pointer; 
     font-weight: bold; 
-    font-size: 0.8rem; 
-    color: #7f8c8d; 
-    transition: 0.3s; 
+    font-size: 0.82rem; 
+    color: #7b8190; 
+    transition: 0.25s; 
+    border-radius: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+
+.tab-btn:hover {
+    transform: translateY(-1px);
+    background: #faf8ff;
 }
 
 .tab-btn.active { 
-    background: white; 
-    color: var(--accent); 
-    border-bottom: 3px solid var(--accent); 
+    background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-lilac));
+    color: #4e5a6b; 
+    border: 1px solid #d8d3ea;
 }
 
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
 .control-group { 
-    margin-top: 20px; 
-    border-bottom: 1px solid #eee; 
-    padding-bottom: 15px; 
+    margin-top: 18px; 
+    padding: 16px;
+    border: 1px solid #ebe7f2;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
 }
 
 label { 
     display: block; 
-    margin: 10px 0 5px; 
-    font-weight: bold; 
-    font-size: 0.8rem; 
+    margin: 12px 0 6px; 
+    font-weight: 700; 
+    font-size: 0.82rem; 
+    color: var(--text);
 }
 
 input, select, button { 
     width: 100%; 
-    padding: 10px; 
-    border-radius: 6px; 
+    padding: 11px 12px; 
+    border-radius: 12px; 
     border: 1px solid #ddd; 
     box-sizing: border-box; 
     margin-bottom: 10px; 
+    font-size: 0.95rem;
 }
 
-.primary-btn { background: var(--accent); color: white; border: none; font-weight: bold; cursor: pointer; }
-.print-btn { background: #34495e; color: white; border: none; cursor: pointer; }
-.clear-btn { background: #eee; color: #333; border: 1px solid #ccc; cursor: pointer; }
+input, select {
+    background: #fcfcff;
+    border: 1px solid #dddfea;
+    color: #4b5563;
+}
+
+.primary-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(142,197,182,0.35);
+}
+
+.print-btn {
+    background: linear-gradient(135deg, var(--pastel-blue), #cfe7ff);
+    color: #4c6175;
+    border: 1px solid #cfe0f0;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.download-btn {
+    background: linear-gradient(135deg, var(--pastel-yellow), #fde7b2);
+    color: #6a5a2f;
+    border: 1px solid #ecdca7;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.clear-btn {
+    background: linear-gradient(135deg, #f7e4e4, #f3d4d4);
+    color: #7a4f4f;
+    border: 1px solid #e8c7c7;
+    cursor: pointer;
+    font-weight: bold;
+}
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checkbox-group {
+    display: grid;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #faf8ff;
+    border: 1px solid #ebe5f5;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 0;
+}
+
+.checkbox-container input {
+    width: auto;
+    margin: 0;
+}
+
+.checkbox-container span {
+    font-weight: 600;
+    color: #5d6472;
+}
+
+h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #586274;
+    font-size: 1rem;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid #ece8f2;
+    margin: 16px 0;
+}
 
 /* ══════════════════════════════════════════════════════════
    WERKBLAD LAYOUT
    ══════════════════════════════════════════════════════════ */
 #preview { 
-    margin-left: 320px; 
+    margin-left: 360px; 
     padding: 30px; 
     width: 100%; 
     display: block; 
@@ -185,8 +302,33 @@ input, select, button {
 /* ══════════════════════════════════════════════════════════
    OEFENING KADERS & MANDJE
    ══════════════════════════════════════════════════════════ */
-.oefening-sectie { margin-bottom: 40px; position: relative; }
-.sectie-titel { display: block; font-size: 1.3rem; font-weight: bold; text-decoration: underline; margin-bottom: 20px; outline: none; }
+.oefening-sectie { 
+    margin-bottom: 40px; 
+    position: relative;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.sectie-titel { 
+    display: block; 
+    font-size: 1.3rem; 
+    font-weight: bold; 
+    text-decoration: underline; 
+    margin-bottom: 20px; 
+    outline: none;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.kaders-grid {
+    break-inside: auto;
+    page-break-inside: auto;
+}
+
+.kaders-grid > .oefening-kader:first-child {
+    break-before: avoid;
+    page-break-before: avoid;
+}
 
 .oefening-kader { 
     border: 2.5px solid var(--border); 
@@ -194,6 +336,7 @@ input, select, button {
     padding: 20px; 
     position: relative; 
     break-inside: avoid; 
+    page-break-inside: avoid;
     margin-bottom: 25px; 
 }
 
@@ -248,6 +391,10 @@ input, select, button {
 .btn-del-sectie { background: #fee; border: 1px solid #fcc; border-radius: 4px; padding: 6px 12px; cursor: pointer; color: #c00; }
 .btn-x-kader { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
 
+/* =========================================================
+   ALLEEN VOOR BROWSER-AFDRUKKEN VIA window.print()
+   NIET GEBRUIKT DOOR pdf-engine.js
+   ========================================================= */
 /* ══════════════════════════════════════════════════════════
    PRINT SETTINGS - GEFORCEERDE ACHTERGRONDEN
    ══════════════════════════════════════════════════════════ */
@@ -275,16 +422,77 @@ input, select, button {
     } 
 
     .a4-page { 
-        box-shadow: none !important; 
-        width: 100% !important; 
-        margin: 0 !important; 
-        padding: 0 !important; 
-        display: block !important; 
-        min-height: auto !important; 
-    } 
+    box-shadow: none !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 20mm 15mm !important;
+
+    display: block !important;
+}
 
     .plank-rij {
         background-image: url('assets/producten/winkel.png') !important;
         background-size: 100% 100% !important;
     }
+}
+.pdf-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.pdf-loading.hidden {
+    display: none;
+}
+
+.pdf-loading-box {
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    background: white;
+    border: 1px solid #e7e3ef;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    padding: 24px;
+    text-align: center;
+}
+
+.pdf-loading-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4e5a6b;
+    margin-bottom: 8px;
+}
+
+.pdf-loading-text {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-bottom: 18px;
+}
+
+.pdf-loading-bar {
+    width: 100%;
+    height: 14px;
+    background: #eef2f7;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid #dde5ee;
+}
+
+.pdf-loading-fill {
+    width: 35%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #dbeafe, #e9ddff, #dff4e4);
+    animation: pdfLoadingMove 1.2s infinite ease-in-out;
+}
+
+@keyframes pdfLoadingMove {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
 }
