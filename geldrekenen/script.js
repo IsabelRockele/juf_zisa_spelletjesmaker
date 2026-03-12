@@ -78,9 +78,10 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     }
 
     html += `<div class="kaders-grid"></div>
-             <div class="sectie-controls no-print">
-                <button class="btn-plus" onclick="voegKadersToeManual(this.parentElement.parentElement, 1)">+ Oefening</button>
-             </div>`;
+         <div class="sectie-controls no-print">
+            <button class="btn-plus" onclick="voegKadersToeManual(this.parentElement.parentElement, 1)">+ Oefening</button>
+            <button class="btn-del-sectie" onclick="verwijderSectie(this)">🗑 Verwijder hele oefening</button>
+         </div>`;
     
     sectie.innerHTML = html;
     container.appendChild(sectie);
@@ -103,6 +104,11 @@ function genereerPosterItemHtml(item, centen) {
 }
 
 function voegKadersToeManual(node, n) { for(let i=0; i<n; i++) voegKaderToe(node); }
+
+function verwijderSectie(knop) {
+    const sectie = knop.closest('.oefening-sectie');
+    if (sectie) sectie.remove();
+}
 
 function getUniekBedrag(max, centen, klein) {
     let bedrag;
@@ -203,4 +209,26 @@ function genereerMix(doel, max, centen, klein) {
     });
     verz.sort((a,b) => b.value - a.value);
     return verz.map(u => `<img src="assets/${u.img}" class="money-img" style="--scale: ${u.scale}">`).join('');
+}
+
+function toonPdfLoading() {
+    const el = document.getElementById('pdf-loading');
+    if (el) el.classList.remove('hidden');
+}
+
+function verbergPdfLoading() {
+    const el = document.getElementById('pdf-loading');
+    if (el) el.classList.add('hidden');
+}
+
+async function downloadAlsPdf() {
+    try {
+        toonPdfLoading();
+        await pdfEngine.generate();
+    } catch (error) {
+        console.error('Fout bij PDF-generatie:', error);
+        alert('Er liep iets mis bij het maken van de PDF.');
+    } finally {
+        verbergPdfLoading();
+    }
 }
