@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juf Zisa - Bundel Maker Pro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <aside id="dashboard" class="no-print">
+        <div class="brand">
+            <h1>Geld Maker</h1>
+            <p>Juf Zisa Edition</p>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('vaardigheden')">Geldvaardigheden</button>
+            <button class="tab-btn" onclick="switchTab('winkel')">Winkeltje</button>
+        </div>
+        
+        <div class="control-group">
+            <h3>Nieuwe Sectie</h3>
+            
+            <div id="tab-vaardigheden" class="tab-content active">
+                <label>Type oefening:</label>
+                <select id="type-vaardigheden">
+                    <option value="tellen">Tellen: Hoeveel ligt er?</option>
+                    <option value="twee_manieren">Betaal op 2 manieren</option>
+                    <option value="weinig_mogelijk">Zo weinig mogelijk eenheden</option>
+                </select>
+            </div>
+
+            <div id="tab-winkel" class="tab-content">
+                <label>Winkeltype:</label>
+                <select id="winkelSelect">
+                    <option value="supermarkt">De Supermarkt</option>
+                    <option value="speelgoed">De Speelgoedwinkel</option>
+                    <option value="bakker">De Bakker</option>
+                </select>
+
+                <label>Type opdracht:</label>
+                <select id="type-winkel">
+                    <option value="winkel_totaal">1. Winkellijstje: Totaal betalen</option>
+                    <option value="winkel_terug">2. Winkellijstje: Terugkrijgen</option>
+                    <option value="winkel_kiezen">3. Wat kan je kopen? (Open)</option>
+                    <option value="winkel_exact">4. Koop voor exact bedrag</option>
+                </select>
+
+                <label>Items op lijstje:</label>
+                <input type="number" id="aantalItems" value="2" min="1" max="4">
+                
+                <label class="checkbox-container">
+                    <input type="checkbox" id="checkSchatten"><span>Inclusief schat-vraag</span>
+                </label>
+            </div>
+
+            <hr>
+            <label>Max. bedrag (€):</label>
+            <input type="number" id="maxBedrag" value="20">
+
+            <label>Aantal kaders per sectie:</label>
+            <input type="number" id="aantalOefeningen" value="1" min="1">
+            
+            <div class="checkbox-group">
+                <label class="checkbox-container"><input type="checkbox" id="checkCenten"><span>Gebruik centen</span></label>
+                <label class="checkbox-container"><input type="checkbox" id="checkKleineCenten"><span>Inclusief 1ct/2ct</span></label>
+            </div>
+            
+            <button id="addSectieBtn" class="primary-btn">Sectie Toevoegen +</button>
+        </div>
+
+        <div class="control-group">
+            <button onclick="window.print()" class="print-btn">🖨️ Afdrukken / PDF</button>
+            <button onclick="location.reload()" class="clear-btn">Alles wissen</button>
+        </div>
+    </aside>
+
+    <main id="preview">
+        <div id="werkblad" class="a4-page">
+            <div class="student-header">
+                <div class="header-box">Naam:</div>
+                <div class="header-box">Datum:</div>
+            </div>
+            <h1 contenteditable="true" class="werkblad-titel">REKENEN MET GELD</h1>
+            <div id="secties-container"></div>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
