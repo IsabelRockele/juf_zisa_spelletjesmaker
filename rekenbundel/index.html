@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="vraagstukken.css?v=1">
   <style>
     /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
     .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
@@ -55,6 +56,7 @@
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
+  <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
 <div class="tabs-scroll-hint">
@@ -1010,6 +1012,198 @@
 
     </div><!-- /tab-cijferen -->
 
+    <!-- ── TAB: VRAAGSTUKKEN ─────────────────────────────────── -->
+    <div class="sidebar-content" id="tab-vraagstukken" style="display:none">
+
+      <!-- Header met limiet -->
+      <div class="bundel-info" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+        <label style="margin:0">AI Vraagstukken</label>
+        <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
+      </div>
+
+      <!-- Bewerking kiezen -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔢</div>
+          Bewerking
+        </div>
+        <div class="form-rij">
+          <div class="vs-bewerking-groep">
+            <label class="vs-bew-chip geselecteerd" data-bew="optellen" onclick="VraagstukkenModule._kiesBewerking('optellen',this)">
+              <input type="radio" name="vs-bewerking" value="optellen" checked>➕ Optellen
+            </label>
+            <label class="vs-bew-chip" data-bew="aftrekken" onclick="VraagstukkenModule._kiesBewerking('aftrekken',this)">
+              <input type="radio" name="vs-bewerking" value="aftrekken">➖ Aftrekken
+            </label>
+            <label class="vs-bew-chip" data-bew="vermenigvuldigen" onclick="VraagstukkenModule._kiesBewerking('vermenigvuldigen',this)">
+              <input type="radio" name="vs-bewerking" value="vermenigvuldigen">✖️ Vermenigvuldigen
+            </label>
+            <label class="vs-bew-chip" data-bew="delen" onclick="VraagstukkenModule._kiesBewerking('delen',this)">
+              <input type="radio" name="vs-bewerking" value="delen">➗ Delen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Niveau -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🎯</div>
+          Niveau
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10',this)">
+              <input type="radio" name="vs-niveau" value="tot10">Tot 10
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-niveau','tot20',this)">
+              <input type="radio" name="vs-niveau" value="tot20" checked>Tot 20
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100',this)">
+              <input type="radio" name="vs-niveau" value="tot100">Tot 100
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot1000',this)">
+              <input type="radio" name="vs-niveau" value="tot1000">Tot 1000
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','kommagetallen',this)">
+              <input type="radio" name="vs-niveau" value="kommagetallen">Kommagetallen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tafels/bewerkingskeuze (voor vermenigvuldigen/delen) -->
+      <div class="config-kaart" id="vs-kaart-tafels" style="display:none">
+        <div class="kaart-titel">
+          <div class="icon">✖️</div>
+          Tafels
+        </div>
+        <div class="form-rij">
+          <div class="checkbox-groep">
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-tafels" value="2" style="display:none"> Tafel van 2
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-tafels" value="3" style="display:none"> Tafel van 3
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-tafels" value="4" style="display:none"> Tafel van 4
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-tafels" value="5" style="display:none"> Tafel van 5
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-tafels" value="10" style="display:none"> Tafel van 10
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schema-opties -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📐</div>
+          Schema bij vraagstuk
+        </div>
+        <div class="form-rij">
+          <div class="checkbox-groep">
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-schema" value="tekenschema" style="display:none"> Tekenschema
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-schema" value="schrijflijnen" style="display:none"> Schrijflijnen
+            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="vs-schema" value="cijferschema" style="display:none"> Cijferschema
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Antwoordzin -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">✍️</div>
+          Antwoordzin
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-antwoordzin','deels',this)">
+              <input type="radio" name="vs-antwoordzin" value="deels" checked>Deels ingevuld (___)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-antwoordzin','leeg',this)">
+              <input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Afbeelding -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🖼️</div>
+          Visuele ondersteuning
+        </div>
+        <div class="form-rij">
+          <label class="vink-chip" id="chip-afbeelding" onclick="this.classList.toggle('geselecteerd');document.getElementById('vs-afbeelding').checked=!document.getElementById('vs-afbeelding').checked">
+            <span class="vink-box"></span>
+            <input type="checkbox" id="vs-afbeelding" style="display:none">
+            <span>Emoji-illustratie toevoegen</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Aantal genereren -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">📦</div>
+          Aantal genereren
+        </div>
+        <div class="form-rij">
+          <div class="vs-bulk-rij">
+            <label>Genereer in één keer</label>
+            <select id="vs-aantal-bulk">
+              <option value="1" selected>1 vraagstuk</option>
+              <option value="2">2 vraagstukken</option>
+              <option value="3">3 vraagstukken</option>
+              <option value="5">5 vraagstukken</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Genereer knop -->
+      <button id="vs-btn-genereer" class="vs-btn-genereer" onclick="VraagstukkenModule.genereer()">
+        ✨ Genereer vraagstuk
+      </button>
+
+      <!-- Preview van gegenereerd vraagstuk -->
+      <div class="vs-preview-sectie">
+        <div class="vs-preview-label">Gegenereerd vraagstuk</div>
+        <div id="vs-preview">
+          <div class="vs-leeg">Klik op "Genereer" om een vraagstuk te maken.</div>
+        </div>
+      </div>
+
+      <!-- Bundel lijst -->
+      <div class="vs-bundel-header">
+        <span class="vs-bundel-titel">📋 Toegevoegd aan bundel</span>
+        <span id="vs-bundel-teller">0 vraagstukken</span>
+      </div>
+      <div id="vs-bundel-lijst" class="vs-bundel-lijst">
+        <div class="vs-leeg">Nog geen vraagstukken toegevoegd.</div>
+      </div>
+
+    </div><!-- /tab-vraagstukken -->
+
 </aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
@@ -1036,6 +1230,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
+<script src="config.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
 <script src="modules/cijferen.js?v=1"></script>
@@ -1059,7 +1254,19 @@
 <script src="generator.js?v=12"></script>
 <script src="preview.js?v=34"></script>
 <script src="pdf-engine.js?v=42"></script>
+<script src="vraagstukken.js?v=1"></script>
 <script src="app.js?v=17"></script>
+<script>
+// Initialiseer vraagstukken module wanneer Firebase klaar is
+document.addEventListener('DOMContentLoaded', () => {
+  // Wacht even zodat Firebase Auth geladen is
+  setTimeout(() => {
+    if (window.VraagstukkenModule) {
+      VraagstukkenModule.init();
+    }
+  }, 1500);
+});
+</script>
 
 <div id="helpModal" class="help-modal">
 
