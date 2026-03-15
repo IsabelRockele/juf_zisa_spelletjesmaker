@@ -27,7 +27,7 @@ const TafelsInzicht = (() => {
   const EMOJI_KEYS = Object.keys(EMOJI_SETS);
 
   /* ── Genereer oefeningen ─────────────────────────────────── */
-  function genereer({ modus = 'per-tafel', tafel = 2, tafels = null, maxUitkomst = 12, tafelMax = 10, aantalOefeningen = 4, emojiSet = 'afwisselend' }) {
+  function genereer({ modus = 'per-tafel', tafel = 2, tafels = null, maxUitkomst = 12, tafelMax = 5, aantalOefeningen = 4, emojiSet = 'afwisselend' }) {
     // tafels (array) heeft voorrang op tafel (enkelvoud)
     const tafelsLijst = tafels ? (Array.isArray(tafels) ? tafels : [tafels]) : [tafel];
 
@@ -35,7 +35,7 @@ const TafelsInzicht = (() => {
 
     if (modus === 'per-tafel') {
       for (const t of tafelsLijst) {
-        for (let m = 1; m <= Math.min(tafelMax, 7); m++) {
+        for (let m = 1; m <= tafelMax; m++) {
           pool.push({ groepen: m, groepGrootte: t });
         }
       }
