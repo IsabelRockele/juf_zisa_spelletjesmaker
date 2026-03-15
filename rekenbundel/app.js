@@ -645,6 +645,9 @@ const App = (() => {
     const cb  = label.querySelector('input');
     const was = cb.checked;
 
+    const breedTypes = ['Redeneren', 'Koppel'];
+    const normalTypes = ['Vermenigvuldigen', 'Gedeeld door', 'Ontbrekende factor', 'Gemengd'];
+
     if (type === 'Gemengd') {
       // Gemengd: alle andere uitvinken
       document.querySelectorAll('#cg-tafels-types .vink-chip').forEach(l => {
@@ -655,15 +658,28 @@ const App = (() => {
       cb.checked = true;
       label.classList.add('geselecteerd');
       label.querySelector('.vink-box').textContent = '✓';
-    } else {
-      // Gemengd uitvinken als ander type gekozen
-      const gemengdLabel = [...document.querySelectorAll('#cg-tafels-types .vink-chip')]
-        .find(l => l.querySelector('input').value === 'Gemengd');
-      if (gemengdLabel) {
-        gemengdLabel.classList.remove('geselecteerd');
-        gemengdLabel.querySelector('input').checked = false;
-        gemengdLabel.querySelector('.vink-box').textContent = '';
+    } else if (breedTypes.includes(type)) {
+      // Redeneren / Koppel: alle andere types uitvinken (ze staan alleen)
+      document.querySelectorAll('#cg-tafels-types .vink-chip').forEach(l => {
+        l.classList.remove('geselecteerd');
+        l.querySelector('input').checked = false;
+        l.querySelector('.vink-box').textContent = '';
+      });
+      if (!was) {
+        cb.checked = true;
+        label.classList.add('geselecteerd');
+        label.querySelector('.vink-box').textContent = '✓';
       }
+    } else {
+      // Normaal type: Redeneren/Koppel uitvinken als die aangevinkt waren
+      document.querySelectorAll('#cg-tafels-types .vink-chip').forEach(l => {
+        const v = l.querySelector('input').value;
+        if (breedTypes.includes(v) || v === 'Gemengd') {
+          l.classList.remove('geselecteerd');
+          l.querySelector('input').checked = false;
+          l.querySelector('.vink-box').textContent = '';
+        }
+      });
       cb.checked = !was;
       label.classList.toggle('geselecteerd', !was);
       label.querySelector('.vink-box').textContent = !was ? '✓' : '';
