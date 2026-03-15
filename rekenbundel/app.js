@@ -27,22 +27,25 @@ const App = (() => {
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
 
-    const isHerken      = bewerking === 'herken-brug';
-    const isSplitsingen = bewerking === 'splitsingen';
+    const isHerken       = bewerking === 'herken-brug';
+    const isSplitsingen  = bewerking === 'splitsingen';
     const isTafels       = bewerking === 'tafels';
     const isInzicht      = bewerking === 'tafels-inzicht';
     const isCijferen     = bewerking === 'cijferen';
+    const isVraagstukken = bewerking === 'vraagstukken';
 
     // Schakel tussen de sidebar-content blokken
-    const tabHoofd    = document.getElementById('tab-hoofdrekenen');
-    const tabTafels   = document.getElementById('tab-tafels');
-    const tabInzicht  = document.getElementById('tab-tafels-inzicht');
-    const tabCijferen = document.getElementById('tab-cijferen');
-    if (tabHoofd)    tabHoofd.style.display    = (!isTafels && !isInzicht && !isCijferen) ? 'block' : 'none';
-    if (tabTafels)   tabTafels.style.display   = isTafels   ? 'block' : 'none';
-    if (tabInzicht)  tabInzicht.style.display  = isInzicht  ? 'block' : 'none';
-    if (tabCijferen) tabCijferen.style.display = isCijferen ? 'block' : 'none';
-    if (isTafels || isInzicht || isCijferen) return;
+    const tabHoofd        = document.getElementById('tab-hoofdrekenen');
+    const tabTafels       = document.getElementById('tab-tafels');
+    const tabInzicht      = document.getElementById('tab-tafels-inzicht');
+    const tabCijferen     = document.getElementById('tab-cijferen');
+    const tabVraagstukken = document.getElementById('tab-vraagstukken');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken) ? 'block' : 'none';
+    if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
+    if (tabInzicht)      tabInzicht.style.display      = isInzicht       ? 'block' : 'none';
+    if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
+    if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
+    if (isTafels || isInzicht || isCijferen || isVraagstukken) return;
 
     // Sectietitel
     const titel = document.getElementById('sectie-titel');
