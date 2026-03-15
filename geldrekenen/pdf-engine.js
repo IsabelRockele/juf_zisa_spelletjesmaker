@@ -694,6 +694,112 @@ if (shelfDataUrl) {
     y += h + 5;
   }
 
+  async function drawVergelijkKader(kaderEl, scale) {
+    // Vaste maten: header=14, body=30, padding=10 → kader=54mm
+    const hdrH = 18, bH = 30, pad = 5;
+    const FIXED_H = pad + hdrH + bH + pad;
+    ensureSpace(FIXED_H + 5);
+    const x = MARGIN_LEFT, y0 = y, tW = CONTENT_W - 4;
+    doc.setDrawColor(183, 183, 201); doc.setLineWidth(0.6);
+    drawRoundedRect(x, y0, CONTENT_W, FIXED_H, 3);
+
+    const cPct = [0.16, 0.16, 0.24, 0.26, 0.18];
+    const cW = cPct.map(p => tW * p);
+    const tx = x + 2, ty = y0 + pad;
+    const cX = [tx];
+    for (let i = 0; i < cW.length - 1; i++) cX.push(cX[i] + cW[i]);
+    const bY = ty + hdrH;
+
+    // Header
+    doc.setFillColor(255, 243, 205); doc.setDrawColor(224, 192, 96); doc.setLineWidth(0.4);
+    doc.rect(tx, ty, tW, hdrH, "FD");
+    const hdrs = ["Product A", "Product B", "Welk is duurder?", "Bewerking", "Verschil"];
+    doc.setTextColor(122, 92, 0); doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
+    hdrs.forEach((h2, i) => {
+      const cx2 = cX[i] + cW[i] / 2;
+      const tw2 = doc.getTextWidth(h2);
+      doc.text(h2, cx2 - tw2 / 2, ty + hdrH * 0.45);
+      // Kleine cursieve ondertitel voor bewerkingskolom
+      if (i === 3) {
+        doc.setFont("helvetica", "italic"); doc.setFontSize(7);
+        const subLines = splitText("Reken het verschil uit tussen de prijzen.", cW[3] - 4, 7, "italic");
+        subLines.forEach((line, li) => {
+          const stw = doc.getTextWidth(line);
+          doc.text(line, cx2 - stw / 2, ty + hdrH * 0.45 + 4.5 + li * 3.5);
+        });
+        doc.setFont("helvetica", "bold"); doc.setFontSize(8.5);
+      }
+    });
+
+    // Body
+    doc.setFillColor(255, 255, 255); doc.setDrawColor(224, 192, 96); doc.setLineWidth(0.4);
+    doc.rect(tx, bY, tW, bH, "FD");
+    for (let i = 1; i < 5; i++) doc.line(cX[i], ty, cX[i], ty + hdrH + bH);
+    doc.rect(tx, ty, tW, hdrH + bH);
+    doc.line(tx, bY, tx + tW, bY);
+
+    // Producten (kolom 1 en 2)
+    const productCols = [...kaderEl.querySelectorAll(".vergelijk-td-product")];
+    for (let ci = 0; ci < Math.min(productCols.length, 2); ci++) {
+      const col = productCols[ci];
+      const centerX = cX[ci] + cW[ci] / 2;
+
+      // Nummer-badge
+      const nrEl = col.querySelector(".vergelijk-nummer");
+      if (nrEl) {
+        doc.setFillColor(61, 171, 146);
+        doc.circle(cX[ci] + 4, bY + 4, 2.5, "F");
+        doc.setFont("helvetica", "bold"); doc.setFontSize(7); doc.setTextColor(255, 255, 255);
+        const nTxt = readText(nrEl);
+        doc.text(nTxt, cX[ci] + 4 - doc.getTextWidth(nTxt) / 2, bY + 5.2);
+      }
+
+      // Afbeelding
+      const img = col.querySelector(".vergelijk-img");
+      if (img) {
+        const imgH = 14, imgW = imgH * 1.1;
+        await drawImageFromElement(img, centerX - imgW / 2, bY + 4, imgW, imgH);
+      }
+
+      // Prijs
+      const prijsEl = col.querySelector(".vergelijk-prijs");
+      if (prijsEl) {
+        doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(61, 58, 82);
+        const pTxt = readText(prijsEl);
+        const pW = doc.getTextWidth(pTxt);
+        doc.text(pTxt, centerX - pW / 2, bY + 24);
+      }
+    }
+
+    // Kolom 3: keuzerondjes
+    const keuzes = [...kaderEl.querySelectorAll(".vergelijk-keuze")];
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9); doc.setTextColor(68, 68, 68);
+    keuzes.forEach((k, ki) => {
+      const ky = bY + 6 + ki * 9;
+      doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.3);
+      doc.circle(cX[2] + 5, ky + 1.2, 2.2);
+      doc.text(readText(k).replace(/^\s*/, ''), cX[2] + 10, ky + 2.5);
+    });
+
+    // Kolom 4: 2 bewerkingslijnen
+    [0, 1].forEach(li => {
+      const ly = bY + 8 + li * 13;
+      doc.setDrawColor(30, 30, 30);
+      drawLine(cX[3] + 4, ly, cX[3] + cW[3] - 4, ly, 0.4);
+    });
+
+    // Kolom 5: "€ ___ verschil"
+    doc.setFont("helvetica", "bold"); doc.setFontSize(11); doc.setTextColor(0, 0, 0);
+    doc.text("€", cX[4] + 4, bY + 14);
+    doc.setDrawColor(30, 30, 30);
+    drawLine(cX[4] + 11, bY + 13.5, cX[4] + cW[4] - 4, bY + 13.5, 0.4);
+    doc.setFont("helvetica", "italic"); doc.setFontSize(8.5); doc.setTextColor(136, 136, 136);
+    doc.text("verschil", cX[4] + 4, bY + 21);
+
+    doc.setTextColor(0, 0, 0);
+    y += FIXED_H + 5;
+  }
+
   async function drawKader(kaderEl, scale) {
     if (kaderEl.querySelector(".terug-tabel")) {
       await drawTerugKader(kaderEl, scale);
@@ -701,6 +807,8 @@ if (shelfDataUrl) {
       await drawKiezenKader(kaderEl, scale);
     } else if (kaderEl.querySelector(".exact-tabel")) {
       await drawExactKader(kaderEl, scale);
+    } else if (kaderEl.querySelector(".vergelijk-tabel")) {
+      await drawVergelijkKader(kaderEl, scale);
     } else if (kaderEl.querySelector(".winkel-container")) {
       await drawWinkelKader(kaderEl, scale);
     } else {
