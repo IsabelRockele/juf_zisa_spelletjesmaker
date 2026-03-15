@@ -8,41 +8,18 @@ window.VraagstukkenModule = (() => {
   let gegenereerdeVraagstukken = []; // opgeslagen in de bundel
   let huidigVraagstuk = null;        // laatste gegenereerde preview
 
-  // ── DAGELIJKS LIMIET (Firestore) ─────────────────────────────
-  // Slaat de teller op als: users/{uid}/dagelijks/{datum}/vraagstukken: N
+  // ── DAGELIJKS LIMIET (localStorage — tijdelijk voor testen) ──
   async function haalTellerOp() {
-    const user = firebase.auth().currentUser;
-    if (!user) return 0;
-    const datum = new Date().toISOString().slice(0, 10); // "2026-03-15"
-    try {
-      const db = firebase.firestore();
-      const doc = await db
-        .collection('users').doc(user.uid)
-        .collection('dagelijks').doc(datum)
-        .get();
-      return doc.exists ? (doc.data().vraagstukken || 0) : 0;
-    } catch (e) {
-      console.warn('Firestore teller ophalen mislukt:', e);
-      return 0;
-    }
+    const datum = new Date().toISOString().slice(0, 10);
+    const key = `vs-teller-${datum}`;
+    return parseInt(localStorage.getItem(key) || '0');
   }
 
   async function verhoogTeller() {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
     const datum = new Date().toISOString().slice(0, 10);
-    try {
-      const db = firebase.firestore();
-      const ref = db
-        .collection('users').doc(user.uid)
-        .collection('dagelijks').doc(datum);
-      await ref.set(
-        { vraagstukken: firebase.firestore.FieldValue.increment(1) },
-        { merge: true }
-      );
-    } catch (e) {
-      console.warn('Firestore teller verhogen mislukt:', e);
-    }
+    const key = `vs-teller-${datum}`;
+    const huidig = parseInt(localStorage.getItem(key) || '0');
+    localStorage.setItem(key, huidig + 1);
   }
 
   // ── LIMIET BADGE UPDATEN ─────────────────────────────────────
