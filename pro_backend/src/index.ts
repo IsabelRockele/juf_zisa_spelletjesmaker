@@ -32,7 +32,7 @@ const FRONTEND_REPO   = "https://isabelrockele.github.io/juf_zisa_spelletjesmake
 const APP_INDEX_URL   = `${FRONTEND_REPO}/pro/index.html`;
 const THANKYOU_URL    = `${FRONTEND_REPO}/pro/bedankt.html`;
 
-const MAIL_COLLECTIONS     = ["post"];
+const MAIL_COLLECTIONS     = ["post_msft"];
 const ORDER_COLLECTIONS    = ["orders", "Orders", "Bestellingen"];
 const LICENSE_COLLECTIONS  = ["licenses", "Licenties"];
 
@@ -656,32 +656,56 @@ export const createMonthlyFirstPayment =
 export const createMonthlyPurchase =
   onRequest({ region: REGION, secrets: ["MOLLIE_LIVE_KEY"] }, handleCreateMonthlyPurchase);
 
+// Beschouw 'paid' en 'authorized' als betaald
+function isPaidStatus(status?: string) {
+  const s = (status || "").toLowerCase();
+  return s === "paid" || s === "authorized";
+}
+
 export const mollieWebhook = onRequest(
   { region: REGION, secrets: ["MOLLIE_LIVE_KEY"] },
   async (req: Request, res: Response): Promise<void> => {
-    if (req.method !== "POST") { res.setHeader("Allow", "POST"); res.status(405).send("Method Not Allowed"); return; }
+    if (req.method !== "POST") {
+      res.setHeader("Allow", "POST");
+      res.status(405).send("Method Not Allowed");
+      return;
+    }
+
     const id = (req.body as any)?.id || (req.query as any)?.id;
     const paymentId = String(id || "").trim();
-    if (!paymentId) { res.status(400).send("Missing id"); return; }
+    if (!paymentId) {
+      res.status(400).send("Missing id");
+      return;
+    }
 
     try {
       const payment: MolliePayment = await mollieGetPayment(paymentId);
-            // --- Maand (prepaid): eigen afhandeling -------------------------------------
+
+      // --- Maand (prepaid): eigen afhandeling --------------------------------
       const orderRes = await findOrderByPaymentId(paymentId);
       if (orderRes) {
         const order = orderRes.data as any;
-        if (order.source === "monthly" && payment.status === "paid") {
+        if (order.source === "monthly" && isPaidStatus(payment.status)) {
           await completeMonthlyPayment(payment, orderRes);
           res.status(200).send("OK");
           return; // => voorkom dat de jaar-logica hieronder nog loopt
         }
       }
 
-      if (payment.status === "paid") {
+      // --- Jaar / wachtlijst --------------------------------------------------
+      logger.info("Webhook ontvangen", { paymentId, status: payment.status });
+
+      if (isPaidStatus(payment.status)) {
         await completeOrderByPayment(payment);
+        logger.info("Order afgehandeld als 'betaald'", { paymentId });
       } else {
-        logger.info("Webhook received non-paid status", { paymentId, status: payment.status });
+        logger.info("Webhook met niet-betaalde status, geen actie", {
+          paymentId,
+          status: payment.status,
+        });
       }
+
+      // Bij een succesvol afgehandelde webhook altijd 200 teruggeven
       res.status(200).send("OK");
     } catch (e: any) {
       logger.error("Webhook error", { paymentId, error: e?.message || String(e) });
@@ -689,6 +713,7 @@ export const mollieWebhook = onRequest(
     }
   }
 );
+
 export const importWaitlist = onRequest(
   { region: REGION },
   async (req: Request, res: Response): Promise<void> => {
