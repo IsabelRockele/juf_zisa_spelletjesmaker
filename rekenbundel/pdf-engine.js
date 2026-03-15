@@ -2351,86 +2351,97 @@ lijnKort(fx, formY);
 
   /* ── Tafels blok tekenen ─────────────────────────────────── */
   function _tekenTafelsBlok(blok) {
-    const KOLS     = 3;
-    const RH       = 20;    // rij-hoogte per oefening
-    const GAP      = 4;
-    const ZINR     = ZINRUIMTE;
-    const HOK_W    = 14;    // breedte invulhokje (mm)
-    const HOK_H    = 11;    // hoogte invulhokje (mm) — iets groter
-    const rijCount = Math.ceil(blok.oefeningen.length / KOLS);
-    const nodig    = ZINR + rijCount * (RH + GAP);
-    checkRuimte(nodig);
+    const eersteType = blok.oefeningen[0]?.type;
+    const isBreed    = eersteType === 'redeneren' || eersteType === 'koppel';
+    const KOLS   = isBreed ? 2 : 3;
+    const RH     = 20;    // rij-hoogte per oefening
+    const GAP    = 4;
+    const HOK_W  = isBreed ? 9 : 14;  // smal hokje voor redeneren/koppel
+    const HOK_H  = 11;    // hoogte invulhokje (mm)
+    const colW   = CW / KOLS;
+    const rijH   = RH + GAP;
+
+    const aantalRijen = Math.ceil(blok.oefeningen.length / KOLS);
+
+    // Zorg dat opdrachtzin + eerste rij samen op dezelfde pagina starten
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + rijH + 4);
 
     // Opdrachtzin
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
-doc.setTextColor(26, 58, 92);
+    doc.setTextColor(26, 58, 92);
     doc.text(blok.opdrachtzin, ML, y + 5);
-    y += ZINR;
+    y += ZINRUIMTE;
 
-    const colW = CW / KOLS;
+    // Teken rij per rij — vanaf rij 1 mag er een paginawissel zijn
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      if (rij > 0) checkRuimte(rijH);
 
-    blok.oefeningen.forEach((oef, i) => {
-      const col = i % KOLS;
-      const row = Math.floor(i / KOLS);
-      const x   = ML + col * colW;
-      const ry  = y + row * (RH + GAP);
+      const rijOef = blok.oefeningen.slice(rij * KOLS, (rij + 1) * KOLS);
 
-      // Buitenste kader (wit, lichte rand)
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(180, 180, 180);
-      doc.setLineWidth(0.4);
-      doc.roundedRect(x + 1, ry, colW - 2, RH, 2, 2, 'FD');
+      rijOef.forEach((oef, k) => {
+        const x  = ML + k * colW;
+        const ry = y;
 
-      // Som opbouwen als losse onderdelen zodat we het hokje exact kunnen plaatsen
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(14);
-      doc.setTextColor(26, 58, 92);
+        // Kader
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(180, 180, 180);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(x + 1, ry, colW - 2, RH, 2, 2, 'FD');
 
-      // Bepaal de som-onderdelen: [tekst|hokje, tekst|hokje, ...]
-      // Elke oefening heeft 1 invulhokje
-      let delen = [];
-      if (oef.type === 'vermenigvuldigen') {
-        delen = [`${oef.a}`, ' × ', `${oef.b}`, ' = ', 'HOK'];
-      } else if (oef.type === 'gedeeld') {
-        delen = [`${oef.a}`, ' : ', `${oef.b}`, ' = ', 'HOK'];
-      } else if (oef.type === 'ontbrekende-factor') {
-        if (oef.positie === 'links') {
-          delen = ['HOK', ' × ', `${oef.b}`, ' = ', `${oef.product}`];
-        } else {
-          delen = [`${oef.a}`, ' × ', 'HOK', ' = ', `${oef.product}`];
+        // Bouw de som-onderdelen op
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(14);
+        doc.setTextColor(26, 58, 92);
+
+        let delen = [];
+        if (oef.type === 'vermenigvuldigen') {
+          delen = [`${oef.a}`, ' × ', `${oef.b}`, ' = ', 'HOK'];
+        } else if (oef.type === 'gedeeld') {
+          delen = [`${oef.a}`, ' : ', `${oef.b}`, ' = ', 'HOK'];
+        } else if (oef.type === 'ontbrekende-factor') {
+          if (oef.positie === 'links') {
+            delen = ['HOK', ' × ', `${oef.b}`, ' = ', `${oef.product}`];
+          } else {
+            delen = [`${oef.a}`, ' × ', 'HOK', ' = ', `${oef.product}`];
+          }
+        } else if (oef.type === 'redeneren') {
+          // deeltal : deler = HOK , want HOK × deler = HOK  (kind vult alles in)
+          delen = [`${oef.deeltal}`, ' : ', `${oef.deler}`, ' = ', 'HOK', '  , want ', 'HOK', ' × ', `${oef.deler}`, ' = ', 'HOK'];
+        } else if (oef.type === 'koppel') {
+          // factor1 × factor2 = HOK , dus HOK : factor2 = HOK
+          delen = [`${oef.factor1}`, ' × ', `${oef.factor2}`, ' = ', 'HOK', '  , dus ', 'HOK', ' : ', `${oef.factor2}`, ' = ', 'HOK'];
         }
-      }
 
-      // Meet totale breedte om te centreren
-      let totaalB = 0;
-      delen.forEach(d => {
-        totaalB += d === 'HOK' ? HOK_W : doc.getTextWidth(d);
+        // Meet totale breedte om te centreren
+        let totaalB = 0;
+        delen.forEach(d => { totaalB += d === 'HOK' ? HOK_W : doc.getTextWidth(d); });
+
+        const cy    = ry + RH / 2;
+        const textY = cy + 2.5;
+        let curX    = x + (colW - totaalB) / 2;
+
+        delen.forEach(d => {
+          if (d === 'HOK') {
+            const hokY = cy - HOK_H / 2;
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(26, 58, 92);
+            doc.setLineWidth(0.6);
+            doc.roundedRect(curX, hokY, HOK_W, HOK_H, 2, 2, 'FD');
+            curX += HOK_W;
+          } else {
+            doc.setTextColor(26, 58, 92);
+            doc.text(d, curX, textY);
+            curX += doc.getTextWidth(d);
+          }
+        });
       });
 
-      const cy   = ry + RH / 2;          // verticaal midden van kader
-      const textY = cy + 2.5;            // basislijn tekst (iets onder midden)
-      let curX = x + (colW - totaalB) / 2;
+      y += rijH;
+    }
 
-      delen.forEach(d => {
-        if (d === 'HOK') {
-          // Teken invulhokje: wit met donkere rand
-          const hokY = cy - HOK_H / 2;
-          doc.setFillColor(255, 255, 255);
-          doc.setDrawColor(26, 58, 92);
-          doc.setLineWidth(0.6);
-          doc.roundedRect(curX, hokY, HOK_W, HOK_H, 2, 2, 'FD');
-          curX += HOK_W;
-        } else {
-          doc.setTextColor(26, 58, 92);
-          doc.text(d, curX, textY);
-          curX += doc.getTextWidth(d);
-        }
-      });
-    });
-
-    y += rijCount * (RH + GAP) + NABLOK;
+    y += NABLOK;
   }
 
   /* ── Tafels inzicht blok tekenen ────────────────────────── */
