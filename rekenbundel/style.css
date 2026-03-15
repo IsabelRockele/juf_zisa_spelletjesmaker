@@ -401,6 +401,12 @@ header .badge {
 }
 .radio-chip input { display: none; }
 .radio-chip.geselecteerd { border-color: var(--lichtblauw); background: #EBF3FB; color: var(--lichtblauw); }
+.radio-chip.radio-chip-binnenkort {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-style: dashed;
+  color: var(--muted);
+}
 
 /* ── KNOPPEN ───────────────────────────────────────────────── */
 .btn-toevoegen {
@@ -1546,6 +1552,35 @@ header .badge {
   font-weight: 500;
   white-space: nowrap;
   padding-bottom: 2px;
+}
+
+/* Ingevuld getal bij delen-aftrekking (groepGrootte) */
+.inzicht-ingevuld {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1565C0;
+  min-width: 18px;
+  text-align: center;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+
+/* Nul bij het einde van de aftrekrij */
+.inzicht-nul {
+  font-size: 15px;
+  font-weight: 700;
+  color: #444;
+  padding-bottom: 2px;
+  flex-shrink: 0;
+}
+
+/* Min-teken bij herhaalde aftrekking */
+.inzicht-min {
+  font-size: 15px;
+  font-weight: 700;
+  color: #E64A19;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 /* ── Getallenlijn preview ──────────────────────────────────────── */
