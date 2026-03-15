@@ -552,6 +552,9 @@
             <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-aftrekking',this)">
               <input type="radio" name="inzicht-bewerking" value="delen-aftrekking">➗ Delen (herhaalde aftrekking)
             </label>
+            <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-rest',this)">
+              <input type="radio" name="inzicht-bewerking" value="delen-rest">➗ Delen (met rest)
+            </label>
             <label class="radio-chip radio-chip-binnenkort" title="Binnenkort beschikbaar">
               <input type="radio" name="inzicht-bewerking" value="delen-verdelen" disabled>🤝 Delen (eerlijk verdelen)
             </label>
@@ -675,6 +678,12 @@
             </label>
             <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-zelf',this)">
               <input type="radio" name="gl-variant-inzicht" value="delen-zelf">➗ Zelf tekenen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-rest-getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-rest-getekend">➗R Sprongen getekend
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-rest-zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-rest-zelf">➗R Zelf tekenen
             </label>
           </div>
         </div>
