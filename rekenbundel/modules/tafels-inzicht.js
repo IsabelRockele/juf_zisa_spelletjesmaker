@@ -5,6 +5,8 @@
      'groepjes'        → emoji-groepjes → herhaalde optelling → vermenigvuldiging
      'delen-aftrekking'→ alle emoji's → kind tekent groepen → herhaalde aftrekking → deling
      'delen-rest'      → alle emoji's → deling met rest (uitkomst % deler ≠ 0)
+     'redeneren'       → 16 : 2 = ... want ... × 2 = 16
+     'koppel'          → 5 × 2 = ___ , dus ___ : 2 = ___
    Modus 'per-tafel': tafel van X, t/m ×tafelMax
    Modus 'tot-uitkomst': alle combinaties met uitkomst ≤ N
    ══════════════════════════════════════════════════════════════ */
@@ -68,6 +70,29 @@ const TafelsInzicht = (() => {
 
     const gemengd = _shuffle(pool);
     const gekozen = gemengd.slice(0, aantalOefeningen);
+
+    // redeneren en koppel hebben geen emoji's nodig
+    if (inzichtType === 'redeneren') {
+      return gekozen.map((oef, i) => ({
+        type:     'redeneren',
+        // deeltal : deler = quotient  want  quotient × deler = deeltal
+        deeltal:  oef.groepen * oef.groepGrootte,
+        deler:    oef.groepGrootte,
+        quotient: oef.groepen,
+        sleutel:  `red-${oef.groepen}-${oef.groepGrootte}-${i}`,
+      }));
+    }
+
+    if (inzichtType === 'koppel') {
+      return gekozen.map((oef, i) => ({
+        type:    'koppel',
+        // factor1 × factor2 = product , dus product : factor2 = factor1
+        factor1: oef.groepen,
+        factor2: oef.groepGrootte,
+        product: oef.groepen * oef.groepGrootte,
+        sleutel: `kop-${oef.groepen}-${oef.groepGrootte}-${i}`,
+      }));
+    }
 
     return gekozen.map((oef, i) => {
       const key = emojiSet === 'afwisselend'
