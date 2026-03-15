@@ -4,6 +4,7 @@
    Typen:
      'groepjes'        → emoji-groepjes → herhaalde optelling → vermenigvuldiging
      'delen-aftrekking'→ alle emoji's → kind tekent groepen → herhaalde aftrekking → deling
+     'delen-rest'      → alle emoji's → deling met rest (uitkomst % deler ≠ 0)
    Modus 'per-tafel': tafel van X, t/m ×tafelMax
    Modus 'tot-uitkomst': alle combinaties met uitkomst ≤ N
    ══════════════════════════════════════════════════════════════ */
@@ -30,19 +31,30 @@ const TafelsInzicht = (() => {
 
   /* ── Genereer oefeningen ─────────────────────────────────── */
   function genereer({ modus = 'per-tafel', tafel = 2, tafels = null, maxUitkomst = 12, tafelMax = 5, aantalOefeningen = 4, emojiSet = 'afwisselend', inzichtType = 'groepjes' }) {
-    // tafels (array) heeft voorrang op tafel (enkelvoud)
     const tafelsLijst = tafels ? (Array.isArray(tafels) ? tafels : [tafels]) : [tafel];
 
     const pool = [];
 
-    if (modus === 'per-tafel') {
+    if (inzichtType === 'delen-rest') {
+      // Pool: combinaties waarbij uitkomst NIET deelbaar is door deler
+      // deler = groepGrootte (tafel), uitkomst = willekeurig getal met rest
+      for (const deler of tafelsLijst) {
+        const maxDeeltal = Math.min(maxUitkomst, deler * tafelMax + deler - 1);
+        for (let deeltal = deler + 1; deeltal <= maxDeeltal; deeltal++) {
+          if (deeltal % deler !== 0) {
+            const quotient = Math.floor(deeltal / deler);
+            const rest     = deeltal % deler;
+            pool.push({ deeltal, deler, quotient, rest });
+          }
+        }
+      }
+    } else if (modus === 'per-tafel') {
       for (const t of tafelsLijst) {
         for (let m = 1; m <= tafelMax; m++) {
           pool.push({ groepen: m, groepGrootte: t });
         }
       }
     } else {
-      // Alle combinaties a×b waarbij uitkomst ≤ maxUitkomst, a≥2, b≥2, max 7 groepen
       for (let a = 2; a <= Math.min(maxUitkomst, 7); a++) {
         for (let b = 2; b <= maxUitkomst; b++) {
           if (a * b <= maxUitkomst) {
@@ -54,23 +66,36 @@ const TafelsInzicht = (() => {
 
     if (pool.length === 0) return [];
 
-    // Shuffle
     const gemengd = _shuffle(pool);
     const gekozen = gemengd.slice(0, aantalOefeningen);
 
-    // Voeg emoji toe
     return gekozen.map((oef, i) => {
       const key = emojiSet === 'afwisselend'
         ? EMOJI_KEYS[i % EMOJI_KEYS.length]
         : (EMOJI_SETS[emojiSet] ? emojiSet : EMOJI_KEYS[0]);
       const set = EMOJI_SETS[key];
 
+      if (inzichtType === 'delen-rest') {
+        return {
+          type:         'delen-rest',
+          deeltal:      oef.deeltal,
+          deler:        oef.deler,
+          quotient:     oef.quotient,
+          rest:         oef.rest,
+          uitkomst:     oef.deeltal, // totaal aantal emoji's
+          groepGrootte: oef.deler,   // voor emoji-rendering
+          emoji:        set.emoji,
+          emojiLabel:   set.label,
+          sleutel:      `gr-${oef.deeltal}-${oef.deler}-${key}`,
+        };
+      }
+
       if (inzichtType === 'delen-aftrekking') {
         return {
           type: 'delen-aftrekking',
-          groepen: oef.groepen,       // aantal groepen = quotient
-          groepGrootte: oef.groepGrootte, // grootte van elke groep = deler
-          uitkomst: oef.groepen * oef.groepGrootte, // deeltal
+          groepen: oef.groepen,
+          groepGrootte: oef.groepGrootte,
+          uitkomst: oef.groepen * oef.groepGrootte,
           emoji: set.emoji,
           emojiLabel: set.label,
           sleutel: `gd-${oef.groepen}-${oef.groepGrootte}-${key}`,
