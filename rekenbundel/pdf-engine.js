@@ -1135,11 +1135,11 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
     cel(qx+c, qy+c, null);
   }
 
-  function _tekenBlok(blok) {
+ async function _tekenBlok(blok) {
   if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'komma')  { _tekenKommaBlok(blok); return; }
   if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen')  { _tekenDeelBlok(blok); return; }
   if (blok.bewerking === 'cijferen') { _tekenCijferenBlok(blok); return; }
-  if (blok.bewerking === 'herken-brug')     { _tekenHerkenBlok(blok); return; }
+  if (blok.bewerking === 'herken-brug')     { await _tekenHerkenBlok(blok); return; }
   if (blok.bewerking === 'splitsingen')     { _tekenSplitsingenBlok(blok); return; }
   if (blok.bewerking === 'tafels')          { _tekenTafelsBlok(blok); return; }
   if (blok.bewerking === 'tafels-inzicht')  { _tekenInzichtBlok(blok); return; }
@@ -1213,24 +1213,61 @@ doc.setTextColor(26, 58, 92);
     lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
   }
 
+  function _wachtOpLamp(timeout = 1500) {
+  return new Promise(resolve => {
+    const kandidaten = Array.from(document.querySelectorAll('.zisa-lamp'));
+    const img = kandidaten.find(el => el.complete && el.naturalWidth > 0) || kandidaten[0] || null;
+
+    if (!img) {
+      resolve(null);
+      return;
+    }
+
+    if (img.complete && img.naturalWidth > 0) {
+      resolve(img);
+      return;
+    }
+
+    let klaar = false;
+
+    const done = () => {
+      if (klaar) return;
+      klaar = true;
+      resolve(img.complete && img.naturalWidth > 0 ? img : null);
+    };
+
+    img.addEventListener('load', done, { once: true });
+    img.addEventListener('error', () => resolve(null), { once: true });
+
+    setTimeout(done, timeout);
+  });
+}
   /* ── Lampje base64 ophalen ───────────────────────────────── */
-  function _getLamp() {
-    if (_lampBase64Cache) return _lampBase64Cache;
-    const img = document.querySelector('.zisa-lamp');
-    if (!img || !img.complete || img.naturalWidth === 0) return null;
-    try {
-      const c = document.createElement('canvas');
-      c.width = img.naturalWidth; c.height = img.naturalHeight;
-      c.getContext('2d').drawImage(img, 0, 0);
-      _lampBase64Cache = c.toDataURL('image/png');
-      return _lampBase64Cache;
-    } catch(e) { return null; }
+ async function _getLamp() {
+  if (_lampBase64Cache) return _lampBase64Cache;
+
+  const img = await _wachtOpLamp();
+  if (!img) return null;
+
+  try {
+    const c = document.createElement('canvas');
+    c.width = img.naturalWidth;
+    c.height = img.naturalHeight;
+
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+
+    _lampBase64Cache = c.toDataURL('image/png');
+    return _lampBase64Cache;
+  } catch (e) {
+    return null;
   }
+}
 
   /* ── Herken-brug blok ────────────────────────────────────── */
-  function _tekenHerkenBlok(blok) {
+  async function _tekenHerkenBlok(blok) {
     const aantalRijen = Math.ceil(blok.oefeningen.length / KOLOMMEN);
-    const lamp = _getLamp();
+   const lamp = await _getLamp();
     checkRuimte(HRK_MIN);
 
     y += VOOR_ZIN;
@@ -2016,14 +2053,16 @@ lijnKort(fx, formY);
 }
 
   /* ── Publieke API ────────────────────────────────────────── */
-  function genereer(bundelData, titel) {
+  async function genereer(bundelData, titel) {
     const { jsPDF } = window.jspdf;
     doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     _lampBase64Cache = null; // reset cache bij nieuwe PDF
     y = MT;
 
     _tekenKoptekst(titel || 'Rekenbundel');
-    bundelData.forEach(blok => _tekenBlok(blok));
+    for (const blok of bundelData) {
+  await _tekenBlok(blok);
+}
 
     doc.save(`${(titel || 'rekenbundel').replace(/\s+/g, '-').toLowerCase()}.pdf`);
   }
