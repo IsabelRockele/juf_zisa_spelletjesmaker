@@ -116,7 +116,7 @@ const Generator = (() => {
 
     // Speciale afhandeling voor inzicht en getallenlijn
     if (blok.bewerking === 'tafels-inzicht') {
-      const nieuweOef = TafelsInzicht.genereer({ ...blok.config, aantalOefeningen: 5 });
+      const nieuweOef = TafelsInzicht.genereer({ ...blok.config, aantalOefeningen: 5, inzichtType: blok.config?.inzichtType || 'groepjes' });
       const bestaand  = new Set(blok.oefeningen.map(o => o.sleutel));
       for (const oef of nieuweOef) {
         if (!bestaand.has(oef.sleutel)) { blok.oefeningen.push(oef); return true; }
