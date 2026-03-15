@@ -1,9 +1,11 @@
 /* ══════════════════════════════════════════════════════════════
    modules/tafels-inzicht.js
-   Verantwoordelijkheid: inzicht-oefeningen voor vermenigvuldigen
-   - Groepjes met emoji's → herhaalde optelling → vermenigvuldiging
-   - Modus 'per-tafel': tafel van X, t/m ×10
-   - Modus 'tot-uitkomst': alle combinaties met uitkomst ≤ N
+   Verantwoordelijkheid: inzicht-oefeningen voor vermenigvuldigen en delen
+   Typen:
+     'groepjes'        → emoji-groepjes → herhaalde optelling → vermenigvuldiging
+     'delen-aftrekking'→ alle emoji's → kind tekent groepen → herhaalde aftrekking → deling
+   Modus 'per-tafel': tafel van X, t/m ×tafelMax
+   Modus 'tot-uitkomst': alle combinaties met uitkomst ≤ N
    ══════════════════════════════════════════════════════════════ */
 
 const TafelsInzicht = (() => {
@@ -27,7 +29,7 @@ const TafelsInzicht = (() => {
   const EMOJI_KEYS = Object.keys(EMOJI_SETS);
 
   /* ── Genereer oefeningen ─────────────────────────────────── */
-  function genereer({ modus = 'per-tafel', tafel = 2, tafels = null, maxUitkomst = 12, tafelMax = 5, aantalOefeningen = 4, emojiSet = 'afwisselend' }) {
+  function genereer({ modus = 'per-tafel', tafel = 2, tafels = null, maxUitkomst = 12, tafelMax = 5, aantalOefeningen = 4, emojiSet = 'afwisselend', inzichtType = 'groepjes' }) {
     // tafels (array) heeft voorrang op tafel (enkelvoud)
     const tafelsLijst = tafels ? (Array.isArray(tafels) ? tafels : [tafels]) : [tafel];
 
@@ -62,6 +64,19 @@ const TafelsInzicht = (() => {
         ? EMOJI_KEYS[i % EMOJI_KEYS.length]
         : (EMOJI_SETS[emojiSet] ? emojiSet : EMOJI_KEYS[0]);
       const set = EMOJI_SETS[key];
+
+      if (inzichtType === 'delen-aftrekking') {
+        return {
+          type: 'delen-aftrekking',
+          groepen: oef.groepen,       // aantal groepen = quotient
+          groepGrootte: oef.groepGrootte, // grootte van elke groep = deler
+          uitkomst: oef.groepen * oef.groepGrootte, // deeltal
+          emoji: set.emoji,
+          emojiLabel: set.label,
+          sleutel: `gd-${oef.groepen}-${oef.groepGrootte}-${key}`,
+        };
+      }
+
       return {
         type: 'groepjes',
         groepen: oef.groepen,
