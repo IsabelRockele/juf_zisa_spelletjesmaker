@@ -733,14 +733,16 @@ const App = (() => {
 
   function _defaultZinInzicht() {
     if (_inzichtType === 'getallenlijn') {
-      if (_glVariantInzicht === 'delen-getekend') return 'Kijk naar de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
-      if (_glVariantInzicht === 'delen-zelf')     return 'Teken de sprongen op de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
-      if (_glVariantInzicht === 'zelf')           return 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.';
+      if (_glVariantInzicht === 'delen-getekend')      return 'Kijk naar de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
+      if (_glVariantInzicht === 'delen-zelf')          return 'Teken de sprongen op de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
+      if (_glVariantInzicht === 'delen-rest-getekend') return 'Kijk naar de getallenlijn. Schrijf de deling met rest.';
+      if (_glVariantInzicht === 'delen-rest-zelf')     return 'Teken de sprongen op de getallenlijn. Schrijf de deling met rest.';
+      if (_glVariantInzicht === 'zelf')                return 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.';
       return 'Kijk naar de getallenlijn. Schrijf de herhaalde optelling en de vermenigvuldiging.';
     }
-    return _inzichtBewerking === 'delen-aftrekking'
-      ? 'Schrijf de herhaalde aftrekking en de deling.'
-      : 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
+    if (_inzichtBewerking === 'delen-aftrekking') return 'Schrijf de herhaalde aftrekking en de deling.';
+    if (_inzichtBewerking === 'delen-rest')       return 'Verdeel de afbeeldingen in groepen. Schrijf de deling met rest.';
+    return 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
   }
 
   function selecteerInzichtBewerking(waarde, el) {
@@ -848,8 +850,10 @@ const App = (() => {
       return;
     }
 
-    // ── Afbeeldingen: vermenigvuldigen of delen-aftrekking ───
+    // ── Afbeeldingen: vermenigvuldigen, delen-aftrekking of delen-rest ─
     const isDeelAftr = _inzichtBewerking === 'delen-aftrekking';
+    const isDeelRest = _inzichtBewerking === 'delen-rest';
+    const inzichtType = isDeelAftr ? 'delen-aftrekking' : isDeelRest ? 'delen-rest' : 'groepjes';
     const oefeningen = TafelsInzicht.genereer({
       modus:            _inzichtModus,
       tafels:           _inzichtTafel,
@@ -857,17 +861,16 @@ const App = (() => {
       tafelMax:         _inzichtTafelMax,
       aantalOefeningen: aantal,
       emojiSet:         _inzichtEmoji,
-      inzichtType:      isDeelAftr ? 'delen-aftrekking' : 'groepjes',
+      inzichtType,
     });
     if (!oefeningen || oefeningen.length === 0) {
       toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
       return;
     }
-    const subtype = isDeelAftr ? 'delen-aftrekking' : 'groepjes';
     bundelData.push({
       id:           `blok-inzicht-${Date.now()}-${bundelData.length + 1}`,
       bewerking:    'tafels-inzicht',
-      subtype,
+      subtype:      inzichtType,
       niveau:       Math.max(..._inzichtTafel) * (_inzichtTafelMax || 5),
       brug:         'zonder',
       opdrachtzin:  zin,
@@ -875,10 +878,10 @@ const App = (() => {
       oefeningen,
       config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
                 maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji,
-                aantalOefeningen: aantal, inzichtType: subtype },
+                aantalOefeningen: aantal, inzichtType },
     });
     Preview.render(bundelData);
-    toonToast(`✅ ${isDeelAftr ? 'Deelblok' : 'Inzichtblok'} toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+    toonToast(`✅ ${isDeelRest ? 'Deelblok (rest)' : isDeelAftr ? 'Deelblok' : 'Inzichtblok'} toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
   }
 
   /* ── Preview en PDF ──────────────────────────────────────── */
