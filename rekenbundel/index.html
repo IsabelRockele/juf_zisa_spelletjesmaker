@@ -1021,6 +1021,30 @@
         <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
       </div>
 
+      <!-- Leerjaar -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🎓</div>
+          Leerjaar
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','1',this)">
+              <input type="radio" name="vs-leerjaar" value="1">1e leerjaar
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-leerjaar','2',this)">
+              <input type="radio" name="vs-leerjaar" value="2" checked>2e leerjaar
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','3',this)">
+              <input type="radio" name="vs-leerjaar" value="3">3e leerjaar
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','4',this)">
+              <input type="radio" name="vs-leerjaar" value="4">4e leerjaar
+            </label>
+          </div>
+        </div>
+      </div>
+
       <!-- Bewerking kiezen -->
       <div class="config-kaart">
         <div class="kaart-titel">
@@ -1072,7 +1096,7 @@
         </div>
       </div>
 
-      <!-- Tafels/bewerkingskeuze (voor vermenigvuldigen/delen) -->
+      <!-- Tafels (voor vermenigvuldigen/delen) -->
       <div class="config-kaart" id="vs-kaart-tafels" style="display:none">
         <div class="kaart-titel">
           <div class="icon">✖️</div>
@@ -1101,6 +1125,38 @@
               <input type="checkbox" name="vs-tafels" value="10" style="display:none"> Tafel van 10
             </label>
           </div>
+        </div>
+      </div>
+
+      <!-- Aantal getallen -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🔗</div>
+          Aantal getallen
+        </div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-aantalgetallen','2',this)">
+              <input type="radio" name="vs-aantalgetallen" value="2" checked>2 getallen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','3',this)">
+              <input type="radio" name="vs-aantalgetallen" value="3">3 getallen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','gemengd',this)">
+              <input type="radio" name="vs-aantalgetallen" value="gemengd">Gemengd
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Thema -->
+      <div class="config-kaart">
+        <div class="kaart-titel">
+          <div class="icon">🌈</div>
+          Thema (optioneel)
+        </div>
+        <div class="form-rij">
+          <input type="text" id="vs-thema" placeholder="Bv: Pasen, lente, supermarkt, voetbal..." style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;" />
         </div>
       </div>
 
@@ -1143,21 +1199,6 @@
               <input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn
             </label>
           </div>
-        </div>
-      </div>
-
-      <!-- Afbeelding -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🖼️</div>
-          Visuele ondersteuning
-        </div>
-        <div class="form-rij">
-          <label class="vink-chip" id="chip-afbeelding" onclick="this.classList.toggle('geselecteerd');document.getElementById('vs-afbeelding').checked=!document.getElementById('vs-afbeelding').checked">
-            <span class="vink-box"></span>
-            <input type="checkbox" id="vs-afbeelding" style="display:none">
-            <span>Emoji-illustratie toevoegen</span>
-          </label>
         </div>
       </div>
 
@@ -1254,7 +1295,7 @@
 <script src="generator.js?v=12"></script>
 <script src="preview.js?v=34"></script>
 <script src="pdf-engine.js?v=42"></script>
-<script src="vraagstukken.js?v=2"></script>
+<script src="vraagstukken.js?v=3"></script>
 <script src="app.js?v=18"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
