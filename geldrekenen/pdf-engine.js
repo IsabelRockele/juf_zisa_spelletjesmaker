@@ -256,14 +256,30 @@ if (shelfDataUrl) {
         if (prijsEl) {
           const pr = relRect(prijsEl, posterEl, scale, x, y0);
           doc.setFillColor(255, 235, 59);
-doc.setDrawColor(60, 60, 60);
-doc.setLineWidth(0.2);
-doc.roundedRect(pr.x, pr.y, pr.w, pr.h, 0.8, 0.8, "FD");
-
+          doc.setDrawColor(60, 60, 60);
+          doc.setLineWidth(0.2);
+          doc.roundedRect(pr.x, pr.y, pr.w, pr.h, 0.8, 0.8, "FD");
           doc.setFont("helvetica", "bold");
           doc.setFontSize(8.5);
           const txt = readText(prijsEl);
           doc.text(txt, pr.x + 1.5, pr.y + pr.h * 0.68);
+        }
+
+        // Nummer-badge linksboven
+        const nummerEl = item.querySelector(".poster-nummer");
+        if (nummerEl) {
+          const nr = relRect(item, posterEl, scale, x, y0);
+          const badgeSize = 5;
+          const bx = nr.x + 1, by = nr.y + 1;
+          doc.setFillColor(61, 171, 146);
+          doc.circle(bx + badgeSize / 2, by + badgeSize / 2, badgeSize / 2, "F");
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(6.5);
+          doc.setTextColor(255, 255, 255);
+          const numTxt = readText(nummerEl);
+          const ntw = doc.getTextWidth(numTxt);
+          doc.text(numTxt, bx + (badgeSize - ntw) / 2, by + badgeSize * 0.72);
+          doc.setTextColor(0, 0, 0);
         }
       }
     }
@@ -285,6 +301,122 @@ doc.roundedRect(pr.x, pr.y, pr.w, pr.h, 0.8, 0.8, "FD");
     }
   }
 
+  async function drawTerugKader(kaderEl, scale) {
+    // Vaste maten — alles in mm, niks van DOM afhankelijk
+    // bodyH=50 zodat 2 lijnen(8+19) + tekst(31) + antwoord(41) allemaal < 50 passen
+    const headerH = 18, bodyH = 50, padTop = 7, padBot = 6;
+    const FIXED_H = padTop + headerH + bodyH + padBot; // 81mm
+
+    ensureSpace(FIXED_H + 5);
+    const x = MARGIN_LEFT, y0 = y, tW = CONTENT_W - 4;
+    doc.setDrawColor(183, 183, 201); doc.setLineWidth(0.6);
+    drawRoundedRect(x, y0, CONTENT_W, FIXED_H, 3);
+
+    const tabel = kaderEl.querySelector(".terug-tabel");
+    if (!tabel) { y += FIXED_H + 5; return; }
+
+    // Kolombreedtes en x-posities
+    const cW = [tW*0.16, tW*0.35, tW*0.13, tW*0.36];
+    const tx = x + 2, ty = y0 + padTop;
+    const cX = [tx, tx+cW[0], tx+cW[0]+cW[1], tx+cW[0]+cW[1]+cW[2]];
+    const bodyY = ty + headerH;
+
+    // ── Header ──
+    doc.setFillColor(245,232,240); doc.setDrawColor(212,184,200); doc.setLineWidth(0.4);
+    doc.rect(tx, ty, tW, headerH, "FD");
+    const hdrs = ["Ik koop …","Hoeveel kost het samen?","Ik betaal met …","Ik krijg … € terug."];
+    doc.setTextColor(90,58,74);
+    hdrs.forEach((hTxt,i) => {
+      const cx2 = cX[i]+cW[i]/2, fs = 9;
+      doc.setFont("helvetica","bold"); doc.setFontSize(fs);
+      const lines = splitText(hTxt, cW[i]-3, fs, "bold");
+      const lh = fs*0.46, th = lines.length*lh;
+      lines.forEach((line,li) => {
+        const tw2 = doc.getTextWidth(line);
+        doc.text(line, cx2-tw2/2, ty+(headerH-th)/2+fs*0.38+li*lh);
+      });
+    });
+
+    // ── Body ──
+    doc.setFillColor(255,255,255); doc.setDrawColor(212,184,200); doc.setLineWidth(0.4);
+    doc.rect(tx, bodyY, tW, bodyH, "FD");
+    for (let i=1;i<4;i++) doc.line(cX[i], ty, cX[i], ty+headerH+bodyH);
+    doc.rect(tx, ty, tW, headerH+bodyH);
+    doc.line(tx, bodyY, tx+tW, bodyY);
+
+    // ── Kolom 1: producten + prijskaartjes — direct gepositioneerd in bodyY ──
+    {
+      const mandjeItems = [...kaderEl.querySelectorAll(".mandje-item-terug")];
+      const itemH = bodyH / Math.max(mandjeItems.length, 1);
+      const imgW = cW[0] * 0.55;  // breedte per afbeelding
+      const col1CenterX = cX[0] + cW[0] / 2;
+
+      for (let idx = 0; idx < mandjeItems.length; idx++) {
+        const item = mandjeItems[idx];
+        const itemTopY = bodyY + idx * itemH;
+
+        // Afbeelding
+        const img = item.querySelector("img");
+        if (img) {
+          const imgH = Math.min(itemH * 0.62, 16);
+          const imgDrawW = imgH * 1.2;
+          const imgX = col1CenterX - imgDrawW / 2;
+          const imgY = itemTopY + 2;
+          await drawImageFromElement(img, imgX, imgY, imgDrawW, imgH);
+        }
+
+        // Prijskaartje
+        const tag = item.querySelector(".mandje-prijs-tag");
+        if (tag) {
+          const tagTxt = readText(tag);
+          doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(51,51,51);
+          const tagW = doc.getTextWidth(tagTxt) + 4;
+          const tagH = 5;
+          const tagX = col1CenterX - tagW / 2;
+          const tagY = itemTopY + itemH * 0.68;
+          doc.setFillColor(255,248,225); doc.setDrawColor(180,180,180); doc.setLineWidth(0.25);
+          doc.roundedRect(tagX, tagY, tagW, tagH, 1, 1, "FD");
+          doc.text(tagTxt, tagX + 2, tagY + tagH * 0.75);
+        }
+      }
+    }
+
+    // ── Kolom 2: lijn1(+7) lijn2(+16) tekst(+26) €-lijn(+35) — alles < 50 ──
+    { const lx=cX[1]+cW[1]*0.07, lw=cW[1]*0.86;
+      doc.setDrawColor(30,30,30);
+      drawLine(lx, bodyY+7,  lx+lw, bodyY+7,  0.45);
+      drawLine(lx, bodyY+16, lx+lw, bodyY+16, 0.45);
+      doc.setFont("helvetica","normal"); doc.setFontSize(11); doc.setTextColor(50,50,50);
+      doc.text("Het kost samen", cX[1]+4, bodyY+26);
+      doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(0,0,0);
+      doc.text("\u20ac", cX[1]+4, bodyY+36);
+      drawLine(cX[1]+11, bodyY+35.5, cX[1]+11+cW[1]*0.55, bodyY+35.5, 0.45);
+    }
+
+    // ── Kolom 3: biljet gecentreerd ──
+    const betaalImg = kaderEl.querySelector(".betaal-biljet-img");
+    if (betaalImg) {
+      const maxH=16, ratio=betaalImg.naturalWidth/(betaalImg.naturalHeight||2);
+      const dW=maxH*(ratio||2);
+      await drawImageFromElement(betaalImg, cX[2]+(cW[2]-dW)/2, bodyY+(bodyH-maxH)/2, dW, maxH);
+    }
+
+    // ── Kolom 4: lijn1(+7) lijn2(+16) tekst(+26) terug(+36) — alles < 50 ──
+    { const lx=cX[3]+cW[3]*0.07, lw=cW[3]*0.86, sX=cX[3]+4;
+      doc.setDrawColor(30,30,30);
+      drawLine(lx, bodyY+7,  lx+lw, bodyY+7,  0.45);
+      drawLine(lx, bodyY+16, lx+lw, bodyY+16, 0.45);
+      doc.setFont("helvetica","normal"); doc.setFontSize(11); doc.setTextColor(50,50,50);
+      doc.text("Ik krijg \u20ac", sX, bodyY+26);
+      const ikW = doc.getTextWidth("Ik krijg \u20ac ");
+      drawLine(sX+ikW, bodyY+25.5, sX+ikW+20, bodyY+25.5, 0.45);
+      doc.text("terug.", sX, bodyY+36);
+    }
+
+    doc.setTextColor(0,0,0);
+    y += FIXED_H + 5;
+  }
+
   async function drawWinkelKader(kaderEl, scale) {
     const kH = rect(kaderEl).height * scale;
     ensureSpace(kH + 5);
@@ -299,47 +431,45 @@ doc.roundedRect(pr.x, pr.y, pr.w, pr.h, 0.8, 0.8, "FD");
     drawRoundedRect(x, y0, w, h, 3);
 
     const container = kaderEl.querySelector(".winkel-container");
-    if (!container) {
-      y += h + 5;
-      return;
-    }
+    if (!container) { y += h + 5; return; }
 
+    // Dashed scheidingslijn
     const listEl = container.querySelector(".winkel-lijstje");
-    const opdrachtEl = container.querySelector(".winkel-opdracht");
-
-    if (listEl && opdrachtEl) {
+    if (listEl) {
       const sepX = relRect(listEl, kaderEl, scale, x, y0).x + relRect(listEl, kaderEl, scale, x, y0).w + 5;
       doc.setLineDashPattern([1.2, 1.2], 0);
       doc.line(sepX, y0 + 4, sepX, y0 + h - 4);
       doc.setLineDashPattern([], 0);
     }
 
-    const labelEls = [...kaderEl.querySelectorAll(".label-groep")];
-    for (const label of labelEls) {
-      const lr = relRect(label, kaderEl, scale, x, y0);
-      const txt = readText(label);
-      const lines = splitText(txt, lr.w, 11, "bold");
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-
-      lines.forEach((line, i) => {
-        doc.text(line, lr.x, lr.y + 4 + i * 5);
-      });
-    }
-
-    const lineEl = kaderEl.querySelector(".lange-invul-lijn");
-    if (lineEl) {
-      const rr = relRect(lineEl, kaderEl, scale, x, y0);
-      drawLine(rr.x, rr.y + rr.h - 1.5, rr.x + rr.w, rr.y + rr.h - 1.5, 0.4);
-    }
-
+    // Productafbeeldingen
     const mandjeImgs = [...kaderEl.querySelectorAll(".product-img-mandje")];
     for (const img of mandjeImgs) {
       const ir = relRect(img, kaderEl, scale, x, y0);
       await drawImageFromElement(img, ir.x, ir.y, ir.w, ir.h);
     }
 
+    // Label-groep teksten
+    const labelEls = [...kaderEl.querySelectorAll(".label-groep")];
+    for (const label of labelEls) {
+      const lr = relRect(label, kaderEl, scale, x, y0);
+      const txt = readText(label);
+      const lines = splitText(txt, lr.w, 11, "bold");
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      lines.forEach((line, i) => {
+        doc.text(line, lr.x, lr.y + 4 + i * 5);
+      });
+    }
+
+    // Invullijn
+    const lineEl = kaderEl.querySelector(".lange-invul-lijn");
+    if (lineEl) {
+      const rr = relRect(lineEl, kaderEl, scale, x, y0);
+      drawLine(rr.x, rr.y + rr.h - 1.5, rr.x + rr.w, rr.y + rr.h - 1.5, 0.4);
+    }
+
+    // Geld-vak
     const geldVak = kaderEl.querySelector(".geld-vak");
     if (geldVak) {
       await drawMoneyVak(geldVak, kaderEl, x, y0, scale);
@@ -399,8 +529,179 @@ doc.roundedRect(pr.x, pr.y, pr.w, pr.h, 0.8, 0.8, "FD");
     y += h + 5;
   }
 
+  function drawWinkelTabel(kaderEl, tabelEl, scale, x, y0, colWidthsPct, headerColor, headerTextColor, borderColor) {
+    const tabelR = relRect(tabelEl, kaderEl, scale, x, y0);
+    const nCols = colWidthsPct.length;
+    const colWidths = colWidthsPct.map(p => tabelR.w * p);
+    const colX = [];
+    let cx = tabelR.x;
+    for (const w of colWidths) { colX.push(cx); cx += w; }
+    const headerH = 14;
+    const bodyH = tabelR.h - headerH;
+    const tx = tabelR.x, ty = tabelR.y;
+
+    // Header
+    doc.setFillColor(...headerColor);
+    doc.setDrawColor(...borderColor);
+    doc.setLineWidth(0.4);
+    doc.rect(tx, ty, tabelR.w, headerH, "FD");
+
+    // Header teksten
+    const headers = [...tabelEl.querySelectorAll("thead th")].map(th => readText(th));
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.setTextColor(...headerTextColor);
+    headers.forEach((hTxt, i) => {
+      const cw = colWidths[i];
+      const center = colX[i] + cw / 2;
+      const lines = splitText(hTxt, cw - 4, 9, "bold");
+      const totalH = lines.length * 4.5;
+      lines.forEach((line, li) => {
+        const tw2 = doc.getTextWidth(line);
+        doc.text(line, center - tw2 / 2, ty + (headerH - totalH) / 2 + 4 + li * 4.5);
+      });
+    });
+
+    // Body
+    doc.setFillColor(255, 255, 255);
+    doc.rect(tx, ty + headerH, tabelR.w, bodyH, "FD");
+    for (let i = 1; i < nCols; i++) {
+      doc.line(colX[i], ty, colX[i], ty + tabelR.h);
+    }
+    doc.rect(tx, ty, tabelR.w, tabelR.h);
+    doc.line(tx, ty + headerH, tx + tabelR.w, ty + headerH);
+    doc.setTextColor(0, 0, 0);
+
+    return { colX, colWidths, headerH, bodyH, bodyY: ty + headerH, tx, ty, tabelR };
+  }
+
+  async function drawKiezenKader(kaderEl, scale) {
+    const kH = rect(kaderEl).height * scale;
+    ensureSpace(kH + 5);
+    const x = MARGIN_LEFT, y0 = y, w = CONTENT_W, h = kH;
+    doc.setDrawColor(183, 183, 201); doc.setLineWidth(0.6);
+    drawRoundedRect(x, y0, w, h, 3);
+
+    const tabelEl = kaderEl.querySelector(".kiezen-tabel");
+    if (!tabelEl) { y += h + 5; return; }
+
+    const { colX, colWidths, headerH, bodyH, bodyY, tx, ty } =
+      drawWinkelTabel(kaderEl, tabelEl, scale, x, y0,
+        [0.26, 0.22, 0.30, 0.22],
+        [232, 247, 244], [45, 107, 94], [168, 216, 206]);
+
+    // Kolom 1: geldafbeeldingen + "Ik tel: € ___"
+    const geldImgs = [...kaderEl.querySelectorAll(".kiezen-geld-vak img")];
+    for (const img of geldImgs) {
+      const ir = relRect(img, kaderEl, scale, x, y0);
+      await drawImageFromElement(img, ir.x, ir.y, ir.w, ir.h);
+    }
+    // "Ik tel: €" + invullijn onderaan kolom 1
+    doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(45, 107, 94);
+    const ikTelTekst = "Ik tel: €";
+    const ikTelY = bodyY + bodyH - 6;
+    doc.text(ikTelTekst, colX[0] + 4, ikTelY);
+    const ikTelW = doc.getTextWidth(ikTelTekst);
+    doc.setDrawColor(30, 30, 30);
+    drawLine(colX[0] + 4 + ikTelW + 2, ikTelY - 0.5, colX[0] + colWidths[0] - 4, ikTelY - 0.5, 0.4);
+
+    // Kolom 2 & 3: invullijnen
+    doc.setTextColor(0, 0, 0);
+    [1, 2].forEach(ci => {
+      const lx = colX[ci] + 5, lw = colWidths[ci] - 10;
+      for (let li = 0; li < 3; li++) {
+        const ly = bodyY + 10 + li * 14;
+        doc.setDrawColor(30, 30, 30);
+        drawLine(lx, ly, lx + lw, ly, 0.4);
+      }
+    });
+
+    // Kolom 4: "Ik houd € ___ over."
+    const overY = bodyY + bodyH / 2;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(50, 50, 50);
+    doc.text("Ik houd", colX[3] + 4, overY - 6);
+    doc.text("€", colX[3] + 4, overY + 2);
+    drawLine(colX[3] + 11, overY + 1.5, colX[3] + colWidths[3] - 5, overY + 1.5, 0.4);
+    doc.text("over.", colX[3] + 4, overY + 9);
+
+    doc.setTextColor(0, 0, 0);
+    y += h + 5;
+  }
+
+  async function drawExactKader(kaderEl, scale) {
+    const tabelEl = kaderEl.querySelector(".exact-tabel");
+    if (!tabelEl) { y += 5; return; }
+
+    // Vaste hoogte: header(14) + body(25) + padding(10) = 49mm
+    const hdrH2 = 14, bH2 = 25, tW2 = CONTENT_W - 4;
+    const kH = hdrH2 + bH2 + 10;
+    ensureSpace(kH + 5);
+    const x = MARGIN_LEFT, y0 = y, w = CONTENT_W, h = kH;
+    doc.setDrawColor(183, 183, 201); doc.setLineWidth(0.6);
+    drawRoundedRect(x, y0, w, h, 3);
+
+    const colWs2 = [tW2 * 0.24, tW2 * 0.38, tW2 * 0.38];
+    const tX2 = x + 2, tY2 = y0 + 5;
+    const cXs2 = [tX2, tX2 + colWs2[0], tX2 + colWs2[0] + colWs2[1]];
+
+    // Header
+    doc.setFillColor(232, 247, 244);
+    doc.setDrawColor(168, 216, 206);
+    doc.setLineWidth(0.4);
+    doc.rect(tX2, tY2, tW2, hdrH2, "FD");
+
+    const hdrs2 = ["Ik wil juist … uitgeven.", "Ik koop (noteer nummers)", "Bewerking"];
+    doc.setTextColor(45, 107, 94);
+    hdrs2.forEach((hTxt, i) => {
+      const cw = colWs2[i], cx = cXs2[i] + cw / 2;
+      doc.setFont("helvetica", "bold"); doc.setFontSize(9);
+      const lines = splitText(hTxt, cw - 4, 9, "bold");
+      const lh = 4.5, th = lines.length * lh;
+      lines.forEach((line, li) => {
+        const tw2 = doc.getTextWidth(line);
+        doc.text(line, cx - tw2 / 2, tY2 + (hdrH2 - th) / 2 + 3.5 + li * lh);
+      });
+    });
+
+    // Body
+    const bY2 = tY2 + hdrH2;
+    doc.setFillColor(255, 255, 255);
+    doc.rect(tX2, bY2, tW2, bH2, "FD");
+    for (let i = 1; i < 3; i++) doc.line(cXs2[i], tY2, cXs2[i], tY2 + hdrH2 + bH2);
+    doc.rect(tX2, tY2, tW2, hdrH2 + bH2);
+    doc.line(tX2, bY2, tX2 + tW2, bY2);
+
+    // Kolom 1: bedrag groot gecentreerd
+    const bedragEl = kaderEl.querySelector(".exact-bedrag-groot");
+    if (bedragEl) {
+      doc.setFont("helvetica", "bold"); doc.setFontSize(15); doc.setTextColor(45, 107, 94);
+      const txt = readText(bedragEl);
+      const tw2 = doc.getTextWidth(txt);
+      doc.text(txt, cXs2[0] + (colWs2[0] - tw2) / 2, bY2 + bH2 / 2 + 3);
+    }
+
+    // Kolom 2 & 3: 2 invullijnen met ruime tussenruimte
+    doc.setTextColor(0, 0, 0);
+    [1, 2].forEach(ci => {
+      const lx = cXs2[ci] + 5, lw = colWs2[ci] - 10;
+      for (let li = 0; li < 2; li++) {
+        doc.setDrawColor(30, 30, 30);
+        drawLine(lx, bY2 + 6 + li * 12, lx + lw, bY2 + 6 + li * 12, 0.4);
+      }
+    });
+
+    doc.setTextColor(0, 0, 0);
+    y += h + 5;
+  }
+
   async function drawKader(kaderEl, scale) {
-    if (kaderEl.querySelector(".winkel-container")) {
+    if (kaderEl.querySelector(".terug-tabel")) {
+      await drawTerugKader(kaderEl, scale);
+    } else if (kaderEl.querySelector(".kiezen-tabel")) {
+      await drawKiezenKader(kaderEl, scale);
+    } else if (kaderEl.querySelector(".exact-tabel")) {
+      await drawExactKader(kaderEl, scale);
+    } else if (kaderEl.querySelector(".winkel-container")) {
       await drawWinkelKader(kaderEl, scale);
     } else {
       await drawStandaardKader(kaderEl, scale);
