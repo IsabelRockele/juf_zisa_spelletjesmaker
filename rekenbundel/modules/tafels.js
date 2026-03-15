@@ -12,7 +12,7 @@ const Tafels = (() => {
 
   /* ── Types ───────────────────────────────────────────────── */
   function getTypes() {
-    return ['Vermenigvuldigen', 'Gedeeld door', 'Ontbrekende factor', 'Gemengd'];
+    return ['Vermenigvuldigen', 'Gedeeld door', 'Ontbrekende factor', 'Gemengd', 'Redeneren', 'Koppel'];
   }
 
   /* ── Genereer oefeningen ─────────────────────────────────── */
@@ -21,9 +21,11 @@ const Tafels = (() => {
 
     // Bouw pool van kandidaten
     const isGemengd = oefeningstypes.includes('Gemengd');
-    const wilVerm   = isGemengd || oefeningstypes.includes('Vermenigvuldigen');
-    const wilDeel   = isGemengd || oefeningstypes.includes('Gedeeld door');
-    const wilFactor = isGemengd || oefeningstypes.includes('Ontbrekende factor');
+    const wilVerm     = isGemengd || oefeningstypes.includes('Vermenigvuldigen');
+    const wilDeel     = isGemengd || oefeningstypes.includes('Gedeeld door');
+    const wilFactor   = isGemengd || oefeningstypes.includes('Ontbrekende factor');
+    const wilRedeneren = oefeningstypes.includes('Redeneren');
+    const wilKoppel    = oefeningstypes.includes('Koppel');
 
     const pool = [];
 
@@ -71,6 +73,25 @@ const Tafels = (() => {
           // tafel × ___ = product  (multiplier is de ontbrekende 2e factor)
           pool.push({ type: 'ontbrekende-factor', positie: 'rechts', a: tafel, b: null, antwoord: multiplier,
             product, sleutel: `f-r-${tafel}-${multiplier}` });
+        }
+
+        if (wilRedeneren && product > 0) {
+          // deeltal : deler = ___ , want ___ × deler = deeltal
+          // Alleen de geselecteerde tafel als deler — niet multiplier
+          pool.push({ type: 'redeneren', deeltal: product, deler: tafel, quotient: multiplier,
+            sleutel: `red-${product}-${tafel}` });
+        }
+
+        if (wilKoppel) {
+          // factor1 × factor2 = ___ , dus ___ : factor2 = ___
+          if (voegVooraan) {
+            pool.push({ type: 'koppel', factor1: tafel, factor2: multiplier, product,
+              sleutel: `kop-${tafel}-${multiplier}` });
+          }
+          if (voegAchteraan && tafel !== multiplier) {
+            pool.push({ type: 'koppel', factor1: multiplier, factor2: tafel, product,
+              sleutel: `kop-${multiplier}-${tafel}` });
+          }
         }
       }
     }
