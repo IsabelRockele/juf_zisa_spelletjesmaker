@@ -539,11 +539,29 @@
       <!-- ── TAFELS INZICHT SIDEBAR CONTENT ───────────────────── -->
     <div class="sidebar-content" id="tab-tafels-inzicht" style="display:none">
 
-      <div class="sectie-titel">Inzicht in vermenigvuldigen</div>
+      <div class="sectie-titel">Inzicht in vermenigvuldigen en delen</div>
 
-      <!-- Type oefening -->
+      <!-- STAP 1: Bewerking -->
       <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🖼️</div>Type oefening</div>
+        <div class="kaart-titel"><div class="icon">🧮</div>Bewerking</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtBewerking('vermenigvuldigen',this)">
+              <input type="radio" name="inzicht-bewerking" value="vermenigvuldigen" checked>✖️ Vermenigvuldigen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-aftrekking',this)">
+              <input type="radio" name="inzicht-bewerking" value="delen-aftrekking">➗ Delen (herhaalde aftrekking)
+            </label>
+            <label class="radio-chip radio-chip-binnenkort" title="Binnenkort beschikbaar">
+              <input type="radio" name="inzicht-bewerking" value="delen-verdelen" disabled>🤝 Delen (eerlijk verdelen)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- STAP 2: Weergave -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🖼️</div>Weergave</div>
         <div class="form-rij">
           <div class="radio-groep">
             <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtType('afbeeldingen',this)">
@@ -556,7 +574,7 @@
         </div>
       </div>
 
-      <!-- Modus -->
+      <!-- STAP 3: Welke oefeningen -->
       <div class="config-kaart">
         <div class="kaart-titel">
           <div class="icon">🎯</div>
@@ -573,7 +591,7 @@
           </div>
         </div>
 
-        <!-- Per maaltafel: welke tafel + tot x10 of x12 -->
+        <!-- Per maaltafel -->
         <div id="inzicht-per-tafel">
           <div class="form-rij">
             <label>Welke maaltafel?</label>
@@ -619,11 +637,11 @@
         </div>
       </div>
 
-      <!-- Emoji kiezen — alleen bij afbeeldingen -->
+      <!-- STAP 4: Afbeelding kiezen — alleen bij afbeeldingen -->
       <div class="config-kaart" id="inzicht-emoji-kaart">
         <div class="kaart-titel">
           <div class="icon">🎨</div>
-          Afbeelding in de vakjes
+          Afbeelding
         </div>
         <div class="form-rij">
           <div class="radio-groep" id="rg-inzicht-emoji">
@@ -641,21 +659,27 @@
         </div>
       </div>
 
-      <!-- Getallenlijn variant — alleen bij getallenlijn -->
+      <!-- STAP 4b: Getallenlijn variant — alleen bij getallenlijn -->
       <div class="config-kaart" id="inzicht-gl-kaart" style="display:none">
         <div class="kaart-titel"><div class="icon">✏️</div>Variant getallenlijn</div>
         <div class="form-rij">
-          <div class="radio-groep">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerGlVariant('getekend',this)">
-              <input type="radio" name="gl-variant" value="getekend" checked>Sprongen getekend
+          <div class="radio-groep" id="rg-gl-variant-inzicht">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGlVariantInzicht('getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="getekend" checked>✖️ Sprongen getekend
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariant('zelf',this)">
-              <input type="radio" name="gl-variant" value="zelf">Zelf tekenen
+            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="zelf">✖️ Zelf tekenen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-getekend">➗ Sprongen getekend
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-zelf">➗ Zelf tekenen
             </label>
           </div>
         </div>
-        <!-- Positie maaltafelgetal — alleen bij zelf tekenen -->
-        <div id="gl-positie-rij" style="display:none">
+        <!-- Positie — alleen bij vermenigvuldigen zelf tekenen -->
+        <div id="gl-positie-rij-inzicht" style="display:none">
           <div class="form-rij">
             <label>Positie maaltafelgetal</label>
             <div class="radio-groep">
