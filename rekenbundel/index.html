@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
+  <style>
+    /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
+    .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
+    /* ", want" en ", dus" label in tafelsommen */
+    .tafel-want {
+      font-size: 13px;
+      color: #555;
+      margin: 0 4px;
+      font-style: italic;
+    }
+    /* Smaller invulvakje voor redeneren/koppel zodat komma zichtbaar blijft */
+    .tafel-vak-smal {
+      display: inline-block;
+      width: 28px !important;
+      min-width: 28px !important;
+    }
+  </style>
 </head>
 <body>
 
@@ -460,6 +477,12 @@
             </label>
             <label class="vink-chip" onclick="App.toggleTafelType(this,'Ontbrekende factor')">
               <span class="vink-box"></span><input type="checkbox" value="Ontbrekende factor" style="display:none"><span>Ontbrekende factor (___ × b = c)</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafelType(this,'Redeneren')">
+              <span class="vink-box"></span><input type="checkbox" value="Redeneren" style="display:none"><span>Redeneren (16 : 2 = ___ , want ___ × 2 = 16)</span>
+            </label>
+            <label class="vink-chip" onclick="App.toggleTafelType(this,'Koppel')">
+              <span class="vink-box"></span><input type="checkbox" value="Koppel" style="display:none"><span>Koppel (5 × 2 = ___ , dus ___ : 2 = ___)</span>
             </label>
             <label class="vink-chip" onclick="App.toggleTafelType(this,'Gemengd')">
               <span class="vink-box"></span><input type="checkbox" value="Gemengd" style="display:none"><span>Gemengd</span>
