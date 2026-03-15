@@ -59,7 +59,7 @@ const Preview = (() => {
     if (isPunt)                                                            gridKlasse = 'splits-grid punt-grid';
     else if (isGetallenlijn)                                               gridKlasse = 'gl-grid';
     else if (isTafelsInzicht)                                              gridKlasse = 'inzicht-grid';
-    else if (isTafels)                                                     gridKlasse = 'tafels-grid';
+    else if (isTafels)  { const eersteType = blok.oefeningen[0]?.type; gridKlasse = (eersteType === 'redeneren' || eersteType === 'koppel') ? 'tafels-grid tafels-grid-2kol' : 'tafels-grid'; }
     else if (isSplitsingen)                                                gridKlasse = 'splits-grid';
     else if (isHerken)                                                     gridKlasse = 'herken-grid';
     else if (heeftAanvullen && blok.aanvullenVariant === 'met-schijfjes') gridKlasse = 'aanvullen-grid-2';
@@ -796,6 +796,32 @@ const Preview = (() => {
                    <span class="tafel-is">=</span>
                    <span class="tafel-term">${oef.product}</span>`;
       }
+    } else if (oef.type === 'redeneren') {
+      // deeltal : deler = ___ , want ___ × deler = ___  (kind vult alles in)
+      somHTML = `<span class="tafel-term">${oef.deeltal}</span>
+                 <span class="tafel-op">:</span>
+                 <span class="tafel-term">${oef.deler}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-want">, want</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-op">×</span>
+                 <span class="tafel-term">${oef.deler}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>`;
+    } else if (oef.type === 'koppel') {
+      // factor1 × factor2 = ___ , dus ___ : factor2 = ___
+      somHTML = `<span class="tafel-term">${oef.factor1}</span>
+                 <span class="tafel-op">×</span>
+                 <span class="tafel-term">${oef.factor2}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-want">, dus</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-op">:</span>
+                 <span class="tafel-term">${oef.factor2}</span>
+                 <span class="tafel-is">=</span>
+                 <span class="tafel-vak tafel-vak-smal"></span>`;
     }
 
     return `<div class=tafel-oef data-blok=${blokId} data-idx=${idx}>
