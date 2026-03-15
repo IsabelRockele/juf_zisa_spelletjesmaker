@@ -131,9 +131,9 @@ const Preview = (() => {
 
     /* ── Cijferen ────────────────────────────────────────── */
     if (blok.bewerking === 'cijferen') {
-      if (blok.config?.bewerking === 'delen') return _deelOefHTML(blok, oef);
-      if (blok.config?.bewerking === 'komma') return _kommaOefHTML(blok, oef);
-      return _cijferenOefHTML(blok, oef);
+      if (blok.config?.bewerking === 'delen') return _deelOefHTML(blok, oef, idx);
+      if (blok.config?.bewerking === 'komma') return _kommaOefHTML(blok, oef, idx);
+      return _cijferenOefHTML(blok, oef, idx);
     }
 
     /* ── Tafels ──────────────────────────────────────────── */
@@ -835,7 +835,7 @@ const Preview = (() => {
 }
 
   /* ── Kommaschema HTML (E,t cijferen) ───────────────────────── */
-  function _kommaOefHTML(blok, oef) {
+  function _kommaOefHTML(blok, oef, idx) {
     const cfg      = blok.config || {};
     const ingevuld = cfg.invulling === 'ingevuld';
 
@@ -872,6 +872,7 @@ const Preview = (() => {
 
     return (
       '<div class="cij-oefening">' +
+        '<button class="btn-del-oef" onclick="App.verwijderOefening(\'' + blok.id + '\',' + idx + ')" title="Verwijder">&#x2715;</button>' +
         '<div class="cij-vraag">' + g1Str + ' ' + op + ' ' + g2Str + ' =</div>' +
         '<div class="cij-schema-wrap">' +
           (oef.operator === '+' || oef.operator === '−'
@@ -892,7 +893,7 @@ const Preview = (() => {
   }
 
   /* ── Deelschema HTML (staartdeling TE÷E) ─────────────────── */
-  function _deelOefHTML(blok, oef) {
+  function _deelOefHTML(blok, oef, idx) {
     const cfg      = blok.config || {};
     const ingevuld = cfg.invulling === 'ingevuld';
     const T = (ingevuld && oef.T !== undefined) ? esc(String(oef.T)) : '';
@@ -952,6 +953,7 @@ const Preview = (() => {
 
     return (
       '<div class="deel-oefening">' +
+        '<button class="btn-del-oef" onclick="App.verwijderOefening(\'' + blok.id + '\',' + idx + ')" title="Verwijder">&#x2715;</button>' +
         vraagHTML +
         '<div class="deel-schema-wrap">' +
           schema +
@@ -962,7 +964,7 @@ const Preview = (() => {
   }
 
   /* ── Cijferschema HTML ────────────────────────────────────── */
-  function _cijferenOefHTML(blok, oef) {
+  function _cijferenOefHTML(blok, oef, idx) {
     const cfg      = blok.config || {};
     const ingevuld = cfg.invulling === 'ingevuld';
     const metPijl  = cfg.startpijl !== false;
@@ -1002,6 +1004,7 @@ const Preview = (() => {
 
     return `
       <div class="cij-oefening">
+        <button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder">&#x2715;</button>
         <div class="cij-vraag">${esc(vraag)}</div>
         ${schattingHTML}
         <div class="cij-schema-wrap">
