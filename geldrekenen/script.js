@@ -121,19 +121,22 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     let html = `<span contenteditable="true" class="sectie-titel">${titel}</span>`;
     
     if (activeTab === 'winkel') {
-        const producten = getGeschaaldePrijzen(winkelData[winkelType], max, centen);
-        const rij1 = producten.slice(0, 6);
-        const rij2 = producten.slice(6, 12);
-        const metNummers = (type === 'winkel_kiezen' || type === 'winkel_exact');
+        const geenPoster = (type === 'winkel_terug' || type === 'winkel_vergelijk');
+        if (!geenPoster) {
+            const producten = getGeschaaldePrijzen(winkelData[winkelType], max, centen);
+            const rij1 = producten.slice(0, 6);
+            const rij2 = producten.slice(6, 12);
+            const metNummers = (type === 'winkel_kiezen' || type === 'winkel_exact');
 
-        html += `<div class="winkel-poster ${winkelType}-stijl">
-            <div class="plank-rij">
-                ${rij1.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 1 : null)).join('')}
-            </div>
-            <div class="plank-rij">
-                ${rij2.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 7 : null)).join('')}
-            </div>
-        </div>`;
+            html += `<div class="winkel-poster ${winkelType}-stijl">
+                <div class="plank-rij">
+                    ${rij1.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 1 : null)).join('')}
+                </div>
+                <div class="plank-rij">
+                    ${rij2.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 7 : null)).join('')}
+                </div>
+            </div>`;
+        }
     }
 
     html += `<div class="kaders-grid"></div>
@@ -340,6 +343,65 @@ function voegKaderToe(sectieNode) {
                             <td class="exact-td-bew">
                                 <div class="kiezen-invul-lijn"></div>
                                 <div class="kiezen-invul-lijn"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                 </table>`;
+
+    } else if (type === 'winkel_vergelijk') {
+        // Opdracht 5: vergelijk 2 producten van de poster
+        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+        // Kies 2 producten met verschillende prijs
+        let paar = [];
+        for (let poging = 0; poging < 30; poging++) {
+            const kandidaten = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, 2);
+            if (Math.round(kandidaten[0].prijs * 100) !== Math.round(kandidaten[1].prijs * 100)) {
+                paar = kandidaten; break;
+            }
+        }
+        if (paar.length < 2) paar = geschaald.slice(0, 2); // fallback
+
+        // Vaste nummers 1 en 2 (geen poster, dus eigen nummering)
+        const nrs = [1, 2];
+        const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+        const verschil = Math.abs(Math.round((paar[0].prijs - paar[1].prijs) * 100)) / 100;
+
+        html += `<table class="vergelijk-tabel">
+                    <thead>
+                        <tr>
+                            <th>Product A</th>
+                            <th>Product B</th>
+                            <th>Welk is duurder?</th>
+                            <th>Bewerking:<br><span class="vergelijk-header-instructie">Reken het verschil uit tussen de prijzen.</span></th>
+                            <th>Verschil</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="vergelijk-td-product">
+                                <div class="vergelijk-nummer">${nrs[0]}</div>
+                                <img src="assets/producten/supermarkt/${paar[0].img}" class="vergelijk-img" onerror="this.src='assets/producten/${paar[0].img}'">
+                                <div class="vergelijk-prijs">${prijsStr(paar[0].prijs)}</div>
+                            </td>
+                            <td class="vergelijk-td-product">
+                                <div class="vergelijk-nummer">${nrs[1]}</div>
+                                <img src="assets/producten/supermarkt/${paar[1].img}" class="vergelijk-img" onerror="this.src='assets/producten/${paar[1].img}'">
+                                <div class="vergelijk-prijs">${prijsStr(paar[1].prijs)}</div>
+                            </td>
+                            <td class="vergelijk-td-duurder">
+                                <div class="vergelijk-keuze-rij">
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> product ${nrs[0]}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> product ${nrs[1]}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> even duur</label>
+                                </div>
+                            </td>
+                            <td class="vergelijk-td-bew">
+                                <div class="vergelijk-invul-lijn"></div>
+                                <div class="vergelijk-invul-lijn"></div>
+                            </td>
+                            <td class="vergelijk-td-verschil">
+                                <div class="vergelijk-verschil-rij">€ <div class="vergelijk-invul-lijn kort"></div></div>
+                                <div class="vergelijk-verschil-label">verschil</div>
                             </td>
                         </tr>
                     </tbody>
