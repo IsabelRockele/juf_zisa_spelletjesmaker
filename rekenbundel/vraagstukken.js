@@ -36,12 +36,14 @@ window.VraagstukkenModule = (() => {
   function leesInstellingen() {
     const bewerking = document.querySelector('input[name="vs-bewerking"]:checked')?.value || 'optellen';
     const niveau = document.querySelector('input[name="vs-niveau"]:checked')?.value || 'tot20';
+    const leerjaar = document.querySelector('input[name="vs-leerjaar"]:checked')?.value || '2';
+    const aantalGetallen = document.querySelector('input[name="vs-aantalgetallen"]:checked')?.value || '2';
+    const thema = document.getElementById('vs-thema')?.value.trim() || '';
     const schema = [];
     document.querySelectorAll('input[name="vs-schema"]:checked').forEach(el => schema.push(el.value));
     const antwoordzin = document.querySelector('input[name="vs-antwoordzin"]:checked')?.value || 'deels';
-    const metAfbeelding = document.getElementById('vs-afbeelding')?.checked || false;
     const aantalBulk = parseInt(document.getElementById('vs-aantal-bulk')?.value || '1');
-    return { bewerking, niveau, schema, antwoordzin, metAfbeelding, aantalBulk };
+    return { bewerking, niveau, leerjaar, aantalGetallen, thema, schema, antwoordzin, aantalBulk };
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
@@ -61,31 +63,45 @@ window.VraagstukkenModule = (() => {
       kommagetallen: 'met kommagetallen (één decimaal, bv. 3,4 + 2,1)'
     }[inst.niveau] || inst.niveau;
 
+    const leerjaarLabel = {
+      '1': '1e leerjaar (6-7 jaar)',
+      '2': '2e leerjaar (7-8 jaar)',
+      '3': '3e leerjaar (8-9 jaar)',
+      '4': '4e leerjaar (9-10 jaar)'
+    }[inst.leerjaar] || '2e leerjaar (7-8 jaar)';
+
+    const aantalGetallenLabel = {
+      '2': 'gebruik exact 2 getallen in de bewerking (bv. 12 + 5)',
+      '3': 'gebruik exact 3 getallen in de bewerking (bv. 12 + 5 + 3)',
+      'gemengd': 'gebruik 2 of 3 getallen, eventueel met gemengde bewerkingen (bv. 12 + 5 - 3)'
+    }[inst.aantalGetallen] || 'gebruik exact 2 getallen';
+
+    const themaInstructie = inst.thema
+      ? `- Thema: gebruik "${inst.thema}" als context voor het vraagstuk`
+      : '- Gebruik een concrete, herkenbare situatie (school, dieren, speelgoed, eten, seizoenen...)';
+
     const antwoordzinInstructie = inst.antwoordzin === 'deels'
       ? 'Eindig met een antwoordzin waarbij alleen het eindgetal ontbreekt en vervangen is door "___". Bv: "Er zijn ___ appels."'
       : 'Laat de antwoordzin volledig leeg (schrijf enkel "Antwoord: _______________").';
-
-    const afbeeldingInstructie = inst.metAfbeelding
-      ? 'Voeg onderaan een emoji toe (1 grote emoji, passend bij het thema van het vraagstuk) als visuele ondersteuning.'
-      : '';
 
     const aantalInstructie = aantal > 1
       ? `Genereer ${aantal} verschillende vraagstukken. Geef elk vraagstuk een nummer (1., 2., ...).`
       : 'Genereer 1 vraagstuk.';
 
-    return `Je bent een Vlaamse onderwijsassistent die wiskundige vraagstukken maakt voor kinderen van 7-8 jaar (2e leerjaar).
+    return `Je bent een Vlaamse onderwijsassistent die wiskundige vraagstukken maakt voor kinderen.
 
 ${aantalInstructie}
 
 Vereisten:
+- Leerjaar: ${leerjaarLabel}
 - Bewerking: ${bewerkingLabel}
 - Rekenniveau: ${niveauLabel}
-- Schrijf in eenvoudig, warm Nederlands (Vlaams) dat een 7-8-jarige begrijpt
-- Gebruik concrete, herkenbare situaties (school, dieren, speelgoed, eten, seizoenen...)
+- Aantal getallen: ${aantalGetallenLabel}
+${themaInstructie}
+- Schrijf in eenvoudig, warm Nederlands (Vlaams) passend bij het leerjaar
 - Het vraagstuk bevat 2-3 zinnen maximum
 - Vermeld duidelijk de getallen en wat er berekend moet worden
 - ${antwoordzinInstructie}
-${afbeeldingInstructie ? '- ' + afbeeldingInstructie : ''}
 
 Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.`;
   }
