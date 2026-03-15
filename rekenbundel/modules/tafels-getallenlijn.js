@@ -1,9 +1,11 @@
 /* ══════════════════════════════════════════════════════════════
    modules/tafels-getallenlijn.js
    Verantwoordelijkheid: oefeningen genereren voor getallenlijn
-   Twee varianten:
-     'getekend'   → boogjes al getekend, kind vult tekst + formules in
-     'zelf'       → lege getallenlijn, kind tekent zelf + ___ × ___ = ___
+   Varianten:
+     'getekend'        → boogjes boven lijn, kind vult tekst + formules in
+     'zelf'            → lege getallenlijn, kind tekent zelf + ___ × ___ = ___
+     'delen-getekend'  → boogjes onder lijn (rechts→links), deelzinnen
+     'delen-zelf'      → lege lijn, kind tekent zelf + aftrekrij + deelsom
    ══════════════════════════════════════════════════════════════ */
 
 const TafelsGetallenlijn = (() => {
@@ -43,7 +45,7 @@ const TafelsGetallenlijn = (() => {
       uitkomst: p.groepen * p.stap,
       variant,
       positie,
-      sleutel:  `gl-${p.groepen}-${p.stap}-${i}`,
+      sleutel:  `gl-${variant}-${p.groepen}-${p.stap}-${i}`,
     }));
   }
 
