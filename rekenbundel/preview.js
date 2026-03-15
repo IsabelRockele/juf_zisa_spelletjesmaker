@@ -747,7 +747,8 @@ const Preview = (() => {
 
   const vakjeW  = Math.max(18, Math.min(24, Math.floor(540 / (max + 2))));
   const lijnW   = (max + 1) * vakjeW;
-  const boogH   = variant === 'getekend' ? 34 : 0;
+  const isBogen = variant === 'getekend' || variant === 'delen-getekend';
+  const boogH   = isBogen ? 34 : 0;
   const svgH    = boogH + 44;
   const totaalW = lijnW + 34;
 
@@ -772,21 +773,33 @@ const Preview = (() => {
   svgInhoud += `<line x1="${vakjeW / 2}" y1="${asY}" x2="${lijnW + 18}" y2="${asY}" stroke="#85B0C6" stroke-width="1.4"/>`;
   svgInhoud += `<polygon points="${lijnW + 24},${asY} ${lijnW + 17},${asY - 4} ${lijnW + 17},${asY + 4}" fill="#85B0C6"/>`;
 
-  // boogjes bij getekend
+  // boogjes vermenigvuldigen: links → rechts, boven de lijn
   if (variant === 'getekend') {
     const boogBasisY = vakjeY - 2;
     const ctrlLift   = 18;
-
     for (let g = 0; g < groepen; g++) {
-      const startGetal = g * stap;
-      const eindGetal  = (g + 1) * stap;
-      const x1 = middenVanGetal(startGetal);
-      const x2 = middenVanGetal(eindGetal);
+      const x1 = middenVanGetal(g * stap);
+      const x2 = middenVanGetal((g + 1) * stap);
       const midX = (x1 + x2) / 2;
       const ctrlY = boogBasisY - ctrlLift;
-
       svgInhoud += `<path d="M ${x1} ${boogBasisY} C ${x1 + (x2 - x1) * 0.22} ${ctrlY}, ${x1 + (x2 - x1) * 0.78} ${ctrlY}, ${x2} ${boogBasisY}" stroke="#444444" stroke-width="1.6" fill="none"/>`;
       svgInhoud += `<text x="${midX}" y="${ctrlY - 4}" text-anchor="middle" font-size="10" font-family="Arial, sans-serif" font-weight="700" fill="#333333">${stap}</text>`;
+    }
+  }
+
+  // boogjes delen: rechts → links, ONDER de lijn (van uitkomst naar 0)
+  if (variant === 'delen-getekend') {
+    const boogBasisY = asY + 2;
+    const ctrlLift   = 18;
+    for (let g = 0; g < groepen; g++) {
+      const vanGetal  = uitkomst - g * stap;
+      const naarGetal = uitkomst - (g + 1) * stap;
+      const x1 = middenVanGetal(vanGetal);
+      const x2 = middenVanGetal(naarGetal);
+      const midX = (x1 + x2) / 2;
+      const ctrlY = boogBasisY + ctrlLift;
+      svgInhoud += `<path d="M ${x1} ${boogBasisY} C ${x1 + (x2 - x1) * 0.22} ${ctrlY}, ${x1 + (x2 - x1) * 0.78} ${ctrlY}, ${x2} ${boogBasisY}" stroke="#1565C0" stroke-width="1.6" fill="none"/>`;
+      svgInhoud += `<text x="${midX}" y="${ctrlY + 12}" text-anchor="middle" font-size="10" font-family="Arial, sans-serif" font-weight="700" fill="#1565C0">${stap}</text>`;
     }
   }
 
@@ -807,12 +820,55 @@ const Preview = (() => {
         <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
         <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
       </div>`;
-   } else {
+
+  } else if (variant === 'delen-getekend') {
+    // Zinnen onder de getallenlijn (bogen staan al in SVG)
+    const minStrepen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-min">−</span>`);
+    inhoudOnderaan = `
+      <div class="gl-formule-rij">
+        <span class="gl-getal-vast">${uitkomst}</span>
+        <span class="gl-min">−</span>${minStrepen}
+        <span class="gl-eq">=</span><span class="gl-nul">0</span>
+      </div>
+      <div class="gl-zin">
+        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>sprongen maken.</span>
+      </div>
+      <div class="gl-zin">
+        <span class="gl-getal-vast">${stap}</span>
+        <span>gaat</span><span class="gl-lijn kort"></span>
+        <span>keer in</span>
+        <span class="gl-getal-vast">${uitkomst}</span><span>.</span>
+      </div>
+      <div class="gl-formule-rij">
+        <span class="gl-lijn"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn"></span>
+      </div>`;
+
+  } else if (variant === 'delen-zelf') {
+    // Aftrekrij met stap ingevuld — kind tekent sprongen en vult deelsom zelf in
+    const minStrepen = Array(groepen)
+      .fill(`<span class="gl-getal-vast" style="color:#1565C0">${stap}</span>`)
+      .join(`<span class="gl-min">−</span>`);
+    inhoudOnderaan = `
+      <div class="gl-formule-rij">
+        <span class="gl-getal-vast">${uitkomst}</span>
+        <span class="gl-min">−</span>${minStrepen}
+        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+      </div>
+      <div class="gl-formule-rij">
+        <span class="gl-lijn"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn"></span>
+      </div>`;
+
+  } else {
+    // vermenigvuldigen zelf tekenen
     const factor1 = positie === 'achteraan' ? groepen : stap;
     const factor2 = positie === 'achteraan' ? stap : groepen;
     const plusSlots = Math.max(groepen, 5);
     const langeLijnPx = Math.min(220, 110 + plusSlots * 18);
-
     inhoudOnderaan = `
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${factor1}</span>
@@ -825,10 +881,13 @@ const Preview = (() => {
       </div>`;
   }
 
+  // SVG hoogte aanpassen: bogen onder de lijn hebben extra ruimte nodig
+  const svgHAangepast = variant === 'delen-getekend' ? boogH + 44 + 30 : svgH;
+
   return `
     <div class="gl-oefening">
       <div class="gl-svg-wrapper">
-        <svg width="${totaalW}" height="${svgH}" viewBox="0 0 ${totaalW} ${svgH}">${svgInhoud}</svg>
+        <svg width="${totaalW}" height="${svgHAangepast}" viewBox="0 0 ${totaalW} ${svgHAangepast}">${svgInhoud}</svg>
       </div>
       <div class="gl-formules">${inhoudOnderaan}</div>
     </div>`;
