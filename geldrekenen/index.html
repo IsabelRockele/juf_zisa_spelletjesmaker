@@ -4,78 +4,130 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Juf Zisa - Bundel Maker Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css">
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
     <aside id="dashboard" class="no-print">
+
         <div class="brand">
-            <h1>Geld Maker</h1>
-            <p>Juf Zisa Edition</p>
+            <div class="brand-inner">
+                <div class="brand-icon">💰</div>
+                <div class="brand-text">
+                    <h1>Geld Maker</h1>
+                    <p>Juf Zisa Edition</p>
+                </div>
+            </div>
         </div>
 
-        <div class="tab-nav">
-            <button class="tab-btn active" onclick="switchTab('vaardigheden')">Geldvaardigheden</button>
-            <button class="tab-btn" onclick="switchTab('winkel')">Winkeltje</button>
+        <div class="dashboard-body">
+
+            <!-- Kaart: Type oefening -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon green">🎯</div>
+                    <span class="dash-card-title">Type oefening</span>
+                </div>
+                <div class="dash-card-body">
+                    <div class="tab-nav">
+                        <button class="tab-btn active" onclick="switchTab('vaardigheden')">Vaardigheden</button>
+                        <button class="tab-btn" onclick="switchTab('winkel')">Winkeltje</button>
+                    </div>
+                    <div id="tab-vaardigheden" class="tab-content active">
+                        <div class="field-group">
+                            <label>Oefening</label>
+                            <select id="type-vaardigheden">
+                                <option value="tellen">Tellen: Hoeveel ligt er?</option>
+                                <option value="twee_manieren">Betaal op 2 manieren</option>
+                                <option value="weinig_mogelijk">Zo weinig mogelijk eenheden</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="tab-winkel" class="tab-content">
+                        <div class="field-group">
+                            <label>Winkeltype</label>
+                            <select id="winkelSelect">
+                                <option value="supermarkt">De Supermarkt</option>
+                                <option value="speelgoed">De Speelgoedwinkel</option>
+                                <option value="bakker">De Bakker</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Opdracht</label>
+                            <select id="type-winkel">
+                                <option value="winkel_totaal">1. Totaal betalen</option>
+                                <option value="winkel_terug">2. Terugkrijgen</option>
+                                <option value="winkel_kiezen">3. Wat kan je kopen?</option>
+                                <option value="winkel_exact">4. Koop voor exact bedrag</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Items op lijstje</label>
+                            <input type="number" id="aantalItems" value="2" min="1" max="4">
+                        </div>
+                        <div class="checkbox-group">
+                            <label class="checkbox-container">
+                                <input type="checkbox" id="checkSchatten">
+                                <span>Inclusief schat-vraag</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kaart: Instellingen -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon blue">⚙️</div>
+                    <span class="dash-card-title">Instellingen</span>
+                </div>
+                <div class="dash-card-body">
+                    <div id="instellingen-banner" class="instellingen-banner" style="display:none;">
+                        ⚠️ Instellingen gewijzigd — nieuwe secties gebruiken deze waarden. Bestaande secties wijzigen niet.
+                    </div>
+                    <div class="field-row">
+                        <div class="field-group">
+                            <label>Max. bedrag (€)</label>
+                            <input type="number" id="maxBedrag" value="20">
+                        </div>
+                        <div class="field-group">
+                            <label>Kaders / sectie</label>
+                            <input type="number" id="aantalOefeningen" value="1" min="1">
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="checkCenten">
+                            <span>Gebruik centen</span>
+                        </label>
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="checkKleineCenten">
+                            <span>Inclusief 1ct / 2ct</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toevoegen-knop -->
+            <button id="addSectieBtn" class="primary-btn">✚ Sectie toevoegen</button>
+
+            <!-- Kaart: Exporteren -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon yellow">📤</div>
+                    <span class="dash-card-title">Exporteren</span>
+                </div>
+                <div class="dash-card-body action-group">
+                    <button onclick="window.print()" class="print-btn">🖨️ Rechtstreeks afdrukken</button>
+                    <button onclick="downloadAlsPdf()" class="download-btn">📄 Downloaden als PDF</button>
+                    <button onclick="location.reload()" class="clear-btn">🗑 Alles wissen</button>
+                </div>
+            </div>
+
         </div>
-        
-        <div class="control-group">
-            <h3>Nieuwe Sectie</h3>
-            
-            <div id="tab-vaardigheden" class="tab-content active">
-                <label>Type oefening:</label>
-                <select id="type-vaardigheden">
-                    <option value="tellen">Tellen: Hoeveel ligt er?</option>
-                    <option value="twee_manieren">Betaal op 2 manieren</option>
-                    <option value="weinig_mogelijk">Zo weinig mogelijk eenheden</option>
-                </select>
-            </div>
-
-            <div id="tab-winkel" class="tab-content">
-                <label>Winkeltype:</label>
-                <select id="winkelSelect">
-                    <option value="supermarkt">De Supermarkt</option>
-                    <option value="speelgoed">De Speelgoedwinkel</option>
-                    <option value="bakker">De Bakker</option>
-                </select>
-
-                <label>Type opdracht:</label>
-                <select id="type-winkel">
-                    <option value="winkel_totaal">1. Winkellijstje: Totaal betalen</option>
-                    <option value="winkel_terug">2. Winkellijstje: Terugkrijgen</option>
-                    <option value="winkel_kiezen">3. Wat kan je kopen? (Open)</option>
-                    <option value="winkel_exact">4. Koop voor exact bedrag</option>
-                </select>
-
-                <label>Items op lijstje:</label>
-                <input type="number" id="aantalItems" value="2" min="1" max="4">
-                
-                <label class="checkbox-container">
-                    <input type="checkbox" id="checkSchatten"><span>Inclusief schat-vraag</span>
-                </label>
-            </div>
-
-            <hr>
-            <label>Max. bedrag (€):</label>
-            <input type="number" id="maxBedrag" value="20">
-
-            <label>Aantal kaders per sectie:</label>
-            <input type="number" id="aantalOefeningen" value="1" min="1">
-            
-            <div class="checkbox-group">
-                <label class="checkbox-container"><input type="checkbox" id="checkCenten"><span>Gebruik centen</span></label>
-                <label class="checkbox-container"><input type="checkbox" id="checkKleineCenten"><span>Inclusief 1ct/2ct</span></label>
-            </div>
-            
-            <button id="addSectieBtn" class="primary-btn">Sectie Toevoegen +</button>
-        </div>
-
-       <div class="control-group action-group">
-    <button onclick="window.print()" class="print-btn">🖨️ Rechtstreeks afdrukken</button>
-    <button onclick="downloadAlsPdf()" class="download-btn">📄 Downloaden als PDF</button>
-    <button onclick="location.reload()" class="clear-btn">Alles wissen</button>
-</div>
     </aside>
 
     <main id="preview">
