@@ -1761,8 +1761,10 @@ doc.setTextColor(26, 58, 92);
     // Bereken hoogte van één oefening
  function oefHoogte(oef) {
  if (oef.variant === 'getekend') return 56;
- if (oef.variant === 'delen-getekend') return 82; // bogen + getal + 4 zinnen
- if (oef.variant === 'delen-zelf') return 52;     // extra ruimte boven formules
+ if (oef.variant === 'delen-getekend') return 82;
+ if (oef.variant === 'delen-rest-getekend') return 78; // bogen + aftrekrij + 2 zinnen
+ if (oef.variant === 'delen-zelf') return 52;
+ if (oef.variant === 'delen-rest-zelf') return 52;
  return 36;
 }
 
@@ -1986,7 +1988,7 @@ lijnB(fx2, tweedeRijY);
   }
 
   // ── Variant delen-getekend: bogen ONDER lijn, rechts→links ──
-  if (variant === 'delen-getekend') {
+  if (variant === 'delen-getekend' || variant === 'delen-rest-getekend') {
     const boogBasisY = asY + 1.2;
     const boogH      = 5.5;
 
@@ -2026,7 +2028,7 @@ lijnB(fx2, tweedeRijY);
       doc.text(t, fx, fy + BL2 - 0.5);
     }
 
-    // Rij 1: uitkomst - ___ - ___ - ... = 0
+    // Rij 1: uitkomst - ___ - ___ - ... = ___
     let fx3 = fxBase;
     sym2(fx3, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     fx3 += doc.getTextWidth(String(uitkomst)) + 1;
@@ -2035,7 +2037,9 @@ lijnB(fx2, tweedeRijY);
       fx3 += doc.getTextWidth('-') + 1.5;
       lijnS2(fx3, zinStartY); fx3 += LS + 1.5;
     }
-    sym2(fx3, zinStartY, '= 0', false);
+    sym2(fx3, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth('=') + 1.5;
+    lijnS2(fx3, zinStartY);
 
     // Rij 2: "Ik kan ___ sprongen maken."
     const rij2Y = zinStartY + 10;
@@ -2067,6 +2071,79 @@ lijnB(fx2, tweedeRijY);
     sym2(fx6, rij4Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     fx6 += doc.getTextWidth('=') + 1.5;
     lijnS2(fx6, rij4Y);
+
+    return;
+  }
+
+  // ── Variant delen-rest-getekend: bogen al getekend, rest-zinnen ──
+  if (variant === 'delen-rest-getekend') {
+    const boogBasisY = asY + 1.2;
+    const boogH2     = 5.5;
+    const zinStartY  = boogBasisY + boogH2 + 10;
+    const LS = 9; const LH = 10; const BL2 = LH - 2;
+    const fxBase = lijnX1;
+
+    function lijnS4(fx, fy) {
+      doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL2, fx + LS, fy + BL2);
+    }
+    function sym4(fx, fy, t, oranje) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
+      doc.text(t, fx, fy + BL2);
+    }
+    function blauw4(fx, fy, t) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(21, 101, 192);
+      doc.text(t, fx, fy + BL2);
+    }
+    function ital4(fx, fy, t) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setTextColor(...TEKSTDONKER);
+      doc.text(t, fx, fy + BL2 - 0.5);
+    }
+
+    // Rij 1: uitkomst - ___ - ___ - ... = ___
+    let fx = fxBase;
+    sym4(fx, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth(String(uitkomst)) + 1;
+    for (let g = 0; g < groepen; g++) {
+      sym4(fx, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx += doc.getTextWidth('-') + 1.5;
+      lijnS4(fx, zinStartY); fx += LS + 1.5;
+    }
+    sym4(fx, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth('=') + 1.5;
+    lijnS4(fx, zinStartY);
+
+    // Rij 2: "Ik kan ___ sprongen van [stap] maken. Dan heb ik nog ___ over."
+    const rij2Y = zinStartY + 10;
+    let fx2 = fxBase;
+    ital4(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('Ik kan') + 2;
+    lijnS4(fx2, rij2Y); fx2 += LS + 2;
+    ital4(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('sprongen van') + 2;
+    blauw4(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth(String(stap)) + 2;
+    ital4(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('maken. Dan heb ik nog') + 2;
+    lijnS4(fx2, rij2Y); fx2 += LS + 2;
+    ital4(fx2, rij2Y, 'over.');
+
+    // Rij 3: ___ : ___ = ___ R ___
+    const rij3Y = rij2Y + 10;
+    let fx3 = fxBase;
+    lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
+    sym4(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth(':') + 1.5;
+    lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
+    sym4(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth('=') + 1.5;
+    lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
+    sym4(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth('R') + 1;
+    lijnS4(fx3, rij3Y);
 
     return;
   }
@@ -2115,6 +2192,77 @@ lijnB(fx2, tweedeRijY);
     sym3(fx2, rij2Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     fx2 += doc.getTextWidth('=') + 1.5;
     lijnS3(fx2, rij2Y);
+
+    return;
+  }
+
+  // ── Variant delen-rest-zelf: stap ingevuld, rest-zinnen ──
+  if (variant === 'delen-rest-zelf') {
+    const formY = asY + 10;
+    const LS = 9; const BL5 = 6.5;
+
+    function lijnS5(fx, fy) {
+      doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL5, fx + LS, fy + BL5);
+    }
+    function sym5(fx, fy, t, oranje) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
+      doc.text(t, fx, fy + BL5);
+    }
+    function blauw5(fx, fy, t) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(21, 101, 192);
+      doc.text(t, fx, fy + BL5);
+    }
+    function ital5(fx, fy, t) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setTextColor(...TEKSTDONKER);
+      doc.text(t, fx, fy + BL5 - 0.5);
+    }
+
+    // Rij 1: uitkomst - stap - stap - ... = ___
+    let fx = lijnX1;
+    sym5(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth(String(uitkomst)) + 1;
+    for (let g = 0; g < groepen; g++) {
+      sym5(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx += doc.getTextWidth('-') + 1.5;
+      blauw5(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx += doc.getTextWidth(String(stap)) + 1.5;
+    }
+    sym5(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth('=') + 1.5;
+    lijnS5(fx, formY);
+
+    // Rij 2: "Ik kan ___ sprongen van [stap] maken. Dan heb ik nog ___ over."
+    const rij2Y = formY + 10;
+    let fx2 = lijnX1;
+    ital5(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('Ik kan') + 2;
+    lijnS5(fx2, rij2Y); fx2 += LS + 2;
+    ital5(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('sprongen van') + 2;
+    blauw5(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth(String(stap)) + 2;
+    ital5(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('maken. Dan heb ik nog') + 2;
+    lijnS5(fx2, rij2Y); fx2 += LS + 2;
+    ital5(fx2, rij2Y, 'over.');
+
+    // Rij 3: ___ : ___ = ___ R ___
+    const rij3Y = rij2Y + 10;
+    let fx3 = lijnX1;
+    lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
+    sym5(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth(':') + 1.5;
+    lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
+    sym5(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth('=') + 1.5;
+    lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
+    sym5(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth('R') + 1;
+    lijnS5(fx3, rij3Y);
 
     return;
   }
@@ -2338,6 +2486,22 @@ doc.setTextColor(26, 58, 92);
     }
 
     function _oefHoogte(oef) {
+      if (oef.type === 'delen-aftrekking') {
+        const cols   = emoKols(oef.uitkomst);
+        const rows   = Math.ceil(oef.uitkomst / cols);
+        const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
+        const linksH = rows * emoMm + (rows - 1) * 1.5;
+        const rechtsH = RIJ_H * 5 + 8;
+        return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
+      }
+      if (oef.type === 'delen-rest') {
+        const cols   = emoKols(oef.uitkomst);
+        const rows   = Math.ceil(oef.uitkomst / cols);
+        const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
+        const linksH = rows * emoMm + (rows - 1) * 1.5;
+        const rechtsH = RIJ_H * 7 + 8; // 7 zinnen
+        return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
+      }
       const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
       const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
       const { h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
@@ -2374,43 +2538,58 @@ doc.setTextColor(26, 58, 92);
       doc.setLineWidth(0.2);
       doc.line(ox + linksW + 2, oy + OEF_PAD_V, ox + linksW + 2, oy + oh - OEF_PAD_V);
 
-      // ── LINKS: groepjes ──────────────────────────────────
-      const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
-      const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
-      const { cols: emoKolsN, rows: emoRijenN, emoMm, h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
-      const gRijen       = Math.ceil(oef.groepen / MAX_GPER_RIJ);
       const emojiDataUrl = _emojiPng(oef.emoji, 120);
-      const linksH       = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
-      const linksOY      = oy + (oh - linksH) / 2;
 
-      for (let gr = 0; gr < gRijen; gr++) {
-        const groepInRij = Math.min(MAX_GPER_RIJ, oef.groepen - gr * MAX_GPER_RIJ);
-        const totB = groepInRij * vakjeB + (groepInRij - 1) * VAKJE_GAP;
-        let vx     = ox + OEF_PAD_H + (linksW - OEF_PAD_H - totB) / 2;
-        const vy   = linksOY + gr * (vH + VAKJE_GAP);
+      // ── LINKS: emoji's ───────────────────────────────────
+      if (oef.type === 'delen-aftrekking' || oef.type === 'delen-rest') {
+        // Alle emoji's samen, geen kader, bovenaan
+        const cols   = emoKols(oef.uitkomst);
+        const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
+        const startX = ox + OEF_PAD_H;
+        const startY = oy + OEF_PAD_V;
+        for (let i = 0; i < oef.uitkomst; i++) {
+          const ec = i % cols, er = Math.floor(i / cols);
+          doc.addImage(emojiDataUrl, 'PNG',
+            startX + ec * (emoMm + 1.5),
+            startY + er * (emoMm + 1.5),
+            emoMm, emoMm);
+        }
+      } else {
+        const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
+        const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
+        const { cols: emoKolsN, rows: emoRijenN, emoMm, h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
+        const gRijen   = Math.ceil(oef.groepen / MAX_GPER_RIJ);
+        const linksH   = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
+        const linksOY  = oy + (oh - linksH) / 2;
 
-        for (let g = 0; g < groepInRij; g++) {
-          doc.setFillColor(255, 255, 255);
-          doc.setDrawColor(230,74,25);
-          doc.setLineWidth(0.5);
-          doc.roundedRect(vx, vy, vakjeB, vH, 1.5, 1.5, 'FD');
-          const colW_e = (vakjeB - 2.5) / emoKolsN;
-          const rowH_e = (vH - 2.5) / emoRijenN;
-          for (let b = 0; b < oef.groepGrootte; b++) {
-            const ec = b % emoKolsN, er = Math.floor(b / emoKolsN);
-            const ex = vx + 1.25 + ec * colW_e + (colW_e - emoMm) / 2;
-            const ey = vy + 1.25 + er * rowH_e + (rowH_e - emoMm) / 2;
-            doc.addImage(emojiDataUrl, 'PNG', ex, ey, emoMm, emoMm);
+        for (let gr = 0; gr < gRijen; gr++) {
+          const groepInRij = Math.min(MAX_GPER_RIJ, oef.groepen - gr * MAX_GPER_RIJ);
+          const totB = groepInRij * vakjeB + (groepInRij - 1) * VAKJE_GAP;
+          let vx     = ox + OEF_PAD_H + (linksW - OEF_PAD_H - totB) / 2;
+          const vy   = linksOY + gr * (vH + VAKJE_GAP);
+
+          for (let g = 0; g < groepInRij; g++) {
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(230,74,25);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(vx, vy, vakjeB, vH, 1.5, 1.5, 'FD');
+            const colW_e = (vakjeB - 2.5) / emoKolsN;
+            const rowH_e = (vH - 2.5) / emoRijenN;
+            for (let b = 0; b < oef.groepGrootte; b++) {
+              const ec = b % emoKolsN, er = Math.floor(b / emoKolsN);
+              const ex = vx + 1.25 + ec * colW_e + (colW_e - emoMm) / 2;
+              const ey = vy + 1.25 + er * rowH_e + (rowH_e - emoMm) / 2;
+              doc.addImage(emojiDataUrl, 'PNG', ex, ey, emoMm, emoMm);
+            }
+            vx += vakjeB + VAKJE_GAP;
           }
-          vx += vakjeB + VAKJE_GAP;
         }
       }
 
       // ── RECHTS: invullijntjes ─────────────────────────────
-      const lijnW   = lijnBreedte(oef.groepen);  // dynamisch, altijd passend
-      const rechtsH = RIJ_H * 3 + 10;
-      let fy = oy + (oh - rechtsH) / 2;
-      const BL = RIJ_H - 2;
+      const lijnW = lijnBreedte(oef.groepen || oef.quotient || 3);
+      const BL    = RIJ_H - 2;
+      let fy      = oy + OEF_PAD_V;
 
       function lijn(lx, ly, w) {
         doc.setDrawColor(100,100,100);
@@ -2427,47 +2606,187 @@ doc.setTextColor(26, 58, 92);
         doc.setTextColor(70,70,70);
         doc.text(t, tx, ty + BL - 0.5);
       }
-
-      // Rij 1: lijn + lijn + ... = lijn(breed)  — altijd 1 rij
-      let lx = rechtsX;
-      for (let g = 0; g < oef.groepen; g++) {
-        lijn(lx, fy, lijnW); lx += lijnW;
-        if (g < oef.groepen - 1) {
-          bold(lx + 0.5, fy, '+', true);
-          doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-          lx += doc.getTextWidth('+') + PLUS_GAP;
-        }
+      function blauw(tx, ty, t) {
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        doc.setTextColor(21,101,192);
+        doc.text(t, tx, ty + BL);
       }
-      bold(lx + 0.5, fy, '=', false);
-      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-      lx += doc.getTextWidth('=') + 1.5;
-      lijn(lx, fy, LIJN_BREED);
-      fy += RIJ_H + 1;
 
-      // Rij 2: lijn groepen van lijn = lijn
-      let lx2 = rechtsX;
-      lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
-      italic(lx2, fy, 'groepen van'); 
-      doc.setFont('helvetica','italic'); doc.setFontSize(FS);
-      lx2 += doc.getTextWidth('groepen van') + 1;
-      lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
-      bold(lx2, fy, '=', false);
-      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-      lx2 += doc.getTextWidth('=') + 1.5;
-      lijn(lx2, fy, lijnW);
-      fy += RIJ_H + 1;
+      // ── Delen met rest ────────────────────────────────────
+      if (oef.type === 'delen-rest') {
+        // Zin 1: "Er zijn ___ [label]."
+        let lx = rechtsX;
+        italic(lx, fy, 'Er zijn'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx += doc.getTextWidth('Er zijn') + 1.5;
+        lijn(lx, fy, lijnW); lx += lijnW + 1.5;
+        italic(lx, fy, oef.emojiLabel + '.');
+        fy += RIJ_H + 1;
 
-      // Rij 3: lijn × lijn = lijn
-      let lx3 = rechtsX;
-      lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
-      bold(lx3, fy, '×', true);
-      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-      lx3 += doc.getTextWidth('×') + 1;
-      lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
-      bold(lx3, fy, '=', false);
-      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-      lx3 += doc.getTextWidth('=') + 1.5;
-      lijn(lx3, fy, lijnW);
+        // Zin 2: "Ik verdeel in groepen van [deler]."
+        let lx2 = rechtsX;
+        italic(lx2, fy, 'Ik verdeel in groepen van'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth('Ik verdeel in groepen van') + 1.5;
+        blauw(lx2, fy, String(oef.deler)); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth(String(oef.deler)) + 1;
+        italic(lx2, fy, '.');
+        fy += RIJ_H + 1;
+
+        // Zin 3: "[deeltal] - ___ - ___ - ... = ___"
+        let lx3 = rechtsX;
+        bold(lx3, fy, String(oef.deeltal), false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx3 += doc.getTextWidth(String(oef.deeltal)) + 1;
+        for (let g = 0; g < oef.quotient; g++) {
+          bold(lx3, fy, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+          lx3 += doc.getTextWidth('-') + 1.5;
+          lijn(lx3, fy, lijnW); lx3 += lijnW + 1.5;
+        }
+        bold(lx3, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx3 += doc.getTextWidth('=') + 1.5;
+        lijn(lx3, fy, lijnW);
+        fy += RIJ_H + 1;
+
+        // Zin 4: "Ik kan ___ groepen maken."
+        let lx4 = rechtsX;
+        italic(lx4, fy, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx4 += doc.getTextWidth('Ik kan') + 1.5;
+        lijn(lx4, fy, lijnW); lx4 += lijnW + 1.5;
+        italic(lx4, fy, 'groepen maken.');
+        fy += RIJ_H + 1;
+
+        // Zin 5: "Dan heb ik nog ___ [label] over."
+        let lx5 = rechtsX;
+        italic(lx5, fy, 'Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx5 += doc.getTextWidth('Dan heb ik nog') + 1.5;
+        lijn(lx5, fy, lijnW); lx5 += lijnW + 1.5;
+        italic(lx5, fy, oef.emojiLabel + ' over.');
+        fy += RIJ_H + 1;
+
+        // Zin 6: "Dat is de rest (R)."
+        italic(rechtsX, fy, 'Dat is de rest (R).');
+        fy += RIJ_H + 1;
+
+        // Zin 7: "___ : ___ = ___ R ___"
+        let lx7 = rechtsX;
+        lijn(lx7, fy, lijnW); lx7 += lijnW + 1;
+        bold(lx7, fy, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx7 += doc.getTextWidth(':') + 1;
+        lijn(lx7, fy, lijnW); lx7 += lijnW + 1;
+        bold(lx7, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx7 += doc.getTextWidth('=') + 1.5;
+        lijn(lx7, fy, lijnW); lx7 += lijnW + 1.5;
+        bold(lx7, fy, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx7 += doc.getTextWidth('R') + 1;
+        lijn(lx7, fy, lijnW);
+
+      // ── Delen als herhaalde aftrekking ────────────────────
+      } else if (oef.type === 'delen-aftrekking') {
+        // Zin 1: "Er zijn ___ [label]."
+        let lx1 = rechtsX;
+        italic(lx1, fy, 'Er zijn'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx1 += doc.getTextWidth('Er zijn') + 1.5;
+        lijn(lx1, fy, lijnW); lx1 += lijnW + 1.5;
+        italic(lx1, fy, oef.emojiLabel + '.');
+        fy += RIJ_H + 1;
+
+        // Zin 2: "Ik maak groepen van [groepGrootte]."
+        let lx2 = rechtsX;
+        italic(lx2, fy, 'Ik maak groepen van'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth('Ik maak groepen van') + 1.5;
+        blauw(lx2, fy, String(oef.groepGrootte)); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth(String(oef.groepGrootte)) + 1;
+        italic(lx2, fy, '.');
+        fy += RIJ_H + 1;
+
+        // Aftrekrij
+        const minTxt = '-';
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        const minW  = doc.getTextWidth(minTxt) + 2;
+        const nulW  = doc.getTextWidth('= 0');
+        const uitW  = doc.getTextWidth(String(oef.uitkomst));
+        const totaalB = uitW + 1 + oef.groepen * (minW + lijnW + 1) + nulW + 2;
+        const perRij = Math.max(1, Math.floor((rechtsW - uitW - 1) / (minW + lijnW + 1)));
+        let g = 0, firstRij = true;
+        while (g < oef.groepen) {
+          let lx3 = rechtsX;
+          if (firstRij) {
+            bold(lx3, fy, String(oef.uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+            lx3 += uitW + 1; firstRij = false;
+          }
+          const eindeRij = Math.min(g + perRij, oef.groepen);
+          for (; g < eindeRij; g++) {
+            bold(lx3, fy, minTxt, true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+            lx3 += minW; lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+          }
+          if (g >= oef.groepen) {
+            bold(lx3, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+            lx3 += doc.getTextWidth('=') + 1.5;
+            lijn(lx3, fy, lijnW);
+          }
+          fy += RIJ_H + 1;
+        }
+
+        // Zin 3: "Ik kan ___ groepen maken."
+        let lx4 = rechtsX;
+        italic(lx4, fy, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx4 += doc.getTextWidth('Ik kan') + 1.5;
+        lijn(lx4, fy, lijnW); lx4 += lijnW + 1.5;
+        italic(lx4, fy, 'groepen maken.');
+        fy += RIJ_H + 1;
+
+        // Deelsom
+        let lx5 = rechtsX;
+        lijn(lx5, fy, lijnW); lx5 += lijnW + 1;
+        bold(lx5, fy, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx5 += doc.getTextWidth(':') + 1;
+        blauw(lx5, fy, String(oef.groepGrootte)); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx5 += doc.getTextWidth(String(oef.groepGrootte)) + 1;
+        bold(lx5, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx5 += doc.getTextWidth('=') + 1.5;
+        lijn(lx5, fy, lijnW);
+
+      // ── Vermenigvuldigen: 3 rijen gecentreerd ────────────
+      } else {
+        const rechtsH = RIJ_H * 3 + 10;
+        fy = oy + (oh - rechtsH) / 2;
+
+        let lx = rechtsX;
+        for (let g = 0; g < oef.groepen; g++) {
+          lijn(lx, fy, lijnW); lx += lijnW;
+          if (g < oef.groepen - 1) {
+            bold(lx + 0.5, fy, '+', true);
+            doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+            lx += doc.getTextWidth('+') + PLUS_GAP;
+          }
+        }
+        bold(lx + 0.5, fy, '=', false);
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx += doc.getTextWidth('=') + 1.5;
+        lijn(lx, fy, LIJN_BREED);
+        fy += RIJ_H + 1;
+
+        let lx2 = rechtsX;
+        lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+        italic(lx2, fy, 'groepen van');
+        doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth('groepen van') + 1;
+        lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+        bold(lx2, fy, '=', false);
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx2 += doc.getTextWidth('=') + 1.5;
+        lijn(lx2, fy, lijnW);
+        fy += RIJ_H + 1;
+
+        let lx3 = rechtsX;
+        lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+        bold(lx3, fy, 'x', true);
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx3 += doc.getTextWidth('x') + 1;
+        lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+        bold(lx3, fy, '=', false);
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        lx3 += doc.getTextWidth('=') + 1.5;
+        lijn(lx3, fy, lijnW);
+      }
 
       y += oh + OEF_GAP;
     });
