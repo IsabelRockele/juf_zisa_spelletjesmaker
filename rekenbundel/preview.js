@@ -637,11 +637,75 @@ const Preview = (() => {
   function _inzichtOefeningHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
 
-    // Emoji-kolommen: zo vierkant mogelijk, max 5 per rij
     function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
 
-    // LINKS: groepjes, max 4 per rij
-    const MAX_PER_RIJ = 3;  // max 3 groepjes naast elkaar
+    /* ── Delen met rest ──────────────────────────────────── */
+    if (oef.type === 'delen-rest') {
+      const cols = emoKols(oef.uitkomst);
+      const colBreedte = 26;
+      let alleEmojis = '';
+      for (let i = 0; i < oef.uitkomst; i++) {
+        alleEmojis += `<span class="inzicht-emoji">${oef.emoji}</span>`;
+      }
+      const emojiBlok = `<div class="inzicht-vakje inzicht-vakje-deel" style="grid-template-columns:repeat(${cols},${colBreedte}px);row-gap:8px;">${alleEmojis}</div>`;
+
+      const aantalMin = oef.quotient; // aantal keer aftrekken
+      const minStrepen = Array(aantalMin)
+        .fill(`<span class="inzicht-lijn" style="width:20px"></span>`)
+        .join('<span class="inzicht-min">−</span>');
+
+      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
+      const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik verdeel in groepen van</span><span class="inzicht-ingevuld">${oef.deler}</span><span class="inzicht-tekst">.</span></div>`;
+      const aftrekRij = `<div class="inzicht-optel-rij">${oef.deeltal}<span class="inzicht-min" style="margin:0 3px">−</span>${minStrepen}<span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
+      const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Dan heb ik nog</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel} over.</span></div>`;
+      const zin5 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Dat is de rest (R).</span></div>`;
+      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst" style="font-style:normal;font-weight:700">R</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+
+      return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
+        ${del}
+        <div class="inzicht-inner">
+          <div class="inzicht-links">${emojiBlok}</div>
+          <div class="inzicht-rechts">
+            ${zin1}${zin2}${aftrekRij}${zin3}${zin4}${zin5}${deelRij}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    /* ── Delen als herhaalde aftrekking ──────────────────── */
+    if (oef.type === 'delen-aftrekking') {
+      const cols = emoKols(oef.uitkomst);
+      const colBreedte = 26;
+      let alleEmojis = '';
+      for (let i = 0; i < oef.uitkomst; i++) {
+        alleEmojis += `<span class="inzicht-emoji">${oef.emoji}</span>`;
+      }
+      const emojiBlok = `<div class="inzicht-vakje inzicht-vakje-deel" style="grid-template-columns:repeat(${cols},${colBreedte}px);row-gap:8px;">${alleEmojis}</div>`;
+
+      const minStrepen = Array(oef.groepen)
+        .fill(`<span class="inzicht-lijn" style="width:20px"></span>`)
+        .join('<span class="inzicht-min">−</span>');
+      const aftrekRij = `<div class="inzicht-optel-rij">${oef.uitkomst}<span class="inzicht-min" style="margin:0 3px">−</span>${minStrepen}<span class="inzicht-is">=</span><span class="inzicht-nul">0</span></div>`;
+
+      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
+      const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik maak groepen van</span><span class="inzicht-ingevuld">${oef.groepGrootte}</span><span class="inzicht-tekst">.</span></div>`;
+      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
+      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${oef.groepGrootte}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+
+      return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
+        ${del}
+        <div class="inzicht-inner">
+          <div class="inzicht-links">${emojiBlok}</div>
+          <div class="inzicht-rechts">
+            ${zin1}${zin2}${aftrekRij}${zin3}${deelRij}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // LINKS: groepjes, max 3 per rij
+    const MAX_PER_RIJ = 3;
     let rijHTML = '';
     for (let start = 0; start < oef.groepen; start += MAX_PER_RIJ) {
       const n = Math.min(MAX_PER_RIJ, oef.groepen - start);
@@ -747,9 +811,12 @@ const Preview = (() => {
 
   const vakjeW  = Math.max(18, Math.min(24, Math.floor(540 / (max + 2))));
   const lijnW   = (max + 1) * vakjeW;
-  const isBogen = variant === 'getekend' || variant === 'delen-getekend';
-  const boogH   = isBogen ? 34 : 0;
-  const svgH    = boogH + 44;
+  const isBogenBoven = variant === 'getekend';
+  const isBogenOnder = variant === 'delen-getekend' || variant === 'delen-rest-getekend';
+  const isBogen = isBogenBoven || isBogenOnder;
+  const boogH   = isBogenBoven ? 34 : 0;
+  const boogHOnder = isBogenOnder ? 30 : 0; // extra ruimte onder de lijn voor bogen
+  const svgH    = boogH + 44 + boogHOnder;
   const totaalW = lijnW + 34;
 
   const vakjeY = boogH + 8;
@@ -787,8 +854,8 @@ const Preview = (() => {
     }
   }
 
-  // boogjes delen: rechts → links, ONDER de lijn (van uitkomst naar 0)
-  if (variant === 'delen-getekend') {
+  // boogjes delen: rechts → links, ONDER de lijn
+  if (variant === 'delen-getekend' || variant === 'delen-rest-getekend') {
     const boogBasisY = asY + 2;
     const ctrlLift   = 18;
     for (let g = 0; g < groepen; g++) {
@@ -863,6 +930,52 @@ const Preview = (() => {
         <span class="gl-lijn"></span>
       </div>`;
 
+  } else if (variant === 'delen-rest-getekend') {
+    const minStrepen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-min">−</span>`);
+    inhoudOnderaan = `
+      <div class="gl-formule-rij">
+        <span class="gl-getal-vast">${uitkomst}</span>
+        <span class="gl-min">−</span>${minStrepen}
+        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+      </div>
+      <div class="gl-zin">
+        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>sprongen van</span>
+        <span class="gl-getal-vast" style="color:#1565C0">${stap}</span>
+        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort"></span><span>over.</span>
+      </div>
+      <div class="gl-formule-rij">
+        <span class="gl-lijn"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn"></span>
+        <span class="gl-getal-vast">R</span>
+        <span class="gl-lijn"></span>
+      </div>`;
+
+  } else if (variant === 'delen-rest-zelf') {
+    const minStrepen = Array(groepen)
+      .fill(`<span class="gl-getal-vast" style="color:#1565C0">${stap}</span>`)
+      .join(`<span class="gl-min">−</span>`);
+    inhoudOnderaan = `
+      <div class="gl-formule-rij">
+        <span class="gl-getal-vast">${uitkomst}</span>
+        <span class="gl-min">−</span>${minStrepen}
+        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+      </div>
+      <div class="gl-zin">
+        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>sprongen van</span>
+        <span class="gl-getal-vast" style="color:#1565C0">${stap}</span>
+        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort"></span><span>over.</span>
+      </div>
+      <div class="gl-formule-rij">
+        <span class="gl-lijn"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn"></span>
+        <span class="gl-getal-vast">R</span>
+        <span class="gl-lijn"></span>
+      </div>`;
+
   } else {
     // vermenigvuldigen zelf tekenen
     const factor1 = positie === 'achteraan' ? groepen : stap;
@@ -882,7 +995,7 @@ const Preview = (() => {
   }
 
   // SVG hoogte aanpassen: bogen onder de lijn hebben extra ruimte nodig
-  const svgHAangepast = variant === 'delen-getekend' ? boogH + 44 + 30 : svgH;
+  const svgHAangepast = isBogenOnder ? svgH : svgH;
 
   return `
     <div class="gl-oefening">
