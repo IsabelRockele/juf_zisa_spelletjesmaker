@@ -722,12 +722,34 @@ const App = (() => {
   }
 
   /* ── Tafels inzicht ─────────────────────────────────────── */
-  let _inzichtType       = 'afbeeldingen';  // 'afbeeldingen' of 'getallenlijn'
+  let _inzichtBewerking  = 'vermenigvuldigen';
+  let _inzichtType       = 'afbeeldingen';
   let _inzichtModus      = 'per-tafel';
-  let _inzichtTafel      = [2];  // array — meerdere tafels mogelijk
-  let _inzichtTafelMax   = 10;
+  let _inzichtTafel      = [2];
+  let _inzichtTafelMax   = 5;
   let _inzichtMaxUitkomst = 24;
   let _inzichtEmoji      = 'afwisselend';
+  let _glVariantInzicht  = 'getekend';
+
+  function _defaultZinInzicht() {
+    if (_inzichtType === 'getallenlijn') {
+      if (_glVariantInzicht === 'delen-getekend') return 'Kijk naar de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
+      if (_glVariantInzicht === 'delen-zelf')     return 'Teken de sprongen op de getallenlijn. Schrijf de herhaalde aftrekking en de deling.';
+      if (_glVariantInzicht === 'zelf')           return 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.';
+      return 'Kijk naar de getallenlijn. Schrijf de herhaalde optelling en de vermenigvuldiging.';
+    }
+    return _inzichtBewerking === 'delen-aftrekking'
+      ? 'Schrijf de herhaalde aftrekking en de deling.'
+      : 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
+  }
+
+  function selecteerInzichtBewerking(waarde, el) {
+    _inzichtBewerking = waarde;
+    document.querySelectorAll('[name="inzicht-bewerking"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
+  }
 
   function selecteerInzichtType(waarde, el) {
     _inzichtType = waarde;
@@ -736,6 +758,17 @@ const App = (() => {
     el.classList.add('geselecteerd');
     document.getElementById('inzicht-emoji-kaart').style.display = waarde === 'afbeeldingen' ? 'block' : 'none';
     document.getElementById('inzicht-gl-kaart').style.display    = waarde === 'getallenlijn'  ? 'block' : 'none';
+    document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
+  }
+
+  function selecteerGlVariantInzicht(waarde, el) {
+    _glVariantInzicht = waarde;
+    document.querySelectorAll('[name="gl-variant-inzicht"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    const positieRij = document.getElementById('gl-positie-rij-inzicht');
+    if (positieRij) positieRij.style.display = waarde === 'zelf' ? 'block' : 'none';
+    document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
   }
 
   function selecteerInzichtModus(waarde, el) {
@@ -782,77 +815,70 @@ const App = (() => {
 
   function voegInzichtBlokToe() {
     const aantal = parseInt(document.getElementById('inp-aantal-inzicht').value);
+    const zin    = document.getElementById('inp-opdrachtzin-inzicht').value.trim() || _defaultZinInzicht();
 
+    // ── Getallenlijn ─────────────────────────────────────────
     if (_inzichtType === 'getallenlijn') {
-      // Getallenlijn via eigen generator
-      const zin = document.getElementById('inp-opdrachtzin-inzicht').value.trim()
-                  || (_glVariant === 'getekend'
-                      ? 'Kijk naar de getallenlijn. Schrijf de herhaalde optelling en de vermenigvuldiging.'
-                      : 'Teken de sprongen op de getallenlijn. Schrijf de vermenigvuldiging.');
       const oefeningen = TafelsGetallenlijn.genereer({
         modus:            _inzichtModus,
         tafels:           _inzichtTafel,
         maxUitkomst:      _inzichtMaxUitkomst,
         tafelMax:         _inzichtTafelMax,
         aantalOefeningen: aantal,
-        variant:          _glVariant,
+        variant:          _glVariantInzicht,
         positie:          _glPositie,
       });
       if (!oefeningen || oefeningen.length === 0) {
         toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
         return;
       }
-      const blok = {
-        id:          `blok-gl-${Date.now()}`,
-        bewerking:   'tafels-getallenlijn',
-        subtype:     _glVariant,
-        niveau:      Math.max(..._inzichtTafel) * _inzichtTafelMax,
-        opdrachtzin: zin,
+      bundelData.push({
+        id:           `blok-gl-${Date.now()}`,
+        bewerking:    'tafels-getallenlijn',
+        subtype:      _glVariantInzicht,
+        niveau:       Math.max(..._inzichtTafel) * _inzichtTafelMax,
+        opdrachtzin:  zin,
         hulpmiddelen: [],
         oefeningen,
         config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
-                  maxUitkomst: _inzichtMaxUitkomst, variant: _glVariant },
-      };
-      bundelData.push(blok);
+                  maxUitkomst: _inzichtMaxUitkomst, variant: _glVariantInzicht },
+      });
       Preview.render(bundelData);
       toonToast(`✅ Getallenlijn toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
       return;
     }
 
-    // Standaard afbeeldingen
-    const zin = document.getElementById('inp-opdrachtzin-inzicht').value.trim()
-                || 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
+    // ── Afbeeldingen: vermenigvuldigen of delen-aftrekking ───
+    const isDeelAftr = _inzichtBewerking === 'delen-aftrekking';
     const oefeningen = TafelsInzicht.genereer({
-      modus:           _inzichtModus,
-      tafels:          _inzichtTafel,
-      maxUitkomst:     _inzichtMaxUitkomst,
-      tafelMax:        _inzichtTafelMax,
+      modus:            _inzichtModus,
+      tafels:           _inzichtTafel,
+      maxUitkomst:      _inzichtMaxUitkomst,
+      tafelMax:         _inzichtTafelMax,
       aantalOefeningen: aantal,
-      emojiSet:        _inzichtEmoji,
+      emojiSet:         _inzichtEmoji,
+      inzichtType:      isDeelAftr ? 'delen-aftrekking' : 'groepjes',
     });
-
     if (!oefeningen || oefeningen.length === 0) {
       toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
       return;
     }
-
-    let _teller2 = bundelData.length + 1;
-    const blok = {
-      id:          `blok-inzicht-${Date.now()}-${_teller2}`,
-      bewerking:   'tafels-inzicht',
-      subtype:     'groepjes',
-      niveau:      Math.max(..._inzichtTafel) * (_inzichtTafelMax || 10),
-      brug:        'zonder',
-      opdrachtzin: zin,
+    const subtype = isDeelAftr ? 'delen-aftrekking' : 'groepjes';
+    bundelData.push({
+      id:           `blok-inzicht-${Date.now()}-${bundelData.length + 1}`,
+      bewerking:    'tafels-inzicht',
+      subtype,
+      niveau:       Math.max(..._inzichtTafel) * (_inzichtTafelMax || 5),
+      brug:         'zonder',
+      opdrachtzin:  zin,
       hulpmiddelen: [],
       oefeningen,
       config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
-                maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji, aantalOefeningen: aantal },
-    };
-
-    bundelData.push(blok);
+                maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji,
+                aantalOefeningen: aantal, inzichtType: subtype },
+    });
     Preview.render(bundelData);
-    toonToast(`✅ Inzichtblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+    toonToast(`✅ ${isDeelAftr ? 'Deelblok' : 'Inzichtblok'} toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
   }
 
   /* ── Preview en PDF ──────────────────────────────────────── */
@@ -1184,7 +1210,7 @@ const App = (() => {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
-    selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, voegInzichtBlokToe,
+    selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe,
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
