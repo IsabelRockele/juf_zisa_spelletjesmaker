@@ -1,4 +1,22 @@
 let activeTab = 'vaardigheden';
+
+// Toon melding als instellingen veranderen na generatie
+function checkInstellingenWijziging() {
+    const heeftSecties = document.getElementById('secties-container')?.children.length > 0;
+    if (heeftSecties) {
+        const banner = document.getElementById('instellingen-banner');
+        if (banner) {
+            banner.style.display = 'block';
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    ['checkCenten', 'checkKleineCenten', 'maxBedrag'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', checkInstellingenWijziging);
+    });
+});
 const moneyConfig = [
     { value: 500, img: '500euro.png', scale: 1.5 }, { value: 200, img: '200euro.png', scale: 1.45 },
     { value: 100, img: '100euro.png', scale: 1.4 }, { value: 50, img: '50euro.png', scale: 1.3 },
@@ -12,23 +30,62 @@ const moneyConfig = [
 
 const winkelData = {
     supermarkt: [
-        /* Pas hier de 'scale' aan voor grootte en 'moveY' om te laten zakken (positief getal is omlaag) */
-        { naam: "Zak appelen", prijs: 2.50, img: "appelen.png", scale: 1.2 }, 
-        { naam: "Eieren", prijs: 3.20, img: "eieren.png", scale: 1.3, moveY: 8 }, // moveY toegevoegd om te laten zakken
-        { naam: "Melk", prijs: 1.45, img: "melk.png", scale: 1.1 }, 
-        { naam: "Pasta", prijs: 0.95, img: "pasta.png", scale: 1.0 }, 
-        { naam: "Pot saus", prijs: 1.80, img: "potsaus.png", scale: 0.9 }, 
-        { naam: "Bananen", prijs: 1.10, img: "trosbananen.png", scale: 0.9 }, 
-        { naam: "Keukenrol", prijs: 3.00, img: "keukenrol.png", scale: 1.2 },
-        { naam: "Afwasmiddel", prijs: 2.00, img: "afwasmiddel.png", scale: 1.2 },
-        { naam: "Choco", prijs: 2.80, img: "choco.png", scale: 1.2 },
-        { naam: "Koekjes", prijs: 1.50, img: "koekjes.png", scale: 0.9 },
-        { naam: "Sap", prijs: 2.10, img: "sap.png", scale: 1.0 },
-        { naam: "Kaas", prijs: 4.20, img: "kaas.png", scale: 1.1 }
+        { naam: "Zak appelen",  basisPrijs: 2.50, img: "appelen.png",     scale: 1.2 }, 
+        { naam: "Eieren",       basisPrijs: 3.20, img: "eieren.png",       scale: 1.3, moveY: 8 },
+        { naam: "Melk",         basisPrijs: 1.45, img: "melk.png",         scale: 1.1 }, 
+        { naam: "Pasta",        basisPrijs: 0.95, img: "pasta.png",        scale: 1.0 }, 
+        { naam: "Pot saus",     basisPrijs: 1.80, img: "potsaus.png",      scale: 0.9 }, 
+        { naam: "Bananen",      basisPrijs: 1.10, img: "trosbananen.png",  scale: 0.9 }, 
+        { naam: "Keukenrol",    basisPrijs: 3.00, img: "keukenrol.png",    scale: 1.2 },
+        { naam: "Afwasmiddel",  basisPrijs: 2.00, img: "afwasmiddel.png",  scale: 1.2 },
+        { naam: "Choco",        basisPrijs: 2.80, img: "choco.png",        scale: 1.2 },
+        { naam: "Koekjes",      basisPrijs: 1.50, img: "koekjes.png",      scale: 0.9 },
+        { naam: "Sap",          basisPrijs: 2.10, img: "sap.png",          scale: 1.0 },
+        { naam: "Kaas",         basisPrijs: 4.20, img: "kaas.png",         scale: 1.1 }
     ],
     bakker: [],
     speelgoed: []
 };
+
+// Schaal basisprijzen op basis van het ingestelde max bedrag
+// max ≤ 10  → factor 1x   (€1–€5)
+// max ≤ 20  → factor 2x   (€2–€10)
+// max ≤ 50  → factor 5x   (€5–€25)
+// max ≤ 100 → factor 10x  (€10–€50)
+// max > 100 → factor 20x
+function getPrijsFactor(max) {
+    if (max <= 5)   return 1;
+    if (max <= 10)  return 2;
+    if (max <= 20)  return 4;
+    if (max <= 50)  return 8;
+    if (max <= 100) return 15;
+    return 25;
+}
+
+function getGeschaaldePrijzen(winkelLijst, max, centen) {
+    const factor = getPrijsFactor(max);
+    return winkelLijst.map(item => {
+        let prijs = item.basisPrijs * factor;
+        if (!centen) prijs = Math.round(prijs); // naar dichtstbijzijnde euro
+        else prijs = Math.round(prijs * 20) / 20; // naar 5 cent
+        return { ...item, prijs };
+    });
+}
+
+// Geeft een bedrag terug dat minstens 2 producten van de poster kan dekken
+function getKiezenBedrag(max, centen, klein) {
+    const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+    const gesorteerd = [...geschaald].sort((a, b) => a.prijs - b.prijs);
+    // Neem som van de 2 goedkoopste als ondergrens, max als bovengrens
+    const ondergrens = gesorteerd[0].prijs + gesorteerd[1].prijs;
+    const bovengrens = Math.min(max, gesorteerd.slice(0, 4).reduce((a, b) => a + b.prijs, 0));
+    // Genereer bedrag tussen onder- en bovengrens
+    let bedrag = ondergrens + Math.random() * (bovengrens - ondergrens);
+    if (!centen) bedrag = Math.round(bedrag);
+    else if (!klein) bedrag = Math.round(bedrag * 20) / 20;
+    else bedrag = Math.round(bedrag * 100) / 100;
+    return Math.max(ondergrens, Math.min(bedrag, max));
+}
 
 let gebruikteBedragen = new Set();
 
@@ -46,6 +103,7 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     const aantal = parseInt(document.getElementById('aantalOefeningen').value);
     const centen = document.getElementById('checkCenten').checked;
     const winkelType = document.getElementById('winkelSelect').value;
+    const max = parseFloat(document.getElementById('maxBedrag').value);
     
     let titel = "Oefening: Tel het geld.";
     if(type === 'twee_manieren') titel = "Oefening: Leg het bedrag op 2 verschillende manieren.";
@@ -63,16 +121,17 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     let html = `<span contenteditable="true" class="sectie-titel">${titel}</span>`;
     
     if (activeTab === 'winkel') {
-        const producten = winkelData[winkelType];
+        const producten = getGeschaaldePrijzen(winkelData[winkelType], max, centen);
         const rij1 = producten.slice(0, 6);
         const rij2 = producten.slice(6, 12);
+        const metNummers = (type === 'winkel_kiezen' || type === 'winkel_exact');
 
         html += `<div class="winkel-poster ${winkelType}-stijl">
             <div class="plank-rij">
-                ${rij1.map(i => genereerPosterItemHtml(i, centen)).join('')}
+                ${rij1.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 1 : null)).join('')}
             </div>
             <div class="plank-rij">
-                ${rij2.map(i => genereerPosterItemHtml(i, centen)).join('')}
+                ${rij2.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 7 : null)).join('')}
             </div>
         </div>`;
     }
@@ -89,12 +148,14 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
 });
 
 /* moveY wordt hier toegepast via translateY */
-function genereerPosterItemHtml(item, centen) {
-    const toonPrijs = centen ? item.prijs : Math.ceil(item.prijs);
+function genereerPosterItemHtml(item, centen, nummer) {
+    const toonPrijs = centen ? item.prijs : item.prijs; // prijs al geschaald
     const scale = item.scale || 1.0;
-    const moveY = item.moveY || 0; // Standaard 0 als moveY niet bestaat
+    const moveY = item.moveY || 0;
+    const nummerHtml = nummer ? `<div class="poster-nummer">${nummer}</div>` : '';
     return `
         <div class="poster-item">
+            ${nummerHtml}
             <img src="assets/producten/supermarkt/${item.img}" 
                  class="poster-img" 
                  style="transform: scale(${scale}) translateY(${moveY}px); transform-origin: bottom center;"
@@ -136,9 +197,158 @@ function voegKaderToe(sectieNode) {
     kader.className = "oefening-kader";
     let html = `<button class="btn-x-kader no-print" onclick="this.parentElement.remove()">X</button>`;
 
-    if (type.startsWith('winkel')) {
-        let items = [...winkelData.supermarkt].sort(() => 0.5 - Math.random()).slice(0, nItems);
-        items = items.map(i => ({...i, prijs: centen ? i.prijs : Math.ceil(i.prijs)}));
+    if (type === 'winkel_terug') {
+        // Zoek betaalbiljet (≤ max, ≥ 2) en producten waarvan totaal < biljet
+        const kandidaten = moneyConfig.filter(u =>
+            u.value <= max && u.value >= 2 &&
+            (centen || u.value >= 1) && (klein || u.value >= 0.05)
+        );
+        let items, totaal, betaalMunt, gevonden = false;
+        for (let poging = 0; poging < 40 && !gevonden; poging++) {
+            const biljetPool = kandidaten.filter(u => u.value >= 2);
+            if (!biljetPool.length) break;
+            betaalMunt = biljetPool[Math.floor(Math.random() * biljetPool.length)];
+            const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+            let kandidaatItems = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
+            const kTotaal = Math.round(kandidaatItems.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
+            if (kTotaal < betaalMunt.value && kTotaal > 0) {
+                items = kandidaatItems; totaal = kTotaal; gevonden = true;
+            }
+        }
+        if (!gevonden) {
+            betaalMunt = kandidaten[kandidaten.length - 1] || moneyConfig.find(u => u.value === 10) || moneyConfig[6];
+            const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+            items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
+            totaal = Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
+        }
+        const wisselgeld = Math.round((betaalMunt.value - totaal) * 100) / 100;
+        const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+        html += `<div class="oefening-kader-terug">
+                    <table class="terug-tabel">
+                        <thead>
+                            <tr>
+                                <th>Ik koop …</th>
+                                <th>Hoeveel kost het samen?</th>
+                                <th>Ik betaal met …</th>
+                                <th>Ik krijg … € terug.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="terug-td-mandje">
+                                    <div class="mandje-grid">
+                                        ${items.map(i => {
+                                            const s = i.scale || 1.0, my = i.moveY || 0;
+                                            return `<div class="mandje-item-terug">
+                                                <img src="assets/producten/supermarkt/${i.img}" class="product-img-mandje" style="transform: scale(${s}) translateY(${my}px);" onerror="this.src='assets/producten/${i.img}'">
+                                                <span class="mandje-prijs-tag">${prijsStr(i.prijs)}</span>
+                                            </div>`;
+                                        }).join('')}
+                                    </div>
+                                </td>
+                                <td class="terug-td-samen">
+                                    <div class="terug-tabel-bew-lijn"></div>
+                                    <div class="terug-tabel-bew-lijn terug-tabel-bew-lijn2"></div>
+                                    <div class="terug-samen-tekst">Het kost samen</div>
+                                    <div class="terug-invul-rij">€ <div class="terug-invul-lijn"></div></div>
+                                </td>
+                                <td class="terug-td-betaal">
+                                    <img src="assets/${betaalMunt.img}" class="betaal-biljet-img" style="--scale: ${betaalMunt.scale}">
+                                </td>
+                                <td class="terug-td-terug">
+                                    <div class="terug-tabel-terug-lijn"></div>
+                                    <div class="terug-tabel-terug-lijn terug-tabel-terug-lijn2"></div>
+                                    <div class="terug-antwoord-rij">
+                                        <span>Ik krijg €</span>
+                                        <div class="terug-invul-lijn kort"></div>
+                                        <span>terug.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                 </div>`;
+
+    } else if (type === 'winkel_kiezen') {
+        // Opdracht 3: gegeven geldbedrag dat minstens 2 producten dekt
+        const bedrag = getKiezenBedrag(max, centen, klein);
+        const bedragStr = `€ ${bedrag.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+        html += `<table class="kiezen-tabel">
+                    <thead>
+                        <tr>
+                            <th>Ik heb …</th>
+                            <th>Ik koop (noteer nummers)</th>
+                            <th>Bewerking</th>
+                            <th>Ik houd over: € …</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="kiezen-td-geld">
+                                <div class="geld-vak kiezen-geld-vak">${genereerGeldSimpel(bedrag, centen, klein)}</div>
+                                <div class="kiezen-ik-tel-rij">Ik tel: € <div class="kiezen-invul-lijn breed"></div></div>
+                            </td>
+                            <td class="kiezen-td-nummers">
+                                <div class="kiezen-nummers-vak">
+                                    <div class="kiezen-invul-lijn"></div>
+                                    <div class="kiezen-invul-lijn"></div>
+                                    <div class="kiezen-invul-lijn"></div>
+                                </div>
+                            </td>
+                            <td class="kiezen-td-bew">
+                                <div class="kiezen-invul-lijn"></div>
+                                <div class="kiezen-invul-lijn"></div>
+                                <div class="kiezen-invul-lijn"></div>
+                            </td>
+                            <td class="kiezen-td-over">
+                                <div class="kiezen-over-tekst">Ik houd</div>
+                                <div class="kiezen-over-rij">€ <div class="kiezen-invul-lijn breed"></div></div>
+                                <div class="kiezen-over-tekst">over.</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                 </table>`;
+
+    } else if (type === 'winkel_exact') {
+        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+        const nKoop = 2 + Math.floor(Math.random() * 2);
+        const gekozen = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nKoop);
+        const exactBedrag = Math.round(gekozen.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
+        const exactStr = `€ ${exactBedrag.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+        const uid = 'exact_' + Math.random().toString(36).slice(2, 7);
+        html += `<div class="exact-hint no-print">✏️ Klik op het bedrag om het aan te passen</div>
+                 <table class="exact-tabel">
+                    <thead>
+                        <tr>
+                            <th>Ik wil juist …<br><span class="exact-bedrag-header" id="${uid}_header">${exactStr}</span><br>uitgeven.</th>
+                            <th>Ik koop (noteer nummers)</th>
+                            <th>Bewerking</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="exact-td-bedrag">
+                                <div class="exact-bedrag-groot" contenteditable="true" spellcheck="false"
+                                     oninput="document.getElementById('${uid}_header').textContent = this.textContent">${exactStr}</div>
+                            </td>
+                            <td class="exact-td-nummers">
+                                <div class="kiezen-nummers-vak">
+                                    <div class="kiezen-invul-lijn"></div>
+                                    <div class="kiezen-invul-lijn"></div>
+                                </div>
+                            </td>
+                            <td class="exact-td-bew">
+                                <div class="kiezen-invul-lijn"></div>
+                                <div class="kiezen-invul-lijn"></div>
+                            </td>
+                        </tr>
+                    </tbody>
+                 </table>`;
+
+    } else if (type.startsWith('winkel')) {
+        // winkel_totaal
+        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+        let items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
         const totaal = items.reduce((a, b) => a + b.prijs, 0);
 
         html += `<div class="winkel-container">
@@ -209,6 +419,42 @@ function genereerMix(doel, max, centen, klein) {
     });
     verz.sort((a,b) => b.value - a.value);
     return verz.map(u => `<img src="assets/${u.img}" class="money-img" style="--scale: ${u.scale}">`).join('');
+}
+
+// Genereert een mix voor de omcirkel-rij bij terugkrijgen:
+// het exacte wisselgeld zit ertussen + willekeurige afleiders
+function genereerWisselgeldMix(wisselgeld, max, centen, klein) {
+    // Stap 1: bouw de exacte wisselgeld-munten op
+    const exacteMunten = [];
+    let rest = Math.round(wisselgeld * 100) / 100;
+    moneyConfig.forEach(u => {
+        if (u.value < 1 && !centen) return;
+        if (u.value < 0.05 && !klein) return;
+        while (rest >= u.value - 0.001) {
+            exacteMunten.push(u);
+            rest = Math.round((rest - u.value) * 100) / 100;
+        }
+    });
+
+    // Stap 2: genereer 4-6 afleiders (andere munten/biljetten, niet gelijk aan wisselgeld-combinatie)
+    const afleiderPool = moneyConfig.filter(u =>
+        u.value <= max && u.value >= (centen ? 0.05 : 1) && (klein || u.value >= 0.05)
+    );
+    const afleiders = [];
+    const aantalAfleiders = 4 + Math.floor(Math.random() * 3); // 4, 5 of 6 afleiders
+    for (let i = 0; i < aantalAfleiders; i++) {
+        afleiders.push(afleiderPool[Math.floor(Math.random() * afleiderPool.length)]);
+    }
+
+    // Stap 3: markeer exacte munten met data-attribuut, meng alles door elkaar
+    const alleItems = [
+        ...exacteMunten.map(u => ({ u, correct: true })),
+        ...afleiders.map(u => ({ u, correct: false }))
+    ].sort(() => 0.5 - Math.random());
+
+    return alleItems.map(({ u, correct }) =>
+        `<img src="assets/${u.img}" class="money-img omcirkel-item${correct ? ' correct-wisselgeld' : ''}" style="--scale: ${u.scale}" title="${correct ? 'wisselgeld' : ''}">`
+    ).join('');
 }
 
 function toonPdfLoading() {
