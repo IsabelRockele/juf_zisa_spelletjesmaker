@@ -1760,12 +1760,10 @@ doc.setTextColor(26, 58, 92);
 
     // Bereken hoogte van één oefening
  function oefHoogte(oef) {
- if (oef.variant === 'getekend') {
-  // bogen + getallenlijn + zin + 2 formulelijnen
-  return 56;
-}
-// getallenlijn + formule eronder binnen het vak
-return 36;
+ if (oef.variant === 'getekend') return 56;
+ if (oef.variant === 'delen-getekend') return 82; // bogen + getal + 4 zinnen
+ if (oef.variant === 'delen-zelf') return 52;     // extra ruimte boven formules
+ return 36;
 }
 
     checkRuimte(ZINR + oefHoogte(blok.oefeningen[0]) + OEF_GAP);
@@ -1819,7 +1817,7 @@ doc.setTextColor(26, 58, 92);
   return lijnX1 + n * vakjeW + vakjeBinnenW / 2;
 }
 
-  function tekenBoog(x1, x2, yBasis, hoogte) {
+  function tekenBoog(x1, x2, yBasis, hoogte, omlaag = false) {
     const stappen = 32;
     let prevX = x1;
     let prevY = yBasis;
@@ -1830,7 +1828,9 @@ doc.setTextColor(26, 58, 92);
     for (let i = 1; i <= stappen; i++) {
       const t = i / stappen;
       const x = x1 + (x2 - x1) * t;
-      const y = yBasis - Math.sin(Math.PI * t) * hoogte;
+      const y = omlaag
+        ? yBasis + Math.sin(Math.PI * t) * hoogte
+        : yBasis - Math.sin(Math.PI * t) * hoogte;
       doc.line(prevX, prevY, x, y);
       prevX = x;
       prevY = y;
@@ -1878,7 +1878,7 @@ doc.triangle(
   'F'
 );
 
-  // ── Variant met al getekende sprongen ───────────────────
+  // ── Variant met al getekende sprongen (vermenigvuldigen) ─
   if (variant === 'getekend') {
     const boogBasisY = vakjeY - 0.6;
     const boogH      = 4.6;
@@ -1985,7 +1985,141 @@ lijnB(fx2, tweedeRijY);
     return;
   }
 
- // ── Variant "zelf tekenen" ────────────────────────────────
+  // ── Variant delen-getekend: bogen ONDER lijn, rechts→links ──
+  if (variant === 'delen-getekend') {
+    const boogBasisY = asY + 1.2;
+    const boogH      = 5.5;
+
+    for (let g = 0; g < groepen; g++) {
+      const vanGetal  = uitkomst - g * stap;
+      const naarGetal = uitkomst - (g + 1) * stap;
+      const xVan  = middenVanGetal(vanGetal);
+      const xNaar = middenVanGetal(naarGetal);
+      const midX  = (xVan + xNaar) / 2;
+
+      doc.setDrawColor(21, 101, 192); // blauw
+      doc.setLineWidth(0.45);
+      tekenBoog(xVan, xNaar, boogBasisY, boogH, true); // omlaag = true
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(21, 101, 192);
+      doc.text(String(stap), midX, boogBasisY + boogH + 3.5, { align: 'center' });
+    }
+
+    const zinStartY = boogBasisY + boogH + 10; // meer ruimte na getallen
+    const LS = 9; const LB = 12; const LH = 10; const BL2 = LH - 2;
+    const fxBase = lijnX1;
+
+    function lijnS2(fx, fy) {
+      doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL2, fx + LS, fy + BL2);
+    }
+    function sym2(fx, fy, t, blauw) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(...(blauw ? [21,101,192] : TEKSTDONKER));
+      doc.text(t, fx, fy + BL2);
+    }
+    function ital2(fx, fy, t) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setTextColor(...TEKSTDONKER);
+      doc.text(t, fx, fy + BL2 - 0.5);
+    }
+
+    // Rij 1: uitkomst - ___ - ___ - ... = 0
+    let fx3 = fxBase;
+    sym2(fx3, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx3 += doc.getTextWidth(String(uitkomst)) + 1;
+    for (let g = 0; g < groepen; g++) {
+      sym2(fx3, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx3 += doc.getTextWidth('-') + 1.5;
+      lijnS2(fx3, zinStartY); fx3 += LS + 1.5;
+    }
+    sym2(fx3, zinStartY, '= 0', false);
+
+    // Rij 2: "Ik kan ___ sprongen maken."
+    const rij2Y = zinStartY + 10;
+    let fx4 = fxBase;
+    ital2(fx4, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx4 += doc.getTextWidth('Ik kan') + 2;
+    lijnS2(fx4, rij2Y); fx4 += LS + 2;
+    ital2(fx4, rij2Y, 'sprongen maken.');
+
+    // Rij 3: "[stap] gaat ___ keer in [uitkomst]."
+    const rij3Y = rij2Y + 10;
+    let fx5 = fxBase;
+    sym2(fx5, rij3Y, String(stap), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx5 += doc.getTextWidth(String(stap)) + 2;
+    ital2(fx5, rij3Y, 'gaat'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx5 += doc.getTextWidth('gaat') + 2;
+    lijnS2(fx5, rij3Y); fx5 += LS + 2;
+    ital2(fx5, rij3Y, 'keer in'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    fx5 += doc.getTextWidth('keer in') + 2;
+    sym2(fx5, rij3Y, String(uitkomst) + '.', false);
+
+    // Rij 4: ___ : ___ = ___
+    const rij4Y = rij3Y + 10;
+    let fx6 = fxBase;
+    lijnS2(fx6, rij4Y); fx6 += LS + 1.5;
+    sym2(fx6, rij4Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx6 += doc.getTextWidth(':') + 1.5;
+    lijnS2(fx6, rij4Y); fx6 += LS + 1.5;
+    sym2(fx6, rij4Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx6 += doc.getTextWidth('=') + 1.5;
+    lijnS2(fx6, rij4Y);
+
+    return;
+  }
+
+  // ── Variant delen-zelf: aftrekrij met stap ingevuld, deelsom leeg ──
+  if (variant === 'delen-zelf') {
+    const formY = asY + 10;
+    const LS = 9; const BL3 = 6.5;
+
+    function lijnS3(fx, fy) {
+      doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
+      doc.line(fx, fy + BL3, fx + LS, fy + BL3);
+    }
+    function sym3(fx, fy, t, oranje) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
+      doc.text(t, fx, fy + BL3);
+    }
+    function blauw3(fx, fy, t) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(21, 101, 192);
+      doc.text(t, fx, fy + BL3);
+    }
+
+    // Rij 1: uitkomst - stap - stap - ... = ___
+    let fx = lijnX1;
+    sym3(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth(String(uitkomst)) + 1;
+    for (let g = 0; g < groepen; g++) {
+      sym3(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx += doc.getTextWidth('-') + 1.5;
+      blauw3(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      fx += doc.getTextWidth(String(stap)) + 1.5;
+    }
+    sym3(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx += doc.getTextWidth('=') + 1.5;
+    lijnS3(fx, formY);
+
+    // Rij 2: ___ : ___ = ___  (volledig leeg)
+    const rij2Y = formY + 10;
+    let fx2 = lijnX1;
+    lijnS3(fx2, rij2Y); fx2 += LS + 1.5;
+    sym3(fx2, rij2Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth(':') + 1.5;
+    lijnS3(fx2, rij2Y); fx2 += LS + 1.5;
+    sym3(fx2, rij2Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    fx2 += doc.getTextWidth('=') + 1.5;
+    lijnS3(fx2, rij2Y);
+
+    return;
+  }
+
+ // ── Variant "zelf tekenen" (vermenigvuldigen) ─────────────
 // Volledig ingevulde maalsom + lange lijn voor herhaalde optelling + korte lijn voor resultaat
 
 const formY = asY + 4;
