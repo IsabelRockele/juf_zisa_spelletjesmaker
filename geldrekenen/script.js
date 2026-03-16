@@ -76,7 +76,6 @@ const winkelData = {
         { naam: "Strip",          basisPrijs: 4.50,  img: "strip.png",           scale: 1.0, moveY: 0, submap: "speelgoed" },
         { naam: "Voetbal",        basisPrijs: 8.50,  img: "voetbal.png",         scale: 1.0, moveY: 0, submap: "speelgoed" }
     ],
-    snoepwinkel: [],
     elektronica: [
         { naam: "Gsm",           basisPrijs: 250, img: "gsm.png",           scale: 1.0, moveY: 0, submap: "elektronica" },
         { naam: "Tablet",        basisPrijs: 200, img: "tablet.png",        scale: 1.1, moveY: 0, submap: "elektronica" },
@@ -231,7 +230,8 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
             const rij2 = producten.slice(6, 12);
             const metNummers = (type === 'winkel_kiezen' || type === 'winkel_exact');
 
-            html += `<div class="winkel-poster ${winkelType}-stijl">
+            html += `<div class="poster-hint no-print">💡 Klik op een product om de grootte of positie aan te passen.</div>
+                     <div class="winkel-poster ${winkelType}-stijl">
                 <div class="plank-rij">
                     ${rij1.map((i, idx) => genereerPosterItemHtml(i, centen, metNummers ? idx + 1 : null)).join('')}
                 </div>
