@@ -169,7 +169,7 @@ const pdfEngine = (() => {
     const tw = doc.getTextWidth(title);
     doc.text(title, MARGIN_LEFT + (CONTENT_W - tw) / 2, y + 10.5);
 
-    y += boxH + 10;
+    y += boxH + 4;
   }
 
   function sectionLeadHeightMm(sectionEl, scale) {
@@ -188,23 +188,31 @@ const pdfEngine = (() => {
 
   function drawSectionTitle(titleEl) {
     const title = readText(titleEl);
-    const lines = splitText(title, CONTENT_W, 13, "bold");
-    const lineH = 6;
+    const fs = 10; // kleiner lettertype
+    const lines = splitText(title, CONTENT_W - 8, fs, "bold");
+    const lineH = 4.8;
+    const bandH = lines.length * lineH + 4; // compacte hoogte
 
-    ensureSpace(lines.length * lineH + 4);
+    // Meer witruimte BOVEN de titel (scheidt van vorige oefening)
+    y += 7;
+    ensureSpace(bandH + 4);
+
+    // Lichtgrijze achtergrondband
+    doc.setFillColor(235, 235, 240);
+    doc.setDrawColor(195, 195, 210);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(MARGIN_LEFT, y, CONTENT_W, bandH, 2, 2, "FD");
 
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-
-    let startY = y;
+    doc.setFontSize(fs);
+    doc.setTextColor(70, 65, 100);
     lines.forEach((line, i) => {
-      doc.text(line, MARGIN_LEFT, y + i * lineH);
+      doc.text(line, MARGIN_LEFT + 4, y + 4.5 + i * lineH);
     });
 
-    const underlineY = startY + lines.length * lineH - 1.5;
-    drawLine(MARGIN_LEFT, underlineY, MARGIN_LEFT + Math.min(CONTENT_W, textWidth(lines[0], 13, "bold")), underlineY, 0.35);
-
-    y += lines.length * lineH + 4;
+    doc.setTextColor(0, 0, 0);
+    // Weinig witruimte ONDER de titel (dicht tegen de oefening)
+    y += bandH + 3;
   }
 
   async function drawWinkelPoster(posterEl, scale) {
@@ -289,15 +297,67 @@ if (shelfDataUrl) {
 
   async function drawMoneyVak(vakEl, parentEl, parentX, parentY, scale) {
     const vr = relRect(vakEl, parentEl, scale, parentX, parentY);
-
-    doc.setDrawColor(170, 170, 170);
-    doc.setLineWidth(0.35);
+    doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.35);
     drawDashedRect(vr.x, vr.y, vr.w, vr.h);
+    await drawMoneyImgsInBox(vakEl, vr.x, vr.y, vr.w, vr.h, scale);
+  }
 
+  // Variant voor 2-kolom layout
+  async function drawMoneyVakAt(vakEl, parentEl, parentX, parentY, scale, maxW) {
+    const vr = relRect(vakEl, parentEl, scale, parentX, parentY);
+    const vakX = parentX + 4, vakW = maxW - 8;
+    doc.setDrawColor(170, 170, 170); doc.setLineWidth(0.35);
+    drawDashedRect(vakX, vr.y, vakW, vr.h, scale);
+    await drawMoneyImgsInBox(vakEl, vakX, vr.y, vakW, vr.h, scale);
+  }
+
+  // Teken geldafbeeldingen in een vak — flow-based, geen DOM-posities
+  async function drawMoneyImgsInBox(vakEl, bx, by, bw, bh, scale) {
     const imgs = [...vakEl.querySelectorAll("img")];
-    for (const img of imgs) {
-      const ir = relRect(img, parentEl, scale, parentX, parentY);
-      await drawImageFromElement(img, ir.x, ir.y, ir.w, ir.h);
+    if (!imgs.length) return;
+
+    const PAD = 2, GAP = 1.5;
+    const maxRowH = bh - PAD * 2;
+
+    // Meet elke afbeelding op (gebruik natuurlijke ratio + scale CSS var)
+    const items = imgs.map(img => {
+      const cssScale = parseFloat(img.style.getPropertyValue('--scale') || img.style.transform?.match(/scale\(([\d.]+)\)/)?.[1] || '1');
+      const nat = img.naturalWidth || 60;
+      const natH = img.naturalHeight || 40;
+      const ratio = nat / natH;
+      // Hoogte gebaseerd op natuurlijke hoogte, begrensd op vakhoogte
+      const h = Math.min(maxRowH * 0.55, 18) * Math.min(cssScale, 1.3);
+      const w = h * ratio;
+      return { img, w, h };
+    });
+
+    // Verdeel in rijen op basis van beschikbare breedte
+    const maxW = bw - PAD * 2;
+    const rows = [];
+    let curRow = [], curW = 0;
+    for (const item of items) {
+      if (curW + item.w + GAP > maxW && curRow.length > 0) {
+        rows.push(curRow);
+        curRow = [item];
+        curW = item.w;
+      } else {
+        curRow.push(item);
+        curW += item.w + GAP;
+      }
+    }
+    if (curRow.length) rows.push(curRow);
+
+    // Teken rijen — verticaal gelijkmatig verdeeld
+    const rowH = (bh - PAD * 2) / Math.max(rows.length, 1);
+    for (let ri = 0; ri < rows.length; ri++) {
+      const row = rows[ri];
+      const rowCenterY = by + PAD + ri * rowH + rowH / 2;
+      let curX = bx + PAD;
+      for (const item of row) {
+        const iy = rowCenterY - item.h / 2;
+        await drawImageFromElement(item.img, curX, iy, item.w, item.h);
+        curX += item.w + GAP;
+      }
     }
   }
 
@@ -489,11 +549,12 @@ if (shelfDataUrl) {
   async function drawStandaardKader(kaderEl, scale) {
     const kH = rect(kaderEl).height * scale;
     ensureSpace(kH + 5);
+    await drawStandaardKaderAt(kaderEl, scale, MARGIN_LEFT, y, CONTENT_W);
+    y += kH + 5;
+  }
 
-    const x = MARGIN_LEFT;
-    const y0 = y;
-    const w = CONTENT_W;
-    const h = kH;
+  async function drawStandaardKaderAt(kaderEl, scale, x, y0, w) {
+    const h = rect(kaderEl).height * scale;
 
     doc.setDrawColor(183, 183, 201);
     doc.setLineWidth(0.6);
@@ -506,35 +567,32 @@ if (shelfDataUrl) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(11);
       doc.text(beforeText, x + 4, strongRect.y + 4);
-
       doc.setFont("helvetica", "bold");
       doc.text(readText(strong), x + 4 + textWidth(beforeText + " ", 11, "normal"), strongRect.y + 4);
     }
 
     const geldVakken = [...kaderEl.querySelectorAll(":scope .geld-vak")];
     for (const vak of geldVakken) {
-      await drawMoneyVak(vak, kaderEl, x, y0, scale);
+      await drawMoneyVakAt(vak, kaderEl, x, y0, scale, w);
     }
 
     const antwoordBox = kaderEl.querySelector(".antwoord-box");
     if (antwoordBox) {
       const ar = relRect(antwoordBox, kaderEl, scale, x, y0);
+      // Herbereken breedte relatief aan nieuwe kolombreedte
+      const arW = w - 8;
+      const arX = x + 4;
       doc.setDrawColor(183, 183, 201);
-      drawRoundedRect(ar.x, ar.y, ar.w, ar.h, 2.2);
-
-      const lijn = antwoordBox.querySelector(".lijn-invul");
+      drawRoundedRect(arX, ar.y, arW, ar.h, 2.2);
       const txt = "Totaal: €";
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      doc.text(txt, ar.x + 3, ar.y + ar.h * 0.62);
-
+      doc.setFont("helvetica", "bold"); doc.setFontSize(11);
+      doc.text(txt, arX + 3, ar.y + ar.h * 0.62);
+      const lijn = antwoordBox.querySelector(".lijn-invul");
       if (lijn) {
-        const lr = relRect(lijn, kaderEl, scale, x, y0);
-        drawLine(lr.x, lr.y + lr.h - 0.8, lr.x + lr.w, lr.y + lr.h - 0.8, 0.35);
+        const txtW = textWidth(txt + " ", 11, "bold");
+        drawLine(arX + txtW + 2, ar.y + ar.h - 2, arX + arW - 3, ar.y + ar.h - 2, 0.35);
       }
     }
-
-    y += h + 5;
   }
 
   function drawWinkelTabel(kaderEl, tabelEl, scale, x, y0, colWidthsPct, headerColor, headerTextColor, borderColor) {
@@ -595,14 +653,16 @@ if (shelfDataUrl) {
 
     const { colX, colWidths, headerH, bodyH, bodyY, tx, ty } =
       drawWinkelTabel(kaderEl, tabelEl, scale, x, y0,
-        [0.26, 0.22, 0.30, 0.22],
+        [0.38, 0.14, 0.30, 0.18],
         [232, 247, 244], [45, 107, 94], [168, 216, 206]);
 
-    // Kolom 1: geldafbeeldingen + "Ik tel: € ___"
-    const geldImgs = [...kaderEl.querySelectorAll(".kiezen-geld-vak img")];
-    for (const img of geldImgs) {
-      const ir = relRect(img, kaderEl, scale, x, y0);
-      await drawImageFromElement(img, ir.x, ir.y, ir.w, ir.h);
+    // Kolom 1: geldafbeeldingen via flow-based rendering + "Ik tel: € ___"
+    const geldVak = kaderEl.querySelector(".kiezen-geld-vak");
+    if (geldVak) {
+      const vakX = colX[0] + 3;
+      const vakW = colWidths[0] - 6;
+      const vakH = bodyH - 14; // ruimte laten voor "Ik tel"
+      await drawMoneyImgsInBox(geldVak, vakX, bodyY + 3, vakW, vakH, scale);
     }
     // "Ik tel: €" + invullijn onderaan kolom 1
     doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(45, 107, 94);
@@ -958,19 +1018,46 @@ if (shelfDataUrl) {
     const titleEl = sectionEl.querySelector(":scope > .sectie-titel");
     const posterEl = sectionEl.querySelector(":scope > .winkel-poster");
     const kaders = [...sectionEl.querySelectorAll(":scope > .kaders-grid > .oefening-kader")];
+    const isTellen = sectionEl.dataset.type === 'tellen';
 
-    ensureSpace(sectionLeadHeightMm(sectionEl, scale));
-
-    if (titleEl) {
-      drawSectionTitle(titleEl);
+    // Bereken hoeveel ruimte titel + poster + eerste kader (of eerste rij) nodig heeft
+    // zodat die samen op de pagina passen
+    let leadH = 7; // witruimte boven titel
+    const titleBandH = titleEl ? 10 : 0; // geschatte titelbalk hoogte
+    const posterH = posterEl ? rect(posterEl).height * scale + 6 : 0;
+    let firstKaderH = 0;
+    if (isTellen && kaders.length > 0) {
+      const k1 = kaders[0], k2 = kaders[1];
+      firstKaderH = Math.max(rect(k1).height * scale, k2 ? rect(k2).height * scale : 0) + 5;
+    } else if (kaders.length > 0) {
+      firstKaderH = rect(kaders[0]).height * scale + 5;
     }
+    ensureSpace(leadH + titleBandH + 3 + posterH + firstKaderH);
 
-    if (posterEl) {
-      await drawWinkelPoster(posterEl, scale);
-    }
+    // Titel tekenen (bevat zelf de 7mm witruimte)
+    if (titleEl) drawSectionTitle(titleEl);
+    if (posterEl) await drawWinkelPoster(posterEl, scale);
 
-    for (const kader of kaders) {
-      await drawKader(kader, scale);
+    // Kaders tekenen — eerste kader staat al op de pagina door ensureSpace hierboven
+    // Volgende kaders mogen gewoon doorstromen (ensureSpace per kader)
+    if (isTellen && kaders.length > 1) {
+      const colW = (CONTENT_W - 6) / 2;
+      for (let i = 0; i < kaders.length; i += 2) {
+        const k1 = kaders[i], k2 = kaders[i + 1];
+        const h1 = rect(k1).height * scale;
+        const h2 = k2 ? rect(k2).height * scale : 0;
+        const rowH = Math.max(h1, h2);
+        if (i > 0) ensureSpace(rowH + 5); // eerste rij al gegarandeerd
+        const rowY = y;
+        await drawStandaardKaderAt(k1, scale, MARGIN_LEFT, rowY, colW);
+        if (k2) await drawStandaardKaderAt(k2, scale, MARGIN_LEFT + colW + 6, rowY, colW);
+        y = rowY + rowH + 5;
+      }
+    } else {
+      for (let i = 0; i < kaders.length; i++) {
+        if (i > 0) ensureSpace(rect(kaders[i]).height * scale + 5);
+        await drawKader(kaders[i], scale);
+      }
     }
 
     y += 3;
