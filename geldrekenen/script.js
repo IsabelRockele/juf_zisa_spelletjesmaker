@@ -76,6 +76,7 @@ const winkelData = {
         { naam: "Strip",          basisPrijs: 4.50,  img: "strip.png",           scale: 1.0, moveY: 0, submap: "speelgoed" },
         { naam: "Voetbal",        basisPrijs: 8.50,  img: "voetbal.png",         scale: 1.0, moveY: 0, submap: "speelgoed" }
     ],
+    snoepwinkel: [],
     elektronica: [
         { naam: "Gsm",           basisPrijs: 250, img: "gsm.png",           scale: 1.0, moveY: 0, submap: "elektronica" },
         { naam: "Tablet",        basisPrijs: 200, img: "tablet.png",        scale: 1.1, moveY: 0, submap: "elektronica" },
@@ -92,7 +93,7 @@ const winkelData = {
     ],
     schoolwinkel: [
         { naam: "Potlood",       basisPrijs: 0.50, img: "potlood.png",       scale: 0.9, moveY: 0, submap: "schoolwinkel" },
-        { naam: "Nietjesmachien", basisPrijs: 0.75, img: "nietjesmachien.png", scale: 0.9, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Gum",           basisPrijs: 0.75, img: "gum.png",           scale: 0.9, moveY: 0, submap: "schoolwinkel" },
         { naam: "Schaar",        basisPrijs: 2.50, img: "schaar.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
         { naam: "Liniaal",       basisPrijs: 1.00, img: "liniaal.png",       scale: 1.0, moveY: 0, submap: "schoolwinkel" },
         { naam: "Passer",        basisPrijs: 3.50, img: "passer.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
@@ -116,7 +117,7 @@ const winkelData = {
         { naam: "Rok",           basisPrijs: 20,  img: "rok.png",           scale: 1.0, moveY: 0, submap: "kledingwinkel" },
         { naam: "Zwembroek",     basisPrijs: 14,  img: "zwembroek.png",     scale: 0.9, moveY: 0, submap: "kledingwinkel" },
         { naam: "Laarzen",       basisPrijs: 50,  img: "laarzen.png",       scale: 1.1, moveY: 0, submap: "kledingwinkel" },
-        { naam: "Jurk",          basisPrijs: 18,  img: "jurk.png",          scale: 1.0, moveY: 0, submap: "kledingwinkel" }
+        { naam: "Pyjama",        basisPrijs: 18,  img: "pyjama.png",        scale: 1.0, moveY: 0, submap: "kledingwinkel" }
     ]
 };
 
@@ -734,10 +735,13 @@ function voegKaderToe(sectieNode) {
         const s = product.scale || 1.0, my = product.moveY || 0;
         const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
 
-        // Winkelnaam voor headers — afgeleid van winkelType
+        // Winkelnaam voor headers — kort label voor de keuzerondjes
         const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'Speelgoedwinkel', snoepwinkel: 'Snoepwinkel', elektronica: 'Elektronicawinkel', schoolwinkel: 'Schoolwinkel', kledingwinkel: 'Kledingwinkel' };
         const winkelNaam2 = winkelNamen[winkelType] || 'Supermarkt';
+        // Kort label voor keuzerondjes en headers: "Winkel A/B" behalve Bakker
+        const kortLabel = winkelType === 'bakker' ? 'Bakker' : 'Winkel';
         const naamA = `${winkelNaam2} A`, naamB = `${winkelNaam2} B`;
+        const keuzeA = `${kortLabel} A`, keuzeB = `${kortLabel} B`;
 
         html += `<table class="vergelijk-tabel">
                     <thead>
@@ -766,8 +770,8 @@ function voegKaderToe(sectieNode) {
                             </td>
                             <td class="vergelijk-td-duurder">
                                 <div class="vergelijk-keuze-rij">
-                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${naamA}</label>
-                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${naamB}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${keuzeA}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${keuzeB}</label>
                                     <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> even duur</label>
                                 </div>
                             </td>
