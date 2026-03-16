@@ -316,22 +316,23 @@ if (shelfDataUrl) {
     const imgs = [...vakEl.querySelectorAll("img")];
     if (!imgs.length) return;
 
-    const PAD = 2, GAP = 1.5;
-    const maxRowH = bh - PAD * 2;
+    const PAD = 2, GAP = 2;
 
-    // Meet elke afbeelding op (gebruik natuurlijke ratio + scale CSS var)
+    // Grotere afbeeldingen zodat biljetten leesbaar zijn
     const items = imgs.map(img => {
-      const cssScale = parseFloat(img.style.getPropertyValue('--scale') || img.style.transform?.match(/scale\(([\d.]+)\)/)?.[1] || '1');
+      const cssScale = parseFloat(img.style.getPropertyValue('--scale') ||
+        img.style.transform?.match(/scale\(([\d.]+)\)/)?.[1] || '1');
       const nat = img.naturalWidth || 60;
       const natH = img.naturalHeight || 40;
       const ratio = nat / natH;
-      // Hoogte gebaseerd op natuurlijke hoogte, begrensd op vakhoogte
-      const h = Math.min(maxRowH * 0.55, 18) * Math.min(cssScale, 1.3);
+      // Biljetten hoog genoeg om tekst te lezen: 16mm, munten 12mm
+      const baseH = ratio > 1.5 ? 16 : 12;
+      const h = baseH * Math.min(cssScale, 1.2);
       const w = h * ratio;
       return { img, w, h };
     });
 
-    // Verdeel in rijen op basis van beschikbare breedte
+    // Verdeel in rijen
     const maxW = bw - PAD * 2;
     const rows = [];
     let curRow = [], curW = 0;
@@ -347,8 +348,8 @@ if (shelfDataUrl) {
     }
     if (curRow.length) rows.push(curRow);
 
-    // Teken rijen — verticaal gelijkmatig verdeeld
-    const rowH = (bh - PAD * 2) / Math.max(rows.length, 1);
+    // Vaste rijhoogte van 18mm
+    const rowH = 18;
     for (let ri = 0; ri < rows.length; ri++) {
       const row = rows[ri];
       const rowCenterY = by + PAD + ri * rowH + rowH / 2;
@@ -478,72 +479,107 @@ if (shelfDataUrl) {
   }
 
   async function drawWinkelKader(kaderEl, scale) {
-    const kH = rect(kaderEl).height * scale;
-    ensureSpace(kH + 5);
+    const PAD = 5;
+    const ITEM_W = 28;  // breedte per mandje-item (afb + tag)
+    const ITEM_H = 22;  // hoogte per mandje-item
+    const COLS = 2;     // max 2 producten naast elkaar
 
-    const x = MARGIN_LEFT;
-    const y0 = y;
-    const w = CONTENT_W;
-    const h = kH;
+    // Tel items
+    const mandjeItems = [...kaderEl.querySelectorAll(".mandje-item-wrap")];
+    const aantalRijen = Math.ceil(mandjeItems.length / COLS);
+    const mandjeW = ITEM_W * COLS + 10;
+    const mandjeH = aantalRijen * ITEM_H + 8; // +8 voor label
 
-    doc.setDrawColor(183, 183, 201);
-    doc.setLineWidth(0.6);
-    drawRoundedRect(x, y0, w, h, 3);
+    // Bewerking hoogte
+    const heeftSchatting = !!kaderEl.querySelector(".dubbel-invul-rij");
+    const bewH = heeftSchatting ? 26 : 20;
+    const topH = Math.max(mandjeH, bewH + 12); // label + bewerking + antwoord
 
-    const container = kaderEl.querySelector(".winkel-container");
-    if (!container) { y += h + 5; return; }
+    // Geldvak hoogte
+    const geldImgs = [...kaderEl.querySelectorAll(".geld-vak img")];
+    const itemsPerRij = Math.floor((CONTENT_W - 12) / 38); // ~38mm per biljet bij 16mm hoog
+    const geldRijen = Math.min(3, Math.max(1, Math.ceil(geldImgs.length / itemsPerRij)));
+    const geldH = geldRijen * 18 + 6;
 
-    // Dashed scheidingslijn
-    const listEl = container.querySelector(".winkel-lijstje");
-    if (listEl) {
-      const sepX = relRect(listEl, kaderEl, scale, x, y0).x + relRect(listEl, kaderEl, scale, x, y0).w + 5;
-      doc.setLineDashPattern([1.2, 1.2], 0);
-      doc.line(sepX, y0 + 4, sepX, y0 + h - 4);
-      doc.setLineDashPattern([], 0);
+    const FIXED_H = PAD + topH + 4 + geldH + PAD;
+    ensureSpace(FIXED_H + 5);
+
+    const x = MARGIN_LEFT, y0 = y;
+    doc.setDrawColor(183, 183, 201); doc.setLineWidth(0.6);
+    drawRoundedRect(x, y0, CONTENT_W, FIXED_H, 3);
+
+    const topY = y0 + PAD;
+    const bewX = x + mandjeW + 8;
+    const bewW = CONTENT_W - mandjeW - 12;
+
+    // ── Mandje label ──
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
+    doc.text("Mijn mandje:", x + 4, topY + 4);
+
+    // ── Mandje items (2 per rij) ──
+    for (let i = 0; i < mandjeItems.length; i++) {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      const ix = x + 4 + col * ITEM_W;
+      const iy = topY + 7 + row * ITEM_H;
+      const wrap = mandjeItems[i];
+      const img = wrap.querySelector("img");
+      const tag = wrap.querySelector(".mandje-prijs-tag");
+      if (img) {
+        const iH = 12, iW = iH * 1.1;
+        await drawImageFromElement(img, ix, iy, iW, iH);
+      }
+      if (tag) {
+        const txt = readText(tag);
+        doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(51,51,51);
+        const tw = doc.getTextWidth(txt) + 3;
+        doc.setFillColor(255,248,225); doc.setDrawColor(180,180,180); doc.setLineWidth(0.2);
+        doc.roundedRect(ix, iy + 13, tw, 5, 1, 1, "FD");
+        doc.text(txt, ix + 1.5, iy + 16.5);
+      }
     }
 
-    // Productafbeeldingen
-    const mandjeImgs = [...kaderEl.querySelectorAll(".product-img-mandje")];
-    for (const img of mandjeImgs) {
-      const ir = relRect(img, kaderEl, scale, x, y0);
-      await drawImageFromElement(img, ir.x, ir.y, ir.w, ir.h);
-    }
+    // ── Verticale scheidingslijn ──
+    doc.setLineDashPattern([1.2,1.2], 0);
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+    doc.line(x + mandjeW + 3, topY, x + mandjeW + 3, topY + topH);
+    doc.setLineDashPattern([], 0);
 
-    // Label-groep teksten
-    const labelEls = [...kaderEl.querySelectorAll(".label-groep")];
-    for (const label of labelEls) {
-      const lr = relRect(label, kaderEl, scale, x, y0);
-      const txt = readText(label);
-      const lines = splitText(txt, lr.w, 11, "bold");
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(11);
-      lines.forEach((line, i) => {
-        doc.text(line, lr.x, lr.y + 4 + i * 5);
+    // ── Bewerking rechts ──
+    doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(0,0,0);
+    if (heeftSchatting) {
+      const vakW = (bewW - 6) / 2;
+      ["Ik schat:", "Bewerking:"].forEach((lbl, vi) => {
+        const vx = bewX + vi * (vakW + 4);
+        doc.text(lbl, vx, topY + 5);
+        [0,1].forEach(li => drawLine(vx, topY + 10 + li * 9, vx + vakW, topY + 10 + li * 9, 0.4));
       });
+    } else {
+      doc.text("Bewerking:", bewX, topY + 5);
+      [0,1].forEach(li => drawLine(bewX, topY + 14 + li * 10, bewX + bewW, topY + 14 + li * 10, 0.4));
     }
 
-    // Lange invullijn (zonder schatting)
-    const lineEl = kaderEl.querySelector(".lange-invul-lijn");
-    if (lineEl) {
-      const rr = relRect(lineEl, kaderEl, scale, x, y0);
-      drawLine(rr.x, rr.y + rr.h - 1.5, rr.x + rr.w, rr.y + rr.h - 1.5, 0.4);
-    }
+    // ── Totaal te betalen ──
+    doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(0,0,0);
+    doc.text("Totaal te betalen: \u20ac ________", bewX, topY + topH - 3);
 
-    // Korte invullijnen (met schatting: 2 vakjes naast elkaar elk met 2 lijnen)
-    const korteLinies = [...kaderEl.querySelectorAll(".korte-invul-lijn")];
-    for (const lijn of korteLinies) {
-      const rr = relRect(lijn, kaderEl, scale, x, y0);
-      doc.setDrawColor(30, 30, 30);
-      drawLine(rr.x, rr.y + rr.h - 1.5, rr.x + rr.w, rr.y + rr.h - 1.5, 0.4);
-    }
+    // ── Horizontale stippellijn boven geldvak ──
+    const geldY = y0 + PAD + topH + 4;
+    doc.setLineDashPattern([1.2,1.2], 0);
+    doc.setDrawColor(180,180,180); doc.setLineWidth(0.4);
+    doc.line(x + 4, geldY - 2, x + CONTENT_W - 4, geldY - 2);
+    doc.setLineDashPattern([], 0);
 
-    // Geld-vak
+    // ── Geldvak — volle breedte ──
     const geldVak = kaderEl.querySelector(".geld-vak");
     if (geldVak) {
-      await drawMoneyVak(geldVak, kaderEl, x, y0, scale);
+      doc.setDrawColor(170,170,170); doc.setLineWidth(0.35);
+      drawDashedRect(x + 4, geldY, CONTENT_W - 8, geldH);
+      await drawMoneyImgsInBox(geldVak, x + 6, geldY + 2, CONTENT_W - 12, geldH - 4, scale);
     }
 
-    y += h + 5;
+    doc.setTextColor(0,0,0);
+    y += FIXED_H + 5;
   }
 
   async function drawStandaardKader(kaderEl, scale) {
@@ -1007,7 +1043,7 @@ if (shelfDataUrl) {
       await drawVergelijkKader(kaderEl, scale);
     } else if (kaderEl.querySelector(".korting-tabel")) {
       await drawKortingKader(kaderEl, scale);
-    } else if (kaderEl.querySelector(".winkel-container")) {
+    } else if (kaderEl.querySelector(".winkel-container") || kaderEl.querySelector(".winkel-totaal-layout")) {
       await drawWinkelKader(kaderEl, scale);
     } else {
       await drawStandaardKader(kaderEl, scale);
