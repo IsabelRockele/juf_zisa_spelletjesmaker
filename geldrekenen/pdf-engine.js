@@ -493,7 +493,7 @@ if (shelfDataUrl) {
     // Bewerking hoogte
     const heeftSchatting = !!kaderEl.querySelector(".dubbel-invul-rij");
     const bewH = heeftSchatting ? 26 : 20;
-    const topH = Math.max(mandjeH, bewH + 12); // label + bewerking + antwoord
+    const topH = Math.max(mandjeH, bewH + 18); // genoeg ruimte voor bewerking + totaal
 
     // Geldvak hoogte
     const geldImgs = [...kaderEl.querySelectorAll(".geld-vak img")];
@@ -561,7 +561,7 @@ if (shelfDataUrl) {
 
     // ── Totaal te betalen ──
     doc.setFont("helvetica","bold"); doc.setFontSize(11); doc.setTextColor(0,0,0);
-    doc.text("Totaal te betalen: \u20ac ________", bewX, topY + topH - 3);
+    doc.text("Totaal te betalen: \u20ac ________", bewX, topY + topH - 2);
 
     // ── Horizontale stippellijn boven geldvak ──
     const geldY = y0 + PAD + topH + 4;
