@@ -363,9 +363,73 @@ function voegKaderToe(sectieNode) {
 
     } else if (type === 'winkel_exact') {
         const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-        const nKoop = 2 + Math.floor(Math.random() * 2);
-        const gekozen = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nKoop);
-        const exactBedrag = Math.round(gekozen.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
+
+        // Varieer prijzen licht (±10-20%) zodat elk kader andere bedragen toont
+        function varieerPrijs(prijs, centen) {
+            const delta = centen
+                ? Math.round((Math.random() * 0.3 - 0.15) * prijs * 20) / 20
+                : Math.round((Math.random() * 0.3 - 0.15) * prijs);
+            let nieuw = prijs + delta;
+            if (!centen) nieuw = Math.max(1, Math.round(nieuw));
+            else nieuw = Math.max(0.20, Math.round(nieuw * 20) / 20);
+            return nieuw;
+        }
+
+        // Probeer max 20 keer een uniek totaalbedrag te genereren
+        let gekozen = [], exactBedrag;
+        let pogingen = 0;
+        do {
+            // Varieer de prijzen licht voor elk poging
+            const gevarieerd = geschaald.map(p => ({
+                ...p,
+                prijs: varieerPrijs(p.prijs, centen)
+            }));
+            const betaalbaar = gevarieerd.filter(p => p.prijs <= max);
+            const geshuffled = [...betaalbaar].sort(() => 0.5 - Math.random());
+
+            let kandidaat = [];
+            for (const p of geshuffled) {
+                const huidigTotaal = kandidaat.reduce((a, b) => a + b.prijs, 0);
+                const nieuwTotaal = Math.round((huidigTotaal + p.prijs) * 100) / 100;
+                if (nieuwTotaal <= max) {
+                    kandidaat.push(p);
+                    if (kandidaat.length >= 3) break;
+                }
+            }
+            if (kandidaat.length === 0) {
+                const goedkoopste = [...betaalbaar].sort((a, b) => a.prijs - b.prijs);
+                kandidaat = goedkoopste.length ? [goedkoopste[0]] : [gevarieerd[0]];
+            }
+
+            exactBedrag = Math.min(
+                Math.round(kandidaat.reduce((a, b) => a + b.prijs, 0) * 100) / 100,
+                max
+            );
+            // Accepteer als bedrag nog niet gebruikt is
+            if (!gebruikteBedragen.has(exactBedrag)) {
+                gekozen = kandidaat;
+                gebruikteBedragen.add(exactBedrag);
+                break;
+            }
+            pogingen++;
+        } while (pogingen < 20);
+
+        // Fallback als na 20 pogingen nog geen uniek bedrag
+        if (gekozen.length === 0) {
+            const betaalbaar = geschaald.filter(p => p.prijs <= max);
+            const geshuffled = [...betaalbaar].sort(() => 0.5 - Math.random());
+            for (const p of geshuffled) {
+                const huidigTotaal = gekozen.reduce((a, b) => a + b.prijs, 0);
+                if (Math.round((huidigTotaal + p.prijs) * 100) / 100 <= max) {
+                    gekozen.push(p);
+                    if (gekozen.length >= 2) break;
+                }
+            }
+            exactBedrag = Math.min(
+                Math.round(gekozen.reduce((a, b) => a + b.prijs, 0) * 100) / 100,
+                max
+            );
+        }
         const exactStr = `€ ${exactBedrag.toFixed(centen ? 2 : 0).replace('.', ',')}`;
         const uid = 'exact_' + Math.random().toString(36).slice(2, 7);
         html += `${schattingRijTabel}<div class="exact-hint no-print">✏️ Klik op het bedrag om het aan te passen</div>
@@ -637,8 +701,10 @@ function voegKaderToe(sectieNode) {
                         <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>
                      </div>`;
         } else if (type === 'tellen') {
-            html += `<div class="geld-vak">${genereerGeldSimpel(bedrag, centen, klein)}</div>
-                     <div class="antwoord-box">Totaal: € <div class="lijn-invul" style="flex-grow:1; border-bottom:1px solid #333; height:18px;"></div></div>`;
+            html += `<div class="tellen-inhoud">
+                        <div class="geld-vak">${genereerGeldSimpel(bedrag, centen, klein)}</div>
+                        <div class="antwoord-box">Totaal: € <div class="lijn-invul" style="flex-grow:1; border-bottom:1px solid #333; height:18px;"></div></div>
+                     </div>`;
         } else {
             html += `Bedrag: <strong>€${bedrag.toFixed(centen ? 2 : 0).replace('.',',')}</strong>
                      <div class="geld-vak">${genereerMix(bedrag, max, centen, klein)}</div>`;
