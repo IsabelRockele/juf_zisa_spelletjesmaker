@@ -887,17 +887,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .geld-vak { 
     border: 2px dashed #aaa; 
     border-radius: 10px; 
-    padding: 10px; 
-    min-height: 110px; 
+    padding: 8px 10px; 
+    min-height: 60px; 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 6px; 
+    gap: 3px; 
     align-items: center; 
     background: #fafafa; 
-    margin-top: 15px; 
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.money-img { height: auto; width: calc(65px * var(--scale)); vertical-align: middle; }
+.money-img { height: auto; width: calc(44px * var(--scale)); vertical-align: middle; }
 .antwoord-box { margin-top: 10px; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: #f9f9f9; font-weight: bold; display: flex; align-items: center; gap: 10px; }
 
 .sectie-controls { margin-top: 10px; display: flex; gap: 10px; }
@@ -1493,4 +1495,49 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
 .keuzemenu-btn:hover {
     background: #243d7a;
+}
+
+/* ── Winkel totaal: nieuwe layout ── */
+.winkel-totaal-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.winkel-totaal-top {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.winkel-totaal-mandje {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ccc;
+}
+
+.mandje-rij {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+}
+
+.mandje-item-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.winkel-totaal-antwoord {
+    margin-top: 4px;
+}
+
+.winkel-totaal-layout .geld-vak {
+    width: 100%;
+    margin-top: 0;
 }
