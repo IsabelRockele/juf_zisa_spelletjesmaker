@@ -6,8 +6,8 @@
   "background_color": "#fffbe6",
   "theme_color": "#2aa198",
   "icons": [
-    { "src": "./icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "./icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "./icons/Zisa_spelgenerator-v2-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "./icons/Zisa_spelgenerator-v2-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
 
