@@ -1,3 +1,8 @@
+function toggleKortingOpties() {
+    const type = document.getElementById('type-winkel').value;
+    document.getElementById('korting-opties').style.display = type === 'winkel_korting' ? 'block' : 'none';
+}
+
 let activeTab = 'vaardigheden';
 
 // Toon melding als instellingen veranderen na generatie
@@ -30,61 +35,78 @@ const moneyConfig = [
 
 const winkelData = {
     supermarkt: [
-        { naam: "Zak appelen",  basisPrijs: 2.50, img: "appelen.png",     scale: 1.2 }, 
-        { naam: "Eieren",       basisPrijs: 3.20, img: "eieren.png",       scale: 1.3, moveY: 8 },
-        { naam: "Melk",         basisPrijs: 1.45, img: "melk.png",         scale: 1.1 }, 
-        { naam: "Pasta",        basisPrijs: 0.95, img: "pasta.png",        scale: 1.0 }, 
-        { naam: "Pot saus",     basisPrijs: 1.80, img: "potsaus.png",      scale: 0.9 }, 
-        { naam: "Bananen",      basisPrijs: 1.10, img: "trosbananen.png",  scale: 0.9 }, 
-        { naam: "Keukenrol",    basisPrijs: 3.00, img: "keukenrol.png",    scale: 1.2 },
-        { naam: "Afwasmiddel",  basisPrijs: 2.00, img: "afwasmiddel.png",  scale: 1.2 },
-        { naam: "Choco",        basisPrijs: 2.80, img: "choco.png",        scale: 1.2 },
-        { naam: "Koekjes",      basisPrijs: 1.50, img: "koekjes.png",      scale: 0.9 },
-        { naam: "Sap",          basisPrijs: 2.10, img: "sap.png",          scale: 1.0 },
-        { naam: "Kaas",         basisPrijs: 4.20, img: "kaas.png",         scale: 1.1 }
+        { naam: "Zak appelen",  basisPrijs: 2.50, img: "appelen.png",     scale: 1.2,  submap: "supermarkt" }, 
+        { naam: "Eieren",       basisPrijs: 3.20, img: "eieren.png",       scale: 1.3,  submap: "supermarkt", moveY: 8 },
+        { naam: "Melk",         basisPrijs: 1.45, img: "melk.png",         scale: 1.1,  submap: "supermarkt" }, 
+        { naam: "Pasta",        basisPrijs: 0.95, img: "pasta.png",        scale: 1.0,  submap: "supermarkt" }, 
+        { naam: "Pot saus",     basisPrijs: 1.80, img: "potsaus.png",      scale: 0.9,  submap: "supermarkt" }, 
+        { naam: "Bananen",      basisPrijs: 1.10, img: "trosbananen.png",  scale: 0.9,  submap: "supermarkt" }, 
+        { naam: "Keukenrol",    basisPrijs: 3.00, img: "keukenrol.png",    scale: 1.2,  submap: "supermarkt" },
+        { naam: "Afwasmiddel",  basisPrijs: 2.00, img: "afwasmiddel.png",  scale: 1.2,  submap: "supermarkt" },
+        { naam: "Choco",        basisPrijs: 2.80, img: "choco.png",        scale: 1.2,  submap: "supermarkt" },
+        { naam: "Koekjes",      basisPrijs: 1.50, img: "koekjes.png",      scale: 0.9,  submap: "supermarkt" },
+        { naam: "Sap",          basisPrijs: 2.10, img: "sap.png",          scale: 1.0,  submap: "supermarkt" },
+        { naam: "Kaas",         basisPrijs: 4.20, img: "kaas.png",         scale: 1.1,  submap: "supermarkt" }
     ],
-    bakker: [],
-    speelgoed: []
+    bakker: [
+        { naam: "Aardbeientaart", basisPrijs: 8.50, img: "aardbeientaart.png", scale: 1.1, submap: "bakker", moveY: 0 },
+        { naam: "Bruinbrood",     basisPrijs: 2.80, img: "bruinbrood.png",      scale: 1.1, submap: "bakker", moveY: 0 },
+        { naam: "Chocoladetaart", basisPrijs: 9.00, img: "chocoladetaart.png",  scale: 1.1, submap: "bakker", moveY: 0 },
+        { naam: "Croissant",      basisPrijs: 1.20, img: "croissant.png",       scale: 1.0, submap: "bakker", moveY: 0 },
+        { naam: "Donut",          basisPrijs: 1.50, img: "donut.png",           scale: 0.9, submap: "bakker", moveY: 0 },
+        { naam: "Koekjes",        basisPrijs: 2.50, img: "koekjes.png",         scale: 0.9, submap: "bakker", moveY: 0 },
+        { naam: "Koffiekoek",     basisPrijs: 1.30, img: "koffiekoek.png",      scale: 0.9, submap: "bakker", moveY: 0 },
+        { naam: "Pistolet",       basisPrijs: 0.60, img: "pistolet.png",        scale: 0.9, submap: "bakker", moveY: 0 },
+        { naam: "Pralines",       basisPrijs: 6.00, img: "pralines.png",        scale: 1.0, submap: "bakker", moveY: 0 },
+        { naam: "Soes",           basisPrijs: 1.80, img: "soes.png",            scale: 0.9, submap: "bakker", moveY: 0 },
+        { naam: "Stokbrood",      basisPrijs: 1.50, img: "stokbrood.png",       scale: 1.2, submap: "bakker", moveY: 0 },
+        { naam: "Witbrood",       basisPrijs: 2.60, img: "witbrood.png",        scale: 1.1, submap: "bakker", moveY: 0 }
+    ],
+    speelgoed: [],
+    snoepwinkel: []
 };
 
-// Schaal basisprijzen op basis van het ingestelde max bedrag
-// max ≤ 10  → factor 1x   (€1–€5)
-// max ≤ 20  → factor 2x   (€2–€10)
-// max ≤ 50  → factor 5x   (€5–€25)
-// max ≤ 100 → factor 10x  (€10–€50)
-// max > 100 → factor 20x
-function getPrijsFactor(max) {
-    if (max <= 5)   return 1;
-    if (max <= 10)  return 2;
-    if (max <= 20)  return 4;
-    if (max <= 50)  return 8;
-    if (max <= 100) return 15;
-    return 25;
-}
-
+// Schaalt prijzen zodat het duurste product ≤ max is,
+// en alle prijzen de juiste verhouding houden.
+// Het goedkoopste product krijgt minstens 10% van max.
 function getGeschaaldePrijzen(winkelLijst, max, centen) {
-    const factor = getPrijsFactor(max);
+    if (!winkelLijst || winkelLijst.length === 0) return [];
+    const basisMax = Math.max(...winkelLijst.map(i => i.basisPrijs));
+    const basisMin = Math.min(...winkelLijst.map(i => i.basisPrijs));
+    // Duurste product = 60-80% van max, goedkoopste = minstens 10% van max
+    const doelMax = max * 0.75;
+    const doelMin = Math.max(max * 0.08, 0.50);
+    const factor = basisMax > 0 ? doelMax / basisMax : 1;
+
     return winkelLijst.map(item => {
-        let prijs = item.basisPrijs * factor;
-        if (!centen) prijs = Math.round(prijs); // naar dichtstbijzijnde euro
-        else prijs = Math.round(prijs * 20) / 20; // naar 5 cent
+        let prijs = Math.max(item.basisPrijs * factor, doelMin);
+        if (!centen) prijs = Math.max(1, Math.round(prijs));
+        else prijs = Math.max(0.20, Math.round(prijs * 20) / 20);
         return { ...item, prijs };
     });
 }
 
-// Geeft een bedrag terug dat minstens 2 producten van de poster kan dekken
-function getKiezenBedrag(max, centen, klein) {
-    const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
-    const gesorteerd = [...geschaald].sort((a, b) => a.prijs - b.prijs);
-    // Neem som van de 2 goedkoopste als ondergrens, max als bovengrens
+// Geeft een bedrag terug dat minstens 2 producten van de winkel kan dekken, altijd ≤ max
+function getKiezenBedrag(winkelLijst, max, centen, klein) {
+    const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
+    // Houd alleen producten die goedkoper zijn dan max
+    const betaalbaar = geschaald.filter(p => p.prijs < max);
+    if (betaalbaar.length < 2) {
+        // Fallback: gewoon max
+        return max;
+    }
+    const gesorteerd = [...betaalbaar].sort((a, b) => a.prijs - b.prijs);
     const ondergrens = gesorteerd[0].prijs + gesorteerd[1].prijs;
-    const bovengrens = Math.min(max, gesorteerd.slice(0, 4).reduce((a, b) => a + b.prijs, 0));
-    // Genereer bedrag tussen onder- en bovengrens
+    // Bovengrens: som van 4 goedkoopste, maar nooit meer dan max
+    const bovengrens = Math.min(max, gesorteerd.slice(0, 4).reduce((s, p) => s + p.prijs, 0));
+    // Als de 2 goedkoopste al meer kosten dan max, gebruik gewoon max
+    if (ondergrens >= max) return max;
     let bedrag = ondergrens + Math.random() * (bovengrens - ondergrens);
     if (!centen) bedrag = Math.round(bedrag);
     else if (!klein) bedrag = Math.round(bedrag * 20) / 20;
     else bedrag = Math.round(bedrag * 100) / 100;
-    return Math.max(ondergrens, Math.min(bedrag, max));
+    // Altijd strikt ≤ max
+    return Math.min(bedrag, max);
 }
 
 let gebruikteBedragen = new Set();
@@ -104,6 +126,9 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     const centen = document.getElementById('checkCenten').checked;
     const winkelType = document.getElementById('winkelSelect').value;
     const max = parseFloat(document.getElementById('maxBedrag').value);
+    const kortingSubtype = document.getElementById('kortingSubtype')?.value || 'korting_nieuw';
+    const kortingPercentages = [...document.querySelectorAll('.kortingPercentCheck:checked')].map(el => parseInt(el.value));
+    const kortingPercent = kortingPercentages.length ? kortingPercentages[0] : 10; // voor de titel
     
     let titel = "Oefening: Tel het geld.";
     if(type === 'twee_manieren') titel = "Oefening: Leg het bedrag op 2 verschillende manieren.";
@@ -112,16 +137,24 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
     if(type.startsWith('winkel')) {
         const winkelNaam = document.getElementById('winkelSelect').options[document.getElementById('winkelSelect').selectedIndex].text;
         titel = `Winkeltje: ${winkelNaam}`;
+        if(type === 'winkel_korting') {
+            const pctTekst = kortingPercentages.length > 1 ? kortingPercentages.join('/') + '%' : kortingPercent + '%';
+            titel = `Solden: ${pctTekst} korting — ${winkelNaam}`;
+        }
     }
 
     const sectie = document.createElement('div');
     sectie.className = "oefening-sectie";
     sectie.dataset.type = type;
+    sectie.dataset.winkel = winkelType;
+    sectie.dataset.kortingSubtype = kortingSubtype;
+    sectie.dataset.kortingPercent = kortingPercent;
+    sectie.dataset.kortingPercentages = JSON.stringify(kortingPercentages.length ? kortingPercentages : [10]);
 
     let html = `<span contenteditable="true" class="sectie-titel">${titel}</span>`;
     
     if (activeTab === 'winkel') {
-        const geenPoster = (type === 'winkel_terug' || type === 'winkel_vergelijk');
+        const geenPoster = (type === 'winkel_terug' || type === 'winkel_vergelijk' || type === 'winkel_korting');
         if (!geenPoster) {
             const producten = getGeschaaldePrijzen(winkelData[winkelType], max, centen);
             const rij1 = producten.slice(0, 6);
@@ -159,10 +192,10 @@ function genereerPosterItemHtml(item, centen, nummer) {
     return `
         <div class="poster-item">
             ${nummerHtml}
-            <img src="assets/producten/supermarkt/${item.img}" 
+            <img src="assets/producten/${item.submap || 'supermarkt'}/${item.img}" 
                  class="poster-img" 
                  style="transform: scale(${scale}) translateY(${moveY}px); transform-origin: bottom center;"
-                 onerror="this.src='assets/producten/${item.img}'">
+                 onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${item.img}'">
             <div class="prijskaartje">€ ${toonPrijs.toFixed(centen ? 2 : 0).replace('.',',')}</div>
         </div>`;
 }
@@ -191,14 +224,29 @@ function getUniekBedrag(max, centen, klein) {
 function voegKaderToe(sectieNode) {
     const grid = sectieNode.querySelector('.kaders-grid');
     const type = sectieNode.dataset.type;
+    const winkelType = sectieNode.dataset.winkel || 'supermarkt';
+    const winkelLijst = winkelData[winkelType] && winkelData[winkelType].length ? winkelData[winkelType] : winkelData.supermarkt;
+    const kortingSubtype = sectieNode.dataset.kortingSubtype || 'korting_nieuw';
+    const kortingPercentages = JSON.parse(sectieNode.dataset.kortingPercentages || '[10]');
+    const kortingPercent = kortingPercentages[Math.floor(Math.random() * kortingPercentages.length)];
     const max = parseFloat(document.getElementById('maxBedrag').value);
     const centen = document.getElementById('checkCenten').checked;
     const klein = document.getElementById('checkKleineCenten').checked;
     const nItems = parseInt(document.getElementById('aantalItems').value);
+    const metSchatten = document.getElementById('checkSchatten').checked;
+
+    // Bijhouden welke producten al gebruikt zijn binnen deze sectie
+    if (!sectieNode._gebruikteProducten) sectieNode._gebruikteProducten = new Set();
+    const gebruikteProducten = sectieNode._gebruikteProducten;
 
     const kader = document.createElement('div');
     kader.className = "oefening-kader";
     let html = `<button class="btn-x-kader no-print" onclick="this.parentElement.remove()">X</button>`;
+
+    // Schatting-rij voor tabel-gebaseerde oefeningen
+    const schattingRijTabel = metSchatten
+        ? `<div class="korting-schatting-rij">Ik schat: <span class="korting-schatting-lijn"></span></div>`
+        : '';
 
     if (type === 'winkel_terug') {
         // Zoek betaalbiljet (≤ max, ≥ 2) en producten waarvan totaal < biljet
@@ -211,7 +259,7 @@ function voegKaderToe(sectieNode) {
             const biljetPool = kandidaten.filter(u => u.value >= 2);
             if (!biljetPool.length) break;
             betaalMunt = biljetPool[Math.floor(Math.random() * biljetPool.length)];
-            const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+            const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
             let kandidaatItems = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
             const kTotaal = Math.round(kandidaatItems.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
             if (kTotaal < betaalMunt.value && kTotaal > 0) {
@@ -220,13 +268,14 @@ function voegKaderToe(sectieNode) {
         }
         if (!gevonden) {
             betaalMunt = kandidaten[kandidaten.length - 1] || moneyConfig.find(u => u.value === 10) || moneyConfig[6];
-            const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+            const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
             items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
             totaal = Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
         }
         const wisselgeld = Math.round((betaalMunt.value - totaal) * 100) / 100;
         const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
-        html += `<div class="oefening-kader-terug">
+
+        html += `${schattingRijTabel}<div class="oefening-kader-terug">
                     <table class="terug-tabel">
                         <thead>
                             <tr>
@@ -243,7 +292,7 @@ function voegKaderToe(sectieNode) {
                                         ${items.map(i => {
                                             const s = i.scale || 1.0, my = i.moveY || 0;
                                             return `<div class="mandje-item-terug">
-                                                <img src="assets/producten/supermarkt/${i.img}" class="product-img-mandje" style="transform: scale(${s}) translateY(${my}px);" onerror="this.src='assets/producten/${i.img}'">
+                                                <img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" class="product-img-mandje" style="transform: scale(${s}) translateY(${my}px);" onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${i.img}'">
                                                 <span class="mandje-prijs-tag">${prijsStr(i.prijs)}</span>
                                             </div>`;
                                         }).join('')}
@@ -274,9 +323,9 @@ function voegKaderToe(sectieNode) {
 
     } else if (type === 'winkel_kiezen') {
         // Opdracht 3: gegeven geldbedrag dat minstens 2 producten dekt
-        const bedrag = getKiezenBedrag(max, centen, klein);
+        const bedrag = getKiezenBedrag(winkelLijst, max, centen, klein);
         const bedragStr = `€ ${bedrag.toFixed(centen ? 2 : 0).replace('.', ',')}`;
-        html += `<table class="kiezen-tabel">
+        html += `${schattingRijTabel}<table class="kiezen-tabel">
                     <thead>
                         <tr>
                             <th>Ik heb …</th>
@@ -313,13 +362,13 @@ function voegKaderToe(sectieNode) {
                  </table>`;
 
     } else if (type === 'winkel_exact') {
-        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+        const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
         const nKoop = 2 + Math.floor(Math.random() * 2);
         const gekozen = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nKoop);
         const exactBedrag = Math.round(gekozen.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
         const exactStr = `€ ${exactBedrag.toFixed(centen ? 2 : 0).replace('.', ',')}`;
         const uid = 'exact_' + Math.random().toString(36).slice(2, 7);
-        html += `<div class="exact-hint no-print">✏️ Klik op het bedrag om het aan te passen</div>
+        html += `${schattingRijTabel}<div class="exact-hint no-print">✏️ Klik op het bedrag om het aan te passen</div>
                  <table class="exact-tabel">
                     <thead>
                         <tr>
@@ -348,50 +397,175 @@ function voegKaderToe(sectieNode) {
                     </tbody>
                  </table>`;
 
+    } else if (type === 'winkel_korting') {
+        const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
+
+        // Pas prijzen aan zodat kortingsbedrag altijd netjes uitkomt voor dit percentage
+        // Rond de prijs op naar het dichtstbijzijnde veelvoud van (100/kortingPercent)
+        const veelvoud = 100 / kortingPercent; // bij 10% → veelvoud van 10
+        const aangepast = geschaald.map(p => {
+            let prijs;
+            if (centen) {
+                const stap = veelvoud * 0.05;
+                prijs = Math.max(stap, Math.ceil(p.prijs / stap) * stap);
+            } else {
+                prijs = Math.max(veelvoud, Math.ceil(p.prijs / veelvoud) * veelvoud);
+            }
+            return { ...p, prijs: Math.round(prijs * 100) / 100 };
+        });
+
+        // Shuffle en kies producten die nog niet gebruikt zijn
+        const geshuffled = [...aangepast].sort(() => 0.5 - Math.random());
+        let product;
+        // Probeer eerst ongebruikte producten
+        product = geshuffled.find(p => !gebruikteProducten.has(p.img));
+        // Als alles gebruikt is, begin opnieuw
+        if (!product) {
+            gebruikteProducten.clear();
+            product = geshuffled[0];
+        }
+        gebruikteProducten.add(product.img);
+
+        const origPrijs = product.prijs;
+        const kortingBedrag = Math.round(origPrijs * kortingPercent) / 100;
+        const nieuwPrijs = Math.round((origPrijs - kortingBedrag) * 100) / 100;
+
+        const fmt = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+        const s = product.scale || 1.0, my = product.moveY || 0;
+        const submap = product.submap || 'supermarkt';
+        const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="korting-product-img" style="transform:scale(${s}) translateY(${my}px);" onerror="this.style.display='none'">`;
+        const kortingTag = kortingSubtype !== 'korting_hoeveel'
+            ? `<div class="korting-tag">-${kortingPercent}%</div>`
+            : '';
+
+        // Schatting-rij bovenaan (alleen als schatten aangevinkt)
+        const schattingRij = metSchatten
+            ? `<div class="korting-schatting-rij no-print-hide">Ik schat: <span class="korting-schatting-lijn"></span></div>`
+            : '';
+
+        if (kortingSubtype === 'korting_nieuw') {
+            html += `${schattingRij}<table class="korting-tabel">
+                <thead><tr>
+                    <th>Product</th>
+                    <th>Originele prijs</th>
+                    <th>Korting (${kortingPercent}%)</th>
+                    <th>Bereken hoeveel je nog<br>moet betalen.</th>
+                    <th>Antwoord</th>
+                </tr></thead>
+                <tbody><tr>
+                    <td class="korting-td-product">${kortingTag}${imgHtml}<div class="korting-naam">${product.naam}</div></td>
+                    <td class="korting-td-prijs"><div class="korting-orig-prijs">${fmt(origPrijs)}</div></td>
+                    <td class="korting-td-percent"><div class="korting-percent-badge">${kortingPercent}%</div><div class="korting-pijl">↓</div></td>
+                    <td class="korting-td-bew"><div class="korting-invul-lijn"></div><div class="korting-invul-lijn"></div></td>
+                    <td class="korting-td-nieuw"><div class="korting-antwoord">€ <div class="korting-invul-lijn kort"></div></div></td>
+                </tr></tbody>
+            </table>`;
+        } else if (kortingSubtype === 'korting_hoeveel') {
+            html += `${schattingRij}<table class="korting-tabel">
+                <thead><tr>
+                    <th>Product</th>
+                    <th>Originele prijs</th>
+                    <th>Nieuwe prijs</th>
+                    <th>Bereken hoeveel procent<br>korting je kreeg.</th>
+                    <th>Antwoord</th>
+                </tr></thead>
+                <tbody><tr>
+                    <td class="korting-td-product">${kortingTag}${imgHtml}<div class="korting-naam">${product.naam}</div></td>
+                    <td class="korting-td-prijs"><div class="korting-gewone-prijs">${fmt(origPrijs)}</div></td>
+                    <td class="korting-td-prijs"><div class="korting-nieuw-prijs">${fmt(nieuwPrijs)}</div></td>
+                    <td class="korting-td-bew"><div class="korting-invul-lijn"></div><div class="korting-invul-lijn"></div></td>
+                    <td class="korting-td-nieuw"><div class="korting-antwoord"><div class="korting-invul-lijn kort"></div> %</div></td>
+                </tr></tbody>
+            </table>`;
+        } else {
+            html += `${schattingRij}<table class="korting-tabel">
+                <thead><tr>
+                    <th>Product</th>
+                    <th>Korting</th>
+                    <th>Nieuwe prijs</th>
+                    <th>Bereken de prijs<br>zonder de korting.</th>
+                    <th>Antwoord</th>
+                </tr></thead>
+                <tbody><tr>
+                    <td class="korting-td-product">${kortingTag}${imgHtml}<div class="korting-naam">${product.naam}</div></td>
+                    <td class="korting-td-percent"><div class="korting-percent-badge">${kortingPercent}%</div></td>
+                    <td class="korting-td-prijs"><div class="korting-nieuw-prijs">${fmt(nieuwPrijs)}</div></td>
+                    <td class="korting-td-bew"><div class="korting-invul-lijn"></div><div class="korting-invul-lijn"></div></td>
+                    <td class="korting-td-nieuw"><div class="korting-antwoord">€ <div class="korting-invul-lijn kort"></div></div></td>
+                </tr></tbody>
+            </table>`;
+        }
+
     } else if (type === 'winkel_vergelijk') {
-        // Opdracht 5: vergelijk 2 producten van de poster
-        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
-        // Kies 2 producten met verschillende prijs
-        let paar = [];
-        for (let poging = 0; poging < 30; poging++) {
-            const kandidaten = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, 2);
-            if (Math.round(kandidaten[0].prijs * 100) !== Math.round(kandidaten[1].prijs * 100)) {
-                paar = kandidaten; break;
+        // Opdracht 5: hetzelfde product in Supermarkt A en Supermarkt B
+        const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
+        // Kies 1 product
+        const product = geschaald[Math.floor(Math.random() * geschaald.length)];
+        const basisPrijs = product.prijs;
+
+        // Genereer 2 verschillende prijzen rond de basisprijs (±10-40%), altijd ≤ max
+        let prijsA, prijsB, verschil;
+        let gevonden = false;
+        for (let poging = 0; poging < 40 && !gevonden; poging++) {
+            const delta = centen
+                ? (Math.round((Math.random() * 0.3 + 0.05) * basisPrijs * 20) / 20)
+                : Math.max(1, Math.round((Math.random() * 0.3 + 0.05) * basisPrijs));
+            let pA = Math.round((basisPrijs + (Math.random() < 0.5 ? delta : 0)) * 100) / 100;
+            let pB = Math.round((basisPrijs + (pA === basisPrijs ? delta : 0)) * 100) / 100;
+            // Altijd ≤ max
+            pA = Math.min(pA, max); pB = Math.min(pB, max);
+            verschil = Math.abs(Math.round((pA - pB) * 100)) / 100;
+            if (verschil > 0 && (centen ? (verschil * 100) % 5 === 0 : Number.isInteger(verschil))) {
+                prijsA = pA; prijsB = pB; gevonden = true;
             }
         }
-        if (paar.length < 2) paar = geschaald.slice(0, 2); // fallback
+        if (!gevonden) {
+            prijsA = Math.min(basisPrijs, max);
+            prijsB = Math.min(centen ? Math.round((basisPrijs + 0.50) * 100) / 100 : basisPrijs + 1, max);
+            // Als ze gelijk zijn na clamping, maak B iets lager
+            if (prijsA === prijsB) prijsB = Math.max(prijsA - (centen ? 0.5 : 1), 1);
+            verschil = Math.abs(Math.round((prijsA - prijsB) * 100)) / 100;
+        }
 
-        // Vaste nummers 1 en 2 (geen poster, dus eigen nummering)
-        const nrs = [1, 2];
         const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
-        const verschil = Math.abs(Math.round((paar[0].prijs - paar[1].prijs) * 100)) / 100;
+        const submap = product.submap || 'supermarkt';
+        const s = product.scale || 1.0, my = product.moveY || 0;
+        const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
+
+        // Winkelnaam voor headers — afgeleid van winkelType
+        const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'Speelgoedwinkel', snoepwinkel: 'Snoepwinkel' };
+        const winkelNaam2 = winkelNamen[winkelType] || 'Supermarkt';
+        const naamA = `${winkelNaam2} A`, naamB = `${winkelNaam2} B`;
 
         html += `<table class="vergelijk-tabel">
                     <thead>
                         <tr>
-                            <th>Product A</th>
-                            <th>Product B</th>
-                            <th>Welk is duurder?</th>
+                            <th>Product</th>
+                            <th>${naamA}</th>
+                            <th>${naamB}</th>
+                            <th>Waar koop je het<br>het goedkoopst?</th>
                             <th>Bewerking:<br><span class="vergelijk-header-instructie">Reken het verschil uit tussen de prijzen.</span></th>
                             <th>Verschil</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="vergelijk-td-product">
-                                <div class="vergelijk-nummer">${nrs[0]}</div>
-                                <img src="assets/producten/supermarkt/${paar[0].img}" class="vergelijk-img" onerror="this.src='assets/producten/${paar[0].img}'">
-                                <div class="vergelijk-prijs">${prijsStr(paar[0].prijs)}</div>
+                            <td class="vergelijk-td-product vergelijk-td-enkel">
+                                ${imgHtml}
+                                <div class="vergelijk-productnaam">${product.naam}</div>
                             </td>
-                            <td class="vergelijk-td-product">
-                                <div class="vergelijk-nummer">${nrs[1]}</div>
-                                <img src="assets/producten/supermarkt/${paar[1].img}" class="vergelijk-img" onerror="this.src='assets/producten/${paar[1].img}'">
-                                <div class="vergelijk-prijs">${prijsStr(paar[1].prijs)}</div>
+                            <td class="vergelijk-td-winkel">
+                                <div class="vergelijk-winkel-logo vergelijk-winkel-a">A</div>
+                                <div class="vergelijk-prijs">${prijsStr(prijsA)}</div>
+                            </td>
+                            <td class="vergelijk-td-winkel">
+                                <div class="vergelijk-winkel-logo vergelijk-winkel-b">B</div>
+                                <div class="vergelijk-prijs">${prijsStr(prijsB)}</div>
                             </td>
                             <td class="vergelijk-td-duurder">
                                 <div class="vergelijk-keuze-rij">
-                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> product ${nrs[0]}</label>
-                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> product ${nrs[1]}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${naamA}</label>
+                                    <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> ${naamB}</label>
                                     <label class="vergelijk-keuze"><span class="vergelijk-cirkel"></span> even duur</label>
                                 </div>
                             </td>
@@ -409,9 +583,28 @@ function voegKaderToe(sectieNode) {
 
     } else if (type.startsWith('winkel')) {
         // winkel_totaal
-        const geschaald = getGeschaaldePrijzen(winkelData.supermarkt, max, centen);
+        const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
         let items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
         const totaal = items.reduce((a, b) => a + b.prijs, 0);
+
+        const schattingBlok = metSchatten
+            ? `<div class="dubbel-invul-rij">
+                    <div class="invul-vak">
+                        <div class="label-groep">Ik schat:</div>
+                        <div class="korte-invul-lijn"></div>
+                        <div class="korte-invul-lijn"></div>
+                    </div>
+                    <div class="invul-vak">
+                        <div class="label-groep">Bewerking:</div>
+                        <div class="korte-invul-lijn"></div>
+                        <div class="korte-invul-lijn"></div>
+                    </div>
+               </div>`
+            : `<div class="opdracht-blok">
+                    <div class="label-groep">Bewerking:</div>
+                    <div class="korte-invul-lijn"></div>
+                    <div class="korte-invul-lijn"></div>
+               </div>`;
 
         html += `<div class="winkel-container">
                     <div class="winkel-lijstje">
@@ -420,18 +613,15 @@ function voegKaderToe(sectieNode) {
                             ${items.map(i => {
                                 const scale = i.scale || 1.0;
                                 const moveY = i.moveY || 0;
-                                return `<img src="assets/producten/supermarkt/${i.img}" 
+                                return `<img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" 
                                              class="product-img-mandje" 
                                              style="transform: scale(${scale}) translateY(${moveY}px);"
-                                             onerror="this.src='assets/producten/${i.img}'">`;
+                                             onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${i.img}'">`;
                             }).join('')}
                         </div>
                     </div>
                     <div class="winkel-opdracht">
-                        <div class="opdracht-blok">
-                            <div class="label-groep">Bewerking:</div>
-                            <div class="lange-invul-lijn"></div>
-                        </div>
+                        ${schattingBlok}
                         <div class="opdracht-blok">
                             <div class="label-groep">Totaal te betalen: € ________</div>
                         </div>
