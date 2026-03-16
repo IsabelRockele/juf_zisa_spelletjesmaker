@@ -92,7 +92,7 @@ const winkelData = {
     ],
     schoolwinkel: [
         { naam: "Potlood",       basisPrijs: 0.50, img: "potlood.png",       scale: 0.9, moveY: 0, submap: "schoolwinkel" },
-        { naam: "Gum",           basisPrijs: 0.75, img: "gum.png",           scale: 0.9, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Nietjesmachien", basisPrijs: 0.75, img: "nietjesmachien.png", scale: 0.9, moveY: 0, submap: "schoolwinkel" },
         { naam: "Schaar",        basisPrijs: 2.50, img: "schaar.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
         { naam: "Liniaal",       basisPrijs: 1.00, img: "liniaal.png",       scale: 1.0, moveY: 0, submap: "schoolwinkel" },
         { naam: "Passer",        basisPrijs: 3.50, img: "passer.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
@@ -116,7 +116,7 @@ const winkelData = {
         { naam: "Rok",           basisPrijs: 20,  img: "rok.png",           scale: 1.0, moveY: 0, submap: "kledingwinkel" },
         { naam: "Zwembroek",     basisPrijs: 14,  img: "zwembroek.png",     scale: 0.9, moveY: 0, submap: "kledingwinkel" },
         { naam: "Laarzen",       basisPrijs: 50,  img: "laarzen.png",       scale: 1.1, moveY: 0, submap: "kledingwinkel" },
-        { naam: "Pyjama",        basisPrijs: 18,  img: "pyjama.png",        scale: 1.0, moveY: 0, submap: "kledingwinkel" }
+        { naam: "Jurk",          basisPrijs: 18,  img: "jurk.png",          scale: 1.0, moveY: 0, submap: "kledingwinkel" }
     ]
 };
 
