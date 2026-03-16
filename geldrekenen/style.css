@@ -541,10 +541,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 }
 
 /* Kolom breedtes opdracht 3 */
-.kiezen-tabel th:nth-child(1), .kiezen-tabel td:nth-child(1) { width: 26%; }
-.kiezen-tabel th:nth-child(2), .kiezen-tabel td:nth-child(2) { width: 22%; }
+.kiezen-tabel th:nth-child(1), .kiezen-tabel td:nth-child(1) { width: 38%; }
+.kiezen-tabel th:nth-child(2), .kiezen-tabel td:nth-child(2) { width: 14%; }
 .kiezen-tabel th:nth-child(3), .kiezen-tabel td:nth-child(3) { width: 30%; }
-.kiezen-tabel th:nth-child(4), .kiezen-tabel td:nth-child(4) { width: 22%; }
+.kiezen-tabel th:nth-child(4), .kiezen-tabel td:nth-child(4) { width: 18%; }
 
 /* Kolom breedtes opdracht 4 */
 .exact-tabel th:nth-child(1), .exact-tabel td:nth-child(1) { width: 28%; }
@@ -1393,4 +1393,22 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     width: 100%;
     display: block;
     margin-bottom: 6px;
+}
+
+/* ── Tellen: 2 oefeningen naast elkaar ── */
+.oefening-sectie[data-type="tellen"] .kaders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.oefening-sectie[data-type="tellen"] .oefening-kader {
+    margin-bottom: 0;
+    padding: 14px;
+}
+
+.tellen-inhoud {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
