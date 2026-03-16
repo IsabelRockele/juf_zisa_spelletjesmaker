@@ -1,0 +1,1731 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root { 
+    --accent: #3dab92;
+    --accent-dark: #2d8f79;
+    --accent-light: #e6f7f4;
+    --pastel-pink: #f6d8e6;
+    --pastel-blue: #dbeafe;
+    --pastel-yellow: #fdf4c8;
+    --pastel-green: #dff4e4;
+    --pastel-lilac: #e9ddff;
+    --panel-bg: #f4f3f8;
+    --surface: #ffffff;
+    --surface2: #eeecf6;
+    --border: #e0ddf0;
+    --border-strong: #ccc9df;
+    --text: #3d3a52;
+    --text-muted: #8e8aab;
+    --shadow: 0 2px 8px rgba(80,70,140,0.07);
+}
+
+body { 
+    display: flex; 
+    font-family: 'Nunito', sans-serif; 
+    margin: 0; 
+    background: linear-gradient(180deg, #f8f7fb 0%, #eef3f7 100%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD & NAVIGATIE
+   ══════════════════════════════════════════════════════════ */
+#dashboard { 
+    width: 300px; 
+    height: 100vh; 
+    background: var(--panel-bg);
+    padding: 0;
+    position: fixed; 
+    box-shadow: 2px 0 16px rgba(80,70,140,0.09);
+    overflow-y: auto; 
+    z-index: 10; 
+    box-sizing: border-box; 
+    border-right: 1px solid var(--border);
+}
+
+#dashboard::-webkit-scrollbar { width: 4px; }
+#dashboard::-webkit-scrollbar-track { background: transparent; }
+#dashboard::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+
+/* Branding */
+.brand {
+    background: linear-gradient(135deg, #3dab92 0%, #2d7fc4 100%);
+    padding: 18px 18px 16px;
+}
+
+.brand-inner {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.brand-icon {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.brand-text h1 { 
+    margin: 0; 
+    color: #ffffff;
+    font-size: 1.15rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.brand-text p {
+    margin: 2px 0 0 0;
+    color: rgba(255,255,255,0.75);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+/* Dashboard body */
+.dashboard-body {
+    padding: 14px 13px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Kaarten */
+.dash-card {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.dash-card-header {
+    padding: 9px 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+}
+
+.dash-card-icon {
+    width: 25px; height: 25px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    flex-shrink: 0;
+}
+
+.dash-card-icon.green  { background: #d4f0ea; }
+.dash-card-icon.blue   { background: #dbeafe; }
+.dash-card-icon.yellow { background: #fef3c7; }
+
+.dash-card-title {
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.dash-card-body {
+    padding: 12px 13px;
+}
+
+/* Tabs */
+.tab-nav { 
+    display: flex; 
+    gap: 4px;
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 12px;
+}
+
+.tab-btn { 
+    flex: 1; 
+    border: none; 
+    background: transparent; 
+    padding: 8px 6px; 
+    cursor: pointer; 
+    font-weight: 700; 
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.76rem; 
+    color: var(--text-muted); 
+    transition: all 0.18s; 
+    border-radius: 8px;
+    margin: 0;
+    width: auto;
+}
+
+.tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.7); }
+
+.tab-btn.active { 
+    background: var(--surface);
+    color: var(--accent); 
+    font-weight: 800;
+    box-shadow: 0 2px 6px rgba(80,70,140,0.1);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Labels */
+label { 
+    display: block; 
+    margin: 0 0 4px; 
+    font-weight: 800; 
+    font-size: 0.7rem; 
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.field-group { margin-bottom: 10px; }
+
+.field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+input, select { 
+    width: 100%; 
+    padding: 9px 10px; 
+    border-radius: 9px; 
+    border: 1.5px solid var(--border);
+    box-sizing: border-box; 
+    margin-bottom: 0; 
+    font-size: 0.84rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: var(--surface);
+    color: var(--text);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' stroke='%238e8aab' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 28px;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(61,171,146,0.12);
+}
+
+/* Checkboxes */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 9px;
+    padding: 8px 11px;
+    margin: 0;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    position: relative;
+}
+
+.checkbox-container:hover {
+    border-color: var(--accent);
+    background: var(--accent-light);
+}
+
+/* Aangevinkt: groene achtergrond + border */
+.checkbox-container:has(input:checked) {
+    background: #e6f7f4;
+    border-color: var(--accent);
+}
+
+.checkbox-container:has(input:checked) span {
+    color: var(--accent-dark);
+}
+
+/* Verberg de standaard browser checkbox, vervang door custom */
+.checkbox-container input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-strong);
+    border-radius: 5px;
+    background: white;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    position: relative;
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.checkbox-container input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 10px;
+    border: 2.5px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+}
+
+.checkbox-container span {
+    font-weight: 700;
+    font-size: 0.82rem;
+    color: var(--text);
+    transition: color 0.15s;
+}
+
+.instellingen-banner {
+    background: #fff8e1;
+    border: 1.5px solid #f0c040;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #7a5800;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* Sectie-knop */
+.primary-btn {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(61,171,146,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-bottom: 0;
+}
+
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(61,171,146,0.4);
+}
+
+.primary-btn:active { transform: translateY(0); }
+
+/* Actie-knoppen */
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.print-btn, .download-btn, .clear-btn {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.84rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.print-btn {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1.5px solid #bfdbfe;
+}
+
+.print-btn:hover { background: #dbeafe; transform: translateY(-1px); }
+
+.download-btn {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1.5px solid #fde68a;
+}
+
+.download-btn:hover { background: #fef3c7; transform: translateY(-1px); }
+
+.clear-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+    font-size: 0.78rem;
+}
+
+.clear-btn:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+
+h3 { margin-top: 0; margin-bottom: 10px; color: #586274; font-size: 1rem; }
+hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+/* ══════════════════════════════════════════════════════════
+   WERKBLAD LAYOUT
+   ══════════════════════════════════════════════════════════ */
+#preview { 
+    margin-left: 320px; 
+    padding: 30px; 
+    width: 100%; 
+    display: block; 
+}
+
+.a4-page { 
+    width: 210mm; 
+    min-height: 297mm; 
+    background: white; 
+    padding: 20mm 15mm; 
+    box-sizing: border-box; 
+    margin: 0 auto 30px auto; 
+    box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+    position: relative; 
+}
+
+.student-header { display: flex; gap: 20px; margin-bottom: 25px; }
+.header-box { border: 1.5px solid var(--border); padding: 8px 15px; border-radius: 8px; flex-grow: 1; font-size: 0.9rem; }
+
+.werkblad-titel { 
+    text-align: center; 
+    border: 3px double var(--border); 
+    padding: 10px; 
+    margin-bottom: 40px; 
+    text-transform: uppercase; 
+}
+
+/* ══════════════════════════════════════════════════════════
+   WINKEL POSTER (DYNAMISCHE PLANKEN)
+   ══════════════════════════════════════════════════════════ */
+.winkel-poster {
+    border: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 30px 0; 
+    display: flex;
+    flex-direction: column;
+    gap: 80px; 
+    margin-bottom: 30px;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #fcfcfc;
+}
+
+.plank-rij {
+    display: grid;
+    grid-template-columns: repeat(6, 75px); 
+    justify-content: center;
+    gap: 10px;
+    height: 80px; /* Iets verhoogd voor betere schaling */
+    
+    background-image: url('assets/producten/winkel.png');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* Forceer printen van deze achtergrond */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+.poster-item { 
+    position: relative; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: flex-end; 
+    /* UITLIJNING OP DE PLANK */
+    padding-bottom: 25px; 
+}
+
+.poster-img { 
+    height: 60px; 
+    width: auto;
+    max-width: 70px; /* Voorkomt overlappen bij brede items */
+    object-fit: contain;
+    filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.2));
+}
+
+.prijskaartje {
+    background: #ffeb3b;
+    border: 1.5px solid #000;
+    padding: 1px 4px;
+    font-weight: bold;
+    font-size: 0.85rem;
+    box-shadow: 2px 2px 0px #000;
+    margin-top: 4px; 
+}
+
+.poster-nummer {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: #3dab92;
+    color: white;
+    font-family: Arial, sans-serif;
+    font-weight: 900;
+    font-size: 0.78rem;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 2;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* ══════════════════════════════════════════════════════════
+   OPDRACHT 3: KIEZEN MET GEGEVEN GELD
+   ══════════════════════════════════════════════════════════ */
+.kiezen-tabel, .exact-tabel {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.kiezen-tabel th, .exact-tabel th {
+    background: #e8f7f4;
+    border: 1.5px solid #a8d8ce;
+    padding: 8px 8px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    color: #2d6b5e;
+}
+
+.kiezen-tabel td, .exact-tabel td {
+    border: 1.5px solid #a8d8ce;
+    padding: 12px 10px;
+    vertical-align: top;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.exact-tabel td {
+    height: 80px;
+    min-height: 80px;
+}
+
+/* Kolom breedtes opdracht 3 */
+.kiezen-tabel th:nth-child(1), .kiezen-tabel td:nth-child(1) { width: 38%; }
+.kiezen-tabel th:nth-child(2), .kiezen-tabel td:nth-child(2) { width: 14%; }
+.kiezen-tabel th:nth-child(3), .kiezen-tabel td:nth-child(3) { width: 30%; }
+.kiezen-tabel th:nth-child(4), .kiezen-tabel td:nth-child(4) { width: 18%; }
+
+/* Kolom breedtes opdracht 4 */
+.exact-tabel th:nth-child(1), .exact-tabel td:nth-child(1) { width: 28%; }
+.exact-tabel th:nth-child(2), .exact-tabel td:nth-child(2) { width: 36%; }
+.exact-tabel th:nth-child(3), .exact-tabel td:nth-child(3) { width: 36%; }
+
+.kiezen-geld-vak {
+    min-height: 60px;
+    border: 2px dashed #a8d8ce;
+    border-radius: 8px;
+    padding: 6px;
+    background: #f5fffe;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+}
+
+.kiezen-ik-tel-rij {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    font-family: Arial, sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #2d6b5e;
+    margin-top: 8px;
+    justify-content: center;
+}
+
+.kiezen-nummers-vak {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 4px 6px;
+}
+
+.kiezen-invul-lijn {
+    border-bottom: 1.5px solid #222;
+    width: 100%;
+    height: 30px;
+    display: block;
+}
+
+.kiezen-invul-lijn.breed {
+    width: 70px;
+    display: inline-block;
+}
+
+.kiezen-td-nummers, .kiezen-td-bew,
+.exact-td-nummers, .exact-td-bew {
+    vertical-align: top;
+    padding-top: 10px !important;
+}
+
+.kiezen-over-tekst {
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin: 4px 0;
+}
+
+.kiezen-over-rij {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    margin: 6px 0;
+}
+
+.exact-hint {
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+    color: #3dab92;
+    font-style: italic;
+    margin-bottom: 4px;
+    padding-left: 2px;
+}
+
+.exact-bedrag-groot {
+    font-family: Arial, sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #2d6b5e;
+    text-align: center;
+    padding: 10px 6px;
+    border-radius: 6px;
+    outline: none;
+    cursor: text;
+    min-width: 60px;
+    display: inline-block;
+    border: 2px dashed transparent;
+    transition: border-color 0.15s;
+}
+
+.exact-bedrag-groot:hover,
+.exact-bedrag-groot:focus {
+    border-color: #3dab92;
+    background: #f0faf8;
+}
+
+.exact-bedrag-header {
+    font-size: 1rem;
+    font-weight: 900;
+    color: #2d6b5e;
+}
+.oefening-sectie { 
+    margin-bottom: 40px; 
+    position: relative;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+
+.sectie-titel { 
+    display: block; 
+    font-size: 1.3rem; 
+    font-weight: bold; 
+    text-decoration: underline; 
+    margin-bottom: 20px; 
+    outline: none;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+
+.kaders-grid {
+    break-inside: auto;
+    page-break-inside: auto;
+}
+
+.kaders-grid > .oefening-kader:first-child {
+    break-before: avoid;
+    page-break-before: avoid;
+}
+
+.oefening-kader { 
+    border: 2.5px solid var(--border); 
+    border-radius: 12px; 
+    padding: 20px; 
+    position: relative; 
+    break-inside: avoid; 
+    page-break-inside: avoid;
+    margin-bottom: 25px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.oefening-kader-terug {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.winkel-container { display: flex; gap: 30px; margin-top: 10px; }
+
+/* ── Terugkrijgen-tabel ── */
+.terug-tabel {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+    table-layout: fixed;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.terug-tabel th {
+    background: #f5e8f0;
+    border: 1.5px solid #d4b8c8;
+    padding: 8px 8px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    color: #5a3a4a;
+}
+
+.terug-tabel td {
+    border: 1.5px solid #d4b8c8;
+    padding: 10px 10px 10px;
+    vertical-align: top;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: 155px;
+}
+
+/* Kolom 2 en 4 breder, kolom 1 en 3 smaller */
+.terug-tabel th:nth-child(1),
+.terug-tabel td:nth-child(1) { width: 16%; }
+.terug-tabel th:nth-child(2),
+.terug-tabel td:nth-child(2) { width: 35%; }
+.terug-tabel th:nth-child(3),
+.terug-tabel td:nth-child(3) { width: 13%; }
+.terug-tabel th:nth-child(4),
+.terug-tabel td:nth-child(4) { width: 36%; }
+
+.terug-td-mandje .mandje-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.mandje-item-terug {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.mandje-prijs-tag {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 13px;
+    color: #333;
+    background: #fff8e1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1px 6px;
+}
+
+.terug-td-samen {
+    vertical-align: top !important;
+    padding-top: 10px !important;
+}
+
+.terug-samen-tekst {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.terug-invul-rij {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.terug-invul-lijn {
+    border-bottom: 1.5px solid #222;
+    width: 55px;
+    height: 20px;
+    display: inline-block;
+}
+
+.terug-invul-lijn.kort {
+    width: 35px;
+}
+
+.betaal-biljet-img {
+    max-height: 50px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+}
+
+.terug-tabel-bew-lijn,
+.terug-tabel-terug-lijn {
+    border-bottom: 1.5px solid #222;
+    width: 85%;
+    height: 28px;
+    margin: 0 auto 6px auto;
+    display: block;
+}
+
+/* Tweede bewerkingslijn */
+.terug-tabel-bew-lijn2,
+.terug-tabel-terug-lijn2 {
+    height: 28px;
+    margin-bottom: 10px;
+}
+
+.terug-antwoord-rij {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 4px;
+    font-family: Arial, sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    flex-wrap: wrap;
+    line-height: 2;
+}
+
+.terug-td-terug {
+    vertical-align: top !important;
+    padding-top: 10px !important;
+}
+
+.terug-td-terug {
+    font-size: 0.88rem;
+    vertical-align: top !important;
+    padding-top: 6px !important;
+}
+
+.terug-td-samen {
+    font-size: 0.88rem;
+    vertical-align: top !important;
+    padding-top: 6px !important;
+}
+
+.winkel-lijstje { 
+    flex: 0 0 170px; 
+    border-right: 2px dashed #ccc; 
+    padding-right: 20px; 
+}
+
+.mandje-grid { 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 10px; 
+    margin-top: 15px; 
+}
+
+.product-img-mandje { 
+    height: 50px; 
+    width: 50px; 
+    object-fit: contain; 
+}
+
+.opdracht-blok { margin-bottom: 25px; }
+.label-groep { font-weight: bold; font-size: 1.1rem; }
+.lange-invul-lijn { 
+    border-bottom: 2px solid #333; 
+    width: 100%; 
+    min-width: 350px; 
+    height: 35px; 
+}
+
+.geld-vak { 
+    border: 2px dashed #aaa; 
+    border-radius: 10px; 
+    padding: 8px 10px; 
+    min-height: 60px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    gap: 3px; 
+    align-items: center; 
+    background: #fafafa; 
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.money-img { height: auto; width: calc(44px * var(--scale)); vertical-align: middle; }
+.antwoord-box { margin-top: 10px; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: #f9f9f9; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+
+.sectie-controls { margin-top: 10px; display: flex; gap: 10px; }
+.btn-plus { background: #eee; border: 1px solid #ccc; border-radius: 4px; padding: 6px 12px; cursor: pointer; }
+.btn-del-sectie { background: #fee; border: 1px solid #fcc; border-radius: 4px; padding: 6px 12px; cursor: pointer; color: #c00; }
+.btn-x-kader { position: absolute; top: -10px; right: -10px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
+
+/* =========================================================
+   ALLEEN VOOR BROWSER-AFDRUKKEN VIA window.print()
+   NIET GEBRUIKT DOOR pdf-engine.js
+   ========================================================= */
+/* ══════════════════════════════════════════════════════════
+   PRINT SETTINGS - GEFORCEERDE ACHTERGRONDEN
+   ══════════════════════════════════════════════════════════ */
+@media print { 
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    @page { margin: 15mm !important; }
+
+    #dashboard, .no-print, .btn-x-kader, .sectie-controls { 
+        display: none !important; 
+    } 
+
+    body { 
+        background: white !important; 
+        width: auto !important; 
+    }
+
+    #preview { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        display: block !important; 
+    } 
+
+    .a4-page { 
+    box-shadow: none !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+
+    margin: 0 !important;
+    padding: 20mm 15mm !important;
+
+    display: block !important;
+}
+
+    .plank-rij {
+        background-image: url('assets/producten/winkel.png') !important;
+        background-size: 100% 100% !important;
+    }
+}
+.pdf-loading {
+    position: fixed;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.82);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.pdf-loading.hidden {
+    display: none;
+}
+
+.pdf-loading-box {
+    width: 360px;
+    max-width: calc(100vw - 40px);
+    background: white;
+    border: 1px solid #e7e3ef;
+    border-radius: 18px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.12);
+    padding: 24px;
+    text-align: center;
+}
+
+.pdf-loading-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4e5a6b;
+    margin-bottom: 8px;
+}
+
+.pdf-loading-text {
+    font-size: 0.95rem;
+    color: #6b7280;
+    margin-bottom: 18px;
+}
+
+.pdf-loading-bar {
+    width: 100%;
+    height: 14px;
+    background: #eef2f7;
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid #dde5ee;
+}
+
+.pdf-loading-fill {
+    width: 35%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #dbeafe, #e9ddff, #dff4e4);
+    animation: pdfLoadingMove 1.2s infinite ease-in-out;
+}
+
+@keyframes pdfLoadingMove {
+    0%   { transform: translateX(-120%); }
+    100% { transform: translateX(320%); }
+}
+/* ══════════════════════════════════════════════════════════
+   OPDRACHT 5: VERGELIJKEN
+   ══════════════════════════════════════════════════════════ */
+.vergelijk-tabel {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.vergelijk-tabel th {
+    background: #fff3cd;
+    border: 1.5px solid #e0c060;
+    padding: 8px 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    color: #7a5c00;
+    vertical-align: top;
+}
+
+.vergelijk-tabel td {
+    border: 1.5px solid #e0c060;
+    padding: 10px 8px;
+    vertical-align: middle;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: 90px;
+}
+
+.vergelijk-tabel th:nth-child(1), .vergelijk-tabel td:nth-child(1) { width: 16%; }
+.vergelijk-tabel th:nth-child(2), .vergelijk-tabel td:nth-child(2) { width: 16%; }
+.vergelijk-tabel th:nth-child(3), .vergelijk-tabel td:nth-child(3) { width: 24%; }
+.vergelijk-tabel th:nth-child(4), .vergelijk-tabel td:nth-child(4) { width: 26%; }
+.vergelijk-tabel th:nth-child(5), .vergelijk-tabel td:nth-child(5) { width: 18%; }
+
+.vergelijk-td-product {
+    position: relative;
+    vertical-align: middle !important;
+}
+
+.vergelijk-nummer {
+    position: absolute;
+    top: 4px; left: 6px;
+    background: #3dab92;
+    color: white;
+    font-weight: 900;
+    font-size: 0.78rem;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vergelijk-img {
+    height: 42px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 4px auto 2px;
+}
+
+.vergelijk-prijs {
+    font-weight: 900;
+    font-size: 1rem;
+    color: #3d3a52;
+    margin-top: 2px;
+}
+
+.vergelijk-keuze-rij {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    padding-left: 6px;
+}
+
+.vergelijk-keuze {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: #444;
+    cursor: default;
+    white-space: nowrap;
+}
+
+.vergelijk-cirkel {
+    width: 14px; height: 14px;
+    border: 1.5px solid #aaa;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.vergelijk-td-bew {
+    vertical-align: top !important;
+    padding-top: 14px !important;
+}
+
+.vergelijk-invul-lijn {
+    border-bottom: 1.5px solid #222;
+    width: 90%;
+    height: 26px;
+    margin: 0 auto 8px auto;
+    display: block;
+}
+
+.vergelijk-invul-lijn.kort {
+    width: 50px;
+    display: inline-block;
+    margin: 0;
+    height: 20px;
+}
+
+.vergelijk-td-verschil {
+    vertical-align: middle !important;
+}
+
+.vergelijk-verschil-rij {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.vergelijk-verschil-label {
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+    text-align: center;
+}
+
+.vergelijk-instructie {
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-style: italic;
+    color: #666;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    text-align: left;
+}
+
+.vergelijk-header-instructie {
+    font-size: 11px;
+    font-weight: 600;
+    font-style: italic;
+    color: #9a7a00;
+}
+
+/* ══════════════════════════════════════════════════════════
+   OPDRACHT 6: SOLDEN / KORTING
+   ══════════════════════════════════════════════════════════ */
+.korting-tabel {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+.korting-tabel th {
+    background: #fce4ec;
+    border: 1.5px solid #e08090;
+    padding: 8px 6px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-align: center;
+    color: #8b1a2a;
+}
+
+.korting-tabel td {
+    border: 1.5px solid #e08090;
+    padding: 10px 8px;
+    vertical-align: middle;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    height: 85px;
+}
+
+.korting-tabel th:nth-child(1), .korting-tabel td:nth-child(1) { width: 20%; }
+.korting-tabel th:nth-child(2), .korting-tabel td:nth-child(2) { width: 18%; }
+.korting-tabel th:nth-child(3), .korting-tabel td:nth-child(3) { width: 18%; }
+.korting-tabel th:nth-child(4), .korting-tabel td:nth-child(4) { width: 28%; }
+.korting-tabel th:nth-child(5), .korting-tabel td:nth-child(5) { width: 16%; }
+
+.korting-td-product {
+    position: relative;
+    vertical-align: middle !important;
+}
+
+.korting-tag {
+    position: absolute;
+    top: 4px; right: 4px;
+    background: #e53935;
+    color: white;
+    font-weight: 900;
+    font-size: 0.78rem;
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+.korting-product-img {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+    margin: 4px auto 2px;
+}
+
+.korting-naam {
+    font-size: 11px;
+    color: #555;
+    margin-top: 2px;
+}
+
+.korting-orig-prijs {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #333;
+    text-decoration: line-through;
+    color: #999;
+}
+
+.korting-nieuw-prijs {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #e53935;
+}
+
+.korting-percent-badge {
+    background: #e53935;
+    color: white;
+    font-weight: 900;
+    font-size: 1.1rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.korting-pijl {
+    font-size: 1.2rem;
+    color: #e53935;
+    margin-top: 4px;
+}
+
+.korting-td-bew {
+    vertical-align: top !important;
+    padding-top: 12px !important;
+}
+
+.korting-invul-lijn {
+    border-bottom: 1.5px solid #222;
+    width: 90%;
+    height: 26px;
+    margin: 0 auto 8px auto;
+    display: block;
+}
+
+.korting-invul-lijn.kort {
+    width: 55px;
+    display: inline-block;
+    margin: 0;
+    height: 20px;
+    vertical-align: bottom;
+}
+
+.korting-antwoord {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.korting-gewone-prijs {
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+/* ── Vergelijk: nieuwe layout met 6 kolommen ── */
+.vergelijk-tabel th:nth-child(1), .vergelijk-tabel td:nth-child(1) { width: 14%; }
+.vergelijk-tabel th:nth-child(2), .vergelijk-tabel td:nth-child(2) { width: 13%; }
+.vergelijk-tabel th:nth-child(3), .vergelijk-tabel td:nth-child(3) { width: 13%; }
+.vergelijk-tabel th:nth-child(4), .vergelijk-tabel td:nth-child(4) { width: 22%; }
+.vergelijk-tabel th:nth-child(5), .vergelijk-tabel td:nth-child(5) { width: 24%; }
+.vergelijk-tabel th:nth-child(6), .vergelijk-tabel td:nth-child(6) { width: 14%; }
+
+.vergelijk-td-enkel {
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+.vergelijk-productnaam {
+    font-size: 11px;
+    color: #555;
+    margin-top: 3px;
+    font-weight: 600;
+}
+
+.vergelijk-td-winkel {
+    vertical-align: middle !important;
+    text-align: center;
+}
+
+.vergelijk-winkel-logo {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 6px;
+    color: white;
+}
+
+.vergelijk-winkel-a { background: #3b82f6; }
+.vergelijk-winkel-b { background: #f97316; }
+
+.korting-schatting-rij {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 6px;
+    padding: 0 4px;
+}
+
+.korting-schatting-lijn {
+    flex: 1;
+    border-bottom: 1.5px solid #555;
+    height: 20px;
+    display: inline-block;
+}
+
+.schatten-blok {
+    margin-bottom: 8px;
+}
+
+.schatten-blok .label-groep {
+    margin-bottom: 4px;
+}
+
+/* ── Schat + Bewerking naast elkaar ── */
+.dubbel-invul-rij {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 14px;
+}
+
+.invul-vak {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.invul-vak .label-groep {
+    margin-bottom: 4px;
+}
+
+.korte-invul-lijn {
+    border-bottom: 1.5px solid #333;
+    height: 24px;
+    width: 100%;
+    display: block;
+    margin-bottom: 6px;
+}
+
+/* ── Tellen: 2 oefeningen naast elkaar ── */
+.oefening-sectie[data-type="tellen"] .kaders-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.oefening-sectie[data-type="tellen"] .oefening-kader {
+    margin-bottom: 0;
+    padding: 14px;
+}
+
+.tellen-inhoud {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Poster aanpas-paneel ── */
+.poster-item {
+    cursor: pointer;
+}
+
+.poster-item:hover .poster-img {
+    outline: 2px dashed var(--accent);
+    border-radius: 4px;
+}
+
+.aanpas-panel {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1.5px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 10px;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.aanpas-rij {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.aanpas-rij input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+}
+
+.aanpas-waarde {
+    font-size: 11px;
+    color: #666;
+    min-width: 36px;
+    text-align: right;
+}
+
+.aanpas-sluit {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    line-height: 1;
+}
+
+.aanpas-sluit:hover {
+    color: #e53935;
+}
+
+/* ── Keuzemenu knop ── */
+.keuzemenu-btn {
+    display: inline-block;
+    background: #1a2e5a;
+    color: white !important;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+    transition: background 0.2s;
+}
+
+.keuzemenu-btn:hover {
+    background: #243d7a;
+}
+
+/* ── Winkel totaal: nieuwe layout ── */
+.winkel-totaal-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+}
+
+.winkel-totaal-top {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.winkel-totaal-mandje {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed #ccc;
+}
+
+.mandje-rij {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: flex-end;
+}
+
+.mandje-item-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.winkel-totaal-antwoord {
+    margin-top: 4px;
+}
+
+.winkel-totaal-layout .geld-vak {
+    width: 100%;
+    margin-top: 0;
+}
+
+.poster-hint {
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 11px;
+    color: #888;
+    font-style: italic;
+    margin-bottom: 4px;
+    padding-left: 2px;
+}
+
+/* ── Help knop ── */
+.help-btn {
+    width: 100%;
+    background: #2e7d5e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    letter-spacing: 0.2px;
+    transition: background 0.2s;
+}
+
+.help-btn:hover { background: #245f49; }
+
+/* ── Help modal ── */
+.help-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.help-modal.hidden { display: none; }
+
+.help-modal-box {
+    background: white;
+    border-radius: 14px;
+    width: min(680px, 92vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+}
+
+.help-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #2e7d5e;
+    color: white;
+    border-radius: 14px 14px 0 0;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    position: sticky;
+    top: 0;
+}
+
+.help-sluit {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 16px;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+}
+
+.help-sluit:hover { background: rgba(255,255,255,0.35); }
+
+.help-modal-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.help-sectie {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-sectie-titel {
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    color: #2e7d5e;
+    border-bottom: 2px solid #e8f5f0;
+    padding-bottom: 4px;
+}
+
+.help-sectie ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.help-sectie li {
+    font-family: Arial, sans-serif;
+    font-size: 12.5px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.help-tabel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.help-rij {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+    font-size: 12.5px;
+    color: #444;
+    line-height: 1.5;
+}
+
+.help-nr {
+    background: #2e7d5e;
+    color: white;
+    font-weight: 900;
+    font-size: 11px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── PRO header band ── */
+.pro-header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 36px;
+    background: #1a2e5a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    z-index: 999;
+}
+
+.pro-header a {
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.pro-header a:hover { color: white; }
+
+/* Verschuif dashboard en preview omlaag voor PRO header */
+body:has(.pro-header) #dashboard {
+    top: 36px;
+    height: calc(100vh - 36px);
+}
+
+body:has(.pro-header) #preview {
+    margin-top: 36px;
+}
+
+.keuzemenu-btn-pro {
+    background: #243d7a !important;
+}
