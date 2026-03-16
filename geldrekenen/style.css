@@ -1474,3 +1474,23 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .aanpas-sluit:hover {
     color: #e53935;
 }
+
+/* ── Keuzemenu knop ── */
+.keuzemenu-btn {
+    display: inline-block;
+    background: #1a2e5a;
+    color: white !important;
+    font-family: 'Nunito', Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+    transition: background 0.2s;
+}
+
+.keuzemenu-btn:hover {
+    background: #243d7a;
+}
