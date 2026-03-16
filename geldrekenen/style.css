@@ -1412,3 +1412,65 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     flex-direction: column;
     gap: 10px;
 }
+
+/* ── Poster aanpas-paneel ── */
+.poster-item {
+    cursor: pointer;
+}
+
+.poster-item:hover .poster-img {
+    outline: 2px dashed var(--accent);
+    border-radius: 4px;
+}
+
+.aanpas-panel {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    border: 1.5px solid var(--accent);
+    border-radius: 10px;
+    padding: 8px 10px;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    min-width: 180px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.aanpas-rij {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+
+.aanpas-rij input[type="range"] {
+    flex: 1;
+    accent-color: var(--accent);
+    height: 4px;
+}
+
+.aanpas-waarde {
+    font-size: 11px;
+    color: #666;
+    min-width: 36px;
+    text-align: right;
+}
+
+.aanpas-sluit {
+    align-self: flex-end;
+    background: none;
+    border: none;
+    font-size: 13px;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    line-height: 1;
+}
+
+.aanpas-sluit:hover {
+    color: #e53935;
+}
