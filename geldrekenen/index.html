@@ -51,19 +51,36 @@
                             <label>Winkeltype</label>
                             <select id="winkelSelect">
                                 <option value="supermarkt">De Supermarkt</option>
-                                <option value="speelgoed">De Speelgoedwinkel</option>
                                 <option value="bakker">De Bakker</option>
+                                <option value="speelgoed">De Speelgoedwinkel</option>
+                                <option value="snoepwinkel">De Snoepwinkel</option>
                             </select>
                         </div>
                         <div class="field-group">
                             <label>Opdracht</label>
-                            <select id="type-winkel">
+                            <select id="type-winkel" onchange="toggleKortingOpties()">
                                 <option value="winkel_totaal">1. Totaal betalen</option>
                                 <option value="winkel_terug">2. Terugkrijgen</option>
                                 <option value="winkel_kiezen">3. Wat kan je kopen?</option>
                                 <option value="winkel_exact">4. Koop voor exact bedrag</option>
                                 <option value="winkel_vergelijk">5. Goedkoper / duurder?</option>
+                                <option value="winkel_korting">6. Solden: korting!</option>
                             </select>
+                        </div>
+                        <div class="field-group" id="korting-opties" style="display:none;">
+                            <label>Type kortingsoefening</label>
+                            <select id="kortingSubtype">
+                                <option value="korting_nieuw">Originele prijs + % korting → nieuwe prijs berekenen</option>
+                                <option value="korting_hoeveel">Originele prijs + nieuwe prijs → hoeveel korting?</option>
+                                <option value="korting_origineel">Nieuwe prijs + % korting → originele prijs berekenen</option>
+                            </select>
+                            <label style="margin-top:8px;">% korting (vink aan welke je wil afwisselen)</label>
+                            <div class="checkbox-group" id="korting-percent-keuzes">
+                                <label class="checkbox-container"><input type="checkbox" class="kortingPercentCheck" value="10" checked><span>10%</span></label>
+                                <label class="checkbox-container"><input type="checkbox" class="kortingPercentCheck" value="20"><span>20%</span></label>
+                                <label class="checkbox-container"><input type="checkbox" class="kortingPercentCheck" value="25"><span>25%</span></label>
+                                <label class="checkbox-container"><input type="checkbox" class="kortingPercentCheck" value="50"><span>50%</span></label>
+                            </div>
                         </div>
                         <div class="field-group">
                             <label>Items op lijstje</label>
