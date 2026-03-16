@@ -62,26 +62,96 @@ const winkelData = {
         { naam: "Stokbrood",      basisPrijs: 1.50, img: "stokbrood.png",       scale: 1.2, submap: "bakker", moveY: 0 },
         { naam: "Witbrood",       basisPrijs: 2.60, img: "witbrood.png",        scale: 1.1, submap: "bakker", moveY: 0 }
     ],
-    speelgoed: [],
-    snoepwinkel: []
+    speelgoed: [
+        { naam: "Camera",         basisPrijs: 8.00,  img: "camera.png",         scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Gezelschapsspel", basisPrijs: 9.50,  img: "gezelschapsspel.png", scale: 1.1, moveY: 0, submap: "speelgoed" },
+        { naam: "K'nex",          basisPrijs: 10.00, img: "knex.png",            scale: 1.1, moveY: 0, submap: "speelgoed" },
+        { naam: "Knuffel",        basisPrijs: 6.50,  img: "knuffel.png",         scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Lego",           basisPrijs: 12.00, img: "lego.png",            scale: 1.1, moveY: 0, submap: "speelgoed" },
+        { naam: "Pop",            basisPrijs: 7.00,  img: "pop.png",             scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Robot",          basisPrijs: 11.00, img: "robot.png",           scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Skates",         basisPrijs: 14.00, img: "skates.png",          scale: 1.1, moveY: 0, submap: "speelgoed" },
+        { naam: "Springtouw",     basisPrijs: 3.50,  img: "springtouw.png",      scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Step",           basisPrijs: 13.00, img: "step.png",            scale: 1.1, moveY: 0, submap: "speelgoed" },
+        { naam: "Strip",          basisPrijs: 4.50,  img: "strip.png",           scale: 1.0, moveY: 0, submap: "speelgoed" },
+        { naam: "Voetbal",        basisPrijs: 8.50,  img: "voetbal.png",         scale: 1.0, moveY: 0, submap: "speelgoed" }
+    ],
+    snoepwinkel: [],
+    elektronica: [
+        { naam: "Gsm",           basisPrijs: 250, img: "gsm.png",           scale: 1.0, moveY: 0, submap: "elektronica" },
+        { naam: "Tablet",        basisPrijs: 200, img: "tablet.png",        scale: 1.1, moveY: 0, submap: "elektronica" },
+        { naam: "Laptop",        basisPrijs: 400, img: "laptop.png",        scale: 1.1, moveY: 0, submap: "elektronica" },
+        { naam: "Koptelefoon",   basisPrijs: 60,  img: "koptelefoon.png",   scale: 1.0, moveY: 0, submap: "elektronica" },
+        { naam: "Oortjes",       basisPrijs: 50,  img: "oortjes.png",       scale: 0.9, moveY: 0, submap: "elektronica" },
+        { naam: "Spelconsole",   basisPrijs: 300, img: "spelconsole.png",   scale: 1.1, moveY: 0, submap: "elektronica" },
+        { naam: "Controller",    basisPrijs: 55,  img: "controller.png",    scale: 1.0, moveY: 0, submap: "elektronica" },
+        { naam: "Camera",        basisPrijs: 150, img: "camera.png",        scale: 1.0, moveY: 0, submap: "elektronica" },
+        { naam: "Smartwatch",    basisPrijs: 120, img: "smartwatch.png",    scale: 0.9, moveY: 0, submap: "elektronica" },
+        { naam: "Luidspreker",   basisPrijs: 80,  img: "luidspreker.png",   scale: 1.0, moveY: 0, submap: "elektronica" },
+        { naam: "Televisie",     basisPrijs: 350, img: "televisie.png",     scale: 1.2, moveY: 0, submap: "elektronica" },
+        { naam: "Toetsenbord",   basisPrijs: 45,  img: "toetsenbord.png",   scale: 1.0, moveY: 0, submap: "elektronica" }
+    ],
+    schoolwinkel: [
+        { naam: "Potlood",       basisPrijs: 0.50, img: "potlood.png",       scale: 0.9, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Gum",           basisPrijs: 0.75, img: "gum.png",           scale: 0.9, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Schaar",        basisPrijs: 2.50, img: "schaar.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Liniaal",       basisPrijs: 1.00, img: "liniaal.png",       scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Passer",        basisPrijs: 3.50, img: "passer.png",        scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Kleurpotloden", basisPrijs: 4.50, img: "kleurpotloden.png", scale: 1.1, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Schilderset",   basisPrijs: 5.50, img: "schilderset.png",   scale: 1.1, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Schrift",       basisPrijs: 2.00, img: "schrift.png",       scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Map",           basisPrijs: 1.50, img: "map.png",           scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Etui",          basisPrijs: 6.00, img: "etui.png",          scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Stiften",       basisPrijs: 3.00, img: "stiften.png",       scale: 1.0, moveY: 0, submap: "schoolwinkel" },
+        { naam: "Plakband",      basisPrijs: 1.25, img: "plakband.png",      scale: 0.9, moveY: 0, submap: "schoolwinkel" }
+    ],
+    kledingwinkel: [
+        { naam: "T-shirt",       basisPrijs: 12,  img: "tshirt.png",        scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Broek",         basisPrijs: 25,  img: "broek.png",         scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Trui",          basisPrijs: 30,  img: "trui.png",          scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Jas",           basisPrijs: 60,  img: "jas.png",           scale: 1.1, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Schoenen",      basisPrijs: 45,  img: "schoenen.png",      scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Pet",           basisPrijs: 15,  img: "pet.png",           scale: 0.9, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Sjaal",         basisPrijs: 10,  img: "sjaal.png",         scale: 0.9, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Handschoenen",  basisPrijs: 12,  img: "handschoenen.png",  scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Rok",           basisPrijs: 20,  img: "rok.png",           scale: 1.0, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Zwembroek",     basisPrijs: 14,  img: "zwembroek.png",     scale: 0.9, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Laarzen",       basisPrijs: 50,  img: "laarzen.png",       scale: 1.1, moveY: 0, submap: "kledingwinkel" },
+        { naam: "Pyjama",        basisPrijs: 18,  img: "pyjama.png",        scale: 1.0, moveY: 0, submap: "kledingwinkel" }
+    ]
 };
 
-// Schaalt prijzen zodat het duurste product ≤ max is,
-// en alle prijzen de juiste verhouding houden.
-// Het goedkoopste product krijgt minstens 10% van max.
+// Schaalt prijzen zodat elk individueel product strikt < max is,
+// én de 2 goedkoopste producten samen altijd ≤ max zijn.
 function getGeschaaldePrijzen(winkelLijst, max, centen) {
     if (!winkelLijst || winkelLijst.length === 0) return [];
-    const basisMax = Math.max(...winkelLijst.map(i => i.basisPrijs));
-    const basisMin = Math.min(...winkelLijst.map(i => i.basisPrijs));
-    // Duurste product = 60-80% van max, goedkoopste = minstens 10% van max
-    const doelMax = max * 0.75;
-    const doelMin = Math.max(max * 0.08, 0.50);
-    const factor = basisMax > 0 ? doelMax / basisMax : 1;
+
+    const basisPrijzen = winkelLijst.map(i => i.basisPrijs);
+    const basisMax = Math.max(...basisPrijzen);
+    const basisMin = Math.min(...basisPrijzen);
+    const basisMin2 = [...basisPrijzen].sort((a,b) => a-b)[1] || basisMin; // op-één-na-goedkoopste
+
+    // Duurste product mag maximaal 60% van max kosten,
+    // zodat er altijd ruimte is voor minstens één ander product.
+    const doelMax = max * 0.60;
+    // De 2 goedkoopste moeten samen ≤ max zijn:
+    // factor × (basisMin + basisMin2) ≤ max → factor ≤ max / (basisMin + basisMin2)
+    const maxFactorCombi = basisMin + basisMin2 > 0 ? max / (basisMin + basisMin2) : Infinity;
+    // Kies de kleinste van beide beperkingen
+    const factor = Math.min(
+        basisMax > 0 ? doelMax / basisMax : 1,
+        maxFactorCombi
+    );
+
+    const doelMin = Math.max(max * 0.06, centen ? 0.20 : 1);
 
     return winkelLijst.map(item => {
         let prijs = Math.max(item.basisPrijs * factor, doelMin);
+        // Afronden
         if (!centen) prijs = Math.max(1, Math.round(prijs));
         else prijs = Math.max(0.20, Math.round(prijs * 20) / 20);
+        // Harde cap: nooit ≥ max (zodat er altijd iets bij kan)
+        prijs = Math.min(prijs, max - (centen ? 0.20 : 1));
         return { ...item, prijs };
     });
 }
@@ -185,19 +255,72 @@ document.getElementById('addSectieBtn').addEventListener('click', () => {
 
 /* moveY wordt hier toegepast via translateY */
 function genereerPosterItemHtml(item, centen, nummer) {
-    const toonPrijs = centen ? item.prijs : item.prijs; // prijs al geschaald
     const scale = item.scale || 1.0;
     const moveY = item.moveY || 0;
     const nummerHtml = nummer ? `<div class="poster-nummer">${nummer}</div>` : '';
     return `
-        <div class="poster-item">
+        <div class="poster-item" onclick="toonAanpasPanel(this)" title="Klik om grootte/positie aan te passen">
             ${nummerHtml}
             <img src="assets/producten/${item.submap || 'supermarkt'}/${item.img}" 
                  class="poster-img" 
+                 data-scale="${scale}"
+                 data-movey="${moveY}"
                  style="transform: scale(${scale}) translateY(${moveY}px); transform-origin: bottom center;"
-                 onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${item.img}'">
-            <div class="prijskaartje">€ ${toonPrijs.toFixed(centen ? 2 : 0).replace('.',',')}</div>
+                 onerror="this.src='assets/producten/${item.img}'">
+            <div class="prijskaartje">€ ${item.prijs.toFixed(centen ? 2 : 0).replace('.',',')}</div>
         </div>`;
+}
+
+function toonAanpasPanel(posterItem) {
+    // Verwijder bestaand paneel
+    document.querySelectorAll('.aanpas-panel').forEach(p => p.remove());
+    const img = posterItem.querySelector('.poster-img');
+    if (!img) return;
+
+    let scale = parseFloat(img.dataset.scale) || 1.0;
+    let moveY = parseFloat(img.dataset.movey) || 0;
+
+    const panel = document.createElement('div');
+    panel.className = 'aanpas-panel no-print';
+    panel.innerHTML = `
+        <div class="aanpas-rij">
+            <span>🔍</span>
+            <input type="range" min="0.4" max="2.0" step="0.05" value="${scale}" 
+                   oninput="pasAan(this, 'scale')">
+            <span class="aanpas-waarde">${scale.toFixed(2)}</span>
+        </div>
+        <div class="aanpas-rij">
+            <span>↕️</span>
+            <input type="range" min="-30" max="30" step="1" value="${moveY}"
+                   oninput="pasAan(this, 'movey')">
+            <span class="aanpas-waarde">${moveY}px</span>
+        </div>
+        <button onclick="this.closest('.aanpas-panel').remove()" class="aanpas-sluit">✕</button>
+    `;
+    panel._img = img;
+    posterItem.appendChild(panel);
+
+    // Sluit paneel bij klik buiten
+    setTimeout(() => {
+        document.addEventListener('click', function sluit(e) {
+            if (!panel.contains(e.target) && e.target !== posterItem && !posterItem.contains(e.target)) {
+                panel.remove();
+                document.removeEventListener('click', sluit);
+            }
+        });
+    }, 100);
+}
+
+function pasAan(slider, type) {
+    const panel = slider.closest('.aanpas-panel');
+    const img = panel._img;
+    const waarde = parseFloat(slider.value);
+    slider.nextElementSibling.textContent = type === 'scale' ? waarde.toFixed(2) : waarde + 'px';
+    if (type === 'scale') img.dataset.scale = waarde;
+    else img.dataset.movey = waarde;
+    const s = parseFloat(img.dataset.scale) || 1.0;
+    const m = parseFloat(img.dataset.movey) || 0;
+    img.style.transform = `scale(${s}) translateY(${m}px)`;
 }
 
 function voegKadersToeManual(node, n) { for(let i=0; i<n; i++) voegKaderToe(node); }
@@ -260,17 +383,32 @@ function voegKaderToe(sectieNode) {
             if (!biljetPool.length) break;
             betaalMunt = biljetPool[Math.floor(Math.random() * biljetPool.length)];
             const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-            let kandidaatItems = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
+            // Kies items waarvan som < betaalbiljet én ≤ max
+            const geshuffled = [...geschaald].sort(() => 0.5 - Math.random());
+            let kandidaatItems = [];
+            for (const p of geshuffled) {
+                const nieuwTotaal = Math.round((kandidaatItems.reduce((a,b) => a+b.prijs,0) + p.prijs) * 100) / 100;
+                if (nieuwTotaal < betaalMunt.value && nieuwTotaal <= max) {
+                    kandidaatItems.push(p);
+                    if (kandidaatItems.length >= nItems) break;
+                }
+            }
             const kTotaal = Math.round(kandidaatItems.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
-            if (kTotaal < betaalMunt.value && kTotaal > 0) {
+            if (kandidaatItems.length > 0 && kTotaal < betaalMunt.value && kTotaal > 0) {
                 items = kandidaatItems; totaal = kTotaal; gevonden = true;
             }
         }
         if (!gevonden) {
             betaalMunt = kandidaten[kandidaten.length - 1] || moneyConfig.find(u => u.value === 10) || moneyConfig[6];
             const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-            items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
-            totaal = Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
+            const geshuffled = [...geschaald].sort(() => 0.5 - Math.random());
+            items = [];
+            for (const p of geshuffled) {
+                const nieuwTotaal = Math.round((items.reduce((a,b) => a+b.prijs,0) + p.prijs) * 100) / 100;
+                if (nieuwTotaal <= max) { items.push(p); if (items.length >= nItems) break; }
+            }
+            if (items.length === 0) items = [geshuffled[0]];
+            totaal = Math.min(Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100, max);
         }
         const wisselgeld = Math.round((betaalMunt.value - totaal) * 100) / 100;
         const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
@@ -597,7 +735,7 @@ function voegKaderToe(sectieNode) {
         const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
 
         // Winkelnaam voor headers — afgeleid van winkelType
-        const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'Speelgoedwinkel', snoepwinkel: 'Snoepwinkel' };
+        const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'Speelgoedwinkel', snoepwinkel: 'Snoepwinkel', elektronica: 'Elektronicawinkel', schoolwinkel: 'Schoolwinkel', kledingwinkel: 'Kledingwinkel' };
         const winkelNaam2 = winkelNamen[winkelType] || 'Supermarkt';
         const naamA = `${winkelNaam2} A`, naamB = `${winkelNaam2} B`;
 
@@ -646,10 +784,19 @@ function voegKaderToe(sectieNode) {
                  </table>`;
 
     } else if (type.startsWith('winkel')) {
-        // winkel_totaal
+        // winkel_totaal — kies items waarvan som ≤ max
         const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-        let items = [...geschaald].sort(() => 0.5 - Math.random()).slice(0, nItems);
-        const totaal = items.reduce((a, b) => a + b.prijs, 0);
+        const geshuffled = [...geschaald].sort(() => 0.5 - Math.random());
+        let items = [];
+        for (const p of geshuffled) {
+            const nieuwTotaal = Math.round((items.reduce((a,b) => a+b.prijs, 0) + p.prijs) * 100) / 100;
+            if (nieuwTotaal <= max) {
+                items.push(p);
+                if (items.length >= nItems) break;
+            }
+        }
+        if (items.length === 0) items = [geshuffled[0]];
+        const totaal = Math.min(Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100, max);
 
         const schattingBlok = metSchatten
             ? `<div class="dubbel-invul-rij">
