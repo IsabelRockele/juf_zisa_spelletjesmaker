@@ -22,6 +22,9 @@
                     <p>Juf Zisa Edition</p>
                 </div>
             </div>
+            <button class="help-btn no-print" onclick="document.getElementById('help-modal').classList.remove('hidden')">
+                ❓ Hoe werkt de Geld Maker?
+            </button>
         </div>
 
         <div class="dashboard-body">
@@ -54,7 +57,6 @@
                                 <option value="supermarkt">De Supermarkt</option>
                                 <option value="bakker">De Bakker</option>
                                 <option value="speelgoed">De Speelgoedwinkel</option>
-                                <option value="snoepwinkel">De Snoepwinkel</option>
                                 <option value="elektronica">De Elektronicawinkel</option>
                                 <option value="schoolwinkel">De Schoolwinkel</option>
                                 <option value="kledingwinkel">De Kledingwinkel</option>
@@ -151,6 +153,89 @@
 
         </div>
     </aside>
+
+    <!-- Help modal -->
+    <div id="help-modal" class="help-modal hidden">
+        <div class="help-modal-box">
+            <div class="help-modal-header">
+                <span>💰 Hoe werkt de Geld Maker?</span>
+                <button onclick="document.getElementById('help-modal').classList.add('hidden')" class="help-sluit">✕</button>
+            </div>
+            <div class="help-modal-body">
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">🚀 Stap 1 — Kies je tab</div>
+                    <ul>
+                        <li>De generator heeft twee tabs: <strong>Vaardigheden</strong> en <strong>Winkeltje</strong>.</li>
+                        <li>Stel je <strong>maximum bedrag</strong> in — alle bedragen blijven hier automatisch onder.</li>
+                        <li>Klik op <strong>+ Sectie toevoegen</strong> om de oefening aan je werkblad toe te voegen.</li>
+                        <li>Je kan <strong>meerdere secties</strong> combineren op één werkblad — mix vaardigheden en winkeltje naar wens.</li>
+                    </ul>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">🧮 Vaardigheden</div>
+                    <div class="help-tabel">
+                        <div class="help-rij"><span class="help-nr">1</span><div><strong>Hoeveel geld tel je?</strong> — Munten en biljetten worden getoond. Leerlingen tellen het totaal. Verschijnt 2 naast elkaar op het werkblad.</div></div>
+                        <div class="help-rij"><span class="help-nr">2</span><div><strong>Leg op 2 manieren</strong> — Een bedrag opgeven op twee verschillende manieren met munten en biljetten.</div></div>
+                        <div class="help-rij"><span class="help-nr">3</span><div><strong>Zo weinig mogelijk</strong> — Een bedrag betalen met zo weinig mogelijk munten en biljetten.</div></div>
+                    </div>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">🏪 Winkeltje — Stap 2</div>
+                    <ul>
+                        <li>Kies een <strong>winkeltype</strong>: Supermarkt, Bakker, Speelgoedwinkel, Elektronicawinkel, Schoolwinkel of Kledingwinkel.</li>
+                        <li>Kies een <strong>opdracht</strong> uit de 6 types (zie hieronder).</li>
+                        <li>Bij opdracht 6 (Solden) kies je ook het <strong>subtype</strong> en de <strong>kortingspercentages</strong>.</li>
+                    </ul>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">📋 De 6 winkeltje-types</div>
+                    <div class="help-tabel">
+                        <div class="help-rij"><span class="help-nr">1</span><div><strong>Totaal betalen</strong> — Producten in een mandje, berekenen wat het totaal kost. Geldmix wordt getoond.</div></div>
+                        <div class="help-rij"><span class="help-nr">2</span><div><strong>Terugkrijgen</strong> — Producten kopen en met een biljet betalen. Berekenen hoeveel wisselgeld ze krijgen.</div></div>
+                        <div class="help-rij"><span class="help-nr">3</span><div><strong>Wat kan je kopen?</strong> — Een geldbedrag gegeven. Kiezen welke producten van de poster ze kunnen kopen.</div></div>
+                        <div class="help-rij"><span class="help-nr">4</span><div><strong>Koop voor exact bedrag</strong> — Een bedrag gegeven. Producten zoeken die samen exact dat bedrag kosten.</div></div>
+                        <div class="help-rij"><span class="help-nr">5</span><div><strong>Goedkoper / duurder?</strong> — Hetzelfde product in twee winkels vergelijken en het verschil berekenen.</div></div>
+                        <div class="help-rij"><span class="help-nr">6</span><div><strong>Solden: korting!</strong> — Kortingsoefeningen met percentage. Kies subtype (nieuwe prijs / hoeveel korting / originele prijs) en de kortingspercentages.</div></div>
+                    </div>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">⚙️ Handige opties</div>
+                    <ul>
+                        <li><strong>Gebruik centen</strong> — Prijzen met kommagetallen (€ 3,50 i.p.v. € 3).</li>
+                        <li><strong>Inclusief schat-vraag</strong> — Voegt een "Ik schat:" lijn toe boven de oefening.</li>
+                        <li><strong>Kaders / sectie</strong> — Hoeveel oefeningen automatisch worden aangemaakt per sectie.</li>
+                        <li><strong>+ Oefening</strong> — Voeg handmatig een extra oefening toe aan een sectie.</li>
+                        <li><strong>Sectietitel</strong> — Klikbaar en aanpasbaar. Typ je eigen titel.</li>
+                    </ul>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">🖼️ Producten op de poster aanpassen</div>
+                    <ul>
+                        <li><strong>Klik op een product</strong> op de winkelplank om een aanpaspaneel te openen.</li>
+                        <li>Sleep de <strong>🔍 schuifregelaar</strong> om het product groter of kleiner te maken.</li>
+                        <li>Sleep de <strong>↕️ schuifregelaar</strong> om het product omhoog of omlaag te zetten op de plank.</li>
+                        <li>Klik op <strong>✕</strong> of ergens buiten het paneel om te sluiten.</li>
+                    </ul>
+                </div>
+
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">📄 Exporteren</div>
+                    <ul>
+                        <li><strong>Downloaden als PDF</strong> — Maakt een nette PDF aan die je kan opslaan of delen.</li>
+                        <li><strong>Rechtstreeks afdrukken</strong> — Stuurt de preview naar je printer.</li>
+                        <li><strong>Alles wissen</strong> — Begint opnieuw met een leeg werkblad.</li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <main id="preview">
         <div id="werkblad" class="a4-page">
