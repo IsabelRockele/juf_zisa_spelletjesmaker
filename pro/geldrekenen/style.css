@@ -1026,13 +1026,15 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .vergelijk-tabel th {
     background: #fff3cd;
     border: 1.5px solid #e0c060;
-    padding: 8px 6px;
+    padding: 8px 4px;
     font-family: Arial, sans-serif;
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 800;
     text-align: center;
     color: #7a5c00;
     vertical-align: top;
+    word-break: break-word;
+    hyphens: auto;
 }
 
 .vergelijk-tabel td {
@@ -1306,11 +1308,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 
 /* ── Vergelijk: nieuwe layout met 6 kolommen ── */
 .vergelijk-tabel th:nth-child(1), .vergelijk-tabel td:nth-child(1) { width: 14%; }
-.vergelijk-tabel th:nth-child(2), .vergelijk-tabel td:nth-child(2) { width: 13%; }
-.vergelijk-tabel th:nth-child(3), .vergelijk-tabel td:nth-child(3) { width: 13%; }
+.vergelijk-tabel th:nth-child(2), .vergelijk-tabel td:nth-child(2) { width: 16%; }
+.vergelijk-tabel th:nth-child(3), .vergelijk-tabel td:nth-child(3) { width: 16%; }
 .vergelijk-tabel th:nth-child(4), .vergelijk-tabel td:nth-child(4) { width: 22%; }
-.vergelijk-tabel th:nth-child(5), .vergelijk-tabel td:nth-child(5) { width: 24%; }
-.vergelijk-tabel th:nth-child(6), .vergelijk-tabel td:nth-child(6) { width: 14%; }
+.vergelijk-tabel th:nth-child(5), .vergelijk-tabel td:nth-child(5) { width: 20%; }
+.vergelijk-tabel th:nth-child(6), .vergelijk-tabel td:nth-child(6) { width: 12%; }
 
 .vergelijk-td-enkel {
     vertical-align: middle !important;
