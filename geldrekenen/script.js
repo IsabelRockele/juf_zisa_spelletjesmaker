@@ -817,27 +817,30 @@ function voegKaderToe(sectieNode) {
                     <div class="korte-invul-lijn"></div>
                </div>`;
 
-        html += `<div class="winkel-container">
-                    <div class="winkel-lijstje">
-                        <div class="label-groep">Mijn mandje:</div>
-                        <div class="mandje-grid">
-                            ${items.map(i => {
-                                const scale = i.scale || 1.0;
-                                const moveY = i.moveY || 0;
-                                return `<img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" 
+        html += `<div class="winkel-totaal-layout">
+                    <div class="winkel-totaal-top">
+                        <div class="winkel-totaal-mandje">
+                            <span class="label-groep">Mijn mandje:</span>
+                            <div class="mandje-rij">
+                                ${items.map(i => {
+                                    const scale = i.scale || 1.0;
+                                    const moveY = i.moveY || 0;
+                                    return `<div class="mandje-item-wrap">
+                                        <img src="assets/producten/${i.submap || 'supermarkt'}/${i.img}" 
                                              class="product-img-mandje" 
                                              style="transform: scale(${scale}) translateY(${moveY}px);"
-                                             onerror="this.src='assets/producten/' + (this.dataset.submap||'supermarkt') + '/${i.img}'">`;
-                            }).join('')}
+                                             onerror="this.style.display='none'">
+                                        <div class="mandje-prijs-tag">€ ${i.prijs.toFixed(centen ? 2 : 0).replace('.', ',')}</div>
+                                    </div>`;
+                                }).join('')}
+                            </div>
                         </div>
-                    </div>
-                    <div class="winkel-opdracht">
                         ${schattingBlok}
-                        <div class="opdracht-blok">
+                        <div class="winkel-totaal-antwoord">
                             <div class="label-groep">Totaal te betalen: € ________</div>
                         </div>
-                        <div class="geld-vak">${genereerMix(totaal, max, centen, klein)}</div>
                     </div>
+                    <div class="geld-vak">${genereerMix(totaal, max, centen, klein)}</div>
                  </div>`;
     } else {
         let bedrag = getUniekBedrag(max, centen, klein);
