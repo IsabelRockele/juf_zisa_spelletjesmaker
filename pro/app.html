@@ -3,263 +3,591 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Zisa's spelletjesmaker PRO – start</title>
+  <title>Zisa's spelletjesmaker PRO</title>
 
   <link rel="icon" href="../start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
   <meta name="theme-color" content="#ffcf56">
 
   <style>
-    html, body { margin:0; background:#fff4df; font-family: system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; }
-    .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .topbar { display:flex; justify-content:flex-end; align-items:flex-start; gap:12px; padding-top:16px; }
-    .pill { font-size:.95rem; background:#fff; padding:6px 10px; border-radius:999px; border:1px solid #eee; }
-
-    .top-actions {
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      align-items:flex-end;
-    }
-    .btn-logout,
-    .btn-handleiding {
-      border:0;
-      border-radius:10px;
-      padding:10px 14px;
-      font-weight:700;
-      cursor:pointer;
-      text-decoration:none;
-      display:inline-block;
-    }
-    .btn-logout {
-      background:#ffd159;
-      color:#000;
-    }
-    .btn-handleiding {
-      background:#e74c3c;
-      color:#fff;
-      position: relative; /* nodig voor tooltip */
-    }
-    .btn-logout:hover,
-    .btn-handleiding:hover {
-      filter: brightness(.97);
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #f0ebe0;
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
     }
 
-    /* Tooltip voor handleiding-knop */
-    .btn-handleiding::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      top: 110%;
-      right: 0;
-      background-color: #e74c3c;
+    /* ═══════════════════════════
+       ZIJBALK
+    ═══════════════════════════ */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: #2a2a2a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 12px 20px;
+      gap: 6px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .sidebar-logo img {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: #ffcf56;
+      padding: 5px;
+      object-fit: contain;
+    }
+
+    .sidebar-logo .brand-sub {
+      font-size: 0.72rem;
+      color: #ffcf56;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .sidebar-logo .brand-main {
+      font-size: 1.25rem;
       color: white;
-      padding: 8px 10px;
-      font-size: 1rem;
-      border-radius: 14px;
-      opacity: 0;
-      white-space: normal;
-      width: 220px;
-      text-align: right;
-      pointer-events: none;
-      transition: opacity .2s ease;
-      z-index: 1000;
+      font-weight: bold;
+      text-align: center;
+      line-height: 1.2;
     }
-    .btn-handleiding:hover::after { opacity: 1; }
 
-    .header-container {
-      display:flex; justify-content:center; align-items:center;
-      margin-bottom:30px; margin-top:60px; width:100%; gap:20px;
+    /* PRO-badge */
+    .pro-badge {
+      background: #ffcf56;
+      color: #7a4500;
+      font-size: 0.7rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.08em;
     }
-    .logo { width:100px; height:auto; }
-    .header-container h1 { font-size:3.5rem; margin:0 0 30px 0; text-align:center; }
 
-    .status { margin:0 0 24px 0; padding:12px 14px; border-radius:12px; background:#fff; border:1px solid #eee; }
-    .status.good { border-color:#bfe3bf; background:#f5fff5; }
-    .status.warn { border-color:#ffd6a8; background:#fff7ec; }
-    .status.err  { border-color:#f1c0c0; background:#fff5f5; }
-
-    .accordion { margin-bottom: 20px; }
-    .accordion-header {
-      background-color: #4db6ac; color: white; cursor: pointer; padding: 15px;
-      font-size: 1.4rem; border: none; text-align: left; width: 100%; border-radius: 8px;
+    .sidebar-divider {
+      width: 50px;
+      height: 2px;
+      background: #444;
+      border-radius: 2px;
+      margin: 4px 0 8px;
+      flex-shrink: 0;
     }
-    .accordion-content { display: none; padding: 15px 0; }
 
+    .nav-btn {
+      width: 100%;
+      background: #383838;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 10px;
+      color: #bbb;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: bold;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.2;
+      flex-shrink: 0;
+    }
+
+    .nav-btn:hover { background: #484848; color: #fff; }
+
+    .nav-btn.active { color: white; }
+    .nav-btn.active.cat-reken    { background: #e67e00; }
+    .nav-btn.active.cat-taal     { background: #2980b9; }
+    .nav-btn.active.cat-puzzels  { background: #8e44ad; }
+    .nav-btn.active.cat-creatief { background: #27ae60; }
+    .nav-btn.active.cat-spel     { background: #c0392b; }
+    .nav-btn.active.cat-tijd     { background: #16a085; }
+
+    .nav-btn .nav-icon { font-size: 1rem; flex-shrink: 0; }
+
+    /* Onderste blok: user-info + knoppen */
+    .sidebar-bottom {
+      margin-top: auto;
+      padding-top: 12px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .user-pill {
+      background: #383838;
+      color: #ccc;
+      font-size: 0.72rem;
+      padding: 6px 10px;
+      border-radius: 8px;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background: #ffcf56;
+      color: #7a4500;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .btn-logout:hover { background: #ffd97d; transform: scale(1.03); }
+
+    .help-btn {
+      width: 100%;
+      background: #484848;
+      color: #ddd;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s;
+    }
+    .help-btn:hover { background: #555; color: #fff; }
+
+    /* ═══════════════════════════
+       HOOFDINHOUD
+    ═══════════════════════════ */
+    .main {
+      flex: 1;
+      padding: 28px 32px 40px;
+      min-width: 0;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Status-balk */
+    .status {
+      margin-bottom: 20px;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      background: #fff;
+      border: 1px solid #eee;
+      color: #555;
+    }
+    .status.good { border-color: #bfe3bf; background: #f5fff5; color: #2d6a2d; }
+    .status.warn { border-color: #ffd6a8; background: #fff7ec; color: #a05000; }
+    .status.err  { border-color: #f1c0c0; background: #fff5f5; color: #a02020; }
+
+    /* Sectie-header */
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-header .section-icon { font-size: 1.8rem; }
+    .section-header h2 { font-size: 1.6rem; font-weight: bold; color: #2a2a2a; margin: 0; }
+    .section-header .section-bar { height: 4px; border-radius: 2px; flex: 1; opacity: 0.3; }
+
+    /* Knoppenraster */
     .button-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 24px 16px;
       justify-items: center;
     }
+
+    a.img-link {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      width: 100%;
+    }
+
     .drukknop-afbeelding {
-      width: 120px; height: auto; transition: transform .2s ease;
+      width: 100%;
+      max-width: 150px;
+      height: auto;
+      display: block;
+      transition: transform 0.2s ease;
     }
 
-    a { position: relative; display: inline-block; }
-    a:hover .drukknop-afbeelding { transform: scale(1.05); }
-    a:not(.btn-handleiding)::after {
-      content: attr(data-tooltip); position: absolute; top: -45px; left: 50%; transform: translateX(-50%);
-      background-color: #f9b600; color: white; padding: 8px 14px; font-size: 1.4rem; border-radius: 14px;
-      opacity: 0; white-space: nowrap; pointer-events: none; transition: opacity .2s ease; z-index: 10;
-    }
-    a:not(.btn-handleiding):hover::after { opacity: 1; }
+    a.img-link:hover .drukknop-afbeelding { transform: scale(1.07); }
 
-    @media (max-width: 600px) {
-      .header-container h1 { font-size: 2.6rem; }
-      .logo { width: 80px; }
-      .btn-logout, .btn-handleiding { font-size: 1rem; padding: 10px 14px; }
+    .img-label {
+      font-size: 0.9rem;
+      font-family: inherit;
+      font-weight: bold;
+      color: #3a2000;
+      text-align: center;
+      line-height: 1.2;
+      width: 100%;
+    }
+
+    /* Panelen */
+    .section-panel { display: none; flex-direction: column; flex: 1; }
+    .section-panel.active { display: flex; }
+
+    /* Categorie-footer */
+    .section-footer { margin-top: auto; padding-top: 40px; }
+
+    .footer-banner {
+      border-radius: 16px;
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .footer-banner .footer-pattern {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 200px;
+      opacity: 0.12;
+    }
+
+    .footer-banner .footer-emoji { font-size: 2.8rem; flex-shrink: 0; position: relative; z-index: 1; }
+
+    .footer-banner .footer-text { position: relative; z-index: 1; }
+    .footer-banner .footer-text strong { display: block; font-size: 1.1rem; color: white; font-weight: bold; margin-bottom: 3px; }
+    .footer-banner .footer-text span { font-size: 0.85rem; color: rgba(255,255,255,0.82); }
+
+    /* Responsive */
+    @media (max-width: 700px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; min-height: auto; height: auto; position: static; flex-direction: row; flex-wrap: wrap; padding: 12px; gap: 6px; }
+      .sidebar-logo { flex-direction: row; margin-bottom: 0; width: auto; }
+      .sidebar-logo img { width: 40px; height: 40px; }
+      .sidebar-logo .brand-main { font-size: 0.85rem; }
+      .sidebar-logo .brand-sub { display: none; }
+      .sidebar-divider { display: none; }
+      .sidebar-bottom { margin-top: 0; padding-top: 0; width: auto; flex-direction: row; }
+      .nav-btn { width: auto; padding: 7px 10px; font-size: 0.7rem; }
+      .main { padding: 16px; }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+<!-- ═══ ZIJBALK ═══ -->
+<nav class="sidebar">
 
-    <div class="topbar">
-      <span id="user-pill" class="pill">-</span>
-      <div class="top-actions">
-        <button id="logout" class="btn-logout">Uitloggen</button>
-        <a href="../Handleiding spelletjesmaker.pdf"
-           class="btn-handleiding"
-           data-tooltip="Hulp nodig? Hier kan je de handleiding downloaden."
-           download>
-           Handleiding
-        </a>
-      </div>
+  <div class="sidebar-logo">
+    <img src="../start_afbeeldingen/zisa.png" alt="Zisa logo">
+    <div>
+      <div class="brand-sub">Juf Zisa's</div>
+      <div class="brand-main">Spel&shy;generator</div>
     </div>
-
-    <div class="header-container">
-      <img src="../start_afbeeldingen/zisa.png" alt="Zisa Spelgenerator Logo" class="logo">
-      <h1>Zisa's spelletjesmaker PRO</h1>
-    </div>
-
-    <div id="status" class="status">Status laden…</div>
-
-    <main id="content" style="display:none;">
-
-      <div class="accordion">
-        <button class="accordion-header">📐 Reken-oefeningen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Rekenvierkant" href="./rekenvierkant.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenvierkant.png" loading="lazy"></a>
-          <a data-tooltip="Rekenweg" href="./rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenweg.png" loading="lazy"></a>
-          <a data-tooltip="Rekenpiramide" href="./rekenpiramide_keuze.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenpiramide.png" loading="lazy"></a>
-          <a data-tooltip="Reken en kleur" href="./reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/reken_en_kleur.png" loading="lazy"></a>
-          <a data-tooltip="Rekenrooster" href="./rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenrooster.png" loading="lazy"></a>
-          <a data-tooltip="Rekendriehoek" href="./rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekendriehoek.png" loading="lazy"></a>
-          <a data-tooltip="Rekencirkel" href="./rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekencirkel.png" loading="lazy"></a>
-          <a data-tooltip="Werkblad bewerkingen" href="./bewerkingen_keuze.html"><img alt="Bewerkingen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.png" loading="lazy"></a>
-          <a data-tooltip="Werkblad getalinzicht" href="./getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/getalinzicht.png" loading="lazy"></a>
-           <a data-tooltip="Cijferen" href="./cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/cijferen.png" loading="lazy"></a>
-           <a data-tooltip="Bundel geld" href="./geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geld.png" loading="lazy"></a>
-          <a data-tooltip="Verliefde harten" href="./harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/harten.png" loading="lazy"></a>
-          <a data-tooltip="Loopspel" href="./loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/loop.png" loading="lazy"></a>
-          <a data-tooltip="Rekenspellen" href="./reken-doolhof-generator.html"><img alt="Rekenspellen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenspellen.png" loading="lazy"></a>
-          <a data-tooltip="MAB en schema" href="./keuze-hulpschema.html"><img alt="MAB en schema" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/MAB.png" loading="lazy"></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🅰️ Taal en letters</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Woordzoeker" href="./woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/woordzoeker.png" loading="lazy"></a>
-          <a data-tooltip="Kruiswoordpuzzel" href="./kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/kruiswoordpuzzel.png" loading="lazy"></a>
-          <a data-tooltip="Lettercode" href="./lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettercode.png" loading="lazy"></a>
-          <a data-tooltip="Geheime boodschap" href="./geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geheime_boodschap.png" loading="lazy"></a>
-          <a data-tooltip="Lettertetris" href="./lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettertetris.png" loading="lazy"></a>
-          <a data-tooltip="Galgje" href="./galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/galgje.png" loading="lazy"></a>
-          <a data-tooltip="Lezen" href="./lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lees.png" loading="lazy"></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🧩 Puzzels &amp; logica</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Sudoku" href="./sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/sudoku.png" loading="lazy"></a>
-          <a data-tooltip="Zoek de verschillen" href="./zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/zoek_de_verschillen.png" loading="lazy"></a>
-          <a data-tooltip="Doolhof" href="./doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/doolhof.png" loading="lazy"></a>
-          <a data-tooltip="Slangendoolhof" href="./slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/slangendoolhof.png" loading="lazy"></a>
-          <a data-tooltip="Hexagonaal raster" href="./hexagon.html"><img alt="Hexagonaal raster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/hexagon.png" loading="lazy"></a>
-          <a data-tooltip="Schaduw" href="./schaduw.html"><img alt="Schaduw" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/schaduw.png" loading="lazy"></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🎨 Creatief en bouwen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Punttekening" href="./punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/punttekening.png" loading="lazy"></a>
-          <a data-tooltip="Pixelart" href="./pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/pixelart.png" loading="lazy"></a>
-          <a data-tooltip="Bouwplaten" href="./bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bouwplaat.png" loading="lazy"></a>
-          <a data-tooltip="Coderen" href="./coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/coderen.png" loading="lazy"></a>
-          <a data-tooltip="Plattegrond" href="./plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/plattegrond.png" loading="lazy"></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">🎲 Spelvormen</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Bingo" href="./bingo.html"><img alt="Bingo" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bingo.png" loading="lazy"></a>
-          <a data-tooltip="Vier op een rij" href="./vieropeenrij.html"><img alt="Vier op een rij" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/vieropeenrij.png" loading="lazy"></a>
-          <a data-tooltip="Rad" href="./rad.html"><img alt="Rad" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rad.png" loading="lazy"></a>
-          <a data-tooltip="QR-generator" href="./QR.html"><img alt="QR-generator" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/QR.png" loading="lazy"></a>
-        </div>
-      </div>
-
-      <div class="accordion">
-        <button class="accordion-header">⏰ Tijd en klok</button>
-        <div class="accordion-content button-grid">
-          <a data-tooltip="Kloklezen" href="./kloklezen.html"><img alt="Kloklezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_kloklezen.png" loading="lazy"></a>
-          <a data-tooltip="Timer" href="./timer.html"><img alt="Timer" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/timer.png" loading="lazy"></a>
-        </div>
-      </div>
-
-    </main>
+    <span class="pro-badge">★ PRO</span>
   </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.accordion-content').forEach(content => { content.style.display = 'none'; });
-      document.querySelectorAll('.accordion-header').forEach(header => {
-        header.addEventListener('click', () => {
-          const content = header.nextElementSibling;
-          const isVisible = content.style.display === 'block';
-          document.querySelectorAll('.accordion-content').forEach(c => c.style.display = 'none');
-          if (!isVisible) content.style.display = 'block';
-        });
-      });
+  <div class="sidebar-divider"></div>
+
+  <button class="nav-btn cat-reken active" data-target="reken">
+    <span class="nav-icon">📐</span> Reken-oefeningen
+  </button>
+  <button class="nav-btn cat-taal" data-target="taal">
+    <span class="nav-icon">🅰️</span> Taal en letters
+  </button>
+  <button class="nav-btn cat-puzzels" data-target="puzzels">
+    <span class="nav-icon">🧩</span> Puzzels &amp; logica
+  </button>
+  <button class="nav-btn cat-creatief" data-target="creatief">
+    <span class="nav-icon">🎨</span> Creatief en bouwen
+  </button>
+  <button class="nav-btn cat-spel" data-target="spel">
+    <span class="nav-icon">🎲</span> Spelvormen
+  </button>
+  <button class="nav-btn cat-tijd" data-target="tijd">
+    <span class="nav-icon">⏰</span> Tijd en klok
+  </button>
+
+  <div class="sidebar-bottom">
+    <div id="user-pill" class="user-pill">-</div>
+    <button id="logout" class="btn-logout">↩ Uitloggen</button>
+    <a href="../Handleiding spelletjesmaker.pdf" class="help-btn" download>❓ Handleiding</a>
+  </div>
+
+</nav>
+
+<!-- ═══ HOOFDINHOUD ═══ -->
+<main class="main" id="content" style="display:none;">
+
+  <div id="status" class="status">Status laden…</div>
+
+  <!-- REKEN-OEFENINGEN -->
+  <div class="section-panel active" id="panel-reken">
+    <div class="section-header">
+      <span class="section-icon">📐</span>
+      <h2>Reken-oefeningen</h2>
+      <div class="section-bar" style="background:#e67e00"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./rekenvierkant.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenvierkant.png" loading="lazy"/><span class="img-label">Rekenvierkant</span></a>
+      <a class="img-link" href="./rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenweg.png" loading="lazy"/><span class="img-label">Rekenweg</span></a>
+      <a class="img-link" href="./rekenpiramide_keuze.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenpiramide.png" loading="lazy"/><span class="img-label">Rekenpiramide</span></a>
+      <a class="img-link" href="./reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/reken_en_kleur.png" loading="lazy"/><span class="img-label">Reken en kleur</span></a>
+      <a class="img-link" href="./rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenrooster.png" loading="lazy"/><span class="img-label">Rekenrooster</span></a>
+      <a class="img-link" href="./rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekendriehoek.png" loading="lazy"/><span class="img-label">Rekendriehoek</span></a>
+      <a class="img-link" href="./rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekencirkel.png" loading="lazy"/><span class="img-label">Rekencirkel</span></a>
+      <a class="img-link" href="./bewerkingen_keuze.html"><img alt="Bewerkingen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.png" loading="lazy"/><span class="img-label">Bundel bewerkingen</span></a>
+      <a class="img-link" href="./getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/getalinzicht.png" loading="lazy"/><span class="img-label">Werkblad getalinzicht</span></a>
+      <a class="img-link" href="./cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/cijferen.png" loading="lazy"/><span class="img-label">Werkblad cijferen</span></a>
+      <a class="img-link" href="./geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geld.png" loading="lazy"/><span class="img-label">Bundel geld</span></a>
+      <a class="img-link" href="./harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/harten.png" loading="lazy"/><span class="img-label">Verliefde harten</span></a>
+      <a class="img-link" href="./loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/loop.png" loading="lazy"/><span class="img-label">Loopspel</span></a>
+      <a class="img-link" href="./reken-doolhof-generator.html"><img alt="Rekenspellen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenspellen.png" loading="lazy"/><span class="img-label">Rekenspellen</span></a>
+      <a class="img-link" href="./keuze-hulpschema.html"><img alt="MAB en schema" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/MAB.png" loading="lazy"/><span class="img-label">MAB en schema</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#e67e00">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <text x="10" y="40" font-size="60" fill="white">+ − × ÷</text>
+          <text x="10" y="75" font-size="30" fill="white">= &lt; &gt; %</text>
+        </svg>
+        <span class="footer-emoji">🧮</span>
+        <div class="footer-text">
+          <strong>Rekenen doe je samen!</strong>
+          <span>Kies een oefening en genereer in seconden een werkblad op maat.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAAL EN LETTERS -->
+  <div class="section-panel" id="panel-taal">
+    <div class="section-header">
+      <span class="section-icon">🅰️</span>
+      <h2>Taal en letters</h2>
+      <div class="section-bar" style="background:#2980b9"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/woordzoeker.png" loading="lazy"/><span class="img-label">Woordzoeker</span></a>
+      <a class="img-link" href="./kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/kruiswoordpuzzel.png" loading="lazy"/><span class="img-label">Kruiswoordpuzzel</span></a>
+      <a class="img-link" href="./lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettercode.png" loading="lazy"/><span class="img-label">Lettercode</span></a>
+      <a class="img-link" href="./geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geheime_boodschap.png" loading="lazy"/><span class="img-label">Geheime boodschap</span></a>
+      <a class="img-link" href="./lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lettertetris.png" loading="lazy"/><span class="img-label">Lettertetris</span></a>
+      <a class="img-link" href="./galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/galgje.png" loading="lazy"/><span class="img-label">Galgje</span></a>
+      <a class="img-link" href="./lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/lees.png" loading="lazy"/><span class="img-label">Lezen</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#2980b9">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <text x="5" y="45" font-size="55" fill="white">A B C</text>
+          <text x="5" y="75" font-size="28" fill="white">a b c d e f</text>
+        </svg>
+        <span class="footer-emoji">✏️</span>
+        <div class="footer-text">
+          <strong>Taal is meer dan spellen!</strong>
+          <span>Van woordzoeker tot geheime boodschap — lezen en schrijven wordt een spel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PUZZELS & LOGICA -->
+  <div class="section-panel" id="panel-puzzels">
+    <div class="section-header">
+      <span class="section-icon">🧩</span>
+      <h2>Puzzels &amp; logica</h2>
+      <div class="section-bar" style="background:#8e44ad"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./sudoku.html"><img alt="Sudoku" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/sudoku.png" loading="lazy"/><span class="img-label">Sudoku</span></a>
+      <a class="img-link" href="./zoekverschillen.html"><img alt="Zoek de verschillen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/zoek_de_verschillen.png" loading="lazy"/><span class="img-label">Zoek de verschillen</span></a>
+      <a class="img-link" href="./doolhof.html"><img alt="Doolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/doolhof.png" loading="lazy"/><span class="img-label">Doolhof</span></a>
+      <a class="img-link" href="./slangendoolhof.html"><img alt="Slangendoolhof" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/slangendoolhof.png" loading="lazy"/><span class="img-label">Slangendoolhof</span></a>
+      <a class="img-link" href="./hexagon.html"><img alt="Hexagonaal raster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/hexagon.png" loading="lazy"/><span class="img-label">Hexagonaal raster</span></a>
+      <a class="img-link" href="./schaduw.html"><img alt="Schaduw" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/schaduw.png" loading="lazy"/><span class="img-label">Schaduw</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#8e44ad">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="25" height="25" rx="4" fill="white"/>
+          <rect x="45" y="10" width="25" height="25" rx="4" fill="white"/>
+          <rect x="10" y="45" width="25" height="25" rx="4" fill="white"/>
+          <rect x="80" y="10" width="25" height="60" rx="4" fill="white"/>
+          <rect x="115" y="10" width="60" height="25" rx="4" fill="white"/>
+          <rect x="115" y="45" width="25" height="25" rx="4" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🔍</span>
+        <div class="footer-text">
+          <strong>Denken is ook leren!</strong>
+          <span>Logisch redeneren, patronen herkennen en problemen oplossen — stap voor stap.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATIEF EN BOUWEN -->
+  <div class="section-panel" id="panel-creatief">
+    <div class="section-header">
+      <span class="section-icon">🎨</span>
+      <h2>Creatief en bouwen</h2>
+      <div class="section-bar" style="background:#27ae60"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./punttekening.html"><img alt="Punttekening" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/punttekening.png" loading="lazy"/><span class="img-label">Punttekening</span></a>
+      <a class="img-link" href="./pixelart.html"><img alt="Pixelart" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/pixelart.png" loading="lazy"/><span class="img-label">Pixelart</span></a>
+      <a class="img-link" href="./bouwplaat.html"><img alt="Bouwplaten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bouwplaat.png" loading="lazy"/><span class="img-label">Bouwplaten</span></a>
+      <a class="img-link" href="./coderen.html"><img alt="Coderen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/coderen.png" loading="lazy"/><span class="img-label">Coderen</span></a>
+      <a class="img-link" href="./plattegrond.html"><img alt="Plattegrond" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/plattegrond.png" loading="lazy"/><span class="img-label">Plattegrond</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#27ae60">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="30" cy="40" r="25" fill="white"/>
+          <polygon points="80,15 110,65 50,65" fill="white"/>
+          <rect x="125" y="15" width="50" height="50" rx="6" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🎨</span>
+        <div class="footer-text">
+          <strong>Bouwen, tekenen, ontwerpen!</strong>
+          <span>Creatief aan de slag met pixels, punten en plattegronden.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPELVORMEN -->
+  <div class="section-panel" id="panel-spel">
+    <div class="section-header">
+      <span class="section-icon">🎲</span>
+      <h2>Spelvormen</h2>
+      <div class="section-bar" style="background:#c0392b"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./bingo.html"><img alt="Bingo" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/bingo.png" loading="lazy"/><span class="img-label">Bingo</span></a>
+      <a class="img-link" href="./vieropeenrij.html"><img alt="Vier op een rij" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/vieropeenrij.png" loading="lazy"/><span class="img-label">Vier op een rij</span></a>
+      <a class="img-link" href="./rad.html"><img alt="Rad" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rad.png" loading="lazy"/><span class="img-label">Rad</span></a>
+      <a class="img-link" href="./QR.html"><img alt="QR-generator" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/QR.png" loading="lazy"/><span class="img-label">QR-generator</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#c0392b">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="25" cy="25" r="18" fill="white"/>
+          <circle cx="70" cy="25" r="18" fill="white"/>
+          <circle cx="25" cy="60" r="18" fill="white"/>
+          <circle cx="70" cy="60" r="18" fill="white"/>
+          <circle cx="120" cy="40" r="30" fill="white"/>
+        </svg>
+        <span class="footer-emoji">🎲</span>
+        <div class="footer-text">
+          <strong>Spelen is leren!</strong>
+          <span>Van bingo tot QR-code — zet leerinhoud om in een leuk klassikaal spel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIJD EN KLOK -->
+  <div class="section-panel" id="panel-tijd">
+    <div class="section-header">
+      <span class="section-icon">⏰</span>
+      <h2>Tijd en klok</h2>
+      <div class="section-bar" style="background:#16a085"></div>
+    </div>
+    <div class="button-grid">
+      <a class="img-link" href="./kloklezen.html"><img alt="Kloklezen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_kloklezen.png" loading="lazy"/><span class="img-label">Kloklezen</span></a>
+      <a class="img-link" href="./timer.html"><img alt="Timer" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/timer.png" loading="lazy"/><span class="img-label">Timer</span></a>
+    </div>
+    <div class="section-footer">
+      <div class="footer-banner" style="background:#16a085">
+        <svg class="footer-pattern" viewBox="0 0 200 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="40" r="35" fill="none" stroke="white" stroke-width="6"/>
+          <line x1="100" y1="40" x2="100" y2="15" stroke="white" stroke-width="4" stroke-linecap="round"/>
+          <line x1="100" y1="40" x2="120" y2="50" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="100" cy="40" r="4" fill="white"/>
+        </svg>
+        <span class="footer-emoji">⏰</span>
+        <div class="footer-text">
+          <strong>Tijd voor tijd!</strong>
+          <span>Kloklezen oefenen of een timer instellen — handig voor elke les.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.target;
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-' + target).classList.add('active');
+      document.querySelector('.main').scrollTop = 0;
     });
-  </script>
+  });
+</script>
 
-  <script src="./device-id.js"></script>
-  <script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
+<script src="./device-id.js"></script>
+<script type="module" src="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/guard.js"></script>
 
-  <script type="module">
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+<script type="module">
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    const $ = (s)=>document.querySelector(s);
-    const statusEl  = $("#status");
-    const contentEl = $("#content");
-    const userPill  = $("#user-pill");
+  const auth = getAuth();
+  const contentEl = document.getElementById('content');
+  const statusEl  = document.getElementById('status');
+  const userPill  = document.getElementById('user-pill');
 
-    const auth = getAuth();
-    $("#logout").onclick = ()=> signOut(auth);
+  document.getElementById('logout').onclick = () => signOut(auth);
 
-    window.onProReady = ({ user, expiresAt, limit }) => {
-      try { userPill.textContent = user.email ?? user.uid; } catch {}
-      statusEl.className = "status good";
-      try {
-        const datum = new Date(expiresAt).toLocaleDateString("nl-BE",{year:'numeric',month:'2-digit',day:'2-digit'});
-        statusEl.textContent = `PRO actief. Geldig tot: ${datum}. (maxDevices: ${limit ?? 2})`;
-      } catch {
-        statusEl.textContent = `PRO actief. (maxDevices: ${limit ?? 2})`;
-      }
-      contentEl.style.display = "block";
-    };
+  window.onProReady = ({ user, expiresAt, limit }) => {
+    try { userPill.textContent = user.email ?? user.uid; } catch {}
+    statusEl.className = 'status good';
+    try {
+      const datum = new Date(expiresAt).toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
+      statusEl.textContent = `PRO actief — geldig tot ${datum}  (max. ${limit ?? 2} toestellen)`;
+    } catch {
+      statusEl.textContent = `PRO actief  (max. ${limit ?? 2} toestellen)`;
+    }
+    contentEl.style.display = 'flex';
+  };
 
-    onAuthStateChanged(auth, (u) => {
-      if (!u) { location.href = "../pro/"; }
-      else { userPill.textContent = u.email ?? u.uid; }
-    });
-  </script>
+  onAuthStateChanged(auth, (u) => {
+    if (!u) { location.href = '../pro/'; }
+    else { userPill.textContent = u.email ?? u.uid; }
+  });
+</script>
+
 </body>
 </html>
