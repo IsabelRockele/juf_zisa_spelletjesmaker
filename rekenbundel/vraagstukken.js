@@ -106,54 +106,18 @@ ${themaInstructie}
 Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.`;
   }
 
-  // ── API AANROEP (via Cloud Function) ────────────────────────
-  // In testmodus roepen we de Anthropic API rechtstreeks aan.
-  // VERVANG DIT later door jouw Cloud Function URL!
   async function roepAPIaan(prompt) {
-    // ⚠️ TIJDELIJK: directe API-aanroep voor testen
-    // Vervang dit door: fetch('https://jouw-cloud-function-url/genereer', {...})
-    const CLOUD_FUNCTION_URL = window.VRAAGSTUK_CF_URL || null;
+    const CLOUD_FUNCTION_URL = 'https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/genereerVraagstuk';
 
-    if (CLOUD_FUNCTION_URL) {
-      // Productie: via Cloud Function (veilig)
-      const user = firebase.auth().currentUser;
-      const token = await user.getIdToken();
-      const resp = await fetch(CLOUD_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({ prompt })
-      });
-      if (!resp.ok) throw new Error(await resp.text());
-      const data = await resp.json();
-      return data.tekst;
-    } else {
-      // Tijdelijk testmodus: directe aanroep (API key in config.js)
-      const apiKey = window.ANTHROPIC_API_KEY;
-      if (!apiKey) throw new Error('Geen API-sleutel geconfigureerd. Zie config.js.');
-      const resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 400,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
-      if (!resp.ok) {
-        const err = await resp.json();
-        throw new Error(err.error?.message || 'API-fout');
-      }
-      const data = await resp.json();
-      return data.content[0].text.trim();
-    }
+    const resp = await fetch(CLOUD_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error);
+    return data.tekst;
   }
 
   // ── GENEREER ─────────────────────────────────────────────────
