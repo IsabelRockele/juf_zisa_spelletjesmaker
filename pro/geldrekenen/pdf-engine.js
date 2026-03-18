@@ -322,11 +322,11 @@ if (shelfDataUrl) {
     const isKiezenVak = vakEl.classList.contains('kiezen-geld-vak');
     const isWinkelVak = !!vakEl.closest('.winkel-totaal-layout');
 
-    const PAD = isCompactSkill ? 2.4 : (isTwoWays || isWinkelVak || isKiezenVak ? 2.1 : 1.9);
-    const ITEM_GAP = isCompactSkill ? 1.6 : (isTwoWays || isWinkelVak || isKiezenVak ? 1.4 : 1.2);
-    const GROUP_GAP = isCompactSkill ? 3.8 : (isTwoWays || isWinkelVak || isKiezenVak ? 3.4 : 3);
-    const ROW_GAP = isCompactSkill ? 3.6 : 3.2;
-    const MIN_SCALE_FACTOR = isCompactSkill ? 0.74 : (isTwoWays || isWinkelVak || isKiezenVak ? 0.68 : 0.60);
+    const PAD = isCompactSkill ? 1.4 : (isTwoWays || isWinkelVak || isKiezenVak ? 1.6 : 1.7);
+    const ITEM_GAP = isCompactSkill ? 1.4 : (isTwoWays || isWinkelVak || isKiezenVak ? 1.3 : 1.2);
+    const GROUP_GAP = isCompactSkill ? 3.2 : (isTwoWays || isWinkelVak || isKiezenVak ? 3.0 : 2.8);
+    const ROW_GAP = isCompactSkill ? 2.4 : 2.8;
+    const MIN_SCALE_FACTOR = isCompactSkill ? 0.86 : (isTwoWays || isWinkelVak || isKiezenVak ? 0.80 : 0.72);
 
     const groupEls = vakEl.querySelectorAll('.money-group').length
       ? [...vakEl.querySelectorAll('.money-group')]
@@ -342,11 +342,11 @@ if (shelfDataUrl) {
         const ratio = nat / natH;
         let baseH;
         if (isCompactSkill) {
-          baseH = ratio > 1.5 ? 15.5 : 11.6;
+          baseH = ratio > 1.5 ? 18.8 : 14.0;
         } else if (isTwoWays || isWinkelVak || isKiezenVak) {
-          baseH = ratio > 1.5 ? 13.8 : 10.4;
+          baseH = ratio > 1.5 ? 16.8 : 12.4;
         } else {
-          baseH = ratio > 1.5 ? 12.0 : 9.0;
+          baseH = ratio > 1.5 ? 14.8 : 10.8;
         }
         const h = baseH * Math.min(cssScale, 1.18) * sizeFactor;
         const w = h * ratio;
@@ -398,7 +398,7 @@ if (shelfDataUrl) {
       if (sizeFactor === MIN_SCALE_FACTOR) break;
     }
 
-    let curY = by + Math.max(PAD, (bh - layout.totalH) / 2);
+    let curY = by + PAD;
     for (const row of layout.rows) {
       let curX = bx + PAD;
       for (const group of row.groups) {
