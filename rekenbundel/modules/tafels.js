@@ -50,20 +50,17 @@ const Tafels = (() => {
               sleutel: `v-${multiplier}-${tafel}` });
           }
         }
+        
         if (wilDeel && product > 0) {
-          // Bij deelsom: tafelPositie bepaalt de deler
-          // vooraan: product : tafel = multiplier  (tafel is deler → staat 'op positie 2')
-          // achteraan: product : multiplier = tafel (multiplier is deler)
-          // beide: allebei
-          if (voegVooraan) {
-            pool.push({ type: 'gedeeld', a: product, b: tafel, antwoord: multiplier,
-              sleutel: `d-${product}-${tafel}` });
-          }
-          if (voegAchteraan && tafel !== multiplier) {
-            pool.push({ type: 'gedeeld', a: product, b: multiplier, antwoord: tafel,
-              sleutel: `d-${product}-${multiplier}` });
-          }
-        }
+  // Altijd enkel de gekozen tafel als deler
+  pool.push({
+    type: 'gedeeld',
+    a: product,
+    b: tafel,
+    antwoord: multiplier,
+    sleutel: `d-${product}-${tafel}`
+  });
+}
         if (wilFactor) {
           // Ontbrekende factor: altijd beide posities (links én rechts) aanbieden,
           // ongeacht tafelPositie — zodat het invulvakje afwisselend 1e of 2e factor is.
