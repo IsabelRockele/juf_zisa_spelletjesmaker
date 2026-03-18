@@ -868,18 +868,45 @@ function voegKaderToe(sectieNode) {
     grid.appendChild(kader);
 }
 
+function renderMoneyGroepen(units) {
+    if (!units.length) return '';
+
+    const groepen = [];
+    let huidigeGroep = [];
+    let vorigeKey = null;
+
+    units.forEach(unit => {
+        const key = `${unit.value}|${unit.img}|${unit.scale}`;
+        if (vorigeKey !== null && key !== vorigeKey) {
+            groepen.push(huidigeGroep);
+            huidigeGroep = [];
+        }
+        huidigeGroep.push(unit);
+        vorigeKey = key;
+    });
+
+    if (huidigeGroep.length) groepen.push(huidigeGroep);
+
+    return groepen.map(groep => {
+        const unit = groep[0];
+        return `<span class="money-group" data-value="${unit.value}" data-count="${groep.length}">`
+            + groep.map(() => `<img src="assets/${unit.img}" class="money-img" style="--scale: ${unit.scale}">`).join('')
+            + `</span>`;
+    }).join('');
+}
+
 function genereerGeldSimpel(totaal, centen, klein) {
     let rest = Math.round(totaal * 100) / 100;
-    let html = '';
+    const units = [];
     moneyConfig.forEach(u => {
         if (u.value < 1 && !centen) return;
         if (u.value < 0.05 && !klein) return;
         while (rest >= u.value - 0.001) {
-            html += `<img src="assets/${u.img}" class="money-img" style="--scale: ${u.scale}">`;
+            units.push(u);
             rest = Math.round((rest - u.value) * 100) / 100;
         }
     });
-    return html;
+    return renderMoneyGroepen(units);
 }
 
 function genereerMix(doel, max, centen, klein) {
@@ -890,7 +917,7 @@ function genereerMix(doel, max, centen, klein) {
         for(let i=0; i<n; i++) verz.push(u);
     });
     verz.sort((a,b) => b.value - a.value);
-    return verz.map(u => `<img src="assets/${u.img}" class="money-img" style="--scale: ${u.scale}">`).join('');
+    return renderMoneyGroepen(verz);
 }
 
 // Genereert een mix voor de omcirkel-rij bij terugkrijgen:
