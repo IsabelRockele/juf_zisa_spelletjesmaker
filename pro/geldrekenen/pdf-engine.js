@@ -311,55 +311,110 @@ if (shelfDataUrl) {
     await drawMoneyImgsInBox(vakEl, vakX, vr.y, vakW, vr.h, scale);
   }
 
-  // Teken geldafbeeldingen in een vak — flow-based, geen DOM-posities
+  // Teken geldafbeeldingen in een vak — groepeert gelijke muntjes/biljetten bij elkaar
   async function drawMoneyImgsInBox(vakEl, bx, by, bw, bh, scale) {
-    const imgs = [...vakEl.querySelectorAll("img")];
-    if (!imgs.length) return;
+    const allImgs = [...vakEl.querySelectorAll("img")];
+    if (!allImgs.length) return 0;
 
-    const PAD = 2, GAP = 2;
+    const sectionType = vakEl.closest('.oefening-sectie')?.dataset?.type || '';
+    const isCompactSkill = sectionType === 'tellen' || sectionType === 'weinig_mogelijk';
+    const isTwoWays = sectionType === 'twee_manieren';
+    const isKiezenVak = vakEl.classList.contains('kiezen-geld-vak');
+    const isWinkelVak = !!vakEl.closest('.winkel-totaal-layout');
 
-    // Grotere afbeeldingen zodat biljetten leesbaar zijn
-    const items = imgs.map(img => {
-      const cssScale = parseFloat(img.style.getPropertyValue('--scale') ||
-        img.style.transform?.match(/scale\(([\d.]+)\)/)?.[1] || '1');
-      const nat = img.naturalWidth || 60;
-      const natH = img.naturalHeight || 40;
-      const ratio = nat / natH;
-      // Biljetten hoog genoeg om tekst te lezen: 16mm, munten 12mm
-      const baseH = ratio > 1.5 ? 16 : 12;
-      const h = baseH * Math.min(cssScale, 1.2);
-      const w = h * ratio;
-      return { img, w, h };
+    const PAD = isCompactSkill ? 2.4 : (isTwoWays || isWinkelVak || isKiezenVak ? 2.1 : 1.9);
+    const ITEM_GAP = isCompactSkill ? 1.6 : (isTwoWays || isWinkelVak || isKiezenVak ? 1.4 : 1.2);
+    const GROUP_GAP = isCompactSkill ? 3.8 : (isTwoWays || isWinkelVak || isKiezenVak ? 3.4 : 3);
+    const ROW_GAP = isCompactSkill ? 3.6 : 3.2;
+    const MIN_SCALE_FACTOR = isCompactSkill ? 0.74 : (isTwoWays || isWinkelVak || isKiezenVak ? 0.68 : 0.60);
+
+    const groupEls = vakEl.querySelectorAll('.money-group').length
+      ? [...vakEl.querySelectorAll('.money-group')]
+      : [vakEl];
+
+    const buildGroups = (sizeFactor = 1) => groupEls.map(groupEl => {
+      const imgs = groupEl === vakEl ? [...allImgs] : [...groupEl.querySelectorAll('img')];
+      const items = imgs.map(img => {
+        const cssScale = parseFloat(img.style.getPropertyValue('--scale') ||
+          img.style.transform?.match(/scale\(([\d.]+)\)/)?.[1] || '1');
+        const nat = img.naturalWidth || 60;
+        const natH = img.naturalHeight || 40;
+        const ratio = nat / natH;
+        let baseH;
+        if (isCompactSkill) {
+          baseH = ratio > 1.5 ? 15.5 : 11.6;
+        } else if (isTwoWays || isWinkelVak || isKiezenVak) {
+          baseH = ratio > 1.5 ? 13.8 : 10.4;
+        } else {
+          baseH = ratio > 1.5 ? 12.0 : 9.0;
+        }
+        const h = baseH * Math.min(cssScale, 1.18) * sizeFactor;
+        const w = h * ratio;
+        return { img, w, h };
+      });
+      const width = items.reduce((sum, item, index) => sum + item.w + (index ? ITEM_GAP : 0), 0);
+      const height = items.reduce((max, item) => Math.max(max, item.h), 0);
+      return { items, width, height };
     });
 
-    // Verdeel in rijen
-    const maxW = bw - PAD * 2;
-    const rows = [];
-    let curRow = [], curW = 0;
-    for (const item of items) {
-      if (curW + item.w + GAP > maxW && curRow.length > 0) {
-        rows.push(curRow);
-        curRow = [item];
-        curW = item.w;
-      } else {
-        curRow.push(item);
-        curW += item.w + GAP;
-      }
-    }
-    if (curRow.length) rows.push(curRow);
+    const layoutGroups = (groups) => {
+      const maxW = Math.max(10, bw - PAD * 2);
+      const rows = [];
+      let currentRow = [];
+      let currentWidth = 0;
 
-    // Vaste rijhoogte van 18mm
-    const rowH = 18;
-    for (let ri = 0; ri < rows.length; ri++) {
-      const row = rows[ri];
-      const rowCenterY = by + PAD + ri * rowH + rowH / 2;
-      let curX = bx + PAD;
-      for (const item of row) {
-        const iy = rowCenterY - item.h / 2;
-        await drawImageFromElement(item.img, curX, iy, item.w, item.h);
-        curX += item.w + GAP;
+      for (const group of groups) {
+        const extra = currentRow.length ? GROUP_GAP : 0;
+        if (currentRow.length && currentWidth + extra + group.width > maxW) {
+          rows.push(currentRow);
+          currentRow = [group];
+          currentWidth = group.width;
+        } else {
+          currentRow.push(group);
+          currentWidth += extra + group.width;
+        }
       }
+      if (currentRow.length) rows.push(currentRow);
+
+      const rowMeta = rows.map(row => {
+        const width = row.reduce((sum, group, index) => sum + group.width + (index ? GROUP_GAP : 0), 0);
+        const height = row.reduce((max, group) => Math.max(max, group.height), 0);
+        return { groups: row, width, height };
+      });
+
+      const totalH = rowMeta.reduce((sum, row, index) => sum + row.height + (index ? ROW_GAP : 0), 0);
+      return { rows: rowMeta, totalH };
+    };
+
+    let sizeFactor = 1;
+    let groups = buildGroups(sizeFactor);
+    let layout = layoutGroups(groups);
+    const maxContentH = Math.max(8, bh - PAD * 2);
+
+    while ((layout.totalH > maxContentH || layout.rows.some(row => row.width > bw - PAD * 2)) && sizeFactor > MIN_SCALE_FACTOR) {
+      sizeFactor = Math.max(MIN_SCALE_FACTOR, sizeFactor * 0.92);
+      groups = buildGroups(sizeFactor);
+      layout = layoutGroups(groups);
+      if (sizeFactor === MIN_SCALE_FACTOR) break;
     }
+
+    let curY = by + Math.max(PAD, (bh - layout.totalH) / 2);
+    for (const row of layout.rows) {
+      let curX = bx + PAD;
+      for (const group of row.groups) {
+        for (let i = 0; i < group.items.length; i++) {
+          const item = group.items[i];
+          const iy = curY + (row.height - item.h) / 2;
+          await drawImageFromElement(item.img, curX, iy, item.w, item.h);
+          curX += item.w;
+          if (i < group.items.length - 1) curX += ITEM_GAP;
+        }
+        curX += GROUP_GAP;
+      }
+      curY += row.height + ROW_GAP;
+    }
+
+    return layout.totalH + PAD * 2;
   }
 
   async function drawTerugKader(kaderEl, scale) {
@@ -495,11 +550,10 @@ if (shelfDataUrl) {
     const bewH = heeftSchatting ? 26 : 20;
     const topH = Math.max(mandjeH, bewH + 18); // genoeg ruimte voor bewerking + totaal
 
-    // Geldvak hoogte
-    const geldImgs = [...kaderEl.querySelectorAll(".geld-vak img")];
-    const itemsPerRij = Math.floor((CONTENT_W - 12) / 38); // ~38mm per biljet bij 16mm hoog
-    const geldRijen = Math.min(3, Math.max(1, Math.ceil(geldImgs.length / itemsPerRij)));
-    const geldH = geldRijen * 18 + 6;
+    // Geldvak hoogte — neem minstens de previewhoogte over zodat grotere munten ook in PDF ruimte krijgen
+    const geldVak = kaderEl.querySelector(".geld-vak");
+    const previewVakH = geldVak ? Math.max(26, rect(geldVak).height * scale) : 26;
+    const geldH = previewVakH;
 
     const FIXED_H = PAD + topH + 4 + geldH + PAD;
     ensureSpace(FIXED_H + 5);
@@ -571,7 +625,6 @@ if (shelfDataUrl) {
     doc.setLineDashPattern([], 0);
 
     // ── Geldvak — volle breedte ──
-    const geldVak = kaderEl.querySelector(".geld-vak");
     if (geldVak) {
       doc.setDrawColor(170,170,170); doc.setLineWidth(0.35);
       drawDashedRect(x + 4, geldY, CONTENT_W - 8, geldH);
@@ -1054,7 +1107,7 @@ if (shelfDataUrl) {
     const titleEl = sectionEl.querySelector(":scope > .sectie-titel");
     const posterEl = sectionEl.querySelector(":scope > .winkel-poster");
     const kaders = [...sectionEl.querySelectorAll(":scope > .kaders-grid > .oefening-kader")];
-    const isTellen = sectionEl.dataset.type === 'tellen';
+    const isTwoColSkill = ['tellen', 'weinig_mogelijk'].includes(sectionEl.dataset.type);
 
     // Bereken hoeveel ruimte titel + poster + eerste kader (of eerste rij) nodig heeft
     // zodat die samen op de pagina passen
@@ -1062,7 +1115,7 @@ if (shelfDataUrl) {
     const titleBandH = titleEl ? 10 : 0; // geschatte titelbalk hoogte
     const posterH = posterEl ? rect(posterEl).height * scale + 6 : 0;
     let firstKaderH = 0;
-    if (isTellen && kaders.length > 0) {
+    if (isTwoColSkill && kaders.length > 0) {
       const k1 = kaders[0], k2 = kaders[1];
       firstKaderH = Math.max(rect(k1).height * scale, k2 ? rect(k2).height * scale : 0) + 5;
     } else if (kaders.length > 0) {
@@ -1076,7 +1129,7 @@ if (shelfDataUrl) {
 
     // Kaders tekenen — eerste kader staat al op de pagina door ensureSpace hierboven
     // Volgende kaders mogen gewoon doorstromen (ensureSpace per kader)
-    if (isTellen && kaders.length > 1) {
+    if (isTwoColSkill && kaders.length > 1) {
       const colW = (CONTENT_W - 6) / 2;
       for (let i = 0; i < kaders.length; i += 2) {
         const k1 = kaders[i], k2 = kaders[i + 1];
