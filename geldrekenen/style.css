@@ -552,17 +552,25 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .exact-tabel th:nth-child(3), .exact-tabel td:nth-child(3) { width: 36%; }
 
 .kiezen-geld-vak {
-    min-height: 60px;
+    min-height: 86px;
     border: 2px dashed #a8d8ce;
     border-radius: 8px;
-    padding: 6px;
+    padding: 10px;
     background: #f5fffe;
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 6px;
     align-items: center;
     justify-content: center;
     margin-bottom: 6px;
+}
+
+.kiezen-geld-vak .money-img {
+    width: calc(50px * var(--scale));
+}
+
+.kiezen-geld-vak .money-group {
+    gap: 4px;
 }
 
 .kiezen-ik-tel-rij {
@@ -888,18 +896,30 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     border: 2px dashed #aaa; 
     border-radius: 10px; 
     padding: 8px 10px; 
-    min-height: 60px; 
+    min-height: 76px; 
+    height: auto;
     display: flex; 
     flex-wrap: wrap; 
-    gap: 3px; 
-    align-items: center; 
+    gap: 6px 8px; 
+    align-items: flex-start; 
+    align-content: flex-start;
+    justify-content: flex-start;
     background: #fafafa; 
     margin-top: 10px;
     width: 100%;
     box-sizing: border-box;
 }
 
-.money-img { height: auto; width: calc(44px * var(--scale)); vertical-align: middle; }
+.money-group {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 4px;
+    max-width: 100%;
+    margin-bottom: 1px;
+}
+
+.money-img { height: auto; width: calc(60px * var(--scale)); vertical-align: middle; flex: 0 0 auto; }
 .antwoord-box { margin-top: 10px; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: #f9f9f9; font-weight: bold; display: flex; align-items: center; gap: 10px; }
 
 .sectie-controls { margin-top: 10px; display: flex; gap: 10px; }
@@ -1399,22 +1419,81 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     margin-bottom: 6px;
 }
 
-/* ── Tellen: 2 oefeningen naast elkaar ── */
-.oefening-sectie[data-type="tellen"] .kaders-grid {
+/* ── Compacte vaardigheden: 2 oefeningen naast elkaar ── */
+.oefening-sectie[data-type="tellen"] .kaders-grid,
+.oefening-sectie[data-type="weinig_mogelijk"] .kaders-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 18px;
 }
 
-.oefening-sectie[data-type="tellen"] .oefening-kader {
+.oefening-sectie[data-type="tellen"] .oefening-kader,
+.oefening-sectie[data-type="weinig_mogelijk"] .oefening-kader {
     margin-bottom: 0;
-    padding: 14px;
+    padding: 16px 14px 14px;
 }
 
 .tellen-inhoud {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+}
+
+.oefening-sectie[data-type="tellen"] .geld-vak,
+.oefening-sectie[data-type="weinig_mogelijk"] .geld-vak {
+    width: calc(100% - 8px);
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 0;
+    height: auto;
+    padding: 4px 8px;
+    gap: 5px 7px;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.oefening-sectie[data-type="weinig_mogelijk"] .geld-vak {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.oefening-sectie[data-type="twee_manieren"] .geld-vak {
+    width: calc(100% - 14px);
+    margin-left: auto;
+    margin-right: auto;
+    min-height: 92px;
+    padding: 8px 10px;
+    gap: 6px 8px;
+}
+
+.oefening-sectie[data-type="tellen"] .money-img,
+.oefening-sectie[data-type="weinig_mogelijk"] .money-img {
+    width: calc(64px * var(--scale));
+}
+
+.oefening-sectie[data-type="twee_manieren"] .money-img {
+    width: calc(56px * var(--scale));
+}
+
+.oefening-sectie[data-type="tellen"] .money-group,
+.oefening-sectie[data-type="weinig_mogelijk"] .money-group {
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.oefening-sectie[data-type="twee_manieren"] .money-group {
+    gap: 3px;
+}
+
+.oefening-sectie[data-type="weinig_mogelijk"] strong {
+    display: inline-block;
+    margin-bottom: 10px;
+    font-size: 1.15rem;
+}
+
+.oefening-sectie[data-type="tellen"] .antwoord-box,
+.oefening-sectie[data-type="weinig_mogelijk"] .antwoord-box {
+    margin-top: 0;
 }
 
 /* ── Poster aanpas-paneel ── */
@@ -1542,6 +1621,17 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .winkel-totaal-layout .geld-vak {
     width: 100%;
     margin-top: 0;
+    min-height: 96px;
+    padding: 8px 10px;
+    gap: 8px 9px;
+}
+
+.winkel-totaal-layout .money-img {
+    width: calc(62px * var(--scale));
+}
+
+.winkel-totaal-layout .money-group {
+    gap: 4px;
 }
 
 .poster-hint {
