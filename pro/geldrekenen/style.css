@@ -895,12 +895,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .geld-vak { 
     border: 2px dashed #aaa; 
     border-radius: 10px; 
-    padding: 10px 12px; 
-    min-height: 92px; 
+    padding: 8px 10px; 
+    min-height: 76px; 
     height: auto;
     display: flex; 
     flex-wrap: wrap; 
-    gap: 8px; 
+    gap: 6px 8px; 
     align-items: flex-start; 
     align-content: flex-start;
     justify-content: flex-start;
@@ -916,9 +916,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     flex-wrap: nowrap;
     gap: 4px;
     max-width: 100%;
+    margin-bottom: 1px;
 }
 
-.money-img { height: auto; width: calc(54px * var(--scale)); vertical-align: middle; flex: 0 0 auto; }
+.money-img { height: auto; width: calc(60px * var(--scale)); vertical-align: middle; flex: 0 0 auto; }
 .antwoord-box { margin-top: 10px; padding: 10px; border: 1.5px solid var(--border); border-radius: 8px; background: #f9f9f9; font-weight: bold; display: flex; align-items: center; gap: 10px; }
 
 .sectie-controls { margin-top: 10px; display: flex; gap: 10px; }
@@ -1443,32 +1444,41 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     width: calc(100% - 8px);
     margin-left: auto;
     margin-right: auto;
-    min-height: 112px;
-    padding: 12px 14px;
-    gap: 10px;
+    min-height: 0;
+    height: auto;
+    padding: 4px 8px;
+    gap: 5px 7px;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.oefening-sectie[data-type="weinig_mogelijk"] .geld-vak {
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .oefening-sectie[data-type="twee_manieren"] .geld-vak {
     width: calc(100% - 14px);
     margin-left: auto;
     margin-right: auto;
-    min-height: 108px;
-    padding: 10px 12px;
-    gap: 8px;
+    min-height: 92px;
+    padding: 8px 10px;
+    gap: 6px 8px;
 }
 
 .oefening-sectie[data-type="tellen"] .money-img,
 .oefening-sectie[data-type="weinig_mogelijk"] .money-img {
-    width: calc(56px * var(--scale));
+    width: calc(64px * var(--scale));
 }
 
 .oefening-sectie[data-type="twee_manieren"] .money-img {
-    width: calc(48px * var(--scale));
+    width: calc(56px * var(--scale));
 }
 
 .oefening-sectie[data-type="tellen"] .money-group,
 .oefening-sectie[data-type="weinig_mogelijk"] .money-group {
     gap: 4px;
+    margin-bottom: 2px;
 }
 
 .oefening-sectie[data-type="twee_manieren"] .money-group {
@@ -1611,13 +1621,13 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
 .winkel-totaal-layout .geld-vak {
     width: 100%;
     margin-top: 0;
-    min-height: 108px;
-    padding: 12px 14px;
-    gap: 10px;
+    min-height: 96px;
+    padding: 8px 10px;
+    gap: 8px 9px;
 }
 
 .winkel-totaal-layout .money-img {
-    width: calc(56px * var(--scale));
+    width: calc(62px * var(--scale));
 }
 
 .winkel-totaal-layout .money-group {
