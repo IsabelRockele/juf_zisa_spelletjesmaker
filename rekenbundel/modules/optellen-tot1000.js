@@ -106,8 +106,8 @@ const OptellenTot1000 = (() => {
     const eA = a % 10, eB = b % 10;
     const tA = Math.floor(a / 10) % 10, tB = Math.floor(b / 10) % 10;
     return {
-      T: (eA + eB) >= 10,   // brug naar tiental
-      H: (tA + tB) >= 10,   // brug naar honderdtal
+      T: (eA + eB) > 10,   // brug naar tiental
+      H: (tA + tB) > 10,   // brug naar honderdtal
     };
   }
 
