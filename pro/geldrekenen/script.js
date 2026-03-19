@@ -356,7 +356,7 @@ function voegKaderToe(sectieNode) {
     const max = parseFloat(document.getElementById('maxBedrag').value);
     const centen = document.getElementById('checkCenten').checked;
     const klein = document.getElementById('checkKleineCenten').checked;
-    const nItems = parseInt(document.getElementById('aantalItems').value);
+    const nItems = Math.max(1, parseInt(document.getElementById('aantalItems')?.value || '1', 10));
     const metSchatten = document.getElementById('checkSchatten').checked;
 
     // Bijhouden welke producten al gebruikt zijn binnen deze sectie
@@ -372,47 +372,260 @@ function voegKaderToe(sectieNode) {
         ? `<div class="korting-schatting-rij">Ik schat: <span class="korting-schatting-lijn"></span></div>`
         : '';
 
-    if (type === 'winkel_terug') {
-        // Zoek betaalbiljet (≤ max, ≥ 2) en producten waarvan totaal < biljet
-        const kandidaten = moneyConfig.filter(u =>
-            u.value <= max && u.value >= 2 &&
-            (centen || u.value >= 1) && (klein || u.value >= 0.05)
-        );
-        let items, totaal, betaalMunt, gevonden = false;
-        for (let poging = 0; poging < 40 && !gevonden; poging++) {
-            const biljetPool = kandidaten.filter(u => u.value >= 2);
-            if (!biljetPool.length) break;
-            betaalMunt = biljetPool[Math.floor(Math.random() * biljetPool.length)];
-            const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-            // Kies items waarvan som < betaalbiljet én ≤ max
-            const geshuffled = [...geschaald].sort(() => 0.5 - Math.random());
-            let kandidaatItems = [];
-            for (const p of geshuffled) {
-                const nieuwTotaal = Math.round((kandidaatItems.reduce((a,b) => a+b.prijs,0) + p.prijs) * 100) / 100;
-                if (nieuwTotaal < betaalMunt.value && nieuwTotaal <= max) {
-                    kandidaatItems.push(p);
-                    if (kandidaatItems.length >= nItems) break;
-                }
-            }
-            const kTotaal = Math.round(kandidaatItems.reduce((a, b) => a + b.prijs, 0) * 100) / 100;
-            if (kandidaatItems.length > 0 && kTotaal < betaalMunt.value && kTotaal > 0) {
-                items = kandidaatItems; totaal = kTotaal; gevonden = true;
-            }
-        }
-        if (!gevonden) {
-            betaalMunt = kandidaten[kandidaten.length - 1] || moneyConfig.find(u => u.value === 10) || moneyConfig[6];
-            const geschaald = getGeschaaldePrijzen(winkelLijst, max, centen);
-            const geshuffled = [...geschaald].sort(() => 0.5 - Math.random());
-            items = [];
-            for (const p of geshuffled) {
-                const nieuwTotaal = Math.round((items.reduce((a,b) => a+b.prijs,0) + p.prijs) * 100) / 100;
-                if (nieuwTotaal <= max) { items.push(p); if (items.length >= nItems) break; }
-            }
-            if (items.length === 0) items = [geshuffled[0]];
-            totaal = Math.min(Math.round(items.reduce((a, b) => a + b.prijs, 0) * 100) / 100, max);
-        }
-        const wisselgeld = Math.round((betaalMunt.value - totaal) * 100) / 100;
+  if (type === 'winkel_terug') {
         const prijsStr = (p) => `€ ${p.toFixed(centen ? 2 : 0).replace('.', ',')}`;
+
+        function rondBedrag(v) {
+            if (!centen) return Math.round(v);
+            if (!klein) return Math.round(v * 20) / 20;
+            return Math.round(v * 100) / 100;
+        }
+
+      function maakAangepastePrijzenVoorTerug(winkelLijst, max, gewenstAantal) {
+    const basis = getGeschaaldePrijzen(winkelLijst, max, centen);
+    if (!basis.length) return [];
+
+    // Doeltotaal lager houden, zodat er altijd nog terug te geven is
+    const doelMinTotaal = !centen
+        ? Math.max(4, Math.floor(max * 0.35))
+        : Math.max(0.40, Math.round(max * 0.35 * 20) / 20);
+
+    const doelMaxTotaal = !centen
+        ? Math.max(doelMinTotaal + 1, Math.floor(max * 0.8))
+        : Math.max(doelMinTotaal + 0.05, Math.round(max * 0.8 * 20) / 20);
+
+    const richtPerItem = doelMinTotaal / gewenstAantal;
+
+    return basis.map(item => {
+        let prijs = item.prijs;
+
+        // Alleen zachtjes optrekken, niet alles naar hetzelfde bedrag duwen
+        if (prijs < richtPerItem) {
+            prijs = prijs + (richtPerItem - prijs) * 0.45;
+        }
+
+        // Variatie toevoegen
+        const spreiding = !centen
+            ? (Math.random() * 4 - 2)          // -2 tot +2
+            : ((Math.random() * 10 - 5) / 20); // -0,25 tot +0,25
+
+        prijs += spreiding;
+
+        if (!centen) prijs = Math.round(prijs);
+        else if (!klein) prijs = Math.round(prijs * 20) / 20;
+        else prijs = Math.round(prijs * 100) / 100;
+
+        prijs = Math.max(centen ? 0.20 : 1, prijs);
+        prijs = Math.min(prijs, max - (centen ? 0.20 : 1));
+
+        return { ...item, prijs };
+    });
+}
+
+    function kiesExactAantalItems(winkelLijst, max, gewenstAantal) {
+    const pool = maakAangepastePrijzenVoorTerug(winkelLijst, max, gewenstAantal);
+
+    const doelMin = !centen
+        ? Math.max(20, Math.floor(max * 0.45))
+        : Math.max(1, Math.round(max * 0.45 * 20) / 20);
+
+    const doelMax = !centen
+        ? Math.max(doelMin, Math.floor(max * 0.9))
+        : Math.max(doelMin, Math.round(max * 0.9 * 20) / 20);
+
+    const geldigeKandidaten = [];
+
+    for (let poging = 0; poging < 400; poging++) {
+        const shuffle = [...pool].sort(() => Math.random() - 0.5);
+
+        const gekozen = [];
+        const gebruikteImgsLokaal = new Set();
+        let totaal = 0;
+
+        for (const item of shuffle) {
+            if (gekozen.length >= gewenstAantal) break;
+            if (gebruikteImgsLokaal.has(item.img)) continue;
+
+            const nieuwTotaal = rondBedrag(totaal + item.prijs);
+            if (nieuwTotaal < max) {
+                gekozen.push(item);
+                gebruikteImgsLokaal.add(item.img);
+                totaal = nieuwTotaal;
+            }
+        }
+
+        if (gekozen.length === gewenstAantal && totaal >= doelMin && totaal <= doelMax) {
+            geldigeKandidaten.push({ items: gekozen, totaal });
+        }
+    }
+
+    if (geldigeKandidaten.length) {
+        // Probeer producten te nemen die nog niet gebruikt zijn in deze sectie
+        const nogNietGebruikt = geldigeKandidaten.filter(k =>
+            k.items.every(it => !gebruikteProducten.has(it.img))
+        );
+
+        const bron = nogNietGebruikt.length ? nogNietGebruikt : geldigeKandidaten;
+        const gekozenKandidaat = bron[Math.floor(Math.random() * bron.length)];
+
+        gekozenKandidaat.items.forEach(it => gebruikteProducten.add(it.img));
+        return gekozenKandidaat;
+    }
+
+    // fallback: willekeurige verschillende producten
+    const shuffle = [...pool].sort(() => Math.random() - 0.5);
+    const fallbackItems = [];
+    const gebruikteImgsLokaal = new Set();
+
+    for (const item of shuffle) {
+        if (fallbackItems.length >= gewenstAantal) break;
+        if (gebruikteImgsLokaal.has(item.img)) continue;
+
+        fallbackItems.push(item);
+        gebruikteImgsLokaal.add(item.img);
+    }
+
+    while (fallbackItems.length < gewenstAantal && shuffle.length > 0) {
+        const extra = shuffle.find(it => !fallbackItems.some(f => f.img === it.img));
+        if (!extra) break;
+        fallbackItems.push(extra);
+    }
+
+    fallbackItems.forEach(it => gebruikteProducten.add(it.img));
+
+    return {
+        items: fallbackItems,
+        totaal: rondBedrag(fallbackItems.reduce((som, item) => som + item.prijs, 0))
+    };
+}
+      function kanMetMinstensTweeBiljetten(bedrag) {
+    let rest = bedrag;
+    let aantal = 0;
+
+    let biljetten = moneyConfig
+        .filter(u => u.value >= 10 && u.value <= bedrag)
+        .sort((a, b) => b.value - a.value);
+
+    const exactBiljet = biljetten.find(u => Math.abs(u.value - bedrag) < 0.001);
+    if (exactBiljet) {
+        biljetten = biljetten.filter(u => Math.abs(u.value - bedrag) >= 0.001);
+    }
+
+    for (const b of biljetten) {
+        while (rest >= b.value - 0.001) {
+            aantal++;
+            rest = rondBedrag(rest - b.value);
+        }
+    }
+
+    return Math.abs(rest) < 0.001 && aantal >= 2;
+}
+
+function bepaalNetBetaalBedrag(totaal, max) {
+    // Betaalbedrag moet altijd strikt groter zijn dan totaal
+    if (max <= 20) {
+        const kandidaten = [10, 20].filter(v => v <= max && v > totaal);
+        return kandidaten[0] || max;
+    }
+
+    if (max <= 50) {
+        const kandidaten = [20, 30, 40, 50].filter(v => v <= max && v > totaal);
+        return kandidaten[0] || max;
+    }
+
+    if (max <= 100) {
+        const kandidaten = [50, 60, 70, 80, 90, 100].filter(v => v <= max && v > totaal);
+        return kandidaten[0] || max;
+    }
+
+    const kandidaten = [100, 120, 140, 150, 160, 170, 180, 190, 200, 500]
+        .filter(v => v <= max && v > totaal);
+
+    return kandidaten[0] || max;
+}
+
+      function maakBetaalCombinatie(bedrag) {
+    const vind = (waarde) => moneyConfig.find(u => Math.abs(u.value - waarde) < 0.001);
+
+    const vasteCombinaties = {
+        10: [10],
+        20: Math.random() < 0.5 ? [20] : [10, 10],
+        30: [20, 10],
+        40: [20, 20],
+        50: Math.random() < 0.5 ? [50] : [20, 20, 10],
+        60: [50, 10],
+        70: [50, 20],
+        80: [50, 20, 10],
+        90: [50, 20, 20],
+        100: Math.random() < 0.5 ? [100] : [50, 50],
+        120: [100, 20],
+        140: [100, 20, 20],
+        150: [100, 50],
+        160: [100, 50, 10],
+        170: [100, 50, 20],
+        180: [100, 50, 20, 10],
+        190: [100, 50, 20, 20],
+        200: Math.random() < 0.5 ? [200] : [100, 100],
+    };
+
+    if (vasteCombinaties[bedrag]) {
+        return vasteCombinaties[bedrag]
+            .map(v => vind(v))
+            .filter(Boolean);
+    }
+
+    let rest = bedrag;
+    const combo = [];
+    const biljetten = moneyConfig
+        .filter(u => u.value <= bedrag)
+        .filter(u => u.value >= 10)
+        .sort((a, b) => b.value - a.value);
+
+    for (const b of biljetten) {
+        while (rest >= b.value - 0.001) {
+            combo.push(b);
+            rest = rondBedrag(rest - b.value);
+        }
+    }
+
+    return combo.length ? combo : [];
+}
+        const gewenstAantal = Math.max(1, Number(nItems) || 1);
+        const gekozen = kiesExactAantalItems(winkelLijst, max, gewenstAantal);
+
+       let items = [...gekozen.items];
+const gebruikteImgsLokaal = new Set(items.map(i => i.img));
+
+const reservePool = [...maakAangepastePrijzenVoorTerug(winkelLijst, max, gewenstAantal)]
+    .sort(() => Math.random() - 0.5);
+
+for (const reserve of reservePool) {
+    if (items.length >= gewenstAantal) break;
+    if (gebruikteImgsLokaal.has(reserve.img)) continue;
+
+    items.push({ ...reserve });
+    gebruikteImgsLokaal.add(reserve.img);
+}
+
+items = items.slice(0, gewenstAantal);
+
+const totaal = rondBedrag(
+    items.reduce((som, item) => som + item.prijs, 0)
+);
+        const betaalBedrag = bepaalNetBetaalBedrag(totaal, max);
+        const betaalCombinatie = maakBetaalCombinatie(betaalBedrag);
+        const wisselgeld = rondBedrag(betaalBedrag - totaal);
+
+        console.log('WINKEL_TERUG_TEST', {
+    nItems,
+    gewenstAantal,
+    itemsLength: items.length,
+    itemNamen: items.map(i => i.naam),
+    itemPrijzen: items.map(i => i.prijs),
+    totaal,
+    betaalBedrag,
+    betaalCombo: betaalCombinatie.map(m => m.value)
+});
 
         html += `${schattingRijTabel}<div class="oefening-kader-terug">
                     <table class="terug-tabel">
@@ -444,7 +657,11 @@ function voegKaderToe(sectieNode) {
                                     <div class="terug-invul-rij">€ <div class="terug-invul-lijn"></div></div>
                                 </td>
                                 <td class="terug-td-betaal">
-                                    <img src="assets/${betaalMunt.img}" class="betaal-biljet-img" style="--scale: ${betaalMunt.scale}">
+                                    <div class="betaal-combo">
+                                        ${betaalCombinatie.map(m => `
+                                            <img src="assets/${m.img}" class="betaal-biljet-img" style="--scale: ${m.scale}">
+                                        `).join('')}
+                                    </div>
                                 </td>
                                 <td class="terug-td-terug">
                                     <div class="terug-tabel-terug-lijn"></div>
