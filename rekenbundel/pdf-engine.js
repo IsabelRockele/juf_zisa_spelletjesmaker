@@ -97,7 +97,7 @@ const PdfEngine = (() => {
     return HULP_KAD_H + Math.max(0, schrijflijnenAantal - 2) * 8;
   }
 
-  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2) {
+  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder') {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
@@ -112,9 +112,16 @@ const PdfEngine = (() => {
       const kadEindX = ox + kadW;
 
       // Bereken centreX voor splitsbeen — moet vóór somMarge want doelGetal nodig
-      const delen   = oef.vraag.replace(' =', '').trim().split(' ');
-      const doelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
-      const doelGetal = parseInt(delen[doelIdx]) || 0;
+     const delen   = oef.vraag.replace(' =', '').trim().split(' ');
+const doelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
+const doelGetal = parseInt(delen[doelIdx]) || 0;
+
+// Alleen bij brugoefeningen: meer ruimte in de som
+const isBrugLayout = blokBrug !== 'zonder';
+const spatieVoorSplits = isBrugLayout ? '   ' : ' ';
+const somTekst = (delen.length >= 3)
+  ? `${delen[0]}${spatieVoorSplits}${delen[1]}${spatieVoorSplits}${delen[2]}${spatieVoorSplits}=`
+  : oef.vraag;
       const isHTE = doelGetal >= 100 && doelGetal % 100 !== 0 && doelGetal % 10 !== 0;
       const aantalTakken = isHTE ? 3 : 2;
       const beenSpanW = aantalTakken === 3 ? 8 : beenSpan;
@@ -129,7 +136,9 @@ const PdfEngine = (() => {
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(12);
       let xOff = somStartX;
-      for (let i = 0; i < doelIdx; i++) xOff += doc.getTextWidth(delen[i] + ' ');
+     for (let i = 0; i < doelIdx; i++) {
+  xOff += doc.getTextWidth(delen[i] + spatieVoorSplits);
+}
       const getalB  = doc.getTextWidth(delen[doelIdx] || '');
       const centreX = xOff + getalB / 2;
 
@@ -144,13 +153,13 @@ const PdfEngine = (() => {
       doc.setFontSize(12);
       doc.setTextColor(44, 62, 80);
       const somY = oy + 7;
-      doc.text(oef.vraag, somStartX, somY);
+      doc.text(somTekst, somStartX, somY);
 
       // Invulvakje — kleiner zodat er ruimte overblijft
       const vakY = oy + 2;
       const vakW = 10, vakH = 9;
-      const somBreedte = doc.getTextWidth(oef.vraag);
-      const vakX = somStartX + somBreedte + 2;
+      const somBreedte = doc.getTextWidth(somTekst);
+const vakX = somStartX + somBreedte + (isBrugLayout ? 4 : 2);
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(26, 58, 92);
       doc.setLineWidth(0.5);
@@ -1171,13 +1180,14 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
     const rijOef = blok.oefeningen.slice(rij * rijGrootte, (rij + 1) * rijGrootte);
     if (heeftHulp) {
       _tekenHulpRij(
-        rijOef,
-        heeftSplits,
-        heeftLijnen,
-        blok.bewerking,
-        blok.splitspositie || 'aftrekker',
-        schrijflijnenAantal
-      );
+  rijOef,
+  heeftSplits,
+  heeftLijnen,
+  blok.bewerking,
+  blok.splitspositie || 'aftrekker',
+  schrijflijnenAantal,
+  blok.brug || 'zonder'
+);
     } else {
       _tekenRij(rijOef, _kolommen);
     }
