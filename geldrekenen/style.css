@@ -818,7 +818,17 @@ hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
     display: block;
     margin: 0 auto;
 }
+.betaal-combo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+}
 
+.betaal-combo .betaal-biljet-img {
+    margin: 0;
+}
 .terug-tabel-bew-lijn,
 .terug-tabel-terug-lijn {
     border-bottom: 1.5px solid #222;
