@@ -29,11 +29,29 @@ const pdfEngine = (() => {
       format: "a4"
     });
     y = MARGIN_TOP;
+    drawFooter(); // Voeg deze regel toe
   }
 
   function addPage() {
     doc.addPage();
     y = MARGIN_TOP;
+    drawFooter(); // Voeg deze regel toe
+  }
+
+  function drawFooter() {
+    const footerText = "juf Zisa's spelgenerator - www.jufzisa.be";
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8); 
+    doc.setTextColor(160, 160, 160); // Subtiel grijs
+    
+    const tw = doc.getTextWidth(footerText);
+    const x = (PAGE_W - tw) / 2; // Exact in het midden
+    
+    // We plaatsen hem op 8mm van de onderkant. 
+    // Omdat MARGIN_BOTTOM 15mm is, blijft er 7mm witruimte boven de tekst.
+    doc.text(footerText, x, PAGE_H - 8); 
+    
+    doc.setTextColor(0, 0, 0); // Reset naar zwart voor de rest van de PDF
   }
 
   function ensureSpace(heightNeeded) {
