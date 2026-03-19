@@ -454,6 +454,10 @@ document.addEventListener("DOMContentLoaded", function() {
     doc.setFont("helvetica", "bold");
     doc.setTextColor(20, 20, 20);
     doc.text("Rekencirkels", pageW / 2, margin + 15, { align: "center" });
+    // Lijn onder titel
+    doc.setDrawColor(80, 80, 80);
+    doc.setLineWidth(0.5);
+    doc.line(margin, margin + 19, pageW - margin, margin + 19);
   }
 
   function downloadPDF() {
@@ -465,7 +469,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var margin = 14;
     var footerH = 12; // ruimte onderaan voor footer
     var headerH = 26; // naam + datum + titel
-    var labelH  = 9;
+    var labelH  = 11;
     var labelGap = 3;
     var rowGap   = 4;
 
@@ -510,10 +514,10 @@ document.addEventListener("DOMContentLoaded", function() {
       doc.setDrawColor(120, 120, 120);
       doc.setLineWidth(0.4);
       doc.roundedRect(margin, y, usableW, labelH, 2, 2, "FD");
-      doc.setFontSize(9.5);
+      doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(20, 20, 20);
-      doc.text(g.label, margin + 4, y + labelH * 0.68);
+      doc.text(g.label, margin + 4, y + labelH * 0.72);
       y += labelH + labelGap;
 
       // Rijen tekenen, met pagina-overgang per rij
@@ -533,10 +537,10 @@ document.addEventListener("DOMContentLoaded", function() {
           doc.setDrawColor(120, 120, 120);
           doc.setLineWidth(0.4);
           doc.roundedRect(margin, y, usableW, labelH, 2, 2, "FD");
-          doc.setFontSize(9.5);
+          doc.setFontSize(12);
           doc.setFont("helvetica", "bold");
           doc.setTextColor(20, 20, 20);
-          doc.text(g.label + " (vervolg)", margin + 4, y + labelH * 0.68);
+          doc.text(g.label + " (vervolg)", margin + 4, y + labelH * 0.72);
           y += labelH + labelGap;
         }
 
