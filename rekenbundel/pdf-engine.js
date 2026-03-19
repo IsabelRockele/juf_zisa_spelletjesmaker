@@ -27,11 +27,31 @@ const PdfEngine = (() => {
   let doc, y, _lampBase64Cache;
 
   /* ── Hulpfuncties ────────────────────────────────────────── */
-  function nieuweBladzijde() { doc.addPage(); y = MT; }
+  function nieuweBladzijde() { 
+    doc.addPage(); 
+    y = MT; 
+    _tekenVoettekst(); // Voeg deze regel toe
+  }
   function checkRuimte(nodig) { if (y + nodig > PH - MB) nieuweBladzijde(); }
   function lijn(x1, y1, x2, y2, rgb, dikte) {
     doc.setDrawColor(...rgb); doc.setLineWidth(dikte);
     doc.line(x1, y1, x2, y2);
+  }
+
+function _tekenVoettekst() {
+    const footerText = "juf Zisa's spelgenerator - www.jufzisa.be";
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(8);
+    doc.setTextColor(160, 160, 160); // Subtiel grijs
+    
+    const tw = doc.getTextWidth(footerText);
+    const x = (PW - tw) / 2; // PW is de constante voor Page Width (210mm)
+    
+    // We plaatsen hem op 8mm van de onderkant. 
+    // MB (Margin Bottom) is 15mm, dus er is 7mm witruimte boven de tekst.
+    doc.text(footerText, x, PH - 8); 
+    
+    doc.setTextColor(0, 0, 0); // Reset naar zwart
   }
 
   /* ── Koptekst ────────────────────────────────────────────── */
@@ -2348,6 +2368,7 @@ lijnKort(fx, formY);
     doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     _lampBase64Cache = null; // reset cache bij nieuwe PDF
     y = MT;
+_tekenVoettekst(); // Voeg deze regel toe
 
     _tekenKoptekst(titel || 'Rekenbundel');
     for (const blok of bundelData) {
