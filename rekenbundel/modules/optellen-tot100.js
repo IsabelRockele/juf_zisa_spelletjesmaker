@@ -45,7 +45,7 @@ const OptellenTot100 = (() => {
   function heeftBrug(a, b) {
     const eA = a % 10, eB = b % 10;
     const tA = Math.floor(a / 10), tB = Math.floor(b / 10);
-    return (eA + eB) >= 10 && (tA + tB) < 10;
+    return (eA + eB) > 10 && (tA + tB) < 10;
   }
 
   /* ── Genereer één getallenpaar ───────────────────────────── */
