@@ -13,7 +13,7 @@ const PdfEngine = (() => {
   const ZINRUIMTE  = 9;
   const RIJ_GAP    = 3;
   const NABLOK     = 10;
-  const VOOR_ZIN   = 7;  // extra ruimte boven opdrachtzin (na scheidingslijn)
+  const VOOR_ZIN   = 3;  // extra ruimte boven opdrachtzin (na scheidingslijn)
   const MIN_RUIMTE = ZINRUIMTE + RIJHOOGTE + RIJ_GAP + 4;
 
   // Herken-brug: één groot kader per oefening
@@ -48,9 +48,9 @@ const PdfEngine = (() => {
     doc.setFontSize(18);
     doc.setTextColor(26, 58, 92);
     doc.text(titel, PW / 2, y, { align: 'center' });
-    y += 9;
-    lijn(ML, y, ML + CW, y, [74,144,217], 1.0);
-    y += 11;
+y += 7;
+lijn(ML, y, ML + CW, y, [74,144,217], 1.0);
+y += 5;
   }
 
   /* ── Gewone oefeningen rij ───────────────────────────────── */
