@@ -707,7 +707,7 @@ drawLine(bewX + totaalLabelW, totaalY + WORKBOOK.underlineOffset, bewX + bewW - 
     const antwoordBox = kaderEl.querySelector(".antwoord-box");
 if (antwoordBox) {
   const ar = relRect(antwoordBox, kaderEl, scale, x, y0);
-  const arW = w - 8;
+ const arW = w * 0.55;   // smaller vak (55%)
   const arX = x + 4;
   doc.setDrawColor(183, 183, 201);
   drawRoundedRect(arX, ar.y, arW, ar.h, 2.2);
@@ -719,11 +719,6 @@ if (antwoordBox) {
   const textY = ar.y + 6.5;
   doc.text(txt, arX + 3, textY);
 
-  const lijn = antwoordBox.querySelector(".lijn-invul");
-  if (lijn) {
-    const txtW = textWidth(txt + " ", 11, "bold");
-    drawLine(arX + txtW + 3, textY + WORKBOOK.titleToFirstLine - 1.5, arX + arW - 3, textY + WORKBOOK.titleToFirstLine - 1.5, 0.4);
-  }
 }
   }
 
