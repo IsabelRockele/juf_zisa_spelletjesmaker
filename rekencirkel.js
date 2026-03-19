@@ -77,19 +77,42 @@ document.addEventListener("DOMContentLoaded", () => {
             if (isValidSet) {
                 // Maak de display-data op basis van het type oefening
                 let displayData;
-                if (typeOefening === 'zoekSom') {
-                    displayData = { center: '?', pairs: solutionPairs };
-                } else { // 'zoekTerm'
-                    const displayPairs = solutionPairs.map(pair => {
-                        // Verberg willekeurig de binnenste of buitenste term
-                        if (Math.random() > 0.5) {
-                            return { inner: '?', outer: pair.outer };
-                        } else {
-                            return { inner: pair.inner, outer: '?' };
-                        }
-                    });
-                    displayData = { center: centerNumber, pairs: displayPairs };
-                }
+               if (typeOefening === 'zoekSom') {
+    // Maximaal 2 stukken volledig tonen, de rest met 1 ontbrekende term
+    const visibleIndices = [];
+    while (visibleIndices.length < 2) {
+        const rnd = getRandomInt(0, NUM_SEGMENTS - 1);
+        if (!visibleIndices.includes(rnd)) {
+            visibleIndices.push(rnd);
+        }
+    }
+
+    const displayPairs = solutionPairs.map((pair, index) => {
+        // Deze 2 stukken blijven volledig zichtbaar
+        if (visibleIndices.includes(index)) {
+            return { inner: pair.inner, outer: pair.outer };
+        }
+
+        // In de andere stukken verbergen we 1 term
+        if (Math.random() > 0.5) {
+            return { inner: '?', outer: pair.outer };
+        } else {
+            return { inner: pair.inner, outer: '?' };
+        }
+    });
+
+    displayData = { center: '?', pairs: displayPairs };
+} else { // 'zoekTerm'
+    const displayPairs = solutionPairs.map(pair => {
+        // Verberg willekeurig de binnenste of buitenste term
+        if (Math.random() > 0.5) {
+            return { inner: '?', outer: pair.outer };
+        } else {
+            return { inner: pair.inner, outer: '?' };
+        }
+    });
+    displayData = { center: centerNumber, pairs: displayPairs };
+}
                 const solutionData = { center: centerNumber, pairs: solutionPairs };
                 return { display: displayData, solution: solutionData };
             }
