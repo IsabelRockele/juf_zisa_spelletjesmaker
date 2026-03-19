@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juf Zisa - Rekencirkel Generator Pro</title>
+  <link rel="stylesheet" href="rekencirkel.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ── PRO BANNER ─────────────────────────────────────────────────────── */
+    .pro-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      gap: 12px;
+    }
+    .pro-header span:first-child {
+      background: #f5c200;
+      color: #0b3060;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+    }
+    .pro-header a {
+      color: rgba(255,255,255,0.75);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .pro-header a:hover { color: #fff; }
+
+    /* ── KEUZEMENU PRO KNOP ──────────────────────────────────────────────── */
+    .keuzemenu-btn-pro {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #0b3060;
+      color: #fff !important;
+      border: none;
+      border-radius: var(--r-md);
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.17s ease;
+      box-shadow: 0 3px 10px rgba(10,40,90,0.22);
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    .keuzemenu-btn-pro:hover {
+      background: #082448;
+      box-shadow: 0 5px 16px rgba(10,40,90,0.30);
+      transform: translateY(-1px);
+    }
+
+    /* ── HELP KNOP (PRO STIJL) ───────────────────────────────────────────── */
+    .help-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      background: #1a8a4a;
+      color: #fff;
+      border: none;
+      border-radius: var(--r-md);
+      padding: 11px 18px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(20,120,60,0.25);
+      transition: all 0.17s ease;
+      box-sizing: border-box;
+      margin-top: 4px;
+    }
+    .help-btn:hover {
+      background: #147040;
+      box-shadow: 0 5px 16px rgba(20,120,60,0.32);
+      transform: translateY(-1px);
+    }
+
+    /* ── PRO ASIDE LAYOUT ────────────────────────────────────────────────── */
+    .pro-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .pro-body {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      flex: 1;
+      align-items: start;
+    }
+
+    .pro-aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: #fff;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      scrollbar-width: thin;
+      scrollbar-color: #c5d8ed transparent;
+    }
+    .pro-aside::-webkit-scrollbar { width: 5px; }
+    .pro-aside::-webkit-scrollbar-thumb { background: #c5d8ed; border-radius: 99px; }
+
+    .pro-brand {
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, #f8fbfe, #f2f7fc);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .pro-brand-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .pro-brand-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .pro-brand-text h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: -0.01em;
+    }
+
+    .pro-brand-text p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: var(--text-soft);
+    }
+
+    .pro-aside-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
+    /* Hergebruik panel-top-row maar dan in de aside */
+    .pro-aside .panel-top-row {
+      margin-bottom: 0;
+    }
+
+    /* ── PRO PREVIEW ZONE ────────────────────────────────────────────────── */
+    .pro-preview {
+      padding: 24px;
+      min-width: 0;
+    }
+
+    /* ── HELP MODAL (PRO STIJL via hidden class) ─────────────────────────── */
+    .help-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 30, 50, 0.45);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(2px);
+    }
+    .help-modal.hidden { display: none; }
+
+    .help-modal-box {
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(10, 30, 60, 0.22);
+      width: 100%;
+      max-width: 580px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .help-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px 14px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(to bottom, #f8fbfe, #f3f7fc);
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .help-sluit {
+      background: #f0f4f8;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-soft);
+    }
+    .help-sluit:hover { background: #e4edf5; color: var(--text); }
+
+    .help-modal-body {
+      padding: 18px 22px;
+      overflow-y: auto;
+      flex: 1;
+      scrollbar-width: thin;
+      scrollbar-color: #c5d8ed transparent;
+    }
+
+    .help-sectie {
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #eef3f8;
+    }
+    .help-sectie:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+    .help-sectie-titel {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .help-sectie p,
+    .help-sectie ul {
+      margin: 0;
+      font-size: 0.88rem;
+      color: var(--text-soft);
+      line-height: 1.6;
+    }
+    .help-sectie ul { padding-left: 18px; }
+    .help-sectie ul li { margin-bottom: 4px; }
+
+    /* Exporteren kaart in aside */
+    .export-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .export-card-header {
+      padding: 12px 16px 10px;
+      background: linear-gradient(to bottom, #f8fbfe, #f3f8fc);
+      border-bottom: 1px solid #e6eef5;
+      font-weight: 700;
+      font-size: 0.92rem;
+      color: #1a3352;
+    }
+    .export-card-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .download-btn, .regen-all-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      border: none;
+      border-radius: var(--r-md);
+      padding: 11px 16px;
+      font: inherit;
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.17s ease;
+      box-sizing: border-box;
+    }
+    .download-btn {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(11,79,153,0.22);
+    }
+    .download-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+    .download-btn.secondary {
+      background: #fff;
+      color: var(--primary);
+      border: 1.5px solid #c5d8ed;
+      box-shadow: none;
+    }
+    .download-btn.secondary:hover { background: var(--primary-soft); }
+
+    .regen-all-btn {
+      background: #f5f5f5;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .regen-all-btn:hover { background: #eaeaea; }
+
+    @media (max-width: 860px) {
+      .pro-body { grid-template-columns: 1fr; }
+      .pro-aside { position: static; height: auto; }
+      .pro-preview { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="pro-shell">
+
+    <!-- PRO BANNER -->
+    <div class="pro-header no-print">
+      <span>⭐ PRO</span>
+      <span>Rekencirkel Generator — Juf Zisa PRO</span>
+      <a href="../app.html">← Terug naar menu</a>
+    </div>
+
+    <div class="pro-body">
+
+      <!-- ASIDE: instellingen -->
+      <aside class="pro-aside no-print">
+
+        <div class="pro-brand">
+          <a href="../app.html" class="keuzemenu-btn-pro">← Terug naar menu</a>
+          <div class="pro-brand-inner">
+            <div class="pro-brand-icon">⭕</div>
+            <div class="pro-brand-text">
+              <h1>Rekencirkel Generator</h1>
+              <p>Juf Zisa PRO Edition</p>
+            </div>
+          </div>
+          <button class="help-btn" onclick="document.getElementById('help-modal').classList.remove('hidden')">
+            ❓ Hoe werkt de Rekencirkel Generator?
+          </button>
+        </div>
+
+        <div class="pro-aside-body">
+
+          <!-- Cirkels header -->
+          <div class="panel-top-row">
+            <h2>Cirkels <span class="count-badge" id="circleCount">1</span></h2>
+            <button id="addCircleBtn" type="button" class="add-btn">+ Cirkel toevoegen</button>
+          </div>
+
+          <!-- Cirkel configuratie kaartjes -->
+          <div id="circleList" class="circle-list"></div>
+
+          <!-- Foutmelding -->
+          <div id="meldingContainer" class="message-box" style="display:none;"></div>
+
+        </div>
+      </aside>
+
+      <!-- PREVIEW -->
+      <section class="pro-preview">
+        <div class="preview-card">
+
+          <div class="preview-card-header">
+            <div>
+              <h2>Voorbeeld</h2>
+              <p>Live weergave van het werkblad.</p>
+            </div>
+            <div class="preview-actions">
+              <button id="genereerBtn" type="button" class="secondary-btn">
+                🔄 Hergeneren
+              </button>
+              <button id="downloadPngBtn" type="button" class="secondary-btn">↓ PNG</button>
+              <button id="downloadPdfBtn" type="button" class="primary-btn">↓ PDF</button>
+            </div>
+          </div>
+
+          <div class="preview-card-body">
+            <div class="canvas-frame">
+              <canvas id="mainCanvas"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- HELP MODAL (pro stijl) -->
+  <div id="help-modal" class="help-modal hidden">
+    <div class="help-modal-box">
+      <div class="help-modal-header">
+        <span>⭕ Hoe werkt de Rekencirkel Generator?</span>
+        <button onclick="document.getElementById('help-modal').classList.add('hidden')" class="help-sluit">✕</button>
+      </div>
+      <div class="help-modal-body">
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">📐 Wat is een rekencirkel?</div>
+          <p>Een rekencirkel bestaat uit drie ringen. In het <strong>midden</strong> staat een getal of teken. De <strong>binnenste ring</strong> en <strong>buitenste ring</strong> bevatten getallen die samen de oefening vormen. Lege invulhokjes vult de leerling zelf in.</p>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">➕ Optellen – zoek de som</div>
+          <p>Het middenvak is leeg: de leerling berekent de som van de twee termen in elk segment. Twee segmenten zijn volledig ingevuld als voorbeeld, bij de rest ontbreekt één term.</p>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">➕ Optellen – zoek een term</div>
+          <p>De som staat in het midden. Per segment is één van de twee termen verborgen. De leerling zoekt de ontbrekende term.</p>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">✖️ Maaltafel</div>
+          <p>In het midden staat het tafelgetal (bv. ×5). De binnenste ring toont het getal om mee te vermenigvuldigen, de buitenste ring de uitkomst. Per segment is altijd één van de twee verborgen.</p>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">⚙️ Instellingen per cirkel</div>
+          <ul>
+            <li><strong>Type:</strong> kies optellen (zoek de som of zoek een term) of maaltafel.</li>
+            <li><strong>Niveau:</strong> tot 10, 20, 100 of 1000 – alleen voor optelcirkels.</li>
+            <li><strong>Brug:</strong> zonder tiental-overschrijding, met overschrijding, of beide.</li>
+            <li><strong>Maaltafel:</strong> kies tafel van 0 t.e.m. 10.</li>
+          </ul>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">🔄 Knoppen per cirkel</div>
+          <ul>
+            <li><strong>↺ Hergeneer:</strong> genereert nieuwe getallen voor die ene cirkel.</li>
+            <li><strong>🗑 Verwijder:</strong> haalt de cirkel van het werkblad.</li>
+            <li><strong>Alles hergeneren:</strong> genereert alle cirkels opnieuw.</li>
+          </ul>
+        </div>
+
+        <div class="help-sectie">
+          <div class="help-sectie-titel">📄 Exporteren</div>
+          <ul>
+            <li><strong>Downloaden als PDF</strong> — Nette PDF op A4, zwart-wit, met naam- en datumlijn. Bij meer dan 4 cirkels volgt automatisch een tweede pagina.</li>
+            <li><strong>Downloaden als PNG</strong> — Hoge resolutie afbeelding voor digitaal gebruik.</li>
+            <li>Maximum <strong>8 cirkels</strong> per werkblad.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="rekencirkel.js"></script>
+  <script src="../device-id.js"></script>
+  <script src="../guard.js"></script>
+</body>
+</html>
