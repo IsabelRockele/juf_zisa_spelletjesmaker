@@ -2455,7 +2455,7 @@ lijnKort(fx, formY);
   /* ── Tafels inzicht blok tekenen ────────────────────────── */
   /* ── Canvas-helper: emoji → PNG data-URL (gecached) ──────── */
   const _emojiCache = {};
-  function _emojiPng(emoji, px = 32) {
+  function _emojiPng(emoji, px = 48) {
     const key = emoji + px;
     if (_emojiCache[key]) return _emojiCache[key];
     const canvas = document.createElement('canvas');
@@ -2497,12 +2497,18 @@ lijnKort(fx, formY);
 
     function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
 
-    function vakjeAfm(groepGrootte, vakjeB) {
-      const cols  = emoKols(groepGrootte);
-      const rows  = Math.ceil(groepGrootte / cols);
-      const emoMm = Math.min((vakjeB - 3) / cols, 5.5);
-      return { cols, rows, emoMm, h: Math.max(10, 2.5 + rows * emoMm + (rows - 1) * 1 + 2.5) };
-    }
+   function vakjeAfm(groepGrootte, vakjeB) {
+  const cols   = emoKols(groepGrootte);
+  const rows   = Math.ceil(groepGrootte / cols);
+  const emoGap = 1;
+  const emoMm  = Math.min((vakjeB - 3 - (cols - 1) * emoGap) / cols, 7.2);
+  return {
+    cols,
+    rows,
+    emoMm,
+    h: Math.max(10, 2.5 + rows * emoMm + (rows - 1) * emoGap + 2.5)
+  };
+}
 
     function _oefHoogte(oef) {
       if (oef.type === 'delen-aftrekking') {
@@ -2522,7 +2528,7 @@ lijnKort(fx, formY);
         return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
       }
       const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
-      const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
+      const vakjeB = Math.min(24, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
       const { h: vH } = vakjeAfm(oef.groepGrootte, vakjeB);
       const gRijen   = Math.ceil(oef.groepen / MAX_GPER_RIJ);
       const linksH   = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
