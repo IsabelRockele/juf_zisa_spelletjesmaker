@@ -728,6 +728,7 @@ header .badge {
   padding: 10px 10px 14px 10px;
   background: #ffffff;
   position: relative;
+  min-height: 128px;
 }
 .oefening-hulp.aftrektal-hulp { padding-left: 30px; }
 
@@ -764,16 +765,21 @@ header .badge {
   border-radius: 4px; background: white;
 }
 .hulp-schrijflijnen {
+  position: absolute;
+  left: 128px;
+  right: 14px;
+  top: 54px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding-top: 18px;
-  padding-bottom: 4px;
-  width: 100%;
+  gap: 4px;
+  padding: 0;
 }
+
 .hulp-schrijflijnen .schrijflijn {
   height: 0;
+  width: 100%;
   border-bottom: 1.5px solid #B0C4D8;
+  margin-bottom: 12px;
 }
 .oefening-hulp .btn-del-oef {
   position: absolute !important;
