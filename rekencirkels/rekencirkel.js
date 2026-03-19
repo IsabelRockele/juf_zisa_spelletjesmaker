@@ -759,8 +759,8 @@ document.addEventListener("DOMContentLoaded", function() {
   function updateAddBtn() {
     var btn = document.getElementById("addCircleBtn");
     if (!btn) return;
-    btn.disabled = circleConfigs.length >= 6;
-    btn.textContent = circleConfigs.length >= 6 ? "Maximum bereikt (6)" : "+ Cirkel toevoegen";
+    btn.disabled = circleConfigs.length >= 8;
+    btn.textContent = circleConfigs.length >= 8 ? "Maximum bereikt (8)" : "+ Cirkel toevoegen";
   }
 
   function updateNumGridDisplay() {
@@ -769,7 +769,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function addCircle() {
-    if (circleConfigs.length >= 6) return;
+    if (circleConfigs.length >= 8) return;
     var cfg = { type: "zoekSom", niveau: 100, brug: "beide" };
     circleConfigs.push(cfg);
     generatedData.push(generateCircle(cfg));
@@ -794,6 +794,15 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("genereerBtn").addEventListener("click", regenerateAll);
     document.getElementById("downloadPngBtn").addEventListener("click", downloadPNG);
     document.getElementById("downloadPdfBtn").addEventListener("click", downloadPDF);
+    document.getElementById("infoBtn").addEventListener("click", function() {
+      document.getElementById("infoModal").style.display = "flex";
+    });
+    document.getElementById("infoModalClose").addEventListener("click", function() {
+      document.getElementById("infoModal").style.display = "none";
+    });
+    document.getElementById("infoModal").addEventListener("click", function(e) {
+      if (e.target === this) this.style.display = "none";
+    });
 
     renderCircleMenu();
     renderPreviewCanvas();
