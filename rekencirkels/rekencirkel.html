@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekencirkel Generator</title>
+  <link rel="stylesheet" href="rekencirkel.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="app-header-left">
+        <button type="button" class="back-btn" onclick="window.location.href='index.html'">
+          ← Keuzemenu
+        </button>
+      </div>
+
+      <div class="app-header-center">
+        <h1>Rekencirkel Generator</h1>
+        <p>Stel per cirkel het type en de moeilijkheidsgraad in.</p>
+      </div>
+
+      <div class="app-header-right">
+        <button id="genereerBtn" type="button" class="primary-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:7px;vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Alles hergeneren
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+
+      <!-- LINKERKOLOM: instellingen -->
+      <aside class="settings-panel">
+
+        <div class="panel-top-row">
+          <h2>Cirkels <span class="count-badge" id="circleCount">1</span></h2>
+          <button id="addCircleBtn" type="button" class="add-btn">+ Cirkel toevoegen</button>
+        </div>
+
+        <div id="circleList" class="circle-list"></div>
+
+        <div id="meldingContainer" class="message-box" style="display:none;"></div>
+
+      </aside>
+
+      <!-- RECHTERKOLOM: preview -->
+      <section class="preview-panel">
+        <div class="preview-card">
+
+          <div class="preview-card-header">
+            <div>
+              <h2>Voorbeeld</h2>
+              <p>Live weergave van het werkblad.</p>
+            </div>
+            <div class="preview-actions">
+              <button id="downloadPngBtn" type="button" class="secondary-btn">↓ PNG</button>
+              <button id="downloadPdfBtn" type="button" class="primary-btn">↓ PDF</button>
+            </div>
+          </div>
+
+          <div class="preview-card-body">
+            <div class="canvas-frame">
+              <canvas id="mainCanvas"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="rekencirkel.js"></script>
+</body>
+</html>
