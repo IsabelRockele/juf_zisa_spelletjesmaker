@@ -101,7 +101,7 @@ const PdfEngine = (() => {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
-    const beenSpan = 6;
+    const beenSpan = 5;
     const vakjW = 9, vakjH = 7;
     const kadH   = _hulpKadH(schrijflijnenAantal);
     const rijH   = kadH + 6;
@@ -117,7 +117,7 @@ const PdfEngine = (() => {
       const doelGetal = parseInt(delen[doelIdx]) || 0;
       const isHTE = doelGetal >= 100 && doelGetal % 100 !== 0 && doelGetal % 10 !== 0;
       const aantalTakken = isHTE ? 3 : 2;
-      const beenSpanW = aantalTakken === 3 ? 10 : beenSpan;
+      const beenSpanW = aantalTakken === 3 ? 8 : beenSpan;
 
       // Bij aftrektal: som naar rechts zodat linkervakje splitsbeen in kader valt
       // Bij 3 takken is de boom breder → meer marge nodig
@@ -158,13 +158,11 @@ const PdfEngine = (() => {
 
       // Schrijflijnen — onder splitsbenen of antwoordvak
       if (heeftLijnen) {
-        const lX1 = ox + marge;
-        const lX2 = ox + kadW - marge - 2;
+        const lX1 = centreX + 18;
+        const lX2 = ox + kadW - 6;
         // beenZone: top(somY+3) + beenH(6) + gap(1) + vakjH(7) = 17mm na somY
-        const lY1 = heeftSplits
-          ? somY + 3 + 6 + 1 + 7 + 10   // onder splitsbeen-vakjes + 10mm spatie
-          : vakY + vakH + 7;              // onder antwoordvak + 7mm
-        const lijnGap = 8;
+        const lY1 = vakY + vakH + 10;
+        const lijnGap = 12;
         if (lX2 > lX1 + 5) {
           doc.setDrawColor(160, 185, 210);
           doc.setLineWidth(0.4);
