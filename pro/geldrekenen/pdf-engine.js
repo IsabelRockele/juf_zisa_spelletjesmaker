@@ -536,12 +536,33 @@ if (shelfDataUrl) {
   drawLine(cX[1] + 11, euroTextY + 0.8, cX[1] + 11 + cW[1] * 0.55, euroTextY + 0.8, 0.45);
 }
 
-  const betaalImg = kaderEl.querySelector(".betaal-biljet-img");
-  if (betaalImg) {
-    const maxH = 16, ratio = betaalImg.naturalWidth / (betaalImg.naturalHeight || 2);
-    const dW = maxH * (ratio || 2);
-    await drawImageFromElement(betaalImg, cX[2] + (cW[2] - dW) / 2, bodyY + (bodyH - maxH) / 2, dW, maxH);
+ const betaalImgs = [...kaderEl.querySelectorAll(".betaal-biljet-img")];
+
+if (betaalImgs.length) {
+  const celX = cX[2];
+  const celY = bodyY;
+  const celW = cW[2];
+  const celH = bodyH;
+
+  const gap = 2;
+  const maxBiljetH = 18;
+
+  const totaalH = betaalImgs.length * maxBiljetH + (betaalImgs.length - 1) * gap;
+  let startY = celY + (celH - totaalH) / 2;
+
+  for (const betaalImg of betaalImgs) {
+    const ratio = (betaalImg.naturalWidth || 40) / (betaalImg.naturalHeight || 20);
+    const dH = maxBiljetH;
+    const dW = dH * ratio;
+
+    const drawX = celX + (celW - dW) / 2;
+    const drawY = startY;
+
+    await drawImageFromElement(betaalImg, drawX, drawY, dW, dH);
+
+    startY += dH + gap;
   }
+}
 
   {
   const lx = cX[3] + cW[3] * 0.07;
