@@ -30,7 +30,7 @@ const Tafels = (() => {
     const pool = [];
 
     for (const tafel of tafels) {
-      for (let multiplier = 1; multiplier <= tafelMax; multiplier++) {
+  for (let multiplier = 0; multiplier <= tafelMax; multiplier++) {
         const product = tafel * multiplier;
 
         // Bepaal welke volgorden we genereren
