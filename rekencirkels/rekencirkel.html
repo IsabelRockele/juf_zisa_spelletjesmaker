@@ -23,7 +23,11 @@
         <p>Stel per cirkel het type en de moeilijkheidsgraad in.</p>
       </div>
 
-      <div class="app-header-right">
+      <div class="app-header-right" style="display:flex;gap:10px;align-items:center;">
+        <button id="infoBtn" type="button" class="info-btn" title="Hoe werkt dit?">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Info
+        </button>
         <button id="genereerBtn" type="button" class="primary-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:7px;vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           Alles hergeneren
@@ -72,6 +76,68 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- INFO MODAL -->
+  <div id="infoModal" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>Hoe werkt de Rekencirkel Generator?</h2>
+        <button id="infoModalClose" class="modal-close-btn" title="Sluiten">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+
+        <div class="info-section">
+          <h3>📐 Wat is een rekencirkel?</h3>
+          <p>Een rekencirkel bestaat uit drie ringen. In het <strong>midden</strong> staat een getal of teken. De <strong>binnenste ring</strong> en <strong>buitenste ring</strong> bevatten getallen die samen de oefening vormen. Lege vakjes (invulhokjes) vult de leerling zelf in.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>➕ Optellen – zoek de som</h3>
+          <p>Het middenvak is leeg: de leerling berekent de som van de twee termen in elk segment. Twee segmenten zijn volledig ingevuld als voorbeeld, bij de rest ontbreekt één term.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>➕ Optellen – zoek een term</h3>
+          <p>De som staat in het midden. Per segment is één van de twee termen verborgen. De leerling zoekt de ontbrekende term.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>✖️ Maaltafel</h3>
+          <p>In het midden staat het tafelgetal (bv. ×5). De binnenste ring toont het getal om mee te vermenigvuldigen, de buitenste ring de uitkomst. Per segment is altijd één van de twee verborgen.</p>
+        </div>
+
+        <div class="info-section">
+          <h3>⚙️ Instellingen per cirkel</h3>
+          <ul>
+            <li><strong>Type:</strong> kies optellen (zoek de som of zoek een term) of maaltafel.</li>
+            <li><strong>Niveau:</strong> tot 10, 20, 100 of 1000 – alleen voor optelcirkels.</li>
+            <li><strong>Brug:</strong> zonder tiental-overschrijding, met overschrijding, of beide.</li>
+            <li><strong>Maaltafel:</strong> kies tafel van 0 t.e.m. 10.</li>
+          </ul>
+        </div>
+
+        <div class="info-section">
+          <h3>🔄 Knoppen per cirkel</h3>
+          <ul>
+            <li><strong>↺ Hergeneer:</strong> genereert nieuwe getallen voor die ene cirkel.</li>
+            <li><strong>🗑 Verwijder:</strong> haalt de cirkel van het werkblad.</li>
+            <li><strong>Alles hergeneren:</strong> genereert alle cirkels opnieuw.</li>
+          </ul>
+        </div>
+
+        <div class="info-section">
+          <h3>📄 Afdrukken</h3>
+          <p>Download als <strong>PDF</strong> voor afdrukken (zwart-wit, A4, met naam- en datumlijn). Download als <strong>PNG</strong> voor digitaal gebruik. Bij meer dan 4 cirkels wordt automatisch een tweede pagina aangemaakt. Maximum <strong>8 cirkels</strong> per werkblad.</p>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button id="infoModalClose2" class="primary-btn" onclick="document.getElementById('infoModal').style.display='none'">Sluiten</button>
+      </div>
+    </div>
   </div>
 
   <script src="rekencirkel.js"></script>
