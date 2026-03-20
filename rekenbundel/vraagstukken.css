@@ -116,6 +116,7 @@
   border-radius: 10px;
   padding: 14px;
   box-shadow: 0 2px 8px rgba(21,101,192,0.07);
+  max-width: 520px;
 }
 .vs-kaart-tekst {
   font-size: 14px;
@@ -303,4 +304,189 @@
   border-radius: 6px;
   border: 1.5px solid #ddd;
   font-size: 13px;
+}
+
+/* ── THEMA CHIPS ─────────────────────────────────────────────── */
+.vs-thema-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.vs-thema-chip {
+  padding: 4px 10px;
+  border-radius: 16px;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.vs-thema-chip:hover { border-color: #1565c0; color: #1565c0; }
+.vs-thema-chip.actief { background: #1565c0; color: #fff; border-color: #1565c0; }
+
+/* ── ROOSTER SCHEMA ──────────────────────────────────────────── */
+.vs-schema-zone {
+  display: flex;
+  gap: 16px;
+  margin: 12px 0 0 0;
+  align-items: flex-start;
+  max-width: 500px; /* niet te breed */
+}
+.vs-schema-links {
+  flex: 0 0 auto;
+}
+.vs-schema-rechts {
+  flex: 0 0 180px; /* vaste breedte voor bewerking */
+}
+.vs-rooster {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #aaa;
+}
+.vs-rooster-rij {
+  display: flex;
+}
+.vs-rooster-cel {
+  width: 16px;
+  height: 16px;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Bewerking blok */
+.vs-bewerking-blok {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.vs-bew-label {
+  font-size: 12px;
+  color: #555;
+  font-weight: 600;
+  margin-bottom: 16px; /* witruimte onder label */
+}
+.vs-bew-stap {
+  font-size: 12px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+  margin-top: 12px;
+}
+.vs-bew-lijn {
+  width: 100%;
+  border-bottom: 1px solid #999;
+  margin-bottom: 24px; /* ruimere schrijfruimte voor kinderen */
+}
+
+/* Antwoordzin */
+.vs-antwoordzin-rij {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 16px; /* meer witruimte boven antwoordzin */
+  max-width: 500px;
+}
+.vs-antw-label {
+  font-size: 12px;
+  color: #555;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.vs-antw-tekst {
+  font-size: 13px;
+  color: #333;
+  flex: 1;
+}
+.vs-antw-lijn {
+  flex: 1;
+  border-bottom: 1px solid #999;
+}
+
+/* ── CIJFER SCHEMA ───────────────────────────────────────────── */
+.vs-cijfer-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #333;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-style: italic;
+}
+.vs-cijfer-stappen {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.vs-cijfer-schema-blok {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.vs-cs-staplabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+.vs-cs-grid {
+  display: grid;
+  gap: 0;
+  border: 1px solid #999;
+  border-collapse: collapse;
+}
+/* Header cellen */
+.vs-cs-header {
+  width: 32px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
+  box-sizing: border-box;
+}
+.vs-cs-header:last-child { border-right: none; }
+
+/* Gewone cellen */
+.vs-cs-cel {
+  width: 32px;
+  height: 28px;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  background: #fff;
+  box-sizing: border-box;
+}
+.vs-cs-cel:last-child { border-right: none; }
+.vs-cs-grijs { background: #d8d8d8; }
+.vs-cs-dik-onder { border-bottom: 2.5px solid #444 !important; }
+
+/* Komma kolom — smal maar MET lijntjes */
+.vs-cs-komma-header {
+  width: 14px;
+  min-width: 14px;
+  height: 28px;
+  background: #aaa;
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+.vs-cs-komma-cel {
+  width: 14px;
+  min-width: 14px;
+  height: 28px;
+  background: #e8e8e8;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  box-sizing: border-box;
+}
+.vs-cs-komma-cel.vs-cs-dik-onder {
+  border-bottom: 2.5px solid #444 !important;
 }
