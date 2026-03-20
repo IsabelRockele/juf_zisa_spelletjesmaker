@@ -25,11 +25,11 @@ window.VraagstukkenModule = (() => {
   // ── LIMIET BADGE UPDATEN ─────────────────────────────────────
   async function updateLimietBadge() {
     const teller = await haalTellerOp();
-    const resterend = Math.max(0, 10 - teller);
+    const resterend = Math.max(0, 30 - teller);
     const badge = document.getElementById('vs-limiet-badge');
     if (!badge) return;
-    badge.textContent = `${resterend}/10 vandaag`;
-    badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 3 ? 'weinig' : '');
+    badge.textContent = `${resterend}/30 vandaag`;
+    badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 5 ? 'weinig' : '');
   }
 
   // ── INSTELLINGEN UITLEZEN ────────────────────────────────────
@@ -116,8 +116,16 @@ window.VraagstukkenModule = (() => {
 ---
 [lege antwoordzin, schrijf enkel een lege lijn als: "_______________"]`;
 
+    // Willekeurig variatie-element om herhaling te vermijden
+    const namen = ['Emma','Luca','Sofie','Noah','Julie','Finn','Noor','Lars','Amber','Axel','Fien','Remi','Elisa','Wout','Hana','Bo','Tijs','Lore','Senne','Nathalie'];
+    const settings = ['in de tuin','op school','op de markt','in het park','thuis','in de winkel','op de boerderij','in het bos','aan de zee','op de speelplaats','in de keuken','bij de bakker','in het zwembad','op de camping'];
+    const r1 = namen[Math.floor(Math.random() * namen.length)];
+    const r2 = namen.filter(n => n !== r1)[Math.floor(Math.random() * (namen.length - 1))];
+    const setting = settings[Math.floor(Math.random() * settings.length)];
+    const variatieInstructie = `- Gebruik de namen "${r1}" en/of "${r2}" en de setting "${setting}" als inspiratie voor een UNIEK verhaal. Kies zelf een origineel voorwerp of situatie — geen ballonnen, geen eieren tenzij het thema dat vraagt.`;
+
     const aantalInstructie = aantal > 1
-      ? `Genereer ${aantal} verschillende vraagstukken. Geef elk vraagstuk een nummer (1., 2., ...).`
+      ? `Genereer ${aantal} VERSCHILLENDE vraagstukken. Elk vraagstuk heeft een ANDER verhaal, andere personages en andere situatie. Geef elk vraagstuk een nummer (1., 2., ...).`
       : 'Genereer 1 vraagstuk.';
 
     return `Je bent een Vlaamse onderwijsassistent die wiskundige vraagstukken maakt voor kinderen.
@@ -131,9 +139,11 @@ Vereisten:
 - Aantal getallen: ${aantalGetallenLabel}
 ${themaInstructie}
 ${berekeningInstructie ? berekeningInstructie : ''}
+${variatieInstructie}
 - Schrijf in eenvoudig, warm Nederlands (Vlaams) passend bij het leerjaar
 - Het vraagstuk bevat 2-3 zinnen maximum
 - Vermeld duidelijk de getallen en wat er berekend moet worden
+- Elk vraagstuk moet een ANDER verhaal hebben dan vorige vraagstukken
 - ${antwoordzinInstructie}
 
 Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.`;
@@ -165,8 +175,8 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     const inst = leesInstellingen();
     const aantalNodig = inst.aantalBulk;
 
-    if (teller + aantalNodig > 10) {
-      const resterend = Math.max(0, 10 - teller);
+    if (teller + aantalNodig > 30) {
+      const resterend = Math.max(0, 30 - teller);
       toonMelding(
         resterend === 0
           ? '⏰ Je hebt je dagelijks limiet van 10 vraagstukken bereikt. Morgen kan je opnieuw!'
