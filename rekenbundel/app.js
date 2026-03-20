@@ -45,7 +45,14 @@ const App = (() => {
     if (tabInzicht)      tabInzicht.style.display      = isInzicht       ? 'block' : 'none';
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
-    if (isTafels || isInzicht || isCijferen || isVraagstukken) return;
+
+    // Vraagstukken-tab: initialiseer module en toon schema-voorbeeld
+    if (isVraagstukken) {
+      if (window.VraagstukkenModule) {
+        VraagstukkenModule.init();
+      }
+      return;
+    }
 
     // Sectietitel
     const titel = document.getElementById('sectie-titel');
@@ -1228,6 +1235,13 @@ const App = (() => {
     toonToast(`✅ Cijferblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
   }
 
+  /* ── Vraagstukken: blok toevoegen vanuit VraagstukkenModule ── */
+  function voegVraagstukBlokToe(blok) {
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast('✅ Vraagstuk toegevoegd aan bundel!', '#27AE60');
+  }
+
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
@@ -1244,6 +1258,7 @@ const App = (() => {
     toggleCijferTafel, selecteerCijferVermPositie,
     selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
     voegCijferenBlokToe,
+    voegVraagstukBlokToe,
   };
 })();
 
