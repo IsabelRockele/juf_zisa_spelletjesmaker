@@ -43,6 +43,10 @@ const Preview = (() => {
     const isTafelsInzicht = blok.bewerking === 'tafels-inzicht';
     const isGetallenlijn  = blok.bewerking === 'tafels-getallenlijn';
     const isCijferen      = blok.bewerking === 'cijferen';
+    const isVraagstuk     = blok.bewerking === 'vraagstukken';
+
+    // ── Vraagstuk: eigen renderer ────────────────────────────
+    if (isVraagstuk) return _maakVraagstukElement(blok);
     const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
     const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('compenseren');
     const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
@@ -1218,6 +1222,138 @@ const Preview = (() => {
           </table>
         </div>
       </div>`;
+  }
+
+  /* ── Vraagstuk blok renderer ─────────────────────────────── */
+  function _maakVraagstukElement(blok) {
+    const inst = blok.inst || blok.config || {};
+    const metRooster = inst.schema?.includes('rooster');
+    const metCijfer  = inst.schema?.includes('cijfer');
+    const drieGetallen = inst.aantalGetallen === '3' || inst.aantalGetallen === 'gemengd';
+
+    // Rooster HTML
+    let roosterRijen = '';
+    for (let r = 0; r < 8; r++) {
+      let cellen = '';
+      for (let k = 0; k < 12; k++) cellen += '<div class="vs-rooster-cel"></div>';
+      roosterRijen += `<div class="vs-rooster-rij">${cellen}</div>`;
+    }
+
+    // Bewerking HTML
+    let bewerkingHTML = '';
+    if (metRooster || metCijfer) {
+      if (drieGetallen) {
+        bewerkingHTML = `<div class="vs-bewerking-blok">
+          <div class="vs-bew-label">Bewerking:</div>
+          <div class="vs-bew-stap">STAP 1</div><div class="vs-bew-lijn"></div>
+          <div class="vs-bew-stap">STAP 2</div><div class="vs-bew-lijn"></div>
+        </div>`;
+      } else {
+        bewerkingHTML = `<div class="vs-bewerking-blok">
+          <div class="vs-bew-label">Bewerking:</div>
+          <div class="vs-bew-lijn"></div><div class="vs-bew-lijn"></div><div class="vs-bew-lijn"></div>
+        </div>`;
+      }
+    }
+
+    // Cijferschema HTML — kolommen afleiden van niveau
+    function bouwCijferSchemaPreview(headers, stap) {
+      const kleuren = {
+        'TD':'#c8e6c9','D':'#ffcdd2','H':'#bbdefb','T':'#81c784','E':'#FFC107',
+        ',':'#bbb','t':'#fff9c4','h':'#fff9c4','d':'#fff9c4'
+      };
+      const tekstKleuren = {
+        'TD':'#1b5e20','D':'#b71c1c','H':'#0d47a1','T':'#1b5e20','E':'#e65100',
+        ',':'#fff','t':'#f57f17','h':'#f57f17','d':'#f57f17'
+      };
+      const celB = headers.length > 5 ? '26px' : '32px';
+      const gridCols = headers.map(h => h === ',' ? '14px' : celB).join(' ');
+      const hdr = headers.map(h =>
+        h === ',' ? `<div class="vs-cs-komma-header">,</div>`
+        : `<div class="vs-cs-header" style="background:${kleuren[h]||'#eee'};color:${tekstKleuren[h]||'#333'};width:${celB}">${h}</div>`
+      ).join('');
+      const maakRij = (cls) => headers.map(h =>
+        h === ',' ? `<div class="vs-cs-komma-cel ${cls||''}"></div>`
+        : `<div class="vs-cs-cel ${cls||''}" style="width:${celB}"></div>`
+      ).join('');
+      const stapLabel = stap ? `<div class="vs-cs-staplabel">${stap}</div>` : '';
+      return `<div class="vs-cijfer-schema-blok">${stapLabel}
+        <div class="vs-cs-grid" style="grid-template-columns:${gridCols}">
+          ${hdr}${maakRij('vs-cs-grijs')}${maakRij('')}${maakRij('vs-cs-dik-onder')}${maakRij('')}
+        </div></div>`;
+    }
+
+    function kolomsVoorNiveau(inst) {
+      const n = inst.niveau;
+      if (n === 'kommagetallen') {
+        const prefix = inst.kommaPrefix || 'E';
+        const dec    = inst.kommaDecimalen || 't';
+        const pk = { 'E':[], 'TE':['T'], 'HTE':['H','T'] };
+        const dk = { 't':['t'], 'th':['t','h'], 'thd':['t','h','d'] };
+        return [...(pk[prefix]||[]), 'E', ',', ...(dk[dec]||['t'])];
+      }
+      if (n === 'tot100000') return ['TD','D','H','T','E'];
+      if (n === 'tot10000')  return ['D','H','T','E'];
+      if (n === 'tot1000')   return ['H','T','E'];
+      if (n === 'tot100')    return ['T','E'];
+      return ['E'];
+    }
+
+    let cijferHTML = '';
+    if (metCijfer) {
+      const headers = kolomsVoorNiveau(inst);
+      if (drieGetallen) {
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>
+          <div class="vs-cijfer-stappen">
+            ${bouwCijferSchemaPreview(headers,'STAP 1')}${bouwCijferSchemaPreview(headers,'STAP 2')}
+          </div>`;
+      } else {
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchemaPreview(headers,'')}`;
+      }
+    }
+
+    // Antwoordzin
+    const antwoordHTML = blok.antwoordzin
+      ? `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><span class="vs-antw-tekst">${esc(blok.antwoordzin)}</span></div>`
+      : `<div class="vs-antwoordzin-rij"><span class="vs-antw-label">Antwoordzin:</span><div class="vs-antw-lijn"></div></div>`;
+
+    // Schema zone
+    const heeftSchema = metRooster || metCijfer;
+    const schemaZone = heeftSchema ? `
+      <div class="vs-schema-zone">
+        ${metRooster ? `<div class="vs-schema-links">
+          <div class="vs-schema-label">Schema:</div>
+          <div class="vs-rooster">${roosterRijen}</div>
+          ${!metCijfer ? bewerkingHTML : ''}
+        </div>` : ''}
+        <div class="vs-schema-rechts">
+          ${!metRooster && metCijfer ? bewerkingHTML : ''}
+          ${metRooster && metCijfer ? bewerkingHTML : ''}
+          ${cijferHTML}
+        </div>
+      </div>` : '';
+
+    const div = document.createElement('div');
+    div.className  = 'preview-blok';
+    div.dataset.id = blok.id;
+    div.innerHTML = `
+      <div class="preview-blok-header">
+        <span class="blok-type-badge">📖 Vraagstuk</span>
+        <span class="blok-niveau">${inst.niveau || ''}</span>
+        <div class="spacer"></div>
+        <div class="blok-acties">
+          <button class="btn-blok-actie verwijder"
+            onclick="App.verwijderBlok('${blok.id}')" title="Verwijder blok">✕</button>
+        </div>
+      </div>
+      <div class="preview-blok-body">
+        <div class="vs-kaart" style="max-width:100%">
+          <div class="vs-kaart-tekst">${(blok.vraagstuk||'').replace(/\n/g,'<br>')}</div>
+          ${schemaZone}
+          ${antwoordHTML}
+        </div>
+      </div>`;
+    return div;
   }
 
   return { render, toonZinEditor };
