@@ -2842,7 +2842,7 @@ doc.setTextColor(26, 58, 92);
 
   /* ══════════════════════════════════════════════════════════════
      _tekenVraagstukBlok — tekent 1 vraagstuk-blok in de PDF
-     Layout: kader → vraagstuk-tekst → rooster + bewerking → cijferschema → antwoordzin
+     Layout: vraagstuk-tekst (volle breedte) → schema zone → antwoordzin
      ══════════════════════════════════════════════════════════════ */
   function _tekenVraagstukBlok(blok) {
     const inst = blok.inst || blok.config || {};
@@ -2850,24 +2850,25 @@ doc.setTextColor(26, 58, 92);
     const metCijfer    = inst.schema?.includes('cijfer');
     const drieGetallen = inst.aantalGetallen === '3' || inst.aantalGetallen === 'gemengd';
 
-    // ── Constanten voor dit blok ─────────────────────────────
-    const KADER_PAD   = 4;     // interne padding kader
-    const TEKST_FS    = 11;    // fontgrootte vraagstuk
-    const TEKST_RH    = 5.5;   // regelafstand (mm per regel)
-    const ANT_FS      = 10;    // fontgrootte antwoordzin
-    const ROOSTER_CEL = 4;     // celgrootte rooster (mm)
+    // ── Constanten ────────────────────────────────────────────
+    const KADER_PAD   = 5;     // interne padding kader
+    const TEKST_FS    = 12;    // fontgrootte vraagstuk (gelijk aan andere blokken)
+    const TEKST_RH    = 6;     // regelafstand
+    const LABEL_FS    = 11;    // fontgrootte labels (Bewerking, Ik cijfer, Antwoordzin)
+    const ROOSTER_CEL = 6;     // celgrootte rooster — groter zodat kind erin kan schrijven
     const ROOSTER_R   = 8;     // rijen rooster
     const ROOSTER_K   = 12;    // kolommen rooster
-    const ROOSTER_W   = ROOSTER_K * ROOSTER_CEL;  // 48mm
-    const ROOSTER_H   = ROOSTER_R * ROOSTER_CEL;  // 32mm
-    const CEL_H       = 7;     // hoogte cijferschema-cel (mm)
-    const CEL_W_NORM  = 8;     // breedte normale cel (mm)
-    const CEL_W_KOMMA = 4;     // breedte kommacel (mm)
-    const BEW_LIJN_H  = 8;     // hoogte per schrijflijn incl. ruimte
-    const GAP         = 3;     // ruimte tussen elementen
-    const SCHEMA_GAP  = 6;     // ruimte tussen rooster en bewerking
+    const ROOSTER_W   = ROOSTER_K * ROOSTER_CEL;  // 72mm
+    const ROOSTER_H   = ROOSTER_R * ROOSTER_CEL;  // 48mm
+    const CEL_H       = 8;     // hoogte cijferschema-cel
+    const CEL_W_NORM  = 10;    // breedte normale cel
+    const CEL_W_KOMMA = 5;     // breedte kommacel
+    const BEW_LIJN_H  = 12;    // hoogte per schrijflijn (ruim genoeg)
+    const GAP         = 4;     // ruimte tussen elementen
+    const SCHEMA_GAP  = 8;     // ruimte tussen rooster en rechterzone
+    const ANT_H       = 10;    // hoogte antwoordzin-zone
 
-    // ── Kolommen bepalen op basis van niveau ─────────────────
+    // ── Kolommen bepalen ──────────────────────────────────────
     function kolomsVoorNiveau() {
       const n = inst.niveau;
       if (n === 'kommagetallen') {
@@ -2884,48 +2885,46 @@ doc.setTextColor(26, 58, 92);
       return ['E'];
     }
 
-    // ── Hoogteschatting tekst (word wrap) ────────────────────
-    function schattingTekstH(tekst) {
-      doc.setFontSize(TEKST_FS);
-      const regelB = metRooster ? CW - ROOSTER_W - SCHEMA_GAP - KADER_PAD * 2 - 4
-                                : CW - KADER_PAD * 2;
-      const regels = doc.splitTextToSize(tekst || '', regelB);
-      return regels.length * TEKST_RH;
-    }
+    // ── Hoogteschattingen ─────────────────────────────────────
+    doc.setFontSize(TEKST_FS);
+    const tekstRegels = doc.splitTextToSize(blok.vraagstuk || '', CW - KADER_PAD * 2);
+    const tekstH = tekstRegels.length * TEKST_RH + 2;
 
-    // ── Hoogte bewerking ─────────────────────────────────────
-    function bewH() {
-      if (!metRooster && !metCijfer) return 0;
-      const LABEL_H = 5;
-      if (drieGetallen) return LABEL_H + BEW_LIJN_H * 2 + 6; // label + 2 stappen
-      return LABEL_H + BEW_LIJN_H * 3; // label + 3 lijnen
-    }
+    // Bewerking hoogte
+    const bewLabelH = 7;
+    const bewH = (metRooster || metCijfer)
+      ? bewLabelH + (drieGetallen ? BEW_LIJN_H * 2 + 8 : BEW_LIJN_H * 3)
+      : 0;
 
-    // ── Hoogte cijferschema ───────────────────────────────────
-    function cijferH() {
-      if (!metCijfer) return 0;
-      const LABEL_H = 5;
-      const schemaH = CEL_H * 5; // header + 4 datarijen
-      if (drieGetallen) return LABEL_H + GAP + schemaH * 2 + GAP;
-      return LABEL_H + GAP + schemaH;
-    }
+    // Cijferschema hoogte
+    const kolommen = kolomsVoorNiveau();
+    const schemaRijH = CEL_H * 5; // header + 4 rijen
+    const cijferLabelH = 8;
+    const cijferSchemaH = metCijfer
+      ? cijferLabelH + GAP + (drieGetallen ? schemaRijH * 2 + GAP + 4 : schemaRijH)
+      : 0;
 
-    // ── Hoogte antwoordzin ────────────────────────────────────
-    const ANT_H = 8;
+    // Rechterkant totaal
+    const rechtsH = bewH + (metCijfer ? GAP * 2 + cijferSchemaH : 0);
+    // Linkerkant (rooster) hoogte incl. label
+    const linksH = metRooster ? ROOSTER_H + 6 : 0;
+    const schemaZoneH = metRooster || metCijfer ? Math.max(linksH, rechtsH) + GAP : 0;
 
-    // ── Totale blok-hoogte berekenen ──────────────────────────
-    const tekst  = blok.vraagstuk || '';
-    const tekstH = schattingTekstH(tekst);
+    // Antwoordzin hoogte
+    doc.setFontSize(LABEL_FS);
+    const antTekst = (blok.antwoordzin || '').trim();
+    const antRegels = antTekst ? doc.splitTextToSize('Antwoordzin:  ' + antTekst, CW - KADER_PAD * 2) : [];
+    const antH = Math.max(ANT_H, antRegels.length * 6 + 4);
 
-    let rechtsH = bewH() + (metCijfer ? cijferH() + GAP : 0) + ANT_H + GAP * 2;
-    let linksH  = ROOSTER_H + (metRooster ? 0 : 0);
-    const schemaH_totaal = Math.max(rechtsH, linksH);
+    // Totale kaderhoogte
+    const totaalH = KADER_PAD + tekstH + GAP + schemaZoneH + antH + KADER_PAD;
 
-    const totaalH = KADER_PAD + tekstH + GAP
-                  + (metRooster || metCijfer ? schemaH_totaal + GAP : 0)
-                  + ANT_H + KADER_PAD + 4;
+    // ── Pagina-check (zoals alle andere blokken) ──────────────
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + totaalH + NABLOK);
 
-    checkRuimte(VOOR_ZIN + totaalH + NABLOK);
+    // ── Opdrachtzin boven het kader (zoals andere blokken) ────
+    // Vraagstukken hebben geen aparte opdrachtzin — sla over
+    y += VOOR_ZIN;
 
     // ── Buitenkader ───────────────────────────────────────────
     const kadX = ML;
@@ -2936,98 +2935,81 @@ doc.setTextColor(26, 58, 92);
     doc.setLineWidth(0.7);
     doc.roundedRect(kadX, kadY, kadW, totaalH, 2, 2, 'FD');
 
-    // Badge "Vraagstuk" linksboven
-    doc.setFillColor(21, 101, 192);
-    doc.roundedRect(kadX + 2, kadY + 2, 26, 5, 1, 1, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7);
-    doc.setTextColor(255, 255, 255);
-    doc.text('VRAAGSTUK', kadX + 4, kadY + 5.7);
-
-    // ── Vraagstuk tekst ───────────────────────────────────────
-    let iy = kadY + KADER_PAD + 6; // +6 voor badge ruimte
-    const tekstBreedte = metRooster
-      ? CW - ROOSTER_W - SCHEMA_GAP - KADER_PAD * 2 - 2
-      : CW - KADER_PAD * 2;
-
+    // ── Vraagstuk tekst (volle breedte, bovenaan) ─────────────
+    let iy = kadY + KADER_PAD;
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(TEKST_FS);
     doc.setTextColor(30, 30, 50);
-    const tekstRegels = doc.splitTextToSize(tekst, tekstBreedte);
     doc.text(tekstRegels, kadX + KADER_PAD, iy);
     iy += tekstH + GAP;
 
     // ── Schema zone ───────────────────────────────────────────
     if (metRooster || metCijfer) {
-      let schemaY = iy;
 
       // LINKS: Rooster
       if (metRooster) {
         const rx = kadX + KADER_PAD;
-        doc.setFontSize(8);
         doc.setFont('helvetica', 'bold');
-        doc.setTextColor(100, 100, 100);
-        doc.text('Schema:', rx, schemaY + 3);
-        const roosY = schemaY + 5;
-        doc.setDrawColor(170, 170, 170);
-        doc.setLineWidth(0.3);
+        doc.setFontSize(LABEL_FS);
+        doc.setTextColor(80, 80, 80);
+        doc.text('Schema:', rx, iy + 4);
+        const roosY = iy + 7;
+        doc.setDrawColor(150, 150, 150);
+        doc.setLineWidth(0.35);
         for (let r = 0; r <= ROOSTER_R; r++) {
-          doc.line(rx, roosY + r * ROOSTER_CEL, rx + ROOSTER_W, roosY + r * ROOSTER_CEL);
+          doc.line(rx, roosY + r * ROOSTER_CEL,
+                   rx + ROOSTER_W, roosY + r * ROOSTER_CEL);
         }
         for (let k = 0; k <= ROOSTER_K; k++) {
-          doc.line(rx + k * ROOSTER_CEL, roosY, rx + k * ROOSTER_CEL, roosY + ROOSTER_H);
+          doc.line(rx + k * ROOSTER_CEL, roosY,
+                   rx + k * ROOSTER_CEL, roosY + ROOSTER_H);
         }
       }
 
-      // RECHTS: Bewerking + eventueel cijferschema
+      // RECHTS: Bewerking + cijferschema
       const rechtsX = metRooster
         ? kadX + KADER_PAD + ROOSTER_W + SCHEMA_GAP
         : kadX + KADER_PAD;
-      let ry = schemaY;
+      const rechtsMaxW = kadW - (rechtsX - kadX) - KADER_PAD;
+      const lijnLengte = rechtsMaxW - 2;
+      let ry = iy;
 
       // Label "Bewerking:"
-      if (metRooster || metCijfer) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(8);
-        doc.setTextColor(80, 80, 80);
-        doc.text('Bewerking:', rechtsX, ry + 3.5);
-        ry += 6;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(LABEL_FS);
+      doc.setTextColor(80, 80, 80);
+      doc.text('Bewerking:', rechtsX, ry + 4);
+      ry += bewLabelH;
 
-        const rechtsMaxW = kadW - (rechtsX - kadX) - KADER_PAD;
-        const lijnLengte = Math.min(rechtsMaxW - 2, 55);
-
-        if (drieGetallen) {
-          // STAP 1
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(50,50,50);
-          doc.text('STAP 1', rechtsX, ry + 3);
-          ry += 4;
-          doc.setDrawColor(140,140,140); doc.setLineWidth(0.4);
+      // Schrijflijnen
+      doc.setDrawColor(120, 120, 120);
+      doc.setLineWidth(0.5);
+      if (drieGetallen) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(50,50,50);
+        doc.text('STAP 1', rechtsX, ry + 4);
+        ry += 5;
+        doc.line(rechtsX, ry + BEW_LIJN_H - 2, rechtsX + lijnLengte, ry + BEW_LIJN_H - 2);
+        ry += BEW_LIJN_H;
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(50,50,50);
+        doc.text('STAP 2', rechtsX, ry + 4);
+        ry += 5;
+        doc.line(rechtsX, ry + BEW_LIJN_H - 2, rechtsX + lijnLengte, ry + BEW_LIJN_H - 2);
+        ry += BEW_LIJN_H;
+      } else {
+        for (let li = 0; li < 3; li++) {
           doc.line(rechtsX, ry + BEW_LIJN_H - 2, rechtsX + lijnLengte, ry + BEW_LIJN_H - 2);
           ry += BEW_LIJN_H;
-          // STAP 2
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(8); doc.setTextColor(50,50,50);
-          doc.text('STAP 2', rechtsX, ry + 3);
-          ry += 4;
-          doc.setDrawColor(140,140,140); doc.setLineWidth(0.4);
-          doc.line(rechtsX, ry + BEW_LIJN_H - 2, rechtsX + lijnLengte, ry + BEW_LIJN_H - 2);
-          ry += BEW_LIJN_H;
-        } else {
-          // 3 schrijflijnen
-          for (let li = 0; li < 3; li++) {
-            doc.setDrawColor(140,140,140); doc.setLineWidth(0.4);
-            doc.line(rechtsX, ry + BEW_LIJN_H - 2, rechtsX + lijnLengte, ry + BEW_LIJN_H - 2);
-            ry += BEW_LIJN_H;
-          }
         }
       }
 
       // Cijferschema
       if (metCijfer) {
-        const kolommen = kolomsVoorNiveau();
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+        ry += GAP;
+        doc.setFont('helvetica', 'italic');
+        doc.setFontSize(LABEL_FS);
         doc.setTextColor(60, 60, 60);
-        doc.text('Ik cijfer.', rechtsX, ry + 3);
-        ry += 5;
+        doc.text('Ik cijfer.', rechtsX, ry + 4);
+        ry += cijferLabelH;
 
         const KLEUREN = {
           'TD':[200,230,201],'D':[255,205,210],'H':[187,222,251],
@@ -3043,22 +3025,20 @@ doc.setTextColor(26, 58, 92);
         function tekenSchema(startY, stapLabel) {
           let sx = rechtsX;
           if (stapLabel) {
-            doc.setFont('helvetica','bold'); doc.setFontSize(7); doc.setTextColor(50,50,50);
-            doc.text(stapLabel, sx, startY + 3); startY += 4;
+            doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(50,50,50);
+            doc.text(stapLabel, sx, startY + 3); startY += 5;
           }
-          // Header rij
           kolommen.forEach(k => {
             const cw = k === ',' ? CEL_W_KOMMA : CEL_W_NORM;
-            const rgb = KLEUREN[k] || [220,220,220];
-            doc.setFillColor(...rgb); doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+            doc.setFillColor(...(KLEUREN[k] || [220,220,220]));
+            doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
             doc.rect(sx, startY, cw, CEL_H, 'FD');
-            const trgb = TEKST_RGB[k] || [50,50,50];
-            doc.setTextColor(...trgb); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+            doc.setTextColor(...(TEKST_RGB[k] || [50,50,50]));
+            doc.setFont('helvetica','bold'); doc.setFontSize(8);
             const tw = doc.getTextWidth(k);
-            doc.text(k, sx + (cw - tw) / 2, startY + CEL_H - 1.5);
+            doc.text(k, sx + (cw - tw) / 2, startY + CEL_H - 2);
             sx += cw;
           });
-          // 4 data rijen: grijs, wit, wit+dikke lijn, wit
           const rijen = [
             { bg:[216,216,216], dik: false },
             { bg:[255,255,255], dik: false },
@@ -3070,8 +3050,8 @@ doc.setTextColor(26, 58, 92);
             let rx2 = rechtsX;
             kolommen.forEach(k => {
               const cw = k === ',' ? CEL_W_KOMMA : CEL_W_NORM;
-              const celBg = k === ',' ? [232,232,232] : bg;
-              doc.setFillColor(...celBg); doc.setDrawColor(180,180,180); doc.setLineWidth(0.25);
+              doc.setFillColor(...(k === ',' ? [232,232,232] : bg));
+              doc.setDrawColor(180,180,180); doc.setLineWidth(0.25);
               doc.rect(rx2, startY, cw, CEL_H, 'FD');
               if (dik) {
                 doc.setDrawColor(80,80,80); doc.setLineWidth(0.8);
@@ -3080,7 +3060,7 @@ doc.setTextColor(26, 58, 92);
               rx2 += cw;
             });
           });
-          return startY + CEL_H; // return eindY
+          return startY + CEL_H;
         }
 
         if (drieGetallen) {
@@ -3090,37 +3070,40 @@ doc.setTextColor(26, 58, 92);
           ry = tekenSchema(ry, '') + GAP;
         }
       }
-
-      iy = Math.max(iy + schemaH_totaal, ry) + GAP;
     }
 
-    // ── Antwoordzin ───────────────────────────────────────────
-    const antY = kadY + totaalH - KADER_PAD - ANT_H + 1;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(ANT_FS);
-    doc.setTextColor(80, 80, 80);
-    doc.text('Antwoordzin:', kadX + KADER_PAD, antY + 4);
-    const labB = doc.getTextWidth('Antwoordzin:');
+    // ── Antwoordzin (onderaan, volle breedte) ─────────────────
+    const antY = kadY + totaalH - KADER_PAD - antH + 2;
 
-    if (blok.antwoordzin && blok.antwoordzin.trim()) {
-      // Deels ingevuld
+    // Scheidingslijn boven antwoordzin
+    doc.setDrawColor(200, 215, 235);
+    doc.setLineWidth(0.4);
+    doc.line(kadX + KADER_PAD, antY - 2, kadX + kadW - KADER_PAD, antY - 2);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(LABEL_FS);
+    doc.setTextColor(50, 50, 50);
+    doc.text('Antwoordzin:', kadX + KADER_PAD, antY + 5);
+
+    if (antTekst) {
+      // Deels ingevuld: tekst naast het label
+      const labB = doc.getTextWidth('Antwoordzin:  ');
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(30, 30, 50);
-      const antTekst = blok.antwoordzin;
-      const antX = kadX + KADER_PAD + labB + 3;
-      const maxB = CW - KADER_PAD * 2 - labB - 4;
-      const antRegels = doc.splitTextToSize(antTekst, maxB);
-      doc.text(antRegels[0] || antTekst, antX, antY + 4);
+      const antX = kadX + KADER_PAD + labB;
+      const antW = kadW - KADER_PAD * 2 - labB;
+      const antR = doc.splitTextToSize(antTekst, antW);
+      doc.text(antR[0], antX, antY + 5);
     } else {
-      // Lege lijn
-      const lijnX = kadX + KADER_PAD + labB + 3;
-      doc.setDrawColor(100, 100, 100); doc.setLineWidth(0.4);
-      doc.line(lijnX, antY + 5, kadX + kadW - KADER_PAD, antY + 5);
+      // Lege lijn: volle breedte onder het label
+      doc.setDrawColor(80, 80, 80);
+      doc.setLineWidth(0.5);
+      doc.line(kadX + KADER_PAD, antY + 9,
+               kadX + kadW - KADER_PAD, antY + 9);
     }
 
     y += totaalH + NABLOK;
     lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
   }
-
   return { genereer };
 })();
