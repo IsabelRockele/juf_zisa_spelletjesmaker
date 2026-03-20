@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
-  <link rel="stylesheet" href="vraagstukken.css?v=1">
+  <link rel="stylesheet" href="vraagstukken.css?v=2">
   <style>
     /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
     .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
@@ -1021,196 +1021,168 @@
         <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
       </div>
 
-      <!-- Leerjaar -->
+      <!-- ① Leerjaar + Bewerking + Niveau -->
       <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🎓</div>
-          Leerjaar
-        </div>
+        <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
         <div class="form-rij">
           <div class="radio-groep">
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','1',this)">
-              <input type="radio" name="vs-leerjaar" value="1">1e leerjaar
-            </label>
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-leerjaar','2',this)">
-              <input type="radio" name="vs-leerjaar" value="2" checked>2e leerjaar
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','3',this)">
-              <input type="radio" name="vs-leerjaar" value="3">3e leerjaar
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','4',this)">
-              <input type="radio" name="vs-leerjaar" value="4">4e leerjaar
-            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','1',this);VraagstukkenModule._filterNiveaus('1')"><input type="radio" name="vs-leerjaar" value="1">1e</label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-leerjaar','2',this);VraagstukkenModule._filterNiveaus('2')"><input type="radio" name="vs-leerjaar" value="2" checked>2e</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','3',this);VraagstukkenModule._filterNiveaus('3')"><input type="radio" name="vs-leerjaar" value="3">3e</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','4',this);VraagstukkenModule._filterNiveaus('4')"><input type="radio" name="vs-leerjaar" value="4">4e</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','5',this);VraagstukkenModule._filterNiveaus('5')"><input type="radio" name="vs-leerjaar" value="5">5e</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-leerjaar','6',this);VraagstukkenModule._filterNiveaus('6')"><input type="radio" name="vs-leerjaar" value="6">6e</label>
           </div>
         </div>
-      </div>
 
-      <!-- Bewerking kiezen -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🔢</div>
-          Bewerking
-        </div>
+        <div class="kaart-titel" style="margin-top:10px"><div class="icon">🔢</div>Bewerking</div>
         <div class="form-rij">
           <div class="vs-bewerking-groep">
-            <label class="vs-bew-chip geselecteerd" data-bew="optellen" onclick="VraagstukkenModule._kiesBewerking('optellen',this)">
-              <input type="radio" name="vs-bewerking" value="optellen" checked>➕ Optellen
-            </label>
-            <label class="vs-bew-chip" data-bew="aftrekken" onclick="VraagstukkenModule._kiesBewerking('aftrekken',this)">
-              <input type="radio" name="vs-bewerking" value="aftrekken">➖ Aftrekken
-            </label>
-            <label class="vs-bew-chip" data-bew="vermenigvuldigen" onclick="VraagstukkenModule._kiesBewerking('vermenigvuldigen',this)">
-              <input type="radio" name="vs-bewerking" value="vermenigvuldigen">✖️ Vermenigvuldigen
-            </label>
-            <label class="vs-bew-chip" data-bew="delen" onclick="VraagstukkenModule._kiesBewerking('delen',this)">
-              <input type="radio" name="vs-bewerking" value="delen">➗ Delen
-            </label>
+            <label class="vs-bew-chip geselecteerd" data-bew="optellen" onclick="VraagstukkenModule._kiesBewerking('optellen',this)"><input type="radio" name="vs-bewerking" value="optellen" checked>➕ Optellen</label>
+            <label class="vs-bew-chip" data-bew="aftrekken" onclick="VraagstukkenModule._kiesBewerking('aftrekken',this)"><input type="radio" name="vs-bewerking" value="aftrekken">➖ Aftrekken</label>
+            <label class="vs-bew-chip" data-bew="vermenigvuldigen" onclick="VraagstukkenModule._kiesBewerking('vermenigvuldigen',this)"><input type="radio" name="vs-bewerking" value="vermenigvuldigen">✖️ Verm.</label>
+            <label class="vs-bew-chip" data-bew="delen" onclick="VraagstukkenModule._kiesBewerking('delen',this)"><input type="radio" name="vs-bewerking" value="delen">➗ Delen</label>
           </div>
         </div>
-      </div>
 
-      <!-- Niveau -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🎯</div>
-          Niveau
-        </div>
+        <div class="kaart-titel" style="margin-top:10px"><div class="icon">🎯</div>Niveau</div>
         <div class="form-rij">
           <div class="radio-groep">
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10',this)">
-              <input type="radio" name="vs-niveau" value="tot10">Tot 10
-            </label>
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-niveau','tot20',this)">
-              <input type="radio" name="vs-niveau" value="tot20" checked>Tot 20
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100',this)">
-              <input type="radio" name="vs-niveau" value="tot100">Tot 100
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot1000',this)">
-              <input type="radio" name="vs-niveau" value="tot1000">Tot 1000
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','kommagetallen',this)">
-              <input type="radio" name="vs-niveau" value="kommagetallen">Kommagetallen
-            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot10">Tot 10</label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-niveau','tot20',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot20" checked>Tot 20</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot100">Tot 100</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot1000',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot1000">Tot 1 000</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10000',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot10000">Tot 10 000</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100000',this);VraagstukkenModule._toggleKomma(false);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="tot100000">Tot 100 000</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','kommagetallen',this);VraagstukkenModule._toggleKomma(true);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-niveau" value="kommagetallen">Kommagetallen</label>
+          </div>
+        </div>
+        <!-- Komma melding bij verm/delen -->
+        <div id="vs-komma-melding" style="display:none;margin-top:6px;padding:8px 10px;background:#fff8e1;border-radius:6px;border:1px solid #ffe082;font-size:12px;color:#f57f17">
+          ⚠️ Kommagetallen werkt voorlopig enkel bij optellen en aftrekken. Vermenigvuldigen en delen volgen later.
+        </div>
+        <div id="vs-komma-niveau-opties" style="display:none">
+          <div class="form-rij">
+            <label style="font-size:12px;color:#666">Getallen vóór de komma</label>
+            <div class="radio-groep">
+              <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-komma-prefix','E',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-prefix" value="E" checked>E (bv. 3,4)</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-komma-prefix','TE',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-prefix" value="TE">T·E (bv. 13,4)</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-komma-prefix','HTE',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-prefix" value="HTE">H·T·E (bv. 123,4)</label>
+            </div>
+          </div>
+          <div class="form-rij">
+            <label style="font-size:12px;color:#666">Cijfers na de komma</label>
+            <div class="radio-groep">
+              <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-komma-niveau','t',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-niveau" value="t" checked>E,t (1 decimaal)</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-komma-niveau','th',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-niveau" value="th">E,th (2 decimalen)</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-komma-niveau','thd',this);VraagstukkenModule._updateSchemaPreview()"><input type="radio" name="vs-komma-niveau" value="thd">E,thd (3 decimalen)</label>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Tafels (voor vermenigvuldigen/delen) -->
+      <!-- Tafels -->
       <div class="config-kaart" id="vs-kaart-tafels" style="display:none">
-        <div class="kaart-titel">
-          <div class="icon">✖️</div>
-          Tafels
-        </div>
+        <div class="kaart-titel"><div class="icon">✖️</div>Tafels</div>
         <div class="form-rij">
           <div class="checkbox-groep">
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-tafels" value="2" style="display:none"> Tafel van 2
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-tafels" value="3" style="display:none"> Tafel van 3
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-tafels" value="4" style="display:none"> Tafel van 4
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-tafels" value="5" style="display:none"> Tafel van 5
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-tafels" value="10" style="display:none"> Tafel van 10
-            </label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked"><span class="vink-box"></span><input type="checkbox" name="vs-tafels" value="2" style="display:none"> ×2</label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked"><span class="vink-box"></span><input type="checkbox" name="vs-tafels" value="3" style="display:none"> ×3</label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked"><span class="vink-box"></span><input type="checkbox" name="vs-tafels" value="4" style="display:none"> ×4</label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked"><span class="vink-box"></span><input type="checkbox" name="vs-tafels" value="5" style="display:none"> ×5</label>
+            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked"><span class="vink-box"></span><input type="checkbox" name="vs-tafels" value="10" style="display:none"> ×10</label>
           </div>
         </div>
       </div>
 
-      <!-- Aantal getallen -->
+      <!-- ② Aantal getallen -->
       <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🔗</div>
-          Aantal getallen
-        </div>
+        <div class="kaart-titel"><div class="icon">🔗</div>Aantal getallen</div>
         <div class="form-rij">
           <div class="radio-groep">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-aantalgetallen','2',this)">
-              <input type="radio" name="vs-aantalgetallen" value="2" checked>2 getallen
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','3',this)">
-              <input type="radio" name="vs-aantalgetallen" value="3">3 getallen
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','gemengd',this)">
-              <input type="radio" name="vs-aantalgetallen" value="gemengd">Gemengd
-            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-aantalgetallen','2',this)"><input type="radio" name="vs-aantalgetallen" value="2" checked>2 getallen</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','3',this)"><input type="radio" name="vs-aantalgetallen" value="3">3 getallen</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','gemengd',this)"><input type="radio" name="vs-aantalgetallen" value="gemengd">Gemengd</label>
           </div>
         </div>
       </div>
 
-      <!-- Thema -->
+      <!-- ③ Thema + Soort berekening -->
       <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">🌈</div>
-          Thema (optioneel)
-        </div>
+        <div class="kaart-titel"><div class="icon">🌈</div>Thema (optioneel)</div>
         <div class="form-rij">
-          <input type="text" id="vs-thema" placeholder="Bv: Pasen, lente, supermarkt, voetbal..." style="width:100%;padding:7px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;" />
-        </div>
-      </div>
-
-      <!-- Schema-opties -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">📐</div>
-          Schema bij vraagstuk
-        </div>
-        <div class="form-rij">
-          <div class="checkbox-groep">
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-schema" value="tekenschema" style="display:none"> Tekenschema
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-schema" value="schrijflijnen" style="display:none"> Schrijflijnen
-            </label>
-            <label class="vink-chip" onclick="this.classList.toggle('geselecteerd');this.querySelector('input').checked=!this.querySelector('input').checked">
-              <span class="vink-box"></span>
-              <input type="checkbox" name="vs-schema" value="cijferschema" style="display:none"> Cijferschema
-            </label>
+          <div class="vs-thema-chips">
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Pasen', this)">🐣 Pasen</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Kerst', this)">🎄 Kerst</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Lente', this)">🌸 Lente</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Herfst', this)">🍂 Herfst</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Winkel', this)">🛒 Winkel</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Circus', this)">🎪 Circus</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Kermis', this)">🎡 Kermis</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Sport', this)">⚽ Sport</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Dieren', this)">🐾 Dieren</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Boerderij', this)">🐄 Boerderij</button>
           </div>
+          <input type="text" id="vs-thema" placeholder="Of typ zelf een thema..." style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;margin-top:6px;" />
+        </div>
+
+        <div class="kaart-titel" style="margin-top:10px"><div class="icon">🧮</div>Soort berekening (optioneel)</div>
+        <div class="form-rij">
+          <div class="vs-thema-chips">
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('totaal berekenen (hoeveel samen)', this)">➕ Totaal</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('verschil berekenen (hoeveel meer of minder, hoeveel blijft er over)', this)">➖ Verschil</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('geld berekenen met euro en cent', this)">💶 Geld</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('tijd berekenen', this)">🕐 Tijd</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gewicht of inhoud berekenen', this)">⚖️ Gewicht</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('helft of dubbel berekenen', this)">✌️ Helft/dubbel</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gemiddelde berekenen', this)">📊 Gemiddelde</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('bruto tara netto', this)">📦 Bruto/tara/netto</button>
+            <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('percentages berekenen', this)">% Percentages</button>
+          </div>
+          <input type="text" id="vs-berekening" placeholder="Of typ zelf..." style="width:100%;padding:6px 10px;border:1.5px solid #ddd;border-radius:6px;font-size:13px;margin-top:6px;" />
         </div>
       </div>
 
-      <!-- Antwoordzin -->
+      <!-- ④ Schema -->
       <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">✍️</div>
-          Antwoordzin
+        <div class="kaart-titel"><div class="icon">📐</div>Schema</div>
+        <div class="form-rij">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button type="button" id="btn-schema-rooster"
+              style="padding:8px 14px;border-radius:20px;border:2px solid #1565c0;background:#1565c0;color:#fff;font-size:13px;font-weight:600;cursor:pointer"
+              onclick="vsToggleSchema('rooster')">
+              ✓ Rooster + bewerking
+            </button>
+            <button type="button" id="btn-schema-cijfer"
+              style="padding:8px 14px;border-radius:20px;border:2px solid #ddd;background:#fff;color:#333;font-size:13px;font-weight:600;cursor:pointer"
+              onclick="vsToggleSchema('cijfer')">
+              Cijferend schema
+            </button>
+          </div>
+          <input type="checkbox" id="vs-schema-rooster" name="vs-schema" value="rooster" checked style="display:none">
+          <input type="checkbox" id="vs-schema-cijfer" name="vs-schema" value="cijfer" style="display:none">
         </div>
+
+        <div id="vs-cijfer-opties" style="display:none;margin-top:10px">
+          <div style="font-size:12px;color:#555;padding:6px 8px;background:#f0f4ff;border-radius:6px;border:1px solid #c5cae9">
+            📐 Het cijferschema past zich automatisch aan het gekozen niveau aan.
+          </div>
+          <div id="vs-schema-preview" style="margin-top:6px"></div>
+        </div>
+      </div>
+
+      <!-- ⑤ Antwoordzin + Aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">✍️</div>Antwoordzin</div>
         <div class="form-rij">
           <div class="radio-groep">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-antwoordzin','deels',this)">
-              <input type="radio" name="vs-antwoordzin" value="deels" checked>Deels ingevuld (___)
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('vs-antwoordzin','leeg',this)">
-              <input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn
-            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-antwoordzin','deels',this)"><input type="radio" name="vs-antwoordzin" value="deels" checked>Deels ingevuld (___)</label>
+            <label class="radio-chip" onclick="App.selecteerRadio('vs-antwoordzin','leeg',this)"><input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn</label>
           </div>
         </div>
-      </div>
-
-      <!-- Aantal genereren -->
-      <div class="config-kaart">
-        <div class="kaart-titel">
-          <div class="icon">📦</div>
-          Aantal genereren
-        </div>
+        <div class="kaart-titel" style="margin-top:10px"><div class="icon">📦</div>Aantal genereren</div>
         <div class="form-rij">
           <div class="vs-bulk-rij">
-            <label>Genereer in één keer</label>
             <select id="vs-aantal-bulk">
               <option value="1" selected>1 vraagstuk</option>
               <option value="2">2 vraagstukken</option>
@@ -1226,7 +1198,7 @@
         ✨ Genereer vraagstuk
       </button>
 
-      <!-- Preview van gegenereerd vraagstuk -->
+      <!-- Preview -->
       <div class="vs-preview-sectie">
         <div class="vs-preview-label">Gegenereerd vraagstuk</div>
         <div id="vs-preview">
@@ -1295,17 +1267,17 @@
 <script src="generator.js?v=12"></script>
 <script src="preview.js?v=34"></script>
 <script src="pdf-engine.js?v=42"></script>
-<script src="vraagstukken.js?v=4"></script>
-<script src="app.js?v=18"></script>
+<script src="vraagstukken.js?v=17"></script>
+<script src="app.js?v=20"></script>
 <script>
-// Initialiseer vraagstukken module wanneer Firebase klaar is
+// Alleen limiet-badge updaten bij laden — init van VraagstukkenModule
+// gebeurt via App.toonBewerking('vraagstukken') als de tab geopend wordt
 document.addEventListener('DOMContentLoaded', () => {
-  // Wacht even zodat Firebase Auth geladen is
   setTimeout(() => {
     if (window.VraagstukkenModule) {
-      VraagstukkenModule.init();
+      VraagstukkenModule.init(); // enkel badge + bundellijst, geen schema-voorbeeld
     }
-  }, 1500);
+  }, 500);
 });
 </script>
 
@@ -1375,5 +1347,35 @@ function scrollTabsLeft(){
 }
 
 </script>
+<!-- Schema toggle voor vraagstukken-tab -->
+<script>
+function vsToggleSchema(type) {
+  var roosterCb    = document.getElementById('vs-schema-rooster');
+  var cijferCb     = document.getElementById('vs-schema-cijfer');
+  var roosterBtn   = document.getElementById('btn-schema-rooster');
+  var cijferBtn    = document.getElementById('btn-schema-cijfer');
+  var cijferOpties = document.getElementById('vs-cijfer-opties');
+
+  if (type === 'rooster') {
+    roosterCb.checked = !roosterCb.checked;
+    var aan = roosterCb.checked;
+    roosterBtn.style.background  = aan ? '#1565c0' : '#fff';
+    roosterBtn.style.color       = aan ? '#fff'    : '#333';
+    roosterBtn.style.borderColor = aan ? '#1565c0' : '#ddd';
+    roosterBtn.textContent       = (aan ? '✓ ' : '') + 'Rooster + bewerking';
+  } else {
+    cijferCb.checked = !cijferCb.checked;
+    var aan = cijferCb.checked;
+    cijferBtn.style.background  = aan ? '#1565c0' : '#fff';
+    cijferBtn.style.color       = aan ? '#fff'    : '#333';
+    cijferBtn.style.borderColor = aan ? '#1565c0' : '#ddd';
+    cijferBtn.textContent       = (aan ? '✓ ' : '') + 'Cijferend schema';
+    if (cijferOpties) cijferOpties.style.display = aan ? '' : 'none';
+  }
+
+  if (window.VraagstukkenModule) VraagstukkenModule._toonSchemaVoorbeeld();
+}
+</script>
+
 </body>
 </html>
