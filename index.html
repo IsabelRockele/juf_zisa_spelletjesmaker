@@ -369,7 +369,7 @@
 <main class="main">
 
   <!-- REKEN-OEFENINGEN -->
-  <div class="section-panel active" id="panel-reken">
+  <div class="section-panel" id="panel-reken">
     <div class="section-header">
       <span class="section-icon">📐</span>
       <h2>Reken-oefeningen</h2>
@@ -565,6 +565,7 @@
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
+      localStorage.setItem('laatsteCategorie', target);
 
       // Zijbalk: actieve knop wisselen
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -584,6 +585,22 @@
       navigator.serviceWorker.register('./sw.js').catch(console.error);
     });
   }
+  // Laatste categorie herstellen bij laden
+window.addEventListener('load', () => {
+  const laatst = localStorage.getItem('laatsteCategorie');
+
+  if (laatst) {
+    // juiste knop activeren
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    const btn = document.querySelector(`.nav-btn[data-target="${laatst}"]`);
+    if (btn) btn.classList.add('active');
+
+    // juiste paneel tonen
+    document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('panel-' + laatst);
+    if (panel) panel.classList.add('active');
+  }
+});
 </script>
 </body>
 </html>
