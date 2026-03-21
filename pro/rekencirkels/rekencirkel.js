@@ -416,7 +416,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     var innerR = (cr + ir) / 2;
     var outerR = (ir + or_) / 2;
-    var pairFS = Math.min(radiusMM * 0.32 * 2.835, 12);
+    var pairFS = Math.min(radiusMM * 0.32 * 2.835, 18);
 
     for (var j = 0; j < NUM_SEGMENTS; j++) {
       var ang = (j / NUM_SEGMENTS) * 2 * Math.PI + (Math.PI / NUM_SEGMENTS);
