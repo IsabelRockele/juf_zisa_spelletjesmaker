@@ -953,7 +953,7 @@ const totaal = rondBedrag(
         const imgHtml = `<img src="assets/producten/${submap}/${product.img}" class="vergelijk-img" onerror="this.style.display='none'" style="transform:scale(${s}) translateY(${my}px);">`;
 
         // Winkelnaam voor headers — kort label voor de keuzerondjes
-        const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'Speelgoedwinkel', snoepwinkel: 'Snoepwinkel', elektronica: 'Elektronicawinkel', schoolwinkel: 'Schoolwinkel', kledingwinkel: 'Kledingwinkel' };
+        const winkelNamen = { supermarkt: 'Supermarkt', bakker: 'Bakker', speelgoed: 'winkel', snoepwinkel: 'winkel', elektronica: 'winkel', schoolwinkel: 'winkel', kledingwinkel: 'winkel' };
         const winkelNaam2 = winkelNamen[winkelType] || 'Supermarkt';
         // Kort label voor keuzerondjes en headers: "Winkel A/B" behalve Bakker
         const kortLabel = winkelType === 'bakker' ? 'Bakker' : 'Winkel';
