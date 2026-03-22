@@ -22,6 +22,79 @@
       width: 28px !important;
       min-width: 28px !important;
     }
+
+    /* ── Eerlijk verdelen: splitshuis-variant ────────────── */
+    .inzicht-oef-splitshuis {
+      position: relative;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 14px 16px 12px;
+      margin-bottom: 4px;
+    }
+    .vs-huis-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .vs-top-vakje {
+      background: #c6efce;
+      border: 2px solid #2e7d32;
+      border-radius: 5px;
+      padding: 3px 12px;
+      font-weight: 700;
+      font-size: 15px;
+      color: #1b5e20;
+    }
+    .vs-vakjes-rij {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 4px;
+      width: 100%;
+      justify-content: center;
+    }
+    .vs-vakje {
+      border: 2px solid #1565c0;
+      border-radius: 4px;
+      width: 32px;
+      min-width: 22px;
+      height: 28px;
+      flex-shrink: 1;
+      background: #fff;
+    }
+
+    /* ── Eerlijk verdelen: 100-veld-variant ─────────────── */
+    .inzicht-oef-100veld {
+      position: relative;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 4px;
+    }
+    .veld100-wrap {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .veld100-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 18px);
+      grid-template-rows: repeat(10, 18px);
+      border: 2px solid #7b1fa2;
+      flex-shrink: 0;
+    }
+    .veld100-cel {
+      border: 0.5px solid #ccc;
+      box-sizing: border-box;
+    }
+    .veld100-zinnen {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -580,8 +653,8 @@
             <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-rest',this)">
               <input type="radio" name="inzicht-bewerking" value="delen-rest">➗ Delen (met rest)
             </label>
-            <label class="radio-chip radio-chip-binnenkort" title="Binnenkort beschikbaar">
-              <input type="radio" name="inzicht-bewerking" value="delen-verdelen" disabled>🤝 Delen (eerlijk verdelen)
+            <label class="radio-chip" onclick="App.selecteerInzichtBewerking('delen-verdelen',this)">
+              <input type="radio" name="inzicht-bewerking" value="delen-verdelen">🤝 Delen (eerlijk verdelen)
             </label>
           </div>
         </div>
@@ -591,12 +664,23 @@
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🖼️</div>Weergave</div>
         <div class="form-rij">
-          <div class="radio-groep">
+          <div class="radio-groep" id="inzicht-type-normaal">
             <label class="radio-chip geselecteerd" onclick="App.selecteerInzichtType('afbeeldingen',this)">
               <input type="radio" name="inzicht-type" value="afbeeldingen" checked>🐾 Afbeeldingen
             </label>
             <label class="radio-chip" onclick="App.selecteerInzichtType('getallenlijn',this)">
               <input type="radio" name="inzicht-type" value="getallenlijn">〰️ Getallenlijn
+            </label>
+          </div>
+          <div class="radio-groep" id="inzicht-type-verdelen" style="display:none">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerVerdelenType('verdelen-emoji',this)">
+              <input type="radio" name="inzicht-type-vd" value="verdelen-emoji" checked>🐾 Afbeeldingen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerVerdelenType('verdelen-splitshuis',this)">
+              <input type="radio" name="inzicht-type-vd" value="verdelen-splitshuis">🏠 Splitshuis
+            </label>
+            <label class="radio-chip" onclick="App.selecteerVerdelenType('verdelen-100veld',this)">
+              <input type="radio" name="inzicht-type-vd" value="verdelen-100veld">🔢 100-veld
             </label>
           </div>
         </div>
@@ -1292,7 +1376,7 @@
               Cijferschema past automatisch aan niveau aan.
             </div>
             <div id="vs-cijfer-delen-melding" style="display:none;margin-bottom:8px;font-size:11px;color:#b45309;padding:6px 8px;background:#fef9c3;border-radius:6px;border:1px solid #fde68a">
-              💡 Wil je een ander type cijferschema voor deling? Stuur een mailtje naar <a href="mailto:zebrapost@jufzisa.be" style="color:#1565c0;font-weight:600">zebrapost@jufzisa.be</a>
+              💡 Wil je een ander type cijferschema voor deling? Stuur een mailtje naar <a href="/cdn-cgi/l/email-protection#cfb5aaadbdaebfa0bcbb8fa5baa9b5a6bcaee1adaa" style="color:#1565c0;font-weight:600"><span class="__cf_email__" data-cfemail="2b514e49594a5b44585f6b415e4d5142584a05494e">[email&#160;protected]</span></a>
             </div>
             <div style="margin-top:8px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">&#x270D;&#xFE0F; Antwoordzin</div>
             <div class="radio-groep" style="margin-bottom:8px">
@@ -1358,7 +1442,7 @@
 <div class="toast" id="toast"></div>
 
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
-<script src="config.js?v=2"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="config.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
 <script src="modules/cijferen.js?v=1"></script>
