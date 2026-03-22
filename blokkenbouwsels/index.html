@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juf Zisa - Blokkenbouwsels Maker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <aside id="dashboard" class="no-print">
+
+        <div class="brand">
+            <a href="../index.html" class="keuzemenu-btn">← Keuzemenu</a>
+            <div class="brand-inner">
+                <div class="brand-icon">🧱</div>
+                <div class="brand-text">
+                    <h1>Blokken Maker</h1>
+                    <p>Juf Zisa Edition</p>
+                </div>
+            </div>
+            <button class="help-btn no-print" onclick="document.getElementById('help-modal').classList.remove('hidden')">
+                ❓ Hoe werkt de Blokken Maker?
+            </button>
+        </div>
+
+        <div class="dashboard-body">
+
+            <!-- Kaart: Type oefening -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon green">🎯</div>
+                    <span class="dash-card-title">Type oefening</span>
+                </div>
+                <div class="dash-card-body">
+                    <div class="field-group">
+                        <label>Oefentype</label>
+                        <select id="type-oefening">
+                            <option value="tellen">Tellen: Hoeveel blokken?</option>
+                            <option value="grondplan_invul">Grondplan invullen</option>
+                            <option value="grondplan_koppel">Grondplan koppelen aan bouwsel</option>
+                            <option value="aanzichten">Aanzichten aanduiden</option>
+                            <option value="pijlenpad">Pijlenpad natekenen</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kaart: Instellingen -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon blue">⚙️</div>
+                    <span class="dash-card-title">Instellingen</span>
+                </div>
+                <div class="dash-card-body">
+                    <div id="instellingen-banner" class="instellingen-banner" style="display:none;">
+                        ⚠️ Instellingen gewijzigd — nieuwe secties gebruiken deze waarden.
+                    </div>
+                    <div class="field-group">
+                        <label>Niveau</label>
+                        <select id="niveau">
+                            <option value="makkelijk">Makkelijk (1–6 blokken)</option>
+                            <option value="middel" selected>Middel (7–12 blokken)</option>
+                            <option value="moeilijk">Moeilijk (13–20 blokken)</option>
+                        </select>
+                    </div>
+                    <div class="field-group">
+                        <label>Oefeningen / sectie</label>
+                        <input type="number" id="aantalOefeningen" value="2" min="1" max="8">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toevoegen-knop -->
+            <button id="addSectieBtn" class="primary-btn" onclick="addSectie()">✚ Sectie toevoegen</button>
+
+            <!-- Kaart: Exporteren -->
+            <div class="dash-card">
+                <div class="dash-card-header">
+                    <div class="dash-card-icon yellow">📤</div>
+                    <span class="dash-card-title">Exporteren</span>
+                </div>
+                <div class="dash-card-body action-group">
+                    <button onclick="window.print()" class="print-btn">🖨️ Rechtstreeks afdrukken</button>
+                    <button onclick="downloadAlsPdf()" class="download-btn">📄 Downloaden als PDF</button>
+                    <button id="oplossingen-btn" onclick="toggleOplossingen()" class="oplossingen-btn">👁 Toon oplossingen</button>
+                    <button onclick="downloadAlsPdf(true)" class="download-opl-btn hidden" id="download-opl-btn">📄 PDF met oplossingen</button>
+                    <button onclick="location.reload()" class="clear-btn">🗑 Alles wissen</button>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+
+    <!-- Help modal -->
+    <div id="help-modal" class="help-modal hidden">
+        <div class="help-modal-box">
+            <div class="help-modal-header">
+                <span>🧱 Hoe werkt de Blokken Maker?</span>
+                <button onclick="document.getElementById('help-modal').classList.add('hidden')" class="help-sluit">✕</button>
+            </div>
+            <div class="help-modal-body">
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">🚀 Snel aan de slag</div>
+                    <ul>
+                        <li>Kies een <strong>oefentype</strong> en een <strong>niveau</strong>.</li>
+                        <li>Klik op <strong>+ Sectie toevoegen</strong> om oefeningen aan het werkblad toe te voegen.</li>
+                        <li>Je kan <strong>meerdere secties</strong> combineren — mix types en niveaus.</li>
+                        <li>Gebruik <strong>+ Oefening</strong> of <strong>✕</strong> in de preview om oefeningen toe te voegen of te verwijderen.</li>
+                    </ul>
+                </div>
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">📋 De 4 oefentypes</div>
+                    <div class="help-tabel">
+                        <div class="help-rij"><span class="help-nr">1</span><div><strong>Tellen</strong> — Een bouwsel wordt getoond. Leerlingen tellen het totaal aantal blokken en schrijven het antwoord op.</div></div>
+                        <div class="help-rij"><span class="help-nr">2</span><div><strong>Grondplan invullen</strong> — Een bouwsel wordt getoond. Leerlingen vullen in het grondplan in hoeveel blokjes er op elke plek staan.</div></div>
+                        <div class="help-rij"><span class="help-nr">3</span><div><strong>Grondplan koppelen</strong> — Een grondplan wordt getoond. Leerlingen verbinden het met het juiste bouwsel uit 4 opties.</div></div>
+                        <div class="help-rij"><span class="help-nr">4</span><div><strong>Aanzichten aanduiden</strong> — Een bouwsel wordt getoond met 3 aanzichten (voor, links, rechts). De vraag zegt welke ze moeten aanduiden.</div></div>
+                    </div>
+                </div>
+                <div class="help-sectie">
+                    <div class="help-sectie-titel">⚙️ Niveaus</div>
+                    <ul>
+                        <li><strong>Makkelijk</strong>: 1–6 blokken, eenvoudige vormen</li>
+                        <li><strong>Middel</strong>: 7–12 blokken, meerdere lagen</li>
+                        <li><strong>Moeilijk</strong>: 13–20 blokken, complexe structuren</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main id="preview">
+        <div id="werkblad" class="a4-page">
+            <div class="student-header">
+                <div class="header-box">Naam:</div>
+                <div class="header-box">Datum:</div>
+            </div>
+            <h1 contenteditable="true" class="werkblad-titel">BLOKKENBOUWSELS</h1>
+
+            <div id="secties-container"></div>
+        </div>
+    </main>
+
+    <div id="pdf-loading" class="pdf-loading hidden">
+        <div class="pdf-loading-box">
+            <div class="pdf-loading-title">PDF wordt gemaakt...</div>
+            <div class="pdf-loading-text">Even wachten, je download start zo meteen.</div>
+            <div class="pdf-loading-bar">
+                <div class="pdf-loading-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="blokken.js"></script>
+    <script src="pdf-engine.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
