@@ -1,30 +1,31 @@
 // modules/vraagstukken.js — Vraagstuk Generator module
-// Juf Zisa — jufzisa.be
-// Versie 1
+// Juf Zisa — jufzisa.be — PRO versie (10/dag per gebruiker)
 
 window.VraagstukkenModule = (() => {
 
   // ── STAAT ────────────────────────────────────────────────────
-  let gegenereerdeVraagstukken = []; // opgeslagen in de bundel
-  let huidigVraagstuk = null;        // laatste gegenereerde preview
+  let gegenereerdeVraagstukken = [];
+  let huidigVraagstuk = null;
+  let _userKey = 'anon'; // wordt ingesteld via setUser()
 
-  // ── DAGELIJKS LIMIET (Firebase — per gebruiker) ─────────────
+  // ── GEBRUIKER INSTELLEN (aangeroepen vanuit PRO guard) ───────
+  function setUser(email) {
+    // Gebruik email als unieke sleutel, maar hash het licht voor privacy
+    _userKey = btoa(email).replace(/=/g, '').substring(0, 16);
+  }
+
+  // ── DAGELIJKS LIMIET (localStorage per gebruiker) ────────────
   async function haalTellerOp() {
-    const user = firebase.auth().currentUser;
-    if (!user) return 999; // niet ingelogd = blokkeren
     const datum = new Date().toISOString().slice(0, 10);
-    const ref = firebase.database().ref(`tellerVraagstukken/${user.uid}/${datum}`);
-    const snap = await ref.once('value');
-    return snap.val() || 0;
+    const key = `vs-teller-${_userKey}-${datum}`;
+    return parseInt(localStorage.getItem(key) || '0');
   }
 
   async function verhoogTeller() {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
     const datum = new Date().toISOString().slice(0, 10);
-    const ref = firebase.database().ref(`tellerVraagstukken/${user.uid}/${datum}`);
-    const snap = await ref.once('value');
-    await ref.set((snap.val() || 0) + 1);
+    const key = `vs-teller-${_userKey}-${datum}`;
+    const huidig = parseInt(localStorage.getItem(key) || '0');
+    localStorage.setItem(key, huidig + 1);
   }
 
   // ── LIMIET BADGE UPDATEN ─────────────────────────────────────
@@ -34,7 +35,7 @@ window.VraagstukkenModule = (() => {
     const badge = document.getElementById('vs-limiet-badge');
     if (!badge) return;
     badge.textContent = `${resterend}/10 vandaag`;
-    badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 5 ? 'weinig' : '');
+    badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 3 ? 'weinig' : '');
   }
 
   // ── INSTELLINGEN UITLEZEN ────────────────────────────────────
@@ -258,7 +259,7 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     const aantalNodig = inst.aantalBulk;
 
     if (teller + aantalNodig > 10) {
-      const resterend = Math.max(0, 10 - teller);
+      const resterend = Math.max(0, 20 - teller);
       toonMelding(
         resterend === 0
           ? '⏰ Je hebt je dagelijks limiet van 10 vraagstukken bereikt. Morgen kan je opnieuw!'
@@ -821,6 +822,6 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     toonSchemaVoorbeeld();
   }
 
-  return { genereer, voegToeAanBundel, verwijderUitBundel, init, reset, getBundel: () => gegenereerdeVraagstukken, _kiesBewerking: kiesBewerking, _kiesThema: kiesThema, _kiesBerekening: kiesBerekening, _toggleSchema: toggleSchema, _toggleCijferOpties: toggleCijferOpties, _toggleKolom: toggleKolom, _toggleKomma: toggleKomma, _checkKomma: checkKomma, _filterNiveaus: filterNiveaus, _updateSchemaPreview: updateSchemaPreview, _toonSchemaVoorbeeld: toonSchemaVoorbeeld, _reset: reset };
+  return { genereer, voegToeAanBundel, verwijderUitBundel, init, reset, setUser, getBundel: () => gegenereerdeVraagstukken, _kiesBewerking: kiesBewerking, _kiesThema: kiesThema, _kiesBerekening: kiesBerekening, _toggleSchema: toggleSchema, _toggleCijferOpties: toggleCijferOpties, _toggleKolom: toggleKolom, _toggleKomma: toggleKomma, _checkKomma: checkKomma, _filterNiveaus: filterNiveaus, _updateSchemaPreview: updateSchemaPreview, _toonSchemaVoorbeeld: toonSchemaVoorbeeld, _reset: reset };
 
 })();
