@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
-  <link rel="stylesheet" href="vraagstukken.css?v=2">
+  <link rel="stylesheet" href="vraagstukken.css?v=3">
   <style>
     /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
     .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
@@ -1063,23 +1063,21 @@
             <div id="vs-sub-verm" style="display:none;border-top:1px solid #e0e8f5;padding-top:10px">
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Welke tafels zijn al gekend?</div>
               <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px" id="vs-tafels-verm">
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="2" style="display:none">×2</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="3" style="display:none">×3</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="4" style="display:none">×4</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="5" style="display:none">×5</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="6" style="display:none">×6</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="7" style="display:none">×7</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="8" style="display:none">×8</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="9" style="display:none">×9</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'verm')"><span class="vink-box"></span><input type="checkbox" value="10" style="display:none">×10</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="2" style="display:none">×2</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="3" style="display:none">×3</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="4" style="display:none">×4</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="5" style="display:none">×5</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="6" style="display:none">×6</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="7" style="display:none">×7</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="8" style="display:none">×8</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="9" style="display:none">×9</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="10" style="display:none">×10</label>
               </div>
-
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Notatie</div>
               <div class="radio-groep" style="margin-bottom:10px">
                 <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-verm-notatie','vooraan',this)"><input type="radio" name="vs-verm-notatie" value="vooraan" checked>Tafel vooraan (2×3)</label>
                 <label class="radio-chip" onclick="App.selecteerRadio('vs-verm-notatie','achteraan',this)"><input type="radio" name="vs-verm-notatie" value="achteraan">Tafel achteraan (3×2)</label>
               </div>
-
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Getalbereik</div>
               <div class="radio-groep">
                 <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-verm-bereik','exe',this);vsUpdateNiveauZichtbaarheid()"><input type="radio" name="vs-verm-bereik" value="exe" checked>E×E (6×4)</label>
@@ -1097,19 +1095,26 @@
 
             <!-- Subzone Delen -->
             <div id="vs-sub-deel" style="display:none;border-top:1px solid #e0e8f5;padding-top:10px">
+              <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Getalbereik</div>
+              <div class="radio-groep" style="margin-bottom:10px">
+                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-deel-bereik','tee',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-bereik" value="tee" checked>TE÷E (84÷4)</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-bereik','htee',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-bereik" value="htee">HTE÷E (846÷4)</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-bereik','dhtee',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-bereik" value="dhtee">DHTE÷E (8046÷4)</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-bereik','tete',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-bereik" value="tete">TE÷TE (84÷12)</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-bereik','htete',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-bereik" value="htete">HTE÷TE (846÷25)</label>
+              </div>
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Welke deeltafels zijn al gekend?</div>
               <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px" id="vs-tafels-deel">
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="2" style="display:none">÷2</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="3" style="display:none">÷3</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="4" style="display:none">÷4</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="5" style="display:none">÷5</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="6" style="display:none">÷6</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="7" style="display:none">÷7</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="8" style="display:none">÷8</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="9" style="display:none">÷9</label>
-                <label class="vink-chip" onclick="vsToggleTafel(this,'deel')"><span class="vink-box"></span><input type="checkbox" value="10" style="display:none">÷10</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="2" style="display:none">÷2</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="3" style="display:none">÷3</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="4" style="display:none">÷4</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="5" style="display:none">÷5</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="6" style="display:none">÷6</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="7" style="display:none">÷7</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="8" style="display:none">÷8</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="9" style="display:none">÷9</label>
+                <label class="vink-chip" onclick="vsToggleTafel(this)"><span class="vink-box"></span><input type="checkbox" value="10" style="display:none">÷10</label>
               </div>
-
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Deelvisie</div>
               <div class="radio-groep" style="margin-bottom:6px">
                 <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-deel-visie','verdelen',this)"><input type="radio" name="vs-deel-visie" value="verdelen" checked>Eerlijk verdelen</label>
@@ -1118,17 +1123,20 @@
               <div id="vs-deel-uitleg" style="font-size:11px;color:#666;padding:5px 8px;background:#f5f5f5;border-radius:5px;margin-bottom:8px">
                 <span id="vs-deel-uitleg-tekst">Bv: verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?</span>
               </div>
-
               <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Notatie</div>
               <div class="radio-groep" style="margin-bottom:8px">
-                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-deel-notatie','vooraan',this)"><input type="radio" name="vs-deel-notatie" value="vooraan" checked>Tafel vooraan (10÷2)</label>
-                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-notatie','achteraan',this)"><input type="radio" name="vs-deel-notatie" value="achteraan">Tafel achteraan (2 in 10)</label>
+                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-deel-notatie','vooraan',this)"><input type="radio" name="vs-deel-notatie" value="vooraan" checked>Deeltal vooraan (84÷4)</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-notatie','achteraan',this)"><input type="radio" name="vs-deel-notatie" value="achteraan">Deler vooraan (4 in 84)</label>
+              </div>
+              <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:6px">Rest</div>
+              <div class="radio-groep" style="margin-bottom:8px">
+                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-deel-rest','nee',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-rest" value="nee" checked>Geen rest</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-deel-rest','ja',this);if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true)"><input type="radio" name="vs-deel-rest" value="ja">Rest toegestaan (R = ___)</label>
               </div>
               <div>
                 <button type="button" onclick="vsAccSluit(this)" style="padding:5px 14px;background:#1565c0;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer">✓ Klaar</button>
               </div>
             </div>
-
           </div>
         </div>
 
@@ -1284,7 +1292,7 @@
               Cijferschema past automatisch aan niveau aan.
             </div>
             <div id="vs-cijfer-delen-melding" style="display:none;margin-bottom:8px;font-size:11px;color:#b45309;padding:6px 8px;background:#fef9c3;border-radius:6px;border:1px solid #fde68a">
-              🚧 Cijferschema voor deling wordt binnenkort gebouwd. In de PDF verschijnt een tijdelijke melding.
+              💡 Wil je een ander type cijferschema voor deling? Stuur een mailtje naar <a href="mailto:zebrapost@jufzisa.be" style="color:#1565c0;font-weight:600">zebrapost@jufzisa.be</a>
             </div>
             <div style="margin-top:8px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">&#x270D;&#xFE0F; Antwoordzin</div>
             <div class="radio-groep" style="margin-bottom:8px">
@@ -1372,9 +1380,9 @@
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
-<script src="preview.js?v=36"></script>
-<script src="pdf-engine.js?v=47"></script>
-<script src="vraagstukken.js?v=27"></script>
+<script src="preview.js?v=41"></script>
+<script src="pdf-engine.js?v=51"></script>
+<script src="vraagstukken.js?v=32"></script>
 <script src="app.js?v=20"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
@@ -1455,6 +1463,37 @@ function scrollTabsLeft(){
 
 </script>
 
+<!-- Uitleg modal -->
+<div id="vs-uitleg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:28px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+    <h2 style="color:#1565c0;margin:0 0 16px;font-size:18px">📖 Hoe werken AI Vraagstukken?</h2>
+    <p style="font-size:13px;color:#333;line-height:1.7;margin:0 0 12px">De AI genereert automatisch wiskundige vraagstukken op maat van jouw klas.</p>
+    <div style="background:#e8f0fe;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-weight:700;color:#1565c0;font-size:13px;margin-bottom:8px">📋 Stap voor stap:</div>
+      <div style="font-size:13px;color:#333;line-height:2">
+        <div>1️⃣ <b>Klik op een sectie</b> om je keuze te maken</div>
+        <div>2️⃣ Na je keuze <b>klapt de sectie automatisch dicht</b></div>
+        <div>3️⃣ Klik op <b>✨ Genereer vraagstuk</b></div>
+        <div>4️⃣ Bekijk het vraagstuk in de sidebar</div>
+        <div>5️⃣ Klik op <b>＋ Voeg toe aan bundel</b></div>
+        <div>6️⃣ Herhaal voor meer vraagstukken</div>
+        <div>7️⃣ Download als <b>PDF</b></div>
+      </div>
+    </div>
+    <div style="background:#e8f5e9;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-weight:700;color:#2e7d32;font-size:13px;margin-bottom:6px">💡 Tips:</div>
+      <div style="font-size:13px;color:#333;line-height:1.8">
+        <div>• Thema en soort berekening zijn optioneel</div>
+        <div>• Bij Helft/dubbel kies je geheel getal of komma mag</div>
+        <div>• Bij Geld kies je euro+cent, enkel € of wisselgeld</div>
+        <div>• Je hebt 30 genereringen per dag</div>
+        <div>• <b>Schema ververst niet automatisch</b> bij wijzigingen aan bereik of rest — klik het schema-vinkje even uit en terug aan om de preview bij te werken</div>
+      </div>
+    </div>
+    <button onclick="document.getElementById('vs-uitleg-modal').style.display='none'" style="width:100%;padding:10px;background:#1565c0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">✓ Begrepen, aan de slag!</button>
+  </div>
+</div>
+
 <style>
 .vs-acc-blok{border:1.5px solid #e0e8f5;border-radius:8px;margin-bottom:6px;overflow:hidden}
 .vs-acc-header{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#f5f8ff;cursor:pointer;user-select:none}
@@ -1467,45 +1506,6 @@ function scrollTabsLeft(){
 .vs-acc-body{padding:10px 12px;background:#fff;border-top:1px solid #e0e8f5}
 </style>
 <script>
-function vsToggleVermDeel(type){
-  var v=document.getElementById('vs-sub-verm'),d=document.getElementById('vs-sub-deel');
-  if(v) v.style.display=type==='verm'?'':'none';
-  if(d) d.style.display=type==='deel'?'':'none';
-  // Melding bij cijferschema voor delen
-  var melding=document.getElementById('vs-cijfer-delen-melding');
-  if(melding) melding.style.display=type==='deel'?'':'none';
-  // Niveau-blok verbergen bij verm/deel (niveau bepaald door tafels/bereik)
-  vsUpdateNiveauZichtbaarheid();
-}
-function vsUpdateNiveauZichtbaarheid(){
-  var bew = document.querySelector('input[name="vs-bewerking"]:checked');
-  var bereik = document.querySelector('input[name="vs-verm-bereik"]:checked');
-  var blok = document.getElementById('vs-blok-niveau');
-  if(!blok) return;
-  var verberg = false;
-  if(bew && bew.value==='vermenigvuldigen'){
-    var geenNiveau = ['exe','txe'].includes(bereik ? bereik.value : 'exe');
-    verberg = geenNiveau;
-  } else if(bew && bew.value==='delen'){
-    verberg = true;
-  }
-  blok.style.display = verberg ? 'none' : '';
-  // Schema preview updaten als bereik wijzigt
-  if(window.VraagstukkenModule) VraagstukkenModule._toonSchemaVoorbeeld();
-}
-function vsToggleTafel(el){
-  el.classList.toggle('geselecteerd');
-  var cb=el.querySelector('input');cb.checked=!cb.checked;
-  var box=el.querySelector('.vink-box');if(box)box.textContent=cb.checked?'\u2713':'';
-}
-document.addEventListener('change',function(e){
-  if(e.target.name==='vs-deel-visie'){
-    var t=document.getElementById('vs-deel-uitleg-tekst');if(!t)return;
-    t.textContent=e.target.value==='verdelen'
-      ?'Bv: verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?'
-      :'Bv: je hebt 10 snoepjes en stopt ze per 2 in een zakje — hoeveel zakjes?';
-  }
-});
 function vsAccToggle(h){
   var b=h.closest('.vs-acc-blok'),bo=b.querySelector('.vs-acc-body'),open=b.classList.contains('open');
   document.querySelectorAll('.vs-acc-blok.open').forEach(function(x){x.classList.remove('open');x.querySelector('.vs-acc-body').style.display='none';});
@@ -1519,6 +1519,38 @@ function vsSetWaarde(id,t){
   var el=document.getElementById(id);if(!el)return;
   el.textContent=t;el.style.color=t==='geen'?'#aaa':'#1565c0';el.style.fontStyle=t==='geen'?'italic':'normal';
 }
+function vsToggleVermDeel(type){
+  var v=document.getElementById('vs-sub-verm'),d=document.getElementById('vs-sub-deel');
+  if(v)v.style.display=type==='verm'?'':'none';
+  if(d)d.style.display=type==='deel'?'':'none';
+  var m=document.getElementById('vs-cijfer-delen-melding');
+  if(m)m.style.display=type==='deel'?'':'none';
+  vsUpdateNiveauZichtbaarheid();
+}
+function vsUpdateNiveauZichtbaarheid(){
+  var bew=document.querySelector('input[name="vs-bewerking"]:checked');
+  var bereik=document.querySelector('input[name="vs-verm-bereik"]:checked');
+  var blok=document.getElementById('vs-blok-niveau');
+  if(!blok)return;
+  var verberg=false;
+  if(bew&&bew.value==='vermenigvuldigen'){
+    verberg=['exe','txe'].includes(bereik?bereik.value:'exe');
+  }else if(bew&&bew.value==='delen'){verberg=true;}
+  blok.style.display=verberg?'none':'';
+}
+function vsToggleTafel(el){
+  el.classList.toggle('geselecteerd');
+  var cb=el.querySelector('input');cb.checked=!cb.checked;
+  var box=el.querySelector('.vink-box');if(box)box.textContent=cb.checked?'✓':'';
+}
+document.addEventListener('change',function(e){
+  if(e.target.name==='vs-deel-visie'){
+    var t=document.getElementById('vs-deel-uitleg-tekst');if(!t)return;
+    t.textContent=e.target.value==='verdelen'
+      ?'Bv: verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?'
+      :'Bv: je hebt 10 snoepjes en stopt ze per 2 in een zakje — hoeveel zakjes?';
+  }
+});
 function vsToggleSchema(type){
   var rCb=document.getElementById('vs-schema-rooster'),cCb=document.getElementById('vs-schema-cijfer');
   var rBtn=document.getElementById('btn-schema-rooster'),cBtn=document.getElementById('btn-schema-cijfer');
@@ -1535,7 +1567,7 @@ function vsToggleSchema(type){
   }
   var r=document.getElementById('vs-schema-rooster').checked,c=document.getElementById('vs-schema-cijfer').checked;
   vsSetWaarde('vs-val-schema',[r?'Rooster':'',c?'Cijferend':''].filter(Boolean).join(' + ')||'geen');
-  if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld();
+  if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld(true);
 }
 function vsHideAllSub(){['vs-geld-subkeuze','vs-helft-subkeuze','vs-procent-subkeuze'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});}
 function vsKiesGeld(el){
@@ -1581,53 +1613,5 @@ function vsKiesProcentSub(w,l,el){
   document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Procent: '+l);
 }
 </script>
-<!-- ── UITLEG MODAL VRAAGSTUKKEN ─────────────────────────────── -->
-<div id="vs-uitleg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center">
-  <div style="background:#fff;border-radius:12px;padding:28px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
-    <h2 style="color:#1565c0;margin:0 0 16px;font-size:18px">📖 Hoe werken AI Vraagstukken?</h2>
-
-    <p style="font-size:13px;color:#333;line-height:1.7;margin:0 0 12px">
-      De AI genereert automatisch wiskundige vraagstukken op maat van jouw klas. Je stelt zelf in op welk niveau en met welk thema.
-    </p>
-
-    <div style="background:#e8f0fe;border-radius:8px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-weight:700;color:#1565c0;font-size:13px;margin-bottom:8px">📋 Stap voor stap:</div>
-      <div style="font-size:13px;color:#333;line-height:2">
-        <div>1️⃣ <b>Klik op een sectie</b> om je keuze te maken (leerjaar, bewerking…)</div>
-        <div>2️⃣ Na je keuze <b>klapt de sectie automatisch dicht</b></div>
-        <div>3️⃣ Klik op <b>✨ Genereer vraagstuk</b></div>
-        <div>4️⃣ Bekijk het vraagstuk + schema in de sidebar</div>
-        <div>5️⃣ Klik op <b>＋ Voeg toe aan bundel</b> om het te bewaren</div>
-        <div>6️⃣ Herhaal voor meer vraagstukken — ze komen rechts te staan</div>
-        <div>7️⃣ Download alles als <b>PDF</b></div>
-      </div>
-    </div>
-
-    <div style="background:#e8f5e9;border-radius:8px;padding:12px 14px;margin-bottom:12px">
-      <div style="font-weight:700;color:#2e7d32;font-size:13px;margin-bottom:6px">💡 Tips:</div>
-      <div style="font-size:13px;color:#333;line-height:1.8">
-        <div>• <b>Thema</b> en <b>soort berekening</b> zijn optioneel — laat ze leeg voor meer variatie</div>
-        <div>• Bij <b>Helft/dubbel</b> kies je of de uitkomst een geheel getal moet zijn (veilig voor lager leerjaar)</div>
-        <div>• Bij <b>Geld</b> kies je of je met cent werkt of enkel hele euro's</div>
-        <div>• Je kan meerdere vraagstukken tegelijk genereren (keuze bij Schema)</div>
-        <div>• Je hebt <b>30 genereringen per dag</b></div>
-      </div>
-    </div>
-
-    <div style="background:#fff8e1;border-radius:8px;padding:12px 14px;margin-bottom:16px">
-      <div style="font-weight:700;color:#f57f17;font-size:13px;margin-bottom:6px">📐 Schema's:</div>
-      <div style="font-size:13px;color:#333;line-height:1.8">
-        <div>• <b>Rooster + bewerking</b> — telrooster met schrijflijnen naast het vraagstuk</div>
-        <div>• <b>Cijferend schema</b> — kolommen (H, T, E…) om cijferend te werken</div>
-        <div>• Je kan beide tegelijk aanvinken</div>
-      </div>
-    </div>
-
-    <button onclick="document.getElementById('vs-uitleg-modal').style.display='none'" style="width:100%;padding:10px;background:#1565c0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
-      ✓ Begrepen, aan de slag!
-    </button>
-  </div>
-</div>
-
 </body>
 </html>
