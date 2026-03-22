@@ -36,6 +36,7 @@ window.VraagstukkenModule = (() => {
   function leesInstellingen() {
     const bewerking = document.querySelector('input[name="vs-bewerking"]:checked')?.value || 'optellen';
     const niveau = document.querySelector('input[name="vs-niveau"]:checked')?.value || 'tot20';
+    const brug = document.querySelector('input[name="vs-brug"]:checked')?.value || 'zonder';
     const leerjaar = document.querySelector('input[name="vs-leerjaar"]:checked')?.value || '2';
     const aantalGetallen = document.querySelector('input[name="vs-aantalgetallen"]:checked')?.value || '2';
     const thema = document.getElementById('vs-thema')?.value.trim() || '';
@@ -69,7 +70,7 @@ window.VraagstukkenModule = (() => {
     const deelBereik  = document.querySelector('input[name="vs-deel-bereik"]:checked')?.value  || 'tee';
     const deelRest    = document.querySelector('input[name="vs-deel-rest"]:checked')?.value    || 'nee';
 
-    return { bewerking, niveau, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie, deelBereik, deelRest };
+    return { bewerking, niveau, brug, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie, deelBereik, deelRest };
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
@@ -127,6 +128,22 @@ window.VraagstukkenModule = (() => {
     const berekeningInstructie = inst.berekening
       ? `- Soort berekening: het vraagstuk moet gaan over "${inst.berekening}"`
       : '';
+
+    // Brug-instructie voor optellen en aftrekken
+    let brugInstructie = '';
+    if ((inst.bewerking === 'optellen' || inst.bewerking === 'aftrekken') &&
+        ['tot20','tot100','tot1000','tot10000','tot100000'].includes(inst.niveau)) {
+      if (inst.brug === 'zonder') {
+        brugInstructie = inst.bewerking === 'optellen'
+          ? '- ZONDER BRUG: de som van de eenheden van beide getallen mag NIET groter zijn dan 9. Bv. 35 + 14 is OK (5+4=9), maar 35 + 17 is NIET OK (5+7=12 overschrijdt het tiental).'
+          : '- ZONDER BRUG: de aftrekking van de eenheden moet mogelijk zijn zonder lenen. Bv. 35 - 12 is OK (5-2=3), maar 35 - 19 is NIET OK (5-9 kan niet zonder lenen).';
+      } else if (inst.brug === 'met') {
+        brugInstructie = inst.bewerking === 'optellen'
+          ? '- MET BRUG: de som van de eenheden van beide getallen MOET groter zijn dan 9 zodat er over het tiental gegaan wordt. Bv. 35 + 17 (5+7=12, brug over tiental).'
+          : '- MET BRUG: de aftrekking MOET lenen vereisen. Bv. 35 - 19 (5-9 kan niet, moet lenen van tientallen).';
+      }
+      // bij 'beide': geen extra instructie, AI kiest zelf
+    }
 
     // Tafels / notatie / bereik voor vermenigvuldigen
     let vermInstructie = '';
@@ -214,6 +231,7 @@ ${niveauInstructie}
 - Aantal getallen: ${aantalGetallenLabel}
 ${themaInstructie}
 ${berekeningInstructie ? berekeningInstructie : ''}
+${brugInstructie ? brugInstructie : ''}
 ${vermInstructie ? vermInstructie : ''}
 ${deelInstructie ? deelInstructie : ''}
 ${variatieInstructie}
