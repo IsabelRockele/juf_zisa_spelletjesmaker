@@ -47,7 +47,7 @@ function addSectie() {
     };
 
     const opdrachtzinnen = {
-        tellen:          'Met hoeveel blokken is elk bouwsel gemaakt? Er staan geen blokken verstopt achter het bouwsel.',
+        tellen:          'Met hoeveel blokken is elk bouwsel gemaakt?|Er staan geen blokken verstopt achter het bouwsel.',
         grondplan_invul: 'Vul het grondplan in. Schrijf in elk vakje hoeveel blokjes er op die plek op elkaar staan.',
         grondplan_koppel:'Verbind elk grondplan met het juiste bouwsel.',
         aanzichten:      'Bekijk het bouwsel goed. Kruis het juiste aanzicht aan.',
@@ -64,7 +64,7 @@ function addSectie() {
             '<span class="opdracht-zin-deel" contenteditable="true">' + zin.trim() + '</span></span>'
         ).join('');
     } else {
-        opdrachtHTML = '<span class="opdracht-zin" contenteditable="true">' + opdracht + '</span>';
+        opdrachtHTML = '<span class="opdracht-zin" contenteditable="true">' + opdracht.replace(/\|/g, '\n') + '</span>';
     }
 
     sectieDiv.innerHTML = `
@@ -355,13 +355,18 @@ function renderAanzichtenOefening(kader, bouwsel, niveau, schema) {
         optieDiv.dataset.richting = richting;
         optieDiv.dataset.correct = (richting === gevraagd) ? 'ja' : 'nee';
 
+        // Canvas in wrap zodat er geen transparante ruimte rondom is
+        const canvasWrap = document.createElement('div');
+        canvasWrap.className = 'aanzicht-canvas-wrap';
+        const aCanvas = document.createElement('canvas');
+        aCanvas.className = 'aanzicht-canvas';
+        canvasWrap.appendChild(aCanvas);
+        optieDiv.appendChild(canvasWrap);
+
+        // Hokje ONDER het aanzicht
         const checkbox = document.createElement('div');
         checkbox.className = 'aanzicht-checkbox';
         optieDiv.appendChild(checkbox);
-
-        const aCanvas = document.createElement('canvas');
-        aCanvas.className = 'aanzicht-canvas';
-        optieDiv.appendChild(aCanvas);
 
         aanzichtenWrap.appendChild(optieDiv);
 
@@ -385,6 +390,18 @@ function renderAanzichtenOefening(kader, bouwsel, niveau, schema) {
     oplAanzicht.innerHTML = '✓ Het juiste aanzicht is het <strong>' + namen[gevraagd] + '</strong>-aanzicht';
     wrapper.appendChild(oplAanzicht);
 
+    // Markeer het correcte aanzicht voor oplossing-weergave in preview
+    // Zoek de optie met de gevraagde richting en voeg data-correct toe
+    requestAnimationFrame(() => {
+        const alleOpties = wrapper.querySelectorAll('.aanzicht-optie');
+        alleOpties.forEach(opt => {
+            const ac = opt.querySelector('.aanzicht-canvas');
+            if (ac && ac.dataset.richting === gevraagd) {
+                opt.dataset.correct = '1';
+            }
+        });
+    });
+
     kader.appendChild(wrapper);
 }
 
@@ -392,7 +409,6 @@ function renderAanzichtenOefening(kader, bouwsel, niveau, schema) {
 // AANZICHT RENDEREN — 1 vaste kleur per bouwsel
 // ─────────────────────────────────────────────
 function renderAanzichtGekleurd(canvas, hmap, richting, eenKleur) {
-    // eenKleur = { voor, boven, rand } — 1 kleur voor heel het bouwsel
     const BR = window.BlokkenRenderer;
     const silhouet = BR.berekenAanzicht(hmap, richting);
     const maxH    = silhouet.length;
@@ -401,20 +417,41 @@ function renderAanzichtGekleurd(canvas, hmap, richting, eenKleur) {
 
     const CEL = 20;
     const TOP = Math.round(CEL * 0.25);
-    const pad = 4;
-    canvas.width  = breedte * CEL + pad * 2;
-    canvas.height = maxH * CEL + TOP + pad * 2;
+    const pad = 3;
+
+    // Bepaal hoeveel kolommen effectief gevuld zijn (trim lege kolommen)
+    let minKol = breedte, maxKol = 0;
+    for (let z = 0; z < maxH; z++) {
+        for (let k = 0; k < breedte; k++) {
+            if (silhouet[z][k]) {
+                if (k < minKol) minKol = k;
+                if (k > maxKol) maxKol = k;
+            }
+        }
+    }
+    // Bepaal hoeveel rijen effectief gevuld zijn
+    let maxRij = 0;
+    for (let z = 0; z < maxH; z++) {
+        for (let k = 0; k < breedte; k++) {
+            if (silhouet[z][k] && z > maxRij) maxRij = z;
+        }
+    }
+    const effectiefBreedte = maxKol - minKol + 1;
+    const effectiefHoogte  = maxRij + 1;
+
+    canvas.width  = effectiefBreedte * CEL + pad * 2;
+    canvas.height = effectiefHoogte  * CEL + TOP + pad * 2;
+    const offsetK = minKol;  // verschuiving voor tekenen
 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for (let k = 0; k < breedte; k++) {
-        // Zoek de hoogte van deze kolom: hoogste z waar silhouet[z][k] true is
+    for (let k = minKol; k <= maxKol; k++) {
         let hoogte = 0;
         for (let z = 0; z < maxH; z++) if (silhouet[z][k]) hoogte = z + 1;
 
         for (let z = 0; z < hoogte; z++) {
-            const cx = pad + k * CEL;
+            const cx = pad + (k - offsetK) * CEL;
             const cy = canvas.height - pad - (z + 1) * CEL - TOP;
 
             // Voorvlak
@@ -563,6 +600,7 @@ function renderPijlenpadOefening(kader, niveau) {
     oplLabel.textContent = '✓ Oplossing — ' + figuur.naam + ':';
     oplWrap.appendChild(oplLabel);
     const oplCanvas = document.createElement('canvas');
+    oplCanvas.className = 'pijlenpad-oplossing-canvas';
     tekenRuitjesPapier(oplCanvas, figuur.gridSize, figuur.pts, figuur.startX, figuur.startY);
     oplWrap.appendChild(oplCanvas);
     wrapper.appendChild(oplWrap);
