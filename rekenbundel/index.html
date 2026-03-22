@@ -1017,10 +1017,12 @@
 
       <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0 6px">
         <label style="font-weight:700;color:#1565c0;font-size:14px">✨ AI Vraagstukken</label>
-        <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button onclick="document.getElementById('vs-uitleg-modal').style.display='flex'" style="padding:3px 10px;border-radius:12px;border:1.5px solid #90caf9;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:600;cursor:pointer">❓ Uitleg</button>
+          <span id="vs-limiet-badge" class="vs-limiet-badge">?/30 vandaag</span>
+        </div>
       </div>
 
-      <!-- ═══ ACCORDEON ═══ -->
       <div id="vs-accordeon">
 
         <!-- 1. Leerjaar -->
@@ -1109,7 +1111,6 @@
               <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','3',this);vsAccSluit(this);vsSetWaarde('vs-val-aantal','3 getallen')"><input type="radio" name="vs-aantalgetallen" value="3">3 getallen</label>
               <label class="radio-chip" onclick="App.selecteerRadio('vs-aantalgetallen','gemengd',this);vsAccSluit(this);vsSetWaarde('vs-val-aantal','Gemengd')"><input type="radio" name="vs-aantalgetallen" value="gemengd">Gemengd</label>
             </div>
-            <!-- Tafels: enkel bij verm/delen -->
             <div id="vs-kaart-tafels" style="display:none;margin-top:8px">
               <div style="font-size:11px;color:#888;margin-bottom:4px">Tafels:</div>
               <div class="checkbox-groep">
@@ -1134,6 +1135,8 @@
             <div class="vs-thema-chips" style="margin-bottom:6px">
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Pasen',this);vsSetWaarde('vs-val-thema','Pasen')">🐣 Pasen</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Kerst',this);vsSetWaarde('vs-val-thema','Kerst')">🎄 Kerst</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Kerstmis met cadeaus en kerstsokken',this);vsSetWaarde('vs-val-thema','Kerstmis')">🎅 Kerstmis</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Sinterklaas met pepernoten, cadeaus en pieten',this);vsSetWaarde('vs-val-thema','Sinterklaas')">🪅 Sinterklaas</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Lente',this);vsSetWaarde('vs-val-thema','Lente')">🌸 Lente</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Herfst',this);vsSetWaarde('vs-val-thema','Herfst')">🍂 Herfst</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesThema('Winkel',this);vsSetWaarde('vs-val-thema','Winkel')">🛒 Winkel</button>
@@ -1161,8 +1164,9 @@
               <button type="button" class="vs-thema-chip" id="chip-geld" onclick="vsKiesGeld(this)">💶 Geld</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('tijd berekenen',this);vsSetWaarde('vs-val-berekening','Tijd')">🕐 Tijd</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gewicht of inhoud berekenen',this);vsSetWaarde('vs-val-berekening','Gewicht')">⚖️ Gewicht</button>
-              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('helft of dubbel berekenen',this);vsSetWaarde('vs-val-berekening','Helft/dubbel')">✌️ Helft/dubbel</button>
-              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gemiddelde berekenen',this);vsSetWaarde('vs-val-berekening','Gemiddelde')">📊 Gemiddelde</button>
+              <button type="button" class="vs-thema-chip" id="chip-helft" onclick="vsKiesHelft(this)">✌️ Helft/dubbel</button>
+              <button type="button" class="vs-thema-chip" id="chip-procent" onclick="vsKiesProcent(this)">📊 Percentages</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gemiddelde berekenen',this);vsSetWaarde('vs-val-berekening','Gemiddelde')">📈 Gemiddelde</button>
             </div>
             <div id="vs-geld-subkeuze" style="display:none;margin-bottom:6px;padding:6px 8px;background:#f0f4ff;border-radius:6px;border:1px solid #c5cae9;font-size:12px">
               <div style="font-weight:600;color:#555;margin-bottom:4px">Geld:</div>
@@ -1173,11 +1177,25 @@
                 <button type="button" onclick="vsKiesGeldSub('wisselgeld berekenen (hoeveel terug na betalen)','Wisselgeld',this)" style="padding:3px 8px;border-radius:12px;border:1.5px solid #ddd;background:#fff;color:#333;font-size:11px;font-weight:600;cursor:pointer">Wisselgeld</button>
               </div>
             </div>
+            <div id="vs-helft-subkeuze" style="display:none;margin-bottom:6px;padding:6px 8px;background:#f0f4ff;border-radius:6px;border:1px solid #c5cae9;font-size:12px">
+              <div style="font-weight:600;color:#555;margin-bottom:4px">Helft/dubbel:</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <button type="button" onclick="vsKiesHelfSub('helft of dubbel berekenen, uitkomst moet altijd een geheel getal zijn','Geheel getal',this)" style="padding:3px 8px;border-radius:12px;border:1.5px solid #1565c0;background:#1565c0;color:#fff;font-size:11px;font-weight:600;cursor:pointer">Altijd geheel getal</button>
+                <button type="button" onclick="vsKiesHelfSub('helft of dubbel berekenen, kommagetallen zijn toegestaan','Komma mag',this)" style="padding:3px 8px;border-radius:12px;border:1.5px solid #ddd;background:#fff;color:#333;font-size:11px;font-weight:600;cursor:pointer">Komma mag</button>
+              </div>
+            </div>
+            <div id="vs-procent-subkeuze" style="display:none;margin-bottom:6px;padding:6px 8px;background:#f0f4ff;border-radius:6px;border:1px solid #c5cae9;font-size:12px">
+              <div style="font-weight:600;color:#555;margin-bottom:4px">Percentages:</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <button type="button" onclick="vsKiesProcentSub('percentages berekenen, uitkomst moet altijd een geheel getal zijn (bv. 50%, 25%, 10%)','Geheel getal',this)" style="padding:3px 8px;border-radius:12px;border:1.5px solid #1565c0;background:#1565c0;color:#fff;font-size:11px;font-weight:600;cursor:pointer">Altijd geheel getal</button>
+                <button type="button" onclick="vsKiesProcentSub('percentages berekenen, kommagetallen zijn toegestaan','Komma mag',this)" style="padding:3px 8px;border-radius:12px;border:1.5px solid #ddd;background:#fff;color:#333;font-size:11px;font-weight:600;cursor:pointer">Komma mag</button>
+              </div>
+            </div>
             <input type="text" id="vs-berekening" placeholder="Of typ zelf..." style="width:100%;padding:5px 8px;border:1.5px solid #ddd;border-radius:6px;font-size:12px" oninput="vsSetWaarde('vs-val-berekening',this.value||'geen')"/>
           </div>
         </div>
 
-        <!-- 7. Schema -->
+        <!-- 7. Schema + Antwoordzin + Aantal -->
         <div class="vs-acc-blok">
           <div class="vs-acc-header" onclick="vsAccToggle(this)">
             <span class="vs-acc-label">📐 Schema</span>
@@ -1186,20 +1204,20 @@
           </div>
           <div class="vs-acc-body" style="display:none">
             <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">
-              <button type="button" id="btn-schema-rooster" style="padding:6px 12px;border-radius:16px;border:2px solid #1565c0;background:#1565c0;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="vsToggleSchema('rooster')">✓ Rooster</button>
+              <button type="button" id="btn-schema-rooster" style="padding:6px 12px;border-radius:16px;border:2px solid #1565c0;background:#1565c0;color:#fff;font-size:12px;font-weight:600;cursor:pointer" onclick="vsToggleSchema('rooster')">&#x2713; Rooster</button>
               <button type="button" id="btn-schema-cijfer" style="padding:6px 12px;border-radius:16px;border:2px solid #ddd;background:#fff;color:#333;font-size:12px;font-weight:600;cursor:pointer" onclick="vsToggleSchema('cijfer')">Cijferend</button>
             </div>
             <input type="checkbox" id="vs-schema-rooster" name="vs-schema" value="rooster" checked style="display:none">
             <input type="checkbox" id="vs-schema-cijfer" name="vs-schema" value="cijfer" style="display:none">
-            <div id="vs-cijfer-opties" style="display:none;font-size:11px;color:#555;padding:4px 6px;background:#f0f4ff;border-radius:4px">
+            <div id="vs-cijfer-opties" style="display:none;margin-bottom:8px;font-size:11px;color:#555;padding:4px 6px;background:#f0f4ff;border-radius:4px">
               Cijferschema past automatisch aan niveau aan.
             </div>
-            <div style="margin-top:10px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">✍️ Antwoordzin</div>
+            <div style="margin-top:8px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">&#x270D;&#xFE0F; Antwoordzin</div>
             <div class="radio-groep" style="margin-bottom:8px">
               <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-antwoordzin','deels',this)"><input type="radio" name="vs-antwoordzin" value="deels" checked>Deels (___)</label>
               <label class="radio-chip" onclick="App.selecteerRadio('vs-antwoordzin','leeg',this)"><input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn</label>
             </div>
-            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">📦 Aantal vraagstukken</div>
+            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">&#x1F4E6; Aantal</div>
             <select id="vs-aantal-bulk" style="padding:4px 8px;border-radius:6px;border:1.5px solid #ddd;font-size:12px">
               <option value="1" selected>1 vraagstuk</option>
               <option value="2">2 vraagstukken</option>
@@ -1211,12 +1229,10 @@
 
       </div><!-- /vs-accordeon -->
 
-      <!-- Genereer knop -->
       <button id="vs-btn-genereer" class="vs-btn-genereer" style="margin-top:10px" onclick="VraagstukkenModule.genereer()">
-        ✨ Genereer vraagstuk
+        &#x2728; Genereer vraagstuk
       </button>
 
-      <!-- Preview sidebar -->
       <div class="vs-preview-sectie">
         <div class="vs-preview-label">Gegenereerd vraagstuk</div>
         <div id="vs-preview">
@@ -1224,9 +1240,8 @@
         </div>
       </div>
 
-      <!-- Bundel lijst -->
       <div class="vs-bundel-header">
-        <span class="vs-bundel-titel">📋 Toegevoegd aan bundel</span>
+        <span class="vs-bundel-titel">&#x1F4CB; Toegevoegd aan bundel</span>
         <span id="vs-bundel-teller">0 vraagstukken</span>
       </div>
       <div id="vs-bundel-lijst" class="vs-bundel-lijst">
@@ -1284,8 +1299,8 @@
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
 <script src="preview.js?v=34"></script>
-<script src="pdf-engine.js?v=42"></script>
-<script src="vraagstukken.js?v=18"></script>
+<script src="pdf-engine.js?v=43"></script>
+<script src="vraagstukken.js?v=19"></script>
 <script src="app.js?v=20"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
@@ -1365,71 +1380,141 @@ function scrollTabsLeft(){
 }
 
 </script>
+
 <style>
-.vs-acc-blok { border:1.5px solid #e0e8f5; border-radius:8px; margin-bottom:6px; overflow:hidden; }
-.vs-acc-header { display:flex; align-items:center; gap:6px; padding:10px 12px; background:#f5f8ff; cursor:pointer; user-select:none; }
-.vs-acc-header:hover { background:#e8f0fe; }
-.vs-acc-blok.open .vs-acc-header { background:#e3ecfd; }
-.vs-acc-label { font-size:13px; font-weight:700; color:#1a237e; flex:1; }
-.vs-acc-waarde { font-size:12px; color:#1565c0; font-weight:600; background:#dde9ff; padding:2px 8px; border-radius:10px; max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.vs-acc-pijl { font-size:11px; color:#888; transition:transform 0.2s; }
-.vs-acc-blok.open .vs-acc-pijl { transform:rotate(180deg); }
-.vs-acc-body { padding:10px 12px; background:#fff; border-top:1px solid #e0e8f5; }
+.vs-acc-blok{border:1.5px solid #e0e8f5;border-radius:8px;margin-bottom:6px;overflow:hidden}
+.vs-acc-header{display:flex;align-items:center;gap:6px;padding:10px 12px;background:#f5f8ff;cursor:pointer;user-select:none}
+.vs-acc-header:hover{background:#e8f0fe}
+.vs-acc-blok.open .vs-acc-header{background:#e3ecfd}
+.vs-acc-label{font-size:13px;font-weight:700;color:#1a237e;flex:1}
+.vs-acc-waarde{font-size:12px;color:#1565c0;font-weight:600;background:#dde9ff;padding:2px 8px;border-radius:10px;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vs-acc-pijl{font-size:11px;color:#888;transition:transform 0.2s}
+.vs-acc-blok.open .vs-acc-pijl{transform:rotate(180deg)}
+.vs-acc-body{padding:10px 12px;background:#fff;border-top:1px solid #e0e8f5}
 </style>
 <script>
-function vsAccToggle(header) {
-  var blok = header.closest('.vs-acc-blok');
-  var body = blok.querySelector('.vs-acc-body');
-  var isOpen = blok.classList.contains('open');
-  document.querySelectorAll('.vs-acc-blok.open').forEach(function(b) {
-    b.classList.remove('open');
-    b.querySelector('.vs-acc-body').style.display = 'none';
-  });
-  if (!isOpen) { blok.classList.add('open'); body.style.display = ''; }
+function vsAccToggle(h){
+  var b=h.closest('.vs-acc-blok'),bo=b.querySelector('.vs-acc-body'),open=b.classList.contains('open');
+  document.querySelectorAll('.vs-acc-blok.open').forEach(function(x){x.classList.remove('open');x.querySelector('.vs-acc-body').style.display='none';});
+  if(!open){b.classList.add('open');bo.style.display='';}
 }
-function vsAccSluit(el) {
-  var blok = el.closest('.vs-acc-blok');
-  if (blok) { blok.classList.remove('open'); blok.querySelector('.vs-acc-body').style.display = 'none'; }
+function vsAccSluit(el){
+  var b=el.closest('.vs-acc-blok');
+  if(b){b.classList.remove('open');b.querySelector('.vs-acc-body').style.display='none';}
 }
-function vsSetWaarde(id, tekst) {
-  var el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = tekst;
-  el.style.color = (tekst === 'geen') ? '#aaa' : '#1565c0';
-  el.style.fontStyle = (tekst === 'geen') ? 'italic' : 'normal';
+function vsSetWaarde(id,t){
+  var el=document.getElementById(id);if(!el)return;
+  el.textContent=t;el.style.color=t==='geen'?'#aaa':'#1565c0';el.style.fontStyle=t==='geen'?'italic':'normal';
 }
-function vsToggleSchema(type) {
-  var rCb=document.getElementById('vs-schema-rooster'), cCb=document.getElementById('vs-schema-cijfer');
-  var rBtn=document.getElementById('btn-schema-rooster'), cBtn=document.getElementById('btn-schema-cijfer');
+function vsToggleSchema(type){
+  var rCb=document.getElementById('vs-schema-rooster'),cCb=document.getElementById('vs-schema-cijfer');
+  var rBtn=document.getElementById('btn-schema-rooster'),cBtn=document.getElementById('btn-schema-cijfer');
   var cOpt=document.getElementById('vs-cijfer-opties');
-  if (type==='rooster') {
-    rCb.checked=!rCb.checked; var a=rCb.checked;
-    rBtn.style.background=a?'#1565c0':'#fff'; rBtn.style.color=a?'#fff':'#333';
-    rBtn.style.borderColor=a?'#1565c0':'#ddd'; rBtn.textContent=(a?'\u2713 ':'')+'Rooster';
-  } else {
-    cCb.checked=!cCb.checked; var a=cCb.checked;
-    cBtn.style.background=a?'#1565c0':'#fff'; cBtn.style.color=a?'#fff':'#333';
-    cBtn.style.borderColor=a?'#1565c0':'#ddd'; cBtn.textContent=(a?'\u2713 ':'')+'Cijferend';
-    if(cOpt) cOpt.style.display=a?'':'none';
+  if(type==='rooster'){
+    rCb.checked=!rCb.checked;var a=rCb.checked;
+    rBtn.style.background=a?'#1565c0':'#fff';rBtn.style.color=a?'#fff':'#333';
+    rBtn.style.borderColor=a?'#1565c0':'#ddd';rBtn.textContent=(a?'✓ ':'')+'Rooster';
+  }else{
+    cCb.checked=!cCb.checked;var a=cCb.checked;
+    cBtn.style.background=a?'#1565c0':'#fff';cBtn.style.color=a?'#fff':'#333';
+    cBtn.style.borderColor=a?'#1565c0':'#ddd';cBtn.textContent=(a?'✓ ':'')+'Cijferend';
+    if(cOpt)cOpt.style.display=a?'':'none';
   }
-  var r=document.getElementById('vs-schema-rooster')?.checked;
-  var c=document.getElementById('vs-schema-cijfer')?.checked;
+  var r=document.getElementById('vs-schema-rooster').checked,c=document.getElementById('vs-schema-cijfer').checked;
   vsSetWaarde('vs-val-schema',[r?'Rooster':'',c?'Cijferend':''].filter(Boolean).join(' + ')||'geen');
-  if(window.VraagstukkenModule) VraagstukkenModule._toonSchemaVoorbeeld();
+  if(window.VraagstukkenModule)VraagstukkenModule._toonSchemaVoorbeeld();
 }
-function vsKiesGeld(el) {
+function vsHideAllSub(){['vs-geld-subkeuze','vs-helft-subkeuze','vs-procent-subkeuze'].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display='none';});}
+function vsKiesGeld(el){
   var was=el.classList.contains('actief');
-  document.querySelectorAll('.vs-thema-chip').forEach(c=>c.classList.remove('actief'));
-  var sub=document.getElementById('vs-geld-subkeuze');
-  if(was) { sub.style.display='none'; document.getElementById('vs-berekening').value=''; vsSetWaarde('vs-val-berekening','geen'); }
-  else { el.classList.add('actief'); sub.style.display=''; document.getElementById('vs-berekening').value='geld berekenen met euro en cent'; vsSetWaarde('vs-val-berekening','Geld: \u20ac + cent'); }
+  document.querySelectorAll('.vs-thema-chip').forEach(function(c){c.classList.remove('actief');});
+  vsHideAllSub();
+  if(!was){el.classList.add('actief');document.getElementById('vs-geld-subkeuze').style.display='';
+    document.getElementById('vs-berekening').value='geld berekenen met euro en cent';
+    vsSetWaarde('vs-val-berekening','Geld: €+cent');}
+  else{document.getElementById('vs-berekening').value='';vsSetWaarde('vs-val-berekening','geen');}
 }
-function vsKiesGeldSub(waarde, label, el) {
-  document.getElementById('vs-geld-subkeuze').querySelectorAll('button').forEach(b=>{b.style.background='#fff';b.style.color='#333';b.style.borderColor='#ddd';});
-  el.style.background='#1565c0'; el.style.color='#fff'; el.style.borderColor='#1565c0';
-  document.getElementById('vs-berekening').value=waarde;
-  vsSetWaarde('vs-val-berekening','Geld: '+label);
+function vsKiesGeldSub(w,l,el){
+  document.getElementById('vs-geld-subkeuze').querySelectorAll('button').forEach(function(b){b.style.background='#fff';b.style.color='#333';b.style.borderColor='#ddd';});
+  el.style.background='#1565c0';el.style.color='#fff';el.style.borderColor='#1565c0';
+  document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Geld: '+l);
+}
+function vsKiesHelft(el){
+  var was=el.classList.contains('actief');
+  document.querySelectorAll('.vs-thema-chip').forEach(function(c){c.classList.remove('actief');});
+  vsHideAllSub();
+  if(!was){el.classList.add('actief');document.getElementById('vs-helft-subkeuze').style.display='';
+    document.getElementById('vs-berekening').value='helft of dubbel berekenen, uitkomst moet altijd een geheel getal zijn';
+    vsSetWaarde('vs-val-berekening','Helft: geheel');}
+  else{document.getElementById('vs-berekening').value='';vsSetWaarde('vs-val-berekening','geen');}
+}
+function vsKiesHelfSub(w,l,el){
+  document.getElementById('vs-helft-subkeuze').querySelectorAll('button').forEach(function(b){b.style.background='#fff';b.style.color='#333';b.style.borderColor='#ddd';});
+  el.style.background='#1565c0';el.style.color='#fff';el.style.borderColor='#1565c0';
+  document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Helft: '+l);
+}
+function vsKiesProcent(el){
+  var was=el.classList.contains('actief');
+  document.querySelectorAll('.vs-thema-chip').forEach(function(c){c.classList.remove('actief');});
+  vsHideAllSub();
+  if(!was){el.classList.add('actief');document.getElementById('vs-procent-subkeuze').style.display='';
+    document.getElementById('vs-berekening').value='percentages berekenen, uitkomst moet altijd een geheel getal zijn (bv. 50%, 25%, 10%)';
+    vsSetWaarde('vs-val-berekening','Procent: geheel');}
+  else{document.getElementById('vs-berekening').value='';vsSetWaarde('vs-val-berekening','geen');}
+}
+function vsKiesProcentSub(w,l,el){
+  document.getElementById('vs-procent-subkeuze').querySelectorAll('button').forEach(function(b){b.style.background='#fff';b.style.color='#333';b.style.borderColor='#ddd';});
+  el.style.background='#1565c0';el.style.color='#fff';el.style.borderColor='#1565c0';
+  document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Procent: '+l);
 }
 </script>
+<!-- ── UITLEG MODAL VRAAGSTUKKEN ─────────────────────────────── -->
+<div id="vs-uitleg-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:12px;padding:28px;max-width:480px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
+    <h2 style="color:#1565c0;margin:0 0 16px;font-size:18px">📖 Hoe werken AI Vraagstukken?</h2>
+
+    <p style="font-size:13px;color:#333;line-height:1.7;margin:0 0 12px">
+      De AI genereert automatisch wiskundige vraagstukken op maat van jouw klas. Je stelt zelf in op welk niveau en met welk thema.
+    </p>
+
+    <div style="background:#e8f0fe;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-weight:700;color:#1565c0;font-size:13px;margin-bottom:8px">📋 Stap voor stap:</div>
+      <div style="font-size:13px;color:#333;line-height:2">
+        <div>1️⃣ <b>Klik op een sectie</b> om je keuze te maken (leerjaar, bewerking…)</div>
+        <div>2️⃣ Na je keuze <b>klapt de sectie automatisch dicht</b></div>
+        <div>3️⃣ Klik op <b>✨ Genereer vraagstuk</b></div>
+        <div>4️⃣ Bekijk het vraagstuk + schema in de sidebar</div>
+        <div>5️⃣ Klik op <b>＋ Voeg toe aan bundel</b> om het te bewaren</div>
+        <div>6️⃣ Herhaal voor meer vraagstukken — ze komen rechts te staan</div>
+        <div>7️⃣ Download alles als <b>PDF</b></div>
+      </div>
+    </div>
+
+    <div style="background:#e8f5e9;border-radius:8px;padding:12px 14px;margin-bottom:12px">
+      <div style="font-weight:700;color:#2e7d32;font-size:13px;margin-bottom:6px">💡 Tips:</div>
+      <div style="font-size:13px;color:#333;line-height:1.8">
+        <div>• <b>Thema</b> en <b>soort berekening</b> zijn optioneel — laat ze leeg voor meer variatie</div>
+        <div>• Bij <b>Helft/dubbel</b> kies je of de uitkomst een geheel getal moet zijn (veilig voor lager leerjaar)</div>
+        <div>• Bij <b>Geld</b> kies je of je met cent werkt of enkel hele euro's</div>
+        <div>• Je kan meerdere vraagstukken tegelijk genereren (keuze bij Schema)</div>
+        <div>• Je hebt <b>30 genereringen per dag</b></div>
+      </div>
+    </div>
+
+    <div style="background:#fff8e1;border-radius:8px;padding:12px 14px;margin-bottom:16px">
+      <div style="font-weight:700;color:#f57f17;font-size:13px;margin-bottom:6px">📐 Schema's:</div>
+      <div style="font-size:13px;color:#333;line-height:1.8">
+        <div>• <b>Rooster + bewerking</b> — telrooster met schrijflijnen naast het vraagstuk</div>
+        <div>• <b>Cijferend schema</b> — kolommen (H, T, E…) om cijferend te werken</div>
+        <div>• Je kan beide tegelijk aanvinken, dan heb je een rooster, schrijflijnen voor bewerking en het cijferschema</div>
+      </div>
+    </div>
+
+    <button onclick="document.getElementById('vs-uitleg-modal').style.display='none'" style="width:100%;padding:10px;background:#1565c0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+      ✓ Begrepen, aan de slag!
+    </button>
+  </div>
+</div>
+
 </body>
 </html>
