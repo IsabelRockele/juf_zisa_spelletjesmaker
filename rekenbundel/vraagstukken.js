@@ -64,10 +64,12 @@ window.VraagstukkenModule = (() => {
     // Tafels voor delen
     const tafelsDeel = [];
     document.querySelectorAll('#vs-tafels-deel input[type="checkbox"]:checked').forEach(cb => tafelsDeel.push(cb.value));
-    const deelVisie  = document.querySelector('input[name="vs-deel-visie"]:checked')?.value  || 'verdelen';
+    const deelVisie   = document.querySelector('input[name="vs-deel-visie"]:checked')?.value   || 'verdelen';
     const deelNotatie = document.querySelector('input[name="vs-deel-notatie"]:checked')?.value || 'vooraan';
+    const deelBereik  = document.querySelector('input[name="vs-deel-bereik"]:checked')?.value  || 'tee';
+    const deelRest    = document.querySelector('input[name="vs-deel-rest"]:checked')?.value    || 'nee';
 
-    return { bewerking, niveau, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie };
+    return { bewerking, niveau, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie, deelBereik, deelRest };
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
@@ -160,13 +162,23 @@ window.VraagstukkenModule = (() => {
       const tafels = inst.tafelsDeel && inst.tafelsDeel.length > 0
         ? `Gebruik enkel de deeltafels van: ${inst.tafelsDeel.join(', ')}. Geen andere tafels.`
         : 'Gebruik deeltafels naar keuze.';
+      const bereikLabel = {
+        'tee':   'Het DEELTAL moet een twee-cijferig getal zijn (TE, bv. 84). De DELER is een enkelvoudig getal (E, bv. 4). Voorbeeld: 84 ÷ 4.',
+        'htee':  'Het DEELTAL moet een drie-cijferig getal zijn (HTE, bv. 846). De DELER is een enkelvoudig getal (E, bv. 4). Voorbeeld: 846 ÷ 4.',
+        'dhtee': 'Het DEELTAL moet een vier-cijferig getal zijn (DHTE, bv. 8046). De DELER is een enkelvoudig getal (E, bv. 4). Voorbeeld: 8046 ÷ 4.',
+        'tete':  'Het DEELTAL moet een twee-cijferig getal zijn (TE, bv. 84). De DELER is een twee-cijferig getal (TE, bv. 12). Voorbeeld: 84 ÷ 12.',
+        'htete': 'Het DEELTAL moet een drie-cijferig getal zijn (HTE, bv. 846). De DELER is een twee-cijferig getal (TE, bv. 25). Voorbeeld: 846 ÷ 25.',
+      }[inst.deelBereik] || 'Het deeltal is een twee-cijferig getal, de deler een enkelvoudig getal.';
       const visie = inst.deelVisie === 'aftrekking'
         ? 'Deelvisie: HERHAALDE AFTREKKING. Het kind verdeelt door herhaaldelijk af te trekken. Stel de situatie zo voor dat gevraagd wordt HOEVEEL GROEPJES je kan maken (bv. "Je hebt 10 snoepjes en stopt ze per 2 in een zakje — hoeveel zakjes?"). De antwoordzin vraagt naar het aantal groepjes.'
         : 'Deelvisie: EERLIJK VERDELEN. Deel een hoeveelheid eerlijk over een aantal groepen. Stel de situatie zo voor dat gevraagd wordt HOEVEEL ER PER GROEP is (bv. "Verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?"). De antwoordzin vraagt naar het aantal per groep.';
       const notatie = inst.deelNotatie === 'achteraan'
         ? 'Schrijf de deling als: deler in deeltal (bv. 2 in 10).'
         : 'Schrijf de deling als: deeltal ÷ deler (bv. 10 ÷ 2).';
-      deelInstructie = `- Delen: ${tafels} ${visie} ${notatie}`;
+      const restLabel = inst.deelRest === 'ja'
+        ? 'De deling MOET een rest hebben (rest ≠ 0). Kies getallen die NIET exact deelbaar zijn zodat er een rest overblijft. Vermeld de rest NIET in het vraagstuk zelf — het kind berekent die zelf.'
+        : 'De deling moet EXACT opgaan, GEEN rest. Kies getallen zodat de rest nul is.';
+      deelInstructie = `- Delen: ${bereikLabel} ${tafels} ${restLabel} ${visie} ${notatie}`;
     }
 
     const antwoordzinInstructie = inst.antwoordzin === 'deels'
@@ -279,8 +291,45 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
   // ── CIJFERSCHEMA BOUWEN ───────────────────────────────────────
   function vermBereikNaarAantalRijen(bereik) {
-    // 2-cijferige 2e factor → 6 datarijen (grijs + 5 wit, 2 vette lijnen)
     return ['txte','texte','htexte'].includes(bereik || '') ? 6 : 4;
+  }
+
+  function deelBereikInfo(bereik) {
+    // links = werkkolommen (deeltal/tussenstappen), rechts = antwoordkolommen (quotiënt)
+    // rijenLinks = werkrijen links, rechts altijd 1 antwoordrij
+    switch(bereik) {
+      case 'tee':   return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+      case 'htee':  return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'E'  };
+      case 'dhtee': return { links:['D','H','T','E'], rechts:['H','T','E'], rijenLinks:6, deler:'E'  };
+      case 'tete':  return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'TE' };
+      case 'htete': return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'TE' };
+      default:      return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+    }
+  }
+
+  function bouwDeelSchema(deelBereik, metRest) {
+    const dk = deelBereikInfo(deelBereik || 'tee');
+    const kleuren = { 'D':'#ffcdd2','H':'#bbdefb','T':'#81c784','E':'#FFC107' };
+    const tekstK  = { 'D':'#b71c1c','H':'#0d47a1','T':'#1b5e20','E':'#e65100' };
+    const celB = '32px';
+    const maakHeader = (cols) => cols.map(k =>
+      `<div class="vs-cs-header" style="background:${kleuren[k]||'#eee'};color:${tekstK[k]||'#333'};width:${celB}">${k}</div>`
+    ).join('');
+    const maakRij = (cols) => cols.map(() =>
+      `<div class="vs-cs-cel" style="width:${celB}"></div>`
+    ).join('');
+    const gridL = dk.links.map(() => celB).join(' ');
+    const gridR = dk.rechts.map(() => celB).join(' ');
+    let linksRijen = '';
+    for (let r = 0; r < dk.rijenLinks; r++) {
+      linksRijen += `<div class="vs-cs-grid" style="grid-template-columns:${gridL}">${maakRij(dk.links)}</div>`;
+    }
+    const linksHTML = `<div class="vs-cs-grid" style="grid-template-columns:${gridL}">${maakHeader(dk.links)}</div>${linksRijen}`;
+    const restRij = metRest
+      ? `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-left:2px"><span style="font-size:11px;font-weight:700;color:#444">R =</span><div style="flex:1;border-bottom:1.5px solid #666;min-width:36px;height:14px"></div></div>`
+      : '';
+    const rechtsHTML = `<div style="padding-top:${celB}"></div><div class="vs-cs-grid" style="grid-template-columns:${gridR}">${maakHeader(dk.rechts)}</div><div class="vs-cs-grid" style="grid-template-columns:${gridR}">${maakRij(dk.rechts)}</div>${restRij}`;
+    return `<div class="vs-deel-schema-wrap"><div class="vs-deel-links">${linksHTML}</div><div class="vs-deel-lijn"></div><div class="vs-deel-rechts">${rechtsHTML}</div></div>`;
   }
 
   function bouwCijferSchema(headers, stap, aantalRijen) {
@@ -343,11 +392,11 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
   // ── HULPFUNCTIE: bouw schema-kaart HTML ──────────────────────
   // ── SCHEMA VOORBEELD IN SIDEBAR ─────────────────────────────
-  function toonSchemaVoorbeeld() {
+  function toonSchemaVoorbeeld(forceRefresh) {
     // Niet uitvoeren als de vraagstukken-tab niet actief is
     const tab = document.getElementById('tab-vraagstukken');
     if (!tab || tab.style.display === 'none') return;
-    if (huidigVraagstuk) return;
+    if (huidigVraagstuk && !forceRefresh) return;
 
     const metRooster     = document.getElementById('vs-schema-rooster')?.checked || false;
     const metCijfer      = document.getElementById('vs-schema-cijfer')?.checked  || false;
@@ -376,12 +425,16 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
     let cijferHTML = '';
     if (metCijfer) {
-      const headers = leesKolommen();
       const inst2 = leesInstellingen();
-      const nRijen = vermBereikNaarAantalRijen(inst2.vermBereik);
-      cijferHTML = drieGetallen
-        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
-        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
+      if (inst2.bewerking === 'delen') {
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwDeelSchema(inst2.deelBereik, inst2.deelRest === 'ja')}`;
+      } else {
+        const headers = leesKolommen();
+        const nRijen = vermBereikNaarAantalRijen(inst2.vermBereik);
+        cijferHTML = drieGetallen
+          ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
+          : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
+      }
     }
 
     sidebar.innerHTML = `
@@ -427,11 +480,15 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
     let cijferHTML = '';
     if (metCijfer) {
-      const headers = leesKolommen();
-      const nRijen = vermBereikNaarAantalRijen(inst.vermBereik);
-      cijferHTML = drieGetallen
-        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
-        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
+      if (inst.bewerking === 'delen') {
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwDeelSchema(inst.deelBereik, inst.deelRest === 'ja')}`;
+      } else {
+        const headers = leesKolommen();
+        const nRijen = vermBereikNaarAantalRijen(inst.vermBereik);
+        cijferHTML = drieGetallen
+          ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
+          : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
+      }
     }
 
     const antwoordHTML = antwoordzin
