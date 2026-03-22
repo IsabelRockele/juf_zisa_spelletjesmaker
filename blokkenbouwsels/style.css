@@ -265,21 +265,32 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
 .opdrachtkader {
     border: 2px solid #3d3a52;
     border-radius: 8px;
-    padding: 5px 14px;
+    padding: 6px 14px;
     margin-bottom: 12px;
     background: #fafafa;
     page-break-after: avoid;
     break-after: avoid;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.opdracht-zin-deel {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    outline: none;
 }
 
 .opdracht-zin {
     font-family: Arial, sans-serif;
-    font-size: 0.92rem;
+    font-size: 14px;
     font-weight: 700;
     color: #222;
     outline: none;
     display: block;
-    line-height: 1.4;
+    line-height: 1.6;
 }
 
 .kaders-grid { display: flex; flex-direction: column; gap: 16px; }
@@ -588,30 +599,42 @@ input:focus, select:focus { outline: none; border-color: var(--accent); box-shad
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 8px 10px;
+    gap: 10px 12px;
     flex: 1;
     min-width: 120px;
+}
+
+.pijlenpad-pijlen::before {
+    content: 'Pijlenreeks:';
+    display: block;
+    width: 100%;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    margin-bottom: 4px;
 }
 
 .pijl-stap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1px;
-    min-width: 22px;
+    gap: 3px;
+    min-width: 24px;
 }
 
 .pijl-symbool {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     line-height: 1;
     color: #1a1a1a;
 }
 
 .pijl-getal {
-    font-size: 0.78rem;
+    font-size: 14px;
     font-weight: 900;
     color: #333;
     font-family: Arial, sans-serif;
+    margin-top: 2px;
 }
 
 .pijlenpad-oplossing-canvas {
