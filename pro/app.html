@@ -579,6 +579,10 @@
 
   window.onProReady = ({ user, expiresAt, limit }) => {
     try { userPill.textContent = user.email ?? user.uid; } catch {}
+    // Geef gebruiker door aan vraagstukken module voor per-gebruiker limiet
+    if (window.VraagstukkenModule && user.email) {
+      VraagstukkenModule.setUser(user.email);
+    }
     statusEl.className = 'status good';
     try {
       const datum = new Date(expiresAt).toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
