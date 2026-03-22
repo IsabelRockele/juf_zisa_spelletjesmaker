@@ -542,13 +542,23 @@ function centreerPts(pts) {
     };
 }
 
+// Bijhoud welke figuren al gebruikt zijn in huidige sessie
+const _gebruikteFiguren = new Set();
+
 function genereerPijlenpad(niveau) {
-    // Kies een willekeurige figuur van het juiste niveau
-    // Als geen exact niveau: gebruik alle figuren
     let opties = PIJLENPAD_FIGUREN.filter(f => f.niveau === niveau);
     if (opties.length === 0) opties = PIJLENPAD_FIGUREN;
 
-    const figuur = opties[Math.floor(Math.random() * opties.length)];
+    // Vermijd herhaling — filter al gebruikte figuren
+    let beschikbaar = opties.filter(f => !_gebruikteFiguren.has(f.naam));
+    // Als alles gebruikt: reset en begin opnieuw
+    if (beschikbaar.length === 0) {
+        _gebruikteFiguren.clear();
+        beschikbaar = opties;
+    }
+
+    const figuur = beschikbaar[Math.floor(Math.random() * beschikbaar.length)];
+    _gebruikteFiguren.add(figuur.naam);
     const { pts, gridSize, startX, startY } = centreerPts(figuur.pts);
     const stappen = ptsNaarStappen(pts);
 
