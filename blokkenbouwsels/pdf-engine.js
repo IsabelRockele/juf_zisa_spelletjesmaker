@@ -255,18 +255,12 @@ const pdfEngine = (() => {
             cellen.forEach((td, ci) => {
                 const cx = x + ci * celMm;
                 const cy = yy + ri * celMm;
-                // Gevulde vs lege cel
-                const gevuld = td.classList.contains('gp-gevuld');
-                if (gevuld) {
-                    doc.setFillColor(255, 253, 231);
-                } else {
-                    doc.setFillColor(248, 248, 248);
-                }
-                doc.setDrawColor(120, 120, 120); doc.setLineWidth(0.5);
+                doc.setFillColor(255, 255, 255);
+                doc.setDrawColor(100, 100, 100); doc.setLineWidth(0.5);
                 doc.rect(cx, cy, celMm, celMm, 'FD');
 
-                // Getal (alleen als niet leeg én gevuld)
-                if (!leeg && gevuld) {
+                // Getal tonen als niet-leeg modus (gp-cijfervak met .gp-getal)
+                if (!leeg) {
                     const getalEl = td.querySelector('.gp-getal');
                     if (getalEl) {
                         const getal = readText(getalEl);
@@ -310,13 +304,25 @@ const pdfEngine = (() => {
         doc.text('GRONDPLAN', MARGIN_LEFT + padH, contentY + 4);
         tekenGrondplanKoppelPdf(planEl, MARGIN_LEFT + padH, contentY + 7, celMm);
 
-        // Antwoord — invulhokje met afgeronde hoeken
+        // Antwoord — invulhokje, bij oplossingen: correcte letter erin
         const antY = contentY + 7 + planH + 10;
         doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(0, 0, 0);
         doc.text('Antwoord:', MARGIN_LEFT + padH, antY);
         const antLW = doc.getTextWidth('Antwoord:');
-        doc.setLineWidth(0.5); doc.setDrawColor(40, 40, 40); doc.setFillColor(255, 255, 255);
+        doc.setLineWidth(0.5); doc.setDrawColor(40, 40, 40);
+        doc.setFillColor(window._pdfMetOplossingen ? 230 : 255, 255, window._pdfMetOplossingen ? 230 : 255);
         doc.roundedRect(MARGIN_LEFT + padH + antLW + 3, antY - 6, 14, 9, 2, 2, 'FD');
+        if (window._pdfMetOplossingen) {
+            const oplEl3 = kaderEl.querySelector('.opl-koppel strong');
+            if (oplEl3) {
+                const letter = readText(oplEl3).trim();
+                if (letter) {
+                    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(0, 120, 0);
+                    const lw3 = doc.getTextWidth(letter);
+                    doc.text(letter, MARGIN_LEFT + padH + antLW + 3 + (14 - lw3) / 2, antY - 0.5);
+                }
+            }
+        }
 
         // Rechts: 4 bouwsels — extra tussenruimte tov grondplan
         const rechtsX = MARGIN_LEFT + padH + planW + tussenRuimte;
@@ -386,19 +392,21 @@ const pdfEngine = (() => {
         if (!bouwselCanvas || opties.length === 0) return;
 
         const padV = 5, padH = 5;
-        const maxBouwselH = 52;
+        const maxBouwselH = 40;
         const bouwselW    = 50;  // smaller zodat aanzichten meer ruimte krijgen
         const aanzW       = 32;  // mm per aanzicht
         const aanzGap     = 5;
         const hokjeB      = 10;
         const hokjeH      = 10;
 
-        const kH = padV * 2 + maxBouwselH + hokjeB + 6;
+        const kH = padV * 2 + maxBouwselH + hokjeH + 2;
         const kY = startKader(kH + 4);
         const contentY = kY + padV;
 
-        // Bouwsel compact links
-        canvasToPdfScherp(bouwselCanvas, MARGIN_LEFT + padH, contentY, bouwselW, maxBouwselH);
+        // Kader rond bouwsel + bouwsel links
+        doc.setLineWidth(0.4); doc.setDrawColor(200, 195, 215); doc.setFillColor(255,255,255);
+        drawRoundedRect(MARGIN_LEFT + padH - 2, contentY - 1, bouwselW + 4, maxBouwselH + 2, 2, 'FD');
+        canvasToPdfScherp(bouwselCanvas, MARGIN_LEFT + padH - 1, contentY, bouwselW, maxBouwselH);
 
         // 3 aanzichten — dichter bij bouwsel
         const aanzStartX = MARGIN_LEFT + padH + bouwselW + 5;
@@ -471,11 +479,47 @@ const pdfEngine = (() => {
                 }
             }
 
-            // Hokje gecentreerd ONDER het aanzicht — geen label
+            // Hokje gecentreerd ONDER het aanzicht
             const hokX = ox + (aanzW - hokjeB) / 2;
-            const hokY = oy + maxBouwselH + 1;
-            doc.setLineWidth(0.6); doc.setDrawColor(40, 40, 40); doc.setFillColor(255, 255, 255);
+            // Bereken werkelijke aanzicht hoogte voor correct hokje-placement
+            const aRichting = aCanvas ? aCanvas.dataset.richting : '';
+            let werkelijkeAanzH = maxBouwselH;
+            if (aCanvas && aCanvas.dataset.bouwsel && aRichting && window.BlokkenRenderer) {
+                try {
+                    const hmapTmp = JSON.parse(aCanvas.dataset.bouwsel);
+                    const sil = window.BlokkenRenderer.berekenAanzicht(hmapTmp, aRichting);
+                    const nL = sil.length;
+                    const nK = sil[0] ? sil[0].length : 0;
+                    if (nL > 0 && nK > 0) {
+                        const celTmp = Math.min(7, aanzW / nK);
+                        werkelijkeAanzH = nL * celTmp;
+                    }
+                } catch(e) {}
+            }
+            // Hokje staat altijd onder maxBouwselH (aanzicht is verticaal gecentreerd daarin)
+            const hokY = oy + maxBouwselH - 6;
+            const isCorrect = window._pdfMetOplossingen && (() => {
+                if (!aRichting) return false;
+                // Probeer via .opl-aanzicht tekst
+                const oplEl4 = kaderEl.querySelector('.opl-aanzicht');
+                if (oplEl4) {
+                    const oplTxt = readText(oplEl4).toLowerCase();
+                    // aRichting = 'voor'|'links'|'rechts', opl bevat 'voorkant'|'linkerkant'|'rechterkant'
+                    if (oplTxt.includes(aRichting)) return true;
+                }
+                // Fallback: via data-correct attribuut op optie
+                const optieDiv = aCanvas ? aCanvas.closest('.aanzicht-optie') : null;
+                if (optieDiv && optieDiv.dataset.correct === '1') return true;
+                return false;
+            })();
+            doc.setLineWidth(0.6); doc.setDrawColor(40, 40, 40);
+            doc.setFillColor(isCorrect ? 230 : 255, 255, isCorrect ? 230 : 255);
             doc.roundedRect(hokX, hokY, hokjeB, hokjeH, 2, 2, 'FD');
+            if (isCorrect) {
+                doc.setDrawColor(0, 140, 0); doc.setLineWidth(0.8);
+                doc.line(hokX + 1.5, hokY + 1.5, hokX + hokjeB - 1.5, hokY + hokjeH - 1.5);
+                doc.line(hokX + hokjeB - 1.5, hokY + 1.5, hokX + 1.5, hokY + hokjeH - 1.5);
+            }
         });
 
         eindKader(kY, kH + 4);
@@ -596,6 +640,25 @@ const pdfEngine = (() => {
         doc.circle(MARGIN_LEFT + padH + CEL_PDF * 2, curY + h - CEL_PDF * 2, 0.9, 'F');
     }
 
+
+    // Bij oplossingen: teken het pad direct op het ruitjespapier
+    if (window._pdfMetOplossingen && oplCanvas && oplCanvas.dataset.paden) {
+        try {
+            const paden = JSON.parse(oplCanvas.dataset.paden);
+            doc.setDrawColor(26, 86, 219); doc.setLineWidth(1.2);
+            paden.forEach(pad => {
+                if (pad.length < 2) return;
+                for (let p = 0; p < pad.length - 1; p++) {
+                    const x1 = MARGIN_LEFT + padH + pad[p][0]   * CEL_PDF;
+                    const y1 = curY         + (gridS - pad[p][1])   * CEL_PDF;
+                    const x2 = MARGIN_LEFT + padH + pad[p+1][0] * CEL_PDF;
+                    const y2 = curY         + (gridS - pad[p+1][1]) * CEL_PDF;
+                    doc.line(x1, y1, x2, y2);
+                }
+            });
+        } catch(e) {}
+    }
+
     // Pijlenreeks rechts van het ruitjespapier
     // Teken pijlen als canvas-afbeeldingen (Unicode pijlen werken niet in jsPDF)
     const pijlX = MARGIN_LEFT + padH + w + 6;
@@ -649,37 +712,7 @@ const pdfEngine = (() => {
       px += PIJL_MM;
     });
 
-    // Oplossing (alleen als zichtbaar) — direct in PDF tekenen
-    const werkbladEl2 = document.getElementById('werkblad');
-    if (oplCanvas && werkbladEl2 && werkbladEl2.classList.contains('toon-oplossingen')) {
-      ensureSpace(h + 16);
-      doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(22,101,52);
-      doc.text('Oplossing:', MARGIN_LEFT + padH, y + 5);
-      const oplY = y + 8;
-      // Ruitjes
-      doc.setDrawColor(100, 140, 180); doc.setLineWidth(0.3);
-      for (let i2 = 0; i2 <= gridS; i2++) {
-        doc.line(MARGIN_LEFT+padH+i2*CEL_PDF, oplY, MARGIN_LEFT+padH+i2*CEL_PDF, oplY+h);
-        doc.line(MARGIN_LEFT+padH, oplY+i2*CEL_PDF, MARGIN_LEFT+padH+w, oplY+i2*CEL_PDF);
-      }
-      // Oplossings-pad tekenen vanuit opgeslagen punten
-      if (oplCanvas.dataset && oplCanvas.dataset.paden) {
-        const paden = JSON.parse(oplCanvas.dataset.paden);
-        doc.setDrawColor(26, 86, 219); doc.setLineWidth(1.2);
-        paden.forEach(pad => {
-          if (pad.length < 2) return;
-          doc.setLineDashPattern([], 0);
-          for (let p = 0; p < pad.length - 1; p++) {
-            const x1 = MARGIN_LEFT+padH + pad[p][0]*CEL_PDF;
-            const y1 = oplY + (gridS - pad[p][1])*CEL_PDF;
-            const x2 = MARGIN_LEFT+padH + pad[p+1][0]*CEL_PDF;
-            const y2 = oplY + (gridS - pad[p+1][1])*CEL_PDF;
-            doc.line(x1, y1, x2, y2);
-          }
-        });
-      }
-      y += h + 14;
-    }
+    // Oplossing wordt direct op ruitjespapier getekend (zie hierboven)
 
     y = kY + kH + 8;
   }
@@ -706,7 +739,7 @@ const pdfEngine = (() => {
         } else {
             const zin = readText(zinEl);
             if (!zin) return;
-            regelsArr = zin.split('|').filter(r => r.trim());
+            regelsArr = zin.split('|').map(r => r.trim()).filter(Boolean);
         }
 
         const boxH = regelsArr.length * regelH + padV * 2;
@@ -768,7 +801,7 @@ const pdfEngine = (() => {
 
                 // Oplossing
                 const oplEl = kader.querySelector('.opl-tellen');
-                if (oplEl && document.getElementById('werkblad').classList.contains('toon-oplossingen')) {
+                if (oplEl && window._pdfMetOplossingen) {
                     doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(22, 101, 52);
                     doc.text(readText(oplEl), hokX, hokY + 14);
                 }
@@ -782,25 +815,31 @@ const pdfEngine = (() => {
         const COLS      = 2;
         const gap       = 6;
         const colW      = (CONTENT_W - gap) / COLS;
-        const padKader  = 4;
-        const pijlB     = 8;   // breedte van de pijl
-        const pijlGap   = 3;   // ruimte voor/na pijl
-        const celMm     = 7;   // grondplan cel in mm
+        const padKader  = 1;
+        const pijlB     = 7;
+        const pijlGap   = 2;
+        const celMm     = 7;
 
-        // Bereken bouwselbreedte: resterende ruimte na grondplan + pijl
-        // colW = padKader + bouwW + pijlGap + pijlB + pijlGap + planW + padKader
-        // planW = nKols * celMm (3 of 4 kols)
+        // Gebruik de GROOTSTE grondplan (3 of 4 kols) om bouwW op te baseren
+        // zodat ook het 4x4 grondplan altijd binnen het kader past
+        const maxNKols = Math.max(...kaders.map(k => {
+            const p = k.querySelector('.grondplan-tabel');
+            return p?.querySelector('tr')?.querySelectorAll('td').length || 3;
+        }));
+        const nKols   = maxNKols;
         const plan0   = kaders[0]?.querySelector('.grondplan-tabel');
-        const nKols   = plan0?.querySelector('tr')?.querySelectorAll('td').length || 3;
         const nRijen  = plan0?.querySelectorAll('tr').length || 3;
         const planW   = nKols * celMm;
         const planH   = nRijen * celMm;
-        const bouwW   = colW - padKader * 2 - pijlGap * 2 - pijlB - planW;
+        // Bouwsel = wat overblijft, maar nooit meer dan 36mm
+        const bouwWBerekend = colW - padKader * 2 - pijlGap * 2 - pijlB - planW;
+        const bouwW   = Math.min(bouwWBerekend, 36);
         const canvasH = (() => {
             const c = kaders[0]?.querySelector('.bouwsel-canvas');
-            return c ? (c.height / c.width) * bouwW : 40;
+            return c ? (c.height / c.width) * bouwW : 36;
         })();
-        const rijH = Math.max(canvasH, planH) + padKader * 2;
+        const rijH = Math.max(canvasH, planH) + padKader * 2 + 4;
+
 
         for (let i = 0; i < kaders.length; i += COLS) {
             const rij = kaders.slice(i, i + COLS);
@@ -835,25 +874,24 @@ const pdfEngine = (() => {
                 drawLine(pijlX + pijlB - 3, midY + 2, pijlX + pijlB, midY, 1);
 
                 // Grondplan — verticaal gecentreerd
-                if (planEl) {
-                    const planX   = pijlX + pijlB + pijlGap;
-                    const planTop = rijY + (rijH - planH) / 2;
-                    // Gebruik werkelijke cel-dimensies op basis van beschikbare ruimte
-                    const beschikbaarB = x + colW - planX - padKader;
-                    const werkCel = Math.min(celMm, beschikbaarB / nKols);
-                    tekenGrondplanPdf(planEl, planX, planTop, werkCel, true);
-                }
+                // Grondplan — leeg of ingevuld afhankelijk van metOplossingen
+                const planX   = pijlX + pijlB + pijlGap;
+                const planTop = rijY + (rijH - planH) / 2;
+                const beschikbaarB = x + colW - planX - padKader;
+                const werkCel = Math.min(celMm, beschikbaarB / nKols);
 
-                // Oplossing indien zichtbaar
-                const oplEl = kader.querySelector('.opl-grondplan');
-                if (oplEl && document.getElementById('werkblad').classList.contains('toon-oplossingen')) {
-                    const oplPl = oplEl.querySelector('.grondplan-tabel');
-                    if (oplPl) {
-                        const planX   = x + padKader + bouwW + pijlGap + pijlB + pijlGap;
-                        const oplCel  = celMm - 1;
-                        const planTop = rijY + (rijH - nRijen * oplCel) / 2;
-                        tekenGrondplanPdf(oplPl, planX, planTop, oplCel, false);
+
+                if (window._pdfMetOplossingen) {
+                    // Tweede grondplan-tabel in kader = oplossing (eerste = leeg)
+                    const alleTabellen = [...kader.querySelectorAll('.grondplan-tabel')];
+                    const oplTabel = alleTabellen.length > 1 ? alleTabellen[1] : null;
+                    if (oplTabel) {
+                        tekenGrondplanPdf(oplTabel, planX, planTop, werkCel, false);
+                    } else if (planEl) {
+                        tekenGrondplanPdf(planEl, planX, planTop, werkCel, true);
                     }
+                } else if (planEl) {
+                    tekenGrondplanPdf(planEl, planX, planTop, werkCel, true);
                 }
             }
             y = rijY + rijH + 6;
@@ -865,6 +903,9 @@ const pdfEngine = (() => {
         const werkblad = document.getElementById('werkblad');
         if (!werkblad) { alert('Werkblad niet gevonden.'); return; }
 
+        // Sla metOplossingen op als module-variabele zodat alle draw-functies het kunnen lezen
+        window._pdfMetOplossingen = !!metOplossingen;
+
         newDoc();
         drawStudentHeader(werkblad);
         drawMainTitle(werkblad);
@@ -874,8 +915,9 @@ const pdfEngine = (() => {
             await drawSection(sectie);
         }
 
+        window._pdfMetOplossingen = false;
         const bestandsnaam = metOplossingen ? 'blokkenbouwsels-oplossingen.pdf' : 'blokkenbouwsels.pdf';
-    await doc.save(bestandsnaam, { returnPromise: true });
+        await doc.save(bestandsnaam, { returnPromise: true });
     }
 
     return { generate };
