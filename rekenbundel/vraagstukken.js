@@ -45,16 +45,29 @@ window.VraagstukkenModule = (() => {
     const antwoordzin = document.querySelector('input[name="vs-antwoordzin"]:checked')?.value || 'deels';
     const aantalBulk = parseInt(document.getElementById('vs-aantal-bulk')?.value || '1');
     const kommaDecimalen = document.querySelector('input[name="vs-komma-niveau"]:checked')?.value || 't';
-    const kommaPrefix = document.querySelector('input[name="vs-komma-prefix"]:checked')?.value || 'E'; // E / TE / HTE
+    const kommaPrefix = document.querySelector('input[name="vs-komma-prefix"]:checked')?.value || 'E';
     const cijferKolommen = (() => {
       if (niveau === 'kommagetallen') return 'komma';
-      if (niveau === 'tot100000') return 'TDHTE'; // TD · D · H · T · E
-      if (niveau === 'tot10000') return 'DHTE';   // D · H · T · E
-      if (niveau === 'tot1000') return 'HTE';     // H · T · E
+      if (niveau === 'tot100000') return 'TDHTE';
+      if (niveau === 'tot10000') return 'DHTE';
+      if (niveau === 'tot1000') return 'HTE';
       if (niveau === 'tot100') return 'TE';
-      return 'E'; // tot5, tot10, tot20
+      return 'E';
     })();
-    return { bewerking, niveau, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix };
+
+    // Tafels voor vermenigvuldigen
+    const tafelsVerm = [];
+    document.querySelectorAll('#vs-tafels-verm input[type="checkbox"]:checked').forEach(cb => tafelsVerm.push(cb.value));
+    const vermNotatie = document.querySelector('input[name="vs-verm-notatie"]:checked')?.value || 'vooraan';
+    const vermBereik  = document.querySelector('input[name="vs-verm-bereik"]:checked')?.value  || 'tafels';
+
+    // Tafels voor delen
+    const tafelsDeel = [];
+    document.querySelectorAll('#vs-tafels-deel input[type="checkbox"]:checked').forEach(cb => tafelsDeel.push(cb.value));
+    const deelVisie  = document.querySelector('input[name="vs-deel-visie"]:checked')?.value  || 'verdelen';
+    const deelNotatie = document.querySelector('input[name="vs-deel-notatie"]:checked')?.value || 'vooraan';
+
+    return { bewerking, niveau, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie };
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
@@ -85,6 +98,13 @@ window.VraagstukkenModule = (() => {
       kommagetallen: `met kommagetallen (bv. ${kommaEx})`
     }[inst.niveau] || inst.niveau;
 
+    // Bij verm (E×E of T×E) of delen: niveau wordt bepaald door tafels/bereik zelf
+    const niveauNietNodig = (inst.bewerking === 'vermenigvuldigen' && ['exe','txe'].includes(inst.vermBereik || 'exe'))
+                         || inst.bewerking === 'delen';
+    const niveauInstructie = niveauNietNodig
+      ? ''
+      : `- Rekenniveau: ${niveauLabel} — de UITKOMST van de bewerking mag nooit groter zijn dan ${niveauLabel}. Kies getallen zo dat het antwoord binnen dit bereik valt.`;
+
     const leerjaarLabel = {
       '1': '1e leerjaar (6-7 jaar)',
       '2': '2e leerjaar (7-8 jaar)',
@@ -105,6 +125,49 @@ window.VraagstukkenModule = (() => {
     const berekeningInstructie = inst.berekening
       ? `- Soort berekening: het vraagstuk moet gaan over "${inst.berekening}"`
       : '';
+
+    // Tafels / notatie / bereik voor vermenigvuldigen
+    let vermInstructie = '';
+    if (inst.bewerking === 'vermenigvuldigen') {
+      const tafels = inst.tafelsVerm && inst.tafelsVerm.length > 0
+        ? `Gebruik enkel de tafels van: ${inst.tafelsVerm.join(', ')}. Geen andere tafels.`
+        : 'Gebruik tafels naar keuze.';
+      const notatie = inst.vermNotatie === 'achteraan'
+        ? 'Schrijf de som als: getal × tafel (bv. 3 × 2, waarbij 2 de tafel is).'
+        : 'Schrijf de som als: tafel × getal (bv. 2 × 3, waarbij 2 de tafel is).';
+      const bereik = {
+        'exe':    'Gebruik enkelvoudige getallen (1–10) als beide factoren (E×E, bv. 6×4).',
+        'txe':    'Gebruik een rond tiental als eerste factor en een enkelvoudig getal als tweede (T×E, bv. 20×4). Geen eenheden in de eerste factor.',
+        'texe':   'Gebruik een getal met tientallen én eenheden als eerste factor en een enkelvoudig getal als tweede (TE×E, bv. 32×4).',
+        'txte':   'Gebruik een rond tiental als eerste factor en een twee-cijferig getal als tweede factor (T×TE, bv. 20×12).',
+        'texte':  'Gebruik een getal met tientallen én eenheden als eerste factor en een twee-cijferig getal als tweede factor (TE×TE, bv. 32×12).',
+        'htexe':  'Gebruik een drie-cijferig getal als eerste factor en een enkelvoudig getal als tweede (HTE×E, bv. 312×4).',
+        'htexte': 'Gebruik een drie-cijferig getal als eerste factor en een twee-cijferig getal als tweede (HTE×TE, bv. 312×25).',
+      }[inst.vermBereik] || '';
+
+      // Uitkomst-beperking bij grotere bereiken
+      const uitkomstMax = !['exe','txe'].includes(inst.vermBereik) ? (() => {
+        const maxLabel = { tot20:'20', tot100:'100', tot1000:'1 000', tot10000:'10 000', tot100000:'100 000' }[inst.niveau];
+        return maxLabel ? `BELANGRIJK: de uitkomst (het product) mag NOOIT groter zijn dan ${maxLabel}. Kies de factoren zo dat het antwoord binnen dit bereik blijft.` : '';
+      })() : '';
+
+      vermInstructie = `- Vermenigvuldigen: ${tafels} ${notatie} ${bereik} ${uitkomstMax}`;
+    }
+
+    // Tafels / deelvisie / notatie voor delen
+    let deelInstructie = '';
+    if (inst.bewerking === 'delen') {
+      const tafels = inst.tafelsDeel && inst.tafelsDeel.length > 0
+        ? `Gebruik enkel de deeltafels van: ${inst.tafelsDeel.join(', ')}. Geen andere tafels.`
+        : 'Gebruik deeltafels naar keuze.';
+      const visie = inst.deelVisie === 'aftrekking'
+        ? 'Deelvisie: HERHAALDE AFTREKKING. Het kind verdeelt door herhaaldelijk af te trekken. Stel de situatie zo voor dat gevraagd wordt HOEVEEL GROEPJES je kan maken (bv. "Je hebt 10 snoepjes en stopt ze per 2 in een zakje — hoeveel zakjes?"). De antwoordzin vraagt naar het aantal groepjes.'
+        : 'Deelvisie: EERLIJK VERDELEN. Deel een hoeveelheid eerlijk over een aantal groepen. Stel de situatie zo voor dat gevraagd wordt HOEVEEL ER PER GROEP is (bv. "Verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?"). De antwoordzin vraagt naar het aantal per groep.';
+      const notatie = inst.deelNotatie === 'achteraan'
+        ? 'Schrijf de deling als: deler in deeltal (bv. 2 in 10).'
+        : 'Schrijf de deling als: deeltal ÷ deler (bv. 10 ÷ 2).';
+      deelInstructie = `- Delen: ${tafels} ${visie} ${notatie}`;
+    }
 
     const antwoordzinInstructie = inst.antwoordzin === 'deels'
       ? `Geef je antwoord in dit exacte formaat, met "---" als scheiding:
@@ -135,10 +198,12 @@ ${aantalInstructie}
 Vereisten:
 - Leerjaar: ${leerjaarLabel}
 - Bewerking: ${bewerkingLabel}
-- Rekenniveau: ${niveauLabel}
+${niveauInstructie}
 - Aantal getallen: ${aantalGetallenLabel}
 ${themaInstructie}
 ${berekeningInstructie ? berekeningInstructie : ''}
+${vermInstructie ? vermInstructie : ''}
+${deelInstructie ? deelInstructie : ''}
 ${variatieInstructie}
 - Schrijf in eenvoudig, warm Nederlands (Vlaams) passend bij het leerjaar
 - Het vraagstuk bevat 2-3 zinnen maximum
@@ -213,8 +278,14 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
   }
 
   // ── CIJFERSCHEMA BOUWEN ───────────────────────────────────────
-  function bouwCijferSchema(headers, stap) {
+  function vermBereikNaarAantalRijen(bereik) {
+    // 2-cijferige 2e factor → 6 datarijen (grijs + 5 wit, 2 vette lijnen)
+    return ['txte','texte','htexte'].includes(bereik || '') ? 6 : 4;
+  }
+
+  function bouwCijferSchema(headers, stap, aantalRijen) {
     if (!headers || headers.length === 0) headers = ['T', 'E'];
+    if (!aantalRijen) aantalRijen = 4; // standaard: grijs + wit + dik + wit
 
     const kleuren = {
       'TD':'#c8e6c9','D':'#ffcdd2','H':'#bbdefb','T':'#81c784','E':'#FFC107',
@@ -240,15 +311,32 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
 
     const stapLabel = stap ? `<div class="vs-cs-staplabel">${stap}</div>` : '';
 
+    // Bouw datarijen op basis van aantalRijen
+    // 4 rijen: grijs / wit / wit+dik / wit
+    // 6 rijen: grijs / wit / wit+dik / wit / wit+dik / wit  (2-cijferige 2e factor)
+    let dataRijen = '';
+    if (aantalRijen === 6) {
+      dataRijen = `
+        ${maakRij('vs-cs-grijs')}
+        ${maakRij()}
+        ${maakRij('vs-cs-dik-onder')}
+        ${maakRij()}
+        ${maakRij('vs-cs-dik-onder')}
+        ${maakRij()}`;
+    } else {
+      dataRijen = `
+        ${maakRij('vs-cs-grijs')}
+        ${maakRij()}
+        ${maakRij('vs-cs-dik-onder')}
+        ${maakRij()}`;
+    }
+
     return `
       <div class="vs-cijfer-schema-blok">
         ${stapLabel}
         <div class="vs-cs-grid" style="grid-template-columns:${gridCols}">
           ${headerRij}
-          ${maakRij('vs-cs-grijs')}
-          ${maakRij()}
-          ${maakRij('vs-cs-dik-onder')}
-          ${maakRij()}
+          ${dataRijen}
         </div>
       </div>`;
   }
@@ -289,13 +377,14 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     let cijferHTML = '';
     if (metCijfer) {
       const headers = leesKolommen();
+      const inst2 = leesInstellingen();
+      const nRijen = vermBereikNaarAantalRijen(inst2.vermBereik);
       cijferHTML = drieGetallen
-        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1')}${bouwCijferSchema(headers,'STAP 2')}</div>`
-        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'')}`;
+        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
+        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
     }
 
     sidebar.innerHTML = `
-      <div class="vs-kaart" style="opacity:0.8;border:1.5px dashed #90caf9">
         <div style="color:#aaa;font-style:italic;font-size:13px;margin-bottom:10px">
           ✏️ Klik op "Genereer" — het vraagstuk verschijnt hier.
         </div>
@@ -339,9 +428,10 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     let cijferHTML = '';
     if (metCijfer) {
       const headers = leesKolommen();
+      const nRijen = vermBereikNaarAantalRijen(inst.vermBereik);
       cijferHTML = drieGetallen
-        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1')}${bouwCijferSchema(headers,'STAP 2')}</div>`
-        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'')}`;
+        ? `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchema(headers,'STAP 1',nRijen)}${bouwCijferSchema(headers,'STAP 2',nRijen)}</div>`
+        : `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchema(headers,'',nRijen)}`;
     }
 
     const antwoordHTML = antwoordzin
@@ -551,6 +641,24 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
   // ── KOLOMMEN BEPALEN OP BASIS VAN NIVEAU ─────────────────────
   function leesKolommen() {
     const niveau = document.querySelector('input[name="vs-niveau"]:checked')?.value || 'tot20';
+    const bewerking = document.querySelector('input[name="vs-bewerking"]:checked')?.value || 'optellen';
+    const vermBereik = document.querySelector('input[name="vs-verm-bereik"]:checked')?.value || 'exe';
+
+    // Bij vermenigvuldigen: kolommen bepalen op basis van niveau (= max uitkomst)
+    if (bewerking === 'vermenigvuldigen') {
+      if (vermBereik === 'exe') return ['T','E'];
+      if (vermBereik === 'txe') return ['H','T','E'];
+      // Grotere bereiken: niveau bepaalt kolommen
+      if (niveau === 'tot100')    return ['T','E'];
+      if (niveau === 'tot1000')   return ['H','T','E'];
+      if (niveau === 'tot10000')  return ['D','H','T','E'];
+      if (niveau === 'tot100000') return ['TD','D','H','T','E'];
+      // Fallback op bereik
+      if (['texe','txte'].includes(vermBereik))            return ['H','T','E'];
+      if (['texte','htexe','htexte'].includes(vermBereik)) return ['D','H','T','E'];
+      return ['H','T','E'];
+    }
+
     if (niveau === 'kommagetallen') {
       const prefix = document.querySelector('input[name="vs-komma-prefix"]:checked')?.value || 'E';
       const dec    = document.querySelector('input[name="vs-komma-niveau"]:checked')?.value || 't';
