@@ -155,6 +155,8 @@ function renderTelOefening(kader, bouwsel, niveau, schema) {
 
     requestAnimationFrame(() => {
         BR.renderBouwsel(canvas, bouwsel, { kleuren: schema });
+        canvas.dataset.bouwsel = JSON.stringify(bouwsel);
+        if (schema) canvas.dataset.schema = JSON.stringify(schema);
     });
 }
 
@@ -221,10 +223,7 @@ function renderGrondplanKoppelOefening(kader, bouwsel, niveau, schema) {
     const wrapper = document.createElement('div');
     wrapper.className = 'koppel-oefening';
 
-    const vraag = document.createElement('p');
-    vraag.className = 'oefening-vraag';
-    vraag.textContent = 'Verbind het grondplan met het juiste bouwsel. Schrijf de letter van het juiste bouwsel op.';
-    wrapper.appendChild(vraag);
+    // Geen vraagzin — staat in opdrachtkader
 
     const inhoud = document.createElement('div');
     inhoud.className = 'koppel-inhoud';
@@ -271,7 +270,10 @@ function renderGrondplanKoppelOefening(kader, bouwsel, niveau, schema) {
         bouwselsKant.appendChild(item);
 
         requestAnimationFrame(() => {
-            BR.renderBouwsel(canvas, opt, { blokSize: 12, kleuren: BR.volgendSchema() });
+            const optSchema = BR.volgendSchema();
+            BR.renderBouwsel(canvas, opt, { blokSize: 12, kleuren: optSchema });
+            canvas.dataset.bouwsel = JSON.stringify(opt);
+            canvas.dataset.schema  = JSON.stringify(optSchema);
         });
     });
 
@@ -353,7 +355,12 @@ function renderAanzichtenOefening(kader, bouwsel, niveau, schema) {
 
         requestAnimationFrame(() => {
             BR.renderBouwsel(canvas, bouwsel, { kleuren: eenKleurSchema });
+            canvas.dataset.bouwsel = JSON.stringify(bouwsel);
+            canvas.dataset.schema  = JSON.stringify(eenKleurSchema);
             renderAanzichtGekleurd(aCanvas, bouwsel, richting, eenKleur);
+            aCanvas.dataset.bouwsel  = JSON.stringify(bouwsel);
+            aCanvas.dataset.richting = richting;
+            aCanvas.dataset.kleur    = JSON.stringify(eenKleur);
         });
     });
 
@@ -508,7 +515,9 @@ function renderPijlenpadOefening(kader, niveau) {
     // Instructie
     const instr = document.createElement('div');
     instr.className = 'pijlenpad-instructie';
-    instr.innerHTML = '☐ Teken de figuur op het ruitjespapier.<br>☐ Volg de pijlenreeks.<br>☐ Begin bij de stip.';
+    instr.innerHTML = '<span class="instr-regel"><span class="instr-hokje"></span>Teken de figuur op het ruitjespapier.</span>' +
+                      '<span class="instr-regel"><span class="instr-hokje"></span>Volg de pijlenreeks.</span>' +
+                      '<span class="instr-regel"><span class="instr-hokje"></span>Begin bij de stip.</span>';
     wrapper.appendChild(instr);
 
     const inhoud = document.createElement('div');
@@ -556,16 +565,31 @@ function renderPijlenpadOefening(kader, niveau) {
 }
 
 function tekenRuitjesPapier(canvas, gridSize, pts, startX, startY) {
-    const CEL = 14;
+    const CEL = 18;  // groter ruitje
     const pad = 4;
     canvas.width  = gridSize * CEL + pad * 2;
     canvas.height = gridSize * CEL + pad * 2;
+    // Sla metadata op voor PDF-rendering
+    canvas.dataset.gridsize = gridSize;
+    canvas.dataset.startx   = startX;
+    canvas.dataset.starty   = startY;
+    if (pts) {
+        // Groepeer punten in paden (gesplitst op null)
+        const paden = [];
+        let huidig = [];
+        pts.forEach(p => {
+            if (p === null) { if (huidig.length) paden.push(huidig); huidig = []; }
+            else huidig.push(p);
+        });
+        if (huidig.length) paden.push(huidig);
+        canvas.dataset.paden = JSON.stringify(paden);
+    }
 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Ruitjes — y-as omhoog in logica, omgekeerd in canvas
-    ctx.strokeStyle = '#b8d4e8'; ctx.lineWidth = 0.5;
+    // Ruitjes — donkerder en groter voor betere afdruk
+    ctx.strokeStyle = '#7aa8c8'; ctx.lineWidth = 0.8;
     for (let i = 0; i <= gridSize; i++) {
         ctx.beginPath(); ctx.moveTo(pad + i*CEL, pad); ctx.lineTo(pad + i*CEL, pad + gridSize*CEL); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(pad, pad + i*CEL); ctx.lineTo(pad + gridSize*CEL, pad + i*CEL); ctx.stroke();
