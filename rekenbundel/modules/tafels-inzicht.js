@@ -37,6 +37,34 @@ const TafelsInzicht = (() => {
 
     const pool = [];
 
+    // ── Eerlijk verdelen: tafel = deler, m = quotient ────────
+    // bijv. tafel van 2 → 2:2, 4:2, 6:2, ... 20:2
+    if (inzichtType === 'verdelen-emoji' || inzichtType === 'verdelen-splitshuis' || inzichtType === 'verdelen-100veld') {
+      for (const deler of tafelsLijst) {
+        for (let quotient = 1; quotient <= tafelMax; quotient++) {
+          pool.push({ aantalGroepen: deler, perGroep: quotient, totaal: deler * quotient });
+        }
+      }
+      if (pool.length === 0) return [];
+      const gekozen = _shuffle(pool).slice(0, aantalOefeningen);
+      const EMOJI_KEYS_LOCAL = Object.keys(EMOJI_SETS);
+      return gekozen.map((oef, i) => {
+        const key = emojiSet === 'afwisselend'
+          ? EMOJI_KEYS_LOCAL[i % EMOJI_KEYS_LOCAL.length]
+          : (EMOJI_SETS[emojiSet] ? emojiSet : EMOJI_KEYS_LOCAL[0]);
+        const set = EMOJI_SETS[key];
+        return {
+          type:          inzichtType,
+          totaal:        oef.totaal,
+          aantalGroepen: oef.aantalGroepen,
+          perGroep:      oef.perGroep,
+          emoji:         set.emoji,
+          emojiLabel:    set.label,
+          sleutel:       `vd-${inzichtType}-${oef.totaal}-${oef.aantalGroepen}-${i}`,
+        };
+      });
+    }
+
     if (inzichtType === 'delen-rest') {
       // Pool: combinaties waarbij uitkomst NIET deelbaar is door deler
       // deler = groepGrootte (tafel), uitkomst = willekeurig getal met rest
@@ -91,6 +119,17 @@ const TafelsInzicht = (() => {
         factor2: oef.groepGrootte,
         product: oef.groepen * oef.groepGrootte,
         sleutel: `kop-${oef.groepen}-${oef.groepGrootte}-${i}`,
+      }));
+    }
+
+    // ── Eerlijk verdelen: 100-veld-variant ───────────────────
+    if (inzichtType === 'verdelen-100veld') {
+      return gekozen.map((oef, i) => ({
+        type:          'verdelen-100veld',
+        totaal:        oef.groepen * oef.groepGrootte,
+        aantalGroepen: oef.groepen,
+        perGroep:      oef.groepGrootte,
+        sleutel:       `vh-${oef.groepen}-${oef.groepGrootte}-${i}`,
       }));
     }
 
