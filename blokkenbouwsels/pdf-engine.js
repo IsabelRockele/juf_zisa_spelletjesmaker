@@ -484,7 +484,10 @@ const pdfEngine = (() => {
     // ─── SECTIE ──────────────────────────────────────
     async function drawSection(sectionEl) {
         const titleEl    = sectionEl.querySelector(':scope > .sectie-titel');
-        const opdrachtEl = sectionEl.querySelector(':scope > .opdrachtkader .opdracht-zin');
+        // Zoek opdracht-zin OF eerste opdracht-zin-deel (voor pijlenpad)
+        const opdrachtEl = sectionEl.querySelector(':scope > .opdrachtkader .opdracht-zin')
+                        || sectionEl.querySelector(':scope > .opdrachtkader .opdracht-zin-deel')
+                        || sectionEl.querySelector(':scope > .opdrachtkader');
         const kaders     = [...sectionEl.querySelectorAll(':scope > .kaders-grid > .oefening-kader')];
         const type       = sectionEl.dataset.type;
 
@@ -493,10 +496,14 @@ const pdfEngine = (() => {
         // Bereken hoeveel ruimte opdrachtkader + eerste rij oefeningen nodig heeft
         // zodat ze ALTIJD samen op dezelfde pagina staan
         if (opdrachtEl) {
-            const zin = readText(opdrachtEl);
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
-            const regels = doc.splitTextToSize(zin || '', CONTENT_W - 16);
-            const opdrachtH = regels.length * 6 + 8 + 5;
+            // Bereken hoogte: tel het aantal regels in het opdrachtkader
+            const kaderEl3 = opdrachtEl.closest
+                ? opdrachtEl.closest('.opdrachtkader') || opdrachtEl
+                : opdrachtEl;
+            const aantalRegels = Math.max(1,
+                kaderEl3.querySelectorAll('.opdracht-zin-deel').length ||
+                kaderEl3.querySelectorAll('.opdracht-zin').length || 1);
+            const opdrachtH = aantalRegels * 6.5 + 10 + 5;
             const eersteRijH = type === 'tellen'           ? 65
                              : type === 'grondplan_invul'  ? 55
                              : type === 'grondplan_koppel' ? 95
@@ -543,13 +550,13 @@ const pdfEngine = (() => {
     const w_CALC = gridS_CALC * CEL_PDF_CALC;
     const h_CALC = gridS_CALC * CEL_PDF_CALC;
     const canvasH = h_CALC;
-    const instrH  = instructieEl ? 22 : 0;
+    const instrH  = 0;  // instructie staat in opdrachtkader
     const aantalStappen = pijlenEl.querySelectorAll('.pijl-stap').length;
     const pijlW2 = CONTENT_W - padH - w_CALC - 14;
     const maxPerRij2 = Math.max(4, Math.floor(pijlW2 / 10));
     const aantalRijen = Math.ceil(aantalStappen / maxPerRij2);
     const pijlSectieH = 10 + aantalRijen * 14;
-    const kH = padV + instrH + 4 + Math.max(h_CALC + 4, pijlSectieH) + padV + 8;
+    const kH = padV + instrH + 4 + Math.max(h_CALC, pijlSectieH) + padV + 4;
     ensureSpace(kH + 8);
     const kY = y;
 
@@ -559,21 +566,8 @@ const pdfEngine = (() => {
 
     let curY = kY + padV;
 
-    // Instructie
-    if (instructieEl) {
-      const instrLines = ['Teken de figuur op het ruitjespapier.',
-                          'Volg de pijlenreeks.',
-                          'Begin bij de stip.'];
-      doc.setFont('helvetica','normal'); doc.setFontSize(11); doc.setTextColor(60,60,60);
-      instrLines.forEach(line => {
-        // Teken een klein vakje als opsommingsteken
-        doc.setLineWidth(0.4); doc.setDrawColor(40,40,40); doc.setFillColor(255,255,255);
-        doc.roundedRect(MARGIN_LEFT + padH, curY - 1, 3.5, 3.5, 0.5, 0.5, 'FD');
-        doc.text(line, MARGIN_LEFT + padH + 5, curY + 2);
-        curY += 6;
-      });
-      curY += 2;
-    }
+    // Instructie staat in opdrachtkader — niet herhalen in oefenvak
+
 
     // Leeg ruitjespapier DIRECT in PDF tekenen
     const CEL_PDF = CEL_PDF_CALC;
@@ -606,7 +600,7 @@ const pdfEngine = (() => {
     // Teken pijlen als canvas-afbeeldingen (Unicode pijlen werken niet in jsPDF)
     const pijlX = MARGIN_LEFT + padH + w + 6;
     const pijlW = CONTENT_W - padH - w - 10;
-    doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(40,40,40);
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(40,40,40);
     doc.text('Pijlenreeks:', pijlX, curY + 5);
 
     const stapEls = [...pijlenEl.querySelectorAll('.pijl-stap')];
@@ -648,10 +642,10 @@ const pdfEngine = (() => {
       const pijlPng = tekenPijlCanvas(sym.textContent.trim());
       doc.addImage(pijlPng, 'PNG', px, py - 1, PIJL_MM * 0.7, PIJL_MM * 0.7);
       // Getal eronder
-      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(0,0,0);
+      doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.setTextColor(0,0,0);
       const getalTxt = getal.textContent.trim();
       const getalW = doc.getTextWidth(getalTxt);
-      doc.text(getalTxt, px + (PIJL_MM * 0.7 - getalW) / 2, py + 7);
+      doc.text(getalTxt, px + (PIJL_MM * 0.7 - getalW) / 2, py + 9);
       px += PIJL_MM;
     });
 
@@ -692,23 +686,47 @@ const pdfEngine = (() => {
 
     // ─── OPDRACHTKADER ───────────────────────────────
     function drawOpdrachtkader(zinEl) {
-        const zin = readText(zinEl);
-        if (!zin) return;
-        const padH = 8, padV = 6;
-        const fs = 11; // groter lettertype
-        const regelH = 6;
+        const padH = 8, padV = 5;
+        const fs = 11;
+        const regelH = 6.5;
+        const hokjeB = 3.5;
         doc.setFont('helvetica', 'bold'); doc.setFontSize(fs);
-        const regels = doc.splitTextToSize(zin, CONTENT_W - padH * 2);
-        const boxH = regels.length * regelH + padV * 2;
-        ensureSpace(boxH + 6);
+
+        // Pijlenpad: .opdracht-zin-deel spans met hokjes
+        const kaderEl2 = zinEl.closest ? zinEl.closest('.opdrachtkader') : null;
+        const instrSpans = kaderEl2
+            ? [...kaderEl2.querySelectorAll('.opdracht-zin-deel')]
+            : [];
+        let regelsArr = [];
+        let heeftHokjes = false;
+
+        if (instrSpans.length > 0) {
+            regelsArr = instrSpans.map(el => readText(el).trim()).filter(Boolean);
+            heeftHokjes = true;
+        } else {
+            const zin = readText(zinEl);
+            if (!zin) return;
+            regelsArr = zin.split('|').filter(r => r.trim());
+        }
+
+        const boxH = regelsArr.length * regelH + padV * 2;
         doc.setLineWidth(0.7); doc.setDrawColor(60, 58, 80);
         doc.setFillColor(250, 250, 252);
         drawRoundedRect(MARGIN_LEFT, y, CONTENT_W, boxH, 3, 'FD');
         doc.setTextColor(20, 20, 20);
-        regels.forEach((line, i) => {
-            doc.text(line, MARGIN_LEFT + padH, y + padV + 4.5 + i * regelH);
+
+        regelsArr.forEach((regel, i) => {
+            const regelY = y + padV + 4.5 + i * regelH;
+            if (heeftHokjes) {
+                doc.setLineWidth(0.4); doc.setDrawColor(40,40,40); doc.setFillColor(255,255,255);
+                doc.roundedRect(MARGIN_LEFT + padH, regelY - hokjeB + 0.5, hokjeB, hokjeB, 0.5, 0.5, 'FD');
+                doc.setTextColor(20, 20, 20);
+                doc.text(regel, MARGIN_LEFT + padH + hokjeB + 2, regelY);
+            } else {
+                doc.text(regel, MARGIN_LEFT + padH, regelY);
+            }
         });
-        y += boxH + 6;
+        y += boxH + 5;
     }
 
     // ─── TELLEN: 3 bouwsels per rij ──────────────────
