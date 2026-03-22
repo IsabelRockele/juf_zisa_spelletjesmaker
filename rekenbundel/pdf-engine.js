@@ -2852,13 +2852,23 @@ doc.setTextColor(26, 58, 92);
 
     // Bepaal schema-type op basis van bewerking en bereik
     const vermBereik = inst.vermBereik || 'exe';
-    // Tweede factor 2-cijferig → 2 tussenresultaten → 5 datarijen
     const vermTweeCijferFactor2 = ['txte','texte','htexte'].includes(vermBereik);
-    // Eerste factor groter dan TE → meer kolommen nodig
     const isVermTweeFactoren = vermTweeCijferFactor2;
     const isDelen = inst.bewerking === 'delen';
-    // 2-cijferige 2e factor → 6 datarijen (grijs + 5 wit, 2 vette lijnen)
+    const deelBereik = inst.deelBereik || 'tee';
     const aantalDataRijen = vermTweeCijferFactor2 ? 6 : 4;
+
+    // Deelschema: kolommen links (werkzone) en rechts (1 antwoordrij)
+    function deelKolommen() {
+      switch(deelBereik) {
+        case 'tee':   return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+        case 'htee':  return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'E'  };
+        case 'dhtee': return { links:['D','H','T','E'], rechts:['H','T','E'], rijenLinks:6, deler:'E'  };
+        case 'tete':  return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'TE' };
+        case 'htete': return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'TE' };
+        default:      return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+      }
+    }
 
     // ── Constanten ────────────────────────────────────────────
     const KADER_PAD   = 5;     // interne padding kader
@@ -2928,7 +2938,9 @@ doc.setTextColor(26, 58, 92);
     const schemaRijH = CEL_H * (1 + aantalDataRijen); // header + datarijen
     const cijferLabelH = 8;
     const cijferSchemaH = metCijfer
-      ? cijferLabelH + GAP + (drieGetallen ? schemaRijH * 2 + GAP + 4 : schemaRijH)
+      ? cijferLabelH + GAP + (isDelen
+          ? (() => { const dk = deelKolommen(); return CEL_H * (1 + dk.rijenLinks); })() // header + werkrijen links
+          : (drieGetallen ? schemaRijH * 2 + GAP + 4 : schemaRijH))
       : 0;
 
     // Rechterkant totaal
@@ -3045,8 +3057,7 @@ doc.setTextColor(26, 58, 92);
         };
         const TEKST_RGB = {
           'TD':[27,94,32],'D':[183,28,28],'H':[13,71,161],
-          'T':[27,94,32],'E':[230,81,0],
-          ',':[255,255,255],'t':[245,127,23],'h':[245,127,23],'d':[245,127,23]
+          'T':[27,94,32],'E':[230,81,0],          ',':[255,255,255],'t':[245,127,23],'h':[245,127,23],'d':[245,127,23]
         };
 
         function tekenSchema(startY, stapLabel) {
@@ -3104,14 +3115,81 @@ doc.setTextColor(26, 58, 92);
           return startY + CEL_H;
         }
 
-        // Delen: geen cijferschema — toon melding in plaats van schema
+        // Delen: split-schema (werkzone links | antwoord rechts)
         if (isDelen && metCijfer) {
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(9);
-          doc.setTextColor(150, 100, 0);
-          doc.text('Cijferschema voor deling', rechtsX, ry + 4);
-          doc.text('wordt binnenkort toegevoegd.', rechtsX, ry + 10);
-          ry += 18;
+          const dk = deelKolommen();
+          const CEL_W = CEL_W_NORM;
+          const linksW = dk.links.length * CEL_W;
+          const scheidLijnX = rechtsX + linksW + 2;
+          const startRy = ry;
+
+          // ── LINKS: header + werkrijen ────────────────────────
+          let sx = rechtsX;
+          dk.links.forEach(k => {
+            doc.setFillColor(...(KLEUREN[k]||[220,220,220]));
+            doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+            doc.rect(sx, ry, CEL_W, CEL_H, 'FD');
+            doc.setTextColor(...(TEKST_RGB[k]||[50,50,50]));
+            doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            const tw = doc.getTextWidth(k);
+            doc.text(k, sx + (CEL_W - tw)/2, ry + CEL_H - 2);
+            sx += CEL_W;
+          });
+          ry += CEL_H;
+
+          for (let r = 0; r < dk.rijenLinks; r++) {
+            sx = rechtsX;
+            dk.links.forEach(() => {
+              doc.setFillColor(255,255,255); doc.setDrawColor(180,180,180); doc.setLineWidth(0.25);
+              doc.rect(sx, ry, CEL_W, CEL_H, 'FD');
+              sx += CEL_W;
+            });
+            ry += CEL_H;
+          }
+
+          // ── Verticale scheidingslijn ─────────────────────────
+          const totaalLijnH = CEL_H * (1 + dk.rijenLinks); // header + werkrijen
+          doc.setDrawColor(60,60,60); doc.setLineWidth(0.7);
+          doc.line(scheidLijnX, startRy, scheidLijnX, startRy + totaalLijnH);
+
+          // ── RECHTS: header quotiënt (ter hoogte van 2e werkrij) ──
+          let ryR = startRy + CEL_H * 2;
+          sx = scheidLijnX + 3;
+          dk.rechts.forEach(k => {
+            doc.setFillColor(...(KLEUREN[k]||[220,220,220]));
+            doc.setDrawColor(150,150,150); doc.setLineWidth(0.3);
+            doc.rect(sx, ryR, CEL_W, CEL_H, 'FD');
+            doc.setTextColor(...(TEKST_RGB[k]||[50,50,50]));
+            doc.setFont('helvetica','bold'); doc.setFontSize(8);
+            const tw = doc.getTextWidth(k);
+            doc.text(k, sx + (CEL_W - tw)/2, ryR + CEL_H - 2);
+            sx += CEL_W;
+          });
+          ryR += CEL_H;
+
+          // 1 antwoordrij rechts
+          sx = scheidLijnX + 3;
+          dk.rechts.forEach(() => {
+            doc.setFillColor(255,255,255); doc.setDrawColor(180,180,180); doc.setLineWidth(0.25);
+            doc.rect(sx, ryR, CEL_W, CEL_H, 'FD');
+            sx += CEL_W;
+          });
+
+          // R= schrijflijn (enkel bij met rest)
+          if (inst.deelRest === 'ja') {
+            const restY = ryR + CEL_H + 3;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9);
+            doc.setTextColor(50, 50, 50);
+            doc.text('R =', scheidLijnX + 3, restY + 4);
+            const rLabelW = doc.getTextWidth('R = ');
+            doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+            doc.line(scheidLijnX + 3 + rLabelW + 2, restY + 5,
+                     scheidLijnX + 3 + rLabelW + 24, restY + 5);
+          }
+
+          ry += GAP;
+
         } else if (metCijfer) {
           if (drieGetallen) {
             ry = tekenSchema(ry, 'STAP 1') + GAP;
