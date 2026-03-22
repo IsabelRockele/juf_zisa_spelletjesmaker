@@ -490,3 +490,26 @@
 .vs-cs-komma-cel.vs-cs-dik-onder {
   border-bottom: 2.5px solid #444 !important;
 }
+
+/* ── Deelschema split-layout ──────────────────────────────── */
+.vs-deel-schema-wrap {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin-top: 4px;
+}
+.vs-deel-links {
+  display: flex;
+  flex-direction: column;
+}
+.vs-deel-lijn {
+  width: 2px;
+  background: #444;
+  align-self: stretch;
+  margin: 0 4px;
+  min-height: 60px;
+}
+.vs-deel-rechts {
+  display: flex;
+  flex-direction: column;
+}
