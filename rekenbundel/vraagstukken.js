@@ -25,10 +25,10 @@ window.VraagstukkenModule = (() => {
   // ── LIMIET BADGE UPDATEN ─────────────────────────────────────
   async function updateLimietBadge() {
     const teller = await haalTellerOp();
-    const resterend = Math.max(0, 30 - teller);
+    const resterend = Math.max(0, 20 - teller);
     const badge = document.getElementById('vs-limiet-badge');
     if (!badge) return;
-    badge.textContent = `${resterend}/30 vandaag`;
+    badge.textContent = `${resterend}/20 vandaag`;
     badge.className = 'vs-limiet-badge ' + (resterend === 0 ? 'leeg' : resterend <= 5 ? 'weinig' : '');
   }
 
@@ -252,8 +252,8 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     const inst = leesInstellingen();
     const aantalNodig = inst.aantalBulk;
 
-    if (teller + aantalNodig > 30) {
-      const resterend = Math.max(0, 30 - teller);
+    if (teller + aantalNodig > 20) {
+      const resterend = Math.max(0, 20 - teller);
       toonMelding(
         resterend === 0
           ? '⏰ Je hebt je dagelijks limiet van 10 vraagstukken bereikt. Morgen kan je opnieuw!'

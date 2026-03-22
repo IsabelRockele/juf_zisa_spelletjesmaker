@@ -641,6 +641,11 @@ const Preview = (() => {
   function _inzichtOefeningHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
 
+    // ── Eerlijk verdelen: dispatch naar eigen renderers ───
+    if (oef.type === 'verdelen-emoji')      return _verdelenEmojiHTML(blokId, oef, idx);
+    if (oef.type === 'verdelen-splitshuis') return _verdelenSplitshuisHTML(blokId, oef, idx);
+    if (oef.type === 'verdelen-100veld')    return _verdelen100VeldHTML(blokId, oef, idx);
+
     function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
 
     /* ── Delen met rest ──────────────────────────────────── */
@@ -765,6 +770,100 @@ const Preview = (() => {
           ${groepVanRij}
           ${vermRij}
         </div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Eerlijk verdelen: emoji-variant ────────────────────── */
+  function _verdelenEmojiHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
+    function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
+
+    // Alle emoji's in één blok (zoals delen-aftrekking)
+    const cols = emoKols(oef.totaal);
+    let alleEmojis = '';
+    for (let i = 0; i < oef.totaal; i++) alleEmojis += `<span class="inzicht-emoji">${oef.emoji}</span>`;
+    const emojiBlok = `<div class="inzicht-vakje inzicht-vakje-deel" style="grid-template-columns:repeat(${cols},26px);row-gap:8px;">${alleEmojis}</div>`;
+
+    // 4 zinnen
+    const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">eerlijk verdelen in</span><span class="inzicht-ingevuld">${oef.aantalGroepen}</span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">gelijke groepen is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">gedeeld door</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+
+    return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
+      ${del}
+      <div class="inzicht-inner">
+        <div class="inzicht-links">${emojiBlok}</div>
+        <div class="inzicht-rechts">${zin1}${zin2}${zin3}${zin4}</div>
+      </div>
+    </div>`;
+  }
+
+  /* ── Eerlijk verdelen: splitshuis-variant ───────────────── */
+  function _verdelenSplitshuisHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
+    const n = oef.aantalGroepen;
+
+    // Vaste vakje-breedte en gap in SVG-eenheden
+    const VAK_B   = 36;   // breedte per vakje
+    const GAP     = 4;    // gap tussen vakjes
+    const PAD     = 10;   // padding links/rechts
+    const SVG_B   = n * VAK_B + (n - 1) * GAP + PAD * 2;
+    const SVG_H   = 24;
+    const midX    = SVG_B / 2;
+
+    const lijnen = Array.from({length: n}, (_, i) => {
+      const vakMidX = PAD + i * (VAK_B + GAP) + VAK_B / 2;
+      return `<line x1="${midX}" y1="0" x2="${vakMidX}" y2="${SVG_H}" stroke="#aaa" stroke-width="1.2"/>`;
+    }).join('');
+
+    const beenSVG = `<svg viewBox="0 0 ${SVG_B} ${SVG_H}" style="width:100%;height:${SVG_H}px;display:block;overflow:visible;">${lijnen}</svg>`;
+
+    const vakjesHTML = Array(n).fill('<div class="vs-vakje"></div>').join('');
+    const zin1 = `<div class="inzicht-tekst-rij" style="margin-top:8px"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">gelijke delen is</span><span class="inzicht-lijn" style="width:22px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:22px"></span></div>`;
+
+    return `<div class="inzicht-oef inzicht-oef-splitshuis" data-blok="${blokId}" data-idx="${idx}">
+      ${del}
+      <div class="vs-huis-wrap">
+        <div class="vs-top-vakje">${oef.totaal}</div>
+        ${beenSVG}
+        <div class="vs-vakjes-rij">${vakjesHTML}</div>
+      </div>
+      ${zin1}${zin2}
+    </div>`;
+  }
+
+  /* ── Eerlijk verdelen: 100-veld-variant ─────────────────── */
+  function _verdelen100VeldHTML(blokId, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
+    const KLEUREN = ['#E74C3C','#5DADE2','#2ECC71','#F39C12','#9B59B6','#1ABC9C','#E67E22','#EC407A','#00BCD4','#8BC34A'];
+    const n = oef.aantalGroepen;   // aantal stroken (deler)
+    const p = oef.perGroep;        // cellen per strook (quotient)
+    // Bouw 10×10 grid
+    let cellen = '';
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        const celNr = r * 10 + c; // 0-based
+        let kleur = '';
+        // Kleur de eerste n×p cellen, elke strook van n cellen een andere kleur
+        if (celNr < n * p) {
+          const strook = Math.floor(celNr / n);
+          kleur = `background:${KLEUREN[strook % KLEUREN.length]};opacity:0.75;`;
+        }
+        cellen += `<div class="veld100-cel" style="${kleur}"></div>`;
+      }
+    }
+    const zin1 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoeveel gekleurde hokjes zijn er?</span><span class="inzicht-lijn" style="width:28px"></span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Met hoeveel stroken van</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">kun je die bedekken?</span><span class="inzicht-lijn" style="width:28px"></span></div>`;
+    const zin3 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoe dikwijls gaat</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">in</span><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">?</span><span class="inzicht-lijn" style="width:28px"></span><span class="inzicht-tekst">keer.</span></div>`;
+
+    return `<div class="inzicht-oef inzicht-oef-100veld" data-blok="${blokId}" data-idx="${idx}">
+      ${del}
+      <div class="veld100-wrap">
+        <div class="veld100-grid">${cellen}</div>
+        <div class="veld100-zinnen">${zin1}${zin2}${zin3}</div>
       </div>
     </div>`;
   }
