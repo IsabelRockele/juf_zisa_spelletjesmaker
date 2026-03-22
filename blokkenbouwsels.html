@@ -1,54 +1,67 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>Ik oefen met blokkenbouwsels – generator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- pdfmake voor echte PDF-download -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.10/vfs_fonts.js"></script>
 <style>
-  :root{
-    --frame:#d8d8dc; --ink:#1f2937; --accent:#2563eb; --muted:#6b7280; --bg:#f6f7fb;
-  }
+  :root{ --frame:#d8d8dc; --ink:#1f2937; --accent:#2563eb; --muted:#6b7280; --bg:#f6f7fb; }
   *{box-sizing:border-box}
   body{margin:0; font-family:Arial, Helvetica, sans-serif; color:var(--ink); background:var(--bg);}
-  header{padding:14px 18px}
-  h1{margin:0; font-size:22px}
-  .layout{display:grid; grid-template-columns:420px 1fr; gap:16px; padding:0 18px 18px}
+  header{padding:14px 18px} h1{margin:0; font-size:22px}
+  .layout{display:grid; grid-template-columns:460px 1fr; gap:16px; padding:0 18px 18px}
   .panel{background:#fff; border:1px solid var(--frame); border-radius:12px; padding:12px}
   .row{display:flex; gap:10px; align-items:end; margin-bottom:8px}
   label{font-size:13px; display:flex; flex-direction:column; gap:4px}
   input[type="number"], select{padding:7px; border:1px solid var(--frame); border-radius:8px; background:#fff}
+  select.mini{padding:4px 6px; font-size:12px}
   .btn{cursor:pointer; border:0; padding:8px 10px; border-radius:8px; color:#fff; background:var(--accent)}
-  .btn.muted{background:var(--muted)}
-  .btn.danger{background:#e55353}
+  .btn.muted{background:var(--muted)} .btn.danger{background:#e55353}
   .small{font-size:12px; color:#6b7280}
   .sect{border:1px dashed var(--frame); border-radius:10px; padding:10px; margin-bottom:10px}
   .sect h3{margin:0 0 8px; font-size:15px}
   .tools{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px}
   .list{display:grid; gap:8px}
-  .card{border:1px solid var(--frame); border-radius:10px; padding:8px; background:#fff}
-  .cardHead{display:flex; justify-content:space-between; gap:8px; align-items:center}
-  .cardBody{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px}
-  .thumb{border:1px solid var(--frame); border-radius:8px; padding:6px; background:#fff; position:relative}
-  .thumb img{display:block; max-width:240px}
-  .dotL,.dotR{position:absolute; top:50%; width:10px; height:10px; margin-top:-5px; border:1.5px solid #000; border-radius:50%; background:#fff}
-  .dotL{left:-6px} .dotR{right:-6px}
-  .sheet .hdr{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px}
+  .itemRow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px; border:1px solid var(--frame); border-radius:10px; background:#fff}
+  .itemRow .left{display:flex; align-items:center; gap:8px}
+
+  /* Werkblad rechts */
+  .sheetHdr{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:8px; position:sticky; top:8px; background:#fff; z-index:1; padding-bottom:8px; border-bottom:1px solid var(--frame)}
   .naam{font-size:14px} .naam span{border-bottom:1px solid #000; padding:0 90px 2px 0}
   .title{font-weight:bold}
-  .typeHdr{font-weight:bold; margin:8px 0 6px}
-  .row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
-  .row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px}
-  .box{border:1px solid var(--frame); border-radius:10px; padding:8px; background:#fff}
+  .typeHdr{font-weight:bold; margin:12px 0 6px}
+  .gridRow2{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+  .gridRow3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+  .cardWB{border:1px solid var(--frame); border-radius:12px; padding:10px; background:#fff}
+
+  /* kaders */
+  .slotLG, .slotSM, .slotXL{
+    border:1px solid var(--frame); border-radius:10px; padding:6px; background:#fff; display:flex;
+    align-items:center; justify-content:center; margin-bottom:10px;
+  }
+  .slotLG{ width: 340px; height: 220px; }     /* standaard 3D bij verbind-opgaven */
+  .slotSM{ width: 240px; height: 180px; }     /* plannen/aanzichten bij verbinden */
+  .slotXL{ width: 410px; height: 300px; }     /* groot knipformaat voor 'Bouw volgens plattegrond' */
+  .slotLG img, .slotSM img, .slotXL img{ max-width:100%; max-height:100%; display:block }
+
+  /* verbindpunten – dicht bij item, veel ruimte tussen rijen */
+  .slotWrap{position:relative}
+  .dotTop,.dotBottom{
+    position:absolute; left:50%; transform:translateX(-50%);
+    width:14px; height:14px; border:1.8px solid #000; border-radius:50%; background:#fff
+  }
+  .dotTop{top:6px} .dotBottom{bottom:6px}
+  .setGrid{display:grid; grid-template-rows:auto auto; row-gap:48px;}
+  .rowItems{display:grid; grid-template-columns:repeat(3, 1fr); gap:14px}
 </style>
 </head>
 <body>
 <header><h1>Generator blokkenbouwsels</h1></header>
 
 <div class="layout">
-  <!-- LINKERKOLOM – OPBOUWEN PER OPDRACHT -->
+  <!-- LINKS -->
   <aside class="panel">
     <div class="row">
       <label>Rastergrootte
@@ -61,9 +74,17 @@
         <select id="maxPerRow"><option>2</option><option selected>3</option></select>
       </label>
     </div>
-    <p class="small">Voeg oefeningen toe per opdracht. Vink “Op werkblad” aan voor wat effectief in het werkblad/PDF komt.</p>
+    <div class="row">
+      <label>Bloktype
+        <select id="blockStyle">
+          <option value="cube">Kubussen</option>
+          <option value="linking" selected>Linking cubes</option>
+        </select>
+      </label>
+    </div>
+    <p class="small">Tip: bij *Verbind: bouwsel ↔ aanzicht* kiest u voortaan het aanzicht **per set**.</p>
 
-    <section class="sect" id="sect-plat">
+    <section class="sect">
       <h3>Plattegrond invullen</h3>
       <div class="tools">
         <button class="btn" data-add="plat1">Voeg 1 toe</button>
@@ -73,27 +94,27 @@
       <div class="list" id="list-plat"></div>
     </section>
 
-    <section class="sect" id="sect-vplat">
+    <section class="sect">
       <h3>Verbind: bouwsel ↔ plattegrond</h3>
       <div class="tools">
-        <button class="btn" data-add="vplat1">Voeg 1 toe</button>
-        <button class="btn muted" data-add="vplat3">Voeg 3 toe</button>
+        <button class="btn" data-add="vplat1">Voeg 1 set toe</button>
+        <button class="btn muted" data-add="vplat3">Voeg 3 sets toe</button>
         <button class="btn danger" data-clear="vplat">Wis deze sectie</button>
       </div>
       <div class="list" id="list-vplat"></div>
     </section>
 
-    <section class="sect" id="sect-vview">
+    <section class="sect">
       <h3>Verbind: bouwsel ↔ aanzicht</h3>
       <div class="tools">
-        <button class="btn" data-add="vview1">Voeg 1 toe</button>
-        <button class="btn muted" data-add="vview3">Voeg 3 toe</button>
+        <button class="btn" data-add="vview1">Voeg 1 set toe</button>
+        <button class="btn muted" data-add="vview3">Voeg 3 sets toe</button>
         <button class="btn danger" data-clear="vview">Wis deze sectie</button>
       </div>
       <div class="list" id="list-vview"></div>
     </section>
 
-    <section class="sect" id="sect-bouw">
+    <section class="sect">
       <h3>Bouw volgens plattegrond (oplossing achteraan)</h3>
       <div class="tools">
         <button class="btn" data-add="bouw1">Voeg 1 toe</button>
@@ -104,46 +125,49 @@
     </section>
   </aside>
 
-  <!-- RECHTERKOLOM – ENKEL HET WERKBLAD -->
-  <main class="panel sheet">
-    <div class="hdr">
-      <div class="naam">Naam: <span>&nbsp;</span></div>
-      <div class="title">Ik oefen met blokkenbouwsels</div>
+  <!-- RECHTS: werkblad -->
+  <main class="panel">
+    <div class="sheetHdr">
+      <div>
+        <span class="naam">Naam: <span>&nbsp;</span></span>
+        <span class="title" style="margin-left:12px">Ik oefen met blokkenbouwsels</span>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn" id="btnPdf">Download als PDF</button>
+        <button class="btn muted" id="btnReset">Alles leegmaken</button>
+      </div>
     </div>
     <div id="sheetPreview"></div>
-    <div style="margin-top:12px; display:flex; gap:10px">
-      <button class="btn" id="btnPdf">Download als PDF</button>
-      <button class="btn muted" id="btnReset">Alles leegmaken</button>
-    </div>
   </main>
 </div>
 
 <script>
-/* ========== HELPERS ========== */
-function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min}
-function choice(a){return a[Math.floor(Math.random()*a.length)]}
+/* ===== Helpers ===== */
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function choice(A){return A[Math.floor(Math.random()*A.length)]}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 const palette=["#ff6b6b","#4dabf7","#51cf66","#ffd43b","#845ef7","#ff922b","#63e6be"];
 function shade(hex,p){let r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16);
   if(p<0){r*=1+p;g*=1+p;b*=1+p;}else{r+=(255-r)*p;g+=(255-g)*p;b+=(255-b)*p;}return`rgb(${r|0},${g|0},${b|0})`}
 function clamp(v,min,max){return Math.max(min,Math.min(max,v))}
 
-/* ========== MODEL ========== */
-const exercises=[]; // {id,type,H,assets:{iso,plan,planEmp,frontCv,sideCv},include,sectId}
-let exId=0;
+/* ===== Model ===== */
+let blockStyle='linking';
+const exercises=[]; let exId=0;
 
-/* ========== GENERATIE ========== */
+/* ===== Generator ===== */
 function makeHeightMap(n,total){
   const H=Array.from({length:n},()=>Array(n).fill(0));
   const sx=rnd(0,n-1), sy=rnd(0,n-1);
-  let cells=[[sx,sy]]; H[sy][sx]=1; let placed=1;
+  H[sy][sx]=1; let placed=1; let cells=[[sx,sy]];
   function nb(x,y){const a=[]; if(x>0)a.push([x-1,y]); if(x<n-1)a.push([x+1,y]); if(y>0)a.push([x,y-1]); if(y<n-1)a.push([x,y+1]); return a;}
   const frontier=new Set(nb(sx,sy).map(([x,y])=>`${x},${y}`));
   while(placed<total){
-    if(Math.random()<0.6){const [cx,cy]=choice(cells); H[cy][cx]++; placed++;}
-    else if(frontier.size){const pick=[...frontier][Math.floor(Math.random()*frontier.size)];
-      frontier.delete(pick); const [nx,ny]=pick.split(',').map(Number); H[ny][nx]=1; placed++; cells.push([nx,ny]);
-      for(const [ax,ay] of nb(nx,ny)) if(H[ay][ax]===0) frontier.add(`${ax},${ay}`);
-    }else{const [cx,cy]=choice(cells); H[cy][cx]++; placed++;}
+    if(Math.random()<0.6){const pick=cells.filter(([x,y])=>H[y][x]<6); const [cx,cy]=(pick.length?choice(pick):choice(cells)); H[cy][cx]++; placed++;}
+    else if(frontier.size){const p=[...frontier][Math.floor(Math.random()*frontier.size)]; frontier.delete(p);
+      const [nx,ny]=p.split(',').map(Number); H[ny][nx]=1; placed++; cells.push([nx,ny]);
+      for(const [ax,ay] of nb(nx,ny)) if(H[ay][ax]===0) frontier.add(`${ax},${ay}`);}
+    else{const [cx,cy]=choice(cells); H[cy][cx]++; placed++;}
   }
   return H;
 }
@@ -153,260 +177,370 @@ function makeViews(H){
   return {front,side};
 }
 
-/* ========== TEKENEN: kubussen met cabinet/oblique, veilig kader en lijntjes per kubus ========== */
-function drawCubesOblique(H, S=28){
+/* ‘Bouw’-variant: maak kolommen naar achter toe niet lager, zodat blokjes niet verdwijnen */
+function adjustForVisibility(H){
   const n=H.length;
-  const d = {x:S*0.5, y:-S*0.5}; // dieptevector (45° met halve schaal)
-
-  // max hoogte
-  let maxH=0; for(const row of H) for(const v of row) if(v>maxH) maxH=v;
-
-  // VEILIGE ORIGIN: genoeg ruimte naar boven en rechts -> niets verdwijnt
-  const pad=70;
-  const baseX = pad + n*Math.abs(d.x) + 40;
-  const baseY = pad + maxH*S + n*Math.abs(d.y) + 40;
-
-  const w = baseX + n*S + n*Math.abs(d.x) + pad;
-  const h = baseY + n*S + pad;
-
-  const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
-  const ctx=cv.getContext('2d'); ctx.lineWidth=0.95;
-
-  function P(x,y,z){ // projectie coördinaat (boven-linkse hoek van frontvlak)
-    return [ baseX + x*S + y*d.x, baseY + (-z*S) + y*d.y ];
+  for(let x=0;x<n;x++){
+    let best=0;
+    for(let y=0;y<n;y++){
+      H[y][x]=Math.max(H[y][x], best);
+      best=H[y][x];
+    }
   }
-  function poly(pts, fill, stroke){
-    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]);
-    for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i][0], pts[i][1]);
-    ctx.closePath(); ctx.fillStyle=fill; ctx.fill();
-    if(stroke){ ctx.strokeStyle=stroke; ctx.stroke(); }
-  }
-  function line(a,b, col="#0003", lw=0.8){
-    ctx.beginPath(); ctx.moveTo(a[0],a[1]); ctx.lineTo(b[0],b[1]); ctx.strokeStyle=col; ctx.lineWidth=lw; ctx.stroke();
-  }
-  const hAt = (x,y)=> (x<0||y<0||x>=n||y>=n)?0:H[y][x];
+  return H;
+}
 
-  // van achter naar voor
+/* ===== Tekenen: kubussen & linking cubes ===== */
+function drawCubesOblique(H, S=52){
+  const n=H.length, d={x:S*0.5, y:-S*0.5};
+  let maxH=0; for(const r of H) for(const v of r) if(v>maxH) maxH=v;
+  const pad=8, baseX=pad, baseY=pad + maxH*S + n*Math.abs(d.y) + 8;
+  const w=pad*2 + n*(S + Math.abs(d.x)), h=pad*2 + maxH*S + n*(S + Math.abs(d.y)) + 8;
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const ctx=cv.getContext('2d'); ctx.lineWidth=1;
+
+  function P(x,y,z){return[baseX+x*S+y*d.x, baseY+(-z*S)+y*d.y]}
+  function poly(pts,fill,stroke){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
+  function line(a,b,col="#0003",lw=0.9){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.stroke();}
+  const hAt=(x,y)=> (x<0||y<0||x>=n||y>=n)?0:H[y][x];
+
   for(let y=n-1;y>=0;y--){
     for(let x=0;x<n;x++){
       const h=H[y][x]; if(h<=0) continue;
-      const base=choice(palette);
-      const colTop   = shade(base,  0.25);
-      const colFront = shade(base, -0.05);
-      const colSide  = shade(base, -0.18);
+      const base=choice(palette), colTop=shade(base,0.25), colFront=shade(base,-0.05), colSide=shade(base,-0.18);
+      for(let k=0;k<h;k++){ const TL=P(x,y,k+1), TR=[TL[0]+S,TL[1]], BL=[TL[0],TL[1]+S], BR=[TR[0],TR[1]+S]; poly([TL,TR,BR,BL], colFront, "#0003"); }
+      for(let k=1;k<h;k++){ const A=P(x,y,k), B=[A[0]+S,A[1]]; line(A,B,"#0005",0.9); }
+      const TLt=P(x,y,h), TRt=[TLt[0]+S,TLt[1]], TLtd=[TLt[0]+d.x,TLt[1]+d.y], TRtd=[TRt[0]+d.x,TRt[1]+d.y]; poly([TLtd,TRtd,TRt,TLt], colTop, "#0003");
+      const rightH = hAt(x+1,y);
+      for(let k=rightH;k<h;k++){ const TRk=[P(x,y,k+1)[0]+S, P(x,y,k+1)[1]], BRk=[TRk[0],TRk[1]+S];
+        const TRkd=[TRk[0]+d.x,TRk[1]+d.y], BRkd=[BRk[0]+d.x,BRk[1]+d.y]; poly([TRk,BRk,BRkd,TRkd], colSide, "#0002"); line(TRk,TRkd,"#0004",0.8); }
+    }
+  }
+  return cv;
+}
 
-      // FRONT per kubuslaag -> duidelijke stapeling
+/* Linking cubes – 1 rond gat per vlak, bovenop een ‘stud’ */
+function drawLinkingCubes(H, S=52){
+  const n=H.length, d={x:S*0.5, y:-S*0.5};
+  let maxH=0; for(const r of H) for(const v of r) if(v>maxH) maxH=v;
+  const pad=8, baseX=pad, baseY=pad + maxH*S + n*Math.abs(d.y) + 8;
+  const w=pad*2 + n*(S + Math.abs(d.x)), h=pad*2 + maxH*S + n*(S + Math.abs(d.y)) + 8;
+  const cv=document.createElement('canvas'); cv.width=w; cv.height=h; const ctx=cv.getContext('2d'); ctx.lineWidth=1;
+
+  function P(x,y,z){return[baseX+x*S+y*d.x, baseY+(-z*S)+y*d.y]}
+  function poly(pts,fill,stroke){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);for(let i=1;i<pts.length;i++)ctx.lineTo(pts[i][0],pts[i][1]);ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.stroke();}}
+  function line(a,b,col="#0003",lw=0.9){ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.stroke();}
+  const hAt=(x,y)=> (x<0||y<0||x>=n||y>=n)?0:H[y][x];
+
+  for(let y=n-1;y>=0;y--){
+    for(let x=0;x<n;x++){
+      const h=H[y][x]; if(h<=0) continue;
+      const base=choice(palette),
+            colFront=shade(base,-0.02),
+            colTop=shade(base,0.10),
+            colSide=shade(base,-0.12),
+            hole=shade(base,-0.45), ring=shade(base,-0.25);
+
       for(let k=0;k<h;k++){
         const TL=P(x,y,k+1), TR=[TL[0]+S,TL[1]], BL=[TL[0],TL[1]+S], BR=[TR[0],TR[1]+S];
         poly([TL,TR,BR,BL], colFront, "#0003");
+        const cx=TL[0]+S*0.5, cy=TL[1]+S*0.5, r=S*0.18;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fillStyle=hole; ctx.fill(); ctx.strokeStyle=ring; ctx.lineWidth=0.9; ctx.stroke();
       }
-      // scheidslijntjes tussen lagen op front
-      for(let k=1;k<h;k++){
-        const A=P(x,y,k), B=[A[0]+S, A[1]];
-        line(A, B, "#0005", 0.8);
-      }
+      for(let k=1;k<h;k++){ const A=P(x,y,k), B=[A[0]+S,A[1]]; line(A,B,"#0006",0.9); }
 
-      // TOP (alleen bovenste niveau)
-      const TLt=P(x,y,h), TRt=[TLt[0]+S,TLt[1]];
-      const TLtd=[TLt[0]+d.x, TLt[1]+d.y], TRtd=[TRt[0]+d.x, TRt[1]+d.y];
-      poly([TLtd, TRtd, TRt, TLt], colTop, "#0003");
+      const TLt=P(x,y,h), TRt=[TLt[0]+S,TLt[1]], TLtd=[TLt[0]+d.x,TLt[1]+d.y], TRtd=[TRt[0]+d.x,TRt[1]+d.y];
+      poly([TLtd,TRtd,TRt,TLt], colTop, "#0003");
+      const cxTop=(TLt[0]+TRt[0]+TLtd[0]+TRtd[0])/4, cyTop=(TLt[1]+TRt[1]+TLtd[1]+TRtd[1])/4;
+      ctx.beginPath(); ctx.arc(cxTop, cyTop, S*0.16, 0, Math.PI*2); ctx.fillStyle=shade(base,0.15); ctx.fill();
+      ctx.beginPath(); ctx.arc(cxTop, cyTop, S*0.16, 0, Math.PI*2); ctx.strokeStyle=ring; ctx.lineWidth=0.9; ctx.stroke();
 
-      // RECHTER ZIJVLAK per zichtbare laag -> duidelijke stapeling
       const rightH = hAt(x+1,y);
-      for(let k=rightH; k<h; k++){
-        const TRk=[P(x,y,k+1)[0]+S, P(x,y,k+1)[1]];
-        const BRk=[TRk[0], TRk[1]+S];
-        const TRkd=[TRk[0]+d.x, TRk[1]+d.y];
-        const BRkd=[BRk[0]+d.x, BRk[1]+d.y];
-        poly([TRk, BRk, BRkd, TRkd], colSide, "#0002");
-        // scheidslijntje per laag op zijvlak
-        line(TRk, TRkd, "#0004", 0.7);
+      for(let k=rightH;k<h;k++){
+        const TRk=[P(x,y,k+1)[0]+S, P(x,y,k+1)[1]], BRk=[TRk[0],TRk[1]+S];
+        const TRkd=[TRk[0]+d.x,TRk[1]+d.y], BRkd=[BRk[0]+d.x,BRk[1]+d.y];
+        poly([TRk,BRk,BRkd,TRkd], colSide, "#0002"); line(TRk,TRkd,"#0004",0.8);
+        const cx=(TRk[0]+BRk[0]+TRkd[0]+BRkd[0])/4, cy=(TRk[1]+BRk[1]+TRkd[1]+BRkd[1])/4;
+        ctx.beginPath(); ctx.arc(cx, cy, S*0.18, 0, Math.PI*2); ctx.fillStyle=hole; ctx.fill();
+        ctx.beginPath(); ctx.arc(cx, cy, S*0.18, 0, Math.PI*2); ctx.strokeStyle=ring; ctx.lineWidth=0.9; ctx.stroke();
       }
     }
   }
   return cv;
 }
 
-/* Plattegrond en aanzichten */
+/* Plattegrond: onderste rij = vooraan */
 function drawPlan(H, showNumbers=true){
-  const n=H.length, cell=32, pad=12;
+  const n=H.length, cell=34, pad=12;
   const cv=document.createElement('canvas'); cv.width=pad*2+n*cell; cv.height=pad*2+n*cell;
   const ctx=cv.getContext('2d'); ctx.fillStyle="#fff"; ctx.fillRect(0,0,cv.width,cv.height);
-  ctx.strokeStyle="#54565a"; ctx.lineWidth=1;
-  ctx.strokeRect(pad,pad,n*cell,n*cell);
-  for(let i=1;i<n;i++){
-    const x=pad+i*cell, y=pad+i*cell;
-    ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+n*cell); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+n*cell,y); ctx.stroke();
-  }
+  ctx.strokeStyle="#54565a"; ctx.lineWidth=1; ctx.strokeRect(pad,pad,n*cell,n*cell);
+  for(let i=1;i<n;i++){const x=pad+i*cell,y=pad+i*cell; ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+n*cell); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+n*cell,y); ctx.stroke();}
   if(showNumbers){
     ctx.fillStyle="#000"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.font="16px Arial";
-    for(let y=0;y<n;y++)for(let x=0;x<n;x++){const v=H[y][x]; if(v>0) ctx.fillText(String(v), pad+x*cell+cell/2, pad+y*cell+cell/2);}
+    for(let y=0;y<n;y++){
+      const dispRow=(n-1)-y;
+      for(let x=0;x<n;x++){
+        const v=H[y][x]; if(v>0) ctx.fillText(String(v), pad+x*cell+cell/2, pad+dispRow*cell+cell/2);
+      }
+    }
   }
   return cv;
 }
-function drawView(arr){
-  const n=arr.length, cell=28, pad=12, max=Math.max(1,...arr);
-  const cv=document.createElement('canvas'); cv.width=pad*2+n*cell; cv.height=pad*2+max*cell+14;
+function drawElevationSquares(arr){
+  const n=arr.length, cell=18, pad=10, max=Math.max(1,...arr);
+  const cv=document.createElement('canvas'); cv.width=pad*2+n*cell; cv.height=pad*2+max*cell;
   const ctx=cv.getContext('2d'); ctx.fillStyle="#fff"; ctx.fillRect(0,0,cv.width,cv.height);
-  ctx.strokeStyle="#54565a";
-  ctx.beginPath(); ctx.moveTo(pad, cv.height-pad); ctx.lineTo(cv.width-pad, cv.height-pad); ctx.stroke();
-  for(let i=0;i<n;i++){
-    const v=arr[i], x=pad+i*cell+4, bh=v*cell, y=(cv.height-pad)-bh;
-    ctx.fillStyle=palette[i%palette.length]; ctx.fillRect(x,y,cell-8,bh);
-    ctx.strokeStyle="#3333"; ctx.strokeRect(x,y,cell-8,bh);
-    ctx.fillStyle="#000"; ctx.font="13px Arial"; ctx.textAlign="center"; ctx.textBaseline="bottom";
-    ctx.fillText(String(v), x+(cell-8)/2, y-2);
-  }
+  ctx.strokeStyle="#54565a"; ctx.lineWidth=1;
+  for(let i=0;i<=n;i++){ const x=pad+i*cell; ctx.beginPath(); ctx.moveTo(x,pad); ctx.lineTo(x,pad+max*cell); ctx.stroke(); }
+  for(let j=0;j<=max;j++){ const y=pad+j*cell; ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(pad+n*cell,y); ctx.stroke(); }
+  for(let i=0;i<n;i++){ const h=arr[i]; for(let k=0;k<h;k++){ const x=pad+i*cell, y=pad + (max-1-k)*cell; ctx.fillStyle="#a3d5ff"; ctx.fillRect(x+1,y+1,cell-2,cell-2); ctx.strokeStyle="#6aa9e9"; ctx.strokeRect(x+1,y+1,cell-2,cell-2); } }
   return cv;
 }
+function renderIso(H){ return (blockStyle==='linking') ? drawLinkingCubes(H,52) : drawCubesOblique(H,52); }
 
-/* ========== UI KAARTEN ========== */
-function addExercise(type, H, sectId){
-  const iso=drawCubesOblique(H);        // verbeterde kubussen
-  const plan=drawPlan(H,true);
-  const planEmp=drawPlan(H,false);
-  const {front,side}=makeViews(H);
-  const frontCv=drawView(front), sideCv=drawView(side);
+/* ===== UI ===== */
+function addExercise(type, H, sect){
+  if(type==='vplat' || type==='vview'){
+    const setSize=3, items=[];
+    const n=clamp(Number(document.getElementById('gridSize').value),2,6);
+    const total=clamp(Number(document.getElementById('totalBlocks').value),2,24);
+    for(let i=0;i<setSize;i++){
+      const HH=makeHeightMap(n,total);
+      const iso=renderIso(HH);
+      const plan=drawPlan(HH,true);
+      const {front,side}=makeViews(HH);
+      items.push({H:HH, iso, plan, front, side, viewImg:null});
+    }
+    const id=`EX_${++exId}`;
+    const rec={id,type,include:true,sect,set:items, viewMode:'front'};
+    updateViewImages(rec);  // initialiseren
+    rec.groupKey=`vview:${rec.viewMode}`;
+    exercises.push(rec);
+    addListRow(rec, sect);
+    refreshSheet();
+    return;
+  }
+
+  // 'bouw' en 'plat'
+  const n=H?H.length:clamp(Number(document.getElementById('gridSize').value),2,6);
+  const total=clamp(Number(document.getElementById('totalBlocks').value),2,24);
+  const HH = H || makeHeightMap(n,total);
+  const HH2 = (type==='bouw')? adjustForVisibility(JSON.parse(JSON.stringify(HH))) : HH;
+
+  const iso=renderIso(HH2);
+  const planFull=drawPlan(HH2,true);
+  const planEmpty=drawPlan(HH2,false);
 
   const id=`EX_${++exId}`;
-  const rec={id,type,H,assets:{iso,plan,planEmp,frontCv,sideCv},include:true,sectId};
+  const rec={id,type,include:true,sect,H:HH2,assets:{iso,plan:planFull,planEmpty}};
+  rec.groupKey=`plain:${type}`;
   exercises.push(rec);
-
-  const listEl=document.getElementById(`list-${sectId}`);
-  const card=document.createElement('div'); card.className='card'; card.dataset.id=id;
-
-  const head=document.createElement('div'); head.className='cardHead';
-  const left=document.createElement('div');
-  const chk=document.createElement('input'); chk.type='checkbox'; chk.checked=true; chk.onchange=()=>{rec.include=chk.checked; refreshSheet()};
-  left.appendChild(chk); left.appendChild(document.createTextNode(' Op werkblad'));
-  head.appendChild(left);
-
-  const del=document.createElement('button'); del.className='btn danger'; del.textContent='Verwijder';
-  del.onclick=()=>{const i=exercises.findIndex(e=>e.id===id); if(i>=0) exercises.splice(i,1); card.remove(); refreshSheet();};
-  head.appendChild(del);
-  card.appendChild(head);
-
-  const body=document.createElement('div'); body.className='cardBody';
-  function thumb(lbl,cv,dotsLR){
-    const t=document.createElement('div'); t.className='thumb';
-    const p=document.createElement('div'); p.className='small'; p.textContent=lbl;
-    const img=document.createElement('img'); img.src=cv.toDataURL();
-    t.appendChild(p); t.appendChild(img);
-    if(dotsLR==='L'||dotsLR==='LR'){const d=document.createElement('div'); d.className='dotL'; t.appendChild(d);}
-    if(dotsLR==='R'||dotsLR==='LR'){const d=document.createElement('div'); d.className='dotR'; t.appendChild(d);}
-    return t;
-  }
-  if(type==='plat'){ body.appendChild(thumb('Bouwsel',iso)); body.appendChild(thumb('Leeg raster',planEmp)); }
-  if(type==='vplat'){ body.appendChild(thumb('Bouwsel',iso,'R')); body.appendChild(thumb('Plattegrond',plan,'L')); }
-  if(type==='vview'){ body.appendChild(thumb('Bouwsel',iso,'R')); body.appendChild(thumb('Vooraanzicht',frontCv,'L')); body.appendChild(thumb('Zijaanzicht',sideCv,'L')); }
-  if(type==='bouw'){ body.appendChild(thumb('Plattegrond',plan)); body.appendChild(thumb('Oplossing (achterkant)',iso)); }
-
-  card.appendChild(body);
-  listEl.appendChild(card);
+  addListRow(rec, sect);
   refreshSheet();
 }
 
-/* ========== SHEET PREVIEW ========== */
-function headerFor(type){
-  switch(type){
-    case 'plat': return 'Maak de plattegrond (vul het raster met het aantal blokken per vak).';
-    case 'vplat': return 'Verbind elk blokkenbouwsel met zijn juiste plattegrond.';
-    case 'vview': return 'Verbind elk blokkenbouwsel met het juiste vooraanzicht of zijaanzicht.';
-    case 'bouw': return 'Bouw het blokkenbouwsel volgens de plattegrond. Oplossing op de achterkant.';
-    default: return '';
+function addListRow(rec, sect){
+  const list=document.getElementById(`list-${sect}`);
+  const row=document.createElement('div'); row.className='itemRow'; row.dataset.id=rec.id;
+
+  const left=document.createElement('div'); left.className='left';
+  const cb=document.createElement('input'); cb.type='checkbox'; cb.checked=true; cb.onchange=()=>{rec.include=cb.checked; refreshSheet();};
+  left.appendChild(cb);
+
+  const labelSpan=document.createElement('span');
+  if(rec.type==='vview'){
+    labelSpan.textContent='Set verbinden (aanzicht)';
+    const sel=document.createElement('select'); sel.className='mini';
+    sel.innerHTML='<option value="front">Vooraanzicht</option><option value="side">Zijaanzicht</option><option value="rear">Achteraanzicht</option><option value="random">Willekeurig</option>';
+    sel.value=rec.viewMode;
+    sel.onchange=()=>{rec.viewMode=sel.value; updateViewImages(rec); rec.groupKey=`vview:${rec.viewMode}`; refreshSheet();};
+    left.appendChild(labelSpan); left.appendChild(sel);
+  }else{
+    const map={plat:'Oefening plattegrond', vplat:'Set verbinden (plattegrond)', bouw:'Oefening bouwen'};
+    labelSpan.textContent=map[rec.type]||rec.type;
+    left.appendChild(labelSpan);
+  }
+
+  const del=document.createElement('button'); del.className='btn danger'; del.textContent='Verwijder';
+  del.onclick=()=>{const i=exercises.findIndex(e=>e.id===rec.id); if(i>=0) exercises.splice(i,1); row.remove(); refreshSheet();};
+  row.appendChild(left); row.appendChild(del); list.appendChild(row);
+}
+
+function updateViewImages(rec){
+  for(const it of rec.set){
+    let arr=null;
+    if(rec.viewMode==='front') arr=it.front;
+    else if(rec.viewMode==='side') arr=it.side;
+    else if(rec.viewMode==='rear') arr=it.front.slice().reverse();
+    else { const pick=Math.random()<0.5?'front':'side'; arr=(pick==='front')?it.front:it.side; }
+    it.viewImg = drawElevationSquares(arr);
   }
 }
-function groupByType(list){
-  const m=new Map(); for(const e of list){ if(!m.has(e.type)) m.set(e.type,[]); m.get(e.type).push(e); } return m;
+
+/* ===== Werkblad – render ===== */
+function headerFor(type, viewMode){
+  if(type==='plat') return 'Maak de plattegrond (vul het raster met het aantal blokken per vak).';
+  if(type==='vplat') return 'Verbind de bouwsels (bolletje onderaan) met de juiste plattegronden (bolletje bovenaan).';
+  if(type==='vview'){
+    if(viewMode==='front') return 'Verbind de bouwsels (bolletje onderaan) met het juiste vooraanzicht (bolletje bovenaan).';
+    if(viewMode==='side')  return 'Verbind de bouwsels (bolletje onderaan) met het juiste zijaanzicht (bolletje bovenaan).';
+    if(viewMode==='rear')  return 'Verbind de bouwsels (bolletje onderaan) met het juiste achteraanzicht (bolletje bovenaan).';
+    return 'Verbind de bouwsels (bolletje onderaan) met het juiste voor- of zijaanzicht (bolletje bovenaan).';
+  }
+  if(type==='bouw') return 'Bouw het blokkenbouwsel volgens de plattegrond. Oplossing op de achterkant.';
+  return '';
 }
+function groupByKey(list){
+  const m=new Map();
+  for(const e of list){
+    const key=e.groupKey||`plain:${e.type}`;
+    if(!m.has(key)) m.set(key,[]);
+    m.get(key).push(e);
+  }
+  return m;
+}
+function chunk(arr,size){const out=[]; for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size)); return out;}
+
+function renderSimpleRow(slice, container){
+  const row=document.createElement('div');
+  const maxPerRow=Number(document.getElementById('maxPerRow').value);
+  row.className=(maxPerRow===3?'gridRow3':'gridRow2');
+  slice.forEach(rec=>{
+    const card=document.createElement('div'); card.className='cardWB';
+    if(rec.type==='bouw'){
+      // alleen grote plattegrond vooraan (oplossing komt achteraan in PDF)
+      const slotPlan=document.createElement('div'); slotPlan.className='slotXL';
+      const imgP=new Image(); imgP.src=rec.assets.plan.toDataURL(); slotPlan.appendChild(imgP);
+      card.appendChild(slotPlan);
+    }else{
+      const topWrap=document.createElement('div'); topWrap.className='slotWrap';
+      const slot3d=document.createElement('div'); slot3d.className='slotLG';
+      const img3d=new Image(); img3d.src=rec.assets.iso.toDataURL(); slot3d.appendChild(img3d); topWrap.appendChild(slot3d);
+      card.appendChild(topWrap);
+      const bottom=document.createElement('div'); bottom.className='slotSM';
+      const img=new Image(); img.src=(rec.type==='plat')? rec.assets.planEmpty.toDataURL() : rec.assets.plan.toDataURL();
+      bottom.appendChild(img); card.appendChild(bottom);
+    }
+    row.appendChild(card);
+  });
+  container.appendChild(row);
+}
+
 function refreshSheet(){
   const area=document.getElementById('sheetPreview'); area.innerHTML='';
   const maxPerRow=Number(document.getElementById('maxPerRow').value);
   const chosen=exercises.filter(e=>e.include);
-  const groups=groupByType(chosen);
-  for(const [type,list] of groups){
-    const hdr=document.createElement('div'); hdr.className='typeHdr'; hdr.textContent=headerFor(type);
-    area.appendChild(hdr);
-    for(let i=0;i<list.length;i+=maxPerRow){
-      const slice=list.slice(i,i+maxPerRow);
-      const row=document.createElement('div'); row.className=(maxPerRow===3?'row3':'row2');
-      for(const rec of slice){
-        const box=document.createElement('div'); box.className='box';
-        const wrap=document.createElement('div'); wrap.className='cardBody';
-        function img(cv,dots){const t=document.createElement('div'); t.className='thumb';
-          const im=document.createElement('img'); im.src=cv.toDataURL(); t.appendChild(im);
-          if(dots==='L'||dots==='LR'){const d=document.createElement('div'); d.className='dotL'; t.appendChild(d);}
-          if(dots==='R'||dots==='LR'){const d=document.createElement('div'); d.className='dotR'; t.appendChild(d);}
-          return t;}
-        if(type==='plat'){ wrap.appendChild(img(rec.assets.iso)); wrap.appendChild(img(rec.assets.planEmp)); }
-        if(type==='vplat'){ wrap.appendChild(img(rec.assets.iso,'R')); wrap.appendChild(img(rec.assets.plan,'L')); }
-        if(type==='vview'){ wrap.appendChild(img(rec.assets.iso,'R')); wrap.appendChild(img(rec.assets.frontCv,'L')); wrap.appendChild(img(rec.assets.sideCv,'L')); }
-        if(type==='bouw'){ wrap.appendChild(img(rec.assets.plan)); }
-        box.appendChild(wrap); row.appendChild(box);
+  const groups=groupByKey(chosen);
+
+  for(const [key,list] of groups){
+    const [kind,extra]=key.split(':');
+    let type=(kind==='plain')? list[0].type : 'vview';
+    let hdr=headerFor(type,(type==='vview')? extra : null);
+
+    const h=document.createElement('div'); h.className='typeHdr'; h.textContent=hdr; area.appendChild(h);
+
+    if(type!=='vplat' && type!=='vview'){
+      const chunks=chunk(list, maxPerRow);
+      chunks.forEach(slice=>renderSimpleRow(slice, area));
+      continue;
+    }
+
+    // verbind-opgaven
+    for(const rec of list){
+      const row=document.createElement('div'); row.className=(maxPerRow===3?'gridRow3':'gridRow2');
+      const card=document.createElement('div'); card.className='cardWB';
+      const grid=document.createElement('div'); grid.className='setGrid';
+      const topRow=document.createElement('div'); topRow.className='rowItems';
+      for(const it of rec.set){
+        const wrap=document.createElement('div'); wrap.className='slotWrap';
+        const slot=document.createElement('div'); slot.className='slotLG';
+        const img=new Image(); img.src=it.iso.toDataURL(); slot.appendChild(img); wrap.appendChild(slot);
+        const dot=document.createElement('div'); dot.className='dotBottom'; wrap.appendChild(dot);
+        topRow.appendChild(wrap);
       }
+      grid.appendChild(topRow);
+
+      const bottomRow=document.createElement('div'); bottomRow.className='rowItems';
+      const shuffled=shuffle(rec.set.slice());
+      for(const it of shuffled){
+        const wrap=document.createElement('div'); wrap.className='slotWrap';
+        const slot=document.createElement('div'); slot.className='slotSM';
+        const img=new Image(); img.src=(rec.type==='vplat')? it.plan.toDataURL() : it.viewImg.toDataURL();
+        slot.appendChild(img); wrap.appendChild(slot);
+        const dot=document.createElement('div'); dot.className='dotTop'; wrap.appendChild(dot);
+        bottomRow.appendChild(wrap);
+      }
+      grid.appendChild(bottomRow);
+      card.appendChild(grid); row.appendChild(card);
       area.appendChild(row);
     }
   }
 }
 
-/* ========== PDF ========== */
-function dotDataURL(){
-  const c=document.createElement('canvas'); c.width=14; c.height=14; const k=c.getContext('2d');
-  k.fillStyle='#fff'; k.fillRect(0,0,14,14); k.strokeStyle='#000'; k.lineWidth=1.3;
-  k.beginPath(); k.arc(7,7,5,0,Math.PI*2); k.stroke(); return c.toDataURL();
-}
+/* ===== PDF ===== */
+function dotDataURL(){ const c=document.createElement('canvas'); c.width=16; c.height=16; const k=c.getContext('2d');
+  k.fillStyle='#fff'; k.fillRect(0,0,16,16); k.strokeStyle='#000'; k.lineWidth=2; k.beginPath(); k.arc(8,8,6,0,Math.PI*2); k.stroke(); return c.toDataURL(); }
+
 document.getElementById('btnPdf').addEventListener('click', ()=>{
-  const maxPerRow=Number(document.getElementById('maxPerRow').value);
   const chosen=exercises.filter(e=>e.include);
-  const groups=groupByType(chosen);
+  const groups=groupByKey(chosen);
   const dot=dotDataURL();
 
-  const content=[];
-  content.push({text:'Naam: ___________________________', margin:[0,0,0,6]});
-  content.push({text:'Ik oefen met blokkenbouwsels', style:'title', margin:[0,0,0,12]});
+  const content=[
+    {text:'Naam: ___________________________', margin:[0,0,0,6]},
+    {text:'Ik oefen met blokkenbouwsels', style:'title', margin:[0,0,0,12]},
+  ];
 
-  for(const [type,list] of groups){
-    content.push({text:headerFor(type), margin:[0,0,0,6]});
-    for(let i=0;i<list.length;i+=maxPerRow){
-      const slice=list.slice(i,i+maxPerRow);
-      const cols=slice.map(rec=>{
-        const stack=[];
-        if(type==='plat'){
-          stack.push({image:rec.assets.iso.toDataURL(), fit:[180,140], margin:[6,6,6,6]});
-          stack.push({image:rec.assets.planEmp.toDataURL(), fit:[180,140], margin:[6,6,6,6]});
+  for(const [key,list] of groups){
+    const [kind,extra]=key.split(':');
+    const type=(kind==='plain')? list[0].type : 'vview';
+    const hdr=headerFor(type,(type==='vview')? extra : null);
+    content.push({text:hdr, margin:[0,0,0,6]});
+
+    if(type!=='vplat' && type!=='vview'){
+      if(type==='bouw'){
+        // grote plattegronden (zonder 3D) – knipformaat
+        for(let i=0;i<list.length;i+=3){
+          const slice=list.slice(i,i+3).map(rec=>({image: rec.assets.plan.toDataURL(), fit:[390,285]}));
+          content.push({columns:slice, columnGap:12, margin:[0,0,0,12]});
         }
-        if(type==='vplat'){
-          stack.push({image:dot, width:12, margin:[0,28,0,0]});
-          stack.push({image:rec.assets.iso.toDataURL(),   fit:[180,140], margin:[10,6,10,6]});
-          stack.push({image:rec.assets.plan.toDataURL(),  fit:[180,140], margin:[10,6,10,6]});
-          stack.push({image:dot, width:12, margin:[0,28,0,0]});
+      }else{
+        // andere simpele opgaven in rijen van 3
+        for(let i=0;i<list.length;i+=3){
+          const slice=list.slice(i,i+3).map(rec=>({
+            stack:[
+              {image: rec.assets.iso.toDataURL(), fit:[320,210]},
+              {image: (rec.type==='plat'? rec.assets.planEmpty.toDataURL() : rec.assets.plan.toDataURL()), fit:[200,160], margin:[0,6,0,0]}
+            ]
+          }));
+          content.push({columns: slice, columnGap:12, margin:[0,0,0,10]});
         }
-        if(type==='vview'){
-          stack.push({image:dot, width:12, margin:[0,28,0,0]});
-          stack.push({image:rec.assets.iso.toDataURL(),     fit:[180,140], margin:[10,6,10,6]});
-          stack.push({image:rec.assets.frontCv.toDataURL(), fit:[180,140], margin:[10,6,10,6]});
-          stack.push({image:rec.assets.sideCv.toDataURL(),  fit:[180,140], margin:[10,6,10,6]});
-          stack.push({image:dot, width:12, margin:[0,28,0,0]});
-        }
-        if(type==='bouw'){
-          stack.push({image:rec.assets.plan.toDataURL(), fit:[190,150], margin:[6,6,6,6]});
-        }
-        return {stack, margin:[2,2,2,2]};
-      });
-      content.push({columns:cols, columnGap:12, margin:[0,0,0,8]});
+      }
+      continue;
+    }
+
+    // verbind-opgaven
+    for(const rec of list){
+      const topCols = rec.set.map(it => ({stack:[
+        {image: it.iso.toDataURL(), fit:[320,210]},
+        {image: dot, width:14, alignment:'center', margin:[0,6,0,0]}
+      ]}));
+      const bottomCols = shuffle(rec.set.slice()).map(it => ({stack:[
+        {image: dot, width:14, alignment:'center', margin:[0,0,0,6]},
+        {image: (rec.type==='vplat'? it.plan.toDataURL() : it.viewImg.toDataURL()), fit:[200,160]}
+      ]}));
+      content.push({columns: topCols, columnGap:18, margin:[0,0,0,14]});
+      content.push({columns: bottomCols, columnGap:18, margin:[0,0,0,24]});
     }
   }
 
-  // Achterkant – oplossingen voor “bouw”
+  // Oplossingen – zelfde formaat als de grote plattegronden
   const bouwOpl=chosen.filter(e=>e.type==='bouw');
   if(bouwOpl.length){
-    content.push({text:'\n— Oplossingen bouwopdrachten —', style:'title', pageBreak:'before', margin:[0,0,0,8]});
-    for(const rec of bouwOpl){
-      content.push({
-        table:{widths:['*'], body:[[ {image:rec.assets.iso.toDataURL(), fit:[460,360], alignment:'center', margin:[0,8,0,8]} ]]},
-        layout:'lightHorizontalLines', margin:[0,0,0,8]
-      });
+    content.push({text:'\n— Oplossingen bouwopdrachten —', style:'title', pageBreak:'before', margin:[0,0,0,10]});
+    for(let i=0;i<bouwOpl.length;i+=3){
+      const slice=bouwOpl.slice(i,i+3).map(rec=>({image: rec.assets.iso.toDataURL(), fit:[390,285]}));
+      content.push({columns:slice, columnGap:12, margin:[0,0,0,12]});
     }
   }
 
@@ -419,40 +553,41 @@ document.getElementById('btnPdf').addEventListener('click', ()=>{
   }).download('blokkenbouwsels.pdf');
 });
 
-/* ========== EVENTS ========== */
+/* ===== Events ===== */
 document.getElementById('btnReset').addEventListener('click', ()=>{
   exercises.splice(0,exercises.length);
   ['list-plat','list-vplat','list-vview','list-bouw'].forEach(id=>document.getElementById(id).innerHTML='');
   refreshSheet();
 });
-function addMany(type, count, sectId){
-  const n=clamp(Number(document.getElementById('gridSize').value),2,6);
-  const total=clamp(Number(document.getElementById('totalBlocks').value),2,24);
-  for(let i=0;i<count;i++) addExercise(type, makeHeightMap(n,total), sectId);
+
+function addMany(kind,count,sect){
+  if(kind==='vplat' || kind==='vview'){
+    for(let i=0;i<count;i++) addExercise(kind,null,sect);
+  }else{
+    for(let i=0;i<count;i++) addExercise(kind, null, sect);
+  }
 }
-document.querySelectorAll('[data-add]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const key=btn.getAttribute('data-add');
-    if(key==='plat1') addMany('plat',1,'plat');
-    if(key==='plat3') addMany('plat',3,'plat');
-    if(key==='vplat1') addMany('vplat',1,'vplat');
-    if(key==='vplat3') addMany('vplat',3,'vplat');
-    if(key==='vview1') addMany('vview',1,'vview');
-    if(key==='vview3') addMany('vview',3,'vview');
-    if(key==='bouw1') addMany('bouw',1,'bouw');
-    if(key==='bouw3') addMany('bouw',3,'bouw');
-  });
-});
-document.querySelectorAll('[data-clear]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const sect=btn.getAttribute('data-clear');
-    for(let i=exercises.length-1;i>=0;i--) if(exercises[i].sectId===sect) exercises.splice(i,1);
-    document.getElementById(`list-${sect}`).innerHTML='';
-    refreshSheet();
-  });
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+  const k=b.getAttribute('data-add');
+  if(k==='plat1') addMany('plat',1,'plat'); if(k==='plat3') addMany('plat',3,'plat');
+  if(k==='vplat1') addMany('vplat',1,'vplat'); if(k==='vplat3') addMany('vplat',3,'vplat');
+  if(k==='vview1') addMany('vview',1,'vview'); if(k==='vview3') addMany('vview',3,'vview');
+  if(k==='bouw1') addMany('bouw',1,'bouw'); if(k==='bouw3') addMany('bouw',3,'bouw');
+}));
+document.getElementById('blockStyle').addEventListener('change', (e)=>{
+  blockStyle = e.target.value;
+  for(const rec of exercises){
+    if(rec.type==='vplat' || rec.type==='vview'){
+      for(const it of rec.set){ it.iso = renderIso(it.H); }
+      updateViewImages(rec);
+    }else{
+      rec.assets.iso = renderIso(rec.H);
+    }
+  }
+  refreshSheet();
 });
 
-/* ========== START ========== */
+/* Init */
 refreshSheet();
 </script>
 </body>
