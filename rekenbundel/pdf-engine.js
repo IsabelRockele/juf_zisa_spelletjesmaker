@@ -2495,6 +2495,13 @@ _tekenVoettekst(); // Voeg deze regel toe
   }
 
   function _tekenInzichtBlok(blok) {
+    // ── Eerlijk verdelen: eigen blok-renderer ────────────────
+    const eersteType = blok.oefeningen[0]?.type || '';
+    if (eersteType === 'verdelen-emoji' || eersteType === 'verdelen-splitshuis' || eersteType === 'verdelen-100veld') {
+      _tekenVerdelenBlok(blok);
+      return;
+    }
+
     const MAX_GPER_RIJ = 3;    // max 3 groepjes naast elkaar → linkerkolom smaller → meer ruimte rechts
     const VAKJE_GAP    = 3;
     const OEF_PAD_V    = 6;
@@ -2838,6 +2845,365 @@ doc.setTextColor(26, 58, 92);
       y += oh + OEF_GAP;
     });
     y += NABLOK;
+  }
+
+  /* ── Eerlijk verdelen: dispatch vanuit _tekenInzichtBlok ─── */
+  function _tekenVerdelenBlok(blok) {
+    checkRuimte(ZINRUIMTE + 40);
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y + 5);
+    y += ZINRUIMTE;
+
+    blok.oefeningen.forEach((oef, i) => {
+      if (i > 0) { y += 6; }
+      if (oef.type === 'verdelen-emoji')      _tekenVerdelenEmoji(oef);
+      else if (oef.type === 'verdelen-splitshuis') _tekenVerdelenSplitshuis(oef);
+      else if (oef.type === 'verdelen-100veld')    _tekenVerdelen100Veld(oef);
+    });
+    y += NABLOK;
+  }
+
+  /* ── Verdelen: emoji-variant ─────────────────────────────── */
+  function _tekenVerdelenEmoji(oef) {
+    const OEF_PAD_V  = 6;
+    const OEF_PAD_H  = 5;
+    const LIJN_DIKTE = 0.25;
+    const LIJN_W     = 12;
+    const RIJ_H      = 10;
+    const FS         = 11;
+    const BL         = RIJ_H - 2;
+    const LINKS_FRAC = 0.38;
+    const oefW       = CW - 4;
+    const linksW     = oefW * LINKS_FRAC;
+    const rechtsW    = oefW - linksW - 8;
+    const rechtsX    = ML + 2 + linksW + 6;
+
+    function emoKols(n) { return Math.min(5, Math.ceil(Math.sqrt(n))); }
+    const cols   = emoKols(oef.totaal);
+    const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
+    const rows   = Math.ceil(oef.totaal / cols);
+    const linksH = rows * emoMm + (rows - 1) * 1.5;
+    const rechtsH = RIJ_H * 4 + 10;
+    const oh = OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
+
+    checkRuimte(oh + 6);
+    const ox = ML + 2, oy = y;
+    doc.setFillColor(255,255,255);
+    doc.setDrawColor(200,200,200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(ox, oy, oefW, oh, 3, 3, 'FD');
+    doc.setDrawColor(225,225,225);
+    doc.setLineWidth(0.2);
+    doc.line(ox + linksW + 2, oy + OEF_PAD_V, ox + linksW + 2, oy + oh - OEF_PAD_V);
+
+    // LINKS: alle emoji's
+    const emojiDataUrl = _emojiPng(oef.emoji, 120);
+    const startX = ox + OEF_PAD_H;
+    const startY = oy + OEF_PAD_V;
+    for (let i = 0; i < oef.totaal; i++) {
+      const ec = i % cols, er = Math.floor(i / cols);
+      doc.addImage(emojiDataUrl, 'PNG', startX + ec * (emoMm + 1.5), startY + er * (emoMm + 1.5), emoMm, emoMm);
+    }
+
+    // RECHTS: 4 zinnen
+    function lijn(lx, ly, w) {
+      doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
+      doc.line(lx, ly + BL, lx + w, ly + BL);
+    }
+    function bold(tx, ty, t, blauw) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      doc.setTextColor(...(blauw ? [21,101,192] : [50,50,50]));
+      doc.text(t, tx, ty + BL);
+    }
+    function italic(tx, ty, t) {
+      doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+      doc.setTextColor(70,70,70);
+      doc.text(t, tx, ty + BL - 0.5);
+    }
+
+    let fy = oy + OEF_PAD_V;
+
+    // Zin 1: [totaal] eerlijk verdelen in [aantalGroepen] is ___.
+    let lx = rechtsX;
+    bold(lx, fy, String(oef.totaal), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(oef.totaal)) + 1.5;
+    italic(lx, fy, 'eerlijk verdelen in'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('eerlijk verdelen in') + 1.5;
+    bold(lx, fy, String(oef.aantalGroepen), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(oef.aantalGroepen)) + 1.5;
+    italic(lx, fy, 'is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('is') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    italic(lx, fy, '.');
+    fy += RIJ_H + 1;
+
+    // Zin 2: ___ verdeeld in ___ gelijke groepen is ___.
+    lx = rechtsX;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    italic(lx, fy, 'verdeeld in'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('verdeeld in') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    italic(lx, fy, 'gelijke groepen is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('gelijke groepen is') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    italic(lx, fy, '.');
+    fy += RIJ_H + 1;
+
+    // Zin 3: ___ gedeeld door ___ is ___.
+    lx = rechtsX;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    italic(lx, fy, 'gedeeld door'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('gedeeld door') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    italic(lx, fy, 'is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('is') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    italic(lx, fy, '.');
+    fy += RIJ_H + 1;
+
+    // Zin 4: ___ : ___ = ___
+    lx = rechtsX;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    bold(lx, fy, ':', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(':') + 1;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    bold(lx, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('=') + 1.5;
+    lijn(lx, fy, LIJN_W);
+
+    y += oh;
+  }
+
+  /* ── Verdelen: splitshuis-variant ───────────────────────── */
+  function _tekenVerdelenSplitshuis(oef) {
+    const n          = oef.aantalGroepen;
+    const DOOS_H     = 10;   // hoogte van elk vakje
+    const DOOS_GAP   = 2;
+    const FS         = 11;
+    const BL         = 8;
+    const LIJN_W     = 12;
+    const LIJN_DIKTE = 0.25;
+    const PAD_V      = 8;
+    const PAD_H      = 6;
+    const TOTAAL_B   = 18;  // breedte bovenste vakje
+    const TOTAAL_H   = 10;
+    const LYN_H      = 10;  // hoogte van de verbindende lijnen
+    const DOOS_B     = Math.min(18, (CW - 4 - PAD_H * 2 - (n - 1) * DOOS_GAP) / n);
+    const totaalB    = n * DOOS_B + (n - 1) * DOOS_GAP;
+    const huisH      = TOTAAL_H + LYN_H + DOOS_H;
+    const zinH       = 10 * 2 + 4; // 2 zinnen
+    const oh         = PAD_V * 2 + huisH + zinH;
+
+    checkRuimte(oh + 6);
+    const ox = ML + 2, oy = y;
+    doc.setFillColor(255,255,255);
+    doc.setDrawColor(200,200,200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(ox, oy, CW - 4, oh, 3, 3, 'FD');
+
+    // Splitshuis tekenen
+    const midX   = ox + (CW - 4) / 2;
+    const topX   = midX - TOTAAL_B / 2;
+    const topY   = oy + PAD_V;
+    const vakY   = topY + TOTAAL_H + LYN_H;
+
+    // Bovenste vakje (groen)
+    doc.setFillColor(198, 239, 206);
+    doc.setDrawColor(0, 150, 50);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(topX, topY, TOTAAL_B, TOTAAL_H, 1.5, 1.5, 'FD');
+    doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    doc.setTextColor(30, 100, 30);
+    doc.text(String(oef.totaal), midX, topY + BL - 1, { align: 'center' });
+
+    // Verbindingslijnen van midden naar elk vakje
+    const startVakX = midX - totaalB / 2 + DOOS_B / 2;
+    for (let i = 0; i < n; i++) {
+      const vakMidX = startVakX + i * (DOOS_B + DOOS_GAP);
+      doc.setDrawColor(150, 150, 150);
+      doc.setLineWidth(0.3);
+      doc.line(midX, topY + TOTAAL_H, vakMidX, vakY);
+    }
+
+    // Onderste vakjes (leeg, blauw kader)
+    const startVakXL = midX - totaalB / 2;
+    for (let i = 0; i < n; i++) {
+      const vx = startVakXL + i * (DOOS_B + DOOS_GAP);
+      doc.setFillColor(255,255,255);
+      doc.setDrawColor(21, 101, 192);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(vx, vakY, DOOS_B, DOOS_H, 1.5, 1.5, 'FD');
+    }
+
+    // Zinnen onder het huis
+    function lijn(lx, ly, w) {
+      doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
+      doc.line(lx, ly + BL, lx + w, ly + BL);
+    }
+    function bold(tx, ty, t, blauw) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      doc.setTextColor(...(blauw ? [21,101,192] : [50,50,50]));
+      doc.text(t, tx, ty + BL);
+    }
+    function italic(tx, ty, t) {
+      doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+      doc.setTextColor(70,70,70);
+      doc.text(t, tx, ty + BL - 0.5);
+    }
+
+    let fy = vakY + DOOS_H + 5;
+    // Zin 1: [totaal] verdeeld in [n] gelijke delen is ___.
+    let lx = ox + PAD_H;
+    bold(lx, fy, String(oef.totaal), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(oef.totaal)) + 1.5;
+    italic(lx, fy, 'verdeeld in'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('verdeeld in') + 1.5;
+    bold(lx, fy, String(n), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(n)) + 1.5;
+    italic(lx, fy, 'gelijke delen is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('gelijke delen is') + 1.5;
+    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    italic(lx, fy, '.');
+    fy += 11;
+
+    // Zin 2: [totaal] : [n] = ___
+    lx = ox + PAD_H;
+    bold(lx, fy, String(oef.totaal), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(oef.totaal)) + 1.5;
+    bold(lx, fy, ':', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(':') + 1.5;
+    bold(lx, fy, String(n), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth(String(n)) + 1.5;
+    bold(lx, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx += doc.getTextWidth('=') + 1.5;
+    lijn(lx, fy, LIJN_W);
+
+    y += oh;
+  }
+
+  /* ── Verdelen: 100-veld-variant ─────────────────────────── */
+  function _tekenVerdelen100Veld(oef) {
+    const KLEUREN = [
+      [231, 76, 60], [93, 173, 226], [46, 204, 113],
+      [243, 156, 18], [155, 89, 182], [26, 188, 156],
+      [230, 126, 34], [236, 64, 122], [0, 188, 212], [139, 195, 74],
+    ];
+    const n      = oef.aantalGroepen;
+    const p      = oef.perGroep;
+    const CEL    = 5;        // mm per cel
+    const GRID_B = CEL * 10; // 50mm
+    const GRID_H = CEL * 10; // 50mm
+    const PAD_V  = 6;
+    const PAD_H  = 6;
+    const LIJN_W  = 12;
+    const LIJN_DIKTE = 0.25;
+    const FS     = 11;
+    const BL     = 8;
+    const ZIN_H  = 10;
+    const oh     = PAD_V * 2 + GRID_H;
+
+    checkRuimte(oh + 6);
+    const ox = ML + 2, oy = y;
+    doc.setFillColor(255,255,255);
+    doc.setDrawColor(200,200,200);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(ox, oy, CW - 4, oh, 3, 3, 'FD');
+
+    // 100-veld grid
+    const gridX = ox + PAD_H;
+    const gridY = oy + PAD_V;
+
+    for (let r = 0; r < 10; r++) {
+      for (let c = 0; c < 10; c++) {
+        const celNr = r * 10 + c;
+        const cx = gridX + c * CEL;
+        const cy = gridY + r * CEL;
+        if (celNr < n * p) {
+          const strook = Math.floor(celNr / n);
+          const kleur = KLEUREN[strook % KLEUREN.length];
+          doc.setFillColor(...kleur);
+          doc.setDrawColor(...kleur);
+          doc.setLineWidth(0.1);
+          doc.rect(cx, cy, CEL, CEL, 'FD');
+        } else {
+          doc.setFillColor(255,255,255);
+          doc.setDrawColor(180,180,180);
+          doc.setLineWidth(0.1);
+          doc.rect(cx, cy, CEL, CEL, 'FD');
+        }
+      }
+    }
+    // Paars grid-raster over alles (5×5 blokken)
+    doc.setDrawColor(130, 60, 160);
+    doc.setLineWidth(0.4);
+    for (let i = 0; i <= 10; i += 5) {
+      doc.line(gridX + i * CEL, gridY, gridX + i * CEL, gridY + GRID_H);
+      doc.line(gridX, gridY + i * CEL, gridX + GRID_B, gridY + i * CEL);
+    }
+    // Extra dunne lijnen voor elke cel
+    doc.setDrawColor(180,180,180);
+    doc.setLineWidth(0.1);
+    for (let i = 0; i <= 10; i++) {
+      doc.line(gridX + i * CEL, gridY, gridX + i * CEL, gridY + GRID_H);
+      doc.line(gridX, gridY + i * CEL, gridX + GRID_B, gridY + i * CEL);
+    }
+
+    // Zinnen rechts van het 100-veld
+    const zinX = gridX + GRID_B + 6;
+    function lijn(lx, ly, w) {
+      doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
+      doc.line(lx, ly + BL, lx + w, ly + BL);
+    }
+    function bold(tx, ty, t, blauw) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+      doc.setTextColor(...(blauw ? [21,101,192] : [50,50,50]));
+      doc.text(t, tx, ty + BL);
+    }
+    function italic(tx, ty, t) {
+      doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+      doc.setTextColor(70,70,70);
+      doc.text(t, tx, ty + BL - 0.5);
+    }
+
+    let fy = gridY + 4;
+
+    // Zin 1: Hoeveel gekleurde hokjes zijn er? ___  (lijn inline)
+    let lx1 = zinX;
+    italic(lx1, fy, 'Hoeveel gekleurde hokjes zijn er?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx1 += doc.getTextWidth('Hoeveel gekleurde hokjes zijn er?') + 2;
+    lijn(lx1, fy, LIJN_W);
+    fy += ZIN_H + 3;
+
+    // Zin 2: Met hoeveel stroken van [n] kun je die bedekken? ___  (lijn inline)
+    let lx2 = zinX;
+    italic(lx2, fy, 'Met hoeveel stroken van'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx2 += doc.getTextWidth('Met hoeveel stroken van') + 1.5;
+    bold(lx2, fy, String(n), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx2 += doc.getTextWidth(String(n)) + 1.5;
+    italic(lx2, fy, 'kun je die bedekken?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx2 += doc.getTextWidth('kun je die bedekken?') + 2;
+    lijn(lx2, fy, LIJN_W);
+    fy += ZIN_H + 3;
+
+    // Zin 3: Hoe dikwijls gaat [n] in [totaal]? ___ keer.  (lijn inline)
+    let lx3 = zinX;
+    italic(lx3, fy, 'Hoe dikwijls gaat'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx3 += doc.getTextWidth('Hoe dikwijls gaat') + 1.5;
+    bold(lx3, fy, String(n), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx3 += doc.getTextWidth(String(n)) + 1.5;
+    italic(lx3, fy, 'in'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx3 += doc.getTextWidth('in') + 1.5;
+    bold(lx3, fy, String(oef.totaal), true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+    lx3 += doc.getTextWidth(String(oef.totaal)) + 1;
+    italic(lx3, fy, '?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
+    lx3 += doc.getTextWidth('?') + 2;
+    lijn(lx3, fy, LIJN_W); lx3 += LIJN_W + 1.5;
+    italic(lx3, fy, 'keer.');
+
+    y += oh;
   }
 
   /* ══════════════════════════════════════════════════════════════
