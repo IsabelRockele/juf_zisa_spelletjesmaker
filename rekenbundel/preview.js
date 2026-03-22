@@ -1257,7 +1257,8 @@ const Preview = (() => {
     }
 
     // Cijferschema HTML — kolommen afleiden van niveau
-    function bouwCijferSchemaPreview(headers, stap) {
+    function bouwCijferSchemaPreview(headers, stap, aantalRijen) {
+      if (!aantalRijen) aantalRijen = 4;
       const kleuren = {
         'TD':'#c8e6c9','D':'#ffcdd2','H':'#bbdefb','T':'#81c784','E':'#FFC107',
         ',':'#bbb','t':'#fff9c4','h':'#fff9c4','d':'#fff9c4'
@@ -1277,14 +1278,27 @@ const Preview = (() => {
         : `<div class="vs-cs-cel ${cls||''}" style="width:${celB}"></div>`
       ).join('');
       const stapLabel = stap ? `<div class="vs-cs-staplabel">${stap}</div>` : '';
+      // 6 datarijen: grijs + 5 wit met vette lijn na wit-2 en wit-4
+      const dataRijen = aantalRijen === 6
+        ? `${maakRij('vs-cs-grijs')}${maakRij('')}${maakRij('vs-cs-dik-onder')}${maakRij('')}${maakRij('vs-cs-dik-onder')}${maakRij('')}`
+        : `${maakRij('vs-cs-grijs')}${maakRij('')}${maakRij('vs-cs-dik-onder')}${maakRij('')}`;
       return `<div class="vs-cijfer-schema-blok">${stapLabel}
         <div class="vs-cs-grid" style="grid-template-columns:${gridCols}">
-          ${hdr}${maakRij('vs-cs-grijs')}${maakRij('')}${maakRij('vs-cs-dik-onder')}${maakRij('')}
+          ${hdr}${dataRijen}
         </div></div>`;
     }
 
     function kolomsVoorNiveau(inst) {
+      console.log('[preview] kolomsVoorNiveau inst.bewerking=', inst.bewerking, 'inst.vermBereik=', inst.vermBereik, 'inst.niveau=', inst.niveau);
       const n = inst.niveau;
+      // Bij vermenigvuldigen: kolommen bepalen op basis van bereik
+      if (inst.bewerking === 'vermenigvuldigen') {
+        const vb = inst.vermBereik || 'exe';
+        if (vb === 'htexte' || vb === 'htexe')  return ['D','H','T','E'];
+        if (vb === 'texte'  || vb === 'txte')   return ['D','H','T','E'];
+        if (vb === 'texe'   || vb === 'txe')    return ['H','T','E'];
+        return ['T','E']; // exe
+      }
       if (n === 'kommagetallen') {
         const prefix = inst.kommaPrefix || 'E';
         const dec    = inst.kommaDecimalen || 't';
@@ -1299,16 +1313,19 @@ const Preview = (() => {
       return ['E'];
     }
 
+    // Aantal datarijen bepalen op basis van bermBereik
+    const nRijen = ['txte','texte','htexte'].includes(inst.vermBereik || '') ? 6 : 4;
+
     let cijferHTML = '';
     if (metCijfer) {
       const headers = kolomsVoorNiveau(inst);
       if (drieGetallen) {
         cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>
           <div class="vs-cijfer-stappen">
-            ${bouwCijferSchemaPreview(headers,'STAP 1')}${bouwCijferSchemaPreview(headers,'STAP 2')}
+            ${bouwCijferSchemaPreview(headers,'STAP 1',nRijen)}${bouwCijferSchemaPreview(headers,'STAP 2',nRijen)}
           </div>`;
       } else {
-        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchemaPreview(headers,'')}`;
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchemaPreview(headers,'',nRijen)}`;
       }
     }
 
