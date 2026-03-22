@@ -2850,6 +2850,16 @@ doc.setTextColor(26, 58, 92);
     const metCijfer    = inst.schema?.includes('cijfer');
     const drieGetallen = inst.aantalGetallen === '3' || inst.aantalGetallen === 'gemengd';
 
+    // Bepaal schema-type op basis van bewerking en bereik
+    const vermBereik = inst.vermBereik || 'exe';
+    // Tweede factor 2-cijferig → 2 tussenresultaten → 5 datarijen
+    const vermTweeCijferFactor2 = ['txte','texte','htexte'].includes(vermBereik);
+    // Eerste factor groter dan TE → meer kolommen nodig
+    const isVermTweeFactoren = vermTweeCijferFactor2;
+    const isDelen = inst.bewerking === 'delen';
+    // 2-cijferige 2e factor → 6 datarijen (grijs + 5 wit, 2 vette lijnen)
+    const aantalDataRijen = vermTweeCijferFactor2 ? 6 : 4;
+
     // ── Constanten ────────────────────────────────────────────
     const KADER_PAD   = 5;     // interne padding kader
     const TEKST_FS    = 12;    // fontgrootte vraagstuk (gelijk aan andere blokken)
@@ -2871,6 +2881,23 @@ doc.setTextColor(26, 58, 92);
     // ── Kolommen bepalen ──────────────────────────────────────
     function kolomsVoorNiveau() {
       const n = inst.niveau;
+      // Bij vermenigvuldigen: kolommen bepalen op basis van het niveau (= max uitkomst)
+      // Want de leerkracht kiest niveau als bovengrens van de uitkomst
+      if (inst.bewerking === 'vermenigvuldigen') {
+        const vb = inst.vermBereik || 'exe';
+        // E×E en T×E: geen niveau nodig, uitkomst bepaald door tafels
+        if (vb === 'exe') return ['T','E'];       // max 9×9=81
+        if (vb === 'txe') return ['H','T','E'];   // max 90×9=810
+        // Grotere bereiken: kolommen volgen het gekozen niveau
+        if (n === 'tot100')    return ['T','E'];
+        if (n === 'tot1000')   return ['H','T','E'];
+        if (n === 'tot10000')  return ['D','H','T','E'];
+        if (n === 'tot100000') return ['TD','D','H','T','E'];
+        // Geen niveau gekozen: baseer op bereik-type
+        if (['texe','txte'].includes(vb))          return ['H','T','E'];
+        if (['texte','htexe','htexte'].includes(vb)) return ['D','H','T','E'];
+        return ['H','T','E'];
+      }
       if (n === 'kommagetallen') {
         const prefix = inst.kommaPrefix || 'E';
         const dec    = inst.kommaDecimalen || 't';
@@ -2898,7 +2925,7 @@ doc.setTextColor(26, 58, 92);
 
     // Cijferschema hoogte
     const kolommen = kolomsVoorNiveau();
-    const schemaRijH = CEL_H * 5; // header + 4 rijen
+    const schemaRijH = CEL_H * (1 + aantalDataRijen); // header + datarijen
     const cijferLabelH = 8;
     const cijferSchemaH = metCijfer
       ? cijferLabelH + GAP + (drieGetallen ? schemaRijH * 2 + GAP + 4 : schemaRijH)
@@ -3028,6 +3055,7 @@ doc.setTextColor(26, 58, 92);
             doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(50,50,50);
             doc.text(stapLabel, sx, startY + 3); startY += 5;
           }
+          // Header rij
           kolommen.forEach(k => {
             const cw = k === ',' ? CEL_W_KOMMA : CEL_W_NORM;
             doc.setFillColor(...(KLEUREN[k] || [220,220,220]));
@@ -3039,13 +3067,26 @@ doc.setTextColor(26, 58, 92);
             doc.text(k, sx + (cw - tw) / 2, startY + CEL_H - 2);
             sx += cw;
           });
-          const rijen = [
-            { bg:[216,216,216], dik: false },
-            { bg:[255,255,255], dik: false },
-            { bg:[255,255,255], dik: true  },
-            { bg:[255,255,255], dik: false },
-          ];
-          rijen.forEach(({ bg, dik }) => {
+
+          // Datarijen — bij verm 2 factoren: 5 rijen met dik na rij 2 en rij 4
+          // Standaard: 4 rijen met dik na rij 2
+          const rijDefs = isVermTweeFactoren
+            ? [
+                { bg:[216,216,216], dik: false },  // grijs   (factor 1)
+                { bg:[255,255,255], dik: false },  // wit 1   (factor 2)
+                { bg:[255,255,255], dik: true  },  // wit 2 + VETTE LIJN
+                { bg:[255,255,255], dik: false },  // wit 3   (tussenresultaat 1)
+                { bg:[255,255,255], dik: true  },  // wit 4 + VETTE LIJN
+                { bg:[255,255,255], dik: false },  // wit 5   (einduitkomst)
+              ]
+            : [
+                { bg:[216,216,216], dik: false },  // grijs
+                { bg:[255,255,255], dik: false },  // wit
+                { bg:[255,255,255], dik: true  },  // wit + dik
+                { bg:[255,255,255], dik: false },  // wit
+              ];
+
+          rijDefs.forEach(({ bg, dik }) => {
             startY += CEL_H;
             let rx2 = rechtsX;
             kolommen.forEach(k => {
@@ -3063,11 +3104,21 @@ doc.setTextColor(26, 58, 92);
           return startY + CEL_H;
         }
 
-        if (drieGetallen) {
-          ry = tekenSchema(ry, 'STAP 1') + GAP;
-          ry = tekenSchema(ry, 'STAP 2') + GAP;
-        } else {
-          ry = tekenSchema(ry, '') + GAP;
+        // Delen: geen cijferschema — toon melding in plaats van schema
+        if (isDelen && metCijfer) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(9);
+          doc.setTextColor(150, 100, 0);
+          doc.text('Cijferschema voor deling', rechtsX, ry + 4);
+          doc.text('wordt binnenkort toegevoegd.', rechtsX, ry + 10);
+          ry += 18;
+        } else if (metCijfer) {
+          if (drieGetallen) {
+            ry = tekenSchema(ry, 'STAP 1') + GAP;
+            ry = tekenSchema(ry, 'STAP 2') + GAP;
+          } else {
+            ry = tekenSchema(ry, '') + GAP;
+          }
         }
       }
     }
