@@ -756,6 +756,7 @@ const App = (() => {
   let _inzichtMaxUitkomst = 24;
   let _inzichtEmoji      = 'afwisselend';
   let _glVariantInzicht  = 'getekend';
+  let _verdelenType      = 'verdelen-emoji'; // actief weergave-type bij eerlijk verdelen
 
   function _defaultZinInzicht() {
     if (_inzichtType === 'getallenlijn') {
@@ -768,6 +769,7 @@ const App = (() => {
     }
     if (_inzichtBewerking === 'delen-aftrekking') return 'Schrijf de herhaalde aftrekking en de deling.';
     if (_inzichtBewerking === 'delen-rest')       return 'Verdeel de afbeeldingen in groepen. Schrijf de deling met rest.';
+    if (_inzichtBewerking === 'delen-verdelen')   return 'Verdeel eerlijk. Vul in.';
     return 'Schrijf de herhaalde optelling en de vermenigvuldiging.';
   }
 
@@ -776,7 +778,30 @@ const App = (() => {
     document.querySelectorAll('[name="inzicht-bewerking"]').forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+    // Toon juiste weergave-knoppen
+    const isVerdelen = waarde === 'delen-verdelen';
+    document.getElementById('inzicht-type-normaal').style.display = isVerdelen ? 'none' : '';
+    document.getElementById('inzicht-type-verdelen').style.display = isVerdelen ? '' : 'none';
+    // Bij verdelen: emoji-kaart tonen (splitshuis/100veld hebben geen emoji-keuze nodig)
+    if (isVerdelen) {
+      const emojiKaart = document.getElementById('inzicht-emoji-kaart');
+      if (emojiKaart) emojiKaart.style.display = _verdelenType === 'verdelen-emoji' ? 'block' : 'none';
+      document.getElementById('inzicht-gl-kaart').style.display = 'none';
+    } else {
+      document.getElementById('inzicht-emoji-kaart').style.display = _inzichtType === 'afbeeldingen' ? 'block' : 'none';
+      document.getElementById('inzicht-gl-kaart').style.display    = _inzichtType === 'getallenlijn'  ? 'block' : 'none';
+    }
     document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
+  }
+
+  function selecteerVerdelenType(waarde, el) {
+    _verdelenType = waarde;
+    document.querySelectorAll('[name="inzicht-type-vd"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    // Emoji-kaart alleen tonen bij afbeeldings-variant
+    const emojiKaart = document.getElementById('inzicht-emoji-kaart');
+    if (emojiKaart) emojiKaart.style.display = waarde === 'verdelen-emoji' ? 'block' : 'none';
   }
 
   function selecteerInzichtType(waarde, el) {
@@ -873,6 +898,40 @@ const App = (() => {
       });
       Preview.render(bundelData);
       toonToast(`✅ Getallenlijn toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
+      return;
+    }
+
+    // ── Eerlijk verdelen ──────────────────────────────────────
+    if (_inzichtBewerking === 'delen-verdelen') {
+      const inzichtType = _verdelenType; // 'verdelen-emoji' | 'verdelen-splitshuis' | 'verdelen-100veld'
+      const oefeningen = TafelsInzicht.genereer({
+        modus:            _inzichtModus,
+        tafels:           _inzichtTafel,
+        maxUitkomst:      _inzichtMaxUitkomst,
+        tafelMax:         _inzichtTafelMax,
+        aantalOefeningen: aantal,
+        emojiSet:         _inzichtEmoji,
+        inzichtType,
+      });
+      if (!oefeningen || oefeningen.length === 0) {
+        toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+        return;
+      }
+      bundelData.push({
+        id:           `blok-inzicht-${Date.now()}-${bundelData.length + 1}`,
+        bewerking:    'tafels-inzicht',
+        subtype:      inzichtType,
+        niveau:       Math.max(..._inzichtTafel) * (_inzichtTafelMax || 5),
+        brug:         'zonder',
+        opdrachtzin:  zin,
+        hulpmiddelen: [],
+        oefeningen,
+        config: { modus: _inzichtModus, tafels: _inzichtTafel, tafelMax: _inzichtTafelMax,
+                  maxUitkomst: _inzichtMaxUitkomst, emojiSet: _inzichtEmoji,
+                  aantalOefeningen: aantal, inzichtType },
+      });
+      Preview.render(bundelData);
+      toonToast(`✅ Verdeel-blok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
       return;
     }
 
@@ -1246,7 +1305,7 @@ const App = (() => {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
-    selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe,
+    selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe, selecteerVerdelenType,
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
