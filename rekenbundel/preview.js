@@ -1313,19 +1313,56 @@ const Preview = (() => {
       return ['E'];
     }
 
+    function deelBereikInfo(bereik) {
+      switch(bereik) {
+        case 'tee':   return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+        case 'htee':  return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'E'  };
+        case 'dhtee': return { links:['D','H','T','E'], rechts:['H','T','E'], rijenLinks:6, deler:'E'  };
+        case 'tete':  return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'TE' };
+        case 'htete': return { links:['H','T','E'],     rechts:['T','E'],     rijenLinks:5, deler:'TE' };
+        default:      return { links:['T','E'],         rechts:['E'],         rijenLinks:4, deler:'E'  };
+      }
+    }
+
+    function bouwDeelSchema(deelBereik, metRest) {
+      const dk = deelBereikInfo(deelBereik || 'tee');
+      const kleuren = { 'D':'#ffcdd2','H':'#bbdefb','T':'#81c784','E':'#FFC107' };
+      const tekstK  = { 'D':'#b71c1c','H':'#0d47a1','T':'#1b5e20','E':'#e65100' };
+      const celB = '32px';
+      const maakHeader = (cols) => cols.map(k =>
+        `<div class="vs-cs-header" style="background:${kleuren[k]||'#eee'};color:${tekstK[k]||'#333'};width:${celB}">${k}</div>`
+      ).join('');
+      const maakRij = (cols) => cols.map(() =>
+        `<div class="vs-cs-cel" style="width:${celB}"></div>`
+      ).join('');
+      const gridL = dk.links.map(() => celB).join(' ');
+      const gridR = dk.rechts.map(() => celB).join(' ');
+      let linksRijen = '';
+      for (let r = 0; r < dk.rijenLinks; r++) {
+        linksRijen += `<div class="vs-cs-grid" style="grid-template-columns:${gridL}">${maakRij(dk.links)}</div>`;
+      }
+      const linksHTML = `<div class="vs-cs-grid" style="grid-template-columns:${gridL}">${maakHeader(dk.links)}</div>${linksRijen}`;
+      const restRij = metRest
+        ? `<div style="display:flex;align-items:center;gap:4px;margin-top:5px;padding-left:2px"><span style="font-size:11px;font-weight:700;color:#444">R =</span><div style="flex:1;border-bottom:1.5px solid #666;min-width:36px;height:14px"></div></div>`
+        : '';
+      const rechtsHTML = `<div style="padding-top:${celB}"></div><div class="vs-cs-grid" style="grid-template-columns:${gridR}">${maakHeader(dk.rechts)}</div><div class="vs-cs-grid" style="grid-template-columns:${gridR}">${maakRij(dk.rechts)}</div>${restRij}`;
+      return `<div class="vs-deel-schema-wrap"><div class="vs-deel-links">${linksHTML}</div><div class="vs-deel-lijn"></div><div class="vs-deel-rechts">${rechtsHTML}</div></div>`;
+    }
+
     // Aantal datarijen bepalen op basis van bermBereik
     const nRijen = ['txte','texte','htexte'].includes(inst.vermBereik || '') ? 6 : 4;
 
     let cijferHTML = '';
     if (metCijfer) {
-      const headers = kolomsVoorNiveau(inst);
-      if (drieGetallen) {
-        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>
-          <div class="vs-cijfer-stappen">
-            ${bouwCijferSchemaPreview(headers,'STAP 1',nRijen)}${bouwCijferSchemaPreview(headers,'STAP 2',nRijen)}
-          </div>`;
+      if (inst.bewerking === 'delen') {
+        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwDeelSchema(inst.deelBereik, inst.deelRest === 'ja')}`;
       } else {
-        cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchemaPreview(headers,'',nRijen)}`;
+        const headers = kolomsVoorNiveau(inst);
+        if (drieGetallen) {
+          cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">${bouwCijferSchemaPreview(headers,'STAP 1',nRijen)}${bouwCijferSchemaPreview(headers,'STAP 2',nRijen)}</div>`;
+        } else {
+          cijferHTML = `<div class="vs-cijfer-label">Ik cijfer.</div>${bouwCijferSchemaPreview(headers,'',nRijen)}`;
+        }
       }
     }
 
