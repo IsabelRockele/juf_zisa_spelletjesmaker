@@ -51,16 +51,28 @@ function addSectie() {
         grondplan_invul: 'Vul het grondplan in. Schrijf in elk vakje hoeveel blokjes er op die plek op elkaar staan.',
         grondplan_koppel:'Verbind elk grondplan met het juiste bouwsel.',
         aanzichten:      'Bekijk het bouwsel goed. Kruis het juiste aanzicht aan.',
-        pijlenpad:       'Teken de figuur op het ruitjespapier. Volg de pijlenreeks. Begin bij de stip.',
+        pijlenpad:       'Teken de figuur op het ruitjespapier.|Volg de pijlenreeks.|Begin bij de stip.',
     };
     const opdracht = opdrachtzinnen[type] || titels[type] || '';
+
+    // Voor pijlenpad: elke zin op aparte regel met hokje
+    let opdrachtHTML;
+    if (type === 'pijlenpad') {
+        const zinnen = opdracht.split('|').filter(z => z.trim());
+        opdrachtHTML = zinnen.map(zin =>
+            '<span class="instr-regel"><span class="instr-hokje"></span>' +
+            '<span class="opdracht-zin-deel" contenteditable="true">' + zin.trim() + '</span></span>'
+        ).join('');
+    } else {
+        opdrachtHTML = '<span class="opdracht-zin" contenteditable="true">' + opdracht + '</span>';
+    }
 
     sectieDiv.innerHTML = `
         <div class="sectie-header no-print">
             <button class="sectie-verwijder-btn" onclick="verwijderSectie('${sectieId}')" title="Sectie verwijderen">✕ Sectie verwijderen</button>
         </div>
         <div class="opdrachtkader">
-            <span class="opdracht-zin" contenteditable="true">${opdracht}</span>
+            ${opdrachtHTML}
         </div>
         <div class="kaders-grid${type === 'tellen' ? ' kaders-grid-tellen' : type === 'grondplan_invul' ? ' kaders-grid-2kol' : ''}" id="${sectieId}-grid"></div>
         <div class="no-print sectie-voeg-toe">
@@ -512,13 +524,7 @@ function renderPijlenpadOefening(kader, niveau) {
     const wrapper = document.createElement('div');
     wrapper.className = 'pijlenpad-oef';
 
-    // Instructie
-    const instr = document.createElement('div');
-    instr.className = 'pijlenpad-instructie';
-    instr.innerHTML = '<span class="instr-regel"><span class="instr-hokje"></span>Teken de figuur op het ruitjespapier.</span>' +
-                      '<span class="instr-regel"><span class="instr-hokje"></span>Volg de pijlenreeks.</span>' +
-                      '<span class="instr-regel"><span class="instr-hokje"></span>Begin bij de stip.</span>';
-    wrapper.appendChild(instr);
+    // Geen instructie in oefenvak — staat al in opdrachtkader bovenaan
 
     const inhoud = document.createElement('div');
     inhoud.className = 'pijlenpad-wrap';
