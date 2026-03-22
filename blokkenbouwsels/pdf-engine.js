@@ -399,9 +399,25 @@ const pdfEngine = (() => {
         const hokjeB      = 10;
         const hokjeH      = 10;
 
-        const kH = padV * 2 + maxBouwselH + hokjeH + 2;
+        // Lees de vraag (bevat "van de rechterkant" etc.)
+        const vraagEl = kaderEl.querySelector('.oefening-vraag');
+        const vraagTxt = vraagEl ? (vraagEl.innerText || vraagEl.textContent || '').trim() : '';
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(11);
+        const vraagRegels = vraagTxt ? doc.splitTextToSize(vraagTxt, CONTENT_W - 16) : [];
+        const vraagH = vraagRegels.length > 0 ? vraagRegels.length * 6 + 4 : 0;
+
+        const kH = padV * 2 + vraagH + maxBouwselH + hokjeH + 2;
         const kY = startKader(kH + 4);
-        const contentY = kY + padV;
+        let contentY = kY + padV;
+
+        // Vraag tekenen
+        if (vraagRegels.length > 0) {
+            doc.setTextColor(30, 30, 30);
+            vraagRegels.forEach((line, i) => {
+                doc.text(line, MARGIN_LEFT + 8, contentY + 5 + i * 6);
+            });
+            contentY += vraagH;
+        }
 
         // Kader rond bouwsel + bouwsel links
         doc.setLineWidth(0.4); doc.setDrawColor(200, 195, 215); doc.setFillColor(255,255,255);
@@ -748,8 +764,12 @@ const pdfEngine = (() => {
         drawRoundedRect(MARGIN_LEFT, y, CONTENT_W, boxH, 3, 'FD');
         doc.setTextColor(20, 20, 20);
 
+        // Verticaal centreren: totale teksthoogte = regelsArr.length * regelH
+        const totaalTekstH = regelsArr.length * regelH;
+        const startTekstY = y + (boxH - totaalTekstH) / 2 + regelH * 0.75;
+
         regelsArr.forEach((regel, i) => {
-            const regelY = y + padV + 4.5 + i * regelH;
+            const regelY = startTekstY + i * regelH;
             if (heeftHokjes) {
                 doc.setLineWidth(0.4); doc.setDrawColor(40,40,40); doc.setFillColor(255,255,255);
                 doc.roundedRect(MARGIN_LEFT + padH, regelY - hokjeB + 0.5, hokjeB, hokjeB, 0.5, 0.5, 'FD');
