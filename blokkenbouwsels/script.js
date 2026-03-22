@@ -30,6 +30,10 @@ function addSectie() {
 
     sectieCounter++;
     const sectieId = `sectie-${sectieCounter}`;
+    // Reset pijlenpad herhaling voor nieuwe sectie
+    if (type === 'pijlenpad' && _gebruikteFiguren[niveau]) {
+        _gebruikteFiguren[niveau].clear();
+    }
 
     const container = document.getElementById('secties-container');
     const sectieDiv = document.createElement('div');
@@ -542,23 +546,25 @@ function centreerPts(pts) {
     };
 }
 
-// Bijhoud welke figuren al gebruikt zijn in huidige sessie
-const _gebruikteFiguren = new Set();
+// Bijhoud welke figuren al gebruikt zijn — per niveau aparte lijst
+const _gebruikteFiguren = {};
 
 function genereerPijlenpad(niveau) {
     let opties = PIJLENPAD_FIGUREN.filter(f => f.niveau === niveau);
     if (opties.length === 0) opties = PIJLENPAD_FIGUREN;
 
-    // Vermijd herhaling — filter al gebruikte figuren
-    let beschikbaar = opties.filter(f => !_gebruikteFiguren.has(f.naam));
-    // Als alles gebruikt: reset en begin opnieuw
+    // Vermijd herhaling per niveau
+    if (!_gebruikteFiguren[niveau]) _gebruikteFiguren[niveau] = new Set();
+    const gebruikt = _gebruikteFiguren[niveau];
+
+    let beschikbaar = opties.filter(f => !gebruikt.has(f.naam));
     if (beschikbaar.length === 0) {
-        _gebruikteFiguren.clear();
+        gebruikt.clear();
         beschikbaar = opties;
     }
 
     const figuur = beschikbaar[Math.floor(Math.random() * beschikbaar.length)];
-    _gebruikteFiguren.add(figuur.naam);
+    gebruikt.add(figuur.naam);
     const { pts, gridSize, startX, startY } = centreerPts(figuur.pts);
     const stappen = ptsNaarStappen(pts);
 
