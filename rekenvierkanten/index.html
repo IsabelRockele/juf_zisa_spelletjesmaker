@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekenvierkant Generator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="app-header-left">
+      <button type="button" class="back-btn" onclick="window.location.href='../index.html'">← Keuzemenu</button>
+    </div>
+    <div class="app-header-center">
+      <h1>Rekenvierkant Generator</h1>
+      <p>Stel per rekenvierkant het type en de moeilijkheidsgraad in.</p>
+    </div>
+    <div class="app-header-right">
+      <button id="infoBtn" type="button" class="info-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Info
+      </button>
+      <button id="genereerAllesBtn" type="button" class="primary-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Alles hergeneren
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <aside class="settings-panel">
+
+      <div class="panel-top-row">
+        <h2>Rekenvierkanten <span class="count-badge" id="roosterCount">1</span></h2>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-card-header"><h3>📄 Formaat (globaal)</h3></div>
+        <div class="setting-card-body">
+          <div class="form-row">
+            <span class="form-label">Roostergrootte:</span>
+            <select class="cfg-select" id="formaat">
+              <option value="5x5">5 × 5</option>
+              <option value="7x7">7 × 7</option>
+            </select>
+          </div>
+
+          <!-- Infobalk 7×7 — alleen zichtbaar bij 7×7 keuze -->
+          <div id="info-7x7" style="display:none; margin-top:4px; padding:11px 13px; background:#eaf3ff; border:1px solid #a0c8f0; border-radius:10px; font-size:0.82rem; line-height:1.6; color:#1a3352;">
+            <strong>ℹ️ Wat werkt bij 7×7?</strong>
+            <ul style="margin:5px 0 0 16px; padding:0;">
+              <li>✅ Optellen en aftrekken (gemengd aanbevolen)</li>
+              <li>✅ Zonder brug: mogelijk, maar geeft kleine getallen</li>
+              <li>❌ Vermenigvuldigen en delen: <em>alleen bij 5×5</em></li>
+            </ul>
+          </div>
+
+          <div id="weergave-keuze" style="display:none;">
+            <div class="form-label" style="margin-bottom:6px;">Weergave 7×7:</div>
+            <div class="radio-group">
+              <span class="radio-chip"><input type="radio" name="weergave" id="wv-klassiek" value="klassiek" checked onchange="genereerAlles()"><label for="wv-klassiek">Klassiek (lege hokjes)</label></span>
+              <span class="radio-chip"><input type="radio" name="weergave" id="wv-kader" value="kader" onchange="genereerAlles()"><label for="wv-kader">Antwoordkader boven rooster</label></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="roosterList"></div>
+
+      <button id="voegRoosterToe" type="button" class="add-btn">+ Rekenvierkant toevoegen</button>
+
+      <div id="meldingContainer" class="message-box"></div>
+
+    </aside>
+
+    <section class="preview-panel">
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div>
+            <h2>Voorbeeld</h2>
+            <p>Live weergave van het werkblad.</p>
+          </div>
+          <div class="preview-actions">
+            <button id="toonOplossing" type="button" class="oplossing-btn">👁 Toon oplossing</button>
+            <button id="downloadPngBtn" type="button" class="secondary-btn">↓ PNG</button>
+            <button id="downloadPdfBtn" type="button" class="primary-btn">↓ PDF werkblad</button>
+            <button id="downloadPdfOplBtn" type="button" class="secondary-btn" style="border-color:#f5c97a;color:var(--accent);">↓ PDF sleutel</button>
+          </div>
+        </div>
+        <div class="preview-card-body">
+          <div class="canvas-frame">
+            <canvas id="mainCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- INFO MODAL -->
+<div id="infoModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Hoe werkt de Rekenvierkant Generator?</h2>
+      <button id="infoModalClose" class="modal-close-btn" title="Sluiten">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-section">
+        <h3>📐 Wat is een rekenvierkant?</h3>
+        <p>Een rekenvierkant is een rooster van getallen en tekens. <strong>Elke rij en elke kolom</strong> vormt een correcte rekensom. De witte hokjes vult de leerling zelf in — de gekleurde hokjes zijn gegeven als startpunt.</p>
+        <p style="margin-top:6px;">Voorbeeld (5×5): <em>3 + 4 = 7 (rij) en 3 + 2 = 5 (kolom)</em> — alle rijen én kolommen moeten kloppen.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>🔢 Formaat kiezen</h3>
+        <ul>
+          <li><strong>5×5</strong> — 3 getallen per rij/kolom. Geschikt voor alle types en niveaus.</li>
+          <li><strong>7×7</strong> — 4 getallen per rij/kolom. <em>Alleen voor optellen en aftrekken.</em> Gemengd type werkt het best. "Zonder brug" geeft automatisch kleine getallen (max ±11).</li>
+        </ul>
+        <p style="margin-top:6px; padding:7px 10px; background:#eaf3ff; border-radius:8px; font-size:0.85rem;">❌ Vermenigvuldigen en delen werken <strong>niet</strong> bij 7×7 — kies daarvoor altijd 5×5.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>➕ Optellen &amp; Aftrekken</h3>
+        <ul>
+          <li><strong>Type:</strong> optellen, aftrekken, of + en − gemengd.</li>
+          <li><strong>Niveau:</strong> tot 10, 20, 100 of 1000 — dit is de maximale uitkomst in het rooster.</li>
+          <li><strong>Brug:</strong> zonder tiental-overschrijding (bv. 3+4), met overschrijding (bv. 7+5), of gemengd.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>✖️ Vermenigvuldigen (alleen 5×5)</h3>
+        <ul>
+          <li><strong>Tafels ×1–10:</strong> kies welke tafels. Selecteer minstens 2 tafels. Uitkomst max 100.</li>
+          <li><strong>Grote getallen:</strong> sommen als 15×2, 25×4, 30×3 — voor 4de leerjaar en hoger.</li>
+          <li><strong>Tafelgetal links of rechts:</strong> bv. 5×3 of 3×5.</li>
+          <li><strong>× en ÷ gemengd:</strong> combineert vermenigvuldigen en delen in één rooster.</li>
+        </ul>
+        <p style="margin-top:6px; font-size:0.82rem; color:#5f7a8f;">De uitkomsten van alle sommen (ook hoekgetallen) zijn altijd deelbaar door een gekozen tafel — zo kan de leerling alles oplossen met de gekende tafels.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>🔄 Hergeneren</h3>
+        <p>Klik op de <strong>↺ knop</strong> naast een rekenvierkant om alleen dat rooster opnieuw te genereren. Klik op <strong>Alles hergeneren</strong> in de header om alle roosters tegelijk te verversen. Herhaal dit tot je een rooster krijgt dat bij jouw les past.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>📄 Meerdere rekenvierkanten</h3>
+        <p>Voeg tot 8 rekenvierkanten toe via <strong>+ Rekenvierkant toevoegen</strong>. Per vierkant kies je apart het type en de moeilijkheidsgraad. Roosters 1–4 staan op pagina 1, roosters 5–8 op pagina 2 van de PDF.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>👁 Oplossing &amp; PDF downloaden</h3>
+        <ul>
+          <li><strong>Toon oplossing:</strong> vult alle lege hokjes in (groen). Klik opnieuw om te verbergen.</li>
+          <li><strong>Antwoordkader (7×7):</strong> alle ontbrekende getallen staan gesorteerd boven het rooster — de leerling schrijft ze op de juiste plek.</li>
+          <li><strong>PDF werkblad:</strong> met naam, datum, titel en opdrachtzin bovenaan — voor de leerlingen.</li>
+          <li><strong>PDF sleutel:</strong> alle antwoorden ingevuld — voor de leerkracht.</li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button id="infoModalClose2" class="primary-btn">Sluiten</button>
+    </div>
+  </div>
+</div>
+    <div class="modal-footer">
+      <button id="infoModalClose2" class="primary-btn">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script src="generator.js"></script>
+<script src="pdf-engine.js"></script>
+</body>
+</html>
