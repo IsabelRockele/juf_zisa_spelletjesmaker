@@ -46,6 +46,7 @@ function addSectie() {
         tellen:          'Hoeveel blokken?',
         grondplan_invul: 'Vul het grondplan in',
         grondplan_koppel:'Welk bouwsel hoort bij het grondplan?',
+        verbinden:       'Verbind elk bouwsel met het juiste grondplan',
         aanzichten:      'Duid het juiste aanzicht aan',
         pijlenpad:       'Teken de figuur',
     };
@@ -54,6 +55,7 @@ function addSectie() {
         tellen:          'Met hoeveel blokken is elk bouwsel gemaakt?|Er staan geen blokken verstopt achter het bouwsel.',
         grondplan_invul: 'Vul het grondplan in. Schrijf in elk vakje hoeveel blokjes er op die plek op elkaar staan.',
         grondplan_koppel:'Verbind elk grondplan met het juiste bouwsel.',
+        verbinden:       'Verbind elk bouwsel met het juiste grondplan. Trek een lijn.',
         aanzichten:      'Bekijk het bouwsel goed. Kruis het juiste aanzicht aan.',
         pijlenpad:       'Teken de figuur op het ruitjespapier.|Volg de pijlenreeks.|Begin bij de stip.',
     };
@@ -78,7 +80,7 @@ function addSectie() {
         <div class="opdrachtkader">
             ${opdrachtHTML}
         </div>
-        <div class="kaders-grid${type === 'tellen' ? ' kaders-grid-tellen' : type === 'grondplan_invul' ? ' kaders-grid-2kol' : ''}" id="${sectieId}-grid"></div>
+        <div class="kaders-grid${type === 'tellen' ? ' kaders-grid-tellen' : type === 'grondplan_invul' ? ' kaders-grid-2kol' : type === 'verbinden' ? ' kaders-grid-verbinden' : ''}" id="${sectieId}-grid"></div>
         <div class="no-print sectie-voeg-toe">
             <button class="voeg-oefening-btn" onclick="voegOefeningToe('${sectieId}', '${type}', '${niveau}')">＋ Oefening</button>
         </div>
@@ -86,11 +88,88 @@ function addSectie() {
 
     container.appendChild(sectieDiv);
 
-    // Voeg oefeningen toe
     const grid = document.getElementById(`${sectieId}-grid`);
-    for (let i = 0; i < aantal; i++) {
-        voegOefeningToe(sectieId, type, niveau, grid);
+    if (type === 'verbinden') {
+        // Verbinden: altijd 3 bouwsels, ongeacht aantalOefeningen
+        const BR = window.BlokkenRenderer;
+        const bouwsels = [
+            BR.genereerBouwsel(niveau),
+            BR.genereerBouwsel(niveau),
+            BR.genereerBouwsel(niveau)
+        ];
+        renderVerbindenSectie(grid, bouwsels, niveau);
+    } else {
+        for (let i = 0; i < aantal; i++) {
+            voegOefeningToe(sectieId, type, niveau, grid);
+        }
     }
+}
+
+// ─────────────────────────────────────────────
+// TYPE 4: VERBIND BOUWSEL MET GRONDPLAN
+// ─────────────────────────────────────────────
+function renderVerbindenSectie(grid, bouwsels, niveau) {
+    const BR = window.BlokkenRenderer;
+    const volgorde = [0, 1, 2].sort(() => Math.random() - 0.5);
+
+    const sectie = document.createElement('div');
+    sectie.className = 'verbinden-sectie';
+    sectie.dataset.volgorde = JSON.stringify(volgorde);
+
+    // Rij 1: bouwsels met bolletje eronder
+    const rijBouwsels = document.createElement('div');
+    rijBouwsels.className = 'verbinden-rij verbinden-rij-bouwsels';
+    bouwsels.forEach((bouwsel, i) => {
+        const schema = BR.volgendSchema();
+        const item = document.createElement('div');
+        item.className = 'verbinden-item';
+        const canvas = document.createElement('canvas');
+        canvas.className = 'bouwsel-canvas verbind-bouwsel-canvas';
+        item.appendChild(canvas);
+        const bol = document.createElement('div');
+        bol.className = 'verbind-bol verbind-bol-onder';
+        item.appendChild(bol);
+        rijBouwsels.appendChild(item);
+        requestAnimationFrame(() => {
+            BR.renderBouwsel(canvas, bouwsel, { kleuren: schema });
+            canvas.dataset.bouwsel = JSON.stringify(bouwsel);
+            canvas.dataset.schema = JSON.stringify(schema);
+        });
+    });
+    sectie.appendChild(rijBouwsels);
+
+    // Verbindingszone
+    const lijnZone = document.createElement('div');
+    lijnZone.className = 'verbinden-lijn-zone';
+    sectie.appendChild(lijnZone);
+
+    // Rij 2: grondplannen in geschudde volgorde met bolletje erboven
+    const rijPlannen = document.createElement('div');
+    rijPlannen.className = 'verbinden-rij verbinden-rij-plannen';
+    volgorde.forEach((origIdx) => {
+        const bouwsel = bouwsels[origIdx];
+        const item = document.createElement('div');
+        item.className = 'verbinden-item';
+        item.dataset.origIdx = origIdx;
+        const bol = document.createElement('div');
+        bol.className = 'verbind-bol verbind-bol-boven';
+        item.appendChild(bol);
+        const planDiv = document.createElement('div');
+        planDiv.className = 'verbind-grondplan';
+        planDiv.innerHTML = BR.renderGrondplanHTML(bouwsel, { toonCijfers: true, leeg: false });
+        item.appendChild(planDiv);
+        rijPlannen.appendChild(item);
+    });
+    sectie.appendChild(rijPlannen);
+
+    // Oplossing
+    const nrs = ['1','2','3'], letters = ['A','B','C'];
+    const koppeling = volgorde.map((origIdx, i) => nrs[origIdx] + '↔' + letters[i]).join('  ');
+    const opl = document.createElement('div');
+    opl.className = 'opl-antwoord opl-verbinden';
+    opl.textContent = '✓ ' + koppeling;
+    sectie.appendChild(opl);
+    grid.appendChild(sectie);
 }
 
 function verwijderSectie(sectieId) {
@@ -106,6 +185,18 @@ let oefeningCounter = 0;
 function voegOefeningToe(sectieId, type, niveau, gridEl) {
     if (!gridEl) gridEl = document.getElementById(`${sectieId}-grid`);
     if (!gridEl) return;
+
+    // Verbinden: voeg nieuwe set van 3 toe eronder
+    if (type === 'verbinden') {
+        const BR = window.BlokkenRenderer;
+        const bouwsels = [
+            BR.genereerBouwsel(niveau),
+            BR.genereerBouwsel(niveau),
+            BR.genereerBouwsel(niveau)
+        ];
+        renderVerbindenSectie(gridEl, bouwsels, niveau);
+        return;
+    }
 
     oefeningCounter++;
     const oefId = `oef-${oefeningCounter}`;
