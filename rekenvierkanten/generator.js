@@ -9,6 +9,8 @@ const state = {
   grids: [],
   oplossingZichtbaar: false,
   nextId: 1,
+  bewerkModus: false,
+  bewerkGridIdx: -1,
 };
 
 /* ─── CANVAS ─────────────────────────────────────────────────────────────── */
@@ -202,8 +204,12 @@ function genereerMaalDeelGrid(cols, rows, bewerking, maalType, tafels) {
   const maalOp = (a, b) => {
     const r = a * b;
     if (!inRange(r)) return null;
-    if (!tafels.includes(a) && !tafels.includes(b)) return null;
-    if (!isTafelProduct(r)) return null;
+    // Minstens één factor moet een gekozen tafel zijn
+    const tafelFactor = tafels.includes(a) ? a : tafels.includes(b) ? b : null;
+    if (tafelFactor === null) return null;
+    // De andere factor (de vermenigvuldiger) mag max maxBase zijn
+    const andereFactor = tafelFactor === a ? b : a;
+    if (andereFactor < 1 || andereFactor > maxBase) return null;
     return r;
   };
 
@@ -536,6 +542,134 @@ function weergaveModus() {
   return document.querySelector('input[name="weergave"]:checked')?.value || 'klassiek';
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   BEWERKINGSMODUS — leerkracht kan extra hokjes verwijderen/herstellen
+   ═══════════════════════════════════════════════════════════════════════════ */
+function activeerBewerkModusById(roosterId) {
+  const idx = state.roosters.findIndex(r => r.id === roosterId);
+  if (idx === -1) return;
+  activeerBewerkModus(idx);
+}
+
+function activeerBewerkModus(roosterIdx) {
+  const was = state.bewerkModus && state.bewerkGridIdx === roosterIdx;
+  // Deactiveer altijd eerst alle knoppen
+  document.querySelectorAll('.bewerk-btn').forEach(b => b.classList.remove('active'));
+  if (was) {
+    // Zelfde rooster: toggle uit
+    state.bewerkModus = false;
+    state.bewerkGridIdx = -1;
+    canvas.style.cursor = 'default';
+    document.getElementById('bewerkBalk').style.display = 'none';
+  } else {
+    // Activeer dit rooster
+    state.bewerkModus = true;
+    state.bewerkGridIdx = roosterIdx;
+    state.oplossingZichtbaar = false;
+    syncOplossingKnop();
+    canvas.style.cursor = 'crosshair';
+    document.getElementById('bewerkBalk').style.display = 'flex';
+    const roosterId = state.roosters[roosterIdx]?.id;
+    const btn = document.getElementById(`bewerk-btn-${roosterId}`);
+    if (btn) btn.classList.add('active');
+  }
+  tekenAlles(false);
+}
+
+function stopBewerkModus() {
+  state.bewerkModus = false;
+  state.bewerkGridIdx = -1;
+  canvas.style.cursor = 'default';
+  document.getElementById('bewerkBalk').style.display = 'none';
+  document.querySelectorAll('.bewerk-btn').forEach(b => b.classList.remove('active'));
+  tekenAlles(false);
+}
+
+function handleCanvasKlik(e) {
+  if (!state.bewerkModus) return;
+  const idx = state.bewerkGridIdx;
+  if (idx < 0 || idx >= state.grids.length) return;
+  const g = state.grids[idx];
+  if (!g) return;
+
+  const cols = document.getElementById('formaat').value === '5x5' ? 5 : 7;
+  const rows = cols;
+  const numGrids = state.grids.length;
+  const {enkB, enkH, offsets} = berekenLayout(numGrids, cols);
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top)  * scaleY;
+
+  const baseX = offsets[idx].x;
+  const baseY = offsets[idx].y;
+  const vakB  = enkB / cols;
+  const vakH  = enkH / rows;
+
+  const c = Math.floor((mx - baseX) / vakB);
+  const r = Math.floor((my - baseY) / vakH);
+  if (r < 0 || r >= rows || c < 0 || c >= cols) return;
+
+  // Alleen getalcellen (even rij én even kolom)
+  if (r % 2 !== 0 || c % 2 !== 0) return;
+
+  const huidig = g.display[r][c];
+  if (huidig === '___') {
+    // Herstel: terug naar oorspronkelijk getal
+    g.display[r][c] = g.full[r][c];
+  } else {
+    // Verwijder: maak leeg
+    g.display[r][c] = '___';
+  }
+  tekenAlles(false);
+}
+
+// Hover-highlight in bewerkModus
+function handleCanvasHover(e) {
+  if (!state.bewerkModus) return;
+  const idx = state.bewerkGridIdx;
+  if (idx < 0 || idx >= state.grids.length) return;
+  const g = state.grids[idx];
+  if (!g) return;
+
+  const cols = document.getElementById('formaat').value === '5x5' ? 5 : 7;
+  const rows = cols;
+  const {enkB, enkH, offsets} = berekenLayout(state.grids.length, cols);
+
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top)  * scaleY;
+
+  const baseX = offsets[idx].x;
+  const baseY = offsets[idx].y;
+  const vakB  = enkB / cols;
+  const vakH  = enkH / rows;
+  const c = Math.floor((mx - baseX) / vakB);
+  const r = Math.floor((my - baseY) / vakH);
+
+  tekenAlles(false);
+
+  // Highlight hover-cel
+  if (r >= 0 && r < rows && c >= 0 && c < cols && r%2===0 && c%2===0) {
+    const x = baseX + c * vakB;
+    const y = baseY + r * vakH;
+    const isLeeg = g.display[r][c] === '___';
+    ctx.strokeStyle = isLeeg ? '#177a4e' : '#e67e00';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x+2, y+2, vakB-4, vakH-4);
+    // Kleine hint tekst
+    ctx.fillStyle = isLeeg ? '#177a4e' : '#e67e00';
+    ctx.font = `bold 11px "Segoe UI",Arial,sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(isLeeg ? '+ herstel' : '✕ verwijder', x + vakB/2, y + vakH - 3);
+  }
+}
+
 function toonMelding(tekst) {
   const el=document.getElementById('meldingContainer');
   el.innerHTML=tekst; el.classList.toggle('visible',!!tekst);
@@ -614,6 +748,7 @@ function genereerGrid(cols, rows, cfg) {
 function genereerAlles() {
   state.oplossingZichtbaar = false;
   syncOplossingKnop();
+  stopBewerkModus();
   toonMelding('');
   const cols = document.getElementById('formaat').value==='5x5' ? 5 : 7;
   const rows = cols;
@@ -634,6 +769,8 @@ function genereerAlles() {
 function genereerEnkel(id) {
   const idx = state.roosters.findIndex(r => r.id===id);
   if (idx===-1) return;
+  // Stop bewerkingsmodus voor dit rooster als het opnieuw gegenereerd wordt
+  if (state.bewerkModus && state.bewerkGridIdx === idx) stopBewerkModus();
   const cols = document.getElementById('formaat').value==='5x5' ? 5 : 7;
   const rows = cols;
   const cfg = leesRoosterConfig(id);
@@ -663,6 +800,9 @@ function maakRoosterKaart(id) {
     <div class="setting-card-header">
       <h3>Rekenvierkant ${id}</h3>
       <div class="card-btns">
+        <button type="button" class="bewerk-btn icon-btn" id="bewerk-btn-${id}" title="Extra hokjes verwijderen" onclick="activeerBewerkModusById(${id})">
+          ✏️
+        </button>
         <button type="button" class="regen-text-btn" title="Genereer opnieuw" onclick="genereerEnkel(${id})">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           Nieuw
@@ -840,6 +980,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const a = document.createElement('a');
     a.href=url; a.download='rekenvierkant.png'; a.click();
   });
+
+  // Bewerkingsmodus canvas events
+  canvas.addEventListener('click', handleCanvasKlik);
+  canvas.addEventListener('mousemove', handleCanvasHover);
+  canvas.addEventListener('mouseleave', () => { if (state.bewerkModus) tekenAlles(false); });
+
+  // Stop-knop in bewerkbalk
+  document.getElementById('stopBewerkBtn')?.addEventListener('click', stopBewerkModus);
 
   document.getElementById('infoBtn').addEventListener('click', () => {
     document.getElementById('infoModal').style.display='flex';
