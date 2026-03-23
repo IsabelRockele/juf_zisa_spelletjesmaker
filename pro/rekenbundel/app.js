@@ -790,8 +790,37 @@ const App = (() => {
     } else {
       document.getElementById('inzicht-emoji-kaart').style.display = _inzichtType === 'afbeeldingen' ? 'block' : 'none';
       document.getElementById('inzicht-gl-kaart').style.display    = _inzichtType === 'getallenlijn'  ? 'block' : 'none';
+      _filterGlVarianten(waarde);
     }
     document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
+  }
+
+  function _filterGlVarianten(bewerking) {
+    const GROEP_MAP = {
+      'vermenigvuldigen': 'verm',
+      'delen-aftrekking': 'deel',
+      'delen-rest':       'rest',
+    };
+    const STANDAARD = {
+      'verm': 'getekend',
+      'deel': 'delen-getekend',
+      'rest': 'delen-rest-getekend',
+    };
+    const groep = GROEP_MAP[bewerking];
+    if (!groep) return;
+    const chips = document.querySelectorAll('#rg-gl-variant-inzicht label[data-groep]');
+    chips.forEach(chip => {
+      chip.style.display = chip.dataset.groep === groep ? '' : 'none';
+      chip.classList.remove('geselecteerd');
+    });
+    const standaard = STANDAARD[groep];
+    const eersteChip = document.querySelector(`#rg-gl-variant-inzicht label[data-groep="${groep}"]`);
+    if (eersteChip) {
+      eersteChip.classList.add('geselecteerd');
+      const radio = eersteChip.querySelector('input[type=radio]');
+      if (radio) radio.checked = true;
+      selecteerGlVariantInzicht(standaard, eersteChip);
+    }
   }
 
   function selecteerVerdelenType(waarde, el) {
@@ -811,6 +840,7 @@ const App = (() => {
     el.classList.add('geselecteerd');
     document.getElementById('inzicht-emoji-kaart').style.display = waarde === 'afbeeldingen' ? 'block' : 'none';
     document.getElementById('inzicht-gl-kaart').style.display    = waarde === 'getallenlijn'  ? 'block' : 'none';
+    if (waarde === 'getallenlijn') _filterGlVarianten(_inzichtBewerking);
     document.getElementById('inp-opdrachtzin-inzicht').value = _defaultZinInzicht();
   }
 
