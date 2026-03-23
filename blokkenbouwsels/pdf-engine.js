@@ -113,7 +113,7 @@ const pdfEngine = (() => {
         let x = MARGIN_LEFT;
         boxes.forEach(box => {
             const label = readText(box); // "Naam:" of "Datum:"
-            doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(60, 60, 60);
+            doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(40, 40, 40);
             doc.text(label, x, y + 5);
             const labelB = doc.getTextWidth(label) + 3;
             // Schrijflijn na het label
@@ -567,6 +567,7 @@ const pdfEngine = (() => {
             const eersteRijH = type === 'tellen'           ? 65
                              : type === 'grondplan_invul'  ? 55
                              : type === 'grondplan_koppel' ? 95
+                             : type === 'verbinden'        ? 120
                              : type === 'aanzichten'       ? 88
                              : type === 'pijlenpad'        ? 80
                              : 70;
@@ -585,6 +586,16 @@ const pdfEngine = (() => {
         if (type === 'grondplan_invul' && kaders.length > 0) {
             await drawGrondplanInvulRijen(kaders);
             y += 4;
+            return;
+        }
+
+        // Verbinden: teken elke .verbinden-sectie apart
+        if (type === 'verbinden') {
+            const verbindSectieEls = [...sectionEl.querySelectorAll('.verbinden-sectie')];
+            for (const vs of verbindSectieEls) {
+                await drawEenVerbindenSectie(vs);
+                y += 4;
+            }
             return;
         }
 
@@ -916,6 +927,111 @@ const pdfEngine = (() => {
             }
             y = rijY + rijH + 6;
         }
+    }
+
+    // ─── VERBINDEN ───────────────────────────────────
+    async function drawEenVerbindenSectie(sectieEl) {
+        if (!sectieEl) return;
+
+        const COLS = 3;
+        const colW = CONTENT_W / COLS;
+        const bouwselH = 38;
+        const lijnZoneH = 18;
+        const bolR = 1.8;  // kleine bol in PDF
+
+        // Grondplan dimensies — bereken per item want kan 3x3 of 4x4 zijn
+        const planItems = [...sectieEl.querySelectorAll('.verbinden-rij-plannen .verbinden-item')];
+        const maxPlanKols = Math.max(...planItems.map(item => {
+            const t = item.querySelector('.grondplan-tabel');
+            return t?.querySelector('tr')?.querySelectorAll('td').length || 3;
+        }));
+        const maxPlanRijen = Math.max(...planItems.map(item => {
+            const t = item.querySelector('.grondplan-tabel');
+            return t?.querySelectorAll('tr').length || 3;
+        }));
+        // Cel zo klein dat 4x4 altijd past binnen colW
+        const maxPlanW = colW - 8;
+        const planCelMm = Math.min(7, maxPlanW / maxPlanKols);
+        const planH = maxPlanRijen * planCelMm;
+        const planW = maxPlanKols * planCelMm;
+
+        const totH = 5 + bouwselH + 2 + bolR*2 + lijnZoneH + bolR*2 + 3 + planH + 6;
+        ensureSpace(totH + 6);
+        const kY = y;
+
+        // Kader
+        doc.setLineWidth(0.5); doc.setDrawColor(200, 195, 215);
+        drawRoundedRect(MARGIN_LEFT, kY, CONTENT_W, totH, 3);
+
+        let curY = kY + 5;
+        const startX = MARGIN_LEFT;
+
+        // ── Bouwsels bovenaan ──
+        const bouwselItems = [...sectieEl.querySelectorAll('.verbinden-rij-bouwsels .verbinden-item')];
+        // Y-posities van de bollen bewaren voor oplossingslijnen
+        const bolBouwselY = {};
+        const bolPlanY = {};
+        const bolBouwselX = {};
+        const bolPlanX = {};
+
+        bouwselItems.forEach((item, i) => {
+            const canvas = item.querySelector('.verbind-bouwsel-canvas') || item.querySelector('.bouwsel-canvas');
+            const x = startX + i * colW;
+            const midX = x + colW/2;
+            if (canvas) {
+                canvasToPdfScherp(canvas, x + (colW-30)/2, curY, 30, bouwselH);
+            }
+            // Bol direct onder bouwsel
+            const bolY = curY + bouwselH + 2 + bolR;
+            doc.setFillColor(50, 50, 70);
+            doc.circle(midX, bolY, bolR, 'F');
+            bolBouwselY[i] = bolY;
+            bolBouwselX[i] = midX;
+        });
+
+        curY += bouwselH + 2 + bolR*2 + lijnZoneH;
+
+        // ── Bolletjes boven grondplannen + grondplannen ──
+        planItems.forEach((item, i) => {
+            const planEl = item.querySelector('.grondplan-tabel');
+            const x = startX + i * colW;
+            const midX = x + colW/2;
+            const nKols = planEl?.querySelector('tr')?.querySelectorAll('td').length || 3;
+            const nRijen = planEl?.querySelectorAll('tr').length || 3;
+            const cel = Math.min(planCelMm, (colW - 6) / nKols);
+            const pw = nKols * cel;
+            const planTop = curY + bolR*2 + 3;
+
+            const bolY = curY + bolR;
+            doc.setFillColor(50, 50, 70);
+            doc.circle(midX, bolY, bolR, 'F');
+            bolPlanY[i] = bolY;
+            bolPlanX[i] = midX;
+
+            if (planEl) {
+                tekenGrondplanKoppelPdf(planEl, x + (colW - pw)/2, planTop, cel);
+            }
+        });
+
+        // ── Oplossing: verbindingslijnen ──
+        if (window._pdfMetOplossingen) {
+            // Lees volgorde uit dataset
+            const volgordeStr = sectieEl.dataset.volgorde;
+            if (volgordeStr) {
+                const volgorde = JSON.parse(volgordeStr);
+                // volgorde[i] = origIdx van bouwsel dat bij plan-positie i hoort
+                doc.setDrawColor(22, 101, 52); doc.setLineWidth(0.8);
+                volgorde.forEach((origBouwselIdx, planIdx) => {
+                    const x1 = bolBouwselX[origBouwselIdx];
+                    const y1 = bolBouwselY[origBouwselIdx];
+                    const x2 = bolPlanX[planIdx];
+                    const y2 = bolPlanY[planIdx];
+                    if (x1 && x2) doc.line(x1, y1, x2, y2);
+                });
+            }
+        }
+
+        y = kY + totH + 6;
     }
 
   // ─── GENERATE ────────────────────────────────────
