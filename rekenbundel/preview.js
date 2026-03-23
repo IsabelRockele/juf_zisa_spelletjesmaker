@@ -157,7 +157,7 @@ const Preview = (() => {
           <div class="lamp-wrapper">
             <div class="lamp-kader">
               <img src="../afbeeldingen_hoofdrekenen/zisa_lamp.png" class="zisa-lamp" alt="Zisa"
-                   onerror="this.style.display='none'"/>
+                   crossOrigin="anonymous" onerror="this.style.display='none'"/>
             </div>
           </div>
           <span class="oef-tekst">${esc(oef.vraag)}</span>
