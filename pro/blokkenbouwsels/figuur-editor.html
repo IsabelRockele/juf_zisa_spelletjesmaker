@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<style>
+* { box-sizing: border-box; }
+body { background:#eee; padding:16px; font-family:Arial; margin:0; }
+h2 { margin:0 0 10px; font-size:16px; }
+.layout { display:flex; gap:16px; flex-wrap:wrap; }
+.panel { background:white; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,.15); }
+canvas { cursor:crosshair; border:1px solid #aaa; display:block; }
+.toolbar { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; align-items:center; }
+button { padding:5px 10px; border-radius:6px; border:1.5px solid #aaa; background:#f5f5f5; cursor:pointer; font-size:12px; font-weight:bold; }
+button.actief { background:#1a56db; color:white; border-color:#1a56db; }
+button:hover { background:#e0e8ff; }
+.info { font-size:11px; color:#555; margin-top:6px; }
+select { padding:4px 8px; border-radius:6px; border:1.5px solid #aaa; font-size:12px; }
+textarea { width:100%; height:80px; font-size:11px; font-family:monospace; border-radius:6px; border:1.5px solid #aaa; padding:6px; }
+.figuur-lijst { display:flex; flex-direction:column; gap:6px; max-height:500px; overflow-y:auto; }
+.figuur-item { padding:6px 10px; border-radius:6px; border:1.5px solid #aaa; cursor:pointer; font-size:12px; background:#f9f9f9; }
+.figuur-item:hover { background:#e8f0ff; border-color:#1a56db; }
+.figuur-item.actief { background:#dbeafe; border-color:#1a56db; }
+.figuur-item canvas { pointer-events:none; }
+</style>
+</head><body>
+<h2>🎨 Figuur Editor — teken zelf op het raster</h2>
+<div class="layout">
+
+<!-- TEKEN PANEEL -->
+<div class="panel">
+  <div class="toolbar">
+    <button id="btn-undo" onclick="undo()">↩ Undo</button>
+    <button id="btn-stop" onclick="stopTekenen()" style="background:#f59e0b;color:white;border-color:#d97706;">⏹ Stop lijn</button>
+    <button id="btn-wis" onclick="wisAlles()">🗑 Wis alles</button>
+    <span style="font-size:12px;color:#555;">CEL:</span>
+    <select id="cel-size" onchange="herlaad()">
+      <option value="20" selected>Normaal</option>
+      <option value="16">Klein</option>
+      <option value="24">Groot</option>
+    </select>
+    <span style="font-size:12px;color:#555;">Grid:</span>
+    <select id="grid-size" onchange="herlaad()">
+      <option value="12">12×12</option>
+      <option value="14" selected>14×14</option>
+      <option value="16">16×16</option>
+      <option value="20">20×20</option>
+    </select>
+  </div>
+  <canvas id="tekenCanvas"></canvas>
+  <div class="info" id="info">Klik op een rasterpunt om te beginnen. Klik opnieuw om een lijn te trekken.</div>
+</div>
+
+<!-- OPSLAAN PANEEL -->
+<div class="panel" style="min-width:260px;">
+  <div class="toolbar">
+    <input id="figuur-naam" placeholder="Naam figuur" style="padding:5px 8px;border-radius:6px;border:1.5px solid #aaa;font-size:12px;width:130px;">
+    <select id="figuur-niveau">
+      <option value="makkelijk">Makkelijk</option>
+      <option value="middel" selected>Middel</option>
+      <option value="moeilijk">Moeilijk</option>
+    </select>
+  </div>
+  <div class="toolbar">
+    <button onclick="slaOp()" style="background:#22c55e;color:white;border-color:#16a34a;">💾 Opslaan</button>
+    <button onclick="exporteer()" style="background:#1a56db;color:white;border-color:#1547b0;">📋 Exporteer JSON</button>
+  </div>
+  <div style="font-size:11px;color:#555;margin-bottom:6px;">Huidige punten:</div>
+  <textarea id="punten-output" readonly></textarea>
+  <div style="font-size:11px;color:#e00;" id="overlap-warning"></div>
+
+  <hr style="margin:10px 0;border:none;border-top:1px solid #ddd;">
+  <div style="font-size:12px;font-weight:bold;margin-bottom:6px;">Opgeslagen figuren:</div>
+  <div class="figuur-lijst" id="figuur-lijst"></div>
+
+  <hr style="margin:10px 0;border:none;border-top:1px solid #ddd;">
+  <div style="font-size:11px;font-weight:bold;margin-bottom:4px;">Exporteer alle figuren (voor in generator):</div>
+  <textarea id="export-output" placeholder="Klik Exporteer JSON..." style="height:120px;"></textarea>
+  <button onclick="kopieer()" style="margin-top:4px;background:#22c55e;color:white;border-color:#16a34a;width:100%;">📋 Kopieer naar klembord</button>
+</div>
+
+</div>
+<script>
+let CEL = 20;
+let GRID = 14;
+let punten = [];
+let opgeslagen = [];
+let canvas, ctx;
+
+function init() {
+    canvas = document.getElementById('tekenCanvas');
+    CEL = parseInt(document.getElementById('cel-size').value);
+    GRID = parseInt(document.getElementById('grid-size').value);
+    const pad = 4;
+    canvas.width = canvas.height = GRID * CEL + pad * 2;
+    ctx = canvas.getContext('2d');
+    canvas.onclick = klik;
+    canvas.onmousemove = hover;
+    teken();
+}
+
+function herlaad() { init(); }
+
+let hoverPt = null;
+
+function snapPt(e) {
+    const r = canvas.getBoundingClientRect();
+    const pad = 4;
+    const mx = e.clientX - r.left - pad;
+    const my = e.clientY - r.top - pad;
+    // y omgekeerd: y=0 is onderkant
+    const gx = Math.round(mx / CEL);
+    const gy = GRID - Math.round(my / CEL);
+    if (gx < 0 || gx > GRID || gy < 0 || gy > GRID) return null;
+    return [gx, gy];
+}
+
+function hover(e) {
+    hoverPt = snapPt(e);
+    teken();
+}
+
+function klik(e) {
+    const pt = snapPt(e);
+    if (!pt) return;
+    // Zoek laatste echte punt (niet null)
+    const prevEcht = [...punten].reverse().find(p=>p!==null);
+    if (prevEcht) {
+        const dx = pt[0]-prevEcht[0], dy = pt[1]-prevEcht[1];
+        // Als laatste punt null is (pen omhoog), mogen we altijd beginnen
+        const laaste = punten[punten.length-1];
+        if (laaste !== null) {
+            if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) {
+                document.getElementById('info').textContent = '⚠️ Alleen horizontaal, verticaal of 45° diagonaal!';
+                return;
+            }
+            if (dx === 0 && dy === 0) return;
+        }
+    }
+    punten.push(pt);
+    const aantalEcht = punten.filter(p=>p!==null).length;
+    document.getElementById('info').textContent = aantalEcht + ' punten. ⏹ Stop lijn om nieuwe lijn te beginnen.';
+    updateOutput();
+    teken();
+}
+
+function undo() {
+    if (punten.length > 0) punten.pop();
+    updateOutput();
+    teken();
+}
+
+function wisAlles() {
+    punten = [];
+    updateOutput();
+    teken();
+}
+
+function cx(x) { return 4 + x * CEL; }
+function cy(y) { return 4 + (GRID - y) * CEL; }
+
+function teken() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Raster
+    ctx.strokeStyle = '#c8dff0'; ctx.lineWidth = 0.5;
+    for (let i = 0; i <= GRID; i++) {
+        ctx.beginPath(); ctx.moveTo(cx(i), cy(0)); ctx.lineTo(cx(i), cy(GRID)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx(0), cy(i)); ctx.lineTo(cx(GRID), cy(i)); ctx.stroke();
+    }
+
+    // Rasterpunten
+    ctx.fillStyle = '#b8d4e8';
+    for (let x = 0; x <= GRID; x++)
+        for (let y = 0; y <= GRID; y++) {
+            ctx.beginPath(); ctx.arc(cx(x), cy(y), 2, 0, Math.PI*2); ctx.fill();
+        }
+
+    // Hover preview
+    const prevVoorHover = [...punten].reverse().find(p=>p!==null);
+    if (hoverPt && prevVoorHover && punten[punten.length-1] !== null) {
+        const prev = prevVoorHover;
+        const dx = hoverPt[0]-prev[0], dy = hoverPt[1]-prev[1];
+        const geldig = dx===0 && dy===0 ? false :
+            (dx===0 || dy===0 || Math.abs(dx)===Math.abs(dy));
+        ctx.strokeStyle = geldig ? 'rgba(26,86,219,0.3)' : 'rgba(220,0,0,0.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx(prev[0]),cy(prev[1])); ctx.lineTo(cx(hoverPt[0]),cy(hoverPt[1])); ctx.stroke();
+        ctx.fillStyle = geldig ? 'rgba(26,86,219,0.5)' : 'rgba(220,0,0,0.5)';
+        ctx.beginPath(); ctx.arc(cx(hoverPt[0]),cy(hoverPt[1]),4,0,Math.PI*2); ctx.fill();
+    }
+
+    // Getekende lijn — null = pen omhoog (nieuwe deellijn)
+    if (punten.length > 0) {
+        ctx.strokeStyle = '#1a56db'; ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        // Startpunt (eerste niet-null punt)
+        const eerste = punten.find(p=>p!==null);
+        if (eerste) {
+            ctx.fillStyle = '#e00';
+            ctx.beginPath(); ctx.arc(cx(eerste[0]),cy(eerste[1]),5,0,Math.PI*2); ctx.fill();
+        }
+        // Teken segmenten (null = pen omhoog)
+        ctx.beginPath();
+        let penNeer = false;
+        for (let i = 0; i < punten.length; i++) {
+            if (punten[i] === null) { penNeer = false; continue; }
+            if (!penNeer) { ctx.moveTo(cx(punten[i][0]),cy(punten[i][1])); penNeer = true; }
+            else ctx.lineTo(cx(punten[i][0]),cy(punten[i][1]));
+        }
+        ctx.stroke();
+        // Alle punten
+        ctx.fillStyle = '#1a56db';
+        punten.forEach(p => {
+            if (!p) return;
+            ctx.beginPath(); ctx.arc(cx(p[0]),cy(p[1]),3,0,Math.PI*2); ctx.fill();
+        });
+    }
+}
+
+function heeftOverlap(pts) {
+    const set = new Set();
+    for (let i = 1; i < pts.length; i++) {
+        const x0=pts[i-1][0],y0=pts[i-1][1],x1=pts[i][0],y1=pts[i][1];
+        const dx=x1-x0, dy=y1-y0;
+        const len=Math.max(Math.abs(dx),Math.abs(dy));
+        if(!len) continue;
+        const rx=dx/len, ry=dy/len;
+        for(let j=1;j<=len;j++){
+            const k=Math.round(x0+rx*j)+','+Math.round(y0+ry*j);
+            if(set.has(k)) return true;
+            set.add(k);
+        }
+    }
+    return false;
+}
+
+function updateOutput() {
+    const echte = punten.filter(p=>p!==null);
+    const txt = '[' + echte.map(p=>'['+p+']').join(',') + ']';
+    document.getElementById('punten-output').value = txt;
+    const ov = heeftOverlap(echte);
+    document.getElementById('overlap-warning').textContent = ov ? '⚠️ OVERLAP GEDETECTEERD!' : (echte.length > 1 ? '✓ Geen overlap' : '');
+}
+
+function slaOp() {
+    const naam = document.getElementById('figuur-naam').value.trim() || ('Figuur ' + (opgeslagen.length+1));
+    const niveau = document.getElementById('figuur-niveau').value;
+    if (punten.length < 2) { alert('Teken eerst een figuur!'); return; }
+    opgeslagen.push({ naam, niveau, pts: punten.slice() });
+    toonLijst();
+    wisAlles();
+    document.getElementById('figuur-naam').value = '';
+}
+
+function toonLijst() {
+    const lijst = document.getElementById('figuur-lijst');
+    lijst.innerHTML = '';
+    opgeslagen.forEach((f, i) => {
+        const div = document.createElement('div');
+        div.className = 'figuur-item';
+        div.textContent = f.naam + ' (' + f.niveau + ') — ' + f.pts.length + ' punten';
+        div.onclick = () => laadFiguur(i);
+        lijst.appendChild(div);
+    });
+}
+
+function laadFiguur(i) {
+    punten = opgeslagen[i].pts.slice();
+    document.getElementById('figuur-naam').value = opgeslagen[i].naam;
+    document.getElementById('figuur-niveau').value = opgeslagen[i].niveau;
+    updateOutput();
+    teken();
+}
+
+function stopTekenen() {
+    // Voeg null toe als scheiding tussen segmenten
+    if (punten.length > 0) {
+        punten.push(null); // null = pen omhoog
+        document.getElementById('info').textContent = 'Lijn gestopt. Klik om nieuwe lijn te beginnen.';
+    }
+}
+
+function exporteer() {
+    if (opgeslagen.length === 0) {
+        alert('Sla eerst figuren op via de 💾 knop!');
+        return;
+    }
+    const json = JSON.stringify(opgeslagen, null, 2);
+    // Download als .json bestand
+    const blob = new Blob([json], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'figuren.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    // Ook in textarea tonen
+    const ta = document.getElementById('export-output');
+    ta.value = json;
+}
+
+function kopieer() {
+    const ta = document.getElementById('export-output');
+    if (!ta.value) { exporteer(); return; }
+    ta.select();
+    document.execCommand('copy');
+    alert('✓ Gekopieerd naar klembord!');
+}
+
+init();
+</script>
+</body></html>
