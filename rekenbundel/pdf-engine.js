@@ -1789,11 +1789,11 @@ doc.setTextColor(26, 58, 92);
 
     // Bereken hoogte van één oefening
  function oefHoogte(oef) {
- if (oef.variant === 'getekend') return 56;
- if (oef.variant === 'delen-getekend') return 82;
- if (oef.variant === 'delen-rest-getekend') return 78; // bogen + aftrekrij + 2 zinnen
- if (oef.variant === 'delen-zelf') return 52;
- if (oef.variant === 'delen-rest-zelf') return 52;
+ if (oef.variant === 'getekend') return 72;
+ if (oef.variant === 'delen-getekend') return 96;
+ if (oef.variant === 'delen-rest-getekend') return 90;
+ if (oef.variant === 'delen-zelf') return 64;
+ if (oef.variant === 'delen-rest-zelf') return 72;
  return 36;
 }
 
@@ -1931,32 +1931,32 @@ doc.triangle(
     }
 
     // zin: Ik zie ___ sprongen van ___.
-    const zinY = asY + 9;
+    const zinY = asY + 14;
     let zx = lijnX1;
 
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(11);
+    doc.setFontSize(14);
     doc.setTextColor(...TEKSTDONKER);
     doc.text('Ik zie', zx, zinY);
     zx += doc.getTextWidth('Ik zie') + 2.2;
 
     doc.setDrawColor(...INVULGRIJS);
     doc.setLineWidth(0.25);
-    doc.line(zx, zinY + 0.6, zx + 10, zinY + 0.6);
-    zx += 12;
+    doc.line(zx, zinY + 0.6, zx + 12, zinY + 0.6);
+    zx += 14;
 
     doc.text('sprongen van', zx, zinY);
     zx += doc.getTextWidth('sprongen van') + 2.2;
 
-    doc.line(zx, zinY + 0.6, zx + 10, zinY + 0.6);
-    zx += 11.5;
+    doc.line(zx, zinY + 0.6, zx + 12, zinY + 0.6);
+    zx += 13.5;
 
     doc.text('.', zx, zinY);
 
     // formules
-    const LS = 9;
-const LB = 12;
-const LH = 10;
+    const LS = 12;
+const LB = 14;
+const LH = 14;
 const BL = LH - 2;
 const formY = zinY + 4;
     const fxBase = lijnX1;
@@ -1975,7 +1975,7 @@ const formY = zinY + 4;
 
     function sym(fx, fy, t) {
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
+      doc.setFontSize(14);
       doc.setTextColor(...TEKSTDONKER);
       doc.text(t, fx, fy + BL);
     }
@@ -1996,7 +1996,7 @@ const formY = zinY + 4;
     lijnB(fx, formY);
 
     // rij 2: ___ × ___ = ___
-const tweedeRijY = formY + 10.5;
+const tweedeRijY = formY + 12;
 
 let fx2 = fxBase;
 lijnS(fx2, tweedeRijY);
@@ -2017,7 +2017,7 @@ lijnB(fx2, tweedeRijY);
   }
 
   // ── Variant delen-getekend: bogen ONDER lijn, rechts→links ──
-  if (variant === 'delen-getekend' || variant === 'delen-rest-getekend') {
+  if (variant === 'delen-getekend') {
     const boogBasisY = asY + 1.2;
     const boogH      = 5.5;
 
@@ -2038,8 +2038,8 @@ lijnB(fx2, tweedeRijY);
       doc.text(String(stap), midX, boogBasisY + boogH + 3.5, { align: 'center' });
     }
 
-    const zinStartY = boogBasisY + boogH + 10; // meer ruimte na getallen
-    const LS = 9; const LB = 12; const LH = 10; const BL2 = LH - 2;
+    const zinStartY = boogBasisY + boogH + 10;
+    const LS = 12; const LH = 14; const BL2 = LH - 2;
     const fxBase = lijnX1;
 
     function lijnS2(fx, fy) {
@@ -2047,69 +2047,87 @@ lijnB(fx2, tweedeRijY);
       doc.line(fx, fy + BL2, fx + LS, fy + BL2);
     }
     function sym2(fx, fy, t, blauw) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(...(blauw ? [21,101,192] : TEKSTDONKER));
       doc.text(t, fx, fy + BL2);
     }
     function ital2(fx, fy, t) {
-      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(14);
       doc.setTextColor(...TEKSTDONKER);
       doc.text(t, fx, fy + BL2 - 0.5);
     }
 
     // Rij 1: uitkomst - ___ - ___ - ... = ___
     let fx3 = fxBase;
-    sym2(fx3, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym2(fx3, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth(String(uitkomst)) + 1;
     for (let g = 0; g < groepen; g++) {
-      sym2(fx3, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      sym2(fx3, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx3 += doc.getTextWidth('-') + 1.5;
       lijnS2(fx3, zinStartY); fx3 += LS + 1.5;
     }
-    sym2(fx3, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym2(fx3, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth('=') + 1.5;
     lijnS2(fx3, zinStartY);
 
     // Rij 2: "Ik kan ___ sprongen maken."
-    const rij2Y = zinStartY + 10;
+    const rij2Y = zinStartY + 12;
     let fx4 = fxBase;
-    ital2(fx4, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital2(fx4, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx4 += doc.getTextWidth('Ik kan') + 2;
     lijnS2(fx4, rij2Y); fx4 += LS + 2;
     ital2(fx4, rij2Y, 'sprongen maken.');
 
     // Rij 3: "[stap] gaat ___ keer in [uitkomst]."
-    const rij3Y = rij2Y + 10;
+    const rij3Y = rij2Y + 12;
     let fx5 = fxBase;
-    sym2(fx5, rij3Y, String(stap), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym2(fx5, rij3Y, String(stap), false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx5 += doc.getTextWidth(String(stap)) + 2;
-    ital2(fx5, rij3Y, 'gaat'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital2(fx5, rij3Y, 'gaat'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx5 += doc.getTextWidth('gaat') + 2;
     lijnS2(fx5, rij3Y); fx5 += LS + 2;
-    ital2(fx5, rij3Y, 'keer in'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital2(fx5, rij3Y, 'keer in'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx5 += doc.getTextWidth('keer in') + 2;
     sym2(fx5, rij3Y, String(uitkomst) + '.', false);
 
     // Rij 4: ___ : ___ = ___
-    const rij4Y = rij3Y + 10;
+    const rij4Y = rij3Y + 12;
     let fx6 = fxBase;
     lijnS2(fx6, rij4Y); fx6 += LS + 1.5;
-    sym2(fx6, rij4Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym2(fx6, rij4Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx6 += doc.getTextWidth(':') + 1.5;
     lijnS2(fx6, rij4Y); fx6 += LS + 1.5;
-    sym2(fx6, rij4Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym2(fx6, rij4Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx6 += doc.getTextWidth('=') + 1.5;
     lijnS2(fx6, rij4Y);
 
     return;
   }
 
-  // ── Variant delen-rest-getekend: bogen al getekend, rest-zinnen ──
+  // ── Variant delen-rest-getekend: bogen + rest-zinnen ──
   if (variant === 'delen-rest-getekend') {
     const boogBasisY = asY + 1.2;
     const boogH2     = 5.5;
+
+    for (let g = 0; g < groepen; g++) {
+      const vanGetal  = uitkomst - g * stap;
+      const naarGetal = uitkomst - (g + 1) * stap;
+      const xVan  = middenVanGetal(vanGetal);
+      const xNaar = middenVanGetal(naarGetal);
+      const midX  = (xVan + xNaar) / 2;
+
+      doc.setDrawColor(21, 101, 192);
+      doc.setLineWidth(0.45);
+      tekenBoog(xVan, xNaar, boogBasisY, boogH2, true);
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8.5);
+      doc.setTextColor(21, 101, 192);
+      doc.text(String(stap), midX, boogBasisY + boogH2 + 3.5, { align: 'center' });
+    }
+
     const zinStartY  = boogBasisY + boogH2 + 10;
-    const LS = 9; const LH = 10; const BL2 = LH - 2;
+    const LS = 12; const LH = 14; const BL2 = LH - 2;
     const fxBase = lijnX1;
 
     function lijnS4(fx, fy) {
@@ -2117,60 +2135,60 @@ lijnB(fx2, tweedeRijY);
       doc.line(fx, fy + BL2, fx + LS, fy + BL2);
     }
     function sym4(fx, fy, t, oranje) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
       doc.text(t, fx, fy + BL2);
     }
     function blauw4(fx, fy, t) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(21, 101, 192);
       doc.text(t, fx, fy + BL2);
     }
     function ital4(fx, fy, t) {
-      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(14);
       doc.setTextColor(...TEKSTDONKER);
       doc.text(t, fx, fy + BL2 - 0.5);
     }
 
     // Rij 1: uitkomst - ___ - ___ - ... = ___
     let fx = fxBase;
-    sym4(fx, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym4(fx, zinStartY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth(String(uitkomst)) + 1;
     for (let g = 0; g < groepen; g++) {
-      sym4(fx, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      sym4(fx, zinStartY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx += doc.getTextWidth('-') + 1.5;
       lijnS4(fx, zinStartY); fx += LS + 1.5;
     }
-    sym4(fx, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym4(fx, zinStartY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth('=') + 1.5;
     lijnS4(fx, zinStartY);
 
     // Rij 2: "Ik kan ___ sprongen van [stap] maken. Dan heb ik nog ___ over."
-    const rij2Y = zinStartY + 10;
+    const rij2Y = zinStartY + 12;
     let fx2 = fxBase;
-    ital4(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital4(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('Ik kan') + 2;
     lijnS4(fx2, rij2Y); fx2 += LS + 2;
-    ital4(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital4(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('sprongen van') + 2;
-    blauw4(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    blauw4(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx2 += doc.getTextWidth(String(stap)) + 2;
-    ital4(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital4(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('maken. Dan heb ik nog') + 2;
     lijnS4(fx2, rij2Y); fx2 += LS + 2;
     ital4(fx2, rij2Y, 'over.');
 
     // Rij 3: ___ : ___ = ___ R ___
-    const rij3Y = rij2Y + 10;
+    const rij3Y = rij2Y + 12;
     let fx3 = fxBase;
     lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
-    sym4(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym4(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth(':') + 1.5;
     lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
-    sym4(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym4(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth('=') + 1.5;
     lijnS4(fx3, rij3Y); fx3 += LS + 1.5;
-    sym4(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym4(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth('R') + 1;
     lijnS4(fx3, rij3Y);
 
@@ -2180,45 +2198,45 @@ lijnB(fx2, tweedeRijY);
   // ── Variant delen-zelf: aftrekrij met stap ingevuld, deelsom leeg ──
   if (variant === 'delen-zelf') {
     const formY = asY + 10;
-    const LS = 9; const BL3 = 6.5;
+    const LS = 12; const BL3 = 10;
 
     function lijnS3(fx, fy) {
       doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
       doc.line(fx, fy + BL3, fx + LS, fy + BL3);
     }
     function sym3(fx, fy, t, oranje) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
       doc.text(t, fx, fy + BL3);
     }
     function blauw3(fx, fy, t) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(21, 101, 192);
       doc.text(t, fx, fy + BL3);
     }
 
     // Rij 1: uitkomst - stap - stap - ... = ___
     let fx = lijnX1;
-    sym3(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym3(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth(String(uitkomst)) + 1;
     for (let g = 0; g < groepen; g++) {
-      sym3(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      sym3(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx += doc.getTextWidth('-') + 1.5;
-      blauw3(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      blauw3(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx += doc.getTextWidth(String(stap)) + 1.5;
     }
-    sym3(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym3(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth('=') + 1.5;
     lijnS3(fx, formY);
 
     // Rij 2: ___ : ___ = ___  (volledig leeg)
-    const rij2Y = formY + 10;
+    const rij2Y = formY + 12;
     let fx2 = lijnX1;
     lijnS3(fx2, rij2Y); fx2 += LS + 1.5;
-    sym3(fx2, rij2Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym3(fx2, rij2Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx2 += doc.getTextWidth(':') + 1.5;
     lijnS3(fx2, rij2Y); fx2 += LS + 1.5;
-    sym3(fx2, rij2Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym3(fx2, rij2Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('=') + 1.5;
     lijnS3(fx2, rij2Y);
 
@@ -2228,68 +2246,68 @@ lijnB(fx2, tweedeRijY);
   // ── Variant delen-rest-zelf: stap ingevuld, rest-zinnen ──
   if (variant === 'delen-rest-zelf') {
     const formY = asY + 10;
-    const LS = 9; const BL5 = 6.5;
+    const LS = 12; const BL5 = 10;
 
     function lijnS5(fx, fy) {
       doc.setDrawColor(...INVULGRIJS); doc.setLineWidth(0.25);
       doc.line(fx, fy + BL5, fx + LS, fy + BL5);
     }
     function sym5(fx, fy, t, oranje) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(...(oranje ? [230,74,25] : TEKSTDONKER));
       doc.text(t, fx, fy + BL5);
     }
     function blauw5(fx, fy, t) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
       doc.setTextColor(21, 101, 192);
       doc.text(t, fx, fy + BL5);
     }
     function ital5(fx, fy, t) {
-      doc.setFont('helvetica', 'italic'); doc.setFontSize(10);
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(14);
       doc.setTextColor(...TEKSTDONKER);
       doc.text(t, fx, fy + BL5 - 0.5);
     }
 
     // Rij 1: uitkomst - stap - stap - ... = ___
     let fx = lijnX1;
-    sym5(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym5(fx, formY, String(uitkomst), false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth(String(uitkomst)) + 1;
     for (let g = 0; g < groepen; g++) {
-      sym5(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      sym5(fx, formY, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx += doc.getTextWidth('-') + 1.5;
-      blauw5(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      blauw5(fx, formY, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(14);
       fx += doc.getTextWidth(String(stap)) + 1.5;
     }
-    sym5(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym5(fx, formY, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx += doc.getTextWidth('=') + 1.5;
     lijnS5(fx, formY);
 
     // Rij 2: "Ik kan ___ sprongen van [stap] maken. Dan heb ik nog ___ over."
-    const rij2Y = formY + 10;
+    const rij2Y = formY + 12;
     let fx2 = lijnX1;
-    ital5(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital5(fx2, rij2Y, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('Ik kan') + 2;
     lijnS5(fx2, rij2Y); fx2 += LS + 2;
-    ital5(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital5(fx2, rij2Y, 'sprongen van'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('sprongen van') + 2;
-    blauw5(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    blauw5(fx2, rij2Y, String(stap)); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx2 += doc.getTextWidth(String(stap)) + 2;
-    ital5(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(10);
+    ital5(fx2, rij2Y, 'maken. Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(14);
     fx2 += doc.getTextWidth('maken. Dan heb ik nog') + 2;
     lijnS5(fx2, rij2Y); fx2 += LS + 2;
     ital5(fx2, rij2Y, 'over.');
 
     // Rij 3: ___ : ___ = ___ R ___
-    const rij3Y = rij2Y + 10;
+    const rij3Y = rij2Y + 12;
     let fx3 = lijnX1;
     lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
-    sym5(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym5(fx3, rij3Y, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth(':') + 1.5;
     lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
-    sym5(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym5(fx3, rij3Y, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth('=') + 1.5;
     lijnS5(fx3, rij3Y); fx3 += LS + 1.5;
-    sym5(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    sym5(fx3, rij3Y, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(14);
     fx3 += doc.getTextWidth('R') + 1;
     lijnS5(fx3, rij3Y);
 
@@ -2300,7 +2318,7 @@ lijnB(fx2, tweedeRijY);
 // Volledig ingevulde maalsom + lange lijn voor herhaalde optelling + korte lijn voor resultaat
 
 const formY = asY + 4;
-const BL = 6.5;
+const BL = 10;
 
 // lange lijn laten meegroeien:
 // tot 5 termen = basislengte
@@ -2323,7 +2341,7 @@ function lijnLang(fx, fy) {
 
 function sym(fx, fy, t) {
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
+  doc.setFontSize(14);
   doc.setTextColor(...TEKSTDONKER);
   doc.text(t, fx, fy + BL);
 }
@@ -2331,7 +2349,7 @@ function sym(fx, fy, t) {
 let fx = lijnX1;
 
 doc.setFont('helvetica', 'bold');
-doc.setFontSize(10);
+doc.setFontSize(14);
 doc.setTextColor(...TEKSTDONKER);
 
 // factoren volledig invullen
