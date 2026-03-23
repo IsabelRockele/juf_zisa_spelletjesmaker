@@ -142,8 +142,9 @@ button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   height: 30px;
 }
 .regen-text-btn:hover { background: #d0e8ff; border-color: var(--primary); }
-.remove-btn { background: var(--danger-soft); color: var(--danger); border: 1px solid #f2cac6; }
-.remove-btn:hover { background: #fce2df; }
+.bewerk-btn { background: #fff4e6; color: #e67e00; border: 1px solid #f5c97a; }
+.bewerk-btn:hover { background: #ffe8c2; border-color: #e67e00; }
+.bewerk-btn.active { background: #e67e00; color: #fff; border-color: #e67e00; }
 
 /* ─── SETTINGS PANEL ─────────────────────────────────────────────────────── */
 .settings-panel {
