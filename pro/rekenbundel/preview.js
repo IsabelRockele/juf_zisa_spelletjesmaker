@@ -157,7 +157,7 @@ const Preview = (() => {
           <div class="lamp-wrapper">
             <div class="lamp-kader">
               <img src="../afbeeldingen_hoofdrekenen/zisa_lamp.png" class="zisa-lamp" alt="Zisa"
-                   onerror="this.style.display='none'"/>
+                   crossOrigin="anonymous" onerror="this.style.display='none'"/>
             </div>
           </div>
           <span class="oef-tekst">${esc(oef.vraag)}</span>
@@ -1128,6 +1128,7 @@ const Preview = (() => {
 
   return `
     <div class="gl-oefening">
+      <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
       <div class="gl-svg-wrapper">
         <svg width="${totaalW}" height="${svgHAangepast}" viewBox="0 0 ${totaalW} ${svgHAangepast}">${svgInhoud}</svg>
       </div>
