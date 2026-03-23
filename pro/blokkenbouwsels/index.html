@@ -3,23 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juf Zisa - Blokkenbouwsels Maker</title>
+    <title>Juf Zisa - Blokkenbouwsels Maker PRO</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="style.css?v=1774251161">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* ── PRO BANNER ─────────────────────────────────────────────────────── */
+        .pro-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 20px;
+            background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+            color: #fff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            gap: 12px;
+        }
+        .pro-header span:first-child {
+            background: #f5c200;
+            color: #0b3060;
+            border-radius: 6px;
+            padding: 2px 9px;
+            font-size: 0.78rem;
+        }
+        .pro-header a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+        .pro-header a:hover { color: #fff; }
+
+        /* ── KEUZEMENU KNOP ─────────────────────────────────────────────────── */
+        .keuzemenu-btn-pro {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #0b3060;
+            color: #fff !important;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.17s ease;
+            box-shadow: 0 3px 10px rgba(10,40,90,0.22);
+            width: 100%;
+            justify-content: center;
+            box-sizing: border-box;
+        }
+        .keuzemenu-btn-pro:hover {
+            background: #082448;
+            box-shadow: 0 5px 16px rgba(10,40,90,0.30);
+            transform: translateY(-1px);
+        }
+
+        /* ── HELP KNOP (PRO STIJL) ───────────────────────────────────────────── */
+        .help-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background: #1a8a4a;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            font-weight: 700;
+            font-size: 0.92rem;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(20,120,60,0.25);
+            transition: all 0.17s ease;
+            box-sizing: border-box;
+            margin-top: 4px;
+        }
+        .help-btn:hover {
+            background: #147040;
+            transform: translateY(-1px);
+        }
+
+        /* Override: aside wordt pro-aside */
+        #dashboard {
+            background: #fff;
+            border-right: 1px solid #dde6ef;
+        }
+
+        .brand {
+            background: linear-gradient(to bottom, #f8fbfe, #f2f7fc);
+            border-bottom: 1px solid #dde6ef;
+            padding: 18px 18px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .brand-inner {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    </style>
 </head>
 <body>
+
+    <!-- PRO BANNER -->
+    <div class="pro-header no-print">
+        <span>⭐ PRO</span>
+        <span>Blokkenbouwsels Maker — Juf Zisa PRO</span>
+        <a href="../app.html">← Terug naar menu</a>
+    </div>
 
     <aside id="dashboard" class="no-print">
 
         <div class="brand">
-            <a href="../index.html" class="keuzemenu-btn">← Keuzemenu</a>
+            <a href="../app.html" class="keuzemenu-btn-pro">← Terug naar menu</a>
             <div class="brand-inner">
                 <div class="brand-icon">🧱</div>
                 <div class="brand-text">
                     <h1>Blokken Maker</h1>
-                    <p>Juf Zisa Edition</p>
+                    <p>Juf Zisa PRO Edition</p>
                 </div>
             </div>
             <button class="help-btn no-print" onclick="document.getElementById('help-modal').classList.remove('hidden')">
@@ -119,7 +227,7 @@
                         <div class="help-rij"><span class="help-nr">1</span><div><strong>Tellen</strong> — Een bouwsel wordt getoond. Leerlingen tellen het totaal aantal blokken en schrijven het antwoord in het invulhokje.</div></div>
                         <div class="help-rij"><span class="help-nr">2</span><div><strong>Grondplan invullen</strong> — Een bouwsel wordt getoond naast een leeg grondplan. Leerlingen schrijven in elk vakje hoeveel blokjes er op die plek op elkaar staan.</div></div>
                         <div class="help-rij"><span class="help-nr">3</span><div><strong>Grondplan koppelen</strong> — Een ingevuld grondplan wordt getoond. Leerlingen zoeken het bijhorende bouwsel uit 4 opties (A/B/C/D) en schrijven de letter op.</div></div>
-                        <div class="help-rij"><span class="help-nr">4</span><div><strong>Verbind bouwsel met grondplan</strong> — 3 bouwsels en 3 grondplannen worden door elkaar getoond. Leerlingen verbinden elk bouwsel met het bijhorende grondplan.</div></div>
+                        <div class="help-rij"><span class="help-nr">4</span><div><strong>Verbind bouwsel met grondplan</strong> — 3 bouwsels staan bovenaan, 3 bijhorende grondplannen staan door elkaar onderaan. Leerlingen trekken een lijn van elk bouwsel naar het juiste grondplan.</div></div>
                         <div class="help-rij"><span class="help-nr">5</span><div><strong>Aanzichten aanduiden</strong> — Een bouwsel wordt getoond met 3 aanzichten. De vraag vermeldt van welke kant (voor, links of rechts). Leerlingen kruisen het juiste aanzicht aan.</div></div>
                         <div class="help-rij"><span class="help-nr">6</span><div><strong>Pijlentekening</strong> — Een reeks pijlen met getallen wordt getoond. Leerlingen volgen de pijlenreeks stap voor stap op het ruitjespapier, te beginnen bij de stip.</div></div>
                     </div>
@@ -141,6 +249,7 @@
                         <li>Bij <strong>Grondplan koppelen</strong>: de correcte letter verschijnt in het antwoordhokje.</li>
                         <li>Bij <strong>Aanzichten</strong>: het juiste hokje krijgt een groen kruisje.</li>
                         <li>Bij <strong>Pijlentekening</strong>: de figuur wordt getekend op het ruitjespapier.</li>
+                        <li>Bij <strong>Verbinden</strong>: groene verbindingslijnen tonen welk bouwsel bij welk grondplan hoort.</li>
                         <li>Download met <strong>📄 PDF met oplossingen</strong> voor een apart antwoordblad.</li>
                     </ul>
                 </div>
@@ -155,7 +264,6 @@
                 <div class="header-box">Datum:</div>
             </div>
             <h1 contenteditable="true" class="werkblad-titel">BLOKKENBOUWSELS</h1>
-
             <div id="secties-container"></div>
         </div>
     </main>
@@ -173,5 +281,7 @@
     <script src="blokken.js?v=1774251161"></script>
     <script src="pdf-engine.js?v=1774251161"></script>
     <script src="script.js?v=1774251161"></script>
+    <script src="../device-id.js"></script>
+    <script src="../guard.js"></script>
 </body>
 </html>
