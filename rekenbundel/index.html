@@ -776,23 +776,23 @@
         <div class="kaart-titel"><div class="icon">✏️</div>Variant getallenlijn</div>
         <div class="form-rij">
           <div class="radio-groep" id="rg-gl-variant-inzicht">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerGlVariantInzicht('getekend',this)">
-              <input type="radio" name="gl-variant-inzicht" value="getekend" checked>✖️ Sprongen getekend
+            <label class="radio-chip geselecteerd" data-groep="verm" onclick="App.selecteerGlVariantInzicht('getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="getekend" checked>Sprongen getekend
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('zelf',this)">
-              <input type="radio" name="gl-variant-inzicht" value="zelf">✖️ Zelf tekenen
+            <label class="radio-chip" data-groep="verm" onclick="App.selecteerGlVariantInzicht('zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="zelf">Zelf tekenen
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-getekend',this)">
-              <input type="radio" name="gl-variant-inzicht" value="delen-getekend">➗ Sprongen getekend
+            <label class="radio-chip" data-groep="deel" style="display:none" onclick="App.selecteerGlVariantInzicht('delen-getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-getekend">Sprongen getekend
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-zelf',this)">
-              <input type="radio" name="gl-variant-inzicht" value="delen-zelf">➗ Zelf tekenen
+            <label class="radio-chip" data-groep="deel" style="display:none" onclick="App.selecteerGlVariantInzicht('delen-zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-zelf">Zelf tekenen
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-rest-getekend',this)">
-              <input type="radio" name="gl-variant-inzicht" value="delen-rest-getekend">➗R Sprongen getekend
+            <label class="radio-chip" data-groep="rest" style="display:none" onclick="App.selecteerGlVariantInzicht('delen-rest-getekend',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-rest-getekend">Sprongen getekend
             </label>
-            <label class="radio-chip" onclick="App.selecteerGlVariantInzicht('delen-rest-zelf',this)">
-              <input type="radio" name="gl-variant-inzicht" value="delen-rest-zelf">➗R Zelf tekenen
+            <label class="radio-chip" data-groep="rest" style="display:none" onclick="App.selecteerGlVariantInzicht('delen-rest-zelf',this)">
+              <input type="radio" name="gl-variant-inzicht" value="delen-rest-zelf">Zelf tekenen
             </label>
           </div>
         </div>
@@ -1476,11 +1476,10 @@
 <script src="preview.js?v=41"></script>
 <script src="pdf-engine.js?v=51"></script>
 <script src="vraagstukken.js?v=34"></script>
-<script src="app.js?v=20"></script>
+<script src="app.js?v=21"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
-  // Wacht even zodat Firebase Auth geladen is
   setTimeout(() => {
     if (window.VraagstukkenModule) {
       VraagstukkenModule.init();
