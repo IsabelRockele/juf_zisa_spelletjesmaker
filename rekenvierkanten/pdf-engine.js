@@ -1,183 +1,364 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   REKENVIERKANT  –  pdf-engine.js
-   Ondersteunt tot 8 roosters verdeeld over 2 pagina's (4 per pagina).
+   REKENVIERKANT GENERATOR  –  pdf-engine.js
+   Verantwoordelijk voor het aanmaken van PDF werkblad en PDF sleutel.
+   Gebruikt jsPDF (UMD, geladen via CDN in index.html).
+   Leest state.grids en state.roosters uit generator.js.
    ═══════════════════════════════════════════════════════════════════════════ */
 'use strict';
 
-/* ─── CANVAS VOOR ÉÉN PAGINA ─────────────────────────────────────────────── */
-function maakPdfCanvasPagina(oplossingModus, gridIndices) {
-  const cols = document.getElementById('formaat').value==='5x5' ? 5 : 7;
-  const rows = cols;
-  const modus = weergaveModus();
-  const metKader = modus === 'kader' && cols === 7 && !oplossingModus;
-  const n = gridIndices.length;
-  const {cw, ch, enkB, enkH, offsets} = berekenLayout(n, cols);
+/* ─── PDF CONSTANTEN ─────────────────────────────────────────────────────── */
+const PDF_W  = 210;   // A4 breedte mm
+const PDF_H  = 297;   // A4 hoogte mm
+const PDF_M  = 14;    // marge mm
 
-  const schaal = 2;
-  const extraCh = metKader ? Math.ceil(n/2) * 110 : 0;
-  const tmpC   = document.createElement('canvas');
-  tmpC.width   = cw * schaal;
-  tmpC.height  = (ch + extraCh) * schaal;
-  const tCtx   = tmpC.getContext('2d');
-  tCtx.scale(schaal, schaal);
-  tCtx.fillStyle = '#ffffff';
-  tCtx.fillRect(0, 0, cw, ch + extraCh);
+/* ─── KLEURENSET (RGB) ───────────────────────────────────────────────────── */
+const C = {
+  zwart:       [42,  42,  42],
+  rooster_bg:  [246, 250, 253],
+  lijn:        [188, 207, 223],
+  rand:        [122, 174, 224],
+  opvul_eq:    [232, 240, 248],
+  opvul_op:    [238, 244, 248],
+  tekst_sym:   [74,  111, 165],
+  tekst_getal: [26,  45,  64],
+  leeg_bg:     [255, 255, 255],
+  ant_bg:      [212, 237, 218],   // groen voor oplossing
+  ant_tekst:   [23,  122, 78],
+  kader_bg:    [234, 243, 255],
+  kader_rand:  [160, 192, 224],
+  header_lijn: [11,  79,  153],
+  // bewerkModus: handmatig verwijderd = zelfde als normaal leeg
+};
 
-  const rijOffset = {};
-  gridIndices.forEach((gi, idx) => {
-    const g = state.grids[gi]; if (!g) return;
-    const data = oplossingModus ? g.full : g.display;
-    const kolIdx = idx % 2;
-    const rijIdx = Math.floor(idx / 2);
+/* ─── HELPER ─────────────────────────────────────────────────────────────── */
+function huidigeDatum() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
 
-    let extraY = 0;
-    if (metKader) {
-      for (let r=0; r<rijIdx; r++) extraY += (rijOffset[r] || 110);
-    }
+function setFill(doc, rgb) { doc.setFillColor(rgb[0], rgb[1], rgb[2]); }
+function setDraw(doc, rgb) { doc.setDrawColor(rgb[0], rgb[1], rgb[2]); }
+function setTekst(doc, rgb) { doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
 
-    const baseX = offsets[idx].x;
-    const baseY = offsets[idx].y + extraY;
+/* ─── TEKEN ÉÉN ROOSTER IN PDF ───────────────────────────────────────────── */
+/**
+ * @param {jsPDF} doc
+ * @param {Array} gridData   - wat te tonen (display of full)
+ * @param {Array} displayData - altijd g.display (voor lege-hokjes detectie)
+ * @param {number} xOff      - x startpositie mm
+ * @param {number} yOff      - y startpositie mm
+ * @param {number} breedte   - totale breedte van het rooster mm
+ * @param {number} cols      - 5 of 7
+ * @param {boolean} oplossingModus
+ */
+function pdfTekenRooster(doc, gridData, displayData, xOff, yOff, breedte, cols, oplossingModus) {
+  const rows  = cols;
+  const vakB  = breedte / cols;
+  const vakH  = vakB;           // vierkante vakjes
 
-    if (metKader) {
-      const ontbrekend = [];
-      for (let r=0; r<rows; r+=2) for (let c=0; c<cols; c+=2) {
-        if (g.display[r][c] === '___') ontbrekend.push(g.full[r][c]);
-      }
-      if (ontbrekend.length > 0) {
-        const kH = tekenAntwoordKader(tCtx, ontbrekend, baseX, baseY, enkB);
-        if (kolIdx === 0) rijOffset[rijIdx] = kH;
-        tekenGrid(tCtx, data, g.display, baseX, baseY + kH, enkB/cols, enkH/rows, cols, rows, false);
+  // ── Achtergronden ──────────────────────────────────────────────────────
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const x   = xOff + c * vakB;
+      const y   = yOff + r * vakH;
+      const val = gridData[r][c];
+      const wasLeeg = displayData && displayData[r][c] === '___';
+
+      if (val === '') {
+        setFill(doc, C.zwart);
+      } else if (val === '=') {
+        setFill(doc, C.opvul_eq);
+      } else if (['+','-','x',':'].includes(val)) {
+        setFill(doc, C.opvul_op);
+      } else if (wasLeeg && oplossingModus) {
+        setFill(doc, C.ant_bg);
       } else {
-        tekenGrid(tCtx, data, g.display, baseX, baseY, enkB/cols, enkH/rows, cols, rows, false);
+        setFill(doc, C.leeg_bg);
       }
-    } else {
-      tekenGrid(tCtx, data, g.display, baseX, baseY, enkB/cols, enkH/rows, cols, rows, oplossingModus);
+      doc.rect(x, y, vakB, vakH, 'F');
     }
-  });
-  return tmpC;
-}
-
-/* ─── HEADER TEKENEN (naam/datum/titel/opdracht) ─────────────────────────── */
-function tekenPdfHeader(doc, oplossingModus, pgW, pgH, MARGE_L, MARGE_R) {
-  let curY = 14;
-
-  // Naam & datum
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(11);
-  doc.setTextColor(60, 60, 60);
-  doc.text('Naam:', MARGE_L, curY);
-  doc.line(MARGE_L + 14, curY + 0.5, MARGE_L + 80, curY + 0.5);
-  doc.text('Datum:', MARGE_L + 88, curY);
-  doc.line(MARGE_L + 104, curY + 0.5, pgW - MARGE_R, curY + 0.5);
-  curY += 12;
-
-  // Titel
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(11, 79, 153);
-  doc.text('Rekenvierkant', pgW / 2, curY, {align: 'center'});
-  curY += 5;
-  doc.setDrawColor(11, 79, 153);
-  doc.setLineWidth(0.6);
-  doc.line(MARGE_L, curY, pgW - MARGE_R, curY);
-  curY += 7;
-
-  // Opdrachtzin / sleutel-label
-  const kadW = pgW - MARGE_L - MARGE_R;
-  const kadH = 9;
-  if (!oplossingModus) {
-    doc.setFillColor(234, 243, 255);
-    doc.setDrawColor(180, 210, 240);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(MARGE_L, curY, kadW, kadH, 2, 2, 'FD');
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(14);
-    doc.setTextColor(30, 60, 110);
-    doc.text('Vul het rekenvierkant aan.', MARGE_L + 4, curY + 6);
-  } else {
-    doc.setFillColor(255, 249, 235);
-    doc.setDrawColor(220, 170, 60);
-    doc.setLineWidth(0.4);
-    doc.roundedRect(MARGE_L, curY, kadW, kadH, 2, 2, 'FD');
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(10);
-    doc.setTextColor(130, 80, 0);
-    doc.text('✓  Correctiesleutel – niet voor leerlingen', MARGE_L + 4, curY + 6);
   }
-  curY += kadH + 6;
-  return curY;
+
+  // ── Rasterlijnen ───────────────────────────────────────────────────────
+  setDraw(doc, C.lijn);
+  doc.setLineWidth(0.3);
+  for (let i = 0; i <= cols; i++) {
+    const x = xOff + i * vakB;
+    doc.line(x, yOff, x, yOff + rows * vakH);
+  }
+  for (let j = 0; j <= rows; j++) {
+    const y = yOff + j * vakH;
+    doc.line(xOff, y, xOff + cols * vakB, y);
+  }
+
+  // ── Buitenrand ─────────────────────────────────────────────────────────
+  setDraw(doc, C.rand);
+  doc.setLineWidth(0.6);
+  doc.rect(xOff, yOff, cols * vakB, rows * vakH, 'S');
+
+  // ── Tekst ──────────────────────────────────────────────────────────────
+  const fs = Math.min(vakH * 0.45, 7);   // fontgrootte in mm → punten via jsPDF schaal
+  const fsPt = fs * 2.835;               // 1 mm ≈ 2.835 pt
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const cx  = xOff + c * vakB + vakB / 2;
+      const cy  = yOff + r * vakH + vakH / 2;
+      const val = gridData[r][c];
+      const wasLeeg = displayData && displayData[r][c] === '___';
+
+      if (val === '') continue;
+      if (!oplossingModus && wasLeeg) continue;
+
+      doc.setFontSize(fsPt);
+
+      if (val === '=' || ['+','-','x',':'].includes(val)) {
+        setTekst(doc, C.tekst_sym);
+        doc.setFont('helvetica', 'bold');
+        const sym = val === 'x' ? '×' : val === ':' ? '÷' : val;
+        doc.text(sym, cx, cy, { align: 'center', baseline: 'middle' });
+      } else {
+        // Getal
+        if (oplossingModus && wasLeeg) {
+          setTekst(doc, C.ant_tekst);
+          doc.setFont('helvetica', 'bold');
+        } else {
+          setTekst(doc, C.tekst_getal);
+          doc.setFont('helvetica', 'normal');
+        }
+        doc.text(String(val), cx, cy, { align: 'center', baseline: 'middle' });
+      }
+    }
+  }
 }
 
-/* ─── PDF GENEREREN ──────────────────────────────────────────────────────── */
-function maakPdf(oplossingModus, bestandsnaam) {
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert('jsPDF is niet geladen. Controleer je internetverbinding en herlaad de pagina.');
+/* ─── ANTWOORDKADER (7×7 kader-modus) ───────────────────────────────────── */
+function pdfTekenAntwoordKader(doc, ontbrekend, xOff, yOff, breedte) {
+  const getallen     = [...ontbrekend].sort((a, b) => a - b);
+  const aantalPerRij = Math.ceil(getallen.length / 2);
+  const vakB         = (breedte - 6) / aantalPerRij;
+  const vakH         = 7;
+  const kadH         = vakH * 2 + 14;
+
+  // Kader achtergrond
+  setFill(doc, C.kader_bg);
+  setDraw(doc, C.kader_rand);
+  doc.setLineWidth(0.4);
+  doc.roundedRect(xOff, yOff, breedte, kadH, 2, 2, 'FD');
+
+  // Label
+  setTekst(doc, [26, 51, 82]);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(7);
+  doc.text('Getallen om in te vullen:', xOff + 3, yOff + 4.5);
+
+  // Getallen in vakjes
+  getallen.forEach((v, idx) => {
+    const kolIdx = idx % aantalPerRij;
+    const rijIdx = Math.floor(idx / aantalPerRij);
+    const x = xOff + 3 + kolIdx * vakB;
+    const y = yOff + 7 + rijIdx * (vakH + 1);
+
+    setFill(doc, [255, 255, 255]);
+    setDraw(doc, C.kader_rand);
+    doc.setLineWidth(0.25);
+    doc.roundedRect(x, y, vakB - 1, vakH, 1, 1, 'FD');
+
+    setTekst(doc, C.tekst_getal);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text(String(v), x + (vakB - 1) / 2, y + vakH / 2, { align: 'center', baseline: 'middle' });
+  });
+
+  return kadH + 3; // hoogte inclusief marge
+}
+
+/* ─── PAGINAKOP ──────────────────────────────────────────────────────────── */
+function pdfTekenKop(doc, isOplossing, paginaNr, aantalPaginas) {
+  let y = PDF_M;
+
+  // ── Rij 1: Naam en Datum invullijnen ────────────────────────────────────
+  setTekst(doc, [26, 45, 64]);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(14);
+
+  // "Naam:" label + invullijn
+  doc.text('Naam:', PDF_M, y + 5);
+  const naamLabelB = doc.getTextWidth('Naam:') + 2;
+  setDraw(doc, [26, 45, 64]);
+  doc.setLineWidth(0.5);
+  doc.line(PDF_M + naamLabelB, y + 5.5, PDF_M + 80, y + 5.5);
+
+  // "Datum:" label + invullijn (meer naar rechts)
+  const datumX = PDF_M + 90;
+  doc.text('Datum:', datumX, y + 5);
+  const datumLabelB = doc.getTextWidth('Datum:') + 2;
+  doc.line(datumX + datumLabelB, y + 5.5, PDF_W - PDF_M, y + 5.5);
+
+  y += 12; // witmarge
+
+  // ── Rij 2: Titel gecentreerd ─────────────────────────────────────────────
+  setTekst(doc, C.header_lijn);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(20);
+  const titel = isOplossing ? 'Rekenvierkant — Antwoordsleutel' : 'Rekenvierkant';
+  doc.text(titel, PDF_W / 2, y + 6, { align: 'center' });
+
+  // Paginanummer klein rechts naast titel als meerdere pagina's
+  if (aantalPaginas > 1) {
+    setTekst(doc, [95, 122, 143]);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(`p. ${paginaNr} / ${aantalPaginas}`, PDF_W - PDF_M, y + 6, { align: 'right' });
+  }
+
+  y += 10;
+
+  // ── Blauwe lijn onder titel ──────────────────────────────────────────────
+  setDraw(doc, C.header_lijn);
+  doc.setLineWidth(0.8);
+  doc.line(PDF_M, y, PDF_W - PDF_M, y);
+
+  y += 5; // witmarge na lijn
+
+  // ── Opdrachtzin in kader ────────────────────────────────────────────────
+  const zin = isOplossing
+    ? 'Hieronder vind je alle ingevulde antwoorden.'
+    : 'Vul de ontbrekende getallen in. Elke rij en elke kolom moet kloppen.';
+
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'normal');
+  const zinB  = PDF_W - 2 * PDF_M;
+  const kadH  = 10;
+  const kadY  = y;
+
+  // Kader achtergrond + rand
+  setFill(doc, [234, 243, 255]);
+  setDraw(doc, C.header_lijn);
+  doc.setLineWidth(0.5);
+  doc.roundedRect(PDF_M, kadY, zinB, kadH, 2, 2, 'FD');
+
+  // Tekst verticaal gecentreerd in kader
+  setTekst(doc, [26, 45, 64]);
+  doc.text(zin, PDF_W / 2, kadY + kadH / 2, { align: 'center', baseline: 'middle' });
+
+  y += kadH + 6; // witmarge na kader
+
+  return y; // yStart voor roosters
+}
+
+/* ─── LAYOUT BEREKENEN ───────────────────────────────────────────────────── */
+function pdfBerekenLayout(numGrids, cols, metKader) {
+  const beschikbaarB = PDF_W - 2 * PDF_M;
+  const numKols      = Math.min(numGrids, 2);
+  const gap          = 8;  // mm tussen roosters horizontaal
+  // Roosters iets kleiner: max 80mm breed bij 2 kolommen, 90mm bij 1 kolom
+  const maxRoosterB  = numKols === 1 ? 90 : 80;
+  const berekendB    = (beschikbaarB - (numKols - 1) * gap) / numKols;
+  const roosterB     = Math.min(berekendB, maxRoosterB);
+  const roosterH     = roosterB;
+  const kaderH       = metKader ? 22 : 0;
+  const rijH         = roosterH + (metKader ? kaderH : 0) + gap;
+
+  // Horizontaal centreren als roosters kleiner zijn dan beschikbaar
+  const totaalB  = numKols * roosterB + (numKols - 1) * gap;
+  const xStart   = PDF_M + (beschikbaarB - totaalB) / 2;
+
+  const offsets = [];
+  for (let i = 0; i < numGrids; i++) {
+    const kolIdx = i % 2;
+    const rijIdx = Math.floor(i / 2);
+    offsets.push({
+      x: xStart + kolIdx * (roosterB + gap),
+      rijIdx,
+    });
+  }
+  return { roosterB, roosterH, rijH, offsets, kaderH, xStart };
+}
+
+/* ─── GENEREER PDF ───────────────────────────────────────────────────────── */
+function genereerPDF(oplossingModus) {
+  const grids = state.grids.filter(Boolean);
+  if (grids.length === 0) {
+    alert('Er zijn nog geen roosters gegenereerd.');
     return;
   }
 
   const { jsPDF } = window.jspdf;
-  const doc      = new jsPDF('p', 'mm', 'a4');
-  const pgW      = doc.internal.pageSize.getWidth();
-  const pgH      = doc.internal.pageSize.getHeight();
-  const MARGE_L  = 15;
-  const MARGE_R  = 15;
+  const cols     = document.getElementById('formaat').value === '5x5' ? 5 : 7;
+  const modus    = weergaveModus();
+  const metKader = modus === 'kader' && cols === 7 && !oplossingModus;
 
-  // Splits roosters in groepen van max 4 per pagina
-  const geldigeIndices = state.grids.map((g,i) => g ? i : null).filter(i => i !== null);
-  const paginaGroepen  = [];
-  for (let i = 0; i < geldigeIndices.length; i += 4) {
-    paginaGroepen.push(geldigeIndices.slice(i, i + 4));
+  // Bepaal aantal pagina's (max 4 roosters per pagina)
+  const perPagina   = 4;
+  const aantalPages = Math.ceil(grids.length / perPagina);
+
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  const { roosterB, roosterH, rijH, offsets, kaderH } = pdfBerekenLayout(
+    Math.min(grids.length, perPagina), cols, metKader
+  );
+
+  for (let pagina = 0; pagina < aantalPages; pagina++) {
+    if (pagina > 0) doc.addPage();
+
+    const yStart   = pdfTekenKop(doc, oplossingModus, pagina + 1, aantalPages);
+    const startIdx = pagina * perPagina;
+    const eindIdx  = Math.min(startIdx + perPagina, grids.length);
+    const gridsOpPagina = grids.slice(startIdx, eindIdx);
+
+    // Bereken per rij de extra y door antwoordkaders van vorige rijen
+    const rijExtraY = {};
+    let extraYTotaal = 0;
+
+    for (let i = 0; i < gridsOpPagina.length; i++) {
+      const g        = gridsOpPagina[i];
+      const kolIdx   = i % 2;
+      const rijIdx   = Math.floor(i / 2);
+      const xOff     = offsets[i].x;
+
+      // Extra Y door vorige rijen met kader
+      if (!(rijIdx in rijExtraY)) {
+        rijExtraY[rijIdx] = extraYTotaal;
+      }
+      const yOff = yStart + rijIdx * rijH + rijExtraY[rijIdx];
+
+      if (metKader) {
+        const ontbrekend = [];
+        for (let r = 0; r < cols; r += 2) {
+          for (let c = 0; c < cols; c += 2) {
+            if (g.display[r][c] === '___') ontbrekend.push(g.full[r][c]);
+          }
+        }
+        if (ontbrekend.length > 0) {
+          const kadH = pdfTekenAntwoordKader(doc, ontbrekend, xOff, yOff, roosterB);
+          if (kolIdx === 0) {
+            // Update extra hoogte voor volgende rij
+            const nieuweExtraY = yOff + kadH + roosterH + 6 - (yStart + (rijIdx + 1) * rijH);
+            extraYTotaal += Math.max(0, nieuweExtraY);
+          }
+          pdfTekenRooster(doc, oplossingModus ? g.full : g.display, g.display,
+            xOff, yOff + kadH, roosterB, cols, oplossingModus);
+        } else {
+          pdfTekenRooster(doc, oplossingModus ? g.full : g.display, g.display,
+            xOff, yOff, roosterB, cols, oplossingModus);
+        }
+      } else {
+        pdfTekenRooster(doc, oplossingModus ? g.full : g.display, g.display,
+          xOff, yOff, roosterB, cols, oplossingModus);
+      }
+    }
   }
-  if (paginaGroepen.length === 0) paginaGroepen.push([]);
 
-  paginaGroepen.forEach((groep, pIdx) => {
-    if (pIdx > 0) doc.addPage();
-
-    // Header op elke pagina
-    const curY = tekenPdfHeader(doc, oplossingModus, pgW, pgH, MARGE_L, MARGE_R);
-
-    if (groep.length === 0) return;
-
-    // Canvas voor deze pagina
-    const tmpC   = maakPdfCanvasPagina(oplossingModus, groep);
-    const dataUrl = tmpC.toDataURL('image/png');
-
-    const beschikW = pgW - MARGE_L - MARGE_R;
-    const beschikH = pgH - curY - 12;
-    const ratio    = tmpC.width / tmpC.height;
-
-    let imgW = beschikW;
-    let imgH = imgW / ratio;
-
-    // Bij 1 rooster: beperk de breedte
-    if (groep.length === 1) {
-      const maxW = beschikW * 0.55;
-      if (imgW > maxW) { imgW = maxW; imgH = imgW / ratio; }
-    }
-
-    if (imgH > beschikH) { imgH = beschikH; imgW = imgH * ratio; }
-
-    const imgX = (pgW - imgW) / 2;
-    doc.addImage(dataUrl, 'PNG', imgX, curY, imgW, imgH);
-
-    // Paginanummer bij meerdere pagina's
-    if (paginaGroepen.length > 1) {
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(150, 150, 150);
-      doc.text(`${pIdx + 1} / ${paginaGroepen.length}`, pgW / 2, pgH - 8, {align: 'center'});
-    }
-  });
-
+  const bestandsnaam = oplossingModus ? 'rekenvierkant-sleutel.pdf' : 'rekenvierkant-werkblad.pdf';
   doc.save(bestandsnaam);
 }
 
 /* ─── EVENT LISTENERS ────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('downloadPdfBtn').addEventListener('click', () => {
-    maakPdf(false, 'rekenvierkant-werkblad.pdf');
+    genereerPDF(false);
   });
   document.getElementById('downloadPdfOplBtn').addEventListener('click', () => {
-    maakPdf(true, 'rekenvierkant-sleutel.pdf');
+    genereerPDF(true);
   });
 });
