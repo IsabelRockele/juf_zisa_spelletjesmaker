@@ -21,7 +21,7 @@
     <div class="app-header-right">
       <button id="infoBtn" type="button" class="info-btn">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        Info
+        Hoe werkt dit?
       </button>
       <button id="genereerAllesBtn" type="button" class="primary-btn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
@@ -73,6 +73,11 @@
 
       <button id="voegRoosterToe" type="button" class="add-btn">+ Rekenvierkant toevoegen</button>
 
+      <!-- Tip: bewerkingsmodus -->
+      <div style="padding:10px 14px; background:#fff4e6; border:1.5px solid #f5c97a; border-radius:10px; font-size:0.82rem; color:#7a4500; line-height:1.6;">
+        <strong>✏️ Te makkelijk?</strong> Klik op de <strong>✏️ knop</strong> bij een rekenvierkant om extra hokjes zelf leeg te maken. Klik op een getal in het rooster om het te verwijderen (of te herstellen).
+      </div>
+
       <div id="meldingContainer" class="message-box"></div>
 
     </aside>
@@ -92,12 +97,16 @@
           </div>
         </div>
         <div class="preview-card-body">
+          <!-- Bewerkingsbalk — alleen zichtbaar in bewerkingsmodus -->
+          <div id="bewerkBalk" style="display:none; align-items:center; gap:10px; margin-bottom:12px; padding:10px 16px; background:#fff4e6; border:1.5px solid #f5c97a; border-radius:12px; font-size:0.88rem; color:#7a4500; font-weight:600;">
+            <span style="font-size:1.1rem;">✏️</span>
+            <span>Bewerkingsmodus actief — klik op een getal in het rooster om het te verwijderen of te herstellen.</span>
+            <button id="stopBewerkBtn" type="button" style="margin-left:auto; background:#e67e00; color:#fff; border:none; border-radius:8px; padding:6px 14px; font-weight:700; font-size:0.84rem; cursor:pointer;">✓ Klaar</button>
+          </div>
           <div class="canvas-frame">
             <canvas id="mainCanvas"></canvas>
           </div>
         </div>
-      </div>
-    </section>
 
   </main>
 </div>
@@ -140,12 +149,23 @@
       <div class="info-section">
         <h3>✖️ Vermenigvuldigen (alleen 5×5)</h3>
         <ul>
-          <li><strong>Tafels ×1–10:</strong> kies welke tafels. Selecteer minstens 2 tafels. Uitkomst max 100.</li>
+          <li><strong>Tafels ×1–10:</strong> kies welke tafels. Selecteer minstens 2 tafels. Elke som gebruikt één van de gekozen tafels als factor, met een vermenigvuldiger van 1 t.e.m. 10.</li>
           <li><strong>Grote getallen:</strong> sommen als 15×2, 25×4, 30×3 — voor 4de leerjaar en hoger.</li>
           <li><strong>Tafelgetal links of rechts:</strong> bv. 5×3 of 3×5.</li>
           <li><strong>× en ÷ gemengd:</strong> combineert vermenigvuldigen en delen in één rooster.</li>
         </ul>
-        <p style="margin-top:6px; font-size:0.82rem; color:#5f7a8f;">De uitkomsten van alle sommen (ook hoekgetallen) zijn altijd deelbaar door een gekozen tafel — zo kan de leerling alles oplossen met de gekende tafels.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>✏️ Zelf extra hokjes leegmaken</h3>
+        <p>Soms zijn er na het genereren nog getallen zichtbaar die een kind zelf kan invullen. Met de <strong>✏️ knop</strong> naast elk rekenvierkant activeer je de bewerkingsmodus:</p>
+        <ul>
+          <li>Klik op een <strong>zichtbaar getal</strong> in het rooster om het leeg te maken.</li>
+          <li>Klik nogmaals op hetzelfde hokje om het getal te <strong>herstellen</strong>.</li>
+          <li>De oplossing (PDF sleutel) blijft altijd correct — de aanpassing wordt meegenomen.</li>
+          <li>Klik op <strong>✓ Klaar</strong> of opnieuw op ✏️ om de bewerkingsmodus te verlaten.</li>
+        </ul>
+        <p style="margin-top:6px; padding:7px 10px; background:#fff4e6; border-radius:8px; font-size:0.85rem;">⚠️ Bij <strong>Nieuw</strong> of <strong>Alles hergeneren</strong> gaan handmatige aanpassingen verloren.</p>
       </div>
 
       <div class="info-section">
@@ -163,17 +183,12 @@
         <ul>
           <li><strong>Toon oplossing:</strong> vult alle lege hokjes in (groen). Klik opnieuw om te verbergen.</li>
           <li><strong>Antwoordkader (7×7):</strong> alle ontbrekende getallen staan gesorteerd boven het rooster — de leerling schrijft ze op de juiste plek.</li>
-          <li><strong>PDF werkblad:</strong> met naam, datum, titel en opdrachtzin bovenaan — voor de leerlingen.</li>
-          <li><strong>PDF sleutel:</strong> alle antwoorden ingevuld — voor de leerkracht.</li>
+          <li><strong>PDF werkblad:</strong> bovenaan staan invullijnen voor naam en datum, de titel gecentreerd, en de opdrachtzin in een kader. Handmatig verwijderde hokjes worden meegenomen.</li>
+          <li><strong>PDF sleutel:</strong> zelfde opmaak, alle antwoorden ingevuld in groen — voor de leerkracht.</li>
         </ul>
       </div>
 
     </div>
-    <div class="modal-footer">
-      <button id="infoModalClose2" class="primary-btn">Sluiten</button>
-    </div>
-  </div>
-</div>
     <div class="modal-footer">
       <button id="infoModalClose2" class="primary-btn">Sluiten</button>
     </div>
