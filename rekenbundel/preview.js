@@ -1128,6 +1128,7 @@ const Preview = (() => {
 
   return `
     <div class="gl-oefening">
+      <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
       <div class="gl-svg-wrapper">
         <svg width="${totaalW}" height="${svgHAangepast}" viewBox="0 0 ${totaalW} ${svgHAangepast}">${svgInhoud}</svg>
       </div>
