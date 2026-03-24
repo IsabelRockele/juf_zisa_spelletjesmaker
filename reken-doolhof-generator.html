@@ -1377,7 +1377,7 @@ function rpGenOp(opKey, range) {
     const tafels = getRPTafels();
     operand = tafels[rnd(0, tafels.length - 1)];
   } else {
-    operand = rnd(1, Math.min(range, 20));
+    operand = rnd(1, Math.max(9, Math.floor(range / 4)));
   }
   return { op, operand };
 }
@@ -1457,7 +1457,7 @@ function buildRekenpad(steps, opKey, range, mode) {
 
     } else {
       // ── OPTELLEN / AFTREKKEN / GEMENGD ──────────────────────
-      const startMax = Math.min(range, 20);
+      const startMax = Math.max(1, Math.floor(range / 2));
       values.push(rnd(1, startMax));
 
       for (let i = 0; i < steps; i++) {
