@@ -73,10 +73,12 @@ const Generator = (() => {
     const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
     if (oefeningen.length < 2 && !wilGroot) return null;
 
+    const isMaakEerst10 = oefeningstypes?.includes('Maak eerst 10') && oefeningstypes.length === 1;
     const defaultZin = isCompenseren ? 'Compenseer.' :
                        isSplitsingen ? 'Splits het getal.' :
                        isTafels      ? 'Reken de tafels.' :
                        isHerken      ? 'Kleur Zisa groen bij elke brugoefening.' :
+                       isMaakEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
                        bewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.';
 
     _teller++;
