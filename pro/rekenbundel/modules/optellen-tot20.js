@@ -16,7 +16,7 @@ const OptellenTot20 = (() => {
   const TYPES_PER_NIVEAU_BRUG = {
     5:  { zonder: ['E+E'],                     met: [],              gemengd: ['E+E'] },
     10: { zonder: ['E+E'],                     met: [],              gemengd: ['E+E'] },
-    20: { zonder: ['E+E', 'T+E', 'TE+E', 'Gemengd'], met: ['E+E'], gemengd: ['E+E', 'T+E', 'TE+E', 'Gemengd'] },
+    20: { zonder: ['E+E', 'T+E', 'TE+E', 'Maak eerst 10', 'Gemengd'], met: ['E+E'], gemengd: ['E+E', 'T+E', 'TE+E', 'Gemengd'] },
   };
 
   // Wat "Gemengd" echt inhoudt per niveau
@@ -72,6 +72,35 @@ const OptellenTot20 = (() => {
           break;
         }
 
+        case 'Maak eerst 10': {
+          // Drie termen: a + b + c waarbij twee van de drie samen exact 10 vormen
+          // e1 ≠ e2: geen 5+5, 1+9 mag maar 5+5 niet — leerling moet echt nadenken
+          const e1 = rand(1, 8);         // 1–8 zodat e2 = 10-e1 altijd ≠ e1
+          const e2 = 10 - e1;
+          if (e1 === e2) continue;       // vangnet voor e1=5
+          const extra = rand(1, 9);   // geen 10: er mag geen 10 in de som staan
+          if (e1 === 10 || e2 === 10) continue;  // vangnet
+          if (extra === e1 || extra === e2) continue;  // geen 7+3+3 of 6+4+4
+          if (e1 + e2 + extra > 20) continue;
+          // Bepaal volgorde: 50% naast elkaar, 50% niet (extra in het midden)
+          const positie = Math.random();
+          let t1, t2, t3;
+          if (positie < 0.5) {
+            // vrienden naast elkaar: e1 + e2 + extra  óf  extra + e1 + e2
+            if (Math.random() < 0.5) { t1 = e1; t2 = e2; t3 = extra; }
+            else                      { t1 = extra; t2 = e1; t3 = e2; }
+          } else {
+            // extra in het midden: e1 + extra + e2
+            t1 = e1; t2 = extra; t3 = e2;
+          }
+          return {
+            a: t1, b: t2, c: t3,
+            som: t1 + t2 + t3,
+            type: 'Maak eerst 10',
+            vriend1: e1, vriend2: e2,
+          };
+        }
+
         default:
           return null;
       }
@@ -117,15 +146,21 @@ const OptellenTot20 = (() => {
       const paar = maakPaar(type, niv, brug);
       if (!paar) continue;
 
-      const sleutel = `${paar.a}+${paar.b}`;
+      const sleutel = paar.type === 'Maak eerst 10'
+        ? `${paar.a}+${paar.b}+${paar.c}`
+        : `${paar.a}+${paar.b}`;
       if (gebruikteSleutels.has(sleutel)) continue;
       gebruikteSleutels.add(sleutel);
 
       oefeningen.push({
         sleutel,
         type: paar.type,
-        vraag: `${paar.a} + ${paar.b} =`,
-        antwoord: paar.som,
+        vraag: paar.type === 'Maak eerst 10'
+          ? `${paar.a} + ${paar.b} + ${paar.c} =`
+          : `${paar.a} + ${paar.b} =`,
+        antwoord: paar.type === 'Maak eerst 10' ? paar.som : paar.som,
+        // Extra info voor Maak eerst 10
+        ...(paar.type === 'Maak eerst 10' ? { vriend1: paar.vriend1, vriend2: paar.vriend2, drieTermen: true } : {}),
       });
     }
     return oefeningen;
