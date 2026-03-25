@@ -120,8 +120,7 @@ const revealIdx = new Set(allIdx.slice(0, reveal));
 
 // DOM
 const card = document.createElement('div');
-card.className = 'hvp-card row-delete-wrap';
-card.appendChild(createRowDeleteButton(card));
+card.className = 'hvp-card';
 card.dataset.reveal = String(reveal);
 card.dataset.total  = String(total);
 
@@ -183,7 +182,7 @@ if (field) {
 
   const key = 'hvpuzzle';
   ensureTitleOnce(sheet, key, 'Vul de ontbrekende getallen in.');
-  _registerAddFn(key, addHvPuzzleExercises);
+  _registerAddFn(key, () => _eenToevoegen(addHvPuzzleExercises, '#hvpCount'));
 
   const block = document.createElement('div');
   block.className = 'hvp-block';
@@ -313,7 +312,7 @@ function addHvIconsExercises(){
 
   const key = 'hvicons';
   ensureTitleOnce(sheet, key, 'Schrijf de getallen op bij elk pictogram.');
-  _registerAddFn(key, addHvIconsExercises);
+  _registerAddFn(key, () => _eenToevoegen(addHvIconsExercises, '#hvIconsCount'));
 
  const block = document.createElement('div');
 block.className = 'hvicons-block';                 // niet alles samen vastzetten
@@ -326,8 +325,7 @@ block.appendChild(createDeleteButton(block));
 
   for (let i = 0; i < nCards; i++){
     const card = document.createElement('div');
-    card.className = 'hvicons-card row-delete-wrap';
-    card.appendChild(createRowDeleteButton(card));
+    card.className = 'hvicons-card';
 
     // 100-veld
     const { wrap } = buildHundredGrid();
@@ -406,7 +404,7 @@ function addGetalbeelden1000(){
   const maxVal = parseInt((document.getElementById('gb1000Max') || {value:'999'}).value, 10) || 999;
   const key   = 'gb1000';
   ensureTitleOnce(sheet, key, 'Hoeveel tel je? Vul in.');
-  _registerAddFn(key, addGetalbeelden1000);
+  _registerAddFn(key, () => _eenToevoegen(addGetalbeelden1000, '#gb1000Count'));
 
   const block = document.createElement('div');
   block.className = 'gb1000-exercise-block';
@@ -419,8 +417,7 @@ function addGetalbeelden1000(){
   for(let i=0;i<count;i++){
     const num  = Math.floor(Math.random() * Math.min(maxVal, 999)) + 1;
     const card = document.createElement('div');
-    card.className = 'gb1000-card row-delete-wrap';
-    card.appendChild(createRowDeleteButton(card));
+    card.className = 'gb1000-card';
 
     const visual = createGetalbeeld1000Visual(num);
     // Bij tot 100: grote hvwrap + enkelvoudige visual (geen grid van 100px)
@@ -529,6 +526,16 @@ function addGetalbeelden1000(){
   const _addFnForKey = {};
   function _registerAddFn(key, fn) { _addFnForKey[key] = fn; }
   window._registerAddFn = _registerAddFn;
+
+  // Hulp: roep een addFn aan maar forceer count=1 via de count-input
+  function _eenToevoegen(fn, countSelector) {
+    if (!countSelector) { fn(); return; }
+    const el = typeof countSelector === 'string' ? $(countSelector) : countSelector;
+    if (!el) { fn(); return; }
+    const orig = el.value;
+    el.value = '1';
+    try { fn(); } finally { el.value = orig; }
+  }
 
   function ensureTitleOnce(container, key, text){
     if (!addedTitles.has(key)) {
@@ -639,10 +646,24 @@ function createRowDeleteButton(target){
 
     target.remove();
 
-    // Als de container leeg is, ruim ze op (werkt voor zowel head als grid)
-    const p = parentBefore;
-    if (p && p.children && p.children.length === 0) {
-      p.remove();
+    // Als de directe container leeg is, verwijder die ook
+    // En als diens parent dan ook leeg is, verwijder die ook (bv. lege blok-wrapper)
+    let p = parentBefore;
+    while (p && !p.id && p !== document.body) {
+      // Controleer of er echte inhoud over is (niet enkel delete-knoppen)
+      const echteKinderen = Array.from(p.children || []).filter(el =>
+        !el.classList.contains('delete-btn') &&
+        !el.classList.contains('row-delete-btn') &&
+        !el.classList.contains('title-add-btn') &&
+        !el.classList.contains('title-delete-btn')
+      );
+      if (echteKinderen.length === 0) {
+        const ouder = p.parentElement;
+        p.remove();
+        p = ouder;
+      } else {
+        break;
+      }
     }
 
     // Als er helemaal geen blokken meer zijn met dit titleKey, verwijder de titel
@@ -867,7 +888,7 @@ t.setAttribute('dominant-baseline','text-before-edge'); // stabieler in PDF
     const discover=$('#jumpDiscover').checked;
     const key = discover ? 'jump_discover' : 'jump_fixed';
     ensureTitleOnce(sheet, key, discover?'Welke sprong wordt er gemaakt? Vul de rij verder aan.':'Tel met sprongen.');
-    _registerAddFn(key, addJumpExercise);
+    _registerAddFn(key, () => _eenToevoegen(addJumpExercise, '#jumpCount'));
     const block=document.createElement('div'); block.className='jump-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey = key;
     if (discover) {
       const p=document.createElement('div'); p.className='discover-jump-prompt';
@@ -1166,6 +1187,23 @@ function isCleanTen(n){ return n % 10 === 0; }
     } else if (type==='compareHTE'){
       const l=makeSideHTEorNumber(n), r=makeSideHTEorNumber(n);
       item.append(l.isHTE?makeLabel(l.text):makeNum(l.value), box('small'), r.isHTE?makeLabel(r.text):makeNum(r.value));
+    } else if (type==='orderAsc' || type==='orderDesc') {
+      // Rangschikken: mix-order-wrap met getallen boven en vakjes onder
+      const values = uniqueRandoms(5, Math.min(1000, n));
+      const wrap = document.createElement('div'); wrap.className = 'mix-order-wrap';
+      const top2 = document.createElement('div'); top2.className = 'mix-order-top';
+      values.forEach(v => { const d = document.createElement('div'); d.textContent = v; top2.appendChild(d); });
+      const bottom2 = document.createElement('div'); bottom2.className = 'mix-order-bottom';
+      for (let k=0; k<5; k++) {
+        bottom2.appendChild(box());
+        if (k<4) {
+          const s = document.createElement('span'); s.className = 'mix-order-symbol';
+          s.textContent = (type==='orderAsc') ? '<' : '>';
+          bottom2.appendChild(s);
+        }
+      }
+      wrap.appendChild(top2); wrap.appendChild(bottom2);
+      item.appendChild(wrap);
     } else {
       // fallback: neighbors
       item.append(box(), makeNum(x), box());
@@ -1534,7 +1572,7 @@ function addHonderdveldExercise() {
   };
   const key = `honderdveld_${type}`;
   ensureTitleOnce(sheet, key, titles[type] || 'Honderdveld');
-  _registerAddFn(key, addHonderdveldExercise);
+  _registerAddFn(key, () => _eenToevoegen(addHonderdveldExercise, '#honderdveldCount'));
 
   let rowContainer = null;
 
@@ -1543,8 +1581,6 @@ function addHonderdveldExercise() {
     const block = document.createElement('div');
     block.className = 'honderdveld-exercise-block';
     block.dataset.titleKey = key;
-    block.appendChild(createDeleteButton(block));
-
     // Container
     const container = document.createElement('div');
     container.className = 'honderdveld-container';
@@ -1664,7 +1700,44 @@ function addHonderdveldExercise() {
     // registerAddFn happens after ensureTitleOnce below
     const titles={'tellen':'Hoeveel tel je? Vul in.','verbinden':'Wat is evenveel? Verbind.','kleuren':'Kleur de hoeveelheid.'};
     ensureTitleOnce(sheet,key,titles[type]);
-    _registerAddFn(key, addMabExercise);
+    _registerAddFn(key, () => {
+      // Voeg 1 container toe aan het bestaande mab-blok
+      const blokken = Array.from(sheet.querySelectorAll(`.mab-exercise-block[data-title-key="${key}"]`));
+      if (!blokken.length) { _eenToevoegen(addMabExercise, '#mabCount'); return; }
+      const blok = blokken[blokken.length - 1];
+      const mabHead = blok.querySelector('.mab-first');
+      const mabGrid = blok.querySelector('.mab-grid-layout');
+      if (!mabGrid) { _eenToevoegen(addMabExercise, '#mabCount'); return; }
+
+      // Maak 1 nieuwe container
+      const num = Math.floor(Math.random() * max) + 1;
+      const h = Math.floor(num/100), t = Math.floor((num%100)/10), u = num%10;
+      const isWhite = (type==='kleuren');
+      const container = document.createElement('div');
+      container.className = 'mab-tellen-container row-delete-wrap';
+      const visual = createMabRepresentationHTE(isWhite?(includeHundreds?9:0):h, isWhite?9:t, isWhite?9:u, isWhite, includeHundreds);
+      if (isWhite) {
+        const numDiv = document.createElement('div'); numDiv.className='mab-connect-num'; numDiv.textContent=num;
+        container.append(numDiv, visual);
+      } else {
+        const table = document.createElement('table'); table.className='mab-te-table';
+        if (includeHundreds) {
+          table.innerHTML=`<tr><td class="te-label h">H</td><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>`;
+        } else {
+          table.innerHTML=`<tr><td class="te-label">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>`;
+        }
+        container.append(visual, table);
+      }
+
+      // Vul mab-first aan als niet vol, anders naar grid
+      const perRij2 = max <= 100 ? 3 : 2;
+      const headCount = mabHead ? mabHead.querySelectorAll('.mab-tellen-container').length : perRij2;
+      if (mabHead && headCount < perRij2) {
+        mabHead.appendChild(container);
+      } else {
+        mabGrid.appendChild(container);
+      }
+    });
 
     const block=document.createElement('div'); block.className='mab-exercise-block'; block.dataset.titleKey=key; block.appendChild(createDeleteButton(block));
     const includeHundreds = max > 100;
@@ -1679,7 +1752,7 @@ function addHonderdveldExercise() {
 
         const container = document.createElement('div');
 container.className = 'mab-tellen-container row-delete-wrap';
-container.appendChild(createRowDeleteButton(container));
+// verwijdering via blok-niveau delete-knop
 
         const visual=createMabRepresentationHTE(isWhite?(includeHundreds?9:0):h, isWhite?9:t, isWhite?9:u, isWhite, includeHundreds);
 
@@ -1722,7 +1795,8 @@ container.appendChild(createRowDeleteButton(container));
     if (type==='verbinden'){
       // TOT 100: 3 op 1 rij + daaronder 3 getallen op 1 rij
       if (max <= 100){
-        let numbers=new Set(); while(numbers.size<count) numbers.add(Math.floor(Math.random()*max)+1);
+        const verbindCount = 4;  // altijd 4 paren bij tot 100
+        let numbers=new Set(); while(numbers.size<verbindCount) numbers.add(Math.floor(Math.random()*max)+1);
         const arr=Array.from(numbers);
 
         const wrap=document.createElement('div'); 
@@ -1733,7 +1807,7 @@ wrap.style.display='grid';
 
         // bovenste rij: schema's met bolletjes ONDERAAN (midden)
         const topRow=document.createElement('div'); topRow.style.display='grid';
-        topRow.style.gridTemplateColumns='repeat(4, 1fr)'; topRow.style.columnGap='18px';
+        topRow.style.gridTemplateColumns=`repeat(${verbindCount}, 1fr)`; topRow.style.columnGap='18px';
 
         arr.forEach(n=>{
           const h=Math.floor(n/100), t=Math.floor((n%100)/10), u=n%10;
@@ -1747,7 +1821,7 @@ wrap.style.display='grid';
 
         // onder: getallen met bolletje BOVENAAN (midden) — in willekeurige volgorde
         const botRow=document.createElement('div'); botRow.style.display='grid';
-        botRow.style.gridTemplateColumns='repeat(4, 1fr)'; botRow.style.columnGap='20px';
+        botRow.style.gridTemplateColumns=`repeat(${verbindCount}, 1fr)`; botRow.style.columnGap='20px';
 
         const shuffled=[...arr].sort(()=>Math.random()-0.5);
         shuffled.forEach(n=>{
@@ -1766,7 +1840,8 @@ wrap.style.display='grid';
 
       // TOT 1000: links 3 onder elkaar, rechts 3 onder elkaar — RUIME witruimte
       {
-        let numbers=new Set(); while(numbers.size<count) numbers.add(Math.floor(Math.random()*max)+1);
+        const verbindCount = 3;  // altijd 3 paren bij tot 1000
+        let numbers=new Set(); while(numbers.size<verbindCount) numbers.add(Math.floor(Math.random()*max)+1);
         const arr=Array.from(numbers);
 
         const wrap = document.createElement('div');
@@ -1976,7 +2051,7 @@ svg.style.height = h + 'px';
         : 'Geef de vakjes met dezelfde waarde dezelfde kleur.';
 
       ensureTitleOnce(sheet, key, title);
-      _registerAddFn(key, addPlaceValueExercise);
+      _registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
 
       const block = document.createElement('div');
       block.className = 'placevalue-exercise-block';
@@ -2106,7 +2181,7 @@ addCells(botCards, bandBot, 'bot');   // punt bovenaan
     if (range === '1000') {
       const key = 'place_value_hte';
       ensureTitleOnce(sheet, key, 'Schrijf de waarde van elk cijfer (H/T/E).');
-      _registerAddFn(key, addPlaceValueExercise);
+      _registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
 
       const block = document.createElement('div');
       block.className = 'placevalue-exercise-block';
@@ -2181,7 +2256,7 @@ block.appendChild(head);
     // TE-versie (tot 100) – vaste coördinaten zoals in uw oude werkende versie
 const key = 'place_value';
 ensureTitleOnce(sheet, key, 'Schrijf de waarde van elk cijfer.');
-_registerAddFn(key, addPlaceValueExercise);
+_registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
 const block = document.createElement('div');
 block.className = 'placevalue-exercise-block';
 block.dataset.titleKey = key;
