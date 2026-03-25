@@ -1,0 +1,2264 @@
+html,body{height:100%;margin:0;font:15px/1.35 system-ui,Segoe UI,Roboto,Arial,sans-serif;background:#fffdfa;color:#222}
+    header{position:sticky;top:0;background:#fff;border-bottom:1px solid #d9e2ec;z-index:10}
+    .wrap{max-width:1060px;margin:0 auto;padding:14px}
+    .layout{display:grid;grid-template-columns:1fr 1.5fr;gap:16px;align-items:start}
+    fieldset{border:1px solid #d9e2ec;border-radius:10px;padding:10px;background:#fff;margin-bottom:12px}
+    legend{padding:0 6px;color:#334;font-weight:600}
+    label{display:inline-flex;align-items:center;gap:8px;margin:4px 10px 4px 0}
+    input[type=number],input[type=text],select{border:1px solid #d9e2ec;border-radius:9px;padding:5px 9px;font-size:14px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:6px}
+    .btn{appearance:none;border:1px solid #1e88e5;background:#1e88e5;color:#fff;border-radius:999px;padding:7px 12px;cursor:pointer;font-weight:600}
+    .btn.ghost{background:#fff;color:#1e88e5}
+    .btn.ghost:hover{box-shadow: inset 0 0 0 2px #1e88e5;}
+    #previewBox{border:1px solid #d9e2ec;border-radius:12px;background:#eef6ff;padding:12px}
+    #previewSvg{display:block;width:100%;height:160px}
+    #sheet{position:relative;border:1px solid #d9e2ec;border-radius:12px;background:#fff;padding:14px}
+    .sheetHeader{margin:4px 0 12px 0; border-bottom: 2px solid #1A3A5C; padding-bottom: 8px;}
+
+    /* Opdrachtblokken */
+    .exercise, .jump-exercise-block, .mixed-exercise-block, .sequence-exercise-block, .honderdveld-exercise-block, .mab-exercise-block, .placevalue-exercise-block{
+  position:relative;
+  margin:2px 0 12px 0;
+  padding:4px 12px 12px 12px;
+  border:1px solid #d9e2ec;
+  border-radius:10px;
+  background:#fff;
+  overflow: visible;
+}
+/* ── Opdrachttitel: blauw-wit balk + knoppen ── */
+.title-row {
+  margin: 16px 0 8px 0;
+  page-break-after: avoid;
+  break-after: avoid;
+}
+
+/* Blauwe balk met donkerblauwe rand onderaan */
+.title-row-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px 7px 14px;
+  background: #1A3A5C !important;
+  border-left: 5px solid #4A90D9;
+  border-radius: 0;
+}
+
+/* Opdrachtzin: WIT en groot */
+.exercise-title {
+  font-family: Arial, sans-serif !important;
+  font-size: 14pt !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  margin: 0 !important;
+  flex: 1;
+  page-break-after: avoid;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+/* Verwijder-knop */
+.title-delete-btn {
+  width: 22px; height: 22px;
+  border: 1.5px solid rgba(255,255,255,0.6);
+  background: transparent !important;
+  color: #fff !important;
+  border-radius: 50%; cursor: pointer; font-size: 14px;
+  line-height: 20px; text-align: center; font-weight: bold;
+  flex-shrink: 0;
+  transition: background .12s;
+}
+.title-delete-btn:hover {
+  background: rgba(231,76,60,0.8) !important;
+  border-color: #e74c3c;
+}
+
+/* + oefening knop */
+.title-add-btn {
+  display: inline-flex !important;
+  align-items: center; gap: 4px;
+  padding: 4px 12px;
+  border: 1.5px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.15) !important;
+  color: #fff !important;
+  border-radius: 999px; cursor: pointer;
+  font-size: 12px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0;
+  transition: background .12s;
+}
+.title-add-btn:hover {
+  background: rgba(255,255,255,0.30) !important;
+}
+
+@media print {
+  .title-add-btn,
+  .title-delete-btn { display: none !important; }
+  .title-row-inner,
+  .exercise-title {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+    .delete-btn{position:absolute;top:0;right:0;width:22px;height:22px;border:1px solid #e57373;background:#fff;color:#e57373;border-radius:50%;cursor:pointer;font-size:14px;line-height:20px;text-align:center;font-weight:bold;z-index:5}
+
+    /* Honderdveld */
+    .honderdveld-container{display:flex;flex-direction:column;align-items:center;gap:6px;}
+    .honderdveld-grid{display:grid;grid-template-columns:repeat(10, 20px);grid-template-rows:repeat(10, 20px);border-top:1px solid #ccc;border-left:1px solid #ccc;width:201px;height:201px;box-sizing:content-box;flex-shrink:0}
+    /* Honderdveld centreren in het oefen-kader (display:grid blijft onaangeroerd) */
+.honderdveld-exercise-block .honderdveld-grid{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+    .honderdveld-cell{border-right:1px solid #ccc;border-bottom:1px solid #ccc;box-sizing:border-box}
+    .honderdveld-cell.filled-ten{background:#4caf50}
+    .honderdveld-cell.filled-unit{background:#ffeb3b}
+    .honderdveld-cell:nth-child(10n+5){border-right:2px solid #334}
+    .honderdveld-cell:nth-child(n+41):nth-child(-n+50){border-bottom:2px solid #334}
+    .honderdveld-task{display:flex;align-items:center;gap:12px}
+    .honderdveld-te-table{border-collapse:collapse;text-align:center;font-weight:bold}
+    .honderdveld-te-table td{border:1px solid #334;width:40px;height:36px}
+    .honderdveld-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:16px;box-sizing:border-box}
+    /* --- AANPASSING: aanvullen tot volgend tiental --- */
+
+/* smallere T/E-vakjes */
+.honderdveld-exercise-block .honderdveld-te-table td:nth-child(1) input,
+.honderdveld-exercise-block .honderdveld-te-table td:nth-child(2) input {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 15px;
+}
+
+/* kader rond elke oefening bij aanvullen tot volgend tiental */
+.honderdveld-exercise-block {
+  border: 2px solid #c9d6ea;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+    .honderdveld-num-box{width:50px;height:44px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;font-size:16px;font-weight:bold}
+    .honderdveld-given-num{font-size:22px;font-weight:800;color:#1A3A5C;text-align:center;margin-bottom:4px}
+    .honderdveld-task-onder{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .aanvul-vragen-onder{width:100%;font-size:13px}
+    .aanvul-vragen-onder .aanvul-rij{display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:4px}
+    .aanvul-vragen-onder .aanvul-input{width:32px;height:26px;font-size:13px;text-align:center;border:1px solid #ccc;border-radius:5px}
+    .honderdveld-row>.honderdveld-exercise-block{flex:0 0 calc(33.33% - 8px);max-width:calc(33.33% - 8px);margin-top:0}
+    .aanvul-vragen{display:flex;flex-direction:column;gap:10px;font-size:16px}
+    .aanvul-rij{display:flex;align-items:center;gap:6px;white-space:nowrap}
+    .aanvul-input{width:40px;height:30px;border:1px solid #ccc;border-radius:6px;text-align:center;font:inherit;font-size:15px}
+    
+    /* — Aanvullen tot volgend tiental: smalle 1-cijfervakjes — */
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:first-child input:nth-of-type(-n+2),
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:nth-child(2) input:first-of-type,
+.honderdveld-exercise-block .aanvul-vragen .aanvul-rij:nth-child(3) input:first-of-type {
+  width: 28px !important;
+  height: 28px !important;
+  font-size: 15px;
+}
+
+    /* MAB Materiaal */
+    .mab-grid-layout{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .mab-grid-layout>*{min-height:240px;align-items:flex-start}
+    .mab-tellen-container{display:flex;flex-direction:column;align-items:center;gap:6px}
+    .mab-labeled-container{display:flex;border:1.5px solid #334;border-radius:4px}
+    .mab-column{display:flex;flex-direction:column;align-items:center;padding:4px}
+    .mab-column-tens{border-right:1.5px solid #334}
+    .mab-header{font-weight:bold;font-size:16px;margin-bottom:4px;min-height:20px;width:100%;text-align:center;border-bottom:1.5px solid #334;padding-bottom:4px}
+    .mab-blocks-wrapper{display:flex;flex-wrap:wrap;gap:4px;min-height:150px;align-content:flex-start;padding-top:4px}
+    /* Honderden-kolom: breed genoeg zodat 2 kleinere honderdvelden naast elkaar passen */
+    .mab-hundreds-wrapper{width:110px}
+    .mab-tens-wrapper{width:76px}
+    .mab-units-wrapper{width:76px}
+    .mab-blocks-wrapper svg{height:60px}
+    .mab-blocks-wrapper svg.unit{height:12px;width:12px}
+    /* NIEUW: kleinere blauwe honderdvelden + 2 per rij */
+    .mab-blocks-wrapper svg.hundred{height:48px;width:48px}
+
+    .mab-te-table{border-collapse:collapse;text-align:center;font-weight:bold;margin-top:6px}
+    .mab-te-table td{border:1px solid #334;width:40px;height:36px}
+    .mab-te-table .te-label{background:#4caf50;color:#fff;font-size:16px}
+    .mab-te-table .te-label.e{background:#ffeb3b;color:#333}
+    .mab-te-table .te-label.h{background:#42a5f5;color:#fff}
+    .mab-te-table input{width:100%;height:100%;border:none;text-align:center;font:inherit;font-weight:bold;font-size:18px;box-sizing:border-box}
+
+
+    /* Getallenlijn */
+    .exercise.drag{padding-bottom:100px}
+    .exercise svg{display:block;width:100%;height:240px}
+    .exercise.drag svg{margin-top:4px}
+    .exercise.blanks svg{margin-top:8px}
+    .card{position:absolute;display:flex;align-items:center;justify-content:center;width:52px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700}
+    .card::before{content:'';position:absolute;top:-7px;left:50%;transform:translateX(-50%);width:7px;height:7px;background:#111;border-radius:50%}
+    /* Kaartje = card-stijl maar in flex-flow (geen absolute positie, geen bolletje) */
+    .kaartje{display:flex;align-items:center;justify-content:center;width:60px;height:44px;border-radius:10px;border:2px solid #c9d6ea;background:#fff;box-shadow:0 3px 8px rgba(0,0,0,.06);font-weight:700;font-size:15px;}
+    .print-overlay-input{position:absolute;background:#fff;border:2px solid #c9d6ea;border-radius:9px;outline:none;z-index:2;font-size:16px;font-weight:700;text-align:center;box-sizing:border-box;padding:0;font-family:inherit;}
+
+    /* Sprongen */
+    .jump-exercise{padding:12px 8px 8px 8px}
+    .jump-row{display:inline-grid;grid-auto-flow:column;grid-auto-columns:max-content;align-items:center;gap:8px}
+    .jump-start,.jump-given{font-weight:bold;font-size:17px;padding:5px;border:2px solid #6b879a;border-radius:9px;background:#eef6ff;text-align:center;min-width:46px;box-sizing:border-box}
+    .jump-box{width:46px;height:34px;border:2px solid #c9d6ea;border-radius:9px;font-family:inherit;font-size:15px;text-align:center;padding:0}
+    .jump-arc-wrapper{position:relative;height:28px}
+    .jump-arcs-inline{display:block;height:28px;overflow:visible;margin:0}
+    .jump-arcs-inline path{fill:none;stroke:#1e88e5;stroke-width:2}
+    .arc-labels{position:absolute;left:0;top:0;width:100%;height:28px;pointer-events:none}
+    .arc-label{position:absolute;transform:translateX(-50%);top:-14px;font-weight:700;font-size:12px;color:#1e88e5;white-space:nowrap}
+
+    /* Gemengd */
+    .mixed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 10px}
+    /* === Plaatswaarde – “match”-oefeningen (verbind / kleur) === */
+.pv-match-grid{ display:grid; grid-template-columns: 1fr; gap:10px; }
+.pv-first{ margin-bottom:10px; }                 /* ruimte tussen 1e en 2e rij */
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+.pv-match-row,
+.pv-color-row{
+  border:1px dashed #d9e2ec; border-radius:9px;
+  padding:10px; overflow:visible;
+}
+
+.pv-row-top, .pv-row-bottom{
+  display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+  flex-wrap:nowrap;
+}
+.pv-card{
+  min-width:52px; min-height:34px; padding:4px 8px;
+  border:2px solid #c9d6ea; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+}
+.pv-dot{
+  width:7px; height:7px; border-radius:50%; background:#111;
+  margin:4px auto 0 auto;
+}
+
+/* “Kleur dezelfde waarde” – 2 x 5 raster binnen één rij */
+.pv-color-grid{
+  display:grid; grid-template-columns: repeat(5, minmax(0,1fr));
+  gap:6px; justify-items:stretch; align-items:stretch;
+}
+.pv-color-cell{
+  border:1.6px solid #c9d6ea; border-radius:8px; min-height:34px;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+  padding:4px;
+}
+/* === Plaatswaarde — Verbind in 3 banden (boven → midden → onder) === */
+/* === PV verbinden in 3 banden: rijkader + ruimte === */
+.pv-connect3-row{
+  border:1px dashed #d9e2ec;
+  border-radius:9px;
+  padding:12px;
+  margin:0;                 /* geen extra buitenmarge */
+  overflow:visible;
+}
+
+/* de 3 banden onder elkaar met extra verticale ruimte */
+.pv-connect3{
+  display:flex;
+  flex-direction:column;
+  gap:22px;                 /* MEER ruimte tussen boven/midden/onder */
+}
+
+/* 5 kolommen per band + ruimere horizontale/verticale gap */
+/* — meer verticale ruimte tussen de 3 banden — */
+.pv-connect3{
+  display:flex;
+  flex-direction:column;
+  gap:60px;                 /* was 22 → ruimer */
+}
+
+/* — ruimer binnen elke band, vooral verticaal — */
+.pv-band{
+  display:grid;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  gap:18px 30px;            /* was 16px 22px → ruimer (horizontaal, verticaal) */
+  align-items:start;
+}
+
+/* — cell stapelt: (dot boven) kaartje (dot onder), geen extra gaten ertussen — */
+.pv-cell{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  gap:0;                    /* expliciet geen interne gap */
+}
+
+/* — kaartje blijft iets groter voor leesbaarheid — */
+.pv-card{
+  min-width:56px;
+  min-height:40px;          /* iets hoger */
+  padding:4px 10px;
+  border:2px solid #c9d6ea;
+  border-radius:9px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  margin:0;
+}
+
+/* — dots tegen het kaartkader laten “raken” — */
+.pv-dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background:#111;
+  flex:0 0 8px;
+  line-height:0;
+}
+
+/* BELANGRIJK: geen marge tussen dot en kaartje */
+.pv-dot.top{    margin:0 0 0 0 !important; }   /* direct boven het kaartje  */
+.pv-dot.bottom{ margin:0 0 0 0 !important; }   /* direct onder het kaartje  */
+
+
+/* titel blijft aan eerste rij + nette opening tussen 1e en 2e rij */
+.pv-first{ margin-bottom:12px; }
+.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+
+
+/* titel vast bij rij 1 + ruimte naar rij 2 */
+.pv-first{ margin-bottom:10px; }
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+    /* Zorg voor ruimte tussen de 1e rij (bij de titel) en de rest */
+.mixed-first{ margin-bottom: 10px; }              /* opening onder rij 1 */
+.mixed-exercise-block > .mixed-grid{ margin-top: 0; } /* geen dubbele marge */
+
+/* (optioneel, maar nuttig): voorkom dat rij 1 gebroken wordt over pagina's */
+.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+
+    /* === Mixed: één oefening per rij (voor rangschikken) === */
+/* Eén oefening per rij (rangschikken): grotere verticale gap */
+.mixed-grid.one-col{
+  grid-template-columns: 1fr;
+  gap: 20px;                 /* ↑↑ maak dit groter/kleiner naar wens (bv. 22px) */
+}
+
+/* Extra ruimte tussen 1e rij (bij de titel) en de rest */
+.mixed-first{ margin-bottom: 18px; }     /* was 10px; pas aan naar smaak */
+
+
+/* Lay-out voor rangschikken (nummers boven, invullijn eronder) */
+.mix-order-wrap{ display:flex; flex-direction:column; gap:6px; width:100%; }
+.mix-order-top{ display:flex; justify-content:center; gap:10px; font-weight:700; font-size:17px; flex-wrap:wrap; }
+.mix-order-bottom{ display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:nowrap; }
+.mix-order-symbol{ font-weight:700; font-size:18px; padding:0 2px; }
+
+    /* bij HTE 2 per rij */
+    .mixed-grid.hte-2col{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .mix-item{display:flex;align-items:center;justify-content:center;gap:6px;padding:6px;border:1px dashed #d9e2ec;border-radius:9px;min-height:54px;overflow:visible;white-space:nowrap}
+    .mix-num{font-weight:700;font-size:17px;min-width:34px;text-align:center}
+    .mix-label{font-weight:700;font-size:16px}
+    .mix-eq{font-weight:700;margin:0 2px}
+    .mix-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+    .mix-box.small{width:40px}
+
+    /* Getallenrij */
+    .seq-row{display:flex;gap:8px;flex-wrap:nowrap;align-items:center;padding:8px 4px}
+    .seq-num{min-width:42px;text-align:center;font-weight:700}
+    .seq-box{width:52px;height:34px;border:2px solid #c9d6ea;border-radius:9px;text-align:center;font:inherit;box-sizing:border-box}
+
+    /* ---- Waarde per cijfer (TE, behoud) ---- */
+    .pv-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+    .pv-item { position:relative; padding:8px; border:1px dashed #d9e2ec; border-radius:8px; min-height:130px; }
+    .pv-number { display:flex; }
+    .pv-digit { width:36px; height:36px; border-radius:6px; border:2px solid #c9d6ea; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+    .pv-digit.tens { background:#4caf50; color:#fff; }
+    .pv-digit.units{ background:#ffeb3b; color:#333; }
+    .pv-arrows { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .pv-answers { position:absolute; left:130px; top:50px; display:flex; flex-direction:column; gap:12px; }
+    .pv-row { display:flex; align-items:center; gap:4px; white-space:nowrap; }
+    .pv-box, .pv-small { border:2px solid #c9d6ea; border-radius:6px; text-align:center; font:inherit; height:34px; font-size:15px; font-weight:700; }
+    .pv-small { width:36px; }
+    .pv-box { width:52px; }
+    .pv-label { font-weight:700; }
+
+    /* ---- Waarde per cijfer (HTE, nieuw) ---- */
+    .pv3-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:24px; }
+    .pv3-grid.one-col{ grid-template-columns:1fr; }
+    .pv3-item { position:relative; padding:8px; border:1px dashed #d9e2ec; border-radius:8px; min-height:270px; }
+    .pv3-number{ display:flex; }
+    .pv3-digit{ width:36px; height:36px; border-radius:6px; border:2px solid #c9d6ea; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:16px; }
+    .pv3-digit.hundreds{ background:#42a5f5; color:#fff; }
+    .pv3-digit.tens{ background:#4caf50; color:#fff; }
+    .pv3-digit.units{ background:#ffeb3b; color:#333; }
+
+
+    .pv3-row{ display:flex; align-items:center; gap:3px; white-space:nowrap;}
+    .pv3-box,.pv3-small{ border:2px solid #c9d6ea; border-radius:6px; text-align:center; font:inherit; height:34px; font-size:15px; font-weight:700; }
+    .pv3-small{ width:36px; }
+    .pv3-box{ width:52px; }
+    .pv3-box-wide{ width:72px; }
+    .pv3-label{ font-weight:700; }
+    
+
+    /* Menu */
+    .menu-btn{position:fixed;top:10px;left:10px;z-index:20;display:inline-block;padding:8px 14px;border-radius:999px;background:#0d47a1;color:#fff;text-decoration:none;font-weight:700;border:1px solid #0a3a85}
+    .menu-btn:focus{outline:2px solid #fff;outline-offset:2px}
+
+   @media print {
+  header, #controls, #previewTitle, .title-delete-btn, .delete-btn, .print-overlay-input { display: none !important; }
+  #sheet { border: 0; padding: 0; }
+}
+
+    @page{margin:12mm 12mm 12mm 22mm}
+
+/* === PATCH: Plaatswaarde TE / HTE en Verbinden (overlap fix) === */
+
+/* Waarde per cijfer tot 100 (TE) */
+.pv-answers{
+  position:absolute;
+  left:130px;   /* uitlijnen met pijl-einde */
+  top:50px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* Plaatswaarde tot 1000: antwoorden volledig onder de cijfers */
+.pv3-answers{
+  position:absolute;
+  left:0;            /* volle breedte van item */
+  right:0;
+  top:0;             /* exacte top-positie wordt in JS gezet per rij */
+  height:180px;      /* speelruimte voor 3 rijen */
+}
+.pv3-answers .pv3-row{
+  position:absolute; /* we plaatsen elke rij onder zijn pijl */
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+  min-height:32px;  
+}
+
+
+/* Verbinden 'Wat is evenveel?' */
+.mab-connect-2row{
+  display:flex;
+  flex-direction:column;
+  gap:68px;          /* ruimte tussen boven- en onderrij */
+  padding:8px 6px 18px 6px;
+}
+.mab-connect-row-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:18px 22px;     /* horizontaal x verticaal */
+  align-items:start; /* voorkomt in elkaar schuiven */
+}
+.mab-connect-card{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  overflow:visible;
+  min-height:270px;  /* genoeg ruimte voor 3 pijlen + hokjes */
+}
+/* schaal H/T/E iets kleiner in verbinden */
+.mab-connect-row-grid .mab-labeled-container{
+  transform:scale(0.88);
+  transform-origin:top center;
+}
+/* compacter blokjes in verbinden */
+.mab-connect-row-grid .mab-blocks-wrapper svg.hundred{ width:44px; height:44px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg{ height:54px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.unit{ width:12px; height:12px; }
+.connect-dot{ position:absolute; left:50%; transform:translateX(-50%); width:10px; height:10px; background:#000; border-radius:50%; }
+.connect-dot.bottom{ bottom:-16px; }
+.connect-dot.top{ top:-16px; }
+/* --- Extra ruimte tussen rijen bij 'Hoeveel tel je?' --- */
+.mab-grid-layout{ gap:26px 16px; } /* rij-gap ↑, kolom-gap gelijk */
+
+/* --- Verbinden: 3 per rij + veilige kaartgrootte --- */
+.mab-connect-2row{
+  display:flex; flex-direction:column;
+  gap:72px;               /* verticale ruimte tussen boven- en onderrij */
+  padding:8px 6px 18px 6px;
+}
+.mab-connect-row-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr)); /* 3 per rij */
+  gap:20px 24px;           /* h × v */
+  align-items:start;
+}
+.mab-connect-card{
+  position:relative;
+  display:flex; justify-content:center; align-items:flex-start;
+  min-height:170px;        /* vaste hoogte voorkomt inzakken/overlap */
+  overflow:visible;
+}
+/* H/T/E-visual in verbinden iets compacter */
+.mab-connect-row-grid .mab-labeled-container{ transform:scale(.9); transform-origin:top center; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.hundred{ width:44px; height:44px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg{ height:54px; }
+.mab-connect-row-grid .mab-blocks-wrapper svg.unit{ width:12px; height:12px; }
+
+/* --- Plaatswaarde: antwoordkolommen blijven leidend --- */
+.pv-answers{ left:130px; }   /* TE */
+.mab-connect-num { min-width: 64px; }
+.mab-connector { pointer-events: none; }
+
+/* Isoleer rendering per blok; voorkomt doorwaaien bij massaal toevoegen */
+.exercise,
+.jump-exercise-block,
+.mixed-exercise-block,
+.sequence-exercise-block,
+.mab-exercise-block,
+.placevalue-exercise-block {
+  contain: layout paint;
+}
+.honderdveld-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+/* ===== Pagineringslogica: titel+eerste rij bij elkaar, overige rijen vrij ===== */
+.title-row { page-break-after: avoid; break-after: avoid; }
+
+.keep-with-title { 
+  break-inside: avoid; 
+  page-break-inside: avoid;
+}
+
+/* Voor volledige blokken die nooit gesplitst mogen worden (bv. verbinden) */
+.keep-together { 
+  break-inside: avoid; 
+  page-break-inside: avoid; 
+}
+
+/* Veilig per-rij niet knippen (toegepast op 'body'-rijen) */
+.row-block { 
+  break-inside: avoid; 
+  page-break-inside: avoid; 
+}
+/* — MAB Tellen/Kleuren: extra verticale ademruimte — */
+.mab-first{               /* de eerste rij onder de titel */
+  margin-bottom: 18px;
+}
+.mab-grid-layout{         /* de overige rijen (body) */
+  row-gap: 28px;          /* was kleiner → rijen plakten tegen elkaar */
+}
+
+/* wat extra marge onder het invultabelletje zelf */
+.mab-te-table{
+  margin-top: 8px;
+  margin-bottom: 6px;
+}
+@media print{
+  /* Hou HTE consequent 2 kolommen met iets kleinere gaten/ruimte */
+  .pv3-grid{
+    grid-template-columns: repeat(2, minmax(0,1fr));
+    column-gap: 12px;   /* was groter → maakte de breedte krapper */
+    row-gap: 30px;      /* ruimte tussen rijen zodat ze niet overlappen */
+  }
+  .pv3-item{
+    box-sizing: border-box;
+    padding: 10px 10px 12px;  /* subtiel smaller dan op scherm */
+  }
+  .pv3-row{
+    column-gap: 8px;    /* minder ruimte tussen label en vakje */
+    row-gap: 6px;
+  }
+  .pv3-box{
+    width: 22px;        /* smal genoeg voor 2-up op A4 */
+    min-width: 22px;
+  }
+  .pv3-small{
+    width: 18px;
+    min-width: 18px;
+  }
+}
+/* — HTE: neerwaartse pijlen naar eerste invulvak — */
+.pv3-arrow-down{
+  position: absolute;
+  width: 0;
+  border-left: 2px solid #222;      /* verticale lijn */
+  pointer-events: none;
+  z-index: 2;
+}
+.pv3-arrow-down::after{             /* pijlpunt (driehoek) */
+  content: "";
+  position: absolute;
+  left: -5px;                       /* centreren op de lijn */
+  bottom: -2px;
+  border: 6px solid transparent;
+  border-top-color: #222;           /* pijl naar beneden */
+}
+/* --- Uniforme layout voor oefenroosters --- */
+.pv3-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 22px;   /* horizontale afstand tussen de 2 kolommen */
+  row-gap: 22px;      /* verticale afstand tussen ALLE rijen */
+}
+
+/* alle kaarten: geen eigen (boven)margin meer, gap bepaalt alles */
+.pv3-grid > .pv3-item{
+  margin: 0 !important;
+}
+
+/* als er ooit styles op '3e rij' stonden, maak die onschadelijk */
+.pv3-grid > .pv3-item:nth-child(3),
+.pv3-grid > .pv3-item:nth-child(4){
+  margin-top: 0 !important;
+}
+/* === OVERRIDE v2: verwijder de grote kaders rond elk oefeningsblok === */
+.exercise,
+.jump-exercise-block,
+.mixed-exercise-block,
+.sequence-exercise-block,
+.honderdveld-exercise-block,
+.mab-exercise-block,
+.placevalue-exercise-block{
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Zorg dat dit ook bij print en html2canvas geldt */
+@media screen, print {
+  .exercise,
+  .jump-exercise-block,
+  .mixed-exercise-block,
+  .sequence-exercise-block,
+  .honderdveld-exercise-block,
+  .mab-exercise-block,
+  .placevalue-exercise-block{
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+}
+/* === OVERRIDE v3: verwijder de buitenkader rond het volledige werkblad === */
+#sheet {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important; /* laat witte achtergrond van pagina zelf gelden */
+}
+
+/* ook bij print of html2canvas export */
+@media screen, print {
+  #sheet {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+}
+/* — per-rij verwijderknop — */
+.row-delete-btn{
+  position:absolute;
+  top:-10px; right:-10px;
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:0 0 0 2px #fff;   /* witte ring zodat hij los komt van kader */
+}
+.row-delete-wrap{ position:relative; }  /* hulklasse om de knop te positioneren */
+/* — rij-kruisje altijd BINNEN de rij en nooit mee naar PDF — */
+.row-delete-wrap{ position: relative; }
+
+.row-delete-btn{
+  position:absolute;
+  /* binnen het kader i.p.v. negatieve offset buiten het kader */
+  top:4px; 
+  right:4px;
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:none;           /* geen buitenste schaduw die de breedte kan beïnvloeden */
+}
+
+/* Verberg ALLE delete-knoppen bij print en PDF-export */
+@media print{
+  .row-delete-btn,
+  .block-delete-btn,
+  [class*="delete-btn"]{ display:none !important; }
+}
+
+/* extra vlag voor html2canvas: wanneer we tijdelijk 'exporting' zetten */
+html.exporting .row-delete-btn,
+html.exporting .block-delete-btn,
+html.exporting [class*="delete-btn"],
+html.exporting .title-add-btn { display:none !important; }
+/* Plaats het rij-kruisje BINNEN het kader, niet erbuiten */
+.row-delete-wrap{ position:relative; }
+.row-delete-btn{
+  position:absolute;
+  top:4px; right:4px;          /* binnen het kader */
+  width:22px; height:22px;
+  border:none; border-radius:999px;
+  background:#f5c2c7; color:#a30014;
+  font-weight:700; line-height:22px; text-align:center;
+  cursor:pointer;
+  box-shadow:none;             /* geen schaduw die het blad “breder” maakt */
+}
+.jump-arcs-svg{ overflow:visible; pointer-events:none; }
+.jump-path{ stroke:#1e88e5; stroke-width:3; fill:none; stroke-linecap:round; }
+.jump-label{ fill:#1e88e5; font-weight:700; font-size:14px; }
+/* Sprongen: rechts ruimte voor het rij-kruisje zodat het niet over het laatste hokje valt */
+.jump-row.row-delete-wrap{ padding-right: 28px; position: relative; }
+
+/* (laat je algemene rijknop staan) */
+.row-delete-btn{ top:4px; right:4px; }   /* dit heb je al */
+/* Sprongen: ruimte bovenaan voor bogen + labels, en rechts voor het kruisje */
+.jump-row{ position:relative; padding-top:25px; overflow:visible; }
+.jump-row.row-delete-wrap{ padding-right:28px; } /* zodat het kruisje niet over het laatste vakje valt */
+/* Extra verticale ruimte tussen rijen bij rangschikoefeningen */
+.sort-row {
+  margin-bottom: 16px;      /* afstand tussen rijen */
+  padding-bottom: 4px;      /* optisch wat lucht binnen de rand */
+}
+/* Meer kopruimte voor sprongen bij export/print zodat bogen/labels nooit afvallen */
+@media print{
+  .jump-row{ padding-top: 44px !important; }
+}
+
+/* idem tijdens html2canvas-export (we zetten 'exporting' in JS) */
+html.exporting .jump-row{ padding-top: 44px !important; }
+/* SPRONGEN – kopruimte boven de hokjes */
+.jump-row{
+  position: relative;
+  padding-top: 34px;   /* ruimte op SCHERM voor bogen/labels */
+  overflow: visible;
+}
+
+/* Extra kopruimte bij PDF/print en tijdens html2canvas-export */
+/* Alleen tijdens print/export: bogen lager (dichter bij de hokjes) */
+@media print{
+  .jump-row .jump-arcs-svg{ top: 10px !important; }   /* was -32 of 0 op scherm */
+  .jump-row{ padding-top: 48px !important; }           /* iets minder kopruimte */
+}
+html.exporting .jump-row .jump-arcs-svg{ top: 10px !important; }
+html.exporting .jump-row{ padding-top: 48px !important; }
+
+/* (al aanwezig, maar voor de zekerheid) bogen/labels-stijl */
+.jump-arcs-svg{ overflow: visible; pointer-events: none; }
+.jump-path{ stroke:#1e88e5; stroke-width:3; fill:none; stroke-linecap:round; }
+.jump-label{ fill:#1e88e5; font-weight:700; font-size:14px; }
+/* PDF/export: til ALLEEN de labels boven de boog */
+
+@media print {
+  /* Til de spronglabels iets hoger in de PDF */
+  .jump-row .jump-arcs-svg {
+    top: 10px !important;        /* boog iets lager t.o.v. hokjes */
+  }
+  .jump-row .jump-arcs-svg text.jump-label {
+    transform: translateY(-6px); /* label iets hoger boven de boog */
+  }
+}
+
+/* Ook bij HTML-export voor PDF-knop (indien die klasse gebruikt wordt) */
+html.exporting .jump-row .jump-arcs-svg {
+  top: 10px !important;
+}
+html.exporting .jump-row .jump-arcs-svg text.jump-label {
+  transform: translateY(-8px);
+}
+/* === SPRONGEN — verbeterde hoogte en labelpositie in PDF/export === */
+@media print {
+  .jump-exercise, .jump-row { overflow: visible !important; }
+  .jump-row { padding-top: 48px !important; }
+
+  /* SVG-hoogte vergroten zodat label niet wordt afgesneden */
+  .jump-row .jump-arc-wrapper,
+  .jump-row .jump-arcs-inline,
+  .jump-row .jump-arcs-svg {
+    height: 40px !important;
+  }
+
+  /* boog iets lager, label hoger */
+  .jump-row .jump-arcs-svg { top: 6px !important; }
+  .jump-row .jump-arcs-svg text.jump-label { transform: translateY(-8px); }
+}
+
+/* ook bij html2canvas-export */
+html.exporting .jump-exercise, 
+html.exporting .jump-row { overflow: visible !important; }
+html.exporting .jump-row { padding-top: 48px !important; }
+html.exporting .jump-row .jump-arc-wrapper,
+html.exporting .jump-row .jump-arcs-inline,
+html.exporting .jump-row .jump-arcs-svg { height: 40px !important; }
+html.exporting .jump-row .jump-arcs-svg { top: 6px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label { transform: translateY(-8px); }
+@media print{
+  .jump-row { padding-top: 48px !important; }        /* kopruimte blijft */
+  .jump-row .jump-arcs-svg { top: 6px !important; }  /* boog iets lager */
+  .jump-row .jump-arcs-svg text.jump-label { 
+    transform: none !important;                      /* geen extra shift meer */
+  }
+}
+html.exporting .jump-row { padding-top: 48px !important; }
+html.exporting .jump-row .jump-arcs-svg { top: 6px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label { transform: none !important; }
+/* Kader rond elke sprongen-rij */
+.jump-row.row-delete-wrap{
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  background: #fff;
+  padding: 12px 12px 14px;
+  padding-top: 34px;     /* kopruimte op scherm */
+  overflow: visible;
+}
+
+/* In PDF/export: extra kopruimte; geen extra transform nodig */
+@media print{
+  .jump-row.row-delete-wrap{ padding-top: 48px !important; }
+  .jump-row .jump-arcs-svg{ top: 10px !important; } /* was 6px → iets lager */
+  .jump-row .jump-arcs-svg text.jump-label{ transform: none !important; }
+}
+html.exporting .jump-row.row-delete-wrap{ padding-top: 48px !important; }
+html.exporting .jump-row .jump-arcs-svg{ top: 10px !important; }
+html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !important; }
+/* --- Rangschikken: meer ruimte tussen getallen en hogere invulvakjes --- */
+.mix-order-top {
+  gap: 20px; /* was 10px; meer ruimte tussen getallen */
+}
+
+.mix-order-top div::after {
+  content: " -";           /* optioneel: voeg streepje tussen getallen */
+  color: #666;
+  font-weight: normal;
+  margin-left: 2px;
+}
+.mix-order-top div:last-child::after {
+  content: "";             /* geen streepje na het laatste getal */
+}
+
+.mix-box {
+  height: 42px !important; /* iets hogere invulhokjes */
+  line-height: 42px;       /* tekst beter gecentreerd */
+}
+/* --- Extra ruimte tussen getallenrij en invulrij bij rangschikken --- */
+.mix-order-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;   /* was 6px; verhoog naar wens (bv. 18px voor meer) */
+}
+/* --- Rangschikken: streepjes mooi centreren tussen getallen --- */
+.mix-order-top {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 26px;            /* horizontale afstand tussen getallen */
+  position: relative;
+}
+
+.mix-order-top div {
+  position: relative;
+}
+
+.mix-order-top div:not(:last-child)::after {
+  content: "-";
+  position: absolute;
+  right: -18px;         /* verschuif naar links/rechts tot mooi in midden */
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-weight: 600;
+  font-size: 16px;
+}
+/* --- Vul aan tot volgend T/H --- */
+.fillnext-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px 16px;                  /* rij × kolom */
+}
+.fillnext-card{
+  border:1px solid #d9e2ec;        /* kader rond elke oefening */
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+  min-height:88px;
+  display:flex; flex-direction:column; gap:6px;
+  overflow:visible;
+}
+.fillnext-top{
+  display:flex; align-items:center; gap:10px;
+}
+.fillnext-num{
+  min-width:56px; height:36px;
+  border:2px solid #c9d6ea; border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700;
+  background:#eef6ff;
+}
+.fillnext-line{
+  display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  font-weight:600;
+}
+.fillnext-box{
+  width:64px; height:34px;         /* HOGER, niet breder */
+  border:2px solid #c9d6ea; border-radius:9px;
+  text-align:center; font:inherit; box-sizing:border-box;
+}
+
+.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+/* eerste rij bij de titel houden */
+.fillnext-first{ margin-bottom:10px; }
+
+/* bij print: elke grid-rij mag afbreken per rij */
+@media print{
+  .fillnext-grid{ break-inside:auto; }
+}
+/* Voorbeeldkader bij 'Vul aan tot'-oefening */
+.fillnext-card.example {
+  border: 3px solid #ffa726;          /* oranje rand */
+  background-color: #fff8e1;          /* zacht oranjegeel */
+  box-shadow: 0 0 6px rgba(255,167,38,0.3);
+}
+/* Rijcontainer voor 'Vul aan' (2 per rij) */
+.fillnext-row{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px 16px;      /* zelfde gap als .fillnext-grid */
+  margin-bottom: 12px; /* extra tussenruimte per rij */
+}
+
+@media print{
+  /* Elke rij blijft bij elkaar op de pagina */
+  .fillnext-row{
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+/* Rij neemt volledige breedte van de grid in (span beide kolommen) */
+.fillnext-row{
+  grid-column: 1 / -1;   /* ← NIEUW: één rij per lijn */
+}
+/* --- Getalbeelden tot 1000 --- */
+.gb1000-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr)); /* precies 2 per rij */
+  gap:16px;
+  align-items:stretch; /* beide kaarten per rij altijd even hoog */
+}
+.gb1000-first{ margin-bottom:10px; }       /* eerste rij bij de titel */
+.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+
+.gb1000-card{
+  border:1px solid #d9e2ec;
+  border-radius:10px;
+  background:#fff;
+  padding:8px 10px;
+  display:grid;
+  grid-template-rows: 1fr auto;  /* visueel deel groeit, antwoordlijn onderaan */
+  min-height:240px;              /* vaste, nette hoogte per rij */
+}
+
+/* visuele compositie (H–T–E als beeld in één vlak) */
+.gb1000-visual{ display:flex; justify-content:center; align-items:flex-start; }
+.gb1000-visual-grid{
+  display:grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap:16px;
+  align-items:start;
+}
+.gb1000-visual-grid .gb1000-h{
+  grid-column:1; grid-row:1 / span 2;
+  display:grid; grid-template-columns:repeat(2, 48px); gap:4px; align-content:flex-start;
+}
+.gb1000-visual-grid .gb1000-t{
+  grid-column:2; grid-row:1;
+  display:grid; grid-auto-rows:48px; gap:4px; align-content:flex-start;
+}
+.gb1000-visual-grid .gb1000-u{
+  grid-column:2; grid-row:2;
+  display:grid; grid-template-columns:repeat(10, 12px); gap:2px; align-content:flex-start;
+}
+
+/* schaal de SVG’s netjes binnen het vlak */
+.gb1000-visual-grid svg.hundred{ width:48px; height:48px; }
+.gb1000-visual-grid .gb1000-t svg{ height:48px; }
+.gb1000-visual-grid .gb1000-u svg.unit{ width:12px; height:12px; }
+
+/* eenvoudige invullijn onderaan de kaart */
+.gb1000-ansline{ margin:10px auto 2px; width:64%; height:0; border-top:2px solid #d7d7d7; }
+
+/* print: elke rij mag als geheel naar volgende pagina */
+@media print{
+  .gb1000-grid{ break-inside:auto; }
+}
+/* — Getalbeelden tot 1000 — */
+.gb1000-grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));  /* 2 oefeningen per rij */
+  gap:24px;
+}
+.gb1000-card{
+  border:1px solid #d9e2ec;
+  border-radius:10px;
+  padding:10px 12px;
+  background:#fff;
+  min-height:200px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+  position:relative;
+}
+.gb1000-visual{
+  display:grid;
+  grid-template-columns: repeat(2, 100px);          /* honderdvakken in 2 kolommen */
+  grid-auto-rows: 100px;
+  gap:8px;
+}
+/* Tot 100: visual is enkel de hvwrap, geen grid nodig */
+.gb1000-visual.gb1000-visual-enkel {
+  display: block;
+  width: 161px;
+  height: 161px;
+}
+
+/* volle honderdvakken (SVG) – grootte 100×100 */
+.gb1000-visual svg.hundred { width:100px; height:100px; }
+
+/* rest-honderdveld: hergebruik van uw honderdvak, maar gehalveerd (≈100px) */
+/* tot 1000: klein raster (originele schaling) */
+.gb1000-hvwrap{ 
+  display: inline-block;
+  flex-shrink: 0;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+}
+.gb1000-hvwrap .honderdveld-grid{
+  transform: scale(.5);
+  transform-origin: top left;
+}
+
+/* tot 100: groter raster via aparte klasse op de hvwrap */
+.gb1000-hvwrap-groot .honderdveld-grid{
+  grid-template-columns: repeat(10, 16px) !important;
+  grid-template-rows:    repeat(10, 16px) !important;
+  width:  161px !important;
+  height: 161px !important;
+  transform: none !important;
+  border-top: 1px solid #000 !important;
+  border-left: 1px solid #000 !important;
+}
+.gb1000-hvwrap-groot {
+  width: 161px !important;
+  height: 161px !important;
+  overflow: hidden !important;
+  flex-shrink: 0 !important;
+  display: block !important;
+}
+
+/* dun invullijntje onderaan elke kaart */
+.gb1000-line{
+  margin-top:auto;
+  width:70%;
+  height:0;
+  border-top:1.5px solid #cfd8dc;
+}
+/* Antwoordpaneel H–T–E + totaal voor Getalbeelden tot 1000 */
+.gb1000-ans{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr) 1.6fr; /* H | T | E | getal */
+  column-gap: 12px;
+  row-gap: 6px;
+  margin-top: 4px;                           /* extra ademruimte */
+  align-items: end;
+}
+
+.gb1000-ans .col,
+.gb1000-ans .total{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gb1000-ans .hdr{
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: .01em;
+}
+
+.gb1000-ans .line{
+  width: 70%;
+  height: 0;
+  border-bottom: 2px solid #cfd8dc;
+  margin-top: 6px;
+}
+
+.gb1000-ans .total .line{
+  width: 100%;          /* breder vak voor het hele getal */
+}
+/* — 100-veld met pictogrammen — */
+.hvicons-grid{
+  display: grid;
+  grid-template-columns: 1fr;   /* één kaart per rij */
+  row-gap: 24px;                /* verticale ruimte tussen kaarten */
+  align-items: start;
+  margin-top: 6px;
+}
+
+.hvicons-card{
+  border:1px solid #d9e2ec;
+  border-radius:10px;
+  background:#fff;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;              /* ruimte tussen veld en legenda */
+  position:relative;
+}
+
+/* het 100-veld hergebruikt uw .honderdveld-grid en .honderdveld-cell */
+.hvicons-board{
+  position:relative;
+  width:100%;
+  max-width:360px;       /* hou velden compact zodat 2 naast elkaar passen */
+  margin:0 auto;
+}
+
+/* pictogram in een cel (absolute overlay) */
+.hv-icon{
+  position:absolute;
+  font-size:18px;        /* emoji/letter */
+  line-height:1;
+  pointer-events:none;
+  transform:translate(-50%, -50%);
+}
+
+/* legenda onderaan: icoontjes met invulvakjes */
+.hvicons-legend{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:10px 12px;
+}
+.hvicons-legend-item{
+  display:grid;
+  grid-template-columns: 28px 1fr;
+  align-items:center;
+  gap:8px;
+}
+.hvicons-legend-icon{
+  width:28px; height:28px;
+  display:flex; align-items:center; justify-content:center;
+  border:1px solid #cfd8dc; border-radius:6px; background:#f8fbff;
+  font-size:18px;
+}
+.hvicons-legend input{
+  width:100%;
+  border:1.5px solid #cfd8dc; border-radius:8px; height:30px;
+  padding:2px 8px; font-size:14px;
+}
+
+/* eerste rij bij titel houden; rijen als geheel laten afbreken in PDF */
+.hvicons-first.keep-with-title{ break-inside:avoid; page-break-inside:avoid; }
+@media print{
+  .hvicons-row{ break-inside:avoid; page-break-inside:avoid; }
+}
+@media print{
+  .hvicons-block.keep-together{ 
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
+/* — 11. 100-veld – Puzzelstukken — */
+.hvp-grid{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 20px;
+}
+.hvp-card{
+  border: 1px solid #d9e2ec;
+  border-radius: 10px;
+  background: #fff;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;              /* ruimte tussen stuk en eventuele instructie */
+  min-height: 260px;      /* gelijke hoogte per rij */
+  position: relative;
+}
+.hvp-piece{
+  display: grid;
+  gap: 2px;               /* ruimte tussen kleine celletjes */
+}
+/* individuele puzzelcellen */
+.hvp-cell{
+  width: 60px;
+  height: 60px;
+  border: 1px solid #cfd8dc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+.hvp-cell.given{ background: #f8fbff; font-weight: 600; }
+.hvp-cell.blank{ background: #fff; } /* leeg laten om in te vullen */
+
+@media print{
+  .hvp-first.keep-with-title{ break-inside: avoid; page-break-inside: avoid; }
+  .hvp-grid .hvp-card:nth-child(2n){ break-inside: avoid; page-break-inside: avoid; }
+}
+/* — 10. 100-veld met pictogrammen: groter raster en duidelijkere iconen — */
+.hvicons-card{ min-height: 320px; }              /* wat meer hoogte per kaart */
+.hvicons-board{ position: relative; max-width: 420px; margin: 0 auto; }
+
+.hvicons-board .honderdveld-grid{
+  /* overschrijft de globale 20px-cellen alléén binnen deze oefening */
+  grid-template-columns: repeat(10, 26px);
+  grid-template-rows:    repeat(10, 26px);
+  width: 261px; height: 261px;
+}
+
+.hv-icon{
+  position: absolute;
+  font-size: 22px;        /* icon wat groter zichtbaar */
+  line-height: 1;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 2;             /* zeker óp de grid */
+}
+/* === 10. Honderdveld met pictogrammen — groter en helderder === */
+.hvicons-card{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;                 /* ruimte tussen raster en legenda */
+  min-height: 380px;         /* kaarthoogte, ongeveer halve A4 */
+}
+
+/* vergroot het raster alléén binnen deze oefening */
+.hvicons-board .honderdveld-grid{
+  grid-template-columns: repeat(10, 36px);
+  grid-template-rows:    repeat(10, 36px);
+  width: 361px; height: 361px;
+  margin: 0 auto;            /* centreren */
+}
+.hvicons-board .honderdveld-cell{
+  position: relative;
+  font-size: 0;              /* nummers onzichtbaar wanneer pictogram wordt gezet */
+}
+
+/* pictogram midden in de cel */
+.hv-icon-in-cell{
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; line-height: 1;
+}
+
+/* legenda: 3 items per rij, met marge */
+.hvicons-legend{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 14px;            /* v × h ruimte tussen items */
+}
+.hvicons-legend-item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+}
+.hvicons-legend-icon{
+  width: 32px; height: 32px; display: grid; place-items: center;
+  font-size: 22px;
+}
+.hvicons-legend-item input{
+  flex: 1; min-width: 0;
+  height: 36px;
+  border: 2px solid #c9d6ea; border-radius: 9px;
+  text-align: center; font-weight: 700;
+}
+/* === 10. Honderdveld met pictogrammen — groter en breder === */
+
+/* 2 kaarten per rij, maar elke kolom is zeker breed genoeg voor het grote bord */
+.hvicons-grid{
+  display: grid;
+  grid-template-columns: 1fr;   /* één kaart per rij */
+  row-gap: 24px;                /* verticale ruimte tussen kaarten */
+  align-items: start;
+  margin-top: 6px;
+}
+
+
+/* kaart groeit mee met inhoud (geen overlap met het bord) */
+.hvicons-card{
+  border:1px solid #d9e2ec; border-radius:10px; background:#fff;
+  padding:12px;
+  display:flex; flex-direction:column; gap:16px;
+  min-height:420px;   /* ruimer: bord + legenda */
+}
+
+/* groot raster (≈ 1/2 A4), gecentreerd */
+.hvicons-board{ display:flex; justify-content:center; }
+.hvicons-board .honderdveld-grid{
+  display:grid;
+  grid-template-columns: repeat(10, 36px);
+  grid-template-rows:    repeat(10, 36px);
+  width: 361px; height: 361px;
+}
+.hvicons-board .honderdveld-cell{
+  position: relative;
+  font-size: 14px;              /* getal tonen (of verbergen per-cel via .no-number) */
+}
+.hvicons-board .honderdveld-cell.no-number{ font-size: 0; }  /* alleen pictogram-cellen */
+
+/* pictogram netjes in het midden van de cel */
+.hv-icon-in-cell{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; line-height:1;
+}
+
+/* legenda: 3 items per rij, met ruimte ertussen en goed leesbare input */
+.hvicons-legend{
+  display:grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+.hvicons-legend-item{
+  display:flex; align-items:center; gap:12px;
+  padding:6px 10px; border:1px solid #e2e8f0; border-radius:10px; background:#fff;
+}
+.hvicons-legend-icon{
+  width:34px; height:34px; display:grid; place-items:center; font-size:22px;
+}
+.hvicons-legend-item input{
+  flex:1; min-width:90px;       /* ← breder; geen smalle ‘pill’-vakjes meer */
+  height:36px; padding:4px 10px;
+  border:2px solid #c9d6ea; border-radius:9px; text-align:center; font-weight:700;
+}
+/* — Keuze 10: pictogrammen op honderdveld — */
+
+/* 2 kaarten per rij, nette kolom- en rijafstand */
+.hvicons-grid{
+  display: grid;
+  grid-template-columns: 1fr;   /* één kaart per rij */
+  row-gap: 24px;                /* verticale ruimte tussen kaarten */
+  align-items: start;
+  margin-top: 6px;
+}
+
+/* kaart mag niets over de rand laten uitsteken */
+.hvicons-card{
+  border:1px solid #d9e2ec; border-radius:10px; background:#fff;
+  padding:12px;
+  display:flex; flex-direction:column; gap:18px;   /* extra ruimte tussen bord en legenda */
+  overflow: hidden;                                 /* voorkomt overlappen buiten de kaart */
+}
+
+/* groot raster binnen de kaart (past met 2 per rij op A4) */
+.hvicons-board{ display:flex; justify-content:center; }
+.hvicons-board .honderdveld-grid{
+  grid-template-columns: repeat(10, 34px);
+  grid-template-rows:    repeat(10, 34px);
+  width: 343px; height: 343px;                      /* iets compacter voor 2 naast elkaar */
+}
+
+/* pictogram in de cel */
+.hv-icon-in-cell{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; line-height:1;
+}
+
+/* legenda onder het bord: 3 items per rij, ruimtelijk, inputs smaller */
+.hvicons-legend{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 14px 18px;                                    /* meer horizontale ruimte */
+}
+.hvicons-legend-item{
+  display:flex; align-items:center; gap:12px;        /* meer ruimte tussen picto en input */
+  padding:6px 10px; border:1px solid #e2e8f0; border-radius:10px; background:#fff;
+  box-sizing:border-box;
+}
+.hvicons-legend-icon{
+  width:34px; height:34px; display:grid; place-items:center; font-size:22px;
+}
+.hvicons-legend-item input{
+  width: 30px;               /* 2 cijfers passen, kleiner dan voorheen */
+  min-width: 30px;
+  height: 34px;
+  padding: 2px 6px;
+  border:2px solid #c9d6ea; border-radius:9px;
+  text-align:center; font-weight:700; font-variant-numeric: tabular-nums;
+}
+
+/* extra marge tussen blokken van dit type onderling */
+.hvicons-block + .hvicons-block{ margin-top: 24px; }
+
+/* extra marge tussen eerste rij en de rest */
+.hvicons-first{ margin-bottom: 18px; }
+
+/* Keuze 10 – kaart/hoofdrij nooit over pagina's splitsen */
+.hvicons-card { break-inside: avoid; page-break-inside: avoid; }
+.hvicons-first { break-inside: avoid; }
+
+/* Extra verticale ruimte tussen opeenvolgende hvicons-blokken */
+.hvicons-block + .hvicons-block { margin-top: 24px; }
+/* === 11. 100-veld – Puzzelstukken === */
+.hvp-block { margin: 14px 0 20px; }
+.hvp-first { margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; }
+
+/* 3 kaarten per rij in het body-gedeelte */
+.hvp-grid{
+  display:grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 18px;
+  align-items:start;
+}
+
+/* kaart zelf: ruim en onsplitsbaar */
+.hvp-card{
+  border:1px solid #d9e2ec; border-radius:10px; background:#fff;
+  padding:12px;
+  display:flex; justify-content:center; align-items:center;
+  break-inside: avoid; page-break-inside: avoid;
+}
+
+/* puzzelstuk-raster */
+.hvp-piece{ display:grid; grid-auto-rows:60px; gap:5px; }
+.hvp-cell{
+  width:60px; height:60px;
+  border:2px solid #c9d6ea; border-radius:7px;
+  font-weight:700; font-size:16px; display:flex; align-items:center; justify-content:center;
+}
+.hvp-cell.blank{ background:#fff; }
+.hvp-cell.given{ background:#eef6ff; }
+
+/* === Puzzelstukken (keuze 11) – compacte kaarthoogte === */
+.hvp-card{
+  min-height: unset !important;   /* alle oude min-heights neutraliseren */
+  padding: 8px 10px;              /* iets minder binnenmarge */
+  display: flex;
+  align-items: flex-start;        /* NIET meer verticaal centreren */
+  justify-content: flex-start;
+  gap: 0;
+}
+
+/* kleine speelruimte boven/onder het raster zelf */
+.hvp-piece{ margin: 2px 0; }
+
+/* iets kleinere verticale ruimte tussen de kaarten onderling (optioneel) */
+.hvp-grid{ gap: 14px 18px; }
+/* Puzzelstukken: laat de kaart meegroeien met de inhoud */
+.hvp-card{
+  display: inline-block;       /* of block, afhankelijk van uw grid */
+  height: auto !important;     /* overschrijft eventuele vaste hoogtes */
+  vertical-align: top;
+  padding: 10px 12px;
+}
+
+/* Het puzzelstuk zelf als grid */
+.hvp-piece{
+  display: grid;
+  gap: 6px;                    /* optisch mooi */
+}
+
+/* Zichtbare cel en ‘gaten’ hebben dezelfde maat, zodat de hoogte klopt */
+.hvp-piece > div{
+  width: 60px;
+  height: 60px;
+}
+/* Zorg dat kaarten/rijen niet gesplitst worden */
+@media print {
+  .keep-with-title,
+  .hvp-block,
+  .hvp-first,
+  .hvp-grid,
+  .hvp-card,
+  .row-delete-wrap {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .exercise-title {
+    break-after: avoid;  /* titel niet alleen laten vallen */
+  }
+}
+.row-delete-wrap{ position: relative; }
+.row-delete-btn{
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  z-index: 20;
+  width: 22px; height: 22px;
+  line-height: 22px; text-align: center;
+  border-radius: 50%;
+  pointer-events: auto;     /* expliciet klikbaar */
+}
+/* Zorg voor gelijke afstand tussen rijen MAB-schema's */
+.mab-grid-layout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;          /* afstand horizontaal + verticaal tussen kaarten */
+}
+
+/* Extra marge tussen elke rij als flex niet volstaat */
+.mab-tellen-container {
+  margin-bottom: 20px;
+}
+/* Hoeveel tel je? / Kleur bij MAB-materiaal — altijd 2 naast elkaar */
+.mab-grid-layout{
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr)); /* precies 2 kolommen */
+  column-gap: 28px;  /* horizontale afstand tussen de twee oefeningen */
+  row-gap: 24px;     /* verticale afstand tussen de rijen */
+  align-items: start; /* geen verticale “uitrekken” verschillen */
+}
+
+/* Zorg dat elk kaartje de volle kolombreedte gebruikt */
+.mab-grid-layout > .mab-tellen-container{
+  width: 100%;
+  /* verwijder lokale margins als die er stonden; gap regelt de afstand */
+  margin: 0 !important;
+}
+
+/* (optioneel) op smalle schermen 1 kolom */
+@media (max-width: 680px){
+  .mab-grid-layout{
+    grid-template-columns: 1fr;
+  }
+}
+/* === PRINTVERBETERING: donkere lijnen voor PDF === */
+.honderdveld-grid,
+.honderdveld-cell,
+.honderdveld-te-table td,
+.mab-labeled-container,
+.mab-column-tens,
+.mab-header,
+.mab-te-table td,
+.mab-blocks-wrapper svg rect,
+.seq-box,
+.mix-box,
+.pv-card,
+.pv3-digit,
+.pv3-box,
+.pv3-small {
+  border-color: #000 !important;
+  stroke: #000 !important;
+}
+
+/* iets dikkere lijnbreedte bij rasters en hokjes */
+.honderdveld-grid,
+.honderdveld-cell {
+  border-width: 1.4px !important;
+}
+
+.mab-labeled-container,
+.mab-column-tens,
+.mab-header {
+  border-width: 2px !important;
+}
+
+.mab-te-table td,
+.honderdveld-te-table td,
+.seq-box,
+.mix-box,
+.pv-box,
+.pv3-box {
+  border-width: 1.8px !important;
+}
+
+/* ook pictogramraster en blanco MAB-materiaal in zwart */
+/* Goed: randen duidelijk zwart, maar vulling respecteren */
+.mab-blocks-wrapper svg path,
+.mab-blocks-wrapper svg rect {
+  stroke: #000 !important;
+  /* géén fill hier, laat JS/CSS de kleur bepalen */
+  vector-effect: non-scaling-stroke; /* randen blijven mooi bij schalen */
+}
+
+/* 100-veld cellen duidelijk zwart omlijnd */
+.honderdveld-cell {
+  border: 1.2px solid #000 !important;
+}
+
+/* getallenlijn-streepjes donkerder */
+line, path {
+  stroke: #000 !important;
+}
+
+/* bij print alle lijnen zwart */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+/* === INVULHOKJES: altijd duidelijke zwarte lijnen === */
+
+/* 1) Getallenlijn – lege hokjes (de SVG-omranding én de overlay-input) */
+.exercise.blanks svg rect {
+  stroke: #000 !important;          /* rand van het hokje in SVG */
+  stroke-width: 2 !important;
+  fill: #fff !important;            /* wit invulvlak */
+}
+
+.print-overlay-input {
+  border: 2px solid #000 !important; /* zichtbare rand bovenop de SVG */
+  border-radius: 9px !important;
+  background: #fff !important;
+  color: #000 !important;
+  box-shadow: none !important;       /* geen wazige rand bij print */
+}
+
+/* 2) Waarde per cijfer – TE/HTE invulvakjes */
+.pv-box, .pv-small,
+.pv3-box, .pv3-small {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* 3) Gemengd / getallenrij-varianten die ook vakjes gebruiken */
+.mix-box, .seq-box {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* 4) T/E/H-tabellen (cells en inputs) onder honderdveld/MAB */
+.honderdveld-te-table td,
+.mab-te-table td {
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input,
+.mab-te-table input {
+  border: 2px solid #000 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+  color: #000 !important;
+}
+
+/* 5) Print – behoud kleuren, maar maak invulhokjes extra duidelijk */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  .print-overlay-input { box-shadow: none !important; }
+}
+/* === 1) Overlay-inputs boven de lijn: zichtbaar kader, groot font === */
+.print-overlay-input{
+  background: #fff !important;
+  border: 2px solid #6b879a !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #000 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
+
+/* Verberg de overlay-rand expliciet tijdens export/print indien toegepast */
+/* op scherm tijdens export */
+.pdf-mode .print-overlay-input { 
+  opacity: 0 !important; 
+}
+
+/* bij afdruk/PDF */
+@media print {
+  .print-overlay-input { 
+    opacity: 0 !important; 
+  }
+}
+
+/* === 2) Onderliggende SVG-hokjes (die op papier moeten) duidelijk zwart === */
+.exercise.blanks svg rect{
+  stroke: #000 !important;
+  stroke-width: 2.2px !important;
+  fill: #fff !important;
+}
+
+/* Getallenlijntje zelf ook stevig zwart */
+.exercise svg line,
+.exercise svg path{
+  stroke: #000 !important;
+}
+
+/* === 3) ‘Vul aan tot volgend tiental/honderdtal’ (honderdveld-varianten) === */
+.aanvul-input{                    /* de kleine invulvakjes in die oefening */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+}
+.honderdveld-te-table td{         /* TE/HTE tabelranden onderaan sommige kaarten */
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+}
+
+/* === 4) Waarde per cijfer (TE/HTE) – donkere vakjes === */
+.pv-box, .pv-small,
+.pv3-box, .pv3-small{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* === 5) Andere oefenvakjes die ingevuld worden === */
+.seq-box, .mix-box{               /* getallenrij & gemengd */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+}
+
+/* --- ZWARTE, DUIDELIJKE HOKJES (print-vriendelijk) ------------------ */
+
+/* 1) Leeg antwoordvak bij H/T/E-schema (naast het schema) */
+.honderdveld-num-box {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 9px !important;
+  height: 44px !important;     /* mag blijven zoals u wenst */
+  width: 58px !important;      /* idem */
+  box-shadow: none !important;
+}
+
+/* 2) “Vul aan tot …” – invulvakjes in de zinnen */
+.aanvul-input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* 3) Consistentie voor TE/HTE tabellen die u onderaan soms gebruikt */
+.honderdveld-te-table td,
+.mab-te-table td {
+  border: 2px solid #000 !important;
+}
+.honderdveld-te-table input,
+.mab-te-table input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+/* 4) Bij print blijven kleuren en zwarte lijnen exact behouden */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}
+/* === PATCH — Zwarte invulhokjes + 5-structuur 100-veld ================== */
+
+/* 1) Invulhokjes overal duidelijk zwart */
+#sheet input.aanvul-input,
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input,
+#sheet .seq-box,                /* getallenrij */
+#sheet .mix-box,                /* gemengd */
+#sheet .pv-box, #sheet .pv-small,
+#sheet .pv3-box, #sheet .pv3-small,
+#sheet .honderdveld-num-box {   /* leeg vak naast TE/HTE-schema */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* 2) Overlay-inputs boven getallenlijn laten verdwijnen (papier toont SVG) */
+#sheet .print-overlay-input{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+}
+@media print { #sheet .print-overlay-input { opacity: 0 !important; } }
+
+/* 3) 100-veld: alle lijnen zwart + 5-structuur terug dikker */
+#sheet .honderdveld-grid{
+  border-top: 1.2px solid #000 !important;
+  border-left: 1.2px solid #000 !important;
+}
+#sheet .honderdveld-cell{
+  border-right: 1.2px solid #000 !important;
+  border-bottom: 1.2px solid #000 !important;
+}
+/* verticale dikkere lijn na elke 5e kolom */
+#sheet .honderdveld-cell:nth-child(10n+5){
+  border-right: 2.4px solid #000 !important;
+}
+/* horizontale dikkere lijn onder rij 5 (cellen 41..50) */
+#sheet .honderdveld-cell:nth-child(n+41):nth-child(-n+50){
+  border-bottom: 2.4px solid #000 !important;
+}
+
+/* 4) TE/HTE tabelranden zelf ook zwart */
+#sheet .honderdveld-te-table td,
+#sheet .mab-te-table td{
+  border: 2px solid #000 !important;
+}
+
+/* 5) Print: kleuren niet laten “verbleken” */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === ZWARTE INVULHOKKEN — VUL AAN + 100-VELD-PICTOGRAMMEN =============== */
+
+/* 1) “Vul aan tot …” (zinnen) */
+#sheet input.aanvul-input,
+#sheet .aanvul-rij input,
+#sheet .aanvul-vragen input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;           /* pill/innershadow weg */
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* 2) 100-veld met pictogrammen – legenda-invulvakjes: smal en zwart */
+#sheet .hvicons-legend input,
+#sheet .hvicons-legend-item input {
+  width: 44px !important;
+  min-width: 44px !important;
+  max-width: 44px !important;
+  height: 34px !important;
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* Extra: TE/HTE-invulvakjes die in dezelfde kaarten staan, voor consistentie */
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+}
+
+/* Print behoudt kleuren en lijnen */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 8: ZWARTE, DUIDELIJKE RANDEN ==================== */
+#sheet .fillnext-box,            /* de invulhokjes */
+#sheet .fillnext-num {           /* het getal-kadertje linksboven */
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* optioneel: de omlijsting van het kaartje zelf iets donkerder */
+#sheet .fillnext-card {
+  border-color: #000 !important;
+}
+
+/* bij print kleuren niet laten verbleken */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 11: Puzzelstukken – duidelijke zwarte randen ================= */
+
+/* Lege vakjes (waar leerlingen getal invullen) */
+#sheet .hvp-cell.blank {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  box-shadow: none !important;
+}
+
+/* Gegeven cijfers – behouden rand, maar iets lichter grijs of zwart */
+#sheet .hvp-cell.given {
+  border: 2px solid #000 !important;
+  background: #f2f2f2 !important; /* mag ook wit blijven */
+  color: #000 !important;
+}
+
+/* Kaart- en rasterrand licht zwart omkaderen */
+#sheet .hvp-piece {
+  border: 2px solid #000 !important;
+  border-radius: 6px;
+}
+
+/* Print behoud kleuren en contrast */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === KEUZE 11 — Puzzelstukken: netjes gecentreerd en los van de randen === */
+
+/* Het kaartje zelf: altijd ruimte tot de rand + centreren van de inhoud */
+#sheet .hvp-card{
+  display: grid;               /* eenvoudig centreren op beide assen */
+  place-items: center;         /* horizontaal + verticaal */
+  padding: 18px !important;    /* ruimte tussen puzzel en kaartkader */
+  box-sizing: border-box;
+  min-height: 180px;           /* voel je vrij dit te tweaken (160–200) */
+}
+
+/* Het “kader” rond het puzzelstuk (rechthoek binnen het kaartje) */
+#sheet .hvp-piece{
+  padding: 10px !important;    /* puzzel raakt het kader boven/onder niet meer */
+  margin: 0 auto !important;   /* extra zeker gecentreerd */
+  display: grid;
+  gap: 6px;                    /* wat lucht tussen de vierkantjes */
+  border: 2px solid #000;      /* kader zelf duidelijk zwart (laat weg als je dat niet wil) */
+  border-radius: 6px;
+}
+
+/* De vakjes van het puzzelstuk (zowel lege als gegeven) */
+#sheet .hvp-cell{
+  width: 60px; height: 60px;
+  font-size: 18px !important; font-weight: 700 !important;             /* fallback als inline style verandert */
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+#sheet .hvp-cell.blank{ background: #fff; }
+#sheet .hvp-cell.given{ background: #f2f2f2; color: #000; }
+
+/* Hou het geheel contrastrijk bij print */
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === SPRONGEN EN INVULSCHEMA'S: HELDERE STIJL =========================== */
+
+/* 1) SPRONGEN – invulvakjes zwart omlijnd */
+#sheet .jump-exercise input[type="text"],
+#sheet .jump-exercise input[type="number"] {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  color: #000 !important;
+}
+
+/* 2) INVULSCHEMA'S (TE/HTE) – enkel de letters T/E/H tonen, 
+   GEEN extra lege invulhokjes tekenen */
+#sheet .mab-te-table input,
+#sheet .honderdveld-te-table input {
+  display: none !important;   /* verbergt de onnodige inputvakjes */
+}
+
+#sheet .mab-te-table td,
+#sheet .honderdveld-te-table td {
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  color: #000 !important;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* 3) Print – behoud kleur en contrast */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === Puzzelstukken: cellen raken elkaar (geen gaps), midden in het kaartje === */
+
+/* kaartje blijft met marge en mooi gecentreerd */
+#sheet .hvp-card{
+  display: grid;
+  place-items: center;
+  padding: 18px !important;     /* afstand tot de buitenrand van de kaart */
+  box-sizing: border-box;
+  min-height: 180px;
+}
+
+/* het puzzelraster zelf */
+#sheet .hvp-piece{
+  display: grid;
+  gap: 0 !important;            /* <<< géén ruimte tussen de vakjes */
+  padding: 10px !important;     /* los van het binnenkader */
+  margin: 0 auto !important;
+  border: 2px solid #000;       /* binnenkader (verwijderen als je dat niet wil) */
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* de afzonderlijke vakjes: strakke zwarte lijnen, geen afgeronde hoeken */
+#sheet .hvp-cell{
+  width: 60px; height: 60px;
+  font-size: 18px !important; font-weight: 700 !important;
+  border: 1.2px solid #000;     /* dunner zodat binnenlijnen niet te zwaar ogen */
+  border-radius: 0 !important;  /* rechte hoeken zodat cellen naadloos aansluiten */
+  box-sizing: border-box;
+}
+
+#sheet .hvp-cell.blank{ background: #fff; }
+#sheet .hvp-cell.given{ background: #f2f2f2; color: #000; }
+
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* === HERSTEL TE/HTE-KLEUREN + DONKERE SPRONGEN-HOKJES ================== */
+
+/* 1) Sprongen tellen – invulhokjes echt zwart */
+#sheet .jump-box{
+  border: 2px solid #000 !important;
+  background: #fff !important;
+  border-radius: 9px !important;
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  outline: none;
+  color: #000 !important;
+}
+
+/* 2) TE/HTE-invulschema's: labels terug met kleur (T groen, E geel, H blauw) */
+#sheet .honderdveld-te-table .te-label,
+#sheet .mab-te-table .te-label{
+  background: #4caf50 !important;  /* T */
+  color: #fff !important;
+  font-weight: 700;
+}
+#sheet .honderdveld-te-table .te-label.e,
+#sheet .mab-te-table .te-label.e{
+  background: #ffeb3b !important;  /* E */
+  color: #333 !important;
+}
+#sheet .honderdveld-te-table .te-label.h,
+#sheet .mab-te-table .te-label.h{
+  background: #42a5f5 !important;  /* H */
+  color: #fff !important;
+}
+
+/* Randen van de cellen zwart, maar alleen niet-labelcellen wit */
+#sheet .honderdveld-te-table td,
+#sheet .mab-te-table td{
+  border: 2px solid #000 !important;
+}
+#sheet .honderdveld-te-table td:not(.te-label),
+#sheet .mab-te-table td:not(.te-label){
+  background: #fff !important;   /* labels behouden hun kleur */
+}
+
+/* Inputs in het schema verbergen (zoals u wenst: geen extra hokjes in het raster) */
+#sheet .honderdveld-te-table input,
+#sheet .mab-te-table input{
+  display: none !important;
+}
+
+/* 3) Print: kleuren en contrast behouden */
+@media print{
+  *{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+/* PUZZELSTUKKEN: micro-gap om dubbele randen te vermijden */
+#sheet .hvp-piece{
+  display: grid;
+  gap: 0.6px !important;   /* heel klein spleetje: voorkomt “dubbele” dikke lijn */
+  padding: 10px !important;
+  margin: 0 auto !important;
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+#sheet .hvp-cell{
+  width: 60px; height: 60px;
+  font-size: 18px !important; font-weight: 700 !important;
+  border: 1px solid #000;  /* 1px + 0.6px gap geeft optisch fijne lijnen */
+  border-radius: 0 !important;
+  box-sizing: border-box;
+}
+/* === Puzzelstukken – micro-gap overal consistent ======================= */
+
+/* 1) Raster van het puzzelstuk: dwing micro-gap af */
+#sheet .hvp-piece{
+  display: grid !important;
+  gap: 0.8px !important;            /* klein spleetje → geen dubbele “dikke” naad */
+  padding: 10px !important;         /* los van kaartkader */
+  margin: 0 auto !important;
+  border: 2px solid #000;           /* (optioneel) binnenkader */
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* 2) Cellen: overal exact dezelfde rand, geen afgeronde hoeken of schaduw */
+#sheet .hvp-piece .hvp-cell,
+#sheet .hvp-piece .hvp-cell.blank,
+#sheet .hvp-piece .hvp-cell.given{
+  display: block !important;
+  margin: 0 !important;
+  width: 34px !important;
+  height: 34px !important;
+  border: 1px solid #000 !important;    /* uniforme dunne binnenrand */
+  border-radius: 0 !important;          /* rechte hoeken → naad sluit aan */
+  box-shadow: none !important;
+  -webkit-appearance: none; appearance: none;
+  background-clip: padding-box;         /* voorkomt “verdikking” langs de randen */
+}
+
+/* (optioneel) visueel verschil tussen leeg en gegeven */
+#sheet .hvp-piece .hvp-cell.blank { background: #fff !important; }
+#sheet .hvp-piece .hvp-cell.given { background: #f2f2f2 !important; color:#000 !important; }
+/* === PUZZELSTUKKEN — cijfers terug mooi gecentreerd ==================== */
+#sheet .hvp-piece .hvp-cell,
+#sheet .hvp-piece .hvp-cell.blank,
+#sheet .hvp-piece .hvp-cell.given{
+  display: flex !important;              /* i.p.v. block */
+  align-items: center !important;        /* verticaal centreren */
+  justify-content: center !important;    /* horizontaal centreren */
+  text-align: center !important;
+  padding: 0 !important;
+  line-height: 1 !important;             /* geen extra verticale schuiving */
+  width: 34px !important;
+  height: 34px !important;
+  box-sizing: border-box !important;
+}
+/* TE/HTE-labels: T groen, E geel, H blauw (laatste wint) */
+#sheet .honderdveld-te-table .te-label,
+#sheet .mab-te-table .te-label{
+  background:#4caf50 !important;  /* T */
+  color:#fff !important;
+  font-weight:700;
+}
+#sheet .honderdveld-te-table .te-label.e,
+#sheet .mab-te-table .te-label.e{
+  background:#ffeb3b !important;  /* E */
+  color:#333 !important;
+}
+#sheet .honderdveld-te-table .te-label.h,
+#sheet .mab-te-table .te-label.h{
+  background:#42a5f5 !important;  /* H */
+  color:#fff !important;
+}
+/* Alleen niet-labelcellen wit houden */
+#sheet .honderdveld-te-table td:not(.te-label),
+#sheet .mab-te-table td:not(.te-label){
+  background:#fff !important;
+}
+/* — Duidelijk kader rond elke 100-veld-oefening — */
+/* — Duidelijk kader rond elke 100-veld-oefening — */
+#sheet .honderdveld-exercise-block {
+  border: 2px solid #000 !important;
+  border-radius: 10px;
+  padding: 12px 18px 12px 12px;  /* rechter padding iets groter */
+  background: #fff;
+  box-sizing: border-box;
+  position: relative;
+}
+
+
+/* ── Uniforme lettergrootte 14pt voor alle oefeningselementen ── */
+.mix-num, .mix-label, .jump-start, .jump-given,
+.seq-num, .honderdveld-given-num,
+.mab-header, .mab-te-table, .mab-connect-num,
+.pv-label, .pv3-label,
+.fillnext-num, .fillnext-line,
+.mix-order-top div, .mix-order-symbol,
+.aanvul-rij, .gb1000-ans .hdr {
+  font-size: 14pt !important;
+}
+.jump-box, .seq-box, .mix-box, .fillnext-box,
+.aanvul-input, .honderdveld-num-box,
+.pv-box, .pv-small, .pv3-box, .pv3-small {
+  font-size: 14pt !important;
+}
+
+/* ── Getallenlijn bereik-waarschuwing ── */
+.ruler-warning {
+  background: #fff8e1;
+  border: 1.5px solid #f9a825;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d4c00;
+  margin: 8px 0 4px 0;
+}
+@media print { .ruler-warning { display: none !important; } }
+
+/* ── Plaatswaarde: bredere invulhokjes ── */
+.pv-box  { width: 52px !important; min-width: 52px !important; }
+.pv-small{ width: 36px !important; min-width: 36px !important; }
+.pv-box.pv3-box-wide { width: 72px !important; min-width: 72px !important; }
+.pv3-box { width: 52px !important; min-width: 52px !important; }
+.pv3-small{ width: 36px !important; min-width: 36px !important; }
+.pv3-box-wide { width: 72px !important; min-width: 72px !important; }
+
+/* ── Vul aan tot tiental: kaart met honderdveld-schema ── */
+.fillnext-card-met-schema {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: unset;
+}
+
+.fillnext-schema {
+  flex-shrink: 0;
+}
+
+/* Klein 100-veld schema (schaal ~0.55) */
+.fillnext-schema .honderdveld-grid {
+  grid-template-columns: repeat(10, 11px) !important;
+  grid-template-rows:    repeat(10, 11px) !important;
+  width:  111px !important;
+  height: 111px !important;
+  border-top:  1px solid #000 !important;
+  border-left: 1px solid #000 !important;
+}
+.fillnext-schema .honderdveld-cell {
+  border-right:  1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
+}
+.fillnext-schema .honderdveld-cell:nth-child(10n+5) {
+  border-right: 2px solid #000 !important;
+}
+.fillnext-schema .honderdveld-cell:nth-child(n+41):nth-child(-n+50) {
+  border-bottom: 2px solid #000 !important;
+}
+
+.fillnext-vragen {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.fillnext-num-groot {
+  font-size: 18pt;
+  font-weight: 700;
+  color: #1A3A5C;
+}
+
+/* Plaatswaarde: nooit halverwege pagina splitsen */
+.pv3-item, .pv-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Getalbeelden tot 100: task gecentreerd onder het 100-veld */
+.gb1000-task-onder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 0;
+  width: 100%;
+  position: relative;
+  z-index: 2;
+  background: #fff;
+  padding-top: 6px;
+}
