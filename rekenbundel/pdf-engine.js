@@ -1175,6 +1175,12 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
   if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
 
+  // Maak eerst 10: blok bevat drieTermen-oefeningen
+  if (blok.oefeningen.length > 0 && blok.oefeningen[0].drieTermen) {
+    _tekenEerst10Blok(blok);
+    return;
+  }
+
   const isTot1000 = blok.niveau >= 1000;
   const _kolommen = isTot1000 ? 3 : KOLOMMEN;
 
@@ -1217,6 +1223,92 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   y += NABLOK;
   lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
 }
+
+  /* ── Maak eerst 10: 3-termen optellen/aftrekken ─────────── */
+  // 3 kolommen (tekst is breder), optioneel geel voorbeeldkader
+  const EERST10_KOLOMMEN = 3;
+
+  function _tekenEerst10Blok(blok) {
+    const metVoorbeeld = blok.metVoorbeeld || false;
+    const aantalKol    = EERST10_KOLOMMEN;
+    const rijH         = RIJHOOGTE + RIJ_GAP;
+    const aantalRijen  = Math.ceil(blok.oefeningen.length / aantalKol);
+
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + rijH + 4);
+
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += ZINRUIMTE;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      if (rij > 0) checkRuimte(rijH);
+      const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
+      _tekenEerst10Rij(rijOef, aantalKol, metVoorbeeld, rij);
+    }
+
+    y += NABLOK;
+    lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+  }
+
+  function _tekenEerst10Rij(oefeningen, aantalKolommen, metVoorbeeld, rijNr) {
+    const kolB = CW / aantalKolommen;
+    const kadW = kolB - 4;
+    const kadH = RIJHOOGTE - 1;
+
+    oefeningen.forEach((oef, kol) => {
+      const globaleIdx = rijNr * aantalKolommen + kol;
+      const isVoorbeeld = metVoorbeeld && globaleIdx === 0;
+
+      const ox = ML + kol * kolB + 2;
+      const oy = y;
+
+      // Kader: geel bij voorbeeld, wit anders
+      if (isVoorbeeld) {
+        doc.setFillColor(255, 243, 205);   // #FFF3CD
+        doc.setDrawColor(240, 165, 0);     // #F0A500
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(180, 200, 225);
+      }
+      doc.setLineWidth(isVoorbeeld ? 0.8 : 0.6);
+      doc.roundedRect(ox, oy, kadW, kadH, 1.5, 1.5, 'FD');
+
+      // Tekst van de som
+      doc.setFont('helvetica', isVoorbeeld ? 'bold' : 'normal');
+      doc.setFontSize(12);
+      doc.setTextColor(44, 62, 80);
+      doc.text(oef.vraag, ox + 3, oy + kadH / 2 + 2);
+
+      // Antwoordvak
+      const vakW = 16, vakH = kadH - 5;
+      const tekstB = doc.getTextWidth(oef.vraag);
+      const vakX = ox + 3 + tekstB + 2;
+      const vakY = oy + (kadH - vakH) / 2;
+
+      if (isVoorbeeld) {
+        // Antwoordvak geel ingevuld met antwoord
+        doc.setFillColor(255, 224, 130);   // #FFE082
+        doc.setDrawColor(240, 165, 0);
+        doc.setLineWidth(0.8);
+        doc.roundedRect(vakX, vakY, vakW, vakH, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(93, 58, 0);       // donkerbruin
+        doc.text(String(oef.antwoord), vakX + vakW / 2, vakY + vakH / 2 + 1.5, { align: 'center' });
+      } else {
+        // Leeg antwoordvak
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(26, 58, 92);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(vakX, vakY, vakW, vakH, 2, 2, 'FD');
+      }
+    });
+
+    y += RIJHOOGTE + RIJ_GAP;
+  }
 
   function _tekenAanvullenBlok(blok) {
     const variant     = blok.aanvullenVariant || 'zonder-schema';
