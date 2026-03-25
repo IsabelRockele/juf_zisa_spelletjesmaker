@@ -23,7 +23,7 @@ const AftrekkenTot20 = (() => {
     5:  { zonder: ['E-E'],         met: [],                        gemengd: ['E-E'] },
     10: { zonder: ['E-E'],         met: [],                        gemengd: ['E-E'] },
     20: {
-      zonder:  ['E-E', 'T-E', 'T-TE', 'TE-E', 'TE-T', 'TE-TE', 'Gemengd'],
+      zonder:  ['E-E', 'T-E', 'T-TE', 'TE-E', 'TE-T', 'TE-TE', 'Maak eerst 10', 'Gemengd'],
       met:     ['TE-E', 'T-E', 'T-TE', 'Gemengd'],
       gemengd: ['E-E', 'T-E', 'T-TE', 'TE-E', 'TE-T', 'TE-TE', 'Gemengd'],
     },
@@ -115,6 +115,37 @@ const AftrekkenTot20 = (() => {
           break;
 
         default:
+          // Maak eerst 10: a - b - c waarbij a - c = 10 (of 20)
+          // Voorbeeld: 17 - 5 - 7 → eerst 17-7 onderstrepen → 10 - 5 = 5
+          // Soms a = 20: 20 - 3 - 7 → 20-7=13, maar dat is niet "10 vormen"
+          // Correcte logica: a - vriend = 10, dan 10 - b = resultaat
+          if (type === 'Maak eerst 10') {
+            const gebruik20 = Math.random() < 0.25;
+            const a = gebruik20 ? 20 : rand(11, 19);
+            const vriend = a - 10;      // bv. 17→7, 13→3
+            if (vriend < 1 || vriend > 9) continue;
+            // b ≠ vriend: anders is het bv. 13-3-3 en hoeft leerling niet na te denken
+            const b = rand(1, 9);
+            if (b === vriend) continue;  // <-- de fix
+            if (10 - b <= 0) continue;
+            // Volgorde: vriend soms naast a, soms niet (b in het midden)
+            let t1, t2;
+            if (Math.random() < 0.5) {
+              // a - b - vriend (vriend staat niet naast a)
+              t1 = b; t2 = vriend;
+            } else {
+              // a - vriend - b (vriend staat naast a)
+              t1 = vriend; t2 = b;
+            }
+            return {
+              a, b: t1, c: t2,
+              verschil: 10 - b,
+              type: 'Maak eerst 10',
+              vriend,
+              som: b,
+              drieTermen: true,
+            };
+          }
           return null;
       }
 
@@ -166,15 +197,20 @@ const AftrekkenTot20 = (() => {
       const paar = maakPaar(type, niv, brug);
       if (!paar) continue;
 
-      const sleutel = `${paar.a}-${paar.b}`;
+      const sleutel = paar.type === 'Maak eerst 10'
+        ? `${paar.a}-${paar.b}-${paar.c}`
+        : `${paar.a}-${paar.b}`;
       if (gebruikteSleutels.has(sleutel)) continue;
       gebruikteSleutels.add(sleutel);
 
       oefeningen.push({
         sleutel,
         type: paar.type,
-        vraag: `${paar.a} - ${paar.b} =`,
-        antwoord: paar.verschil,
+        vraag: paar.type === 'Maak eerst 10'
+          ? `${paar.a} - ${paar.b} - ${paar.c} =`
+          : `${paar.a} - ${paar.b} =`,
+        antwoord: paar.type === 'Maak eerst 10' ? paar.verschil : paar.verschil,
+        ...(paar.type === 'Maak eerst 10' ? { vriend: paar.vriend, drieTermen: true } : {}),
       });
     }
     return oefeningen;
