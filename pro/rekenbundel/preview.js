@@ -179,6 +179,18 @@ const Preview = (() => {
       return _compenserenHTML(blokId, oef, idx, compenserenVariant, metVoorbeeld);
     }
 
+    /* ── Maak eerst 10 ───────────────────────────────────────── */
+    if (oef.drieTermen) {
+      const metVoorbeeld = blok.metVoorbeeld || false;
+      const isVoorbeeld  = metVoorbeeld && idx === 0;
+      return `
+        <div class="oefening-item oefening-eerst10${isVoorbeeld ? ' eerst10-voorbeeld' : ''}">
+          <span class="oef-tekst">${esc(oef.vraag)}</span>
+          <span class="antwoord-vak${isVoorbeeld ? ' antwoord-ingevuld' : ''}">${isVoorbeeld ? String(oef.antwoord) : ''}</span>
+          <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
+        </div>`;
+    }
+
     /* ── Gewone oefening zonder hulpmiddelen ─────────────── */
     if (!heeftSplits && !heeftLijnen) {
       return `
