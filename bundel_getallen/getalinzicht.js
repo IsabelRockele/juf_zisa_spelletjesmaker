@@ -651,12 +651,31 @@ function createRowDeleteButton(target){
     let p = parentBefore;
     while (p && !p.id && p !== document.body) {
       // Controleer of er echte inhoud over is (niet enkel delete-knoppen)
-      const echteKinderen = Array.from(p.children || []).filter(el =>
-        !el.classList.contains('delete-btn') &&
-        !el.classList.contains('row-delete-btn') &&
-        !el.classList.contains('title-add-btn') &&
-        !el.classList.contains('title-delete-btn')
-      );
+      const echteKinderen = Array.from(p.children || []).filter(el => {
+        const cl = el.classList;
+        // Sla knoppen over
+        if (cl.contains('delete-btn') || cl.contains('row-delete-btn') ||
+            cl.contains('title-add-btn') || cl.contains('title-delete-btn')) return false;
+        // Sla lege container-divs over (mixed-grid, mixed-first, fillnext-grid, etc.)
+        const isLegeContainer = (
+          cl.contains('mixed-grid') || cl.contains('mixed-first') ||
+          cl.contains('fillnext-grid') || cl.contains('fillnext-first') ||
+          cl.contains('mab-grid-layout') || cl.contains('mab-first') ||
+          cl.contains('hvp-grid') || cl.contains('hvp-first') ||
+          cl.contains('gb1000-grid') || cl.contains('gb1000-first') ||
+          cl.contains('pv-grid') || cl.contains('pv-first') ||
+          cl.contains('pv3-grid')
+        ) && el.children.length === 0;
+        if (isLegeContainer) return false;
+        // Ook lege containers met enkel knoppen tellen niet mee
+        if (el.children.length > 0) {
+          const echteSubKinderen = Array.from(el.children).filter(sub =>
+            !sub.classList.contains('delete-btn') && !sub.classList.contains('row-delete-btn')
+          );
+          if (echteSubKinderen.length === 0) return false;
+        }
+        return true;
+      });
       if (echteKinderen.length === 0) {
         const ouder = p.parentElement;
         p.remove();
