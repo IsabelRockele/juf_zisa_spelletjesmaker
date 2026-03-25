@@ -4,123 +4,298 @@
   <meta charset="utf-8">
   <title>Getalinzicht — keuze leerjaren</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#f6fafc; --ink:#0f172a; --muted:#556070; --blue:#1976d2;
-      --ring:#a7d3ff; --card:#ffffff; --border:#e2e8f0;
+    :root {
+      --blauw: #1A3A5C;
+      --lichtblauw: #4A90D9;
+      --groen: #27AE60;
+      --oranje: #f59e0b;
+      --bg: #f0f6ff;
+      --wit: #ffffff;
+      --border: #d8e8f8;
+      --muted: #64748b;
     }
-    html,body{height:100%}
-    body{
-      margin:0; font:16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color:var(--ink); background:var(--bg);
-    }
-    .wrap{max-width:960px; margin:48px auto; padding:0 16px;}
-    h1{font-size:28px; margin:0 0 8px}
-    p.lead{margin:0 0 28px; color:#475569}
-    .grid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px}
-    @media (max-width:720px){ .grid{grid-template-columns:1fr} }
 
-    .card{
-      background:var(--card); border:1px solid var(--border); border-radius:16px;
-      padding:22px; box-shadow:0 4px 18px rgba(2,25,55,.06);
-      display:flex; flex-direction:column; gap:12px; min-height:190px;
-    }
-    .card h2{font-size:22px; margin:0}
-    .card p{margin:0; color:var(--muted)}
-    .sub{font-size:13px; color:#64748b}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .btn{
-      display:inline-block; padding:10px 16px; border-radius:999px;
-      background:var(--blue); color:#fff; border:0; font-weight:600;
-      text-decoration:none; text-align:center; cursor:pointer;
-      width:fit-content;
+    html, body {
+      height: 100%;
+      font-family: 'Nunito', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--blauw);
     }
-    .btn:focus{outline:3px solid var(--ring); outline-offset:2px}
-    .btn.secondary{ background:#e2e8f0; color:#0f172a }
-    
-    /* Nieuwe stijl voor de knop linksboven */
-    .btn-top-left {
+
+    /* Achtergrond met subtiele geometrie */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 10% 20%, rgba(74,144,217,.10) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 90% 80%, rgba(39,174,96,.08) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 28px;
+      background: var(--wit);
+      border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 12px rgba(26,58,92,.07);
+    }
+
+    .menu-knop {
+      background: var(--blauw);
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 7px 16px;
+      border-radius: 999px;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .menu-knop:hover { background: #2a5a8c; }
+
+    .header-logo {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--blauw);
+      letter-spacing: -.5px;
+    }
+    .header-logo span { color: var(--groen); }
+    .header-sub {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Hoofd */
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 52px auto;
+      padding: 0 20px;
+    }
+
+    .intro {
+      text-align: center;
+      margin-bottom: 44px;
+    }
+    .intro h1 {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--blauw);
+      margin-bottom: 8px;
+      letter-spacing: -.5px;
+    }
+    .intro h1 span { color: var(--lichtblauw); }
+    .intro p {
+      font-size: 16px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+
+    /* Kaarten */
+    .card {
+      background: var(--wit);
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      padding: 28px 26px 24px;
+      box-shadow: 0 6px 24px rgba(26,58,92,.08);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: transform .2s, box-shadow .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 36px rgba(26,58,92,.13);
+    }
+    .card::before {
+      content: '';
       position: absolute;
-      top: 20px;
-      left: 20px;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--lichtblauw), var(--groen));
+      border-radius: 20px 20px 0 0;
+    }
+    .card.coming-soon::before {
+      background: linear-gradient(90deg, #94a3b8, #cbd5e1);
     }
 
-    /* Overlay / modal */
-    .modal{
-      position:fixed; inset:0; display:none; place-items:center;
-      background:rgba(15,23,42,.55); z-index:1000;
+    .card-icon {
+      font-size: 36px;
+      line-height: 1;
     }
-    .modal.open{ display:grid }
-    .modal-card{
-      background:#fff; border-radius:14px; border:1px solid var(--border);
-      padding:22px 20px; max-width:460px; width:92%;
-      box-shadow:0 18px 40px rgba(2,25,55,.18);
+
+    .card h2 {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--blauw);
+      margin: 0;
     }
-    .modal-card h3{margin:0 0 8px; font-size:20px}
-    .modal-card p{margin:0 0 16px; color:#475569}
-    .modal-actions{display:flex; gap:10px; justify-content:flex-end}
+
+    .card p {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      line-height: 1.5;
+      flex: 1;
+    }
+
+    .card .tag {
+      display: inline-block;
+      background: #e0f0ff;
+      color: var(--lichtblauw);
+      font-size: 12px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 999px;
+      margin-bottom: 4px;
+    }
+    .card.coming-soon .tag {
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
+
+    /* Knoppen */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 999px;
+      background: var(--lichtblauw);
+      color: #fff;
+      border: none;
+      font-weight: 800;
+      font-size: 14px;
+      font-family: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      width: fit-content;
+      box-shadow: 0 3px 10px rgba(74,144,217,.35);
+    }
+    .btn:hover { background: var(--blauw); transform: translateY(-1px); }
+
+    .btn-disabled {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #94a3b8;
+      border: none;
+      font-weight: 800;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: not-allowed;
+      width: fit-content;
+    }
+
+    /* Binnenkort-banner */
+    .binnenkort-banner {
+      background: linear-gradient(135deg, #fff8e1, #fffde7);
+      border: 2px solid #fde68a;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #92400e;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed; inset: 0; display: none; place-items: center;
+      background: rgba(15,23,42,.55); z-index: 1000;
+    }
+    .modal.open { display: grid; }
+    .modal-card {
+      background: #fff; border-radius: 16px; border: 1px solid var(--border);
+      padding: 28px 26px; max-width: 440px; width: 92%;
+      box-shadow: 0 18px 48px rgba(2,25,55,.18);
+    }
+    .modal-card h3 { margin: 0 0 10px; font-size: 22px; font-weight: 900; color: var(--blauw); }
+    .modal-card p  { margin: 0 0 20px; color: var(--muted); font-weight: 600; font-size: 15px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+
+    .btn-sluit {
+      padding: 9px 20px; border-radius: 999px;
+      background: var(--blauw); color: #fff;
+      border: none; font-family: inherit; font-weight: 800; font-size: 14px;
+      cursor: pointer; transition: background .15s;
+    }
+    .btn-sluit:hover { background: #2a5a8c; }
   </style>
 </head>
 <body>
-  <a href="index.html" class="btn btn-top-left">Keuzemenu</a>
 
-  <div class="wrap">
-    <h1>Getalinzicht</h1>
-    <p class="lead">Kies de bouwsteen. U kunt later altijd terug naar deze pagina.</p>
+<header>
+  <a href="../index.html" class="menu-knop">⬅ Keuzemenu</a>
+  <div class="header-logo">🔢 Getal<span>inzicht</span></div>
+  <div class="header-sub">— jufzisa.be</div>
+</header>
 
-    <div class="grid">
-      <div class="card">
-        <div>
-          <h2>1ste t/m 3de leerjaar</h2>
-          <p>Getalinzicht tot 20, 100 en 1000, plaatswaarde, honderdveld, MAB, …</p>
-          <div class="sub">groep 3 t/m 5</div>
-        </div>
-        <a class="btn" href="getalinzicht.html">Open 1–3</a>
-      </div>
+<div class="wrap">
 
-      <div class="card">
-        <div>
-          <h2>4de t/m 5de leerjaar</h2>
-          <p>Getalinzicht tot 10 000, 100 000 en kommagetallen, …</p>
-          <div class="sub">groep 6 t/m 8</div>
-        </div>
-        <button class="btn" id="btnWip" type="button">Open 4–5</button>
-      </div>
-    </div>
+  <div class="intro">
+    <h1>Kies je <span>leerjaar</span></h1>
+    <p>Selecteer de module die past bij je klas.</p>
   </div>
 
-  <div class="modal" id="wipModal" role="dialog" aria-modal="true" aria-labelledby="wipTitle" aria-describedby="wipDesc">
-    <div class="modal-card">
-      <h3 id="wipTitle">Even geduld…</h3>
-      <p id="wipDesc">Hier wordt nog aan gewerkt. Deze module komt binnenkort beschikbaar.</p>
-      <div class="modal-actions">
-        <button class="btn secondary" id="closeWip" type="button">Sluiten</button>
+  <div class="grid">
+
+    <!-- 1ste–3de leerjaar -->
+    <div class="card">
+      <div class="card-icon">🏫</div>
+      <div>
+        <div class="tag">1ste – 3de leerjaar</div>
+        <h2>Getalinzicht tot 1000</h2>
       </div>
+      <p>Getallenlijn, honderdveld, MAB-materiaal, plaatswaarde, sprongen, buurgetallen en meer — voor getallen tot 20, 100 en 1000.</p>
+      <a class="btn" href="getalinzicht.html">▶ Open module</a>
     </div>
+
+    <!-- 4de–6de leerjaar -->
+    <div class="card coming-soon">
+      <div class="card-icon">📐</div>
+      <div>
+        <div class="tag">4de – 6de leerjaar</div>
+        <h2>Getalinzicht tot 1 000 000</h2>
+      </div>
+      <p>Grotere getallen, kommagetallen en uitgebreide plaatswaarde-oefeningen. <strong>Wordt gebouwd in de zomer van 2026.</strong></p>
+      <div class="binnenkort-banner">
+        🚧 Nog niet beschikbaar — komt eraan!
+      </div>
+      <button class="btn-disabled" disabled>Binnenkort beschikbaar</button>
+    </div>
+
   </div>
+</div>
 
-  <script>
-    (function(){
-      const btn = document.getElementById('btnWip');
-      const modal = document.getElementById('wipModal');
-      const close = document.getElementById('closeWip');
-
-      function openModal(){
-        modal.classList.add('open');
-        close.focus();
-      }
-      function closeModal(){
-        modal.classList.remove('open');
-        btn.focus();
-      }
-
-      btn.addEventListener('click', openModal);
-      close.addEventListener('click', closeModal);
-      document.addEventListener('keydown', (e)=>{
-        if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-      });
-      modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
-    })();
-  </script>
 </body>
 </html>
