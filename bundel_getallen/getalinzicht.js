@@ -1273,6 +1273,7 @@ else if(type==='orderAsc' || type==='orderDesc'){
 }
 else if (type==='nextTen'){
   const showExample = document.getElementById('fillNextExample')?.checked;
+  const metSchema   = document.getElementById('fillNextSchema')?.checked !== false;
   // Kies een getal dat GEEN veelvoud van 10 is, onder 100
   let x;
   do { x = Math.floor(Math.random() * 99) + 1; } while (x % 10 === 0);
@@ -1281,21 +1282,25 @@ else if (type==='nextTen'){
   const tens = Math.floor(x / 10);
 
   const card = document.createElement('div');
-  card.className = 'fillnext-card fillnext-card-met-schema' + ((showExample && i===0) ? ' example' : '');
+  card.className = (metSchema ? 'fillnext-card fillnext-card-met-schema' : 'fillnext-card')
+                 + ((showExample && i===0) ? ' example' : '');
 
-  // Bouw een mini honderdveld-schema (inkleuring t/m x)
-  const schema = document.createElement('div');
-  schema.className = 'fillnext-schema';
-  const schemaGrid = document.createElement('div');
-  schemaGrid.className = 'honderdveld-grid';
-  for (let j = 1; j <= 100; j++) {
-    const cel = document.createElement('div');
-    cel.className = 'honderdveld-cell';
-    if (j <= tens * 10) cel.classList.add('filled-ten');
-    else if (j <= x)    cel.classList.add('filled-unit');
-    schemaGrid.appendChild(cel);
+  if (metSchema) {
+    // Mini honderdveld-schema
+    const schema = document.createElement('div');
+    schema.className = 'fillnext-schema';
+    const schemaGrid = document.createElement('div');
+    schemaGrid.className = 'honderdveld-grid';
+    for (let j = 1; j <= 100; j++) {
+      const cel = document.createElement('div');
+      cel.className = 'honderdveld-cell';
+      if (j <= tens * 10) cel.classList.add('filled-ten');
+      else if (j <= x)    cel.classList.add('filled-unit');
+      schemaGrid.appendChild(cel);
+    }
+    schema.appendChild(schemaGrid);
+    card.appendChild(schema);
   }
-  schema.appendChild(schemaGrid);
 
   // Invulvragen
   const vragen = document.createElement('div');
@@ -1309,7 +1314,6 @@ else if (type==='nextTen'){
       ${(showExample && i===0) ? `<span style="font-weight:700;">${diff}</span>` : `<input type="text" class="fillnext-box">`} erbij.
     </div>`;
 
-  card.appendChild(schema);
   card.appendChild(vragen);
   item.appendChild(card);
   grid.appendChild(item);
