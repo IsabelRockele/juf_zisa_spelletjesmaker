@@ -4,50 +4,611 @@
   <meta charset="utf-8" />
   <title>Zisa PRO – inloggen</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#ffcf56" />
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="icon" href="../start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
+
   <style>
-    :root { --bg:#fff3e0; --card:#fff; --shadow:0 8px 28px rgba(0,0,0,.08); --btn:#fbbf24; }
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:var(--bg);margin:0}
-    .card{max-width:780px;margin:64px auto;background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:28px}
-    h1{margin:0 0 16px 0;font-size:28px}
-    label{display:block;font-weight:600;margin:16px 0 6px}
-    input{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:10px;font-size:16px}
-    .row{display:grid;grid-template-columns:1fr 160px;gap:12px;margin-top:10px}
-    button{appearance:none;border:0;background:var(--btn);color:#000;font-weight:700;padding:12px 16px;border-radius:10px;cursor:pointer}
-    .muted{color:#666;font-size:14px;margin-top:8px}
-    .error{color:#b91c1c;background:#fee2e2;border:1px solid #fecaca;padding:10px 12px;border-radius:10px;margin-top:12px}
-    .ok{color:#065f46;background:#ecfdf5;border:1px solid #a7f3d0;padding:10px 12px;border-radius:10px;margin-top:12px}
-    a{color:#2563eb;text-decoration:none}
+    :root{
+      --bg: #e8e0d0;
+      --card: #fffaf2;
+      --card-2: #ffffff;
+      --line: #ead8b8;
+      --shadow: 0 14px 36px rgba(80, 50, 10, 0.14);
+      --yellow: #ffcf56;
+      --yellow-dark: #f2b300;
+      --brown: #6f4300;
+      --brown-dark: #442700;
+      --text: #2f2a22;
+      --muted: #746a5b;
+      --good-bg: #ecfdf5;
+      --good-bd: #a7f3d0;
+      --good-tx: #065f46;
+      --err-bg: #fff1f1;
+      --err-bd: #f5bcbc;
+      --err-tx: #a11d1d;
+      --google-bd: #d9d9d9;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body{
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255, 207, 86, 0.35), transparent 22%),
+        radial-gradient(circle at left bottom, rgba(255, 255, 255, 0.45), transparent 26%),
+        var(--bg);
+    }
+
+    .page{
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 460px minmax(320px, 1fr);
+    }
+
+    .left{
+      background: #2a2a2a;
+      color: white;
+      padding: 34px 26px 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left::after{
+      content: "";
+      position: absolute;
+      right: -30px;
+      bottom: -30px;
+      width: 180px;
+      height: 180px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+    }
+
+    .brand{
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-wrap{
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .logo{
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      background: var(--yellow);
+      padding: 6px;
+      object-fit: contain;
+      box-shadow: 0 6px 18px rgba(0,0,0,.18);
+      flex-shrink: 0;
+    }
+
+    .brand-sub{
+      font-size: .82rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .brand-main{
+      font-size: 1.8rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .pro-badge{
+      display: inline-block;
+      margin-top: 10px;
+      background: var(--yellow);
+      color: var(--brown);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: .82rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+    }
+
+    .welcome-box{
+      position: relative;
+      z-index: 1;
+      margin-top: 30px;
+      background: #383838;
+      border: 1px solid #4a4a4a;
+      border-radius: 18px;
+      padding: 20px 18px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .welcome-box h2{
+      margin: 0 0 10px 0;
+      font-size: 1.3rem;
+      color: white;
+    }
+
+    .welcome-box p{
+      margin: 0;
+      color: #ddd1bf;
+      line-height: 1.55;
+      font-size: .98rem;
+    }
+
+    .mini-points{
+      position: relative;
+      z-index: 1;
+      margin-top: 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .mini-point{
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mini-icon{
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--yellow);
+      color: var(--brown);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .mini-text{
+      font-size: .92rem;
+      color: #f6f1e8;
+      line-height: 1.35;
+    }
+
+    .left-footer{
+      position: relative;
+      z-index: 1;
+      margin-top: 28px;
+      color: #cabca6;
+      font-size: .88rem;
+      line-height: 1.45;
+    }
+
+    .right{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 24px;
+    }
+
+    .card{
+      width: 100%;
+      max-width: 780px;
+      background: linear-gradient(180deg, var(--card) 0%, var(--card-2) 100%);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 30px 28px 26px;
+    }
+
+    .topline{
+      display: inline-block;
+      background: #fff3cf;
+      color: var(--brown);
+      border: 1px solid #f3dda1;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-weight: 700;
+      font-size: .82rem;
+      margin-bottom: 14px;
+    }
+
+    h1{
+      margin: 0 0 10px 0;
+      font-size: 2rem;
+      line-height: 1.1;
+      color: var(--brown-dark);
+    }
+
+    .intro{
+      margin: 0 0 22px 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 1rem;
+    }
+
+    .panel{
+      background: white;
+      border: 1px solid #f0e2c5;
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    label{
+      display:block;
+      font-weight: 800;
+      margin: 0 0 7px;
+      color: var(--brown-dark);
+      font-size: .98rem;
+    }
+
+    .field{
+      margin-bottom: 16px;
+    }
+
+    input{
+      width:100%;
+      padding: 14px 15px;
+      border: 1.5px solid #decda9;
+      border-radius: 14px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #fffdf9;
+      color: var(--text);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s, transform .05s;
+    }
+
+    input:focus{
+      border-color: var(--yellow-dark);
+      box-shadow: 0 0 0 4px rgba(255, 207, 86, .22);
+    }
+
+    .password-row{
+      display: grid;
+      grid-template-columns: 1fr 170px;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .btn{
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform .08s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+    }
+
+    .btn:hover{
+      transform: translateY(-1px);
+    }
+
+    .btn:active{
+      transform: translateY(0);
+    }
+
+    .btn-primary{
+      background: var(--yellow);
+      color: var(--brown-dark);
+      box-shadow: 0 8px 18px rgba(255, 207, 86, .32);
+    }
+
+    .btn-primary:hover{
+      background: #ffd86f;
+    }
+
+    .or{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 18px 0;
+      color: #8e826d;
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .or::before,
+    .or::after{
+      content: "";
+      height: 1px;
+      background: #eadfc8;
+      flex: 1;
+    }
+
+    .btn-google{
+      width: 100%;
+      background: #fff;
+      color: #2f2f2f;
+      border: 1.5px solid var(--google-bd);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.04);
+    }
+
+    .btn-google:hover{
+      background: #fafafa;
+      border-color: #cfcfcf;
+    }
+
+    .g-logo{
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      border-radius: 50%;
+      background: conic-gradient(#4285F4 0 25%, #34A853 25% 50%, #FBBC05 50% 75%, #EA4335 75% 100%);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .g-logo::after{
+      content: "";
+      position: absolute;
+      inset: 4px;
+      background: white;
+      border-radius: 50%;
+    }
+
+    .links{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 18px;
+      margin-top: 16px;
+      font-size: .95rem;
+    }
+
+    .links a{
+      color: #2b69d6;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .links a:hover{
+      text-decoration: underline;
+    }
+
+    #msg{
+      margin-top: 16px;
+    }
+
+    .error,
+    .ok{
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: .95rem;
+      line-height: 1.45;
+      font-weight: 700;
+    }
+
+    .error{
+      color: var(--err-tx);
+      background: var(--err-bg);
+      border: 1px solid var(--err-bd);
+    }
+
+    .ok{
+      color: var(--good-tx);
+      background: var(--good-bg);
+      border: 1px solid var(--good-bd);
+    }
+
+    .help-box{
+      margin-top: 18px;
+      background: #fff8e8;
+      border: 1px dashed #ebcf86;
+      border-radius: 16px;
+      padding: 14px 15px;
+      color: #755a1f;
+      font-size: .93rem;
+      line-height: 1.5;
+    }
+
+    .help-box a{
+      color: #2b69d6;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .help-box a:hover{
+      text-decoration: underline;
+    }
+    .google-info {
+  margin-top: 12px;
+  background: #fff8e8;
+  border: 1px solid #ebcf86;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.info-icon {
+  background: #ffcf56;
+  color: #7a4500;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.info-text {
+  font-size: 13.5px;
+  color: #5c4a2a;
+  line-height: 1.4;
+}
+
+    @media (max-width: 980px){
+      .page{
+        grid-template-columns: 1fr;
+      }
+
+      .left{
+        min-height: auto;
+        padding-bottom: 22px;
+      }
+
+      .right{
+        padding-top: 18px;
+      }
+    }
+
+    @media (max-width: 640px){
+      .card{
+        padding: 22px 18px 20px;
+        border-radius: 20px;
+      }
+
+      h1{
+        font-size: 1.65rem;
+      }
+
+      .password-row{
+        grid-template-columns: 1fr;
+      }
+
+      .logo-wrap{
+        align-items: flex-start;
+      }
+
+      .brand-main{
+        font-size: 1.5rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Zisa PRO – inloggen</h1>
-    <p>Log in met <b>hetzelfde e-mailadres als bij de aankoop</b>. Na inloggen activeren we PRO op dit toestel en sturen we je door naar de app.</p>
+  <div class="page">
 
-    <label for="email">E-mail</label>
-    <input id="email" type="email" autocomplete="username" placeholder="jouw@email.be" />
+    <section class="left">
+      <div class="brand">
+        <div class="logo-wrap">
+          <img class="logo" src="../start_afbeeldingen/zisa.png" alt="Zisa logo">
+          <div>
+            <div class="brand-sub">Juf Zisa's</div>
+            <div class="brand-main">Spelletjesmaker</div>
+            <span class="pro-badge">★ PRO</span>
+          </div>
+        </div>
 
-    <div class="row">
-      <input id="pw" type="password" autocomplete="current-password" placeholder="Wachtwoord" />
-      <button id="loginBtn">Inloggen</button>
-    </div>
+        <div class="welcome-box">
+          <h2>Welkom terug!</h2>
+          <p>
+            Log in met hetzelfde e-mailadres als bij je aankoop.
+            Na het inloggen activeren we PRO op dit toestel en sturen we je automatisch door naar de app.
+          </p>
+        </div>
 
-    <div class="muted">
-      <a id="resetLink" href="#">Wachtwoord vergeten / instellen?</a>
-    </div>
+        <div class="mini-points">
+          <div class="mini-point">
+            <span class="mini-icon">✓</span>
+            <div class="mini-text">Maak werkbladen op maat van jouw klas.</div>
+          </div>
+          <div class="mini-point">
+            <span class="mini-icon">✓</span>
+            <div class="mini-text">Gebruik je PRO-aankoop veilig op je toegelaten toestellen.</div>
+          </div>
+          <div class="mini-point">
+            <span class="mini-icon">✓</span>
+            <div class="mini-text">Log in met e-mail en wachtwoord of gewoon met Google.</div>
+          </div>
+        </div>
+      </div>
 
-    <div id="msg"></div>
+      <div class="left-footer">
+        Zisa PRO is gemaakt om snel, warm en duidelijk te werken — net zoals in de klas.
+      </div>
+    </section>
 
-    <p class="muted" style="margin-top:18px">Hulp nodig? Mail ons gerust: <a href="mailto:zebrapost@jufzisa.be">zebrapost@jufzisa.be</a></p>
+    <main class="right">
+      <div class="card">
+        <div class="topline">Inloggen op je PRO-account</div>
+        <h1>Fijn dat je er bent</h1>
+        <p class="intro">
+          Kies hieronder hoe je wil inloggen. Gebruik je liever je Google-account?
+          Dan kan dat nu ook.
+        </p>
+
+        <div class="panel">
+          <div class="field">
+            <label for="email">E-mailadres</label>
+            <input id="email" type="email" autocomplete="username" placeholder="jouw@email.be" />
+          </div>
+
+          <div class="field">
+            <label for="pw">Wachtwoord</label>
+            <div class="password-row">
+              <input id="pw" type="password" autocomplete="current-password" placeholder="Vul je wachtwoord in" />
+              <button id="loginBtn" class="btn btn-primary">Inloggen</button>
+            </div>
+          </div>
+
+          <div class="or">of</div>
+
+          <button id="googleLoginBtn" class="btn btn-google" type="button">
+            <div class="google-info">
+  <span class="info-icon">ℹ️</span>
+  <div class="info-text">
+    Je kan alleen met Google inloggen als je een Google-account hebt met hetzelfde e-mailadres als je account voor deze app.<br>
+    Heb je een Google-account met een ander e-mailadres, dan werkt dit niet voor deze app.<br>
+    Heb je nog geen Google-account? Maak er dan eerst één aan met hetzelfde e-mailadres.
+  </div>
+</div>
+            <span class="g-logo" aria-hidden="true"></span>
+            Inloggen met Google
+          </button>
+
+          <div class="links">
+            <a id="resetLink" href="#">Wachtwoord vergeten of instellen?</a>
+          </div>
+
+          <div id="msg"></div>
+
+          <div class="help-box">
+            Hulp nodig? Mail gerust naar
+            <a href="mailto:zebrapost@jufzisa.be">zebrapost@jufzisa.be</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
   </div>
 
-  <!-- Firebase (modular SDK) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      sendPasswordResetEmail,
+      onAuthStateChanged,
+      signInWithPopup,
+      GoogleAuthProvider
+    } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
-    // Jouw Firebase-config
     const firebaseConfig = {
       apiKey: "AIzaSyA1svbzlhdjiiDMyRIgqQq1jSu_F8li3Bw",
       authDomain: "zisa-spelletjesmaker-pro.firebaseapp.com",
@@ -57,25 +618,26 @@
       appId: "1:828063957776:web:8d8686b478846fe980db95",
       measurementId: "G-9LHNLFHSXX"
     };
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
-    // ➜ Bepaal het basismapje dynamisch (werkt in /pro/, /pr/, …)
     const HERE = new URL(location.href);
-    const APP_URL = new URL("app.html", HERE); // zelfde map + app.html
+    const APP_URL = new URL("app.html", HERE);
 
     const email = document.getElementById('email');
-    const pw    = document.getElementById('pw');
-    const btn   = document.getElementById('loginBtn');
-    const msg   = document.getElementById('msg');
+    const pw = document.getElementById('pw');
+    const btn = document.getElementById('loginBtn');
+    const googleBtn = document.getElementById('googleLoginBtn');
+    const msg = document.getElementById('msg');
     const reset = document.getElementById('resetLink');
 
-    function show(type, text){
+    function show(type, text) {
       msg.className = type === 'error' ? 'error' : 'ok';
       msg.textContent = text;
     }
 
-    // Al ingelogd? -> meteen door (respecteer optionele ?r= retourlink)
     onAuthStateChanged(auth, (user) => {
       if (user) {
         const params = new URLSearchParams(location.search);
@@ -87,27 +649,45 @@
 
     btn.onclick = async () => {
       msg.textContent = "";
+      msg.className = "";
       try {
         await signInWithEmailAndPassword(auth, email.value.trim(), pw.value);
-        // onAuthStateChanged doet de redirect
       } catch (e) {
         show('error', e.message.replace('Firebase:', '').trim());
+      }
+    };
+
+    googleBtn.onclick = async () => {
+      msg.textContent = "";
+      msg.className = "";
+      try {
+        await signInWithPopup(auth, provider);
+      } catch (e) {
+        show('error', "Het inloggen met Google is niet gelukt. Probeer het opnieuw.");
+        console.error(e);
       }
     };
 
     reset.onclick = async (e) => {
       e.preventDefault();
-      if (!email.value.trim()) return show('error', "Vul eerst je e-mail in en klik dan op deze link.");
+      if (!email.value.trim()) {
+        return show('error', "Vul eerst je e-mailadres in en klik daarna opnieuw op deze link.");
+      }
       try {
         await sendPasswordResetEmail(auth, email.value.trim());
-        show('ok', "We hebben je een e-mail gestuurd om je wachtwoord in te stellen/wijzigen.");
+        show('ok', "We hebben je een e-mail gestuurd om je wachtwoord in te stellen of te wijzigen.");
       } catch (e) {
         show('error', e.message.replace('Firebase:', '').trim());
       }
     };
+
+    pw.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') btn.click();
+    });
+
+    email.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') pw.focus();
+    });
   </script>
 </body>
 </html>
-
-
-
