@@ -70,6 +70,8 @@ const App = (() => {
       else if (isSplitsingen) zinInp.value = 'Splits het getal.';
       else if (bewerking === 'aftrekken') zinInp.value = 'Trek af.';
       else                    zinInp.value = 'Reken vlug uit.';
+      // Pas daarna corrigeren voor Maak eerst 10 indien al geselecteerd
+      _updateOpdrachtzin();
     }
 
     // Niveau- en brugkaart: verbergen bij herken-brug; niveau tonen bij splitsingen (zonder brug)
@@ -98,7 +100,7 @@ const App = (() => {
       : isSplitsingen ? 10
       : parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const brug   = isHerken ? 'gemengd' : 'zonder';
-    _updateTypesUI(niveau, brug);
+    _updateTypesUI(niveau, brug, true);  // true = reset selectie bij tab-switch
   }
 
   /* ── Brug: hoofd- en subkeuze ───────────────────────────── */
@@ -199,8 +201,51 @@ const App = (() => {
     }
   }
 
+  /* ── Gemengd info: uitgrijs + tekst ─────────────────────── */
+  function _updateGemengdInfo(container, infoEl) {
+    const gemengdActief = !![...container.querySelectorAll('.vink-chip')]
+      .find(l => l.querySelector('input').value === 'Gemengd' && l.querySelector('input').checked);
+
+    // Uitgrijs 'Maak eerst 10' chip als Gemengd actief
+    [...container.querySelectorAll('.vink-chip')].forEach(l => {
+      if (l.querySelector('input').value === 'Maak eerst 10') {
+        l.style.opacity    = gemengdActief ? '0.4' : '';
+        l.style.cursor     = gemengdActief ? 'default' : '';
+        l.style.pointerEvents = gemengdActief ? 'none' : '';
+      }
+    });
+
+    // Informatietekst tonen/verbergen
+    if (infoEl) {
+      if (gemengdActief) {
+        const gemengdTypes = actieveBewerking === 'aftrekken'
+          ? 'E-E, T-E, T-TE, TE-E, TE-T en TE-TE'
+          : 'E+E, T+E en TE+E';
+        infoEl.textContent = `ℹ️ Gemengd bevat: ${gemengdTypes} — Maak eerst 10 zit hier niet bij.`;
+        infoEl.style.display = 'block';
+      } else {
+        infoEl.style.display = 'none';
+      }
+    }
+  }
+
+  /* ── Opdrachtzin aanpassen op basis van geselecteerde types ── */
+  function _updateOpdrachtzin() {
+    const zinInp = document.getElementById('inp-opdrachtzin');
+    if (!zinInp) return;
+    const geselecteerd = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
+    const alleenEerst10 = geselecteerd.length === 1 && geselecteerd[0] === 'Maak eerst 10';
+    if (alleenEerst10) {
+      zinInp.value = 'Onderstreep eerst wat samen 10 is en reken dan uit.';
+    } else if (actieveBewerking === 'aftrekken') {
+      zinInp.value = 'Trek af.';
+    } else {
+      zinInp.value = 'Reken vlug uit.';
+    }
+  }
+
   /* ── Types UI opbouwen ───────────────────────────────────── */
-  function _updateTypesUI(niveau, brug) {
+  function _updateTypesUI(niveau, brug, resetSelectie = false) {
     if (!brug) brug = _getBrugWaarde();
 
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
@@ -208,19 +253,24 @@ const App = (() => {
     const beschikbaar = Generator.getTypes(actieveBewerking, niveau, brug, hulpmiddelen, splitsModus);
     const container   = document.getElementById('cg-types');
 
-    // Onthoud huidige selectie vóór herbouw
-    const vorigeSelectie = [...container.querySelectorAll('input:checked')].map(c => c.value);
+    // Bij reset (tab-switch): alles leeg. Anders: onthoud huidige selectie.
+    const vorigeSelectie = resetSelectie
+      ? []
+      : [...container.querySelectorAll('input:checked')].map(c => c.value);
 
     container.innerHTML = '';
 
-    beschikbaar.forEach((type, i) => {
-      // Herstel vorige selectie indien mogelijk, anders eerste chip standaard
-      const wasGeselecteerd = vorigeSelectie.length > 0
-        ? vorigeSelectie.includes(type)
-        : i === 0;
+    // Informatietekst (verschijnt bij Gemengd)
+    const infoEl = document.createElement('div');
+    infoEl.id = 'types-info-tekst';
+    infoEl.style.cssText = 'font-size:12px;color:#888;margin-top:6px;display:none;width:100%;';
+
+    beschikbaar.forEach((type) => {
+      const wasGeselecteerd = vorigeSelectie.includes(type);
 
       const label = document.createElement('label');
       label.className = 'vink-chip' + (wasGeselecteerd ? ' geselecteerd' : '');
+      label.dataset.type = type;
       label.innerHTML = `
         <span class="vink-box">${wasGeselecteerd ? '✓' : ''}</span>
         <input type="checkbox" name="types" value="${type}" ${wasGeselecteerd ? 'checked' : ''} style="display:none">
@@ -240,23 +290,28 @@ const App = (() => {
           checkbox.checked = true;
           label.querySelector('.vink-box').textContent = '✓';
         } else {
-          const gemengd = [...container.querySelectorAll('.vink-chip')]
+          const gemengdLabel = [...container.querySelectorAll('.vink-chip')]
             .find(l => l.querySelector('input').value === 'Gemengd');
-          if (gemengd) {
-            gemengd.classList.remove('geselecteerd');
-            gemengd.querySelector('input').checked = false;
-            gemengd.querySelector('.vink-box').textContent = '';
+          if (gemengdLabel) {
+            gemengdLabel.classList.remove('geselecteerd');
+            gemengdLabel.querySelector('input').checked = false;
+            gemengdLabel.querySelector('.vink-box').textContent = '';
           }
           const wasChecked = checkbox.checked;
           checkbox.checked = !wasChecked;
           label.classList.toggle('geselecteerd', !wasChecked);
           label.querySelector('.vink-box').textContent = !wasChecked ? '✓' : '';
         }
+        _updateGemengdInfo(container, infoEl);
         _updateSplitsKaarten();
+        _updateOpdrachtzin();
       };
 
       container.appendChild(label);
     });
+
+    container.appendChild(infoEl);
+    _updateGemengdInfo(container, infoEl);
 
     // Brugkaart verbergen voor niveau 5 en 10
     const kaartBrug = document.getElementById('kaart-brug');
@@ -387,8 +442,10 @@ const App = (() => {
     const brug   = _getBrugWaarde();
     const types  = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const aantal = parseInt(document.getElementById('inp-aantal').value);
+    const alleenEerst10 = types.length === 1 && types[0] === 'Maak eerst 10';
     const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
-                   (actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
+                   (alleenEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
+                   actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
 
     if (types.length === 0) {
       toonToast('⚠️ Kies minstens één oefentype!', '#E74C3C');
