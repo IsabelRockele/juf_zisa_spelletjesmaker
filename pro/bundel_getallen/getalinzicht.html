@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Getalinzicht Generator — jufzisa.be</title>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <!-- Volgorde: eerst oefeningen, dan preview, dan pdf -->
+  <script defer src="getalinzicht.js"></script>
+  <script defer src="gi-preview.js"></script>
+  <script defer src="gi-pdf.js"></script>
+
+  <link rel="stylesheet" href="getalinzicht.css">
+  <link rel="stylesheet" href="getalinzicht-ui.css">
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────── -->
+<header>
+  <a href="getalkeuze.html" class="menu-knop">⬅ Keuzemenu</a>
+  <div class="logo">🔢 Getal<span>inzicht</span></div>
+  <div class="subtitle">— jufzisa.be</div>
+  <button class="info-knop" onclick="document.getElementById('infoModal').style.display='flex'" title="Hoe werkt deze generator?">❓ Hoe werkt dit?</button>
+  <div class="spacer"></div>
+  <div class="badge">BETA</div>
+</header>
+
+<!-- ── INFO MODAAL ────────────────────────────────────────── -->
+<div id="infoModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:2000;align-items:center;justify-content:center;" onclick="if(event.target===this)this.style.display='none'">
+  <div style="background:#fff;border-radius:16px;max-width:580px;width:92%;max-height:88vh;overflow-y:auto;padding:28px 28px 24px;box-shadow:0 18px 48px rgba(2,25,55,.2);position:relative;">
+    <button onclick="document.getElementById('infoModal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#666;line-height:1;">×</button>
+    <h2 style="margin:0 0 4px;font-size:20px;color:#1A3A5C;">Hoe werkt de Getalinzicht generator?</h2>
+    <p style="margin:0 0 18px;font-size:13px;color:#666;">Klik op een tabblad links om een oefentype te kiezen, stel in en voeg toe aan het werkblad.</p>
+
+    <div style="display:flex;flex-direction:column;gap:14px;font-size:14px;line-height:1.6;color:#2C3E50;">
+
+      <div><strong>📏 Getallenlijn</strong><br>
+      Stel het bereik in (Van / Tot). Kies bij <em>Labels</em> welke getallen zichtbaar zijn. Met <em>"Toon enkel"</em> bepaal je zelf welke getallen een label krijgen. Kies opdracht <em>Verbind</em> (kaartjes verbinden met lijn) of <em>Vul in</em> (ontbrekende getallen invullen).</div>
+
+      <div><strong>🦘 Sprongen</strong><br>
+      Leerlingen tellen met vaste stap. Kies het beginpunt, de stap en het aantal hokjes. Met <em>Ontdekken</em> zoeken ze zelf de stapgrootte.</div>
+
+      <div><strong>🔀 Gemengd</strong><br>
+      Buurgetallen, vergelijken, samenstellen (T en E / H T E), rangschikken en aanvullen tot tiental of honderdtal.</div>
+
+      <div><strong>🔢 Getallenrij</strong><br>
+      Een reeks getallen met één of meerdere ontbrekende getallen die leerlingen aanvullen.</div>
+
+      <div><strong>🗂️ 100-veld</strong><br>
+      Drie soorten: veld lezen en T/E invullen, getal inkleuren, of aanvullen tot het volgende tiental.</div>
+
+      <div><strong>🟦 MAB-materiaal</strong><br>
+      Honderden, tientallen en eenheden tellen, inkleuren of verbinden. Werkt tot 100 of tot 1000.</div>
+
+      <div><strong>🏛️ Plaatswaarde</strong><br>
+      Schrijf de waarde van elk cijfer. Tot 100 (T/E) of tot 1000 (H/T/E). De pijlen wijzen naar de invulvakjes.</div>
+
+      <div><strong>➕ Vul aan</strong><br>
+      Aanvullen tot het volgende tiental of honderdtal, met een mini 100-veld als visueel hulpmiddel.</div>
+
+      <div><strong>🖼️ Getalbeelden</strong><br>
+      Een ingekleurd 100-veld of MAB-beeld: leerlingen schrijven het bijhorende getal.</div>
+
+      <div><strong>🍂 Pictogrammen</strong><br>
+      Een 100-veld met icoontjes. Leerlingen tellen per symbool hoeveel er zijn.</div>
+
+      <div><strong>🧩 Puzzelstukken</strong><br>
+      Een getallenraster met ontbrekende getallen die leerlingen aanvullen op basis van het patroon.</div>
+
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:4px 0;">
+
+      <div><strong>📄 PDF downloaden</strong><br>
+      Klik op de rode knop <em>Download PDF</em> onderaan. De pagina maakt een screenshot van je werkblad en zet die in een nette A4 met naam- en datumveld.</div>
+
+      <div><strong>💡 Tips</strong>
+        <ul style="margin:4px 0 0 16px;padding:0;">
+          <li>Klik op <strong>+ oefening</strong> in de blauwe titelbalk om extra oefeningen van hetzelfde type toe te voegen.</li>
+          <li>Klik op <strong>×</strong> om een oefening of volledige sectie te verwijderen.</li>
+          <li>Met <em>Leegmaken</em> verwijder je alles en begin je opnieuw.</li>
+          <li>Een getallenlijn tot 1000 past niet op één blad — gebruik max. 100 verschil, bv. 250–350.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:20px;">
+      <button onclick="document.getElementById('infoModal').style.display='none'" style="background:#1A3A5C;color:#fff;border:none;border-radius:8px;padding:9px 22px;font-size:14px;font-weight:700;cursor:pointer;">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── SIDEBAR ───────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-tabs" id="sidebarTabs">
+      <div class="sidebar-tab tab-getallenlijn active"   onclick="GI_UI.toonTab('getallenlijn',this)">📏 Getallenlijn</div>
+      <div class="sidebar-tab tab-sprongen"              onclick="GI_UI.toonTab('sprongen',this)">🦘 Sprongen</div>
+      <div class="sidebar-tab tab-gemengd"               onclick="GI_UI.toonTab('gemengd',this)">🔀 Gemengd</div>
+      <div class="sidebar-tab tab-getallenrij"           onclick="GI_UI.toonTab('getallenrij',this)">🔢 Getallenrij</div>
+      <div class="sidebar-tab tab-honderdveld"           onclick="GI_UI.toonTab('honderdveld',this)">🗂️ 100-veld</div>
+      <div class="sidebar-tab tab-mab"                   onclick="GI_UI.toonTab('mab',this)">🟦 MAB</div>
+      <div class="sidebar-tab tab-plaatswaarde"          onclick="GI_UI.toonTab('plaatswaarde',this)">🏛️ Plaatswaarde</div>
+      <div class="sidebar-tab tab-vulaanvol"             onclick="GI_UI.toonTab('vulaanvol',this)">➕ Vul aan</div>
+      <div class="sidebar-tab tab-getalbeelden"          onclick="GI_UI.toonTab('getalbeelden',this)">🖼️ Getalbeelden</div>
+      <div class="sidebar-tab tab-pictogrammen"          onclick="GI_UI.toonTab('pictogrammen',this)">🍂 Pictogrammen</div>
+      <div class="sidebar-tab tab-puzzel"                onclick="GI_UI.toonTab('puzzel',this)">🧩 Puzzelstukken</div>
+    </div>
+
+    <div class="tabs-scroll-hint">
+      <button class="tabs-scroll-btn" onclick="GI_UI.scrollTabsLeft()">←</button>
+      Scroll voor meer
+      <button class="tabs-scroll-btn" onclick="GI_UI.scrollTabsRight()">→</button>
+    </div>
+
+    <!-- ══ TAB: GETALLENLIJN ══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-getallenlijn">
+      <div class="sectie-titel">Getallenlijn instellen</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">📐</span> Bereik</div>
+        <div class="chips-rij" style="margin-bottom:10px">
+          <label class="radio-chip"><input type="radio" name="preset" value="0-10">   0–10</label>
+          <label class="radio-chip"><input type="radio" name="preset" value="0-20">   0–20</label>
+          <label class="radio-chip geselecteerd"><input type="radio" name="preset" value="0-100" checked>  0–100</label>
+          <label class="radio-chip"><input type="radio" name="preset" value="0-1000"> 0–1000</label>
+        </div>
+        <div class="veld-rij">
+          <label>Van <input id="start" type="number" value="0"   min="0"   max="1000" style="width:68px"></label>
+          <label>Tot <input id="end"   type="number" value="100" min="0"   max="1000" style="width:68px"></label>
+          <label>Stap<input id="unit"  type="number" value="1"   min="1"   max="1000" style="width:56px"></label>
+        </div>
+        <div id="tip-bereik-1000" class="tip-box" style="display:none;margin-top:8px">
+          ⚠️ Een getallenlijn van 0 tot 1000 past niet op een A4-blad. Kies een kleiner bereik, max. 100 verschil — bv. <em>Van 200 Tot 300</em> of <em>Van 250 Tot 350</em>.
+        </div>
+      </div>
+
+      <div class="harmonica">
+        <button class="harmonica-hoofd" onclick="GI_UI.toggleHarm(this)">
+          <span>🏷️ Labels &amp; streepjes</span><span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="veld-rij">
+            <label class="check-label"><input id="showZero" type="checkbox" checked> 0 tonen</label>
+            <label class="check-label"><input id="showEnds" type="checkbox" checked> Uiteinden</label>
+          </div>
+          <div class="veld-rij">
+            <label class="check-label"><input id="showTens"  type="checkbox" checked> Tientallen</label>
+            <label class="check-label"><input id="showFives" type="checkbox"> Vijftallen</label>
+            <label class="check-label"><input id="showOnes"  type="checkbox"> Eenheden</label>
+          </div>
+          <div class="veld-rij" style="margin-top:4px">
+            <label>Grote streep bij
+              <select id="majorStep" style="width:68px">
+                <option value="10">10</option>
+                <option value="5">5</option>
+                <option value="1">1</option>
+              </select>
+            </label>
+          </div>
+          <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px">
+            <label class="check-label" style="margin-bottom:6px">
+              <input id="showOnly" type="checkbox" onchange="GI_UI.toggleShowOnly(this.checked)">
+              Toon enkel deze getallen
+            </label>
+            <div id="showOnlyWrap" style="display:none;margin-top:6px">
+              <input id="showOnlyList" type="text" placeholder="bv. 250, 300, 350"
+                style="width:100%" oninput="GI_UI.hertekenPreview()">
+              <div class="harm-beschrijving" style="margin-top:4px">
+                Alleen deze getallen krijgen een label op de lijn. Laat leeg om alle ingestelde labels te tonen.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="harmonica">
+        <button class="harmonica-hoofd" onclick="GI_UI.toggleHarm(this)">
+          <span>📝 Opdracht</span><span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="chips-rij" style="margin-bottom:8px">
+            <label class="radio-chip geselecteerd"><input type="radio" name="mode" value="none"   checked> Geen</label>
+            <label class="radio-chip"><input type="radio" name="mode" value="drag">   Verbind</label>
+            <label class="radio-chip"><input type="radio" name="mode" value="blanks"> Vul in</label>
+          </div>
+          <div id="mode-drag" style="display:none">
+            <label class="veld-label" style="margin-bottom:0">Getallen
+              <input id="dragList" type="text" placeholder="bv. 12, 45, 78" style="width:100%">
+            </label>
+            <div class="tip-box" style="margin-top:6px">
+              💡 Typ getallen gescheiden door komma's. Je kan er altijd getallen bij schrijven of tussenvoegen, bv. <em>5, 50, 52</em> → typ er <em>, 75</em> achter om een vierde getal toe te voegen.
+            </div>
+          </div>
+          <div id="mode-blanks" style="display:none">
+            <label>Lege hokjes <input id="blankCount" type="number" value="5" min="1" style="width:56px"></label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddToSheet">➕ Voeg getallenlijn toe</button>
+    </div>
+
+
+    <!-- ══ TAB: SPRONGEN ══════════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-sprongen" style="display:none">
+      <div class="sectie-titel">Sprongen tellen</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">🔢</span> Instellingen</div>
+        <div class="veld-rij">
+          <label>Startgetal <input id="jumpStart" type="number" value="31" style="width:68px" min="0" max="1000"></label>
+          <label>Sprong van <input id="jumpStep"  type="number" value="10" style="width:68px" min="1" max="1000"></label>
+          <label>Hokjes     <input id="jumpCount" type="number" value="5"  min="1" max="40"   style="width:56px"></label>
+        </div>
+      </div>
+
+      <div class="harmonica">
+        <button class="harmonica-hoofd" onclick="GI_UI.toggleHarm(this)">
+          <span>🔍 Sprong laten ontdekken</span><span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <label class="check-label" style="margin-bottom:10px">
+            <input id="jumpDiscover" type="checkbox" onchange="GI_UI.toggleJumpDiscover(this.checked)">
+            Activeer ontdekken
+          </label>
+          <div id="jumpDiscoverOptions" style="display:none">
+            <div class="veld-rij">
+              <label>Aantal ingevuld <input id="jumpGivenCount" type="number" value="2" min="0" style="width:56px"></label>
+            </div>
+            <div style="margin:8px 0 4px">
+              <label class="veld-label">Vaste posities (komma-gescheiden)
+                <input id="jumpGivenPositions" type="text" placeholder="bv. 1,3,5" style="width:100%">
+              </label>
+            </div>
+            <div class="veld-rij">
+              <label class="check-label"><input id="jumpIncludeStart" type="checkbox" checked> Start invullen</label>
+              <label class="check-label"><input id="jumpIncludeEnd"   type="checkbox"> Eind invullen</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddJumpExercise">➕ Voeg sprong-oefening toe</button>
+    </div>
+
+
+    <!-- ══ TAB: GEMENGD ═══════════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-gemengd" style="display:none">
+      <div class="sectie-titel">Gemengde rekoefeningen</div>
+
+      <!-- Verborgen select — getalinzicht.js leest dit uit -->
+      <select id="mixedType" style="display:none">
+        <option value="neighbors">Buurgetallen</option>
+        <option value="neighborTens">Buurtientallen</option>
+        <option value="neighborHundreds">Buurhonderdtallen</option>
+        <option value="orderAsc">Rangschik klein→groot</option>
+        <option value="orderDesc">Rangschik groot→klein</option>
+        <option value="composeTE">Vul in (T/E → getal)</option>
+        <option value="compare">Vergelijken (getal ↔ getal)</option>
+        <option value="compareTE">Vergelijken (T/E ↔ getal)</option>
+        <option value="composeHTE">Vul in (H/T/E → getal)</option>
+        <option value="compareHTE">Vergelijken (HTE ↔ getal)</option>
+      </select>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Aantal &amp; bereik</div>
+        <div class="veld-rij">
+          <label>Getallen tot <input id="mixedMax"   type="number" value="100" min="10" max="1000" style="width:72px"></label>
+          <label>Aantal       <input id="mixedCount" type="number" value="1"   min="1"  max="60"   style="width:56px"></label>
+        </div>
+      </div>
+
+      <div class="harm-label">Kies een soort oefening:</div>
+
+      <div class="harmonica harm-keuze" data-mixtype="neighbors">
+        <button class="harmonica-hoofd harm-actief" onclick="GI_UI.kiesGemengd('neighbors',this)">
+          <span class="harm-titel-wrap">🏠 Buurgetallen <span class="harm-badge geselecteerd">✓</span></span>
+          <span class="harm-pijl">▼</span>
+        </button>
+        <div class="harmonica-inhoud">
+          <div class="harm-beschrijving">Het getal vóór en na een getal.</div>
+          <div class="harm-chips-rij">
+            <label class="radio-chip geselecteerd" onclick="GI_UI.kiesGemengd('neighbors',this)">
+              <input type="radio" name="gemengdKeuze" value="neighbors" checked> Buurgetallen
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('neighborTens',this)">
+              <input type="radio" name="gemengdKeuze" value="neighborTens"> Buurtientallen
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('neighborHundreds',this)">
+              <input type="radio" name="gemengdKeuze" value="neighborHundreds"> Buurhonderdtallen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-mixtype="orderAsc">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesGemengd('orderAsc',this)">
+          <span class="harm-titel-wrap">📶 Rangschikken <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Getallen van klein naar groot of omgekeerd.</div>
+          <div class="harm-chips-rij">
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('orderAsc',this)">
+              <input type="radio" name="gemengdKeuze" value="orderAsc"> Klein → groot
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('orderDesc',this)">
+              <input type="radio" name="gemengdKeuze" value="orderDesc"> Groot → klein
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-mixtype="composeTE">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesGemengd('composeTE',this)">
+          <span class="harm-titel-wrap">🔧 Samenstellen <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Getal samenstellen uit T/E of H/T/E.</div>
+          <div class="harm-chips-rij">
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('composeTE',this)">
+              <input type="radio" name="gemengdKeuze" value="composeTE"> T/E → getal
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('composeHTE',this)">
+              <input type="radio" name="gemengdKeuze" value="composeHTE"> H/T/E → getal
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-mixtype="compare">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesGemengd('compare',this)">
+          <span class="harm-titel-wrap">⚖️ Vergelijken <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Plaats &lt;, &gt; of = tussen getallen of T/E-notaties.</div>
+          <div class="harm-chips-rij">
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('compare',this)">
+              <input type="radio" name="gemengdKeuze" value="compare"> Getal ↔ getal
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('compareTE',this)">
+              <input type="radio" name="gemengdKeuze" value="compareTE"> T/E ↔ getal
+            </label>
+            <label class="radio-chip" onclick="GI_UI.kiesGemengd('compareHTE',this)">
+              <input type="radio" name="gemengdKeuze" value="compareHTE"> HTE ↔ getal
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddMixed">➕ Voeg oefeningen toe</button>
+    </div>
+
+
+    <!-- ══ TAB: GETALLENRIJ ═══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-getallenrij" style="display:none">
+      <div class="sectie-titel">Getallenrij (vooruit/achteruit)</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">📊</span> Instellingen</div>
+        <div class="veld-rij">
+          <label>Start <input id="seqStart"      type="number" value="22" min="0"  max="1000" style="width:68px"></label>
+          <label>Eind  <input id="seqEnd"        type="number" value="40" min="0"  max="1000" style="width:68px"></label>
+          <label>Lege hokjes <input id="seqBlankCount" type="number" value="5" min="0" style="width:56px"></label>
+        </div>
+        <div class="tip-box" style="margin-top:8px">
+          💡 Niet meer dan +12 voor het eindgetal, anders wordt de rij te lang.
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="seqLockEnds" type="checkbox" checked> Start en eind vooraf invullen
+        </label>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddSequence">➕ Voeg getallenrij toe</button>
+    </div>
+
+
+    <!-- ══ TAB: HONDERDVELD ═══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-honderdveld" style="display:none">
+      <div class="sectie-titel">100-veld</div>
+
+      <select id="honderdveldType" style="display:none">
+        <option value="veld-naar-getal">Veld → Getal</option>
+        <option value="getal-naar-veld">Getal → Veld</option>
+        <option value="aanvullen-tiental">Aanvullen tot tiental</option>
+      </select>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Bereik &amp; aantal</div>
+        <div class="veld-rij">
+          <label>Getallen tot <input id="honderdveldMax"   type="number" value="100" min="1"  max="1000" style="width:72px"></label>
+          <label>Aantal       <input id="honderdveldCount" type="number" value="1"   min="1"  max="20"   style="width:56px"></label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="honderdveldTwoColumns" type="checkbox"> 2 oefeningen per rij
+        </label>
+      </div>
+
+      <div class="harm-label">Kies een soort oefening:</div>
+
+      <div class="harmonica harm-keuze" data-hvtype="veld-naar-getal">
+        <button class="harmonica-hoofd harm-actief" onclick="GI_UI.kiesHonderdveld('veld-naar-getal',this)">
+          <span class="harm-titel-wrap">🔍 Veld → Getal <span class="harm-badge geselecteerd">✓</span></span>
+          <span class="harm-pijl">▼</span>
+        </button>
+        <div class="harmonica-inhoud">
+          <div class="harm-beschrijving">Ingekleurd veld — leerlingen schrijven het getal.</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-hvtype="getal-naar-veld">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesHonderdveld('getal-naar-veld',this)">
+          <span class="harm-titel-wrap">🎨 Getal → Veld <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Er staat een getal — leerlingen kleuren de vakjes.</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-hvtype="aanvullen-tiental">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesHonderdveld('aanvullen-tiental',this)">
+          <span class="harm-titel-wrap">➕ Aanvullen tot tiental <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Hoeveel ontbreekt er nog tot het eerstvolgende tiental?</div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddHonderdveld">➕ Voeg 100-veld-oefening toe</button>
+    </div>
+
+
+    <!-- ══ TAB: MAB ═══════════════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-mab" style="display:none">
+      <div class="sectie-titel">MAB-materiaal (blokken)</div>
+
+      <select id="mabType" style="display:none">
+        <option value="tellen">Hoeveel tel je?</option>
+        <option value="verbinden">Wat is evenveel?</option>
+        <option value="kleuren">Kleur de hoeveelheid</option>
+      </select>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Bereik &amp; aantal</div>
+        <div class="veld-rij">
+          <label>Getallen tot <input id="mabMax"   type="number" value="99" min="1"  max="1000" style="width:72px"></label>
+          <label>Aantal       <input id="mabCount" type="number" value="1"  min="1"  max="10"   style="width:56px"></label>
+        </div>
+      </div>
+
+      <div class="harm-label">Kies een soort oefening:</div>
+
+      <div class="harmonica harm-keuze" data-mabtype="tellen">
+        <button class="harmonica-hoofd harm-actief" onclick="GI_UI.kiesMAB('tellen',this)">
+          <span class="harm-titel-wrap">🔢 Hoeveel tel je? <span class="harm-badge geselecteerd">✓</span></span>
+          <span class="harm-pijl">▼</span>
+        </button>
+        <div class="harmonica-inhoud">
+          <div class="harm-beschrijving">MAB-blokken zijn afgebeeld — leerlingen schrijven het totaal.</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-mabtype="verbinden">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesMAB('verbinden',this)">
+          <span class="harm-titel-wrap">🔗 Wat is evenveel? <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Twee rijen MAB-beelden — leerlingen verbinden de gelijke hoeveelheden.</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-mabtype="kleuren">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesMAB('kleuren',this)">
+          <span class="harm-titel-wrap">🎨 Kleur de hoeveelheid <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Er staat een getal — leerlingen kleuren de juiste MAB-blokken.</div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddMab">➕ Voeg MAB-oefening toe</button>
+    </div>
+
+
+    <!-- ══ TAB: PLAATSWAARDE ══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-plaatswaarde" style="display:none">
+      <div class="sectie-titel">Waarde per cijfer</div>
+
+      <select id="pvMode" style="display:none">
+        <option value="standard" selected>Standaard</option>
+        <option value="connect">Verbind</option>
+        <option value="color">Kleur</option>
+      </select>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Bereik &amp; aantal</div>
+        <div class="veld-rij">
+          <label>Bereik
+            <select id="pvRange" style="width:110px">
+              <option value="20">tot 20</option>
+              <option value="100" selected>tot 100</option>
+              <option value="1000">tot 1000</option>
+            </select>
+          </label>
+          <label>Aantal <input id="pvCount" type="number" value="1" min="3" max="12" style="width:56px"></label>
+        </div>
+      </div>
+
+      <div class="harm-label">Kies een soort oefening:</div>
+
+      <div class="harmonica harm-keuze" data-pvmode="standard">
+        <button class="harmonica-hoofd harm-actief" onclick="GI_UI.kiesPV('standard',this)">
+          <span class="harm-titel-wrap">📌 Standaard <span class="harm-badge geselecteerd">✓</span></span>
+          <span class="harm-pijl">▼</span>
+        </button>
+        <div class="harmonica-inhoud">
+          <div class="harm-beschrijving">Schrijf de waarde van elk cijfer (E, T, H).</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-pvmode="connect">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesPV('connect',this)">
+          <span class="harm-titel-wrap">🔗 Verbind evenveel <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Verbind getallen met dezelfde plaatswaarde.</div>
+        </div>
+      </div>
+
+      <div class="harmonica harm-keuze" data-pvmode="color">
+        <button class="harmonica-hoofd" onclick="GI_UI.kiesPV('color',this)">
+          <span class="harm-titel-wrap">🎨 Kleur dezelfde waarde <span class="harm-badge" style="display:none">✓</span></span>
+          <span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <div class="harm-beschrijving">Kleur vakjes met dezelfde plaatswaarde in één kleur.</div>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddPlaceValue">➕ Voeg waarde-oefeningen toe</button>
+    </div>
+
+
+    <!-- ══ TAB: VUL AAN ═══════════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-vulaanvol" style="display:none">
+      <div class="sectie-titel">Vul aan tot…</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Instellingen</div>
+        <div class="veld-rij">
+          <label>Bereik
+            <select id="fillNextRange" style="width:110px" onchange="document.getElementById('fillNextSchemaWrap').style.display=this.value==='100'?'block':'none'">
+              <option value="100">tot 100</option>
+              <option value="1000">tot 1000</option>
+            </select>
+          </label>
+          <label>Aantal <input type="number" id="fillNextCount" value="1" min="1" max="10" style="width:56px"></label>
+        </div>
+        <div class="veld-rij" style="margin-top:8px">
+          <label style="flex-direction:column;align-items:flex-start;gap:4px;width:100%">Soort
+            <select id="fillNextType" style="width:100%">
+              <option value="nextTen">Tot het eerstvolgende tiental</option>
+              <option value="nextHundred">Tot het eerstvolgende honderdtal</option>
+            </select>
+          </label>
+        </div>
+        <label class="check-label" style="margin-top:10px">
+          <input type="checkbox" id="fillNextExample">
+          Voorbeeld tonen (eerste oefening ingevuld)
+        </label>
+        <div id="fillNextSchemaWrap" style="margin-top:8px">
+          <label class="check-label">
+            <input type="checkbox" id="fillNextSchema" checked>
+            Hulpschema tonen (100-veld naast de zinnen)
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddFillNext">➕ Voeg 'Vul aan'-oefeningen toe</button>
+    </div>
+
+
+    <!-- ══ TAB: GETALBEELDEN ══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-getalbeelden" style="display:none">
+      <div class="sectie-titel">Getalbeelden</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">🖼️</span> Instellingen</div>
+        <div class="veld-rij">
+          <label>Getallen tot
+            <select id="gb1000Max" style="width:100px">
+              <option value="20">tot 20</option>
+              <option value="100">tot 100</option>
+              <option value="999" selected>tot 1000</option>
+            </select>
+          </label>
+          <label>Aantal <input id="gb1000Count" type="number" min="1" value="1" style="width:56px"></label>
+        </div>
+        <div class="harm-beschrijving" style="margin-top:8px">
+          Visuele voorstellingen van getallen. Leerlingen schrijven het bijhorende getal.
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddGB1000">➕ Voeg getalbeelden toe</button>
+    </div>
+
+
+    <!-- ══ TAB: PICTOGRAMMEN ══════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-pictogrammen" style="display:none">
+      <div class="sectie-titel">100-veld met pictogrammen</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">⚙️</span> Basisinstellingen</div>
+        <div class="veld-rij">
+          <label>Kaarten       <input id="hvIconsCount"   type="number" min="1"  value="1" style="width:56px"></label>
+          <label>Picto's per oef.<input id="hvIconsPerCard" type="number" min="2" max="8" value="6" style="width:56px"></label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="hvIconsShowNumbers" type="checkbox" checked> Toon overige getallen
+        </label>
+      </div>
+
+      <div class="harmonica">
+        <button class="harmonica-hoofd" onclick="GI_UI.toggleHarm(this)">
+          <span>🎨 Thema</span><span class="harm-pijl">▶</span>
+        </button>
+        <div class="harmonica-inhoud" style="display:none">
+          <select id="hvIconsTheme" style="width:100%">
+            <option value="herfst">Herfst (emoji)</option>
+            <option value="letters">Letters A..H</option>
+            <option value="vrij">Vrije pictogrammen</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddHvIcons">➕ Voeg pictogram-oefeningen toe</button>
+    </div>
+
+
+    <!-- ══ TAB: PUZZELSTUKKEN ═════════════════════════════════ -->
+    <div class="sidebar-content" id="tab-puzzel" style="display:none">
+      <div class="sectie-titel">100-veld – Puzzelstukken</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><span class="icon">🧩</span> Instellingen</div>
+        <div class="veld-rij">
+          <label>Puzzels        <input id="hvpCount" type="number" min="1" value="1" style="width:56px"></label>
+          <label>Gegeven cijfers<input id="hvpGiven" type="number" min="2" max="6" value="3" style="width:56px"></label>
+        </div>
+        <div class="veld-rij" style="margin-top:8px">
+          <label>Grootte
+            <select id="hvpSize" style="width:110px">
+              <option value="small">Klein</option>
+              <option value="medium" selected>Middel</option>
+              <option value="large">Groot</option>
+            </select>
+          </label>
+        </div>
+        <div class="harm-beschrijving" style="margin-top:8px">
+          Een uitsnede van het honderdveld — leerlingen vullen de ontbrekende getallen in.
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" id="btnAddHvPuzzle">➕ Voeg puzzelstukken toe</button>
+    </div>
+
+
+    <!-- ── FOOTER ──────────────────────────────────────────── -->
+    <div class="sidebar-footer">
+      <button class="btn-pdf"    id="btnDownloadPdf">🖨️ Download PDF</button>
+      <button class="btn-wissen" id="btnClearSheet">🗑️ Leegmaken</button>
+    </div>
+
+  </aside>
+
+
+  <!-- ── WERKBLAD ZONE ──────────────────────────────────── -->
+  <div class="werkblad-zone">
+    <!-- previewWrap verwijderd -->
+    <div id="sheet"></div>
+  </div>
+
+</div><!-- .main -->
+
+<div id="toast"></div>
+
+<script>
+const GI_UI = (() => {
+
+  const TABS = {
+    getallenlijn: 'tab-getallenlijn', sprongen: 'tab-sprongen',
+    gemengd: 'tab-gemengd', getallenrij: 'tab-getallenrij',
+    honderdveld: 'tab-honderdveld', mab: 'tab-mab',
+    plaatswaarde: 'tab-plaatswaarde', vulaanvol: 'tab-vulaanvol',
+    getalbeelden: 'tab-getalbeelden', pictogrammen: 'tab-pictogrammen',
+    puzzel: 'tab-puzzel',
+  };
+
+  /* ── Tab wisselen ──────────────────────────────────────── */
+  function toonTab(naam, tabEl) {
+    Object.values(TABS).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    if (tabEl) {
+      tabEl.classList.add('active');
+      // Scroll de tab-balk zodat de actieve tab volledig zichtbaar is
+      const tabsEl = document.getElementById('sidebarTabs');
+      if (tabsEl) {
+        const tabLeft  = tabEl.offsetLeft;
+        const tabRight = tabEl.offsetLeft + tabEl.offsetWidth;
+        const visLeft  = tabsEl.scrollLeft;
+        const visRight = tabsEl.scrollLeft + tabsEl.offsetWidth;
+        if (tabLeft < visLeft) {
+          tabsEl.scrollTo({ left: tabLeft - 8, behavior: 'smooth' });
+        } else if (tabRight > visRight) {
+          tabsEl.scrollTo({ left: tabRight - tabsEl.offsetWidth + 8, behavior: 'smooth' });
+        }
+      }
+    }
+    const el = document.getElementById(TABS[naam]);
+    if (el) el.style.display = 'block';
+    // previewWrap verwijderd
+  }
+
+  /* ── Gewone harmonica toggle ────────────────────────────── */
+  function toggleHarm(btn) {
+    const inhoud = btn.nextElementSibling;
+    const pijl   = btn.querySelector('.harm-pijl');
+    const open   = inhoud.style.display !== 'none';
+    inhoud.style.display = open ? 'none' : 'block';
+    if (pijl) pijl.textContent = open ? '▶' : '▼';
+    btn.classList.toggle('harm-actief', !open);
+  }
+
+  /* ── Keuze-harmonica helpers ────────────────────────────── */
+  function _openHarm(harmEl) {
+    const inhoud = harmEl.querySelector('.harmonica-inhoud');
+    const pijl   = harmEl.querySelector('.harm-pijl');
+    if (inhoud) inhoud.style.display = 'block';
+    if (pijl)   pijl.textContent = '▼';
+    harmEl.querySelector('.harmonica-hoofd')?.classList.add('harm-actief');
+  }
+  function _sluitHarm(harmEl) {
+    const inhoud = harmEl.querySelector('.harmonica-inhoud');
+    const pijl   = harmEl.querySelector('.harm-pijl');
+    if (inhoud) inhoud.style.display = 'none';
+    if (pijl)   pijl.textContent = '▶';
+    harmEl.querySelector('.harmonica-hoofd')?.classList.remove('harm-actief');
+  }
+  function _badge(harmEl, aan) {
+    const b = harmEl.querySelector('.harm-badge');
+    if (!b) return;
+    b.style.display = aan ? 'inline' : 'none';
+    b.classList.toggle('geselecteerd', aan);
+  }
+
+  /* ── Gemengd ────────────────────────────────────────────── */
+  const GEMENGD_GROEP = {
+    neighbors: 'neighbors', neighborTens: 'neighbors', neighborHundreds: 'neighbors',
+    orderAsc: 'orderAsc', orderDesc: 'orderAsc',
+    composeTE: 'composeTE', composeHTE: 'composeTE',
+    compare: 'compare', compareTE: 'compare', compareHTE: 'compare',
+  };
+
+  function kiesGemengd(waarde, triggerEl) {
+    const sel = document.getElementById('mixedType');
+    if (sel) sel.value = waarde;
+    const doelGroep = GEMENGD_GROEP[waarde];
+    const tab = document.getElementById('tab-gemengd');
+    tab.querySelectorAll('.harm-keuze').forEach(h => {
+      const isDoelGroep = h.dataset.mixtype === doelGroep;
+      _badge(h, isDoelGroep);
+      isDoelGroep ? _openHarm(h) : _sluitHarm(h);
+    });
+    tab.querySelectorAll('input[name="gemengdKeuze"]').forEach(r => {
+      r.closest('.radio-chip')?.classList.toggle('geselecteerd', r.value === waarde);
+    });
+    const radio = tab.querySelector(`input[name="gemengdKeuze"][value="${waarde}"]`);
+    if (radio) radio.checked = true;
+  }
+
+  /* ── Honderdveld ────────────────────────────────────────── */
+  function kiesHonderdveld(waarde) {
+    const sel = document.getElementById('honderdveldType');
+    if (sel) sel.value = waarde;
+    document.getElementById('tab-honderdveld').querySelectorAll('.harm-keuze').forEach(h => {
+      const match = h.dataset.hvtype === waarde;
+      _badge(h, match);
+      match ? _openHarm(h) : _sluitHarm(h);
+    });
+  }
+
+  /* ── MAB ────────────────────────────────────────────────── */
+  function kiesMAB(waarde) {
+    const sel = document.getElementById('mabType');
+    if (sel) sel.value = waarde;
+    document.getElementById('tab-mab').querySelectorAll('.harm-keuze').forEach(h => {
+      const match = h.dataset.mabtype === waarde;
+      _badge(h, match);
+      match ? _openHarm(h) : _sluitHarm(h);
+    });
+  }
+
+  /* ── Plaatswaarde ───────────────────────────────────────── */
+  function kiesPV(waarde) {
+    const sel = document.getElementById('pvMode');
+    if (sel) sel.value = waarde;
+    document.getElementById('tab-plaatswaarde').querySelectorAll('.harm-keuze').forEach(h => {
+      const match = h.dataset.pvmode === waarde;
+      _badge(h, match);
+      match ? _openHarm(h) : _sluitHarm(h);
+    });
+  }
+
+  /* ── Sprongen ontdekken ─────────────────────────────────── */
+  function toggleJumpDiscover(checked) {
+    const opts = document.getElementById('jumpDiscoverOptions');
+    if (opts) opts.style.display = checked ? 'block' : 'none';
+  }
+
+  /* ── Scroll ─────────────────────────────────────────────── */
+  function scrollTabsLeft()  { document.getElementById('sidebarTabs')?.scrollBy({ left: -130, behavior: 'smooth' }); }
+  function scrollTabsRight() { document.getElementById('sidebarTabs')?.scrollBy({ left:  130, behavior: 'smooth' }); }
+
+  /* ── Chips (preset / mode) ──────────────────────────────── */
+  function initChips() {
+    document.querySelectorAll('.radio-chip input').forEach(inp => {
+      inp.addEventListener('change', () => {
+        document.querySelectorAll(`input[name="${inp.name}"]`).forEach(r =>
+          r.closest('.radio-chip')?.classList.remove('geselecteerd')
+        );
+        inp.closest('.radio-chip')?.classList.add('geselecteerd');
+        if (inp.name === 'preset' || inp.name === 'mode') {
+          setTimeout(() => { if (typeof renderPreview === 'function') renderPreview(); }, 50);
+        }
+        // Toon tip bij 0-1000 preset
+        if (inp.name === 'preset') {
+          const tip = document.getElementById('tip-bereik-1000');
+          if (tip) tip.style.display = (inp.value === '0-1000') ? 'block' : 'none';
+          // Drag-suggesties worden automatisch bijgewerkt via gi-preview.js
+        }
+      });
+    });
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        document.getElementById('mode-drag').style.display   = (r.value === 'drag'   && r.checked) ? 'block' : 'none';
+        document.getElementById('mode-blanks').style.display = (r.value === 'blanks' && r.checked) ? 'block' : 'none';
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    initChips();
+    toonTab('getallenlijn', document.querySelector('.tab-getallenlijn'));
+  });
+
+  function toggleShowOnly(aan) {
+    const wrap = document.getElementById('showOnlyWrap');
+    if (wrap) wrap.style.display = aan ? 'block' : 'none';
+    hertekenPreview();
+  }
+
+  function hertekenPreview() {
+    if (window.GI_Preview) window.GI_Preview.renderPreview();
+  }
+
+  return {
+    toonTab, toggleHarm,
+    kiesGemengd, kiesHonderdveld, kiesMAB, kiesPV,
+    toggleJumpDiscover, scrollTabsLeft, scrollTabsRight,
+    toggleShowOnly, hertekenPreview,
+  };
+})();
+</script>
+
+</body>
+</html>
