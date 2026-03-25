@@ -57,6 +57,24 @@ header {
 }
 .menu-knop:hover { background: #2a5a8c; }
 
+.info-knop {
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 6px 16px;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(245,158,11,.4);
+}
+.info-knop:hover {
+  background: #d97706;
+  transform: translateY(-1px);
+}
+
 .logo {
   font-size: 21px;
   font-weight: 800;
