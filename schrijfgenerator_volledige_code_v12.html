@@ -1487,28 +1487,37 @@ function drawModelBox(ctx, x, y, w, h, fill = true){
 }
 
 function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = null, leftPad = 12, topPad = 3, bottomPad = 3){
-  const offs = getLineOffsetsByType(lineType, lineSpacing);
   const b = getStrokeBounds(r.strokes || []);
-  const targetTop = y + offs[0].dy + topPad;
-  const targetBottom = y + offs[3].dy - bottomPad;
-  const targetHeight = Math.max(24, targetBottom - targetTop);
-  const scaleByHeight = b.height > 0 ? targetHeight / b.height : 0.2;
-  let scale = scaleByHeight;
-  if(maxWidth){
+
+  // BELANGRIJK:
+  // behoud standaard exact dezelfde grootte en hoogtepositie
+  // als op het bord getekend werd.
+  let scale = 1;
+
+  // Alleen verkleinen als het echt niet in de beschikbare breedte past.
+  if (maxWidth) {
     const usableW = Math.max(40, maxWidth - leftPad * 2);
-    const scaleByWidth = b.width > 0 ? usableW / b.width : scaleByHeight;
-    scale = Math.min(scaleByHeight, scaleByWidth);
+    const drawnW = b.width > 0 ? b.width : 1;
+
+    if (drawnW > usableW) {
+      scale = usableW / drawnW;
+    }
   }
-  const dx = x + leftPad - b.minX * scale;
-  const dy = targetTop - b.minY * scale;
+
+  // Horizontaal schuiven we de tekening gewoon wat naar rechts.
+  // Verticaal blijft ze op exact dezelfde hoogte binnen de schrijflijnen.
+  const dx = x + leftPad;
+  const dy = y;
+
   const width = Math.max(36, b.width * scale + 20);
+
   return {
     scale,
     dx,
     dy,
     width,
     startX: r.startPt ? dx + r.startPt.x * scale : x + leftPad,
-    startY: r.startPt ? dy + r.startPt.y * scale : y + offs[2].dy
+    startY: r.startPt ? dy + r.startPt.y * scale : y
   };
 }
 
