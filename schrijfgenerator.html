@@ -92,7 +92,89 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .btn-sm{padding:4px 9px;font-size:11px;}
 
 /* MAIN */
+/* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);padding:12px 14px;}
+
+.top-tabs{
+  display:flex;
+  gap:8px;
+  margin-bottom:12px;
+  flex-shrink:0;
+}
+
+.top-tab{
+  padding:8px 16px;
+  border-radius:10px;
+  border:2px solid #e0d8cc;
+  background:#fff;
+  font-family:'Nunito',sans-serif;
+  font-size:12px;
+  font-weight:800;
+  cursor:pointer;
+  transition:all .15s;
+}
+
+.top-tab:hover{
+  border-color:var(--accent);
+  color:var(--accent);
+}
+
+.top-tab.active{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+}
+
+.top-tab-panel{
+  display:none;
+  flex:1;
+  min-height:0;
+}
+
+.top-tab-panel.active{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+.worksheet-builder{
+  background:#fff;
+  border:2px solid #ede8e0;
+  border-radius:14px;
+  padding:18px;
+  box-shadow:0 1px 6px var(--sh);
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.worksheet-head h2{
+  font-size:20px;
+  margin-bottom:6px;
+  color:var(--ink);
+}
+
+.worksheet-head p{
+  font-size:13px;
+  color:var(--soft);
+  line-height:1.6;
+}
+
+.worksheet-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.worksheet-placeholder{
+  border:2px dashed #ddd;
+  border-radius:12px;
+  background:#faf6f0;
+  padding:18px;
+  font-size:13px;
+  line-height:1.8;
+  color:var(--soft);
+}
 
 .main-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-shrink:0;flex-wrap:wrap;}
 .tool-btn{padding:5px 11px;border-radius:6px;border:2px solid #e0d8cc;background:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
@@ -234,18 +316,14 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
         <input type="range" id="animSpeed" min="1" max="10" value="5">
         <div class="range-lbl"><span>Traag</span><span>Snel</span></div>
       </div>
+      <div>
+  <label class="lbl">Herhalingen naast voorbeeld</label>
+  <input type="number" id="animRepeatCount" min="1" max="8" value="3">
+</div>
       <div class="trow">
         <span style="font-size:12px;font-weight:700">Herhalen</span>
         <button class="tgl" id="loopTgl" onclick="this.classList.toggle('on')"></button>
       </div>
-    </div>
-  </div>
-
-  <div class="acc-section">
-    <div class="acc-head" onclick="toggleAcc(this)">📄 Werkblad (extra) <span class="acc-arrow">▾</span></div>
-    <div class="acc-body closed">
-      <p style="font-size:11px;color:var(--soft);line-height:1.5;">Maak een afdrukbaar werkblad met de getekende letters. Elke rij met inhoud wordt opgenomen.</p>
-      <button class="btn btn-primary" style="margin-top:4px" onclick="openWerkblad()">📄 Werkblad opbouwen…</button>
     </div>
   </div>
 
@@ -267,7 +345,13 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 <!-- ===== MAIN ===== -->
 <main class="main">
 
-  <div class="main-toolbar">
+  <div class="top-tabs">
+    <button class="top-tab active" id="tabBtnBoard" onclick="switchTopTab('board')">Op het bord</button>
+    <button class="top-tab" id="tabBtnWorksheet" onclick="switchTopTab('worksheet')">Als werkblad</button>
+  </div>
+
+  <div id="boardTab" class="top-tab-panel active">
+    <div class="main-toolbar">
     <button class="tool-btn active" id="btnDraw" onclick="setTool('draw')">✏️ Tekenen</button>
     <button class="tool-btn" id="btnErase" onclick="setTool('erase')">⬜ Gum</button>
     <button class="tool-btn" onclick="undoLast()">↩ Ongedaan</button>
@@ -277,13 +361,36 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 
   <div class="wb-scroll" id="wbScroll"></div>
 
-  <div class="add-row-bar">
+    <div class="add-row-bar">
     <button class="btn btn-green btn-sm" onclick="addRow()">＋ Rij toevoegen</button>
     <button class="btn btn-ghost btn-sm" onclick="playAllRows()">▶▶ Alles afspelen</button>
     <button class="btn btn-ghost btn-sm" onclick="stopAllAnim()">■ Stop alles</button>
   </div>
+  </div>
+
+  <div id="worksheetTab" class="top-tab-panel">
+    <div class="worksheet-builder">
+      <div class="worksheet-head">
+        <h2>Werkblad maken</h2>
+        <p>Kies hier later verschillende schrijfoefeningen. Voor nu staat hier alvast de werkbladfunctie.</p>
+      </div>
+
+      <div class="worksheet-actions">
+        <button class="btn btn-primary" onclick="openWerkblad()">📄 Werkblad opbouwen…</button>
+      </div>
+
+      <div class="worksheet-placeholder">
+        <strong>Later komt hier:</strong><br>
+        letter oefenen<br>
+        naam voorschrijven<br>
+        zin overschrijven<br>
+        meerdere oefeningen op één werkblad
+      </div>
+    </div>
+  </div>
 
 </main>
+
 </div>
 
 <!-- ===== WERKBLAD MODAL ===== -->
@@ -304,8 +411,8 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
           <input type="text" id="wbDatum" placeholder="(optioneel)">
         </div>
         <div class="wb-opt">
-          <label class="lbl">Herhalingen per rij</label>
-          <input type="number" id="wbRepeat" min="1" max="8" value="4">
+          <label class="lbl">Aantal voorgeschreven letters</label>
+<input type="number" id="wbRepeat" min="1" max="8" value="4">
         </div>
         <div class="wb-opt">
           <label class="lbl">Lege oefenrijen per letter</label>
@@ -691,74 +798,198 @@ function eraseAt(r,pos){
 // =====================================================
 //  ANIMATIE
 // =====================================================
-function playRow(idx){
-  const r=rows[idx];
-  if(!r||!r.strokes.length){ alert('Geen inhoud op rij '+(idx+1)); return; }
-  stopRowAnim(idx); activateRow(idx);
+function getStrokeBounds(strokes){
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
-  const canvas=r.canvas, w=canvas.width, h=canvas.height;
-  r.offscreen=document.createElement('canvas');
-  r.offscreen.width=w; r.offscreen.height=h;
-  const oct=r.offscreen.getContext('2d');
-  drawLines(oct,w,h);
+  strokes.forEach(stroke=>{
+    stroke.forEach(p=>{
+      if (p.x < minX) minX = p.x;
+      if (p.y < minY) minY = p.y;
+      if (p.x > maxX) maxX = p.x;
+      if (p.y > maxY) maxY = p.y;
+    });
+  });
 
-  const speed=parseInt(document.getElementById('animSpeed').value);
-  const msPt=Math.max(1,28-speed*2.5);
-  const loop=document.getElementById('loopTgl').classList.contains('on');
-  const PL=44,PW=9;
-  let si=0,pi=0,lastT=0;
-  r.animRunning=true;
-
-  const btn=document.getElementById('playbtn-'+idx);
-  if(btn){ btn.classList.add('playing'); btn.textContent='⏹ Stop'; btn.onclick=()=>stopRowAnim(idx); }
-
-  function drawPotlood(ctx,pt,prev){
-    let angle=-Math.PI/4;
-    if(prev){ const dx=pt.x-prev.x,dy=pt.y-prev.y; if(Math.abs(dx)+Math.abs(dy)>.5) angle=Math.atan2(dy,dx)-Math.PI/2; }
-    ctx.save(); ctx.translate(pt.x,pt.y); ctx.rotate(angle);
-    ctx.beginPath(); ctx.moveTo(-3,0); ctx.lineTo(3,0); ctx.lineTo(0,-7); ctx.closePath();
-    ctx.fillStyle='#333'; ctx.fill();
-    ctx.beginPath(); ctx.moveTo(-PW/2,0); ctx.lineTo(PW/2,0); ctx.lineTo(PW/2,-11); ctx.lineTo(-PW/2,-11); ctx.closePath();
-    ctx.fillStyle='#e8c870'; ctx.fill(); ctx.strokeStyle='#c8a030'; ctx.lineWidth=.8; ctx.stroke();
-    ctx.fillStyle='#f5d055'; ctx.fillRect(-PW/2,-11,PW,PL-18);
-    ctx.strokeStyle='#d4a020'; ctx.lineWidth=.8; ctx.strokeRect(-PW/2,-11,PW,PL-18);
-    ctx.fillStyle='#bbb'; ctx.fillRect(-PW/2,PL-29,PW,5);
-    ctx.fillStyle='#f09090'; ctx.fillRect(-PW/2,PL-24,PW,7);
-    ctx.restore();
+  if (!isFinite(minX)) {
+    return { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 0, height: 0 };
   }
 
-  function drawSeg(ctx,p1,p2){
-    ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
-    ctx.lineCap='round'; ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  return {
+    minX,
+    minY,
+    maxX,
+    maxY,
+    width: maxX - minX,
+    height: maxY - minY
+  };
+}
+
+function playRow(idx){
+  const r = rows[idx];
+  if (!r || !r.strokes.length) {
+    alert('Geen inhoud op rij ' + (idx + 1));
+    return;
+  }
+
+  stopRowAnim(idx);
+  activateRow(idx);
+
+  const canvas = r.canvas;
+  const w = canvas.width;
+  const h = canvas.height;
+
+  r.offscreen = document.createElement('canvas');
+  r.offscreen.width = w;
+  r.offscreen.height = h;
+
+  const oct = r.offscreen.getContext('2d');
+  drawLines(oct, w, h);
+
+  const speed = parseInt(document.getElementById('animSpeed').value) || 5;
+  const msPt = Math.max(1, 28 - speed * 2.5);
+  const loop = document.getElementById('loopTgl').classList.contains('on');
+  const repeatCount = parseInt(document.getElementById('animRepeatCount').value) || 3;
+
+  const bounds = getStrokeBounds(r.strokes);
+  const letterWidth = bounds.width || 40;
+  const minX = bounds.minX || 0;
+  const repeatGap = 34; // ruimte tussen de herhalingen
+  const stepX = letterWidth + repeatGap;
+
+  // eerste voorbeeld blijft op originele plaats, herhalingen komen ernaast
+  const repeatedStrokes = [];
+  for (let rep = 0; rep < repeatCount; rep++) {
+    const offsetX = rep * stepX;
+
+    r.strokes.forEach(stroke => {
+      repeatedStrokes.push(
+        stroke.map(p => ({
+          x: p.x + offsetX,
+          y: p.y
+        }))
+      );
+    });
+  }
+
+  let si = 0;
+  let pi = 0;
+  let lastT = 0;
+  r.animRunning = true;
+
+  const btn = document.getElementById('playbtn-' + idx);
+  if (btn) {
+    btn.classList.add('playing');
+    btn.textContent = '⏹ Stop';
+    btn.onclick = () => stopRowAnim(idx);
+  }
+
+  function drawPotlood(ctx, pt){
+  const angle = 0.55; // gespiegeld
+
+  ctx.save();
+  ctx.translate(pt.x - 4, pt.y - 2);
+  ctx.rotate(angle);
+
+  // potloodbody
+  ctx.fillStyle = '#f5d055';
+  ctx.fillRect(-3, -28, 10, 28);
+  ctx.strokeStyle = '#d4a020';
+  ctx.lineWidth = 0.8;
+  ctx.strokeRect(-3, -28, 10, 28);
+
+  // metalen ring
+  ctx.fillStyle = '#bbb';
+  ctx.fillRect(-3, -33, 10, 5);
+
+  // gom
+  ctx.fillStyle = '#f09090';
+  ctx.fillRect(-3, -40, 10, 7);
+
+  // houten punt
+  ctx.beginPath();
+  ctx.moveTo(-3, 0);
+  ctx.lineTo(7, 0);
+  ctx.lineTo(2, 8);
+  ctx.closePath();
+  ctx.fillStyle = '#d8b48a';
+  ctx.fill();
+  ctx.strokeStyle = '#b88b5a';
+  ctx.lineWidth = 0.7;
+  ctx.stroke();
+
+  // grafietpunt
+  ctx.beginPath();
+  ctx.moveTo(1.2, 6.2);
+  ctx.lineTo(2.8, 6.2);
+  ctx.lineTo(2, 8.6);
+  ctx.closePath();
+  ctx.fillStyle = '#333';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+  function drawSeg(ctx, p1, p2){
+    ctx.beginPath();
+    ctx.strokeStyle = S.penColor;
+    ctx.lineWidth = S.penSize;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.stroke();
   }
 
   function frame(ts){
-    if(!r.animRunning) return;
-    if(ts-lastT<msPt){ r.animFrame=requestAnimationFrame(frame); return; }
-    lastT=ts;
+    if (!r.animRunning) return;
 
-    if(si>=r.strokes.length){
-      if(loop){ si=0; pi=0; oct.clearRect(0,0,w,h); drawLines(oct,w,h); }
-      else { r.animRunning=false; r.ctx.drawImage(r.offscreen,0,0); resetPlayBtn(idx); return; }
+    if (ts - lastT < msPt) {
+      r.animFrame = requestAnimationFrame(frame);
+      return;
+    }
+    lastT = ts;
+
+    if (si >= repeatedStrokes.length) {
+      if (loop) {
+        si = 0;
+        pi = 0;
+        oct.clearRect(0, 0, w, h);
+        drawLines(oct, w, h);
+      } else {
+        r.animRunning = false;
+        r.ctx.drawImage(r.offscreen, 0, 0);
+        resetPlayBtn(idx);
+        return;
+      }
     }
 
-    const stroke=r.strokes[si];
-    if(pi>=stroke.length){ si++; pi=0; r.animFrame=requestAnimationFrame(frame); return; }
+    const stroke = repeatedStrokes[si];
 
-    const pt=stroke[pi], prev=pi>0?stroke[pi-1]:null;
-
-    if(S.animStyle==='lijn'){
-      if(pi>0) drawSeg(r.offscreen.getContext('2d'),prev,pt);
-      r.ctx.drawImage(r.offscreen,0,0);
-    } else {
-      if(pi>0) drawSeg(r.offscreen.getContext('2d'),prev,pt);
-      r.ctx.drawImage(r.offscreen,0,0);
-      drawPotlood(r.ctx,pt,prev);
+    if (pi >= stroke.length) {
+      si++;
+      pi = 0;
+      r.animFrame = requestAnimationFrame(frame);
+      return;
     }
 
-    pi++; r.animFrame=requestAnimationFrame(frame);
+    const pt = stroke[pi];
+    const prev = pi > 0 ? stroke[pi - 1] : null;
+
+    if (pi > 0) {
+      drawSeg(oct, prev, pt);
+    }
+
+    r.ctx.drawImage(r.offscreen, 0, 0);
+
+    if (S.animStyle === 'potlood') {
+      drawPotlood(r.ctx, pt);
+    }
+
+    pi++;
+    r.animFrame = requestAnimationFrame(frame);
   }
-  r.animFrame=requestAnimationFrame(frame);
+
+  r.animFrame = requestAnimationFrame(frame);
 }
 
 function stopRowAnim(idx){
@@ -788,7 +1019,7 @@ function closeWerkblad(){ document.getElementById('wbModal').classList.add('hidd
 function buildWerkblad(){
   const naam=document.getElementById('wbNaam').value.trim();
   const datum=document.getElementById('wbDatum').value.trim();
-  const repeat=parseInt(document.getElementById('wbRepeat').value)||4;
+  const voorbeeldAantal = parseInt(document.getElementById('wbRepeat').value) || 4;
   const extra=parseInt(document.getElementById('wbExtra').value)||2;
   const showDot=document.getElementById('wbDotTgl').classList.contains('on');
   const L=lh();
@@ -853,22 +1084,21 @@ ctx.stroke();
     if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+dx0,r.startPt.y+dy0);
 
     let xC=MARGIN+8+scaledW;
-    for(let rep=1;rep<repeat;rep++){
+    for(let rep=1; rep<voorbeeldAantal; rep++){
       if(xC+scaledW>MARGIN+IW) break;
       const rdx=xC-mnX;
       drawLetterWb(ctx,r.strokes,rdx,dy0,0.13,'#555');
       if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+rdx,r.startPt.y+dy0);
       xC+=scaledW;
     }
-    ctx.font='bold 8px Nunito,sans-serif'; ctx.fillStyle='#e8622a'; ctx.textAlign='left';
-    ctx.fillText('RIJ '+(ri+1),MARGIN,curY+9);
+    
     curY+=RH;
 
     for(let ex=0;ex<extra;ex++){
       drawWbLines(ctx,MARGIN,curY,IW,L);
       if(showDot&&r.startPt){
         let xC2=MARGIN+8;
-        for(let rep=0;rep<repeat;rep++){
+        for(let rep=0; rep<voorbeeldAantal; rep++){
           if(xC2+scaledW>MARGIN+IW) break;
           drawDot(ctx,r.startPt.x+(xC2-mnX),r.startPt.y+curY);
           xC2+=scaledW;
@@ -1100,6 +1330,19 @@ function buildLineTypePreviews(){
     const c = document.getElementById('preview-' + type);
     if (c) drawLineTypePreview(c, type);
   });
+}
+
+function switchTopTab(tab){
+  const boardBtn = document.getElementById('tabBtnBoard');
+  const worksheetBtn = document.getElementById('tabBtnWorksheet');
+  const boardTab = document.getElementById('boardTab');
+  const worksheetTab = document.getElementById('worksheetTab');
+
+  boardBtn.classList.toggle('active', tab === 'board');
+  worksheetBtn.classList.toggle('active', tab === 'worksheet');
+
+  boardTab.classList.toggle('active', tab === 'board');
+  worksheetTab.classList.toggle('active', tab === 'worksheet');
 }
 
 // =====================================================
