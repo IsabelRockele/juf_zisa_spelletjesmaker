@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="nl">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schrijfgenerator — Juf Zisa</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+:root {
+  --bg:#fdf8f2; --paper:#fffef9; --ink:#2d2417; --soft:#8b7355;
+  --accent:#e8622a; --green:#4a9b6f; --lc:#b8cfe8;
+  --sh:rgba(45,36,23,0.10); --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* HEADER */
+header{background:var(--ink);color:#fdf8f2;padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+header .logo{font-size:18px;font-weight:800;} header .logo span{color:var(--accent);}
+header .sub{font-size:11px;opacity:.55;font-weight:600;}
+.hdr-badge{margin-left:auto;background:var(--accent);color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+
+/* LAYOUT */
+.app{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:255px;flex-shrink:0;background:#fff;border-right:2px solid #ede8e0;display:flex;flex-direction:column;overflow-y:auto;}
+
+.acc-section{border-bottom:1.5px solid #ede8e0;}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--soft);}
+.acc-head:hover{background:#faf6f0;}
+.acc-arrow{font-size:10px;transition:transform .2s;}
+.acc-body{padding:10px 14px 14px;display:flex;flex-direction:column;gap:10px;}
+.acc-body.closed{display:none;}
+
+label.lbl{font-size:11px;font-weight:700;display:block;margin-bottom:3px;color:var(--ink);}
+select,input[type=text],input[type=number]{width:100%;padding:6px 10px;border:2px solid #e8e0d4;border-radius:7px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:600;background:var(--bg);color:var(--ink);outline:none;transition:border-color .2s;}
+select:focus,input:focus{border-color:var(--accent);}
+input[type=range]{width:100%;accent-color:var(--accent);}
+.range-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--soft);font-weight:600;}
+
+.chips{display:flex;gap:5px;flex-wrap:wrap;}
+.chip{width:22px;height:22px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:border-color .15s,transform .15s;}
+.chip.on{border-color:var(--ink);transform:scale(1.2);}
+
+.trow{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tgl{width:34px;height:19px;background:#ddd;border-radius:10px;position:relative;cursor:pointer;border:none;outline:none;transition:background .2s;flex-shrink:0;}
+.tgl.on{background:var(--green);}
+.tgl::after{content:'';position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.tgl.on::after{left:18px;}
+
+/* BUTTONS */
+.btn{padding:7px 12px;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s,transform .1s;white-space:nowrap;}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(232,98,42,.3);}
+.btn-dark{background:var(--ink);color:#fff;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-ghost{background:transparent;color:var(--soft);border:2px solid #e0d8cc;}
+.btn-sm{padding:4px 9px;font-size:11px;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);padding:12px 14px;}
+
+.main-toolbar{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-shrink:0;flex-wrap:wrap;}
+.tool-btn{padding:5px 11px;border-radius:6px;border:2px solid #e0d8cc;background:#fff;font-family:'Nunito',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+.tool-btn:hover{border-color:var(--accent);color:var(--accent);}
+.tool-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.toolbar-hint{margin-left:auto;font-size:10px;color:var(--soft);font-weight:600;}
+
+/* SCHRIJFLIJNEN SCROLL */
+.wb-scroll{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:2px;}
+
+/* SCHRIJFRIJ */
+.row-wrap{background:#fff;border-radius:var(--r);box-shadow:0 1px 6px var(--sh);overflow:hidden;flex-shrink:0;border:2px solid transparent;transition:border-color .15s;}
+.row-wrap.active-row{border-color:var(--accent);}
+.row-head{display:flex;align-items:center;gap:5px;padding:4px 10px;background:#f8f4ee;border-bottom:1.5px solid #ede8e0;}
+.row-num{font-size:10px;font-weight:800;color:var(--soft);min-width:16px;}
+.row-label{font-size:11px;font-weight:700;color:var(--soft);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.row-btns{display:flex;gap:3px;align-items:center;}
+.row-btn{padding:3px 8px;border-radius:5px;font-size:10px;font-weight:700;font-family:'Nunito',sans-serif;cursor:pointer;border:1.5px solid #ddd;background:#fff;transition:all .15s;white-space:nowrap;}
+.row-btn:hover{border-color:var(--accent);color:var(--accent);}
+.row-btn.playing{background:var(--accent);color:#fff;border-color:var(--accent);}
+.row-btn.del-btn:hover{border-color:#c00;color:#c00;}
+canvas.row-canvas{display:block;width:100%;touch-action:none;}
+
+/* ONDERBALK */
+.add-row-bar{flex-shrink:0;display:flex;gap:6px;align-items:center;padding-top:8px;flex-wrap:wrap;}
+
+/* WERKBLAD MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.hidden{display:none;}
+.modal{background:#fff;border-radius:14px;width:min(820px,100%);max-height:92vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.modal-head{background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px 14px 0 0;display:flex;align-items:center;}
+.modal-head .mtitle{font-size:14px;font-weight:800;}
+.modal-close{margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;font-size:15px;cursor:pointer;padding:3px 9px;border-radius:6px;}
+.modal-body{padding:16px;overflow-y:auto;flex:1;}
+.wb-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.wb-opt{display:flex;flex-direction:column;gap:4px;}
+#wbCanvas{border:1.5px dashed #ddd;border-radius:8px;display:block;width:100%;margin-top:4px;}
+.modal-foot{padding:10px 18px;border-top:2px solid #ede8e0;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
+
+@media print{
+  body *{visibility:hidden;}
+  #wbCanvas,#wbCanvas *{visibility:visible;}
+  #wbCanvas{position:fixed;top:0;left:0;width:100%!important;border:none!important;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">✏️ Schrijf<span>generator</span></div>
+    <div class="sub">Handschrift voordoen &amp; oefenen</div>
+  </div>
+  <div class="hdr-badge">Juf Zisa</div>
+</header>
+
+<div class="app">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar">
+
+  <div class="acc-section">
+    <div class="acc-head" onclick="toggleAcc(this)">✏️ Pen &amp; schrijflijnen <span class="acc-arrow">▾</span></div>
+    <div class="acc-body">
+      <div>
+        <label class="lbl">Type schrijflijnen</label>
+        <select id="lineType" onchange="redrawAll()">
+          <option value="4lijn">Vierlijnsstelsel</option>
+          <option value="3lijn">Drielijnsstelsel</option>
+          <option value="2lijn">Tweeregelig</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Regelafstand</label>
+        <select id="lineSpacing" onchange="resizeAll()">
+          <option value="large">Groot (klas 1–2)</option>
+          <option value="medium" selected>Middel (klas 3–4)</option>
+          <option value="small">Klein (klas 5–6)</option>
+        </select>
+      </div>
+      <div>
+        <label class="lbl">Lijnkleur</label>
+        <div class="chips" id="lcChips">
+          <div class="chip on" data-c="#b8cfe8" style="background:#b8cfe8"></div>
+          <div class="chip" data-c="#f0c8c8" style="background:#f0c8c8"></div>
+          <div class="chip" data-c="#c8e0c8" style="background:#c8e0c8"></div>
+          <div class="chip" data-c="#e8e0c0" style="background:#e8e0c0"></div>
+          <div class="chip" data-c="#d0d0d0" style="background:#d0d0d0"></div>
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Penkleur</label>
+        <div class="chips" id="pcChips">
+          <div class="chip on" data-c="#1a1a2e" style="background:#1a1a2e"></div>
+          <div class="chip" data-c="#1a3a6e" style="background:#1a3a6e"></div>
+          <div class="chip" data-c="#2d6e2d" style="background:#2d6e2d"></div>
+          <div class="chip" data-c="#8b1a1a" style="background:#8b1a1a"></div>
+          <div class="chip" data-c="#5b3a8b" style="background:#5b3a8b"></div>
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Pendikte</label>
+        <input type="range" id="penSize" min="2" max="10" value="4" oninput="S.penSize=+this.value">
+        <div class="range-lbl"><span>Fijn</span><span>Dik</span></div>
+      </div>
+      <div class="trow">
+        <span style="font-size:12px;font-weight:700">Smoothing (vloeiend)</span>
+        <button class="tgl on" id="smoothTgl" onclick="this.classList.toggle('on')"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc-section">
+    <div class="acc-head" onclick="toggleAcc(this)">🎬 Animatie <span class="acc-arrow">▾</span></div>
+    <div class="acc-body">
+      <div>
+        <label class="lbl">Animatiestijl</label>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-dark btn-sm" id="btnPotlood" onclick="setAS('potlood')">🖊 Potlood</button>
+          <button class="btn btn-ghost btn-sm" id="btnLijn" onclick="setAS('lijn')">〰 Lijn</button>
+        </div>
+      </div>
+      <div>
+        <label class="lbl">Schrijfsnelheid</label>
+        <input type="range" id="animSpeed" min="1" max="10" value="5">
+        <div class="range-lbl"><span>Traag</span><span>Snel</span></div>
+      </div>
+      <div class="trow">
+        <span style="font-size:12px;font-weight:700">Herhalen</span>
+        <button class="tgl" id="loopTgl" onclick="this.classList.toggle('on')"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc-section">
+    <div class="acc-head" onclick="toggleAcc(this)">📄 Werkblad (extra) <span class="acc-arrow">▾</span></div>
+    <div class="acc-body closed">
+      <p style="font-size:11px;color:var(--soft);line-height:1.5;">Maak een afdrukbaar werkblad met de getekende letters. Elke rij met inhoud wordt opgenomen.</p>
+      <button class="btn btn-primary" style="margin-top:4px" onclick="openWerkblad()">📄 Werkblad opbouwen…</button>
+    </div>
+  </div>
+
+  <div class="acc-section">
+    <div class="acc-head" onclick="toggleAcc(this)">ℹ️ Invoerhulp <span class="acc-arrow" style="transform:rotate(-90deg)">▾</span></div>
+    <div class="acc-body closed">
+      <p style="font-size:11px;color:var(--soft);line-height:1.7">
+        🖱️ <strong>Muis</strong> op laptop<br>
+        👆 <strong>Touch/smartboard</strong><br>
+        🖊️ <strong>Apple Pencil / stylus</strong><br><br>
+        Klik een rij aan om er op te schrijven.<br>
+        Elke rij heeft zijn eigen ▶ knop.
+      </p>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="main">
+
+  <div class="main-toolbar">
+    <button class="tool-btn active" id="btnDraw" onclick="setTool('draw')">✏️ Tekenen</button>
+    <button class="tool-btn" id="btnErase" onclick="setTool('erase')">⬜ Gum</button>
+    <button class="tool-btn" onclick="undoLast()">↩ Ongedaan</button>
+    <button class="tool-btn" onclick="clearActiveRow()">🗑 Rij leeg</button>
+    <span class="toolbar-hint">Klik op een rij om te schrijven</span>
+  </div>
+
+  <div class="wb-scroll" id="wbScroll"></div>
+
+  <div class="add-row-bar">
+    <button class="btn btn-green btn-sm" onclick="addRow()">＋ Rij toevoegen</button>
+    <button class="btn btn-ghost btn-sm" onclick="playAllRows()">▶▶ Alles afspelen</button>
+    <button class="btn btn-ghost btn-sm" onclick="stopAllAnim()">■ Stop alles</button>
+  </div>
+
+</main>
+</div>
+
+<!-- ===== WERKBLAD MODAL ===== -->
+<div class="modal-overlay hidden" id="wbModal">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="mtitle">📄 Werkblad opbouwen</span>
+      <button class="modal-close" onclick="closeWerkblad()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="wb-opts">
+        <div class="wb-opt">
+          <label class="lbl">Naam leerling</label>
+          <input type="text" id="wbNaam" placeholder="(optioneel)">
+        </div>
+        <div class="wb-opt">
+          <label class="lbl">Datum</label>
+          <input type="text" id="wbDatum" placeholder="(optioneel)">
+        </div>
+        <div class="wb-opt">
+          <label class="lbl">Herhalingen per rij</label>
+          <input type="number" id="wbRepeat" min="1" max="8" value="4">
+        </div>
+        <div class="wb-opt">
+          <label class="lbl">Lege oefenrijen per letter</label>
+          <input type="number" id="wbExtra" min="0" max="5" value="2">
+        </div>
+        <div class="wb-opt" style="grid-column:span 2">
+          <div class="trow">
+            <span style="font-size:12px;font-weight:700">Startpunt (oranje stip) tonen</span>
+            <button class="tgl on" id="wbDotTgl" onclick="this.classList.toggle('on')"></button>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="buildWerkblad()">🔄 Preview opbouwen</button>
+      <canvas id="wbCanvas"></canvas>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" onclick="closeWerkblad()">Sluiten</button>
+      <button class="btn btn-dark" onclick="window.print()">🖨️ Afdrukken</button>
+<button class="btn btn-green" onclick="downloadPDF()">⬇️ Download als PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================================================
+//  STATE
+// =====================================================
+const S = {
+  tool: 'draw',
+  penColor: '#1a1a2e',
+  penSize: 4,
+  lineColor: '#b8cfe8',
+  animStyle: 'potlood',
+  activeRow: 0,
+};
+
+const rows = []; // { strokes[], startPt, animRunning, animFrame, offscreen, canvas, ctx }
+
+// =====================================================
+//  HELPERS
+// =====================================================
+function lh() {
+  return {
+    large: 42,
+    medium: 30,
+    small: 22
+  }[document.getElementById('lineSpacing').value];
+}
+function canH() { return lh()*4+20; }
+function panW() {
+  const s=document.getElementById('wbScroll');
+  return Math.max(300, s.clientWidth-4);
+}
+
+// =====================================================
+//  ACCORDION
+// =====================================================
+function toggleAcc(head) {
+  const body=head.nextElementSibling, arrow=head.querySelector('.acc-arrow');
+  body.classList.toggle('closed');
+  arrow.style.transform=body.classList.contains('closed')?'rotate(-90deg)':'';
+}
+
+// =====================================================
+//  CHIP SELECTORS
+// =====================================================
+document.querySelectorAll('#lcChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#lcChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); S.lineColor=c.dataset.c; redrawAll();
+}));
+document.querySelectorAll('#pcChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#pcChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); S.penColor=c.dataset.c;
+}));
+
+// =====================================================
+//  TOOL & ANIMATIE STIJL
+// =====================================================
+function setTool(t) {
+  S.tool=t;
+  document.getElementById('btnDraw').classList.toggle('active',t==='draw');
+  document.getElementById('btnErase').classList.toggle('active',t==='erase');
+  rows.forEach(r=>{ if(r.canvas) r.canvas.style.cursor=t==='erase'?'cell':'crosshair'; });
+}
+
+function setAS(s) {
+  S.animStyle=s;
+  document.getElementById('btnPotlood').className='btn btn-sm '+(s==='potlood'?'btn-dark':'btn-ghost');
+  document.getElementById('btnLijn').className='btn btn-sm '+(s==='lijn'?'btn-dark':'btn-ghost');
+}
+
+// =====================================================
+//  RIJEN
+// =====================================================
+function activateRow(idx) {
+  S.activeRow=idx;
+  document.querySelectorAll('.row-wrap').forEach((w,i)=>{
+    w.classList.toggle('active-row',i===idx);
+  });
+}
+
+function addRow() {
+  const idx=rows.length;
+  const rowData={ strokes:[], startPt:null, animRunning:false, animFrame:null, offscreen:null, canvas:null, ctx:null };
+
+  const wrap=document.createElement('div');
+  wrap.className='row-wrap'; wrap.dataset.idx=idx;
+
+  wrap.innerHTML=`
+    <div class="row-head">
+      <span class="row-num">${idx+1}</span>
+      <span class="row-label">Rij ${idx+1}</span>
+      <div class="row-btns">
+        <button class="row-btn" id="playbtn-${idx}" onclick="playRow(${idx})">▶ Afspelen</button>
+        <button class="row-btn del-btn" onclick="clearRow(${idx})" title="Rij leeg">🗑</button>
+        ${idx>0?`<button class="row-btn del-btn" onclick="removeRow(${idx})" title="Rij verwijderen">✕</button>`:''}
+      </div>
+    </div>`;
+
+  const canvasEl=document.createElement('canvas');
+  canvasEl.className='row-canvas'; canvasEl.dataset.idx=idx;
+  wrap.appendChild(canvasEl);
+  document.getElementById('wbScroll').appendChild(wrap);
+
+  rowData.canvas=canvasEl; rowData.ctx=canvasEl.getContext('2d');
+  rows.push(rowData);
+
+  wrap.addEventListener('pointerdown',()=>activateRow(idx),{capture:true});
+  setupCanvasEvents(canvasEl,idx);
+  resizeRow(idx);
+  activateRow(idx);
+}
+
+function clearRow(idx) {
+  const r=rows[idx]; if(!r) return;
+  r.strokes=[]; r.startPt=null;
+  stopRowAnim(idx); redrawRow(idx);
+}
+function clearActiveRow(){ clearRow(S.activeRow); }
+
+function removeRow(idx) {
+  if(rows.length<=1) return;
+  stopRowAnim(idx);
+  rows.splice(idx,1);
+  const scroll=document.getElementById('wbScroll');
+  scroll.innerHTML='';
+  const saved=[...rows];
+  rows.length=0;
+  saved.forEach(r=>addRowFromSaved(r));
+  activateRow(Math.max(0,Math.min(idx,rows.length-1)));
+}
+
+function addRowFromSaved(saved) {
+  const idx=rows.length;
+  const rowData={ strokes:saved.strokes, startPt:saved.startPt, animRunning:false, animFrame:null, offscreen:null, canvas:null, ctx:null };
+  const wrap=document.createElement('div');
+  wrap.className='row-wrap'; wrap.dataset.idx=idx;
+  wrap.innerHTML=`
+    <div class="row-head">
+      <span class="row-num">${idx+1}</span>
+      <span class="row-label">Rij ${idx+1}</span>
+      <div class="row-btns">
+        <button class="row-btn" id="playbtn-${idx}" onclick="playRow(${idx})">▶ Afspelen</button>
+        <button class="row-btn del-btn" onclick="clearRow(${idx})">🗑</button>
+        ${idx>0?`<button class="row-btn del-btn" onclick="removeRow(${idx})">✕</button>`:''}
+      </div>
+    </div>`;
+  const canvasEl=document.createElement('canvas');
+  canvasEl.className='row-canvas'; canvasEl.dataset.idx=idx;
+  wrap.appendChild(canvasEl);
+  document.getElementById('wbScroll').appendChild(wrap);
+  rowData.canvas=canvasEl; rowData.ctx=canvasEl.getContext('2d');
+  rows.push(rowData);
+  wrap.addEventListener('pointerdown',()=>activateRow(idx),{capture:true});
+  setupCanvasEvents(canvasEl,idx);
+  resizeRow(idx);
+}
+
+function undoLast(){
+  const r=rows[S.activeRow]; if(!r||!r.strokes.length) return;
+  r.strokes.pop();
+  r.startPt=r.strokes.length>0?{...r.strokes[0][0]}:null;
+  redrawRow(S.activeRow);
+}
+
+// =====================================================
+//  RESIZE & REDRAW
+// =====================================================
+function resizeRow(idx){
+  const r=rows[idx]; if(!r||!r.canvas) return;
+  const w=panW(), h=canH();
+  r.canvas.width=w; r.canvas.height=h;
+  r.offscreen=null;
+  redrawRow(idx);
+}
+function resizeAll(){ rows.forEach((_,i)=>resizeRow(i)); }
+function redrawAll(){ rows.forEach((_,i)=>redrawRow(i)); }
+
+function redrawRow(idx){
+  const r=rows[idx]; if(!r||!r.canvas) return;
+  const ctx=r.ctx, w=r.canvas.width, h=r.canvas.height;
+  drawLines(ctx,w,h);
+  r.strokes.forEach(s=>strokeSmooth(ctx,s,S.penColor));
+}
+
+// =====================================================
+//  SCHRIJFLIJNEN
+// =====================================================
+function lineOffsets(){
+  const L=lh(), t=document.getElementById('lineType').value;
+  if(t==='4lijn') return [{dy:10,dash:true,lw:1},{dy:10+L,dash:false,lw:1},{dy:10+L*2,dash:false,lw:1.5},{dy:10+L*3,dash:true,lw:1}];
+  if(t==='3lijn') return [{dy:12,dash:false,lw:1},{dy:12+L*1.5,dash:false,lw:1.5},{dy:12+L*3,dash:false,lw:1}];
+  return [{dy:16,dash:false,lw:1},{dy:16+L*2,dash:false,lw:1.5}];
+}
+
+function drawLines(ctx,w,h,col){
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+  const offs=lineOffsets();
+  if(document.getElementById('lineType').value==='4lijn'){
+    ctx.fillStyle='rgba(255,252,240,.5)';
+    ctx.fillRect(0,offs[1].dy,w,lh());
+  }
+  offs.forEach(l=>{
+    ctx.beginPath();
+    ctx.strokeStyle=col||S.lineColor;
+    ctx.lineWidth=l.lw;
+    ctx.setLineDash(l.dash?[6,5]:[]);
+    ctx.moveTo(0,l.dy); ctx.lineTo(w,l.dy); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+
+// =====================================================
+//  SMOOTH STROKE
+// =====================================================
+function strokeSmooth(ctx,stroke,col){
+  if(!stroke||stroke.length<2) return;
+  const sm=document.getElementById('smoothTgl').classList.contains('on');
+  ctx.beginPath();
+  ctx.strokeStyle=col||S.penColor;
+  ctx.lineWidth=S.penSize; ctx.lineCap='round'; ctx.lineJoin='round';
+  if(sm&&stroke.length>3){
+    ctx.moveTo(stroke[0].x,stroke[0].y);
+    for(let i=0;i<stroke.length-1;i++){
+      const p0=stroke[Math.max(0,i-1)],p1=stroke[i],p2=stroke[i+1],p3=stroke[Math.min(stroke.length-1,i+2)];
+      ctx.bezierCurveTo(p1.x+(p2.x-p0.x)/6,p1.y+(p2.y-p0.y)/6,p2.x-(p3.x-p1.x)/6,p2.y-(p3.y-p1.y)/6,p2.x,p2.y);
+    }
+  } else {
+    ctx.moveTo(stroke[0].x,stroke[0].y);
+    stroke.forEach(p=>ctx.lineTo(p.x,p.y));
+  }
+  ctx.stroke();
+}
+
+// =====================================================
+//  CANVAS POINTER EVENTS
+// =====================================================
+function getPos(e,canvas){
+  const rect=canvas.getBoundingClientRect();
+  const sx=canvas.width/rect.width, sy=canvas.height/rect.height;
+  const src=e.touches?e.touches[0]:e;
+  return {x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy};
+}
+
+function setupCanvasEvents(canvas,idx){
+  let drawing=false, cur=[];
+  canvas.addEventListener('pointerdown',e=>{
+    drawing=true; cur=[];
+    const pos=getPos(e,canvas), r=rows[idx];
+    cur.push(pos);
+    if(!r.startPt) r.startPt={...pos};
+    canvas.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!drawing) return;
+    const pos=getPos(e,canvas), r=rows[idx];
+    if(S.tool==='erase'){ eraseAt(r,pos); redrawRow(idx); return; }
+    cur.push(pos);
+    if(cur.length>1){
+      const ctx=r.ctx;
+      ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
+      ctx.lineCap='round'; ctx.lineJoin='round';
+      ctx.moveTo(cur[cur.length-2].x,cur[cur.length-2].y);
+      ctx.lineTo(pos.x,pos.y); ctx.stroke();
+    }
+  });
+  canvas.addEventListener('pointerup',()=>{
+    if(!drawing) return; drawing=false;
+    const r=rows[idx];
+    if(S.tool==='draw'&&cur.length>1){
+      r.strokes.push([...cur]);
+      if(document.getElementById('smoothTgl').classList.contains('on')) redrawRow(idx);
+    }
+    if(r.strokes.length>0) r.startPt={...r.strokes[0][0]};
+    cur=[];
+  });
+  canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+}
+
+function eraseAt(r,pos){
+  r.strokes=r.strokes.filter(s=>!s.some(p=>Math.hypot(p.x-pos.x,p.y-pos.y)<20));
+  r.startPt=r.strokes.length>0?{...r.strokes[0][0]}:null;
+}
+
+// =====================================================
+//  ANIMATIE
+// =====================================================
+function playRow(idx){
+  const r=rows[idx];
+  if(!r||!r.strokes.length){ alert('Geen inhoud op rij '+(idx+1)); return; }
+  stopRowAnim(idx); activateRow(idx);
+
+  const canvas=r.canvas, w=canvas.width, h=canvas.height;
+  r.offscreen=document.createElement('canvas');
+  r.offscreen.width=w; r.offscreen.height=h;
+  const oct=r.offscreen.getContext('2d');
+  drawLines(oct,w,h);
+
+  const speed=parseInt(document.getElementById('animSpeed').value);
+  const msPt=Math.max(1,28-speed*2.5);
+  const loop=document.getElementById('loopTgl').classList.contains('on');
+  const PL=44,PW=9;
+  let si=0,pi=0,lastT=0;
+  r.animRunning=true;
+
+  const btn=document.getElementById('playbtn-'+idx);
+  if(btn){ btn.classList.add('playing'); btn.textContent='⏹ Stop'; btn.onclick=()=>stopRowAnim(idx); }
+
+  function drawPotlood(ctx,pt,prev){
+    let angle=-Math.PI/4;
+    if(prev){ const dx=pt.x-prev.x,dy=pt.y-prev.y; if(Math.abs(dx)+Math.abs(dy)>.5) angle=Math.atan2(dy,dx)-Math.PI/2; }
+    ctx.save(); ctx.translate(pt.x,pt.y); ctx.rotate(angle);
+    ctx.beginPath(); ctx.moveTo(-3,0); ctx.lineTo(3,0); ctx.lineTo(0,-7); ctx.closePath();
+    ctx.fillStyle='#333'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-PW/2,0); ctx.lineTo(PW/2,0); ctx.lineTo(PW/2,-11); ctx.lineTo(-PW/2,-11); ctx.closePath();
+    ctx.fillStyle='#e8c870'; ctx.fill(); ctx.strokeStyle='#c8a030'; ctx.lineWidth=.8; ctx.stroke();
+    ctx.fillStyle='#f5d055'; ctx.fillRect(-PW/2,-11,PW,PL-18);
+    ctx.strokeStyle='#d4a020'; ctx.lineWidth=.8; ctx.strokeRect(-PW/2,-11,PW,PL-18);
+    ctx.fillStyle='#bbb'; ctx.fillRect(-PW/2,PL-29,PW,5);
+    ctx.fillStyle='#f09090'; ctx.fillRect(-PW/2,PL-24,PW,7);
+    ctx.restore();
+  }
+
+  function drawSeg(ctx,p1,p2){
+    ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
+    ctx.lineCap='round'; ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+
+  function frame(ts){
+    if(!r.animRunning) return;
+    if(ts-lastT<msPt){ r.animFrame=requestAnimationFrame(frame); return; }
+    lastT=ts;
+
+    if(si>=r.strokes.length){
+      if(loop){ si=0; pi=0; oct.clearRect(0,0,w,h); drawLines(oct,w,h); }
+      else { r.animRunning=false; r.ctx.drawImage(r.offscreen,0,0); resetPlayBtn(idx); return; }
+    }
+
+    const stroke=r.strokes[si];
+    if(pi>=stroke.length){ si++; pi=0; r.animFrame=requestAnimationFrame(frame); return; }
+
+    const pt=stroke[pi], prev=pi>0?stroke[pi-1]:null;
+
+    if(S.animStyle==='lijn'){
+      if(pi>0) drawSeg(r.offscreen.getContext('2d'),prev,pt);
+      r.ctx.drawImage(r.offscreen,0,0);
+    } else {
+      if(pi>0) drawSeg(r.offscreen.getContext('2d'),prev,pt);
+      r.ctx.drawImage(r.offscreen,0,0);
+      drawPotlood(r.ctx,pt,prev);
+    }
+
+    pi++; r.animFrame=requestAnimationFrame(frame);
+  }
+  r.animFrame=requestAnimationFrame(frame);
+}
+
+function stopRowAnim(idx){
+  const r=rows[idx]; if(!r) return;
+  r.animRunning=false;
+  if(r.animFrame){ cancelAnimationFrame(r.animFrame); r.animFrame=null; }
+  redrawRow(idx); resetPlayBtn(idx);
+}
+
+function resetPlayBtn(idx){
+  const btn=document.getElementById('playbtn-'+idx);
+  if(btn){ btn.classList.remove('playing'); btn.textContent='▶ Afspelen'; btn.onclick=()=>playRow(idx); }
+}
+
+function stopAllAnim(){ rows.forEach((_,i)=>stopRowAnim(i)); }
+function playAllRows(){ stopAllAnim(); rows.forEach((_,i)=>setTimeout(()=>playRow(i),i*400)); }
+
+// =====================================================
+//  WERKBLAD MODAL
+// =====================================================
+function openWerkblad(){
+  document.getElementById('wbModal').classList.remove('hidden');
+  buildWerkblad();
+}
+function closeWerkblad(){ document.getElementById('wbModal').classList.add('hidden'); }
+
+function buildWerkblad(){
+  const naam=document.getElementById('wbNaam').value.trim();
+  const datum=document.getElementById('wbDatum').value.trim();
+  const repeat=parseInt(document.getElementById('wbRepeat').value)||4;
+  const extra=parseInt(document.getElementById('wbExtra').value)||2;
+  const showDot=document.getElementById('wbDotTgl').classList.contains('on');
+  const L=lh();
+
+  const actRows=rows.filter(r=>r.strokes.length>0);
+  if(!actRows.length){ alert('Teken eerst iets op minstens één rij!'); return; }
+
+  const W=794,MARGIN=40,IW=W-MARGIN*2;
+  const RH=L*4+16;
+  const headerH=130;
+  const totalRijen=actRows.reduce((s,_)=>s+1+extra,0);
+  const H=headerH+totalRijen*RH+24;
+
+const c = document.getElementById('wbCanvas');
+const scale = 2;
+
+c.width = W * scale;
+c.height = H * scale;
+c.style.width = '100%';
+c.style.height = (H) + 'px';
+
+const ctx = c.getContext('2d');
+ctx.setTransform(1, 0, 0, 1, 0, 0);
+ctx.scale(scale, scale);
+ctx.fillStyle = '#fff';
+ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle='#1a1a2e'; ctx.font='bold 13px Nunito,sans-serif'; ctx.textAlign='left';
+  // NAAM LINKS
+ctx.fillStyle='#1a1a2e';
+ctx.font='bold 13px Nunito,sans-serif';
+ctx.textAlign='left';
+ctx.fillText('Naam: ____________________________', MARGIN, 30);
+
+// DATUM RECHTS (met afstand)
+ctx.textAlign='right';
+ctx.fillText('Datum: __________', W - MARGIN, 30);
+
+  // TITEL ONDER NAAM EN DATUM
+ctx.fillStyle='#1a1a2e';
+ctx.font='bold 24px Nunito,sans-serif';
+ctx.textAlign='center';
+ctx.fillText('Ik oefen op handschrift', W/2, 95);
+  ctx.strokeStyle='#e8622a';
+ctx.lineWidth=2;
+ctx.beginPath();
+ctx.moveTo(MARGIN,115);
+ctx.lineTo(W-MARGIN,115);
+ctx.stroke();
+
+  let curY=headerH;
+
+  actRows.forEach((r,ri)=>{
+    let mnX=Infinity,mxX=-Infinity;
+    r.strokes.forEach(s=>s.forEach(p=>{mnX=Math.min(mnX,p.x);mxX=Math.max(mxX,p.x);}));
+    const scaledW=mxX-mnX+50;
+
+    // Voorbeeldrij
+    drawWbLines(ctx,MARGIN,curY,IW,L);
+    const dx0=MARGIN+8-mnX, dy0=curY;
+    drawLetterWb(ctx,r.strokes,dx0,dy0,0.22,'#333');
+    if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+dx0,r.startPt.y+dy0);
+
+    let xC=MARGIN+8+scaledW;
+    for(let rep=1;rep<repeat;rep++){
+      if(xC+scaledW>MARGIN+IW) break;
+      const rdx=xC-mnX;
+      drawLetterWb(ctx,r.strokes,rdx,dy0,0.13,'#555');
+      if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+rdx,r.startPt.y+dy0);
+      xC+=scaledW;
+    }
+    ctx.font='bold 8px Nunito,sans-serif'; ctx.fillStyle='#e8622a'; ctx.textAlign='left';
+    ctx.fillText('RIJ '+(ri+1),MARGIN,curY+9);
+    curY+=RH;
+
+    for(let ex=0;ex<extra;ex++){
+      drawWbLines(ctx,MARGIN,curY,IW,L);
+      if(showDot&&r.startPt){
+        let xC2=MARGIN+8;
+        for(let rep=0;rep<repeat;rep++){
+          if(xC2+scaledW>MARGIN+IW) break;
+          drawDot(ctx,r.startPt.x+(xC2-mnX),r.startPt.y+curY);
+          xC2+=scaledW;
+        }
+      }
+      curY+=RH;
+    }
+  });
+
+  ctx.font='8px Nunito,sans-serif'; ctx.fillStyle='#ccc'; ctx.textAlign='center';
+  ctx.fillText('Schrijfgenerator — Juf Zisa',W/2,H-8);
+}
+
+function drawWbLines(ctx,x,y,w,L){
+  const offs=lineOffsets();
+  if(document.getElementById('lineType').value==='4lijn'){
+    ctx.fillStyle='rgba(255,252,240,.5)'; ctx.fillRect(x,y+offs[1].dy,w,L);
+  }
+  offs.forEach(l=>{
+    ctx.beginPath(); ctx.strokeStyle=S.lineColor; ctx.lineWidth=l.lw;
+    ctx.setLineDash(l.dash?[5,4]:[]); ctx.moveTo(x,y+l.dy); ctx.lineTo(x+w,y+l.dy); ctx.stroke(); ctx.setLineDash([]);
+  });
+}
+
+function drawLetterWb(ctx,strokes,dx,dy,alpha,col){
+  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=col; ctx.lineWidth=S.penSize;
+  ctx.lineCap='round'; ctx.lineJoin='round'; ctx.translate(dx,dy);
+  strokes.forEach(s=>{
+    if(!s||s.length<2) return;
+    const sm=document.getElementById('smoothTgl').classList.contains('on');
+    ctx.beginPath();
+    if(sm&&s.length>3){
+      ctx.moveTo(s[0].x,s[0].y);
+      for(let i=0;i<s.length-1;i++){
+        const p0=s[Math.max(0,i-1)],p1=s[i],p2=s[i+1],p3=s[Math.min(s.length-1,i+2)];
+        ctx.bezierCurveTo(p1.x+(p2.x-p0.x)/6,p1.y+(p2.y-p0.y)/6,p2.x-(p3.x-p1.x)/6,p2.y-(p3.y-p1.y)/6,p2.x,p2.y);
+      }
+    } else { ctx.moveTo(s[0].x,s[0].y); s.forEach(p=>ctx.lineTo(p.x,p.y)); }
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function drawDot(ctx,x,y){
+  ctx.beginPath(); ctx.fillStyle='#e8622a'; ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+}
+
+function downloadPDF() {
+  const canvas = document.getElementById('wbCanvas');
+  const imgData = canvas.toDataURL('image/png', 1.0);
+
+  // A4 formaat in mm
+  const pdf = new jspdf.jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+
+  // verhouding behouden (SUPER belangrijk!)
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * pageWidth) / canvas.width;
+
+  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+  pdf.save('werkblad-handschrift.pdf');
+}
+
+// =====================================================
+//  EVENTS
+// =====================================================
+document.getElementById('lineType').addEventListener('change',redrawAll);
+document.getElementById('lineSpacing').addEventListener('change',resizeAll);
+document.getElementById('smoothTgl').addEventListener('click',()=>setTimeout(redrawAll,50));
+
+// =====================================================
+//  INIT
+// =====================================================
+window.addEventListener('load',()=>{
+  addRow(); addRow(); addRow();
+  activateRow(0);
+  new ResizeObserver(resizeAll).observe(document.getElementById('wbScroll'));
+});
+window.addEventListener('resize',resizeAll);
+</script>
+</body>
+</html>
