@@ -50,6 +50,38 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 .tgl::after{content:'';position:absolute;width:13px;height:13px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
 .tgl.on::after{left:18px;}
 
+.line-type-picker{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+
+.line-type-card{
+  border:2px solid #e8e0d4;
+  border-radius:8px;
+  background:#fff;
+  padding:6px;
+  cursor:pointer;
+  transition:border-color .15s, transform .1s, box-shadow .15s;
+}
+
+.line-type-card:hover{
+  border-color:var(--accent);
+}
+
+.line-type-card.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px rgba(232,98,42,.12);
+}
+
+.line-type-preview{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:5px;
+  background:#fff;
+}
+
 /* BUTTONS */
 .btn{padding:7px 12px;border-radius:7px;font-family:'Nunito',sans-serif;font-weight:800;font-size:12px;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:opacity .15s,transform .1s;white-space:nowrap;}
 .btn:active{transform:scale(.97);}
@@ -126,12 +158,26 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
     <div class="acc-head" onclick="toggleAcc(this)">✏️ Pen &amp; schrijflijnen <span class="acc-arrow">▾</span></div>
     <div class="acc-body">
       <div>
-        <label class="lbl">Type schrijflijnen</label>
-        <select id="lineType" onchange="redrawAll()">
-          <option value="4lijn">Vierlijnsstelsel</option>
-          <option value="3lijn">Drielijnsstelsel</option>
-          <option value="2lijn">Tweeregelig</option>
-        </select>
+       <label class="lbl">Type schrijflijnen</label>
+<div id="lineTypePicker" class="line-type-picker">
+  <button type="button" class="line-type-card active" data-type="type1" onclick="setLineType('type1', this)">
+    <canvas class="line-type-preview" id="preview-type1" width="120" height="64"></canvas>
+  </button>
+
+  <button type="button" class="line-type-card" data-type="type2" onclick="setLineType('type2', this)">
+    <canvas class="line-type-preview" id="preview-type2" width="120" height="64"></canvas>
+  </button>
+
+  <button type="button" class="line-type-card" data-type="type3" onclick="setLineType('type3', this)">
+    <canvas class="line-type-preview" id="preview-type3" width="120" height="64"></canvas>
+  </button>
+
+  <button type="button" class="line-type-card" data-type="type4" onclick="setLineType('type4', this)">
+    <canvas class="line-type-preview" id="preview-type4" width="120" height="64"></canvas>
+  </button>
+</div>
+
+<input type="hidden" id="lineType" value="type1">
       </div>
       <div>
         <label class="lbl">Regelafstand</label>
@@ -469,26 +515,102 @@ function redrawRow(idx){
 //  SCHRIJFLIJNEN
 // =====================================================
 function lineOffsets(){
-  const L=lh(), t=document.getElementById('lineType').value;
-  if(t==='4lijn') return [{dy:10,dash:true,lw:1},{dy:10+L,dash:false,lw:1},{dy:10+L*2,dash:false,lw:1.5},{dy:10+L*3,dash:true,lw:1}];
-  if(t==='3lijn') return [{dy:12,dash:false,lw:1},{dy:12+L*1.5,dash:false,lw:1.5},{dy:12+L*3,dash:false,lw:1}];
-  return [{dy:16,dash:false,lw:1},{dy:16+L*2,dash:false,lw:1.5}];
+  const L = lh();
+  const top = 10;
+  const t = document.getElementById('lineType').value;
+
+  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4') {
+    return [
+      { dy: top,     kind:'top'    },
+      { dy: top+L,   kind:'mid1'   },
+      { dy: top+L*2, kind:'base'   },
+      { dy: top+L*3, kind:'bottom' }
+    ];
+  }
+
+  return [
+    { dy: top,     kind:'top'    },
+    { dy: top+L,   kind:'mid1'   },
+    { dy: top+L*2, kind:'base'   },
+    { dy: top+L*3, kind:'bottom' }
+  ];
 }
 
 function drawLines(ctx,w,h,col){
   ctx.clearRect(0,0,w,h);
-  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
-  const offs=lineOffsets();
-  if(document.getElementById('lineType').value==='4lijn'){
-    ctx.fillStyle='rgba(255,252,240,.5)';
-    ctx.fillRect(0,offs[1].dy,w,lh());
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,w,h);
+
+  const offs = lineOffsets();
+  const t = document.getElementById('lineType').value;
+
+  const topY = offs[0].dy;
+  const mid1Y = offs[1].dy;
+  const baseY = offs[2].dy;
+  const bottomY = offs[3].dy;
+
+  // inkleuring middenzone
+  if (t === 'type1') {
+    ctx.fillStyle = 'rgba(255,252,240,.5)';
+    ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
+  } else if (t === 'type2' || t === 'type3') {
+    ctx.fillStyle = 'rgba(220,235,248,.45)';
+    ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   }
+
   offs.forEach(l=>{
     ctx.beginPath();
-    ctx.strokeStyle=col||S.lineColor;
-    ctx.lineWidth=l.lw;
-    ctx.setLineDash(l.dash?[6,5]:[]);
-    ctx.moveTo(0,l.dy); ctx.lineTo(w,l.dy); ctx.stroke();
+
+    let stroke = col || S.lineColor;
+    let width = 1;
+    let dash = [];
+
+    if (t === 'type1') {
+      stroke = col || S.lineColor;
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = (l.kind === 'top' || l.kind === 'bottom') ? [6,5] : [];
+    }
+
+    if (t === 'type2') {
+      stroke = col || S.lineColor;
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = [];
+    }
+
+    if (t === 'type3') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#d9534f'; // rood
+        width = 1.5;
+        dash = [];
+      } else if (l.kind === 'base') {
+        stroke = '#4a9b6f'; // groen
+        width = 1.8;
+        dash = [];
+      } else {
+        stroke = '#9fc2e8'; // blauwe hulplijn
+        width = 1;
+        dash = [6,5];
+      }
+    }
+
+    if (t === 'type4') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#b7b7b7'; // grijs
+        width = 1.4;
+        dash = [];
+      } else {
+        stroke = '#9fc2e8'; // blauw
+        width = (l.kind === 'base') ? 1.5 : 1;
+        dash = [];
+      }
+    }
+
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.moveTo(0, l.dy);
+    ctx.lineTo(w, l.dy);
+    ctx.stroke();
     ctx.setLineDash([]);
   });
 }
@@ -761,13 +883,75 @@ ctx.stroke();
 }
 
 function drawWbLines(ctx,x,y,w,L){
-  const offs=lineOffsets();
-  if(document.getElementById('lineType').value==='4lijn'){
-    ctx.fillStyle='rgba(255,252,240,.5)'; ctx.fillRect(x,y+offs[1].dy,w,L);
+  const offs = lineOffsets();
+  const t = document.getElementById('lineType').value;
+
+  const topY = y + offs[0].dy;
+  const mid1Y = y + offs[1].dy;
+  const baseY = y + offs[2].dy;
+
+  if (t === 'type1') {
+    ctx.fillStyle = 'rgba(255,252,240,.5)';
+    ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
+  } else if (t === 'type2' || t === 'type3') {
+    ctx.fillStyle = 'rgba(220,235,248,.45)';
+    ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
   }
+
   offs.forEach(l=>{
-    ctx.beginPath(); ctx.strokeStyle=S.lineColor; ctx.lineWidth=l.lw;
-    ctx.setLineDash(l.dash?[5,4]:[]); ctx.moveTo(x,y+l.dy); ctx.lineTo(x+w,y+l.dy); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath();
+
+    let stroke = S.lineColor;
+    let width = 1;
+    let dash = [];
+
+    if (t === 'type1') {
+      stroke = S.lineColor;
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = (l.kind === 'top' || l.kind === 'bottom') ? [5,4] : [];
+    }
+
+    if (t === 'type2') {
+      stroke = S.lineColor;
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = [];
+    }
+
+    if (t === 'type3') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#d9534f';
+        width = 1.5;
+        dash = [];
+      } else if (l.kind === 'base') {
+        stroke = '#4a9b6f';
+        width = 1.8;
+        dash = [];
+      } else {
+        stroke = '#9fc2e8';
+        width = 1;
+        dash = [5,4];
+      }
+    }
+
+    if (t === 'type4') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#b7b7b7';
+        width = 1.4;
+        dash = [];
+      } else {
+        stroke = '#9fc2e8';
+        width = (l.kind === 'base') ? 1.5 : 1;
+        dash = [];
+      }
+    }
+
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.moveTo(x, y + l.dy);
+    ctx.lineTo(x + w, y + l.dy);
+    ctx.stroke();
+    ctx.setLineDash([]);
   });
 }
 
@@ -816,6 +1000,108 @@ function downloadPDF() {
   pdf.save('werkblad-handschrift.pdf');
 }
 
+function setLineType(type, btn){
+  document.getElementById('lineType').value = type;
+
+  document.querySelectorAll('.line-type-card').forEach(el=>{
+    el.classList.remove('active');
+  });
+
+  if (btn) btn.classList.add('active');
+
+  redrawAll();
+  buildLineTypePreviews();
+
+  if (!document.getElementById('wbModal').classList.contains('hidden')) {
+    buildWerkblad();
+  }
+}
+
+function drawLineTypePreview(canvas, type){
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,w,h);
+
+  const top = 10;
+  const gap = 13;
+
+  const lines = [
+    { y: top, kind:'top' },
+    { y: top + gap, kind:'mid1' },
+    { y: top + gap*2, kind:'base' },
+    { y: top + gap*3, kind:'bottom' }
+  ];
+
+  if (type === 'type1') {
+    ctx.fillStyle = 'rgba(255,252,240,.7)';
+    ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
+  } else if (type === 'type2' || type === 'type3') {
+    ctx.fillStyle = 'rgba(220,235,248,.65)';
+    ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
+  }
+
+  lines.forEach(l=>{
+    ctx.beginPath();
+
+    let stroke = '#b8cfe8';
+    let width = 1;
+    let dash = [];
+
+    if (type === 'type1') {
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = (l.kind === 'top' || l.kind === 'bottom') ? [4,3] : [];
+    }
+
+    if (type === 'type2') {
+      width = (l.kind === 'base') ? 1.5 : 1;
+      dash = [];
+    }
+
+    if (type === 'type3') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#d9534f';
+        width = 1.5;
+      } else if (l.kind === 'base') {
+        stroke = '#4a9b6f';
+        width = 1.8;
+      } else {
+        stroke = '#9fc2e8';
+        width = 1;
+        dash = [4,3];
+      }
+    }
+
+    if (type === 'type4') {
+      if (l.kind === 'top' || l.kind === 'bottom') {
+        stroke = '#b7b7b7';
+        width = 1.4;
+      } else {
+        stroke = '#9fc2e8';
+        width = (l.kind === 'base') ? 1.5 : 1;
+      }
+    }
+
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash);
+    ctx.moveTo(6, l.y);
+    ctx.lineTo(w-6, l.y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  });
+}
+
+function buildLineTypePreviews(){
+  ['type1','type2','type3','type4'].forEach(type=>{
+    const c = document.getElementById('preview-' + type);
+    if (c) drawLineTypePreview(c, type);
+  });
+}
+
 // =====================================================
 //  EVENTS
 // =====================================================
@@ -829,8 +1115,10 @@ document.getElementById('smoothTgl').addEventListener('click',()=>setTimeout(red
 window.addEventListener('load',()=>{
   addRow(); addRow(); addRow();
   activateRow(0);
+  buildLineTypePreviews();
   new ResizeObserver(resizeAll).observe(document.getElementById('wbScroll'));
 });
+
 window.addEventListener('resize',resizeAll);
 </script>
 </body>
