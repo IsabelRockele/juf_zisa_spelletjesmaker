@@ -848,35 +848,108 @@ function drawLines(ctx,w,h,col){
 // =====================================================
 //  SMOOTH STROKE
 // =====================================================
-function strokeSmooth(ctx,stroke,col){
-  if(!stroke||!stroke.length) return;
-  const sm=document.getElementById('smoothTgl').classList.contains('on');
-  ctx.beginPath();
-  ctx.strokeStyle=col||S.penColor;
-  ctx.lineWidth=S.penSize; ctx.lineCap='round'; ctx.lineJoin='round';
-  if(stroke.length === 1){
-    const p = stroke[0];
+function pointDistance(a,b){
+  return Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
+}
+
+function simplifyStroke(stroke, minDist = 1.6){
+  if(!stroke || stroke.length <= 2) return (stroke || []).map(p => ({x:p.x, y:p.y}));
+  const pts = [{ x: stroke[0].x, y: stroke[0].y }];
+  let last = stroke[0];
+  for(let i=1;i<stroke.length-1;i++){
+    const p = stroke[i];
+    if(pointDistance(last, p) >= minDist){
+      pts.push({ x: p.x, y: p.y });
+      last = p;
+    }
+  }
+  const end = stroke[stroke.length-1];
+  if(!pts.length || pointDistance(pts[pts.length-1], end) > 0.01){
+    pts.push({ x: end.x, y: end.y });
+  }
+  return pts;
+}
+
+function smoothStrokePoints(stroke, passes = 2){
+  let pts = (stroke || []).map(p => ({x:p.x, y:p.y}));
+  if(pts.length <= 2) return pts;
+  for(let pass=0; pass<passes; pass++){
+    const next = [{ ...pts[0] }];
+    for(let i=1;i<pts.length-1;i++){
+      const prev = pts[i-1];
+      const cur = pts[i];
+      const following = pts[i+1];
+      next.push({
+        x: prev.x * 0.2 + cur.x * 0.6 + following.x * 0.2,
+        y: prev.y * 0.2 + cur.y * 0.6 + following.y * 0.2
+      });
+    }
+    next.push({ ...pts[pts.length-1] });
+    pts = next;
+  }
+  return pts;
+}
+
+function normalizeStroke(stroke, smoothingOn = true){
+  if(!stroke || !stroke.length) return [];
+  if(stroke.length === 1) return [{ x: stroke[0].x, y: stroke[0].y }];
+  let pts = simplifyStroke(stroke, 1.6);
+  if(smoothingOn && pts.length > 2){
+    pts = smoothStrokePoints(pts, 2);
+  }
+  return pts;
+}
+
+function drawStrokePath(ctx, stroke, dx = 0, dy = 0, scale = 1, smoothingOn = true){
+  const pts = normalizeStroke(stroke, smoothingOn);
+  if(!pts.length) return;
+  if(pts.length === 1){
+    const p = pts[0];
     ctx.beginPath();
-    ctx.arc(p.x, p.y, Math.max(1.0, S.penSize * 0.42), 0, Math.PI * 2);
-    ctx.fillStyle = col || S.penColor;
+    ctx.arc(dx + p.x * scale, dy + p.y * scale, Math.max(1.0, ctx.lineWidth * 0.42), 0, Math.PI * 2);
     ctx.fill();
     return;
   }
-  if(sm && stroke.length > 2){
-    ctx.moveTo(stroke[0].x, stroke[0].y);
-    for(let i=1;i<stroke.length-1;i++){
-      const midX = (stroke[i].x + stroke[i+1].x) / 2;
-      const midY = (stroke[i].y + stroke[i+1].y) / 2;
-      ctx.quadraticCurveTo(stroke[i].x, stroke[i].y, midX, midY);
+
+  ctx.beginPath();
+  ctx.moveTo(dx + pts[0].x * scale, dy + pts[0].y * scale);
+
+  if(smoothingOn && pts.length > 2){
+    for(let i=1;i<pts.length-1;i++){
+      const midX = (pts[i].x + pts[i+1].x) / 2;
+      const midY = (pts[i].y + pts[i+1].y) / 2;
+      ctx.quadraticCurveTo(
+        dx + pts[i].x * scale,
+        dy + pts[i].y * scale,
+        dx + midX * scale,
+        dy + midY * scale
+      );
     }
-    const penultimate = stroke[stroke.length-2];
-    const last = stroke[stroke.length-1];
-    ctx.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
+    const penultimate = pts[pts.length-2];
+    const last = pts[pts.length-1];
+    ctx.quadraticCurveTo(
+      dx + penultimate.x * scale,
+      dy + penultimate.y * scale,
+      dx + last.x * scale,
+      dy + last.y * scale
+    );
   } else {
-    ctx.moveTo(stroke[0].x,stroke[0].y);
-    for(let i=1;i<stroke.length;i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+    for(let i=1;i<pts.length;i++){
+      ctx.lineTo(dx + pts[i].x * scale, dy + pts[i].y * scale);
+    }
   }
   ctx.stroke();
+}
+
+function strokeSmooth(ctx,stroke,col){
+  if(!stroke||!stroke.length) return;
+  const sm=document.getElementById('smoothTgl').classList.contains('on');
+  ctx.strokeStyle=col||S.penColor;
+  ctx.fillStyle=col||S.penColor;
+  ctx.lineWidth=S.penSize; 
+  ctx.lineCap='round'; 
+  ctx.lineJoin='round';
+  drawStrokePath(ctx, stroke, 0, 0, 1, sm);
 }
 
 // =====================================================
@@ -921,7 +994,9 @@ function setupCanvasEvents(canvas,idx){
     const r=rows[idx];
     if(S.tool==='draw'){
       if(cur.length > 1){
-        r.strokes.push([...cur]);
+        const sm = document.getElementById('smoothTgl').classList.contains('on');
+        const normalized = normalizeStroke(cur, sm);
+        r.strokes.push(normalized.length ? normalized : [...cur]);
       } else if(cur.length === 1){
         r.strokes.push(createTapDotStroke(cur[0]));
       }
@@ -1549,17 +1624,7 @@ function drawLetterWb(ctx, strokes, dx, dy, scale=1, col='#333'){
   ctx.lineWidth = Math.max(1.4, S.penSize * scale);
   strokes.forEach(stroke=>{
     if(!stroke || !stroke.length) return;
-    if(stroke.length === 1){
-      const p = stroke[0];
-      ctx.beginPath();
-      ctx.arc(dx + p.x * scale, dy + p.y * scale, Math.max(1.1, S.penSize * scale * 0.42), 0, Math.PI * 2);
-      ctx.fill();
-      return;
-    }
-    ctx.beginPath();
-    ctx.moveTo(dx + stroke[0].x * scale, dy + stroke[0].y * scale);
-    for(let i=1;i<stroke.length;i++) ctx.lineTo(dx + stroke[i].x * scale, dy + stroke[i].y * scale);
-    ctx.stroke();
+    drawStrokePath(ctx, stroke, dx, dy, scale, true);
   });
   ctx.restore();
 }
