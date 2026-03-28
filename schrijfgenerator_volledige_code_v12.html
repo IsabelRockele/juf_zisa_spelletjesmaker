@@ -285,10 +285,6 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
   <button type="button" class="line-type-card" data-type="type4" onclick="setLineType('type4', this)">
     <canvas class="line-type-preview" id="preview-type4" width="120" height="64"></canvas>
   </button>
-
-  <button type="button" class="line-type-card" data-type="type5" onclick="setLineType('type5', this)">
-    <canvas class="line-type-preview" id="preview-type5" width="120" height="64"></canvas>
-  </button>
 </div>
 
 <input type="hidden" id="lineType" value="type1">
@@ -704,7 +700,7 @@ function lineOffsets(){
   const top = 10;
   const t = document.getElementById('lineType').value;
 
-  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4' || t === 'type5') {
+  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4') {
     return [
       { dy: top,     kind:'top'    },
       { dy: top+L,   kind:'mid1'   },
@@ -740,9 +736,6 @@ function drawLines(ctx,w,h,col){
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   } else if (t === 'type2' || t === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
-    ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
-  } else if (t === 'type5') {
-    ctx.fillStyle = 'rgba(190,225,235,.65)';
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   }
 
@@ -793,18 +786,6 @@ function drawLines(ctx,w,h,col){
       }
     }
 
-    if (t === 'type5') {
-      if (l.kind === 'top' || l.kind === 'mid1') {
-        stroke = '#d9534f'; // rood
-        width = 1.5;
-        dash = [];
-      } else if (l.kind === 'base' || l.kind === 'bottom') {
-        stroke = '#4a9b6f'; // groen
-        width = 1.6;
-        dash = [];
-      }
-    }
-
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -847,6 +828,25 @@ function getPos(e,canvas){
   return {x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy};
 }
 
+function simplifyStrokePoints(points){
+  if(!points || points.length <= 2) return points || [];
+  const out = [points[0]];
+  for(let i=1;i<points.length-1;i++){
+    const prev = out[out.length-1];
+    const curr = points[i];
+    const next = points[i+1];
+    const avg = {
+      x: (prev.x + curr.x + next.x) / 3,
+      y: (prev.y + curr.y + next.y) / 3
+    };
+    if(Math.hypot(avg.x - prev.x, avg.y - prev.y) > 1.2){
+      out.push(avg);
+    }
+  }
+  out.push(points[points.length-1]);
+  return out;
+}
+
 function setupCanvasEvents(canvas,idx){
   let drawing=false, cur=[];
   canvas.addEventListener('pointerdown',e=>{
@@ -861,22 +861,41 @@ function setupCanvasEvents(canvas,idx){
     if(!drawing) return;
     const pos=getPos(e,canvas), r=rows[idx];
     if(S.tool==='erase'){ eraseAt(r,pos); redrawRow(idx); return; }
-    cur.push(pos);
+
+    const last = cur[cur.length-1];
+    if(!last || Math.hypot(pos.x-last.x, pos.y-last.y) > 1.9){
+      cur.push(pos);
+    }
+
     if(cur.length>1){
       const ctx=r.ctx;
       ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
       ctx.lineCap='round'; ctx.lineJoin='round';
       ctx.moveTo(cur[cur.length-2].x,cur[cur.length-2].y);
-      ctx.lineTo(pos.x,pos.y); ctx.stroke();
+      ctx.lineTo(cur[cur.length-1].x,cur[cur.length-1].y); ctx.stroke();
     }
   });
   canvas.addEventListener('pointerup',()=>{
-    if(!drawing) return; drawing=false;
+    if(!drawing) return;
+    drawing=false;
     const r=rows[idx];
-    if(S.tool==='draw'&&cur.length>1){
-      r.strokes.push([...cur]);
+
+    if(S.tool==='draw'){
+      if(cur.length===1){
+        const p = cur[0];
+        const d = Math.max(0.9, S.penSize * 0.32);
+        r.strokes.push([
+          {x:p.x-d, y:p.y},
+          {x:p.x,   y:p.y},
+          {x:p.x+d, y:p.y}
+        ]);
+      } else if(cur.length>1){
+        r.strokes.push(simplifyStrokePoints(cur));
+      }
+
       if(document.getElementById('smoothTgl').classList.contains('on')) redrawRow(idx);
     }
+
     if(r.strokes.length>0) r.startPt={...r.strokes[0][0]};
     cur=[];
     updateWorksheetGuidance();
@@ -1359,9 +1378,6 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
   } else if (lineType === 'type2' || lineType === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
     ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
-  } else if (lineType === 'type5') {
-    ctx.fillStyle = 'rgba(190,225,235,.65)';
-    ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
   }
 
   offs.forEach(l=>{
@@ -1398,16 +1414,6 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
         width = (l.kind === 'base') ? 1.5 : 1;
       }
     }
-
-    if (lineType === 'type5') {
-      if (l.kind === 'top' || l.kind === 'mid1') {
-        stroke = '#d9534f';
-        width = 1.5;
-      } else if (l.kind === 'base' || l.kind === 'bottom') {
-        stroke = '#4a9b6f';
-        width = 1.6;
-      }
-    }
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1436,31 +1442,46 @@ function drawLetterWb(ctx, strokes, dx, dy, scale=1, col='#333'){
   ctx.strokeStyle = col;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(1.4, S.penSize * scale);
+  ctx.lineWidth = Math.max(1.15, S.penSize * scale);
+
   strokes.forEach(stroke=>{
     if(!stroke || !stroke.length) return;
+
+    const pts = stroke.map(p => ({
+      x: dx + p.x * scale,
+      y: dy + p.y * scale
+    }));
+
     ctx.beginPath();
-    ctx.moveTo(dx + stroke[0].x * scale, dy + stroke[0].y * scale);
-    for(let i=1;i<stroke.length;i++) ctx.lineTo(dx + stroke[i].x * scale, dy + stroke[i].y * scale);
+    ctx.moveTo(pts[0].x, pts[0].y);
+
+    if (pts.length > 3) {
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[Math.min(pts.length - 1, i + 2)];
+        ctx.bezierCurveTo(
+          p1.x + (p2.x - p0.x) / 6,
+          p1.y + (p2.y - p0.y) / 6,
+          p2.x - (p3.x - p1.x) / 6,
+          p2.y - (p3.y - p1.y) / 6,
+          p2.x,
+          p2.y
+        );
+      }
+    } else {
+      pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    }
+
     ctx.stroke();
   });
+
   ctx.restore();
 }
 
 function drawPracticeSectionMarkers(ctx, startX, dotY, segmentW, count){
-  ctx.save();
-  ctx.strokeStyle = 'rgba(232,98,42,.22)';
-  ctx.lineWidth = 1;
-  for(let i=0;i<count;i++){
-    const x = startX + i * segmentW;
-    if(i>0){
-      ctx.beginPath();
-      ctx.moveTo(x - 10, dotY - 24);
-      ctx.lineTo(x - 10, dotY + 12);
-      ctx.stroke();
-    }
-  }
-  ctx.restore();
+  // bewust leeg: geen verticale hulpstreepjes tonen
 }
 
 function drawPracticeDots(ctx, startX, dotY, segmentW, count){
@@ -1469,7 +1490,7 @@ function drawPracticeDots(ctx, startX, dotY, segmentW, count){
   for(let i=0;i<count;i++){
     const x = startX + i * segmentW;
     ctx.beginPath();
-    ctx.arc(x, dotY, 3.2, 0, Math.PI*2);
+    ctx.arc(x, dotY, 2.05, 0, Math.PI*2);
     ctx.fill();
   }
   ctx.restore();
@@ -1520,26 +1541,20 @@ function drawModelBox(ctx, x, y, w, h, fill = true){
 
 function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = null, leftPad = 12, topPad = 3, bottomPad = 3){
   const b = getStrokeBounds(r.strokes || []);
-
-  // BELANGRIJK:
-  // behoud standaard exact dezelfde grootte en hoogtepositie
-  // als op het bord getekend werd.
   let scale = 1;
 
-  // Alleen verkleinen als het echt niet in de beschikbare breedte past.
   if (maxWidth) {
     const usableW = Math.max(40, maxWidth - leftPad * 2);
     const drawnW = b.width > 0 ? b.width : 1;
-
-    if (drawnW > usableW) {
-      scale = usableW / drawnW;
-    }
+    if (drawnW > usableW) scale = usableW / drawnW;
   }
 
-  // Horizontaal schuiven we de tekening gewoon wat naar rechts.
-  // Verticaal blijft ze op exact dezelfde hoogte binnen de schrijflijnen.
   const dx = x + leftPad;
-  const dy = y;
+
+  // Houd de ONDERKANT van wat de leerkracht schreef op dezelfde hoogte.
+  // Zo zweeft het voorbeeld op het werkblad niet omhoog wanneer het verkleind wordt.
+  const bottomLockOffset = (b.maxY || 0) - ((b.maxY || 0) * scale);
+  const dy = y + bottomLockOffset;
 
   const width = Math.max(36, b.width * scale + 20);
 
@@ -1549,7 +1564,7 @@ function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = nul
     dy,
     width,
     startX: r.startPt ? dx + r.startPt.x * scale : x + leftPad,
-    startY: r.startPt ? dy + r.startPt.y * scale : y
+    startY: r.startPt ? dy + r.startPt.y * scale : y + bottomLockOffset
   };
 }
 
@@ -1924,9 +1939,6 @@ function drawLineTypePreview(canvas, type){
   } else if (type === 'type2' || type === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.65)';
     ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
-  } else if (type === 'type5') {
-    ctx.fillStyle = 'rgba(190,225,235,.65)';
-    ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
   }
 
   lines.forEach(l=>{
@@ -1970,16 +1982,6 @@ function drawLineTypePreview(canvas, type){
       }
     }
 
-    if (type === 'type5') {
-      if (l.kind === 'top' || l.kind === 'mid1') {
-        stroke = '#d9534f';
-        width = 1.5;
-      } else if (l.kind === 'base' || l.kind === 'bottom') {
-        stroke = '#4a9b6f';
-        width = 1.6;
-      }
-    }
-
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1991,7 +1993,7 @@ function drawLineTypePreview(canvas, type){
 }
 
 function buildLineTypePreviews(){
-  ['type1','type2','type3','type4','type5'].forEach(type=>{
+  ['type1','type2','type3','type4'].forEach(type=>{
     const c = document.getElementById('preview-' + type);
     if (c) drawLineTypePreview(c, type);
   });
