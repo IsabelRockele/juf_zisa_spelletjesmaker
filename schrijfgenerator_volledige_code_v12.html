@@ -285,6 +285,10 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
   <button type="button" class="line-type-card" data-type="type4" onclick="setLineType('type4', this)">
     <canvas class="line-type-preview" id="preview-type4" width="120" height="64"></canvas>
   </button>
+
+  <button type="button" class="line-type-card" data-type="type5" onclick="setLineType('type5', this)">
+    <canvas class="line-type-preview" id="preview-type5" width="120" height="64"></canvas>
+  </button>
 </div>
 
 <input type="hidden" id="lineType" value="type1">
@@ -404,6 +408,14 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
         <div id="wsFieldLetter">
           <label class="lbl">Aantal voorgeschreven letters</label>
           <input type="number" id="wsLetterRepeat" min="1" max="8" value="4">
+        </div>
+
+        <div id="wsFieldLetterLayout">
+          <label class="lbl">Opmaak letteroefening</label>
+          <select id="wsLetterLayout" onchange="handleWorksheetTypeChange()">
+            <option value="repeat">Meerdere voorgeschreven letters</option>
+            <option value="model6dots">1 zwarte letter + 6 startpuntjes</option>
+          </select>
         </div>
 
         <div id="wsFieldLetterExtra">
@@ -700,7 +712,7 @@ function lineOffsets(){
   const top = 10;
   const t = document.getElementById('lineType').value;
 
-  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4') {
+  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4' || t === 'type5') {
     return [
       { dy: top,     kind:'top'    },
       { dy: top+L,   kind:'mid1'   },
@@ -736,6 +748,9 @@ function drawLines(ctx,w,h,col){
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   } else if (t === 'type2' || t === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
+    ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
+  } else if (t === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.65)';
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   }
 
@@ -786,6 +801,18 @@ function drawLines(ctx,w,h,col){
       }
     }
 
+    if (t === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f'; // rood
+        width = 1.5;
+        dash = [];
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#2f9a44'; // groen
+        width = 1.6;
+        dash = [];
+      }
+    }
+
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -800,20 +827,32 @@ function drawLines(ctx,w,h,col){
 //  SMOOTH STROKE
 // =====================================================
 function strokeSmooth(ctx,stroke,col){
-  if(!stroke||stroke.length<2) return;
+  if(!stroke||!stroke.length) return;
   const sm=document.getElementById('smoothTgl').classList.contains('on');
   ctx.beginPath();
   ctx.strokeStyle=col||S.penColor;
   ctx.lineWidth=S.penSize; ctx.lineCap='round'; ctx.lineJoin='round';
-  if(sm&&stroke.length>3){
-    ctx.moveTo(stroke[0].x,stroke[0].y);
-    for(let i=0;i<stroke.length-1;i++){
-      const p0=stroke[Math.max(0,i-1)],p1=stroke[i],p2=stroke[i+1],p3=stroke[Math.min(stroke.length-1,i+2)];
-      ctx.bezierCurveTo(p1.x+(p2.x-p0.x)/6,p1.y+(p2.y-p0.y)/6,p2.x-(p3.x-p1.x)/6,p2.y-(p3.y-p1.y)/6,p2.x,p2.y);
+  if(stroke.length === 1){
+    const p = stroke[0];
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, Math.max(1.0, S.penSize * 0.42), 0, Math.PI * 2);
+    ctx.fillStyle = col || S.penColor;
+    ctx.fill();
+    return;
+  }
+  if(sm && stroke.length > 2){
+    ctx.moveTo(stroke[0].x, stroke[0].y);
+    for(let i=1;i<stroke.length-1;i++){
+      const midX = (stroke[i].x + stroke[i+1].x) / 2;
+      const midY = (stroke[i].y + stroke[i+1].y) / 2;
+      ctx.quadraticCurveTo(stroke[i].x, stroke[i].y, midX, midY);
     }
+    const penultimate = stroke[stroke.length-2];
+    const last = stroke[stroke.length-1];
+    ctx.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
   } else {
     ctx.moveTo(stroke[0].x,stroke[0].y);
-    stroke.forEach(p=>ctx.lineTo(p.x,p.y));
+    for(let i=1;i<stroke.length;i++) ctx.lineTo(stroke[i].x, stroke[i].y);
   }
   ctx.stroke();
 }
@@ -828,23 +867,8 @@ function getPos(e,canvas){
   return {x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy};
 }
 
-function simplifyStrokePoints(points){
-  if(!points || points.length <= 2) return points || [];
-  const out = [points[0]];
-  for(let i=1;i<points.length-1;i++){
-    const prev = out[out.length-1];
-    const curr = points[i];
-    const next = points[i+1];
-    const avg = {
-      x: (prev.x + curr.x + next.x) / 3,
-      y: (prev.y + curr.y + next.y) / 3
-    };
-    if(Math.hypot(avg.x - prev.x, avg.y - prev.y) > 1.2){
-      out.push(avg);
-    }
-  }
-  out.push(points[points.length-1]);
-  return out;
+function createTapDotStroke(pos){
+  return [{ x: pos.x, y: pos.y }];
 }
 
 function setupCanvasEvents(canvas,idx){
@@ -861,41 +885,26 @@ function setupCanvasEvents(canvas,idx){
     if(!drawing) return;
     const pos=getPos(e,canvas), r=rows[idx];
     if(S.tool==='erase'){ eraseAt(r,pos); redrawRow(idx); return; }
-
-    const last = cur[cur.length-1];
-    if(!last || Math.hypot(pos.x-last.x, pos.y-last.y) > 1.9){
-      cur.push(pos);
-    }
-
+    cur.push(pos);
     if(cur.length>1){
       const ctx=r.ctx;
       ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
       ctx.lineCap='round'; ctx.lineJoin='round';
       ctx.moveTo(cur[cur.length-2].x,cur[cur.length-2].y);
-      ctx.lineTo(cur[cur.length-1].x,cur[cur.length-1].y); ctx.stroke();
+      ctx.lineTo(pos.x,pos.y); ctx.stroke();
     }
   });
   canvas.addEventListener('pointerup',()=>{
-    if(!drawing) return;
-    drawing=false;
+    if(!drawing) return; drawing=false;
     const r=rows[idx];
-
     if(S.tool==='draw'){
-      if(cur.length===1){
-        const p = cur[0];
-        const d = Math.max(0.9, S.penSize * 0.32);
-        r.strokes.push([
-          {x:p.x-d, y:p.y},
-          {x:p.x,   y:p.y},
-          {x:p.x+d, y:p.y}
-        ]);
-      } else if(cur.length>1){
-        r.strokes.push(simplifyStrokePoints(cur));
+      if(cur.length > 1){
+        r.strokes.push([...cur]);
+      } else if(cur.length === 1){
+        r.strokes.push(createTapDotStroke(cur[0]));
       }
-
-      if(document.getElementById('smoothTgl').classList.contains('on')) redrawRow(idx);
+      redrawRow(idx);
     }
-
     if(r.strokes.length>0) r.startPt={...r.strokes[0][0]};
     cur=[];
     updateWorksheetGuidance();
@@ -1146,7 +1155,7 @@ function getWorksheetTypeLabel(type){
 
 function getWorksheetTypeHelp(type){
   return {
-    letter:'Gebruik dit voor letters die je eerst op het bord voordoet. Daarna komen voorbeeldletters en oefenrijen op het werkblad.',
+    letter:'Gebruik dit voor letters die je eerst op het bord voordoet. Je kan kiezen tussen meerdere voorgeschreven letters of 1 zwarte voorbeeldletter met daarnaast 6 startpuntjes.',
     nameHand:'Schrijf de naam op het bord. Je kan ook meerdere namen schrijven: één per rij. Elke naam wordt als zwart voorbeeld tussen de lijnen geplaatst, met rechts 2 schrijfruimtes.',
     nameTyped:'Typ hier één of meer namen. Elke naam verschijnt in Arial 14 en krijgt daarnaast 2 schrijfruimtes. De leerkracht kan zelf startpunten zetten op papier.',
     sentenceHand:'Schrijf de zin op het bord. Je kan ook meerdere zinnen schrijven: één per rij. Elke zin blijft samen met de schrijflijnen op dezelfde pagina.',
@@ -1156,12 +1165,14 @@ function getWorksheetTypeHelp(type){
 
 function handleWorksheetTypeChange(){
   const type = document.getElementById('wsItemType')?.value || 'letter';
+  const letterLayout = document.getElementById('wsLetterLayout')?.value || 'repeat';
   const show = (id, yes) => {
     const el = document.getElementById(id);
     if(el) el.classList.toggle('wb-hidden', !yes);
   };
-  show('wsFieldLetter', type === 'letter');
-  show('wsFieldLetterExtra', type === 'letter');
+  show('wsFieldLetterLayout', type === 'letter');
+  show('wsFieldLetter', type === 'letter' && letterLayout === 'repeat');
+  show('wsFieldLetterExtra', type === 'letter' && letterLayout === 'repeat');
   show('wsFieldNameTyped', type === 'nameTyped');
   show('wsFieldSentenceTyped', type === 'sentenceTyped');
   show('wsFieldSentenceLines', type === 'sentenceHand' || type === 'sentenceTyped');
@@ -1180,6 +1191,7 @@ function getActiveRowsForWorksheet(){
 function countRowsForWorksheetItem(item){
   if(item.type === 'letter'){
     const rowCount = (item.boardRows || []).length || 1;
+    if((item.letterLayout || 'repeat') === 'model6dots') return rowCount;
     return rowCount * (1 + (item.extra || 0));
   }
   if(item.type === 'nameHand'){
@@ -1223,6 +1235,9 @@ function getWorksheetItemHeight(item, showInstruction = true){
 function summarizeWorksheetItem(item){
 
   if(item.type === 'letter'){
+    if((item.letterLayout || 'repeat') === 'model6dots'){
+      return `${(item.boardRows || []).length || 0} voorbeeldrij(en) · 1 zwarte letter + 6 startpuntjes`;
+    }
     return `${(item.boardRows || []).length || 0} voorbeeldrij(en) · ${item.repeat || 4} voorgeschreven · ${item.extra || 0} lege rij(en)`;
   }
   if(item.type === 'nameHand'){
@@ -1247,6 +1262,7 @@ function addWorksheetItemFromUI(){
     showDot: document.getElementById('wsDotTgl')?.classList.contains('on') ?? true,
     repeat: parseInt(document.getElementById('wsLetterRepeat')?.value) || 4,
     extra: parseInt(document.getElementById('wsLetterExtra')?.value) || 2,
+    letterLayout: document.getElementById('wsLetterLayout')?.value || 'repeat',
     sentenceLines: parseInt(document.getElementById('wsSentenceLines')?.value) || 1,
     lineType: document.getElementById('lineType')?.value || 'type1',
     lineSpacing: document.getElementById('lineSpacing')?.value || 'medium'
@@ -1378,6 +1394,9 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
   } else if (lineType === 'type2' || lineType === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
     ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
+  } else if (lineType === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.65)';
+    ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
   }
 
   offs.forEach(l=>{
@@ -1414,6 +1433,15 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
         width = (l.kind === 'base') ? 1.5 : 1;
       }
     }
+    if (lineType === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f';
+        width = 1.5;
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#2f9a44';
+        width = 1.6;
+      }
+    }
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1440,48 +1468,41 @@ function drawLetterWb(ctx, strokes, dx, dy, scale=1, col='#333'){
   if(!strokes || !strokes.length) return;
   ctx.save();
   ctx.strokeStyle = col;
+  ctx.fillStyle = col;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  ctx.lineWidth = Math.max(1.15, S.penSize * scale);
-
+  ctx.lineWidth = Math.max(1.4, S.penSize * scale);
   strokes.forEach(stroke=>{
     if(!stroke || !stroke.length) return;
-
-    const pts = stroke.map(p => ({
-      x: dx + p.x * scale,
-      y: dy + p.y * scale
-    }));
-
-    ctx.beginPath();
-    ctx.moveTo(pts[0].x, pts[0].y);
-
-    if (pts.length > 3) {
-      for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[Math.max(0, i - 1)];
-        const p1 = pts[i];
-        const p2 = pts[i + 1];
-        const p3 = pts[Math.min(pts.length - 1, i + 2)];
-        ctx.bezierCurveTo(
-          p1.x + (p2.x - p0.x) / 6,
-          p1.y + (p2.y - p0.y) / 6,
-          p2.x - (p3.x - p1.x) / 6,
-          p2.y - (p3.y - p1.y) / 6,
-          p2.x,
-          p2.y
-        );
-      }
-    } else {
-      pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    if(stroke.length === 1){
+      const p = stroke[0];
+      ctx.beginPath();
+      ctx.arc(dx + p.x * scale, dy + p.y * scale, Math.max(1.1, S.penSize * scale * 0.42), 0, Math.PI * 2);
+      ctx.fill();
+      return;
     }
-
+    ctx.beginPath();
+    ctx.moveTo(dx + stroke[0].x * scale, dy + stroke[0].y * scale);
+    for(let i=1;i<stroke.length;i++) ctx.lineTo(dx + stroke[i].x * scale, dy + stroke[i].y * scale);
     ctx.stroke();
   });
-
   ctx.restore();
 }
 
 function drawPracticeSectionMarkers(ctx, startX, dotY, segmentW, count){
-  // bewust leeg: geen verticale hulpstreepjes tonen
+  ctx.save();
+  ctx.strokeStyle = 'rgba(232,98,42,.22)';
+  ctx.lineWidth = 1;
+  for(let i=0;i<count;i++){
+    const x = startX + i * segmentW;
+    if(i>0){
+      ctx.beginPath();
+      ctx.moveTo(x - 10, dotY - 24);
+      ctx.lineTo(x - 10, dotY + 12);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
 }
 
 function drawPracticeDots(ctx, startX, dotY, segmentW, count){
@@ -1490,13 +1511,13 @@ function drawPracticeDots(ctx, startX, dotY, segmentW, count){
   for(let i=0;i<count;i++){
     const x = startX + i * segmentW;
     ctx.beginPath();
-    ctx.arc(x, dotY, 2.05, 0, Math.PI*2);
+    ctx.arc(x, dotY, 2.4, 0, Math.PI*2);
     ctx.fill();
   }
   ctx.restore();
 }
 
-function drawDot(ctx, x, y, radius = 3.2){
+function drawDot(ctx, x, y, radius = 2.4){
   ctx.save();
   ctx.fillStyle = '#e8622a';
   ctx.beginPath();
@@ -1541,20 +1562,26 @@ function drawModelBox(ctx, x, y, w, h, fill = true){
 
 function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = null, leftPad = 12, topPad = 3, bottomPad = 3){
   const b = getStrokeBounds(r.strokes || []);
+
+  // BELANGRIJK:
+  // behoud standaard exact dezelfde grootte en hoogtepositie
+  // als op het bord getekend werd.
   let scale = 1;
 
+  // Alleen verkleinen als het echt niet in de beschikbare breedte past.
   if (maxWidth) {
     const usableW = Math.max(40, maxWidth - leftPad * 2);
     const drawnW = b.width > 0 ? b.width : 1;
-    if (drawnW > usableW) scale = usableW / drawnW;
+
+    if (drawnW > usableW) {
+      scale = usableW / drawnW;
+    }
   }
 
+  // Horizontaal schuiven we de tekening gewoon wat naar rechts.
+  // Verticaal blijft ze op exact dezelfde hoogte binnen de schrijflijnen.
   const dx = x + leftPad;
-
-  // Houd de ONDERKANT van wat de leerkracht schreef op dezelfde hoogte.
-  // Zo zweeft het voorbeeld op het werkblad niet omhoog wanneer het verkleind wordt.
-  const bottomLockOffset = (b.maxY || 0) - ((b.maxY || 0) * scale);
-  const dy = y + bottomLockOffset;
+  const dy = y;
 
   const width = Math.max(36, b.width * scale + 20);
 
@@ -1564,7 +1591,7 @@ function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = nul
     dy,
     width,
     startX: r.startPt ? dx + r.startPt.x * scale : x + leftPad,
-    startY: r.startPt ? dy + r.startPt.y * scale : y + bottomLockOffset
+    startY: r.startPt ? dy + r.startPt.y * scale : y
   };
 }
 
@@ -1588,27 +1615,58 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
       const placement = getWorksheetRowPlacement(r, pageX, y, item.lineType, item.lineSpacing, null, 8, 3, 3);
       const gap = 26;
       const modelW = placement.width;
+      const letterLayout = item.letterLayout || 'repeat';
+
       drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
-      let xC = pageX + 8;
-      for(let rep=0; rep<(item.repeat || 4); rep++){
-        if(xC + modelW > pageX + innerW) break;
-        const repDx = xC + (placement.dx - (pageX + 8));
-        drawLetterWb(ctx, r.strokes, repDx, placement.dy, placement.scale, '#cfcfcf');
-        if(item.showDot && r.startPt) drawDot(ctx, xC + (placement.startX - (pageX + 8)), placement.startY, 3.2);
-        xC += modelW + gap;
-      }
-      y += RH;
-      for(let ex=0; ex<(item.extra || 0); ex++){
-        drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+
+      if(letterLayout === 'model6dots'){
+        const boxGap = 18;
+        const modelBoxW = Math.min(112, Math.max(86, innerW * 0.14));
+        const xModel = pageX;
+        const xPractice = xModel + modelBoxW + boxGap;
+        const practiceW = Math.max(220, innerW - modelBoxW - boxGap - 12);
+        const rowTop = y + offs[0].dy - 8;
+        const rowH = (offs[3].dy - offs[0].dy) + 16;
+
+        drawLinesForWorksheetItem(ctx, xModel, y, modelBoxW, item.lineType, item.lineSpacing);
+        drawModelBox(ctx, xModel, rowTop, modelBoxW, rowH, false);
+        drawLinesForWorksheetItem(ctx, xPractice, y, practiceW, item.lineType, item.lineSpacing);
+
+        const modelPlacement = getWorksheetRowPlacement(r, xModel + 8, y, item.lineType, item.lineSpacing, modelBoxW - 16, 10, 3, 3);
+        drawLetterWb(ctx, r.strokes, modelPlacement.dx, modelPlacement.dy, modelPlacement.scale, '#222');
+
         if(item.showDot && r.startPt){
-          let xC2 = pageX + 8;
-          for(let rep=0; rep<(item.repeat || 4); rep++){
-            if(xC2 + modelW > pageX + innerW) break;
-            drawDot(ctx, xC2 + (placement.startX - (pageX + 8)), y + ((placement.startY - (startY + 30)) - 0), 3.2);
-            xC2 += modelW + gap;
-          }
+          const startOffset = modelPlacement.startX - xModel;
+          const dotY = modelPlacement.startY;
+          const usableStart = xPractice + Math.max(16, startOffset + 2);
+          const usableEnd = xPractice + practiceW - 30;
+          const segmentW = Math.max(62, (usableEnd - usableStart) / 5);
+          drawPracticeDots(ctx, usableStart, dotY, segmentW, 6);
+        }
+
+        y += RH;
+      } else {
+        let xC = pageX + 8;
+        for(let rep=0; rep<(item.repeat || 4); rep++){
+          if(xC + modelW > pageX + innerW) break;
+          const repDx = xC + (placement.dx - (pageX + 8));
+          drawLetterWb(ctx, r.strokes, repDx, placement.dy, placement.scale, '#cfcfcf');
+          if(item.showDot && r.startPt) drawDot(ctx, xC + (placement.startX - (pageX + 8)), placement.startY, 2.4);
+          xC += modelW + gap;
         }
         y += RH;
+        for(let ex=0; ex<(item.extra || 0); ex++){
+          drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+          if(item.showDot && r.startPt){
+            let xC2 = pageX + 8;
+            for(let rep=0; rep<(item.repeat || 4); rep++){
+              if(xC2 + modelW > pageX + innerW) break;
+              drawDot(ctx, xC2 + (placement.startX - (pageX + 8)), y + ((placement.startY - (startY + 30)) - 0), 2.4);
+              xC2 += modelW + gap;
+            }
+          }
+          y += RH;
+        }
       }
     });
     ctx.restore();
@@ -1939,6 +1997,9 @@ function drawLineTypePreview(canvas, type){
   } else if (type === 'type2' || type === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.65)';
     ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
+  } else if (type === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.75)';
+    ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
   }
 
   lines.forEach(l=>{
@@ -1982,6 +2043,16 @@ function drawLineTypePreview(canvas, type){
       }
     }
 
+    if (type === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f';
+        width = 1.5;
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#2f9a44';
+        width = 1.6;
+      }
+    }
+
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1993,7 +2064,7 @@ function drawLineTypePreview(canvas, type){
 }
 
 function buildLineTypePreviews(){
-  ['type1','type2','type3','type4'].forEach(type=>{
+  ['type1','type2','type3','type4','type5'].forEach(type=>{
     const c = document.getElementById('preview-' + type);
     if (c) drawLineTypePreview(c, type);
   });
@@ -2005,7 +2076,8 @@ function getLineTypeLabel(){
     type1:'Type 1',
     type2:'Type 2',
     type3:'Type 3',
-    type4:'Type 4'
+    type4:'Type 4',
+    type5:'Type 5'
   };
   const v = document.getElementById('lineType')?.value || 'type1';
   return map[v] || 'Type 1';
