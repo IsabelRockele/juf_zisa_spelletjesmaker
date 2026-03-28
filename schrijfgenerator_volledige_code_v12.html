@@ -214,6 +214,15 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 .worksheet-preview-shell{background:#fff;border:2px solid #ede8e0;border-radius:14px;box-shadow:0 1px 6px var(--sh);display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
 .worksheet-preview-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1.5px solid #ede8e0;background:#fffef9;}
 .worksheet-preview-head h3{font-size:18px;color:var(--ink);}
+.worksheet-title-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;}
+.worksheet-title-display{font-size:18px;font-weight:800;color:var(--ink);max-width:100%;word-break:break-word;}
+.worksheet-title-edit-btn,.worksheet-title-save-btn,.worksheet-title-cancel-btn{width:34px;height:34px;border-radius:999px;border:2px solid #e0d8cc;background:#fff;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .15s;}
+.worksheet-title-edit-btn:hover,.worksheet-title-save-btn:hover,.worksheet-title-cancel-btn:hover{border-color:var(--accent);color:var(--accent);}
+.worksheet-title-save-btn{background:var(--green);border-color:var(--green);color:#fff;}
+.worksheet-title-save-btn:hover{background:#3f8a62;border-color:#3f8a62;color:#fff;}
+.worksheet-title-edit-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;}
+.worksheet-title-input{min-width:240px;max-width:520px;flex:1;}
+.worksheet-title-editor.hidden,.worksheet-title-view.hidden{display:none;}
 .worksheet-preview-pages{flex:1;overflow:auto;padding:16px;background:#f6f1ea;display:flex;flex-direction:column;gap:16px;}
 .worksheet-page-card{background:#fff;border:1px solid #e7dfd2;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:10px;align-self:center;width:min(100%,830px);}
 .worksheet-page-label{font-size:11px;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
@@ -460,6 +469,7 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
       <div class="acc-body">
         <input type="hidden" id="worksheetNaam" value="">
         <input type="hidden" id="worksheetDatum" value="">
+        <input type="hidden" id="worksheetTitle" value="Ik oefen op handschrift">
         <div class="worksheet-actions">
           <button class="btn btn-ghost" type="button" onclick="clearWorksheetItems()">Werkblad leegmaken</button>
           <button class="btn btn-green" type="button" onclick="downloadPDF()">⬇️ Download als PDF</button>
@@ -506,7 +516,19 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
             <div class="worksheet-live-right">
         <div class="worksheet-preview-shell">
           <div class="worksheet-preview-head">
-            <h3>Voorbeeld</h3>
+            <div class="worksheet-title-bar">
+              <div id="worksheetTitleView" class="worksheet-title-view">
+                <span id="worksheetTitleDisplay" class="worksheet-title-display">Ik oefen op handschrift</span>
+                <button type="button" class="worksheet-title-edit-btn" onclick="startWorksheetTitleEdit()" title="Titel wijzigen">✏️</button>
+              </div>
+              <div id="worksheetTitleEditor" class="worksheet-title-editor hidden">
+                <div class="worksheet-title-edit-wrap">
+                  <input type="text" id="worksheetTitleInput" class="worksheet-title-input" value="Ik oefen op handschrift" maxlength="80" placeholder="Typ hier de titel van het werkblad">
+                  <button type="button" class="worksheet-title-save-btn" onclick="saveWorksheetTitleEdit()" title="Titel opslaan">✓</button>
+                  <button type="button" class="worksheet-title-cancel-btn" onclick="cancelWorksheetTitleEdit()" title="Annuleren">✕</button>
+                </div>
+              </div>
+            </div>
             <span class="helper-mini">Het blad bouwt hier live op.</span>
           </div>
           <div id="worksheetPreviewPages" class="worksheet-preview-pages"></div>
@@ -826,35 +848,108 @@ function drawLines(ctx,w,h,col){
 // =====================================================
 //  SMOOTH STROKE
 // =====================================================
-function strokeSmooth(ctx,stroke,col){
-  if(!stroke||!stroke.length) return;
-  const sm=document.getElementById('smoothTgl').classList.contains('on');
-  ctx.beginPath();
-  ctx.strokeStyle=col||S.penColor;
-  ctx.lineWidth=S.penSize; ctx.lineCap='round'; ctx.lineJoin='round';
-  if(stroke.length === 1){
-    const p = stroke[0];
+function pointDistance(a,b){
+  return Math.hypot((a?.x || 0) - (b?.x || 0), (a?.y || 0) - (b?.y || 0));
+}
+
+function simplifyStroke(stroke, minDist = 1.6){
+  if(!stroke || stroke.length <= 2) return (stroke || []).map(p => ({x:p.x, y:p.y}));
+  const pts = [{ x: stroke[0].x, y: stroke[0].y }];
+  let last = stroke[0];
+  for(let i=1;i<stroke.length-1;i++){
+    const p = stroke[i];
+    if(pointDistance(last, p) >= minDist){
+      pts.push({ x: p.x, y: p.y });
+      last = p;
+    }
+  }
+  const end = stroke[stroke.length-1];
+  if(!pts.length || pointDistance(pts[pts.length-1], end) > 0.01){
+    pts.push({ x: end.x, y: end.y });
+  }
+  return pts;
+}
+
+function smoothStrokePoints(stroke, passes = 2){
+  let pts = (stroke || []).map(p => ({x:p.x, y:p.y}));
+  if(pts.length <= 2) return pts;
+  for(let pass=0; pass<passes; pass++){
+    const next = [{ ...pts[0] }];
+    for(let i=1;i<pts.length-1;i++){
+      const prev = pts[i-1];
+      const cur = pts[i];
+      const following = pts[i+1];
+      next.push({
+        x: prev.x * 0.2 + cur.x * 0.6 + following.x * 0.2,
+        y: prev.y * 0.2 + cur.y * 0.6 + following.y * 0.2
+      });
+    }
+    next.push({ ...pts[pts.length-1] });
+    pts = next;
+  }
+  return pts;
+}
+
+function normalizeStroke(stroke, smoothingOn = true){
+  if(!stroke || !stroke.length) return [];
+  if(stroke.length === 1) return [{ x: stroke[0].x, y: stroke[0].y }];
+  let pts = simplifyStroke(stroke, 1.6);
+  if(smoothingOn && pts.length > 2){
+    pts = smoothStrokePoints(pts, 2);
+  }
+  return pts;
+}
+
+function drawStrokePath(ctx, stroke, dx = 0, dy = 0, scale = 1, smoothingOn = true){
+  const pts = normalizeStroke(stroke, smoothingOn);
+  if(!pts.length) return;
+  if(pts.length === 1){
+    const p = pts[0];
     ctx.beginPath();
-    ctx.arc(p.x, p.y, Math.max(1.0, S.penSize * 0.42), 0, Math.PI * 2);
-    ctx.fillStyle = col || S.penColor;
+    ctx.arc(dx + p.x * scale, dy + p.y * scale, Math.max(1.0, ctx.lineWidth * 0.42), 0, Math.PI * 2);
     ctx.fill();
     return;
   }
-  if(sm && stroke.length > 2){
-    ctx.moveTo(stroke[0].x, stroke[0].y);
-    for(let i=1;i<stroke.length-1;i++){
-      const midX = (stroke[i].x + stroke[i+1].x) / 2;
-      const midY = (stroke[i].y + stroke[i+1].y) / 2;
-      ctx.quadraticCurveTo(stroke[i].x, stroke[i].y, midX, midY);
+
+  ctx.beginPath();
+  ctx.moveTo(dx + pts[0].x * scale, dy + pts[0].y * scale);
+
+  if(smoothingOn && pts.length > 2){
+    for(let i=1;i<pts.length-1;i++){
+      const midX = (pts[i].x + pts[i+1].x) / 2;
+      const midY = (pts[i].y + pts[i+1].y) / 2;
+      ctx.quadraticCurveTo(
+        dx + pts[i].x * scale,
+        dy + pts[i].y * scale,
+        dx + midX * scale,
+        dy + midY * scale
+      );
     }
-    const penultimate = stroke[stroke.length-2];
-    const last = stroke[stroke.length-1];
-    ctx.quadraticCurveTo(penultimate.x, penultimate.y, last.x, last.y);
+    const penultimate = pts[pts.length-2];
+    const last = pts[pts.length-1];
+    ctx.quadraticCurveTo(
+      dx + penultimate.x * scale,
+      dy + penultimate.y * scale,
+      dx + last.x * scale,
+      dy + last.y * scale
+    );
   } else {
-    ctx.moveTo(stroke[0].x,stroke[0].y);
-    for(let i=1;i<stroke.length;i++) ctx.lineTo(stroke[i].x, stroke[i].y);
+    for(let i=1;i<pts.length;i++){
+      ctx.lineTo(dx + pts[i].x * scale, dy + pts[i].y * scale);
+    }
   }
   ctx.stroke();
+}
+
+function strokeSmooth(ctx,stroke,col){
+  if(!stroke||!stroke.length) return;
+  const sm=document.getElementById('smoothTgl').classList.contains('on');
+  ctx.strokeStyle=col||S.penColor;
+  ctx.fillStyle=col||S.penColor;
+  ctx.lineWidth=S.penSize; 
+  ctx.lineCap='round'; 
+  ctx.lineJoin='round';
+  drawStrokePath(ctx, stroke, 0, 0, 1, sm);
 }
 
 // =====================================================
@@ -899,7 +994,9 @@ function setupCanvasEvents(canvas,idx){
     const r=rows[idx];
     if(S.tool==='draw'){
       if(cur.length > 1){
-        r.strokes.push([...cur]);
+        const sm = document.getElementById('smoothTgl').classList.contains('on');
+        const normalized = normalizeStroke(cur, sm);
+        r.strokes.push(normalized.length ? normalized : [...cur]);
       } else if(cur.length === 1){
         r.strokes.push(createTapDotStroke(cur[0]));
       }
@@ -1136,6 +1233,58 @@ function playAllRows(){ stopAllAnim(); rows.forEach((_,i)=>setTimeout(()=>playRo
 const worksheetItems = [];
 let worksheetPages = [];
 
+function getWorksheetTitle(){
+  const fallback = 'Ik oefen op handschrift';
+  const hidden = document.getElementById('worksheetTitle');
+  const value = hidden?.value?.trim() || '';
+  return value || fallback;
+}
+
+function refreshWorksheetTitleUI(){
+  const title = getWorksheetTitle();
+  const display = document.getElementById('worksheetTitleDisplay');
+  const input = document.getElementById('worksheetTitleInput');
+  if(display) display.textContent = title;
+  if(input && document.activeElement !== input) input.value = title;
+}
+
+function startWorksheetTitleEdit(){
+  const view = document.getElementById('worksheetTitleView');
+  const editor = document.getElementById('worksheetTitleEditor');
+  const input = document.getElementById('worksheetTitleInput');
+  refreshWorksheetTitleUI();
+  view?.classList.add('hidden');
+  editor?.classList.remove('hidden');
+  if(input){
+    input.value = getWorksheetTitle();
+    input.focus();
+    input.select();
+  }
+}
+
+function saveWorksheetTitleEdit(){
+  const input = document.getElementById('worksheetTitleInput');
+  const hidden = document.getElementById('worksheetTitle');
+  const value = input?.value?.trim() || '';
+  if(hidden) hidden.value = value || 'Ik oefen op handschrift';
+  closeWorksheetTitleEdit(false);
+  renderWorksheetPreview();
+}
+
+function cancelWorksheetTitleEdit(){
+  closeWorksheetTitleEdit(true);
+}
+
+function closeWorksheetTitleEdit(resetInput = true){
+  const view = document.getElementById('worksheetTitleView');
+  const editor = document.getElementById('worksheetTitleEditor');
+  const input = document.getElementById('worksheetTitleInput');
+  if(resetInput && input) input.value = getWorksheetTitle();
+  refreshWorksheetTitleUI();
+  editor?.classList.add('hidden');
+  view?.classList.remove('hidden');
+}
+
 function cloneRowForWorksheet(r){
   return {
     strokes: (r.strokes || []).map(stroke => stroke.map(p => ({x:p.x, y:p.y}))),
@@ -1323,6 +1472,7 @@ function addWorksheetItemFromUI(){
   }
 
   renderWorksheetItemList();
+  refreshWorksheetTitleUI();
   renderWorksheetPreview();
   updateWorksheetGuidance();
   switchTopTab('worksheet');
@@ -1474,17 +1624,7 @@ function drawLetterWb(ctx, strokes, dx, dy, scale=1, col='#333'){
   ctx.lineWidth = Math.max(1.4, S.penSize * scale);
   strokes.forEach(stroke=>{
     if(!stroke || !stroke.length) return;
-    if(stroke.length === 1){
-      const p = stroke[0];
-      ctx.beginPath();
-      ctx.arc(dx + p.x * scale, dy + p.y * scale, Math.max(1.1, S.penSize * scale * 0.42), 0, Math.PI * 2);
-      ctx.fill();
-      return;
-    }
-    ctx.beginPath();
-    ctx.moveTo(dx + stroke[0].x * scale, dy + stroke[0].y * scale);
-    for(let i=1;i<stroke.length;i++) ctx.lineTo(dx + stroke[i].x * scale, dy + stroke[i].y * scale);
-    ctx.stroke();
+    drawStrokePath(ctx, stroke, dx, dy, scale, true);
   });
   ctx.restore();
 }
@@ -1862,7 +2002,7 @@ ctx.fillText(`Datum: ${datum ? datum : '_____________'}`, W - marginX - 80, head
   ctx.fillStyle='#1a1a2e';
   ctx.font='bold 24px Nunito,sans-serif';
   ctx.textAlign='center';
-  ctx.fillText('Ik oefen op handschrift', W/2, 95);
+  ctx.fillText(getWorksheetTitle(), W/2, 95);
   ctx.strokeStyle='#e8622a';
   ctx.lineWidth=2;
   ctx.beginPath();
@@ -1886,6 +2026,7 @@ ctx.fillText(`Datum: ${datum ? datum : '_____________'}`, W - marginX - 80, head
 }
 
 function renderWorksheetPreview(){
+  refreshWorksheetTitleUI();
   const host = document.getElementById('worksheetPreviewPages');
   if(!host) return;
   host.innerHTML = '';
@@ -2110,7 +2251,10 @@ function switchTopTab(tab){
   if(boardSidebar) boardSidebar.classList.toggle('active', tab === 'board');
   if(worksheetSidebar) worksheetSidebar.classList.toggle('active', tab === 'worksheet');
 
-  if(tab === 'worksheet') updateWorksheetGuidance();
+  if(tab === 'worksheet'){
+    updateWorksheetGuidance();
+    refreshWorksheetTitleUI();
+  }
 }
 
 
@@ -2128,6 +2272,18 @@ function closeWorksheetHelp(){
 document.getElementById('lineType').addEventListener('change',()=>{ redrawAll(); updateWorksheetGuidance(); renderWorksheetPreview(); });
 document.getElementById('lineSpacing').addEventListener('change',()=>{ resizeAll(); renderWorksheetPreview(); updateWorksheetGuidance(); });
 document.getElementById('smoothTgl').addEventListener('click',()=>setTimeout(redrawAll,50));
+const worksheetTitleInputEl = document.getElementById('worksheetTitleInput');
+if(worksheetTitleInputEl){
+  worksheetTitleInputEl.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      saveWorksheetTitleEdit();
+    } else if(e.key === 'Escape'){
+      e.preventDefault();
+      cancelWorksheetTitleEdit();
+    }
+  });
+}
 
 // =====================================================
 //  INIT
