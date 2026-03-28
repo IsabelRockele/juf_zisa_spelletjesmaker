@@ -285,6 +285,10 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
   <button type="button" class="line-type-card" data-type="type4" onclick="setLineType('type4', this)">
     <canvas class="line-type-preview" id="preview-type4" width="120" height="64"></canvas>
   </button>
+
+  <button type="button" class="line-type-card" data-type="type5" onclick="setLineType('type5', this)">
+    <canvas class="line-type-preview" id="preview-type5" width="120" height="64"></canvas>
+  </button>
 </div>
 
 <input type="hidden" id="lineType" value="type1">
@@ -700,7 +704,7 @@ function lineOffsets(){
   const top = 10;
   const t = document.getElementById('lineType').value;
 
-  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4') {
+  if (t === 'type1' || t === 'type2' || t === 'type3' || t === 'type4' || t === 'type5') {
     return [
       { dy: top,     kind:'top'    },
       { dy: top+L,   kind:'mid1'   },
@@ -736,6 +740,9 @@ function drawLines(ctx,w,h,col){
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   } else if (t === 'type2' || t === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
+    ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
+  } else if (t === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.65)';
     ctx.fillRect(0, mid1Y, w, baseY - mid1Y);
   }
 
@@ -782,6 +789,18 @@ function drawLines(ctx,w,h,col){
       } else {
         stroke = '#9fc2e8'; // blauw
         width = (l.kind === 'base') ? 1.5 : 1;
+        dash = [];
+      }
+    }
+
+    if (t === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f'; // rood
+        width = 1.5;
+        dash = [];
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#4a9b6f'; // groen
+        width = 1.6;
         dash = [];
       }
     }
@@ -1340,6 +1359,9 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
   } else if (lineType === 'type2' || lineType === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
     ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
+  } else if (lineType === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.65)';
+    ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
   }
 
   offs.forEach(l=>{
@@ -1374,6 +1396,16 @@ function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
       } else {
         stroke = '#9fc2e8';
         width = (l.kind === 'base') ? 1.5 : 1;
+      }
+    }
+
+    if (lineType === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f';
+        width = 1.5;
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#4a9b6f';
+        width = 1.6;
       }
     }
     ctx.strokeStyle = stroke;
@@ -1892,6 +1924,9 @@ function drawLineTypePreview(canvas, type){
   } else if (type === 'type2' || type === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.65)';
     ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
+  } else if (type === 'type5') {
+    ctx.fillStyle = 'rgba(190,225,235,.65)';
+    ctx.fillRect(0, lines[1].y, w, lines[2].y - lines[1].y);
   }
 
   lines.forEach(l=>{
@@ -1935,6 +1970,16 @@ function drawLineTypePreview(canvas, type){
       }
     }
 
+    if (type === 'type5') {
+      if (l.kind === 'top' || l.kind === 'mid1') {
+        stroke = '#d9534f';
+        width = 1.5;
+      } else if (l.kind === 'base' || l.kind === 'bottom') {
+        stroke = '#4a9b6f';
+        width = 1.6;
+      }
+    }
+
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1946,7 +1991,7 @@ function drawLineTypePreview(canvas, type){
 }
 
 function buildLineTypePreviews(){
-  ['type1','type2','type3','type4'].forEach(type=>{
+  ['type1','type2','type3','type4','type5'].forEach(type=>{
     const c = document.getElementById('preview-' + type);
     if (c) drawLineTypePreview(c, type);
   });
