@@ -1317,7 +1317,7 @@ function getWorksheetTypeLabel(type){
 function getWorksheetTypeHelp(type){
   return {
     letter:'Gebruik dit voor letters die je eerst op het bord voordoet. Je kan kiezen tussen meerdere voorgeschreven letters of 1 zwarte voorbeeldletter met daarnaast 6 startpuntjes.',
-    nameHand:'Schrijf de naam op het bord. Je kan ook meerdere namen schrijven: één per rij. Elke naam wordt als zwart voorbeeld tussen de lijnen geplaatst, met rechts 2 schrijfruimtes.',
+       nameHand:'Schrijf de naam op het bord. Je kan ook meerdere namen schrijven: één per rij. Het voorbeeldvak past zich aan de breedte van de naam aan. Als de naam breed is, krijgt die automatisch 1 schrijfruimte ernaast. Anders komen er 2 schrijfruimtes.',
     nameTyped:'Typ hier één of meer namen. Elke naam verschijnt in Arial 14 en krijgt daarnaast 2 schrijfruimtes. De leerkracht kan zelf startpunten zetten op papier.',
     sentenceHand:'Schrijf de zin op het bord. Je kan ook meerdere zinnen schrijven: één per rij. Elke zin blijft samen met de schrijflijnen op dezelfde pagina.',
     sentenceTyped:'Typ hier één of meer zinnen. Elke zin komt als zwart voorbeeld boven 1 of 2 schrijflijnen. Ook deze oefeningen blijven in de PDF samen.'
@@ -1402,7 +1402,7 @@ function summarizeWorksheetItem(item){
     return `${(item.boardRows || []).length || 0} voorbeeldrij(en) · ${item.repeat || 4} voorgeschreven · ${item.extra || 0} lege rij(en)`;
   }
   if(item.type === 'nameHand'){
-    return `${(item.boardRows || []).length || 1} naam/namen · voorbeeld + 2 schrijflijnen`;
+    return `${(item.boardRows || []).length || 1} naam/namen · voorbeeld + 1 of 2 schrijflijnen`;
   }
   if(item.type === 'nameTyped'){
     return `${item.typedName || ''} · voorbeeld + 2 schrijflijnen`;
@@ -1784,7 +1784,7 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
         drawModelBox(ctx, xModel, rowTop, modelBoxW, rowH, false);
         drawLinesForWorksheetItem(ctx, xPractice, y, practiceW, item.lineType, item.lineSpacing);
 
-        const modelPlacement = getWorksheetRowPlacement(r, xModel + 8, y, item.lineType, item.lineSpacing, modelBoxW - 16, 10, 3, 3);
+        const modelPlacement = getWorksheetRowPlacement(r, xModel + 2, y, item.lineType, item.lineSpacing, modelBoxW - 8, 4, 3, 3);
         drawLetterWb(ctx, r.strokes, modelPlacement.dx, modelPlacement.dy, modelPlacement.scale, '#222');
 
         if(item.showDot && r.startPt){
@@ -1838,31 +1838,39 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
       const boxPadLeft = 6;
       const boxPadRight = 6;
       const practicePadLeft = 10;
-      const naturalBoxW = Math.ceil(Math.max(70, bounds.width + boxPadLeft + boxPadRight + 4));
-      const maxModelW = Math.max(90, innerW - (minPracticeW * 2) - (boxGap * 2));
-      const modelBoxW = Math.max(90, Math.min(maxModelW, naturalBoxW));
-      const practiceW = Math.max(minPracticeW, (innerW - modelBoxW - boxGap * 2) / 2);
+      const naturalBoxW = Math.ceil(Math.max(90, bounds.width + boxPadLeft + boxPadRight + 22));
+      const onePracticeMinTotal = naturalBoxW + boxGap + minPracticeW;
+      const copies = onePracticeMinTotal > innerW ? 0 : ((naturalBoxW + boxGap * 2 + minPracticeW * 2) <= innerW ? 2 : 1);
+
+      const freeForModel = innerW - Math.max(0, copies) * minPracticeW - Math.max(0, copies) * boxGap;
+      const modelBoxW = Math.max(90, Math.min(naturalBoxW, freeForModel));
+      const practiceW = copies > 0 ? Math.max(minPracticeW, (innerW - modelBoxW - boxGap * copies) / copies) : 0;
       const xModel = pageX;
-      const xPractice1 = xModel + modelBoxW + boxGap;
-      const xPractice2 = xPractice1 + practiceW + boxGap;
+      const practiceXs = [];
+      let cursorX = xModel + modelBoxW + boxGap;
+      for(let i = 0; i < copies; i++){
+        practiceXs.push(cursorX);
+        cursorX += practiceW + boxGap;
+      }
       const rowTop = y + offs[0].dy - 8;
       const rowH = (offs[3].dy - offs[0].dy) + 16;
 
       drawLinesForWorksheetItem(ctx, xModel, y, modelBoxW, item.lineType, item.lineSpacing);
       drawModelBox(ctx, xModel, rowTop, modelBoxW, rowH, false);
-      drawLinesForWorksheetItem(ctx, xPractice1, y, practiceW, item.lineType, item.lineSpacing);
-      drawLinesForWorksheetItem(ctx, xPractice2, y, practiceW, item.lineType, item.lineSpacing);
+      practiceXs.forEach(px => {
+        drawLinesForWorksheetItem(ctx, px, y, practiceW, item.lineType, item.lineSpacing);
+      });
 
-      const usableModelW = Math.max(24, modelBoxW - boxPadLeft - boxPadRight);
-      const exampleScale = (bounds.width > usableModelW && bounds.width > 0) ? (usableModelW / bounds.width) : 1;
-      const exampleDx = xModel + boxPadLeft - (bounds.minX * exampleScale);
+      const exampleDx = xModel + boxPadLeft - bounds.minX;
       const exampleDy = y;
-      drawLetterWb(ctx, r.strokes, exampleDx, exampleDy, exampleScale, '#222');
+     drawLetterWb(ctx, r.strokes, exampleDx, exampleDy, 1, '#222');
 
       if(item.showDot && r.startPt){
-        const dotY = y + (r.startPt.y * exampleScale);
-        drawDot(ctx, xPractice1 + practicePadLeft, dotY, 3.2);
-        drawDot(ctx, xPractice2 + practicePadLeft, dotY, 3.2);
+        const dotY = y + r.startPt.y;
+        practiceXs.forEach(px => {
+          drawDot(ctx, px + practicePadLeft, dotY, 3.2);
+        });
+
       }
 
       y += RH;
