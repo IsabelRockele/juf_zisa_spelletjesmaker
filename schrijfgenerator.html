@@ -25,7 +25,26 @@ header .sub{font-size:11px;opacity:.55;font-weight:600;}
 .app{display:flex;flex:1;overflow:hidden;}
 
 /* SIDEBAR */
-.sidebar{width:255px;flex-shrink:0;background:#fff;border-right:2px solid #ede8e0;display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar{width:340px;flex-shrink:0;background:#fff;border-right:2px solid #ede8e0;display:flex;flex-direction:column;overflow-y:auto;}
+
+.sidebar-mode-tabs{display:flex;gap:8px;padding:12px 12px 10px;position:sticky;top:0;background:#fff;z-index:5;border-bottom:1.5px solid #ede8e0;}
+.sidebar-mode-tab{flex:1;padding:9px 10px;border-radius:10px;border:2px solid #e0d8cc;background:#fff;font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .15s;text-align:center;}
+.sidebar-mode-tab:hover{border-color:var(--accent);color:var(--accent);}
+.sidebar-mode-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.sidebar-panel{display:none;flex-direction:column;}
+.sidebar-panel.active{display:flex;}
+.sidebar-helper-card{margin:12px;border:2px solid #ede8e0;border-radius:14px;background:#fffef9;padding:14px;box-shadow:0 1px 6px var(--sh);display:flex;flex-direction:column;gap:12px;}
+.sidebar-helper-card h3{font-size:16px;color:var(--ink);}
+.sidebar-helper-card p,.sidebar-helper-card li{font-size:12px;line-height:1.6;color:var(--soft);}
+.sidebar-helper-card ul{padding-left:18px;}
+.sidebar-helper-note{border:2px dashed #ddd;border-radius:10px;background:#faf6f0;padding:12px;}
+.sidebar-status{background:#f8f4ee;border-radius:10px;padding:10px;}
+.sidebar-status strong{display:block;font-size:12px;color:var(--ink);margin-bottom:4px;}
+.helper-mini{font-size:11px;color:var(--soft);}
+.sidebar-helper-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.help-btn{border:2px solid #e8e0d4;background:#fff;border-radius:999px;padding:6px 10px;font-family:'Nunito',sans-serif;font-size:11px;font-weight:800;color:var(--ink);cursor:pointer;}
+.help-btn:hover{border-color:var(--accent);color:var(--accent);}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none;}
 
 .acc-section{border-bottom:1.5px solid #ede8e0;}
 .acc-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;user-select:none;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--soft);}
@@ -95,35 +114,6 @@ input[type=range]{width:100%;accent-color:var(--accent);}
 /* MAIN */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);padding:12px 14px;}
 
-.top-tabs{
-  display:flex;
-  gap:8px;
-  margin-bottom:12px;
-  flex-shrink:0;
-}
-
-.top-tab{
-  padding:8px 16px;
-  border-radius:10px;
-  border:2px solid #e0d8cc;
-  background:#fff;
-  font-family:'Nunito',sans-serif;
-  font-size:12px;
-  font-weight:800;
-  cursor:pointer;
-  transition:all .15s;
-}
-
-.top-tab:hover{
-  border-color:var(--accent);
-  color:var(--accent);
-}
-
-.top-tab.active{
-  background:var(--accent);
-  color:#fff;
-  border-color:var(--accent);
-}
 
 .top-tab-panel{
   display:none;
@@ -211,19 +201,50 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 .modal-body{padding:16px;overflow-y:auto;flex:1;}
 .wb-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
 .wb-opt{display:flex;flex-direction:column;gap:4px;}
+.wb-opt.full{grid-column:span 2;}
+.wb-inline-help{font-size:11px;line-height:1.5;color:var(--soft);background:#faf6f0;border:1.5px dashed #ddd;border-radius:8px;padding:8px 10px;}
+.wb-hidden{display:none !important;}
 #wbCanvas{border:1.5px dashed #ddd;border-radius:8px;display:block;width:100%;margin-top:4px;}
 .modal-foot{padding:10px 18px;border-top:2px solid #ede8e0;display:flex;gap:8px;justify-content:flex-end;flex-shrink:0;}
 
+
+.worksheet-live-layout{display:grid;grid-template-columns:1fr;gap:18px;flex:1;min-height:0;}
+.worksheet-live-left{min-height:0;display:none;}
+.worksheet-live-right{min-height:0;display:flex;flex-direction:column;}
+.worksheet-preview-shell{background:#fff;border:2px solid #ede8e0;border-radius:14px;box-shadow:0 1px 6px var(--sh);display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;}
+.worksheet-preview-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1.5px solid #ede8e0;background:#fffef9;}
+.worksheet-preview-head h3{font-size:18px;color:var(--ink);}
+.worksheet-preview-pages{flex:1;overflow:auto;padding:16px;background:#f6f1ea;display:flex;flex-direction:column;gap:16px;}
+.worksheet-page-card{background:#fff;border:1px solid #e7dfd2;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:10px;align-self:center;width:min(100%,830px);}
+.worksheet-page-label{font-size:11px;font-weight:800;color:var(--soft);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.worksheet-page-canvas{display:block;width:100%;height:auto;border:1px solid #efe8de;border-radius:6px;background:#fff;}
+.worksheet-item-list{display:flex;flex-direction:column;gap:8px;}
+.worksheet-item-card{border:2px solid #ede8e0;border-radius:10px;padding:10px;background:#fffef9;}
+.worksheet-item-card strong{display:block;font-size:12px;margin-bottom:4px;color:var(--ink);}
+.worksheet-item-meta{font-size:11px;color:var(--soft);line-height:1.5;margin-bottom:8px;}
+.worksheet-item-actions{display:flex;gap:6px;flex-wrap:wrap;}
+@media (max-width: 980px){
+  .worksheet-live-layout{grid-template-columns:1fr;}
+}
+
 @media print{
   body *{visibility:hidden;}
-  #wbCanvas,#wbCanvas *{visibility:visible;}
-  #wbCanvas{position:fixed;top:0;left:0;width:100%!important;border:none!important;}
+  #worksheetPrintArea, #worksheetPrintArea *{visibility:visible;}
+  #worksheetPrintArea{position:absolute;left:0;top:0;width:100%;background:#fff;padding:0;}
+  .worksheet-print-page{page-break-after:always;break-after:page;margin:0 auto 0 auto;}
+  .worksheet-print-page:last-child{page-break-after:auto;break-after:auto;}
 }
 </style>
 </head>
 <body>
 
 <header>
+
+  <button onclick="window.location.href='index.html'" 
+          style="background:#fff; color:#2d2417; border:2px solid #e0d8cc; border-radius:8px; padding:6px 12px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer;">
+    ← Keuzemenu
+  </button>
+
   <div>
     <div class="logo">✏️ Schrijf<span>generator</span></div>
     <div class="sub">Handschrift voordoen &amp; oefenen</div>
@@ -235,6 +256,13 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 
 <!-- ===== SIDEBAR ===== -->
 <aside class="sidebar">
+
+  <div class="sidebar-mode-tabs">
+    <button class="sidebar-mode-tab active" id="tabBtnBoard" onclick="switchTopTab('board')">Op het bord</button>
+    <button class="sidebar-mode-tab" id="tabBtnWorksheet" onclick="switchTopTab('worksheet')">Als werkblad</button>
+  </div>
+
+  <div id="boardSidebar" class="sidebar-panel active">
 
   <div class="acc-section">
     <div class="acc-head" onclick="toggleAcc(this)">✏️ Pen &amp; schrijflijnen <span class="acc-arrow">▾</span></div>
@@ -340,15 +368,107 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
     </div>
   </div>
 
+  </div>
+
+  
+  <div id="worksheetSidebar" class="sidebar-panel">
+    <div class="sidebar-helper-card">
+      <div class="sidebar-helper-top">
+        <h3>Werkblad</h3>
+        <button type="button" class="help-btn" onclick="openWorksheetHelp()">ℹ Uitleg</button>
+      </div>
+
+      <div class="sidebar-status" id="worksheetStatus">
+        <strong>Nog niets voorbereid</strong>
+        <div class="helper-mini">Ga eerst naar <em>Op het bord</em> of kies een getypte oefening.</div>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-head" onclick="toggleAcc(this)">🧩 Nieuwe oefening <span class="acc-arrow">▾</span></div>
+      <div class="acc-body">
+        <div>
+          <label class="lbl">Soort oefening</label>
+          <select id="wsItemType" onchange="handleWorksheetTypeChange()">
+            <option value="letter">Letter oefenen</option>
+            <option value="nameHand">Naam naschrijven (voorgeschreven)</option>
+            <option value="nameTyped">Naam naschrijven (getypt)</option>
+            <option value="sentenceHand">Zin overschrijven (voorgeschreven)</option>
+            <option value="sentenceTyped">Zin overschrijven (getypt)</option>
+          </select>
+        </div>
+
+        <div class="wb-inline-help" id="wsTypeHelp"></div>
+        <div class="helper-mini" id="wsBoardMultiHelp" style="display:none;margin-top:-4px;margin-bottom:8px">Schrijf op <strong>Op het bord</strong> gerust meerdere voorbeelden: één naam of zin per rij.</div>
+
+        <div id="wsFieldLetter">
+          <label class="lbl">Aantal voorgeschreven letters</label>
+          <input type="number" id="wsLetterRepeat" min="1" max="8" value="4">
+        </div>
+
+        <div id="wsFieldLetterExtra">
+          <label class="lbl">Lege oefenrijen per letter</label>
+          <input type="number" id="wsLetterExtra" min="0" max="5" value="2">
+        </div>
+
+        <div id="wsFieldNameTyped" class="wb-hidden">
+          <label class="lbl">Naam / namen typen</label>
+          <textarea id="wsTypedName" rows="4" placeholder="bv. Noor&#10;Lina&#10;Milan" oninput="updateWorksheetGuidance()"></textarea>
+          <div class="helper-mini">Typ hier één naam per regel. Elke naam wordt een aparte oefening.</div>
+        </div>
+
+        <div id="wsFieldSentenceTyped" class="wb-hidden">
+          <label class="lbl">Zin / zinnen typen</label>
+          <textarea id="wsTypedSentence" rows="4" placeholder="bv. Ik schrijf netjes.&#10;Ik let op mijn letters." oninput="updateWorksheetGuidance()"></textarea>
+          <div class="helper-mini">Typ hier één zin per regel. Elke zin wordt een aparte oefening.</div>
+        </div>
+
+        <div id="wsFieldSentenceLines" class="wb-hidden">
+          <label class="lbl">Schrijflijnen onder de zin</label>
+          <select id="wsSentenceLines">
+            <option value="1">1 schrijflijn</option>
+            <option value="2">2 schrijflijnen</option>
+          </select>
+        </div>
+
+        <div id="wsFieldDot" class="trow">
+          <span style="font-size:12px;font-weight:700">Startpunt tonen</span>
+          <button class="tgl on" id="wsDotTgl" onclick="this.classList.toggle('on')"></button>
+        </div>
+
+        <div class="worksheet-actions">
+          <button class="btn btn-ghost" type="button" onclick="switchTopTab('board')">← Naar op het bord</button>
+          <button class="btn btn-primary" type="button" onclick="addWorksheetItemFromUI()">＋ Voeg oefening toe</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-head" onclick="toggleAcc(this)">📄 Werkblad <span class="acc-arrow">▾</span></div>
+      <div class="acc-body">
+        <input type="hidden" id="worksheetNaam" value="">
+        <input type="hidden" id="worksheetDatum" value="">
+        <div class="worksheet-actions">
+          <button class="btn btn-ghost" type="button" onclick="clearWorksheetItems()">Werkblad leegmaken</button>
+          <button class="btn btn-green" type="button" onclick="downloadPDF()">⬇️ Download als PDF</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="acc-section">
+      <div class="acc-head" onclick="toggleAcc(this)">📚 Oefeningen op dit blad <span class="acc-arrow">▾</span></div>
+      <div class="acc-body">
+        <div id="worksheetItemList" class="worksheet-item-list"></div>
+      </div>
+    </div>
+  </div>
+
+
 </aside>
 
 <!-- ===== MAIN ===== -->
 <main class="main">
 
-  <div class="top-tabs">
-    <button class="top-tab active" id="tabBtnBoard" onclick="switchTopTab('board')">Op het bord</button>
-    <button class="top-tab" id="tabBtnWorksheet" onclick="switchTopTab('worksheet')">Als werkblad</button>
-  </div>
 
   <div id="boardTab" class="top-tab-panel active">
     <div class="main-toolbar">
@@ -368,74 +488,27 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
   </div>
   </div>
 
+  
   <div id="worksheetTab" class="top-tab-panel">
-    <div class="worksheet-builder">
-      <div class="worksheet-head">
-        <h2>Werkblad maken</h2>
-        <p>Kies hier later verschillende schrijfoefeningen. Voor nu staat hier alvast de werkbladfunctie.</p>
-      </div>
-
-      <div class="worksheet-actions">
-        <button class="btn btn-primary" onclick="openWerkblad()">📄 Werkblad opbouwen…</button>
-      </div>
-
-      <div class="worksheet-placeholder">
-        <strong>Later komt hier:</strong><br>
-        letter oefenen<br>
-        naam voorschrijven<br>
-        zin overschrijven<br>
-        meerdere oefeningen op één werkblad
+    <div class="worksheet-live-layout">
+            <div class="worksheet-live-right">
+        <div class="worksheet-preview-shell">
+          <div class="worksheet-preview-head">
+            <h3>Voorbeeld</h3>
+            <span class="helper-mini">Het blad bouwt hier live op.</span>
+          </div>
+          <div id="worksheetPreviewPages" class="worksheet-preview-pages"></div>
+        </div>
       </div>
     </div>
   </div>
+
 
 </main>
 
 </div>
 
-<!-- ===== WERKBLAD MODAL ===== -->
-<div class="modal-overlay hidden" id="wbModal">
-  <div class="modal">
-    <div class="modal-head">
-      <span class="mtitle">📄 Werkblad opbouwen</span>
-      <button class="modal-close" onclick="closeWerkblad()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="wb-opts">
-        <div class="wb-opt">
-          <label class="lbl">Naam leerling</label>
-          <input type="text" id="wbNaam" placeholder="(optioneel)">
-        </div>
-        <div class="wb-opt">
-          <label class="lbl">Datum</label>
-          <input type="text" id="wbDatum" placeholder="(optioneel)">
-        </div>
-        <div class="wb-opt">
-          <label class="lbl">Aantal voorgeschreven letters</label>
-<input type="number" id="wbRepeat" min="1" max="8" value="4">
-        </div>
-        <div class="wb-opt">
-          <label class="lbl">Lege oefenrijen per letter</label>
-          <input type="number" id="wbExtra" min="0" max="5" value="2">
-        </div>
-        <div class="wb-opt" style="grid-column:span 2">
-          <div class="trow">
-            <span style="font-size:12px;font-weight:700">Startpunt (oranje stip) tonen</span>
-            <button class="tgl on" id="wbDotTgl" onclick="this.classList.toggle('on')"></button>
-          </div>
-        </div>
-      </div>
-      <button class="btn btn-primary btn-sm" onclick="buildWerkblad()">🔄 Preview opbouwen</button>
-      <canvas id="wbCanvas"></canvas>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-ghost btn-sm" onclick="closeWerkblad()">Sluiten</button>
-      <button class="btn btn-dark" onclick="window.print()">🖨️ Afdrukken</button>
-<button class="btn btn-green" onclick="downloadPDF()">⬇️ Download als PDF</button>
-    </div>
-  </div>
-</div>
-
+<div id="worksheetPrintArea" style="display:none"></div>
 <script>
 // =====================================================
 //  STATE
@@ -549,7 +622,7 @@ function addRow() {
 function clearRow(idx) {
   const r=rows[idx]; if(!r) return;
   r.strokes=[]; r.startPt=null;
-  stopRowAnim(idx); redrawRow(idx);
+  stopRowAnim(idx); redrawRow(idx); updateWorksheetGuidance();
 }
 function clearActiveRow(){ clearRow(S.activeRow); }
 
@@ -563,6 +636,7 @@ function removeRow(idx) {
   rows.length=0;
   saved.forEach(r=>addRowFromSaved(r));
   activateRow(Math.max(0,Math.min(idx,rows.length-1)));
+  updateWorksheetGuidance();
 }
 
 function addRowFromSaved(saved) {
@@ -595,7 +669,7 @@ function undoLast(){
   const r=rows[S.activeRow]; if(!r||!r.strokes.length) return;
   r.strokes.pop();
   r.startPt=r.strokes.length>0?{...r.strokes[0][0]}:null;
-  redrawRow(S.activeRow);
+  redrawRow(S.activeRow); updateWorksheetGuidance();
 }
 
 // =====================================================
@@ -754,6 +828,25 @@ function getPos(e,canvas){
   return {x:(src.clientX-rect.left)*sx, y:(src.clientY-rect.top)*sy};
 }
 
+function simplifyStrokePoints(points){
+  if(!points || points.length <= 2) return points || [];
+  const out = [points[0]];
+  for(let i=1;i<points.length-1;i++){
+    const prev = out[out.length-1];
+    const curr = points[i];
+    const next = points[i+1];
+    const avg = {
+      x: (prev.x + curr.x + next.x) / 3,
+      y: (prev.y + curr.y + next.y) / 3
+    };
+    if(Math.hypot(avg.x - prev.x, avg.y - prev.y) > 1.2){
+      out.push(avg);
+    }
+  }
+  out.push(points[points.length-1]);
+  return out;
+}
+
 function setupCanvasEvents(canvas,idx){
   let drawing=false, cur=[];
   canvas.addEventListener('pointerdown',e=>{
@@ -768,24 +861,44 @@ function setupCanvasEvents(canvas,idx){
     if(!drawing) return;
     const pos=getPos(e,canvas), r=rows[idx];
     if(S.tool==='erase'){ eraseAt(r,pos); redrawRow(idx); return; }
-    cur.push(pos);
+
+    const last = cur[cur.length-1];
+    if(!last || Math.hypot(pos.x-last.x, pos.y-last.y) > 1.9){
+      cur.push(pos);
+    }
+
     if(cur.length>1){
       const ctx=r.ctx;
       ctx.beginPath(); ctx.strokeStyle=S.penColor; ctx.lineWidth=S.penSize;
       ctx.lineCap='round'; ctx.lineJoin='round';
       ctx.moveTo(cur[cur.length-2].x,cur[cur.length-2].y);
-      ctx.lineTo(pos.x,pos.y); ctx.stroke();
+      ctx.lineTo(cur[cur.length-1].x,cur[cur.length-1].y); ctx.stroke();
     }
   });
   canvas.addEventListener('pointerup',()=>{
-    if(!drawing) return; drawing=false;
+    if(!drawing) return;
+    drawing=false;
     const r=rows[idx];
-    if(S.tool==='draw'&&cur.length>1){
-      r.strokes.push([...cur]);
+
+    if(S.tool==='draw'){
+      if(cur.length===1){
+        const p = cur[0];
+        const d = Math.max(0.9, S.penSize * 0.32);
+        r.strokes.push([
+          {x:p.x-d, y:p.y},
+          {x:p.x,   y:p.y},
+          {x:p.x+d, y:p.y}
+        ]);
+      } else if(cur.length>1){
+        r.strokes.push(simplifyStrokePoints(cur));
+      }
+
       if(document.getElementById('smoothTgl').classList.contains('on')) redrawRow(idx);
     }
+
     if(r.strokes.length>0) r.startPt={...r.strokes[0][0]};
     cur=[];
+    updateWorksheetGuidance();
   });
   canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 }
@@ -1007,174 +1120,300 @@ function resetPlayBtn(idx){
 function stopAllAnim(){ rows.forEach((_,i)=>stopRowAnim(i)); }
 function playAllRows(){ stopAllAnim(); rows.forEach((_,i)=>setTimeout(()=>playRow(i),i*400)); }
 
+
 // =====================================================
-//  WERKBLAD MODAL
+//  WERKBLAD OPBOUWEN
 // =====================================================
-function openWerkblad(){
-  document.getElementById('wbModal').classList.remove('hidden');
-  buildWerkblad();
-}
-function closeWerkblad(){ document.getElementById('wbModal').classList.add('hidden'); }
+const worksheetItems = [];
+let worksheetPages = [];
 
-function buildWerkblad(){
-  const naam=document.getElementById('wbNaam').value.trim();
-  const datum=document.getElementById('wbDatum').value.trim();
-  const voorbeeldAantal = parseInt(document.getElementById('wbRepeat').value) || 4;
-  const extra=parseInt(document.getElementById('wbExtra').value)||2;
-  const showDot=document.getElementById('wbDotTgl').classList.contains('on');
-  const L=lh();
-
-  const actRows=rows.filter(r=>r.strokes.length>0);
-  if(!actRows.length){ alert('Teken eerst iets op minstens één rij!'); return; }
-
-  const W=794,MARGIN=40,IW=W-MARGIN*2;
-  const RH=L*4+16;
-  const headerH=130;
-  const totalRijen=actRows.reduce((s,_)=>s+1+extra,0);
-  const H=headerH+totalRijen*RH+24;
-
-const c = document.getElementById('wbCanvas');
-const scale = 2;
-
-c.width = W * scale;
-c.height = H * scale;
-c.style.width = '100%';
-c.style.height = (H) + 'px';
-
-const ctx = c.getContext('2d');
-ctx.setTransform(1, 0, 0, 1, 0, 0);
-ctx.scale(scale, scale);
-ctx.fillStyle = '#fff';
-ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle='#1a1a2e'; ctx.font='bold 13px Nunito,sans-serif'; ctx.textAlign='left';
-  // NAAM LINKS
-ctx.fillStyle='#1a1a2e';
-ctx.font='bold 13px Nunito,sans-serif';
-ctx.textAlign='left';
-ctx.fillText('Naam: ____________________________', MARGIN, 30);
-
-// DATUM RECHTS (met afstand)
-ctx.textAlign='right';
-ctx.fillText('Datum: __________', W - MARGIN, 30);
-
-  // TITEL ONDER NAAM EN DATUM
-ctx.fillStyle='#1a1a2e';
-ctx.font='bold 24px Nunito,sans-serif';
-ctx.textAlign='center';
-ctx.fillText('Ik oefen op handschrift', W/2, 95);
-  ctx.strokeStyle='#e8622a';
-ctx.lineWidth=2;
-ctx.beginPath();
-ctx.moveTo(MARGIN,115);
-ctx.lineTo(W-MARGIN,115);
-ctx.stroke();
-
-  let curY=headerH;
-
-  actRows.forEach((r,ri)=>{
-    let mnX=Infinity,mxX=-Infinity;
-    r.strokes.forEach(s=>s.forEach(p=>{mnX=Math.min(mnX,p.x);mxX=Math.max(mxX,p.x);}));
-    const scaledW=mxX-mnX+50;
-
-    // Voorbeeldrij
-    drawWbLines(ctx,MARGIN,curY,IW,L);
-    const dx0=MARGIN+8-mnX, dy0=curY;
-    drawLetterWb(ctx,r.strokes,dx0,dy0,0.22,'#333');
-    if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+dx0,r.startPt.y+dy0);
-
-    let xC=MARGIN+8+scaledW;
-    for(let rep=1; rep<voorbeeldAantal; rep++){
-      if(xC+scaledW>MARGIN+IW) break;
-      const rdx=xC-mnX;
-      drawLetterWb(ctx,r.strokes,rdx,dy0,0.13,'#555');
-      if(showDot&&r.startPt) drawDot(ctx,r.startPt.x+rdx,r.startPt.y+dy0);
-      xC+=scaledW;
-    }
-    
-    curY+=RH;
-
-    for(let ex=0;ex<extra;ex++){
-      drawWbLines(ctx,MARGIN,curY,IW,L);
-      if(showDot&&r.startPt){
-        let xC2=MARGIN+8;
-        for(let rep=0; rep<voorbeeldAantal; rep++){
-          if(xC2+scaledW>MARGIN+IW) break;
-          drawDot(ctx,r.startPt.x+(xC2-mnX),r.startPt.y+curY);
-          xC2+=scaledW;
-        }
-      }
-      curY+=RH;
-    }
-  });
-
-  ctx.font='8px Nunito,sans-serif'; ctx.fillStyle='#ccc'; ctx.textAlign='center';
-  ctx.fillText('Schrijfgenerator — Juf Zisa',W/2,H-8);
+function cloneRowForWorksheet(r){
+  return {
+    strokes: (r.strokes || []).map(stroke => stroke.map(p => ({x:p.x, y:p.y}))),
+    startPt: r.startPt ? {x:r.startPt.x, y:r.startPt.y} : null
+  };
 }
 
-function drawWbLines(ctx,x,y,w,L){
-  const offs = lineOffsets();
-  const t = document.getElementById('lineType').value;
+function getWorksheetTypeLabel(type){
+  return {
+    letter:'Letter oefenen',
+    nameHand:'Schrijf de namen netjes over.',
+    nameTyped:'Schrijf de namen netjes over.',
+    sentenceHand:'Schrijf de zin netjes over.',
+    sentenceTyped:'Schrijf de zin netjes over.'
+  }[type] || 'Oefening';
+}
 
+function getWorksheetTypeHelp(type){
+  return {
+    letter:'Gebruik dit voor letters die je eerst op het bord voordoet. Daarna komen voorbeeldletters en oefenrijen op het werkblad.',
+    nameHand:'Schrijf de naam op het bord. Je kan ook meerdere namen schrijven: één per rij. Elke naam wordt als zwart voorbeeld tussen de lijnen geplaatst, met rechts 2 schrijfruimtes.',
+    nameTyped:'Typ hier één of meer namen. Elke naam verschijnt in Arial 14 en krijgt daarnaast 2 schrijfruimtes. De leerkracht kan zelf startpunten zetten op papier.',
+    sentenceHand:'Schrijf de zin op het bord. Je kan ook meerdere zinnen schrijven: één per rij. Elke zin blijft samen met de schrijflijnen op dezelfde pagina.',
+    sentenceTyped:'Typ hier één of meer zinnen. Elke zin komt als zwart voorbeeld boven 1 of 2 schrijflijnen. Ook deze oefeningen blijven in de PDF samen.'
+  }[type] || '';
+}
+
+function handleWorksheetTypeChange(){
+  const type = document.getElementById('wsItemType')?.value || 'letter';
+  const show = (id, yes) => {
+    const el = document.getElementById(id);
+    if(el) el.classList.toggle('wb-hidden', !yes);
+  };
+  show('wsFieldLetter', type === 'letter');
+  show('wsFieldLetterExtra', type === 'letter');
+  show('wsFieldNameTyped', type === 'nameTyped');
+  show('wsFieldSentenceTyped', type === 'sentenceTyped');
+  show('wsFieldSentenceLines', type === 'sentenceHand' || type === 'sentenceTyped');
+  show('wsFieldDot', type === 'letter' || type === 'nameHand');
+  const help = document.getElementById('wsTypeHelp');
+  if(help) help.textContent = getWorksheetTypeHelp(type);
+  const boardMultiHelp = document.getElementById('wsBoardMultiHelp');
+  if(boardMultiHelp) boardMultiHelp.style.display = ['nameHand','sentenceHand'].includes(type) ? 'block' : 'none';
+  updateWorksheetGuidance();
+}
+
+function getActiveRowsForWorksheet(){
+  return rows.filter(r => r.strokes && r.strokes.length > 0);
+}
+
+function countRowsForWorksheetItem(item){
+  if(item.type === 'letter'){
+    const rowCount = (item.boardRows || []).length || 1;
+    return rowCount * (1 + (item.extra || 0));
+  }
+  if(item.type === 'nameHand'){
+    return Math.max(1, ((item.boardRows || []).length || 1));
+  }
+  if(item.type === 'nameTyped'){
+    return 1;
+  }
+  if(item.type === 'sentenceHand'){
+    return Math.max(1, ((item.boardRows || []).length || 1)) * (1 + (item.sentenceLines || 1));
+  }
+  if(item.type === 'sentenceTyped'){
+    return 1 + (item.sentenceLines || 1);
+  }
+  return 1;
+}
+
+function getWorksheetItemHeight(item, showInstruction = true){
+  const L = lh();
+  const RH = L*4 + 16;
+  const bottomGap = 12;
+  const instructionH = showInstruction ? 40 : 0;
+  const sentenceLines = item.sentenceLines || 1;
+  const sentenceReduction = Math.max(0, sentenceLines - 1) * 18;
+
+  if(item.type === 'letter'){
+    return 30 + countRowsForWorksheetItem(item) * RH + bottomGap;
+  }
+  if(item.type === 'nameHand' || item.type === 'nameTyped'){
+    return instructionH + countRowsForWorksheetItem(item) * RH + bottomGap;
+  }
+  if(item.type === 'sentenceHand'){
+    return instructionH + Math.max(1, ((item.boardRows || []).length || 1)) * (RH + sentenceLines * RH - sentenceReduction) + bottomGap;
+  }
+  if(item.type === 'sentenceTyped'){
+    return instructionH + 28 + sentenceLines * RH - sentenceReduction + bottomGap;
+  }
+  return 30 + RH + bottomGap;
+}
+
+function summarizeWorksheetItem(item){
+
+  if(item.type === 'letter'){
+    return `${(item.boardRows || []).length || 0} voorbeeldrij(en) · ${item.repeat || 4} voorgeschreven · ${item.extra || 0} lege rij(en)`;
+  }
+  if(item.type === 'nameHand'){
+    return `${(item.boardRows || []).length || 1} naam/namen · voorbeeld + 2 schrijflijnen`;
+  }
+  if(item.type === 'nameTyped'){
+    return `${item.typedName || ''} · voorbeeld + 2 schrijflijnen`;
+  }
+  if(item.type === 'sentenceHand'){
+    return `${(item.boardRows || []).length || 1} zin/zinnen · voorbeeld + ${item.sentenceLines || 1} schrijflijn(en)`;
+  }
+  if(item.type === 'sentenceTyped'){
+    return `${item.typedSentence || ''} · voorbeeld + ${item.sentenceLines || 1} schrijflijn(en)`;
+  }
+  return '';
+}
+
+function addWorksheetItemFromUI(){
+  const type = document.getElementById('wsItemType')?.value || 'letter';
+  const activeRows = getActiveRowsForWorksheet();
+  const baseItem = {
+    showDot: document.getElementById('wsDotTgl')?.classList.contains('on') ?? true,
+    repeat: parseInt(document.getElementById('wsLetterRepeat')?.value) || 4,
+    extra: parseInt(document.getElementById('wsLetterExtra')?.value) || 2,
+    sentenceLines: parseInt(document.getElementById('wsSentenceLines')?.value) || 1,
+    lineType: document.getElementById('lineType')?.value || 'type1',
+    lineSpacing: document.getElementById('lineSpacing')?.value || 'medium'
+  };
+
+  const pushItem = (extra={}) => {
+    worksheetItems.push({
+      id: Date.now() + Math.random(),
+      type,
+      boardRows: [],
+      typedName: '',
+      typedSentence: '',
+      ...baseItem,
+      ...extra
+    });
+  };
+
+  if(type === 'letter'){
+    if(!activeRows.length){
+      alert('Ga eerst naar "Op het bord" en schrijf daar je voorbeeld.');
+      return;
+    }
+    pushItem({ boardRows: activeRows.map(cloneRowForWorksheet) });
+  }
+
+  if(type === 'nameHand'){
+    if(!activeRows.length){
+      alert('Ga eerst naar "Op het bord" en schrijf daar één of meer namen, telkens op een aparte rij.');
+      return;
+    }
+    pushItem({ boardRows: activeRows.map(cloneRowForWorksheet) });
+  }
+
+  if(type === 'sentenceHand'){
+    if(!activeRows.length){
+      alert('Ga eerst naar "Op het bord" en schrijf daar één of meer zinnen, telkens op een aparte rij.');
+      return;
+    }
+    pushItem({ boardRows: activeRows.map(cloneRowForWorksheet) });
+  }
+
+  if(type === 'nameTyped'){
+    const raw = (document.getElementById('wsTypedName')?.value || '').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    if(!raw.length){
+      alert('Typ eerst één of meer namen.');
+      return;
+    }
+    raw.forEach(name => pushItem({ typedName: name }));
+  }
+
+  if(type === 'sentenceTyped'){
+    const raw = (document.getElementById('wsTypedSentence')?.value || '').split(/\n+/).map(s=>s.trim()).filter(Boolean);
+    if(!raw.length){
+      alert('Typ eerst één of meer zinnen.');
+      return;
+    }
+    raw.forEach(sentence => pushItem({ typedSentence: sentence }));
+  }
+
+  renderWorksheetItemList();
+  renderWorksheetPreview();
+  updateWorksheetGuidance();
+  switchTopTab('worksheet');
+}
+
+function moveWorksheetItem(index, direction){
+  const newIndex = index + direction;
+  if(newIndex < 0 || newIndex >= worksheetItems.length) return;
+  const [item] = worksheetItems.splice(index, 1);
+  worksheetItems.splice(newIndex, 0, item);
+  renderWorksheetItemList();
+  renderWorksheetPreview();
+}
+
+function deleteWorksheetItem(index){
+  worksheetItems.splice(index, 1);
+  renderWorksheetItemList();
+  renderWorksheetPreview();
+  updateWorksheetGuidance();
+}
+
+function clearWorksheetItems(){
+  worksheetItems.length = 0;
+  renderWorksheetItemList();
+  renderWorksheetPreview();
+  updateWorksheetGuidance();
+}
+
+function renderWorksheetItemList(){
+  const host = document.getElementById('worksheetItemList');
+  if(!host) return;
+  if(!worksheetItems.length){
+    host.innerHTML = `<div class="worksheet-placeholder">Nog geen oefeningen toegevoegd.</div>`;
+    return;
+  }
+  host.innerHTML = worksheetItems.map((item, index) => `
+    <div class="worksheet-item-card">
+      <strong>${index + 1}. ${getWorksheetTypeLabel(item.type)}</strong>
+      <div class="worksheet-item-meta">${summarizeWorksheetItem(item)}</div>
+      <div class="worksheet-item-actions">
+        <button class="row-btn" onclick="moveWorksheetItem(${index}, -1)">↑</button>
+        <button class="row-btn" onclick="moveWorksheetItem(${index}, 1)">↓</button>
+        <button class="row-btn del-btn" onclick="deleteWorksheetItem(${index})">✕ verwijderen</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function getLineOffsetsByType(lineType, lineSpacing){
+  const L = {large:42, medium:30, small:22}[lineSpacing || 'medium'] || 30;
+  const top = 10;
+  return [
+    { dy: top, kind:'top'    },
+    { dy: top+L, kind:'mid1' },
+    { dy: top+L*2, kind:'base' },
+    { dy: top+L*3, kind:'bottom' }
+  ];
+}
+
+function drawLinesForWorksheetItem(ctx, x, y, w, lineType, lineSpacing){
+  const offs = getLineOffsetsByType(lineType, lineSpacing);
   const topY = y + offs[0].dy;
   const mid1Y = y + offs[1].dy;
   const baseY = y + offs[2].dy;
 
-  if (t === 'type1') {
+  if (lineType === 'type1') {
     ctx.fillStyle = 'rgba(255,252,240,.5)';
     ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
-  } else if (t === 'type2' || t === 'type3') {
+  } else if (lineType === 'type2' || lineType === 'type3') {
     ctx.fillStyle = 'rgba(220,235,248,.45)';
     ctx.fillRect(x, mid1Y, w, baseY - mid1Y);
   }
 
   offs.forEach(l=>{
     ctx.beginPath();
-
     let stroke = S.lineColor;
     let width = 1;
     let dash = [];
-
-    if (t === 'type1') {
-      stroke = S.lineColor;
+    if (lineType === 'type1') {
       width = (l.kind === 'base') ? 1.5 : 1;
       dash = (l.kind === 'top' || l.kind === 'bottom') ? [5,4] : [];
     }
-
-    if (t === 'type2') {
-      stroke = S.lineColor;
+    if (lineType === 'type2') {
       width = (l.kind === 'base') ? 1.5 : 1;
-      dash = [];
     }
-
-    if (t === 'type3') {
+    if (lineType === 'type3') {
       if (l.kind === 'top' || l.kind === 'bottom') {
         stroke = '#d9534f';
         width = 1.5;
-        dash = [];
       } else if (l.kind === 'base') {
         stroke = '#4a9b6f';
         width = 1.8;
-        dash = [];
       } else {
         stroke = '#9fc2e8';
         width = 1;
         dash = [5,4];
       }
     }
-
-    if (t === 'type4') {
+    if (lineType === 'type4') {
       if (l.kind === 'top' || l.kind === 'bottom') {
         stroke = '#b7b7b7';
         width = 1.4;
-        dash = [];
       } else {
         stroke = '#9fc2e8';
         width = (l.kind === 'base') ? 1.5 : 1;
-        dash = [];
       }
     }
-
     ctx.strokeStyle = stroke;
     ctx.lineWidth = width;
     ctx.setLineDash(dash);
@@ -1185,49 +1424,479 @@ function drawWbLines(ctx,x,y,w,L){
   });
 }
 
-function drawLetterWb(ctx,strokes,dx,dy,alpha,col){
-  ctx.save(); ctx.globalAlpha=alpha; ctx.strokeStyle=col; ctx.lineWidth=S.penSize;
-  ctx.lineCap='round'; ctx.lineJoin='round'; ctx.translate(dx,dy);
-  strokes.forEach(s=>{
-    if(!s||s.length<2) return;
-    const sm=document.getElementById('smoothTgl').classList.contains('on');
+function getStrokeBoundsScaled(strokes, scale){
+  const b = getStrokeBounds(strokes);
+  return {
+    minX: b.minX * scale,
+    minY: b.minY * scale,
+    maxX: b.maxX * scale,
+    maxY: b.maxY * scale,
+    width: b.width * scale,
+    height: b.height * scale
+  };
+}
+
+function drawLetterWb(ctx, strokes, dx, dy, scale=1, col='#333'){
+  if(!strokes || !strokes.length) return;
+  ctx.save();
+  ctx.strokeStyle = col;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = Math.max(1.15, S.penSize * scale);
+
+  strokes.forEach(stroke=>{
+    if(!stroke || !stroke.length) return;
+
+    const pts = stroke.map(p => ({
+      x: dx + p.x * scale,
+      y: dy + p.y * scale
+    }));
+
     ctx.beginPath();
-    if(sm&&s.length>3){
-      ctx.moveTo(s[0].x,s[0].y);
-      for(let i=0;i<s.length-1;i++){
-        const p0=s[Math.max(0,i-1)],p1=s[i],p2=s[i+1],p3=s[Math.min(s.length-1,i+2)];
-        ctx.bezierCurveTo(p1.x+(p2.x-p0.x)/6,p1.y+(p2.y-p0.y)/6,p2.x-(p3.x-p1.x)/6,p2.y-(p3.y-p1.y)/6,p2.x,p2.y);
+    ctx.moveTo(pts[0].x, pts[0].y);
+
+    if (pts.length > 3) {
+      for (let i = 0; i < pts.length - 1; i++) {
+        const p0 = pts[Math.max(0, i - 1)];
+        const p1 = pts[i];
+        const p2 = pts[i + 1];
+        const p3 = pts[Math.min(pts.length - 1, i + 2)];
+        ctx.bezierCurveTo(
+          p1.x + (p2.x - p0.x) / 6,
+          p1.y + (p2.y - p0.y) / 6,
+          p2.x - (p3.x - p1.x) / 6,
+          p2.y - (p3.y - p1.y) / 6,
+          p2.x,
+          p2.y
+        );
       }
-    } else { ctx.moveTo(s[0].x,s[0].y); s.forEach(p=>ctx.lineTo(p.x,p.y)); }
+    } else {
+      pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
+    }
+
     ctx.stroke();
   });
+
   ctx.restore();
 }
 
-function drawDot(ctx,x,y){
-  ctx.beginPath(); ctx.fillStyle='#e8622a'; ctx.arc(x,y,3.5,0,Math.PI*2); ctx.fill();
+function drawPracticeSectionMarkers(ctx, startX, dotY, segmentW, count){
+  // bewust leeg: geen verticale hulpstreepjes tonen
+}
+
+function drawPracticeDots(ctx, startX, dotY, segmentW, count){
+  ctx.save();
+  ctx.fillStyle = '#e8622a';
+  for(let i=0;i<count;i++){
+    const x = startX + i * segmentW;
+    ctx.beginPath();
+    ctx.arc(x, dotY, 2.05, 0, Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawDot(ctx, x, y, radius = 3.2){
+  ctx.save();
+  ctx.fillStyle = '#e8622a';
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawWorksheetText(ctx, text, x, y, fontSize=14, align='left', color='#333'){
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.font = `${fontSize}pt Arial`;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+function drawInstructionBar(ctx, text, x, y, w){
+  ctx.save();
+  ctx.fillStyle = '#f1f1f1';
+  ctx.fillRect(x, y, w, 26);
+  ctx.fillStyle = '#1a1a2e';
+  ctx.font = '700 14px Nunito,sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x + 10, y + 13);
+  ctx.restore();
+}
+
+function drawModelBox(ctx, x, y, w, h, fill = true){
+  ctx.save();
+  if(fill){
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x, y, w, h);
+  }
+  ctx.strokeStyle = '#ddd6ca';
+  ctx.lineWidth = 1.3;
+  ctx.strokeRect(x, y, w, h);
+  ctx.restore();
+}
+
+function getWorksheetRowPlacement(r, x, y, lineType, lineSpacing, maxWidth = null, leftPad = 12, topPad = 3, bottomPad = 3){
+  const b = getStrokeBounds(r.strokes || []);
+  let scale = 1;
+
+  if (maxWidth) {
+    const usableW = Math.max(40, maxWidth - leftPad * 2);
+    const drawnW = b.width > 0 ? b.width : 1;
+    if (drawnW > usableW) scale = usableW / drawnW;
+  }
+
+  const dx = x + leftPad;
+
+  // Houd de ONDERKANT van wat de leerkracht schreef op dezelfde hoogte.
+  // Zo zweeft het voorbeeld op het werkblad niet omhoog wanneer het verkleind wordt.
+  const bottomLockOffset = (b.maxY || 0) - ((b.maxY || 0) * scale);
+  const dy = y + bottomLockOffset;
+
+  const width = Math.max(36, b.width * scale + 20);
+
+  return {
+    scale,
+    dx,
+    dy,
+    width,
+    startX: r.startPt ? dx + r.startPt.x * scale : x + leftPad,
+    startY: r.startPt ? dy + r.startPt.y * scale : y + bottomLockOffset
+  };
+}
+
+function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = true){
+  const L = {large:42, medium:30, small:22}[item.lineSpacing || 'medium'] || 30;
+  const RH = L*4 + 16;
+  const innerW = pageW;
+  const offs = getLineOffsetsByType(item.lineType, item.lineSpacing);
+  let y = startY;
+
+  ctx.save();
+
+  if(item.type === 'letter'){
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = 'bold 13px Nunito,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(getWorksheetTypeLabel(item.type), pageX, y + 14);
+    y += 30;
+
+    (item.boardRows || []).forEach((r) => {
+      const placement = getWorksheetRowPlacement(r, pageX, y, item.lineType, item.lineSpacing, null, 8, 3, 3);
+      const gap = 26;
+      const modelW = placement.width;
+      drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+      let xC = pageX + 8;
+      for(let rep=0; rep<(item.repeat || 4); rep++){
+        if(xC + modelW > pageX + innerW) break;
+        const repDx = xC + (placement.dx - (pageX + 8));
+        drawLetterWb(ctx, r.strokes, repDx, placement.dy, placement.scale, '#cfcfcf');
+        if(item.showDot && r.startPt) drawDot(ctx, xC + (placement.startX - (pageX + 8)), placement.startY, 3.2);
+        xC += modelW + gap;
+      }
+      y += RH;
+      for(let ex=0; ex<(item.extra || 0); ex++){
+        drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+        if(item.showDot && r.startPt){
+          let xC2 = pageX + 8;
+          for(let rep=0; rep<(item.repeat || 4); rep++){
+            if(xC2 + modelW > pageX + innerW) break;
+            drawDot(ctx, xC2 + (placement.startX - (pageX + 8)), y + ((placement.startY - (startY + 30)) - 0), 3.2);
+            xC2 += modelW + gap;
+          }
+        }
+        y += RH;
+      }
+    });
+    ctx.restore();
+    return;
+  }
+
+  if(item.type === 'nameHand'){
+    if(showInstruction){
+      drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
+      y += 40;
+    }
+
+    (item.boardRows || []).forEach((r) => {
+      const boxGap = 18;
+      const modelBoxW = Math.min(190, Math.max(145, innerW * 0.25));
+      const practiceW = Math.max(120, (innerW - modelBoxW - boxGap * 2) / 2);
+      const xModel = pageX;
+      const xPractice1 = xModel + modelBoxW + boxGap;
+      const xPractice2 = xPractice1 + practiceW + boxGap;
+      const rowTop = y + offs[0].dy - 8;
+      const rowH = (offs[3].dy - offs[0].dy) + 16;
+
+      drawLinesForWorksheetItem(ctx, xModel, y, modelBoxW, item.lineType, item.lineSpacing);
+      drawModelBox(ctx, xModel, rowTop, modelBoxW, rowH, false);
+      drawLinesForWorksheetItem(ctx, xPractice1, y, practiceW, item.lineType, item.lineSpacing);
+      drawLinesForWorksheetItem(ctx, xPractice2, y, practiceW, item.lineType, item.lineSpacing);
+
+      const examplePlacement = getWorksheetRowPlacement(r, xModel + 8, y, item.lineType, item.lineSpacing, modelBoxW - 16, 10, 3, 3);
+      drawLetterWb(ctx, r.strokes, examplePlacement.dx, examplePlacement.dy, examplePlacement.scale, '#222');
+
+      if(item.showDot && r.startPt){
+        const startOffset = examplePlacement.startX - xModel;
+        const dotY = examplePlacement.startY;
+        drawDot(ctx, xPractice1 + startOffset, dotY, 3.2);
+        drawDot(ctx, xPractice2 + startOffset, dotY, 3.2);
+      }
+
+      y += RH;
+    });
+
+    ctx.restore();
+    return;
+  }
+
+  if(item.type === 'nameTyped'){
+    if(showInstruction){
+      drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
+      y += 40;
+    }
+
+    const boxGap = 18;
+    const modelBoxW = Math.min(180, Math.max(130, innerW * 0.26));
+    const practiceW = Math.max(120, (innerW - modelBoxW - boxGap * 2) / 2);
+    const xModel = pageX;
+    const xPractice1 = xModel + modelBoxW + boxGap;
+    const xPractice2 = xPractice1 + practiceW + boxGap;
+
+    const typedTop = y + 2;
+    const typedH = 24;
+    drawModelBox(ctx, xModel, typedTop, modelBoxW, typedH);
+
+    ctx.save();
+    ctx.fillStyle = '#222';
+    ctx.font = '14pt Arial';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.typedName || '', xModel + 12, typedTop + typedH/2 + 1);
+    ctx.restore();
+
+    const lineY = y + 16;
+    drawLinesForWorksheetItem(ctx, xPractice1, lineY, practiceW, item.lineType, item.lineSpacing);
+    drawLinesForWorksheetItem(ctx, xPractice2, lineY, practiceW, item.lineType, item.lineSpacing);
+
+    ctx.restore();
+    return;
+  }
+
+  if(item.type === 'sentenceHand'){
+    if(showInstruction){
+      drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
+      y += 40;
+    }
+
+    (item.boardRows || []).forEach((r) => {
+      drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+      const examplePlacement = getWorksheetRowPlacement(r, pageX, y, item.lineType, item.lineSpacing, innerW - 20, 12, 3, 3);
+      drawLetterWb(ctx, r.strokes, examplePlacement.dx, examplePlacement.dy, examplePlacement.scale, '#222');
+      y += RH;
+      const totalSentenceLines = item.sentenceLines || 1;
+      for(let i=0;i<totalSentenceLines;i++){
+        drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+        y += (i === totalSentenceLines - 1) ? RH : (RH - 28);
+      }
+    });
+
+    ctx.restore();
+    return;
+  }
+
+  if(item.type === 'sentenceTyped'){
+    if(showInstruction){
+      drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
+      y += 34;
+    }
+    else {
+      y += 0;
+    }
+    drawWorksheetText(ctx, item.typedSentence || '', pageX + 10, y + 18, 14, 'left', '#222');
+    y += 26;
+    const totalSentenceLines = item.sentenceLines || 1;
+    for(let i=0;i<totalSentenceLines;i++){
+      drawLinesForWorksheetItem(ctx, pageX, y, innerW, item.lineType, item.lineSpacing);
+      y += (i === totalSentenceLines - 1) ? RH : (RH - 28);
+    }
+    ctx.restore();
+    return;
+  }
+
+  ctx.restore();
+}
+
+function buildWorksheetPagesData(){
+  const W = 794;
+  const H = 1123;
+  const marginX = 40;
+  const headerH = 130;
+  const footerH = 24;
+  const contentTop = headerH;
+  const contentBottom = H - footerH;
+  const usableHeight = contentBottom - contentTop;
+
+  const pages = [];
+  let currentPage = [];
+  let used = 0;
+  const seenTypes = new Set();
+
+  worksheetItems.forEach(item => {
+    const showInstruction = item.type === 'letter' ? true : !seenTypes.has(item.type);
+    const itemHeight = getWorksheetItemHeight(item, showInstruction);
+    if(currentPage.length && used + itemHeight > usableHeight){
+      pages.push(currentPage);
+      currentPage = [];
+      used = 0;
+    }
+    currentPage.push({...item, __showInstruction: showInstruction});
+    used += itemHeight;
+    if(item.type !== 'letter'){
+      seenTypes.add(item.type);
+    }
+  });
+
+  if(!currentPage.length && !pages.length){
+    pages.push([]);
+  } else if(currentPage.length){
+    pages.push(currentPage);
+  }
+  return {pages, W, H, marginX, headerH, footerH};
+}
+
+function drawWorksheetPage(canvas, items, pageNumber, totalPages){
+  const {W, H, marginX, headerH} = buildWorksheetPagesData();
+  const scale = 2;
+  canvas.width = W * scale;
+  canvas.height = H * scale;
+  canvas.className = 'worksheet-page-canvas';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,W,H);
+
+  const naam = document.getElementById('worksheetNaam')?.value.trim() || '';
+  const datum = document.getElementById('worksheetDatum')?.value.trim() || '';
+
+  const headerInfoY = 42;
+
+  ctx.fillStyle='#1a1a2e';
+  ctx.font='bold 14px Nunito,sans-serif';
+  ctx.textAlign='left';
+  ctx.fillText(`Naam: ${naam ? naam : '_______________________'}`, marginX, headerInfoY);
+  ctx.textAlign='right';
+ctx.fillText(`Datum: ${datum ? datum : '_____________'}`, W - marginX - 80, headerInfoY);
+
+  ctx.fillStyle='#1a1a2e';
+  ctx.font='bold 24px Nunito,sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('Ik oefen op handschrift', W/2, 95);
+  ctx.strokeStyle='#e8622a';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(marginX,115);
+  ctx.lineTo(W-marginX,115);
+  ctx.stroke();
+
+  let y = headerH;
+  items.forEach(item => {
+    const showInstruction = item.__showInstruction !== false;
+    drawWorksheetItem(ctx, item, marginX, y, W - marginX * 2, showInstruction);
+    y += getWorksheetItemHeight(item, showInstruction);
+  });
+
+  ctx.font='10px Nunito,sans-serif';
+  ctx.fillStyle='#b9b0a3';
+  ctx.textAlign='left';
+  ctx.fillText(`Pagina ${pageNumber} / ${totalPages}`, marginX, H - 10);
+  ctx.textAlign='center';
+  ctx.fillText('Schrijfgenerator — Juf Zisa', W/2, H - 10);
+}
+
+function renderWorksheetPreview(){
+  const host = document.getElementById('worksheetPreviewPages');
+  if(!host) return;
+  host.innerHTML = '';
+  const data = buildWorksheetPagesData();
+  worksheetPages = data.pages;
+
+  data.pages.forEach((items, idx) => {
+    const card = document.createElement('div');
+    card.className = 'worksheet-page-card';
+    const label = document.createElement('div');
+    label.className = 'worksheet-page-label';
+    label.textContent = `Pagina ${idx + 1}`;
+    const canvas = document.createElement('canvas');
+    drawWorksheetPage(canvas, items, idx + 1, data.pages.length);
+    card.appendChild(label);
+    card.appendChild(canvas);
+    host.appendChild(card);
+  });
+
+  buildWorksheetPrintArea();
+}
+
+function buildWorksheetPrintArea(){
+  const host = document.getElementById('worksheetPrintArea');
+  if(!host) return;
+  host.innerHTML = '';
+  worksheetPages.forEach((items, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'worksheet-print-page';
+    const canvas = document.createElement('canvas');
+    drawWorksheetPage(canvas, items, idx + 1, worksheetPages.length);
+    canvas.style.width = '210mm';
+    canvas.style.height = 'auto';
+    wrap.appendChild(canvas);
+    host.appendChild(wrap);
+  });
 }
 
 function downloadPDF() {
-  const canvas = document.getElementById('wbCanvas');
-  const imgData = canvas.toDataURL('image/png', 1.0);
-
-  // A4 formaat in mm
+  if(!worksheetPages.length){
+    renderWorksheetPreview();
+  }
   const pdf = new jspdf.jsPDF({
     orientation: 'portrait',
     unit: 'mm',
     format: 'a4'
   });
-
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-
-  // verhouding behouden (SUPER belangrijk!)
-  const imgWidth = pageWidth;
-  const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-  pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+  worksheetPages.forEach((items, idx) => {
+    const temp = document.createElement('canvas');
+    drawWorksheetPage(temp, items, idx + 1, worksheetPages.length);
+    const imgData = temp.toDataURL('image/png', 1.0);
+    if(idx > 0) pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+  });
   pdf.save('werkblad-handschrift.pdf');
+}
+
+function updateWorksheetGuidance(){
+  const activeRows = rows.filter(r=>r.strokes.length>0);
+  const type = document.getElementById('wsItemType')?.value || 'letter';
+  const needsBoard = ['letter','nameHand','sentenceHand'].includes(type);
+  const hasBoard = activeRows.length > 0;
+
+  let statusHtml = '';
+  if(worksheetItems.length){
+    statusHtml = `<strong>${worksheetItems.length} oefening(en) op het werkblad</strong><div class="helper-mini">Je ziet rechts meteen de opbouw. In de PDF blijft elke oefening samen. Voor een nieuwe voorgeschreven naam of zin kan je op het bord gewoon verder schrijven of eerst op <em>Rij leeg</em> klikken.</div>`;
+  } else if(needsBoard && hasBoard){
+    statusHtml = `<strong>Klaar om toe te voegen</strong><div class="helper-mini">Voorbeeld staat op het bord klaar · schrijflijnen: ${getLineTypeLabel()} · je kan ook meerdere voorbeelden zetten, één per rij.</div>`;
+  } else if(needsBoard){
+    statusHtml = `<strong>Voor deze oefening eerst naar "Op het bord"</strong><div class="helper-mini">Schrijf daar je voorbeeld. Voor meerdere namen of zinnen: één per rij. Voeg daarna de oefening hier toe.</div>`;
+  } else {
+    statusHtml = `<strong>Deze oefening kan je hier meteen invullen</strong><div class="helper-mini">Typ je tekst links en voeg de oefening toe.</div>`;
+  }
+
+  const statusSide = document.getElementById('worksheetStatus');
+  const statusMain = document.getElementById('worksheetStatusMain');
+  if(statusSide) statusSide.innerHTML = statusHtml;
+  if(statusMain) statusMain.innerHTML = statusHtml;
 }
 
 function setLineType(type, btn){
@@ -1241,10 +1910,8 @@ function setLineType(type, btn){
 
   redrawAll();
   buildLineTypePreviews();
-
-  if (!document.getElementById('wbModal').classList.contains('hidden')) {
-    buildWerkblad();
-  }
+  renderWorksheetPreview();
+  updateWorksheetGuidance();
 }
 
 function drawLineTypePreview(canvas, type){
@@ -1332,24 +1999,53 @@ function buildLineTypePreviews(){
   });
 }
 
+
+function getLineTypeLabel(){
+  const map = {
+    type1:'Type 1',
+    type2:'Type 2',
+    type3:'Type 3',
+    type4:'Type 4'
+  };
+  const v = document.getElementById('lineType')?.value || 'type1';
+  return map[v] || 'Type 1';
+}
+
+
+
 function switchTopTab(tab){
   const boardBtn = document.getElementById('tabBtnBoard');
   const worksheetBtn = document.getElementById('tabBtnWorksheet');
   const boardTab = document.getElementById('boardTab');
   const worksheetTab = document.getElementById('worksheetTab');
+  const boardSidebar = document.getElementById('boardSidebar');
+  const worksheetSidebar = document.getElementById('worksheetSidebar');
 
   boardBtn.classList.toggle('active', tab === 'board');
   worksheetBtn.classList.toggle('active', tab === 'worksheet');
 
   boardTab.classList.toggle('active', tab === 'board');
   worksheetTab.classList.toggle('active', tab === 'worksheet');
+  if(boardSidebar) boardSidebar.classList.toggle('active', tab === 'board');
+  if(worksheetSidebar) worksheetSidebar.classList.toggle('active', tab === 'worksheet');
+
+  if(tab === 'worksheet') updateWorksheetGuidance();
+}
+
+
+function openWorksheetHelp(){
+  document.getElementById('worksheetHelpModal')?.classList.remove('hidden');
+}
+
+function closeWorksheetHelp(){
+  document.getElementById('worksheetHelpModal')?.classList.add('hidden');
 }
 
 // =====================================================
 //  EVENTS
 // =====================================================
-document.getElementById('lineType').addEventListener('change',redrawAll);
-document.getElementById('lineSpacing').addEventListener('change',resizeAll);
+document.getElementById('lineType').addEventListener('change',()=>{ redrawAll(); updateWorksheetGuidance(); renderWorksheetPreview(); });
+document.getElementById('lineSpacing').addEventListener('change',()=>{ resizeAll(); renderWorksheetPreview(); updateWorksheetGuidance(); });
 document.getElementById('smoothTgl').addEventListener('click',()=>setTimeout(redrawAll,50));
 
 // =====================================================
@@ -1359,10 +2055,36 @@ window.addEventListener('load',()=>{
   addRow(); addRow(); addRow();
   activateRow(0);
   buildLineTypePreviews();
+  updateWorksheetGuidance();
+  handleWorksheetTypeChange();
+  renderWorksheetItemList();
+  renderWorksheetPreview();
   new ResizeObserver(resizeAll).observe(document.getElementById('wbScroll'));
 });
 
 window.addEventListener('resize',resizeAll);
 </script>
+
+<div id="worksheetHelpModal" class="modal-overlay hidden" onclick="if(event.target===this) closeWorksheetHelp()">
+  <div class="modal" style="max-width:680px;">
+    <div class="modal-head">
+      <div class="mtitle">Uitleg werkblad</div>
+      <button type="button" class="modal-close" onclick="closeWorksheetHelp()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sidebar-helper-note">
+        <strong>Duidelijke werkwijze</strong>
+        <ul>
+          <li>1. Kies links het soort oefening.</li>
+          <li>2. Voorgeschreven oefening? Ga eerst naar <strong>Op het bord</strong>.</li>
+          <li>3. Je kan meerdere namen of zinnen schrijven: <strong>één per rij</strong>.</li>
+          <li>4. Klik op <strong>Voeg oefening toe</strong> en kijk rechts meteen naar het resultaat.</li>
+          <li>5. Voor een volgende voorgeschreven naam of zin: klik op <strong>Rij leeg</strong> en schrijf verder.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
