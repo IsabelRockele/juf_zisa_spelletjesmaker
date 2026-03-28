@@ -1681,8 +1681,15 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
 
     (item.boardRows || []).forEach((r) => {
       const boxGap = 18;
-      const modelBoxW = Math.min(190, Math.max(145, innerW * 0.25));
-      const practiceW = Math.max(120, (innerW - modelBoxW - boxGap * 2) / 2);
+      const minPracticeW = 120;
+      const bounds = getStrokeBounds(r.strokes || []);
+      const boxPadLeft = 6;
+      const boxPadRight = 6;
+      const practicePadLeft = 10;
+      const naturalBoxW = Math.ceil(Math.max(70, bounds.width + boxPadLeft + boxPadRight + 4));
+      const maxModelW = Math.max(90, innerW - (minPracticeW * 2) - (boxGap * 2));
+      const modelBoxW = Math.max(90, Math.min(maxModelW, naturalBoxW));
+      const practiceW = Math.max(minPracticeW, (innerW - modelBoxW - boxGap * 2) / 2);
       const xModel = pageX;
       const xPractice1 = xModel + modelBoxW + boxGap;
       const xPractice2 = xPractice1 + practiceW + boxGap;
@@ -1694,14 +1701,16 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
       drawLinesForWorksheetItem(ctx, xPractice1, y, practiceW, item.lineType, item.lineSpacing);
       drawLinesForWorksheetItem(ctx, xPractice2, y, practiceW, item.lineType, item.lineSpacing);
 
-      const examplePlacement = getWorksheetRowPlacement(r, xModel + 8, y, item.lineType, item.lineSpacing, modelBoxW - 16, 10, 3, 3);
-      drawLetterWb(ctx, r.strokes, examplePlacement.dx, examplePlacement.dy, examplePlacement.scale, '#222');
+      const usableModelW = Math.max(24, modelBoxW - boxPadLeft - boxPadRight);
+      const exampleScale = (bounds.width > usableModelW && bounds.width > 0) ? (usableModelW / bounds.width) : 1;
+      const exampleDx = xModel + boxPadLeft - (bounds.minX * exampleScale);
+      const exampleDy = y;
+      drawLetterWb(ctx, r.strokes, exampleDx, exampleDy, exampleScale, '#222');
 
       if(item.showDot && r.startPt){
-        const startOffset = examplePlacement.startX - xModel;
-        const dotY = examplePlacement.startY;
-        drawDot(ctx, xPractice1 + startOffset, dotY, 3.2);
-        drawDot(ctx, xPractice2 + startOffset, dotY, 3.2);
+        const dotY = y + (r.startPt.y * exampleScale);
+        drawDot(ctx, xPractice1 + practicePadLeft, dotY, 3.2);
+        drawDot(ctx, xPractice2 + practicePadLeft, dotY, 3.2);
       }
 
       y += RH;
