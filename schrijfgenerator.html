@@ -1882,37 +1882,38 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
   }
 
   if(item.type === 'nameTyped'){
-    if(showInstruction){
-      drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
-      y += 40;
-    }
-
-    const boxGap = 18;
-    const modelBoxW = Math.min(180, Math.max(130, innerW * 0.26));
-    const practiceW = Math.max(120, (innerW - modelBoxW - boxGap * 2) / 2);
-    const xModel = pageX;
-    const xPractice1 = xModel + modelBoxW + boxGap;
-    const xPractice2 = xPractice1 + practiceW + boxGap;
-
-    const typedTop = y + 2;
-    const typedH = 24;
-    drawModelBox(ctx, xModel, typedTop, modelBoxW, typedH);
-
-    ctx.save();
-    ctx.fillStyle = '#222';
-    ctx.font = '14pt Arial';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(item.typedName || '', xModel + 12, typedTop + typedH/2 + 1);
-    ctx.restore();
-
-    const lineY = y + 16;
-    drawLinesForWorksheetItem(ctx, xPractice1, lineY, practiceW, item.lineType, item.lineSpacing);
-    drawLinesForWorksheetItem(ctx, xPractice2, lineY, practiceW, item.lineType, item.lineSpacing);
-
-    ctx.restore();
-    return;
+  if(showInstruction){
+    drawInstructionBar(ctx, getWorksheetTypeLabel(item.type), pageX, y, innerW);
+    y += 40;
   }
+
+  const boxGap = 6;
+const typedName = item.typedName || '';
+const textMetrics = ctx.measureText(typedName);
+const nameW = Math.max(70, Math.ceil(textMetrics.width) + 12);
+const practiceW = Math.max(120, (innerW - nameW - boxGap * 2) / 2);
+const xName = pageX;
+const xPractice1 = xName + nameW + boxGap;
+const xPractice2 = xPractice1 + practiceW + boxGap;
+
+  const lineY = y;
+  drawLinesForWorksheetItem(ctx, xPractice1, lineY, practiceW, item.lineType, item.lineSpacing);
+  drawLinesForWorksheetItem(ctx, xPractice2, lineY, practiceW, item.lineType, item.lineSpacing);
+
+  const offsTyped = getLineOffsetsByType(item.lineType, item.lineSpacing);
+  const zoneMidY = lineY + ((offsTyped[1].dy + offsTyped[2].dy) / 2);
+
+  ctx.save();
+  ctx.fillStyle = '#222';
+  ctx.font = '14pt Arial';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(item.typedName || '', xName, zoneMidY);
+  ctx.restore();
+
+  ctx.restore();
+  return;
+}
 
   if(item.type === 'sentenceHand'){
     if(showInstruction){
