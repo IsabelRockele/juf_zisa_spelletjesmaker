@@ -273,6 +273,18 @@ canvas.row-canvas{display:block;width:100%;touch-action:none;}
 
   <div id="boardSidebar" class="sidebar-panel active">
 
+     <div class="sidebar-helper-card">
+      <div class="sidebar-helper-top">
+        <h3>Op het bord</h3>
+        <button type="button" class="help-btn" onclick="openBoardHelp()">ℹ Uitleg</button>
+      </div>
+
+      <div class="sidebar-status">
+        <strong>Schrijven, wissen en afspelen</strong>
+        <div class="helper-mini">Klik op <em>Uitleg</em> voor alle keuzes en knoppen van dit tabblad.</div>
+      </div>
+    </div>
+
   <div class="acc-section">
     <div class="acc-head" onclick="toggleAcc(this)">✏️ Pen &amp; schrijflijnen <span class="acc-arrow">▾</span></div>
     <div class="acc-body">
@@ -2258,6 +2270,14 @@ function switchTopTab(tab){
 }
 
 
+function openBoardHelp(){
+  document.getElementById('boardHelpModal')?.classList.remove('hidden');
+}
+
+function closeBoardHelp(){
+  document.getElementById('boardHelpModal')?.classList.add('hidden');
+}
+
 function openWorksheetHelp(){
   document.getElementById('worksheetHelpModal')?.classList.remove('hidden');
 }
@@ -2301,6 +2321,71 @@ window.addEventListener('load',()=>{
 
 window.addEventListener('resize',resizeAll);
 </script>
+
+<div id="boardHelpModal" class="modal-overlay hidden" onclick="if(event.target===this) closeBoardHelp()">
+  <div class="modal" style="max-width:760px;">
+    <div class="modal-head">
+      <div class="mtitle">Uitleg op het bord</div>
+      <button type="button" class="modal-close" onclick="closeBoardHelp()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="sidebar-helper-note" style="margin-bottom:12px;">
+        <strong>Wat kan je hier doen?</strong>
+        <ul>
+          <li>In <strong>Op het bord</strong> schrijf je zelf voorbeelden voor met muis, vinger of stylus.</li>
+          <li>Je kiest links eerst hoe de schrijflijnen en pen eruitzien.</li>
+          <li>Daarna kan je je voorbeeld per rij laten <strong>afspelen</strong> als schrijfdemonstratie.</li>
+          <li>Alles wat je hier schrijft, kan je later ook gebruiken bij <strong>Als werkblad</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-helper-note" style="margin-bottom:12px;">
+        <strong>1. Pen &amp; schrijflijnen</strong>
+        <ul>
+          <li><strong>Type schrijflijnen</strong>: kies welk soort schrijfpatroon je wil gebruiken.</li>
+          <li><strong>Regelafstand</strong>: maakt de schrijfzone groter of kleiner.</li>
+          <li><strong>Lijnkleur</strong>: verandert de kleur van de schrijflijnen.</li>
+          <li><strong>Penkleur</strong>: kiest de kleur waarmee je schrijft.</li>
+          <li><strong>Pendikte</strong>: maakt je pen fijner of dikker.</li>
+          <li><strong>Smoothing</strong>: maakt je geschreven lijn vloeiender en minder hoekig.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-helper-note" style="margin-bottom:12px;">
+        <strong>2. Animatie</strong>
+        <ul>
+          <li><strong>Animatiestijl</strong>: kies tussen een schrijvende <strong>potloodweergave</strong> of alleen een <strong>lijn</strong>.</li>
+          <li><strong>Schrijfsnelheid</strong>: bepaalt hoe traag of snel het voorbeeld wordt afgespeeld.</li>
+          <li><strong>Herhalingen naast voorbeeld</strong>: bepaalt hoeveel keer het voorbeeld extra naast elkaar wordt getoond bij het afspelen.</li>
+          <li><strong>Herhalen</strong>: laat de animatie telkens opnieuw starten tot je ze stopt.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-helper-note" style="margin-bottom:12px;">
+        <strong>3. Knoppen boven het bord</strong>
+        <ul>
+          <li><strong>Tekenen</strong>: hiermee schrijf je op de actieve rij.</li>
+          <li><strong>Gum</strong>: hiermee wis je stukken van je geschreven voorbeeld.</li>
+          <li><strong>Ongedaan</strong>: verwijdert je laatst geschreven streek op de actieve rij.</li>
+          <li><strong>Rij leeg</strong>: wist alles van de rij die actief is.</li>
+          <li><strong>Klik op een rij</strong>: zo maak je die rij actief om erop te schrijven.</li>
+        </ul>
+      </div>
+
+      <div class="sidebar-helper-note">
+        <strong>4. Knoppen per rij en onderaan</strong>
+        <ul>
+          <li><strong>▶ Afspelen</strong> bij een rij: speelt alleen die ene rij af.</li>
+          <li><strong>🗑</strong> bij een rij: maakt alleen die rij leeg.</li>
+          <li><strong>✕</strong> bij een rij: verwijdert die volledige rij.</li>
+          <li><strong>＋ Rij toevoegen</strong>: zet een extra schrijfrij onderaan.</li>
+          <li><strong>▶▶ Alles afspelen</strong>: speelt alle rijen na elkaar af.</li>
+          <li><strong>■ Stop alles</strong>: stopt alle lopende animaties.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="worksheetHelpModal" class="modal-overlay hidden" onclick="if(event.target===this) closeWorksheetHelp()">
   <div class="modal" style="max-width:680px;">
