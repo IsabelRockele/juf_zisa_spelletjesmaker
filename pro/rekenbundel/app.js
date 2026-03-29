@@ -38,27 +38,28 @@ const App = (() => {
     const isVraagstukken = bewerking === 'vraagstukken';
     const isRekentaal    = bewerking === 'rekentaal';
     const isGemengd      = bewerking === 'gemengd';
+    const isKomma        = bewerking === 'komma';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
     const tabGemengd      = document.getElementById('tab-gemengd');
+    const tabKomma        = document.getElementById('tab-komma');
     const tabTafels       = document.getElementById('tab-tafels');
     const tabInzicht      = document.getElementById('tab-tafels-inzicht');
     const tabCijferen     = document.getElementById('tab-cijferen');
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
     const tabRekentaal    = document.getElementById('tab-rekentaal');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd) ? 'block' : 'none';
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma) ? 'block' : 'none';
     if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
+    if (tabKomma)        tabKomma.style.display        = isKomma         ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
     if (tabInzicht)      tabInzicht.style.display      = isInzicht       ? 'block' : 'none';
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
     if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
 
-    if (isGemengd) {
-      _updateGemengdTypesUI();
-      return;
-    }
+    if (isKomma)   { return; }
+    if (isGemengd) { _updateGemengdTypesUI(); return; }
 
     // Rekentaal-tab: HTML staat al in de pagina, niks te initialiseren
     if (isRekentaal) {
