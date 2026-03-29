@@ -540,14 +540,29 @@
         <div class="form-rij">
           <label>Met of zonder brug?</label>
           <div class="radio-groep">
-            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdBrug('zonder',this)">
-              <input type="radio" name="gem-brug" value="zonder" checked>Zonder brug
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdBrugHoofd('zonder',this)">
+              <input type="radio" name="gem-brug-hoofd" value="zonder" checked>Zonder brug
             </label>
-            <label class="radio-chip" onclick="App.selecteerGemengdBrug('met',this)">
-              <input type="radio" name="gem-brug" value="met">Met brug
+            <label class="radio-chip" onclick="App.selecteerGemengdBrugHoofd('met',this)">
+              <input type="radio" name="gem-brug-hoofd" value="met">Met brug
             </label>
-            <label class="radio-chip" onclick="App.selecteerGemengdBrug('gemengd',this)">
-              <input type="radio" name="gem-brug" value="gemengd">Beide
+            <label class="radio-chip" onclick="App.selecteerGemengdBrugHoofd('beide',this)">
+              <input type="radio" name="gem-brug-hoofd" value="beide">Beide
+            </label>
+          </div>
+        </div>
+        <!-- Subkeuze: enkel bij tot 1000 + Met brug -->
+        <div class="form-rij" id="rij-gem-brug-sub" style="display:none">
+          <label>Welke brug?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdBrugSub('naar-tiental',this)">
+              <input type="radio" name="gem-brug-sub" value="naar-tiental" checked>→ tiental
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdBrugSub('naar-honderdtal',this)">
+              <input type="radio" name="gem-brug-sub" value="naar-honderdtal">→ honderdtal
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdBrugSub('beide',this)">
+              <input type="radio" name="gem-brug-sub" value="beide">Beide
             </label>
           </div>
         </div>
