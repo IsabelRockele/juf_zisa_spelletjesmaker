@@ -33,6 +33,7 @@ const App = (() => {
     const isInzicht      = bewerking === 'tafels-inzicht';
     const isCijferen     = bewerking === 'cijferen';
     const isVraagstukken = bewerking === 'vraagstukken';
+    const isRekentaal    = bewerking === 'rekentaal';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
@@ -40,11 +41,21 @@ const App = (() => {
     const tabInzicht      = document.getElementById('tab-tafels-inzicht');
     const tabCijferen     = document.getElementById('tab-cijferen');
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken) ? 'block' : 'none';
+    const tabRekentaal    = document.getElementById('tab-rekentaal');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal) ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
     if (tabInzicht)      tabInzicht.style.display      = isInzicht       ? 'block' : 'none';
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
+    if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
+
+    // Rekentaal-tab: HTML staat al in de pagina, niks te initialiseren
+    if (isRekentaal) {
+      return;
+    }
+
+    // Rekentaal-tab: HTML is statisch, enkel tonen/verbergen
+    if (isRekentaal) { return; }
 
     // Vraagstukken-tab: initialiseer module en toon schema-voorbeeld
     if (isVraagstukken) {
@@ -526,6 +537,8 @@ const App = (() => {
   function voegOefeningToe(blokId) {
     const blok = bundelData.find(b => b.id === blokId);
     if (!blok) return;
+
+    // Rekentaal gaat via Generator.voegOefeningToe (zie generator.js)
     const gelukt = Generator.voegOefeningToe(blok);
     if (gelukt) {
       Preview.render(bundelData);
@@ -1382,11 +1395,19 @@ const App = (() => {
     toonToast(`✅ Cijferblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
   }
 
+  /* ── Rekentaal: blok toevoegen ─────────────────────────────── */
   /* ── Vraagstukken: blok toevoegen vanuit VraagstukkenModule ── */
   function voegVraagstukBlokToe(blok) {
     bundelData.push(blok);
     Preview.render(bundelData);
     toonToast('✅ Vraagstuk toegevoegd aan bundel!', '#27AE60');
+  }
+
+  /* ── Rekentaal: blok toevoegen vanuit RekentaalModule ───────── */
+  function voegRekentaalBlokToe(blok) {
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Rekentaalblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#7c3aed');
   }
 
   return {
@@ -1406,6 +1427,8 @@ const App = (() => {
     selecteerCijferInvulling, selecteerCijferStartpijl, selecteerCijferSchatting,
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
+    voegRekentaalBlokToe,
+    toonToast,
   };
 })();
 
