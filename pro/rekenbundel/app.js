@@ -34,20 +34,28 @@ const App = (() => {
     const isCijferen     = bewerking === 'cijferen';
     const isVraagstukken = bewerking === 'vraagstukken';
     const isRekentaal    = bewerking === 'rekentaal';
+    const isGemengd      = bewerking === 'gemengd';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
+    const tabGemengd      = document.getElementById('tab-gemengd');
     const tabTafels       = document.getElementById('tab-tafels');
     const tabInzicht      = document.getElementById('tab-tafels-inzicht');
     const tabCijferen     = document.getElementById('tab-cijferen');
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
-        const tabRekentaal    = document.getElementById('tab-rekentaal');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal) ? 'block' : 'none';
+    const tabRekentaal    = document.getElementById('tab-rekentaal');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd) ? 'block' : 'none';
+    if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
     if (tabInzicht)      tabInzicht.style.display      = isInzicht       ? 'block' : 'none';
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
-      if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
+    if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
+
+    if (isGemengd) {
+      _updateGemengdTypesUI();
+      return;
+    }
 
     // Rekentaal-tab: HTML staat al in de pagina, niks te initialiseren
     if (isRekentaal) {
@@ -538,7 +546,7 @@ const App = (() => {
     const blok = bundelData.find(b => b.id === blokId);
     if (!blok) return;
 
-     // Rekentaal gaat via Generator.voegOefeningToe (zie generator.js)
+    // Rekentaal gaat via Generator.voegOefeningToe (zie generator.js)
     const gelukt = Generator.voegOefeningToe(blok);
     if (gelukt) {
       Preview.render(bundelData);
@@ -636,12 +644,12 @@ const App = (() => {
   function _getGrootGetallen() {
     return [..._grootGetallen].sort((a, b) => a - b);
   }
-   let _splitsMode     = 'tot';
+ let _splitsMode     = 'tot';
  let _splitsTot      = 5;
  let _splitsGetallen = [];  // extra geselecteerde getallen bovenop "tot"
 
   function selecteerSplitsNiveau(mode, waarde, el) {
- _splitsMode = 'combi';
+  _splitsMode = 'combi';
   _splitsTot  = waarde;
 
   document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
@@ -665,13 +673,13 @@ const App = (() => {
   }
 
   function toggleSplitsGetal(label, getal) {
-      const cb  = label.querySelector('input');
+  const cb  = label.querySelector('input');
   const was = cb.checked;
   cb.checked = !was;
   label.classList.toggle('geselecteerd', !was);
   label.querySelector('.vink-box').textContent = !was ? '✓' : '';
 
-     if (!was) {
+  if (!was) {
     if (!_splitsGetallen.includes(getal)) _splitsGetallen.push(getal);
   } else {
     _splitsGetallen = _splitsGetallen.filter(g => g !== getal);
@@ -1403,7 +1411,7 @@ function _getSplitsConfig() {
     toonToast(`✅ Cijferblok toegevoegd! (${oefeningen.length} oefeningen)`, '#27AE60');
   }
 
-  /* ── Rekentaal: blok toevoegen ─────────────────────────────── */  
+  /* ── Rekentaal: blok toevoegen ─────────────────────────────── */
   /* ── Vraagstukken: blok toevoegen vanuit VraagstukkenModule ── */
   function voegVraagstukBlokToe(blok) {
     bundelData.push(blok);
@@ -1411,11 +1419,194 @@ function _getSplitsConfig() {
     toonToast('✅ Vraagstuk toegevoegd aan bundel!', '#27AE60');
   }
 
-    /* ── Rekentaal: blok toevoegen vanuit RekentaalModule ───────── */
+  /* ── Rekentaal: blok toevoegen vanuit RekentaalModule ───────── */
   function voegRekentaalBlokToe(blok) {
     bundelData.push(blok);
     Preview.render(bundelData);
     toonToast(`✅ Rekentaalblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#7c3aed');
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     GEMENGD OPTELLEN & AFTREKKEN
+     ══════════════════════════════════════════════════════════════ */
+
+  let _gemengdNiveau     = 100;
+  let _gemengdBrug       = 'zonder';
+  let _gemengdVerhouding = '50-50';
+
+  function selecteerGemengdNiveau(waarde, el) {
+    _gemengdNiveau = waarde;
+    document.querySelectorAll('[name="gem-niveau"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    // Brug verbergen bij niveau ≤ 10 (geen brug mogelijk)
+    const kaartBrug = document.getElementById('kaart-gem-brug');
+    const kaartHulp = document.getElementById('kaart-gem-hulpmiddelen');
+    if (kaartBrug) kaartBrug.style.display = waarde <= 10 ? 'none' : 'block';
+    if (kaartHulp && waarde <= 10) {
+      kaartHulp.style.display = 'none';
+      _gemengdBrug = 'zonder';
+    }
+    _updateGemengdTypesUI();
+  }
+
+  function selecteerGemengdBrug(waarde, el) {
+    _gemengdBrug = waarde;
+    document.querySelectorAll('[name="gem-brug"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    // Hulpmiddelen tonen bij met/beide brug
+    const kaartHulp = document.getElementById('kaart-gem-hulpmiddelen');
+    if (kaartHulp) kaartHulp.style.display = (waarde === 'met' || waarde === 'gemengd') ? 'block' : 'none';
+    _updateGemengdTypesUI();
+  }
+
+  function selecteerGemengdVerhouding(waarde, el) {
+    _gemengdVerhouding = waarde;
+    document.querySelectorAll('[name="gem-verhouding"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function selecteerGemengdRadio(naam, waarde, el) {
+    document.querySelectorAll(`[name="${naam}"]`).forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+  }
+
+  function toggleGemengdHulpmiddel(label, waarde) {
+    const cb  = label.querySelector('input');
+    const was = cb.checked;
+    cb.checked = !was;
+    label.classList.toggle('geselecteerd', !was);
+    label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+    if (waarde === 'schrijflijnen') {
+      const rij = document.getElementById('rij-gem-schrijflijnen-aantal');
+      if (rij) rij.style.display = !was ? 'block' : 'none';
+    }
+    if (waarde === 'splitsbeen') {
+      const rij = document.getElementById('rij-gem-splitspositie');
+      if (rij) rij.style.display = !was ? 'block' : 'none';
+    }
+  }
+
+  function _vulTypesContainer(containerId, bewerking, niveau, brug) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const brugVoor = niveau <= 100
+      ? (brug === 'zonder' || brug === 'gemengd' ? brug : 'met')
+      : brug;
+    const types = Generator.getTypes(bewerking, niveau, brugVoor);
+    container.innerHTML = '';
+
+    // "Alles gemengd" chip eerst
+    const labelGemengd = document.createElement('label');
+    labelGemengd.className = 'vink-chip';
+    labelGemengd.dataset.type = '__alles__';
+    labelGemengd.innerHTML = `
+      <span class="vink-box"></span>
+      <input type="checkbox" value="__alles__" style="display:none">
+      <span>Alles gemengd</span>`;
+    labelGemengd.onclick = (e) => {
+      e.preventDefault();
+      const cb  = labelGemengd.querySelector('input');
+      const was = cb.checked;
+      // Alles gemengd: alle andere uitvinken
+      container.querySelectorAll('.vink-chip').forEach(l => {
+        l.classList.remove('geselecteerd');
+        l.querySelector('input').checked = false;
+        l.querySelector('.vink-box').textContent = '';
+      });
+      if (!was) {
+        cb.checked = true;
+        labelGemengd.classList.add('geselecteerd');
+        labelGemengd.querySelector('.vink-box').textContent = '✓';
+      }
+    };
+    container.appendChild(labelGemengd);
+
+    // Individuele types (zonder Gemengd en Maak eerst 10)
+    types.forEach(type => {
+      if (type === 'Gemengd' || type === 'Maak eerst 10') return;
+      const label = document.createElement('label');
+      label.className = 'vink-chip';
+      label.dataset.type = type;
+      label.innerHTML = `
+        <span class="vink-box"></span>
+        <input type="checkbox" value="${type}" style="display:none">
+        <span>${type}</span>`;
+      label.onclick = (e) => {
+        e.preventDefault();
+        // Als "Alles gemengd" aan was: uitvinken
+        const cbAlles = container.querySelector('[value="__alles__"]');
+        if (cbAlles?.checked) {
+          cbAlles.checked = false;
+          labelGemengd.classList.remove('geselecteerd');
+          labelGemengd.querySelector('.vink-box').textContent = '';
+        }
+        const cb  = label.querySelector('input');
+        const was = cb.checked;
+        cb.checked = !was;
+        label.classList.toggle('geselecteerd', !was);
+        label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+      };
+      container.appendChild(label);
+    });
+
+    // Standaard: eerste type selecteren
+    const eerste = container.querySelector('.vink-chip');
+    if (eerste) eerste.click();
+  }
+
+  function _updateGemengdTypesUI() {
+    const brug = _gemengdBrug;
+    _vulTypesContainer('cg-gem-opt-types', 'optellen',  _gemengdNiveau, brug);
+    _vulTypesContainer('cg-gem-aft-types', 'aftrekken', _gemengdNiveau, brug);
+  }
+
+  function _getGemengdTypes(containerId, alleTypes) {
+    // Als "Alles gemengd" aangevinkt: geef alle types terug (zonder Gemengd/Maak eerst 10)
+    const cbAlles = document.querySelector(`#${containerId} [value="__alles__"]`);
+    if (cbAlles?.checked) return alleTypes.filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    return [...document.querySelectorAll(`#${containerId} input:checked`)].map(c => c.value);
+  }
+
+  function voegGemengdBlokToe() {
+    const brugVoor = _gemengdNiveau <= 100
+      ? (_gemengdBrug === 'zonder' || _gemengdBrug === 'gemengd' ? _gemengdBrug : 'met')
+      : _gemengdBrug;
+    const alleOpt = Generator.getTypes('optellen',  _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+    const alleAft = Generator.getTypes('aftrekken', _gemengdNiveau, brugVoor).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+
+    const typesOpt = _getGemengdTypes('cg-gem-opt-types', alleOpt);
+    const typesAft = _getGemengdTypes('cg-gem-aft-types', alleAft);
+    if (typesOpt.length === 0) { toonToast('⚠️ Kies minstens één opteltype!', '#E74C3C'); return; }
+    if (typesAft.length === 0) { toonToast('⚠️ Kies minstens één aftrekkingstype!', '#E74C3C'); return; }
+
+    const hulpmiddelen       = [...document.querySelectorAll('[name="gem-hulpmiddelen"]:checked')].map(c => c.value);
+    const schrijflijnenAantal = parseInt(document.querySelector('[name="gem-schrijflijnen-aantal"]:checked')?.value || '2');
+    const splitspositie       = document.querySelector('[name="gem-splitspositie"]:checked')?.value || 'aftrekker';
+
+    const aantal = parseInt(document.getElementById('inp-aantal-gemengd').value) || 16;
+    const zin    = document.getElementById('inp-opdrachtzin-gemengd').value.trim()
+                   || 'Kijk goed naar het teken. Reken uit.';
+
+    const blok = Generator.maakGemengdBlok({
+      niveau:           _gemengdNiveau,
+      brug:             _gemengdBrug,
+      typesOpt,
+      typesAft,
+      aantalOefeningen: aantal,
+      opdrachtzin:      zin,
+      verhouding:       _gemengdVerhouding,
+      hulpmiddelen,
+      schrijflijnenAantal,
+      splitspositie,
+    });
+    if (!blok) { toonToast('⚠️ Te weinig oefeningen. Pas de instellingen aan.', '#E74C3C'); return; }
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Gemengd blok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#FF8C00');
   }
 
   return {
@@ -1436,6 +1627,7 @@ function _getSplitsConfig() {
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
     voegRekentaalBlokToe,
+    selecteerGemengdNiveau, selecteerGemengdBrug, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
 })();
