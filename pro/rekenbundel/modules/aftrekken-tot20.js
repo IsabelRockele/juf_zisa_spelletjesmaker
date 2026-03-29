@@ -67,10 +67,20 @@ const AftrekkenTot20 = (() => {
       let a, b;
 
       switch (type) {
-        case 'E-E':
-          a = rand(2, Math.min(9, max));
-          b = rand(1, a - 1);
-          break;
+             case 'E-E': {
+  a = rand(1, Math.min(9, max));
+
+  // Af en toe eens -0 bij tot 5 en tot 10, maar niet te vaak
+  const kansNul = max <= 5 ? 0.18 : 0.08;
+const metNul = max <= 10 && Math.random() < kansNul;
+
+  if (metNul) {
+    b = 0;
+  } else {
+    b = rand(1, a - 1);
+  }
+  break;
+}
 
         case 'T-E':
           if (metBrug === 'met') {
