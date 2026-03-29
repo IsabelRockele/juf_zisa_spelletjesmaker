@@ -2158,3 +2158,129 @@ header .badge {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   REKENTAAL — stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Tab kleur: warm paars/aubergine ─────────────────────────── */
+.tab-rekentaal {
+  background: #f3eeff;
+  color: #5b2d8e;
+  border-bottom: 3px solid transparent;
+}
+.tab-rekentaal:hover {
+  background: #e4d4ff;
+  color: #3d1d6e;
+}
+.tab-rekentaal.active {
+  background: #7c3aed !important;
+  color: #fff !important;
+  border-bottom-color: #5b21b6 !important;
+}
+
+/* ── Invulhokje in de preview (op plaats van {?}) ────────────── */
+.rt-invulhokje {
+  display: inline-block;
+  min-width: 26px;
+  height: 14px;
+  border: 1.5px solid #7c3aed;
+  border-radius: 3px;
+  background: #f5f0ff;
+  margin: 0 3px;
+  vertical-align: middle;
+}
+
+/* ── Oefeningen-lijst in de bundel-preview ───────────────────── */
+.rt-oefeningen-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 6px 2px;
+}
+
+.rt-oefeningen-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 2px;
+}
+
+.rt-oef-rij {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 4px 2px;
+  font-size: 13px;
+  border-bottom: 1px dotted #ddd;
+}
+
+.rt-oef-rij:last-child {
+  border-bottom: none;
+}
+
+.rt-oef-zin {
+  flex: 0 0 auto;
+  color: #1e2d40;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.rt-oef-zin strong {
+  color: #111;
+  font-weight: 700;
+}
+
+.rt-pijl {
+  flex: 0 0 auto;
+  color: #999;
+  font-size: 11px;
+  letter-spacing: -1px;
+}
+
+.rt-oef-lijn {
+  flex: 1;
+  border-bottom: 1.5px solid #333;
+  min-width: 60px;
+  margin: 0 4px;
+  align-self: flex-end;
+  margin-bottom: 2px;
+}
+
+/* ── Categorie-knop ─────────────────────────────────────────── */
+.rt-cat-btn {
+  transition: background 0.15s, color 0.15s;
+}
+.rt-cat-btn.geselecteerd {
+  background: #7c3aed !important;
+  color: #fff !important;
+  border-color: #5b21b6 !important;
+}
+
+/* ── Vink-chip in rekentaal sidebar ─────────────────────────── */
+#tab-rekentaal .vink-chip.geselecteerd {
+  background: #ede9fe;
+  border-color: #7c3aed;
+  color: #3d1d6e;
+}
+
+/* ── Voeg-toe knop in rekentaal ─────────────────────────────── */
+.voeg-toe-knop {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background 0.15s;
+}
+.voeg-toe-knop:hover {
+  background: #5b21b6;
+}
