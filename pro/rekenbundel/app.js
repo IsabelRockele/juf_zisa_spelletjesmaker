@@ -27,6 +27,9 @@ const App = (() => {
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
 
+    // Scroll de tabbar zodat de actieve tab gecentreerd in beeld komt
+    if (window.scrollNaarActieveTab) scrollNaarActieveTab(tabEl);
+
     const isHerken       = bewerking === 'herken-brug';
     const isSplitsingen  = bewerking === 'splitsingen';
     const isTafels       = bewerking === 'tafels';
