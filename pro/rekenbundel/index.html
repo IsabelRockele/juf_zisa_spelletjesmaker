@@ -6,6 +6,7 @@
   <title>Rekenbundel Generator PRO — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
+  <link rel="stylesheet" href="rekentaal.css?v=1">
   <style>
     /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
     .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
@@ -138,6 +139,7 @@
   <div class="sidebar-tab tab-optellen active" onclick="App.toonBewerking('optellen',this)">➕ Optellen</div>
   <div class="sidebar-tab tab-aftrekken" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
 <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug<br>tot 100</div>
+ <div class="sidebar-tab tab-rekentaal" onclick="App.toonBewerking('rekentaal',this)">🗣️ Reken<br>taal</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
@@ -1438,6 +1440,153 @@
 
     </div><!-- /tab-vraagstukken -->
 
+        <!-- ── TAB: REKENTAAL ───────────────────────────────────── -->
+    <div class="sidebar-content" id="tab-rekentaal" style="display:none">
+
+      <div class="sectie-titel">Configureer een rekentaalblok</div>
+
+      <!-- Niveau -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">&#127919;</div> Niveau</div>
+        <div class="form-rij"><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="RekentaalModule.selecteerNiveau(20,this)"><input type="radio" name="rt-niveau" value="20" checked>Tot 20</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerNiveau(100,this)"><input type="radio" name="rt-niveau" value="100">Tot 100</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerNiveau(1000,this)"><input type="radio" name="rt-niveau" value="1000">Tot 1000</label>
+        </div></div>
+      </div>
+
+      <!-- Brug -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">&#127753;</div> Brug</div>
+        <div class="form-rij"><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="RekentaalModule.selecteerBrug(this.dataset.v,this)" data-v="zonder"><input type="radio" name="rt-brug" value="zonder" checked>Zonder brug</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerBrug(this.dataset.v,this)" data-v="met"><input type="radio" name="rt-brug" value="met">Met brug</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerBrug(this.dataset.v,this)" data-v="gemengd"><input type="radio" name="rt-brug" value="gemengd">Gemengd</label>
+        </div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">Brug geldt enkel voor optellen en aftrekken.</div>
+      </div>
+
+      <!-- Categorieen -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">&#128221;</div> Categorieën en zinnen</div>
+
+        <div style="margin-bottom:12px">
+          <button class="rt-cat-btn" data-rt-cat="optellen" onclick="RekentaalModule.toggleCategorie(this.getAttribute('data-rt-cat'))" style="background:#f0f4ff;border:1.5px solid #b0c4ee;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:5px;display:inline-flex;align-items:center;gap:6px">
+            <span class="rt-cat-vink" style="color:#27AE60;font-weight:900;min-width:12px"></span>+ Optellen
+          </button>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px">
+            <label class="vink-chip" data-rt-zin="optellen-opt1" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt1')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>De som van &#8230; en &#8230;</label>
+            <label class="vink-chip" data-rt-zin="optellen-opt2" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt2')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; meer dan &#8230;</label>
+            <label class="vink-chip" data-rt-zin="optellen-opt3" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt3')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Tel &#8230; bij &#8230; op</label>
+            <label class="vink-chip" data-rt-zin="optellen-opt4" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt4')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Doe &#8230; bij &#8230; om &#8230; te krijgen</label>
+            <label class="vink-chip" data-rt-zin="optellen-opt5" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt5')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Vermeerder &#8230; met &#8230;</label>
+            <label class="vink-chip" data-rt-zin="optellen-opt6" onclick="event.preventDefault();RekentaalModule.toggleZin('optellen','opt6')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; vermeerderd met &#8230; is &#8230;</label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <button class="rt-cat-btn" data-rt-cat="aftrekken" onclick="RekentaalModule.toggleCategorie(this.getAttribute('data-rt-cat'))" style="background:#f0f4ff;border:1.5px solid #b0c4ee;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:5px;display:inline-flex;align-items:center;gap:6px">
+            <span class="rt-cat-vink" style="color:#27AE60;font-weight:900;min-width:12px"></span>- Aftrekken
+          </button>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px">
+            <label class="vink-chip" data-rt-zin="aftrekken-aft1" onclick="event.preventDefault();RekentaalModule.toggleZin('aftrekken','aft1')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Het verschil van &#8230; en &#8230;</label>
+            <label class="vink-chip" data-rt-zin="aftrekken-aft2" onclick="event.preventDefault();RekentaalModule.toggleZin('aftrekken','aft2')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; minder dan &#8230;</label>
+            <label class="vink-chip" data-rt-zin="aftrekken-aft3" onclick="event.preventDefault();RekentaalModule.toggleZin('aftrekken','aft3')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Trek &#8230; van &#8230; af</label>
+            <label class="vink-chip" data-rt-zin="aftrekken-aft4" onclick="event.preventDefault();RekentaalModule.toggleZin('aftrekken','aft4')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Verminder &#8230; met &#8230;</label>
+            <label class="vink-chip" data-rt-zin="aftrekken-aft5" onclick="event.preventDefault();RekentaalModule.toggleZin('aftrekken','aft5')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; verminderd met &#8230; is &#8230;</label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <button class="rt-cat-btn" data-rt-cat="vermenigvuldigen" onclick="RekentaalModule.toggleCategorie(this.getAttribute('data-rt-cat'))" style="background:#f0f4ff;border:1.5px solid #b0c4ee;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:5px;display:inline-flex;align-items:center;gap:6px">
+            <span class="rt-cat-vink" style="color:#27AE60;font-weight:900;min-width:12px"></span>x Vermenigvuldigen
+          </button>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px">
+            <label class="vink-chip" data-rt-zin="vermenigvuldigen-verm1" onclick="event.preventDefault();RekentaalModule.toggleZin('vermenigvuldigen','verm1')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Het product van &#8230; en &#8230;</label>
+            <label class="vink-chip" data-rt-zin="vermenigvuldigen-verm2" onclick="event.preventDefault();RekentaalModule.toggleZin('vermenigvuldigen','verm2')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Vermenigvuldig &#8230; met &#8230;</label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <button class="rt-cat-btn" data-rt-cat="delen" onclick="RekentaalModule.toggleCategorie(this.getAttribute('data-rt-cat'))" style="background:#f0f4ff;border:1.5px solid #b0c4ee;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:5px;display:inline-flex;align-items:center;gap:6px">
+            <span class="rt-cat-vink" style="color:#27AE60;font-weight:900;min-width:12px"></span>: Delen
+          </button>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px">
+            <label class="vink-chip" data-rt-zin="delen-deel1" onclick="event.preventDefault();RekentaalModule.toggleZin('delen','deel1')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Het quoti&#235;nt van &#8230; en &#8230;</label>
+            <label class="vink-chip" data-rt-zin="delen-deel2" onclick="event.preventDefault();RekentaalModule.toggleZin('delen','deel2')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; gedeeld door &#8230; is &#8230;</label>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px">
+          <button class="rt-cat-btn" data-rt-cat="dubbel_helft_kwart" onclick="RekentaalModule.toggleCategorie(this.getAttribute('data-rt-cat'))" style="background:#f0f4ff;border:1.5px solid #b0c4ee;border-radius:7px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:5px;display:inline-flex;align-items:center;gap:6px">
+            <span class="rt-cat-vink" style="color:#27AE60;font-weight:900;min-width:12px"></span>Dubbel, helft en kwart
+          </button>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;padding-left:4px">
+            <label class="vink-chip" data-rt-zin="dubbel_helft_kwart-dhk1" onclick="event.preventDefault();RekentaalModule.toggleZin('dubbel_helft_kwart','dhk1')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Het dubbel van &#8230; is &#8230;</label>
+            <label class="vink-chip" data-rt-zin="dubbel_helft_kwart-dhk2" onclick="event.preventDefault();RekentaalModule.toggleZin('dubbel_helft_kwart','dhk2')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; is het dubbel van &#8230;</label>
+            <label class="vink-chip" data-rt-zin="dubbel_helft_kwart-dhk3" onclick="event.preventDefault();RekentaalModule.toggleZin('dubbel_helft_kwart','dhk3')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>De helft van &#8230; is &#8230;</label>
+            <label class="vink-chip" data-rt-zin="dubbel_helft_kwart-dhk4" onclick="event.preventDefault();RekentaalModule.toggleZin('dubbel_helft_kwart','dhk4')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>&#8230; is de helft van &#8230;</label>
+            <label class="vink-chip" data-rt-zin="dubbel_helft_kwart-dhk5" onclick="event.preventDefault();RekentaalModule.toggleZin('dubbel_helft_kwart','dhk5')" style="font-size:11px;padding:3px 8px;cursor:pointer"><span class="vink-box" style="margin-right:4px"></span>Een kwart van &#8230; is &#8230;</label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Tafels (verborgen tot vermenigvuldigen/delen geselecteerd) -->
+      <div class="config-kaart" id="rt-kaart-tafels" style="display:none">
+        <div class="kaart-titel"><div class="icon">x</div> Tafels</div>
+        <div class="form-rij"><div style="display:flex;flex-wrap:wrap;gap:4px">
+          <label class="vink-chip geselecteerd" onclick="RekentaalModule.toggleTafel(this,2)" data-tafel="2"><span class="vink-box">&#10003;</span> x2</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,3)" data-tafel="3"><span class="vink-box"></span> x3</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,4)" data-tafel="4"><span class="vink-box"></span> x4</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,5)" data-tafel="5"><span class="vink-box"></span> x5</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,6)" data-tafel="6"><span class="vink-box"></span> x6</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,7)" data-tafel="7"><span class="vink-box"></span> x7</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,8)" data-tafel="8"><span class="vink-box"></span> x8</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,9)" data-tafel="9"><span class="vink-box"></span> x9</label>
+          <label class="vink-chip" onclick="RekentaalModule.toggleTafel(this,10)" data-tafel="10"><span class="vink-box"></span> x10</label>
+        </div></div>
+      </div>
+
+      <!-- Positie tafelterm -->
+      <div class="config-kaart" id="rt-kaart-tafel-positie" style="display:none">
+        <div class="kaart-titel"><div class="icon">🔀</div> Positie tafelterm</div>
+        <div class="form-rij"><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="RekentaalModule.selecteerTafelPositie(this.dataset.v,this)" data-v="vooraan"><input type="radio" name="rt-tafel-positie" value="vooraan" checked>Tafel vooraan (2 × 5)</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerTafelPositie(this.dataset.v,this)" data-v="achteraan"><input type="radio" name="rt-tafel-positie" value="achteraan">Tafel achteraan (5 × 2)</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerTafelPositie(this.dataset.v,this)" data-v="beide">Beide</label>
+        </div></div>
+      </div>
+
+      <!-- Dubbel/helft/kwart max -->
+      <div class="config-kaart" id="rt-kaart-dhk-max" style="display:none">
+        <div class="kaart-titel"><div class="icon">&#8593;</div> Max getal (dubbel/helft/kwart)</div>
+        <div class="form-rij"><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="RekentaalModule.selecteerDhkMax(20,this)"><input type="radio" name="rt-dhk-max" value="20" checked>Tot 20</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerDhkMax(100,this)"><input type="radio" name="rt-dhk-max" value="100">Tot 100</label>
+          <label class="radio-chip" onclick="RekentaalModule.selecteerDhkMax(1000,this)"><input type="radio" name="rt-dhk-max" value="1000">Tot 1000</label>
+        </div></div>
+        <div style="font-size:11px;color:#888;margin-top:4px">Getallen deelbaar door 4.</div>
+      </div>
+
+      <!-- Aantal en opdrachtzin -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">&#128290;</div> Aantal en opdrachtzin</div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <input type="number" id="rt-aantal" min="4" max="30" value="12" style="width:60px;padding:4px 8px;border:1.5px solid #b0c4ee;border-radius:6px;font-size:13px">
+        </div>
+        <div class="form-rij" style="margin-top:6px">
+          <label>Opdrachtzin</label>
+          <input type="text" id="rt-opdrachtzin" value="Zet om in een bewerking en reken uit." style="width:100%;padding:5px 8px;border:1.5px solid #b0c4ee;border-radius:6px;font-size:12px;box-sizing:border-box">
+        </div>
+      </div>
+
+      <button class="voeg-toe-knop" onclick="RekentaalModule.voegBlokToe()">+ Voeg rekentaalblok toe</button>
+
+    </div><!-- /tab-rekentaal -->
+
+
 </aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
@@ -1489,7 +1638,9 @@
 <script src="preview.js?v=41"></script>
 <script src="pdf-engine.js?v=51"></script>
 <script src="vraagstukken.js?v=2"></script>
-<script src="app.js?v=21"></script>
+<script src="modules/rekentaal.js?v=14"></script>
+
+<script src="app.js?v=33"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
