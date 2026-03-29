@@ -206,9 +206,14 @@ const Preview = (() => {
     }
 
     /* ── Oefening met splitsbeen / schrijflijnen ─────────── */
+    // Bij gemengd blok: bepaal bewerking per oefening via het teken in oef.vraag
+    const oefBewerking = blok.bewerking === 'gemengd'
+      ? (oef.vraag.includes('−') || oef.vraag.includes('-') ? 'aftrekken' : 'optellen')
+      : bewerking;
+
     let doelIdx = 0;
     if (heeftSplits) {
-      if (bewerking === 'optellen') doelIdx = 2;
+      if (oefBewerking === 'optellen') doelIdx = 2;
       else if (splitspositie === 'aftrekker') doelIdx = 2;
       else doelIdx = 0;
     }
@@ -217,11 +222,11 @@ const Preview = (() => {
     const somHTML = woorden.map((w, i) =>
       (i === doelIdx && heeftSplits) ? `<span class="splits-doel">${esc(w)}</span>` : esc(w)
     ).join(' ') + ' =';
-    const isAftrektal = heeftSplits && bewerking === 'aftrekken' && splitspositie === 'aftrektal';
+    const isAftrektal = heeftSplits && oefBewerking === 'aftrekken' && splitspositie === 'aftrektal';
 
     // Bereken splitsbeen info voor HTML én positionering
     const splDelen   = oef.vraag.replace(' =','').trim().split(' ');
-    const splDoelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
+    const splDoelIdx = (oefBewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
     const splGetal   = parseInt(splDelen[splDoelIdx]) || 0;
     const splIsHTE   = splGetal >= 100 && splGetal % 100 !== 0 && splGetal % 10 !== 0;
     const splAantal  = heeftSplits ? (splIsHTE ? 3 : 2) : 0;
