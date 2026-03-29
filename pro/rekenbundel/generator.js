@@ -99,7 +99,7 @@ const Generator = (() => {
       tafels,
       tafelPositie,
       tafelMax,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, tafels, tafelPositie, tafelMax },
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax },
       oefeningen,
     };
   }
@@ -125,7 +125,7 @@ const Generator = (() => {
       }
       return false;
     }
-    
+
     // Cijferen: gebruik de Cijferen module
     if (blok.bewerking === 'cijferen') {
       const nieuweOef = Cijferen.genereer({ ...blok.config, aantalOefeningen: 5 });
