@@ -106,6 +106,26 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    // Rekentaal: gebruik RekentaalGenerator
+    if (blok.bewerking === 'rekentaal') {
+      if (!window.RekentaalGenerator) return false;
+      const cfg = blok.config || {};
+      const nieuweOef = RekentaalGenerator.genereer({
+        categorieën:      cfg.categorieën || {},
+        niveau:           cfg.niveau || 20,
+        brug:             cfg.brug || 'zonder',
+        tafels:           cfg.tafels || [2],
+        dhkMax:           cfg.dhkMax || 20,
+        tafelPositie:     cfg.tafelPositie || 'vooraan',
+        aantalOefeningen: 1,
+      });
+      if (nieuweOef && nieuweOef.length > 0) {
+        blok.oefeningen.push(nieuweOef[0]);
+        return true;
+      }
+      return false;
+    }
+
     // Cijferen: gebruik de Cijferen module
     if (blok.bewerking === 'cijferen') {
       const nieuweOef = Cijferen.genereer({ ...blok.config, aantalOefeningen: 5 });
