@@ -137,6 +137,7 @@
     <div class="sidebar-tabs">
   <div class="sidebar-tab tab-optellen active" onclick="App.toonBewerking('optellen',this)">➕ Optellen</div>
   <div class="sidebar-tab tab-aftrekken" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
+  <div class="sidebar-tab tab-gemengd" onclick="App.toonBewerking('gemengd',this)">➕➖ Gemengd</div>
 <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug<br>tot 100</div>
   <div class="sidebar-tab tab-rekentaal" onclick="App.toonBewerking('rekentaal',this)">🗣️ Reken<br>taal</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
@@ -499,7 +500,164 @@
         ＋ Voeg blok toe aan bundel
       </button>
 
-    </div><!-- /sidebar-content -->
+    </div><!-- /sidebar-content tab-hoofdrekenen -->
+
+    <!-- ── GEMENGD OPTELLEN & AFTREKKEN SIDEBAR CONTENT ──────── -->
+    <div class="sidebar-content" id="tab-gemengd" style="display:none">
+
+      <div class="sectie-titel">➕➖ Gemengd optellen &amp; aftrekken</div>
+      <p style="font-size:12px;color:#555;margin:0 0 10px 0;">Oefeningen van optellen én aftrekken door elkaar — kinderen moeten goed naar het bewerkingsteken kijken.</p>
+
+      <!-- Niveau -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Niveau kiezen</div>
+        <div class="form-rij">
+          <label>Rekenen tot</label>
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(5,this)">
+              <input type="radio" name="gem-niveau" value="5">Tot 5
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10,this)">
+              <input type="radio" name="gem-niveau" value="10">Tot 10
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(20,this)">
+              <input type="radio" name="gem-niveau" value="20">Tot 20
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdNiveau(100,this)">
+              <input type="radio" name="gem-niveau" value="100" checked>Tot 100
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(1000,this)">
+              <input type="radio" name="gem-niveau" value="1000">Tot 1000
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brug -->
+      <div class="config-kaart" id="kaart-gem-brug">
+        <div class="kaart-titel"><div class="icon">🌉</div>Bruglogica</div>
+        <div class="form-rij">
+          <label>Met of zonder brug?</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdBrug('zonder',this)">
+              <input type="radio" name="gem-brug" value="zonder" checked>Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdBrug('met',this)">
+              <input type="radio" name="gem-brug" value="met">Met brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdBrug('gemengd',this)">
+              <input type="radio" name="gem-brug" value="gemengd">Beide
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hulpmiddelen (enkel bij met/beide brug) -->
+      <div class="config-kaart" id="kaart-gem-hulpmiddelen" style="display:none">
+        <div class="kaart-titel"><div class="icon">🛠️</div>Hulpmiddelen</div>
+        <div class="form-rij">
+          <label>Hulpmiddelen toevoegen</label>
+          <div class="checkbox-groep">
+            <label class="vink-chip" id="gem-chip-splitsbeen" onclick="App.toggleGemengdHulpmiddel(this,'splitsbeen')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="gem-hulpmiddelen" value="splitsbeen" style="display:none">
+              <span>Splitsbeen</span>
+            </label>
+            <label class="vink-chip" id="gem-chip-schrijflijnen" onclick="App.toggleGemengdHulpmiddel(this,'schrijflijnen')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="gem-hulpmiddelen" value="schrijflijnen" style="display:none">
+              <span>Schrijflijnen</span>
+            </label>
+          </div>
+        </div>
+        <!-- Aantal schrijflijnen -->
+        <div class="form-rij" id="rij-gem-schrijflijnen-aantal" style="display:none">
+          <label>Aantal schrijflijnen</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdRadio('gem-schrijflijnen-aantal','2',this)">
+              <input type="radio" name="gem-schrijflijnen-aantal" value="2" checked>2 lijnen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdRadio('gem-schrijflijnen-aantal','3',this)">
+              <input type="radio" name="gem-schrijflijnen-aantal" value="3">3 lijnen
+            </label>
+          </div>
+        </div>
+        <!-- Splitspositie (enkel bij splitsbeen aangevinkt) -->
+        <div class="form-rij" id="rij-gem-splitspositie" style="display:none">
+          <label>Splitsbeen onder welk getal? (bij aftrekken)</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdRadio('gem-splitspositie','aftrekker',this)">
+              <input type="radio" name="gem-splitspositie" value="aftrekker" checked>Aftrekker (bv. 12−6: onder 6)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdRadio('gem-splitspositie','aftrektal',this)">
+              <input type="radio" name="gem-splitspositie" value="aftrektal">Aftrektal (bv. 12−6: onder 12)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Types optellen -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">➕</div>Types optellen</div>
+        <div class="form-rij">
+          <label>Kies welke opteltypes (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-gem-opt-types"><!-- gevuld door app.js --></div>
+        </div>
+      </div>
+
+      <!-- Types aftrekken -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">➖</div>Types aftrekken</div>
+        <div class="form-rij">
+          <label>Kies welke aftrekkingstypes (meerdere mogelijk)</label>
+          <div class="checkbox-groep" id="cg-gem-aft-types"><!-- gevuld door app.js --></div>
+        </div>
+      </div>
+
+      <!-- Verhouding -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">⚖️</div>Verhouding</div>
+        <div class="form-rij">
+          <label>Verdeling optellen / aftrekken</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdVerhouding('50-50',this)">
+              <input type="radio" name="gem-verhouding" value="50-50" checked>50% / 50%
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdVerhouding('meer-opt',this)">
+              <input type="radio" name="gem-verhouding" value="meer-opt">Meer optellen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerGemengdVerhouding('meer-aft',this)">
+              <input type="radio" name="gem-verhouding" value="meer-aft">Meer aftrekken
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Opdrachtzin & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdracht &amp; hoeveelheid</div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-gemengd" value="Kijk goed naar het teken. Reken uit." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-gemengd">
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="16" selected>16</option>
+            <option value="20">20</option>
+            <option value="24">24</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegGemengdBlokToe()">
+        ＋ Voeg gemengd blok toe
+      </button>
+
+    </div><!-- /tab-gemengd -->
 
     <!-- ── TAFELS SIDEBAR CONTENT ──────────────────────────── -->
     <div class="sidebar-content" id="tab-tafels" style="display:none">
