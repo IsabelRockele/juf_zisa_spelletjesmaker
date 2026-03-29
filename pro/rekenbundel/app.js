@@ -636,25 +636,25 @@ const App = (() => {
   function _getGrootGetallen() {
     return [..._grootGetallen].sort((a, b) => a - b);
   }
-  let _splitsMode    = 'tot';
-  let _splitsTot     = 10;
-  let _splitsGetallen = [];  // geselecteerde specifieke getallen
+   let _splitsMode     = 'tot';
+ let _splitsTot      = 5;
+ let _splitsGetallen = [];  // extra geselecteerde getallen bovenop "tot"
 
   function selecteerSplitsNiveau(mode, waarde, el) {
-    _splitsMode = 'tot';
-    _splitsTot  = waarde;
-    _splitsGetallen = [];
-    document.querySelectorAll('#cg-splits-getallen .vink-chip').forEach(l => {
-      l.classList.remove('geselecteerd');
-      l.querySelector('.vink-box').textContent = '';
-      l.querySelector('input').checked = false;
-    });
-    document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
-      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
-    el.classList.add('geselecteerd');
-    _updateTypesUI(waarde, 'zonder');
-    _updateSplitsKaarten();
-  }
+ _splitsMode = 'combi';
+  _splitsTot  = waarde;
+
+  document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
+    r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+  el.classList.add('geselecteerd');
+
+  const maxN = _splitsGetallen.length > 0
+    ? Math.max(waarde, ..._splitsGetallen)
+    : waarde;
+
+  _updateTypesUI(maxN, 'zonder');
+  _updateSplitsKaarten();
+}
 
   let _puntBrug = 'zonder';
   function selecteerPuntBrug(waarde, el) {
@@ -665,35 +665,43 @@ const App = (() => {
   }
 
   function toggleSplitsGetal(label, getal) {
-    const cb  = label.querySelector('input');
-    const was = cb.checked;
-    cb.checked = !was;
-    label.classList.toggle('geselecteerd', !was);
-    label.querySelector('.vink-box').textContent = !was ? '✓' : '';
+      const cb  = label.querySelector('input');
+  const was = cb.checked;
+  cb.checked = !was;
+  label.classList.toggle('geselecteerd', !was);
+  label.querySelector('.vink-box').textContent = !was ? '✓' : '';
 
-    if (!was) {
-      _splitsMode = 'specifiek';
-      document.querySelectorAll('[name="splits-niveau"]').forEach(r =>
-        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
-      if (!_splitsGetallen.includes(getal)) _splitsGetallen.push(getal);
-    } else {
-      _splitsGetallen = _splitsGetallen.filter(g => g !== getal);
-      if (_splitsGetallen.length === 0) {
-        _splitsMode = 'tot';
-        const eerste = document.querySelector('[name="splits-niveau"]');
-        eerste?.closest('.radio-chip')?.classList.add('geselecteerd');
-      }
-    }
-    const maxN = _splitsGetallen.length > 0 ? Math.max(..._splitsGetallen) : _splitsTot;
-    _updateTypesUI(maxN, 'zonder');
+     if (!was) {
+    if (!_splitsGetallen.includes(getal)) _splitsGetallen.push(getal);
+  } else {
+    _splitsGetallen = _splitsGetallen.filter(g => g !== getal);
   }
 
-  function _getSplitsConfig() {
-    if (_splitsMode === 'specifiek' && _splitsGetallen.length > 0) {
-      return { mode: 'specifiek', getallen: [..._splitsGetallen], niveau: Math.max(..._splitsGetallen) };
-    }
-    return { mode: 'tot', getallen: null, niveau: _splitsTot };
-  }
+  _splitsMode = 'combi';
+
+  const maxN = _splitsGetallen.length > 0
+    ? Math.max(_splitsTot, ..._splitsGetallen)
+    : _splitsTot;
+
+  _updateTypesUI(maxN, 'zonder');
+  _updateSplitsKaarten();
+}
+
+function _getSplitsConfig() {
+  const basisGetallen =
+    _splitsTot <= 5  ? [3, 4, 5] :
+    _splitsTot <= 10 ? [3, 4, 5, 6, 7, 8, 9, 10] :
+    _splitsTot <= 20 ? [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] :
+    Array.from({ length: 98 }, (_, i) => i + 3);
+
+  const gecombineerd = [...new Set([...basisGetallen, ..._splitsGetallen])].sort((a, b) => a - b);
+
+  return {
+    mode: 'specifiek',
+    getallen: gecombineerd,
+    niveau: gecombineerd.length ? Math.max(...gecombineerd) : _splitsTot
+  };
+}
 
   function toggleVoorbeeld(label) {
     const cb = label.querySelector('input');
