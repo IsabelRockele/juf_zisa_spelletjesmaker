@@ -1446,22 +1446,53 @@ function _getSplitsConfig() {
     const kaartBrug = document.getElementById('kaart-gem-brug');
     const kaartHulp = document.getElementById('kaart-gem-hulpmiddelen');
     if (kaartBrug) kaartBrug.style.display = waarde <= 10 ? 'none' : 'block';
-    if (kaartHulp && waarde <= 10) {
-      kaartHulp.style.display = 'none';
+    if (waarde <= 10) {
+      if (kaartHulp) kaartHulp.style.display = 'none';
       _gemengdBrug = 'zonder';
+    } else {
+      // Subkeuze tonen/verbergen op basis van huidig hoofd-brug + nieuw niveau
+      _updateGemengdBrugSubUI();
+      _gemengdBrug = _getGemengdBrugWaarde();
     }
     _updateGemengdTypesUI();
   }
 
-  function selecteerGemengdBrug(waarde, el) {
-    _gemengdBrug = waarde;
-    document.querySelectorAll('[name="gem-brug"]').forEach(r =>
+  function selecteerGemengdBrugHoofd(waarde, el) {
+    document.querySelectorAll('[name="gem-brug-hoofd"]').forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+    _updateGemengdBrugSubUI();
+    _gemengdBrug = _getGemengdBrugWaarde();
     // Hulpmiddelen tonen bij met/beide brug
     const kaartHulp = document.getElementById('kaart-gem-hulpmiddelen');
-    if (kaartHulp) kaartHulp.style.display = (waarde === 'met' || waarde === 'gemengd') ? 'block' : 'none';
+    if (kaartHulp) kaartHulp.style.display = (waarde === 'met' || waarde === 'beide') ? 'block' : 'none';
     _updateGemengdTypesUI();
+  }
+
+  function selecteerGemengdBrugSub(waarde, el) {
+    document.querySelectorAll('[name="gem-brug-sub"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    _gemengdBrug = _getGemengdBrugWaarde();
+    _updateGemengdTypesUI();
+  }
+
+  function _getGemengdBrugWaarde() {
+    const hoofd = document.querySelector('[name="gem-brug-hoofd"]:checked')?.value || 'zonder';
+    if (hoofd === 'zonder') return 'zonder';
+    if (_gemengdNiveau >= 1000) {
+      if (hoofd === 'beide') return 'gemengd';
+      const sub = document.querySelector('[name="gem-brug-sub"]:checked')?.value || 'naar-tiental';
+      return sub; // naar-tiental / naar-honderdtal / beide
+    }
+    // Tot 100: met = 'met', beide = 'gemengd'
+    return hoofd === 'beide' ? 'gemengd' : 'met';
+  }
+
+  function _updateGemengdBrugSubUI() {
+    const hoofd = document.querySelector('[name="gem-brug-hoofd"]:checked')?.value || 'zonder';
+    const rijSub = document.getElementById('rij-gem-brug-sub');
+    if (rijSub) rijSub.style.display = (_gemengdNiveau >= 1000 && hoofd === 'met') ? 'block' : 'none';
   }
 
   function selecteerGemengdVerhouding(waarde, el) {
@@ -1630,7 +1661,7 @@ function _getSplitsConfig() {
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
     voegRekentaalBlokToe,
-    selecteerGemengdNiveau, selecteerGemengdBrug, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
+    selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
 })();
