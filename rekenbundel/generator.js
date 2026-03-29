@@ -213,5 +213,64 @@ const Generator = (() => {
     return module.getTypes(niveau, brugVoorModule);
   }
 
-  return { maakBlok, voegOefeningToe, getTypes };
+  /* ── Maak een gemengd optellen+aftrekken blok ───────────── */
+  function maakGemengdBlok({ niveau, brug, typesOpt, typesAft, aantalOefeningen, opdrachtzin, verhouding = '50-50', hulpmiddelen = [], schrijflijnenAantal = 2, splitspositie = 'aftrekker' }) {
+    const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
+
+    const modOpt = niveau <= 20  ? OptellenTot20  :
+                   niveau <= 100 ? OptellenTot100 : OptellenTot1000;
+    const modAft = niveau <= 20  ? AftrekkenTot20  :
+                   niveau <= 100 ? AftrekkenTot100 : AftrekkenTot1000;
+
+    if (!modOpt || !modAft) return null;
+
+    // Bereken aantal opt/aft op basis van verhouding
+    let aantalOpt, aantalAft;
+    if (verhouding === 'meer-opt') {
+      aantalOpt = Math.ceil(aantalOefeningen * 0.67);
+      aantalAft = aantalOefeningen - aantalOpt;
+    } else if (verhouding === 'meer-aft') {
+      aantalAft = Math.ceil(aantalOefeningen * 0.67);
+      aantalOpt = aantalOefeningen - aantalAft;
+    } else {
+      aantalOpt = Math.ceil(aantalOefeningen / 2);
+      aantalAft = aantalOefeningen - aantalOpt;
+    }
+
+    // Genereer met extra buffer zodat shuffle genoeg unieke oefeningen heeft
+    const bufferOpt = modOpt.genereer({ niveau, oefeningstypes: typesOpt, brug: brugVoorModule, aantalOefeningen: aantalOpt * 2 });
+    const bufferAft = modAft.genereer({ niveau, oefeningstypes: typesAft, brug: brugVoorModule, aantalOefeningen: aantalAft * 2 });
+
+    if (!bufferOpt?.length || !bufferAft?.length) return null;
+
+    // Pak het gewenste aantal uit elke pool
+    const oefOpt = bufferOpt.slice(0, aantalOpt);
+    const oefAft = bufferAft.slice(0, aantalAft);
+
+    // Shuffle samen
+    const alle = [...oefOpt, ...oefAft];
+    for (let i = alle.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [alle[i], alle[j]] = [alle[j], alle[i]];
+    }
+
+    if (alle.length < 2) return null;
+
+    _teller++;
+    return {
+      id:          `blok-gemengd-${Date.now()}-${_teller}`,
+      bewerking:   'gemengd',
+      subtype:     `gemengd-tot${niveau}`,
+      niveau,
+      brug,
+      opdrachtzin: opdrachtzin || 'Kijk goed naar het teken. Reken uit.',
+      hulpmiddelen,
+      schrijflijnenAantal,
+      splitspositie,
+      config: { niveau, brug, typesOpt, typesAft, aantalOefeningen, verhouding, hulpmiddelen, schrijflijnenAantal, splitspositie },
+      oefeningen:  alle,
+    };
+  }
+
+  return { maakBlok, maakGemengdBlok, voegOefeningToe, getTypes };
 })();
