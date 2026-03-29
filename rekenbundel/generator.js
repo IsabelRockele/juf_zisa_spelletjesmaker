@@ -99,7 +99,7 @@ const Generator = (() => {
       tafels,
       tafelPositie,
       tafelMax,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, tafels, tafelPositie, tafelMax },
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax },
       oefeningen,
     };
   }
