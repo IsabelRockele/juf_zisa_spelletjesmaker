@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekenbundel Generator PRO — jufzisa.be</title>
+  <title>Rekenbundel Generator — jufzisa.be</title>
   <link rel="stylesheet" href="style.css?v=29">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
   <link rel="stylesheet" href="rekentaal.css?v=1">
@@ -96,7 +96,7 @@
       gap: 2px;
       padding-top: 4px;
     }
-    
+
     /* ── Maak eerst 10: voorbeeld-kader ─────────────────── */
     .oefening-eerst10.eerst10-voorbeeld {
       background: #FFF3CD !important;
@@ -108,7 +108,24 @@
       font-weight: 700;
       color: #5D3A00;
     }
-    
+
+    /* ── Binnenkort: uitgegrauwde niveauchip ─────────────── */
+    .radio-chip-binnenkort {
+      opacity: 0.45;
+      cursor: not-allowed !important;
+      pointer-events: none;
+      position: relative;
+    }
+    .radio-chip-binnenkort::after {
+      content: "binnenkort";
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: #888;
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
@@ -116,7 +133,7 @@
 <!-- ── HEADER ──────────────────────────────────────────────── -->
 <header>
 
-  <a href="../app.html" class="menu-knop">⬅ Terug naar menu</a>
+  <a href="../index.html" class="menu-knop">⬅ Keuzemenu</a>
 
   <div class="logo">🧮 Reken<span>bundel</span></div>
   <div class="subtitle">— jufzisa.be</div>
@@ -125,7 +142,7 @@
 
   <div class="spacer"></div>
 
-  <div class="badge" style="background:#e65100">PRO</div>
+  <div class="badge">BETA</div>
 
 
 </header>
@@ -139,7 +156,8 @@
   <div class="sidebar-tab tab-optellen active" onclick="App.toonBewerking('optellen',this)">➕ Optellen</div>
   <div class="sidebar-tab tab-aftrekken" onclick="App.toonBewerking('aftrekken',this)">➖ Aftrekken</div>
   <div class="sidebar-tab tab-gemengd" onclick="App.toonBewerking('gemengd',this)">➕➖ Gemengd</div>
-  <div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug<br>tot 100</div>
+  <div class="sidebar-tab tab-komma" onclick="App.toonBewerking('komma',this)">🔢 Komma<br>getallen</div>
+<div class="sidebar-tab tab-brug" onclick="App.toonBewerking('herken-brug',this)">🔦 Herken brug<br>tot 100</div>
   <div class="sidebar-tab tab-rekentaal" onclick="App.toonBewerking('rekentaal',this)">🗣️ Reken<br>taal</div>
   <div class="sidebar-tab tab-splits" onclick="App.toonBewerking('splitsingen',this)">✂️ Splits</div>
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
@@ -176,22 +194,40 @@
         </div>
         <div class="form-rij">
           <label>Rekenen tot</label>
-          <div class="radio-groep">
-            <label class="radio-chip" onclick="App.selecteerRadio('niveau','5',this)">
-              <input type="radio" name="niveau" value="5">Tot 5
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('niveau','10',this)">
-              <input type="radio" name="niveau" value="10">Tot 10
-            </label>
-            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('niveau','20',this)">
-              <input type="radio" name="niveau" value="20" checked>Tot 20
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('niveau','100',this)">
-              <input type="radio" name="niveau" value="100">Tot 100
-            </label>
-            <label class="radio-chip" onclick="App.selecteerRadio('niveau','1000',this)">
-              <input type="radio" name="niveau" value="1000">Tot 1000
-            </label>
+          <div class="radio-groep" style="flex-direction:column;gap:6px;align-items:flex-start;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 1</span>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','5',this)">
+                <input type="radio" name="niveau" value="5">Tot 5
+              </label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','10',this)">
+                <input type="radio" name="niveau" value="10">Tot 10
+              </label>
+              <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('niveau','20',this)">
+                <input type="radio" name="niveau" value="20" checked>Tot 20
+              </label>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','100',this)">
+                <input type="radio" name="niveau" value="100">Tot 100
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 2</span>
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','1000',this)">
+                <input type="radio" name="niveau" value="1000">Tot 1 000
+              </label>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="niveau" value="10000" disabled>Tot 10 000
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 3</span>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="niveau" value="100000" disabled>Tot 100 000
+              </label>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="niveau" value="1000000" disabled>Tot 1 000 000
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -501,7 +537,7 @@
         ＋ Voeg blok toe aan bundel
       </button>
 
-     </div><!-- /sidebar-content tab-hoofdrekenen -->
+    </div><!-- /sidebar-content tab-hoofdrekenen -->
 
     <!-- ── GEMENGD OPTELLEN & AFTREKKEN SIDEBAR CONTENT ──────── -->
     <div class="sidebar-content" id="tab-gemengd" style="display:none">
@@ -514,22 +550,40 @@
         <div class="kaart-titel"><div class="icon">🎯</div>Niveau kiezen</div>
         <div class="form-rij">
           <label>Rekenen tot</label>
-          <div class="radio-groep">
-            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(5,this)">
-              <input type="radio" name="gem-niveau" value="5">Tot 5
-            </label>
-            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10,this)">
-              <input type="radio" name="gem-niveau" value="10">Tot 10
-            </label>
-            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(20,this)">
-              <input type="radio" name="gem-niveau" value="20">Tot 20
-            </label>
-            <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdNiveau(100,this)">
-              <input type="radio" name="gem-niveau" value="100" checked>Tot 100
-            </label>
-            <label class="radio-chip" onclick="App.selecteerGemengdNiveau(1000,this)">
-              <input type="radio" name="gem-niveau" value="1000">Tot 1000
-            </label>
+          <div class="radio-groep" style="flex-direction:column;gap:6px;align-items:flex-start;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 1</span>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(5,this)">
+                <input type="radio" name="gem-niveau" value="5">Tot 5
+              </label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10,this)">
+                <input type="radio" name="gem-niveau" value="10">Tot 10
+              </label>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(20,this)">
+                <input type="radio" name="gem-niveau" value="20">Tot 20
+              </label>
+              <label class="radio-chip geselecteerd" onclick="App.selecteerGemengdNiveau(100,this)">
+                <input type="radio" name="gem-niveau" value="100" checked>Tot 100
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 2</span>
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(1000,this)">
+                <input type="radio" name="gem-niveau" value="1000">Tot 1 000
+              </label>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="gem-niveau" value="10000" disabled>Tot 10 000
+              </label>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span style="font-size:10px;font-weight:700;color:#1A3A5C;background:#dce8f7;border-radius:4px;padding:2px 7px;white-space:nowrap;">Graad 3</span>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="gem-niveau" value="100000" disabled>Tot 100 000
+              </label>
+              <label class="radio-chip radio-chip-binnenkort">
+                <input type="radio" name="gem-niveau" value="1000000" disabled>Tot 1 000 000
+              </label>
+            </div>
           </div>
         </div>
       </div>
@@ -675,6 +729,29 @@
 
     </div><!-- /tab-gemengd -->
 
+    <!-- ── KOMMAGETALLEN SIDEBAR CONTENT ─────────────────────── -->
+    <div class="sidebar-content" id="tab-komma" style="display:none">
+      <div class="sectie-titel">🔢 Kommagetallen</div>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:16px;">
+        <div style="font-size:48px;">🚧</div>
+        <div style="font-size:16px;font-weight:700;color:#1A3A5C;">Binnenkort beschikbaar!</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;max-width:260px;">
+          Dit tabblad wordt deze zomer uitgebouwd met oefeningen voor kommagetallen
+          (optellen, aftrekken, vermenigvuldigen en delen) voor graad 2 en graad 3.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;width:100%;max-width:260px;margin-top:8px;">
+          <div style="background:#f0f6ff;border:1px solid #c0d8f0;border-radius:8px;padding:10px 14px;font-size:12px;color:#1A3A5C;text-align:left;">
+            ✅ Graad 2 — 1 decimaal (bv. 3,4 + 2,1)
+          </div>
+          <div style="background:#f0f6ff;border:1px solid #c0d8f0;border-radius:8px;padding:10px 14px;font-size:12px;color:#1A3A5C;text-align:left;">
+            ✅ Graad 3 — 2 decimalen (bv. 4,23 − 1,58)
+          </div>
+          <div style="background:#f0f6ff;border:1px solid #c0d8f0;border-radius:8px;padding:10px 14px;font-size:12px;color:#1A3A5C;text-align:left;">
+            ✅ Vermenigvuldigen &amp; delen met komma
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-komma -->
 
     <!-- ── TAFELS SIDEBAR CONTENT ──────────────────────────── -->
     <div class="sidebar-content" id="tab-tafels" style="display:none">
@@ -1292,7 +1369,7 @@
         <label style="font-weight:700;color:#1565c0;font-size:14px">✨ AI Vraagstukken</label>
         <div style="display:flex;align-items:center;gap:6px">
           <button onclick="document.getElementById('vs-uitleg-modal').style.display='flex'" style="padding:3px 10px;border-radius:12px;border:1.5px solid #90caf9;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:600;cursor:pointer">❓ Uitleg</button>
-          <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
+          <span id="vs-limiet-badge" class="vs-limiet-badge">?/20 vandaag</span>
         </div>
       </div>
 
@@ -1614,7 +1691,7 @@
 
     </div><!-- /tab-vraagstukken -->
 
-        <!-- ── TAB: REKENTAAL ───────────────────────────────────── -->
+    <!-- ── TAB: REKENTAAL ───────────────────────────────────── -->
     <div class="sidebar-content" id="tab-rekentaal" style="display:none">
 
       <div class="sectie-titel">Configureer een rekentaalblok</div>
@@ -1760,7 +1837,6 @@
 
     </div><!-- /tab-rekentaal -->
 
-
 </aside>
 
   <!-- ── PREVIEW ZONE ──────────────────────────────────────── -->
@@ -1807,18 +1883,19 @@
 <script src="modules/compenseren-aftrekken.js?v=2"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
+
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
 <script src="preview.js?v=41"></script>
 <script src="pdf-engine.js?v=51"></script>
-<script src="vraagstukken.js?v=2"></script>
+<script src="vraagstukken.js?v=34"></script>
+
 <script src="modules/rekentaal.js?v=14"></script>
 
 <script src="app.js?v=33"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
-  // Wacht even zodat Firebase Auth geladen is
   setTimeout(() => {
     if (window.VraagstukkenModule) {
       VraagstukkenModule.init();
@@ -1895,17 +1972,24 @@ function scrollTabsLeft(){
 function scrollNaarActieveTab(tabEl) {
   const tabs = document.querySelector(".sidebar-tabs");
   if (!tabs || !tabEl) return;
-  // Bereken positie van de tab relatief aan de scrollcontainer
   const tabLinks  = tabEl.offsetLeft;
   const tabBreedte = tabEl.offsetWidth;
   const containerBreedte = tabs.offsetWidth;
-  // Scroll zodat de tab gecentreerd staat (met min. 60px ruimte aan elke kant)
   const gewensteScroll = tabLinks - (containerBreedte / 2) + (tabBreedte / 2);
   tabs.scrollTo({
     left: Math.max(0, gewensteScroll),
     behavior: "smooth"
   });
 }
+
+// Kommagetallen-tab: enkel tonen/verbergen, geen app.js-logica nodig
+document.querySelector('.tab-komma')?.addEventListener('click', function() {
+  document.querySelectorAll('.sidebar-content').forEach(el => el.style.display = 'none');
+  document.getElementById('tab-komma').style.display = 'block';
+  document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+  this.classList.add('active');
+  if (window.scrollNaarActieveTab) scrollNaarActieveTab(this);
+});
 
 </script>
 
@@ -2068,7 +2152,5 @@ function vsKiesProcentSub(w,l,el){
   document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Procent: '+l);
 }
 </script>
-<script src="../device-id.js"></script>
-<script type="module" src="../guard.js"></script>
 </body>
 </html>
