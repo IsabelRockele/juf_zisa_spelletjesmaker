@@ -1164,6 +1164,7 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
 
  async function _tekenBlok(blok) {
   if (blok.bewerking === 'vraagstukken')                              { _tekenVraagstukBlok(blok); return; }
+  if (blok.bewerking === 'rekentaal')                                  { _tekenRekentaalBlok(blok); return; }
   if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'komma')  { _tekenKommaBlok(blok); return; }
   if (blok.bewerking === 'cijferen' && blok.config?.bewerking === 'delen')  { _tekenDeelBlok(blok); return; }
   if (blok.bewerking === 'cijferen') { _tekenCijferenBlok(blok); return; }
@@ -3710,5 +3711,16 @@ doc.setTextColor(26, 58, 92);
     y += totaalH + NABLOK;
     lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
   }
+
+  /* ── Rekentaal blok ─────────────────────────────────────────── */
+  function _tekenRekentaalBlok(blok) {
+    const layout = {
+      ML, CW, PH, MB,
+      VOOR_ZIN, ZINRUIMTE, NABLOK,
+      tekenVoettekst: _tekenVoettekst,
+    };
+    y = RekentaalPdfRenderer.tekenBlok(doc, blok, y, layout);
+  }
+
   return { genereer };
 })();
