@@ -1875,6 +1875,21 @@ function scrollTabsLeft(){
   });
 }
 
+function scrollNaarActieveTab(tabEl) {
+  const tabs = document.querySelector(".sidebar-tabs");
+  if (!tabs || !tabEl) return;
+  // Bereken positie van de tab relatief aan de scrollcontainer
+  const tabLinks  = tabEl.offsetLeft;
+  const tabBreedte = tabEl.offsetWidth;
+  const containerBreedte = tabs.offsetWidth;
+  // Scroll zodat de tab gecentreerd staat (met min. 60px ruimte aan elke kant)
+  const gewensteScroll = tabLinks - (containerBreedte / 2) + (tabBreedte / 2);
+  tabs.scrollTo({
+    left: Math.max(0, gewensteScroll),
+    behavior: "smooth"
+  });
+}
+
 </script>
 
 <!-- Uitleg modal -->
