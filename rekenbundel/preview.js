@@ -44,9 +44,12 @@ const Preview = (() => {
     const isGetallenlijn  = blok.bewerking === 'tafels-getallenlijn';
     const isCijferen      = blok.bewerking === 'cijferen';
     const isVraagstuk     = blok.bewerking === 'vraagstukken';
+    const isRekentaal     = blok.bewerking === 'rekentaal';
 
     // ── Vraagstuk: eigen renderer ────────────────────────────
-    if (isVraagstuk) return _maakVraagstukElement(blok);
+    if (isVraagstuk)  return _maakVraagstukElement(blok);
+    // ── Rekentaal: eigen renderer ────────────────────────────
+    if (isRekentaal)  return _maakRekentaalElement(blok);
     const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
     const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('compenseren');
     const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
@@ -56,7 +59,8 @@ const Preview = (() => {
                       isTafelsInzicht ? '🔍 Inzicht' :
                       isTafels      ? '✖️ Tafels' :
                       isSplitsingen ? '✂️ Splits' :
-                      isHerken ? '🔦 Herken brug' :
+                      isHerken    ? '🔦 Herken brug' :
+                      isRekentaal ? '🗣️ Rekentaal' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
@@ -1519,6 +1523,64 @@ const Preview = (() => {
           ${antwoordHTML}
         </div>
       </div>`;
+    return div;
+  }
+
+  /* ── Rekentaal blok renderer ─────────────────────────────── */
+  function _maakRekentaalElement(blok) {
+    const div = document.createElement('div');
+    div.className  = 'preview-blok';
+    div.dataset.id = blok.id;
+
+    const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
+
+    function _renderZin(oef) {
+      let t = (oef.template || '');
+      // Vervang {P} en {Q} voor vermenigvuldigen
+      t = t.replace('{P}', '<strong>' + (oef.P !== undefined ? oef.P : oef.a) + '</strong>');
+      t = t.replace('{Q}', '<strong>' + (oef.Q !== undefined ? oef.Q : oef.b) + '</strong>');
+      t = t.replace('{a}', '<strong>' + oef.a + '</strong>');
+      t = t.replace('{b}', oef.b !== undefined ? '<strong>' + oef.b + '</strong>' : '');
+      t = t.replace('{?}', '<span class="rt-invulhokje"></span>');
+      return t;
+    }
+
+    let oefHtml = '';
+    (blok.oefeningen || []).forEach((oef, idx) => {
+      const zinHtml = _renderZin(oef);
+      oefHtml += '<div class="rt-oef-rij">' +
+        '<span class="rt-oef-zin">' + zinHtml + '</span>' +
+        '<span class="rt-pijl">&#x2192;</span>' +
+        '<span class="rt-oef-lijn"></span>' +
+        '<button class="btn-del-oef" onclick="App.verwijderOefening(\'' + blok.id + '\',' + idx + ')" title="Verwijder">&#x2715;</button>' +
+        '</div>';
+    });
+
+    div.innerHTML = `
+      <div class="preview-blok-header">
+        <span class="blok-type-badge">&#x1F5E3;&#xFE0F; Rekentaal</span>
+        <span class="blok-niveau">Tot ${blok.niveau}</span>
+        <span style="color:rgba(255,255,255,.6);font-size:12px;margin-left:4px">${brugLabel}</span>
+        <div class="spacer"></div>
+        <div class="blok-acties">
+          <button class="btn-blok-actie verwijder"
+            onclick="App.verwijderBlok('${blok.id}')" title="Verwijder blok">&#x2715;</button>
+        </div>
+      </div>
+      <div class="preview-blok-body">
+        <div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">
+          <span class="opdrachtzin-tekst" id="zin-tekst-${blok.id}">${esc(blok.opdrachtzin)}</span>
+          <button class="btn-bewerk-zin" onclick="App.bewerkZin('${blok.id}')" title="Bewerk">&#x270F;&#xFE0F;</button>
+        </div>
+        <div class="rt-oefeningen-lijst">
+          ${oefHtml}
+        </div>
+      </div>
+      <div class="preview-blok-footer">
+        <span class="footer-info">${(blok.oefeningen || []).length} oefeningen &middot; rekentaal</span>
+        <button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button>
+      </div>`;
+
     return div;
   }
 
