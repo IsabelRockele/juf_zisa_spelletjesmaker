@@ -1982,14 +1982,7 @@ function scrollNaarActieveTab(tabEl) {
   });
 }
 
-// Kommagetallen-tab: enkel tonen/verbergen, geen app.js-logica nodig
-document.querySelector('.tab-komma')?.addEventListener('click', function() {
-  document.querySelectorAll('.sidebar-content').forEach(el => el.style.display = 'none');
-  document.getElementById('tab-komma').style.display = 'block';
-  document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
-  this.classList.add('active');
-  if (window.scrollNaarActieveTab) scrollNaarActieveTab(this);
-});
+// Kommagetallen-tab wordt afgehandeld via App.toonBewerking('komma')
 
 </script>
 
