@@ -28,12 +28,22 @@ const Splitsingen = (() => {
     return paren;
   }
 
-  function _splits(n) {
-    const paren = [];
-    for (let a = 1; a < n; a++) paren.push([a, n - a]);
-    return paren;
+   function _splits(n, metNul = true) {
+  const paren = [];
+  for (let a = 1; a < n; a++) {
+    paren.push([a, n - a]);
   }
 
+  // Voeg soms één nulsplit toe, maar niet overmatig
+  if (metNul) {
+    if (Math.random() < 0.4) {
+      if (Math.random() < 0.5) paren.push([0, n]);
+      else paren.push([n, 0]);
+    }
+}
+
+  return paren;
+}
   function _getallen(niveau) {
     if (niveau <= 5)  return [3, 4, 5];
     if (niveau <= 10) return [3, 4, 5, 6, 7, 8, 9, 10];
