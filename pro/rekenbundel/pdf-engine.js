@@ -133,7 +133,11 @@ y += 5;
 
       // Bereken centreX voor splitsbeen — moet vóór somMarge want doelGetal nodig
      const delen   = oef.vraag.replace(' =', '').trim().split(' ');
-const doelIdx = (bewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
+// Bij gemengd blok: detecteer bewerking per oefening via het teken
+const oefBewerking = (bewerking === 'gemengd')
+  ? (oef.vraag.includes('−') || oef.vraag.includes('-') ? 'aftrekken' : 'optellen')
+  : bewerking;
+const doelIdx = (oefBewerking === 'optellen') ? 2 : (splitspositie === 'aftrekker' ? 2 : 0);
 const doelGetal = parseInt(delen[doelIdx]) || 0;
 
 // Alleen bij brugoefeningen: meer ruimte in de som
@@ -148,7 +152,7 @@ const somTekst = (delen.length >= 3)
 
       // Bij aftrektal: som naar rechts zodat linkervakje splitsbeen in kader valt
       // Bij 3 takken is de boom breder → meer marge nodig
-      const isAftrektal = heeftSplits && bewerking === 'aftrekken' && splitspositie === 'aftrektal';
+      const isAftrektal = heeftSplits && oefBewerking === 'aftrekken' && splitspositie === 'aftrektal';
       const extraMarge = isAftrektal ? (aantalTakken === 3 ? 13 : 6) : 0;
       const somMarge = marge + extraMarge;
       const somStartX = ox + somMarge;
