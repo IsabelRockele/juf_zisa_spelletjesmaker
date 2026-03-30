@@ -635,3 +635,13 @@ header .badge {
 .tab-verbinden { background: var(--klok-oranje); color: #1A3A5C; }
 .tab-verbinden:hover { background: #FFC080; }
 .tab-verbinden.active { background: #FF8C00 !important; color: #fff; border-bottom-color: #c45e00 !important; font-weight: 800; }
+
+/* Schrijven tab */
+.tab-schrijven { background: #e8d5f5; color: #3a1a6c; }
+.tab-schrijven:hover { background: #d5b8f0; }
+.tab-schrijven.active { background: #8e44ad !important; color: #fff; border-bottom-color: #6c3483 !important; font-weight: 800; }
+
+/* Begrippen tab */
+.tab-begrippen { background: #fde8f5; color: #5a1a4c; }
+.tab-begrippen:hover { background: #f5c8e8; }
+.tab-begrippen.active { background: #9b2576 !important; color: #fff; border-bottom-color: #7a1a5a !important; font-weight: 800; }
