@@ -24,6 +24,8 @@
       <div class="sidebar-tab tab-verbinden" onclick="toonTab('verbinden',this)">🔗 Verbinden</div>
       <div class="sidebar-tab tab-ordenen" onclick="toonTab('ordenen',this)">📅 Ordenen</div>
       <div class="sidebar-tab tab-maateenheden" onclick="toonTab('maateenheden',this)">📏 Maat<br>eenheden</div>
+      <div class="sidebar-tab tab-schrijven" onclick="toonTab('schrijven',this)">✏️ Schrijven</div>
+      <div class="sidebar-tab tab-begrippen" onclick="toonTab('begrippen',this)">🧠 Begrippen</div>
     </div>
     <div class="tabs-scroll-hint">
       <button class="tabs-scroll-btn" onclick="scrollTabsLeft()">←</button>
@@ -33,6 +35,21 @@
 
     <!-- TAB KLOKLEZEN -->
     <div class="sidebar-content actief" id="tab-klok">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="klokLeerjaar" value="2" checked/> 2de</div>
+          <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="3"/> 3de</div>
+          <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="4"/> 4de</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🖼️</div>Kloktype</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="klokType" value="analoog" checked/> Analoge klok</div>
+          <div class="radio-chip"><input type="radio" name="klokType" value="digitaal"/> Digitale wekker</div>
+        </div>
+      </div>
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🕐</div>Klokken instellen</div>
         <div class="form-rij">
@@ -55,21 +72,30 @@
           <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="minuut"/> Per minuut</div>
         </div>
       </div>
-      <div class="config-kaart">
+      <!-- Tijdnotatie: enkel bij analoge klok -->
+      <div class="config-kaart" id="kaart-tijdnotatie">
         <div class="kaart-titel"><div class="icon">🔢</div>Tijdnotatie</div>
         <div class="radio-groep">
           <div class="radio-chip geselecteerd"><input type="radio" name="tijdnotatie" value="standaard" checked/> 1 wekker</div>
           <div class="radio-chip"><input type="radio" name="tijdnotatie" value="24uur"/> 24-uurs (2 wekkers)</div>
         </div>
       </div>
-      <div class="config-kaart">
+      <!-- 12u/24u keuze: enkel bij digitale wekker -->
+      <div class="config-kaart" id="kaart-digitaalNotatie" style="display:none;">
+        <div class="kaart-titel"><div class="icon">🔢</div>Tijdweergave</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="digitaalNotatie" value="12u" checked/> Tot 12u (9:30)</div>
+          <div class="radio-chip"><input type="radio" name="digitaalNotatie" value="24u"/> Tot 24u (21:30)</div>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-invulmethode">
         <div class="kaart-titel"><div class="icon">✏️</div>Invulmethode</div>
         <div class="radio-groep">
           <div class="radio-chip geselecteerd"><input type="radio" name="invulmethode" value="digitaal" checked/> Digitaal (wekker)</div>
           <div class="radio-chip"><input type="radio" name="invulmethode" value="analoog"/> Analoog (zin)</div>
         </div>
       </div>
-      <div class="config-kaart">
+      <div class="config-kaart" id="kaart-hulpmiddelen">
         <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
         <div class="form-rij">
           <label for="voorOverHulp">Voor/over hulp</label>
@@ -198,6 +224,11 @@
             <option value="8">8 paren</option>
           </select>
         </div>
+        <div class="checkbox-groep" style="margin-top:8px;">
+          <div class="checkbox-chip" id="chip-verb24Dagdeel">
+            <input type="checkbox" id="verb24Dagdeel"/> Met dagdeel (2u in de namiddag)
+          </div>
+        </div>
       </div>
       <div id="verb24Preview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
       <div class="config-kaart">
@@ -278,6 +309,102 @@
       <div id="maatPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
       <button class="genereer-knop voeg-toe-knop" id="voegMaatToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
     </div><!-- /tab-maateenheden -->
+
+    <!-- TAB SCHRIJVEN -->
+    <div class="sidebar-content" id="tab-schrijven">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="schrijfLeerjaar" value="2" checked/> 2de leerjaar</div>
+          <div class="radio-chip"><input type="radio" name="schrijfLeerjaar" value="3"/> 3de leerjaar</div>
+        </div>
+      </div>
+
+      <!-- 2de leerjaar opties -->
+      <div id="schrijf2deOpties">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfMoeilijkheid" value="uur" checked/> Hele uren</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfMoeilijkheid" value="halfuur" checked/> Halve uren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="schrijfMoeilijkheid" value="kwartier"/> Kwartieren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="schrijfMoeilijkheid" value="5minuten"/> Per 5 min</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+          <div class="radio-groep">
+            <div class="radio-chip"><input type="radio" name="schrijfAantal" value="4"/> 4</div>
+            <div class="radio-chip geselecteerd"><input type="radio" name="schrijfAantal" value="6" checked/> 6</div>
+            <div class="radio-chip"><input type="radio" name="schrijfAantal" value="8"/> 8</div>
+            <div class="radio-chip"><input type="radio" name="schrijfAantal" value="10"/> 10</div>
+          </div>
+          <input type="hidden" id="schrijfAantalWaarde" value="6"/>
+        </div>
+      </div>
+
+      <!-- 3de leerjaar opties -->
+      <div id="schrijf3deOpties" style="display:none;">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🌅</div>Dagdelen</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfDagdeel" value="ochtend" checked/> 's Ochtends (6-9u)</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfDagdeel" value="voormiddag" checked/> Voormiddag (9-12u)</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfDagdeel" value="namiddag" checked/> Namiddag (13-18u)</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="schrijfDagdeel" value="avond" checked/> 's Avonds (18-24u)</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+          <div class="radio-groep">
+            <div class="radio-chip"><input type="radio" name="schrijfAantal3" value="4"/> 4</div>
+            <div class="radio-chip geselecteerd"><input type="radio" name="schrijfAantal3" value="6" checked/> 6</div>
+            <div class="radio-chip"><input type="radio" name="schrijfAantal3" value="8"/> 8</div>
+          </div>
+          <input type="hidden" id="schrijfAantalWaarde3" value="6"/>
+        </div>
+      </div>
+
+      <div class="melding-box" id="meldingSchrijven"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinSchrijven" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Schrijf de tijd op twee manieren.</textarea>
+        </div>
+      </div>
+      <div id="schrijfPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegSchrijfToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div><!-- /tab-schrijven -->
+
+    <!-- TAB BEGRIPPEN -->
+    <div class="sidebar-content" id="tab-begrippen">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Centraal begrip</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="begrip" value="kwartier" checked/> Kwartier</div>
+          <div class="radio-chip"><input type="radio" name="begrip" value="halfuur"/> Halfuur</div>
+          <div class="radio-chip"><input type="radio" name="begrip" value="uur"/> Uur</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎨</div>Kleur</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="begripKleur" value="geel" checked/> Geel</div>
+          <div class="radio-chip"><input type="radio" name="begripKleur" value="blauw"/> Blauw</div>
+          <div class="radio-chip"><input type="radio" name="begripKleur" value="groen"/> Groen</div>
+          <div class="radio-chip"><input type="radio" name="begripKleur" value="oranje"/> Oranje</div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingBegrippen"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinBegrippen" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Kleur de kaartjes die kloppen in de juiste kleur.</textarea>
+        </div>
+      </div>
+      <div id="begrippenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegBegripToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div><!-- /tab-begrippen -->
 
   </aside>
 
