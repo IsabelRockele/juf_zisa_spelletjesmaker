@@ -1203,32 +1203,44 @@ const KlokTijdverschil = (() => {
       const klokRij = document.createElement('div');
       klokRij.style.cssText = 'display:flex;align-items:center;gap:6px;justify-content:center;';
 
+      // Klok 1 met notatie eronder
+      const klok1Wrap = document.createElement('div');
+      klok1Wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
       const cvs1 = document.createElement('canvas');
       cvs1.width = cvs1.height = 90;
       cvs1.className = 'klok-vast';
       cvs1.style.cssText = 'flex-shrink:0;';
+      klok1Wrap.appendChild(cvs1);
+      if (metNotatie) {
+        const n1 = document.createElement('div');
+        n1.style.cssText = 'font-size:12px;color:#666;letter-spacing:2px;';
+        n1.textContent = '__ : __';
+        klok1Wrap.appendChild(n1);
+      }
 
       const pijl = document.createElement('div');
-      pijl.style.cssText = 'color:#4A90D9;font-size:14px;flex-shrink:0;';
+      pijl.style.cssText = 'color:#4A90D9;font-size:14px;flex-shrink:0;align-self:center;';
       pijl.textContent = '▶';
 
+      // Klok 2 met notatie eronder
+      const klok2Wrap = document.createElement('div');
+      klok2Wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
       const cvs2 = document.createElement('canvas');
       cvs2.width = cvs2.height = 90;
       cvs2.className = 'klok-vast';
       cvs2.style.cssText = 'flex-shrink:0;';
-
-      klokRij.appendChild(cvs1);
-      klokRij.appendChild(pijl);
-      klokRij.appendChild(cvs2);
-      cel.appendChild(klokRij);
-
-      // Optionele tijdnotatie
+      klok2Wrap.appendChild(cvs2);
       if (metNotatie) {
-        const notatieRij = document.createElement('div');
-        notatieRij.style.cssText = 'display:flex;justify-content:space-around;margin-top:4px;font-size:11px;color:#888;';
-        notatieRij.innerHTML = '<span>__ : __</span><span></span><span>__ : __</span>';
-        cel.appendChild(notatieRij);
+        const n2 = document.createElement('div');
+        n2.style.cssText = 'font-size:12px;color:#666;letter-spacing:2px;';
+        n2.textContent = '__ : __';
+        klok2Wrap.appendChild(n2);
       }
+
+      klokRij.appendChild(klok1Wrap);
+      klokRij.appendChild(pijl);
+      klokRij.appendChild(klok2Wrap);
+      cel.appendChild(klokRij);
 
       // Invulvak
       const invul = document.createElement('div');
