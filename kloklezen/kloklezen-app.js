@@ -91,7 +91,24 @@ const KlokLezen = (() => {
     return shuffleInPlace(perCatSelected);
   }
 
-  // ── Klok tekenen ──────────────────────────────────────────────
+  // Genereer stopwatch-tijden: HH:MM:SS objecten
+  function genereerStopwatchTijden(moeilijkheden, aantal) {
+    const tijden = [];
+    const gebruikt = new Set();
+    let pogingen = 0;
+    while (tijden.length < aantal && pogingen < 300) {
+      pogingen++;
+      const uur = Math.floor(Math.random() * 12) + 1;
+      const min = Math.floor(Math.random() * 60);
+      const sec = Math.floor(Math.random() * 60);
+      const key = `${uur}:${min}:${sec}`;
+      if (!gebruikt.has(key)) {
+        gebruikt.add(key);
+        tijden.push({ isStopwatch: true, uur, min, sec });
+      }
+    }
+    return tijden;
+  }
 
   function tekenKlokBasis(ctx, centerX, centerY, radius, toonHulpminuten, toon24Uur, voorOverHulpType) {
     const klokRadius = radius * 0.9;
@@ -372,10 +389,13 @@ const KlokLezen = (() => {
         ? (document.querySelector('input[name="digitaalNotatie"]:checked')?.value || '12u')
         : null;
 
-      // Bij 24u digitaal: genereer tijden van 13-23u
-      const tijden = isDigitaal && digitaalNotatie === '24u'
-        ? genereerTijdenSlim(moeilijkheden, numClocks).map(t => ({ ...t, uur: t.uur + 12 > 23 ? t.uur : t.uur + 12 }))
-        : genereerTijdenSlim(moeilijkheden, numClocks);
+      // Bij stopwatch: genereer mm:ss,hh tijden
+      const isStopwatch = isDigitaal && digitaalNotatie === 'stopwatch';
+      const tijden = isStopwatch
+        ? genereerStopwatchTijden(moeilijkheden, numClocks)
+        : isDigitaal && digitaalNotatie === '24u'
+          ? genereerTijdenSlim(moeilijkheden, numClocks).map(t => ({ ...t, uur: t.uur >= 12 ? t.uur : t.uur + 12 }))
+          : genereerTijdenSlim(moeilijkheden, numClocks);
 
       return {
         type:           'kloklezen',
@@ -1122,23 +1142,57 @@ const KlokVerbinden = (() => {
 const KlokTijdverschil = (() => {
 
   // ── Oefening genereren ────────────────────────────────────────
-  function genereerOefening(moeilijkheden, metHulplijn) {
-    const per5 = moeilijkheden.includes('5minuten');
-    const stap = per5 ? 5 : 1;
+  function genereerOefening(moeilijkheden, metHulplijn, metOverschrijding, metStopwatch, type23, klokType, metOverschrijdingMin) {
+    const per5   = moeilijkheden.includes('5minuten');
+    const perMin = moeilijkheden.includes('minuut');
+    const stap   = per5 ? 5 : perMin ? 1 : 5;
 
-    // Kies willekeurig beginuur (1-12) en beginminuut
+    if (metStopwatch) {
+      const uur = Math.floor(Math.random() * 12) + 1;
+      const minBegin = Math.floor(Math.random() * 55);
+      const secBegin = Math.floor(Math.random() * 55);
+      if (!metOverschrijdingMin) {
+        const sv = Math.max(1, Math.floor(Math.random() * (58 - secBegin)));
+        return { type: 'stopwatch', uur, minBegin, secBegin, uurEind: uur, minEind: minBegin, secEind: secBegin + sv, metHulplijn };
+      }
+      const verschilSec = Math.floor(Math.random() * 55) + 5;
+      const totaalSec = secBegin + verschilSec;
+      const extraMin = Math.floor(totaalSec / 60);
+      const secEind = totaalSec % 60;
+      let totaalMin = minBegin + extraMin;
+      const extraUur = metOverschrijding ? Math.floor(totaalMin / 60) : 0;
+      if (!metOverschrijding) totaalMin = Math.min(totaalMin, 59);
+      return { type: 'stopwatch', uur, minBegin, secBegin, uurEind: uur + extraUur, minEind: totaalMin % 60, secEind, metHulplijn };
+    }
+
+    if (type23 === 'uren') {
+      const minPool = [];
+      if (moeilijkheden.includes('uur'))      minPool.push(0);
+      if (moeilijkheden.includes('halfuur'))  minPool.push(30);
+      if (moeilijkheden.includes('kwartier')){ minPool.push(15); minPool.push(45); }
+      if (moeilijkheden.includes('5minuten')) for (let m=0;m<60;m+=5) minPool.push(m);
+      const minuten = minPool.length > 0 ? minPool : [0];
+      const uur1 = Math.floor(Math.random() * 10) + 1;
+      const min1 = minuten[Math.floor(Math.random() * minuten.length)];
+      return { type: 'uren', klokType: klokType || 'analoog', uur1, min1, uur2: uur1 + Math.floor(Math.random() * 6) + 1, min2: min1, metHulplijn };
+    }
+
     const uur = Math.floor(Math.random() * 12) + 1;
-    const maxBegin = 55 - stap; // zodat eindtijd altijd < 60 min
-    const beginMinStappen = Math.floor(Math.random() * (maxBegin / stap));
-    const beginMin = beginMinStappen * stap;
 
-    // Kies verschil: minstens 5 min, hoogstens de rest van het uur
-    const restStappen = Math.floor((60 - beginMin - stap) / stap);
+    if (metOverschrijding) {
+      const beginMin = 30 + Math.floor(Math.random() * Math.floor(25 / stap)) * stap;
+      const minVerschil = 60 - beginMin + stap;
+      const maxVerschil = Math.min(119 - beginMin, 59);
+      const verschil = minVerschil + Math.floor(Math.random() * Math.max(1, Math.floor((maxVerschil - minVerschil) / stap))) * stap;
+      const eindTotaal = beginMin + verschil;
+      return { uur, beginMin, eindMin: eindTotaal % 60, eindUur: uur + Math.floor(eindTotaal / 60), verschil, metHulplijn, metOverschrijding: true, klokType: klokType || 'analoog' };
+    }
+
+    const maxBegin = 60 - stap * 2;
+    const beginMin = Math.floor(Math.random() * Math.max(1, Math.floor(maxBegin / stap))) * stap;
+    const restStappen = Math.max(1, Math.floor((60 - beginMin - stap) / stap));
     const verschilStappen = Math.floor(Math.random() * restStappen) + 1;
-    const verschil = verschilStappen * stap;
-    const eindMin = beginMin + verschil;
-
-    return { uur, beginMin, eindMin, verschil, metHulplijn };
+    return { uur, beginMin, eindMin: beginMin + verschilStappen * stap, eindUur: uur, verschil: verschilStappen * stap, metHulplijn, metOverschrijding: false, klokType: klokType || 'analoog' };
   }
 
   // ── Hulpgetallenlijn tekenen ──────────────────────────────────
@@ -1230,7 +1284,6 @@ const KlokTijdverschil = (() => {
     container.innerHTML = '';
     const { oefeningen, metNotatie } = instellingen;
 
-    // Grid van 2 kolommen
     const grid = document.createElement('div');
     grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:10px;';
 
@@ -1238,61 +1291,110 @@ const KlokTijdverschil = (() => {
       const cel = document.createElement('div');
       cel.style.cssText = 'border:1px solid #dde8f5;border-radius:8px;padding:8px;background:#fafcff;';
 
-      // Klokken rij
       const klokRij = document.createElement('div');
       klokRij.style.cssText = 'display:flex;align-items:center;gap:6px;justify-content:center;';
 
-      // Klok 1 met notatie eronder
-      const klok1Wrap = document.createElement('div');
-      klok1Wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
-      const cvs1 = document.createElement('canvas');
-      cvs1.width = cvs1.height = 90;
-      cvs1.className = 'klok-vast';
-      cvs1.style.cssText = 'flex-shrink:0;';
-      klok1Wrap.appendChild(cvs1);
-      if (metNotatie) {
-        const n1 = document.createElement('div');
-        n1.style.cssText = 'font-size:12px;color:#666;letter-spacing:2px;';
-        n1.textContent = '__ : __';
-        klok1Wrap.appendChild(n1);
+      if (oef.type === 'stopwatch') {
+        // Digitale stopwatch-displays
+        const fmt = (u, m, s) =>
+          `${u.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+
+        const d1 = document.createElement('div');
+        d1.style.cssText = 'background:#d8e8fe;border:1.5px solid #4A90D9;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:bold;color:#1a3a8c;';
+        d1.textContent = fmt(oef.uur, oef.minBegin, oef.secBegin);
+
+        const pijl = document.createElement('div');
+        pijl.style.cssText = 'color:#4A90D9;font-size:14px;';
+        pijl.textContent = '▶';
+
+        const d2 = document.createElement('div');
+        d2.style.cssText = 'background:#d8e8fe;border:1.5px solid #4A90D9;border-radius:6px;padding:6px 10px;font-size:13px;font-weight:bold;color:#1a3a8c;';
+        d2.textContent = fmt(oef.uurEind, oef.minEind, oef.secEind);
+
+        klokRij.appendChild(d1);
+        klokRij.appendChild(pijl);
+        klokRij.appendChild(d2);
+        cel.appendChild(klokRij);
+
+        const invul = document.createElement('div');
+        invul.style.cssText = 'text-align:center;margin-top:6px;font-size:11px;color:#555;';
+        invul.innerHTML = `Verschil: <span style="border-bottom:1px solid #333;display:inline-block;width:22px;"></span> u <span style="border-bottom:1px solid #333;display:inline-block;width:22px;"></span> min <span style="border-bottom:1px solid #333;display:inline-block;width:22px;"></span> sec`;
+        cel.appendChild(invul);
+
+      } else if (oef.type === 'uren') {
+        // Verschil in uren: twee klokken of wekkers
+        const maakDisplay = (uur, min) => {
+          const el = document.createElement('div');
+          if (oef.klokType === 'digitaal') {
+            el.style.cssText = 'background:#d8e8fe;border:1.5px solid #4A90D9;border-radius:6px;padding:8px 12px;font-size:15px;font-weight:bold;color:#1a3a8c;';
+            el.textContent = `${uur.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}`;
+          } else {
+            const cvs = document.createElement('canvas');
+            cvs.width = cvs.height = 70;
+            setTimeout(() => tekenKlokCanvas(cvs, uur, min), 10);
+            el.appendChild(cvs);
+          }
+          return el;
+        };
+        klokRij.appendChild(maakDisplay(oef.uur1, oef.min1));
+        const pijl = document.createElement('div');
+        pijl.style.cssText = 'color:#4A90D9;font-size:14px;align-self:center;';
+        pijl.textContent = '▶';
+        klokRij.appendChild(pijl);
+        klokRij.appendChild(maakDisplay(oef.uur2, oef.min2));
+        cel.appendChild(klokRij);
+        const invul = document.createElement('div');
+        invul.style.cssText = 'text-align:center;margin-top:6px;font-size:11px;color:#555;';
+        invul.innerHTML = `Verschil: <span style="border-bottom:1px solid #333;display:inline-block;width:40px;"></span> uur`;
+        cel.appendChild(invul);
+
+      } else {
+        // Minuten- of uren-verschil: analoog of digitaal
+        const isDigitaal = oef.klokType === 'digitaal';
+
+        const maakKlokEl = (uur, min) => {
+          if (isDigitaal) {
+            const d = document.createElement('div');
+            d.style.cssText = 'background:#d8e8fe;border:1.5px solid #4A90D9;border-radius:6px;padding:8px 12px;font-size:15px;font-weight:bold;color:#1a3a8c;white-space:nowrap;';
+            d.textContent = `${uur.toString().padStart(2,'0')}:${min.toString().padStart(2,'0')}`;
+            return d;
+          } else {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
+            const cvs = document.createElement('canvas');
+            cvs.width = cvs.height = 90; cvs.className = 'klok-vast';
+            wrap.appendChild(cvs);
+            if (metNotatie) {
+              const n = document.createElement('div');
+              n.style.cssText = 'font-size:12px;color:#666;letter-spacing:2px;';
+              n.textContent = '__ : __';
+              wrap.appendChild(n);
+            }
+            setTimeout(() => tekenKlokCanvas(cvs, uur, min), 10);
+            return wrap;
+          }
+        };
+
+        const el1 = maakKlokEl(oef.type === 'uren' ? oef.uur1 : oef.uur, oef.type === 'uren' ? oef.min1 : oef.beginMin);
+        const pijl = document.createElement('div');
+        pijl.style.cssText = 'color:#4A90D9;font-size:14px;flex-shrink:0;align-self:center;';
+        pijl.textContent = '▶';
+        const el2 = maakKlokEl(oef.type === 'uren' ? oef.uur2 : (oef.eindUur || oef.uur), oef.type === 'uren' ? oef.min2 : oef.eindMin);
+
+        klokRij.appendChild(el1);
+        klokRij.appendChild(pijl);
+        klokRij.appendChild(el2);
+        cel.appendChild(klokRij);
+
+        const invul = document.createElement('div');
+        invul.style.cssText = 'text-align:center;margin-top:6px;font-size:12px;color:#555;';
+        invul.innerHTML = oef.type === 'uren'
+          ? `Verschil: <span style="border-bottom:2px solid #333;display:inline-block;width:40px;"></span> uur`
+          : `Verschil: <span style="border-bottom:2px solid #333;display:inline-block;width:40px;"></span> min.`;
+        cel.appendChild(invul);
       }
 
-      const pijl = document.createElement('div');
-      pijl.style.cssText = 'color:#4A90D9;font-size:14px;flex-shrink:0;align-self:center;';
-      pijl.textContent = '▶';
-
-      // Klok 2 met notatie eronder
-      const klok2Wrap = document.createElement('div');
-      klok2Wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:4px;';
-      const cvs2 = document.createElement('canvas');
-      cvs2.width = cvs2.height = 90;
-      cvs2.className = 'klok-vast';
-      cvs2.style.cssText = 'flex-shrink:0;';
-      klok2Wrap.appendChild(cvs2);
-      if (metNotatie) {
-        const n2 = document.createElement('div');
-        n2.style.cssText = 'font-size:12px;color:#666;letter-spacing:2px;';
-        n2.textContent = '__ : __';
-        klok2Wrap.appendChild(n2);
-      }
-
-      klokRij.appendChild(klok1Wrap);
-      klokRij.appendChild(pijl);
-      klokRij.appendChild(klok2Wrap);
-      cel.appendChild(klokRij);
-
-      // Invulvak
-      const invul = document.createElement('div');
-      invul.style.cssText = 'text-align:center;margin-top:6px;font-size:12px;color:#555;';
-      invul.innerHTML = `Verschil: <span style="border-bottom:2px solid #333;display:inline-block;width:40px;"></span> min.`;
-      cel.appendChild(invul);
       grid.appendChild(cel);
-
-      // Teken klokken na insert met vaste grootte
-      setTimeout(() => {
-        tekenKlokCanvas(cvs1, oef.uur, oef.beginMin);
-        tekenKlokCanvas(cvs2, oef.uur, oef.eindMin);
-      }, 10);
     });
 
     container.appendChild(grid);
@@ -1300,15 +1402,17 @@ const KlokTijdverschil = (() => {
 
   // ── PDF tekenen ───────────────────────────────────────────────
   function tekenInPdf(doc, instellingen, yStart, margin, hulpCanvas) {
-    const { oefeningen, metNotatie } = instellingen;
+    const { oefeningen, metNotatie, metStopwatch } = instellingen;
     const pageW   = doc.internal.pageSize.getWidth();
     const pageH   = doc.internal.pageSize.getHeight();
     const breedte = pageW - 2 * margin;
     const cols    = 2;
     const colW    = (breedte - 8) / cols;
     const klokD   = 34;
-    const notatieH = metNotatie ? 10 : 0; // ruimte voor tijdnotatie onder klok
-    const oefH    = klokD + 20 + notatieH; // klok + invulvak + optioneel notatie
+    const notatieH = metNotatie ? 10 : 0;
+    const oefH    = instellingen.metStopwatch
+      ? 42 + notatieH   // stopwatch: meer ruimte voor displays + invulvak
+      : klokD + 20 + notatieH;
     let y = yStart;
 
     for (let i = 0; i < oefeningen.length; i += cols) {
@@ -1329,53 +1433,152 @@ const KlokTijdverschil = (() => {
         doc.setLineWidth(0.3);
         doc.roundedRect(x0, y, colW, oefH, 2, 2, 'FD');
 
-        // Begin klok
-        const klok1X = x0 + colW * 0.22;
-        tekenKlokPdfIntern(doc, klok1X, klokY, klokR, oef.uur, oef.beginMin);
+        if (oef.type === 'stopwatch') {
+          // Stopwatch: twee wekkers met HH:MM:SS
+          const fmt = (u, m, s) =>
+            `${u.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
 
-        // Pijl — start net na klok1, eindigt net voor klok2
-        const pijlMid = klokY;
-        const pijlX1  = klok1X + klokR + 2;   // net na rechterkant klok1
-        const pijlX2  = x0 + colW * 0.78 - klokR - 2; // net voor linkerkant klok2
-        doc.setDrawColor(74, 144, 217);
-        doc.setLineWidth(0.7);
-        doc.line(pijlX1, pijlMid, pijlX2, pijlMid);
-        doc.line(pijlX2 - 1.5, pijlMid - 1.2, pijlX2, pijlMid);
-        doc.line(pijlX2 - 1.5, pijlMid + 1.2, pijlX2, pijlMid);
+          const sw1X = x0 + colW * 0.25;
+          const sw2X = x0 + colW * 0.75;
+          const swY  = y + 5;
+          const swW  = colW * 0.42;
+          const swH  = 14;
 
-        // Eind klok
-        const klok2X = x0 + colW * 0.78;
-        tekenKlokPdfIntern(doc, klok2X, klokY, klokR, oef.uur, oef.eindMin);
+          // Display 1 — beginwekker
+          doc.setFillColor(220, 235, 250);
+          doc.setDrawColor(80, 130, 200); doc.setLineWidth(0.4);
+          doc.roundedRect(sw1X - swW/2, swY, swW, swH, 2, 2, 'FD');
+          doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(20, 50, 140);
+          doc.text(fmt(oef.uur, oef.minBegin, oef.secBegin), sw1X, swY + 9.5, { align: 'center' });
 
-        // Tijdnotatie onder klokken
-        if (metNotatie) {
-          const notY = klokY + klokR + 6;
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(80, 80, 80);
-          doc.setDrawColor(80, 80, 80);
-          doc.setLineWidth(0.5);
-          // Links: __  :  __
-          doc.line(klok1X - 10, notY + 1.5, klok1X - 3, notY + 1.5);
-          doc.text(':', klok1X, notY + 0.5, { align: 'center' });
-          doc.line(klok1X + 3, notY + 1.5, klok1X + 10, notY + 1.5);
-          // Rechts: __  :  __
-          doc.line(klok2X - 10, notY + 1.5, klok2X - 3, notY + 1.5);
-          doc.text(':', klok2X, notY + 0.5, { align: 'center' });
-          doc.line(klok2X + 3, notY + 1.5, klok2X + 10, notY + 1.5);
-          doc.setTextColor(0, 0, 0);
+          // Pijl
+          const pijlMid = swY + swH / 2;
+          doc.setDrawColor(74, 144, 217); doc.setLineWidth(0.7);
+          doc.line(sw1X + swW/2 + 1, pijlMid, sw2X - swW/2 - 1, pijlMid);
+          doc.line(sw2X - swW/2 - 3, pijlMid - 1.2, sw2X - swW/2 - 1, pijlMid);
+          doc.line(sw2X - swW/2 - 3, pijlMid + 1.2, sw2X - swW/2 - 1, pijlMid);
+
+          // Display 2 — eindwekker
+          doc.setFillColor(220, 235, 250);
+          doc.setDrawColor(80, 130, 200);
+          doc.roundedRect(sw2X - swW/2, swY, swW, swH, 2, 2, 'FD');
+          doc.setTextColor(20, 50, 140);
+          doc.text(fmt(oef.uurEind, oef.minEind, oef.secEind), sw2X, swY + 9.5, { align: 'center' });
+          doc.setFont(undefined, 'normal'); doc.setTextColor(0, 0, 0);
+
+        } else if (oef.type === 'uren') {
+          // Verschil in uren — analoog of digitaal
+          const klok1X = x0 + colW * 0.22;
+          const klok2X = x0 + colW * 0.78;
+          if (oef.klokType === 'digitaal') {
+            const swW = colW * 0.38; const swH = 12; const swY = y + 6;
+            doc.setFillColor(220, 235, 250); doc.setDrawColor(80, 130, 200); doc.setLineWidth(0.4);
+            doc.roundedRect(klok1X - swW/2, swY, swW, swH, 2, 2, 'FD');
+            doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(20, 50, 140);
+            doc.text(`${oef.uur1.toString().padStart(2,'0')}:${oef.min1.toString().padStart(2,'0')}`, klok1X, swY + 8.5, { align: 'center' });
+            const pijlM = swY + swH/2;
+            doc.setDrawColor(74, 144, 217); doc.setLineWidth(0.7);
+            doc.line(klok1X + swW/2 + 1, pijlM, klok2X - swW/2 - 1, pijlM);
+            doc.line(klok2X - swW/2 - 3, pijlM - 1.2, klok2X - swW/2 - 1, pijlM);
+            doc.line(klok2X - swW/2 - 3, pijlM + 1.2, klok2X - swW/2 - 1, pijlM);
+            doc.setFillColor(220, 235, 250); doc.setDrawColor(80, 130, 200);
+            doc.roundedRect(klok2X - swW/2, swY, swW, swH, 2, 2, 'FD');
+            doc.text(`${oef.uur2.toString().padStart(2,'0')}:${oef.min2.toString().padStart(2,'0')}`, klok2X, swY + 8.5, { align: 'center' });
+            doc.setFont(undefined, 'normal'); doc.setTextColor(0, 0, 0);
+          } else {
+            tekenKlokPdfIntern(doc, klok1X, klokY, klokR, oef.uur1, oef.min1);
+            const pijlMid = klokY;
+            doc.setDrawColor(74, 144, 217); doc.setLineWidth(0.7);
+            doc.line(klok1X + klokR + 2, pijlMid, klok2X - klokR - 2, pijlMid);
+            doc.line(klok2X - klokR - 4, pijlMid - 1.2, klok2X - klokR - 2, pijlMid);
+            doc.line(klok2X - klokR - 4, pijlMid + 1.2, klok2X - klokR - 2, pijlMid);
+            tekenKlokPdfIntern(doc, klok2X, klokY, klokR, oef.uur2, oef.min2);
+          }
+
+        } else {
+          // Minuten-verschil — analoog of digitaal
+          const klok1X = x0 + colW * 0.22;
+          const klok2X = x0 + colW * 0.78;
+
+          if (oef.klokType === 'digitaal') {
+            const swW = colW * 0.38; const swH = 12; const swY = y + (oefH - swH) / 2 - 6;
+            const fmt2 = (u, m) => `${u.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+            doc.setFillColor(220, 235, 250); doc.setDrawColor(80, 130, 200); doc.setLineWidth(0.4);
+            doc.roundedRect(klok1X - swW/2, swY, swW, swH, 2, 2, 'FD');
+            doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(20, 50, 140);
+            doc.text(fmt2(oef.uur, oef.beginMin), klok1X, swY + 8.5, { align: 'center' });
+            const pijlM = swY + swH/2;
+            doc.setDrawColor(74, 144, 217); doc.setLineWidth(0.7);
+            doc.line(klok1X + swW/2 + 1, pijlM, klok2X - swW/2 - 1, pijlM);
+            doc.line(klok2X - swW/2 - 3, pijlM - 1.2, klok2X - swW/2 - 1, pijlM);
+            doc.line(klok2X - swW/2 - 3, pijlM + 1.2, klok2X - swW/2 - 1, pijlM);
+            doc.setFillColor(220, 235, 250); doc.setDrawColor(80, 130, 200);
+            doc.roundedRect(klok2X - swW/2, swY, swW, swH, 2, 2, 'FD');
+            doc.text(fmt2(oef.eindUur || oef.uur, oef.eindMin), klok2X, swY + 8.5, { align: 'center' });
+            doc.setFont(undefined, 'normal'); doc.setTextColor(0, 0, 0);
+          } else {
+            tekenKlokPdfIntern(doc, klok1X, klokY, klokR, oef.uur, oef.beginMin);
+
+            // Pijl
+            const pijlMid = klokY;
+            const pijlX1  = klok1X + klokR + 2;
+            const pijlX2  = klok2X - klokR - 2;
+            doc.setDrawColor(74, 144, 217); doc.setLineWidth(0.7);
+            doc.line(pijlX1, pijlMid, pijlX2, pijlMid);
+            doc.line(pijlX2 - 1.5, pijlMid - 1.2, pijlX2, pijlMid);
+            doc.line(pijlX2 - 1.5, pijlMid + 1.2, pijlX2, pijlMid);
+
+            // Eind klok
+            const eindUur = oef.eindUur || oef.uur;
+            tekenKlokPdfIntern(doc, klok2X, klokY, klokR, eindUur, oef.eindMin);
+
+            // Bij overschrijding: uuraanduiding boven klokken
+            if (oef.metOverschrijding) {
+              doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(100, 100, 100);
+              doc.text(`${oef.uur}u`, klok1X, y + 3, { align: 'center' });
+              doc.text(`${eindUur}u`, klok2X, y + 3, { align: 'center' });
+              doc.setTextColor(0, 0, 0);
+            }
+
+            // Tijdnotatie
+            if (metNotatie) {
+              const notY = klokY + klokR + 6;
+              doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(80, 80, 80);
+              doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+              doc.line(klok1X - 10, notY + 1.5, klok1X - 3, notY + 1.5);
+              doc.text(':', klok1X, notY + 0.5, { align: 'center' });
+              doc.line(klok1X + 3, notY + 1.5, klok1X + 10, notY + 1.5);
+              doc.line(klok2X - 10, notY + 1.5, klok2X - 3, notY + 1.5);
+              doc.text(':', klok2X, notY + 0.5, { align: 'center' });
+              doc.line(klok2X + 3, notY + 1.5, klok2X + 10, notY + 1.5);
+              doc.setTextColor(0, 0, 0);
+            }
+          }
         }
 
-        // Invulvak verschil
         const invulY = y + oefH - 7;
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'normal');
-        doc.setTextColor(60, 60, 60);
-        doc.text('Verschil:', x0 + colW * 0.32, invulY, { align: 'right' });
-        doc.setDrawColor(80, 80, 80);
-        doc.setLineWidth(0.5);
-        doc.line(x0 + colW * 0.34, invulY + 0.5, x0 + colW * 0.66, invulY + 0.5);
-        doc.text('min.', x0 + colW * 0.68, invulY);
+        doc.setFontSize(11); doc.setFont(undefined, 'normal'); doc.setTextColor(60, 60, 60);
+        if (oef.type === 'stopwatch') {
+          doc.text('Verschil:', x0 + 2, invulY);
+          doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+          const lijnL = 14; let xv = x0 + 22;
+          doc.line(xv, invulY + 0.5, xv + lijnL, invulY + 0.5); xv += lijnL + 1;
+          doc.text('u', xv, invulY); xv += 5;
+          doc.line(xv, invulY + 0.5, xv + lijnL, invulY + 0.5); xv += lijnL + 1;
+          doc.text('min', xv, invulY); xv += 8;
+          doc.line(xv, invulY + 0.5, xv + lijnL, invulY + 0.5); xv += lijnL + 1;
+          doc.text('sec', xv, invulY);
+        } else if (oef.type === 'uren') {
+          doc.text('Verschil:', x0 + colW * 0.32, invulY, { align: 'right' });
+          doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+          doc.line(x0 + colW * 0.34, invulY + 0.5, x0 + colW * 0.66, invulY + 0.5);
+          doc.text('uur', x0 + colW * 0.68, invulY);
+        } else {
+          doc.text('Verschil:', x0 + colW * 0.32, invulY, { align: 'right' });
+          doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+          doc.line(x0 + colW * 0.34, invulY + 0.5, x0 + colW * 0.66, invulY + 0.5);
+          doc.text('min.', x0 + colW * 0.68, invulY);
+        }
         doc.setTextColor(0, 0, 0);
       }
 
@@ -1385,7 +1588,7 @@ const KlokTijdverschil = (() => {
       if (oefeningen[i]?.metHulplijn) {
         for (let k = 0; k < cols; k++) {
           const oef = oefeningen[i + k];
-          if (!oef) break;
+          if (!oef || oef.type === 'stopwatch') break;
           const x0 = margin + k * (colW + 8);
           tekenHulplijnPdf(doc, x0, y, colW, oef.beginMin, oef.eindMin, oef.uur);
         }
@@ -1441,26 +1644,55 @@ const KlokTijdverschil = (() => {
   return {
 
     leesInstellingen() {
-      const moeilijkheden = Array.from(
-        document.querySelectorAll('input[name="tvMoeilijkheid"]:checked')
-      ).map(cb => cb.value);
-
-      if (moeilijkheden.length === 0) {
-        document.getElementById('meldingTijdverschil').textContent = 'Kies minstens één optie!';
-        return null;
-      }
-      document.getElementById('meldingTijdverschil').textContent = '';
-
-      const aantalOef  = parseInt(document.getElementById('tvAantalOef').value) || 6;
-      const metHulp    = document.getElementById('tvHulplijn')?.checked || false;
+      const leerjaar = document.querySelector('input[name="tvLeerjaar"]:checked')?.value || '23';
+      const aantalOef = parseInt(document.getElementById('tvAantalOef').value) || 6;
+      const metHulp   = document.getElementById('tvHulplijn')?.checked || false;
       const metNotatie = document.getElementById('tvNotatie')?.checked || false;
 
       const oefeningen = [];
-      for (let i = 0; i < aantalOef; i++) {
-        oefeningen.push(genereerOefening(moeilijkheden, metHulp));
-      }
 
-      return { type: 'tijdverschil', moeilijkheden, aantalOef, metHulplijn: metHulp, metNotatie, oefeningen };
+      if (leerjaar === '23') {
+        // 2de/3de: minuten of uren verschil, analoog of digitaal
+        const type23     = document.querySelector('input[name="tvType23"]:checked')?.value || 'minuten';
+        const klokType   = document.querySelector('input[name="tvKlokType"]:checked')?.value || 'analoog';
+        const moeilijkheden = Array.from(
+          document.querySelectorAll('input[name="tvMoeilijkheid"]:checked')
+        ).map(cb => cb.value);
+        if (moeilijkheden.length === 0) {
+          document.getElementById('meldingTijdverschil').textContent = 'Kies minstens één moeilijkheidsgraad!';
+          return null;
+        }
+        document.getElementById('meldingTijdverschil').textContent = '';
+        for (let i = 0; i < aantalOef; i++) {
+          oefeningen.push(genereerOefening(moeilijkheden, metHulp, false, false, type23, klokType));
+        }
+        return { type: 'tijdverschil', leerjaar, type23, klokType, moeilijkheden, aantalOef, metHulplijn: metHulp, metNotatie, oefeningen };
+
+      } else if (leerjaar === '4') {
+        const moeilijkheden = Array.from(
+          document.querySelectorAll('input[name="tvMoeilijkheid4"]:checked')
+        ).map(cb => cb.value);
+        if (moeilijkheden.length === 0) {
+          document.getElementById('meldingTijdverschil').textContent = 'Kies minstens één nauwkeurigheid!';
+          return null;
+        }
+        const metOverschrijding = document.querySelector('input[name="tvOverschrijding4"]:checked')?.value === 'met';
+        document.getElementById('meldingTijdverschil').textContent = '';
+        for (let i = 0; i < aantalOef; i++) {
+          oefeningen.push(genereerOefening(moeilijkheden, metHulp, metOverschrijding, false, 'minuten', 'analoog'));
+        }
+        return { type: 'tijdverschil', leerjaar, moeilijkheden, metOverschrijding, aantalOef, metHulplijn: metHulp, metNotatie, oefeningen };
+
+      } else {
+        // 5de/6de: altijd HH:MM:SS
+        const metOverschrijdingMin = document.querySelector('input[name="tvOverschrijdingMin"]:checked')?.value === 'met';
+        const metOverschrijdingUur = document.querySelector('input[name="tvOverschrijdingUur"]:checked')?.value === 'met';
+        document.getElementById('meldingTijdverschil').textContent = '';
+        for (let i = 0; i < aantalOef; i++) {
+          oefeningen.push(genereerOefening([], metHulp, metOverschrijdingUur, true, 'seconden', 'digitaal', metOverschrijdingMin));
+        }
+        return { type: 'tijdverschil', leerjaar, metOverschrijdingMin, metOverschrijdingUur, metStopwatch: true, aantalOef, metHulplijn: metHulp, metNotatie, oefeningen };
+      }
     },
 
     tekenPreviewHtml,
@@ -1486,58 +1718,22 @@ const KlokBegrippen = (() => {
   // Kaartjes per begrip: juiste en foute antwoorden
   const KAARTJES = {
     kwartier: {
-      juist: [
-        '15 minuten',
-        'de helft van een halfuur',
-        '¼ van een uur',
-        '1/4 uur',
-        '60 seconden × 15',
-        '3 × 5 minuten',
-      ],
-      fout: [
-        '30 minuten',
-        'de helft van een uur',
-        '20 minuten',
-        '½ uur',
-        '2 kwartieren',
-        '45 minuten',
-      ],
+      juist:        ['15 minuten', 'de helft van een halfuur', '¼ van een uur', '1/4 uur', '3 × 5 minuten'],
+      juistSeconden:['900 seconden', '60 × 15 seconden'],
+      fout:         ['30 minuten', 'de helft van een uur', '20 minuten', '½ uur', '2 kwartieren', '45 minuten'],
+      foutSeconden: ['1800 seconden', '3600 seconden', '60 seconden'],
     },
     halfuur: {
-      juist: [
-        '30 minuten',
-        'de helft van een uur',
-        '2 kwartieren',
-        '½ uur',
-        '1800 seconden',
-        '6 × 5 minuten',
-      ],
-      fout: [
-        '15 minuten',
-        '¼ van een uur',
-        '45 minuten',
-        '3 kwartieren',
-        '20 minuten',
-        '1 uur',
-      ],
+      juist:        ['30 minuten', 'de helft van een uur', '2 kwartieren', '½ uur', '6 × 5 minuten'],
+      juistSeconden:['1800 seconden', '60 × 30 seconden'],
+      fout:         ['15 minuten', '¼ van een uur', '45 minuten', '3 kwartieren', '20 minuten', '1 uur'],
+      foutSeconden: ['900 seconden', '3600 seconden', '600 seconden'],
     },
     uur: {
-      juist: [
-        '60 minuten',
-        '4 kwartieren',
-        '2 halfuren',
-        '3600 seconden',
-        '12 × 5 minuten',
-        '60 × 60 seconden',
-      ],
-      fout: [
-        '30 minuten',
-        '3 kwartieren',
-        '45 minuten',
-        '1800 seconden',
-        '24 uur',
-        '100 minuten',
-      ],
+      juist:        ['60 minuten', '4 kwartieren', '2 halfuren', '12 × 5 minuten'],
+      juistSeconden:['3600 seconden', '60 × 60 seconden'],
+      fout:         ['30 minuten', '3 kwartieren', '45 minuten', '1800 seconden', '24 uur', '100 minuten'],
+      foutSeconden: ['900 seconden', '7200 seconden', '600 seconden'],
     },
   };
 
@@ -1557,11 +1753,16 @@ const KlokBegrippen = (() => {
     return a;
   }
 
-  function genereerKaartjes(begrip) {
+  function genereerKaartjes(begrip, metSeconden) {
     const data = KAARTJES[begrip];
-    const juist = shuffleArr(data.juist).slice(0, 4);
-    const fout  = shuffleArr(data.fout).slice(0, 4);
-    // Combineer en schud — markeer welke juist zijn (voor antwoordsleutel)
+    const juistPool = metSeconden
+      ? [...data.juist, ...data.juistSeconden]
+      : data.juist;
+    const foutPool = metSeconden
+      ? [...data.fout, ...data.foutSeconden]
+      : data.fout;
+    const juist = shuffleArr(juistPool).slice(0, 4);
+    const fout  = shuffleArr(foutPool).slice(0, 4);
     const alle = [
       ...juist.map(t => ({ tekst: t, juist: true })),
       ...fout.map(t => ({ tekst: t, juist: false })),
@@ -1653,10 +1854,11 @@ const KlokBegrippen = (() => {
   // ── Publieke API ──────────────────────────────────────────────
   return {
     leesInstellingen() {
-      const begrip = document.querySelector('input[name="begrip"]:checked')?.value || 'kwartier';
-      const kleur  = document.querySelector('input[name="begripKleur"]:checked')?.value || 'geel';
-      const kaartjes = genereerKaartjes(begrip);
-      return { type: 'begrippen', begrip, kleur, kaartjes };
+      const begrip      = document.querySelector('input[name="begrip"]:checked')?.value || 'kwartier';
+      const kleur       = document.querySelector('input[name="begripKleur"]:checked')?.value || 'geel';
+      const metSeconden = document.getElementById('begripMetSeconden')?.checked || false;
+      const kaartjes    = genereerKaartjes(begrip, metSeconden);
+      return { type: 'begrippen', begrip, kleur, metSeconden, kaartjes };
     },
     tekenPreviewHtml,
     tekenInPdf,
@@ -2360,7 +2562,7 @@ const Bundel = (() => {
         const groepeerdInst = { ...basisInst, numClocks: alleTijden.length, tijden: alleTijden };
 
         if (basisInst.klokType === 'digitaal') {
-          // Digitale wekker preview
+          const isStopwatch = basisInst.digitaalNotatie === 'stopwatch';
           const inhoud = document.createElement('div');
           inhoud.className = 'preview-inhoud';
           inhoud.style.cssText = 'display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px;';
@@ -2370,15 +2572,21 @@ const Bundel = (() => {
             const cel = document.createElement('div');
             cel.style.cssText = 'border:2px solid #90bce0;border-radius:8px;overflow:hidden;background:#f0f8ff;';
 
-            // Digitale display
+            // Digitale display — HH:MM:SS bij stopwatch, HH:MM anders
             const display = document.createElement('div');
-            display.style.cssText = 'background:#e8f0fe;padding:10px;text-align:center;font-size:20px;font-weight:bold;color:#1a3a8c;letter-spacing:2px;border-bottom:1px solid #90bce0;';
-            display.textContent = `${(t.uur||0).toString().padStart(2,'0')}:${(t.minuut||0).toString().padStart(2,'0')}`;
+            display.style.cssText = `background:#e8f0fe;padding:10px;text-align:center;font-size:${isStopwatch ? 15 : 20}px;font-weight:bold;color:#1a3a8c;letter-spacing:1px;border-bottom:1px solid #90bce0;`;
+            if (isStopwatch) {
+              display.textContent = `${(t.uur||0).toString().padStart(2,'0')}:${(t.min||0).toString().padStart(2,'0')}:${(t.sec||0).toString().padStart(2,'0')}`;
+            } else {
+              display.textContent = `${(t.uur||0).toString().padStart(2,'0')}:${(t.minuut||0).toString().padStart(2,'0')}`;
+            }
 
             // Schrijflijn
             const lijn = document.createElement('div');
-            lijn.style.cssText = 'padding:6px 8px;font-size:11px;color:#666;display:flex;align-items:center;gap:4px;';
-            lijn.innerHTML = 'Het is <span style="flex:1;border-bottom:1px solid #555;display:inline-block;margin-left:4px;"></span>';
+            lijn.style.cssText = 'padding:6px 8px 4px;font-size:14px;color:#444;';
+            lijn.innerHTML = isStopwatch
+              ? `Het is<br><span style="display:block;border-bottom:1px solid #555;margin:6px 0 8px;"></span><span style="display:block;border-bottom:1px solid #555;margin-top:2px;"></span>`
+              : `Het is <span style="display:block;border-bottom:1px solid #555;margin-top:4px;"></span>`;
 
             cel.appendChild(display);
             cel.appendChild(lijn);
@@ -2600,8 +2808,8 @@ const Bundel = (() => {
     const wekkerH  = 20;
     const belR     = 2.5;
     const pootH    = 3;
-    const lijnOff  = 8;    // ruimte tussen "Het is" en schrijflijn
-    const celH     = belR * 2 + wekkerH + pootH + 7 + 6 + lijnOff + 4;
+    const lijnOff  = 8;
+    const celH     = belR * 2 + wekkerH + pootH + 7 + 6 + lijnOff + (inst?.digitaalNotatie === 'stopwatch' ? 16 : 8);
     let y = yStart;
 
     tijden.forEach((t, i) => {
@@ -2645,9 +2853,12 @@ const Bundel = (() => {
       doc.setLineWidth(0.3);
       doc.roundedRect(schermX, schermY, schermW, schermH, 2, 2, 'FD');
 
-      // Tijd
-      const tijdStr = `${(t.uur||0).toString().padStart(2,'0')}:${(t.minuut||0).toString().padStart(2,'0')}`;
-      doc.setFontSize(12); doc.setFont(undefined, 'bold');
+      // Tijd — stopwatch of gewone tijd
+      const isStopwatch = t.isStopwatch;
+      const tijdStr = isStopwatch
+        ? `${(t.uur||0).toString().padStart(2,'0')}:${(t.min||0).toString().padStart(2,'0')}:${(t.sec||0).toString().padStart(2,'0')}`
+        : `${(t.uur||0).toString().padStart(2,'0')}:${(t.minuut||0).toString().padStart(2,'0')}`;
+      doc.setFontSize(isStopwatch ? 13 : 12); doc.setFont(undefined, 'bold');
       doc.setTextColor(15, 40, 130);
       doc.text(tijdStr, cx, schermY + schermH * 0.68, { align: 'center' });
       doc.setFont(undefined, 'normal');
@@ -2659,15 +2870,26 @@ const Bundel = (() => {
       doc.roundedRect(wx + wekkerW * 0.13, pootY, pootW, pootH, 1, 1, 'F');
       doc.roundedRect(wx + wekkerW * 0.73, pootY, pootW, pootH, 1, 1, 'F');
 
-      // "Het is" — schrijflijn over volledige kolombreedte
-      const hetIsY = pootY + pootH + 7;
-      doc.setFontSize(14); doc.setFont(undefined, 'normal');
-      doc.setTextColor(60, 60, 60);
-      doc.text('Het is', x, hetIsY);
-      // Schrijflijn met meer marge eronder
-      doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
-      doc.line(x, hetIsY + lijnOff, x + colW, hetIsY + lijnOff);
-      doc.setTextColor(0, 0, 0);
+      // Schrijflijn(en) — stopwatch krijgt 2 lijnen
+      if (isStopwatch) {
+        const hetIsY = pootY + pootH + 7;
+        doc.setFontSize(14); doc.setFont(undefined, 'normal');
+        doc.setTextColor(60, 60, 60);
+        doc.text('Het is', x, hetIsY);
+        doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+        doc.line(x, hetIsY + lijnOff, x + colW, hetIsY + lijnOff);
+        // Tweede schrijflijn
+        doc.line(x, hetIsY + lijnOff + 9, x + colW, hetIsY + lijnOff + 9);
+        doc.setTextColor(0, 0, 0);
+      } else {
+        const hetIsY = pootY + pootH + 7;
+        doc.setFontSize(14); doc.setFont(undefined, 'normal');
+        doc.setTextColor(60, 60, 60);
+        doc.text('Het is', x, hetIsY);
+        doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.5);
+        doc.line(x, hetIsY + lijnOff, x + colW, hetIsY + lijnOff);
+        doc.setTextColor(0, 0, 0);
+      }
     });
 
     const aantalRijen = Math.ceil(tijden.length / cols);
@@ -2869,35 +3091,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const canvas = document.getElementById('mainCanvas');
 
-  // ── Maateenheden: zin-chips dynamisch opbouwen ────────────────
-  const maatzinGroep = document.getElementById('maatzinGroep');
-  if (maatzinGroep) {
-    Maateenheden.ALLE_ZINNEN.forEach(zin => {
-      const chip = document.createElement('div');
-      chip.className = 'checkbox-chip geselecteerd';
-      chip.dataset.zinId = zin.id;
-      const zinZonder = zin.zin.replace('{_}', '___');
-      chip.innerHTML = `<input type="checkbox" name="maatzin" value="${zin.id}" checked/> ${zinZonder}`;
-      maatzinGroep.appendChild(chip);
-    });
-    // Initiële preview
-    genereerMaatPreview();
-  }
+  // ── Maateenheden: preview initialiseren ──────────────────────
+  genereerMaatPreview();
 
   // ── KlokType toggle: analoog / digitale wekker ───────────────
   function updateKlokType() {
     const type = document.querySelector('input[name="klokType"]:checked')?.value || 'analoog';
-    const isDigitaal = type === 'digitaal';
+    const isDigitaal  = type === 'digitaal';
+    const notatie     = document.querySelector('input[name="digitaalNotatie"]:checked')?.value || '12u';
+    const isStopwatch = isDigitaal && notatie === 'stopwatch';
+
     document.getElementById('kaart-invulmethode').style.display   = isDigitaal ? 'none' : '';
     document.getElementById('kaart-hulpmiddelen').style.display    = isDigitaal ? 'none' : '';
     document.getElementById('kaart-tijdnotatie').style.display     = isDigitaal ? 'none' : '';
     document.getElementById('kaart-digitaalNotatie').style.display = isDigitaal ? '' : 'none';
+
+    // Bij stopwatch: moeilijkheidsgraad niet relevant
+    const kaartMoeilijk = document.querySelector('.config-kaart:has(input[name="moeilijkheid"])');
+    if (kaartMoeilijk) kaartMoeilijk.style.display = isStopwatch ? 'none' : '';
+
     const ta = document.getElementById('opdrachtzin');
-    if (ta && isDigitaal) ta.value = 'Schrijf hoe laat het is. Bijvoorbeeld: Het is 5 voor 12.';
-    else if (ta && !isDigitaal) updateOpdrachtzin();
+    if (ta) {
+      if (isStopwatch) ta.value = 'Schrijf de tijd op. Bijvoorbeeld: Het is 9 uur, 21 minuten en 35 seconden.';
+      else if (isDigitaal) ta.value = 'Schrijf hoe laat het is. Bijvoorbeeld: Het is 5 voor 12.';
+      else updateOpdrachtzin();
+    }
   }
 
-  document.querySelectorAll('input[name="klokType"]').forEach(r => {
+  document.querySelectorAll('input[name="klokType"], input[name="digitaalNotatie"]').forEach(r => {
     r.addEventListener('change', updateKlokType);
   });
 
@@ -3021,7 +3242,7 @@ document.addEventListener('DOMContentLoaded', () => {
     KlokBegrippen.tekenPreviewHtml(document.getElementById('begrippenPreview'), inst);
   }
 
-  document.querySelectorAll('input[name="begrip"], input[name="begripKleur"]')
+  document.querySelectorAll('input[name="begrip"], input[name="begripKleur"], #begripMetSeconden')
     .forEach(el => el.addEventListener('change', genereerBegripPreview));
 
   document.getElementById('voegBegripToeBtn')?.addEventListener('click', () => {
@@ -3095,19 +3316,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const inst = KlokTijdverschil.leesInstellingen();
     if (!inst) return;
     KlokTijdverschil.tekenPreviewHtml(document.getElementById('tvPreview'), inst);
+    // Opdrachtzin aanpassen
+    const ta = document.getElementById('opdrachtzinTijdverschil');
+    if (ta && !ta._aangepast) {
+      ta.value = inst.metStopwatch
+        ? 'Hoeveel uur, minuten en seconden liggen er tussen de twee tijden?'
+        : 'Hoeveel minuten liggen er tussen de twee klokken?';
+    }
   }
+
+  document.querySelectorAll('input[name="tvMoeilijkheid"], input[name="tvMoeilijkheid4"], input[name="tvOverschrijding4"], input[name="tvOverschrijdingMin"], input[name="tvOverschrijdingUur"], input[name="tvKlokType"], #tvHulplijn, #tvNotatie')
+    .forEach(el => el.addEventListener('change', genereerTvPreview));
+
+  document.getElementById('opdrachtzinTijdverschil')?.addEventListener('input', function() {
+    this._aangepast = true;
+  });
 
   document.getElementById('voegTvToeBtn')?.addEventListener('click', () => {
     const inst = KlokTijdverschil.leesInstellingen();
     if (!inst) return;
     const opdrachtzin = document.getElementById('opdrachtzinTijdverschil').value.trim()
-      || "Hoeveel minuten liggen er tussen de twee klokken?";
+      || (inst.metStopwatch
+        ? 'Hoeveel uur, minuten en seconden liggen er tussen de twee tijden?'
+        : 'Hoeveel minuten liggen er tussen de twee klokken?');
     Bundel.voegToe(inst, opdrachtzin);
     genereerTvPreview();
   });
 
-  document.querySelectorAll('input[name="tvMoeilijkheid"], #tvHulplijn, #tvNotatie')
-    .forEach(el => el.addEventListener('change', genereerTvPreview));
+  // ── Verbinden sub-tabs ────────────────────────────────────────
+  window.toonVerbSubTab = function(nr) {
+    document.getElementById('verbSectie1').style.display = nr === 1 ? '' : 'none';
+    document.getElementById('verbSectie2').style.display = nr === 2 ? '' : 'none';
+    const btn1 = document.getElementById('verbSubTab1');
+    const btn2 = document.getElementById('verbSubTab2');
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#4A90D9';
+    btn1.style.background = nr === 1 ? 'var(--accent)' : '#fff';
+    btn1.style.color       = nr === 1 ? '#fff' : 'var(--accent)';
+    btn1.style.borderColor = 'var(--accent)';
+    btn2.style.background  = nr === 2 ? 'var(--accent)' : '#fff';
+    btn2.style.color        = nr === 2 ? '#fff' : 'var(--accent)';
+    btn2.style.borderColor  = 'var(--accent)';
+  };
+  function updateTvLeerjaar() {
+    const lj = document.querySelector('input[name="tvLeerjaar"]:checked')?.value || '23';
+    document.getElementById('tvOpties23').style.display = lj === '23' ? '' : 'none';
+    document.getElementById('tvOpties4').style.display  = lj === '4'  ? '' : 'none';
+    document.getElementById('tvOpties56').style.display = lj === '56' ? '' : 'none';
+    // Hulpmiddelen verbergen bij 5de/6de (stopwatch)
+    document.getElementById('kaart-tvHulp').style.display = lj === '56' ? 'none' : '';
+    // Opdrachtzin aanpassen
+    const ta = document.getElementById('opdrachtzinTijdverschil');
+    if (ta && !ta._aangepast) {
+      if (lj === '56') ta.value = 'Hoeveel uur, minuten en seconden liggen er tussen de twee tijden?';
+      else if (document.querySelector('input[name="tvType23"]:checked')?.value === 'uren') ta.value = 'Hoeveel uur verschil zit er tussen de twee klokken?';
+      else ta.value = 'Hoeveel minuten liggen er tussen de twee klokken?';
+    }
+    genereerTvPreview();
+  }
+
+  document.querySelectorAll('input[name="tvLeerjaar"]').forEach(r => r.addEventListener('change', updateTvLeerjaar));
+  document.querySelectorAll('input[name="tvType23"]').forEach(r => r.addEventListener('change', () => {
+    const ta = document.getElementById('opdrachtzinTijdverschil');
+    if (ta && !ta._aangepast) {
+      ta.value = r.value === 'uren'
+        ? 'Hoeveel uur verschil zit er tussen de twee klokken?'
+        : 'Hoeveel minuten liggen er tussen de twee klokken?';
+    }
+    genereerTvPreview();
+  }));
+
+  updateTvLeerjaar(); // initieel
 
   genereerTvPreview();
   function genereerVerbPreview() {
