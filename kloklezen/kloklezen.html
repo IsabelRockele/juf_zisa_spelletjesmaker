@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kloklezen Werkblad Generator — jufzisa.be</title>
+  <link rel="stylesheet" href="kloklezen.css"/>
+</head>
+<body>
+<header>
+  <a href="../index.html" class="menu-knop">⬅ Keuzemenu</a>
+  <div class="logo">🕐 Klok<span>lezen</span></div>
+  <div class="subtitle">— jufzisa.be</div>
+  <div class="spacer"></div>
+</header>
+
+<div class="main">
+
+  <!-- KOLOM 1: SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-tabs" id="sidebarTabs">
+      <div class="sidebar-tab tab-klok active" onclick="toonTab('klok',this)">🕐 Klok<br>lezen</div>
+      <div class="sidebar-tab tab-tijdverschil" onclick="toonTab('tijdverschil',this)">⏱️ Tijd<br>verschil</div>
+      <div class="sidebar-tab tab-verbinden" onclick="toonTab('verbinden',this)">🔗 Verbinden</div>
+      <div class="sidebar-tab tab-ordenen" onclick="toonTab('ordenen',this)">📅 Ordenen</div>
+      <div class="sidebar-tab tab-maateenheden" onclick="toonTab('maateenheden',this)">📏 Maat<br>eenheden</div>
+    </div>
+    <div class="tabs-scroll-hint">
+      <button class="tabs-scroll-btn" onclick="scrollTabsLeft()">←</button>
+      Scroll voor meer keuzes
+      <button class="tabs-scroll-btn" onclick="scrollTabsRight()">→</button>
+    </div>
+
+    <!-- TAB KLOKLEZEN -->
+    <div class="sidebar-content actief" id="tab-klok">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🕐</div>Klokken instellen</div>
+        <div class="form-rij">
+          <label for="numClocks">Aantal klokken</label>
+          <select id="numClocks">
+            <option value="3">3 klokken</option>
+            <option value="9" selected>9 klokken</option>
+            <option value="18">18 klokken</option>
+          </select>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Wat wil je oefenen?</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd" id="chip-alles"><input type="checkbox" id="selecteerAlles"/> Alles</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="moeilijkheid" value="uur" checked/> Hele uren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="halfuur"/> Halve uren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="kwartier"/> Kwartieren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="5minuten"/> Per 5 min</div>
+          <div class="checkbox-chip"><input type="checkbox" name="moeilijkheid" value="minuut"/> Per minuut</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Tijdnotatie</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="tijdnotatie" value="standaard" checked/> 1 wekker</div>
+          <div class="radio-chip"><input type="radio" name="tijdnotatie" value="24uur"/> 24-uurs (2 wekkers)</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">✏️</div>Invulmethode</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="invulmethode" value="digitaal" checked/> Digitaal (wekker)</div>
+          <div class="radio-chip"><input type="radio" name="invulmethode" value="analoog"/> Analoog (zin)</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
+        <div class="form-rij">
+          <label for="voorOverHulp">Voor/over hulp</label>
+          <select id="voorOverHulp">
+            <option value="geen" selected>Geen</option>
+            <option value="hulp1">Hulp 1 (2 helften)</option>
+            <option value="hulp2">Hulp 2 (4 kwarten)</option>
+          </select>
+        </div>
+        <div class="checkbox-groep" style="margin-top:6px;">
+          <div class="checkbox-chip geselecteerd" id="chip-hulpminuten"><input type="checkbox" id="hulpminuten" checked/> Hulpminuten</div>
+          <div class="checkbox-chip" id="chip-hulp24uur"><input type="checkbox" id="hulp24uur"/> Hulp 24u</div>
+          <div class="checkbox-chip" id="chip-hulpAnaloog"><input type="checkbox" id="hulpAnaloog"/> Hulp analoog</div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingContainer"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzin" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Schrijf de tijd op zoals op een digitale klok.</textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="genereer-knop" id="genereerBtn" style="flex:1;">🔄 Vernieuwen</button>
+        <button class="genereer-knop voeg-toe-knop" id="voegToeBtn" style="flex:1;">➕ Voeg toe</button>
+      </div>
+    </div>
+
+    <!-- TAB TIJDVERSCHIL -->
+    <div class="sidebar-content" id="tab-tijdverschil">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Nauwkeurigheid</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="tvMoeilijkheid" value="5minuten" checked/> Per 5 minuten</div>
+          <div class="checkbox-chip"><input type="checkbox" name="tvMoeilijkheid" value="minuut"/> Per minuut</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+        <div class="radio-groep">
+          <div class="radio-chip"><input type="radio" name="tvAantal" value="4"/> 4</div>
+          <div class="radio-chip geselecteerd"><input type="radio" name="tvAantal" value="6" checked/> 6</div>
+          <div class="radio-chip"><input type="radio" name="tvAantal" value="8"/> 8</div>
+        </div>
+        <input type="hidden" id="tvAantalOef" value="6"/>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip" id="chip-tvHulplijn">
+            <input type="checkbox" id="tvHulplijn"/> Hulpgetallenlijn
+          </div>
+          <div class="checkbox-chip" id="chip-tvNotatie">
+            <input type="checkbox" id="tvNotatie"/> Tijdlijn invullen (__ : __)
+          </div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingTijdverschil"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinTijdverschil" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Hoeveel minuten liggen er tussen de twee klokken?</textarea>
+        </div>
+      </div>
+      <div id="tvPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegTvToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB VERBINDEN -->
+    <div class="sidebar-content" id="tab-verbinden">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="uur" checked/> Hele uren</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="halfuur" checked/> Halve uren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="kwartier"/> Kwartieren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="5minuten"/> Per 5 min</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Tijdnotatie rechts</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="verbNotatie" value="digitaal12" checked/> Digitaal (5:30)</div>
+          <div class="radio-chip"><input type="radio" name="verbNotatie" value="spreektaal"/> Spreektaal (5 uur 30)</div>
+          <div class="radio-chip"><input type="radio" name="verbNotatie" value="digitaal24"/> Digitaal 24u</div>
+          <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinA"/> Zin (voor/half)</div>
+          <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinB"/> Zin (voor/over uur)</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal rijen</div>
+        <div class="form-rij">
+          <select id="verbAantalRijen">
+            <option value="1">1 rij (4 klokken)</option>
+            <option value="2" selected>2 rijen (8 klokken)</option>
+            <option value="3">3 rijen (12 klokken)</option>
+            <option value="4">4 rijen (16 klokken)</option>
+          </select>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip" id="chip-verbHulp"><input type="checkbox" id="verbHulpminuten"/> Hulpminuten op klok</div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingVerbinden"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinVerbinden" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Trek een lijn van de klok naar de juiste tijd.</textarea>
+        </div>
+      </div>
+      <div id="verbPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegVerbToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+
+      <div style="border-top:2px solid var(--border);margin:14px 0 10px;"></div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔁</div>24u ↔ 12u verbinden</div>
+        <div class="form-rij">
+          <label for="verb24aantalParen">Aantal paren</label>
+          <select id="verb24aantalParen">
+            <option value="4">4 paren</option>
+            <option value="6" selected>6 paren</option>
+            <option value="8">8 paren</option>
+          </select>
+        </div>
+      </div>
+      <div id="verb24Preview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin 24u</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinVerbinden24u" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Verbind de 24-uurs tijd met de juiste daguren.</textarea>
+        </div>
+      </div>
+      <button class="genereer-knop voeg-toe-knop" id="voegVerb24ToeBtn" style="width:100%;">➕ Voeg 24u↔12u toe</button>
+    </div>
+
+    <!-- TAB ORDENEN -->
+    <div class="sidebar-content" id="tab-ordenen">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal wekkers</div>
+        <div class="radio-groep">
+          <div class="radio-chip"><input type="radio" name="ordAantal" value="6"/> 6</div>
+          <div class="radio-chip geselecteerd"><input type="radio" name="ordAantal" value="12" checked/> 12</div>
+          <div class="radio-chip"><input type="radio" name="ordAantal" value="16"/> 16</div>
+        </div>
+        <div class="checkbox-groep" style="margin-top:8px;">
+          <div class="checkbox-chip" id="chip-ordPer5min">
+            <input type="checkbox" id="ordPer5min"/> Per 5 minuten
+          </div>
+          <div class="checkbox-chip geselecteerd" id="chip-ordToonGrenzen">
+            <input type="checkbox" id="ordToonGrenzen" checked/> Grenzen tonen (6u-9u)
+          </div>
+        </div>
+        <input type="hidden" id="ordAantalWekkers" value="12"/>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🌅</div>Dagdeelgrenzen (uren)</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Pas de grenzen aan voor jouw school</div>
+        <div id="ordGrenzenContainer" style="display:flex;flex-direction:column;gap:6px;font-size:12px;"></div>
+      </div>
+      <div class="melding-box" id="meldingOrdenen"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinOrdenen" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Kleur elke wekker in de kleur van het juiste dagdeel.</textarea>
+        </div>
+      </div>
+      <div id="ordPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegOrdToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB MAATEENHEDEN -->
+    <div class="sidebar-content" id="tab-maateenheden">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📏</div>Kies de zinnen</div>
+        <div class="checkbox-groep" id="maatzinGroep">
+          <!-- Ingevuld door JS op basis van Maateenheden.ALLE_ZINNEN -->
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Lay-out</div>
+        <div class="form-rij">
+          <label for="maatKolommen">Kolommen</label>
+          <select id="maatKolommen">
+            <option value="1">1 kolom</option>
+            <option value="2" selected>2 kolommen</option>
+          </select>
+        </div>
+        <div class="checkbox-groep" style="margin-top:6px;">
+          <div class="checkbox-chip" id="chip-maatMetSleutel">
+            <input type="checkbox" id="maatMetSleutel"/> Met antwoordsleutel
+          </div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingMaateenheden"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinMaat" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Vul in.</textarea>
+        </div>
+      </div>
+      <!-- Kleine inline preview -->
+      <div id="maatPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegMaatToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div><!-- /tab-maateenheden -->
+
+  </aside>
+
+  <!-- KOLOM 2: BUNDEL VISUELE PREVIEW (enige content kolom) -->
+  <div class="content">
+    <div class="toolbar">
+      <span class="toolbar-label">📋 Bundelopbouw</span>
+      <div class="toolbar-spacer"></div>
+      <div id="bundelMelding" class="bundel-melding-toolbar"></div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap;cursor:pointer;">
+        <input type="checkbox" id="titelElkePagina" checked style="cursor:pointer;"/>
+        Titel op elke pagina
+      </label>
+      <button class="toolbar-knop primair" id="downloadPdfBtn">📄 Download PDF</button>
+    </div>
+    <div class="canvas-area" id="bundelPreview">
+      <div class="preview-leeg">
+        <div style="font-size:48px;margin-bottom:12px;">📋</div>
+        <p>Je bundel is nog leeg.<br>Stel een oefening in links en klik <strong>➕ Voeg toe</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Scripts: jsPDF eerst, dan app (alles in één bestand) -->
+<canvas id="mainCanvas" width="552" height="552" style="display:none;"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="kloklezen-app.js"></script>
+
+</body>
+</html>
