@@ -2110,44 +2110,42 @@ const KlokOrdenen = (() => {
       const pageH   = doc.internal.pageSize.getHeight();
       const breedte = pageW - 2 * margin;
 
+      // Legenda alleen op eerste pagina
       let y = tekenLegendaPdf(doc, grenzen, instellingen.toonGrenzen ?? true, margin, yStart, pageW);
 
-      // Wekkers in 4×n raster
-      const cols    = 4;
-      const wekkerW = (breedte - (cols - 1) * 3) / cols;
-      const wekkerH = wekkerW * 0.65;
-      const rasterPadding = 3;
+      const cols          = 4;
+      const wekkerW       = (breedte - (cols - 1) * 3) / cols;
+      const wekkerH       = wekkerW * 0.65;
+      const rasterPadding = 4;
+      const belExtra      = 4;   // belletje steekt boven y uit
+      const rijH          = wekkerH + rasterPadding + belExtra;
+
+      let rijOpPagina = 0;
+      let eersteRijOpPagina = true;
 
       wekkers.forEach((w, i) => {
         const col = i % cols;
-        const rij = Math.floor(i / cols);
 
-        // Nieuwe pagina nodig?
-        if (i > 0 && col === 0) {
-          const rijY = y + rij * (wekkerH + rasterPadding);
-          if (rijY + wekkerH + margin > pageH) {
+        if (col === 0 && i > 0) {
+          // Checkt of volgende rij inclusief belletje en marge past
+          if (y + (rijOpPagina + 1) * rijH + wekkerH + margin > pageH) {
             doc.addPage();
-            y = yStart;
+            y = margin + belExtra; // voldoende marge bovenaan
+            rijOpPagina = 0;
+          } else {
+            rijOpPagina++;
           }
         }
 
         const wx = margin + col * (wekkerW + rasterPadding);
-        const wy = y + Math.floor(i / cols) * (wekkerH + rasterPadding);
+        const wy = y + rijOpPagina * rijH;
 
-        // Kleine willekeurige rotatie (beperkt — jsPDF heeft geen echte shape-rotatie)
         const rotaties = [-4, -2, 0, 2, 4, -3, 3, -1, 1];
         const rot = rotaties[i % rotaties.length];
-
         tekenWekkerPdf(doc, wx, wy, wekkerW, wekkerH, w.uur24, w.minuut, rot);
-
-        // Kleurstrookje onderaan wekker (invulzone)
-        const [r, g, b] = w.dagdeel.kleur;
-        // Toon enkel een lege strook — kinderen kleuren de wekker zelf in
-        // (in de PDF tonen we GEEN kleur, enkel een lege wekker)
       });
 
-      const aantalRijen = Math.ceil(wekkers.length / cols);
-      return y + aantalRijen * (wekkerH + rasterPadding);
+      return y + (rijOpPagina + 1) * rijH + 2;
     },
   };
 
@@ -2989,7 +2987,7 @@ const Bundel = (() => {
       if (groep.type === 'schrijven')     eersteBlokH = 40;
       if (groep.type === 'begrippen')     eersteBlokH = 50;
       if (groep.type === 'tijdverschil') eersteBlokH = 50;
-      if (groep.type === 'ordenen')      eersteBlokH = 50;
+      if (groep.type === 'ordenen')      eersteBlokH = 90;  // legenda + eerste rij wekkers
 
       const benodigdVoorStart = opdrachtzinH + eersteBlokH;
 
