@@ -41,6 +41,7 @@
           <div class="radio-chip geselecteerd"><input type="radio" name="klokLeerjaar" value="2" checked/> 2de</div>
           <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="3"/> 3de</div>
           <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="4"/> 4de</div>
+          <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="5"/> 5de</div>
         </div>
       </div>
       <div class="config-kaart">
@@ -86,6 +87,7 @@
         <div class="radio-groep">
           <div class="radio-chip geselecteerd"><input type="radio" name="digitaalNotatie" value="12u" checked/> Tot 12u (9:30)</div>
           <div class="radio-chip"><input type="radio" name="digitaalNotatie" value="24u"/> Tot 24u (21:30)</div>
+          <div class="radio-chip"><input type="radio" name="digitaalNotatie" value="stopwatch"/> Stopwatch (04:35,47)</div>
         </div>
       </div>
       <div class="config-kaart" id="kaart-invulmethode">
@@ -126,13 +128,85 @@
 
     <!-- TAB TIJDVERSCHIL -->
     <div class="sidebar-content" id="tab-tijdverschil">
+
+      <!-- Leerjaar keuze -->
       <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🎯</div>Nauwkeurigheid</div>
-        <div class="checkbox-groep">
-          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="tvMoeilijkheid" value="5minuten" checked/> Per 5 minuten</div>
-          <div class="checkbox-chip"><input type="checkbox" name="tvMoeilijkheid" value="minuut"/> Per minuut</div>
+        <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="tvLeerjaar" value="23" checked/> 2de/3de</div>
+          <div class="radio-chip"><input type="radio" name="tvLeerjaar" value="4"/> 4de</div>
+          <div class="radio-chip"><input type="radio" name="tvLeerjaar" value="56"/> 5de/6de</div>
         </div>
       </div>
+
+      <!-- 2de/3de leerjaar opties -->
+      <div id="tvOpties23">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🎯</div>Type oefening</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="tvType23" value="minuten" checked/> Verschil in minuten</div>
+            <div class="radio-chip"><input type="radio" name="tvType23" value="uren"/> Verschil in uren</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🖼️</div>Kloktype</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="tvKlokType" value="analoog" checked/> Analoge klok</div>
+            <div class="radio-chip"><input type="radio" name="tvKlokType" value="digitaal"/> Digitale wekker</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="tvMoeilijkheid" value="uur" checked/> Hele uren</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="tvMoeilijkheid" value="halfuur" checked/> Halve uren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="tvMoeilijkheid" value="kwartier"/> Kwartieren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="tvMoeilijkheid" value="5minuten"/> Per 5 min</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4de leerjaar opties -->
+      <div id="tvOpties4" style="display:none;">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🎯</div>Nauwkeurigheid</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="tvMoeilijkheid4" value="5minuten" checked/> Per 5 minuten</div>
+            <div class="checkbox-chip"><input type="checkbox" name="tvMoeilijkheid4" value="minuut"/> Per minuut</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">⚡</div>Overschrijding</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="tvOverschrijding4" value="zonder" checked/> Zonder overschrijding uur</div>
+            <div class="radio-chip"><input type="radio" name="tvOverschrijding4" value="met"/> Met overschrijding uur</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5de/6de leerjaar opties -->
+      <div id="tvOpties56" style="display:none;">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">⏱️</div>Altijd HH:MM:SS</div>
+          <p style="font-size:12px;color:var(--muted);margin:4px 0 8px;">Tijden bevatten steeds uren, minuten én seconden.</p>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">⚡</div>Overschrijding minuut</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="tvOverschrijdingMin" value="zonder" checked/> Zonder</div>
+            <div class="radio-chip"><input type="radio" name="tvOverschrijdingMin" value="met"/> Met overschrijding minuut</div>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">⚡</div>Overschrijding uur</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="tvOverschrijdingUur" value="zonder" checked/> Zonder</div>
+            <div class="radio-chip"><input type="radio" name="tvOverschrijdingUur" value="met"/> Met overschrijding uur</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gemeenschappelijk -->
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
         <div class="radio-groep">
@@ -142,15 +216,11 @@
         </div>
         <input type="hidden" id="tvAantalOef" value="6"/>
       </div>
-      <div class="config-kaart">
+      <div class="config-kaart" id="kaart-tvHulp">
         <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
         <div class="checkbox-groep">
-          <div class="checkbox-chip" id="chip-tvHulplijn">
-            <input type="checkbox" id="tvHulplijn"/> Hulpgetallenlijn
-          </div>
-          <div class="checkbox-chip" id="chip-tvNotatie">
-            <input type="checkbox" id="tvNotatie"/> Tijdlijn invullen (__ : __)
-          </div>
+          <div class="checkbox-chip" id="chip-tvHulplijn"><input type="checkbox" id="tvHulplijn"/> Hulpgetallenlijn</div>
+          <div class="checkbox-chip" id="chip-tvNotatie"><input type="checkbox" id="tvNotatie"/> Tijdlijn invullen (__ : __)</div>
         </div>
       </div>
       <div class="melding-box" id="meldingTijdverschil"></div>
@@ -166,78 +236,90 @@
 
     <!-- TAB VERBINDEN -->
     <div class="sidebar-content" id="tab-verbinden">
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
-        <div class="checkbox-groep">
-          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="uur" checked/> Hele uren</div>
-          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="halfuur" checked/> Halve uren</div>
-          <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="kwartier"/> Kwartieren</div>
-          <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="5minuten"/> Per 5 min</div>
-        </div>
-      </div>
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🔢</div>Tijdnotatie rechts</div>
-        <div class="radio-groep">
-          <div class="radio-chip geselecteerd"><input type="radio" name="verbNotatie" value="digitaal12" checked/> Digitaal (5:30)</div>
-          <div class="radio-chip"><input type="radio" name="verbNotatie" value="spreektaal"/> Spreektaal (5 uur 30)</div>
-          <div class="radio-chip"><input type="radio" name="verbNotatie" value="digitaal24"/> Digitaal 24u</div>
-          <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinA"/> Zin (voor/half)</div>
-          <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinB"/> Zin (voor/over uur)</div>
-        </div>
-      </div>
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🔢</div>Aantal rijen</div>
-        <div class="form-rij">
-          <select id="verbAantalRijen">
-            <option value="1">1 rij (4 klokken)</option>
-            <option value="2" selected>2 rijen (8 klokken)</option>
-            <option value="3">3 rijen (12 klokken)</option>
-            <option value="4">4 rijen (16 klokken)</option>
-          </select>
-        </div>
-      </div>
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
-        <div class="checkbox-groep">
-          <div class="checkbox-chip" id="chip-verbHulp"><input type="checkbox" id="verbHulpminuten"/> Hulpminuten op klok</div>
-        </div>
-      </div>
-      <div class="melding-box" id="meldingVerbinden"></div>
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
-        <div class="form-rij">
-          <textarea id="opdrachtzinVerbinden" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Trek een lijn van de klok naar de juiste tijd.</textarea>
-        </div>
-      </div>
-      <div id="verbPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
-      <button class="genereer-knop voeg-toe-knop" id="voegVerbToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
 
-      <div style="border-top:2px solid var(--border);margin:14px 0 10px;"></div>
+      <!-- Sub-tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button id="verbSubTab1" onclick="toonVerbSubTab(1)" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--accent);background:var(--accent);color:#fff;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔗 Klok ↔ Tijd</button>
+        <button id="verbSubTab2" onclick="toonVerbSubTab(2)" style="flex:1;padding:7px 4px;border-radius:7px;border:1.5px solid var(--border);background:#fff;color:var(--accent);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">🔁 24u ↔ 12u</button>
+      </div>
 
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🔁</div>24u ↔ 12u verbinden</div>
-        <div class="form-rij">
-          <label for="verb24aantalParen">Aantal paren</label>
-          <select id="verb24aantalParen">
-            <option value="4">4 paren</option>
-            <option value="6" selected>6 paren</option>
-            <option value="8">8 paren</option>
-          </select>
-        </div>
-        <div class="checkbox-groep" style="margin-top:8px;">
-          <div class="checkbox-chip" id="chip-verb24Dagdeel">
-            <input type="checkbox" id="verb24Dagdeel"/> Met dagdeel (2u in de namiddag)
+      <!-- Sub-tab 1: Klok ↔ Tijd -->
+      <div id="verbSectie1">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheid</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="uur" checked/> Hele uren</div>
+            <div class="checkbox-chip geselecteerd"><input type="checkbox" name="verbMoeilijkheid" value="halfuur" checked/> Halve uren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="kwartier"/> Kwartieren</div>
+            <div class="checkbox-chip"><input type="checkbox" name="verbMoeilijkheid" value="5minuten"/> Per 5 min</div>
           </div>
         </div>
-      </div>
-      <div id="verb24Preview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
-      <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin 24u</div>
-        <div class="form-rij">
-          <textarea id="opdrachtzinVerbinden24u" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Verbind de 24-uurs tijd met de juiste daguren.</textarea>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🔢</div>Tijdnotatie rechts</div>
+          <div class="radio-groep">
+            <div class="radio-chip geselecteerd"><input type="radio" name="verbNotatie" value="digitaal12" checked/> Digitaal (5:30)</div>
+            <div class="radio-chip"><input type="radio" name="verbNotatie" value="spreektaal"/> Spreektaal (5 uur 30)</div>
+            <div class="radio-chip"><input type="radio" name="verbNotatie" value="digitaal24"/> Digitaal 24u</div>
+            <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinA"/> Zin (voor/half)</div>
+            <div class="radio-chip"><input type="radio" name="verbNotatie" value="zinB"/> Zin (voor/over uur)</div>
+          </div>
         </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🔢</div>Aantal rijen</div>
+          <div class="form-rij">
+            <select id="verbAantalRijen">
+              <option value="1" selected>1 rij (4 klokken)</option>
+              <option value="2">2 rijen (8 klokken)</option>
+              <option value="3">3 rijen (12 klokken)</option>
+              <option value="4">4 rijen (16 klokken)</option>
+            </select>
+          </div>
+        </div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">💡</div>Hulpmiddelen</div>
+          <div class="checkbox-groep">
+            <div class="checkbox-chip" id="chip-verbHulp"><input type="checkbox" id="verbHulpminuten"/> Hulpminuten op klok</div>
+          </div>
+        </div>
+        <div class="melding-box" id="meldingVerbinden"></div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+          <div class="form-rij">
+            <textarea id="opdrachtzinVerbinden" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Trek een lijn van de klok naar de juiste tijd.</textarea>
+          </div>
+        </div>
+        <div id="verbPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
+        <button class="genereer-knop voeg-toe-knop" id="voegVerbToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
       </div>
-      <button class="genereer-knop voeg-toe-knop" id="voegVerb24ToeBtn" style="width:100%;">➕ Voeg 24u↔12u toe</button>
+
+      <!-- Sub-tab 2: 24u ↔ 12u -->
+      <div id="verbSectie2" style="display:none;">
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">🔁</div>24u ↔ 12u verbinden</div>
+          <div class="form-rij">
+            <label for="verb24aantalParen">Aantal paren</label>
+            <select id="verb24aantalParen">
+              <option value="4">4 paren</option>
+              <option value="6" selected>6 paren</option>
+              <option value="8">8 paren</option>
+            </select>
+          </div>
+          <div class="checkbox-groep" style="margin-top:8px;">
+            <div class="checkbox-chip" id="chip-verb24Dagdeel">
+              <input type="checkbox" id="verb24Dagdeel"/> Met dagdeel (2u in de namiddag)
+            </div>
+          </div>
+        </div>
+        <div id="verb24Preview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:13px;margin-bottom:10px;"></div>
+        <div class="config-kaart">
+          <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+          <div class="form-rij">
+            <textarea id="opdrachtzinVerbinden24u" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Verbind de 24-uurs tijd met de juiste daguren.</textarea>
+          </div>
+        </div>
+        <button class="genereer-knop voeg-toe-knop" id="voegVerb24ToeBtn" style="width:100%;">➕ Voeg 24u↔12u toe</button>
+      </div>
+
     </div>
 
     <!-- TAB ORDENEN -->
@@ -278,9 +360,35 @@
     <!-- TAB MAATEENHEDEN -->
     <div class="sidebar-content" id="tab-maateenheden">
       <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">📏</div>Kies de zinnen</div>
-        <div class="checkbox-groep" id="maatzinGroep">
-          <!-- Ingevuld door JS op basis van Maateenheden.ALLE_ZINNEN -->
+        <div class="kaart-titel"><div class="icon">1️⃣</div>Niveau 1 — Basisomzettingen</div>
+        <div class="checkbox-groep" id="maatNiveau1">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maatzin" value="u_min" checked/> 1 uur = ___ minuten</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maatzin" value="hu_min" checked/> 1 halfuur = ___ minuten</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maatzin" value="kw_min" checked/> 1 kwartier = ___ minuten</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maatzin" value="u_hu" checked/> 1 uur = ___ halfuren</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maatzin" value="d_u" checked/> 1 dag = ___ uren</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">2️⃣</div>Niveau 2 — Uitgebreide omzettingen</div>
+        <div class="checkbox-groep" id="maatNiveau2">
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="2kw_min"/> 2 kwartieren = ___ minuten</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="3kw_min"/> 3 kwartieren = ___ minuten</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="u_kw"/> 1 uur = ___ kwartieren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="kw_hu"/> 1 kwartier = de helft van ___</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="hu_kw"/> 1 halfuur = ___ kwartieren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="4hu_kw"/> 4 halfuren = ___ kwartieren</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="kw_u"/> 1 kwartier = ¼ van ___</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="hu_u"/> 1 halfuur = de helft van ___</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">3️⃣</div>Niveau 3 — Seconden</div>
+        <div class="checkbox-groep" id="maatNiveau3">
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="min_sec"/> 1 minuut = ___ seconden</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="u_sec"/> 1 uur = ___ seconden</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="hu_sec"/> 1 halfuur = ___ seconden</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maatzin" value="kw_sec"/> 1 kwartier = ___ seconden</div>
         </div>
       </div>
       <div class="config-kaart">
@@ -384,6 +492,11 @@
           <div class="radio-chip geselecteerd"><input type="radio" name="begrip" value="kwartier" checked/> Kwartier</div>
           <div class="radio-chip"><input type="radio" name="begrip" value="halfuur"/> Halfuur</div>
           <div class="radio-chip"><input type="radio" name="begrip" value="uur"/> Uur</div>
+        </div>
+        <div class="checkbox-groep" style="margin-top:8px;">
+          <div class="checkbox-chip" id="chip-begripSeconden">
+            <input type="checkbox" id="begripMetSeconden"/> Met seconden
+          </div>
         </div>
       </div>
       <div class="config-kaart">
