@@ -159,6 +159,10 @@ header .badge {
 .tab-ordenen:hover { background: #CE93D8; }
 .tab-ordenen.active { background: #9733b3 !important; color: #fff; border-bottom-color: #4A148C !important; font-weight: 800; }
 
+.tab-rangschikken { background: #d4f0e8; color: #1a5c42; }
+.tab-rangschikken:hover { background: #b8e6d4; }
+.tab-rangschikken.active { background: #1e8a5e !important; color: #fff; border-bottom-color: #145c3e !important; font-weight: 800; }
+
 .tabs-scroll-hint {
   display: flex;
   align-items: center;
