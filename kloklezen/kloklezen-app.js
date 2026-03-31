@@ -381,7 +381,8 @@ const KlokLezen = (() => {
       }
       document.getElementById('meldingContainer').textContent = '';
 
-      const numClocks  = parseInt(document.getElementById('numClocks').value);
+      const numRijen   = Math.max(1, parseInt(document.getElementById('numRijen')?.value) || 3);
+      const numClocks  = numRijen * 3;
       const klokType   = document.querySelector('input[name="klokType"]:checked')?.value || 'analoog';
       const leerjaar   = document.querySelector('input[name="klokLeerjaar"]:checked')?.value || '2';
       const isDigitaal = klokType === 'digitaal';
@@ -1645,7 +1646,7 @@ const KlokTijdverschil = (() => {
 
     leesInstellingen() {
       const leerjaar = document.querySelector('input[name="tvLeerjaar"]:checked')?.value || '23';
-      const aantalOef = parseInt(document.getElementById('tvAantalOef').value) || 6;
+      const aantalOef = Math.max(1, parseInt(document.getElementById('tvAantalRijen')?.value) || 3) * 2;
       const metHulp   = document.getElementById('tvHulplijn')?.checked || false;
       const metNotatie = document.getElementById('tvNotatie')?.checked || false;
 
@@ -2413,6 +2414,370 @@ const KlokSchrijven = (() => {
 
 })();
 
+/* ══════════════════════════════════════════════════════════════
+   KlokRangschikken — module
+   3 klokken per rij, rangschikken van vroeg naar laat
+   ══════════════════════════════════════════════════════════════ */
+
+const KlokRangschikken = (() => {
+
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Stap in minuten per nauwkeurigheid
+  const STAP = { uur: 60, halfuur: 30, kwartier: 15, '5min': 5, '1min': 1 };
+
+  // Genereer één groepje van 3 tijden
+  function genereerGroepje(niveau, nauwkeurigheid) {
+    const stap = STAP[nauwkeurigheid] || 60;
+
+    // Genereer een willekeurige tijd binnen de nauwkeurigheid
+    function willekeurigeTijd(uur) {
+      const aantalStappen = 60 / stap;
+      const minuut = Math.floor(Math.random() * aantalStappen) * stap;
+      return { uur, min: minuut };
+    }
+
+    let tijden = [];
+
+    if (niveau === '1') {
+      // Ver uit elkaar: 3 verschillende uren, minuten willekeurig binnen nauwkeurigheid
+      const uren = shuffle([1,2,3,4,5,6,7,8,9,10,11,12]).slice(0, 3).sort((a,b) => a-b);
+      tijden = uren.map(u => willekeurigeTijd(u));
+
+    } else if (niveau === '2') {
+      // Dicht bij elkaar: zelfde uur, 3 opeenvolgende stappen
+      const uur = Math.floor(Math.random() * 11) + 1;
+      const maxStapIndex = Math.max(0, Math.floor(60 / stap) - 3);
+      const startStap = Math.floor(Math.random() * (maxStapIndex + 1));
+      tijden = [
+        { uur, min: startStap * stap },
+        { uur, min: (startStap + 1) * stap },
+        { uur, min: (startStap + 2) * stap },
+      ];
+
+    } else {
+      // Over de uurgrens
+      const uur = Math.floor(Math.random() * 10) + 1;
+      if (stap >= 60) {
+        tijden = [
+          { uur: uur,     min: 0 },
+          { uur: uur + 1, min: 0 },
+          { uur: uur + 2, min: 0 },
+        ];
+      } else {
+        tijden = [
+          { uur,      min: 60 - stap },
+          { uur: uur + 1, min: 0 },
+          { uur: uur + 1, min: stap },
+        ];
+      }
+    }
+
+    // Sorteer, schud, rangorde toewijzen
+    const gesorteerd = [...tijden].sort((a, b) => a.uur * 60 + a.min - (b.uur * 60 + b.min));
+    const schud = shuffle([...gesorteerd]);
+    return schud.map(t => ({
+      ...t,
+      rang: gesorteerd.findIndex(g => g.uur === t.uur && g.min === t.min) + 1,
+    }));
+  }
+
+  // ── HTML preview ──────────────────────────────────────────────
+  function tekenPreviewHtml(container, instellingen) {
+    if (!container || !instellingen) return;
+    container.innerHTML = '';
+    const { groepjes, weergave } = instellingen;
+
+    groepjes.forEach(groep => {
+      // Kader per rij
+      const rij = document.createElement('div');
+      rij.style.cssText = 'display:flex;gap:10px;margin-bottom:10px;border:2px solid #c0d8ee;border-radius:10px;padding:10px;background:#fff;';
+
+      groep.forEach((t, gi) => {
+        const cel = document.createElement('div');
+        cel.style.cssText = 'flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;';
+
+        const toonType = weergave === 'gemengd'
+          ? (gi % 2 === 0 ? 'analoog' : 'digitaal')
+          : weergave;
+
+        if (toonType === 'digitaal') {
+          const wekkerWrap = document.createElement('div');
+          wekkerWrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;';
+
+          // Knopje
+          const knopje = document.createElement('div');
+          knopje.style.cssText = 'width:28px;height:9px;background:#5bbfba;border-radius:3px 3px 0 0;margin-bottom:-1px;z-index:1;';
+          wekkerWrap.appendChild(knopje);
+
+          // Body
+          const body = document.createElement('div');
+          body.style.cssText = 'background:#82d2d2;border:2px solid #5aafaa;border-radius:8px;padding:3px;width:80px;box-sizing:border-box;';
+
+          // Grijs frame
+          const frame = document.createElement('div');
+          frame.style.cssText = 'background:#a0afb4;border-radius:5px;padding:3px;';
+
+          // Wit scherm met tijd
+          const scherm = document.createElement('div');
+          scherm.style.cssText = 'background:#fff;border-radius:3px;padding:5px 6px;font-size:15px;font-weight:bold;color:#3c5060;text-align:center;letter-spacing:1px;';
+          scherm.textContent = `${t.uur.toString().padStart(2,'0')}:${t.min.toString().padStart(2,'0')}`;
+
+          frame.appendChild(scherm);
+          body.appendChild(frame);
+          wekkerWrap.appendChild(body);
+
+          // Pootjes
+          const pootjes = document.createElement('div');
+          pootjes.style.cssText = 'display:flex;justify-content:space-between;width:64px;margin-top:-1px;';
+          pootjes.innerHTML = '<div style="width:10px;height:6px;background:#646e73;border-radius:0 0 3px 3px;"></div><div style="width:10px;height:6px;background:#646e73;border-radius:0 0 3px 3px;"></div>';
+          wekkerWrap.appendChild(pootjes);
+
+          cel.appendChild(wekkerWrap);
+        } else {
+          // Analoge klok — volledig met cijfers en streepjes
+          const cvs = document.createElement('canvas');
+          const sz = 100;
+          cvs.width = cvs.height = sz;
+          cvs.style.cssText = 'width:66px;height:66px;';
+          setTimeout(() => {
+            const ctx = cvs.getContext('2d');
+            const cx = sz/2, cy = sz/2, r = sz/2 - 3;
+            // Buitenring
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+            ctx.fillStyle = '#A9D8E8'; ctx.fill();
+            // Wijzerplaat
+            ctx.beginPath(); ctx.arc(cx, cy, r*0.88, 0, 2*Math.PI);
+            ctx.fillStyle = '#fff'; ctx.fill();
+            // 60 streepjes
+            for (let i = 0; i < 60; i++) {
+              const hoek = (i - 15) * Math.PI / 30;
+              const buit = r * 0.88;
+              const binn = i % 5 === 0 ? buit * 0.83 : buit * 0.92;
+              ctx.beginPath();
+              ctx.moveTo(cx + buit*Math.cos(hoek), cy + buit*Math.sin(hoek));
+              ctx.lineTo(cx + binn*Math.cos(hoek), cy + binn*Math.sin(hoek));
+              ctx.strokeStyle = '#555'; ctx.lineWidth = i % 5 === 0 ? 1.5 : 0.8;
+              ctx.stroke();
+            }
+            // Cijfers
+            ctx.font = `bold ${Math.round(r * 0.22)}px Arial`;
+            ctx.fillStyle = '#448866';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            for (let u = 1; u <= 12; u++) {
+              const hoek = (u - 3) * Math.PI / 6;
+              ctx.fillText(u, cx + r*0.68*Math.cos(hoek), cy + r*0.68*Math.sin(hoek));
+            }
+            // Uurwijzer
+            const uurH = ((t.uur % 12) + t.min/60 - 3) * Math.PI/6;
+            ctx.strokeStyle = '#333'; ctx.lineWidth = r * 0.07; ctx.lineCap = 'round';
+            ctx.beginPath(); ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + r*0.52*Math.cos(uurH), cy + r*0.52*Math.sin(uurH)); ctx.stroke();
+            // Minuutwijzer
+            const minH = (t.min - 15) * Math.PI/30;
+            ctx.lineWidth = r * 0.05;
+            ctx.beginPath(); ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + r*0.78*Math.cos(minH), cy + r*0.78*Math.sin(minH)); ctx.stroke();
+            // Middelpunt
+            ctx.beginPath(); ctx.arc(cx, cy, r*0.06, 0, 2*Math.PI);
+            ctx.fillStyle = '#333'; ctx.fill();
+          }, 10);
+          cel.appendChild(cvs);
+        }
+
+        const hokje = document.createElement('div');
+        hokje.style.cssText = 'width:28px;height:24px;border:2px solid #4A90D9;border-radius:5px;background:#fff;margin-top:3px;';
+        cel.appendChild(hokje);
+        rij.appendChild(cel);
+      });
+
+      container.appendChild(rij);
+    });
+  }
+
+  // ── PDF tekenen ───────────────────────────────────────────────
+  function tekenInPdf(doc, instellingen, yStart, margin, hulpCanvas) {
+    const { groepjes, weergave } = instellingen;
+    const pageW   = doc.internal.pageSize.getWidth();
+    const pageH   = doc.internal.pageSize.getHeight();
+    const breedte = pageW - 2 * margin;
+    const cols    = 3;
+    const colW    = (breedte - (cols - 1) * 6) / cols;
+    const klokD   = 30;
+    const klokR   = klokD / 2;
+    const hokjeH  = 10;
+    const hokjeW  = 14;
+    const kaderPad = 3;
+    const rijH    = klokD + hokjeH + 8;
+    let y = yStart;
+
+    groepjes.forEach((groep, gi) => {
+      // Check pagina — maar nooit voor de eerste rij (die hoort bij de opdrachtzin)
+      if (gi > 0 && y + rijH + kaderPad * 2 + margin > pageH) {
+        doc.addPage();
+        y = margin;
+      }
+
+      // Kader rond de rij
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(160, 200, 230);
+      doc.setLineWidth(0.5);
+      doc.roundedRect(margin, y, breedte, rijH + kaderPad * 2, 3, 3, 'FD');
+
+      groep.forEach((t, ti) => {
+        const x  = margin + ti * (colW + 6);
+        const cx = x + colW / 2;
+        const cy = y + kaderPad + klokR + 2;
+
+        const toonType = weergave === 'gemengd'
+          ? (ti % 2 === 0 ? 'analoog' : 'digitaal')
+          : weergave;
+
+        if (toonType === 'digitaal') {
+          const wW = colW * 0.75;
+          const wH = wW * 0.52;
+          const wX = cx - wW / 2;
+          const wY = y + kaderPad + 2;
+          const tijdStr = `${t.uur.toString().padStart(2,'0')}:${t.min.toString().padStart(2,'0')}`;
+          tekenWekkerSilhouet(doc, wX, wY, wW, wH, tijdStr);
+        } else {
+          tekenKlokMiniPdf(doc, cx, cy, klokR, t.uur, t.min);
+        }
+
+        // Invulhokje: digitaal dichter, analoog meer ruimte, gemengd op analoog-niveau
+        const isDigitaalCel = toonType === 'digitaal';
+        const isMixed = weergave === 'gemengd';
+        const hokjeOffsetY = (isDigitaalCel && !isMixed) ? 1 : 4;
+        const hokjeX = cx - hokjeW / 2;
+        const hokjeY = y + kaderPad + klokD + hokjeOffsetY;
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(74, 144, 217);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(hokjeX, hokjeY, hokjeW, hokjeH, 2, 2, 'FD');
+      });
+
+      y += rijH + kaderPad * 2 + 1;
+    });
+
+    return y;
+  }
+
+  // Teken een wekker die lijkt op wekker.png: knopje boven, afgeronde body, wit scherm, pootjes
+  function tekenWekkerSilhouet(doc, x, y, breedte, hoogte, tijdStr) {
+    const cx = x + breedte / 2;
+    const bodyH = hoogte * 0.72;
+    const bodyY = y + hoogte * 0.14; // ruimte voor knopje
+
+    // Knopje bovenop (afgerond rechthoekje)
+    doc.setFillColor(80, 185, 180);
+    doc.setDrawColor(60, 160, 155);
+    doc.setLineWidth(0.3);
+    doc.roundedRect(cx - breedte * 0.18, y, breedte * 0.36, hoogte * 0.18, 2, 2, 'FD');
+
+    // Buitenste body — lichtblauw/teal
+    doc.setFillColor(130, 210, 210);
+    doc.setDrawColor(80, 170, 165);
+    doc.setLineWidth(0.5);
+    doc.roundedRect(x, bodyY, breedte, bodyH, 4, 4, 'FD');
+
+    // Binnenkader — grijs
+    const kader1Pad = breedte * 0.05;
+    doc.setFillColor(160, 175, 180);
+    doc.roundedRect(x + kader1Pad, bodyY + kader1Pad * 0.6, breedte - kader1Pad * 2, bodyH - kader1Pad * 1.2, 3, 3, 'FD');
+
+    // Wit scherm
+    const schermPad = breedte * 0.09;
+    const schermX = x + schermPad;
+    const schermY = bodyY + schermPad * 0.7;
+    const schermW = breedte - schermPad * 2;
+    const schermH = bodyH - schermPad * 1.4;
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(200, 215, 218);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(schermX, schermY, schermW, schermH, 2, 2, 'FD');
+
+    // Tijd in het scherm
+    doc.setFontSize(breedte * 0.28);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(60, 80, 90);
+    doc.text(tijdStr, cx, schermY + schermH * 0.68, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+
+    // Pootjes
+    const pootW = breedte * 0.1;
+    const pootH = hoogte * 0.1;
+    const pootY = bodyY + bodyH - 0.5;
+    doc.setFillColor(100, 110, 115);
+    doc.setDrawColor(80, 90, 95);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x + breedte * 0.15, pootY, pootW, pootH, 1, 1, 'FD');
+    doc.roundedRect(x + breedte * 0.75, pootY, pootW, pootH, 1, 1, 'FD');
+
+    doc.setTextColor(0, 0, 0);
+  }
+
+  // Mini analoge klok in PDF
+  function tekenKlokMiniPdf(doc, cx, cy, r, uur, min) {
+    doc.setFillColor(169, 216, 232);
+    doc.circle(cx, cy, r, 'F');
+    doc.setFillColor(255, 255, 255);
+    doc.circle(cx, cy, r * 0.88, 'F');
+    doc.setDrawColor(80, 80, 80);
+    for (let i = 0; i < 60; i++) {
+      const hoek = (i - 15) * Math.PI / 30;
+      const buit = r * 0.88;
+      const binn = i % 5 === 0 ? r * 0.74 : r * 0.82;
+      doc.setLineWidth(i % 5 === 0 ? 0.5 : 0.2);
+      doc.line(cx + buit*Math.cos(hoek), cy + buit*Math.sin(hoek),
+               cx + binn*Math.cos(hoek), cy + binn*Math.sin(hoek));
+    }
+    doc.setFontSize(r * 0.55);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(68, 136, 102);
+    for (let u = 1; u <= 12; u++) {
+      const hoek = (u - 3) * Math.PI / 6;
+      doc.text(u.toString(), cx + r*0.62*Math.cos(hoek), cy + r*0.62*Math.sin(hoek) + 0.8, { align: 'center' });
+    }
+    doc.setFont(undefined, 'normal');
+    const uurH = ((uur % 12) + min/60 - 3) * Math.PI/6;
+    doc.setDrawColor(50, 50, 50); doc.setLineWidth(1.2);
+    doc.line(cx, cy, cx + r*0.50*Math.cos(uurH), cy + r*0.50*Math.sin(uurH));
+    const minH = (min - 15) * Math.PI/30;
+    doc.setLineWidth(0.8);
+    doc.line(cx, cy, cx + r*0.74*Math.cos(minH), cy + r*0.74*Math.sin(minH));
+    doc.setFillColor(50, 50, 50);
+    doc.circle(cx, cy, 0.8, 'F');
+    doc.setTextColor(0, 0, 0);
+  }
+
+  return {
+    leesInstellingen() {
+      const niveau        = document.querySelector('input[name="rangNiveau"]:checked')?.value || '1';
+      const nauwkeurigheid = document.querySelector('input[name="rangNauwkeurigheid"]:checked')?.value || 'uur';
+      const weergave      = document.querySelector('input[name="rangWeergave"]:checked')?.value || 'analoog';
+      const aantalRijen   = Math.max(1, parseInt(document.getElementById('rangAantalRijen')?.value) || 3);
+
+      const groepjes = [];
+      for (let i = 0; i < aantalRijen; i++) {
+        groepjes.push(genereerGroepje(niveau, nauwkeurigheid));
+      }
+
+      return { type: 'rangschikken', niveau, nauwkeurigheid, weergave, aantalRijen, groepjes };
+    },
+
+    tekenPreviewHtml,
+    tekenInPdf,
+  };
+
+})();
+
 const Bundel = (() => {
 
   // ── State ────────────────────────────────────────────────────
@@ -2545,13 +2910,19 @@ const Bundel = (() => {
 
       // Header
       const aantalLabel = groep.type === 'kloklezen' ? ` — ${groep.items.length} klokken` : '';
+      // Opdrachtzin verbergen bij herhaalde rangschikken-oefeningen
+      const vorigeRangOpdracht = gi > 0 && groepen[gi-1].type === 'rangschikken'
+        ? groepen[gi-1].opdrachtzin : null;
+      const verbergOpdracht = groep.type === 'rangschikken' &&
+        groep.opdrachtzin === vorigeRangOpdracht;
+
       blok.innerHTML = `
         <div class="preview-blok-header">
           <span class="preview-blok-nr">Oefening ${gi + 1}${aantalLabel}</span>
           <span class="preview-blok-type">${typeLabel(groep.type, groep.items[0].instellingen, groep.items.length)}</span>
           <button class="preview-blok-verwijder" onclick="Bundel.verwijderGroep(${groep.groepId})">🗑 Verwijder oefening</button>
         </div>
-        <div class="preview-opdracht">${groep.opdrachtzin}</div>
+        ${verbergOpdracht ? '' : `<div class="preview-opdracht">${groep.opdrachtzin}</div>`}
       `;
 
       if (groep.type === 'kloklezen') {
@@ -2739,6 +3110,17 @@ const Bundel = (() => {
         KlokBegrippen.tekenPreviewHtml(inhoud, groep.items[0].instellingen);
         blok.appendChild(inhoud);
 
+      } else if (groep.type === 'rangschikken') {
+        const inhoud = document.createElement('div');
+        inhoud.className = 'preview-inhoud';
+        KlokRangschikken.tekenPreviewHtml(inhoud, groep.items[0].instellingen);
+        const verwijderBtn = document.createElement('button');
+        verwijderBtn.className = 'preview-blok-verwijder';
+        verwijderBtn.textContent = '🗑 Verwijder oefening';
+        verwijderBtn.onclick = () => Bundel.verwijderGroep(groep.items[0].groepId);
+        inhoud.appendChild(verwijderBtn);
+        blok.appendChild(inhoud);
+
       } else if (groep.type === 'tijdverschil') {
         const inhoud = document.createElement('div');
         inhoud.className = 'preview-inhoud';
@@ -2776,6 +3158,10 @@ const Bundel = (() => {
     }
     if (type === 'ordenen') {
       return `📅 Dagdelen — ${(inst.wekkers||[]).length} wekkers`;
+    }
+    if (type === 'rangschikken') {
+      const niv = inst.niveau === '1' ? 'makkelijk' : inst.niveau === '2' ? 'middel' : 'moeilijk';
+      return `🔢 Rangschikken — ${inst.weergave}, niveau ${niv}`;
     }
     if (type === 'verbinden24u') {
       return `🔁 24u↔12u — ${inst.aantalParen} paren`;
@@ -2966,7 +3352,8 @@ const Bundel = (() => {
     });
 
     let isEerstePagina = true;
-    let y = tekenHeader(true); // Start altijd met volle header
+    let y = tekenHeader(true);
+    let eersteRangschikkenOpdracht = null; // bijhouden welke opdrachtzin al getoond werd
 
     groepen.forEach(groep => {
 
@@ -2986,6 +3373,7 @@ const Bundel = (() => {
       if (groep.type === 'verbinden')    eersteBlokH = KlokVerbinden.RIJ_H;
       if (groep.type === 'schrijven')     eersteBlokH = 40;
       if (groep.type === 'begrippen')     eersteBlokH = 50;
+      if (groep.type === 'rangschikken')  eersteBlokH = 65;  // klokD(30) + hokje(10) + padding(12) + kader(8) + marge
       if (groep.type === 'tijdverschil') eersteBlokH = 50;
       if (groep.type === 'ordenen')      eersteBlokH = 90;  // legenda + eerste rij wekkers
 
@@ -3004,8 +3392,16 @@ const Bundel = (() => {
 
       isEerstePagina = false;
 
-      // Opdrachtzin
-      y = tekenOpdrachtzin(doc, y + 2, groep.opdrachtzin) + 2;
+      // Opdrachtzin — bij rangschikken enkel de eerste keer tonen
+      const toonOpdrachtzin = groep.type !== 'rangschikken' ||
+        groep.opdrachtzin !== eersteRangschikkenOpdracht;
+      if (groep.type === 'rangschikken') eersteRangschikkenOpdracht = groep.opdrachtzin;
+
+      if (toonOpdrachtzin) {
+        y = tekenOpdrachtzin(doc, y + 2, groep.opdrachtzin) + 2;
+      } else {
+        y += 4; // kleine witruimte tussen opeenvolgende rangschikken-rijen
+      }
 
       if (groep.type === 'kloklezen') {
         const alleTijden = groep.items.map(item => item.instellingen.tijden[0]);
@@ -3040,6 +3436,9 @@ const Bundel = (() => {
       } else if (groep.type === 'begrippen') {
         y = KlokBegrippen.tekenInPdf(doc, groep.items[0].instellingen, y, margin);
 
+      } else if (groep.type === 'rangschikken') {
+        y = KlokRangschikken.tekenInPdf(doc, groep.items[0].instellingen, y, margin, hulpCanvas);
+
       } else if (groep.type === 'tijdverschil') {
         y = KlokTijdverschil.tekenInPdf(doc, groep.items[0].instellingen, y, margin, hulpCanvas);
 
@@ -3059,6 +3458,17 @@ const Bundel = (() => {
         );
       }
     });
+
+    // ── Voettekst op elke pagina ──────────────────────────────
+    const aantalPaginas = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= aantalPaginas; p++) {
+      doc.setPage(p);
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(160, 160, 160);
+      doc.text("Juf Zisa's kloklezen generator  —  www.jufzisa.be", pageW / 2, pageH - margin + 3, { align: 'center' });
+      doc.setTextColor(0, 0, 0);
+    }
 
     doc.save('kloklezen_bundel.pdf');
   }
@@ -3253,6 +3663,29 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   genereerBegripPreview();
+
+  // ── Rangschikken ──────────────────────────────────────────────
+  function genereerRangPreview() {
+    const inst = KlokRangschikken.leesInstellingen();
+    if (!inst) return;
+    KlokRangschikken.tekenPreviewHtml(document.getElementById('rangPreview'), inst);
+  }
+
+  document.querySelectorAll('input[name="rangNiveau"], input[name="rangNauwkeurigheid"], input[name="rangWeergave"]')
+    .forEach(el => el.addEventListener('change', genereerRangPreview));
+  document.getElementById('rangAantalRijen')?.addEventListener('input', genereerRangPreview);
+
+  document.getElementById('voegRangToeBtn')?.addEventListener('click', () => {
+    const inst = KlokRangschikken.leesInstellingen();
+    if (!inst) return;
+    const opdrachtzin = document.getElementById('opdrachtzinRangschikken').value.trim()
+      || 'Schrijf 1, 2 of 3 onder elke klok van vroeg naar laat.';
+    Bundel.voegToe(inst, opdrachtzin);
+    genereerRangPreview();
+  });
+
+  genereerRangPreview();
+
   function genereerSchrijfPreview() {
     const inst = KlokSchrijven.leesInstellingen();
     if (!inst) return;
