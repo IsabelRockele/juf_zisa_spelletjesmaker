@@ -2350,14 +2350,16 @@ const KlokSchrijven = (() => {
       doc.setTextColor(100, 100, 100);
 
       if (leerjaar === '2') {
-        // ________ = ________
+        const beschikbaar = pageW - 2 * margin - 22; // ruimte na de digitale tijd
+        const lijn1 = Math.round(beschikbaar * 0.62); // ~62% voor "8 uur 15 minuten"
+        const lijn2 = Math.round(beschikbaar * 0.28); // ~28% voor "8u15"
         const x1 = margin + 22;
         doc.text('=', x1, y + 8);
         doc.setDrawColor(80, 80, 80); doc.setLineWidth(0.4);
-        doc.line(x1 + 5, y + 9, x1 + 55, y + 9);
-        const x2 = x1 + 62;
+        doc.line(x1 + 5, y + 9, x1 + 5 + lijn1, y + 9);
+        const x2 = x1 + 5 + lijn1 + 5;
         doc.text('=', x2, y + 8);
-        doc.line(x2 + 5, y + 9, x2 + 45, y + 9);
+        doc.line(x2 + 5, y + 9, x2 + 5 + lijn2, y + 9);
       } else {
         // ________ = ________
         const x1 = margin + 24;
