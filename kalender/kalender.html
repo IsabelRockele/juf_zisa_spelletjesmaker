@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalender Werkblad Generator — jufzisa.be</title>
+  <link rel="stylesheet" href="kalender.css"/>
+</head>
+<body>
+
+<header>
+  <a href="../index.html" class="menu-knop">⬅ Keuzemenu</a>
+  <div class="logo">📅 Kalen<span>der</span></div>
+  <div class="subtitle">— jufzisa.be</div>
+  <button id="infoBtn" style="background:#2e9e5b;border:none;color:#fff;font-weight:700;font-size:13px;padding:0 14px;height:34px;border-radius:17px;white-space:nowrap;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;"><span style="color:#ff3b3b;font-size:16px;font-weight:900;line-height:1;">?</span> Uitleg</button>
+  <div class="spacer"></div>
+</header>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-tabs" id="sidebarTabs">
+      <div class="sidebar-tab tab-kalender active" onclick="toonTab('kalender',this)" title="Maandkalender met eigen events en schoolvakanties.">📅 Kalen<br>der</div>
+      <div class="sidebar-tab tab-dagen"    onclick="toonTab('dagen',this)"    title="Gisteren, eergisteren, morgen, overmorgen.">📆 Dagen</div>
+      <div class="sidebar-tab tab-maanden"  onclick="toonTab('maanden',this)"  title="Volgorde, hoeveel dagen, schrikkeljaar.">🗓️ Maanden</div>
+      <div class="sidebar-tab tab-tellen"   onclick="toonTab('tellen',this)"   title="Tellen in dagen en weken tot een event.">⏳ Tellen</div>
+    </div>
+    <div class="tabs-scroll-hint">
+      <button class="tabs-scroll-btn" onclick="scrollTabsLeft()">←</button>
+      Scroll voor meer keuzes
+      <button class="tabs-scroll-btn" onclick="scrollTabsRight()">→</button>
+    </div>
+
+    <!-- TAB KALENDER -->
+    <div class="sidebar-content actief" id="tab-kalender">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📅</div>Maand &amp; jaar</div>
+        <div class="form-rij">
+          <label>Maand</label>
+          <select id="kalMaand">
+            <option value="0">Januari</option><option value="1">Februari</option>
+            <option value="2">Maart</option><option value="3">April</option>
+            <option value="4">Mei</option><option value="5">Juni</option>
+            <option value="6">Juli</option><option value="7">Augustus</option>
+            <option value="8">September</option><option value="9">Oktober</option>
+            <option value="10">November</option><option value="11">December</option>
+          </select>
+        </div>
+        <div class="form-rij" style="margin-top:6px;">
+          <label>Jaar</label>
+          <input type="number" id="kalJaar" min="2024" max="2035" style="width:80px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🏫</div>Schoolvakanties</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="kalRegio" value="geen" checked/> Geen</div>
+          <div class="radio-chip"><input type="radio" name="kalRegio" value="vlaanderen"/> Vlaanderen</div>
+          <div class="radio-chip"><input type="radio" name="kalRegio" value="nederland"/> Nederland</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📅</div>2de kalender naast eerste</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip"><input type="checkbox" id="tweedeKalender"/> 2de maandkalender</div>
+        </div>
+        <div id="tweedeKalOpties" style="display:none;margin-top:8px;">
+          <div class="form-rij">
+            <label>Maand</label>
+            <select id="kalMaand2">
+              <option value="0">Januari</option><option value="1">Februari</option>
+              <option value="2">Maart</option><option value="3">April</option>
+              <option value="4">Mei</option><option value="5">Juni</option>
+              <option value="6">Juli</option><option value="7">Augustus</option>
+              <option value="8">September</option><option value="9">Oktober</option>
+              <option value="10">November</option><option value="11">December</option>
+            </select>
+          </div>
+          <div class="form-rij" style="margin-top:6px;">
+            <label>Jaar</label>
+            <input type="number" id="kalJaar2" min="2024" max="2035" style="width:80px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+          </div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💾</div>Opgeslagen kalenders</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px;">
+          <input type="text" id="kalNaamOpslaan" placeholder="Naam (bv. maart klas 2)" style="flex:1;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none;"/>
+          <button id="kalOpslaanBtn" style="background:#4A90D9;color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-weight:600;">💾</button>
+        </div>
+        <select id="kalGeslagenLijst" style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:5px 8px;font-size:12px;font-family:inherit;outline:none;margin-bottom:4px;">
+          <option value="">— Kies opgeslagen kalender —</option>
+        </select>
+        <div style="display:flex;gap:4px;">
+          <button id="kalLaadBtn" style="flex:1;background:#e8f4fd;color:#1a3a5c;border:1.5px solid #4A90D9;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-weight:600;">📂 Laden</button>
+          <button id="kalVerwijderBtn" style="flex:1;background:#fde8e8;color:#c00;border:1.5px solid #fcc;border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-weight:600;">🗑 Verwijderen</button>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingKalender"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <textarea id="opdrachtzinKalender" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;">Bekijk de kalender goed.</textarea>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">✏️</div>Eigen opdrachten bij de kalender</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;">Typ een vraag → het kind krijgt er een invullijn onder. Laat leeg als je geen eigen vragen wil.</div>
+        <div id="kalOpdrachtenLijst"></div>
+        <button id="kalAddOpdracht" style="background:none;border:1.5px dashed #4A90D9;color:#4A90D9;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;width:100%;margin-top:4px;">+ Vraag toevoegen</button>
+      </div>
+      <!-- Kleine interactieve preview van de kalender in de sidebar -->
+      <div id="sidebarKalenderPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px;margin-bottom:10px;font-size:11px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegKalToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB DAGEN -->
+    <div class="sidebar-content" id="tab-dagen">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="dagenLeerjaar" value="1" checked/> 1ste</div>
+          <div class="radio-chip"><input type="radio" name="dagenLeerjaar" value="2"/> 2de</div>
+          <div class="radio-chip"><input type="radio" name="dagenLeerjaar" value="3"/> 3de/4de</div>
+          <div class="radio-chip"><input type="radio" name="dagenLeerjaar" value="5"/> 5de/6de</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📆</div>Type oefening</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="dagenType" value="gisteren" checked/> Gisteren</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="dagenType" value="eergisteren" checked/> Eergisteren</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="dagenType" value="morgen" checked/> Morgen</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="dagenType" value="overmorgen" checked/> Overmorgen</div>
+          <div class="checkbox-chip"><input type="checkbox" name="dagenType" value="omgekeerd"/> Omgekeerd redeneren</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📅</div>Met datum?</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="dagenMetDatum" value="nee" checked/> Zonder datum</div>
+          <div class="radio-chip"><input type="radio" name="dagenMetDatum" value="ja"/> Met datum</div>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-dagenReferentie" style="display:none;">
+        <div class="kaart-titel"><div class="icon">📌</div>Referentiedatum</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="dagenRef" value="vandaag" checked/> Vandaag</div>
+          <div class="radio-chip"><input type="radio" name="dagenRef" value="kies"/> Zelf kiezen</div>
+        </div>
+        <div id="dagenRefDatum" style="display:none;margin-top:8px;">
+          <input type="date" id="dagenDatum" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;"/>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💡</div>Weekstrip als hulp</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" id="dagenWeekstrip" checked/> Weekstrip tonen</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+        <input type="number" id="dagenAantal" value="4" min="1" max="12" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+      </div>
+      <div class="melding-box" id="meldingDagen"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <textarea id="opdrachtzinDagen" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;">Vul de juiste dag in.</textarea>
+      </div>
+      <div id="dagenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegDagenToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB MAANDEN -->
+    <div class="sidebar-content" id="tab-maanden">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🗓️</div>Type oefening</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maandenType" value="volgorde" checked/> Volgorde</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="maandenType" value="hoeveel_dagen" checked/> Hoeveel dagen?</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maandenType" value="schrikkeljaar"/> Schrikkeljaar</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maandenType" value="weken"/> ±4 weken</div>
+          <div class="checkbox-chip"><input type="checkbox" name="maandenType" value="seizoenen"/> Seizoenen</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+        <input type="number" id="maandenAantal" value="6" min="1" max="20" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+      </div>
+      <div class="melding-box" id="meldingMaanden"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <textarea id="opdrachtzinMaanden" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;">Vul in.</textarea>
+      </div>
+      <div id="maandenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegMaandenToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB TELLEN -->
+    <div class="sidebar-content" id="tab-tellen">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">⏳</div>Eenheid</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="tellenEenheid" value="dagen" checked/> In dagen</div>
+          <div class="radio-chip"><input type="radio" name="tellenEenheid" value="weken"/> In weken</div>
+          <div class="radio-chip"><input type="radio" name="tellenEenheid" value="gemengd"/> Gemengd</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📌</div>Startdatum</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="tellenStart" value="vandaag" checked/> Vandaag</div>
+          <div class="radio-chip"><input type="radio" name="tellenStart" value="kies"/> Zelf kiezen</div>
+        </div>
+        <div id="tellenStartDatum" style="display:none;margin-top:8px;">
+          <input type="date" id="tellenDatumStart" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;"/>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Events (naam + datum)</div>
+        <div id="tellenEventsList"></div>
+        <button id="tellenAddEventBtn" style="background:none;border:1.5px dashed #4A90D9;color:#4A90D9;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;width:100%;margin-top:6px;">+ Event toevoegen</button>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">💡</div>Kalender als hulp</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" id="tellenMetKalender" checked/> Kalender tonen</div>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingTellen"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <textarea id="opdrachtzinTellen" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;">Hoeveel dagen zijn het er nog?</textarea>
+      </div>
+      <div id="tellenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegTellenToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="toolbar">
+      <span class="toolbar-label">📋 Bundelopbouw</span>
+      <div class="toolbar-spacer"></div>
+      <div id="bundelMelding" class="bundel-melding-toolbar"></div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);white-space:nowrap;cursor:pointer;">
+        <input type="checkbox" id="titelElkePagina" checked style="cursor:pointer;"/> Titel op elke pagina
+      </label>
+      <button class="toolbar-knop primair" id="downloadPdfBtn">📄 Download PDF</button>
+    </div>
+    <div class="canvas-area" id="bundelPreview">
+      <div style="padding:20px;">
+        <!-- Bundel oefeningen: kalenders + andere oefeningen -->
+        <div id="bundelOefeningen">
+          <div style="text-align:center;padding:32px 16px;color:#7f8c9a;font-size:13px;background:#f8fafc;border-radius:8px;border:1.5px dashed #c0d8ee;">
+            <div style="font-size:28px;margin-bottom:6px;">📅</div>
+            Voeg een kalender toe via het tabblad links.<br>
+            <span style="font-size:12px;color:#aaa;">Klik op een dag om events toe te voegen, dan op "Voeg toe aan bundel".</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- INFO MODAAL -->
+<div id="infoModaal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9999;overflow-y:auto;padding:20px;">
+  <div style="background:#fff;border-radius:12px;max-width:640px;margin:0 auto;padding:32px 36px;position:relative;box-shadow:0 8px 40px rgba(0,0,0,0.18);">
+    <button onclick="document.getElementById('infoModaal').style.display='none'" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:#888;">✕</button>
+    <h2 style="margin:0 0 16px;font-size:19px;color:#1a3a6c;">📅 Kalender Generator — Handleiding</h2>
+    <p style="font-size:13px;line-height:1.7;margin:0 0 10px;"><strong>De kalender</strong> staat altijd rechts. Klik op een dag om een event toe te voegen (naam + kleur). Vakanties en weekends worden automatisch ingekleurd als je een regio kiest.</p>
+    <p style="font-size:13px;line-height:1.7;margin:0 0 10px;"><strong>Oefeningen</strong> voeg je toe via de tabs: Dagen, Maanden of Tellen. Ze verschijnen onder de kalender en worden mee afgedrukt in de PDF.</p>
+    <p style="font-size:13px;line-height:1.7;margin:0 0 16px;background:#fff8e8;border-left:3px solid #f0b429;padding:8px 12px;border-radius:4px;">💡 De PDF drukt altijd de kalender af, gevolgd door de oefeningen. Je hoeft de kalender dus niet apart toe te voegen aan de bundel.</p>
+    <div style="text-align:center;">
+      <button onclick="document.getElementById('infoModaal').style.display='none'" style="background:#4A90D9;color:#fff;border:none;border-radius:8px;padding:10px 28px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;">Begrepen! 🚀</button>
+    </div>
+  </div>
+</div>
+
+<!-- Event popup -->
+<div id="eventPopup" style="display:none;position:fixed;z-index:8888;background:#fff;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.22);padding:18px;min-width:250px;">
+  <div style="font-weight:700;font-size:14px;color:#1a3a5c;margin-bottom:10px;" id="popupTitel">Dag bewerken</div>
+  <input type="text" id="popupNaam" placeholder="Naam event (bv. Uitstap)" style="width:100%;border:1.5px solid #c0d8ee;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;box-sizing:border-box;"/>
+  <div style="font-size:12px;color:#666;margin-bottom:6px;">Kleur:</div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;" id="popupKleuren">
+    <div class="kleur-keuze" data-kleur=""       style="width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #ccc;cursor:pointer;" title="Geen kleur"></div>
+    <div class="kleur-keuze" data-kleur="#fff3cd" style="width:26px;height:26px;border-radius:50%;background:#fff3cd;border:2px solid #f0c040;cursor:pointer;" title="Geel"></div>
+    <div class="kleur-keuze" data-kleur="#d4edda" style="width:26px;height:26px;border-radius:50%;background:#d4edda;border:2px solid #52b36a;cursor:pointer;" title="Groen"></div>
+    <div class="kleur-keuze" data-kleur="#cce5ff" style="width:26px;height:26px;border-radius:50%;background:#cce5ff;border:2px solid #4A90D9;cursor:pointer;" title="Blauw"></div>
+    <div class="kleur-keuze" data-kleur="#f8d7da" style="width:26px;height:26px;border-radius:50%;background:#f8d7da;border:2px solid #e74c3c;cursor:pointer;" title="Rood"></div>
+    <div class="kleur-keuze" data-kleur="#e2d9f3" style="width:26px;height:26px;border-radius:50%;background:#e2d9f3;border:2px solid #8e44ad;cursor:pointer;" title="Paars"></div>
+    <div class="kleur-keuze" data-kleur="#fce4d6" style="width:26px;height:26px;border-radius:50%;background:#fce4d6;border:2px solid #e67e22;cursor:pointer;" title="Oranje"></div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <button id="popupOpslaan"  style="flex:1;background:#4A90D9;color:#fff;border:none;border-radius:8px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">✓ Opslaan</button>
+    <button id="popupVerwijder" style="background:#fde8e8;color:#c00;border:1px solid #fcc;border-radius:8px;padding:8px 10px;font-size:13px;cursor:pointer;font-family:inherit;">🗑</button>
+    <button id="popupSluiten"  style="background:#f5f5f5;color:#666;border:1px solid #ddd;border-radius:8px;padding:8px 10px;font-size:13px;cursor:pointer;font-family:inherit;">✕</button>
+  </div>
+</div>
+
+<canvas id="mainCanvas" style="display:none;"></canvas>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="kalender-app.js"></script>
+</body>
+</html>
