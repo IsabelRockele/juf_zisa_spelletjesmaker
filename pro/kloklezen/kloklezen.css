@@ -529,7 +529,7 @@ header .badge {
   padding: 4px 14px 10px;
 }
 
-.preview-inhoud canvas {
+.preview-inhoud > canvas {
   width: 100% !important;
   height: auto !important;
 }
