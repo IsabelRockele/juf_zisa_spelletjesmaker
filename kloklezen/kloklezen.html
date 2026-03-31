@@ -21,7 +21,7 @@
   <aside class="sidebar">
     <div class="sidebar-tabs" id="sidebarTabs">
       <div class="sidebar-tab tab-klok active" onclick="toonTab('klok',this)" title="Analoge klokken of digitale wekkers aflezen. Kies moeilijkheid en invulmethode.">🕐 Klok<br>lezen</div>
-      <div class="sidebar-tab tab-tijdverschil" onclick="toonTab('tijdverschil',this)" title="Bereken hoeveel minuten, uren of seconden er tussen twee tijden liggen. Kies leerjaar 2de/3de, 4de of 5de/6de.">⏱️ Tijd<br>verschil</div>
+      <div class="sidebar-tab tab-tijdverschil" onclick="toonTab('tijdverschil',this)" title="Bereken hoeveel minuten, uren of seconden er tussen twee tijden liggen. Kies leerjaar 1ste/2de/3de, 4de of 5de/6de.">⏱️ Tijd<br>verschil</div>
       <div class="sidebar-tab tab-verbinden" onclick="toonTab('verbinden',this)" title="Trek lijnen van analoge klokken naar de juiste tijdnotatie, of verbind 24u met 12u.">🔗 Verbinden</div>
       <div class="sidebar-tab tab-ordenen" onclick="toonTab('ordenen',this)" title="Kleur digitale wekkers in de kleur van het juiste dagdeel (ochtend, voormiddag, ...).">📅 Ordenen</div>
       <div class="sidebar-tab tab-rangschikken" onclick="toonTab('rangschikken',this)" title="Schrijf 1, 2 of 3 onder elke klok van vroeg naar laat. Drie niveaus van moeilijkheid.">🔢 Rang<br>schikken</div>
@@ -40,7 +40,8 @@
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
         <div class="radio-groep">
-          <div class="radio-chip geselecteerd"><input type="radio" name="klokLeerjaar" value="2" checked/> 2de</div>
+          <div class="radio-chip geselecteerd"><input type="radio" name="klokLeerjaar" value="1" checked/> 1ste</div>
+          <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="2"/> 2de</div>
           <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="3"/> 3de</div>
           <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="4"/> 4de</div>
           <div class="radio-chip"><input type="radio" name="klokLeerjaar" value="5"/> 5de</div>
@@ -131,13 +132,13 @@
       <div class="config-kaart">
         <div class="kaart-titel"><div class="icon">🎓</div>Leerjaar</div>
         <div class="radio-groep">
-          <div class="radio-chip geselecteerd"><input type="radio" name="tvLeerjaar" value="23" checked/> 2de/3de</div>
+          <div class="radio-chip geselecteerd"><input type="radio" name="tvLeerjaar" value="23" checked/> 1ste/2de/3de</div>
           <div class="radio-chip"><input type="radio" name="tvLeerjaar" value="4"/> 4de</div>
           <div class="radio-chip"><input type="radio" name="tvLeerjaar" value="56"/> 5de/6de</div>
         </div>
       </div>
 
-      <!-- 2de/3de leerjaar opties -->
+      <!-- 1ste/2de/3de leerjaar opties -->
       <div id="tvOpties23">
         <div class="config-kaart">
           <div class="kaart-titel"><div class="icon">🎯</div>Type oefening</div>
@@ -596,7 +597,7 @@
           </tr>
           <tr>
             <td style="padding:8px 10px;font-weight:700;white-space:nowrap;border-bottom:1px solid #e8eef8;">⏱️ Tijdverschil</td>
-            <td style="padding:8px 10px;border-bottom:1px solid #e8eef8;">Kies eerst het leerjaar. <strong>2de/3de:</strong> verschil in minuten of uren, analoog of digitaal. <strong>4de:</strong> per 5 min of per minuut, met/zonder overschrijding uur. <strong>5de/6de:</strong> altijd HH:MM:SS, met/zonder overschrijding minuut of uur.</td>
+            <td style="padding:8px 10px;border-bottom:1px solid #e8eef8;">Kies eerst het leerjaar. <strong>1ste/2de/3de:</strong> verschil in minuten of uren, analoog of digitaal. <strong>4de:</strong> per 5 min of per minuut, met/zonder overschrijding uur. <strong>5de/6de:</strong> altijd HH:MM:SS, met/zonder overschrijding minuut of uur.</td>
           </tr>
           <tr style="background:#f5f8ff;">
             <td style="padding:8px 10px;font-weight:700;white-space:nowrap;border-bottom:1px solid #e8eef8;">🔗 Verbinden</td>
