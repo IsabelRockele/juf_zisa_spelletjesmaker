@@ -23,6 +23,7 @@
       <div class="sidebar-tab tab-tijdverschil" onclick="toonTab('tijdverschil',this)">⏱️ Tijd<br>verschil</div>
       <div class="sidebar-tab tab-verbinden" onclick="toonTab('verbinden',this)">🔗 Verbinden</div>
       <div class="sidebar-tab tab-ordenen" onclick="toonTab('ordenen',this)">📅 Ordenen</div>
+      <div class="sidebar-tab tab-rangschikken" onclick="toonTab('rangschikken',this)">🔢 Rang<br>schikken</div>
       <div class="sidebar-tab tab-maateenheden" onclick="toonTab('maateenheden',this)">📏 Maat<br>eenheden</div>
       <div class="sidebar-tab tab-schrijven" onclick="toonTab('schrijven',this)">✏️ Schrijven</div>
       <div class="sidebar-tab tab-begrippen" onclick="toonTab('begrippen',this)">🧠 Begrippen</div>
@@ -52,14 +53,10 @@
         </div>
       </div>
       <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🕐</div>Klokken instellen</div>
+        <div class="kaart-titel"><div class="icon">🕐</div>Aantal rijen</div>
         <div class="form-rij">
-          <label for="numClocks">Aantal klokken</label>
-          <select id="numClocks">
-            <option value="3">3 klokken</option>
-            <option value="9" selected>9 klokken</option>
-            <option value="18">18 klokken</option>
-          </select>
+          <label for="numRijen">Rijen (3 klokken per rij)</label>
+          <input type="number" id="numRijen" value="3" min="1" max="20" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
         </div>
       </div>
       <div class="config-kaart">
@@ -208,11 +205,10 @@
 
       <!-- Gemeenschappelijk -->
       <div class="config-kaart">
-        <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
-        <div class="radio-groep">
-          <div class="radio-chip"><input type="radio" name="tvAantal" value="4"/> 4</div>
-          <div class="radio-chip geselecteerd"><input type="radio" name="tvAantal" value="6" checked/> 6</div>
-          <div class="radio-chip"><input type="radio" name="tvAantal" value="8"/> 8</div>
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal rijen</div>
+        <div class="form-rij">
+          <label for="tvAantalRijen">Rijen (2 oefeningen per rij)</label>
+          <input type="number" id="tvAantalRijen" value="3" min="1" max="20" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
         </div>
         <input type="hidden" id="tvAantalOef" value="6"/>
       </div>
@@ -356,6 +352,52 @@
       <div id="ordPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
       <button class="genereer-knop voeg-toe-knop" id="voegOrdToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
     </div>
+
+    <!-- TAB RANGSCHIKKEN -->
+    <div class="sidebar-content" id="tab-rangschikken">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Moeilijkheidsgraad</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="rangNiveau" value="1" checked/> Niveau 1 — ver uit elkaar</div>
+          <div class="radio-chip"><input type="radio" name="rangNiveau" value="2"/> Niveau 2 — dicht bij elkaar</div>
+          <div class="radio-chip"><input type="radio" name="rangNiveau" value="3"/> Niveau 3 — over de uurgrens</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">⏰</div>Nauwkeurigheid</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="rangNauwkeurigheid" value="uur" checked/> Hele uren</div>
+          <div class="radio-chip"><input type="radio" name="rangNauwkeurigheid" value="halfuur"/> Halve uren</div>
+          <div class="radio-chip"><input type="radio" name="rangNauwkeurigheid" value="kwartier"/> Kwartieren</div>
+          <div class="radio-chip"><input type="radio" name="rangNauwkeurigheid" value="5min"/> Per 5 min</div>
+          <div class="radio-chip"><input type="radio" name="rangNauwkeurigheid" value="1min"/> Per minuut</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🖼️</div>Weergave</div>
+        <div class="radio-groep">
+          <div class="radio-chip geselecteerd"><input type="radio" name="rangWeergave" value="analoog" checked/> Analoge klokken</div>
+          <div class="radio-chip"><input type="radio" name="rangWeergave" value="digitaal"/> Digitale wekkers</div>
+          <div class="radio-chip"><input type="radio" name="rangWeergave" value="gemengd"/> Gemengd</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal rijen</div>
+        <div class="form-rij">
+          <label for="rangAantalRijen">Rijen (3 klokken per rij)</label>
+          <input type="number" id="rangAantalRijen" value="3" min="1" max="20" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+        </div>
+      </div>
+      <div class="melding-box" id="meldingRangschikken"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <div class="form-rij">
+          <textarea id="opdrachtzinRangschikken" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;">Schrijf 1, 2 of 3 onder elke klok van vroeg naar laat.</textarea>
+        </div>
+      </div>
+      <div id="rangPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;min-height:40px;font-size:12px;margin-bottom:10px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegRangToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div><!-- /tab-rangschikken -->
 
     <!-- TAB MAATEENHEDEN -->
     <div class="sidebar-content" id="tab-maateenheden">
