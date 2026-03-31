@@ -627,7 +627,9 @@ function setAS(s) {
 //  RIJEN
 // =====================================================
 function activateRow(idx) {
-  S.activeRow=idx;
+  const wasAlreadyActive = S.activeRow === idx;
+  S.activeRow = idx;
+  S._justActivated = wasAlreadyActive ? false : true; // blokkeer eerste klik als wissel
   document.querySelectorAll('.row-wrap').forEach((w,i)=>{
     w.classList.toggle('active-row',i===idx);
   });
@@ -981,9 +983,16 @@ function createTapDotStroke(pos){
 function setupCanvasEvents(canvas,idx){
   let drawing=false, cur=[];
   canvas.addEventListener('pointerdown',e=>{
+    // Als de rij net geactiveerd werd door deze klik: niet tekenen
+    if(S._justActivated){
+      S._justActivated = false;
+      canvas.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+      return; // deze klik was alleen om te selecteren
+    }
     drawing=true; cur=[];
     const pos=getPos(e,canvas);
-    cur.push(pos); // eerste punt bufferen; startPt pas na echte stroke in pointerup
+    cur.push(pos);
     canvas.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
