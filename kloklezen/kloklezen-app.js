@@ -2307,13 +2307,20 @@ const KlokSchrijven = (() => {
   }
 
   // ── PDF tekenen ───────────────────────────────────────────────
-  function tekenInPdf(doc, instellingen, yStart, margin) {
-    const { leerjaar, tijden } = instellingen;
-    const pageW   = doc.internal.pageSize.getWidth();
-    const breedte = pageW - 2 * margin;
-    let y = yStart;
+   function tekenInPdf(doc, instellingen, yStart, margin) {
+  const { leerjaar, tijden } = instellingen;
+  const pageW   = doc.internal.pageSize.getWidth();
+  const pageH   = doc.internal.pageSize.getHeight();
+  const breedte = pageW - 2 * margin;
+  let y = yStart;
 
     // Voorbeeldrij
+    const voorbeeldH = 13;
+
+if (y + voorbeeldH + margin + 8 > pageH) {
+  doc.addPage();
+  y = margin;
+}
     doc.setFillColor(240, 248, 255);
     doc.setDrawColor(180, 200, 230);
     doc.setLineWidth(0.3);
@@ -2330,10 +2337,18 @@ const KlokSchrijven = (() => {
     y += 13;
 
     // Oefeningen
-    const regelH = leerjaar === '2' ? 12 : 12;
+const regelH = 12;
+const onderReserve = margin + 8; // reserve voor voettekstzone
 
-    tijden.forEach((t, i) => {
-      doc.setFontSize(11); doc.setFont(undefined, 'normal');
+tijden.forEach((t, i) => {
+  // Past de volgende regel nog?
+  if (y + regelH + onderReserve > pageH) {
+    doc.addPage();
+    y = margin;
+  }
+
+  doc.setFontSize(11);
+  doc.setFont(undefined, 'normal');
 
       // Nummer
       doc.setTextColor(150, 150, 150);
