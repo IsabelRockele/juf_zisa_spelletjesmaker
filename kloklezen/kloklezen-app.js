@@ -3555,6 +3555,13 @@ document.addEventListener('DOMContentLoaded', () => {
     KlokLezen.leesInstellingen(); // valideert
   });
 
+  document.getElementById('infoBtn')?.addEventListener('click', () => {
+    document.getElementById('infoModaal').style.display = 'block';
+  });
+  document.getElementById('infoModaal')?.addEventListener('click', (e) => {
+    if (e.target === document.getElementById('infoModaal'))
+      document.getElementById('infoModaal').style.display = 'none';
+  });
   document.getElementById('downloadPdfBtn').addEventListener('click', () => Bundel.downloadPdf());
 
   // ── Auto-update opdrachtzin ───────────────────────────────────
