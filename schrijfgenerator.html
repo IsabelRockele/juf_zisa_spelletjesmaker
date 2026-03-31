@@ -982,9 +982,8 @@ function setupCanvasEvents(canvas,idx){
   let drawing=false, cur=[];
   canvas.addEventListener('pointerdown',e=>{
     drawing=true; cur=[];
-    const pos=getPos(e,canvas), r=rows[idx];
-    cur.push(pos);
-    if(!r.startPt) r.startPt={...pos};
+    const pos=getPos(e,canvas);
+    cur.push(pos); // eerste punt bufferen; startPt pas na echte stroke in pointerup
     canvas.setPointerCapture(e.pointerId);
     e.stopPropagation();
   });
@@ -1379,7 +1378,8 @@ function getWorksheetItemHeight(item, showInstruction = true){
   const sentenceReduction = Math.max(0, sentenceLines - 1) * 18;
 
   if(item.type === 'letter'){
-    return 30 + countRowsForWorksheetItem(item) * RH + bottomGap;
+    const labelH = item.__hideLabel ? 0 : 30;
+    return labelH + countRowsForWorksheetItem(item) * RH + bottomGap;
   }
   if(item.type === 'nameHand' || item.type === 'nameTyped'){
     return instructionH + countRowsForWorksheetItem(item) * RH + bottomGap;
@@ -1757,11 +1757,13 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
   ctx.save();
 
   if(item.type === 'letter'){
-    ctx.fillStyle = '#1a1a2e';
-    ctx.font = 'bold 13px Nunito,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(getWorksheetTypeLabel(item.type), pageX, y + 14);
-    y += 30;
+    if(!item.__hideLabel){
+      ctx.fillStyle = '#1a1a2e';
+      ctx.font = 'bold 13px Nunito,sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(getWorksheetTypeLabel(item.type), pageX, y + 14);
+      y += 30;
+    }
 
     (item.boardRows || []).forEach((r) => {
       const placement = getWorksheetRowPlacement(r, pageX, y, item.lineType, item.lineSpacing, null, 8, 3, 3);
@@ -1813,7 +1815,7 @@ function drawWorksheetItem(ctx, item, pageX, startY, pageW, showInstruction = tr
             let xC2 = pageX + 8;
             for(let rep=0; rep<(item.repeat || 4); rep++){
               if(xC2 + modelW > pageX + innerW) break;
-              drawDot(ctx, xC2 + (placement.startX - (pageX + 8)), y + ((placement.startY - (startY + 30)) - 0), 2.4);
+              drawDot(ctx, xC2 + (placement.startX - (pageX + 8)), y + (placement.startY - placement.dy), 2.4);
               xC2 += modelW + gap;
             }
           }
@@ -1969,6 +1971,15 @@ function buildWorksheetPagesData(){
   const contentBottom = H - footerH;
   const usableHeight = contentBottom - contentTop;
 
+  // Bereken hoogte van één boardRow + zijn lege rijen (zonder label overhead)
+  function singleRowHeight(item){
+    const L = {large:42, medium:30, small:22}[item.lineSpacing || 'medium'] || 30;
+    const RH = L*4 + 16;
+    return RH * (1 + (item.extra || 0));
+  }
+  // Hoogte van het label bovenaan een letter-item (eerste boardRow)
+  function labelHeight(){ return 30; }
+
   const pages = [];
   let currentPage = [];
   let used = 0;
@@ -1976,16 +1987,39 @@ function buildWorksheetPagesData(){
 
   worksheetItems.forEach(item => {
     const showInstruction = item.type === 'letter' ? true : !seenTypes.has(item.type);
-    const itemHeight = getWorksheetItemHeight(item, showInstruction);
-    if(currentPage.length && used + itemHeight > usableHeight){
-      pages.push(currentPage);
-      currentPage = [];
-      used = 0;
-    }
-    currentPage.push({...item, __showInstruction: showInstruction});
-    used += itemHeight;
-    if(item.type !== 'letter'){
-      seenTypes.add(item.type);
+
+    if(item.type === 'letter'){
+      // Split per boardRow zodat lege rijen nooit afgekapt worden
+      const boardRows = item.boardRows || [];
+      boardRows.forEach((r, ri) => {
+        const isFirst = ri === 0;
+        const rowH = singleRowHeight(item) + (isFirst ? labelHeight() : 0);
+
+        if(currentPage.length && used + rowH > usableHeight){
+          pages.push(currentPage);
+          currentPage = [];
+          used = 0;
+        }
+        // Sub-item: één boardRow met alle instellingen
+        currentPage.push({
+          ...item,
+          boardRows: [r],
+          __showInstruction: isFirst && showInstruction,
+          __hideLabel: !isFirst, // label alleen bij eerste rij
+        });
+        used += rowH;
+      });
+      if(item.type !== 'letter') seenTypes.add(item.type);
+    } else {
+      const itemHeight = getWorksheetItemHeight(item, showInstruction);
+      if(currentPage.length && used + itemHeight > usableHeight){
+        pages.push(currentPage);
+        currentPage = [];
+        used = 0;
+      }
+      currentPage.push({...item, __showInstruction: showInstruction});
+      used += itemHeight;
+      if(item.type !== 'letter') seenTypes.add(item.type);
     }
   });
 
