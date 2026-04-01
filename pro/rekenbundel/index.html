@@ -3,11 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekenbundel Generator — jufzisa.be</title>
+  <title>Rekenbundel Generator — Juf Zisa PRO</title>
   <link rel="stylesheet" href="style.css?v=29">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
   <link rel="stylesheet" href="rekentaal.css?v=1">
   <style>
+    /* ── PRO BANNER ─────────────────────────────────────────── */
+    .pro-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .pro-banner .pro-badge {
+      background: #f5c200;
+      color: #0b3060;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+    }
+    .pro-banner a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .pro-banner a:hover { color: #fff; }
     /* Redeneren & Koppel: 2-koloms grid voor brede sommen */
     .tafels-grid-2kol { grid-template-columns: 1fr 1fr !important; }
     /* ", want" en ", dus" label in tafelsommen */
@@ -129,6 +159,13 @@
   </style>
 </head>
 <body>
+
+<!-- PRO BANNER -->
+<div class="pro-banner">
+  <span class="pro-badge">⭐ PRO</span>
+  <span>Rekenbundel Generator — Juf Zisa PRO</span>
+  <a href="../app.html">← Terug naar menu</a>
+</div>
 
 <!-- ── HEADER ──────────────────────────────────────────────── -->
 <header>
@@ -2145,5 +2182,7 @@ function vsKiesProcentSub(w,l,el){
   document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Procent: '+l);
 }
 </script>
+<script src="../device-id.js"></script>
+<script src="../guard.js"></script>
 </body>
 </html>
