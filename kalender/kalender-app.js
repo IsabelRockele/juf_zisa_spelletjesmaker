@@ -914,6 +914,116 @@ function tekenKleinePdfKalender(doc,jaar,maand,x,y,breedte,hoogte,van,tot,regio)
   doc.rect(x,y,breedte,hoogte,'S');
 }
 
+// ── ALGEMEEN MODULE ───────────────────────────────────────────
+const AlgemeenModule = {
+  genereer(typen, aantal) {
+    const jaar = new Date().getFullYear();
+    const pool = [];
+
+    if (typen.includes('week_dagen')) {
+      pool.push({vraag:'1 week telt ___ dagen.', antwoord:'7'});
+      pool.push({vraag:'Hoeveel dagen heeft een week?', antwoord:'7'});
+      pool.push({vraag:'7 dagen = ___ week.', antwoord:'1'});
+    }
+    if (typen.includes('maand_weken')) {
+      pool.push({vraag:'1 maand telt ongeveer ___ weken.', antwoord:'4'});
+      pool.push({vraag:'Hoeveel weken heeft een maand ongeveer?', antwoord:'4'});
+      pool.push({vraag:'4 weken = ___ maand.', antwoord:'1'});
+    }
+    if (typen.includes('jaar_maanden')) {
+      pool.push({vraag:'1 jaar telt ___ maanden.', antwoord:'12'});
+      pool.push({vraag:'Hoeveel maanden heeft een jaar?', antwoord:'12'});
+      pool.push({vraag:'12 maanden = ___ jaar.', antwoord:'1'});
+    }
+    if (typen.includes('jaar_weken')) {
+      pool.push({vraag:'1 jaar telt ongeveer ___ weken.', antwoord:'52'});
+      pool.push({vraag:'Hoeveel weken heeft een jaar?', antwoord:'52'});
+      pool.push({vraag:'52 weken = ___ jaar.', antwoord:'1'});
+    }
+    if (typen.includes('jaar_dagen')) {
+      pool.push({vraag:'1 jaar telt ___ dagen.', antwoord:'365'});
+      pool.push({vraag:'Hoeveel dagen telt een gewoon jaar?', antwoord:'365'});
+      pool.push({vraag:'365 dagen = ___ jaar.', antwoord:'1'});
+    }
+    if (typen.includes('schrikkeljaar')) {
+      pool.push({vraag:'1 schrikkeljaar telt ___ dagen.', antwoord:'366'});
+      pool.push({vraag:'Hoeveel dagen heeft een schrikkeljaar?', antwoord:'366'});
+      pool.push({vraag:`Is ${jaar} een schrikkeljaar?`, antwoord: isSchrikkeljaar(jaar)?'Ja':'Nee'});
+      pool.push({vraag:'Hoeveel dagen heeft februari in een schrikkeljaar?', antwoord:'29'});
+      pool.push({vraag:'Hoeveel dagen heeft februari in een gewoon jaar?', antwoord:'28'});
+      pool.push({vraag:'Elke ___ jaar is er een schrikkeljaar.', antwoord:'4'});
+    }
+    if (typen.includes('weken_rekenen')) {
+      pool.push({vraag:'2 weken = ___ dagen.', antwoord:'14'});
+      pool.push({vraag:'3 weken = ___ dagen.', antwoord:'21'});
+      pool.push({vraag:'4 weken = ___ dagen.', antwoord:'28'});
+      pool.push({vraag:'14 dagen = ___ weken.', antwoord:'2'});
+      pool.push({vraag:'21 dagen = ___ weken.', antwoord:'3'});
+      pool.push({vraag:'28 dagen = ___ weken.', antwoord:'4'});
+    }
+    return shuffleArr(pool).slice(0, aantal);
+  },
+
+  leesInstellingen() {
+    const typen = Array.from(document.querySelectorAll('input[name="algemeenType"]:checked')).map(c=>c.value);
+    if (!typen.length) { document.getElementById('meldingAlgemeen').textContent='Kies minstens één type!'; return null; }
+    document.getElementById('meldingAlgemeen').textContent = '';
+    const aantal = Math.max(1, parseInt(document.getElementById('algemeenAantal').value)||6);
+    const oefeningen = this.genereer(typen, aantal);
+    return { type:'algemeen', typen, aantal, oefeningen };
+  },
+
+  tekenPreviewHtml(container, inst) {
+    container.innerHTML = '';
+    function renderRijen() {
+      Array.from(container.querySelectorAll('.oef-rij')).forEach(r=>r.remove());
+      container.querySelector('.oef-acties')?.remove();
+      inst.oefeningen.forEach((oef,i)=>{
+        const rij = document.createElement('div');
+        rij.className = 'oef-rij';
+        rij.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;';
+        rij.innerHTML = `<span style="color:#888;min-width:18px;flex-shrink:0;">${i+1}.</span>`
+          +`<span style="flex:1;color:#1a3a5c;">${oef.vraag}</span>`
+          +`<span style="border-bottom:1.5px solid #333;display:inline-block;min-width:50px;flex-shrink:0;"></span>`
+          +`<button title="Verwijder" style="background:none;border:1px solid #fcc;color:#c00;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;padding:0;flex-shrink:0;line-height:1;">×</button>`;
+        rij.querySelector('button').addEventListener('click',()=>{ inst.oefeningen.splice(i,1); renderRijen(); });
+        container.appendChild(rij);
+      });
+      const acties = document.createElement('div');
+      acties.className = 'oef-acties';
+      acties.style.cssText = 'margin-top:6px;';
+      const btn = document.createElement('button');
+      btn.style.cssText = 'background:none;border:1.5px dashed #00897B;color:#00897B;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;width:100%;';
+      btn.textContent = '+ Extra vraag genereren';
+      btn.addEventListener('click',()=>{
+        const extra = AlgemeenModule.genereer(inst.typen, 1);
+        if (extra.length) { inst.oefeningen.push(extra[0]); renderRijen(); }
+      });
+      acties.appendChild(btn);
+      container.appendChild(acties);
+    }
+    renderRijen();
+  },
+
+  tekenInPdf(doc, inst, y, margin, pageW, pageH) {
+    const breedte = pageW - 2*margin;
+    const rijH = 14;
+    inst.oefeningen.forEach((oef,i) => {
+      if (y+rijH+margin > pageH) { doc.addPage(); y=margin+10; }
+      doc.setFontSize(14); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
+      doc.text(`${i+1}.`, margin, y+9);
+      doc.setTextColor(26,58,92);
+      doc.text(oef.vraag, margin+8, y+9, {maxWidth:breedte*0.65});
+      const vraagB = doc.getTextWidth(oef.vraag);
+      const lijnX = Math.min(margin+8+vraagB+4, margin+breedte*0.7);
+      doc.setDrawColor(80,80,80); doc.setLineWidth(0.5);
+      doc.line(lijnX, y+10, margin+breedte, y+10);
+      y += rijH;
+    });
+    return y+4;
+  }
+};
+
 // ── BUNDEL ────────────────────────────────────────────────────
 const Bundel = (() => {
   let oefeningen=[];
@@ -940,7 +1050,7 @@ function renderBundelPreview(){
     return;
   }
   container.innerHTML='';
-  const labels={kalender:'📅 Kalender',dagen:'📆 Dagen',maanden:'🗓️ Maanden',tellen:'⏳ Tellen'};
+  const labels={kalender:'📅 Kalender',dagen:'📆 Dagen',maanden:'🗓️ Maanden',tellen:'⏳ Tellen',algemeen:'🧠 Algemeen'};
   const gezien=new Set();
   oefs.forEach((oef,gi)=>{
     if(gezien.has(oef.groepId))return;
@@ -967,6 +1077,8 @@ function renderBundelPreview(){
       MaandenModule.tekenPreviewHtml(inhoud,oef.inst);
     } else if(oef.type==='tellen'){
       TellenModule.tekenPreviewHtml(inhoud,oef.inst);
+    } else if(oef.type==='algemeen'){
+      AlgemeenModule.tekenPreviewHtml(inhoud,oef.inst);
     }
 
     blok.appendChild(inhoud);
@@ -1073,6 +1185,8 @@ function downloadPdf(){
         y=MaandenModule.tekenInPdf(doc,oef.inst,y,margin,pageW,pageH);
       } else if(oef.type==='tellen'){
         y=TellenModule.tekenInPdf(doc,oef.inst,y,margin,pageW,pageH);
+      } else if(oef.type==='algemeen'){
+        y=AlgemeenModule.tekenInPdf(doc,oef.inst,y,margin,pageW,pageH);
       }
     });
   }
@@ -1310,6 +1424,9 @@ function downloadAntwoordblad() {
     } else if (oef.type === 'maanden') {
       sectieKop('🗓️ Maanden');
       oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
+    } else if (oef.type === 'algemeen') {
+      sectieKop('🧠 Algemeen');
+      oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
     } else if (oef.type === 'tellen') {
       sectieKop('⏳ Tellen');
       const { startDatum, events, eenheid } = oef.inst;
@@ -1495,6 +1612,13 @@ document.addEventListener('DOMContentLoaded', () => {
     TellenModule.tekenPreviewHtml(document.getElementById('tellenPreview'), inst);
   });
 
+  document.getElementById('voegAlgemeenToeBtn')?.addEventListener('click', () => {
+    const inst = AlgemeenModule.leesInstellingen();
+    if (!inst) return;
+    Bundel.voegToe(inst, document.getElementById('opdrachtzinAlgemeen').value.trim() || 'Vul in.');
+    AlgemeenModule.tekenPreviewHtml(document.getElementById('algemeenPreview'), inst);
+  });
+
   // 2de kalender toggle
   const tweedeKalCheckbox = document.getElementById('tweedeKalender');
   const tweedeKalOpties = document.getElementById('tweedeKalOpties');
@@ -1564,6 +1688,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inst) MaandenModule.tekenPreviewHtml(document.getElementById('maandenPreview'), inst);
     }));
 
+  // Algemeen preview auto
+  document.querySelectorAll('input[name="algemeenType"],#algemeenAantal')
+    .forEach(el => el.addEventListener('change', () => {
+      const inst = AlgemeenModule.leesInstellingen();
+      if (inst) AlgemeenModule.tekenPreviewHtml(document.getElementById('algemeenPreview'), inst);
+    }));
+
   // Dagen preview auto (event delegation want chips zijn dynamisch)
   document.getElementById('dagenTypeChips')?.addEventListener('change', () => {
     const inst = DagenModule.leesInstellingen();
@@ -1589,4 +1720,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (instM) MaandenModule.tekenPreviewHtml(document.getElementById('maandenPreview'), instM);
   const instD = DagenModule.leesInstellingen();
   if (instD) DagenModule.tekenPreviewHtml(document.getElementById('dagenPreview'), instD);
+  const instA = AlgemeenModule.leesInstellingen();
+  if (instA) AlgemeenModule.tekenPreviewHtml(document.getElementById('algemeenPreview'), instA);
 });
