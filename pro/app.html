@@ -367,62 +367,101 @@
     .status.err  { border-color: #f1c0c0; background: #fff5f5; color: #a02020; }
 
     /* Updates-balk */
-    .updates-balk {
-      background: #fff;
+    /* Updates knop */
+    .updates-knop {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff3cd;
       border: 1.5px solid #ffe082;
-      border-radius: 12px;
-      padding: 14px 18px;
-      margin-bottom: 18px;
+      border-radius: 20px;
+      padding: 7px 16px;
+      font-family: inherit;
       font-size: 0.83rem;
-    }
-    .updates-balk summary {
       font-weight: bold;
       color: #7a4500;
       cursor: pointer;
-      list-style: none;
+      margin-bottom: 18px;
+      transition: background 0.15s;
+    }
+    .updates-knop:hover { background: #ffe082; }
+
+    /* Updates modal overlay */
+    .updates-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .updates-overlay.open { display: flex; }
+
+    .updates-modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      width: min(520px, 92vw);
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      position: relative;
+    }
+    .updates-modal h3 {
+      font-size: 1.1rem;
+      color: #7a4500;
+      margin: 0 0 16px;
       display: flex;
       align-items: center;
       gap: 8px;
-      user-select: none;
     }
-    .updates-balk summary::-webkit-details-marker { display: none; }
-    .updates-balk summary::after {
-      content: '▾';
-      margin-left: auto;
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-    .updates-balk[open] summary::after { content: '▴'; }
-    .updates-balk ul {
-      margin: 10px 0 0 0;
+    .updates-modal ul {
+      margin: 0;
       padding: 0;
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 10px;
     }
-    .updates-balk li {
+    .updates-modal li {
       display: flex;
-      gap: 8px;
+      gap: 10px;
       align-items: flex-start;
       color: #444;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-size: 0.83rem;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #f5f0e8;
     }
-    .updates-balk li .update-datum {
+    .updates-modal li:last-child { border-bottom: none; padding-bottom: 0; }
+    .updates-modal li .update-datum {
       background: #fff3cd;
       color: #7a4500;
       font-size: 0.72rem;
       font-weight: bold;
-      padding: 1px 7px;
+      padding: 2px 8px;
       border-radius: 10px;
       white-space: nowrap;
       flex-shrink: 0;
-      margin-top: 2px;
+      margin-top: 3px;
     }
-    .updates-balk li .update-tool {
+    .updates-modal li .update-tool {
       font-weight: bold;
       color: #2a2a2a;
     }
+    .updates-modal-close {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #aaa;
+      line-height: 1;
+    }
+    .updates-modal-close:hover { color: #555; }
     .section-header {
       display: flex;
       align-items: center;
@@ -589,28 +628,36 @@
 <!-- ═══ HOOFDINHOUD ═══ -->
 <main class="main" id="content">
 
-  <!-- UPDATES -->
-  <details class="updates-balk">
-    <summary>🆕 Laatste updates</summary>
-    <ul>
-      <li>
-        <span class="update-datum">apr 2026</span>
-        <span><span class="update-tool">Kalender Generator</span> — Nieuw bij Tijd en klok! Bouw een kalender-werkblad met eigen events, herhaalbare events (bv. elke woensdag zwemmen), schoolvakanties, eigen vragen, antwoordblad voor de leerkracht en oefentabs Dagen (3 niveaus), Maanden, Tellen en Algemene kennis.</span>
-      </li>
-      <li>
-        <span class="update-datum">apr 2026</span>
-        <span><span class="update-tool">Bundel Kloklezen</span> — Uitgebreid met nieuwe tabs: Ordenen op dagdeel, Rangschikken, Maateenheden, Schrijven en Begrippen. Alle tabs combineerbaar in één bundel.</span>
-      </li>
-      <li>
-        <span class="update-datum">maart 2026</span>
-        <span><span class="update-tool">Blokkenbouwsels</span> — Nieuw bij creatief en bouwen! Maak je eigen bundel met oefeningen rond blokkenbouwsels.</span>
-      </li>
-       <li>
-        <span class="update-datum">maart 2026</span>
-        <span><span class="update-tool">Handschrift</span> — Nieuw bij Taal en letters! Voorschrijven op het bord en automatisch laten herhalen zodat kinderen goed de schrijfbeweging zien. Ook de mogelijkheid om je eigen werkbladen te maken als herhaling of extra inoefening.</span>
-      </li>
-    </ul>
-  </details>
+  <!-- UPDATES KNOP -->
+  <button class="updates-knop" onclick="document.getElementById('updatesOverlay').classList.add('open')">
+    🆕 Bekijk hier alle updates
+  </button>
+
+  <!-- UPDATES MODAL -->
+  <div class="updates-overlay" id="updatesOverlay">
+    <div class="updates-modal">
+      <button class="updates-modal-close" onclick="document.getElementById('updatesOverlay').classList.remove('open')">✕</button>
+      <h3>🆕 Laatste updates</h3>
+      <ul>
+        <li>
+          <span class="update-datum">apr 2026</span>
+          <span><span class="update-tool">Kalender Generator</span> — Nieuw bij Tijd en klok! Bouw een kalender-werkblad met eigen events, herhaalbare events (bv. elke woensdag zwemmen), schoolvakanties, eigen vragen, antwoordblad voor de leerkracht en oefentabs Dagen (3 niveaus), Maanden, Tellen en Algemene kennis.</span>
+        </li>
+        <li>
+          <span class="update-datum">apr 2026</span>
+          <span><span class="update-tool">Bundel Kloklezen</span> — Uitgebreid met nieuwe tabs: Ordenen op dagdeel, Rangschikken, Maateenheden, Schrijven en Begrippen. Alle tabs combineerbaar in één bundel.</span>
+        </li>
+        <li>
+          <span class="update-datum">maart 2026</span>
+          <span><span class="update-tool">Blokkenbouwsels</span> — Nieuw bij creatief en bouwen! Maak je eigen bundel met oefeningen rond blokkenbouwsels.</span>
+        </li>
+        <li>
+          <span class="update-datum">maart 2026</span>
+          <span><span class="update-tool">Handschrift</span> — Nieuw bij Taal en letters! Voorschrijven op het bord en automatisch laten herhalen zodat kinderen goed de schrijfbeweging zien. Ook de mogelijkheid om je eigen werkbladen te maken als herhaling of extra inoefening.</span>
+        </li>
+      </ul>
+    </div>
+  </div>
 
   <div id="status" class="status">Status laden…</div>
 
@@ -893,6 +940,9 @@ window.addEventListener('load', () => {
 
   document.getElementById('suggestOverlay').addEventListener('click', function(e) {
     if (e.target === this) sluitModal();
+  });
+  document.getElementById('updatesOverlay').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
   });
 
   async function verstuurSuggestie() {
