@@ -159,6 +159,10 @@ header .badge {
 .tab-tellen:hover { background: #CE93D8; }
 .tab-tellen.active { background: #9733b3 !important; color: #fff; border-bottom-color: #4A148C !important; font-weight: 800; }
 
+.tab-algemeen { background: #B2DFDB; color: #1a3a38; }
+.tab-algemeen:hover { background: #80CBC4; }
+.tab-algemeen.active { background: #00897B !important; color: #fff; border-bottom-color: #004D40 !important; font-weight: 800; }
+
 .tabs-scroll-hint {
   display: flex;
   align-items: center;
