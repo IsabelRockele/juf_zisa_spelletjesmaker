@@ -335,7 +335,8 @@ const KalenderModule = {
       doc.text(dag.toString(), cx+2, cy+7.5);
       if (event?.naam) {
         doc.setFontSize(5); doc.setFont(undefined,'normal'); doc.setTextColor(50,50,50);
-        doc.text(event.naam.substring(0,8), cx+colW/2, cy+rijH-1.5, {align:'center'});
+        const maxTekst = doc.splitTextToSize(event.naam, colW-2)[0];
+        doc.text(maxTekst, cx+colW/2, cy+rijH-1.5, {align:'center'});
       }
       kol++; if(kol===7){kol=0;rij++;}
     }
@@ -416,7 +417,8 @@ const KalenderModule = {
       if (event?.naam) {
         doc.setFontSize(6); doc.setFont(undefined, 'bold');
         doc.setTextColor(50,50,50);
-        doc.text(event.naam.substring(0,10), x+colW/2, wy+13.5, {align:'center'});
+        const maxTekst = doc.splitTextToSize(event.naam, colW-3)[0];
+        doc.text(maxTekst, x+colW/2, wy+13.5, {align:'center'});
       }
 
       kolom++;
@@ -433,6 +435,64 @@ const KalenderModule = {
   }
 };
 
+// ── DAGEN NIVEAUS ─────────────────────────────────────────────
+const DAGEN_NIVEAUS = {
+  1: {
+    uitleg: 'Basisoefeningen: gisteren, morgen, … én omgekeerd (als het gisteren zaterdag was, welke dag is het vandaag?).',
+    types: [
+      {value:'gisteren',         label:'Gisteren',              default:true},
+      {value:'eergisteren',      label:'Eergisteren',           default:true},
+      {value:'morgen',           label:'Morgen',                default:true},
+      {value:'overmorgen',       label:'Overmorgen',            default:true},
+      {value:'omgekeerd',        label:'Omgekeerd (→ vandaag)', default:true},
+    ]
+  },
+  2: {
+    uitleg: 'Extra uitdaging: X dagen later/geleden (3–6 dagen).',
+    types: [
+      {value:'gisteren',      label:'Gisteren',        default:true},
+      {value:'morgen',        label:'Morgen',          default:true},
+      {value:'xdagenlater',   label:'X dagen later',   default:true},
+      {value:'xdagengeleden', label:'X dagen geleden', default:true},
+    ]
+  },
+  3: {
+    uitleg: 'Moeilijke redeneersom: combineer twee relaties. Bv. "Als het gisteren dinsdag was, welke dag is het dan overmorgen?"',
+    types: [
+      {value:'combo_gisteren_morgen',        label:'Gisteren → morgen',        default:true},
+      {value:'combo_gisteren_overmorgen',    label:'Gisteren → overmorgen',    default:true},
+      {value:'combo_eergisteren_morgen',     label:'Eergisteren → morgen',     default:true},
+      {value:'combo_eergisteren_overmorgen', label:'Eergisteren → overmorgen', default:false},
+      {value:'combo_eergisteren_vandaag',    label:'Eergisteren → vandaag',    default:true},
+      {value:'combo_overmorgen_vandaag',     label:'Overmorgen → vandaag',     default:true},
+      {value:'combo_morgen_gisteren',        label:'Morgen → gisteren',        default:false},
+      {value:'combo_overmorgen_gisteren',    label:'Overmorgen → gisteren',    default:false},
+    ]
+  }
+};
+
+function renderDagenNiveauChips(niveau) {
+  const config = DAGEN_NIVEAUS[niveau];
+  const uitlegEl = document.getElementById('dagenNiveauUitleg');
+  const chipsEl  = document.getElementById('dagenTypeChips');
+  if (!uitlegEl || !chipsEl) return;
+  uitlegEl.textContent = config.uitleg;
+  chipsEl.innerHTML = '';
+  config.types.forEach(t => {
+    const chip = document.createElement('div');
+    chip.className = 'checkbox-chip' + (t.default ? ' geselecteerd' : '');
+    chip.innerHTML = `<input type="checkbox" name="dagenType" value="${t.value}"${t.default?' checked':''}/> ${t.label}`;
+    // klik-handler (initChips werkt niet meer retroactief, dus hier direct)
+    chip.addEventListener('click', () => {
+      const inp = chip.querySelector('input');
+      inp.checked = !inp.checked;
+      chip.classList.toggle('geselecteerd', inp.checked);
+      inp.dispatchEvent(new Event('change', {bubbles:true}));
+    });
+    chipsEl.appendChild(chip);
+  });
+}
+
 // ── DAGEN MODULE ──────────────────────────────────────────────
 const DagenModule = {
   genereerOefeningen(inst) {
@@ -440,24 +500,71 @@ const DagenModule = {
     const oefeningen = [];
     if (!typen.length) return [];
     for (let i = 0; i < aantal; i++) {
-      const type = typen[i % typen.length];
+      // Willekeurig type kiezen (niet cyclisch, anders herhaalt extra-vraag altijd type[0])
+      const type = typen[Math.floor(Math.random() * typen.length)];
       const basis = new Date(refDatum);
       basis.setDate(basis.getDate() + Math.floor(Math.random()*10));
       let vraag, antwoord;
+
       if (type === 'omgekeerd') {
         const v = [1,2,-1,-2][Math.floor(Math.random()*4)];
         const doel = new Date(basis); doel.setDate(doel.getDate()+v);
         const rel = v===1?'morgen':v===-1?'gisteren':v===2?'overmorgen':'eergisteren';
+        const werkwoord = v > 0 ? 'is' : 'was';
         vraag = metDatum
-          ? `${rel[0].toUpperCase()+rel.slice(1)} is het ${dagNaam(doel)} ${doel.getDate()} ${MAANDEN_NL[doel.getMonth()]}. Welke dag is het vandaag?`
-          : `${rel[0].toUpperCase()+rel.slice(1)} is het ${dagNaam(doel)}. Welke dag is het vandaag?`;
+          ? `${rel[0].toUpperCase()+rel.slice(1)} ${werkwoord} het ${dagNaam(doel)} ${doel.getDate()} ${MAANDEN_NL[doel.getMonth()]}. Welke dag is het vandaag?`
+          : `${rel[0].toUpperCase()+rel.slice(1)} ${werkwoord} het ${dagNaam(doel)}. Welke dag is het vandaag?`;
         antwoord = metDatum ? `${dagNaam(basis)} ${basis.getDate()} ${MAANDEN_NL[basis.getMonth()]}` : dagNaam(basis);
+
+      } else if (type === 'xdagenlater') {
+        const x = 3 + Math.floor(Math.random()*4); // 3–6
+        const doel = new Date(basis); doel.setDate(doel.getDate()+x);
+        vraag = metDatum
+          ? `Vandaag is het ${dagNaam(basis)} ${basis.getDate()} ${MAANDEN_NL[basis.getMonth()]}. Welke dag is het ${x} dagen later?`
+          : `Vandaag is het ${dagNaam(basis)}. Welke dag is het ${x} dagen later?`;
+        antwoord = metDatum ? `${dagNaam(doel)} ${doel.getDate()} ${MAANDEN_NL[doel.getMonth()]}` : dagNaam(doel);
+
+      } else if (type === 'xdagengeleden') {
+        const x = 3 + Math.floor(Math.random()*4); // 3–6
+        const doel = new Date(basis); doel.setDate(doel.getDate()-x);
+        vraag = metDatum
+          ? `Vandaag is het ${dagNaam(basis)} ${basis.getDate()} ${MAANDEN_NL[basis.getMonth()]}. Welke dag was het ${x} dagen geleden?`
+          : `Vandaag is het ${dagNaam(basis)}. Welke dag was het ${x} dagen geleden?`;
+        antwoord = metDatum ? `${dagNaam(doel)} ${doel.getDate()} ${MAANDEN_NL[doel.getMonth()]}` : dagNaam(doel);
+
+      } else if (type.startsWith('combo_')) {
+        // Niveau 3: combo van twee relaties
+        // Mogelijke waarden: gisteren(-1), eergisteren(-2), morgen(1), overmorgen(2), vandaag(0)
+        const bekende = ['eergisteren','overmorgen','gisteren','morgen','vandaag'];
+        let van='', naar='';
+        for (const b of bekende) {
+          if (type.startsWith('combo_'+b+'_')) { van=b; break; }
+        }
+        naar = type.replace('combo_'+van+'_','');
+        const offsetMap = {gisteren:-1, eergisteren:-2, morgen:1, overmorgen:2, vandaag:0};
+        const offsetVan  = offsetMap[van]  ?? 0;
+        const offsetNaar = offsetMap[naar] ?? 0;
+        const vanDag  = new Date(basis); vanDag.setDate(vanDag.getDate()+offsetVan);
+        const naarDag = new Date(basis); naarDag.setDate(naarDag.getDate()+offsetNaar);
+        const werkwoordVan  = offsetVan  < 0 ? 'was' : 'is';
+        const werkwoordNaar = offsetNaar <= 0 ? 'is' : 'is'; // vandaag/morgen = is
+        // Vraagzin: "Als het [van] [dagNaam] [was/is], welke dag [is/was] het dan [naar]?"
+        const naarLabel = naar === 'vandaag' ? 'dan vandaag' : `dan ${naar}`;
+        vraag = metDatum
+          ? `Als het ${van} ${dagNaam(vanDag)} ${vanDag.getDate()} ${MAANDEN_NL[vanDag.getMonth()]} ${werkwoordVan}, welke dag is het ${naarLabel}?`
+          : `Als het ${van} ${dagNaam(vanDag)} ${werkwoordVan}, welke dag is het ${naarLabel}?`;
+        antwoord = metDatum
+          ? `${dagNaam(naarDag)} ${naarDag.getDate()} ${MAANDEN_NL[naarDag.getMonth()]}`
+          : dagNaam(naarDag);
+
       } else {
         const v = type==='gisteren'?-1:type==='eergisteren'?-2:type==='morgen'?1:2;
         const doel = new Date(basis); doel.setDate(doel.getDate()+v);
+        const verleden = v < 0; // gisteren / eergisteren
+        const werkwoord = verleden ? 'was' : 'is';
         vraag = metDatum
-          ? `Vandaag is het ${dagNaam(basis)} ${basis.getDate()} ${MAANDEN_NL[basis.getMonth()]}. Welke dag was/is ${type}?`
-          : `Vandaag is het ${dagNaam(basis)}. Welke dag was/is ${type}?`;
+          ? `Vandaag is het ${dagNaam(basis)} ${basis.getDate()} ${MAANDEN_NL[basis.getMonth()]}. Welke dag ${werkwoord} het ${type}?`
+          : `Vandaag is het ${dagNaam(basis)}. Welke dag ${werkwoord} het ${type}?`;
         antwoord = metDatum ? `${dagNaam(doel)} ${doel.getDate()} ${MAANDEN_NL[doel.getMonth()]}` : dagNaam(doel);
       }
       oefeningen.push({ vraag, antwoord });
@@ -491,12 +598,42 @@ const DagenModule = {
       });
       container.appendChild(strip);
     }
-    inst.oefeningen.forEach((oef,i)=>{
-      const rij=document.createElement('div');
-      rij.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #eee;font-size:13px;';
-      rij.innerHTML=`<span style="color:#888;min-width:20px;">${i+1}.</span><span style="flex:1;color:#1a3a5c;">${oef.vraag}</span><span style="border-bottom:1.5px solid #333;display:inline-block;min-width:80px;"></span>`;
-      container.appendChild(rij);
-    });
+
+    function renderRijen() {
+      // Verwijder oude rijen (niet de weekstrip)
+      Array.from(container.querySelectorAll('.oef-rij')).forEach(r=>r.remove());
+      container.querySelector('.oef-acties')?.remove();
+
+      inst.oefeningen.forEach((oef,i)=>{
+        const rij=document.createElement('div');
+        rij.className='oef-rij';
+        rij.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;';
+        rij.innerHTML=`<span style="color:#888;min-width:18px;flex-shrink:0;">${i+1}.</span>`
+          +`<span style="flex:1;color:#1a3a5c;">${oef.vraag}</span>`
+          +`<span style="border-bottom:1.5px solid #333;display:inline-block;min-width:60px;flex-shrink:0;"></span>`
+          +`<button title="Verwijder deze vraag" style="background:none;border:1px solid #fcc;color:#c00;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;padding:0;flex-shrink:0;line-height:1;">×</button>`;
+        rij.querySelector('button').addEventListener('click',()=>{
+          inst.oefeningen.splice(i,1);
+          renderRijen();
+        });
+        container.appendChild(rij);
+      });
+
+      // Knop: extra vraag genereren
+      const acties = document.createElement('div');
+      acties.className='oef-acties';
+      acties.style.cssText='margin-top:6px;';
+      const btn = document.createElement('button');
+      btn.style.cssText='background:none;border:1.5px dashed #4A90D9;color:#4A90D9;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;width:100%;';
+      btn.textContent='+ Extra vraag genereren';
+      btn.addEventListener('click',()=>{
+        const extra = DagenModule.genereerOefeningen({...inst, aantal:1});
+        if(extra.length) { inst.oefeningen.push(extra[0]); renderRijen(); }
+      });
+      acties.appendChild(btn);
+      container.appendChild(acties);
+    }
+    renderRijen();
   },
 
   tekenInPdf(doc, inst, y, margin, pageW, pageH) {
@@ -514,15 +651,18 @@ const DagenModule = {
       });
       y+=14;
     }
+    const rijH=14;
     inst.oefeningen.forEach((oef,i)=>{
-      if(y+14+margin>pageH){doc.addPage();y=margin;}
-      doc.setFontSize(12); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
+      if(y+rijH+margin>pageH){doc.addPage();y=margin+10;}
+      doc.setFontSize(14); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
       doc.text(`${i+1}.`,margin,y+9);
       doc.setTextColor(26,58,92);
-      doc.text(oef.vraag,margin+8,y+9,{maxWidth:breedte*0.7});
+      doc.text(oef.vraag,margin+8,y+9,{maxWidth:breedte*0.65});
+      const vraagB=doc.getTextWidth(oef.vraag);
+      const lijnX=Math.min(margin+8+vraagB+4, margin+breedte*0.7);
       doc.setDrawColor(80,80,80); doc.setLineWidth(0.5);
-      doc.line(margin+breedte*0.72,y+10,margin+breedte,y+10);
-      y+=14;
+      doc.line(lijnX,y+10,margin+breedte,y+10);
+      y+=rijH;
     });
     return y+4;
   }
@@ -558,6 +698,19 @@ const MaandenModule = {
       pool.push({vraag:'1 week = ___ dagen.', antwoord:'7'});
       pool.push({vraag:'Een jaar heeft ongeveer ___ weken.', antwoord:'52'});
     }
+    if(typen.includes('algemeen')) {
+      pool.push({vraag:'1 week telt ___ dagen.', antwoord:'7'});
+      pool.push({vraag:'1 maand telt ongeveer ___ weken.', antwoord:'4'});
+      pool.push({vraag:'1 jaar telt ___ maanden.', antwoord:'12'});
+      pool.push({vraag:'1 jaar telt ongeveer ___ weken.', antwoord:'52'});
+      pool.push({vraag:'1 jaar telt ___ dagen.', antwoord:'365'});
+      pool.push({vraag:`1 schrikkeljaar telt ___ dagen.`, antwoord:'366'});
+      pool.push({vraag:'Hoeveel dagen heeft een gewoon jaar?', antwoord:'365'});
+      pool.push({vraag:'Hoeveel maanden heeft een jaar?', antwoord:'12'});
+      pool.push({vraag:'Hoeveel weken heeft een jaar?', antwoord:'52'});
+      pool.push({vraag:'Hoeveel dagen heeft een week?', antwoord:'7'});
+      pool.push({vraag:'Hoeveel weken heeft een maand?', antwoord:'4'});
+    }
     if(typen.includes('seizoenen')) {
       const seizoenen={lente:['maart','april','mei'],zomer:['juni','juli','augustus'],herfst:['september','oktober','november'],winter:['december','januari','februari']};
       Object.entries(seizoenen).forEach(([s,ms])=>{
@@ -579,29 +732,63 @@ const MaandenModule = {
 
   tekenPreviewHtml(container,inst) {
     container.innerHTML='';
-    inst.oefeningen.forEach((oef,i)=>{
-      const rij=document.createElement('div');
-      rij.style.cssText='display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;';
-      rij.innerHTML=`<span style="color:#888;min-width:20px;">${i+1}.</span><span style="flex:1;color:#1a3a5c;">${oef.vraag}</span><span style="border-bottom:1.5px solid #333;display:inline-block;min-width:60px;"></span>`;
-      container.appendChild(rij);
-    });
+
+    function renderRijen() {
+      Array.from(container.querySelectorAll('.oef-rij')).forEach(r=>r.remove());
+      container.querySelector('.oef-acties')?.remove();
+
+      inst.oefeningen.forEach((oef,i)=>{
+        const rij=document.createElement('div');
+        rij.className='oef-rij';
+        rij.style.cssText='display:flex;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #eee;font-size:13px;';
+        rij.innerHTML=`<span style="color:#888;min-width:18px;flex-shrink:0;">${i+1}.</span>`
+          +`<span style="flex:1;color:#1a3a5c;">${oef.vraag}</span>`
+          +`<span style="border-bottom:1.5px solid #333;display:inline-block;min-width:80px;flex-shrink:0;"></span>`
+          +`<button title="Verwijder" style="background:none;border:1px solid #fcc;color:#c00;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;padding:0;flex-shrink:0;line-height:1;">×</button>`;
+        rij.querySelector('button').addEventListener('click',()=>{
+          inst.oefeningen.splice(i,1);
+          renderRijen();
+        });
+        container.appendChild(rij);
+      });
+
+      const acties=document.createElement('div');
+      acties.className='oef-acties';
+      acties.style.cssText='margin-top:6px;';
+      const btn=document.createElement('button');
+      btn.style.cssText='background:none;border:1.5px dashed #FF8C00;color:#FF8C00;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;font-weight:600;font-family:inherit;width:100%;';
+      btn.textContent='+ Extra vraag genereren';
+      btn.addEventListener('click',()=>{
+        const typen=inst.typen||['volgorde'];
+        const extra=MaandenModule.genereer(typen,1);
+        if(extra.length){inst.oefeningen.push(extra[0]);renderRijen();}
+      });
+      acties.appendChild(btn);
+      container.appendChild(acties);
+    }
+    renderRijen();
   },
 
   tekenInPdf(doc,inst,y,margin,pageW,pageH) {
-    const breedte=pageW-2*margin; const kolW=(breedte-6)/2;
+    const breedte=pageW-2*margin;
+    const rijH=14;
     inst.oefeningen.forEach((oef,i)=>{
-      const col=i%2; const x=margin+col*(kolW+6);
-      if(col===0&&i>0&&y+13+margin>pageH){doc.addPage();y=margin;}
-      const wy=col===0?y:y; // simplified
-      doc.setFontSize(11); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
-      doc.text(`${i+1}.`,x,wy+8);
+      if(y+rijH+margin>pageH){
+        doc.addPage();
+        y=margin+10;
+      }
+      doc.setFontSize(14); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
+      doc.text(`${i+1}.`,margin,y+9);
       doc.setTextColor(26,58,92);
-      doc.text(oef.vraag,x+8,wy+8,{maxWidth:kolW*0.62});
+      doc.text(oef.vraag,margin+8,y+9,{maxWidth:breedte*0.65});
+      // Antwoordlijn: start vlak na de vraagtekst
+      const vraagB=doc.getTextWidth(oef.vraag);
+      const lijnX=Math.min(margin+8+vraagB+4, margin+breedte*0.68);
       doc.setDrawColor(80,80,80); doc.setLineWidth(0.5);
-      doc.line(x+kolW*0.68,wy+9,x+kolW-2,wy+9);
-      if(col===1) y+=13;
+      doc.line(lijnX, y+10, margin+breedte, y+10);
+      y+=rijH;
     });
-    return y+13+6;
+    return y+6;
   }
 };
 
@@ -626,14 +813,15 @@ const TellenModule = {
     events.forEach(ev=>{
       const dagen=Math.round((ev.datum-startDatum)/(86400000));
       const weken=Math.floor(dagen/7);
-      let ant=eenheid==='dagen'?`${dagen} dag${dagen!==1?'en':''}`
-        :eenheid==='weken'?`${weken} week${weken!==1?'en':''}`
-        :`${weken} week${weken!==1?'en':''} en ${dagen%7} dag${dagen%7!==1?'en':''}`;
+      const label=eenheid==='weken'?'weken':eenheid==='gemengd'?'weken en dagen':'dagen';
       const startStr=`${dagNaam(startDatum)} ${startDatum.getDate()} ${MAANDEN_NL[startDatum.getMonth()]}`;
       const evStr=`${dagNaam(ev.datum)} ${ev.datum.getDate()} ${MAANDEN_NL[ev.datum.getMonth()]}`;
       const div=document.createElement('div');
       div.style.cssText='border:1.5px solid #c0d8ee;border-radius:8px;padding:10px;margin-bottom:8px;background:#f8fbff;font-size:13px;';
-      div.innerHTML=`<strong>Vandaag</strong> is ${startStr}.<br><strong>${ev.naam}</strong> is op ${evStr}.<br><span style="color:#555;">Nog hoeveel ${eenheid==='weken'?'weken':'dagen'}? <span style="border-bottom:1.5px solid #333;display:inline-block;width:50px;"></span></span>`;
+      div.innerHTML=`<strong>Vandaag</strong> is het ${startStr}.<br>`
+        +`<strong>${ev.naam}</strong> is op ${evStr}.<br>`
+        +`<span style="color:#555;">Nog hoeveel ${label}?</span> `
+        +`<span style="border-bottom:1.5px solid #333;display:inline-block;min-width:50px;"></span>`;
       container.appendChild(div);
     });
   },
@@ -644,25 +832,32 @@ const TellenModule = {
     events.forEach(ev=>{
       const dagen=Math.round((ev.datum-startDatum)/86400000);
       const overMaand=startDatum.getMonth()!==ev.datum.getMonth()||startDatum.getFullYear()!==ev.datum.getFullYear();
-      const kalH=metKalender?(overMaand?58:55):0;
-      if(y+30+kalH+margin>pageH){doc.addPage();y=margin;}
+      const kalH=metKalender?(overMaand?62:58):0;
+      if(y+34+kalH+margin>pageH){doc.addPage();y=margin;}
       const startStr=`${dagNaam(startDatum)} ${startDatum.getDate()} ${MAANDEN_NL[startDatum.getMonth()]} ${startDatum.getFullYear()}`;
       const evStr=`${dagNaam(ev.datum)} ${ev.datum.getDate()} ${MAANDEN_NL[ev.datum.getMonth()]} ${ev.datum.getFullYear()}`;
+      const label=eenheid==='weken'?'weken':eenheid==='gemengd'?'weken en dagen':'dagen';
       doc.setFontSize(12); doc.setFont(undefined,'normal'); doc.setTextColor(26,58,92);
       doc.text(`Vandaag is het ${startStr}.`,margin,y+8);
-      doc.setFont(undefined,'bold'); doc.text(ev.naam,margin,y+16);
-      doc.setFont(undefined,'normal'); doc.text(` is op ${evStr}.`,margin+doc.getTextWidth(ev.naam),y+16);
-      doc.setFontSize(11); doc.setTextColor(60,60,60);
-      const label=eenheid==='weken'?'weken':'dagen';
-      doc.text(`Nog hoeveel ${label}?`,margin,y+24);
+      // Tweede zin: bereken bold-breedte VOOR font-switch
+      doc.setFont(undefined,'bold');
+      const naamBreedte = doc.getTextWidth(ev.naam);
+      doc.text(ev.naam, margin, y+17);
+      doc.setFont(undefined,'normal');
+      doc.text(` is op ${evStr}.`, margin + naamBreedte, y+17);
+      // Vraag + invullijn op 14pt
+      doc.setFontSize(14); doc.setTextColor(60,60,60);
+      doc.text(`Nog hoeveel ${label}?`,margin,y+26);
       doc.setDrawColor(80,80,80); doc.setLineWidth(0.5);
-      doc.line(margin+48,y+25,margin+90,y+25);
-      y+=28;
+      const labelB=doc.getTextWidth(`Nog hoeveel ${label}?`);
+      doc.line(margin+labelB+4,y+27,margin+90,y+27);
+      y+=32;
       if(metKalender){
         const kalW=overMaand?(breedte-8)/2:breedte*0.55;
-        tekenKleinePdfKalender(doc,startDatum.getFullYear(),startDatum.getMonth(),margin,y,kalW,52,startDatum,ev.datum,'geen');
-        if(overMaand) tekenKleinePdfKalender(doc,ev.datum.getFullYear(),ev.datum.getMonth(),margin+kalW+8,y,kalW,52,startDatum,ev.datum,'geen');
-        y+=56;
+        // Geen inkleuring: geef null,null mee zodat kind zelf moet tellen
+        tekenKleinePdfKalender(doc,startDatum.getFullYear(),startDatum.getMonth(),margin,y,kalW,56,null,null,'geen');
+        if(overMaand) tekenKleinePdfKalender(doc,ev.datum.getFullYear(),ev.datum.getMonth(),margin+kalW+8,y,kalW,56,null,null,'geen');
+        y+=60;
       }
       y+=6;
     });
@@ -674,27 +869,48 @@ function tekenKleinePdfKalender(doc,jaar,maand,x,y,breedte,hoogte,van,tot,regio)
   const eerstedag=new Date(jaar,maand,1);
   const startIdx=dagIndex(eerstedag);
   const aantalDagen=aantalDagenInMaand(jaar,maand);
-  const rijH=(hoogte-12)/6;
   const colW=breedte/7;
+  const rijH=(hoogte-14)/6; // 14 = ruimte voor titel + dag-headers
+
+  // Maandtitel
   doc.setFontSize(8); doc.setFont(undefined,'bold'); doc.setTextColor(26,58,92);
   doc.text(`${MAANDEN_NL_HOOFD[maand]} ${jaar}`,x+breedte/2,y+5,{align:'center'});
+
+  // Dag-headers met grijze/blauwe achtergrond
   DAGEN_KORT.forEach((d,i)=>{
-    doc.setFontSize(6); doc.setFont(undefined,'bold'); doc.setTextColor(74,144,217);
-    doc.text(d,x+i*colW+colW/2,y+10,{align:'center'});
+    const isWE=i>=5;
+    doc.setFillColor(isWE?127:74, isWE?140:144, isWE?154:217);
+    doc.rect(x+i*colW, y+7, colW-0.3, 5, 'F');
+    doc.setFontSize(5.5); doc.setFont(undefined,'bold'); doc.setTextColor(255,255,255);
+    doc.text(d, x+i*colW+colW/2, y+11, {align:'center'});
   });
-  let kol=startIdx,rij=1;
+
+  // Dagvakjes
+  let kol=startIdx, rij=0;
+  const yStart=y+13;
   for(let dag=1;dag<=aantalDagen;dag++){
     const d=new Date(jaar,maand,dag);
-    const dx=x+kol*colW; const dy=y+rij*rijH+6;
+    const dx=x+kol*colW;
+    const dy=yStart+rij*rijH;
     const isWE=dagIndex(d)>=5;
-    const gemarkeerd=van&&tot&&d>=van&&d<=tot;
-    if(gemarkeerd){doc.setFillColor(255,230,150);doc.rect(dx,dy-3,colW-0.3,rijH,'F');}
-    doc.setFontSize(6.5); doc.setFont(undefined,gemarkeerd?'bold':'normal');
-    doc.setTextColor(isWE?160:gemarkeerd?120:60,isWE?60:60,isWE?50:60);
-    doc.text(dag.toString(),dx+colW/2,dy+2,{align:'center'});
+
+    // Achtergrondkleur
+    if(isWE){
+      doc.setFillColor(242,244,246);
+      doc.rect(dx,dy,colW-0.3,rijH-0.3,'F');
+    }
+    // Vakje-rand
+    doc.setDrawColor(200,215,230); doc.setLineWidth(0.15);
+    doc.rect(dx,dy,colW-0.3,rijH-0.3,'S');
+    // Dagnummer
+    doc.setFontSize(6); doc.setFont(undefined, isWE?'normal':'bold');
+    doc.setTextColor(isWE?140:40, isWE?140:40, isWE?140:40);
+    doc.text(dag.toString(), dx+1.5, dy+rijH-1.5);
+
     kol++; if(kol===7){kol=0;rij++;}
   }
-  doc.setDrawColor(180,200,230); doc.setLineWidth(0.3);
+  // Buitenkader
+  doc.setDrawColor(74,144,217); doc.setLineWidth(0.4);
   doc.rect(x,y,breedte,hoogte,'S');
 }
 
@@ -800,6 +1016,7 @@ function downloadPdf(){
 
   let y=header(true);
   const oefs=Bundel.getOefeningen();
+  const veiligeMarge = margin + 8; // niet te hoog op nieuwe pagina
 
   if(!oefs.length){
     doc.setFontSize(12); doc.setTextColor(150,150,150);
@@ -812,7 +1029,16 @@ function downloadPdf(){
       gezien.add(oef.groepId);
       if(!eerste){ y+=8; }
       eerste=false;
-      if(y+40+margin>pageH){doc.addPage();y=header(false);}
+
+      // Schat minimale hoogte: opdrachtzin (16) + eerste oefening per type
+      const eersteH = oef.type==='kalender' ? 80
+        : oef.type==='tellen' ? 40
+        : 28; // dagen, maanden: 14pt vraag + speling
+      if(y + 16 + eersteH + margin > pageH){
+        doc.addPage();
+        y=header(false);
+        if(y<veiligeMarge) y=veiligeMarge;
+      }
       y=tekenOpdrachtzin(y+2, oef.opdrachtzin);
       if(oef.type==='kalender'){
         const inst=oef.inst;
@@ -909,7 +1135,210 @@ function renderKalOpdrachten() {
 window.kalOpdracht_verwijder = function(i) { kalOpdrachten.splice(i,1); renderKalOpdrachten(); };
 
 // ── DOM READY ─────────────────────────────────────────────────
-// ── CHIP INTERACTIVITEIT ──────────────────────────────────────
+// ── HERHAALBARE EVENTS ────────────────────────────────────────
+let herhalKleur = '#fff3cd'; // default geel
+
+function initHerhalKleuren() {
+  document.querySelectorAll('.herhal-kleur').forEach(el => {
+    el.addEventListener('click', () => {
+      herhalKleur = el.dataset.kleur;
+      document.querySelectorAll('.herhal-kleur').forEach(k => {
+        k.classList.remove('geselecteerd');
+        k.style.outline = '';
+      });
+      el.classList.add('geselecteerd');
+      el.style.outline = '3px solid #1a3a5c';
+      el.style.outlineOffset = '2px';
+    });
+  });
+  // Initieel eerste geselecteerd tonen
+  const eerste = document.querySelector('.herhal-kleur.geselecteerd');
+  if (eerste) { eerste.style.outline = '3px solid #1a3a5c'; eerste.style.outlineOffset = '2px'; }
+}
+
+function pasHerhaalEventsToe() {
+  const naam = document.getElementById('herhalNaam').value.trim();
+  if (!naam) { alert('Vul eerst een naam in voor het event.'); return; }
+  const dagIdx = parseInt(document.getElementById('herhalDag').value); // 0=ma … 4=vr
+  const freq = document.querySelector('input[name="herhalFreq"]:checked')?.value || 'elke';
+  const startWeek = parseInt(document.querySelector('input[name="herhalStartWeek"]:checked')?.value || '1');
+  const aantalDagen = aantalDagenInMaand(huidigJaar, huidigMaand);
+
+  // Verzamel alle dagen van de gekozen weekdag in de huidige maand
+  const trefDagen = [];
+  for (let dag = 1; dag <= aantalDagen; dag++) {
+    const d = new Date(huidigJaar, huidigMaand, dag);
+    if (dagIndex(d) === dagIdx) trefDagen.push(dag);
+  }
+
+  // Filter op frequentie
+  const toepassen = freq === 'elke'
+    ? trefDagen
+    : trefDagen.filter((_, i) => (i % 2) === (startWeek - 1));
+
+  toepassen.forEach(dag => {
+    const sleutel = datumSleutel(huidigJaar, huidigMaand, dag);
+    kalEvents[sleutel] = { naam, kleur: herhalKleur };
+  });
+
+  tekenSidebarKalender();
+  tekenAlleKalenderBlokken();
+
+  const meld = document.getElementById('meldingKalender');
+  meld.textContent = `✓ "${naam}" toegevoegd op ${toepassen.length} dag(en).`;
+  setTimeout(() => meld.textContent = '', 3000);
+}
+
+function verwijderHerhaalEvents() {
+  const dagIdx = parseInt(document.getElementById('herhalDag').value);
+  const aantalDagen = aantalDagenInMaand(huidigJaar, huidigMaand);
+  let verwijderd = 0;
+  for (let dag = 1; dag <= aantalDagen; dag++) {
+    const d = new Date(huidigJaar, huidigMaand, dag);
+    if (dagIndex(d) === dagIdx) {
+      const sleutel = datumSleutel(huidigJaar, huidigMaand, dag);
+      if (kalEvents[sleutel]) { delete kalEvents[sleutel]; verwijderd++; }
+    }
+  }
+  tekenSidebarKalender();
+  tekenAlleKalenderBlokken();
+  const meld = document.getElementById('meldingKalender');
+  meld.textContent = verwijderd ? `🗑 ${verwijderd} event(s) verwijderd.` : 'Geen events gevonden op die weekdag.';
+  setTimeout(() => meld.textContent = '', 3000);
+}
+
+// ── ANTWOORDBLAD ──────────────────────────────────────────────
+// eigenAntwoorden: { "groepId-vraagIndex": "antwoord" }
+let eigenAntwoorden = {};
+
+function openAntwoordModaal() {
+  const modaal = document.getElementById('antwoordModaal');
+  const container = document.getElementById('antwoordEigenVragen');
+  container.innerHTML = '';
+
+  const oefs = Bundel.getOefeningen();
+  const gezien = new Set();
+  let heeftEigenVragen = false;
+
+  oefs.forEach(oef => {
+    if (gezien.has(oef.groepId)) return;
+    gezien.add(oef.groepId);
+    if (oef.type === 'kalender' && oef.inst.opdrachten?.length) {
+      oef.inst.opdrachten.forEach((vraag, vi) => {
+        if (!vraag.trim()) return;
+        heeftEigenVragen = true;
+        const key = `${oef.groepId}-${vi}`;
+        const rij = document.createElement('div');
+        rij.style.cssText = 'margin-bottom:12px;';
+        rij.innerHTML = `<div style="font-size:12px;font-weight:700;color:#1a3a5c;margin-bottom:4px;">${vraag}</div>
+          <input type="text" placeholder="Antwoord (optioneel)" value="${eigenAntwoorden[key]||''}"
+            style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;box-sizing:border-box;"/>`;
+        rij.querySelector('input').addEventListener('input', e => { eigenAntwoorden[key] = e.target.value; });
+        container.appendChild(rij);
+      });
+    }
+  });
+
+  if (!heeftEigenVragen) {
+    container.innerHTML = '<p style="font-size:13px;color:#7f8c9a;font-style:italic;">Geen eigen vragen gevonden. Het antwoordblad bevat de antwoorden van Dagen, Maanden en Tellen.</p>';
+  }
+
+  modaal.style.display = 'block';
+}
+
+function downloadAntwoordblad() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
+  const margin = 10;
+  const breedte = pageW - 2 * margin;
+
+  // Header
+  doc.setFillColor(26, 58, 92);
+  doc.rect(0, 0, pageW, 20, 'F');
+  doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(255, 255, 255);
+  doc.text('🔑 ANTWOORDBLAD — Kalender Generator', pageW / 2, 13, { align: 'center' });
+  doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(180, 210, 240);
+  doc.text('www.jufzisa.be', pageW / 2, 18, { align: 'center' });
+
+  let y = 28;
+
+  function sectieKop(tekst) {
+    doc.setFillColor(235, 243, 251);
+    doc.rect(margin, y, breedte, 8, 'F');
+    doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(26, 58, 92);
+    doc.text(tekst, margin + 3, y + 5.5);
+    y += 11;
+  }
+
+  function antwoordRij(nr, vraag, antwoord) {
+    if (y + 12 > pageH - margin) { doc.addPage(); y = margin; }
+    doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(60, 60, 60);
+    doc.text(`${nr}.`, margin, y + 7);
+    const vraagTekst = doc.splitTextToSize(vraag, breedte * 0.55);
+    doc.setTextColor(26, 58, 92);
+    doc.text(vraagTekst, margin + 7, y + 7);
+    // Antwoord rechts
+    doc.setFillColor(220, 240, 220);
+    doc.roundedRect(margin + breedte * 0.6, y + 1, breedte * 0.4, 8, 1, 1, 'F');
+    doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(20, 100, 40);
+    const antTekst = doc.splitTextToSize(antwoord || '—', breedte * 0.38)[0];
+    doc.text(antTekst, margin + breedte * 0.6 + 2, y + 6.5);
+    y += Math.max(vraagTekst.length * 5, 10) + 3;
+  }
+
+  const oefs = Bundel.getOefeningen();
+  const gezien = new Set();
+  let nr = 1;
+
+  oefs.forEach(oef => {
+    if (gezien.has(oef.groepId)) return;
+    gezien.add(oef.groepId);
+
+    if (oef.type === 'kalender' && oef.inst.opdrachten?.length) {
+      const maandNaam = MAANDEN_NL_HOOFD[oef.inst.maand];
+      sectieKop(`📅 Eigen vragen bij ${maandNaam} ${oef.inst.jaar}`);
+      oef.inst.opdrachten.forEach((vraag, vi) => {
+        if (!vraag.trim()) return;
+        const key = `${oef.groepId}-${vi}`;
+        antwoordRij(nr++, vraag, eigenAntwoorden[key] || '');
+      });
+    } else if (oef.type === 'dagen') {
+      sectieKop('📆 Dagen');
+      oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
+    } else if (oef.type === 'maanden') {
+      sectieKop('🗓️ Maanden');
+      oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
+    } else if (oef.type === 'tellen') {
+      sectieKop('⏳ Tellen');
+      const { startDatum, events, eenheid } = oef.inst;
+      events.forEach(ev => {
+        const dagen = Math.round((ev.datum - startDatum) / 86400000);
+        const weken = Math.floor(dagen / 7);
+        const ant = eenheid === 'dagen' ? `${dagen} dag${dagen !== 1 ? 'en' : ''}`
+          : eenheid === 'weken' ? `${weken} week${weken !== 1 ? 'en' : ''}`
+          : `${weken} week${weken !== 1 ? 'en' : ''} en ${dagen % 7} dag${dagen % 7 !== 1 ? 'en' : ''}`;
+        antwoordRij(nr++, `Hoeveel ${eenheid === 'weken' ? 'weken' : 'dagen'} tot ${ev.naam}?`, ant);
+      });
+    }
+  });
+
+  if (nr === 1) {
+    doc.setFontSize(12); doc.setTextColor(150, 150, 150);
+    doc.text('Geen oefeningen met antwoorden gevonden.', pageW / 2, y + 20, { align: 'center' });
+  }
+
+  // Voettekst
+  const n = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= n; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(160, 160, 160);
+    doc.text("Juf Zisa's kalender generator  —  www.jufzisa.be", pageW / 2, pageH - margin + 3, { align: 'center' });
+  }
+  doc.save('antwoordblad.pdf');
+  document.getElementById('antwoordModaal').style.display = 'none';
+}
 function initChips() {
   document.querySelectorAll('.radio-chip').forEach(chip => {
     const nieuw = chip.cloneNode(true);
@@ -1087,12 +1516,35 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTellenEvents();
   });
 
+  // Herhaalbare events
+  initHerhalKleuren();
+  document.getElementById('herhalToepassenBtn')?.addEventListener('click', pasHerhaalEventsToe);
+  document.getElementById('herhalVerwijderenBtn')?.addEventListener('click', verwijderHerhaalEvents);
+  document.querySelectorAll('input[name="herhalFreq"]').forEach(r => r.addEventListener('change', () => {
+    document.getElementById('herhalOm2Opties').style.display = r.value === 'om2' ? '' : 'none';
+  }));
+
+  // Antwoordblad
+  document.getElementById('downloadAntwoordBtn')?.addEventListener('click', openAntwoordModaal);
+  document.getElementById('antwoordDownloadBtn')?.addEventListener('click', downloadAntwoordblad);
+  document.getElementById('antwoordModaal')?.addEventListener('click', e => {
+    if (e.target === document.getElementById('antwoordModaal')) document.getElementById('antwoordModaal').style.display = 'none';
+  });
+
   // Kalender eigen opdrachten
   document.getElementById('kalAddOpdracht')?.addEventListener('click', () => {
     kalOpdrachten.push('');
     renderKalOpdrachten();
   });
   renderKalOpdrachten();
+
+  // Dagen niveau chips initialiseren
+  renderDagenNiveauChips(1);
+  document.querySelectorAll('input[name="dagenNiveau"]').forEach(r => r.addEventListener('change', () => {
+    renderDagenNiveauChips(parseInt(r.value));
+    const inst = DagenModule.leesInstellingen();
+    if (inst) DagenModule.tekenPreviewHtml(document.getElementById('dagenPreview'), inst);
+  }));
 
   // Dagen toggles
   document.querySelectorAll('input[name="dagenMetDatum"]').forEach(r => r.addEventListener('change', () => {
@@ -1112,8 +1564,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (inst) MaandenModule.tekenPreviewHtml(document.getElementById('maandenPreview'), inst);
     }));
 
-  // Dagen preview auto
-  document.querySelectorAll('input[name="dagenType"],input[name="dagenLeerjaar"],input[name="dagenMetDatum"],#dagenAantal,#dagenWeekstrip')
+  // Dagen preview auto (event delegation want chips zijn dynamisch)
+  document.getElementById('dagenTypeChips')?.addEventListener('change', () => {
+    const inst = DagenModule.leesInstellingen();
+    if (inst) DagenModule.tekenPreviewHtml(document.getElementById('dagenPreview'), inst);
+  });
+  document.querySelectorAll('input[name="dagenLeerjaar"],input[name="dagenMetDatum"],#dagenAantal,#dagenWeekstrip')
     .forEach(el => el.addEventListener('change', () => {
       const inst = DagenModule.leesInstellingen();
       if (inst) DagenModule.tekenPreviewHtml(document.getElementById('dagenPreview'), inst);
