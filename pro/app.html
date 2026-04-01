@@ -366,7 +366,63 @@
     .status.warn { border-color: #ffd6a8; background: #fff7ec; color: #a05000; }
     .status.err  { border-color: #f1c0c0; background: #fff5f5; color: #a02020; }
 
-    /* Sectie-header */
+    /* Updates-balk */
+    .updates-balk {
+      background: #fff;
+      border: 1.5px solid #ffe082;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      font-size: 0.83rem;
+    }
+    .updates-balk summary {
+      font-weight: bold;
+      color: #7a4500;
+      cursor: pointer;
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    .updates-balk summary::-webkit-details-marker { display: none; }
+    .updates-balk summary::after {
+      content: '▾';
+      margin-left: auto;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+    .updates-balk[open] summary::after { content: '▴'; }
+    .updates-balk ul {
+      margin: 10px 0 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .updates-balk li {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: #444;
+      line-height: 1.5;
+    }
+    .updates-balk li .update-datum {
+      background: #fff3cd;
+      color: #7a4500;
+      font-size: 0.72rem;
+      font-weight: bold;
+      padding: 1px 7px;
+      border-radius: 10px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .updates-balk li .update-tool {
+      font-weight: bold;
+      color: #2a2a2a;
+    }
     .section-header {
       display: flex;
       align-items: center;
@@ -531,7 +587,22 @@
 </nav>
 
 <!-- ═══ HOOFDINHOUD ═══ -->
-<main class="main" id="content" style="display:none;">
+<main class="main" id="content">
+
+  <!-- UPDATES -->
+  <details class="updates-balk">
+    <summary>🆕 Laatste updates</summary>
+    <ul>
+      <li>
+        <span class="update-datum">apr 2026</span>
+        <span><span class="update-tool">Kalender Generator</span> — Nieuw bij Tijd en klok! Bouw een kalender-werkblad met eigen events, herhaalbare events (bv. elke woensdag zwemmen), schoolvakanties, eigen vragen, antwoordblad voor de leerkracht en oefentabs Dagen (3 niveaus), Maanden, Tellen en Algemene kennis.</span>
+      </li>
+      <li>
+        <span class="update-datum">apr 2026</span>
+        <span><span class="update-tool">Bundel Kloklezen</span> — Uitgebreid met nieuwe tabs: Ordenen op dagdeel, Rangschikken, Maateenheden, Schrijven en Begrippen. Alle tabs combineerbaar in één bundel.</span>
+      </li>
+    </ul>
+  </details>
 
   <div id="status" class="status">Status laden…</div>
 
@@ -550,8 +621,7 @@
       <a class="img-link" href="./rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekenrooster.webp" loading="eager"/><span class="img-label">Rekenrooster</span></a>
       <a class="img-link" href="./rekendriehoek.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekendriehoek.webp" loading="eager"/><span class="img-label">Rekendriehoek</span></a>
       <a class="img-link" href="./rekencirkels/rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/rekencirkel.webp" loading="eager"/><span class="img-label">Rekencirkel</span></a>
-      <a class="img-link" href="./rekenbundel/index.html" style="position:relative">
-        <span style="position:absolute;top:6px;left:50%;transform:translateX(-50%);background:#e65100;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;z-index:1">✨ nieuwe uitgebreidere versie</span>
+      <a class="img-link" href="./rekenbundel/index.html">
         <img alt="Bewerkingen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.webp" loading="eager"/>
         <span class="img-label">Bundel bewerkingen</span>
       </a>
