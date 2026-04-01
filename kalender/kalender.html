@@ -25,6 +25,7 @@
       <div class="sidebar-tab tab-dagen"    onclick="toonTab('dagen',this)"    title="Gisteren, eergisteren, morgen, overmorgen.">📆 Dagen</div>
       <div class="sidebar-tab tab-maanden"  onclick="toonTab('maanden',this)"  title="Volgorde, hoeveel dagen, schrikkeljaar.">🗓️ Maanden</div>
       <div class="sidebar-tab tab-tellen"   onclick="toonTab('tellen',this)"   title="Tellen in dagen en weken tot een event.">⏳ Tellen</div>
+      <div class="sidebar-tab tab-algemeen" onclick="toonTab('algemeen',this)" title="Algemene tijdskennis: weken, maanden, jaren.">🧠 Alge<br>meen</div>
     </div>
     <div class="tabs-scroll-hint">
       <button class="tabs-scroll-btn" onclick="scrollTabsLeft()">←</button>
@@ -282,6 +283,33 @@
       </div>
       <div id="tellenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;"></div>
       <button class="genereer-knop voeg-toe-knop" id="voegTellenToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
+    </div>
+
+    <!-- TAB ALGEMEEN -->
+    <div class="sidebar-content" id="tab-algemeen">
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🧠</div>Type oefening</div>
+        <div class="checkbox-groep">
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="week_dagen" checked/> Dagen in een week</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="maand_weken" checked/> Weken in een maand</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="jaar_maanden" checked/> Maanden in een jaar</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="jaar_weken" checked/> Weken in een jaar</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="jaar_dagen" checked/> Dagen in een jaar</div>
+          <div class="checkbox-chip geselecteerd"><input type="checkbox" name="algemeenType" value="schrikkeljaar" checked/> Schrikkeljaar</div>
+          <div class="checkbox-chip"><input type="checkbox" name="algemeenType" value="weken_rekenen"/> Weken rekenen</div>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Aantal oefeningen</div>
+        <input type="number" id="algemeenAantal" value="6" min="1" max="20" style="width:70px;border:1.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:13px;font-family:inherit;outline:none;"/>
+      </div>
+      <div class="melding-box" id="meldingAlgemeen"></div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdrachtzin</div>
+        <textarea id="opdrachtzinAlgemeen" rows="2" style="width:100%;border:1.5px solid var(--border);border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit;resize:vertical;outline:none;box-sizing:border-box;">Vul in.</textarea>
+      </div>
+      <div id="algemeenPreview" style="background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px;margin-bottom:10px;font-size:12px;"></div>
+      <button class="genereer-knop voeg-toe-knop" id="voegAlgemeenToeBtn" style="width:100%;">➕ Voeg toe aan bundel</button>
     </div>
 
   </aside>
