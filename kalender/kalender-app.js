@@ -927,7 +927,7 @@ const AlgemeenModule = {
     }
     if (typen.includes('maand_weken')) {
       pool.push({vraag:'1 maand telt ongeveer ___ weken.', antwoord:'4'});
-      pool.push({vraag:'Hoeveel weken heeft een maand ongeveer?', antwoord:'4'});
+      pool.push({vraag:'Hoeveel weken heeft een maand?', antwoord:'4'});
       pool.push({vraag:'4 weken = ___ maand.', antwoord:'1'});
     }
     if (typen.includes('jaar_maanden')) {
@@ -942,7 +942,7 @@ const AlgemeenModule = {
     }
     if (typen.includes('jaar_dagen')) {
       pool.push({vraag:'1 jaar telt ___ dagen.', antwoord:'365'});
-      pool.push({vraag:'Hoeveel dagen telt een gewoon jaar?', antwoord:'365'});
+      pool.push({vraag:'Hoeveel dagen heeft een gewoon jaar?', antwoord:'365'});
       pool.push({vraag:'365 dagen = ___ jaar.', antwoord:'1'});
     }
     if (typen.includes('schrikkeljaar')) {
@@ -951,7 +951,7 @@ const AlgemeenModule = {
       pool.push({vraag:`Is ${jaar} een schrikkeljaar?`, antwoord: isSchrikkeljaar(jaar)?'Ja':'Nee'});
       pool.push({vraag:'Hoeveel dagen heeft februari in een schrikkeljaar?', antwoord:'29'});
       pool.push({vraag:'Hoeveel dagen heeft februari in een gewoon jaar?', antwoord:'28'});
-      pool.push({vraag:'Elke ___ jaar is er een schrikkeljaar.', antwoord:'4'});
+      pool.push({vraag:'Elk ___ jaar is er een schrikkeljaar.', antwoord:'4'});
     }
     if (typen.includes('weken_rekenen')) {
       pool.push({vraag:'2 weken = ___ dagen.', antwoord:'14'});
@@ -1368,38 +1368,45 @@ function downloadAntwoordblad() {
   const margin = 10;
   const breedte = pageW - 2 * margin;
 
-  // Header
+  // Header — geen emoji's, jsPDF ondersteunt die niet
   doc.setFillColor(26, 58, 92);
   doc.rect(0, 0, pageW, 20, 'F');
   doc.setFontSize(13); doc.setFont(undefined, 'bold'); doc.setTextColor(255, 255, 255);
-  doc.text('🔑 ANTWOORDBLAD — Kalender Generator', pageW / 2, 13, { align: 'center' });
+  doc.text('ANTWOORDBLAD  --  Kalender Generator', pageW / 2, 13, { align: 'center' });
   doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(180, 210, 240);
   doc.text('www.jufzisa.be', pageW / 2, 18, { align: 'center' });
 
   let y = 28;
 
+  function nieuweBladzijde() {
+    doc.addPage();
+    y = margin + 8;
+  }
+
   function sectieKop(tekst) {
+    if (y + 10 > pageH - margin) nieuweBladzijde();
     doc.setFillColor(235, 243, 251);
     doc.rect(margin, y, breedte, 8, 'F');
     doc.setFontSize(10); doc.setFont(undefined, 'bold'); doc.setTextColor(26, 58, 92);
     doc.text(tekst, margin + 3, y + 5.5);
-    y += 11;
+    y += 12;
   }
 
   function antwoordRij(nr, vraag, antwoord) {
-    if (y + 12 > pageH - margin) { doc.addPage(); y = margin; }
+    const vraagTekst = doc.splitTextToSize(vraag, breedte * 0.55);
+    const rijH = Math.max(vraagTekst.length * 5, 10) + 4;
+    if (y + rijH > pageH - margin) nieuweBladzijde();
     doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(60, 60, 60);
     doc.text(`${nr}.`, margin, y + 7);
-    const vraagTekst = doc.splitTextToSize(vraag, breedte * 0.55);
     doc.setTextColor(26, 58, 92);
     doc.text(vraagTekst, margin + 7, y + 7);
-    // Antwoord rechts
+    // Antwoord rechts in groen vak
     doc.setFillColor(220, 240, 220);
-    doc.roundedRect(margin + breedte * 0.6, y + 1, breedte * 0.4, 8, 1, 1, 'F');
+    doc.roundedRect(margin + breedte * 0.6, y + 1, breedte * 0.4, rijH - 2, 1, 1, 'F');
     doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(20, 100, 40);
     const antTekst = doc.splitTextToSize(antwoord || '—', breedte * 0.38)[0];
     doc.text(antTekst, margin + breedte * 0.6 + 2, y + 6.5);
-    y += Math.max(vraagTekst.length * 5, 10) + 3;
+    y += rijH;
   }
 
   const oefs = Bundel.getOefeningen();
@@ -1410,25 +1417,48 @@ function downloadAntwoordblad() {
     if (gezien.has(oef.groepId)) return;
     gezien.add(oef.groepId);
 
-    if (oef.type === 'kalender' && oef.inst.opdrachten?.length) {
-      const maandNaam = MAANDEN_NL_HOOFD[oef.inst.maand];
-      sectieKop(`📅 Eigen vragen bij ${maandNaam} ${oef.inst.jaar}`);
-      oef.inst.opdrachten.forEach((vraag, vi) => {
-        if (!vraag.trim()) return;
-        const key = `${oef.groepId}-${vi}`;
-        antwoordRij(nr++, vraag, eigenAntwoorden[key] || '');
-      });
+    if (oef.type === 'kalender') {
+      const inst = oef.inst;
+      const maandNaam = MAANDEN_NL_HOOFD[inst.maand];
+      const titel2 = inst.heeft2de ? ` + ${MAANDEN_NL_HOOFD[inst.maand2]} ${inst.jaar2}` : '';
+      sectieKop(`Kalender: ${maandNaam} ${inst.jaar}${titel2}`);
+
+      // Teken kalender(s) in het antwoordblad
+      if (inst.heeft2de) {
+        const kalW = (breedte - 8) / 2;
+        const hoogte = 56;
+        if (y + hoogte + margin > pageH) nieuweBladzijde();
+        const y1 = KalenderModule.tekenInPdfKlein(doc, inst, margin, y, kalW, pageH);
+        const y2 = KalenderModule.tekenInPdfKlein(doc, {...inst, maand:inst.maand2, jaar:inst.jaar2}, margin + kalW + 8, y, kalW, pageH);
+        y = Math.max(y1, y2) + 4;
+      } else {
+        const kalW = breedte * 0.65;
+        const kalX = margin + (breedte - kalW) / 2;
+        if (y + 60 + margin > pageH) nieuweBladzijde();
+        const yNa = KalenderModule.tekenInPdfKlein(doc, inst, kalX, y, kalW, pageH);
+        y = yNa + 4;
+      }
+
+      // Eigen vragen met antwoorden
+      if (inst.opdrachten?.length) {
+        inst.opdrachten.forEach((vraag, vi) => {
+          if (!vraag.trim()) return;
+          const key = `${oef.groepId}-${vi}`;
+          antwoordRij(nr++, vraag, eigenAntwoorden[key] || '');
+        });
+      }
+
     } else if (oef.type === 'dagen') {
-      sectieKop('📆 Dagen');
+      sectieKop('Dagen');
       oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
     } else if (oef.type === 'maanden') {
-      sectieKop('🗓️ Maanden');
+      sectieKop('Maanden');
       oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
     } else if (oef.type === 'algemeen') {
-      sectieKop('🧠 Algemeen');
+      sectieKop('Algemene kennis');
       oef.inst.oefeningen.forEach(o => antwoordRij(nr++, o.vraag, o.antwoord));
     } else if (oef.type === 'tellen') {
-      sectieKop('⏳ Tellen');
+      sectieKop('Tellen');
       const { startDatum, events, eenheid } = oef.inst;
       events.forEach(ev => {
         const dagen = Math.round((ev.datum - startDatum) / 86400000);
@@ -1441,17 +1471,17 @@ function downloadAntwoordblad() {
     }
   });
 
-  if (nr === 1) {
+  if (nr === 1 && !oefs.some(o => o.type === 'kalender')) {
     doc.setFontSize(12); doc.setTextColor(150, 150, 150);
     doc.text('Geen oefeningen met antwoorden gevonden.', pageW / 2, y + 20, { align: 'center' });
   }
 
-  // Voettekst
+  // Voettekst op elke pagina
   const n = doc.internal.getNumberOfPages();
   for (let p = 1; p <= n; p++) {
     doc.setPage(p);
     doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(160, 160, 160);
-    doc.text("Juf Zisa's kalender generator  —  www.jufzisa.be", pageW / 2, pageH - margin + 3, { align: 'center' });
+    doc.text("Juf Zisa's kalender generator  --  www.jufzisa.be", pageW / 2, pageH - margin + 3, { align: 'center' });
   }
   doc.save('antwoordblad.pdf');
   document.getElementById('antwoordModaal').style.display = 'none';
