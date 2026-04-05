@@ -485,6 +485,22 @@ button:active{transform:scale(.97);}
       &nbsp;&nbsp;
       <label class="radio-item"><input type="radio" name="rp-tafelupto" value="12"> Tot ×12 (grotere getallen)</label>
     </div>
+    <!-- Niveau-instelling -->
+    <div style="margin-top:12px;border-top:1px solid #d0e6f8;padding-top:10px;">
+      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor ÷ in het pad)</div>
+      <div class="radio-group" style="flex-direction:column;gap:6px;">
+        <label class="radio-item" style="align-items:flex-start;gap:8px;">
+          <input type="radio" name="rp-niveau" value="basis" checked style="margin-top:2px;">
+          <span><strong>2de–3de leerjaar</strong> — enkel delingen die voorkomen in de deeltafel<br>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 ÷ 4 = 5 ✓ &nbsp;|&nbsp; 60 ÷ 3 = 20 ✗</span></span>
+        </label>
+        <label class="radio-item" style="align-items:flex-start;gap:8px;">
+          <input type="radio" name="rp-niveau" value="uitgebreid" style="margin-top:2px;">
+          <span><strong>4de leerjaar en hoger</strong> — delingen buiten de deeltafel toegestaan<br>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 ÷ 3 = 20 ✓ &nbsp;|&nbsp; 50 ÷ 2 = 25 ✓</span></span>
+        </label>
+      </div>
+    </div>
   </div>
 
   <div class="sub-block">
@@ -761,42 +777,159 @@ function buildMaze(rows,cols,sums){
     r:Math.floor(i/cols),c:i%cols,sum:sums[i],isStart:i===0,isEnd:i===N-1
   }));
   const idx=(r,c)=>r*cols+c;
-  let path=[0],r=0,c=0;
-  while(r<rows-1||c<cols-1){
-    const moves=[];
-    if(r<rows-1)moves.push([r+1,c]);
-    if(c<cols-1)moves.push([r,c+1]);
-    shuffle(moves);[r,c]=moves[0]; path.push(idx(r,c));
+
+  // Set van 2×2-blokken die al een diagonaal hebben (gedeeld tussen pad en extra verbindingen)
+  const plannedDiagBlocks = new Set();
+
+  // Bouw een slingerend pad via random walk met backtracking
+  // Het pad mag alle richtingen op inclusief diagonalen
+  function buildWindingPath() {
+    const visited = new Set([0]);
+    let path = [0], r = 0, c = 0;
+    // Alle 8 richtingen: horizontaal, verticaal én diagonaal
+    const DIRS = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+    const minSteps = (rows - 1) + (cols - 1);
+    const targetLen = Math.floor(N * 0.65);
+
+    let attempts = 0;
+    while (attempts++ < 5000) {
+      if (r === rows-1 && c === cols-1) {
+        if (path.length >= minSteps + 1) return path;
+      }
+
+      const dirs = shuffle([...DIRS]);
+      const candidates = [];
+      for (const [dr, dc] of dirs) {
+        const nr = r + dr, nc = c + dc;
+        if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+        if (visited.has(idx(nr, nc))) continue;
+        const isDiag = dr !== 0 && dc !== 0;
+        if (isDiag) {
+          const blkR = Math.min(r, nr), blkC = Math.min(c, nc);
+          const blk = blkR * cols + blkC;
+          if (plannedDiagBlocks.has(blk)) continue;
+        }
+        const distToEnd = Math.abs(nr - (rows-1)) + Math.abs(nc - (cols-1));
+        candidates.push({ nr, nc, distToEnd, isDiag });
+      }
+
+      if (candidates.length === 0) {
+        if (path.length <= 1) break;
+        const prevR = Math.floor(path[path.length-2] / cols);
+        const prevC = path[path.length-2] % cols;
+        const wasDiag = Math.abs(r - prevR) === 1 && Math.abs(c - prevC) === 1;
+        if (wasDiag) {
+          const blkR = Math.min(r, prevR), blkC = Math.min(c, prevC);
+          plannedDiagBlocks.delete(blkR * cols + blkC);
+        }
+        visited.delete(idx(r, c));
+        path.pop();
+        r = Math.floor(path[path.length-1] / cols);
+        c = path[path.length-1] % cols;
+        continue;
+      }
+
+      const wantLong = path.length < targetLen;
+      if (wantLong) {
+        candidates.sort((a,b) => b.distToEnd - a.distToEnd);
+      } else {
+        candidates.sort((a,b) => a.distToEnd - b.distToEnd);
+      }
+      const pick = Math.random() < 0.25 && candidates.length > 1 ? candidates[1] : candidates[0];
+
+      if (pick.isDiag) {
+        const blkR = Math.min(r, pick.nr), blkC = Math.min(c, pick.nc);
+        plannedDiagBlocks.add(blkR * cols + blkC);
+      }
+
+      r = pick.nr; c = pick.nc;
+      visited.add(idx(r, c));
+      path.push(idx(r, c));
+    }
+    // Fallback: simpel pad rechts/omlaag
+    plannedDiagBlocks.clear();
+    path = [0]; r = 0; c = 0;
+    while (r < rows-1 || c < cols-1) {
+      const moves = [];
+      if (r < rows-1) moves.push([r+1, c]);
+      if (c < cols-1) moves.push([r, c+1]);
+      shuffle(moves); [r, c] = moves[0]; path.push(idx(r, c));
+    }
+    return path;
   }
+
+  let path = buildWindingPath();
   const conns=[];
-  for(let r2=0;r2<rows;r2++)for(let c2=0;c2<cols;c2++){
-    const from=idx(r2,c2), pos=path.indexOf(from);
-    if(c2<cols-1){const to=idx(r2,c2+1);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'h'});}
-    if(r2<rows-1){const to=idx(r2+1,c2);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'v'});}
-    if(r2<rows-1&&c2<cols-1&&Math.random()<.5){const to=idx(r2+1,c2+1);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'d'});}
-    if(r2<rows-1&&c2>0&&Math.random()<.4){const to=idx(r2+1,c2-1);conns.push({from,to,isCorrect:pos>=0&&path[pos+1]===to,dir:'d2'});}
+  const connSet = new Set();
+  function addConn(a, b, dir) {
+    const key = Math.min(a,b) + '_' + Math.max(a,b);
+    if (connSet.has(key)) return;
+    connSet.add(key);
+    const posA = path.indexOf(a);
+    const posB = path.indexOf(b);
+    const aToB = posA >= 0 && path[posA + 1] === b;
+    const bToA = posB >= 0 && path[posB + 1] === a;
+    if (aToB) {
+      conns.push({ from: a, to: b, isCorrect: true, dir });
+    } else if (bToA) {
+      conns.push({ from: b, to: a, isCorrect: true, dir });
+    } else {
+      conns.push({ from: a, to: b, isCorrect: false, dir });
+    }
   }
-  // Verzamel alle correcte antwoorden in het doolhof (om conflicten te vermijden)
-  const allCorrectAns=new Set(nodes.map(n=>n.sum.ans));
-  conns.forEach(conn=>{
-    const ca=nodes[conn.from].sum.ans;
-    if(conn.isCorrect){conn.label=ca;}
-   else{
-      const toAns=nodes[conn.to].sum.ans;
-      const isDeel=document.getElementById('op').value==='div';
-      const upto=isDeel?(parseInt(document.getElementById('table-upto').value)||10):999;
-      const maxVal=isDeel?upto:ca+10;
-      const pool=[];
-      for(let v=1;v<=maxVal;v++){
-        if(v!==ca&&v!==toAns)pool.push(v);
+
+  // Diagonale afleidingswegen — gebruik plannedDiagBlocks zodat geen kruising mogelijk is
+  const diagBlocks = new Set([...plannedDiagBlocks]);
+
+  for(let r2=0;r2<rows;r2++) for(let c2=0;c2<cols;c2++){
+    if(c2<cols-1) addConn(idx(r2,c2), idx(r2,c2+1), 'h');
+    if(r2<rows-1) addConn(idx(r2,c2), idx(r2+1,c2), 'v');
+    if(r2<rows-1 && c2<cols-1 && Math.random()<.45) {
+      const blk = r2 * cols + c2;
+      if(!diagBlocks.has(blk)) { diagBlocks.add(blk); addConn(idx(r2,c2), idx(r2+1,c2+1), 'd'); }
+    }
+    if(r2<rows-1 && c2>0 && Math.random()<.35) {
+      const blk = r2 * cols + (c2-1);
+      if(!diagBlocks.has(blk)) { diagBlocks.add(blk); addConn(idx(r2,c2), idx(r2+1,c2-1), 'd2'); }
+    }
+  }
+
+  // Veiligheidscheck: elke stap in het correcte pad moet een isCorrect verbinding hebben
+  for (let i = 0; i < path.length - 1; i++) {
+    const a = path[i], b = path[i+1];
+    const hasCorrect = conns.some(c => c.isCorrect && c.from === a && c.to === b);
+    if (!hasCorrect) conns.push({ from: a, to: b, isCorrect: true, dir: 'h' });
+  }
+
+  // Lees het bereik uit de UI
+  const opVal = document.getElementById('op').value;
+  const isDeel = opVal === 'div';
+  const isMulD = opVal === 'mul' || opVal === 'div';
+  const uiRange = isMulD ? (parseInt(document.getElementById('table-upto').value)||10) : (parseInt(document.getElementById('range').value)||20);
+
+  // Verzamel alle uitkomsten van sommen in dit doolhof
+  const allAns = nodes.map(n => n.sum.ans);
+
+  conns.forEach(conn => {
+    const ca = nodes[conn.from].sum.ans;
+    if (conn.isCorrect) {
+      conn.label = ca;
+    } else {
+      const toAns = nodes[conn.to].sum.ans;
+      const fromOtherNodes = allAns.filter(v => v !== ca && v !== toAns);
+      const maxDecoy = isMulD ? uiRange : Math.min(uiRange, ca + 5);
+      const extra = [];
+      for (let v = 1; v <= maxDecoy; v++) {
+        if (v !== ca && v !== toAns) extra.push(v);
       }
-      let w;
-      if(pool.length>0){
-        w=pool[rnd(0,pool.length-1)];
-      }else{
-        w=ca===1?2:ca-1;
-      }
-      conn.label=w;
+      const usedOnThisNode = conns
+        .filter(c2 => c2.from === conn.from && c2.label !== undefined)
+        .map(c2 => c2.label);
+      const pool = [...new Set([...fromOtherNodes, ...extra])]
+        .filter(v => !usedOnThisNode.includes(v));
+      conn.label = pool.length > 0
+        ? pool[rnd(0, pool.length - 1)]
+        : (ca === 1 ? 2 : ca - 1);
     }
   });
   return{nodes,conns,path,rows,cols};
@@ -918,11 +1051,19 @@ function generateDoolhof(){
   output.innerHTML='';
 
   for(let n=0;n<aantal;n++){
-    const sums=makeSums(needed+8);
+    const sums=makeSums(needed+16);
     if(!sums.length&&isMul){errEl.textContent='Vink minstens één tafel aan!';errEl.style.display='block';return;}
     if(sums.length<needed){errEl.textContent=`Niet genoeg unieke sommen (${sums.length}/${needed}). Probeer meer soorten of een groter bereik.`;errEl.style.display='block';return;}
     shuffle(sums);
-    const maze=buildMaze(rows,cols,sums.slice(0,needed));
+    // Probeer sommen met unieke uitkomsten te kiezen (voorkomt verwarring in het doolhof)
+    // Val terug op gewone shuffle als er niet genoeg unieke uitkomsten zijn (bv. brug tot 20)
+    const uniqueAnsSums = [];
+    const usedAns = new Set();
+    for (const s of sums) {
+      if (!usedAns.has(s.ans)) { usedAns.add(s.ans); uniqueAnsSums.push(s); }
+    }
+    const finalSums = uniqueAnsSums.length >= needed ? uniqueAnsSums : sums;
+    const maze=buildMaze(rows,cols,finalSums.slice(0,needed));
 
     const div=document.createElement('div');
     div.className='worksheet maze-worksheet';
@@ -1238,7 +1379,7 @@ function rpGenOp(opKey, range) {
     const tafels = getRPTafels();
     operand = tafels[rnd(0, tafels.length - 1)];
   } else {
-    operand = rnd(1, Math.min(range, 20));
+    operand = rnd(1, Math.max(9, Math.floor(range / 4)));
   }
   return { op, operand };
 }
@@ -1247,6 +1388,7 @@ function buildRekenpad(steps, opKey, range, mode) {
   const maxTries = 400;
   const isMulDiv = opKey === 'mul';
   const tafelUpto = parseInt(document.querySelector('input[name="rp-tafelupto"]:checked')?.value || '10');
+  const niveau = document.querySelector('input[name="rp-niveau"]:checked')?.value || 'basis';
   const tafels = getRPTafels();
 
   for (let t = 0; t < maxTries; t++) {
@@ -1256,17 +1398,12 @@ function buildRekenpad(steps, opKey, range, mode) {
 
     if (isMulDiv) {
       // ── TAFELMODUS ──────────────────────────────────────────
-      // Getallen in het pad zijn altijd geldige tafelresultaten
-      // Bereik: 1 t/m tafelUpto × max(tafels) bv. 1-100 bij tafels tot 10
-      // Maar startgetal is altijd 1-tafelUpto (wat kinderen kennen)
       const maxVal = tafelUpto * Math.max(...tafels);
 
-      // Bouw pool van alle geldige getallen = veelvouden van elke tafel t/m maxVal
       const geldigeGetallen = new Set();
       for (const t of tafels) {
         for (let v = t; v <= maxVal; v += t) geldigeGetallen.add(v);
       }
-      // Voeg ook 1-tafelUpto toe als startgetallen
       for (let v = 1; v <= tafelUpto; v++) geldigeGetallen.add(v);
 
       const start = rnd(1, tafelUpto);
@@ -1277,19 +1414,20 @@ function buildRekenpad(steps, opKey, range, mode) {
         const prevOp = ops.length > 0 ? ops[ops.length-1].op : null;
         const prevOperand = ops.length > 0 ? ops[ops.length-1].operand : null;
 
-        // Maak lijst van geldige stappen — vermijd directe herhaling (× dan ÷ zelfde tafel)
         const geldig = [];
         for (const t of tafels) {
           const product = cur * t;
-          // × mag als uitkomst in geldige pool zit en niet direct de vorige ÷ terugdraait
-          if (product <= maxVal && geldigeGetallen.has(product)) {
+          // Bij basis-niveau: product mag niet groter zijn dan t × tafelUpto
+          const maxVoorDezeTafel = niveau === 'basis' ? t * tafelUpto : maxVal;
+          if (product <= maxVoorDezeTafel && geldigeGetallen.has(product)) {
             if (!(prevOp === '÷' && prevOperand === t && product === values[values.length-2])) {
               geldig.push({ op: '×', operand: t });
             }
           }
-          // ÷ mag als deelbaar en niet direct de vorige × terugdraait
           if (cur % t === 0 && cur / t >= 1) {
             const quotient = cur / t;
+            // Bij basis-niveau: uitkomst moet ≤ tafelUpto zijn (staat in de deeltafel)
+            if (niveau === 'basis' && quotient > tafelUpto) continue;
             if (!(prevOp === '×' && prevOperand === t && quotient === values[values.length-2])) {
               geldig.push({ op: '÷', operand: t });
             }
@@ -1297,7 +1435,6 @@ function buildRekenpad(steps, opKey, range, mode) {
         }
         if (geldig.length === 0) { ok = false; break; }
         shuffle(geldig);
-        // Kies bij voorkeur een stap die een ander getal geeft dan de vorige uitkomst
         const geenHerhaling = geldig.filter(s => {
           const nxt = s.op === '×' ? cur * s.operand : cur / s.operand;
           return nxt !== (values[values.length-2] || -1);
@@ -1311,7 +1448,7 @@ function buildRekenpad(steps, opKey, range, mode) {
 
     } else {
       // ── OPTELLEN / AFTREKKEN / GEMENGD ──────────────────────
-      const startMax = Math.min(range, 20);
+      const startMax = Math.max(1, Math.floor(range / 2));
       values.push(rnd(1, startMax));
 
       for (let i = 0; i < steps; i++) {
@@ -1331,6 +1468,8 @@ function buildRekenpad(steps, opKey, range, mode) {
           } else {
             if (cur % step.operand !== 0) continue;
             next = cur / step.operand;
+            // Bij basis-niveau: uitkomst van deling moet ≤ tafelUpto zijn
+            if (niveau === 'basis' && next > tafelUpto) continue;
           }
           if (next < 1 || next > range) continue;
           ops.push(step);
