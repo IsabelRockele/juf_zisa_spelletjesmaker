@@ -1,0 +1,225 @@
+/* ─── TOKENS ─────────────────────────────────────────────────────────────── */
+:root {
+  --bg:            #eef4f8;
+  --panel:         #ffffff;
+  --panel-soft:    #f5f9fc;
+  --line:          #dce8f2;
+  --text:          #162d44;
+  --text-soft:     #5f7a8f;
+  --primary:       #0b4f99;
+  --primary-dark:  #083d77;
+  --primary-soft:  #eaf3ff;
+  --accent:        #e67e00;
+  --accent-soft:   #fff4e6;
+  --success:       #177a4e;
+  --success-soft:  #edfaf3;
+  --danger:        #c0392b;
+  --danger-soft:   #fdf1f0;
+  --shadow-sm:     0 2px 8px rgba(16,40,70,0.08);
+  --shadow-md:     0 6px 22px rgba(16,40,70,0.10);
+  --shadow-lg:     0 12px 40px rgba(16,40,70,0.12);
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  18px;
+  --r-xl:  24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  font-family: "Segoe UI", system-ui, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+body { min-height: 100vh; }
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ─── HEADER ─────────────────────────────────────────────────────────────── */
+.app-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 28px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.app-header-left { display: flex; gap: 8px; align-items: center; }
+.app-header-center h1 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--primary);
+  letter-spacing: -0.02em;
+}
+.app-header-center p { margin: 4px 0 0; font-size: 0.9rem; color: var(--text-soft); }
+.app-header-right { display: flex; gap: 10px; align-items: center; }
+
+/* ─── MAIN ───────────────────────────────────────────────────────────────── */
+.app-main {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+  flex: 1;
+}
+/* Canvas vult volledige breedte als left-panel verborgen is */
+.app-main:has(> #left-panel[style*="display: none"]),
+.app-main:has(> #left-panel[style*="display:none"]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* ─── BUTTONS ─────────────────────────────────────────────────────────────── */
+button { font: inherit; cursor: pointer; border: none; transition: all 0.17s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+.primary-btn {
+  background: var(--primary); color: #fff;
+  border-radius: var(--r-md); padding: 11px 20px;
+  font-weight: 700; font-size: 0.92rem;
+  box-shadow: 0 3px 10px rgba(11,79,153,0.22);
+}
+.primary-btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(11,79,153,0.28); }
+
+.secondary-btn {
+  background: #fff; color: var(--primary);
+  border: 1.5px solid #c5d8ed;
+  border-radius: var(--r-md); padding: 11px 20px;
+  font-weight: 700; font-size: 0.92rem;
+}
+.secondary-btn:hover { background: var(--primary-soft); border-color: #a0c0e0; }
+
+.back-btn {
+  background: #0b3060; color: #fff; border: none;
+  border-radius: var(--r-md); padding: 10px 18px;
+  font-weight: 700; font-size: 0.88rem;
+  box-shadow: 0 3px 10px rgba(10,40,90,0.22);
+  white-space: nowrap;
+}
+.back-btn:hover { background: #082448; transform: translateY(-1px); }
+
+.danger-btn {
+  background: var(--danger-soft); color: var(--danger);
+  border: 1.5px solid #e8b4b0;
+  border-radius: var(--r-md); padding: 11px 20px;
+  font-weight: 700; font-size: 0.92rem;
+}
+.danger-btn:hover { background: #fce4e2; border-color: var(--danger); }
+
+/* ─── SETTINGS PANEL ─────────────────────────────────────────────────────── */
+.settings-panel {
+  position: sticky; top: 80px;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #c5d8ed transparent;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.settings-panel::-webkit-scrollbar { width: 5px; }
+.settings-panel::-webkit-scrollbar-thumb { background: #c5d8ed; border-radius: 99px; }
+
+.panel-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2px; }
+.panel-top-row h2 { margin: 0; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+
+/* ─── SETTING CARDS ──────────────────────────────────────────────────────── */
+.setting-card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.setting-card-header {
+  padding: 11px 16px 9px;
+  background: linear-gradient(to bottom, #f8fbfe, #f3f8fc);
+  border-bottom: 1px solid #e6eef5;
+}
+.setting-card-header h3 { margin: 0; font-size: 0.88rem; font-weight: 700; color: #1a3352; text-transform: uppercase; letter-spacing: 0.04em; }
+.setting-card-body { padding: 12px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+/* ─── FORM ROWS ──────────────────────────────────────────────────────────── */
+.form-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.form-label { font-weight: 600; font-size: 0.86rem; color: #2b4a65; flex-shrink: 0; }
+
+.cfg-select {
+  font: inherit; font-size: 0.86rem;
+  padding: 6px 10px; border: 1.5px solid #ccdce8;
+  border-radius: var(--r-sm); background: #fff; color: var(--text);
+  min-width: 0; max-width: 185px; width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s; cursor: pointer;
+}
+.cfg-select:focus { outline: none; border-color: #7aaee0; box-shadow: 0 0 0 3px rgba(126,174,224,0.18); }
+
+/* ─── MELDING BAR (buiten left-panel, onder header) ─────────────────────── */
+.melding-bar {
+  display: none;
+  margin: 0 24px 12px;
+  padding: 12px 16px;
+  background: #fff9ee;
+  border: 1px solid #f5c97a;
+  border-radius: var(--r-md);
+  color: #7a4500; font-weight: 600; font-size: 0.88rem;
+  box-shadow: var(--shadow-sm);
+}
+.melding-bar:not(:empty) { display: block; }
+
+/* ─── MESSAGE BOX ────────────────────────────────────────────────────────── */
+.message-box {
+  padding: 12px 16px; background: #fff9ee;
+  border: 1px solid #f5c97a; border-radius: var(--r-md);
+  color: #7a4500; font-weight: 600; font-size: 0.88rem;
+  box-shadow: var(--shadow-sm); display: none;
+}
+.message-box.visible { display: block; }
+.message-box:not(:empty) { display: block; }
+
+/* ─── PREVIEW ─────────────────────────────────────────────────────────────── */
+.preview-panel { min-width: 0; }
+.preview-card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--r-xl); box-shadow: var(--shadow-lg); overflow: hidden;
+}
+.preview-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 18px 24px;
+  border-bottom: 1px solid #e4edf5;
+  background: linear-gradient(to bottom, #fcfeff, #f7fbfe);
+  flex-wrap: wrap;
+}
+.preview-card-header h2 { margin: 0; font-size: 1.2rem; color: #122b46; }
+.preview-card-header p { margin: 4px 0 0; font-size: 0.88rem; color: var(--text-soft); }
+.preview-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.preview-card-body { padding: 20px; display: flex; flex-direction: column; align-items: center; }
+
+.canvas-frame {
+  width: 100%;
+  background: linear-gradient(160deg, #f6fafd 0%, #eef4f8 100%);
+  border: 1px solid #dce8f2; border-radius: var(--r-lg);
+  padding: 18px; display: flex; justify-content: center; align-items: flex-start;
+  min-height: 420px; overflow: auto;
+}
+#mainCanvas {
+  display: block; background: #fff;
+  border: 1px solid #d2e2ef; border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(20,50,80,0.09);
+  max-width: 100%; height: auto;
+}
+
+/* ─── RESPONSIVE ──────────────────────────────────────────────────────────── */
+@media (max-width: 1100px) { .app-main { grid-template-columns: 270px minmax(0,1fr); } }
+@media (max-width: 860px) {
+  .app-main { grid-template-columns: 1fr; padding: 16px; gap: 16px; }
+  .settings-panel { position: static; max-height: none; }
+  .app-header { grid-template-columns: auto 1fr; padding: 14px 16px; }
+  .app-header-right { display: none; }
+}
+@media (max-width: 480px) {
+  .preview-card-header { flex-direction: column; align-items: flex-start; }
+  .canvas-frame { min-height: 300px; padding: 10px; }
+  .app-header { grid-template-columns: 1fr; }
+}
