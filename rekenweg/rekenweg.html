@@ -80,12 +80,26 @@
       <div class="preview-card">
         <div class="preview-card-header">
           <div>
-            <h2 id="canvasTitle">Tekengebied</h2>
+            <h2 id="canvasTitle">Rekenweg</h2>
             <p id="edit-instructions" style="display:none; margin:4px 0 0; font-style:italic; color:var(--primary); font-size:0.88rem;">
               Klik op een vakje en typ een getal of bewerkingsteken. Klaar? Download je rekenweg rechtsboven.
             </p>
           </div>
         </div>
+
+        <!-- BEWERKBALK (verschijnt na genereren) -->
+        <div id="bewerkBalk" style="display:none; align-items:center; gap:10px; padding:10px 20px; background:#fff4e6; border-top:1.5px solid #f5c97a; font-size:0.88rem; color:#7a4500; font-weight:600;">
+          <span style="font-size:1.1rem;">✏️</span>
+          <span>Klik op een getal om het leeg te maken (oranje rand = klikbaar). Klik nogmaals om te herstellen.</span>
+          <button id="klaarBtn" type="button" style="display:none; margin-left:auto; background:#e67e00; color:#fff; border:none; border-radius:8px; padding:7px 16px; font-weight:700; font-size:0.84rem; cursor:pointer;">✓ Klaar</button>
+        </div>
+
+        <div class="preview-card-header" style="border-top:1px solid #e4edf5; border-bottom:none; padding:12px 20px; display:none;" id="templateActies">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button id="bewerkBtn" type="button" class="bewerk-btn" style="display:none;">✏️ Vakjes leegmaken</button>
+          </div>
+        </div>
+
         <div class="preview-card-body">
           <div class="canvas-frame" id="drawingCanvasContainer">
             <canvas id="mainCanvas"></canvas>
