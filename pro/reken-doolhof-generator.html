@@ -3,12 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Rekenspellen Generator – Zisa PRO</title>
-<meta name="google" content="notranslate">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
-
 /* PRO-header */
 .pro-header {
   position: relative;
@@ -120,6 +118,7 @@ button:active{transform:scale(.97);}
 #print-output{width:100%;max-width:860px;margin-top:0;}
 .worksheet{background:white;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(26,78,138,.1);margin-bottom:18px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
 .worksheet svg{display:block;width:100%;height:auto;}
+.ws-footer{display:block;}
 .empty-msg{color:#aac3df;font-size:1rem;font-weight:600;text-align:center;padding:28px;}
 
 /* ANSWER KEY */
@@ -140,6 +139,150 @@ button:active{transform:scale(.97);}
   #preview-area .maze-worksheet:first-child{page-break-before:auto!important;break-before:auto!important;}
   .ans-key,.no-print{display:none!important;}
 }
+
+/* ── SPRINGPAD (Grid-doolhof) ──────────────────────────────── */
+
+/* Compacte header per oefening (geen mainTitle/legendBox meer) */
+.sp-worksheet .sp-oef-header {
+  margin-bottom: 4px;
+}
+.sp-worksheet .sp-oef-uitleg {
+  font-size: 0.85rem;
+  color: #444;
+  margin-bottom: 2px;
+}
+.sp-worksheet .sp-oef-sprong {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1a4e8a;
+}
+.sp-worksheet .sp-oef-pijlen {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1a4e8a;
+  letter-spacing: 0.2rem;
+  margin-top: 2px;
+}
+/* Gelijke hoogte kolommen in het springpad-grid */
+.sp-worksheet .sp-card-grid {
+  align-items: stretch !important;
+}
+.sp-worksheet .sp-card-grid > div {
+  display: flex;
+  flex-direction: column;
+}
+.sp-worksheet .sp-card-grid > div .exerciseBlock {
+  flex: 1;
+}
+.sp-worksheet .gridRowWrapper {
+  justify-content: flex-start;
+  margin-left: 32px; /* ruimte voor start-label */
+}
+.sp-worksheet .exerciseBlock { margin-bottom: 0; }
+.sp-worksheet .sheet-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  row-gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.sp-worksheet .titles .mainTitle { font-size: 1.1rem; font-weight: bold; color: #1a4e8a; }
+.sp-worksheet .titles .subTitle  { font-size: 0.95rem; color: #3a6a9a; }
+.sp-worksheet .titles .explain   { font-size: 0.85rem; color: #555; margin-top: 0.3rem; max-width: 460px; }
+.sp-worksheet .legendBox {
+  border: 1px solid #bbb;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  height: fit-content;
+}
+.sp-worksheet .legendRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+.sp-worksheet .arrowBox {
+  font-size: 1.05rem;
+  letter-spacing: 0.3rem;
+  margin: 0.3rem 0;
+  color: #1a4e8a;
+  font-weight: 700;
+}
+.sp-worksheet .gridRowWrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 0.4rem;
+  position: relative;
+}
+.sp-worksheet .grid {
+  display: grid;
+  position: relative;
+  background: #fff;
+  border: 2px solid #9da7ad;
+}
+.sp-worksheet .cellSprong,
+.sp-worksheet .cellMaze {
+  position: relative;
+  background: #fff;
+  border: 1px solid #9da7ad;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  box-sizing: border-box;
+  width: 52px;
+  height: 52px;
+}
+.sp-worksheet .cellSprong.startCell,
+.sp-worksheet .cellSprong.endCell { background: #f7f2e9; font-weight: bold; }
+.sp-worksheet .cellSprongNumber   { font-size: 0.95rem; color: #000; font-weight: normal; z-index: 10; position: relative; }
+.sp-worksheet .cellMazePlus       { display: none; }
+
+/* Poortjes */
+.sp-worksheet .gate {
+  position: absolute;
+  background: #fff;
+  z-index: 5;
+  pointer-events: none;
+}
+.sp-worksheet .gate-top    { width:12px; height:4px; left:50%; top:-2px; transform:translateX(-50%); }
+.sp-worksheet .gate-bottom { width:12px; height:4px; left:50%; bottom:-2px; transform:translateX(-50%); }
+.sp-worksheet .gate-left   { width:4px; height:12px; left:-2px; top:50%; transform:translateY(-50%); }
+.sp-worksheet .gate-right  { width:4px; height:12px; right:-2px; top:50%; transform:translateY(-50%); }
+
+/* Buitenrand: geen poortjes */
+.sp-worksheet .cellSprong[data-r="0"] .gate-top,
+.sp-worksheet .cellMaze[data-r="0"] .gate-top    { display:none; }
+.sp-worksheet .cellSprong[data-r="4"] .gate-bottom,
+.sp-worksheet .cellMaze[data-r="4"] .gate-bottom { display:none; }
+.sp-worksheet .cellSprong[data-c="0"] .gate-left,
+.sp-worksheet .cellMaze[data-c="0"] .gate-left   { display:none; }
+.sp-worksheet .cellSprong[data-c="4"] .gate-right,
+.sp-worksheet .cellMaze[data-c="4"] .gate-right  { display:none; }
+
+/* Ingang/uitgang */
+.sp-worksheet .cellMaze.mazeEntry[data-c="0"] .gate-left  { display:block !important; background:#fff; }
+.sp-worksheet .cellMaze.mazeExit[data-c="4"]  .gate-right { display:block !important; background:#fff; }
+.sp-worksheet .cellSprong.mazeEntry[data-c="0"] .gate-left  { display:block !important; background:#fff; }
+.sp-worksheet .cellSprong.mazeExit[data-c="4"]  .gate-right { display:block !important; background:#fff; }
+
+/* Labels naast het rooster */
+.sp-worksheet .mazeStartLabel,
+.sp-worksheet .mazeEndLabel {
+  position: absolute;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  color: #000;
+  pointer-events: none;
+}
+.sp-worksheet .oefgrid { position: relative; }
+
 </style>
 </head>
 <body>
@@ -148,7 +291,6 @@ button:active{transform:scale(.97);}
   <a href="app.html" class="back-link">&larr; Terug naar menu</a>
   <h1 class="title">Rekenspellen Generator (Zisa)</h1>
 </header>
-
 
 <h1>🎲 Rekenspellen Generator</h1>
 <p class="subtitle">Doolhof & IN-UIT machine · direct afdrukken als werkblad</p>
@@ -159,6 +301,7 @@ button:active{transform:scale(.97);}
   <button class="tab" onclick="switchTab('inuit',this)">⚙️ IN-UIT Machine</button>
   <button class="tab" onclick="switchTab('rekenpad',this)">➡️ Rekenpad</button>
   <button class="tab" onclick="switchTab('rooster',this)">🔢 Rekenrooster</button>
+  <button class="tab" onclick="switchTab('springpad',this)">🐾 Springpad</button>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ DOOLHOF PANEL -->
@@ -485,6 +628,7 @@ button:active{transform:scale(.97);}
       &nbsp;&nbsp;
       <label class="radio-item"><input type="radio" name="rp-tafelupto" value="12"> Tot ×12 (grotere getallen)</label>
     </div>
+
     <!-- Niveau-instelling -->
     <div style="margin-top:12px;border-top:1px solid #d0e6f8;padding-top:10px;">
       <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor ÷ in het pad)</div>
@@ -565,6 +709,41 @@ button:active{transform:scale(.97);}
   <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
 
 </div><!-- /panel-rooster -->
+
+<!-- ═══════════════════════════════════════════════════════ SPRINGPAD PANEL -->
+<div class="panel" id="panel-springpad">
+
+  <div class="section-title">📄 Werkblad</div>
+  <div class="row">
+    <div class="field">
+      <label>Naam leerling</label>
+      <input type="text" id="sp-naam" placeholder="Naam: ___________">
+    </div>
+    <div class="field">
+      <label>Datum</label>
+      <input type="text" id="sp-datum" placeholder="">
+    </div>
+  </div>
+
+  <hr style="border:none;border-top:1px solid #e5eff8;margin-bottom:14px;">
+  <div class="section-title">⚙️ Springpaden configureren</div>
+
+  <div id="sp-configs" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"></div>
+
+  <div id="sp-add-btn" style="margin-top:6px;">
+    <button onclick="addSpringpadConfig()" style="width:100%;padding:12px;background:#f0fff4;color:#2e7d32;border:2px dashed #81c784;border-radius:10px;font-size:.92rem;font-weight:800;cursor:pointer;letter-spacing:.3px;">
+      ＋ Springpad toevoegen (max. 4)
+    </button>
+  </div>
+
+  <div class="actions" style="margin-top:12px;">
+    <button class="btn-gen" onclick="previewSpringpad()">▶ Genereer preview</button>
+    <button class="btn-sec" onclick="previewSpringpad()">🔀 Nieuwe variant</button>
+    <button class="btn-add-sp" onclick="addPreviewToBundel()" id="btn-voeg-sp" style="display:none;background:#2e7d32;color:white;border:2px solid #1b5e20;border-radius:10px;padding:9px 18px;font-weight:800;font-size:.88rem;cursor:pointer;">✅ Voeg toe aan bundel</button>
+  </div>
+  <div class="workflow-tip"><span class="tip-icon">💡</span><div>Klik eerst <strong>Genereer preview</strong>, daarna <strong>Voeg toe aan bundel</strong> — anders komt het niet in de PDF.</div></div>
+</div><!-- /panel-springpad -->
+
 
 <!-- PDF LOADING OVERLAY -->
 <div id="pdf-overlay">
@@ -778,9 +957,6 @@ function buildMaze(rows,cols,sums){
   }));
   const idx=(r,c)=>r*cols+c;
 
-  // Set van 2×2-blokken die al een diagonaal hebben (gedeeld tussen pad en extra verbindingen)
-  const plannedDiagBlocks = new Set();
-
   // Bouw een slingerend pad via random walk met backtracking
   // Het pad mag alle richtingen op inclusief diagonalen
   function buildWindingPath() {
@@ -788,6 +964,7 @@ function buildMaze(rows,cols,sums){
     let path = [0], r = 0, c = 0;
     // Alle 8 richtingen: horizontaal, verticaal én diagonaal
     const DIRS = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+    // Diagonale stappen kosten minder "afstand" dus weeg ze iets zwaarder bij slingeren
     const minSteps = (rows - 1) + (cols - 1);
     const targetLen = Math.floor(N * 0.65);
 
@@ -803,11 +980,13 @@ function buildMaze(rows,cols,sums){
         const nr = r + dr, nc = c + dc;
         if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
         if (visited.has(idx(nr, nc))) continue;
+        // Controleer of deze diagonale stap geen conflicten geeft met al geplande diagonalen
         const isDiag = dr !== 0 && dc !== 0;
         if (isDiag) {
+          // Blok linksboven van de diagonaal
           const blkR = Math.min(r, nr), blkC = Math.min(c, nc);
           const blk = blkR * cols + blkC;
-          if (plannedDiagBlocks.has(blk)) continue;
+          if (plannedDiagBlocks.has(blk)) continue; // kruist een bestaande diagonaal
         }
         const distToEnd = Math.abs(nr - (rows-1)) + Math.abs(nc - (cols-1));
         candidates.push({ nr, nc, distToEnd, isDiag });
@@ -815,6 +994,7 @@ function buildMaze(rows,cols,sums){
 
       if (candidates.length === 0) {
         if (path.length <= 1) break;
+        // Bij backtrack: verwijder ook eventuele geplande diagonaal
         const prevR = Math.floor(path[path.length-2] / cols);
         const prevC = path[path.length-2] % cols;
         const wasDiag = Math.abs(r - prevR) === 1 && Math.abs(c - prevC) === 1;
@@ -837,6 +1017,7 @@ function buildMaze(rows,cols,sums){
       }
       const pick = Math.random() < 0.25 && candidates.length > 1 ? candidates[1] : candidates[0];
 
+      // Registreer diagonaal als gepland zodat geen andere diagonaal kan kruisen
       if (pick.isDiag) {
         const blkR = Math.min(r, pick.nr), blkC = Math.min(c, pick.nc);
         plannedDiagBlocks.add(blkR * cols + blkC);
@@ -858,50 +1039,75 @@ function buildMaze(rows,cols,sums){
     return path;
   }
 
+  // Set van 2×2-blokken die al een diagonaal hebben (gedeeld tussen pad en extra verbindingen)
+  const plannedDiagBlocks = new Set();
   let path = buildWindingPath();
   const conns=[];
+  // Verbindingen zijn DIRECTIONEEL: from→to EN to→from zijn aparte verbindingen
+  // want het correcte pad kan ook omhoog of naar links lopen
   const connSet = new Set();
   function addConn(a, b, dir) {
+    // Voeg beide richtingen toe als aparte verbinding, maar sla visueel duplicaat over
     const key = Math.min(a,b) + '_' + Math.max(a,b);
     if (connSet.has(key)) return;
     connSet.add(key);
+
+    // Zoek of a→b of b→a op het correcte pad zit
     const posA = path.indexOf(a);
     const posB = path.indexOf(b);
     const aToB = posA >= 0 && path[posA + 1] === b;
     const bToA = posB >= 0 && path[posB + 1] === a;
+
+    // from = het knooppunt dat "vraagt" (waarvan het antwoord op de weg staat)
+    // Als het pad a→b gaat: from=a, to=b, label = antwoord van a
+    // Als het pad b→a gaat: from=b, to=a, label = antwoord van b
+    // Anders: afleiding, from=a (willekeurig), to=b
     if (aToB) {
       conns.push({ from: a, to: b, isCorrect: true, dir });
     } else if (bToA) {
       conns.push({ from: b, to: a, isCorrect: true, dir });
     } else {
+      // Afleidingsweg — sla op als a→b maar markeer niet-correct
       conns.push({ from: a, to: b, isCorrect: false, dir });
     }
   }
 
-  // Diagonale afleidingswegen — gebruik plannedDiagBlocks zodat geen kruising mogelijk is
+  // Bijhouden welke 2×2-blokken al een diagonaal hebben (om kruisen te vermijden)
+  // plannedDiagBlocks is al gevuld door buildWindingPath voor correcte diagonalen
   const diagBlocks = new Set([...plannedDiagBlocks]);
 
   for(let r2=0;r2<rows;r2++) for(let c2=0;c2<cols;c2++){
     if(c2<cols-1) addConn(idx(r2,c2), idx(r2,c2+1), 'h');
     if(r2<rows-1) addConn(idx(r2,c2), idx(r2+1,c2), 'v');
+    // Diagonaal \ — alleen als geen kruising met bestaande diagonaal in dit 2×2-blok
     if(r2<rows-1 && c2<cols-1 && Math.random()<.45) {
       const blk = r2 * cols + c2;
-      if(!diagBlocks.has(blk)) { diagBlocks.add(blk); addConn(idx(r2,c2), idx(r2+1,c2+1), 'd'); }
+      if(!diagBlocks.has(blk)) {
+        diagBlocks.add(blk);
+        addConn(idx(r2,c2), idx(r2+1,c2+1), 'd');
+      }
     }
+    // Diagonaal / — zelfde kruischeck
     if(r2<rows-1 && c2>0 && Math.random()<.35) {
       const blk = r2 * cols + (c2-1);
-      if(!diagBlocks.has(blk)) { diagBlocks.add(blk); addConn(idx(r2,c2), idx(r2+1,c2-1), 'd2'); }
+      if(!diagBlocks.has(blk)) {
+        diagBlocks.add(blk);
+        addConn(idx(r2,c2), idx(r2+1,c2-1), 'd2');
+      }
     }
   }
-
   // Veiligheidscheck: elke stap in het correcte pad moet een isCorrect verbinding hebben
+  // Als dat niet klopt (kan niet meer voorkomen maar voor zekerheid), gebruik fallback
   for (let i = 0; i < path.length - 1; i++) {
     const a = path[i], b = path[i+1];
     const hasCorrect = conns.some(c => c.isCorrect && c.from === a && c.to === b);
-    if (!hasCorrect) conns.push({ from: a, to: b, isCorrect: true, dir: 'h' });
+    if (!hasCorrect) {
+      // Voeg alsnog toe
+      conns.push({ from: a, to: b, isCorrect: true, dir: 'h' });
+    }
   }
 
-  // Lees het bereik uit de UI
+  // Lees het bereik uit de UI (voor optellen/aftrekken)
   const opVal = document.getElementById('op').value;
   const isDeel = opVal === 'div';
   const isMulD = opVal === 'mul' || opVal === 'div';
@@ -909,24 +1115,37 @@ function buildMaze(rows,cols,sums){
 
   // Verzamel alle uitkomsten van sommen in dit doolhof
   const allAns = nodes.map(n => n.sum.ans);
+  const allAnsSet = new Set(allAns);
 
   conns.forEach(conn => {
-    const ca = nodes[conn.from].sum.ans;
+    const ca = nodes[conn.from].sum.ans; // correct antwoord op dit knooppunt
     if (conn.isCorrect) {
       conn.label = ca;
     } else {
+      // Afleidingsgetal: bij voorkeur een uitkomst van een ANDERE som in het doolhof,
+      // zodat kinderen écht moeten rekenen (het getal staat ergens, maar niet hier).
+      // Nooit het correcte antwoord (ca) of het antwoord van het doelknooppunt.
       const toAns = nodes[conn.to].sum.ans;
+
+      // Pool 1: uitkomsten van andere knopen (meest pedagogisch waardevol)
       const fromOtherNodes = allAns.filter(v => v !== ca && v !== toAns);
+
+      // Pool 2: willekeurige getallen binnen het bereik als aanvulling
       const maxDecoy = isMulD ? uiRange : Math.min(uiRange, ca + 5);
       const extra = [];
       for (let v = 1; v <= maxDecoy; v++) {
         if (v !== ca && v !== toAns) extra.push(v);
       }
+
+      // Combineer: geef voorkeur aan andere-knoop-uitkomsten, aangevuld met extra
+      // Filter ook dubbele labels op verbindingen van hetzelfde knooppunt (vermijd verwarring)
       const usedOnThisNode = conns
         .filter(c2 => c2.from === conn.from && c2.label !== undefined)
         .map(c2 => c2.label);
+
       const pool = [...new Set([...fromOtherNodes, ...extra])]
         .filter(v => !usedOnThisNode.includes(v));
+
       conn.label = pool.length > 0
         ? pool[rnd(0, pool.length - 1)]
         : (ca === 1 ? 2 : ca - 1);
@@ -1071,9 +1290,17 @@ function generateDoolhof(){
     const div=document.createElement('div');
     div.className='worksheet maze-worksheet';
 
-    // Werkblad kop
+    // Werkblad kop: naam/datum enkel bij eerste doolhof
     const titel=`🌀 Doolhof${aantal>1?' '+(n+1):''}`;
-    div.innerHTML=renderWorksheetHeader(naam,datum,titel,opdracht);
+    if(n===0){
+      div.innerHTML=renderWorksheetHeader(naam,datum,titel,opdracht);
+    } else {
+      div.innerHTML=`<div class="ws-header" style="padding:6px 20px 4px;font-family:Arial,sans-serif;text-align:center;">
+        <div style="border:2px solid #7ab8e8;border-radius:8px;padding:5px 20px;background:#f0f7ff;display:inline-block;">
+          <span style="font-size:20px;font-weight:900;color:#1a4e8a;font-family:Arial,sans-serif;">${titel}</span>
+        </div>
+      </div>`;
+    }
 
     // SVG
     const svgWrap=document.createElement('div');
@@ -1401,12 +1628,17 @@ function buildRekenpad(steps, opKey, range, mode) {
 
     if (isMulDiv) {
       // ── TAFELMODUS ──────────────────────────────────────────
+      // Getallen in het pad zijn altijd geldige tafelresultaten
+      // Bereik: 1 t/m tafelUpto × max(tafels) bv. 1-100 bij tafels tot 10
+      // Maar startgetal is altijd 1-tafelUpto (wat kinderen kennen)
       const maxVal = tafelUpto * Math.max(...tafels);
 
+      // Bouw pool van alle geldige getallen = veelvouden van elke tafel t/m maxVal
       const geldigeGetallen = new Set();
       for (const t of tafels) {
         for (let v = t; v <= maxVal; v += t) geldigeGetallen.add(v);
       }
+      // Voeg ook 1-tafelUpto toe als startgetallen
       for (let v = 1; v <= tafelUpto; v++) geldigeGetallen.add(v);
 
       const start = rnd(1, tafelUpto);
@@ -1417,19 +1649,24 @@ function buildRekenpad(steps, opKey, range, mode) {
         const prevOp = ops.length > 0 ? ops[ops.length-1].op : null;
         const prevOperand = ops.length > 0 ? ops[ops.length-1].operand : null;
 
+        // Maak lijst van geldige stappen — vermijd directe herhaling (× dan ÷ zelfde tafel)
         const geldig = [];
         for (const t of tafels) {
           const product = cur * t;
+          // × mag als uitkomst in geldige pool zit en niet direct de vorige ÷ terugdraait
           // Bij basis-niveau: product mag niet groter zijn dan t × tafelUpto
+          // (bv. tafel van 2 gaat maar tot 2×10=20, dus 50×2=100 is niet toegelaten)
           const maxVoorDezeTafel = niveau === 'basis' ? t * tafelUpto : maxVal;
           if (product <= maxVoorDezeTafel && geldigeGetallen.has(product)) {
             if (!(prevOp === '÷' && prevOperand === t && product === values[values.length-2])) {
               geldig.push({ op: '×', operand: t });
             }
           }
+          // ÷ mag als deelbaar en niet direct de vorige × terugdraait
           if (cur % t === 0 && cur / t >= 1) {
             const quotient = cur / t;
             // Bij basis-niveau: uitkomst moet ≤ tafelUpto zijn (staat in de deeltafel)
+            // Bv. 60 ÷ 3 = 20 → 20 > 10 → NIET toegelaten op 2de/3de leerjaar
             if (niveau === 'basis' && quotient > tafelUpto) continue;
             if (!(prevOp === '×' && prevOperand === t && quotient === values[values.length-2])) {
               geldig.push({ op: '÷', operand: t });
@@ -1438,6 +1675,7 @@ function buildRekenpad(steps, opKey, range, mode) {
         }
         if (geldig.length === 0) { ok = false; break; }
         shuffle(geldig);
+        // Kies bij voorkeur een stap die een ander getal geeft dan de vorige uitkomst
         const geenHerhaling = geldig.filter(s => {
           const nxt = s.op === '×' ? cur * s.operand : cur / s.operand;
           return nxt !== (values[values.length-2] || -1);
@@ -1708,7 +1946,7 @@ function saveRoosterConfigsFromDOM() {
   roosterConfigs.forEach(cfg => {
     const id = cfg.id;
     const opEl = document.getElementById(`ro-op-${id}`);
-    if (!opEl) return;
+    if (!opEl) return; // nog niet gerenderd
     cfg.op     = opEl.value;
     cfg.rows   = document.getElementById(`ro-rows-${id}`)?.value;
     cfg.cols   = document.getElementById(`ro-cols-${id}`)?.value;
@@ -1767,7 +2005,7 @@ function renderRoosterConfigs() {
     }
 
     const opSel = mkField('Bewerking', 'ro-op-' + id, [
-      ['add','Optellen (+)'],['sub','Aftrekken (−)'],['addsub','Gemengd +/−'],
+      ['add','Optellen (+)'],['sub','Aftrekken (−)'],
       ['mul','× vermenigvuldigen'],['div','÷ delen']
     ], cfg.op || 'mul');
     opSel.querySelector('select').onchange = () => toggleRoosterOpties(id);
@@ -1947,14 +2185,11 @@ function getRoosterConfigData(id) {
 
     } else {
       // Optellen en gemengd: som rij+kolom mag nooit > range uitkomen
-      // Kies eerst kolomgetallen (klein houden zodat rijgetallen ook passen)
       const colPool = [];
       for (let i = 1; i <= Math.floor(range / 2); i++) colPool.push(i);
       shuffle(colPool);
       colNums = colPool.slice(0, nCols);
 
-      // Rijgetallen: kies zodat rij + elk kolomgetal <= range
-      // en brugkeuze wordt gerespecteerd
       const maxKolom = Math.max(...colNums);
       const rowPool = [];
       for (let i = 1; i <= range - maxKolom; i++) {
@@ -1963,7 +2198,6 @@ function getRoosterConfigData(id) {
         );
         if (voldoet) rowPool.push(i);
       }
-      // Fallback zonder brugeis als te weinig gevonden
       if (rowPool.length < nRows) {
         for (let i = 1; i <= range - maxKolom; i++) {
           if (!rowPool.includes(i)) rowPool.push(i);
@@ -2164,9 +2398,11 @@ function switchTab(name, btn) {
   const bd = document.getElementById('btn-voeg-d');
   const bi = document.getElementById('btn-voeg-iu');
   const br = document.getElementById('btn-voeg-rp');
+  const bs = document.getElementById('btn-voeg-sp');
   if (bd) bd.style.display = 'none';
   if (bi) bi.style.display = 'none';
   if (br) br.style.display = 'none';
+  if (bs) bs.style.display = 'none';
   document.getElementById('preview-area').innerHTML = '';
 }
 
@@ -2193,7 +2429,8 @@ function addPreviewToBundel() {
   const isFirstInBundel = bundel.querySelectorAll('.worksheet').length === 0;
   sheets.forEach((sheet, idx) => {
     // Naam/datum enkel op het allereerste blad van de bundel
-    if (!(isFirstInBundel && idx === 0)) {
+    const showND = isFirstInBundel && idx === 0;
+    if (!showND) {
       const ndRow = sheet.querySelector('.ws-naam-datum');
       if (ndRow) ndRow.style.display = 'none';
     }
@@ -2228,9 +2465,11 @@ function clearAll() {
   const bd = document.getElementById('btn-voeg-d');
   const bi = document.getElementById('btn-voeg-iu');
   const br = document.getElementById('btn-voeg-rp');
+  const bs = document.getElementById('btn-voeg-sp');
   if (bd) bd.style.display = 'none';
   if (bi) bi.style.display = 'none';
   if (br) br.style.display = 'none';
+  if (bs) bs.style.display = 'none';
   updatePageCounter();
 }
 
@@ -2309,12 +2548,13 @@ async function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pW = 210, pH = 297;
-  const margin = 10;
-  const footerH = 8;
+  const margin = 10;       // mm rondom
+  const footerH = 8;       // mm voor voettekst onderaan
   const usableW = pW - margin * 2;
-  const usableH = pH - margin - footerH;
-  const gap = 4;
+  const usableH = pH - margin - footerH; // beschikbare hoogte (voettekst uit de weg)
+  const gap = 4;           // mm tussen werkbladen op zelfde pagina
 
+  // Bereken hoogte van elk canvas in mm (geschaald naar usableW breedte)
   const items = canvases.map(canvas => {
     const ratio = canvas.width / canvas.height;
     const iW = usableW;
@@ -2326,7 +2566,9 @@ async function downloadPDF() {
 
   for (let i = 0; i < items.length; i++) {
     const { canvas, iW, iH } = items[i];
-    const fitsH = Math.min(iH, usableH - margin);
+    const fitsH = Math.min(iH, usableH - margin); // nooit buiten de pagina
+
+    // Past het werkblad nog op de huidige pagina?
     const spaceLeft = usableH - curY;
     const needsNewPage = (i > 0) && (spaceLeft < fitsH + gap);
 
@@ -2367,7 +2609,1508 @@ async function downloadPNG() {
     link.click();
   });
 }
-</script> 
+
+
+// ══════════════════════════════════════════════════════════
+// SPRINGPAD
+// ══════════════════════════════════════════════════════════
+
+/************************************
+ * Rekendoolhof-generator
+ *
+ * Doelen:
+ * 1. Keuze tussen:
+ *    - "sprongen": getallen volgen met sprongen (2 / 5 / 10)
+ *    - "maze": leeg rooster + pijlen volgen
+ *
+ * 2. Thema (icoontjes, uitlegtekst):
+ *    herfst / sint / pasen / lente / zomer
+ *
+ * 3. Pad niet telkens hetzelfde:
+ *    we kiezen willekeurig uit meerdere voorgeprogrammeerde paden.
+ *
+ * 4. Sprong en bereik werken echt:
+ *    sprong = stapgrootte, bereikMax = max. afleiders / startkeuze.
+ *
+ * 5. Meerdere oefeningen op één blad:
+ *    we bouwen bv. 2 oefenblokken onder elkaar.
+ ************************************/
+
+/* ========= STATE ========== */
+const sp_state = {
+  type: "sprongen",
+  sprong: 5,
+  bereikMax: 100,
+  thema: "herfst",
+  size: 5,
+  startMode: "mooi" // "mooi" of "vrij"
+};
+
+let sp_worksheetItems = [];
+
+
+
+/* ========= THEMA INFO ========== */
+function getThemaInfo(thema){
+  switch (thema) {
+    case "herfst":
+      return {
+        startIcon: "🐿️",
+        endIcon: "🌰",
+        uitleg: "De eekhoorn wil naar zijn eikel."
+      };
+    case "sint":
+      return {
+        startIcon: "🎅",
+        endIcon: "🎁",
+        uitleg: "De Sint wil naar zijn pakje."
+      };
+    case "pasen":
+      return {
+        startIcon: "🐰",
+        endIcon: "🥚",
+        uitleg: "Het konijntje wil naar zijn ei."
+      };
+    case "lente":
+      return {
+        startIcon: "🐦",
+        endIcon: "🌸",
+        uitleg: "Het vogeltje wil naar de bloem."
+      };
+    case "zomer":
+      return {
+        startIcon: "🏖️",
+        endIcon: "🍦",
+        uitleg: "We gaan naar het ijsje."
+      };
+    case "kerst":
+      return {
+        startIcon: "🎄",
+        endIcon: "⭐",
+        uitleg: "De kerstboom wil zijn ster aan de top."
+      };
+    case "halloween":
+      return {
+        startIcon: "🎃",
+        endIcon: "🍬",
+        uitleg: "Het spookje wil naar het snoepje."
+      };
+    case "carnaval":
+      return {
+        startIcon: "🎭",
+        endIcon: "🎉",
+        uitleg: "Het masker wil naar het feest."
+      };
+    default:
+      return {
+        startIcon: "🐿️",
+        endIcon: "🌰",
+        uitleg: "De eekhoorn wil naar zijn eikel."
+      };
+  }
+}
+
+/* ========= PADVARIANTEN ==========
+   We geven meerdere 5x5-routes (start linksonder, eind rechtsboven).
+   Elke route is een lijst van [r,c].
+   We kiezen elke keer één willekeurige route.
+   Alle routes hebben bochten.
+*/
+const PAD_VARIANTEN = [
+  // variant A
+  [
+    [4,0],[4,1],[3,1],[3,2],[2,2],[2,3],[2,4],[1,4],[0,4]
+  ],
+  // variant B
+  [
+    [4,0],[4,1],[4,2],[3,2],[2,2],[1,2],[1,3],[1,4],[0,4]
+  ],
+  // variant C
+  [
+    [4,0],[3,0],[3,1],[3,2],[2,2],[2,3],[1,3],[1,4],[0,4]
+  ],
+  // variant D (de oude die u al zag, ook bochtig)
+  [
+    [4,0],[4,1],[4,2],[3,2],[2,2],[2,3],[2,4],[1,4],[0,4]
+  ]
+];
+// Genereer een pad met variatie voor gegeven rooster-grootte.
+// We starten linksonder (row = size-1, col = 0).
+// We willen ongeveer richting rechtsboven gaan (row = 0, col = size-1).
+// We bouwen stap voor stap. Elke stap is maximaal 1 vakje omhoog, omlaag,
+// links of rechts (geen diagonaal).
+// We vermijden terug- en terug- en terug-lopen in hetzelfde kleine hoekje.
+// We stoppen zodra we voldoende lengte hebben voor een oefening.
+function genereerPadVoorSize(size){
+  // We bouwen het pad zelf stapsgewijs.
+  // Start = linksonder (size-1,0)
+  // Doel = rechtsboven (0,size-1)
+  // We proberen altijd buur-stappen (up/right) en af en toe een kleine zijsprong
+  // (left/down) om bochten te maken, maar we vermijden dubbele cellen.
+
+  const doelR = 0;
+  const doelC = size - 1;
+
+  // hulpfunctie om unieke cellen toe te voegen
+  function pushUniek(padArr, r, c){
+    const last = padArr[padArr.length-1];
+    if (!last || last[0] !== r || last[1] !== c){
+      padArr.push([r,c]);
+    }
+  }
+
+  function maakKandidaat(){
+    let r = size - 1;
+    let c = 0;
+    const padArr = [[r,c]];
+
+    // we bouwen tot we de rechterbovenhoek bereikt hebben
+    // maar om variatie te hebben, kiezen we soms eerst "rechts", soms eerst "omhoog".
+    // We laten max size*size stappen om te voorkomen dat we vastlopen.
+
+    for (let steps = 0; steps < size*size; steps++){
+      if (r === doelR && c === doelC){
+        break; // we zijn al aan het doel
+      }
+
+      // mogelijke richtingen
+      const opties = [];
+
+      // voorkeur: naar rechts als nog niet laatste kolom
+      if (c < doelC) {
+        opties.push("right");
+        opties.push("right"); // dubbel gewicht
+      }
+      // voorkeur: omhoog als we nog niet op rij 0 zitten
+      if (r > doelR){
+        opties.push("up");
+        opties.push("up"); // dubbel gewicht
+      }
+
+      // extra variatie: heel soms een kleine zijsprong "om te kronkelen",
+      // maar alleen als we NIET terug buiten het bord gaan
+      if (c > 0) {
+        opties.push("left");
+      }
+      if (r < size-1){
+        opties.push("down");
+      }
+
+      // we willen niet meteen exact terugkeren (right dan left onmiddellijk, of up dan down)
+      function tegengesteld(a,b){
+        return (
+          (a==="right" && b==="left") ||
+          (a==="left"  && b==="right")||
+          (a==="up"    && b==="down") ||
+          (a==="down"  && b==="up")
+        );
+      }
+
+      // laatste richting?
+      let lastDir = null;
+      if (padArr.length >= 2){
+        const [pr,pc] = padArr[padArr.length-2];
+        if (r === pr && c === pc+1) lastDir = "right";
+        else if (r === pr && c === pc-1) lastDir = "left";
+        else if (c === pc && r === pr-1) lastDir = "up";
+        else if (c === pc && r === pr+1) lastDir = "down";
+      }
+
+      // filter opties die meteen perfect tegengesteld zouden zijn
+      const gefilterd = opties.filter(dir => !(lastDir && tegengesteld(lastDir,dir)));
+
+      if (gefilterd.length === 0){
+        break; // geen geldige richting meer -> stoppen
+      }
+
+      // kies willekeurig uit de gefilterde lijst
+      const dir = gefilterd[Math.floor(Math.random()*gefilterd.length)];
+
+      // voer die stap uit als die binnen het rooster blijft
+      let nr = r;
+      let nc = c;
+      if (dir === "right") nc = c+1;
+      else if (dir === "left") nc = c-1;
+      else if (dir === "up") nr = r-1;
+      else if (dir === "down") nr = r+1;
+
+      if (nr < 0 || nr >= size || nc < 0 || nc >= size){
+        // ongeldige stap, probeer opnieuw door de loop verder te laten draaien
+        continue;
+      }
+
+      // voeg cel toe als nieuwe stap
+      pushUniek(padArr, nr, nc);
+      r = nr;
+      c = nc;
+
+      // als we dichtbij het doel zijn maar nog niet exact,
+      // duwen we de rest gewoon recht naar boven en dan naar rechts (of omgekeerd)
+      if (r === doelR && c !== doelC){
+        while (c < doelC){
+          c++;
+          pushUniek(padArr, r, c);
+        }
+      }
+      if (c === doelC && r !== doelR){
+        while (r > doelR){
+          r--;
+          pushUniek(padArr, r, c);
+        }
+      }
+      if (r === doelR && c === doelC){
+        break;
+      }
+    }
+
+    // als we na de lus nog niet bij het doel zijn, maak rechtstreekse "sluipweg"
+    if (!(r === doelR && c === doelC)){
+      while (r > doelR){
+        r--;
+        pushUniek(padArr, r, c);
+      }
+      while (c < doelC){
+        c++;
+        pushUniek(padArr, r, c);
+      }
+    }
+
+    return padArr;
+  }
+
+  // We proberen een paar keer een kandidaat en kiezen de langste (meer bochten).
+  let beste = null;
+  for (let t=0; t<4; t++){
+    const cand = maakKandidaat();
+    if (!beste || cand.length > beste.length){
+      beste = cand;
+    }
+  }
+  return beste;
+}
+
+
+
+
+function kiesPad(avoidPadIndex = -1){
+  // kies willekeurige index die niet gelijk is aan avoidPadIndex
+  let idx;
+  do {
+    idx = Math.floor(Math.random()*PAD_VARIANTEN.length);
+  } while (idx === avoidPadIndex && PAD_VARIANTEN.length > 1);
+  return { path: PAD_VARIANTEN[idx], index: idx };
+}
+// pad uit 5x5 rekken naar bv. 7x7 of 10x10
+function schaalPad(pad5, size){
+  if (size === 5) return pad5;
+  const maxIdx = 4; // originele pad gebruikt r/c 0..4
+  const factor = (size-1)/maxIdx;
+  const nieuw = [];
+  for (const [r,c] of pad5){
+    const nr = Math.round(r * factor);
+    const nc = Math.round(c * factor);
+    if (
+      !nieuw.length ||
+      nieuw[nieuw.length-1][0] !== nr ||
+      nieuw[nieuw.length-1][1] !== nc
+    ){
+      nieuw.push([nr,nc]);
+    }
+  }
+  // zorg dat eerste echt linksonder zit, laatste echt rechtsboven
+  nieuw[0] = [size-1,0];
+  nieuw[nieuw.length-1] = [0,size-1];
+  return nieuw;
+}
+
+
+/* ========= MAZE PIJLEN ==========
+   Voor het lege doolhof met pijlen. Kinderen volgen pijlen met de vinger.
+   U kunt hier varianten maken of randomiseren als u wenst.
+*/
+// Maak pijlenreeks op basis van het gekozen pad
+// pad is bv. [[4,0],[4,1],[3,1],...]
+// We vertalen beweging per stap:
+// (r,c)->(r,c+1)  = →
+ // (r,c)->(r,c-1)  = ← (komt zelden voor maar kan)
+// (r,c)->(r-1,c)  = ↑
+// (r,c)->(r+1,c)  = ↓
+function pijlenUitPad(pad){
+  const pijlen = [];
+  for (let i=0; i<pad.length-1; i++){
+    const [r1,c1] = pad[i];
+    const [r2,c2] = pad[i+1];
+    if (r2 === r1 && c2 === c1+1) pijlen.push("→");
+    else if (r2 === r1 && c2 === c1-1) pijlen.push("←");
+    else if (c2 === c1 && r2 === r1-1) pijlen.push("↑");
+    else if (c2 === c1 && r2 === r1+1) pijlen.push("↓");
+  }
+  return pijlen;
+}
+// Voeg een extra pijl toe vóór de start (richting in) en na het einde (richting uit)
+function pijlenMetInEnUit(pad) {
+  const pijlen = pijlenUitPad(pad);
+
+  // eerste stap: waar ligt de ingang?
+  const [r1, c1] = pad[0];
+  const [r2, c2] = pad[1];
+  // Bepaal de richting van buiten naar de tweede cel
+  if (r2 === r1 && c2 === c1 + 1) pijlen.unshift("→");
+  else if (r2 === r1 && c2 === c1 - 1) pijlen.unshift("←");
+  else if (c2 === c1 && r2 === r1 - 1) pijlen.unshift("↑");
+  else if (c2 === c1 && r2 === r1 + 1) pijlen.unshift("↓");
+
+  // laatste stap: waar ligt de uitgang?
+  const [rn1, cn1] = pad[pad.length - 2];
+  const [rn2, cn2] = pad[pad.length - 1];
+  // Richting van de voorlaatste naar buiten
+  if (rn2 === rn1 && cn2 === cn1 + 1) pijlen.push("→");
+  else if (rn2 === rn1 && cn2 === cn1 - 1) pijlen.push("←");
+  else if (cn2 === cn1 && rn2 === rn1 - 1) pijlen.push("↑");
+  else if (cn2 === cn1 && rn2 === rn1 + 1) pijlen.push("↓");
+
+  return pijlen;
+}
+
+
+/* ========= HULPFUNCTIES GETALLEN ========= */
+
+function chooseStartValue(step, maxVal, padLength){
+  // We willen een veelvoud van step, of iets dat eindigt op 0 of 5,
+  // en we willen dat start + step*(padLength-1) niet boven 100 gaat.
+  //
+  // We proberen kandidaten zoals 0,5,10,15,20,25,30,...
+  // en kiezen de grootste die nog veilig eindigt.
+  //
+  // "maxVal" = bereikMax (20 of 100), maar we beschermen sowieso tegen 100.
+
+  const kandidaten = [];
+  for (let base = 0; base <= 40; base += 5){
+    kandidaten.push(base);
+  }
+  // ook een paar hogere instappen zodat niet altijd van 0 vertrekt:
+  for (let base = 50; base <= 80; base += 5){
+    kandidaten.push(base);
+  }
+  // voeg eventueel 20, 25 ... al zitten die er eigenlijk al in
+
+  // filter: eindwaarde
+  const geldige = kandidaten.filter(start => {
+    const eind = start + step * (padLength - 1);
+    if (eind > 100) return false;
+    if (eind > maxVal && maxVal < 100) return false; // bv. bereik tot 20
+    return true;
+  });
+
+  if (geldige.length === 0){
+    // fallback: zelfde logica als vroeger
+    if (maxVal <= 20){
+      if (step === 2)  return 0;
+      if (step === 5)  return 5;
+      if (step === 10) return 10;
+      return 0;
+    } else {
+      // maxVal ~100
+      if (step === 2)  return 20;
+      if (step === 5)  return 10;
+      if (step === 10) return 0;
+      return 10;
+    }
+  }
+
+  // kies willekeurig uit de geldige om variatie te geven
+  const pickIndex = Math.floor(Math.random() * geldige.length);
+  return geldige[pickIndex];
+}
+
+
+function makeEmptyGrid(rows, cols){
+  const arr = [];
+  for (let r=0; r<rows; r++){
+    const line = [];
+    for (let c=0; c<cols; c++){
+      line.push(null);
+    }
+    arr.push(line);
+  }
+  return arr;
+}
+
+// Vul eerst het echte pad met correcte sprongen:
+// padCoords = lijst coördinaten zoals [[4,0],[4,1],[3,1],...]
+// startVal = bv. 20
+// step = bv. 2
+function fillPadNumbers(grid, padCoords, startVal, step){
+  if (startVal === null || startVal === undefined){
+    // geen geldige start → we vullen niets in
+    return { laatsteIndex: -1 };
+  }
+
+  let val = startVal;
+  let laatsteIndex = -1;
+
+  for (let i = 0; i < padCoords.length; i++){
+    const [r,c] = padCoords[i];
+
+    // als dit getal >100 zou zijn, stoppen we VOOR we invullen
+    if (val > 100){
+      break;
+    }
+
+    grid[r][c] = val;
+    laatsteIndex = i;
+
+    // bereken volgende mogelijke waarde
+    const volgende = val + step;
+    // als die volgende boven 100 zou gaan, dan stoppen we hier
+    if (volgende > 100){
+      break;
+    }
+    val = volgende;
+  }
+
+  return { laatsteIndex };
+}
+
+
+
+
+// Vul alle andere vakken met 'afleiders' die NIET
+// het juiste volggetal kunnen zijn vanaf een buur op het pad.
+// Zo kan een kind echt de route volgen.
+function fillOtherNumbers(grid, maxVal){
+  const rows = grid.length;
+  const cols = grid[0].length;
+
+  // helper om te kijken of (r,c) grenst aan een padcel met een waarde v
+  // en of het verwachte volgende getal v+step daar zou moeten staan.
+  function forbiddenValuesForCell(rr, cc){
+    // we kijken naar alle buren (boven, onder, links, rechts)
+    const forbids = new Set();
+    const dirs = [
+      [-1,0],[1,0],[0,-1],[0,1]
+    ];
+    for (const [dr,dc] of dirs){
+      const nr = rr+dr;
+      const nc = cc+dc;
+      if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+      const v = grid[nr][nc];
+      // v is een padgetal als het al een getal is in grid[]
+      if (typeof v === "number"){
+        // we willen vermijden dat wij exact v+1, v+2, v+5, v+10
+        // leggen als dat de "logische stap" zou kunnen zijn.
+        // We kennen de sprongen niet hier (2,5,10),
+        // dus we verbieden ALLE v+2, v+5, v+10.
+        forbids.add(v+2);
+        forbids.add(v+5);
+        forbids.add(v+10);
+        forbids.add(v); // ook hetzelfde getal zelf liever niet dupliceren naast het pad
+      }
+    }
+    return forbids;
+  }
+
+  for (let r=0; r<rows; r++){
+    for (let c=0; c<cols; c++){
+      if (grid[r][c] === null){
+        const forb = forbiddenValuesForCell(r,c);
+        let candidate;
+        let tries = 0;
+        do {
+          candidate = Math.floor(Math.random()*maxVal) + 1;
+          if (candidate > 100) candidate = 100;
+          tries++;
+          // veiligheidsrem zodat we niet eindeloos blijven proberen
+          if (tries > 50) break;
+        } while (forb.has(candidate));
+        grid[r][c] = candidate;
+      }
+    }
+  }
+}
+
+
+/* ========= CEL-HTML ========= */
+
+function makeSprongCellHTML(r, c, value, isStart, isEnd){
+  let cls = "cellSprong";
+  if (isStart) cls += " startCell";
+  if (isEnd)   cls += " endCell";
+
+  return `
+    <div class="${cls}" data-r="${r}" data-c="${c}">
+      <div class="cellSprongNumber">${value}</div>
+
+      <span class="gate gate-top"></span>
+      <span class="gate gate-bottom"></span>
+      <span class="gate gate-left"></span>
+      <span class="gate gate-right"></span>
+    </div>
+  `;
+}
+
+function makeMazeCellHTML(r, c, isStart, isEnd){
+  let cls = "cellMaze";
+  if (isStart) cls += " startCell";
+  if (isEnd)   cls += " endCell";
+
+  return `
+    <div class="${cls}" data-r="${r}" data-c="${c}">
+      <div class="cellMazePlus">+</div>
+
+      <span class="gate gate-top"></span>
+      <span class="gate gate-bottom"></span>
+      <span class="gate gate-left"></span>
+      <span class="gate gate-right"></span>
+    </div>
+  `;
+}
+
+/* ========= ÉÉN SPRONGEN-OEFENING BOUWEN ========= */
+// Bepaalt of we een geldig startgetal kunnen kiezen zodat
+// start + sprong * (padLengte-1) <= 100.
+// Geeft een geschikt startgetal terug of null als het onmogelijk is.
+function berekenVeiligeStartwaarde(sprong, padLengte){
+  // We willen dat de eindwaarde niet boven 100 gaat.
+  // eindwaarde = start + sprong*(padLengte-1) <= 100
+  // => start <= 100 - sprong*(padLengte-1)
+
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  // We willen starts die logisch zijn voor kinderen:
+  // veelvouden van 5, of 0,5,10,15,20,25,...
+  // en ook niet negatief.
+  const kandidaten = [];
+  for (let base = 0; base <= 100; base += 5){
+    kandidaten.push(base);
+  }
+
+  // filter op haalbaar volgens maxStart
+  const geldige = kandidaten.filter(v => v <= maxStart && v >= 0);
+
+  if (geldige.length === 0){
+    return null; // met deze sprong en dit pad wordt de eindwaarde >100
+  }
+
+  // kleine variatie: kies een willekeurige van de geldige
+  const pick = Math.floor(Math.random() * geldige.length);
+  return geldige[pick];
+}
+// kiest een 'mooi' startgetal dat past bij de sprong en onder 100 blijft
+function berekenMooieStartwaarde(sprong, padLengte){
+  // voor sprong 2: we willen een even getal
+  // voor sprong 5 of 10: we willen iets dat eindigt op 0 of 5
+  //
+  // en we eisen dat eind <= 100.
+
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  const kandidaten = [];
+
+  if (sprong === 2){
+    // even getallen tot maxStart
+    for (let v = 0; v <= maxStart; v++){
+      if (v % 2 === 0) kandidaten.push(v);
+    }
+  } else if (sprong === 5 || sprong === 10){
+    // getallen die eindigen op 0 of 5
+    for (let v = 0; v <= maxStart; v++){
+      const lastDigit = v % 10;
+      if (lastDigit === 0 || lastDigit === 5){
+        kandidaten.push(v);
+      }
+    }
+  } else {
+    // andere sprongen: neem multiples van sprong als 'mooi'
+    for (let v = 0; v <= maxStart; v++){
+      if (v % sprong === 0){
+        kandidaten.push(v);
+      }
+    }
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  // variatie: kies willekeurig
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+
+// kiest een 'vrije' startwaarde (mag eender wat), zolang eind <= 100
+function berekenVrijeStartwaarde(sprong, padLengte){
+  const maxStart = 100 - sprong * (padLengte - 1);
+
+  // we laten alle waarden 0..maxStart toe
+  if (maxStart < 0){
+    return null;
+  }
+
+  const kandidaten = [];
+  for (let v = 0; v <= maxStart; v++){
+    kandidaten.push(v);
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+// Neem een volledig pad (lijst coördinaten [r,c])
+// en hou alleen de eerste N stappen.
+// Zo maken we een korter pad als de sprong anders boven 100 zou gaan.
+function knipPadOpLengte(pad, maxStappen){
+  if (pad.length <= maxStappen){
+    return pad.slice();
+  }
+  return pad.slice(0, maxStappen);
+}
+// Probeer een startwaarde te vinden zodat we het HELE pad
+// (van pad[0] = linksonder tot pad[pad.length-1] = rechtsboven)
+// kunnen vullen met sprongen 'sprong'
+// zonder boven limiet (100 of bereikMax) te gaan.
+//
+// mode "mooi" = netjes (even voor sprong 2, op 0/5 voor sprong 5/10, ...)
+// mode "vrij" = eender welke start binnen bereik.
+//
+// Geeft: een startwaarde (number) OF null als het onmogelijk is.
+function berekenStartVoorVolledigPad(sprong, padLength, bereikMax, mode){
+  // We willen eindwaarde <= limiet.
+  // limiet = min(100, bereikMax als die <100 anders 100)
+  const limiet = (bereikMax < 100 ? bereikMax : 100);
+
+  // We willen: start + sprong*(padLength-1) <= limiet
+  // => start <= limiet - sprong*(padLength-1)
+  const maxStart = limiet - sprong * (padLength - 1);
+
+  if (maxStart < 0){
+    // zelfs als we bij 0 starten komen we al boven de limiet
+    return null;
+  }
+
+  // kandidaten opstellen
+  const kandidaten = [];
+
+  if (mode === "mooi"){
+    if (sprong === 2){
+      // mooie start = even getallen
+      for (let v = 0; v <= maxStart; v++){
+        if (v % 2 === 0) kandidaten.push(v);
+      }
+    } else if (sprong === 5 || sprong === 10){
+      // mooie start = getallen die eindigen op 0 of 5
+      for (let v = 0; v <= maxStart; v++){
+        const lastDigit = v % 10;
+        if (lastDigit === 0 || lastDigit === 5){
+          kandidaten.push(v);
+        }
+      }
+    } else {
+      // andere sprongen: veelvoud van sprong
+      for (let v = 0; v <= maxStart; v++){
+        if (v % sprong === 0){
+          kandidaten.push(v);
+        }
+      }
+    }
+  } else {
+    // "vrij": alles 0..maxStart is toegestaan
+    for (let v = 0; v <= maxStart; v++){
+      kandidaten.push(v);
+    }
+  }
+
+  if (kandidaten.length === 0){
+    return null;
+  }
+
+  // kies willekeurig voor variatie
+  const pick = Math.floor(Math.random() * kandidaten.length);
+  return kandidaten[pick];
+}
+
+function buildSprongenOefening(themaInfo, sprong, bereikMax, size, avoidIdx = -1, startMode = "mooi"){
+  // VEILIGHEIDSREGEL:
+  // Voorlopig ondersteunen we alleen een betrouwbaar pad voor 5x5.
+  if (size !== 5){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Voor sprongoefeningen is het doolhof voorlopig alleen beschikbaar in 5×5.
+              Kies 5×5 om een juist pad te krijgen.
+            </div>
+          </div>
+          <div class="legendBox">
+            <div class="legendRow"><span>${themaInfo.startIcon}</span><span>start</span></div>
+            <div class="legendRow"><span>${themaInfo.endIcon}</span><span>einde</span></div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+      padIndex: -1
+    };
+  }
+
+  // ... de rest van de functie blijft hieronder staan, maar aangepast voor vaste paden ...
+
+  // Vanaf hier weten we: size === 5
+  const rows = 5;
+  const cols = 5;
+
+  // Een lijst van veilige paden voor 5×5.
+  const PAD_VARIANTEN_5X5 = [
+    // variant 1: slinger omhoog en naar rechts
+    [
+      [4,0],[4,1],[4,2],[3,2],[2,2],[2,1],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 2: eerst horizontaal dan zigzag naar boven
+    [
+      [4,0],[4,1],[4,2],[4,3],[4,4],[3,4],[2,4],[2,3],[1,3],[1,2],[1,1],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 3: kronkel via het midden
+    [
+      [4,0],[3,0],[2,0],[2,1],[2,2],[3,2],[4,2],[4,3],[3,3],[2,3],[1,3],[0,3],[0,4]
+    ],
+    // variant 4: langer pad met veel wissels
+    [
+      [4,0],[4,1],[3,1],[3,2],[3,3],[4,3],[4,4],[3,4],[2,4],[1,4],[1,3],[0,3],[0,4]
+    ]
+  ];
+  // Kortere paden speciaal voor sprong 10 (max. 9 getallen op het pad)
+  const PAD_VARIANTEN_5X5_SPRONG10 = [
+    // variant 1: recht omhoog, dan naar rechts
+    [
+      [4,0],[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 2: via kolom 1 naar boven
+    [
+      [4,0],[4,1],[3,1],[2,1],[1,1],[0,1],[0,2],[0,3],[0,4]
+    ],
+    // variant 3: kleine kronkel in het midden
+    [
+      [4,0],[3,0],[3,1],[3,2],[2,2],[1,2],[0,2],[0,3],[0,4]
+    ]
+  ];
+
+   // Kies passende padvariant (korter pad voor sprong 10)
+  const padVarianten = (sprong === 10)
+    ? PAD_VARIANTEN_5X5_SPRONG10
+    : PAD_VARIANTEN_5X5;
+
+  let padIndex;
+  do {
+    padIndex = Math.floor(Math.random() * padVarianten.length);
+  } while (padIndex === avoidIdx && padVarianten.length > 1);
+
+  const pad = padVarianten[padIndex];
+
+  // Limiet = min(100, bereikMax)
+  const limiet = (bereikMax < 100 ? bereikMax : 100);
+  const maxStart = limiet - sprong*(pad.length-1);
+
+  if (maxStart < 0){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Met sprong ${sprong} lukt het niet binnen ${limiet} om tot aan de eikel te tellen.
+              Kies een andere sprong.
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  // Kies een startwaarde
+  let mogelijkeStarts = [];
+  for (let s = 0; s <= maxStart; s++){
+    if (startMode === "mooi"){
+      if (sprong === 2 && s % 2 !== 0) continue;
+      if ((sprong === 5 || sprong === 10) && (s % 5 !== 0)) continue;
+      if (sprong !== 2 && sprong !== 5 && sprong !== 10){
+        if (s % sprong !== 0) continue;
+      }
+    }
+    mogelijkeStarts.push(s);
+  }
+
+  if (mogelijkeStarts.length === 0){
+    const warningHTML = `
+      <section class="exerciseBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Rekendoolhof</div>
+            <div class="subTitle">Maak sprongen van ${sprong}.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Geen geschikt startgetal gevonden binnen ${limiet}.
+              Kies een andere sprong of gebruik "vrij".
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  const gekozenStart = mogelijkeStarts[Math.floor(Math.random()*mogelijkeStarts.length)];
+
+  const gridData = makeEmptyGrid(rows, cols);
+  let val = gekozenStart;
+  for (let i=0; i<pad.length; i++){
+    const [rr,cc] = pad[i];
+    gridData[rr][cc] = val;
+    val += sprong;
+  }
+
+  fillOtherNumbers(gridData, bereikMax);
+
+  const startCell = [4,0];
+  const endCell   = [0,4];
+
+  let gridCellsHTML = "";
+  for (let r=0; r<rows; r++){
+    for (let c=0; c<cols; c++){
+      const isStart = (r === startCell[0] && c === startCell[1]);
+      const isEnd   = (r === endCell[0]   && c === endCell[1]);
+      gridCellsHTML += makeSprongCellHTML(r,c,gridData[r][c],isStart,isEnd);
+    }
+  }
+
+  const extraUitleg = (startMode === "mooi")
+    ? `(netjes tellen met sprongen van ${sprong})`
+    : `(tel verder vanaf een vrij startgetal)`;
+
+  const headerHTML = `
+    <div class="sp-oef-header">
+      <div class="sp-oef-uitleg">${themaInfo.startIcon} ${themaInfo.uitleg}</div>
+      <div class="sp-oef-sprong">Sprongen van ${sprong}</div>
+    </div>
+  `;
+
+  const gridWrapperHTML = `
+    <div class="gridRowWrapper" style="margin-top:8px;">
+      <div class="grid oefgrid" style="
+        grid-template-columns: repeat(${cols}, 52px);
+        grid-template-rows: repeat(${rows}, 52px);
+      ">
+        ${gridCellsHTML}
+      </div>
+    </div>
+  `;
+
+  return {
+    blockHTML: `<section class="exerciseBlock">${headerHTML}${gridWrapperHTML}</section>`,
+    startCell,
+    endCell,
+    startIcon: themaInfo.startIcon,
+    endIcon: themaInfo.endIcon,
+        padIndex
+  };
+}
+
+/* ========= ÉÉN MAZE-OEFENING BOUWEN ========= */
+// Zet een pad (lijst coördinaten [r,c]) om naar pijlen
+// Elke stap tussen twee opeenvolgende cellen levert één pijl.
+// ↑ = 1 vakje omhoog, ↓ = 1 vakje omlaag,
+// → = 1 vakje naar rechts, ← = 1 vakje naar links.
+function padNaarPijlen(pad){
+  const pijlen = [];
+  for (let i = 0; i < pad.length - 1; i++){
+    const [r1,c1] = pad[i];
+    const [r2,c2] = pad[i+1];
+
+    if (r2 === r1 && c2 === c1+1){
+      pijlen.push("→");
+    } else if (r2 === r1 && c2 === c1-1){
+      pijlen.push("←");
+    } else if (c2 === c1 && r2 === r1-1){
+      pijlen.push("↑");
+    } else if (c2 === c1 && r2 === r1+1){
+      pijlen.push("↓");
+    } else {
+      // veiligheidsval: als er ooit een sprong van 2 cellen zou zitten (mag niet),
+      // tonen we een vraagteken. Dan ziet u meteen dat er iets fout is.
+      pijlen.push("?");
+    }
+  }
+  return pijlen;
+}
+
+function buildMazeOefening(themaInfo, size, avoidIdx = -1){
+  // 1. Alleen 5×5 ondersteund
+  if (size !== 5){
+    const warningHTML = `
+      <section class="exerciseBlock mazeBlock">
+        <div class="sheet-header">
+          <div class="titles">
+            <div class="mainTitle">Doolhof</div>
+            <div class="subTitle">Volg de pijlen met je vinger.</div>
+            <div class="explain" style="color:#b00; font-weight:bold;">
+              Voor dit doolhof is het rooster voorlopig alleen beschikbaar in 5×5.
+              Kies 5×5.
+            </div>
+          </div>
+          <div class="legendBox">
+            <div class="legendRow"><span>${themaInfo.startIcon}</span><span>start</span></div>
+            <div class="legendRow"><span>${themaInfo.endIcon}</span><span>einde</span></div>
+          </div>
+        </div>
+      </section>
+    `;
+    return {
+      blockHTML: warningHTML,
+      startCell: [4,0],
+      endCell: [0,4],
+      startIcon: themaInfo.startIcon,
+      endIcon: themaInfo.endIcon,
+          padIndex
+    };
+  }
+
+  // 2. Roostergrootte
+  const rows = 5;
+  const cols = 5;
+
+  // 3. Veilige paden binnen het rooster (variatie)
+  const PAD_VARIANTEN_MAZE = [
+    [
+      [4,0],[4,1],[4,2],[3,2],[2,2],[1,2],[0,2],[0,3],[0,4]
+    ],
+    [
+      [4,0],[4,1],[3,1],[3,2],[2,2],[2,3],[1,3],[1,4],[0,4]
+    ],
+    [
+      [4,0],[3,0],[3,1],[3,2],[2,2],[2,1],[1,1],[1,2],[1,3],[1,4],[0,4]
+    ],
+    [
+      [4,0],[4,1],[4,2],[3,2],[3,3],[4,3],[4,4],[3,4],[2,4],[1,4],[0,4]
+    ]
+  ];
+
+  // 4. Kies willekeurig pad (niet twee keer na elkaar hetzelfde)
+  let padIndex;
+  do {
+    padIndex = Math.floor(Math.random() * PAD_VARIANTEN_MAZE.length);
+  } while (padIndex === avoidIdx && PAD_VARIANTEN_MAZE.length > 1);
+
+  const pad = PAD_VARIANTEN_MAZE[padIndex];
+
+  // -------- HIER BEGINNEN DE AANPASSINGEN VOOR DE PIJLEN --------
+
+  // Beschrijving van uw layout:
+  // - Het echte doolhof-pad eindigt NIET op het beige vak,
+  //   maar in het witte vak vlak ervoor.
+  // - Daarna moet je 1× naar rechts (wit -> beige),
+  //   en daarna nog 1× naar rechts (beige -> buiten bij de eikel).
+
+  const TOP_ROW = 0;
+  const LAST_COL_IN_GRID = cols - 1; // bij 5x5 is dat 4
+
+  // We maken een kopie van het gekozen pad en vullen eventueel bij.
+  const padGefixt = pad.slice();
+
+  // huidige eindpositie
+  let curR = padGefixt[padGefixt.length - 1][0];
+  let curC = padGefixt[padGefixt.length - 1][1];
+
+  // STAP A. Zorg dat we op de bovenste rij zitten (rij 0),
+  // anders stappen we naar boven tot rij 0.
+  let safetyA = 0;
+  while (curR !== TOP_ROW && safetyA < 50){
+    curR = curR - 1; // omhoog
+    padGefixt.push([curR, curC]);
+    safetyA++;
+  }
+
+  // STAP B. Zorg dat we belanden in het WITTE vak dat net LINKS van de beige uitgang zit.
+  // - Beige uitgangscel binnen het rooster = (0, LAST_COL_IN_GRID).
+  // - Het witte vak net ervoor zit op kolom LAST_COL_IN_GRID - 1.
+  const targetWhiteCol = LAST_COL_IN_GRID - 1;
+  let safetyB = 0;
+  while (curC < targetWhiteCol && safetyB < 50){
+    curC = curC + 1; // naar rechts
+    padGefixt.push([curR, curC]);
+    safetyB++;
+  }
+
+  // STAP C. Stap naar de BEIGE uitgangscel in het rooster (0, LAST_COL_IN_GRID).
+  if (!(curR === TOP_ROW && curC === LAST_COL_IN_GRID)){
+    curC = curC + 1; // wit -> beige
+    padGefixt.push([curR, curC]);
+  }
+
+  // STAP D. Nog 1 stap naar rechts BUITEN het rooster, naar de eikel.
+  curC = curC + 1; // beige -> buiten
+  padGefixt.push([curR, curC]);
+
+  // Nu eindigt padGefixt dus exact bij "einde" buiten het rooster.
+
+  // Definitief start- en eindpunt van de route-met-pijlen
+  const startCell = padGefixt[0];
+  // let absoluteEndCell = padGefixt[padGefixt.length - 1]; // niet nodig voor return
+
+  // Maak pijlenreeks
+  const pijlenLijst = padNaarPijlen(padGefixt);
+  const pijlenHTML  = pijlenLijst.join(" ");
+
+  // Voor het rooster zelf (te tekenen vakjes):
+  // - start in startCell
+  // - einde (het beige vak) = rechtsboven in het rooster = (0, LAST_COL_IN_GRID)
+  const visueelEndR = TOP_ROW;
+  const visueelEndC = LAST_COL_IN_GRID;
+
+  // We gebruiken deze visuele eindcel als "endCell" voor de rest van de app,
+  // want placeIconsForBlock zet daar het label "einde" en de eikel ernaast.
+  const endCell = [visueelEndR, visueelEndC];
+
+  // Bouw de gridcellen
+  let gridCellsHTML = "";
+  for (let r = 0; r < rows; r++){
+    for (let c = 0; c < cols; c++){
+      const isStart = (r === startCell[0] && c === startCell[1]);
+      const isEnd   = (r === visueelEndR && c === visueelEndC);
+
+      gridCellsHTML += makeSprongCellHTML(
+        r,
+        c,
+        "",
+        isStart,
+        isEnd
+      );
+    }
+  }
+
+  // Header met pijlen en uitleg
+  const headerHTML = `
+    <div class="sp-oef-header">
+      <div class="sp-oef-uitleg">${themaInfo.startIcon} ${themaInfo.uitleg}</div>
+      <div class="sp-oef-pijlen">Volg: ${pijlenHTML}</div>
+    </div>
+  `;
+
+  // Rooster-wrapper
+  const gridWrapperHTML = `
+    <div class="gridRowWrapper">
+      <div class="grid oefgrid mazeBlock" style="
+        grid-template-columns: repeat(${cols}, 52px);
+        grid-template-rows: repeat(${rows}, 52px);
+      ">
+        ${gridCellsHTML}
+      </div>
+    </div>
+  `;
+
+  // Teruggeven naar renderWorksheet()
+  return {
+    blockHTML: `<section class="exerciseBlock mazeBlock">${headerHTML}${gridWrapperHTML}</section>`,
+    startCell,
+    endCell,            // <-- nu bestaat endCell weer en is geldig (roosterhoek)
+    startIcon: themaInfo.startIcon,
+    endIcon: themaInfo.endIcon,
+    padIndex            // voor variatie tussen oefeningen
+  };
+}
+
+
+/* ========= START/EINDE ICONEN BUITEN ELKE GRID =========
+   We plaatsen per oefening afzonderlijk de icoontjes naast
+   de juiste cellen. Let op:
+   - We zoeken .oefgrid binnen die oefen-block
+   - We plaatsen iconen daarin.
+*/
+function placeIconsForBlock(blockEl, startCell, endCell, startIcon, endIcon){
+  const gridEl = blockEl.querySelector(".oefgrid");
+  if (!gridEl) return;
+
+  const isMaze = blockEl.classList.contains("mazeBlock");
+
+  function getCell(r, c){
+    return gridEl.querySelector(
+      `.cellSprong[data-r="${r}"][data-c="${c}"],
+       .cellMaze[data-r="${r}"][data-c="${c}"]`
+    );
+  }
+
+  const startDiv = getCell(startCell[0], startCell[1]);
+  const endDiv   = getCell(endCell[0],   endCell[1]);
+  if (!startDiv || !endDiv) return;
+
+  const startBox = startDiv.getBoundingClientRect();
+  const endBox   = endDiv.getBoundingClientRect();
+  const gridBox  = gridEl.getBoundingClientRect();
+
+  // Altijd: poortcellen markeren (voor openingen)
+  startDiv.classList.add("mazeEntry");
+  endDiv.classList.add("mazeExit");
+
+  // STARTLABEL
+  const startLabel = document.createElement("div");
+  startLabel.className = "mazeStartLabel";
+  startLabel.style.display = "flex";
+  startLabel.style.flexDirection = "column";
+  startLabel.style.alignItems = "flex-start";
+  startLabel.innerHTML = `
+    <span>${startIcon}</span>
+    <span class="mazeLabelText">start</span>
+  `;
+  startLabel.style.left = (startBox.left - gridBox.left - 40) + "px";
+  startLabel.style.top  = (
+    startBox.top - gridBox.top +
+    startBox.height/2 - 20
+  ) + "px";
+  gridEl.appendChild(startLabel);
+
+  // EINDELABEL
+  const endLabel = document.createElement("div");
+  endLabel.className = "mazeEndLabel";
+  endLabel.style.display = "flex";
+  endLabel.style.flexDirection = "column";
+  endLabel.style.alignItems = "flex-end";
+  endLabel.innerHTML = `
+  <span class="mazeLabelText">einde</span>
+  <span>${endIcon}</span>
+`;
+
+  endLabel.style.left = (
+    endBox.left - gridBox.left +
+    endBox.width + 8
+  ) + "px";
+  endLabel.style.top  = (
+    endBox.top - gridBox.top +
+    endBox.height/2 - 20
+  ) + "px";
+  gridEl.appendChild(endLabel);
+}
+
+
+
+/* ========= HOOFDFUNCTIE OM HET VOLLE WERKBLAD TE BOUWEN =========
+   We gaan NU meteen 2 oefeningen onder elkaar zetten,
+   zodat u al ziet hoe "meerdere oefeningen op één blad" kan werken.
+   Later kunnen we dit makkelijk uitbreiden naar 3 of meer.
+*/
+function sp_renderWorksheet(){
+  const ws = document.getElementById("worksheet");
+  ws.innerHTML = "";
+
+  let previousPadIndex = -1;
+
+  sp_worksheetItems.forEach((item, idx) => {
+    const themaInfo = getThemaInfo(item.thema);
+
+    let oef;
+  if (item.kind === "sprongen"){
+  oef = buildSprongenOefening(
+    themaInfo,
+    item.sprong,
+    item.bereikMax,
+    item.size,
+    previousPadIndex,
+    item.startMode || "mooi"
+  );
+} else {
+  oef = buildMazeOefening(
+    themaInfo,
+    item.size,
+    previousPadIndex
+  );
+}
+
+    // oefening tonen
+    ws.insertAdjacentHTML("beforeend", oef.blockHTML);
+
+    // lijn tussen blokken (behalve na de laatste)
+    if (idx < worksheetItems.length - 1){
+      ws.insertAdjacentHTML(
+        "beforeend",
+        "<hr style='margin:2rem 0;border:0;border-top:1px solid #999;'>"
+      );
+    }
+
+    // iconen plaatsen en openingen zetten
+    const allBlocks = ws.querySelectorAll(".exerciseBlock");
+    const thisBlock = allBlocks[allBlocks.length-1];
+    placeIconsForBlock(
+      thisBlock,
+      oef.startCell,
+      oef.endCell,
+      oef.startIcon,
+      oef.endIcon
+    );
+
+    // onthoud padIndex zodat de volgende oef een ander pad krijgt
+    previousPadIndex = oef.padIndex;
+  });
+}
+// sp_hookControls: niet gebruikt (eigen generateSpringpad)
+
+// ══════════════════════════════════════════════════════════
+// SPRINGPAD – CONFIG SYSTEEM (zoals rekenrooster)
+// ══════════════════════════════════════════════════════════
+
+let spConfigs = [];
+let spIdCounter = 0;
+
+function saveSpConfigsFromDOM() {
+  spConfigs.forEach(cfg => {
+    const id = cfg.id;
+    const typeEl = document.getElementById(`sp-type-${id}`);
+    if (!typeEl) return;
+    cfg.type      = typeEl.value;
+    cfg.sprong    = document.getElementById(`sp-sprong-${id}`)?.value || '5';
+    cfg.bereik    = document.getElementById(`sp-bereik-${id}`)?.value || '100';
+    cfg.startmode = document.getElementById(`sp-startmode-${id}`)?.value || 'mooi';
+    cfg.thema     = document.getElementById(`sp-thema-${id}`)?.value || 'herfst';
+    cfg.opdracht  = document.getElementById(`sp-opdracht-${id}`)?.value || '';
+  });
+}
+
+function renderSpringpadConfigs() {
+  saveSpConfigsFromDOM();
+  const container = document.getElementById('sp-configs');
+  container.innerHTML = '';
+  const addBtn = document.getElementById('sp-add-btn');
+  if (addBtn) addBtn.style.display = spConfigs.length >= 4 ? 'none' : 'block';
+  if (!spConfigs.length) return;
+
+  spConfigs.forEach((cfg, idx) => {
+    const id = cfg.id;
+    const div = document.createElement('div');
+    div.className = 'sub-block';
+    div.style.cssText = 'margin:0;';
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;';
+    hdr.innerHTML = `<span class="sub-block-title" style="margin:0;">Springpad ${idx+1}</span>`;
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '✕ Verwijder';
+    delBtn.style.cssText = 'background:#fdeaea;color:#a02020;border:1px solid #e8b0b0;border-radius:6px;padding:2px 8px;font-size:.75rem;font-weight:800;cursor:pointer;';
+    delBtn.onclick = () => { spConfigs = spConfigs.filter(c => c.id !== id); renderSpringpadConfigs(); };
+    hdr.appendChild(delBtn);
+    div.appendChild(hdr);
+
+    function mkSel(labelTxt, selId, options, selectedVal) {
+      const f = document.createElement('div');
+      f.className = 'field';
+      f.style.cssText = 'margin-bottom:6px;';
+      const lbl = document.createElement('label');
+      lbl.textContent = labelTxt;
+      const sel = document.createElement('select');
+      sel.id = selId;
+      options.forEach(([val, txt]) => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.textContent = txt;
+        if (val === selectedVal) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      f.appendChild(lbl); f.appendChild(sel);
+      return f;
+    }
+
+    // Type
+    const typeF = mkSel('Type', `sp-type-${id}`, [
+      ['sprongen','Springpad (rekenen)'],
+      ['maze','Leeg doolhof (pijlen)']
+    ], cfg.type || 'sprongen');
+    typeF.querySelector('select').onchange = () => toggleSpType(id);
+    div.appendChild(typeF);
+
+    // Sprong-instellingen wrapper
+    const sprongWrap = document.createElement('div');
+    sprongWrap.id = `sp-wrap-${id}`;
+    sprongWrap.appendChild(mkSel('Sprong', `sp-sprong-${id}`, [
+      ['2','+2'],['5','+5'],['10','+10']
+    ], cfg.sprong || '5'));
+    sprongWrap.appendChild(mkSel('Bereik', `sp-bereik-${id}`, [
+      ['20','Tot 20'],['100','Tot 100']
+    ], cfg.bereik || '100'));
+    sprongWrap.appendChild(mkSel('Startgetal', `sp-startmode-${id}`, [
+      ['mooi','Mooi (20, 25, 30…)'],['vrij','Vrij (7, 12, 17…)']
+    ], cfg.startmode || 'mooi'));
+    div.appendChild(sprongWrap);
+
+    // Thema
+    div.appendChild(mkSel('Thema', `sp-thema-${id}`, [
+      ['herfst','Herfst (🐿️→🌰)'],['halloween','Halloween (🎃→🍬)'],
+      ['sint','Sint (🎅→🎁)'],['kerst','Kerst (🎄→⭐)'],
+      ['carnaval','Carnaval (🎭→🎉)'],['pasen','Pasen (🐰→🥚)'],
+      ['lente','Lente (🐦→🌸)'],['zomer','Zomer (🏖️→🍦)']
+    ], cfg.thema || 'herfst'));
+
+    // Opdrachtzin
+    const isMazeType = (cfg.type || 'sprongen') === 'maze';
+    const opdrachtOpties = isMazeType ? [
+      ['Teken het pad! Volg de pijlen en teken je weg.','Teken het pad! Volg de pijlen'],
+      ['Volg de pijlen en teken de weg naar het einde.','Volg de pijlen en teken de weg'],
+      ['Teken de weg door het doolhof.','Teken de weg door het doolhof']
+    ] : [
+      ['Volg het pad en kleur de juiste vakjes!','Volg het pad en kleur de juiste vakjes'],
+      ['Zoek de weg! Kleur de vakjes met de juiste sprongen.','Zoek de weg! Kleur de juiste sprongen'],
+      ['Welke vakjes horen bij het pad? Kleur ze in!','Welke vakjes horen bij het pad?']
+    ];
+    const defaultOpdracht = cfg.opdracht || (isMazeType
+      ? 'Teken het pad! Volg de pijlen en teken je weg.'
+      : 'Volg het pad en kleur de juiste vakjes!');
+    div.appendChild(mkSel('Opdrachtzin', `sp-opdracht-${id}`, opdrachtOpties, defaultOpdracht));
+
+    container.appendChild(div);
+    toggleSpType(id);
+  });
+}
+
+function toggleSpType(id) {
+  const type = document.getElementById(`sp-type-${id}`)?.value;
+  const wrap = document.getElementById(`sp-wrap-${id}`);
+  if (wrap) wrap.style.display = (type === 'maze') ? 'none' : 'block';
+  // Wissel opdrachtzin-opties mee
+  const opdSel = document.getElementById(`sp-opdracht-${id}`);
+  if (!opdSel) return;
+  const isMaze = (type === 'maze');
+  const opties = isMaze ? [
+    ['Teken het pad! Volg de pijlen en teken je weg.','Teken het pad! Volg de pijlen'],
+    ['Volg de pijlen en teken de weg naar het einde.','Volg de pijlen en teken de weg'],
+    ['Teken de weg door het doolhof.','Teken de weg door het doolhof']
+  ] : [
+    ['Volg het pad en kleur de juiste vakjes!','Volg het pad en kleur de juiste vakjes'],
+    ['Zoek de weg! Kleur de vakjes met de juiste sprongen.','Zoek de weg! Kleur de juiste sprongen'],
+    ['Welke vakjes horen bij het pad? Kleur ze in!','Welke vakjes horen bij het pad?']
+  ];
+  opdSel.innerHTML = '';
+  opties.forEach(([val, txt]) => {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = txt;
+    opdSel.appendChild(opt);
+  });
+}
+
+function addSpringpadConfig() {
+  if (spConfigs.length >= 4) { alert('Maximum 4 springpaden per werkblad.'); return; }
+  spConfigs.push({ id: ++spIdCounter });
+  renderSpringpadConfigs();
+}
+
+function removeSpringpadConfig(id) {
+  spConfigs = spConfigs.filter(c => c.id !== id);
+  renderSpringpadConfigs();
+}
+
+function generateSpringpad() {
+  if (!spConfigs.length) { alert('Voeg eerst een springpad toe.'); return; }
+  saveSpConfigsFromDOM();
+
+  const naam  = document.getElementById('sp-naam').value.trim();
+  const datum = document.getElementById('sp-datum').value.trim();
+
+  // Bepaal of alle paden dezelfde opdrachtzin hebben
+  const alleOpdrachten = spConfigs.map(c => c.opdracht || '');
+  const eenOpdracht    = alleOpdrachten.every(o => o === alleOpdrachten[0]);
+
+  const output = document.getElementById('preview-area');
+  output.innerHTML = '';
+
+  const div = document.createElement('div');
+  div.className = 'worksheet sp-worksheet';
+
+  // Werkblad-header: opdrachtzin staat in elk kader afzonderlijk
+  div.innerHTML = renderWorksheetHeader(naam, datum, '🐾 Springpad', '');
+
+  // Grid: 2 kolommen als > 1 pad
+  const cols = spConfigs.length > 1 ? 2 : 1;
+  const grid = document.createElement('div');
+  grid.style.cssText = `display:grid;grid-template-columns:repeat(${cols},1fr);gap:20px 28px;padding:10px 20px 18px;align-items:start;`;
+
+  let prevPadIdx = -1;
+  const pendingIcons = [];
+
+  spConfigs.forEach((cfg, idx) => {
+    const themaInfo = getThemaInfo(cfg.thema || 'herfst');
+    const type      = cfg.type || 'sprongen';
+    const sprong    = parseInt(cfg.sprong) || 5;
+    const bereik    = parseInt(cfg.bereik) || 100;
+    const startmode = cfg.startmode || 'mooi';
+
+    let oef;
+    if (type === 'sprongen') {
+      oef = buildSprongenOefening(themaInfo, sprong, bereik, 5, prevPadIdx, startmode);
+    } else {
+      oef = buildMazeOefening(themaInfo, 5, prevPadIdx);
+    }
+
+    // Kader per springpad
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'border:1.5px solid #c8dff5;border-radius:10px;padding:10px 48px 14px 12px;background:#fafcff;display:flex;flex-direction:column;';
+
+    // Opdrachtzin bovenaan het kader (altijd tonen, ook als ze gelijk zijn)
+    const opDiv = document.createElement('div');
+    opDiv.style.cssText = 'font-size:14pt;font-weight:700;color:#1a4e8a;font-style:italic;margin-bottom:8px;line-height:1.3;';
+    opDiv.textContent = cfg.opdracht || '';
+    wrapper.appendChild(opDiv);
+
+    const oefDiv = document.createElement('div');
+    oefDiv.innerHTML = oef.blockHTML;
+    const block = oefDiv.firstElementChild;
+    // Verwijder de hoofdopdrachtzin uit renderWorksheetHeader want die staat al in het kader
+    wrapper.appendChild(block);
+    grid.appendChild(wrapper);
+
+    pendingIcons.push({ block, startCell: oef.startCell, endCell: oef.endCell,
+                        startIcon: oef.startIcon, endIcon: oef.endIcon });
+    prevPadIdx = oef.padIndex;
+  });
+
+  div.appendChild(grid);
+  output.appendChild(div);
+
+  // Iconen plaatsen na layout
+  setTimeout(() => {
+    pendingIcons.forEach(p => {
+      placeIconsForBlock(p.block, p.startCell, p.endCell, p.startIcon, p.endIcon);
+    });
+  }, 80);
+
+  const btn = document.getElementById('btn-voeg-sp');
+  if (btn) btn.style.display = 'inline-block';
+}
+
+function previewSpringpad() { generateSpringpad(); }
+
+// Init: start met 1 springpad
+addSpringpadConfig();
+
+</script>
 
 <!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
   <script src="./device-id.js"></script>
