@@ -19,6 +19,11 @@ let currentTemplateData = []; // Tekstuele data van slots
 // Variabelen voor toetsenbordnavigatie
 let editedCell = null;
 
+// Bewerkingsmodus
+let bewerkModus = false;
+let verwijderdeVakjes = new Map();
+let origineleWaarden  = new Map();
+
 // Regels voor takken
 const branchRules = {
   'A': { count: 5, next: 'B' }, 'B': { count: 4, next: 'C' }, 'C': { count: 4, next: 'D' },
@@ -130,6 +135,8 @@ function drawDrawnPath() {
   });
 }
 
+function isOperator(v){ return ['=','+','-','x',':'].includes(v); }
+
 function drawPathTemplateOnCanvas(grid) {
   if (!ctx || !grid) return;
   ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -138,10 +145,17 @@ function drawPathTemplateOnCanvas(grid) {
       const cell=grid[r][c];
       if (cell!==null){
         const x=cell.col*CELL_SIZE, y=cell.row*CELL_SIZE;
-        ctx.fillStyle="#FFF"; ctx.fillRect(x,y,CELL_SIZE,CELL_SIZE);
-        ctx.strokeStyle="#000"; ctx.lineWidth=1; ctx.strokeRect(x,y,CELL_SIZE,CELL_SIZE);
-        if (cell.value){
-          ctx.fillStyle="#000"; ctx.font=`bold ${CELL_SIZE*0.5}px Arial`;
+        const origW = origineleWaarden.get(`${r},${c}`) || cell.value;
+        const isVerwijderd = verwijderdeVakjes.has(`${r},${c}`);
+        const klikbaar = bewerkModus && !isOperator(origW);
+        ctx.fillStyle = klikbaar ? '#fff8e6' : '#FFF';
+        ctx.fillRect(x,y,CELL_SIZE,CELL_SIZE);
+        if(klikbaar){ ctx.strokeStyle='#e67e00'; ctx.lineWidth=2; }
+        else { ctx.strokeStyle='#000'; ctx.lineWidth=1; }
+        ctx.strokeRect(x,y,CELL_SIZE,CELL_SIZE);
+        if (cell.value && !isVerwijderd){
+          ctx.fillStyle = klikbaar ? '#c05000' : '#000';
+          ctx.font=`bold ${CELL_SIZE*0.5}px Arial`;
           ctx.textAlign="center"; ctx.textBaseline="middle";
           ctx.fillText(cell.value,x+CELL_SIZE/2,y+CELL_SIZE/2);
         }
@@ -157,6 +171,14 @@ function saveCellValue(cellData, value) {
   }
   const item = currentTemplateData.find(i=>i.type==='empty_slot' && i.row===cellData.row && i.col===cellData.col);
   if (item) item.value=value;
+  // Sla originele waarden op
+  origineleWaarden = new Map();
+  for(let r=0;r<GRID_ROWS;r++)
+    for(let c=0;c<GRID_COLS;c++)
+      if(currentTemplateGrid[r][c]) origineleWaarden.set(`${r},${c}`, currentTemplateGrid[r][c].value);
+  // Toon bewerkknop in header
+  const _bwBtn2 = document.getElementById('bewerkBtn');
+  if(_bwBtn2) _bwBtn2.style.display='inline-flex';
   drawPathTemplateOnCanvas(currentTemplateGrid);
 }
 
@@ -244,8 +266,44 @@ function createInputForCell(cellData) {
   });
 }
 
+
+function startBewerkModus(){
+  bewerkModus = true;
+  verwijderdeVakjes = new Map();
+  document.getElementById('bewerkBtn').style.display  = 'none';
+  document.getElementById('klaarBtn').style.display   = 'inline-flex';
+  document.getElementById('bewerkBalk').style.display = 'flex';
+  document.getElementById('downloadPdfBtn').style.display = 'none';
+  document.getElementById('downloadPngBtn').style.display = 'none';
+  drawPathTemplateOnCanvas(currentTemplateGrid);
+}
+
+function stopBewerkModus(){
+  bewerkModus = false;
+  document.getElementById('bewerkBtn').style.display  = 'inline-flex';
+  document.getElementById('klaarBtn').style.display   = 'none';
+  document.getElementById('bewerkBalk').style.display = 'none';
+  document.getElementById('downloadPdfBtn').style.display = 'block';
+  document.getElementById('downloadPngBtn').style.display = 'block';
+  drawPathTemplateOnCanvas(currentTemplateGrid);
+}
+
+function toggleVakjeLeeg(r, c){
+  const cell = currentTemplateGrid && currentTemplateGrid[r] && currentTemplateGrid[r][c];
+  if(!cell) return;
+  const origW = origineleWaarden.get(`${r},${c}`) || cell.value;
+  if(isOperator(origW)) return;
+  const k = `${r},${c}`;
+  if(verwijderdeVakjes.has(k)){ verwijderdeVakjes.delete(k); cell.value=origW; }
+  else { verwijderdeVakjes.set(k, origW); cell.value=''; }
+  drawPathTemplateOnCanvas(currentTemplateGrid);
+}
+
 function resetAndStartOver() {
   removeCurrentInput();
+  bewerkModus = false;
+  verwijderdeVakjes = new Map();
+  origineleWaarden  = new Map();
   currentDrawnPath = [];
   currentTemplateGrid = null;
   currentTemplateData = [];
@@ -264,6 +322,13 @@ function startDrawingMode() {
   document.getElementById("edit-instructions").style.display='none';
   document.getElementById('drawing-example-img').style.display='block';
   document.getElementById('template-example-img').style.display='none';
+  const _bwBtn = document.getElementById('bewerkBtn');
+  if(_bwBtn) _bwBtn.style.display='none';
+  const _klBtn = document.getElementById('klaarBtn');
+  if(_klBtn) _klBtn.style.display='none';
+  const _bwBalk = document.getElementById('bewerkBalk');
+  if(_bwBalk) _bwBalk.style.display='none';
+  bewerkModus = false;
   activeBranchIndex = 0;
   activeBranchLetter = branchLettersOrder[activeBranchIndex];
   if (document.getElementById("branchLetter")) {
@@ -359,13 +424,18 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener('click',(e)=>{
     if (currentViewMode==='template-canvas') {
       const rect=canvas.getBoundingClientRect();
-      const x=e.clientX-rect.left, y=e.clientY-rect.top;
-      const col=Math.floor(x/CELL_SIZE), row=Math.floor(y/CELL_SIZE);
-      if (currentTemplateGrid && currentTemplateGrid[row] && currentTemplateGrid[row][col]) {
-        const cellData = currentTemplateGrid[row][col];
-        createInputForCell(cellData);
+      const scaleX=canvas.width/rect.width, scaleY=canvas.height/rect.height;
+      const col=Math.floor((e.clientX-rect.left)*scaleX/CELL_SIZE);
+      const row=Math.floor((e.clientY-rect.top)*scaleY/CELL_SIZE);
+      if(row<0||row>=GRID_ROWS||col<0||col>=GRID_COLS) return;
+      if(bewerkModus){
+        toggleVakjeLeeg(row, col);
       } else {
-        removeCurrentInput();
+        if(currentTemplateGrid&&currentTemplateGrid[row]&&currentTemplateGrid[row][col]){
+          createInputForCell(currentTemplateGrid[row][col]);
+        } else {
+          removeCurrentInput();
+        }
       }
     }
   });
@@ -394,6 +464,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("showMyPathBtn").addEventListener("click", showMyPathTemplate);
+  document.getElementById("bewerkBtn").addEventListener("click", startBewerkModus);
+  document.getElementById("klaarBtn").addEventListener("click", stopBewerkModus);
 
   document.getElementById("downloadPngBtn").addEventListener("click", ()=>{
     if (currentViewMode!=='template-canvas' || !currentTemplateGrid) { alert("Er is geen template om te downloaden."); return; }
