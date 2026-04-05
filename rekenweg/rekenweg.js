@@ -461,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
     doc.setFontSize(14);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(26, 45, 64);
-    doc.text('Los op.', PW / 2, y + zinH / 2, { align: 'center', baseline: 'middle' });
+    doc.text('Los op.', M + 4, y + zinH / 2, { baseline: 'middle' });
 
     y += zinH + 8;
 
