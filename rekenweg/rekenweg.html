@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekenweg Template Maker</title>
+  <link rel="stylesheet" href="rekenweg.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="app-header-left">
+      <button id="menuBtn" type="button" class="back-btn">← Keuzemenu</button>
+      <button id="newPathBtn" type="button" class="back-btn" style="display:none;">↩ Nieuwe Rekenweg</button>
+    </div>
+    <div class="app-header-center">
+      <h1>Rekenweg Template Maker</h1>
+      <p>Teken een pad en vul de vakjes in om een rekenweg te maken.</p>
+    </div>
+    <div class="app-header-right">
+      <button id="downloadPngBtn" type="button" class="secondary-btn" style="display:none;">↓ PNG</button>
+      <button id="downloadPdfBtn" type="button" class="primary-btn" style="display:none;">↓ PDF werkblad</button>
+    </div>
+  </header>
+
+  <!-- Meldingen buiten left-panel zodat ze zichtbaar blijven als left-panel verborgen wordt -->
+  <div id="meldingContainer" class="melding-bar"></div>
+
+  <main class="app-main" id="main-content">
+
+    <!-- LINKER PANEEL -->
+    <aside class="settings-panel" id="left-panel">
+      <div class="panel-top-row">
+        <h2>Instellingen</h2>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-card-header"><h3>🌿 Actieve tak</h3></div>
+        <div class="setting-card-body">
+          <div class="form-row">
+            <span class="form-label">Tak (letter):</span>
+            <select class="cfg-select" id="branchLetter">
+              <option value="A">A</option><option value="B">B</option><option value="C">C</option>
+              <option value="D">D</option><option value="E">E</option><option value="F">F</option>
+              <option value="G">G</option><option value="H">H</option><option value="I">I</option>
+              <option value="J">J</option><option value="K">K</option><option value="L">L</option>
+              <option value="M">M</option><option value="N">N</option><option value="O">O</option>
+              <option value="P">P</option><option value="Q">Q</option><option value="R">R</option>
+              <option value="S">S</option><option value="T">T</option><option value="U">U</option>
+              <option value="V">V</option><option value="W">W</option><option value="X">X</option>
+              <option value="Y">Y</option><option value="Z">Z</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-card-header"><h3>🖊️ Acties</h3></div>
+        <div class="setting-card-body">
+          <button id="undoLastCellBtn" type="button" class="secondary-btn" style="width:100%;">↩ Laatste vakje wissen</button>
+          <button id="clearPathBtn" type="button" class="danger-btn" style="width:100%;">✕ Alles wissen</button>
+          <button id="showMyPathBtn" type="button" class="primary-btn" style="width:100%;">▶ Toon mijn pad</button>
+        </div>
+      </div>
+
+      <div class="setting-card">
+        <div class="setting-card-header"><h3>📷 Voorbeeld</h3></div>
+        <div class="setting-card-body" style="padding:8px;">
+          <img id="drawing-example-img" src="../start_afbeeldingen/voorbeeld_pad.png" alt="Voorbeeld pad" style="width:100%; height:auto; display:block; border-radius:8px;">
+          <img id="template-example-img" src="../start_afbeeldingen/voorbeeld_rekenweg.png" alt="Voorbeeld rekenweg" style="width:100%; height:auto; display:none; border-radius:8px;">
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- CANVAS PANEEL -->
+    <section class="preview-panel">
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div>
+            <h2 id="canvasTitle">Tekengebied</h2>
+            <p id="edit-instructions" style="display:none; margin:4px 0 0; font-style:italic; color:var(--primary); font-size:0.88rem;">
+              Klik op een vakje en typ een getal of bewerkingsteken. Klaar? Download je rekenweg rechtsboven.
+            </p>
+          </div>
+        </div>
+        <div class="preview-card-body">
+          <div class="canvas-frame" id="drawingCanvasContainer">
+            <canvas id="mainCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script src="rekenweg.js"></script>
+</body>
+</html>
