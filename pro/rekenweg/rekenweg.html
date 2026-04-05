@@ -64,6 +64,8 @@
       <p>Teken een pad en vul de vakjes in om een rekenweg te maken.</p>
     </div>
     <div class="app-header-right">
+      <button id="bewerkBtn" type="button" class="bewerk-btn" style="display:none;">✏️ Vakjes leegmaken</button>
+      <button id="klaarBtn" type="button" class="klaar-btn" style="display:none;">✓ Klaar</button>
       <button id="downloadPngBtn" type="button" class="secondary-btn" style="display:none;">↓ PNG</button>
       <button id="downloadPdfBtn" type="button" class="primary-btn" style="display:none;">↓ PDF werkblad</button>
     </div>
@@ -78,6 +80,10 @@
     <aside class="settings-panel" id="left-panel">
       <div class="panel-top-row">
         <h2>Instellingen</h2>
+        <button type="button" id="uitlegBtn" class="uitleg-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          Uitleg
+        </button>
       </div>
 
       <div class="setting-card">
@@ -131,20 +137,13 @@
           </div>
         </div>
 
-        <!-- BEWERKBALK (verschijnt na genereren) -->
+        <!-- BEWERKBALK (visuele hint tijdens bewerkingsmodus) -->
         <div id="bewerkBalk" style="display:none; align-items:center; gap:10px; padding:10px 20px; background:#fff4e6; border-top:1.5px solid #f5c97a; font-size:0.88rem; color:#7a4500; font-weight:600;">
           <span style="font-size:1.1rem;">✏️</span>
-          <span>Klik op een getal om het leeg te maken (oranje rand = klikbaar). Klik nogmaals om te herstellen.</span>
-          <button id="klaarBtn" type="button" style="display:none; margin-left:auto; background:#e67e00; color:#fff; border:none; border-radius:8px; padding:7px 16px; font-weight:700; font-size:0.84rem; cursor:pointer;">✓ Klaar</button>
+          <span>Bewerkingsmodus actief — klik op een getal om het leeg te maken. Klik nogmaals om te herstellen. Gebruik de knoppen rechtsboven om te stoppen.</span>
         </div>
 
-        <div class="preview-card-header" style="border-top:1px solid #e4edf5; border-bottom:none; padding:12px 20px; display:none;" id="templateActies">
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button id="bewerkBtn" type="button" class="bewerk-btn" style="display:none;">✏️ Vakjes leegmaken</button>
-          </div>
-        </div>
-
-        <div class="preview-card-body">
+<div class="preview-card-body">
           <div class="canvas-frame" id="drawingCanvasContainer">
             <canvas id="mainCanvas"></canvas>
           </div>
@@ -154,6 +153,81 @@
 
   </main>
 </div>
+
+
+<!-- UITLEG MODAL -->
+<div id="uitlegModal" class="modal-overlay" style="display:none;" onclick="if(event.target===this)document.getElementById('uitlegModal').style.display='none'">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Hoe werkt de Rekenweg Template Maker?</h2>
+      <button id="uitlegModalSluit" class="modal-close-btn" title="Sluiten" onclick="document.getElementById('uitlegModal').style.display='none'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-section">
+        <h3>✏️ Stap 1 — Teken je pad</h3>
+        <p>Sleep met de muis over het raster om een pad te tekenen. Elk vakje dat je aansleept wordt deel van de rekenweg. Je ziet de letter van de actieve tak in elk vakje staan.</p>
+        <p style="margin-top:6px;">Elke tak heeft een maximaal aantal vakjes. Als de tak vol is, gaat de generator automatisch naar de volgende letter (A → B → C …).</p>
+      </div>
+
+      <div class="info-section">
+        <h3>🌿 Takken</h3>
+        <p>Een rekenweg bestaat uit <strong>takken</strong> — aaneengesloten stukken van het pad. Tak A heeft 5 vakjes, de andere takken hebben elk 4 vakjes. Je kiest zelf de actieve tak via het dropdown-menu.</p>
+        <ul>
+          <li><strong>↩ Laatste vakje wissen</strong> — verwijdert het laatste getekende vakje.</li>
+          <li><strong>✕ Alles wissen</strong> — begint helemaal opnieuw.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>▶ Toon mijn pad</h3>
+        <p>Als je tevreden bent met de vorm van je pad, klik je op <strong>▶ Toon mijn pad</strong>. Het gekleurde tekenraster verdwijnt en je ziet lege witte vakjes — klaar om in te vullen.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>🔢 Getallen en bewerkingstekens invullen</h3>
+        <p>Klik op een vakje en typ een getal of bewerkingsteken (<strong>+  −  x  :  =</strong>). Navigeer met de pijltjestoetsen of spatiebalk naar het volgende vakje. Druk Enter om te bevestigen.</p>
+        <p style="margin-top:6px; padding:7px 10px; background:#eaf3ff; border-radius:8px; font-size:0.85rem;">💡 Tip: zorg dat elke leesbare rij of kolom een volledige som vormt, bv. <em>7 + 5 = 12</em>.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>✏️ Vakjes leegmaken voor de leerling</h3>
+        <p>Na het invullen verschijnt de knop <strong>✏️ Vakjes leegmaken</strong>. Klik erop om de bewerkingsmodus te starten:</p>
+        <ul>
+          <li>Vakjes met een <strong>oranje rand</strong> zijn klikbaar (alleen getallen, geen operators).</li>
+          <li>Klik op een getal om het <strong>leeg te maken</strong> — de leerling moet het dan invullen.</li>
+          <li>Klik nogmaals op hetzelfde vakje om het getal te <strong>herstellen</strong>.</li>
+          <li>Klik <strong>✓ Klaar</strong> als je klaar bent met aanpassen.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>📄 Downloaden</h3>
+        <ul>
+          <li><strong>↓ PDF werkblad</strong> — genereert een A4 PDF met naam- en datumlijn, de titel "Rekenweg", de opdrachtzin "Los op." en de rekenweg netjes gecentreerd. Onderaan staat de voettekst van Juf Zisa.</li>
+          <li><strong>↓ PNG</strong> — downloadt het canvas als afbeelding, handig om in een eigen document te plakken.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>↩ Nieuwe Rekenweg</h3>
+        <p>Via de knop <strong>↩ Nieuwe Rekenweg</strong> in de header keer je terug naar het tekenraster en begin je opnieuw. Alle ingevulde getallen gaan verloren.</p>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="primary-btn" onclick="document.getElementById('uitlegModal').style.display='none'">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('uitlegBtn').addEventListener('click', function(){
+    document.getElementById('uitlegModal').style.display = 'flex';
+  });
+</script>
 
 <script src="rekenweg.js"></script>
 <script src="../device-id.js"></script>
