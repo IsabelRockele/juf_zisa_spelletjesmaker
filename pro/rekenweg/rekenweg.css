@@ -223,3 +223,68 @@ button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
   .canvas-frame { min-height: 300px; padding: 10px; }
   .app-header { grid-template-columns: 1fr; }
 }
+
+/* ─── UITLEG KNOP ────────────────────────────────────────────────────────── */
+.uitleg-btn {
+  background: #1a8a4a; color: #fff; border: none;
+  border-radius: var(--r-md); padding: 7px 14px;
+  font-weight: 700; font-size: 0.82rem; gap: 6px;
+  box-shadow: 0 3px 10px rgba(20,120,60,0.25);
+  white-space: nowrap; flex-shrink: 0;
+}
+.uitleg-btn:hover { background: #147040; transform: translateY(-1px); }
+
+/* ─── MODAL ───────────────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15,30,50,0.45);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  padding: 20px; backdrop-filter: blur(2px);
+}
+.modal-box {
+  background: #fff; border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(10,30,60,0.22);
+  width: 100%; max-width: 580px; max-height: 85vh;
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px; border-bottom: 1px solid var(--line);
+  background: linear-gradient(to bottom, #f8fbfe, #f3f7fc); flex-shrink: 0;
+}
+.modal-header h2 { margin: 0; font-size: 1.1rem; color: var(--text); }
+.modal-close-btn {
+  background: #f0f4f8; border: 1px solid var(--line); border-radius: 8px;
+  width: 34px; height: 34px; padding: 0; color: var(--text-soft); flex-shrink: 0;
+}
+.modal-close-btn:hover { background: #e4edf5; color: var(--text); }
+.modal-body {
+  padding: 20px 24px; overflow-y: auto; flex: 1;
+  scrollbar-width: thin; scrollbar-color: #c5d8ed transparent;
+}
+.modal-body::-webkit-scrollbar { width: 5px; }
+.modal-body::-webkit-scrollbar-thumb { background: #c5d8ed; border-radius: 99px; }
+.info-section { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid #eef3f8; }
+.info-section:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.info-section h3 { margin: 0 0 6px; font-size: 0.95rem; color: var(--text); }
+.info-section p, .info-section ul { margin: 0; font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+.info-section ul { padding-left: 18px; }
+.info-section ul li { margin-bottom: 3px; }
+.modal-footer { padding: 14px 24px 18px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; flex-shrink: 0; }
+/* ─── BEWERK & KLAAR KNOPPEN (in header) ───────────────────────────────── */
+.bewerk-btn {
+  background: var(--accent-soft); color: var(--accent);
+  border: 1.5px solid #f5c97a;
+  border-radius: var(--r-md); padding: 10px 18px;
+  font-weight: 700; font-size: 0.88rem;
+  white-space: nowrap;
+}
+.bewerk-btn:hover { background: #ffe8c2; border-color: var(--accent); }
+
+.klaar-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--r-md); padding: 10px 18px;
+  font-weight: 700; font-size: 0.88rem;
+  box-shadow: 0 3px 10px rgba(230,126,0,0.25);
+  white-space: nowrap;
+}
+.klaar-btn:hover { background: #c96d00; transform: translateY(-1px); }
