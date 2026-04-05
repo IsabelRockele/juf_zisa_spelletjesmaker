@@ -1500,20 +1500,20 @@
           <div class="vs-acc-body" style="display:none">
             <div class="radio-groep">
               <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 10')"><input type="radio" name="vs-niveau" value="tot10">Tot 10</label>
-              <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-niveau','tot20',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 20');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="tot20" checked>Tot 20</label>
-              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 100');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="tot100">Tot 100</label>
-              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot1000',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 1 000');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="tot1000">Tot 1 000</label>
-              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10000',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 10 000');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="tot10000">Tot 10 000</label>
-              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100000',this);VraagstukkenModule._toggleKomma(false);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Tot 100 000');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="tot100000">Tot 100 000</label>
-              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','kommagetallen',this);VraagstukkenModule._toggleKomma(true);vsSetWaarde('vs-val-niveau','Kommagetallen');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="kommagetallen">Kommagetallen</label>
+              <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-niveau','tot20',this);VraagstukkenModule._toggleKomma(false);vsSetWaarde('vs-val-niveau','Tot 20');vsUpdateBrugZichtbaarheid();vsAccSluitAlsBrugVerborgen(this)"><input type="radio" name="vs-niveau" value="tot20" checked>Tot 20</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100',this);VraagstukkenModule._toggleKomma(false);vsSetWaarde('vs-val-niveau','Tot 100');vsUpdateBrugZichtbaarheid();vsAccSluitAlsBrugVerborgen(this)"><input type="radio" name="vs-niveau" value="tot100">Tot 100</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot1000',this);VraagstukkenModule._toggleKomma(false);vsSetWaarde('vs-val-niveau','Tot 1 000');vsUpdateBrugZichtbaarheid();vsAccSluitAlsBrugVerborgen(this)"><input type="radio" name="vs-niveau" value="tot1000">Tot 1 000</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot10000',this);VraagstukkenModule._toggleKomma(false);vsSetWaarde('vs-val-niveau','Tot 10 000');vsUpdateBrugZichtbaarheid();vsAccSluitAlsBrugVerborgen(this)"><input type="radio" name="vs-niveau" value="tot10000">Tot 10 000</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','tot100000',this);VraagstukkenModule._toggleKomma(false);vsSetWaarde('vs-val-niveau','Tot 100 000');vsUpdateBrugZichtbaarheid();vsAccSluitAlsBrugVerborgen(this)"><input type="radio" name="vs-niveau" value="tot100000">Tot 100 000</label>
+              <label class="radio-chip" onclick="App.selecteerRadio('vs-niveau','kommagetallen',this);VraagstukkenModule._toggleKomma(true);vsAccSluit(this);vsSetWaarde('vs-val-niveau','Kommagetallen');vsUpdateBrugZichtbaarheid()"><input type="radio" name="vs-niveau" value="kommagetallen">Kommagetallen</label>
             </div>
             <!-- Brug-keuze: enkel bij optellen/aftrekken + tot20+ -->
             <div id="vs-brug-keuze" style="display:none;margin-top:8px;padding:8px;background:#f0f4ff;border-radius:6px;border:1px solid #c5cae9">
               <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:6px">Met of zonder brug?</div>
               <div class="radio-groep">
-                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-brug','zonder',this)"><input type="radio" name="vs-brug" value="zonder" checked>Zonder brug</label>
-                <label class="radio-chip" onclick="App.selecteerRadio('vs-brug','met',this)"><input type="radio" name="vs-brug" value="met">Met brug</label>
-                <label class="radio-chip" onclick="App.selecteerRadio('vs-brug','beide',this)"><input type="radio" name="vs-brug" value="beide">Beide</label>
+                <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-brug','zonder',this);vsAccSluit(this)"><input type="radio" name="vs-brug" value="zonder" checked>Zonder brug</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-brug','met',this);vsAccSluit(this)"><input type="radio" name="vs-brug" value="met">Met brug</label>
+                <label class="radio-chip" onclick="App.selecteerRadio('vs-brug','beide',this);vsAccSluit(this)"><input type="radio" name="vs-brug" value="beide">Beide</label>
               </div>
             </div>
             <div id="vs-komma-melding" style="display:none;margin-top:6px;padding:6px 8px;background:#fff8e1;border-radius:6px;font-size:11px;color:#f57f17">
@@ -1598,7 +1598,8 @@
           <div class="vs-acc-body" style="display:none">
             <div class="vs-thema-chips" style="margin-bottom:6px">
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('totaal berekenen (hoeveel samen)',this);vsSetWaarde('vs-val-berekening','Totaal')">➕ Totaal</button>
-              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('verschil berekenen (hoeveel meer of minder, hoeveel blijft er over)',this);vsSetWaarde('vs-val-berekening','Verschil')">➖ Verschil</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('verschil berekenen: vergelijkende vraag (hoeveel meer of hoeveel minder heeft de ene dan de andere)',this);vsSetWaarde('vs-val-berekening','Verschil')">➖ Verschil</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('rest berekenen: iemand heeft een hoeveelheid, geeft of verliest een deel, de vraag is hoeveel er nog overblijft. De vraagtekst eindigt altijd op een vraag als: Hoeveel blijft er nog over? of Hoeveel heeft hij/zij nog? De antwoordzin vermeldt het resterende aantal.',this);vsSetWaarde('vs-val-berekening','Hoeveel over?')">🔢 Hoeveel over?</button>
               <button type="button" class="vs-thema-chip" id="chip-geld" onclick="vsKiesGeld(this)">💶 Geld</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('tijd berekenen',this);vsSetWaarde('vs-val-berekening','Tijd')">🕐 Tijd</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gewicht of inhoud berekenen',this);vsSetWaarde('vs-val-berekening','Gewicht')">⚖️ Gewicht</button>
@@ -2047,6 +2048,10 @@ function vsAccToggle(h){
 function vsAccSluit(el){
   var b=el.closest('.vs-acc-blok');
   if(b){b.classList.remove('open');b.querySelector('.vs-acc-body').style.display='none';}
+}
+function vsAccSluitAlsBrugVerborgen(el){
+  var brug=document.getElementById('vs-brug-keuze');
+  if(!brug||brug.style.display==='none')vsAccSluit(el);
 }
 function vsSetWaarde(id,t){
   var el=document.getElementById(id);if(!el)return;
