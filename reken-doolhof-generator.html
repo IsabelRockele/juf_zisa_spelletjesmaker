@@ -81,6 +81,7 @@ button:active{transform:scale(.97);}
 #print-output{width:100%;max-width:860px;margin-top:0;}
 .worksheet{background:white;border-radius:16px;padding:0;box-shadow:0 4px 20px rgba(26,78,138,.1);margin-bottom:18px;overflow:hidden;page-break-inside:avoid;break-inside:avoid;}
 .worksheet svg{display:block;width:100%;height:auto;}
+.ws-footer{display:block;}
 .empty-msg{color:#aac3df;font-size:1rem;font-weight:600;text-align:center;padding:28px;}
 
 /* ANSWER KEY */
@@ -936,27 +937,30 @@ function buildMaze(rows,cols,sums){
 // ══════════════════════════════════════════════════════════
 // DOOLHOF – RENDER SVG
 // ══════════════════════════════════════════════════════════
-function renderWorksheetHeader(naam, datum, titel, opdracht) {
+function renderWorksheetHeader(naam, datum, titel, opdracht, showNaamDatum=true) {
   const naamTxt  = naam  ? naam  : '';
   const datumTxt = datum ? datum : '';
   const titelClean = titel.replace(/[^\w\s\-&]/g, '').trim();
   const dp = datumTxt.split('/');
 
-  return `<div class="ws-header" style="padding:10px 20px 8px;font-family:Arial,sans-serif;">
-    <div style="display:flex;align-items:baseline;gap:36px;margin-bottom:8px;">
-      <div style="font-size:14px;font-weight:700;color:#1a4e8a;white-space:nowrap;">
+  const naamDatumHtml = showNaamDatum ? `
+    <div class="ws-naam-datum" style="display:flex;align-items:baseline;gap:36px;margin-bottom:8px;">
+      <div style="font-size:14pt;font-weight:700;color:#1a4e8a;white-space:nowrap;">
         Naam:&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:200px;padding-bottom:1px;">${naamTxt}</span>
       </div>
-      <div style="font-size:14px;font-weight:700;color:#1a4e8a;white-space:nowrap;">
+      <div style="font-size:14pt;font-weight:700;color:#1a4e8a;white-space:nowrap;">
         Datum:&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:34px;padding-bottom:1px;">${dp[0]||''}</span>
         &nbsp;/&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:34px;padding-bottom:1px;">${dp[1]||''}</span>
         &nbsp;/&nbsp;<span style="display:inline-block;border-bottom:1.5px solid #1a4e8a;min-width:60px;padding-bottom:1px;">${dp[2]||''}</span>
       </div>
-    </div>
-    <div style="border:2px solid #7ab8e8;border-radius:8px;padding:7px 20px;background:#f0f7ff;text-align:center;margin-top:10px;margin-bottom:6px;">
+    </div>` : '';
+
+  return `<div class="ws-header" style="padding:10px 20px 8px;font-family:Arial,sans-serif;">
+    ${naamDatumHtml}
+    <div style="border:2px solid #7ab8e8;border-radius:8px;padding:7px 20px;background:#f0f7ff;text-align:center;margin-top:${showNaamDatum?'10px':'0'};margin-bottom:6px;">
       <span style="font-size:20px;font-weight:900;color:#1a4e8a;font-family:Arial,sans-serif;">${titelClean}</span>
     </div>
-    <div style="font-size:14px;font-weight:700;color:#3a6a9a;margin-bottom:2px;font-style:italic;text-align:left;">
+    <div style="font-size:14pt;font-weight:700;color:#3a6a9a;margin-bottom:2px;font-style:italic;text-align:left;">
       ${opdracht}
     </div>
   </div>`;
@@ -968,7 +972,7 @@ function renderMazeSVG(maze){
   const cx=(r,c)=>pad+c*cellW+cellW/2;
   const cy=(r,c)=>pad+r*cellH+cellH/2;
 
-  const CR='#d6e8f5',CS='#a8c8e0',ROAD_W=18;
+  const CR='#cccccc',CS='#a8c8e0',ROAD_W=18;
   const SF='#fde8d0',SS='#e8a870',ST='#8a4010';
   const EF='#d8f0e0',ES='#80c898',ET='#1a6030';
   const NF='#ffffff',NS='#7aa8c8',NT='#2c5f7a';
@@ -982,7 +986,7 @@ function renderMazeSVG(maze){
     const fn=nodes[conn.from],tn=nodes[conn.to];
     const x1=cx(fn.r,fn.c),y1=cy(fn.r,fn.c),x2=cx(tn.r,tn.c),y2=cy(tn.r,tn.c);
     s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${CR}" stroke-width="${ROAD_W}" stroke-linecap="round"/>`;
-    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="white" stroke-width="${ROAD_W-4}" stroke-linecap="round" opacity=".65"/>`;
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="white" stroke-width="${ROAD_W-4}" stroke-linecap="round"/>`;
   });
   // labels
   conns.forEach(conn=>{
@@ -1003,13 +1007,13 @@ function renderMazeSVG(maze){
     s+=`<rect x="${bx}" y="${by}" width="${nW}" height="${nH}" rx="12" fill="${f}" stroke="${st}" stroke-width="2"/>`;
     if(node.isStart){
       s+=`<text x="${x}" y="${y-9}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="900" fill="${tc}" letter-spacing="1">START</text>`;
-      const fs=node.sum.label.length>7?11:13;
+      const fs=node.sum.label.length>7?12:14;
       s+=`<text x="${x}" y="${y+9}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="800" fill="${tc}">${node.sum.label}</text>`;
     }else if(node.isEnd){
       s+=`<text x="${x}" y="${y-8}" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="900" fill="${tc}" letter-spacing="1">EINDE</text>`;
       s+=`<text x="${x}" y="${y+8}" text-anchor="middle" dominant-baseline="central" font-size="10" fill="${tc}">🏁</text>`;
     }else{
-      const fs=node.sum.label.length>9?10:node.sum.label.length>7?12:14;
+      const fs=node.sum.label.length>9?12:node.sum.label.length>7?13:14;
       s+=`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${fs}" font-weight="800" fill="${tc}">${node.sum.label}</text>`;
     }
   });
@@ -1066,9 +1070,17 @@ function generateDoolhof(){
     const div=document.createElement('div');
     div.className='worksheet maze-worksheet';
 
-    // Werkblad kop
+    // Werkblad kop: naam/datum enkel bij eerste doolhof
     const titel=`🌀 Doolhof${aantal>1?' '+(n+1):''}`;
-    div.innerHTML=renderWorksheetHeader(naam,datum,titel,opdracht);
+    if(n===0){
+      div.innerHTML=renderWorksheetHeader(naam,datum,titel,opdracht);
+    } else {
+      div.innerHTML=`<div class="ws-header" style="padding:6px 20px 4px;font-family:Arial,sans-serif;text-align:center;">
+        <div style="border:2px solid #7ab8e8;border-radius:8px;padding:5px 20px;background:#f0f7ff;display:inline-block;">
+          <span style="font-size:20px;font-weight:900;color:#1a4e8a;font-family:Arial,sans-serif;">${titel}</span>
+        </div>
+      </div>`;
+    }
 
     // SVG
     const svgWrap=document.createElement('div');
@@ -1710,7 +1722,24 @@ function removeRoosterConfig(id) {
   renderRoosterConfigs();
 }
 
+function saveRoosterConfigsFromDOM() {
+  roosterConfigs.forEach(cfg => {
+    const id = cfg.id;
+    const opEl = document.getElementById(`ro-op-${id}`);
+    if (!opEl) return; // nog niet gerenderd
+    cfg.op     = opEl.value;
+    cfg.rows   = document.getElementById(`ro-rows-${id}`)?.value;
+    cfg.cols   = document.getElementById(`ro-cols-${id}`)?.value;
+    cfg.blanks = document.getElementById(`ro-blanks-${id}`)?.value;
+    cfg.range  = document.getElementById(`ro-range-${id}`)?.value;
+    cfg.brug   = document.getElementById(`ro-brug-${id}`)?.value;
+    cfg.upto   = document.querySelector(`input[name="ro-upto-${id}"]:checked`)?.value;
+    cfg.tafels = [...document.querySelectorAll(`.ro-tafel-cb-${id}:checked`)].map(c => parseInt(c.value));
+  });
+}
+
 function renderRoosterConfigs() {
+  saveRoosterConfigsFromDOM();
   const container = document.getElementById('ro-configs');
   container.innerHTML = '';
   const addBtn = document.getElementById('ro-add-btn');
@@ -1758,22 +1787,22 @@ function renderRoosterConfigs() {
     const opSel = mkField('Bewerking', 'ro-op-' + id, [
       ['add','Optellen (+)'],['sub','Aftrekken (−)'],['addsub','Gemengd +/−'],
       ['mul','× vermenigvuldigen'],['div','÷ delen']
-    ], 'mul');
+    ], cfg.op || 'mul');
     opSel.querySelector('select').onchange = () => toggleRoosterOpties(id);
     row.appendChild(opSel);
-    row.appendChild(mkField('Rijen', 'ro-rows-' + id, [['3','3'],['4','4'],['5','5'],['6','6']], '5'));
-    row.appendChild(mkField('Kolommen', 'ro-cols-' + id, [['2','2'],['3','3'],['4','4']], '3'));
+    row.appendChild(mkField('Rijen', 'ro-rows-' + id, [['3','3'],['4','4'],['5','5'],['6','6']], cfg.rows || '5'));
+    row.appendChild(mkField('Kolommen', 'ro-cols-' + id, [['2','2'],['3','3'],['4','4']], cfg.cols || '3'));
     row.appendChild(mkField('Moeilijkheid', 'ro-blanks-' + id, [
       ['none','Alles invullen'],['some','Met hints'],['half','Halve hints']
-    ], 'none'));
+    ], cfg.blanks || 'none'));
     div.appendChild(row);
 
     // Bereik voor +/−
     const bereikDiv = document.createElement('div');
     bereikDiv.id = 'ro-bereik-' + id;
     bereikDiv.style.cssText = 'display:none;flex-wrap:wrap;gap:10px;margin-top:6px;';
-    const rangeSel = mkField('Bereik', 'ro-range-' + id, [['10','Tot 10'],['20','Tot 20'],['50','Tot 50'],['100','Tot 100']], '20');
-    const brugSel  = mkField('Brug', 'ro-brug-' + id, [['no','Zonder brug'],['yes','Met brug'],['mix','Gemengd']], 'mix');
+    const rangeSel = mkField('Bereik', 'ro-range-' + id, [['10','Tot 10'],['20','Tot 20'],['50','Tot 50'],['100','Tot 100']], cfg.range || '20');
+    const brugSel  = mkField('Brug', 'ro-brug-' + id, [['no','Zonder brug'],['yes','Met brug'],['mix','Gemengd']], cfg.brug || 'mix');
     bereikDiv.appendChild(rangeSel);
     bereikDiv.appendChild(brugSel);
     div.appendChild(bereikDiv);
@@ -1795,7 +1824,7 @@ function renderRoosterConfigs() {
       lbl.className = 'radio-item';
       const rb = document.createElement('input');
       rb.type = 'radio'; rb.name = 'ro-upto-' + id; rb.value = val;
-      rb.checked = (val === '10');
+      rb.checked = (val === (cfg.upto || '10'));
       lbl.appendChild(rb);
       lbl.appendChild(document.createTextNode(' tot ×' + val + (val==='10' ? ' (2de-3de leerjaar)' : ' (hoger leerjaar)')));
       uptoRow.appendChild(lbl);
@@ -1810,7 +1839,7 @@ function renderRoosterConfigs() {
       cb.type = 'checkbox';
       cb.className = 'ro-tafel-cb-' + id;
       cb.value = t;
-      cb.checked = [2,5,10].includes(t);
+      cb.checked = (cfg.tafels && cfg.tafels.length > 0) ? cfg.tafels.includes(t) : [2,5,10].includes(t);
       lbl.appendChild(cb);
       lbl.appendChild(document.createTextNode(' ×' + t));
       cbGrid.appendChild(lbl);
@@ -1852,6 +1881,7 @@ function getRoosterConfigData(id) {
     const shuffled = [...pool]; shuffle(shuffled);
     colNums = shuffled.slice(0, Math.min(nCols, shuffled.length));
     while (colNums.length < nCols) colNums.push(pool[rnd(0, pool.length-1)]);
+    if (colNums.length === 0) colNums = [2, 5, 10].slice(0, nCols);
   } else {
     const pool = [];
     for (let i = 1; i <= range; i++) pool.push(i);
@@ -1956,6 +1986,18 @@ function getRoosterConfigData(id) {
       shuffle(rowPool);
       rowNums = rowPool.slice(0, nRows);
     }
+  }
+
+  // Veiligheidsnet: nooit lege arrays doorgeven aan renderRoosterSVG
+  if (rowNums.length < nRows) {
+    const extra = isMul ? [...Array(upto)].map((_,i)=>i+1) : [...Array(range)].map((_,i)=>i+1);
+    shuffle(extra);
+    for (const v of extra) { if (rowNums.length >= nRows) break; if (!rowNums.includes(v)) rowNums.push(v); }
+    while (rowNums.length < nRows) rowNums.push(rowNums[0] || 1);
+  }
+  if (colNums.length < nCols) {
+    const fallback = isMul ? [2,5,10] : [...Array(range)].map((_,i)=>i+1);
+    while (colNums.length < nCols) colNums.push(fallback[rnd(0, fallback.length-1)]);
   }
 
   // Celwaarden
@@ -2162,7 +2204,14 @@ function addPreviewToBundel() {
   if (!sheets.length) { alert('Genereer eerst een preview.'); return; }
 
   // Verplaats alle werkbladen van preview naar bundel
-  sheets.forEach(sheet => {
+  const isFirstInBundel = bundel.querySelectorAll('.worksheet').length === 0;
+  sheets.forEach((sheet, idx) => {
+    // Naam/datum enkel op het allereerste blad van de bundel
+    const showND = isFirstInBundel && idx === 0;
+    if (!showND) {
+      const ndRow = sheet.querySelector('.ws-naam-datum');
+      if (ndRow) ndRow.style.display = 'none';
+    }
     // Voeg verwijderknop toe
     const del = document.createElement('button');
     del.textContent = '✕ Verwijder';
@@ -2253,6 +2302,7 @@ async function captureWorksheets() {
       backgroundColor: '#ffffff',
       logging: false,
       width: sheet.offsetWidth,
+      height: clone.scrollHeight,
     });
 
     document.body.removeChild(wrapper);
@@ -2274,35 +2324,49 @@ async function downloadPDF() {
   const { jsPDF } = window.jspdf;
   const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const pW = 210, pH = 297;
-  const margin = 10; // mm rondom
+  const margin = 10;       // mm rondom
+  const footerH = 8;       // mm voor voettekst onderaan
   const usableW = pW - margin * 2;
-  const usableH = pH - margin * 2;
-  const gap = 6; // mm tussen werkbladen op zelfde pagina
+  const usableH = pH - margin - footerH; // beschikbare hoogte (voettekst uit de weg)
+  const gap = 4;           // mm tussen werkbladen op zelfde pagina
 
-  let curY = margin; // huidige y-positie op de pagina
-  let firstOnPage = true;
-
-  for (let i = 0; i < canvases.length; i++) {
-    const canvas = canvases[i];
+  // Bereken hoogte van elk canvas in mm (geschaald naar usableW breedte)
+  const items = canvases.map(canvas => {
     const ratio = canvas.width / canvas.height;
     const iW = usableW;
     const iH = iW / ratio;
+    return { canvas, iW, iH };
+  });
 
-    // Past dit werkblad nog op de huidige pagina?
-    const neededH = firstOnPage ? iH : iH + gap;
-    if (!firstOnPage && curY + neededH > pH - margin) {
-      // Nieuwe pagina
+  let curY = margin;
+
+  for (let i = 0; i < items.length; i++) {
+    const { canvas, iW, iH } = items[i];
+    const fitsH = Math.min(iH, usableH - margin); // nooit buiten de pagina
+
+    // Past het werkblad nog op de huidige pagina?
+    const spaceLeft = usableH - curY;
+    const needsNewPage = (i > 0) && (spaceLeft < fitsH + gap);
+
+    if (needsNewPage) {
       pdf.addPage();
       curY = margin;
-      firstOnPage = true;
+    } else if (i > 0) {
+      curY += gap;
     }
 
-    if (!firstOnPage) curY += gap;
-
     const imgData = canvas.toDataURL('image/jpeg', 0.95);
-    pdf.addImage(imgData, 'JPEG', margin, curY, iW, Math.min(iH, usableH));
-    curY += Math.min(iH, usableH);
-    firstOnPage = false;
+    pdf.addImage(imgData, 'JPEG', margin, curY, iW, fitsH);
+    curY += fitsH;
+  }
+
+  // Voettekst op elke pagina
+  const totalPages = pdf.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    pdf.setPage(p);
+    pdf.setFontSize(8);
+    pdf.setTextColor(170, 170, 170);
+    pdf.text("Juf Zisa's Spelgenerator – www.jufzisa.be", pW / 2, pH - 5, { align: 'center' });
   }
 
   const filename = 'werkblad-' + new Date().toISOString().slice(0,10) + '.pdf';
