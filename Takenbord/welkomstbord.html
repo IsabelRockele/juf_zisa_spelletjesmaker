@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kies je bord</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="klasbord.css">
+<style>
+body{height:100vh;overflow:hidden}
+#app-welcome{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);padding:20px}
+</style>
+</head>
+<body>
+<div id="app-welcome">
+  <div class="mode-box">
+    <h2>Kies je bord</h2>
+    <p class="mode-sub">Kies eerst hoe je wil werken. Daarna ga je naar het juiste scherm.</p>
+
+    <div class="mode-options">
+      <div class="mode-card klas" onclick="window.location.href='klasbord.html?tab=leerlingen'">
+        <div class="mode-icon">📋</div>
+        <div class="mode-title">Klasbord</div>
+        <ul>
+          <li>Alle leerlingen tegelijk zichtbaar</li>
+          <li>Iedereen werkt op hetzelfde bord</li>
+          <li>Ideaal voor hoekenwerk</li>
+        </ul>
+      </div>
+
+      <div class="mode-card kind" onclick="window.location.href='takenbord_kind.html'">
+        <div class="mode-icon">👤</div>
+        <div class="mode-title">Kindbord</div>
+        <ul>
+          <li>Elke leerling eigen taken</li>
+          <li>Per kind of groepje werken</li>
+          <li>Ideaal voor differentiatie</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
