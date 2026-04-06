@@ -12,62 +12,76 @@
     --card-shadow:0 4px 14px rgba(0,0,0,.08);
     --radius:20px;
   }
-
   *{box-sizing:border-box}
   body{
     margin:0;
-    font-family: "Nunito", Arial, sans-serif;
+    font-family:"Nunito", Arial, sans-serif;
     background:var(--bg);
     color:var(--text);
   }
-
   .page{
     max-width:1400px;
     margin:0 auto;
-    padding:28px 26px 40px;
+    padding:28px 26px 120px;
   }
-
   h1{
-    margin:10px 0 26px;
+    margin:10px 0 12px;
     text-align:center;
     font-size:clamp(32px, 4vw, 52px);
     line-height:1.1;
   }
-
   .subtitle{
     text-align:center;
     color:var(--muted);
     font-size:18px;
-    margin:-6px 0 28px;
+    margin:0 0 22px;
   }
-
+  .names-topbar{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+  }
+  .teacher-btn,.back-fab,.small-btn,.apply-btn,.close-btn,.add-task-btn{
+    border:none;
+    background:#ffffff;
+    color:#374151;
+    border-radius:16px;
+    padding:12px 16px;
+    font-size:17px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:var(--card-shadow);
+  }
+  .teacher-btn{
+    background:linear-gradient(135deg,#ede9fe,#dbeafe);
+    color:#3730a3;
+  }
   .name-grid{
     display:grid;
     grid-template-columns:repeat(6, minmax(0, 1fr));
     gap:18px;
   }
-
   .name-card{
     border:none;
     border-radius:var(--radius);
     padding:20px 14px 18px;
-    min-height:122px;
+    min-height:136px;
     cursor:pointer;
     box-shadow:var(--card-shadow);
-    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease, border-color .15s ease;
     text-align:center;
+    border:4px solid transparent;
+    position:relative;
   }
-
   .name-card:hover{
     transform:translateY(-3px) scale(1.01);
     box-shadow:0 8px 22px rgba(0,0,0,.12);
     filter:saturate(1.05);
   }
-
-  .name-card:active{
-    transform:translateY(0) scale(.99);
-  }
-
+  .name-card:active{ transform:translateY(0) scale(.99); }
   .name{
     font-size:30px;
     font-weight:800;
@@ -75,17 +89,37 @@
     margin-bottom:10px;
     word-break:break-word;
   }
-
   .task-info{
     font-size:17px;
     font-weight:700;
     color:#374151;
-    background:rgba(255,255,255,.55);
+    background:rgba(255,255,255,.58);
     border-radius:999px;
     padding:8px 12px;
     display:inline-block;
   }
-
+  .assign-hint{
+    display:block;
+    margin-top:10px;
+    font-size:14px;
+    font-weight:800;
+    color:#b91c1c;
+  }
+  .has-personal-badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:#ffffffc9;
+    border-radius:999px;
+    padding:5px 8px;
+    font-size:12px;
+    font-weight:800;
+    color:#166534;
+  }
+  .needs-assignment{
+    border-color:#fca5a5 !important;
+    background:#fee2e2 !important;
+  }
   .p1{ background:#fde2e4; }
   .p2{ background:#dff7f2; }
   .p3{ background:#e3f0ff; }
@@ -96,38 +130,26 @@
   .topbar{
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    justify-content:center;
     gap:12px;
     margin-bottom:18px;
     flex-wrap:wrap;
   }
-
-  .back-btn{
-    border:none;
-    background:#ffffff;
-    color:#374151;
-    border-radius:16px;
-    padding:12px 16px;
-    font-size:18px;
-    font-weight:800;
-    cursor:pointer;
-    box-shadow:var(--card-shadow);
-  }
-
-  .back-btn:hover{
-    transform:translateY(-1px);
-  }
-
   .pupil-title{
-    flex:1;
     text-align:center;
     font-size:clamp(28px, 3vw, 42px);
     font-weight:800;
     margin:0;
   }
-
-  .ghost-space{
-    width:120px;
+  .back-fab{
+    position:fixed;
+    left:18px;
+    bottom:18px;
+    z-index:50;
+    padding:16px 22px;
+    font-size:24px;
+    border-radius:22px;
+    background:linear-gradient(135deg,#ffffff,#eef2ff);
   }
 
   .task-list{
@@ -137,7 +159,6 @@
     max-width:900px;
     margin:0 auto;
   }
-
   .task-row{
     display:flex;
     align-items:center;
@@ -148,7 +169,12 @@
     padding:18px 18px;
     box-shadow:var(--card-shadow);
     flex-wrap:wrap;
+    border:4px solid transparent;
+    transition:border-color .15s ease, background .15s ease;
   }
+  .task-row.status-0-row{ border-color:#edf2ff; }
+  .task-row.status-1-row{ border-color:#fde68a; background:#fffdf3; }
+  .task-row.status-2-row{ border-color:#bbf7d0; background:#f5fff8; }
 
   .task-left{
     display:flex;
@@ -157,7 +183,6 @@
     min-width:220px;
     flex:1;
   }
-
   .task-icon{
     width:56px;
     height:56px;
@@ -167,25 +192,16 @@
     justify-content:center;
     font-size:28px;
     background:#f3f4f6;
+    flex-shrink:0;
   }
-
-  .task-label{
-    font-size:24px;
-    font-weight:800;
-  }
-
-  .task-sub{
-    font-size:15px;
-    color:var(--muted);
-    margin-top:4px;
-  }
+  .task-label{ font-size:24px; font-weight:800; }
+  .task-sub{ font-size:15px; color:var(--muted); margin-top:4px; }
 
   .task-actions{
     display:flex;
     gap:10px;
     flex-wrap:wrap;
   }
-
   .status-btn{
     min-width:62px;
     height:62px;
@@ -195,15 +211,46 @@
     font-weight:800;
     cursor:pointer;
     box-shadow:0 2px 8px rgba(0,0,0,.08);
-    transition:transform .12s ease, opacity .12s ease;
+    transition:transform .12s ease, opacity .12s ease, filter .12s ease, background .12s ease;
+    opacity:.28;
+    filter:grayscale(.45);
   }
-
   .status-btn:hover{ transform:scale(1.05); }
-  .status-btn.active{ outline:4px solid rgba(31,41,55,.15); }
-
+  .status-btn.active{
+    opacity:1;
+    filter:none;
+    transform:scale(1.08);
+    outline:4px solid rgba(31,41,55,.15);
+  }
   .status-0{ background:#eef2ff; }
   .status-1{ background:#fef3c7; }
   .status-2{ background:#dcfce7; }
+  .status-0.active{ background:#c7d2fe; }
+  .status-1.active{ background:#fde68a; }
+  .status-2.active{ background:#86efac; }
+
+  .smiley-row{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .smiley-chip{
+    min-width:48px;
+    height:48px;
+    border:none;
+    border-radius:14px;
+    cursor:pointer;
+    font-size:24px;
+    background:#f3f4f6;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+    opacity:.65;
+  }
+  .smiley-chip.active{
+    outline:4px solid rgba(31,41,55,.12);
+    background:#fff7ed;
+    opacity:1;
+  }
 
   .empty-box{
     max-width:760px;
@@ -214,42 +261,287 @@
     text-align:center;
     box-shadow:var(--card-shadow);
   }
+  .empty-title{ font-size:28px; font-weight:800; margin-bottom:10px; }
+  .empty-text{ font-size:18px; color:var(--muted); line-height:1.5; }
 
-  .empty-title{
-    font-size:28px;
-    font-weight:800;
-    margin-bottom:10px;
+  .overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.35);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .overlay.show{ display:flex; }
+
+  .popup{
+    width:min(520px, 100%);
+    background:white;
+    border-radius:24px;
+    padding:28px 22px 20px;
+    box-shadow:0 20px 60px rgba(0,0,0,.18);
+    text-align:center;
+  }
+  .popup h3{
+    margin:0 0 8px;
+    font-size:30px;
+  }
+  .popup p{
+    margin:0 0 18px;
+    color:var(--muted);
+    font-size:18px;
+  }
+  .popup-smileys{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .popup-smiley{
+    width:74px;
+    height:74px;
+    border:none;
+    border-radius:20px;
+    background:#f3f4f6;
+    cursor:pointer;
+    font-size:36px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+  }
+  .popup-close{
+    border:none;
+    background:#e5e7eb;
+    border-radius:14px;
+    padding:12px 18px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
   }
 
-  .empty-text{
-    font-size:18px;
+  .teacher-modal{
+    width:min(1040px, 100%);
+    max-height:90vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:26px;
+    padding:24px;
+    box-shadow:0 20px 60px rgba(0,0,0,.22);
+  }
+  .teacher-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+    flex-wrap:wrap;
+  }
+  .teacher-header h3{
+    margin:0;
+    font-size:30px;
+  }
+  .teacher-sub{
     color:var(--muted);
+    font-size:17px;
+    margin-bottom:18px;
     line-height:1.5;
+  }
+  .teacher-grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:18px;
+  }
+  .teacher-card{
+    background:#f8fafc;
+    border-radius:22px;
+    padding:18px;
+  }
+  .teacher-card h4{
+    margin:0 0 14px;
+    font-size:22px;
+  }
+  .select-grid{
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0,1fr));
+    gap:10px;
+  }
+  .select-pill{
+    border:none;
+    border-radius:18px;
+    padding:12px 12px 10px;
+    font-size:17px;
+    font-weight:800;
+    cursor:pointer;
+    background:#e5e7eb;
+    color:#374151;
+    text-align:center;
+    border:3px solid transparent;
+  }
+  .select-pill.active{
+    background:#c7d2fe;
+    color:#312e81;
+    border-color:#818cf8;
+  }
+  .select-pill.needs-task.active{
+    background:#fca5a5;
+    color:#7f1d1d;
+    border-color:#dc2626;
+  }
+  .select-pill.has-own.active{
+    background:#86efac;
+    color:#14532d;
+    border-color:#16a34a;
+  }
+  .select-pill.needs-task{
+    background:#fee2e2;
+    color:#991b1b;
+    border-color:#fca5a5;
+  }
+  .select-pill.has-own{
+    background:#dcfce7;
+    color:#166534;
+    border-color:#86efac;
+  }
+  .select-pill-top{
+    display:block;
+    font-size:17px;
+    font-weight:800;
+    margin-bottom:4px;
+  }
+  .select-pill-sub{
+    display:block;
+    font-size:12px;
+    font-weight:800;
+    opacity:.85;
+  }
+  .task-chip-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .task-chip{
+    border:none;
+    border-radius:16px;
+    padding:12px 14px;
+    font-size:16px;
+    font-weight:800;
+    cursor:pointer;
+    background:#e5e7eb;
+    color:#374151;
+  }
+  .task-chip.active{
+    background:#fde68a;
+    color:#92400e;
+  }
+  .teacher-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:18px;
+  }
+  .apply-btn{
+    background:linear-gradient(135deg,#dcfce7,#bbf7d0);
+    color:#166534;
+  }
+  .danger-btn{
+    background:linear-gradient(135deg,#fee2e2,#fecaca);
+    color:#991b1b;
+  }
+  .close-btn{
+    background:#e5e7eb;
+  }
+  .small-btn{
+    padding:10px 14px;
+    font-size:15px;
+    background:#ede9fe;
+    color:#4338ca;
+  }
+  .custom-task-box{
+    background:#eef2ff;
+    border-radius:18px;
+    padding:14px;
+    margin-top:16px;
+  }
+  .custom-task-title{
+    font-size:16px;
+    font-weight:800;
+    color:#3730a3;
+    margin-bottom:10px;
+  }
+  .emoji-picker{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .emoji-btn{
+    width:42px;
+    height:42px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-size:22px;
+    background:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+  }
+  .emoji-btn.active{
+    outline:3px solid #818cf8;
+    background:#e0e7ff;
+  }
+  .custom-task-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .custom-task-input{
+    flex:1;
+    min-width:220px;
+    border:none;
+    border-radius:14px;
+    padding:14px 16px;
+    font-size:16px;
+    box-shadow:inset 0 0 0 2px #c7d2fe;
+  }
+  .add-task-btn{
+    background:linear-gradient(135deg,#ddd6fe,#bfdbfe);
+    color:#312e81;
   }
 
   @media (max-width: 1200px){
     .name-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
   }
-
+  @media (max-width: 900px){
+    .teacher-grid{ grid-template-columns:1fr; }
+  }
   @media (max-width: 760px){
-    .page{ padding:20px 16px 32px; }
+    .page{ padding:20px 16px 120px; }
     .name-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
     .name{ font-size:24px; }
     .task-info{ font-size:15px; }
     .task-row{ padding:14px; }
     .task-label{ font-size:20px; }
     .status-btn{ min-width:56px; height:56px; font-size:24px; }
-    .pupil-title{ order:3; width:100%; }
-    .ghost-space{ display:none; }
+    .select-grid{ grid-template-columns:1fr; }
+    .back-fab{
+      left:14px;
+      right:14px;
+      bottom:14px;
+      width:calc(100% - 28px);
+      text-align:center;
+      font-size:22px;
+    }
   }
 </style>
 </head>
 <body>
 <div class="page">
-
   <section id="names-screen">
     <h1>Kies je naam</h1>
     <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
+    <div class="names-topbar">
+      <button class="teacher-btn" id="openTeacherBtn">⚙️ Taken toewijzen</button>
+    </div>
     <div id="nameGrid" class="name-grid"></div>
     <div id="emptyNames" class="empty-box" style="display:none;">
       <div class="empty-title">Geen leerlingen gevonden</div>
@@ -262,23 +554,88 @@
 
   <section id="tasks-screen" style="display:none;">
     <div class="topbar">
-      <button class="back-btn" onclick="goBack()">← Terug</button>
       <h2 id="pupilTitle" class="pupil-title"></h2>
-      <div class="ghost-space"></div>
     </div>
     <div id="taskList" class="task-list"></div>
     <div id="emptyTasks" class="empty-box" style="display:none;">
       <div class="empty-title">Er zijn nog geen taken</div>
-      <div class="empty-text">
-        Deze leerling heeft momenteel geen actieve taken om te maken.
+      <div class="empty-text">Deze leerling heeft momenteel geen actieve taken om te maken.</div>
+    </div>
+    <button class="back-fab" id="backBtn">← Terug naar namen</button>
+  </section>
+</div>
+
+<div id="smileyOverlay" class="overlay">
+  <div class="popup">
+    <h3>Hoe ging het?</h3>
+    <p>Kies een smiley die past bij deze taak.</p>
+    <div class="popup-smileys">
+      <button class="popup-smiley" data-smiley="1">😊</button>
+      <button class="popup-smiley" data-smiley="2">🙂</button>
+      <button class="popup-smiley" data-smiley="3">😐</button>
+      <button class="popup-smiley" data-smiley="4">😟</button>
+    </div>
+    <button class="popup-close" id="popupClose">Overslaan</button>
+  </div>
+</div>
+
+<div id="teacherOverlay" class="overlay">
+  <div class="teacher-modal">
+    <div class="teacher-header">
+      <h3>Taken toewijzen</h3>
+      <button class="close-btn" id="teacherCloseBtn">Sluiten</button>
+    </div>
+    <div class="teacher-sub">
+      Wil je <strong>niet meer de taken van klasbord gebruiken</strong>? Klik dan eerst op
+      <strong>Kindbord leeg maken</strong>. Daarna krijgen kinderen alleen nog taken die jij hier per kind of per groepje aanduidt.
+    </div>
+
+    <div class="teacher-actions" style="margin-top:0;margin-bottom:18px;">
+      <button class="danger-btn teacher-btn" id="emptyBoardBtn">🧹 Kindbord leeg maken</button>
+      <button class="small-btn" id="useClassboardBtn">↩ Volg opnieuw klasbord</button>
+    </div>
+
+    <div class="teacher-grid">
+      <div class="teacher-card">
+        <h4>Kinderen</h4>
+        <div class="teacher-actions" style="margin-top:0;margin-bottom:14px;">
+          <button class="small-btn" id="selectAllPupilsBtn">Alles selecteren</button>
+          <button class="small-btn" id="clearPupilsBtn">Selectie wissen</button>
+        </div>
+        <div id="teacherPupilGrid" class="select-grid"></div>
+      </div>
+
+      <div class="teacher-card">
+        <h4>Taken</h4>
+        <div class="teacher-actions" style="margin-top:0;margin-bottom:14px;">
+          <button class="small-btn" id="selectActiveTasksBtn">Alle actieve taken</button>
+          <button class="small-btn" id="clearTasksBtn">Taken wissen</button>
+        </div>
+        <div id="teacherTaskGrid" class="task-chip-grid"></div>
+
+        <div class="custom-task-box">
+          <div class="custom-task-title">Eigen taak toevoegen</div>
+          <div id="emojiPicker" class="emoji-picker"></div>
+          <div class="custom-task-row">
+            <input id="customTaskInput" class="custom-task-input" type="text" placeholder="Typ hier je eigen taak...">
+            <button class="add-task-btn" id="addCustomTaskBtn">+ Toevoegen</button>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
+    <div class="teacher-actions">
+      <button class="apply-btn" id="applyAssignmentsBtn">Toewijzen aan selectie</button>
+      <button class="close-btn" id="clearAssignmentsBtn">Persoonlijke taken wissen voor selectie</button>
+      <button class="teacher-btn" id="teacherDoneBtn">Klaar</button>
+    </div>
+  </div>
 </div>
 
 <script>
 const STORAGE_KEY = 'taakbord_test_v4';
+const SMILEYS = ['', '😊', '🙂', '😐', '😟'];
+const EMOJIS = ['📖','🔢','✏️','🔤','🎨','💻','✂️','🎵','📄','🗂️','📒','📐','🛒','🔣','📏','⭐','🏆','🎯','🔬','📚','🌍','🎭','🏃','🍎','🧩','🎲','🖍️','🌱','💡','🧪','🎸','⚽','🏊','🌈','🖊️','📝'];
 
 const DEFAULT_TASKS = [
   {id:'lezen',label:'Lezen',icon:'📖'},{id:'rekenen',label:'Rekenen',icon:'🔢'},
@@ -293,6 +650,10 @@ const DEFAULT_TASKS = [
 
 let state = {};
 let currentPupil = null;
+let pendingTaskId = null;
+let teacherSelectedPupils = new Set();
+let teacherSelectedTasks = new Set();
+let selectedEmoji = '⭐';
 
 function loadState(){
   try{
@@ -304,6 +665,16 @@ function loadState(){
   state.activeTasks = state.activeTasks || [];
   state.progress = state.progress || {};
   state.customTasks = state.customTasks || [];
+  state.personalAssignments = state.personalAssignments || {};
+  state.kindBoardOnlyPersonal = !!state.kindBoardOnlyPersonal;
+}
+
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function uid(){
+  return '_' + Math.random().toString(36).slice(2) + Date.now();
 }
 
 function allTasks(){
@@ -314,12 +685,27 @@ function taskById(taskId){
   return allTasks().find(t => t.id === taskId) || { id:taskId, label:taskId, icon:'📝' };
 }
 
+function hasPersonalAssignments(pupilId){
+  return Array.isArray(state.personalAssignments?.[pupilId]);
+}
+
 function getEntry(pupilId, taskId){
   return ((state.progress || {})[pupilId] || {})[taskId] || { status:0, smiley:0 };
 }
 
+function getAssignedTaskIds(pupilId){
+  const personal = state.personalAssignments?.[pupilId];
+  if(Array.isArray(personal)){
+    return personal;
+  }
+  if(state.kindBoardOnlyPersonal){
+    return [];
+  }
+  return state.activeTasks || [];
+}
+
 function getTasksForPupil(pupil){
-  return (state.activeTasks || []).map(taskById);
+  return getAssignedTaskIds(pupil.id).map(taskById);
 }
 
 function remainingCount(pupil){
@@ -331,11 +717,16 @@ function remainingCount(pupil){
   return remaining;
 }
 
-function taskText(count){
+function taskText(count, pupilId){
+  if(state.kindBoardOnlyPersonal && !hasPersonalAssignments(pupilId)){
+    return 'Nog geen taken';
+  }
   if(count === 0) return 'Alles is klaar';
   if(count === 1) return 'Nog 1 taak';
   return `Nog ${count} taken`;
 }
+
+function updateModeBadge(){}
 
 function renderNames(){
   const grid = document.getElementById('nameGrid');
@@ -344,19 +735,24 @@ function renderNames(){
 
   if(!state.pupils.length){
     empty.style.display = 'block';
+    updateModeBadge();
     return;
   }
-
   empty.style.display = 'none';
+  updateModeBadge();
 
   state.pupils.forEach((pupil, index) => {
+    const needsAssignment = state.kindBoardOnlyPersonal && !hasPersonalAssignments(pupil.id);
     const btn = document.createElement('button');
-    btn.className = `name-card p${(index % 6) + 1}`;
+    btn.type = 'button';
+    btn.className = `name-card p${(index % 6) + 1}` + (needsAssignment ? ' needs-assignment' : '');
     btn.innerHTML = `
+      ${hasPersonalAssignments(pupil.id) ? '<span class="has-personal-badge">eigen taken</span>' : ''}
       <div class="name">${pupil.voornaam || ''}</div>
-      <div class="task-info">${taskText(remainingCount(pupil))}</div>
+      <div class="task-info">${taskText(remainingCount(pupil), pupil.id)}</div>
+      ${needsAssignment ? '<span class="assign-hint">Nog taken geven</span>' : ''}
     `;
-    btn.onclick = () => openPupil(pupil.id);
+    btn.addEventListener('click', () => openPupil(pupil.id));
     grid.appendChild(btn);
   });
 }
@@ -382,8 +778,39 @@ function setStatus(taskId, status){
   if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
   const old = state.progress[currentPupil.id][taskId] || { status:0, smiley:0 };
   state.progress[currentPupil.id][taskId] = { ...old, status };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  saveState();
   renderTasks();
+  renderNames();
+
+  if(status === 2){
+    pendingTaskId = taskId;
+    openSmileyPopup();
+  }
+}
+
+function setSmiley(smiley){
+  if(!currentPupil || !pendingTaskId) return;
+  if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
+  const old = state.progress[currentPupil.id][pendingTaskId] || { status:2, smiley:0 };
+  state.progress[currentPupil.id][pendingTaskId] = { ...old, status:2, smiley:smiley };
+  saveState();
+  closeSmileyPopup();
+  renderTasks();
+  renderNames();
+}
+
+function openSmileyPopup(){
+  document.getElementById('smileyOverlay').classList.add('show');
+}
+function closeSmileyPopup(){
+  pendingTaskId = null;
+  document.getElementById('smileyOverlay').classList.remove('show');
+}
+
+function statusText(status){
+  if(status === 2) return 'Deze taak is klaar';
+  if(status === 1) return 'Je bent hier nog mee bezig';
+  return 'Deze taak moet je nog maken';
 }
 
 function renderTasks(){
@@ -401,25 +828,250 @@ function renderTasks(){
   tasks.forEach(task => {
     const entry = getEntry(currentPupil.id, task.id);
     const row = document.createElement('div');
-    row.className = 'task-row';
+    row.className = `task-row status-${entry.status}-row`;
 
-    row.innerHTML = `
-      <div class="task-left">
-        <div class="task-icon">${task.icon}</div>
-        <div>
-          <div class="task-label">${task.label}</div>
-          <div class="task-sub">${entry.status === 2 ? 'Deze taak is klaar' : entry.status === 1 ? 'Je bent hier nog mee bezig' : 'Deze taak moet je nog maken'}</div>
-        </div>
-      </div>
-      <div class="task-actions">
-        <button class="status-btn status-0 ${entry.status === 0 ? 'active' : ''}" onclick="setStatus('${task.id}',0)">○</button>
-        <button class="status-btn status-1 ${entry.status === 1 ? 'active' : ''}" onclick="setStatus('${task.id}',1)">↻</button>
-        <button class="status-btn status-2 ${entry.status === 2 ? 'active' : ''}" onclick="setStatus('${task.id}',2)">✓</button>
+    const left = document.createElement('div');
+    left.className = 'task-left';
+    left.innerHTML = `
+      <div class="task-icon">${task.icon}</div>
+      <div>
+        <div class="task-label">${task.label}</div>
+        <div class="task-sub">${statusText(entry.status)}</div>
       </div>
     `;
+
+    const actions = document.createElement('div');
+    actions.className = 'task-actions';
+
+    [0,1,2].forEach(status => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `status-btn status-${status}` + (entry.status === status ? ' active' : '');
+      btn.textContent = status === 0 ? '○' : status === 1 ? '↻' : '✓';
+      btn.addEventListener('click', () => setStatus(task.id, status));
+      actions.appendChild(btn);
+    });
+
+    row.appendChild(left);
+    row.appendChild(actions);
+
+    if(entry.smiley > 0){
+      const smileyRow = document.createElement('div');
+      smileyRow.className = 'smiley-row';
+      for(let i = 1; i <= 4; i++){
+        const s = document.createElement('button');
+        s.type = 'button';
+        s.className = 'smiley-chip' + (entry.smiley === i ? ' active' : '');
+        s.textContent = SMILEYS[i];
+        s.addEventListener('click', () => {
+          if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
+          const old = state.progress[currentPupil.id][task.id] || { status:2, smiley:0 };
+          state.progress[currentPupil.id][task.id] = { ...old, smiley:i };
+          saveState();
+          renderTasks();
+          renderNames();
+        });
+        smileyRow.appendChild(s);
+      }
+      const wrapper = document.createElement('div');
+      wrapper.style.width = '100%';
+      wrapper.appendChild(smileyRow);
+      row.appendChild(wrapper);
+    }
+
     list.appendChild(row);
   });
 }
+
+/* Teacher modal */
+function openTeacherModal(){
+  teacherSelectedPupils = new Set();
+  teacherSelectedTasks = new Set();
+  renderTeacherModal();
+  renderEmojiPicker();
+  document.getElementById('teacherOverlay').classList.add('show');
+}
+
+function closeTeacherModal(){
+  document.getElementById('teacherOverlay').classList.remove('show');
+}
+
+function renderTeacherModal(){
+  const pupilGrid = document.getElementById('teacherPupilGrid');
+  const taskGrid = document.getElementById('teacherTaskGrid');
+  pupilGrid.innerHTML = '';
+  taskGrid.innerHTML = '';
+
+  state.pupils.forEach(pupil => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    const hasOwn = hasPersonalAssignments(pupil.id);
+    const needsTask = state.kindBoardOnlyPersonal && !hasOwn;
+    btn.className = 'select-pill'
+      + (needsTask ? ' needs-task' : '')
+      + (hasOwn ? ' has-own' : '')
+      + (teacherSelectedPupils.has(pupil.id) ? ' active' : '');
+    btn.innerHTML = `
+      <span class="select-pill-top">${pupil.voornaam}</span>
+      <span class="select-pill-sub">${
+        needsTask ? 'nog taken geven' :
+        hasOwn ? `${(state.personalAssignments[pupil.id] || []).length} eigen taken` :
+        'volgt klasbord'
+      }</span>
+    `;
+    btn.addEventListener('click', () => {
+      if(teacherSelectedPupils.has(pupil.id)) teacherSelectedPupils.delete(pupil.id);
+      else teacherSelectedPupils.add(pupil.id);
+      renderTeacherModal();
+    });
+    pupilGrid.appendChild(btn);
+  });
+
+  allTasks().forEach(task => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'task-chip' + (teacherSelectedTasks.has(task.id) ? ' active' : '');
+    btn.textContent = `${task.icon} ${task.label}`;
+    btn.addEventListener('click', () => {
+      if(teacherSelectedTasks.has(task.id)) teacherSelectedTasks.delete(task.id);
+      else teacherSelectedTasks.add(task.id);
+      renderTeacherModal();
+    });
+    taskGrid.appendChild(btn);
+  });
+}
+
+function renderEmojiPicker(){
+  const wrap = document.getElementById('emojiPicker');
+  wrap.innerHTML = '';
+  EMOJIS.forEach(emoji => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'emoji-btn' + (selectedEmoji === emoji ? ' active' : '');
+    btn.textContent = emoji;
+    btn.addEventListener('click', () => {
+      selectedEmoji = emoji;
+      renderEmojiPicker();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function addCustomTask(){
+  const input = document.getElementById('customTaskInput');
+  const label = input.value.trim();
+  if(!label){
+    alert('Typ eerst een taaknaam.');
+    input.focus();
+    return;
+  }
+  const exists = allTasks().some(t => t.label.toLowerCase() === label.toLowerCase());
+  if(exists){
+    alert('Deze taak bestaat al.');
+    return;
+  }
+  state.customTasks.push({
+    id: uid(),
+    label,
+    icon: selectedEmoji
+  });
+  saveState();
+  input.value = '';
+  teacherSelectedTasks = new Set([...teacherSelectedTasks, state.customTasks[state.customTasks.length - 1].id]);
+  renderTeacherModal();
+}
+
+function selectAllPupils(){
+  teacherSelectedPupils = new Set(state.pupils.map(p => p.id));
+  renderTeacherModal();
+}
+function clearPupilSelection(){
+  teacherSelectedPupils = new Set();
+  renderTeacherModal();
+}
+function selectActiveTasks(){
+  teacherSelectedTasks = new Set(state.activeTasks || []);
+  renderTeacherModal();
+}
+function clearTaskSelection(){
+  teacherSelectedTasks = new Set();
+  renderTeacherModal();
+}
+
+function applyAssignmentsToSelection(){
+  if(!teacherSelectedPupils.size){
+    alert('Selecteer eerst minstens één kind.');
+    return;
+  }
+  const tasks = Array.from(teacherSelectedTasks);
+  teacherSelectedPupils.forEach(pid => {
+    state.personalAssignments[pid] = [...tasks];
+  });
+  saveState();
+  renderNames();
+  if(currentPupil) renderTasks();
+
+  // handig om verder te werken zonder telkens terug naar het namenoverzicht te gaan
+  teacherSelectedPupils = new Set();
+  teacherSelectedTasks = new Set();
+  renderTeacherModal();
+}
+
+function clearAssignmentsForSelection(){
+  if(!teacherSelectedPupils.size){
+    alert('Selecteer eerst minstens één kind.');
+    return;
+  }
+  teacherSelectedPupils.forEach(pid => {
+    delete state.personalAssignments[pid];
+  });
+  saveState();
+  closeTeacherModal();
+  renderNames();
+  if(currentPupil) renderTasks();
+}
+
+function emptyKindBoard(){
+  if(!confirm('Wil je het kindbord leeg maken? Daarna zien kinderen geen taken meer uit klasbord, tot jij hier taken per kind of per groepje toewijst.')) return;
+  state.kindBoardOnlyPersonal = true;
+  state.personalAssignments = {};
+  saveState();
+  closeTeacherModal();
+  renderNames();
+  if(currentPupil) renderTasks();
+}
+
+function useClassboardAgain(){
+  state.kindBoardOnlyPersonal = false;
+  state.personalAssignments = {};
+  saveState();
+  closeTeacherModal();
+  renderNames();
+  if(currentPupil) renderTasks();
+}
+
+/* Event listeners */
+document.getElementById('backBtn').addEventListener('click', goBack);
+document.getElementById('popupClose').addEventListener('click', closeSmileyPopup);
+document.querySelectorAll('.popup-smiley').forEach(btn => {
+  btn.addEventListener('click', () => setSmiley(Number(btn.dataset.smiley)));
+});
+
+document.getElementById('openTeacherBtn').addEventListener('click', openTeacherModal);
+document.getElementById('teacherCloseBtn').addEventListener('click', closeTeacherModal);
+document.getElementById('selectAllPupilsBtn').addEventListener('click', selectAllPupils);
+document.getElementById('clearPupilsBtn').addEventListener('click', clearPupilSelection);
+document.getElementById('selectActiveTasksBtn').addEventListener('click', selectActiveTasks);
+document.getElementById('clearTasksBtn').addEventListener('click', clearTaskSelection);
+document.getElementById('applyAssignmentsBtn').addEventListener('click', applyAssignmentsToSelection);
+document.getElementById('clearAssignmentsBtn').addEventListener('click', clearAssignmentsForSelection);
+document.getElementById('teacherDoneBtn').addEventListener('click', closeTeacherModal);
+document.getElementById('emptyBoardBtn').addEventListener('click', emptyKindBoard);
+document.getElementById('useClassboardBtn').addEventListener('click', useClassboardAgain);
+document.getElementById('addCustomTaskBtn').addEventListener('click', addCustomTask);
+document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') addCustomTask();
+});
 
 loadState();
 renderNames();
