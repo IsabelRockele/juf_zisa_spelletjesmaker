@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Takenbord per kind</title>
+<style>
+  :root{
+    --bg:#f3f4f8;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --card-shadow:0 4px 14px rgba(0,0,0,.08);
+    --radius:20px;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Nunito", Arial, sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+  .page{
+    max-width:1400px;
+    margin:0 auto;
+    padding:28px 26px 40px;
+  }
+
+  h1{
+    margin:10px 0 26px;
+    text-align:center;
+    font-size:clamp(32px, 4vw, 52px);
+    line-height:1.1;
+  }
+
+  .subtitle{
+    text-align:center;
+    color:var(--muted);
+    font-size:18px;
+    margin:-6px 0 28px;
+  }
+
+  .name-grid{
+    display:grid;
+    grid-template-columns:repeat(6, minmax(0, 1fr));
+    gap:18px;
+  }
+
+  .name-card{
+    border:none;
+    border-radius:var(--radius);
+    padding:20px 14px 18px;
+    min-height:122px;
+    cursor:pointer;
+    box-shadow:var(--card-shadow);
+    transition:transform .15s ease, box-shadow .15s ease, filter .15s ease;
+    text-align:center;
+  }
+
+  .name-card:hover{
+    transform:translateY(-3px) scale(1.01);
+    box-shadow:0 8px 22px rgba(0,0,0,.12);
+    filter:saturate(1.05);
+  }
+
+  .name-card:active{
+    transform:translateY(0) scale(.99);
+  }
+
+  .name{
+    font-size:30px;
+    font-weight:800;
+    line-height:1.1;
+    margin-bottom:10px;
+    word-break:break-word;
+  }
+
+  .task-info{
+    font-size:17px;
+    font-weight:700;
+    color:#374151;
+    background:rgba(255,255,255,.55);
+    border-radius:999px;
+    padding:8px 12px;
+    display:inline-block;
+  }
+
+  .p1{ background:#fde2e4; }
+  .p2{ background:#dff7f2; }
+  .p3{ background:#e3f0ff; }
+  .p4{ background:#fceccf; }
+  .p5{ background:#ebe4ff; }
+  .p6{ background:#def4d7; }
+
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+
+  .back-btn{
+    border:none;
+    background:#ffffff;
+    color:#374151;
+    border-radius:16px;
+    padding:12px 16px;
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:var(--card-shadow);
+  }
+
+  .back-btn:hover{
+    transform:translateY(-1px);
+  }
+
+  .pupil-title{
+    flex:1;
+    text-align:center;
+    font-size:clamp(28px, 3vw, 42px);
+    font-weight:800;
+    margin:0;
+  }
+
+  .ghost-space{
+    width:120px;
+  }
+
+  .task-list{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    max-width:900px;
+    margin:0 auto;
+  }
+
+  .task-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    background:#fff;
+    border-radius:22px;
+    padding:18px 18px;
+    box-shadow:var(--card-shadow);
+    flex-wrap:wrap;
+  }
+
+  .task-left{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    min-width:220px;
+    flex:1;
+  }
+
+  .task-icon{
+    width:56px;
+    height:56px;
+    border-radius:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    background:#f3f4f6;
+  }
+
+  .task-label{
+    font-size:24px;
+    font-weight:800;
+  }
+
+  .task-sub{
+    font-size:15px;
+    color:var(--muted);
+    margin-top:4px;
+  }
+
+  .task-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+
+  .status-btn{
+    min-width:62px;
+    height:62px;
+    border:none;
+    border-radius:18px;
+    font-size:28px;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    transition:transform .12s ease, opacity .12s ease;
+  }
+
+  .status-btn:hover{ transform:scale(1.05); }
+  .status-btn.active{ outline:4px solid rgba(31,41,55,.15); }
+
+  .status-0{ background:#eef2ff; }
+  .status-1{ background:#fef3c7; }
+  .status-2{ background:#dcfce7; }
+
+  .empty-box{
+    max-width:760px;
+    margin:60px auto 0;
+    background:#fff;
+    border-radius:24px;
+    padding:30px 24px;
+    text-align:center;
+    box-shadow:var(--card-shadow);
+  }
+
+  .empty-title{
+    font-size:28px;
+    font-weight:800;
+    margin-bottom:10px;
+  }
+
+  .empty-text{
+    font-size:18px;
+    color:var(--muted);
+    line-height:1.5;
+  }
+
+  @media (max-width: 1200px){
+    .name-grid{ grid-template-columns:repeat(4, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 760px){
+    .page{ padding:20px 16px 32px; }
+    .name-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+    .name{ font-size:24px; }
+    .task-info{ font-size:15px; }
+    .task-row{ padding:14px; }
+    .task-label{ font-size:20px; }
+    .status-btn{ min-width:56px; height:56px; font-size:24px; }
+    .pupil-title{ order:3; width:100%; }
+    .ghost-space{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <section id="names-screen">
+    <h1>Kies je naam</h1>
+    <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
+    <div id="nameGrid" class="name-grid"></div>
+    <div id="emptyNames" class="empty-box" style="display:none;">
+      <div class="empty-title">Geen leerlingen gevonden</div>
+      <div class="empty-text">
+        Open eerst je klasbord en voeg daar leerlingen en taken toe.<br>
+        Daarna kan dit kindbord de gegevens overnemen.
+      </div>
+    </div>
+  </section>
+
+  <section id="tasks-screen" style="display:none;">
+    <div class="topbar">
+      <button class="back-btn" onclick="goBack()">← Terug</button>
+      <h2 id="pupilTitle" class="pupil-title"></h2>
+      <div class="ghost-space"></div>
+    </div>
+    <div id="taskList" class="task-list"></div>
+    <div id="emptyTasks" class="empty-box" style="display:none;">
+      <div class="empty-title">Er zijn nog geen taken</div>
+      <div class="empty-text">
+        Deze leerling heeft momenteel geen actieve taken om te maken.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const STORAGE_KEY = 'taakbord_test_v4';
+
+const DEFAULT_TASKS = [
+  {id:'lezen',label:'Lezen',icon:'📖'},{id:'rekenen',label:'Rekenen',icon:'🔢'},
+  {id:'schrijven',label:'Schrijven',icon:'✏️'},{id:'spelling',label:'Spelling',icon:'🔤'},
+  {id:'tekenen',label:'Tekenen',icon:'🎨'},{id:'computer',label:'Computer',icon:'💻'},
+  {id:'knippen',label:'Knippen',icon:'✂️'},{id:'muziek',label:'Muziek',icon:'🎵'},
+  {id:'werkblad',label:'Werkblad',icon:'📄'},{id:'project',label:'Project',icon:'🗂️'},
+  {id:'werkboek',label:'Werkboek',icon:'📒'},{id:'meetkunde',label:'Meetkunde',icon:'📐'},
+  {id:'winkeltje',label:'Winkeltje',icon:'🛒'},{id:'getallen',label:'Getallen',icon:'🔣'},
+  {id:'metendrekenen',label:'Metend rekenen',icon:'📏'}
+];
+
+let state = {};
+let currentPupil = null;
+
+function loadState(){
+  try{
+    state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  }catch(e){
+    state = {};
+  }
+  state.pupils = state.pupils || [];
+  state.activeTasks = state.activeTasks || [];
+  state.progress = state.progress || {};
+  state.customTasks = state.customTasks || [];
+}
+
+function allTasks(){
+  return [...DEFAULT_TASKS, ...(state.customTasks || [])];
+}
+
+function taskById(taskId){
+  return allTasks().find(t => t.id === taskId) || { id:taskId, label:taskId, icon:'📝' };
+}
+
+function getEntry(pupilId, taskId){
+  return ((state.progress || {})[pupilId] || {})[taskId] || { status:0, smiley:0 };
+}
+
+function getTasksForPupil(pupil){
+  return (state.activeTasks || []).map(taskById);
+}
+
+function remainingCount(pupil){
+  const tasks = getTasksForPupil(pupil);
+  let remaining = 0;
+  tasks.forEach(task => {
+    if (getEntry(pupil.id, task.id).status !== 2) remaining++;
+  });
+  return remaining;
+}
+
+function taskText(count){
+  if(count === 0) return 'Alles is klaar';
+  if(count === 1) return 'Nog 1 taak';
+  return `Nog ${count} taken`;
+}
+
+function renderNames(){
+  const grid = document.getElementById('nameGrid');
+  const empty = document.getElementById('emptyNames');
+  grid.innerHTML = '';
+
+  if(!state.pupils.length){
+    empty.style.display = 'block';
+    return;
+  }
+
+  empty.style.display = 'none';
+
+  state.pupils.forEach((pupil, index) => {
+    const btn = document.createElement('button');
+    btn.className = `name-card p${(index % 6) + 1}`;
+    btn.innerHTML = `
+      <div class="name">${pupil.voornaam || ''}</div>
+      <div class="task-info">${taskText(remainingCount(pupil))}</div>
+    `;
+    btn.onclick = () => openPupil(pupil.id);
+    grid.appendChild(btn);
+  });
+}
+
+function openPupil(pupilId){
+  currentPupil = state.pupils.find(p => p.id === pupilId);
+  if(!currentPupil) return;
+  document.getElementById('names-screen').style.display = 'none';
+  document.getElementById('tasks-screen').style.display = 'block';
+  document.getElementById('pupilTitle').textContent = currentPupil.voornaam;
+  renderTasks();
+}
+
+function goBack(){
+  currentPupil = null;
+  document.getElementById('tasks-screen').style.display = 'none';
+  document.getElementById('names-screen').style.display = 'block';
+  renderNames();
+}
+
+function setStatus(taskId, status){
+  if(!currentPupil) return;
+  if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
+  const old = state.progress[currentPupil.id][taskId] || { status:0, smiley:0 };
+  state.progress[currentPupil.id][taskId] = { ...old, status };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  renderTasks();
+}
+
+function renderTasks(){
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('emptyTasks');
+  list.innerHTML = '';
+
+  const tasks = getTasksForPupil(currentPupil || {});
+  if(!tasks.length){
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tasks.forEach(task => {
+    const entry = getEntry(currentPupil.id, task.id);
+    const row = document.createElement('div');
+    row.className = 'task-row';
+
+    row.innerHTML = `
+      <div class="task-left">
+        <div class="task-icon">${task.icon}</div>
+        <div>
+          <div class="task-label">${task.label}</div>
+          <div class="task-sub">${entry.status === 2 ? 'Deze taak is klaar' : entry.status === 1 ? 'Je bent hier nog mee bezig' : 'Deze taak moet je nog maken'}</div>
+        </div>
+      </div>
+      <div class="task-actions">
+        <button class="status-btn status-0 ${entry.status === 0 ? 'active' : ''}" onclick="setStatus('${task.id}',0)">○</button>
+        <button class="status-btn status-1 ${entry.status === 1 ? 'active' : ''}" onclick="setStatus('${task.id}',1)">↻</button>
+        <button class="status-btn status-2 ${entry.status === 2 ? 'active' : ''}" onclick="setStatus('${task.id}',2)">✓</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+}
+
+loadState();
+renderNames();
+</script>
+</body>
+</html>
