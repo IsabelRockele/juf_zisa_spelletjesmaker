@@ -70,7 +70,7 @@
   .name-card{
     border:none;
     border-radius:var(--radius);
-    padding:20px 14px 18px;
+    padding:20px 14px 14px;
     min-height:136px;
     cursor:pointer;
     box-shadow:var(--card-shadow);
@@ -78,6 +78,9 @@
     text-align:center;
     border:4px solid transparent;
     position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
   }
   .name-card:hover{
     transform:translateY(-3px) scale(1.01);
@@ -947,6 +950,13 @@ Noor Janssens"></textarea>
 
 <!-- Discreet slotje — altijd zichtbaar, ook in smartboard-modus -->
 <button id="smartboard-exit-btn" onclick="document.getElementById('kind-exit-overlay').classList.add('show')" title="Leerkracht" style="position:fixed;bottom:12px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.5);font-size:15px;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;">🔒</button>
+
+<!-- Foto-hint: inline boven het namenraster, verdwijnt na sluiten -->
+<div id="kind-hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:10px 16px;margin:0 0 14px;font-size:13px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
+  <span>💡 <strong>Wist je dat?</strong> Je kan foto's bij namen en afbeeldingen bij taken toevoegen via <strong>⚙️ Taken toewijzen</strong>.</span>
+  <button onclick="localStorage.setItem('kind_hint_photos','1');document.getElementById('kind-hint-photos').style.display='none'" style="border:none;background:none;color:#a16207;font-size:13px;font-weight:800;cursor:pointer;padding:0;flex-shrink:0;margin-left:auto;">✕ Sluiten</button>
+</div>
+
 <div class="name-grid" id="nameGrid"></div>
 <div class="empty-box" id="emptyNames" style="display:none;">
 <div class="empty-title">Geen leerlingen gevonden</div>
@@ -959,6 +969,7 @@ Noor Janssens"></textarea>
 <section id="tasks-screen" style="display:none;">
 <div class="topbar">
 <h2 class="pupil-title" id="pupilTitle"></h2>
+<button id="kind-undo-btn" onclick="undoKindAction()" style="display:none;border:none;background:#fef3c7;color:#92400e;border:1.5px solid #f59e0b;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:800;cursor:pointer;margin-left:8px;">↩ Ongedaan</button>
 </div>
 <div class="task-list" id="taskList"></div>
 <div class="empty-box" id="emptyTasks" style="display:none;">
@@ -1404,6 +1415,14 @@ function renderNames(){
   empty.style.display = 'none';
   updateModeBadge();
 
+  // Punt 3: eerste-keer-hint foto's
+  const kindHintEl = document.getElementById('kind-hint-photos');
+  if(kindHintEl){
+    const hasPhoto = state.pupils.some(p => state.pupilPhotos[p.id]);
+    const dismissed = localStorage.getItem('kind_hint_photos');
+    kindHintEl.style.display = (!hasPhoto && !dismissed && state.pupils.length > 2) ? 'flex' : 'none';
+  }
+
   state.pupils.forEach((pupil, index) => {
     const needsAssignment = state.kindBoardOnlyPersonal && !hasPersonalAssignments(pupil.id);
     const btn = document.createElement('button');
@@ -1411,11 +1430,25 @@ function renderNames(){
     btn.className = `name-card p${(index % 6) + 1}` + (needsAssignment ? ' needs-assignment' : '');
     const photo = state.pupilPhotos[pupil.id];
     const photoHtml = photo ? `<div class="name-card-photo-wrap"><img class="name-card-photo" src="${photo}" alt="${getVisibleName(pupil)}" /></div>` : '';
+
+    // Voortgangsbalk onderaan naamkaart
+    const tasks = getTasksForPupil(pupil);
+    const prog = state.progress[pupil.id] || {};
+    const done = tasks.filter(t => (prog[t.id]?.status||0) === 2).length;
+    const total = tasks.length;
+    const pct = total > 0 ? Math.round((done/total)*100) : 0;
+    const barColor = pct === 100 ? '#22c55e' : pct > 50 ? '#84cc16' : pct > 0 ? '#f59e0b' : '#e2e8f0';
+    const progressBar = total > 0 ? `
+      <div style="width:100%;height:6px;background:#e2e8f0;border-radius:3px;margin-top:8px;position:relative;">
+        <div style="position:absolute;top:0;left:0;height:6px;width:${pct}%;background:${barColor};border-radius:3px;transition:width .4s;min-width:${pct>0?'6px':'0'};"></div>
+      </div>` : '';
+
     btn.innerHTML = `
       ${photoHtml}
       <div class="name">${getVisibleName(pupil)}</div>
       <div class="task-info">${taskText(remainingCount(pupil), pupil.id)}</div>
       ${needsAssignment ? '<span class="assign-hint">Nog taken geven</span>' : ''}
+      ${progressBar}
     `;
     btn.addEventListener('click', () => openPupil(pupil.id));
     grid.appendChild(btn);
@@ -1438,19 +1471,47 @@ function goBack(){
   renderNames();
 }
 
+let kindLastAction = null;
+let kindUndoTimer = null;
+
 function setStatus(taskId, status){
   if(!currentPupil) return;
   if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
   const old = state.progress[currentPupil.id][taskId] || { status:0, smiley:0 };
+  // Bewaar voor undo
+  kindLastAction = { pid: currentPupil.id, tid: taskId, prevStatus: old.status, prevSmiley: old.smiley||0 };
   state.progress[currentPupil.id][taskId] = { ...old, status };
   saveState();
   renderTasks();
   renderNames();
-
+  showKindUndoBtn();
   if(status === 2){
     pendingTaskId = taskId;
     openSmileyPopup();
   }
+}
+
+function undoKindAction(){
+  if(!kindLastAction) return;
+  const { pid, tid, prevStatus, prevSmiley } = kindLastAction;
+  if(!state.progress[pid]) state.progress[pid] = {};
+  state.progress[pid][tid] = { status: prevStatus, smiley: prevSmiley };
+  saveState();
+  renderTasks();
+  renderNames();
+  kindLastAction = null;
+  hideKindUndoBtn();
+}
+
+function showKindUndoBtn(){
+  const btn = document.getElementById('kind-undo-btn');
+  if(btn) btn.style.display = 'inline-block';
+  clearTimeout(kindUndoTimer);
+  kindUndoTimer = setTimeout(() => { hideKindUndoBtn(); kindLastAction = null; }, 8000);
+}
+function hideKindUndoBtn(){
+  const btn = document.getElementById('kind-undo-btn');
+  if(btn) btn.style.display = 'none';
 }
 
 function setSmiley(smiley){
