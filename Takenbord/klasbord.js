@@ -893,7 +893,7 @@ function renderPupilRows(allTasks){
     row.className='pupil-board-row'+(complete?' complete':'');
     const dc=complete?'done':busy>0?'busy':'';
     const bh=busy>0?` · <span class="busy-label">${busy} bezig</span>`:'';
-    const nh=state.showNumbers?`<span style="font-size:10px;color:#a0aec0;font-weight:700;flex-shrink:0">${idx+1}.</span>`:'';
+    const nh=state.showNumbers?`<span class="pupil-num">${idx+1}.</span>`:'';
     const notesBtn = hasNotes ? '<button class="notes-btn has-notes" onclick="openNotesModal(\''+pid+'\')" title="Bevindingen bekijken">\uD83D\uDD12</button>' : '';
     const medalSpan = complete ? '<span class="pupil-medal">\uD83C\uDFC5</span>' : '';
     row.innerHTML = '<div class="pupil-name-cell">'
@@ -973,42 +973,86 @@ function setBoardSize(size){
 }
 function applyBoardSize(){
   const sizes = {
-    compact: { name:'120px', task:'90px',  gap:'5px',  btnW:'46px', btnH:'46px', btnFont:'20px', nameFont:'13px' },
-    normal:  { name:'220px', task:'120px', gap:'8px',  btnW:'66px', btnH:'66px', btnFont:'26px', nameFont:'16px' },
-    large:   { name:'260px', task:'150px', gap:'10px', btnW:'84px', btnH:'84px', btnFont:'32px', nameFont:'18px' },
+    compact: {
+      name:'140px', task:'80px',  gap:'5px',
+      btnW:'48px',  btnH:'48px',  btnFont:'22px', nameFont:'13px',
+      photoSize:'34px', iconSize:'26px', iconCustom:'36px',
+      labelSize:'12px', rowPad:'6px', smileySz:'14px', numFont:'12px'
+    },
+    normal: {
+      name:'220px', task:'120px', gap:'8px',
+      btnW:'66px',  btnH:'66px',  btnFont:'26px', nameFont:'16px',
+      photoSize:'52px', iconSize:'38px', iconCustom:'56px',
+      labelSize:'16px', rowPad:'10px', smileySz:'18px', numFont:'15px'
+    },
+    large: {
+      name:'280px', task:'160px', gap:'10px',
+      btnW:'90px',  btnH:'90px',  btnFont:'36px', nameFont:'20px',
+      photoSize:'72px', iconSize:'54px', iconCustom:'76px',
+      labelSize:'20px', rowPad:'14px', smileySz:'24px', numFont:'19px'
+    },
   };
   const s = sizes[state.boardSize] || sizes.normal;
   const root = document.documentElement;
-  root.style.setProperty('--col-name', s.name);
-  root.style.setProperty('--col-task', s.task);
-  root.style.setProperty('--gap', s.gap);
-  root.style.setProperty('--btn-w', s.btnW);
-  root.style.setProperty('--btn-h', s.btnH);
-  root.style.setProperty('--btn-font', s.btnFont);
-  root.style.setProperty('--name-font', s.nameFont);
+  root.style.setProperty('--col-name',   s.name);
+  root.style.setProperty('--col-task',   s.task);
+  root.style.setProperty('--gap',        s.gap);
+  root.style.setProperty('--btn-w',      s.btnW);
+  root.style.setProperty('--btn-h',      s.btnH);
+  root.style.setProperty('--btn-font',   s.btnFont);
+  root.style.setProperty('--name-font',  s.nameFont);
+  root.style.setProperty('--photo-size', s.photoSize);
+  root.style.setProperty('--icon-size',  s.iconSize);
+  root.style.setProperty('--icon-custom',s.iconCustom);
+  root.style.setProperty('--label-size', s.labelSize);
+  root.style.setProperty('--row-pad',    s.rowPad);
+  root.style.setProperty('--smiley-sz',  s.smileySz);
+  root.style.setProperty('--num-font',   s.numFont);
 }
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
+const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipad';
+
+function applySmartboard(){
+  if(!isSmartboard && !isIpad) return;
+  document.body.classList.add('smartboard');
+  currentMode = 'board';
+  if(isIpad){
+    document.body.classList.add('ipad-modus');
+    // iPad: toon duidelijke sluit-knop met tekst
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn){
+      btn.textContent = '✕ Sluiten';
+      btn.style.display = 'block';
+    }
+  } else {
+    // Smartboard: discreet slotje
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn) btn.style.display = 'block';
+  }
+}
+
+function handleExitBtn(){
+  if(isIpad){
+    if(confirm('Wil je dit scherm sluiten?')){
+      window.location.href = 'welkomstbord.html';
+    }
+  } else {
+    document.getElementById('smartboard-exit-overlay').classList.remove('hidden');
+  }
+}
+
 function hideBackupReminder(){
   const el = document.getElementById('backup-reminder');
   if(el) el.style.display = 'none';
 }
+
 function checkBackupReminder(){
-  if(!state.pupils.length) return; // geen data = geen melding nodig
+  if(!state.pupils.length) return;
   const last = parseInt(localStorage.getItem('last_export_'+STORAGE_KEY)||'0');
   const days = (Date.now() - last) / (1000*60*60*24);
   const el = document.getElementById('backup-reminder');
   if(!el) return;
-  // Toon als: nooit gebackupt (last=0) én er zijn leerlingen, of laatste backup > 7 dagen
   el.style.display = (last === 0 || days > 7) ? 'flex' : 'none';
-}
-
-function applySmartboard(){
-  if(!isSmartboard) return;
-  document.body.classList.add('smartboard');
-  currentMode = 'board';
-  // Toon het discreet slotje-knopje
-  var btn = document.getElementById('smartboard-exit-btn');
-  if(btn) btn.style.display = 'block';
 }
 
 function exitSmartboard(dest){
@@ -1016,7 +1060,6 @@ function exitSmartboard(dest){
   if(dest === 'welkom'){
     window.location.href = 'welkomstbord.html';
   } else {
-    // Verwijder smartboard-modus en ga naar beheer
     document.body.classList.remove('smartboard');
     var btn = document.getElementById('smartboard-exit-btn');
     if(btn) btn.style.display = 'none';
@@ -1028,7 +1071,7 @@ function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
 }
 function goBackFromBoard(){
-  if(isSmartboard) return;
+  if(isSmartboard || isIpad) return;
   currentMode = 'settings';
   renderShell();
 }
