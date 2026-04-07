@@ -9,6 +9,11 @@
 <style>
 body{height:100vh;overflow:hidden}
 #app-welcome{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);padding:20px}
+.mode-smartboard-link{margin-top:14px;padding:8px 14px;background:rgba(99,102,241,.12);border:1.5px dashed #818cf8;border-radius:10px;font-size:13px;font-weight:800;color:#4338ca;cursor:pointer;transition:all .15s;}
+.mode-smartboard-link:hover{background:rgba(99,102,241,.22);color:#3730a3;}
+.mode-card.klas .mode-smartboard-link{color:#4338ca;}
+.mode-card.kind .mode-smartboard-link{color:#065f46;border-color:#6ee7b7;background:rgba(16,185,129,.1);}
+.mode-card.kind .mode-smartboard-link:hover{background:rgba(16,185,129,.2);}
 </style>
 </head>
 <body>
@@ -26,6 +31,7 @@ body{height:100vh;overflow:hidden}
           <li>Iedereen werkt op hetzelfde bord</li>
           <li>Ideaal voor hoekenwerk</li>
         </ul>
+        <div class="mode-smartboard-link" onclick="event.stopPropagation();window.location.href='klasbord.html?modus=smartboard'">📺 Smartboard-weergave openen</div>
       </div>
 
       <div class="mode-card kind" onclick="window.location.href='takenbord_kind.html'">
@@ -36,6 +42,7 @@ body{height:100vh;overflow:hidden}
           <li>Per kind of groepje werken</li>
           <li>Ideaal voor differentiatie</li>
         </ul>
+        <div class="mode-smartboard-link" onclick="event.stopPropagation();window.location.href='takenbord_kind.html?modus=smartboard'">📺 Smartboard-weergave openen</div>
       </div>
     </div>
   </div>
