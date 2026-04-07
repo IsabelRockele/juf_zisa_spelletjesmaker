@@ -23,7 +23,7 @@ const EMOJIS = [
 // notes: { pupilId: string }
 // customIcons: { taskId: dataURL } – eigen afbeelding per taak
 // pupilPhotos: { pupilId: dataURL } – foto/afbeelding per leerling
-let state = { pupils:[], activeTasks:[], progress:{}, customTasks:[], pupilTaskOverrides:{}, notes:{}, showNumbers:false, showLastname:false, showSmileys:false, customIcons:{}, pupilPhotos:{} };
+let state = { pupils:[], activeTasks:[], progress:{}, customTasks:[], pupilTaskOverrides:{}, notes:{}, showNumbers:false, showLastname:false, showSmileys:false, customIcons:{}, pupilPhotos:{}, taskLabelOverrides:{}, boardSize:"normal" };
 let currentMode='board', currentTab='leerlingen';
 let selectedEmoji='⭐', ptSelectedEmoji='⭐';
 let editingId=null, editingPupilTasksId=null, editingNotesId=null;
@@ -51,6 +51,8 @@ function loadState(){
       // Zorg dat deze velden altijd objecten zijn, ook bij oudere opgeslagen data
       if(!state.customIcons||typeof state.customIcons!=='object') state.customIcons={};
       if(!state.pupilPhotos||typeof state.pupilPhotos!=='object') state.pupilPhotos={};
+      if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
+      if(!state.boardSize) state.boardSize='normal';
       if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
     }
   }catch(e){}
@@ -80,19 +82,47 @@ function pupilStats(pid){
 }
 function hasOverrides(pid){ const ov=state.pupilTaskOverrides[pid]||{}; return(ov.removed?.length||0)+(ov.extra?.length||0)>0; }
 
-// BOARD ACTIONS
+// Undo state
+let lastAction = null;
+
 function cycleStatus(pid,tid){
   if(!state.progress[pid]) state.progress[pid]={};
   if(!state.progress[pid][tid]) state.progress[pid][tid]={status:0,smiley:0};
   const cur=state.progress[pid][tid].status;
   const next=(cur+1)%3;
+  // Bewaar voor undo
+  lastAction = { type:'status', pid, tid, prevStatus: cur, prevSmiley: state.progress[pid][tid].smiley||0 };
   state.progress[pid][tid].status=next;
   const tasks=pupilTasks(pid);
   const wasDone=tasks.every(t=>t.id===tid?cur===2:getStatus(pid,t.id)===2);
   if(isPupilComplete(pid)&&!wasDone){ const p=state.pupils.find(x=>x.id===pid); if(p) setTimeout(()=>showCelebration(displayName(p)),80); }
   saveState(); renderBoard();
-  // After completing a task, show smiley popup
+  showUndoBtn();
   if(next===2){ openSmileyPopup(pid,tid); }
+}
+
+function undoLastAction(){
+  if(!lastAction) return;
+  if(lastAction.type==='status'){
+    const {pid,tid,prevStatus,prevSmiley}=lastAction;
+    if(!state.progress[pid]) state.progress[pid]={};
+    state.progress[pid][tid]={status:prevStatus,smiley:prevSmiley};
+    saveState(); renderBoard();
+  }
+  lastAction=null;
+  hideUndoBtn();
+}
+
+function showUndoBtn(){
+  const btn=document.getElementById('btn-undo');
+  if(btn) btn.classList.remove('hidden');
+  // Auto-verberg na 8 seconden
+  clearTimeout(window._undoTimer);
+  window._undoTimer=setTimeout(()=>{ hideUndoBtn(); lastAction=null; },8000);
+}
+function hideUndoBtn(){
+  const btn=document.getElementById('btn-undo');
+  if(btn) btn.classList.add('hidden');
 }
 
 function setSmiley(val){
@@ -225,7 +255,16 @@ function closeTaskRename(){
 }
 
 // EXPORT / IMPORT / KLASLIJST
-function exportData(){ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='klasbord-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href); }
+function exportData(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));
+  a.download='klasbord-backup-'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  // Sla tijdstip laatste backup op
+  localStorage.setItem('last_export_'+STORAGE_KEY, Date.now());
+  hideBackupReminder();
+}
 function importData(e){ const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.pupils){alert('Ongeldig bestand.');return;}confirmAction('custom',`Bord vervangen door backup van ${f.name}?`,()=>{state={...state,...d};saveState();renderShell();});}catch{alert('Kon bestand niet lezen.');}};r.readAsText(f);e.target.value=''; }
 function saveClassList(){ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({pupils:state.pupils},null,2)],{type:'application/json'}));a.download='klaslijst-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href); }
 let _loadNames=null;
@@ -698,6 +737,14 @@ function renderPupilList(){
   document.getElementById('toggle-smileys').checked=!!state.showSmileys;
   document.getElementById('pupil-count-title').textContent=`Leerlingen (${state.pupils.length})`;
 
+  // Eerste-keer-hint foto's (punt 3) — toon als er leerlingen zijn maar nog geen foto
+  const hasAnyPhoto = state.pupils.some(p => state.pupilPhotos[p.id]);
+  const hintDismissed = localStorage.getItem('hint_photos_dismissed');
+  const hintEl = document.getElementById('hint-photos');
+  if(hintEl){
+    hintEl.style.display = (!hasAnyPhoto && !hintDismissed && state.pupils.length > 0) ? 'flex' : 'none';
+  }
+
   // Leerlingenlijst — foto-knop direct zichtbaar naast elke naam
   const el=document.getElementById('pupil-list');
   if(!state.pupils.length){el.innerHTML='<div style="opacity:.3;text-align:center;padding:28px 0;font-size:13px">Nog geen leerlingen</div>';return;}
@@ -739,6 +786,14 @@ function renderPupilList(){
 }
 function renderTaskSettings(){
   const ci=state.customIcons||{};
+
+  // Eerste-keer-hint pictogrammen (punt 3)
+  const hasAnyIcon = Object.keys(ci).length > 0;
+  const iconHintDismissed = localStorage.getItem('hint_icons_dismissed');
+  const iconHintEl = document.getElementById('hint-icons');
+  if(iconHintEl){
+    iconHintEl.style.display = (!hasAnyIcon && !iconHintDismissed) ? 'flex' : 'none';
+  }
 
   // Taakchips met direct zichtbaar upload-knopje én naam-bewerk knopje
   const chipsEl=document.getElementById('task-chips');
@@ -797,6 +852,13 @@ function renderTaskSettings(){
 function selectEmoji(e){selectedEmoji=e;renderTaskSettings();}
 
 function renderBoard(){
+  applyBoardSize();
+  checkBackupReminder();
+  // Sync grootte-knoppen
+  ['compact','normal','large'].forEach(s=>{
+    const btn=document.getElementById('size-'+s);
+    if(btn) btn.classList.toggle('size-btn-active', s===(state.boardSize||'normal'));
+  });
   const hp=state.pupils.length>0,ht=classActiveTasks().length>0||state.pupils.some(p=>(state.pupilTaskOverrides[p.id]?.extra||[]).length>0),show=hp&&ht;
   document.getElementById('empty-state').classList.toggle('hidden',show);
   document.getElementById('board-inner').classList.toggle('hidden',!show);
@@ -897,8 +959,49 @@ function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // INIT
-// ── SMARTBOARD MODUS ─────────────────────────────────────────────────────────
+// Punt 5: Bord-grootte instellen
+function setBoardSize(size){
+  state.boardSize = size;
+  saveState();
+  applyBoardSize();
+  renderBoard();
+  // Update actieve knop
+  ['compact','normal','large'].forEach(s=>{
+    const btn=document.getElementById('size-'+s);
+    if(btn) btn.classList.toggle('size-btn-active', s===size);
+  });
+}
+function applyBoardSize(){
+  const sizes = {
+    compact: { name:'120px', task:'90px',  gap:'5px',  btnW:'46px', btnH:'46px', btnFont:'20px', nameFont:'13px' },
+    normal:  { name:'220px', task:'120px', gap:'8px',  btnW:'66px', btnH:'66px', btnFont:'26px', nameFont:'16px' },
+    large:   { name:'260px', task:'150px', gap:'10px', btnW:'84px', btnH:'84px', btnFont:'32px', nameFont:'18px' },
+  };
+  const s = sizes[state.boardSize] || sizes.normal;
+  const root = document.documentElement;
+  root.style.setProperty('--col-name', s.name);
+  root.style.setProperty('--col-task', s.task);
+  root.style.setProperty('--gap', s.gap);
+  root.style.setProperty('--btn-w', s.btnW);
+  root.style.setProperty('--btn-h', s.btnH);
+  root.style.setProperty('--btn-font', s.btnFont);
+  root.style.setProperty('--name-font', s.nameFont);
+}
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
+function hideBackupReminder(){
+  const el = document.getElementById('backup-reminder');
+  if(el) el.style.display = 'none';
+}
+function checkBackupReminder(){
+  if(!state.pupils.length) return; // geen data = geen melding nodig
+  const last = parseInt(localStorage.getItem('last_export_'+STORAGE_KEY)||'0');
+  const days = (Date.now() - last) / (1000*60*60*24);
+  const el = document.getElementById('backup-reminder');
+  if(!el) return;
+  // Toon als: nooit gebackupt (last=0) én er zijn leerlingen, of laatste backup > 7 dagen
+  el.style.display = (last === 0 || days > 7) ? 'flex' : 'none';
+}
+
 function applySmartboard(){
   if(!isSmartboard) return;
   document.body.classList.add('smartboard');
@@ -943,6 +1046,7 @@ currentMode = urlParams.get('view') === 'board' ? 'board' : 'settings';
 currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
 applySmartboard();
+applyBoardSize();
 renderShell();
 
 // ── TIMER ────────────────────────────────────────────────────────────────────
