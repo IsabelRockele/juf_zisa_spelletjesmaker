@@ -6,6 +6,8 @@
 <title>Klasbord – TEST versie</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="klasbord.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -81,7 +83,7 @@ Lena
 <span id="pupil-count-title" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
 <button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 Alfabetisch</button>
 </div>
-<div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen<br/>Beweeg muis tussen namen → blauwe streep = invoegen</div>
+<div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto toevoegen</strong><br/>Beweeg muis tussen namen → blauwe streep = invoegen</div>
 <div id="pupil-list"></div>
 </div>
 </div>
@@ -90,7 +92,7 @@ Lena
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <div class="card">
 <div class="card-title">📋 Klassikale taken</div>
-<div class="card-hint">Klik om taken aan/uit te zetten. Per leerling aanpassen via 📋.</div>
+<div class="card-hint">Klik op een taak om aan/uit te zetten. Klik 📷 onder een taak om een eigen afbeelding te uploaden.</div>
 <div class="task-chips" id="task-chips"></div>
 </div>
 <div class="card">
@@ -110,13 +112,14 @@ Lena
 <span class="board-progress-text" id="board-progress-text">0/0 klaar</span>
 <button class="btn btn-ghost btn-sm hidden" id="btn-reset" onclick="confirmAction('reset')">🔄 Reset dag</button>
 </div>
-<div class="board-bar-right"><button class="btn back-btn-orange btn-sm" onclick="goBackFromBoard()">← Vorig scherm</button>
-<button class="btn btn-ghost btn-sm" onclick="openPdfModal()">📄 PDF rapport</button>
-<button class="btn btn-ghost btn-sm" onclick="showExportInfo()">💾 Export</button>
-<button class="btn btn-ghost btn-sm" onclick="document.getElementById('import-file').click()">📂 Import</button>
+<div class="board-bar-right">
+<button class="btn back-btn-orange btn-sm teacher-only" onclick="goBackFromBoard()">← Vorig scherm</button>
+<button class="btn btn-ghost btn-sm teacher-only" onclick="openPdfModal()">📄 PDF rapport</button>
+<button class="btn btn-ghost btn-sm teacher-only" onclick="showExportInfo()">💾 Export</button>
+<button class="btn btn-ghost btn-sm teacher-only" onclick="showImportInfo()">📂 Import</button>
 <input accept=".json" class="hidden" id="import-file" onchange="importData(event)" type="file"/>
-<button class="btn btn-ghost btn-sm" onclick="document.getElementById('help-overlay').classList.remove('hidden')">❓ Uitleg</button>
-<button class="btn btn-indigo" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
+<button class="btn btn-ghost btn-sm teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')">❓ Uitleg</button>
+<button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
 </div>
 </div>
 <div id="board-scroll">
@@ -183,36 +186,61 @@ Lena
 <p class="modal-sub">Overzicht van alle leerlingen + detailpagina per leerling met taken, smileys en bevindingen.</p>
 <div class="pdf-field"><label>Naam van de periode</label><input id="pdf-period-name" placeholder="bv. Week 14 of November" type="text"/></div>
 <div class="pdf-row"><div class="pdf-field"><label>Van</label><input id="pdf-date-from" type="date"/></div><div class="pdf-field"><label>Tot</label><input id="pdf-date-to" type="date"/></div></div>
-<div class="info-box blue" style="margin-bottom:12px;">
-<strong style="display:block;margin-bottom:6px;">Kies hoe je het rapport wil bewaren:</strong>
-<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-<button class="btn btn-primary" onclick="generateAndPrint('download')" style="flex:1">⬇️ Downloaden als PDF</button>
-<button class="btn btn-secondary" onclick="generateAndPrint('print')" style="flex:1">🖨️ Afdrukken</button>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+  <button class="btn btn-primary" onclick="generateAndPrint('download')" style="flex:1;padding:12px;">⬇️ Downloaden als PDF</button>
+  <button class="btn btn-secondary" onclick="generateAndPrint('print')" style="flex:1;padding:12px;">🖨️ Afdrukken</button>
 </div>
-<div style="font-size:11px;line-height:1.5;"><strong>⬇ Downloaden</strong> = PDF bestand direct op je computer.<br/><strong>🖨 Afdrukken</strong> = via afdrukvenster, kies dan "Bestemming: Opslaan als PDF".</div>
+<div class="info-box blue" style="font-size:11px;line-height:1.6;margin-bottom:0;">
+  <strong>⬇️ Downloaden</strong> — PDF komt direct in je Downloads-map.<br/>
+  <strong>🖨️ Afdrukken</strong> — opent afdrukvenster (ook bruikbaar om op te slaan als PDF).
 </div>
 <div class="modal-btns"><button class="btn btn-secondary" onclick="document.getElementById('pdf-overlay').classList.add('hidden')">Annuleren</button></div>
 </div>
 </div><div class="overlay hidden" id="export-overlay">
-<div class="modal" style="max-width:460px;">
+<div class="modal" style="max-width:480px;">
 <div class="modal-title">💾 Backup opslaan</div>
+<div class="info-box blue" style="margin-bottom:10px;">
+  <strong style="display:block;margin-bottom:4px;">📌 Wat is een backup?</strong>
+  Een backup is een bestand dat al je gegevens bevat: namen, taken, voortgang en bevindingen. Je kan het later opnieuw inladen als je browser wordt gewist of als je op een andere computer werkt.
+</div>
 <div class="info-box green">
-<strong>📌 Hoe werkt het?</strong><br/>
-      1. Klik op <strong>"Backup downloaden"</strong> hieronder<br/>
-      2. Het bestand gaat naar je <strong>Downloads-map</strong><br/>
-      3. Klik op het <strong>mapje-icoontje</strong> naast het bestand — sla het op een veilige plek op<br/>
-      4. ⚠️ <strong>Klik het bestand NIET open</strong> — je ziet dan enkel cryptische tekst, dat is normaal<br/>
-      5. Gebruik de <strong>📂 Import-knop</strong> om het later terug te laden
-    </div>
+<strong>Hoe een backup opslaan (stap voor stap):</strong><br/><br/>
+1. Klik op <strong>"Backup downloaden"</strong> hieronder.<br/>
+2. Er verschijnt onderaan je scherm een bestand (of in je Downloads-map).<br/>
+3. Klik met de <strong>rechtermuisknop</strong> op het bestand → kies <em>"Opslaan als"</em> of sleep het naar een map die je makkelijk terugvindt (bv. een map "Klasbord backups" op je bureaublad).<br/>
+4. ⚠️ <strong>Klik het bestand NIET zomaar open</strong> — je ziet dan rare tekens, dat is normaal, het bestand is niet stuk.<br/>
+5. Om het terug te laden: klik op de <strong>📂 Import-knop</strong> op het klasbord en kies het bewaard bestand.
+</div>
 <div class="info-box amber">
-      💡 <strong>Tip:</strong> Maak een backup aan het einde van elke periode. Zo ben je nooit gegevens kwijt als je browser wordt gewist.
-    </div>
+💡 <strong>Tip:</strong> Maak een backup aan het einde van elke periode. Geef het bestand een duidelijke naam, bv. <em>backup-week14.json</em>.
+</div>
 <div class="modal-btns">
 <button class="btn btn-secondary" onclick="document.getElementById('export-overlay').classList.add('hidden')">Annuleren</button>
 <button class="btn btn-primary" onclick="exportData();document.getElementById('export-overlay').classList.add('hidden')">⬇️ Backup downloaden</button>
 </div>
 </div>
-</div><div class="overlay hidden" id="new-period-overlay">
+</div><div class="overlay hidden" id="import-overlay">
+<div class="modal" style="max-width:460px;">
+<div class="modal-title">📂 Backup terugzetten</div>
+<div class="info-box blue" style="margin-bottom:10px;">
+  Een backup is een bestand dat je eerder hebt opgeslagen via de <strong>💾 Export-knop</strong>. Het heeft een naam zoals <em>klasbord-backup-2024-11-15.json</em>.
+</div>
+<div class="info-box green">
+<strong>Hoe een backup terugzetten:</strong><br/><br/>
+1. Zorg dat je het backupbestand weet te vinden op je computer (bv. in Downloads of in je map "Klasbord backups").<br/>
+2. Klik hieronder op <strong>"Kies backupbestand"</strong>.<br/>
+3. Zoek het bestand op en klik op <strong>Openen</strong>.<br/>
+4. Je gegevens worden hersteld.
+</div>
+<div class="info-box amber">
+⚠️ <strong>Let op:</strong> het huidig bord wordt vervangen door de backup. Maak eerst zelf een nieuwe backup als je de huidige gegevens wil bewaren.
+</div>
+<div class="modal-btns">
+<button class="btn btn-secondary" onclick="document.getElementById('import-overlay').classList.add('hidden')">Annuleren</button>
+<button class="btn btn-primary" onclick="document.getElementById('import-overlay').classList.add('hidden');document.getElementById('import-file').click()">📂 Kies backupbestand</button>
+</div>
+</div>
+</div>
 <div class="modal" style="max-width:480px;">
 <div class="modal-title">🔄 Nieuwe periode starten</div>
 <p class="modal-sub">Kies wat je wil bewaren en wat je wil wissen.</p>
@@ -253,7 +281,12 @@ Lena
 <li>Klik op een taak om ze <strong>aan of uit</strong> te zetten voor de hele klas</li>
 <li>Voeg een <strong>eigen taak</strong> toe met een pictogram naar keuze</li>
 <li>Per leerling taken aanpassen via 📋 in de leerlingenlijst</li>
+<li><strong>📷 Eigen pictogram</strong> — klik het 📷-knopje naast een taak om een eigen afbeelding te uploaden (jpg, png, gif, webp). De afbeelding past zich automatisch aan zodat niets wordt afgesneden.</li>
 </ul>
+</div>
+<div class="help-section">
+<h3>👦 Leerlingfoto toevoegen</h3>
+<p>Klik het 📷-knopje naast een leerlingnaam om een foto of afbeelding toe te voegen. Die verschijnt dan op het bord naast de naam. Klik 🗑 om de foto te verwijderen.</p>
 </div>
 <div class="help-section">
 <h3>🔄 Nieuwe periode</h3>
@@ -292,13 +325,26 @@ Lena
 <p>Klik "📄 PDF rapport" → kies <strong>Downloaden als PDF</strong> voor een direct bestand, of <strong>Afdrukken</strong> voor het afdrukvenster.</p>
 </div>
 <div class="help-section">
-<h3>💾 Backup bewaren</h3>
-<p>Klik "💾 Export" voor een uitleg over hoe je een backup maakt. Klik "📂 Import" om een backup terug te laden.</p>
+<h3>💾 Backup bewaren (Export / Import)</h3>
+<p><strong>Export</strong> = sla al je gegevens op als bestand op je computer. Klik op "💾 Export" voor stap-voor-stap uitleg. Bewaar het bestand op een plek die je makkelijk terugvindt.<br/>
+<strong>Import</strong> = zet een eerder bewaarde backup terug. Klik op "📂 Import" en kies je backupbestand. <em>Tip: klik het backupbestand nooit zomaar open — je ziet dan rare tekens, maar het bestand is niet stuk.</em></p>
 </div>
 <div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-overlay').classList.add('hidden')">Begrepen!</button></div>
 </div>
 </div><div id="celebration" onclick="closeCelebration()">
 <div class="celeb-box"><div class="c-emoji">🎉</div><div class="c-name" id="celeb-name"></div><div class="c-sub">heeft alle taken afgewerkt!</div><div class="c-hint">Tik om te sluiten</div></div>
+</div>
+<!-- RENAME TASK MODAL -->
+<div class="overlay hidden" id="rename-task-overlay">
+<div class="modal" style="max-width:380px;">
+<div class="modal-title">✎ Taaknaam aanpassen</div>
+<p class="modal-sub">Geef deze taak een naam die past bij jouw klas, bv. "Rekenhoek" of "Leesmap".</p>
+<input id="rename-task-input" type="text" placeholder="Nieuwe naam…" onkeydown="if(event.key==='Enter')saveTaskRename()" style="margin-bottom:4px;" />
+<div class="modal-btns">
+  <button class="btn btn-secondary" onclick="closeTaskRename()">Annuleren</button>
+  <button class="btn btn-primary" onclick="saveTaskRename()">Opslaan</button>
+</div>
+</div>
 </div>
 <script src="klasbord.js"></script>
 </body>
