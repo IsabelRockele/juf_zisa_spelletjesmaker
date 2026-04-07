@@ -99,6 +99,11 @@ Lena
   </div>
   <div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto</strong><br/>Muis tussen namen → blauwe streep = invoegen
   <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button></div>
+  <div id="hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
+    <span>💡 <strong>Wist je dat?</strong> Je kan een foto of afbeelding toevoegen bij elke leerling — klik het 📷-knopje naast een naam.</span>
+    <button onclick="localStorage.setItem('hint_photos_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕ Sluiten</button>
+  </div>
+
   <div id="pupil-list"></div>
 </div>
 
@@ -117,6 +122,10 @@ Lena
 <div class="card">
 <div class="card-title">➕ Eigen taak toevoegen</div>
 <div class="card-hint">Kies een emoji en typ een naam. De taak verschijnt direct in de lijst.</div>
+<div id="hint-icons" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
+  <span>💡 <strong>Wist je dat?</strong> Je kan elk emoji-pictogram vervangen door een eigen afbeelding — klik het 📷-knopje onder een taak.</span>
+  <button onclick="localStorage.setItem('hint_icons_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕ Sluiten</button>
+</div>
 <div class="emoji-picker" id="emoji-picker"></div>
 <div style="display:flex;gap:7px;"><input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Taaknaam…" style="flex:1" type="text"/><button class="btn btn-primary" onclick="addCustomTask()">+</button></div>
 </div>
@@ -126,12 +135,26 @@ Lena
 </div>
 <!-- BOARD -->
 <div id="board-wrap">
+
+<!-- Backup-herinnering banner -->
+<div id="backup-reminder" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:9px 14px;margin:8px 12px 0;font-size:12px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
+  <span>⚠️ <strong>Geen recente backup.</strong> Sla je gegevens op als bestand zodat je ze nooit kwijt bent.</span>
+  <button onclick="showExportInfo()" style="border:none;background:#f59e0b;color:#fff;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;">💾 Nu backuppen</button>
+  <button onclick="localStorage.setItem('last_export_'+STORAGE_KEY, Date.now());document.getElementById('backup-reminder').style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;margin-left:auto;">✕ Later</button>
+</div>
 <div id="board-bar">
 <div class="board-bar-left">
 <span class="board-progress-text" id="board-progress-text">0/0 klaar</span>
 <button class="btn btn-ghost btn-sm hidden" id="btn-reset" onclick="confirmAction('reset')">🔄 Reset dag</button>
+<button class="btn btn-undo hidden" id="btn-undo" onclick="undoLastAction()" title="Ongedaan maken">↩ Ongedaan</button>
 </div>
 <div class="board-bar-right">
+<div class="size-btns teacher-only" title="Bordgrootte aanpassen">
+  <span style="font-size:10px;font-weight:800;color:#94a3b8;margin-right:2px;">Grootte:</span>
+  <button id="size-compact" class="size-btn" onclick="setBoardSize('compact')" title="Klein — meer leerlingen op het scherm">S</button>
+  <button id="size-normal"  class="size-btn size-btn-active" onclick="setBoardSize('normal')" title="Normaal">M</button>
+  <button id="size-large"   class="size-btn" onclick="setBoardSize('large')" title="Groot — beter leesbaar op smartboard">L</button>
+</div>
 <button class="btn back-btn-orange btn-sm teacher-only" onclick="goBackFromBoard()">← Vorig scherm</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="openPdfModal()">📄 PDF rapport</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="showExportInfo()">💾 Export</button>
