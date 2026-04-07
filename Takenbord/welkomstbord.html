@@ -6,30 +6,59 @@
 <title>Kies je bord</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="klasbord.css">
+<!-- QR-code bibliotheek (lichtgewicht, geen server nodig) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 body{min-height:100vh;overflow:auto}
 #app-welcome{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);padding:20px}
 .mode-smartboard-link{margin-top:14px;padding:8px 14px;background:rgba(99,102,241,.12);border:1.5px dashed #818cf8;border-radius:10px;font-size:13px;font-weight:800;color:#4338ca;cursor:pointer;transition:all .15s;display:block;text-align:center;}
 .mode-smartboard-link:hover{background:rgba(99,102,241,.22);color:#3730a3;}
-.mode-card.klas .mode-smartboard-link{color:#4338ca;}
 .mode-card.kind .mode-smartboard-link{color:#065f46;border-color:#6ee7b7;background:rgba(16,185,129,.1);}
 .mode-card.kind .mode-smartboard-link:hover{background:rgba(16,185,129,.2);}
 .snelgids{margin-top:20px;padding:14px 18px;background:rgba(99,102,241,.1);border:1.5px solid rgba(99,102,241,.2);border-radius:14px;text-align:left;}
 .snelgids-title{font-size:13px;font-weight:800;color:#3730a3;margin-bottom:8px;}
 .snelgids-body{font-size:12px;color:#4338ca;line-height:1.9;}
-/* Smartboard uitleg modal */
-.sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
-.sb-modal{background:#fff;border-radius:18px;padding:28px 30px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.2);}
-.sb-modal h3{font-size:20px;font-weight:800;color:#1e1b4b;margin-bottom:6px;}
-.sb-modal p{font-size:14px;color:#4b5563;line-height:1.7;margin-bottom:14px;}
+/* Smartboard modal */
+.sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.sb-modal{background:#fff;border-radius:18px;padding:0;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);overflow:hidden;max-height:92vh;overflow-y:auto;}
+.sb-modal-header{background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:20px 24px;color:#fff;}
+.sb-modal-header h3{font-size:20px;font-weight:800;margin:0 0 4px;}
+.sb-modal-header p{font-size:13px;opacity:.85;margin:0;}
+.sb-modal-body{padding:20px 24px;}
 .sb-info{background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;font-size:13px;color:#0369a1;line-height:1.7;margin-bottom:16px;}
-.sb-btns{display:flex;flex-direction:column;gap:8px;}
-.sb-btn-go{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;}
+.sb-warn{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:13px;color:#92400e;line-height:1.7;margin-bottom:16px;}
+.sb-btns{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.sb-btn-go{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;}
 .sb-btn-go:hover{opacity:.9;}
-.sb-btn-setup{background:#e0e7ff;color:#4338ca;border:none;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;}
+.sb-btn-qr{background:#f0fdf4;color:#15803d;border:2px solid #86efac;border-radius:12px;padding:12px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;}
+.sb-btn-qr:hover{background:#dcfce7;}
+.sb-btn-setup{background:#e0e7ff;color:#4338ca;border:none;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;width:100%;}
 .sb-btn-setup:hover{background:#c7d2fe;}
-.sb-btn-cancel{background:none;border:none;color:#9ca3af;font-size:13px;font-weight:700;cursor:pointer;padding:6px;font-family:inherit;}
-.sb-btn-cancel:hover{color:#6b7280;}
+.sb-btn-cancel{background:none;border:none;color:#9ca3af;font-size:13px;font-weight:700;cursor:pointer;padding:6px;font-family:inherit;width:100%;}
+/* QR sectie */
+.qr-section{display:none;border-top:2px solid #e0e7ff;padding-top:18px;margin-top:4px;}
+.qr-section.visible{display:block;}
+.qr-title{font-size:15px;font-weight:800;color:#1e1b4b;margin-bottom:4px;}
+.qr-sub{font-size:12px;color:#6b7280;margin-bottom:14px;line-height:1.6;}
+.qr-box{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;}
+#qr-canvas{flex-shrink:0;border-radius:10px;border:3px solid #e0e7ff;padding:8px;background:#fff;}
+.qr-url-box{flex:1;min-width:160px;}
+.qr-url{font-size:11px;color:#6366f1;word-break:break-all;background:#eef2ff;border-radius:8px;padding:8px;margin-bottom:8px;font-family:monospace;line-height:1.5;}
+.qr-actions{display:flex;flex-direction:column;gap:6px;}
+.qr-btn{border:none;border-radius:9px;padding:8px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;text-align:center;}
+.qr-btn-print{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+.qr-btn-copy{background:#e0e7ff;color:#4338ca;}
+.qr-note{font-size:11px;color:#f59e0b;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:8px;margin-top:10px;line-height:1.6;}
+/* Print stijl voor QR */
+@media print{
+  body > *:not(#qr-print-area){display:none!important;}
+  #qr-print-area{display:block!important;}
+}
+#qr-print-area{display:none;padding:30px;text-align:center;font-family:Nunito,sans-serif;}
+#qr-print-area h2{font-size:24px;font-weight:800;margin-bottom:6px;}
+#qr-print-area p{font-size:14px;color:#4b5563;margin-bottom:20px;}
+#qr-print-area .print-qr{margin:0 auto 16px;}
+#qr-print-area .print-url{font-size:12px;color:#6b7280;word-break:break-all;max-width:300px;margin:0 auto;}
 </style>
 </head>
 <body>
@@ -47,9 +76,8 @@ body{min-height:100vh;overflow:auto}
           <li>Iedereen werkt op hetzelfde bord</li>
           <li>Ideaal voor hoekenwerk</li>
         </ul>
-        <div class="mode-smartboard-link" onclick="event.stopPropagation();openSmartboardInfo('klasbord')">📺 Smartboard-weergave openen</div>
+        <div class="mode-smartboard-link" onclick="event.stopPropagation();openSmartboardInfo('klasbord')">📺 Smartboard / iPad-weergave</div>
       </div>
-
       <div class="mode-card kind" onclick="window.location.href='takenbord_kind.html'">
         <div class="mode-icon">👤</div>
         <div class="mode-title">Kindbord</div>
@@ -58,58 +86,184 @@ body{min-height:100vh;overflow:auto}
           <li>Per kind of groepje werken</li>
           <li>Ideaal voor differentiatie</li>
         </ul>
-        <div class="mode-smartboard-link" onclick="event.stopPropagation();openSmartboardInfo('kindbord')">📺 Smartboard-weergave openen</div>
+        <div class="mode-smartboard-link" onclick="event.stopPropagation();openSmartboardInfo('kindbord')">📺 Smartboard / iPad-weergave</div>
       </div>
     </div>
 
-    <!-- Snelgids BINNEN het witte kader -->
     <div class="snelgids">
       <div class="snelgids-title">Nieuw hier? Zo werkt het:</div>
       <div class="snelgids-body">
         <strong>1. Kies</strong> Klasbord of Kindbord hierboven.<br/>
         <strong>2. Stel in</strong> — voeg leerlingen en taken toe in het beheer-scherm.<br/>
         <strong>3. Ga naar het bord</strong> — klik de groene knop "Naar het bord".<br/>
-        <strong>4. Smartboard?</strong> Klik "Smartboard-weergave" als het bord klaar is — alle beheerknoppen verdwijnen. Terugkeren via het kleine slotje rechtsonder.
+        <strong>4. Smartboard/iPad?</strong> Klik "Smartboard / iPad-weergave" → genereer een QR-code voor iPads.
       </div>
     </div>
   </div>
 </div>
 
-<!-- Smartboard uitleg popup -->
+<!-- Smartboard + QR popup -->
 <div class="sb-overlay" id="sb-overlay" style="display:none;" onclick="if(event.target===this)closeSbInfo()">
   <div class="sb-modal">
-    <h3>📺 Smartboard-weergave</h3>
-    <p>In deze modus zijn alle beheerknoppen verborgen. Kinderen zien enkel de namen en taken — ze kunnen niets fout aanklikken.</p>
-    <div class="sb-info">
-      <strong>Belangrijk vóór je start:</strong><br/>
-      Zorg dat je al leerlingen en taken hebt ingesteld in het beheer-scherm. Anders zie je een leeg bord.<br/><br/>
-      <strong>Terug naar beheer:</strong> klik het kleine <strong>🔒</strong> rechtsonder in het scherm.
+    <div class="sb-modal-header">
+      <h3>📺 Smartboard / iPad-weergave</h3>
+      <p>Beheerknoppen verborgen — kinderen zien enkel namen en taken.</p>
     </div>
-    <div class="sb-btns">
-      <button class="sb-btn-go" id="sb-btn-go" onclick="goToSmartboard()">📺 Smartboard-weergave openen</button>
-      <button class="sb-btn-setup" id="sb-btn-setup" onclick="goToSetup()">⚙️ Eerst leerlingen &amp; taken instellen</button>
-      <button class="sb-btn-cancel" onclick="closeSbInfo()">Annuleren</button>
+    <div class="sb-modal-body">
+      <div class="sb-warn">
+        <strong>Vóór je start:</strong> zorg dat leerlingen en taken al ingesteld zijn. Anders zie je een leeg bord.<br/>
+        <strong>Terug naar beheer:</strong> klik het kleine 🔒 rechtsonder.
+      </div>
+      <div class="sb-btns">
+        <button class="sb-btn-go" onclick="goToSmartboard()">📺 Openen op dit scherm</button>
+        <button class="sb-btn-qr" onclick="toggleQR()">📱 QR-code genereren voor iPad</button>
+        <button class="sb-btn-setup" onclick="goToSetup()">⚙️ Eerst leerlingen &amp; taken instellen</button>
+        <button class="sb-btn-cancel" onclick="closeSbInfo()">Annuleren</button>
+      </div>
+
+      <!-- QR sectie -->
+      <div class="qr-section" id="qr-section">
+        <div class="qr-title">📱 QR-code voor iPad</div>
+        <div class="qr-sub">
+          Kinderen scannen deze QR-code met de iPad-camera en komen direct op het bord.<br/>
+          <strong>Tip:</strong> druk de QR-code af en hang hem op in de klas.
+        </div>
+        <div class="qr-box">
+          <div id="qr-canvas"></div>
+          <div class="qr-url-box">
+            <div class="qr-url" id="qr-url-text"></div>
+            <div class="qr-actions">
+              <button class="qr-btn qr-btn-print" onclick="printQR()">🖨️ Afdrukken / Opslaan</button>
+              <button class="qr-btn qr-btn-copy" onclick="copyQRUrl()">📋 Link kopiëren</button>
+            </div>
+          </div>
+        </div>
+        <div class="qr-note">
+          ⚠️ <strong>Belangrijk:</strong> de iPad en dit toestel moeten op <strong>hetzelfde WiFi-netwerk</strong> staan én deze pagina moet via een <strong>lokale server of GitHub Pages</strong> geopend zijn (niet als los bestand).<br/>
+          Kinderen werken op hun eigen iPad — wijzigingen zijn voorlopig niet zichtbaar op het smartboard. Dit komt met een volgende update.
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
+<!-- Print-gebied voor QR -->
+<div id="qr-print-area">
+  <h2 id="qr-print-title">Scan om het bord te openen</h2>
+  <p id="qr-print-sub">Scan met de iPad-camera of een QR-scanner app.</p>
+  <div class="print-qr" id="qr-print-canvas"></div>
+  <div class="print-url" id="qr-print-url"></div>
+</div>
+
 <script>
 var sbTarget = '';
+var qrGenerated = false;
+var qrInstance = null;
+
 function openSmartboardInfo(bord){
   sbTarget = bord;
+  qrGenerated = false;
+  document.getElementById('qr-section').classList.remove('visible');
+  document.getElementById('qr-canvas').innerHTML = '';
   document.getElementById('sb-overlay').style.display = 'flex';
 }
 function closeSbInfo(){
   document.getElementById('sb-overlay').style.display = 'none';
 }
+function getSmartboardUrl(){
+  var base = window.location.href.replace(/welkomstbord\.html.*$/, '');
+  if(sbTarget === 'klasbord') return base + 'klasbord.html?modus=smartboard';
+  return base + 'takenbord_kind.html?modus=smartboard';
+}
+function getIpadUrl(){
+  var base = window.location.href.replace(/welkomstbord\.html.*$/, '');
+  if(sbTarget === 'klasbord') return base + 'klasbord.html?modus=ipad';
+  return base + 'takenbord_kind.html?modus=ipad';
+}
 function goToSmartboard(){
-  if(sbTarget === 'klasbord') window.location.href = 'klasbord.html?modus=smartboard';
-  else window.location.href = 'takenbord_kind.html?modus=smartboard';
+  window.location.href = getSmartboardUrl();
 }
 function goToSetup(){
   closeSbInfo();
   if(sbTarget === 'klasbord') window.location.href = 'klasbord.html?tab=leerlingen';
   else window.location.href = 'takenbord_kind.html';
+}
+
+function toggleQR(){
+  var sec = document.getElementById('qr-section');
+  var isVisible = sec.classList.contains('visible');
+  if(isVisible){
+    sec.classList.remove('visible');
+    return;
+  }
+  sec.classList.add('visible');
+  if(!qrGenerated) generateQR();
+}
+
+function generateQR(){
+  var url = getIpadUrl();
+  document.getElementById('qr-url-text').textContent = url;
+  document.getElementById('qr-canvas').innerHTML = '';
+
+  // Controleer of QRCode bibliotheek beschikbaar is
+  if(typeof QRCode === 'undefined'){
+    document.getElementById('qr-canvas').innerHTML =
+      '<div style="padding:20px;font-size:13px;color:#dc2626;background:#fee2e2;border-radius:8px;max-width:200px;">QR-bibliotheek kon niet geladen worden. Kopieer de link handmatig.</div>';
+    return;
+  }
+
+  qrInstance = new QRCode(document.getElementById('qr-canvas'), {
+    text: url,
+    width: 160,
+    height: 160,
+    colorDark: '#1e1b4b',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  qrGenerated = true;
+}
+
+function copyQRUrl(){
+  var url = getIpadUrl();
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(function(){
+      var btn = document.querySelector('.qr-btn-copy');
+      var orig = btn.textContent;
+      btn.textContent = '✓ Gekopieerd!';
+      btn.style.background = '#dcfce7';
+      btn.style.color = '#15803d';
+      setTimeout(function(){ btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 2000);
+    });
+  } else {
+    prompt('Kopieer deze link:', url);
+  }
+}
+
+function printQR(){
+  var url = getIpadUrl();
+  var boardName = sbTarget === 'klasbord' ? 'Klasbord' : 'Kindbord';
+
+  // Bouw print-pagina op
+  document.getElementById('qr-print-title').textContent = 'Scan om ' + boardName + ' te openen';
+  document.getElementById('qr-print-sub').textContent = 'Scan met de iPad-camera. WiFi vereist.';
+  document.getElementById('qr-print-url').textContent = url;
+
+  // Genereer grotere QR voor afdrukken
+  var printCanvas = document.getElementById('qr-print-canvas');
+  printCanvas.innerHTML = '';
+  if(typeof QRCode !== 'undefined'){
+    new QRCode(printCanvas, {
+      text: url,
+      width: 220,
+      height: 220,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+
+  setTimeout(function(){ window.print(); }, 300);
 }
 </script>
 </body>
