@@ -35,71 +35,88 @@
 </div>
 <div id="tab-content-leerlingen">
 <div class="ll-layout">
+
+<!-- LINKER KOLOM: invoer -->
 <div>
-<div class="card">
-<div class="card-title">✏️ Naam toevoegen</div>
-<div style="display:flex;gap:6px;margin-bottom:6px;">
-<div style="flex:1"><div class="name-tag">Voornaam *</div><input id="input-voornaam" onkeydown="if(event.key==='Enter')document.getElementById('input-achternaam').focus()" placeholder="Jana" type="text"/></div>
-<div style="flex:1"><div class="name-tag">Achternaam</div><input id="input-achternaam" onkeydown="if(event.key==='Enter')addPupil()" placeholder="De Smedt" type="text"/></div>
-</div>
-<button class="btn btn-primary" onclick="addPupil()" style="width:100%">+ Toevoegen</button>
-</div>
-<div class="card">
-<div class="card-title">📋 Klaslijst plakken</div>
-<div class="card-hint">Kopieer uit Excel, Word of Smartschool — één naam per regel.</div>
-<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
-<span style="font-size:12px;font-weight:700;color:#4a5568;">Volgorde:</span>
-<button class="sort-chip active" id="order-btn-voor" onclick="setOrder('voornaam')">Voornaam Achternaam</button>
-<button class="sort-chip" id="order-btn-ach" onclick="setOrder('achternaam')">Achternaam Voornaam</button>
-</div>
-<textarea id="bulk-input" placeholder="Jana De Smedt
+
+  <!-- Stap 1: Volgorde EERST -->
+  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="card-title" style="margin-bottom:0;">📋 Stap 1 — Klaslijst plakken</div>
+      <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
+    </div>
+    <div class="card-hint" style="margin-bottom:7px;">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
+    <!-- Volgorde boven het tekstvak -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;padding:6px 10px;background:#f8fafc;border-radius:9px;border:1.5px solid #e0e7ff;flex-wrap:wrap;">
+      <span style="font-size:11px;font-weight:800;color:#4a5568;">Volgorde:</span>
+      <button class="sort-chip active" id="order-btn-voor" onclick="setOrder('voornaam')">Voornaam Achternaam</button>
+      <button class="sort-chip" id="order-btn-ach" onclick="setOrder('achternaam')">Achternaam Voornaam</button>
+    </div>
+    <textarea id="bulk-input" placeholder="Jana De Smedt
 Thomas Peeters
 Lena
-..." style="min-height:80px;margin-bottom:7px;"></textarea>
-<div style="display:flex;gap:6px;">
-<button class="btn btn-primary btn-sm" onclick="bulkAdd()" style="flex:1">➕ Toevoegen</button>
-<button class="btn btn-secondary btn-sm" onclick="bulkReplace()" style="flex:1">🔄 Vervangen</button>
+..." style="min-height:70px;margin-bottom:7px;"></textarea>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-primary btn-sm" onclick="bulkAdd()" style="flex:1">➕ Toevoegen</button>
+      <button class="btn btn-secondary btn-sm" onclick="bulkReplace()" style="flex:1">🔄 Vervangen</button>
+    </div>
+  </div>
+
+  <!-- Stap 2: Eén naam -->
+  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
+    <div class="card-title" style="margin-bottom:8px;">✏️ Stap 2 — Of één naam toevoegen</div>
+    <div style="display:flex;gap:6px;margin-bottom:0;">
+      <div style="flex:1"><div class="name-tag">Voornaam *</div><input id="input-voornaam" onkeydown="if(event.key==='Enter')document.getElementById('input-achternaam').focus()" placeholder="Jana" type="text"/></div>
+      <div style="flex:1"><div class="name-tag">Achternaam</div><input id="input-achternaam" onkeydown="if(event.key==='Enter')addPupil()" placeholder="De Smedt" type="text"/></div>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="addPupil()" style="width:100%;margin-top:7px;">+ Toevoegen</button>
+  </div>
+
+  <!-- Weergave + klaslijst bewaren in één compact kaartje -->
+  <div class="card" style="padding:12px 14px;">
+    <div class="card-title" style="margin-bottom:8px;">⚙️ Instellingen</div>
+    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
+    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
+    <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
+    <div style="font-size:11px;color:#a0aec0;padding-left:50px;margin-bottom:10px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
+    <div style="border-top:1px solid #e2e8f0;padding-top:9px;">
+      <div style="font-size:11px;font-weight:800;color:#a0aec0;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">💾 Klaslijst bewaren / laden</div>
+      <div style="display:flex;gap:6px;">
+        <button class="btn btn-secondary btn-sm" onclick="saveClassList()" style="flex:1">💾 Opslaan</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('load-class-file').click()" style="flex:1">📂 Laden</button>
+        <input accept=".json" class="hidden" id="load-class-file" onchange="loadClassList(event)" type="file"/>
+      </div>
+    </div>
+  </div>
+
 </div>
-</div>
-<div class="card">
-<div class="card-title">⚙️ Weergave</div>
-<div class="toggle-row"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
-<div class="toggle-row"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
-<div class="toggle-row"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor andere kinderen</span></div>
-<div style="font-size:11px;color:#a0aec0;margin-top:-4px;padding-left:50px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
-</div>
-<div class="card">
-<div class="card-title">💾 Klaslijst bewaren</div>
-<div class="card-hint">Sla de namen op als bestand zodat je ze later makkelijk opnieuw kunt laden.</div>
-<div style="display:flex;gap:6px;">
-<button class="btn btn-secondary btn-sm" onclick="saveClassList()" style="flex:1">💾 Opslaan</button>
-<button class="btn btn-ghost btn-sm" onclick="document.getElementById('load-class-file').click()" style="flex:1">📂 Laden</button>
-<input accept=".json" class="hidden" id="load-class-file" onchange="loadClassList(event)" type="file"/>
-</div>
-</div>
-</div>
+
+<!-- RECHTER KOLOM: leerlingenlijst -->
 <div class="card" style="padding:12px 14px;">
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;flex-wrap:wrap;gap:6px;">
-<span id="pupil-count-title" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
-<button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 Alfabetisch</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+    <span id="pupil-count-title" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
+    <button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 Alfabetisch</button>
+  </div>
+  <div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto</strong><br/>Muis tussen namen → blauwe streep = invoegen
+  <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button></div>
+  <div id="pupil-list"></div>
 </div>
-<div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto toevoegen</strong><br/>Beweeg muis tussen namen → blauwe streep = invoegen
-<button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ meer uitleg</button></div>
-<div id="pupil-list"></div>
-</div>
+
 </div>
 </div>
 <div class="hidden" id="tab-content-taken">
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <div class="card">
-<div class="card-title">📋 Klassikale taken</div>
-<div class="card-hint">Klik op een taak om aan/uit te zetten. <strong>✎ naam</strong> = naam wijzigen. <strong>📷 afb.</strong> = eigen afbeelding uploaden.
-<button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg taken</button></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+<div class="card-title" style="margin-bottom:0;">📋 Klassikale taken</div>
+<button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
+</div>
+<div class="card-hint" style="margin-bottom:9px;">Klik op een taak = aan/uit zetten. Onder elke taak: <strong>✎ naam</strong> wijzigen · <strong>📷 afb.</strong> eigen afbeelding.</div>
 <div class="task-chips" id="task-chips"></div>
 </div>
 <div class="card">
 <div class="card-title">➕ Eigen taak toevoegen</div>
-<div class="card-hint">Kies een pictogram en typ een naam.</div>
+<div class="card-hint">Kies een emoji en typ een naam. De taak verschijnt direct in de lijst.</div>
 <div class="emoji-picker" id="emoji-picker"></div>
 <div style="display:flex;gap:7px;"><input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Taaknaam…" style="flex:1" type="text"/><button class="btn btn-primary" onclick="addCustomTask()">+</button></div>
 </div>
