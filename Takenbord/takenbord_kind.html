@@ -5,6 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Takenbord per kind</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
   :root{
     --bg:#f3f4f8;
@@ -532,6 +534,42 @@
 .back-btn-orange:hover{
   opacity:.92;
 }
+
+/* EIGEN AFBEELDINGEN – leerlingkaart */
+.name-card-photo-wrap { margin-bottom:8px; }
+.name-card-photo { width:64px; height:64px; border-radius:50%; object-fit:cover; border:3px solid rgba(255,255,255,.7); box-shadow:0 2px 8px rgba(0,0,0,.12); }
+
+/* EIGEN AFBEELDINGEN – taakrij */
+.task-icon-img { width:56px; height:56px; border-radius:16px; object-fit:contain; background:#f3f4f6; flex-shrink:0; }
+
+/* PILL met foto */
+.pill-photo { width:28px; height:28px; border-radius:50%; object-fit:cover; vertical-align:middle; margin-right:4px; border:2px solid rgba(255,255,255,.6); }
+.pill-photo-btn { position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; border:none; background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.18); font-size:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2; }
+
+/* Chip upload knop */
+.chip-task-img { width:20px; height:20px; object-fit:contain; border-radius:4px; vertical-align:middle; margin-right:3px; }
+.chip-upload-btn { border:none; background:rgba(255,255,255,.8); border-radius:8px; padding:4px 6px; font-size:13px; cursor:pointer; opacity:.7; transition:opacity .12s; }
+.chip-upload-btn:hover { opacity:1; }
+
+/* Smartboard-modus: teacher-only elementen verborgen */
+body.smartboard .teacher-only { display:none !important; }
+
+/* Taaknaam-wrap in teacher modal */
+.kind-task-wrap { display:inline-flex; flex-direction:column; align-items:center; gap:2px; }
+.chip-task-img { width:18px; height:18px; object-fit:contain; border-radius:3px; vertical-align:middle; margin-right:3px; }
+.smiley-row-single { justify-content:flex-start; }
+.smiley-chip-chosen { min-width:56px !important; height:56px !important; font-size:28px !important; background:#f0fdf4 !important; outline:3px solid #86efac !important; opacity:1 !important; cursor:pointer !important; }
+
+/* Upload-rijen in teacher modal */
+.kind-upload-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:14px; border:1px solid #e5e7eb; background:#f9fafb; margin-bottom:8px; flex-wrap:wrap; }
+.kind-upload-row:last-child { margin-bottom:0; }
+.kind-upload-preview { width:48px; height:48px; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:12px; background:#fff; border:2px solid #e0e7ff; overflow:hidden; }
+.kind-upload-thumb { width:44px; height:44px; object-fit:contain; border-radius:10px; }
+.kind-upload-thumb-round { border-radius:50%; object-fit:cover; }
+.kind-upload-emoji { font-size:26px; line-height:1; }
+.kind-upload-label { flex:1; font-size:17px; font-weight:800; color:#1f2937; min-width:100px; }
+.kind-upload-btns { display:flex; gap:8px; flex-wrap:wrap; }
+.kind-upload-btn { padding:10px 14px !important; font-size:15px !important; border-radius:12px !important; }
 .setup-screen{
   display:block;
 }
@@ -880,8 +918,10 @@ Noor Janssens"></textarea>
 <section id="names-screen" style="display:none;">
 <h1>Kies je naam</h1>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
-<div class="names-topbar"><button class="back-btn-orange" onclick="goBackToSetup()" type="button">← Vorig scherm</button>
-<button class="teacher-btn" id="openTeacherBtn">⚙️ Taken toewijzen</button>
+<div class="names-topbar">
+  <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Instellingen</button>
+  <button class="teacher-btn teacher-only" id="openTeacherBtn">⚙️ Taken toewijzen</button>
+  <button class="teacher-btn teacher-only" onclick="openPdfModalKind()" type="button">📄 PDF rapport</button>
 </div>
 <div class="name-grid" id="nameGrid"></div>
 <div class="empty-box" id="emptyNames" style="display:none;">
@@ -961,6 +1001,20 @@ Noor Janssens"></textarea>
 <button class="apply-btn" id="applyAssignmentsBtn">Toewijzen aan selectie</button>
 <button class="close-btn" id="clearAssignmentsBtn">Persoonlijke taken wissen voor selectie</button>
 <button class="teacher-btn" id="teacherDoneBtn">Klaar</button>
+</div>
+
+<!-- Eigen pictogrammen voor taken -->
+<div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:20px;">
+  <h4 style="font-size:20px;margin:0 0 8px;">🖼️ Eigen pictogrammen voor taken</h4>
+  <p style="font-size:15px;color:#6b7280;margin:0 0 14px;">Vervang het emoji-pictogram van een taak door een eigen afbeelding (jpg, png, gif, webp). Niets wordt afgesneden.</p>
+  <div id="kindIconUploadList"></div>
+</div>
+
+<!-- Foto's bij namen -->
+<div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:20px;">
+  <h4 style="font-size:20px;margin:0 0 8px;">📷 Foto's bij namen</h4>
+  <p style="font-size:15px;color:#6b7280;margin:0 0 14px;">Voeg een foto of afbeelding toe bij elke leerling. Die verschijnt dan op de namenkaart.</p>
+  <div id="kindPhotoUploadList"></div>
 </div>
 </div>
 </div>
@@ -1083,6 +1137,10 @@ function loadState(){
   state.kindBoardOnlyPersonal = !!state.kindBoardOnlyPersonal;
   state.nameOrder = state.nameOrder || 'voornaam';
   state.showLastname = !!state.showLastname;
+  state.customIcons = state.customIcons || {};
+  state.pupilPhotos = state.pupilPhotos || {};
+  state.taskLabelOverrides = state.taskLabelOverrides || {};
+  state.notes = state.notes || {};
 
   setupNameOrder = state.nameOrder;
   setupShowLastname = state.showLastname;
@@ -1224,7 +1282,9 @@ function removeSetupPupil(pupilId){
 }
 
 function allTasks(){
-  return [...DEFAULT_TASKS, ...(state.customTasks || [])];
+  const overrides = state.taskLabelOverrides || {};
+  const defaults = DEFAULT_TASKS.map(t => overrides[t.id] ? {...t, label: overrides[t.id]} : t);
+  return [...defaults, ...(state.customTasks || [])];
 }
 
 function taskById(taskId){
@@ -1295,8 +1355,11 @@ function renderNames(){
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = `name-card p${(index % 6) + 1}` + (needsAssignment ? ' needs-assignment' : '');
+    const photo = state.pupilPhotos[pupil.id];
+    const photoHtml = photo ? `<div class="name-card-photo-wrap"><img class="name-card-photo" src="${photo}" alt="${getVisibleName(pupil)}" /></div>` : '';
     btn.innerHTML = `
-            <div class="name">${getVisibleName(pupil)}</div>
+      ${photoHtml}
+      <div class="name">${getVisibleName(pupil)}</div>
       <div class="task-info">${taskText(remainingCount(pupil), pupil.id)}</div>
       ${needsAssignment ? '<span class="assign-hint">Nog taken geven</span>' : ''}
     `;
@@ -1378,10 +1441,15 @@ function renderTasks(){
     const row = document.createElement('div');
     row.className = `task-row status-${entry.status}-row`;
 
+    const ci = state.customIcons[task.id];
+    const iconContent = ci
+      ? `<img class="task-icon-img" src="${ci}" alt="${task.label}" />`
+      : `<div class="task-icon">${task.icon}</div>`;
+
     const left = document.createElement('div');
     left.className = 'task-left';
     left.innerHTML = `
-      <div class="task-icon">${task.icon}</div>
+      ${iconContent}
       <div>
         <div class="task-label">${task.label}</div>
         <div class="task-sub">${statusText(entry.status)}</div>
@@ -1403,24 +1471,20 @@ function renderTasks(){
     row.appendChild(left);
     row.appendChild(actions);
 
+    // Smiley: toon enkel de gekozen smiley als klikbaar knopje om te wijzigen
     if(entry.smiley > 0){
       const smileyRow = document.createElement('div');
-      smileyRow.className = 'smiley-row';
-      for(let i = 1; i <= 4; i++){
-        const s = document.createElement('button');
-        s.type = 'button';
-        s.className = 'smiley-chip' + (entry.smiley === i ? ' active' : '');
-        s.textContent = SMILEYS[i];
-        s.addEventListener('click', () => {
-          if(!state.progress[currentPupil.id]) state.progress[currentPupil.id] = {};
-          const old = state.progress[currentPupil.id][task.id] || { status:2, smiley:0 };
-          state.progress[currentPupil.id][task.id] = { ...old, smiley:i };
-          saveState();
-          renderTasks();
-          renderNames();
-        });
-        smileyRow.appendChild(s);
-      }
+      smileyRow.className = 'smiley-row smiley-row-single';
+      const s = document.createElement('button');
+      s.type = 'button';
+      s.className = 'smiley-chip smiley-chip-chosen active';
+      s.textContent = SMILEYS[entry.smiley];
+      s.title = 'Klik om te wijzigen';
+      s.addEventListener('click', () => {
+        pendingTaskId = task.id;
+        openSmileyPopup();
+      });
+      smileyRow.appendChild(s);
       const wrapper = document.createElement('div');
       wrapper.style.width = '100%';
       wrapper.appendChild(smileyRow);
@@ -1444,49 +1508,228 @@ function closeTeacherModal(){
   document.getElementById('teacherOverlay').classList.remove('show');
 }
 
+// ── AFBEELDINGEN UPLOADEN ────────────────────────────────────────────────────
+function resizeImageToDataURL(file, size, cb){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const ratio = Math.min(size / img.width, size / img.height);
+      const w = img.width * ratio, h = img.height * ratio;
+      const x = (size - w) / 2, y = (size - h) / 2;
+      ctx.clearRect(0, 0, size, size);
+      ctx.drawImage(img, x, y, w, h);
+      cb(canvas.toDataURL('image/png'));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadTaskIconKind(taskId){
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    resizeImageToDataURL(f, 80, dataURL => {
+      state.customIcons[taskId] = dataURL;
+      saveState();
+      renderTeacherModal();
+      renderTasks();
+    });
+  };
+  inp.click();
+}
+
+function removeTaskIconKind(taskId){
+  delete state.customIcons[taskId];
+  saveState();
+  renderTeacherModal();
+  renderTasks();
+}
+
+function uploadPupilPhotoKind(pupilId){
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/jpeg,image/png,image/gif,image/webp';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    resizeImageToDataURL(f, 80, dataURL => {
+      state.pupilPhotos[pupilId] = dataURL;
+      saveState();
+      renderTeacherModal();
+      renderNames();
+    });
+  };
+  inp.click();
+}
+
+function removePupilPhotoKind(pupilId){
+  delete state.pupilPhotos[pupilId];
+  saveState();
+  renderTeacherModal();
+  renderNames();
+}
+// ── EINDE AFBEELDINGEN ───────────────────────────────────────────────────────
+
 function renderTeacherModal(){
   const pupilGrid = document.getElementById('teacherPupilGrid');
   const taskGrid = document.getElementById('teacherTaskGrid');
   pupilGrid.innerHTML = '';
   taskGrid.innerHTML = '';
 
+  // Leerlingen selectie: selectiepil + bevindingen knop ernaast
   state.pupils.forEach(pupil => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
     const hasOwn = hasPersonalAssignments(pupil.id);
     const needsTask = state.kindBoardOnlyPersonal && !hasOwn;
+    const photo = state.pupilPhotos[pupil.id];
+    const hasNotes = !!state.notes[pupil.id];
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;';
+
+    // Selectiepil
+    const btn = document.createElement('button');
+    btn.type = 'button';
     btn.className = 'select-pill'
       + (needsTask ? ' needs-task' : '')
       + (hasOwn ? ' has-own' : '')
       + (teacherSelectedPupils.has(pupil.id) ? ' active' : '');
-    btn.innerHTML = `
-            <span class="select-pill-top">${getVisibleName(pupil)}</span>
-      <span class="select-pill-sub">${
-        needsTask ? 'nog taken geven' :
-        hasOwn ? `${(state.personalAssignments[pupil.id] || []).length} eigen taken` :
-        'volgt klasbord'
-      }</span>
-    `;
+    btn.style.flex = '1';
+    const photoHtml = photo ? `<img class="pill-photo" src="${photo}" alt="" />` : '';
+    btn.innerHTML = `${photoHtml}<span class="select-pill-top">${getVisibleName(pupil)}</span>
+      <span class="select-pill-sub">${needsTask ? 'nog taken geven' : hasOwn ? `${(state.personalAssignments[pupil.id]||[]).length} eigen taken` : 'volgt klasbord'}</span>`;
     btn.addEventListener('click', () => {
       if(teacherSelectedPupils.has(pupil.id)) teacherSelectedPupils.delete(pupil.id);
       else teacherSelectedPupils.add(pupil.id);
       renderTeacherModal();
     });
-    pupilGrid.appendChild(btn);
+    wrap.appendChild(btn);
+
+    // Bevindingen-knop
+    const notesBtn = document.createElement('button');
+    notesBtn.type = 'button';
+    notesBtn.title = hasNotes ? 'Bevindingen bekijken/aanpassen' : 'Bevindingen toevoegen';
+    notesBtn.style.cssText = `width:36px;height:36px;border:none;border-radius:10px;cursor:pointer;font-size:18px;flex-shrink:0;background:${hasNotes?'#fef9c3':'#f3f4f6'};`;
+    notesBtn.textContent = '🔒';
+    notesBtn.addEventListener('click', () => openNotesModal(pupil.id));
+    wrap.appendChild(notesBtn);
+
+    // Foto-knop
+    const photoBtn = document.createElement('button');
+    photoBtn.type = 'button';
+    photoBtn.title = photo ? 'Foto wijzigen' : 'Foto toevoegen';
+    photoBtn.style.cssText = `width:36px;height:36px;border:none;border-radius:10px;cursor:pointer;font-size:15px;flex-shrink:0;background:${photo?'#dcfce7':'#ede9fe'};overflow:hidden;`;
+    if(photo){
+      photoBtn.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" />`;
+    } else {
+      photoBtn.textContent = '📷';
+    }
+    photoBtn.addEventListener('click', () => uploadPupilPhotoKind(pupil.id));
+    wrap.appendChild(photoBtn);
+
+    pupilGrid.appendChild(wrap);
   });
 
+  // Taken selectie: chip + naam-wijzig + afbeelding knop
   allTasks().forEach(task => {
+    const ci = state.customIcons[task.id];
+
+    const wrap = document.createElement('div');
+    wrap.className = 'kind-task-wrap';
+
+    // Selectiechip
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'task-chip' + (teacherSelectedTasks.has(task.id) ? ' active' : '');
-    btn.textContent = `${task.icon} ${task.label}`;
+    const imgHtml = ci ? `<img class="chip-task-img" src="${ci}" alt="" />` : '';
+    btn.innerHTML = `${imgHtml}${ci ? '' : task.icon} ${task.label}`;
     btn.addEventListener('click', () => {
       if(teacherSelectedTasks.has(task.id)) teacherSelectedTasks.delete(task.id);
       else teacherSelectedTasks.add(task.id);
       renderTeacherModal();
     });
-    taskGrid.appendChild(btn);
+    wrap.appendChild(btn);
+
+    // Knopjesrij: naam wijzigen + afbeelding
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:4px;justify-content:center;margin-top:3px;';
+
+    const renameBtn = document.createElement('button');
+    renameBtn.type = 'button';
+    renameBtn.textContent = '✎ naam';
+    renameBtn.style.cssText = 'border:none;background:#f0fdf4;color:#16a34a;border-radius:6px;font-size:10px;font-weight:700;padding:2px 6px;cursor:pointer;';
+    renameBtn.addEventListener('click', () => openTaskRenameKind(task.id, task.label));
+    btnRow.appendChild(renameBtn);
+
+    const uploadBtn = document.createElement('button');
+    uploadBtn.type = 'button';
+    uploadBtn.textContent = ci ? '📷 wijzig' : '📷 afb.';
+    uploadBtn.style.cssText = `border:none;background:${ci?'#fef9c3':'#f0f0ff'};color:${ci?'#92400e':'#6366f1'};border-radius:6px;font-size:10px;font-weight:700;padding:2px 6px;cursor:pointer;`;
+    uploadBtn.addEventListener('click', () => uploadTaskIconKind(task.id));
+    btnRow.appendChild(uploadBtn);
+
+    if(ci){
+      const delBtn = document.createElement('button');
+      delBtn.type = 'button';
+      delBtn.textContent = '🗑';
+      delBtn.style.cssText = 'border:none;background:none;color:#fca5a5;font-size:11px;cursor:pointer;padding:0 2px;';
+      delBtn.addEventListener('click', () => removeTaskIconKind(task.id));
+      btnRow.appendChild(delBtn);
+    }
+    wrap.appendChild(btnRow);
+    taskGrid.appendChild(wrap);
   });
+
+  // Eigen pictogrammen lijst
+  const iconList = document.getElementById('kindIconUploadList');
+  if(iconList){
+    iconList.innerHTML = '';
+    allTasks().forEach(task => {
+      const ci = state.customIcons[task.id];
+      const row = document.createElement('div');
+      row.className = 'kind-upload-row';
+      row.innerHTML = `
+        <div class="kind-upload-preview">
+          ${ci ? `<img src="${ci}" class="kind-upload-thumb" alt="${task.label}" />` : `<span class="kind-upload-emoji">${task.icon}</span>`}
+        </div>
+        <span class="kind-upload-label">${task.label}</span>
+        <div class="kind-upload-btns">
+          <button type="button" class="teacher-btn kind-upload-btn" onclick="uploadTaskIconKind('${task.id}')">${ci ? '🔄 Vervangen' : '📷 Afbeelding uploaden'}</button>
+          ${ci ? `<button type="button" class="danger-btn kind-upload-btn" onclick="removeTaskIconKind('${task.id}')">🗑 Verwijderen</button>` : ''}
+        </div>
+      `;
+      iconList.appendChild(row);
+    });
+    if(!allTasks().length) iconList.innerHTML = '<p style="color:#9ca3af;font-size:14px;">Er zijn nog geen taken aangemaakt.</p>';
+  }
+
+  // Foto's lijst
+  const photoList = document.getElementById('kindPhotoUploadList');
+  if(photoList){
+    photoList.innerHTML = '';
+    state.pupils.forEach(pupil => {
+      const photo = state.pupilPhotos[pupil.id];
+      const row = document.createElement('div');
+      row.className = 'kind-upload-row';
+      row.innerHTML = `
+        <div class="kind-upload-preview">
+          ${photo ? `<img src="${photo}" class="kind-upload-thumb kind-upload-thumb-round" alt="${getVisibleName(pupil)}" />` : `<span class="kind-upload-emoji">👤</span>`}
+        </div>
+        <span class="kind-upload-label">${getVisibleName(pupil)}</span>
+        <div class="kind-upload-btns">
+          <button type="button" class="teacher-btn kind-upload-btn" onclick="uploadPupilPhotoKind('${pupil.id}')">${photo ? '🔄 Vervangen' : '📷 Foto uploaden'}</button>
+          ${photo ? `<button type="button" class="danger-btn kind-upload-btn" onclick="removePupilPhotoKind('${pupil.id}')">🗑 Verwijderen</button>` : ''}
+        </div>
+      `;
+      photoList.appendChild(row);
+    });
+    if(!state.pupils.length) photoList.innerHTML = '<p style="color:#9ca3af;font-size:14px;">Er zijn nog geen leerlingen toegevoegd.</p>';
+  }
 }
 
 function renderEmojiPicker(){
@@ -1598,6 +1841,207 @@ function useClassboardAgain(){
   if(currentPupil) renderTasks();
 }
 
+// ── BEVINDINGEN (NOTITIES) ───────────────────────────────────────────────────
+let editingNotesId = null;
+function openNotesModal(pupilId){
+  editingNotesId = pupilId;
+  const p = state.pupils.find(x => x.id === pupilId);
+  if(!p) return;
+  document.getElementById('kind-notes-title').textContent = '🔒 Bevindingen: ' + getVisibleName(p);
+  document.getElementById('kind-notes-input').value = state.notes[pupilId] || '';
+  document.getElementById('kind-notes-overlay').classList.add('show');
+  setTimeout(() => document.getElementById('kind-notes-input').focus(), 50);
+}
+function saveNotesKind(){
+  if(!editingNotesId) return;
+  const val = document.getElementById('kind-notes-input').value.trim();
+  if(val) state.notes[editingNotesId] = val;
+  else delete state.notes[editingNotesId];
+  saveState();
+  closeNotesModal();
+  renderTeacherModal();
+}
+function closeNotesModal(){
+  document.getElementById('kind-notes-overlay').classList.remove('show');
+  editingNotesId = null;
+}
+
+// ── TAAKNAAM HERNOEMEN ───────────────────────────────────────────────────────
+let renamingTaskId = null;
+function openTaskRenameKind(taskId, currentLabel){
+  renamingTaskId = taskId;
+  document.getElementById('kind-rename-input').value = currentLabel;
+  document.getElementById('kind-rename-overlay').classList.add('show');
+  setTimeout(() => { const inp = document.getElementById('kind-rename-input'); inp.focus(); inp.select(); }, 50);
+}
+function saveTaskRenameKind(){
+  const newLabel = document.getElementById('kind-rename-input').value.trim();
+  if(!newLabel || !renamingTaskId) return;
+  const ct = state.customTasks.find(t => t.id === renamingTaskId);
+  if(ct){ ct.label = newLabel; }
+  else {
+    if(!state.taskLabelOverrides) state.taskLabelOverrides = {};
+    state.taskLabelOverrides[renamingTaskId] = newLabel;
+  }
+  saveState();
+  closeTaskRenameKind();
+  renderTeacherModal();
+  if(currentPupil) renderTasks();
+}
+function closeTaskRenameKind(){
+  document.getElementById('kind-rename-overlay').classList.remove('show');
+  renamingTaskId = null;
+}
+
+// ── SMARTBOARD MODUS ─────────────────────────────────────────────────────────
+// ?modus=smartboard verbergt alle leerkracht-knoppen via body.smartboard CSS
+const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
+function applySmartboardMode(){
+  if(!isSmartboard) return;
+  document.body.classList.add('smartboard');
+}
+
+// ── PDF RAPPORT ──────────────────────────────────────────────────────────────
+function openPdfModalKind(){
+  const today = new Date().toISOString().slice(0,10);
+  if(!document.getElementById('kind-pdf-from').value) document.getElementById('kind-pdf-from').value = today;
+  if(!document.getElementById('kind-pdf-to').value) document.getElementById('kind-pdf-to').value = today;
+  document.getElementById('kind-pdf-overlay').classList.add('show');
+}
+function closePdfModalKind(){
+  document.getElementById('kind-pdf-overlay').classList.remove('show');
+}
+function fmtDateKind(str){ if(!str) return ''; try{ return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch{ return str; } }
+
+function generateKindPdf(mode){
+  var periodName = document.getElementById('kind-pdf-period').value.trim();
+  var dateFrom = document.getElementById('kind-pdf-from').value;
+  var dateTo = document.getElementById('kind-pdf-to').value;
+  var pl = [periodName];
+  if(dateFrom||dateTo) pl.push(fmtDateKind(dateFrom)+(dateTo&&dateTo!==dateFrom?' \u2013 '+fmtDateKind(dateTo):''));
+  var periodLabel = pl.filter(Boolean).join('  \xB7  ');
+  var today = fmtDateKind(new Date().toISOString().slice(0,10));
+  var SMILEYS_PDF = ['','😊','🙂','😐','😟'];
+  var SMILEY_LABELS_PDF = ['','Super!','Ging goed','Beetje moeilijk','Te moeilijk'];
+
+  var css = '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}'
+    +'body{font-family:Nunito,sans-serif;background:#f8fafc;color:#1a202c;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    +'#tb{position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a8a;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-wrap:wrap}'
+    +'#tb h2{font-size:15px;font-weight:800}.tbb{display:flex;gap:8px;align-items:center}'
+    +'.tb1{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:#22c55e;color:#fff}'
+    +'.tb2{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,255,255,.15);color:#fff}'
+    +'#ct{margin-top:62px;padding:20px;max-width:1000px;margin-left:auto;margin-right:auto}'
+    +'.pr-page{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:24px;overflow:hidden}'
+    +'.pr-ph{background:#1e3a8a;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}'
+    +'.pr-ph h1{font-size:16px;font-weight:800}.pr-ph span{font-size:10px;opacity:.75}'
+    +'.pr-pb{padding:18px}'
+    +'.pr-period{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700}'
+    +'.pr-dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}'
+    +'.pr-dn{font-size:18px;font-weight:800;color:#1e3a8a}'
+    +'.pr-db{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800}'
+    +'.badge-ok{background:#dcfce7;color:#15803d}.badge-partial{background:#fef9c3;color:#92400e}.badge-none{background:#fee2e2;color:#dc2626}'
+    +'.pr-tt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}'
+    +'.pr-tt th{background:#f1f5f9;color:#475569;padding:7px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #e2e8f0}'
+    +'.pr-tt td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}'
+    +'.pr-status-done{color:#15803d;font-weight:800}.pr-status-busy{color:#d97706;font-weight:700}'
+    +'.pr-nb{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px}'
+    +'.pr-nb h4{font-size:10px;font-weight:800;color:#92400e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}'
+    +'.pr-nb p{font-size:12px;color:#1a202c;line-height:1.7;white-space:pre-wrap}'
+    +'@media print{#tb{display:none!important}body{background:#fff}#ct{margin-top:0;padding:8mm;max-width:none}.pr-page{box-shadow:none;border-radius:0;margin-bottom:0;page-break-after:always}.pr-page:last-child{page-break-after:auto}}';
+
+  var periodDiv = periodLabel ? '<div class="pr-period">Periode: '+periodLabel+'</div>' : '';
+  var pages = '';
+  state.pupils.forEach(function(p){
+    var pid = p.id;
+    var tasks = getTasksForPupil(p);
+    var prog = state.progress[pid] || {};
+    var done = tasks.filter(function(t){ return (prog[t.id] ? prog[t.id].status||0 : 0) === 2; }).length;
+    var total = tasks.length;
+    var complete = done === total && total > 0;
+    var badgeCls = complete ? 'badge-ok' : done > 0 ? 'badge-partial' : 'badge-none';
+    var badgeTxt = complete ? 'Alle taken klaar' : done > 0 ? (done+'/'+total+' klaar') : 'Nog niet gestart';
+    var rows = '';
+    tasks.forEach(function(t){
+      var s = prog[t.id] ? prog[t.id].status||0 : 0;
+      var sm = prog[t.id] ? prog[t.id].smiley||0 : 0;
+      var sh = s===2 ? '<span class="pr-status-done">&#x2713; Klaar</span>' : s===1 ? '<span class="pr-status-busy">Bezig</span>' : '<span style="color:#cbd5e0">Niet gestart</span>';
+      var smh = sm ? (SMILEYS_PDF[sm]+' <span style="font-size:10px;color:#718096">'+SMILEY_LABELS_PDF[sm]+'</span>') : '<span style="color:#cbd5e0">&mdash;</span>';
+      rows += '<tr><td>'+t.icon+' '+t.label+'</td><td>'+sh+'</td><td>'+smh+'</td></tr>';
+    });
+    var photo = state.pupilPhotos[pid];
+    var photoHtml = photo ? '<img src="'+photo+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:10px;vertical-align:middle;" />' : '';
+    var notesVal = state.notes[pid] ? state.notes[pid].replace(/&/g,'&amp;').replace(/</g,'&lt;') : '';
+    var notesHtml = notesVal ? '<div class="pr-nb"><h4>Bevindingen leerkracht</h4><p>'+notesVal+'</p></div>' : '';
+    var name = getVisibleName(p);
+    pages += '<div class="pr-page">'
+      +'<div class="pr-ph"><h1>'+photoHtml+name+'</h1><span>Detailrapport</span></div>'
+      +'<div class="pr-pb">'+periodDiv
+      +'<div class="pr-dh"><span class="pr-dn">'+name+'</span><span class="pr-db '+badgeCls+'">'+badgeTxt+'</span></div>'
+      +'<table class="pr-tt"><thead><tr><th>Taak</th><th>Status</th><th>Zelfbeoordeling</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +notesHtml+'</div></div>';
+  });
+
+  var pspan = periodLabel ? 'Periode: '+periodLabel+'  &middot;  ' : '';
+  var html = '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8">'
+    +'<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">'
+    +'<title>Kindbord Rapport<\/title><style>'+css+'<\/style><\/head><body>'
+    +'<div id="tb"><div><h2>Kindbord Rapport<\/h2><span>'+pspan+'Gegenereerd op '+today+'<\/span><\/div>'
+    +'<div class="tbb"><button class="tb2" onclick="window.close()">&#x2715; Sluiten<\/button>'
+    +'<button class="tb1" onclick="window.print()">&#x1F5A8;&#xFE0F; Opslaan als PDF \/ Afdrukken<\/button><\/div><\/div>'
+    +'<div id="ct">'+pages+'<\/div><\/body><\/html>';
+
+  closePdfModalKind();
+
+  if(mode === 'download'){
+    var jsPDFLib = window.jspdf && window.jspdf.jsPDF;
+    if(!jsPDFLib){ alert('PDF-bibliotheek nog niet geladen. Probeer opnieuw.'); return; }
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-family:Nunito,sans-serif;font-weight:800;font-size:18px;color:#6366f1;z-index:9999;flex-direction:column;gap:12px;';
+    ov.innerHTML = '<div>\u23F3 PDF wordt aangemaakt\u2026</div><div style="font-size:13px;font-weight:600;color:#718096;">even geduld a.u.b.</div>';
+    document.body.appendChild(ov);
+    var container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:0;top:0;width:900px;background:#fff;z-index:9998;overflow:visible;font-family:Nunito,sans-serif;';
+    container.innerHTML = '<style>'+css+'</style><div id="ct" style="padding:20px;max-width:860px;margin:0 auto;">'+pages+'</div>';
+    document.body.appendChild(container);
+    document.fonts.ready.then(async function(){
+      try {
+        var pdf = new jsPDFLib({ orientation:'portrait', unit:'mm', format:'a4' });
+        var pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
+        var pgs = container.querySelectorAll('.pr-page');
+        for(var i=0;i<pgs.length;i++){
+          var canvas = await html2canvas(pgs[i],{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,width:880});
+          var imgData = canvas.toDataURL('image/jpeg',0.92);
+          var imgH = (canvas.height/canvas.width)*usableW;
+          if(i>0) pdf.addPage();
+          if(imgH <= pageH-2*margin){
+            pdf.addImage(imgData,'JPEG',margin,margin,usableW,imgH);
+          } else {
+            var pxPerMm=canvas.width/usableW, slicePx=Math.floor((pageH-2*margin)*pxPerMm);
+            var srcY=0, first=true;
+            while(srcY<canvas.height){
+              if(!first) pdf.addPage(); first=false;
+              var sc=document.createElement('canvas'); sc.width=canvas.width; sc.height=Math.min(slicePx,canvas.height-srcY);
+              sc.getContext('2d').drawImage(canvas,0,-srcY);
+              var sh2=(sc.height/canvas.width)*usableW;
+              pdf.addImage(sc.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,usableW,sh2);
+              srcY+=slicePx;
+            }
+          }
+        }
+        var fn='kindbord-rapport'+(periodName?'-'+periodName.replace(/[^a-zA-Z0-9]/g,'-'):'')+'-'+new Date().toISOString().slice(0,10)+'.pdf';
+        pdf.save(fn);
+      } catch(err){ console.error(err); alert('PDF fout: '+err.message); }
+      finally{ document.body.removeChild(container); document.body.removeChild(ov); }
+    });
+  } else {
+    var blob = new Blob([html],{type:'text/html'});
+    var url = URL.createObjectURL(blob);
+    var tab = window.open(url,'_blank');
+    if(!tab) alert('Pop-up geblokkeerd!');
+    setTimeout(function(){ URL.revokeObjectURL(url); },15000);
+  }
+}
+
 /* Event listeners */
 document.getElementById('backBtn').addEventListener('click', goBack);
 document.getElementById('popupClose').addEventListener('click', closeSmileyPopup);
@@ -1622,12 +2066,21 @@ document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
 });
 
 loadState();
-document.getElementById('setup-screen').style.display = 'block';
-document.getElementById('names-screen').style.display = 'none';
-document.getElementById('tasks-screen').style.display = 'none';
+
+// Smartboard modus: setup-scherm overslaan als er al leerlingen zijn
+if(isSmartboard && state.pupils.length > 0){
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('names-screen').style.display = 'block';
+  document.getElementById('tasks-screen').style.display = 'none';
+} else {
+  document.getElementById('setup-screen').style.display = 'block';
+  document.getElementById('names-screen').style.display = 'none';
+  document.getElementById('tasks-screen').style.display = 'none';
+}
 renderNames();
 renderSetupAddedList();
 setSetupOrder(state.nameOrder || 'voornaam');
+applySmartboardMode();
 
 const setupLastnameCheckbox = document.getElementById('setup-show-lastname');
 if(setupLastnameCheckbox){
@@ -1638,5 +2091,59 @@ function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
 }
 </script>
+
+<!-- BEVINDINGEN MODAL -->
+<div class="overlay" id="kind-notes-overlay">
+<div class="popup" style="text-align:left;max-width:500px;width:100%;">
+<h3 id="kind-notes-title" style="font-size:20px;margin-bottom:8px;">🔒 Bevindingen</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:12px;">Privé notities — nooit zichtbaar op het bord. Verschijnen wel in het PDF-rapport.</p>
+<textarea id="kind-notes-input" style="width:100%;min-height:120px;border:2px solid #c7d2fe;border-radius:14px;padding:12px;font-size:15px;font-family:Nunito,Arial,sans-serif;resize:vertical;" placeholder="bv. Werkte zelfstandig · Had hulp nodig · Meer uitdaging nodig…"></textarea>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+  <button class="close-btn" onclick="closeNotesModal()" type="button">Annuleren</button>
+  <button class="apply-btn teacher-btn" onclick="saveNotesKind()" type="button">💾 Opslaan</button>
+</div>
+</div>
+</div>
+
+<!-- TAAKNAAM MODAL -->
+<div class="overlay" id="kind-rename-overlay">
+<div class="popup" style="text-align:left;max-width:420px;width:100%;">
+<h3 style="font-size:20px;margin-bottom:8px;">✎ Taaknaam aanpassen</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:12px;">Geef deze taak een naam die past bij jouw klas, bv. "Rekenhoek" of "Leesmap".</p>
+<input id="kind-rename-input" type="text" style="width:100%;border:2px solid #c7d2fe;border-radius:14px;padding:12px;font-size:16px;font-family:Nunito,Arial,sans-serif;margin-bottom:4px;" placeholder="Nieuwe naam…" onkeydown="if(event.key==='Enter')saveTaskRenameKind()" />
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:12px;">
+  <button class="close-btn" onclick="closeTaskRenameKind()" type="button">Annuleren</button>
+  <button class="apply-btn teacher-btn" onclick="saveTaskRenameKind()" type="button">✓ Opslaan</button>
+</div>
+</div>
+</div>
+
+<!-- PDF MODAL -->
+<div class="overlay" id="kind-pdf-overlay">
+<div class="popup" style="text-align:left;max-width:460px;width:100%;">
+<h3 style="font-size:22px;margin-bottom:8px;">📄 PDF rapport</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:14px;">Per leerling: taken, smileys en bevindingen.</p>
+<div style="margin-bottom:10px;">
+  <label style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;">Naam van de periode</label>
+  <input id="kind-pdf-period" type="text" placeholder="bv. Week 14" style="width:100%;border:2px solid #c7d2fe;border-radius:12px;padding:10px;font-size:15px;font-family:Nunito,Arial,sans-serif;" />
+</div>
+<div style="display:flex;gap:10px;margin-bottom:14px;">
+  <div style="flex:1;"><label style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;">Van</label><input id="kind-pdf-from" type="date" style="width:100%;border:2px solid #c7d2fe;border-radius:12px;padding:10px;font-size:14px;font-family:Nunito,Arial,sans-serif;" /></div>
+  <div style="flex:1;"><label style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:4px;">Tot</label><input id="kind-pdf-to" type="date" style="width:100%;border:2px solid #c7d2fe;border-radius:12px;padding:10px;font-size:14px;font-family:Nunito,Arial,sans-serif;" /></div>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+  <button class="apply-btn teacher-btn" onclick="generateKindPdf('download')" type="button" style="flex:1;">⬇️ Downloaden als PDF</button>
+  <button class="close-btn" onclick="generateKindPdf('print')" type="button" style="flex:1;">🖨️ Afdrukken</button>
+</div>
+<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px;font-size:11px;color:#1e40af;line-height:1.7;margin-bottom:12px;">
+  <strong>⬇️ Downloaden</strong> — PDF komt direct in je Downloads-map.<br/>
+  <strong>🖨️ Afdrukken</strong> — kies "Opslaan als PDF" als bestemming.
+</div>
+<div style="display:flex;justify-content:flex-end;">
+  <button class="close-btn" onclick="closePdfModalKind()" type="button">Annuleren</button>
+</div>
+</div>
+</div>
+
 </body>
 </html>
