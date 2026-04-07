@@ -556,6 +556,9 @@
 
 /* Smartboard-modus: teacher-only elementen verborgen */
 body.smartboard .teacher-only { display:none !important; }
+/* iPad-modus: ook timer verborgen */
+body.ipad-modus #timerToggleBtn { display:none !important; }
+body.ipad-modus #timer-popup { display:none !important; }
 
 /* Taaknaam-wrap in teacher modal */
 .kind-task-wrap { display:inline-flex; flex-direction:column; align-items:center; gap:2px; }
@@ -1965,15 +1968,29 @@ function closeTaskRenameKind(){
   renamingTaskId = null;
 }
 
-// ── SMARTBOARD MODUS ─────────────────────────────────────────────────────────
+// ── SMARTBOARD / IPAD MODUS ───────────────────────────────────────────────────
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
+const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipad';
+
 function applySmartboardMode(){
-  if(!isSmartboard) return;
+  if(!isSmartboard && !isIpad) return;
   document.body.classList.add('smartboard');
-  // Toon het discreet slotje
-  var btn = document.getElementById('smartboard-exit-btn');
-  if(btn) btn.style.display = 'block';
+  if(isIpad){
+    document.body.classList.add('ipad-modus');
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn){
+      btn.textContent = '✕ Sluiten';
+      btn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:7000;border:none;background:rgba(99,102,241,.15);color:#6366f1;font-size:14px;font-weight:800;border-radius:14px;padding:8px 16px;cursor:pointer;display:block;';
+      btn.onclick = function(){
+        if(confirm('Wil je dit scherm sluiten?')) window.location.href = 'welkomstbord.html';
+      };
+    }
+  } else {
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn) btn.style.display = 'block';
+  }
 }
+
 function exitKindSmartboard(dest){
   document.getElementById('kind-exit-overlay').classList.remove('show');
   if(dest === 'welkom'){
@@ -2155,8 +2172,8 @@ document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
 
 loadState();
 
-// Smartboard modus: setup-scherm overslaan als er al leerlingen zijn
-if(isSmartboard && state.pupils.length > 0){
+// Smartboard/iPad modus: setup-scherm overslaan als er al leerlingen zijn
+if((isSmartboard || isIpad) && state.pupils.length > 0){
   document.getElementById('setup-screen').style.display = 'none';
   document.getElementById('names-screen').style.display = 'block';
   document.getElementById('tasks-screen').style.display = 'none';
