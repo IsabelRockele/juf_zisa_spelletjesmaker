@@ -905,6 +905,7 @@ Noor Janssens"></textarea>
         </div>
 
         <p class="setup-help" style="margin-top:0;">Je kan eerst namen invoeren en daarna pas taken per kind toewijzen.</p>
+        <p class="setup-help" style="margin-top:6px;font-size:14px;color:#6b7280;">💡 <strong>Tip:</strong> Foto's of afbeeldingen bij namen toevoegen kan via <strong>⚙️ Taken toewijzen</strong> nadat je naar het kindbord gaat.</p>
 
         <div class="setup-right-actions">
           <button type="button" class="back-btn-orange" onclick="goBackToWelcome()">← Vorig scherm</button>
@@ -922,7 +923,11 @@ Noor Janssens"></textarea>
   <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Instellingen</button>
   <button class="teacher-btn teacher-only" id="openTeacherBtn">⚙️ Taken toewijzen</button>
   <button class="teacher-btn teacher-only" onclick="openPdfModalKind()" type="button">📄 PDF rapport</button>
+  <button class="teacher-btn" onclick="toggleTimer()" type="button" id="timerToggleBtn">⏱️ Timer</button>
 </div>
+
+<!-- Discreet slotje — altijd zichtbaar, ook in smartboard-modus -->
+<button id="smartboard-exit-btn" onclick="document.getElementById('kind-exit-overlay').classList.add('show')" title="Leerkracht" style="position:fixed;bottom:12px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.5);font-size:15px;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;">🔒</button>
 <div class="name-grid" id="nameGrid"></div>
 <div class="empty-box" id="emptyNames" style="display:none;">
 <div class="empty-title">Geen leerlingen gevonden</div>
@@ -961,7 +966,10 @@ Noor Janssens"></textarea>
 <div class="teacher-modal">
 <div class="teacher-header">
 <h3>Taken toewijzen</h3>
+<div style="display:flex;gap:8px;align-items:center;">
+<button type="button" class="small-btn" onclick="document.getElementById('kind-help-overlay').classList.add('show')" style="background:#eef2ff;color:#4338ca;">❓ Uitleg</button>
 <button class="close-btn" id="teacherCloseBtn">Sluiten</button>
+</div>
 </div>
 <div class="teacher-sub">
       Wil je <strong>niet meer de taken van klasbord gebruiken</strong>? Klik dan eerst op
@@ -1001,20 +1009,6 @@ Noor Janssens"></textarea>
 <button class="apply-btn" id="applyAssignmentsBtn">Toewijzen aan selectie</button>
 <button class="close-btn" id="clearAssignmentsBtn">Persoonlijke taken wissen voor selectie</button>
 <button class="teacher-btn" id="teacherDoneBtn">Klaar</button>
-</div>
-
-<!-- Eigen pictogrammen voor taken -->
-<div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:20px;">
-  <h4 style="font-size:20px;margin:0 0 8px;">🖼️ Eigen pictogrammen voor taken</h4>
-  <p style="font-size:15px;color:#6b7280;margin:0 0 14px;">Vervang het emoji-pictogram van een taak door een eigen afbeelding (jpg, png, gif, webp). Niets wordt afgesneden.</p>
-  <div id="kindIconUploadList"></div>
-</div>
-
-<!-- Foto's bij namen -->
-<div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:20px;">
-  <h4 style="font-size:20px;margin:0 0 8px;">📷 Foto's bij namen</h4>
-  <p style="font-size:15px;color:#6b7280;margin:0 0 14px;">Voeg een foto of afbeelding toe bij elke leerling. Die verschijnt dan op de namenkaart.</p>
-  <div id="kindPhotoUploadList"></div>
 </div>
 </div>
 </div>
@@ -1588,49 +1582,52 @@ function renderTeacherModal(){
     const needsTask = state.kindBoardOnlyPersonal && !hasOwn;
     const photo = state.pupilPhotos[pupil.id];
     const hasNotes = !!state.notes[pupil.id];
+    const isSelected = teacherSelectedPupils.has(pupil.id);
 
     const wrap = document.createElement('div');
-    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;';
+    wrap.style.cssText = 'display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:12px;background:'+(isSelected?'#e0e7ff':'#f9fafb')+';border:2px solid '+(isSelected?'#6366f1':'#e5e7eb')+';transition:all .12s;';
 
-    // Selectiepil
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'select-pill'
-      + (needsTask ? ' needs-task' : '')
-      + (hasOwn ? ' has-own' : '')
-      + (teacherSelectedPupils.has(pupil.id) ? ' active' : '');
-    btn.style.flex = '1';
-    const photoHtml = photo ? `<img class="pill-photo" src="${photo}" alt="" />` : '';
-    btn.innerHTML = `${photoHtml}<span class="select-pill-top">${getVisibleName(pupil)}</span>
-      <span class="select-pill-sub">${needsTask ? 'nog taken geven' : hasOwn ? `${(state.personalAssignments[pupil.id]||[]).length} eigen taken` : 'volgt klasbord'}</span>`;
-    btn.addEventListener('click', () => {
+    // Aanvinkhokje
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = isSelected;
+    cb.style.cssText = 'width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#6366f1;';
+    cb.addEventListener('change', () => {
+      if(cb.checked) teacherSelectedPupils.add(pupil.id);
+      else teacherSelectedPupils.delete(pupil.id);
+      renderTeacherModal();
+    });
+    wrap.appendChild(cb);
+
+    // Foto-thumbnail (klikbaar voor upload)
+    const photoBtn = document.createElement('button');
+    photoBtn.type = 'button';
+    photoBtn.title = photo ? 'Foto wijzigen' : 'Foto toevoegen';
+    photoBtn.style.cssText = 'width:32px;height:32px;border:none;border-radius:50%;cursor:pointer;flex-shrink:0;padding:0;overflow:hidden;background:'+(photo?'transparent':'#ede9fe')+';font-size:14px;display:flex;align-items:center;justify-content:center;';
+    photoBtn.innerHTML = photo ? `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />` : '📷';
+    photoBtn.addEventListener('click', () => uploadPupilPhotoKind(pupil.id));
+    wrap.appendChild(photoBtn);
+
+    // Naam + status info (klik selecteert ook)
+    const nameDiv = document.createElement('div');
+    nameDiv.style.cssText = 'flex:1;cursor:pointer;';
+    nameDiv.innerHTML = `<div style="font-size:15px;font-weight:800;color:#1f2937;">${getVisibleName(pupil)}</div>`
+      + `<div style="font-size:11px;color:#6b7280;">${needsTask ? '⚠️ nog taken geven' : hasOwn ? '✓ '+((state.personalAssignments[pupil.id]||[]).length)+' eigen taken' : 'volgt klasbord'}</div>`;
+    nameDiv.addEventListener('click', () => {
       if(teacherSelectedPupils.has(pupil.id)) teacherSelectedPupils.delete(pupil.id);
       else teacherSelectedPupils.add(pupil.id);
       renderTeacherModal();
     });
-    wrap.appendChild(btn);
+    wrap.appendChild(nameDiv);
 
     // Bevindingen-knop
     const notesBtn = document.createElement('button');
     notesBtn.type = 'button';
     notesBtn.title = hasNotes ? 'Bevindingen bekijken/aanpassen' : 'Bevindingen toevoegen';
-    notesBtn.style.cssText = `width:36px;height:36px;border:none;border-radius:10px;cursor:pointer;font-size:18px;flex-shrink:0;background:${hasNotes?'#fef9c3':'#f3f4f6'};`;
+    notesBtn.style.cssText = 'width:32px;height:32px;border:none;border-radius:8px;cursor:pointer;font-size:16px;flex-shrink:0;background:'+(hasNotes?'#fef9c3':'#f3f4f6')+';';
     notesBtn.textContent = '🔒';
     notesBtn.addEventListener('click', () => openNotesModal(pupil.id));
     wrap.appendChild(notesBtn);
-
-    // Foto-knop
-    const photoBtn = document.createElement('button');
-    photoBtn.type = 'button';
-    photoBtn.title = photo ? 'Foto wijzigen' : 'Foto toevoegen';
-    photoBtn.style.cssText = `width:36px;height:36px;border:none;border-radius:10px;cursor:pointer;font-size:15px;flex-shrink:0;background:${photo?'#dcfce7':'#ede9fe'};overflow:hidden;`;
-    if(photo){
-      photoBtn.innerHTML = `<img src="${photo}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" />`;
-    } else {
-      photoBtn.textContent = '📷';
-    }
-    photoBtn.addEventListener('click', () => uploadPupilPhotoKind(pupil.id));
-    wrap.appendChild(photoBtn);
 
     pupilGrid.appendChild(wrap);
   });
@@ -1684,52 +1681,6 @@ function renderTeacherModal(){
     wrap.appendChild(btnRow);
     taskGrid.appendChild(wrap);
   });
-
-  // Eigen pictogrammen lijst
-  const iconList = document.getElementById('kindIconUploadList');
-  if(iconList){
-    iconList.innerHTML = '';
-    allTasks().forEach(task => {
-      const ci = state.customIcons[task.id];
-      const row = document.createElement('div');
-      row.className = 'kind-upload-row';
-      row.innerHTML = `
-        <div class="kind-upload-preview">
-          ${ci ? `<img src="${ci}" class="kind-upload-thumb" alt="${task.label}" />` : `<span class="kind-upload-emoji">${task.icon}</span>`}
-        </div>
-        <span class="kind-upload-label">${task.label}</span>
-        <div class="kind-upload-btns">
-          <button type="button" class="teacher-btn kind-upload-btn" onclick="uploadTaskIconKind('${task.id}')">${ci ? '🔄 Vervangen' : '📷 Afbeelding uploaden'}</button>
-          ${ci ? `<button type="button" class="danger-btn kind-upload-btn" onclick="removeTaskIconKind('${task.id}')">🗑 Verwijderen</button>` : ''}
-        </div>
-      `;
-      iconList.appendChild(row);
-    });
-    if(!allTasks().length) iconList.innerHTML = '<p style="color:#9ca3af;font-size:14px;">Er zijn nog geen taken aangemaakt.</p>';
-  }
-
-  // Foto's lijst
-  const photoList = document.getElementById('kindPhotoUploadList');
-  if(photoList){
-    photoList.innerHTML = '';
-    state.pupils.forEach(pupil => {
-      const photo = state.pupilPhotos[pupil.id];
-      const row = document.createElement('div');
-      row.className = 'kind-upload-row';
-      row.innerHTML = `
-        <div class="kind-upload-preview">
-          ${photo ? `<img src="${photo}" class="kind-upload-thumb kind-upload-thumb-round" alt="${getVisibleName(pupil)}" />` : `<span class="kind-upload-emoji">👤</span>`}
-        </div>
-        <span class="kind-upload-label">${getVisibleName(pupil)}</span>
-        <div class="kind-upload-btns">
-          <button type="button" class="teacher-btn kind-upload-btn" onclick="uploadPupilPhotoKind('${pupil.id}')">${photo ? '🔄 Vervangen' : '📷 Foto uploaden'}</button>
-          ${photo ? `<button type="button" class="danger-btn kind-upload-btn" onclick="removePupilPhotoKind('${pupil.id}')">🗑 Verwijderen</button>` : ''}
-        </div>
-      `;
-      photoList.appendChild(row);
-    });
-    if(!state.pupils.length) photoList.innerHTML = '<p style="color:#9ca3af;font-size:14px;">Er zijn nog geen leerlingen toegevoegd.</p>';
-  }
 }
 
 function renderEmojiPicker(){
@@ -1894,11 +1845,26 @@ function closeTaskRenameKind(){
 }
 
 // ── SMARTBOARD MODUS ─────────────────────────────────────────────────────────
-// ?modus=smartboard verbergt alle leerkracht-knoppen via body.smartboard CSS
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
 function applySmartboardMode(){
   if(!isSmartboard) return;
   document.body.classList.add('smartboard');
+  // Toon het discreet slotje
+  var btn = document.getElementById('smartboard-exit-btn');
+  if(btn) btn.style.display = 'block';
+}
+function exitKindSmartboard(dest){
+  document.getElementById('kind-exit-overlay').classList.remove('show');
+  if(dest === 'welkom'){
+    window.location.href = 'welkomstbord.html';
+  } else {
+    // Verwijder smartboard-modus
+    document.body.classList.remove('smartboard');
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn) btn.style.display = 'none';
+    // Ga naar setup
+    goBackToSetup();
+  }
 }
 
 // ── PDF RAPPORT ──────────────────────────────────────────────────────────────
@@ -1953,6 +1919,7 @@ function generateKindPdf(mode){
   var pages = '';
   state.pupils.forEach(function(p){
     var pid = p.id;
+    var fullName = p.voornaam + (p.achternaam ? ' ' + p.achternaam : '');
     var tasks = getTasksForPupil(p);
     var prog = state.progress[pid] || {};
     var done = tasks.filter(function(t){ return (prog[t.id] ? prog[t.id].status||0 : 0) === 2; }).length;
@@ -1972,7 +1939,7 @@ function generateKindPdf(mode){
     var photoHtml = photo ? '<img src="'+photo+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:10px;vertical-align:middle;" />' : '';
     var notesVal = state.notes[pid] ? state.notes[pid].replace(/&/g,'&amp;').replace(/</g,'&lt;') : '';
     var notesHtml = notesVal ? '<div class="pr-nb"><h4>Bevindingen leerkracht</h4><p>'+notesVal+'</p></div>' : '';
-    var name = getVisibleName(p);
+    var name = fullName; // altijd volledige naam in PDF, ongeacht weergave-instelling
     pages += '<div class="pr-page">'
       +'<div class="pr-ph"><h1>'+photoHtml+name+'</h1><span>Detailrapport</span></div>'
       +'<div class="pr-pb">'+periodDiv
@@ -2090,7 +2057,343 @@ if(setupLastnameCheckbox){
 function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
 }
+
+// ── TIMER ────────────────────────────────────────────────────────────────────
+var timerTotalSeconds = 15 * 60;
+var timerRemaining    = 15 * 60;
+var timerInterval     = null;
+var timerPaused       = false;
+var timerView         = 'both'; // 'both' | 'analog' | 'digital'
+var timerFlashInterval = null;
+
+function toggleTimer(){
+  var p = document.getElementById('timer-popup');
+  if(!p) return;
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+// Weergave: analoog + digitaal / enkel analoog / enkel digitaal
+function setTimerView(mode){
+  timerView = mode;
+  var clock = document.getElementById('timer-clock');
+  var digWrap = document.getElementById('timer-digital-wrap');
+  var displayWrap = document.getElementById('timer-display-wrap');
+  if(!clock || !digWrap) return;
+
+  if(mode === 'both'){
+    clock.style.display   = 'block';
+    digWrap.style.display = 'flex';
+    displayWrap.style.flexDirection = 'row';
+  } else if(mode === 'analog'){
+    clock.style.display   = 'block';
+    digWrap.style.display = 'none';
+    displayWrap.style.flexDirection = 'column';
+  } else { // digital only
+    clock.style.display   = 'none';
+    digWrap.style.display = 'flex';
+    displayWrap.style.flexDirection = 'column';
+  }
+
+  // Highlight actieve knop
+  ['both','analog','digital'].forEach(function(v){
+    var btn = document.getElementById('tv-' + v);
+    if(!btn) return;
+    var active = v === mode;
+    btn.style.borderColor = active ? '#6366f1' : '#e0e7ff';
+    btn.style.background  = active ? '#eef2ff' : '#f8fafc';
+    btn.style.color       = active ? '#6366f1' : '#6b7280';
+  });
+
+  drawClock();
+}
+
+function adjustTime(delta){
+  timerTotalSeconds = Math.max(60, timerTotalSeconds + delta * 60);
+  timerRemaining    = timerTotalSeconds;
+  updateSetDisplay();
+}
+function setTimerPreset(minutes){
+  timerTotalSeconds = minutes * 60;
+  timerRemaining    = timerTotalSeconds;
+  updateSetDisplay();
+}
+function updateSetDisplay(){
+  var el = document.getElementById('timer-set-display');
+  if(!el) return;
+  var m = Math.floor(timerTotalSeconds / 60), s = timerTotalSeconds % 60;
+  el.textContent = timerPad(m) + ':' + timerPad(s);
+}
+function timerPad(n){ return n < 10 ? '0' + n : '' + n; }
+
+function startTimer(){
+  timerRemaining = timerTotalSeconds;
+  timerPaused    = false;
+  document.getElementById('timer-setup').style.display   = 'none';
+  document.getElementById('timer-running').style.display = 'block';
+  document.getElementById('timer-done').style.display    = 'none';
+  setTimerView(timerView);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(timerTick, 1000);
+  timerTick();
+}
+function timerTick(){
+  if(timerPaused) return;
+  updateTimerDigital();
+  drawClock();
+  updateTimerProgress();
+  if(timerRemaining <= 0){
+    clearInterval(timerInterval);
+    timerDone();
+    return;
+  }
+  timerRemaining--;
+}
+function updateTimerDigital(){
+  var el = document.getElementById('timer-digital');
+  if(!el) return;
+  var m = Math.floor(timerRemaining / 60), s = timerRemaining % 60;
+  el.textContent = timerPad(m) + ':' + timerPad(s);
+  el.style.color = timerRemaining < 60 ? '#dc2626' : '#1e1b4b';
+}
+function updateTimerProgress(){
+  var bar = document.getElementById('timer-progress');
+  if(!bar) return;
+  var pct = timerTotalSeconds > 0 ? (timerRemaining / timerTotalSeconds) * 100 : 0;
+  bar.style.width = pct + '%';
+  if(pct > 50)      bar.style.background = 'linear-gradient(90deg,#6366f1,#22c55e)';
+  else if(pct > 20) bar.style.background = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+  else              bar.style.background = 'linear-gradient(90deg,#dc2626,#f87171)';
+}
+function drawClock(){
+  var canvas = document.getElementById('timer-clock');
+  if(!canvas || canvas.style.display === 'none') return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, r = W/2 - 6;
+  ctx.clearRect(0, 0, W, H);
+
+  var pct = timerTotalSeconds > 0 ? timerRemaining / timerTotalSeconds : 0;
+  var fillColor = pct > 0.5 ? '#6366f1' : pct > 0.2 ? '#f59e0b' : '#dc2626';
+
+  // Lege achtergrondcirkel (het al verstreken deel)
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.fillStyle = '#f0f4f8'; ctx.fill();
+  ctx.strokeStyle = '#e0e7ff'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Gekleurde taartpunt = resterende tijd
+  // Start bovenaan (12 uur = -90°), eindigt op de huidige "wijzerstand"
+  // De schijf loopt van de huidige positie TOT bovenaan, met de klok mee
+  // = van -90° + (2π * (1-pct))  tot  -90° + 2π
+  // Wat gelijk is aan: de schijf vult van "huidige positie" naar "12 uur" met klok mee
+  // Simpelste correcte aanpak:
+  // - De LEGE sector loopt van 12 uur (boven) MET de klok mee, grootte = verstreken fractie
+  // - De VOLLE sector is de rest
+  if(pct > 0){
+    var top = -Math.PI / 2;
+    // Huidige "wijzerstand": hoeveel is verstreken = (1 - pct) van de cirkel
+    var elapsed_angle = top + 2 * Math.PI * (1 - pct);
+    // Volle schijf = van elapsed_angle tot top + 2π (= terug naar boven), met klok mee
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r - 2, elapsed_angle, top + 2 * Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+
+  // Rand bovenop
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = '#e0e7ff'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Uurmarkeringen (wit, bovenop schijf)
+  for(var i = 0; i < 12; i++){
+    var a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * (r - 2),  cy + Math.sin(a) * (r - 2));
+    ctx.lineTo(cx + Math.cos(a) * (r - (i % 3 === 0 ? 11 : 7)), cy + Math.sin(a) * (r - (i % 3 === 0 ? 11 : 7)));
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = i % 3 === 0 ? 2.5 : 1.5;
+    ctx.stroke();
+  }
+
+  // Secondewijzer — wijst naar hoeveel er AL verstreken is (met klok mee vanaf 12)
+  var elapsed = timerTotalSeconds - timerRemaining;
+  var sAngle = -Math.PI/2 + (2*Math.PI * (elapsed % 60) / 60);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(sAngle) * r * 0.82, cy + Math.sin(sAngle) * r * 0.82);
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
+
+  // Middelpunt
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff'; ctx.fill();
+
+  // Tijd in het midden
+  ctx.fillStyle = pct > 0.15 ? '#fff' : '#dc2626';
+  ctx.font = 'bold ' + Math.round(r * 0.28) + 'px Nunito,Arial,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if(timerRemaining < 60){
+    ctx.fillText('0:' + timerPad(timerRemaining % 60), cx, cy);
+  } else {
+    ctx.fillText(Math.ceil(timerRemaining / 60) + "'", cx, cy);
+  }
+}
+
+function pauseResumeTimer(){
+  timerPaused = !timerPaused;
+  var btn = document.getElementById('timer-pause-btn');
+  if(btn) btn.textContent = timerPaused ? '▶ Verder' : '⏸ Pauze';
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerInterval = null;
+  // Stop knipperen en herstel stijl
+  if(typeof timerFlashInterval !== 'undefined'){ clearInterval(timerFlashInterval); timerFlashInterval = null; }
+  var pop = document.getElementById('timer-popup');
+  if(pop){ pop.style.background = '#fff'; pop.style.border = '3px solid #e0e7ff'; pop.style.boxShadow = '0 8px 40px rgba(0,0,0,.22)'; }
+  timerPaused   = false;
+  timerRemaining = timerTotalSeconds;
+  document.getElementById('timer-setup').style.display   = 'block';
+  document.getElementById('timer-running').style.display = 'none';
+  document.getElementById('timer-done').style.display    = 'none';
+  updateSetDisplay();
+}
+function timerDone(){
+  document.getElementById('timer-running').style.display = 'none';
+  document.getElementById('timer-done').style.display    = 'block';
+
+  // Geluid: herhalend alarm gedurende ~10 seconden
+  // 3 tonen per cyclus, 5 cycli met korte pauze ertussen
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    // Melodie: hoog-laag-hoog patroon, 5 keer herhalen
+    var pattern = [
+      {freq:880, t:0},    {freq:660, t:0.18}, {freq:880, t:0.36},
+      {freq:880, t:0.9},  {freq:660, t:1.08}, {freq:880, t:1.26},
+      {freq:880, t:1.8},  {freq:660, t:1.98}, {freq:880, t:2.16},
+      {freq:880, t:2.7},  {freq:660, t:2.88}, {freq:880, t:3.06},
+      {freq:880, t:3.6},  {freq:660, t:3.78}, {freq:880, t:3.96},
+      {freq:1046,t:4.8},  {freq:1046,t:5.0},  {freq:1046,t:5.2}  // 3 hoge slottonen
+    ];
+    pattern.forEach(function(note){
+      var osc = ac.createOscillator(), gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.frequency.value = note.freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.45, ac.currentTime + note.t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + note.t + 0.16);
+      osc.start(ac.currentTime + note.t);
+      osc.stop(ac.currentTime + note.t + 0.2);
+    });
+  } catch(e){}
+
+  // Visuele puls: blijft knipperen tot leerkracht op "Nieuwe timer" klikt
+  var pop = document.getElementById('timer-popup');
+  pop.style.border = '3px solid #dc2626';
+  pop.style.boxShadow = '0 0 0 0 rgba(220,38,38,0.7)';
+  var fc = 0;
+  timerFlashInterval = setInterval(function(){
+    fc++;
+    pop.style.background = fc % 2 === 0 ? '#fff5f5' : '#fff';
+    pop.style.border     = fc % 2 === 0 ? '3px solid #dc2626' : '3px solid #fca5a5';
+  }, 600);
+}
+
+// Draggable + resizable
+(function(){
+  var el, ox, oy, ol, ot, dragging = false;
+  var resizing = false, rx, rw;
+  document.addEventListener('mousedown', function(e){
+    el = document.getElementById('timer-popup');
+    if(!el) return;
+    var handle = document.getElementById('timer-drag-handle');
+    var resizeH = document.getElementById('timer-resize');
+    if(resizeH && e.target === resizeH){
+      rx = e.clientX; rw = el.offsetWidth; resizing = true; e.preventDefault();
+    } else if(handle && handle.contains(e.target) && e.target.tagName !== 'BUTTON'){
+      var rect = el.getBoundingClientRect();
+      ox=e.clientX; oy=e.clientY; ol=rect.left; ot=rect.top;
+      dragging=true; e.preventDefault();
+    }
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!el) return;
+    if(dragging){ el.style.left=(ol+e.clientX-ox)+'px'; el.style.top=(ot+e.clientY-oy)+'px'; el.style.right='auto'; }
+    if(resizing){
+      var newW = Math.max(170, rw+(e.clientX-rx));
+      el.style.width = newW + 'px';
+      // Canvas mee schalen
+      var canvas = document.getElementById('timer-clock');
+      if(canvas && timerView !== 'digital'){
+        var cSize = Math.min(newW * 0.42, 180);
+        canvas.width = cSize; canvas.height = cSize;
+        drawClock();
+      }
+    }
+  });
+  document.addEventListener('mouseup', function(){ dragging=false; resizing=false; });
+})();
 </script>
+
+<!-- HELP OVERLAY KINDBORD -->
+<div class="overlay" id="kind-help-overlay">
+<div class="popup" style="text-align:left;max-width:540px;width:100%;max-height:88vh;overflow-y:auto;">
+<h3 style="font-size:20px;margin-bottom:4px;">❓ Uitleg — Kindbord</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Alles wat je moet weten over het kindbord en de instellingen.</p>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">👦 Leerlingen &amp; namen</div>
+<ul style="font-size:13px;color:#4b5563;line-height:1.8;padding-left:18px;">
+<li>Namen invoeren via het <strong>setup-scherm</strong> (verschijnt automatisch bij eerste gebruik).</li>
+<li>Klik <strong>📷</strong> naast een naam om een foto toe te voegen — verschijnt op de naamkaart.</li>
+<li>Klik <strong>🔒</strong> naast een naam om privé bevindingen toe te voegen. Zichtbaar in het PDF-rapport.</li>
+</ul>
+</div>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">📋 Taken toewijzen</div>
+<ul style="font-size:13px;color:#4b5563;line-height:1.8;padding-left:18px;">
+<li>Vink één of meer kinderen aan via het ☑️-hokje. Selecteer dan taken en klik <strong>"Toewijzen aan selectie"</strong>.</li>
+<li>Standaard volgen kinderen het klasbord. Klik <strong>"🧹 Kindbord leeg maken"</strong> als je eigen taken per kind wil geven.</li>
+<li><strong>✎ naam</strong> onder een taak = naam aanpassen, bv. "Rekenen" → "Rekenhoek".</li>
+<li><strong>📷 afb.</strong> onder een taak = eigen afbeelding uploaden als pictogram.</li>
+</ul>
+</div>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">📺 Smartboard-weergave</div>
+<p style="font-size:13px;color:#4b5563;line-height:1.7;">Open via het welkomstscherm. Alle beheerknoppen zijn verborgen — kinderen zien enkel namen en taken. <strong>Terug naar beheer:</strong> klik het kleine 🔒 rechtsonder in het scherm.</p>
+</div>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">⏱️ Werktimer</div>
+<p style="font-size:13px;color:#4b5563;line-height:1.7;">Klik <strong>"⏱️ Timer"</strong> in de balk. Stel de tijd in, klik Starten. Versleep de timer aan de titelbalk. Kies analoog, digitaal of beide. Geluid + rode knippering als tijd om is.</p>
+</div>
+
+<div style="margin-bottom:14px;">
+<div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">📄 PDF rapport</div>
+<p style="font-size:13px;color:#4b5563;line-height:1.7;">Klik <strong>"📄 PDF rapport"</strong> in de balk. Per leerling een pagina met taken, smileys en bevindingen. Kies "⬇️ Downloaden" — het afdrukvenster opent. Kies <em>Bestemming: Opslaan als PDF</em>.</p>
+</div>
+
+<div style="display:flex;justify-content:flex-end;">
+<button type="button" class="apply-btn teacher-btn" onclick="document.getElementById('kind-help-overlay').classList.remove('show')" style="padding:10px 24px;">Begrepen!</button>
+</div>
+</div>
+</div>
+
+<!-- EXIT SMARTBOARD MODAL -->
+<div class="overlay" id="kind-exit-overlay">
+<div class="popup" style="text-align:center;max-width:340px;width:100%;">
+<div style="font-size:36px;margin-bottom:8px;">🔒</div>
+<h3 style="font-size:20px;margin-bottom:8px;">Leerkracht-menu</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Kies wat je wil doen.</p>
+<div style="display:flex;flex-direction:column;gap:8px;">
+<button type="button" class="primary-big-btn" onclick="exitKindSmartboard('instellingen')" style="font-size:16px;padding:12px;">⚙️ Terug naar instellingen</button>
+<button type="button" class="secondary-big-btn" onclick="exitKindSmartboard('welkom')" style="font-size:16px;padding:12px;">🏠 Terug naar welkomstscherm</button>
+<button type="button" class="close-btn" onclick="document.getElementById('kind-exit-overlay').classList.remove('show')" style="font-size:15px;padding:10px;">Annuleren (blijf op bord)</button>
+</div>
+</div>
+</div>
 
 <!-- BEVINDINGEN MODAL -->
 <div class="overlay" id="kind-notes-overlay">
@@ -2145,5 +2448,70 @@ function goBackToWelcome(){
 </div>
 </div>
 
+<!-- TIMER POPUP -->
+<div id="timer-popup" style="display:none;position:fixed;z-index:8000;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.22);border:3px solid #e0e7ff;padding:14px 16px;user-select:none;top:80px;right:30px;min-width:180px;">
+  <!-- Titelbalk (drag handle) -->
+  <div id="timer-drag-handle" style="cursor:move;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;">
+    <span style="font-weight:800;font-size:13px;color:#6366f1;white-space:nowrap;">⏱️ Werktimer</span>
+    <div style="display:flex;gap:3px;align-items:center;">
+      <!-- Weergave-knoppen -->
+      <button onclick="setTimerView('both')" id="tv-both" title="Analoog + digitaal" style="border:2px solid #6366f1;background:#eef2ff;color:#6366f1;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">◷+</button>
+      <button onclick="setTimerView('analog')" id="tv-analog" title="Enkel analoog" style="border:2px solid #e0e7ff;background:#f8fafc;color:#6b7280;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">◷</button>
+      <button onclick="setTimerView('digital')" id="tv-digital" title="Enkel digitaal" style="border:2px solid #e0e7ff;background:#f8fafc;color:#6b7280;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">0:00</button>
+      <button onclick="toggleTimer()" style="border:none;background:#fee2e2;color:#dc2626;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:13px;margin-left:2px;">✕</button>
+    </div>
+  </div>
+
+  <!-- INSTELLEN -->
+  <div id="timer-setup" style="text-align:center;">
+    <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;">Stel de werktijd in</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+      <button onclick="adjustTime(-5)" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;font-weight:800;line-height:1;">−</button>
+      <span id="timer-set-display" style="font-size:24px;font-weight:800;color:#1e1b4b;min-width:60px;text-align:center;">15:00</span>
+      <button onclick="adjustTime(5)" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;font-weight:800;line-height:1;">+</button>
+    </div>
+    <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+      <button onclick="setTimerPreset(5)"  class="timer-preset">5'</button>
+      <button onclick="setTimerPreset(10)" class="timer-preset">10'</button>
+      <button onclick="setTimerPreset(15)" class="timer-preset">15'</button>
+      <button onclick="setTimerPreset(20)" class="timer-preset">20'</button>
+      <button onclick="setTimerPreset(30)" class="timer-preset">30'</button>
+    </div>
+    <button onclick="startTimer()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:9px 0;font-size:15px;font-weight:800;cursor:pointer;width:100%;">▶ Starten</button>
+  </div>
+
+  <!-- LOPEND -->
+  <div id="timer-running" style="display:none;">
+    <div id="timer-display-wrap" style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <!-- Analoge klok -->
+      <canvas id="timer-clock" width="120" height="120" id="timer-clock" style="display:block;flex-shrink:0;"></canvas>
+      <!-- Digitale weergave -->
+      <div id="timer-digital-wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div id="timer-digital" style="font-size:32px;font-weight:800;color:#1e1b4b;letter-spacing:1px;line-height:1;">15:00</div>
+        <div style="background:#e0e7ff;border-radius:5px;height:7px;width:90px;overflow:hidden;">
+          <div id="timer-progress" style="height:100%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:5px;width:100%;transition:width .5s;"></div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button onclick="pauseResumeTimer()" id="timer-pause-btn" style="background:#fef3c7;color:#92400e;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;">⏸ Pauze</button>
+          <button onclick="resetTimer()" style="background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;">↺ Stop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AFGELOPEN -->
+  <div id="timer-done" style="display:none;text-align:center;">
+    <div style="font-size:40px;margin-bottom:6px;">🔔</div>
+    <div style="font-size:18px;font-weight:800;color:#16a34a;margin-bottom:10px;">Tijd is om!</div>
+    <button onclick="resetTimer()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:9px 0;font-size:14px;font-weight:800;cursor:pointer;width:100%;">Nieuwe timer</button>
+  </div>
+
+  <!-- Resize-handvat -->
+  <div id="timer-resize" style="position:absolute;bottom:3px;right:3px;width:14px;height:14px;cursor:se-resize;opacity:.35;font-size:11px;text-align:center;line-height:14px;">⊿</div>
+</div>
+<style>
+.timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
+.timer-preset:hover{background:#e0e7ff;}
+</style>
 </body>
 </html>
