@@ -83,7 +83,8 @@ Lena
 <span id="pupil-count-title" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
 <button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 Alfabetisch</button>
 </div>
-<div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto toevoegen</strong><br/>Beweeg muis tussen namen → blauwe streep = invoegen</div>
+<div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto toevoegen</strong><br/>Beweeg muis tussen namen → blauwe streep = invoegen
+<button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ meer uitleg</button></div>
 <div id="pupil-list"></div>
 </div>
 </div>
@@ -92,7 +93,8 @@ Lena
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <div class="card">
 <div class="card-title">📋 Klassikale taken</div>
-<div class="card-hint">Klik op een taak om aan/uit te zetten. Klik 📷 onder een taak om een eigen afbeelding te uploaden.</div>
+<div class="card-hint">Klik op een taak om aan/uit te zetten. <strong>✎ naam</strong> = naam wijzigen. <strong>📷 afb.</strong> = eigen afbeelding uploaden.
+<button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg taken</button></div>
 <div class="task-chips" id="task-chips"></div>
 </div>
 <div class="card">
@@ -120,6 +122,24 @@ Lena
 <input accept=".json" class="hidden" id="import-file" onchange="importData(event)" type="file"/>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')">❓ Uitleg</button>
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
+<button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="timerToggleBtn">⏱️ Timer</button>
+</div>
+</div>
+
+<!-- Discreet slotje — altijd zichtbaar, ook in smartboard-modus -->
+<button id="smartboard-exit-btn" onclick="document.getElementById('smartboard-exit-overlay').classList.remove('hidden')" title="Leerkracht" style="position:fixed;bottom:12px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.5);font-size:15px;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;transition:all .2s;">🔒</button>
+
+<!-- Exit-modal -->
+<div class="overlay hidden" id="smartboard-exit-overlay">
+<div class="modal" style="max-width:360px;text-align:center;">
+<div style="font-size:36px;margin-bottom:8px;">🔒</div>
+<div class="modal-title" style="text-align:center;font-size:18px;">Leerkracht-menu</div>
+<p class="modal-sub" style="text-align:center;">Kies wat je wil doen.</p>
+<div style="display:flex;flex-direction:column;gap:8px;">
+<button class="btn btn-indigo" onclick="exitSmartboard('beheer')" style="width:100%;padding:12px;">⚙️ Terug naar beheer</button>
+<button class="btn btn-secondary" onclick="exitSmartboard('welkom')" style="width:100%;padding:12px;">🏠 Terug naar welkomstscherm</button>
+<button class="btn btn-ghost" onclick="document.getElementById('smartboard-exit-overlay').classList.add('hidden')" style="width:100%;padding:10px;">Annuleren (blijf op bord)</button>
+</div>
 </div>
 </div>
 <div id="board-scroll">
@@ -263,72 +283,98 @@ Lena
 </div>
 </div>
 </div><div class="overlay hidden" id="help-beheer-overlay">
-<div class="modal" style="max-width:540px;">
-<div class="modal-title">❓ Uitleg Beheer</div>
+<div class="modal" style="max-width:580px;">
+<div class="modal-title">❓ Uitleg — Beheer</div>
+<p class="modal-sub">Hier stel je alles in vóór je naar het bord gaat. Navigeer via de tabbladen bovenaan.</p>
+
 <div class="help-section">
 <h3>👦 Tabblad Leerlingen</h3>
 <ul>
-<li><strong>Naam toevoegen</strong> — voornaam + achternaam (achternaam bepaalt alfabetische volgorde)</li>
-<li><strong>Klaslijst plakken</strong> — kopieer namen uit Smartschool/Excel/Word en plak ze in het tekstvak</li>
-<li><strong>📋</strong> per leerling — taken toevoegen of weghalen voor die leerling (differentiatie)</li>
-<li><strong>🔒</strong> per leerling — jouw privé-bevindingen, nooit zichtbaar op het bord</li>
-<li><strong>✎</strong> naam aanpassen · <strong>⠳ slepen</strong> — volgorde wijzigen</li>
+<li><strong>Naam toevoegen</strong> — voornaam + achternaam. Achternaam bepaalt de alfabetische volgorde.</li>
+<li><strong>Klaslijst plakken</strong> — kopieer namen uit Smartschool, Excel of Word en plak ze in één keer. Kies de volgorde (Voornaam Achternaam of omgekeerd).</li>
+<li><strong>⠳ Slepen</strong> — versleep namen om de volgorde aan te passen.</li>
+<li><strong>📷 Foto uploaden</strong> — klik het 📷-knopje naast een naam om een foto of afbeelding toe te voegen. Die verschijnt op het bord. Klik 🗑 om te verwijderen. Alle afbeeldingsformaten werken (jpg, png, gif, webp).</li>
+<li><strong>📋</strong> per leerling — taken individueel aan/uitzetten voor die leerling (differentiatie).</li>
+<li><strong>🔒</strong> per leerling — jouw privé-bevindingen. Nooit zichtbaar op het bord, wel in het PDF-rapport.</li>
+<li><strong>✎</strong> — naam aanpassen.</li>
 </ul>
 </div>
+
 <div class="help-section">
 <h3>📋 Tabblad Taken</h3>
 <ul>
-<li>Klik op een taak om ze <strong>aan of uit</strong> te zetten voor de hele klas</li>
-<li>Voeg een <strong>eigen taak</strong> toe met een pictogram naar keuze</li>
-<li>Per leerling taken aanpassen via 📋 in de leerlingenlijst</li>
-<li><strong>📷 Eigen pictogram</strong> — klik het 📷-knopje naast een taak om een eigen afbeelding te uploaden (jpg, png, gif, webp). De afbeelding past zich automatisch aan zodat niets wordt afgesneden.</li>
+<li>Klik op een taakchip om die <strong>aan of uit</strong> te zetten voor de hele klas.</li>
+<li><strong>✎ naam</strong> — klik dit knopje onder een taak om de naam aan te passen, bv. "Rekenen" → "Rekenhoek".</li>
+<li><strong>📷 afb.</strong> — vervang het emoji-pictogram door een eigen afbeelding. Niets wordt afgesneden.</li>
+<li><strong>Eigen taak toevoegen</strong> — kies een emoji en typ een naam. De taak verschijnt direct in de lijst.</li>
 </ul>
 </div>
+
 <div class="help-section">
-<h3>👦 Leerlingfoto toevoegen</h3>
-<p>Klik het 📷-knopje naast een leerlingnaam om een foto of afbeelding toe te voegen. Die verschijnt dan op het bord naast de naam. Klik 🗑 om de foto te verwijderen.</p>
+<h3>🔄 Nieuwe periode starten</h3>
+<p>Klik bovenaan op <strong>"🔄 Nieuwe periode"</strong> om een nieuwe week of periode te starten. Kies wat je wil bewaren en wat je wil wissen (vinkjes, bevindingen of alles).</p>
 </div>
+
 <div class="help-section">
-<h3>🔄 Nieuwe periode</h3>
-<p>Klik bovenaan op "Nieuwe periode" om een nieuwe week of periode te starten. Kies wat je wil wissen.</p>
+<h3>💾 Klaslijst bewaren</h3>
+<p>Sla de namen op als bestand zodat je ze volgend jaar of op een andere computer snel kunt inladen. Gebruik <strong>"💾 Opslaan"</strong> en <strong>"📂 Laden"</strong> onderaan het leerlingen-tabblad.</p>
 </div>
+
 <div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-beheer-overlay').classList.add('hidden')">Begrepen!</button></div>
 </div>
-</div><div class="overlay hidden" id="help-overlay">
-<div class="modal" style="max-width:540px;">
-<div class="modal-title">❓ Uitleg Klasbord</div>
-<div class="help-section">
-<h3>🚀 Eerste keer starten</h3>
-<p>Bij het openen verschijnt een welkomstscherm. Klik op stap 1 en 2 om leerlingen en taken in te stellen. Daarna verschijnt de groene knop "Naar het klasbord".</p>
 </div>
+
+<div class="overlay hidden" id="help-overlay">
+<div class="modal" style="max-width:580px;max-height:88vh;">
+<div class="modal-title">❓ Uitleg — Klasbord</div>
+<p class="modal-sub">Alles wat je moet weten om het klasbord te gebruiken.</p>
+
 <div class="help-section">
-<h3>📋 Het bord gebruiken</h3>
+<h3>📋 Hokjes gebruiken</h3>
 <div class="help-row" style="margin-top:6px">
-<div class="help-badge" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2.5px dashed #c7d2fe;font-size:20px;">○</div>
-<span style="font-size:13px;color:#4b5563"><strong>Leeg (paars gestippeld)</strong> — taak nog niet begonnen</span>
+  <div class="help-badge" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2.5px dashed #c7d2fe;font-size:20px;">○</div>
+  <span style="font-size:13px;color:#4b5563"><strong>Leeg</strong> — taak nog niet begonnen. Klik om naar "Bezig" te gaan.</span>
 </div>
 <div class="help-row">
-<div class="help-badge" style="background:#fef9c3;border:2px solid #f59e0b;">🔄</div>
-<span style="font-size:13px;color:#4b5563"><strong>Bezig (geel)</strong> — leerling is er mee bezig</span>
+  <div class="help-badge" style="background:#fef9c3;border:2px solid #f59e0b;">🔄</div>
+  <span style="font-size:13px;color:#4b5563"><strong>Bezig (geel)</strong> — leerling is er mee bezig.</span>
 </div>
 <div class="help-row">
-<div class="help-badge" style="background:#dcfce7;border:2px solid #16a34a;color:#15803d;font-weight:800;">✓</div>
-<span style="font-size:13px;color:#4b5563"><strong>Klaar (groen)</strong> — afgewerkt!</span>
+  <div class="help-badge" style="background:#dcfce7;border:2px solid #16a34a;color:#15803d;font-weight:800;">✓</div>
+  <span style="font-size:13px;color:#4b5563"><strong>Klaar (groen)</strong> — verschijnt een smiley-popup. Afgewerkt!</span>
 </div>
 </div>
+
 <div class="help-section">
-<h3>😊 Smileys na afvinken</h3>
-<p>Na afvinken verschijnt een popup: hoe vond je het? 😊 Super · 🙂 Goed · 😐 Moeilijk · 😟 Te moeilijk. Zichtbaar in het PDF-rapport.</p>
+<h3>😊 Smileys</h3>
+<p>Na afvinken vraagt een popup: hoe vond je het? <strong>😊 Super · 🙂 Goed · 😐 Moeilijk · 😟 Te moeilijk</strong>. De gekozen smiley staat nadien als klein icoon onder het vinkje. Klik erop om te wijzigen. Zichtbaar in het PDF-rapport.</p>
+<p style="margin-top:4px;font-size:12px;color:#718096;">Tip: zet "Smileys zichtbaar voor andere kinderen" uit (beheer → leerlingen) als je wil dat enkel het kind zijn eigen smiley ziet.</p>
 </div>
+
+<div class="help-section">
+<h3>📺 Smartboard-weergave</h3>
+<p>Open het bord via <strong>"📺 Smartboard-weergave"</strong> op het welkomstscherm. In deze modus zijn alle beheerknoppen (PDF, Export, Import, Beheer) verborgen zodat kinderen niets fout kunnen aanklikken.<br/>
+<strong>Terug naar beheer:</strong> klik het kleine 🔒-icoontje rechtsonder in het scherm. Dat opent een discreet menu voor de leerkracht.</p>
+</div>
+
+<div class="help-section">
+<h3>⏱️ Werktimer</h3>
+<p>Klik op <strong>"⏱️ Timer"</strong> in de balk. Stel de werktijd in en klik "▶ Starten". De timer zweeft boven het bord en overlapt niets — versleep hem aan de titelbalk, pas de breedte aan via het ⊿-hoekje. Kies je weergave: analoog, digitaal of beide.<br/>
+Als de tijd om is klinkt een geluidssignaal en knippert de timer rood tot je op "Nieuwe timer" klikt.</p>
+</div>
+
 <div class="help-section">
 <h3>📄 PDF rapport</h3>
-<p>Klik "📄 PDF rapport" → kies <strong>Downloaden als PDF</strong> voor een direct bestand, of <strong>Afdrukken</strong> voor het afdrukvenster.</p>
+<p>Klik <strong>"📄 PDF rapport"</strong> in de balk. Kies een periodenaam en datums. Klik <strong>"⬇️ Downloaden als PDF"</strong> — het afdrukvenster opent. Kies bij <em>Bestemming</em>: <strong>Opslaan als PDF</strong> → klik Opslaan. De PDF staat in je Downloads-map.</p>
 </div>
+
 <div class="help-section">
-<h3>💾 Backup bewaren (Export / Import)</h3>
-<p><strong>Export</strong> = sla al je gegevens op als bestand op je computer. Klik op "💾 Export" voor stap-voor-stap uitleg. Bewaar het bestand op een plek die je makkelijk terugvindt.<br/>
-<strong>Import</strong> = zet een eerder bewaarde backup terug. Klik op "📂 Import" en kies je backupbestand. <em>Tip: klik het backupbestand nooit zomaar open — je ziet dan rare tekens, maar het bestand is niet stuk.</em></p>
+<h3>💾 Backup (Export / Import)</h3>
+<p><strong>💾 Export</strong> = sla al je gegevens (namen, taken, voortgang, bevindingen) op als bestand. Bewaar het op een vaste plek, bv. een map "Klasbord backups" op je bureaublad.<br/>
+<strong>📂 Import</strong> = zet een backup terug. Kies het bewaard bestand. <em>Klik het backupbestand nooit zomaar open — je ziet dan rare tekens, maar het bestand is niet stuk.</em><br/>
+Maak een backup aan het einde van elke periode!</p>
 </div>
+
 <div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-overlay').classList.add('hidden')">Begrepen!</button></div>
 </div>
 </div><div id="celebration" onclick="closeCelebration()">
@@ -347,5 +393,70 @@ Lena
 </div>
 </div>
 <script src="klasbord.js"></script>
-</body>
-</html>
+
+<!-- TIMER POPUP -->
+<div id="timer-popup" style="display:none;position:fixed;z-index:8000;background:#fff;border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.22);border:3px solid #e0e7ff;padding:14px 16px;user-select:none;top:80px;right:30px;min-width:180px;">
+  <!-- Titelbalk (drag handle) -->
+  <div id="timer-drag-handle" style="cursor:move;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;">
+    <span style="font-weight:800;font-size:13px;color:#6366f1;white-space:nowrap;">⏱️ Werktimer</span>
+    <div style="display:flex;gap:3px;align-items:center;">
+      <!-- Weergave-knoppen -->
+      <button onclick="setTimerView('both')" id="tv-both" title="Analoog + digitaal" style="border:2px solid #6366f1;background:#eef2ff;color:#6366f1;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">◷+</button>
+      <button onclick="setTimerView('analog')" id="tv-analog" title="Enkel analoog" style="border:2px solid #e0e7ff;background:#f8fafc;color:#6b7280;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">◷</button>
+      <button onclick="setTimerView('digital')" id="tv-digital" title="Enkel digitaal" style="border:2px solid #e0e7ff;background:#f8fafc;color:#6b7280;border-radius:6px;padding:2px 5px;cursor:pointer;font-size:10px;font-weight:800;">0:00</button>
+      <button onclick="toggleTimer()" style="border:none;background:#fee2e2;color:#dc2626;border-radius:6px;padding:2px 7px;cursor:pointer;font-size:13px;margin-left:2px;">✕</button>
+    </div>
+  </div>
+
+  <!-- INSTELLEN -->
+  <div id="timer-setup" style="text-align:center;">
+    <div style="font-size:11px;font-weight:700;color:#6b7280;margin-bottom:6px;">Stel de werktijd in</div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+      <button onclick="adjustTime(-5)" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;font-weight:800;line-height:1;">−</button>
+      <span id="timer-set-display" style="font-size:24px;font-weight:800;color:#1e1b4b;min-width:60px;text-align:center;">15:00</span>
+      <button onclick="adjustTime(5)" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;width:28px;height:28px;font-size:16px;cursor:pointer;font-weight:800;line-height:1;">+</button>
+    </div>
+    <div style="display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+      <button onclick="setTimerPreset(5)"  class="timer-preset">5'</button>
+      <button onclick="setTimerPreset(10)" class="timer-preset">10'</button>
+      <button onclick="setTimerPreset(15)" class="timer-preset">15'</button>
+      <button onclick="setTimerPreset(20)" class="timer-preset">20'</button>
+      <button onclick="setTimerPreset(30)" class="timer-preset">30'</button>
+    </div>
+    <button onclick="startTimer()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:9px 0;font-size:15px;font-weight:800;cursor:pointer;width:100%;">▶ Starten</button>
+  </div>
+
+  <!-- LOPEND -->
+  <div id="timer-running" style="display:none;">
+    <div id="timer-display-wrap" style="display:flex;align-items:center;justify-content:center;gap:10px;">
+      <!-- Analoge klok -->
+      <canvas id="timer-clock" width="120" height="120" id="timer-clock" style="display:block;flex-shrink:0;"></canvas>
+      <!-- Digitale weergave -->
+      <div id="timer-digital-wrap" style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div id="timer-digital" style="font-size:32px;font-weight:800;color:#1e1b4b;letter-spacing:1px;line-height:1;">15:00</div>
+        <div style="background:#e0e7ff;border-radius:5px;height:7px;width:90px;overflow:hidden;">
+          <div id="timer-progress" style="height:100%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:5px;width:100%;transition:width .5s;"></div>
+        </div>
+        <div style="display:flex;gap:5px;">
+          <button onclick="pauseResumeTimer()" id="timer-pause-btn" style="background:#fef3c7;color:#92400e;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;">⏸ Pauze</button>
+          <button onclick="resetTimer()" style="background:#fee2e2;color:#dc2626;border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:800;cursor:pointer;">↺ Stop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AFGELOPEN -->
+  <div id="timer-done" style="display:none;text-align:center;">
+    <div style="font-size:40px;margin-bottom:6px;">🔔</div>
+    <div style="font-size:18px;font-weight:800;color:#16a34a;margin-bottom:10px;">Tijd is om!</div>
+    <button onclick="resetTimer()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:9px 0;font-size:14px;font-weight:800;cursor:pointer;width:100%;">Nieuwe timer</button>
+  </div>
+
+  <!-- Resize-handvat -->
+  <div id="timer-resize" style="position:absolute;bottom:3px;right:3px;width:14px;height:14px;cursor:se-resize;opacity:.35;font-size:11px;text-align:center;line-height:14px;">⊿</div>
+</div>
+<style>
+.timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
+.timer-preset:hover{background:#e0e7ff;}
+</style>
+</body></html>
