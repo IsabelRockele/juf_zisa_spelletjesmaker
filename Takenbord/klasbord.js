@@ -1,4 +1,3 @@
-
 const STORAGE_KEY = 'taakbord_test_v4';
 const SMILEYS = ['','😊','🙂','😐','😟'];
 const SMILEY_LABELS = ['','Super!','Ging goed','Beetje moeilijk','Te moeilijk'];
@@ -21,7 +20,9 @@ const EMOJIS = [
 // STATE
 // progress: { pupilId: { taskId: { status:0-2, smiley:0-4 } } }
 // notes: { pupilId: string }
-let state = { pupils:[], activeTasks:[], progress:{}, customTasks:[], pupilTaskOverrides:{}, notes:{}, showNumbers:false, showLastname:false, showSmileys:false };
+// customIcons: { taskId: dataURL } – eigen afbeelding per taak
+// pupilPhotos: { pupilId: dataURL } – foto/afbeelding per leerling
+let state = { pupils:[], activeTasks:[], progress:{}, customTasks:[], pupilTaskOverrides:{}, notes:{}, showNumbers:false, showLastname:false, showSmileys:false, customIcons:{}, pupilPhotos:{} };
 let currentMode='board', currentTab='leerlingen';
 let selectedEmoji='⭐', ptSelectedEmoji='⭐';
 let editingId=null, editingPupilTasksId=null, editingNotesId=null;
@@ -46,6 +47,10 @@ function loadState(){
         });
       }
       state={...state,...s};
+      // Zorg dat deze velden altijd objecten zijn, ook bij oudere opgeslagen data
+      if(!state.customIcons||typeof state.customIcons!=='object') state.customIcons={};
+      if(!state.pupilPhotos||typeof state.pupilPhotos!=='object') state.pupilPhotos={};
+      if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
     }
   }catch(e){}
 }
@@ -53,7 +58,11 @@ function saveState(){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state)
 function uid(){ return '_'+Math.random().toString(36).slice(2)+Date.now(); }
 
 // TASK HELPERS
-function allBaseTasks(){ return [...DEFAULT_TASKS,...state.customTasks]; }
+function allBaseTasks(){
+  const overrides=state.taskLabelOverrides||{};
+  const defaults=DEFAULT_TASKS.map(t=>overrides[t.id]?{...t,label:overrides[t.id]}:t);
+  return [...defaults,...state.customTasks];
+}
 function classActiveTasks(){ return allBaseTasks().filter(t=>state.activeTasks.includes(t.id)); }
 function pupilTasks(pid){
   const ov=state.pupilTaskOverrides[pid]||{};
@@ -185,6 +194,35 @@ function toggleTask(id){ state.activeTasks=state.activeTasks.includes(id)?state.
 function addCustomTask(){ const inp=document.getElementById('input-task'),label=inp.value.trim();if(!label)return;const id='c_'+Date.now();state.customTasks.push({id,label,icon:selectedEmoji});state.activeTasks.push(id);inp.value='';saveState();renderTaskSettings();renderBoard(); }
 function removeCustomTask(id){ state.customTasks=state.customTasks.filter(t=>t.id!==id);state.activeTasks=state.activeTasks.filter(t=>t!==id);saveState();renderTaskSettings();renderBoard(); }
 
+// Taaknaam hernoemen (werkt voor zowel standaard als eigen taken)
+let renamingTaskId=null;
+function openTaskRenameModal(taskId, currentLabel){
+  renamingTaskId=taskId;
+  document.getElementById('rename-task-input').value=currentLabel;
+  document.getElementById('rename-task-overlay').classList.remove('hidden');
+  setTimeout(()=>{ const inp=document.getElementById('rename-task-input'); inp.focus(); inp.select(); },50);
+}
+function saveTaskRename(){
+  const newLabel=document.getElementById('rename-task-input').value.trim();
+  if(!newLabel||!renamingTaskId) return;
+  // Zoek in customTasks
+  const ct=state.customTasks.find(t=>t.id===renamingTaskId);
+  if(ct){ ct.label=newLabel; }
+  else {
+    // Standaard taak: sla de naam-override op
+    if(!state.taskLabelOverrides) state.taskLabelOverrides={};
+    state.taskLabelOverrides[renamingTaskId]=newLabel;
+  }
+  saveState();
+  closeTaskRename();
+  renderTaskSettings();
+  renderBoard();
+}
+function closeTaskRename(){
+  document.getElementById('rename-task-overlay').classList.add('hidden');
+  renamingTaskId=null;
+}
+
 // EXPORT / IMPORT / KLASLIJST
 function exportData(){ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='klasbord-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href); }
 function importData(e){ const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!d.pupils){alert('Ongeldig bestand.');return;}confirmAction('custom',`Bord vervangen door backup van ${f.name}?`,()=>{state={...state,...d};saveState();renderShell();});}catch{alert('Kon bestand niet lezen.');}};r.readAsText(f);e.target.value=''; }
@@ -197,7 +235,9 @@ function loadClassListAction(replace){ if(!_loadNames)return;if(replace){const n
 function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!document.getElementById('pdf-date-from').value)document.getElementById('pdf-date-from').value=today;if(!document.getElementById('pdf-date-to').value)document.getElementById('pdf-date-to').value=today;document.getElementById('pdf-overlay').classList.remove('hidden'); }
 function fmtDate(str){ if(!str)return'';try{return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return str;} }
 
-function generateAndPrint(){
+function generateAndPrint(mode){
+  // mode: 'download' = echte PDF download via nieuw venster + auto-print-to-save
+  //       'print'    = open venster voor afdrukken
   const periodName=document.getElementById('pdf-period-name').value.trim();
   const dateFrom=document.getElementById('pdf-date-from').value;
   const dateTo=document.getElementById('pdf-date-to').value;
@@ -333,10 +373,15 @@ function generateAndPrint(){
   const html='<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8">'
     +'<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">'
     +'<title>Klasbord Rapport<\/title><style>'+css+'<\/style><\/head><body>'
-    +'<div id="tb"><div><h2>Klasbord Rapport</h2><span>'+pspan+'Gegenereerd op '+today+'</span></div>'
-    +'<div class="tbb"><span class="tbh">Kies pagina\'s in het afdrukvenster · Sla op als PDF via Bestemming</span>'
-    +'<button class="tb2" onclick="window.close()">Sluiten</button>'
-    +'<button class="tb1" onclick="window.print()">Afdrukken / Opslaan als PDF</button></div></div>'
+    +'<div id="tb"><div><h2>📄 Klasbord Rapport</h2><span>'+pspan+'Gegenereerd op '+today+'</span></div>'
+    +'<div class="tbb">'
+    +'<div style="background:rgba(255,255,255,.12);border-radius:8px;padding:8px 14px;font-size:12px;line-height:1.6;color:#fff;">'
+    +'<strong>Stap 1:</strong> Klik op de groene knop →<br/>'
+    +'<strong>Stap 2:</strong> Kies bij <em>Bestemming</em>: <strong>Opslaan als PDF</strong><br/>'
+    +'<strong>Stap 3:</strong> Klik <strong>Opslaan</strong> — PDF staat in je Downloads'
+    +'</div>'
+    +'<button class="tb2" onclick="window.close()">✕ Sluiten</button>'
+    +'<button class="tb1" onclick="window.print()">🖨️ Opslaan als PDF / Afdrukken</button></div></div>'
     +'<div id="ct">'
     +'<div class="pr-page pr-ow">'
     +'<div class="pr-ph"><h1>Klasbord &#x2013; Overzicht</h1><span>Gegenereerd op '+today+'</span></div>'
@@ -350,11 +395,101 @@ function generateAndPrint(){
     +'<\/div><\/body><\/html>';
 
   document.getElementById('pdf-overlay').classList.add('hidden');
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const tab=window.open(url,'_blank');
-  if(!tab) alert('Pop-up geblokkeerd! Sta pop-ups toe voor deze pagina in je browser.');
-  setTimeout(function(){URL.revokeObjectURL(url);},15000);
+
+  if(mode==='download'){
+    // PDF download via html2canvas + jsPDF — zelfde aanpak als andere generators
+    const { jsPDF } = window.jspdf;
+
+    // Laad-overlay tonen
+    const ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-family:Nunito,sans-serif;font-weight:800;font-size:18px;color:#6366f1;z-index:9999;flex-direction:column;gap:12px;';
+    ov.innerHTML = '<div>⏳ PDF wordt aangemaakt…</div><div style="font-size:13px;font-weight:600;color:#718096;">even geduld a.u.b.</div>';
+    document.body.appendChild(ov);
+
+    // Render-container zichtbaar in het scherm (html2canvas vereist dit)
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;left:0;top:0;width:900px;background:#fff;z-index:9998;overflow:visible;font-family:Nunito,sans-serif;';
+    container.innerHTML =
+      '<style>' + css + '*{-webkit-print-color-adjust:exact;print-color-adjust:exact;font-family:Nunito,sans-serif;}</style>'
+      + '<div id="ct" style="padding:20px;max-width:860px;margin:0 auto;">'
+      + '<div class="pr-page" style="margin-bottom:24px;">'
+      + '<div class="pr-ph"><h1>Klasbord – Overzicht</h1><span>Gegenereerd op ' + today + '</span></div>'
+      + '<div class="pr-pb">' + periodDiv
+      + '<div class="pr-ss"><h2 class="r">Niet volledig afgewerkt (' + incomplete.length + ')</h2><div class="sc-grid">' + (si || '<p style="color:#a0aec0;font-size:11px">Iedereen klaar!</p>') + '</div></div>'
+      + '<div class="pr-ss"><h2 class="g">Volledig afgewerkt (' + complete2.length + ')</h2><div class="sc-grid">' + (sc || '<p style="color:#a0aec0;font-size:11px">Nog niemand volledig klaar.</p>') + '</div></div>'
+      + '<div style="font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 8px">Volledig klasoverzicht</div>'
+      + '<table class="pr-ot"><thead><tr><th class="nc">Leerling</th>' + taskHeaders + '</tr></thead><tbody>' + overviewRows + '</tbody></table>'
+      + '</div></div>'
+      + detailPages
+      + '</div>';
+    document.body.appendChild(container);
+
+    // Wacht tot fonts geladen zijn, render dan pagina per pagina
+    document.fonts.ready.then(async function(){
+      try {
+        const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+        const pageW = 210, pageH = 297, margin = 10, usableW = pageW - 2 * margin;
+        const pages = container.querySelectorAll('.pr-page');
+
+        for(let i = 0; i < pages.length; i++){
+          const canvas = await html2canvas(pages[i], {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            width: 880
+          });
+
+          const imgData = canvas.toDataURL('image/jpeg', 0.92);
+          const imgH = (canvas.height / canvas.width) * usableW;
+
+          if(i > 0) pdf.addPage();
+
+          if(imgH <= pageH - 2 * margin){
+            // Past op één pagina
+            pdf.addImage(imgData, 'JPEG', margin, margin, usableW, imgH);
+          } else {
+            // Te hoog: knip in stukken
+            const pxPerMm = canvas.width / usableW;
+            const slicePx = Math.floor((pageH - 2 * margin) * pxPerMm);
+            let srcY = 0;
+            let firstSlice = true;
+            while(srcY < canvas.height){
+              if(!firstSlice) pdf.addPage();
+              firstSlice = false;
+              const sliceCanvas = document.createElement('canvas');
+              sliceCanvas.width = canvas.width;
+              sliceCanvas.height = Math.min(slicePx, canvas.height - srcY);
+              sliceCanvas.getContext('2d').drawImage(canvas, 0, -srcY);
+              const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+              const sliceH = (sliceCanvas.height / canvas.width) * usableW;
+              pdf.addImage(sliceData, 'JPEG', margin, margin, usableW, sliceH);
+              srcY += slicePx;
+            }
+          }
+        }
+
+        const filename = 'klasbord-rapport' + (periodName ? '-' + periodName.replace(/[^a-zA-Z0-9]/g,'-') : '') + '-' + new Date().toISOString().slice(0,10) + '.pdf';
+        pdf.save(filename);
+
+      } catch(err){
+        console.error('PDF fout:', err);
+        alert('PDF aanmaken mislukt: ' + err.message + '\n\nProbeer de knop "🖨️ Afdrukken" en kies "Opslaan als PDF".');
+      } finally {
+        document.body.removeChild(container);
+        document.body.removeChild(ov);
+      }
+    });
+
+  } else {
+    // Afdrukken: open rapport in nieuw venster
+    const blob = new Blob([html], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const tab = window.open(url, '_blank');
+    if(!tab) alert('Pop-up geblokkeerd! Sta pop-ups toe voor deze pagina in je browser.');
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 15000);
+  }
 }
 
 function buildAllTasksForBoard(){
@@ -415,8 +550,69 @@ function closeSettings(){ currentMode='board'; renderShell(); }
 
 // ── EXPORT INFO ─────────────────────────────────────────────────────────────
 function showExportInfo(){ document.getElementById('export-overlay').classList.remove('hidden'); }
+function showImportInfo(){ document.getElementById('import-overlay').classList.remove('hidden'); }
 
-// ── NIEUWE PERIODE ──────────────────────────────────────────────────────────
+// ── AFBEELDINGEN UPLOADEN ───────────────────────────────────────────────────
+function resizeImageToDataURL(file, size, cb){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=size; canvas.height=size;
+      const ctx=canvas.getContext('2d');
+      // Letterbox: centreer afbeelding zonder bij te snijden
+      const ratio=Math.min(size/img.width, size/img.height);
+      const w=img.width*ratio, h=img.height*ratio;
+      const x=(size-w)/2, y=(size-h)/2;
+      ctx.clearRect(0,0,size,size);
+      ctx.drawImage(img,x,y,w,h);
+      cb(canvas.toDataURL('image/png'));
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function uploadTaskIcon(taskId){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/jpeg,image/png,image/gif,image/webp,image/svg+xml';
+  inp.onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    resizeImageToDataURL(f,160,dataURL=>{
+      if(!state.customIcons) state.customIcons={};
+      state.customIcons[taskId]=dataURL;
+      saveState(); renderTaskSettings(); renderBoard();
+    });
+  };
+  inp.click();
+}
+
+function removeTaskIcon(taskId){
+  if(state.customIcons) delete state.customIcons[taskId];
+  saveState(); renderTaskSettings(); renderBoard();
+}
+
+function uploadPupilPhoto(pupilId){
+  const inp=document.createElement('input');
+  inp.type='file'; inp.accept='image/jpeg,image/png,image/gif,image/webp';
+  inp.onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    resizeImageToDataURL(f,120,dataURL=>{
+      if(!state.pupilPhotos) state.pupilPhotos={};
+      state.pupilPhotos[pupilId]=dataURL;
+      saveState(); renderPupilList(); renderBoard();
+    });
+  };
+  inp.click();
+}
+
+function removePupilPhoto(pupilId){
+  if(state.pupilPhotos) delete state.pupilPhotos[pupilId];
+  saveState(); renderPupilList(); renderBoard();
+}
+
+// ── EINDE AFBEELDINGEN ───────────────────────────────────────────────────────
 var selectedPeriodOption=0;
 function openNewPeriod(){
   selectedPeriodOption=0;
@@ -500,6 +696,8 @@ function renderPupilList(){
   document.getElementById('toggle-lastname').checked=!!state.showLastname;
   document.getElementById('toggle-smileys').checked=!!state.showSmileys;
   document.getElementById('pupil-count-title').textContent=`Leerlingen (${state.pupils.length})`;
+
+  // Leerlingenlijst — foto-knop direct zichtbaar naast elke naam
   const el=document.getElementById('pupil-list');
   if(!state.pupils.length){el.innerHTML='<div style="opacity:.3;text-align:center;padding:28px 0;font-size:13px">Nog geen leerlingen</div>';return;}
   let html='';
@@ -510,17 +708,24 @@ function renderPupilList(){
     const extraHtml = ov ? '<span class="pupil-extra-badge">\u2605 taken</span>' : '';
     const noteCls   = hasNotes ? 'has-notes' : '';
     const fullN     = esc(p.voornaam+(p.achternaam?' '+p.achternaam:''));
+    const photo     = state.pupilPhotos&&state.pupilPhotos[p.id];
+    // Foto-knop: groot en duidelijk zichtbaar in de rij
+    const photoCell = photo
+      ? `<button class="pupil-photo-btn has-photo" onclick="uploadPupilPhoto('${p.id}')" title="Klik om foto te wijzigen"><img src="${photo}" class="pupil-row-photo" alt="" /></button>`
+      : `<button class="pupil-photo-btn no-photo" onclick="uploadPupilPhoto('${p.id}')" title="Foto toevoegen">📷 foto</button>`;
     html += '<div class="insert-zone" onclick="insertAfter('+(i-1)+')"></div>';
     html += '<div class="pupil-row" draggable="true"'
       +' ondragstart="onDragStart(event,'+i+')" ondragover="onDragOver(event,'+i+')"'
       +' ondragleave="onDragLeave('+i+')" ondrop="onDrop(event,'+i+')" ondragend="onDragEnd()">'
       +'<span class="drag-handle">\u2833</span>'
       + numHtml
+      + photoCell
       +'<div class="pupil-display">'
         +'<span class="pupil-voornaam">'+esc(p.voornaam)+'</span>'
         + achHtml + extraHtml
       +'</div>'
       +'<div class="row-btns">'
+        +(photo?`<button class="row-btn del" onclick="removePupilPhoto('${p.id}')" title="Foto verwijderen" style="font-size:10px;">🗑</button>`:'')
         +'<button class="row-btn" onclick="openPupilTasksModal(\''+p.id+'\')" title="Taken aanpassen">\uD83D\uDCCB</button>'
         +'<button class="row-btn notes-btn '+noteCls+'" onclick="openNotesModal(\''+p.id+'\')" title="Bevindingen">\uD83D\uDD12</button>'
         +'<button class="row-btn" onclick="startEdit(\''+p.id+'\')" title="Naam aanpassen">\u270E</button>'
@@ -532,7 +737,59 @@ function renderPupilList(){
   el.innerHTML=html;
 }
 function renderTaskSettings(){
-  document.getElementById('task-chips').innerHTML=allBaseTasks().map(t=>{const a=state.activeTasks.includes(t.id),c=t.id.startsWith('c_');return`<div class="task-chip ${a?'active':''}" onclick="toggleTask('${t.id}')">${t.icon} ${esc(t.label)}${c?`<button class="remove-chip" onclick="event.stopPropagation();removeCustomTask('${t.id}')">✕</button>`:''}</div>`;}).join('');
+  const ci=state.customIcons||{};
+
+  // Taakchips met direct zichtbaar upload-knopje én naam-bewerk knopje
+  const chipsEl=document.getElementById('task-chips');
+  chipsEl.innerHTML='';
+  allBaseTasks().forEach(t=>{
+    const a=state.activeTasks.includes(t.id), c=t.id.startsWith('c_');
+    const hasImg=!!ci[t.id];
+    const wrap=document.createElement('div');
+    wrap.className='task-chip-wrap';
+
+    // De chip zelf (klik = aan/uit)
+    const chip=document.createElement('div');
+    chip.className='task-chip'+(a?' active':'');
+    chip.onclick=()=>toggleTask(t.id);
+    const iconHtml=hasImg?`<img class="chip-icon-img" src="${ci[t.id]}" alt="" />`:`${t.icon} `;
+    chip.innerHTML=iconHtml+esc(t.label)+(c?`<button class="remove-chip" onclick="event.stopPropagation();removeCustomTask('${t.id}')">✕</button>`:'');
+    wrap.appendChild(chip);
+
+    // Knopjesrij onder de chip
+    const btnRow=document.createElement('div');
+    btnRow.className='chip-btn-row';
+
+    // Naam bewerken knopje
+    const editBtn=document.createElement('button');
+    editBtn.className='chip-edit-name';
+    editBtn.title='Naam aanpassen';
+    editBtn.textContent='✎ naam';
+    editBtn.onclick=()=>openTaskRenameModal(t.id, t.label);
+    btnRow.appendChild(editBtn);
+
+    // Upload-knopje
+    const uploadBtn=document.createElement('button');
+    uploadBtn.className='chip-upload-inline'+(hasImg?' has-img':'');
+    uploadBtn.title=hasImg?'Eigen afbeelding — klik om te vervangen':'Eigen afbeelding uploaden';
+    uploadBtn.innerHTML=hasImg?`<img src="${ci[t.id]}" class="chip-upload-preview-img" alt="" /> <span>📷 wijzig</span>`:'📷 afb.';
+    uploadBtn.onclick=()=>uploadTaskIcon(t.id);
+    btnRow.appendChild(uploadBtn);
+
+    // Verwijder-afbeelding knopje
+    if(hasImg){
+      const delBtn=document.createElement('button');
+      delBtn.className='chip-upload-del';
+      delBtn.title='Afbeelding verwijderen';
+      delBtn.textContent='🗑';
+      delBtn.onclick=()=>removeTaskIcon(t.id);
+      btnRow.appendChild(delBtn);
+    }
+
+    wrap.appendChild(btnRow);
+    chipsEl.appendChild(wrap);
+  });
+
   document.getElementById('emoji-picker').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
   document.getElementById('input-task').placeholder=`${selectedEmoji} Taaknaam…`;
 }
@@ -550,7 +807,16 @@ function renderBoard(){
 function renderTaskHeader(tasks){
   const h=document.getElementById('task-header');
   h.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
-  tasks.forEach(t=>{const d=document.createElement('div');d.className='task-header-cell';d.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;h.appendChild(d);});
+  tasks.forEach(t=>{
+    const d=document.createElement('div');d.className='task-header-cell';
+    const ci=state.customIcons&&state.customIcons[t.id];
+    if(ci){
+      d.innerHTML=`<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
+    } else {
+      d.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
+    }
+    h.appendChild(d);
+  });
 }
 function renderPupilRows(allTasks){
   const c=document.getElementById('pupil-rows');c.innerHTML='';
@@ -558,6 +824,8 @@ function renderPupilRows(allTasks){
     const pid=pupil.id,myTasks=pupilTasks(pid),myIds=new Set(myTasks.map(t=>t.id));
     const complete=isPupilComplete(pid),{done,busy,total}=pupilStats(pid),prog=state.progress[pid]||{};
     const hasNotes=!!state.notes[pid];
+    const photo=state.pupilPhotos&&state.pupilPhotos[pid];
+    const photoHtml=photo?`<img class="pupil-board-photo" src="${photo}" alt="${esc(displayName(pupil))}" />`:'';
     const row=document.createElement('div');
     row.className='pupil-board-row'+(complete?' complete':'');
     const dc=complete?'done':busy>0?'busy':'';
@@ -567,6 +835,7 @@ function renderPupilRows(allTasks){
     const medalSpan = complete ? '<span class="pupil-medal">\uD83C\uDFC5</span>' : '';
     row.innerHTML = '<div class="pupil-name-cell">'
       + '<div class="pupil-dot '+dc+'"></div>'+nh
+      + photoHtml
       + '<div class="pupil-info">'
         + '<div class="pupil-name">'+esc(displayName(pupil))+'</div>'
         + '<div class="pupil-sub">'+done+'/'+total+bh+'</div>'
@@ -582,31 +851,39 @@ function renderPupilRows(allTasks){
         const isExtra=!!(state.pupilTaskOverrides[pid]?.extra?.find(x=>x.id===t.id));
         const entry=prog[t.id]||{status:0,smiley:0};
         const s=entry.status||0,sm=entry.smiley||0;
-        // Status button
+        // Status button — GEEN afbeelding hier, afbeelding staat alleen in de kolomheader
         const btn=document.createElement('button');
-        btn.className='task-btn status-'+s+(isExtra?' extra-task':'');        btn.textContent=s===0?'':s===1?'🔄':'✓';
+        btn.className='task-btn status-'+s+(isExtra?' extra-task':'');
+        btn.textContent = s===0 ? '' : s===1 ? '🔄' : '✓';
         btn.title=(isExtra?'★ Extra · ':'')+['Leeg → Bezig','Bezig → Klaar','Klaar → wissen'][s];
         btn.onclick=()=>cycleStatus(pid,t.id);
         cell.appendChild(btn);
-        // Smiley row (only show if showSmileys is on, or always show own row after completing)
+        // Smiley: na afvinken toon enkel gekozen smiley (klikbaar om te wijzigen via popup)
         if(s===2||sm>0){
-          const sr=document.createElement('div');sr.className='smiley-row';
-          [1,2,3,4].forEach(v=>{
+          if(sm>0){
+            // Toon enkel de gekozen smiley als knopje – klik opent popup om te wijzigen
+            const sr=document.createElement('div');sr.className='smiley-row smiley-row-single';
             const sb=document.createElement('button');
-            // If smileys are hidden: show selected smiley dimmed, hide others
-            const isSelected=sm===v;
-            if(!state.showSmileys && !isSelected && sm>0){
-              // hide other smileys when not showing publicly
-              sb.style.display='none';
-            }
-            sb.className='smiley-btn'+(isSelected?' selected':'');
-            sb.textContent=SMILEYS[v];
-            sb.title=state.showSmileys?SMILEY_LABELS[v]:(isSelected?SMILEY_LABELS[v]:'Klik om smiley aan te passen');
-            sb.onclick=()=>{ if(!state.progress[pid])state.progress[pid]={}; if(!state.progress[pid][t.id])state.progress[pid][t.id]={status:s,smiley:0}; state.progress[pid][t.id].smiley=(state.progress[pid][t.id].smiley===v?0:v); saveState();renderBoard(); };
+            sb.className='smiley-btn selected smiley-chosen';
+            sb.textContent=SMILEYS[sm];
+            sb.title=SMILEY_LABELS[sm]+' · Klik om te wijzigen';
+            sb.onclick=()=>openSmileyPopup(pid,t.id);
             sr.appendChild(sb);
-          });
-          // If no smiley chosen yet and smileys are hidden, don't show empty row
-          if(sm>0||state.showSmileys) cell.appendChild(sr);
+            cell.appendChild(sr);
+          } else if(state.showSmileys){
+            // Smileys publiek zichtbaar en nog niet gekozen: toon rij om te kiezen
+            const sr=document.createElement('div');sr.className='smiley-row';
+            [1,2,3,4].forEach(v=>{
+              const sb=document.createElement('button');
+              sb.className='smiley-btn';
+              sb.textContent=SMILEYS[v];
+              sb.title=SMILEY_LABELS[v];
+              sb.onclick=()=>{ if(!state.progress[pid])state.progress[pid]={}; if(!state.progress[pid][t.id])state.progress[pid][t.id]={status:s,smiley:0}; state.progress[pid][t.id].smiley=v; saveState();renderBoard(); };
+              sr.appendChild(sb);
+            });
+            cell.appendChild(sr);
+          }
+          // Als smileys niet publiek en nog geen keuze: geen rij tonen (popup verscheen al)
         }
       }
       row.appendChild(cell);
@@ -619,6 +896,23 @@ function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 // INIT
+// ── SMARTBOARD MODUS ─────────────────────────────────────────────────────────
+const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
+function applySmartboard(){
+  if(!isSmartboard) return;
+  document.body.classList.add('smartboard');
+  currentMode = 'board';
+}
+function goBackToWelcome(){
+  window.location.href = 'welkomstbord.html';
+}
+function goBackFromBoard(){
+  if(isSmartboard) return;
+  currentMode = 'settings';
+  renderShell();
+}
+
+// INIT
 loadState();
 document.getElementById('toggle-numbers').checked = !!state.showNumbers;
 document.getElementById('toggle-lastname').checked = !!state.showLastname;
@@ -629,14 +923,6 @@ const startTab = urlParams.get('tab');
 
 currentMode = urlParams.get('view') === 'board' ? 'board' : 'settings';
 currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
+
+applySmartboard();
 renderShell();
-
-
-function goBackToWelcome(){
-  window.location.href = 'welkomstbord.html';
-}
-
-function goBackFromBoard(){
-  currentMode = 'settings';
-  renderShell();
-}
