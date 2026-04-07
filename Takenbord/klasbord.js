@@ -1,3 +1,4 @@
+
 const STORAGE_KEY = 'taakbord_test_v4';
 const SMILEYS = ['','😊','🙂','😐','😟'];
 const SMILEY_LABELS = ['','Super!','Ging goed','Beetje moeilijk','Te moeilijk'];
@@ -902,6 +903,23 @@ function applySmartboard(){
   if(!isSmartboard) return;
   document.body.classList.add('smartboard');
   currentMode = 'board';
+  // Toon het discreet slotje-knopje
+  var btn = document.getElementById('smartboard-exit-btn');
+  if(btn) btn.style.display = 'block';
+}
+
+function exitSmartboard(dest){
+  document.getElementById('smartboard-exit-overlay').classList.add('hidden');
+  if(dest === 'welkom'){
+    window.location.href = 'welkomstbord.html';
+  } else {
+    // Verwijder smartboard-modus en ga naar beheer
+    document.body.classList.remove('smartboard');
+    var btn = document.getElementById('smartboard-exit-btn');
+    if(btn) btn.style.display = 'none';
+    currentMode = 'settings';
+    renderShell();
+  }
 }
 function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
@@ -926,3 +944,279 @@ currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
 applySmartboard();
 renderShell();
+
+// ── TIMER ────────────────────────────────────────────────────────────────────
+var timerTotalSeconds = 15 * 60;
+var timerRemaining    = 15 * 60;
+var timerInterval     = null;
+var timerPaused       = false;
+var timerView         = 'both'; // 'both' | 'analog' | 'digital'
+var timerFlashInterval = null;
+
+function toggleTimer(){
+  var p = document.getElementById('timer-popup');
+  if(!p) return;
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+}
+
+// Weergave: analoog + digitaal / enkel analoog / enkel digitaal
+function setTimerView(mode){
+  timerView = mode;
+  var clock = document.getElementById('timer-clock');
+  var digWrap = document.getElementById('timer-digital-wrap');
+  var displayWrap = document.getElementById('timer-display-wrap');
+  if(!clock || !digWrap) return;
+
+  if(mode === 'both'){
+    clock.style.display   = 'block';
+    digWrap.style.display = 'flex';
+    displayWrap.style.flexDirection = 'row';
+  } else if(mode === 'analog'){
+    clock.style.display   = 'block';
+    digWrap.style.display = 'none';
+    displayWrap.style.flexDirection = 'column';
+  } else { // digital only
+    clock.style.display   = 'none';
+    digWrap.style.display = 'flex';
+    displayWrap.style.flexDirection = 'column';
+  }
+
+  // Highlight actieve knop
+  ['both','analog','digital'].forEach(function(v){
+    var btn = document.getElementById('tv-' + v);
+    if(!btn) return;
+    var active = v === mode;
+    btn.style.borderColor = active ? '#6366f1' : '#e0e7ff';
+    btn.style.background  = active ? '#eef2ff' : '#f8fafc';
+    btn.style.color       = active ? '#6366f1' : '#6b7280';
+  });
+
+  drawClock();
+}
+
+function adjustTime(delta){
+  timerTotalSeconds = Math.max(60, timerTotalSeconds + delta * 60);
+  timerRemaining    = timerTotalSeconds;
+  updateSetDisplay();
+}
+function setTimerPreset(minutes){
+  timerTotalSeconds = minutes * 60;
+  timerRemaining    = timerTotalSeconds;
+  updateSetDisplay();
+}
+function updateSetDisplay(){
+  var el = document.getElementById('timer-set-display');
+  if(!el) return;
+  var m = Math.floor(timerTotalSeconds / 60), s = timerTotalSeconds % 60;
+  el.textContent = timerPad(m) + ':' + timerPad(s);
+}
+function timerPad(n){ return n < 10 ? '0' + n : '' + n; }
+
+function startTimer(){
+  timerRemaining = timerTotalSeconds;
+  timerPaused    = false;
+  document.getElementById('timer-setup').style.display   = 'none';
+  document.getElementById('timer-running').style.display = 'block';
+  document.getElementById('timer-done').style.display    = 'none';
+  setTimerView(timerView);
+  clearInterval(timerInterval);
+  timerInterval = setInterval(timerTick, 1000);
+  timerTick();
+}
+function timerTick(){
+  if(timerPaused) return;
+  updateTimerDigital();
+  drawClock();
+  updateTimerProgress();
+  if(timerRemaining <= 0){
+    clearInterval(timerInterval);
+    timerDone();
+    return;
+  }
+  timerRemaining--;
+}
+function updateTimerDigital(){
+  var el = document.getElementById('timer-digital');
+  if(!el) return;
+  var m = Math.floor(timerRemaining / 60), s = timerRemaining % 60;
+  el.textContent = timerPad(m) + ':' + timerPad(s);
+  el.style.color = timerRemaining < 60 ? '#dc2626' : '#1e1b4b';
+}
+function updateTimerProgress(){
+  var bar = document.getElementById('timer-progress');
+  if(!bar) return;
+  var pct = timerTotalSeconds > 0 ? (timerRemaining / timerTotalSeconds) * 100 : 0;
+  bar.style.width = pct + '%';
+  if(pct > 50)      bar.style.background = 'linear-gradient(90deg,#6366f1,#22c55e)';
+  else if(pct > 20) bar.style.background = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+  else              bar.style.background = 'linear-gradient(90deg,#dc2626,#f87171)';
+}
+function drawClock(){
+  var canvas = document.getElementById('timer-clock');
+  if(!canvas || canvas.style.display === 'none') return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height, cx = W/2, cy = H/2, r = W/2 - 6;
+  ctx.clearRect(0, 0, W, H);
+
+  var pct = timerTotalSeconds > 0 ? timerRemaining / timerTotalSeconds : 0;
+  var fillColor = pct > 0.5 ? '#6366f1' : pct > 0.2 ? '#f59e0b' : '#dc2626';
+
+  // Lege achtergrondcirkel (het al verstreken deel)
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.fillStyle = '#f0f4f8'; ctx.fill();
+  ctx.strokeStyle = '#e0e7ff'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Gekleurde taartpunt = resterende tijd
+  // Start bovenaan (12 uur = -90°), eindigt op de huidige "wijzerstand"
+  // De schijf loopt van de huidige positie TOT bovenaan, met de klok mee
+  // = van -90° + (2π * (1-pct))  tot  -90° + 2π
+  // Wat gelijk is aan: de schijf vult van "huidige positie" naar "12 uur" met klok mee
+  // Simpelste correcte aanpak:
+  // - De LEGE sector loopt van 12 uur (boven) MET de klok mee, grootte = verstreken fractie
+  // - De VOLLE sector is de rest
+  if(pct > 0){
+    var top = -Math.PI / 2;
+    // Huidige "wijzerstand": hoeveel is verstreken = (1 - pct) van de cirkel
+    var elapsed_angle = top + 2 * Math.PI * (1 - pct);
+    // Volle schijf = van elapsed_angle tot top + 2π (= terug naar boven), met klok mee
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r - 2, elapsed_angle, top + 2 * Math.PI);
+    ctx.closePath();
+    ctx.fillStyle = fillColor;
+    ctx.fill();
+  }
+
+  // Rand bovenop
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, 2*Math.PI);
+  ctx.strokeStyle = '#e0e7ff'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Uurmarkeringen (wit, bovenop schijf)
+  for(var i = 0; i < 12; i++){
+    var a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * (r - 2),  cy + Math.sin(a) * (r - 2));
+    ctx.lineTo(cx + Math.cos(a) * (r - (i % 3 === 0 ? 11 : 7)), cy + Math.sin(a) * (r - (i % 3 === 0 ? 11 : 7)));
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = i % 3 === 0 ? 2.5 : 1.5;
+    ctx.stroke();
+  }
+
+  // Secondewijzer — wijst naar hoeveel er AL verstreken is (met klok mee vanaf 12)
+  var elapsed = timerTotalSeconds - timerRemaining;
+  var sAngle = -Math.PI/2 + (2*Math.PI * (elapsed % 60) / 60);
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx + Math.cos(sAngle) * r * 0.82, cy + Math.sin(sAngle) * r * 0.82);
+  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
+  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
+
+  // Middelpunt
+  ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2*Math.PI);
+  ctx.fillStyle = '#fff'; ctx.fill();
+
+  // Tijd in het midden
+  ctx.fillStyle = pct > 0.15 ? '#fff' : '#dc2626';
+  ctx.font = 'bold ' + Math.round(r * 0.28) + 'px Nunito,Arial,sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if(timerRemaining < 60){
+    ctx.fillText('0:' + timerPad(timerRemaining % 60), cx, cy);
+  } else {
+    ctx.fillText(Math.ceil(timerRemaining / 60) + "'", cx, cy);
+  }
+}
+
+function pauseResumeTimer(){
+  timerPaused = !timerPaused;
+  var btn = document.getElementById('timer-pause-btn');
+  if(btn) btn.textContent = timerPaused ? '▶ Verder' : '⏸ Pauze';
+}
+function resetTimer(){
+  clearInterval(timerInterval);
+  timerInterval = null;
+  // Stop knipperen en herstel stijl
+  if(typeof timerFlashInterval !== 'undefined'){ clearInterval(timerFlashInterval); timerFlashInterval = null; }
+  var pop = document.getElementById('timer-popup');
+  if(pop){ pop.style.background = '#fff'; pop.style.border = '3px solid #e0e7ff'; pop.style.boxShadow = '0 8px 40px rgba(0,0,0,.22)'; }
+  timerPaused   = false;
+  timerRemaining = timerTotalSeconds;
+  document.getElementById('timer-setup').style.display   = 'block';
+  document.getElementById('timer-running').style.display = 'none';
+  document.getElementById('timer-done').style.display    = 'none';
+  updateSetDisplay();
+}
+function timerDone(){
+  document.getElementById('timer-running').style.display = 'none';
+  document.getElementById('timer-done').style.display    = 'block';
+
+  // Geluid: herhalend alarm gedurende ~10 seconden
+  // 3 tonen per cyclus, 5 cycli met korte pauze ertussen
+  try {
+    var ac = new (window.AudioContext || window.webkitAudioContext)();
+    // Melodie: hoog-laag-hoog patroon, 5 keer herhalen
+    var pattern = [
+      {freq:880, t:0},    {freq:660, t:0.18}, {freq:880, t:0.36},
+      {freq:880, t:0.9},  {freq:660, t:1.08}, {freq:880, t:1.26},
+      {freq:880, t:1.8},  {freq:660, t:1.98}, {freq:880, t:2.16},
+      {freq:880, t:2.7},  {freq:660, t:2.88}, {freq:880, t:3.06},
+      {freq:880, t:3.6},  {freq:660, t:3.78}, {freq:880, t:3.96},
+      {freq:1046,t:4.8},  {freq:1046,t:5.0},  {freq:1046,t:5.2}  // 3 hoge slottonen
+    ];
+    pattern.forEach(function(note){
+      var osc = ac.createOscillator(), gain = ac.createGain();
+      osc.connect(gain); gain.connect(ac.destination);
+      osc.frequency.value = note.freq;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.45, ac.currentTime + note.t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + note.t + 0.16);
+      osc.start(ac.currentTime + note.t);
+      osc.stop(ac.currentTime + note.t + 0.2);
+    });
+  } catch(e){}
+
+  // Visuele puls: blijft knipperen tot leerkracht op "Nieuwe timer" klikt
+  var pop = document.getElementById('timer-popup');
+  pop.style.border = '3px solid #dc2626';
+  pop.style.boxShadow = '0 0 0 0 rgba(220,38,38,0.7)';
+  var fc = 0;
+  timerFlashInterval = setInterval(function(){
+    fc++;
+    pop.style.background = fc % 2 === 0 ? '#fff5f5' : '#fff';
+    pop.style.border     = fc % 2 === 0 ? '3px solid #dc2626' : '3px solid #fca5a5';
+  }, 600);
+}
+
+// Draggable + resizable
+(function(){
+  var el, ox, oy, ol, ot, dragging = false;
+  var resizing = false, rx, rw;
+  document.addEventListener('mousedown', function(e){
+    el = document.getElementById('timer-popup');
+    if(!el) return;
+    var handle = document.getElementById('timer-drag-handle');
+    var resizeH = document.getElementById('timer-resize');
+    if(resizeH && e.target === resizeH){
+      rx = e.clientX; rw = el.offsetWidth; resizing = true; e.preventDefault();
+    } else if(handle && handle.contains(e.target) && e.target.tagName !== 'BUTTON'){
+      var rect = el.getBoundingClientRect();
+      ox=e.clientX; oy=e.clientY; ol=rect.left; ot=rect.top;
+      dragging=true; e.preventDefault();
+    }
+  });
+  document.addEventListener('mousemove', function(e){
+    if(!el) return;
+    if(dragging){ el.style.left=(ol+e.clientX-ox)+'px'; el.style.top=(ot+e.clientY-oy)+'px'; el.style.right='auto'; }
+    if(resizing){
+      var newW = Math.max(170, rw+(e.clientX-rx));
+      el.style.width = newW + 'px';
+      // Canvas mee schalen
+      var canvas = document.getElementById('timer-clock');
+      if(canvas && timerView !== 'digital'){
+        var cSize = Math.min(newW * 0.42, 180);
+        canvas.width = cSize; canvas.height = cSize;
+        drawClock();
+      }
+    }
+  });
+  document.addEventListener('mouseup', function(){ dragging=false; resizing=false; });
+})();
