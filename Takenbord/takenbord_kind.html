@@ -25,12 +25,12 @@
   .page{
     max-width:1400px;
     margin:0 auto;
-    padding:28px 26px 120px;
+    padding:16px 20px 80px;
   }
   h1{
-    margin:10px 0 12px;
+    margin:6px 0 8px;
     text-align:center;
-    font-size:clamp(32px, 4vw, 52px);
+    font-size:clamp(26px, 4vw, 44px);
     line-height:1.1;
   }
   .subtitle{
@@ -830,20 +830,25 @@ body.smartboard .teacher-only { display:none !important; }
   border:none;
   background:#fee2e2;
   color:#991b1b;
-  border-radius:12px;
-  padding:8px 10px;
-  font-size:13px;
+  border-radius:8px;
+  padding:4px 8px;
+  font-size:12px;
   font-weight:800;
   cursor:pointer;
+  flex-shrink:0;
 }
+/* Kleinere knoppen voor setup-scherm */
+.setup-btn-small { border:none; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:800; cursor:pointer; font-family:"Nunito",Arial,sans-serif; background:#e5e7eb; color:#374151; box-shadow:0 2px 6px rgba(0,0,0,.06); }
+.setup-btn-small:hover { opacity:.88; }
+.setup-btn-primary { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; }
+.setup-btn-danger { background:#fee2e2; color:#991b1b; }
+.setup-btn-nav { border:none; border-radius:12px; padding:10px 18px; font-size:15px; font-weight:800; cursor:pointer; font-family:"Nunito",Arial,sans-serif; width:100%; }
+.setup-btn-go { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; margin-top:4px; }
+.setup-btn-go:hover { opacity:.9; }
 @media (max-width: 900px){
   .setup-grid{ grid-template-columns:1fr; }
-  .setup-right{
-    position:static;
-  }
-  .setup-added-list{
-    max-height:none;
-  }
+  .setup-right{ position:static; }
+  .setup-added-list{ max-height:none; }
 }
 </style>
 </head>
@@ -851,68 +856,82 @@ body.smartboard .teacher-only { display:none !important; }
 <div class="page">
 
 <section id="setup-screen" class="setup-screen">
-  <h1>Leerlingen invoeren</h1>
-  <p class="subtitle">Voeg eerst de namen toe voor dit kindbord. Daarna ga je verder naar het overzicht.</p>
+  <div class="setup-card" style="max-width:980px;">
 
-  <div class="setup-card">
+    <!-- Titelbalk met navigatieknoppen -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <h2 style="font-size:22px;font-weight:800;color:#1f2937;margin:0 0 2px;">Leerlingen invoeren</h2>
+        <p style="font-size:13px;color:#6b7280;margin:0;">Voeg namen toe, stel de weergave in en ga naar het kindbord.</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button type="button" class="back-btn-orange" style="padding:8px 14px;font-size:13px;border-radius:10px;" onclick="goBackToWelcome()">← Terug</button>
+        <button type="button" onclick="goToNamesScreen()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">Naar kindbord →</button>
+      </div>
+    </div>
+
     <div class="setup-grid">
+      <!-- LINKER KOLOM: invoer -->
       <div class="setup-left">
-        <div class="setup-box">
-          <div class="setup-label">Eén leerling toevoegen</div>
-          <input id="setupNameInput" class="setup-input" type="text" placeholder="Bijvoorbeeld: Jana De Smedt">
-          <div class="setup-actions" style="justify-content:flex-start;margin-top:12px;">
-            <button type="button" class="teacher-btn" onclick="addSinglePupilFromSetup()">+ Toevoegen</button>
+
+        <!-- Stap 1: volgorde kiezen EERST -->
+        <div class="setup-box" style="padding:12px 14px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;">Stap 1 — Volgorde van namen instellen</div>
+            <button type="button" onclick="document.getElementById('setup-help-overlay').classList.add('show')" style="border:none;background:#eef2ff;color:#6366f1;border-radius:7px;padding:2px 8px;font-size:11px;font-weight:800;cursor:pointer;">❓ Uitleg</button>
           </div>
-        </div>
-
-        <div class="setup-box">
-          <div class="setup-label">Meerdere namen plakken</div>
-          <textarea id="setupBulkInput" class="setup-textarea" placeholder="Jana De Smedt
-Lars Peeters
-Mila
-Noor Janssens"></textarea>
-          <div class="setup-actions" style="justify-content:flex-start;margin-top:12px;">
-            <button type="button" class="teacher-btn" onclick="addBulkPupilsFromSetup()">➕ Namen toevoegen</button>
-            <button type="button" class="secondary-big-btn" onclick="clearAllPupilsFromSetup()">🗑 Lijst leeg maken</button>
-          </div>
-        </div>
-
-        <div class="setup-box">
-          <div class="setup-label">Instellingen voor klaslijst</div>
-
-          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-            <span style="font-size:14px;font-weight:800;color:#374151;">Volgorde in geplakte lijst:</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
             <button type="button" class="sort-chip active" id="setup-order-voor" onclick="setSetupOrder('voornaam')">Voornaam Achternaam</button>
             <button type="button" class="sort-chip" id="setup-order-ach" onclick="setSetupOrder('achternaam')">Achternaam Voornaam</button>
           </div>
-
-          <div class="toggle-row" style="margin-bottom:0;">
+          <div class="toggle-row" style="margin:0;">
             <label class="toggle">
               <input id="setup-show-lastname" type="checkbox" onchange="toggleSetupLastname()">
               <span class="toggle-slider"></span>
             </label>
-            <span class="toggle-label">Achternaam zichtbaar tonen op kindbord</span>
+            <span style="font-size:13px;font-weight:700;color:#374151;">Achternaam zichtbaar op bord</span>
           </div>
         </div>
+
+        <!-- Stap 2a: één naam -->
+        <div class="setup-box" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Stap 2a — Eén leerling toevoegen</div>
+          <div style="display:flex;gap:8px;">
+            <input id="setupNameInput" class="setup-input" type="text" placeholder="Jana De Smedt" style="flex:1;" onkeydown="if(event.key==='Enter')addSinglePupilFromSetup()">
+            <button type="button" onclick="addSinglePupilFromSetup()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;padding:0 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Toevoegen</button>
+          </div>
+        </div>
+
+        <!-- Stap 2b: klaslijst plakken -->
+        <div class="setup-box" style="padding:12px 14px;">
+          <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Stap 2b — Volledige klaslijst in één keer plakken</div>
+          <textarea id="setupBulkInput" class="setup-textarea" style="min-height:110px;" placeholder="Jana De Smedt
+Lars Peeters
+Mila
+Noor Janssens"></textarea>
+          <div style="display:flex;gap:7px;margin-top:8px;">
+            <button type="button" onclick="addBulkPupilsFromSetup()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;flex:1;">➕ Toevoegen</button>
+            <button type="button" onclick="clearAllPupilsFromSetup()" style="background:#fee2e2;color:#991b1b;border:none;border-radius:9px;padding:7px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗑 Leeg</button>
+          </div>
+        </div>
+
       </div>
 
+      <!-- RECHTER KOLOM: lijst + navigatie -->
       <div class="setup-right">
         <div id="setupStatus" class="setup-status success"></div>
 
-        <div class="setup-list-wrap">
-          <div class="setup-list-title">Leerlingen op het bord</div>
+        <div class="setup-list-wrap" style="flex:1;">
+          <div class="setup-list-title">Leerlingen op het bord (<span id="setup-count">0</span>)</div>
           <div id="setupAddedList" class="setup-added-list"></div>
         </div>
 
-        <p class="setup-help" style="margin-top:0;">Je kan eerst namen invoeren en daarna pas taken per kind toewijzen.</p>
-        <p class="setup-help" style="margin-top:6px;font-size:14px;color:#6b7280;">💡 <strong>Tip:</strong> Foto's of afbeeldingen bij namen toevoegen kan via <strong>⚙️ Taken toewijzen</strong> nadat je naar het kindbord gaat.</p>
-
-        <div class="setup-right-actions">
-          <button type="button" class="back-btn-orange" onclick="goBackToWelcome()">← Vorig scherm</button>
-          <button type="button" class="primary-big-btn" onclick="goToNamesScreen()">Verder naar kindbord</button>
+        <div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:12px;color:#166534;line-height:1.6;">
+          💡 Foto's bij namen toevoegen kan later via <strong>⚙️ Taken toewijzen</strong> op het kindbord.
         </div>
       </div>
     </div>
+
   </div>
 </section>
 
@@ -949,6 +968,44 @@ Noor Janssens"></textarea>
 <button class="back-fab back-btn-orange" id="backBtn">← Terug naar namen</button>
 </section>
 </div>
+<!-- SETUP UITLEG OVERLAY -->
+<div class="overlay" id="setup-help-overlay">
+<div class="popup" style="text-align:left;max-width:500px;width:100%;">
+<h3 style="font-size:20px;margin-bottom:4px;">❓ Uitleg — Namen invoeren</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Zo voeg je snel je volledige klas toe.</p>
+
+<div style="margin-bottom:14px;">
+  <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">✏️ Eén leerling toevoegen</div>
+  <p style="font-size:13px;color:#4b5563;line-height:1.7;">Typ de naam van één leerling en klik "+ Toevoegen". Je kan voor- en achternaam in één vakje typen, bv. <em>Jana De Smedt</em>.</p>
+</div>
+
+<div style="margin-bottom:14px;">
+  <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">📋 Klaslijst in één keer plakken</div>
+  <p style="font-size:13px;color:#4b5563;line-height:1.7;">Heb je al een lijst in <strong>Smartschool, Excel of Word</strong>? Selecteer alle namen daar, kopieer (Ctrl+C) en plak ze in het grote tekstvak (Ctrl+V). Zet elke naam op een aparte regel. Klik dan <strong>"➕ Namen toevoegen"</strong>.</p>
+</div>
+
+<div style="margin-bottom:14px;">
+  <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">🔀 Volgorde: Voornaam Achternaam of Achternaam Voornaam?</div>
+  <p style="font-size:13px;color:#4b5563;line-height:1.7;">Dit is heel belangrijk! Stel dit in <strong>vóór</strong> je de namen plakt.<br/><br/>
+  <strong>Voornaam Achternaam</strong> — gebruik dit als je lijst zo is opgemaakt:<br/>
+  <span style="font-family:monospace;background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:12px;">Jana De Smedt</span><br/><br/>
+  <strong>Achternaam Voornaam</strong> — gebruik dit als Smartschool zo exporteert:<br/>
+  <span style="font-family:monospace;background:#f3f4f6;padding:2px 6px;border-radius:4px;font-size:12px;">De Smedt Jana</span><br/><br/>
+  Kies de verkeerde volgorde? Dan wordt "De Smedt" de voornaam. Met <strong>"🗑 Lijst leeg maken"</strong> begin je opnieuw.</p>
+</div>
+
+<div style="margin-bottom:16px;">
+  <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:6px;">👁️ Achternaam tonen op het bord</div>
+  <p style="font-size:13px;color:#4b5563;line-height:1.7;">Zet dit <strong>aan</strong> als er meerdere kinderen zijn met dezelfde voornaam, zodat je ze kan onderscheiden op het bord. Zet het <strong>uit</strong> als je enkel voornamen wil tonen (privacyvriendelijker op een smartboard).</p>
+</div>
+
+<div style="display:flex;justify-content:flex-end;">
+  <button type="button" class="apply-btn teacher-btn" onclick="document.getElementById('setup-help-overlay').classList.remove('show')" style="padding:10px 24px;">Begrepen!</button>
+</div>
+</div>
+</div>
+
+<!-- SMILEY OVERLAY -->
 <div class="overlay" id="smileyOverlay">
 <div class="popup">
 <h3>Hoe ging het?</h3>
@@ -1246,11 +1303,14 @@ function showSetupStatus(message){
 function renderSetupAddedList(){
   const wrap = document.getElementById('setupAddedList');
   if(!wrap) return;
-
   wrap.innerHTML = '';
 
+  // Update teller
+  const counter = document.getElementById('setup-count');
+  if(counter) counter.textContent = state.pupils.length;
+
   if(!state.pupils.length){
-    wrap.innerHTML = `<div class="setup-empty">Er zijn nog geen leerlingen toegevoegd aan het bord.</div>`;
+    wrap.innerHTML = '<div class="setup-empty">Nog geen leerlingen toegevoegd.</div>';
     return;
   }
 
@@ -1259,7 +1319,7 @@ function renderSetupAddedList(){
     row.className = 'setup-added-item';
     row.innerHTML = `
       <span class="setup-added-name">${index + 1}. ${getSetupDisplayName(pupil)}</span>
-      <button type="button" class="setup-remove-btn" onclick="removeSetupPupil('${pupil.id}')">Verwijder</button>
+      <button type="button" class="setup-remove-btn" onclick="removeSetupPupil('${pupil.id}')">✕</button>
     `;
     wrap.appendChild(row);
   });
