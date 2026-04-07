@@ -5,6 +5,9 @@
   --blue:#3b82f6; --green:#16a34a; --yellow:#d97706; --red:#ef4444;
   --indigo:#6366f1; --violet:#8b5cf6;
   --col-name:220px; --col-task:120px; --gap:8px;
+  --btn-w:66px; --btn-h:66px; --btn-font:26px; --name-font:16px;
+  --photo-size:52px; --icon-size:38px; --icon-custom:56px;
+  --label-size:16px; --row-pad:4px; --smiley-sz:18px; --num-font:13px;
 }
 html,body { height:100%; font-family:'Nunito','Segoe UI',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
 #app { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
@@ -149,7 +152,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-row:hover { border-color:#c7d2fe; background:#eef2ff; }
 .pupil-row.drag-over { border-color:var(--indigo); background:#e0e7ff; }
 .drag-handle { color:#d1d5db; font-size:12px; cursor:grab; flex-shrink:0; }
-.pupil-num   { font-size:11px; color:#a0aec0; font-weight:700; min-width:18px; text-align:right; flex-shrink:0; }
+.pupil-num   { font-size:var(--num-font,13px); color:#94a3b8; font-weight:800; min-width:22px; text-align:right; flex-shrink:0; }
 .pupil-display { flex:1; overflow:hidden; }
 .pupil-voornaam  { font-weight:700; font-size:13px; color:#2d3748; }
 .pupil-achternaam{ font-size:11px; color:#a0aec0; margin-left:3px; }
@@ -191,16 +194,16 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .header-corner { position:sticky; left:0; z-index:35; background:linear-gradient(135deg,#f0f9ff,#fef9ff); width:var(--col-name); min-width:var(--col-name); flex-shrink:0; display:flex; align-items:flex-end; padding-bottom:3px; }
 .header-corner span { font-size:11px; font-weight:800; color:var(--indigo); text-transform:uppercase; letter-spacing:.06em; }
 .task-header-cell { width:var(--col-task); min-width:var(--col-task); flex-shrink:0; text-align:center; display:flex; flex-direction:column; align-items:center; gap:5px; padding-bottom:3px; }
-.task-header-cell .t-icon  { font-size:38px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
-.task-header-cell .t-label { font-size:16px; font-weight:800; color:#3730a3; line-height:1.2; word-break:break-word; }
+.task-header-cell .t-icon  { font-size:var(--icon-size,38px); filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); transition:font-size .2s; }
+.task-header-cell .t-label { font-size:var(--label-size,16px); font-weight:800; color:#3730a3; line-height:1.2; word-break:break-word; transition:font-size .2s; }
 
 /* Eigen afbeelding in taaknaam-header — groter */
-.t-icon-custom { width:56px; height:56px; background-size:contain; background-repeat:no-repeat; background-position:center; border-radius:10px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); }
+.t-icon-custom { width:var(--icon-custom,56px); height:var(--icon-custom,56px); background-size:contain; background-repeat:no-repeat; background-position:center; border-radius:10px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); transition:width .2s,height .2s; }
 #legend { display:flex; gap:14px; align-items:center; flex-wrap:wrap; background:#fff; border-bottom:2px solid #e0e7ff; padding:7px 14px 7px calc(var(--col-name) + var(--gap) + 14px); margin:0 -14px 8px; }
 .legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:#4b5563; font-weight:700; }
 .legend-dot  { width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
 #pupil-rows { display:flex; flex-direction:column; gap:6px; }
-.pupil-board-row { display:flex; align-items:center; gap:var(--gap); background:#fff; border-radius:14px; border:2px solid #e0e7ff; padding:4px 0; transition:all .3s; box-shadow:0 2px 8px rgba(99,102,241,.08); }
+.pupil-board-row { display:flex; align-items:center; gap:var(--gap); background:#fff; border-radius:14px; border:2px solid #e0e7ff; padding:var(--row-pad,4px) 0; transition:all .3s; box-shadow:0 2px 8px rgba(99,102,241,.08); }
 .pupil-board-row.complete { background:linear-gradient(90deg,#f0fdf4,#fff); border-color:#86efac; box-shadow:0 2px 8px rgba(22,163,74,.15); }
 .pupil-name-cell { position:sticky; left:0; z-index:20; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:all .3s; border-radius:12px 0 0 12px; }
 .pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
@@ -208,7 +211,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-dot.done { background:#16a34a; box-shadow:0 0 6px #86efac; }
 .pupil-dot.busy { background:#f59e0b; box-shadow:0 0 5px #fde68a; }
 .pupil-info { overflow:hidden; flex:1; }
-.pupil-name { font-weight:800; font-size:16px; color:#1e1b4b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.pupil-name { font-weight:800; font-size:var(--name-font,16px); color:#1e1b4b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .pupil-board-row.complete .pupil-name { color:#15803d; }
 .pupil-sub  { font-size:10px; color:#818cf8; margin-top:1px; font-weight:600; }
 .pupil-sub .busy-label { color:#d97706; font-weight:700; }
@@ -218,7 +221,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .notes-btn.has-notes { opacity:1; }
 .task-cell { width:var(--col-task); min-width:var(--col-task); flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px; justify-content:center; padding:3px 0; }
 .task-ph { width:54px; height:54px; display:flex; align-items:center; justify-content:center; font-size:18px; color:#e0e7ff; }
-.smiley-btn { font-size:18px; cursor:pointer; background:none; border:none; padding:1px; border-radius:6px; transition:transform .12s; opacity:.3; filter:grayscale(1); line-height:1; }
+.smiley-btn { font-size:var(--smiley-sz,18px); cursor:pointer; background:none; border:none; padding:1px; border-radius:6px; transition:transform .12s; opacity:.3; filter:grayscale(1); line-height:1; }
 .smiley-btn:hover { opacity:.8; transform:scale(1.2); filter:none; }
 .smiley-btn.selected { opacity:1; filter:none; transform:scale(1.15); }
 .smiley-row { display:flex; gap:2px; }
@@ -314,15 +317,15 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-photo-btn.has-photo img { width:100%; height:100%; border-radius:50%; object-fit:cover; display:block; }
 
 /* EIGEN AFBEELDINGEN – leerlingen op het bord */
-.pupil-board-photo { width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2.5px solid #e0e7ff; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+.pupil-board-photo { width:var(--photo-size,52px); height:var(--photo-size,52px); border-radius:50%; object-fit:cover; flex-shrink:0; border:2.5px solid #e0e7ff; box-shadow:0 1px 4px rgba(0,0,0,.1); transition:width .2s,height .2s; }
 
 /* SMILEY gekozen – enkel tonen */
 .smiley-row-single { justify-content:center; }
-.smiley-chosen { font-size:20px !important; opacity:1 !important; filter:none !important; transform:scale(1.1) !important; border:2px solid #bbf7d0 !important; border-radius:8px !important; background:#f0fdf4 !important; padding:2px 4px !important; cursor:pointer !important; }
+.smiley-chosen { font-size:var(--smiley-sz,20px) !important; opacity:1 !important; filter:none !important; transform:scale(1.1) !important; border:2px solid #bbf7d0 !important; border-radius:8px !important; background:#f0fdf4 !important; padding:2px 4px !important; cursor:pointer !important; }
 .smiley-chosen:hover { transform:scale(1.2) !important; border-color:#6366f1 !important; background:#eef2ff !important; }
 
-/* TAAKKNOP – puur status: leeg/bezig/klaar — afbeelding staat ALLEEN in de kolomheader */
-.task-btn { width:66px; height:66px; border-radius:16px; border:2.5px dashed #c7d2fe; background:linear-gradient(135deg,#eef2ff,#f5f3ff); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:transparent; transition:all .18s cubic-bezier(.34,1.56,.64,1); font-family:inherit; position:relative; }
+/* TAAKKNOP — grootte via CSS-variabelen zodat compact/normaal/groot werkt */
+.task-btn { width:var(--btn-w,66px); height:var(--btn-h,66px); border-radius:16px; border:2.5px dashed #c7d2fe; background:linear-gradient(135deg,#eef2ff,#f5f3ff); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:var(--btn-font,26px); font-weight:800; color:transparent; transition:all .18s cubic-bezier(.34,1.56,.64,1); font-family:inherit; position:relative; }
 .task-btn::after { content:'○'; position:absolute; font-size:26px; color:#c7d2fe; font-weight:400; line-height:1; }
 .task-btn:hover { border-color:#818cf8; background:linear-gradient(135deg,#e0e7ff,#ede9fe); transform:scale(1.06); }
 .task-btn:hover::after { color:#818cf8; }
@@ -337,12 +340,12 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 /* Taakheader – eigen afbeelding: zie definitie bij .task-header-cell hierboven */
 
 /* EIGEN AFBEELDINGEN – leerlingen op het bord */
-.pupil-board-photo { width:52px; height:52px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2.5px solid #e0e7ff; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+.pupil-board-photo { width:var(--photo-size,52px); height:var(--photo-size,52px); border-radius:50%; object-fit:cover; flex-shrink:0; border:2.5px solid #e0e7ff; box-shadow:0 1px 4px rgba(0,0,0,.1); transition:width .2s,height .2s; }
 .pupil-row-photo { width:26px; height:26px; border-radius:50%; object-fit:cover; flex-shrink:0; border:2px solid #e0e7ff; }
 
 /* SMILEY gekozen – enkel tonen */
 .smiley-row-single { justify-content:center; }
-.smiley-chosen { font-size:20px !important; opacity:1 !important; filter:none !important; transform:scale(1.1) !important; border:2px solid #bbf7d0 !important; border-radius:8px !important; background:#f0fdf4 !important; padding:2px 4px !important; cursor:pointer !important; }
+.smiley-chosen { font-size:var(--smiley-sz,20px) !important; opacity:1 !important; filter:none !important; transform:scale(1.1) !important; border:2px solid #bbf7d0 !important; border-radius:8px !important; background:#f0fdf4 !important; padding:2px 4px !important; cursor:pointer !important; }
 .smiley-chosen:hover { transform:scale(1.2) !important; border-color:#6366f1 !important; background:#eef2ff !important; }
 
 /* UPLOAD HINT BANNER – zichtbaar bovenaan de tabbladen */
@@ -357,3 +360,24 @@ body.smartboard #board-bar { padding:6px 14px; }
 /* INLINE HELP KNOPJES */
 .help-inline-btn { border:none; background:transparent; color:#818cf8; font-size:11px; font-weight:700; cursor:pointer; padding:1px 4px; border-radius:4px; text-decoration:underline; text-underline-offset:2px; margin-left:4px; }
 .help-inline-btn:hover { color:#6366f1; background:#eef2ff; }
+
+/* CSS VARIABELEN voor bordgrootte */
+:root {
+  --col-name: 220px;
+  --col-task: 120px;
+  --gap: 8px;
+  --btn-w: 66px;
+  --btn-h: 66px;
+  --btn-font: 26px;
+  --name-font: 16px;
+}
+
+/* UNDO KNOP */
+.btn-undo { background:#fef3c7; color:#92400e; border:1.5px solid #f59e0b; font-weight:800; border-radius:10px; padding:5px 12px; font-size:12px; cursor:pointer; transition:all .15s; }
+.btn-undo:hover { background:#fde68a; }
+
+/* GROOTTE KNOPPEN */
+.size-btns { display:flex; align-items:center; gap:2px; background:#f1f5f9; border-radius:8px; padding:2px; }
+.size-btn { border:none; background:transparent; color:#64748b; border-radius:6px; width:26px; height:26px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
+.size-btn:hover { background:#e2e8f0; }
+.size-btn-active { background:#6366f1 !important; color:#fff !important; }
