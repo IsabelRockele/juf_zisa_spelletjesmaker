@@ -17,11 +17,12 @@
 <!-- TOPBAR (settings mode only) -->
 <div id="topbar">
 <div id="topbar-left">
-<button class="btn back-btn-orange" onclick="goBackToWelcome()">← Vorig scherm</button>
+<button class="btn back-btn-orange" onclick="goBackToWelcome()">← Welkomstscherm</button>
 <button class="btn btn-indigo" onclick="closeSettings()">Naar het klasbord</button>
 <span id="topbar-title" style="font-size:13px;color:#6366f1;font-weight:700;"></span>
 </div>
 <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+<button class="btn btn-secondary btn-sm" onclick="openBackupModal()" title="Backup maken of terugzetten">💾 Backup</button>
 <button class="btn btn-amber btn-sm" onclick="openNewPeriod()">🔄 Nieuwe periode</button>
 <button class="btn btn-ghost btn-sm" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ Uitleg beheer</button>
 </div>
@@ -34,6 +35,17 @@
 <button class="tab-btn" id="tab-tk" onclick="switchTab('taken')">📋 Taken</button>
 </div>
 <div id="tab-content-leerlingen">
+
+<!-- Hergebruik klaslijst banner — enkel zichtbaar als bord leeg is EN er een bewaarde lijst bestaat -->
+<div id="hergebruik-klaslijst-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+  <div style="font-size:14px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">👥 Je hebt een bewaarde klaslijst</div>
+  <div style="font-size:12px;color:#4338ca;margin-bottom:10px;" id="hergebruik-klaslijst-info"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button onclick="laadBewaardeklaslijst()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;">✅ Bewaarde klaslijst gebruiken</button>
+    <button onclick="document.getElementById('hergebruik-klaslijst-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;">✏️ Nieuwe klaslijst invoeren</button>
+  </div>
+</div>
+
 <div class="ll-layout">
 
 <!-- LINKER KOLOM: invoer -->
@@ -72,23 +84,14 @@ Lena
     <button class="btn btn-primary btn-sm" onclick="addPupil()" style="width:100%;margin-top:7px;">+ Toevoegen</button>
   </div>
 
-  <!-- Weergave + klaslijst bewaren in één compact kaartje -->
+  <!-- Weergave-instellingen -->
   <div class="card" style="padding:12px 14px;">
     <div class="card-title" style="margin-bottom:8px;">⚙️ Instellingen</div>
     <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
     <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
     <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
-    <div style="font-size:11px;color:#a0aec0;padding-left:50px;margin-bottom:10px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
-    <div style="border-top:1px solid #e2e8f0;padding-top:9px;">
-      <div style="font-size:11px;font-weight:800;color:#a0aec0;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">💾 Klaslijst bewaren / laden</div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-secondary btn-sm" onclick="saveClassList()" style="flex:1">💾 Opslaan</button>
-        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('load-class-file').click()" style="flex:1">📂 Laden</button>
-        <input accept=".json" class="hidden" id="load-class-file" onchange="loadClassList(event)" type="file"/>
-      </div>
-    </div>
+    <div style="font-size:11px;color:#a0aec0;padding-left:50px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
   </div>
-
 </div>
 
 <!-- RECHTER KOLOM: leerlingenlijst -->
@@ -104,12 +107,27 @@ Lena
     <button onclick="localStorage.setItem('hint_photos_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕ Sluiten</button>
   </div>
 
+  <!-- Automatisch opgeslagen melding -->
+  <div id="autosave-notice" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
+    <span>✅ <strong>Automatisch opgeslagen</strong> — je leerlingen staan klaar bij elke opening van de app.</span>
+  </div>
+
   <div id="pupil-list"></div>
 </div>
 
 </div>
 </div>
 <div class="hidden" id="tab-content-taken">
+
+<!-- Hergebruik taken banner — enkel zichtbaar als bord geen actieve taken heeft EN er bewaarde taken bestaan -->
+<div id="hergebruik-taken-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:14px;padding:14px 16px;margin-bottom:14px;">
+  <div style="font-size:14px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">📋 Je hebt bewaarde taken</div>
+  <div style="font-size:12px;color:#4338ca;margin-bottom:10px;" id="hergebruik-taken-info"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+    <button onclick="laadBewaardeTaken()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;">✅ Bewaarde taken gebruiken</button>
+    <button onclick="document.getElementById('hergebruik-taken-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer;">✏️ Nieuwe taken instellen</button>
+  </div>
+</div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <div class="card">
 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
@@ -117,6 +135,9 @@ Lena
 <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
 </div>
 <div class="card-hint" style="margin-bottom:9px;">Klik op een taak = aan/uit zetten. Onder elke taak: <strong>✎ naam</strong> wijzigen · <strong>📷 afb.</strong> eigen afbeelding.</div>
+<div id="icons-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
+  <span>✅ <strong>Automatisch opgeslagen</strong> — je eigen afbeeldingen staan klaar bij elke opening.</span>
+</div>
 <div class="task-chips" id="task-chips"></div>
 </div>
 <div class="card">
@@ -139,11 +160,12 @@ Lena
 <!-- Backup-herinnering banner -->
 <div id="backup-reminder" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:9px 14px;margin:8px 12px 0;font-size:12px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
   <span>⚠️ <strong>Geen recente backup.</strong> Sla je gegevens op als bestand zodat je ze nooit kwijt bent.</span>
-  <button onclick="showExportInfo()" style="border:none;background:#f59e0b;color:#fff;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;">💾 Nu backuppen</button>
+  <button onclick="openBackupModal()" style="border:none;background:#f59e0b;color:#fff;border-radius:7px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;">💾 Backup maken</button>
   <button onclick="localStorage.setItem('last_export_'+STORAGE_KEY, Date.now());document.getElementById('backup-reminder').style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;margin-left:auto;">✕ Later</button>
 </div>
 <div id="board-bar">
 <div class="board-bar-left">
+<span id="board-naam-label" style="font-size:13px;font-weight:800;color:#6366f1;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:4px;"></span>
 <span class="board-progress-text" id="board-progress-text">0/0 klaar</span>
 <button class="btn btn-ghost btn-sm hidden" id="btn-reset" onclick="confirmAction('reset')">🔄 Reset dag</button>
 <button class="btn btn-undo hidden" id="btn-undo" onclick="undoLastAction()" title="Ongedaan maken">↩ Ongedaan</button>
@@ -155,10 +177,9 @@ Lena
   <button id="size-normal"  class="size-btn size-btn-active" onclick="setBoardSize('normal')" title="Normaal">M</button>
   <button id="size-large"   class="size-btn" onclick="setBoardSize('large')" title="Groot — beter leesbaar op smartboard">L</button>
 </div>
-<button class="btn back-btn-orange btn-sm teacher-only" onclick="goBackFromBoard()">← Vorig scherm</button>
+<button class="btn back-btn-orange btn-sm teacher-only" onclick="goBackFromBoard()">← Beheer</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="openPdfModal()">📄 PDF rapport</button>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="showExportInfo()">💾 Export</button>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="showImportInfo()">📂 Import</button>
+<button class="btn btn-ghost btn-sm teacher-only" onclick="openBackupModal()">💾 Backup</button>
 <input accept=".json" class="hidden" id="import-file" onchange="importData(event)" type="file"/>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')">❓ Uitleg</button>
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
@@ -499,4 +520,37 @@ Maak een backup aan het einde van elke periode!</p>
 .timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
 .timer-preset:hover{background:#e0e7ff;}
 </style>
+<!-- BACKUP MODAL -->
+<div class="overlay hidden" id="backup-modal">
+<div class="modal" style="max-width:460px;">
+  <div class="modal-title">💾 Backup</div>
+  <p class="modal-sub">Je gegevens worden automatisch bewaard door de app. Een backup is enkel nodig als noodoplossing — bv. als je van computer wisselt of de browser-cache wordt leeggemaakt.</p>
+
+  <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:#166534;line-height:1.7;">
+    ✅ <strong>Alles staat automatisch opgeslagen.</strong><br/>
+    Namen, taken, afbeeldingen en voortgang blijven bewaard bij elke opening van de app — je hoeft zelf niets te doen.
+  </div>
+
+  <div style="margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:8px;">📥 Backup maken</div>
+    <p style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.6;">Sla al je gegevens op als bestand op je computer. Bewaar het op een veilige plek.</p>
+    <button class="btn btn-primary" onclick="exportData();closeBM()" style="width:100%;">⬇️ Backup downloaden</button>
+  </div>
+
+  <div style="border-top:1px solid #e2e8f0;padding-top:12px;margin-bottom:12px;">
+    <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:8px;">📤 Backup terugzetten</div>
+    <p style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.6;">Zet een eerder gemaakte backup terug. <strong>Let op:</strong> dit vervangt alle huidige gegevens.</p>
+    <button class="btn btn-secondary" onclick="document.getElementById('import-file').click();closeBM()" style="width:100%;">📂 Backup terugzetten</button>
+  </div>
+
+  <div style="border-top:1px solid #e2e8f0;padding-top:12px;">
+    <div style="font-size:13px;font-weight:800;color:#374151;margin-bottom:8px;">🎒 Nieuw schooljaar</div>
+    <p style="font-size:12px;color:#6b7280;margin-bottom:8px;line-height:1.6;">Start een nieuwe klas. Kies zelf wat je bewaart en wat je wist.</p>
+    <button class="btn btn-ghost" onclick="closeBM();openNewSchoolYear()" style="width:100%;">🎒 Nieuw schooljaar starten</button>
+  </div>
+
+  <div class="modal-btns"><button class="btn btn-ghost" onclick="closeBM()">Sluiten</button></div>
+</div>
+</div>
+
 </body></html>
