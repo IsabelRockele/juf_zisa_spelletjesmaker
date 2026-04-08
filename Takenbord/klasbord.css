@@ -381,3 +381,56 @@ body.smartboard #board-bar { padding:6px 14px; }
 .size-btn { border:none; background:transparent; color:#64748b; border-radius:6px; width:26px; height:26px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .12s; }
 .size-btn:hover { background:#e2e8f0; }
 .size-btn-active { background:#6366f1 !important; color:#fff !important; }
+
+/* IPAD MODUS — zelfde als smartboard maar timer verborgen + sluit-knop */
+body.ipad-modus #timerToggleBtn { display:none !important; }
+body.ipad-modus #timer-popup { display:none !important; }
+body.ipad-modus #smartboard-exit-btn { 
+  width:auto !important; height:auto !important; 
+  border-radius:14px !important; 
+  background:rgba(99,102,241,.15) !important; 
+  color:#6366f1 !important;
+  font-size:14px !important;
+  padding:8px 16px !important;
+  line-height:normal !important;
+  font-weight:800 !important;
+  bottom:16px !important; right:16px !important;
+}
+
+/* ── SAVED DATA MODAL ────────────────────────────────────────────────────── */
+.sd-section { margin-bottom:22px; padding-bottom:20px; border-bottom:2px solid #f1f5f9; }
+.sd-section:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+.sd-sec-title { font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:6px; }
+.sd-sec-info { font-size:12px; color:#6b7280; margin-bottom:10px; line-height:1.6; }
+.sd-question { font-size:13px; color:#374151; margin:8px 0 12px; line-height:1.6; }
+.sd-empty { font-size:13px; color:#9ca3af; padding:10px 0; }
+.sd-btns { display:flex; gap:7px; flex-wrap:wrap; margin-top:10px; }
+.sd-btn { border:none; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; }
+.sd-btn-primary { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; }
+.sd-btn-primary:hover { opacity:.9; }
+.sd-btn-secondary { background:#e0e7ff; color:#4338ca; }
+.sd-btn-secondary:hover { background:#c7d2fe; }
+.sd-btn-danger { background:#fee2e2; color:#dc2626; }
+.sd-btn-danger:hover { background:#fecaca; }
+.sd-btn-ghost { background:#f3f4f6; color:#6b7280; }
+.sd-btn-ghost:hover { background:#e5e7eb; }
+.sd-new-year { margin-top:8px; }
+/* Leerlingenpillen in overzicht */
+.sd-pupil-list { display:flex; flex-wrap:wrap; gap:5px; margin:8px 0 12px; }
+.sd-pill { background:#eef2ff; color:#4338ca; border-radius:20px; padding:3px 10px; font-size:11px; font-weight:700; }
+.sd-pill-more { background:#f3f4f6; color:#9ca3af; }
+/* Pictogrammen grid */
+.sd-icon-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:10px; margin:10px 0; }
+.sd-icon-item { background:#f8fafc; border:1.5px solid #e0e7ff; border-radius:10px; padding:10px 8px; display:flex; flex-direction:column; align-items:center; gap:5px; position:relative; }
+.sd-icon-thumb { width:48px; height:48px; object-fit:contain; border-radius:8px; }
+.sd-icon-label { font-size:11px; font-weight:800; color:#374151; text-align:center; line-height:1.3; }
+.sd-icon-date { font-size:10px; color:#9ca3af; }
+.sd-icon-del { position:absolute; top:4px; right:4px; border:none; background:none; color:#fca5a5; font-size:13px; cursor:pointer; padding:0; line-height:1; }
+.sd-icon-del:hover { color:#dc2626; }
+/* Overschrijven keuze */
+.sd-icon-overwrite-list { display:flex; flex-direction:column; gap:10px; margin:12px 0; }
+.sd-overwrite-row { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#f8fafc; border-radius:10px; border:1.5px solid #e0e7ff; flex-wrap:wrap; }
+.sd-overwrite-choice { display:flex; gap:6px; margin-left:auto; }
+.sd-choice-btn { border:2px solid #e0e7ff; background:#f8fafc; color:#6b7280; border-radius:8px; padding:5px 12px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+.sd-choice-keep.active { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
+.sd-choice-replace.active { border-color:#f59e0b; background:#fffbeb; color:#92400e; }
