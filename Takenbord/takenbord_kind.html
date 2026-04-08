@@ -928,11 +928,23 @@ Noor Janssens"></textarea>
         <div id="setupStatus" class="setup-status success"></div>
 
         <div class="setup-list-wrap" style="flex:1;">
+          <!-- Hergebruik klaslijst banner -->
+          <div id="kind-hergebruik-klaslijst-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
+            <div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:3px;">👥 Je hebt een bewaarde klaslijst</div>
+            <div style="font-size:11px;color:#4338ca;margin-bottom:8px;" id="kind-hergebruik-klaslijst-info"></div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" onclick="kindLaadBewaardeKlaslijst()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;">✅ Bewaarde klaslijst gebruiken</button>
+              <button type="button" onclick="document.getElementById('kind-hergebruik-klaslijst-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;">✏️ Nieuwe lijst invoeren</button>
+            </div>
+          </div>
           <div class="setup-list-title">Leerlingen op het bord (<span id="setup-count">0</span>)</div>
           <div id="setupAddedList" class="setup-added-list"></div>
         </div>
 
         <div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:12px;color:#166534;line-height:1.6;">
+          ✅ <strong>Automatisch opgeslagen</strong> — namen en instellingen blijven bewaard bij elke opening.
+        </div>
+        <div style="margin-top:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:12px;color:#92400e;line-height:1.6;">
           💡 Foto's bij namen toevoegen kan later via <strong>⚙️ Taken toewijzen</strong> op het kindbord.
         </div>
       </div>
@@ -943,9 +955,10 @@ Noor Janssens"></textarea>
 
 <section id="names-screen" style="display:none;">
 <h1>Kies je naam</h1>
+<p class="subtitle" id="kind-bord-naam" style="font-size:13px;font-weight:800;color:#6366f1;margin-bottom:4px;"></p>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
 <div class="names-topbar">
-  <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Instellingen</button>
+  <button class="back-btn-orange teacher-only" onclick="goBackToWelcome()" type="button">← Welkomstscherm</button>
   <button class="teacher-btn teacher-only" id="openTeacherBtn">⚙️ Taken toewijzen</button>
   <button class="teacher-btn teacher-only" onclick="openPdfModalKind()" type="button">📄 PDF rapport</button>
   <button class="teacher-btn" onclick="toggleTimer()" type="button" id="timerToggleBtn">⏱️ Timer</button>
@@ -1043,12 +1056,14 @@ Noor Janssens"></textarea>
 </div>
 </div>
 <div class="teacher-sub">
-      Wil je <strong>niet meer de taken van klasbord gebruiken</strong>? Klik dan eerst op
-      <strong>Kindbord leeg maken</strong>. Daarna krijgen kinderen alleen nog taken die jij hier per kind of per groepje aanduidt.
-    </div>
+  Kinderen volgen standaard de taken van het klasbord. Wil je <strong>per kind of per groepje andere taken</strong> instellen? Klik dan op <strong>🧹 Eigen taken instellen</strong> — daarna kies je zelf welke taken elk kind krijgt.<br/>
+  <span style="font-size:11px;color:#9ca3af;margin-top:4px;display:block;">Wil je later terug naar de taken van het klasbord? Klik dan op "↩ Terug naar klasbord-taken".</span>
+</div>
+<div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin:0 0 14px;font-size:12px;color:#166534;display:flex;align-items:center;gap:8px;">
+  ✅ <strong>Automatisch opgeslagen</strong> — namen, taken, afbeeldingen en naamwijzigingen blijven bewaard bij elke opening.
+</div>
 <div class="teacher-actions" style="margin-top:0;margin-bottom:18px;">
-<button class="danger-btn teacher-btn" id="emptyBoardBtn">🧹 Kindbord leeg maken</button>
-<button class="small-btn" id="useClassboardBtn">↩ Volg opnieuw klasbord</button>
+<button class="danger-btn teacher-btn" id="emptyBoardBtn">🧹 Eigen taken instellen per kind</button>
 </div>
 <div class="teacher-grid">
 <div class="teacher-card">
@@ -1061,6 +1076,16 @@ Noor Janssens"></textarea>
 </div>
 <div class="teacher-card">
 <h4>Taken</h4>
+<!-- Hergebruik taken banner -->
+<div id="kind-hergebruik-taken-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
+  <div style="font-size:12px;font-weight:800;color:#1e1b4b;margin-bottom:3px;">📋 Je hebt bewaarde taken</div>
+  <div style="font-size:11px;color:#4338ca;margin-bottom:7px;" id="kind-hergebruik-taken-info"></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+    <button type="button" onclick="kindLaadBewaardeTaken()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">✅ Bewaarde taken gebruiken</button>
+    <button type="button" onclick="document.getElementById('kind-hergebruik-taken-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">✏️ Nieuwe taken instellen</button>
+  </div>
+</div>
+<div style="font-size:11px;color:#6b7280;margin-bottom:10px;line-height:1.5;">Klik op een taak om te selecteren. Gebruik <strong>✎ naam</strong> om de naam aan te passen en <strong>📷 afb.</strong> voor een eigen afbeelding — alles wordt automatisch bewaard.</div>
 <div class="teacher-actions" style="margin-top:0;margin-bottom:14px;">
 <button class="small-btn" id="selectActiveTasksBtn">Alle actieve taken</button>
 <button class="small-btn" id="clearTasksBtn">Taken wissen</button>
@@ -1068,6 +1093,7 @@ Noor Janssens"></textarea>
 <div class="task-chip-grid" id="teacherTaskGrid"></div>
 <div class="custom-task-box">
 <div class="custom-task-title">Eigen taak toevoegen</div>
+<div style="font-size:11px;color:#6b7280;margin-bottom:8px;">Eigen taken blijven bewaard en kunnen aan/uit gezet worden zoals de andere taken.</div>
 <div class="emoji-picker" id="emojiPicker"></div>
 <div class="custom-task-row">
 <input class="custom-task-input" id="customTaskInput" placeholder="Typ hier je eigen taak..." type="text"/>
@@ -1081,10 +1107,27 @@ Noor Janssens"></textarea>
 <button class="close-btn" id="clearAssignmentsBtn">Persoonlijke taken wissen voor selectie</button>
 <button class="teacher-btn" id="teacherDoneBtn">Klaar</button>
 </div>
+<div style="border-top:2px solid #e5e7eb;margin-top:16px;padding-top:14px;">
+  <button type="button" onclick="openKindNewSchoolYear()" style="width:100%;border:none;background:#f3f4f6;color:#6b7280;border-radius:12px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;">🎒 Nieuw schooljaar — klas wissen</button>
+</div>
 </div>
 </div>
 <script>
-const STORAGE_KEY = 'takenbord_kind_v1';
+const STORAGE_KEY = (function(){
+  const params = new URLSearchParams(window.location.search);
+  const bordId = params.get('bordid');
+  const type = params.get('type') || 'kindbord';
+  if(bordId){
+    try {
+      const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+      const lijst = all[type] || [];
+      const bord = lijst.find(function(b){ return b.id === bordId; });
+      if(bord && bord.storageKey) return bord.storageKey;
+    } catch{}
+    return 'kind_'+bordId;
+  }
+  return 'takenbord_kind_v1';
+})();
 const SMILEYS = ['', '😊', '🙂', '😐', '😟'];
 const EMOJIS = ['📖','🔢','✏️','🔤','🎨','💻','✂️','🎵','📄','🗂️','📒','📐','🛒','🔣','📏','⭐','🏆','🎯','🔬','📚','🌍','🎭','🏃','🍎','🧩','🎲','🖍️','🌱','💡','🧪','🎸','⚽','🏊','🌈','🖊️','📝'];
 
@@ -1206,6 +1249,7 @@ function loadState(){
   state.pupilPhotos = state.pupilPhotos || {};
   state.taskLabelOverrides = state.taskLabelOverrides || {};
   state.notes = state.notes || {};
+  state.boardSize = state.boardSize || 'normal'; // consistentie met klasbord
 
   setupNameOrder = state.nameOrder;
   setupShowLastname = state.showLastname;
@@ -1213,6 +1257,18 @@ function loadState(){
 
 function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Timestamp bijwerken in borden-index
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const bordId = params.get('bordid');
+    const type = params.get('type')||'kindbord';
+    if(bordId){
+      const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+      const lijst = all[type]||[];
+      const bord = lijst.find(function(b){ return b.id===bordId; });
+      if(bord){ bord.bijgewerkt=Date.now(); localStorage.setItem('borden_v1',JSON.stringify(all)); }
+    }
+  }catch(e){}
 }
 
 function uid(){
@@ -1318,6 +1374,7 @@ function renderSetupAddedList(){
   const wrap = document.getElementById('setupAddedList');
   if(!wrap) return;
   wrap.innerHTML = '';
+  toonKindHergebruikBanners();
 
   // Update teller
   const counter = document.getElementById('setup-count');
@@ -1483,7 +1540,9 @@ function setStatus(taskId, status){
   const old = state.progress[currentPupil.id][taskId] || { status:0, smiley:0 };
   // Bewaar voor undo
   kindLastAction = { pid: currentPupil.id, tid: taskId, prevStatus: old.status, prevSmiley: old.smiley||0 };
-  state.progress[currentPupil.id][taskId] = { ...old, status };
+  // Smiley wissen als taak niet meer klaar is
+  const newSmiley = status === 2 ? (old.smiley||0) : 0;
+  state.progress[currentPupil.id][taskId] = { ...old, status, smiley: newSmiley };
   saveState();
   renderTasks();
   renderNames();
@@ -1619,6 +1678,7 @@ function openTeacherModal(){
   teacherSelectedTasks = new Set();
   renderTeacherModal();
   renderEmojiPicker();
+  toonKindHergebruikBanners();
   document.getElementById('teacherOverlay').classList.add('show');
 }
 
@@ -1676,7 +1736,7 @@ function uploadPupilPhotoKind(pupilId){
   inp.accept = 'image/jpeg,image/png,image/gif,image/webp';
   inp.onchange = e => {
     const f = e.target.files[0]; if(!f) return;
-    resizeImageToDataURL(f, 80, dataURL => {
+    resizeImageToDataURL(f, 64, dataURL => {
       state.pupilPhotos[pupilId] = dataURL;
       saveState();
       renderTeacherModal();
@@ -1900,15 +1960,6 @@ function clearAssignmentsForSelection(){
 function emptyKindBoard(){
   if(!confirm('Wil je het kindbord leeg maken? Daarna zien kinderen geen taken meer uit klasbord, tot jij hier taken per kind of per groepje toewijst.')) return;
   state.kindBoardOnlyPersonal = true;
-  state.personalAssignments = {};
-  saveState();
-  closeTeacherModal();
-  renderNames();
-  if(currentPupil) renderTasks();
-}
-
-function useClassboardAgain(){
-  state.kindBoardOnlyPersonal = false;
   state.personalAssignments = {};
   saveState();
   closeTeacherModal();
@@ -2164,7 +2215,6 @@ document.getElementById('applyAssignmentsBtn').addEventListener('click', applyAs
 document.getElementById('clearAssignmentsBtn').addEventListener('click', clearAssignmentsForSelection);
 document.getElementById('teacherDoneBtn').addEventListener('click', closeTeacherModal);
 document.getElementById('emptyBoardBtn').addEventListener('click', emptyKindBoard);
-document.getElementById('useClassboardBtn').addEventListener('click', useClassboardAgain);
 document.getElementById('addCustomTaskBtn').addEventListener('click', addCustomTask);
 document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
   if(e.key === 'Enter') addCustomTask();
@@ -2190,6 +2240,167 @@ applySmartboardMode();
 const setupLastnameCheckbox = document.getElementById('setup-show-lastname');
 if(setupLastnameCheckbox){
   setupLastnameCheckbox.checked = !!state.showLastname;
+}
+
+function openKindNewSchoolYear(){
+  closeTeacherModal();
+  document.getElementById('kind-nsy-overlay').classList.add('show');
+}
+
+function doKindNewSchoolYear(){
+  const keepTasks    = document.getElementById('knsy-keep-tasks').checked;
+  const keepIcons    = document.getElementById('knsy-keep-icons').checked;
+  const wipePupils   = document.getElementById('knsy-wipe-pupils').checked;
+  const wipeProgress = document.getElementById('knsy-wipe-progress').checked;
+
+  if(!wipePupils && !wipeProgress){
+    alert('Selecteer minstens één item om te wissen.');
+    return;
+  }
+  if(wipePupils){
+    state.pupils = [];
+    state.notes = {};
+    state.personalAssignments = {};
+    state.pupilPhotos = {};
+  }
+  if(wipeProgress){
+    state.progress = {};
+  }
+  if(!keepTasks){
+    state.customTasks = [];
+    state.activeTasks = [];
+    state.taskLabelOverrides = {};
+  }
+  if(!keepIcons){
+    state.customIcons = {};
+  }
+  saveState();
+  document.getElementById('kind-nsy-overlay').classList.remove('show');
+  renderNames();
+  renderSetupAddedList();
+  // Ga terug naar setup als leerlingen gewist
+  if(wipePupils) goBackToSetup();
+  // Toast
+  const wiped = [];
+  if(wipePupils) wiped.push('leerlingen');
+  if(wipeProgress) wiped.push('voortgang');
+  if(!keepTasks) wiped.push('taken');
+  if(!keepIcons) wiped.push('afbeeldingen');
+  // Simpele melding
+  alert('🎒 Klaar voor nieuwe klas! Gewist: ' + wiped.join(', ') + '.');
+}
+
+// Toon bordnaam
+(function(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const bordId = params.get('bordid');
+    const type = params.get('type') || 'kindbord';
+    if(!bordId) return;
+    const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+    const bord = (all[type]||[]).find(function(b){ return b.id === bordId; });
+    if(bord){
+      const el = document.getElementById('kind-bord-naam');
+      if(el) el.textContent = '👤 ' + bord.naam;
+    }
+  } catch {}
+})();
+
+// ── BEWAREN & HERGEBRUIKEN ──────────────────────────────────────────────────
+function slaKindKlaslijstOp(){
+  if(!state.pupils.length){ showKindToast('Geen leerlingen om op te slaan.'); return; }
+  const data = {
+    pupils: state.pupils.map(p=>({voornaam:p.voornaam,achternaam:p.achternaam||''})),
+    pupilPhotos: state.pupilPhotos||{},
+    showLastname: state.showLastname,
+    nameOrder: state.nameOrder||'voornaam',
+    savedAt: Date.now()
+  };
+  localStorage.setItem('hergebruik_klaslijst_kindbord', JSON.stringify(data));
+  showKindToast('✅ Klaslijst bewaard voor nieuwe borden');
+}
+function slaKindTakenOp(){
+  const data = {
+    activeTasks: state.activeTasks||[],
+    customTasks: state.customTasks||[],
+    taskLabelOverrides: state.taskLabelOverrides||{},
+    customIcons: state.customIcons||{},
+    savedAt: Date.now()
+  };
+  localStorage.setItem('hergebruik_taken_kindbord', JSON.stringify(data));
+  showKindToast('✅ Taken bewaard voor nieuwe borden');
+}
+function showKindToast(msg){
+  let t=document.getElementById('kind-toast');
+  if(!t){t=document.createElement('div');t.id='kind-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e1b4b;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .3s;white-space:nowrap;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},3000);
+}
+
+function toonKindHergebruikBanners(){
+  // Klaslijst banner: enkel als bord leeg is
+  const klBanner = document.getElementById('kind-hergebruik-klaslijst-banner');
+  if(klBanner){
+    if(!state.pupils.length){
+      try{
+        const kl=JSON.parse(localStorage.getItem('hergebruik_klaslijst_kindbord')||'null');
+        if(kl && kl.pupils && kl.pupils.length){
+          document.getElementById('kind-hergebruik-klaslijst-info').textContent=
+            kl.pupils.length+' leerlingen · bewaard op '+fmtKindDate(kl.savedAt);
+          klBanner.style.display='block';
+        } else { klBanner.style.display='none'; }
+      } catch { klBanner.style.display='none'; }
+    } else { klBanner.style.display='none'; }
+  }
+  // Taken banner: enkel als geen actieve taken
+  const tkBanner=document.getElementById('kind-hergebruik-taken-banner');
+  if(tkBanner){
+    if(!state.activeTasks||!state.activeTasks.length){
+      try{
+        const tk=JSON.parse(localStorage.getItem('hergebruik_taken_kindbord')||'null');
+        if(tk && tk.savedAt){
+          const nEigen=(tk.customTasks||[]).length;
+          const nActief=(tk.activeTasks||[]).length;
+          document.getElementById('kind-hergebruik-taken-info').textContent=
+            nActief+' actieve taken'+(nEigen?', '+nEigen+' eigen taken':'')+' · bewaard op '+fmtKindDate(tk.savedAt);
+          tkBanner.style.display='block';
+        } else { tkBanner.style.display='none'; }
+      } catch { tkBanner.style.display='none'; }
+    } else { tkBanner.style.display='none'; }
+  }
+}
+function fmtKindDate(ts){
+  if(!ts)return'';
+  try{return new Date(ts).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}
+  catch{return'';}
+}
+function kindLaadBewaardeKlaslijst(){
+  try{
+    const kl=JSON.parse(localStorage.getItem('hergebruik_klaslijst_kindbord')||'null');
+    if(!kl||!kl.pupils)return;
+    state.pupils=kl.pupils.map(p=>({id:'_'+Math.random().toString(36).slice(2)+Date.now(),voornaam:p.voornaam,achternaam:p.achternaam||''}));
+    state.pupilPhotos=kl.pupilPhotos||{};
+    state.showLastname=kl.showLastname||false;
+    state.nameOrder=kl.nameOrder||'voornaam';
+    saveState();
+    document.getElementById('kind-hergebruik-klaslijst-banner').style.display='none';
+    renderNames();renderSetupAddedList();
+    showKindToast('✅ '+state.pupils.length+' leerlingen ingeladen');
+  }catch(e){showKindToast('Kon klaslijst niet laden.');}
+}
+function kindLaadBewaardeTaken(){
+  try{
+    const tk=JSON.parse(localStorage.getItem('hergebruik_taken_kindbord')||'null');
+    if(!tk)return;
+    state.activeTasks=tk.activeTasks||[];
+    state.customTasks=tk.customTasks||[];
+    state.taskLabelOverrides=tk.taskLabelOverrides||{};
+    state.customIcons=tk.customIcons||{};
+    saveState();
+    document.getElementById('kind-hergebruik-taken-banner').style.display='none';
+    renderTeacherTaskGrid();
+    showKindToast('✅ Taken ingeladen');
+  }catch(e){showKindToast('Kon taken niet laden.');}
 }
 
 function goBackToWelcome(){
@@ -2651,5 +2862,45 @@ function timerDone(){
 .timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
 .timer-preset:hover{background:#e0e7ff;}
 </style>
+<!-- NIEUW SCHOOLJAAR MODAL -->
+<div class="overlay" id="kind-nsy-overlay">
+<div class="popup" style="text-align:left;max-width:460px;width:100%;">
+<h3 style="font-size:20px;margin-bottom:4px;">🎒 Nieuw schooljaar starten</h3>
+<p style="font-size:14px;color:#6b7280;margin-bottom:14px;">Kies wat je bewaart voor volgend schooljaar.</p>
+
+<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400e;line-height:1.7;">
+  ⚠️ Maak eerst een backup als je de voortgang nog nodig hebt.
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">
+  <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#f8fafc;border-radius:10px;border:2px solid #e0e7ff;cursor:pointer;">
+    <input type="checkbox" id="knsy-keep-tasks" checked style="width:17px;height:17px;margin-top:1px;flex-shrink:0;accent-color:#6366f1;">
+    <div><div style="font-size:13px;font-weight:800;color:#1f2937;">📋 Taken bewaren</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:1px;">Alle taken, eigen toegevoegde taken en aangepaste namen blijven.</div></div>
+  </label>
+  <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#f8fafc;border-radius:10px;border:2px solid #e0e7ff;cursor:pointer;">
+    <input type="checkbox" id="knsy-keep-icons" checked style="width:17px;height:17px;margin-top:1px;flex-shrink:0;accent-color:#6366f1;">
+    <div><div style="font-size:13px;font-weight:800;color:#1f2937;">🖼️ Eigen afbeeldingen bij taken bewaren</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:1px;">De afbeeldingen die je bij taken hebt toegevoegd.</div></div>
+  </label>
+  <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;cursor:pointer;">
+    <input type="checkbox" id="knsy-wipe-pupils" checked style="width:17px;height:17px;margin-top:1px;flex-shrink:0;accent-color:#dc2626;">
+    <div><div style="font-size:13px;font-weight:800;color:#dc2626;">🗑️ Leerlingen wissen</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:1px;">Alle namen, foto's en bevindingen worden verwijderd.</div></div>
+  </label>
+  <label style="display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:#fff5f5;border-radius:10px;border:2px solid #fecaca;cursor:pointer;">
+    <input type="checkbox" id="knsy-wipe-progress" checked style="width:17px;height:17px;margin-top:1px;flex-shrink:0;accent-color:#dc2626;">
+    <div><div style="font-size:13px;font-weight:800;color:#dc2626;">🗑️ Voortgang wissen</div>
+    <div style="font-size:11px;color:#6b7280;margin-top:1px;">Alle vinkjes en smileys worden leeggemaakt.</div></div>
+  </label>
+</div>
+
+<div style="display:flex;gap:8px;justify-content:flex-end;">
+  <button type="button" class="close-btn" onclick="document.getElementById('kind-nsy-overlay').classList.remove('show')">Annuleren</button>
+  <button type="button" class="apply-btn teacher-btn" onclick="doKindNewSchoolYear()">🎒 Starten</button>
+</div>
+</div>
+</div>
+
 </body>
 </html>
