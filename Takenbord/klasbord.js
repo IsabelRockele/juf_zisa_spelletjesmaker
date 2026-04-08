@@ -1,5 +1,20 @@
 
-const STORAGE_KEY = 'taakbord_test_v4';
+const STORAGE_KEY = (function(){
+  const params = new URLSearchParams(window.location.search);
+  const bordId = params.get('bordid');
+  const type = params.get('type') || 'klasbord';
+  if(bordId){
+    try {
+      const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+      const lijst = all[type] || [];
+      const bord = lijst.find(function(b){ return b.id === bordId; });
+      if(bord && bord.storageKey) return bord.storageKey;
+    } catch{}
+    return 'klas_'+bordId;
+  }
+  return 'taakbord_test_v4';
+})();
+// Formaat savedClassList: { pupils:[...], savedAt: timestamp, schoolYear: string }
 const SMILEYS = ['','😊','🙂','😐','😟'];
 const SMILEY_LABELS = ['','Super!','Ging goed','Beetje moeilijk','Te moeilijk'];
 
@@ -57,7 +72,21 @@ function loadState(){
     }
   }catch(e){}
 }
-function saveState(){ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){} }
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+  // Timestamp bijwerken in borden-index
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const bordId = params.get('bordid');
+    const type = params.get('type')||'klasbord';
+    if(bordId){
+      const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+      const lijst = all[type]||[];
+      const bord = lijst.find(function(b){ return b.id===bordId; });
+      if(bord){ bord.bijgewerkt=Date.now(); localStorage.setItem('borden_v1',JSON.stringify(all)); }
+    }
+  }catch(e){}
+}
 function uid(){ return '_'+Math.random().toString(36).slice(2)+Date.now(); }
 
 // TASK HELPERS
@@ -93,6 +122,8 @@ function cycleStatus(pid,tid){
   // Bewaar voor undo
   lastAction = { type:'status', pid, tid, prevStatus: cur, prevSmiley: state.progress[pid][tid].smiley||0 };
   state.progress[pid][tid].status=next;
+  // Smiley wissen als taak niet meer klaar is
+  if(next !== 2) state.progress[pid][tid].smiley = 0;
   const tasks=pupilTasks(pid);
   const wasDone=tasks.every(t=>t.id===tid?cur===2:getStatus(pid,t.id)===2);
   if(isPupilComplete(pid)&&!wasDone){ const p=state.pupils.find(x=>x.id===pid); if(p) setTimeout(()=>showCelebration(displayName(p)),80); }
@@ -270,6 +301,120 @@ function saveClassList(){ const a=document.createElement('a');a.href=URL.createO
 let _loadNames=null;
 function loadClassList(e){ const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result),names=d.pupils||d;if(!Array.isArray(names)){alert('Ongeldig bestand.');return;}_loadNames=names.map(n=>typeof n==='string'?{id:uid(),...parseName(n)}:n.id?n:{id:uid(),...n});confirmAction('classload',`${_loadNames.length} namen gevonden in ${f.name}.`);}catch{alert('Kon bestand niet lezen.');}};r.readAsText(f);e.target.value=''; }
 function loadClassListAction(replace){ if(!_loadNames)return;if(replace){const np={},no={},nn={};_loadNames.forEach(n=>{const old=state.pupils.find(op=>op.voornaam.toLowerCase()===n.voornaam.toLowerCase()&&(op.achternaam||'').toLowerCase()===(n.achternaam||'').toLowerCase());if(old){if(state.progress[old.id])np[n.id]=state.progress[old.id];if(state.pupilTaskOverrides[old.id])no[n.id]=state.pupilTaskOverrides[old.id];if(state.notes[old.id])nn[n.id]=state.notes[old.id];}});state.pupils=_loadNames;state.progress=np;state.pupilTaskOverrides=no;state.notes=nn;}else{_loadNames.forEach(n=>{if(!state.pupils.some(p=>p.voornaam.toLowerCase()===n.voornaam.toLowerCase()&&(p.achternaam||'').toLowerCase()===(n.achternaam||'').toLowerCase()))state.pupils.push(n);});}saveState();renderPupilList();renderBoard();closeConfirm(); }
+
+
+
+function openBackupModal(){ document.getElementById('backup-modal').classList.remove('hidden'); }
+function closeBM(){ document.getElementById('backup-modal').classList.add('hidden'); }
+
+// ── BEWAREN & HERGEBRUIKEN ──────────────────────────────────────────────────
+function slaKlaslijstOp(){
+  if(!state.pupils.length){ showToast('Geen leerlingen om op te slaan.'); return; }
+  const data = {
+    pupils: state.pupils.map(p=>({voornaam:p.voornaam,achternaam:p.achternaam||''})),
+    pupilPhotos: state.pupilPhotos||{},
+    showLastname: state.showLastname,
+    showNumbers: state.showNumbers,
+    savedAt: Date.now()
+  };
+  localStorage.setItem('hergebruik_klaslijst_klasbord', JSON.stringify(data));
+  showToast('✅ Klaslijst bewaard voor nieuwe borden');
+}
+function slaTakenOp(){
+  const data = {
+    activeTasks: state.activeTasks||[],
+    customTasks: state.customTasks||[],
+    taskLabelOverrides: state.taskLabelOverrides||{},
+    customIcons: state.customIcons||{},
+    showSmileys: state.showSmileys,
+    savedAt: Date.now()
+  };
+  localStorage.setItem('hergebruik_taken_klasbord', JSON.stringify(data));
+  showToast('✅ Taken bewaard voor nieuwe borden');
+}
+
+function toonHergebruikBanners(){
+  // Klaslijst banner: enkel tonen als bord leeg is
+  const klBanner = document.getElementById('hergebruik-klaslijst-banner');
+  if(klBanner){
+    if(state.pupils.length === 0){
+      try {
+        const kl = JSON.parse(localStorage.getItem('hergebruik_klaslijst_klasbord')||'null');
+        if(kl && kl.pupils && kl.pupils.length){
+          document.getElementById('hergebruik-klaslijst-info').textContent =
+            kl.pupils.length + ' leerlingen · bewaard op ' + fmtSavedDate(kl.savedAt);
+          klBanner.style.display = 'block';
+        } else { klBanner.style.display = 'none'; }
+      } catch { klBanner.style.display = 'none'; }
+    } else { klBanner.style.display = 'none'; }
+  }
+
+  // Taken banner: enkel tonen als er geen actieve taken zijn
+  const tkBanner = document.getElementById('hergebruik-taken-banner');
+  if(tkBanner){
+    if(!state.activeTasks || state.activeTasks.length === 0){
+      try {
+        const tk = JSON.parse(localStorage.getItem('hergebruik_taken_klasbord')||'null');
+        if(tk && tk.savedAt){
+          const nEigen = (tk.customTasks||[]).length;
+          const nActief = (tk.activeTasks||[]).length;
+          document.getElementById('hergebruik-taken-info').textContent =
+            nActief + ' actieve taken' + (nEigen ? ', ' + nEigen + ' eigen taken' : '') + ' · bewaard op ' + fmtSavedDate(tk.savedAt);
+          tkBanner.style.display = 'block';
+        } else { tkBanner.style.display = 'none'; }
+      } catch { tkBanner.style.display = 'none'; }
+    } else { tkBanner.style.display = 'none'; }
+  }
+}
+
+function laadBewaardeklaslijst(){
+  try {
+    const kl = JSON.parse(localStorage.getItem('hergebruik_klaslijst_klasbord')||'null');
+    if(!kl || !kl.pupils) return;
+    state.pupils = kl.pupils.map(p=>({id:uid(),voornaam:p.voornaam,achternaam:p.achternaam||''}));
+    state.pupilPhotos = kl.pupilPhotos||{};
+    state.showLastname = kl.showLastname||false;
+    state.showNumbers = kl.showNumbers||false;
+    saveState();
+    document.getElementById('hergebruik-klaslijst-banner').style.display='none';
+    renderPupilList(); renderBoard();
+    showToast('✅ ' + state.pupils.length + ' leerlingen ingeladen');
+  } catch(e){ showToast('Kon klaslijst niet laden.'); }
+}
+
+function laadBewaardeTaken(){
+  try {
+    const tk = JSON.parse(localStorage.getItem('hergebruik_taken_klasbord')||'null');
+    if(!tk) return;
+    state.activeTasks = tk.activeTasks||[];
+    state.customTasks = tk.customTasks||[];
+    state.taskLabelOverrides = tk.taskLabelOverrides||{};
+    state.customIcons = tk.customIcons||{};
+    state.showSmileys = tk.showSmileys||false;
+    saveState();
+    document.getElementById('hergebruik-taken-banner').style.display='none';
+    renderTaskSettings(); renderBoard();
+    showToast('✅ Taken ingeladen');
+  } catch(e){ showToast('Kon taken niet laden.'); }
+}
+
+function fmtSavedDate(ts){
+  if(!ts) return '';
+  try{ return new Date(ts).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+  catch{ return ''; }
+}
+
+// Toon autosave bevestiging in leerlingen-tab als er leerlingen zijn
+function renderClasslistBanner(){
+  const el = document.getElementById('autosave-notice');
+  if(el) el.style.display = state.pupils.length > 0 ? 'flex' : 'none';
+}
+
+// Toon autosave bevestiging in taken-tab als er eigen afbeeldingen zijn
+function renderIconsBanner(){
+  const el = document.getElementById('icons-banner');
+  if(el) el.style.display = Object.keys(state.customIcons||{}).length > 0 ? 'flex' : 'none';
+}
 
 // PDF (print-based)
 function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!document.getElementById('pdf-date-from').value)document.getElementById('pdf-date-from').value=today;if(!document.getElementById('pdf-date-to').value)document.getElementById('pdf-date-to').value=today;document.getElementById('pdf-overlay').classList.remove('hidden'); }
@@ -619,7 +764,7 @@ function uploadTaskIcon(taskId){
   inp.type='file'; inp.accept='image/jpeg,image/png,image/gif,image/webp,image/svg+xml';
   inp.onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
-    resizeImageToDataURL(f,160,dataURL=>{
+    resizeImageToDataURL(f,80,dataURL=>{
       if(!state.customIcons) state.customIcons={};
       state.customIcons[taskId]=dataURL;
       saveState(); renderTaskSettings(); renderBoard();
@@ -638,7 +783,7 @@ function uploadPupilPhoto(pupilId){
   inp.type='file'; inp.accept='image/jpeg,image/png,image/gif,image/webp';
   inp.onchange=e=>{
     const f=e.target.files[0]; if(!f)return;
-    resizeImageToDataURL(f,120,dataURL=>{
+    resizeImageToDataURL(f,64,dataURL=>{
       if(!state.pupilPhotos) state.pupilPhotos={};
       state.pupilPhotos[pupilId]=dataURL;
       saveState(); renderPupilList(); renderBoard();
@@ -701,6 +846,13 @@ function renderShell(){
   const isB = currentMode === 'board';
   const isS = currentMode === 'settings';
 
+  // Toon bordnaam in topbar
+  const bordNaam = getBordNaam();
+  const titleEl = document.getElementById('topbar-title');
+  if(titleEl) titleEl.textContent = bordNaam ? '📋 ' + bordNaam : '';
+  const boardTitle = document.getElementById('board-naam-label');
+  if(boardTitle) boardTitle.textContent = bordNaam || '';
+
   const topbar = document.getElementById('topbar');
   if(topbar) topbar.classList.toggle('visible', isS);
 
@@ -723,11 +875,24 @@ function renderShell(){
   else renderBoard();
 }
 
+function getBordNaam(){
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const bordId = params.get('bordid');
+    const type = params.get('type') || 'klasbord';
+    if(!bordId) return '';
+    const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+    const bord = (all[type]||[]).find(function(b){ return b.id === bordId; });
+    return bord ? bord.naam : '';
+  } catch { return ''; }
+}
+
 function renderSettings(){
   document.getElementById('tab-ll').classList.toggle('active',currentTab==='leerlingen');
   document.getElementById('tab-tk').classList.toggle('active',currentTab==='taken');
   document.getElementById('tab-content-leerlingen').classList.toggle('hidden',currentTab!=='leerlingen');
   document.getElementById('tab-content-taken').classList.toggle('hidden',currentTab!=='taken');
+  toonHergebruikBanners();
   if(currentTab==='leerlingen')renderPupilList();
   if(currentTab==='taken')renderTaskSettings();
 }
@@ -736,6 +901,7 @@ function renderPupilList(){
   document.getElementById('toggle-lastname').checked=!!state.showLastname;
   document.getElementById('toggle-smileys').checked=!!state.showSmileys;
   document.getElementById('pupil-count-title').textContent=`Leerlingen (${state.pupils.length})`;
+  renderClasslistBanner();
 
   // Eerste-keer-hint foto's (punt 3) — toon als er leerlingen zijn maar nog geen foto
   const hasAnyPhoto = state.pupils.some(p => state.pupilPhotos[p.id]);
@@ -786,6 +952,7 @@ function renderPupilList(){
 }
 function renderTaskSettings(){
   const ci=state.customIcons||{};
+  renderIconsBanner();
 
   // Eerste-keer-hint pictogrammen (punt 3)
   const hasAnyIcon = Object.keys(ci).length > 0;
