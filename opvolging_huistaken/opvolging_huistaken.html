@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Opvolging huistaken</title>
+
+  <link rel="stylesheet" href="css/opvolging_huistaken.css" />
+  <link rel="stylesheet" href="css/opvolging_huistaken-layout.css" />
+  <link rel="stylesheet" href="css/opvolging_huistaken-theme.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-card">
+        <div class="brand-badge">Z</div>
+        <div>
+          <h1>Huistaken</h1>
+          <p>Testomgeving</p>
+        </div>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-btn is-active" data-view="dashboard">Dashboard</button>
+        <button class="menu-btn" data-view="instellingen">Instellingen</button>
+        <button class="menu-btn" data-view="klaslijst">Klaslijst</button>
+        <button class="menu-btn" data-view="rapportperiodes">Rapportperiodes</button>
+        <button class="menu-btn" data-view="registratie">Registratie</button>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <header class="page-header card">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Basisstructuur om verder op te bouwen.</p>
+        </div>
+
+        <div class="header-actions">
+          <button class="ghost-btn" id="backBtn">← Terug</button>
+          <button class="soft-btn" data-help="algemeen">❓ Uitleg</button>
+        </div>
+      </header>
+
+      <!-- DASHBOARD -->
+      <section class="view is-active" id="view-dashboard">
+        <div class="grid two-columns">
+          <article class="card feature-card">
+            <div class="card-topline">Wat zit er nu al in?</div>
+            <h3>Vereenvoudigde werking</h3>
+            <p>Je werkt nu alleen met datums. Elke kolom is gewoon een registratiemoment waarop huistaken gecontroleerd of afgegeven worden.</p>
+          </article>
+
+          <article class="card feature-card">
+            <div class="card-topline">Volgende focus</div>
+            <h3>Verder verfijnen</h3>
+            <p>Vanaf hier verfijnen we de werking stap voor stap: historiek per leerling, betere PDF’s, opslag per gebruiker en later Firebase-koppeling.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- INSTELLINGEN -->
+      <section class="view" id="view-instellingen">
+        <div class="card">
+          <div class="section-heading">
+            <h3>Instellingen</h3>
+            <button class="soft-btn" data-help="instellingen">❓</button>
+          </div>
+
+          <div class="form-grid two">
+            <label>
+              <span>Schoolnaam</span>
+              <input type="text" id="schoolNameInput" placeholder="Bijvoorbeeld GO! Basisschool De Linde" />
+            </label>
+
+            <label>
+              <span>Klasnaam</span>
+              <input type="text" id="classNameInput" placeholder="Bijvoorbeeld 2A" />
+            </label>
+          </div>
+
+          <div class="form-grid two">
+            <label>
+              <span>Titel voor PDF</span>
+              <input type="text" id="pdfTitleInput" placeholder="Bijvoorbeeld Opvolging huistaken" />
+            </label>
+
+            <label>
+              <span>Schoollogo</span>
+              <input type="file" id="schoolLogoInput" accept="image/*" />
+            </label>
+          </div>
+
+          <div class="form-grid two" style="margin-top: 16px;">
+            <label>
+              <span>Drempel extra opvolging</span>
+              <input type="number" id="extraOpvolgingDrempelInput" min="1" value="4" />
+            </label>
+
+            <div class="notice-box" style="margin-top: 0;">
+              Een leerling verschijnt pas bij <strong>extra opvolging</strong> vanaf dit aantal probleemregistraties
+              (<strong>te laat</strong>, <strong>niet in orde</strong>, <strong>onvolledig</strong>).
+            </div>
+          </div>
+
+          <div class="logo-preview-box">
+            <div class="logo-preview-title">Voorbeeld schoollogo</div>
+            <div class="logo-preview">
+              <img id="logoPreview" alt="Geen logo gekozen" />
+              <div id="logoPreviewPlaceholder" class="logo-placeholder">Nog geen logo gekozen</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KLASLIJST -->
+      <section class="view" id="view-klaslijst">
+        <div class="card">
+          <div class="section-heading">
+            <h3>Klaslijst</h3>
+            <button class="soft-btn" data-help="klaslijst">❓</button>
+          </div>
+
+          <div class="toolbar-row toolbar-row-wrap">
+            <input type="text" id="leerlingInput" placeholder="Achternaam Voornaam" />
+            <button class="primary-btn" id="addLeerlingBtn">+ Leerling toevoegen</button>
+            <button class="soft-btn" id="plakLijstBtn">📋 Lijst plakken</button>
+          </div>
+
+          <div class="notice-box">
+            Geef namen best in als <strong>Achternaam Voornaam</strong>. Zo staan ze alfabetisch zoals in veel schoolsystemen.
+          </div>
+
+          <div class="classlist-box">
+            <ul id="klaslijst" class="simple-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- RAPPORTPERIODES -->
+      <section class="view" id="view-rapportperiodes">
+        <div class="card">
+          <div class="section-heading">
+            <h3>Rapportperiodes</h3>
+            <button class="soft-btn" data-help="rapportperiodes">❓</button>
+          </div>
+
+          <div class="period-add-grid">
+            <input type="text" id="periodeNaamInput" placeholder="Naam rapportperiode, bv. Rapportperiode 1" />
+            <input type="date" id="periodeStartInput" />
+            <input type="date" id="periodeEindeInput" />
+            <button class="primary-btn" id="addPeriodeBtn">+ Rapportperiode toevoegen</button>
+          </div>
+
+          <div class="periods-box">
+            <div id="periodesLijst"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- REGISTRATIE -->
+      <section class="view" id="view-registratie">
+        <div class="card">
+          <div class="section-heading">
+            <div>
+              <h3>Registratie</h3>
+              <p class="section-subtitle">Elke kolom is een datum waarop je huistaken registreert.</p>
+            </div>
+            <button class="soft-btn" data-help="registratie">❓</button>
+          </div>
+
+          <div class="registration-toolbar sticky-toolbar">
+            <div class="toolbar-left">
+              <div class="toolbar-field-group">
+                <label for="registratiePeriodeSelect">Rapportperiode</label>
+                <select id="registratiePeriodeSelect"></select>
+              </div>
+
+              <div class="toolbar-field-group">
+                <label for="registratieTitelInput">Titel PDF</label>
+                <input type="text" id="registratieTitelInput" placeholder="Opvolging huistaken" />
+              </div>
+            </div>
+
+            <div class="toolbar-right">
+              <div class="toolbar-field-group">
+                <label for="dagKolomDatumInput">Datum</label>
+                <input type="date" id="dagKolomDatumInput" />
+              </div>
+
+              <button class="primary-btn" id="addDagKolomBtn">+ Dag</button>
+              <button class="soft-btn" id="pdfKlasBtn">PDF klasoverzicht</button>
+              <button class="soft-btn" id="pdfAlleLeerlingenBtn">PDF alle leerlingen</button>
+            </div>
+          </div>
+
+          <div class="table-scroll-wrap" id="tableScrollWrap">
+            <table class="registratie-tabel" id="registratieTabel">
+              <thead id="registratieThead"></thead>
+              <tbody id="registratieTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- HELP MODAL -->
+  <div class="help-modal" id="helpModal" hidden>
+    <div class="help-backdrop" data-close-help></div>
+    <div class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+      <div class="help-header">
+        <h3 id="helpTitle">Uitleg</h3>
+        <button class="icon-btn" data-close-help aria-label="Sluiten">✕</button>
+      </div>
+      <div class="help-body" id="helpBody"></div>
+      <div class="help-footer">
+        <button class="primary-btn" data-close-help>Sluiten</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAPPORTPERIODE BEWERKEN MODAL -->
+  <div class="help-modal" id="periodeEditModal" hidden>
+    <div class="help-backdrop" data-close-periode-edit></div>
+    <div class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="periodeEditTitle">
+      <div class="help-header">
+        <h3 id="periodeEditTitle">Rapportperiode bewerken</h3>
+        <button class="icon-btn" data-close-periode-edit aria-label="Sluiten">✕</button>
+      </div>
+
+      <div class="help-body">
+        <div class="form-grid two">
+          <label>
+            <span>Naam rapportperiode</span>
+            <input type="text" id="editPeriodeNaamInput" />
+          </label>
+
+          <label>
+            <span>Startdatum</span>
+            <input type="date" id="editPeriodeStartInput" />
+          </label>
+        </div>
+
+        <div class="form-grid two" style="margin-top: 16px;">
+          <label>
+            <span>Einddatum</span>
+            <input type="date" id="editPeriodeEindeInput" />
+          </label>
+          <div></div>
+        </div>
+      </div>
+
+      <div class="help-footer">
+        <button class="ghost-btn" data-close-periode-edit>Annuleren</button>
+        <button class="primary-btn" id="savePeriodeEditBtn">Opslaan</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/opvolging_huistaken-app.js"></script>
+</body>
+</html>
