@@ -1245,10 +1245,6 @@ if (!state.leerlingen.length) {
   return;
 }
 
-if (!state.columns.length) {
-  renderRegistratieLeeg(thead, tbody, "Voeg eerst een datum toe via de knop ‘+ Dag’.");
-  return;
-}
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
@@ -1277,24 +1273,28 @@ if (!state.columns.length) {
     };
   }
 
-  thead.innerHTML = `
+    thead.innerHTML = `
     <tr>
       <th>Leerling</th>
-      ${state.columns.map((kolom) => `
-        <th>
-          <div class="column-top">${formatDate(kolom)}</div>
-          <div class="column-sub">Registratiedag</div>
-          <div class="name-actions" style="margin-top:8px;">
-            <button type="button" class="ghost-btn kolom-verwijder-btn" data-kolom="${kolom}">Verwijderen</button>
-          </div>
-        </th>
-      `).join("")}
+      ${
+        state.columns.length
+          ? state.columns.map((kolom) => `
+              <th class="registratie-dagkolom">
+                <div class="column-top">${formatDate(kolom)}</div>
+                <div class="column-sub">Registratiedag</div>
+                <div class="name-actions" style="margin-top:8px;">
+                  <button type="button" class="ghost-btn kolom-verwijder-btn" data-kolom="${kolom}">Verwijderen</button>
+                </div>
+              </th>
+            `).join("")
+          : `<th class="registratie-dagkolom registratie-hint-kolom">Nog geen dag toegevoegd</th>`
+      }
     </tr>
   `;
 
   sorteerLeerlingen();
 
-  tbody.innerHTML = state.leerlingen
+   tbody.innerHTML = state.leerlingen
     .map((leerling) => `
       <tr>
         <td>
@@ -1308,44 +1308,48 @@ if (!state.columns.length) {
             </div>
           </div>
         </td>
-        ${state.columns.map((kolom) => {
-          const actief = leerlingIsActiefOpDatum(leerling, kolom);
+        ${
+          state.columns.length
+            ? state.columns.map((kolom) => {
+                const actief = leerlingIsActiefOpDatum(leerling, kolom);
 
-          if (!actief) {
-            return `
-              <td>
-                <div class="cell-stack">
-                  <div class="notice-box" style="margin-top:0; padding:10px 12px;">Niet actief op deze datum</div>
-                </div>
-              </td>
-            `;
-          }
+                if (!actief) {
+                  return `
+                    <td class="registratie-dagcel">
+                      <div class="cell-stack">
+                        <div class="notice-box" style="margin-top:0; padding:10px 12px;">Niet actief op deze datum</div>
+                      </div>
+                    </td>
+                  `;
+                }
 
-          const cell = getCellData(leerling.id, kolom);
-          const statusClass = `status-${slugStatus(cell.status)}`;
+                const cell = getCellData(leerling.id, kolom);
+                const statusClass = `status-${slugStatus(cell.status)}`;
 
-          return `
-            <td>
-              <div class="cell-stack">
-                <select
-                  class="status-select ${statusClass}"
-                  data-student-id="${leerling.id}"
-                  data-kolom="${kolom}"
-                >
-                  ${STATUSSEN.map(
-                    (status) => `<option value="${status}" ${cell.status === status ? "selected" : ""}>${status}</option>`
-                  ).join("")}
-                </select>
+                return `
+                  <td class="registratie-dagcel">
+                    <div class="cell-stack">
+                      <select
+                        class="status-select ${statusClass}"
+                        data-student-id="${leerling.id}"
+                        data-kolom="${kolom}"
+                      >
+                        ${STATUSSEN.map(
+                          (status) => `<option value="${status}" ${cell.status === status ? "selected" : ""}>${status}</option>`
+                        ).join("")}
+                      </select>
 
-                <textarea
-                  data-student-id="${leerling.id}"
-                  data-kolom="${kolom}"
-                  placeholder="Opmerking..."
-                >${escapeHtml(cell.comment || "")}</textarea>
-              </div>
-            </td>
-          `;
-        }).join("")}
+                      <textarea
+                        data-student-id="${leerling.id}"
+                        data-kolom="${kolom}"
+                        placeholder="Opmerking..."
+                      >${escapeHtml(cell.comment || "")}</textarea>
+                    </div>
+                  </td>
+                `;
+              }).join("")
+            : `<td class="registratie-start-cell">Voeg eerst een dag toe om status en opmerkingen in te vullen.</td>`
+        }
       </tr>
     `).join("");
 
