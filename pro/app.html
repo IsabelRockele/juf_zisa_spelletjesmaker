@@ -121,8 +121,9 @@
     .nav-btn.active.cat-taal     { background: #2980b9; }
     .nav-btn.active.cat-puzzels  { background: #8e44ad; }
     .nav-btn.active.cat-creatief { background: #27ae60; }
-    .nav-btn.active.cat-spel     { background: #c0392b; }
-    .nav-btn.active.cat-tijd     { background: #16a085; }
+    .nav-btn.active.cat-spel            { background: #c0392b; }
+.nav-btn.active.cat-tijd            { background: #16a085; }
+.nav-btn.active.cat-klasmanagement  { background: #5b7cfa; }
 
     .nav-btn .nav-icon { font-size: 1rem; flex-shrink: 0; }
 
@@ -589,6 +590,9 @@
   <button class="nav-btn cat-tijd" data-target="tijd">
     <span class="nav-icon">⏰</span> Tijd en klok
   </button>
+  <button class="nav-btn cat-klasmanagement" data-target="klasmanagement">
+  <span class="nav-icon">📋</span> Klasmanagement
+</button>
 
   <div class="sidebar-bottom">
     <div id="user-pill" class="user-pill">-</div>
@@ -869,14 +873,15 @@
   </div>
 
   <div class="button-grid">
+    <!-- TODO: Takenbord activeren wanneer klaar -->
     <!--
-<a class="img-link" href="./takenbord/index.html">
-  <img alt="Takenbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/takenbord.webp" loading="lazy"/>
-  <span class="img-label">Takenbord</span>
-</a>
--->
+    <a class="img-link" href="./takenbord/index.html">
+      <img alt="Takenbord" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/takenbord.webp" loading="lazy"/>
+      <span class="img-label">Takenbord</span>
+    </a>
+    -->
 
-    <a class="img-link" href="./opvolging_huistaken/index.html">
+    <a class="img-link" href="./opvolging_huistaken/opvolging_huistaken.html">
       <img alt="Opvolging huistaken" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/huistaken.webp" loading="lazy"/>
       <span class="img-label">Opvolging huistaken</span>
     </a>
@@ -887,7 +892,7 @@
       <span class="footer-emoji">📋</span>
       <div class="footer-text">
         <strong>Overzicht in je klas</strong>
-        <span>Gebruik het takenbord en volg huistaken eenvoudig op per leerling.</span>
+        <span>Gebruik klasmanagement om taken en huistaken overzichtelijk op te volgen.</span>
       </div>
     </div>
   </div>
