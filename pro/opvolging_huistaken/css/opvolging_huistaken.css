@@ -1384,3 +1384,86 @@ textarea {
   background: #eef4ff;
   border-color: #c8d8f1;
 }
+
+/* REGISTRATIE – COMPACTERE BOVENBALK */
+.registratie-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.registratie-uitleg-row {
+  margin-bottom: 0;
+}
+
+.registratie-top-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.registration-toolbar {
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 12px 14px;
+}
+
+.toolbar-left,
+.toolbar-right {
+  gap: 10px;
+}
+
+.registratie-datum-row {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.registratie-datum-veld {
+  min-width: 150px;
+}
+
+#view-registratie .toolbar-field-group label {
+  margin-bottom: 6px;
+}
+
+#view-registratie input[type="text"],
+#view-registratie input[type="date"],
+#view-registratie select {
+  padding: 10px 12px;
+}
+
+#view-registratie .primary-btn,
+#view-registratie .soft-btn {
+  padding: 10px 14px;
+}
+
+#pdfKlasBtn,
+#pdfAlleLeerlingenBtn {
+  background: #fff7fa;
+  border-color: #f0d7df;
+  color: #c93b61;
+  font-weight: 700;
+}
+
+#pdfKlasBtn:hover,
+#pdfAlleLeerlingenBtn:hover {
+  background: #fdeef3;
+  border-color: #e8c4d0;
+}
+
+@media (max-width: 900px) {
+  .registratie-topbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .registratie-datum-row {
+    flex-wrap: wrap;
+  }
+}
