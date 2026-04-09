@@ -434,7 +434,7 @@ function renderHeader() {
 
   const subtitles = {
   dashboard: "Start hier en werk stap voor stap.",
-  instellingen: "Vul hier de gegevens in die later bewaard blijven.",
+  instellingen: "Vul hier de gegevens van je school en klas in. Deze instellingen worden gebruikt in je opvolging en in de PDF’s.",
   klaslijst: "Beheer hier je leerlingen met startdatum en einddatum.",
   rapportperiodes: "Stel hier zelf je rapportperiodes in.",
   registratie: "Registreer hier per leerling de huistaken."
