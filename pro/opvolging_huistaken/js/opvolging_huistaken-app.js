@@ -1,3 +1,13 @@
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  deleteDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 const helpTexts = {
   algemeen: `
     <p>Welkom in de testversie van de module voor huistaken.</p>
@@ -41,6 +51,10 @@ const state = {
   currentSchoolYear: bepaalSchooljaarTekst(),
   schoolYears: [bepaalSchooljaarTekst()],
   schoolYearData: {},
+    firebaseReady: false,
+  firebaseHydrating: false,
+  currentUserUid: "",
+  saveTimer: null,
 
   currentView: "dashboard",
   previousView: "dashboard",
@@ -142,6 +156,139 @@ function cloneSchoolYearData(data) {
   };
 }
 
+const auth = getAuth();
+const db = getFirestore();
+
+function getUserDocRef() {
+  return doc(db, "pro_huistaken", state.currentUserUid);
+}
+
+function getSchoolYearDocRef(schoolYearId) {
+  return doc(db, "pro_huistaken", state.currentUserUid, "schoolYears", schoolYearId);
+}
+
+function buildCurrentSchoolYearPayload() {
+  return {
+    schoolName: state.schoolName,
+    className: state.className,
+    pdfTitle: state.pdfTitle,
+    schoolLogoDataUrl: state.schoolLogoDataUrl,
+    extraOpvolgingDrempel: state.extraOpvolgingDrempel,
+    reportPeriods: JSON.parse(JSON.stringify(state.reportPeriods)),
+    activePeriodId: state.activePeriodId || null,
+    leerlingen: JSON.parse(JSON.stringify(state.leerlingen)),
+    columns: [...state.columns],
+    entries: JSON.parse(JSON.stringify(state.entries))
+  };
+}
+
+async function saveMetaToFirestore() {
+  if (!state.currentUserUid) return;
+
+  await setDoc(
+    getUserDocRef(),
+    {
+      currentSchoolYear: state.currentSchoolYear,
+      schoolYears: state.schoolYears,
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
+}
+
+async function saveCurrentSchoolYearToFirestore() {
+  if (!state.firebaseReady || state.firebaseHydrating || !state.currentUserUid) return;
+
+  const payload = buildCurrentSchoolYearPayload();
+  state.schoolYearData[state.currentSchoolYear] = JSON.parse(JSON.stringify(payload));
+
+  await setDoc(
+    getSchoolYearDocRef(state.currentSchoolYear),
+    {
+      ...payload,
+      updatedAt: serverTimestamp()
+    },
+    { merge: true }
+  );
+
+  await saveMetaToFirestore();
+}
+
+function scheduleFirestoreSave() {
+  if (!state.firebaseReady || state.firebaseHydrating || !state.currentUserUid) return;
+
+  clearTimeout(state.saveTimer);
+  state.saveTimer = setTimeout(() => {
+    saveCurrentSchoolYearToFirestore().catch((error) => {
+      console.error("Fout bij opslaan in Firestore:", error);
+    });
+  }, 500);
+}
+
+function markChanged() {
+  if (state.firebaseHydrating) return;
+  saveCurrentSchoolYearData();
+  scheduleFirestoreSave();
+}
+
+async function deleteSchoolYearFromFirestore(schoolYearId) {
+  if (!state.currentUserUid) return;
+  await deleteDoc(getSchoolYearDocRef(schoolYearId));
+}
+
+async function loadFirestoreIntoState() {
+  if (!state.currentUserUid) return;
+
+  state.firebaseHydrating = true;
+
+  const metaSnap = await getDoc(getUserDocRef());
+
+  if (metaSnap.exists()) {
+    const meta = metaSnap.data();
+    state.schoolYears = Array.isArray(meta.schoolYears) && meta.schoolYears.length
+      ? meta.schoolYears
+      : [bepaalSchooljaarTekst()];
+
+    state.currentSchoolYear = meta.currentSchoolYear || state.schoolYears[state.schoolYears.length - 1];
+  } else {
+    state.schoolYears = [bepaalSchooljaarTekst()];
+    state.currentSchoolYear = bepaalSchooljaarTekst();
+  }
+
+  state.schoolYearData = {};
+
+  for (const schoolYearId of state.schoolYears) {
+    const yearSnap = await getDoc(getSchoolYearDocRef(schoolYearId));
+
+    if (yearSnap.exists()) {
+      const data = yearSnap.data();
+      state.schoolYearData[schoolYearId] = {
+        schoolName: data.schoolName || "",
+        className: data.className || "",
+        pdfTitle: data.pdfTitle || "Opvolging huistaken",
+        schoolLogoDataUrl: data.schoolLogoDataUrl || "",
+        extraOpvolgingDrempel: data.extraOpvolgingDrempel || 4,
+        reportPeriods: Array.isArray(data.reportPeriods) ? data.reportPeriods : [],
+        activePeriodId: data.activePeriodId || null,
+        leerlingen: Array.isArray(data.leerlingen) ? data.leerlingen : [],
+        columns: Array.isArray(data.columns) ? data.columns : [],
+        entries: data.entries || {}
+      };
+    } else {
+      state.schoolYearData[schoolYearId] = createEmptySchoolYearData();
+    }
+  }
+
+  if (!state.schoolYearData[state.currentSchoolYear]) {
+    state.schoolYearData[state.currentSchoolYear] = createEmptySchoolYearData();
+  }
+
+  loadSchoolYearData(state.currentSchoolYear);
+
+  state.firebaseHydrating = false;
+  state.firebaseReady = true;
+}
+
 function saveCurrentSchoolYearData() {
   state.schoolYearData[state.currentSchoolYear] = {
     schoolName: state.schoolName,
@@ -209,7 +356,7 @@ function renderDashboard() {
 
   const vandaag = getVandaagIso();
 
-  if (schooljaarEl) schooljaarEl.textContent = bepaalSchooljaarTekst();
+  if (schooljaarEl) schooljaarEl.textContent = state.currentSchoolYear.replace("-", "–");
   if (actieveEl) actieveEl.textContent = String(countActieveLeerlingenOpDatum(vandaag));
   if (totaalEl) totaalEl.textContent = String(state.leerlingen.length);
   if (periodesEl) periodesEl.textContent = String(state.reportPeriods.length);
@@ -335,28 +482,36 @@ function setupSchooljaar() {
   const kopieerKlaslijstSelect = document.getElementById("kopieerKlaslijstSelect");
   const kopieerPeriodesSelect = document.getElementById("kopieerPeriodesSelect");
 
-  if (schooljaarSelect) {
-    schooljaarSelect.addEventListener("change", () => {
-      saveCurrentSchoolYearData();
-      loadSchoolYearData(schooljaarSelect.value);
-    });
-  }
+  if (schooljaarSelect && !schooljaarSelect.dataset.bound) {
+  schooljaarSelect.addEventListener("change", () => {
+    saveCurrentSchoolYearData();
+    loadSchoolYearData(schooljaarSelect.value);
+    markChanged();
+  });
+  schooljaarSelect.dataset.bound = "1";
+}
 
-  nieuwSchooljaarBtn?.addEventListener("click", () => {
+  if (nieuwSchooljaarBtn && !nieuwSchooljaarBtn.dataset.bound) {
+  nieuwSchooljaarBtn.addEventListener("click", () => {
     const voorstel = getVolgendSchooljaar(state.currentSchoolYear);
     if (nieuwSchooljaarInput) nieuwSchooljaarInput.value = voorstel;
     if (kopieerKlaslijstSelect) kopieerKlaslijstSelect.value = "nee";
     if (kopieerPeriodesSelect) kopieerPeriodesSelect.value = "ja";
     if (modal) modal.hidden = false;
   });
+  nieuwSchooljaarBtn.dataset.bound = "1";
+}
 
-  document.querySelectorAll("[data-close-schooljaar-modal]").forEach((button) => {
-    button.addEventListener("click", () => {
-      if (modal) modal.hidden = true;
-    });
+ document.querySelectorAll("[data-close-schooljaar-modal]").forEach((button) => {
+  if (button.dataset.bound) return;
+  button.addEventListener("click", () => {
+    if (modal) modal.hidden = true;
   });
+  button.dataset.bound = "1";
+});
 
-  bevestigBtn?.addEventListener("click", () => {
+  if (bevestigBtn && !bevestigBtn.dataset.bound) {
+  bevestigBtn.addEventListener("click", async () => {
     const nieuwJaar = (nieuwSchooljaarInput?.value || "").trim();
 
     if (!/^\d{4}-\d{4}$/.test(nieuwJaar)) {
@@ -408,8 +563,21 @@ function setupSchooljaar() {
     state.schoolYearData[nieuwJaar] = nieuweData;
     loadSchoolYearData(nieuwJaar);
 
+     if (state.schoolYears.length > 2) {
+      const oudste = state.schoolYears[0];
+      await deleteSchoolYearFromFirestore(oudste);
+      delete state.schoolYearData[oudste];
+      state.schoolYears = state.schoolYears.slice(-2);
+    }
+
+    state.schoolYearData[nieuwJaar] = nieuweData;
+    loadSchoolYearData(nieuwJaar);
+    markChanged();
+
     if (modal) modal.hidden = true;
   });
+  bevestigBtn.dataset.bound = "1";
+}
 
   renderSchooljaar();
 }
@@ -493,44 +661,64 @@ function setupInstellingen() {
 
   if (schoolNameInput) {
     schoolNameInput.value = state.schoolName;
-    schoolNameInput.addEventListener("input", () => {
-      state.schoolName = schoolNameInput.value.trim();
-    });
+    if (!schoolNameInput.dataset.bound) {
+      schoolNameInput.addEventListener("input", () => {
+        state.schoolName = schoolNameInput.value.trim();
+        markChanged();
+      });
+      schoolNameInput.dataset.bound = "1";
+    }
   }
 
   if (classNameInput) {
     classNameInput.value = state.className;
-    classNameInput.addEventListener("input", () => {
-      state.className = classNameInput.value.trim();
-      if (state.currentView === "registratie") renderRegistratie();
-    });
+    if (!classNameInput.dataset.bound) {
+      classNameInput.addEventListener("input", () => {
+        state.className = classNameInput.value.trim();
+        if (state.currentView === "registratie") renderRegistratie();
+        markChanged();
+      });
+      classNameInput.dataset.bound = "1";
+    }
   }
 
   if (pdfTitleInput) {
     pdfTitleInput.value = state.pdfTitle;
-    pdfTitleInput.addEventListener("input", () => {
-      state.pdfTitle = pdfTitleInput.value.trim() || "Opvolging huistaken";
-      if (registratieTitelInput) registratieTitelInput.value = state.pdfTitle;
-    });
+    if (!pdfTitleInput.dataset.bound) {
+      pdfTitleInput.addEventListener("input", () => {
+        state.pdfTitle = pdfTitleInput.value.trim() || "Opvolging huistaken";
+        if (registratieTitelInput) registratieTitelInput.value = state.pdfTitle;
+        markChanged();
+      });
+      pdfTitleInput.dataset.bound = "1";
+    }
   }
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
-    registratieTitelInput.addEventListener("input", () => {
-      state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
-      if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
-    });
+    if (!registratieTitelInput.dataset.bound) {
+      registratieTitelInput.addEventListener("input", () => {
+        state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
+        if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
+        markChanged();
+      });
+      registratieTitelInput.dataset.bound = "1";
+    }
   }
 
   if (extraOpvolgingDrempelInput) {
     extraOpvolgingDrempelInput.value = state.extraOpvolgingDrempel;
-    extraOpvolgingDrempelInput.addEventListener("input", () => {
-      const waarde = parseInt(extraOpvolgingDrempelInput.value, 10);
-      state.extraOpvolgingDrempel = !isNaN(waarde) && waarde > 0 ? waarde : 4;
-    });
+    if (!extraOpvolgingDrempelInput.dataset.bound) {
+      extraOpvolgingDrempelInput.addEventListener("input", () => {
+        const waarde = parseInt(extraOpvolgingDrempelInput.value, 10);
+        state.extraOpvolgingDrempel = !isNaN(waarde) && waarde > 0 ? waarde : 4;
+        markChanged();
+      });
+      extraOpvolgingDrempelInput.dataset.bound = "1";
+    }
   }
 
-  if (schoolLogoInput) {
+  if (schoolLogoInput && !schoolLogoInput.dataset.bound) {
     schoolLogoInput.addEventListener("change", () => {
       const file = schoolLogoInput.files?.[0];
       if (!file) return;
@@ -539,9 +727,11 @@ function setupInstellingen() {
       reader.onload = () => {
         state.schoolLogoDataUrl = reader.result;
         renderLogoPreview();
+        markChanged();
       };
       reader.readAsDataURL(file);
     });
+    schoolLogoInput.dataset.bound = "1";
   }
 
   renderLogoPreview();
@@ -1612,5 +1802,25 @@ document.addEventListener("DOMContentLoaded", () => {
   setupKolomKnoppen();
   setupPdfKnoppen();
 
-  switchView("dashboard");
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    state.currentUserUid = user.uid;
+
+    try {
+      await loadFirestoreIntoState();
+    } catch (error) {
+      console.error("Fout bij laden uit Firestore:", error);
+      state.firebaseHydrating = false;
+      state.firebaseReady = true;
+    }
+
+    renderSchooljaar();
+    renderHeader();
+    renderDashboard();
+    renderKlaslijst();
+    renderRapportperiodes();
+    renderRegistratie();
+    switchView("dashboard");
+  });
 });
