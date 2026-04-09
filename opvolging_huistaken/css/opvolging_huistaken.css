@@ -741,3 +741,448 @@ textarea {
 #extraOpvolgingDrempelInput {
   max-width: 140px;
 }
+#leerlingModal .help-backdrop,
+#uitschrijfModal .help-backdrop {
+  background: rgba(32, 49, 77, 0.48);
+}
+
+#leerlingModal .help-dialog,
+#uitschrijfModal .help-dialog {
+  background: #ffffff;
+  opacity: 1;
+  box-shadow: 0 24px 60px rgba(32, 49, 77, 0.22);
+}
+.dashboard-stack {
+  display: grid;
+  gap: 20px;
+}
+
+.dashboard-hero {
+  display: grid;
+  grid-template-columns: 1.6fr 0.8fr;
+  gap: 18px;
+  align-items: stretch;
+}
+
+.dashboard-hero-left,
+.dashboard-hero-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.dashboard-hero-text {
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 760px;
+}
+
+.dashboard-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.dashboard-highlight-box {
+  height: 100%;
+  border: 1px solid #d8e3f4;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #f7faff, #eef4ff);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px;
+}
+
+.dashboard-highlight-label {
+  font-size: 14px;
+  color: #6f80a0;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.dashboard-highlight-value {
+  font-size: 30px;
+  font-weight: 800;
+  color: #243b6b;
+}
+
+.dashboard-stats-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.stat-card {
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.stat-label {
+  color: #70819f;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.stat-value {
+  font-size: 38px;
+  line-height: 1;
+  font-weight: 800;
+  color: #243b6b;
+  margin-bottom: 10px;
+}
+
+.stat-note {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.dashboard-bottom-grid {
+  align-items: start;
+}
+
+.dashboard-panel {
+  min-height: 100%;
+}
+
+.dashboard-steps,
+.dashboard-rules {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-step,
+.dashboard-rule {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 14px 16px;
+  background: #f8fbff;
+  border: 1px solid #dbe6f3;
+  border-radius: 16px;
+}
+
+.dashboard-rule {
+  grid-template-columns: 1fr;
+}
+
+.dashboard-step p,
+.dashboard-rule p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.dashboard-step-number {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #dfeaff;
+  color: #365491;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-hero,
+  .dashboard-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.dashboard-hero-simple {
+  grid-template-columns: 1.4fr 0.7fr;
+}
+
+.dashboard-bottom-grid {
+  align-items: start;
+}
+
+.dashboard-panel {
+  min-height: 100%;
+}
+
+.dashboard-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.dashboard-highlight-box {
+  min-height: 180px;
+}
+
+.dashboard-step,
+.dashboard-rule {
+  background: #fbfcff;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-hero-simple {
+    grid-template-columns: 1fr;
+  }
+}
+.menu-btn-dashboard {
+  background: #eef4ff;
+  border-color: #d8e6ff;
+}
+
+.menu-btn-instellingen {
+  background: #fff6e8;
+  border-color: #f4dfb8;
+}
+
+.menu-btn-klaslijst {
+  background: #eefaf1;
+  border-color: #d6ebda;
+}
+
+.menu-btn-rapportperiodes {
+  background: #fff4f7;
+  border-color: #efd7df;
+}
+
+.menu-btn-registratie {
+  background: #f5f2ff;
+  border-color: #ddd6f6;
+}
+
+.menu-btn-dashboard:hover,
+.menu-btn-dashboard.is-active {
+  background: #dfeafe;
+  border-color: #c9dbff;
+}
+
+.menu-btn-instellingen:hover,
+.menu-btn-instellingen.is-active {
+  background: #fdeecf;
+  border-color: #edd8a9;
+}
+
+.menu-btn-klaslijst:hover,
+.menu-btn-klaslijst.is-active {
+  background: #dff3e4;
+  border-color: #cce4d2;
+}
+
+.menu-btn-rapportperiodes:hover,
+.menu-btn-rapportperiodes.is-active {
+  background: #fde7ee;
+  border-color: #ebcfd9;
+}
+
+.menu-btn-registratie:hover,
+.menu-btn-registratie.is-active {
+  background: #ebe6ff;
+  border-color: #d8cff5;
+}
+/* DASHBOARD RUSTIGER MAKEN */
+.dashboard-single-block {
+  max-width: 920px;
+}
+
+.dashboard-panel-narrow {
+  max-width: 920px;
+}
+
+.dashboard-hero-simple {
+  grid-template-columns: 1.5fr 0.65fr;
+}
+
+.dashboard-highlight-box {
+  min-height: 140px;
+  padding: 20px;
+}
+
+.dashboard-highlight-value {
+  font-size: 24px;
+}
+
+.dashboard-step {
+  padding: 12px 14px;
+}
+
+.dashboard-step p {
+  margin-top: 4px;
+}
+
+/* ZACHTE PASTELKLEUREN LINKS */
+.menu-btn-dashboard {
+  background: #edf4ff !important;
+  border-color: #d9e6fb !important;
+}
+
+.menu-btn-instellingen {
+  background: #fff5e8 !important;
+  border-color: #f1dfbf !important;
+}
+
+.menu-btn-klaslijst {
+  background: #eef9f0 !important;
+  border-color: #d9eadc !important;
+}
+
+.menu-btn-rapportperiodes {
+  background: #fff1f5 !important;
+  border-color: #edd7df !important;
+}
+
+.menu-btn-registratie {
+  background: #f4f1ff !important;
+  border-color: #ddd7f3 !important;
+}
+
+.menu-btn-dashboard:hover,
+.menu-btn-dashboard.is-active {
+  background: #ddeafe !important;
+  border-color: #c9daf9 !important;
+}
+
+.menu-btn-instellingen:hover,
+.menu-btn-instellingen.is-active {
+  background: #fceccf !important;
+  border-color: #ecd8ab !important;
+}
+
+.menu-btn-klaslijst:hover,
+.menu-btn-klaslijst.is-active {
+  background: #def1e2 !important;
+  border-color: #cfe3d3 !important;
+}
+
+.menu-btn-rapportperiodes:hover,
+.menu-btn-rapportperiodes.is-active {
+  background: #fbe4eb !important;
+  border-color: #e7ced8 !important;
+}
+
+.menu-btn-registratie:hover,
+.menu-btn-registratie.is-active {
+  background: #eae4ff !important;
+  border-color: #d6cdf1 !important;
+}
+/* LINKSBOVEN: KEUZEMENU + SCHOOLJAAR */
+.top-left-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+/* KEUZEMENU KNOP */
+.keuzemenu-btn {
+  background: #1A3A5C;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.keuzemenu-btn:hover {
+  background: #2c5d8a;
+}
+
+/* SCHOOLJAAR BLOK */
+.schooljaar-box {
+  background: #eef4ff;
+  border: 1px solid #d8e6ff;
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.schooljaar-label {
+  display: block;
+  font-size: 12px;
+  color: #6f80a0;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+#schooljaarDisplay {
+  font-size: 16px;
+  font-weight: 700;
+  color: #243b6b;
+}
+/* UITLEGBLOKKEN IN HET SCHERM */
+.uitleg-open-row {
+  margin-bottom: 10px;
+}
+
+.uitleg-panel {
+  margin-bottom: 18px;
+  border: 1px solid #d8e2f0;
+  border-radius: 18px;
+  background: #f8fbff;
+  overflow: hidden;
+}
+
+.uitleg-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #edf4ff;
+  border-bottom: 1px solid #d8e2f0;
+}
+
+.uitleg-panel-body {
+  padding: 16px;
+  color: #4d617f;
+  line-height: 1.7;
+}
+
+.uitleg-toggle-btn,
+.uitleg-open-btn {
+  padding: 9px 12px;
+  font-size: 14px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* REGISTRATIE LEEGTOESTAND */
+.registratie-empty {
+  padding: 26px;
+  text-align: center;
+  color: #64748b;
+  background: #ffffff;
+}
+
+.registratie-empty-cell {
+  padding: 0 !important;
+}
+/* SCHOOLJAAR */
+.schooljaar-select {
+  width: 100%;
+  margin-top: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #c7d3e4;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 15px;
+  background: #ffffff;
+  color: #20314d;
+}
+
+.schooljaar-btn {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.schooljaar-info {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #5f7394;
+}
