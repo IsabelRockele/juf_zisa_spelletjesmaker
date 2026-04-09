@@ -446,10 +446,10 @@ textarea {
 .registration-toolbar {
   display: flex;
   justify-content: space-between;
-  gap: 20px;
+  gap: 14px;
   flex-wrap: wrap;
-  margin-bottom: 18px;
-  padding: 16px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
   background: #f8fbff;
   border: 1px solid #dbe6f3;
   border-radius: 18px;
@@ -464,9 +464,28 @@ textarea {
 .toolbar-left,
 .toolbar-right {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: end;
   flex-wrap: wrap;
+}
+
+.toolbar-field-group {
+  min-width: 160px;
+}
+
+#view-registratie .primary-btn,
+#view-registratie .soft-btn {
+  padding: 10px 14px;
+}
+
+#view-registratie .toolbar-field-group label {
+  margin-bottom: 6px;
+}
+
+#view-registratie input[type="text"],
+#view-registratie input[type="date"],
+#view-registratie select {
+  padding: 10px 12px;
 }
 
 .toolbar-field-group {
@@ -1340,4 +1359,18 @@ textarea {
   .instellingen-opvolging-grid {
     grid-template-columns: 1fr;
   }
+}
+
+#pdfKlasBtn,
+#pdfAlleLeerlingenBtn {
+  background: #fff7fa;
+  border-color: #f0d7df;
+  color: #c93b61;
+  font-weight: 700;
+}
+
+#pdfKlasBtn:hover,
+#pdfAlleLeerlingenBtn:hover {
+  background: #fdeef3;
+  border-color: #e8c4d0;
 }
