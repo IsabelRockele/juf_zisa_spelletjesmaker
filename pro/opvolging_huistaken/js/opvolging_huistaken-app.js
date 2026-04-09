@@ -1068,7 +1068,7 @@ function setupRapportperiodes() {
   addBtn?.addEventListener("click", () => {
     const naam = naamInput?.value.trim();
     const start = startInput?.value || "";
-    const einde = eindeInput?.value || "";
+    const end = eindeInput?.value || "";
 
     if (!naam) {
       alert("Geef eerst een naam voor de rapportperiode.");
