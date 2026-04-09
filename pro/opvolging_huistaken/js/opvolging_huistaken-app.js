@@ -834,6 +834,18 @@ De Smet Noor`
     markChanged();
   });
 
+  document.getElementById("clearKlaslijstBtn")?.addEventListener("click", () => {
+  const bevestiging = confirm("Ben je zeker dat je de volledige klaslijst wil leegmaken?");
+  if (!bevestiging) return;
+
+  state.leerlingen = [];
+
+  renderKlaslijst();
+  renderRegistratie();
+  renderDashboard();
+  markChanged();
+});
+
   renderKlaslijst();
 }
 
