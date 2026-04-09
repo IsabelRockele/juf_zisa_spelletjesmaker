@@ -109,6 +109,19 @@ function getActivePeriod() {
   );
 }
 
+function getColumnsForActivePeriod() {
+  const periode = getActivePeriod();
+  if (!periode) return [];
+  if (!Array.isArray(periode.columns)) periode.columns = [];
+  return periode.columns;
+}
+
+function setColumnsForActivePeriod(columns) {
+  const periode = getActivePeriod();
+  if (!periode) return;
+  periode.columns = columns;
+}
+
 function getVandaagIso() {
   const vandaag = new Date();
   const jaar = vandaag.getFullYear();
@@ -178,7 +191,7 @@ function buildCurrentSchoolYearPayload() {
     reportPeriods: JSON.parse(JSON.stringify(state.reportPeriods)),
     activePeriodId: state.activePeriodId || null,
     leerlingen: JSON.parse(JSON.stringify(state.leerlingen)),
-    columns: [...state.columns],
+    columns: [],
     entries: JSON.parse(JSON.stringify(state.entries))
   };
 }
@@ -300,7 +313,7 @@ function saveCurrentSchoolYearData() {
     reportPeriods: JSON.parse(JSON.stringify(state.reportPeriods)),
     activePeriodId: state.activePeriodId,
     leerlingen: JSON.parse(JSON.stringify(state.leerlingen)),
-    columns: [...state.columns],
+    columns: [],
     entries: JSON.parse(JSON.stringify(state.entries))
   };
 }
@@ -317,7 +330,7 @@ function loadSchoolYearData(schoolYear) {
   state.reportPeriods = JSON.parse(JSON.stringify(data.reportPeriods));
   state.activePeriodId = data.activePeriodId || state.reportPeriods[0]?.id || null;
   state.leerlingen = JSON.parse(JSON.stringify(data.leerlingen));
-  state.columns = [...data.columns];
+  state.columns = [];
   state.entries = JSON.parse(JSON.stringify(data.entries));
 
   renderSchooljaar();
@@ -1175,6 +1188,11 @@ function addKolom(value) {
     return;
   }
 
+  if (!state.activePeriodId) {
+    alert("Kies eerst een rapportperiode.");
+    return;
+  }
+
   const columns = getColumnsForActivePeriod();
 
   if (!columns.includes(value)) {
@@ -1248,11 +1266,13 @@ function renderRegistratieLeeg(thead, tbody, boodschap) {
 }
 
 function renderRegistratie() {
-    const activeColumns = getColumnsForActivePeriod();
-      if ((!activeColumns || activeColumns.length === 0) && Array.isArray(state.columns) && state.columns.length > 0) {
+  const activeColumns = getColumnsForActivePeriod();
+
+  if ((!activeColumns || activeColumns.length === 0) && Array.isArray(state.columns) && state.columns.length > 0) {
     setColumnsForActivePeriod([...state.columns]);
     state.columns = [];
   }
+
   const thead = document.getElementById("registratieThead");
   const tbody = document.getElementById("registratieTbody");
   const periodeSelect = document.getElementById("registratiePeriodeSelect");
@@ -1261,25 +1281,24 @@ function renderRegistratie() {
   if (!thead || !tbody) return;
 
   if (!state.reportPeriods.length) {
-  if (periodeSelect) periodeSelect.innerHTML = "";
-  renderRegistratieLeeg(thead, tbody, "Maak eerst minstens één rapportperiode aan.");
-  return;
-}
+    if (periodeSelect) periodeSelect.innerHTML = "";
+    renderRegistratieLeeg(thead, tbody, "Maak eerst minstens één rapportperiode aan.");
+    return;
+  }
 
-if (!state.leerlingen.length) {
-  renderRegistratieLeeg(thead, tbody, "Voeg eerst minstens één leerling toe in de klaslijst.");
-  return;
-}
-
+  if (!state.leerlingen.length) {
+    renderRegistratieLeeg(thead, tbody, "Voeg eerst minstens één leerling toe in de klaslijst.");
+    return;
+  }
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
     registratieTitelInput.oninput = () => {
-  state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
-  const pdfTitleInput = document.getElementById("pdfTitleInput");
-  if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
-  markChanged();
-};
+      state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
+      const pdfTitleInput = document.getElementById("pdfTitleInput");
+      if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
+      markChanged();
+    };
   }
 
   if (periodeSelect) {
@@ -1293,14 +1312,14 @@ if (!state.leerlingen.length) {
       )
       .join("");
 
-   periodeSelect.onchange = () => {
-  state.activePeriodId = periodeSelect.value;
-  renderRegistratie();
-  markChanged();
-};
+    periodeSelect.onchange = () => {
+      state.activePeriodId = periodeSelect.value;
+      renderRegistratie();
+      markChanged();
+    };
   }
 
-    thead.innerHTML = `
+  thead.innerHTML = `
     <tr>
       <th>Leerling</th>
       ${
@@ -1321,7 +1340,7 @@ if (!state.leerlingen.length) {
 
   sorteerLeerlingen();
 
-   tbody.innerHTML = state.leerlingen
+  tbody.innerHTML = state.leerlingen
     .map((leerling) => `
       <tr>
         <td>
@@ -1380,36 +1399,36 @@ if (!state.leerlingen.length) {
       </tr>
     `).join("");
 
- tbody.querySelectorAll(".status-select").forEach((select) => {
-  select.addEventListener("change", () => {
-    const studentId = select.dataset.studentId;
-    const kolom = select.dataset.kolom;
-    const bestaand = getCellData(studentId, kolom);
+  tbody.querySelectorAll(".status-select").forEach((select) => {
+    select.addEventListener("change", () => {
+      const studentId = select.dataset.studentId;
+      const kolom = select.dataset.kolom;
+      const bestaand = getCellData(studentId, kolom);
 
-    setCellData(studentId, kolom, {
-      ...bestaand,
-      status: select.value
+      setCellData(studentId, kolom, {
+        ...bestaand,
+        status: select.value
+      });
+
+      select.className = `status-select status-${slugStatus(select.value)}`;
+      markChanged();
     });
-
-    select.className = `status-select status-${slugStatus(select.value)}`;
-    markChanged();
   });
-});
 
- tbody.querySelectorAll("textarea").forEach((textarea) => {
-  textarea.addEventListener("input", () => {
-    const studentId = textarea.dataset.studentId;
-    const kolom = textarea.dataset.kolom;
-    const bestaand = getCellData(studentId, kolom);
+  tbody.querySelectorAll("textarea").forEach((textarea) => {
+    textarea.addEventListener("input", () => {
+      const studentId = textarea.dataset.studentId;
+      const kolom = textarea.dataset.kolom;
+      const bestaand = getCellData(studentId, kolom);
 
-    setCellData(studentId, kolom, {
-      ...bestaand,
-      comment: textarea.value
+      setCellData(studentId, kolom, {
+        ...bestaand,
+        comment: textarea.value
+      });
+
+      markChanged();
     });
-
-    markChanged();
   });
-});
 
   tbody.querySelectorAll(".leerling-pdf-btn").forEach((button) => {
     button.addEventListener("click", () => {
