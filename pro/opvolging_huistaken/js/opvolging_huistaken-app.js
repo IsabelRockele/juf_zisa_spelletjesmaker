@@ -896,9 +896,10 @@ function setupLeerlingModal() {
     if (modal) modal.hidden = true;
     state.editingLeerlingId = null;
 
-        renderKlaslijst();
+    renderKlaslijst();
     renderRegistratie();
     renderDashboard();
+    markChanged();
   });
 }
 
