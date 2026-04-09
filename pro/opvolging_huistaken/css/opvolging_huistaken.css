@@ -1388,15 +1388,17 @@ textarea {
 /* REGISTRATIE – COMPACTERE BOVENBALK */
 .registratie-topbar {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 10px;
 }
 
 .registratie-uitleg-row {
   margin-bottom: 0;
+  display: flex;
+  align-items: center;
 }
 
 .registratie-top-actions {
@@ -1404,6 +1406,7 @@ textarea {
   gap: 10px;
   align-items: center;
   flex-wrap: wrap;
+  margin-left: 0;
 }
 
 .registration-toolbar {
