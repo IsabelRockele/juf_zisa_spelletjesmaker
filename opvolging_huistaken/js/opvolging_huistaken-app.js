@@ -1,24 +1,23 @@
 const helpTexts = {
   algemeen: `
     <p>Welkom in de testversie van de module voor huistaken.</p>
-    <p>Je werkt hier alleen met datums. Elke kolom is een registratiemoment waarop huistaken gecontroleerd of afgegeven worden.</p>
+    <p>We bouwen nu eerst de klaslijst correct op met startdatum en einddatum per leerling.</p>
   `,
   instellingen: `
     <p>Hier vul je schoolnaam, klasnaam, titel en schoollogo in.</p>
     <p>Het schoollogo komt onderaan in de PDF, gecentreerd in de voettekst.</p>
   `,
   klaslijst: `
-    <p>Hier geef je je klaslijst in.</p>
-    <p>Je kan leerlingen één per één toevoegen of een volledige lijst plakken.</p>
-    <p>Met het pennetje pas je een naam aan. Met het rode kruisje verwijder je een leerling.</p>
+    <p>Nieuwe leerlingen krijgen een startdatum.</p>
+    <p>Leerlingen die weggaan, schrijf je uit met een einddatum.</p>
+    <p>Zo blijven vroegere registraties en PDF’s correct.</p>
   `,
   rapportperiodes: `
     <p>Hier maak je je rapportperiodes aan met naam, startdatum en einddatum.</p>
-    <p>Bij bewerken krijg je alles samen in één popupvenster.</p>
   `,
   registratie: `
-    <p>Hier werk je alleen met datums.</p>
-    <p>Je voegt gewoon een registratiedag toe. Of dat nu één keer per week is of vier keer per week, maakt niet uit.</p>
+    <p>Hier werken we met registratiedata.</p>
+    <p>In een volgende stap zorgen we dat per datum alleen actieve leerlingen zichtbaar zijn.</p>
   `
 };
 
@@ -39,6 +38,10 @@ const STATUS_COLORS = {
 };
 
 const state = {
+  currentSchoolYear: bepaalSchooljaarTekst(),
+  schoolYears: [bepaalSchooljaarTekst()],
+  schoolYearData: {},
+
   currentView: "dashboard",
   previousView: "dashboard",
 
@@ -48,28 +51,22 @@ const state = {
   schoolLogoDataUrl: "",
   extraOpvolgingDrempel: 4,
 
-  reportPeriods: [
-    {
-      id: createId(),
-      name: "Rapportperiode 1",
-      start: "2025-09-01",
-      end: "2025-12-22"
-    }
-  ],
+ reportPeriods: [],
   activePeriodId: null,
 
-  leerlingen: [
-    { id: createId(), name: "De Smet Natalie" },
-    { id: createId(), name: "Janssens Emma" }
-  ],
+leerlingen: [],
 
-  columns: ["2025-10-10", "2025-10-17", "2025-10-24"],
+  columns: [],
 
   entries: {},
-  editingPeriodId: null
+  editingPeriodId: null,
+  editingLeerlingId: null,
+  uitschrijfLeerlingId: null
 };
 
-state.activePeriodId = state.reportPeriods[0].id;
+state.activePeriodId = state.reportPeriods[0]?.id || null;
+state.schoolYearData[state.currentSchoolYear] = createEmptySchoolYearData();
+loadSchoolYearData(state.currentSchoolYear);
 
 // ----------------------
 // Helpers
@@ -95,6 +92,128 @@ function getActivePeriod() {
     state.reportPeriods[0] ||
     null
   );
+}
+
+function getVandaagIso() {
+  const vandaag = new Date();
+  const jaar = vandaag.getFullYear();
+  const maand = String(vandaag.getMonth() + 1).padStart(2, "0");
+  const dag = String(vandaag.getDate()).padStart(2, "0");
+  return `${jaar}-${maand}-${dag}`;
+}
+
+function bepaalSchooljaarTekst() {
+  const vandaag = new Date();
+  const jaar = vandaag.getMonth() >= 8 ? vandaag.getFullYear() : vandaag.getFullYear() - 1;
+  return `${jaar}-${jaar + 1}`;
+}
+
+function countActieveLeerlingenOpDatum(datum) {
+  return state.leerlingen.filter((leerling) => leerlingIsActiefOpDatum(leerling, datum)).length;
+}
+
+function createEmptySchoolYearData() {
+  return {
+    schoolName: "",
+    className: "",
+    pdfTitle: "Opvolging huistaken",
+    schoolLogoDataUrl: "",
+    extraOpvolgingDrempel: 4,
+    reportPeriods: [],
+    activePeriodId: null,
+    leerlingen: [],
+    columns: [],
+    entries: {}
+  };
+}
+
+function cloneSchoolYearData(data) {
+  return {
+    schoolName: data.schoolName || "",
+    className: data.className || "",
+    pdfTitle: data.pdfTitle || "Opvolging huistaken",
+    schoolLogoDataUrl: data.schoolLogoDataUrl || "",
+    extraOpvolgingDrempel: data.extraOpvolgingDrempel || 4,
+    reportPeriods: JSON.parse(JSON.stringify(data.reportPeriods || [])),
+    activePeriodId: data.activePeriodId || null,
+    leerlingen: JSON.parse(JSON.stringify(data.leerlingen || [])),
+    columns: [...(data.columns || [])],
+    entries: JSON.parse(JSON.stringify(data.entries || {}))
+  };
+}
+
+function saveCurrentSchoolYearData() {
+  state.schoolYearData[state.currentSchoolYear] = {
+    schoolName: state.schoolName,
+    className: state.className,
+    pdfTitle: state.pdfTitle,
+    schoolLogoDataUrl: state.schoolLogoDataUrl,
+    extraOpvolgingDrempel: state.extraOpvolgingDrempel,
+    reportPeriods: JSON.parse(JSON.stringify(state.reportPeriods)),
+    activePeriodId: state.activePeriodId,
+    leerlingen: JSON.parse(JSON.stringify(state.leerlingen)),
+    columns: [...state.columns],
+    entries: JSON.parse(JSON.stringify(state.entries))
+  };
+}
+
+function loadSchoolYearData(schoolYear) {
+  const data = state.schoolYearData[schoolYear] || createEmptySchoolYearData();
+
+  state.currentSchoolYear = schoolYear;
+  state.schoolName = data.schoolName;
+  state.className = data.className;
+  state.pdfTitle = data.pdfTitle;
+  state.schoolLogoDataUrl = data.schoolLogoDataUrl;
+  state.extraOpvolgingDrempel = data.extraOpvolgingDrempel;
+  state.reportPeriods = JSON.parse(JSON.stringify(data.reportPeriods));
+  state.activePeriodId = data.activePeriodId || state.reportPeriods[0]?.id || null;
+  state.leerlingen = JSON.parse(JSON.stringify(data.leerlingen));
+  state.columns = [...data.columns];
+  state.entries = JSON.parse(JSON.stringify(data.entries));
+
+  renderSchooljaar();
+  setupInstellingen();
+  renderKlaslijst();
+  renderRapportperiodes();
+  renderRegistratie();
+  renderDashboard();
+}
+
+function renderSchooljaar() {
+  const select = document.getElementById("schooljaarSelect");
+  const dashboardSchooljaar = document.getElementById("dashboardSchooljaar");
+
+  if (select) {
+    select.innerHTML = state.schoolYears
+      .map((jaar) => `<option value="${jaar}" ${jaar === state.currentSchoolYear ? "selected" : ""}>${jaar.replace("-", "–")}</option>`)
+      .join("");
+  }
+
+  if (dashboardSchooljaar) {
+    dashboardSchooljaar.textContent = state.currentSchoolYear.replace("-", "–");
+  }
+}
+
+function getVolgendSchooljaar(huidig) {
+  const [startJaar] = huidig.split("-").map(Number);
+  return `${startJaar + 1}-${startJaar + 2}`;
+}
+
+function renderDashboard() {
+  const schooljaarEl = document.getElementById("dashboardSchooljaar");
+  const actieveEl = document.getElementById("dashboardActieveLeerlingen");
+  const totaalEl = document.getElementById("dashboardTotaalLeerlingen");
+  const periodesEl = document.getElementById("dashboardRapportperiodes");
+  const dagenEl = document.getElementById("dashboardRegistratiedagen");
+
+  const vandaag = getVandaagIso();
+
+  if (schooljaarEl) schooljaarEl.textContent = bepaalSchooljaarTekst();
+  if (actieveEl) actieveEl.textContent = String(countActieveLeerlingenOpDatum(vandaag));
+  if (totaalEl) totaalEl.textContent = String(state.leerlingen.length);
+  if (periodesEl) periodesEl.textContent = String(state.reportPeriods.length);
+  if (dagenEl) dagenEl.textContent = String(state.columns.length);
 }
 
 function getCellKey(studentId, columnValue) {
@@ -153,15 +272,20 @@ function renderHeader() {
   };
 
   const subtitles = {
-    dashboard: "Basisstructuur om verder op te bouwen.",
-    instellingen: "Hier stel je schoolnaam, klasnaam, titel en logo in.",
-    klaslijst: "Hier beheer je je klaslijst.",
-    rapportperiodes: "Hier maak je je rapportperiodes aan.",
-    registratie: "Hier werk je met datums als registratiemomenten."
-  };
+  dashboard: "Start hier en werk stap voor stap.",
+  instellingen: "Vul hier de gegevens in die later bewaard blijven.",
+  klaslijst: "Beheer hier je leerlingen met startdatum en einddatum.",
+  rapportperiodes: "Stel hier zelf je rapportperiodes in.",
+  registratie: "Registreer hier per leerling de huistaken."
+};
 
-  if (pageTitle) pageTitle.textContent = titles[state.currentView] || "Dashboard";
-  if (pageSubtitle) pageSubtitle.textContent = subtitles[state.currentView] || "";
+ if (pageTitle) pageTitle.textContent = titles[state.currentView] || "Dashboard";
+if (pageSubtitle) pageSubtitle.textContent = subtitles[state.currentView] || "";
+
+const backBtn = document.getElementById("backBtn");
+if (backBtn) {
+  backBtn.style.display = state.currentView === "dashboard" ? "none" : "inline-flex";
+}
 }
 
 function switchView(targetView) {
@@ -180,6 +304,7 @@ function switchView(targetView) {
 
   renderHeader();
 
+  if (targetView === "dashboard") renderDashboard();
   if (targetView === "klaslijst") renderKlaslijst();
   if (targetView === "rapportperiodes") renderRapportperiodes();
   if (targetView === "registratie") renderRegistratie();
@@ -192,9 +317,101 @@ function setupMenu() {
     });
   });
 
-  document.getElementById("backBtn")?.addEventListener("click", () => {
+    document.getElementById("backBtn")?.addEventListener("click", () => {
     switchView(state.previousView || "dashboard");
   });
+
+    document.getElementById("dashboardStartInstellingenBtn")?.addEventListener("click", () => {
+    switchView("instellingen");
+  });
+}
+
+function setupSchooljaar() {
+  const schooljaarSelect = document.getElementById("schooljaarSelect");
+  const nieuwSchooljaarBtn = document.getElementById("nieuwSchooljaarBtn");
+  const modal = document.getElementById("schooljaarModal");
+  const nieuwSchooljaarInput = document.getElementById("nieuwSchooljaarInput");
+  const bevestigBtn = document.getElementById("bevestigNieuwSchooljaarBtn");
+  const kopieerKlaslijstSelect = document.getElementById("kopieerKlaslijstSelect");
+  const kopieerPeriodesSelect = document.getElementById("kopieerPeriodesSelect");
+
+  if (schooljaarSelect) {
+    schooljaarSelect.addEventListener("change", () => {
+      saveCurrentSchoolYearData();
+      loadSchoolYearData(schooljaarSelect.value);
+    });
+  }
+
+  nieuwSchooljaarBtn?.addEventListener("click", () => {
+    const voorstel = getVolgendSchooljaar(state.currentSchoolYear);
+    if (nieuwSchooljaarInput) nieuwSchooljaarInput.value = voorstel;
+    if (kopieerKlaslijstSelect) kopieerKlaslijstSelect.value = "nee";
+    if (kopieerPeriodesSelect) kopieerPeriodesSelect.value = "ja";
+    if (modal) modal.hidden = false;
+  });
+
+  document.querySelectorAll("[data-close-schooljaar-modal]").forEach((button) => {
+    button.addEventListener("click", () => {
+      if (modal) modal.hidden = true;
+    });
+  });
+
+  bevestigBtn?.addEventListener("click", () => {
+    const nieuwJaar = (nieuwSchooljaarInput?.value || "").trim();
+
+    if (!/^\d{4}-\d{4}$/.test(nieuwJaar)) {
+      alert("Geef een schooljaar in in deze vorm: 2026-2027");
+      return;
+    }
+
+    if (state.schoolYears.includes(nieuwJaar)) {
+      alert("Dit schooljaar bestaat al.");
+      return;
+    }
+
+    saveCurrentSchoolYearData();
+
+    const huidigeData = state.schoolYearData[state.currentSchoolYear] || createEmptySchoolYearData();
+    const nieuweData = createEmptySchoolYearData();
+
+    nieuweData.schoolName = huidigeData.schoolName;
+    nieuweData.className = huidigeData.className;
+    nieuweData.pdfTitle = huidigeData.pdfTitle;
+    nieuweData.schoolLogoDataUrl = huidigeData.schoolLogoDataUrl;
+    nieuweData.extraOpvolgingDrempel = huidigeData.extraOpvolgingDrempel;
+
+    if (kopieerKlaslijstSelect?.value === "ja") {
+      nieuweData.leerlingen = JSON.parse(JSON.stringify(huidigeData.leerlingen || []));
+      nieuweData.leerlingen.forEach((leerling) => {
+        leerling.id = createId();
+        leerling.endDate = "";
+      });
+    }
+
+    if (kopieerPeriodesSelect?.value === "ja") {
+      nieuweData.reportPeriods = JSON.parse(JSON.stringify(huidigeData.reportPeriods || []));
+      nieuweData.reportPeriods.forEach((periode) => {
+        periode.id = createId();
+      });
+      nieuweData.activePeriodId = nieuweData.reportPeriods[0]?.id || null;
+    }
+
+    state.schoolYears.push(nieuwJaar);
+    state.schoolYears.sort();
+
+    if (state.schoolYears.length > 2) {
+      const oudste = state.schoolYears[0];
+      delete state.schoolYearData[oudste];
+      state.schoolYears = state.schoolYears.slice(-2);
+    }
+
+    state.schoolYearData[nieuwJaar] = nieuweData;
+    loadSchoolYearData(nieuwJaar);
+
+    if (modal) modal.hidden = true;
+  });
+
+  renderSchooljaar();
 }
 
 // ----------------------
@@ -241,6 +458,29 @@ function renderLogoPreview() {
     img.classList.remove("has-logo");
     placeholder.style.display = "block";
   }
+}
+
+function setupUitlegPanelen() {
+  document.querySelectorAll("[data-toggle-uitleg]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.toggleUitleg;
+      const panel = document.getElementById(id);
+      const openBtn = document.querySelector(`[data-open-uitleg="${id}"]`);
+
+      if (panel) panel.classList.add("hidden");
+      if (openBtn) openBtn.classList.remove("hidden");
+    });
+  });
+
+  document.querySelectorAll("[data-open-uitleg]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const id = button.dataset.openUitleg;
+      const panel = document.getElementById(id);
+
+      if (panel) panel.classList.remove("hidden");
+      button.classList.add("hidden");
+    });
+  });
 }
 
 function setupInstellingen() {
@@ -311,6 +551,13 @@ function setupInstellingen() {
 // Klaslijst
 // ----------------------
 
+function leerlingStatusTekst(leerling) {
+  if (leerling.endDate) {
+    return `Actief vanaf ${formatDate(leerling.startDate)} · Uitgeschreven vanaf ${formatDate(leerling.endDate)}`;
+  }
+  return `Actief vanaf ${formatDate(leerling.startDate)}`;
+}
+
 function renderKlaslijst() {
   const lijst = document.getElementById("klaslijst");
   if (!lijst) return;
@@ -323,74 +570,44 @@ function renderKlaslijst() {
   }
 
   lijst.innerHTML = state.leerlingen
-    .map(
-      (leerling) => `
-      <li class="leerling-item">
-        <span class="leerling-naam">${escapeHtml(leerling.name)}</span>
-        <div class="leerling-acties">
-          <button type="button" class="actie-btn actie-bewerk" data-student-id="${leerling.id}" title="Naam aanpassen">✏️</button>
-          <button type="button" class="actie-btn actie-verwijder" data-student-id="${leerling.id}" title="Verwijderen">❌</button>
-        </div>
-      </li>
-    `
-    )
+    .map((leerling) => {
+      const naam = (leerling.name || "").trim();
+      const zichtbareNaam = naam !== "" ? naam : "(geen naam ingevuld)";
+
+      return `
+        <li class="leerling-item">
+          <div>
+            <div class="leerling-naam">${escapeHtml(zichtbareNaam)}</div>
+            <div class="pdf-note">${escapeHtml(leerlingStatusTekst(leerling))}</div>
+          </div>
+          <div class="leerling-acties">
+            <button type="button" class="actie-btn actie-bewerk" data-student-id="${leerling.id}" title="Aanpassen">✏️</button>
+            <button type="button" class="actie-btn actie-bewerk" data-uitschrijf-id="${leerling.id}" title="Uitschrijven">↩</button>
+          </div>
+        </li>
+      `;
+    })
     .join("");
 
-  lijst.querySelectorAll(".actie-bewerk").forEach((button) => {
+  lijst.querySelectorAll("[data-student-id]").forEach((button) => {
     button.addEventListener("click", () => {
-      const id = button.dataset.studentId;
-      const leerling = state.leerlingen.find((item) => item.id === id);
-      if (!leerling) return;
-
-      const nieuweNaam = prompt("Pas de naam aan:", leerling.name);
-      if (!nieuweNaam) return;
-
-      leerling.name = nieuweNaam.trim();
-      renderKlaslijst();
-      if (state.currentView === "registratie") renderRegistratie();
+      openLeerlingModal(button.dataset.studentId);
     });
   });
 
-  lijst.querySelectorAll(".actie-verwijder").forEach((button) => {
+  lijst.querySelectorAll("[data-uitschrijf-id]").forEach((button) => {
     button.addEventListener("click", () => {
-      const id = button.dataset.studentId;
-      state.leerlingen = state.leerlingen.filter((item) => item.id !== id);
-      renderKlaslijst();
-      if (state.currentView === "registratie") renderRegistratie();
+      openUitschrijfModal(button.dataset.uitschrijfId);
     });
   });
 }
 
 function setupKlaslijst() {
-  const input = document.getElementById("leerlingInput");
-  const addBtn = document.getElementById("addLeerlingBtn");
-  const plakBtn = document.getElementById("plakLijstBtn");
-
-  addBtn?.addEventListener("click", () => {
-    const naam = input?.value.trim();
-    if (!naam) {
-      alert("Typ eerst een naam in.");
-      return;
-    }
-
-    const bestaatAl = state.leerlingen.some((leerling) => leerling.name.toLowerCase() === naam.toLowerCase());
-    if (!bestaatAl) {
-      state.leerlingen.push({ id: createId(), name: naam });
-    }
-
-    if (input) input.value = "";
-    renderKlaslijst();
-    if (state.currentView === "registratie") renderRegistratie();
+  document.getElementById("openAddLeerlingBtn")?.addEventListener("click", () => {
+    openLeerlingModal(null);
   });
 
-  input?.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      addBtn?.click();
-    }
-  });
-
-  plakBtn?.addEventListener("click", () => {
+  document.getElementById("plakLijstBtn")?.addEventListener("click", () => {
     const tekst = prompt(
 `Plak hier je klaslijst.
 Zet elke leerling op een nieuwe regel.
@@ -411,15 +628,165 @@ De Smet Noor`
     namen.forEach((naam) => {
       const bestaatAl = state.leerlingen.some((leerling) => leerling.name.toLowerCase() === naam.toLowerCase());
       if (!bestaatAl) {
-        state.leerlingen.push({ id: createId(), name: naam });
+        state.leerlingen.push({
+          id: createId(),
+          name: naam,
+          startDate: getVandaagIso(),
+          endDate: ""
+        });
       }
     });
 
-    renderKlaslijst();
-    if (state.currentView === "registratie") renderRegistratie();
+       renderKlaslijst();
+    renderRegistratie();
+    renderDashboard();
   });
 
   renderKlaslijst();
+}
+
+// ----------------------
+// Leerling modals
+// ----------------------
+
+function setupLeerlingModal() {
+  const modal = document.getElementById("leerlingModal");
+  const closeButtons = document.querySelectorAll("[data-close-leerling-modal]");
+  const saveBtn = document.getElementById("saveLeerlingBtn");
+
+  closeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (modal) modal.hidden = true;
+      state.editingLeerlingId = null;
+    });
+  });
+
+  saveBtn?.addEventListener("click", () => {
+    const naamInput = document.getElementById("leerlingNaamInput");
+    const startInput = document.getElementById("leerlingStartdatumInput");
+    const eindInput = document.getElementById("leerlingEinddatumInput");
+
+    const naam = (naamInput?.value || "").trim();
+    const startDate = startInput?.value || "";
+    const endDate = eindInput?.value || "";
+
+    if (naam === "") {
+      alert("Geef eerst een naam in.");
+      naamInput?.focus();
+      return;
+    }
+
+    if (!startDate) {
+      alert("Geef een startdatum in.");
+      startInput?.focus();
+      return;
+    }
+
+    if (state.editingLeerlingId) {
+      const leerling = state.leerlingen.find((item) => item.id === state.editingLeerlingId);
+      if (!leerling) return;
+
+      leerling.name = naam;
+      leerling.startDate = startDate;
+      leerling.endDate = endDate;
+    } else {
+      state.leerlingen.push({
+        id: createId(),
+        name: naam,
+        startDate: startDate,
+        endDate: endDate
+      });
+    }
+
+    if (naamInput) naamInput.value = "";
+    if (startInput) startInput.value = "";
+    if (eindInput) eindInput.value = "";
+
+    if (modal) modal.hidden = true;
+    state.editingLeerlingId = null;
+
+        renderKlaslijst();
+    renderRegistratie();
+    renderDashboard();
+  });
+}
+
+function openLeerlingModal(studentId) {
+  const modal = document.getElementById("leerlingModal");
+  const title = document.getElementById("leerlingModalTitle");
+  const naamInput = document.getElementById("leerlingNaamInput");
+  const startInput = document.getElementById("leerlingStartdatumInput");
+  const eindInput = document.getElementById("leerlingEinddatumInput");
+
+  if (!modal) return;
+
+  if (studentId) {
+    const leerling = state.leerlingen.find((item) => item.id === studentId);
+    if (!leerling) return;
+
+    state.editingLeerlingId = studentId;
+    if (title) title.textContent = "Leerling aanpassen";
+    if (naamInput) naamInput.value = (leerling.name || "").trim();
+    if (startInput) startInput.value = leerling.startDate || "";
+    if (eindInput) eindInput.value = leerling.endDate || "";
+  } else {
+    state.editingLeerlingId = null;
+    if (title) title.textContent = "Leerling toevoegen";
+    if (naamInput) naamInput.value = "";
+    if (startInput) startInput.value = "";
+    if (eindInput) eindInput.value = "";
+  }
+
+  modal.hidden = false;
+}
+
+function setupUitschrijfModal() {
+  const modal = document.getElementById("uitschrijfModal");
+  const closeButtons = document.querySelectorAll("[data-close-uitschrijf-modal]");
+  const confirmBtn = document.getElementById("confirmUitschrijvenBtn");
+
+  closeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      if (modal) modal.hidden = true;
+      state.uitschrijfLeerlingId = null;
+    });
+  });
+
+  confirmBtn?.addEventListener("click", () => {
+    const einddatumInput = document.getElementById("uitschrijfEinddatumInput");
+    const leerling = state.leerlingen.find((item) => item.id === state.uitschrijfLeerlingId);
+    if (!leerling) return;
+
+    if (!einddatumInput?.value) {
+      alert("Geef een einddatum in.");
+      return;
+    }
+
+    leerling.endDate = einddatumInput.value;
+
+    if (modal) modal.hidden = true;
+    state.uitschrijfLeerlingId = null;
+
+     renderKlaslijst();
+    renderRegistratie();
+    renderDashboard();
+  });
+}
+
+function openUitschrijfModal(studentId) {
+  const modal = document.getElementById("uitschrijfModal");
+  const naamEl = document.getElementById("uitschrijfLeerlingNaam");
+  const einddatumInput = document.getElementById("uitschrijfEinddatumInput");
+
+  const leerling = state.leerlingen.find((item) => item.id === studentId);
+  if (!leerling || !modal) return;
+
+  state.uitschrijfLeerlingId = studentId;
+
+  if (naamEl) naamEl.textContent = leerling.name;
+  if (einddatumInput) einddatumInput.value = leerling.endDate || "";
+
+  modal.hidden = false;
 }
 
 // ----------------------
@@ -469,29 +836,27 @@ function renderRapportperiodes() {
       .join("");
   }
 
-  container.querySelectorAll(".actie-bewerk").forEach((button) => {
+  container.querySelectorAll("[data-period-id]").forEach((button) => {
     button.addEventListener("click", () => {
-      openPeriodeEditModal(button.dataset.periodId);
-    });
-  });
+      if (button.title === "Bewerken") {
+        openPeriodeEditModal(button.dataset.periodId);
+      } else {
+        const id = button.dataset.periodId;
 
-  container.querySelectorAll(".actie-verwijder").forEach((button) => {
-    button.addEventListener("click", () => {
-      const id = button.dataset.periodId;
+        if (state.reportPeriods.length === 1) {
+          alert("Je moet minstens één rapportperiode behouden.");
+          return;
+        }
 
-      if (state.reportPeriods.length === 1) {
-        alert("Je moet minstens één rapportperiode behouden.");
-        return;
+        state.reportPeriods = state.reportPeriods.filter((item) => item.id !== id);
+
+        if (state.activePeriodId === id) {
+          state.activePeriodId = state.reportPeriods[0]?.id || "";
+        }
+
+        renderRapportperiodes();
+        renderRegistratie();
       }
-
-      state.reportPeriods = state.reportPeriods.filter((item) => item.id !== id);
-
-      if (state.activePeriodId === id) {
-        state.activePeriodId = state.reportPeriods[0]?.id || "";
-      }
-
-      renderRapportperiodes();
-      if (state.currentView === "registratie") renderRegistratie();
     });
   });
 
@@ -532,8 +897,9 @@ function setupRapportperiodes() {
     if (startInput) startInput.value = "";
     if (eindeInput) eindeInput.value = "";
 
-    renderRapportperiodes();
+        renderRapportperiodes();
     renderRegistratie();
+    renderDashboard();
   });
 
   renderRapportperiodes();
@@ -566,8 +932,9 @@ function setupPeriodeEditModal() {
     if (modal) modal.hidden = true;
     state.editingPeriodId = null;
 
-    renderRapportperiodes();
-    renderRegistratie();
+            renderRapportperiodes();
+        renderRegistratie();
+        renderDashboard();
   });
 }
 
@@ -604,12 +971,14 @@ function addKolom(value) {
     state.columns.sort();
   }
 
-  renderRegistratie();
+   renderRegistratie();
+  renderDashboard();
 }
 
 function removeKolom(value) {
   state.columns = state.columns.filter((item) => item !== value);
   renderRegistratie();
+  renderDashboard();
 }
 
 function setupKolomKnoppen() {
@@ -622,30 +991,24 @@ function setupKolomKnoppen() {
 }
 
 // ----------------------
-// Registratie tabel
+// Registratie
 // ----------------------
 
-function maakNaamCel(leerling) {
-  return `
-    <div class="name-cell">
-      <div class="name-cell-main">
-        <div><strong>${escapeHtml(leerling.name)}</strong></div>
-        <div class="pdf-note">${escapeHtml(state.className || "Geen klasnaam ingevuld")}</div>
-      </div>
-      <div class="name-actions">
-        <button type="button" class="ghost-btn leerling-pdf-btn" data-student-id="${leerling.id}">PDF leerling</button>
-      </div>
-    </div>
-  `;
+function leerlingIsActiefOpDatum(leerling, datum) {
+  if (!leerling.startDate) return true;
+  if (datum < leerling.startDate) return false;
+  if (leerling.endDate && datum > leerling.endDate) return false;
+  return true;
 }
 
-function maakKolomHeader(kolom) {
-  return `
-    <div class="column-top">${formatDate(kolom)}</div>
-    <div class="column-sub">Registratiedag</div>
-    <div class="name-actions" style="margin-top:8px;">
-      <button type="button" class="ghost-btn kolom-verwijder-btn" data-kolom="${kolom}">Verwijderen</button>
-    </div>
+function renderRegistratieLeeg(thead, tbody, boodschap) {
+  thead.innerHTML = "";
+  tbody.innerHTML = `
+    <tr>
+      <td class="registratie-empty-cell">
+        <div class="registratie-empty">${boodschap}</div>
+      </td>
+    </tr>
   `;
 }
 
@@ -656,6 +1019,22 @@ function renderRegistratie() {
   const registratieTitelInput = document.getElementById("registratieTitelInput");
 
   if (!thead || !tbody) return;
+
+  if (!state.reportPeriods.length) {
+  if (periodeSelect) periodeSelect.innerHTML = "";
+  renderRegistratieLeeg(thead, tbody, "Maak eerst minstens één rapportperiode aan.");
+  return;
+}
+
+if (!state.leerlingen.length) {
+  renderRegistratieLeeg(thead, tbody, "Voeg eerst minstens één leerling toe in de klaslijst.");
+  return;
+}
+
+if (!state.columns.length) {
+  renderRegistratieLeeg(thead, tbody, "Voeg eerst een datum toe via de knop ‘+ Dag’.");
+  return;
+}
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
@@ -670,10 +1049,10 @@ function renderRegistratie() {
     periodeSelect.innerHTML = state.reportPeriods
       .map(
         (periode) => `
-        <option value="${periode.id}" ${periode.id === state.activePeriodId ? "selected" : ""}>
-          ${escapeHtml(periode.name)}
-        </option>
-      `
+          <option value="${periode.id}" ${periode.id === state.activePeriodId ? "selected" : ""}>
+            ${escapeHtml(periode.name)}
+          </option>
+        `
       )
       .join("");
 
@@ -686,51 +1065,74 @@ function renderRegistratie() {
   thead.innerHTML = `
     <tr>
       <th>Leerling</th>
-      ${state.columns.map((kolom) => `<th>${maakKolomHeader(kolom)}</th>`).join("")}
+      ${state.columns.map((kolom) => `
+        <th>
+          <div class="column-top">${formatDate(kolom)}</div>
+          <div class="column-sub">Registratiedag</div>
+          <div class="name-actions" style="margin-top:8px;">
+            <button type="button" class="ghost-btn kolom-verwijder-btn" data-kolom="${kolom}">Verwijderen</button>
+          </div>
+        </th>
+      `).join("")}
     </tr>
   `;
 
   sorteerLeerlingen();
 
   tbody.innerHTML = state.leerlingen
-    .map((leerling) => {
-      return `
-        <tr>
-          <td>${maakNaamCel(leerling)}</td>
-          ${state.columns
-            .map((kolom) => {
-              const cell = getCellData(leerling.id, kolom);
-              const statusClass = `status-${slugStatus(cell.status)}`;
+    .map((leerling) => `
+      <tr>
+        <td>
+          <div class="name-cell">
+            <div class="name-cell-main">
+              <div><strong>${escapeHtml(leerling.name)}</strong></div>
+              <div class="pdf-note">${escapeHtml(leerlingStatusTekst(leerling))}</div>
+            </div>
+            <div class="name-actions">
+              <button type="button" class="ghost-btn leerling-pdf-btn" data-student-id="${leerling.id}">PDF leerling</button>
+            </div>
+          </div>
+        </td>
+        ${state.columns.map((kolom) => {
+          const actief = leerlingIsActiefOpDatum(leerling, kolom);
 
-              return `
-                <td>
-                  <div class="cell-stack">
-                    <select
-                      class="status-select ${statusClass}"
-                      data-student-id="${leerling.id}"
-                      data-kolom="${kolom}"
-                    >
-                      ${STATUSSEN.map(
-                        (status) => `
-                        <option value="${status}" ${cell.status === status ? "selected" : ""}>${status}</option>
-                      `
-                      ).join("")}
-                    </select>
+          if (!actief) {
+            return `
+              <td>
+                <div class="cell-stack">
+                  <div class="notice-box" style="margin-top:0; padding:10px 12px;">Niet actief op deze datum</div>
+                </div>
+              </td>
+            `;
+          }
 
-                    <textarea
-                      data-student-id="${leerling.id}"
-                      data-kolom="${kolom}"
-                      placeholder="Opmerking..."
-                    >${escapeHtml(cell.comment || "")}</textarea>
-                  </div>
-                </td>
-              `;
-            })
-            .join("")}
-        </tr>
-      `;
-    })
-    .join("");
+          const cell = getCellData(leerling.id, kolom);
+          const statusClass = `status-${slugStatus(cell.status)}`;
+
+          return `
+            <td>
+              <div class="cell-stack">
+                <select
+                  class="status-select ${statusClass}"
+                  data-student-id="${leerling.id}"
+                  data-kolom="${kolom}"
+                >
+                  ${STATUSSEN.map(
+                    (status) => `<option value="${status}" ${cell.status === status ? "selected" : ""}>${status}</option>`
+                  ).join("")}
+                </select>
+
+                <textarea
+                  data-student-id="${leerling.id}"
+                  data-kolom="${kolom}"
+                  placeholder="Opmerking..."
+                >${escapeHtml(cell.comment || "")}</textarea>
+              </div>
+            </td>
+          `;
+        }).join("")}
+      </tr>
+    `).join("");
 
   tbody.querySelectorAll(".status-select").forEach((select) => {
     select.addEventListener("change", () => {
@@ -894,6 +1296,9 @@ function berekenStatusTellingenVoorLeerling(studentId) {
   const opmerkingenLijst = [];
 
   state.columns.forEach((kolom) => {
+    const leerling = state.leerlingen.find((l) => l.id === studentId);
+    if (!leerling || !leerlingIsActiefOpDatum(leerling, kolom)) return;
+
     const cell = getCellData(studentId, kolom);
     counts[cell.status] = (counts[cell.status] || 0) + 1;
 
@@ -928,6 +1333,8 @@ function berekenStatusTellingenVoorKlas() {
     };
 
     state.columns.forEach((kolom) => {
+      if (!leerlingIsActiefOpDatum(leerling, kolom)) return;
+
       const cell = getCellData(leerling.id, kolom);
       counts[cell.status] = (counts[cell.status] || 0) + 1;
 
@@ -1193,9 +1600,13 @@ function setupPdfKnoppen() {
 
 document.addEventListener("DOMContentLoaded", () => {
   setupMenu();
+  setupSchooljaar();
   setupHelpModal();
+  setupUitlegPanelen();
   setupInstellingen();
   setupKlaslijst();
+  setupLeerlingModal();
+  setupUitschrijfModal();
   setupRapportperiodes();
   setupPeriodeEditModal();
   setupKolomKnoppen();
