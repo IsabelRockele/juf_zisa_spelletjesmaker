@@ -386,6 +386,29 @@ function getCellData(studentId, columnValue) {
   return state.entries[key] || { status: "op tijd", comment: "" };
 }
 
+function leerlingHeeftExtraOpvolging(leerlingId) {
+  const periode = getActivePeriod();
+  if (!periode) return false;
+
+  const columns = getColumnsForActivePeriod();
+  let count = 0;
+
+  columns.forEach((datum) => {
+    const cell = getCellData(leerlingId, datum);
+    if (!cell) return;
+
+    if (
+      cell.status === "te laat" ||
+      cell.status === "niet in orde" ||
+      cell.status === "onvolledig"
+    ) {
+      count++;
+    }
+  });
+
+  return count >= (state.extraOpvolgingDrempel || 4);
+}
+
 function setCellData(studentId, columnValue, data) {
   const key = getCellKey(studentId, columnValue);
   state.entries[key] = data;
@@ -1327,7 +1350,7 @@ const dagInput = document.getElementById("dagKolomDatumInput");
 
   tbody.innerHTML = state.leerlingen
     .map((leerling) => `
-      <tr>
+      <tr class="${leerlingHeeftExtraOpvolging(leerling.id) ? 'extra-opvolging' : ''}">
         <td>
           <div class="name-cell">
             <div class="name-cell-main">
