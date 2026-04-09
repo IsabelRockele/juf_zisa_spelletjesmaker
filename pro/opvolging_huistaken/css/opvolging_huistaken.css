@@ -1186,3 +1186,19 @@ textarea {
   line-height: 1.5;
   color: #5f7394;
 }
+/* TESTFASE BANNER */
+.testfase-banner {
+  background: #fff4e5;
+  border-bottom: 1px solid #f0d5a8;
+  color: #7a5a1e;
+  padding: 10px 20px;
+  font-size: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.testfase-banner span:first-child {
+  font-weight: 700;
+}
