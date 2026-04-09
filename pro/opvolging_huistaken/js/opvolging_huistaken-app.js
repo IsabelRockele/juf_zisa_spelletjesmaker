@@ -962,6 +962,7 @@ function setupUitschrijfModal() {
      renderKlaslijst();
     renderRegistratie();
     renderDashboard();
+    markChanged();
   });
 }
 
@@ -1819,12 +1820,12 @@ document.addEventListener("DOMContentLoaded", () => {
       state.firebaseReady = true;
     }
 
-    renderSchooljaar();
+       renderSchooljaar();
     renderHeader();
     renderDashboard();
     renderKlaslijst();
     renderRapportperiodes();
     renderRegistratie();
-    switchView("dashboard");
+    switchView(state.currentView || "dashboard");
   });
 });
