@@ -1699,11 +1699,22 @@ function genereerAlleLeerlingenPdf() {
   if (!ensureJsPdf()) return;
 
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
   const periode = getActivePeriod();
   const titel = state.pdfTitle || "Opvolging huistaken";
+  const vandaag = getVandaagIso();
 
-  state.leerlingen.forEach((leerling, index) => {
+  const actieveLeerlingen = state.leerlingen.filter((leerling) =>
+    leerlingIsActiefOpDatum(leerling, vandaag)
+  );
+
+  if (!actieveLeerlingen.length) {
+    alert("Er zijn geen actieve leerlingen om af te drukken.");
+    return;
+  }
+
+  const doc = new jsPDF("p", "mm", "a4");
+
+  actieveLeerlingen.forEach((leerling, index) => {
     if (index !== 0) doc.addPage();
 
     const { counts, opmerkingenLijst } = berekenStatusTellingenVoorLeerling(leerling.id);
