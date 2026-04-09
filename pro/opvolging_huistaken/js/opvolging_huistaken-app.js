@@ -1175,9 +1175,12 @@ function addKolom(value) {
     return;
   }
 
-  if (!state.columns.includes(value)) {
-    state.columns.push(value);
-    state.columns.sort();
+  const columns = getColumnsForActivePeriod();
+
+  if (!columns.includes(value)) {
+    columns.push(value);
+    columns.sort();
+    setColumnsForActivePeriod(columns);
     renderRegistratie();
     renderDashboard();
     markChanged();
@@ -1189,7 +1192,8 @@ function addKolom(value) {
 }
 
 function removeKolom(value) {
-  state.columns = state.columns.filter((item) => item !== value);
+  const columns = getColumnsForActivePeriod().filter((item) => item !== value);
+  setColumnsForActivePeriod(columns);
   renderRegistratie();
   renderDashboard();
   markChanged();
@@ -1202,6 +1206,23 @@ function setupKolomKnoppen() {
   dagBtn?.addEventListener("click", () => {
     addKolom(dagInput?.value || "");
   });
+}
+
+function getActivePeriod() {
+  return state.reportPeriods.find((periode) => periode.id === state.activePeriodId) || null;
+}
+
+function getColumnsForActivePeriod() {
+  const periode = getActivePeriod();
+  if (!periode) return [];
+  if (!Array.isArray(periode.columns)) periode.columns = [];
+  return periode.columns;
+}
+
+function setColumnsForActivePeriod(columns) {
+  const periode = getActivePeriod();
+  if (!periode) return;
+  periode.columns = columns;
 }
 
 // ----------------------
@@ -1227,6 +1248,11 @@ function renderRegistratieLeeg(thead, tbody, boodschap) {
 }
 
 function renderRegistratie() {
+    const activeColumns = getColumnsForActivePeriod();
+      if ((!activeColumns || activeColumns.length === 0) && Array.isArray(state.columns) && state.columns.length > 0) {
+    setColumnsForActivePeriod([...state.columns]);
+    state.columns = [];
+  }
   const thead = document.getElementById("registratieThead");
   const tbody = document.getElementById("registratieTbody");
   const periodeSelect = document.getElementById("registratiePeriodeSelect");
@@ -1267,18 +1293,19 @@ if (!state.leerlingen.length) {
       )
       .join("");
 
-    periodeSelect.onchange = () => {
-      state.activePeriodId = periodeSelect.value;
-      renderRegistratie();
-    };
+   periodeSelect.onchange = () => {
+  state.activePeriodId = periodeSelect.value;
+  renderRegistratie();
+  markChanged();
+};
   }
 
     thead.innerHTML = `
     <tr>
       <th>Leerling</th>
       ${
-        state.columns.length
-          ? state.columns.map((kolom) => `
+        activeColumns.length
+          ? activeColumns.map((kolom) => `
               <th class="registratie-dagkolom">
                 <div class="column-top">${formatDate(kolom)}</div>
                 <div class="column-sub">Registratiedag</div>
@@ -1309,8 +1336,8 @@ if (!state.leerlingen.length) {
           </div>
         </td>
         ${
-          state.columns.length
-            ? state.columns.map((kolom) => {
+          activeColumns.length
+            ? activeColumns.map((kolom) => {
                 const actief = leerlingIsActiefOpDatum(leerling, kolom);
 
                 if (!actief) {
