@@ -1133,7 +1133,9 @@ textarea {
 }
 /* UITLEGBLOKKEN IN HET SCHERM */
 .uitleg-open-row {
-  margin-bottom: 10px;
+  margin-bottom: 14px;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .uitleg-panel {
@@ -1160,10 +1162,29 @@ textarea {
   line-height: 1.7;
 }
 
-.uitleg-toggle-btn,
-.uitleg-open-btn {
+.uitleg-toggle-btn {
   padding: 9px 12px;
   font-size: 14px;
+}
+
+.uitleg-open-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  border: 1px solid #d7e3f5;
+  background: #eef4ff;
+  color: #28456f;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.uitleg-open-btn:hover {
+  background: #e3edff;
+  border-color: #c8d8f1;
 }
 
 .hidden {
