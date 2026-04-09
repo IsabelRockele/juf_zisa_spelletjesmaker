@@ -1226,13 +1226,6 @@ function setupKolomKnoppen() {
   });
 }
 
-function getColumnsForActivePeriod() {
-  const periode = getActivePeriod();
-  if (!periode) return [];
-  if (!Array.isArray(periode.columns)) periode.columns = [];
-  return periode.columns;
-}
-
 function setColumnsForActivePeriod(columns) {
   const periode = getActivePeriod();
   if (!periode) return;
