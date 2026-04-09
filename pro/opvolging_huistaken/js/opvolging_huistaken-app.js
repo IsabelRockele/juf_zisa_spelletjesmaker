@@ -828,9 +828,10 @@ De Smet Noor`
       }
     });
 
-       renderKlaslijst();
+    renderKlaslijst();
     renderRegistratie();
     renderDashboard();
+    markChanged();
   });
 
   renderKlaslijst();
