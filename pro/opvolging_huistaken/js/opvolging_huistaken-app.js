@@ -1065,7 +1065,7 @@ function setupRapportperiodes() {
   const eindeInput = document.getElementById("periodeEindeInput");
   const addBtn = document.getElementById("addPeriodeBtn");
 
-  addBtn?.addEventListener("click", () => {
+    addBtn?.addEventListener("click", () => {
     const naam = naamInput?.value.trim();
     const start = startInput?.value || "";
     const end = eindeInput?.value || "";
@@ -1088,9 +1088,10 @@ function setupRapportperiodes() {
     if (startInput) startInput.value = "";
     if (eindeInput) eindeInput.value = "";
 
-        renderRapportperiodes();
+    renderRapportperiodes();
     renderRegistratie();
     renderDashboard();
+    markChanged();
   });
 
   renderRapportperiodes();
