@@ -165,8 +165,8 @@
   </div>
 </section>
 
-     <section class="view" id="view-instellingen">
-  <div class="card">
+    <section class="view" id="view-instellingen">
+  <div class="card instellingen-card">
     <div class="uitleg-open-row">
       <button class="soft-btn uitleg-open-btn hidden" type="button" data-open-uitleg="uitleg-instellingen">Uitleg tonen</button>
     </div>
@@ -178,51 +178,93 @@
       </div>
       <div class="uitleg-panel-body">
         Wat je hier invult, blijft later bewaard en kan aangepast worden.
-        Schoolnaam, klasnaam, PDF-titel, schoollogo en drempel blijven zichtbaar staan wanneer je dit scherm opnieuw opent.
+        Schoolnaam, klasnaam, PDF-titel, schoollogo en instellingen voor extra opvolging blijven zichtbaar wanneer je dit scherm opnieuw opent.
       </div>
     </div>
 
-    <div class="form-grid two">
-      <label>
-        <span>Schoolnaam</span>
-        <input type="text" id="schoolNameInput" placeholder="Bijvoorbeeld GO! Basisschool De Linde" />
-      </label>
-
-      <label>
-        <span>Klasnaam</span>
-        <input type="text" id="classNameInput" placeholder="Bijvoorbeeld 2A" />
-      </label>
+    <div class="instellingen-intro">
+      <h3>Basisinstellingen</h3>
+      <p>
+        Vul hier de gegevens van je school en klas in. Deze instellingen worden gebruikt in je opvolging en in de PDF’s.
+      </p>
     </div>
 
-    <div class="form-grid two">
-      <label>
-        <span>Titel voor PDF</span>
-        <input type="text" id="pdfTitleInput" placeholder="Bijvoorbeeld Opvolging huistaken" />
-      </label>
+    <div class="instellingen-stack">
+      <div class="instellingen-blok">
+        <div class="instellingen-blok-header">
+          <h4>Algemene gegevens</h4>
+          <p>Deze gegevens komen terug in de tool en in de PDF’s.</p>
+        </div>
 
-      <label>
-        <span>Schoollogo</span>
-        <input type="file" id="schoolLogoInput" accept="image/*" />
-      </label>
-    </div>
+        <div class="form-grid two">
+          <label>
+            <span>Schoolnaam</span>
+            <input type="text" id="schoolNameInput" placeholder="Bijvoorbeeld GO! Basisschool De Linde" />
+          </label>
 
-    <div class="form-grid two" style="margin-top: 16px;">
-      <label>
-        <span>Drempel extra opvolging</span>
-        <input type="number" id="extraOpvolgingDrempelInput" min="1" value="4" />
-      </label>
+          <label>
+            <span>Klasnaam</span>
+            <input type="text" id="classNameInput" placeholder="Bijvoorbeeld 2A" />
+          </label>
+        </div>
 
-      <div class="notice-box" style="margin-top: 0;">
-        Een leerling verschijnt pas bij <strong>extra opvolging</strong> vanaf dit aantal probleemregistraties
-        (<strong>te laat</strong>, <strong>niet in orde</strong>, <strong>onvolledig</strong>).
+        <div class="form-grid two" style="margin-top: 16px;">
+          <label>
+            <span>Titel voor PDF</span>
+            <input type="text" id="pdfTitleInput" placeholder="Bijvoorbeeld Opvolging huistaken" />
+          </label>
+
+          <div class="instellingen-kleine-info">
+            Deze titel wordt bovenaan op je PDF’s gebruikt.
+          </div>
+        </div>
       </div>
-    </div>
 
-    <div class="logo-preview-box">
-      <div class="logo-preview-title">Voorbeeld schoollogo</div>
-      <div class="logo-preview">
-        <img id="logoPreview" alt="Geen logo gekozen" />
-        <div id="logoPreviewPlaceholder" class="logo-placeholder">Nog geen logo gekozen</div>
+      <div class="instellingen-blok">
+        <div class="instellingen-blok-header">
+          <h4>Extra opvolging</h4>
+          <p>Kies vanaf wanneer een leerling extra opvolging nodig heeft.</p>
+        </div>
+
+        <div class="instellingen-opvolging-grid">
+          <label class="instellingen-smal-veld">
+            <span>Extra opvolging vanaf</span>
+            <input type="number" id="extraOpvolgingDrempelInput" min="1" value="4" />
+          </label>
+
+          <div class="notice-box instellingen-uitleg-box" style="margin-top: 0;">
+            <strong>Wanneer krijgt een leerling extra opvolging?</strong><br />
+            Vul het aantal keer in dat een leerling <strong>te laat</strong>, <strong>niet in orde</strong> of <strong>onvolledig</strong> is.<br />
+            Vanaf dat aantal verschijnt de leerling automatisch in de lijst <strong>extra opvolging</strong>.<br />
+            <em>Standaard: 4 keer per rapportperiode.</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="instellingen-blok">
+        <div class="instellingen-blok-header">
+          <h4>Schoollogo</h4>
+          <p>Voeg een logo toe dat gebruikt wordt in je PDF’s.</p>
+        </div>
+
+        <div class="form-grid two">
+          <label>
+            <span>Schoollogo kiezen</span>
+            <input type="file" id="schoolLogoInput" accept="image/*" />
+          </label>
+
+          <div class="instellingen-kleine-info">
+            Kies een nieuw bestand als je je huidige logo wil vervangen.
+          </div>
+        </div>
+
+        <div class="logo-preview-box instellingen-logo-box">
+          <div class="logo-preview-title">Voorbeeld schoollogo</div>
+          <div class="logo-preview instellingen-logo-preview">
+            <img id="logoPreview" alt="Geen logo gekozen" />
+            <div id="logoPreviewPlaceholder" class="logo-placeholder">Nog geen logo gekozen</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
