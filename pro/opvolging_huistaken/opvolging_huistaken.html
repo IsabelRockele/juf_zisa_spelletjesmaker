@@ -312,11 +312,18 @@
 
      <section class="view" id="view-registratie">
   <div class="card">
-    <div class="uitleg-open-row">
-  <button class="uitleg-open-btn" type="button" data-open-uitleg="uitleg-registratie">ℹ️ Uitleg tonen</button>
-</div>
+    <div class="registratie-topbar">
+      <div class="uitleg-open-row registratie-uitleg-row">
+        <button class="uitleg-open-btn" type="button" data-open-uitleg="uitleg-registratie">ℹ️ Uitleg tonen</button>
+      </div>
 
-<div class="uitleg-panel hidden" id="uitleg-registratie">
+      <div class="registratie-top-actions">
+        <button class="soft-btn" id="pdfKlasBtn">PDF klasoverzicht</button>
+        <button class="soft-btn" id="pdfAlleLeerlingenBtn">PDF alle leerlingen</button>
+      </div>
+    </div>
+
+    <div class="uitleg-panel hidden" id="uitleg-registratie">
       <div class="uitleg-panel-header">
         <strong>Uitleg bij registratie</strong>
         <button class="ghost-btn uitleg-toggle-btn" type="button" data-toggle-uitleg="uitleg-registratie">Sluiten</button>
@@ -341,15 +348,13 @@
         </div>
       </div>
 
-      <div class="toolbar-right">
-        <div class="toolbar-field-group">
+      <div class="toolbar-right registratie-datum-row">
+        <div class="toolbar-field-group registratie-datum-veld">
           <label for="dagKolomDatumInput">Datum</label>
           <input type="date" id="dagKolomDatumInput" />
         </div>
 
         <button class="primary-btn" id="addDagKolomBtn">+ Dag</button>
-        <button class="soft-btn" id="pdfKlasBtn">PDF klasoverzicht</button>
-        <button class="soft-btn" id="pdfAlleLeerlingenBtn">PDF alle leerlingen</button>
       </div>
     </div>
 
