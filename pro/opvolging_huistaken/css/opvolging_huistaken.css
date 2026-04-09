@@ -1374,3 +1374,13 @@ textarea {
   background: #fdeef3;
   border-color: #e8c4d0;
 }
+
+#plakLijstBtn {
+  font-weight: 700;
+  border-radius: 14px;
+}
+
+#plakLijstBtn:hover {
+  background: #eef4ff;
+  border-color: #c8d8f1;
+}
