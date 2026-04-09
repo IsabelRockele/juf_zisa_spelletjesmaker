@@ -1067,10 +1067,11 @@ function renderRapportperiodes() {
   });
 
   if (registratiePeriodeSelect) {
-    registratiePeriodeSelect.onchange = () => {
-      state.activePeriodId = registratiePeriodeSelect.value;
-      renderRegistratie();
-    };
+   registratiePeriodeSelect.onchange = () => {
+  state.activePeriodId = registratiePeriodeSelect.value;
+  renderRegistratie();
+  markChanged();
+};
   }
 }
 
@@ -1177,9 +1178,13 @@ function addKolom(value) {
   if (!state.columns.includes(value)) {
     state.columns.push(value);
     state.columns.sort();
+    renderRegistratie();
+    renderDashboard();
+    markChanged();
+    return;
   }
 
-   renderRegistratie();
+  renderRegistratie();
   renderDashboard();
 }
 
@@ -1187,6 +1192,7 @@ function removeKolom(value) {
   state.columns = state.columns.filter((item) => item !== value);
   renderRegistratie();
   renderDashboard();
+  markChanged();
 }
 
 function setupKolomKnoppen() {
@@ -1247,10 +1253,11 @@ if (!state.columns.length) {
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
     registratieTitelInput.oninput = () => {
-      state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
-      const pdfTitleInput = document.getElementById("pdfTitleInput");
-      if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
-    };
+  state.pdfTitle = registratieTitelInput.value.trim() || "Opvolging huistaken";
+  const pdfTitleInput = document.getElementById("pdfTitleInput");
+  if (pdfTitleInput) pdfTitleInput.value = state.pdfTitle;
+  markChanged();
+};
   }
 
   if (periodeSelect) {
@@ -1342,33 +1349,36 @@ if (!state.columns.length) {
       </tr>
     `).join("");
 
-  tbody.querySelectorAll(".status-select").forEach((select) => {
-    select.addEventListener("change", () => {
-      const studentId = select.dataset.studentId;
-      const kolom = select.dataset.kolom;
-      const bestaand = getCellData(studentId, kolom);
+ tbody.querySelectorAll(".status-select").forEach((select) => {
+  select.addEventListener("change", () => {
+    const studentId = select.dataset.studentId;
+    const kolom = select.dataset.kolom;
+    const bestaand = getCellData(studentId, kolom);
 
-      setCellData(studentId, kolom, {
-        ...bestaand,
-        status: select.value
-      });
-
-      select.className = `status-select status-${slugStatus(select.value)}`;
+    setCellData(studentId, kolom, {
+      ...bestaand,
+      status: select.value
     });
+
+    select.className = `status-select status-${slugStatus(select.value)}`;
+    markChanged();
   });
+});
 
-  tbody.querySelectorAll("textarea").forEach((textarea) => {
-    textarea.addEventListener("input", () => {
-      const studentId = textarea.dataset.studentId;
-      const kolom = textarea.dataset.kolom;
-      const bestaand = getCellData(studentId, kolom);
+ tbody.querySelectorAll("textarea").forEach((textarea) => {
+  textarea.addEventListener("input", () => {
+    const studentId = textarea.dataset.studentId;
+    const kolom = textarea.dataset.kolom;
+    const bestaand = getCellData(studentId, kolom);
 
-      setCellData(studentId, kolom, {
-        ...bestaand,
-        comment: textarea.value
-      });
+    setCellData(studentId, kolom, {
+      ...bestaand,
+      comment: textarea.value
     });
+
+    markChanged();
   });
+});
 
   tbody.querySelectorAll(".leerling-pdf-btn").forEach((button) => {
     button.addEventListener("click", () => {
