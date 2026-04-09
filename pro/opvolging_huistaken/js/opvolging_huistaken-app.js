@@ -1226,12 +1226,6 @@ function setupKolomKnoppen() {
   });
 }
 
-function setColumnsForActivePeriod(columns) {
-  const periode = getActivePeriod();
-  if (!periode) return;
-  periode.columns = columns;
-}
-
 // ----------------------
 // Registratie
 // ----------------------
