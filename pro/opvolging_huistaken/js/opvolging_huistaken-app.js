@@ -1233,7 +1233,7 @@ function setupKolomKnoppen() {
 function leerlingIsActiefOpDatum(leerling, datum) {
   if (!leerling.startDate) return true;
   if (datum < leerling.startDate) return false;
-  if (leerling.endDate && datum > leerling.endDate) return false;
+  if (leerling.endDate && datum >= leerling.endDate) return false;
   return true;
 }
 
@@ -1257,9 +1257,10 @@ function renderRegistratie() {
   }
 
   const thead = document.getElementById("registratieThead");
-  const tbody = document.getElementById("registratieTbody");
-  const periodeSelect = document.getElementById("registratiePeriodeSelect");
-  const registratieTitelInput = document.getElementById("registratieTitelInput");
+const tbody = document.getElementById("registratieTbody");
+const periodeSelect = document.getElementById("registratiePeriodeSelect");
+const registratieTitelInput = document.getElementById("registratieTitelInput");
+const dagInput = document.getElementById("dagKolomDatumInput");
 
   if (!thead || !tbody) return;
 
@@ -1295,11 +1296,12 @@ function renderRegistratie() {
       )
       .join("");
 
-    periodeSelect.onchange = () => {
-      state.activePeriodId = periodeSelect.value;
-      renderRegistratie();
-      markChanged();
-    };
+   periodeSelect.onchange = () => {
+  state.activePeriodId = periodeSelect.value;
+  if (dagInput) dagInput.value = "";
+  renderRegistratie();
+  markChanged();
+};
   }
 
   thead.innerHTML = `
@@ -1545,8 +1547,9 @@ function berekenStatusTellingenVoorLeerling(studentId) {
   };
 
   const opmerkingenLijst = [];
+  const activeColumns = getColumnsForActivePeriod();
 
-  state.columns.forEach((kolom) => {
+  activeColumns.forEach((kolom) => {
     const leerling = state.leerlingen.find((l) => l.id === studentId);
     if (!leerling || !leerlingIsActiefOpDatum(leerling, kolom)) return;
 
@@ -1575,6 +1578,7 @@ function berekenStatusTellingenVoorKlas() {
   };
 
   const probleemPerLeerling = [];
+  const activeColumns = getColumnsForActivePeriod();
 
   state.leerlingen.forEach((leerling) => {
     const detail = {
@@ -1583,7 +1587,7 @@ function berekenStatusTellingenVoorKlas() {
       "onvolledig": 0
     };
 
-    state.columns.forEach((kolom) => {
+    activeColumns.forEach((kolom) => {
       if (!leerlingIsActiefOpDatum(leerling, kolom)) return;
 
       const cell = getCellData(leerling.id, kolom);
@@ -1876,12 +1880,15 @@ document.addEventListener("DOMContentLoaded", () => {
       state.firebaseReady = true;
     }
 
-       renderSchooljaar();
-    renderHeader();
-    renderDashboard();
-    renderKlaslijst();
-    renderRapportperiodes();
-    renderRegistratie();
-    switchView(state.currentView || "dashboard");
+   const dagInput = document.getElementById("dagKolomDatumInput");
+if (dagInput) dagInput.value = "";
+
+renderSchooljaar();
+renderHeader();
+renderDashboard();
+renderKlaslijst();
+renderRapportperiodes();
+renderRegistratie();
+switchView(state.currentView || "dashboard");
   });
 });
