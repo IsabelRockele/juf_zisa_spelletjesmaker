@@ -1226,10 +1226,6 @@ function setupKolomKnoppen() {
   });
 }
 
-function getActivePeriod() {
-  return state.reportPeriods.find((periode) => periode.id === state.activePeriodId) || null;
-}
-
 function getColumnsForActivePeriod() {
   const periode = getActivePeriod();
   if (!periode) return [];
