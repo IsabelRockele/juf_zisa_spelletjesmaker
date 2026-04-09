@@ -1124,9 +1124,10 @@ function setupPeriodeEditModal() {
     if (modal) modal.hidden = true;
     state.editingPeriodId = null;
 
-            renderRapportperiodes();
-        renderRegistratie();
-        renderDashboard();
+     renderRapportperiodes();
+    renderRegistratie();
+    renderDashboard();
+    markChanged();
   });
 }
 
