@@ -68,6 +68,9 @@ h1, h2, h3, h4, p {
   top: 0;
   align-self: start;
   height: 100vh;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .brand-card {
@@ -1625,4 +1628,9 @@ textarea {
   100% {
     transform: translateX(240%);
   }
+}
+
+.privacy-box {
+  margin-top: auto;
+  padding-top: 20px;
 }
