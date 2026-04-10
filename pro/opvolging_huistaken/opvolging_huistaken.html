@@ -560,6 +560,40 @@
   </div>
 </div>
 
+<div class="help-modal" id="privacyModal" hidden>
+  <div class="help-backdrop" data-close-privacy></div>
+  <div class="help-dialog" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+    <div class="help-header">
+      <h3 id="privacyModalTitle">Privacy</h3>
+      <button class="icon-btn" data-close-privacy aria-label="Sluiten">✕</button>
+    </div>
+
+    <div class="help-body">
+      <p>
+        Deze tool slaat enkel gegevens op die nodig zijn om de opvolging van huistaken mogelijk te maken,
+        zoals namen van leerlingen en registraties per dag.
+      </p>
+
+      <p>
+        Alle gegevens worden per gebruiker opgeslagen en zijn enkel toegankelijk voor de ingelogde leerkracht.
+        Er worden geen gegevens gedeeld met derden.
+      </p>
+
+      <p>
+        De gegevens worden veilig bewaard via Google Firebase.
+      </p>
+
+      <p>
+        Als gebruiker blijf je zelf verantwoordelijk voor het correct gebruik van persoonsgegevens binnen de schoolcontext.
+      </p>
+    </div>
+
+    <div class="help-footer">
+      <button class="primary-btn" data-close-privacy>Sluiten</button>
+    </div>
+  </div>
+</div>
+
 <script src="../device-id.js"></script>
 <script type="module" src="../guard.js"></script>
 <script type="module" src="js/opvolging_huistaken-app.js"></script>
