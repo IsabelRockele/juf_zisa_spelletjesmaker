@@ -439,6 +439,14 @@ function statusDisplayOrder() {
   return ["op tijd", "te laat", "niet in orde", "onvolledig", "afwezig"];
 }
 
+function leerlingWasActiefInPeriode(leerling, columns) {
+  if (!columns || !columns.length) return true;
+
+  return columns.some((kolom) => {
+    return leerlingIsActiefOpDatum(leerling, kolom);
+  });
+}
+
 // ----------------------
 // Navigatie
 // ----------------------
@@ -1341,8 +1349,12 @@ const dagInput = document.getElementById("dagKolomDatumInput");
 
   sorteerLeerlingen();
 
-  tbody.innerHTML = state.leerlingen
-    .map((leerling) => `
+const zichtbareLeerlingen = state.leerlingen.filter((leerling) =>
+  leerlingWasActiefInPeriode(leerling, activeColumns)
+);
+
+tbody.innerHTML = zichtbareLeerlingen
+  .map((leerling) => `
       <tr class="${leerlingHeeftExtraOpvolging(leerling.id) ? 'extra-opvolging' : ''}">
         <td>
           <div class="name-cell">
