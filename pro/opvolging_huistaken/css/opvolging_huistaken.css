@@ -1508,3 +1508,17 @@ textarea {
   background: #ebebeb;
   border-color: #bfbfbf;
 }
+
+#pdfKlasZwartWitBtn,
+#pdfAlleLeerlingenZwartWitBtn {
+  background: #f2f2f2;
+  border-color: #cfcfcf;
+  color: #444;
+  font-weight: 700;
+}
+
+#pdfKlasZwartWitBtn:hover,
+#pdfAlleLeerlingenZwartWitBtn:hover {
+  background: #e7e7e7;
+  border-color: #bdbdbd;
+}
