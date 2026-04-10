@@ -545,17 +545,19 @@ textarea {
 
 .registratie-tabel thead th:first-child {
   left: 0;
-  z-index: 11;
+  z-index: 30;
+  background: #eef3fb;
 }
 
 .registratie-tabel td:first-child,
 .registratie-tabel th:first-child {
   position: sticky;
   left: 0;
-  background: #f7faff;
   min-width: 260px;
   width: 260px;
-  z-index: 7;
+  background: #f7faff;
+  z-index: 20;
+  box-shadow: 2px 0 0 #d9e2ef;
 }
 
 .registratie-dagkolom,
