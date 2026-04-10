@@ -43,6 +43,7 @@ body {
 
 body {
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, p {
@@ -135,6 +136,21 @@ h1, h2, h3, h4, p {
 
 .main-content {
   padding: 28px;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.card {
+  min-width: 0;
+}
+
+#view-registratie {
+  min-width: 0;
+}
+
+#view-registratie .card {
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .card {
@@ -514,8 +530,11 @@ textarea {
 .table-scroll-wrap {
   border: 1px solid var(--line);
   border-radius: 18px;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 62vh;
+  max-width: 100%;
+  width: 100%;
   background: white;
 }
 
@@ -524,6 +543,7 @@ textarea {
   border-spacing: 0;
   min-width: 0;
   width: max-content;
+  max-width: none;
 }
 
 .registratie-tabel th,
