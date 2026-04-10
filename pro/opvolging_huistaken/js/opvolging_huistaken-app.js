@@ -1648,6 +1648,30 @@ function wachtOpPdfOverlay() {
   });
 }
 
+function wacht(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function voerPdfActieUit(tekst, actie) {
+  const start = performance.now();
+
+  toonPdfLoading(tekst);
+  await wachtOpPdfOverlay();
+
+  try {
+    await Promise.resolve(actie());
+  } finally {
+    const verstreken = performance.now() - start;
+    const resterend = Math.max(0, 500 - verstreken);
+
+    if (resterend > 0) {
+      await wacht(resterend);
+    }
+
+    verbergPdfLoading();
+  }
+}
+
 function maakPieCanvas(counts) {
   const labels = statusDisplayOrder();
   const values = labels.map((label) => counts[label] || 0);
@@ -2200,43 +2224,19 @@ function genereerAlleLeerlingenPdfZwartWit() {
 
 function setupPdfKnoppen() {
   document.getElementById("pdfKlasBtn")?.addEventListener("click", async () => {
-    toonPdfLoading("Klasoverzicht wordt voorbereid...");
-    await wachtOpPdfOverlay();
-    try {
-      genereerKlasoverzichtPdf();
-    } finally {
-      verbergPdfLoading();
-    }
+    await voerPdfActieUit("Klasoverzicht wordt voorbereid...", () => genereerKlasoverzichtPdf());
   });
 
   document.getElementById("pdfKlasZwartWitBtn")?.addEventListener("click", async () => {
-    toonPdfLoading("Klasoverzicht wordt voorbereid...");
-    await wachtOpPdfOverlay();
-    try {
-      genereerKlasoverzichtPdfZwartWit();
-    } finally {
-      verbergPdfLoading();
-    }
+    await voerPdfActieUit("Klasoverzicht wordt voorbereid...", () => genereerKlasoverzichtPdfZwartWit());
   });
 
   document.getElementById("pdfAlleLeerlingenBtn")?.addEventListener("click", async () => {
-    toonPdfLoading("Alle leerlingen worden voorbereid...");
-    await wachtOpPdfOverlay();
-    try {
-      genereerAlleLeerlingenPdf();
-    } finally {
-      verbergPdfLoading();
-    }
+    await voerPdfActieUit("Alle leerlingen worden voorbereid...", () => genereerAlleLeerlingenPdf());
   });
 
   document.getElementById("pdfAlleLeerlingenZwartWitBtn")?.addEventListener("click", async () => {
-    toonPdfLoading("Alle leerlingen worden voorbereid...");
-    await wachtOpPdfOverlay();
-    try {
-      genereerAlleLeerlingenPdfZwartWit();
-    } finally {
-      verbergPdfLoading();
-    }
+    await voerPdfActieUit("Alle leerlingen worden voorbereid...", () => genereerAlleLeerlingenPdfZwartWit());
   });
 }
 
