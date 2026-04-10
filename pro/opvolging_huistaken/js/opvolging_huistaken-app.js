@@ -468,7 +468,7 @@ function renderHeader() {
   instellingen: "Vul hier de gegevens van je school en klas in. Deze instellingen worden gebruikt in je opvolging en in de PDF’s.",
   klaslijst: "Beheer hier je leerlingen met startdatum en einddatum.",
   rapportperiodes: "Stel hier zelf je rapportperiodes in.",
-  registratie: "Registreer hier per leerling de huistaken."
+  registratie: "Registreer hier per leerling de huistaken. Je kan alleen datums kiezen binnen de gekozen rapportperiode. Zie je geen leerlingen? Controleer dan of je in de juiste rapportperiode werkt en of de start- of einddatum van je leerlingen klopt."
 };
 
  if (pageTitle) pageTitle.textContent = titles[state.currentView] || "Dashboard";
@@ -1336,6 +1336,15 @@ const dagInput = document.getElementById("dagKolomDatumInput");
     renderRegistratieLeeg(thead, tbody, "Voeg eerst minstens één leerling toe in de klaslijst.");
     return;
   }
+
+  if (zichtbareLeerlingen.length === 0) {
+  renderRegistratieLeeg(
+    thead,
+    tbody,
+    "Er zijn geen actieve leerlingen op deze datum. Controleer de start- en einddatum van je leerlingen."
+  );
+  return;
+}
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
