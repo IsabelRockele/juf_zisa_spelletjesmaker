@@ -41,11 +41,11 @@ const STATUSSEN = [
 ];
 
 const STATUS_COLORS = {
-  "op tijd": [217, 243, 228],
-  "te laat": [255, 231, 209],
-  "niet in orde": [248, 215, 218],
-  "onvolledig": [255, 244, 201],
-  "afwezig": [220, 236, 255]
+  "op tijd": [88, 186, 120],
+  "te laat": [245, 166, 35],
+  "niet in orde": [220, 82, 82],
+  "onvolledig": [230, 195, 55],
+  "afwezig": [91, 155, 213]
 };
 
 const state = {
@@ -1455,8 +1455,8 @@ tbody.innerHTML = zichtbareLeerlingen
 function addPdfTitleBar(doc, title, subtitleLines = []) {
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  doc.setFillColor(236, 243, 252);
-  doc.roundedRect(18, 14, pageWidth - 36, 22, 4, 4, "F");
+  doc.setDrawColor(219, 230, 243);
+  doc.roundedRect(18, 14, pageWidth - 36, 22, 4, 4, "S");
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(28, 46, 88);
@@ -1479,11 +1479,58 @@ function addPdfTitleBar(doc, title, subtitleLines = []) {
   return y;
 }
 
+function tekenLegendaRegel(doc, status, x, y, zwartWit = false) {
+  let kleur = STATUS_COLORS[status] || [180, 180, 180];
+
+  if (zwartWit) {
+    const grijsMap = {
+      "op tijd": [70, 70, 70],
+      "te laat": [110, 110, 110],
+      "niet in orde": [150, 150, 150],
+      "onvolledig": [190, 190, 190],
+      "afwezig": [225, 225, 225]
+    };
+    kleur = grijsMap[status] || [180, 180, 180];
+  }
+
+  doc.setFillColor(...kleur);
+  doc.rect(x, y - 4, 4, 4, "F");
+  doc.setDrawColor(120, 120, 120);
+  doc.rect(x, y - 4, 4, 4, "S");
+
+  doc.setTextColor(32, 49, 77);
+  doc.text(`${status}:`, x + 8, y);
+}
+
+function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  let y = 40;
+
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(32, 49, 77);
+  doc.setFontSize(16);
+  doc.text(leerlingNaam || "-", pageWidth / 2, y, { align: "center" });
+  y += 8;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text(`Klas: ${klasNaam || "-"}`, pageWidth / 2, y, { align: "center" });
+  y += 8;
+
+  if (schoolNaam) {
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(90, 106, 133);
+    doc.setFontSize(11);
+    doc.text(schoolNaam, pageWidth / 2, y, { align: "center" });
+    y += 6;
+  }
+
+  return y;
+}
+
 function addInfoCard(doc, x, y, w, h, title) {
-  doc.setFillColor(248, 251, 255);
-  doc.roundedRect(x, y, w, h, 4, 4, "F");
   doc.setDrawColor(219, 230, 243);
-  doc.roundedRect(x, y, w, h, 4, 4);
+  doc.roundedRect(x, y, w, h, 4, 4, "S");
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(32, 49, 77);
@@ -1544,6 +1591,50 @@ function maakPieCanvas(counts) {
     ctx.arc(120, 120, 82, startAngle, startAngle + slice);
     ctx.closePath();
     ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+    ctx.fill();
+
+    startAngle += slice;
+  });
+
+  ctx.beginPath();
+  ctx.arc(120, 120, 34, 0, Math.PI * 2);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+
+  return canvas;
+}
+
+function maakPieCanvasZwartWit(counts) {
+  const labels = statusDisplayOrder();
+  const values = labels.map((label) => counts[label] || 0);
+  const totaal = values.reduce((sum, value) => sum + value, 0) || 1;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 240;
+  canvas.height = 240;
+  const ctx = canvas.getContext("2d");
+
+  const grijsMap = {
+    "op tijd": "rgb(70,70,70)",
+    "te laat": "rgb(110,110,110)",
+    "niet in orde": "rgb(150,150,150)",
+    "onvolledig": "rgb(190,190,190)",
+    "afwezig": "rgb(225,225,225)"
+  };
+
+  let startAngle = -Math.PI / 2;
+
+  labels.forEach((label) => {
+    const value = counts[label] || 0;
+    if (value <= 0) return;
+
+    const slice = (value / totaal) * Math.PI * 2;
+
+    ctx.beginPath();
+    ctx.moveTo(120, 120);
+    ctx.arc(120, 120, 82, startAngle, startAngle + slice);
+    ctx.closePath();
+    ctx.fillStyle = grijsMap[label];
     ctx.fill();
 
     startAngle += slice;
@@ -1656,11 +1747,10 @@ function genereerLeerlingPdf(studentId) {
   const { counts, opmerkingenLijst } = berekenStatusTellingenVoorLeerling(studentId);
   const pieCanvas = maakPieCanvas(counts);
 
-  const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-    `${leerling.name} — Klas: ${state.className || "-"}`,
-    state.schoolName || ""
-  ]);
+ addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
 
+  
   addInfoCard(doc, 18, topY + 4, 64, 66, "Overzicht");
   doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
 
@@ -1672,9 +1762,10 @@ function genereerLeerlingPdf(studentId) {
   doc.setTextColor(32, 49, 77);
 
   statusDisplayOrder().forEach((status) => {
-    doc.text(`${status}: ${counts[status] || 0} keer`, 96, y);
-    y += 10;
-  });
+  tekenLegendaRegel(doc, status, 96, y, false);
+  doc.text(`${counts[status] || 0}`, 126, y);
+  y += 10;
+});
 
   addInfoCard(doc, 18, topY + 78, 174, 142, "Opmerkingen");
   y = topY + 92;
@@ -1692,10 +1783,8 @@ function genereerLeerlingPdf(studentId) {
       if (y > 240) {
         addFooter(doc);
         doc.addPage();
-        const vervolgY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-          `${leerling.name} — Klas: ${state.className || "-"}`,
-          state.schoolName || ""
-        ]);
+        addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
         addInfoCard(doc, 18, vervolgY + 4, 174, 220, "Opmerkingen");
         y = vervolgY + 18;
       }
@@ -1740,10 +1829,8 @@ function genereerAlleLeerlingenPdf() {
     const { counts, opmerkingenLijst } = berekenStatusTellingenVoorLeerling(leerling.id);
     const pieCanvas = maakPieCanvas(counts);
 
-    const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-      `${leerling.name} — Klas: ${state.className || "-"}`,
-      state.schoolName || ""
-    ]);
+    addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
 
     addInfoCard(doc, 18, topY + 4, 64, 66, "Overzicht");
     doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
@@ -1776,10 +1863,8 @@ function genereerAlleLeerlingenPdf() {
         if (y > 240) {
           addFooter(doc);
           doc.addPage();
-          const vervolgY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-            `${leerling.name} — Klas: ${state.className || "-"}`,
-            state.schoolName || ""
-          ]);
+          addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
           addInfoCard(doc, 18, vervolgY + 4, 174, 220, "Opmerkingen");
           y = vervolgY + 18;
         }
@@ -1811,10 +1896,8 @@ function genereerKlasoverzichtPdf() {
   const { counts, probleemPerLeerling } = berekenStatusTellingenVoorKlas();
   const pieCanvas = maakPieCanvas(counts);
 
-  const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-    `${state.className || "-"}`,
-    state.schoolName || ""
-  ]);
+addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
 
   addInfoCard(doc, 18, topY + 4, 64, 66, "Klasoverzicht");
   doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
@@ -1827,9 +1910,10 @@ function genereerKlasoverzichtPdf() {
   doc.setTextColor(32, 49, 77);
 
   statusDisplayOrder().forEach((status) => {
-    doc.text(`${status}: ${counts[status] || 0}`, 96, y);
-    y += 10;
-  });
+  tekenLegendaRegel(doc, status, 96, y, false);
+  doc.text(`${counts[status] || 0} keer`, 126, y);
+  y += 10;
+});
 
   addInfoCard(doc, 18, topY + 78, 174, 142, "Leerlingen die extra opvolging vragen");
   y = topY + 92;
@@ -1877,6 +1961,10 @@ function setupPdfKnoppen() {
 
   document.getElementById("pdfAlleLeerlingenBtn")?.addEventListener("click", () => {
     genereerAlleLeerlingenPdf();
+  });
+
+    document.getElementById("pdfZwartWitBtn")?.addEventListener("click", () => {
+    genereerKlasoverzichtPdfZwartWit();
   });
 }
 
