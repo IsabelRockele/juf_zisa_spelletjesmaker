@@ -1506,10 +1506,22 @@ function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = 50;
 
+  const naamTekst = leerlingNaam || "-";
+  const klasTekst = `Klas: ${klasNaam || "-"}`;
+  const tussenruimte = 10;
+
   doc.setFont("helvetica", "bold");
   doc.setTextColor(32, 49, 77);
   doc.setFontSize(16);
-  doc.text(`${leerlingNaam || "-"}   Klas: ${klasNaam || "-"}`, pageWidth / 2, y, { align: "center" });
+
+  const naamBreedte = doc.getTextWidth(naamTekst);
+  const klasBreedte = doc.getTextWidth(klasTekst);
+  const totaalBreedte = naamBreedte + tussenruimte + klasBreedte;
+  const startX = (pageWidth - totaalBreedte) / 2;
+
+  doc.text(naamTekst, startX, y);
+  doc.text(klasTekst, startX + naamBreedte + tussenruimte, y);
+
   y += 10;
 
   if (schoolNaam) {
@@ -1522,6 +1534,7 @@ function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
 
   return y;
 }
+
 
 function addInfoCard(doc, x, y, w, h, title) {
   doc.setDrawColor(219, 230, 243);
@@ -1560,6 +1573,14 @@ function addFooter(doc) {
       doc.addImage(state.schoolLogoDataUrl, "PNG", x, y, drawW, drawH);
     } catch (e) {}
   }
+}
+
+function toonPdfLoading() {
+  document.getElementById("pdfLoadingOverlay")?.classList.remove("hidden");
+}
+
+function verbergPdfLoading() {
+  document.getElementById("pdfLoadingOverlay")?.classList.add("hidden");
 }
 
 function maakPieCanvas(counts) {
@@ -1883,6 +1904,9 @@ const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoo
 }
 
 function genereerKlasoverzichtPdf() {
+  toonPdfLoading();
+
+  setTimeout(() => {
   if (!ensureJsPdf()) return;
 
   const { jsPDF } = window.jspdf;
@@ -1949,7 +1973,9 @@ const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
   }
 
   addFooter(doc);
-  doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+     doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+    verbergPdfLoading();
+  }, 50);
 }
 
 function genereerKlasoverzichtPdfZwartWit() {
