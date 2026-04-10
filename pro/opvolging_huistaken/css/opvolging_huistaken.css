@@ -780,12 +780,14 @@ textarea {
   max-width: 140px;
 }
 #leerlingModal .help-backdrop,
-#uitschrijfModal .help-backdrop {
+#uitschrijfModal .help-backdrop,
+#schooljaarModal .help-backdrop {
   background: rgba(32, 49, 77, 0.48);
 }
 
 #leerlingModal .help-dialog,
-#uitschrijfModal .help-dialog {
+#uitschrijfModal .help-dialog,
+#schooljaarModal .help-dialog {
   background: #ffffff;
   opacity: 1;
   box-shadow: 0 24px 60px rgba(32, 49, 77, 0.22);
