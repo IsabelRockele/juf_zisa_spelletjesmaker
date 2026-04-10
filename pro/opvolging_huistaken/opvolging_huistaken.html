@@ -545,7 +545,13 @@
 <div id="pdfLoadingOverlay" class="pdf-loading-overlay hidden">
   <div class="pdf-loading-box">
     <div class="pdf-spinner"></div>
-    <p>Even geduld, PDF wordt samengesteld...</p>
+    <p id="pdfLoadingText">Even geduld, PDF wordt samengesteld...</p>
+
+    <div class="pdf-loading-bar">
+      <div id="pdfLoadingBarFill" class="pdf-loading-bar-fill is-indeterminate"></div>
+    </div>
+
+    <div id="pdfLoadingPercent" class="pdf-loading-percent"></div>
   </div>
 </div>
 
