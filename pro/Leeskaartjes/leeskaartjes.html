@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leeskaartjes – Juf Zisa PRO</title>
+  <link rel="stylesheet" href="leeskaartjes.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="leeskaartjes.js"></script>
+
+  <style>
+    /* ── PRO BANNER ──────────────────────────────────────────────────────── */
+    .pro-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+
+    .pro-header span:first-child {
+      background: #f5c200;
+      color: #0b3060;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+    }
+
+    .pro-header a {
+      color: rgba(255,255,255,0.80);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+
+    .pro-header a:hover {
+      color: #fff;
+    }
+
+    /* ── AANPASSING OP BESTAANDE HEADER ─────────────────────────────────── */
+    .site-header {
+      top: 37px;
+      z-index: 150;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .site-header-left,
+    .site-header-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .site-header-center {
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 160px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      border: none;
+      text-decoration: none;
+      background: #1a3a5c;
+      color: #ffffff;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(26, 58, 92, 0.08);
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .back-btn:hover {
+      background: #122a42;
+    }
+
+    @media (max-width: 980px) {
+      .site-header {
+        gap: 12px;
+      }
+
+      .site-header-left,
+      .site-header-right,
+      .site-header-center {
+        width: 100%;
+      }
+
+      .site-header-right {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PRO BANNER -->
+  <div class="pro-header">
+    <span>⭐ PRO</span>
+    <span>Leeskaartjes Generator — Juf Zisa PRO</span>
+    <a href="../app.html">← Terug naar menu</a>
+  </div>
+
+  <header class="site-header">
+    <div class="site-header-left">
+      <button type="button" class="back-btn" onclick="window.location.href='../app.html'">← Terug naar menu</button>
+    </div>
+
+    <div class="site-header-center header-text">
+      <h1>Leeskaartjes</h1>
+      <p>Genereer leeskaartjes per AVI-niveau en download ze als PDF.</p>
+    </div>
+
+    <div class="site-header-right"></div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="panel controls-panel">
+      <h2>Instellingen</h2>
+
+      <div class="field">
+        <label for="titelInput">Titel bovenaan</label>
+        <input id="titelInput" type="text" value="Leeskaartjes" />
+      </div>
+
+      <div class="field">
+        <label>AVI-niveaus</label>
+        <div class="avi-grid" id="aviGrid">
+          <label class="avi-option"><input type="checkbox" value="aviStart"> <span>AVI Start</span></label>
+          <label class="avi-option"><input type="checkbox" value="M3" checked> <span>AVI M3</span></label>
+          <label class="avi-option"><input type="checkbox" value="E3"> <span>AVI E3</span></label>
+          <label class="avi-option"><input type="checkbox" value="M4"> <span>AVI M4</span></label>
+          <label class="avi-option"><input type="checkbox" value="E4"> <span>AVI E4</span></label>
+          <label class="avi-option"><input type="checkbox" value="M5"> <span>AVI M5</span></label>
+          <label class="avi-option"><input type="checkbox" value="E5"> <span>AVI E5</span></label>
+          <label class="avi-option"><input type="checkbox" value="M6"> <span>AVI M6</span></label>
+          <label class="avi-option"><input type="checkbox" value="E6"> <span>AVI E6</span></label>
+          <label class="avi-option"><input type="checkbox" value="M7"> <span>AVI M7</span></label>
+          <label class="avi-option"><input type="checkbox" value="E7"> <span>AVI E7</span></label>
+        </div>
+        <small>Je mag meerdere AVI-niveaus combineren.</small>
+      </div>
+
+      <div class="field">
+        <label for="woordenPerKaartInput">Aantal woorden per kaartje</label>
+        <input id="woordenPerKaartInput" type="number" min="5" max="12" step="1" value="5" />
+        <small>Minimum 5 woorden per kaartje.</small>
+      </div>
+
+      <div class="field">
+        <label for="aantalKaartjesInput">Aantal kaartjes</label>
+        <input id="aantalKaartjesInput" type="number" min="1" max="48" step="1" value="8" />
+      </div>
+
+      <div class="field">
+        <label for="lettergrootteSelect">Lettergrootte woorden</label>
+        <select id="lettergrootteSelect">
+          <option value="14">14</option>
+          <option value="16">16</option>
+          <option value="18" selected>18</option>
+          <option value="20">20</option>
+          <option value="22">22</option>
+          <option value="24">24</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="letterstijlSelect">Letterstijl</label>
+        <select id="letterstijlSelect">
+          <option value="normal" selected>Gewoon</option>
+          <option value="bold">Vet</option>
+        </select>
+      </div>
+
+      <div class="field checkbox-row">
+        <input id="tekstjeCheckbox" type="checkbox" checked />
+        <label for="tekstjeCheckbox">Kort tekstje onderaan toevoegen</label>
+      </div>
+
+      <div class="info-box">
+        <strong>Belangrijk</strong>
+        <p>Bij AVI Start wordt het tekstje automatisch uitgezet. Daar worden enkel eenvoudige CVC-woorden gebruikt, zoals kat, mat en dak.</p>
+      </div>
+
+      <div class="button-row">
+        <button id="genereerBtn" class="primary-btn" type="button">Genereer kaartjes</button>
+        <button id="downloadPdfBtn" class="secondary-btn" type="button">Download PDF</button>
+      </div>
+    </aside>
+
+    <section class="panel preview-panel">
+      <div class="preview-header">
+        <div>
+          <h2>Voorbeeld</h2>
+          <p id="previewMeta">Nog geen kaartjes gegenereerd.</p>
+        </div>
+      </div>
+
+      <div class="page-preview">
+        <div class="page-top">
+          <div class="preview-title" id="previewTitel">Leeskaartjes</div>
+          <div class="preview-name-line">Naam: <span>________________________</span></div>
+        </div>
+
+        <div id="kaartjesContainer" class="kaartjes-grid"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../device-id.js"></script>
+  <script src="../guard.js"></script>
+</body>
+</html>
