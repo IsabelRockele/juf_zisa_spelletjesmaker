@@ -1497,3 +1497,14 @@ textarea {
   color: #b43b57;
   font-weight: 700;
 }
+#pdfZwartWitBtn {
+  background: #f5f5f5;
+  border-color: #d2d2d2;
+  color: #444;
+  font-weight: 700;
+}
+
+#pdfZwartWitBtn:hover {
+  background: #ebebeb;
+  border-color: #bfbfbf;
+}
