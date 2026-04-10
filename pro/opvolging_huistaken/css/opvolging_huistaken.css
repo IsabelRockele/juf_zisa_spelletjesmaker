@@ -1472,3 +1472,28 @@ textarea {
     flex-wrap: wrap;
   }
 }
+
+.klaslijst-uitleg {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: #f8fbff;
+  border: 1px solid #dbe6f3;
+  border-radius: 14px;
+  color: #4d617f;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#plakLijstBtn {
+  background: #eef4ff;
+  border: 1px solid #c8d8f1;
+  color: #28456f;
+  font-weight: 700;
+}
+
+#clearKlaslijstBtn {
+  background: #fff1f3;
+  border: 1px solid #efcfd7;
+  color: #b43b57;
+  font-weight: 700;
+}
