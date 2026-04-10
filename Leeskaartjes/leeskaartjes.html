@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leeskaartjes – jufzisa.be</title>
+  <link rel="stylesheet" href="leeskaartjes.css" />
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="leeskaartjes.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="menu-btn" href="../index.html">← Keuzemenu</a>
+    <div class="header-text">
+      <h1>Leeskaartjes</h1>
+      <p>Genereer leeskaartjes per AVI-niveau en download ze als PDF.</p>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <aside class="panel controls-panel">
+      <h2>Instellingen</h2>
+
+      <div class="field">
+        <label for="titelInput">Titel bovenaan</label>
+        <input id="titelInput" type="text" value="Leeskaartjes" />
+      </div>
+
+      <div class="field">
+        <label for="niveauSelect">AVI-niveau</label>
+        <select id="niveauSelect">
+          <option value="aviStart">AVI Start</option>
+          <option value="M3">AVI M3</option>
+          <option value="E3">AVI E3</option>
+          <option value="M4">AVI M4</option>
+          <option value="E4">AVI E4</option>
+          <option value="M5">AVI M5</option>
+          <option value="E5">AVI E5</option>
+          <option value="M6">AVI M6</option>
+          <option value="E6">AVI E6</option>
+          <option value="M7">AVI M7</option>
+          <option value="E7">AVI E7</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="woordenPerKaartInput">Aantal woorden per kaartje</label>
+        <input id="woordenPerKaartInput" type="number" min="5" max="12" step="1" value="5" />
+        <small>Minimum 5 woorden per kaartje.</small>
+      </div>
+
+      <div class="field">
+        <label for="aantalKaartjesInput">Aantal kaartjes</label>
+        <input id="aantalKaartjesInput" type="number" min="1" max="48" step="1" value="8" />
+      </div>
+
+      <div class="field">
+        <label for="lettergrootteSelect">Lettergrootte woorden</label>
+        <select id="lettergrootteSelect">
+          <option value="14">14</option>
+          <option value="16">16</option>
+          <option value="18" selected>18</option>
+          <option value="20">20</option>
+          <option value="22">22</option>
+          <option value="24">24</option>
+        </select>
+      </div>
+
+      <div class="field">
+  <label for="letterstijlSelect">Letterstijl</label>
+  <select id="letterstijlSelect">
+    <option value="normal" selected>Gewoon</option>
+    <option value="bold">Vet</option>
+  </select>
+</div>
+
+      <div class="field checkbox-row">
+        <input id="tekstjeCheckbox" type="checkbox" checked />
+        <label for="tekstjeCheckbox">Kort tekstje onderaan toevoegen</label>
+      </div>
+
+      <div class="info-box">
+        <strong>Belangrijk</strong>
+        <p>Bij AVI Start wordt het tekstje automatisch uitgezet. Daar worden enkel eenvoudige CVC-woorden gebruikt, zoals kat, mat en dak.</p>
+      </div>
+
+      <div class="button-row">
+        <button id="genereerBtn" class="primary-btn" type="button">Genereer kaartjes</button>
+        <button id="downloadPdfBtn" class="secondary-btn" type="button">Download PDF</button>
+      </div>
+    </aside>
+
+    <section class="panel preview-panel">
+      <div class="preview-header">
+        <div>
+          <h2>Voorbeeld</h2>
+          <p id="previewMeta">Nog geen kaartjes gegenereerd.</p>
+        </div>
+      </div>
+
+      <div class="page-preview">
+        <div class="page-top">
+          <div class="preview-title" id="previewTitel">Leeskaartjes</div>
+          <div class="preview-name-line">Naam: <span>________________________</span></div>
+        </div>
+
+        <div id="kaartjesContainer" class="kaartjes-grid"></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
