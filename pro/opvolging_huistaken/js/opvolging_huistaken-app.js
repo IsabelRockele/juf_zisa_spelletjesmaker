@@ -374,7 +374,7 @@ function renderDashboard() {
   if (actieveEl) actieveEl.textContent = String(countActieveLeerlingenOpDatum(vandaag));
   if (totaalEl) totaalEl.textContent = String(state.leerlingen.length);
   if (periodesEl) periodesEl.textContent = String(state.reportPeriods.length);
-  if (dagenEl) dagenEl.textContent = String(state.columns.length);
+  if (dagenEl) dagenEl.textContent = String(getColumnsForActivePeriod().length);
 }
 
 function getCellKey(studentId, columnValue) {
@@ -1223,6 +1223,18 @@ function addKolom(value) {
     return;
   }
 
+  const periode = getActivePeriod();
+
+  if (periode?.start && value < periode.start) {
+    alert("Deze datum valt vóór het begin van de gekozen rapportperiode.");
+    return;
+  }
+
+  if (periode?.end && value > periode.end) {
+    alert("Deze datum valt na het einde van de gekozen rapportperiode.");
+    return;
+  }
+
   const columns = getColumnsForActivePeriod();
 
   if (!columns.includes(value)) {
@@ -1335,24 +1347,37 @@ const dagInput = document.getElementById("dagKolomDatumInput");
     };
   }
 
-  if (periodeSelect) {
-    periodeSelect.innerHTML = state.reportPeriods
-      .map(
-        (periode) => `
-          <option value="${periode.id}" ${periode.id === state.activePeriodId ? "selected" : ""}>
-            ${escapeHtml(periode.name)}
-          </option>
-        `
-      )
-      .join("");
+if (periodeSelect) {
+  periodeSelect.innerHTML = state.reportPeriods
+    .map(
+      (periode) => `
+        <option value="${periode.id}" ${periode.id === state.activePeriodId ? "selected" : ""}>
+          ${escapeHtml(periode.name)}
+        </option>
+      `
+    )
+    .join("");
 
-   periodeSelect.onchange = () => {
-  state.activePeriodId = periodeSelect.value;
-  if (dagInput) dagInput.value = "";
-  renderRegistratie();
-  markChanged();
-};
+  const actievePeriode = getActivePeriod();
+  if (dagInput) {
+    dagInput.min = actievePeriode?.start || "";
+    dagInput.max = actievePeriode?.end || "";
   }
+
+  periodeSelect.onchange = () => {
+    state.activePeriodId = periodeSelect.value;
+
+    const nieuweActievePeriode = getActivePeriod();
+    if (dagInput) {
+      dagInput.value = "";
+      dagInput.min = nieuweActievePeriode?.start || "";
+      dagInput.max = nieuweActievePeriode?.end || "";
+    }
+
+    renderRegistratie();
+    markChanged();
+  };
+}
 
   thead.innerHTML = `
     <tr>
