@@ -6,8 +6,8 @@ const woordData = {
       "wit","zit","lip","kip","dik","mik","pot","mot","rot","sok","bok","rok",
       "pop","kop","zon","ton","man","pan","ram","kam","gas","jas","tas","rat",
       "lat","wat","ham","nam","sap","map","tap","dop","kom","bom","vel","bel",
-      "cel","hel","mes","bes","les","jet","net","wet","wil","ril","pil","mol",
-      "hol","dol","rug","mug","dag","lag","rag","big","nog","rug","kam","lam"
+      "rel","hel","mes","bes","les","jet","net","wet","wil","ril","pil","mol",
+      "hol","dol","rug","mug","dag","lag","dag","big","nog","rug","kam","lam"
     ],
     tekstjes: []
   },
@@ -66,7 +66,7 @@ const woordData = {
   woorden: [
     "leeuw","meeuw","nieuw","kieuw","schrik","schrap","schrijn","schroef","school",
     "bocht","lucht","nacht","licht","zacht","dochter","eendje","bakje","huisje","karretje",
-    "bloemetje","lammetje","boompje","schrift","straat","streep","sprong","strand","strik",
+    "bloempje","lammetje","boompje","schrift","straat","streep","sprong","strand","strik",
     "herfst","korst","tekst","worst","melk","helpen","kamer","vader","beker","tafel",
     "appel","jager","deksel","anker","venster","meisjes","tafels","boeken","potloden",
     "stoelen","huizen","sokken","ramen","bloemen","brooddoos","tuinstoel","regenjas",
@@ -132,7 +132,7 @@ const woordData = {
     "circus","cactus","camera","citroen","cavia","computer","cabine","clown","camping",
     "cyclus","cijfer","centrum","controle","cultureel","yoga","yoghurt","baby","pony",
     "typen","gymzaal","mysterie","muziek","robot","raket","uniform","kanarie","gitaar",
-    "station","laser","pilot","kampioen","pyjama","microfoon","capsule","machine"
+    "station","laser","piloot","kampioen","pyjama","microfoon","capsule","machine"
   ],
   tekstjes: {
     zin: [
@@ -313,7 +313,7 @@ const kleurSets = [
 ];
 
 const titelInput = document.getElementById("titelInput");
-const niveauSelect = document.getElementById("niveauSelect");
+const aviGrid = document.getElementById("aviGrid");
 const woordenPerKaartInput = document.getElementById("woordenPerKaartInput");
 const aantalKaartjesInput = document.getElementById("aantalKaartjesInput");
 const lettergrootteSelect = document.getElementById("lettergrootteSelect");
@@ -443,8 +443,10 @@ function maakUniekeKaarten(woordenlijst, aantalKaartjes, woordenPerKaart) {
 }
 
 function updateTekstjeStatus() {
-  const niveau = niveauSelect.value;
-  if (niveau === "aviStart") {
+  const niveaus = getGekozenNiveaus();
+  const enkelAviStart = niveaus.length === 1 && niveaus[0] === "aviStart";
+
+  if (enkelAviStart) {
     tekstjeCheckbox.checked = false;
     tekstjeCheckbox.disabled = true;
   } else {
@@ -452,8 +454,47 @@ function updateTekstjeStatus() {
   }
 }
 
+function getGekozenNiveaus() {
+  if (!aviGrid) return ["M3"];
+
+  const checks = aviGrid.querySelectorAll('input[type="checkbox"]:checked');
+  const niveaus = Array.from(checks).map((el) => el.value);
+
+  return niveaus.length ? niveaus : ["M3"];
+}
+
+function verzamelDataVoorNiveaus(niveaus) {
+  const woorden = [];
+  const tekstjesLijst = [];
+  const tekstjesGetypeerd = { zin: [], vraag: [], roep: [] };
+
+  niveaus.forEach((niveau) => {
+    const data = woordData[niveau];
+    if (!data) return;
+
+    if (Array.isArray(data.woorden)) {
+      woorden.push(...data.woorden);
+    }
+
+    if (Array.isArray(data.tekstjes)) {
+      tekstjesLijst.push(...data.tekstjes);
+    } else if (data.tekstjes && typeof data.tekstjes === "object") {
+      tekstjesGetypeerd.zin.push(...(data.tekstjes.zin || []));
+      tekstjesGetypeerd.vraag.push(...(data.tekstjes.vraag || []));
+      tekstjesGetypeerd.roep.push(...(data.tekstjes.roep || []));
+    }
+  });
+
+  return {
+    woorden,
+    tekstjesLijst,
+    tekstjesGetypeerd
+  };
+}
+
 function maakKaartjes() {
-  const niveau = niveauSelect.value;
+  const niveaus = getGekozenNiveaus();
+const niveauLabel = niveaus.join(" + ");
   const woordenPerKaart = Math.max(5, parseInt(woordenPerKaartInput.value, 10) || 5);
   const aantalKaartjes = Math.max(1, parseInt(aantalKaartjesInput.value, 10) || 1);
  const lettergrootte = parseInt(lettergrootteSelect.value, 10) || 18;
@@ -462,14 +503,15 @@ const titel = (titelInput.value || "").trim() || "Leeskaartjes";
 
   updateTekstjeStatus();
 
-  const data = woordData[niveau];
-  if (!data) {
-    alert("Voor dit AVI-niveau is nog geen woordenlijst voorzien.");
-    return;
-  }
+  const verzameld = verzamelDataVoorNiveaus(niveaus);
+if (!verzameld.woorden.length) {
+  alert("Voor deze AVI-niveaus zijn nog geen woordenlijsten voorzien.");
+  return;
+}
 
-  const metTekstje = niveau !== "aviStart" && tekstjeCheckbox.checked;
-  const gemaakteKaarten = maakUniekeKaarten(data.woorden, aantalKaartjes, woordenPerKaart);
+ const enkelAviStart = niveaus.length === 1 && niveaus[0] === "aviStart";
+const metTekstje = !enkelAviStart && tekstjeCheckbox.checked;
+const gemaakteKaarten = maakUniekeKaarten(verzameld.woorden, aantalKaartjes, woordenPerKaart);
 
   if (!gemaakteKaarten.volledigGelukt) {
     alert("Voor deze keuze zijn er te weinig verschillende combinaties mogelijk zonder identieke woordkaartjes. Kies minder kaartjes of minder woorden per kaartje.");
@@ -479,21 +521,30 @@ const titel = (titelInput.value || "").trim() || "Leeskaartjes";
  let ruweTekstjes = [];
 
 if (metTekstje) {
-  if (niveau === "M3" || niveau === "E3") {
-    ruweTekstjes = kiesTekstjesZonderDirecteHerhaling(data.tekstjes, aantalKaartjes)
+  const alleenEenvoudigeTekstjes =
+    verzameld.tekstjesLijst.length > 0 &&
+    verzameld.tekstjesGetypeerd.zin.length === 0 &&
+    verzameld.tekstjesGetypeerd.vraag.length === 0 &&
+    verzameld.tekstjesGetypeerd.roep.length === 0;
+
+  if (alleenEenvoudigeTekstjes) {
+    ruweTekstjes = kiesTekstjesZonderDirecteHerhaling(verzameld.tekstjesLijst, aantalKaartjes)
       .map((zin) => ({ type: "zin", zin }));
   } else {
-    ruweTekstjes = kiesGetypeerdeTekstjesZonderDirecteHerhaling(data.tekstjes, aantalKaartjes);
+    if (verzameld.tekstjesLijst.length > 0) {
+      verzameld.tekstjesGetypeerd.zin.push(...verzameld.tekstjesLijst);
+    }
+    ruweTekstjes = kiesGetypeerdeTekstjesZonderDirecteHerhaling(verzameld.tekstjesGetypeerd, aantalKaartjes);
   }
 }
   huidigeKaartjes = gemaakteKaarten.kaarten.map((woorden, index) => ({
     label: "Kaart " + (index + 1),
     woorden,
-    tekstje: formatteerTekstje(ruweTekstjes[index], niveau),
+    tekstje: formatteerTekstje(ruweTekstjes[index], niveaus[0]),
     kleur: kleurSets[index % kleurSets.length]
   }));
 
-  renderKaartjes(titel, lettergrootte, letterstijl, niveau, woordenPerKaart, metTekstje);
+  renderKaartjes(titel, lettergrootte, letterstijl, niveauLabel, woordenPerKaart, metTekstje);
 }
 
 function renderKaartjes(titel, lettergrootte, letterstijl, niveau, woordenPerKaart, metTekstje) {
@@ -681,7 +732,9 @@ function downloadPdf() {
 
 genereerBtn.addEventListener("click", maakKaartjes);
 downloadPdfBtn.addEventListener("click", downloadPdf);
-niveauSelect.addEventListener("change", maakKaartjes);
+if (aviGrid) {
+  aviGrid.addEventListener("change", maakKaartjes);
+}
 tekstjeCheckbox.addEventListener("change", maakKaartjes);
 
 if (letterstijlSelect) {
