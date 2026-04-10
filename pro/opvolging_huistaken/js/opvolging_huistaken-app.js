@@ -1504,18 +1504,13 @@ function tekenLegendaRegel(doc, status, x, y, zwartWit = false) {
 
 function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
   const pageWidth = doc.internal.pageSize.getWidth();
-  let y = 40;
+  let y = 50;
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(32, 49, 77);
   doc.setFontSize(16);
-  doc.text(leerlingNaam || "-", pageWidth / 2, y, { align: "center" });
-  y += 8;
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.text(`Klas: ${klasNaam || "-"}`, pageWidth / 2, y, { align: "center" });
-  y += 8;
+  doc.text(`${leerlingNaam || "-"}   Klas: ${klasNaam || "-"}`, pageWidth / 2, y, { align: "center" });
+  y += 10;
 
   if (schoolNaam) {
     doc.setFont("helvetica", "normal");
@@ -1763,7 +1758,7 @@ const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolNam
 
   statusDisplayOrder().forEach((status) => {
   tekenLegendaRegel(doc, status, 96, y, false);
-  doc.text(`${counts[status] || 0}`, 126, y);
+  doc.text(`${counts[status] || 0} keer`, 126, y);
   y += 10;
 });
 
@@ -1842,10 +1837,11 @@ const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolNam
     doc.setFontSize(12);
     doc.setTextColor(32, 49, 77);
 
-    statusDisplayOrder().forEach((status) => {
-      doc.text(`${status}: ${counts[status] || 0} keer`, 96, y);
-      y += 10;
-    });
+   statusDisplayOrder().forEach((status) => {
+  tekenLegendaRegel(doc, status, 96, y, false);
+  doc.text(`${counts[status] || 0} keer`, 126, y);
+  y += 10;
+});
 
     addInfoCard(doc, 18, topY + 78, 174, 142, "Opmerkingen");
     y = topY + 92;
@@ -2026,17 +2022,104 @@ function genereerKlasoverzichtPdfZwartWit() {
   doc.save(`Klasoverzicht_zwart_wit_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
 }
 
+function genereerAlleLeerlingenPdfZwartWit() {
+  if (!ensureJsPdf()) return;
+
+  const { jsPDF } = window.jspdf;
+  const periode = getActivePeriod();
+  const titel = (state.pdfTitle || "Opvolging huistaken") + " - zwart-wit";
+  const vandaag = getVandaagIso();
+
+  const actieveLeerlingen = state.leerlingen.filter((leerling) =>
+    leerlingIsActiefOpDatum(leerling, vandaag)
+  );
+
+  if (!actieveLeerlingen.length) {
+    alert("Er zijn geen actieve leerlingen om af te drukken.");
+    return;
+  }
+
+  const doc = new jsPDF("p", "mm", "a4");
+
+  actieveLeerlingen.forEach((leerling, index) => {
+    if (index !== 0) doc.addPage();
+
+    const { counts, opmerkingenLijst } = berekenStatusTellingenVoorLeerling(leerling.id);
+    const pieCanvas = maakPieCanvasZwartWit(counts);
+
+    addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+    const topY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
+
+    addInfoCard(doc, 18, topY + 4, 64, 66, "Overzicht");
+    doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
+
+    addInfoCard(doc, 88, topY + 4, 104, 66, "Samenvatting");
+    let y = topY + 18;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(12);
+    doc.setTextColor(32, 49, 77);
+
+    statusDisplayOrder().forEach((status) => {
+      tekenLegendaRegel(doc, status, 96, y, true);
+      doc.text(`${counts[status] || 0} keer`, 126, y);
+      y += 10;
+    });
+
+    addInfoCard(doc, 18, topY + 78, 174, 142, "Opmerkingen");
+    y = topY + 92;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+
+    if (opmerkingenLijst.length === 0) {
+      doc.text("Geen opmerkingen genoteerd.", 26, y);
+    } else {
+      opmerkingenLijst.forEach((item) => {
+        const statusTekst = `${item.datum} — ${item.status}`;
+        const commentTekst = item.comment;
+
+        if (y > 240) {
+          addFooter(doc);
+          doc.addPage();
+          addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`);
+          const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoolName);
+          addInfoCard(doc, 18, vervolgY + 4, 174, 220, "Opmerkingen");
+          y = vervolgY + 18;
+        }
+
+        doc.setFont("helvetica", "bold");
+        doc.text(statusTekst, 26, y);
+        y += 6;
+
+        doc.setFont("helvetica", "normal");
+        const regels = doc.splitTextToSize(commentTekst, 154);
+        doc.text(regels, 26, y);
+        y += regels.length * 5 + 6;
+      });
+    }
+
+    addFooter(doc);
+  });
+
+  doc.save(`Alle_leerlingen_zwart_wit_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+}
+
 function setupPdfKnoppen() {
   document.getElementById("pdfKlasBtn")?.addEventListener("click", () => {
     genereerKlasoverzichtPdf();
+  });
+
+  document.getElementById("pdfKlasZwartWitBtn")?.addEventListener("click", () => {
+    genereerKlasoverzichtPdfZwartWit();
   });
 
   document.getElementById("pdfAlleLeerlingenBtn")?.addEventListener("click", () => {
     genereerAlleLeerlingenPdf();
   });
 
-    document.getElementById("pdfZwartWitBtn")?.addEventListener("click", () => {
-    genereerKlasoverzichtPdfZwartWit();
+  document.getElementById("pdfAlleLeerlingenZwartWitBtn")?.addEventListener("click", () => {
+    genereerAlleLeerlingenPdfZwartWit();
   });
 }
 
