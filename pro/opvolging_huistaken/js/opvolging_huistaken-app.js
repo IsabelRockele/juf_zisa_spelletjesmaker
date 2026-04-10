@@ -1506,9 +1506,9 @@ function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = 50;
 
-  const naamTekst = leerlingNaam || "-";
-  const klasTekst = `Klas: ${klasNaam || "-"}`;
-  const tussenruimte = 10;
+  const naamTekst = (leerlingNaam || "-").replace(/\s+/g, " ").trim() || "-";
+  const klasTekst = `Klas: ${(klasNaam || "-").replace(/\s+/g, " ").trim() || "-"}`;
+  const tussenruimte = 28;
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(32, 49, 77);
@@ -1517,7 +1517,7 @@ function addLeerlingKop(doc, leerlingNaam, klasNaam, schoolNaam) {
   const naamBreedte = doc.getTextWidth(naamTekst);
   const klasBreedte = doc.getTextWidth(klasTekst);
   const totaalBreedte = naamBreedte + tussenruimte + klasBreedte;
-  const startX = (pageWidth - totaalBreedte) / 2;
+  const startX = Math.max(18, (pageWidth - totaalBreedte) / 2);
 
   doc.text(naamTekst, startX, y);
   doc.text(klasTekst, startX + naamBreedte + tussenruimte, y);
@@ -1575,12 +1575,53 @@ function addFooter(doc) {
   }
 }
 
-function toonPdfLoading() {
-  document.getElementById("pdfLoadingOverlay")?.classList.remove("hidden");
+function toonPdfLoading(tekst = "Even geduld, PDF wordt samengesteld...") {
+  const overlay = document.getElementById("pdfLoadingOverlay");
+  const tekstEl = document.getElementById("pdfLoadingText");
+  const fillEl = document.getElementById("pdfLoadingBarFill");
+  const percentEl = document.getElementById("pdfLoadingPercent");
+
+  overlay?.classList.remove("hidden");
+
+  if (tekstEl) tekstEl.textContent = tekst;
+  if (fillEl) {
+    fillEl.style.width = "42%";
+    fillEl.classList.add("is-indeterminate");
+  }
+  if (percentEl) percentEl.textContent = "";
+}
+
+function updatePdfLoading(tekst = "Even geduld, PDF wordt samengesteld...", percentage = null) {
+  const tekstEl = document.getElementById("pdfLoadingText");
+  const fillEl = document.getElementById("pdfLoadingBarFill");
+  const percentEl = document.getElementById("pdfLoadingPercent");
+
+  if (tekstEl) tekstEl.textContent = tekst;
+
+  if (fillEl) {
+    if (typeof percentage === "number" && Number.isFinite(percentage)) {
+      const veilig = Math.max(0, Math.min(100, Math.round(percentage)));
+      fillEl.style.width = `${veilig}%`;
+      fillEl.classList.remove("is-indeterminate");
+      if (percentEl) percentEl.textContent = `${veilig}%`;
+    } else {
+      fillEl.style.width = "42%";
+      fillEl.classList.add("is-indeterminate");
+      if (percentEl) percentEl.textContent = "";
+    }
+  }
 }
 
 function verbergPdfLoading() {
   document.getElementById("pdfLoadingOverlay")?.classList.add("hidden");
+}
+
+function wachtOpPdfOverlay() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      setTimeout(resolve, 0);
+    });
+  });
 }
 
 function maakPieCanvas(counts) {
@@ -1904,8 +1945,6 @@ const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoo
 }
 
 function genereerKlasoverzichtPdf() {
-  toonPdfLoading();
-
   setTimeout(() => {
   if (!ensureJsPdf()) return;
 
@@ -1974,7 +2013,6 @@ const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
 
   addFooter(doc);
      doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
-    verbergPdfLoading();
   }, 50);
 }
 
@@ -1984,7 +2022,7 @@ function genereerKlasoverzichtPdfZwartWit() {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF("p", "mm", "a4");
   const periode = getActivePeriod();
-  const titel = (state.pdfTitle || "Opvolging huistaken") + " - zwart-wit";
+  const titel = state.pdfTitle || "Opvolging huistaken";
   const { counts, probleemPerLeerling } = berekenStatusTellingenVoorKlas();
   const pieCanvas = maakPieCanvasZwartWit(counts);
 
@@ -2045,7 +2083,7 @@ function genereerKlasoverzichtPdfZwartWit() {
   }
 
   addFooter(doc);
-  doc.save(`Klasoverzicht_zwart_wit_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+  doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
 }
 
 function genereerAlleLeerlingenPdfZwartWit() {
@@ -2053,7 +2091,7 @@ function genereerAlleLeerlingenPdfZwartWit() {
 
   const { jsPDF } = window.jspdf;
   const periode = getActivePeriod();
-  const titel = (state.pdfTitle || "Opvolging huistaken") + " - zwart-wit";
+  const titel = state.pdfTitle || "Opvolging huistaken";
   const vandaag = getVandaagIso();
 
   const actieveLeerlingen = state.leerlingen.filter((leerling) =>
@@ -2128,24 +2166,48 @@ function genereerAlleLeerlingenPdfZwartWit() {
     addFooter(doc);
   });
 
-  doc.save(`Alle_leerlingen_zwart_wit_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+  doc.save(`Alle_leerlingen_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
 }
 
 function setupPdfKnoppen() {
-  document.getElementById("pdfKlasBtn")?.addEventListener("click", () => {
-    genereerKlasoverzichtPdf();
+  document.getElementById("pdfKlasBtn")?.addEventListener("click", async () => {
+    toonPdfLoading("Klasoverzicht wordt voorbereid...");
+    await wachtOpPdfOverlay();
+    try {
+      genereerKlasoverzichtPdf();
+    } finally {
+      verbergPdfLoading();
+    }
   });
 
-  document.getElementById("pdfKlasZwartWitBtn")?.addEventListener("click", () => {
-    genereerKlasoverzichtPdfZwartWit();
+  document.getElementById("pdfKlasZwartWitBtn")?.addEventListener("click", async () => {
+    toonPdfLoading("Klasoverzicht wordt voorbereid...");
+    await wachtOpPdfOverlay();
+    try {
+      genereerKlasoverzichtPdfZwartWit();
+    } finally {
+      verbergPdfLoading();
+    }
   });
 
-  document.getElementById("pdfAlleLeerlingenBtn")?.addEventListener("click", () => {
-    genereerAlleLeerlingenPdf();
+  document.getElementById("pdfAlleLeerlingenBtn")?.addEventListener("click", async () => {
+    toonPdfLoading("Alle leerlingen worden voorbereid...");
+    await wachtOpPdfOverlay();
+    try {
+      genereerAlleLeerlingenPdf();
+    } finally {
+      verbergPdfLoading();
+    }
   });
 
-  document.getElementById("pdfAlleLeerlingenZwartWitBtn")?.addEventListener("click", () => {
-    genereerAlleLeerlingenPdfZwartWit();
+  document.getElementById("pdfAlleLeerlingenZwartWitBtn")?.addEventListener("click", async () => {
+    toonPdfLoading("Alle leerlingen worden voorbereid...");
+    await wachtOpPdfOverlay();
+    try {
+      genereerAlleLeerlingenPdfZwartWit();
+    } finally {
+      verbergPdfLoading();
+    }
   });
 }
 
