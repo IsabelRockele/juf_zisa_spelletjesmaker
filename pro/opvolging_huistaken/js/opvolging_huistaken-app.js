@@ -1337,14 +1337,6 @@ const dagInput = document.getElementById("dagKolomDatumInput");
     return;
   }
 
-  if (zichtbareLeerlingen.length === 0) {
-  renderRegistratieLeeg(
-    thead,
-    tbody,
-    "Er zijn geen actieve leerlingen op deze datum. Controleer de start- en einddatum van je leerlingen."
-  );
-  return;
-}
 
   if (registratieTitelInput) {
     registratieTitelInput.value = state.pdfTitle;
@@ -1407,11 +1399,20 @@ if (periodeSelect) {
     </tr>
   `;
 
-  sorteerLeerlingen();
+sorteerLeerlingen();
 
 const zichtbareLeerlingen = state.leerlingen.filter((leerling) =>
   leerlingWasActiefInPeriode(leerling, activeColumns)
 );
+
+if (zichtbareLeerlingen.length === 0) {
+  renderRegistratieLeeg(
+    thead,
+    tbody,
+    "Er zijn geen actieve leerlingen op deze datum. Controleer de start- en einddatum van je leerlingen."
+  );
+  return;
+}
 
 tbody.innerHTML = zichtbareLeerlingen
   .map((leerling) => `
