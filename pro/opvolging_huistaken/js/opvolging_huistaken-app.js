@@ -639,6 +639,16 @@ function setupHelpModal() {
       if (modal) modal.hidden = true;
     });
   });
+
+  document.getElementById("openPrivacyBtn")?.addEventListener("click", () => {
+  document.getElementById("privacyModal").hidden = false;
+});
+
+document.querySelectorAll("[data-close-privacy]").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.getElementById("privacyModal").hidden = true;
+  });
+});
 }
 
 // ----------------------
