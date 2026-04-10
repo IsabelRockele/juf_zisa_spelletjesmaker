@@ -566,6 +566,9 @@ function setupSchooljaar() {
     const huidigeData = state.schoolYearData[state.currentSchoolYear] || createEmptySchoolYearData();
     const nieuweData = createEmptySchoolYearData();
 
+    nieuweData.entries = {};
+nieuweData.columns = [];
+nieuweData.activePeriodId = null;
     nieuweData.schoolName = huidigeData.schoolName;
     nieuweData.className = huidigeData.className;
     nieuweData.pdfTitle = huidigeData.pdfTitle;
@@ -581,24 +584,18 @@ function setupSchooljaar() {
     }
 
     if (kopieerPeriodesSelect?.value === "ja") {
-      nieuweData.reportPeriods = JSON.parse(JSON.stringify(huidigeData.reportPeriods || []));
-      nieuweData.reportPeriods.forEach((periode) => {
-        periode.id = createId();
-      });
-      nieuweData.activePeriodId = nieuweData.reportPeriods[0]?.id || null;
-    }
+  nieuweData.reportPeriods = (huidigeData.reportPeriods || []).map((periode) => ({
+    id: createId(),
+    name: periode.name || "",
+    start: periode.start || "",
+    end: periode.end || "",
+    columns: []
+  }));
+  nieuweData.activePeriodId = nieuweData.reportPeriods[0]?.id || null;
+}
 
     state.schoolYears.push(nieuwJaar);
     state.schoolYears.sort();
-
-    if (state.schoolYears.length > 2) {
-      const oudste = state.schoolYears[0];
-      delete state.schoolYearData[oudste];
-      state.schoolYears = state.schoolYears.slice(-2);
-    }
-
-    state.schoolYearData[nieuwJaar] = nieuweData;
-    loadSchoolYearData(nieuwJaar);
 
      if (state.schoolYears.length > 2) {
       const oudste = state.schoolYears[0];
@@ -1274,10 +1271,6 @@ function renderRegistratieLeeg(thead, tbody, boodschap) {
 function renderRegistratie() {
   const activeColumns = getColumnsForActivePeriod();
 
-  if ((!activeColumns || activeColumns.length === 0) && Array.isArray(state.columns) && state.columns.length > 0) {
-    setColumnsForActivePeriod([...state.columns]);
-    state.columns = [];
-  }
 
   const thead = document.getElementById("registratieThead");
 const tbody = document.getElementById("registratieTbody");
