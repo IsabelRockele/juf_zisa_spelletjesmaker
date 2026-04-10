@@ -1203,13 +1203,13 @@ function openPeriodeEditModal(periodId) {
 // ----------------------
 
 function addKolom(value) {
-  if (!value) {
-    alert("Kies eerst een datum.");
+  if (!state.activePeriodId) {
+    alert("Kies eerst een rapportperiode.");
     return;
   }
 
-  if (!state.activePeriodId) {
-    alert("Kies eerst een rapportperiode.");
+  if (!value) {
+    alert("Kies eerst een datum.");
     return;
   }
 
@@ -1222,11 +1222,13 @@ function addKolom(value) {
     renderRegistratie();
     renderDashboard();
     markChanged();
+    scrollNaarLaatsteDagKolom();
     return;
   }
 
   renderRegistratie();
   renderDashboard();
+  scrollNaarLaatsteDagKolom();
 }
 
 function removeKolom(value) {
@@ -1235,6 +1237,28 @@ function removeKolom(value) {
   renderRegistratie();
   renderDashboard();
   markChanged();
+}
+
+function scrollNaarLaatsteDagKolom() {
+  requestAnimationFrame(() => {
+    const wrap = document.getElementById("tableScrollWrap");
+    const tabel = document.getElementById("registratieTabel");
+    const laatsteDagKolom = tabel?.querySelector("thead th:last-child");
+
+    if (!wrap || !laatsteDagKolom) return;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const kolomRect = laatsteDagKolom.getBoundingClientRect();
+
+    const extraMarge = 16;
+    const verschuiving = (kolomRect.right - wrapRect.right) + extraMarge;
+
+    if (verschuiving > 0) {
+      wrap.scrollLeft += verschuiving;
+    } else {
+      wrap.scrollLeft = wrap.scrollWidth;
+    }
+  });
 }
 
 function setupKolomKnoppen() {
@@ -1945,75 +1969,80 @@ const vervolgY = addLeerlingKop(doc, leerling.name, state.className, state.schoo
 }
 
 function genereerKlasoverzichtPdf() {
-  setTimeout(() => {
   if (!ensureJsPdf()) return;
 
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF("p", "mm", "a4");
-  const periode = getActivePeriod();
-  const titel = state.pdfTitle || "Opvolging huistaken";
-  const { counts, probleemPerLeerling } = berekenStatusTellingenVoorKlas();
-  const pieCanvas = maakPieCanvas(counts);
+  toonPdfLoading();
 
-const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-  `${state.className || "-"}`,
-  state.schoolName || ""
-]);
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "mm", "a4");
+      const periode = getActivePeriod();
+      const titel = state.pdfTitle || "Opvolging huistaken";
+      const { counts, probleemPerLeerling } = berekenStatusTellingenVoorKlas();
+      const pieCanvas = maakPieCanvas(counts);
 
-  addInfoCard(doc, 18, topY + 4, 64, 66, "Klasoverzicht");
-  doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
+      const topY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
+        `${state.className || "-"}`,
+        state.schoolName || ""
+      ]);
 
-  addInfoCard(doc, 88, topY + 4, 104, 66, "Samenvatting");
-  let y = topY + 18;
+      addInfoCard(doc, 18, topY + 4, 64, 66, "Klasoverzicht");
+      doc.addImage(pieCanvas.toDataURL("image/png"), "PNG", 29, topY + 16, 34, 34);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(12);
-  doc.setTextColor(32, 49, 77);
-
-  statusDisplayOrder().forEach((status) => {
-  tekenLegendaRegel(doc, status, 96, y, false);
-  doc.text(`${counts[status] || 0} keer`, 126, y);
-  y += 10;
-});
-
-  addInfoCard(doc, 18, topY + 78, 174, 142, "Leerlingen die extra opvolging vragen");
-  y = topY + 92;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(11);
-
-  if (probleemPerLeerling.length === 0) {
-    doc.text("Geen leerlingen boven de ingestelde drempel.", 26, y);
-  } else {
-    probleemPerLeerling.slice(0, 8).forEach((item, index) => {
-      if (y > 240) {
-        addFooter(doc);
-        doc.addPage();
-        const vervolgY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
-          "Vervolg klasoverzicht",
-          state.schoolName || ""
-        ]);
-        addInfoCard(doc, 18, vervolgY + 4, 174, 220, "Leerlingen die extra opvolging vragen");
-        y = vervolgY + 18;
-      }
-
-      doc.setFont("helvetica", "bold");
-      doc.text(`${index + 1}. ${item.naam}`, 26, y);
-      y += 6;
+      addInfoCard(doc, 88, topY + 4, 104, 66, "Samenvatting");
+      let y = topY + 18;
 
       doc.setFont("helvetica", "normal");
-      doc.text(`te laat: ${item.detail["te laat"]}`, 34, y);
-      y += 5;
-      doc.text(`onvolledig: ${item.detail["onvolledig"]}`, 34, y);
-      y += 5;
-      doc.text(`niet in orde: ${item.detail["niet in orde"]}`, 34, y);
-      y += 9;
-    });
-  }
+      doc.setFontSize(12);
+      doc.setTextColor(32, 49, 77);
 
-  addFooter(doc);
-     doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
-  }, 50);
+      statusDisplayOrder().forEach((status) => {
+        tekenLegendaRegel(doc, status, 96, y, false);
+        doc.text(`${counts[status] || 0} keer`, 126, y);
+        y += 10;
+      });
+
+      addInfoCard(doc, 18, topY + 78, 174, 142, "Leerlingen die extra opvolging vragen");
+      y = topY + 92;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+
+      if (probleemPerLeerling.length === 0) {
+        doc.text("Geen leerlingen boven de ingestelde drempel.", 26, y);
+      } else {
+        probleemPerLeerling.slice(0, 8).forEach((item, index) => {
+          if (y > 240) {
+            addFooter(doc);
+            doc.addPage();
+            const vervolgY = addPdfTitleBar(doc, `${titel} - ${periode?.name || ""}`, [
+              "Vervolg klasoverzicht",
+              state.schoolName || ""
+            ]);
+            addInfoCard(doc, 18, vervolgY + 4, 174, 220, "Leerlingen die extra opvolging vragen");
+            y = vervolgY + 18;
+          }
+
+          doc.setFont("helvetica", "bold");
+          doc.text(`${index + 1}. ${item.naam}`, 26, y);
+          y += 6;
+
+          doc.setFont("helvetica", "normal");
+          doc.text(`te laat: ${item.detail["te laat"]}`, 34, y);
+          y += 5;
+          doc.text(`onvolledig: ${item.detail["onvolledig"]}`, 34, y);
+          y += 5;
+          doc.text(`niet in orde: ${item.detail["niet in orde"]}`, 34, y);
+          y += 9;
+        });
+      }
+
+      addFooter(doc);
+      doc.save(`Klasoverzicht_${(periode?.name || "periode").replace(/\s+/g, "_")}.pdf`);
+      verbergPdfLoading();
+    }, 80);
+  });
 }
 
 function genereerKlasoverzichtPdfZwartWit() {
