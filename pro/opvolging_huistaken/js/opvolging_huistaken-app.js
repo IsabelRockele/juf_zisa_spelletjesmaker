@@ -474,10 +474,6 @@ function renderHeader() {
  if (pageTitle) pageTitle.textContent = titles[state.currentView] || "Dashboard";
 if (pageSubtitle) pageSubtitle.textContent = subtitles[state.currentView] || "";
 
-const backBtn = document.getElementById("backBtn");
-if (backBtn) {
-  backBtn.style.display = state.currentView === "dashboard" ? "none" : "inline-flex";
-}
 }
 
 function switchView(targetView) {
@@ -507,10 +503,6 @@ function setupMenu() {
     button.addEventListener("click", () => {
       switchView(button.dataset.view);
     });
-  });
-
-    document.getElementById("backBtn")?.addEventListener("click", () => {
-    switchView(state.previousView || "dashboard");
   });
 
     document.getElementById("dashboardStartInstellingenBtn")?.addEventListener("click", () => {
