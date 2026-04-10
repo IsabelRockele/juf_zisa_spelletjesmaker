@@ -81,6 +81,37 @@
 <button class="menu-btn menu-btn-rapportperiodes" data-view="rapportperiodes">Rapportperiodes</button>
 <button class="menu-btn menu-btn-registratie" data-view="registratie">Registratie</button>
       </nav>
+
+          <aside class="sidebar">
+      <div class="top-left-controls">
+  <button class="keuzemenu-btn" id="keuzemenuBtn" type="button" onclick="window.location.href='../app.html'">☰ Keuzemenu</button>
+
+<div class="schooljaar-box">
+  <span class="schooljaar-label">Schooljaar</span>
+
+  <select id="schooljaarSelect" class="schooljaar-select"></select>
+
+  <button class="ghost-btn schooljaar-btn" id="nieuwSchooljaarBtn" type="button">
+    + Nieuw schooljaar
+  </button>
+
+  <div class="schooljaar-info">
+    Bewaring van maximum 2 schooljaren: het huidige en het vorige. Vanaf toevoegen van een 3de schooljaar verdwijnt het oudste.
+  </div>
+</div>
+
+      <nav class="menu">
+        <button class="menu-btn menu-btn-dashboard is-active" data-view="dashboard">Dashboard</button>
+<button class="menu-btn menu-btn-instellingen" data-view="instellingen">Instellingen</button>
+<button class="menu-btn menu-btn-klaslijst" data-view="klaslijst">Klaslijst</button>
+<button class="menu-btn menu-btn-rapportperiodes" data-view="rapportperiodes">Rapportperiodes</button>
+<button class="menu-btn menu-btn-registratie" data-view="registratie">Registratie</button>
+      </nav>
+
+      <div class="privacy-box">
+  <button class="ghost-btn" id="openPrivacyBtn">🔒 Privacy</button>
+</div>
+
     </aside>
 
     <main class="main-content">
