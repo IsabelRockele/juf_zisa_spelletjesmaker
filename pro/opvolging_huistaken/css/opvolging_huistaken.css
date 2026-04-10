@@ -1634,3 +1634,13 @@ textarea {
   margin-top: auto;
   padding-top: 20px;
 }
+
+#privacyModal .help-backdrop {
+  background: rgba(32, 49, 77, 0.48);
+}
+
+#privacyModal .help-dialog {
+  background: #ffffff;
+  opacity: 1;
+  box-shadow: 0 24px 60px rgba(32, 49, 77, 0.22);
+}
