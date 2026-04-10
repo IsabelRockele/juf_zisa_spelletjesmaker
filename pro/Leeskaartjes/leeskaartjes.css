@@ -1,0 +1,301 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --blauw: #1a3a5c;
+  --blauw-donker: #122a42;
+  --lichtblauw: #edf4ff;
+  --accent: #f6d96c;
+  --tekst: #2c3e50;
+  --subtiel: #72819a;
+  --kaart-rand: #bfd2ee;
+  --paneel: #ffffff;
+  --achtergrond: #f4f6fb;
+  --schaduw: 0 10px 30px rgba(26, 58, 92, 0.08);
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--tekst);
+  background: var(--achtergrond);
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #dbe4f0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  text-decoration: none;
+  background: var(--blauw);
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: var(--schaduw);
+}
+
+.menu-btn:hover {
+  background: var(--blauw-donker);
+}
+
+.header-text h1 {
+  margin: 0 0 4px 0;
+  font-size: 28px;
+}
+
+.header-text p {
+  margin: 0;
+  color: var(--subtiel);
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+
+.panel {
+  background: var(--paneel);
+  border: 1px solid #dbe4f0;
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: var(--schaduw);
+}
+
+.controls-panel h2,
+.preview-panel h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+
+.field {
+  margin-bottom: 16px;
+}
+
+.field label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.field input[type="text"],
+.field input[type="number"],
+.field select {
+  width: 100%;
+  border: 1px solid #c9d6ea;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  background: #ffffff;
+}
+
+.field small {
+  display: block;
+  margin-top: 6px;
+  color: var(--subtiel);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-row label {
+  margin: 0;
+}
+
+.info-box {
+  background: var(--lichtblauw);
+  border: 1px solid #d8e6ff;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 18px 0;
+}
+
+.info-box p {
+  margin: 6px 0 0 0;
+  line-height: 1.45;
+  color: var(--subtiel);
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.primary-btn,
+.secondary-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primary-btn {
+  background: var(--blauw);
+  color: #ffffff;
+}
+
+.primary-btn:hover {
+  background: var(--blauw-donker);
+}
+
+.secondary-btn {
+  background: var(--accent);
+  color: #453300;
+}
+
+.preview-header {
+  margin-bottom: 16px;
+}
+
+#previewMeta {
+  margin: 6px 0 0 0;
+  color: var(--subtiel);
+}
+
+.page-preview {
+  background: #ffffff;
+  border: 1px dashed #c9d6ea;
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.page-top {
+  margin-bottom: 18px;
+}
+
+.preview-title {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--blauw);
+  margin-bottom: 10px;
+}
+
+.preview-name-line {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.kaartjes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
+  gap: 16px;
+}
+
+.leeskaartje {
+  position: relative;
+  border: 2px solid var(--kaart-rand);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fffef7 0%, #ffffff 100%);
+  padding: 16px;
+  min-height: 250px;
+  overflow: hidden;
+}
+
+.leeskaartje::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 6px rgba(246, 217, 108, 0.12);
+}
+
+.kaart-label {
+  display: block;
+  margin-bottom: 16px;
+  color: #5f7087;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.woorden-lijst {
+  margin: 0;
+  padding-left: 22px;
+}
+
+.woorden-lijst li {
+  margin-bottom: 12px;
+  line-height: 1.25;
+  font-weight: inherit;
+}
+
+.kaart-tekstje {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #d7dfef;
+  color: #4d5f79;
+  line-height: 1.35;
+  font-weight: inherit;
+}
+
+@media (max-width: 980px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.avi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.avi-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #c9d6ea;
+  border-radius: 12px;
+  background: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 0;
+}
+
+.avi-option input[type="checkbox"] {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.avi-option span {
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .avi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .avi-grid {
+    grid-template-columns: 1fr;
+  }
+}
