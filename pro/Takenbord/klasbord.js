@@ -1228,15 +1228,6 @@ function drawClock(){
     ctx.stroke();
   }
 
-  // Secondewijzer — wijst naar hoeveel er AL verstreken is (met klok mee vanaf 12)
-  var elapsed = timerTotalSeconds - timerRemaining;
-  var sAngle = -Math.PI/2 + (2*Math.PI * (elapsed % 60) / 60);
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.cos(sAngle) * r * 0.82, cy + Math.sin(sAngle) * r * 0.82);
-  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
-
   // Middelpunt
   ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2*Math.PI);
   ctx.fillStyle = '#fff'; ctx.fill();
