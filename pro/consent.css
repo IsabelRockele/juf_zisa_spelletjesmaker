@@ -212,3 +212,23 @@
   #zisa-consent-footer { flex-direction: column; align-items: stretch; text-align: center; padding: 12px 16px; }
   #zisa-consent-knop   { width: 100%; padding: 11px; }
 }
+
+/* ── Niet nu knop ── */
+#zisa-consent-niet-nu {
+  background: transparent;
+  color: var(--gray);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+}
+
+#zisa-consent-niet-nu:hover {
+  background: var(--light);
+  color: var(--dark);
+}
