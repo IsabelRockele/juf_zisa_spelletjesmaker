@@ -8,8 +8,20 @@
 <link rel="stylesheet" href="klasbord.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-klasbord.js"></script>
 </head>
 <body>
+<div class="pro-header">
+  <div class="pro-header-left">
+    <a href="../app.html" class="pro-back-btn">← Terug naar menu</a>
+    <span class="pro-header-title">📋 Klasbord</span>
+  </div>
+  <span class="pro-badge">PRO</span>
+</div>
 <div id="app">
 <div id="test-banner">🧪 TEST VERSIE — opgeslagen in browser (localStorage) — geen login vereist</div>
 <!-- WELCOME SCREEN -->
@@ -501,6 +513,15 @@ Maak een backup aan het einde van elke periode!</p>
 <style>
 .timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
 .timer-preset:hover{background:#e0e7ff;}
+
+/* ── PRO HEADER ── */
+.pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:10px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:44px;box-sizing:border-box;}
+.pro-header-left{display:flex;align-items:center;gap:10px;}
+.pro-back-btn{border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.pro-back-btn:hover{background:rgba(255,255,255,.3);}
+.pro-header-title{font-size:14px;font-weight:800;opacity:.9;}
+.pro-badge{background:rgba(255,255,255,.2);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;letter-spacing:.05em;}
+body{padding-top:44px!important;}
 </style>
 <!-- BACKUP MODAL -->
 <div class="overlay hidden" id="backup-modal">
@@ -535,4 +556,6 @@ Maak een backup aan het einde van elke periode!</p>
 </div>
 </div>
 
+  <script src="../device-id.js"></script>
+  <script src="../guard.js"></script>
 </body></html>
