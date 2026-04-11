@@ -136,32 +136,11 @@ body{min-height:100vh;overflow:auto;}
            placeholder="bv. Mijn klas of Hoekwerk week 14"
            onkeydown="if(event.key==='Enter')maakNieuwBord()">
 
-    <!-- Bewaarde klaslijst -->
-    <div id="nieuw-klaslijst-sectie" style="display:none;margin-bottom:10px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;">
-        <div>
-          <div style="font-size:13px;font-weight:800;color:#166534;">👥 Bewaarde klaslijst gebruiken?</div>
-          <div style="font-size:11px;color:#6b7280;margin-top:2px;" id="nieuw-klaslijst-info"></div>
-        </div>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;margin-left:10px;">
-          <input type="checkbox" id="nieuw-gebruik-klaslijst" checked style="width:16px;height:16px;accent-color:#16a34a;">
-          <span style="font-size:12px;font-weight:800;color:#166534;">Ja</span>
-        </label>
-      </div>
-    </div>
-
-    <!-- Bewaarde taken -->
-    <div id="nieuw-taken-sectie" style="display:none;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;">
-        <div>
-          <div style="font-size:13px;font-weight:800;color:#166534;">📋 Bewaarde taken gebruiken?</div>
-          <div style="font-size:11px;color:#6b7280;margin-top:2px;" id="nieuw-taken-info"></div>
-        </div>
-        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;flex-shrink:0;margin-left:10px;">
-          <input type="checkbox" id="nieuw-gebruik-taken" checked style="width:16px;height:16px;accent-color:#16a34a;">
-          <span style="font-size:12px;font-weight:800;color:#166534;">Ja</span>
-        </label>
-      </div>
+    <!-- Basis van bestaand bord: enkel tonen als er al borden zijn -->
+    <div id="nieuw-basis-sectie" style="display:none;margin-bottom:6px;">
+      <label style="font-size:12px;font-weight:800;color:#374151;display:block;margin-bottom:6px;">Vertrek van een bestaand bord?</label>
+      <select id="nieuw-basis-keuze" style="width:100%;border:2px solid #e0e7ff;border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit;color:#374151;background:#fff;margin-bottom:6px;" onchange="updateBasisInfo()"></select>
+      <div id="nieuw-basis-info" style="font-size:11px;color:#6b7280;line-height:1.6;padding:8px 10px;background:#f8fafc;border-radius:8px;display:none;"></div>
     </div>
 
     <div class="modal-btns">
@@ -171,20 +150,7 @@ body{min-height:100vh;overflow:auto;}
   </div>
 </div>
 
-<!-- MAX BORDEN MODAL -->
-<div class="overlay-bg" id="modal-max" style="display:none;">
-  <div class="modal-kaart">
-    <h3>⚠️ Maximaal 4 borden</h3>
-    <p>Je hebt al 4 borden van dit type. Als je doorgaat, wordt het oudste bord verwijderd:</p>
-    <div class="warn-box" id="max-oldest-info"></div>
-    <div class="tip-box">💡 <strong>Tip:</strong> open het oudste bord en download eerst een <strong>PDF rapport</strong> als je de gegevens nog nodig hebt voor rapporten of evaluatiegesprekken.</div>
-    <button type="button" class="modal-btn-danger" onclick="verwijderOudsteEnMaak()">🗑️ Oudste bord verwijderen en doorgaan</button>
-    <button type="button" class="modal-btn-sec" onclick="openOudsteVoorPdf()">📄 Eerst PDF downloaden van oudste bord</button>
-    <button type="button" class="modal-btn-cancel" style="width:100%;" onclick="sluitMax()">Annuleren</button>
-  </div>
-</div>
-
-<!-- VERWIJDER BEVESTIGING -->
+<!-- VERWIJDER BEVESTIGING --><!-- VERWIJDER BEVESTIGING -->
 <div class="overlay-bg" id="modal-del" style="display:none;">
   <div class="modal-kaart">
     <h3>🗑️ Bord verwijderen?</h3>
@@ -399,35 +365,47 @@ function openNieuwBord(){
   document.getElementById('modal-nieuw-ok').className =
     'modal-btn-ok' + (huidigType === 'kindbord' ? ' kind' : '');
 
-  var klKey = huidigType === 'klasbord' ? 'hergebruik_klaslijst_klasbord' : 'hergebruik_klaslijst_kindbord';
-  var tkKey = huidigType === 'klasbord' ? 'hergebruik_taken_klasbord' : 'hergebruik_taken_kindbord';
-
-  // Toon bewaarde klaslijst optie
-  var klSectie = document.getElementById('nieuw-klaslijst-sectie');
-  var klInfo = document.getElementById('nieuw-klaslijst-info');
-  try {
-    var kl = JSON.parse(localStorage.getItem(klKey)||'null');
-    if(kl && kl.pupils && kl.pupils.length){
-      klSectie.style.display = 'block';
-      klInfo.textContent = kl.pupils.length + ' leerlingen · bewaard op ' + fmtDatum(kl.savedAt);
-    } else { klSectie.style.display = 'none'; }
-  } catch { klSectie.style.display = 'none'; }
-
-  // Toon bewaarde taken optie
-  var tkSectie = document.getElementById('nieuw-taken-sectie');
-  var tkInfo = document.getElementById('nieuw-taken-info');
-  try {
-    var tk = JSON.parse(localStorage.getItem(tkKey)||'null');
-    if(tk && tk.savedAt){
-      var aantalEigen = (tk.customTasks||[]).length;
-      tkSectie.style.display = 'block';
-      tkInfo.textContent = (aantalEigen ? aantalEigen + ' eigen taken · ' : '') + 'bewaard op ' + fmtDatum(tk.savedAt);
-    } else { tkSectie.style.display = 'none'; }
-  } catch { tkSectie.style.display = 'none'; }
+  // Toon "vertrek van bestaand bord" als er al borden zijn
+  var borden = getBorden(huidigType);
+  var basisSectie = document.getElementById('nieuw-basis-sectie');
+  var basisKeuze = document.getElementById('nieuw-basis-keuze');
+  if(borden.length > 0){
+    basisSectie.style.display = 'block';
+    basisKeuze.innerHTML = '<option value="">Leeg bord starten</option>'
+      + borden.map(function(b){
+          var n = 0;
+          try { n = (JSON.parse(localStorage.getItem(b.storageKey)||'{}')).pupils.length || 0; } catch{}
+          return '<option value="' + b.id + '">' + esc(b.naam) + (n ? ' — ' + n + ' leerlingen' : '') + '</option>';
+        }).join('');
+    document.getElementById('nieuw-basis-info').style.display = 'none';
+  } else {
+    basisSectie.style.display = 'none';
+  }
 
   document.getElementById('modal-nieuw').style.display = 'flex';
   setTimeout(function(){ document.getElementById('nieuw-naam').focus(); }, 100);
 }
+
+function updateBasisInfo(){
+  var id = document.getElementById('nieuw-basis-keuze').value;
+  var infoEl = document.getElementById('nieuw-basis-info');
+  if(!id){ infoEl.style.display = 'none'; return; }
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id === id; });
+  if(!bord){ infoEl.style.display = 'none'; return; }
+  try {
+    var d = JSON.parse(localStorage.getItem(bord.storageKey)||'{}');
+    var nLeerlingen = (d.pupils||[]).length;
+    var nEigen = (d.customTasks||[]).length;
+    var nActief = (d.activeTasks||[]).length;
+    infoEl.innerHTML = '👥 ' + nLeerlingen + ' leerlingen · '
+      + '📋 ' + nActief + ' actieve taken'
+      + (nEigen ? ' + ' + nEigen + ' eigen taken' : '')
+      + '<br/>Voortgang en bevindingen starten leeg.';
+    infoEl.style.display = 'block';
+  } catch { infoEl.style.display = 'none'; }
+}
+
 function sluitNieuw(){ document.getElementById('modal-nieuw').style.display = 'none'; }
 
 function maakNieuwBord(){
@@ -459,44 +437,37 @@ function doeAanmaken(naam){
   borden.push({ id:id, naam:naam, storageKey:storageKey, aangemaakt:Date.now(), bijgewerkt:Date.now() });
   saveBorden(huidigType, borden);
 
-  var klKey = huidigType === 'klasbord' ? 'hergebruik_klaslijst_klasbord' : 'hergebruik_klaslijst_kindbord';
-  var tkKey = huidigType === 'klasbord' ? 'hergebruik_taken_klasbord' : 'hergebruik_taken_kindbord';
-
-  var gebruikKlaslijst = document.getElementById('nieuw-gebruik-klaslijst');
-  var gebruikTaken = document.getElementById('nieuw-gebruik-taken');
-  var klSectie = document.getElementById('nieuw-klaslijst-sectie');
-  var tkSectie = document.getElementById('nieuw-taken-sectie');
-  var wilKlaslijst = gebruikKlaslijst && gebruikKlaslijst.checked && klSectie && klSectie.style.display !== 'none';
-  var wilTaken = gebruikTaken && gebruikTaken.checked && tkSectie && tkSectie.style.display !== 'none';
+  // Haal basis-bord op als geselecteerd
+  var basisId = '';
+  var basisKeuze = document.getElementById('nieuw-basis-keuze');
+  if(basisKeuze) basisId = basisKeuze.value;
 
   var nieuweState = huidigType === 'klasbord'
     ? {pupils:[],activeTasks:[],progress:{},customTasks:[],pupilTaskOverrides:{},notes:{},showNumbers:false,showLastname:false,showSmileys:false,customIcons:{},pupilPhotos:{},taskLabelOverrides:{},boardSize:'normal'}
     : {pupils:[],activeTasks:[],progress:{},customTasks:[],personalAssignments:{},kindBoardOnlyPersonal:false,nameOrder:'voornaam',showLastname:false,customIcons:{},pupilPhotos:{},taskLabelOverrides:{},notes:{},boardSize:'normal'};
 
-  if(wilKlaslijst){
-    try {
-      var kl = JSON.parse(localStorage.getItem(klKey)||'null');
-      if(kl && kl.pupils){
-        nieuweState.pupils = kl.pupils.map(function(p){ return {id:'_'+Math.random().toString(36).slice(2)+Date.now(),voornaam:p.voornaam,achternaam:p.achternaam||''}; });
-        nieuweState.pupilPhotos = kl.pupilPhotos || {};
-        nieuweState.showLastname = kl.showLastname || false;
-        if('showNumbers' in nieuweState) nieuweState.showNumbers = kl.showNumbers || false;
-        if('nameOrder' in nieuweState) nieuweState.nameOrder = kl.nameOrder || 'voornaam';
-      }
-    } catch(e){}
-  }
-
-  if(wilTaken){
-    try {
-      var tk = JSON.parse(localStorage.getItem(tkKey)||'null');
-      if(tk){
-        nieuweState.activeTasks = tk.activeTasks || [];
-        nieuweState.customTasks = tk.customTasks || [];
-        nieuweState.taskLabelOverrides = tk.taskLabelOverrides || {};
-        nieuweState.customIcons = tk.customIcons || {};
-        if('showSmileys' in nieuweState) nieuweState.showSmileys = tk.showSmileys || false;
-      }
-    } catch(e){}
+  if(basisId){
+    var basisBord = getBorden(huidigType).find(function(b){ return b.id === basisId; });
+    if(basisBord){
+      try {
+        var bron = JSON.parse(localStorage.getItem(basisBord.storageKey)||'{}');
+        // Leerlingen — nieuwe IDs, geen voortgang
+        nieuweState.pupils = (bron.pupils||[]).map(function(p){
+          return {id:'_'+Math.random().toString(36).slice(2)+Date.now(), voornaam:p.voornaam, achternaam:p.achternaam||''};
+        });
+        nieuweState.pupilPhotos = bron.pupilPhotos || {};
+        nieuweState.showLastname = bron.showLastname || false;
+        if('showNumbers' in nieuweState) nieuweState.showNumbers = bron.showNumbers || false;
+        if('nameOrder' in nieuweState) nieuweState.nameOrder = bron.nameOrder || 'voornaam';
+        // Taken + afbeeldingen + namen
+        nieuweState.activeTasks = bron.activeTasks || [];
+        nieuweState.customTasks = (bron.customTasks||[]).map(function(t){ return Object.assign({},t); });
+        nieuweState.taskLabelOverrides = bron.taskLabelOverrides || {};
+        nieuweState.customIcons = bron.customIcons || {};
+        if('showSmileys' in nieuweState) nieuweState.showSmileys = bron.showSmileys || false;
+        nieuweState.boardSize = bron.boardSize || 'normal';
+      } catch(e){}
+    }
   }
 
   localStorage.setItem(storageKey, JSON.stringify(nieuweState));
