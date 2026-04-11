@@ -86,8 +86,9 @@ function toonConsentPopup(user, consentRef) {
         <span id="zisa-consent-slotje">🔒</span>
         <h2 id="zisa-consent-titel">Even een momentje</h2>
         <p id="zisa-consent-subtitel">
-          Klasmanagement slaat gegevens op in de cloud.<br>
-          Lees even hoe we daarmee omgaan.
+          Om <strong style="color:#ffcf56;">Opvolging huistaken</strong> en <strong style="color:#ffcf56;">Takenbord</strong> te gebruiken,
+          slaan we klasgegevens veilig op in de cloud.<br><br>
+          <span style="color:#bbbbbb;font-size:0.82rem;">De rest van de Spelgenerator — werkbladen, spelletjes, alles — werkt gewoon zonder dit akkoord. Klik op 'niet nu' onderaan als je nog even geen akkoord wil geven.</span>
         </p>
       </div>
 
