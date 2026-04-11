@@ -419,92 +419,179 @@ function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!do
 function fmtDate(str){ if(!str)return'';try{return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return str;} }
 
 function generateAndPrint(){
-  const periodName=document.getElementById('pdf-period-name').value.trim();
-  const dateFrom=document.getElementById('pdf-date-from').value;
-  const dateTo=document.getElementById('pdf-date-to').value;
-  const pl=[periodName];
+  const { jsPDF } = window.jspdf;
+  if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+
+  const periodName = document.getElementById('pdf-period-name').value.trim();
+  const dateFrom = document.getElementById('pdf-date-from').value;
+  const dateTo = document.getElementById('pdf-date-to').value;
+  const pl = [periodName];
   if(dateFrom||dateTo) pl.push(fmtDate(dateFrom)+(dateTo&&dateTo!==dateFrom?' – '+fmtDate(dateTo):''));
-  const periodLabel=pl.filter(Boolean).join('  ·  ');
-  const today=fmtDate(new Date().toISOString().slice(0,10));
-  const allTasks=buildAllTasksForBoard();
-  const periodDiv=periodLabel?'<div class="pr-period">Periode: '+periodLabel+'</div>':'';
-  let overviewRows='';
-  state.pupils.forEach((p,i)=>{
-    const pid=p.id,complete=isPupilComplete(pid);
-    const myIds=new Set(pupilTasks(pid).map(t=>t.id));
-    let cells='';
+  const periodLabel = pl.filter(Boolean).join('  ·  ');
+  const today = fmtDate(new Date().toISOString().slice(0,10));
+  const allTasks = buildAllTasksForBoard();
+  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  const pw = doc.internal.pageSize.getWidth();
+  const ph = doc.internal.pageSize.getHeight();
+  const BLUE = [30,58,138];
+  const LIGHT = [241,245,249];
+  const GREEN = [21,128,61];
+  const RED = [220,38,38];
+
+  function addHeader(title, sub){
+    doc.setFillColor(...BLUE);
+    doc.rect(0,0,pw,14,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text(title, 10, 9);
+    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-10, 9, {align:'right'}); }
+    doc.setTextColor(0,0,0);
+  }
+  function addFooter(pageNum){
+    doc.setFontSize(7); doc.setTextColor(150,150,150);
+    doc.text('Klasbord · Juf Zisa · '+today, 10, ph-4);
+    doc.text('Pagina '+pageNum, pw-10, ph-4, {align:'right'});
+    doc.setTextColor(0,0,0);
+  }
+
+  let pageNum = 1;
+
+  // ── PAGINA 1: Overzichtstabel ─────────────────────────────────────────────
+  addHeader('Klasbord — Overzicht', (periodLabel?'Periode: '+periodLabel+'  ·  ':'' )+'Gegenereerd op '+today);
+
+  // Samenvatting aantallen
+  const complete = state.pupils.filter(p=>isPupilComplete(p.id));
+  const incomplete = state.pupils.filter(p=>!isPupilComplete(p.id));
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.setTextColor(...GREEN); doc.text('✓ Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor(...RED);   doc.text('✗ Niet volledig: '+incomplete.length, 60, 20);
+  doc.setTextColor(0,0,0);
+
+  // Overzichtstabel
+  const ovHead = [['Leerling', ...allTasks.map(t=>t.icon+' '+t.label)]];
+  const ovBody = state.pupils.map((p,i)=>{
+    const pid = p.id;
+    const myIds = new Set(pupilTasks(pid).map(t=>t.id));
+    const num = state.showNumbers ? (i+1)+'. ' : '';
+    const row = [num+displayName(p)];
     allTasks.forEach(t=>{
-      if(!myIds.has(t.id)){cells+='<td class="pr-status-na">—</td>';}
-      else{
-        const st=getStatus(pid,t.id),sm=getSmiley(pid,t.id);
-        if(st===2) cells+='<td><span class="pr-status-done">&#x2713;</span>'+(sm?'<br><span style="font-size:13px">'+SMILEYS[sm]+'</span>':'')+'</td>';
-        else if(st===1) cells+='<td><span class="pr-status-busy">Bezig</span></td>';
-        else cells+='<td class="pr-status-empty">·</td>';
+      if(!myIds.has(t.id)){ row.push('—'); }
+      else {
+        const st=getStatus(pid,t.id), sm=getSmiley(pid,t.id);
+        if(st===2) row.push('✓'+(sm?' '+SMILEYS[sm]:''));
+        else if(st===1) row.push('…');
+        else row.push('');
       }
     });
-    const num=state.showNumbers?(i+1)+'. ':'';
-    overviewRows+='<tr class="'+(complete?'row-complete':'')+'"><td class="name-col">'+num+esc(displayName(p))+'</td>'+cells+'</tr>';
+    return row;
   });
-  const taskHeaders=allTasks.map(t=>'<th><div style="font-size:16px">'+t.icon+'</div><div>'+esc(t.label)+'</div></th>').join('');
-  let detailPages='';
+
+  doc.autoTable({
+    head: ovHead, body: ovBody,
+    startY: 24,
+    styles: { fontSize:8, cellPadding:2 },
+    headStyles: { fillColor:BLUE, textColor:255, fontStyle:'bold', halign:'center' },
+    columnStyles: { 0: { halign:'left', cellWidth:35 } },
+    didDrawCell: function(data){
+      if(data.section==='body' && data.column.index > 0){
+        const val = data.cell.raw;
+        if(typeof val==='string' && val.startsWith('✓')){
+          data.cell.styles.textColor = GREEN;
+        }
+      }
+    },
+    alternateRowStyles: { fillColor:[248,250,252] },
+    margin: { left:10, right:10 }
+  });
+
+  addFooter(pageNum);
+
+  // ── PAGINA PER LEERLING ───────────────────────────────────────────────────
   state.pupils.forEach(function(p){
-    const pid=p.id,st2=pupilStats(pid),complete=isPupilComplete(pid);
-    const done=st2.done,total=st2.total,tasks=pupilTasks(pid);
-    const bc=complete?'badge-complete':done>0?'badge-partial':'badge-empty';
-    const bt=complete?'Volledig klaar':done>0?done+' / '+total+' klaar':'Nog niet gestart';
-    let rows='';
-    tasks.forEach(function(t,i){
-      const isX=!!(state.pupilTaskOverrides[pid]&&state.pupilTaskOverrides[pid].extra&&state.pupilTaskOverrides[pid].extra.find(function(x){return x.id===t.id;}));
-      const s=getStatus(pid,t.id),sm=getSmiley(pid,t.id);
-      const sh=s===2?'<span class="pr-status-done">&#x2713; Klaar</span>':s===1?'<span class="pr-status-busy">Bezig</span>':'<span style="color:#cbd5e0">Niet gestart</span>';
-      const smh=sm?'<span class="pr-sc">'+SMILEYS[sm]+'</span><span class="pr-sl">'+SMILEY_LABELS[sm]+'</span>':'<span style="color:#cbd5e0">—</span>';
-      const bg=isX?'#fffbeb':i%2?'#f8fafc':'#fff';
-      rows+='<tr style="background:'+bg+'"><td><span class="pr-ti">'+t.icon+'</span>'+esc(t.label)+(isX?'<span class="pr-xs">★ extra</span>':'')+'</td><td>'+sh+'</td><td>'+smh+'</td></tr>';
+    doc.addPage();
+    pageNum++;
+    const pid = p.id;
+    const tasks = pupilTasks(pid);
+    const stats = pupilStats(pid);
+    const isComplete = isPupilComplete(pid);
+    const fullName = p.voornaam+(p.achternaam?' '+p.achternaam:'');
+
+    addHeader(displayName(p)+' — Detailrapport', (periodLabel||'')+' · '+today);
+
+    // Badge
+    const badgeColor = isComplete ? GREEN : stats.done>0 ? [146,64,14] : RED;
+    const badgeText = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : 'Nog niet gestart';
+    doc.setFillColor(...badgeColor);
+    doc.roundedRect(pw-60, 16, 50, 7, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text(badgeText, pw-35, 21, {align:'center'});
+    doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
+
+    // Naam
+    doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text(fullName, 10, 22);
+    doc.setFont('helvetica','normal');
+
+    // Periodlabel
+    if(periodLabel){
+      doc.setFontSize(8); doc.setTextColor(30,64,175);
+      doc.text('Periode: '+periodLabel, 10, 28);
+      doc.setTextColor(0,0,0);
+    }
+
+    // Takentabel
+    const taskRows = tasks.map(function(t){
+      const isExtra = !!(state.pupilTaskOverrides[pid]&&state.pupilTaskOverrides[pid].extra&&
+        state.pupilTaskOverrides[pid].extra.find(function(x){return x.id===t.id;}));
+      const st = getStatus(pid,t.id);
+      const sm = getSmiley(pid,t.id);
+      const statusTxt = st===2?'✓ Klaar':st===1?'Bezig':'Niet gestart';
+      const smileyTxt = sm ? SMILEYS[sm]+' '+SMILEY_LABELS[sm] : '—';
+      return [t.icon+' '+t.label+(isExtra?' ★':''), statusTxt, smileyTxt];
     });
-    const nn=state.notes[pid]?'<div class="pr-nb"><h4>Bevindingen leerkracht</h4><p>'+esc(state.notes[pid])+'</p></div>':'';
-    const fn=esc(p.voornaam+(p.achternaam?' '+p.achternaam:''));
-    detailPages+='<div class="pr-page pr-dp">'
-      +'<div class="pr-ph"><h1>'+esc(displayName(p))+'</h1><span>Detailrapport</span></div>'
-      +'<div class="pr-pb">'+periodDiv
-      +'<div class="pr-dh"><span class="pr-dn">'+fn+'</span><span class="pr-db '+bc+'">'+bt+'</span></div>'
-      +'<table class="pr-tt"><thead><tr><th style="width:40%">Taak</th><th style="width:25%">Status</th><th style="width:35%">Zelfbeoordeling</th></tr></thead><tbody>'+rows+'</tbody></table>'
-      +nn+'</div></div>';
+
+    doc.autoTable({
+      head:[['Taak','Status','Zelfbeoordeling']],
+      body: taskRows,
+      startY: periodLabel ? 32 : 28,
+      styles:{ fontSize:9, cellPadding:2.5 },
+      headStyles:{ fillColor:LIGHT, textColor:[71,85,105], fontStyle:'bold' },
+      columnStyles:{ 0:{cellWidth:90}, 1:{cellWidth:35, halign:'center'}, 2:{cellWidth:60} },
+      didDrawCell: function(data){
+        if(data.section==='body' && data.column.index===1){
+          const v = data.cell.raw;
+          if(v&&v.startsWith('✓')) data.cell.styles.textColor = GREEN;
+          else if(v==='Bezig') data.cell.styles.textColor = [146,64,14];
+          else data.cell.styles.textColor = [160,160,160];
+        }
+      },
+      alternateRowStyles:{ fillColor:[248,250,252] },
+      margin:{ left:10, right:10 }
+    });
+
+    // Bevindingen
+    const note = state.notes[pid];
+    if(note){
+      const y = doc.lastAutoTable.finalY + 6;
+      doc.setFillColor(255,251,235);
+      doc.setDrawColor(253,230,138);
+      doc.roundedRect(10, y, pw-20, 8+note.length*0.06, 2, 2, 'FD');
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+      doc.text('BEVINDINGEN LEERKRACHT', 14, y+5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(26,32,44);
+      const lines = doc.splitTextToSize(note, pw-28);
+      doc.setFontSize(9);
+      doc.text(lines, 14, y+11);
+    }
+
+    addFooter(pageNum);
   });
-  const incomplete=state.pupils.filter(function(p){return!isPupilComplete(p.id);});
-  const complete2=state.pupils.filter(function(p){return isPupilComplete(p.id);});
-  let si='',sc='';
-  incomplete.forEach(function(p){
-    const pr=state.progress[p.id]||{};
-    const nd=pupilTasks(p.id).filter(function(t){return(pr[t.id]?pr[t.id].status||0:0)!==2;});
-    si+='<div class="sc-card sc-inc"><div class="sc-n">'+esc(displayName(p))+'</div><div class="sc-o">'+nd.map(function(t){return t.icon+' '+t.label;}).join(' · ')+'</div></div>';
-  });
-  complete2.forEach(function(p){
-    sc+='<div class="sc-card sc-ok"><div class="sc-n">&#x2713; '+esc(displayName(p))+'</div><div class="sc-d">Alle '+pupilTasks(p.id).length+' taken afgewerkt</div></div>';
-  });
-  const css='*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:Nunito,sans-serif;background:#f8fafc;color:#1a202c;-webkit-print-color-adjust:exact;print-color-adjust:exact}#tb{position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a8a;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-wrap:wrap}#tb h2{font-size:15px;font-weight:800}.tbb{display:flex;gap:8px;align-items:center}.tb1{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:#22c55e;color:#fff}.tb2{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,255,255,.15);color:#fff}.tbh{font-size:11px;opacity:.6;color:#fff}#ct{margin-top:62px;padding:20px;max-width:1200px;margin-left:auto;margin-right:auto}.pr-page{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:24px;overflow:hidden}.pr-ph{background:#1e3a8a;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}.pr-ph h1{font-size:16px;font-weight:800}.pr-ph span{font-size:10px;opacity:.75}.pr-pb{padding:18px}.pr-period{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700}.pr-ss{margin-bottom:16px}.pr-ss h2{font-size:13px;font-weight:800;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid}.pr-ss h2.r{color:#dc2626;border-color:#fca5a5}.pr-ss h2.g{color:#15803d;border-color:#86efac}.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.sc-card{border:1px solid;border-radius:8px;padding:8px 12px}.sc-inc{background:#fff5f5;border-color:#fca5a5}.sc-ok{background:#f0fdf4;border-color:#86efac}.sc-n{font-weight:800;font-size:13px;margin-bottom:3px}.sc-o{color:#dc2626;font-size:11px;line-height:1.4}.sc-d{color:#15803d;font-size:11px}.pr-ot{width:100%;border-collapse:collapse;font-size:11px}.pr-ot th{background:#1e3a8a;color:#fff;padding:8px 6px;text-align:center;font-size:10px;font-weight:800;border:1px solid #1e40af}.pr-ot th.nc{text-align:left;min-width:120px}.pr-ot td{padding:6px;border:1px solid #e2e8f0;text-align:center;vertical-align:middle}.pr-ot td.nc{text-align:left;font-weight:700;font-size:12px}.pr-ot tr:nth-child(even) td{background:#f8fafc}.pr-ot tr.rc td{background:#f0fdf4!important}.sd{background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 6px;font-weight:800;font-size:10px;display:inline-block}.sb{background:#fef9c3;color:#92400e;border-radius:4px;padding:2px 6px;font-weight:800;font-size:10px;display:inline-block}.se{color:#d1d5db}.sn{color:#e5e7eb;font-size:14px}.pr-dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}.pr-dn{font-size:18px;font-weight:800;color:#1e3a8a}.pr-db{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800}.badge-complete{background:#dcfce7;color:#15803d}.badge-partial{background:#fef9c3;color:#92400e}.badge-empty{background:#fee2e2;color:#dc2626}.pr-tt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}.pr-tt th{background:#f1f5f9;color:#475569;padding:7px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #e2e8f0}.pr-tt td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}.pr-ti{font-size:15px;margin-right:5px}.pr-xs{color:#d97706;font-size:10px;margin-left:4px;background:#fef9c3;padding:1px 5px;border-radius:4px}.pr-sc{font-size:16px}.pr-sl{font-size:10px;color:#718096;display:block}.pr-nb{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px}.pr-nb h4{font-size:10px;font-weight:800;color:#92400e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}.pr-nb p{font-size:12px;color:#1a202c;line-height:1.7;white-space:pre-wrap}@media print{#tb{display:none!important}body{background:#fff}#ct{margin-top:0;padding:8mm;max-width:none}.pr-page{box-shadow:none;border-radius:0;margin-bottom:0;page-break-after:always}.pr-page:last-child{page-break-after:auto}.pr-ow{page-break-after:always}}';
-  const pspan=periodLabel?'Periode: '+periodLabel+'  &#xB7;  ':'';
-  const html='<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"><title>Klasbord Rapport<\/title><style>'+css+'<\/style><\/head><body>'
-    +'<div id="tb"><div><h2>Klasbord Rapport</h2><span>'+pspan+'Gegenereerd op '+today+'</span></div>'
-    +'<div class="tbb"><span class="tbh">Kies pagina\'s in het afdrukvenster · Sla op als PDF via Bestemming</span>'
-    +'<button class="tb2" onclick="window.close()">Sluiten</button>'
-    +'<button class="tb1" onclick="window.print()">Afdrukken / Opslaan als PDF</button></div></div>'
-    +'<div id="ct">'
-    +'<div class="pr-page pr-ow">'
-    +'<div class="pr-ph"><h1>Klasbord &#x2013; Overzicht</h1><span>Gegenereerd op '+today+'</span></div>'
-    +'<div class="pr-pb">'+periodDiv
-    +'<div class="pr-ss"><h2 class="r">Niet volledig afgewerkt ('+incomplete.length+')</h2><div class="sc-grid">'+(si||'<p style="color:#a0aec0;font-style:italic;font-size:11px">Iedereen klaar!</p>')+'</div></div>'
-    +'<div class="pr-ss"><h2 class="g">Volledig afgewerkt ('+complete2.length+')</h2><div class="sc-grid">'+(sc||'<p style="color:#a0aec0;font-style:italic;font-size:11px">Nog niemand volledig klaar.</p>')+'</div></div>'
-    +'<div style="font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 8px">Volledig klasoverzicht</div>'
-    +'<table class="pr-ot"><thead><tr><th class="nc">Leerling</th>'+taskHeaders+'</tr></thead><tbody>'+overviewRows+'</tbody></table>'
-    +'</div></div>'
-    +detailPages
-    +'<\/div><\/body><\/html>';
+
+  // Opslaan
+  const filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
+  doc.save(filename);
   document.getElementById('pdf-overlay').classList.add('hidden');
-  const blob=new Blob([html],{type:'text/html'});
-  const url=URL.createObjectURL(blob);
-  const tab=window.open(url,'_blank');
-  if(!tab) alert('Pop-up geblokkeerd! Sta pop-ups toe voor deze pagina in je browser.');
-  setTimeout(function(){URL.revokeObjectURL(url);},15000);
+  showToast('✅ PDF gedownload: '+filename);
 }
 
 // NIEUWE PERIODE
