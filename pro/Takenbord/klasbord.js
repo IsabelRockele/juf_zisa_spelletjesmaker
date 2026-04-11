@@ -418,6 +418,12 @@ function closeCelebration(){ document.getElementById('celebration').classList.re
 function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!document.getElementById('pdf-date-from').value)document.getElementById('pdf-date-from').value=today;if(!document.getElementById('pdf-date-to').value)document.getElementById('pdf-date-to').value=today;document.getElementById('pdf-overlay').classList.remove('hidden'); }
 function fmtDate(str){ if(!str)return'';try{return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return str;} }
 
+// Strip emoji uit tekst voor PDF (jsPDF ondersteunt geen emoji)
+function stripEmoji(str){
+  return (str||'').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}]/gu, '').replace(/\s+/g,' ').trim();
+}
+
+
 function generateAndPrint(){
   const { jsPDF } = window.jspdf;
   if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
@@ -463,12 +469,12 @@ function generateAndPrint(){
   const complete = state.pupils.filter(p=>isPupilComplete(p.id));
   const incomplete = state.pupils.filter(p=>!isPupilComplete(p.id));
   doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.setTextColor(...GREEN); doc.text('✓ Volledig klaar: '+complete.length, 10, 20);
-  doc.setTextColor(...RED);   doc.text('✗ Niet volledig: '+incomplete.length, 60, 20);
+  doc.setTextColor(...GREEN); doc.text('Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor(...RED);   doc.text('Niet volledig: '+incomplete.length, 60, 20);
   doc.setTextColor(0,0,0);
 
   // Overzichtstabel
-  const ovHead = [['Leerling', ...allTasks.map(t=>t.icon+' '+t.label)]];
+  const ovHead = [['Leerling', ...allTasks.map(t=>stripEmoji(t.icon)+' '+t.label)]];
   const ovBody = state.pupils.map((p,i)=>{
     const pid = p.id;
     const myIds = new Set(pupilTasks(pid).map(t=>t.id));
@@ -478,7 +484,7 @@ function generateAndPrint(){
       if(!myIds.has(t.id)){ row.push('—'); }
       else {
         const st=getStatus(pid,t.id), sm=getSmiley(pid,t.id);
-        if(st===2) row.push('✓'+(sm?' '+SMILEYS[sm]:''));
+        if(st===2) row.push('OK'+(sm?' '+stripEmoji(SMILEYS[sm]):''));
         else if(st===1) row.push('…');
         else row.push('');
       }
@@ -545,8 +551,8 @@ function generateAndPrint(){
         state.pupilTaskOverrides[pid].extra.find(function(x){return x.id===t.id;}));
       const st = getStatus(pid,t.id);
       const sm = getSmiley(pid,t.id);
-      const statusTxt = st===2?'✓ Klaar':st===1?'Bezig':'Niet gestart';
-      const smileyTxt = sm ? SMILEYS[sm]+' '+SMILEY_LABELS[sm] : '—';
+      const statusTxt = st===2?'Klaar':st===1?'Bezig':'Niet gestart';
+      const smileyTxt = sm ? stripEmoji(SMILEYS[sm])+' '+SMILEY_LABELS[sm] : '-';
       return [t.icon+' '+t.label+(isExtra?' ★':''), statusTxt, smileyTxt];
     });
 
