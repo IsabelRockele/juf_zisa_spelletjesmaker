@@ -418,186 +418,201 @@ function closeCelebration(){ document.getElementById('celebration').classList.re
 function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!document.getElementById('pdf-date-from').value)document.getElementById('pdf-date-from').value=today;if(!document.getElementById('pdf-date-to').value)document.getElementById('pdf-date-to').value=today;document.getElementById('pdf-overlay').classList.remove('hidden'); }
 function fmtDate(str){ if(!str)return'';try{return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return str;} }
 
-// Strip emoji uit tekst voor PDF (jsPDF ondersteunt geen emoji)
+// Strip emoji en niet-latin tekens voor PDF (jsPDF ondersteunt geen emoji)
 function stripEmoji(str){
-  return (str||'').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}]/gu, '').replace(/\s+/g,' ').trim();
+  if(!str) return '';
+  // Verwijder alles buiten het standaard latin bereik
+  return str.replace(/[^\u0000-\u00FF\u0100-\u017F\u0180-\u024F\u2013\u2014\u2019\u201C\u201D\u2026\u00B7]/g, '').replace(/\s+/g,' ').trim();
 }
 
 
 function generateAndPrint(){
-  const { jsPDF } = window.jspdf;
-  if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+  var jspdfLib = window.jspdf;
+  if(!jspdfLib || !jspdfLib.jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+  var jsPDF = jspdfLib.jsPDF;
 
-  const periodName = document.getElementById('pdf-period-name').value.trim();
-  const dateFrom = document.getElementById('pdf-date-from').value;
-  const dateTo = document.getElementById('pdf-date-to').value;
-  const pl = [periodName];
-  if(dateFrom||dateTo) pl.push(fmtDate(dateFrom)+(dateTo&&dateTo!==dateFrom?' – '+fmtDate(dateTo):''));
-  const periodLabel = pl.filter(Boolean).join('  ·  ');
-  const today = fmtDate(new Date().toISOString().slice(0,10));
-  const allTasks = buildAllTasksForBoard();
-  const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
-  const pw = doc.internal.pageSize.getWidth();
-  const ph = doc.internal.pageSize.getHeight();
-  const BLUE = [30,58,138];
-  const LIGHT = [241,245,249];
-  const GREEN = [21,128,61];
-  const RED = [220,38,38];
+  var periodName = document.getElementById('pdf-period-name').value.trim();
+  var dateFrom = document.getElementById('pdf-date-from').value;
+  var dateTo = document.getElementById('pdf-date-to').value;
+  var pl = [periodName];
+  if(dateFrom||dateTo) pl.push(fmtDate(dateFrom)+(dateTo&&dateTo!==dateFrom?' - '+fmtDate(dateTo):''));
+  var periodLabel = pl.filter(Boolean).join('  .  ');
+  var today = fmtDate(new Date().toISOString().slice(0,10));
+  var allTasks = buildAllTasksForBoard();
 
-  function addHeader(title, sub){
-    doc.setFillColor(...BLUE);
+  var doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  var pw = doc.internal.pageSize.getWidth();   // 297
+  var ph = doc.internal.pageSize.getHeight();  // 210
+  var BLUE  = [30, 58, 138];
+  var GREEN = [21, 128, 61];
+  var RED   = [220, 38, 38];
+  var pageNum = 1;
+
+  function se(s){ return stripEmoji(s||''); }
+
+  function hdr(title, sub){
+    doc.setFillColor(BLUE[0],BLUE[1],BLUE[2]);
     doc.rect(0,0,pw,14,'F');
     doc.setTextColor(255,255,255);
     doc.setFontSize(12); doc.setFont('helvetica','bold');
     doc.text(title, 10, 9);
-    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-10, 9, {align:'right'}); }
+    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-8, 9, {align:'right'}); }
     doc.setTextColor(0,0,0);
   }
-  function addFooter(pageNum){
+  function ftr(){
     doc.setFontSize(7); doc.setTextColor(150,150,150);
-    doc.text('Klasbord · Juf Zisa · '+today, 10, ph-4);
-    doc.text('Pagina '+pageNum, pw-10, ph-4, {align:'right'});
+    doc.text('Klasbord - Juf Zisa - '+today, 10, ph-3);
+    doc.text(''+pageNum, pw-8, ph-3, {align:'right'});
     doc.setTextColor(0,0,0);
   }
 
-  let pageNum = 1;
+  // ── PAGINA 1: OVERZICHT ───────────────────────────────────────────────────
+  var sub = (periodLabel?'Periode: '+periodLabel+'  .  ':'')+' Gegenereerd op '+today;
+  hdr('Klasbord - Overzicht', sub);
 
-  // ── PAGINA 1: Overzichtstabel ─────────────────────────────────────────────
-  addHeader('Klasbord — Overzicht', (periodLabel?'Periode: '+periodLabel+'  ·  ':'' )+'Gegenereerd op '+today);
+  var complete  = state.pupils.filter(function(p){ return isPupilComplete(p.id); });
+  var incomplete = state.pupils.filter(function(p){ return !isPupilComplete(p.id); });
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.setTextColor(GREEN[0],GREEN[1],GREEN[2]); doc.text('Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor(RED[0],RED[1],RED[2]);       doc.text('Niet volledig: '+incomplete.length, 70, 20);
+  doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
 
-  // Samenvatting aantallen
-  const complete = state.pupils.filter(p=>isPupilComplete(p.id));
-  const incomplete = state.pupils.filter(p=>!isPupilComplete(p.id));
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.setTextColor(...GREEN); doc.text('Volledig klaar: '+complete.length, 10, 20);
-  doc.setTextColor(...RED);   doc.text('Niet volledig: '+incomplete.length, 60, 20);
-  doc.setTextColor(0,0,0);
+  // Taaknamen afkappen op 12 tekens voor kolombreedte
+  var taskCols = allTasks.map(function(t){ 
+    var lbl = se(t.label);
+    return lbl.length > 14 ? lbl.slice(0,13)+'.' : lbl;
+  });
 
-  // Overzichtstabel
-  const ovHead = [['Leerling', ...allTasks.map(t=>stripEmoji(t.icon)+' '+t.label)]];
-  const ovBody = state.pupils.map((p,i)=>{
-    const pid = p.id;
-    const myIds = new Set(pupilTasks(pid).map(t=>t.id));
-    const num = state.showNumbers ? (i+1)+'. ' : '';
-    const row = [num+displayName(p)];
-    allTasks.forEach(t=>{
-      if(!myIds.has(t.id)){ row.push('—'); }
-      else {
-        const st=getStatus(pid,t.id), sm=getSmiley(pid,t.id);
-        if(st===2) row.push('OK'+(sm?' '+stripEmoji(SMILEYS[sm]):''));
-        else if(st===1) row.push('…');
-        else row.push('');
-      }
+  var ovHead = [['Leerling'].concat(taskCols)];
+  var ovBody = state.pupils.map(function(p,i){
+    var pid = p.id;
+    var myIds = new Set(pupilTasks(pid).map(function(t){ return t.id; }));
+    var num = state.showNumbers ? (i+1)+'. ' : '';
+    var row = [num+displayName(p)];
+    allTasks.forEach(function(t){
+      if(!myIds.has(t.id)){ row.push('-'); return; }
+      var st = getStatus(pid,t.id);
+      if(st===2)      row.push('Klaar');
+      else if(st===1) row.push('Bezig');
+      else            row.push('');
     });
     return row;
   });
 
+  // Bereken kolombreedtes: naam=40, rest gelijk verdeeld
+  var restWidth = pw - 20 - 40; // marges + naamkolom
+  var taskColW = allTasks.length > 0 ? Math.min(28, restWidth / allTasks.length) : 28;
+  var colStyles = { 0: { cellWidth:40, halign:'left', fontStyle:'bold' } };
+  allTasks.forEach(function(_,i){ colStyles[i+1] = { cellWidth: taskColW, halign:'center' }; });
+
   doc.autoTable({
-    head: ovHead, body: ovBody,
+    head: ovHead,
+    body: ovBody,
     startY: 24,
-    styles: { fontSize:8, cellPadding:2 },
-    headStyles: { fillColor:BLUE, textColor:255, fontStyle:'bold', halign:'center' },
-    columnStyles: { 0: { halign:'left', cellWidth:35 } },
-    didDrawCell: function(data){
+    styles: { fontSize: allTasks.length > 8 ? 7 : 8, cellPadding: 2, overflow:'ellipsize' },
+    headStyles: { fillColor: BLUE, textColor: 255, fontStyle:'bold', halign:'center', fontSize: allTasks.length > 8 ? 6 : 7 },
+    columnStyles: colStyles,
+    alternateRowStyles: { fillColor:[248,250,252] },
+    didParseCell: function(data){
       if(data.section==='body' && data.column.index > 0){
-        const val = data.cell.raw;
-        if(typeof val==='string' && val.startsWith('✓')){
-          data.cell.styles.textColor = GREEN;
-        }
+        var v = data.cell.raw;
+        if(v==='Klaar')      { data.cell.styles.textColor=GREEN; data.cell.styles.fontStyle='bold'; }
+        else if(v==='Bezig') { data.cell.styles.textColor=[180,100,0]; }
+        else if(v==='-')     { data.cell.styles.textColor=[180,180,180]; }
       }
     },
-    alternateRowStyles: { fillColor:[248,250,252] },
     margin: { left:10, right:10 }
   });
+  ftr();
 
-  addFooter(pageNum);
-
-  // ── PAGINA PER LEERLING ───────────────────────────────────────────────────
+  // ── PER LEERLING ──────────────────────────────────────────────────────────
   state.pupils.forEach(function(p){
-    doc.addPage();
-    pageNum++;
-    const pid = p.id;
-    const tasks = pupilTasks(pid);
-    const stats = pupilStats(pid);
-    const isComplete = isPupilComplete(pid);
-    const fullName = p.voornaam+(p.achternaam?' '+p.achternaam:'');
+    doc.addPage(); pageNum++;
+    var pid = p.id;
+    var tasks = pupilTasks(pid);
+    var stats = pupilStats(pid);
+    var isComplete = isPupilComplete(pid);
+    var fullName = se(p.voornaam+(p.achternaam?' '+p.achternaam:''));
 
-    addHeader(displayName(p)+' — Detailrapport', (periodLabel||'')+' · '+today);
+    hdr(se(displayName(p))+' - Detailrapport', (periodLabel?periodLabel+' . ':'')+today);
 
     // Badge
-    const badgeColor = isComplete ? GREEN : stats.done>0 ? [146,64,14] : RED;
-    const badgeText = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : 'Nog niet gestart';
-    doc.setFillColor(...badgeColor);
-    doc.roundedRect(pw-60, 16, 50, 7, 2, 2, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text(badgeText, pw-35, 21, {align:'center'});
+    var badgeColor = isComplete ? GREEN : stats.done>0 ? [180,100,0] : RED;
+    var badgeTxt   = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : 'Nog niet gestart';
+    doc.setFillColor(badgeColor[0],badgeColor[1],badgeColor[2]);
+    doc.roundedRect(pw-70, 15, 62, 8, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text(badgeTxt, pw-39, 20.5, {align:'center'});
     doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
 
-    // Naam
     doc.setFontSize(14); doc.setFont('helvetica','bold');
     doc.text(fullName, 10, 22);
     doc.setFont('helvetica','normal');
 
-    // Periodlabel
+    var startY = 26;
     if(periodLabel){
       doc.setFontSize(8); doc.setTextColor(30,64,175);
-      doc.text('Periode: '+periodLabel, 10, 28);
+      doc.text('Periode: '+se(periodLabel), 10, startY);
       doc.setTextColor(0,0,0);
+      startY = 31;
     }
 
-    // Takentabel
-    const taskRows = tasks.map(function(t){
-      const isExtra = !!(state.pupilTaskOverrides[pid]&&state.pupilTaskOverrides[pid].extra&&
-        state.pupilTaskOverrides[pid].extra.find(function(x){return x.id===t.id;}));
-      const st = getStatus(pid,t.id);
-      const sm = getSmiley(pid,t.id);
-      const statusTxt = st===2?'Klaar':st===1?'Bezig':'Niet gestart';
-      const smileyTxt = sm ? stripEmoji(SMILEYS[sm])+' '+SMILEY_LABELS[sm] : '-';
-      return [t.icon+' '+t.label+(isExtra?' ★':''), statusTxt, smileyTxt];
+    var taskRows = tasks.map(function(t){
+      var st = getStatus(pid,t.id);
+      var sm = getSmiley(pid,t.id);
+      var statusTxt = st===2 ? 'Klaar' : st===1 ? 'Bezig' : 'Niet gestart';
+      var smileyTxt = sm ? se(SMILEYS[sm])+' '+se(SMILEY_LABELS[sm]) : '-';
+      var isExtra = !!(state.pupilTaskOverrides[pid] && state.pupilTaskOverrides[pid].extra &&
+        state.pupilTaskOverrides[pid].extra.find(function(x){ return x.id===t.id; }));
+      return [se(t.label)+(isExtra?' (extra)':''), statusTxt, smileyTxt];
     });
 
     doc.autoTable({
-      head:[['Taak','Status','Zelfbeoordeling']],
+      head: [['Taak', 'Status', 'Zelfbeoordeling']],
       body: taskRows,
-      startY: periodLabel ? 32 : 28,
-      styles:{ fontSize:9, cellPadding:2.5 },
-      headStyles:{ fillColor:LIGHT, textColor:[71,85,105], fontStyle:'bold' },
-      columnStyles:{ 0:{cellWidth:90}, 1:{cellWidth:35, halign:'center'}, 2:{cellWidth:60} },
-      didDrawCell: function(data){
+      startY: startY,
+      styles: { fontSize:9, cellPadding:3, overflow:'linebreak' },
+      headStyles: { fillColor:[241,245,249], textColor:[71,85,105], fontStyle:'bold', fontSize:8 },
+      columnStyles: {
+        0: { cellWidth: pw - 20 - 45 - 70, halign:'left' },
+        1: { cellWidth: 45, halign:'center', fontStyle:'bold' },
+        2: { cellWidth: 70, halign:'left' }
+      },
+      didParseCell: function(data){
         if(data.section==='body' && data.column.index===1){
-          const v = data.cell.raw;
-          if(v&&v.startsWith('✓')) data.cell.styles.textColor = GREEN;
-          else if(v==='Bezig') data.cell.styles.textColor = [146,64,14];
-          else data.cell.styles.textColor = [160,160,160];
+          var v = data.cell.raw;
+          if(v==='Klaar')           { data.cell.styles.textColor=GREEN; data.cell.styles.fillColor=[240,253,244]; }
+          else if(v==='Bezig')      { data.cell.styles.textColor=[180,100,0]; data.cell.styles.fillColor=[255,251,235]; }
+          else if(v==='Niet gestart'){ data.cell.styles.textColor=[30,58,138]; data.cell.styles.fillColor=[239,246,255]; }
         }
       },
-      alternateRowStyles:{ fillColor:[248,250,252] },
-      margin:{ left:10, right:10 }
+      alternateRowStyles: { fillColor:[250,250,252] },
+      margin: { left:10, right:10 }
     });
 
     // Bevindingen
-    const note = state.notes[pid];
+    var note = state.notes[pid];
     if(note){
-      const y = doc.lastAutoTable.finalY + 6;
+      var y = doc.lastAutoTable.finalY + 6;
+      var noteLines = doc.splitTextToSize(se(note), pw - 40);
+      var boxH = 8 + noteLines.length * 5 + 4; // padding boven+onder
+      if(y + boxH > ph - 10){ doc.addPage(); pageNum++; hdr(se(displayName(p))+' - Bevindingen',''); ftr(); y = 20; }
       doc.setFillColor(255,251,235);
       doc.setDrawColor(253,230,138);
-      doc.roundedRect(10, y, pw-20, 8+note.length*0.06, 2, 2, 'FD');
-      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
-      doc.text('BEVINDINGEN LEERKRACHT', 14, y+5);
-      doc.setFont('helvetica','normal'); doc.setTextColor(26,32,44);
-      const lines = doc.splitTextToSize(note, pw-28);
-      doc.setFontSize(9);
-      doc.text(lines, 14, y+11);
+      doc.roundedRect(10, y, pw-20, boxH, 2, 2, 'FD');
+      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+      doc.text('BEVINDINGEN LEERKRACHT', 16, y+5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(26,32,44);
+      doc.text(noteLines, 16, y+11);
     }
 
-    addFooter(pageNum);
+    ftr();
   });
 
-  // Opslaan
-  const filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
+  var filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
   doc.save(filename);
   document.getElementById('pdf-overlay').classList.add('hidden');
-  showToast('✅ PDF gedownload: '+filename);
+  showToast('PDF gedownload: '+filename);
 }
 
 // NIEUWE PERIODE
