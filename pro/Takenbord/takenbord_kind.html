@@ -2079,6 +2079,12 @@ function closePdfModalKind(){
 }
 function fmtDateKind(str){ if(!str) return ''; try{ return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch{ return str; } }
 
+// Strip emoji uit tekst voor PDF
+function stripEmoji(str){
+  return (str||'').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F900}-\u{1F9FF}]/gu, '').replace(/\s+/g,' ').trim();
+}
+
+
 function generateKindPdf(){
   const { jsPDF } = window.jspdf;
   if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
@@ -2131,11 +2137,11 @@ function generateKindPdf(){
   var complete = state.pupils.filter(function(p){ return isPupilDone(p.id); });
   var incomplete = state.pupils.filter(function(p){ return !isPupilDone(p.id); });
   doc.setFontSize(9);
-  doc.setTextColor.apply(doc, GREEN); doc.text('✓ Volledig klaar: '+complete.length, 10, 20);
-  doc.setTextColor.apply(doc, RED);   doc.text('✗ Niet volledig: '+incomplete.length, 70, 20);
+  doc.setTextColor.apply(doc, GREEN); doc.text('Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor.apply(doc, RED);   doc.text('Niet volledig: '+incomplete.length, 70, 20);
   doc.setTextColor(0,0,0);
 
-  var ovHead = [['Leerling'].concat(allTasks.map(function(t){ return t.icon+' '+t.label; }))];
+  var ovHead = [['Leerling'].concat(allTasks.map(function(t){ return stripEmoji(t.icon)+' '+t.label; }))];
   var ovBody = state.pupils.map(function(p){
     var pid = p.id;
     var myIds = new Set(getTasksForPupil(p).map(function(t){ return t.id; }));
@@ -2146,7 +2152,7 @@ function generateKindPdf(){
       var pr = (state.progress[pid]||{})[t.id]||{};
       var st = pr.status||0;
       var sm = pr.smiley||0;
-      if(st===2) row.push('✓'+(sm?' '+SMILEYS[sm]:''));
+      if(st===2) row.push('OK'+(sm?' '+stripEmoji(SMILEYS[sm]):''));
       else if(st===1) row.push('…');
       else row.push('');
     });
@@ -2200,9 +2206,9 @@ function generateKindPdf(){
       var pr = (state.progress[pid]||{})[t.id]||{};
       var st = pr.status||0;
       var sm = pr.smiley||0;
-      var statusTxt = st===2?'✓ Klaar':st===1?'Bezig':'Niet gestart';
-      var smileyTxt = sm ? SMILEYS[sm]+' '+SMILEY_LABELS[sm] : '—';
-      return [t.icon+' '+t.label, statusTxt, smileyTxt];
+      var statusTxt = st===2?'Klaar':st===1?'Bezig':'Niet gestart';
+      var smileyTxt = sm ? stripEmoji(SMILEYS[sm])+' '+SMILEY_LABELS[sm] : '-';
+      return [stripEmoji(t.icon)+' '+t.label, statusTxt, smileyTxt];
     });
 
     doc.autoTable({
@@ -2507,15 +2513,6 @@ function drawClock(){
     ctx.lineWidth = i % 3 === 0 ? 2.5 : 1.5;
     ctx.stroke();
   }
-
-  // Secondewijzer — wijst naar hoeveel er AL verstreken is (met klok mee vanaf 12)
-  var elapsed = timerTotalSeconds - timerRemaining;
-  var sAngle = -Math.PI/2 + (2*Math.PI * (elapsed % 60) / 60);
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.cos(sAngle) * r * 0.82, cy + Math.sin(sAngle) * r * 0.82);
-  ctx.strokeStyle = 'rgba(255,255,255,0.95)';
-  ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.stroke();
 
   // Middelpunt
   ctx.beginPath(); ctx.arc(cx, cy, 4, 0, 2*Math.PI);
