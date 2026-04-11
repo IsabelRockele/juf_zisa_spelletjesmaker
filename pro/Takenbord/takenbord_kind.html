@@ -857,6 +857,11 @@ body.ipad-modus #timer-popup { display:none !important; }
   .setup-added-list{ max-height:none; }
 }
 </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-klasbord.js"></script>
 </head>
 <body>
 <div class="page">
@@ -1217,11 +1222,28 @@ function goBackToSetup(){
 
 function loadState(){
   try{
-    state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    const r = localStorage.getItem(STORAGE_KEY);
+    state = r ? JSON.parse(r) : {};
   }catch(e){
     state = {};
   }
-    state.pupils = state.pupils || [];
+  // Firestore laden op achtergrond
+  if(window.fbLoad){
+    window.fbLoad(STORAGE_KEY).then(function(fbData){
+      if(fbData){
+        state = Object.assign({}, state, fbData);
+        applyStateDefaults();
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+        renderNames();
+        renderSetupAddedList();
+      }
+    }).catch(console.warn);
+  }
+  applyStateDefaults();
+}
+
+function applyStateDefaults(){
+  state.pupils = state.pupils || [];
   state.activeTasks = state.activeTasks || [];
   state.progress = state.progress || {};
   state.customTasks = state.customTasks || [];
@@ -1233,14 +1255,15 @@ function loadState(){
   state.pupilPhotos = state.pupilPhotos || {};
   state.taskLabelOverrides = state.taskLabelOverrides || {};
   state.notes = state.notes || {};
-  state.boardSize = state.boardSize || 'normal'; // consistentie met klasbord
-
+  state.boardSize = state.boardSize || 'normal';
   setupNameOrder = state.nameOrder;
   setupShowLastname = state.showLastname;
 }
 
 function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  // Firestore opslaan
+  if(window.fbSave) window.fbSave(STORAGE_KEY, state).catch(console.warn);
   // Timestamp bijwerken in borden-index
   try{
     const params = new URLSearchParams(window.location.search);
@@ -1250,7 +1273,11 @@ function saveState(){
       const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
       const lijst = all[type]||[];
       const bord = lijst.find(function(b){ return b.id===bordId; });
-      if(bord){ bord.bijgewerkt=Date.now(); localStorage.setItem('borden_v1',JSON.stringify(all)); }
+      if(bord){
+        bord.bijgewerkt=Date.now();
+        localStorage.setItem('borden_v1',JSON.stringify(all));
+        if(window.fbSaveMeta) window.fbSaveMeta(all).catch(console.warn);
+      }
     }
   }catch(e){}
 }
@@ -2216,7 +2243,6 @@ if((isSmartboard || isIpad) && state.pupils.length > 0){
 }
 renderNames();
 renderSetupAddedList();
-toonKindHergebruikBanners();
 setSetupOrder(state.nameOrder || 'voornaam');
 applySmartboardMode();
 
@@ -2789,5 +2815,7 @@ function timerDone(){
 </div>
 </div>
 
+  <script src="../device-id.js"></script>
+  <script src="../guard.js"></script>
 </body>
 </html>
