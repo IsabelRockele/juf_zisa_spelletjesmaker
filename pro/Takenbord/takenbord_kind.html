@@ -7,6 +7,7 @@
 <title>Takenbord per kind</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root{
     --bg:#f3f4f8;
@@ -2077,134 +2078,163 @@ function closePdfModalKind(){
 }
 function fmtDateKind(str){ if(!str) return ''; try{ return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'}); }catch{ return str; } }
 
-function generateKindPdf(mode){
+function generateKindPdf(){
+  const { jsPDF } = window.jspdf;
+  if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+
   var periodName = document.getElementById('kind-pdf-period').value.trim();
   var dateFrom = document.getElementById('kind-pdf-from').value;
   var dateTo = document.getElementById('kind-pdf-to').value;
   var pl = [periodName];
-  if(dateFrom||dateTo) pl.push(fmtDateKind(dateFrom)+(dateTo&&dateTo!==dateFrom?' \u2013 '+fmtDateKind(dateTo):''));
-  var periodLabel = pl.filter(Boolean).join('  \xB7  ');
+  if(dateFrom||dateTo) pl.push(fmtDateKind(dateFrom)+(dateTo&&dateTo!==dateFrom?' – '+fmtDateKind(dateTo):''));
+  var periodLabel = pl.filter(Boolean).join('  ·  ');
   var today = fmtDateKind(new Date().toISOString().slice(0,10));
-  var SMILEYS_PDF = ['','😊','🙂','😐','😟'];
-  var SMILEY_LABELS_PDF = ['','Super!','Ging goed','Beetje moeilijk','Te moeilijk'];
 
-  var css = '*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}'
-    +'body{font-family:Nunito,sans-serif;background:#f8fafc;color:#1a202c;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
-    +'#tb{position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a8a;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-wrap:wrap}'
-    +'#tb h2{font-size:15px;font-weight:800}.tbb{display:flex;gap:8px;align-items:center}'
-    +'.tb1{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:#22c55e;color:#fff}'
-    +'.tb2{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,255,255,.15);color:#fff}'
-    +'#ct{margin-top:62px;padding:20px;max-width:1000px;margin-left:auto;margin-right:auto}'
-    +'.pr-page{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:24px;overflow:hidden}'
-    +'.pr-ph{background:#1e3a8a;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}'
-    +'.pr-ph h1{font-size:16px;font-weight:800}.pr-ph span{font-size:10px;opacity:.75}'
-    +'.pr-pb{padding:18px}'
-    +'.pr-period{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700}'
-    +'.pr-dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}'
-    +'.pr-dn{font-size:18px;font-weight:800;color:#1e3a8a}'
-    +'.pr-db{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800}'
-    +'.badge-ok{background:#dcfce7;color:#15803d}.badge-partial{background:#fef9c3;color:#92400e}.badge-none{background:#fee2e2;color:#dc2626}'
-    +'.pr-tt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}'
-    +'.pr-tt th{background:#f1f5f9;color:#475569;padding:7px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #e2e8f0}'
-    +'.pr-tt td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}'
-    +'.pr-status-done{color:#15803d;font-weight:800}.pr-status-busy{color:#d97706;font-weight:700}'
-    +'.pr-nb{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px}'
-    +'.pr-nb h4{font-size:10px;font-weight:800;color:#92400e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}'
-    +'.pr-nb p{font-size:12px;color:#1a202c;line-height:1.7;white-space:pre-wrap}'
-    +'@media print{#tb{display:none!important}body{background:#fff}#ct{margin-top:0;padding:8mm;max-width:none}.pr-page{box-shadow:none;border-radius:0;margin-bottom:0;page-break-after:always}.pr-page:last-child{page-break-after:auto}}';
+  var doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+  var pw = doc.internal.pageSize.getWidth();
+  var ph = doc.internal.pageSize.getHeight();
+  var BLUE = [30,58,138];
+  var LIGHT = [241,245,249];
+  var GREEN = [21,128,61];
+  var RED = [220,38,38];
+  var pageNum = 1;
 
-  var periodDiv = periodLabel ? '<div class="pr-period">Periode: '+periodLabel+'</div>' : '';
-  var pages = '';
-  state.pupils.forEach(function(p){
-    var pid = p.id;
-    var fullName = p.voornaam + (p.achternaam ? ' ' + p.achternaam : '');
-    var tasks = getTasksForPupil(p);
-    var prog = state.progress[pid] || {};
-    var done = tasks.filter(function(t){ return (prog[t.id] ? prog[t.id].status||0 : 0) === 2; }).length;
-    var total = tasks.length;
-    var complete = done === total && total > 0;
-    var badgeCls = complete ? 'badge-ok' : done > 0 ? 'badge-partial' : 'badge-none';
-    var badgeTxt = complete ? 'Alle taken klaar' : done > 0 ? (done+'/'+total+' klaar') : 'Nog niet gestart';
-    var rows = '';
-    tasks.forEach(function(t){
-      var s = prog[t.id] ? prog[t.id].status||0 : 0;
-      var sm = prog[t.id] ? prog[t.id].smiley||0 : 0;
-      var sh = s===2 ? '<span class="pr-status-done">&#x2713; Klaar</span>' : s===1 ? '<span class="pr-status-busy">Bezig</span>' : '<span style="color:#cbd5e0">Niet gestart</span>';
-      var smh = sm ? (SMILEYS_PDF[sm]+' <span style="font-size:10px;color:#718096">'+SMILEY_LABELS_PDF[sm]+'</span>') : '<span style="color:#cbd5e0">&mdash;</span>';
-      rows += '<tr><td>'+t.icon+' '+t.label+'</td><td>'+sh+'</td><td>'+smh+'</td></tr>';
-    });
-    var photo = state.pupilPhotos[pid];
-    var photoHtml = photo ? '<img src="'+photo+'" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-right:10px;vertical-align:middle;" />' : '';
-    var notesVal = state.notes[pid] ? state.notes[pid].replace(/&/g,'&amp;').replace(/</g,'&lt;') : '';
-    var notesHtml = notesVal ? '<div class="pr-nb"><h4>Bevindingen leerkracht</h4><p>'+notesVal+'</p></div>' : '';
-    var name = fullName; // altijd volledige naam in PDF, ongeacht weergave-instelling
-    pages += '<div class="pr-page">'
-      +'<div class="pr-ph"><h1>'+photoHtml+name+'</h1><span>Detailrapport</span></div>'
-      +'<div class="pr-pb">'+periodDiv
-      +'<div class="pr-dh"><span class="pr-dn">'+name+'</span><span class="pr-db '+badgeCls+'">'+badgeTxt+'</span></div>'
-      +'<table class="pr-tt"><thead><tr><th>Taak</th><th>Status</th><th>Zelfbeoordeling</th></tr></thead><tbody>'+rows+'</tbody></table>'
-      +notesHtml+'</div></div>';
+  function addHeader(title, sub){
+    doc.setFillColor.apply(doc, BLUE);
+    doc.rect(0,0,pw,14,'F');
+    doc.setTextColor(255,255,255);
+    doc.setFontSize(12); doc.setFont('helvetica','bold');
+    doc.text(title, 10, 9);
+    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-10, 9, {align:'right'}); }
+    doc.setTextColor(0,0,0);
+  }
+  function addFooter(){
+    doc.setFontSize(7); doc.setTextColor(150,150,150);
+    doc.text('Kindbord · Juf Zisa · '+today, 10, ph-4);
+    doc.text('Pagina '+pageNum, pw-10, ph-4, {align:'right'});
+    doc.setTextColor(0,0,0);
+  }
+
+  // ── OVERZICHTSPAGINA ─────────────────────────────────────────────────────
+  var sub = (periodLabel ? 'Periode: '+periodLabel+'  ·  ' : '')+'Gegenereerd op '+today;
+  addHeader('Kindbord — Overzicht', sub);
+
+  var allTaskIds = new Set();
+  state.pupils.forEach(function(p){ getTasksForPupil(p).forEach(function(t){ allTaskIds.add(t.id); }); });
+  var allTasks = [];
+  allTaskIds.forEach(function(id){
+    var t = getTaskById(id);
+    if(t) allTasks.push(t);
   });
 
-  var pspan = periodLabel ? 'Periode: '+periodLabel+'  &middot;  ' : '';
-  var html = '<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8">'
-    +'<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">'
-    +'<title>Kindbord Rapport<\/title><style>'+css+'<\/style><\/head><body>'
-    +'<div id="tb"><div><h2>Kindbord Rapport<\/h2><span>'+pspan+'Gegenereerd op '+today+'<\/span><\/div>'
-    +'<div class="tbb"><button class="tb2" onclick="window.close()">&#x2715; Sluiten<\/button>'
-    +'<button class="tb1" onclick="window.print()">&#x1F5A8;&#xFE0F; Opslaan als PDF \/ Afdrukken<\/button><\/div><\/div>'
-    +'<div id="ct">'+pages+'<\/div><\/body><\/html>';
+  var complete = state.pupils.filter(function(p){ return isPupilDone(p.id); });
+  var incomplete = state.pupils.filter(function(p){ return !isPupilDone(p.id); });
+  doc.setFontSize(9);
+  doc.setTextColor.apply(doc, GREEN); doc.text('✓ Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor.apply(doc, RED);   doc.text('✗ Niet volledig: '+incomplete.length, 70, 20);
+  doc.setTextColor(0,0,0);
 
-  closePdfModalKind();
-
-  if(mode === 'download'){
-    var jsPDFLib = window.jspdf && window.jspdf.jsPDF;
-    if(!jsPDFLib){ alert('PDF-bibliotheek nog niet geladen. Probeer opnieuw.'); return; }
-    var ov = document.createElement('div');
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-family:Nunito,sans-serif;font-weight:800;font-size:18px;color:#6366f1;z-index:9999;flex-direction:column;gap:12px;';
-    ov.innerHTML = '<div>\u23F3 PDF wordt aangemaakt\u2026</div><div style="font-size:13px;font-weight:600;color:#718096;">even geduld a.u.b.</div>';
-    document.body.appendChild(ov);
-    var container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:0;top:0;width:900px;background:#fff;z-index:9998;overflow:visible;font-family:Nunito,sans-serif;';
-    container.innerHTML = '<style>'+css+'</style><div id="ct" style="padding:20px;max-width:860px;margin:0 auto;">'+pages+'</div>';
-    document.body.appendChild(container);
-    document.fonts.ready.then(async function(){
-      try {
-        var pdf = new jsPDFLib({ orientation:'portrait', unit:'mm', format:'a4' });
-        var pageW=210, pageH=297, margin=10, usableW=pageW-2*margin;
-        var pgs = container.querySelectorAll('.pr-page');
-        for(var i=0;i<pgs.length;i++){
-          var canvas = await html2canvas(pgs[i],{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#ffffff',logging:false,width:880});
-          var imgData = canvas.toDataURL('image/jpeg',0.92);
-          var imgH = (canvas.height/canvas.width)*usableW;
-          if(i>0) pdf.addPage();
-          if(imgH <= pageH-2*margin){
-            pdf.addImage(imgData,'JPEG',margin,margin,usableW,imgH);
-          } else {
-            var pxPerMm=canvas.width/usableW, slicePx=Math.floor((pageH-2*margin)*pxPerMm);
-            var srcY=0, first=true;
-            while(srcY<canvas.height){
-              if(!first) pdf.addPage(); first=false;
-              var sc=document.createElement('canvas'); sc.width=canvas.width; sc.height=Math.min(slicePx,canvas.height-srcY);
-              sc.getContext('2d').drawImage(canvas,0,-srcY);
-              var sh2=(sc.height/canvas.width)*usableW;
-              pdf.addImage(sc.toDataURL('image/jpeg',0.92),'JPEG',margin,margin,usableW,sh2);
-              srcY+=slicePx;
-            }
-          }
-        }
-        var fn='kindbord-rapport'+(periodName?'-'+periodName.replace(/[^a-zA-Z0-9]/g,'-'):'')+'-'+new Date().toISOString().slice(0,10)+'.pdf';
-        pdf.save(fn);
-      } catch(err){ console.error(err); alert('PDF fout: '+err.message); }
-      finally{ document.body.removeChild(container); document.body.removeChild(ov); }
+  var ovHead = [['Leerling'].concat(allTasks.map(function(t){ return t.icon+' '+t.label; }))];
+  var ovBody = state.pupils.map(function(p){
+    var pid = p.id;
+    var myIds = new Set(getTasksForPupil(p).map(function(t){ return t.id; }));
+    var naam = state.showLastname && p.achternaam ? p.voornaam+' '+p.achternaam : p.voornaam;
+    var row = [naam];
+    allTasks.forEach(function(t){
+      if(!myIds.has(t.id)){ row.push('—'); return; }
+      var pr = (state.progress[pid]||{})[t.id]||{};
+      var st = pr.status||0;
+      var sm = pr.smiley||0;
+      if(st===2) row.push('✓'+(sm?' '+SMILEYS[sm]:''));
+      else if(st===1) row.push('…');
+      else row.push('');
     });
-  } else {
-    var blob = new Blob([html],{type:'text/html'});
-    var url = URL.createObjectURL(blob);
-    var tab = window.open(url,'_blank');
-    if(!tab) alert('Pop-up geblokkeerd!');
-    setTimeout(function(){ URL.revokeObjectURL(url); },15000);
-  }
+    return row;
+  });
+
+  doc.autoTable({
+    head: ovHead, body: ovBody,
+    startY: 24,
+    styles:{ fontSize:8, cellPadding:2 },
+    headStyles:{ fillColor:BLUE, textColor:255, fontStyle:'bold', halign:'center' },
+    columnStyles:{ 0:{ halign:'left', cellWidth:35 } },
+    alternateRowStyles:{ fillColor:[248,250,252] },
+    margin:{ left:10, right:10 }
+  });
+  addFooter();
+
+  // ── PER LEERLING ──────────────────────────────────────────────────────────
+  state.pupils.forEach(function(p){
+    doc.addPage(); pageNum++;
+    var pid = p.id;
+    var tasks = getTasksForPupil(p);
+    var done = tasks.filter(function(t){ return ((state.progress[pid]||{})[t.id]||{}).status===2; }).length;
+    var total = tasks.length;
+    var isComplete = isPupilDone(pid);
+    var fullName = p.voornaam+(p.achternaam?' '+p.achternaam:'');
+    var naam = state.showLastname ? fullName : p.voornaam;
+
+    addHeader(naam+' — Detailrapport', (periodLabel||'')+' · '+today);
+
+    // Badge
+    var badgeColor = isComplete ? GREEN : done>0 ? [146,64,14] : RED;
+    var badgeText = isComplete ? 'Volledig klaar' : done>0 ? done+'/'+total+' klaar' : 'Nog niet gestart';
+    doc.setFillColor.apply(doc, badgeColor);
+    doc.roundedRect(pw-60, 16, 50, 7, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
+    doc.text(badgeText, pw-35, 21, {align:'center'});
+    doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
+
+    doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text(fullName, 10, 22);
+    doc.setFont('helvetica','normal');
+
+    if(periodLabel){
+      doc.setFontSize(8); doc.setTextColor(30,64,175);
+      doc.text('Periode: '+periodLabel, 10, 28);
+      doc.setTextColor(0,0,0);
+    }
+
+    var taskRows = tasks.map(function(t){
+      var pr = (state.progress[pid]||{})[t.id]||{};
+      var st = pr.status||0;
+      var sm = pr.smiley||0;
+      var statusTxt = st===2?'✓ Klaar':st===1?'Bezig':'Niet gestart';
+      var smileyTxt = sm ? SMILEYS[sm]+' '+SMILEY_LABELS[sm] : '—';
+      return [t.icon+' '+t.label, statusTxt, smileyTxt];
+    });
+
+    doc.autoTable({
+      head:[['Taak','Status','Zelfbeoordeling']],
+      body: taskRows,
+      startY: periodLabel ? 32 : 28,
+      styles:{ fontSize:9, cellPadding:2.5 },
+      headStyles:{ fillColor:LIGHT, textColor:[71,85,105], fontStyle:'bold' },
+      columnStyles:{ 0:{cellWidth:90}, 1:{cellWidth:35, halign:'center'}, 2:{cellWidth:60} },
+      alternateRowStyles:{ fillColor:[248,250,252] },
+      margin:{ left:10, right:10 }
+    });
+
+    var note = state.notes && state.notes[pid];
+    if(note){
+      var y = doc.lastAutoTable.finalY + 6;
+      doc.setFillColor(255,251,235);
+      doc.setDrawColor(253,230,138);
+      doc.roundedRect(10, y, pw-20, 14, 2, 2, 'FD');
+      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+      doc.text('BEVINDINGEN LEERKRACHT', 14, y+5);
+      doc.setFont('helvetica','normal'); doc.setTextColor(26,32,44);
+      var lines = doc.splitTextToSize(note, pw-28);
+      doc.setFontSize(9);
+      doc.text(lines, 14, y+11);
+    }
+
+    addFooter();
+  });
+
+  var filename = 'kindbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
+  doc.save(filename);
+  document.getElementById('kind-pdf-overlay').classList.remove('show');
 }
 
 /* Event listeners */
