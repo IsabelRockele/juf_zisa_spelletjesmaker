@@ -2086,89 +2086,116 @@ function stripEmoji(str){
 
 
 function generateKindPdf(){
-  const { jsPDF } = window.jspdf;
-  if(!jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+  var jspdfLib = window.jspdf;
+  if(!jspdfLib || !jspdfLib.jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
+  var jsPDF = jspdfLib.jsPDF;
 
   var periodName = document.getElementById('kind-pdf-period').value.trim();
-  var dateFrom = document.getElementById('kind-pdf-from').value;
-  var dateTo = document.getElementById('kind-pdf-to').value;
+  var dateFrom   = document.getElementById('kind-pdf-from').value;
+  var dateTo     = document.getElementById('kind-pdf-to').value;
   var pl = [periodName];
-  if(dateFrom||dateTo) pl.push(fmtDateKind(dateFrom)+(dateTo&&dateTo!==dateFrom?' – '+fmtDateKind(dateTo):''));
-  var periodLabel = pl.filter(Boolean).join('  ·  ');
+  if(dateFrom||dateTo) pl.push(fmtDateKind(dateFrom)+(dateTo&&dateTo!==dateFrom?' - '+fmtDateKind(dateTo):''));
+  var periodLabel = pl.filter(Boolean).join('  .  ');
   var today = fmtDateKind(new Date().toISOString().slice(0,10));
 
   var doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
   var pw = doc.internal.pageSize.getWidth();
   var ph = doc.internal.pageSize.getHeight();
-  var BLUE = [30,58,138];
-  var LIGHT = [241,245,249];
-  var GREEN = [21,128,61];
-  var RED = [220,38,38];
+  var BLUE  = [30, 58, 138];
+  var GREEN = [21, 128, 61];
+  var RED   = [220, 38, 38];
   var pageNum = 1;
 
-  function addHeader(title, sub){
-    doc.setFillColor.apply(doc, BLUE);
+  function se(s){ return stripEmoji(s||''); }
+
+  function hdr(title, sub){
+    doc.setFillColor(BLUE[0],BLUE[1],BLUE[2]);
     doc.rect(0,0,pw,14,'F');
     doc.setTextColor(255,255,255);
     doc.setFontSize(12); doc.setFont('helvetica','bold');
     doc.text(title, 10, 9);
-    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-10, 9, {align:'right'}); }
+    if(sub){ doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.text(sub, pw-8, 9, {align:'right'}); }
     doc.setTextColor(0,0,0);
   }
-  function addFooter(){
+  function ftr(){
     doc.setFontSize(7); doc.setTextColor(150,150,150);
-    doc.text('Kindbord · Juf Zisa · '+today, 10, ph-4);
-    doc.text('Pagina '+pageNum, pw-10, ph-4, {align:'right'});
+    doc.text('Kindbord - Juf Zisa - '+today, 10, ph-3);
+    doc.text(''+pageNum, pw-8, ph-3, {align:'right'});
     doc.setTextColor(0,0,0);
   }
 
-  // ── OVERZICHTSPAGINA ─────────────────────────────────────────────────────
-  var sub = (periodLabel ? 'Periode: '+periodLabel+'  ·  ' : '')+'Gegenereerd op '+today;
-  addHeader('Kindbord — Overzicht', sub);
+  // Hulpfuncties
+  function isKlaar(pupilId){
+    var tasks = getTasksForPupil(state.pupils.find(function(p){ return p.id===pupilId; })||{});
+    if(!tasks.length) return false;
+    return tasks.every(function(t){ return ((state.progress[pupilId]||{})[t.id]||{}).status===2; });
+  }
+  function getNaam(p){
+    return se(state.showLastname && p.achternaam ? p.voornaam+' '+p.achternaam : p.voornaam);
+  }
 
-  var allTaskIds = new Set();
-  state.pupils.forEach(function(p){ getTasksForPupil(p).forEach(function(t){ allTaskIds.add(t.id); }); });
-  var allTasks = [];
-  allTaskIds.forEach(function(id){
-    var t = getTaskById(id);
-    if(t) allTasks.push(t);
+  // ── OVERZICHT ─────────────────────────────────────────────────────────────
+  var sub = (periodLabel?'Periode: '+periodLabel+'  .  ':'')+' Gegenereerd op '+today;
+  hdr('Kindbord - Overzicht', sub);
+
+  // Verzamel alle unieke taken
+  var allTaskIds = [];
+  var seenIds = {};
+  state.pupils.forEach(function(p){
+    getTasksForPupil(p).forEach(function(t){
+      if(!seenIds[t.id]){ seenIds[t.id]=true; allTaskIds.push(t); }
+    });
   });
 
-  var complete = state.pupils.filter(function(p){ return isPupilDone(p.id); });
-  var incomplete = state.pupils.filter(function(p){ return !isPupilDone(p.id); });
-  doc.setFontSize(9);
-  doc.setTextColor.apply(doc, GREEN); doc.text('Volledig klaar: '+complete.length, 10, 20);
-  doc.setTextColor.apply(doc, RED);   doc.text('Niet volledig: '+incomplete.length, 70, 20);
-  doc.setTextColor(0,0,0);
+  var complete  = state.pupils.filter(function(p){ return isKlaar(p.id); });
+  var incomplete = state.pupils.filter(function(p){ return !isKlaar(p.id); });
+  doc.setFontSize(9); doc.setFont('helvetica','bold');
+  doc.setTextColor(GREEN[0],GREEN[1],GREEN[2]); doc.text('Volledig klaar: '+complete.length, 10, 20);
+  doc.setTextColor(RED[0],RED[1],RED[2]);       doc.text('Niet volledig: '+incomplete.length, 70, 20);
+  doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
 
-  var ovHead = [['Leerling'].concat(allTasks.map(function(t){ return stripEmoji(t.icon)+' '+t.label; }))];
+  var taskCols = allTaskIds.map(function(t){
+    var lbl = se(t.label);
+    return lbl.length > 14 ? lbl.slice(0,13)+'.' : lbl;
+  });
+
+  var ovHead = [['Leerling'].concat(taskCols)];
   var ovBody = state.pupils.map(function(p){
     var pid = p.id;
     var myIds = new Set(getTasksForPupil(p).map(function(t){ return t.id; }));
-    var naam = state.showLastname && p.achternaam ? p.voornaam+' '+p.achternaam : p.voornaam;
-    var row = [naam];
-    allTasks.forEach(function(t){
-      if(!myIds.has(t.id)){ row.push('—'); return; }
-      var pr = (state.progress[pid]||{})[t.id]||{};
-      var st = pr.status||0;
-      var sm = pr.smiley||0;
-      if(st===2) row.push('OK'+(sm?' '+stripEmoji(SMILEYS[sm]):''));
-      else if(st===1) row.push('…');
+    var row = [getNaam(p)];
+    allTaskIds.forEach(function(t){
+      if(!myIds.has(t.id)){ row.push('-'); return; }
+      var st = ((state.progress[pid]||{})[t.id]||{}).status||0;
+      if(st===2) row.push('Klaar');
+      else if(st===1) row.push('Bezig');
       else row.push('');
     });
     return row;
   });
 
+  var taskColW = allTaskIds.length > 0 ? Math.min(28, (pw-20-40)/allTaskIds.length) : 28;
+  var colStyles = { 0:{ cellWidth:40, halign:'left', fontStyle:'bold' } };
+  allTaskIds.forEach(function(_,i){ colStyles[i+1]={ cellWidth:taskColW, halign:'center' }; });
+
   doc.autoTable({
     head: ovHead, body: ovBody,
     startY: 24,
-    styles:{ fontSize:8, cellPadding:2 },
-    headStyles:{ fillColor:BLUE, textColor:255, fontStyle:'bold', halign:'center' },
-    columnStyles:{ 0:{ halign:'left', cellWidth:35 } },
+    styles:{ fontSize: allTaskIds.length>8?7:8, cellPadding:2, overflow:'ellipsize' },
+    headStyles:{ fillColor:BLUE, textColor:255, fontStyle:'bold', halign:'center', fontSize: allTaskIds.length>8?6:7 },
+    columnStyles: colStyles,
+    didParseCell: function(data){
+      if(data.section==='body' && data.column.index>0){
+        var v = data.cell.raw;
+        if(v==='Klaar')      { data.cell.styles.textColor=GREEN; data.cell.styles.fontStyle='bold'; }
+        else if(v==='Bezig') { data.cell.styles.textColor=[180,100,0]; }
+        else if(v==='-')     { data.cell.styles.textColor=[180,180,180]; }
+      }
+    },
     alternateRowStyles:{ fillColor:[248,250,252] },
     margin:{ left:10, right:10 }
   });
-  addFooter();
+  ftr();
 
   // ── PER LEERLING ──────────────────────────────────────────────────────────
   state.pupils.forEach(function(p){
@@ -2177,29 +2204,29 @@ function generateKindPdf(){
     var tasks = getTasksForPupil(p);
     var done = tasks.filter(function(t){ return ((state.progress[pid]||{})[t.id]||{}).status===2; }).length;
     var total = tasks.length;
-    var isComplete = isPupilDone(pid);
-    var fullName = p.voornaam+(p.achternaam?' '+p.achternaam:'');
-    var naam = state.showLastname ? fullName : p.voornaam;
+    var klaar = isKlaar(pid);
+    var fullName = se(p.voornaam+(p.achternaam?' '+p.achternaam:''));
 
-    addHeader(naam+' — Detailrapport', (periodLabel||'')+' · '+today);
+    hdr(getNaam(p)+' - Detailrapport', (periodLabel?periodLabel+' . ':'')+today);
 
-    // Badge
-    var badgeColor = isComplete ? GREEN : done>0 ? [146,64,14] : RED;
-    var badgeText = isComplete ? 'Volledig klaar' : done>0 ? done+'/'+total+' klaar' : 'Nog niet gestart';
-    doc.setFillColor.apply(doc, badgeColor);
-    doc.roundedRect(pw-60, 16, 50, 7, 2, 2, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(8); doc.setFont('helvetica','bold');
-    doc.text(badgeText, pw-35, 21, {align:'center'});
+    var badgeColor = klaar ? GREEN : done>0 ? [180,100,0] : RED;
+    var badgeTxt   = klaar ? 'Volledig klaar' : done>0 ? done+'/'+total+' klaar' : 'Nog niet gestart';
+    doc.setFillColor(badgeColor[0],badgeColor[1],badgeColor[2]);
+    doc.roundedRect(pw-70, 15, 62, 8, 2, 2, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text(badgeTxt, pw-39, 20.5, {align:'center'});
     doc.setTextColor(0,0,0); doc.setFont('helvetica','normal');
 
     doc.setFontSize(14); doc.setFont('helvetica','bold');
     doc.text(fullName, 10, 22);
     doc.setFont('helvetica','normal');
 
+    var startY = 26;
     if(periodLabel){
       doc.setFontSize(8); doc.setTextColor(30,64,175);
-      doc.text('Periode: '+periodLabel, 10, 28);
+      doc.text('Periode: '+se(periodLabel), 10, startY);
       doc.setTextColor(0,0,0);
+      startY = 31;
     }
 
     var taskRows = tasks.map(function(t){
@@ -2207,36 +2234,49 @@ function generateKindPdf(){
       var st = pr.status||0;
       var sm = pr.smiley||0;
       var statusTxt = st===2?'Klaar':st===1?'Bezig':'Niet gestart';
-      var smileyTxt = sm ? stripEmoji(SMILEYS[sm])+' '+SMILEY_LABELS[sm] : '-';
-      return [stripEmoji(t.icon)+' '+t.label, statusTxt, smileyTxt];
+      var smileyTxt = sm ? se(SMILEYS[sm])+' '+se(SMILEY_LABELS[sm]) : '-';
+      return [se(t.label), statusTxt, smileyTxt];
     });
 
     doc.autoTable({
       head:[['Taak','Status','Zelfbeoordeling']],
       body: taskRows,
-      startY: periodLabel ? 32 : 28,
-      styles:{ fontSize:9, cellPadding:2.5 },
-      headStyles:{ fillColor:LIGHT, textColor:[71,85,105], fontStyle:'bold' },
-      columnStyles:{ 0:{cellWidth:90}, 1:{cellWidth:35, halign:'center'}, 2:{cellWidth:60} },
-      alternateRowStyles:{ fillColor:[248,250,252] },
+      startY: startY,
+      styles:{ fontSize:9, cellPadding:3, overflow:'linebreak' },
+      headStyles:{ fillColor:[241,245,249], textColor:[71,85,105], fontStyle:'bold', fontSize:8 },
+      columnStyles:{
+        0:{ cellWidth:pw-20-45-70, halign:'left' },
+        1:{ cellWidth:45, halign:'center', fontStyle:'bold' },
+        2:{ cellWidth:70, halign:'left' }
+      },
+      didParseCell: function(data){
+        if(data.section==='body' && data.column.index===1){
+          var v = data.cell.raw;
+          if(v==='Klaar')            { data.cell.styles.textColor=GREEN; data.cell.styles.fillColor=[240,253,244]; }
+          else if(v==='Bezig')       { data.cell.styles.textColor=[180,100,0]; data.cell.styles.fillColor=[255,251,235]; }
+          else if(v==='Niet gestart'){ data.cell.styles.textColor=[30,58,138]; data.cell.styles.fillColor=[239,246,255]; }
+        }
+      },
+      alternateRowStyles:{ fillColor:[250,250,252] },
       margin:{ left:10, right:10 }
     });
 
+    // Bevindingen
     var note = state.notes && state.notes[pid];
     if(note){
       var y = doc.lastAutoTable.finalY + 6;
+      var noteLines = doc.splitTextToSize(se(note), pw-40);
+      var boxH = 8 + noteLines.length * 5 + 4;
+      if(y+boxH > ph-10){ doc.addPage(); pageNum++; hdr(getNaam(p)+' - Bevindingen',''); ftr(); y=20; }
       doc.setFillColor(255,251,235);
       doc.setDrawColor(253,230,138);
-      doc.roundedRect(10, y, pw-20, 14, 2, 2, 'FD');
-      doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
-      doc.text('BEVINDINGEN LEERKRACHT', 14, y+5);
-      doc.setFont('helvetica','normal'); doc.setTextColor(26,32,44);
-      var lines = doc.splitTextToSize(note, pw-28);
-      doc.setFontSize(9);
-      doc.text(lines, 14, y+11);
+      doc.roundedRect(10, y, pw-20, boxH, 2, 2, 'FD');
+      doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor(146,64,14);
+      doc.text('BEVINDINGEN LEERKRACHT', 16, y+5);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(26,32,44);
+      doc.text(noteLines, 16, y+11);
     }
-
-    addFooter();
+    ftr();
   });
 
   var filename = 'kindbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
