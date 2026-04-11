@@ -373,6 +373,131 @@ function getBordNaam(){
 }
 
 function switchTab(tab){ currentTab=tab; renderSettings(); }
+function toggleMode(){ currentMode=currentMode==='board'?'settings':'board';renderShell(); }
+function closeSettings(){ currentMode='board'; renderShell(); }
+
+// CONFIRM
+let confirmCallback=null;
+function confirmAction(type,msg,cb){ confirmCallback=cb||null;document.getElementById('confirm-title').textContent=type==='reset'?'Voortgang wissen':type==='classload'?'Klaslijst laden':'Bevestigen';document.getElementById('confirm-text').textContent=msg||'';const btns=document.getElementById('confirm-btns');if(type==='reset')btns.innerHTML='<button class="btn btn-secondary" onclick="closeConfirm()">Annuleren</button><button class="btn btn-danger" onclick="resetAll();closeConfirm()">Wissen</button>';else if(type==='classload')btns.innerHTML='<button class="btn btn-secondary" onclick="closeConfirm()">Annuleren</button><button class="btn btn-secondary" onclick="loadClassListAction(false)">➕ Samenvoegen</button><button class="btn btn-primary" onclick="loadClassListAction(true)">🔄 Vervangen</button>';else btns.innerHTML='<button class="btn btn-secondary" onclick="closeConfirm()">Annuleren</button><button class="btn btn-primary" onclick="confirmCallback&&confirmCallback();closeConfirm()">Doorgaan</button>';document.getElementById('confirm-overlay').classList.remove('hidden'); }
+function closeConfirm(){ document.getElementById('confirm-overlay').classList.add('hidden'); }
+function showCelebration(n){ document.getElementById('celeb-name').textContent=n;document.getElementById('celebration').classList.add('show'); }
+function closeCelebration(){ document.getElementById('celebration').classList.remove('show'); }
+
+// PDF
+function openPdfModal(){ const today=new Date().toISOString().slice(0,10);if(!document.getElementById('pdf-date-from').value)document.getElementById('pdf-date-from').value=today;if(!document.getElementById('pdf-date-to').value)document.getElementById('pdf-date-to').value=today;document.getElementById('pdf-overlay').classList.remove('hidden'); }
+function fmtDate(str){ if(!str)return'';try{return new Date(str).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}catch{return str;} }
+
+function generateAndPrint(){
+  const periodName=document.getElementById('pdf-period-name').value.trim();
+  const dateFrom=document.getElementById('pdf-date-from').value;
+  const dateTo=document.getElementById('pdf-date-to').value;
+  const pl=[periodName];
+  if(dateFrom||dateTo) pl.push(fmtDate(dateFrom)+(dateTo&&dateTo!==dateFrom?' – '+fmtDate(dateTo):''));
+  const periodLabel=pl.filter(Boolean).join('  ·  ');
+  const today=fmtDate(new Date().toISOString().slice(0,10));
+  const allTasks=buildAllTasksForBoard();
+  const periodDiv=periodLabel?'<div class="pr-period">Periode: '+periodLabel+'</div>':'';
+  let overviewRows='';
+  state.pupils.forEach((p,i)=>{
+    const pid=p.id,complete=isPupilComplete(pid);
+    const myIds=new Set(pupilTasks(pid).map(t=>t.id));
+    let cells='';
+    allTasks.forEach(t=>{
+      if(!myIds.has(t.id)){cells+='<td class="pr-status-na">—</td>';}
+      else{
+        const st=getStatus(pid,t.id),sm=getSmiley(pid,t.id);
+        if(st===2) cells+='<td><span class="pr-status-done">&#x2713;</span>'+(sm?'<br><span style="font-size:13px">'+SMILEYS[sm]+'</span>':'')+'</td>';
+        else if(st===1) cells+='<td><span class="pr-status-busy">Bezig</span></td>';
+        else cells+='<td class="pr-status-empty">·</td>';
+      }
+    });
+    const num=state.showNumbers?(i+1)+'. ':'';
+    overviewRows+='<tr class="'+(complete?'row-complete':'')+'"><td class="name-col">'+num+esc(displayName(p))+'</td>'+cells+'</tr>';
+  });
+  const taskHeaders=allTasks.map(t=>'<th><div style="font-size:16px">'+t.icon+'</div><div>'+esc(t.label)+'</div></th>').join('');
+  let detailPages='';
+  state.pupils.forEach(function(p){
+    const pid=p.id,st2=pupilStats(pid),complete=isPupilComplete(pid);
+    const done=st2.done,total=st2.total,tasks=pupilTasks(pid);
+    const bc=complete?'badge-complete':done>0?'badge-partial':'badge-empty';
+    const bt=complete?'Volledig klaar':done>0?done+' / '+total+' klaar':'Nog niet gestart';
+    let rows='';
+    tasks.forEach(function(t,i){
+      const isX=!!(state.pupilTaskOverrides[pid]&&state.pupilTaskOverrides[pid].extra&&state.pupilTaskOverrides[pid].extra.find(function(x){return x.id===t.id;}));
+      const s=getStatus(pid,t.id),sm=getSmiley(pid,t.id);
+      const sh=s===2?'<span class="pr-status-done">&#x2713; Klaar</span>':s===1?'<span class="pr-status-busy">Bezig</span>':'<span style="color:#cbd5e0">Niet gestart</span>';
+      const smh=sm?'<span class="pr-sc">'+SMILEYS[sm]+'</span><span class="pr-sl">'+SMILEY_LABELS[sm]+'</span>':'<span style="color:#cbd5e0">—</span>';
+      const bg=isX?'#fffbeb':i%2?'#f8fafc':'#fff';
+      rows+='<tr style="background:'+bg+'"><td><span class="pr-ti">'+t.icon+'</span>'+esc(t.label)+(isX?'<span class="pr-xs">★ extra</span>':'')+'</td><td>'+sh+'</td><td>'+smh+'</td></tr>';
+    });
+    const nn=state.notes[pid]?'<div class="pr-nb"><h4>Bevindingen leerkracht</h4><p>'+esc(state.notes[pid])+'</p></div>':'';
+    const fn=esc(p.voornaam+(p.achternaam?' '+p.achternaam:''));
+    detailPages+='<div class="pr-page pr-dp">'
+      +'<div class="pr-ph"><h1>'+esc(displayName(p))+'</h1><span>Detailrapport</span></div>'
+      +'<div class="pr-pb">'+periodDiv
+      +'<div class="pr-dh"><span class="pr-dn">'+fn+'</span><span class="pr-db '+bc+'">'+bt+'</span></div>'
+      +'<table class="pr-tt"><thead><tr><th style="width:40%">Taak</th><th style="width:25%">Status</th><th style="width:35%">Zelfbeoordeling</th></tr></thead><tbody>'+rows+'</tbody></table>'
+      +nn+'</div></div>';
+  });
+  const incomplete=state.pupils.filter(function(p){return!isPupilComplete(p.id);});
+  const complete2=state.pupils.filter(function(p){return isPupilComplete(p.id);});
+  let si='',sc='';
+  incomplete.forEach(function(p){
+    const pr=state.progress[p.id]||{};
+    const nd=pupilTasks(p.id).filter(function(t){return(pr[t.id]?pr[t.id].status||0:0)!==2;});
+    si+='<div class="sc-card sc-inc"><div class="sc-n">'+esc(displayName(p))+'</div><div class="sc-o">'+nd.map(function(t){return t.icon+' '+t.label;}).join(' · ')+'</div></div>';
+  });
+  complete2.forEach(function(p){
+    sc+='<div class="sc-card sc-ok"><div class="sc-n">&#x2713; '+esc(displayName(p))+'</div><div class="sc-d">Alle '+pupilTasks(p.id).length+' taken afgewerkt</div></div>';
+  });
+  const css='*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}body{font-family:Nunito,sans-serif;background:#f8fafc;color:#1a202c;-webkit-print-color-adjust:exact;print-color-adjust:exact}#tb{position:fixed;top:0;left:0;right:0;z-index:100;background:#1e3a8a;color:#fff;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.2);flex-wrap:wrap}#tb h2{font-size:15px;font-weight:800}.tbb{display:flex;gap:8px;align-items:center}.tb1{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:#22c55e;color:#fff}.tb2{padding:8px 18px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;font-weight:700;font-size:13px;background:rgba(255,255,255,.15);color:#fff}.tbh{font-size:11px;opacity:.6;color:#fff}#ct{margin-top:62px;padding:20px;max-width:1200px;margin-left:auto;margin-right:auto}.pr-page{background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,.07);margin-bottom:24px;overflow:hidden}.pr-ph{background:#1e3a8a;color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}.pr-ph h1{font-size:16px;font-weight:800}.pr-ph span{font-size:10px;opacity:.75}.pr-pb{padding:18px}.pr-period{background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:7px 12px;margin-bottom:14px;font-size:11px;color:#1e40af;font-weight:700}.pr-ss{margin-bottom:16px}.pr-ss h2{font-size:13px;font-weight:800;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid}.pr-ss h2.r{color:#dc2626;border-color:#fca5a5}.pr-ss h2.g{color:#15803d;border-color:#86efac}.sc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}.sc-card{border:1px solid;border-radius:8px;padding:8px 12px}.sc-inc{background:#fff5f5;border-color:#fca5a5}.sc-ok{background:#f0fdf4;border-color:#86efac}.sc-n{font-weight:800;font-size:13px;margin-bottom:3px}.sc-o{color:#dc2626;font-size:11px;line-height:1.4}.sc-d{color:#15803d;font-size:11px}.pr-ot{width:100%;border-collapse:collapse;font-size:11px}.pr-ot th{background:#1e3a8a;color:#fff;padding:8px 6px;text-align:center;font-size:10px;font-weight:800;border:1px solid #1e40af}.pr-ot th.nc{text-align:left;min-width:120px}.pr-ot td{padding:6px;border:1px solid #e2e8f0;text-align:center;vertical-align:middle}.pr-ot td.nc{text-align:left;font-weight:700;font-size:12px}.pr-ot tr:nth-child(even) td{background:#f8fafc}.pr-ot tr.rc td{background:#f0fdf4!important}.sd{background:#dcfce7;color:#15803d;border-radius:4px;padding:2px 6px;font-weight:800;font-size:10px;display:inline-block}.sb{background:#fef9c3;color:#92400e;border-radius:4px;padding:2px 6px;font-weight:800;font-size:10px;display:inline-block}.se{color:#d1d5db}.sn{color:#e5e7eb;font-size:14px}.pr-dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid #e2e8f0}.pr-dn{font-size:18px;font-weight:800;color:#1e3a8a}.pr-db{padding:4px 14px;border-radius:20px;font-size:11px;font-weight:800}.badge-complete{background:#dcfce7;color:#15803d}.badge-partial{background:#fef9c3;color:#92400e}.badge-empty{background:#fee2e2;color:#dc2626}.pr-tt{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px}.pr-tt th{background:#f1f5f9;color:#475569;padding:7px 10px;text-align:left;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid #e2e8f0}.pr-tt td{padding:8px 10px;border-bottom:1px solid #f1f5f9;vertical-align:middle}.pr-ti{font-size:15px;margin-right:5px}.pr-xs{color:#d97706;font-size:10px;margin-left:4px;background:#fef9c3;padding:1px 5px;border-radius:4px}.pr-sc{font-size:16px}.pr-sl{font-size:10px;color:#718096;display:block}.pr-nb{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 14px}.pr-nb h4{font-size:10px;font-weight:800;color:#92400e;margin-bottom:6px;text-transform:uppercase;letter-spacing:.04em}.pr-nb p{font-size:12px;color:#1a202c;line-height:1.7;white-space:pre-wrap}@media print{#tb{display:none!important}body{background:#fff}#ct{margin-top:0;padding:8mm;max-width:none}.pr-page{box-shadow:none;border-radius:0;margin-bottom:0;page-break-after:always}.pr-page:last-child{page-break-after:auto}.pr-ow{page-break-after:always}}';
+  const pspan=periodLabel?'Periode: '+periodLabel+'  &#xB7;  ':'';
+  const html='<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"><title>Klasbord Rapport<\/title><style>'+css+'<\/style><\/head><body>'
+    +'<div id="tb"><div><h2>Klasbord Rapport</h2><span>'+pspan+'Gegenereerd op '+today+'</span></div>'
+    +'<div class="tbb"><span class="tbh">Kies pagina\'s in het afdrukvenster · Sla op als PDF via Bestemming</span>'
+    +'<button class="tb2" onclick="window.close()">Sluiten</button>'
+    +'<button class="tb1" onclick="window.print()">Afdrukken / Opslaan als PDF</button></div></div>'
+    +'<div id="ct">'
+    +'<div class="pr-page pr-ow">'
+    +'<div class="pr-ph"><h1>Klasbord &#x2013; Overzicht</h1><span>Gegenereerd op '+today+'</span></div>'
+    +'<div class="pr-pb">'+periodDiv
+    +'<div class="pr-ss"><h2 class="r">Niet volledig afgewerkt ('+incomplete.length+')</h2><div class="sc-grid">'+(si||'<p style="color:#a0aec0;font-style:italic;font-size:11px">Iedereen klaar!</p>')+'</div></div>'
+    +'<div class="pr-ss"><h2 class="g">Volledig afgewerkt ('+complete2.length+')</h2><div class="sc-grid">'+(sc||'<p style="color:#a0aec0;font-style:italic;font-size:11px">Nog niemand volledig klaar.</p>')+'</div></div>'
+    +'<div style="font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 8px">Volledig klasoverzicht</div>'
+    +'<table class="pr-ot"><thead><tr><th class="nc">Leerling</th>'+taskHeaders+'</tr></thead><tbody>'+overviewRows+'</tbody></table>'
+    +'</div></div>'
+    +detailPages
+    +'<\/div><\/body><\/html>';
+  document.getElementById('pdf-overlay').classList.add('hidden');
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const tab=window.open(url,'_blank');
+  if(!tab) alert('Pop-up geblokkeerd! Sta pop-ups toe voor deze pagina in je browser.');
+  setTimeout(function(){URL.revokeObjectURL(url);},15000);
+}
+
+// NIEUWE PERIODE
+var selectedPeriodOption=0;
+function openNewPeriod(){
+  selectedPeriodOption=0;
+  [1,2,3].forEach(function(n){document.getElementById('po'+n).classList.remove('selected');});
+  document.getElementById('new-period-confirm').disabled=true;
+  document.getElementById('new-period-overlay').classList.remove('hidden');
+}
+function selectPeriod(n){
+  selectedPeriodOption=n;
+  [1,2,3].forEach(function(i){document.getElementById('po'+i).classList.toggle('selected',i===n);});
+  document.getElementById('new-period-confirm').disabled=false;
+}
+function doNewPeriod(){
+  if(!selectedPeriodOption) return;
+  if(selectedPeriodOption===1){ state.progress={}; }
+  else if(selectedPeriodOption===2){ state.progress={}; state.notes={}; }
+  else { state.pupils=[];state.progress={};state.notes={};state.activeTasks=[];state.customTasks=[];state.pupilTaskOverrides={}; }
+  saveState();
+  document.getElementById('new-period-overlay').classList.add('hidden');
+  renderShell();
+}
 function renderSettings(){
   document.getElementById('tab-ll').classList.toggle('active',currentTab==='leerlingen');
   document.getElementById('tab-tk').classList.toggle('active',currentTab==='taken');
