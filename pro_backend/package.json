@@ -7,7 +7,7 @@
     "lib"
   ],
   "engines": {
-    "node": "20"
+    "node": "22"
   },
   "scripts": {
     "build": "tsc",
@@ -23,7 +23,7 @@
     "pdfkit": "^0.17.2"
   },
   "devDependencies": {
-    "@types/node": "^20.11.30",
+    "@types/node": "^22.0.0",
     "@types/pdfkit": "^0.17.2",
     "rimraf": "^5.0.5",
     "typescript": "^5.7.3"
