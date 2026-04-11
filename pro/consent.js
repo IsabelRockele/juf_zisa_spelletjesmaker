@@ -13,20 +13,14 @@ import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
 
 // ── Instellingen ─────────────────────────────────────────────
 const CONSENT_VERSION = "1.0";
-// Verhoog dit bij een nieuwe versie van de privacyverklaring.
-// Alle gebruikers krijgen de pop-up dan automatisch opnieuw.
-
-const PRIVACY_URL = "./privacy.html";
-// Pad naar de volledige AVG-verklaring in de app.
+const PRIVACY_URL     = "./privacy.html";
 // ─────────────────────────────────────────────────────────────
 
-// Interne state — onthoudt of consent nog nodig is
-// ook als gebruiker even naar een ander tabblad gaat.
+// Interne state
 let _consentNodig = false;
 let _consentUser  = null;
 let _consentRef   = null;
 
-// Hergebruik de Firebase-app die guard.js al heeft gestart.
 async function getFirebaseApp() {
   let pogingen = 0;
   while (getApps().length === 0 && pogingen < 50) {
@@ -36,7 +30,10 @@ async function getFirebaseApp() {
   return getApp();
 }
 
-// ── Hoofdfunctie — exporteer deze en roep ze aan vanuit app.html ──
+// ── Hoofdfunctie ─────────────────────────────────────────────
+// Exporteer deze en roep ze aan vanuit app.html:
+//   1. Bij klik op Klasmanagement-knop
+//   2. Bij automatisch laden als Klasmanagement de laatste categorie was
 export async function checkAndShowConsent(user) {
   const app = await getFirebaseApp();
   const db  = getFirestore(app);
@@ -45,14 +42,17 @@ export async function checkAndShowConsent(user) {
   try {
     const snap = await getDoc(consentRef);
     if (snap.exists() && snap.data().version === CONSENT_VERSION) {
-      return; // Akkoord al gegeven — niets doen.
+      // Consent al gegeven — state leeg houden zodat pop-up nooit meer terugkomt
+      _consentNodig = false;
+      _consentUser  = null;
+      _consentRef   = null;
+      return;
     }
   } catch (err) {
     console.warn("[consent.js] Kan consent niet lezen, pop-up tonen als fallback.", err);
   }
 
-  // Sla state op zodat visibilitychange de pop-up kan heropenen
-  // wanneer de gebruiker terugkomt van de privacypagina.
+  // Consent nog niet gegeven — state bewaren voor visibilitychange
   _consentNodig = true;
   _consentUser  = user;
   _consentRef   = consentRef;
@@ -60,10 +60,13 @@ export async function checkAndShowConsent(user) {
   toonConsentPopup(user, consentRef);
 }
 
-// ── Heropen pop-up als gebruiker terugkomt van ander tabblad ──
-// De leerkracht opent de privacyverklaring in een nieuw tabblad,
-// leest die, en keert terug. De pop-up verschijnt dan automatisch
-// opnieuw zodat ze het vinkje nog kunnen aanvinken.
+// ── Heropen pop-up bij terugkeer van ander tabblad ────────────
+// Werkt voor:
+//   - Gebruiker opent privacy.html via window.open() en sluit dat venster
+//   - Gebruiker wisselt van tabblad en keert terug
+// Werkt NIET voor:
+//   - Gebruiker klikt op "Terug naar app" knop in privacy.html
+//     → daarvoor gebruiken we window.close() in privacy.html
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible" && _consentNodig) {
     if (!document.getElementById("zisa-consent-overlay")) {
@@ -72,7 +75,7 @@ document.addEventListener("visibilitychange", function () {
   }
 });
 
-// ── Pop-up opbouwen ─────────────────────────────────────────
+// ── Pop-up opbouwen ───────────────────────────────────────────
 function toonConsentPopup(user, consentRef) {
   document.getElementById("zisa-consent-overlay")?.remove();
 
@@ -117,7 +120,7 @@ function toonConsentPopup(user, consentRef) {
           </div>
         </div>
 
-        <a href="${PRIVACY_URL}" target="_blank" id="zisa-consent-link">
+        <a href="${PRIVACY_URL}" id="zisa-consent-link">
           📄 Lees de volledige privacyverklaring (opent in nieuw venster)
         </a>
 
@@ -143,6 +146,14 @@ function toonConsentPopup(user, consentRef) {
   document.body.appendChild(overlay);
   document.body.style.overflow = "hidden";
 
+  // Privacy-link: open als popup-venster zodat window.close() werkt
+  // en de gebruiker automatisch terugkeert naar dit tabblad met de pop-up
+  document.getElementById("zisa-consent-link").addEventListener("click", function (e) {
+    e.preventDefault();
+    window.open(PRIVACY_URL, "zisa-privacy",
+      "width=900,height=700,scrollbars=yes,resizable=yes");
+  });
+
   document.getElementById("zisa-consent-knop").addEventListener("click", () => {
     const vinkje  = document.getElementById("zisa-consent-vinkje");
     const foutMsg = document.getElementById("zisa-consent-fout");
@@ -156,7 +167,7 @@ function toonConsentPopup(user, consentRef) {
   });
 }
 
-// ── Akkoord opslaan in Firestore ───────────────────────────
+// ── Akkoord opslaan ───────────────────────────────────────────
 async function slaConsentOp(user, consentRef, overlay) {
   const knop = document.getElementById("zisa-consent-knop");
   knop.disabled = true;
@@ -171,7 +182,7 @@ async function slaConsentOp(user, consentRef, overlay) {
       uid:       user.uid
     });
 
-    // Consent opgeslagen — state resetten zodat pop-up niet meer terugkomt
+    // Consent opgeslagen — state resetten
     _consentNodig = false;
     _consentUser  = null;
     _consentRef   = null;
