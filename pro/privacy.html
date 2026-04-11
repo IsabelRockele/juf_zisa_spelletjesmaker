@@ -290,7 +290,25 @@
   <span class="pv-badge">🔒 Privacyverklaring</span>
 </header>
 
-<a href="./app.html" class="pv-terug">← Terug naar de app</a>
+<button onclick="window.close()" class="pv-terug" style="cursor:pointer;border:none;">
+  ← Terug naar de app
+</button>
+<style>
+  /* Verberg de terugknop als de pagina niet als popup geopend is
+     (bv. als iemand de URL rechtstreeks bezoekt via de sidebar-knop) */
+  .pv-terug-wrapper { display: flex; align-items: center; }
+</style>
+<script>
+  // Als de pagina niet als popup geopend is (opener = null),
+  // verander de knop naar een normale link naar app.html
+  if (!window.opener) {
+    var btn = document.querySelector('.pv-terug');
+    if (btn) {
+      btn.onclick = function() { location.href = './app.html'; };
+      btn.textContent = '← Terug naar de app';
+    }
+  }
+</script>
 
 <!-- ── Inhoud ── -->
 <div class="pv-content">
