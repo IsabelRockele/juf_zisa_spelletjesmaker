@@ -947,13 +947,6 @@
 
   window.onProReady = ({ user, expiresAt, limit }) => {
     window._zisaUser = user; // consent.js heeft dit nodig
-
-    // Consent check bij automatisch laden van Klasmanagement
-    // Dit is de betrouwbare plek — gebruiker is hier gegarandeerd beschikbaar
-    const huidigePaneel = localStorage.getItem('laatsteCategorie');
-    if (huidigePaneel === 'klasmanagement') {
-      checkAndShowConsent(user);
-    }
     try { userPill.textContent = user.email ?? user.uid; } catch {}
     // Geef gebruiker door aan vraagstukken module voor per-gebruiker limiet
     if (window.VraagstukkenModule && user.email) {
@@ -991,7 +984,19 @@
       const panel = document.getElementById('panel-' + laatst);
       if (panel) panel.classList.add('active');
 
-      // Consent check gebeurt vanuit onProReady zodra gebruiker bekend is
+      // Consent check bij automatisch laden van Klasmanagement
+      if (laatst === 'klasmanagement') {
+        let pogingen = 0;
+        const wachtOpUser = setInterval(() => {
+          pogingen++;
+          if (window._zisaUser) {
+            clearInterval(wachtOpUser);
+            checkAndShowConsent(window._zisaUser);
+          } else if (pogingen >= 50) {
+            clearInterval(wachtOpUser);
+          }
+        }, 100);
+      }
     }
   });
 </script>
