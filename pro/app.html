@@ -946,6 +946,11 @@
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
+      // Bewaar vorige categorie zodat "Niet nu" ernaar kan terugkeren
+      const huidige = localStorage.getItem('laatsteCategorie') || 'reken';
+      if (huidige !== 'klasmanagement') {
+        window._vorigCategorie = huidige;
+      }
       localStorage.setItem('laatsteCategorie', target);
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
