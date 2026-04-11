@@ -1,0 +1,214 @@
+/* ============================================================
+   consent.css  –  AVG Pop-up
+   Juf Zisa's Spelgenerator PRO
+   Huisstijl: donker (#2a2a2a), goud (#ffcf56), Comic Sans
+   ============================================================ */
+
+#zisa-consent-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#zisa-consent-modal {
+  background: #ffffff;
+  border-radius: 18px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+#zisa-consent-header {
+  background: #2a2a2a;
+  border-radius: 18px 18px 0 0;
+  padding: 24px 28px 20px;
+  text-align: center;
+}
+
+#zisa-consent-slotje {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+#zisa-consent-titel {
+  color: #ffcf56;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0 0 6px 0;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+#zisa-consent-subtitel {
+  color: #bbbbbb;
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Body ── */
+#zisa-consent-body {
+  padding: 22px 26px;
+  flex: 1;
+}
+
+/* ── Drie info-blokken ── */
+.zisa-consent-blokken {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.zisa-consent-blok {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: #f5f0e8;
+  border-radius: 10px;
+  padding: 11px 14px;
+  border-left: 4px solid #ffcf56;
+}
+
+.zisa-consent-blok-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.zisa-consent-blok strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #2a2a2a;
+  margin-bottom: 2px;
+}
+
+.zisa-consent-blok p {
+  font-size: 0.8rem;
+  color: #555555;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Link naar volledige verklaring ── */
+#zisa-consent-link {
+  display: inline-block;
+  color: #5b7cfa;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin-bottom: 18px;
+  padding-bottom: 2px;
+  border-bottom: 2px solid #5b7cfa;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+#zisa-consent-link:hover {
+  color: #ffcf56;
+  border-color: #ffcf56;
+}
+
+/* ── Vinkje ── */
+#zisa-consent-vinkje-rij {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fff9ec;
+  border: 2px solid #ffcf56;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+#zisa-consent-vinkje {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: #ffcf56;
+  cursor: pointer;
+}
+
+#zisa-consent-vinkje-rij span {
+  font-size: 0.85rem;
+  color: #333333;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+/* ── Foutmelding ── */
+#zisa-consent-fout {
+  color: #c0392b;
+  font-size: 0.82rem;
+  font-weight: bold;
+  margin: 4px 0 0 0;
+}
+
+/* ── Footer ── */
+#zisa-consent-footer {
+  background: #f5f0e8;
+  border-radius: 0 0 18px 18px;
+  padding: 14px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border-top: 1px solid #e8e0d0;
+}
+
+#zisa-consent-versie {
+  font-size: 0.74rem;
+  color: #999999;
+}
+
+/* ── Doorgaan-knop ── */
+#zisa-consent-knop {
+  background: #ffcf56;
+  color: #7a4500;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 22px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  white-space: nowrap;
+}
+
+#zisa-consent-knop:hover:not(:disabled) {
+  background: #ffd97d;
+  transform: scale(1.03);
+}
+
+#zisa-consent-knop:disabled {
+  background: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ── Scrollbar ── */
+#zisa-consent-modal::-webkit-scrollbar { width: 5px; }
+#zisa-consent-modal::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+/* ── Responsief ── */
+@media (max-width: 480px) {
+  #zisa-consent-header { padding: 18px 16px 14px; }
+  #zisa-consent-body   { padding: 16px 16px; }
+  #zisa-consent-footer { flex-direction: column; align-items: stretch; text-align: center; padding: 12px 16px; }
+  #zisa-consent-knop   { width: 100%; padding: 11px; }
+}
