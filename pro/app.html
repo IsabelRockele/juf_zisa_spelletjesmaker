@@ -555,6 +555,7 @@
       .main { padding: 16px; }
     }
   </style>
+  <link rel="stylesheet" href="./consent.css">
 </head>
 <body>
 
@@ -598,6 +599,7 @@
     <div id="user-pill" class="user-pill">-</div>
     <button id="logout" class="btn-logout">↩ Uitloggen</button>
     <a href="../Handleiding spelletjesmaker.pdf" class="help-btn" download>❓ Handleiding</a>
+    <a href="./privacy.html" class="help-btn" target="_blank">🔒 Privacyverklaring</a>
     <button class="suggest-btn" onclick="document.getElementById('suggestOverlay').classList.add('open')">
     <span class="tooltip">Idee voor een nieuwe tool?</span>
 💡 Suggestie insturen <span style="background:#fff4;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:0.7rem;margin-left:2px;">?</span>
@@ -909,7 +911,9 @@
 
 </main>
 
-<script>
+<script type="module">
+  import { checkAndShowConsent } from "./consent.js";
+
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
@@ -919,6 +923,11 @@
       document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
       document.getElementById('panel-' + target).classList.add('active');
       document.querySelector('.main').scrollTop = 0;
+
+      // AVG-check: alleen bij Klasmanagement, alleen als user bekend is
+      if (target === 'klasmanagement' && window._zisaUser) {
+        checkAndShowConsent(window._zisaUser);
+      }
     });
   });
 </script>
@@ -937,6 +946,7 @@
   document.getElementById('logout').onclick = () => signOut(auth);
 
   window.onProReady = ({ user, expiresAt, limit }) => {
+    window._zisaUser = user; // consent.js heeft dit nodig
     try { userPill.textContent = user.email ?? user.uid; } catch {}
     // Geef gebruiker door aan vraagstukken module voor per-gebruiker limiet
     if (window.VraagstukkenModule && user.email) {
