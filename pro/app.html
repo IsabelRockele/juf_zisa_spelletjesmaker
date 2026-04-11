@@ -124,6 +124,9 @@
     .nav-btn.active.cat-spel            { background: #c0392b; }
 .nav-btn.active.cat-tijd            { background: #16a085; }
 .nav-btn.active.cat-klasmanagement  { background: #5b7cfa; }
+    #panel-klasmanagement { position: relative; }
+    #klas-blokkeer { display: none; }
+    #klas-blokkeer.actief { display: flex !important; }
 
     .nav-btn .nav-icon { font-size: 1rem; flex-shrink: 0; }
 
@@ -877,6 +880,32 @@
 
 <!-- KLASMANAGEMENT -->
 <div class="section-panel" id="panel-klasmanagement">
+
+  <!-- Blokkeer-overlay: zichtbaar zolang consent niet gegeven -->
+  <div id="klas-blokkeer" style="
+    display:none;
+    position:absolute;
+    inset:0;
+    background:rgba(240,237,232,0.92);
+    z-index:10;
+    border-radius:12px;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    gap:12px;
+    text-align:center;
+    padding:40px;
+  ">
+    <span style="font-size:2rem;">🔒</span>
+    <p style="font-family:'Comic Sans MS',cursive;font-weight:bold;color:#2a2a2a;font-size:1rem;">
+      Geef eerst akkoord met de privacyverklaring om Klasmanagement te gebruiken.
+    </p>
+    <button onclick="document.getElementById('zisa-consent-overlay') && document.getElementById('zisa-consent-overlay').scrollIntoView()"
+      style="background:#ffcf56;color:#7a4500;border:none;border-radius:10px;padding:9px 20px;font-family:'Comic Sans MS',cursive;font-weight:bold;cursor:pointer;">
+      Bekijk de privacyverklaring →
+    </button>
+  </div>
+
   <div class="section-header">
     <span class="section-icon">📋</span>
     <h2>Klasmanagement</h2>
