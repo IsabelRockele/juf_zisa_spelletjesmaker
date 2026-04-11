@@ -46,33 +46,48 @@ let dragSrc=null, bulkOrder='voornaam';
 // Smiley popup state
 let pendingSmileyPid=null, pendingSmileyTid=null;
 
+function applyStateData(s){
+  if(!s) return;
+  if(s.pupils&&s.pupils.length&&typeof s.pupils[0]==='string') s.pupils=s.pupils.map(n=>{const p=n.trim().split(' ');return{id:uid(),voornaam:p[0],achternaam:p.slice(1).join(' ')};});
+  if(s.progress){
+    Object.keys(s.progress).forEach(pid=>{
+      const pr=s.progress[pid];
+      Object.keys(pr).forEach(tid=>{
+        if(typeof pr[tid]==='number') pr[tid]={status:pr[tid],smiley:0};
+      });
+    });
+  }
+  state={...state,...s};
+  if(!state.customIcons||typeof state.customIcons!=='object') state.customIcons={};
+  if(!state.pupilPhotos||typeof state.pupilPhotos!=='object') state.pupilPhotos={};
+  if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
+  if(!state.boardSize) state.boardSize='normal';
+}
+
 function loadState(){
+  // Probeer localStorage eerst (snel, synchron)
   try{
     const r=localStorage.getItem(STORAGE_KEY);
-    if(r){
-      const s=JSON.parse(r);
-      if(s.pupils&&s.pupils.length&&typeof s.pupils[0]==='string') s.pupils=s.pupils.map(n=>{const p=n.trim().split(' ');return{id:uid(),voornaam:p[0],achternaam:p.slice(1).join(' ')};});
-      // migrate old progress format {taskId:0-2} to {taskId:{status,smiley}}
-      if(s.progress){
-        Object.keys(s.progress).forEach(pid=>{
-          const pr=s.progress[pid];
-          Object.keys(pr).forEach(tid=>{
-            if(typeof pr[tid]==='number') pr[tid]={status:pr[tid],smiley:0};
-          });
-        });
-      }
-      state={...state,...s};
-      // Zorg dat deze velden altijd objecten zijn, ook bij oudere opgeslagen data
-      if(!state.customIcons||typeof state.customIcons!=='object') state.customIcons={};
-      if(!state.pupilPhotos||typeof state.pupilPhotos!=='object') state.pupilPhotos={};
-      if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
-      if(!state.boardSize) state.boardSize='normal';
-      if(!state.taskLabelOverrides||typeof state.taskLabelOverrides!=='object') state.taskLabelOverrides={};
-    }
+    if(r) applyStateData(JSON.parse(r));
   }catch(e){}
+  // Daarna Firestore laden en UI updaten als er nieuwere data is
+  if(window.fbLoad){
+    window.fbLoad(STORAGE_KEY).then(function(fbData){
+      if(fbData){
+        applyStateData(fbData);
+        // Sync terug naar localStorage
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+        // Herrender
+        renderShell();
+      }
+    }).catch(console.warn);
+  }
 }
 function saveState(){
+  // Lokaal opslaan als fallback
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+  // Firestore opslaan
+  if(window.fbSave) window.fbSave(STORAGE_KEY, state).catch(console.warn);
   // Timestamp bijwerken in borden-index
   try{
     const params = new URLSearchParams(window.location.search);
@@ -82,7 +97,12 @@ function saveState(){
       const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
       const lijst = all[type]||[];
       const bord = lijst.find(function(b){ return b.id===bordId; });
-      if(bord){ bord.bijgewerkt=Date.now(); localStorage.setItem('borden_v1',JSON.stringify(all)); }
+      if(bord){
+        bord.bijgewerkt=Date.now();
+        localStorage.setItem('borden_v1',JSON.stringify(all));
+        // Update ook in Firestore meta
+        if(window.fbSaveMeta) window.fbSaveMeta(all).catch(console.warn);
+      }
     }
   }catch(e){}
 }
@@ -486,6 +506,80 @@ function renderTaskSettings(){
   document.getElementById('input-task').placeholder=`${selectedEmoji} Taaknaam…`;
 }
 function selectEmoji(e){selectedEmoji=e;renderTaskSettings();}
+
+// Bouw lijst van alle taken voor het bord (klassikale + evt. extra per leerling)
+function buildAllTasksForBoard(){
+  const base = classActiveTasks();
+  const extra = [];
+  state.pupils.forEach(p => {
+    const ov = state.pupilTaskOverrides[p.id]||{};
+    (ov.extra||[]).forEach(t => { if(!extra.find(x=>x.id===t.id)) extra.push(t); });
+  });
+  return [...base, ...extra];
+}
+
+// Afbeelding resizen naar vierkant canvas
+function resizeImageToDataURL(file, size, cb){
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = size; canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const ratio = Math.min(size/img.width, size/img.height);
+      const w = img.width*ratio, h = img.height*ratio;
+      const x = (size-w)/2, y = (size-h)/2;
+      ctx.clearRect(0,0,size,size);
+      ctx.drawImage(img,x,y,w,h);
+      cb(canvas.toDataURL('image/png'));
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// Upload eigen afbeelding bij taak
+function uploadTaskIcon(taskId){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/jpeg,image/png,image/gif,image/webp,image/svg+xml';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    resizeImageToDataURL(f, 80, dataURL => {
+      if(!state.customIcons) state.customIcons = {};
+      state.customIcons[taskId] = dataURL;
+      saveState(); renderTaskSettings(); renderBoard();
+    });
+  };
+  inp.click();
+}
+
+// Verwijder eigen afbeelding bij taak
+function removeTaskIcon(taskId){
+  if(state.customIcons) delete state.customIcons[taskId];
+  saveState(); renderTaskSettings(); renderBoard();
+}
+
+// Upload foto bij leerling
+function uploadPupilPhoto(pupilId){
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/jpeg,image/png,image/gif,image/webp';
+  inp.onchange = e => {
+    const f = e.target.files[0]; if(!f) return;
+    resizeImageToDataURL(f, 64, dataURL => {
+      if(!state.pupilPhotos) state.pupilPhotos = {};
+      state.pupilPhotos[pupilId] = dataURL;
+      saveState(); renderPupilList(); renderBoard();
+    });
+  };
+  inp.click();
+}
+
+// Verwijder foto bij leerling
+function removePupilPhoto(pupilId){
+  if(state.pupilPhotos) delete state.pupilPhotos[pupilId];
+  saveState(); renderPupilList(); renderBoard();
+}
 
 function renderBoard(){
   applyBoardSize();
