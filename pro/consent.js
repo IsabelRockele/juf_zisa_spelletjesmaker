@@ -2,21 +2,15 @@
 //  consent.js  –  AVG Toestemmingsbeheer
 //  Juf Zisa's Spelgenerator PRO
 //  Versie: 1.0
-//
-//  Wordt geladen als <script type="module"> in app.html
-//  Firebase Modular SDK v10 — zelfde versie als guard.js
 // ============================================================
 
 import { getApps, getApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, serverTimestamp }
                              from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ── Instellingen ─────────────────────────────────────────────
 const CONSENT_VERSION = "1.0";
 const PRIVACY_URL     = "./privacy.html";
-// ─────────────────────────────────────────────────────────────
 
-// Interne state
 let _consentNodig = false;
 let _consentUser  = null;
 let _consentRef   = null;
@@ -30,10 +24,18 @@ async function getFirebaseApp() {
   return getApp();
 }
 
+// ── Blokkeer-overlay helpers ──────────────────────────────────
+function toonBlokkeer() {
+  const el = document.getElementById("klas-blokkeer");
+  if (el) el.classList.add("actief");
+}
+
+function verbergBlokkeer() {
+  const el = document.getElementById("klas-blokkeer");
+  if (el) el.classList.remove("actief");
+}
+
 // ── Hoofdfunctie ─────────────────────────────────────────────
-// Exporteer deze en roep ze aan vanuit app.html:
-//   1. Bij klik op Klasmanagement-knop
-//   2. Bij automatisch laden als Klasmanagement de laatste categorie was
 export async function checkAndShowConsent(user) {
   const app = await getFirebaseApp();
   const db  = getFirestore(app);
@@ -42,31 +44,26 @@ export async function checkAndShowConsent(user) {
   try {
     const snap = await getDoc(consentRef);
     if (snap.exists() && snap.data().version === CONSENT_VERSION) {
-      // Consent al gegeven — state leeg houden zodat pop-up nooit meer terugkomt
+      // Consent al gegeven — blokkeer verbergen
       _consentNodig = false;
       _consentUser  = null;
       _consentRef   = null;
+      verbergBlokkeer();
       return;
     }
   } catch (err) {
     console.warn("[consent.js] Kan consent niet lezen, pop-up tonen als fallback.", err);
   }
 
-  // Consent nog niet gegeven — state bewaren voor visibilitychange
+  // Consent nog niet gegeven — blokkeer tonen en popup
   _consentNodig = true;
   _consentUser  = user;
   _consentRef   = consentRef;
-
+  toonBlokkeer();
   toonConsentPopup(user, consentRef);
 }
 
-// ── Heropen pop-up bij terugkeer van ander tabblad ────────────
-// Werkt voor:
-//   - Gebruiker opent privacy.html via window.open() en sluit dat venster
-//   - Gebruiker wisselt van tabblad en keert terug
-// Werkt NIET voor:
-//   - Gebruiker klikt op "Terug naar app" knop in privacy.html
-//     → daarvoor gebruiken we window.close() in privacy.html
+// ── Heropen popup bij terugkeer van ander tabblad ─────────────
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible" && _consentNodig) {
     if (!document.getElementById("zisa-consent-overlay")) {
@@ -146,8 +143,6 @@ function toonConsentPopup(user, consentRef) {
   document.body.appendChild(overlay);
   document.body.style.overflow = "hidden";
 
-  // Privacy-link: open als popup-venster zodat window.close() werkt
-  // en de gebruiker automatisch terugkeert naar dit tabblad met de pop-up
   document.getElementById("zisa-consent-link").addEventListener("click", function (e) {
     e.preventDefault();
     window.open(PRIVACY_URL, "zisa-privacy",
@@ -182,11 +177,11 @@ async function slaConsentOp(user, consentRef, overlay) {
       uid:       user.uid
     });
 
-    // Consent opgeslagen — state resetten
     _consentNodig = false;
     _consentUser  = null;
     _consentRef   = null;
 
+    verbergBlokkeer();
     overlay.remove();
     document.body.style.overflow = "";
 
