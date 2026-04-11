@@ -928,15 +928,7 @@ Noor Janssens"></textarea>
         <div id="setupStatus" class="setup-status success"></div>
 
         <div class="setup-list-wrap" style="flex:1;">
-          <!-- Hergebruik klaslijst banner -->
-          <div id="kind-hergebruik-klaslijst-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:12px;padding:12px 14px;margin-bottom:12px;">
-            <div style="font-size:13px;font-weight:800;color:#1e1b4b;margin-bottom:3px;">👥 Je hebt een bewaarde klaslijst</div>
-            <div style="font-size:11px;color:#4338ca;margin-bottom:8px;" id="kind-hergebruik-klaslijst-info"></div>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button type="button" onclick="kindLaadBewaardeKlaslijst()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;">✅ Bewaarde klaslijst gebruiken</button>
-              <button type="button" onclick="document.getElementById('kind-hergebruik-klaslijst-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:9px;padding:7px 14px;font-size:12px;font-weight:800;cursor:pointer;">✏️ Nieuwe lijst invoeren</button>
-            </div>
-          </div>
+
           <div class="setup-list-title">Leerlingen op het bord (<span id="setup-count">0</span>)</div>
           <div id="setupAddedList" class="setup-added-list"></div>
         </div>
@@ -1076,15 +1068,7 @@ Noor Janssens"></textarea>
 </div>
 <div class="teacher-card">
 <h4>Taken</h4>
-<!-- Hergebruik taken banner -->
-<div id="kind-hergebruik-taken-banner" style="display:none;background:#eef2ff;border:2px solid #6366f1;border-radius:10px;padding:10px 12px;margin-bottom:12px;">
-  <div style="font-size:12px;font-weight:800;color:#1e1b4b;margin-bottom:3px;">📋 Je hebt bewaarde taken</div>
-  <div style="font-size:11px;color:#4338ca;margin-bottom:7px;" id="kind-hergebruik-taken-info"></div>
-  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-    <button type="button" onclick="kindLaadBewaardeTaken()" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">✅ Bewaarde taken gebruiken</button>
-    <button type="button" onclick="document.getElementById('kind-hergebruik-taken-banner').style.display='none'" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:800;cursor:pointer;">✏️ Nieuwe taken instellen</button>
-  </div>
-</div>
+
 <div style="font-size:11px;color:#6b7280;margin-bottom:10px;line-height:1.5;">Klik op een taak om te selecteren. Gebruik <strong>✎ naam</strong> om de naam aan te passen en <strong>📷 afb.</strong> voor een eigen afbeelding — alles wordt automatisch bewaard.</div>
 <div class="teacher-actions" style="margin-top:0;margin-bottom:14px;">
 <button class="small-btn" id="selectActiveTasksBtn">Alle actieve taken</button>
@@ -1374,7 +1358,6 @@ function renderSetupAddedList(){
   const wrap = document.getElementById('setupAddedList');
   if(!wrap) return;
   wrap.innerHTML = '';
-  toonKindHergebruikBanners();
 
   // Update teller
   const counter = document.getElementById('setup-count');
@@ -1678,7 +1661,6 @@ function openTeacherModal(){
   teacherSelectedTasks = new Set();
   renderTeacherModal();
   renderEmojiPicker();
-  toonKindHergebruikBanners();
   document.getElementById('teacherOverlay').classList.add('show');
 }
 
@@ -2234,6 +2216,7 @@ if((isSmartboard || isIpad) && state.pupils.length > 0){
 }
 renderNames();
 renderSetupAddedList();
+toonKindHergebruikBanners();
 setSetupOrder(state.nameOrder || 'voornaam');
 applySmartboardMode();
 
@@ -2306,102 +2289,6 @@ function doKindNewSchoolYear(){
   } catch {}
 })();
 
-// ── BEWAREN & HERGEBRUIKEN ──────────────────────────────────────────────────
-function slaKindKlaslijstOp(){
-  if(!state.pupils.length){ showKindToast('Geen leerlingen om op te slaan.'); return; }
-  const data = {
-    pupils: state.pupils.map(p=>({voornaam:p.voornaam,achternaam:p.achternaam||''})),
-    pupilPhotos: state.pupilPhotos||{},
-    showLastname: state.showLastname,
-    nameOrder: state.nameOrder||'voornaam',
-    savedAt: Date.now()
-  };
-  localStorage.setItem('hergebruik_klaslijst_kindbord', JSON.stringify(data));
-  showKindToast('✅ Klaslijst bewaard voor nieuwe borden');
-}
-function slaKindTakenOp(){
-  const data = {
-    activeTasks: state.activeTasks||[],
-    customTasks: state.customTasks||[],
-    taskLabelOverrides: state.taskLabelOverrides||{},
-    customIcons: state.customIcons||{},
-    savedAt: Date.now()
-  };
-  localStorage.setItem('hergebruik_taken_kindbord', JSON.stringify(data));
-  showKindToast('✅ Taken bewaard voor nieuwe borden');
-}
-function showKindToast(msg){
-  let t=document.getElementById('kind-toast');
-  if(!t){t=document.createElement('div');t.id='kind-toast';t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1e1b4b;color:#fff;padding:10px 20px;border-radius:12px;font-size:14px;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.25);transition:opacity .3s;white-space:nowrap;';document.body.appendChild(t);}
-  t.textContent=msg;t.style.opacity='1';
-  clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},3000);
-}
-
-function toonKindHergebruikBanners(){
-  // Klaslijst banner: enkel als bord leeg is
-  const klBanner = document.getElementById('kind-hergebruik-klaslijst-banner');
-  if(klBanner){
-    if(!state.pupils.length){
-      try{
-        const kl=JSON.parse(localStorage.getItem('hergebruik_klaslijst_kindbord')||'null');
-        if(kl && kl.pupils && kl.pupils.length){
-          document.getElementById('kind-hergebruik-klaslijst-info').textContent=
-            kl.pupils.length+' leerlingen · bewaard op '+fmtKindDate(kl.savedAt);
-          klBanner.style.display='block';
-        } else { klBanner.style.display='none'; }
-      } catch { klBanner.style.display='none'; }
-    } else { klBanner.style.display='none'; }
-  }
-  // Taken banner: enkel als geen actieve taken
-  const tkBanner=document.getElementById('kind-hergebruik-taken-banner');
-  if(tkBanner){
-    if(!state.activeTasks||!state.activeTasks.length){
-      try{
-        const tk=JSON.parse(localStorage.getItem('hergebruik_taken_kindbord')||'null');
-        if(tk && tk.savedAt){
-          const nEigen=(tk.customTasks||[]).length;
-          const nActief=(tk.activeTasks||[]).length;
-          document.getElementById('kind-hergebruik-taken-info').textContent=
-            nActief+' actieve taken'+(nEigen?', '+nEigen+' eigen taken':'')+' · bewaard op '+fmtKindDate(tk.savedAt);
-          tkBanner.style.display='block';
-        } else { tkBanner.style.display='none'; }
-      } catch { tkBanner.style.display='none'; }
-    } else { tkBanner.style.display='none'; }
-  }
-}
-function fmtKindDate(ts){
-  if(!ts)return'';
-  try{return new Date(ts).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'});}
-  catch{return'';}
-}
-function kindLaadBewaardeKlaslijst(){
-  try{
-    const kl=JSON.parse(localStorage.getItem('hergebruik_klaslijst_kindbord')||'null');
-    if(!kl||!kl.pupils)return;
-    state.pupils=kl.pupils.map(p=>({id:'_'+Math.random().toString(36).slice(2)+Date.now(),voornaam:p.voornaam,achternaam:p.achternaam||''}));
-    state.pupilPhotos=kl.pupilPhotos||{};
-    state.showLastname=kl.showLastname||false;
-    state.nameOrder=kl.nameOrder||'voornaam';
-    saveState();
-    document.getElementById('kind-hergebruik-klaslijst-banner').style.display='none';
-    renderNames();renderSetupAddedList();
-    showKindToast('✅ '+state.pupils.length+' leerlingen ingeladen');
-  }catch(e){showKindToast('Kon klaslijst niet laden.');}
-}
-function kindLaadBewaardeTaken(){
-  try{
-    const tk=JSON.parse(localStorage.getItem('hergebruik_taken_kindbord')||'null');
-    if(!tk)return;
-    state.activeTasks=tk.activeTasks||[];
-    state.customTasks=tk.customTasks||[];
-    state.taskLabelOverrides=tk.taskLabelOverrides||{};
-    state.customIcons=tk.customIcons||{};
-    saveState();
-    document.getElementById('kind-hergebruik-taken-banner').style.display='none';
-    renderTeacherTaskGrid();
-    showKindToast('✅ Taken ingeladen');
-  }catch(e){showKindToast('Kon taken niet laden.');}
-}
 
 function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
