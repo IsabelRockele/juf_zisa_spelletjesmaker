@@ -134,7 +134,10 @@ function toonConsentPopup(user, consentRef) {
 
       <div id="zisa-consent-footer">
         <span id="zisa-consent-versie">Privacyverklaring v${CONSENT_VERSION} · jufzisa.be</span>
-        <button id="zisa-consent-knop" type="button">Doorgaan →</button>
+        <div style="display:flex;gap:10px;">
+          <button id="zisa-consent-niet-nu" type="button">Niet nu</button>
+          <button id="zisa-consent-knop" type="button">Doorgaan →</button>
+        </div>
       </div>
 
     </div>
@@ -147,6 +150,29 @@ function toonConsentPopup(user, consentRef) {
     e.preventDefault();
     window.open(PRIVACY_URL, "zisa-privacy",
       "width=900,height=700,scrollbars=yes,resizable=yes");
+  });
+
+  // "Niet nu" — sluit popup en ga terug naar vorige categorie
+  document.getElementById("zisa-consent-niet-nu").addEventListener("click", () => {
+    // Popup sluiten
+    overlay.remove();
+    document.body.style.overflow = "";
+    // Blokkeer verbergen
+    verbergBlokkeer();
+    // State resetten zodat popup opnieuw verschijnt bij volgende klik
+    _consentNodig = false;
+    _consentUser  = null;
+    _consentRef   = null;
+    // Terug naar vorige categorie (of reken als er geen vorige was)
+    const vorige = window._vorigCategorie || "reken";
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    const btn = document.querySelector(`.nav-btn[data-target="${vorige}"]`);
+    if (btn) btn.classList.add("active");
+    document.querySelectorAll(".section-panel").forEach(p => p.classList.remove("active"));
+    const panel = document.getElementById("panel-" + vorige);
+    if (panel) panel.classList.add("active");
+    // Sla vorige categorie terug op in localStorage
+    localStorage.setItem("laatsteCategorie", vorige);
   });
 
   document.getElementById("zisa-consent-knop").addEventListener("click", () => {
