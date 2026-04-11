@@ -314,7 +314,7 @@ async function makeInvoicePdfBase64(params: {
        .text(`Nummer: ${params.invoiceNumber}`, W - M - 200, y + 14, { width: 200, align: "right", lineBreak: false })
        .text(`Datum: ${params.dateISO}`,        W - M - 200, y + 27, { width: 200, align: "right", lineBreak: false });
     doc.fillColor(GRAY).fontSize(9)
-       .text(`Referentie: ${params.paymentId}`, W - M - 200, y + 40, { width: 200, align: "right", lineBreak: false });
+       .text(`Mollie: ${params.paymentId}`, W - M - 200, y + 40, { width: 200, align: "right", lineBreak: false });
 
     // ── AAN BLOK ─────────────────────────────────────────────
     const ay = y + 53 + 20;
