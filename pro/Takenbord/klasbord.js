@@ -326,6 +326,37 @@ function loadClassListAction(replace){ if(!_loadNames)return;if(replace){const n
 function openBackupModal(){ document.getElementById('backup-modal').classList.remove('hidden'); }
 function closeBM(){ document.getElementById('backup-modal').classList.add('hidden'); }
 
+function openNewSchoolYear(){
+  document.getElementById('new-school-year-modal').classList.remove('hidden');
+}
+function closeNewSchoolYear(){
+  document.getElementById('new-school-year-modal').classList.add('hidden');
+}
+function doNewSchoolYear(){
+  const keepTasks    = document.getElementById('nsy-keep-tasks').checked;
+  const keepIcons    = document.getElementById('nsy-keep-icons').checked;
+  const wipePupils   = document.getElementById('nsy-wipe-pupils').checked;
+  const wipeProgress = document.getElementById('nsy-wipe-progress').checked;
+  if(!wipePupils && !wipeProgress){
+    alert('Selecteer minstens één item om te wissen.');
+    return;
+  }
+  if(wipePupils){ state.pupils=[];state.notes={};state.pupilTaskOverrides={};state.pupilPhotos={}; }
+  if(wipeProgress){ state.progress={}; }
+  if(!keepTasks){ state.customTasks=[];state.activeTasks=[];state.taskLabelOverrides={}; }
+  if(!keepIcons){ state.customIcons={}; }
+  saveState();
+  closeNewSchoolYear();
+  renderPupilList();
+  renderBoard();
+  const wiped=[];
+  if(wipePupils) wiped.push('leerlingen');
+  if(wipeProgress) wiped.push('voortgang');
+  if(!keepTasks) wiped.push('taken');
+  if(!keepIcons) wiped.push('afbeeldingen');
+  showToast('🎒 Klaar voor nieuwe klas! Gewist: '+wiped.join(', '));
+}
+
 
 function renderShell(){
   const isB = currentMode === 'board';
