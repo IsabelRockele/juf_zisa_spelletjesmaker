@@ -2306,26 +2306,37 @@ document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
   if(e.key === 'Enter') addCustomTask();
 });
 
-loadState();
+function initKindbordAfterLoad(){
+  // Smartboard/iPad modus: setup-scherm overslaan als er al leerlingen zijn
+  if((isSmartboard || isIpad) && state.pupils.length > 0){
+    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('names-screen').style.display = 'block';
+    document.getElementById('tasks-screen').style.display = 'none';
+  } else {
+    document.getElementById('setup-screen').style.display = 'block';
+    document.getElementById('names-screen').style.display = 'none';
+    document.getElementById('tasks-screen').style.display = 'none';
+  }
 
-// Smartboard/iPad modus: setup-scherm overslaan als er al leerlingen zijn
-if((isSmartboard || isIpad) && state.pupils.length > 0){
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('names-screen').style.display = 'block';
-  document.getElementById('tasks-screen').style.display = 'none';
-} else {
-  document.getElementById('setup-screen').style.display = 'block';
-  document.getElementById('names-screen').style.display = 'none';
-  document.getElementById('tasks-screen').style.display = 'none';
+  renderNames();
+  renderSetupAddedList();
+  setSetupOrder(state.nameOrder || 'voornaam');
+  applySmartboardMode();
+
+  const setupLastnameCheckbox = document.getElementById('setup-show-lastname');
+  if(setupLastnameCheckbox){
+    setupLastnameCheckbox.checked = !!state.showLastname;
+  }
 }
-renderNames();
-renderSetupAddedList();
-setSetupOrder(state.nameOrder || 'voornaam');
-applySmartboardMode();
 
-const setupLastnameCheckbox = document.getElementById('setup-show-lastname');
-if(setupLastnameCheckbox){
-  setupLastnameCheckbox.checked = !!state.showLastname;
+if (window.fbOnReady) {
+  window.fbOnReady(function(){
+    loadState();
+    setTimeout(initKindbordAfterLoad, 300);
+  });
+} else {
+  loadState();
+  setTimeout(initKindbordAfterLoad, 300);
 }
 
 function openKindNewSchoolYear(){
