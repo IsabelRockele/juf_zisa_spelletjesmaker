@@ -30,8 +30,7 @@ function esc(s){
 }
 
 function displayName(p){
-  if(state.showLastname && p.achternaam) return p.voornaam + ' ' + p.achternaam;
-  return p.voornaam;
+  return p.voornaam + (p.achternaam ? ' '+p.achternaam : '');
 }
 
 const DEFAULT_TASKS = [
@@ -389,7 +388,7 @@ function showKindApp(){
   const loading = document.getElementById('loading');
   const app     = document.getElementById('app');
   if(loading) loading.style.display = 'none';
-  if(app)     app.style.display = 'block';
+  if(app)     app.style.display = 'flex';
 }
 
 window.addEventListener('load', function(){
