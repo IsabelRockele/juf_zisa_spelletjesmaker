@@ -574,7 +574,7 @@ function getBordUrl(modus){
   if(!bord) return '';
   var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
   var pagina = huidigType==='klasbord' ? 'klasbord.html' : 'takenbord_kind.html';
-  return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus;
+ return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus + '&rol=kind';
 }
 function gaNaarSmartboard(){ window.location.href = getBordUrl('smartboard'); }
 function toggleQR(){
