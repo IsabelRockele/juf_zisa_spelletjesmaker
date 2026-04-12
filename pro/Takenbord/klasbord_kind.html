@@ -127,7 +127,8 @@
 
     /* ── Gap tussen rijen: margin i.p.v. gap zodat sticky namen niet doorzichtig zijn ── */
     #pupil-rows { gap: 0 !important; }
-    .pupil-board-row { margin-bottom: 6px !important; }
+    .pupil-board-row { margin-bottom: 6px !important; overflow: hidden !important; }
+    .pupil-name-cell { box-shadow: 4px 0 8px rgba(99,102,241,.10) !important; border-radius: 0 !important; }
 
     /* ── Verberg leerkracht-elementen ── */
     .teacher-only { display:none !important; }
