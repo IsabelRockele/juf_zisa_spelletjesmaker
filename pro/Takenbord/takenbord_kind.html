@@ -956,6 +956,7 @@ Noor Janssens"></textarea>
 <p class="subtitle" id="kind-bord-naam" style="font-size:13px;font-weight:800;color:#6366f1;margin-bottom:4px;"></p>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
 <div class="names-topbar">
+  <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Terug naar beheer</button>
   <button class="back-btn-orange teacher-only" onclick="goBackToWelcome()" type="button">← Welkomstscherm</button>
   <button class="teacher-btn teacher-only" id="openTeacherBtn">⚙️ Taken toewijzen</button>
   <button class="teacher-btn teacher-only" onclick="openPdfModalKind()" type="button">📄 PDF rapport</button>
@@ -1121,6 +1122,7 @@ const STORAGE_KEY = (function(){
 })();
 const SMILEYS = ['', '😊', '🙂', '😐', '😟'];
 const EMOJIS = ['📖','🔢','✏️','🔤','🎨','💻','✂️','🎵','📄','🗂️','📒','📐','🛒','🔣','📏','⭐','🏆','🎯','🔬','📚','🌍','🎭','🏃','🍎','🧩','🎲','🖍️','🌱','💡','🧪','🎸','⚽','🏊','🌈','🖊️','📝'];
+const SMILEY_LABELS = ['', 'Heel goed', 'Goed', 'Ging wel', 'Moeilijk'];
 
 const DEFAULT_TASKS = [
   {id:'lezen',label:'Lezen',icon:'📖'},{id:'rekenen',label:'Rekenen',icon:'🔢'},
