@@ -88,7 +88,7 @@ function toonConsentPopup(user, consentRef) {
         <p id="zisa-consent-subtitel">
           Om <strong style="color:#ffcf56;">Opvolging huistaken</strong> en <strong style="color:#ffcf56;">Takenbord</strong> te gebruiken,
           slaan we klasgegevens veilig op in de cloud.<br><br>
-          <span style="color:#bbbbbb;font-size:0.82rem;">De rest van de Spelgenerator — werkbladen, spelletjes, alles — werkt gewoon zonder dit akkoord.</span>
+          <span style="color:#bbbbbb;font-size:0.82rem;">De rest van de Spelgenerator — werkbladen, spelletjes, alles — werkt gewoon zonder dit akkoord, klik dan onderaan op 'niet nu'.</span>
         </p>
       </div>
 
