@@ -94,8 +94,8 @@ function saveState(){
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }catch(e){}
 
-  if(window.fbSave){
-    window.fbSave(STORAGE_KEY, state).catch(console.warn);
+  if(window.fbSaveShared){
+    window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
   }
 }
 
@@ -105,18 +105,19 @@ function loadState(){
     if(r) state = {...state, ...JSON.parse(r)};
   }catch(e){}
 
-  if(window.fbLoad){
-    window.fbLoad(STORAGE_KEY).then(data=>{
+  if(window.fbLoadShared){
+    window.fbLoadShared(STORAGE_KEY).then(data=>{
       if(data){
         state = {...state, ...data};
         renderBoard();
       }
-    });
+    }).catch(console.warn);
   }
 }
 
 // ===== STATUS =====
 function cycleStatus(pid,tid){
+    
   if(!state.progress[pid]) state.progress[pid] = {};
   if(!state.progress[pid][tid]) state.progress[pid][tid] = {status:0};
 
@@ -178,7 +179,7 @@ function renderBoard(){
 }
 
 // ===== AFSLUITEN =====
-function closeBoard(){
+function closeKindScreen(){
   document.body.innerHTML = `
     <div style="
       display:flex;
