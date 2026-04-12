@@ -88,7 +88,7 @@ function toonConsentPopup(user, consentRef) {
         <p id="zisa-consent-subtitel">
           Om <strong style="color:#ffcf56;">Opvolging huistaken</strong> en <strong style="color:#ffcf56;">Takenbord</strong> te gebruiken,
           slaan we klasgegevens veilig op in de cloud.<br><br>
-          <span style="color:#bbbbbb;font-size:0.82rem;">De rest van de Spelgenerator — werkbladen, spelletjes, alles — werkt gewoon zonder dit akkoord. Klik op 'niet nu' onderaan als je nog even geen akkoord wil geven.</span>
+          <span style="color:#bbbbbb;font-size:0.82rem;">De rest van de Spelgenerator — werkbladen, spelletjes, alles — werkt gewoon zonder dit akkoord.</span>
         </p>
       </div>
 
@@ -211,6 +211,13 @@ async function slaConsentOp(user, consentRef, overlay) {
     verbergBlokkeer();
     overlay.remove();
     document.body.style.overflow = "";
+
+    // Als er een navigatie in de wacht stond (via navigeerMetConsent), voer die nu uit
+    if (window._navigeerNaConsent) {
+      const url = window._navigeerNaConsent;
+      window._navigeerNaConsent = null;
+      location.href = url;
+    }
 
   } catch (err) {
     console.error("[consent.js] Fout bij opslaan:", err);
