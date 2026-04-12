@@ -449,8 +449,8 @@ function updateScrollArrow(){
   if(!s) return;
   var canRight=s.scrollWidth>s.clientWidth+4 && s.scrollLeft+s.clientWidth<s.scrollWidth-4;
   var canLeft=s.scrollLeft>4;
-  if(ar) ar.style.display=canRight?'flex':'none';
-  if(al) al.style.display=canLeft?'flex':'none';
+  if(ar) ar.classList.toggle('hidden', !canRight);
+  if(al) al.classList.toggle('hidden', !canLeft);
 }
 function getBordNaam(){
   try {
