@@ -30,7 +30,8 @@ function esc(s){
 }
 
 function displayName(p){
-  return p.voornaam + (p.achternaam ? ' '+p.achternaam : '');
+  if(state.showLastname && p.achternaam) return p.voornaam + ' ' + p.achternaam;
+  return p.voornaam;
 }
 
 const DEFAULT_TASKS = [
