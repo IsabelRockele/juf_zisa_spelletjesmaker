@@ -446,6 +446,28 @@ function getBordNaam(){
   } catch { return ''; }
 }
 
+function renderWhiteColumn(){
+  // Verwijder bestaande witte kolom
+  var old = document.getElementById('white-col');
+  if(old) old.remove();
+  // Maak een sticky witte achtergrondkolom die de volledige hoogte van pupil-rows dekt
+  var col = document.createElement('div');
+  col.id = 'white-col';
+  col.style.cssText = [
+    'position:sticky',
+    'left:0',
+    'z-index:22',
+    'width:var(--col-name)',
+    'min-width:var(--col-name)',
+    'flex-shrink:0',
+    'background:#fff',
+    'pointer-events:none',
+    'margin-right:calc(-1 * var(--col-name))',
+    'align-self:stretch'
+  ].join(';');
+  var rows = document.getElementById('pupil-rows');
+  if(rows) rows.parentNode.insertBefore(col, rows);
+}
 function scrollBoardRight(){
   var s=document.getElementById('board-scroll');
   if(s) s.scrollBy({left:240,behavior:'smooth'});
@@ -931,6 +953,7 @@ function renderBoard(){
   const _minW=(200+allTasks.length*(100+6)+48)+'px';
   document.getElementById('board-inner').style.minWidth=''; // CSS max-content doet dit
   renderTaskHeader(allTasks);renderPupilRows(allTasks);updateProgressBar();updateMeta();
+  renderWhiteColumn();
   setTimeout(updateScrollArrow, 50);
 }
 function renderTaskHeader(tasks){
