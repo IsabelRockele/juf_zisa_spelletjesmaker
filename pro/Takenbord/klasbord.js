@@ -64,45 +64,63 @@ function applyStateData(s){
   if(!state.boardSize) state.boardSize='normal';
 }
 
-var _sharedUnsubscribe = null; // realtime listener opruimen bij nieuw bord
+var _sharedUnsubscribe = null;
 
 function loadState(){
-  // Stop eventuele vorige realtime listener
   if(_sharedUnsubscribe){ try{ _sharedUnsubscribe(); }catch(e){} _sharedUnsubscribe=null; }
 
-  // Probeer localStorage eerst (snel, synchron)
+  // 1. localStorage eerst (snel, synchron)
   try{
     const r=localStorage.getItem(STORAGE_KEY);
     if(r) applyStateData(JSON.parse(r));
   }catch(e){}
 
-  // Daarna Firestore laden en UI updaten als er nieuwere data is
-  if(window.fbLoad){
-    window.fbLoad(STORAGE_KEY).then(function(fbData){
-      if(fbData){
-        applyStateData(fbData);
-        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
-        if(window.fbSaveShared) window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
-        renderShell();
-      }
-    }).catch(console.warn);
-  }
+  // 2. Laad privé data (structuur: namen, taken, instellingen) EN gedeelde data (progress)
+  //    en merge ze zodat kind-wijzigingen nooit verloren gaan
+  const privéLaad = window.fbLoad
+    ? window.fbLoad(STORAGE_KEY).catch(function(){ return null; })
+    : Promise.resolve(null);
 
-  // Realtime listener op gedeeld bord: vangt statuswijzigingen van kinderen op
+  const gedeeldLaad = window.fbLoadShared
+    ? window.fbLoadShared(STORAGE_KEY).catch(function(){ return null; })
+    : Promise.resolve(null);
+
+  Promise.all([privéLaad, gedeeldLaad]).then(function(results){
+    const privéData   = results[0];
+    const gedeeldData = results[1];
+
+    if(privéData){
+      applyStateData(privéData);
+    }
+
+    // Gedeelde progress (kind-wijzigingen) wint altijd van privé progress
+    if(gedeeldData && gedeeldData.progress){
+      const merged = Object.assign({}, state.progress);
+      Object.keys(gedeeldData.progress).forEach(function(pid){
+        merged[pid] = Object.assign({}, merged[pid]||{}, gedeeldData.progress[pid]);
+      });
+      state.progress = merged;
+    }
+
+    try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+
+    // Zorg dat gedeeld bord ook up-to-date is met de volledige state
+    if(window.fbSaveShared) window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
+
+    renderShell();
+  });
+
+  // 3. Realtime listener: vangt live kind-wijzigingen op
   if(window.fbListenShared){
     _sharedUnsubscribe = window.fbListenShared(STORAGE_KEY, function(sharedData){
-      if(!sharedData) return;
-      // Enkel progress en smileys overnemen van kinderen, niet de structuur (taken/namen)
-      if(sharedData.progress){
-        // Merge per leerling: kind-wijzigingen overschrijven enkel de progress-entries
-        const merged = Object.assign({}, state.progress);
-        Object.keys(sharedData.progress).forEach(function(pid){
-          merged[pid] = Object.assign({}, merged[pid]||{}, sharedData.progress[pid]);
-        });
-        state.progress = merged;
-        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
-        renderBoard();
-      }
+      if(!sharedData || !sharedData.progress) return;
+      const merged = Object.assign({}, state.progress);
+      Object.keys(sharedData.progress).forEach(function(pid){
+        merged[pid] = Object.assign({}, merged[pid]||{}, sharedData.progress[pid]);
+      });
+      state.progress = merged;
+      try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+      renderBoard();
     });
   }
 }
@@ -892,7 +910,9 @@ function renderBoard(){
   document.getElementById('board-inner').classList.toggle('hidden',!show);
   if(!show){document.getElementById('empty-text').textContent=!hp?'Voeg leerlingen toe via ⚙️ Beheer':'Activeer taken via ⚙️ Beheer → Taken';updateMeta();return;}
   const allTasks=buildAllTasksForBoard();
-  document.getElementById('board-inner').style.minWidth=(200+allTasks.length*(100+6)+48)+'px';
+  const _minW=(200+allTasks.length*(100+6)+48)+'px';
+  document.getElementById('board-inner').style.minWidth=_minW;
+  document.getElementById('board-scroll').style.minWidth='0'; // zeker geen beperking
   renderTaskHeader(allTasks);renderPupilRows(allTasks);updateProgressBar();updateMeta();
 }
 function renderTaskHeader(tasks){
