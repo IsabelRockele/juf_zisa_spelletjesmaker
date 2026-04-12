@@ -447,16 +447,22 @@ function getBordNaam(){
 }
 
 function scrollBoardRight(){
-  var s=document.getElementById("board-scroll");
-  if(s) s.scrollBy({left:240,behavior:"smooth"});
+  var s=document.getElementById('board-scroll');
+  if(s) s.scrollBy({left:240,behavior:'smooth'});
+}
+function scrollBoardLeft(){
+  var s=document.getElementById('board-scroll');
+  if(s) s.scrollBy({left:-240,behavior:'smooth'});
 }
 function updateScrollArrow(){
-  var s=document.getElementById("board-scroll");
-  var a=document.getElementById("scroll-right-arrow");
-  if(!s||!a) return;
-  var canScroll=s.scrollWidth>s.clientWidth+4;
-  var atEnd=s.scrollLeft+s.clientWidth>=s.scrollWidth-4;
-  a.style.display=(canScroll&&!atEnd)?"flex":"none";
+  var s=document.getElementById('board-scroll');
+  var ar=document.getElementById('scroll-right-arrow');
+  var al=document.getElementById('scroll-left-arrow');
+  if(!s) return;
+  var canScrollRight=s.scrollWidth>s.clientWidth+4 && s.scrollLeft+s.clientWidth<s.scrollWidth-4;
+  var canScrollLeft=s.scrollLeft>4;
+  if(ar) ar.style.display=canScrollRight?'flex':'none';
+  if(al) al.style.display=canScrollLeft?'flex':'none';
 }
 function openSmartboardVenster(){
   // Bouw de smartboard-URL op basis van de huidige URL
