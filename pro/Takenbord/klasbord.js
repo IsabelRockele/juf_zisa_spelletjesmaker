@@ -1005,9 +1005,10 @@ function applyBoardSize(){
 }
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
 const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipad';
+const isKindModus = new URLSearchParams(window.location.search).get('rol') === 'kind';
 
 function applySmartboard(){
-  if(!isSmartboard && !isIpad) return;
+  if(!isSmartboard && !isIpad && !isKindModus) return;
   document.body.classList.add('smartboard');
   currentMode = 'board';
   if(isIpad){
@@ -1065,7 +1066,7 @@ function goBackToWelcome(){
   window.location.href = 'welkomstbord.html';
 }
 function goBackFromBoard(){
-  if(isSmartboard || isIpad) return;
+  if(isSmartboard || isIpad || isKindModus) return;
   currentMode = 'settings';
   renderShell();
 }
@@ -1077,9 +1078,10 @@ function initKlasbordAfterLoad(){
   document.getElementById('toggle-smileys').checked = !!state.showSmileys;
 
   const urlParams = new URLSearchParams(window.location.search);
+  const isKindModus = urlParams.get('rol') === 'kind';
   const startTab = urlParams.get('tab');
 
-  currentMode = urlParams.get('view') === 'board' ? 'board' : 'settings';
+ currentMode = (isKindModus || urlParams.get('view') === 'board') ? 'board' : 'settings';
   currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
   applySmartboard();
