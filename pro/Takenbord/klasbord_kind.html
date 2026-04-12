@@ -125,11 +125,12 @@
     .loading-card .title { font-size:22px; font-weight:800; color:#1e1b4b; }
     .loading-card .sub   { font-size:14px; color:#64748b; margin-top:6px; line-height:1.6; }
 
-    /* ── Gap tussen rijen: margin i.p.v. gap zodat sticky namen niet doorzichtig zijn ── */
+    /* ── Naamkolom: vult volledige rijhoogte, dekt scrollende content af ── */
     #pupil-rows { gap: 0 !important; }
-    .pupil-board-row { margin-bottom: 6px !important; }
-    .pupil-name-cell { background: #fff !important; z-index: 25 !important; box-shadow: none !important; border-radius: 0 !important; }
-    .pupil-name-cell::before { content:"" !important; position:absolute !important; top:-4px !important; left:-4px !important; right:-2px !important; bottom:-4px !important; background:#fff !important; z-index:-1 !important; border-radius:14px 0 0 14px !important; }
+    .pupil-board-row { margin-bottom: 6px !important; align-items: stretch !important; }
+    .pupil-name-cell { background: #fff !important; z-index: 25 !important; border-radius: 13px 0 0 13px !important; align-items: center !important; }
+    .pupil-name-cell::after { content:"" !important; position:absolute !important; inset:0 !important; left:-16px !important; right:0 !important; background:#fff !important; z-index:-1 !important; border-radius:13px 0 0 13px !important; transition:background .3s !important; }
+    .pupil-board-row.complete .pupil-name-cell::after { background:#f0fdf4 !important; }
 
     /* ── Verberg leerkracht-elementen ── */
     .teacher-only { display:none !important; }
@@ -141,6 +142,27 @@
     .board-bar-right { gap:8px; }
     #timerToggleBtn { display:none !important; }
     #btn-undo { display:none !important; }
+
+    /* ── Scroll-pijlen: verticaal gecentreerd, altijd bereikbaar ── */
+    #scroll-right-arrow,
+    #scroll-left-arrow {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 50;
+      width: 48px; height: 48px;
+      border-radius: 50%; border: none;
+      background: linear-gradient(135deg,#6366f1,#8b5cf6);
+      color: #fff; font-size: 26px; cursor: pointer;
+      box-shadow: 0 4px 18px rgba(99,102,241,.45);
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1; transition: opacity .2s;
+    }
+    #scroll-right-arrow { right: 10px; }
+    #scroll-left-arrow  { left:  10px; }
+    #scroll-right-arrow.hidden,
+    #scroll-left-arrow.hidden { display: none !important; }
+
   </style>
 </head>
 <body>
@@ -172,14 +194,14 @@
 
       <div id="board-scroll">
         <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Nog geen bordgegevens gevonden</p></div>
-        <div class="hidden" id="board-inner">
-          <div id="task-header"><div class="header-corner"><span>Leerling</span></div></div>
-          <div id="legend">
+        <div id="task-header" class="hidden"><div class="header-corner"><span>Leerling</span></div></div>
+        <div id="legend" class="hidden">
             <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
             <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
             <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
             <span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
-          </div>
+        </div>
+        <div id="board-inner" class="hidden">
           <div id="pupil-rows"></div>
           <div id="progress-bar-wrap"><div id="progress-track"><div id="progress-fill"></div></div><span id="progress-label">0/0 klaar</span></div>
         </div>
@@ -208,7 +230,8 @@
   </div>
 
   <!-- Scroll-pijl: verschijnt automatisch als er taken buiten beeld zijn -->
-  <button id="scroll-right-arrow" class="hidden" onclick="scrollRight()" title="Meer taken →" aria-label="Scroll naar rechts">›</button>
+  <button id="scroll-left-arrow"  class="hidden" onclick="scrollLeft()"  aria-label="Scroll naar links">‹</button>
+  <button id="scroll-right-arrow" class="hidden" onclick="scrollRight()" aria-label="Scroll naar rechts">›</button>
 
   <script src="klasbord_kind.js"></script>
 </body>
