@@ -182,7 +182,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .emoji-btn.selected { border-color:var(--indigo); background:#e0e7ff; }
 
 /* BOARD */
-#board-wrap { flex:1; overflow-y:hidden; overflow-x:hidden; display:none; flex-direction:column; min-width:0; }
+#board-wrap { flex:1; overflow:hidden; display:none; flex-direction:column; min-width:0; }
 #board-wrap.visible { display:flex; }
 /* Board topbar */
 #board-bar { flex-shrink:0; background:#fff; border-bottom:2px solid #e0e7ff; padding:8px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
