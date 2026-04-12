@@ -218,10 +218,9 @@ function renderBoard(){
     return;
   }
 
-  // Minimale breedte zodat overflow-x:auto werkt op alle drie de elementen
+  // Minimale breedte op alle drie elementen zodat overflow-x:auto werkt
   const COL_NAME = 220, COL_TASK = 120, GAP = 8;
-  const minW = COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 32;
-  const minWpx = minW + 'px';
+  const minWpx = (COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 32) + 'px';
   document.getElementById('board-inner').style.minWidth = minWpx;
   document.getElementById('task-header').style.minWidth = minWpx;
   document.getElementById('legend').style.minWidth = minWpx;
