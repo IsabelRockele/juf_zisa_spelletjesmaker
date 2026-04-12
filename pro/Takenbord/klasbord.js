@@ -910,7 +910,7 @@ function renderBoard(){
   document.getElementById('board-inner').classList.toggle('hidden',!show);
   if(!show){document.getElementById('empty-text').textContent=!hp?'Voeg leerlingen toe via ⚙️ Beheer':'Activeer taken via ⚙️ Beheer → Taken';updateMeta();return;}
   const allTasks=buildAllTasksForBoard();
-  const _minW=(200+allTasks.length*(100+6)+48)+'px';
+  const _minW=(220+allTasks.length*(120+8)+32)+'px';
   document.getElementById('board-inner').style.minWidth=_minW;
   document.getElementById('board-scroll').style.minWidth='0'; // zeker geen beperking
   renderTaskHeader(allTasks);renderPupilRows(allTasks);updateProgressBar();updateMeta();
