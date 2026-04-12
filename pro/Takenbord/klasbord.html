@@ -179,11 +179,11 @@ Lena
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="openSmartboardVenster()" title="Open het bord in smartboard-weergave in een nieuw venster">📺 Smartboard</button>
 <button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="timerToggleBtn">⏱️ Timer</button>
+<button id="smartboard-exit-btn" onclick="handleExitBtn()" title="Afsluiten" class="btn btn-ghost btn-sm" style="display:none;">✕ Afsluiten</button>
 </div>
 </div>
 
-<!-- Discreet slotje — altijd zichtbaar, ook in smartboard/ipad-modus -->
-<button id="smartboard-exit-btn" onclick="handleExitBtn()" title="Afsluiten" style="position:fixed;top:8px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.6);font-size:16px;font-weight:800;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;transition:all .2s;font-family:inherit;">✕</button>
+
 
 <!-- Exit-modal -->
 <div class="overlay hidden" id="smartboard-exit-overlay">
