@@ -1,0 +1,28 @@
+Bestand: welkomstbord.html
+
+Zoek dit volledige blok:
+
+function getBordUrl(modus){
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===sbBordId; });
+  if(!bord) return '';
+  var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
+  var pagina = huidigType==='klasbord' ? 'klasbord.html' : 'takenbord_kind.html';
+  return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus + '&rol=kind';
+}
+
+Vervang door dit:
+
+function getBordUrl(modus){
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===sbBordId; });
+  if(!bord) return '';
+  var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
+  var pagina;
+  if(huidigType === 'klasbord'){
+    pagina = (modus === 'ipad') ? 'klasbord_kind.html' : 'klasbord.html';
+  } else {
+    pagina = 'takenbord_kind.html';
+  }
+  return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus;
+}
