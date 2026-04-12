@@ -446,46 +446,6 @@ function getBordNaam(){
   } catch { return ''; }
 }
 
-function renderWhiteColumn(){
-  // Verwijder bestaande witte kolom
-  var old = document.getElementById('white-col');
-  if(old) old.remove();
-  // Maak een sticky witte achtergrondkolom die de volledige hoogte van pupil-rows dekt
-  var col = document.createElement('div');
-  col.id = 'white-col';
-  col.style.cssText = [
-    'position:sticky',
-    'left:0',
-    'z-index:22',
-    'width:var(--col-name)',
-    'min-width:var(--col-name)',
-    'flex-shrink:0',
-    'background:#fff',
-    'pointer-events:none',
-    'margin-right:calc(-1 * var(--col-name))',
-    'align-self:stretch'
-  ].join(';');
-  var rows = document.getElementById('pupil-rows');
-  if(rows) rows.parentNode.insertBefore(col, rows);
-}
-function scrollBoardRight(){
-  var s=document.getElementById('board-scroll');
-  if(s) s.scrollBy({left:240,behavior:'smooth'});
-}
-function scrollBoardLeft(){
-  var s=document.getElementById('board-scroll');
-  if(s) s.scrollBy({left:-240,behavior:'smooth'});
-}
-function updateScrollArrow(){
-  var s=document.getElementById('board-scroll');
-  var ar=document.getElementById('scroll-right-arrow');
-  var al=document.getElementById('scroll-left-arrow');
-  if(!s) return;
-  var canScrollRight=s.scrollWidth>s.clientWidth+4 && s.scrollLeft+s.clientWidth<s.scrollWidth-4;
-  var canScrollLeft=s.scrollLeft>4;
-  if(ar) ar.style.display=canScrollRight?'flex':'none';
-  if(al) al.style.display=canScrollLeft?'flex':'none';
-}
 function openSmartboardVenster(){
   // Bouw de smartboard-URL op basis van de huidige URL
   const p = new URLSearchParams(window.location.search);
@@ -940,7 +900,6 @@ function removePupilPhoto(pupilId){
 function renderBoard(){
   applyBoardSize();
   checkBackupReminder();
-  // Sync grootte-knoppen
   ['compact','normal','large'].forEach(s=>{
     const btn=document.getElementById('size-'+s);
     if(btn) btn.classList.toggle('size-btn-active', s===(state.boardSize||'normal'));
@@ -950,12 +909,142 @@ function renderBoard(){
   document.getElementById('board-inner').classList.toggle('hidden',!show);
   if(!show){document.getElementById('empty-text').textContent=!hp?'Voeg leerlingen toe via ⚙️ Beheer':'Activeer taken via ⚙️ Beheer → Taken';updateMeta();return;}
   const allTasks=buildAllTasksForBoard();
-  const _minW=(200+allTasks.length*(100+6)+48)+'px';
-  document.getElementById('board-inner').style.minWidth=''; // CSS max-content doet dit
-  renderTaskHeader(allTasks);renderPupilRows(allTasks);updateProgressBar();updateMeta();
-  renderWhiteColumn();
-  setTimeout(updateScrollArrow, 50);
+  renderTable(allTasks);
+  updateProgressBar();updateMeta();
+  setTimeout(updateScrollArrow,50);
 }
+
+function renderTable(allTasks){
+  // Vervang board-inner inhoud door een echte <table>
+  const inner = document.getElementById('board-inner');
+  inner.innerHTML = '';
+
+  const table = document.createElement('table');
+  table.className = 'board-table';
+  table.style.cssText = 'border-collapse:separate; border-spacing:0 6px; width:100%;';
+
+  // ── THEAD: taakheader ──────────────────────────────────────────────────
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  // Hoekcel
+  const th0 = document.createElement('th');
+  th0.className = 'board-th-corner';
+  th0.innerHTML = '<span>Leerling</span>';
+  headerRow.appendChild(th0);
+
+  // Taakkolommen
+  allTasks.forEach(t => {
+    const th = document.createElement('th');
+    th.className = 'board-th-task';
+    const ci = state.customIcons && state.customIcons[t.id];
+    if(ci){
+      th.innerHTML = `<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
+    } else {
+      th.innerHTML = `<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
+    }
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Legenda-rij
+  const legendRow = document.createElement('tr');
+  const legendTd = document.createElement('td');
+  legendTd.colSpan = allTasks.length + 1;
+  legendTd.style.cssText = 'padding:6px 14px; background:#fff; border-bottom:2px solid #e0e7ff;';
+  legendTd.innerHTML = `
+    <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
+      <span style="font-size:11px;color:#818cf8;font-weight:600;">Klik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
+    </div>`;
+  legendRow.appendChild(legendTd);
+  thead.appendChild(legendRow);
+
+  // ── TBODY: leerlingenrijen ─────────────────────────────────────────────
+  const tbody = document.createElement('tbody');
+  let totalDone=0, totalAll=0;
+
+  state.pupils.forEach((pupil,idx)=>{
+    const pid=pupil.id, myTasks=pupilTasks(pid), myIds=new Set(myTasks.map(t=>t.id));
+    const complete=isPupilComplete(pid),{done,busy,total}=pupilStats(pid),prog=state.progress[pid]||{};
+    const hasNotes=!!state.notes[pid];
+    const photo=state.pupilPhotos&&state.pupilPhotos[pid];
+    totalDone+=done; totalAll+=total;
+
+    const tr = document.createElement('tr');
+    tr.className = 'board-tr' + (complete?' complete':'');
+
+    // Naam-cel — sticky left
+    const tdName = document.createElement('td');
+    tdName.className = 'board-td-name' + (complete?' complete':'');
+    const dc=complete?'done':busy>0?'busy':'';
+    const bh=busy>0?` · <span class="busy-label">${busy} bezig</span>`:'';
+    const nh=state.showNumbers?`<span class="pupil-num">${idx+1}.</span>`:'';
+    const notesBtn=hasNotes?'<button class="notes-btn has-notes" onclick="openNotesModal(\''+pid+'\')" title="Bevindingen bekijken">\uD83D\uDD12</button>':'';
+    const medalSpan=complete?'<span class="pupil-medal">\uD83C\uDFC5</span>':'';
+    const photoHtml=photo?`<img class="pupil-board-photo" src="${photo}" alt="${esc(displayName(pupil))}" />`:'';
+    tdName.innerHTML=`<div class="pupil-dot ${dc}"></div>${nh}${photoHtml}<div class="pupil-info"><div class="pupil-name">${esc(displayName(pupil))}</div><div class="pupil-sub">${done}/${total}${bh}</div></div>${notesBtn}${medalSpan}`;
+    tr.appendChild(tdName);
+
+    // Taak-cellen
+    allTasks.forEach(t=>{
+      const td=document.createElement('td');
+      td.className='board-td-task';
+      if(!myIds.has(t.id)){
+        td.innerHTML='<div class="task-ph">—</div>';
+      } else {
+        const isExtra=!!(state.pupilTaskOverrides[pid]?.extra?.find(x=>x.id===t.id));
+        const entry=prog[t.id]||{status:0,smiley:0};
+        const s=entry.status||0, sm=entry.smiley||0;
+        const btn=document.createElement('button');
+        btn.className='task-btn status-'+s+(isExtra?' extra-task':'');
+        btn.textContent=s===0?'':s===1?'🔄':'✓';
+        btn.title=(isExtra?'★ Extra · ':'')+['Leeg → Bezig','Bezig → Klaar','Klaar → wissen'][s];
+        btn.onclick=()=>cycleStatus(pid,t.id);
+        td.appendChild(btn);
+        if(sm>0){
+          const sr=document.createElement('div');sr.className='smiley-row smiley-row-single';
+          const sb=document.createElement('button');
+          sb.className='smiley-btn selected smiley-chosen';
+          sb.textContent=SMILEYS[sm];
+          sb.title=SMILEY_LABELS[sm]+' · Klik om te wijzigen';
+          sb.onclick=()=>openSmileyPopup(pid,t.id);
+          sr.appendChild(sb);
+          td.appendChild(sr);
+        } else if(s===2&&state.showSmileys){
+          const sr=document.createElement('div');sr.className='smiley-row';
+          [1,2,3,4].forEach(v=>{
+            const sb=document.createElement('button');
+            sb.className='smiley-btn';
+            sb.textContent=SMILEYS[v];
+            sb.title=SMILEY_LABELS[v];
+            sb.onclick=()=>{if(!state.progress[pid])state.progress[pid]={};if(!state.progress[pid][t.id])state.progress[pid][t.id]={status:s,smiley:0};state.progress[pid][t.id].smiley=v;saveState();renderBoard();};
+            sr.appendChild(sb);
+          });
+          td.appendChild(sr);
+        }
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  inner.appendChild(table);
+
+  // Progress bar
+  const pbWrap=document.createElement('div');
+  pbWrap.id='progress-bar-wrap-new';
+  pbWrap.style.cssText='margin-top:14px;padding:12px 16px;background:#fff;border-radius:12px;border:2px solid #e0e7ff;display:flex;align-items:center;gap:12px;';
+  pbWrap.innerHTML='<div id="progress-track" style="flex:1;height:10px;background:#e0e7ff;border-radius:5px;overflow:hidden;"><div id="progress-fill" style="height:100%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:5px;transition:width .5s ease;width:0%;"></div></div><span id="progress-label" style="font-size:13px;font-weight:800;color:#6366f1;white-space:nowrap;">0/0 klaar</span>';
+  inner.appendChild(pbWrap);
+}
+
+function renderTaskHeader(tasks){ /* vervangen door renderTable */ }
+function renderPupilRows(allTasks){ /* vervangen door renderTable */ }
 function renderTaskHeader(tasks){
   const h=document.getElementById('task-header');
   h.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
@@ -1182,9 +1271,6 @@ function initKlasbordAfterLoad(){
   applySmartboard();
   applyBoardSize();
   renderShell();
-  // Scroll-pijl listener
-  var bs = document.getElementById('board-scroll');
-  if(bs) bs.addEventListener('scroll', updateScrollArrow, {passive:true});
 }
 
 if (window.fbOnReady) {
