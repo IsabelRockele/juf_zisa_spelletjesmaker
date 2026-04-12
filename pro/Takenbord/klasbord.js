@@ -428,6 +428,15 @@ function getBordNaam(){
   } catch { return ''; }
 }
 
+function openSmartboardVenster(){
+  // Bouw de smartboard-URL op basis van de huidige URL
+  const p = new URLSearchParams(window.location.search);
+  p.set('modus','smartboard');
+  p.delete('rol'); // zeker geen kind-rol meegeven
+  const url = window.location.pathname + '?' + p.toString();
+  window.open(url, '_blank');
+}
+
 function switchTab(tab){ currentTab=tab; renderSettings(); }
 function toggleMode(){ currentMode=currentMode==='board'?'settings':'board';renderShell(); }
 function closeSettings(){ currentMode='board'; renderShell(); }
