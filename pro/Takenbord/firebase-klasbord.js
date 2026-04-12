@@ -50,6 +50,19 @@ const FIREBASE_CONFIG = {
     } catch(e) { console.warn('fbLoad:', e.message); return null; }
   };
 
+  window.fbSaveShared = async function(key, data) {
+    try {
+      await _db.collection('klasbord_shared').doc(key).set(data);
+    } catch(e) { console.warn('fbSaveShared:', e.message); }
+  };
+
+  window.fbLoadShared = async function(key) {
+    try {
+      var snap = await _db.collection('klasbord_shared').doc(key).get();
+      return snap.exists ? snap.data() : null;
+    } catch(e) { console.warn('fbLoadShared:', e.message); return null; }
+  };
+
   window.fbDelete = async function(key) {
     if (!_uid) return;
     try {
