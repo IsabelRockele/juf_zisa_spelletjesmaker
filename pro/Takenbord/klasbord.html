@@ -201,8 +201,8 @@ Lena
 <div id="board-scroll">
 <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Klik op ⚙️ Beheer aanpassen om te starten</p></div>
 <div class="hidden" id="board-inner"></div>
-      </div>
-    </div>
+</div>
+</div>
 </div>
 </div>
 <div class="hidden" id="smiley-popup">
@@ -550,4 +550,7 @@ body{padding-top:44px!important;}
 
   <script src="../device-id.js"></script>
   <script src="../guard.js"></script>
+
+<button id="scroll-left-arrow" onclick="scrollBoardLeft()" style="position:fixed;bottom:24px;right:80px;z-index:50;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;">&#8249;</button>
+<button id="scroll-right-arrow" onclick="scrollBoardRight()" style="position:fixed;bottom:24px;right:24px;z-index:50;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;">&#8250;</button>
 </body></html>
