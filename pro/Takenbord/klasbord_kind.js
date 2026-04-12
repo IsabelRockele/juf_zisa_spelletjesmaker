@@ -1,25 +1,16 @@
 // ===== KLASBORD KINDMODUS =====
 
-// Haal bord op via URL
-const params = new URLSearchParams(window.location.search);
-const bordId = params.get('bordid');
-const type = params.get('type') || 'klasbord';
+// ── URL-parameters ────────────────────────────────────────────────────────
+const params  = new URLSearchParams(window.location.search);
+const bordId  = params.get('bordid');
+const type    = params.get('type') || 'klasbord';
 
-// Zelfde STORAGE_KEY logica als hoofdversie
-const STORAGE_KEY = (function(){
-  if(bordId){
-    try {
-      const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
-      const lijst = all[type] || [];
-      const bord = lijst.find(b => b.id === bordId);
-      if(bord && bord.storageKey) return bord.storageKey;
-    } catch{}
-    return 'klas_'+bordId;
-  }
-  return 'klas_test';
-})();
+// STORAGE_KEY: op de iPad staat geen borden_v1, dus altijd 'klas_' + bordId
+// (Dat is exact dezelfde sleutel als de leerkrachtversie gebruikt wanneer
+//  het bord aangemaakt wordt via welkomstbord.html.)
+const STORAGE_KEY = bordId ? ('klas_' + bordId) : 'klas_test';
 
-// Basis state
+// ── State ─────────────────────────────────────────────────────────────────
 let state = {
   pupils: [],
   activeTasks: [],
@@ -32,12 +23,10 @@ let state = {
   taskLabelOverrides: {}
 };
 
-// Helpers
+// ── Helpers ───────────────────────────────────────────────────────────────
 function esc(s){
   return String(s||'')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
 function displayName(p){
@@ -63,152 +52,353 @@ const DEFAULT_TASKS = [
 ];
 
 function allBaseTasks(){
-  const overrides = state.taskLabelOverrides || {};
-  const defaults = DEFAULT_TASKS.map(t =>
-    overrides[t.id] ? {...t, label: overrides[t.id]} : t
-  );
-  return [...defaults, ...(state.customTasks||[])];
+  const ov = state.taskLabelOverrides || {};
+  return [
+    ...DEFAULT_TASKS.map(t => ov[t.id] ? {...t, label:ov[t.id]} : t),
+    ...(state.customTasks || [])
+  ];
 }
 
 function classActiveTasks(){
-  return allBaseTasks().filter(t => state.activeTasks.includes(t.id));
+  return allBaseTasks().filter(t => (state.activeTasks||[]).includes(t.id));
 }
 
 function pupilTasks(pid){
   const ov = state.pupilTaskOverrides[pid] || {};
-  const removed = ov.removed || [];
-  const extra = ov.extra || [];
-
   return [
-    ...classActiveTasks().filter(t => !removed.includes(t.id)),
-    ...extra
+    ...classActiveTasks().filter(t => !(ov.removed||[]).includes(t.id)),
+    ...(ov.extra||[])
   ];
 }
 
-function getStatus(pid,tid){
-  return (state.progress[pid]?.[tid]?.status)||0;
+function buildAllTasksForBoard(){
+  // Verzamel alle unieke taken die op het bord voorkomen (union over alle leerlingen)
+  const seen = new Set(), tasks = [];
+  (state.pupils||[]).forEach(p => {
+    pupilTasks(p.id).forEach(t => {
+      if (!seen.has(t.id)){ seen.add(t.id); tasks.push(t); }
+    });
+  });
+  return tasks;
 }
 
-function saveState(){
-  try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }catch(e){}
+function getStatus(pid,tid){
+  return (state.progress[pid]?.[tid]?.status) || 0;
+}
 
+function getSmiley(pid,tid){
+  return (state.progress[pid]?.[tid]?.smiley) || 0;
+}
+
+// ── Opslaan / laden ───────────────────────────────────────────────────────
+function saveState(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
   if(window.fbSaveShared){
     window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
   }
 }
 
-function loadState(){
-  try{
-    const r = localStorage.getItem(STORAGE_KEY);
-    if(r) state = {...state, ...JSON.parse(r)};
-  }catch(e){}
+function applyData(data){
+  if(!data) return;
+  state = Object.assign({}, state, data);
+  // Zorg voor correcte types
+  if(!state.progress || typeof state.progress !== 'object') state.progress = {};
+  if(!state.pupils || !Array.isArray(state.pupils)) state.pupils = [];
+  if(!state.activeTasks || !Array.isArray(state.activeTasks)) state.activeTasks = [];
+  if(!state.customTasks || !Array.isArray(state.customTasks)) state.customTasks = [];
+  if(!state.pupilTaskOverrides || typeof state.pupilTaskOverrides !== 'object') state.pupilTaskOverrides = {};
+  if(!state.taskLabelOverrides || typeof state.taskLabelOverrides !== 'object') state.taskLabelOverrides = {};
+  if(!state.customIcons || typeof state.customIcons !== 'object') state.customIcons = {};
+}
 
-  if(window.fbLoadShared){
-    window.fbLoadShared(STORAGE_KEY).then(data=>{
-      if(data){
-        state = {...state, ...data};
+function loadState(){
+  // 1. Lokale opslag (snel, geen netwerk nodig)
+  try {
+    const r = localStorage.getItem(STORAGE_KEY);
+    if(r){ applyData(JSON.parse(r)); }
+  } catch(e){}
+
+  // 2. Firebase Shared: wacht op auth-ready, laad dan opnieuw
+  //    (fbOnReady wacht tot anoniem aanmelden klaar is)
+  if(window.fbOnReady){
+    window.fbOnReady(function(){
+      if(window.fbLoadShared){
+        window.fbLoadShared(STORAGE_KEY).then(function(data){
+          if(data){
+            applyData(data);
+            // Cache lokaal zodat volgende keer sneller laadt
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+          }
+          renderBoard();
+          showKindApp();
+        }).catch(function(e){
+          console.warn('fbLoadShared fout:', e);
+          renderBoard();
+          showKindApp();
+        });
+      } else {
         renderBoard();
+        showKindApp();
       }
-    }).catch(console.warn);
+    });
+  } else {
+    // Geen Firebase beschikbaar → gewoon lokale data gebruiken
+    setTimeout(function(){
+      renderBoard();
+      showKindApp();
+    }, 200);
   }
 }
 
-// ===== STATUS =====
-function cycleStatus(pid,tid){
-    
+// ── Smiley popup ──────────────────────────────────────────────────────────
+let _smileyPid = null, _smileyTid = null;
+
+function openSmileyPopup(pid, tid){
+  _smileyPid = pid; _smileyTid = tid;
+  const popup = document.getElementById('smiley-popup');
+  if(!popup) return;
+  document.getElementById('sp-title').textContent = 'Hoe ging het?';
+  // Positie: midden-scherm
+  popup.style.left = '50%';
+  popup.style.top  = '50%';
+  popup.style.transform = 'translate(-50%,-50%)';
+  popup.classList.remove('hidden');
+}
+
+window.setSmiley = function(v){
+  if(!_smileyPid || !_smileyTid) return;
+  if(!state.progress[_smileyPid]) state.progress[_smileyPid] = {};
+  if(!state.progress[_smileyPid][_smileyTid]) state.progress[_smileyPid][_smileyTid] = {status:0};
+  state.progress[_smileyPid][_smileyTid].smiley = v;
+  saveState();
+  closeSmileyPopup();
+  renderBoard();
+};
+
+window.closeSmileyPopup = function(){
+  const popup = document.getElementById('smiley-popup');
+  if(popup) popup.classList.add('hidden');
+  _smileyPid = null; _smileyTid = null;
+};
+
+// ── Status wisselen ───────────────────────────────────────────────────────
+window.cycleStatus = function(pid, tid){
   if(!state.progress[pid]) state.progress[pid] = {};
-  if(!state.progress[pid][tid]) state.progress[pid][tid] = {status:0};
+  if(!state.progress[pid][tid]) state.progress[pid][tid] = {status:0, smiley:0};
 
-  const cur = state.progress[pid][tid].status;
-  const next = (cur+1)%3;
-
+  const cur  = state.progress[pid][tid].status || 0;
+  const next = (cur + 1) % 3;
   state.progress[pid][tid].status = next;
-
   saveState();
   renderBoard();
+
+  // Na afvinken (status 2 = klaar) → smiley vragen
+  if(next === 2){ openSmileyPopup(pid, tid); }
+};
+
+// ── Renderen ─────────────────────────────────────────────────────────────
+const SMILEYS = ['','😊','🙂','😐','😟'];
+
+function renderBoard(){
+  const hasPupils = (state.pupils||[]).length > 0;
+  const allTasks  = buildAllTasksForBoard();
+  const hasTasks  = allTasks.length > 0;
+  const show      = hasPupils && hasTasks;
+
+  document.getElementById('empty-state').classList.toggle('hidden', show);
+  document.getElementById('board-inner').classList.toggle('hidden', !show);
+
+  if(!show){
+    document.getElementById('empty-text').textContent =
+      !hasPupils ? 'Geen leerlingen gevonden voor dit bord'
+                 : 'Geen taken ingesteld op dit bord';
+    updateProgress(0, 0);
+    return;
+  }
+
+  // Minimale breedte zodat horizontaal scrollen werkt
+  // col-name=220px, col-task=120px, gap=8px
+  const COL_NAME = 220, COL_TASK = 120, GAP = 8;
+  document.getElementById('board-inner').style.minWidth =
+    (COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 16) + 'px';
+
+  renderTaskHeader(allTasks);
+  renderPupilRows(allTasks);
+  updateProgressFromState();
+  updateScrollArrow();
 }
 
-// ===== RENDER =====
-function renderBoard(){
-  const container = document.getElementById('pupil-rows');
-  if(!container) return;
+function renderTaskHeader(tasks){
+  const h = document.getElementById('task-header');
+  // Verwijder enkel de taakkolommen, niet de header-corner
+  h.querySelectorAll('.task-header-cell').forEach(e => e.remove());
 
+  tasks.forEach(t => {
+    const ci = state.customIcons && state.customIcons[t.id];
+    const cell = document.createElement('div');
+    cell.className = 'task-header-cell';
+    if(ci){
+      cell.innerHTML = `<div class="t-icon-custom" style="background-image:url(${ci})"></div>
+                        <span class="t-label">${esc(t.label)}</span>`;
+    } else {
+      cell.innerHTML = `<span class="t-icon">${t.icon}</span>
+                        <span class="t-label">${esc(t.label)}</span>`;
+    }
+    h.appendChild(cell);
+  });
+}
+
+function renderPupilRows(allTasks){
+  const container = document.getElementById('pupil-rows');
   container.innerHTML = '';
 
-  const tasks = [];
-  state.pupils.forEach(p=>{
-    pupilTasks(p.id).forEach(t=>{
-      if(!tasks.find(x=>x.id===t.id)) tasks.push(t);
-    });
-  });
+  let totalDone = 0, totalAll = 0;
 
-  state.pupils.forEach(p=>{
+  state.pupils.forEach(pupil => {
+    const pid   = pupil.id;
+    const myIds = new Set(pupilTasks(pid).map(t => t.id));
+
+    let done = 0, total = 0;
+    allTasks.forEach(t => {
+      if(myIds.has(t.id)){
+        total++;
+        if(getStatus(pid, t.id) === 2) done++;
+      }
+    });
+    totalDone += done; totalAll += total;
+    const complete = total > 0 && done === total;
+
+    // Foto
+    const photo = state.pupilPhotos && state.pupilPhotos[pid];
+    const photoHtml = photo
+      ? `<img class="pupil-board-photo" src="${photo}" alt="${esc(displayName(pupil))}" />`
+      : '';
+
+    // Rij
     const row = document.createElement('div');
-    row.style.marginBottom = '12px';
+    row.className = 'pupil-board-row' + (complete ? ' complete' : '');
 
-    const title = document.createElement('div');
-    title.style.fontWeight = 'bold';
-    title.textContent = displayName(p);
-    row.appendChild(title);
+    // Naam-cel (sticky left)
+    const nameCell = document.createElement('div');
+    nameCell.className = 'pupil-name-cell' + (complete ? '' : '');
+    nameCell.innerHTML =
+      `<div class="pupil-dot ${complete ? 'done' : ''}"></div>`
+      + photoHtml
+      + `<div class="pupil-info">
+           <div class="pupil-name">${esc(displayName(pupil))}</div>
+           <div class="pupil-sub">${done}/${total}</div>
+         </div>`;
+    row.appendChild(nameCell);
 
-    const taskWrap = document.createElement('div');
-    taskWrap.style.display = 'flex';
-    taskWrap.style.flexWrap = 'wrap';
-    taskWrap.style.gap = '6px';
+    // Taak-cellen
+    allTasks.forEach(t => {
+      const cell = document.createElement('div');
+      cell.className = 'task-cell';
 
-    tasks.forEach(t=>{
-      const btn = document.createElement('button');
-      const status = getStatus(p.id,t.id);
+      if(!myIds.has(t.id)){
+        // Taak niet actief voor deze leerling: lege placeholder
+        cell.innerHTML = '<div class="task-ph">—</div>';
+      } else {
+        const s      = getStatus(pid, t.id);
+        const sm     = getSmiley(pid, t.id);
+        const smHtml = sm ? `<div style="font-size:16px;margin-top:2px;">${SMILEYS[sm]}</div>` : '';
 
-      btn.textContent = status===2 ? '✓' : status===1 ? '🔄' : '';
-      btn.style.width = '50px';
-      btn.style.height = '50px';
-      btn.style.borderRadius = '8px';
-      btn.style.border = '1px solid #ccc';
+        const btn = document.createElement('button');
+        btn.className = 'task-btn' + (s === 1 ? ' status-1' : s === 2 ? ' status-2' : '');
+        btn.title = s === 0 ? 'Nog te doen' : s === 1 ? 'Bezig' : 'Klaar';
+        btn.textContent = s === 2 ? '✓' : s === 1 ? '🔄' : '';
+        btn.addEventListener('click', function(){ cycleStatus(pid, t.id); });
 
-      btn.onclick = ()=>cycleStatus(p.id,t.id);
-
-      taskWrap.appendChild(btn);
+        cell.appendChild(btn);
+        if(smHtml){
+          const smDiv = document.createElement('div');
+          smDiv.innerHTML = smHtml;
+          cell.appendChild(smDiv.firstChild);
+        }
+      }
+      row.appendChild(cell);
     });
 
-    row.appendChild(taskWrap);
     container.appendChild(row);
   });
+
+  updateProgress(totalDone, totalAll);
 }
 
-// ===== AFSLUITEN =====
-function closeKindScreen(){
-  document.body.innerHTML = `
-    <div style="
-      display:flex;
-      flex-direction:column;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
-      font-family:sans-serif;
-    ">
-      <div style="font-size:40px;">✅</div>
-      <div>Klaar voor vandaag</div>
-      <div style="font-size:12px;margin-top:8px;">Scan opnieuw om verder te werken</div>
-    </div>
-  `;
+function updateProgressFromState(){
+  let done = 0, total = 0;
+  const allTasks = buildAllTasksForBoard();
+  state.pupils.forEach(p => {
+    const myIds = new Set(pupilTasks(p.id).map(t => t.id));
+    allTasks.forEach(t => {
+      if(myIds.has(t.id)){ total++; if(getStatus(p.id,t.id)===2) done++; }
+    });
+  });
+  updateProgress(done, total);
 }
 
-// ===== INIT =====
+function updateProgress(done, total){
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  const txt = `${done}/${total} klaar`;
+  const el1 = document.getElementById('board-progress-text');
+  const el2 = document.getElementById('board-progress-text-inline');
+  const fill = document.getElementById('progress-fill');
+  const lbl  = document.getElementById('progress-label');
+  if(el1) el1.textContent = txt;
+  if(el2) el2.textContent = txt;
+  if(fill) fill.style.width = pct + '%';
+  if(lbl)  lbl.textContent = txt;
+}
+
+// ── Scroll-pijl (kindmodus) ───────────────────────────────────────────────
+function updateScrollArrow(){
+  const scroll = document.getElementById('board-scroll');
+  const arrow  = document.getElementById('scroll-right-arrow');
+  if(!scroll || !arrow) return;
+
+  function check(){
+    const canScrollMore = scroll.scrollLeft + scroll.clientWidth < scroll.scrollWidth - 4;
+    arrow.classList.toggle('hidden', !canScrollMore);
+  }
+
+  // Initieel check
+  check();
+
+  // Scroll-listener (eenmalig binden)
+  if(!scroll._arrowBound){
+    scroll._arrowBound = true;
+    scroll.addEventListener('scroll', check, {passive:true});
+    window.addEventListener('resize', check);
+  }
+}
+
+window.scrollRight = function(){
+  const scroll = document.getElementById('board-scroll');
+  if(scroll) scroll.scrollBy({ left: 220, behavior:'smooth' });
+};
+
+// ── Afsluiten ─────────────────────────────────────────────────────────────
+window.closeKindScreen = function(){
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('closed-screen').classList.add('show');
+};
+
+// ── Opstarten ─────────────────────────────────────────────────────────────
 function showKindApp(){
   const loading = document.getElementById('loading');
-  const app = document.getElementById('app');
+  const app     = document.getElementById('app');
   if(loading) loading.style.display = 'none';
-  if(app) app.style.display = 'block';
+  if(app)     app.style.display = 'block';
 }
 
-window.addEventListener('load', ()=>{
-  loadState();
+window.addEventListener('load', function(){
+  // Bord-naam tonen (als die in de URL zit als 'naam' param)
+  const naam = params.get('naam');
+  if(naam){
+    const el = document.getElementById('board-naam-label');
+    if(el) el.textContent = decodeURIComponent(naam);
+  }
 
-  setTimeout(()=>{
-    renderBoard();
-    showKindApp();
-  }, 300);
+  loadState();
+  // showKindApp() wordt aangeroepen vanuit loadState() na Firebase-respons
 });
