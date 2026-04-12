@@ -216,11 +216,11 @@ function renderBoard(){
     return;
   }
 
-  // Minimale breedte zodat horizontaal scrollen werkt
+  // Minimale breedte op de SCROLL-container zodat overflow-x:auto werkt
   // col-name=220px, col-task=120px, gap=8px
   const COL_NAME = 220, COL_TASK = 120, GAP = 8;
-  document.getElementById('board-inner').style.minWidth =
-    (COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 16) + 'px';
+  const minW = COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 32;
+  document.getElementById('board-inner').style.minWidth = minW + 'px';
 
   renderTaskHeader(allTasks);
   renderPupilRows(allTasks);
@@ -357,14 +357,14 @@ function updateScrollArrow(){
   if(!scroll || !arrow) return;
 
   function check(){
-    const canScrollMore = scroll.scrollLeft + scroll.clientWidth < scroll.scrollWidth - 4;
-    arrow.classList.toggle('hidden', !canScrollMore);
+    // Horizontaal: is er meer content dan zichtbaar?
+    const canScrollMore = scroll.scrollWidth > scroll.clientWidth + 4;
+    const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 4;
+    arrow.classList.toggle('hidden', !canScrollMore || atEnd);
   }
 
-  // Initieel check
   check();
 
-  // Scroll-listener (eenmalig binden)
   if(!scroll._arrowBound){
     scroll._arrowBound = true;
     scroll.addEventListener('scroll', check, {passive:true});
@@ -374,7 +374,7 @@ function updateScrollArrow(){
 
 window.scrollRight = function(){
   const scroll = document.getElementById('board-scroll');
-  if(scroll) scroll.scrollBy({ left: 220, behavior:'smooth' });
+  if(scroll) scroll.scrollBy({ left: 240, behavior:'smooth' });
 };
 
 // ── Afsluiten ─────────────────────────────────────────────────────────────
