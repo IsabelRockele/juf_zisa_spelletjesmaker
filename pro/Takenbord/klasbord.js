@@ -446,6 +446,18 @@ function getBordNaam(){
   } catch { return ''; }
 }
 
+function scrollBoardRight(){
+  var s=document.getElementById("board-scroll");
+  if(s) s.scrollBy({left:240,behavior:"smooth"});
+}
+function updateScrollArrow(){
+  var s=document.getElementById("board-scroll");
+  var a=document.getElementById("scroll-right-arrow");
+  if(!s||!a) return;
+  var canScroll=s.scrollWidth>s.clientWidth+4;
+  var atEnd=s.scrollLeft+s.clientWidth>=s.scrollWidth-4;
+  a.style.display=(canScroll&&!atEnd)?"flex":"none";
+}
 function openSmartboardVenster(){
   // Bouw de smartboard-URL op basis van de huidige URL
   const p = new URLSearchParams(window.location.search);
@@ -910,8 +922,10 @@ function renderBoard(){
   document.getElementById('board-inner').classList.toggle('hidden',!show);
   if(!show){document.getElementById('empty-text').textContent=!hp?'Voeg leerlingen toe via ⚙️ Beheer':'Activeer taken via ⚙️ Beheer → Taken';updateMeta();return;}
   const allTasks=buildAllTasksForBoard();
+  const _minW=(200+allTasks.length*(100+6)+48)+'px';
   document.getElementById('board-inner').style.minWidth=''; // CSS max-content doet dit
   renderTaskHeader(allTasks);renderPupilRows(allTasks);updateProgressBar();updateMeta();
+  setTimeout(updateScrollArrow, 50);
 }
 function renderTaskHeader(tasks){
   const h=document.getElementById('task-header');
@@ -1139,6 +1153,9 @@ function initKlasbordAfterLoad(){
   applySmartboard();
   applyBoardSize();
   renderShell();
+  // Scroll-pijl listener
+  var bs = document.getElementById('board-scroll');
+  if(bs) bs.addEventListener('scroll', updateScrollArrow, {passive:true});
 }
 
 if (window.fbOnReady) {
