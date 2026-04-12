@@ -207,6 +207,8 @@ function renderBoard(){
 
   document.getElementById('empty-state').classList.toggle('hidden', show);
   document.getElementById('board-inner').classList.toggle('hidden', !show);
+  document.getElementById('task-header').classList.toggle('hidden', !show);
+  document.getElementById('legend').classList.toggle('hidden', !show);
 
   if(!show){
     document.getElementById('empty-text').textContent =
@@ -216,11 +218,13 @@ function renderBoard(){
     return;
   }
 
-  // Minimale breedte op de SCROLL-container zodat overflow-x:auto werkt
-  // col-name=220px, col-task=120px, gap=8px
+  // Minimale breedte zodat overflow-x:auto werkt op alle drie de elementen
   const COL_NAME = 220, COL_TASK = 120, GAP = 8;
   const minW = COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 32;
-  document.getElementById('board-inner').style.minWidth = minW + 'px';
+  const minWpx = minW + 'px';
+  document.getElementById('board-inner').style.minWidth = minWpx;
+  document.getElementById('task-header').style.minWidth = minWpx;
+  document.getElementById('legend').style.minWidth = minWpx;
 
   renderTaskHeader(allTasks);
   renderPupilRows(allTasks);
@@ -350,17 +354,19 @@ function updateProgress(done, total){
   if(lbl)  lbl.textContent = txt;
 }
 
-// ── Scroll-pijl (kindmodus) ───────────────────────────────────────────────
+// ── Scroll-pijlen (kindmodus) ─────────────────────────────────────────────
 function updateScrollArrow(){
-  const scroll = document.getElementById('board-scroll');
-  const arrow  = document.getElementById('scroll-right-arrow');
-  if(!scroll || !arrow) return;
+  const scroll  = document.getElementById('board-scroll');
+  const arRight = document.getElementById('scroll-right-arrow');
+  const arLeft  = document.getElementById('scroll-left-arrow');
+  if(!scroll) return;
 
   function check(){
-    // Horizontaal: is er meer content dan zichtbaar?
-    const canScrollMore = scroll.scrollWidth > scroll.clientWidth + 4;
-    const atEnd = scroll.scrollLeft + scroll.clientWidth >= scroll.scrollWidth - 4;
-    arrow.classList.toggle('hidden', !canScrollMore || atEnd);
+    const canRight = scroll.scrollWidth > scroll.clientWidth + 4
+                  && scroll.scrollLeft + scroll.clientWidth < scroll.scrollWidth - 4;
+    const canLeft  = scroll.scrollLeft > 4;
+    if(arRight) arRight.classList.toggle('hidden', !canRight);
+    if(arLeft)  arLeft.classList.toggle('hidden',  !canLeft);
   }
 
   check();
@@ -375,6 +381,11 @@ function updateScrollArrow(){
 window.scrollRight = function(){
   const scroll = document.getElementById('board-scroll');
   if(scroll) scroll.scrollBy({ left: 240, behavior:'smooth' });
+};
+
+window.scrollLeft = function(){
+  const scroll = document.getElementById('board-scroll');
+  if(scroll) scroll.scrollBy({ left: -240, behavior:'smooth' });
 };
 
 // ── Afsluiten ─────────────────────────────────────────────────────────────
