@@ -402,7 +402,8 @@ body.ipad-modus #smartboard-exit-btn {
   padding:8px 16px !important;
   line-height:normal !important;
   font-weight:800 !important;
-  bottom:24px !important; right:140px !important;
+  top:8px !important; right:12px !important;
+  bottom:auto !important;
 }
 
 /* ── SAVED DATA MODAL ────────────────────────────────────────────────────── */
