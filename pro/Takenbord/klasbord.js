@@ -1071,20 +1071,31 @@ function goBackFromBoard(){
 }
 
 // INIT
-loadState();
-document.getElementById('toggle-numbers').checked = !!state.showNumbers;
-document.getElementById('toggle-lastname').checked = !!state.showLastname;
-document.getElementById('toggle-smileys').checked = !!state.showSmileys;
+function initKlasbordAfterLoad(){
+  document.getElementById('toggle-numbers').checked = !!state.showNumbers;
+  document.getElementById('toggle-lastname').checked = !!state.showLastname;
+  document.getElementById('toggle-smileys').checked = !!state.showSmileys;
 
-const urlParams = new URLSearchParams(window.location.search);
-const startTab = urlParams.get('tab');
+  const urlParams = new URLSearchParams(window.location.search);
+  const startTab = urlParams.get('tab');
 
-currentMode = urlParams.get('view') === 'board' ? 'board' : 'settings';
-currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
+  currentMode = urlParams.get('view') === 'board' ? 'board' : 'settings';
+  currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
-applySmartboard();
-applyBoardSize();
-renderShell();
+  applySmartboard();
+  applyBoardSize();
+  renderShell();
+}
+
+if (window.fbOnReady) {
+  window.fbOnReady(function(){
+    loadState();
+    setTimeout(initKlasbordAfterLoad, 300);
+  });
+} else {
+  loadState();
+  setTimeout(initKlasbordAfterLoad, 300);
+}
 
 // ── TIMER ────────────────────────────────────────────────────────────────────
 var timerTotalSeconds = 15 * 60;
