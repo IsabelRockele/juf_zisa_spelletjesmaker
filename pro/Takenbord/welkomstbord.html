@@ -573,8 +573,13 @@ function getBordUrl(modus){
   var bord = borden.find(function(b){ return b.id===sbBordId; });
   if(!bord) return '';
   var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
-  var pagina = huidigType==='klasbord' ? 'klasbord.html' : 'takenbord_kind.html';
- return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus + '&rol=kind';
+ var pagina;
+if(huidigType === 'klasbord'){
+  pagina = modus === 'ipad' ? 'klasbord_kind.html' : 'klasbord.html';
+} else {
+  pagina = modus === 'ipad' ? 'takenbord_kind_public.html' : 'takenbord_kind.html';
+}
+return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus;
 }
 function gaNaarSmartboard(){ window.location.href = getBordUrl('smartboard'); }
 function toggleQR(){
