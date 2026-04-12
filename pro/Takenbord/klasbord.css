@@ -191,7 +191,6 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .board-bar-right { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
 /* board-scroll: enige scrollcontainer — beide richtingen toegestaan */
 #board-scroll { flex:1; min-height:0; overflow:auto; min-width:0; background:linear-gradient(135deg,#f0f9ff,#fef9ff); padding:0 14px 40px; }
-/* board-inner: breedte = inhoud zodat overflow-x triggert */
 #board-inner { min-width:max-content; }
 #task-header { position:sticky; top:0; z-index:30; background:linear-gradient(135deg,#f0f9ff,#fef9ff); display:flex; align-items:stretch; gap:var(--gap); padding-top:10px; padding-bottom:8px; border-bottom:3px solid #e0e7ff; margin-bottom:6px; }
 .header-corner { position:sticky; left:0; z-index:35; background:linear-gradient(135deg,#f0f9ff,#fef9ff); width:var(--col-name); min-width:var(--col-name); flex-shrink:0; display:flex; align-items:flex-end; padding-bottom:3px; }
@@ -281,6 +280,10 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .celeb-box .c-sub   { font-size:15px; opacity:.85; margin-top:5px; color:#fff; }
 .celeb-box .c-hint  { font-size:11px; opacity:.4; margin-top:18px; color:#fff; }
 @keyframes popIn { from{transform:scale(.5);opacity:0} to{transform:scale(1);opacity:1} }
+#board-scroll::-webkit-scrollbar { width:8px; height:8px; }
+#board-scroll::-webkit-scrollbar-track { background:#e0e7ff; border-radius:4px; }
+#board-scroll::-webkit-scrollbar-thumb { background:#6366f1; border-radius:4px; }
+#board-scroll::-webkit-scrollbar-thumb:hover { background:#4338ca; }
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-thumb { background:#c7d2fe; border-radius:3px; }
 .hidden { display:none !important; }
