@@ -208,8 +208,11 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 #pupil-rows { display:flex; flex-direction:column; gap:0; }
 .pupil-board-row { display:flex; align-items:center; gap:var(--gap); background:#fff; border-radius:14px; border:2px solid #e0e7ff; padding:var(--row-pad,4px) 0; transition:all .3s; box-shadow:0 2px 8px rgba(99,102,241,.08); margin-bottom:6px; }
 .pupil-board-row.complete { background:linear-gradient(90deg,#f0fdf4,#fff); border-color:#86efac; box-shadow:0 2px 8px rgba(22,163,74,.15); }
-.pupil-name-cell { position:sticky; left:0; z-index:25; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:all .3s; box-shadow:4px 0 12px 4px #fff; margin-left:-2px; border-radius:14px 0 0 14px; }
-.pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; border-radius:14px 0 0 14px; }
+.pupil-name-cell { position:sticky; left:0; z-index:25; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; }
+/* Witte overlay die afgeronde hoeken van de rij afdekt */
+.pupil-name-cell::before { content:''; position:absolute; top:-4px; left:-4px; right:-2px; bottom:-4px; background:#fff; z-index:-1; border-radius:14px 0 0 14px; }
+.pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
+.pupil-board-row.complete .pupil-name-cell::before { background:#f0fdf4; }
 .pupil-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:#c7d2fe; transition:all .3s; }
 .pupil-dot.done { background:#16a34a; box-shadow:0 0 6px #86efac; }
 .pupil-dot.busy { background:#f59e0b; box-shadow:0 0 5px #fde68a; }
