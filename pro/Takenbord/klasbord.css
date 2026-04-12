@@ -268,7 +268,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .board-td-name {
   position: sticky;
   left: 0;
-  z-index: 25;
+  z-index: 20;
   background: #fff;
   min-width: var(--col-name);
   width: var(--col-name);
