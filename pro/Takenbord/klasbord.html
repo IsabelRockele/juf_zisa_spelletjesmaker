@@ -179,11 +179,11 @@ Lena
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="openSmartboardVenster()" title="Open het bord in smartboard-weergave in een nieuw venster">📺 Smartboard</button>
 <button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="timerToggleBtn">⏱️ Timer</button>
-<button id="smartboard-exit-btn" onclick="handleExitBtn()" title="Afsluiten" class="btn btn-ghost btn-sm" style="display:none;">✕ Afsluiten</button>
 </div>
 </div>
 
-
+<!-- Discreet slotje — altijd zichtbaar, ook in smartboard/ipad-modus -->
+<button id="smartboard-exit-btn" onclick="handleExitBtn()" title="Leerkracht" style="position:fixed;bottom:12px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.5);font-size:15px;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;transition:all .2s;">🔒</button>
 
 <!-- Exit-modal -->
 <div class="overlay hidden" id="smartboard-exit-overlay">
@@ -200,18 +200,9 @@ Lena
 </div>
 <div id="board-scroll">
 <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Klik op ⚙️ Beheer aanpassen om te starten</p></div>
-<div class="hidden" id="board-inner">
-<div id="task-header"><div class="header-corner"><span>Leerling</span></div></div>
-<div id="legend">
-<div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
-<div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
-<div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
-<span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
-</div>
-<div id="pupil-rows"></div>
-<div id="progress-bar-wrap"><div id="progress-track"><div id="progress-fill"></div></div><span id="progress-label">0/0 klaar</span></div>
-</div>
-</div>
+<div class="hidden" id="board-inner"></div>
+      </div>
+    </div>
 </div>
 </div>
 <div class="hidden" id="smiley-popup">
@@ -559,6 +550,4 @@ body{padding-top:44px!important;}
 
   <script src="../device-id.js"></script>
   <script src="../guard.js"></script>
-<button id="scroll-left-arrow" onclick="scrollBoardLeft()" title="Meer taken links" style="position:fixed;bottom:24px;right:80px;z-index:50;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;">&lsaquo;</button>
-<button id="scroll-right-arrow" onclick="scrollBoardRight()" title="Meer taken rechts" style="position:fixed;bottom:24px;right:24px;z-index:50;width:48px;height:48px;border-radius:50%;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 18px rgba(99,102,241,.45);display:none;align-items:center;justify-content:center;">&rsaquo;</button>
 </body></html>
