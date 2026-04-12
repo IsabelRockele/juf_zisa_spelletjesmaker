@@ -44,8 +44,30 @@ function displayName(p){
   return p.voornaam + (p.achternaam ? ' '+p.achternaam : '');
 }
 
+const DEFAULT_TASKS = [
+  {id:'lezen',label:'Lezen',icon:'📖'},
+  {id:'rekenen',label:'Rekenen',icon:'🔢'},
+  {id:'schrijven',label:'Schrijven',icon:'✏️'},
+  {id:'spelling',label:'Spelling',icon:'🔤'},
+  {id:'tekenen',label:'Tekenen',icon:'🎨'},
+  {id:'computer',label:'Computer',icon:'💻'},
+  {id:'knippen',label:'Knippen',icon:'✂️'},
+  {id:'muziek',label:'Muziek',icon:'🎵'},
+  {id:'werkblad',label:'Werkblad',icon:'📄'},
+  {id:'project',label:'Project',icon:'🗂️'},
+  {id:'werkboek',label:'Werkboek',icon:'📒'},
+  {id:'meetkunde',label:'Meetkunde',icon:'📐'},
+  {id:'winkeltje',label:'Winkeltje',icon:'🛒'},
+  {id:'getallen',label:'Getallen',icon:'🔣'},
+  {id:'metendrekenen',label:'Metend rekenen',icon:'📏'}
+];
+
 function allBaseTasks(){
-  return [...(state.customTasks||[])];
+  const overrides = state.taskLabelOverrides || {};
+  const defaults = DEFAULT_TASKS.map(t =>
+    overrides[t.id] ? {...t, label: overrides[t.id]} : t
+  );
+  return [...defaults, ...(state.customTasks||[])];
 }
 
 function classActiveTasks(){
@@ -174,12 +196,18 @@ function closeBoard(){
 }
 
 // ===== INIT =====
+function showKindApp(){
+  const loading = document.getElementById('loading');
+  const app = document.getElementById('app');
+  if(loading) loading.style.display = 'none';
+  if(app) app.style.display = 'block';
+}
+
 window.addEventListener('load', ()=>{
   loadState();
-  setTimeout(renderBoard,300);
 
-  const btn = document.getElementById('exit-btn');
-  if(btn){
-    btn.onclick = closeBoard;
-  }
+  setTimeout(()=>{
+    renderBoard();
+    showKindApp();
+  }, 300);
 });
