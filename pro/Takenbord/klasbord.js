@@ -64,14 +64,20 @@ function applyStateData(s){
   if(!state.boardSize) state.boardSize='normal';
 }
 
+var _sharedUnsubscribe = null; // realtime listener opruimen bij nieuw bord
+
 function loadState(){
+  // Stop eventuele vorige realtime listener
+  if(_sharedUnsubscribe){ try{ _sharedUnsubscribe(); }catch(e){} _sharedUnsubscribe=null; }
+
   // Probeer localStorage eerst (snel, synchron)
   try{
     const r=localStorage.getItem(STORAGE_KEY);
     if(r) applyStateData(JSON.parse(r));
   }catch(e){}
+
   // Daarna Firestore laden en UI updaten als er nieuwere data is
-   if(window.fbLoad){
+  if(window.fbLoad){
     window.fbLoad(STORAGE_KEY).then(function(fbData){
       if(fbData){
         applyStateData(fbData);
@@ -80,6 +86,24 @@ function loadState(){
         renderShell();
       }
     }).catch(console.warn);
+  }
+
+  // Realtime listener op gedeeld bord: vangt statuswijzigingen van kinderen op
+  if(window.fbListenShared){
+    _sharedUnsubscribe = window.fbListenShared(STORAGE_KEY, function(sharedData){
+      if(!sharedData) return;
+      // Enkel progress en smileys overnemen van kinderen, niet de structuur (taken/namen)
+      if(sharedData.progress){
+        // Merge per leerling: kind-wijzigingen overschrijven enkel de progress-entries
+        const merged = Object.assign({}, state.progress);
+        Object.keys(sharedData.progress).forEach(function(pid){
+          merged[pid] = Object.assign({}, merged[pid]||{}, sharedData.progress[pid]);
+        });
+        state.progress = merged;
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+        renderBoard();
+      }
+    });
   }
 }
 function saveState(){
