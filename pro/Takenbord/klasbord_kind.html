@@ -58,7 +58,7 @@
       z-index: 40 !important;
       background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
     }
-    #legend { min-width: max-content !important; display: flex !important; align-items: center !important; background: #fff !important; border-bottom: 2px solid #e0e7ff !important; margin: 0 -14px 8px !important; }
+    #legend { min-width: max-content !important; display: flex !important; align-items: center !important; background: #fff !important; border-bottom: 2px solid #e0e7ff !important; margin: 0 -14px 8px !important; padding: 0 !important; }
     #legend-name { position: sticky !important; left: 0 !important; z-index: 36 !important; background: #fff !important; width: var(--col-name) !important; min-width: var(--col-name) !important; flex-shrink: 0 !important; align-self: stretch !important; }
     #legend-items { display: flex !important; gap: 14px !important; align-items: center !important; padding: 7px 14px !important; flex-wrap: wrap !important; }
 
@@ -118,8 +118,10 @@
 
     /* ── Naamkolom: vult volledige rijhoogte, dekt scrollende content af ── */
     #pupil-rows { gap: 0 !important; }
+    /* Rijen: duidelijk afgebakend vak */
     .pupil-board-row { margin-bottom: 6px !important; align-items: stretch !important; }
-    .pupil-name-cell { background: #fff !important; z-index: 20 !important; align-items: center !important; }
+    /* Naamcel: sticky, eigen achtergrond — GEEN box-shadow hack */
+    .pupil-name-cell { background: #fff !important; z-index: 20 !important; align-items: center !important; border-radius: 0 !important; }
     .pupil-board-row.complete .pupil-name-cell { background: #f0fdf4 !important; }
 
     /* ── Verberg leerkracht-elementen ── */
