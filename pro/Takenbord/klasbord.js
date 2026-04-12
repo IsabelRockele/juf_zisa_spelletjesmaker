@@ -71,13 +71,12 @@ function loadState(){
     if(r) applyStateData(JSON.parse(r));
   }catch(e){}
   // Daarna Firestore laden en UI updaten als er nieuwere data is
-  if(window.fbLoad){
+   if(window.fbLoad){
     window.fbLoad(STORAGE_KEY).then(function(fbData){
       if(fbData){
         applyStateData(fbData);
-        // Sync terug naar localStorage
         try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
-        // Herrender
+        if(window.fbSaveShared) window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
         renderShell();
       }
     }).catch(console.warn);
@@ -88,6 +87,7 @@ function saveState(){
   try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
   // Firestore opslaan
   if(window.fbSave) window.fbSave(STORAGE_KEY, state).catch(console.warn);
+  if(window.fbSaveShared) window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
   // Timestamp bijwerken in borden-index
   try{
     const params = new URLSearchParams(window.location.search);
