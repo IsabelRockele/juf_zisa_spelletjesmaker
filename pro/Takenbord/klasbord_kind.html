@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Klasbord kindmodus — Juf Zisa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="klasbord.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-klasbord.js"></script>
+  <style>
+    body { padding-top: 0 !important; background:#f8fafc; }
+    .kind-topbar{
+      position:sticky; top:0; z-index:20;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+      padding:12px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
+      box-shadow:0 4px 14px rgba(0,0,0,.04);
+    }
+    .kind-title{font-size:18px;font-weight:800;color:#1e1b4b;}
+    .kind-sub{font-size:12px;color:#64748b;font-weight:700;}
+    .kind-close-btn{
+      border:none; background:#ef4444; color:#fff; border-radius:12px;
+      padding:10px 14px; font-size:14px; font-weight:800; cursor:pointer;
+      font-family:inherit;
+    }
+    .kind-closed{
+      min-height:100vh; display:none; align-items:center; justify-content:center;
+      padding:24px; text-align:center; background:linear-gradient(160deg,#f8fafc 0%,#eef2ff 100%);
+    }
+    .kind-closed.show{display:flex;}
+    .kind-closed-card{
+      background:#fff; border-radius:24px; padding:28px 24px; max-width:420px; width:100%;
+      box-shadow:0 12px 40px rgba(0,0,0,.08);
+    }
+    .kind-closed-emoji{font-size:44px; margin-bottom:10px;}
+    .kind-closed-title{font-size:24px; font-weight:800; color:#1e1b4b; margin-bottom:8px;}
+    .kind-closed-text{font-size:15px; color:#64748b; line-height:1.6;}
+    .loading-wrap{
+      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .loading-card{
+      background:#fff; border-radius:24px; padding:28px 24px; max-width:420px; width:100%;
+      box-shadow:0 12px 40px rgba(0,0,0,.08); text-align:center;
+    }
+    .loading-card .emoji{font-size:42px;margin-bottom:10px;}
+    .loading-card .title{font-size:22px;font-weight:800;color:#1e1b4b;}
+    .loading-card .sub{font-size:14px;color:#64748b;margin-top:6px;line-height:1.6;}
+    #app{display:none;}
+    .teacher-only{display:none !important;}
+    #smartboard-exit-btn{display:none !important;}
+    #topbar,#settings-wrap,.pro-header,#help-overlay,#help-beheer-overlay,#backup-modal,
+    #export-overlay,#import-overlay,#pdf-overlay,#notes-overlay,#pupil-tasks-overlay,
+    #rename-task-overlay,#confirm-overlay,#celebration,#backup-reminder{display:none !important;}
+    .board-bar-right{gap:8px;}
+    #timerToggleBtn{display:none !important;}
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading-wrap">
+    <div class="loading-card">
+      <div class="emoji">📋</div>
+      <div class="title">Kindbord laden…</div>
+      <div class="sub">Even geduld. Het bord wordt voorbereid.</div>
+    </div>
+  </div>
+
+  <div id="app">
+    <div class="kind-topbar">
+      <div>
+        <div id="board-naam-label" class="kind-title">Klasbord</div>
+        <div class="kind-sub"><span id="board-progress-text">0/0 klaar</span></div>
+      </div>
+      <button class="kind-close-btn" onclick="closeKindScreen()">✕ Afsluiten</button>
+    </div>
+
+    <div id="board-wrap" class="visible">
+      <div id="board-bar">
+        <div class="board-bar-left">
+          <span class="board-progress-text" id="board-progress-text-inline">0/0 klaar</span>
+          <button class="btn btn-undo hidden" id="btn-undo" onclick="undoLastAction()" title="Ongedaan maken">↩ Ongedaan</button>
+        </div>
+        <div class="board-bar-right"></div>
+      </div>
+
+      <div id="board-scroll">
+        <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Nog geen bordgegevens gevonden</p></div>
+        <div class="hidden" id="board-inner">
+          <div id="task-header"><div class="header-corner"><span>Leerling</span></div></div>
+          <div id="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
+            <span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
+          </div>
+          <div id="pupil-rows"></div>
+          <div id="progress-bar-wrap"><div id="progress-track"><div id="progress-fill"></div></div><span id="progress-label">0/0 klaar</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hidden" id="smiley-popup">
+    <h3 id="sp-title">Hoe vond je het?</h3>
+    <p>Kies een smiley die past bij hoe de taak ging.</p>
+    <div class="smiley-choices">
+      <div class="smiley-choice" onclick="setSmiley(1)"><span class="sc-icon">😊</span><span class="sc-label">Super!</span></div>
+      <div class="smiley-choice" onclick="setSmiley(2)"><span class="sc-icon">🙂</span><span class="sc-label">Ging goed</span></div>
+      <div class="smiley-choice" onclick="setSmiley(3)"><span class="sc-icon">😐</span><span class="sc-label">Beetje moeilijk</span></div>
+      <div class="smiley-choice" onclick="setSmiley(4)"><span class="sc-icon">😟</span><span class="sc-label">Te moeilijk</span></div>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="closeSmileyPopup()" style="width:100%">Overslaan</button>
+  </div>
+
+  <div id="closed-screen" class="kind-closed">
+    <div class="kind-closed-card">
+      <div class="kind-closed-emoji">✅</div>
+      <div class="kind-closed-title">Klaar voor vandaag</div>
+      <div class="kind-closed-text">Het bord is afgesloten op deze iPad.<br>Scan later opnieuw om verder te werken.</div>
+    </div>
+  </div>
+
+  <script src="klasbord_kind.js"></script>
+</body>
+</html>
