@@ -208,7 +208,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 #pupil-rows { display:flex; flex-direction:column; gap:0; }
 .pupil-board-row { display:flex; align-items:center; gap:var(--gap); background:#fff; border-radius:14px; border:2px solid #e0e7ff; padding:var(--row-pad,4px) 0; transition:all .3s; box-shadow:0 2px 8px rgba(99,102,241,.08); margin-bottom:6px; }
 .pupil-board-row.complete { background:linear-gradient(90deg,#f0fdf4,#fff); border-color:#86efac; box-shadow:0 2px 8px rgba(22,163,74,.15); }
-.pupil-name-cell { position:sticky; left:0; z-index:25; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; box-shadow: 200px 0 0 200px #fff; clip-path: inset(0 -200px 0 -200px); }
+.pupil-name-cell { position:sticky; left:0; z-index:25; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; box-shadow: -8px 0 0 8px #fff, 0 -8px 0 0 #fff, 0 8px 0 0 #fff; }
 .pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
 .pupil-board-row.complete .pupil-name-cell::before { background:#f0fdf4; }
 .pupil-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:#c7d2fe; transition:all .3s; }
