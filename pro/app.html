@@ -921,7 +921,7 @@
     </a>
     -->
 
-    <a class="img-link" href="./opvolging_huistaken/opvolging_huistaken.html">
+    <a class="img-link" href="#" onclick="navigeerMetConsent(event, './opvolging_huistaken/opvolging_huistaken.html')">
       <img alt="Opvolging huistaken" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/huistaken.webp" loading="lazy"/>
       <span class="img-label">Opvolging huistaken</span>
     </a>
@@ -968,6 +968,31 @@
       }
     });
   });
+</script>
+
+<script type="module">
+  import { checkAndShowConsent } from "./consent.js";
+
+  // Navigeer naar een Klasmanagement-tool maar check eerst consent
+  window.navigeerMetConsent = async function(event, url) {
+    event.preventDefault();
+    if (!window._zisaUser) {
+      // Gebruiker nog niet geladen — gewoon navigeren
+      location.href = url;
+      return;
+    }
+    // Check consent — als al gegeven: meteen navigeren
+    // Als niet gegeven: popup tonen en na akkoord navigeren
+    window._navigeerNaConsent = url;
+    await checkAndShowConsent(window._zisaUser);
+    // Als consent al gegeven was, navigeer dan meteen
+    if (!document.getElementById("zisa-consent-overlay")) {
+      location.href = url;
+    } else {
+      // Wacht op akkoord — consent.js navigeert daarna
+      window._navigeerNaConsent = url;
+    }
+  };
 </script>
 
 <script src="./device-id.js"></script>
