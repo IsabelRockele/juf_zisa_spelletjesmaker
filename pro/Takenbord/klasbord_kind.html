@@ -11,50 +11,130 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-klasbord.js"></script>
   <style>
-    body { padding-top: 0 !important; background:#f8fafc; }
-    .kind-topbar{
-      position:sticky; top:0; z-index:20;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:12px 16px; background:#fff; border-bottom:1px solid #e2e8f0;
-      box-shadow:0 4px 14px rgba(0,0,0,.04);
+    /* ── Reset klasbord.css viewport-locks voor kindmodus ── */
+    html, body {
+      overflow: auto !important;   /* klasbord.css zet overflow:hidden — hier resetten */
+      height: auto !important;
+      background: #f8fafc;
+      padding-top: 0 !important;
     }
-    .kind-title{font-size:18px;font-weight:800;color:#1e1b4b;}
-    .kind-sub{font-size:12px;color:#64748b;font-weight:700;}
-    .kind-close-btn{
-      border:none; background:#ef4444; color:#fff; border-radius:12px;
-      padding:10px 14px; font-size:14px; font-weight:800; cursor:pointer;
-      font-family:inherit;
+    /* #app mag niet meer height:100vh + overflow:hidden zijn */
+    #app {
+      display: none;
+      height: auto !important;
+      overflow: visible !important;
+      flex-direction: column;
     }
-    .kind-closed{
-      min-height:100vh; display:none; align-items:center; justify-content:center;
-      padding:24px; text-align:center; background:linear-gradient(160deg,#f8fafc 0%,#eef2ff 100%);
+    /* board-wrap vult niet meer de resterende vh, maar groeit mee met inhoud */
+    #board-wrap {
+      overflow: visible !important;
+      flex: none !important;
+      display: block !important;  /* was flex — kindmodus heeft geen flex-kolom layout nodig */
     }
-    .kind-closed.show{display:flex;}
-    .kind-closed-card{
-      background:#fff; border-radius:24px; padding:28px 24px; max-width:420px; width:100%;
-      box-shadow:0 12px 40px rgba(0,0,0,.08);
+    /* board-scroll: horizontaal scrollen, verticaal vrij meegroeien */
+    #board-scroll {
+      overflow-x: auto !important;
+      overflow-y: visible !important;
+      flex: none !important;
+      padding: 0 14px 100px !important; /* extra padding-bottom voor scroll-pijl */
     }
-    .kind-closed-emoji{font-size:44px; margin-bottom:10px;}
-    .kind-closed-title{font-size:24px; font-weight:800; color:#1e1b4b; margin-bottom:8px;}
-    .kind-closed-text{font-size:15px; color:#64748b; line-height:1.6;}
-    .loading-wrap{
-      min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+    /* board-inner groeit mee — JS stelt min-width in voor horizontaal scrollen */
+    #board-inner {
+      display: block;
     }
-    .loading-card{
-      background:#fff; border-radius:24px; padding:28px 24px; max-width:420px; width:100%;
-      box-shadow:0 12px 40px rgba(0,0,0,.08); text-align:center;
+
+    /* ── Sticky namen: stevige achtergrond zodat content er NIET doorheen schijnt ── */
+    .pupil-name-cell {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 25 !important;
+      background: #fff !important;
+      /* Schaduwtje rechts zodat de overgang zichtbaar is */
+      box-shadow: 3px 0 8px rgba(0,0,0,.08) !important;
     }
-    .loading-card .emoji{font-size:42px;margin-bottom:10px;}
-    .loading-card .title{font-size:22px;font-weight:800;color:#1e1b4b;}
-    .loading-card .sub{font-size:14px;color:#64748b;margin-top:6px;line-height:1.6;}
-    #app{display:none;}
-    .teacher-only{display:none !important;}
-    #smartboard-exit-btn{display:none !important;}
-    #topbar,#settings-wrap,.pro-header,#help-overlay,#help-beheer-overlay,#backup-modal,
-    #export-overlay,#import-overlay,#pdf-overlay,#notes-overlay,#pupil-tasks-overlay,
-    #rename-task-overlay,#confirm-overlay,#celebration,#backup-reminder{display:none !important;}
-    .board-bar-right{gap:8px;}
-    #timerToggleBtn{display:none !important;}
+    .pupil-board-row.complete .pupil-name-cell {
+      background: #f0fdf4 !important;
+    }
+    /* Task-header corner ook sticky en ondoorzichtig */
+    .header-corner {
+      position: sticky !important;
+      left: 0 !important;
+      z-index: 40 !important;
+      background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
+    }
+    /* Task-header zelf sticky aan de bovenkant */
+    #task-header {
+      position: sticky !important;
+      top: 58px !important; /* hoogte kind-topbar */
+      z-index: 35 !important;
+      background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
+    }
+    /* Legend niet sticky in kindmodus, gewoon inline */
+    #legend {
+      position: static !important;
+      margin: 0 0 8px !important;
+      padding-left: 14px !important;
+    }
+
+    /* ── Kind-topbar ── */
+    .kind-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 16px;
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(0,0,0,.06);
+    }
+    .kind-title { font-size:18px; font-weight:800; color:#1e1b4b; }
+    .kind-sub   { font-size:12px; color:#64748b; font-weight:700; }
+    .kind-close-btn {
+      border: none; background: #ef4444; color: #fff; border-radius: 12px;
+      padding: 10px 14px; font-size: 14px; font-weight: 800; cursor: pointer;
+      font-family: inherit; white-space: nowrap;
+    }
+
+    /* ── Afsluit-scherm ── */
+    .kind-closed {
+      min-height: 100vh; display: none; align-items: center; justify-content: center;
+      padding: 24px; text-align: center;
+      background: linear-gradient(160deg,#f8fafc 0%,#eef2ff 100%);
+    }
+    .kind-closed.show { display: flex; }
+    .kind-closed-card {
+      background: #fff; border-radius: 24px; padding: 28px 24px; max-width: 420px; width: 100%;
+      box-shadow: 0 12px 40px rgba(0,0,0,.08);
+    }
+    .kind-closed-emoji { font-size:44px; margin-bottom:10px; }
+    .kind-closed-title { font-size:24px; font-weight:800; color:#1e1b4b; margin-bottom:8px; }
+    .kind-closed-text  { font-size:15px; color:#64748b; line-height:1.6; }
+
+    /* ── Laadscherm ── */
+    .loading-wrap {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+    .loading-card {
+      background: #fff; border-radius: 24px; padding: 28px 24px; max-width: 420px; width: 100%;
+      box-shadow: 0 12px 40px rgba(0,0,0,.08); text-align: center;
+    }
+    .loading-card .emoji { font-size:42px; margin-bottom:10px; }
+    .loading-card .title { font-size:22px; font-weight:800; color:#1e1b4b; }
+    .loading-card .sub   { font-size:14px; color:#64748b; margin-top:6px; line-height:1.6; }
+
+    /* ── Verberg leerkracht-elementen ── */
+    .teacher-only { display:none !important; }
+    #smartboard-exit-btn { display:none !important; }
+    #topbar, #settings-wrap, .pro-header, #help-overlay, #help-beheer-overlay,
+    #backup-modal, #export-overlay, #import-overlay, #pdf-overlay, #notes-overlay,
+    #pupil-tasks-overlay, #rename-task-overlay, #confirm-overlay,
+    #celebration, #backup-reminder { display:none !important; }
+    .board-bar-right { gap:8px; }
+    #timerToggleBtn { display:none !important; }
+    #btn-undo { display:none !important; }
   </style>
 </head>
 <body>
@@ -121,7 +201,7 @@
     </div>
   </div>
 
-  <!-- Scroll-pijl rechts: verschijnt automatisch als er meer taken zijn dan op scherm passen -->
+  <!-- Scroll-pijl: verschijnt automatisch als er taken buiten beeld zijn -->
   <button id="scroll-right-arrow" class="hidden" onclick="scrollRight()" title="Meer taken →" aria-label="Scroll naar rechts">›</button>
 
   <script src="klasbord_kind.js"></script>
