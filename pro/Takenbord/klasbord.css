@@ -461,7 +461,7 @@ body.smartboard #board-bar { padding:6px 14px; }
 body.ipad-modus #timerToggleBtn { display:none !important; }
 body.ipad-modus #timer-popup { display:none !important; }
 body.ipad-modus #smartboard-exit-btn,
-body.smartboard #smartboard-exit-btn { 
+body.smartboard #smartboard-exit-btn {
   display:inline-flex !important;
 }
 
