@@ -434,6 +434,72 @@ function renderShell(){
   else renderBoard();
 }
 
+
+// ── BIBLIOTHEEK ────────────────────────────────────────────────────────────
+const BIBLIOTHEEK_KEY = 'jufzisa_klasbord_bibliotheek';
+
+function openSlaOpAlsBibliotheek(){
+  document.getElementById('bibliotheek-opslaan-modal').classList.remove('hidden');
+}
+
+function openLaadUitBibliotheek(){
+  const bib = JSON.parse(localStorage.getItem(BIBLIOTHEEK_KEY)||'null');
+  const geenData = document.getElementById('bib-geen-data');
+  const opties = document.getElementById('bib-laden-opties');
+  const btn = document.getElementById('bib-laden-btn');
+  if(!bib){
+    if(geenData) geenData.style.display = 'block';
+    if(opties) opties.style.display = 'none';
+    if(btn) btn.style.display = 'none';
+  } else {
+    if(geenData) geenData.style.display = 'none';
+    if(opties) opties.style.display = 'flex';
+    if(btn) btn.style.display = 'inline-flex';
+  }
+  document.getElementById('bibliotheek-laden-modal').classList.remove('hidden');
+}
+
+function slaOpAlsBibliotheek(){
+  const bib = {};
+  if(document.getElementById('bib-save-namen').checked){
+    bib.pupils = state.pupils;
+    bib.pupilPhotos = state.pupilPhotos||{};
+    bib.pupilTaskOverrides = state.pupilTaskOverrides||{};
+  }
+  if(document.getElementById('bib-save-taken').checked){
+    bib.customTasks = state.customTasks||[];
+    bib.taskLabelOverrides = state.taskLabelOverrides||{};
+  }
+  if(document.getElementById('bib-save-iconen').checked){
+    bib.customIcons = state.customIcons||{};
+  }
+  bib.savedAt = Date.now();
+  localStorage.setItem(BIBLIOTHEEK_KEY, JSON.stringify(bib));
+  document.getElementById('bibliotheek-opslaan-modal').classList.add('hidden');
+  showToast('📚 Bibliotheek opgeslagen!');
+}
+
+function laadUitBibliotheek(){
+  const bib = JSON.parse(localStorage.getItem(BIBLIOTHEEK_KEY)||'null');
+  if(!bib){ showToast('Geen bibliotheek gevonden.'); return; }
+  if(document.getElementById('bib-load-namen').checked && bib.pupils){
+    state.pupils = bib.pupils;
+    if(bib.pupilPhotos) state.pupilPhotos = {...(state.pupilPhotos||{}), ...bib.pupilPhotos};
+    if(bib.pupilTaskOverrides) state.pupilTaskOverrides = {...(state.pupilTaskOverrides||{}), ...bib.pupilTaskOverrides};
+  }
+  if(document.getElementById('bib-load-taken').checked){
+    if(bib.customTasks) state.customTasks = bib.customTasks;
+    if(bib.taskLabelOverrides) state.taskLabelOverrides = {...(state.taskLabelOverrides||{}), ...bib.taskLabelOverrides};
+  }
+  if(document.getElementById('bib-load-iconen').checked && bib.customIcons){
+    state.customIcons = {...(state.customIcons||{}), ...bib.customIcons};
+  }
+  saveState();
+  document.getElementById('bibliotheek-laden-modal').classList.add('hidden');
+  renderShell();
+  showToast('📥 Bibliotheek geladen! Stel nu je bord samen via Beheer aanpassen.');
+}
+
 function openQrModal(){
   const modal = document.getElementById('qr-modal');
   if(!modal) return;
