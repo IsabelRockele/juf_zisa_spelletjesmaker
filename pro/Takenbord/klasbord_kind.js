@@ -218,12 +218,22 @@ function renderBoard(){
     return;
   }
 
-  // Minimale breedte op alle drie elementen zodat overflow-x:auto werkt
-  const COL_NAME = 220, COL_TASK = 120, GAP = 8;
-  const minWpx = (COL_NAME + GAP + allTasks.length * (COL_TASK + GAP) + 32) + 'px';
-  document.getElementById('board-inner').style.minWidth = minWpx;
-  document.getElementById('task-header').style.minWidth = minWpx;
-  document.getElementById('legend').style.minWidth = minWpx;
+  // top-fixed sync: horizontaal scrollen mee
+  const bs = document.getElementById('board-scroll');
+  const tf = document.getElementById('top-fixed');
+  if(bs && tf && !bs._syncBound){
+    bs._syncBound = true;
+    bs.addEventListener('scroll', () => { tf.scrollLeft = bs.scrollLeft; }, {passive:true});
+  }
+
+  // Minimale breedte: header/legend krijgen padding mee, rijen niet
+  const COL_NAME = 220, COL_TASK = 120, PAD = 14;
+  const minW = COL_NAME + allTasks.length * COL_TASK;
+  const minWFixed = (minW + PAD * 2) + 'px';
+  document.getElementById('board-inner').style.minWidth = minW + 'px';
+  document.getElementById('pupil-rows').style.minWidth = minW + 'px';
+  document.getElementById('task-header').style.minWidth = minWFixed;
+  document.getElementById('legend').style.minWidth = minWFixed;
 
   renderTaskHeader(allTasks);
   renderPupilRows(allTasks);
