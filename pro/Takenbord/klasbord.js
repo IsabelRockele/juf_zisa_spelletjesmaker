@@ -978,29 +978,27 @@ function renderBoardTable(allTasks){
     taskHeader.appendChild(cell);
   });
 
-  // Zorg dat header in board-scroll zit (niet in inner)
+  // Legenda en header zitten in top-fixed (HTML) — alleen minWidth en sync instellen
   const boardScroll=document.getElementById('board-scroll');
-  if(taskHeader.parentNode!==boardScroll){
-    boardScroll.insertBefore(taskHeader,inner);
+  const topFixed=document.getElementById('top-fixed');
+  const legend=document.getElementById('legend');
+  const COL_NAME_PX=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220');
+  const COL_TASK_PX=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120');
+  const PAD_PX=14;
+  const minWFixed=(COL_NAME_PX+allTasks.length*COL_TASK_PX+PAD_PX*2)+'px';
+  const minWRows=(COL_NAME_PX+allTasks.length*COL_TASK_PX)+'px';
+
+  if(taskHeader) taskHeader.style.minWidth=minWFixed;
+  if(legend){ legend.style.minWidth=minWFixed; legend.classList.remove('hidden'); }
+
+  // Scroll sync: top-fixed horizontaal mee met board-scroll
+  if(boardScroll&&topFixed&&!boardScroll._syncBound){
+    boardScroll._syncBound=true;
+    boardScroll.addEventListener('scroll',()=>{topFixed.scrollLeft=boardScroll.scrollLeft;},{passive:true});
   }
 
-  // ── LEGENDA ───────────────────────────────────────────────────────────
-  let legend=document.getElementById('legend');
-  if(!legend){
-    legend=document.createElement('div');
-    legend.id='legend';
-    legend.innerHTML=`<div id="legend-name"></div><div id="legend-items">
-      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
-      <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
-      <span style="font-size:11px;color:#818cf8;font-weight:600;">Klik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
-    </div>`;
-    boardScroll.insertBefore(legend,inner);
-  }
-  legend.style.minWidth=minW+'px';
-
-  // ── LEERLINGENRIJEN (flex) ────────────────────────────────────────────
-  inner.style.minWidth=minW+'px';
+  // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
+  inner.style.minWidth=minWRows;
 
   // Zorg voor pupil-rows container
   let pupilRows=document.getElementById('pupil-rows');
