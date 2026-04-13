@@ -963,7 +963,8 @@ Noor Janssens"></textarea>
   <button class="teacher-btn" onclick="toggleTimer()" type="button" id="timerToggleBtn">⏱️ Timer</button>
 </div>
 
-<!-- Discreet slotje — altijd zichtbaar, ook in smartboard-modus -->
+<!-- ⚙️ Menu knop voor smartboard modus -->
+<button id="smartboard-exit-btn" onclick="document.getElementById('kind-exit-overlay').classList.add('show')" style="display:none;position:fixed;bottom:16px;right:16px;z-index:7000;border:none;background:rgba(99,102,241,.15);color:#6366f1;font-size:13px;font-weight:800;border-radius:12px;padding:8px 16px;cursor:pointer;font-family:inherit;">⚙️ Menu</button>
 
 
 <!-- Foto-hint: inline boven het namenraster, verdwijnt na sluiten -->
@@ -1606,8 +1607,8 @@ function openSmileyPopup(){
   document.getElementById('smileyOverlay').classList.add('show');
 }
 function closeSmileyPopup(){
-  pendingTaskId = null;
   document.getElementById('smileyOverlay').classList.remove('show');
+  setTimeout(function(){ pendingTaskId = null; }, 100);
 }
 
 function statusText(status){
@@ -2040,20 +2041,16 @@ const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipa
 function applySmartboardMode(){
   if(!isSmartboard && !isIpad) return;
   document.body.classList.add('smartboard');
+  var btn = document.getElementById('smartboard-exit-btn');
   if(isIpad){
     document.body.classList.add('ipad-modus');
-    var btn = document.getElementById('smartboard-exit-btn');
-    if(btn){
-      btn.textContent = '✕ Sluiten';
-      btn.style.cssText = 'position:fixed;bottom:16px;right:16px;z-index:7000;border:none;background:rgba(99,102,241,.15);color:#6366f1;font-size:14px;font-weight:800;border-radius:14px;padding:8px 16px;cursor:pointer;display:block;';
-      btn.onclick = function(){
-        if(confirm('Wil je dit scherm sluiten?')) window.location.href = 'welkomstbord.html';
-      };
-    }
+    if(btn) btn.style.display = 'block';
   } else {
-    var btn = document.getElementById('smartboard-exit-btn');
     if(btn) btn.style.display = 'block';
   }
+  // Pijltjes na laden tonen
+  setTimeout(updateKindScrollArrows, 500);
+  setTimeout(updateKindScrollArrows, 1500);
 }
 
 function exitKindSmartboard(dest){
@@ -2061,11 +2058,10 @@ function exitKindSmartboard(dest){
   if(dest === 'welkom'){
     window.location.href = 'welkomstbord.html';
   } else {
-    // Verwijder smartboard-modus
+    // Verwijder smartboard-modus en ga naar beheer
     document.body.classList.remove('smartboard');
     var btn = document.getElementById('smartboard-exit-btn');
     if(btn) btn.style.display = 'none';
-    // Ga naar setup
     goBackToSetup();
   }
 }
@@ -2287,6 +2283,23 @@ function generateKindPdf(){
   document.getElementById('kind-pdf-overlay').classList.remove('show');
 }
 
+/* Swipe support */
+(function(){
+  var startX = 0, startY = 0;
+  document.addEventListener('touchstart', function(e){
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - startX;
+    var dy = e.changedTouches[0].clientY - startY;
+    if(Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    var tl = document.getElementById('taskList');
+    if(tl) tl.scrollBy({left: dx < 0 ? 200 : -200, behavior:'smooth'});
+    setTimeout(updateKindScrollArrows, 300);
+  }, {passive:true});
+})();
+
 /* Event listeners */
 document.getElementById('backBtn').addEventListener('click', goBack);
 document.getElementById('popupClose').addEventListener('click', closeSmileyPopup);
@@ -2325,6 +2338,13 @@ function initKindbordAfterLoad(){
   renderSetupAddedList();
   setSetupOrder(state.nameOrder || 'voornaam');
   applySmartboardMode();
+// Verberg scroll-pijltjes op touch-apparaten
+if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+  var arL = document.getElementById('kind-scroll-left');
+  var arR = document.getElementById('kind-scroll-right');
+  if(arL) arL.style.setProperty('display','none','important');
+  if(arR) arR.style.setProperty('display','none','important');
+}
 
   const setupLastnameCheckbox = document.getElementById('setup-show-lastname');
   if(setupLastnameCheckbox){
@@ -2728,11 +2748,11 @@ function timerDone(){
 <!-- EXIT SMARTBOARD MODAL -->
 <div class="overlay" id="kind-exit-overlay">
 <div class="popup" style="text-align:center;max-width:340px;width:100%;">
-<div style="font-size:36px;margin-bottom:8px;">🔒</div>
+<div style="font-size:36px;margin-bottom:8px;">⚙️</div>
 <h3 style="font-size:20px;margin-bottom:8px;">Leerkracht-menu</h3>
 <p style="font-size:14px;color:#6b7280;margin-bottom:16px;">Kies wat je wil doen.</p>
 <div style="display:flex;flex-direction:column;gap:8px;">
-<button type="button" class="primary-big-btn" onclick="exitKindSmartboard('instellingen')" style="font-size:16px;padding:12px;">⚙️ Terug naar instellingen</button>
+<button type="button" class="primary-big-btn" onclick="exitKindSmartboard('beheer')" style="font-size:16px;padding:12px;">⚙️ Terug naar beheer</button>
 <button type="button" class="secondary-big-btn" onclick="exitKindSmartboard('welkom')" style="font-size:16px;padding:12px;">🏠 Terug naar welkomstscherm</button>
 <button type="button" class="close-btn" onclick="document.getElementById('kind-exit-overlay').classList.remove('show')" style="font-size:15px;padding:10px;">Annuleren (blijf op bord)</button>
 </div>
