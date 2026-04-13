@@ -435,69 +435,71 @@ function renderShell(){
 }
 
 
-// ── BIBLIOTHEEK ────────────────────────────────────────────────────────────
-const BIBLIOTHEEK_KEY = 'jufzisa_klasbord_bibliotheek';
-
-function openSlaOpAlsBibliotheek(){
-  document.getElementById('bibliotheek-opslaan-modal').classList.remove('hidden');
-}
-
+// ── BIBLIOTHEEK (overnemen uit ander bord) ───────────────────────────────
 function openLaadUitBibliotheek(){
-  const bib = JSON.parse(localStorage.getItem(BIBLIOTHEEK_KEY)||'null');
-  const geenData = document.getElementById('bib-geen-data');
-  const opties = document.getElementById('bib-laden-opties');
-  const btn = document.getElementById('bib-laden-btn');
-  if(!bib){
-    if(geenData) geenData.style.display = 'block';
-    if(opties) opties.style.display = 'none';
-    if(btn) btn.style.display = 'none';
-  } else {
-    if(geenData) geenData.style.display = 'none';
-    if(opties) opties.style.display = 'flex';
-    if(btn) btn.style.display = 'inline-flex';
+  const select = document.getElementById('bib-bronbord');
+  if(!select) return;
+  select.innerHTML = '<option value="">Kies een bord...</option>';
+  try {
+    const all = JSON.parse(localStorage.getItem('borden_v1')||'{}');
+    const huidigBordId = new URLSearchParams(window.location.search).get('bordid');
+    let n = 0;
+    Object.keys(all).forEach(function(type){
+      (all[type]||[]).forEach(function(bord){
+        if(bord.id === huidigBordId) return;
+        const opt = document.createElement('option');
+        opt.value = 'klas_' + bord.id;
+        opt.textContent = (bord.naam||'Naamloos') + ' (' + type + ')';
+        select.appendChild(opt);
+        n++;
+      });
+    });
+    if(n === 0) select.innerHTML = '<option value="">Geen andere borden gevonden</option>';
+  } catch(e){
+    select.innerHTML = '<option value="">Fout bij laden</option>';
   }
   document.getElementById('bibliotheek-laden-modal').classList.remove('hidden');
 }
 
-function slaOpAlsBibliotheek(){
-  const bib = {};
-  if(document.getElementById('bib-save-namen').checked){
-    bib.pupils = state.pupils;
-    bib.pupilPhotos = state.pupilPhotos||{};
-    bib.pupilTaskOverrides = state.pupilTaskOverrides||{};
+function laadUitBibliotheek(){
+  const select = document.getElementById('bib-bronbord');
+  const bronKey = select ? select.value : '';
+  if(!bronKey){ showToast('Kies eerst een bronbord.'); return; }
+
+  // Probeer eerst localStorage, dan Firebase
+  let bronData = null;
+  try { bronData = JSON.parse(localStorage.getItem(bronKey)||'null'); } catch(e){}
+
+  if(bronData){
+    _verwerkBibliotheekData(bronData);
+  } else if(window.fbLoad){
+    showToast('Bezig met laden...');
+    window.fbLoad(bronKey).then(function(data){
+      if(!data){ showToast('Bord niet gevonden.'); return; }
+      _verwerkBibliotheekData(data);
+    }).catch(function(){ showToast('Kon bord niet laden.'); });
+  } else {
+    showToast('Bord niet gevonden.');
   }
-  if(document.getElementById('bib-save-taken').checked){
-    bib.customTasks = state.customTasks||[];
-    bib.taskLabelOverrides = state.taskLabelOverrides||{};
-  }
-  if(document.getElementById('bib-save-iconen').checked){
-    bib.customIcons = state.customIcons||{};
-  }
-  bib.savedAt = Date.now();
-  localStorage.setItem(BIBLIOTHEEK_KEY, JSON.stringify(bib));
-  document.getElementById('bibliotheek-opslaan-modal').classList.add('hidden');
-  showToast('📚 Bibliotheek opgeslagen!');
 }
 
-function laadUitBibliotheek(){
-  const bib = JSON.parse(localStorage.getItem(BIBLIOTHEEK_KEY)||'null');
-  if(!bib){ showToast('Geen bibliotheek gevonden.'); return; }
-  if(document.getElementById('bib-load-namen').checked && bib.pupils){
-    state.pupils = bib.pupils;
-    if(bib.pupilPhotos) state.pupilPhotos = {...(state.pupilPhotos||{}), ...bib.pupilPhotos};
-    if(bib.pupilTaskOverrides) state.pupilTaskOverrides = {...(state.pupilTaskOverrides||{}), ...bib.pupilTaskOverrides};
+function _verwerkBibliotheekData(bronData){
+  if(document.getElementById('bib-load-namen').checked && bronData.pupils && bronData.pupils.length){
+    state.pupils = bronData.pupils;
+    if(bronData.pupilPhotos) state.pupilPhotos = Object.assign({}, state.pupilPhotos||{}, bronData.pupilPhotos);
   }
   if(document.getElementById('bib-load-taken').checked){
-    if(bib.customTasks) state.customTasks = bib.customTasks;
-    if(bib.taskLabelOverrides) state.taskLabelOverrides = {...(state.taskLabelOverrides||{}), ...bib.taskLabelOverrides};
+    if(bronData.customTasks && bronData.customTasks.length) state.customTasks = bronData.customTasks;
+    if(bronData.taskLabelOverrides) state.taskLabelOverrides = Object.assign({}, state.taskLabelOverrides||{}, bronData.taskLabelOverrides);
   }
-  if(document.getElementById('bib-load-iconen').checked && bib.customIcons){
-    state.customIcons = {...(state.customIcons||{}), ...bib.customIcons};
+  if(document.getElementById('bib-load-iconen').checked && bronData.customIcons){
+    state.customIcons = Object.assign({}, state.customIcons||{}, bronData.customIcons);
   }
   saveState();
   document.getElementById('bibliotheek-laden-modal').classList.add('hidden');
+  currentMode = 'settings';
   renderShell();
-  showToast('📥 Bibliotheek geladen! Stel nu je bord samen via Beheer aanpassen.');
+  showToast('✅ Gegevens overgenomen! Stel nu je bord samen via Beheer aanpassen.');
 }
 
 function openQrModal(){
