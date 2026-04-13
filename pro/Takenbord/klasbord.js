@@ -1166,6 +1166,8 @@ function applySmartboard(){
   if(!isSmartboard && !isIpad && !isKindModus) return;
   document.body.classList.add('smartboard');
   currentMode = 'board';
+  setTimeout(updateScrollArrow, 500);
+  setTimeout(updateScrollArrow, 1500);
   if(isIpad){
     document.body.classList.add('ipad-modus');
     // iPad: toon duidelijke sluit-knop met tekst
@@ -1246,6 +1248,10 @@ function initKlasbordAfterLoad(){
   // Scroll-pijl listener
   var bs = document.getElementById('board-scroll');
   if(bs) bs.addEventListener('scroll', updateScrollArrow, {passive:true});
+  window.addEventListener('resize', updateScrollArrow);
+  setTimeout(updateScrollArrow, 300);
+  setTimeout(updateScrollArrow, 800);
+  setTimeout(updateScrollArrow, 2000);
 }
 
 if (window.fbOnReady) {
