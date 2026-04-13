@@ -588,6 +588,10 @@ body.smartboard #smartboard-exit-btn {
 #scroll-left-arrow  { left: 8px; }
 #scroll-right-arrow.hidden,
 #scroll-left-arrow.hidden { display: none !important; }
+
+/* Scroll-pijlen enkel in board-modus zichtbaar */
+body:not(.board-mode) #scroll-right-arrow,
+body:not(.board-mode) #scroll-left-arrow { display: none !important; }
 /* ══ ACCORDION BEHEER ════════════════════════════════════════════════════ */
 
 .ac-container { display:flex; flex-direction:column; gap:8px; }
@@ -838,7 +842,7 @@ body.smartboard #smartboard-exit-btn {
 .settings-inner { flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; width:100%; }
 .sb-layout { display:flex; flex:1; min-height:0; overflow:hidden; width:100%; }
 
-.sb-nav { width:190px; min-width:190px; flex-shrink:0; background:#1e1b4b; display:flex; flex-direction:column; padding:14px 12px 16px; overflow-y:auto; height:100%; gap:2px; }
+.sb-nav { width:190px; min-width:190px; flex-shrink:0; background:#1e1b4b; display:flex; flex-direction:column; padding:14px 12px 0; height:100%; gap:2px; overflow:hidden; }
 .sb-nav::-webkit-scrollbar { width:3px; }
 .sb-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:2px; }
 .sb-back-btn { width:100%; border:none; background:rgba(255,255,255,.13); color:rgba(255,255,255,.9); border-radius:10px; padding:11px 14px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; text-align:left; margin-bottom:8px; transition:background .15s; }
@@ -1010,3 +1014,20 @@ body.ipad-modus .teacher-banner { display: none !important; }
 /* Verberg notities-knop in smartboard/ipad modus */
 body.smartboard .board-notes-btn,
 body.ipad-modus .board-notes-btn { display: none !important; }
+
+/* Zijbalk: scrollbare inhoud + sticky "Naar klasbord" knop */
+.sb-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sb-nav-scroll::-webkit-scrollbar { width: 3px; }
+.sb-nav-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+.sb-nav-footer {
+  padding: 10px 12px 14px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255,255,255,.1);
+}
