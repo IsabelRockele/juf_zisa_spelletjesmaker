@@ -436,11 +436,11 @@ function renderShell(){
 
 function scrollBoardRight(){
   var s=document.getElementById('board-scroll');
-  if(s) s.scrollBy({left:240,behavior:'smooth'});
+  if(s){ s.scrollBy({left:240,behavior:'smooth'}); setTimeout(updateScrollArrow,300); }
 }
 function scrollBoardLeft(){
   var s=document.getElementById('board-scroll');
-  if(s) s.scrollBy({left:-240,behavior:'smooth'});
+  if(s){ s.scrollBy({left:-240,behavior:'smooth'}); setTimeout(updateScrollArrow,300); }
 }
 function updateScrollArrow(){
   var s=document.getElementById('board-scroll');
