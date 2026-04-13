@@ -369,6 +369,10 @@ function updateScrollArrow(){
   }
 
   check();
+  requestAnimationFrame(check);
+  setTimeout(check, 150);
+  setTimeout(check, 500);
+  setTimeout(check, 1200);
 
   if(!scroll._arrowBound){
     scroll._arrowBound = true;
@@ -389,16 +393,16 @@ window.scrollLeft = function(){
 
 // ── Afsluiten ─────────────────────────────────────────────────────────────
 window.closeKindScreen = function(){
-  document.getElementById('app').style.display = 'none';
+  document.getElementById('wrap').style.display = 'none';
   document.getElementById('closed-screen').classList.add('show');
 };
 
 // ── Opstarten ─────────────────────────────────────────────────────────────
 function showKindApp(){
   const loading = document.getElementById('loading');
-  const app     = document.getElementById('app');
+  const wrap    = document.getElementById('wrap');
   if(loading) loading.style.display = 'none';
-  if(app)     app.style.display = 'flex';
+  if(wrap)    wrap.style.display = 'flex';
 }
 
 window.addEventListener('load', function(){
