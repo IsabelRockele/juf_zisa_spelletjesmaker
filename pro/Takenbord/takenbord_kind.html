@@ -883,87 +883,163 @@ body.ipad-modus #timer-popup { display:none !important; }
 <div class="page">
 
 <section id="setup-screen" class="setup-screen">
-  <div class="setup-card" style="max-width:980px;">
+<div class="kb-setup-layout">
 
-    <!-- Titelbalk met navigatieknoppen -->
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
-      <div>
-        <h2 style="font-size:22px;font-weight:800;color:#1f2937;margin:0 0 2px;">Leerlingen invoeren</h2>
-        <p style="font-size:13px;color:#6b7280;margin:0;">Voeg namen toe, stel de weergave in en ga naar het kindbord.</p>
+  <!-- ── ZIJBALK ── -->
+  <nav class="kb-sb-nav">
+    <button class="kb-sb-back" onclick="goBackToWelcome()">← Welkomstscherm</button>
+    <div class="kb-sb-bord-naam" id="kb-sb-bord-naam"></div>
+    <div class="kb-sb-label">Instellen</div>
+
+    <button class="kb-sb-stap" id="kb-stap-namen" onclick="kbToon('namen')">
+      <div class="kb-sb-badge" id="kb-badge-namen">1</div>
+      <div class="kb-sb-info">
+        <div class="kb-sb-titel">Namen</div>
+        <div class="kb-sb-sub" id="kb-sub-namen">Leerlingen toevoegen</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button type="button" class="back-btn-orange" style="padding:8px 14px;font-size:13px;border-radius:10px;" onclick="goBackToWelcome()">← Terug</button>
-        <button type="button" onclick="goToNamesScreen()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;padding:8px 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">Naar kindbord →</button>
+    </button>
+
+    <button class="kb-sb-stap" id="kb-stap-taken" onclick="kbToon('taken')">
+      <div class="kb-sb-badge kb-badge-2" id="kb-badge-taken">2</div>
+      <div class="kb-sb-info">
+        <div class="kb-sb-titel">Taken</div>
+        <div class="kb-sb-sub" id="kb-sub-taken">Taken toewijzen</div>
       </div>
-    </div>
+    </button>
 
-    <div class="setup-grid">
-      <!-- LINKER KOLOM: invoer -->
-      <div class="setup-left">
+    <button class="kb-sb-stap" id="kb-stap-inst" onclick="kbToon('inst')">
+      <div class="kb-sb-badge kb-badge-3" id="kb-badge-inst">3</div>
+      <div class="kb-sb-info">
+        <div class="kb-sb-titel">Instellingen</div>
+        <div class="kb-sb-sub">Weergave</div>
+      </div>
+    </button>
 
-        <!-- Stap 1: volgorde kiezen EERST -->
-        <div class="setup-box" style="padding:12px 14px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;">Stap 1 — Volgorde van namen instellen</div>
-            <button type="button" onclick="document.getElementById('setup-help-overlay').classList.add('show')" style="border:none;background:#eef2ff;color:#6366f1;border-radius:7px;padding:2px 8px;font-size:11px;font-weight:800;cursor:pointer;">❓ Uitleg</button>
+    <button class="kb-sb-go" onclick="goToNamesScreen()">👤 Naar het kindbord →</button>
+
+    <div style="height:16px;"></div>
+    <div class="kb-sb-label">Meer</div>
+    <button class="kb-sb-extra" onclick="openBackupKind()">💾 Backup &amp; herstel</button>
+    <button class="kb-sb-extra" onclick="document.getElementById('setup-help-overlay').classList.add('show')">❓ Uitleg</button>
+  </nav>
+
+  <!-- ── CONTENT ── -->
+  <div class="kb-sb-content">
+
+    <!-- PANEEL 1: NAMEN -->
+    <div class="kb-paneel" id="kb-paneel-namen">
+      <div class="kb-paneel-titel">Namen toevoegen</div>
+
+      <div class="namen-bib-banner" style="margin-bottom:20px;">
+        <span>📚 Namen overnemen uit een ander bord?</span>
+        <button onclick="openLaadUitBibliotheekKind()" class="namen-bib-btn">📥 Bibliotheek</button>
+      </div>
+
+      <div class="namen-grid">
+        <div class="namen-invoer-col">
+          <div class="invoer-blok">
+            <div class="invoer-blok-titel">📋 Klaslijst in één keer plakken</div>
+            <div class="invoer-blok-hint">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
+            <div class="volgorde-rij">
+              <span class="volgorde-label">Volgorde:</span>
+              <button type="button" class="sort-chip active" id="setup-order-voor" onclick="setSetupOrder('voornaam')">Voornaam Achternaam</button>
+              <button type="button" class="sort-chip" id="setup-order-ach" onclick="setSetupOrder('achternaam')">Achternaam Voornaam</button>
+            </div>
+            <textarea id="setupBulkInput" class="namen-textarea" placeholder="Jana De Smedt&#10;Thomas Peeters&#10;Lena&#10;..."></textarea>
+            <div class="invoer-btns-rij">
+              <button type="button" class="invoer-btn invoer-btn-primary" onclick="addBulkPupilsFromSetup()">➕ Toevoegen</button>
+              <button type="button" class="invoer-btn invoer-btn-secondary" onclick="clearAllPupilsFromSetup()">🗑 Lijst leeg</button>
+            </div>
           </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;">
-            <button type="button" class="sort-chip active" id="setup-order-voor" onclick="setSetupOrder('voornaam')">Voornaam Achternaam</button>
-            <button type="button" class="sort-chip" id="setup-order-ach" onclick="setSetupOrder('achternaam')">Achternaam Voornaam</button>
-          </div>
-          <div class="toggle-row" style="margin:0;">
-            <label class="toggle">
-              <input id="setup-show-lastname" type="checkbox" onchange="toggleSetupLastname()">
-              <span class="toggle-slider"></span>
-            </label>
-            <span style="font-size:13px;font-weight:700;color:#374151;">Achternaam zichtbaar op bord</span>
+          <div class="invoer-blok">
+            <div class="invoer-blok-titel">✏️ Of één naam toevoegen</div>
+            <input id="setupNameInput" class="naam-input" type="text" placeholder="Jana De Smedt" style="width:100%;margin-bottom:10px;" onkeydown="if(event.key==='Enter')addSinglePupilFromSetup()"/>
+            <button type="button" class="invoer-btn invoer-btn-primary invoer-btn-full" onclick="addSinglePupilFromSetup()">+ Toevoegen</button>
           </div>
         </div>
 
-        <!-- Stap 2a: één naam -->
-        <div class="setup-box" style="padding:12px 14px;">
-          <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Stap 2a — Eén leerling toevoegen</div>
-          <div style="display:flex;gap:8px;">
-            <input id="setupNameInput" class="setup-input" type="text" placeholder="Jana De Smedt" style="flex:1;" onkeydown="if(event.key==='Enter')addSinglePupilFromSetup()">
-            <button type="button" onclick="addSinglePupilFromSetup()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:10px;padding:0 16px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">+ Toevoegen</button>
+        <div class="namen-lijst-col">
+          <div class="namen-lijst-hdr">
+            <span class="namen-count">Leerlingen (<span id="setup-count">0</span>)</span>
           </div>
-        </div>
-
-        <!-- Stap 2b: klaslijst plakken -->
-        <div class="setup-box" style="padding:12px 14px;">
-          <div style="font-size:12px;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Stap 2b — Volledige klaslijst in één keer plakken</div>
-          <textarea id="setupBulkInput" class="setup-textarea" style="min-height:110px;" placeholder="Jana De Smedt
-Lars Peeters
-Mila
-Noor Janssens"></textarea>
-          <div style="display:flex;gap:7px;margin-top:8px;">
-            <button type="button" onclick="addBulkPupilsFromSetup()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:9px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;flex:1;">➕ Toevoegen</button>
-            <button type="button" onclick="clearAllPupilsFromSetup()" style="background:#fee2e2;color:#991b1b;border:none;border-radius:9px;padding:7px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">🗑 Leeg</button>
+          <div id="setupStatus" style="margin-bottom:8px;"></div>
+          <div id="autosave-kind" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#166534;">
+            ✅ <strong>Automatisch opgeslagen</strong>
           </div>
-        </div>
-
-      </div>
-
-      <!-- RECHTER KOLOM: lijst + navigatie -->
-      <div class="setup-right">
-        <div id="setupStatus" class="setup-status success"></div>
-
-        <div class="setup-list-wrap" style="flex:1;">
-
-          <div class="setup-list-title">Leerlingen op het bord (<span id="setup-count">0</span>)</div>
           <div id="setupAddedList" class="setup-added-list"></div>
         </div>
+      </div>
+    </div>
 
-        <div style="margin-top:10px;padding:10px 12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:12px;color:#166534;line-height:1.6;">
-          ✅ <strong>Automatisch opgeslagen</strong> — namen en instellingen blijven bewaard bij elke opening.
+    <!-- PANEEL 2: TAKEN TOEWIJZEN -->
+    <div class="kb-paneel kb-paneel-hidden" id="kb-paneel-taken">
+      <div class="kb-paneel-titel">Taken toewijzen</div>
+      <div style="font-size:14px;color:#6b7280;margin-bottom:20px;line-height:1.7;">
+        Vink leerlingen aan (links) en taken (rechts), dan klik <strong>Toewijzen</strong>. Per leerling kan je een andere set taken geven.
+      </div>
+      <div class="kb-taken-layout">
+        <!-- Leerlingen -->
+        <div class="kb-taken-col">
+          <div class="kb-taken-col-titel">👦 Leerlingen</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <button type="button" class="invoer-btn invoer-btn-secondary" style="flex:1;padding:7px;" onclick="kbSelectAllPupils()">Alles selecteren</button>
+            <button type="button" class="invoer-btn invoer-btn-secondary" style="flex:1;padding:7px;" onclick="kbDeselectAllPupils()">Deselecteren</button>
+          </div>
+          <div id="teacherPupilGrid"></div>
         </div>
-        <div style="margin-top:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:12px;color:#92400e;line-height:1.6;">
-          💡 Foto's bij namen toevoegen kan later via <strong>⚙️ Taken toewijzen</strong> op het kindbord.
+        <!-- Taken -->
+        <div class="kb-taken-col">
+          <div class="kb-taken-col-titel">📋 Taken</div>
+          <div style="display:flex;gap:6px;margin-bottom:10px;">
+            <button type="button" class="invoer-btn invoer-btn-secondary" style="flex:1;padding:7px;" onclick="kbSelectAllTasks()">Alles selecteren</button>
+            <button type="button" class="invoer-btn invoer-btn-secondary" style="flex:1;padding:7px;" onclick="kbDeselectAllTasks()">Deselecteren</button>
+          </div>
+          <div id="teacherTaskGrid" class="kb-task-grid"></div>
+          <!-- Eigen taak toevoegen -->
+          <div class="eigen-taak-wrap" style="margin-top:16px;">
+            <div class="eigen-taak-titel">➕ Eigen taak toevoegen</div>
+            <div class="eigen-taak-hint">Klik op ⭐ voor een pictogram, typ een naam en klik +</div>
+            <div class="eigen-taak-rij" style="position:relative;">
+              <button type="button" class="eigen-taak-emoji-btn" id="kb-emoji-btn" onclick="toggleKbEmojiPicker()" title="Kies pictogram">⭐</button>
+              <div class="emoji-picker-popup" id="kb-emoji-popup">
+                <div style="font-size:12px;font-weight:800;color:#6b7280;margin-bottom:8px;">Kies een pictogram</div>
+                <div id="emojiPicker" class="emoji-picker"></div>
+              </div>
+              <input id="newTaskInput" type="text" class="naam-input" style="flex:1;" placeholder="Naam van de taak…" onkeydown="if(event.key==='Enter')addCustomTask()"/>
+              <button type="button" class="invoer-btn invoer-btn-primary" onclick="addCustomTask()" style="flex:none;padding:0 20px;height:46px;font-size:16px;">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Toewijzen knop -->
+      <div style="margin-top:20px;padding:16px;background:#eef2ff;border-radius:14px;border:1.5px solid #c7d2fe;">
+        <div style="font-size:13px;color:#4338ca;margin-bottom:10px;font-weight:700;" id="kb-assign-hint">Selecteer leerlingen en taken hierboven, dan klik Toewijzen.</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" class="invoer-btn invoer-btn-primary" onclick="assignTasksToSelected()" style="flex:1;">✓ Toewijzen aan geselecteerde leerlingen</button>
+          <button type="button" class="invoer-btn invoer-btn-secondary" onclick="clearAssignmentsSelected()" style="flex:1;">✕ Taken wissen bij geselecteerde</button>
         </div>
       </div>
     </div>
 
-  </div>
+    <!-- PANEEL 3: INSTELLINGEN -->
+    <div class="kb-paneel kb-paneel-hidden" id="kb-paneel-inst">
+      <div class="kb-paneel-titel">Instellingen</div>
+      <div class="invoer-blok">
+        <div class="toggle-row" style="margin-bottom:14px;">
+          <label class="toggle"><input id="setup-show-lastname" type="checkbox" onchange="toggleSetupLastname()"/><span class="toggle-slider"></span></label>
+          <span class="toggle-label" style="font-size:15px;">Achternaam zichtbaar op bord</span>
+        </div>
+        <div style="font-size:13px;color:#94a3b8;padding-left:52px;margin-bottom:20px;">Zet aan als er meerdere kinderen zijn met dezelfde voornaam.</div>
+        <div class="toggle-row" style="margin-bottom:14px;">
+          <label class="toggle"><input id="setup-only-personal" type="checkbox" onchange="toggleOnlyPersonal()"/><span class="toggle-slider"></span></label>
+          <span class="toggle-label" style="font-size:15px;">Enkel eigen taken tonen (geen klasborddtaken)</span>
+        </div>
+        <div style="font-size:13px;color:#94a3b8;padding-left:52px;">Als dit aan staat zien leerlingen enkel hun persoonlijk toegewezen taken.</div>
+      </div>
+    </div>
+
+  </div><!-- /kb-sb-content -->
+</div><!-- /kb-setup-layout -->
 </section>
 
 <section id="names-screen" style="display:none;">
@@ -1188,6 +1264,7 @@ let teacherSelectedTasks = new Set();
 let selectedEmoji = '⭐';
 let setupNameOrder = 'voornaam';
 let setupShowLastname = false;
+var _kbActief = 'namen';
 
 
 function addSinglePupilFromSetup(){
@@ -1253,7 +1330,12 @@ function clearAllPupilsFromSetup(){
 }
 
 function goToNamesScreen(){
-  document.getElementById('setup-screen').style.display = 'none';
+  if(!state.pupils || !state.pupils.length){
+    alert('Voeg eerst leerlingen toe via Stap 1.');
+    kbToon('namen');
+    return;
+  }
+  document.getElementById('setup-screen').classList.remove('active');
   document.getElementById('names-screen').style.display = 'block';
   document.getElementById('tasks-screen').style.display = 'none';
   currentPupil = null;
@@ -1264,10 +1346,256 @@ function goBackToSetup(){
   currentPupil = null;
   document.getElementById('tasks-screen').style.display = 'none';
   document.getElementById('names-screen').style.display = 'none';
-  document.getElementById('setup-screen').style.display = 'block';
+  document.getElementById('setup-screen').classList.add('active');
+  kbToon(_kbActief || 'namen');
   renderNames();
   renderSetupAddedList();
 }
+
+// ── KINDBORD ZIJBALK ──────────────────────────────────────────────────────
+
+function kbToon(sectie){
+  _kbActief = sectie;
+  ['namen','taken','inst'].forEach(function(s){
+    var p = document.getElementById('kb-paneel-'+s); if(p) p.classList.toggle('kb-paneel-hidden', s!==sectie);
+    var b = document.getElementById('kb-stap-'+s);  if(b) b.classList.toggle('kb-actief', s===sectie);
+  });
+  if(sectie === 'taken') kbRenderTaken();
+  if(sectie === 'namen') renderSetupAddedList();
+  if(sectie === 'inst'){
+    var sl = document.getElementById('setup-show-lastname'); if(sl) sl.checked = !!setupShowLastname;
+    var op = document.getElementById('setup-only-personal'); if(op) op.checked = !!state.kindBoardOnlyPersonal;
+  }
+  kbUpdateWizard();
+}
+
+function kbUpdateWizard(){
+  var hN = state.pupils && state.pupils.length > 0;
+  var hT = state.pupils && state.pupils.some(function(p){ return Array.isArray(state.personalAssignments && state.personalAssignments[p.id]); });
+  var b1=document.getElementById('kb-badge-namen'); if(b1){b1.textContent=hN?'✓':'1';b1.classList.toggle('kb-badge-klaar',hN);}
+  var b2=document.getElementById('kb-badge-taken'); if(b2){b2.textContent=hT?'✓':'2';b2.classList.toggle('kb-badge-klaar',hT);}
+  var s1=document.getElementById('kb-sub-namen'); if(s1) s1.textContent=hN?state.pupils.length+' leerlingen':'Leerlingen toevoegen';
+  var s2=document.getElementById('kb-sub-taken'); if(s2) s2.textContent=hT?'Taken toegewezen':'Taken toewijzen';
+  var bn=document.getElementById('kb-sb-bord-naam');
+  if(bn){ try{ var borden=JSON.parse(localStorage.getItem('kbBorden')||'[]'); var b=borden.find(function(x){return x.id===bordId;}); bn.textContent=b?b.naam:''; }catch(e){} }
+}
+
+function kbSelectAllPupils(){
+  state.pupils.forEach(function(p){ teacherSelectedPupils.add(p.id); });
+  kbRenderTaken();
+}
+function kbDeselectAllPupils(){
+  teacherSelectedPupils.clear();
+  kbRenderTaken();
+}
+function kbSelectAllTasks(){
+  allTasks().forEach(function(t){ teacherSelectedTasks.add(t.id); });
+  kbRenderTaken();
+}
+function kbDeselectAllTasks(){
+  teacherSelectedTasks.clear();
+  kbRenderTaken();
+}
+
+function toggleOnlyPersonal(){
+  var cb = document.getElementById('setup-only-personal');
+  state.kindBoardOnlyPersonal = cb ? cb.checked : false;
+  saveState();
+}
+
+function toggleKbEmojiPicker(){
+  var popup = document.getElementById('kb-emoji-popup'); if(!popup) return;
+  popup.classList.toggle('open');
+  if(popup.classList.contains('open')){
+    setTimeout(function(){
+      document.addEventListener('click', function closeKbEP(e){
+        if(!popup.contains(e.target) && e.target.id !== 'kb-emoji-btn'){
+          popup.classList.remove('open');
+          document.removeEventListener('click', closeKbEP);
+        }
+      });
+    }, 10);
+  }
+}
+
+function kbRenderTaken(){
+  // Leerlingen kolom
+  var pupilGrid = document.getElementById('teacherPupilGrid');
+  if(!pupilGrid) return;
+  pupilGrid.innerHTML = '';
+  state.pupils.forEach(function(pupil){
+    const hasOwn = hasPersonalAssignments(pupil.id);
+    const photo = state.pupilPhotos[pupil.id];
+    const isSelected = teacherSelectedPupils.has(pupil.id);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'kb-pupil-row' + (isSelected ? ' selected' : '');
+    wrap.onclick = function(){
+      if(teacherSelectedPupils.has(pupil.id)) teacherSelectedPupils.delete(pupil.id);
+      else teacherSelectedPupils.add(pupil.id);
+      kbRenderTaken();
+    };
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox'; cb.checked = isSelected;
+    cb.style.cssText = 'width:18px;height:18px;cursor:pointer;flex-shrink:0;accent-color:#059669;';
+    cb.onclick = function(e){ e.stopPropagation(); };
+    cb.onchange = function(){
+      if(cb.checked) teacherSelectedPupils.add(pupil.id);
+      else teacherSelectedPupils.delete(pupil.id);
+      kbRenderTaken();
+    };
+    wrap.appendChild(cb);
+
+    const photoBtn = document.createElement('button');
+    photoBtn.type = 'button';
+    photoBtn.style.cssText = 'width:32px;height:32px;border:none;border-radius:50%;cursor:pointer;flex-shrink:0;padding:0;overflow:hidden;background:'+(photo?'transparent':'#ede9fe')+';font-size:14px;display:flex;align-items:center;justify-content:center;';
+    photoBtn.innerHTML = photo ? '<img src="'+photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />' : '📷';
+    photoBtn.onclick = function(e){ e.stopPropagation(); uploadPupilPhotoKind(pupil.id); };
+    wrap.appendChild(photoBtn);
+
+    const nameDiv = document.createElement('div');
+    nameDiv.style.cssText = 'flex:1;';
+    const assignedCount = hasOwn ? (state.personalAssignments[pupil.id]||[]).length : null;
+    nameDiv.innerHTML = '<div style="font-size:14px;font-weight:800;color:#1f2937;">'+getVisibleName(pupil)+'</div>'
+      + '<div style="font-size:11px;color:#6b7280;">'+(hasOwn ? '✓ '+assignedCount+' eigen taken' : state.kindBoardOnlyPersonal ? '⚠️ nog geen taken' : 'volgt klasbord')+'</div>';
+    wrap.appendChild(nameDiv);
+
+    const notesBtn = document.createElement('button');
+    notesBtn.type = 'button';
+    notesBtn.style.cssText = 'width:30px;height:30px;border:none;border-radius:8px;cursor:pointer;font-size:15px;flex-shrink:0;background:'+(state.notes&&state.notes[pupil.id]?'#fef9c3':'#f3f4f6')+';';
+    notesBtn.textContent = '🔒';
+    notesBtn.title = 'Bevindingen';
+    notesBtn.onclick = function(e){ e.stopPropagation(); openNotesModal(pupil.id); };
+    wrap.appendChild(notesBtn);
+
+    pupilGrid.appendChild(wrap);
+  });
+
+  // Taken kolom
+  var taskGrid = document.getElementById('teacherTaskGrid');
+  if(!taskGrid) return;
+  taskGrid.innerHTML = '';
+
+  // Global click listener voor dropdowns
+  if(!taskGrid._dropdownBound){
+    taskGrid._dropdownBound = true;
+    document.addEventListener('click', function(){
+      document.querySelectorAll('.kb-task-dropdown.open').forEach(function(d){ d.classList.remove('open'); });
+    });
+  }
+
+  allTasks().forEach(function(task){
+    const ci = state.customIcons && state.customIcons[task.id];
+    const isSelected = teacherSelectedTasks.has(task.id);
+
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+
+    const chip = document.createElement('div');
+    chip.className = 'kb-task-chip' + (isSelected ? ' active' : '');
+    chip.onclick = function(){
+      if(teacherSelectedTasks.has(task.id)) teacherSelectedTasks.delete(task.id);
+      else teacherSelectedTasks.add(task.id);
+      kbRenderTaken();
+    };
+
+    const iconEl = document.createElement('div');
+    iconEl.className = 'chip-icon';
+    iconEl.style.fontSize = '24px';
+    if(ci){ iconEl.innerHTML = '<img src="'+ci+'" style="width:30px;height:30px;object-fit:contain;border-radius:5px;" alt="" />'; }
+    else { iconEl.textContent = task.icon; }
+    chip.appendChild(iconEl);
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'chip-label';
+    labelEl.style.cssText = 'font-size:11px;font-weight:800;color:'+(isSelected?'#065f46':'#94a3b8')+';text-align:center;line-height:1.2;word-break:break-word;';
+    labelEl.textContent = task.label;
+    chip.appendChild(labelEl);
+
+    // Gear knop
+    const dropdown = document.createElement('div');
+    dropdown.className = 'kb-task-dropdown';
+
+    const gear = document.createElement('button');
+    gear.type = 'button';
+    gear.className = 'kb-task-gear';
+    gear.textContent = '⚙';
+    gear.onclick = function(e){
+      e.stopPropagation();
+      document.querySelectorAll('.kb-task-dropdown.open').forEach(function(d){ if(d!==dropdown) d.classList.remove('open'); });
+      dropdown.classList.toggle('open');
+    };
+    chip.appendChild(gear);
+    wrap.appendChild(chip);
+
+    // Dropdown items
+    const r1 = document.createElement('button'); r1.type='button'; r1.className='kb-task-menu-item';
+    r1.innerHTML = '✎ &nbsp;Naam wijzigen';
+    r1.onclick = function(e){ e.stopPropagation(); dropdown.classList.remove('open'); openTaskRenameKind(task.id, task.label); };
+    dropdown.appendChild(r1);
+
+    const r2 = document.createElement('button'); r2.type='button'; r2.className='kb-task-menu-item';
+    r2.innerHTML = ci ? '📷 &nbsp;Afbeelding wijzigen' : '📷 &nbsp;Eigen afbeelding';
+    r2.onclick = function(e){ e.stopPropagation(); dropdown.classList.remove('open'); uploadTaskIconKind(task.id); };
+    dropdown.appendChild(r2);
+
+    if(task.id.startsWith('c_')){
+      const sep = document.createElement('div'); sep.className='kb-task-menu-sep'; dropdown.appendChild(sep);
+      const r3 = document.createElement('button'); r3.type='button'; r3.className='kb-task-menu-item kb-task-menu-danger';
+      r3.innerHTML = '🗑 &nbsp;Taak verwijderen';
+      r3.onclick = function(e){ e.stopPropagation(); dropdown.classList.remove('open');
+        state.customTasks = (state.customTasks||[]).filter(function(t){ return t.id!==task.id; });
+        saveState(); kbRenderTaken();
+      };
+      dropdown.appendChild(r3);
+    }
+    wrap.appendChild(dropdown);
+    taskGrid.appendChild(wrap);
+  });
+
+  // Hint toewijzen bijwerken
+  var hint = document.getElementById('kb-assign-hint');
+  if(hint){
+    var np = teacherSelectedPupils.size, nt = teacherSelectedTasks.size;
+    if(np>0 && nt>0) hint.textContent = np+' leerling'+(np>1?'en':'')+' geselecteerd · '+nt+' taak'+(nt>1?'en':'')+' geselecteerd → Klik Toewijzen';
+    else hint.textContent = 'Selecteer leerlingen en taken hierboven, dan klik Toewijzen.';
+  }
+
+  // Emoji-picker vullen
+  renderEmojiPicker();
+  var kbBtn = document.getElementById('kb-emoji-btn');
+  if(kbBtn) kbBtn.textContent = selectedEmoji;
+
+  kbUpdateWizard();
+}
+
+function assignTasksToSelected(){
+  if(!teacherSelectedPupils.size){ alert('Selecteer eerst leerlingen.'); return; }
+  if(!teacherSelectedTasks.size){ alert('Selecteer eerst taken.'); return; }
+  if(!state.personalAssignments) state.personalAssignments = {};
+  teacherSelectedPupils.forEach(function(pid){
+    state.personalAssignments[pid] = Array.from(teacherSelectedTasks);
+  });
+  saveState(); kbRenderTaken(); kbUpdateWizard();
+}
+
+function clearAssignmentsSelected(){
+  if(!teacherSelectedPupils.size){ alert('Selecteer eerst leerlingen.'); return; }
+  if(!state.personalAssignments) state.personalAssignments = {};
+  teacherSelectedPupils.forEach(function(pid){
+    delete state.personalAssignments[pid];
+  });
+  saveState(); kbRenderTaken(); kbUpdateWizard();
+}
+
+function openBackupKind(){
+  // Hergebruik bestaande backup-functionaliteit
+  var el = document.getElementById('backupModal') || document.getElementById('exportOverlay');
+  if(el) el.classList.add('show');
+}
+
+// ── EINDE KINDBORD ZIJBALK ─────────────────────────────────────────────────
 
 function loadState(){
   try{
@@ -2473,11 +2801,11 @@ document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
 function initKindbordAfterLoad(){
   // Smartboard/iPad modus: setup-scherm overslaan als er al leerlingen zijn
   if((isSmartboard || isIpad) && state.pupils.length > 0){
-    document.getElementById('setup-screen').style.display = 'none';
+    document.getElementById('setup-screen').classList.remove('active');
     document.getElementById('names-screen').style.display = 'block';
     document.getElementById('tasks-screen').style.display = 'none';
   } else {
-    document.getElementById('setup-screen').style.display = 'block';
+    document.getElementById('setup-screen').classList.add('active');kbUpdateWizard();
     document.getElementById('names-screen').style.display = 'none';
     document.getElementById('tasks-screen').style.display = 'none';
   }
@@ -3024,7 +3352,86 @@ function timerDone(){
 <style>
 .timer-preset{border:1.5px solid #e0e7ff;background:#f8f9ff;color:#4338ca;border-radius:7px;padding:3px 8px;font-size:12px;font-weight:700;cursor:pointer;}
 .timer-preset:hover{background:#e0e7ff;}
-</style>
+
+/* ══ KINDBORD ZIJBALK BEHEER ════════════════════════════════════════════ */
+.setup-screen { display:none; }
+.setup-screen.active { display:flex !important; }
+
+.kb-setup-layout { display:flex; height:calc(100vh - 44px); width:100%; overflow:hidden; background:#f0f4f8; }
+
+.kb-sb-nav { width:190px; min-width:190px; flex-shrink:0; background:#1e1b4b; display:flex; flex-direction:column; padding:14px 12px 16px; overflow-y:auto; gap:2px; }
+.kb-sb-nav::-webkit-scrollbar { width:3px; }
+.kb-sb-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:2px; }
+
+.kb-sb-back { width:100%; border:none; background:rgba(255,255,255,.13); color:rgba(255,255,255,.9); border-radius:10px; padding:11px 14px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; text-align:left; margin-bottom:8px; transition:background .15s; }
+.kb-sb-back:hover { background:rgba(255,255,255,.22); }
+
+.kb-sb-bord-naam { font-size:12px; font-weight:800; color:rgba(255,255,255,.45); padding:0 4px; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.kb-sb-label { font-size:10px; font-weight:800; color:rgba(255,255,255,.3); text-transform:uppercase; letter-spacing:.08em; padding:10px 6px 4px; }
+
+.kb-sb-stap { display:flex; align-items:center; gap:10px; padding:11px 10px; border-radius:10px; border:none; background:transparent; cursor:pointer; font-family:inherit; text-align:left; transition:background .15s; width:100%; margin-bottom:2px; }
+.kb-sb-stap:hover { background:rgba(255,255,255,.1); }
+.kb-sb-stap.kb-actief { background:rgba(255,255,255,.18); }
+
+.kb-sb-badge { width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; flex-shrink:0; background:#dbeafe; color:#1e40af; transition:all .2s; }
+.kb-badge-2 { background:#dcfce7; color:#15803d; }
+.kb-badge-3 { background:#f3e8ff; color:#7c3aed; }
+.kb-badge-klaar { background:#bbf7d0 !important; color:#15803d !important; }
+
+.kb-sb-info { overflow:hidden; flex:1; }
+.kb-sb-titel { font-size:13px; font-weight:800; color:rgba(255,255,255,.92); line-height:1.2; }
+.kb-sb-sub { font-size:11px; color:rgba(255,255,255,.45); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.kb-sb-go { display:block; width:100%; background:#059669; color:#fff; border:none; border-radius:11px; padding:13px 10px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; text-align:center; margin-top:12px; transition:background .15s; }
+.kb-sb-go:hover { background:#047857; }
+
+.kb-sb-extra { display:flex; align-items:center; gap:8px; width:100%; border:none; background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); font-size:13px; font-weight:700; padding:10px 12px; border-radius:9px; cursor:pointer; font-family:inherit; text-align:left; transition:background .15s; margin-bottom:4px; }
+.kb-sb-extra:hover { background:rgba(255,255,255,.16); color:#fff; }
+
+.kb-sb-content { flex:1; min-width:0; overflow-y:auto; padding:28px 36px 60px; }
+.kb-sb-content::-webkit-scrollbar { width:7px; }
+.kb-sb-content::-webkit-scrollbar-track { background:#e0e7ff; }
+.kb-sb-content::-webkit-scrollbar-thumb { background:#059669; border-radius:3px; }
+
+.kb-paneel { width:100%; }
+.kb-paneel-hidden { display:none !important; }
+.kb-paneel-titel { font-size:22px; font-weight:800; color:#1e1b4b; margin-bottom:22px; padding-bottom:14px; border-bottom:2px solid #e0e7ff; }
+
+/* Taken-toewijzen layout */
+.kb-taken-layout { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:720px){ .kb-taken-layout { grid-template-columns:1fr; } }
+.kb-taken-col { background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; padding:18px; }
+.kb-taken-col-titel { font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:12px; }
+.kb-task-grid { display:flex; flex-wrap:wrap; gap:8px; }
+
+/* Taak-tegels in kindbord beheer */
+.kb-task-chip {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:5px; padding:10px 8px; min-width:80px; min-height:70px;
+  border-radius:12px; border:2.5px solid #e0e7ff; background:#f8fafc;
+  cursor:pointer; position:relative; transition:all .15s; text-align:center;
+}
+.kb-task-chip:hover { border-color:#818cf8; background:#eef2ff; transform:translateY(-1px); }
+.kb-task-chip.active { border-color:#059669; background:#ecfdf5; }
+.kb-task-chip .chip-icon { font-size:24px; line-height:1; }
+.kb-task-chip .chip-label { font-size:11px; font-weight:800; color:#94a3b8; line-height:1.2; word-break:break-word; }
+.kb-task-chip.active .chip-label { color:#065f46; }
+.kb-task-gear { position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:5px; border:1px solid #e0e7ff; background:rgba(255,255,255,.9); color:#6366f1; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .12s; }
+.kb-task-chip:hover .kb-task-gear { opacity:1; }
+.kb-task-dropdown { display:none; position:absolute; top:calc(100% + 4px); right:0; background:#fff; border:1.5px solid #e0e7ff; border-radius:10px; padding:5px; box-shadow:0 6px 20px rgba(0,0,0,.12); min-width:170px; z-index:9999; }
+.kb-task-dropdown.open { display:block; }
+.kb-task-menu-item { display:flex; align-items:center; width:100%; border:none; background:none; padding:8px 10px; border-radius:7px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; color:#374151; text-align:left; }
+.kb-task-menu-item:hover { background:#f1f5f9; }
+.kb-task-menu-danger { color:#dc2626; }
+.kb-task-menu-danger:hover { background:#fff5f5; }
+.kb-task-menu-sep { height:1px; background:#f1f5f9; margin:3px 0; }
+
+/* Leerling-rijen in taken paneel */
+.kb-pupil-row { display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px; background:#f9fafb; border:2px solid #e5e7eb; margin-bottom:8px; transition:all .12s; cursor:pointer; }
+.kb-pupil-row.selected { background:#ecfdf5; border-color:#059669; }
+.kb-pupil-row:hover { border-color:#a7f3d0; }
+</style></style>
 <!-- NIEUW SCHOOLJAAR MODAL -->
 <div class="overlay" id="kind-nsy-overlay">
 <div class="popup" style="text-align:left;max-width:460px;width:100%;">
