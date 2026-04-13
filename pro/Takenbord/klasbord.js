@@ -515,10 +515,18 @@ function openQrModal(){
   const urlEl = document.getElementById('qr-url-text');
   if(urlEl) urlEl.textContent = url;
   
-  // Genereer QR via Google Charts API
+  // Genereer QR via qrcodejs
   const container = document.getElementById('qr-code-container');
   if(container){
-    container.innerHTML = '<img src="https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=' + encodeURIComponent(url) + '&choe=UTF-8&chld=M|2" alt="QR code" style="border-radius:8px;display:block;" />';
+    container.innerHTML = '';
+    new QRCode(container, {
+      text: url,
+      width: 240,
+      height: 240,
+      colorDark: '#1e3a8a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
   }
   
   modal.classList.remove('hidden');
