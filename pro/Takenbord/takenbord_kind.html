@@ -957,7 +957,7 @@ Noor Janssens"></textarea>
 <p class="subtitle" id="kind-bord-naam" style="font-size:13px;font-weight:800;color:#6366f1;margin-bottom:4px;"></p>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
 <div class="names-topbar">
-  <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Terug naar beheer</button>
+  <button class="teacher-only" onclick="goBackToSetup()" type="button" style="border:none;background:#f97316;color:#fff;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">← Terug naar beheer</button>
   <button class="teacher-btn teacher-only" id="openTeacherBtn" style="background:#6366f1;color:#fff;border:none;">⚙️ Taken toewijzen</button>
   <button class="teacher-btn teacher-only" onclick="openSmartboardTakenbord()" type="button" style="background:#3b82f6;color:#fff;border:none;">📺 Smartboard</button>
   <button class="teacher-btn teacher-only" onclick="openQrTakenbord()" type="button" style="background:#8b5cf6;color:#fff;border:none;">📱 QR-code</button>
@@ -972,7 +972,11 @@ Noor Janssens"></textarea>
 </div>
 
 <!-- ⚙️ Menu knop voor smartboard modus -->
-<button id="smartboard-exit-btn" onclick="document.getElementById('kind-exit-overlay').classList.add('show')" style="display:none;position:fixed;bottom:16px;right:16px;z-index:7000;border:none;background:rgba(99,102,241,.15);color:#6366f1;font-size:13px;font-weight:800;border-radius:12px;padding:8px 16px;cursor:pointer;font-family:inherit;">⚙️ Menu</button>
+<div id="smartboard-top-btns" style="display:none;position:fixed;top:12px;right:12px;z-index:7000;display:none;gap:8px;align-items:center;">
+  <button onclick="toggleTimer()" style="border:2px solid #e0e7ff;background:#f0f4ff;color:#6366f1;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⏱️ Timer</button>
+  <button onclick="document.getElementById('kind-exit-overlay').classList.add('show')" style="border:none;background:rgba(99,102,241,.15);color:#6366f1;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⚙️ Menu</button>
+</div>
+<button id="smartboard-exit-btn" style="display:none;"></button>
 
 
 <!-- Foto-hint: inline boven het namenraster, verdwijnt na sluiten -->
@@ -1006,7 +1010,7 @@ Noor Janssens"></textarea>
 </section>
 </div>
 <!-- QR MODAL -->
-<div class="overlay hidden" id="qr-takenbord-modal" style="display:none;">
+<div id="qr-takenbord-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
 <div class="modal" style="max-width:360px;text-align:center;">
   <div class="modal-title">📱 QR-code voor leerlingen</div>
   <p class="modal-sub" style="margin-bottom:16px;">Laat leerlingen deze code scannen om hun taken te zien.</p>
@@ -2104,14 +2108,9 @@ function openQrTakenbord(){
 function applySmartboardMode(){
   if(!isSmartboard && !isIpad) return;
   document.body.classList.add('smartboard');
-  var btn = document.getElementById('smartboard-exit-btn');
-  if(isIpad){
-    document.body.classList.add('ipad-modus');
-    if(btn) btn.style.display = 'block';
-  } else {
-    if(btn) btn.style.display = 'block';
-  }
-  // Pijltjes na laden tonen
+  var topBtns = document.getElementById('smartboard-top-btns');
+  if(topBtns) topBtns.style.display = 'flex';
+  if(isIpad) document.body.classList.add('ipad-modus');
   setTimeout(updateKindScrollArrows, 500);
   setTimeout(updateKindScrollArrows, 1500);
 }
