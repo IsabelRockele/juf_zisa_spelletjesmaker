@@ -101,7 +101,7 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 #scroll-right-arrow,#scroll-left-arrow{position:fixed;top:65%;transform:translateY(-50%);z-index:50;width:44px;height:44px;border-radius:50%;border:none;background:rgba(99,102,241,.85);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 4px 12px rgba(99,102,241,.4);}
 #scroll-right-arrow{right:8px;}
 #scroll-left-arrow{left:8px;}
-@media (hover:none) and (pointer:coarse){#scroll-right-arrow,#scroll-left-arrow{display:none!important;}}
+/* Pijltjes worden via JS verborgen op touch-apparaten */
 .hidden{display:none!important;}
   </style>
 </head>
@@ -180,5 +180,14 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
   <button id="scroll-right-arrow" class="hidden" onclick="scrollRight()" aria-label="Scroll naar rechts">›</button>
 
   <script src="klasbord_kind.js"></script>
+<script>
+// Verberg pijltjes op touch-apparaten
+if('ontouchstart' in window || navigator.maxTouchPoints > 0){
+  var arL = document.getElementById('scroll-left-arrow');
+  var arR = document.getElementById('scroll-right-arrow');
+  if(arL) arL.style.setProperty('display','none','important');
+  if(arR) arR.style.setProperty('display','none','important');
+}
+</script>
 </body>
 </html>
