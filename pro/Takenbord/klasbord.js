@@ -947,16 +947,16 @@ function renderBoardTable(allTasks){
   const inner=document.getElementById('board-inner');
   inner.innerHTML='';
 
-  const minW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220')
-    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')
-    + allTasks.length*(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120')
-    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')) + 32;
+  // Gebruik zelfde berekening als rijen: COL_NAME + n*COL_TASK (geen gap)
+  const _CN=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220');
+  const _CT=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120');
+  const minW = _CN + allTasks.length * _CT;
 
   // ── TAAKNAMEN HEADER ─────────────────────────────────────────────────
   const taskHeader=document.getElementById('task-header')||document.createElement('div');
   taskHeader.id='task-header';
   taskHeader.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
-  taskHeader.style.minWidth=minW+'px';
+  taskHeader.style.minWidth=(minW + 28) + 'px';
 
   // Zorg dat header-corner bestaat
   if(!taskHeader.querySelector('.header-corner')){
@@ -982,11 +982,9 @@ function renderBoardTable(allTasks){
   const boardScroll=document.getElementById('board-scroll');
   const topFixed=document.getElementById('top-fixed');
   const legend=document.getElementById('legend');
-  const COL_NAME_PX=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220');
-  const COL_TASK_PX=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120');
   const PAD_PX=14;
-  const minWFixed=(COL_NAME_PX+allTasks.length*COL_TASK_PX+PAD_PX*2)+'px';
-  const minWRows=(COL_NAME_PX+allTasks.length*COL_TASK_PX)+'px';
+  const minWFixed=(_CN+allTasks.length*_CT+PAD_PX*2)+'px';
+  const minWRows=(_CN+allTasks.length*_CT)+'px';
 
   if(taskHeader) taskHeader.style.minWidth=minWFixed;
   if(legend){ legend.style.minWidth=minWFixed; legend.classList.remove('hidden'); }
@@ -999,6 +997,7 @@ function renderBoardTable(allTasks){
 
   // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
   inner.style.minWidth=minWRows;
+  pupilRows.style.minWidth=minWRows;
 
   // Zorg voor pupil-rows container
   let pupilRows=document.getElementById('pupil-rows');
