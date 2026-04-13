@@ -37,39 +37,35 @@
 
 <!-- ── ZIJBALK ── -->
 <nav class="sb-nav">
-  <div class="sb-nav-scroll">
-    <button class="sb-back-btn" onclick="goBackToWelcome()">← Welkomstscherm</button>
-    <div class="sb-bord-naam" id="sb-bord-naam"></div>
-    <div class="sb-section-label">Instellen</div>
-    <button class="sb-stap" id="sb-stap-namen" onclick="sbToon('namen')">
-      <div class="sb-stap-badge" id="sb-badge-namen">1</div>
-      <div class="sb-stap-info">
-        <div class="sb-stap-titel">Namen</div>
-        <div class="sb-stap-sub" id="sb-sub-namen">Leerlingen toevoegen</div>
-      </div>
-    </button>
-    <button class="sb-stap" id="sb-stap-taken" onclick="sbToon('taken')">
-      <div class="sb-stap-badge sb-badge-2" id="sb-badge-taken">2</div>
-      <div class="sb-stap-info">
-        <div class="sb-stap-titel">Taken</div>
-        <div class="sb-stap-sub" id="sb-sub-taken">Taken kiezen</div>
-      </div>
-    </button>
-    <button class="sb-stap" id="sb-stap-inst" onclick="sbToon('inst')">
-      <div class="sb-stap-badge sb-badge-3" id="sb-badge-inst">3</div>
-      <div class="sb-stap-info">
-        <div class="sb-stap-titel">Instellingen</div>
-        <div class="sb-stap-sub">Weergave</div>
-      </div>
-    </button>
-    <div class="sb-spacer"></div>
-    <div class="sb-section-label">Meer</div>
-    <button class="sb-extra-btn" onclick="openBackupModal()">💾 Backup &amp; herstel</button>
-    <button class="sb-extra-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ Uitleg</button>
-  </div>
-  <div class="sb-nav-footer">
-    <button class="sb-go-btn" id="sb-go-btn" onclick="closeSettings()">📋 Naar het klasbord →</button>
-  </div>
+  <button class="sb-back-btn" onclick="goBackToWelcome()">← Welkomstscherm</button>
+  <div class="sb-bord-naam" id="sb-bord-naam"></div>
+  <div class="sb-section-label">Instellen</div>
+  <button class="sb-stap" id="sb-stap-namen" onclick="sbToon('namen')">
+    <div class="sb-stap-badge" id="sb-badge-namen">1</div>
+    <div class="sb-stap-info">
+      <div class="sb-stap-titel">Namen</div>
+      <div class="sb-stap-sub" id="sb-sub-namen">Leerlingen toevoegen</div>
+    </div>
+  </button>
+  <button class="sb-stap" id="sb-stap-taken" onclick="sbToon('taken')">
+    <div class="sb-stap-badge sb-badge-2" id="sb-badge-taken">2</div>
+    <div class="sb-stap-info">
+      <div class="sb-stap-titel">Taken</div>
+      <div class="sb-stap-sub" id="sb-sub-taken">Taken kiezen</div>
+    </div>
+  </button>
+  <button class="sb-stap" id="sb-stap-inst" onclick="sbToon('inst')">
+    <div class="sb-stap-badge sb-badge-3" id="sb-badge-inst">3</div>
+    <div class="sb-stap-info">
+      <div class="sb-stap-titel">Instellingen</div>
+      <div class="sb-stap-sub">Weergave</div>
+    </div>
+  </button>
+  <button class="sb-go-btn" id="sb-go-btn" onclick="closeSettings()" style="margin-top:16px;">📋 Naar het klasbord →</button>
+  <div style="height:16px;"></div>
+  <div class="sb-section-label">Meer</div>
+  <button class="sb-extra-btn" onclick="openBackupModal()">💾 Backup &amp; herstel</button>
+  <button class="sb-extra-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ Uitleg</button>
 </nav>
 
 <!-- ── CONTENT ── -->
@@ -183,7 +179,7 @@
 
 <!-- Leerkracht-banner (verborgen in smartboard/ipad modus) -->
 <div id="teacher-banner" class="teacher-banner">
-  <span>👩‍🏫 <strong>Leerkrachtweergave</strong> hier kan je ook opmerkingen toevoegen bij elk kind, klik dan op het slotje. — Gebruik <strong>📺 Smartboard</strong> om het bord op het scherm of iPad te tonen.</span>
+  <span>👩‍🏫 <strong>Leerkrachtweergave</strong> — kinderen zien dit scherm niet. Gebruik <strong>📺 Smartboard</strong> om het bord op het scherm of iPad te tonen.</span>
   <button onclick="document.getElementById('teacher-banner').style.display='none'" class="teacher-banner-close">✕</button>
 </div>
 
