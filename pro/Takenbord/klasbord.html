@@ -28,69 +28,40 @@
 <!-- WELCOME SCREEN -->
 
 <!-- TOPBAR (settings mode only) -->
-<div id="topbar" style="display:none;"></div>
-
+<div id="topbar">
+<div id="topbar-left">
+<button class="btn back-btn-orange" onclick="goBackToWelcome()">← Welkomstscherm</button>
+<button class="btn btn-indigo" onclick="closeSettings()">Naar het klasbord</button>
+<span id="topbar-title" style="font-size:13px;color:#6366f1;font-weight:700;"></span>
+</div>
+<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
+<button class="btn btn-secondary btn-sm" onclick="openBackupModal()" title="Backup maken of terugzetten">💾 Backup</button>
+<button class="btn btn-amber btn-sm" onclick="openNewPeriod()">🔄 Nieuwe periode</button>
+<button class="btn btn-ghost btn-sm" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ Uitleg beheer</button>
+</div>
+</div>
 <!-- SETTINGS -->
 <div id="settings-wrap">
 <div class="settings-inner">
 
-<!-- ── ZIJBALK ── -->
-<div class="sb-layout">
-<nav class="sb-nav">
+<!-- ── ACCORDION ── -->
+<div class="ac-container">
 
-  <!-- Terug -->
-  <button class="sb-back-btn" onclick="goBackToWelcome()">← Welkomstscherm</button>
-
-  <!-- Bordnaam -->
-  <div class="sb-bord-naam" id="sb-bord-naam"></div>
-
-  <!-- Stappen -->
-  <div class="sb-section-label">Instellen</div>
-
-  <button class="sb-stap" id="sb-stap-namen" onclick="sbToon('namen')">
-    <div class="sb-stap-badge" id="sb-badge-namen">1</div>
-    <div class="sb-stap-info">
-      <div class="sb-stap-titel">Namen</div>
-      <div class="sb-stap-sub" id="sb-sub-namen">Leerlingen toevoegen</div>
-    </div>
-  </button>
-
-  <button class="sb-stap" id="sb-stap-taken" onclick="sbToon('taken')">
-    <div class="sb-stap-badge sb-badge-2" id="sb-badge-taken">2</div>
-    <div class="sb-stap-info">
-      <div class="sb-stap-titel">Taken</div>
-      <div class="sb-stap-sub" id="sb-sub-taken">Taken kiezen</div>
-    </div>
-  </button>
-
-  <button class="sb-stap" id="sb-stap-inst" onclick="sbToon('inst')">
-    <div class="sb-stap-badge sb-badge-3" id="sb-badge-inst">3</div>
-    <div class="sb-stap-info">
-      <div class="sb-stap-titel">Instellingen</div>
-      <div class="sb-stap-sub">Weergave</div>
-    </div>
-  </button>
-
-  <div class="sb-spacer"></div>
-
-  <!-- Extra -->
-  <div class="sb-section-label">Meer</div>
-  <button class="sb-extra-btn" onclick="openBackupModal()">💾 Backup &amp; herstel</button>
-  <button class="sb-extra-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ Uitleg</button>
-
-  <!-- Naar bord -->
-  <button class="sb-go-btn" id="sb-go-btn" onclick="closeSettings()">📋 Naar het klasbord →</button>
-
-</nav>
-
-<!-- ── INHOUD ── -->
-<div class="sb-content">
-
-<!-- ── CONTENT PANELEN ── -->
-
-  <!-- PANEEL 1: NAMEN -->
-  <div class="sb-paneel" id="sb-paneel-namen">
-    <div class="sb-paneel-titel">Namen toevoegen</div>
+  <!-- STAP 1: NAMEN -->
+  <div class="ac-item" id="ac-namen">
+    <button class="ac-hdr ac-open" onclick="acToggle('namen')">
+      <div class="ac-hdr-left">
+        <div class="ac-badge ac-badge-1" id="ac-badge-namen">1</div>
+        <div>
+          <div class="ac-titel">Namen toevoegen</div>
+          <div class="ac-sub" id="ac-sub-namen">Voeg de leerlingen van je klas toe</div>
+        </div>
+      </div>
+      <div class="ac-hdr-right">
+        <span class="ac-chevron" id="ac-chevron-namen">▲</span>
+      </div>
+    </button>
+    <div class="ac-body" id="ac-body-namen">
       <!-- Bibliotheek -->
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;padding:8px 12px;background:#eef2ff;border-radius:10px;border:1.5px solid #c7d2fe;">
         <span style="font-size:12px;font-weight:800;color:#4338ca;">📚 Bibliotheek — overnemen uit ander bord</span>
@@ -145,50 +116,89 @@
         </div>
       </div>
 
-  </div><!-- /sb-paneel-namen -->
+      <!-- Volgende stap knop -->
+      <div style="text-align:right;margin-top:12px;">
+        <button class="ac-next-btn" onclick="acToggle('taken')">Stap 2: Taken kiezen →</button>
+      </div>
+    </div>
+  </div>
 
-  <!-- PANEEL 2: TAKEN -->
-  <div class="sb-paneel sb-paneel-hidden" id="sb-paneel-taken">
-    <div class="sb-paneel-titel">Taken kiezen</div>
-      <div id="icons-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:7px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
+  <!-- STAP 2: TAKEN -->
+  <div class="ac-item" id="ac-taken">
+    <button class="ac-hdr" onclick="acToggle('taken')">
+      <div class="ac-hdr-left">
+        <div class="ac-badge ac-badge-2" id="ac-badge-taken">2</div>
+        <div>
+          <div class="ac-titel">Taken kiezen</div>
+          <div class="ac-sub" id="ac-sub-taken">Klik op een taak om aan of uit te zetten</div>
+        </div>
+      </div>
+      <div class="ac-hdr-right">
+        <span class="ac-chevron" id="ac-chevron-taken">▼</span>
+      </div>
+    </button>
+    <div class="ac-body ac-body-hidden" id="ac-body-taken">
+      <div id="icons-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:7px 12px;margin-bottom:12px;font-size:12px;color:#166534;align-items:center;gap:8px;">
         <span>✅ Eigen afbeeldingen opgeslagen</span>
       </div>
-      <div id="hint-icons" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
-        <span>💡 Eigen afbeelding uploaden? Klik 📷 onder een taak.</span>
+      <div id="hint-icons" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>💡 Eigen afbeelding? Klik 📷 onder een taak.</span>
         <button onclick="localStorage.setItem('hint_icons_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕</button>
       </div>
-      <div style="font-size:12px;color:#6b7280;margin-bottom:8px;">Klik op een taak = aan/uit · <strong>✎ naam</strong> wijzigen · <strong>📷 afb.</strong> eigen afbeelding
+      <div style="font-size:13px;color:#6b7280;margin-bottom:14px;">Klik op een taak om ze <strong>aan</strong> of <strong>uit</strong> te zetten.
         <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
       </div>
       <div class="task-chips" id="task-chips"></div>
 
       <!-- Eigen taak toevoegen -->
-      <div style="display:flex;align-items:center;gap:8px;margin:12px 0 8px;color:#a0aec0;font-size:11px;font-weight:700;">
-        <div style="flex:1;height:1px;background:#e0e7ff;"></div><span>eigen taak toevoegen</span><div style="flex:1;height:1px;background:#e0e7ff;"></div>
+      <div class="eigen-taak-wrap">
+        <div class="eigen-taak-titel">➕ Eigen taak toevoegen</div>
+        <div class="eigen-taak-rij" style="position:relative;">
+          <button class="eigen-taak-emoji-btn" id="eigen-taak-emoji-btn" onclick="toggleEmojiPicker()" title="Kies een pictogram">⭐</button>
+          <div class="emoji-picker-popup" id="emoji-picker-popup">
+            <div style="font-size:11px;font-weight:800;color:#6b7280;margin-bottom:8px;">Kies een pictogram voor deze taak</div>
+            <div class="emoji-picker" id="emoji-picker"></div>
+          </div>
+          <input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Naam van de taak…" style="flex:1;font-size:14px;height:44px;" type="text"/>
+          <button class="btn btn-primary" onclick="addCustomTask()" style="height:44px;padding:0 18px;font-size:15px;">+</button>
+        </div>
+        <div class="eigen-taak-hint">Klik op ⭐ om een pictogram te kiezen, typ dan de naam en klik +</div>
       </div>
-      <div class="emoji-picker" id="emoji-picker"></div>
-      <div style="display:flex;gap:6px;">
-        <input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Taaknaam…" style="flex:1;font-size:13px;" type="text"/>
-        <button class="btn btn-primary" onclick="addCustomTask()">+</button>
+    </div>
+  </div>
+
+  <!-- STAP 3: INSTELLINGEN -->
+  <div class="ac-item" id="ac-inst">
+    <button class="ac-hdr" onclick="acToggle('inst')">
+      <div class="ac-hdr-left">
+        <div class="ac-badge ac-badge-3" id="ac-badge-inst">3</div>
+        <div>
+          <div class="ac-titel">Instellingen</div>
+          <div class="ac-sub">Weergave op het bord aanpassen</div>
+        </div>
       </div>
-
-  </div><!-- /sb-paneel-taken -->
-
-  <!-- PANEEL 3: INSTELLINGEN -->
-  <div class="sb-paneel sb-paneel-hidden" id="sb-paneel-inst">
-    <div class="sb-paneel-titel">Instellingen</div>
+      <div class="ac-hdr-right">
+        <span class="ac-chevron" id="ac-chevron-inst">▼</span>
+      </div>
+    </button>
+    <div class="ac-body ac-body-hidden" id="ac-body-inst">
       <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
       <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
       <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
       <div style="font-size:11px;color:#a0aec0;padding-left:50px;margin-bottom:12px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
-  </div><!-- /sb-paneel-inst -->
+      <!-- Naar het bord -->
+      <div style="text-align:right;">
+        <button class="ac-go-btn" id="ac-go-btn" onclick="closeSettings()">📋 Naar het klasbord →</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /ac-container -->
 
 <!-- verborgen stubs zodat JS-refs niet breken -->
 <div class="hidden" id="tab-content-leerlingen"></div>
 <div class="hidden" id="tab-content-taken"></div>
 
-</div><!-- /sb-content -->
-</div><!-- /sb-layout -->
 </div><!-- /settings-inner -->
 </div><!-- /settings-wrap -->
 <!-- BOARD -->
