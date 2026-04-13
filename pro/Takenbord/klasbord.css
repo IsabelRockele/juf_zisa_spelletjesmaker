@@ -327,9 +327,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 
 /* Eigen afbeelding in taaknaam-header — groter */
 .t-icon-custom { width:var(--icon-custom,56px); height:var(--icon-custom,56px); background-size:contain; background-repeat:no-repeat; background-position:center; border-radius:10px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); transition:width .2s,height .2s; }
-#legend { display:flex; flex-direction:row; align-items:center; background:#fff; border-bottom:2px solid #e0e7ff; padding:0 14px; }
-#legend-name { width:var(--col-name); min-width:var(--col-name); flex-shrink:0; }
-#legend-items { display:flex; flex-direction:row; flex-wrap:nowrap; gap:14px; align-items:center; padding:6px 0; }
+#legend { display:flex; gap:14px; align-items:center; flex-wrap:wrap; background:#fff; border-bottom:2px solid #e0e7ff; padding:7px 14px 7px calc(var(--col-name) + var(--gap) + 14px); margin:0 -14px 8px; }
 .legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:#4b5563; font-weight:700; }
 .legend-dot  { width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
 #pupil-rows { display:flex; flex-direction:column; gap:0; }
@@ -564,31 +562,10 @@ body.smartboard #smartboard-exit-btn {
 .sd-choice-keep.active { border-color:#22c55e; background:#f0fdf4; color:#15803d; }
 .sd-choice-replace.active { border-color:#f59e0b; background:#fffbeb; color:#92400e; }
 
-/* ── Scroll-pijlen: rechtsonder / linksonder, klein zodat ze geen hokjes bedekken ── */
 #scroll-right-arrow,
 #scroll-left-arrow {
   position: fixed;
-  bottom: 20px;
-  z-index: 50;
-  width: 40px; height: 40px;
-  border-radius: 50%; border: none;
-  background: rgba(99,102,241,.85);
-  color: #fff; font-size: 22px; cursor: pointer;
-  box-shadow: 0 2px 10px rgba(99,102,241,.4);
-  display: flex; align-items: center; justify-content: center;
-  line-height: 1; transition: opacity .2s;
-}
-#scroll-right-arrow { right: 12px; }
-#scroll-left-arrow  { right: 58px; }
-#scroll-right-arrow.hidden,
-#scroll-left-arrow.hidden { display: none !important; }
-#scroll-right-arrow:hover,
-#scroll-left-arrow:hover { opacity: .75; }
-
-#scroll-right-arrow,
-#scroll-left-arrow {
-  position: fixed;
-  top: 50%;
+  top: 65%;
   transform: translateY(-50%);
   z-index: 50;
   width: 44px; height: 44px;
