@@ -863,6 +863,7 @@ body.ipad-modus #timer-popup { display:none !important; }
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-klasbord.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 <div class="page">
@@ -957,10 +958,17 @@ Noor Janssens"></textarea>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
 <div class="names-topbar">
   <button class="back-btn-orange teacher-only" onclick="goBackToSetup()" type="button">← Terug naar beheer</button>
-  <button class="back-btn-orange teacher-only" onclick="goBackToWelcome()" type="button">← Welkomstscherm</button>
-  <button class="teacher-btn teacher-only" id="openTeacherBtn">⚙️ Taken toewijzen</button>
-  <button class="teacher-btn teacher-only" onclick="openPdfModalKind()" type="button">📄 PDF rapport</button>
-  <button class="teacher-btn" onclick="toggleTimer()" type="button" id="timerToggleBtn">⏱️ Timer</button>
+  <button class="teacher-btn teacher-only" id="openTeacherBtn" style="background:#6366f1;color:#fff;border:none;">⚙️ Taken toewijzen</button>
+  <button class="teacher-btn teacher-only" onclick="openSmartboardTakenbord()" type="button" style="background:#3b82f6;color:#fff;border:none;">📺 Smartboard</button>
+  <button class="teacher-btn teacher-only" onclick="openQrTakenbord()" type="button" style="background:#8b5cf6;color:#fff;border:none;">📱 QR-code</button>
+  <div class="meer-opties-wrap teacher-only" style="position:relative;display:inline-block;">
+    <button onclick="toggleTakenbordMeer()" style="background:#f1f5f9;color:#374151;border:2px solid #e2e8f0;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Meer ▾</button>
+    <div id="takenbord-meer-menu" style="display:none;position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:2px solid #e0e7ff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:160px;z-index:200;padding:6px;">
+      <button onclick="openPdfModalKind();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">📄 PDF rapport</button>
+      <button onclick="toggleTimer();closeTakenbordMeer()" id="timerToggleBtn" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">⏱️ Timer</button>
+      <button onclick="goBackToWelcome();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">🏠 Welkomstscherm</button>
+    </div>
+  </div>
 </div>
 
 <!-- ⚙️ Menu knop voor smartboard modus -->
@@ -997,6 +1005,19 @@ Noor Janssens"></textarea>
 <button class="back-fab back-btn-orange" id="backBtn">← Terug naar namen</button>
 </section>
 </div>
+<!-- QR MODAL -->
+<div class="overlay hidden" id="qr-takenbord-modal" style="display:none;">
+<div class="modal" style="max-width:360px;text-align:center;">
+  <div class="modal-title">📱 QR-code voor leerlingen</div>
+  <p class="modal-sub" style="margin-bottom:16px;">Laat leerlingen deze code scannen om hun taken te zien.</p>
+  <div id="qr-takenbord-container" style="display:flex;justify-content:center;margin:16px 0;"></div>
+  <p id="qr-takenbord-url" style="font-size:11px;color:#94a3b8;word-break:break-all;margin-bottom:16px;"></p>
+  <div class="modal-btns">
+    <button class="btn btn-secondary" onclick="document.getElementById('qr-takenbord-modal').style.display='none'">Sluiten</button>
+  </div>
+</div>
+</div>
+
 <!-- SETUP UITLEG OVERLAY -->
 <div class="overlay" id="setup-help-overlay">
 <div class="popup" style="text-align:left;max-width:500px;width:100%;">
@@ -2037,6 +2058,48 @@ function closeTaskRenameKind(){
 // ── SMARTBOARD / IPAD MODUS ───────────────────────────────────────────────────
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
 const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipad';
+
+function toggleTakenbordMeer(){
+  var m = document.getElementById('takenbord-meer-menu');
+  if(m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+function closeTakenbordMeer(){
+  var m = document.getElementById('takenbord-meer-menu');
+  if(m) m.style.display = 'none';
+}
+document.addEventListener('click', function(e){
+  var w = document.querySelector('.meer-opties-wrap');
+  if(w && !w.contains(e.target)) closeTakenbordMeer();
+});
+
+function openSmartboardTakenbord(){
+  var params = new URLSearchParams(window.location.search);
+  params.set('modus','smartboard');
+  window.open(window.location.pathname + '?' + params.toString(), '_blank');
+}
+
+function openQrTakenbord(){
+  var modal = document.getElementById('qr-takenbord-modal');
+  if(!modal) return;
+  // Bouw URL naar public kindversie
+  var params = new URLSearchParams(window.location.search);
+  params.delete('modus');
+  var url = window.location.origin + window.location.pathname + '?' + params.toString();
+  document.getElementById('qr-takenbord-url').textContent = url;
+  var container = document.getElementById('qr-takenbord-container');
+  if(container){
+    container.innerHTML = '';
+    new QRCode(container, {
+      text: url,
+      width: 240,
+      height: 240,
+      colorDark: '#1e3a8a',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+  modal.style.display = 'flex';
+}
 
 function applySmartboardMode(){
   if(!isSmartboard && !isIpad) return;
