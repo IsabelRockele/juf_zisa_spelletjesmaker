@@ -983,11 +983,11 @@ function renderBoardTable(allTasks){
   const topFixed=document.getElementById('top-fixed');
   const legend=document.getElementById('legend');
   const PAD_PX=14;
-  const minWFixed=(_CN+allTasks.length*_CT+PAD_PX*2)+'px';
-  const minWRows=(_CN+allTasks.length*_CT)+'px';
+  const minWFixed=(_CN+allTasks.length*_CT)+'px';
+  const minWRows=minWFixed;
 
   if(taskHeader) taskHeader.style.minWidth=minWFixed;
-  if(legend){ legend.style.minWidth=minWFixed; legend.classList.remove('hidden'); }
+  if(legend){ legend.style.minWidth=(_CN+allTasks.length*_CT+PAD_PX*2)+'px'; legend.classList.remove('hidden'); }
 
   // Scroll sync: top-fixed horizontaal mee met board-scroll
   if(boardScroll&&topFixed&&!boardScroll._syncBound){
