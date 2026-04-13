@@ -223,7 +223,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-board-row.complete { background:linear-gradient(90deg,#f0fdf4,#fff); border-color:#86efac; box-shadow:0 2px 8px rgba(22,163,74,.15); }
 
 /* Naamcel */
-.pupil-name-cell { position:sticky; left:0; z-index:20; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:var(--row-pad,10px) 8px var(--row-pad,10px) 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; border-radius:12px 0 0 12px; }
+.pupil-name-cell { position:sticky; left:0; z-index:20; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:var(--row-pad,10px) 8px var(--row-pad,10px) 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; border-radius:12px 0 0 12px; margin:-2px 0 -2px -2px; border-left:2px solid #e0e7ff; border-top:2px solid #e0e7ff; border-bottom:2px solid #e0e7ff; }
 .pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
 
 /* Taakvakken wrapper */
@@ -507,18 +507,19 @@ body.smartboard #smartboard-exit-btn {
 #scroll-right-arrow,
 #scroll-left-arrow {
   position: fixed;
-  bottom: 20px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 50;
-  width: 40px; height: 40px;
+  width: 44px; height: 44px;
   border-radius: 50%; border: none;
   background: rgba(99,102,241,.85);
-  color: #fff; font-size: 22px; cursor: pointer;
+  color: #fff; font-size: 24px; cursor: pointer;
   box-shadow: 0 2px 10px rgba(99,102,241,.4);
   display: flex; align-items: center; justify-content: center;
   line-height: 1; transition: opacity .2s;
 }
-#scroll-right-arrow { right: 12px; }
-#scroll-left-arrow  { right: 58px; }
+#scroll-right-arrow { right: 8px; }
+#scroll-left-arrow  { left: 8px; }
 #scroll-right-arrow.hidden,
 #scroll-left-arrow.hidden { display: none !important; }
 #scroll-right-arrow:hover,
