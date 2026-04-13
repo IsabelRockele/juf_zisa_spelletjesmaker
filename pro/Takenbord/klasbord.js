@@ -937,7 +937,10 @@ function renderBoard(){
   renderBoardTable(allTasks);
   updateProgressBar();
   updateMeta();
-  setTimeout(updateScrollArrow,50);
+  requestAnimationFrame(updateScrollArrow);
+  setTimeout(updateScrollArrow,150);
+  setTimeout(updateScrollArrow,500);
+  setTimeout(updateScrollArrow,1500);
 }
 
 function renderBoardTable(allTasks){
@@ -1048,7 +1051,8 @@ function renderBoardTable(allTasks){
         const isExtra=!!(state.pupilTaskOverrides[pid]?.extra?.find(x=>x.id===t.id));
         const entry=prog[t.id]||{status:0,smiley:0};
         const s=entry.status||0, sm=entry.smiley||0;
-        const wrap=td;
+        const wrap=document.createElement('div');
+        wrap.className='task-cell';
         const btn=document.createElement('button');
         btn.className='task-btn status-'+s+(isExtra?' extra-task':'');
         btn.textContent=s===0?'':s===1?'🔄':'✓';
@@ -1081,6 +1085,7 @@ function renderBoardTable(allTasks){
           });
           wrap.appendChild(sr);
         }
+        td.appendChild(wrap);
       }
       taskWrap.appendChild(td);
     });
