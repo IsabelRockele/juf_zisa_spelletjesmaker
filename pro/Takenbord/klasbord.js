@@ -1388,7 +1388,8 @@ function renderBoardTable(allTasks){
     const dc=complete?'done':busy>0?'busy':'';
     const bh=busy>0?` · <span class="busy-label">${busy} bezig</span>`:'';
     const nh=state.showNumbers?`<span class="pupil-num">${idx+1}.</span>`:'';
-    const notesBtn=hasNotes?`<button class="notes-btn has-notes" onclick="openNotesModal('${pid}')" title="Bevindingen bekijken">🔒</button>`:'';
+    // Notities-knop — altijd zichtbaar in leerkrachtweergave
+    const notesBtn=`<button class="board-notes-btn${hasNotes?' has-notes':''}" onclick="openNotesModal('${pid}')" title="${hasNotes?'Opmerking bekijken/bewerken':'Opmerking toevoegen'}">🔒</button>`;
     const medalSpan=complete?'<span class="pupil-medal">🏅</span>':'';
     const photoHtml=photo?`<img class="pupil-board-photo" src="${photo}" alt="${esc(displayName(pupil))}" />`:'';
     nameCell.innerHTML=`<div class="pupil-dot ${dc}"></div>${nh}${photoHtml}<div class="pupil-info"><div class="pupil-name">${esc(displayName(pupil))}</div><div class="pupil-sub">${done}/${total}${bh}</div></div>${notesBtn}${medalSpan}`;
