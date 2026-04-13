@@ -937,3 +937,9 @@ body.smartboard #smartboard-exit-btn {
 .emoji-picker { display:flex; flex-wrap:wrap; gap:4px; }
 .emoji-btn { width:34px; height:34px; border-radius:7px; font-size:18px; border:2px solid #e0e7ff; background:#f8fafc; cursor:pointer; }
 .emoji-btn:hover, .emoji-btn.selected { border-color:#6366f1; background:#eef2ff; }
+
+/* Bredere scrollbar in modals */
+.modal::-webkit-scrollbar { width:10px; }
+.modal::-webkit-scrollbar-track { background:#f0f0f8; border-radius:5px; }
+.modal::-webkit-scrollbar-thumb { background:#6366f1; border-radius:5px; }
+.modal::-webkit-scrollbar-thumb:hover { background:#4338ca; }
