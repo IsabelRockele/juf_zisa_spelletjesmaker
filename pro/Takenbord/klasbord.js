@@ -821,14 +821,76 @@ function doNewPeriod(){
   document.getElementById('new-period-overlay').classList.add('hidden');
   renderShell();
 }
-function renderSettings(){
-  document.getElementById('tab-ll').classList.toggle('active',currentTab==='leerlingen');
-  document.getElementById('tab-tk').classList.toggle('active',currentTab==='taken');
-  document.getElementById('tab-content-leerlingen').classList.toggle('hidden',currentTab!=='leerlingen');
-  document.getElementById('tab-content-taken').classList.toggle('hidden',currentTab!=='taken');
-  if(currentTab==='leerlingen')renderPupilList();
-  if(currentTab==='taken')renderTaskSettings();
+// ── WIZARD STAPPENBALK UPDATE ─────────────────────────────────────────────
+function updateWizard(){
+  const heeftNamen = state.pupils && state.pupils.length > 0;
+  const heeftTaken = state.activeTasks && state.activeTasks.length > 0;
+  const klaar = heeftNamen && heeftTaken;
+
+  // Stap 1: Namen
+  const s1 = document.getElementById('wz-step-1');
+  const n1 = document.getElementById('wz-num-1');
+  if(s1 && n1){
+    s1.classList.toggle('wz-done', heeftNamen);
+    s1.classList.toggle('wz-active', !heeftNamen);
+    n1.textContent = heeftNamen ? '✓' : '1';
+  }
+  // Stap 2: Taken
+  const s2 = document.getElementById('wz-step-2');
+  const n2 = document.getElementById('wz-num-2');
+  if(s2 && n2){
+    s2.classList.toggle('wz-done', heeftTaken);
+    s2.classList.toggle('wz-active', heeftNamen && !heeftTaken);
+    n2.textContent = heeftTaken ? '✓' : '2';
+  }
+  // Stap 3: Instellingen
+  const s3 = document.getElementById('wz-step-3');
+  const n3 = document.getElementById('wz-num-3');
+  if(s3 && n3){
+    s3.classList.toggle('wz-done', klaar);
+    s3.classList.toggle('wz-active', klaar);
+    n3.textContent = klaar ? '✓' : '3';
+  }
+  // Panel-badges
+  const pb1 = document.getElementById('panel-badge-namen');
+  if(pb1) pb1.classList.toggle('beheer-badge-done', heeftNamen);
+  const pb2 = document.getElementById('panel-badge-taken');
+  if(pb2) pb2.classList.toggle('beheer-badge-done', heeftTaken);
+
+  // Subtitel namen-panel
+  const sub = document.getElementById('namen-sub-text');
+  if(sub) sub.textContent = heeftNamen
+    ? state.pupils.length + ' leerlingen toegevoegd'
+    : 'Voeg de leerlingen van je klas toe';
+
+  // Status-strip
+  const sL = document.getElementById('stat-leerlingen');
+  const sT = document.getElementById('stat-taken');
+  if(sL) sL.textContent = state.pupils.length;
+  if(sT) sT.textContent = (state.activeTasks||[]).length;
+
+  // Statustext + Go-knop
+  const st = document.getElementById('wz-status-text');
+  const btn = document.getElementById('wz-go-btn');
+  if(!heeftNamen){
+    if(st) st.textContent = 'Stap 1: voeg namen toe';
+    if(btn){ btn.disabled = true; btn.classList.remove('wz-go-ready'); }
+  } else if(!heeftTaken){
+    if(st) st.textContent = 'Stap 2: kies taken';
+    if(btn){ btn.disabled = true; btn.classList.remove('wz-go-ready'); }
+  } else {
+    if(st) st.textContent = state.pupils.length + ' leerlingen · ' + state.activeTasks.length + ' taken';
+    if(btn){ btn.disabled = false; btn.classList.add('wz-go-ready'); }
+  }
 }
+
+function renderSettings(){
+  // Geen tabs meer — render alles direct
+  renderPupilList();
+  renderTaskSettings();
+  updateWizard();
+}
+function switchTab(tab){ currentTab=tab; renderSettings(); }
 function renderPupilList(){
   document.getElementById('toggle-numbers').checked=!!state.showNumbers;
   document.getElementById('toggle-lastname').checked=!!state.showLastname;
@@ -884,6 +946,7 @@ function renderPupilList(){
   });
   html += '<div class="insert-zone" onclick="insertAfter('+(state.pupils.length-1)+')"></div>';
   el.innerHTML=html;
+  updateWizard();
 }
 function renderTaskSettings(){
   const ci=state.customIcons||{};
@@ -952,6 +1015,7 @@ function renderTaskSettings(){
 
   document.getElementById('emoji-picker').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
   document.getElementById('input-task').placeholder=`${selectedEmoji} Taaknaam…`;
+  updateWizard();
 }
 function selectEmoji(e){selectedEmoji=e;renderTaskSettings();}
 
