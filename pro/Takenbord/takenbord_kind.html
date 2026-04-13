@@ -3728,6 +3728,7 @@ body.ipad-modus .kind-teacher-banner { display: none !important; }
 
 <script>
 // ── BIBLIOTHEEK KINDBORD ──────────────────────────────────────────────────
+function escBib(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 var _kindBibBronKey = null;
 
 function openLaadUitBibliotheekKind(){
@@ -3767,7 +3768,7 @@ function openLaadUitBibliotheekKind(){
       rij.onmouseover = function(){ this.style.borderColor='#059669';this.style.background='#ecfdf5'; };
       rij.onmouseout  = function(){ this.style.borderColor='#e0e7ff';this.style.background='#f8fafc'; };
       rij.innerHTML = '<div>'
-        + '<div style="font-size:15px;font-weight:800;color:#1e1b4b;">'+esc(b.naam||'Naamloos')+'</div>'
+        + '<div style="font-size:15px;font-weight:800;color:#1e1b4b;">'+escBib(b.naam||'Naamloos')+'</div>'
         + '<div style="font-size:12px;color:#94a3b8;margin-top:2px;">'+(item.type==='kindbord'?'Kindbord':'Klasbord')+' · '+(n?n+' leerlingen':'leeg')+'</div>'
         + '</div>'
         + '<button style="border:none;background:#059669;color:#fff;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Kiezen</button>';
