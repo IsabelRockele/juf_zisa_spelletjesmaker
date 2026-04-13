@@ -591,3 +591,227 @@ body.smartboard #smartboard-exit-btn {
 #scroll-left-arrow  { left: 8px; }
 #scroll-right-arrow.hidden,
 #scroll-left-arrow.hidden { display: none !important; }
+/* ══ NIEUWE BEHEER-LAYOUT: WIZARD + 2-KOLOM ══════════════════════════════ */
+
+/* Settings-wrap: geen padding-bottom nodig, panels regelen dat zelf */
+#settings-wrap { padding:10px 14px 40px; }
+
+/* ── WIZARD STAPPENBALK ── */
+.wizard-bar {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:#fff;
+  border:1.5px solid #e0e7ff;
+  border-radius:14px;
+  padding:10px 16px;
+  margin-bottom:12px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.wizard-steps {
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.wz-step {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:800;
+  border:1.5px solid #e0e7ff;
+  background:#f8fafc;
+  color:#94a3b8;
+  transition:all .2s;
+}
+.wz-step.wz-active {
+  border-color:#6366f1;
+  background:#eef2ff;
+  color:#4338ca;
+}
+.wz-step.wz-done {
+  border-color:#86efac;
+  background:#f0fdf4;
+  color:#15803d;
+}
+.wz-num {
+  width:20px;
+  height:20px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:11px;
+  font-weight:800;
+  background:rgba(0,0,0,.08);
+  flex-shrink:0;
+}
+.wz-arrow {
+  color:#cbd5e0;
+  font-size:16px;
+  font-weight:400;
+  padding:0 2px;
+}
+.wz-label { white-space:nowrap; }
+
+/* Go-knop */
+.wz-go-btn {
+  background:#e2e8f0;
+  color:#94a3b8;
+  border:1.5px solid #e0e7ff;
+  border-radius:10px;
+  padding:9px 18px;
+  font-size:13px;
+  font-weight:800;
+  cursor:not-allowed;
+  font-family:inherit;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.wz-go-btn.wz-go-ready {
+  background:linear-gradient(135deg,#6366f1,#8b5cf6);
+  color:#fff;
+  border-color:#6366f1;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(99,102,241,.35);
+}
+.wz-go-btn.wz-go-ready:hover { opacity:.9; transform:translateY(-1px); }
+
+/* ── 2-KOLOM GRID ── */
+.beheer-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  align-items:start;
+}
+@media(max-width:740px){
+  .beheer-grid { grid-template-columns:1fr; }
+}
+.beheer-col-left, .beheer-col-right {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+
+/* ── PANELS ── */
+.beheer-panel {
+  background:#fff;
+  border:1.5px solid #e0e7ff;
+  border-radius:14px;
+  overflow:hidden;
+}
+.beheer-panel-hdr {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:11px 14px;
+  border-bottom:1.5px solid #f0f0f8;
+  background:linear-gradient(135deg,#fafbff,#f8f9ff);
+}
+.beheer-panel-body {
+  padding:12px 14px;
+}
+.beheer-panel-title {
+  font-size:13px;
+  font-weight:800;
+  color:#1e1b4b;
+  line-height:1.2;
+}
+.beheer-panel-sub {
+  font-size:11px;
+  color:#64748b;
+  margin-top:2px;
+}
+
+/* Panel-badge (stap-nummer) */
+.beheer-panel-badge {
+  width:26px;
+  height:26px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:800;
+  flex-shrink:0;
+  transition:all .2s;
+}
+.beheer-badge-1 { background:#dbeafe; color:#1e40af; }
+.beheer-badge-2 { background:#dcfce7; color:#15803d; }
+.beheer-badge-3 { background:#f3e8ff; color:#7c3aed; }
+.beheer-badge-done { background:#bbf7d0 !important; color:#15803d !important; }
+
+/* Bibliotheek-knop in panel header */
+.beheer-lib-btn {
+  margin-left:auto;
+  border:1.5px solid #c7d2fe;
+  background:#eef2ff;
+  color:#4338ca;
+  border-radius:8px;
+  padding:5px 10px;
+  font-size:11px;
+  font-weight:800;
+  cursor:pointer;
+  font-family:inherit;
+  white-space:nowrap;
+}
+.beheer-lib-btn:hover { background:#e0e7ff; }
+
+/* Scheidingslijn met label */
+.beheer-or-divider {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:10px 0 8px;
+  color:#a0aec0;
+  font-size:11px;
+  font-weight:700;
+}
+.beheer-or-divider::before,
+.beheer-or-divider::after {
+  content:'';
+  flex:1;
+  height:1px;
+  background:#e0e7ff;
+}
+
+/* Namenlijst: scrollbaar in panel */
+#pupil-list {
+  max-height:44vh;
+  overflow-y:auto;
+}
+#pupil-list::-webkit-scrollbar { width:6px; }
+#pupil-list::-webkit-scrollbar-track { background:#f0f0f8; border-radius:3px; }
+#pupil-list::-webkit-scrollbar-thumb { background:#c7d2fe; border-radius:3px; }
+#pupil-list::-webkit-scrollbar-thumb:hover { background:#818cf8; }
+
+/* Status-strip onderaan instellingen-panel */
+.beheer-status-strip {
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+.beheer-stat {
+  flex:1;
+  background:#f0f4ff;
+  border-radius:10px;
+  padding:8px 10px;
+  text-align:center;
+}
+.beheer-stat-n {
+  display:block;
+  font-size:20px;
+  font-weight:800;
+  color:#4338ca;
+  line-height:1.2;
+}
+.beheer-stat-l {
+  display:block;
+  font-size:10px;
+  font-weight:700;
+  color:#818cf8;
+  margin-top:1px;
+}
