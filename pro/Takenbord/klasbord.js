@@ -997,7 +997,6 @@ function renderBoardTable(allTasks){
 
   // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
   inner.style.minWidth=minWRows;
-  pupilRows.style.minWidth=minWRows;
 
   // Zorg voor pupil-rows container
   let pupilRows=document.getElementById('pupil-rows');
@@ -1006,6 +1005,7 @@ function renderBoardTable(allTasks){
     pupilRows.id='pupil-rows';
     inner.appendChild(pupilRows);
   }
+  pupilRows.style.minWidth=minWRows;
   pupilRows.innerHTML='';
 
   // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
