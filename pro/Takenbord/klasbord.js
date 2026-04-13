@@ -254,7 +254,7 @@ function parseName(str){
   if(bulkOrder==='achternaam') return{voornaam:parts[parts.length-1],achternaam:parts.slice(0,parts.length-1).join(' ')};
   return{voornaam:parts[0],achternaam:parts.slice(1).join(' ')};
 }
-function setOrder(o){ bulkOrder=o; document.getElementById('order-btn-voor').classList.toggle('active',o==='voornaam'); document.getElementById('order-btn-ach').classList.toggle('active',o==='achternaam'); }
+function setOrder(o){ bulkOrder=o; var bv=document.getElementById('order-btn-voor');var ba=document.getElementById('order-btn-ach');if(bv)bv.classList.toggle('active',o==='voornaam');if(ba)ba.classList.toggle('active',o==='achternaam'); }
 
 function addPupil(){
   const v=document.getElementById('input-voornaam').value.trim(),a=document.getElementById('input-achternaam').value.trim();
@@ -370,10 +370,10 @@ function openBackupModal(){ document.getElementById('backup-modal').classList.re
 function closeBM(){ document.getElementById('backup-modal').classList.add('hidden'); }
 
 function openNewSchoolYear(){
-  document.getElementById('new-school-year-modal').classList.remove('hidden');
+  var m=document.getElementById('new-school-year-modal');if(m)m.classList.remove('hidden');
 }
 function closeNewSchoolYear(){
-  document.getElementById('new-school-year-modal').classList.add('hidden');
+  var m=document.getElementById('new-school-year-modal');if(m)m.classList.add('hidden');
 }
 function doNewSchoolYear(){
   const keepTasks    = document.getElementById('nsy-keep-tasks').checked;
@@ -822,46 +822,58 @@ function doNewPeriod(){
   renderShell();
 }
 // ── ACCORDION ────────────────────────────────────────────────────────────
-function acToggle(sectie){
+// ── ZIJBALK NAVIGATIE ─────────────────────────────────────────────────────
+var _sbActief = 'namen';
+
+function sbToon(sectie){
+  _sbActief = sectie;
   ['namen','taken','inst'].forEach(function(s){
-    var body    = document.getElementById('ac-body-' + s);
-    var hdr     = document.querySelector('#ac-' + s + ' .ac-hdr');
-    var chevron = document.getElementById('ac-chevron-' + s);
-    if(!body) return;
-    var open = s === sectie;
-    body.classList.toggle('ac-body-hidden', !open);
-    if(hdr)     hdr.classList.toggle('ac-open', open);
-    if(chevron) chevron.textContent = open ? '▲' : '▼';
+    var paneel = document.getElementById('sb-paneel-' + s);
+    var stap   = document.getElementById('sb-stap-' + s);
+    if(paneel) paneel.classList.toggle('sb-paneel-hidden', s !== sectie);
+    if(stap)   stap.classList.toggle('sb-actief', s === sectie);
   });
   if(sectie === 'namen') renderPupilList();
   if(sectie === 'taken') renderTaskSettings();
   if(sectie === 'inst'){
-    document.getElementById('toggle-numbers').checked = !!state.showNumbers;
-    document.getElementById('toggle-lastname').checked = !!state.showLastname;
-    document.getElementById('toggle-smileys').checked  = !!state.showSmileys;
+    var tn=document.getElementById('toggle-numbers'); if(tn) tn.checked=!!state.showNumbers;
+    var tl=document.getElementById('toggle-lastname'); if(tl) tl.checked=!!state.showLastname;
+    var ts=document.getElementById('toggle-smileys');  if(ts) ts.checked=!!state.showSmileys;
   }
-  updateAcWizard();
+  updateSbWizard();
 }
 
-function updateAcWizard(){
+function acToggle(s){ sbToon(s); }
+
+function updateSbWizard(){
   var heeftNamen = state.pupils && state.pupils.length > 0;
   var heeftTaken = state.activeTasks && state.activeTasks.length > 0;
-  var b1 = document.getElementById('ac-badge-namen');
-  var b2 = document.getElementById('ac-badge-taken');
-  var b3 = document.getElementById('ac-badge-inst');
-  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('ac-badge-done', heeftNamen); }
-  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('ac-badge-done', heeftTaken); }
-  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('ac-badge-done', heeftNamen&&heeftTaken); }
-  var sub1 = document.getElementById('ac-sub-namen');
-  if(sub1) sub1.textContent = heeftNamen ? state.pupils.length + ' leerlingen toegevoegd' : 'Voeg de leerlingen van je klas toe';
-  var sub2 = document.getElementById('ac-sub-taken');
-  if(sub2) sub2.textContent = heeftTaken ? state.activeTasks.length + ' taken actief' : 'Klik op een taak om aan of uit te zetten';
+  var b1=document.getElementById('sb-badge-namen'); if(b1){ b1.textContent=heeftNamen?'✓':'1'; b1.classList.toggle('sb-badge-klaar',heeftNamen); }
+  var b2=document.getElementById('sb-badge-taken'); if(b2){ b2.textContent=heeftTaken?'✓':'2'; b2.classList.toggle('sb-badge-klaar',heeftTaken); }
+  var b3=document.getElementById('sb-badge-inst');  if(b3){ b3.textContent=(heeftNamen&&heeftTaken)?'✓':'3'; b3.classList.toggle('sb-badge-klaar',heeftNamen&&heeftTaken); }
+  var s1=document.getElementById('sb-sub-namen'); if(s1) s1.textContent=heeftNamen?state.pupils.length+' leerlingen':'Leerlingen toevoegen';
+  var s2=document.getElementById('sb-sub-taken'); if(s2) s2.textContent=heeftTaken?(state.activeTasks.length)+' actief':'Taken kiezen';
+  var bn=document.getElementById('sb-bord-naam'); if(bn){ var n=getBordNaam(); bn.textContent=n||''; bn.style.display=n?'block':'none'; }
 }
 
+function updateAcWizard(){ updateSbWizard(); }
+
+function toggleEmojiPicker(){
+  var popup=document.getElementById('emoji-picker-popup'); if(!popup) return;
+  popup.classList.toggle('open');
+  if(popup.classList.contains('open')){
+    setTimeout(function(){
+      document.addEventListener('click', function closeEP(e){
+        if(!popup.contains(e.target) && e.target.id!=='eigen-taak-emoji-btn'){ popup.classList.remove('open'); document.removeEventListener('click',closeEP); }
+      });
+    }, 10);
+  }
+}
+function updateEmojiBtn(){ var btn=document.getElementById('eigen-taak-emoji-btn'); if(btn) btn.textContent=selectedEmoji; }
+
 function renderSettings(){
-  renderPupilList();
-  renderTaskSettings();
-  updateAcWizard();
+  sbToon(_sbActief);
+  updateSbWizard();
 }
 function switchTab(tab){ currentTab=tab; }
 
@@ -1287,7 +1299,7 @@ function renderBoardTable(allTasks){
 function renderTaskHeader(tasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 function renderPupilRows(allTasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 
-function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;document.getElementById('progress-fill').style.width=t?(d/t*100)+'%':'0%';document.getElementById('progress-label').textContent=`${d}/${t} klaar`;}
+function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=t?(d/t*100)+'%':'0%';if(pl)pl.textContent=`${d}/${t} klaar`;}
 function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p){return isPupilComplete(p.id);}).length;var el=document.getElementById('board-progress-text');if(el)el.textContent=(t>0)?(d+'/'+t+' klaar'):'';var pl=document.getElementById('progress-label');if(pl)pl.textContent=(d+'/'+t+' klaar');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1426,7 +1438,8 @@ function initKlasbordAfterLoad(){
   const isKindModus = urlParams.get('rol') === 'kind';
   const startTab = urlParams.get('tab');
 
-  currentMode = (isKindModus || urlParams.get('view') === 'board') ? 'board' : 'settings';
+  var heeftAlles = state.pupils&&state.pupils.length>0&&state.activeTasks&&state.activeTasks.length>0;
+  currentMode = (isKindModus||urlParams.get('view')==='board'||heeftAlles)?'board':'settings';
   currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
   applySmartboard();
