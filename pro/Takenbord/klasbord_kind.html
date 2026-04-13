@@ -11,56 +11,53 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-klasbord.js"></script>
   <style>
-    /* ── Reset klasbord.css viewport-locks voor kindmodus ── */
-    html, body {
-      overflow: hidden !important;
-      height: 100% !important;
-      background: #f8fafc;
-      padding-top: 0 !important;
-    }
-    #app {
-      display: none;
-      height: 100vh !important;
-      overflow: hidden !important;
-      flex-direction: column;
-    }
-    /* board-wrap: flex-kolom die de resterende hoogte vult */
-    #board-wrap {
-      flex: 1 1 0 !important;
-      min-height: 0 !important;
-      overflow: hidden !important;
-      display: block !important;
-    }
-    /* board-scroll: scrollt in beide richtingen */
+    /* ── Reset + board layout ── */
+    html, body { overflow: hidden !important; height: 100% !important; background: #eef2ff !important; padding-top: 0 !important; }
+    #app { display: none; height: 100vh !important; overflow: hidden !important; flex-direction: column; }
+    #board-wrap { flex: 1 1 0 !important; min-height: 0 !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+    #board-bar { display: none !important; }
     #board-scroll {
-      height: 100% !important;
+      flex: 1 !important; min-height: 0 !important;
       overflow: auto !important;
-      flex: 1 1 0 !important;
-      min-height: 0 !important;
-      padding: 0 14px 100px !important;
+      padding: 0 14px 80px !important;
+      background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
     }
-    #board-inner,
-    #task-header,
-    #legend {
-      min-width: max-content !important;
-    }
+    #board-scroll::-webkit-scrollbar { width: 8px !important; height: 8px !important; }
+    #board-scroll::-webkit-scrollbar-track { background: #e0e7ff !important; border-radius: 4px !important; }
+    #board-scroll::-webkit-scrollbar-thumb { background: #6366f1 !important; border-radius: 4px !important; }
+    /* task-header */
+    #task-header { position: sticky !important; top: 58px !important; z-index: 35 !important; background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important; display: flex !important; align-items: stretch !important; gap: 8px !important; padding: 10px 0 8px !important; border-bottom: 3px solid #e0e7ff !important; margin-bottom: 4px !important; min-width: max-content !important; }
+    .header-corner { position: sticky !important; left: 0 !important; z-index: 40 !important; background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important; width: 220px !important; min-width: 220px !important; flex-shrink: 0 !important; display: flex !important; align-items: flex-end !important; padding-bottom: 4px !important; padding-left: 14px !important; font-size: 11px !important; font-weight: 800 !important; color: #6366f1 !important; text-transform: uppercase !important; letter-spacing: .05em !important; }
+    .task-header-cell { width: 110px !important; min-width: 110px !important; flex-shrink: 0 !important; text-align: center !important; display: flex !important; flex-direction: column !important; align-items: center !important; gap: 3px !important; }
+    /* legend */
+    #legend { position: sticky !important; top: 130px !important; z-index: 35 !important; min-width: max-content !important; display: flex !important; align-items: center !important; background: #fff !important; border-bottom: 2px solid #e0e7ff !important; margin: 0 -14px 8px !important; padding: 0 !important; }
+    #legend-name { position: sticky !important; left: 0 !important; z-index: 36 !important; background: #fff !important; width: 220px !important; min-width: 220px !important; flex-shrink: 0 !important; align-self: stretch !important; }
+    #legend-items { display: flex !important; gap: 14px !important; align-items: center !important; padding: 7px 14px !important; flex-wrap: wrap !important; }
+    /* rijen */
+    #pupil-rows { min-width: max-content !important; gap: 0 !important; }
+    .pupil-board-row { display: flex !important; align-items: stretch !important; border: 2px solid #e0e7ff !important; border-radius: 14px !important; box-shadow: 0 2px 8px rgba(99,102,241,.08) !important; margin-bottom: 6px !important; background: #fff !important; position: relative !important; }
+    .pupil-board-row.complete { background: linear-gradient(90deg,#f0fdf4,#fff) !important; border-color: #86efac !important; }
+    /* naamcel */
+    .pupil-name-cell { position: sticky !important; left: 0 !important; z-index: 20 !important; background: #fff !important; width: 220px !important; min-width: 220px !important; flex-shrink: 0 !important; padding: 10px 10px 10px 14px !important; display: flex !important; align-items: center !important; gap: 8px !important; border-right: 2px solid #e0e7ff !important; }
+    .pupil-board-row.complete .pupil-name-cell { background: #f0fdf4 !important; border-color: #86efac !important; }
+    .pupil-name-cell::before { content: "" !important; position: absolute !important; inset: 0 !important; background: inherit !important; border-radius: 12px 0 0 12px !important; z-index: -1 !important; }
+    /* taakvakken */
+    .task-cells-wrap { display: flex !important; align-items: center !important; gap: 8px !important; padding: 6px 10px !important; }
+    .task-cell { width: 110px !important; min-width: 110px !important; flex-shrink: 0 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 3px !important; padding: 2px 0 !important; }
+    .task-btn { width: 54px !important; height: 54px !important; border-radius: 12px !important; border: 2px dashed #c7d2fe !important; background: #eef2ff !important; cursor: pointer !important; font-size: 20px !important; font-weight: 800 !important; display: flex !important; align-items: center !important; justify-content: center !important; color: #c7d2fe !important; position: relative !important; transition: transform .12s !important; font-family: inherit !important; }
+    .task-btn::after { content: "○" !important; position: absolute !important; font-size: 26px !important; color: #c7d2fe !important; font-weight: 400 !important; }
+    .task-btn.status-1 { background: #fef9c3 !important; border: 2px solid #f59e0b !important; color: #d97706 !important; }
+    .task-btn.status-1::after, .task-btn.status-2::after { display: none !important; }
+    .task-btn.status-2 { background: #dcfce7 !important; border: 2px solid #16a34a !important; color: #15803d !important; }
+    #board-inner { display: contents !important; }
 
     /* ── Task-header sticky bovenaan (onder kind-topbar van 58px) ── */
-    #task-header {
-      position: sticky !important;
-      top: 58px !important;
-      z-index: 35 !important;
-      background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
+
+    #legend {
+      position: static !important;
+      margin: 0 0 8px !important;
+      padding-left: 14px !important;
     }
-    .header-corner {
-      position: sticky !important;
-      left: 0 !important;
-      z-index: 40 !important;
-      background: linear-gradient(135deg,#f0f9ff,#fef9ff) !important;
-    }
-    #legend { min-width: max-content !important; display: flex !important; align-items: center !important; background: #fff !important; border-bottom: 2px solid #e0e7ff !important; margin: 0 -14px 8px !important; padding: 0 !important; }
-    #legend-name { position: sticky !important; left: 0 !important; z-index: 36 !important; background: #fff !important; width: var(--col-name) !important; min-width: var(--col-name) !important; flex-shrink: 0 !important; align-self: stretch !important; }
-    #legend-items { display: flex !important; gap: 14px !important; align-items: center !important; padding: 7px 14px !important; flex-wrap: wrap !important; }
 
     /* ── Kind-topbar ── */
     .kind-topbar {
@@ -78,11 +75,7 @@
     }
     .kind-title { font-size:18px; font-weight:800; color:#1e1b4b; }
     .kind-sub   { font-size:12px; color:#64748b; font-weight:700; }
-    .kind-timer-btn {
-      border: 2px solid #e0e7ff; background: #f0f4ff; color: #6366f1; border-radius: 12px;
-      padding: 10px 14px; font-size: 14px; font-weight: 800; cursor: pointer;
-      font-family: inherit; white-space: nowrap;
-    }
+    .kind-timer-btn { border: 2px solid #e0e7ff; background: #f0f4ff; color: #6366f1; border-radius: 12px; padding: 10px 14px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit; white-space: nowrap; }
     .kind-close-btn {
       border: none; background: #ef4444; color: #fff; border-radius: 12px;
       padding: 10px 14px; font-size: 14px; font-weight: 800; cursor: pointer;
@@ -117,12 +110,10 @@
     .loading-card .sub   { font-size:14px; color:#64748b; margin-top:6px; line-height:1.6; }
 
     /* ── Naamkolom: vult volledige rijhoogte, dekt scrollende content af ── */
-    #pupil-rows { gap: 0 !important; }
-    /* Rijen: duidelijk afgebakend vak */
+
     .pupil-board-row { margin-bottom: 6px !important; align-items: stretch !important; }
-    /* Naamcel: sticky, eigen achtergrond — GEEN box-shadow hack */
-    .pupil-name-cell { background: #fff !important; z-index: 20 !important; align-items: center !important; border-radius: 0 !important; }
-    .pupil-board-row.complete .pupil-name-cell { background: #f0fdf4 !important; }
+    .pupil-name-cell { background: #fff !important; z-index: 25 !important; border-radius: 13px 0 0 13px !important; align-items: center !important; box-shadow: -20px 0 0 20px #fff !important; }
+    .pupil-board-row.complete .pupil-name-cell { box-shadow: -20px 0 0 20px #f0fdf4 !important; }
 
     /* ── Verberg leerkracht-elementen ── */
     .teacher-only { display:none !important; }
@@ -132,7 +123,6 @@
     #pupil-tasks-overlay, #rename-task-overlay, #confirm-overlay,
     #celebration, #backup-reminder { display:none !important; }
     .board-bar-right { gap:8px; }
-    #timerToggleBtn { display:none !important; }
     #btn-undo { display:none !important; }
 
     /* ── Scroll-pijlen: verticaal gecentreerd, altijd bereikbaar ── */
@@ -190,13 +180,13 @@
         <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Nog geen bordgegevens gevonden</p></div>
         <div id="task-header" class="hidden"><div class="header-corner"><span>Leerling</span></div></div>
         <div id="legend" class="hidden">
-            <div id="legend-name"></div>
-            <div id="legend-items">
-              <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
-              <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
-              <span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
-            </div>
+          <div id="legend-name"></div>
+          <div id="legend-items">
+            <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
+            <span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
+          </div>
         </div>
         <div id="board-inner" class="hidden">
           <div id="pupil-rows"></div>
