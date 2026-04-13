@@ -3752,12 +3752,13 @@ function openLaadUitBibliotheekKind(){
     });
   } catch(e){}
 
+  console.log('Bibliotheek borden:', allBorden);
   if(!allBorden.length){
-    lijst.innerHTML = '<div style="font-size:14px;color:#9ca3af;padding:12px 0;">Geen andere borden gevonden.</div>';
+    lijst.innerHTML = '<div style="font-size:14px;color:#9ca3af;padding:12px 0;">Geen andere borden gevonden. Maak eerst een ander bord aan via het welkomstscherm.</div>';
   } else {
     allBorden.forEach(function(item){
       var b = item.bord;
-      var storageKey = item.type === 'kindbord' ? 'kind_'+b.id : 'takenbord_v1_'+b.id;
+      var storageKey = b.storageKey || (item.type === 'kindbord' ? 'kind_'+b.id : 'klas_'+b.id);
       // Probeer pupil-count
       var n = 0;
       try { n = (JSON.parse(localStorage.getItem(storageKey)||'{}')).pupils.length || 0; } catch(e){}
@@ -3770,13 +3771,14 @@ function openLaadUitBibliotheekKind(){
         + '<div style="font-size:12px;color:#94a3b8;margin-top:2px;">'+(item.type==='kindbord'?'Kindbord':'Klasbord')+' · '+(n?n+' leerlingen':'leeg')+'</div>'
         + '</div>'
         + '<button style="border:none;background:#059669;color:#fff;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Kiezen</button>';
-      rij.addEventListener('click', function(){
-        _kindBibBronKey = storageKey;
-        document.getElementById('kind-bib-bronnaam').textContent = b.naam||'dit bord';
-        document.getElementById('kind-bib-opties').style.display = 'block';
-        // Scroll naar opties
-        document.getElementById('kind-bib-opties').scrollIntoView({behavior:'smooth'});
-      });
+      rij.addEventListener('click', (function(sk, bn){
+        return function(){
+          _kindBibBronKey = sk;
+          document.getElementById('kind-bib-bronnaam').textContent = bn||'dit bord';
+          document.getElementById('kind-bib-opties').style.display = 'block';
+          document.getElementById('kind-bib-opties').scrollIntoView({behavior:'smooth'});
+        };
+      })(storageKey, b.naam));
       lijst.appendChild(rij);
     });
   }
