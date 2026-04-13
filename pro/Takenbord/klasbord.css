@@ -462,13 +462,13 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .smiley-chosen:hover { transform:scale(1.2) !important; border-color:#6366f1 !important; background:#eef2ff !important; }
 
 /* TAAKKNOP — grootte via CSS-variabelen zodat compact/normaal/groot werkt */
-.task-btn { width:var(--btn-w,66px); height:var(--btn-h,66px); border-radius:16px; border:2.5px dashed #c7d2fe; background:linear-gradient(135deg,#eef2ff,#f5f3ff); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:var(--btn-font,26px); font-weight:800; color:transparent; transition:all .18s cubic-bezier(.34,1.56,.64,1); font-family:inherit; position:relative; }
+.task-btn { width:var(--btn-w,66px); height:var(--btn-h,66px); border-radius:16px; border:3px dashed #c7d2fe; background:linear-gradient(135deg,#eef2ff,#f5f3ff); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:var(--btn-font,26px); font-weight:800; color:transparent; transition:all .18s cubic-bezier(.34,1.56,.64,1); font-family:inherit; position:relative; }
 .task-btn::after { content:'○'; position:absolute; font-size:26px; color:#c7d2fe; font-weight:400; line-height:1; }
 .task-btn:hover { border-color:#818cf8; background:linear-gradient(135deg,#e0e7ff,#ede9fe); transform:scale(1.06); }
 .task-btn:hover::after { color:#818cf8; }
 .task-btn.status-1 { border:3px solid #f59e0b; background:linear-gradient(135deg,#fef9c3,#fef3c7); color:#d97706; box-shadow:0 3px 10px rgba(245,158,11,.25); }
 .task-btn.status-1::after { display:none; }
-.task-btn.status-2 { border:3px solid #16a34a; background:linear-gradient(135deg,#dcfce7,#d1fae5); color:#15803d; transform:scale(1.07); box-shadow:0 3px 12px rgba(22,163,74,.25); }
+.task-btn.status-2 { border:3px solid #16a34a; background:linear-gradient(135deg,#dcfce7,#d1fae5); color:#15803d; box-shadow:0 3px 12px rgba(22,163,74,.25); }
 .task-btn.status-2::after { display:none; }
 .task-btn:hover { border-color:#818cf8; transform:scale(1.06); }
 .task-btn.status-2:hover { transform:scale(1.1); }
