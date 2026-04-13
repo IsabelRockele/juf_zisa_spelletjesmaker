@@ -10,12 +10,11 @@
 <style>
 body{min-height:100vh;overflow:auto;}
 /* ── PRO HEADER ── */
-.pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:10px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:44px;box-sizing:border-box;}
-.pro-header-left{display:flex;align-items:center;gap:10px;}
-.pro-back-btn{border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
-.pro-back-btn:hover{background:rgba(255,255,255,.3);}
-.pro-header-title{font-size:14px;font-weight:800;opacity:.9;}
-.pro-badge{background:rgba(255,255,255,.2);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;letter-spacing:.05em;}
+.pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#0b3060 0%,#1a5fa8 100%);color:#fff;padding:8px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:44px;box-sizing:border-box;font-size:0.85rem;font-weight:700;letter-spacing:0.02em;}
+.pro-back-btn{border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.pro-back-btn:hover{background:rgba(255,255,255,.25);}
+.pro-header-title{font-size:14px;font-weight:700;opacity:.9;}
+.pro-badge{background:#f5c200;color:#0b3060;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800;}
 body{padding-top:44px;}
 #app{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#f0f4ff 0%,#e8eeff 50%,#f0fdf8 100%);padding:24px;}
 
@@ -94,11 +93,11 @@ body{padding-top:44px;}
 </head>
 <body>
 <div class="pro-header">
-  <div class="pro-header-left">
-    <a href="../app.html" class="pro-back-btn">← Terug naar menu</a>
-    <span class="pro-header-title">📋 Klasbord</span>
-  </div>
-  <span class="pro-badge">PRO</span>
+  <span class="pro-badge">⭐ PRO</span>
+  <span class="pro-header-title">📋 Klasbord — Juf Zisa PRO</span>
+</div>
+<div style="padding:10px 20px 0;">
+  <a href="../app.html" style="display:inline-flex;align-items:center;gap:8px;background:#0b3060;color:#fff;border-radius:10px;padding:8px 18px;font-size:14px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;">☰ Keuzemenu</a>
 </div>
 <div id="app">
 
@@ -624,7 +623,9 @@ laadEl.style.cssText = 'text-align:center;padding:60px 20px;font-family:Nunito,s
 laadEl.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📋</div><div style="font-size:18px;font-weight:800;color:#1e1b4b;">Klasbord laden...</div><div style="font-size:13px;color:#9ca3af;margin-top:8px;">Even geduld</div>';
 document.getElementById('app').appendChild(laadEl);
 
-window.fbOnReady(async function(uid) {
+(function wachтOpFb(pogingen){
+  if(typeof window.fbOnReady === 'function'){
+    window.fbOnReady(async function(uid) {
   // Verwijder laadmelding
   var lm = document.getElementById('laad-melding');
   if(lm) lm.remove();
@@ -658,6 +659,10 @@ window.fbOnReady(async function(uid) {
   // Toon het type-keuze scherm
   document.getElementById('scherm-type').style.display = '';
 });
+  } else if(pogingen > 0){
+    setTimeout(function(){ wachтOpFb(pogingen-1); }, 100);
+  }
+})(30);
 </script>
   <script src="../device-id.js"></script>
   <script src="../guard.js"></script>
