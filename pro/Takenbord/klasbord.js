@@ -254,7 +254,7 @@ function parseName(str){
   if(bulkOrder==='achternaam') return{voornaam:parts[parts.length-1],achternaam:parts.slice(0,parts.length-1).join(' ')};
   return{voornaam:parts[0],achternaam:parts.slice(1).join(' ')};
 }
-function setOrder(o){ bulkOrder=o; const bv=document.getElementById('order-btn-voor');const ba=document.getElementById('order-btn-ach');if(bv)bv.classList.toggle('active',o==='voornaam');if(ba)ba.classList.toggle('active',o==='achternaam'); }
+function setOrder(o){ bulkOrder=o; document.getElementById('order-btn-voor').classList.toggle('active',o==='voornaam'); document.getElementById('order-btn-ach').classList.toggle('active',o==='achternaam'); }
 
 function addPupil(){
   const v=document.getElementById('input-voornaam').value.trim(),a=document.getElementById('input-achternaam').value.trim();
@@ -370,12 +370,10 @@ function openBackupModal(){ document.getElementById('backup-modal').classList.re
 function closeBM(){ document.getElementById('backup-modal').classList.add('hidden'); }
 
 function openNewSchoolYear(){
-  const m=document.getElementById('new-school-year-modal');
-  if(m) m.classList.remove('hidden');
+  document.getElementById('new-school-year-modal').classList.remove('hidden');
 }
 function closeNewSchoolYear(){
-  const m=document.getElementById('new-school-year-modal');
-  if(m) m.classList.add('hidden');
+  document.getElementById('new-school-year-modal').classList.add('hidden');
 }
 function doNewSchoolYear(){
   const keepTasks    = document.getElementById('nsy-keep-tasks').checked;
@@ -823,47 +821,66 @@ function doNewPeriod(){
   document.getElementById('new-period-overlay').classList.add('hidden');
   renderShell();
 }
-// ── ACCORDION ────────────────────────────────────────────────────────────
-function acToggle(sectie){
+// ── ZIJBALK NAVIGATIE ────────────────────────────────────────────────────
+var _sbActief = 'namen';
+
+function sbToon(sectie){
+  _sbActief = sectie;
   ['namen','taken','inst'].forEach(function(s){
-    var body    = document.getElementById('ac-body-' + s);
-    var hdr     = document.querySelector('#ac-' + s + ' .ac-hdr');
-    var chevron = document.getElementById('ac-chevron-' + s);
-    if(!body) return;
-    var open = s === sectie;
-    body.classList.toggle('ac-body-hidden', !open);
-    if(hdr)     hdr.classList.toggle('ac-open', open);
-    if(chevron) chevron.textContent = open ? '▲' : '▼';
+    var paneel = document.getElementById('sb-paneel-' + s);
+    var stap   = document.getElementById('sb-stap-' + s);
+    if(paneel) paneel.classList.toggle('sb-paneel-hidden', s !== sectie);
+    if(stap)   stap.classList.toggle('sb-actief', s === sectie);
   });
   if(sectie === 'namen') renderPupilList();
   if(sectie === 'taken') renderTaskSettings();
   if(sectie === 'inst'){
-    document.getElementById('toggle-numbers').checked = !!state.showNumbers;
-    document.getElementById('toggle-lastname').checked = !!state.showLastname;
-    document.getElementById('toggle-smileys').checked  = !!state.showSmileys;
+    var tn = document.getElementById('toggle-numbers');
+    var tl = document.getElementById('toggle-lastname');
+    var ts = document.getElementById('toggle-smileys');
+    if(tn) tn.checked = !!state.showNumbers;
+    if(tl) tl.checked = !!state.showLastname;
+    if(ts) ts.checked = !!state.showSmileys;
   }
-  updateAcWizard();
+  updateSbWizard();
 }
 
-function updateAcWizard(){
+// Alias voor oude accordion-aanroepen die nog ergens kunnen zitten
+function acToggle(s){ sbToon(s); }
+
+function updateSbWizard(){
   var heeftNamen = state.pupils && state.pupils.length > 0;
   var heeftTaken = state.activeTasks && state.activeTasks.length > 0;
-  var b1 = document.getElementById('ac-badge-namen');
-  var b2 = document.getElementById('ac-badge-taken');
-  var b3 = document.getElementById('ac-badge-inst');
-  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('ac-badge-done', heeftNamen); }
-  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('ac-badge-done', heeftTaken); }
-  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('ac-badge-done', heeftNamen&&heeftTaken); }
-  var sub1 = document.getElementById('ac-sub-namen');
-  if(sub1) sub1.textContent = heeftNamen ? state.pupils.length + ' leerlingen toegevoegd' : 'Voeg de leerlingen van je klas toe';
-  var sub2 = document.getElementById('ac-sub-taken');
-  if(sub2) sub2.textContent = heeftTaken ? state.activeTasks.length + ' taken actief' : 'Klik op een taak om aan of uit te zetten';
+
+  // Badges
+  var b1 = document.getElementById('sb-badge-namen');
+  var b2 = document.getElementById('sb-badge-taken');
+  var b3 = document.getElementById('sb-badge-inst');
+  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('sb-badge-klaar', heeftNamen); }
+  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('sb-badge-klaar', heeftTaken); }
+  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('sb-badge-klaar', heeftNamen&&heeftTaken); }
+
+  // Sub-teksten
+  var s1 = document.getElementById('sb-sub-namen');
+  if(s1) s1.textContent = heeftNamen ? state.pupils.length + ' leerlingen' : 'Leerlingen toevoegen';
+  var s2 = document.getElementById('sb-sub-taken');
+  if(s2) s2.textContent = heeftTaken ? (state.activeTasks.length) + ' actief' : 'Taken kiezen';
+
+  // Bordnaam
+  var bn = document.getElementById('sb-bord-naam');
+  if(bn){ var n=getBordNaam(); bn.textContent = n || ''; bn.style.display = n ? 'block' : 'none'; }
+
+  // Go-knop: altijd klikbaar maar visueel verschil
+  var go = document.getElementById('sb-go-btn');
+  if(go) go.disabled = false;
 }
 
+// Alias voor updateAcWizard die nog in renderPupilList/renderTaskSettings zit
+function updateAcWizard(){ updateSbWizard(); }
+
 function renderSettings(){
-  renderPupilList();
-  renderTaskSettings();
-  updateAcWizard();
+  sbToon(_sbActief);
+  updateSbWizard();
 }
 function switchTab(tab){ currentTab=tab; }
 
@@ -1395,7 +1412,9 @@ function initKlasbordAfterLoad(){
   const isKindModus = urlParams.get('rol') === 'kind';
   const startTab = urlParams.get('tab');
 
-  currentMode = (isKindModus || urlParams.get('view') === 'board') ? 'board' : 'settings';
+  // Direct naar bord als namen én taken al ingesteld zijn
+  var heeftAlles = state.pupils && state.pupils.length > 0 && state.activeTasks && state.activeTasks.length > 0;
+  currentMode = (isKindModus || urlParams.get('view') === 'board' || heeftAlles) ? 'board' : 'settings';
   currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
   applySmartboard();
