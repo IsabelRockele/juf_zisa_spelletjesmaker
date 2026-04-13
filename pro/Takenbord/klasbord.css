@@ -665,169 +665,87 @@ body.smartboard #smartboard-exit-btn {
 }
 .ac-go-btn:hover { opacity:.9; }
 
-/* ══ ZIJBALK BEHEER LAYOUT ══════════════════════════════════════════════ */
+/* ══ NAMEN-PANEEL INVOER ═════════════════════════════════════════════════ */
 
-#settings-wrap { flex:1; min-height:0; overflow:hidden; display:none; }
-#settings-wrap.visible { display:flex; }
-
-.sb-layout { display:flex; height:100%; width:100%; min-height:0; }
-
-/* ── ZIJBALK ── */
-.sb-nav {
-  width:180px; min-width:180px;
-  background:#1e1b4b;
-  display:flex; flex-direction:column;
-  padding:14px 12px 14px;
-  overflow-y:auto;
-  flex-shrink:0;
+.namen-bib-banner {
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px; background:#eef2ff; border-radius:12px;
+  border:1.5px solid #c7d2fe; margin-bottom:20px; flex-wrap:wrap;
+  font-size:13px; font-weight:800; color:#4338ca;
 }
-.sb-nav::-webkit-scrollbar { width:4px; }
-.sb-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:2px; }
-
-.sb-back-btn {
-  border:none; background:rgba(255,255,255,.12); color:rgba(255,255,255,.85);
-  border-radius:9px; padding:10px 12px; font-size:13px; font-weight:800;
-  cursor:pointer; font-family:inherit; text-align:left; margin-bottom:10px;
-  transition:background .15s; width:100%;
+.namen-bib-btn {
+  border:1.5px solid #6366f1; background:#fff; color:#6366f1;
+  border-radius:9px; padding:8px 16px; font-size:13px; font-weight:800;
+  cursor:pointer; font-family:inherit; white-space:nowrap;
 }
-.sb-back-btn:hover { background:rgba(255,255,255,.22); }
+.namen-bib-btn:hover { background:#eef2ff; }
 
-.sb-bord-naam {
-  font-size:12px; font-weight:800; color:rgba(255,255,255,.55);
-  padding:0 4px; margin-bottom:10px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+.namen-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;
 }
+@media(max-width:720px){ .namen-grid { grid-template-columns:1fr; } }
 
-.sb-section-label {
-  font-size:10px; font-weight:800; color:rgba(255,255,255,.3);
-  text-transform:uppercase; letter-spacing:.07em; padding:8px 4px 4px;
-}
+.namen-invoer-col { display:flex; flex-direction:column; gap:16px; }
 
-.sb-stap {
-  display:flex; align-items:center; gap:10px;
-  padding:11px 10px; border-radius:10px; border:none;
-  background:transparent; cursor:pointer; font-family:inherit;
-  text-align:left; transition:background .15s; width:100%;
-  margin-bottom:2px;
-}
-.sb-stap:hover { background:rgba(255,255,255,.1); }
-.sb-stap.sb-actief { background:rgba(255,255,255,.18); }
-
-.sb-stap-badge {
-  width:26px; height:26px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  font-size:12px; font-weight:800; flex-shrink:0;
-  background:#dbeafe; color:#1e40af; transition:all .2s;
-}
-.sb-badge-2 { background:#dcfce7; color:#15803d; }
-.sb-badge-3 { background:#f3e8ff; color:#7c3aed; }
-.sb-badge-klaar { background:#bbf7d0 !important; color:#15803d !important; }
-
-.sb-stap-info { overflow:hidden; }
-.sb-stap-titel { font-size:13px; font-weight:800; color:rgba(255,255,255,.9); }
-.sb-stap-sub { font-size:11px; color:rgba(255,255,255,.45); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-
-.sb-spacer { flex:1; min-height:16px; }
-
-.sb-extra-btn {
-  display:block; width:100%; border:none; background:transparent;
-  color:rgba(255,255,255,.6); font-size:13px; font-weight:700;
-  padding:10px 10px; border-radius:8px; cursor:pointer; font-family:inherit;
-  text-align:left; transition:background .15s; margin-bottom:2px;
-}
-.sb-extra-btn:hover { background:rgba(255,255,255,.1); color:rgba(255,255,255,.9); }
-
-.sb-go-btn {
-  display:block; width:100%; background:#6366f1; color:#fff;
-  border:none; border-radius:10px; padding:12px 10px;
-  font-size:13px; font-weight:800; cursor:pointer; font-family:inherit;
-  text-align:center; margin-top:10px; transition:opacity .15s;
-}
-.sb-go-btn:hover { opacity:.9; }
-.sb-go-btn:disabled { background:rgba(255,255,255,.15); color:rgba(255,255,255,.35); cursor:not-allowed; }
-
-/* ── CONTENT AREA ── */
-.sb-content {
-  flex:1; min-width:0; overflow-y:auto;
-  background:#f0f4f8; padding:24px 28px 60px;
-}
-.sb-content::-webkit-scrollbar { width:7px; }
-.sb-content::-webkit-scrollbar-track { background:#e0e7ff; }
-.sb-content::-webkit-scrollbar-thumb { background:#6366f1; border-radius:3px; }
-
-.sb-paneel { max-width:960px; margin:0 auto; }
-.sb-paneel-hidden { display:none; }
-
-.sb-paneel-titel {
-  font-size:20px; font-weight:800; color:#1e1b4b;
-  margin-bottom:20px; padding-bottom:14px; border-bottom:2px solid #e0e7ff;
-}
-
-/* Leerlingenlijst scrollt intern */
-#pupil-list { max-height:44vh; overflow-y:auto; }
-#pupil-list::-webkit-scrollbar { width:6px; }
-#pupil-list::-webkit-scrollbar-track { background:#f0f0f8; border-radius:3px; }
-#pupil-list::-webkit-scrollbar-thumb { background:#c7d2fe; border-radius:3px; }
-#pupil-list::-webkit-scrollbar-thumb:hover { background:#818cf8; }
-
-.ac-twee-kolom { display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start; }
-@media(max-width:700px){ .ac-twee-kolom { grid-template-columns:1fr; } }
-
-/* ══ GROTE TAAK-TEGELS ══════════════════════════════════════════════════ */
-.task-chips { display:flex; flex-wrap:wrap; gap:10px; }
-.task-chip-wrap { display:flex; flex-direction:column; align-items:center; gap:4px; }
-
-.task-chip {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:6px; padding:14px 10px; min-width:90px; min-height:80px;
-  border-radius:14px; cursor:pointer; font-family:inherit;
-  border:2.5px solid #e0e7ff; background:#f8fafc; color:#94a3b8;
-  transition:all .15s; text-align:center;
-}
-.task-chip:hover { border-color:#818cf8; background:#eef2ff; color:#4338ca; transform:translateY(-2px); }
-.task-chip.active { border-color:#6366f1; background:#eef2ff; color:#4338ca; box-shadow:0 4px 12px rgba(99,102,241,.2); }
-.task-chip .chip-icon { font-size:28px; line-height:1; }
-.task-chip .chip-icon-img { width:36px; height:36px; object-fit:contain; border-radius:6px; }
-.task-chip .chip-label { font-size:12px; font-weight:800; line-height:1.2; }
-.task-chip .remove-chip { position:absolute; top:-6px; right:-6px; width:18px; height:18px; border-radius:50%; background:#ef4444; border:none; color:#fff; font-size:9px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-
-.chip-btn-row { display:flex; gap:4px; align-items:center; }
-.chip-edit-name { border:none; background:#f0fdf4; color:#16a34a; border-radius:6px; font-size:10px; font-weight:700; padding:3px 7px; cursor:pointer; }
-.chip-edit-name:hover { background:#dcfce7; }
-.chip-upload-inline { border:none; background:#f0f0ff; color:#6366f1; border-radius:6px; font-size:10px; font-weight:700; padding:3px 7px; cursor:pointer; white-space:nowrap; display:flex; align-items:center; gap:2px; }
-.chip-upload-inline:hover { background:#e0e7ff; }
-.chip-upload-inline.has-img { background:#fef9c3; color:#92400e; }
-.chip-upload-del { border:none; background:none; color:#fca5a5; font-size:12px; cursor:pointer; padding:0 2px; }
-.chip-upload-del:hover { color:#ef4444; }
-.chip-icon-img-small { width:14px; height:14px; object-fit:contain; border-radius:2px; }
-
-/* ══ EIGEN TAAK TOEVOEGEN ══════════════════════════════════════════════ */
-.eigen-taak-wrap {
-  margin-top:20px; padding:16px; background:#fff;
-  border:1.5px solid #e0e7ff; border-radius:14px;
-}
-.eigen-taak-titel {
-  font-size:13px; font-weight:800; color:#374151; margin-bottom:12px;
-}
-.eigen-taak-rij { display:flex; gap:8px; align-items:center; }
-.eigen-taak-emoji-btn {
-  width:44px; height:44px; border-radius:10px; font-size:22px;
-  border:2px solid #e0e7ff; background:#f8fafc; cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-  flex-shrink:0; transition:all .12s;
-}
-.eigen-taak-emoji-btn:hover { border-color:#6366f1; background:#eef2ff; }
-.eigen-taak-hint { font-size:11px; color:#a0aec0; margin-top:6px; }
-
-/* Emoji picker popup */
-.emoji-picker-popup {
-  display:none; position:absolute; z-index:200;
+/* Invoer-blokken */
+.invoer-blok {
   background:#fff; border:1.5px solid #e0e7ff; border-radius:14px;
-  padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.12);
-  max-width:340px;
+  padding:18px 20px;
 }
-.emoji-picker-popup.open { display:block; }
-.emoji-picker { display:flex; flex-wrap:wrap; gap:4px; }
-.emoji-btn { width:34px; height:34px; border-radius:7px; font-size:18px; border:2px solid #e0e7ff; background:#f8fafc; cursor:pointer; transition:all .1s; }
-.emoji-btn:hover { border-color:#6366f1; background:#eef2ff; }
-.emoji-btn.selected { border-color:#6366f1; background:#eef2ff; }
+.invoer-blok-titel {
+  font-size:14px; font-weight:800; color:#1e1b4b; margin-bottom:6px;
+}
+.invoer-blok-hint {
+  font-size:12px; color:#94a3b8; margin-bottom:12px; line-height:1.5;
+}
+
+.volgorde-rij {
+  display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;
+}
+.volgorde-label { font-size:12px; font-weight:800; color:#6b7280; }
+.sort-chip {
+  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
+  border:1.5px solid #e0e7ff; background:#f8fafc; color:#94a3b8; cursor:pointer;
+  transition:all .12s; font-family:inherit;
+}
+.sort-chip.active { border-color:#6366f1; background:#eef2ff; color:#4338ca; }
+
+.namen-textarea {
+  width:100%; min-height:90px; font-size:14px; padding:12px 14px;
+  border:1.5px solid #e0e7ff; border-radius:10px; resize:vertical;
+  font-family:inherit; color:#1a202c; background:#f7fafc;
+  line-height:1.6; margin-bottom:12px;
+}
+.namen-textarea:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px #dbeafe; }
+
+.invoer-btns-rij { display:flex; gap:10px; }
+.invoer-btn {
+  flex:1; padding:11px 16px; border-radius:10px; font-size:14px;
+  font-weight:800; cursor:pointer; font-family:inherit; border:none;
+  transition:opacity .15s;
+}
+.invoer-btn:hover { opacity:.88; }
+.invoer-btn-primary { background:#3b82f6; color:#fff; }
+.invoer-btn-secondary { background:#e2e8f0; color:#4a5568; }
+.invoer-btn-full { width:100%; margin-top:4px; }
+
+/* Naam-velden */
+.naam-velden-rij { display:flex; gap:12px; margin-bottom:12px; }
+.naam-veld { flex:1; display:flex; flex-direction:column; gap:6px; }
+.naam-label { font-size:12px; font-weight:800; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
+.naam-input {
+  width:100%; padding:11px 14px; font-size:15px; font-family:inherit;
+  border:1.5px solid #e0e7ff; border-radius:10px; background:#f7fafc; color:#1a202c;
+}
+.naam-input:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px #dbeafe; }
+
+/* Leerlingenlijst kolom */
+.namen-lijst-col { display:flex; flex-direction:column; }
+.namen-lijst-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:10px; flex-wrap:wrap; gap:8px;
+}
+.namen-count { font-weight:800; font-size:15px; color:#1e1b4b; }
+.namen-lijst-hint {
+  font-size:12px; color:#a0aec0; margin-bottom:12px; line-height:1.8;
+}
