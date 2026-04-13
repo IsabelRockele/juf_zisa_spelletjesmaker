@@ -745,55 +745,220 @@ body.smartboard #smartboard-exit-btn {
   font-size:12px; color:#a0aec0; margin-bottom:12px; line-height:1.8;
 }
 
-/* ══ SETTINGS LAYOUT (correct) ═════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════
+   ZIJBALK BEHEER — volledige definitie
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Settings-wrap vult de resterende hoogte van #app */
 #settings-wrap {
-  flex:1;
-  min-height:0;
-  overflow:hidden;
-  display:none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: none;
 }
 #settings-wrap.visible {
-  display:flex;
-  flex-direction:column;
+  display: flex;
+  flex-direction: column;
 }
+
+/* settings-inner = directe container, ook flex */
 .settings-inner {
-  flex:1;
-  min-height:0;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-  width:100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
 }
+
+/* Horizontale split: zijbalk + content */
 .sb-layout {
-  display:flex;
-  flex:1;
-  min-height:0;
-  overflow:hidden;
-  width:100%;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
 }
+
+/* ── ZIJBALK ── */
 .sb-nav {
-  width:185px;
-  min-width:185px;
-  flex-shrink:0;
-  background:#1e1b4b;
-  display:flex;
-  flex-direction:column;
-  padding:14px 12px;
-  overflow-y:auto;
-  height:100%;
+  width: 190px;
+  min-width: 190px;
+  flex-shrink: 0;
+  background: #1e1b4b;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px 16px;
+  overflow-y: auto;
+  height: 100%;
+  gap: 2px;
 }
-.sb-nav::-webkit-scrollbar { width:4px; }
-.sb-nav::-webkit-scrollbar-thumb { background:rgba(255,255,255,.2); border-radius:2px; }
+.sb-nav::-webkit-scrollbar { width: 3px; }
+.sb-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 2px; }
+
+/* Terug-knop */
+.sb-back-btn {
+  width: 100%;
+  border: none;
+  background: rgba(255,255,255,.13);
+  color: rgba(255,255,255,.9);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  margin-bottom: 8px;
+  transition: background .15s;
+}
+.sb-back-btn:hover { background: rgba(255,255,255,.22); }
+
+/* Bordnaam */
+.sb-bord-naam {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255,255,255,.45);
+  padding: 0 4px;
+  margin-bottom: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sectie-labels */
+.sb-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(255,255,255,.3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 10px 6px 4px;
+}
+
+/* Stap-knoppen */
+.sb-stap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 10px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .15s;
+  width: 100%;
+  margin-bottom: 2px;
+}
+.sb-stap:hover { background: rgba(255,255,255,.1); }
+.sb-stap.sb-actief { background: rgba(255,255,255,.18); }
+
+/* Badge (cijfer/vinkje) */
+.sb-stap-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: #dbeafe;
+  color: #1e40af;
+  transition: all .2s;
+}
+.sb-badge-2 { background: #dcfce7; color: #15803d; }
+.sb-badge-3 { background: #f3e8ff; color: #7c3aed; }
+.sb-badge-klaar { background: #bbf7d0 !important; color: #15803d !important; }
+
+/* Stap tekst */
+.sb-stap-info { overflow: hidden; flex: 1; }
+.sb-stap-titel {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(255,255,255,.92);
+  line-height: 1.2;
+}
+.sb-stap-sub {
+  font-size: 11px;
+  color: rgba(255,255,255,.45);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Opvulling tussen stappen en knoppen onderaan */
+.sb-spacer { flex: 1; min-height: 12px; }
+
+/* Extra knoppen (Backup, Uitleg) */
+.sb-extra-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.75);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background .15s;
+  margin-bottom: 4px;
+}
+.sb-extra-btn:hover {
+  background: rgba(255,255,255,.16);
+  color: #fff;
+}
+
+/* Naar het klasbord — grote prominente knop */
+.sb-go-btn {
+  display: block;
+  width: 100%;
+  background: #6366f1;
+  color: #fff;
+  border: none;
+  border-radius: 11px;
+  padding: 13px 10px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  margin-top: 10px;
+  transition: background .15s;
+  box-shadow: 0 2px 8px rgba(99,102,241,.4);
+}
+.sb-go-btn:hover { background: #4f46e5; }
+
+/* ── CONTENT AREA ── */
 .sb-content {
-  flex:1;
-  min-width:0;
-  overflow-y:auto;
-  background:#f0f4f8;
-  padding:24px 32px 60px;
-  height:100%;
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  background: #f0f4f8;
+  padding: 28px 36px 60px;
+  height: 100%;
 }
-.sb-content::-webkit-scrollbar { width:7px; }
-.sb-content::-webkit-scrollbar-track { background:#e0e7ff; }
-.sb-content::-webkit-scrollbar-thumb { background:#6366f1; border-radius:3px; }
-.sb-paneel { width:100%; max-width:none; }
-.sb-paneel-hidden { display:none; }
+.sb-content::-webkit-scrollbar { width: 7px; }
+.sb-content::-webkit-scrollbar-track { background: #e0e7ff; }
+.sb-content::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 3px; }
+
+/* Panelen */
+.sb-paneel { width: 100%; }
+.sb-paneel-hidden { display: none !important; }
+.sb-paneel-titel {
+  font-size: 22px;
+  font-weight: 800;
+  color: #1e1b4b;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #e0e7ff;
+}
