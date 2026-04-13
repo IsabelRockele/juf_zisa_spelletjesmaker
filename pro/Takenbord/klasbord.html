@@ -194,7 +194,8 @@ Lena
       <button id="size-large" onclick="setBoardSize('large');closeMeerOpties()" style="flex:1;padding:6px;border-radius:8px;border:2px solid #e0e7ff;background:#f8fafc;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">L</button>
     </div>
     <div style="border-top:1px solid #e0e7ff;margin:4px 0;"></div>
-    <button onclick="openBackupModal();closeMeerOpties()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">💾 Backup</button>
+    <button onclick="openBackupModal();closeMeerOpties()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">💾 Backup opslaan</button>
+    <button onclick="document.getElementById('import-overlay').classList.remove('hidden');closeMeerOpties()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">📂 Backup terugzetten</button>
   </div>
 </div>
 <button id="smartboard-exit-btn" onclick="handleExitBtn()" class="btn btn-ghost btn-sm" style="display:none;">⚙️ Menu</button>
