@@ -927,6 +927,8 @@ function renderBoard(){
   const show=hp&&ht;
   document.getElementById('empty-state').classList.toggle('hidden',show);
   document.getElementById('board-inner').classList.toggle('hidden',!show);
+  const th=document.getElementById('task-header'); if(th) th.classList.toggle('hidden',!show);
+  const lg=document.getElementById('legend'); if(lg) lg.classList.toggle('hidden',!show);
   if(!show){
     document.getElementById('empty-text').textContent=!hp?'Voeg leerlingen toe via ⚙️ Beheer':'Activeer taken via ⚙️ Beheer → Taken';
     updateMeta();return;
@@ -942,49 +944,71 @@ function renderBoardTable(allTasks){
   const inner=document.getElementById('board-inner');
   inner.innerHTML='';
 
-  const table=document.createElement('table');
-  table.className='board-table';
+  const minW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220')
+    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')
+    + allTasks.length*(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120')
+    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')) + 32;
 
-  // ── THEAD ──────────────────────────────────────────────────────────────
-  const thead=document.createElement('thead');
+  // ── TAAKNAMEN HEADER ─────────────────────────────────────────────────
+  const taskHeader=document.getElementById('task-header')||document.createElement('div');
+  taskHeader.id='task-header';
+  taskHeader.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
+  taskHeader.style.minWidth=minW+'px';
 
-  // Taakheader rij
-  const headRow=document.createElement('tr');
-  // Hoekcel
-  const th0=document.createElement('th');
-  th0.innerHTML='<span class="board-corner-label">Leerling</span>';
-  headRow.appendChild(th0);
-  // Taakkolommen
+  // Zorg dat header-corner bestaat
+  if(!taskHeader.querySelector('.header-corner')){
+    const corner=document.createElement('div');
+    corner.className='header-corner';
+    corner.innerHTML='<span class="board-corner-label">Leerling</span>';
+    taskHeader.insertBefore(corner,taskHeader.firstChild);
+  }
+
   allTasks.forEach(t=>{
-    const th=document.createElement('th');
     const ci=state.customIcons&&state.customIcons[t.id];
+    const cell=document.createElement('div');
+    cell.className='task-header-cell';
     if(ci){
-      th.innerHTML=`<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
+      cell.innerHTML=`<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
     } else {
-      th.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
+      cell.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
     }
-    headRow.appendChild(th);
+    taskHeader.appendChild(cell);
   });
-  thead.appendChild(headRow);
 
-  // Legenda rij
-  const legRow=document.createElement('tr');
-  legRow.className='board-legend-row';
-  const legTd=document.createElement('td');
-  legTd.colSpan=allTasks.length+1;
-  legTd.innerHTML=`<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
-    <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
-    <span style="font-size:11px;color:#818cf8;font-weight:600;">Klik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
-  </div>`;
-  legRow.appendChild(legTd);
-  thead.appendChild(legRow);
-  table.appendChild(thead);
+  // Zorg dat header in board-scroll zit (niet in inner)
+  const boardScroll=document.getElementById('board-scroll');
+  if(taskHeader.parentNode!==boardScroll){
+    boardScroll.insertBefore(taskHeader,inner);
+  }
 
-  // ── TBODY ──────────────────────────────────────────────────────────────
-  const tbody=document.createElement('tbody');
+  // ── LEGENDA ───────────────────────────────────────────────────────────
+  let legend=document.getElementById('legend');
+  if(!legend){
+    legend=document.createElement('div');
+    legend.id='legend';
+    legend.innerHTML=`<div id="legend-name"></div><div id="legend-items">
+      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
+      <span style="font-size:11px;color:#818cf8;font-weight:600;">Klik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
+    </div>`;
+    boardScroll.insertBefore(legend,inner);
+  }
+  legend.style.minWidth=minW+'px';
 
+  // ── LEERLINGENRIJEN (flex) ────────────────────────────────────────────
+  inner.style.minWidth=minW+'px';
+
+  // Zorg voor pupil-rows container
+  let pupilRows=document.getElementById('pupil-rows');
+  if(!pupilRows){
+    pupilRows=document.createElement('div');
+    pupilRows.id='pupil-rows';
+    inner.appendChild(pupilRows);
+  }
+  pupilRows.innerHTML='';
+
+  // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
   state.pupils.forEach((pupil,idx)=>{
     const pid=pupil.id;
     const myTasks=pupilTasks(pid);
@@ -995,35 +1019,29 @@ function renderBoardTable(allTasks){
     const hasNotes=!!state.notes[pid];
     const photo=state.pupilPhotos&&state.pupilPhotos[pid];
 
-    // Spacer rij (visuele ruimte tussen leerlingen)
-    if(idx>0){
-      const spacer=document.createElement('tr');
-      spacer.className='board-spacer-row';
-      const spacerTd=document.createElement('td');
-      spacerTd.colSpan=allTasks.length+1;
-      spacer.appendChild(spacerTd);
-      tbody.appendChild(spacer);
-    }
-
-    const tr=document.createElement('tr');
-    if(complete) tr.className='complete';
+    const row=document.createElement('div');
+    row.className='pupil-board-row'+(complete?' complete':'');
 
     // Naam-cel
-    const tdName=document.createElement('td');
-    tdName.className='board-td-name';
+    const nameCell=document.createElement('div');
+    nameCell.className='pupil-name-cell';
     const dc=complete?'done':busy>0?'busy':'';
     const bh=busy>0?` · <span class="busy-label">${busy} bezig</span>`:'';
     const nh=state.showNumbers?`<span class="pupil-num">${idx+1}.</span>`:'';
     const notesBtn=hasNotes?`<button class="notes-btn has-notes" onclick="openNotesModal('${pid}')" title="Bevindingen bekijken">🔒</button>`:'';
     const medalSpan=complete?'<span class="pupil-medal">🏅</span>':'';
     const photoHtml=photo?`<img class="pupil-board-photo" src="${photo}" alt="${esc(displayName(pupil))}" />`:'';
-    tdName.innerHTML=`<div class="pupil-dot ${dc}"></div>${nh}${photoHtml}<div class="pupil-info"><div class="pupil-name">${esc(displayName(pupil))}</div><div class="pupil-sub">${done}/${total}${bh}</div></div>${notesBtn}${medalSpan}`;
-    tr.appendChild(tdName);
+    nameCell.innerHTML=`<div class="pupil-dot ${dc}"></div>${nh}${photoHtml}<div class="pupil-info"><div class="pupil-name">${esc(displayName(pupil))}</div><div class="pupil-sub">${done}/${total}${bh}</div></div>${notesBtn}${medalSpan}`;
+    row.appendChild(nameCell);
+
+    // Taakvakken wrapper
+    const taskWrap=document.createElement('div');
+    taskWrap.className='task-cells-wrap';
 
     // Taak-cellen
     allTasks.forEach(t=>{
-      const td=document.createElement('td');
-      td.className='board-td-task';
+      const td=document.createElement('div');
+      td.className='task-cell';
       if(!myIds.has(t.id)){
         td.innerHTML='<div class="task-ph">—</div>';
       } else {
@@ -1066,13 +1084,11 @@ function renderBoardTable(allTasks){
         }
         td.appendChild(wrap);
       }
-      tr.appendChild(td);
+      taskWrap.appendChild(td);
     });
-    tbody.appendChild(tr);
+    row.appendChild(taskWrap);
+    pupilRows.appendChild(row);
   });
-
-  table.appendChild(tbody);
-  inner.appendChild(table);
 
   // Progress bar
   let pbWrap=document.getElementById('progress-bar-wrap');
