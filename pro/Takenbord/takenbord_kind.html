@@ -592,12 +592,12 @@ body.ipad-modus #timer-popup { display:none !important; }
 .kind-upload-btns { display:flex; gap:8px; flex-wrap:wrap; }
 .kind-upload-btn { padding:10px 14px !important; font-size:15px !important; border-radius:12px !important; }
 .setup-screen{
-  display:block;
+  display:none;
 }
 .setup-card{
-  max-width:900px;
-  margin:20px auto 0;
-  background:#fff;
+  max-width:none;
+  margin:0;
+  background:transparent;
   border-radius:24px;
   padding:26px;
   box-shadow:var(--card-shadow);
@@ -907,14 +907,6 @@ body.ipad-modus #timer-popup { display:none !important; }
       </div>
     </button>
 
-    <button class="kb-sb-stap" id="kb-stap-inst" onclick="kbToon('inst')">
-      <div class="kb-sb-badge kb-badge-3" id="kb-badge-inst">3</div>
-      <div class="kb-sb-info">
-        <div class="kb-sb-titel">Instellingen</div>
-        <div class="kb-sb-sub">Weergave</div>
-      </div>
-    </button>
-
     <button class="kb-sb-go" onclick="goToNamesScreen()">👤 Naar het kindbord →</button>
 
     <div style="height:16px;"></div>
@@ -930,37 +922,47 @@ body.ipad-modus #timer-popup { display:none !important; }
     <div class="kb-paneel" id="kb-paneel-namen">
       <div class="kb-paneel-titel">Namen toevoegen</div>
 
-      <div class="namen-bib-banner" style="margin-bottom:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#ecfdf5;border-radius:12px;border:1.5px solid #a7f3d0;margin-bottom:20px;flex-wrap:wrap;font-size:14px;font-weight:800;color:#065f46;">
         <span>📚 Namen overnemen uit een ander bord?</span>
-        <button onclick="openLaadUitBibliotheekKind()" class="namen-bib-btn">📥 Bibliotheek</button>
+        <button onclick="openLaadUitBibliotheekKind()" style="border:1.5px solid #059669;background:#fff;color:#059669;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;">📥 Bibliotheek</button>
       </div>
 
-      <div class="namen-grid">
-        <div class="namen-invoer-col">
-          <div class="invoer-blok">
-            <div class="invoer-blok-titel">📋 Klaslijst in één keer plakken</div>
-            <div class="invoer-blok-hint">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
-            <div class="volgorde-rij">
-              <span class="volgorde-label">Volgorde:</span>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start;width:100%;">
+
+        <!-- LINKER KOLOM -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <div style="background:#fff;border:1.5px solid #e0e7ff;border-radius:14px;padding:18px 20px;">
+            <div style="font-size:15px;font-weight:800;color:#1e1b4b;margin-bottom:6px;">📋 Klaslijst in één keer plakken</div>
+            <div style="font-size:13px;color:#94a3b8;margin-bottom:14px;line-height:1.5;">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+              <span style="font-size:13px;font-weight:800;color:#6b7280;">Volgorde:</span>
               <button type="button" class="sort-chip active" id="setup-order-voor" onclick="setSetupOrder('voornaam')">Voornaam Achternaam</button>
               <button type="button" class="sort-chip" id="setup-order-ach" onclick="setSetupOrder('achternaam')">Achternaam Voornaam</button>
             </div>
-            <textarea id="setupBulkInput" class="namen-textarea" placeholder="Jana De Smedt&#10;Thomas Peeters&#10;Lena&#10;..."></textarea>
-            <div class="invoer-btns-rij">
-              <button type="button" class="invoer-btn invoer-btn-primary" onclick="addBulkPupilsFromSetup()">➕ Toevoegen</button>
-              <button type="button" class="invoer-btn invoer-btn-secondary" onclick="clearAllPupilsFromSetup()">🗑 Lijst leeg</button>
+            <div class="toggle-row" style="margin-bottom:14px;">
+              <label class="toggle"><input id="setup-show-lastname" type="checkbox" onchange="toggleSetupLastname()"/><span class="toggle-slider"></span></label>
+              <span style="font-size:14px;font-weight:700;color:#374151;margin-left:10px;">Achternaam tonen op het bord</span>
+            </div>
+            <textarea id="setupBulkInput" style="width:100%;min-height:100px;font-size:15px;padding:12px 14px;border:1.5px solid #e0e7ff;border-radius:10px;resize:vertical;font-family:inherit;color:#1a202c;background:#f7fafc;line-height:1.6;margin-bottom:12px;box-sizing:border-box;" placeholder="Jana De Smedt&#10;Thomas Peeters&#10;Lena&#10;..."></textarea>
+            <div style="display:flex;gap:10px;">
+              <button type="button" onclick="addBulkPupilsFromSetup()" style="flex:1;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;border:none;background:#3b82f6;color:#fff;">➕ Toevoegen</button>
+              <button type="button" onclick="clearAllPupilsFromSetup()" style="flex:1;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;border:none;background:#e2e8f0;color:#4a5568;">🗑 Lijst leeg</button>
             </div>
           </div>
-          <div class="invoer-blok">
-            <div class="invoer-blok-titel">✏️ Of één naam toevoegen</div>
-            <input id="setupNameInput" class="naam-input" type="text" placeholder="Jana De Smedt" style="width:100%;margin-bottom:10px;" onkeydown="if(event.key==='Enter')addSinglePupilFromSetup()"/>
-            <button type="button" class="invoer-btn invoer-btn-primary invoer-btn-full" onclick="addSinglePupilFromSetup()">+ Toevoegen</button>
+
+          <div style="background:#fff;border:1.5px solid #e0e7ff;border-radius:14px;padding:18px 20px;">
+            <div style="font-size:15px;font-weight:800;color:#1e1b4b;margin-bottom:12px;">✏️ Of één naam toevoegen</div>
+            <input id="setupNameInput" type="text" placeholder="Jana De Smedt" onkeydown="if(event.key==='Enter')addSinglePupilFromSetup()" style="width:100%;padding:12px 14px;font-size:15px;font-family:inherit;border:1.5px solid #e0e7ff;border-radius:10px;background:#f7fafc;color:#1a202c;box-sizing:border-box;margin-bottom:10px;"/>
+            <button type="button" onclick="addSinglePupilFromSetup()" style="width:100%;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;border:none;background:#3b82f6;color:#fff;">+ Toevoegen</button>
           </div>
+
         </div>
 
-        <div class="namen-lijst-col">
-          <div class="namen-lijst-hdr">
-            <span class="namen-count">Leerlingen (<span id="setup-count">0</span>)</span>
+        <!-- RECHTER KOLOM: leerlingenlijst -->
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <span style="font-weight:800;font-size:15px;color:#1e1b4b;">Leerlingen (<span id="setup-count">0</span>)</span>
           </div>
           <div id="setupStatus" style="margin-bottom:8px;"></div>
           <div id="autosave-kind" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:13px;color:#166534;">
@@ -968,6 +970,7 @@ body.ipad-modus #timer-popup { display:none !important; }
           </div>
           <div id="setupAddedList" class="setup-added-list"></div>
         </div>
+
       </div>
     </div>
 
@@ -1012,31 +1015,24 @@ body.ipad-modus #timer-popup { display:none !important; }
         </div>
       </div>
       <!-- Toewijzen knop -->
-      <div style="margin-top:20px;padding:16px;background:#eef2ff;border-radius:14px;border:1.5px solid #c7d2fe;">
-        <div style="font-size:13px;color:#4338ca;margin-bottom:10px;font-weight:700;" id="kb-assign-hint">Selecteer leerlingen en taken hierboven, dan klik Toewijzen.</div>
+      <div style="margin-top:20px;padding:16px;background:#ecfdf5;border-radius:14px;border:1.5px solid #a7f3d0;">
+        <div style="font-size:13px;color:#065f46;margin-bottom:10px;font-weight:700;" id="kb-assign-hint">Selecteer leerlingen en taken hierboven, dan klik Toewijzen.</div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;">
-          <button type="button" class="invoer-btn invoer-btn-primary" onclick="assignTasksToSelected()" style="flex:1;">✓ Toewijzen aan geselecteerde leerlingen</button>
+          <button type="button" class="invoer-btn invoer-btn-green" onclick="assignTasksToSelected()" style="flex:1;">✓ Toewijzen aan geselecteerde leerlingen</button>
           <button type="button" class="invoer-btn invoer-btn-secondary" onclick="clearAssignmentsSelected()" style="flex:1;">✕ Taken wissen bij geselecteerde</button>
         </div>
       </div>
-    </div>
-
-    <!-- PANEEL 3: INSTELLINGEN -->
-    <div class="kb-paneel kb-paneel-hidden" id="kb-paneel-inst">
-      <div class="kb-paneel-titel">Instellingen</div>
-      <div class="invoer-blok">
-        <div class="toggle-row" style="margin-bottom:14px;">
-          <label class="toggle"><input id="setup-show-lastname" type="checkbox" onchange="toggleSetupLastname()"/><span class="toggle-slider"></span></label>
-          <span class="toggle-label" style="font-size:15px;">Achternaam zichtbaar op bord</span>
-        </div>
-        <div style="font-size:13px;color:#94a3b8;padding-left:52px;margin-bottom:20px;">Zet aan als er meerdere kinderen zijn met dezelfde voornaam.</div>
-        <div class="toggle-row" style="margin-bottom:14px;">
+      <div class="invoer-blok" style="margin-top:16px;">
+        <div class="toggle-row">
           <label class="toggle"><input id="setup-only-personal" type="checkbox" onchange="toggleOnlyPersonal()"/><span class="toggle-slider"></span></label>
-          <span class="toggle-label" style="font-size:15px;">Enkel eigen taken tonen (geen klasborddtaken)</span>
+          <span class="toggle-label" style="font-size:14px;">Enkel eigen taken tonen per leerling</span>
         </div>
-        <div style="font-size:13px;color:#94a3b8;padding-left:52px;">Als dit aan staat zien leerlingen enkel hun persoonlijk toegewezen taken.</div>
+        <div style="font-size:13px;color:#94a3b8;padding-left:52px;margin-top:6px;">Zet aan als elk kind een eigen takenlijst krijgt en je niet wil dat ze de klasbord-taken zien.</div>
       </div>
     </div>
+
+    <!-- Instellingen verplaatst naar Namen en Taken panelen -->
+    <div id="kb-paneel-inst" class="kb-paneel-hidden"></div>
 
   </div><!-- /kb-sb-content -->
 </div><!-- /kb-setup-layout -->
@@ -1371,13 +1367,16 @@ function kbToon(sectie){
 
 function kbUpdateWizard(){
   var hN = state.pupils && state.pupils.length > 0;
-  var hT = state.pupils && state.pupils.some(function(p){ return Array.isArray(state.personalAssignments && state.personalAssignments[p.id]); });
+  var hT = state.personalAssignments && state.pupils && state.pupils.some(function(p){ return Array.isArray(state.personalAssignments[p.id]); });
   var b1=document.getElementById('kb-badge-namen'); if(b1){b1.textContent=hN?'✓':'1';b1.classList.toggle('kb-badge-klaar',hN);}
   var b2=document.getElementById('kb-badge-taken'); if(b2){b2.textContent=hT?'✓':'2';b2.classList.toggle('kb-badge-klaar',hT);}
   var s1=document.getElementById('kb-sub-namen'); if(s1) s1.textContent=hN?state.pupils.length+' leerlingen':'Leerlingen toevoegen';
   var s2=document.getElementById('kb-sub-taken'); if(s2) s2.textContent=hT?'Taken toegewezen':'Taken toewijzen';
   var bn=document.getElementById('kb-sb-bord-naam');
   if(bn){ try{ var borden=JSON.parse(localStorage.getItem('kbBorden')||'[]'); var b=borden.find(function(x){return x.id===bordId;}); bn.textContent=b?b.naam:''; }catch(e){} }
+  // "Enkel eigen taken" toggle sync
+  var op=document.getElementById('setup-only-personal'); if(op) op.checked=!!state.kindBoardOnlyPersonal;
+  var sl=document.getElementById('setup-show-lastname'); if(sl) sl.checked=!!setupShowLastname;
 }
 
 function kbSelectAllPupils(){
@@ -3354,10 +3353,10 @@ function timerDone(){
 .timer-preset:hover{background:#e0e7ff;}
 
 /* ══ KINDBORD ZIJBALK BEHEER ════════════════════════════════════════════ */
-.setup-screen { display:none; }
-.setup-screen.active { display:flex !important; }
+.setup-screen { display:none !important; padding:0 !important; }
+.setup-screen.active { display:flex !important; flex-direction:column; }
 
-.kb-setup-layout { display:flex; height:calc(100vh - 44px); width:100%; overflow:hidden; background:#f0f4f8; }
+.kb-setup-layout { display:flex; width:100%; height:calc(100vh - 44px); overflow:hidden; background:#f0f4f8; flex:1; }
 
 .kb-sb-nav { width:190px; min-width:190px; flex-shrink:0; background:#1e1b4b; display:flex; flex-direction:column; padding:14px 12px 16px; overflow-y:auto; gap:2px; }
 .kb-sb-nav::-webkit-scrollbar { width:3px; }
@@ -3389,7 +3388,7 @@ function timerDone(){
 .kb-sb-extra { display:flex; align-items:center; gap:8px; width:100%; border:none; background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); font-size:13px; font-weight:700; padding:10px 12px; border-radius:9px; cursor:pointer; font-family:inherit; text-align:left; transition:background .15s; margin-bottom:4px; }
 .kb-sb-extra:hover { background:rgba(255,255,255,.16); color:#fff; }
 
-.kb-sb-content { flex:1; min-width:0; overflow-y:auto; padding:28px 36px 60px; }
+.kb-sb-content { flex:1; min-width:0; overflow-y:auto; padding:28px 36px 60px; width:100%; }
 .kb-sb-content::-webkit-scrollbar { width:7px; }
 .kb-sb-content::-webkit-scrollbar-track { background:#e0e7ff; }
 .kb-sb-content::-webkit-scrollbar-thumb { background:#059669; border-radius:3px; }
@@ -3431,7 +3430,126 @@ function timerDone(){
 .kb-pupil-row { display:flex; align-items:center; gap:8px; padding:9px 12px; border-radius:12px; background:#f9fafb; border:2px solid #e5e7eb; margin-bottom:8px; transition:all .12s; cursor:pointer; }
 .kb-pupil-row.selected { background:#ecfdf5; border-color:#059669; }
 .kb-pupil-row:hover { border-color:#a7f3d0; }
-</style></style>
+</style>
+/* ══ NAMEN INVOER (kindbord beheer) ════════════════════════════════════ */
+.namen-bib-banner { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background:#ecfdf5; border-radius:12px; border:1.5px solid #a7f3d0; margin-bottom:20px; flex-wrap:wrap; font-size:14px; font-weight:800; color:#065f46; }
+.namen-bib-btn { border:1.5px solid #059669; background:#fff; color:#059669; border-radius:9px; padding:8px 16px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; white-space:nowrap; }
+.namen-bib-btn:hover { background:#ecfdf5; }
+
+.namen-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start; width:100%; }
+@media(max-width:720px){ .namen-grid { grid-template-columns:1fr; } }
+.namen-invoer-col { display:flex; flex-direction:column; gap:16px; }
+.namen-lijst-col { display:flex; flex-direction:column; }
+.namen-lijst-hdr { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+.namen-count { font-weight:800; font-size:15px; color:#1e1b4b; }
+.namen-lijst-hint { font-size:13px; color:#a0aec0; margin-bottom:12px; line-height:1.8; }
+
+.invoer-blok { background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; padding:18px 20px; }
+.invoer-blok-titel { font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:6px; }
+.invoer-blok-hint { font-size:13px; color:#94a3b8; margin-bottom:14px; line-height:1.5; }
+
+.volgorde-rij { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+.volgorde-label { font-size:13px; font-weight:800; color:#6b7280; }
+.sort-chip { padding:7px 16px; border-radius:20px; font-size:13px; font-weight:700; border:1.5px solid #e0e7ff; background:#f8fafc; color:#94a3b8; cursor:pointer; transition:all .12s; font-family:inherit; }
+.sort-chip.active { border-color:#059669; background:#ecfdf5; color:#065f46; }
+
+.namen-textarea { width:100%; min-height:100px; font-size:15px; padding:12px 14px; border:1.5px solid #e0e7ff; border-radius:10px; resize:vertical; font-family:inherit; color:#1a202c; background:#f7fafc; line-height:1.6; margin-bottom:12px; box-sizing:border-box; }
+.namen-textarea:focus { outline:none; border-color:#059669; box-shadow:0 0 0 3px #d1fae5; }
+
+.invoer-btns-rij { display:flex; gap:10px; }
+.invoer-btn { flex:1; padding:12px 16px; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; border:none; transition:opacity .15s; }
+.invoer-btn:hover { opacity:.88; }
+.invoer-btn-primary { background:#3b82f6; color:#fff; }
+.invoer-btn-secondary { background:#e2e8f0; color:#4a5568; }
+.invoer-btn-full { width:100%; margin-top:6px; flex:unset; }
+
+.naam-input { width:100%; padding:12px 14px; font-size:15px; font-family:inherit; border:1.5px solid #e0e7ff; border-radius:10px; background:#f7fafc; color:#1a202c; box-sizing:border-box; }
+.naam-input:focus { outline:none; border-color:#059669; box-shadow:0 0 0 3px #d1fae5; }
+.naam-label { font-size:12px; font-weight:800; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
+
+/* Toggle-row hergebruik */
+.toggle-label { font-size:14px; font-weight:700; color:#374151; margin-left:10px; }
+
+/* Eigen taak toevoegen (kindbord) */
+.eigen-taak-wrap { margin-top:16px; padding:18px 20px; background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; }
+.eigen-taak-titel { font-size:15px; font-weight:800; color:#1e1b4b; margin-bottom:4px; }
+.eigen-taak-hint { font-size:13px; color:#64748b; margin-bottom:14px; }
+.eigen-taak-rij { display:flex; gap:10px; align-items:center; }
+.eigen-taak-emoji-btn { width:46px; height:46px; border-radius:10px; font-size:24px; border:2px solid #e0e7ff; background:#f8fafc; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .12s; }
+.eigen-taak-emoji-btn:hover { border-color:#059669; background:#ecfdf5; }
+.emoji-picker-popup { display:none; position:absolute; left:0; top:calc(100% + 6px); z-index:200; background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; padding:14px; box-shadow:0 8px 24px rgba(0,0,0,.12); max-width:340px; }
+.emoji-picker-popup.open { display:block; }
+
+/* ══ KNOP OPMAAK KINDBORD BEHEER ═══════════════════════════════════════ */
+
+/* Groene primaire knop voor kindbord */
+.invoer-btn-green { background:#059669; color:#fff; }
+.invoer-btn-green:hover { background:#047857; }
+
+/* Alle knoppen in de setup zonder opmaak krijgen basisstijl */
+.kb-sb-content button:not([class]),
+.kb-sb-content input[type="button"]:not([class]) {
+  font-family:inherit;
+  cursor:pointer;
+}
+
+/* Setup-added-item knoppen (verwijder x) */
+.setup-added-item button {
+  border:none;
+  background:none;
+  cursor:pointer;
+  font-family:inherit;
+}
+
+/* Namen-bib-banner knop */
+.namen-bib-btn {
+  border:1.5px solid #059669;
+  background:#fff;
+  color:#059669;
+  border-radius:9px;
+  padding:8px 16px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  font-family:inherit;
+  white-space:nowrap;
+  transition:background .15s;
+}
+.namen-bib-btn:hover { background:#ecfdf5; }
+
+/* Sort chips groen voor kindbord */
+.sort-chip.active {
+  border-color:#059669 !important;
+  background:#ecfdf5 !important;
+  color:#065f46 !important;
+}
+
+/* Leerlingen toevoegen knoppen */
+.namen-textarea + .invoer-btns-rij .invoer-btn-primary,
+button.invoer-btn-primary { background:#3b82f6; color:#fff; }
+
+/* Knopjes in setup-added-list */
+.setup-added-item .remove-btn,
+.setup-added-item button {
+  width:28px; height:28px;
+  border-radius:7px;
+  background:#fee2e2;
+  color:#dc2626;
+  border:none;
+  cursor:pointer;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  transition:background .12s;
+}
+.setup-added-item button:hover { background:#fecaca; }
+
+/* kbUpdateWizard badge zonder stap 3 */
+#kb-badge-inst { display:none; }
+#kb-stap-inst  { display:none; }
+</style>
 <!-- NIEUW SCHOOLJAAR MODAL -->
 <div class="overlay" id="kind-nsy-overlay">
 <div class="popup" style="text-align:left;max-width:460px;width:100%;">
