@@ -1258,9 +1258,11 @@ function loadState(){
   }catch(e){
     state = {};
   }
-  // Firestore laden op achtergrond
-  if(window.fbLoad){
-    window.fbLoad(STORAGE_KEY).then(function(fbData){
+  applyStateDefaults();
+  // Laad via gedeelde collectie zodat kind en leerkracht dezelfde data zien
+  const loader = window.fbLoadShared || window.fbLoad;
+  if(loader){
+    loader(STORAGE_KEY).then(function(fbData){
       if(fbData){
         state = Object.assign({}, state, fbData);
         applyStateDefaults();
@@ -1270,7 +1272,17 @@ function loadState(){
       }
     }).catch(console.warn);
   }
-  applyStateDefaults();
+  // Realtime listener: als kind iets aanpast ziet leerkracht het live
+  if(window.fbListenShared){
+    window.fbListenShared(STORAGE_KEY, function(fbData){
+      if(fbData){
+        state = Object.assign({}, state, fbData);
+        applyStateDefaults();
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+        renderNames();
+      }
+    });
+  }
 }
 
 function applyStateDefaults(){
@@ -1293,8 +1305,9 @@ function applyStateDefaults(){
 
 function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  // Firestore opslaan
-  if(window.fbSave) window.fbSave(STORAGE_KEY, state).catch(console.warn);
+  // Sla op via gedeelde collectie zodat kind en leerkracht dezelfde data zien
+  const saver = window.fbSaveShared || window.fbSave;
+  if(saver) saver(STORAGE_KEY, state).catch(console.warn);
   // Timestamp bijwerken in borden-index
   try{
     const params = new URLSearchParams(window.location.search);
