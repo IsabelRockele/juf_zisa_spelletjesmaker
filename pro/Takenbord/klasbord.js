@@ -721,8 +721,8 @@ function generateAndPrint(){
     hdr(se(displayName(p))+' - Detailrapport', (periodLabel?periodLabel+' . ':'')+today);
 
     // Badge
-    var badgeColor = isComplete ? GREEN : stats.done>0 ? [180,100,0] : RED;
-    var badgeTxt   = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : 'Nog niet gestart';
+    var badgeColor = isComplete ? GREEN : (stats.done>0||stats.busy>0) ? [180,100,0] : RED;
+    var badgeTxt   = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : stats.busy>0 ? stats.busy+' bezig' : 'Nog niet gestart';
     doc.setFillColor(badgeColor[0],badgeColor[1],badgeColor[2]);
     doc.roundedRect(pw-70, 15, 62, 8, 2, 2, 'F');
     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
