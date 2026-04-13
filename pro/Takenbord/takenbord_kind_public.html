@@ -32,6 +32,12 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:line
 .names-sub{text-align:center;font-size:14px;color:#64748b;margin-bottom:20px;}
 .name-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;}
 .name-card{background:#fff;border-radius:18px;padding:18px 12px;text-align:center;cursor:pointer;border:2px solid #e0e7ff;box-shadow:0 2px 8px rgba(99,102,241,.08);transition:transform .15s,box-shadow .15s;}
+.name-card.p1{background:#fde2e4;border-color:#fca5a5;}
+.name-card.p2{background:#dff7f2;border-color:#6ee7d6;}
+.name-card.p3{background:#e3f0ff;border-color:#93c5fd;}
+.name-card.p4{background:#fceccf;border-color:#fcd34d;}
+.name-card.p5{background:#ebe4ff;border-color:#c4b5fd;}
+.name-card.p6{background:#def4d7;border-color:#86efac;}
 .name-card:hover,.name-card:active{transform:scale(1.04);box-shadow:0 6px 20px rgba(99,102,241,.2);}
 .name-card.done{border-color:#86efac;background:linear-gradient(135deg,#f0fdf4,#fff);}
 .name-card.busy{border-color:#fcd34d;background:linear-gradient(135deg,#fffbeb,#fff);}
@@ -270,7 +276,8 @@ function tekenNamen(){
     if(klaar === taken.length && taken.length > 0) totaalKlaar++;
 
     const card = document.createElement('div');
-    card.className = 'name-card' + (klaar===taken.length&&taken.length>0?' done':'') + (bezig>0&&klaar<taken.length?' busy':'');
+    const kleurKlasse = ' p' + ((pupils.indexOf(p) % 6) + 1);
+    card.className = 'name-card' + kleurKlasse + (klaar===taken.length&&taken.length>0?' done':'') + (bezig>0&&klaar<taken.length?' busy':'');
     
     const foto = (state.pupilPhotos||{})[p.id];
     const fotoHtml = foto
