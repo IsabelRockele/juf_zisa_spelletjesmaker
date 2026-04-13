@@ -1259,10 +1259,33 @@ function loadState(){
     state = {};
   }
   applyStateDefaults();
-  // Laad via gedeelde collectie zodat kind en leerkracht dezelfde data zien
-  const loader = window.fbLoadShared || window.fbLoad;
-  if(loader){
-    loader(STORAGE_KEY).then(function(fbData){
+  // Laad via gedeelde collectie — als leeg, migreer van privé naar shared
+  if(window.fbLoadShared){
+    window.fbLoadShared(STORAGE_KEY).then(function(sharedData){
+      if(sharedData && sharedData.pupils && sharedData.pupils.length > 0){
+        // Shared data beschikbaar
+        state = Object.assign({}, state, sharedData);
+        applyStateDefaults();
+        try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+        renderNames();
+        renderSetupAddedList();
+      } else if(window.fbLoad){
+        // Geen shared data — laad privé en migreer naar shared
+        window.fbLoad(STORAGE_KEY).then(function(privData){
+          if(privData){
+            state = Object.assign({}, state, privData);
+            applyStateDefaults();
+            // Migreer naar shared zodat kinderen het kunnen zien
+            if(window.fbSaveShared) window.fbSaveShared(STORAGE_KEY, state).catch(console.warn);
+            try{ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); }catch(e){}
+            renderNames();
+            renderSetupAddedList();
+          }
+        }).catch(console.warn);
+      }
+    }).catch(console.warn);
+  } else if(window.fbLoad){
+    window.fbLoad(STORAGE_KEY).then(function(fbData){
       if(fbData){
         state = Object.assign({}, state, fbData);
         applyStateDefaults();
