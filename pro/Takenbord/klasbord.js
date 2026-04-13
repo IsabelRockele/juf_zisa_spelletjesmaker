@@ -937,58 +937,69 @@ function renderBoard(){
   renderBoardTable(allTasks);
   updateProgressBar();
   updateMeta();
-  requestAnimationFrame(updateScrollArrow);
-  setTimeout(updateScrollArrow,150);
-  setTimeout(updateScrollArrow,500);
-  setTimeout(updateScrollArrow,1200);
+  setTimeout(updateScrollArrow,50);
 }
 
 function renderBoardTable(allTasks){
-  const COL_NAME=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220');
-  const COL_TASK=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120');
-  const PAD=14;
-  const minW=COL_NAME+allTasks.length*COL_TASK;
-  const minWFixed=minW+PAD*2;
-
-  // ── LEGENDA in top-fixed ──────────────────────────────────────────────
-  const legend=document.getElementById('legend');
-  if(legend){
-    legend.style.minWidth=minWFixed+'px';
-    legend.classList.remove('hidden');
-  }
-
-  // ── TAAKNAMEN HEADER in top-fixed ─────────────────────────────────────
-  const taskHeader=document.getElementById('task-header');
-  if(taskHeader){
-    taskHeader.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
-    taskHeader.style.minWidth=minWFixed+'px';
-    taskHeader.classList.remove('hidden');
-    allTasks.forEach(t=>{
-      const ci=state.customIcons&&state.customIcons[t.id];
-      const cell=document.createElement('div');
-      cell.className='task-header-cell';
-      if(ci){
-        cell.innerHTML=`<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
-      } else {
-        cell.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
-      }
-      taskHeader.appendChild(cell);
-    });
-  }
-
-  // ── Scroll sync: top-fixed horizontaal mee met board-scroll ───────────
-  const boardScroll=document.getElementById('board-scroll');
-  const topFixed=document.getElementById('top-fixed');
-  if(boardScroll&&topFixed&&!boardScroll._syncBound){
-    boardScroll._syncBound=true;
-    boardScroll.addEventListener('scroll',()=>{topFixed.scrollLeft=boardScroll.scrollLeft;},{passive:true});
-  }
-
-  // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
   const inner=document.getElementById('board-inner');
-  inner.classList.remove('hidden');
+  inner.innerHTML='';
+
+  const minW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-name')||'220')
+    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')
+    + allTasks.length*(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--col-task')||'120')
+    + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')||'8')) + 32;
+
+  // ── TAAKNAMEN HEADER ─────────────────────────────────────────────────
+  const taskHeader=document.getElementById('task-header')||document.createElement('div');
+  taskHeader.id='task-header';
+  taskHeader.querySelectorAll('.task-header-cell').forEach(e=>e.remove());
+  taskHeader.style.minWidth=minW+'px';
+
+  // Zorg dat header-corner bestaat
+  if(!taskHeader.querySelector('.header-corner')){
+    const corner=document.createElement('div');
+    corner.className='header-corner';
+    corner.innerHTML='<span class="board-corner-label">Leerling</span>';
+    taskHeader.insertBefore(corner,taskHeader.firstChild);
+  }
+
+  allTasks.forEach(t=>{
+    const ci=state.customIcons&&state.customIcons[t.id];
+    const cell=document.createElement('div');
+    cell.className='task-header-cell';
+    if(ci){
+      cell.innerHTML=`<div class="t-icon-custom" style="background-image:url(${ci})"></div><span class="t-label">${esc(t.label)}</span>`;
+    } else {
+      cell.innerHTML=`<span class="t-icon">${t.icon}</span><span class="t-label">${esc(t.label)}</span>`;
+    }
+    taskHeader.appendChild(cell);
+  });
+
+  // Zorg dat header in board-scroll zit (niet in inner)
+  const boardScroll=document.getElementById('board-scroll');
+  if(taskHeader.parentNode!==boardScroll){
+    boardScroll.insertBefore(taskHeader,inner);
+  }
+
+  // ── LEGENDA ───────────────────────────────────────────────────────────
+  let legend=document.getElementById('legend');
+  if(!legend){
+    legend=document.createElement('div');
+    legend.id='legend';
+    legend.innerHTML=`<div id="legend-name"></div><div id="legend-items">
+      <div class="legend-item"><div class="legend-dot" style="background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:2px dashed #c7d2fe;font-size:16px;">○</div><span>Nog te doen</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fef9c3;border:1.5px solid #f59e0b;color:#d97706">🔄</div><span>Bezig</span></div>
+      <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
+      <span style="font-size:11px;color:#818cf8;font-weight:600;">Klik op een hokje om te schakelen · smiley verschijnt na afvinken</span>
+    </div>`;
+    boardScroll.insertBefore(legend,inner);
+  }
+  legend.style.minWidth=minW+'px';
+
+  // ── LEERLINGENRIJEN (flex) ────────────────────────────────────────────
   inner.style.minWidth=minW+'px';
 
+  // Zorg voor pupil-rows container
   let pupilRows=document.getElementById('pupil-rows');
   if(!pupilRows){
     pupilRows=document.createElement('div');
@@ -996,7 +1007,6 @@ function renderBoardTable(allTasks){
     inner.appendChild(pupilRows);
   }
   pupilRows.innerHTML='';
-  pupilRows.style.minWidth=minW+'px';
 
   // ── LEERLINGENRIJEN ───────────────────────────────────────────────────
   state.pupils.forEach((pupil,idx)=>{
@@ -1038,8 +1048,7 @@ function renderBoardTable(allTasks){
         const isExtra=!!(state.pupilTaskOverrides[pid]?.extra?.find(x=>x.id===t.id));
         const entry=prog[t.id]||{status:0,smiley:0};
         const s=entry.status||0, sm=entry.smiley||0;
-        const wrap=document.createElement('div');
-        wrap.className='task-cell';
+        const wrap=td;
         const btn=document.createElement('button');
         btn.className='task-btn status-'+s+(isExtra?' extra-task':'');
         btn.textContent=s===0?'':s===1?'🔄':'✓';
@@ -1072,7 +1081,6 @@ function renderBoardTable(allTasks){
           });
           wrap.appendChild(sr);
         }
-        td.appendChild(wrap);
       }
       taskWrap.appendChild(td);
     });
