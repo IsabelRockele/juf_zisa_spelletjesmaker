@@ -225,6 +225,19 @@ Lena
 </div>
 </div>
 </div>
+<!-- QR CODE MODAL -->
+<div class="overlay hidden" id="qr-modal">
+<div class="modal" style="max-width:360px;text-align:center;">
+  <div class="modal-title">📱 QR-code voor leerlingen</div>
+  <p class="modal-sub" style="margin-bottom:16px;">Laat leerlingen deze code scannen om het bord te openen op hun tablet.</p>
+  <div id="qr-code-container" style="display:flex;justify-content:center;margin:16px 0;"></div>
+  <p id="qr-url-text" style="font-size:11px;color:#94a3b8;word-break:break-all;margin-bottom:16px;"></p>
+  <div class="modal-btns">
+    <button class="btn btn-secondary" onclick="document.getElementById('qr-modal').classList.add('hidden')">Sluiten</button>
+  </div>
+</div>
+</div>
+
 <div class="hidden" id="smiley-popup">
 <h3 id="sp-title">Hoe vond je het?</h3>
 <p>Kies een smiley die past bij hoe de taak ging.</p>
@@ -420,26 +433,29 @@ Lena
 
 <div class="help-section">
 <h3>📺 Smartboard-weergave</h3>
-<p>Open het bord via <strong>"📺 Smartboard-weergave"</strong> op het welkomstscherm. In deze modus zijn alle beheerknoppen (PDF, Export, Import, Beheer) verborgen zodat kinderen niets fout kunnen aanklikken.<br/>
-<strong>Terug naar beheer:</strong> klik het kleine 🔒-icoontje rechtsonder in het scherm. Dat opent een discreet menu voor de leerkracht.</p>
+<p>Klik op <strong>"📺 Smartboard"</strong> in de balk om het bord in een apart venster te openen. In smartboard-modus zijn alle beheerknoppen verborgen zodat kinderen niets fout kunnen aanklikken.<br/>
+<strong>Terug naar beheer:</strong> klik de knop <strong>⚙️ Menu</strong> rechts in de balk. Dat opent een keuze: terug naar beheer of terug naar het welkomstscherm.</p>
 </div>
 
 <div class="help-section">
 <h3>⏱️ Werktimer</h3>
-<p>Klik op <strong>"⏱️ Timer"</strong> in de balk. Stel de werktijd in en klik "▶ Starten". De timer zweeft boven het bord en overlapt niets — versleep hem aan de titelbalk, pas de breedte aan via het ⊿-hoekje. Kies je weergave: analoog, digitaal of beide.<br/>
+<p>Klik op <strong>"Meer opties"</strong> → <strong>"⏱️ Timer"</strong>. Stel de werktijd in en klik "▶ Starten". De timer zweeft boven het bord — versleep hem aan de titelbalk, pas de breedte aan via het ⊿-hoekje. Kies je weergave: analoog, digitaal of beide.<br/>
 Als de tijd om is klinkt een geluidssignaal en knippert de timer rood tot je op "Nieuwe timer" klikt.</p>
 </div>
 
 <div class="help-section">
 <h3>📄 PDF rapport</h3>
-<p>Klik <strong>"📄 PDF rapport"</strong> in de balk. Kies een periodenaam en datums. Klik <strong>"⬇️ Downloaden als PDF"</strong> — het afdrukvenster opent. Kies bij <em>Bestemming</em>: <strong>Opslaan als PDF</strong> → klik Opslaan. De PDF staat in je Downloads-map.</p>
+<p>Klik op <strong>"Meer opties"</strong> → <strong>"📄 PDF rapport"</strong>. Kies een periodenaam en datums. Klik <strong>"⬇️ Downloaden als PDF"</strong> — het afdrukvenster opent. Kies bij <em>Bestemming</em>: <strong>Opslaan als PDF</strong> → klik Opslaan.</p>
 </div>
 
 <div class="help-section">
-<h3>💾 Backup (Export / Import)</h3>
-<p><strong>💾 Export</strong> = sla al je gegevens (namen, taken, voortgang, bevindingen) op als bestand. Bewaar het op een vaste plek, bv. een map "Klasbord backups" op je bureaublad.<br/>
-<strong>📂 Import</strong> = zet een backup terug. Kies het bewaard bestand. <em>Klik het backupbestand nooit zomaar open — je ziet dan rare tekens, maar het bestand is niet stuk.</em><br/>
-Maak een backup aan het einde van elke periode!</p>
+<h3>📱 QR-code</h3>
+<p>Klik op <strong>"Meer opties"</strong> → <strong>"📱 QR-code tonen"</strong>. Er verschijnt een QR-code die leerlingen kunnen scannen met hun tablet of smartphone. Ze komen dan rechtstreeks op het kinderbord — zonder dat je terug naar het welkomstscherm moet gaan.</p>
+</div>
+
+<div class="help-section">
+<h3>💾 Backup</h3>
+<p>Je gegevens worden automatisch opgeslagen in de cloud via Firebase. Voor een extra veiligheidsnet kan je via <strong>"Meer opties"</strong> → <strong>"💾 Backup"</strong> je gegevens ook als bestand opslaan op je computer. Handig als extra zekerheid aan het einde van een periode.</p>
 </div>
 
 <div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-overlay').classList.add('hidden')">Begrepen!</button></div>
