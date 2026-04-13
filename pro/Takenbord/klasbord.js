@@ -434,6 +434,28 @@ function renderShell(){
   else renderBoard();
 }
 
+function openQrModal(){
+  const modal = document.getElementById('qr-modal');
+  if(!modal) return;
+  // Bouw de QR URL: huidige URL maar met rol=kind
+  const params = new URLSearchParams(window.location.search);
+  params.set('rol', 'kind');
+  params.delete('modus');
+  const url = window.location.origin + window.location.pathname.replace('klasbord.html','klasbord_kind.html') + '?' + params.toString();
+  
+  // Toon URL
+  const urlEl = document.getElementById('qr-url-text');
+  if(urlEl) urlEl.textContent = url;
+  
+  // Genereer QR via Google Charts API
+  const container = document.getElementById('qr-code-container');
+  if(container){
+    container.innerHTML = '<img src="https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=' + encodeURIComponent(url) + '&choe=UTF-8" alt="QR code" style="border-radius:8px;" />';
+  }
+  
+  modal.classList.remove('hidden');
+}
+
 function toggleMeerOpties(){
   var menu = document.getElementById('meer-opties-menu');
   if(!menu) return;
