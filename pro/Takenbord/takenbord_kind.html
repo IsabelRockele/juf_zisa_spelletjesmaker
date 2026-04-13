@@ -964,7 +964,7 @@ Noor Janssens"></textarea>
 </div>
 
 <!-- Discreet slotje — altijd zichtbaar, ook in smartboard-modus -->
-<button id="smartboard-exit-btn" onclick="document.getElementById('kind-exit-overlay').classList.add('show')" title="Leerkracht" style="position:fixed;bottom:12px;right:12px;z-index:7000;width:32px;height:32px;border-radius:50%;border:none;background:rgba(200,200,220,0.35);color:rgba(100,100,140,0.5);font-size:15px;cursor:pointer;display:none;padding:0;line-height:32px;text-align:center;">🔒</button>
+
 
 <!-- Foto-hint: inline boven het namenraster, verdwijnt na sluiten -->
 <div id="kind-hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:10px 16px;margin:0 0 14px;font-size:13px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -986,6 +986,7 @@ Noor Janssens"></textarea>
 <h2 class="pupil-title" id="pupilTitle"></h2>
 <button id="kind-undo-btn" onclick="undoKindAction()" style="display:none;border:none;background:#fef3c7;color:#92400e;border:1.5px solid #f59e0b;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:800;cursor:pointer;margin-left:8px;">↩ Ongedaan</button>
 <button class="teacher-btn teacher-only" onclick="openTeacherModal()" style="margin-left:auto;">⚙️ Beheer</button>
+<button onclick="showKindClosed()" style="margin-left:8px;border:none;background:#ef4444;color:#fff;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">✕ Klaar</button>
 </div>
 <div class="task-list" id="taskList"></div>
 <div class="empty-box" id="emptyTasks" style="display:none;">
@@ -2897,6 +2898,18 @@ function timerDone(){
 </div>
 
   <script src="../device-id.js"></script>
-  <script src="../guard.js"></script>
+  <script src="../guard.js">
+function showKindClosed(){
+  // Toon een eenvoudig afsluit-scherm
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:linear-gradient(160deg,#f8fafc,#eef2ff);display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = '<div style="background:#fff;border-radius:24px;padding:32px 28px;max-width:380px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.1);text-align:center;">'
+    + '<div style="font-size:48px;margin-bottom:12px;">✅</div>'
+    + '<div style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:8px;">Klaar voor vandaag!</div>'
+    + '<div style="font-size:15px;color:#64748b;line-height:1.6;">Goed gedaan! Je taken zijn opgeslagen.</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+}
+</script>
 </body>
 </html>
