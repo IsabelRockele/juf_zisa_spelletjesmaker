@@ -405,30 +405,44 @@ function renderShell(){
   const isB = currentMode === 'board';
   const isS = currentMode === 'settings';
 
-  // Toon bordnaam in topbar
+  // Bordnaam
   const bordNaam = getBordNaam();
-  const titleEl = document.getElementById('topbar-title');
-  if(titleEl) titleEl.textContent = bordNaam ? '📋 ' + bordNaam : '';
   const boardTitle = document.getElementById('board-naam-label');
   if(boardTitle) boardTitle.textContent = bordNaam || '';
 
+  // Topbar verborgen — zijbalk doet de navigatie
   const topbar = document.getElementById('topbar');
-  if(topbar) topbar.classList.toggle('visible', isS);
+  if(topbar) topbar.style.display = 'none';
 
+  // Settings-wrap tonen/verbergen
   const settingsWrap = document.getElementById('settings-wrap');
   if(settingsWrap){
-    settingsWrap.classList.toggle('visible', isS);
-    settingsWrap.classList.toggle('hidden', !isS);
+    if(isS){
+      settingsWrap.classList.add('visible');
+      settingsWrap.classList.remove('hidden');
+    } else {
+      settingsWrap.classList.remove('visible');
+      settingsWrap.classList.add('hidden');
+    }
   }
 
+  // Board-wrap tonen/verbergen
   const boardWrap = document.getElementById('board-wrap');
   if(boardWrap){
-    boardWrap.classList.toggle('visible', isB);
-    boardWrap.classList.toggle('hidden', !isB);
+    if(isB){
+      boardWrap.classList.add('visible');
+      boardWrap.classList.remove('hidden');
+    } else {
+      boardWrap.classList.remove('visible');
+      boardWrap.classList.add('hidden');
+    }
   }
 
   const btnReset = document.getElementById('btn-reset');
   if(btnReset) btnReset.classList.toggle('hidden', !isB);
+
+  // body class voor scroll-pijlen zichtbaarheid
+  document.body.classList.toggle('board-mode', isB);
 
   if(isS) renderSettings();
   else renderBoard();
@@ -610,7 +624,7 @@ function stripEmoji(str){
 }
 
 
-function generateAndPrint(){
+function generateAndPrint(mode){
   var jspdfLib = window.jspdf;
   if(!jspdfLib || !jspdfLib.jsPDF){ alert('PDF-bibliotheek niet geladen. Ververs de pagina.'); return; }
   var jsPDF = jspdfLib.jsPDF;
@@ -722,7 +736,7 @@ function generateAndPrint(){
 
     // Badge
     var badgeColor = isComplete ? GREEN : (stats.done>0||stats.busy>0) ? [180,100,0] : RED;
-    var badgeTxt   = isComplete ? 'Volledig klaar' : stats.done>0 ? stats.done+'/'+stats.total+' klaar' : stats.busy>0 ? stats.busy+' bezig' : 'Nog niet gestart';
+    var badgeTxt   = isComplete ? 'Alle '+stats.total+' taken klaar' : stats.done+' van de '+stats.total+' taken klaar'+(stats.busy>0?' ('+stats.busy+' bezig)':'');
     doc.setFillColor(badgeColor[0],badgeColor[1],badgeColor[2]);
     doc.roundedRect(pw-70, 15, 62, 8, 2, 2, 'F');
     doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
@@ -758,9 +772,9 @@ function generateAndPrint(){
       styles: { fontSize:9, cellPadding:3, overflow:'linebreak' },
       headStyles: { fillColor:[241,245,249], textColor:[71,85,105], fontStyle:'bold', fontSize:8 },
       columnStyles: {
-        0: { cellWidth: pw - 20 - 45 - 70, halign:'left' },
-        1: { cellWidth: 45, halign:'center', fontStyle:'bold' },
-        2: { cellWidth: 70, halign:'left' }
+        0: { cellWidth: pw - 20 - 55 - 75, halign:'left' },
+        1: { cellWidth: 55, halign:'left', fontStyle:'bold' },
+        2: { cellWidth: 75, halign:'left' }
       },
       didParseCell: function(data){
         if(data.section==='body' && data.column.index===1){
@@ -793,10 +807,25 @@ function generateAndPrint(){
     ftr();
   });
 
-  var filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
-  doc.save(filename);
   document.getElementById('pdf-overlay').classList.add('hidden');
-  showToast('PDF gedownload: '+filename);
+  if(mode === 'print'){
+    // Open in nieuw venster en print
+    var blob = doc.output('blob');
+    var url = URL.createObjectURL(blob);
+    var win = window.open(url, '_blank');
+    if(win){
+      win.addEventListener('load', function(){ win.print(); }, false);
+    } else {
+      // Fallback: gewoon downloaden
+      var filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
+      doc.save(filename);
+      showToast('Afdrukvenster geblokkeerd — PDF gedownload.');
+    }
+  } else {
+    var filename = 'klasbord-rapport-'+new Date().toISOString().slice(0,10)+'.pdf';
+    doc.save(filename);
+    showToast('PDF gedownload: '+filename);
+  }
 }
 
 // NIEUWE PERIODE
