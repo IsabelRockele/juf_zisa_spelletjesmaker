@@ -326,7 +326,9 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 
 /* Eigen afbeelding in taaknaam-header — groter */
 .t-icon-custom { width:var(--icon-custom,56px); height:var(--icon-custom,56px); background-size:contain; background-repeat:no-repeat; background-position:center; border-radius:10px; filter:drop-shadow(0 2px 4px rgba(0,0,0,.15)); transition:width .2s,height .2s; }
-#legend { display:flex; gap:14px; align-items:center; flex-wrap:wrap; background:#fff; border-bottom:2px solid #e0e7ff; padding:7px 14px 7px calc(var(--col-name) + var(--gap) + 14px); margin:0 -14px 8px; }
+#legend { display:flex; flex-direction:row; align-items:center; background:#fff; border-bottom:2px solid #e0e7ff; padding:0 14px; }
+#legend-name { width:var(--col-name); min-width:var(--col-name); flex-shrink:0; }
+#legend-items { display:flex; flex-direction:row; flex-wrap:nowrap; gap:14px; align-items:center; padding:6px 0; }
 .legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:#4b5563; font-weight:700; }
 .legend-dot  { width:20px; height:20px; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; }
 #pupil-rows { display:flex; flex-direction:column; gap:0; }
@@ -335,8 +337,6 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-name-cell { position:sticky; left:0; z-index:20; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; }
 .pupil-name-cell::before { content:''; position:absolute; inset:0; background:inherit; border-radius:12px 0 0 12px; z-index:-1; }
 .pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
-
-/* Taakvakken: horizontaal naast elkaar */
 .task-cells-wrap { display:flex; flex-direction:row; align-items:center; padding:6px 0; }
 .task-cell { width:var(--col-task); min-width:var(--col-task); flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:var(--row-pad,6px) 0; }
 .pupil-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:#c7d2fe; transition:all .3s; }
