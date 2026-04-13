@@ -254,7 +254,7 @@ function parseName(str){
   if(bulkOrder==='achternaam') return{voornaam:parts[parts.length-1],achternaam:parts.slice(0,parts.length-1).join(' ')};
   return{voornaam:parts[0],achternaam:parts.slice(1).join(' ')};
 }
-function setOrder(o){ bulkOrder=o; document.getElementById('order-btn-voor').classList.toggle('active',o==='voornaam'); document.getElementById('order-btn-ach').classList.toggle('active',o==='achternaam'); }
+function setOrder(o){bulkOrder=o;var bv=document.getElementById('order-btn-voor');var ba=document.getElementById('order-btn-ach');if(bv)bv.classList.toggle('active',o==='voornaam');if(ba)ba.classList.toggle('active',o==='achternaam');}
 
 function addPupil(){
   const v=document.getElementById('input-voornaam').value.trim(),a=document.getElementById('input-achternaam').value.trim();
@@ -858,12 +858,146 @@ function updateAcWizard(){
   if(sub2) sub2.textContent = heeftTaken ? state.activeTasks.length + ' taken actief' : 'Klik op een taak om aan of uit te zetten';
 }
 
-function renderSettings(){
-  renderPupilList();
-  renderTaskSettings();
+var _sbActief='namen';
+function sbToon(sectie){
+  _sbActief=sectie;
+  ['namen','taken','inst'].forEach(function(s){
+    var p=document.getElementById('sb-paneel-'+s);if(p)p.classList.toggle('sb-paneel-hidden',s!==sectie);
+    var b=document.getElementById('sb-stap-'+s);if(b)b.classList.toggle('sb-actief',s===sectie);
+  });
+  if(sectie==='namen')renderPupilList();
+  if(sectie==='taken')renderTaskSettings();
+  if(sectie==='inst'){
+    var tn=document.getElementById('toggle-numbers');if(tn)tn.checked=!!state.showNumbers;
+    var tl=document.getElementById('toggle-lastname');if(tl)tl.checked=!!state.showLastname;
+    var ts=document.getElementById('toggle-smileys');if(ts)ts.checked=!!state.showSmileys;
+  }
+  updateSbWizard();
+}
+function acToggle(s){sbToon(s);}
+function updateSbWizard(){
+  var hN=state.pupils&&state.pupils.length>0,hT=state.activeTasks&&state.activeTasks.length>0;
+  var b1=document.getElementById('sb-badge-namen');if(b1){b1.textContent=hN?'✓':'1';b1.classList.toggle('sb-badge-klaar',hN);}
+  var b2=document.getElementById('sb-badge-taken');if(b2){b2.textContent=hT?'✓':'2';b2.classList.toggle('sb-badge-klaar',hT);}
+  var b3=document.getElementById('sb-badge-inst');if(b3){b3.textContent=(hN&&hT)?'✓':'3';b3.classList.toggle('sb-badge-klaar',hN&&hT);}
+  var s1=document.getElementById('sb-sub-namen');if(s1)s1.textContent=hN?state.pupils.length+' leerlingen':'Leerlingen toevoegen';
+  var s2=document.getElementById('sb-sub-taken');if(s2)s2.textContent=hT?state.activeTasks.length+' actief':'Taken kiezen';
+  var bn=document.getElementById('sb-bord-naam');if(bn){var n=getBordNaam();bn.textContent=n||'';bn.style.display=n?'block':'none';}
+}
+function updateAcWizard(){updateSbWizard();}
+function toggleEmojiPicker(){
+  var popup=document.getElementById('emoji-picker-popup');if(!popup)return;
+  popup.classList.toggle('open');
+  if(popup.classList.contains('open')){
+    setTimeout(function(){
+      document.addEventListener('click',function closeEP(e){
+        if(!popup.contains(e.target)&&e.target.id!=='eigen-taak-emoji-btn'){popup.classList.remove('open');document.removeEventListener('click',closeEP);}
+      });
+    },10);
+  }
+}
+function updateEmojiBtn(){var b=document.getElementById('eigen-taak-emoji-btn');if(b)b.textContent=selectedEmoji;}
+function renderSettings(){sbToon(_sbActief);updateSbWizard();}
+function switchTab(tab){currentTab=tab;}
+
+function renderPupilList(){
+  document.getElementById('toggle-numbers').checked=!!state.showNumbers;
+  document.getElementById('toggle-lastname').checked=!!state.showLastname;
+  document.getElementById('toggle-smileys').checked=!!state.showSmileys;
+  document.getElementById('pupil-count-title').textContent=`Leerlingen (${state.pupils.length})`;
+  // Autosave melding tonen als er leerlingen zijn
+  const an = document.getElementById('autosave-notice');
+  if(an) an.style.display = state.pupils.length > 0 ? 'flex' : 'none';
+
+  // Eerste-keer-hint foto's (punt 3) — toon als er leerlingen zijn maar nog geen foto
+  const hasAnyPhoto = state.pupils.some(p => state.pupilPhotos[p.id]);
+  const hintDismissed = localStorage.getItem('hint_photos_dismissed');
+  const hintEl = document.getElementById('hint-photos');
+  if(hintEl){
+    hintEl.style.display = (!hasAnyPhoto && !hintDismissed && state.pupils.length > 0) ? 'flex' : 'none';
+  }
+
+  // Leerlingenlijst — foto-knop direct zichtbaar naast elke naam
+  const el=document.getElementById('pupil-list');
+  if(!state.pupils.length){el.innerHTML='<div style="opacity:.3;text-align:center;padding:28px 0;font-size:13px">Nog geen leerlingen</div>';return;}
+  let html='';
+  state.pupils.forEach((p,i)=>{
+    const ov=hasOverrides(p.id), hasNotes=!!state.notes[p.id];
+    const numHtml   = state.showNumbers ? '<span class="pupil-num">'+(i+1)+'.</span>' : '';
+    const achHtml   = p.achternaam ? '<span class="pupil-achternaam">'+esc(p.achternaam)+'</span>' : '';
+    const extraHtml = ov ? '<span class="pupil-extra-badge">\u2605 taken</span>' : '';
+    const noteCls   = hasNotes ? 'has-notes' : '';
+    const fullN     = esc(p.voornaam+(p.achternaam?' '+p.achternaam:''));
+    const photo     = state.pupilPhotos&&state.pupilPhotos[p.id];
+    // Foto-knop: groot en duidelijk zichtbaar in de rij
+    const photoCell = photo
+      ? `<button class="pupil-photo-btn has-photo" onclick="uploadPupilPhoto('${p.id}')" title="Klik om foto te wijzigen"><img src="${photo}" class="pupil-row-photo" alt="" /></button>`
+      : `<button class="pupil-photo-btn no-photo" onclick="uploadPupilPhoto('${p.id}')" title="Foto toevoegen">📷 foto</button>`;
+    html += '<div class="insert-zone" onclick="insertAfter('+(i-1)+')"></div>';
+    html += '<div class="pupil-row" draggable="true"'
+      +' ondragstart="onDragStart(event,'+i+')" ondragover="onDragOver(event,'+i+')"'
+      +' ondragleave="onDragLeave('+i+')" ondrop="onDrop(event,'+i+')" ondragend="onDragEnd()">'
+      +'<span class="drag-handle">\u2833</span>'
+      + numHtml
+      + photoCell
+      +'<div class="pupil-display">'
+        +'<span class="pupil-voornaam">'+esc(p.voornaam)+'</span>'
+        + achHtml + extraHtml
+      +'</div>'
+      +'<div class="row-btns">'
+        +(photo?`<button class="row-btn del" onclick="removePupilPhoto('${p.id}')" title="Foto verwijderen" style="font-size:10px;">🗑</button>`:'')
+        +'<button class="row-btn" onclick="openPupilTasksModal(\''+p.id+'\')" title="Taken aanpassen">\uD83D\uDCCB</button>'
+        +'<button class="row-btn notes-btn '+noteCls+'" onclick="openNotesModal(\''+p.id+'\')" title="Bevindingen">\uD83D\uDD12</button>'
+        +'<button class="row-btn" onclick="startEdit(\''+p.id+'\')" title="Naam aanpassen">\u270E</button>'
+        +'<button class="row-btn del" onclick="confirmAction(\'custom\',\''+fullN+' verwijderen?\',()=>removePupil(\''+p.id+'\'))" title="Verwijderen">\u2715</button>'
+      +'</div>'
+      +'</div>';
+  });
+  html += '<div class="insert-zone" onclick="insertAfter('+(state.pupils.length-1)+')"></div>';
+  el.innerHTML=html;
   updateAcWizard();
 }
-function switchTab(tab){ currentTab=tab; }
+function renderTaskSettings(){
+  const ci=state.customIcons||{};
+  const ib=document.getElementById('icons-banner');
+  if(ib)ib.style.display=Object.keys(ci).length>0?'flex':'none';
+  const iconHintEl=document.getElementById('hint-icons');
+  if(iconHintEl)iconHintEl.style.display='none';
+  const chipsEl=document.getElementById('task-chips');
+  if(!chipsEl)return;
+  chipsEl.innerHTML='';
+  if(!chipsEl._dropdownBound){
+    chipsEl._dropdownBound=true;
+    document.addEventListener('click',function(){document.querySelectorAll('.taak-dropdown.open').forEach(function(d){d.classList.remove('open');});});
+  }
+  allBaseTasks().forEach(function(t){
+    const a=state.activeTasks.includes(t.id),c=t.id.startsWith('c_'),hasImg=!!ci[t.id];
+    const wrap=document.createElement('div');wrap.className='taak-wrap';
+    const tegel=document.createElement('div');
+    tegel.className='taak-tegel'+(a?' actief':'');
+    tegel.onclick=function(){toggleTask(t.id);};
+    const iconEl=document.createElement('div');iconEl.className='taak-icon';
+    if(hasImg){iconEl.innerHTML=`<img src="${ci[t.id]}" style="width:34px;height:34px;object-fit:contain;border-radius:6px;" alt="" />`;}
+    else{iconEl.textContent=t.icon;}
+    tegel.appendChild(iconEl);
+    const naamEl=document.createElement('div');naamEl.className='taak-naam';naamEl.textContent=t.label;tegel.appendChild(naamEl);
+    const dropdown=document.createElement('div');dropdown.className='taak-dropdown';
+    const gear=document.createElement('button');gear.className='taak-gear';gear.textContent='⚙';gear.title='Opties';
+    gear.onclick=function(e){e.stopPropagation();document.querySelectorAll('.taak-dropdown.open').forEach(function(d){if(d!==dropdown)d.classList.remove('open');});dropdown.classList.toggle('open');};
+    tegel.appendChild(gear);wrap.appendChild(tegel);
+    const r1=document.createElement('button');r1.className='taak-menu-item';r1.innerHTML='✎ &nbsp;Naam wijzigen';
+    r1.onclick=function(e){e.stopPropagation();dropdown.classList.remove('open');openTaskRenameModal(t.id,t.label);};dropdown.appendChild(r1);
+    const r2=document.createElement('button');r2.className='taak-menu-item';r2.innerHTML=hasImg?'📷 &nbsp;Afbeelding wijzigen':'📷 &nbsp;Eigen afbeelding';
+    r2.onclick=function(e){e.stopPropagation();dropdown.classList.remove('open');uploadTaskIcon(t.id);};dropdown.appendChild(r2);
+    if(hasImg){const r3=document.createElement('button');r3.className='taak-menu-item';r3.innerHTML='🗑 &nbsp;Afbeelding verwijderen';r3.onclick=function(e){e.stopPropagation();dropdown.classList.remove('open');removeTaskIcon(t.id);};dropdown.appendChild(r3);}
+    if(c){const sep=document.createElement('div');sep.className='taak-menu-sep';dropdown.appendChild(sep);const r4=document.createElement('button');r4.className='taak-menu-item taak-menu-danger';r4.innerHTML='🗑 &nbsp;Taak verwijderen';r4.onclick=function(e){e.stopPropagation();dropdown.classList.remove('open');removeCustomTask(t.id);};dropdown.appendChild(r4);}
+    wrap.appendChild(dropdown);chipsEl.appendChild(wrap);
+  });
+  const epEl=document.getElementById('emoji-picker');
+  if(epEl)epEl.innerHTML=EMOJIS.map(function(e){return `<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`;}).join('');
+  const itEl=document.getElementById('input-task');if(itEl)itEl.placeholder='Naam van de taak…';
+  updateEmojiBtn();updateSbWizard();
+}
 
 function renderPupilList(){
   document.getElementById('toggle-numbers').checked=!!state.showNumbers;
@@ -1328,7 +1462,7 @@ function renderBoardTable(allTasks){
 function renderTaskHeader(tasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 function renderPupilRows(allTasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 
-function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;document.getElementById('progress-fill').style.width=t?(d/t*100)+'%':'0%';document.getElementById('progress-label').textContent=`${d}/${t} klaar`;}
+function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=t?(d/t*100)+'%':'0%';if(pl)pl.textContent=`${d}/${t} klaar`;}
 function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p){return isPupilComplete(p.id);}).length;var el=document.getElementById('board-progress-text');if(el)el.textContent=(t>0)?(d+'/'+t+' klaar'):'';var pl=document.getElementById('progress-label');if(pl)pl.textContent=(d+'/'+t+' klaar');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1467,7 +1601,8 @@ function initKlasbordAfterLoad(){
   const isKindModus = urlParams.get('rol') === 'kind';
   const startTab = urlParams.get('tab');
 
-  currentMode = (isKindModus || urlParams.get('view') === 'board') ? 'board' : 'settings';
+  var hA=state.pupils&&state.pupils.length>0&&state.activeTasks&&state.activeTasks.length>0;
+  currentMode=(isKindModus||urlParams.get('view')==='board'||hA)?'board':'settings';
   currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
   applySmartboard();
