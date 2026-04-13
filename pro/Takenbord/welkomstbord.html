@@ -100,7 +100,7 @@ body{padding-top:44px;}
 .wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
 @media(max-width:640px){ .wb-grid { grid-template-columns:1fr; } }
 
-.wb-sectie { background:#fff; border-radius:20px; border:1.5px solid #e0e7ff; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 2px 12px rgba(99,102,241,.07); }
+.wb-sectie { background:#fff; border-radius:20px; border:1.5px solid #e0e7ff; overflow:visible; display:flex; flex-direction:column; box-shadow:0 2px 12px rgba(99,102,241,.07); position:relative; }
 
 .wb-sectie-hdr { display:flex; align-items:center; gap:14px; padding:18px 20px; border-bottom:1.5px solid #f0f0f8; }
 .wb-hdr-klas { background:linear-gradient(135deg,#eef2ff,#f5f3ff); }
@@ -118,7 +118,7 @@ body{padding-top:44px;}
 .wb-hdr-klas .wb-type-badge { background:#e0e7ff; color:#4338ca; }
 .wb-hdr-kind .wb-type-badge { background:#d1fae5; color:#059669; }
 
-.wb-borden-lijst { padding:14px 16px 0; flex:1; }
+.wb-borden-lijst { padding:14px 16px 0; flex:1; overflow:visible; }
 
 .wb-bord-rij { display:flex; align-items:center; gap:12px; padding:13px 16px; background:#f8fafc; border:1.5px solid #e8eef8; border-radius:14px; margin-bottom:10px; transition:all .12s; }
 .wb-bord-rij:hover { border-color:#6366f1; background:#eef2ff; }
@@ -160,7 +160,7 @@ body{padding-top:44px;}
 /* Drie-puntjes menu */
 .wb-bord-menu-btn { width:34px; height:34px; border-radius:9px; border:1.5px solid #e0e7ff; background:#f8fafc; color:#9ca3af; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .12s; font-weight:800; letter-spacing:1px; line-height:1; }
 .wb-bord-menu-btn:hover { background:#e0e7ff; color:#6366f1; border-color:#c7d2fe; }
-.wb-bord-dropdown { position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.12); min-width:200px; z-index:100; padding:6px; display:none; }
+.wb-bord-dropdown { position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18); min-width:200px; z-index:9999; padding:6px; display:none; }
 .wb-bord-dropdown.open { display:block; }
 .wb-drop-item { display:flex; align-items:center; gap:10px; width:100%; border:none; background:none; padding:10px 12px; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; color:#374151; text-align:left; transition:background .1s; }
 .wb-drop-item:hover { background:#f1f5f9; }
@@ -441,26 +441,24 @@ function renderSectie(type){
       info.innerHTML = '<div class="wb-bord-naam">' + esc(bord.naam) + '</div>'
         + '<div class="wb-bord-meta">' + (n ? n + ' leerlingen · ' : '') + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>';
 
-      // Openen knop
+      // Openen
       var openBtn = document.createElement('button');
       openBtn.className = 'wb-bord-open';
       openBtn.textContent = '▶ Openen';
       openBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openBord(id); }; })(type, bord.id);
 
-      // Drie-puntjes knop + dropdown
+      // ··· knop + dropdown
       var actiesWrap = document.createElement('div');
-      actiesWrap.className = 'wb-bord-acties';
-      actiesWrap.style.position = 'relative';
+      actiesWrap.style.cssText = 'position:relative;flex-shrink:0;';
 
       var menuBtn = document.createElement('button');
       menuBtn.className = 'wb-bord-menu-btn';
       menuBtn.textContent = '···';
-      menuBtn.title = 'Meer opties';
 
       var dropdown = document.createElement('div');
       dropdown.className = 'wb-bord-dropdown';
       dropdown.innerHTML =
-        '<button class="wb-drop-item" data-act="sb">📺 Smartboard / iPad</button>'
+          '<button class="wb-drop-item" data-act="sb">📺 Smartboard / iPad</button>'
         + '<button class="wb-drop-item" data-act="ren">✎ Naam wijzigen</button>'
         + '<div class="wb-drop-sep"></div>'
         + '<button class="wb-drop-item danger" data-act="del">🗑 Verwijderen</button>';
@@ -480,6 +478,18 @@ function renderSectie(type){
         e.stopPropagation();
         document.querySelectorAll('.wb-bord-dropdown.open').forEach(function(d){ if(d!==dropdown) d.classList.remove('open'); });
         dropdown.classList.toggle('open');
+        if(dropdown.classList.contains('open')){
+          // Boven of onder openen afhankelijk van beschikbare ruimte
+          var rect = menuBtn.getBoundingClientRect();
+          var spaceBelow = window.innerHeight - rect.bottom;
+          if(spaceBelow < 160){
+            dropdown.style.top = 'auto';
+            dropdown.style.bottom = 'calc(100% + 4px)';
+          } else {
+            dropdown.style.top = 'calc(100% + 4px)';
+            dropdown.style.bottom = 'auto';
+          }
+        }
       });
 
       actiesWrap.appendChild(menuBtn);
@@ -505,8 +515,6 @@ function renderSectie(type){
   }
 }
 
-
-document.addEventListener("click", function(){ document.querySelectorAll(".wb-bord-dropdown.open").forEach(function(d){ d.classList.remove("open"); }); });
 
 function toggleUitleg(type){
   var el = document.getElementById('uitleg-' + type);
