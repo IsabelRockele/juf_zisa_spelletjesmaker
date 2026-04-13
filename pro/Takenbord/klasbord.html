@@ -177,6 +177,12 @@
 <!-- BOARD -->
 <div id="board-wrap">
 
+<!-- Leerkracht-banner (verborgen in smartboard/ipad modus) -->
+<div id="teacher-banner" class="teacher-banner">
+  <span>👩‍🏫 <strong>Leerkrachtweergave</strong> — kinderen zien dit scherm niet. Gebruik <strong>📺 Smartboard</strong> om het bord op het scherm of iPad te tonen.</span>
+  <button onclick="document.getElementById('teacher-banner').style.display='none'" class="teacher-banner-close">✕</button>
+</div>
+
 <!-- Backup-herinnering banner -->
 <div id="backup-reminder" style="display:none;background:#fef3c7;border:1.5px solid #f59e0b;border-radius:10px;padding:9px 14px;margin:8px 12px 0;font-size:12px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
   <span>⚠️ <strong>Geen recente backup.</strong> Sla je gegevens op als bestand zodat je ze nooit kwijt bent.</span>
