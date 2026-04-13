@@ -31,7 +31,7 @@
 <div id="topbar">
 <div id="topbar-left">
 <button class="btn back-btn-orange" onclick="goBackToWelcome()">← Welkomstscherm</button>
-<button class="btn btn-indigo" onclick="closeSettings()">Naar het klasbord</button>
+<button class="btn btn-indigo" onclick="closeSettings()">📋 Naar het klasbord</button>
 <span id="topbar-title" style="font-size:13px;color:#6366f1;font-weight:700;"></span>
 </div>
 <div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center;">
@@ -43,94 +43,161 @@
 <!-- SETTINGS -->
 <div id="settings-wrap">
 <div class="settings-inner">
-<div class="tab-bar">
-<button class="tab-btn active" id="tab-ll" onclick="switchTab('leerlingen')">👦 Leerlingen</button>
-<button class="tab-btn" id="tab-tk" onclick="switchTab('taken')">📋 Taken</button>
-</div>
-<div id="tab-content-leerlingen">
-<div style="background:linear-gradient(135deg,#f0f9ff,#eef2ff);border:2px solid #c7d2fe;border-radius:12px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-  <div>
-    <div style="font-size:13px;font-weight:800;color:#1e1b4b;">📚 Bibliotheek</div>
-    <div style="font-size:11px;color:#64748b;margin-top:2px;">Hergebruik namen, foto's of taken van een ander bord</div>
+
+<!-- ── WIZARD STAPPENBALK ── -->
+<div class="wizard-bar">
+  <div class="wizard-steps">
+    <div class="wz-step" id="wz-step-1">
+      <div class="wz-num" id="wz-num-1">1</div>
+      <div class="wz-label">Namen</div>
+    </div>
+    <div class="wz-arrow">›</div>
+    <div class="wz-step" id="wz-step-2">
+      <div class="wz-num" id="wz-num-2">2</div>
+      <div class="wz-label">Taken</div>
+    </div>
+    <div class="wz-arrow">›</div>
+    <div class="wz-step" id="wz-step-3">
+      <div class="wz-num" id="wz-num-3">3</div>
+      <div class="wz-label">Instellingen</div>
+    </div>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button onclick="openLaadUitBibliotheek()" style="border:2px solid #6366f1;background:#fff;color:#6366f1;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">📥 Overnemen uit ander bord</button>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span id="wz-status-text" style="font-size:12px;color:#94a3b8;font-weight:700;"></span>
+    <button id="wz-go-btn" onclick="closeSettings()" class="wz-go-btn" disabled>📋 Naar het klasbord →</button>
   </div>
 </div>
 
-<div class="ll-layout">
+<!-- ── 2-KOLOM LAYOUT ── -->
+<div class="beheer-grid">
 
-<!-- LINKER KOLOM: invoer -->
-<div>
+<!-- LINKER KOLOM: Namen -->
+<div class="beheer-col-left">
 
-  <!-- Stap 1: Volgorde EERST -->
-  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-      <div class="card-title" style="margin-bottom:0;">📋 Stap 1 — Klaslijst plakken</div>
+  <!-- Panel: Namen invoeren -->
+  <div class="beheer-panel">
+    <div class="beheer-panel-hdr">
+      <div class="beheer-panel-badge beheer-badge-1" id="panel-badge-namen">1</div>
+      <div>
+        <div class="beheer-panel-title">Namen toevoegen</div>
+        <div class="beheer-panel-sub" id="namen-sub-text">Voeg de leerlingen van je klas toe</div>
+      </div>
+      <button onclick="openLaadUitBibliotheek()" class="beheer-lib-btn" title="Overnemen uit ander bord">📥 Bibliotheek</button>
+    </div>
+    <div class="beheer-panel-body">
+
+      <!-- Volgorde-keuze -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+        <span style="font-size:11px;font-weight:800;color:#6b7280;">Volgorde:</span>
+        <button class="sort-chip active" id="order-btn-voor" onclick="setOrder('voornaam')">Voornaam Achternaam</button>
+        <button class="sort-chip" id="order-btn-ach" onclick="setOrder('achternaam')">Achternaam Voornaam</button>
+      </div>
+
+      <!-- Lijst plakken -->
+      <div style="font-size:11px;font-weight:800;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;">Lijst plakken <span style="font-weight:600;text-transform:none;color:#a0aec0;">(één naam per regel)</span></div>
+      <textarea id="bulk-input" placeholder="Jana De Smedt&#10;Thomas Peeters&#10;Lena&#10;..." style="min-height:64px;margin-bottom:6px;font-size:13px;"></textarea>
+      <div style="display:flex;gap:6px;margin-bottom:10px;">
+        <button class="btn btn-primary btn-sm" onclick="bulkAdd()" style="flex:1;">➕ Toevoegen</button>
+        <button class="btn btn-secondary btn-sm" onclick="bulkReplace()" style="flex:1;">🔄 Vervangen</button>
+      </div>
+
+      <!-- Scheidingslijn -->
+      <div class="beheer-or-divider"><span>of één naam</span></div>
+
+      <!-- Eén naam -->
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <div style="flex:1;"><div class="name-tag">Voornaam *</div><input id="input-voornaam" onkeydown="if(event.key==='Enter')document.getElementById('input-achternaam').focus()" placeholder="Jana" type="text"/></div>
+        <div style="flex:1;"><div class="name-tag">Achternaam</div><input id="input-achternaam" onkeydown="if(event.key==='Enter')addPupil()" placeholder="De Smedt" type="text"/></div>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="addPupil()" style="width:100%;margin-bottom:0;">+ Toevoegen</button>
+
+    </div>
+  </div>
+
+  <!-- Panel: Leerlingenlijst -->
+  <div class="beheer-panel">
+    <div class="beheer-panel-hdr" style="padding-bottom:8px;">
+      <div style="flex:1;">
+        <span id="pupil-count-title" style="font-weight:800;font-size:13px;color:#1e1b4b;">Leerlingen (0)</span>
+        <span style="font-size:11px;color:#a0aec0;margin-left:6px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · 📷 foto</span>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 A–Z</button>
+    </div>
+    <div class="beheer-panel-body" style="padding-top:0;">
+      <div id="hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>💡 <strong>Foto toevoegen?</strong> Klik het 📷-knopje naast een naam.</span>
+        <button onclick="localStorage.setItem('hint_photos_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕</button>
+      </div>
+      <div id="autosave-notice" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:7px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
+        <span>✅ <strong>Automatisch opgeslagen</strong></span>
+      </div>
+      <div id="pupil-list"></div>
+    </div>
+  </div>
+
+</div><!-- /col-left -->
+
+<!-- RECHTER KOLOM: Taken + Instellingen -->
+<div class="beheer-col-right">
+
+  <!-- Panel: Taken -->
+  <div class="beheer-panel">
+    <div class="beheer-panel-hdr">
+      <div class="beheer-panel-badge beheer-badge-2" id="panel-badge-taken">2</div>
+      <div style="flex:1;">
+        <div class="beheer-panel-title">Taken kiezen</div>
+        <div class="beheer-panel-sub">Klik op een taak om aan/uit te zetten</div>
+      </div>
       <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
     </div>
-    <div class="card-hint" style="margin-bottom:7px;">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
-    <!-- Volgorde boven het tekstvak -->
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;padding:6px 10px;background:#f8fafc;border-radius:9px;border:1.5px solid #e0e7ff;flex-wrap:wrap;">
-      <span style="font-size:11px;font-weight:800;color:#4a5568;">Volgorde:</span>
-      <button class="sort-chip active" id="order-btn-voor" onclick="setOrder('voornaam')">Voornaam Achternaam</button>
-      <button class="sort-chip" id="order-btn-ach" onclick="setOrder('achternaam')">Achternaam Voornaam</button>
+    <div class="beheer-panel-body">
+      <div id="icons-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:7px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
+        <span>✅ Eigen afbeeldingen opgeslagen</span>
+      </div>
+      <div id="hint-icons" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span>💡 Eigen afbeelding uploaden? Klik 📷 onder een taak.</span>
+        <button onclick="localStorage.setItem('hint_icons_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕</button>
+      </div>
+      <div class="task-chips" id="task-chips"></div>
+
+      <!-- Eigen taak toevoegen — compact inline -->
+      <div class="beheer-or-divider" style="margin:10px 0 8px;"><span>eigen taak toevoegen</span></div>
+      <div class="emoji-picker" id="emoji-picker"></div>
+      <div style="display:flex;gap:6px;">
+        <input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Taaknaam…" type="text" style="flex:1;font-size:13px;"/>
+        <button class="btn btn-primary" onclick="addCustomTask()" style="padding:7px 14px;">+</button>
+      </div>
     </div>
-    <textarea id="bulk-input" placeholder="Jana De Smedt
-Thomas Peeters
-Lena
-..." style="min-height:70px;margin-bottom:7px;"></textarea>
-    <div style="display:flex;gap:6px;">
-      <button class="btn btn-primary btn-sm" onclick="bulkAdd()" style="flex:1">➕ Toevoegen</button>
-      <button class="btn btn-secondary btn-sm" onclick="bulkReplace()" style="flex:1">🔄 Vervangen</button>
+  </div>
+
+  <!-- Panel: Instellingen -->
+  <div class="beheer-panel">
+    <div class="beheer-panel-hdr">
+      <div class="beheer-panel-badge beheer-badge-3" id="panel-badge-inst">3</div>
+      <div>
+        <div class="beheer-panel-title">Instellingen</div>
+        <div class="beheer-panel-sub">Weergave op het bord</div>
+      </div>
+    </div>
+    <div class="beheer-panel-body">
+      <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
+      <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
+      <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
+      <div style="font-size:11px;color:#a0aec0;padding-left:50px;margin-bottom:8px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
+      <!-- Status-strip -->
+      <div class="beheer-status-strip" id="wz-status-strip">
+        <div class="beheer-stat"><span class="beheer-stat-n" id="stat-leerlingen">0</span><span class="beheer-stat-l">leerlingen</span></div>
+        <div class="beheer-stat"><span class="beheer-stat-n" id="stat-taken">0</span><span class="beheer-stat-l">taken actief</span></div>
+      </div>
     </div>
   </div>
 
-  <!-- Stap 2: Eén naam -->
-  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
-    <div class="card-title" style="margin-bottom:8px;">✏️ Stap 2 — Of één naam toevoegen</div>
-    <div style="display:flex;gap:6px;margin-bottom:0;">
-      <div style="flex:1"><div class="name-tag">Voornaam *</div><input id="input-voornaam" onkeydown="if(event.key==='Enter')document.getElementById('input-achternaam').focus()" placeholder="Jana" type="text"/></div>
-      <div style="flex:1"><div class="name-tag">Achternaam</div><input id="input-achternaam" onkeydown="if(event.key==='Enter')addPupil()" placeholder="De Smedt" type="text"/></div>
-    </div>
-    <button class="btn btn-primary btn-sm" onclick="addPupil()" style="width:100%;margin-top:7px;">+ Toevoegen</button>
-  </div>
+</div><!-- /col-right -->
+</div><!-- /beheer-grid -->
 
-  <!-- Weergave-instellingen -->
-  <div class="card" style="padding:12px 14px;">
-    <div class="card-title" style="margin-bottom:8px;">⚙️ Instellingen</div>
-    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers" onchange="toggleNumbers()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
-    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname" onchange="toggleLastname()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
-    <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys" onchange="toggleSmileys()" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
-    <div style="font-size:11px;color:#a0aec0;padding-left:50px;">Uit = smiley enkel zichtbaar voor wie hem ingaf</div>
-  </div>
-</div>
-
-<!-- RECHTER KOLOM: leerlingenlijst -->
-<div class="card" style="padding:12px 14px;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
-    <span id="pupil-count-title" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
-    <button class="btn btn-secondary btn-sm" onclick="sortAlpha()">🔤 Alfabetisch</button>
-  </div>
-  <div class="card-hint" style="margin-bottom:7px;">⠳ sleep · ✎ naam · 📋 taken · 🔒 bevindingen · <strong>📷 foto</strong><br/>Muis tussen namen → blauwe streep = invoegen
-  <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button></div>
-  <div id="hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
-    <span>💡 <strong>Wist je dat?</strong> Je kan een foto of afbeelding toevoegen bij elke leerling — klik het 📷-knopje naast een naam.</span>
-    <button onclick="localStorage.setItem('hint_photos_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕ Sluiten</button>
-  </div>
-
-  <!-- Automatisch opgeslagen melding -->
-  <div id="autosave-notice" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
-    <span>✅ <strong>Automatisch opgeslagen</strong> — je leerlingen staan klaar bij elke opening.</span>
-  </div>
-
-  <div id="pupil-list"></div>
-</div>
-
-</div>
-</div>
+<!-- verborgen: oude tab-content divs zodat JS-refs niet breken -->
+<div class="hidden" id="tab-content-leerlingen-OLD_UNUSED"></div>
 <div class="hidden" id="tab-content-taken">
-
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
 <div class="card">
@@ -139,22 +206,60 @@ Lena
 <button class="help-inline-btn" onclick="document.getElementById('help-beheer-overlay').classList.remove('hidden')">❓ uitleg</button>
 </div>
 <div class="card-hint" style="margin-bottom:9px;">Klik op een taak = aan/uit zetten. Onder elke taak: <strong>✎ naam</strong> wijzigen · <strong>📷 afb.</strong> eigen afbeelding.</div>
-<div id="icons-banner" style="display:none;background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#166534;align-items:center;gap:8px;">
-  <span>✅ <strong>Automatisch opgeslagen</strong> — je eigen afbeeldingen staan klaar bij elke opening.</span>
-</div>
-<div class="task-chips" id="task-chips"></div>
+<div id="icons-banner-OLD" style="display:none;"></div>
+<div class="task-chips" id="task-chips-OLD"></div>
 </div>
 <div class="card">
 <div class="card-title">➕ Eigen taak toevoegen</div>
 <div class="card-hint">Kies een emoji en typ een naam. De taak verschijnt direct in de lijst.</div>
-<div id="hint-icons" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:#92400e;align-items:center;gap:8px;flex-wrap:wrap;">
-  <span>💡 <strong>Wist je dat?</strong> Je kan elk emoji-pictogram vervangen door een eigen afbeelding — klik het 📷-knopje onder een taak.</span>
-  <button onclick="localStorage.setItem('hint_icons_dismissed','1');this.parentElement.style.display='none'" style="border:none;background:none;color:#a16207;font-size:11px;font-weight:800;cursor:pointer;padding:0;margin-left:auto;">✕ Sluiten</button>
-</div>
-<div class="emoji-picker" id="emoji-picker"></div>
-<div style="display:flex;gap:7px;"><input id="input-task" onkeydown="if(event.key==='Enter')addCustomTask()" placeholder="Taaknaam…" style="flex:1" type="text"/><button class="btn btn-primary" onclick="addCustomTask()">+</button></div>
+<div id="hint-icons-OLD" style="display:none;"></div>
+<div class="emoji-picker" id="emoji-picker-OLD"></div>
+<div style="display:flex;gap:7px;"><input id="input-task-OLD" placeholder="Taaknaam…" style="flex:1" type="text"/><button class="btn btn-primary" onclick="">+</button></div>
 </div>
 </div>
+</div>
+
+<!-- Tweede hidden leerlingen-content div die JS verwacht via switchTab -->
+<div class="hidden" id="tab-content-leerlingen">
+<div class="ll-layout">
+<div>
+  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="card-title" style="margin-bottom:0;">📋 Stap 1 — Klaslijst plakken</div>
+    </div>
+    <div class="card-hint" style="margin-bottom:7px;">Kopieer namen uit Smartschool, Excel of Word — één naam per regel.</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;padding:6px 10px;background:#f8fafc;border-radius:9px;border:1.5px solid #e0e7ff;flex-wrap:wrap;">
+      <span style="font-size:11px;font-weight:800;color:#4a5568;">Volgorde:</span>
+      <button class="sort-chip active" id="order-btn-voor-OLD">Voornaam Achternaam</button>
+      <button class="sort-chip" id="order-btn-ach-OLD">Achternaam Voornaam</button>
+    </div>
+    <textarea id="bulk-input-OLD" style="min-height:70px;margin-bottom:7px;" placeholder="..."></textarea>
+    <div style="display:flex;gap:6px;">
+      <button class="btn btn-primary btn-sm" style="flex:1">➕ Toevoegen</button>
+      <button class="btn btn-secondary btn-sm" style="flex:1">🔄 Vervangen</button>
+    </div>
+  </div>
+  <div class="card" style="padding:12px 14px;margin-bottom:8px;">
+    <div class="card-title" style="margin-bottom:8px;">✏️ Stap 2 — Of één naam toevoegen</div>
+    <div style="display:flex;gap:6px;margin-bottom:0;">
+      <div style="flex:1"><div class="name-tag">Voornaam *</div><input id="input-voornaam-OLD" placeholder="Jana" type="text"/></div>
+      <div style="flex:1"><div class="name-tag">Achternaam</div><input id="input-achternaam-OLD" placeholder="De Smedt" type="text"/></div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="width:100%;margin-top:7px;">+ Toevoegen</button>
+  </div>
+  <div class="card" style="padding:12px 14px;">
+    <div class="card-title" style="margin-bottom:8px;">⚙️ Instellingen</div>
+    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-numbers-OLD" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Klasnummers tonen</span></div>
+    <div class="toggle-row" style="margin-bottom:5px;"><label class="toggle"><input id="toggle-lastname-OLD" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Achternaam tonen op bord</span></div>
+    <div class="toggle-row" style="margin-bottom:2px;"><label class="toggle"><input id="toggle-smileys-OLD" type="checkbox"/><span class="toggle-slider"></span></label><span class="toggle-label">Smileys zichtbaar voor anderen</span></div>
+  </div>
+</div>
+<div class="card" style="padding:12px 14px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:6px;">
+    <span id="pupil-count-title-OLD" style="font-weight:800;font-size:13px;">Leerlingen (0)</span>
+    <button class="btn btn-secondary btn-sm">🔤 Alfabetisch</button>
+  </div>
+  <div id="pupil-list-OLD"></div>
 </div>
 </div>
 </div>
@@ -176,7 +281,6 @@ Lena
 </div>
 <div class="board-bar-right">
 <input accept=".json" class="hidden" id="import-file" onchange="importData(event)" type="file"/>
-<button class="btn teacher-only" onclick="goBackFromBoard()" style="background:#f97316;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">← Beheer</button>
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⚙️ Beheer aanpassen</button>
 <button class="btn teacher-only" onclick="openSmartboardVenster()" style="background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📺 Smartboard</button>
 <button class="btn teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')" style="background:#22c55e;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">❓ Uitleg</button>
