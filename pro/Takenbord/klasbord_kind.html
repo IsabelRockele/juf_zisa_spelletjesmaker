@@ -10,8 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="firebase-klasbord.js"></script>
   <style>
-/* ── EXACT DE GOEDGEKEURDE TESTVERSIE CSS ── */
-:root{--col-name:220px;--col-task:110px;--gap:8px;--name-font:15px;}
+:root{--col-name:220px;--col-task:120px;--name-font:15px;--pad:14px;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef2ff;overflow:hidden;}
 #wrap{height:100vh;display:flex;flex-direction:column;}
@@ -23,49 +22,48 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 .kind-timer-btn{border:2px solid #e0e7ff;background:#f0f4ff;color:#6366f1;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;}
 .kind-close-btn{border:none;background:#ef4444;color:#fff;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;white-space:nowrap;}
 
-/* Laadscherm */
 #loading{position:fixed;inset:0;z-index:999;background:linear-gradient(160deg,#f8fafc,#eef2ff);display:flex;align-items:center;justify-content:center;}
 .loading-card{background:#fff;border-radius:24px;padding:28px 24px;max-width:420px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.08);text-align:center;}
 .loading-card .emoji{font-size:42px;margin-bottom:10px;}
 .loading-card .title{font-size:22px;font-weight:800;color:#1e1b4b;}
 .loading-card .sub{font-size:14px;color:#64748b;margin-top:6px;line-height:1.6;}
 
-/* Afsluit-scherm */
 #closed-screen{display:none;position:fixed;inset:0;z-index:998;background:linear-gradient(160deg,#f8fafc,#eef2ff);align-items:center;justify-content:center;}
 #closed-screen.show{display:flex;}
 .closed-card{background:#fff;border-radius:24px;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.08);text-align:center;}
 
-#board-scroll{flex:1;min-height:0;overflow:auto;padding:0 14px 80px;background:linear-gradient(135deg,#f0f9ff,#fef9ff);}
-#board-scroll::-webkit-scrollbar{width:8px;height:8px;}
-#board-scroll::-webkit-scrollbar-track{background:#e0e7ff;border-radius:4px;}
-#board-scroll::-webkit-scrollbar-thumb{background:#6366f1;border-radius:4px;}
+/* top-fixed: legenda + taaknamen, bewegen NOOIT */
+#top-fixed{flex-shrink:0;overflow:hidden;background:linear-gradient(135deg,#f0f9ff,#fef9ff);}
 
-/* Taaknamen-header sticky bovenaan */
-#task-header{position:sticky;top:0;z-index:35;background:linear-gradient(135deg,#f0f9ff,#fef9ff);display:flex;align-items:stretch;gap:var(--gap);padding:10px 0 8px;border-bottom:3px solid #e0e7ff;margin-bottom:4px;min-width:max-content;}
-.header-corner{position:sticky;left:0;z-index:40;background:linear-gradient(135deg,#f0f9ff,#fef9ff);width:var(--col-name);min-width:var(--col-name);flex-shrink:0;display:flex;align-items:flex-end;padding-bottom:4px;padding-left:14px;font-size:11px;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;}
-.task-header-cell{width:var(--col-task);min-width:var(--col-task);flex-shrink:0;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;}
+#legend{display:flex;align-items:center;background:#fff;border-bottom:2px solid #e0e7ff;padding:0 var(--pad);}
+#legend-name{width:var(--col-name);min-width:var(--col-name);flex-shrink:0;}
+#legend-items{display:flex;gap:14px;align-items:center;padding:7px 0;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#4b5563;font-weight:700;white-space:nowrap;}
+.legend-dot{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+
+#task-header{display:flex;align-items:stretch;padding:10px var(--pad) 8px;border-bottom:3px solid #e0e7ff;}
+.header-corner{width:var(--col-name);min-width:var(--col-name);flex-shrink:0;display:flex;align-items:flex-end;padding-bottom:4px;font-size:11px;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:.05em;}
+.task-header-cell{width:var(--col-task);min-width:var(--col-task);flex-shrink:0;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding-bottom:4px;}
 .t-icon{font-size:34px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));}
 .t-icon-custom{width:48px;height:48px;background-size:contain;background-repeat:no-repeat;background-position:center;border-radius:8px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15));}
 .t-label{font-size:13px;font-weight:800;color:#3730a3;line-height:1.2;}
 
-/* Legenda sticky onder header */
-#legend{position:sticky;top:73px;z-index:35;min-width:max-content;display:flex;align-items:center;background:#fff;border-bottom:2px solid #e0e7ff;margin:0 -14px 8px;}
-#legend-name{position:sticky;left:0;z-index:36;background:#fff;width:var(--col-name);min-width:var(--col-name);flex-shrink:0;align-self:stretch;}
-#legend-items{display:flex;gap:14px;align-items:center;padding:7px 14px;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#4b5563;font-weight:700;white-space:nowrap;}
-.legend-dot{width:20px;height:20px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;}
+/* Alleen leerlingenrijen scrollen */
+#board-scroll{flex:1;min-height:0;overflow:auto;padding:8px var(--pad) 80px;background:linear-gradient(135deg,#f0f9ff,#fef9ff);}
+#board-scroll::-webkit-scrollbar{width:8px;height:8px;}
+#board-scroll::-webkit-scrollbar-track{background:#e0e7ff;border-radius:4px;}
+#board-scroll::-webkit-scrollbar-thumb{background:#6366f1;border-radius:4px;}
 
-/* Leerlingenrijen */
+#board-inner{min-width:max-content;}
 #pupil-rows{min-width:max-content;}
-.pupil-board-row{display:flex;align-items:stretch;border:2px solid #e0e7ff;border-radius:14px;box-shadow:0 2px 8px rgba(99,102,241,.08);margin-bottom:6px;background:#fff;position:relative;}
+
+.pupil-board-row{display:flex;align-items:stretch;border:2px solid #e0e7ff;border-radius:14px;box-shadow:0 2px 8px rgba(99,102,241,.08);margin-bottom:6px;background:#fff;}
 .pupil-board-row.complete{background:linear-gradient(90deg,#f0fdf4,#fff);border-color:#86efac;box-shadow:0 2px 8px rgba(22,163,74,.15);}
 
-/* Naamcel: sticky links — exacte testversie stijl */
-.pupil-name-cell{position:sticky;left:0;z-index:20;background:#fff;width:var(--col-name);min-width:var(--col-name);flex-shrink:0;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:8px;border-right:2px solid #e0e7ff;}
+.pupil-name-cell{position:sticky;left:0;z-index:5;background:#fff;width:var(--col-name);min-width:var(--col-name);flex-shrink:0;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:8px;border-right:2px solid #e0e7ff;border-radius:12px 0 0 12px;}
 .pupil-board-row.complete .pupil-name-cell{background:#f0fdf4;border-color:#86efac;}
-.pupil-name-cell::before{content:'';position:absolute;inset:0;background:inherit;border-radius:12px 0 0 12px;z-index:-1;}
+.task-cells-wrap{display:flex;align-items:center;padding:6px 0;}
 
-.task-cells-wrap{display:flex;align-items:center;gap:var(--gap);padding:6px 10px;}
 .pupil-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;background:#c7d2fe;}
 .pupil-dot.done{background:#16a34a;box-shadow:0 0 6px #86efac;}
 .pupil-dot.busy{background:#f59e0b;}
@@ -75,9 +73,9 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 .pupil-board-row.complete .pupil-name{color:#15803d;}
 .pupil-sub{font-size:10px;color:#818cf8;margin-top:2px;font-weight:600;}
 
-.task-cell{width:var(--col-task);min-width:var(--col-task);flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:2px 0;}
+.task-cell{width:var(--col-task);min-width:var(--col-task);flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 0;}
 .task-ph{width:54px;height:54px;display:flex;align-items:center;justify-content:center;color:#e0e7ff;font-size:18px;}
-.task-btn{width:54px;height:54px;border-radius:12px;border:2px dashed #c7d2fe;background:#eef2ff;cursor:pointer;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#c7d2fe;position:relative;transition:transform .12s;font-family:inherit;}
+.task-btn{width:62px;height:62px;border-radius:12px;border:2px dashed #c7d2fe;background:#eef2ff;cursor:pointer;font-size:20px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#c7d2fe;position:relative;transition:transform .12s;font-family:inherit;}
 .task-btn::after{content:'○';position:absolute;font-size:26px;color:#c7d2fe;font-weight:400;}
 .task-btn.status-1{background:#fef9c3;border:2px solid #f59e0b;color:#d97706;}
 .task-btn.status-1::after,.task-btn.status-2::after{display:none;}
@@ -90,7 +88,6 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 #progress-fill{height:100%;background:linear-gradient(90deg,#6366f1,#22c55e);border-radius:5px;transition:width .5s;width:0%;}
 #progress-label{font-size:13px;font-weight:800;color:#6366f1;white-space:nowrap;}
 
-/* Smiley popup */
 #smiley-popup{display:none;position:fixed;z-index:300;background:#fff;border-radius:20px;padding:22px 28px;box-shadow:0 8px 40px rgba(0,0,0,.18);border:2px solid #e0e7ff;text-align:center;min-width:280px;top:50%;left:50%;transform:translate(-50%,-50%);}
 #smiley-popup.show{display:block;}
 #smiley-popup h3{font-size:16px;font-weight:800;color:#1e1b4b;margin-bottom:6px;}
@@ -101,7 +98,6 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 .sc-icon{font-size:28px;}.sc-label{font-size:10px;font-weight:700;color:#64748b;}
 .btn-skip{background:#f1f5f9;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;width:100%;font-family:inherit;color:#64748b;}
 
-/* Scroll-pijlen: altijd in het midden van het scherm */
 #scroll-right-arrow,#scroll-left-arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:50;width:44px;height:44px;border-radius:50%;border:none;background:rgba(99,102,241,.85);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 4px 12px rgba(99,102,241,.4);}
 #scroll-right-arrow{right:8px;}
 #scroll-left-arrow{left:8px;}
@@ -121,7 +117,7 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
     <div class="closed-card">
       <div style="font-size:48px;margin-bottom:12px;">✅</div>
       <div style="font-size:22px;font-weight:800;color:#1e1b4b;margin-bottom:8px;">Klaar voor vandaag!</div>
-      <div style="font-size:15px;color:#64748b;line-height:1.6;">Goed gedaan! Het bord is afgesloten.<br>Scan later opnieuw om verder te werken.</div>
+      <div style="font-size:15px;color:#64748b;line-height:1.6;">Goed gedaan! Het bord is afgesloten.</div>
     </div>
   </div>
 
@@ -137,12 +133,8 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
       </div>
     </div>
 
-    <div id="board-scroll">
-      <div id="empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;opacity:.4;text-align:center;">
-        <div style="font-size:44px;margin-bottom:12px;">📋</div>
-        <p id="empty-text" style="font-size:14px;font-weight:600;">Nog geen bordgegevens gevonden</p>
-      </div>
-      <div id="task-header" class="hidden"><div class="header-corner"><span>Leerling</span></div></div>
+    <!-- top-fixed: legenda + taaknamen, bewegen NOOIT -->
+    <div id="top-fixed">
       <div id="legend" class="hidden">
         <div id="legend-name"></div>
         <div id="legend-items">
@@ -151,6 +143,15 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
           <div class="legend-item"><div class="legend-dot" style="background:#dcfce7;border:1.5px solid #16a34a;color:#15803d;font-weight:800;">✓</div><span>Klaar</span></div>
           <span style="font-size:11px;color:#818cf8;font-weight:600;">Tik op een hokje · smiley na afvinken</span>
         </div>
+      </div>
+      <div id="task-header" class="hidden"><div class="header-corner">Leerling</div></div>
+    </div>
+
+    <!-- Alleen leerlingenrijen scrollen -->
+    <div id="board-scroll">
+      <div id="empty-state" style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px;opacity:.4;text-align:center;">
+        <div style="font-size:44px;margin-bottom:12px;">📋</div>
+        <p id="empty-text" style="font-size:14px;font-weight:600;">Nog geen bordgegevens gevonden</p>
       </div>
       <div id="board-inner" class="hidden">
         <div id="pupil-rows"></div>
