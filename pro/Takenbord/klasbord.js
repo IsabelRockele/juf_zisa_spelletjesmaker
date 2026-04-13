@@ -821,66 +821,47 @@ function doNewPeriod(){
   document.getElementById('new-period-overlay').classList.add('hidden');
   renderShell();
 }
-// ── ZIJBALK NAVIGATIE ────────────────────────────────────────────────────
-var _sbActief = 'namen';
-
-function sbToon(sectie){
-  _sbActief = sectie;
+// ── ACCORDION ────────────────────────────────────────────────────────────
+function acToggle(sectie){
   ['namen','taken','inst'].forEach(function(s){
-    var paneel = document.getElementById('sb-paneel-' + s);
-    var stap   = document.getElementById('sb-stap-' + s);
-    if(paneel) paneel.classList.toggle('sb-paneel-hidden', s !== sectie);
-    if(stap)   stap.classList.toggle('sb-actief', s === sectie);
+    var body    = document.getElementById('ac-body-' + s);
+    var hdr     = document.querySelector('#ac-' + s + ' .ac-hdr');
+    var chevron = document.getElementById('ac-chevron-' + s);
+    if(!body) return;
+    var open = s === sectie;
+    body.classList.toggle('ac-body-hidden', !open);
+    if(hdr)     hdr.classList.toggle('ac-open', open);
+    if(chevron) chevron.textContent = open ? '▲' : '▼';
   });
   if(sectie === 'namen') renderPupilList();
   if(sectie === 'taken') renderTaskSettings();
   if(sectie === 'inst'){
-    var tn = document.getElementById('toggle-numbers');
-    var tl = document.getElementById('toggle-lastname');
-    var ts = document.getElementById('toggle-smileys');
-    if(tn) tn.checked = !!state.showNumbers;
-    if(tl) tl.checked = !!state.showLastname;
-    if(ts) ts.checked = !!state.showSmileys;
+    document.getElementById('toggle-numbers').checked = !!state.showNumbers;
+    document.getElementById('toggle-lastname').checked = !!state.showLastname;
+    document.getElementById('toggle-smileys').checked  = !!state.showSmileys;
   }
-  updateSbWizard();
+  updateAcWizard();
 }
 
-// Alias voor oude accordion-aanroepen die nog ergens kunnen zitten
-function acToggle(s){ sbToon(s); }
-
-function updateSbWizard(){
+function updateAcWizard(){
   var heeftNamen = state.pupils && state.pupils.length > 0;
   var heeftTaken = state.activeTasks && state.activeTasks.length > 0;
-
-  // Badges
-  var b1 = document.getElementById('sb-badge-namen');
-  var b2 = document.getElementById('sb-badge-taken');
-  var b3 = document.getElementById('sb-badge-inst');
-  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('sb-badge-klaar', heeftNamen); }
-  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('sb-badge-klaar', heeftTaken); }
-  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('sb-badge-klaar', heeftNamen&&heeftTaken); }
-
-  // Sub-teksten
-  var s1 = document.getElementById('sb-sub-namen');
-  if(s1) s1.textContent = heeftNamen ? state.pupils.length + ' leerlingen' : 'Leerlingen toevoegen';
-  var s2 = document.getElementById('sb-sub-taken');
-  if(s2) s2.textContent = heeftTaken ? (state.activeTasks.length) + ' actief' : 'Taken kiezen';
-
-  // Bordnaam
-  var bn = document.getElementById('sb-bord-naam');
-  if(bn){ var n=getBordNaam(); bn.textContent = n || ''; bn.style.display = n ? 'block' : 'none'; }
-
-  // Go-knop: altijd klikbaar maar visueel verschil
-  var go = document.getElementById('sb-go-btn');
-  if(go) go.disabled = false;
+  var b1 = document.getElementById('ac-badge-namen');
+  var b2 = document.getElementById('ac-badge-taken');
+  var b3 = document.getElementById('ac-badge-inst');
+  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('ac-badge-done', heeftNamen); }
+  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('ac-badge-done', heeftTaken); }
+  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('ac-badge-done', heeftNamen&&heeftTaken); }
+  var sub1 = document.getElementById('ac-sub-namen');
+  if(sub1) sub1.textContent = heeftNamen ? state.pupils.length + ' leerlingen toegevoegd' : 'Voeg de leerlingen van je klas toe';
+  var sub2 = document.getElementById('ac-sub-taken');
+  if(sub2) sub2.textContent = heeftTaken ? state.activeTasks.length + ' taken actief' : 'Klik op een taak om aan of uit te zetten';
 }
 
-// Alias voor updateAcWizard die nog in renderPupilList/renderTaskSettings zit
-function updateAcWizard(){ updateSbWizard(); }
-
 function renderSettings(){
-  sbToon(_sbActief);
-  updateSbWizard();
+  renderPupilList();
+  renderTaskSettings();
+  updateAcWizard();
 }
 function switchTab(tab){ currentTab=tab; }
 
@@ -968,8 +949,14 @@ function renderTaskSettings(){
     const chip=document.createElement('div');
     chip.className='task-chip'+(a?' active':'');
     chip.onclick=()=>toggleTask(t.id);
-    const iconHtml=hasImg?`<img class="chip-icon-img" src="${ci[t.id]}" alt="" />`:`${t.icon} `;
-    chip.innerHTML=iconHtml+esc(t.label)+(c?`<button class="remove-chip" onclick="event.stopPropagation();removeCustomTask('${t.id}')">✕</button>`:'');
+    // Grote tegel-inhoud
+    const iconPart = hasImg
+      ? `<img class="chip-icon-img" src="${ci[t.id]}" alt="" style="width:36px;height:36px;object-fit:contain;border-radius:6px;" />`
+      : `<span class="chip-icon">${t.icon}</span>`;
+    chip.innerHTML = iconPart
+      + `<span class="chip-label">${esc(t.label)}</span>`
+      + (c ? `<button class="remove-chip" onclick="event.stopPropagation();removeCustomTask('${t.id}')">✕</button>` : '');
+    chip.style.position = 'relative';
     wrap.appendChild(chip);
 
     // Knopjesrij onder de chip
@@ -1006,11 +993,38 @@ function renderTaskSettings(){
     chipsEl.appendChild(wrap);
   });
 
-  document.getElementById('emoji-picker').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
-  document.getElementById('input-task').placeholder=`${selectedEmoji} Taaknaam…`;
+  const epEl=document.getElementById('emoji-picker');
+  if(epEl) epEl.innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  const itEl=document.getElementById('input-task');
+  if(itEl) itEl.placeholder='Naam van de taak…';
+  updateEmojiBtn();
   updateAcWizard();
 }
-function selectEmoji(e){selectedEmoji=e;renderTaskSettings();}
+
+// ── EMOJI PICKER TOGGLE ───────────────────────────────────────────────────
+function toggleEmojiPicker(){
+  var popup = document.getElementById('emoji-picker-popup');
+  if(!popup) return;
+  popup.classList.toggle('open');
+  // Sluit bij klik buiten
+  if(popup.classList.contains('open')){
+    setTimeout(function(){
+      document.addEventListener('click', function closeEP(e){
+        if(!popup.contains(e.target) && e.target.id !== 'eigen-taak-emoji-btn'){
+          popup.classList.remove('open');
+          document.removeEventListener('click', closeEP);
+        }
+      });
+    }, 10);
+  }
+}
+
+function updateEmojiBtn(){
+  var btn = document.getElementById('eigen-taak-emoji-btn');
+  if(btn) btn.textContent = selectedEmoji;
+}
+
+function selectEmoji(e){selectedEmoji=e;renderTaskSettings();updateEmojiBtn();document.getElementById('emoji-picker-popup')?.classList.remove('open');}
 
 // Bouw lijst van alle taken voor het bord (klassikale + evt. extra per leerling)
 function buildAllTasksForBoard(){
@@ -1273,7 +1287,7 @@ function renderBoardTable(allTasks){
 function renderTaskHeader(tasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 function renderPupilRows(allTasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 
-function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=t?(d/t*100)+'%':'0%';if(pl)pl.textContent=`${d}/${t} klaar`;}
+function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;document.getElementById('progress-fill').style.width=t?(d/t*100)+'%':'0%';document.getElementById('progress-label').textContent=`${d}/${t} klaar`;}
 function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p){return isPupilComplete(p.id);}).length;var el=document.getElementById('board-progress-text');if(el)el.textContent=(t>0)?(d+'/'+t+' klaar'):'';var pl=document.getElementById('progress-label');if(pl)pl.textContent=(d+'/'+t+' klaar');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -1412,9 +1426,7 @@ function initKlasbordAfterLoad(){
   const isKindModus = urlParams.get('rol') === 'kind';
   const startTab = urlParams.get('tab');
 
-  // Direct naar bord als namen én taken al ingesteld zijn
-  var heeftAlles = state.pupils && state.pupils.length > 0 && state.activeTasks && state.activeTasks.length > 0;
-  currentMode = (isKindModus || urlParams.get('view') === 'board' || heeftAlles) ? 'board' : 'settings';
+  currentMode = (isKindModus || urlParams.get('view') === 'board') ? 'board' : 'settings';
   currentTab = startTab === 'taken' ? 'taken' : 'leerlingen';
 
   applySmartboard();
