@@ -1011,7 +1011,7 @@ Noor Janssens"></textarea>
 </div>
 <!-- QR MODAL -->
 <div id="qr-takenbord-modal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
-<div class="modal" style="max-width:360px;text-align:center;">
+<div style="max-width:360px;width:90%;background:#fff;border-radius:20px;padding:24px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.2);">
   <div class="modal-title">📱 QR-code voor leerlingen</div>
   <p class="modal-sub" style="margin-bottom:16px;">Laat leerlingen deze code scannen om hun taken te zien.</p>
   <div id="qr-takenbord-container" style="display:flex;justify-content:center;margin:16px 0;"></div>
@@ -2085,10 +2085,10 @@ function openSmartboardTakenbord(){
 function openQrTakenbord(){
   var modal = document.getElementById('qr-takenbord-modal');
   if(!modal) return;
-  // Bouw URL naar public kindversie
+  // Bouw URL naar public kindversie (zonder beheerknoppen)
   var params = new URLSearchParams(window.location.search);
   params.delete('modus');
-  var url = window.location.origin + window.location.pathname + '?' + params.toString();
+  var url = window.location.origin + window.location.pathname.replace('takenbord_kind.html','takenbord_kind_public.html') + '?' + params.toString();
   document.getElementById('qr-takenbord-url').textContent = url;
   var container = document.getElementById('qr-takenbord-container');
   if(container){
