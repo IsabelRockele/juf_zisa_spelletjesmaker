@@ -431,47 +431,63 @@ function renderSectie(type){
       var rij = document.createElement('div');
       rij.className = 'wb-bord-rij' + (isKind ? ' kind' : '');
 
+      // Stip
+      var dot = document.createElement('div');
+      dot.className = 'wb-bord-dot';
+
+      // Info
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      info.innerHTML = '<div class="wb-bord-naam">' + esc(bord.naam) + '</div>'
+        + '<div class="wb-bord-meta">' + (n ? n + ' leerlingen · ' : '') + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>';
+
+      // Openen knop
       var openBtn = document.createElement('button');
       openBtn.className = 'wb-bord-open';
       openBtn.textContent = '▶ Openen';
       openBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openBord(id); }; })(type, bord.id);
 
-      var sbBtn = document.createElement('button');
-      sbBtn.className = 'wb-bord-btn wb-bord-btn-sb';
-      sbBtn.innerHTML = '📺 <span>Smartboard</span>';
-      sbBtn.title = 'Openen zonder beheerknoppen — voor smartboard of iPad';
-      sbBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openSB(id); }; })(type, bord.id);
+      // Drie-puntjes knop + dropdown
+      var actiesWrap = document.createElement('div');
+      actiesWrap.className = 'wb-bord-acties';
+      actiesWrap.style.position = 'relative';
 
-      var renBtn = document.createElement('button');
-      renBtn.className = 'wb-bord-btn';
-      renBtn.innerHTML = '✎ <span>Naam</span>';
-      renBtn.title = 'Naam wijzigen';
-      renBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; hernoemBord(id); }; })(type, bord.id);
+      var menuBtn = document.createElement('button');
+      menuBtn.className = 'wb-bord-menu-btn';
+      menuBtn.textContent = '···';
+      menuBtn.title = 'Meer opties';
 
-      var delBtn = document.createElement('button');
-      delBtn.className = 'wb-bord-btn wb-bord-btn-del';
-      delBtn.innerHTML = '🗑 <span>Wis</span>';
-      delBtn.title = 'Verwijderen';
-      delBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openDel(id); }; })(type, bord.id);
+      var dropdown = document.createElement('div');
+      dropdown.className = 'wb-bord-dropdown';
+      dropdown.innerHTML =
+        '<button class="wb-drop-item" data-act="sb">📺 Smartboard / iPad</button>'
+        + '<button class="wb-drop-item" data-act="ren">✎ Naam wijzigen</button>'
+        + '<div class="wb-drop-sep"></div>'
+        + '<button class="wb-drop-item danger" data-act="del">🗑 Verwijderen</button>';
 
-      var acties = document.createElement('div');
-      acties.className = 'wb-bord-acties';
-      acties.appendChild(sbBtn);
-      acties.appendChild(renBtn);
-      acties.appendChild(delBtn);
+      dropdown.addEventListener('click', (function(t,id){ return function(e){
+        e.stopPropagation();
+        var act = e.target.closest('[data-act]');
+        if(!act) return;
+        dropdown.classList.remove('open');
+        huidigType = t;
+        if(act.dataset.act === 'sb')  openSB(id);
+        if(act.dataset.act === 'ren') hernoemBord(id);
+        if(act.dataset.act === 'del') openDel(id);
+      }; })(type, bord.id));
 
-      var dot = document.createElement('div');
-      dot.className = 'wb-bord-dot';
+      menuBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        document.querySelectorAll('.wb-bord-dropdown.open').forEach(function(d){ if(d!==dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+      });
 
-      var info = document.createElement('div');
-      info.style.flex = '1';
-      info.style.minWidth = '0';
-      info.innerHTML = '<div class="wb-bord-naam">' + esc(bord.naam) + '</div>'
-        + '<div class="wb-bord-meta">' + (n ? n + ' leerlingen · ' : '') + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>';
-      info.appendChild(acties);
+      actiesWrap.appendChild(menuBtn);
+      actiesWrap.appendChild(dropdown);
 
       rij.appendChild(dot);
       rij.appendChild(info);
+      rij.appendChild(actiesWrap);
       rij.appendChild(openBtn);
       lijst.appendChild(rij);
     });
@@ -489,6 +505,8 @@ function renderSectie(type){
   }
 }
 
+
+document.addEventListener("click", function(){ document.querySelectorAll(".wb-bord-dropdown.open").forEach(function(d){ d.classList.remove("open"); }); });
 
 function toggleUitleg(type){
   var el = document.getElementById('uitleg-' + type);
