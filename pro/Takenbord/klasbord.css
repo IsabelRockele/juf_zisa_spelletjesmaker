@@ -337,8 +337,8 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .pupil-name-cell { position:sticky; left:0; z-index:20; background:#fff; width:var(--col-name); min-width:var(--col-name); flex-shrink:0; padding:0 8px 0 12px; display:flex; align-items:center; gap:7px; border-right:2px solid #e0e7ff; transition:background .3s; }
 .pupil-name-cell::before { content:''; position:absolute; inset:0; background:inherit; border-radius:12px 0 0 12px; z-index:-1; }
 .pupil-board-row.complete .pupil-name-cell { background:#f0fdf4; border-color:#86efac; }
-.task-cells-wrap { display:flex; flex-direction:row; align-items:center; padding:6px 0; }
-.task-cell { width:var(--col-task); min-width:var(--col-task); flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:var(--row-pad,6px) 0; }
+.task-cells-wrap { display:flex; flex-direction:row; align-items:flex-start; padding:6px 0; }
+.task-cell { width:var(--col-task); min-width:var(--col-task); max-width:var(--col-task); flex-shrink:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; padding:var(--row-pad,6px) 0; overflow:hidden; }
 .pupil-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; background:#c7d2fe; transition:all .3s; }
 .pupil-dot.done { background:#16a34a; box-shadow:0 0 6px #86efac; }
 .pupil-dot.busy { background:#f59e0b; box-shadow:0 0 5px #fde68a; }
