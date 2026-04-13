@@ -422,50 +422,59 @@
 </div>
 </div>
 </div><div class="overlay hidden" id="help-beheer-overlay">
-<div class="modal" style="max-width:580px;">
-<div class="modal-title">❓ Uitleg — Beheer</div>
-<p class="modal-sub">Hier stel je alles in vóór je naar het bord gaat. Navigeer via de tabbladen bovenaan.</p>
+<div class="modal" style="max-width:780px;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+<div class="modal-title" style="margin-bottom:0;">❓ Uitleg — Beheer</div>
+<button class="btn btn-primary" onclick="document.getElementById('help-beheer-overlay').classList.add('hidden')">✓ Begrepen!</button>
+</div>
+<p class="modal-sub">Gebruik de zijbalk links om tussen de 3 stappen te navigeren: Namen → Taken → Instellingen.</p>
 
 <div class="help-section">
-<h3>👦 Tabblad Leerlingen</h3>
+<h3>👦 Stap 1 — Namen</h3>
 <ul>
-<li><strong>Naam toevoegen</strong> — voornaam + achternaam. Achternaam bepaalt de alfabetische volgorde.</li>
-<li><strong>Klaslijst plakken</strong> — kopieer namen uit Smartschool, Excel of Word en plak ze in één keer. Kies de volgorde (Voornaam Achternaam of omgekeerd).</li>
-<li><strong>⠳ Slepen</strong> — versleep namen om de volgorde aan te passen.</li>
-<li><strong>📷 Foto uploaden</strong> — klik het 📷-knopje naast een naam om een foto of afbeelding toe te voegen. Die verschijnt op het bord. Klik 🗑 om te verwijderen. Alle afbeeldingsformaten werken (jpg, png, gif, webp).</li>
-<li><strong>📋</strong> per leerling — taken individueel aan/uitzetten voor die leerling (differentiatie).</li>
-<li><strong>🔒</strong> per leerling — jouw privé-bevindingen. Nooit zichtbaar op het bord, wel in het PDF-rapport.</li>
-<li><strong>✎</strong> — naam aanpassen.</li>
+<li><strong>Klaslijst plakken</strong> — kopieer namen uit Smartschool, Excel of Word en plak ze in één keer in het tekstvak. Kies de volgorde (Voornaam Achternaam of omgekeerd) en klik Toevoegen.</li>
+<li><strong>Één naam</strong> — vul voornaam en achternaam in en klik + Toevoegen.</li>
+<li><strong>⠳ Slepen</strong> — versleep namen in de lijst om de volgorde aan te passen.</li>
+<li><strong>✎</strong> — naam aanpassen van een leerling.</li>
+<li><strong>📋</strong> — taken individueel aan/uitzetten voor die leerling (differentiatie).</li>
+<li><strong>🔒</strong> — jouw privé-bevindingen per leerling. Nooit zichtbaar op het bord, wel in het PDF-rapport.</li>
+<li><strong>📷</strong> — foto of afbeelding toevoegen bij een leerling. Die verschijnt op het bord.</li>
 </ul>
 </div>
 
 <div class="help-section">
-<h3>📋 Tabblad Taken</h3>
+<h3>📋 Stap 2 — Taken</h3>
 <ul>
-<li>Klik op een taakchip om die <strong>aan of uit</strong> te zetten voor de hele klas.</li>
-<li><strong>✎ naam</strong> — klik dit knopje onder een taak om de naam aan te passen, bv. "Rekenen" → "Rekenhoek".</li>
-<li><strong>📷 afb.</strong> — vervang het emoji-pictogram door een eigen afbeelding. Niets wordt afgesneden.</li>
-<li><strong>Eigen taak toevoegen</strong> — kies een emoji en typ een naam. De taak verschijnt direct in de lijst.</li>
+<li><strong>Aan/uit zetten</strong> — klik op een taak-tegel om die aan of uit te zetten voor de hele klas. Blauw omrand = actief.</li>
+<li><strong>⚙ knopje</strong> — verschijnt bij hover op een tegel. Klik erop voor: naam wijzigen, eigen afbeelding uploaden, of taak verwijderen.</li>
+<li><strong>Eigen taak toevoegen</strong> — klik op ⭐ om een pictogram te kiezen, typ een naam en klik +.</li>
 </ul>
 </div>
 
 <div class="help-section">
-<h3>🔄 Nieuwe periode starten</h3>
-<p>Klik bovenaan op <strong>"🔄 Nieuwe periode"</strong> om een nieuwe week of periode te starten. Kies wat je wil bewaren en wat je wil wissen (vinkjes, bevindingen of alles).</p>
+<h3>⚙️ Stap 3 — Instellingen</h3>
+<ul>
+<li><strong>Klasnummers tonen</strong> — toont een volgnummer voor elke leerling op het bord.</li>
+<li><strong>Achternaam tonen</strong> — toont de achternaam mee op het bord.</li>
+<li><strong>Smileys zichtbaar voor anderen</strong> — uit = leerlingen zien enkel hun eigen smiley, niet die van anderen.</li>
+</ul>
 </div>
 
 <div class="help-section">
-<h3>💾 Klaslijst bewaren</h3>
-<p>Sla de namen op als bestand zodat je ze volgend jaar of op een andere computer snel kunt inladen. Gebruik <strong>"💾 Opslaan"</strong> en <strong>"📂 Laden"</strong> onderaan het leerlingen-tabblad.</p>
+<h3>💾 Backup &amp; herstel</h3>
+<p>Je gegevens worden automatisch opgeslagen in de cloud. Via <strong>Backup &amp; herstel</strong> in de zijbalk kan je ook een lokaal bestand downloaden als extra zekerheid, of een eerdere backup terugzetten.</p>
 </div>
 
-<div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-beheer-overlay').classList.add('hidden')">Begrepen!</button></div>
+<div class="modal-btns"><button class="btn btn-primary" onclick="document.getElementById('help-beheer-overlay').classList.add('hidden')">✓ Begrepen!</button></div>
 </div>
 </div>
 
 <div class="overlay hidden" id="help-overlay">
-<div class="modal" style="max-width:580px;max-height:88vh;">
-<div class="modal-title">❓ Uitleg — Klasbord</div>
+<div class="modal" style="max-width:780px;max-height:88vh;">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+<div class="modal-title" style="margin-bottom:0;">❓ Uitleg — Klasbord</div>
+<button class="btn btn-primary" onclick="document.getElementById('help-overlay').classList.add('hidden')">✓ Begrepen!</button>
+</div>
 <p class="modal-sub">Alles wat je moet weten om het klasbord te gebruiken.</p>
 
 <div class="help-section">
@@ -487,7 +496,7 @@
 <div class="help-section">
 <h3>😊 Smileys</h3>
 <p>Na afvinken vraagt een popup: hoe vond je het? <strong>😊 Super · 🙂 Goed · 😐 Moeilijk · 😟 Te moeilijk</strong>. De gekozen smiley staat nadien als klein icoon onder het vinkje. Klik erop om te wijzigen. Zichtbaar in het PDF-rapport.</p>
-<p style="margin-top:4px;font-size:12px;color:#718096;">Tip: zet "Smileys zichtbaar voor andere kinderen" uit (beheer → leerlingen) als je wil dat enkel het kind zijn eigen smiley ziet.</p>
+<p style="margin-top:4px;font-size:12px;color:#718096;">Tip: zet "Smileys zichtbaar voor anderen" uit via Beheer → Instellingen als je wil dat enkel het kind zijn eigen smiley ziet.</p>
 </div>
 
 <div class="help-section">
