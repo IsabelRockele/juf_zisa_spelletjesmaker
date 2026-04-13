@@ -943,3 +943,70 @@ body.smartboard #smartboard-exit-btn {
 .modal::-webkit-scrollbar-track { background:#f0f0f8; border-radius:5px; }
 .modal::-webkit-scrollbar-thumb { background:#6366f1; border-radius:5px; }
 .modal::-webkit-scrollbar-thumb:hover { background:#4338ca; }
+
+/* ══ LEERKRACHT-BANNER ══════════════════════════════════════════════════ */
+.teacher-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #fef3c7;
+  border: 1.5px solid #f59e0b;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin: 8px 12px 0;
+  font-size: 13px;
+  color: #92400e;
+  line-height: 1.5;
+}
+.teacher-banner-close {
+  border: none;
+  background: none;
+  color: #a16207;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0 4px;
+}
+.teacher-banner-close:hover { color: #92400e; }
+
+/* Verberg banner in smartboard/ipad modus */
+body.smartboard .teacher-banner,
+body.ipad-modus .teacher-banner { display: none !important; }
+
+/* ══ NOTITIES-KNOP OP HET BORD ══════════════════════════════════════════ */
+.board-notes-btn {
+  border: 1.5px solid #e0e7ff;
+  background: #f8fafc;
+  color: #cbd5e1;
+  border-radius: 7px;
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all .15s;
+  opacity: 0.4;
+}
+.pupil-name-cell:hover .board-notes-btn { opacity: 1; }
+.board-notes-btn:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+  color: #6366f1;
+}
+.board-notes-btn.has-notes {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  color: #92400e;
+  opacity: 1;
+}
+.board-notes-btn.has-notes:hover {
+  background: #fde68a;
+}
+/* Verberg notities-knop in smartboard/ipad modus */
+body.smartboard .board-notes-btn,
+body.ipad-modus .board-notes-btn { display: none !important; }
