@@ -859,7 +859,7 @@ body:not(.board-mode) #scroll-left-arrow { display: none !important; }
 .sb-stap-info { overflow:hidden; flex:1; }
 .sb-stap-titel { font-size:13px; font-weight:800; color:rgba(255,255,255,.92); line-height:1.2; }
 .sb-stap-sub { font-size:11px; color:rgba(255,255,255,.45); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.sb-spacer { flex:1; min-height:12px; }
+.sb-spacer { flex:0; min-height:16px; }
 .sb-extra-btn { display:flex; align-items:center; gap:8px; width:100%; border:none; background:rgba(255,255,255,.08); color:rgba(255,255,255,.75); font-size:13px; font-weight:700; padding:10px 12px; border-radius:9px; cursor:pointer; font-family:inherit; text-align:left; transition:background .15s; margin-bottom:4px; }
 .sb-extra-btn:hover { background:rgba(255,255,255,.16); color:#fff; }
 .sb-go-btn { display:block; width:100%; background:#6366f1; color:#fff; border:none; border-radius:11px; padding:13px 10px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; text-align:center; margin-top:10px; transition:background .15s; box-shadow:0 2px 8px rgba(99,102,241,.4); }
