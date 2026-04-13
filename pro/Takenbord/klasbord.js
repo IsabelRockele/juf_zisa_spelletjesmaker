@@ -434,6 +434,22 @@ function renderShell(){
   else renderBoard();
 }
 
+function toggleMeerOpties(){
+  var menu = document.getElementById('meer-opties-menu');
+  if(!menu) return;
+  var open = menu.style.display !== 'none';
+  menu.style.display = open ? 'none' : 'block';
+}
+function closeMeerOpties(){
+  var menu = document.getElementById('meer-opties-menu');
+  if(menu) menu.style.display = 'none';
+}
+// Sluit dropdown bij klik buiten
+document.addEventListener('click', function(e){
+  var wrap = document.querySelector('.meer-opties-wrap');
+  if(wrap && !wrap.contains(e.target)) closeMeerOpties();
+});
+
 function scrollBoardRight(){
   var s=document.getElementById('board-scroll');
   if(s){ s.scrollBy({left:240,behavior:'smooth'}); setTimeout(updateScrollArrow,300); }
@@ -1116,7 +1132,11 @@ function setBoardSize(size){
   // Update actieve knop
   ['compact','normal','large'].forEach(s=>{
     const btn=document.getElementById('size-'+s);
-    if(btn) btn.classList.toggle('size-btn-active', s===size);
+    if(btn){
+      btn.style.borderColor = s===size ? '#6366f1' : '#e0e7ff';
+      btn.style.background  = s===size ? '#eef2ff' : '#f8fafc';
+      btn.style.color       = s===size ? '#6366f1' : '#374151';
+    }
   });
 }
 function applyBoardSize(){
