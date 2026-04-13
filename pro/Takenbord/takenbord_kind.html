@@ -981,6 +981,10 @@ Noor Janssens"></textarea>
       <button onclick="openPdfModalKind();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">📄 PDF rapport</button>
       <button onclick="toggleTimer();closeTakenbordMeer()" id="timerToggleBtn" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">⏱️ Timer</button>
       <button onclick="goBackToWelcome();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">🏠 Welkomstscherm</button>
+      <div style="border-top:1px solid #e0e7ff;margin:4px 0;"></div>
+      <button onclick="exportTakenbord();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">💾 Backup opslaan</button>
+      <button onclick="document.getElementById('takenbord-import-input').click();closeTakenbordMeer()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">📂 Backup terugzetten</button>
+      <input type="file" id="takenbord-import-input" accept=".json" style="display:none;" onchange="importTakenbord(event)">
     </div>
   </div>
 </div>
@@ -2112,6 +2116,38 @@ function closeTaskRenameKind(){
 // ── SMARTBOARD / IPAD MODUS ───────────────────────────────────────────────────
 const isSmartboard = new URLSearchParams(window.location.search).get('modus') === 'smartboard';
 const isIpad = new URLSearchParams(window.location.search).get('modus') === 'ipad';
+
+function exportTakenbord(){
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'takenbord-backup-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importTakenbord(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const imported = JSON.parse(e.target.result);
+      if(!imported.pupils){ alert('Ongeldig backupbestand.'); return; }
+      if(!confirm('Wil je de backup terugzetten? Het huidige bord wordt vervangen.')) return;
+      state = imported;
+      saveState();
+      renderNames();
+      alert('✅ Backup succesvol teruggezet!');
+    } catch(err){
+      alert('Fout bij het lezen van het bestand. Is het een geldig backupbestand?');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
 
 function toggleTakenbordMeer(){
   var m = document.getElementById('takenbord-meer-menu');
