@@ -389,7 +389,7 @@ input:focus,textarea:focus,select:focus { outline:none; border-color:var(--blue)
 .smiley-choice { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:10px 12px; border-radius:12px; border:2px solid #e0e7ff; transition:all .15s; background:#f8faff; }
 .smiley-choice:hover { border-color:#818cf8; background:#eef2ff; transform:scale(1.05); }
 .smiley-choice span.sc-icon { font-size:34px; }
-.smiley-choice span.sc-label { font-size:10px; font-weight:700; color:var(--muted); }
+.smiley-choice span.sc-label { font-size:13px; font-weight:800; color:#374151; }
 .smiley-choice.selected { border-color:var(--green); background:#dcfce7; }
 .pdf-field { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
 .pdf-field label { font-size:11px; font-weight:700; color:#718096; text-transform:uppercase; letter-spacing:.04em; }
