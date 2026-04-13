@@ -1042,13 +1042,44 @@ body.ipad-modus #timer-popup { display:none !important; }
 </div><!-- /kb-setup-layout -->
 </section>
 
+<!-- ── BIBLIOTHEEK MODAL ─────────────────────────────────────────────── -->
+<div id="kind-bib-overlay" style="display:none;position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.5);align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:20px;padding:28px;max-width:600px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div style="font-size:20px;font-weight:800;color:#1e1b4b;">📚 Overnemen uit ander bord</div>
+      <button onclick="closeKindBib()" style="border:none;background:none;font-size:20px;cursor:pointer;color:#9ca3af;">✕</button>
+    </div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">Kies een bord om namen, taken of pictogrammen van over te nemen.</p>
+
+    <div id="kind-bib-lijst" style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;"></div>
+
+    <div id="kind-bib-opties" style="display:none;background:#f8fafc;border:1.5px solid #e0e7ff;border-radius:14px;padding:16px;margin-bottom:16px;">
+      <div style="font-size:14px;font-weight:800;color:#1e1b4b;margin-bottom:12px;">Wat wil je overnemen van <strong id="kind-bib-bronnaam"></strong>?</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#374151;">
+          <input type="checkbox" id="bib-opt-namen" checked style="width:18px;height:18px;accent-color:#059669;"> Namen overnemen
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#374151;">
+          <input type="checkbox" id="bib-opt-taken" checked style="width:18px;height:18px;accent-color:#059669;"> Taken &amp; pictogrammen overnemen
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#374151;">
+          <input type="checkbox" id="bib-opt-toewijzing" style="width:18px;height:18px;accent-color:#059669;"> Taak-toewijzingen per leerling overnemen
+        </label>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="uitvoerenKindBib()" style="flex:1;padding:12px;border-radius:10px;border:none;background:#059669;color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">✓ Overnemen</button>
+        <button onclick="document.getElementById('kind-bib-opties').style.display='none'" style="flex:1;padding:12px;border-radius:10px;border:none;background:#e2e8f0;color:#4a5568;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;">Annuleren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <section id="names-screen" style="display:none;">
 <h1>Kies je naam</h1>
 <p class="subtitle" id="kind-bord-naam" style="font-size:13px;font-weight:800;color:#6366f1;margin-bottom:4px;"></p>
 <p class="subtitle">Klik op jouw naam en kijk welke taken je nog moet maken.</p>
 <div class="names-topbar">
   <button class="teacher-only" onclick="goBackToSetup()" type="button" style="border:none;background:#f97316;color:#fff;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">← Terug naar beheer</button>
-  <button class="teacher-btn teacher-only" id="openTeacherBtn" style="background:#6366f1;color:#fff;border:none;">⚙️ Taken toewijzen</button>
   <button class="teacher-btn teacher-only" onclick="openSmartboardTakenbord()" type="button" style="background:#3b82f6;color:#fff;border:none;">📺 Smartboard</button>
   <button class="teacher-btn teacher-only" onclick="openQrTakenbord()" type="button" style="background:#8b5cf6;color:#fff;border:none;">📱 QR-code</button>
   <div class="meer-opties-wrap teacher-only" style="position:relative;display:inline-block;">
@@ -1065,6 +1096,12 @@ body.ipad-modus #timer-popup { display:none !important; }
   </div>
 </div>
 
+<!-- Leerkracht-banner -->
+<div id="kind-teacher-banner" class="kind-teacher-banner teacher-only">
+  <span>👩‍🏫 <strong>Leerkrachtweergave</strong> — kinderen zien dit scherm niet. Gebruik <strong>📺 Smartboard</strong> of <strong>📱 QR-code</strong> om het bord te tonen.</span>
+  <button onclick="document.getElementById('kind-teacher-banner').style.display='none'" style="border:none;background:none;color:#a16207;font-size:14px;font-weight:800;cursor:pointer;padding:0 4px;">✕</button>
+</div>
+
 <!-- ⚙️ Menu knop voor smartboard modus -->
 <div id="smartboard-top-btns" style="display:none;position:fixed;top:12px;right:12px;z-index:7000;display:none;gap:8px;align-items:center;">
   <button onclick="toggleTimer()" style="border:2px solid #e0e7ff;background:#f0f4ff;color:#6366f1;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⏱️ Timer</button>
@@ -1075,7 +1112,7 @@ body.ipad-modus #timer-popup { display:none !important; }
 
 <!-- Foto-hint: inline boven het namenraster, verdwijnt na sluiten -->
 <div id="kind-hint-photos" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;border-radius:12px;padding:10px 16px;margin:0 0 14px;font-size:13px;color:#92400e;align-items:center;gap:10px;flex-wrap:wrap;">
-  <span>💡 <strong>Wist je dat?</strong> Je kan foto's bij namen en afbeeldingen bij taken toevoegen via <strong>⚙️ Taken toewijzen</strong>.</span>
+  <span>💡 <strong>Tip:</strong> Je kan foto's bij namen en afbeeldingen bij taken toevoegen via <strong>← Terug naar beheer</strong>.</span>
   <button onclick="localStorage.setItem('kind_hint_photos','1');document.getElementById('kind-hint-photos').style.display='none'" style="border:none;background:none;color:#a16207;font-size:13px;font-weight:800;cursor:pointer;padding:0;flex-shrink:0;margin-left:auto;">✕ Sluiten</button>
 </div>
 
@@ -1941,7 +1978,25 @@ function renderNames(){
       ${progressBar}
     `;
     btn.addEventListener('click', () => openPupil(pupil.id));
-    grid.appendChild(btn);
+
+    // Notities-knop — alleen zichtbaar voor leerkracht
+    const hasNotes = !!(state.notes && state.notes[pupil.id]);
+    const notesWrap = document.createElement('div');
+    notesWrap.className = 'kind-notes-wrap teacher-only';
+    notesWrap.style.cssText = 'position:relative;';
+    const notesBtn = document.createElement('button');
+    notesBtn.type = 'button';
+    notesBtn.className = 'kind-notes-btn' + (hasNotes ? ' has-notes' : '');
+    notesBtn.textContent = '🔒';
+    notesBtn.title = hasNotes ? 'Opmerking bekijken/bewerken' : 'Opmerking toevoegen';
+    notesBtn.addEventListener('click', (e) => { e.stopPropagation(); openNotesModal(pupil.id); });
+    notesWrap.appendChild(notesBtn);
+
+    const cardWrap = document.createElement('div');
+    cardWrap.className = 'kind-card-wrap';
+    cardWrap.appendChild(btn);
+    cardWrap.appendChild(notesWrap);
+    grid.appendChild(cardWrap);
   });
 }
 
@@ -2790,7 +2845,7 @@ document.querySelectorAll('.popup-smiley').forEach(btn => {
   btn.addEventListener('click', () => setSmiley(Number(btn.dataset.smiley)));
 });
 
-document.getElementById('openTeacherBtn').addEventListener('click', openTeacherModal);
+const _openTeacherBtn = document.getElementById('openTeacherBtn'); if(_openTeacherBtn) _openTeacherBtn.addEventListener('click', openTeacherModal);
 document.getElementById('teacherCloseBtn').addEventListener('click', closeTeacherModal);
 document.getElementById('selectAllPupilsBtn').addEventListener('click', selectAllPupils);
 document.getElementById('clearPupilsBtn').addEventListener('click', clearPupilSelection);
@@ -3611,6 +3666,162 @@ function showKindClosed(){
     + '<div style="font-size:15px;color:#64748b;line-height:1.6;">Goed gedaan! Je taken zijn opgeslagen.</div>'
     + '</div>';
   document.body.appendChild(overlay);
+}
+</script>
+
+<style>
+/* ══ NOTITIES-KNOP OP KINDBORD ═════════════════════════════════════════ */
+.kind-card-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.kind-notes-wrap {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 10;
+}
+.kind-notes-btn {
+  width: 28px; height: 28px;
+  border-radius: 7px; border: 1.5px solid #e0e7ff;
+  background: rgba(255,255,255,.85);
+  color: #cbd5e1; font-size: 13px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.5; transition: all .15s;
+}
+.kind-card-wrap:hover .kind-notes-btn { opacity: 1; }
+.kind-notes-btn.has-notes {
+  background: #fef3c7; border-color: #f59e0b;
+  color: #92400e; opacity: 1;
+}
+body.smartboard .kind-notes-wrap,
+body.ipad-modus .kind-notes-wrap { display: none !important; }
+
+/* ══ LEERKRACHT-BANNER KINDBORD ════════════════════════════════════════ */
+.kind-teacher-banner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; background: #fef3c7; border: 1.5px solid #f59e0b;
+  border-radius: 10px; padding: 10px 16px; margin: 0 0 12px;
+  font-size: 13px; color: #92400e; line-height: 1.5; flex-wrap: wrap;
+}
+body.smartboard .kind-teacher-banner,
+body.ipad-modus .kind-teacher-banner { display: none !important; }
+</style>
+
+<script>
+// ── BIBLIOTHEEK KINDBORD ──────────────────────────────────────────────────
+var _kindBibBronKey = null;
+
+function openLaadUitBibliotheekKind(){
+  _kindBibBronKey = null;
+  var lijst = document.getElementById('kind-bib-lijst');
+  var opties = document.getElementById('kind-bib-opties');
+  lijst.innerHTML = '';
+  opties.style.display = 'none';
+
+  // Huidige bord-id
+  var params = new URLSearchParams(window.location.search);
+  var huidigBordId = params.get('bordid');
+
+  // Verzamel alle borden (kindborden + klasborden)
+  var allBorden = [];
+  try {
+    var bv1 = JSON.parse(localStorage.getItem('borden_v1') || '{}');
+    ['kindbord','klasbord'].forEach(function(type){
+      (bv1[type]||[]).forEach(function(b){
+        if(b.id !== huidigBordId) allBorden.push({ type:type, bord:b });
+      });
+    });
+  } catch(e){}
+
+  if(!allBorden.length){
+    lijst.innerHTML = '<div style="font-size:14px;color:#9ca3af;padding:12px 0;">Geen andere borden gevonden.</div>';
+  } else {
+    allBorden.forEach(function(item){
+      var b = item.bord;
+      var storageKey = item.type === 'kindbord' ? 'kind_'+b.id : 'takenbord_v1_'+b.id;
+      // Probeer pupil-count
+      var n = 0;
+      try { n = (JSON.parse(localStorage.getItem(storageKey)||'{}')).pupils.length || 0; } catch(e){}
+      var rij = document.createElement('div');
+      rij.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:#f8fafc;border:1.5px solid #e0e7ff;border-radius:12px;cursor:pointer;transition:all .12s;gap:10px;';
+      rij.onmouseover = function(){ this.style.borderColor='#059669';this.style.background='#ecfdf5'; };
+      rij.onmouseout  = function(){ this.style.borderColor='#e0e7ff';this.style.background='#f8fafc'; };
+      rij.innerHTML = '<div>'
+        + '<div style="font-size:15px;font-weight:800;color:#1e1b4b;">'+esc(b.naam||'Naamloos')+'</div>'
+        + '<div style="font-size:12px;color:#94a3b8;margin-top:2px;">'+(item.type==='kindbord'?'Kindbord':'Klasbord')+' · '+(n?n+' leerlingen':'leeg')+'</div>'
+        + '</div>'
+        + '<button style="border:none;background:#059669;color:#fff;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Kiezen</button>';
+      rij.addEventListener('click', function(){
+        _kindBibBronKey = storageKey;
+        document.getElementById('kind-bib-bronnaam').textContent = b.naam||'dit bord';
+        document.getElementById('kind-bib-opties').style.display = 'block';
+        // Scroll naar opties
+        document.getElementById('kind-bib-opties').scrollIntoView({behavior:'smooth'});
+      });
+      lijst.appendChild(rij);
+    });
+  }
+
+  document.getElementById('kind-bib-overlay').style.display = 'flex';
+}
+
+function closeKindBib(){
+  document.getElementById('kind-bib-overlay').style.display = 'none';
+  _kindBibBronKey = null;
+}
+
+function uitvoerenKindBib(){
+  if(!_kindBibBronKey) return;
+  var bronData = {};
+  try { bronData = JSON.parse(localStorage.getItem(_kindBibBronKey)||'{}'); } catch(e){}
+
+  var optNamen     = document.getElementById('bib-opt-namen').checked;
+  var optTaken     = document.getElementById('bib-opt-taken').checked;
+  var optToewijzing = document.getElementById('bib-opt-toewijzing').checked;
+
+  if(optNamen && bronData.pupils && bronData.pupils.length){
+    // Voeg nieuwe namen toe (geen duplicaten op voornaam+achternaam)
+    var bestaand = state.pupils.map(function(p){ return (p.voornaam+' '+(p.achternaam||'')).trim().toLowerCase(); });
+    bronData.pupils.forEach(function(p){
+      var key = (p.voornaam+' '+(p.achternaam||'')).trim().toLowerCase();
+      if(!bestaand.includes(key)){
+        state.pupils.push({ id: '_'+Math.random().toString(36).slice(2)+Date.now(), voornaam:p.voornaam, achternaam:p.achternaam||'' });
+        bestaand.push(key);
+      }
+    });
+  }
+
+  if(optTaken){
+    // Taken overnemen
+    if(bronData.activeTasks) state.activeTasks = bronData.activeTasks.slice();
+    if(bronData.customTasks) state.customTasks = (bronData.customTasks||[]).slice();
+    if(bronData.customIcons) state.customIcons = Object.assign({}, bronData.customIcons);
+    if(bronData.taskLabelOverrides) state.taskLabelOverrides = Object.assign({}, bronData.taskLabelOverrides);
+  }
+
+  if(optToewijzing && bronData.personalAssignments){
+    // Toewijzingen overnemen voor leerlingen met zelfde naam
+    var bronNamen = bronData.pupils || [];
+    state.pupils.forEach(function(p){
+      var match = bronNamen.find(function(bp){
+        return bp.voornaam.toLowerCase() === p.voornaam.toLowerCase()
+          && (bp.achternaam||'').toLowerCase() === (p.achternaam||'').toLowerCase();
+      });
+      if(match && bronData.personalAssignments[match.id]){
+        if(!state.personalAssignments) state.personalAssignments = {};
+        state.personalAssignments[p.id] = bronData.personalAssignments[match.id].slice();
+      }
+    });
+  }
+
+  saveState();
+  renderSetupAddedList();
+  kbUpdateWizard();
+  closeKindBib();
+  alert('✓ Overgenomen! Controleer de namen en taken in de beheerpagina.');
 }
 </script>
 </body>
