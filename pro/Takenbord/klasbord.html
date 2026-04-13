@@ -53,8 +53,7 @@
     <div style="font-size:11px;color:#64748b;margin-top:2px;">Hergebruik namen, foto's of taken van een ander bord</div>
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;">
-    <button onclick="openSlaOpAlsBibliotheek()" style="border:none;background:#6366f1;color:#fff;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">💾 Opslaan als bibliotheek</button>
-    <button onclick="openLaadUitBibliotheek()" style="border:2px solid #6366f1;background:#fff;color:#6366f1;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">📥 Laden uit bibliotheek</button>
+    <button onclick="openLaadUitBibliotheek()" style="border:2px solid #6366f1;background:#fff;color:#6366f1;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">📥 Overnemen uit ander bord</button>
   </div>
 </div>
 
@@ -235,37 +234,33 @@ Lena
 </div>
 </div>
 </div>
-<!-- BIBLIOTHEEK MODALS -->
-<div class="overlay hidden" id="bibliotheek-opslaan-modal">
-<div class="modal" style="max-width:400px;">
-  <div class="modal-title">💾 Opslaan als bibliotheek</div>
-  <p class="modal-sub">Sla gegevens van dit bord op als bibliotheek voor hergebruik in andere borden.</p>
-  <div style="margin:14px 0;display:flex;flex-direction:column;gap:10px;">
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-save-namen" checked style="width:16px;height:16px;"> Klaslijst (namen + foto's)</label>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-save-taken" checked style="width:16px;height:16px;"> Eigen taken + taaknamen</label>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-save-iconen" checked style="width:16px;height:16px;"> Eigen pictogrammen bij taken</label>
-  </div>
-  <div class="modal-btns">
-    <button class="btn btn-secondary" onclick="document.getElementById('bibliotheek-opslaan-modal').classList.add('hidden')">Annuleren</button>
-    <button class="btn btn-primary" onclick="slaOpAlsBibliotheek()">💾 Opslaan</button>
-  </div>
-</div>
-</div>
-
+<!-- BIBLIOTHEEK MODAL -->
 <div class="overlay hidden" id="bibliotheek-laden-modal">
-<div class="modal" style="max-width:400px;">
-  <div class="modal-title">📥 Laden uit bibliotheek</div>
-  <p class="modal-sub">Kies wat je wil overnemen. De voortgang en actieve taken blijven onaangepast — je stelt het bord daarna zelf samen.</p>
-  <div style="margin:14px 0;display:flex;flex-direction:column;gap:10px;" id="bib-laden-opties">
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-namen" checked style="width:16px;height:16px;"> Klaslijst (namen + foto's)</label>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-taken" checked style="width:16px;height:16px;"> Eigen taken + taaknamen</label>
-    <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-iconen" checked style="width:16px;height:16px;"> Eigen pictogrammen bij taken</label>
+<div class="modal" style="max-width:440px;">
+  <div class="modal-title">📥 Laden uit bestaand bord</div>
+  <p class="modal-sub">Kies een bronbord en wat je wil overnemen. Daarna pas je het bord zelf aan in het beheer.</p>
+  
+  <div style="margin:12px 0;">
+    <div style="font-size:12px;font-weight:800;color:#6b7280;margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em;">Bronbord</div>
+    <select id="bib-bronbord" style="width:100%;padding:8px 10px;border:2px solid #e0e7ff;border-radius:8px;font-size:13px;font-weight:700;font-family:inherit;color:#1e1b4b;background:#fff;">
+      <option value="">Bezig met laden...</option>
+    </select>
   </div>
-  <p style="font-size:11px;color:#92400e;background:#fffbeb;border-radius:8px;padding:8px 10px;margin-top:4px;">⚠️ Actieve taken en voortgang worden <strong>niet</strong> overschreven.</p>
-  <div id="bib-geen-data" style="display:none;font-size:13px;color:#94a3b8;text-align:center;padding:12px;">Nog geen bibliotheek opgeslagen.</div>
+
+  <div style="margin:12px 0;">
+    <div style="font-size:12px;font-weight:800;color:#6b7280;margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em;">Wat overnemen?</div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-namen" checked style="width:16px;height:16px;"> Klaslijst (namen + foto's)</label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-taken" checked style="width:16px;height:16px;"> Eigen taken + taaknamen</label>
+      <label style="display:flex;align-items:center;gap:10px;font-size:13px;font-weight:700;cursor:pointer;"><input type="checkbox" id="bib-load-iconen" checked style="width:16px;height:16px;"> Eigen pictogrammen bij taken</label>
+    </div>
+  </div>
+
+  <p style="font-size:11px;color:#92400e;background:#fffbeb;border-radius:8px;padding:8px 10px;">⚠️ Actieve taken en voortgang worden <strong>niet</strong> overschreven. Je stelt het bord daarna zelf samen.</p>
+  
   <div class="modal-btns">
     <button class="btn btn-secondary" onclick="document.getElementById('bibliotheek-laden-modal').classList.add('hidden')">Annuleren</button>
-    <button class="btn btn-primary" id="bib-laden-btn" onclick="laadUitBibliotheek()">📥 Overnemen</button>
+    <button class="btn btn-primary" onclick="laadUitBibliotheek()">📥 Overnemen</button>
   </div>
 </div>
 </div>
