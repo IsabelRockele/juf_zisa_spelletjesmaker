@@ -254,7 +254,7 @@ function parseName(str){
   if(bulkOrder==='achternaam') return{voornaam:parts[parts.length-1],achternaam:parts.slice(0,parts.length-1).join(' ')};
   return{voornaam:parts[0],achternaam:parts.slice(1).join(' ')};
 }
-function setOrder(o){ bulkOrder=o; document.getElementById('order-btn-voor').classList.toggle('active',o==='voornaam'); document.getElementById('order-btn-ach').classList.toggle('active',o==='achternaam'); }
+function setOrder(o){ bulkOrder=o; const bv=document.getElementById('order-btn-voor');const ba=document.getElementById('order-btn-ach');if(bv)bv.classList.toggle('active',o==='voornaam');if(ba)ba.classList.toggle('active',o==='achternaam'); }
 
 function addPupil(){
   const v=document.getElementById('input-voornaam').value.trim(),a=document.getElementById('input-achternaam').value.trim();
@@ -370,10 +370,12 @@ function openBackupModal(){ document.getElementById('backup-modal').classList.re
 function closeBM(){ document.getElementById('backup-modal').classList.add('hidden'); }
 
 function openNewSchoolYear(){
-  document.getElementById('new-school-year-modal').classList.remove('hidden');
+  const m=document.getElementById('new-school-year-modal');
+  if(m) m.classList.remove('hidden');
 }
 function closeNewSchoolYear(){
-  document.getElementById('new-school-year-modal').classList.add('hidden');
+  const m=document.getElementById('new-school-year-modal');
+  if(m) m.classList.add('hidden');
 }
 function doNewSchoolYear(){
   const keepTasks    = document.getElementById('nsy-keep-tasks').checked;
@@ -1254,7 +1256,7 @@ function renderBoardTable(allTasks){
 function renderTaskHeader(tasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 function renderPupilRows(allTasks){ /* niet meer gebruikt — zie renderBoardTable */ }
 
-function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;document.getElementById('progress-fill').style.width=t?(d/t*100)+'%':'0%';document.getElementById('progress-label').textContent=`${d}/${t} klaar`;}
+function updateProgressBar(){const t=state.pupils.length,d=state.pupils.filter(p=>isPupilComplete(p.id)).length;const pf=document.getElementById('progress-fill');const pl=document.getElementById('progress-label');if(pf)pf.style.width=t?(d/t*100)+'%':'0%';if(pl)pl.textContent=`${d}/${t} klaar`;}
 function updateMeta(){var t=state.pupils.length,d=state.pupils.filter(function(p){return isPupilComplete(p.id);}).length;var el=document.getElementById('board-progress-text');if(el)el.textContent=(t>0)?(d+'/'+t+' klaar'):'';var pl=document.getElementById('progress-label');if(pl)pl.textContent=(d+'/'+t+' klaar');}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
