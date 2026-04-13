@@ -163,6 +163,7 @@ function openSmileyPopup(pid, tid){
   popup.style.top  = '50%';
   popup.style.transform = 'translate(-50%,-50%)';
   popup.classList.remove('hidden');
+  popup.style.display = 'block';
 }
 
 window.setSmiley = function(v){
@@ -177,7 +178,7 @@ window.setSmiley = function(v){
 
 window.closeSmileyPopup = function(){
   const popup = document.getElementById('smiley-popup');
-  if(popup) popup.classList.add('hidden');
+  if(popup){ popup.classList.add('hidden'); popup.style.display = 'none'; }
   _smileyPid = null; _smileyTid = null;
 };
 
@@ -400,6 +401,24 @@ window.scrollLeft = function(){
   const scroll = document.getElementById('board-scroll');
   if(scroll) scroll.scrollBy({ left: -240, behavior:'smooth' });
 };
+
+// Swipe links/rechts op touch-apparaten
+(function(){
+  let startX = 0, startY = 0;
+  const el = document.getElementById('board-scroll') || document.body;
+  document.addEventListener('touchstart', function(e){
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    // Alleen horizontale swipe (meer horizontaal dan verticaal)
+    if(Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    const scroll = document.getElementById('board-scroll');
+    if(scroll) scroll.scrollBy({left: dx < 0 ? 240 : -240, behavior:'smooth'});
+  }, {passive:true});
+})();
 
 // ── Afsluiten ─────────────────────────────────────────────────────────────
 window.closeKindScreen = function(){
