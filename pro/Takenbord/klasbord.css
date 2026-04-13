@@ -1,3 +1,11 @@
+/* ── PRO HEADER ──────────────────────────────────────────────────────────── */
+.pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;padding:10px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:44px;box-sizing:border-box;}
+.pro-header-left{display:flex;align-items:center;gap:10px;}
+.pro-back-btn{border:none;background:rgba(255,255,255,.2);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.pro-back-btn:hover{background:rgba(255,255,255,.3);}
+.pro-header-title{font-size:14px;font-weight:800;opacity:.9;}
+.pro-badge{background:rgba(255,255,255,.2);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:800;letter-spacing:.05em;}
+
 *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
 :root {
   --bg:#f0f4f8; --border:#e2e8f0; --text:#1a202c; --muted:#718096;
@@ -8,7 +16,7 @@
   --photo-size:52px; --icon-size:38px; --icon-custom:56px;
   --label-size:16px; --row-pad:4px; --smiley-sz:18px; --num-font:13px;
 }
-html,body { height:100%; font-family:'Nunito','Segoe UI',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
+html,body { padding-top:44px; height:100%; font-family:'Nunito','Segoe UI',sans-serif; background:var(--bg); color:var(--text); overflow:hidden; }
 #app { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
 
 /* WELCOME */
