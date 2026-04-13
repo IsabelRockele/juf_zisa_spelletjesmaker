@@ -518,7 +518,7 @@ function openQrModal(){
   // Genereer QR via Google Charts API
   const container = document.getElementById('qr-code-container');
   if(container){
-    container.innerHTML = '<img src="https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=' + encodeURIComponent(url) + '&choe=UTF-8" alt="QR code" style="border-radius:8px;" />';
+    container.innerHTML = '<img src="https://chart.googleapis.com/chart?cht=qr&chs=240x240&chl=' + encodeURIComponent(url) + '&choe=UTF-8&chld=M|2" alt="QR code" style="border-radius:8px;display:block;" />';
   }
   
   modal.classList.remove('hidden');
