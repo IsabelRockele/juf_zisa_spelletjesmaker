@@ -165,20 +165,27 @@ Lena
 <button class="btn btn-undo hidden" id="btn-undo" onclick="undoLastAction()" title="Ongedaan maken">↩ Ongedaan</button>
 </div>
 <div class="board-bar-right">
-<div class="size-btns teacher-only" title="Bordgrootte aanpassen">
-  <span style="font-size:10px;font-weight:800;color:#94a3b8;margin-right:2px;">Grootte:</span>
-  <button id="size-compact" class="size-btn" onclick="setBoardSize('compact')" title="Klein — meer leerlingen op het scherm">S</button>
-  <button id="size-normal"  class="size-btn size-btn-active" onclick="setBoardSize('normal')" title="Normaal">M</button>
-  <button id="size-large"   class="size-btn" onclick="setBoardSize('large')" title="Groot — beter leesbaar op smartboard">L</button>
-</div>
-<button class="btn back-btn-orange btn-sm teacher-only" onclick="goBackFromBoard()">← Beheer</button>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="openPdfModal()">📄 PDF rapport</button>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="openBackupModal()">💾 Backup</button>
 <input accept=".json" class="hidden" id="import-file" onchange="importData(event)" type="file"/>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')">❓ Uitleg</button>
-<button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
-<button class="btn btn-ghost btn-sm teacher-only" onclick="openSmartboardVenster()" title="Open het bord in smartboard-weergave in een nieuw venster">📺 Smartboard</button>
-<button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="timerToggleBtn">⏱️ Timer</button>
+<button class="btn teacher-only" onclick="goBackFromBoard()" style="background:#f97316;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">← Beheer</button>
+<button class="btn btn-indigo teacher-only" onclick="toggleMode()" style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">⚙️ Beheer aanpassen</button>
+<button class="btn teacher-only" onclick="openSmartboardVenster()" style="background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">📺 Smartboard</button>
+<button class="btn teacher-only" onclick="document.getElementById('help-overlay').classList.remove('hidden')" style="background:#22c55e;color:#fff;border:none;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">❓ Uitleg</button>
+<div class="meer-opties-wrap teacher-only" style="position:relative;">
+  <button onclick="toggleMeerOpties()" style="background:#f1f5f9;color:#374151;border:2px solid #e2e8f0;border-radius:10px;padding:7px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;">Meer opties ▾</button>
+  <div id="meer-opties-menu" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:2px solid #e0e7ff;border-radius:14px;box-shadow:0 8px 24px rgba(0,0,0,.12);min-width:180px;z-index:200;padding:8px;">
+    <button onclick="toggleTimer();closeMeerOpties()" id="timerToggleBtn" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">⏱️ Timer</button>
+    <button onclick="openPdfModal();closeMeerOpties()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">📄 PDF rapport</button>
+    <div style="border-top:1px solid #e0e7ff;margin:4px 0;"></div>
+    <div style="padding:6px 12px;font-size:11px;font-weight:800;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Grootte</div>
+    <div style="display:flex;gap:6px;padding:4px 12px 8px;">
+      <button id="size-compact" onclick="setBoardSize('compact');closeMeerOpties()" style="flex:1;padding:6px;border-radius:8px;border:2px solid #e0e7ff;background:#f8fafc;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">S</button>
+      <button id="size-normal" onclick="setBoardSize('normal');closeMeerOpties()" style="flex:1;padding:6px;border-radius:8px;border:2px solid #6366f1;background:#eef2ff;color:#6366f1;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">M</button>
+      <button id="size-large" onclick="setBoardSize('large');closeMeerOpties()" style="flex:1;padding:6px;border-radius:8px;border:2px solid #e0e7ff;background:#f8fafc;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;">L</button>
+    </div>
+    <div style="border-top:1px solid #e0e7ff;margin:4px 0;"></div>
+    <button onclick="openBackupModal();closeMeerOpties()" style="display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:#374151;">💾 Backup</button>
+  </div>
+</div>
 <button id="smartboard-exit-btn" onclick="handleExitBtn()" class="btn btn-ghost btn-sm" style="display:none;">⚙️ Menu</button>
 </div>
 </div>
