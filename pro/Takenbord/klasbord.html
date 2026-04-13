@@ -179,11 +179,12 @@ Lena
 <button class="btn btn-indigo teacher-only" onclick="toggleMode()">⚙️ Beheer aanpassen</button>
 <button class="btn btn-ghost btn-sm teacher-only" onclick="openSmartboardVenster()" title="Open het bord in smartboard-weergave in een nieuw venster">📺 Smartboard</button>
 <button class="btn btn-ghost btn-sm" onclick="toggleTimer()" id="timerToggleBtn">⏱️ Timer</button>
+<button id="smartboard-exit-btn" onclick="handleExitBtn()" class="btn btn-ghost btn-sm" style="display:none;">⚙️ Menu</button>
 </div>
 </div>
 
 <!-- Discreet slotje — altijd zichtbaar, ook in smartboard/ipad-modus -->
-<button id="smartboard-exit-btn" onclick="handleExitBtn()" title="Leerkracht menu" style="position:fixed;bottom:16px;right:16px;z-index:7000;border:none;background:rgba(99,102,241,.15);color:#6366f1;font-size:13px;font-weight:800;cursor:pointer;display:none;padding:8px 14px;border-radius:10px;font-family:inherit;transition:all .2s;">⚙️ Menu</button>
+
 
 <!-- Exit-modal -->
 <div class="overlay hidden" id="smartboard-exit-overlay">
@@ -200,9 +201,7 @@ Lena
 </div>
 <div id="board-scroll">
 <div id="empty-state"><div class="e-icon">📋</div><p id="empty-text">Klik op ⚙️ Beheer aanpassen om te starten</p></div>
-<div id="task-header" class="hidden"><div class="header-corner"><span class="board-corner-label">Leerling</span></div></div>
-<div id="legend" class="hidden"><div id="legend-name"></div><div id="legend-items"></div></div>
-<div class="hidden" id="board-inner"><div id="pupil-rows"></div></div>
+<div class="hidden" id="board-inner"></div>
 </div>
 </div>
 </div>
