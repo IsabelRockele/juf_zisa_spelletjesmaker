@@ -135,6 +135,43 @@ body{padding-top:44px;}
 .wb-limiet-warn{background:#fff5f5;border:1px solid #fecaca;border-radius:9px;padding:8px 12px;font-size:11px;color:#dc2626;line-height:1.5;margin:0 14px 10px;}
 .wb-limiet-info{background:#f8fafc;border:1px solid #e0e7ff;border-radius:9px;padding:8px 12px;font-size:11px;color:#6b7280;line-height:1.5;margin:0 14px 10px;}
 
+
+/* ── Uitleg-toggle knop ── */
+.wb-info-btn{
+  width:22px;height:22px;border-radius:50%;border:1.5px solid #c7d2fe;
+  background:#eef2ff;color:#6366f1;font-size:12px;font-weight:800;
+  cursor:pointer;font-family:inherit;flex-shrink:0;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.wb-info-btn:hover{background:#e0e7ff;}
+.wb-info-btn-kind{border-color:#a7f3d0;background:#ecfdf5;color:#059669;}
+.wb-info-btn-kind:hover{background:#d1fae5;}
+
+.wb-uitleg{
+  font-size:12px;color:#374151;line-height:1.7;
+  padding:10px 16px;background:#f8fafc;
+  border-bottom:1.5px solid #e0e7ff;
+}
+.wb-uitleg.hidden{display:none;}
+
+/* ── Bord-rij knoppen met tekst ── */
+.wb-bord-btn{
+  border:1.5px solid #e0e7ff;background:#f8fafc;color:#6b7280;
+  border-radius:8px;padding:5px 10px;font-size:11px;font-weight:800;
+  cursor:pointer;font-family:inherit;white-space:nowrap;
+  display:flex;align-items:center;gap:4px;
+}
+.wb-bord-btn:hover{background:#e2e8f0;color:#374151;}
+.wb-bord-btn-sb{border-color:#c7d2fe;color:#6366f1;background:#eef2ff;}
+.wb-bord-btn-sb:hover{background:#e0e7ff;}
+.wb-bord-btn-del{border-color:#fecaca;color:#dc2626;background:#fff5f5;}
+.wb-bord-btn-del:hover{background:#fee2e2;}
+.wb-bord-rij.kind .wb-bord-btn-sb{border-color:#a7f3d0;color:#059669;background:#ecfdf5;}
+.wb-bord-rij.kind .wb-bord-btn-sb:hover{background:#d1fae5;}
+
+/* Acties op aparte regel onder de bordnaam */
+.wb-bord-acties{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+
 </style>
 
 </head>
@@ -167,10 +204,14 @@ body{padding-top:44px;}
       <div class="wb-sectie">
         <div class="wb-sectie-hdr wb-hdr-klas">
           <div class="wb-sectie-icon">📋</div>
-          <div>
+          <div style="flex:1;">
             <div class="wb-sectie-titel">Klasbord</div>
-            <div class="wb-sectie-sub">Alle kinderen en taken op één bord</div>
+            <div class="wb-sectie-sub">Alle kinderen &amp; taken op één bord — ideaal voor hoekenwerk of contractwerk</div>
           </div>
+          <button class="wb-info-btn" onclick="toggleUitleg('klas')">?</button>
+        </div>
+        <div class="wb-uitleg hidden" id="uitleg-klas">
+          📋 Alle leerlingen staan in rijen, de taken in kolommen. Jij of de leerling klikt een hokje aan: leeg → bezig → klaar. Per kind kan je een taak verbergen of een extra taak toevoegen.
         </div>
         <div class="wb-borden-lijst" id="lijst-klasbord"></div>
         <div id="info-klasbord" style="margin-bottom:8px;"></div>
@@ -181,10 +222,14 @@ body{padding-top:44px;}
       <div class="wb-sectie">
         <div class="wb-sectie-hdr wb-hdr-kind">
           <div class="wb-sectie-icon">👤</div>
-          <div>
+          <div style="flex:1;">
             <div class="wb-sectie-titel">Kindbord</div>
-            <div class="wb-sectie-sub">Elk kind ziet zijn eigen taken</div>
+            <div class="wb-sectie-sub">Kinderen klikken op hun naam en zien hun eigen taken — ideaal voor differentiatie</div>
           </div>
+          <button class="wb-info-btn wb-info-btn-kind" onclick="toggleUitleg('kind')">?</button>
+        </div>
+        <div class="wb-uitleg hidden" id="uitleg-kind">
+          👤 Op het smartboard zie je enkel de namen. Een kind klikt op zijn naam en ziet zijn persoonlijke takenlijst. Handig als elk kind andere taken heeft.
         </div>
         <div class="wb-borden-lijst" id="lijst-kindbord"></div>
         <div id="info-kindbord" style="margin-bottom:8px;"></div>
@@ -392,38 +437,37 @@ function renderSectie(type){
       openBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openBord(id); }; })(type, bord.id);
 
       var sbBtn = document.createElement('button');
-      sbBtn.className = 'wb-bord-sb';
-      sbBtn.textContent = '📺';
-      sbBtn.title = 'Smartboard';
+      sbBtn.className = 'wb-bord-btn wb-bord-btn-sb';
+      sbBtn.innerHTML = '📺 <span>Smartboard</span>';
+      sbBtn.title = 'Openen zonder beheerknoppen — voor smartboard of iPad';
       sbBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openSB(id); }; })(type, bord.id);
 
       var renBtn = document.createElement('button');
       renBtn.className = 'wb-bord-btn';
-      renBtn.textContent = '✎';
-      renBtn.title = 'Hernoemen';
+      renBtn.innerHTML = '✎ <span>Naam</span>';
+      renBtn.title = 'Naam wijzigen';
       renBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; hernoemBord(id); }; })(type, bord.id);
 
       var delBtn = document.createElement('button');
-      delBtn.className = 'wb-bord-btn';
-      delBtn.style.color = '#fca5a5';
-      delBtn.textContent = '🗑';
+      delBtn.className = 'wb-bord-btn wb-bord-btn-del';
+      delBtn.innerHTML = '🗑 <span>Wis</span>';
       delBtn.title = 'Verwijderen';
       delBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openDel(id); }; })(type, bord.id);
+
+      var acties = document.createElement('div');
+      acties.className = 'wb-bord-acties';
+      acties.appendChild(sbBtn);
+      acties.appendChild(renBtn);
+      acties.appendChild(delBtn);
 
       var info = document.createElement('div');
       info.style.flex = '1';
       info.style.minWidth = '0';
       info.innerHTML = '<div class="wb-bord-naam">' + esc(bord.naam) + '</div>'
         + '<div class="wb-bord-meta">' + (n ? n + ' leerlingen · ' : '') + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>';
-
-      var acties = document.createElement('div');
-      acties.className = 'wb-bord-acties';
-      acties.appendChild(renBtn);
-      acties.appendChild(delBtn);
+      info.appendChild(acties);
 
       rij.appendChild(info);
-      rij.appendChild(sbBtn);
-      rij.appendChild(acties);
       rij.appendChild(openBtn);
       lijst.appendChild(rij);
     });
@@ -439,6 +483,12 @@ function renderSectie(type){
       infoEl.innerHTML = '';
     }
   }
+}
+
+
+function toggleUitleg(type){
+  var el = document.getElementById('uitleg-' + type);
+  if(el) el.classList.toggle('hidden');
 }
 
 function renderBordenLijst(){ renderDashboard(); }
