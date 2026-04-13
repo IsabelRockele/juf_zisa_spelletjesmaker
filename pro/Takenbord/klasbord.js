@@ -821,76 +821,50 @@ function doNewPeriod(){
   document.getElementById('new-period-overlay').classList.add('hidden');
   renderShell();
 }
-// ── WIZARD STAPPENBALK UPDATE ─────────────────────────────────────────────
-function updateWizard(){
-  const heeftNamen = state.pupils && state.pupils.length > 0;
-  const heeftTaken = state.activeTasks && state.activeTasks.length > 0;
-  const klaar = heeftNamen && heeftTaken;
-
-  // Stap 1: Namen
-  const s1 = document.getElementById('wz-step-1');
-  const n1 = document.getElementById('wz-num-1');
-  if(s1 && n1){
-    s1.classList.toggle('wz-done', heeftNamen);
-    s1.classList.toggle('wz-active', !heeftNamen);
-    n1.textContent = heeftNamen ? '✓' : '1';
+// ── ACCORDION ────────────────────────────────────────────────────────────
+function acToggle(sectie){
+  ['namen','taken','inst'].forEach(function(s){
+    var body    = document.getElementById('ac-body-' + s);
+    var hdr     = document.querySelector('#ac-' + s + ' .ac-hdr');
+    var chevron = document.getElementById('ac-chevron-' + s);
+    if(!body) return;
+    var open = s === sectie;
+    body.classList.toggle('ac-body-hidden', !open);
+    if(hdr)     hdr.classList.toggle('ac-open', open);
+    if(chevron) chevron.textContent = open ? '▲' : '▼';
+  });
+  if(sectie === 'namen') renderPupilList();
+  if(sectie === 'taken') renderTaskSettings();
+  if(sectie === 'inst'){
+    document.getElementById('toggle-numbers').checked = !!state.showNumbers;
+    document.getElementById('toggle-lastname').checked = !!state.showLastname;
+    document.getElementById('toggle-smileys').checked  = !!state.showSmileys;
   }
-  // Stap 2: Taken
-  const s2 = document.getElementById('wz-step-2');
-  const n2 = document.getElementById('wz-num-2');
-  if(s2 && n2){
-    s2.classList.toggle('wz-done', heeftTaken);
-    s2.classList.toggle('wz-active', heeftNamen && !heeftTaken);
-    n2.textContent = heeftTaken ? '✓' : '2';
-  }
-  // Stap 3: Instellingen
-  const s3 = document.getElementById('wz-step-3');
-  const n3 = document.getElementById('wz-num-3');
-  if(s3 && n3){
-    s3.classList.toggle('wz-done', klaar);
-    s3.classList.toggle('wz-active', klaar);
-    n3.textContent = klaar ? '✓' : '3';
-  }
-  // Panel-badges
-  const pb1 = document.getElementById('panel-badge-namen');
-  if(pb1) pb1.classList.toggle('beheer-badge-done', heeftNamen);
-  const pb2 = document.getElementById('panel-badge-taken');
-  if(pb2) pb2.classList.toggle('beheer-badge-done', heeftTaken);
+  updateAcWizard();
+}
 
-  // Subtitel namen-panel
-  const sub = document.getElementById('namen-sub-text');
-  if(sub) sub.textContent = heeftNamen
-    ? state.pupils.length + ' leerlingen toegevoegd'
-    : 'Voeg de leerlingen van je klas toe';
-
-  // Status-strip
-  const sL = document.getElementById('stat-leerlingen');
-  const sT = document.getElementById('stat-taken');
-  if(sL) sL.textContent = state.pupils.length;
-  if(sT) sT.textContent = (state.activeTasks||[]).length;
-
-  // Statustext + Go-knop
-  const st = document.getElementById('wz-status-text');
-  const btn = document.getElementById('wz-go-btn');
-  if(!heeftNamen){
-    if(st) st.textContent = 'Stap 1: voeg namen toe';
-    if(btn){ btn.disabled = true; btn.classList.remove('wz-go-ready'); }
-  } else if(!heeftTaken){
-    if(st) st.textContent = 'Stap 2: kies taken';
-    if(btn){ btn.disabled = true; btn.classList.remove('wz-go-ready'); }
-  } else {
-    if(st) st.textContent = state.pupils.length + ' leerlingen · ' + state.activeTasks.length + ' taken';
-    if(btn){ btn.disabled = false; btn.classList.add('wz-go-ready'); }
-  }
+function updateAcWizard(){
+  var heeftNamen = state.pupils && state.pupils.length > 0;
+  var heeftTaken = state.activeTasks && state.activeTasks.length > 0;
+  var b1 = document.getElementById('ac-badge-namen');
+  var b2 = document.getElementById('ac-badge-taken');
+  var b3 = document.getElementById('ac-badge-inst');
+  if(b1){ b1.textContent = heeftNamen ? '✓' : '1'; b1.classList.toggle('ac-badge-done', heeftNamen); }
+  if(b2){ b2.textContent = heeftTaken ? '✓' : '2'; b2.classList.toggle('ac-badge-done', heeftTaken); }
+  if(b3){ b3.textContent = (heeftNamen&&heeftTaken) ? '✓' : '3'; b3.classList.toggle('ac-badge-done', heeftNamen&&heeftTaken); }
+  var sub1 = document.getElementById('ac-sub-namen');
+  if(sub1) sub1.textContent = heeftNamen ? state.pupils.length + ' leerlingen toegevoegd' : 'Voeg de leerlingen van je klas toe';
+  var sub2 = document.getElementById('ac-sub-taken');
+  if(sub2) sub2.textContent = heeftTaken ? state.activeTasks.length + ' taken actief' : 'Klik op een taak om aan of uit te zetten';
 }
 
 function renderSettings(){
-  // Geen tabs meer — render alles direct
   renderPupilList();
   renderTaskSettings();
-  updateWizard();
+  updateAcWizard();
 }
-function switchTab(tab){ currentTab=tab; renderSettings(); }
+function switchTab(tab){ currentTab=tab; }
+
 function renderPupilList(){
   document.getElementById('toggle-numbers').checked=!!state.showNumbers;
   document.getElementById('toggle-lastname').checked=!!state.showLastname;
@@ -946,7 +920,7 @@ function renderPupilList(){
   });
   html += '<div class="insert-zone" onclick="insertAfter('+(state.pupils.length-1)+')"></div>';
   el.innerHTML=html;
-  updateWizard();
+  updateAcWizard();
 }
 function renderTaskSettings(){
   const ci=state.customIcons||{};
@@ -1015,7 +989,7 @@ function renderTaskSettings(){
 
   document.getElementById('emoji-picker').innerHTML=EMOJIS.map(e=>`<button class="emoji-btn ${e===selectedEmoji?'selected':''}" onclick="selectEmoji('${e}')">${e}</button>`).join('');
   document.getElementById('input-task').placeholder=`${selectedEmoji} Taaknaam…`;
-  updateWizard();
+  updateAcWizard();
 }
 function selectEmoji(e){selectedEmoji=e;renderTaskSettings();}
 
