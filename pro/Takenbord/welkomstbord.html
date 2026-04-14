@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Klasbord — Juf Zisa</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="klasbord.css">
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-body{min-height:100vh;overflow:auto;}
+
 /* ── PRO HEADER ── */
 .pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#0b3060 0%,#1a5fa8 100%);color:#fff;padding:8px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:44px;box-sizing:border-box;font-size:0.85rem;font-weight:700;letter-spacing:0.02em;}
 .pro-back-btn{border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
 .pro-back-btn:hover{background:rgba(255,255,255,.25);}
 .pro-header-title{font-size:14px;font-weight:700;opacity:.9;}
 .pro-badge{background:#f5c200;color:#0b3060;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800;}
-body{padding-top:44px;}
+body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding-top:44px !important;overflow:auto !important;height:auto !important;}
 #app{min-height:100vh;background:#f0f4fb;padding:0 0 60px;}
 
 /* ── SCHERM 1: type kiezen ── */
@@ -90,14 +90,14 @@ body{padding-top:44px;}
 #qr-print-area{display:none;padding:30px;text-align:center;font-family:Nunito,sans-serif;}
 
 /* ── DASHBOARD WELKOMSTBORD ── */
-#app { min-height:100vh; background:#f0f4fb; padding:0 0 60px; }
 
-.wb-welcome-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px; }
+
+.wb-welcome-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px; padding:0 32px; }
 .wb-welcome-title { font-size:28px; font-weight:800; color:#1e1b4b; }
 .wb-welcome-sub { font-size:15px; color:#64748b; margin-top:4px; }
 .wb-autosave-pill { background:#f0fdf4; border:1.5px solid #86efac; border-radius:20px; padding:8px 18px; font-size:14px; font-weight:800; color:#15803d; white-space:nowrap; }
 
-.wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px; }
+.wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; padding:0 24px; }
 @media(max-width:640px){ .wb-grid { grid-template-columns:1fr; } }
 
 .wb-sectie { background:#fff; border-radius:20px; border:2.5px solid transparent; overflow:visible; display:flex; flex-direction:column; position:relative; }
@@ -172,21 +172,25 @@ body{padding-top:44px;}
 
 /* ══ BORD-ILLUSTRATIES ══════════════════════════════════════════════════ */
 .wb-illus { border-radius:10px; overflow:hidden; margin:0 auto 12px; border:1.5px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.07); max-width:360px; display:block; }
-.wb-illus-bar { padding:5px 9px; display:flex; align-items:center; gap:4px; }
+.wb-illus-bar { padding:5px 10px; display:flex; align-items:center; gap:5px; }
 .wb-illus-bar-klas { background:#1e1b4b; }
 .wb-illus-bar-kind { background:#4c1d95; }
-.wb-illus-dot { width:5px; height:5px; border-radius:50%; }
-.wb-illus-lbl { font-size:7px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
+.wb-illus-dot { width:6px; height:6px; border-radius:50%; }
+.wb-illus-lbl { font-size:8px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
+
+/* Klasbord grid */
 .kb-illus-body { background:#f0f4fb; padding:6px; height:112px; overflow:hidden; }
-.kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; }
-.kb-illus-cell { border-radius:3px; padding:3px 4px; font-size:7px; font-weight:700; text-align:center; }
+.kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; width:100%; }
+.kb-illus-cell { border-radius:4px; padding:3px 4px; font-size:8px; font-weight:700; text-align:center; }
 .kb-illus-head-n { background:#e0e7ff; color:#3730a3; }
-.kb-illus-head-t { background:#fef3c7; color:#92400e; font-size:7px; }
+.kb-illus-head-t { background:#fef3c7; color:#92400e; font-size:8px; }
 .kb-illus-naam { background:#f8fafc; color:#374151; text-align:left; }
-.kb-illus-v { display:flex; align-items:center; justify-content:center; font-size:7px; }
+.kb-illus-v { display:flex; align-items:center; justify-content:center; font-size:9px; }
 .kb-illus-leeg { background:#f1f5f9; }
 .kb-illus-bezig { background:#fef9c3; }
 .kb-illus-klaar { background:#dcfce7; color:#16a34a; }
+
+/* Kindbord kaartjes */
 .kn-illus-body { background:#faf5ff; padding:6px; display:grid; grid-template-columns:repeat(4,1fr); gap:3px; height:112px; overflow:hidden; align-content:start; }
 .kn-illus-kaart { background:#fff; border-radius:6px; padding:4px 3px; text-align:center; border:1px solid #ede9fe; }
 .kn-illus-av { width:18px; height:18px; border-radius:50%; margin:0 auto 2px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; }
@@ -204,12 +208,7 @@ body{padding-top:44px;}
   </div>
   <a href="../app.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;border:1px solid rgba(255,255,255,.25);">☰ Keuzemenu</a>
 </div>
-<div id="app">
-
-  <!-- DASHBOARD: alles op één scherm -->
-  <div id="dashboard" style="max-width:900px;margin:0 auto;">
-
-    <!-- Welkomstregel -->
+<div id="app"><div id="dashboard"><!-- Welkomstregel -->
     <div style="background:#4c1d95;padding:16px 32px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-size:28px;font-weight:800;color:#fff;">👋 Welkom bij Takenbord</div>
@@ -236,15 +235,46 @@ body{padding-top:44px;}
           Alle leerlingen staan in rijen, de taken in kolommen. Jij of de leerling klikt een hokje aan: leeg → bezig → klaar. Per kind kan je een taak verbergen of een extra taak toevoegen.
         </div>
         <div class="wb-illus">
-          <div class="wb-illus-bar wb-illus-bar-klas"><div class="wb-illus-dot" style="background:#f59e0b;"></div><div class="wb-illus-dot" style="background:#fde68a;"></div><span class="wb-illus-lbl">Zo ziet het eruit — namen × taken</span></div>
-          <div class="kb-illus-body"><div class="kb-illus-grid">
-            <div class="kb-illus-cell kb-illus-head-n">Leerling</div><div class="kb-illus-cell kb-illus-head-t">📖 Lezen</div><div class="kb-illus-cell kb-illus-head-t">🔢 Rekenen</div><div class="kb-illus-cell kb-illus-head-t">✏️ Schrijven</div><div class="kb-illus-cell kb-illus-head-t">🎨 Tekenen</div>
-            <div class="kb-illus-cell kb-illus-naam">Bram</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
-            <div class="kb-illus-cell kb-illus-naam">Elif</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
-            <div class="kb-illus-cell kb-illus-naam">Finn</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div><div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
-            <div class="kb-illus-cell kb-illus-naam">Noor</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
-            <div class="kb-illus-cell kb-illus-naam">Liam</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div><div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div><div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
-          </div></div>
+          <div class="wb-illus-bar wb-illus-bar-klas">
+            <div class="wb-illus-dot" style="background:#f59e0b;"></div>
+            <div class="wb-illus-dot" style="background:#fde68a;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Zo ziet het eruit — namen × taken</span>
+          </div>
+          <div class="kb-illus-body">
+            <div class="kb-illus-grid">
+              <div class="kb-illus-cell kb-illus-head-n">Leerling</div>
+              <div class="kb-illus-cell kb-illus-head-t">📖 Lezen</div>
+              <div class="kb-illus-cell kb-illus-head-t">🔢 Rekenen</div>
+              <div class="kb-illus-cell kb-illus-head-t">✏️ Schrijven</div>
+              <div class="kb-illus-cell kb-illus-head-t">🎨 Tekenen</div>
+              <div class="kb-illus-cell kb-illus-naam">Bram</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Elif</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Finn</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Noor</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-naam">Liam</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+            </div>
+          </div>
         </div>
         <div class="wb-borden-lijst" id="lijst-klasbord"></div>
         <div id="info-klasbord" style="margin-bottom:8px;"></div>
@@ -266,7 +296,12 @@ body{padding-top:44px;}
           Op het smartboard zie je enkel de namen. Een kind klikt op zijn naam en ziet zijn persoonlijke takenlijst. Handig als elk kind andere taken heeft.
         </div>
         <div class="wb-illus">
-          <div class="wb-illus-bar wb-illus-bar-kind"><div class="wb-illus-dot" style="background:#a78bfa;"></div><div class="wb-illus-dot" style="background:#ddd6fe;"></div><span class="wb-illus-lbl">Zo ziet het eruit — klik op je naam</span></div>
+          <div class="wb-illus-bar wb-illus-bar-kind">
+            <div class="wb-illus-dot" style="background:#a78bfa;"></div>
+            <div class="wb-illus-dot" style="background:#ddd6fe;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Zo ziet het eruit — klik op je naam</span>
+          </div>
           <div class="kn-illus-body">
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#f97316;">B</div><div class="kn-illus-naam">Bram</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:60%;background:#f97316;"></div></div></div>
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#8b5cf6;">E</div><div class="kn-illus-naam">Elif</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:75%;background:#8b5cf6;"></div></div></div>
@@ -276,6 +311,7 @@ body{padding-top:44px;}
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#d97706;">A</div><div class="kn-illus-naam">Amira</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#7c3aed;">T</div><div class="kn-illus-naam">Tibo</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:40%;background:#7c3aed;"></div></div></div>
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#0d9488;">S</div><div class="kn-illus-naam">Sara</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:80%;background:#0d9488;"></div></div></div>
+
           </div>
         </div>
         <div class="wb-borden-lijst" id="lijst-kindbord"></div>
@@ -290,6 +326,7 @@ body{padding-top:44px;}
       <div class="wb-tip-dot"></div>
       Je kan zoveel borden aanmaken als je wil. De 3 meest recente worden bewaard, oudere verdwijnen automatisch.
     </div>
+  
 
   </div>
 
@@ -636,7 +673,7 @@ function renderBordenLijst_OLD(){
         + '</div>';
     } else if(aantalBorden > 0 && resterend > 1){
       infoHtml += '<div style="background:#f8fafc;border:1px solid #e0e7ff;border-radius:10px;padding:9px 14px;font-size:12px;color:#6b7280;line-height:1.6;">'
-        + 'Je kan maximaal 3 borden per type bewaren, bij aanmaak 4de bord verdwijnt het oudst gemaakte bord. Je hebt er nog <strong>' + resterend + '</strong> vrij.'
+        + 'Je kan maximaal 3 borden per type bewaren, bij aanmaak van een nieuw bord verdwijnt het oudste. Je hebt er nog <strong>' + resterend + '</strong> vrij.'
         + '</div>';
     }
 
