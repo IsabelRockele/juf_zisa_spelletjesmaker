@@ -215,8 +215,8 @@
               <label class="radio-chip" onclick="App.selecteerRadio('niveau','1000',this)">
                 <input type="radio" name="niveau" value="1000">Tot 1 000
               </label>
-              <label class="radio-chip radio-chip-binnenkort">
-                <input type="radio" name="niveau" value="10000" disabled>Tot 10 000
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','10000',this)">
+                <input type="radio" name="niveau" value="10000">Tot 10 000
               </label>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -598,8 +598,8 @@
               <label class="radio-chip" onclick="App.selecteerGemengdNiveau(1000,this)">
                 <input type="radio" name="gem-niveau" value="1000">Tot 1 000
               </label>
-              <label class="radio-chip radio-chip-binnenkort">
-                <input type="radio" name="gem-niveau" value="10000" disabled>Tot 10 000
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10000,this)">
+                <input type="radio" name="gem-niveau" value="10000">Tot 10 000
               </label>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1921,7 +1921,9 @@
   <script src="modules/transformeren-optellen.js?v=1"></script>
   <script src="modules/transformeren-aftrekken.js?v=1"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
+  <script src="modules/optellen-tot10000.js?v=1"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
+  <script src="modules/aftrekken-tot10000.js?v=1"></script>
 
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="generator.js?v=12"></script>
