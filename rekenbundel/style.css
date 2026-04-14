@@ -1859,11 +1859,13 @@ header .badge {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
+.cij-duizend { background-color: #e74c3c; color: #fff !important; }
 .cij-honderd { background-color: #2980b9; }
 .cij-tien    { background-color: #27ae60; }
 .cij-een     { background-color: #f1c40f; color: #333 !important; }
 
 .cij-onthoud { vertical-align: middle !important; padding-bottom: 0 !important; }
+.cij-onthoud.cij-duizend { background-color: #f1948a; }
 .cij-onthoud.cij-honderd { background-color: #a9cce3; }
 .cij-onthoud.cij-tien    { background-color: #a3e4d7; }
 .cij-onthoud.cij-een     { background-color: #f9e79f; }
