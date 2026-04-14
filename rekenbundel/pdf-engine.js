@@ -453,6 +453,61 @@ const somTekst = (delen.length >= 3)
     const variant     = blok.compenserenVariant || 'met-tekens';
     const metVoorbeeld = blok.metVoorbeeld !== false;
 
+    // zonder-hulp: aparte renderer — simpele som + lange schrijflijn
+    if (variant === 'zonder-hulp') {
+      const KAAL_H   = 14;
+      const KAAL_RIJ = KAAL_H + 5;
+      const kolB     = CW / 2;
+      const kadW     = kolB - 6;
+      const marge    = 3;
+      const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
+      checkRuimte(ZINRUIMTE + KAAL_RIJ + 4);
+      y += VOOR_ZIN;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(26, 58, 92);
+      doc.text(blok.opdrachtzin, ML, y);
+      y += ZINRUIMTE;
+      for (let rij = 0; rij < aantalRijen; rij++) {
+        if (rij > 0) checkRuimte(KAAL_RIJ);
+        blok.oefeningen.slice(rij * 2, (rij + 1) * 2).forEach((oef, kol) => {
+          const isVb = metVoorbeeld && rij === 0 && kol === 0;
+          const oy = y, ox = ML + kol * kolB + 3;
+          doc.setFillColor(isVb ? 255 : 255, isVb ? 248 : 255, isVb ? 220 : 255);
+          doc.setDrawColor(isVb ? 240 : 180, isVb ? 192 : 200, isVb ? 80 : 225);
+          doc.setLineWidth(isVb ? 1 : 0.5);
+          doc.roundedRect(ox, oy, kadW, KAAL_H, 2, 2, 'FD');
+          const somY = oy + 9;
+          if (isVb) {
+            // Voorbeeld: som = ander + tiental − delta = antwoord
+            const isAftrekken = oef.vraag.includes(' - ');
+            const teken = isAftrekken ? '-' : '+';
+            const tussenTeken = isAftrekken ? '+' : '-';
+            const s1 = `${oef.vraag.replace(' =','')} = ${oef.andereGetal} ${teken} ${oef.tiental} `;
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
+            doc.setTextColor(26, 58, 92);
+            doc.text(s1, ox + marge, somY);
+            const x2 = ox + marge + doc.getTextWidth(s1);
+            doc.setTextColor(192, 0, 0);
+            const s2 = `${tussenTeken} ${oef.compenseerDelta} = ${oef.antwoord}`;
+            doc.text(s2, x2, somY);
+          } else {
+            doc.setFont('helvetica', 'normal'); doc.setFontSize(11);
+            doc.setTextColor(44, 62, 80);
+            const somStr = oef.vraag;
+            doc.text(somStr, ox + marge, somY);
+            const xL = ox + marge + doc.getTextWidth(somStr) + 2;
+            doc.setDrawColor(180, 195, 210); doc.setLineWidth(0.4);
+            doc.line(xL, somY, ox + kadW - marge, somY);
+          }
+        });
+        y += KAAL_RIJ;
+      }
+      y += NABLOK + 4;
+      lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
+      return;
+    }
+
     // Afmetingen kader: 2 per rij
     const COMP_KAD_H  = 38;   // hoog genoeg voor som + pijl + blokje
     const COMP_RIJ_H  = COMP_KAD_H + 6;
@@ -657,7 +712,7 @@ const avX = somX + somTotaalB + 4.5;
 
       y += COMP_RIJ_H;
     }
-    y += NABLOK;
+    y += NABLOK + 4;  // extra marge na compenseer-blok
     lijn(ML, y - 4, ML + CW, y - 4, [210, 220, 230], 0.4);
   }
 
@@ -1412,39 +1467,47 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
             doc.setFont('helvetica', 'normal');
 
           } else {
-            // Optellen: blauw(tg) links + geel(ag) rechts
-            const pTg  = Math.min(0.80, Math.max(0.20, tg  / (tg + ag)));
-            const pTgT = Math.min(0.85, Math.max(0.15, tgT / (tg + ag)));
-            const bB1 = beschikB * pTg, bG1 = beschikB * (1 - pTg);
-            doc.setFillColor(181, 212, 244);
-            doc.roundedRect(ox+mg, curY, bB1, balkH, 1, 1, 'F');
-            doc.setFillColor(253, 230, 138);
-            doc.roundedRect(ox+mg+bB1+2, curY, bG1, balkH, 1, 1, 'F');
+            // Optellen: balkjes volgen volgorde van de som (a links, b rechts)
+            const aIsTg   = oef.vraag.trim().startsWith(String(tg));
+            const valA1   = aIsTg ? tg  : ag;
+            const valB1   = aIsTg ? ag  : tg;
+            const valA2   = aIsTg ? tgT : ag - d;
+            const valB2   = aIsTg ? ag - d : tgT;
+            const klrA    = aIsTg ? [181,212,244] : [253,230,138];
+            const klrB    = aIsTg ? [253,230,138] : [181,212,244];
+            const txtKlrA = aIsTg ? [30,58,138]   : [120,53,15];
+            const txtKlrB = aIsTg ? [120,53,15]   : [30,58,138];
+            const scrKlrA = aIsTg ? [160,180,210] : [200,170,120];
+            const scrKlrB = aIsTg ? [200,170,120] : [160,180,210];
+
+            const pA1  = Math.min(0.80, Math.max(0.20, valA1 / (tg + ag)));
+            const pA2  = Math.min(0.85, Math.max(0.15, valA2 / (tg + ag)));
+            const bA1 = beschikB * pA1, bB1 = beschikB * (1 - pA1);
+            doc.setFillColor(...klrA); doc.roundedRect(ox+mg, curY, bA1, balkH, 1, 1, 'F');
+            doc.setFillColor(...klrB); doc.roundedRect(ox+mg+bA1+2, curY, bB1, balkH, 1, 1, 'F');
             doc.setFontSize(9); doc.setFont('helvetica', 'bold');
-            doc.setTextColor(30, 58, 138);
-            doc.text(String(tg), ox+mg+bB1/2-doc.getTextWidth(String(tg))/2, curY+5.5);
-            doc.setTextColor(120, 53, 15);
-            doc.text(String(ag), ox+mg+bB1+2+bG1/2-doc.getTextWidth(String(ag))/2, curY+5.5);
+            doc.setTextColor(...txtKlrA);
+            doc.text(String(valA1), ox+mg+bA1/2-doc.getTextWidth(String(valA1))/2, curY+5.5);
+            doc.setTextColor(...txtKlrB);
+            doc.text(String(valB1), ox+mg+bA1+2+bB1/2-doc.getTextWidth(String(valB1))/2, curY+5.5);
             doc.setFont('helvetica', 'normal');
             curY += balkH + gap1;
 
-            const bB2 = beschikB * pTgT, bG2 = beschikB * (1 - pTgT);
-            doc.setFillColor(181, 212, 244);
-            doc.roundedRect(ox+mg, curY, bB2, balkH, 1, 1, 'F');
-            doc.setFillColor(253, 230, 138);
-            doc.roundedRect(ox+mg+bB2+2, curY, bG2, balkH, 1, 1, 'F');
+            const bA2 = beschikB * pA2, bB2 = beschikB * (1 - pA2);
+            doc.setFillColor(...klrA); doc.roundedRect(ox+mg, curY, bA2, balkH, 1, 1, 'F');
+            doc.setFillColor(...klrB); doc.roundedRect(ox+mg+bA2+2, curY, bB2, balkH, 1, 1, 'F');
             if (isVb) {
               doc.setFontSize(9); doc.setFont('helvetica', 'bold');
-              doc.setTextColor(30, 58, 138);
-              doc.text(String(tgT), ox+mg+bB2/2-doc.getTextWidth(String(tgT))/2, curY+5.5);
-              doc.setTextColor(120, 53, 15);
-              doc.text(String(agT), ox+mg+bB2+2+bG2/2-doc.getTextWidth(String(agT))/2, curY+5.5);
+              doc.setTextColor(...txtKlrA);
+              doc.text(String(valA2), ox+mg+bA2/2-doc.getTextWidth(String(valA2))/2, curY+5.5);
+              doc.setTextColor(...txtKlrB);
+              doc.text(String(valB2), ox+mg+bA2+2+bB2/2-doc.getTextWidth(String(valB2))/2, curY+5.5);
               doc.setFont('helvetica', 'normal');
             } else {
-              doc.setDrawColor(160, 180, 210); doc.setLineWidth(0.4);
-              doc.line(ox+mg+4, curY+balkH-2, ox+mg+bB2-4, curY+balkH-2);
-              doc.setDrawColor(200, 170, 120);
-              doc.line(ox+mg+bB2+5, curY+balkH-2, ox+mg+bB2+2+bG2-4, curY+balkH-2);
+              doc.setDrawColor(...scrKlrA); doc.setLineWidth(0.4);
+              doc.line(ox+mg+4, curY+balkH-2, ox+mg+bA2-4, curY+balkH-2);
+              doc.setDrawColor(...scrKlrB);
+              doc.line(ox+mg+bA2+5, curY+balkH-2, ox+mg+bA2+2+bB2-4, curY+balkH-2);
             }
           }
           curY += balkH + 5;
