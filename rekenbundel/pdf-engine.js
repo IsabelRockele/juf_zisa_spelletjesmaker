@@ -93,10 +93,11 @@ y += 5;
       doc.setTextColor(44, 62, 80);
       doc.text(oef.vraag, ox + 3, oy + kadH / 2 + 2);
 
-      const vakW = 16, vakH = kadH - 5;
       const tekstB = doc.getTextWidth(oef.vraag);
-      const vakX = ox + 3 + tekstB + 2;
-      const vakY = oy + (kadH - vakH) / 2;
+      const vakW   = Math.max(16, Math.min(22, ox + kadW - 4 - (ox + 3 + tekstB + 2)));
+      const vakH   = kadH - 5;
+      const vakX   = ox + 3 + tekstB + 2;
+      const vakY   = oy + (kadH - vakH) / 2;
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(26, 58, 92);
       doc.setLineWidth(0.6);
@@ -117,12 +118,11 @@ y += 5;
     return HULP_KAD_H + Math.max(0, schrijflijnenAantal - 2) * 8;
   }
 
-  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder') {
+  function _tekenHulpRij(oefeningen, heeftSplits, heeftLijnen, bewerking, splitspositie, schrijflijnenAantal = 2, blokBrug = 'zonder', blokNiveau = 100) {
     const kolB   = CW / 2;
     const kadW   = kolB - 6;
     const marge  = 3;
     const beenSpan = 5;
-    const vakjW = 9, vakjH = 7;
     const kadH   = _hulpKadH(schrijflijnenAantal);
     const rijH   = kadH + 6;
 
@@ -148,7 +148,11 @@ const somTekst = (delen.length >= 3)
   : oef.vraag;
       const isHTE = doelGetal >= 100 && doelGetal % 100 !== 0 && doelGetal % 10 !== 0;
       const aantalTakken = isHTE ? 3 : 2;
-      const beenSpanW = aantalTakken === 3 ? 8 : beenSpan;
+      // Bredere vakjes bij niveau tot 10.000
+      const splGroot  = blokNiveau >= 10000;
+      const vakjW     = splGroot ? 16 : 9;
+      const vakjH     = splGroot ? 8  : 7;
+      const beenSpanW = aantalTakken === 3 ? (splGroot ? 20 : 8) : (splGroot ? 14 : beenSpan);
 
       // Bij aftrektal: som naar rechts zodat linkervakje splitsbeen in kader valt
       // Bij 3 takken is de boom breder → meer marge nodig
@@ -179,22 +183,27 @@ const somTekst = (delen.length >= 3)
       const somY = oy + 7;
       doc.text(somTekst, somStartX, somY);
 
-      // Invulvakje — kleiner zodat er ruimte overblijft
-      const vakY = oy + 2;
-      const vakW = 10, vakH = 9;
+      // Invulvakje — direct na = teken, breed genoeg voor 4-cijferig antwoord
       const somBreedte = doc.getTextWidth(somTekst);
-const vakX = somStartX + somBreedte + (isBrugLayout ? 4 : 2);
+      const vakY  = oy + 2;
+      const vakW  = 16;
+      const vakH  = 9;
+      const vakX  = somStartX + somBreedte + 2;
       doc.setFillColor(255, 255, 255);
       doc.setDrawColor(26, 58, 92);
       doc.setLineWidth(0.5);
       doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'FD');
 
-      // Schrijflijnen — onder splitsbenen of antwoordvak
+      // Schrijflijnen — rechts van het meest rechtse splitsvakje
       if (heeftLijnen) {
-        const lX1 = centreX + 18;
-        const lX2 = ox + kadW - 6;
-        // beenZone: top(somY+3) + beenH(6) + gap(1) + vakjH(7) = 17mm na somY
-        const lY1 = vakY + vakH + 10;
+        const span2   = vakjW / 2 + 2;
+        const span3   = vakjW + 4;
+        const rechtsteVak = aantalTakken === 3
+          ? centreX + span3 + vakjW / 2   // rechterrand derde vakje
+          : centreX + span2 + vakjW / 2;  // rechterrand tweede vakje
+        const lX1    = rechtsteVak + 3;
+        const lX2    = ox + kadW - 6;
+        const lY1    = vakY + vakH + 10;
         const lijnGap = 12;
         if (lX2 > lX1 + 5) {
           doc.setDrawColor(160, 185, 210);
@@ -205,33 +214,36 @@ const vakX = somStartX + somBreedte + (isBrugLayout ? 4 : 2);
         }
       }
 
-      // Splitsbeen: 2 of 3 takken (doelGetal/isHTE/aantalTakken/beenSpanW al berekend bovenaan)
+      // Splitsbeen: 2 of 3 takken
       if (heeftSplits) {
-        const beenTop = somY + 3;
-        const beenH   = 6;
+        const beenTop  = somY + 3;
+        const beenH    = 6;
+        // Span = halve vakjbreedte + kleine marge zodat takken netjes in midden van vakje eindigen
+        const span2    = vakjW / 2 + 2;
         doc.setDrawColor(26, 58, 92);
         doc.setLineWidth(0.6);
 
         if (aantalTakken === 3) {
-          doc.line(centreX, beenTop, centreX - beenSpanW, beenTop + beenH);
-          doc.line(centreX, beenTop, centreX,              beenTop + beenH);
-          doc.line(centreX, beenTop, centreX + beenSpanW, beenTop + beenH);
+          const span3 = vakjW + 4;
+          doc.line(centreX, beenTop, centreX - span3, beenTop + beenH);
+          doc.line(centreX, beenTop, centreX,          beenTop + beenH);
+          doc.line(centreX, beenTop, centreX + span3,  beenTop + beenH);
+          const vakjY = beenTop + beenH + 1;
+          doc.setFillColor(255, 255, 255);
+          doc.setDrawColor(26, 58, 92);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(centreX - span3 - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX - vakjW / 2,          vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX + span3 - vakjW / 2,  vakjY, vakjW, vakjH, 1, 1, 'FD');
         } else {
-          doc.line(centreX, beenTop, centreX - beenSpan, beenTop + beenH);
-          doc.line(centreX, beenTop, centreX + beenSpan, beenTop + beenH);
-        }
-
-        const vakjY = beenTop + beenH + 1;
-        doc.setFillColor(255, 255, 255);
-        doc.setDrawColor(26, 58, 92);
-        doc.setLineWidth(0.5);
-        if (aantalTakken === 3) {
-          doc.roundedRect(centreX - beenSpanW - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
-          doc.roundedRect(centreX - vakjW / 2,              vakjY, vakjW, vakjH, 1, 1, 'FD');
-          doc.roundedRect(centreX + beenSpanW - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
-        } else {
-          doc.roundedRect(centreX - beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
-          doc.roundedRect(centreX + beenSpan - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.line(centreX, beenTop, centreX - span2, beenTop + beenH);
+          doc.line(centreX, beenTop, centreX + span2,  beenTop + beenH);
+          const vakjY = beenTop + beenH + 1;
+          doc.setFillColor(255, 255, 255);
+          doc.setDrawColor(26, 58, 92);
+          doc.setLineWidth(0.5);
+          doc.roundedRect(centreX - span2 - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
+          doc.roundedRect(centreX + span2 - vakjW / 2, vakjY, vakjW, vakjH, 1, 1, 'FD');
         }
       }
     });
@@ -1173,7 +1185,8 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   blok.bewerking,
   blok.splitspositie || 'aftrekker',
   schrijflijnenAantal,
-  blok.brug || 'zonder'
+  blok.brug || 'zonder',
+  blok.niveau || 100
 );
     } else {
       _tekenRij(rijOef, _kolommen);
