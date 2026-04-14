@@ -2299,3 +2299,208 @@ header .badge {
 .voeg-toe-knop:hover {
   background: #5b21b6;
 }
+
+/* ══════════════════════════════════════════════════════════
+   TRANSFORMEREN (optellingswip) — preview stijlen
+   Volgt exact hetzelfde patroon als compenseren
+══════════════════════════════════════════════════════════ */
+
+.oefeningen-grid.trans-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Oefening: flex row — trans-layout links, schrijflijnen rechts */
+.oefening-trans {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 28px 12px 10px;
+  position: relative;
+}
+.oefening-trans.trans-voorbeeld {
+  background: #FFF3CD !important;
+  border-color: #F0A500 !important;
+}
+
+/* ── Schema-balkjes boven de som ── */
+.trans-balk-rij {
+  display: flex;
+  width: 100%;
+  height: 28px;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.trans-balk-b {
+  background: #b5d4f4;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 20px;
+}
+.trans-balk-g {
+  background: #fde68a;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 10px;
+}
+.trans-balk-num {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #1e3a8a;
+  overflow: hidden;
+}
+.trans-balk-num-g {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #78350f;
+  overflow: hidden;
+}
+.trans-balk-schrijf {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(30,58,138,0.3);
+}
+.trans-balk-schrijf-g {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(120,53,15,0.3);
+}
+.trans-balk-inv {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #1e3a8a;
+}
+.trans-balk-inv-g {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #78350f;
+}
+
+/* ── Som-tabel (pijlen + rijen) ──
+   Exact als comp-grid maar dan een tabel-layout
+   kol1=tg(30%)  kol2=+(8%)  kol3=ag(30%)  kol4==(8%)  kol5=antw
+*/
+.trans-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+.trans-tabel td { padding: 0; }
+.trans-td-getal-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: bottom;
+}
+.trans-td-teken {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-getal-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: bottom;
+}
+.trans-td-is {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-antw { vertical-align: bottom; }
+
+/* Pijl-rij */
+.trans-td-pijl-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-td-pijl-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-pijl-cel-l {
+  display: flex; align-items: flex-start;
+  justify-content: flex-end; gap: 3px;
+}
+.trans-pijl-cel-r {
+  display: flex; align-items: flex-start;
+  justify-content: flex-start; gap: 3px;
+}
+.trans-pijl-svg { color: var(--tekst); display: block; }
+
+/* Schrijflijn naast pijl */
+.trans-schrijflijn-pijl {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid #B0C4D8;
+  margin-top: 10px;
+  vertical-align: bottom;
+}
+/* Ingevulde waarde naast pijl (voorbeeld) */
+.trans-pijl-waarde {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid currentColor;
+  margin-top: 10px;
+  vertical-align: bottom;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.trans-pijl-waarde.blauw { color: #1d4ed8; }
+.trans-pijl-waarde.geel  { color: #b45309; }
+
+/* Onderste rij: schrijflijnen of ingevuld */
+.trans-tr-onder td { padding-top: 10px; vertical-align: bottom; font-weight: 400; color: var(--muted); }
+.trans-schrijflijn {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+}
+.trans-ingevuld {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+/* Kaal variant */
+.oefening-trans-kaal {
+  padding: 8px 28px 8px 10px;
+}
+.trans-kaal-som {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  font-size: 15px; font-weight: 600;
+  color: var(--tekst);
+}
+.trans-kaal-getal {
+  min-width: 36px; text-align: right;
+  padding-bottom: 3px;
+}
+.trans-kaal-teken { margin: 0 5px; padding-bottom: 3px; }
+.trans-kaal-lijn {
+  display: inline-block;
+  flex: 1;
+  min-width: 120px;
+  border-bottom: 1.5px solid #B0C4D8;
+}
+.trans-kaal-vb {
+  font-size: 14px; font-weight: 600;
+  color: var(--blauw); line-height: 2;
+  padding: 4px 2px;
+}
+.trans-kaal-stap { color: #1d4ed8; }
