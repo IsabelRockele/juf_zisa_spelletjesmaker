@@ -11,13 +11,13 @@ const Generator = (() => {
   let _teller = 0;
 
   /* ── Kies de juiste module op basis van bewerking + niveau ── */
-  function _getModule(bewerking, niveau) {
+  function _getModule(bewerking, niveau, brug = 'zonder') {
     if (bewerking === 'aanvullen') return niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     if (bewerking === 'optellen') {
       if (niveau <= 20)    return OptellenTot20;
       if (niveau <= 100)   return OptellenTot100;
       if (niveau <= 1000)  return OptellenTot1000;
-      if (niveau <= 10000) return OptellenTot10000;
+      if (niveau <= 10000) return brug === 'zonder' ? OptellenTot10000 : OptellenTot10000Brug;
     }
     if (bewerking === 'aftrekken') {
       if (niveau <= 20)    return AftrekkenTot20;
@@ -46,6 +46,9 @@ const Generator = (() => {
     const isCompenseren   = hulpmiddelen.includes('compenseren');
     const isTransformeren = hulpmiddelen.includes('transformeren');
 
+    // Brugwaarde aanpassen voor modules die enkel met/zonder kennen
+    const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
+
     // Kies module
     const compModule = isCompenseren
       ? (bewerking === 'aftrekken'
@@ -60,14 +63,11 @@ const Generator = (() => {
                    isCompenseren   ? compModule :
                    isTransformeren ? transModule :
                    isTafels        ? Tafels :
-                   _getModule(bewerking, niveau);
+                   _getModule(bewerking, niveau, brugVoorModule);
     if (!module) {
       console.warn(`Geen module voor ${bewerking} tot ${niveau}`);
       return null;
     }
-
-    // Brugwaarde aanpassen voor modules die enkel met/zonder kennen
-    const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
 
     // Genereer oefeningen
     let oefeningen;
@@ -186,7 +186,7 @@ const Generator = (() => {
     const module = isAanvullen     ? aanvulModule2 :
                    isCompenseren   ? compModule :
                    isTransformeren ? transModule2 :
-                   _getModule(blok.bewerking, blok.niveau);
+                   _getModule(blok.bewerking, blok.niveau, blok.config.brug || 'zonder');
     if (!module) return false;
 
     const brugVoorModule = blok.niveau <= 100 ? _brugVoor100(blok.config.brug) : blok.config.brug;
@@ -226,7 +226,7 @@ const Generator = (() => {
     } else if (isAanvullen) {
       module = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     } else {
-      module = _getModule(bewerking, niveau);
+      module = _getModule(bewerking, niveau, brug);
     }
     if (!module) return [];
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
