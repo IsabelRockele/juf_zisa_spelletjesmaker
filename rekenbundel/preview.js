@@ -367,6 +367,32 @@ const Preview = (() => {
     const isVoorbeeldOef = metVoorbeeld && idx === 0;
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">&#x2715;</button>`;
 
+    // ── ZONDER HULP: lange schrijflijn, voorbeeld toont volledige tussenstap ──
+    if (variant === 'zonder-hulp') {
+      const isAftrekken = oef.vraag.includes(' - ');
+      const teken = isAftrekken ? '-' : '+';
+      if (isVoorbeeldOef) {
+        // Voorbeeld: som = tussenstap − delta = antwoord
+        const tussenTeken = isAftrekken ? '+' : '−';
+        return `<div class="oefening-item oefening-comp comp-voorbeeld">
+          <div style="font-size:14px;font-weight:600;line-height:2;padding:2px 0">
+            <span style="color:#1a3a5c">${esc(oef.vraag.replace(' =',''))} = </span>
+            <span style="color:#2980b9">${esc(String(oef.andereGetal))} ${teken} ${esc(String(oef.tiental))}</span>
+            <span style="color:#e74c3c"> ${tussenTeken} ${esc(String(oef.compenseerDelta))}</span>
+            <span style="color:#1a3a5c"> = ${oef.antwoord}</span>
+          </div>
+          ${del}
+        </div>`;
+      }
+      return `<div class="oefening-item oefening-comp">
+        <div style="display:flex;align-items:flex-end;font-size:15px;font-weight:600;gap:0">
+          <span style="padding-bottom:3px">${esc(oef.vraag)}</span>
+          <span style="display:inline-block;border-bottom:1.5px solid #B0C4D8;flex:1;min-width:180px;margin-left:4px"></span>
+        </div>
+        ${del}
+      </div>`;
+    }
+
     const delen       = oef.vraag.replace(' =', '').split(' ');
     const a           = parseInt(delen[0]);
     const compGetal   = oef.compenseerGetal;
@@ -530,20 +556,36 @@ const Preview = (() => {
         ${tabel}${del}
       </div>`;
     } else {
-      const r1tg = Math.min(80, Math.max(20, tg / (tg + ag) * 100)).toFixed(1);
-      const r1ag = (100 - parseFloat(r1tg)).toFixed(1);
-      const r2tg = Math.min(85, Math.max(15, tgT / (tg + ag) * 100)).toFixed(1);
-      const r2ag = (100 - parseFloat(r2tg)).toFixed(1);
-      const balk2B = isVb ? `<div class="trans-balk-inv">${tgT}</div>` : `<div class="trans-balk-schrijf"></div>`;
-      const balk2G = isVb ? `<div class="trans-balk-inv-g">${ag - d}</div>` : `<div class="trans-balk-schrijf-g"></div>`;
+      const totaalSom = tg + ag;
+      const aIsTg = (String(tg) === oef.vraag.split(' ')[0]);
+      // Rij 1: a links, b rechts — zelfde volgorde als de som
+      const rA1 = Math.min(80, Math.max(20, (aIsTg ? tg : ag) / totaalSom * 100)).toFixed(1);
+      const rB1 = (100 - parseFloat(rA1)).toFixed(1);
+      // Rij 2: tg wordt groter (+d), ag wordt kleiner (-d)
+      const rA2 = Math.min(85, Math.max(15, (aIsTg ? tgT : ag - d) / totaalSom * 100)).toFixed(1);
+      const rB2 = (100 - parseFloat(rA2)).toFixed(1);
+
+      const klA  = aIsTg ? 'trans-balk-b' : 'trans-balk-g';
+      const klB  = aIsTg ? 'trans-balk-g' : 'trans-balk-b';
+      const numA = aIsTg ? 'trans-balk-num' : 'trans-balk-num-g';
+      const numB = aIsTg ? 'trans-balk-num-g' : 'trans-balk-num';
+      const scrA = aIsTg ? 'trans-balk-schrijf' : 'trans-balk-schrijf-g';
+      const scrB = aIsTg ? 'trans-balk-schrijf-g' : 'trans-balk-schrijf';
+      const invA = aIsTg ? 'trans-balk-inv' : 'trans-balk-inv-g';
+      const invB = aIsTg ? 'trans-balk-inv-g' : 'trans-balk-inv';
+      const lblA2 = aIsTg ? tgT : ag - d;
+      const lblB2 = aIsTg ? ag - d : tgT;
+
+      const balk2A = isVb ? `<div class="${invA}">${lblA2}</div>` : `<div class="${scrA}"></div>`;
+      const balk2B_schema = isVb ? `<div class="${invB}">${lblB2}</div>` : `<div class="${scrB}"></div>`;
       return `<div class="${klasse}">
         <div class="trans-balk-rij">
-          <div class="trans-balk-b" style="width:${r1tg}%"><div class="trans-balk-num">${esc(String(tg))}</div><div class="trans-balk-schrijf"></div></div>
-          <div class="trans-balk-g" style="width:${r1ag}%"><div class="trans-balk-num-g">${esc(String(ag))}</div><div class="trans-balk-schrijf-g"></div></div>
+          <div class="${klA}" style="width:${rA1}%"><div class="${numA}">${esc(String(aIsTg ? tg : ag))}</div><div class="${scrA}"></div></div>
+          <div class="${klB}" style="width:${rB1}%"><div class="${numB}">${esc(String(aIsTg ? ag : tg))}</div><div class="${scrB}"></div></div>
         </div>
         <div class="trans-balk-rij">
-          <div class="trans-balk-b" style="width:${r2tg}%">${balk2B}</div>
-          <div class="trans-balk-g" style="width:${r2ag}%">${balk2G}</div>
+          <div class="${klA}" style="width:${rA2}%;position:relative">${balk2A}</div>
+          <div class="${klB}" style="width:${rB2}%;position:relative">${balk2B_schema}</div>
         </div>
         ${tabel}${del}
       </div>`;
