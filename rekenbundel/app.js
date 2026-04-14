@@ -390,10 +390,10 @@ const App = (() => {
       }
     }
 
-    // Transformeren: enkel bij optellen, tot 100 of tot 1000
+    // Transformeren: bij optellen én aftrekken, tot 100 of tot 1000
     const chipTransUI = document.getElementById('chip-transformeren');
     if (chipTransUI) {
-      const verbergTrans = actieveBewerking !== 'optellen' || niveau <= 20 || (niveau > 100 && niveau < 1000);
+      const verbergTrans = niveau <= 20 || (niveau > 100 && niveau < 1000);
       chipTransUI.style.display = verbergTrans ? 'none' : '';
       if (verbergTrans) {
         const cb = chipTransUI.querySelector('input');
