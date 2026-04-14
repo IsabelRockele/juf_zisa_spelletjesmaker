@@ -169,16 +169,44 @@ body{padding-top:44px;}
 .wb-drop-sep { height:1px; background:#f1f5f9; margin:4px 0; }
 .wb-bord-acties { position:relative; }
 
+
+/* ══ BORD-ILLUSTRATIES ══════════════════════════════════════════════════ */
+.wb-illus { border-radius:12px; overflow:hidden; margin:0 14px 14px; border:1.5px solid rgba(0,0,0,.07); }
+.wb-illus-bar { padding:5px 10px; display:flex; align-items:center; gap:5px; }
+.wb-illus-bar-klas { background:#1e1b4b; }
+.wb-illus-bar-kind { background:#4c1d95; }
+.wb-illus-dot { width:6px; height:6px; border-radius:50%; }
+.wb-illus-lbl { font-size:8px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
+
+/* Klasbord grid */
+.kb-illus-body { background:#f0f4fb; padding:8px; }
+.kb-illus-grid { display:grid; grid-template-columns:56px repeat(4,1fr); gap:3px; }
+.kb-illus-cell { border-radius:4px; padding:3px 4px; font-size:8px; font-weight:700; text-align:center; }
+.kb-illus-head-n { background:#e0e7ff; color:#3730a3; }
+.kb-illus-head-t { background:#fef3c7; color:#92400e; font-size:8px; }
+.kb-illus-naam { background:#f8fafc; color:#374151; text-align:left; }
+.kb-illus-v { display:flex; align-items:center; justify-content:center; font-size:9px; }
+.kb-illus-leeg { background:#f1f5f9; }
+.kb-illus-bezig { background:#fef9c3; }
+.kb-illus-klaar { background:#dcfce7; color:#16a34a; }
+
+/* Kindbord kaartjes */
+.kn-illus-body { background:#f5f3ff; padding:8px; display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+.kn-illus-kaart { background:#fff; border-radius:8px; padding:6px 4px; text-align:center; border:1.5px solid #e0e0e0; }
+.kn-illus-av { width:22px; height:22px; border-radius:50%; margin:0 auto 3px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; }
+.kn-illus-naam { font-size:8px; font-weight:800; color:#1e1b4b; }
+.kn-illus-bar { height:3px; border-radius:2px; background:#e2e8f0; margin-top:4px; overflow:hidden; }
+.kn-illus-fill { height:100%; border-radius:2px; }
 </style>
 
 </head>
 <body>
 <div class="pro-header">
-  <span class="pro-badge">⭐ PRO</span>
-  <span class="pro-header-title">📋 Klasbord — Juf Zisa PRO</span>
-</div>
-<div style="padding:10px 20px 0;">
-  <a href="../app.html" style="display:inline-flex;align-items:center;gap:8px;background:#0b3060;color:#fff;border-radius:10px;padding:8px 18px;font-size:14px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;">☰ Keuzemenu</a>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="pro-badge">⭐ PRO</span>
+    <span class="pro-header-title">📋 Klasbord — Juf Zisa PRO</span>
+  </div>
+  <a href="../app.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;border:1px solid rgba(255,255,255,.25);">☰ Keuzemenu</a>
 </div>
 <div id="app">
 
@@ -186,7 +214,7 @@ body{padding-top:44px;}
   <div id="dashboard">
 
     <!-- Welkomstregel -->
-    <div style="background:#4c1d95;border-radius:20px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="background:#4c1d95;border-radius:0;padding:22px 32px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-size:28px;font-weight:800;color:#fff;">👋 Welkom bij Takenbord</div>
         <div style="font-size:15px;color:rgba(255,255,255,.65);margin-top:4px;">Kies een bord om te openen, of maak een nieuw bord aan.</div>
@@ -211,6 +239,43 @@ body{padding-top:44px;}
         <div class="wb-uitleg hidden" id="uitleg-klas">
           Alle leerlingen staan in rijen, de taken in kolommen. Jij of de leerling klikt een hokje aan: leeg → bezig → klaar. Per kind kan je een taak verbergen of een extra taak toevoegen.
         </div>
+        <div class="wb-illus">
+          <div class="wb-illus-bar wb-illus-bar-klas">
+            <div class="wb-illus-dot" style="background:#f59e0b;"></div>
+            <div class="wb-illus-dot" style="background:#fde68a;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Klasbord — namen × taken</span>
+          </div>
+          <div class="kb-illus-body">
+            <div class="kb-illus-grid">
+              <div class="kb-illus-cell kb-illus-head-n">Leerling</div>
+              <div class="kb-illus-cell kb-illus-head-t">📖 Lezen</div>
+              <div class="kb-illus-cell kb-illus-head-t">🔢 Rekenen</div>
+              <div class="kb-illus-cell kb-illus-head-t">✏️ Schrijven</div>
+              <div class="kb-illus-cell kb-illus-head-t">🎨 Tekenen</div>
+              <div class="kb-illus-cell kb-illus-naam">Bram</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Elif</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Finn</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Noor</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+            </div>
+          </div>
+        </div>
         <div class="wb-borden-lijst" id="lijst-klasbord"></div>
         <div id="info-klasbord" style="margin-bottom:8px;"></div>
         <button type="button" class="wb-nieuw-btn" onclick="dashNieuw('klasbord')">➕ Nieuw klasbord aanmaken</button>
@@ -229,6 +294,22 @@ body{padding-top:44px;}
         </div>
         <div class="wb-uitleg hidden" id="uitleg-kind">
           Op het smartboard zie je enkel de namen. Een kind klikt op zijn naam en ziet zijn persoonlijke takenlijst. Handig als elk kind andere taken heeft.
+        </div>
+        <div class="wb-illus">
+          <div class="wb-illus-bar wb-illus-bar-kind">
+            <div class="wb-illus-dot" style="background:#a78bfa;"></div>
+            <div class="wb-illus-dot" style="background:#ddd6fe;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Kindbord — klik op je naam</span>
+          </div>
+          <div class="kn-illus-body">
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#f97316;">B</div><div class="kn-illus-naam">Bram</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:60%;background:#f97316;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#8b5cf6;">E</div><div class="kn-illus-naam">Elif</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:75%;background:#8b5cf6;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#22c55e;">F</div><div class="kn-illus-naam">Finn</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#ec4899;">N</div><div class="kn-illus-naam">Noor</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:30%;background:#ec4899;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#0ea5e9;">L</div><div class="kn-illus-naam">Liam</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:50%;background:#0ea5e9;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#d97706;">A</div><div class="kn-illus-naam">Amira</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
+          </div>
         </div>
         <div class="wb-borden-lijst" id="lijst-kindbord"></div>
         <div id="info-kindbord" style="margin-bottom:8px;"></div>
