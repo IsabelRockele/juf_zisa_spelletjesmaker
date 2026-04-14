@@ -698,17 +698,16 @@ doc.setTextColor(30, 30, 30);
   }
 
   function _tekenCijferKaart(oef, ox, oy, kadW, kadH, ingevuld, metPijl, metSchat) {
-    const showH = oef.showH;
-    const op    = oef.operator;
+    const showD   = oef.showD;
+    const showH   = oef.showH || showD;
+    const op      = oef.operator;
     const opTekst = op === '\u2212' ? '-' : op;
 
-    // Buitenste kader
     doc.setDrawColor(180, 180, 180);
     doc.setLineWidth(0.4);
     doc.setFillColor(255, 255, 255);
     doc.roundedRect(ox, oy, kadW, kadH, 2, 2, 'FD');
 
-    // Vraag bovenaan
     doc.setFontSize(12);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(30, 30, 30);
@@ -716,63 +715,41 @@ doc.setTextColor(30, 30, 30);
 
     let schemaY = oy + CIJ_VRAAG_H;
 
-    // Schatting-vak: eigen afgerond vak met lichtgrijs
     if (metSchat) {
-      const vakX = ox + 3;
-      const vakY = schemaY + 1;
-      const vakW = kadW - 6;
-      const vakH = CIJ_SCHAT_H - 2;
-
-      // Lichtgrijs afgerond vak
-      doc.setFillColor(245, 245, 245);
-      doc.setDrawColor(210, 210, 210);
-      doc.setLineWidth(0.3);
+      const vakX = ox + 3, vakY = schemaY + 1;
+      const vakW = kadW - 6, vakH = CIJ_SCHAT_H - 2;
+      doc.setFillColor(245, 245, 245); doc.setDrawColor(210, 210, 210); doc.setLineWidth(0.3);
       doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'FD');
-
-      // "Ik schat:" tekst iets groter
-      doc.setFontSize(9);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(60, 60, 60);
+      doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(60, 60, 60);
       doc.text('Ik schat:', vakX + 2, vakY + vakH / 2 + 1.5);
-
-      // Schrijflijn rechts van de tekst, ruim genoeg
-      const lijnStart = vakX + 18;
-      const lijnEind  = vakX + vakW - 3;
-      const lijnY     = vakY + vakH - 3;
-      doc.setDrawColor(160, 160, 160);
-      doc.setLineWidth(0.4);
-      doc.line(lijnStart, lijnY, lijnEind, lijnY);
-
+      doc.setDrawColor(160, 160, 160); doc.setLineWidth(0.4);
+      doc.line(vakX + 18, vakY + vakH - 3, vakX + vakW - 3, vakY + vakH - 3);
       schemaY += CIJ_SCHAT_H;
     }
 
-    // Lucht tussen schatting/vraag en schema (pijl-zone)
     schemaY += CIJ_PIJL_H;
 
-    // Schema horizontaal centreren in kaart
-    const aantalCols = showH ? 3 : 2;
+    const aantalCols = showD ? 4 : showH ? 3 : 2;
     const schemaW    = aantalCols * CIJ_CEL;
     const schemaX    = ox + (kadW - schemaW) / 2 + 4;
     const opX        = schemaX - 5;
+    const c          = CIJ_CEL;
 
-    // Operator naast g2-rij (rij index 3, direct boven dikke lijn)
-    const c = CIJ_CEL;
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(30, 30, 30);
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
     doc.text(opTekst, opX, schemaY + 3 * c + c / 2 + 3, { align: 'right' });
 
-    _tekenCijferSchema(oef, schemaX, schemaY, showH, ingevuld, metPijl);
+    _tekenCijferSchema(oef, schemaX, schemaY, showD, showH, ingevuld, metPijl);
   }
 
-  function _tekenCijferSchema(oef, sx, sy, showH, ingevuld, metPijl) {
+  function _tekenCijferSchema(oef, sx, sy, showD, showH, ingevuld, metPijl) {
     const c    = CIJ_CEL;
-    const cols = showH ? ['H', 'T', 'E'] : ['T', 'E'];
+    const cols = showD ? ['D','H','T','E'] : showH ? ['H','T','E'] : ['T','E'];
 
     const kleur = {
-      H: { bg: [41, 128, 185],  fg: [255,255,255], licht: [169,204,227] },
-      T: { bg: [39, 174, 96],   fg: [255,255,255], licht: [163,228,215] },
-      E: { bg: [241, 196, 15],  fg: [50,50,50],    licht: [249,231,159] },
+      D: { bg: [231,76,60],  fg: [255,255,255], licht: [241,148,138] },
+      H: { bg: [41,128,185], fg: [255,255,255], licht: [169,204,227] },
+      T: { bg: [39,174,96],  fg: [255,255,255], licht: [163,228,215] },
+      E: { bg: [241,196,15], fg: [50,50,50],    licht: [249,231,159] },
     };
 
     for (let ri = 0; ri < 5; ri++) {
@@ -786,29 +763,15 @@ doc.setTextColor(30, 30, 30);
         doc.setDrawColor(120, 120, 120);
 
         if (ri === 0) {
-          // Header
           doc.setFillColor(...k.bg);
           doc.rect(cx, cy, c, c, 'FD');
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(...k.fg);
+          doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...k.fg);
           doc.text(col, cx + c / 2, cy + 6.5, { align: 'center' });
-
-          // Startpijl boven E-kolom: klein staaltje + driehoekpunt
           if (metPijl && col === 'E') {
-            const px      = cx + c / 2;
-            const staart  = 2;    // korter staaltje
-            const breedte = 3.5;
-            const hoogte  = 4;
-            const puntBot = cy;
-            const puntTop = puntBot - hoogte;
-            const staaltTop = puntTop - staart;
-
-            doc.setFillColor(241, 196, 15);
-            doc.setDrawColor(241, 196, 15);
-            // Staaltje
-            doc.rect(px - 1.2, staaltTop, 2.4, staart, 'F');
-            // Pijlpunt
+            const px = cx + c / 2, breedte = 3.5, hoogte = 4, staart = 2;
+            const puntBot = cy, puntTop = puntBot - hoogte;
+            doc.setFillColor(241, 196, 15); doc.setDrawColor(241, 196, 15);
+            doc.rect(px - 1.2, puntTop - staart, 2.4, staart, 'F');
             doc.triangle(px - breedte, puntTop, px + breedte, puntTop, px, puntBot, 'F');
           }
         } else if (ri === 1) {
@@ -817,11 +780,9 @@ doc.setTextColor(30, 30, 30);
         } else if (ri === 4) {
           doc.setFillColor(255, 255, 255);
           doc.rect(cx, cy, c, c, 'FD');
-          doc.setLineWidth(1.2);
-          doc.setDrawColor(30, 30, 30);
+          doc.setLineWidth(1.2); doc.setDrawColor(30, 30, 30);
           doc.line(cx, cy, cx + c, cy);
-          doc.setLineWidth(0.5);
-          doc.setDrawColor(120, 120, 120);
+          doc.setLineWidth(0.5); doc.setDrawColor(120, 120, 120);
           doc.line(cx, cy, cx, cy + c);
           doc.line(cx + c, cy, cx + c, cy + c);
           doc.line(cx, cy + c, cx + c, cy + c);
@@ -830,12 +791,10 @@ doc.setTextColor(30, 30, 30);
           doc.rect(cx, cy, c, c, 'FD');
           if (ingevuld) {
             let txt = '';
-            if (ri === 2) txt = col === 'H' ? (oef.H1 || '') : col === 'T' ? (oef.T1 || '') : (oef.E1 || '');
-            else          txt = col === 'H' ? (oef.H2 || '') : col === 'T' ? (oef.T2 || '') : (oef.E2 || '');
+            if (ri === 2) txt = col==='D'?(oef.D1||''):col==='H'?(oef.H1||''):col==='T'?(oef.T1||''):(oef.E1||'');
+            else          txt = col==='D'?(oef.D2||''):col==='H'?(oef.H2||''):col==='T'?(oef.T2||''):(oef.E2||'');
             if (txt) {
-              doc.setFontSize(12);
-              doc.setFont('helvetica', 'bold');
-              doc.setTextColor(30, 30, 30);
+              doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
               doc.text(txt, cx + c / 2, cy + c - 2, { align: 'center' });
             }
           }
@@ -843,11 +802,6 @@ doc.setTextColor(30, 30, 30);
       }
     }
   }
-
-
-  /* ══════════════════════════════════════════════════════════════
-     KOMMAGETALLEN — PDF functies
-     ══════════════════════════════════════════════════════════════ */
 
   function _tekenKommaBlok(blok) {
     const cfg      = blok.config || {};
