@@ -300,6 +300,11 @@
               <input type="checkbox" name="hulpmiddelen" value="compenseren" style="display:none">
               <span>Compenseren</span>
             </label>
+            <label class="vink-chip" id="chip-transformeren" onclick="App.toggleHulpmiddel(this,'transformeren')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="hulpmiddelen" value="transformeren" style="display:none">
+              <span>Transformeren (optellingswip)</span>
+            </label>
           </div>
         </div>
 
@@ -362,6 +367,28 @@
             <label class="vink-chip" id="chip-metvoorbeeld" onclick="App.toggleVoorbeeld(this)">
               <span class="vink-box"></span>
               <input type="checkbox" id="cb-metvoorbeeld" style="display:none">
+              <span>Eerste oefening als uitgewerkt voorbeeld</span>
+            </label>
+          </div>
+        </div>
+        <!-- Transformeren sub-opties -->
+        <div class="form-rij" id="rij-transformeren" style="display:none">
+          <label>Optellingswip weergeven als</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('transformeren-variant','schema',this)">
+              <input type="radio" name="transformeren-variant" value="schema" checked>Met schema (balkjes + pijltjes)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('transformeren-variant','pijltjes',this)">
+              <input type="radio" name="transformeren-variant" value="pijltjes">Met pijltjes (zonder schema)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('transformeren-variant','kaal',this)">
+              <input type="radio" name="transformeren-variant" value="kaal">Zonder hulp
+            </label>
+          </div>
+          <div style="margin-top:8px">
+            <label class="vink-chip" id="chip-trans-voorbeeld" onclick="App.toggleVoorbeeld(this)">
+              <span class="vink-box"></span>
+              <input type="checkbox" id="cb-trans-voorbeeld" style="display:none">
               <span>Eerste oefening als uitgewerkt voorbeeld</span>
             </label>
           </div>
@@ -1882,6 +1909,7 @@
 <script src="modules/compenseren-optellen-tot1000.js?v=7"></script>
 <script src="modules/compenseren-aftrekken-tot1000.js?v=2"></script>
 <script src="modules/compenseren-aftrekken.js?v=2"></script>
+  <script src="modules/transformeren-optellen.js?v=1"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
 
@@ -2029,6 +2057,7 @@ function scrollNaarActieveTab(tabEl) {
 .vs-acc-pijl{font-size:11px;color:#888;transition:transform 0.2s}
 .vs-acc-blok.open .vs-acc-pijl{transform:rotate(180deg)}
 .vs-acc-body{padding:10px 12px;background:#fff;border-top:1px solid #e0e8f5}
+
 </style>
 <script>
 function vsUpdateBrugZichtbaarheid(){
