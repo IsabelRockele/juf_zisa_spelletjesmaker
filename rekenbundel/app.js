@@ -270,6 +270,8 @@ const App = (() => {
   /* ── Types UI opbouwen ───────────────────────────────────── */
   function _updateTypesUI(niveau, brug, resetSelectie = false) {
     if (!brug) brug = _getBrugWaarde();
+    // Tot 10.000: altijd zonder brug (nog geen brug-varianten beschikbaar)
+    if (niveau >= 10000) brug = 'zonder';
 
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
     const splitsModus  = actieveBewerking === 'splitsingen' ? (_splitsMode || 'tot') : 'tot';
@@ -336,10 +338,10 @@ const App = (() => {
     container.appendChild(infoEl);
     _updateGemengdInfo(container, infoEl);
 
-    // Brugkaart verbergen voor niveau 5 en 10
+    // Brugkaart verbergen voor niveau 5, 10 én 10000 (nog geen brug-varianten)
     const kaartBrug = document.getElementById('kaart-brug');
-    if (kaartBrug) kaartBrug.style.display = (niveau <= 10) ? 'none' : 'block';
-    if (niveau <= 10) _updateHulpmiddelenUI('zonder');
+    if (kaartBrug) kaartBrug.style.display = (niveau <= 10 || niveau >= 10000) ? 'none' : 'block';
+    if (niveau <= 10 || niveau >= 10000) _updateHulpmiddelenUI('zonder');
 
     // Splits-kaarten updaten op basis van standaard geselecteerd type
     _updateSplitsKaarten();
