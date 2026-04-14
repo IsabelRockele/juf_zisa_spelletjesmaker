@@ -16,7 +16,7 @@
 .pro-header-title{font-size:14px;font-weight:700;opacity:.9;}
 .pro-badge{background:#f5c200;color:#0b3060;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800;}
 body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding-top:44px !important;overflow:auto !important;height:auto !important;}
-#app{min-height:100vh;background:#f0f4fb;padding:0 0 60px;}
+#app{min-height:100vh;background:#f0f4fb;padding:0;}
 
 /* ── SCHERM 1: type kiezen ── */
 .type-box{background:#fff;border-radius:24px;padding:32px 36px;max-width:540px;width:100%;box-shadow:0 4px 24px rgba(99,102,241,.1);}
@@ -97,12 +97,12 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
 .wb-welcome-sub { font-size:15px; color:#64748b; margin-top:4px; }
 .wb-autosave-pill { background:#f0fdf4; border:1.5px solid #86efac; border-radius:20px; padding:8px 18px; font-size:14px; font-weight:800; color:#15803d; white-space:nowrap; }
 
-.wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; padding:0 24px; }
+.wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; padding:12px 20px 0; }
 @media(max-width:640px){ .wb-grid { grid-template-columns:1fr; } }
 
 .wb-sectie { background:#fff; border-radius:20px; border:2.5px solid transparent; overflow:visible; display:flex; flex-direction:column; position:relative; }
 
-.wb-sectie-hdr { display:flex; align-items:center; gap:14px; padding:18px 20px; border-bottom:1.5px solid rgba(0,0,0,.06); }
+.wb-sectie-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1.5px solid rgba(0,0,0,.06); }
 .wb-hdr-klas { background:#fff7ed; border-radius:18px 18px 0 0; }
 .wb-hdr-kind { background:#f0e7ff; border-radius:18px 18px 0 0; }
 
@@ -118,7 +118,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
 .wb-hdr-klas .wb-type-badge { background:#fef3c7; color:#92400e; }
 .wb-hdr-kind .wb-type-badge { background:#ede9fe; color:#6d28d9; }
 
-.wb-borden-lijst { padding:14px 16px 0; flex:1; overflow:visible; }
+.wb-borden-lijst { padding:8px 12px 0; flex:1; overflow:visible; }
 
 .wb-bord-rij { display:flex; align-items:center; gap:12px; padding:13px 16px; background:#f8fafc; border:1.5px solid #e8eef8; border-radius:14px; margin-bottom:10px; transition:all .12s; }
 .wb-bord-rij:hover { border-color:#fde68a; background:#fffbeb; }
@@ -138,7 +138,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
 .wb-leeg { text-align:center; padding:24px 12px; color:#9ca3af; font-size:14px; line-height:1.7; }
 .wb-leeg-icon { font-size:30px; margin-bottom:8px; }
 
-.wb-nieuw-btn { width:100%; border:2px dashed #fde68a; background:none; color:#d97706; border-radius:14px; padding:14px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .12s; margin:0 0 16px; }
+.wb-nieuw-btn { width:100%; border:2px dashed #fde68a; background:none; color:#d97706; border-radius:12px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .12s; margin:0 0 10px; }
 .wb-nieuw-btn:hover { background:#fffbeb; border-color:#f59e0b; }
 .wb-nieuw-kind { border-color:#ddd6fe; color:#7c3aed; }
 .wb-nieuw-kind:hover { background:#f5f3ff; border-color:#8b5cf6; }
@@ -179,7 +179,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
 .wb-illus-lbl { font-size:8px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
 
 /* Klasbord grid */
-.kb-illus-body { background:#f0f4fb; padding:6px; height:112px; overflow:hidden; }
+.kb-illus-body { background:#f0f4fb; padding:5px; height:90px; overflow:hidden; }
 .kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; width:100%; }
 .kb-illus-cell { border-radius:4px; padding:3px 4px; font-size:8px; font-weight:700; text-align:center; }
 .kb-illus-head-n { background:#e0e7ff; color:#3730a3; }
@@ -191,7 +191,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
 .kb-illus-klaar { background:#dcfce7; color:#16a34a; }
 
 /* Kindbord kaartjes */
-.kn-illus-body { background:#faf5ff; padding:6px; display:grid; grid-template-columns:repeat(4,1fr); gap:3px; height:112px; overflow:hidden; align-content:start; }
+.kn-illus-body { background:#faf5ff; padding:5px; display:grid; grid-template-columns:repeat(4,1fr); gap:3px; height:90px; overflow:hidden; align-content:start; }
 .kn-illus-kaart { background:#fff; border-radius:6px; padding:4px 3px; text-align:center; border:1px solid #ede9fe; }
 .kn-illus-av { width:18px; height:18px; border-radius:50%; margin:0 auto 2px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; }
 .kn-illus-naam { font-size:7px; font-weight:800; color:#1e1b4b; }
@@ -209,7 +209,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:44px;}html,body{padding
   <a href="../app.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;border:1px solid rgba(255,255,255,.25);">☰ Keuzemenu</a>
 </div>
 <div id="app"><div id="dashboard"><!-- Welkomstregel -->
-    <div style="background:#4c1d95;padding:16px 32px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div style="background:#4c1d95;padding:12px 32px 12px;margin-top:-44px;padding-top:56px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
       <div>
         <div style="font-size:28px;font-weight:800;color:#fff;">👋 Welkom bij Takenbord</div>
         <div style="font-size:15px;color:rgba(255,255,255,.65);margin-top:4px;">Kies een bord om te openen, of maak een nieuw bord aan.</div>
