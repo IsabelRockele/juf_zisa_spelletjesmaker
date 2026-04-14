@@ -2889,8 +2889,12 @@ document.getElementById('customTaskInput').addEventListener('keydown', (e) => {
 
 function initKindbordAfterLoad(){
   document.body.classList.add('kb-ready');
-  // Smartboard/iPad modus: setup-scherm overslaan als er al leerlingen zijn
-  if((isSmartboard || isIpad) && state.pupils.length > 0){
+  var heeftLeerlingen = state.pupils && state.pupils.length > 0;
+  var heeftTaken = state.activeTasks && state.activeTasks.length > 0;
+  var bordKlaar = heeftLeerlingen && (heeftTaken || (state.personalAssignments && Object.keys(state.personalAssignments).length > 0));
+
+  // Ga direct naar bord als: smartboard/iPad, of bord is al volledig ingesteld
+  if(((isSmartboard || isIpad) && heeftLeerlingen) || (!isSmartboard && !isIpad && bordKlaar)){
     document.getElementById('setup-screen').classList.remove('active');
     document.getElementById('names-screen').style.display = 'block';
     document.getElementById('tasks-screen').style.display = 'none';
