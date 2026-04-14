@@ -884,6 +884,13 @@ body.ipad-modus #timer-popup { display:none !important; }
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
+<div class="pro-header">
+  <div class="pro-header-left">
+    <a href="../app.html" class="pro-back-btn">← Terug naar menu</a>
+    <span class="pro-header-title">👤 Kindbord</span>
+  </div>
+  <span class="pro-badge">PRO</span>
+</div>
 <div class="page">
 
 <section id="setup-screen" class="setup-screen">
@@ -3728,6 +3735,228 @@ body.ipad-modus .kind-notes-wrap { display: none !important; }
 }
 body.smartboard .kind-teacher-banner,
 body.ipad-modus .kind-teacher-banner { display: none !important; }
+
+/* ══ PRO-BANNER ═════════════════════════════════════════════════════════ */
+.pro-header {
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg,#1e3a8a,#2563eb);
+  color:#fff; padding:10px 20px;
+  font-family:Nunito,sans-serif;
+  position:fixed; top:0; left:0; right:0;
+  z-index:1000; height:44px; box-sizing:border-box;
+}
+.pro-header-left { display:flex; align-items:center; gap:10px; }
+.pro-back-btn {
+  border:none; background:rgba(255,255,255,.2); color:#fff;
+  border-radius:8px; padding:5px 12px; font-size:13px; font-weight:800;
+  cursor:pointer; font-family:inherit; text-decoration:none;
+  display:inline-flex; align-items:center; gap:5px;
+}
+.pro-back-btn:hover { background:rgba(255,255,255,.3); }
+.pro-header-title { font-size:14px; font-weight:800; opacity:.9; }
+.pro-badge {
+  background:#f5c200; color:#0b3060;
+  border-radius:6px; padding:2px 9px;
+  font-size:0.78rem; font-weight:800;
+}
+
+/* Ruimte voor vaste banner */
+body { padding-top:44px !important; }
+
+/* ══ WARME GROENE ZIJBALK (kindbord) ═════════════════════════════════════ */
+.kb-sb-nav {
+  background:#f0fff8 !important;
+  border-right:2px solid #a7f3d0 !important;
+}
+.kb-sb-back {
+  background:#a7f3d0 !important;
+  color:#065f46 !important;
+  border:none;
+}
+.kb-sb-back:hover { background:#6ee7b7 !important; }
+.kb-sb-bord-naam { color:#059669 !important; }
+.kb-sb-label { color:#047857 !important; }
+
+/* Stap-knoppen duidelijk klikbaar */
+.kb-sb-stap {
+  background:#fff !important;
+  border:2px solid #a7f3d0 !important;
+  border-radius:12px !important;
+  margin-bottom:6px !important;
+}
+.kb-sb-stap:hover {
+  background:#ecfdf5 !important;
+  border-color:#059669 !important;
+}
+.kb-sb-stap.kb-actief {
+  background:#ecfdf5 !important;
+  border-color:#059669 !important;
+  box-shadow:0 2px 6px rgba(5,150,105,.2) !important;
+}
+.kb-sb-titel { color:#1e1b4b !important; }
+.kb-sb-sub   { color:#047857 !important; }
+
+/* Badges */
+.kb-sb-badge { background:#059669 !important; color:#fff !important; }
+.kb-badge-2  { background:#ede9fe !important; color:#6d28d9 !important; }
+.kb-badge-klaar { background:#d1fae5 !important; color:#065f46 !important; }
+
+/* Naar kindbord knop */
+.kb-sb-go {
+  background:#059669 !important;
+  box-shadow:0 2px 8px rgba(5,150,105,.3) !important;
+}
+.kb-sb-go:hover { background:#047857 !important; }
+
+/* Extra knoppen */
+.kb-sb-extra {
+  background:#fff !important;
+  border:1.5px solid #a7f3d0 !important;
+  color:#065f46 !important;
+}
+.kb-sb-extra:hover { background:#ecfdf5 !important; }
+
+/* Content */
+.kb-sb-content { background:#f0f4fb !important; }
+.kb-paneel-titel { border-bottom-color:#a7f3d0 !important; }
+
+/* Namen-paneel accenten */
+.kb-sb-content .invoer-blok { border-color:#a7f3d0 !important; }
+.kb-sb-content .invoer-blok-titel { color:#065f46 !important; }
+.kb-sb-content .invoer-btn-primary { background:#059669 !important; }
+.kb-sb-content .sort-chip.active {
+  border-color:#059669 !important;
+  background:#ecfdf5 !important;
+  color:#065f46 !important;
+}
+.kb-sb-content .namen-textarea:focus {
+  border-color:#059669 !important;
+  box-shadow:0 0 0 3px #d1fae5 !important;
+}
+.kb-sb-content .naam-input:focus {
+  border-color:#059669 !important;
+  box-shadow:0 0 0 3px #d1fae5 !important;
+}
+
+/* Taken-paneel */
+.kb-task-chip.active {
+  border-color:#059669 !important;
+  background:#ecfdf5 !important;
+}
+.kb-taken-col-titel { color:#065f46 !important; }
+
+/* ══ PAARSE ZIJBALK STIJL (kindbord beheer) ══════════════════════════════ */
+
+/* Pagina-achtergrond */
+.kb-setup-layout { background:#f5f3ff !important; }
+.kb-sb-content { background:#f5f3ff !important; }
+
+/* Zijbalk — warm crème met paarse accenten */
+.kb-sb-nav {
+  background:#faf5ff !important;
+  border-right:2px solid #ddd6fe !important;
+}
+
+/* Terug-knop */
+.kb-sb-back {
+  background:#ddd6fe !important;
+  color:#4c1d95 !important;
+}
+.kb-sb-back:hover { background:#c4b5fd !important; }
+
+/* Bordnaam */
+.kb-sb-bord-naam { color:#7c3aed !important; }
+
+/* Labels */
+.kb-sb-label { color:#6d28d9 !important; }
+
+/* Stap-knoppen — duidelijk als knoppen */
+.kb-sb-stap {
+  background:#fff !important;
+  border:2px solid #ddd6fe !important;
+  border-radius:12px !important;
+  margin-bottom:6px !important;
+}
+.kb-sb-stap:hover {
+  background:#f5f3ff !important;
+  border-color:#a78bfa !important;
+}
+.kb-sb-stap.kb-actief {
+  background:#f5f3ff !important;
+  border-color:#7c3aed !important;
+  box-shadow:0 2px 6px rgba(124,58,237,.2) !important;
+}
+
+/* Stap tekst */
+.kb-sb-titel { color:#1e1b4b !important; }
+.kb-sb-sub   { color:#6d28d9 !important; }
+
+/* Badges */
+.kb-sb-badge { background:#7c3aed !important; color:#fff !important; }
+.kb-badge-2  { background:#ede9fe !important; color:#6d28d9 !important; }
+.kb-badge-klaar { background:#d1fae5 !important; color:#065f46 !important; }
+
+/* Extra knoppen */
+.kb-sb-extra {
+  background:#fff !important;
+  border:1.5px solid #ddd6fe !important;
+  color:#4c1d95 !important;
+}
+.kb-sb-extra:hover { background:#f5f3ff !important; }
+
+/* Naar het kindbord knop */
+.kb-sb-go {
+  background:#7c3aed !important;
+  box-shadow:0 2px 8px rgba(124,58,237,.3) !important;
+}
+.kb-sb-go:hover { background:#6d28d9 !important; }
+
+/* Scrollbar */
+.kb-sb-content::-webkit-scrollbar-thumb { background:#c4b5fd !important; }
+
+/* Paneel-titels */
+.kb-paneel-titel { border-bottom-color:#ddd6fe !important; }
+
+/* Namen-paneel accenten */
+.kb-paneel#kb-paneel-namen .namen-bib-banner,
+#kb-paneel-namen .namen-bib-banner {
+  background:#f5f3ff !important;
+  border-color:#ddd6fe !important;
+  color:#4c1d95 !important;
+}
+#kb-paneel-namen .namen-bib-btn,
+.kb-paneel#kb-paneel-namen .namen-bib-btn {
+  border-color:#7c3aed !important;
+  color:#7c3aed !important;
+}
+
+/* Volgorde sort-chips */
+.sort-chip.active {
+  border-color:#7c3aed !important;
+  background:#f5f3ff !important;
+  color:#4c1d95 !important;
+}
+
+/* Invoer focus */
+.namen-textarea:focus { border-color:#7c3aed !important; box-shadow:0 0 0 3px #ede9fe !important; }
+.naam-input:focus { border-color:#7c3aed !important; box-shadow:0 0 0 3px #ede9fe !important; }
+
+/* Knoppen primair → paars */
+.invoer-btn-primary { background:#7c3aed !important; }
+.invoer-btn-primary:hover { opacity:.88; }
+
+/* Taken: selectie-kleur paars */
+.kb-task-chip.active {
+  border-color:#7c3aed !important;
+  background:#f5f3ff !important;
+}
+.kb-pupil-row.selected {
+  background:#f5f3ff !important;
+  border-color:#7c3aed !important;
+}
+
+/* Toewijzen-blok */
+#kb-assign-hint { color:#4c1d95 !important; }
 </style>
 
 <script>
