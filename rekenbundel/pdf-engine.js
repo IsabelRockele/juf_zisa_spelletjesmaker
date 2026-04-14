@@ -1179,6 +1179,7 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   if (blok.bewerking === 'tafels-getallenlijn') { _tekenGetallenlijnBlok(blok); return; }
   if (blok.hulpmiddelen?.includes('aanvullen')) { _tekenAanvullenBlok(blok); return; }
   if (blok.hulpmiddelen?.includes('compenseren')) { _tekenCompenserenBlok(blok); return; }
+  if (blok.hulpmiddelen?.includes('transformeren')) { _tekenTransformerenBlok(blok); return; }
 
   // Maak eerst 10: blok bevat drieTermen-oefeningen
   if (blok.oefeningen.length > 0 && blok.oefeningen[0].drieTermen) {
@@ -1314,6 +1315,253 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
 
     y += RIJHOOGTE + RIJ_GAP;
   }
+
+  /* ── Transformeren (optellingswip) PDF-renderer ──────────── */
+  function _tekenTransformerenBlok(blok) {
+    const variant      = blok.transformerenVariant || 'schema';
+    const metVb        = blok.metVoorbeeld !== false;
+
+    // Kader hoogte per variant
+    const SCHEMA_H = 62;
+    const PIJL_H   = 44;
+    const KAAL_H   = 16;
+    const KADH     = variant === 'kaal' ? KAAL_H : variant === 'schema' ? SCHEMA_H : PIJL_H;
+    const RIJ_H    = KADH + 8;
+    const kolB     = CW / 2;
+    const kadW     = kolB - 6;
+    const mg       = 4;
+
+    const aantalRijen = Math.ceil(blok.oefeningen.length / 2);
+    checkRuimte(ZINRUIMTE + RIJ_H + 4);
+
+    y += VOOR_ZIN;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(26, 58, 92);
+    doc.text(blok.opdrachtzin, ML, y);
+    y += ZINRUIMTE;
+
+    for (let rij = 0; rij < aantalRijen; rij++) {
+      if (rij > 0) checkRuimte(RIJ_H);
+      const rijOef = blok.oefeningen.slice(rij * 2, (rij + 1) * 2);
+
+      rijOef.forEach((oef, kol) => {
+        const isVb  = metVb && rij === 0 && kol === 0;
+        const oy    = y;
+        const ox    = ML + kol * kolB + 3;
+        const tg    = oef.transformeerGetal;
+        const ag    = oef.andereGetal;
+        const d     = oef.transformeerDelta;
+        const tgT   = tg + d;
+        const agT   = ag - d;
+        const som   = oef.antwoord;
+
+        // Kader
+        doc.setFillColor(isVb ? 255 : 255, isVb ? 248 : 255, isVb ? 220 : 255);
+        doc.setDrawColor(isVb ? 240 : 180, isVb ? 192 : 200, isVb ? 80 : 225);
+        doc.setLineWidth(isVb ? 1 : 0.5);
+        doc.roundedRect(ox, oy, kadW, KADH, 2, 2, 'FD');
+
+        // ── KAAL ─────────────────────────────────────────────
+        if (variant === 'kaal') {
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(12);
+          doc.setTextColor(44, 62, 80);
+          const somY = oy + 10;
+          if (isVb) {
+            const s1 = `${tg}  +  ${ag}  =  `;
+            doc.text(s1, ox + mg, somY);
+            const x2 = ox + mg + doc.getTextWidth(s1);
+            doc.setTextColor(42, 100, 180);
+            const s2 = `${tgT} + ${agT}`;
+            doc.text(s2, x2, somY);
+            doc.setTextColor(44, 62, 80);
+            doc.text(`  =  ${som}`, x2 + doc.getTextWidth(s2), somY);
+          } else {
+            const somStr = `${tg}  +  ${ag}  =`;
+            doc.setFontSize(12);
+            doc.text(somStr, ox + mg, somY);
+            const xL = ox + mg + doc.getTextWidth(somStr) + 2;
+            doc.setDrawColor(180, 195, 210);
+            doc.setLineWidth(0.4);
+            doc.line(xL, somY, ox + kadW - mg, somY);
+          }
+          return;
+        }
+
+        // ── SCHEMA + PIJLTJES: gemeenschappelijke layout ─────
+        // Y-startpositie voor de som-rij
+        let curY = oy + mg;
+
+        // Schema-balkjes (enkel bij 'schema')
+        if (variant === 'schema') {
+          const totaal   = tg + ag;
+          const balkH    = 7;
+          const gap1     = 1;   // balk1 en balk2 bijna raken elkaar
+          const beschikB = kadW - mg * 2 - 2;
+          const pTg  = Math.min(0.80, Math.max(0.20, tg  / totaal));
+          const pTgT = Math.min(0.85, Math.max(0.15, tgT / totaal));
+
+          // Balk 1 — origineel
+          const bB1 = beschikB * pTg;
+          const bG1 = beschikB * (1 - pTg);
+          doc.setFillColor(181, 212, 244);
+          doc.roundedRect(ox + mg, curY, bB1, balkH, 1, 1, 'F');
+          doc.setFillColor(253, 230, 138);
+          doc.roundedRect(ox + mg + bB1 + 2, curY, bG1, balkH, 1, 1, 'F');
+          doc.setFontSize(9);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(30, 58, 138);
+          doc.text(String(tg), ox + mg + bB1 / 2 - doc.getTextWidth(String(tg)) / 2, curY + 5.5);
+          doc.setTextColor(120, 53, 15);
+          doc.text(String(ag), ox + mg + bB1 + 2 + bG1 / 2 - doc.getTextWidth(String(ag)) / 2, curY + 5.5);
+          doc.setFont('helvetica', 'normal');
+          curY += balkH + gap1;   // slechts 1px tussen de twee balken
+
+          // Balk 2 — getransformeerd
+          const bB2 = beschikB * pTgT;
+          const bG2 = beschikB * (1 - pTgT);
+          doc.setFillColor(181, 212, 244);
+          doc.roundedRect(ox + mg, curY, bB2, balkH, 1, 1, 'F');
+          doc.setFillColor(253, 230, 138);
+          doc.roundedRect(ox + mg + bB2 + 2, curY, bG2, balkH, 1, 1, 'F');
+          if (isVb) {
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(30, 58, 138);
+            doc.text(String(tgT), ox + mg + bB2 / 2 - doc.getTextWidth(String(tgT)) / 2, curY + 5.5);
+            doc.setTextColor(120, 53, 15);
+            doc.text(String(agT), ox + mg + bB2 + 2 + bG2 / 2 - doc.getTextWidth(String(agT)) / 2, curY + 5.5);
+            doc.setFont('helvetica', 'normal');
+          } else {
+            doc.setDrawColor(160, 180, 210);
+            doc.setLineWidth(0.4);
+            doc.line(ox + mg + 4, curY + balkH - 2, ox + mg + bB2 - 4, curY + balkH - 2);
+            doc.setDrawColor(200, 170, 120);
+            doc.line(ox + mg + bB2 + 5, curY + balkH - 2, ox + mg + bB2 + 2 + bG2 - 4, curY + balkH - 2);
+          }
+          curY += balkH + 5;
+        } else {
+          curY += 4;
+        }
+
+        // Rij 1: som  tg + ag = ___  (compact, meting-gebaseerde posities)
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(44, 62, 80);
+        const somY = curY + 8;
+
+        const tgStr  = String(tg);
+        const agStr  = String(ag);
+        const tgB    = doc.getTextWidth(tgStr);
+        const agB    = doc.getTextWidth(agStr);
+        const plB    = doc.getTextWidth('+');
+        const eqB    = doc.getTextWidth('=');
+        const spB    = 3;
+
+        const x_tg  = ox + mg + 6;
+        const x_pl  = x_tg + tgB + spB;
+        const x_ag  = x_pl + plB + spB;
+        const x_eq  = x_ag + agB + spB;
+        const x_an  = x_eq + eqB + spB;
+
+        doc.text(tgStr, x_tg, somY);
+        doc.setFont('helvetica', 'normal');
+        doc.text('+', x_pl, somY);
+        doc.setFont('helvetica', 'bold');
+        doc.text(agStr, x_ag, somY);
+        doc.setFont('helvetica', 'normal');
+        doc.text('=', x_eq, somY);
+
+        if (isVb) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(26, 58, 92);
+          doc.text(String(som), x_an, somY);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(44, 62, 80);
+        } else {
+          doc.setDrawColor(180, 195, 210);
+          doc.setLineWidth(0.4);
+          doc.line(x_an, somY, Math.min(x_an + 18, ox + kadW - mg), somY);
+        }
+
+        // Rij 2: pijlen met schrijflijntje
+        // Pijl tg: schrijflijn LINKS van pijl (er is ruimte want tg staat niet aan de rand)
+        // Pijl ag: schrijflijn RECHTS van pijl
+        const pijlTopY = somY + 2;
+        const pijlBotY = pijlTopY + 7;
+        const x_tgMid  = x_tg + tgB / 2;
+        const x_agMid  = x_ag + agB / 2;
+        const slLen    = 10;
+
+        // Pijl tg
+        doc.setDrawColor(44, 62, 80);
+        doc.setLineWidth(0.5);
+        doc.line(x_tgMid, pijlTopY, x_tgMid, pijlBotY);
+        doc.setFillColor(44, 62, 80);
+        doc.triangle(x_tgMid, pijlBotY + 0.5, x_tgMid - 1, pijlBotY - 1, x_tgMid + 1, pijlBotY - 1, 'F');
+        // Schrijflijn LINKS van pijl tg — op hoogte midden pijl
+        const pijlMidY = pijlTopY + (pijlBotY - pijlTopY) / 2;
+        if (isVb) {
+          doc.setFontSize(8);
+          doc.setTextColor(42, 100, 180);
+          const tgSign = `+${d}`;
+          doc.text(tgSign, x_tgMid - doc.getTextWidth(tgSign) - 2, pijlMidY + 1);
+          doc.setTextColor(44, 62, 80);
+        } else {
+          doc.setDrawColor(180, 195, 210);
+          doc.setLineWidth(0.4);
+          doc.line(x_tgMid - 2 - slLen, pijlMidY, x_tgMid - 2, pijlMidY);
+        }
+
+        // Pijl ag
+        doc.setDrawColor(44, 62, 80);
+        doc.setLineWidth(0.5);
+        doc.line(x_agMid, pijlTopY, x_agMid, pijlBotY);
+        doc.setFillColor(44, 62, 80);
+        doc.triangle(x_agMid, pijlBotY + 0.5, x_agMid - 1, pijlBotY - 1, x_agMid + 1, pijlBotY - 1, 'F');
+        // Schrijflijn RECHTS van pijl ag — op hoogte midden pijl
+        if (isVb) {
+          doc.setFontSize(8);
+          doc.setTextColor(160, 112, 16);
+          doc.text('-' + String(d), x_agMid + 2, pijlMidY + 1);
+          doc.setTextColor(44, 62, 80);
+        } else {
+          doc.setDrawColor(180, 195, 210);
+          doc.setLineWidth(0.4);
+          doc.line(x_agMid + 2, pijlMidY, x_agMid + 2 + slLen, pijlMidY);
+        }
+
+        // Rij 3: getransformeerde som — = op dezelfde y als de schrijflijnen
+        doc.setFontSize(12);
+        doc.setTextColor(100, 100, 100);
+        const rij3Y = pijlBotY + 7;
+
+        // + en = op rij3Y (zelfde hoogte als de schrijflijnen)
+        doc.text('+', x_pl, rij3Y);
+        doc.text('=', x_eq, rij3Y);
+
+        if (isVb) {
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(44, 62, 80);
+          doc.text(String(tgT), x_tg, rij3Y);
+          doc.text(String(agT), x_ag, rij3Y);
+          doc.text(String(som),  x_an, rij3Y);
+          doc.setFont('helvetica', 'normal');
+        } else {
+          doc.setDrawColor(180, 195, 210);
+          doc.setLineWidth(0.4);
+          doc.line(x_tg, rij3Y, x_tg + tgB + 4, rij3Y);
+          doc.line(x_ag, rij3Y, x_ag + agB + 4, rij3Y);
+          doc.line(x_an, rij3Y, Math.min(x_an + 18, ox + kadW - mg), rij3Y);
+        }
+        doc.setTextColor(44, 62, 80);
+      });
+
+      y += RIJ_H;
+    }
+  }
+
 
   function _tekenAanvullenBlok(blok) {
     const variant     = blok.aanvullenVariant || 'zonder-schema';
