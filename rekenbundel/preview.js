@@ -239,8 +239,12 @@ const Preview = (() => {
     const splGetal   = parseInt(splDelen[splDoelIdx]) || 0;
     const splIsHTE   = splGetal >= 100 && splGetal % 100 !== 0 && splGetal % 10 !== 0;
     const splAantal  = heeftSplits ? (splIsHTE ? 3 : 2) : 0;
-    const boomKlasse = splAantal === 3 ? 'splitsbeen-boom splitsbeen-3' : 'splitsbeen-boom';
-    const vakjesHTML = splAantal > 0 ? Array(splAantal).fill('<div class="splits-vak"></div>').join('') : '';
+    // Gebruik grotere vakjes bij niveau tot 10.000
+    const splGroot   = (blok.niveau || 0) >= 10000;
+    const boomKlasse = splAantal === 3 ? 'splitsbeen-boom splitsbeen-3' :
+                       splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
+    const vakKlasse  = splGroot ? 'splits-vak-groot' : 'splits-vak';
+    const vakjesHTML = splAantal > 0 ? Array(splAantal).fill(`<div class="${vakKlasse}"></div>`).join('') : '';
 
     return `
       <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}">
