@@ -36,12 +36,13 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10 }) {
-    const isHerken      = bewerking === 'herken-brug';
-    const isSplitsingen = bewerking === 'splitsingen';
-    const isTafels      = bewerking === 'tafels';
-    const isAanvullen   = hulpmiddelen.includes('aanvullen');
-    const isCompenseren = hulpmiddelen.includes('compenseren');
+  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10 }) {
+    const isHerken        = bewerking === 'herken-brug';
+    const isSplitsingen   = bewerking === 'splitsingen';
+    const isTafels        = bewerking === 'tafels';
+    const isAanvullen     = hulpmiddelen.includes('aanvullen');
+    const isCompenseren   = hulpmiddelen.includes('compenseren');
+    const isTransformeren = hulpmiddelen.includes('transformeren');
 
     // Kies module
     const compModule = isCompenseren
@@ -50,9 +51,10 @@ const Generator = (() => {
           : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const aanvulModule = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
-    const module = isAanvullen   ? aanvulModule :
-                   isCompenseren ? compModule :
-                   isTafels      ? Tafels :
+    const module = isAanvullen     ? aanvulModule :
+                   isCompenseren   ? compModule :
+                   isTransformeren ? TransformerenOptellen :
+                   isTafels        ? Tafels :
                    _getModule(bewerking, niveau);
     if (!module) {
       console.warn(`Geen module voor ${bewerking} tot ${niveau}`);
@@ -69,16 +71,18 @@ const Generator = (() => {
     else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
     else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
+    else if (isTransformeren) oefeningen = TransformerenOptellen.genereer({ niveau, oefeningstypes, aantalOefeningen });
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
     const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
     if (oefeningen.length < 2 && !wilGroot) return null;
 
     const isMaakEerst10 = oefeningstypes?.includes('Maak eerst 10') && oefeningstypes.length === 1;
-    const defaultZin = isCompenseren ? 'Compenseer.' :
-                       isSplitsingen ? 'Splits het getal.' :
-                       isTafels      ? 'Reken de tafels.' :
-                       isHerken      ? 'Kleur Zisa groen bij elke brugoefening.' :
-                       isMaakEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
+    const defaultZin = isCompenseren    ? 'Compenseer.' :
+                       isTransformeren  ? 'Reken uit door te transformeren.' :
+                       isSplitsingen    ? 'Splits het getal.' :
+                       isTafels         ? 'Reken de tafels.' :
+                       isHerken         ? 'Kleur Zisa groen bij elke brugoefening.' :
+                       isMaakEerst10    ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
                        bewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.';
 
     _teller++;
@@ -93,13 +97,14 @@ const Generator = (() => {
       splitspositie,
       aanvullenVariant,
       compenserenVariant,
+      transformerenVariant,
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
       tafels,
       tafelPositie,
       tafelMax,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax },
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax },
       oefeningen,
     };
   }
@@ -161,22 +166,25 @@ const Generator = (() => {
       return false;
     }
 
-    const isAanvullen   = blok.hulpmiddelen?.includes('aanvullen');
-    const isCompenseren = blok.hulpmiddelen?.includes('compenseren');
+    const isAanvullen     = blok.hulpmiddelen?.includes('aanvullen');
+    const isCompenseren   = blok.hulpmiddelen?.includes('compenseren');
+    const isTransformeren = blok.hulpmiddelen?.includes('transformeren');
     const compModule = isCompenseren
       ? (blok.bewerking === 'aftrekken'
           ? (blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
           : (blok.niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const aanvulModule2 = blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
-    const module = isAanvullen   ? aanvulModule2 :
-                   isCompenseren ? compModule :
+    const module = isAanvullen     ? aanvulModule2 :
+                   isCompenseren   ? compModule :
+                   isTransformeren ? TransformerenOptellen :
                    _getModule(blok.bewerking, blok.niveau);
     if (!module) return false;
 
     const brugVoorModule = blok.niveau <= 100 ? _brugVoor100(blok.config.brug) : blok.config.brug;
-    const nieuweOef = isAanvullen    ? aanvulModule2.genereer({ aantalOefeningen: 5, oefeningstypes: blok.config.oefeningstypes }) :
-                      isCompenseren  ? compModule.genereer({ aantalOefeningen: 5 }) :
+    const nieuweOef = isAanvullen     ? aanvulModule2.genereer({ aantalOefeningen: 5, oefeningstypes: blok.config.oefeningstypes }) :
+                      isCompenseren   ? compModule.genereer({ aantalOefeningen: 5 }) :
+                      isTransformeren ? TransformerenOptellen.genereer({ niveau: blok.niveau, oefeningstypes: blok.config.oefeningstypes, aantalOefeningen: 5 }) :
                       module.genereer({ ...blok.config, brug: brugVoorModule, niveau: blok.niveau, aantalOefeningen: 5 });
     const bestaandeSleutels = new Set(blok.oefeningen.map(o => o.sleutel));
 
@@ -197,9 +205,12 @@ const Generator = (() => {
 
     const isCompenseren = hulpmiddelen.includes('compenseren');
     const isAanvullen   = hulpmiddelen.includes('aanvullen');
+    const isTransform   = hulpmiddelen.includes('transformeren');
 
     let module;
-    if (isCompenseren) {
+    if (isTransform) {
+      return TransformerenOptellen.getTypes(niveau);
+    } else if (isCompenseren) {
       module = bewerking === 'aftrekken'
         ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
         : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen);
