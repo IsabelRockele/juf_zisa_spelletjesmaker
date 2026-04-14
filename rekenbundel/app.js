@@ -132,13 +132,18 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const hoofd  = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
     if (hoofd === 'zonder') return 'zonder';
+    // Tot 10.000: geen sub-keuze, enkel met/zonder
+    if (niveau >= 10000) {
+      if (hoofd === 'met' || hoofd === 'beide') return 'naar-duizendtal';
+      return 'zonder';
+    }
     // Tot 1000: subkeuze bepaalt de exacte brugwaarde
     if (niveau >= 1000) {
       const sub = document.querySelector('[name="brug-sub"]:checked')?.value || 'naar-tiental';
-      if (hoofd === 'met')  return sub;          // naar-tiental / naar-honderdtal / beide
-      if (hoofd === 'beide') return 'gemengd';   // zonder én met brug door elkaar
+      if (hoofd === 'met')   return sub;
+      if (hoofd === 'beide') return 'gemengd';
     }
-    // Tot 100: met brug = 'met', beide = 'gemengd'
+    // Tot 100
     if (hoofd === 'met')   return 'met';
     if (hoofd === 'beide') return 'gemengd';
     return 'zonder';
@@ -180,8 +185,8 @@ const App = (() => {
     const rijSub = document.getElementById('rij-brug-sub');
     if (!rijSub) return;
 
-    // Subkeuze enkel bij tot 1000 + met brug (niet bij 'beide' = gemengd)
-    const toonSub = niveau >= 1000 && hoofd === 'met';
+    // Subkeuze enkel bij tot 1000 + met brug (niet bij 'beide' = gemengd, niet bij 10000)
+    const toonSub = niveau >= 1000 && niveau < 10000 && hoofd === 'met';
     rijSub.style.display = toonSub ? 'block' : 'none';
 
     if (toonSub && compenseren) {
@@ -270,8 +275,6 @@ const App = (() => {
   /* ── Types UI opbouwen ───────────────────────────────────── */
   function _updateTypesUI(niveau, brug, resetSelectie = false) {
     if (!brug) brug = _getBrugWaarde();
-    // Tot 10.000: altijd zonder brug (nog geen brug-varianten beschikbaar)
-    if (niveau >= 10000) brug = 'zonder';
 
     const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
     const splitsModus  = actieveBewerking === 'splitsingen' ? (_splitsMode || 'tot') : 'tot';
@@ -338,10 +341,13 @@ const App = (() => {
     container.appendChild(infoEl);
     _updateGemengdInfo(container, infoEl);
 
-    // Brugkaart verbergen voor niveau 5, 10 én 10000 (nog geen brug-varianten)
+    // Brugkaart verbergen voor niveau 5 en 10
     const kaartBrug = document.getElementById('kaart-brug');
-    if (kaartBrug) kaartBrug.style.display = (niveau <= 10 || niveau >= 10000) ? 'none' : 'block';
-    if (niveau <= 10 || niveau >= 10000) _updateHulpmiddelenUI('zonder');
+    if (kaartBrug) kaartBrug.style.display = (niveau <= 10) ? 'none' : 'block';
+    if (niveau <= 10) _updateHulpmiddelenUI('zonder');
+    // Tot 10.000: geen brug-subkeuze (naar-tiental/naar-honderdtal), wel zonder/met
+    const kaartBrugSub = document.getElementById('kaart-brug-sub');
+    if (kaartBrugSub) kaartBrugSub.style.display = (niveau >= 10000) ? 'none' : '';
 
     // Splits-kaarten updaten op basis van standaard geselecteerd type
     _updateSplitsKaarten();
@@ -418,7 +424,7 @@ const App = (() => {
     if (actieveBewerking === 'splitsingen') { kaart.style.display = 'none'; return; }
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    const isBrug = ['naar-tiental','naar-honderdtal','beide','met'].includes(brug);
+    const isBrug = ['naar-tiental','naar-honderdtal','beide','met','naar-duizendtal'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
