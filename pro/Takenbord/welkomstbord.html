@@ -15,7 +15,7 @@ body{min-height:100vh;overflow:auto;}
 .pro-back-btn:hover{background:rgba(255,255,255,.25);}
 .pro-header-title{font-size:14px;font-weight:700;opacity:.9;}
 .pro-badge{background:#f5c200;color:#0b3060;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800;}
-body{padding-top:44px;margin:0;}
+body{padding-top:44px;margin:0;padding-bottom:0;}
 #app{min-height:100vh;background:#f0f4f8;padding:20px 24px 60px;}
 
 /* ── SCHERM 1: type kiezen ── */
@@ -171,7 +171,7 @@ body{padding-top:44px;margin:0;}
 
 
 /* ══ BORD-ILLUSTRATIES ══════════════════════════════════════════════════ */
-.wb-illus { border-radius:10px; overflow:hidden; margin:0 32px 12px; border:1.5px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.07); }
+.wb-illus { border-radius:10px; overflow:hidden; margin:0 auto 12px; border:1.5px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.07); max-width:360px; display:block; }
 .wb-illus-bar { padding:5px 10px; display:flex; align-items:center; gap:5px; }
 .wb-illus-bar-klas { background:#1e1b4b; }
 .wb-illus-bar-kind { background:#4c1d95; }
@@ -179,8 +179,8 @@ body{padding-top:44px;margin:0;}
 .wb-illus-lbl { font-size:8px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
 
 /* Klasbord grid */
-.kb-illus-body { background:#f0f4fb; padding:6px; height:90px; overflow:hidden; }
-.kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; }
+.kb-illus-body { background:#f0f4fb; padding:6px; height:112px; overflow:hidden; }
+.kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; width:100%; }
 .kb-illus-cell { border-radius:4px; padding:3px 4px; font-size:8px; font-weight:700; text-align:center; }
 .kb-illus-head-n { background:#e0e7ff; color:#3730a3; }
 .kb-illus-head-t { background:#fef3c7; color:#92400e; font-size:8px; }
@@ -191,11 +191,11 @@ body{padding-top:44px;margin:0;}
 .kb-illus-klaar { background:#dcfce7; color:#16a34a; }
 
 /* Kindbord kaartjes */
-.kn-illus-body { background:#faf5ff; padding:6px; display:grid; grid-template-columns:repeat(4,1fr); gap:4px; height:90px; overflow:hidden; align-content:start; }
-.kn-illus-kaart { background:#fff; border-radius:8px; padding:6px 4px; text-align:center; border:1.5px solid #e0e0e0; }
-.kn-illus-av { width:22px; height:22px; border-radius:50%; margin:0 auto 3px; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff; }
-.kn-illus-naam { font-size:8px; font-weight:800; color:#1e1b4b; }
-.kn-illus-bar { height:3px; border-radius:2px; background:#e2e8f0; margin-top:4px; overflow:hidden; }
+.kn-illus-body { background:#faf5ff; padding:6px; display:grid; grid-template-columns:repeat(4,1fr); gap:3px; height:112px; overflow:hidden; align-content:start; }
+.kn-illus-kaart { background:#fff; border-radius:6px; padding:4px 3px; text-align:center; border:1px solid #ede9fe; }
+.kn-illus-av { width:18px; height:18px; border-radius:50%; margin:0 auto 2px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; }
+.kn-illus-naam { font-size:7px; font-weight:800; color:#1e1b4b; }
+.kn-illus-bar { height:2px; border-radius:2px; background:#e2e8f0; margin-top:2px; overflow:hidden; }
 .kn-illus-fill { height:100%; border-radius:2px; }
 </style>
 
@@ -270,6 +270,11 @@ body{padding-top:44px;margin:0;}
               <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
               <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
               <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-naam">Liam</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
             </div>
           </div>
         </div>
@@ -308,6 +313,7 @@ body{padding-top:44px;margin:0;}
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#d97706;">A</div><div class="kn-illus-naam">Amira</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#7c3aed;">T</div><div class="kn-illus-naam">Tibo</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:40%;background:#7c3aed;"></div></div></div>
             <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#0d9488;">S</div><div class="kn-illus-naam">Sara</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:80%;background:#0d9488;"></div></div></div>
+
           </div>
         </div>
         <div class="wb-borden-lijst" id="lijst-kindbord"></div>
