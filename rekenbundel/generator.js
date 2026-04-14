@@ -14,14 +14,16 @@ const Generator = (() => {
   function _getModule(bewerking, niveau) {
     if (bewerking === 'aanvullen') return niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     if (bewerking === 'optellen') {
-      if (niveau <= 20)   return OptellenTot20;
-      if (niveau <= 100)  return OptellenTot100;
-      if (niveau <= 1000) return OptellenTot1000;
+      if (niveau <= 20)    return OptellenTot20;
+      if (niveau <= 100)   return OptellenTot100;
+      if (niveau <= 1000)  return OptellenTot1000;
+      if (niveau <= 10000) return OptellenTot10000;
     }
     if (bewerking === 'aftrekken') {
-      if (niveau <= 20)   return AftrekkenTot20;
-      if (niveau <= 100)  return AftrekkenTot100;
-      if (niveau <= 1000) return AftrekkenTot1000;
+      if (niveau <= 20)    return AftrekkenTot20;
+      if (niveau <= 100)   return AftrekkenTot100;
+      if (niveau <= 1000)  return AftrekkenTot1000;
+      if (niveau <= 10000) return AftrekkenTot10000;
     }
     if (bewerking === 'herken-brug') return HerkenBrugTot100;
     if (bewerking === 'splitsingen') return Splitsingen;
@@ -236,9 +238,11 @@ const Generator = (() => {
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
 
     const modOpt = niveau <= 20  ? OptellenTot20  :
-                   niveau <= 100 ? OptellenTot100 : OptellenTot1000;
+                   niveau <= 100 ? OptellenTot100 :
+                   niveau <= 1000 ? OptellenTot1000 : OptellenTot10000;
     const modAft = niveau <= 20  ? AftrekkenTot20  :
-                   niveau <= 100 ? AftrekkenTot100 : AftrekkenTot1000;
+                   niveau <= 100 ? AftrekkenTot100 :
+                   niveau <= 1000 ? AftrekkenTot1000 : AftrekkenTot10000;
 
     if (!modOpt || !modAft) return null;
 
