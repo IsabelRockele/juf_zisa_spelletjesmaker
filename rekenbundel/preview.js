@@ -1410,7 +1410,8 @@ const Preview = (() => {
     const ingevuld = cfg.invulling === 'ingevuld';
     const metPijl  = cfg.startpijl !== false;
     const metSchat = cfg.schatting === true;
-    const showH    = oef.showH;
+    const showD    = oef.showD;
+    const showH    = oef.showH || showD;
     const op       = oef.operator;
 
     const vraag = `${oef.g1} ${op} ${oef.g2} = ?`;
@@ -1423,22 +1424,27 @@ const Preview = (() => {
 
     const pijlHTML = metPijl ? `<div class="cij-startpijl"></div>` : '';
 
+    const hCelD = showD ? `<td class="cij-header cij-duizend">D</td>` : '';
     const hCelH = showH ? `<td class="cij-header cij-honderd">H</td>` : '';
     const hCelT = `<td class="cij-header cij-tien">T</td>`;
     const hCelE = `<td class="cij-header cij-een">E${pijlHTML}</td>`;
 
+    const oCelD = showD ? `<td class="cij-onthoud cij-duizend"></td>` : '';
     const oCelH = showH ? `<td class="cij-onthoud cij-honderd"></td>` : '';
     const oCelT = `<td class="cij-onthoud cij-tien"></td>`;
     const oCelE = `<td class="cij-onthoud cij-een"></td>`;
 
+    const g1D = showD ? `<td class="cij-getal">${ingevuld ? esc(oef.D1||'') : ''}</td>` : '';
     const g1H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H1) : ''}</td>` : '';
     const g1T = `<td class="cij-getal">${ingevuld ? esc(oef.T1) : ''}</td>`;
     const g1E = `<td class="cij-getal">${ingevuld ? esc(oef.E1) : ''}</td>`;
 
+    const g2D = showD ? `<td class="cij-getal">${ingevuld ? esc(oef.D2||'') : ''}</td>` : '';
     const g2H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H2) : ''}</td>` : '';
     const g2T = `<td class="cij-getal">${ingevuld ? esc(oef.T2) : ''}</td>`;
     const g2E = `<td class="cij-getal">${ingevuld ? esc(oef.E2) : ''}</td>`;
 
+    const opD = showD ? `<td class="cij-oplossing"></td>` : '';
     const opH = showH ? `<td class="cij-oplossing"></td>` : '';
     const opT = `<td class="cij-oplossing"></td>`;
     const opE = `<td class="cij-oplossing"></td>`;
@@ -1451,12 +1457,12 @@ const Preview = (() => {
         <div class="cij-schema-wrap">
           <div class="cij-operator">${esc(op)}</div>
           <table class="cij-schema">
-            <thead><tr>${hCelH}${hCelT}${hCelE}</tr></thead>
+            <thead><tr>${hCelD}${hCelH}${hCelT}${hCelE}</tr></thead>
             <tbody>
-              <tr>${oCelH}${oCelT}${oCelE}</tr>
-              <tr>${g1H}${g1T}${g1E}</tr>
-              <tr>${g2H}${g2T}${g2E}</tr>
-              <tr>${opH}${opT}${opE}</tr>
+              <tr>${oCelD}${oCelH}${oCelT}${oCelE}</tr>
+              <tr>${g1D}${g1H}${g1T}${g1E}</tr>
+              <tr>${g2D}${g2H}${g2T}${g2E}</tr>
+              <tr>${opD}${opH}${opT}${opE}</tr>
             </tbody>
           </table>
         </div>
