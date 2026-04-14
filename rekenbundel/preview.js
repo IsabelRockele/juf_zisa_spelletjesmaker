@@ -444,59 +444,40 @@ const Preview = (() => {
 
   function _transformerenHTML(blokId, oef, idx, blok) {
     const del     = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">&#x2715;</button>`;
-    const variant = blok.transformerenVariant || 'schema';
-    const isVb    = blok.metVoorbeeld === true && idx === 0;
-    const tg      = oef.transformeerGetal;
-    const ag      = oef.andereGetal;
-    const d       = oef.transformeerDelta;
-    const tgT     = tg + d;
-    const agT     = ag - d;
-    const som     = oef.antwoord;
-    const totaal  = tg + ag;
-    const klasse  = 'oefening-item oefening-trans' + (isVb ? ' trans-voorbeeld' : '');
-
-    // Balkbreedtes visueel uitvergroot
-    const r1tg = Math.min(80, Math.max(20, tg  / totaal * 100)).toFixed(1);
-    const r1ag = (100 - parseFloat(r1tg)).toFixed(1);
-    const r2tg = Math.min(85, Math.max(15, tgT / totaal * 100)).toFixed(1);
-    const r2ag = (100 - parseFloat(r2tg)).toFixed(1);
+    const variant  = blok.transformerenVariant || 'schema';
+    const isVb     = blok.metVoorbeeld === true && idx === 0;
+    const isAftrek = blok.bewerking === 'aftrekken';
+    const tg       = oef.transformeerGetal;
+    const ag       = oef.andereGetal;
+    const d        = oef.transformeerDelta;
+    const tgT      = tg + d;
+    const agT      = ag + d;
+    const som      = oef.antwoord;
+    const klasse   = 'oefening-item oefening-trans' + (isVb ? ' trans-voorbeeld' : '');
+    const bewTeken = isAftrek ? '-' : '+';
+    const dTxt     = (d > 0 ? '+' : '') + d;
 
     const pijl = `<svg class="trans-pijl-svg" width="12" height="32" viewBox="0 0 12 32" fill="none"><line x1="6" y1="0" x2="6" y2="26" stroke="currentColor" stroke-width="1.5"/><polyline points="2,20 6,27 10,20" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg>`;
 
-    // ── KAAL ────────────────────────────────────────────────
     if (variant === 'kaal') {
       if (isVb) {
         return `<div class="${klasse} oefening-trans-kaal">
-          <div class="trans-kaal-vb">${esc(String(tg))} + ${esc(String(ag))} = <span class="trans-kaal-stap">${tgT} + ${agT}</span> = ${som}</div>
+          <div class="trans-kaal-vb">${esc(String(tg))} ${bewTeken} ${esc(String(ag))} = <span class="trans-kaal-stap">${tgT} ${bewTeken} ${agT}</span> = ${som}</div>
           ${del}</div>`;
       }
       return `<div class="${klasse} oefening-trans-kaal">
         <div class="trans-kaal-som">
           <span class="trans-kaal-getal">${esc(String(tg))}</span>
-          <span class="trans-kaal-teken">+</span>
+          <span class="trans-kaal-teken">${bewTeken}</span>
           <span class="trans-kaal-getal">${esc(String(ag))}</span>
           <span class="trans-kaal-teken">=</span>
           <span class="trans-kaal-lijn"></span>
         </div>${del}</div>`;
     }
 
-    // ── Gedeelde elementen voor schema + pijltjes ────────────
-    // Antwoordvak of ingevuld antwoord
-    const antw1 = isVb
-      ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>`
-      : `<span class="antwoord-vak"></span>`;
-
-    // Naast pijl links (bij tg): schrijflijn of ingevuld teken
-    const pijlL = isVb
-      ? `<span class="trans-pijl-waarde blauw">+${d}</span>${pijl}`
-      : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
-
-    // Naast pijl rechts (bij ag): schrijflijn of ingevuld teken
-    const pijlR = isVb
-      ? `${pijl}<span class="trans-pijl-waarde geel">&minus;${d}</span>`
-      : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
-
-    // Onderste rij: schrijflijnen of ingevuld
+    const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak"></span>`;
+    const pijlL = isVb ? `<span class="trans-pijl-waarde blauw">${dTxt}</span>${pijl}` : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
+    const pijlR = isVb ? `${pijl}<span class="trans-pijl-waarde blauw">${dTxt}</span>` : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
     const ondL  = isVb ? `<span class="trans-ingevuld">${tgT}</span>` : `<span class="trans-schrijflijn"></span>`;
     const ondR  = isVb ? `<span class="trans-ingevuld">${agT}</span>` : `<span class="trans-schrijflijn"></span>`;
     const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn"></span>`;
@@ -505,7 +486,7 @@ const Preview = (() => {
       <colgroup><col style="width:30%"><col style="width:8%"><col style="width:30%"><col style="width:8%"><col></colgroup>
       <tr>
         <td class="trans-td-getal-l">${esc(String(tg))}</td>
-        <td class="trans-td-teken">+</td>
+        <td class="trans-td-teken">${bewTeken}</td>
         <td class="trans-td-getal-r">${esc(String(ag))}</td>
         <td class="trans-td-is">=</td>
         <td class="trans-td-antw">${antw1}</td>
@@ -518,43 +499,51 @@ const Preview = (() => {
       </tr>
       <tr class="trans-tr-onder">
         <td class="trans-td-getal-l">${ondL}</td>
-        <td class="trans-td-teken">+</td>
+        <td class="trans-td-teken">${bewTeken}</td>
         <td class="trans-td-getal-r">${ondR}</td>
         <td class="trans-td-is">=</td>
         <td class="trans-td-antw">${ondAn}</td>
       </tr>
     </table>`;
 
-    // ── PIJLTJES ─────────────────────────────────────────────
-    if (variant === 'pijltjes') {
-      return `<div class="${klasse}">${tabel}${del}</div>`;
+    if (variant === 'pijltjes') return `<div class="${klasse}">${tabel}${del}</div>`;
+
+    if (isAftrek) {
+      const absD = Math.abs(d);
+      const geelInhoud = isVb ? String(absD) : '';
+      const rij2Inhoud = isVb
+        ? `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${agT}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">${tgT}</div>`
+        : `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${ag}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">?</div>`;
+      return `<div class="${klasse}">
+        <div style="display:flex;width:100%;height:26px;margin-bottom:2px;gap:2px">
+          <div style="background:#fde68a;border-radius:3px;width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#78350f">${geelInhoud}</div>
+          <div style="background:#b5d4f4;border-radius:3px;flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a">${tg}</div>
+        </div>
+        <div style="display:flex;width:100%;height:26px;margin-bottom:10px;gap:2px">
+          <div style="background:#fde68a;border-radius:3px;width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#78350f">${geelInhoud}</div>
+          <div style="border-radius:3px;flex:1;display:flex;overflow:hidden;gap:1px">${rij2Inhoud}</div>
+        </div>
+        ${tabel}${del}
+      </div>`;
+    } else {
+      const r1tg = Math.min(80, Math.max(20, tg / (tg + ag) * 100)).toFixed(1);
+      const r1ag = (100 - parseFloat(r1tg)).toFixed(1);
+      const r2tg = Math.min(85, Math.max(15, tgT / (tg + ag) * 100)).toFixed(1);
+      const r2ag = (100 - parseFloat(r2tg)).toFixed(1);
+      const balk2B = isVb ? `<div class="trans-balk-inv">${tgT}</div>` : `<div class="trans-balk-schrijf"></div>`;
+      const balk2G = isVb ? `<div class="trans-balk-inv-g">${ag - d}</div>` : `<div class="trans-balk-schrijf-g"></div>`;
+      return `<div class="${klasse}">
+        <div class="trans-balk-rij">
+          <div class="trans-balk-b" style="width:${r1tg}%"><div class="trans-balk-num">${esc(String(tg))}</div><div class="trans-balk-schrijf"></div></div>
+          <div class="trans-balk-g" style="width:${r1ag}%"><div class="trans-balk-num-g">${esc(String(ag))}</div><div class="trans-balk-schrijf-g"></div></div>
+        </div>
+        <div class="trans-balk-rij">
+          <div class="trans-balk-b" style="width:${r2tg}%">${balk2B}</div>
+          <div class="trans-balk-g" style="width:${r2ag}%">${balk2G}</div>
+        </div>
+        ${tabel}${del}
+      </div>`;
     }
-
-    // ── SCHEMA ───────────────────────────────────────────────
-    const balk2B = isVb
-      ? `<div class="trans-balk-inv">${tgT}</div>`
-      : `<div class="trans-balk-schrijf"></div>`;
-    const balk2G = isVb
-      ? `<div class="trans-balk-inv-g">${agT}</div>`
-      : `<div class="trans-balk-schrijf-g"></div>`;
-
-    return `<div class="${klasse}">
-      <div class="trans-balk-rij">
-        <div class="trans-balk-b" style="width:${r1tg}%">
-          <div class="trans-balk-num">${esc(String(tg))}</div>
-          <div class="trans-balk-schrijf"></div>
-        </div>
-        <div class="trans-balk-g" style="width:${r1ag}%">
-          <div class="trans-balk-num-g">${esc(String(ag))}</div>
-          <div class="trans-balk-schrijf-g"></div>
-        </div>
-      </div>
-      <div class="trans-balk-rij">
-        <div class="trans-balk-b" style="width:${r2tg}%">${balk2B}</div>
-        <div class="trans-balk-g" style="width:${r2ag}%">${balk2G}</div>
-      </div>
-      ${tabel}${del}
-    </div>`;
   }
 
 
