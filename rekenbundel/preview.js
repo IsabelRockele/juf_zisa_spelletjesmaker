@@ -52,7 +52,8 @@ const Preview = (() => {
     if (isRekentaal)  return _maakRekentaalElement(blok);
     const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
     const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('compenseren');
-    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && !heeftAanvullen && !heeftCompenseren && (blok.hulpmiddelen?.length > 0);
+    const heeftTransformeren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('transformeren');
+    const heeftHulp        = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && !heeftAanvullen && !heeftCompenseren && !heeftTransformeren && (blok.hulpmiddelen?.length > 0);
     const brugLabel = { met:'🌉 Met brug', zonder:'✅ Zonder brug', gemengd:'🔀 Gemengd' }[blok.brug] || '';
     const badgeTxt  = isGetallenlijn  ? '〰️ Getallenlijn' :
                       isCijferen      ? `🧮 Cijferen` :
@@ -61,6 +62,7 @@ const Preview = (() => {
                       isSplitsingen ? '✂️ Splits' :
                       isHerken    ? '🔦 Herken brug' :
                       isRekentaal ? '🗣️ Rekentaal' :
+                      blok.hulpmiddelen?.includes('transformeren') ? '↔️ Transformeren' :
                       blok.bewerking === 'aftrekken' ? 'Aftrekken' : 'Optellen';
     const isPunt = isSplitsingen && blok.oefeningen[0]?.type === 'puntoefening';
     let gridKlasse;
@@ -73,6 +75,7 @@ const Preview = (() => {
     else if (heeftAanvullen && blok.aanvullenVariant === 'met-schijfjes') gridKlasse = 'aanvullen-grid-2';
     else if (heeftAanvullen)                                               gridKlasse = 'aanvullen-grid-3';
     else if (heeftCompenseren)                                             gridKlasse = 'comp-grid';
+    else if (heeftTransformeren)                                           gridKlasse = 'trans-grid';
     else if (heeftHulp)                                                    gridKlasse = 'hulp-grid';
     else if (isCijferen)                                                   gridKlasse = (blok.config?.bewerking === 'delen' || blok.config?.bereik >= 1000 || blok.config?.schatting) ? 'cijferen-grid-3' : 'cijferen-grid';
     else                                                                   gridKlasse = '';
@@ -181,6 +184,12 @@ const Preview = (() => {
       const compenserenVariant = blok.compenserenVariant || 'met-tekens';
       const metVoorbeeld       = blok.metVoorbeeld || false;
       return _compenserenHTML(blokId, oef, idx, compenserenVariant, metVoorbeeld);
+    }
+
+    /* ── Transformeren ───────────────────────────────────── */
+    const heeftTransformerenOef = hulp.includes('transformeren');
+    if (heeftTransformerenOef) {
+      return _transformerenHTML(blokId, oef, idx, blok);
     }
 
     /* ── Maak eerst 10 ───────────────────────────────────────── */
@@ -426,6 +435,126 @@ const Preview = (() => {
         </div>
         ${del}
       </div>`;
+  }
+
+
+  /* ══════════════════════════════════════════════════════════
+     TRANSFORMEREN (OPTELLINGSWIP) HTML RENDERER
+  ══════════════════════════════════════════════════════════ */
+
+  function _transformerenHTML(blokId, oef, idx, blok) {
+    const del     = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">&#x2715;</button>`;
+    const variant = blok.transformerenVariant || 'schema';
+    const isVb    = blok.metVoorbeeld === true && idx === 0;
+    const tg      = oef.transformeerGetal;
+    const ag      = oef.andereGetal;
+    const d       = oef.transformeerDelta;
+    const tgT     = tg + d;
+    const agT     = ag - d;
+    const som     = oef.antwoord;
+    const totaal  = tg + ag;
+    const klasse  = 'oefening-item oefening-trans' + (isVb ? ' trans-voorbeeld' : '');
+
+    // Balkbreedtes visueel uitvergroot
+    const r1tg = Math.min(80, Math.max(20, tg  / totaal * 100)).toFixed(1);
+    const r1ag = (100 - parseFloat(r1tg)).toFixed(1);
+    const r2tg = Math.min(85, Math.max(15, tgT / totaal * 100)).toFixed(1);
+    const r2ag = (100 - parseFloat(r2tg)).toFixed(1);
+
+    const pijl = `<svg class="trans-pijl-svg" width="12" height="32" viewBox="0 0 12 32" fill="none"><line x1="6" y1="0" x2="6" y2="26" stroke="currentColor" stroke-width="1.5"/><polyline points="2,20 6,27 10,20" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" fill="none"/></svg>`;
+
+    // ── KAAL ────────────────────────────────────────────────
+    if (variant === 'kaal') {
+      if (isVb) {
+        return `<div class="${klasse} oefening-trans-kaal">
+          <div class="trans-kaal-vb">${esc(String(tg))} + ${esc(String(ag))} = <span class="trans-kaal-stap">${tgT} + ${agT}</span> = ${som}</div>
+          ${del}</div>`;
+      }
+      return `<div class="${klasse} oefening-trans-kaal">
+        <div class="trans-kaal-som">
+          <span class="trans-kaal-getal">${esc(String(tg))}</span>
+          <span class="trans-kaal-teken">+</span>
+          <span class="trans-kaal-getal">${esc(String(ag))}</span>
+          <span class="trans-kaal-teken">=</span>
+          <span class="trans-kaal-lijn"></span>
+        </div>${del}</div>`;
+    }
+
+    // ── Gedeelde elementen voor schema + pijltjes ────────────
+    // Antwoordvak of ingevuld antwoord
+    const antw1 = isVb
+      ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>`
+      : `<span class="antwoord-vak"></span>`;
+
+    // Naast pijl links (bij tg): schrijflijn of ingevuld teken
+    const pijlL = isVb
+      ? `<span class="trans-pijl-waarde blauw">+${d}</span>${pijl}`
+      : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
+
+    // Naast pijl rechts (bij ag): schrijflijn of ingevuld teken
+    const pijlR = isVb
+      ? `${pijl}<span class="trans-pijl-waarde geel">&minus;${d}</span>`
+      : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
+
+    // Onderste rij: schrijflijnen of ingevuld
+    const ondL  = isVb ? `<span class="trans-ingevuld">${tgT}</span>` : `<span class="trans-schrijflijn"></span>`;
+    const ondR  = isVb ? `<span class="trans-ingevuld">${agT}</span>` : `<span class="trans-schrijflijn"></span>`;
+    const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn"></span>`;
+
+    const tabel = `<table class="trans-tabel">
+      <colgroup><col style="width:30%"><col style="width:8%"><col style="width:30%"><col style="width:8%"><col></colgroup>
+      <tr>
+        <td class="trans-td-getal-l">${esc(String(tg))}</td>
+        <td class="trans-td-teken">+</td>
+        <td class="trans-td-getal-r">${esc(String(ag))}</td>
+        <td class="trans-td-is">=</td>
+        <td class="trans-td-antw">${antw1}</td>
+      </tr>
+      <tr>
+        <td class="trans-td-pijl-l"><div class="trans-pijl-cel-l">${pijlL}</div></td>
+        <td></td>
+        <td class="trans-td-pijl-r"><div class="trans-pijl-cel-r">${pijlR}</div></td>
+        <td></td><td></td>
+      </tr>
+      <tr class="trans-tr-onder">
+        <td class="trans-td-getal-l">${ondL}</td>
+        <td class="trans-td-teken">+</td>
+        <td class="trans-td-getal-r">${ondR}</td>
+        <td class="trans-td-is">=</td>
+        <td class="trans-td-antw">${ondAn}</td>
+      </tr>
+    </table>`;
+
+    // ── PIJLTJES ─────────────────────────────────────────────
+    if (variant === 'pijltjes') {
+      return `<div class="${klasse}">${tabel}${del}</div>`;
+    }
+
+    // ── SCHEMA ───────────────────────────────────────────────
+    const balk2B = isVb
+      ? `<div class="trans-balk-inv">${tgT}</div>`
+      : `<div class="trans-balk-schrijf"></div>`;
+    const balk2G = isVb
+      ? `<div class="trans-balk-inv-g">${agT}</div>`
+      : `<div class="trans-balk-schrijf-g"></div>`;
+
+    return `<div class="${klasse}">
+      <div class="trans-balk-rij">
+        <div class="trans-balk-b" style="width:${r1tg}%">
+          <div class="trans-balk-num">${esc(String(tg))}</div>
+          <div class="trans-balk-schrijf"></div>
+        </div>
+        <div class="trans-balk-g" style="width:${r1ag}%">
+          <div class="trans-balk-num-g">${esc(String(ag))}</div>
+          <div class="trans-balk-schrijf-g"></div>
+        </div>
+      </div>
+      <div class="trans-balk-rij">
+        <div class="trans-balk-b" style="width:${r2tg}%">${balk2B}</div>
+        <div class="trans-balk-g" style="width:${r2ag}%">${balk2G}</div>
+      </div>
+      ${tabel}${del}
+    </div>`;
   }
 
 
