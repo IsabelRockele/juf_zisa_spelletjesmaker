@@ -780,6 +780,18 @@ header .badge {
   border: 1.5px solid var(--blauw);
   border-radius: 4px; background: white;
 }
+/* Bredere vakjes voor getallen tot 10.000 */
+.splits-vak-groot {
+  width: 44px; height: 22px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 4px; background: white;
+}
+.splitsbeen-boom-groot {
+  width: 72px; height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='16'%3E%3Cpolyline points='4,16 36,2 68,16' fill='none' stroke='%231a3a5c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 72px 16px;
+}
 .hulp-schrijflijnen {
   position: absolute;
   left: 128px;
