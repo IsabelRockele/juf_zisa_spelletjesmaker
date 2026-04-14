@@ -53,11 +53,14 @@ const Generator = (() => {
     const compModule = isCompenseren
       ? (bewerking === 'aftrekken'
           ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
-          : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
+          : (niveau >= 10000 ? CompenserenOptellenTot10000 :
+             niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const aanvulModule = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule  = isTransformeren
-      ? (bewerking === 'aftrekken' ? TransformerenAftrekken : TransformerenOptellen)
+      ? (bewerking === 'aftrekken' ? TransformerenAftrekken
+         : niveau >= 10000 ? TransformerenOptellenTot10000
+         : TransformerenOptellen)
       : null;
     const module = isAanvullen     ? aanvulModule :
                    isCompenseren   ? compModule :
@@ -82,7 +85,7 @@ const Generator = (() => {
     if (oefeningen.length < 2 && !wilGroot) return null;
 
     const isMaakEerst10 = oefeningstypes?.includes('Maak eerst 10') && oefeningstypes.length === 1;
-    const defaultZin = isCompenseren    ? 'Compenseer.' :
+    const defaultZin = isCompenseren    ? 'Reken uit door te compenseren.' :
                        isTransformeren  ? 'Reken uit door te transformeren.' :
                        isSplitsingen    ? 'Splits het getal.' :
                        isTafels         ? 'Reken de tafels.' :
@@ -177,11 +180,14 @@ const Generator = (() => {
     const compModule = isCompenseren
       ? (blok.bewerking === 'aftrekken'
           ? (blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
-          : (blok.niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen))
+          : (blok.niveau >= 10000 ? CompenserenOptellenTot10000 :
+             blok.niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
     const aanvulModule2 = blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule2  = isTransformeren
-      ? (blok.bewerking === 'aftrekken' ? TransformerenAftrekken : TransformerenOptellen)
+      ? (blok.bewerking === 'aftrekken' ? TransformerenAftrekken
+         : blok.niveau >= 10000 ? TransformerenOptellenTot10000
+         : TransformerenOptellen)
       : null;
     const module = isAanvullen     ? aanvulModule2 :
                    isCompenseren   ? compModule :
@@ -217,12 +223,15 @@ const Generator = (() => {
 
     let module;
     if (isTransform) {
-      const transM = bewerking === 'aftrekken' ? TransformerenAftrekken : TransformerenOptellen;
+      const transM = bewerking === 'aftrekken' ? TransformerenAftrekken
+                   : niveau >= 10000 ? TransformerenOptellenTot10000
+                   : TransformerenOptellen;
       return transM.getTypes(niveau);
     } else if (isCompenseren) {
       module = bewerking === 'aftrekken'
         ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
-        : (niveau >= 1000 ? CompenserenOptellenTot1000  : CompenserenOptellen);
+        : (niveau >= 10000 ? CompenserenOptellenTot10000 :
+           niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen);
     } else if (isAanvullen) {
       module = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     } else {
