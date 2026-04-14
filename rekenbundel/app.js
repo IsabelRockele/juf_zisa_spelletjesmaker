@@ -389,6 +389,22 @@ const App = (() => {
         if (rijComp) rijComp.style.display = 'none';
       }
     }
+
+    // Transformeren: enkel bij optellen, tot 100 of tot 1000
+    const chipTransUI = document.getElementById('chip-transformeren');
+    if (chipTransUI) {
+      const verbergTrans = actieveBewerking !== 'optellen' || niveau <= 20 || (niveau > 100 && niveau < 1000);
+      chipTransUI.style.display = verbergTrans ? 'none' : '';
+      if (verbergTrans) {
+        const cb = chipTransUI.querySelector('input');
+        if (cb) cb.checked = false;
+        chipTransUI.classList.remove('geselecteerd');
+        const vb = chipTransUI.querySelector('.vink-box');
+        if (vb) vb.textContent = '';
+        const rijTrans = document.getElementById('rij-transformeren');
+        if (rijTrans) rijTrans.style.display = 'none';
+      }
+    }
   }
 
   /* ── Hulpmiddelen UI ────────────────────────────────────── */
@@ -421,6 +437,8 @@ const App = (() => {
       if (rijAanv) rijAanv.style.display = 'none';
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = 'none';
+      const rijTrans = document.getElementById('rij-transformeren');
+      if (rijTrans) rijTrans.style.display = 'none';
       const rijLijnen = document.getElementById('rij-schrijflijnen-aantal');
       if (rijLijnen) rijLijnen.style.display = 'none';
     }
@@ -430,6 +448,7 @@ const App = (() => {
     const chipLijnen    = document.getElementById('chip-schrijflijnen');
     const chipAanvullen = document.getElementById('chip-aanvullen');
     const chipComp      = document.getElementById('chip-compenseren');
+    const chipTrans     = document.getElementById('chip-transformeren');
 
     if (isZonderTot1000) {
       // Splitsbeen en schrijflijnen beschikbaar, rest niet
@@ -437,6 +456,7 @@ const App = (() => {
       if (chipLijnen)    chipLijnen.style.display    = '';
       if (chipAanvullen) { chipAanvullen.style.display = 'none'; _resetChip(chipAanvullen, 'rij-aanvullen'); }
       if (chipComp)      { chipComp.style.display      = 'none'; _resetChip(chipComp, 'rij-compenseren'); }
+      if (chipTrans)     { chipTrans.style.display      = 'none'; _resetChip(chipTrans, 'rij-transformeren'); }
     } else if (isBrug) {
       // Alle chips zichtbaar (niveau-filter doet de rest)
       if (chipSplits) chipSplits.style.display = '';
@@ -481,8 +501,12 @@ const App = (() => {
     const splitspositie       = document.querySelector('[name="splitspositie"]:checked')?.value || 'aftrekker';
     const aanvullenVariant    = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
     const compenserenVariant  = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
+    const transformerenVariant = document.querySelector('[name="transformeren-variant"]:checked')?.value || 'schema';
     const schrijflijnenAantal = parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
-    const metVoorbeeld        = document.getElementById('cb-metvoorbeeld')?.checked || false;
+    const isTransformeren     = hulpmiddelen.includes('transformeren');
+    const metVoorbeeld        = isTransformeren
+      ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
+      : (document.getElementById('cb-metvoorbeeld')?.checked || false);
     const splitsVariant       = document.querySelector('[name="splits-variant"]:checked')?.value || 'afwisselend';
     const splitsConfig  = isSplitsingen ? _getSplitsConfig() : null;
     const wilGroot = types.some(t => t.includes('Groot'));
@@ -517,6 +541,7 @@ const App = (() => {
       splitspositie,
       aanvullenVariant,
       compenserenVariant,
+      transformerenVariant,
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
@@ -602,6 +627,12 @@ const App = (() => {
       // Pas brug-subkeuze aan en herlaad types voor compenseren-module
       _updateBrugSubUI(!was);
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+      _updateTypesUI(niveau, _getBrugWaarde());
+    }
+    if (waarde === 'transformeren') {
+      const rijTrans = document.getElementById('rij-transformeren');
+      if (rijTrans) rijTrans.style.display = !was ? 'block' : 'none';
+      const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
       _updateTypesUI(niveau, _getBrugWaarde());
     }
   }
