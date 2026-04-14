@@ -113,7 +113,7 @@ function toonConsentPopup(user, consentRef) {
             <span class="zisa-consent-blok-icon">🗑️</span>
             <div>
               <strong>Jij blijft in controle</strong>
-              <p>Je kan je gegevens altijd laten verwijderen via <a href="mailto:info@jufzisa.be">info@jufzisa.be</a>.</p>
+              <p>Je kan je gegevens altijd laten verwijderen via <a href="mailto:zebrapost@jufzisa.be">zebrapost@jufzisa.be</a>.</p>
             </div>
           </div>
         </div>
