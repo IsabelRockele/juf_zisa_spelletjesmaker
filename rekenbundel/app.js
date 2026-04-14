@@ -1264,18 +1264,22 @@ function _getSplitsConfig() {
     const isDeel    = waarde === 'delen';
     const isKomma   = waarde === 'komma';
     const isPlusMin = !isKeer && !isDeel && !isKomma;
+    const isAftrek  = waarde === 'aftrekken';
 
-    const kaartBereik = document.getElementById('kaart-cijfer-bereik');
-    const kaartBrug   = document.getElementById('kaart-cijfer-brug');
-    const kaartVerm   = document.getElementById('kaart-cijfer-verm');
-    const kaartDeel   = document.getElementById('kaart-cijfer-deel');
-    const kaartKomma  = document.getElementById('kaart-cijfer-komma');
+    const kaartBereik   = document.getElementById('kaart-cijfer-bereik');
+    const kaartBrug     = document.getElementById('kaart-cijfer-brug');
+    const kaartVerm     = document.getElementById('kaart-cijfer-verm');
+    const kaartDeel     = document.getElementById('kaart-cijfer-deel');
+    const kaartKomma    = document.getElementById('kaart-cijfer-komma');
+    const chipBrugNul   = document.getElementById('chip-brug-over-nul');
 
     if (kaartBereik) kaartBereik.style.display = isPlusMin ? 'block' : 'none';
     if (kaartBrug)   kaartBrug.style.display   = isPlusMin ? 'block' : 'none';
     if (kaartVerm)   kaartVerm.style.display   = isKeer    ? 'block' : 'none';
     if (kaartDeel)   kaartDeel.style.display   = isDeel    ? 'block' : 'none';
     if (kaartKomma)  kaartKomma.style.display  = isKomma   ? 'block' : 'none';
+    // "Brug over nul" enkel zichtbaar bij aftrekken
+    if (chipBrugNul) chipBrugNul.style.display = isAftrek  ? '' : 'none';
 
     const zinInp = document.getElementById('inp-opdrachtzin-cijferen');
     if (zinInp) {
