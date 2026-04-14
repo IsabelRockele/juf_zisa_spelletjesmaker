@@ -1181,6 +1181,9 @@
             <label class="radio-chip" onclick="App.selecteerCijferBereik(1000,this)">
               <input type="radio" name="cijfer-bereik" value="1000">Tot 1000
             </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBereik(10000,this)">
+              <input type="radio" name="cijfer-bereik" value="10000">Tot 10.000
+            </label>
           </div>
         </div>
       </div>
@@ -1192,15 +1195,21 @@
           Brug
         </div>
         <div class="form-rij">
-          <div class="radio-groep">
+          <div class="radio-groep" id="cijfer-brug-opties">
             <label class="radio-chip geselecteerd" onclick="App.selecteerCijferBrug('beide',this)">
               <input type="radio" name="cijfer-brug" value="beide" checked>Beide
             </label>
-            <label class="radio-chip" onclick="App.selecteerCijferBrug('met',this)">
-              <input type="radio" name="cijfer-brug" value="met">Met brug
-            </label>
             <label class="radio-chip" onclick="App.selecteerCijferBrug('zonder',this)">
               <input type="radio" name="cijfer-brug" value="zonder">Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('met_een',this)">
+              <input type="radio" name="cijfer-brug" value="met_een">Met één brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('meer_dan_een',this)">
+              <input type="radio" name="cijfer-brug" value="meer_dan_een">Meer dan één brug
+            </label>
+            <label class="radio-chip" id="chip-brug-over-nul" style="display:none" onclick="App.selecteerCijferBrug('over_nul',this)">
+              <input type="radio" name="cijfer-brug" value="over_nul">Brug over nul
             </label>
           </div>
         </div>
