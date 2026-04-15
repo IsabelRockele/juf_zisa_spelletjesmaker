@@ -155,9 +155,12 @@ const somTekst = (delen.length >= 3)
       const beenSpanW = aantalTakken === 3 ? (splGroot ? 20 : 8) : (splGroot ? 14 : beenSpan);
 
       // Bij aftrektal: som naar rechts zodat linkervakje splitsbeen in kader valt
-      // Bij 3 takken is de boom breder → meer marge nodig
       const isAftrektal = heeftSplits && oefBewerking === 'aftrekken' && splitspositie === 'aftrektal';
-      const extraMarge = isAftrektal ? (aantalTakken === 3 ? 13 : 6) : 0;
+      const extraMarge = isAftrektal
+        ? (splGroot
+            ? (aantalTakken === 3 ? 22 : 14)   // 4-cijferig: bredere vakjes
+            : (aantalTakken === 3 ? 13 : 6))    // 3-cijferig: origineel
+        : 0;
       const somMarge = marge + extraMarge;
       const somStartX = ox + somMarge;
 
@@ -254,22 +257,23 @@ const somTekst = (delen.length >= 3)
   /* ── Aanvullen constanten ────────────────────────────────── */
   const AANV_KAD_H_ZONDER  = 32;
   const AANV_KAD_H_SCHEMA  = 50;
-  const AANV_KAD_H_SCHIJF  = 62;
-  const AANV_KOLOMMEN      = 3;   // zonder-schema en met-schema: 3 per rij
-  const AANV_KOLOMMEN_SCHIJF = 2; // met-schijfjes: 2 per rij (meer ruimte nodig)
+  const AANV_KAD_H_SCHIJF  = 62;   // tot 1000: 2 rijen schijfjes
+  const AANV_KAD_H_SCHIJF_D = 78;  // tot 10000: 3 rijen schijfjes (4-4-2)
+  const AANV_KOLOMMEN      = 3;
+  const AANV_KOLOMMEN_SCHIJF = 2;
 
-  function _aanvulKadH(variant) {
-    if (variant === 'met-schema')   return AANV_KAD_H_SCHEMA;
-    if (variant === 'met-schijfjes') return AANV_KAD_H_SCHIJF;
+  function _aanvulKadH(variant, niveau) {
+    if (variant === 'met-schema')    return AANV_KAD_H_SCHEMA;
+    if (variant === 'met-schijfjes') return (niveau >= 10000) ? AANV_KAD_H_SCHIJF_D : AANV_KAD_H_SCHIJF;
     return AANV_KAD_H_ZONDER;
   }
 
-  function _tekenAanvullenRij(oefeningen, variant) {
+  function _tekenAanvullenRij(oefeningen, variant, niveau = 100) {
     const aantalKol = variant === 'met-schijfjes' ? AANV_KOLOMMEN_SCHIJF : AANV_KOLOMMEN;
     const kolB  = CW / aantalKol;
     const kadW  = kolB - 6;
     const marge = 3;
-    const kadH  = _aanvulKadH(variant);
+    const kadH  = _aanvulKadH(variant, niveau);
 
     oefeningen.forEach((oef, kol) => {
       const ox = ML + kol * kolB + 3;
@@ -360,91 +364,94 @@ const somTekst = (delen.length >= 3)
   }
 
   function _tekenAanvulSchijfjes(ox, oy, kadW, marge, somY2, groot, klein) {
-    const hKlein = Math.floor(klein / 100);
+    const dKlein = Math.floor(klein / 1000);
+    const hKlein = Math.floor((klein % 1000) / 100);
     const tKlein = Math.floor((klein % 100) / 10);
     const eKlein = klein % 10;
-    const hGroot = Math.floor(groot / 100);
-    const metH   = hGroot > 0;  // H-kolom enkel bij tot 1000
-    const TOTAAL  = 10;
-    const schY    = somY2 + 9;
-    const aantalKol = metH ? 3 : 2;
-    const kolW    = (kadW - marge * 2) / aantalKol;
-    const kopH    = 5;
-    const schijfD = aantalKol === 3 ? 4.2 : 5.2;  // kleiner bij 3 kolommen
-    const gap     = 0.9;
-    const rijH    = schijfD + gap;
+    const dGroot = Math.floor(groot / 1000);
+    const hGroot = Math.floor((groot % 1000) / 100);
+    const metD   = dGroot > 0;
+    const metH   = hGroot > 0 || dGroot > 0;
+
+    const TOTAAL   = 10;
+    const schY     = somY2 + 9;
+    const aantalKol = (metD ? 1 : 0) + (metH ? 1 : 0) + 2;  // D? + H? + T + E
+    const kolW     = (kadW - marge * 2) / aantalKol;
+    const kopH     = 5;
+    // 4-4-2 bij D-kolom, 5-5 anders
+    const rijGrootte = metD ? 4 : 5;
+    const schijfD  = metD ? 3.8 : (metH ? 4.2 : 5.2);
+    const gap      = 0.8;
+    const rijH     = schijfD + gap;
+    const aantalRijen = Math.ceil(TOTAAL / rijGrootte);  // 3 rijen bij 4-4-2, 2 bij 5-5
 
     doc.setFontSize(8);
     doc.setFont('helvetica', 'bold');
+
+    // Kolom X posities
+    let kx = ox + marge;
+    const kolommen = [];
+    if (metD) { kolommen.push({ label:'D', kleur:[220,80,60], txtKleur:[255,255,255], aantalVoor:dKlein, tekst:'1000' }); }
+    if (metH) { kolommen.push({ label:'H', kleur:[100,160,210], txtKleur:[10,50,100], aantalVoor:hKlein, tekst:'100' }); }
+    kolommen.push({ label:'T', kleur:[80,190,130], txtKleur:[10,80,40], aantalVoor:tKlein, tekst:'10' });
+    kolommen.push({ label:'E', kleur:[245,210,100], txtKleur:[100,75,0], aantalVoor:eKlein, tekst:'1' });
+
+    const headerKleuren = {
+      'D': [[220,60,40],[255,255,255]],
+      'H': [[214,234,248],[26,82,118]],
+      'T': [[171,235,198],[30,132,73]],
+      'E': [[254,249,231],[154,125,10]],
+    };
+
+    // Teken headers en kaders
+    kolommen.forEach((kol, i) => {
+      const x = ox + marge + i * kolW;
+      const [bg, fg] = headerKleuren[kol.label];
+      doc.setFillColor(...bg);
+      doc.setDrawColor(170, 170, 170);
+      doc.setLineWidth(0.4);
+      doc.rect(x, schY, kolW, kopH, 'FD');
+      doc.setTextColor(...fg);
+      doc.text(kol.label, x + kolW / 2, schY + kopH - 1, { align: 'center' });
+    });
+
+    // Kader rondom alles
+    const totW = kolW * kolommen.length;
+    const totH = kopH + aantalRijen * rijH + gap;
     doc.setDrawColor(170, 170, 170);
     doc.setLineWidth(0.4);
-
-    // H header — blauw (enkel bij tot 1000)
-    if (metH) {
-      doc.setFillColor(214, 234, 248);
-      doc.rect(ox + marge, schY, kolW, kopH, 'FD');
-      doc.setTextColor(26, 82, 118);
-      doc.text('H', ox + marge + kolW / 2, schY + kopH - 1, { align: 'center' });
+    doc.rect(ox + marge, schY, totW, totH);
+    // Verticale scheidingslijnen
+    for (let i = 1; i < kolommen.length; i++) {
+      doc.line(ox + marge + i * kolW, schY, ox + marge + i * kolW, schY + totH);
     }
 
-    // T header — groen
-    const tKolX = ox + marge + (metH ? kolW : 0);
-    doc.setFillColor(171, 235, 198);
-    doc.rect(tKolX, schY, kolW, kopH, 'FD');
-    doc.setTextColor(30, 132, 73);
-    doc.text('T', tKolX + kolW / 2, schY + kopH - 1, { align: 'center' });
-
-    // E header — geel
-    const eKolX = tKolX + kolW;
-    doc.setFillColor(254, 249, 231);
-    doc.rect(eKolX, schY, kolW, kopH, 'FD');
-    doc.setTextColor(154, 125, 10);
-    doc.text('E', eKolX + kolW / 2, schY + kopH - 1, { align: 'center' });
-
-    // Kader rondom alle kolommen
-    const totW = kolW * aantalKol;
-    doc.setDrawColor(170, 170, 170);
-    doc.setLineWidth(0.4);
-    doc.rect(ox + marge, schY, totW, kopH + rijH * 2 + gap);
-    if (metH) doc.line(ox + marge + kolW, schY, ox + marge + kolW, schY + kopH + rijH * 2 + gap);
-    doc.line(tKolX + kolW, schY, tKolX + kolW, schY + kopH + rijH * 2 + gap);
-
-    const rij1Y = schY + kopH + gap;
-    const rij2Y = rij1Y + rijH;
-
-    function tekenRij(rijY, startIdx, eindIdx, kolX, aantalVoor, kleur, tekst, tekstKleur) {
-      for (let i = startIdx; i < eindIdx; i++) {
-        const sx = kolX + gap + (i - startIdx) * (schijfD + gap) + schijfD / 2;
-        const sy = rijY + schijfD / 2;
-        if (i < aantalVoor) {
-          doc.setFillColor(...kleur);
-          doc.setDrawColor(kleur[0]-40, kleur[1]-40, kleur[2]-40);
+    // Teken schijfjes per kolom
+    kolommen.forEach((kol, ki) => {
+      const kolX = ox + marge + ki * kolW;
+      for (let i = 0; i < TOTAAL; i++) {
+        const rijNr = Math.floor(i / rijGrootte);
+        const posInRij = i % rijGrootte;
+        const sx = kolX + gap + posInRij * (schijfD + gap) + schijfD / 2;
+        const sy = schY + kopH + gap + rijNr * rijH + schijfD / 2;
+        const isVoor = i < kol.aantalVoor;
+        if (isVoor) {
+          doc.setFillColor(...kol.kleur);
+          doc.setDrawColor(kol.kleur[0]-40, kol.kleur[1]-40, kol.kleur[2]-40);
         } else {
           doc.setFillColor(255, 255, 255);
           doc.setDrawColor(180, 180, 180);
         }
         doc.setLineWidth(0.3);
         doc.circle(sx, sy, schijfD / 2, 'FD');
-        if (i < aantalVoor) {
+        if (isVoor) {
           doc.setFont('helvetica', 'bold');
-          doc.setFontSize(5);
-          doc.setTextColor(...tekstKleur);
-          doc.text(tekst, sx, sy + 1, { align: 'center' });
+          doc.setFontSize(4.5);
+          doc.setTextColor(...kol.txtKleur);
+          doc.text(kol.tekst, sx, sy + 1.2, { align: 'center' });
         }
       }
-    }
-
-    // H kolom: blauw
-    if (metH) {
-      tekenRij(rij1Y, 0, 5, ox + marge, hKlein, [100, 160, 210], '100', [10, 50, 100]);
-      tekenRij(rij2Y, 5, 10, ox + marge, hKlein, [100, 160, 210], '100', [10, 50, 100]);
-    }
-    // T kolom: groen
-    tekenRij(rij1Y, 0, 5, tKolX, tKlein, [80, 190, 130], '10', [10, 80, 40]);
-    tekenRij(rij2Y, 5, 10, tKolX, tKlein, [80, 190, 130], '10', [10, 80, 40]);
-    // E kolom: geel
-    tekenRij(rij1Y, 0, 5, eKolX, eKlein, [245, 210, 100], '1', [100, 75, 0]);
-    tekenRij(rij2Y, 5, 10, eKolX, eKlein, [245, 210, 100], '1', [100, 75, 0]);
+    });
   }
 
 
@@ -1634,7 +1641,7 @@ cel(schemaX+2*c+kW, r2y, ingevuld ? oef.g2t_ : null);
   function _tekenAanvullenBlok(blok) {
     const variant     = blok.aanvullenVariant || 'zonder-schema';
     const aantalKol   = variant === 'met-schijfjes' ? AANV_KOLOMMEN_SCHIJF : AANV_KOLOMMEN;
-    const kadH        = _aanvulKadH(variant);
+    const kadH        = _aanvulKadH(variant, blok?.niveau || 100);
     const rijH        = kadH + 5;
     const aantalRijen = Math.ceil(blok.oefeningen.length / aantalKol);
    checkRuimte(ZINRUIMTE + rijH + 4);
@@ -1649,7 +1656,7 @@ doc.setTextColor(26, 58, 92);
     for (let rij = 0; rij < aantalRijen; rij++) {
       if (rij > 0) checkRuimte(rijH);
       const rijOef = blok.oefeningen.slice(rij * aantalKol, (rij + 1) * aantalKol);
-      _tekenAanvullenRij(rijOef, variant);
+      _tekenAanvullenRij(rijOef, variant, blok.niveau || 100);
     }
     y += NABLOK;
     lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
