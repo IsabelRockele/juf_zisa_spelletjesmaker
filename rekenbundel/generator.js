@@ -61,15 +61,19 @@ const Generator = (() => {
           : (niveau >= 10000 ? CompenserenOptellenTot10000 :
              niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
+    const compModuleDhHt = isCompenseren && bewerking === 'optellen' && niveau >= 10000
+      ? CompenserenOptellenTot10000DhHt : null;
     const aanvulModule = niveau >= 10000 ? AanvullenTot10000 : niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule  = isTransformeren
       ? (bewerking === 'aftrekken' ? (niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
          : niveau >= 10000 ? TransformerenOptellenTot10000
          : TransformerenOptellen)
       : null;
+    const transModuleDhHt = isTransformeren && bewerking === 'optellen' && niveau >= 10000
+      ? TransformerenOptellenTot10000DhHt : null;
     const module = isAanvullen     ? aanvulModule :
-                   isCompenseren   ? compModule :
-                   isTransformeren ? transModule :
+                   isCompenseren   ? (oefeningstypes.includes('DH+HT') && compModuleDhHt ? compModuleDhHt : compModule) :
+                   isTransformeren ? (oefeningstypes.includes('DH+HT') && transModuleDhHt ? transModuleDhHt : transModule) :
                    isTafels        ? Tafels :
                    _getModule(bewerking, niveau, brugVoorModule, strategie);
     if (!module) {
@@ -82,9 +86,9 @@ const Generator = (() => {
     if (isTafels)           oefeningen = Tafels.genereer({ tafels, oefeningstypes, aantalOefeningen, tafelPositie, tafelMax });
     else if (isSplitsingen) oefeningen = Splitsingen.genereer({ oefeningstypes, aantalOefeningen, niveau, splitsVariant, splitsGetallen, splitsModus, brug });
     else if (isHerken)      oefeningen = module.genereer({ oefeningstypes, aantalOefeningen });
-    else if (isAanvullen)   oefeningen = aanvulModule.genereer({ aantalOefeningen, oefeningstypes });
-    else if (isCompenseren) oefeningen = compModule.genereer({ aantalOefeningen, oefeningstypes });
-    else if (isTransformeren) oefeningen = transModule.genereer({ niveau, oefeningstypes, aantalOefeningen });
+    else if (isAanvullen)   oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
+    else if (isCompenseren) oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
+    else if (isTransformeren) oefeningen = module.genereer({ niveau, oefeningstypes, aantalOefeningen });
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
     const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
     if (oefeningen.length < 2 && !wilGroot) return null;
@@ -195,23 +199,25 @@ const Generator = (() => {
           : (blok.niveau >= 10000 ? CompenserenOptellenTot10000 :
              blok.niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
+    const compModuleDhHt2 = isCompenseren && blok.bewerking === 'optellen' && blok.niveau >= 10000
+      ? CompenserenOptellenTot10000DhHt : null;
     const aanvulModule2 = blok.niveau >= 10000 ? AanvullenTot10000 : blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule2  = isTransformeren
       ? (blok.bewerking === 'aftrekken' ? (blok.niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
          : blok.niveau >= 10000 ? TransformerenOptellenTot10000
          : TransformerenOptellen)
       : null;
+    const transModuleDhHt2 = isTransformeren && blok.bewerking === 'optellen' && blok.niveau >= 10000
+      ? TransformerenOptellenTot10000DhHt : null;
+    const isDhHtType = blok.config.oefeningstypes?.includes('DH+HT');
     const module = isAanvullen     ? aanvulModule2 :
-                   isCompenseren   ? compModule :
-                   isTransformeren ? transModule2 :
+                   isCompenseren   ? (isDhHtType && compModuleDhHt2 ? compModuleDhHt2 : compModule) :
+                   isTransformeren ? (isDhHtType && transModuleDhHt2 ? transModuleDhHt2 : transModule2) :
                    _getModule(blok.bewerking, blok.niveau, blok.config.brug || 'zonder', blok.config.strategie || 'aftrekker');
     if (!module) return false;
 
     const brugVoorModule = blok.niveau <= 100 ? _brugVoor100(blok.config.brug) : blok.config.brug;
-    const nieuweOef = isAanvullen     ? aanvulModule2.genereer({ aantalOefeningen: 5, oefeningstypes: blok.config.oefeningstypes }) :
-                      isCompenseren   ? compModule.genereer({ aantalOefeningen: 5 }) :
-                      isTransformeren ? transModule2.genereer({ niveau: blok.niveau, oefeningstypes: blok.config.oefeningstypes, aantalOefeningen: 5 }) :
-                      module.genereer({ ...blok.config, brug: brugVoorModule, niveau: blok.niveau, aantalOefeningen: 5 });
+    const nieuweOef = module.genereer({ aantalOefeningen: 5, oefeningstypes: blok.config.oefeningstypes, brug: brugVoorModule, niveau: blok.niveau });
     const bestaandeSleutels = new Set(blok.oefeningen.map(o => o.sleutel));
 
     for (const oef of nieuweOef) {
@@ -238,12 +244,23 @@ const Generator = (() => {
       const transM = bewerking === 'aftrekken' ? (niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
                    : niveau >= 10000 ? TransformerenOptellenTot10000
                    : TransformerenOptellen;
-      return transM.getTypes(niveau);
+      const types = transM.getTypes(niveau);
+      // Voeg DH+HT toe bij optellen tot 10000
+      if (bewerking === 'optellen' && niveau >= 10000) {
+        return [...types, ...TransformerenOptellenTot10000DhHt.getTypes()];
+      }
+      return types;
     } else if (isCompenseren) {
       module = bewerking === 'aftrekken'
         ? (niveau >= 10000 ? CompenserenAftrekkenTot10000 : niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
         : (niveau >= 10000 ? CompenserenOptellenTot10000 :
            niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen);
+      const types = module.getTypes ? module.getTypes(niveau) : [];
+      // Voeg DH+HT toe bij optellen tot 10000
+      if (bewerking === 'optellen' && niveau >= 10000) {
+        return [...types, ...CompenserenOptellenTot10000DhHt.getTypes()];
+      }
+      return types;
     } else if (isAanvullen) {
       module = niveau >= 10000 ? AanvullenTot10000 : niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     } else {
