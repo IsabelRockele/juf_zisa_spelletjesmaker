@@ -11,8 +11,8 @@ const Generator = (() => {
   let _teller = 0;
 
   /* ── Kies de juiste module op basis van bewerking + niveau ── */
-  function _getModule(bewerking, niveau, brug = 'zonder') {
-    if (bewerking === 'aanvullen') return niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+  function _getModule(bewerking, niveau, brug = 'zonder', strategie = 'aftrekker') {
+    if (bewerking === 'aanvullen') return niveau >= 10000 ? AanvullenTot10000 : niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     if (bewerking === 'optellen') {
       if (niveau <= 20)    return OptellenTot20;
       if (niveau <= 100)   return OptellenTot100;
@@ -23,7 +23,12 @@ const Generator = (() => {
       if (niveau <= 20)    return AftrekkenTot20;
       if (niveau <= 100)   return AftrekkenTot100;
       if (niveau <= 1000)  return AftrekkenTot1000;
-      if (niveau <= 10000) return AftrekkenTot10000;
+      if (niveau <= 10000) {
+        if (brug === 'zonder') return AftrekkenTot10000;
+        if (strategie === 'aftrektal')    return AftrekkenTot10000BrugAftrektal;
+        if (strategie === 'rekenfeiten')  return AftrekkenTot10000BrugRekenfeiten;
+        return AftrekkenTot10000BrugAftrekker;
+      }
     }
     if (bewerking === 'herken-brug') return HerkenBrugTot100;
     if (bewerking === 'splitsingen') return Splitsingen;
@@ -38,7 +43,7 @@ const Generator = (() => {
   }
 
   /* ── Maak een nieuw blok ─────────────────────────────────── */
-  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10 }) {
+  function maakBlok({ bewerking, niveau, oefeningstypes, brug, aantalOefeningen, opdrachtzin, hulpmiddelen = [], splitspositie = 'aftrekker', aanvullenVariant = 'zonder-schema', compenserenVariant = 'met-tekens', transformerenVariant = 'schema', schrijflijnenAantal = 2, metVoorbeeld = false, splitsVariant = 'afwisselend', splitsGetallen = null, splitsModus = 'tot', tafels = null, tafelPositie = 'vooraan', tafelMax = 10, strategie = 'aftrekker' }) {
     const isHerken        = bewerking === 'herken-brug';
     const isSplitsingen   = bewerking === 'splitsingen';
     const isTafels        = bewerking === 'tafels';
@@ -52,13 +57,13 @@ const Generator = (() => {
     // Kies module
     const compModule = isCompenseren
       ? (bewerking === 'aftrekken'
-          ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+          ? (niveau >= 10000 ? CompenserenAftrekkenTot10000 : niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
           : (niveau >= 10000 ? CompenserenOptellenTot10000 :
              niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
-    const aanvulModule = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+    const aanvulModule = niveau >= 10000 ? AanvullenTot10000 : niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule  = isTransformeren
-      ? (bewerking === 'aftrekken' ? TransformerenAftrekken
+      ? (bewerking === 'aftrekken' ? (niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
          : niveau >= 10000 ? TransformerenOptellenTot10000
          : TransformerenOptellen)
       : null;
@@ -66,7 +71,7 @@ const Generator = (() => {
                    isCompenseren   ? compModule :
                    isTransformeren ? transModule :
                    isTafels        ? Tafels :
-                   _getModule(bewerking, niveau, brugVoorModule);
+                   _getModule(bewerking, niveau, brugVoorModule, strategie);
     if (!module) {
       console.warn(`Geen module voor ${bewerking} tot ${niveau}`);
       return null;
@@ -85,13 +90,19 @@ const Generator = (() => {
     if (oefeningen.length < 2 && !wilGroot) return null;
 
     const isMaakEerst10 = oefeningstypes?.includes('Maak eerst 10') && oefeningstypes.length === 1;
-    const defaultZin = isCompenseren    ? 'Reken uit door te compenseren.' :
+    const defaultZin = isAanvullen      ? 'Los op door aan te vullen.' :
+                       isCompenseren    ? 'Reken uit door te compenseren.' :
                        isTransformeren  ? 'Reken uit door te transformeren.' :
                        isSplitsingen    ? 'Splits het getal.' :
                        isTafels         ? 'Reken de tafels.' :
                        isHerken         ? 'Kleur Zisa groen bij elke brugoefening.' :
                        isMaakEerst10    ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
                        bewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.';
+
+    // Bij aftrekken tot 10000 met brug: splitspositie volgt uit strategie
+    const effectiefSplitspositie = (bewerking === 'aftrekken' && niveau >= 10000 && brug !== 'zonder')
+      ? (strategie === 'aftrekker' ? 'aftrekker' : 'aftrektal')
+      : splitspositie;
 
     _teller++;
     return {
@@ -102,7 +113,7 @@ const Generator = (() => {
       brug,
       opdrachtzin: opdrachtzin || defaultZin,
       hulpmiddelen,
-      splitspositie,
+      splitspositie: effectiefSplitspositie,
       aanvullenVariant,
       compenserenVariant,
       transformerenVariant,
@@ -112,7 +123,8 @@ const Generator = (() => {
       tafels,
       tafelPositie,
       tafelMax,
-      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax },
+      strategie,
+      config: { bewerking, oefeningstypes, brug, aantalOefeningen, hulpmiddelen, splitspositie: effectiefSplitspositie, aanvullenVariant, compenserenVariant, transformerenVariant, schrijflijnenAantal, metVoorbeeld, splitsVariant, splitsGetallen, splitsModus, tafels, tafelPositie, tafelMax, strategie },
       oefeningen,
     };
   }
@@ -179,20 +191,20 @@ const Generator = (() => {
     const isTransformeren = blok.hulpmiddelen?.includes('transformeren');
     const compModule = isCompenseren
       ? (blok.bewerking === 'aftrekken'
-          ? (blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+          ? (blok.niveau >= 10000 ? CompenserenAftrekkenTot10000 : blok.niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
           : (blok.niveau >= 10000 ? CompenserenOptellenTot10000 :
              blok.niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen))
       : null;
-    const aanvulModule2 = blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+    const aanvulModule2 = blok.niveau >= 10000 ? AanvullenTot10000 : blok.niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     const transModule2  = isTransformeren
-      ? (blok.bewerking === 'aftrekken' ? TransformerenAftrekken
+      ? (blok.bewerking === 'aftrekken' ? (blok.niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
          : blok.niveau >= 10000 ? TransformerenOptellenTot10000
          : TransformerenOptellen)
       : null;
     const module = isAanvullen     ? aanvulModule2 :
                    isCompenseren   ? compModule :
                    isTransformeren ? transModule2 :
-                   _getModule(blok.bewerking, blok.niveau, blok.config.brug || 'zonder');
+                   _getModule(blok.bewerking, blok.niveau, blok.config.brug || 'zonder', blok.config.strategie || 'aftrekker');
     if (!module) return false;
 
     const brugVoorModule = blok.niveau <= 100 ? _brugVoor100(blok.config.brug) : blok.config.brug;
@@ -223,19 +235,19 @@ const Generator = (() => {
 
     let module;
     if (isTransform) {
-      const transM = bewerking === 'aftrekken' ? TransformerenAftrekken
+      const transM = bewerking === 'aftrekken' ? (niveau >= 10000 ? TransformerenAftrekkenTot10000 : TransformerenAftrekken)
                    : niveau >= 10000 ? TransformerenOptellenTot10000
                    : TransformerenOptellen;
       return transM.getTypes(niveau);
     } else if (isCompenseren) {
       module = bewerking === 'aftrekken'
-        ? (niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
+        ? (niveau >= 10000 ? CompenserenAftrekkenTot10000 : niveau >= 1000 ? CompenserenAftrekkenTot1000 : CompenserenAftrekken)
         : (niveau >= 10000 ? CompenserenOptellenTot10000 :
            niveau >= 1000  ? CompenserenOptellenTot1000  : CompenserenOptellen);
     } else if (isAanvullen) {
-      module = niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
+      module = niveau >= 10000 ? AanvullenTot10000 : niveau >= 1000 ? AanvullenTot1000 : AanvullenTot100;
     } else {
-      module = _getModule(bewerking, niveau, brug);
+      module = _getModule(bewerking, niveau, brug, 'aftrekker');
     }
     if (!module) return [];
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
