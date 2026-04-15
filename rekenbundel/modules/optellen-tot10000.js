@@ -20,7 +20,7 @@ const OptellenTot10000 = (() => {
     'D+D',
     'DH+D','DH+H','DH+DH',
     'DHT+D','DHT+H','DHT+T','DHT+DH','DHT+DHT',
-    'DHTE+D','DHTE+H','DHTE+T','DHTE+HT','DHTE+DHT','DHTE+DHTE',
+    'DHTE+D','DHTE+H','DHTE+T','DHTE+HT','DHTE+DHT','DHTE+DHTE','DHTE+HTE',
     'Gemengd',
   ];
 
@@ -78,6 +78,7 @@ const OptellenTot10000 = (() => {
         case 'DHTE+T':   { const g1=maakDHTE();const g2=maakT(); [a,b]=omkeer?[g2,g1]:[g1,g2]; break; }
         case 'DHTE+HT':  { const g1=maakDHTE();const g2=maakHT();[a,b]=omkeer?[g2,g1]:[g1,g2]; break; }
         case 'DHTE+DHT': { const g1=maakDHTE();const g2=maakDHT();[a,b]=omkeer?[g2,g1]:[g1,g2]; break; }
+        case 'DHTE+HTE':  { const g1=maakDHTE();const g2=maakHTE();[a,b]=omkeer?[g2,g1]:[g1,g2]; break; }
         case 'DHTE+DHTE': a = maakDHTE(); b = maakDHTE(); break;
         default: return null;
       }
