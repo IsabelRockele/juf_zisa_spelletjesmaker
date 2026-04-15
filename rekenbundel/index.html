@@ -267,6 +267,21 @@
             </label>
           </div>
         </div>
+        <!-- Strategie-keuze: enkel bij aftrekken + tot 10000 + met brug -->
+        <div class="form-rij" id="rij-strategie" style="display:none">
+          <label>Strategie</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerStrategie('aftrekker',this)">
+              <input type="radio" name="strategie" value="aftrekker" checked>Via aftrekker splitsen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerStrategie('aftrektal',this)">
+              <input type="radio" name="strategie" value="aftrektal">Via aftrektal splitsen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerStrategie('rekenfeiten',this)">
+              <input type="radio" name="strategie" value="rekenfeiten">Via rekenfeiten
+            </label>
+          </div>
+        </div>
         <!-- Verborgen input die de echte brugwaarde bijhoudt voor rest van de app -->
         <input type="radio" name="brug" value="zonder" checked style="display:none">
       </div>
@@ -1916,23 +1931,29 @@
 <script src="modules/aftrekken-tot100.js?v=3"></script>
 <script src="modules/herken-brug-tot100.js?v=3"></script>
 <script src="modules/aanvullen-tot1000.js?v=1"></script>
-<script src="modules/aanvullen-tot100.js?v=3"></script>
+<script src="modules/aanvullen-tot10000.js?v=1"></script>
+<script src="modules/aanvullen-tot100.js?v=4"></script>
 <script src="modules/compenseren-optellen.js?v=3"></script>
 <script src="modules/compenseren-optellen-tot1000.js?v=7"></script>
   <script src="modules/compenseren-optellen-tot10000.js?v=1"></script>
 <script src="modules/compenseren-aftrekken-tot1000.js?v=2"></script>
+  <script src="modules/compenseren-aftrekken-tot10000.js?v=1"></script>
 <script src="modules/compenseren-aftrekken.js?v=2"></script>
   <script src="modules/transformeren-optellen.js?v=1"></script>
   <script src="modules/transformeren-optellen-tot10000.js?v=1"></script>
   <script src="modules/transformeren-aftrekken.js?v=1"></script>
+  <script src="modules/transformeren-aftrekken-tot10000.js?v=1"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
   <script src="modules/optellen-tot10000.js?v=1"></script>
   <script src="modules/optellen-tot10000-brug.js?v=1"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
   <script src="modules/aftrekken-tot10000.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-aftrekker.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-aftrektal.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-rekenfeiten.js?v=1"></script>
 
 <script src="hulpmiddelen.js?v=3"></script>
-<script src="generator.js?v=12"></script>
+<script src="generator.js?v=13"></script>
 <script src="preview.js?v=41"></script>
 <script src="pdf-engine.js?v=51"></script>
 <script src="vraagstukken.js?v=34"></script>
