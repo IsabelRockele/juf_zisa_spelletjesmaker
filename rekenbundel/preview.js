@@ -122,12 +122,12 @@ const Preview = (() => {
     const blokId        = blok.id;
     const isHerken      = blok.bewerking === 'herken-brug';
     const hulp          = blok.hulpmiddelen || [];
-    const heeftSplits   = hulp.includes('splitsbeen');
-    const heeftLijnen   = hulp.includes('schrijflijnen');
+    const heeftSplits   = hulp.includes('splitsbeen') || (oef.splitsDeel1 !== undefined);
+    const heeftLijnen   = hulp.includes('schrijflijnen') || (oef.splitsDeel1 !== undefined);
     const heeftAanvullen = hulp.includes('aanvullen');
-    const splitspositie = blok.splitspositie || 'aftrekker';
+    const splitspositie = blok.splitspositie || (oef.splitsDeel1 !== undefined ? 'aftrekker' : 'aftrekker');
     const bewerking     = blok.bewerking || 'optellen';
-    const schrijflijnenAantal = blok.schrijflijnenAantal || 2;
+    const schrijflijnenAantal = oef.splitsDeel1 !== undefined ? 2 : (blok.schrijflijnenAantal || 2);
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
 
     /* ── Tafels inzicht ──────────────────────────────────── */
@@ -172,6 +172,43 @@ const Preview = (() => {
           <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
         </div>`;
     }
+    /* ── DH-HT / D-HT brug (ingebouwde splits) ─────────────── */
+    if (oef.splitsDeel1 !== undefined) {
+      const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
+      const splGroot = (blok.niveau || 0) >= 10000;
+      const vakKlasse = splGroot ? 'splits-vak-groot' : 'splits-vak';
+      const boomKlasse = splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
+      const isAftrektalSplits = splitspositie === 'aftrektal';
+      const delen = oef.vraag.replace(' =', '').trim().split(' ');
+      // delen = [aftrektal, '-', aftrekker]
+      const doelIdx = isAftrektalSplits ? 0 : 2;
+      const somHTML = delen.map((w, i) =>
+        i === doelIdx ? `<span class="splits-doel">${esc(w)}</span>` : esc(w)
+      ).join(' ') + ' =';
+      const isAftrektalGroot2 = isAftrektalSplits && splGroot;
+      return `
+        <div class="oefening-item oefening-hulp${splGroot ? ' niveau-10000' : ''}${isAftrektalSplits ? ' aftrektal-hulp' : ''}${isAftrektalGroot2 ? ' aftrektal-hulp-groot' : ''}">
+          <div class="hulp-som-rij">
+            <span class="oef-tekst">${somHTML}</span>
+            <span class="antwoord-vak" style="margin-left:4px;"></span>
+          </div>
+          <div class="hulp-splits-rij" data-splits="2">
+            <div class="splitsbeen-anker">
+              <div class="${boomKlasse}"></div>
+              <div class="splitsbeen-vakjes">
+                <div class="${vakKlasse}"></div>
+                <div class="${vakKlasse}"></div>
+              </div>
+            </div>
+          </div>
+          <div class="hulp-schrijflijnen">
+            <div class="schrijflijn"></div>
+            <div class="schrijflijn"></div>
+          </div>
+          ${del}
+        </div>`;
+    }
+
 
     /* ── Aanvullen ───────────────────────────────────────── */
     if (heeftAanvullen) {
@@ -192,7 +229,39 @@ const Preview = (() => {
       return _transformerenHTML(blokId, oef, idx, blok);
     }
 
-    /* ── Maak eerst 10 ───────────────────────────────────────── */
+    /* ── Ingebouwde splits (DH-HT / D-HT brug) ──────────────── */
+    if ((oef.type === 'DH-HT' || oef.type === 'D-HT') && !hulp.includes('splitsbeen') && !hulp.includes('compenseren') && !hulp.includes('transformeren')) {
+      console.log('>>> GRID RENDERER GEBRUIKT:', oef.vraag, 'splitsDeel1:', oef.splitsDeel1);
+      const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
+      const splGroot = (blok.niveau || 0) >= 10000;
+      const vakKlasse = splGroot ? 'splits-vak-groot' : 'splits-vak';
+      const boomKlasse = splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
+      const delen = oef.vraag.replace(' =', '').trim().split(' ');
+      return `
+        <div class="oefening-item oefening-hulp" style="padding-bottom:4px;">
+          <div style="display:inline-grid;grid-template-columns:auto auto auto auto;align-items:center;gap:0 4px;">
+            <span class="oef-tekst" style="grid-column:1;">${esc(delen[0])}</span>
+            <span class="oef-tekst" style="grid-column:2;">${esc(delen[1])}</span>
+            <div style="grid-column:3;display:flex;flex-direction:column;align-items:center;">
+              <span class="oef-tekst">${esc(delen[2])}</span>
+              <div class="${boomKlasse}" style="margin-top:2px;"></div>
+              <div class="splitsbeen-vakjes">
+                <div class="${vakKlasse}"></div>
+                <div class="${vakKlasse}"></div>
+              </div>
+            </div>
+            <div style="grid-column:4;display:flex;align-items:flex-start;gap:4px;padding-top:2px;">
+              <span class="oef-tekst">=</span>
+              <span class="antwoord-vak"></span>
+            </div>
+          </div>
+          <div class="hulp-schrijflijnen" style="margin-top:4px;">
+            <div class="schrijflijn"></div>
+            <div class="schrijflijn"></div>
+          </div>
+          ${del}
+        </div>`;
+    }
     if (oef.drieTermen) {
       const metVoorbeeld = blok.metVoorbeeld || false;
       const isVoorbeeld  = metVoorbeeld && idx === 0;
@@ -248,7 +317,7 @@ const Preview = (() => {
     const vakjesHTML = splAantal > 0 ? Array(splAantal).fill(`<div class="${vakKlasse}"></div>`).join('') : '';
 
     return `
-      <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''  }${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}">
+      <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}${splGroot ? ' niveau-10000' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
           <span class="antwoord-vak" style="margin-left:4px;"></span>
@@ -806,7 +875,8 @@ const Preview = (() => {
 
       const boom   = anker.querySelector('.splitsbeen-boom');
       const isDrie = boom?.classList.contains('splitsbeen-3');
-      const boomB  = isDrie ? 80 : 52;  // iets groter dan werkelijke breedte → schuift links
+      const isGroot = boom?.classList.contains('splitsbeen-boom-groot');
+      const boomB  = isDrie ? 80 : isGroot ? 72 : 48;
 
       // Zet anker absoluut t.o.v. hulp-splits-rij (die is position:relative)
       // splits-rij heeft dezelfde left als oefening (minus padding)
