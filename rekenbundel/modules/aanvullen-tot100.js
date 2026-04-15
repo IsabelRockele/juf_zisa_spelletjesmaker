@@ -64,7 +64,7 @@ const AanvullenTot100 = (() => {
   }
 
   function getTypes() {
-    return ['aanvullen'];
+    return ['TE-TE'];
   }
 
   return { genereer, getTypes };
