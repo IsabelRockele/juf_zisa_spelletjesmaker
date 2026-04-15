@@ -1218,8 +1218,15 @@ function _getSplitsConfig() {
   function downloadPDF() {
     if (bundelData.length === 0) return;
     const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
-    PdfEngine.genereer(bundelData, titel);
+    PdfEngine.genereer(bundelData, titel, false);
     toonToast('📄 PDF gedownload!', '#27AE60');
+  }
+
+  function downloadSleutel() {
+    if (bundelData.length === 0) return;
+    const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
+    PdfEngine.genereer(bundelData, titel, true);
+    toonToast('🔑 Oplossingssleutel gedownload!', '#27AE60');
   }
 
   /* ── Initialisatie ───────────────────────────────────────── */
@@ -1930,7 +1937,7 @@ function _getSplitsConfig() {
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
-    genereerPreview, downloadPDF,
+    genereerPreview, downloadPDF, downloadSleutel, getBundelData: () => bundelData,
     selecteerCijferBewerking, selecteerCijferBereik, selecteerCijferBrug,
     selecteerCijferVermType, selecteerCijferVermBrug,
     selecteerCijferDeelType, selecteerCijferDeelRest,
