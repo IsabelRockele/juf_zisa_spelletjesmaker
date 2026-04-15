@@ -163,6 +163,7 @@
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
+  <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
   <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
@@ -1416,6 +1417,120 @@
 
     </div><!-- /tab-cijferen -->
 
+    <!-- ── SCHATTEND REKENEN SIDEBAR CONTENT ─────────────────────── -->
+    <div class="sidebar-content" id="tab-schatten" style="display:none">
+
+      <div class="sectie-titel">🔮 Schattend rekenen</div>
+
+      <!-- 1. Niveau (eerst!) -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Niveau</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerSchattenNiveau(1000,this)">
+              <input type="radio" name="schatten-niveau" value="1000">Tot 1.000
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenNiveau(10000,this)">
+              <input type="radio" name="schatten-niveau" value="10000" checked>Tot 10.000
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Oefentype -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Oefentype</div>
+        <div class="form-rij">
+          <div class="radio-groep" style="flex-direction:column;gap:6px">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenType('afronden',this)">
+              <input type="radio" name="schatten-type" value="afronden" checked>
+              🎯 Afronden
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('schatting-tabel',this)">
+              <input type="radio" name="schatten-type" value="schatting-tabel">
+              📊 Schatting met tabel (4 kolommen)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('schatting-compact',this)">
+              <input type="radio" name="schatten-type" value="schatting-compact">
+              ➡️ Schatting compact (1 lijn)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('mogelijk',this)">
+              <input type="radio" name="schatten-type" value="mogelijk">
+              ✅ Is het antwoord mogelijk?
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Bewerking (verborgen bij afronden) -->
+      <div class="config-kaart" id="kaart-schatten-bewerking" style="display:none">
+        <div class="kaart-titel"><div class="icon">➕</div>Bewerking</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenBewerking('optellen',this)">
+              <input type="radio" name="schatten-bewerking" value="optellen" checked>Optellen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenBewerking('aftrekken',this)">
+              <input type="radio" name="schatten-bewerking" value="aftrekken">Aftrekken
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenBewerking('gemengd',this)">
+              <input type="radio" name="schatten-bewerking" value="gemengd">Gemengd
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Afronden naar (verborgen bij afronden-type, want dan altijd beide) -->
+      <div class="config-kaart" id="kaart-schatten-afronden" style="display:none">
+        <div class="kaart-titel"><div class="icon">🔵</div>Afronden naar</div>
+        <div class="form-rij">
+          <div class="radio-groep" id="rg-schatten-afronden">
+            <!-- Tot 1.000: T en H zichtbaar; tot 10.000: H en D zichtbaar -->
+            <label class="radio-chip" id="chip-schatten-T" onclick="App.selecteerSchattenAfronden('T',this)" style="display:none">
+              <input type="radio" name="schatten-afronden" value="T">
+              Dichtstbij gelegen <strong style="color:#27ae60">T</strong>iental
+            </label>
+            <label class="radio-chip geselecteerd" id="chip-schatten-H" onclick="App.selecteerSchattenAfronden('H',this)">
+              <input type="radio" name="schatten-afronden" value="H" checked>
+              Dichtstbij gelegen <strong style="color:#2980b9">H</strong>onderdtal
+            </label>
+            <label class="radio-chip" id="chip-schatten-D" onclick="App.selecteerSchattenAfronden('D',this)">
+              <input type="radio" name="schatten-afronden" value="D">
+              Dichtstbij gelegen <strong style="color:#e74c3c">D</strong>uizendtal
+            </label>
+          </div>
+        </div>
+        <div id="schatten-afronden-hint" style="font-size:11px;color:#888;margin-top:4px">
+          Tot 10.000: afronden naar honderdtal of duizendtal.
+        </div>
+      </div>
+
+      <!-- 5. Opdracht & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdracht &amp; hoeveelheid</div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-schatten" value="Rond het getal af. Schrijf in de tabel." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-schatten">
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegSchattenBlokToe()" style="background:#e8780a">
+        ＋ Voeg schattingsblok toe
+      </button>
+
+    </div><!-- /tab-schatten -->
+
+
     <!-- ── TAB: VRAAGSTUKKEN ─────────────────────────────────── -->
     <div class="sidebar-content" id="tab-vraagstukken" style="display:none">
 
@@ -1958,6 +2073,7 @@
   <script src="modules/transformeren-aftrekken-tot10000-dh-ht.js?v=1"></script>
 
 <script src="hulpmiddelen.js?v=3"></script>
+<script src="modules/schatten.js?v=1"></script>
 <script src="generator.js?v=13"></script>
 <script src="preview.js?v=42"></script>
 <script src="pdf-engine.js?v=51"></script>
