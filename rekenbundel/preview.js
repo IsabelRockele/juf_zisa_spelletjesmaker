@@ -4,6 +4,215 @@
 
 const Preview = (() => {
 
+  let _toonOplossingen = false;
+
+  /* ── Bereken splits-waarden vanuit oefening-vraag ─────────
+     Werkt voor optellen en aftrekken tot 20/100/1000/10000
+     Geeft { d1, d2, sl1, sl2 } terug
+  ──────────────────────────────────────────────────────────── */
+  function _berekenSplits(oef, bewerking, splitspositie, strategie, aantalLijnen) {
+    // Als de data al aanwezig is, gebruik die
+    if (oef.splitsDeel1 !== undefined && oef.splitsDeel1 !== null &&
+        oef.splitsDeel2 !== undefined && oef.splitsDeel2 !== null) {
+      return {
+        d1: oef.splitsDeel1,
+        d2: oef.splitsDeel2,
+        sl1: oef.schrijflijn1 ?? '',
+        sl2: oef.schrijflijn2 ?? '',
+      };
+    }
+    // Bereken vanuit de vraag
+    try {
+      const delen = (oef.vraag || '').replace(' =','').trim().split(' ');
+      if (delen.length < 3) return { d1:'', d2:'', sl1:'', sl2:'' };
+      const g1 = parseInt(delen[0]) || 0;
+      const g2 = parseInt(delen[2]) || 0;
+      const antwoord = oef.antwoord ?? (bewerking === 'optellen' ? g1 + g2 : g1 - g2);
+
+      let d1, d2, sl1 = '', sl2 = '', sl3 = '';
+      if (bewerking === 'optellen') {
+        const nLijnen = aantalLijnen || 2;
+        const g2H = Math.floor(g2 / 100) * 100;   // honderden van g2
+        const g2T = Math.floor((g2 % 100) / 10) * 10; // tientallen van g2
+        const g2E = g2 % 10;                        // eenheden van g2
+        const isHTE = g2H > 0;  // HTE+HTE strategie als er honderden zijn
+        const isTE  = !isHTE && g2T > 0;  // TE+TE als alleen tientallen
+
+        if (isHTE) {
+          // HTE strategie: splits in H + T + E (altijd 3 lijnen)
+          d1 = g2H; d2 = g2T; const d3He = g2E;
+          const ts1 = g1 + g2H;
+          const ts2 = ts1 + g2T;
+          sl1 = `${g1} + ${g2H} = ${ts1}`;
+          sl2 = `${ts1} + ${g2T} = ${ts2}`;
+          sl3 = `${ts2} + ${g2E} = ${antwoord}`;
+        } else if (isTE) {
+          // TE+TE strategie: splits bijteller in T en E
+          d1 = g2T; d2 = g2E;
+          const ts1 = g1 + g2T;
+          if (nLijnen >= 3 && g2E > 0) {
+            // 3 lijnen: splits eenheden verder via tiental
+            const e1 = ts1 % 10;
+            const d2a = e1 === 0 ? g2E : Math.min(g2E, 10 - e1);
+            const d2b = g2E - d2a;
+            const ts2 = ts1 + d2a;
+            sl1 = `${g1} + ${g2T} = ${ts1}`;
+            sl2 = `${ts1} + ${d2a} = ${ts2}`;
+            sl3 = `${ts2} + ${d2b} = ${antwoord}`;
+          } else {
+            sl1 = `${g1} + ${g2T} = ${ts1}`;
+            sl2 = `${ts1} + ${g2E} = ${antwoord}`;
+          }
+        } else {
+          // Aanvullingsstrategie: aanvullen tot tiental
+          const eenhedenG1 = g1 % 10;
+          d1 = eenhedenG1 === 0 ? 10 : (10 - eenhedenG1);
+          d2 = g2 - d1;
+          const ts1 = g1 + d1;
+          sl1 = `${g1} + ${d1} = ${ts1}`;
+          sl2 = `${ts1} + ${d2} = ${antwoord}`;
+        }
+      } else if (splitspositie === 'aftrektal') {
+        // T-E strategie: splits aftrektal, bewaar tiendelen apart
+        // 20-9: 20=10+10 -> 10-9=1, 10+1=11
+        // 50-7: 50=40+10 -> 10-7=3, 40+3=43
+        d1 = 10;                          // altijd 10 (het stuk dat afgetrokken wordt)
+        d2 = g1 - 10;                     // rest (tiendelen, bijv. 40)
+        const ts1At = d1 - g2;            // 10 - g2
+        sl1 = `${d1} - ${g2} = ${ts1At}`;
+        sl2 = `${d2} + ${ts1At} = ${antwoord}`;
+      } else {
+        // T-TE strategie: splits de aftrekker in T en E
+        // 50-37: 37=30+7 -> 50-30=20, 20-7=13
+        // 13-8: 8=0+8 -> splits op eenheden g1: 13-3=10, 10-5=5
+        const d1T = Math.floor(g2 / 10) * 10;  // tiendelen van g2
+        const d2E = g2 % 10;                    // eenheden van g2
+        if (d1T === 0) {
+          // Enkel eenheden: splits op eenheden van g1
+          d1 = g1 % 10;
+          d2 = g2 - d1;
+          const ts1E = g1 - d1;
+          sl1 = `${g1} - ${d1} = ${ts1E}`;
+          sl2 = `${ts1E} - ${d2} = ${antwoord}`;
+        } else {
+          d1 = d1T; d2 = d2E;
+          const ts1TE = g1 - d1;
+          sl1 = `${g1} - ${d1} = ${ts1TE}`;
+          sl2 = `${ts1TE} - ${d2} = ${antwoord}`;
+        }
+      }
+      return { d1, d2, sl1: sl1 || '', sl2: sl2 || '', sl3: sl3 || '' };
+    } catch(e) {
+      return { d1:'', d2:'', sl1:'', sl2:'' };
+    }
+  }
+
+  function toggleOplossingen(btn) {
+    _toonOplossingen = !_toonOplossingen;
+    if (btn) {
+      btn.textContent = _toonOplossingen ? '🙈 Verberg oplossingen' : '👁 Toon oplossingen';
+      btn.style.background = _toonOplossingen ? '#27AE60' : '';
+      btn.style.color = _toonOplossingen ? '#fff' : '';
+    }
+    // Herrender zodat compenseren/transformeren correct tonen
+    // (die gebruiken _toonOplossingen in hun renderer)
+    if (typeof App !== 'undefined' && typeof App.getBundelData === 'function') {
+      const bd = App.getBundelData();
+      if (bd && bd.length > 0) {
+        const scrollY = window.scrollY;
+        Preview.render(bd);
+        window.scrollTo(0, scrollY);
+        // GEEN return: val door naar data-antwoord loop voor aanvullen/splits/schrijflijnen
+      }
+    }
+
+    // Alle elementen met data-antwoord — universeel
+    document.querySelectorAll('[data-antwoord]').forEach(el => {
+      const ant = String(el.dataset.antwoord ?? '').trim();
+      if (ant === '' || ant === 'undefined') return;
+
+      const isSchrijflijn  = el.classList.contains('schrijflijn');
+      const isSplitsVak    = el.classList.contains('splits-vak') || el.classList.contains('splits-vak-groot');
+      const isAntwoordVak  = el.classList.contains('antwoord-vak');
+      const isInvulhokje   = el.classList.contains('invulhokje');
+      const isAanvulVraag  = el.classList.contains('aanvullen-vraag');
+
+      if (_toonOplossingen) {
+        el.textContent = ant;
+        el.style.color      = '#006100';
+        el.style.fontWeight = '700';
+
+        if (isSchrijflijn) {
+          // Schrijflijn: geef hoogte zodat tekst zichtbaar is
+          el.style.height        = 'auto';
+          el.style.minHeight     = '18px';
+          el.style.borderBottom  = '2px solid #00a650';
+          el.style.paddingBottom = '2px';
+          el.style.display       = 'block';
+          el.style.lineHeight    = '18px';
+          el.style.paddingLeft   = '4px';
+        } else if (isSplitsVak) {
+          // Splitsbeen vakje: groen kader
+          el.style.background    = '#c6efce';
+          el.style.border        = '1.5px solid #00a650';
+          el.style.display       = 'flex';
+          el.style.alignItems    = 'center';
+          el.style.justifyContent = 'center';
+        } else if (isAntwoordVak) {
+          // Antwoord vakje na =
+          el.style.background    = '#c6efce';
+          el.style.border        = '1.5px solid #00a650';
+          el.style.display       = 'flex';
+          el.style.alignItems    = 'center';
+          el.style.justifyContent = 'center';
+        } else if (isInvulhokje || el.classList.contains('comp-blokje-hokje')) {
+          // Aanvullen/compenseren invulhokje
+          el.style.background    = '#c6efce';
+          el.style.border        = '1.5px solid #00a650';
+          el.style.display       = 'inline-flex';
+          el.style.alignItems    = 'center';
+          el.style.justifyContent = 'center';
+          el.style.minWidth      = '28px';
+          el.style.padding       = '0 4px';
+        } else if (isAanvulVraag) {
+          // Aanvullen schema ?-vakje
+          el.style.background    = '#c6efce';
+          el.style.color         = '#006100';
+          el.style.fontWeight    = '700';
+        } else if (el.classList.contains('trans-schrijflijn') || el.classList.contains('comp-schrijf-tekst')) {
+          // Transformeren/compenseren schrijflijnen
+          el.style.borderBottom  = '2px solid #00a650';
+          el.style.minWidth      = '40px';
+          el.style.display       = 'inline-block';
+          el.style.paddingBottom = '1px';
+        } else {
+          // Andere (tafels etc)
+          el.style.background    = '#c6efce';
+          el.style.border        = '1.5px solid #00a650';
+        }
+      } else {
+        el.textContent = '';
+        el.style.background     = '';
+        el.style.color          = '';
+        el.style.fontWeight     = '';
+        el.style.border         = '';
+        el.style.borderBottom   = '';
+        el.style.paddingBottom  = '';
+        el.style.display        = '';
+        el.style.alignItems     = '';
+        el.style.justifyContent = '';
+        el.style.minWidth       = '';
+        el.style.height         = '';
+        el.style.minHeight      = '';
+        el.style.lineHeight     = '';
+        el.style.paddingLeft    = '';
+        el.style.padding        = '';
+        el.style.minWidth       = '';
+        el.style.display        = '';
+      }
+    });
+  }
+
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -13,6 +222,12 @@ const Preview = (() => {
     const btnGenereer = document.getElementById('btn-genereer');
     const btnPdf      = document.getElementById('btn-pdf');
     const teller      = document.getElementById('blok-teller');
+    // Reset toggle enkel bij nieuwe render ALS het al uitstond
+    // (niet resetten als de gebruiker oplossingen bekijkt en een oefening toevoegt)
+    if (!_toonOplossingen) {
+      const btnToggleR = document.getElementById('btn-toggle-oplossingen');
+      if (btnToggleR) { btnToggleR.textContent = '👁 Toon oplossingen'; btnToggleR.style.background = ''; btnToggleR.style.color = ''; }
+    }
 
     teller.textContent = `${bundelData.length} blok${bundelData.length !== 1 ? 'ken' : ''}`;
 
@@ -25,11 +240,19 @@ const Preview = (() => {
         </div>`;
       btnGenereer.disabled = true;
       btnPdf.disabled      = true;
+      const btnSleutelD = document.getElementById('btn-sleutel');
+      if (btnSleutelD) btnSleutelD.disabled = true;
+      const btnToggleD = document.getElementById('btn-toggle-oplossingen');
+      if (btnToggleD) btnToggleD.disabled = true;
       return;
     }
 
     btnGenereer.disabled = false;
     btnPdf.disabled      = false;
+    const btnSleutel = document.getElementById('btn-sleutel');
+    if (btnSleutel) btnSleutel.disabled = false;
+    const btnToggle = document.getElementById('btn-toggle-oplossingen');
+    if (btnToggle) btnToggle.disabled = false;
     container.innerHTML  = '';
     bundelData.forEach(blok => container.appendChild(_maakBlokElement(blok)));
     // Splitsbeen ankers positioneren onder hun doelgetal
@@ -170,7 +393,7 @@ const Preview = (() => {
             </div>
           </div>
           <span class="oef-tekst">${esc(oef.vraag)}</span>
-          <span class="antwoord-vak"></span>
+          <span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}"></span>
           <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
         </div>`;
     }
@@ -182,30 +405,39 @@ const Preview = (() => {
       const boomKlasse = splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
       const isAftrektalSplits = splitspositie === 'aftrektal';
       const delen = oef.vraag.replace(' =', '').trim().split(' ');
-      // delen = [aftrektal, '-', aftrekker]
       const doelIdx = isAftrektalSplits ? 0 : 2;
       const somHTML = delen.map((w, i) =>
         i === doelIdx ? `<span class="splits-doel">${esc(w)}</span>` : esc(w)
       ).join(' ') + ' =';
       const isAftrektalGroot2 = isAftrektalSplits && splGroot;
+
+      // Bereken splits-waarden via centrale helper
+      const _sp = _berekenSplits(oef, isAftrektalSplits ? 'aftrekken' : (blok.bewerking || 'optellen'), splitspositie, blok.config?.strategie, schrijflijnenAantal, splitspositie);
+      const d1 = _sp.d1;
+      const d2 = _sp.d2;
+      const sl1 = _sp.sl1;
+      const sl2 = _sp.sl2;
+      const sl3 = _sp.sl3 || '';
+
       return `
         <div class="oefening-item oefening-hulp${splGroot ? ' niveau-10000' : ''}${isAftrektalSplits ? ' aftrektal-hulp' : ''}${isAftrektalGroot2 ? ' aftrektal-hulp-groot' : ''}">
           <div class="hulp-som-rij">
             <span class="oef-tekst">${somHTML}</span>
-            <span class="antwoord-vak" style="margin-left:4px;"></span>
+            <span class="antwoord-vak" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}"></span>
           </div>
           <div class="hulp-splits-rij" data-splits="2">
             <div class="splitsbeen-anker">
               <div class="${boomKlasse}"></div>
               <div class="splitsbeen-vakjes">
-                <div class="${vakKlasse}"></div>
-                <div class="${vakKlasse}"></div>
+                <div class="${vakKlasse}" data-antwoord="${d1}"></div>
+                <div class="${vakKlasse}" data-antwoord="${d2}"></div>
               </div>
             </div>
           </div>
           <div class="hulp-schrijflijnen">
-            <div class="schrijflijn"></div>
-            <div class="schrijflijn"></div>
+            <div class="schrijflijn" data-antwoord="${sl1}"></div>
+            <div class="schrijflijn" data-antwoord="${sl2}"></div>
+            ${sl3 ? `<div class="schrijflijn" data-antwoord="${sl3}"></div>` : ''}
           </div>
           ${del}
         </div>`;
@@ -239,6 +471,12 @@ const Preview = (() => {
       const vakKlasse = splGroot ? 'splits-vak-groot' : 'splits-vak';
       const boomKlasse = splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
       const delen = oef.vraag.replace(' =', '').trim().split(' ');
+      // Bereken splits-waarden via centrale helper
+      const _spGrid = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, blok.schrijflijnenAantal || 2);
+      const d1Grid = _spGrid.d1;
+      const d2Grid = _spGrid.d2;
+      const sl1Grid = _spGrid.sl1;
+      const sl2Grid = _spGrid.sl2;
       return `
         <div class="oefening-item oefening-hulp" style="padding-bottom:4px;">
           <div style="display:inline-grid;grid-template-columns:auto auto auto auto;align-items:center;gap:0 4px;">
@@ -248,18 +486,18 @@ const Preview = (() => {
               <span class="oef-tekst">${esc(delen[2])}</span>
               <div class="${boomKlasse}" style="margin-top:2px;"></div>
               <div class="splitsbeen-vakjes">
-                <div class="${vakKlasse}"></div>
-                <div class="${vakKlasse}"></div>
+                <div class="${vakKlasse}" data-antwoord="${d1Grid}"></div>
+                <div class="${vakKlasse}" data-antwoord="${d2Grid}"></div>
               </div>
             </div>
             <div style="grid-column:4;display:flex;align-items:flex-start;gap:4px;padding-top:2px;">
               <span class="oef-tekst">=</span>
-              <span class="antwoord-vak"></span>
+              <span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}"></span>
             </div>
           </div>
           <div class="hulp-schrijflijnen" style="margin-top:4px;">
-            <div class="schrijflijn"></div>
-            <div class="schrijflijn"></div>
+            <div class="schrijflijn" data-antwoord="${sl1Grid}"></div>
+            <div class="schrijflijn" data-antwoord="${sl2Grid}"></div>
           </div>
           ${del}
         </div>`;
@@ -280,7 +518,7 @@ const Preview = (() => {
       return `
         <div class="oefening-item">
           <span class="oef-tekst">${esc(oef.vraag)}</span>
-          <span class="antwoord-vak"></span>
+          <span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}"></span>
           <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
         </div>`;
     }
@@ -316,13 +554,24 @@ const Preview = (() => {
     const boomKlasse = splAantal === 3 ? 'splitsbeen-boom splitsbeen-3' :
                        splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
     const vakKlasse  = splGroot ? 'splits-vak-groot' : 'splits-vak';
-    const vakjesHTML = splAantal > 0 ? Array(splAantal).fill(`<div class="${vakKlasse}"></div>`).join('') : '';
+    let vakjesHTML = '';
+    if (splAantal > 0) {
+      // Gebruik _berekenSplits voor correcte d1/d2
+      const _spVak = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, blok.schrijflijnenAantal || 2);
+      const splAntw = splAantal === 3
+        ? [oef.splitsH ?? '', oef.splitsT ?? '', oef.splitsE ?? '']
+        : [_spVak.d1 !== '' ? _spVak.d1 : (oef.splitsDeel1 ?? ''),
+           _spVak.d2 !== '' ? _spVak.d2 : (oef.splitsDeel2 ?? '')];
+      vakjesHTML = splAntw.map(ant =>
+        `<div class="${vakKlasse}" data-antwoord="${ant}"></div>`
+      ).join('');
+    }
 
     return `
       <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}${splGroot ? ' niveau-10000' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
-          <span class="antwoord-vak" style="margin-left:4px;"></span>
+          <span class="antwoord-vak" style="margin-left:4px;" data-antwoord="${oef.antwoord ?? ''}" ></span>
         </div>
         ${heeftSplits ? `
         <div class="hulp-splits-rij" data-splits="${splAantal}">
@@ -333,7 +582,13 @@ const Preview = (() => {
         </div>` : ''}
         ${heeftLijnen ? `
         <div class="hulp-schrijflijnen">
-          ${Array(schrijflijnenAantal).fill('<div class="schrijflijn"></div>').join('')}
+          ${(() => {
+            const _spH = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, schrijflijnenAantal);
+            const antw = [_spH.sl1, _spH.sl2, _spH.sl3];
+            return Array(schrijflijnenAantal).fill(0).map((_, si) =>
+              `<div class="schrijflijn" data-antwoord="${antw[si] ?? ''}"></div>`
+            ).join('');
+          })()}
         </div>` : ''}
         <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
       </div>`;
@@ -345,7 +600,8 @@ const Preview = (() => {
     const groot  = parseInt(delen[0]);
     const klein  = parseInt(delen[2]);
     const del    = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
-    const hokje  = `<span class="invulhokje"></span>`;
+    const antwoord = groot - klein;
+    const hokje  = `<span class="invulhokje" data-antwoord="${antwoord}"></span>`;
 
     if (variant === 'zonder-schema') {
       return `
@@ -367,7 +623,7 @@ const Preview = (() => {
             <div class="aanvullen-groot">${groot}</div>
             <div class="aanvullen-rij-onder">
               <div class="aanvullen-klein">${klein}</div>
-              <div class="aanvullen-vraag">?</div>
+              <div class="aanvullen-vraag" data-antwoord="${antwoord}">?</div>
             </div>
           </div>
           ${del}
@@ -400,16 +656,31 @@ const Preview = (() => {
 
   function _schijfjesHTML(dKlein, hKlein, tKlein, eKlein, dGroot, hGroot, tGroot, eGroot) {
     const TOTAAL = 10;
+    const LEGE_RIJ = 5;  // extra lege schijfjes onderaan voor aanvullen
     const metD = dGroot > 0;
     const metH = hGroot > 0 || dGroot > 0;
     const rijGrootte = metD ? 4 : 5;  // 4-4-2 bij D-kolom, 5-5 bij anderen
 
-    function schijfjesVoorKolom(aantalVoorgetekend, klas, getal) {
+    // Bepaal welke kolommen een lege aanvulrij nodig hebben
+    // tot 100: altijd E (en soms T bij brug over tiental)
+    // tot 1000: T en E
+    // tot 10000: H, T en E
+    const metLegeRijE = true;          // altijd
+    const metLegeRijT = tGroot > 0;    // bij tot 1000 en hoger
+    const metLegeRijH = hGroot > 0;    // bij tot 10000
+
+    function schijfjesVoorKolom(aantalVoorgetekend, klas, getal, metLegeAanvulRij) {
       const items = [];
       for (let i = 0; i < TOTAAL; i++) {
         items.push(i < aantalVoorgetekend
           ? `<div class="schijfje ${klas}">${getal}</div>`
           : `<div class="schijfje schijfje-leeg"></div>`);
+      }
+      // Extra lege rij onderaan voor aanvullen inkleuren
+      if (metLegeAanvulRij) {
+        for (let i = 0; i < LEGE_RIJ; i++) {
+          items.push(`<div class="schijfje schijfje-leeg schijfje-aanvul"></div>`);
+        }
       }
       const rijen = [];
       for (let r = 0; r < items.length; r += rijGrootte) {
@@ -421,13 +692,13 @@ const Preview = (() => {
     const dKolom = metD ? `
       <div class="schijfjes-kolom schijfjes-kolom-d">
         <div class="schijfjes-kop schijfjes-kop-d">D</div>
-        ${schijfjesVoorKolom(dKlein, 'schijfje-d', 1000)}
+        ${schijfjesVoorKolom(dKlein, 'schijfje-d', 1000, false)}
       </div>` : '';
 
     const hKolom = metH ? `
       <div class="schijfjes-kolom schijfjes-kolom-h">
         <div class="schijfjes-kop schijfjes-kop-h">H</div>
-        ${schijfjesVoorKolom(hKlein, 'schijfje-h', 100)}
+        ${schijfjesVoorKolom(hKlein, 'schijfje-h', 100, metLegeRijH)}
       </div>` : '';
 
     return `
@@ -435,11 +706,11 @@ const Preview = (() => {
       ${hKolom}
       <div class="schijfjes-kolom schijfjes-kolom-t">
         <div class="schijfjes-kop schijfjes-kop-t">T</div>
-        ${schijfjesVoorKolom(tKlein, 'schijfje-t', 10)}
+        ${schijfjesVoorKolom(tKlein, 'schijfje-t', 10, metLegeRijT)}
       </div>
       <div class="schijfjes-kolom schijfjes-kolom-e">
         <div class="schijfjes-kop schijfjes-kop-e">E</div>
-        ${schijfjesVoorKolom(eKlein, 'schijfje-e', 1)}
+        ${schijfjesVoorKolom(eKlein, 'schijfje-e', 1, metLegeRijE)}
       </div>`;
   }
 
@@ -452,7 +723,7 @@ const Preview = (() => {
     if (variant === 'zonder-hulp') {
       const isAftrekken = oef.vraag.includes(' - ');
       const teken = isAftrekken ? '-' : '+';
-      if (isVoorbeeldOef) {
+      if (isVoorbeeldOef || _toonOplossingen) {
         // Voorbeeld: som = tussenstap − delta = antwoord
         const tussenTeken = isAftrekken ? '+' : '−';
         return `<div class="oefening-item oefening-comp comp-voorbeeld">
@@ -498,7 +769,7 @@ const Preview = (() => {
 
     // Compenseerblokje — volgorde afhankelijk van bewerking
     let blokjeInhoud;
-    if (isVoorbeeldOef) {
+    if (isVoorbeeldOef || _toonOplossingen) {
       if (isAftrekken) {
         blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-getal">${oef.tiental}</span><span class="comp-blokje-teken">+</span><span class="comp-blokje-getal">${oef.compenseerDelta}</span>`;
       } else {
@@ -506,19 +777,22 @@ const Preview = (() => {
       }
     } else if (variant === 'met-tekens') {
       if (isAftrekken) {
-        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje"></span><span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje"></span>`;
+        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${compGetal}"></span><span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
       } else {
-        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje"></span>`;
+        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${compGetal}"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
       }
     } else {
       // zonder-tekens én zelf-kringen: 2 lege brede hokjes
-      blokjeInhoud = `<span class="comp-blokje-hokje comp-blokje-hokje-breed"></span><span class="comp-blokje-hokje comp-blokje-hokje-breed"></span>`;
+      blokjeInhoud = `<span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${compGetal}"></span><span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${oef.compenseerDelta}"></span>`;
     }
 
-    const antw  = isVoorbeeldOef ? String(oef.antwoord) : '';
+    const antw  = (isVoorbeeldOef || _toonOplossingen) ? String(oef.antwoord) : '';
+    const antwData = oef.antwoord ?? '';
     // Schrijflijnen: tekst staat boven de lijn (als label), lijn is de streep eronder
-    const lijn1tekst = isVoorbeeldOef ? esc(oef.schrijflijn1) : '';
-    const lijn2tekst = isVoorbeeldOef ? esc(oef.schrijflijn2) : '';
+    const lijn1tekst = (isVoorbeeldOef || _toonOplossingen) ? esc(oef.schrijflijn1) : '';
+    const lijn2tekst = (isVoorbeeldOef || _toonOplossingen) ? esc(oef.schrijflijn2) : '';
+    const lijn1data  = oef.schrijflijn1 ?? '';
+    const lijn2data  = oef.schrijflijn2 ?? '';
 
     // Layout:
     // - Som en pijl in een 2-kolom grid zodat pijl exact onder kring staat
@@ -536,13 +810,13 @@ const Preview = (() => {
           <div class="cg-pre">${somPrefix}</div>
           <div class="cg-k">${kringSpan}</div>
           <div class="cg-suf">${somSuffix} =</div>
-          <div class="cg-av"><span class="antwoord-vak${isVoorbeeldOef ? ' antwoord-ingevuld' : ''}">${antw}</span></div>
+          <div class="cg-av"><span class="antwoord-vak${isVoorbeeldOef ? ' antwoord-ingevuld' : ''}" data-antwoord="${antwData}">${antw}</span></div>
           <div class="cg-pijl">${pijlTonen ? pijlChar : ''}</div>
           <div class="cg-blok"><div class="comp-blokje">${blokjeInhoud}</div></div>
         </div>
         <div class="comp-schrijf">
-          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn1tekst}</span></div>
-          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst">${lijn2tekst}</span></div>
+          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst" data-antwoord="${lijn1data}">${lijn1tekst}</span></div>
+          <div class="comp-schrijflijn"><span class="comp-schrijf-tekst" data-antwoord="${lijn2data}">${lijn2tekst}</span></div>
         </div>
         ${del}
       </div>`;
@@ -556,7 +830,8 @@ const Preview = (() => {
   function _transformerenHTML(blokId, oef, idx, blok) {
     const del     = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">&#x2715;</button>`;
     const variant  = blok.transformerenVariant || 'schema';
-    const isVb     = blok.metVoorbeeld === true && idx === 0;
+    const isVbStijl = blok.metVoorbeeld === true && idx === 0;  // alleen voor gele achtergrond
+    const isVb     = isVbStijl || _toonOplossingen;  // voor data tonen
     const isAftrek = blok.bewerking === 'aftrekken';
     const tg       = oef.transformeerGetal;
     const ag       = oef.andereGetal;
@@ -570,7 +845,7 @@ const Preview = (() => {
     const tgT      = tg + d;
     const agT      = ag + d;
     const som      = oef.antwoord;
-    const klasse   = 'oefening-item oefening-trans' + (isVb ? ' trans-voorbeeld' : '');
+    const klasse   = 'oefening-item oefening-trans' + (isVbStijl ? ' trans-voorbeeld' : '');
     const bewTeken = isAftrek ? '-' : '+';
     const dTxt     = (d > 0 ? '+' : '') + d;
 
@@ -592,7 +867,7 @@ const Preview = (() => {
         </div>${del}</div>`;
     }
 
-    const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak"></span>`;
+    const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}" ></span>`;
 
     // Pijltekens: tg krijgt +d, ag krijgt +d (bij aftrekken beide +d)
     const pijlTxtL = (d > 0 ? '+' : '') + d;
@@ -600,9 +875,9 @@ const Preview = (() => {
 
     const pijlL = isVb ? `<span class="trans-pijl-waarde blauw">${pijlTxtL}</span>${pijl}` : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
     const pijlR = isVb ? `${pijl}<span class="trans-pijl-waarde blauw">${pijlTxtR}</span>` : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
-    const ondL  = isVb ? `<span class="trans-ingevuld">${linksT}</span>` : `<span class="trans-schrijflijn"></span>`;
-    const ondR  = isVb ? `<span class="trans-ingevuld">${rechtsT}</span>` : `<span class="trans-schrijflijn"></span>`;
-    const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn"></span>`;
+    const ondL  = isVb ? `<span class="trans-ingevuld">${linksT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${linksT}"></span>`;
+    const ondR  = isVb ? `<span class="trans-ingevuld">${rechtsT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${rechtsT}"></span>`;
+    const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn" data-antwoord="${som}"></span>`;
 
     const tabel = `<table class="trans-tabel">
       <colgroup><col style="width:30%"><col style="width:8%"><col style="width:30%"><col style="width:8%"><col></colgroup>
@@ -1151,22 +1426,27 @@ const Preview = (() => {
   function _tafelOefeningHTML(blokId, oef, idx) {
     const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">×</button>`;
     let somHTML = '';
+    // Bereken antwoord voor data-antwoord attribuut
+    let tafelAntwoord = '';
+    if (oef.type === 'vermenigvuldigen') tafelAntwoord = oef.a * oef.b;
+    else if (oef.type === 'gedeeld') tafelAntwoord = oef.a / oef.b;
+    else if (oef.type === 'ontbrekende-factor') tafelAntwoord = oef.positie === 'links' ? oef.product / oef.b : oef.product / oef.a;
 
     if (oef.type === 'vermenigvuldigen') {
       somHTML = `<span class="tafel-term">${oef.a}</span>
                  <span class="tafel-op">×</span>
                  <span class="tafel-term">${oef.b}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak"></span>`;
+                 <span class="tafel-vak" data-antwoord="${oef.a * oef.b}"></span>`;
     } else if (oef.type === 'gedeeld') {
       somHTML = `<span class="tafel-term">${oef.a}</span>
                  <span class="tafel-op">:</span>
                  <span class="tafel-term">${oef.b}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak"></span>`;
+                 <span class="tafel-vak" data-antwoord="${oef.a / oef.b}"></span>`;
     } else if (oef.type === 'ontbrekende-factor') {
       if (oef.positie === 'links') {
-        somHTML = `<span class="tafel-vak"></span>
+        somHTML = `<span class="tafel-vak" data-antwoord="${oef.product / oef.b}"></span>
                    <span class="tafel-op">×</span>
                    <span class="tafel-term">${oef.b}</span>
                    <span class="tafel-is">=</span>
@@ -1174,7 +1454,7 @@ const Preview = (() => {
       } else {
         somHTML = `<span class="tafel-term">${oef.a}</span>
                    <span class="tafel-op">×</span>
-                   <span class="tafel-vak"></span>
+                   <span class="tafel-vak" data-antwoord="${oef.product / oef.a}"></span>
                    <span class="tafel-is">=</span>
                    <span class="tafel-term">${oef.product}</span>`;
       }
@@ -2023,5 +2303,5 @@ const Preview = (() => {
       </div>`;
   }
 
-  return { render, toonZinEditor };
+  return { render, toonZinEditor, toggleOplossingen };
 })();
