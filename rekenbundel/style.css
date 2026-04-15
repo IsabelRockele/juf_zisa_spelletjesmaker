@@ -747,6 +747,7 @@ header .badge {
   min-height: 128px;
 }
 .oefening-hulp.aftrektal-hulp { padding-left: 30px; }
+.oefening-hulp.aftrektal-hulp.aftrektal-hulp-groot { padding-left: 54px; }
 
 .hulp-som-rij {
   display: flex; align-items: center; white-space: nowrap;
@@ -900,7 +901,10 @@ header .badge {
 .schijfjes-kolom {
   display: flex;
   flex-direction: column;
-  min-width: 80px;
+  min-width: 72px;
+}
+.schijfjes-kolom-d {
+  min-width: 60px;
 }
 .schijfjes-kolom + .schijfjes-kolom {
   border-left: 1.5px solid #aaa;
@@ -911,6 +915,10 @@ header .badge {
   font-weight: 700;
   padding: 3px 0;
   border-bottom: 1.5px solid #aaa;
+}
+.schijfjes-kop-d {
+  background: #E74C3C;
+  color: #fff;
 }
 .schijfjes-kop-h {
   background: #85C1E9;
@@ -939,6 +947,11 @@ header .badge {
   justify-content: center;
   font-size: 9px;
   font-weight: 700;
+}
+.schijfje-d {
+  background: #E74C3C;
+  border: 1.5px solid #922B21;
+  color: #fff;
 }
 .schijfje-h {
   background: #5DADE2;
