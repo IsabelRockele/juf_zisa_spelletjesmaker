@@ -50,6 +50,8 @@ const Preview = (() => {
     if (isVraagstuk)  return _maakVraagstukElement(blok);
     // ── Rekentaal: eigen renderer ────────────────────────────
     if (isRekentaal)  return _maakRekentaalElement(blok);
+    // ── Schatten: eigen renderer ─────────────────────────────
+    if (blok.bewerking === 'schatten') return _schattenBlokElement(blok);
     const heeftAanvullen   = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('aanvullen');
     const heeftCompenseren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('compenseren');
     const heeftTransformeren = !isHerken && !isSplitsingen && !isTafels && !isTafelsInzicht && !isGetallenlijn && !isCijferen && blok.hulpmiddelen?.includes('transformeren');
@@ -1849,6 +1851,176 @@ const Preview = (() => {
       </div>`;
 
     return div;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SCHATTEN — preview renderers
+     ══════════════════════════════════════════════════════════════ */
+
+  function _schattenBlokElement(blok) {
+    const div = document.createElement('div');
+    div.className = 'preview-blok';
+    div.dataset.id = blok.id;
+
+    const subtypeLabel = {
+      'afronden':          '🎯 Afronden',
+      'schatting-tabel':   '📊 Schatting (tabel)',
+      'schatting-compact': '➡️ Schatting (compact)',
+      'mogelijk':          '✅ Mogelijk?',
+    }[blok.subtype] || '🔮 Schatten';
+
+    const gridKlasse = {
+      'afronden':          'schatten-afronden-grid',
+      'schatting-tabel':   'schatten-tabel-grid',
+      'schatting-compact': 'schatten-compact-grid',
+      'mogelijk':          'schatten-mogelijk-grid',
+    }[blok.subtype] || '';
+
+    // Tabel/compact: voeg een header-rij toe boven de oefeningen
+    let headerRij = '';
+    if (blok.subtype === 'schatting-tabel') {
+      const afKleur = blok.config?.afrondenNaar === 'H' ? '#2980b9' : '#e74c3c';
+      const afLabel = blok.config?.afrondenNaar || 'H';
+      const somLabel = blok.config?.bewerking === 'aftrekken' ? 'Het verschil tussen ...' : 'De som van ...';
+      const bewLabel = blok.config?.bewerking === 'aftrekken' ? 'Trek de ronde getallen af.' : 'Tel de ronde getallen op.';
+      headerRij = `<div class="scht-tabel-header">
+        <div class="scht-t-som scht-hdr-cel">${somLabel}</div>
+        <div class="scht-t-col2 scht-hdr-cel">Rond af naar <strong style="color:${afKleur}">${afLabel}</strong></div>
+        <div class="scht-t-col3 scht-hdr-cel">${bewLabel}</div>
+        <div class="scht-t-col4 scht-hdr-cel">Schatting:</div>
+      </div>`;
+    } else if (blok.subtype === 'schatting-compact') {
+      const somLabel = blok.config?.bewerking === 'aftrekken' ? 'Het verschil tussen ...' : 'De som van ...';
+      headerRij = `<div class="scht-compact-header">${somLabel} &#x2192; is ongeveer ...</div>`;
+    }
+    const oefHtml = blok.oefeningen.map((o, i) => _schattenOefeningHTML(blok, o, i)).join('');
+
+    div.innerHTML = `
+      <div class="preview-blok-header" style="background:linear-gradient(135deg,#e8780a,#f59e42)">
+        <span class="blok-type-badge">${subtypeLabel}</span>
+        <span class="blok-niveau">Tot ${blok.niveau.toLocaleString('nl-BE')}</span>
+        <div class="spacer"></div>
+        <div class="blok-acties">
+          <button class="btn-blok-actie verwijder"
+            onclick="App.verwijderBlok('${blok.id}')" title="Verwijder blok">✕</button>
+        </div>
+      </div>
+      <div class="preview-blok-body">
+        <div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">
+          <span class="opdrachtzin-tekst" id="zin-tekst-${blok.id}">${esc(blok.opdrachtzin)}</span>
+          <button class="btn-bewerk-zin" onclick="App.bewerkZin('${blok.id}')" title="Bewerk">✏️</button>
+        </div>
+        <div class="oefeningen-grid ${gridKlasse}" id="grid-${blok.id}">
+          ${headerRij}${oefHtml}
+        </div>
+      </div>
+      <div class="preview-blok-footer">
+        <span class="footer-info">${blok.oefeningen.length} oefeningen · schatten</span>
+        <button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button>
+      </div>`;
+    return div;
+  }
+
+  function _schattenOefeningHTML(blok, oef, idx) {
+    const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blok.id}',${idx})" title="Verwijder">✕</button>`;
+    if (oef.type === 'afronden')          return _afrondenPreviewHTML(blok, oef, idx, del);
+    if (oef.type === 'schatting-tabel')   return _schattingTabelPreviewHTML(blok, oef, idx, del);
+    if (oef.type === 'schatting-compact') return _schattingCompactPreviewHTML(blok, oef, idx, del);
+    if (oef.type === 'mogelijk')          return _mogelijkPreviewHTML(blok, oef, idx, del);
+    return '';
+  }
+
+  function _afrondenPreviewHTML(blok, oef, idx, del) {
+    const kleur1 = oef.label1 === 'T' ? '#27ae60' : oef.label1 === 'H' ? '#2980b9' : '#e74c3c';
+    const kleur2 = oef.label2 === 'H' ? '#2980b9' : '#e74c3c';
+    const naam1  = oef.label1 === 'T' ? 'T<span style="font-weight:400">iental</span>'
+                 : oef.label1 === 'H' ? 'H<span style="font-weight:400">onderdtal</span>'
+                 : 'D<span style="font-weight:400">uizendtal</span>';
+    const naam2  = oef.label2 === 'H' ? 'H<span style="font-weight:400">onderdtal</span>'
+                 : 'D<span style="font-weight:400">uizendtal</span>';
+    return `
+      <div class="oefening-item scht-afronden">
+        <div class="scht-af-getal">${oef.getal.toLocaleString('nl-BE')}</div>
+        <div class="scht-af-rijen">
+          <div class="scht-af-rij">
+            <span class="scht-af-label">dichtstbij <strong style="color:${kleur1}">${naam1}</strong>:</span>
+            <span class="scht-lijn"></span>
+          </div>
+          <div class="scht-af-rij">
+            <span class="scht-af-label">dichtstbij <strong style="color:${kleur2}">${naam2}</strong>:</span>
+            <span class="scht-lijn"></span>
+          </div>
+        </div>
+        ${del}
+      </div>`;
+  }
+
+  function _schattingTabelPreviewHTML(blok, oef, idx, del) {
+    const isVb = idx === 0;
+    const tekenTxt = oef.bewerking === 'optellen' ? '+' : '-';
+
+    const col2 = isVb
+      ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')}</span>`
+      : `<span class="scht-lijn smal"></span><span class="scht-teken">${tekenTxt}</span><span class="scht-lijn smal"></span>`;
+    const col3 = isVb
+      ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')} = ${oef.schatting.toLocaleString('nl-BE')}</span>`
+      : `<span class="scht-lijn breed"></span>`;
+    const col4 = isVb
+      ? `<span class="scht-vb-oranje">${oef.schatting.toLocaleString('nl-BE')}</span>`
+      : `<span class="scht-lijn smal"></span>`;
+
+    return `
+      <div class="oefening-item scht-tabel-rij${isVb ? ' scht-vb' : ''}">
+        <div class="scht-t-som">${oef.a.toLocaleString('nl-BE')} ${tekenTxt} ${oef.b.toLocaleString('nl-BE')}</div>
+        <div class="scht-t-col2">${col2}</div>
+        <div class="scht-t-col3">${col3}</div>
+        <div class="scht-t-col4">${col4}</div>
+        ${del}
+      </div>`;
+  }
+
+  function _schattingCompactPreviewHTML(blok, oef, idx, del) {
+    const isVb = idx === 0;
+    const tekenTxt = oef.bewerking === 'optellen' ? '+' : '-';
+    const inhoud = isVb
+      ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')} = ${oef.schatting.toLocaleString('nl-BE')}</span>`
+      : `<span class="scht-lijn smal"></span><span style="color:#e8780a;font-weight:700"> ${tekenTxt} </span><span class="scht-lijn smal"></span><span> = </span><span class="scht-lijn smal"></span>`;
+    return `
+      <div class="oefening-item scht-compact${isVb ? ' scht-vb' : ''}">
+        <span class="scht-comp-som">${oef.a.toLocaleString('nl-BE')} ${tekenTxt} ${oef.b.toLocaleString('nl-BE')}</span>
+        <span class="scht-pijl">&#x2192;</span>
+        <span class="scht-comp-inhoud">${inhoud}</span>
+        ${del}
+      </div>`;
+  }
+
+  function _mogelijkPreviewHTML(blok, oef, idx, del) {
+    const tekenTxt = oef.bewerking === 'optellen' ? '+' : '-';
+    return `
+      <div class="oefening-item scht-mogelijk"
+           style="flex-direction:column;align-items:flex-start;justify-content:flex-start;padding:14px 32px 18px 14px;gap:0;min-height:210px;font-size:16px;border:2px solid #e8a040;border-radius:8px">
+        <div style="background:#fff8e8;border:1.5px solid #f0c050;border-radius:6px;padding:12px 14px;font-size:16px;font-weight:500;line-height:1.7;width:100%;box-sizing:border-box;white-space:normal;word-wrap:break-word;color:#333">
+          Is ${oef.label.toLowerCase()} van
+          <strong>${oef.a.toLocaleString('nl-BE')}</strong>
+          ${tekenTxt}
+          <strong>${oef.b.toLocaleString('nl-BE')}</strong>
+          gelijk aan
+          <strong>${oef.beweerdAntwoord.toLocaleString('nl-BE')}</strong>?
+        </div>
+        <div style="display:flex;align-items:flex-end;gap:6px;font-size:14px;font-weight:600;width:100%;margin-top:20px;margin-bottom:14px">
+          <span style="font-size:13px;font-style:italic;color:#666;padding-bottom:2px">Ik schat:</span>
+          <span class="scht-lijn smal"></span>
+          ${tekenTxt}
+          <span class="scht-lijn smal"></span>
+          =
+          <span class="scht-lijn smal"></span>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer"><input type="checkbox" style="width:17px;height:17px;flex-shrink:0"> ${oef.label} is mogelijk.</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer"><input type="checkbox" style="width:17px;height:17px;flex-shrink:0"> ${oef.label} is niet mogelijk.</label>
+        </div>
+        ${del}
+      </div>`;
   }
 
   return { render, toonZinEditor };
