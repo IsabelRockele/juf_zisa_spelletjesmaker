@@ -783,7 +783,7 @@ header .badge {
 }
 /* Bredere vakjes voor getallen tot 10.000 */
 .splits-vak-groot {
-  width: 44px; height: 22px;
+  width: 30px; height: 22px;
   border: 1.5px solid var(--blauw);
   border-radius: 4px; background: white;
 }
@@ -802,6 +802,9 @@ header .badge {
   flex-direction: column;
   gap: 4px;
   padding: 0;
+}
+.oefening-hulp.niveau-10000 .hulp-schrijflijnen {
+  left: 158px;
 }
 
 .hulp-schrijflijnen .schrijflijn {
