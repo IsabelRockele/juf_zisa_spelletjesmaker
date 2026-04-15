@@ -39,6 +39,7 @@ const App = (() => {
     const isRekentaal    = bewerking === 'rekentaal';
     const isGemengd      = bewerking === 'gemengd';
     const isKomma        = bewerking === 'komma';
+    const isSchatten     = bewerking === 'schatten';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
@@ -49,7 +50,8 @@ const App = (() => {
     const tabCijferen     = document.getElementById('tab-cijferen');
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
     const tabRekentaal    = document.getElementById('tab-rekentaal');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma) ? 'block' : 'none';
+    const tabSchatten     = document.getElementById('tab-schatten');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten) ? 'block' : 'none';
     if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
     if (tabKomma)        tabKomma.style.display        = isKomma         ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
@@ -57,6 +59,9 @@ const App = (() => {
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
     if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
+    if (tabSchatten)     tabSchatten.style.display     = isSchatten      ? 'block' : 'none';
+
+    if (isSchatten) { _updateSchattenUI(); _updateSchattenAfrondenUI(); return; }
 
     if (isKomma)   { return; }
     if (isGemengd) { _updateGemengdTypesUI(); return; }
@@ -1549,6 +1554,161 @@ function _getSplitsConfig() {
   }
 
   /* ══════════════════════════════════════════════════════════════
+     SCHATTEND REKENEN
+     ══════════════════════════════════════════════════════════════ */
+
+  let _schattenType       = 'afronden';
+  let _schattenNiveau     = 10000;
+  let _schattenBewerking  = 'optellen';
+  let _schattenAfronden   = 'H';
+
+  function selecteerSchattenType(waarde, el) {
+    _schattenType = waarde;
+    document.querySelectorAll('[name="schatten-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+    _updateSchattenUI();
+    const zinInp = document.getElementById('inp-opdrachtzin-schatten');
+    if (zinInp) zinInp.value = _defaultZinSchatten();
+  }
+
+  function selecteerSchattenNiveau(waarde, el) {
+    _schattenNiveau = parseInt(waarde);
+    document.querySelectorAll('[name="schatten-niveau"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+    _updateSchattenAfrondenUI();
+  }
+
+  function _updateSchattenAfrondenUI() {
+    const tot1000 = _schattenNiveau <= 1000;
+    const chipT = document.getElementById('chip-schatten-T');
+    const chipH = document.getElementById('chip-schatten-H');
+    const chipD = document.getElementById('chip-schatten-D');
+    const hint  = document.getElementById('schatten-afronden-hint');
+
+    // Tot 1000: T en H zichtbaar, D verborgen
+    // Tot 10000: H en D zichtbaar, T verborgen
+    if (chipT) chipT.style.display = tot1000 ? '' : 'none';
+    if (chipD) chipD.style.display = tot1000 ? 'none' : '';
+
+    // Als huidige keuze niet meer geldig is: reset naar H
+    if (tot1000 && _schattenAfronden === 'D') {
+      _schattenAfronden = 'H';
+      document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      if (chipH) chipH.classList.add('geselecteerd');
+    }
+    if (!tot1000 && _schattenAfronden === 'T') {
+      _schattenAfronden = 'H';
+      document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      if (chipH) chipH.classList.add('geselecteerd');
+    }
+
+    // Hint tekst aanpassen
+    if (hint) {
+      hint.textContent = tot1000
+        ? 'Tot 1.000: afronden naar tiental (bv. 852 → 850) of honderdtal (bv. 852 → 900).'
+        : 'Tot 10.000: afronden naar honderdtal of duizendtal.';
+    }
+  }
+
+  function selecteerSchattenBewerking(waarde, el) {
+    _schattenBewerking = waarde;
+    document.querySelectorAll('[name="schatten-bewerking"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerSchattenAfronden(waarde, el) {
+    _schattenAfronden = waarde;
+    document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function _updateSchattenUI() {
+    const isAfronden = _schattenType === 'afronden';
+    const kaartBew = document.getElementById('kaart-schatten-bewerking');
+    if (kaartBew) kaartBew.style.display = isAfronden ? 'none' : 'block';
+    // Afronden-kaart: verborgen bij type 'afronden' (beide kolommen altijd getoond)
+    const kaartAf = document.getElementById('kaart-schatten-afronden');
+    if (kaartAf) kaartAf.style.display = isAfronden ? 'none' : 'block';
+    // Pas opdrachtzin aan
+    const zinInp = document.getElementById('inp-opdrachtzin-schatten');
+    if (zinInp) zinInp.value = _defaultZinSchatten();
+    _updateSchattenAfrondenUI();
+  }
+
+  function voegSchattenBlokToe() {
+    const aantal = parseInt(document.getElementById('inp-aantal-schatten').value) || 4;
+    const zin    = document.getElementById('inp-opdrachtzin-schatten').value.trim()
+                   || _defaultZinSchatten();
+    let oefeningen = [];
+
+    if (_schattenBewerking === 'gemengd' && _schattenType !== 'afronden') {
+      const aantalOpt = Math.ceil(aantal / 2);
+      const aantalAft = aantal - aantalOpt;
+      const fnMap = {
+        'schatting-tabel':   Schatten.genereerSchattingTabel,
+        'schatting-compact': Schatten.genereerSchattingCompact,
+        'mogelijk':          Schatten.genereerMogelijk,
+      };
+      const fn = fnMap[_schattenType] || Schatten.genereerSchattingTabel;
+      const opt = fn({ niveau: _schattenNiveau, bewerking: 'optellen', afrondenNaar: _schattenAfronden, aantalOefeningen: aantalOpt });
+      const aft = fn({ niveau: _schattenNiveau, bewerking: 'aftrekken', afrondenNaar: _schattenAfronden, aantalOefeningen: aantalAft });
+      const alle = [...opt, ...aft];
+      for (let i = alle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [alle[i], alle[j]] = [alle[j], alle[i]];
+      }
+      oefeningen = alle;
+    } else if (_schattenType === 'afronden') {
+      oefeningen = Schatten.genereerAfronden({ niveau: _schattenNiveau, aantalOefeningen: aantal });
+    } else if (_schattenType === 'schatting-tabel') {
+      oefeningen = Schatten.genereerSchattingTabel({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    } else if (_schattenType === 'schatting-compact') {
+      oefeningen = Schatten.genereerSchattingCompact({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    } else if (_schattenType === 'mogelijk') {
+      oefeningen = Schatten.genereerMogelijk({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    }
+
+    if (!oefeningen || oefeningen.length === 0) {
+      toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    const blok = {
+      id:          `blok-schatten-${Date.now()}`,
+      bewerking:   'schatten',
+      subtype:     _schattenType,
+      niveau:      _schattenNiveau,
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      oefeningen,
+      config: {
+        type:         _schattenType,
+        niveau:       _schattenNiveau,
+        bewerking:    _schattenBewerking,
+        afrondenNaar: _schattenAfronden,
+        aantalOefeningen: aantal,
+      },
+    };
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Schattingsblok toegevoegd! (${oefeningen.length} oefeningen)`, '#e8780a');
+  }
+
+  function _defaultZinSchatten() {
+    if (_schattenType === 'afronden')        return 'Rond het getal af. Schrijf in de tabel.';
+    if (_schattenType === 'mogelijk')        return 'Is het antwoord mogelijk? Controleer door schattend te rekenen.';
+    if (_schattenType === 'schatting-tabel') return 'Maak bij elke oefening een goede schatting.';
+    return 'Reken schattend uit.';
+  }
+
+  /* ══════════════════════════════════════════════════════════════
      GEMENGD OPTELLEN & AFTREKKEN
      ══════════════════════════════════════════════════════════════ */
 
@@ -1780,6 +1940,8 @@ function _getSplitsConfig() {
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
     voegRekentaalBlokToe,
+    selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
+    voegSchattenBlokToe,
     selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
