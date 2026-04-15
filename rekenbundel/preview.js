@@ -232,6 +232,7 @@ const Preview = (() => {
       (i === doelIdx && heeftSplits) ? `<span class="splits-doel">${esc(w)}</span>` : esc(w)
     ).join(' ') + ' =';
     const isAftrektal = heeftSplits && oefBewerking === 'aftrekken' && splitspositie === 'aftrektal';
+    const isAftrektalGroot = isAftrektal && (parseInt(oef.vraag) >= 1000);
 
     // Bereken splitsbeen info voor HTML én positionering
     const splDelen   = oef.vraag.replace(' =','').trim().split(' ');
@@ -247,7 +248,7 @@ const Preview = (() => {
     const vakjesHTML = splAantal > 0 ? Array(splAantal).fill(`<div class="${vakKlasse}"></div>`).join('') : '';
 
     return `
-      <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''}">
+      <div class="oefening-item oefening-hulp${isAftrektal ? ' aftrektal-hulp' : ''  }${isAftrektalGroot ? ' aftrektal-hulp-groot' : ''}">
         <div class="hulp-som-rij">
           <span class="oef-tekst">${somHTML}</span>
           <span class="antwoord-vak" style="margin-left:4px;"></span>
@@ -303,13 +304,15 @@ const Preview = (() => {
     }
 
     if (variant === 'met-schijfjes') {
-      const hKlein = Math.floor(klein / 100);
+      const dKlein = Math.floor(klein / 1000);
+      const hKlein = Math.floor((klein % 1000) / 100);
       const tKlein = Math.floor((klein % 100) / 10);
       const eKlein = klein % 10;
-      const hGroot = Math.floor(groot / 100);
+      const dGroot = Math.floor(groot / 1000);
+      const hGroot = Math.floor((groot % 1000) / 100);
       const tGroot = Math.floor((groot % 100) / 10);
       const eGroot = groot % 10;
-      const schijfjesHTML = _schijfjesHTML(hKlein, tKlein, eKlein, hGroot, tGroot, eGroot);
+      const schijfjesHTML = _schijfjesHTML(dKlein, hKlein, tKlein, eKlein, dGroot, hGroot, tGroot, eGroot);
       return `
         <div class="oefening-item oefening-aanvullen aanvullen-schijfjes">
           <div class="aanvullen-sommen">
@@ -324,11 +327,11 @@ const Preview = (() => {
     return '';
   }
 
-  function _schijfjesHTML(hKlein, tKlein, eKlein, hGroot, tGroot, eGroot) {
-    // Altijd 10 schijfjes per kolom
-    // Voorgetekend (klein getal) = ingekleurd, rest = wit (kind kleurt bij)
+  function _schijfjesHTML(dKlein, hKlein, tKlein, eKlein, dGroot, hGroot, tGroot, eGroot) {
     const TOTAAL = 10;
-    const metH = hGroot > 0;  // H-kolom enkel bij tot 1000
+    const metD = dGroot > 0;
+    const metH = hGroot > 0 || dGroot > 0;
+    const rijGrootte = metD ? 4 : 5;  // 4-4-2 bij D-kolom, 5-5 bij anderen
 
     function schijfjesVoorKolom(aantalVoorgetekend, klas, getal) {
       const items = [];
@@ -338,11 +341,17 @@ const Preview = (() => {
           : `<div class="schijfje schijfje-leeg"></div>`);
       }
       const rijen = [];
-      for (let r = 0; r < items.length; r += 5) {
-        rijen.push(`<div class="schijfjes-rij">${items.slice(r, r + 5).join('')}</div>`);
+      for (let r = 0; r < items.length; r += rijGrootte) {
+        rijen.push(`<div class="schijfjes-rij">${items.slice(r, r + rijGrootte).join('')}</div>`);
       }
       return rijen.join('');
     }
+
+    const dKolom = metD ? `
+      <div class="schijfjes-kolom schijfjes-kolom-d">
+        <div class="schijfjes-kop schijfjes-kop-d">D</div>
+        ${schijfjesVoorKolom(dKlein, 'schijfje-d', 1000)}
+      </div>` : '';
 
     const hKolom = metH ? `
       <div class="schijfjes-kolom schijfjes-kolom-h">
@@ -351,6 +360,7 @@ const Preview = (() => {
       </div>` : '';
 
     return `
+      ${dKolom}
       ${hKolom}
       <div class="schijfjes-kolom schijfjes-kolom-t">
         <div class="schijfjes-kop schijfjes-kop-t">T</div>
@@ -480,6 +490,12 @@ const Preview = (() => {
     const tg       = oef.transformeerGetal;
     const ag       = oef.andereGetal;
     const d        = oef.transformeerDelta;
+    // Bepaal welke term links staat (volg volgorde van de som)
+    const aIsTg    = oef.vraag.trim().startsWith(String(tg));
+    const links    = aIsTg ? tg  : ag;   // wat links staat in de som
+    const rechts   = aIsTg ? ag  : tg;   // wat rechts staat
+    const linksT   = aIsTg ? tg + d : ag + d;
+    const rechtsT  = aIsTg ? ag + d : tg + d;
     const tgT      = tg + d;
     const agT      = ag + d;
     const som      = oef.antwoord;
@@ -492,32 +508,37 @@ const Preview = (() => {
     if (variant === 'kaal') {
       if (isVb) {
         return `<div class="${klasse} oefening-trans-kaal">
-          <div class="trans-kaal-vb">${esc(String(tg))} ${bewTeken} ${esc(String(ag))} = <span class="trans-kaal-stap">${tgT} ${bewTeken} ${agT}</span> = ${som}</div>
+          <div class="trans-kaal-vb">${esc(String(links))} ${bewTeken} ${esc(String(rechts))} = <span class="trans-kaal-stap">${linksT} ${bewTeken} ${rechtsT}</span> = ${som}</div>
           ${del}</div>`;
       }
       return `<div class="${klasse} oefening-trans-kaal">
         <div class="trans-kaal-som">
-          <span class="trans-kaal-getal">${esc(String(tg))}</span>
+          <span class="trans-kaal-getal">${esc(String(links))}</span>
           <span class="trans-kaal-teken">${bewTeken}</span>
-          <span class="trans-kaal-getal">${esc(String(ag))}</span>
+          <span class="trans-kaal-getal">${esc(String(rechts))}</span>
           <span class="trans-kaal-teken">=</span>
           <span class="trans-kaal-lijn"></span>
         </div>${del}</div>`;
     }
 
     const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak"></span>`;
-    const pijlL = isVb ? `<span class="trans-pijl-waarde blauw">${dTxt}</span>${pijl}` : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
-    const pijlR = isVb ? `${pijl}<span class="trans-pijl-waarde blauw">${dTxt}</span>` : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
-    const ondL  = isVb ? `<span class="trans-ingevuld">${tgT}</span>` : `<span class="trans-schrijflijn"></span>`;
-    const ondR  = isVb ? `<span class="trans-ingevuld">${agT}</span>` : `<span class="trans-schrijflijn"></span>`;
+
+    // Pijltekens: tg krijgt +d, ag krijgt +d (bij aftrekken beide +d)
+    const pijlTxtL = (d > 0 ? '+' : '') + d;
+    const pijlTxtR = (d > 0 ? '+' : '') + d;
+
+    const pijlL = isVb ? `<span class="trans-pijl-waarde blauw">${pijlTxtL}</span>${pijl}` : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
+    const pijlR = isVb ? `${pijl}<span class="trans-pijl-waarde blauw">${pijlTxtR}</span>` : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
+    const ondL  = isVb ? `<span class="trans-ingevuld">${linksT}</span>` : `<span class="trans-schrijflijn"></span>`;
+    const ondR  = isVb ? `<span class="trans-ingevuld">${rechtsT}</span>` : `<span class="trans-schrijflijn"></span>`;
     const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn"></span>`;
 
     const tabel = `<table class="trans-tabel">
       <colgroup><col style="width:30%"><col style="width:8%"><col style="width:30%"><col style="width:8%"><col></colgroup>
       <tr>
-        <td class="trans-td-getal-l">${esc(String(tg))}</td>
+        <td class="trans-td-getal-l">${esc(String(links))}</td>
         <td class="trans-td-teken">${bewTeken}</td>
-        <td class="trans-td-getal-r">${esc(String(ag))}</td>
+        <td class="trans-td-getal-r">${esc(String(rechts))}</td>
         <td class="trans-td-is">=</td>
         <td class="trans-td-antw">${antw1}</td>
       </tr>
@@ -541,13 +562,14 @@ const Preview = (() => {
     if (isAftrek) {
       const absD = Math.abs(d);
       const geelInhoud = isVb ? String(absD) : '';
+      // links = aftrektal (groot), rechts = aftrekker (klein, transformeerterm)
       const rij2Inhoud = isVb
-        ? `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${agT}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">${tgT}</div>`
-        : `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${ag}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">?</div>`;
+        ? `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${linksT}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">${rechtsT}</div>`
+        : `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${links}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">?</div>`;
       return `<div class="${klasse}">
         <div style="display:flex;width:100%;height:26px;margin-bottom:2px;gap:2px">
           <div style="background:#fde68a;border-radius:3px;width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#78350f">${geelInhoud}</div>
-          <div style="background:#b5d4f4;border-radius:3px;flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a">${tg}</div>
+          <div style="background:#b5d4f4;border-radius:3px;flex:1;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a">${links}</div>
         </div>
         <div style="display:flex;width:100%;height:26px;margin-bottom:10px;gap:2px">
           <div style="background:#fde68a;border-radius:3px;width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#78350f">${geelInhoud}</div>
