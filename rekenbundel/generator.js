@@ -142,6 +142,32 @@ const Generator = (() => {
 
   /* ── Voeg één extra oefening toe aan een bestaand blok ───── */
   function voegOefeningToe(blok) {
+    // Schatten: gebruik Schatten module
+    if (blok.bewerking === 'schatten') {
+      const cfg = blok.config || {};
+      const fnMap = {
+        'afronden':          Schatten.genereerAfronden,
+        'schatting-tabel':   Schatten.genereerSchattingTabel,
+        'schatting-compact': Schatten.genereerSchattingCompact,
+        'mogelijk':          Schatten.genereerMogelijk,
+      };
+      const fn = fnMap[cfg.type] || Schatten.genereerAfronden;
+      const nieuweOef = fn({
+        niveau:       cfg.niveau || 10000,
+        bewerking:    cfg.bewerking || 'optellen',
+        afrondenNaar: cfg.afrondenNaar || 'H',
+        aantalOefeningen: 5,
+      });
+      const bestaand = new Set(blok.oefeningen.map(o => o.sleutel));
+      for (const oef of nieuweOef) {
+        if (!bestaand.has(oef.sleutel)) {
+          blok.oefeningen.push(oef);
+          return true;
+        }
+      }
+      return false;
+    }
+
     // Rekentaal: gebruik RekentaalGenerator
     if (blok.bewerking === 'rekentaal') {
       if (!window.RekentaalGenerator) return false;
