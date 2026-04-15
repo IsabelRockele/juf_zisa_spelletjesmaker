@@ -117,6 +117,7 @@ const App = (() => {
     if (kaartNiveau) kaartNiveau.style.display = (isHerken || isSplitsingen) ? 'none' : 'block';
 
     _updateHulpmiddelenUI(isHerken || isSplitsingen ? 'zonder' : _getBrugWaarde());
+    _updateStrategieUI();
 
     // Types laden
     const niveau = isHerken ? 100
@@ -162,6 +163,7 @@ const App = (() => {
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     _updateBrugSubUI();
+    _updateStrategieUI();
     const brug = _syncBrugInput();
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     _updateTypesUI(niveau, brug);
@@ -176,6 +178,30 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     _updateTypesUI(niveau, brug);
     _updateHulpmiddelenUI(brug);
+  }
+
+  function selecteerStrategie(waarde, el) {
+    document.querySelectorAll('[name="strategie"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const brug = _syncBrugInput();
+    _updateTypesUI(niveau, brug);
+  }
+
+  function _getStrategie() {
+    return document.querySelector('[name="strategie"]:checked')?.value || 'aftrekker';
+  }
+
+  function _updateStrategieUI() {
+    const niveau    = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const hoofd     = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
+    const bewerking = actieveBewerking;
+    const rijStr    = document.getElementById('rij-strategie');
+    if (!rijStr) return;
+    // Strategie-keuze enkel bij aftrekken + niveau 10000 + met brug
+    const toon = bewerking === 'aftrekken' && niveau >= 10000 && hoofd === 'met';
+    rijStr.style.display = toon ? 'block' : 'none';
   }
 
   // Toont/verbergt de subkeuze-rij + past beschikbare sub-opties aan bij compenseren
@@ -224,6 +250,7 @@ const App = (() => {
     if (naam === 'niveau') {
       _updateTypesUI(parseInt(waarde), null);
       _updateBrugSubUI();
+      _updateStrategieUI();
       const brug = _syncBrugInput();
       _updateHulpmiddelenUI(brug);
     }
@@ -263,7 +290,14 @@ const App = (() => {
     if (!zinInp) return;
     const geselecteerd = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const alleenEerst10 = geselecteerd.length === 1 && geselecteerd[0] === 'Maak eerst 10';
-    if (alleenEerst10) {
+    const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    if (hulpmiddelen.includes('aanvullen')) {
+      zinInp.value = 'Los op door aan te vullen.';
+    } else if (hulpmiddelen.includes('compenseren')) {
+      zinInp.value = 'Reken uit door te compenseren.';
+    } else if (hulpmiddelen.includes('transformeren')) {
+      zinInp.value = 'Reken uit door te transformeren.';
+    } else if (alleenEerst10) {
       zinInp.value = 'Onderstreep eerst wat samen 10 is en reken dan uit.';
     } else if (actieveBewerking === 'aftrekken') {
       zinInp.value = 'Trek af.';
@@ -293,8 +327,17 @@ const App = (() => {
     infoEl.id = 'types-info-tekst';
     infoEl.style.cssText = 'font-size:12px;color:#888;margin-top:6px;display:none;width:100%;';
 
+    const TYPE_LABELS = {
+      'aanvullen': 'Aanvullen',
+      'DH-H':  'DH − H',
+      'DH-DH': 'DH − DH',
+      'H+H':   'H + H',
+      'HT+HT': 'HT + HT',
+    };
+
     beschikbaar.forEach((type) => {
       const wasGeselecteerd = vorigeSelectie.includes(type);
+      const zichtbaarLabel  = TYPE_LABELS[type] || type;
 
       const label = document.createElement('label');
       label.className = 'vink-chip' + (wasGeselecteerd ? ' geselecteerd' : '');
@@ -302,7 +345,7 @@ const App = (() => {
       label.innerHTML = `
         <span class="vink-box">${wasGeselecteerd ? '✓' : ''}</span>
         <input type="checkbox" name="types" value="${type}" ${wasGeselecteerd ? 'checked' : ''} style="display:none">
-        <span>${type}</span>`;
+        <span>${zichtbaarLabel}</span>`;
 
       label.onclick = (e) => {
         e.preventDefault();
@@ -340,6 +383,15 @@ const App = (() => {
 
     container.appendChild(infoEl);
     _updateGemengdInfo(container, infoEl);
+
+    // Auto-aanvinken als er maar 1 type is
+    const alleChips = [...container.querySelectorAll('.vink-chip')];
+    if (alleChips.length === 1) {
+      const enigeChip = alleChips[0];
+      enigeChip.classList.add('geselecteerd');
+      enigeChip.querySelector('input').checked = true;
+      enigeChip.querySelector('.vink-box').textContent = '✓';
+    }
 
     // Brugkaart verbergen voor niveau 5 en 10
     const kaartBrug = document.getElementById('kaart-brug');
@@ -494,9 +546,6 @@ const App = (() => {
     const types  = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const aantal = parseInt(document.getElementById('inp-aantal').value);
     const alleenEerst10 = types.length === 1 && types[0] === 'Maak eerst 10';
-    const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
-                   (alleenEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
-                   actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
 
     if (types.length === 0) {
       toonToast('⚠️ Kies minstens één oefentype!', '#E74C3C');
@@ -506,6 +555,13 @@ const App = (() => {
     const isHerken      = actieveBewerking === 'herken-brug';
     const isSplitsingen = actieveBewerking === 'splitsingen';
     const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    const hulpmiddelenZin = hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
+                            hulpmiddelen.includes('compenseren')   ? 'Reken uit door te compenseren.' :
+                            hulpmiddelen.includes('transformeren') ? 'Reken uit door te transformeren.' : null;
+    const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
+                   hulpmiddelenZin ||
+                   (alleenEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
+                   actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
     const splitspositie       = document.querySelector('[name="splitspositie"]:checked')?.value || 'aftrekker';
     const aanvullenVariant    = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
     const compenserenVariant  = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
@@ -553,6 +609,7 @@ const App = (() => {
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
+      strategie: _getStrategie(),
     });
 
     if (!blok) {
@@ -617,7 +674,9 @@ const App = (() => {
 
     if (waarde === 'splitsbeen') {
       const rijPos = document.getElementById('rij-splitspositie');
-      if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken') ? 'block' : 'none';
+      const heeftAndereHulp = ['compenseren','transformeren','aanvullen'].some(h =>
+        document.querySelector(`[name="hulpmiddelen"][value="${h}"]`)?.checked);
+      if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken' && !heeftAndereHulp) ? 'block' : 'none';
     }
     if (waarde === 'schrijflijnen') {
       const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
@@ -626,13 +685,16 @@ const App = (() => {
     if (waarde === 'aanvullen') {
       const rijAanvullen = document.getElementById('rij-aanvullen');
       if (rijAanvullen) rijAanvullen.style.display = !was ? 'block' : 'none';
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
       _updateTypesUI(niveau, _getBrugWaarde());
     }
     if (waarde === 'compenseren') {
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = !was ? 'block' : 'none';
-      // Pas brug-subkeuze aan en herlaad types voor compenseren-module
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
       _updateBrugSubUI(!was);
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
       _updateTypesUI(niveau, _getBrugWaarde());
@@ -640,9 +702,12 @@ const App = (() => {
     if (waarde === 'transformeren') {
       const rijTrans = document.getElementById('rij-transformeren');
       if (rijTrans) rijTrans.style.display = !was ? 'block' : 'none';
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
       _updateTypesUI(niveau, _getBrugWaarde());
     }
+    _updateOpdrachtzin();
   }
 
   /* ── Splits: niveau en specifieke getallen ───────────────── */
@@ -1688,7 +1753,7 @@ function _getSplitsConfig() {
   }
 
   return {
-    init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
+    init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
     selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe, selecteerVerdelenType,
