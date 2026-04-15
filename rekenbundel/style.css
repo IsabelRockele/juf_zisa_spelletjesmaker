@@ -741,10 +741,17 @@ header .badge {
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
-  padding: 10px 10px 14px 10px;
+  padding: 10px 10px 18px 10px;
   background: #ffffff;
   position: relative;
   min-height: 128px;
+  /* Kader past zich automatisch aan schrijflijnen aan */
+  height: auto;
+}
+
+/* Groter kader bij 3 schrijflijnen */
+.oefening-hulp .hulp-schrijflijnen:has(.schrijflijn:nth-child(3)) {
+  margin-bottom: 6px;
 }
 .oefening-hulp.aftrektal-hulp { padding-left: 30px; }
 .oefening-hulp.aftrektal-hulp.aftrektal-hulp-groot { padding-left: 54px; }
@@ -802,6 +809,12 @@ header .badge {
   flex-direction: column;
   gap: 4px;
   padding: 0;
+}
+
+/* Bij 3 schrijflijnen: kader moet groter */
+.oefening-hulp:has(.schrijflijn:nth-child(3)) {
+  min-height: 168px !important;
+  padding-bottom: 24px !important;
 }
 .oefening-hulp.niveau-10000 .hulp-schrijflijnen {
   left: 158px;
@@ -974,6 +987,13 @@ header .badge {
 .schijfje-leeg {
   background: white;
   border: 1.5px dashed #BDC3C7;
+}
+
+/* Extra lege schijfjes onderaan voor aanvullen inkleuren */
+.schijfje-aanvul {
+  background: #fafcff;
+  border: 1.5px dashed #d8e4ef;
+  opacity: 0.55;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -2534,3 +2554,247 @@ header .badge {
   padding: 4px 2px;
 }
 .trans-kaal-stap { color: #1d4ed8; }
+
+/* ══════════════════════════════════════════════════════════════
+   SCHATTEN — preview stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+/* Tab kleur: warm oranje */
+.tab-schatten { background-color: #ffe0b2; color: #1A3A5C; }
+.tab-schatten:hover { background-color: #ffcc80; }
+.tab-schatten.active {
+  background-color: #e8780a !important;
+  color: #ffffff;
+  border-bottom-color: #b35a00 !important;
+  font-weight: 800;
+}
+
+/* Schrijflijn generiek */
+.scht-lijn {
+  display: inline-block;
+  border-bottom: 1.5px solid #555;
+  min-width: 44px;
+  height: 18px;
+  margin: 0 2px;
+  vertical-align: bottom;
+  flex-shrink: 0;
+}
+.scht-lijn.smal  { min-width: 32px; }
+.scht-lijn.breed { min-width: 90px; flex: 1; }
+
+/* Bewerkingsteken (+ of -) in schrijfformules */
+.scht-teken { font-size: 14px; font-weight: 700; color: #e8780a; flex-shrink: 0; }
+
+/* Voorbeeld-klassen */
+.scht-vb-blauw  { font-size: 14px; font-weight: 700; color: #2980b9; }
+.scht-vb-oranje { font-size: 15px; font-weight: 800; color: #e8780a; }
+.scht-vb { background: #fff8e8 !important; border-color: #f0a500 !important; }
+
+/* ── Type 1: Afronden ────────────────────────────────────── */
+.schatten-afronden-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.scht-afronden {
+  flex-direction: column !important; align-items: flex-start !important;
+  padding: 10px 28px 10px 10px; gap: 8px; min-height: 80px;
+}
+.scht-af-getal {
+  font-size: 18px; font-weight: 800; color: #1a3a5c;
+  text-align: center; width: 100%; padding-bottom: 5px;
+  border-bottom: 1px solid #dce8f0;
+}
+.scht-af-rijen { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.scht-af-rij   { display: flex; align-items: flex-end; gap: 6px; }
+.scht-af-label { font-size: 13px; color: #555; white-space: nowrap; flex-shrink: 0; padding-bottom: 2px; }
+
+/* ── Type 2: Schatting tabel ─────────────────────────────── */
+.schatten-tabel-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #b0c4d8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header rij boven tabel */
+.scht-tabel-header {
+  display: grid;
+  grid-template-columns: 140px 150px 1fr 80px;
+  background: #c5d8ec;
+  border-bottom: 2px solid #90aac8;
+}
+.scht-hdr-cel {
+  padding: 7px 8px;
+  font-size: 12px; font-weight: 700; color: #1a3a5c;
+  border-right: 1px solid #90aac8;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+}
+.scht-hdr-cel:last-child { border-right: none; justify-content: center; }
+
+/* Data rijen */
+.scht-tabel-rij {
+  display: grid !important;
+  grid-template-columns: 140px 150px 1fr 80px;
+  gap: 0; align-items: center;
+  padding: 0 !important; border: none !important;
+  border-bottom: 1px solid #dce8f5 !important;
+  border-radius: 0 !important; min-height: 40px;
+  position: relative;
+}
+.scht-tabel-rij:last-child { border-bottom: none !important; }
+.scht-tabel-rij > div {
+  padding: 8px 8px; border-right: 1px solid #dce8f5;
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 4px; min-height: 40px;
+  overflow: hidden;
+}
+.scht-tabel-rij > div:last-child { border-right: none; }
+.scht-t-som  { color: #1a3a5c; font-weight: 700; white-space: nowrap; }
+.scht-t-col4 { justify-content: center; }
+/* Verwijder-knop in tabel */
+.scht-tabel-rij .btn-del-oef { position: absolute !important; top: 4px; right: 4px; }
+
+/* ── Type 3: Schatting compact ───────────────────────────── */
+.schatten-compact-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #a8d5a8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header balk boven compact lijst */
+.scht-compact-header {
+  background: #c8e8c8;
+  padding: 7px 12px;
+  font-size: 12px; font-weight: 700; color: #1a5c1a;
+  border-bottom: 2px solid #88c488;
+  text-align: center;
+}
+
+.scht-compact {
+  display: flex !important; flex-direction: row; align-items: center;
+  gap: 12px; padding: 11px 34px 11px 12px !important;
+  border: none !important; border-bottom: 1px solid #c8e8c8 !important;
+  border-radius: 0 !important; min-height: 44px;
+}
+.scht-compact:last-child { border-bottom: none !important; }
+.scht-comp-som   { font-size: 14px; font-weight: 700; color: #1a3a5c; white-space: nowrap; flex-shrink: 0; min-width: 140px; }
+.scht-pijl       { font-size: 15px; color: #666; flex-shrink: 0; }
+.scht-comp-inhoud { display: flex; align-items: center; gap: 4px; flex: 1; flex-wrap: nowrap; }
+
+/* ── Type 4: Mogelijk/niet mogelijk ─────────────────────── */
+.schatten-mogelijk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* Hogere specificiteit via .oefeningen-grid zodat !important van .oefening-item niet wint */
+.schatten-mogelijk-grid .oefening-item.scht-mogelijk {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding: 14px 32px 18px 14px !important;
+  gap: 0 !important;
+  border: 2px solid #e8a040 !important;
+  border-radius: 8px !important;
+  min-height: 210px !important;
+  box-sizing: border-box;
+  font-size: 16px !important;
+}
+
+/* Geel vraagkadertje */
+.schatten-mogelijk-grid .scht-mog-vraag {
+  background: #fff8e8 !important;
+  border: 1.5px solid #f0c050 !important;
+  border-radius: 6px !important;
+  padding: 12px 14px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.7 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  color: #333 !important;
+}
+
+/* Ik schat rij */
+.schatten-mogelijk-grid .scht-mog-schat {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 14px !important;
+}
+.schatten-mogelijk-grid .scht-mog-label {
+  font-size: 13px !important;
+  font-style: italic !important;
+  color: #666 !important;
+  flex-shrink: 0 !important;
+  padding-bottom: 2px !important;
+}
+
+/* Aankruisvakjes */
+.schatten-mogelijk-grid .scht-mog-keuze {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.schatten-mogelijk-grid .scht-checkbox {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #222 !important;
+  cursor: pointer !important;
+}
+.schatten-mogelijk-grid .scht-checkbox input[type="checkbox"] {
+  width: 17px !important;
+  height: 17px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Toggle oplossingen knop ─────────────────────────────── */
+.btn-toggle-oplossingen {
+  padding: 9px 20px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1.5px solid #ccc;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-toggle-oplossingen:hover { background: #e0e0e0; }
+.btn-toggle-oplossingen:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Antwoord-vak in preview — leeg of ingevuld */
+.antwoord-vak {
+  display: inline-block;
+  min-width: 28px;
+  height: 20px;
+  border: 1.5px solid #1a3a5c;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: background .2s, color .2s;
+}
+
+/* ── Oplossingssleutel download knop ─────────────────────── */
+.btn-sleutel {
+  padding: 9px 20px;
+  background: #27AE60;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-sleutel:hover { background: #1e8449; }
+.btn-sleutel:disabled { opacity: .4; cursor: not-allowed; }
