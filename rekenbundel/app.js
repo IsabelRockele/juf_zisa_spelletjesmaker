@@ -166,7 +166,7 @@ const App = (() => {
     _updateStrategieUI();
     const brug = _syncBrugInput();
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    _updateTypesUI(niveau, brug);
+    _updateTypesUI(niveau, brug, true);
     _updateHulpmiddelenUI(brug);
   }
 
@@ -176,7 +176,7 @@ const App = (() => {
     el.classList.add('geselecteerd');
     const brug = _syncBrugInput();
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    _updateTypesUI(niveau, brug);
+    _updateTypesUI(niveau, brug, true);
     _updateHulpmiddelenUI(brug);
   }
 
@@ -184,6 +184,16 @@ const App = (() => {
     document.querySelectorAll('[name="strategie"]').forEach(r =>
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
+
+    // Sync splitspositie met strategie
+    const splitsRadio = document.querySelector(`[name="splitspositie"][value="${waarde}"]`);
+    if (splitsRadio) {
+      document.querySelectorAll('[name="splitspositie"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      splitsRadio.checked = true;
+      splitsRadio.closest('.radio-chip')?.classList.add('geselecteerd');
+    }
+
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const brug = _syncBrugInput();
     _updateTypesUI(niveau, brug);
@@ -248,7 +258,7 @@ const App = (() => {
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     if (naam === 'niveau') {
-      _updateTypesUI(parseInt(waarde), null);
+      _updateTypesUI(parseInt(waarde), null, true);
       _updateBrugSubUI();
       _updateStrategieUI();
       const brug = _syncBrugInput();
@@ -688,7 +698,7 @@ const App = (() => {
       const rijPos = document.getElementById('rij-splitspositie');
       if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-      _updateTypesUI(niveau, _getBrugWaarde());
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
     }
     if (waarde === 'compenseren') {
       const rijComp = document.getElementById('rij-compenseren');
@@ -697,7 +707,7 @@ const App = (() => {
       if (rijPos && !was) rijPos.style.display = 'none';
       _updateBrugSubUI(!was);
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-      _updateTypesUI(niveau, _getBrugWaarde());
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
     }
     if (waarde === 'transformeren') {
       const rijTrans = document.getElementById('rij-transformeren');
@@ -705,7 +715,7 @@ const App = (() => {
       const rijPos = document.getElementById('rij-splitspositie');
       if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
-      _updateTypesUI(niveau, _getBrugWaarde());
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
     }
     _updateOpdrachtzin();
   }
