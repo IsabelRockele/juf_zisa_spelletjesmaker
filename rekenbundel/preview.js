@@ -200,6 +200,11 @@ const Preview = (() => {
     }
     // Herrender voor compenseren/transformeren, daarna data-antwoord loop
     const _doToggleUpdate = () => {
+      // Getallenlijn zelf: boogjes tonen/verbergen
+      document.querySelectorAll('.gl-boog-oplossing').forEach(el => {
+        el.style.display = _toonOplossingen ? '' : 'none';
+      });
+
       // Herken-brug: lamp-kader inkleuren bij brugoefeningen
       document.querySelectorAll('.lamp-kader[data-heeft-brug]').forEach(kader => {
         if (_toonOplossingen && kader.dataset.heeftBrug === 'true') {
@@ -268,11 +273,14 @@ const Preview = (() => {
           el.style.minWidth      = '40px';
           el.style.display       = 'inline-block';
           el.style.paddingBottom = '1px';
-        } else if (el.classList.contains('sb-hokje') || el.classList.contains('sh-vakje')) {
-          // Splitsbeen / splitshuis hokje
+        } else if (el.classList.contains('sb-hokje') || el.classList.contains('sh-vakje') || el.classList.contains('vs-vakje')) {
+          // Splitsbeen / splitshuis / verdelen hokje
           el.style.background = '#c6efce';
           el.style.color      = '#006100';
           el.style.fontWeight = 'bold';
+          el.style.display    = 'flex';
+          el.style.alignItems = 'center';
+          el.style.justifyContent = 'center';
         } else if (el.classList.contains('tafel-vak') || el.classList.contains('sbw-vak')) {
           // Tafels / splitsbeen bewerkingen
           el.style.background   = '#c6efce';
@@ -288,6 +296,7 @@ const Preview = (() => {
           el.style.display      = 'inline-block';
           el.style.minWidth     = '20px';
           el.style.textAlign    = 'center';
+
         } else if (el.classList.contains('punt-lijn')) {
           // Puntoefening vakje
           el.style.background   = '#c6efce';
@@ -1589,7 +1598,7 @@ const Preview = (() => {
 
     const beenSVG = `<svg viewBox="0 0 ${SVG_B} ${SVG_H}" style="width:100%;height:${SVG_H}px;display:block;overflow:visible;">${lijnen}</svg>`;
 
-    const vakjesHTML = Array(n).fill('<div class="vs-vakje"></div>').join('');
+    const vakjesHTML = Array(n).fill(`<div class="vs-vakje" data-antwoord="${oef.perGroep}"></div>`).join('');
     const zin1 = `<div class="inzicht-tekst-rij" style="margin-top:8px"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">gelijke delen is</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:22px"></span><span class="inzicht-tekst">.</span></div>`;
     const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:22px"></span></div>`;
 
@@ -1624,9 +1633,9 @@ const Preview = (() => {
         cellen += `<div class="veld100-cel" style="${kleur}"></div>`;
       }
     }
-    const zin1 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoeveel gekleurde hokjes zijn er?</span><span class="inzicht-lijn" style="width:28px"></span></div>`;
-    const zin2 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Met hoeveel stroken van</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">kun je die bedekken?</span><span class="inzicht-lijn" style="width:28px"></span></div>`;
-    const zin3 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoe dikwijls gaat</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">in</span><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">?</span><span class="inzicht-lijn" style="width:28px"></span><span class="inzicht-tekst">keer.</span></div>`;
+    const zin1 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoeveel gekleurde hokjes zijn er?</span><span class="inzicht-lijn" data-antwoord="${oef.totaal}" style="width:28px"></span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Met hoeveel stroken van</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">kun je die bedekken?</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:28px"></span></div>`;
+    const zin3 = `<div class="inzicht-tekst-rij" style="flex-wrap:wrap;gap:3px 4px;"><span class="inzicht-tekst">Hoe dikwijls gaat</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">in</span><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">?</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:28px"></span><span class="inzicht-tekst">keer.</span></div>`;
 
     return `<div class="inzicht-oef inzicht-oef-100veld" data-blok="${blokId}" data-idx="${idx}">
       ${del}
@@ -1882,7 +1891,17 @@ const Preview = (() => {
       </div>`;
 
   } else {
-    // vermenigvuldigen zelf tekenen
+    // vermenigvuldigen zelf tekenen - voeg boogjes toe aan SVG (verborgen, tonen bij oplossing)
+    for (let g = 0; g < groepen; g++) {
+      const x1 = middenVanGetal(g * stap);
+      const x2 = middenVanGetal((g + 1) * stap);
+      const midX = (x1 + x2) / 2;
+      const boogY = vakjeY - 2;
+      const ctrlLift = 18;
+      const ctrlY = boogY - ctrlLift;
+      svgInhoud += `<path class="gl-boog-oplossing" d="M ${x1} ${boogY} C ${x1 + (x2-x1)*0.22} ${ctrlY}, ${x1 + (x2-x1)*0.78} ${ctrlY}, ${x2} ${boogY}" stroke="#444" stroke-width="1.6" fill="none"/>`;
+      svgInhoud += `<text class="gl-boog-oplossing" x="${midX}" y="${ctrlY - 4}" text-anchor="middle" font-size="10" font-family="Arial,sans-serif" font-weight="700" fill="#333">${stap}</text>`;
+    }
     const factor1 = positie === 'achteraan' ? groepen : stap;
     const factor2 = positie === 'achteraan' ? stap : groepen;
     const plusSlots = Math.max(groepen, 5);
@@ -1893,9 +1912,9 @@ const Preview = (() => {
         <span class="gl-maal">×</span>
         <span class="gl-getal-vast">${factor2}</span>
         <span class="gl-eq">=</span>
-        <span class="gl-lijn breed" style="width:${langeLijnPx}px"></span>
+        <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:${langeLijnPx}px"></span>
         <span class="gl-eq">=</span>
-        <span class="gl-lijn breed" style="width:34px"></span>
+        <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:34px"></span>
       </div>`;
   }
 
