@@ -273,8 +273,23 @@ const Preview = (() => {
           el.style.background = '#c6efce';
           el.style.color      = '#006100';
           el.style.fontWeight = 'bold';
-        } else if (el.classList.contains('tafel-vak') || el.classList.contains('sbw-vak') || el.classList.contains('punt-lijn')) {
-          // Tafels / splitsbeen bewerkingen / puntoefening
+        } else if (el.classList.contains('tafel-vak') || el.classList.contains('sbw-vak')) {
+          // Tafels / splitsbeen bewerkingen
+          el.style.background   = '#c6efce';
+          el.style.color        = '#006100';
+          el.style.fontWeight   = 'bold';
+          el.style.borderBottom = '2px solid #00a650';
+        } else if (el.classList.contains('inzicht-lijn') || el.classList.contains('gl-lijn')) {
+          // Tafels inzicht / getallenlijn
+          el.style.background   = 'transparent';
+          el.style.color        = '#006100';
+          el.style.fontWeight   = 'bold';
+          el.style.borderBottom = '2px solid #00a650';
+          el.style.display      = 'inline-block';
+          el.style.minWidth     = '20px';
+          el.style.textAlign    = 'center';
+        } else if (el.classList.contains('punt-lijn')) {
+          // Puntoefening vakje
           el.style.background   = '#c6efce';
           el.style.color        = '#006100';
           el.style.fontWeight   = 'bold';
@@ -1414,16 +1429,16 @@ const Preview = (() => {
 
       const aantalMin = oef.quotient; // aantal keer aftrekken
       const minStrepen = Array(aantalMin)
-        .fill(`<span class="inzicht-lijn" style="width:20px"></span>`)
+        .fill(`<span class="inzicht-lijn" data-antwoord="${oef.deler}" style="width:20px"></span>`)
         .join('<span class="inzicht-min">−</span>');
 
-      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
+      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" data-antwoord="${oef.uitkomst}" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
       const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik verdeel in groepen van</span><span class="inzicht-ingevuld">${oef.deler}</span><span class="inzicht-tekst">.</span></div>`;
-      const aftrekRij = `<div class="inzicht-optel-rij">${oef.deeltal}<span class="inzicht-min" style="margin:0 3px">−</span>${minStrepen}<span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
-      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
-      const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Dan heb ik nog</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel} over.</span></div>`;
+      const aftrekRij = `<div class="inzicht-optel-rij">${oef.deeltal}<span class="inzicht-min" style="margin:0 3px">−</span>${minStrepen}<span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.rest}" style="width:20px"></span></div>`;
+      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" data-antwoord="${oef.quotient}" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
+      const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Dan heb ik nog</span><span class="inzicht-lijn" data-antwoord="${oef.rest}" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel} over.</span></div>`;
       const zin5 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Dat is de rest (R).</span></div>`;
-      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst" style="font-style:normal;font-weight:700">R</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" data-antwoord="${oef.deeltal}" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" data-antwoord="${oef.deler}" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.quotient}" style="width:20px"></span><span class="inzicht-tekst" style="font-style:normal;font-weight:700">R</span><span class="inzicht-lijn" data-antwoord="${oef.rest}" style="width:20px"></span></div>`;
 
       return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
         ${del}
@@ -1447,14 +1462,14 @@ const Preview = (() => {
       const emojiBlok = `<div class="inzicht-vakje inzicht-vakje-deel" style="grid-template-columns:repeat(${cols},${colBreedte}px);row-gap:8px;">${alleEmojis}</div>`;
 
       const minStrepen = Array(oef.groepen)
-        .fill(`<span class="inzicht-lijn" style="width:20px"></span>`)
+        .fill(`<span class="inzicht-lijn" data-antwoord="${oef.groepGrootte}" style="width:20px"></span>`)
         .join('<span class="inzicht-min">−</span>');
       const aftrekRij = `<div class="inzicht-optel-rij">${oef.uitkomst}<span class="inzicht-min" style="margin:0 3px">−</span>${minStrepen}<span class="inzicht-is">=</span><span class="inzicht-nul">0</span></div>`;
 
-      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
+      const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Er zijn</span><span class="inzicht-lijn" data-antwoord="${oef.uitkomst}" style="width:20px"></span><span class="inzicht-tekst">${oef.emojiLabel}.</span></div>`;
       const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik maak groepen van</span><span class="inzicht-ingevuld">${oef.groepGrootte}</span><span class="inzicht-tekst">.</span></div>`;
-      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
-      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${oef.groepGrootte}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+      const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-tekst">Ik kan</span><span class="inzicht-lijn" data-antwoord="${oef.groepen}" style="width:20px"></span><span class="inzicht-tekst">groepen maken.</span></div>`;
+      const deelRij = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" data-antwoord="${oef.uitkomst}" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${oef.groepGrootte}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.groepen}" style="width:20px"></span></div>`;
 
       return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
         ${del}
@@ -1491,26 +1506,26 @@ const Preview = (() => {
 
     // Rij 1: lijn + lijn + ... = lijn(breed)
     const delen = Array(oef.groepen)
-      .fill(`<span class="inzicht-lijn" ${lijnStyle}></span>`)
+      .fill(`<span class="inzicht-lijn" data-antwoord="${oef.groepGrootte}" ${lijnStyle}></span>`)
       .join('<span class="inzicht-plus">+</span>');
-    const optelRij = `<div class="inzicht-optel-rij">${delen}<span class="inzicht-is">=</span><span class="inzicht-lijn breed"></span></div>`;
+    const optelRij = `<div class="inzicht-optel-rij">${delen}<span class="inzicht-is">=</span><span class="inzicht-lijn breed" data-antwoord="${oef.uitkomst}"></span></div>`;
 
     // Rij 2: lijn groepen van lijn = lijn
     const groepVanRij = `<div class="inzicht-tekst-rij">
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.groepen}" ${lijnStyle}></span>
       <span class="inzicht-tekst">groepen van</span>
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.groepGrootte}" ${lijnStyle}></span>
       <span class="inzicht-is">=</span>
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.uitkomst}" ${lijnStyle}></span>
     </div>`;
 
     // Rij 3: lijn × lijn = lijn
     const vermRij = `<div class="inzicht-tekst-rij">
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.groepen}" ${lijnStyle}></span>
       <span class="inzicht-op">×</span>
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.groepGrootte}" ${lijnStyle}></span>
       <span class="inzicht-is">=</span>
-      <span class="inzicht-lijn" ${lijnStyle}></span>
+      <span class="inzicht-lijn" data-antwoord="${oef.uitkomst}" ${lijnStyle}></span>
     </div>`;
 
     return `<div class="inzicht-oef" data-blok="${blokId}" data-idx="${idx}">
@@ -1540,10 +1555,10 @@ const Preview = (() => {
     const emojiBlok = `<div class="inzicht-vakje inzicht-vakje-deel" style="grid-template-columns:repeat(${cols},26px);row-gap:8px;">${alleEmojis}</div>`;
 
     // 4 zinnen
-    const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">eerlijk verdelen in</span><span class="inzicht-ingevuld">${oef.aantalGroepen}</span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
-    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">gelijke groepen is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
-    const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">gedeeld door</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
-    const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:20px"></span></div>`;
+    const zin1 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">eerlijk verdelen in</span><span class="inzicht-ingevuld">${oef.aantalGroepen}</span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" data-antwoord="${oef.totaal}" style="width:20px"></span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-lijn" data-antwoord="${oef.aantalGroepen}" style="width:20px"></span><span class="inzicht-tekst">gelijke groepen is</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin3 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" data-antwoord="${oef.totaal}" style="width:20px"></span><span class="inzicht-tekst">gedeeld door</span><span class="inzicht-lijn" data-antwoord="${oef.aantalGroepen}" style="width:20px"></span><span class="inzicht-tekst">is</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:20px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin4 = `<div class="inzicht-tekst-rij"><span class="inzicht-lijn" data-antwoord="${oef.totaal}" style="width:20px"></span><span class="inzicht-op">:</span><span class="inzicht-lijn" data-antwoord="${oef.aantalGroepen}" style="width:20px"></span><span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:20px"></span></div>`;
 
     return `<div class="inzicht-oef inzicht-oef-deel" data-blok="${blokId}" data-idx="${idx}">
       ${del}
@@ -1575,8 +1590,8 @@ const Preview = (() => {
     const beenSVG = `<svg viewBox="0 0 ${SVG_B} ${SVG_H}" style="width:100%;height:${SVG_H}px;display:block;overflow:visible;">${lijnen}</svg>`;
 
     const vakjesHTML = Array(n).fill('<div class="vs-vakje"></div>').join('');
-    const zin1 = `<div class="inzicht-tekst-rij" style="margin-top:8px"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">gelijke delen is</span><span class="inzicht-lijn" style="width:22px"></span><span class="inzicht-tekst">.</span></div>`;
-    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" style="width:22px"></span></div>`;
+    const zin1 = `<div class="inzicht-tekst-rij" style="margin-top:8px"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-tekst">verdeeld in</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-tekst">gelijke delen is</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:22px"></span><span class="inzicht-tekst">.</span></div>`;
+    const zin2 = `<div class="inzicht-tekst-rij"><span class="inzicht-ingevuld">${oef.totaal}</span><span class="inzicht-op">:</span><span class="inzicht-ingevuld">${n}</span><span class="inzicht-is">=</span><span class="inzicht-lijn" data-antwoord="${oef.perGroep}" style="width:22px"></span></div>`;
 
     return `<div class="inzicht-oef inzicht-oef-splitshuis" data-blok="${blokId}" data-idx="${idx}">
       ${del}
@@ -1763,24 +1778,24 @@ const Preview = (() => {
   let inhoudOnderaan = '';
 
   if (variant === 'getekend') {
-    const delen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-plus">+</span>`);
+    const delen = Array(groepen).fill(`<span class="gl-lijn" data-antwoord="${stap}"></span>`).join(`<span class="gl-plus">+</span>`);
     inhoudOnderaan = `
       <div class="gl-zin">
         <span>Ik zie</span>
-        <span class="gl-lijn kort"></span>
+        <span class="gl-lijn kort" data-antwoord="${groepen}"></span>
         <span>sprongen van</span>
-        <span class="gl-lijn kort"></span>
+        <span class="gl-lijn kort" data-antwoord="${stap}"></span>
         <span>.</span>
       </div>
-      <div class="gl-formule-rij">${delen}<span class="gl-eq">=</span><span class="gl-lijn breed"></span></div>
+      <div class="gl-formule-rij">${delen}<span class="gl-eq">=</span><span class="gl-lijn breed" data-antwoord="${uitkomst}"></span></div>
       <div class="gl-formule-rij">
-        <span class="gl-lijn"></span><span class="gl-maal">×</span><span class="gl-lijn"></span>
-        <span class="gl-eq">=</span><span class="gl-lijn breed"></span>
+        <span class="gl-lijn" data-antwoord="${groepen}"></span><span class="gl-maal">×</span><span class="gl-lijn" data-antwoord="${stap}"></span>
+        <span class="gl-eq">=</span><span class="gl-lijn breed" data-antwoord="${uitkomst}"></span>
       </div>`;
 
   } else if (variant === 'delen-getekend') {
     // Zinnen onder de getallenlijn (bogen staan al in SVG)
-    const minStrepen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-min">−</span>`);
+    const minStrepen = Array(groepen).fill(`<span class="gl-lijn" data-antwoord="${stap}"></span>`).join(`<span class="gl-min">−</span>`);
     inhoudOnderaan = `
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${uitkomst}</span>
@@ -1788,19 +1803,19 @@ const Preview = (() => {
         <span class="gl-eq">=</span><span class="gl-nul">0</span>
       </div>
       <div class="gl-zin">
-        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>Ik kan</span><span class="gl-lijn kort" data-antwoord="${groepen}"></span>
         <span>sprongen maken.</span>
       </div>
       <div class="gl-zin">
         <span class="gl-getal-vast">${stap}</span>
-        <span>gaat</span><span class="gl-lijn kort"></span>
+        <span>gaat</span><span class="gl-lijn kort" data-antwoord="${groepen}"></span>
         <span>keer in</span>
         <span class="gl-getal-vast">${uitkomst}</span><span>.</span>
       </div>
       <div class="gl-formule-rij">
-        <span class="gl-lijn"></span><span class="gl-maal">:</span>
-        <span class="gl-lijn"></span><span class="gl-eq">=</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${uitkomst}"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn" data-antwoord="${stap}"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn" data-antwoord="${groepen}"></span>
       </div>`;
 
   } else if (variant === 'delen-zelf') {
@@ -1812,34 +1827,34 @@ const Preview = (() => {
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${uitkomst}</span>
         <span class="gl-min">−</span>${minStrepen}
-        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+        <span class="gl-eq">=</span><span class="gl-lijn" data-antwoord="0"></span>
       </div>
       <div class="gl-formule-rij">
-        <span class="gl-lijn"></span><span class="gl-maal">:</span>
-        <span class="gl-lijn"></span><span class="gl-eq">=</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${uitkomst}"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn" data-antwoord="${stap}"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn" data-antwoord="${groepen}"></span>
       </div>`;
 
   } else if (variant === 'delen-rest-getekend') {
-    const minStrepen = Array(groepen).fill(`<span class="gl-lijn"></span>`).join(`<span class="gl-min">−</span>`);
+    const minStrepen = Array(groepen).fill(`<span class="gl-lijn" data-antwoord="${stap}"></span>`).join(`<span class="gl-min">−</span>`);
     inhoudOnderaan = `
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${uitkomst}</span>
         <span class="gl-min">−</span>${minStrepen}
-        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+        <span class="gl-eq">=</span><span class="gl-lijn" data-antwoord="${rest}"></span>
       </div>
       <div class="gl-zin">
-        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>Ik kan</span><span class="gl-lijn kort" data-antwoord="${groepen}"></span>
         <span>sprongen van</span>
         <span class="gl-getal-vast" style="color:#1565C0">${stap}</span>
-        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort"></span><span>over.</span>
+        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort" data-antwoord="${rest}"></span><span>over.</span>
       </div>
       <div class="gl-formule-rij">
-        <span class="gl-lijn"></span><span class="gl-maal">:</span>
-        <span class="gl-lijn"></span><span class="gl-eq">=</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${uitkomst}"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn" data-antwoord="${stap}"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn" data-antwoord="${groepen}"></span>
         <span class="gl-getal-vast">R</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${rest}"></span>
       </div>`;
 
   } else if (variant === 'delen-rest-zelf') {
@@ -1850,20 +1865,20 @@ const Preview = (() => {
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${uitkomst}</span>
         <span class="gl-min">−</span>${minStrepen}
-        <span class="gl-eq">=</span><span class="gl-lijn"></span>
+        <span class="gl-eq">=</span><span class="gl-lijn" data-antwoord="${rest}"></span>
       </div>
       <div class="gl-zin">
-        <span>Ik kan</span><span class="gl-lijn kort"></span>
+        <span>Ik kan</span><span class="gl-lijn kort" data-antwoord="${groepen}"></span>
         <span>sprongen van</span>
         <span class="gl-getal-vast" style="color:#1565C0">${stap}</span>
-        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort"></span><span>over.</span>
+        <span>maken. Dan heb ik nog</span><span class="gl-lijn kort" data-antwoord="${rest}"></span><span>over.</span>
       </div>
       <div class="gl-formule-rij">
-        <span class="gl-lijn"></span><span class="gl-maal">:</span>
-        <span class="gl-lijn"></span><span class="gl-eq">=</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${uitkomst}"></span><span class="gl-maal">:</span>
+        <span class="gl-lijn" data-antwoord="${stap}"></span><span class="gl-eq">=</span>
+        <span class="gl-lijn" data-antwoord="${groepen}"></span>
         <span class="gl-getal-vast">R</span>
-        <span class="gl-lijn"></span>
+        <span class="gl-lijn" data-antwoord="${rest}"></span>
       </div>`;
 
   } else {
