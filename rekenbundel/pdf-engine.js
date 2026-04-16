@@ -149,10 +149,12 @@ y += 5;
       if (delen.length < 3) return { d1:'', d2:'', sl1:'', sl2:'' };
       const g1 = parseInt(delen[0]) || 0;
       const g2 = parseInt(delen[2]) || 0;
-      const antwoord = oef.antwoord ?? (bewerking === 'optellen' ? g1+g2 : g1-g2);
+      // Bij gemengd: bepaal bewerking uit de vraag
+      const effectieveBewerking = (oef.vraag && oef.vraag.includes(' - ')) ? 'aftrekken' : 'optellen';
+      const antwoord = oef.antwoord ?? (effectieveBewerking === 'optellen' ? g1+g2 : g1-g2);
       let d1, d2, d3 = '', sl1 = '', sl2 = '', sl3 = '';
       const nLijnenPdf = aantalLijnen || 2;
-      if (bewerking === 'optellen') {
+      if (effectieveBewerking === 'optellen') {
         const g2H = Math.floor(g2 / 100) * 100;
         const g2T = Math.floor((g2 % 100) / 10) * 10;
         const g2E = g2 % 10;
@@ -2053,9 +2055,19 @@ doc.setTextColor(26, 58, 92);
       const ox = ML + kol * kolB + 3;
       const oy = y;
 
+      // ── Detecteer brug ───────────────────────────────────
+      const _hDelen = oef.vraag.replace(' =','').split(' ');
+      const _hg1 = parseInt(_hDelen[0]), _hop = _hDelen[1], _hg2 = parseInt(_hDelen[2]);
+      const _heeftBrug = _hop === '+' ? ((_hg1%10+_hg2%10)>=10 && (_hg1+_hg2)%10!==0) : (_hg1%10!==0 && _hg1%10<_hg2%10 && (_hg1-_hg2)%10!==0);
+
       // ── Buitenkader (één geheel per oefening) ────────────
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(26, 58, 92);
+      if (_metAntwoorden && _heeftBrug) {
+        doc.setFillColor(198, 239, 206);
+        doc.setDrawColor(0, 150, 50);
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(26, 58, 92);
+      }
       doc.setLineWidth(0.7);
       doc.roundedRect(ox, oy, kadW, HRK_KAD_H, 3, 3, 'FD');
 
@@ -2097,6 +2109,19 @@ doc.setTextColor(26, 58, 92);
       doc.setDrawColor(26, 58, 92);
       doc.setLineWidth(0.5);
       doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'FD');
+
+      // ── Antwoord in invulvakje bij oplossingssleutel ──────
+      if (_metAntwoorden && oef.antwoord !== undefined) {
+        doc.setFillColor(198, 239, 206);
+        doc.roundedRect(vakX, vakY, vakW, vakH, 1.5, 1.5, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(0, 100, 0);
+        const antStr = String(oef.antwoord);
+        doc.text(antStr, vakX + vakW/2 - doc.getTextWidth(antStr)/2, vakY + 5.5);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont('helvetica', 'normal');
+      }
     });
 
     y += HRK_RIJ_H;
@@ -2273,27 +2298,34 @@ doc.setTextColor(26, 58, 92);
     const beenY2 = beenY1 + 10;
     const vakY   = beenY2 + 1;
 
-    function hokje(cx, cy, waarde) {
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(26, 58, 92);
+    function hokje(cx, cy, waarde, antw) {
+      const toonAntw = _metAntwoorden && waarde === null && antw !== undefined && antw !== null;
+      doc.setFillColor(toonAntw ? 198 : 255, toonAntw ? 239 : 255, toonAntw ? 206 : 255);
+      doc.setDrawColor(toonAntw ? 0 : 26, toonAntw ? 150 : 58, toonAntw ? 50 : 92);
       doc.setLineWidth(0.5);
       doc.roundedRect(cx - vakW / 2, cy, vakW, vakH, 1.5, 1.5, 'FD');
-      if (waarde !== null) {
+      const toonWaarde = waarde !== null ? waarde : (toonAntw ? antw : null);
+      if (toonWaarde !== null) {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(13);
+        doc.setTextColor(toonAntw ? 0 : 26, toonAntw ? 100 : 58, toonAntw ? 0 : 92);
+        doc.text(String(toonWaarde), cx, cy + vakH / 2 + 2.3, { align: 'center' });
         doc.setTextColor(26, 58, 92);
-        // Verticaal centreren: baseline = cy + vakH/2 + ~1/3 van capheight (≈ fontSize*0.35/2.83)
-        doc.text(String(waarde), cx, cy + vakH / 2 + 2.3, { align: 'center' });
       }
     }
 
-    hokje(midX, topY, oef.totaal);
+    // Bereken ontbrekende waarden voor oplossingssleutel
+    const _totaalAntw  = oef.totaal  !== null ? oef.totaal  : (oef.links !== null && oef.rechts !== null ? oef.links + oef.rechts : null);
+    const _linksAntw   = oef.links   !== null ? oef.links   : (oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : null);
+    const _rechtsAntw  = oef.rechts  !== null ? oef.rechts  : (oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : null);
+
+    hokje(midX,   topY, oef.totaal, _totaalAntw);
     doc.setDrawColor(...BLAUW);
     doc.setLineWidth(0.6);
     doc.line(midX, beenY1, linksX,  beenY2);
     doc.line(midX, beenY1, rechtsX, beenY2);
-    hokje(linksX,  vakY, oef.links);
-    hokje(rechtsX, vakY, oef.rechts);
+    hokje(linksX,  vakY, oef.links,  _linksAntw);
+    hokje(rechtsX, vakY, oef.rechts, _rechtsAntw);
   }
 
   /* ── Groot splitshuis ────────────────────────────────────────
@@ -2347,18 +2379,20 @@ doc.setTextColor(26, 58, 92);
       }
 
       // Links
-      if (rij.links !== null) {
+      const _gsLinksAntw = rij.links !== null ? rij.links : (_metAntwoorden && oef.totaal !== null && rij.rechts !== null ? oef.totaal - rij.rechts : null);
+      if (_gsLinksAntw !== null) {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.setTextColor(26, 58, 92);
-        doc.text(String(rij.links), kamLinksX, rijMidY, { align: 'center' });
+        doc.setTextColor(rij.links !== null ? 26 : 0, rij.links !== null ? 58 : 100, rij.links !== null ? 92 : 0);
+        doc.text(String(_gsLinksAntw), kamLinksX, rijMidY, { align: 'center' });
       }
       // Rechts
-      if (rij.rechts !== null) {
+      const _gsRechtsAntw = rij.rechts !== null ? rij.rechts : (_metAntwoorden && oef.totaal !== null && rij.links !== null ? oef.totaal - rij.links : null);
+      if (_gsRechtsAntw !== null) {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(10);
-        doc.setTextColor(26, 58, 92);
-        doc.text(String(rij.rechts), kamRechtsX, rijMidY, { align: 'center' });
+        doc.setTextColor(rij.rechts !== null ? 26 : 0, rij.rechts !== null ? 58 : 100, rij.rechts !== null ? 92 : 0);
+        doc.text(String(_gsRechtsAntw), kamRechtsX, rijMidY, { align: 'center' });
       }
     });
   }
@@ -2421,6 +2455,17 @@ doc.setTextColor(26, 58, 92);
     const bewStartY = scheidY + 5;
     const vakB      = 10;
     const ops       = ['+', '+', '-', '-'];
+    // Bereken ontbrekende waarden
+    const _sbL = oef.links  !== null ? oef.links  : (oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : null);
+    const _sbR = oef.rechts !== null ? oef.rechts : (oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : null);
+    const _sbT = oef.totaal !== null ? oef.totaal : (_sbL !== null && _sbR !== null ? _sbL + _sbR : null);
+    // Antwoorden per rij: [vak1, vak2, uitkomst]
+    const _sbwAntw = [
+      [_sbL, _sbR, _sbT],   // links + rechts = totaal
+      [_sbR, _sbL, _sbT],   // rechts + links = totaal
+      [_sbT, _sbL, _sbR],   // totaal - links = rechts
+      [_sbT, _sbR, _sbL],   // totaal - rechts = links
+    ];
     const rijB   = 3 * vakB + 11;
     const startX = ox + (B - rijB) / 2;
 
@@ -2428,9 +2473,24 @@ doc.setTextColor(26, 58, 92);
       const baseY = bewStartY + i * (SBW_BEW_H + 3) + SBW_BEW_H - 3;
       let x = startX;
 
-      doc.setDrawColor(...DONKER);
-      doc.setLineWidth(0.5);
-      doc.line(x, baseY, x + vakB, baseY);
+      function _sbwLijn(xPos, antw) {
+        if (_metAntwoorden && antw !== null && antw !== undefined) {
+          doc.setDrawColor(0, 130, 50);
+        } else {
+          doc.setDrawColor(...DONKER);
+        }
+        doc.setLineWidth(0.5);
+        doc.line(xPos, baseY, xPos + vakB, baseY);
+        if (_metAntwoorden && antw !== null && antw !== undefined) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(9);
+          doc.setTextColor(0, 100, 0);
+          doc.text(String(antw), xPos + vakB/2, baseY - 1, { align: 'center' });
+          doc.setTextColor(...DONKER);
+        }
+      }
+
+      _sbwLijn(x, _sbwAntw[i][0]);
       x += vakB + 1;
 
       doc.setFont('helvetica', 'bold');
@@ -2439,9 +2499,7 @@ doc.setTextColor(26, 58, 92);
       doc.text(ops[i], x + 2, baseY, { align: 'center' });
       x += 5;
 
-      doc.setDrawColor(...DONKER);
-      doc.setLineWidth(0.5);
-      doc.line(x, baseY, x + vakB, baseY);
+      _sbwLijn(x, _sbwAntw[i][1]);
       x += vakB + 1;
 
       doc.setFont('helvetica', 'bold');
@@ -2450,9 +2508,7 @@ doc.setTextColor(26, 58, 92);
       doc.text('=', x + 2, baseY, { align: 'center' });
       x += 5;
 
-      doc.setDrawColor(...DONKER);
-      doc.setLineWidth(0.5);
-      doc.line(x, baseY, x + vakB, baseY);
+      _sbwLijn(x, _sbwAntw[i][2]);
     }
   }
 
@@ -2478,39 +2534,77 @@ doc.setTextColor(26, 58, 92);
     // Afmetingen elementen
     const midY   = ky + H / 2;
     const hokjeH = 9;
-    const hokjeB = 12;
-    const opW    = 5;
-    const getalW = 8;
-    // tekstbaseline: operator-tekst verticaal centreren naast hokje
-    const tekstY = midY + hokjeH / 2 - 1;
+    const GAP_EL = 3;  // spatie tussen elementen
 
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(...DONKER);
+
+    const tekstY = midY + 2;
+
+    // Meet echte breedtes via getTextWidth
     const totW = (oef.tekst || []).reduce((acc, d) => {
-      if (d === null)            return acc + hokjeB + 3;
-      if (typeof d === 'string') return acc + opW + 3;
-      return acc + getalW + 3;
+      if (d === null) return acc + doc.getTextWidth('00') + 4 + GAP_EL;
+      return acc + doc.getTextWidth(String(d)) + GAP_EL;
     }, 0);
 
     // Centreren, maar minimum MARGE vanaf kaderbegrenzing
     let x = kx + Math.max(MARGE, (B - totW) / 2);
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(...DONKER);
-
-    (oef.tekst || []).forEach(d => {
+    // Bereken antwoord uit tekst
+    const _pTekst = oef.tekst || [];
+    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷','*','/'].includes(x));
+    const _pEqIdx = _pTekst.indexOf('=');
+    function _pBerekenAntw(nullPos) {
+      if (_pEqIdx === -1 || !_pOp) return null;
+      const a = _pTekst[0], b = _pTekst[2], c = _pTekst[_pEqIdx + 1];
+      if (nullPos > _pEqIdx) {
+        if (_pOp === '+') return (a||0) + (b||0);
+        if (_pOp === '-') return (a||0) - (b||0);
+        if (_pOp === '×' || _pOp === '*') return (a||0) * (b||0);
+        if (_pOp === '÷' || _pOp === '/') return (a||0) / (b||0);
+      } else if (nullPos === 0) {
+        if (_pOp === '+') return (c||0) - (b||0);
+        if (_pOp === '-') return (c||0) + (b||0);
+        if (_pOp === '×' || _pOp === '*') return (c||0) / (b||0);
+        if (_pOp === '÷' || _pOp === '/') return (c||0) * (b||0);
+      } else {
+        if (_pOp === '+') return (c||0) - (a||0);
+        if (_pOp === '-') return (a||0) - (c||0);
+        if (_pOp === '×' || _pOp === '*') return (c||0) / (a||0);
+        if (_pOp === '÷' || _pOp === '/') return (a||0) * (c||0);
+      }
+      return null;
+    }
+    let _pNulIdx = 0;
+    _pTekst.forEach((d, _pi) => {
       if (d === null) {
-        doc.setFillColor(255, 255, 255);
+        const _pAntw = _metAntwoorden ? _pBerekenAntw(_pi) : null;
+        _pNulIdx++;
+        const _pToon = _pAntw !== undefined && _pAntw !== null;
+        doc.setFillColor(_pToon ? 198 : 255, _pToon ? 239 : 255, _pToon ? 206 : 255);
         doc.setDrawColor(...DONKER);
         doc.setLineWidth(0.5);
-        doc.roundedRect(x, midY - hokjeH / 2, hokjeB, hokjeH, 1, 1, 'FD');
-        x += hokjeB + 3;
+        const _hokB = doc.getTextWidth('00') + 4;
+        doc.roundedRect(x, midY - hokjeH / 2, _hokB, hokjeH, 1, 1, 'FD');
+        if (_pToon) {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(14);
+          doc.setTextColor(0, 100, 0);
+          const _pStr = String(_pAntw);
+          doc.text(_pStr, x + _hokB/2 - doc.getTextWidth(_pStr)/2, tekstY);
+          doc.setTextColor(...DONKER);
+        }
+        x += _hokB + GAP_EL;
       } else if (typeof d === 'string') {
-        doc.text(d, x + opW / 2, tekstY, { align: 'center' });
-        x += opW + 3;
+        const _dW = doc.getTextWidth(d);
+        doc.text(d, x, tekstY);
+        x += _dW + GAP_EL;
       } else {
         const str = String(d);
-        doc.text(str, x + getalW / 2, tekstY, { align: 'center' });
-        x += getalW + 3;
+        const _gW = doc.getTextWidth(str);
+        doc.text(str, x, tekstY);
+        x += _gW + GAP_EL;
       }
     });
   }
@@ -3237,6 +3331,7 @@ lijnKort(fx, formY);
         const textY = cy + 2.5;
         let curX    = x + (colW - totaalB) / 2;
 
+        let _hokIdx = 0;
         delen.forEach(d => {
           if (d === 'HOK') {
             const hokY = cy - HOK_H / 2;
@@ -3246,7 +3341,18 @@ lijnKort(fx, formY);
               if (oef.type === 'vermenigvuldigen') hokAntwoord = oef.a * oef.b;
               else if (oef.type === 'gedeeld') hokAntwoord = oef.a / oef.b;
               else if (oef.type === 'ontbrekende-factor') hokAntwoord = oef.positie === 'links' ? oef.product / oef.b : oef.product / oef.a;
+              else if (oef.type === 'redeneren') {
+                // HOK0=quotient, HOK1=quotient, HOK2=deeltal
+                const _rdQ = oef.deeltal / oef.deler;
+                hokAntwoord = [_rdQ, _rdQ, oef.deeltal][_hokIdx] ?? _rdQ;
+              }
+              else if (oef.type === 'koppel') {
+                // HOK0=product, HOK1=product, HOK2=factor1
+                const _kpP = oef.factor1 * oef.factor2;
+                hokAntwoord = [_kpP, _kpP, oef.factor1][_hokIdx] ?? _kpP;
+              }
             }
+            _hokIdx++;
             _antwoordVak(curX, hokY, HOK_W, HOK_H, hokAntwoord);
             curX += HOK_W;
           } else {
@@ -4746,6 +4852,7 @@ doc.setTextColor(26, 58, 92);
       ML, CW, PH, MB,
       VOOR_ZIN, ZINRUIMTE, NABLOK,
       tekenVoettekst: _tekenVoettekst,
+      metAntwoorden: _metAntwoorden,
     };
     y = RekentaalPdfRenderer.tekenBlok(doc, blok, y, layout);
   }
