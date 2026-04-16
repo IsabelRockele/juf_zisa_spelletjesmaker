@@ -29,7 +29,7 @@ const Preview = (() => {
       const g2 = parseInt(delen[2]) || 0;
       const antwoord = oef.antwoord ?? (bewerking === 'optellen' ? g1 + g2 : g1 - g2);
 
-      let d1, d2, sl1 = '', sl2 = '', sl3 = '';
+      let d1, d2, d3 = '', sl1 = '', sl2 = '', sl3 = '';
       if (bewerking === 'optellen') {
         const nLijnen = aantalLijnen || 2;
         const g2H = Math.floor(g2 / 100) * 100;   // honderden van g2
@@ -67,7 +67,7 @@ const Preview = (() => {
           sl2 = `${ts1Bd} + ${d2} = ${antwoord}`;
         } else if (isHTE) {
           // HTE strategie: splits in H + T + E (altijd 3 lijnen)
-          d1 = g2H; d2 = g2T; const d3He = g2E;
+          d1 = g2H; d2 = g2T; d3 = g2E;
           const ts1 = g1 + g2H;
           const ts2 = ts1 + g2T;
           sl1 = `${g1} + ${g2H} = ${ts1}`;
@@ -100,35 +100,88 @@ const Preview = (() => {
           sl2 = `${ts1} + ${d2} = ${antwoord}`;
         }
       } else if (splitspositie === 'aftrektal') {
-        // T-E strategie: splits aftrektal, bewaar tiendelen apart
-        // 20-9: 20=10+10 -> 10-9=1, 10+1=11
-        // 50-7: 50=40+10 -> 10-7=3, 40+3=43
-        d1 = 10;                          // altijd 10 (het stuk dat afgetrokken wordt)
-        d2 = g1 - 10;                     // rest (tiendelen, bijv. 40)
-        const ts1At = d1 - g2;            // 10 - g2
-        sl1 = `${d1} - ${g2} = ${ts1At}`;
-        sl2 = `${d2} + ${ts1At} = ${antwoord}`;
-      } else {
-        // T-TE strategie: splits de aftrekker in T en E
-        // 50-37: 37=30+7 -> 50-30=20, 20-7=13
-        // 13-8: 8=0+8 -> splits op eenheden g1: 13-3=10, 10-5=5
-        const d1T = Math.floor(g2 / 10) * 10;  // tiendelen van g2
-        const d2E = g2 % 10;                    // eenheden van g2
-        if (d1T === 0) {
-          // Enkel eenheden: splits op eenheden van g1
-          d1 = g1 % 10;
-          d2 = g2 - d1;
-          const ts1E = g1 - d1;
-          sl1 = `${g1} - ${d1} = ${ts1E}`;
-          sl2 = `${ts1E} - ${d2} = ${antwoord}`;
+        const g1H_at = Math.floor(g1 / 100) * 100;
+        const g1T_at = Math.floor((g1 % 100) / 10) * 10;
+        const g1E_at = g1 % 10;
+
+        const g1D_at = Math.floor(g1 / 1000) * 1000;
+
+        if (g1D_at > 0 && g1H_at > 0 && g1T_at === 0 && g1E_at === 0) {
+          // DH-H: splits g1 in D en H (3600-900 -> 3000+600 -> 3000-900=2100, 2100+600=2700)
+          d1 = g1D_at; d2 = g1H_at;
+          const ts1DhH_at = d1 - g2;
+          sl1 = `${d1} - ${g2} = ${ts1DhH_at}`;
+          sl2 = `${ts1DhH_at} + ${d2} = ${antwoord}`;
+        } else if (g1H_at > 0 && g1E_at === 0 && g1T_at > 0) {
+          // HT-TE: splits g1 in H en T, gebruik T om af te trekken
+          // 420-16: T=20, H=400 -> 20-16=4, 400+4=404
+          d1 = g1T_at; d2 = g1H_at;
+          const ts1Ht = d1 - g2;
+          sl1 = `${d1} - ${g2} = ${ts1Ht}`;
+          sl2 = `${d2} + ${ts1Ht} = ${antwoord}`;
+        } else if (g1H_at > 0) {
+          // HTE: splits g1 in H+T+E
+          // 572-413: 500+70+2 -> 500-413=87, 87+70=157, 157+2=159
+          d1 = g1H_at; d2 = g1T_at; d3 = g1E_at;
+          const ts1At3 = d1 - g2;
+          const ts2At3 = ts1At3 + d2;
+          sl1 = `${d1} - ${g2} = ${ts1At3}`;
+          sl2 = `${ts1At3} + ${d2} = ${ts2At3}`;
+          sl3 = `${ts2At3} + ${d3} = ${antwoord}`;
         } else {
-          d1 = d1T; d2 = d2E;
-          const ts1TE = g1 - d1;
-          sl1 = `${g1} - ${d1} = ${ts1TE}`;
-          sl2 = `${ts1TE} - ${d2} = ${antwoord}`;
+          // TE: splits g1 in T+E
+          // 85-39: 80+5 -> 80-39=41, 41+5=46
+          d1 = g1T_at; d2 = g1E_at;
+          const ts1At = d1 - g2;
+          sl1 = `${d1} - ${g2} = ${ts1At}`;
+          sl2 = `${ts1At} + ${d2} = ${antwoord}`;
+        }
+      } else {
+        // Aftrekker splitsen (T-TE / DH-H / DH-DH)
+        const g2D_a = Math.floor(g2 / 1000) * 1000;
+        const g2H_a = Math.floor((g2 % 1000) / 100) * 100;
+        const g2T_a = Math.floor((g2 % 100) / 10) * 10;
+        const g2E_a = g2 % 10;
+
+        if (g2D_a > 0 && g2H_a > 0) {
+          // DH-DH: splits in D en H (3200-1500 -> 1000+500)
+          d1 = g2D_a; d2 = g2H_a;
+          const ts1DhDh = g1 - g2D_a;
+          sl1 = `${g1} - ${g2D_a} = ${ts1DhDh}`;
+          sl2 = `${ts1DhDh} - ${g2H_a} = ${antwoord}`;
+        } else if (g2D_a === 0 && g2H_a > 0 && g2T_a === 0 && g2E_a === 0) {
+          // DH-H: splits op aanvulling tot duizendtal (4200-800 -> 200+600)
+          const aanvullingD = g1 % 1000;
+          const restH = g2 - aanvullingD;
+          d1 = aanvullingD; d2 = restH;
+          const ts1DhH = g1 - aanvullingD;
+          sl1 = `${g1} - ${aanvullingD} = ${ts1DhH}`;
+          sl2 = `${ts1DhH} - ${restH} = ${antwoord}`;
+        } else if (g2H_a > 0) {
+          // HTE aftrekken: splits in H + T + E
+          d1 = g2H_a; d2 = g2T_a; d3 = g2E_a;
+          const ts1HteA = g1 - g2H_a;
+          const ts2HteA = ts1HteA - g2T_a;
+          sl1 = `${g1} - ${g2H_a} = ${ts1HteA}`;
+          sl2 = `${ts1HteA} - ${g2T_a} = ${ts2HteA}`;
+          sl3 = `${ts2HteA} - ${g2E_a} = ${antwoord}`;
+        } else {
+          // T-TE: splits aftrekker in T en E
+          if (g2T_a === 0) {
+            // Enkel eenheden: splits op eenheden van g1
+            d1 = g1 % 10; d2 = g2 - d1;
+            const ts1E = g1 - d1;
+            sl1 = `${g1} - ${d1} = ${ts1E}`;
+            sl2 = `${ts1E} - ${d2} = ${antwoord}`;
+          } else {
+            d1 = g2T_a; d2 = g2E_a;
+            const ts1TE = g1 - d1;
+            sl1 = `${g1} - ${d1} = ${ts1TE}`;
+            sl2 = `${ts1TE} - ${d2} = ${antwoord}`;
+          }
         }
       }
-      return { d1, d2, sl1: sl1 || '', sl2: sl2 || '', sl3: sl3 || '' };
+      return { d1, d2, d3: d3 || '', sl1: sl1 || '', sl2: sl2 || '', sl3: sl3 || '' };
     } catch(e) {
       return { d1:'', d2:'', sl1:'', sl2:'' };
     }
@@ -141,22 +194,12 @@ const Preview = (() => {
       btn.style.background = _toonOplossingen ? '#27AE60' : '';
       btn.style.color = _toonOplossingen ? '#fff' : '';
     }
-    // Herrender zodat compenseren/transformeren correct tonen
-    // (die gebruiken _toonOplossingen in hun renderer)
-    if (typeof App !== 'undefined' && typeof App.getBundelData === 'function') {
-      const bd = App.getBundelData();
-      if (bd && bd.length > 0) {
-        const scrollY = window.scrollY;
-        Preview.render(bd);
-        window.scrollTo(0, scrollY);
-        // GEEN return: val door naar data-antwoord loop voor aanvullen/splits/schrijflijnen
-      }
-    }
-
-    // Alle elementen met data-antwoord — universeel
-    document.querySelectorAll('[data-antwoord]').forEach(el => {
-      const ant = String(el.dataset.antwoord ?? '').trim();
-      if (ant === '' || ant === 'undefined') return;
+    // Herrender voor compenseren/transformeren, daarna data-antwoord loop
+    const _doToggleUpdate = () => {
+      // Alle elementen met data-antwoord — universeel
+      document.querySelectorAll('[data-antwoord]').forEach(el => {
+        const ant = String(el.dataset.antwoord ?? '').trim();
+        if (ant === '' || ant === 'undefined') return;
 
       const isSchrijflijn  = el.classList.contains('schrijflijn');
       const isSplitsVak    = el.classList.contains('splits-vak') || el.classList.contains('splits-vak-groot');
@@ -212,6 +255,10 @@ const Preview = (() => {
           el.style.minWidth      = '40px';
           el.style.display       = 'inline-block';
           el.style.paddingBottom = '1px';
+        } else if (el.classList.contains('trans-schrijflijn-pijl')) {
+          // Transformeren pijl-waarde (delta tonen)
+          el.style.display    = 'inline-block';
+          el.style.minWidth   = '20px';
         } else {
           // Andere (tafels etc)
           el.style.background    = '#c6efce';
@@ -238,6 +285,22 @@ const Preview = (() => {
         el.style.display        = '';
       }
     });
+    }; // einde _doToggleUpdate
+
+    // Toon/verberg opmerking over tussenstappen
+    let opmDiv = document.getElementById('opm-tussenstappen');
+    if (!opmDiv) {
+      opmDiv = document.createElement('div');
+      opmDiv.id = 'opm-tussenstappen';
+      opmDiv.style.cssText = 'margin:8px 0 4px 0;padding:6px 10px;background:#f0faf0;border-left:3px solid #27ae60;font-size:12px;color:#555;font-style:italic;';
+      opmDiv.textContent = '* De tussenstappen bij splitsoefeningen kunnen afwijken van de gebruikte methode in de klas.';
+      const container = document.getElementById('preview-inhoud');
+      if (container) container.insertBefore(opmDiv, container.firstChild);
+    }
+    opmDiv.style.display = _toonOplossingen ? 'block' : 'none';
+
+    // Directe DOM update via data-antwoord loop
+    _doToggleUpdate();
   }
 
   function esc(s) {
@@ -586,7 +649,9 @@ const Preview = (() => {
       // Gebruik _berekenSplits voor correcte d1/d2
       const _spVak = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, blok.schrijflijnenAantal || 2);
       const splAntw = splAantal === 3
-        ? [oef.splitsH ?? '', oef.splitsT ?? '', oef.splitsE ?? '']
+        ? [_spVak.d1 !== '' ? _spVak.d1 : (oef.splitsH ?? ''),
+           _spVak.d2 !== '' ? _spVak.d2 : (oef.splitsT ?? ''),
+           _spVak.d3 !== undefined && _spVak.d3 !== '' ? _spVak.d3 : (oef.splitsE ?? '')]
         : [_spVak.d1 !== '' ? _spVak.d1 : (oef.splitsDeel1 ?? ''),
            _spVak.d2 !== '' ? _spVak.d2 : (oef.splitsDeel2 ?? '')];
       vakjesHTML = splAntw.map(ant =>
@@ -804,13 +869,13 @@ const Preview = (() => {
       }
     } else if (variant === 'met-tekens') {
       if (isAftrekken) {
-        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${compGetal}"></span><span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
+        blokjeInhoud = `<span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${oef.tiental}"></span><span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
       } else {
-        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${compGetal}"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
+        blokjeInhoud = `<span class="comp-blokje-teken">+</span><span class="comp-blokje-hokje" data-antwoord="${oef.tiental}"></span><span class="comp-blokje-teken">&minus;</span><span class="comp-blokje-hokje" data-antwoord="${oef.compenseerDelta}"></span>`;
       }
     } else {
       // zonder-tekens én zelf-kringen: 2 lege brede hokjes
-      blokjeInhoud = `<span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${compGetal}"></span><span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${oef.compenseerDelta}"></span>`;
+      blokjeInhoud = `<span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${oef.tiental}"></span><span class="comp-blokje-hokje comp-blokje-hokje-breed" data-antwoord="${oef.compenseerDelta}"></span>`;
     }
 
     const antw  = (isVoorbeeldOef || _toonOplossingen) ? String(oef.antwoord) : '';
@@ -864,13 +929,16 @@ const Preview = (() => {
     const ag       = oef.andereGetal;
     const d        = oef.transformeerDelta;
     // Bepaal welke term links staat (volg volgorde van de som)
-    const aIsTg    = oef.vraag.trim().startsWith(String(tg));
-    const links    = aIsTg ? tg  : ag;   // wat links staat in de som
-    const rechts   = aIsTg ? ag  : tg;   // wat rechts staat
-    const linksT   = aIsTg ? tg + d : ag + d;
-    const rechtsT  = aIsTg ? ag + d : tg + d;
-    const tgT      = tg + d;
-    const agT      = ag + d;
+    // Bij aftrekken: grootste getal altijd links (= aftrektal)
+    const grootsteLinks = isAftrek ? Math.max(tg, ag) === tg : oef.vraag.trim().startsWith(String(tg));
+    const links    = grootsteLinks ? tg  : ag;
+    const rechts   = grootsteLinks ? ag  : tg;
+    // Bij optellen: tg+d en ag-d (of omgekeerd afhankelijk van positie)
+    // Bij aftrekken: beide +d
+    const tgT  = tg + d;
+    const agT  = isAftrek ? ag + d : ag - d;
+    const linksT   = grootsteLinks ? tgT : agT;
+    const rechtsT  = grootsteLinks ? agT : tgT;
     const som      = oef.antwoord;
     const klasse   = 'oefening-item oefening-trans' + (isVbStijl ? ' trans-voorbeeld' : '');
     const bewTeken = isAftrek ? '-' : '+';
@@ -896,15 +964,20 @@ const Preview = (() => {
 
     const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}" ></span>`;
 
-    // Pijltekens: tg krijgt +d, ag krijgt +d (bij aftrekken beide +d)
-    const pijlTxtL = (d > 0 ? '+' : '') + d;
-    const pijlTxtR = (d > 0 ? '+' : '') + d;
+    // Pijltekens: bij optellen: tg +d, ag -d (of omgekeerd)
+    // Bij aftrekken: beide +d of beide -d
+    const pijlTxtL = isAftrek
+      ? (d > 0 ? '+' : '') + d          // aftrekken: beide zelfde richting
+      : (aIsTg ? (d > 0 ? '+' : '') + d : (d > 0 ? '-' : '+') + Math.abs(d));
+    const pijlTxtR = isAftrek
+      ? (d > 0 ? '+' : '') + d
+      : (aIsTg ? (d > 0 ? '-' : '+') + Math.abs(d) : (d > 0 ? '+' : '') + d);
 
-    const pijlL = isVb ? `<span class="trans-pijl-waarde blauw">${pijlTxtL}</span>${pijl}` : `<span class="trans-schrijflijn-pijl"></span>${pijl}`;
-    const pijlR = isVb ? `${pijl}<span class="trans-pijl-waarde blauw">${pijlTxtR}</span>` : `${pijl}<span class="trans-schrijflijn-pijl"></span>`;
-    const ondL  = isVb ? `<span class="trans-ingevuld">${linksT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${linksT}"></span>`;
-    const ondR  = isVb ? `<span class="trans-ingevuld">${rechtsT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${rechtsT}"></span>`;
-    const ondAn = isVb ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn" data-antwoord="${som}"></span>`;
+    const pijlL = isVbStijl ? `<span class="trans-pijl-waarde blauw">${pijlTxtL}</span>${pijl}` : `<span class="trans-schrijflijn-pijl" data-antwoord="${pijlTxtL}"></span>${pijl}`;
+    const pijlR = isVbStijl ? `${pijl}<span class="trans-pijl-waarde blauw">${pijlTxtR}</span>` : `${pijl}<span class="trans-schrijflijn-pijl" data-antwoord="${pijlTxtR}"></span>`;
+    const ondL  = isVbStijl ? `<span class="trans-ingevuld">${linksT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${linksT}"></span>`;
+    const ondR  = isVbStijl ? `<span class="trans-ingevuld">${rechtsT}</span>` : `<span class="trans-schrijflijn" data-antwoord="${rechtsT}"></span>`;
+    const ondAn = isVbStijl ? `<span class="trans-ingevuld">${som}</span>`  : `<span class="trans-schrijflijn" data-antwoord="${som}"></span>`;
 
     const tabel = `<table class="trans-tabel">
       <colgroup><col style="width:30%"><col style="width:8%"><col style="width:30%"><col style="width:8%"><col></colgroup>
@@ -938,7 +1011,7 @@ const Preview = (() => {
       // links = aftrektal (groot), rechts = aftrekker (klein, transformeerterm)
       const rij2Inhoud = isVb
         ? `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${linksT}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">${rechtsT}</div>`
-        : `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${links}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">?</div>`;
+        : `<div style="background:#b5d4f4;flex:3;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1e3a8a;padding:0 4px">${rechts}</div><div style="background:#e5e7eb;flex:2;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#9ca3af">?</div>`;
       return `<div class="${klasse}">
         <div style="display:flex;width:100%;height:26px;margin-bottom:2px;gap:2px">
           <div style="background:#fde68a;border-radius:3px;width:28px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#78350f">${geelInhoud}</div>
@@ -968,8 +1041,8 @@ const Preview = (() => {
       const scrB = aIsTg ? 'trans-balk-schrijf-g' : 'trans-balk-schrijf';
       const invA = aIsTg ? 'trans-balk-inv' : 'trans-balk-inv-g';
       const invB = aIsTg ? 'trans-balk-inv-g' : 'trans-balk-inv';
-      const lblA2 = aIsTg ? tgT : ag - d;
-      const lblB2 = aIsTg ? ag - d : tgT;
+      const lblA2 = aIsTg ? tgT : agT;
+      const lblB2 = aIsTg ? agT : tgT;
 
       const balk2A = isVb ? `<div class="${invA}">${lblA2}</div>` : `<div class="${scrA}"></div>`;
       const balk2B_schema = isVb ? `<div class="${invB}">${lblB2}</div>` : `<div class="${scrB}"></div>`;
