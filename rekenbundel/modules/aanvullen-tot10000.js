@@ -3,13 +3,13 @@
    Aanvullen tot 10.000 — DH-DH (altijd brug)
 
    Regels:
-   - Aftrekker: DH met honderdtallen 7/8/9 (moet aanvullen)
-   - Aftrektal: DH met honderdtallen 1-6
+   - Aftrekker: DH met honderdtallen 7/8/9
+   - Aftrektal: DH, duizendtallen = aftrekker D + 1
    - Brug: H aftrektal < H aftrekker
-   - D aftrektal > D aftrekker (zodat verschil > 0)
+   - Verschil altijd ≤ 600 (max 1 duizendtal verschil)
 
-   Voorbeeld: 9200 - 8800 = ?
-   → 8800 + ___ = 9200
+   Voorbeeld: 9200 - 8800 = 400
+              5300 - 4700 = 600
    ══════════════════════════════════════════════════════════════ */
 
 const AanvullenTot10000 = (() => {
@@ -25,22 +25,21 @@ const AanvullenTot10000 = (() => {
       const dB = rand(1, 8);
       const aftrekker = dB * 1000 + hB * 100;
 
-      // Aftrektal: honderdtallen 1-6, duizendtallen > dB
-      const hA = rand(1, 6);
-      if (hA >= hB) continue;
-      const dA = rand(dB + 1, 9);
+      // Aftrektal: duizendtallen = dB + 1 (zodat verschil klein blijft)
+      const dA = dB + 1;
       if (dA > 9) continue;
+
+      // honderdtallen zodat verschil ≤ 600
+      // verschil = 1000 + (hA - hB) * 100 ≤ 600 → hA ≤ hB - 4
+      const hAMax = hB - 4;
+      if (hAMax < 1) continue;
+      const hA = rand(1, hAMax);
+
       const aftrektal = dA * 1000 + hA * 100;
-
       const verschil = aftrektal - aftrekker;
-      if (verschil <= 0) continue;
+      if (verschil <= 0 || verschil > 600) continue;
 
-      return {
-        a: aftrektal,
-        b: aftrekker,
-        verschil,
-        type: 'DH-DH',
-      };
+      return { a: aftrektal, b: aftrekker, verschil, type: 'DH-DH' };
     }
     return null;
   }
