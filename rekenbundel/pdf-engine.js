@@ -3058,6 +3058,22 @@ antwB(fx2, tweedeRijY, uitkomst);
 
   // ── Variant delen-zelf: aftrekrij met stap ingevuld, deelsom leeg ──
   if (variant === 'delen-zelf') {
+    // Bij oplossing: teken boogjes onder de lijn
+    if (_metAntwoorden) {
+      const boogBasisY = asY + 1.2;
+      const boogH = 5.5;
+      doc.setDrawColor(21, 101, 192);
+      doc.setLineWidth(0.45);
+      for (let g = 0; g < groepen; g++) {
+        const x1 = lijnX1 + (uitkomst - g * stap) * vakjeW + vakjeW / 2;
+        const x2 = lijnX1 + (uitkomst - (g + 1) * stap) * vakjeW + vakjeW / 2;
+        const midX = (x1 + x2) / 2;
+        tekenBoog(x1, x2, boogBasisY, boogH, true);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+        doc.setTextColor(21, 101, 192);
+        doc.text(String(stap), midX, boogBasisY + boogH + 3.5, { align: 'center' });
+      }
+    }
     const formY = asY + 10;
     const LS = 12; const BL3 = 10;
 
@@ -3106,6 +3122,22 @@ antwB(fx2, tweedeRijY, uitkomst);
 
   // ── Variant delen-rest-zelf: stap ingevuld, rest-zinnen ──
   if (variant === 'delen-rest-zelf') {
+    // Bij oplossing: teken boogjes onder de lijn
+    if (_metAntwoorden) {
+      const boogBasisY = asY + 1.2;
+      const boogH = 5.5;
+      doc.setDrawColor(21, 101, 192);
+      doc.setLineWidth(0.45);
+      for (let g = 0; g < groepen; g++) {
+        const x1 = lijnX1 + (uitkomst - g * stap) * vakjeW + vakjeW / 2;
+        const x2 = lijnX1 + (uitkomst - (g + 1) * stap) * vakjeW + vakjeW / 2;
+        const midX = (x1 + x2) / 2;
+        tekenBoog(x1, x2, boogBasisY, boogH, true);
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+        doc.setTextColor(21, 101, 192);
+        doc.text(String(stap), midX, boogBasisY + boogH + 3.5, { align: 'center' });
+      }
+    }
     const formY = asY + 10;
     const LS = 12; const BL5 = 10;
 
@@ -3217,6 +3249,24 @@ doc.setTextColor(...TEKSTDONKER);
 const factor1 = positie === 'achteraan' ? groepen : stap;
 const factor2 = positie === 'achteraan' ? stap : groepen;
 
+// Bij oplossing: teken boogjes boven de lijn
+  if (_metAntwoorden) {
+    const boogBasisY = vakjeY - 2;
+    const ctrlLift = 18;
+    doc.setDrawColor(...LIJNGRIJS);
+    doc.setLineWidth(0.45);
+    for (let g = 0; g < groepen; g++) {
+      const x1 = lijnX1 + (g * stap) * vakjeW + vakjeW / 2;
+      const x2 = lijnX1 + ((g + 1) * stap) * vakjeW + vakjeW / 2;
+      const midX = (x1 + x2) / 2;
+      const ctrlY = boogBasisY - ctrlLift;
+      tekenBoog(x1, x2, boogBasisY, ctrlLift, false);
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(51, 51, 51);
+      doc.text(String(stap), midX, ctrlY - 2, { align: 'center' });
+    }
+  }
+
 // Altijd volledig ingevulde maalsom:
 // bv. 2 × 8 = ______ = ___
 // of 8 × 2 = ______ = ___
@@ -3233,12 +3283,26 @@ fx += doc.getTextWidth(String(factor2)) + 3;
 sym(fx, formY, '=');
 fx += doc.getTextWidth('=') + 3;
 
+// Lange lijn = uitkomst bij oplossing
+if (_metAntwoorden) {
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+  doc.setTextColor(0, 130, 0);
+  doc.text(String(uitkomst), fx + langeLijn/2 - doc.getTextWidth(String(uitkomst))/2, formY + BL);
+  doc.setTextColor(...TEKSTDONKER);
+}
 lijnLang(fx, formY);
 fx += langeLijn + 3;
 
 sym(fx, formY, '=');
 fx += doc.getTextWidth('=') + 3;
 
+// Korte lijn = uitkomst bij oplossing
+if (_metAntwoorden) {
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
+  doc.setTextColor(0, 130, 0);
+  doc.text(String(uitkomst), fx + korteLijn/2 - doc.getTextWidth(String(uitkomst))/2, formY + BL);
+  doc.setTextColor(...TEKSTDONKER);
+}
 lijnKort(fx, formY);
 }
 
@@ -3983,20 +4047,42 @@ doc.setTextColor(26, 58, 92);
       doc.line(midX, topY + TOTAAL_H, vakMidX, vakY);
     }
 
-    // Onderste vakjes (leeg, blauw kader)
+    // Onderste vakjes (leeg of ingevuld bij oplossing)
     const startVakXL = midX - totaalB / 2;
     for (let i = 0; i < n; i++) {
       const vx = startVakXL + i * (DOOS_B + DOOS_GAP);
-      doc.setFillColor(255,255,255);
-      doc.setDrawColor(21, 101, 192);
+      if (_metAntwoorden) {
+        doc.setFillColor(198, 239, 206);
+        doc.setDrawColor(0, 150, 50);
+      } else {
+        doc.setFillColor(255,255,255);
+        doc.setDrawColor(21, 101, 192);
+      }
       doc.setLineWidth(0.5);
       doc.roundedRect(vx, vakY, DOOS_B, DOOS_H, 1.5, 1.5, 'FD');
+      if (_metAntwoorden) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(FS);
+        doc.setTextColor(0, 100, 0);
+        const t = String(oef.perGroep);
+        doc.text(t, vx + DOOS_B/2 - doc.getTextWidth(t)/2, vakY + BL - 1);
+        doc.setTextColor(50, 50, 50);
+      }
     }
 
     // Zinnen onder het huis
     function lijn(lx, ly, w) {
       doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
       doc.line(lx, ly + BL, lx + w, ly + BL);
+    }
+    function antw(lx, ly, w, val) {
+      lijn(lx, ly, w);
+      if (_metAntwoorden && val !== undefined && val !== null) {
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        doc.setTextColor(0, 130, 0);
+        const t = String(val), tw = doc.getTextWidth(t);
+        doc.text(t, lx + w/2 - tw/2, ly + BL);
+        doc.setTextColor(50, 50, 50);
+      }
     }
     function bold(tx, ty, t, blauw) {
       doc.setFont('helvetica','bold'); doc.setFontSize(FS);
@@ -4020,7 +4106,7 @@ doc.setTextColor(26, 58, 92);
     lx += doc.getTextWidth(String(n)) + 1.5;
     italic(lx, fy, 'gelijke delen is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('gelijke delen is') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.perGroep); lx += LIJN_W + 1;
     italic(lx, fy, '.');
     fy += 11;
 
@@ -4034,7 +4120,7 @@ doc.setTextColor(26, 58, 92);
     lx += doc.getTextWidth(String(n)) + 1.5;
     bold(lx, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
     lx += doc.getTextWidth('=') + 1.5;
-    lijn(lx, fy, LIJN_W);
+    antw(lx, fy, LIJN_W, oef.perGroep);
 
     y += oh;
   }
@@ -4112,6 +4198,16 @@ doc.setTextColor(26, 58, 92);
       doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
       doc.line(lx, ly + BL, lx + w, ly + BL);
     }
+    function antw(lx, ly, w, val) {
+      lijn(lx, ly, w);
+      if (_metAntwoorden && val !== undefined && val !== null) {
+        doc.setFont('helvetica','bold'); doc.setFontSize(FS);
+        doc.setTextColor(0, 130, 0);
+        const t = String(val), tw = doc.getTextWidth(t);
+        doc.text(t, lx + w/2 - tw/2, ly + BL);
+        doc.setTextColor(50, 50, 50);
+      }
+    }
     function bold(tx, ty, t, blauw) {
       doc.setFont('helvetica','bold'); doc.setFontSize(FS);
       doc.setTextColor(...(blauw ? [21,101,192] : [50,50,50]));
@@ -4125,14 +4221,14 @@ doc.setTextColor(26, 58, 92);
 
     let fy = gridY + 4;
 
-    // Zin 1: Hoeveel gekleurde hokjes zijn er? ___  (lijn inline)
+    // Zin 1: Hoeveel gekleurde hokjes zijn er? ___
     let lx1 = zinX;
     italic(lx1, fy, 'Hoeveel gekleurde hokjes zijn er?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx1 += doc.getTextWidth('Hoeveel gekleurde hokjes zijn er?') + 2;
-    lijn(lx1, fy, LIJN_W);
+    antw(lx1, fy, LIJN_W, oef.totaal);
     fy += ZIN_H + 3;
 
-    // Zin 2: Met hoeveel stroken van [n] kun je die bedekken? ___  (lijn inline)
+    // Zin 2: Met hoeveel stroken van [n] kun je die bedekken? ___
     let lx2 = zinX;
     italic(lx2, fy, 'Met hoeveel stroken van'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx2 += doc.getTextWidth('Met hoeveel stroken van') + 1.5;
@@ -4140,7 +4236,7 @@ doc.setTextColor(26, 58, 92);
     lx2 += doc.getTextWidth(String(n)) + 1.5;
     italic(lx2, fy, 'kun je die bedekken?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx2 += doc.getTextWidth('kun je die bedekken?') + 2;
-    lijn(lx2, fy, LIJN_W);
+    antw(lx2, fy, LIJN_W, oef.perGroep);
     fy += ZIN_H + 3;
 
     // Zin 3: Hoe dikwijls gaat [n] in [totaal]? ___ keer.  (lijn inline)
@@ -4155,7 +4251,7 @@ doc.setTextColor(26, 58, 92);
     lx3 += doc.getTextWidth(String(oef.totaal)) + 1;
     italic(lx3, fy, '?'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx3 += doc.getTextWidth('?') + 2;
-    lijn(lx3, fy, LIJN_W); lx3 += LIJN_W + 1.5;
+    antw(lx3, fy, LIJN_W, oef.perGroep); lx3 += LIJN_W + 1.5;
     italic(lx3, fy, 'keer.');
 
     y += oh;
