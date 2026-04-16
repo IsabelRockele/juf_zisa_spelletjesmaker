@@ -534,6 +534,11 @@ header .badge {
   background: #c6efce !important;
   border-color: #27ae60 !important;
 }
+
+/* Getallenlijn zelf: boogjes verborgen tot oplossing getoond */
+.gl-boog-oplossing {
+  display: none;
+}
 .zisa-lamp {
   height: 52px;
   width: auto;
