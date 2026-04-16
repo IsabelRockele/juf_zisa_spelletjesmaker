@@ -12,3 +12,5 @@ Thumbs.db
 # Backups/oud
 pro_backend/functions_oud/
 *package-lock-*.json
+# Cloud Functions (bevat API keys)
+vraagstukken/
