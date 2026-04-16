@@ -268,6 +268,17 @@ const Preview = (() => {
           el.style.minWidth      = '40px';
           el.style.display       = 'inline-block';
           el.style.paddingBottom = '1px';
+        } else if (el.classList.contains('sb-hokje') || el.classList.contains('sh-vakje')) {
+          // Splitsbeen / splitshuis hokje
+          el.style.background = '#c6efce';
+          el.style.color      = '#006100';
+          el.style.fontWeight = 'bold';
+        } else if (el.classList.contains('tafel-vak') || el.classList.contains('sbw-vak') || el.classList.contains('punt-lijn')) {
+          // Tafels / splitsbeen bewerkingen / puntoefening
+          el.style.background   = '#c6efce';
+          el.style.color        = '#006100';
+          el.style.fontWeight   = 'bold';
+          el.style.borderBottom = '2px solid #00a650';
         } else if (el.classList.contains('rt-oef-lijn')) {
           // Rekentaal schrijflijn
           el.style.borderBottom  = '2px solid #00a650';
@@ -1114,12 +1125,41 @@ const Preview = (() => {
      null in tekst = schrijflijn
   ────────────────────────────────────────────────────────── */
   function _puntoefHTML(blokId, oef, idx, del) {
-    const delen = (oef.tekst || []).map((d, i) => {
+    // Bereken antwoord uit tekst: [a, op, b, '=', c] - een van a/b/c is null
+    const _pTekst = oef.tekst || [];
+    const _pNums  = _pTekst.filter(x => typeof x === 'number');
+    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷','*','/'].includes(x));
+    const _pEqIdx = _pTekst.indexOf('=');
+    function _pBerekenAntw(nullPos) {
+      if (_pEqIdx === -1 || !_pOp) return '';
+      const a = _pTekst[0], b = _pTekst[2], c = _pTekst[_pEqIdx + 1];
+      if (nullPos > _pEqIdx) { // c = a OP b
+        if (_pOp === '+' || _pOp === '+') return (a||0) + (b||0);
+        if (_pOp === '-') return (a||0) - (b||0);
+        if (_pOp === '×' || _pOp === '*') return (a||0) * (b||0);
+        if (_pOp === '÷' || _pOp === '/') return (a||0) / (b||0);
+      } else if (nullPos === 0) { // a = c OP-inv b
+        if (_pOp === '+') return (c||0) - (b||0);
+        if (_pOp === '-') return (c||0) + (b||0);
+        if (_pOp === '×' || _pOp === '*') return (c||0) / (b||0);
+        if (_pOp === '÷' || _pOp === '/') return (c||0) * (b||0);
+      } else { // b = c OP-inv a
+        if (_pOp === '+') return (c||0) - (a||0);
+        if (_pOp === '-') return (a||0) - (c||0);
+        if (_pOp === '×' || _pOp === '*') return (c||0) / (a||0);
+        if (_pOp === '÷' || _pOp === '/') return (a||0) * (c||0);
+      }
+      return '';
+    }
+    let _pNulIdx = 0;
+    const delen = _pTekst.map((d, _pi) => {
       if (typeof d === 'string') {
         return `<span class="punt-teken">${d}</span>`;
       }
       if (d === null) {
-        return `<span class="punt-lijn"></span>`;
+        const _pAntw = _pBerekenAntw(_pi);
+        _pNulIdx++;
+        return `<span class="punt-lijn" data-antwoord="${_pAntw !== '' && _pAntw !== undefined ? _pAntw : ''}"></span>`;
       }
       return `<span class="punt-getal">${d}</span>`;
     }).join('');
@@ -1144,17 +1184,21 @@ const Preview = (() => {
     const linksGegeven = oef.links  !== null;
     const rechtsGegeven= oef.rechts !== null;
 
+    const _ksTotAntw  = oef.links  !== null && oef.rechts !== null ? oef.links + oef.rechts : '';
+    const _ksLinkAntw = oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : '';
+    const _ksRechAntw = oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : '';
+
     const dakHTML = dakGegeven
       ? `<span class="sh-dak-getal">${oef.totaal}</span>`
-      : `<span class="sh-vakje sh-vakje-dak"></span>`;
+      : `<span class="sh-vakje sh-vakje-dak" data-antwoord="${_ksTotAntw}"></span>`;
 
     const linksHTML = linksGegeven
       ? `<span class="sh-kamer-getal">${oef.links}</span>`
-      : `<span class="sh-vakje sh-vakje-kamer"></span>`;
+      : `<span class="sh-vakje sh-vakje-kamer" data-antwoord="${_ksLinkAntw}"></span>`;
 
     const rechtsHTML = rechtsGegeven
       ? `<span class="sh-kamer-getal">${oef.rechts}</span>`
-      : `<span class="sh-vakje sh-vakje-kamer"></span>`;
+      : `<span class="sh-vakje sh-vakje-kamer" data-antwoord="${_ksRechAntw}"></span>`;
 
     return `
       <div class="oefening-item oefening-splits oefening-kleinsplitshuis">
@@ -1180,9 +1224,12 @@ const Preview = (() => {
        [links]  [rechts]   ← invulvakje of getal onderaan
   ────────────────────────────────────────────────────────── */
   function _splitsbeenHTML(blokId, oef, idx, del) {
-    const top    = `<span class="sb-hokje">${oef.totaal !== null ? oef.totaal : ''}</span>`;
-    const links  = `<span class="sb-hokje">${oef.links  !== null ? oef.links  : ''}</span>`;
-    const rechts = `<span class="sb-hokje">${oef.rechts !== null ? oef.rechts : ''}</span>`;
+    const _sbTotAntw  = oef.totaal  !== null ? oef.totaal  : (oef.links  !== null && oef.rechts !== null ? oef.links + oef.rechts : '');
+    const _sbLinkAntw = oef.links   !== null ? oef.links   : (oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : '');
+    const _sbRechAntw = oef.rechts  !== null ? oef.rechts  : (oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : '');
+    const top    = oef.totaal  !== null ? `<span class="sb-hokje">${oef.totaal}</span>`  : `<span class="sb-hokje" data-antwoord="${_sbTotAntw}"></span>`;
+    const links  = oef.links   !== null ? `<span class="sb-hokje">${oef.links}</span>`   : `<span class="sb-hokje" data-antwoord="${_sbLinkAntw}"></span>`;
+    const rechts = oef.rechts  !== null ? `<span class="sb-hokje">${oef.rechts}</span>`  : `<span class="sb-hokje" data-antwoord="${_sbRechAntw}"></span>`;
 
     return `
       <div class="oefening-item oefening-splits oefening-splitsbeen">
@@ -1207,8 +1254,10 @@ const Preview = (() => {
   ────────────────────────────────────────────────────────── */
   function _grootsplitshuisHTML(blokId, oef, idx, del) {
     const rijenHTML = (oef.rijen || []).map(rij => {
-      const linksHTML  = rij.links  !== null ? `<span class="sh-kamer-getal">${rij.links}</span>`  : ``;
-      const rechtsHTML = rij.rechts !== null ? `<span class="sh-kamer-getal">${rij.rechts}</span>` : ``;
+      const _gsLinkAntw  = rij.links  !== null ? rij.links  : (oef.totaal !== null && rij.rechts !== null ? oef.totaal - rij.rechts : '');
+      const _gsRechAntw  = rij.rechts !== null ? rij.rechts : (oef.totaal !== null && rij.links  !== null ? oef.totaal - rij.links  : '');
+      const linksHTML  = rij.links  !== null ? `<span class="sh-kamer-getal">${rij.links}</span>`  : `<span class="sh-vakje sh-vakje-kamer" data-antwoord="${_gsLinkAntw}"></span>`;
+      const rechtsHTML = rij.rechts !== null ? `<span class="sh-kamer-getal">${rij.rechts}</span>` : `<span class="sh-vakje sh-vakje-kamer" data-antwoord="${_gsRechAntw}"></span>`;
       return `
         <div class="sh-muur-rij">
           <div class="sh-kamer sh-kamer-l">${linksHTML}</div>
@@ -1237,19 +1286,36 @@ const Preview = (() => {
      Kind vult alles zelf in.
   ────────────────────────────────────────────────────────── */
   function _splitsbeenBewerkingHTML(blokId, oef, idx, del) {
-    const top    = `<span class="sb-hokje">${oef.totaal}</span>`;
-    const links  = `<span class="sb-hokje">${oef.links  !== null ? oef.links  : ''}</span>`;
-    const rechts = `<span class="sb-hokje">${oef.rechts !== null ? oef.rechts : ''}</span>`;
-
+    // Bereken alle waarden (ook ontbrekende)
+    const _sbL = oef.links  !== null ? oef.links  : (oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : null);
+    const _sbR = oef.rechts !== null ? oef.rechts : (oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : null);
+    const _sbT = oef.totaal !== null ? oef.totaal : (_sbL !== null && _sbR !== null ? _sbL + _sbR : null);
+    const top    = `<span class="sb-hokje">${_sbT ?? ''}</span>`;
+    const links  = oef.links  !== null
+      ? `<span class="sb-hokje">${oef.links}</span>`
+      : `<span class="sb-hokje" data-antwoord="${_sbL ?? ''}"></span>`;
+    const rechts = oef.rechts !== null
+      ? `<span class="sb-hokje">${oef.rechts}</span>`
+      : `<span class="sb-hokje" data-antwoord="${_sbR ?? ''}"></span>`;
+    // Antwoorden: [vak1, vak2, uitkomst]
+    const _sbwAntw = [
+      [_sbL, _sbR, _sbT],
+      [_sbR, _sbL, _sbT],
+      [_sbT, _sbL, _sbR],
+      [_sbT, _sbR, _sbL],
+    ];
     const ops  = ['+', '+', '−', '−'];
-    const rijenHTML = ops.map(op => `
+    const rijenHTML = ops.map((op, _bi) => {
+      const [_a1, _a2, _a3] = _sbwAntw[_bi];
+      return `
       <div class="sbw-bewerking">
-        <span class="sbw-vak"></span>
+        <span class="sbw-vak" data-antwoord="${_a1 !== null && _a1 !== undefined ? _a1 : ''}"></span>
         <span class="sbw-op">${op}</span>
-        <span class="sbw-vak"></span>
+        <span class="sbw-vak" data-antwoord="${_a2 !== null && _a2 !== undefined ? _a2 : ''}"></span>
         <span class="sbw-is">=</span>
-        <span class="sbw-vak"></span>
-      </div>`).join('');
+        <span class="sbw-vak" data-antwoord="${_a3 !== null && _a3 !== undefined ? _a3 : ''}"></span>
+      </div>`;
+    }).join('');
 
     return `
       <div class="oefening-item oefening-splits oefening-sbw">
@@ -1593,31 +1659,33 @@ const Preview = (() => {
                    <span class="tafel-term">${oef.product}</span>`;
       }
     } else if (oef.type === 'redeneren') {
-      // deeltal : deler = ___ , want ___ × deler = ___  (kind vult alles in)
+      // deeltal : deler = quotient , want quotient × deler = deeltal
+      const _rdQuotient = oef.deeltal / oef.deler;
       somHTML = `<span class="tafel-term">${oef.deeltal}</span>
                  <span class="tafel-op">:</span>
                  <span class="tafel-term">${oef.deler}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${_rdQuotient}"></span>
                  <span class="tafel-want">, want</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${_rdQuotient}"></span>
                  <span class="tafel-op">×</span>
                  <span class="tafel-term">${oef.deler}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>`;
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${oef.deeltal}"></span>`;
     } else if (oef.type === 'koppel') {
-      // factor1 × factor2 = ___ , dus ___ : factor2 = ___
+      // factor1 × factor2 = product , dus product : factor2 = factor1
+      const _kpProduct = oef.factor1 * oef.factor2;
       somHTML = `<span class="tafel-term">${oef.factor1}</span>
                  <span class="tafel-op">×</span>
                  <span class="tafel-term">${oef.factor2}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${_kpProduct}"></span>
                  <span class="tafel-want">, dus</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${_kpProduct}"></span>
                  <span class="tafel-op">:</span>
                  <span class="tafel-term">${oef.factor2}</span>
                  <span class="tafel-is">=</span>
-                 <span class="tafel-vak tafel-vak-smal"></span>`;
+                 <span class="tafel-vak tafel-vak-smal" data-antwoord="${oef.factor1}"></span>`;
     }
 
     return `<div class=tafel-oef data-blok=${blokId} data-idx=${idx}>
