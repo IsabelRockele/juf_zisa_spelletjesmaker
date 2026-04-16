@@ -528,6 +528,12 @@ header .badge {
   padding: 4px;
   background: var(--wit);
 }
+
+/* Ingekleurd bij oplossing: brugoefening */
+.lamp-brug-oplossing {
+  background: #c6efce !important;
+  border-color: #27ae60 !important;
+}
 .zisa-lamp {
   height: 52px;
   width: auto;
