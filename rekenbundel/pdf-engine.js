@@ -159,7 +159,30 @@ y += 5;
         const isHTE = g2H > 0;
         const isTE  = !isHTE && g2T > 0;
 
-        if (isHTE) {
+        // HT+HT of brug naar D
+        const isHTplusHT = (g1 % 100 !== 0) && g2H > 0;
+        const g1RestTotD = 1000 - (g1 % 1000);
+        const isBrugD = (g1 % 100 === 0) && (g1 % 1000 !== 0) && g2 >= g1RestTotD
+                        && Math.floor(g1 / 1000) !== Math.floor((g1 + g2) / 1000);
+
+        if (isHTplusHT) {
+          d1 = g2H; d2 = g2T;
+          const ts1Ht = g1 + g2H;
+          if (g2E > 0) {
+            const ts2Ht = ts1Ht + g2T;
+            sl1 = `${g1} + ${g2H} = ${ts1Ht}`;
+            sl2 = `${ts1Ht} + ${g2T} = ${ts2Ht}`;
+            sl3 = `${ts2Ht} + ${g2E} = ${antwoord}`;
+          } else {
+            sl1 = `${g1} + ${g2H} = ${ts1Ht}`;
+            sl2 = `${ts1Ht} + ${g2T} = ${antwoord}`;
+          }
+        } else if (isBrugD) {
+          d1 = g1RestTotD; d2 = g2 - d1;
+          const ts1Bd = g1 + d1;
+          sl1 = `${g1} + ${d1} = ${ts1Bd}`;
+          sl2 = `${ts1Bd} + ${d2} = ${antwoord}`;
+        } else if (isHTE) {
           // HTE: splits in H + T + E
           d1 = g2H; d2 = g2T;
           const ts1 = g1 + g2H;
