@@ -2767,6 +2767,12 @@ doc.triangle(
     doc.text('Ik zie', zx, zinY);
     zx += doc.getTextWidth('Ik zie') + 2.2;
 
+    if (_metAntwoorden) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(0, 130, 0);
+      doc.text(String(groepen), zx + 6 - doc.getTextWidth(String(groepen))/2, zinY + 0.6);
+      doc.setTextColor(40, 40, 40);
+    }
     doc.setDrawColor(...INVULGRIJS);
     doc.setLineWidth(0.25);
     doc.line(zx, zinY + 0.6, zx + 12, zinY + 0.6);
@@ -2775,6 +2781,12 @@ doc.triangle(
     doc.text('sprongen van', zx, zinY);
     zx += doc.getTextWidth('sprongen van') + 2.2;
 
+    if (_metAntwoorden) {
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+      doc.setTextColor(0, 130, 0);
+      doc.text(String(stap), zx + 6 - doc.getTextWidth(String(stap))/2, zinY + 0.6);
+      doc.setTextColor(40, 40, 40);
+    }
     doc.line(zx, zinY + 0.6, zx + 12, zinY + 0.6);
     zx += 13.5;
 
@@ -2800,6 +2812,28 @@ const formY = zinY + 4;
       doc.line(fx, fy + BL, fx + LB, fy + BL);
     }
 
+    function antwS(fx, fy, val) {
+      lijnS(fx, fy);
+      if (_metAntwoorden && val !== undefined && val !== null) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+        doc.setTextColor(0, 130, 0);
+        const t = String(val), tw = doc.getTextWidth(t);
+        doc.text(t, fx + LS/2 - tw/2, fy + BL);
+        doc.setTextColor(...TEKSTDONKER);
+      }
+    }
+
+    function antwB(fx, fy, val) {
+      lijnB(fx, fy);
+      if (_metAntwoorden && val !== undefined && val !== null) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+        doc.setTextColor(0, 130, 0);
+        const t = String(val), tw = doc.getTextWidth(t);
+        doc.text(t, fx + LB/2 - tw/2, fy + BL);
+        doc.setTextColor(...TEKSTDONKER);
+      }
+    }
+
     function sym(fx, fy, t) {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(14);
@@ -2810,7 +2844,7 @@ const formY = zinY + 4;
     // rij 1: ___ + ___ + ___ = ___
     let fx = fxBase;
     for (let g = 0; g < groepen; g++) {
-      lijnS(fx, formY);
+      antwS(fx, formY, stap);
       fx += LS + 1.5;
 
       if (g < groepen - 1) {
@@ -2820,25 +2854,25 @@ const formY = zinY + 4;
     }
     sym(fx, formY, '=');
     fx += doc.getTextWidth('=') + 2.2;
-    lijnB(fx, formY);
+    antwB(fx, formY, uitkomst);
 
     // rij 2: ___ × ___ = ___
 const tweedeRijY = formY + 12;
 
 let fx2 = fxBase;
-lijnS(fx2, tweedeRijY);
+antwS(fx2, tweedeRijY, groepen);
 fx2 += LS + 1.5;
 
 sym(fx2, tweedeRijY, '×');
 fx2 += doc.getTextWidth('×') + 2.2;
 
-lijnS(fx2, tweedeRijY);
+antwS(fx2, tweedeRijY, stap);
 fx2 += LS + 1.5;
 
 sym(fx2, tweedeRijY, '=');
 fx2 += doc.getTextWidth('=') + 2.2;
 
-lijnB(fx2, tweedeRijY);
+antwB(fx2, tweedeRijY, uitkomst);
 
     return;
   }
@@ -3460,7 +3494,7 @@ lijnKort(fx, formY);
       return OEF_PAD_V * 2 + Math.max(linksH, rechtsH);
     }
 
-    checkRuimte(ZINRUIMTE + _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + _oefHoogte(blok.oefeningen[0]) + OEF_GAP);
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -3541,9 +3575,21 @@ doc.setTextColor(26, 58, 92);
       let fy      = oy + OEF_PAD_V;
 
       function lijn(lx, ly, w) {
-        doc.setDrawColor(100,100,100);
+        doc.setDrawColor(_metAntwoorden ? 0 : 100, _metAntwoorden ? 150 : 100, _metAntwoorden ? 50 : 100);
         doc.setLineWidth(LIJN_DIKTE);
         doc.line(lx, ly + BL, lx + w, ly + BL);
+      }
+      function antw(lx, ly, w, tekst) {
+        lijn(lx, ly, w);
+        if (_metAntwoorden && tekst !== undefined && tekst !== null && String(tekst) !== '') {
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(FS);
+          doc.setTextColor(0, 130, 0);
+          const t = String(tekst);
+          const tw = doc.getTextWidth(t);
+          doc.text(t, lx + w/2 - tw/2, ly + BL);
+          doc.setTextColor(50, 50, 50);
+        }
       }
       function bold(tx, ty, t, oranje) {
         doc.setFont('helvetica','bold'); doc.setFontSize(FS);
@@ -3567,7 +3613,7 @@ doc.setTextColor(26, 58, 92);
         let lx = rechtsX;
         italic(lx, fy, 'Er zijn'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx += doc.getTextWidth('Er zijn') + 1.5;
-        lijn(lx, fy, lijnW); lx += lijnW + 1.5;
+        antw(lx, fy, lijnW, oef.uitkomst); lx += lijnW + 1.5;
         italic(lx, fy, oef.emojiLabel + '.');
         fy += RIJ_H + 1;
 
@@ -3587,18 +3633,18 @@ doc.setTextColor(26, 58, 92);
         for (let g = 0; g < oef.quotient; g++) {
           bold(lx3, fy, '-', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
           lx3 += doc.getTextWidth('-') + 1.5;
-          lijn(lx3, fy, lijnW); lx3 += lijnW + 1.5;
+          antw(lx3, fy, lijnW, oef.deler); lx3 += lijnW + 1.5;
         }
         bold(lx3, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx3 += doc.getTextWidth('=') + 1.5;
-        lijn(lx3, fy, lijnW);
+        antw(lx3, fy, lijnW, oef.rest);
         fy += RIJ_H + 1;
 
         // Zin 4: "Ik kan ___ groepen maken."
         let lx4 = rechtsX;
         italic(lx4, fy, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx4 += doc.getTextWidth('Ik kan') + 1.5;
-        lijn(lx4, fy, lijnW); lx4 += lijnW + 1.5;
+        antw(lx4, fy, lijnW, oef.quotient); lx4 += lijnW + 1.5;
         italic(lx4, fy, 'groepen maken.');
         fy += RIJ_H + 1;
 
@@ -3606,7 +3652,7 @@ doc.setTextColor(26, 58, 92);
         let lx5 = rechtsX;
         italic(lx5, fy, 'Dan heb ik nog'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx5 += doc.getTextWidth('Dan heb ik nog') + 1.5;
-        lijn(lx5, fy, lijnW); lx5 += lijnW + 1.5;
+        antw(lx5, fy, lijnW, oef.rest); lx5 += lijnW + 1.5;
         italic(lx5, fy, oef.emojiLabel + ' over.');
         fy += RIJ_H + 1;
 
@@ -3616,16 +3662,16 @@ doc.setTextColor(26, 58, 92);
 
         // Zin 7: "___ : ___ = ___ R ___"
         let lx7 = rechtsX;
-        lijn(lx7, fy, lijnW); lx7 += lijnW + 1;
+        antw(lx7, fy, lijnW, oef.deeltal); lx7 += lijnW + 1;
         bold(lx7, fy, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx7 += doc.getTextWidth(':') + 1;
-        lijn(lx7, fy, lijnW); lx7 += lijnW + 1;
+        antw(lx7, fy, lijnW, oef.deler); lx7 += lijnW + 1;
         bold(lx7, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx7 += doc.getTextWidth('=') + 1.5;
-        lijn(lx7, fy, lijnW); lx7 += lijnW + 1.5;
+        antw(lx7, fy, lijnW, oef.quotient); lx7 += lijnW + 1.5;
         bold(lx7, fy, 'R', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx7 += doc.getTextWidth('R') + 1;
-        lijn(lx7, fy, lijnW);
+        antw(lx7, fy, lijnW, oef.rest);
 
       // ── Delen als herhaalde aftrekking ────────────────────
       } else if (oef.type === 'delen-aftrekking') {
@@ -3633,7 +3679,7 @@ doc.setTextColor(26, 58, 92);
         let lx1 = rechtsX;
         italic(lx1, fy, 'Er zijn'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx1 += doc.getTextWidth('Er zijn') + 1.5;
-        lijn(lx1, fy, lijnW); lx1 += lijnW + 1.5;
+        antw(lx1, fy, lijnW, oef.uitkomst); lx1 += lijnW + 1.5;
         italic(lx1, fy, oef.emojiLabel + '.');
         fy += RIJ_H + 1;
 
@@ -3664,12 +3710,12 @@ doc.setTextColor(26, 58, 92);
           const eindeRij = Math.min(g + perRij, oef.groepen);
           for (; g < eindeRij; g++) {
             bold(lx3, fy, minTxt, true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-            lx3 += minW; lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+            lx3 += minW; antw(lx3, fy, lijnW, oef.groepGrootte); lx3 += lijnW + 1;
           }
           if (g >= oef.groepen) {
             bold(lx3, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
             lx3 += doc.getTextWidth('=') + 1.5;
-            lijn(lx3, fy, lijnW);
+            antw(lx3, fy, lijnW, 0);
           }
           fy += RIJ_H + 1;
         }
@@ -3678,29 +3724,30 @@ doc.setTextColor(26, 58, 92);
         let lx4 = rechtsX;
         italic(lx4, fy, 'Ik kan'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx4 += doc.getTextWidth('Ik kan') + 1.5;
-        lijn(lx4, fy, lijnW); lx4 += lijnW + 1.5;
+        antw(lx4, fy, lijnW, oef.groepen); lx4 += lijnW + 1.5;
         italic(lx4, fy, 'groepen maken.');
         fy += RIJ_H + 1;
 
         // Deelsom
         let lx5 = rechtsX;
-        lijn(lx5, fy, lijnW); lx5 += lijnW + 1;
+        antw(lx5, fy, lijnW, oef.uitkomst); lx5 += lijnW + 1;
         bold(lx5, fy, ':', true); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx5 += doc.getTextWidth(':') + 1;
         blauw(lx5, fy, String(oef.groepGrootte)); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx5 += doc.getTextWidth(String(oef.groepGrootte)) + 1;
         bold(lx5, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx5 += doc.getTextWidth('=') + 1.5;
-        lijn(lx5, fy, lijnW);
+        antw(lx5, fy, lijnW, oef.groepen);
 
       // ── Vermenigvuldigen: 3 rijen gecentreerd ────────────
       } else {
         const rechtsH = RIJ_H * 3 + 10;
         fy = oy + (oh - rechtsH) / 2;
 
+        // Rij 1: stap + stap + ... = uitkomst
         let lx = rechtsX;
         for (let g = 0; g < oef.groepen; g++) {
-          lijn(lx, fy, lijnW); lx += lijnW;
+          antw(lx, fy, lijnW, oef.groepGrootte); lx += lijnW;
           if (g < oef.groepen - 1) {
             bold(lx + 0.5, fy, '+', true);
             doc.setFont('helvetica','bold'); doc.setFontSize(FS);
@@ -3710,31 +3757,33 @@ doc.setTextColor(26, 58, 92);
         bold(lx + 0.5, fy, '=', false);
         doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx += doc.getTextWidth('=') + 1.5;
-        lijn(lx, fy, LIJN_BREED);
+        antw(lx, fy, LIJN_BREED, oef.uitkomst);
         fy += RIJ_H + 1;
 
+        // Rij 2: groepen groepen van groepGrootte = uitkomst
         let lx2 = rechtsX;
-        lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+        antw(lx2, fy, lijnW, oef.groepen); lx2 += lijnW + 1;
         italic(lx2, fy, 'groepen van');
         doc.setFont('helvetica','italic'); doc.setFontSize(FS);
         lx2 += doc.getTextWidth('groepen van') + 1;
-        lijn(lx2, fy, lijnW); lx2 += lijnW + 1;
+        antw(lx2, fy, lijnW, oef.groepGrootte); lx2 += lijnW + 1;
         bold(lx2, fy, '=', false);
         doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx2 += doc.getTextWidth('=') + 1.5;
-        lijn(lx2, fy, lijnW);
+        antw(lx2, fy, lijnW, oef.uitkomst);
         fy += RIJ_H + 1;
 
+        // Rij 3: groepen × groepGrootte = uitkomst
         let lx3 = rechtsX;
-        lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
-        bold(lx3, fy, 'x', true);
+        antw(lx3, fy, lijnW, oef.groepen); lx3 += lijnW + 1;
+        bold(lx3, fy, '×', true);
         doc.setFont('helvetica','bold'); doc.setFontSize(FS);
-        lx3 += doc.getTextWidth('x') + 1;
-        lijn(lx3, fy, lijnW); lx3 += lijnW + 1;
+        lx3 += doc.getTextWidth('×') + 1;
+        antw(lx3, fy, lijnW, oef.groepGrootte); lx3 += lijnW + 1;
         bold(lx3, fy, '=', false);
         doc.setFont('helvetica','bold'); doc.setFontSize(FS);
         lx3 += doc.getTextWidth('=') + 1.5;
-        lijn(lx3, fy, lijnW);
+        antw(lx3, fy, lijnW, oef.uitkomst);
       }
 
       y += oh + OEF_GAP;
@@ -3744,7 +3793,8 @@ doc.setTextColor(26, 58, 92);
 
   /* ── Eerlijk verdelen: dispatch vanuit _tekenInzichtBlok ─── */
   function _tekenVerdelenBlok(blok) {
-    checkRuimte(ZINRUIMTE + 40);
+    // Reserveer ruimte voor opdrachtzin + eerste oefening samen
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + 60);
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -3753,7 +3803,7 @@ doc.setTextColor(26, 58, 92);
     y += ZINRUIMTE;
 
     blok.oefeningen.forEach((oef, i) => {
-      if (i > 0) { y += 6; }
+      if (i > 0) { checkRuimte(60); y += 6; }
       if (oef.type === 'verdelen-emoji')      _tekenVerdelenEmoji(oef);
       else if (oef.type === 'verdelen-splitshuis') _tekenVerdelenSplitshuis(oef);
       else if (oef.type === 'verdelen-100veld')    _tekenVerdelen100Veld(oef);
@@ -3808,6 +3858,16 @@ doc.setTextColor(26, 58, 92);
       doc.setDrawColor(100,100,100); doc.setLineWidth(LIJN_DIKTE);
       doc.line(lx, ly + BL, lx + w, ly + BL);
     }
+    function antw(lx, ly, w, val) {
+      lijn(lx, ly, w);
+      if (_metAntwoorden && val !== undefined && val !== null) {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(FS);
+        doc.setTextColor(0, 130, 0);
+        const t = String(val), tw = doc.getTextWidth(t);
+        doc.text(t, lx + w/2 - tw/2, ly + BL);
+        doc.setTextColor(50, 50, 50);
+      }
+    }
     function bold(tx, ty, t, blauw) {
       doc.setFont('helvetica','bold'); doc.setFontSize(FS);
       doc.setTextColor(...(blauw ? [21,101,192] : [50,50,50]));
@@ -3831,43 +3891,43 @@ doc.setTextColor(26, 58, 92);
     lx += doc.getTextWidth(String(oef.aantalGroepen)) + 1.5;
     italic(lx, fy, 'is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('is') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.perGroep); lx += LIJN_W + 1;
     italic(lx, fy, '.');
     fy += RIJ_H + 1;
 
     // Zin 2: ___ verdeeld in ___ gelijke groepen is ___.
     lx = rechtsX;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    antw(lx, fy, LIJN_W, oef.totaal); lx += LIJN_W + 1.5;
     italic(lx, fy, 'verdeeld in'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('verdeeld in') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    antw(lx, fy, LIJN_W, oef.aantalGroepen); lx += LIJN_W + 1.5;
     italic(lx, fy, 'gelijke groepen is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('gelijke groepen is') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.perGroep); lx += LIJN_W + 1;
     italic(lx, fy, '.');
     fy += RIJ_H + 1;
 
     // Zin 3: ___ gedeeld door ___ is ___.
     lx = rechtsX;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    antw(lx, fy, LIJN_W, oef.totaal); lx += LIJN_W + 1.5;
     italic(lx, fy, 'gedeeld door'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('gedeeld door') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1.5;
+    antw(lx, fy, LIJN_W, oef.aantalGroepen); lx += LIJN_W + 1.5;
     italic(lx, fy, 'is'); doc.setFont('helvetica','italic'); doc.setFontSize(FS);
     lx += doc.getTextWidth('is') + 1.5;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.perGroep); lx += LIJN_W + 1;
     italic(lx, fy, '.');
     fy += RIJ_H + 1;
 
     // Zin 4: ___ : ___ = ___
     lx = rechtsX;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.totaal); lx += LIJN_W + 1;
     bold(lx, fy, ':', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
     lx += doc.getTextWidth(':') + 1;
-    lijn(lx, fy, LIJN_W); lx += LIJN_W + 1;
+    antw(lx, fy, LIJN_W, oef.aantalGroepen); lx += LIJN_W + 1;
     bold(lx, fy, '=', false); doc.setFont('helvetica','bold'); doc.setFontSize(FS);
     lx += doc.getTextWidth('=') + 1.5;
-    lijn(lx, fy, LIJN_W);
+    antw(lx, fy, LIJN_W, oef.perGroep);
 
     y += oh;
   }
