@@ -24,6 +24,33 @@ const App = (() => {
   function toonBewerking(bewerking, tabEl) {
     actieveBewerking = bewerking;
 
+    // Reset alle keuzes bij tab wissel
+    // 1. Hulpmiddelen
+    document.querySelectorAll('[name="hulpmiddelen"]').forEach(cb => {
+      cb.checked = false;
+      cb.closest('.vink-chip')?.classList.remove('geselecteerd');
+      const vb = cb.closest('.vink-chip')?.querySelector('.vink-box');
+      if (vb) vb.textContent = '';
+    });
+    // 2. Niveau → reset naar 20 (laagste)
+    document.querySelectorAll('[name="niveau"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === '20') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+    // 3. Brug → reset naar 'zonder'
+    document.querySelectorAll('[name="brug-hoofd"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === 'zonder') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+    // 4. Splitspositie → reset naar 'aftrekker'
+    document.querySelectorAll('[name="splitspositie"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === 'aftrekker') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
 
@@ -123,6 +150,13 @@ const App = (() => {
 
     _updateHulpmiddelenUI(isHerken || isSplitsingen ? 'zonder' : _getBrugWaarde());
     _updateStrategieUI();
+    // Zorg dat splitspositie rij correct getoond/verborgen wordt na bewerking wissel
+    const rijPosB = document.getElementById('rij-splitspositie');
+    if (rijPosB) {
+      const brugNu = _getBrugWaarde();
+      const toonRijPos = (brugNu !== 'zonder') && (bewerking === 'aftrekken');
+      rijPosB.style.display = toonRijPos ? 'block' : 'none';
+    }
 
     // Types laden
     const niveau = isHerken ? 100
@@ -701,6 +735,16 @@ const App = (() => {
       const heeftAndereHulp = ['compenseren','transformeren','aanvullen'].some(h =>
         document.querySelector(`[name="hulpmiddelen"][value="${h}"]`)?.checked);
       if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken' && !heeftAndereHulp) ? 'block' : 'none';
+    }
+    // Als comp/trans/aanvullen uitgezet wordt: check of splitsbeen nu zichtbaar moet worden
+    if (['compenseren','transformeren','aanvullen'].includes(waarde) && was) {
+      const splitsbeenActief = document.querySelector('[name="hulpmiddelen"][value="splitsbeen"]')?.checked;
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && splitsbeenActief && actieveBewerking === 'aftrekken') {
+        const nogAndereHulp = ['compenseren','transformeren','aanvullen'].filter(h => h !== waarde)
+          .some(h => document.querySelector(`[name="hulpmiddelen"][value="${h}"]`)?.checked);
+        rijPos.style.display = nogAndereHulp ? 'none' : 'block';
+      }
     }
     if (waarde === 'schrijflijnen') {
       const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
