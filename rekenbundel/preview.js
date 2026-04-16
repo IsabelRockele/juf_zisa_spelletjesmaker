@@ -38,7 +38,34 @@ const Preview = (() => {
         const isHTE = g2H > 0;  // HTE+HTE strategie als er honderden zijn
         const isTE  = !isHTE && g2T > 0;  // TE+TE als alleen tientallen
 
-        if (isHTE) {
+        // HT+HT: g1 heeft tientallen -> splits g2 in H en T
+        const isHTplusHT = (g1 % 100 !== 0) && g2H > 0;
+        // Brug naar D: g1 is veelvoud van 100 EN som kruist duizendtal
+        const g1RestTotD = 1000 - (g1 % 1000);
+        const isBrugD = (g1 % 100 === 0) && (g1 % 1000 !== 0) && g2 >= g1RestTotD
+                        && Math.floor(g1 / 1000) !== Math.floor((g1 + g2) / 1000);
+
+        if (isHTplusHT) {
+          // HT+HT: splits bijteller in H + T (+ E)
+          d1 = g2H; d2 = g2T;
+          const ts1Ht = g1 + g2H;
+          if (g2E > 0) {
+            const ts2Ht = ts1Ht + g2T;
+            sl1 = `${g1} + ${g2H} = ${ts1Ht}`;
+            sl2 = `${ts1Ht} + ${g2T} = ${ts2Ht}`;
+            sl3 = `${ts2Ht} + ${g2E} = ${antwoord}`;
+          } else {
+            sl1 = `${g1} + ${g2H} = ${ts1Ht}`;
+            sl2 = `${ts1Ht} + ${g2T} = ${antwoord}`;
+          }
+        } else if (isBrugD) {
+          // Aanvulling tot duizendtal: bijv. 300+800 -> d1=700, d2=100
+          d1 = g1RestTotD;
+          d2 = g2 - d1;
+          const ts1Bd = g1 + d1;
+          sl1 = `${g1} + ${d1} = ${ts1Bd}`;
+          sl2 = `${ts1Bd} + ${d2} = ${antwoord}`;
+        } else if (isHTE) {
           // HTE strategie: splits in H + T + E (altijd 3 lijnen)
           d1 = g2H; d2 = g2T; const d3He = g2E;
           const ts1 = g1 + g2H;
