@@ -526,8 +526,12 @@ const App = (() => {
     const chipTrans     = document.getElementById('chip-transformeren');
 
     if (isZonderTot1000) {
-      // Splitsbeen en schrijflijnen beschikbaar, rest niet
-      if (chipSplits)    chipSplits.style.display    = '';
+      // Zonder brug: splitsbeen enkel tot 1000, niet bij hogere niveaus
+      const isZonderBovén1000 = brug === 'zonder' && niveau > 1000;
+      if (chipSplits)    { 
+        if (isZonderBovén1000) { chipSplits.style.display = 'none'; _resetChip(chipSplits, 'rij-splitspositie'); }
+        else chipSplits.style.display = '';
+      }
       if (chipLijnen)    chipLijnen.style.display    = '';
       if (chipAanvullen) { chipAanvullen.style.display = 'none'; _resetChip(chipAanvullen, 'rij-aanvullen'); }
       if (chipComp)      { chipComp.style.display      = 'none'; _resetChip(chipComp, 'rij-compenseren'); }
@@ -569,7 +573,12 @@ const App = (() => {
 
     const isHerken      = actieveBewerking === 'herken-brug';
     const isSplitsingen = actieveBewerking === 'splitsingen';
-    const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value)
+                          .filter(h => {
+                            // Splitsbeen niet toestaan bij zonder brug + niveau >= 10000
+                            if (h === 'splitsbeen' && brug === 'zonder' && niveau >= 10000) return false;
+                            return true;
+                          });
     const hulpmiddelenZin = hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
                             hulpmiddelen.includes('compenseren')   ? 'Reken uit door te compenseren.' :
                             hulpmiddelen.includes('transformeren') ? 'Reken uit door te transformeren.' : null;
@@ -1218,7 +1227,7 @@ function _getSplitsConfig() {
   function downloadPDF() {
     if (bundelData.length === 0) return;
     const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
-    PdfEngine.genereer(bundelData, titel, false);
+    PdfEngine.genereer(bundelData, titel);
     toonToast('📄 PDF gedownload!', '#27AE60');
   }
 
@@ -1937,7 +1946,7 @@ function _getSplitsConfig() {
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
-    genereerPreview, downloadPDF, downloadSleutel, getBundelData: () => bundelData,
+    genereerPreview, downloadPDF, downloadSleutel,
     selecteerCijferBewerking, selecteerCijferBereik, selecteerCijferBrug,
     selecteerCijferVermType, selecteerCijferVermBrug,
     selecteerCijferDeelType, selecteerCijferDeelRest,
