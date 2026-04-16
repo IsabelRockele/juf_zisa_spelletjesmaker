@@ -27,10 +27,14 @@ const Preview = (() => {
       if (delen.length < 3) return { d1:'', d2:'', sl1:'', sl2:'' };
       const g1 = parseInt(delen[0]) || 0;
       const g2 = parseInt(delen[2]) || 0;
-      const antwoord = oef.antwoord ?? (bewerking === 'optellen' ? g1 + g2 : g1 - g2);
+      // Bij gemengd: bepaal bewerking uit de vraag zelf
+      const effectieveBewerking = (bewerking === 'gemengd' || bewerking === 'optellen' || bewerking === 'aftrekken')
+        ? (oef.vraag && oef.vraag.includes(' - ') ? 'aftrekken' : 'optellen')
+        : bewerking;
+      const antwoord = oef.antwoord ?? (effectieveBewerking === 'optellen' ? g1 + g2 : g1 - g2);
 
       let d1, d2, d3 = '', sl1 = '', sl2 = '', sl3 = '';
-      if (bewerking === 'optellen') {
+      if (effectieveBewerking === 'optellen') {
         const nLijnen = aantalLijnen || 2;
         const g2H = Math.floor(g2 / 100) * 100;   // honderden van g2
         const g2T = Math.floor((g2 % 100) / 10) * 10; // tientallen van g2
@@ -196,6 +200,15 @@ const Preview = (() => {
     }
     // Herrender voor compenseren/transformeren, daarna data-antwoord loop
     const _doToggleUpdate = () => {
+      // Herken-brug: lamp-kader inkleuren bij brugoefeningen
+      document.querySelectorAll('.lamp-kader[data-heeft-brug]').forEach(kader => {
+        if (_toonOplossingen && kader.dataset.heeftBrug === 'true') {
+          kader.classList.add('lamp-brug-oplossing');
+        } else {
+          kader.classList.remove('lamp-brug-oplossing');
+        }
+      });
+
       // Alle elementen met data-antwoord — universeel
       document.querySelectorAll('[data-antwoord]').forEach(el => {
         const ant = String(el.dataset.antwoord ?? '').trim();
@@ -254,6 +267,12 @@ const Preview = (() => {
           el.style.borderBottom  = '2px solid #00a650';
           el.style.minWidth      = '40px';
           el.style.display       = 'inline-block';
+          el.style.paddingBottom = '1px';
+        } else if (el.classList.contains('rt-oef-lijn')) {
+          // Rekentaal schrijflijn
+          el.style.borderBottom  = '2px solid #00a650';
+          el.style.display       = 'inline-block';
+          el.style.minWidth      = '80px';
           el.style.paddingBottom = '1px';
         } else if (el.classList.contains('trans-schrijflijn-pijl')) {
           // Transformeren pijl-waarde (delta tonen)
@@ -320,6 +339,17 @@ const Preview = (() => {
     }
 
     teller.textContent = `${bundelData.length} blok${bundelData.length !== 1 ? 'ken' : ''}`;
+
+    // Als oplossingen getoond worden: heractiveer toggle na render
+    if (_toonOplossingen) {
+      const btnT = document.getElementById('btn-toggle-oplossingen');
+      if (btnT) {
+        btnT.textContent = '🙈 Verberg oplossingen';
+        btnT.style.background = '#27AE60';
+        btnT.style.color = '#fff';
+      }
+      setTimeout(() => { if (_toonOplossingen) _doToggleUpdate(); }, 50);
+    }
 
     if (bundelData.length === 0) {
       container.innerHTML = `
@@ -474,10 +504,14 @@ const Preview = (() => {
 
     /* ── Herken-brug ─────────────────────────────────────── */
     if (isHerken) {
+      // Detecteer of deze oefening een brug heeft
+      const _herkenDelen = oef.vraag.replace(' =','').split(' ');
+      const _hg1 = parseInt(_herkenDelen[0]), _hop = _herkenDelen[1], _hg2 = parseInt(_herkenDelen[2]);
+      const _heeftBrug = _hop === '+' ? ((_hg1%10+_hg2%10)>=10 && (_hg1+_hg2)%10!==0) : (_hg1%10!==0 && _hg1%10<_hg2%10 && (_hg1-_hg2)%10!==0);
       return `
         <div class="oefening-item oefening-herken">
           <div class="lamp-wrapper">
-            <div class="lamp-kader">
+            <div class="lamp-kader" data-heeft-brug="${_heeftBrug}">
               <img src="../afbeeldingen_hoofdrekenen/zisa_lamp.png" class="zisa-lamp" alt="Zisa"
                    crossOrigin="anonymous" onerror="this.style.display='none'"/>
             </div>
@@ -2197,10 +2231,42 @@ const Preview = (() => {
     let oefHtml = '';
     (blok.oefeningen || []).forEach((oef, idx) => {
       const zinHtml = _renderZin(oef);
+      // Bepaal bewerking voor oplossing
+      const _rtBew = oef.bewerking || blok.bewerking || '';
+      const _rtA = oef.a !== undefined ? oef.a : (oef.P !== undefined ? oef.P : '');
+      let _rtB = oef.b !== undefined ? oef.b : (oef.Q !== undefined ? oef.Q : '');
+      const _rtAnt = oef.antwoord !== undefined ? oef.antwoord : '';
+      let _rtTeken = '';
+      if (_rtBew === 'optellen' || _rtBew === '+') _rtTeken = '+';
+      else if (_rtBew === 'aftrekken' || _rtBew === '-') _rtTeken = '-';
+      else if (_rtBew === 'vermenigvuldigen') _rtTeken = '×';
+      else if (_rtBew === 'delen') _rtTeken = '÷';  // ÷ = ÷
+      // Dubbel/helft/kwart: hardcoded bewerking op basis van templateId
+      const _rtTmplId = oef.templateId || oef.id || '';
+      if (!_rtTeken && _rtTmplId) {
+        if (_rtTmplId === 'dhk1' || _rtTmplId === 'dhk2') {
+          _rtTeken = '×'; _rtB = '2';
+        } else if (_rtTmplId === 'dhk3' || _rtTmplId === 'dhk4') {
+          _rtTeken = '÷'; _rtB = '2';
+        } else if (_rtTmplId === 'dhk5') {
+          _rtTeken = '÷'; _rtB = '4';
+        }
+      }
+      // Fallback: afleiden uit getallen
+      if (!_rtTeken && _rtA !== '' && _rtB !== '' && _rtAnt !== '') {
+        if (Number(_rtA) + Number(_rtB) === Number(_rtAnt)) _rtTeken = '+';
+        else if (Number(_rtA) - Number(_rtB) === Number(_rtAnt)) _rtTeken = '−';
+        else if (Number(_rtA) * Number(_rtB) === Number(_rtAnt)) _rtTeken = '×';
+        else if (Math.round(Number(_rtA) / Number(_rtB)) === Number(_rtAnt)) _rtTeken = '÷';
+      }
+      const _rtOplStr = (_rtA !== '' && _rtB !== '' && _rtTeken && _rtAnt !== '')
+        ? _rtA + ' ' + _rtTeken + ' ' + _rtB + ' = ' + _rtAnt
+        : (_rtAnt !== '' ? String(_rtAnt) : '');
+
       oefHtml += '<div class="rt-oef-rij">' +
         '<span class="rt-oef-zin">' + zinHtml + '</span>' +
         '<span class="rt-pijl">&#x2192;</span>' +
-        '<span class="rt-oef-lijn"></span>' +
+        '<span class="rt-oef-lijn" data-antwoord="' + _rtOplStr + '"></span>' +
         '<button class="btn-del-oef" onclick="App.verwijderOefening(\'' + blok.id + '\',' + idx + ')" title="Verwijder">&#x2715;</button>' +
         '</div>';
     });
