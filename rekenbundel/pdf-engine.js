@@ -5004,20 +5004,38 @@ doc.setTextColor(26, 58, 92);
         const lw  = (KAD_W - (sx - ox) - 8) / 4;
         const ly  = ikSchatY + 0.5;
 
+        // Lijn 1: afgerond getal A
         doc.setDrawColor(100,100,100); doc.setLineWidth(0.5);
         doc.line(sx, ly, sx + lw, ly);
+        if (_metAntwoorden) {
+          doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(0,130,0);
+          doc.text(String(o.afA.toLocaleString('nl-BE')), sx + lw/2 - doc.getTextWidth(String(o.afA.toLocaleString('nl-BE')))/2, ikSchatY);
+          doc.setTextColor(60,60,60);
+        }
 
         doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(200,100,0);
         doc.text(tekenTxt, sx + lw + 2, ikSchatY);
 
+        // Lijn 2: afgerond getal B
         doc.setDrawColor(100,100,100);
         doc.line(sx + lw + 6, ly, sx + lw*2 + 6, ly);
+        if (_metAntwoorden) {
+          doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(0,130,0);
+          doc.text(String(o.afB.toLocaleString('nl-BE')), sx + lw + 6 + lw/2 - doc.getTextWidth(String(o.afB.toLocaleString('nl-BE')))/2, ikSchatY);
+          doc.setTextColor(60,60,60);
+        }
 
         doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(60,60,60);
         doc.text('=', sx + lw*2 + 8, ikSchatY);
 
+        // Lijn 3: schatting
         doc.setDrawColor(100,100,100);
         doc.line(sx + lw*2 + 14, ly, sx + lw*3 + 14, ly);
+        if (_metAntwoorden) {
+          doc.setFont('helvetica','bold'); doc.setFontSize(14); doc.setTextColor(0,130,0);
+          doc.text(String(o.schatting.toLocaleString('nl-BE')), sx + lw*2 + 14 + lw/2 - doc.getTextWidth(String(o.schatting.toLocaleString('nl-BE')))/2, ikSchatY);
+          doc.setTextColor(60,60,60);
+        }
 
         // Checkboxen
         const checkY = ikSchatY + 10;
