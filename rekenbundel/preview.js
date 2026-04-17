@@ -1947,16 +1947,15 @@ const Preview = (() => {
     const factor2 = positie === 'achteraan' ? stap : groepen;
     const plusSlots = Math.max(groepen, 5);
     const langeLijnPx = Math.min(220, 110 + plusSlots * 18);
-    // Herhaalde optelling: stap + stap + ... = uitkomst
-    const optelDelen = Array(groepen).fill(`<span class="gl-lijn" data-antwoord="${stap}"></span>`).join(`<span class="gl-plus">+</span>`);
+    // Maalsom: factor1 x factor2 = lange lijn (kind schrijft herhaalde optelling) = uitkomst
+    const langeLijnPxGroter = Math.min(300, 60 + groepen * 30);
     inhoudOnderaan = `
-      <div class="gl-formule-rij">${optelDelen}<span class="gl-eq">=</span><span class="gl-lijn breed" data-antwoord="${uitkomst}"></span></div>
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${factor1}</span>
         <span class="gl-maal">×</span>
         <span class="gl-getal-vast">${factor2}</span>
         <span class="gl-eq">=</span>
-        <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:${langeLijnPx}px"></span>
+        <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:${langeLijnPxGroter}px"></span>
         <span class="gl-eq">=</span>
         <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:34px"></span>
       </div>`;
