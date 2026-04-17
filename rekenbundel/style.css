@@ -535,9 +535,9 @@ header .badge {
   border-color: #27ae60 !important;
 }
 
-/* Getallenlijn zelf: boogjes verborgen tot oplossing getoond */
+/* Getallenlijn zelf: boogjes verborgen tot oplossing getoond - opacity via JS */
 .gl-boog-oplossing {
-  display: none;
+  /* opacity geregeld via setAttribute in toggle */
 }
 .zisa-lamp {
   height: 52px;
@@ -1704,18 +1704,27 @@ header .badge {
 
 .gl-lijn {
   display: inline-block;
+  min-width: 16px;
   width: 16px;
   border-bottom: 1.5px solid #777;
   height: 16px;
   flex-shrink: 0;
+  text-align: center;
+  line-height: 14px;
+  vertical-align: bottom;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 .gl-lijn.kort {
+  min-width: 18px;
   width: 18px;
 }
 
 .gl-lijn.breed {
-  width: 22px;
+  min-width: 22px;
+  width: auto;
+  padding: 0 3px;
 }
 
 .gl-plus,
