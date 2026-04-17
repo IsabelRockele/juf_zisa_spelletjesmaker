@@ -1164,7 +1164,7 @@ function _getSplitsConfig() {
     const zin    = document.getElementById('inp-opdrachtzin-inzicht').value.trim() || _defaultZinInzicht();
 
     // ── Getallenlijn ─────────────────────────────────────────
-    if (_inzichtType === 'getallenlijn') {
+    if (_inzichtType === 'getallenlijn' && _inzichtBewerking !== 'delen-verdelen') {
       const oefeningen = TafelsGetallenlijn.genereer({
         modus:            _inzichtModus,
         tafels:           _inzichtTafel,
