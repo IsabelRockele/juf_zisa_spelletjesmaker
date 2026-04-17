@@ -344,6 +344,23 @@ const Preview = (() => {
         el.style.display        = '';
       }
     });
+    
+
+      // Mogelijk checkboxen tonen/verbergen
+      document.querySelectorAll('.mogelijk-check').forEach(el => {
+        const isJuist = el.dataset.antwoord === 'ja';
+        if (_toonOplossingen && isJuist) {
+          el.textContent = '✕';
+          el.style.background = '#c6efce';
+          el.style.border = '2px solid #00a650';
+          el.style.color = '#006100';
+        } else {
+          el.textContent = '';
+          el.style.background = '';
+          el.style.border = '2px solid #333';
+          el.style.color = '';
+        }
+      });
     }; // einde _doToggleUpdate
 
     // Toon/verberg opmerking over tussenstappen
@@ -1955,7 +1972,7 @@ const Preview = (() => {
         <span class="gl-maal">×</span>
         <span class="gl-getal-vast">${factor2}</span>
         <span class="gl-eq">=</span>
-        <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:${langeLijnPxGroter}px"></span>
+        <span class="gl-lijn breed" data-antwoord="${Array(groepen).fill(stap).join(' + ')} = ${uitkomst}" style="width:${langeLijnPxGroter}px"></span>
         <span class="gl-eq">=</span>
         <span class="gl-lijn breed" data-antwoord="${uitkomst}" style="width:34px"></span>
       </div>`;
@@ -2535,11 +2552,11 @@ const Preview = (() => {
         <div class="scht-af-rijen">
           <div class="scht-af-rij">
             <span class="scht-af-label">dichtstbij <strong style="color:${kleur1}">${naam1}</strong>:</span>
-            <span class="scht-lijn"></span>
+            <span class="scht-lijn" data-antwoord="${oef.dichtstbij1}"></span>
           </div>
           <div class="scht-af-rij">
             <span class="scht-af-label">dichtstbij <strong style="color:${kleur2}">${naam2}</strong>:</span>
-            <span class="scht-lijn"></span>
+            <span class="scht-lijn" data-antwoord="${oef.dichtstbij2}"></span>
           </div>
         </div>
         ${del}
@@ -2552,13 +2569,13 @@ const Preview = (() => {
 
     const col2 = isVb
       ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')}</span>`
-      : `<span class="scht-lijn smal"></span><span class="scht-teken">${tekenTxt}</span><span class="scht-lijn smal"></span>`;
+      : `<span class="scht-lijn smal" data-antwoord="${oef.afA.toLocaleString('nl-BE')}"></span><span class="scht-teken">${tekenTxt}</span><span class="scht-lijn smal" data-antwoord="${oef.afB.toLocaleString('nl-BE')}"></span>`;
     const col3 = isVb
       ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')} = ${oef.schatting.toLocaleString('nl-BE')}</span>`
-      : `<span class="scht-lijn breed"></span>`;
+      : `<span class="scht-lijn breed" data-antwoord="${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')} = ${oef.schatting.toLocaleString('nl-BE')}"></span>`;
     const col4 = isVb
       ? `<span class="scht-vb-oranje">${oef.schatting.toLocaleString('nl-BE')}</span>`
-      : `<span class="scht-lijn smal"></span>`;
+      : `<span class="scht-lijn smal" data-antwoord="${oef.schatting.toLocaleString('nl-BE')}"></span>`;
 
     return `
       <div class="oefening-item scht-tabel-rij${isVb ? ' scht-vb' : ''}">
@@ -2575,7 +2592,7 @@ const Preview = (() => {
     const tekenTxt = oef.bewerking === 'optellen' ? '+' : '-';
     const inhoud = isVb
       ? `<span class="scht-vb-blauw">${oef.afA.toLocaleString('nl-BE')} ${tekenTxt} ${oef.afB.toLocaleString('nl-BE')} = ${oef.schatting.toLocaleString('nl-BE')}</span>`
-      : `<span class="scht-lijn smal"></span><span style="color:#e8780a;font-weight:700"> ${tekenTxt} </span><span class="scht-lijn smal"></span><span> = </span><span class="scht-lijn smal"></span>`;
+      : `<span class="scht-lijn smal" data-antwoord="${oef.afA.toLocaleString('nl-BE')}"></span><span style="color:#e8780a;font-weight:700"> ${tekenTxt} </span><span class="scht-lijn smal" data-antwoord="${oef.afB.toLocaleString('nl-BE')}"></span><span> = </span><span class="scht-lijn smal" data-antwoord="${oef.schatting.toLocaleString('nl-BE')}"></span>`;
     return `
       <div class="oefening-item scht-compact${isVb ? ' scht-vb' : ''}">
         <span class="scht-comp-som">${oef.a.toLocaleString('nl-BE')} ${tekenTxt} ${oef.b.toLocaleString('nl-BE')}</span>
@@ -2600,15 +2617,21 @@ const Preview = (() => {
         </div>
         <div style="display:flex;align-items:flex-end;gap:6px;font-size:14px;font-weight:600;width:100%;margin-top:20px;margin-bottom:14px">
           <span style="font-size:13px;font-style:italic;color:#666;padding-bottom:2px">Ik schat:</span>
-          <span class="scht-lijn smal"></span>
+          <span class="scht-lijn smal" data-antwoord="${oef.afA ? oef.afA.toLocaleString('nl-BE') : ''}"></span>
           ${tekenTxt}
-          <span class="scht-lijn smal"></span>
+          <span class="scht-lijn smal" data-antwoord="${oef.afB ? oef.afB.toLocaleString('nl-BE') : ''}"></span>
           =
-          <span class="scht-lijn smal"></span>
+          <span class="scht-lijn smal" data-antwoord="${oef.schatting ? oef.schatting.toLocaleString('nl-BE') : ''}"></span>
         </div>
         <div style="display:flex;flex-direction:column;gap:10px">
-          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer"><input type="checkbox" style="width:17px;height:17px;flex-shrink:0"> ${oef.label} is mogelijk.</label>
-          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer"><input type="checkbox" style="width:17px;height:17px;flex-shrink:0"> ${oef.label} is niet mogelijk.</label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer">
+            <span class="mogelijk-check" data-antwoord="${oef.isMogelijk ? 'ja' : ''}" style="width:17px;height:17px;flex-shrink:0;border:2px solid #333;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold"></span>
+            ${oef.label} is mogelijk.
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:#222;cursor:pointer">
+            <span class="mogelijk-check" data-antwoord="${!oef.isMogelijk ? 'ja' : ''}" style="width:17px;height:17px;flex-shrink:0;border:2px solid #333;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-weight:bold"></span>
+            ${oef.label} is niet mogelijk.
+          </label>
         </div>
         ${del}
       </div>`;
