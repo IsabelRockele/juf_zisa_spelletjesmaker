@@ -202,7 +202,7 @@ const Preview = (() => {
     const _doToggleUpdate = () => {
       // Getallenlijn zelf: boogjes tonen/verbergen
       document.querySelectorAll('.gl-boog-oplossing').forEach(el => {
-        el.style.display = _toonOplossingen ? '' : 'none';
+        el.setAttribute('opacity', _toonOplossingen ? '1' : '0');
       });
 
       // Herken-brug: lamp-kader inkleuren bij brugoefeningen
@@ -292,10 +292,15 @@ const Preview = (() => {
           el.style.background   = 'transparent';
           el.style.color        = '#006100';
           el.style.fontWeight   = 'bold';
+          el.style.fontSize     = '13px';
           el.style.borderBottom = '2px solid #00a650';
           el.style.display      = 'inline-block';
-          el.style.minWidth     = '20px';
+          el.style.minWidth     = '16px';
+          el.style.width        = 'auto';
+          el.style.padding      = '0 2px';
           el.style.textAlign    = 'center';
+          el.style.lineHeight   = '14px';
+          el.style.verticalAlign = 'bottom';
 
         } else if (el.classList.contains('punt-lijn')) {
           // Puntoefening vakje
@@ -383,7 +388,21 @@ const Preview = (() => {
         btnT.style.background = '#27AE60';
         btnT.style.color = '#fff';
       }
-      setTimeout(() => { if (_toonOplossingen) _doToggleUpdate(); }, 50);
+      setTimeout(() => {
+        if (_toonOplossingen) {
+          document.querySelectorAll('[data-antwoord]').forEach(el => {
+            const ant = String(el.dataset.antwoord ?? '').trim();
+            if (ant && ant !== 'undefined') {
+              el.textContent = ant;
+              el.style.color = '#006100';
+              el.style.fontWeight = '700';
+            }
+          });
+          document.querySelectorAll('.gl-boog-oplossing').forEach(el => {
+            el.setAttribute('opacity', '1');
+          });
+        }
+      }, 50);
     }
 
     if (bundelData.length === 0) {
@@ -1720,13 +1739,13 @@ const Preview = (() => {
 
   /* ── Getallenlijn preview HTML ───────────────────────────── */
  function _getallenlijnHTML(blokId, oef, idx) {
-  const { groepen, stap, uitkomst, variant, positie } = oef;
+  const { groepen, stap, uitkomst, variant, positie, rest = 0 } = oef;
   const max = Math.max(uitkomst, 20);
 
   const vakjeW  = Math.max(18, Math.min(24, Math.floor(540 / (max + 2))));
   const lijnW   = (max + 1) * vakjeW;
-  const isBogenBoven = variant === 'getekend';
-  const isBogenOnder = variant === 'delen-getekend' || variant === 'delen-rest-getekend';
+  const isBogenBoven = variant === 'getekend' || variant === 'zelf';
+  const isBogenOnder = variant === 'delen-getekend' || variant === 'delen-rest-getekend' || variant === 'delen-zelf' || variant === 'delen-rest-zelf';
   const isBogen = isBogenBoven || isBogenOnder;
   const boogH   = isBogenBoven ? 34 : 0;
   const boogHOnder = isBogenOnder ? 30 : 0; // extra ruimte onder de lijn voor bogen
@@ -1828,6 +1847,17 @@ const Preview = (() => {
       </div>`;
 
   } else if (variant === 'delen-zelf') {
+    // Boogjes onder de lijn toevoegen (verborgen, tonen bij oplossing)
+    for (let g = 0; g < groepen; g++) {
+      const x1 = middenVanGetal(uitkomst - g * stap);
+      const x2 = middenVanGetal(uitkomst - (g + 1) * stap);
+      const midX = (x1 + x2) / 2;
+      const boogBasisY = asY + 2;
+      const ctrlLift = 18;
+      const ctrlY = boogBasisY + ctrlLift;
+      svgInhoud += `<path class="gl-boog-oplossing" d="M ${x1} ${boogBasisY} C ${x1 + (x2-x1)*0.22} ${ctrlY}, ${x1 + (x2-x1)*0.78} ${ctrlY}, ${x2} ${boogBasisY}" stroke="#1565C0" stroke-width="1.6" fill="none" opacity="0"/>`;
+      svgInhoud += `<text class="gl-boog-oplossing" x="${midX}" y="${ctrlY + 12}" text-anchor="middle" font-size="10" font-family="Arial,sans-serif" font-weight="700" fill="#1565C0" opacity="0">${stap}</text>`;
+    }
     // Aftrekrij met stap ingevuld — kind tekent sprongen en vult deelsom zelf in
     const minStrepen = Array(groepen)
       .fill(`<span class="gl-getal-vast" style="color:#1565C0">${stap}</span>`)
@@ -1867,6 +1897,17 @@ const Preview = (() => {
       </div>`;
 
   } else if (variant === 'delen-rest-zelf') {
+    // Boogjes onder de lijn toevoegen (verborgen, tonen bij oplossing)
+    for (let g = 0; g < groepen; g++) {
+      const x1 = middenVanGetal(uitkomst - g * stap);
+      const x2 = middenVanGetal(uitkomst - (g + 1) * stap);
+      const midX = (x1 + x2) / 2;
+      const boogBasisY = asY + 2;
+      const ctrlLift = 18;
+      const ctrlY = boogBasisY + ctrlLift;
+      svgInhoud += `<path class="gl-boog-oplossing" d="M ${x1} ${boogBasisY} C ${x1 + (x2-x1)*0.22} ${ctrlY}, ${x1 + (x2-x1)*0.78} ${ctrlY}, ${x2} ${boogBasisY}" stroke="#1565C0" stroke-width="1.6" fill="none" opacity="0"/>`;
+      svgInhoud += `<text class="gl-boog-oplossing" x="${midX}" y="${ctrlY + 12}" text-anchor="middle" font-size="10" font-family="Arial,sans-serif" font-weight="700" fill="#1565C0" opacity="0">${stap}</text>`;
+    }
     const minStrepen = Array(groepen)
       .fill(`<span class="gl-getal-vast" style="color:#1565C0">${stap}</span>`)
       .join(`<span class="gl-min">−</span>`);
@@ -1899,14 +1940,17 @@ const Preview = (() => {
       const boogY = vakjeY - 2;
       const ctrlLift = 18;
       const ctrlY = boogY - ctrlLift;
-      svgInhoud += `<path class="gl-boog-oplossing" d="M ${x1} ${boogY} C ${x1 + (x2-x1)*0.22} ${ctrlY}, ${x1 + (x2-x1)*0.78} ${ctrlY}, ${x2} ${boogY}" stroke="#444" stroke-width="1.6" fill="none"/>`;
-      svgInhoud += `<text class="gl-boog-oplossing" x="${midX}" y="${ctrlY - 4}" text-anchor="middle" font-size="10" font-family="Arial,sans-serif" font-weight="700" fill="#333">${stap}</text>`;
+      svgInhoud += `<path class="gl-boog-oplossing" d="M ${x1} ${boogY} C ${x1 + (x2-x1)*0.22} ${ctrlY}, ${x1 + (x2-x1)*0.78} ${ctrlY}, ${x2} ${boogY}" stroke="#444444" stroke-width="1.6" fill="none" opacity="0"/>`;
+      svgInhoud += `<text class="gl-boog-oplossing" x="${midX}" y="${ctrlY - 4}" text-anchor="middle" font-size="10" font-family="Arial,sans-serif" font-weight="700" fill="#333333" opacity="0">${stap}</text>`;
     }
     const factor1 = positie === 'achteraan' ? groepen : stap;
     const factor2 = positie === 'achteraan' ? stap : groepen;
     const plusSlots = Math.max(groepen, 5);
     const langeLijnPx = Math.min(220, 110 + plusSlots * 18);
+    // Herhaalde optelling: stap + stap + ... = uitkomst
+    const optelDelen = Array(groepen).fill(`<span class="gl-lijn" data-antwoord="${stap}"></span>`).join(`<span class="gl-plus">+</span>`);
     inhoudOnderaan = `
+      <div class="gl-formule-rij">${optelDelen}<span class="gl-eq">=</span><span class="gl-lijn breed" data-antwoord="${uitkomst}"></span></div>
       <div class="gl-formule-rij">
         <span class="gl-getal-vast">${factor1}</span>
         <span class="gl-maal">×</span>
