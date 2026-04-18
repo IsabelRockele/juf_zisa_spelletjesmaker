@@ -322,9 +322,19 @@ const App = (() => {
     // Informatietekst tonen/verbergen
     if (infoEl) {
       if (gemengdActief) {
-        const gemengdTypes = actieveBewerking === 'aftrekken'
-          ? 'E-E, T-E, T-TE, TE-E, TE-T en TE-TE'
-          : 'E+E, T+E en TE+E';
+        // Welk niveau is actief? (nodig voor juiste tekst)
+        const niveauEl = document.querySelector('[name="niveau"]:checked');
+        const huidigNiveau = niveauEl ? parseInt(niveauEl.value) : 100;
+        const huidigBrug = _getBrugWaarde();
+
+        let gemengdTypes;
+        if (actieveBewerking === 'aftrekken' && huidigNiveau >= 10000 && huidigBrug !== 'zonder') {
+          gemengdTypes = 'DH-H, DH-DH, DH-HT en D-HT';
+        } else if (actieveBewerking === 'aftrekken') {
+          gemengdTypes = 'E-E, T-E, T-TE, TE-E, TE-T en TE-TE';
+        } else {
+          gemengdTypes = 'E+E, T+E en TE+E';
+        }
         infoEl.textContent = `ℹ️ Gemengd bevat: ${gemengdTypes} — Maak eerst 10 zit hier niet bij.`;
         infoEl.style.display = 'block';
       } else {
