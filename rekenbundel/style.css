@@ -2029,6 +2029,7 @@ header .badge {
 }
 .deel-T { background-color: #27ae60; }
 .deel-E { background-color: #f1c40f; color: #333 !important; }
+.deel-H { background-color: #2980b9; color: #fff; }
 
 .deel-cel {
   background-color: #fdfdfd;
@@ -2181,15 +2182,75 @@ header .badge {
 }
 .deel-T { background-color: #27ae60 !important; }
 .deel-E { background-color: #f1c40f !important; color: #333 !important; }
+.deel-H { background-color: #2980b9 !important; color: #fff !important; }
 
 /* Gewone invulcellen */
 .deel-cel {
   background-color: #fff;
+  position: relative;
 }
 
-/* Aftrekrijen: dikke bovenlijn */
+/* Aftrekrijen met dikke bovenlijn (oude styling, behouden voor andere usages) */
 .deel-aftrek-rij td {
   border-top: 3px solid #222 !important;
+}
+
+/* Nieuwe aftrek-rij: dikke lijn ONDER de rij met het aftrek-getal */
+.deel-aftrek-onder td {
+  border-bottom: 3px solid #222 !important;
+}
+
+/* Dikke bovenlijn per cel (voor compatibiliteit met oudere HTE-rendering) */
+.deel-dikboven {
+  border-top: 3px solid #222 !important;
+}
+
+/* Dalend cijfer: verticale stippellijn boven de cel, blauwgroen.
+   Alleen zichtbaar als de body de klasse .toont-oplossingen heeft
+   (anders moet de leerling zelf de cijfers naar beneden halen). */
+.deel-dalend::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 12px;
+  border-left: 2px dotted #1abc9c;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+body.toont-oplossingen .deel-dalend::before {
+  display: block;
+}
+
+/* Boogje boven H+T (alleen bij HTE:E scenario B: H < deler) */
+.deel-links {
+  position: relative;
+}
+.deel-boog {
+  position: absolute;
+  top: -8px;
+  height: 6px;
+  border: 2px solid #1abc9c;
+  border-bottom: none;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  pointer-events: none;
+  z-index: 3;
+  display: none;
+}
+body.toont-oplossingen .deel-boog {
+  display: block;
+}
+/* Boogje over H + T (kolom 0 en 1 van 3) — centreer over de eerste twee cellen.
+   Stel in dat cellen ~32px breed zijn (deel-cel heeft typically die breedte).
+   We positioneren de boog boven kolom 0 (links) met breedte = 2 kolommen. */
+.deel-boog-HT {
+  left: 1px;
+  width: calc(2 * var(--deel-cel-w, 32px) - 6px);
+  top: 32px;  /* ongeveer onder de headerrij, boven rij 1 */
 }
 
 /* Minteken: verschijnt net BOVEN de dikke lijn van de aftrekrij */
