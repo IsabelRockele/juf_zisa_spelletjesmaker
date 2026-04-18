@@ -73,6 +73,23 @@ const Cijferen = (() => {
         ? (Math.random() < 0.5 ? 'optellen' : 'aftrekken')
         : bewerking;
 
+      // Bij brug=beide: willen we ~50% met brug en ~50% zonder brug.
+      // We bepalen per oefening of we een brug-oefening "willen" of niet,
+      // afhankelijk van hoeveel we er al hebben.
+      let _wilBrug = null;
+      if (brug === 'beide') {
+        const reedsMetBrug    = oefeningen.filter(o => _heeftBrug(o.g1, o.g2,
+          o.operator === '+' ? 'optellen' : 'aftrekken', bereik)).length;
+        const reedsZonderBrug = oefeningen.length - reedsMetBrug;
+        const doel = Math.ceil(aantalOefeningen / 2);
+        // Als met-brug ondervertegenwoordigd is, eisen we met brug.
+        // Als zonder-brug ondervertegenwoordigd is, eisen we zonder.
+        // Anders: vrije keuze.
+        if      (reedsMetBrug    < doel && reedsZonderBrug >= doel) _wilBrug = true;
+        else if (reedsZonderBrug < doel && reedsMetBrug    >= doel) _wilBrug = false;
+        else _wilBrug = null;
+      }
+
       // Genereer getallen op basis van bereik
       let g1, g2;
       if (bereik <= 100) {
@@ -115,6 +132,13 @@ const Cijferen = (() => {
       }
       if (brug === 'met' && !_heeftBrug(g1, g2, opType, bereik)) continue;
       if (brug === 'over_nul' && !isBrugOverNul) continue;
+
+      // Brug=beide met stratificatie-keuze
+      if (brug === 'beide' && _wilBrug !== null) {
+        const heeftBrug = _heeftBrug(g1, g2, opType, bereik);
+        if (_wilBrug && !heeftBrug) continue;  // we wilden brug maar oefening heeft er geen
+        if (!_wilBrug && heeftBrug) continue;  // we wilden zonder maar oefening heeft brug
+      }
 
       const sleutel = `${g1}${opType}${g2}`;
       if (gebruikt.has(sleutel)) continue;
@@ -183,40 +207,132 @@ const Cijferen = (() => {
     return oefeningen;
   }
 
-  /* ── Staartdeling TE ÷ E ─────────────────────────────────── */
-  function _genDelen(delers, metRest, aantalOefeningen) {
+  /* ── Staartdeling TE ÷ E of HTE ÷ E ───────────────────────── */
+  function _genDelen(delers, metRest, aantalOefeningen, deelType) {
+    const isHTE = (deelType === 'HTE:E');
     const oefeningen = [], gebruikt = new Set();
     let pogingen = 0;
     while (oefeningen.length < aantalOefeningen && pogingen < 5000) {
       pogingen++;
       const deler   = delers[Math.floor(Math.random() * delers.length)];
-      const deeltal = _rnd(10, 99);
-      if (deeltal < deler) continue;
-      const T = Math.floor(deeltal / 10), E = deeltal % 10;
-      if (!metRest && T < deler) continue;
-      const quotT  = Math.floor(T / deler);
-      if (quotT === 0) continue;
-      const restT  = T % deler;
-      const nieuwE = restT * 10 + E;
-      const quotE  = Math.floor(nieuwE / deler);
-      const restE  = nieuwE % deler;
-      if (!metRest && restE !== 0) continue;
-      if (quotE === 0 && restE === 0) continue;
-      const quotiënt = quotT * 10 + quotE;
-      if (quotiënt < 10) continue;
-      const sleutel = `${deeltal}:${deler}`;
-      if (gebruikt.has(sleutel)) continue;
-      gebruikt.add(sleutel);
-      oefeningen.push({
-        sleutel, g1: deeltal, g2: deler,
-        operator: '\u00f7', result: quotiënt,
-        deeltal, deler, T, E, quotT, restT,
-        nieuwE, quotE, restE, quotiënt,
-        aftrekT: quotT * deler, aftrekE: quotE * deler,
-        showD: false, showH: false,
-        D1:'', H1:'', T1: String(T), E1: String(E),
-        D2:'', H2:'', T2:'',         E2: String(deler),
-      });
+
+      if (isHTE) {
+        // ── HTE ÷ E ──────────────────────────────────────────
+        // Twee scenarios:
+        //  A) H ≥ deler  → quotient 3-cijferig, schema heeft 3 aftrek-stappen
+        //     (maar we tonen visueel maar 2 stappen in het compacte schema:
+        //      rij 2 is aftrek1 onder H; rij 3 = restH ín H-kolom + T; etc.)
+        //  B) H < deler  → quotient 2-cijferig, eerste stap neemt H+T samen.
+        //     Boogje boven H+T. Rij 2 = aftrek van (H*10+T) onder H+T.
+        const deeltal = _rnd(100, 999);
+        if (deeltal < deler * 10) continue; // moet minstens 2-cijferig quotient geven
+        const H = Math.floor(deeltal / 100);
+        const T = Math.floor((deeltal % 100) / 10);
+        const E = deeltal % 10;
+
+        const toonBoog = (H < deler);
+
+        let quot1, rest1, quot2, rest2, quot3, rest3;
+        let aftrek1, aftrek2, aftrek3;
+        let quotH, quotT, quotE;
+        let aftrekH, aftrekT, aftrekE;
+        let restH, restT, restE;
+        let nieuwT, nieuwE;
+
+        if (toonBoog) {
+          // Scenario B: H+T samen als eerste stap
+          const HT = H * 10 + T;
+          quot1 = Math.floor(HT / deler);
+          if (quot1 === 0) continue;
+          rest1 = HT % deler;
+          // quot1 staat in T-positie van quotient
+          quotH = 0; quotT = quot1; restH = 0;
+          aftrekH = 0; // niet gebruikt
+          aftrekT = quot1 * deler; // = "aftrek1" (uitgelijnd op T)
+          nieuwT = HT; restT = rest1;
+          // Stap 2: (restT*10 + E) ÷ deler
+          nieuwE = restT * 10 + E;
+          quotE = Math.floor(nieuwE / deler);
+          restE = nieuwE % deler;
+          aftrekE = quotE * deler;
+          if (!metRest && restE !== 0) continue;
+        } else {
+          // Scenario A: standaard H-T-E
+          quotH = Math.floor(H / deler);
+          if (quotH === 0) continue;
+          restH = H % deler;
+          aftrekH = quotH * deler;
+          nieuwT = restH * 10 + T;
+          quotT = Math.floor(nieuwT / deler);
+          restT = nieuwT % deler;
+          aftrekT = quotT * deler;
+          nieuwE = restT * 10 + E;
+          quotE = Math.floor(nieuwE / deler);
+          restE = nieuwE % deler;
+          aftrekE = quotE * deler;
+          if (!metRest && restE !== 0) continue;
+        }
+
+        const quotiënt = quotH * 100 + quotT * 10 + quotE;
+        if (quotiënt < 10) continue;
+
+        const sleutel = `${deeltal}:${deler}`;
+        if (gebruikt.has(sleutel)) continue;
+        gebruikt.add(sleutel);
+
+        oefeningen.push({
+          sleutel, g1: deeltal, g2: deler,
+          operator: '\u00f7', result: quotiënt,
+          deeltal, deler,
+          deelType: 'HTE:E',
+          // Cijfers van het deeltal
+          H, T, E,
+          // Boogje tonen als H < deler (we moeten H+T samen nemen)
+          toonBoog,
+          // Quotient-cijfers per positie
+          quotH, quotT, quotE,
+          // Aftrek-getallen en tussenresten
+          aftrekH, aftrekT, aftrekE,
+          restH, restT, restE,
+          nieuwT, nieuwE,
+          quotiënt,
+          // Dit deeltal heeft een H, dus showH voor het cijferschema
+          showD: false, showH: true,
+          D1:'', H1: String(H), T1: String(T), E1: String(E),
+          D2:'', H2:'',         T2:'',         E2: String(deler),
+        });
+      } else {
+        // ── TE ÷ E (zoals voorheen) ──────────────────────────
+        const deeltal = _rnd(10, 99);
+        if (deeltal < deler) continue;
+        const T = Math.floor(deeltal / 10), E = deeltal % 10;
+        if (!metRest && T < deler) continue;
+        const quotT  = Math.floor(T / deler);
+        if (quotT === 0) continue;
+        const restT  = T % deler;
+        const nieuwE = restT * 10 + E;
+        const quotE  = Math.floor(nieuwE / deler);
+        const restE  = nieuwE % deler;
+        if (!metRest && restE !== 0) continue;
+        if (quotE === 0 && restE === 0) continue;
+        const quotiënt = quotT * 10 + quotE;
+        if (quotiënt < 10) continue;
+        const sleutel = `${deeltal}:${deler}`;
+        if (gebruikt.has(sleutel)) continue;
+        gebruikt.add(sleutel);
+        oefeningen.push({
+          sleutel, g1: deeltal, g2: deler,
+          operator: '\u00f7', result: quotiënt,
+          deeltal, deler,
+          deelType: 'TE:E',
+          T, E, quotT, restT,
+          nieuwE, quotE, restE, quotiënt,
+          aftrekT: quotT * deler, aftrekE: quotE * deler,
+          showD: false, showH: false,
+          D1:'', H1:'', T1: String(T), E1: String(E),
+          D2:'', H2:'', T2:'',         E2: String(deler),
+        });
+      }
     }
     return oefeningen;
   }
@@ -281,7 +397,7 @@ const Cijferen = (() => {
     if (bewerking === 'komma')
       return _genKomma(kommaType||'Et_plus_Et', kommaBrug||'beide', aantalOefeningen);
     if (bewerking === 'delen')
-      return _genDelen(actieveTafels, metRest||false, aantalOefeningen);
+      return _genDelen(actieveTafels, metRest||false, aantalOefeningen, deelType||'TE:E');
     return _genPlusMin(bewerking, bereik, brug||'beide', aantalOefeningen);
   }
 
