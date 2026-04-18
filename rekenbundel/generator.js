@@ -264,6 +264,11 @@ const Generator = (() => {
 
   /* ── Geef beschikbare types terug ────────────────────────── */
   function getTypes(bewerking, niveau, brug = 'zonder', hulpmiddelen = [], splitsModus = 'tot') {
+    if (bewerking === 'gemengd') {
+      const typesOpt = this.getTypes('optellen',  niveau, brug, hulpmiddelen, splitsModus).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+      const typesAft = this.getTypes('aftrekken', niveau, brug, hulpmiddelen, splitsModus).filter(t => t !== 'Gemengd' && t !== 'Maak eerst 10');
+      return [...new Set([...typesOpt, ...typesAft])];
+    }
     if (bewerking === 'herken-brug')  return _getModule(bewerking, niveau)?.getTypes() || [];
     if (bewerking === 'splitsingen')  return Splitsingen.getTypes(null, splitsModus, niveau);
     if (bewerking === 'tafels')       return Tafels.getTypes();
@@ -321,12 +326,20 @@ const Generator = (() => {
   function maakGemengdBlok({ niveau, brug, typesOpt, typesAft, aantalOefeningen, opdrachtzin, verhouding = '50-50', hulpmiddelen = [], schrijflijnenAantal = 2, splitspositie = 'aftrekker' }) {
     const brugVoorModule = niveau <= 100 ? _brugVoor100(brug) : brug;
 
+    // Gebruik brug-correcte modules
+    const _metBrug10000 = niveau >= 10000 && brug !== 'zonder';
+    const _heeftDhHtOpt = _metBrug10000 && typesOpt && typesOpt.some(t => t === 'DH+HT' || t === 'DH-HT' || t === 'D-HT');
+    const _heeftDhHtAft = _metBrug10000 && typesAft && typesAft.some(t => t === 'DH-HT' || t === 'D-HT');
+
     const modOpt = niveau <= 20  ? OptellenTot20  :
                    niveau <= 100 ? OptellenTot100 :
-                   niveau <= 1000 ? OptellenTot1000 : OptellenTot10000;
+                   niveau <= 1000 ? OptellenTot1000 :
+                   _metBrug10000 ? OptellenTot10000Brug : OptellenTot10000;
     const modAft = niveau <= 20  ? AftrekkenTot20  :
                    niveau <= 100 ? AftrekkenTot100 :
-                   niveau <= 1000 ? AftrekkenTot1000 : AftrekkenTot10000;
+                   niveau <= 1000 ? AftrekkenTot1000 :
+                   _heeftDhHtAft ? AftrekkenTot10000BrugHt :
+                   _metBrug10000 ? AftrekkenTot10000BrugAftrekker : AftrekkenTot10000;
 
     if (!modOpt || !modAft) return null;
 
@@ -345,7 +358,15 @@ const Generator = (() => {
 
     // Genereer met extra buffer zodat shuffle genoeg unieke oefeningen heeft
     const bufferOpt = modOpt.genereer({ niveau, oefeningstypes: typesOpt, brug: brugVoorModule, aantalOefeningen: aantalOpt * 2 });
-    const bufferAft = modAft.genereer({ niveau, oefeningstypes: typesAft, brug: brugVoorModule, aantalOefeningen: aantalAft * 2 });
+    // Voor aftrekken: als DH-HT/D-HT types geselecteerd, voeg ook die toe
+    let bufferAft = modAft.genereer({ niveau, oefeningstypes: typesAft, brug: brugVoorModule, aantalOefeningen: aantalAft * 2 });
+    if (_heeftDhHtAft && typeof AftrekkenTot10000BrugHt !== 'undefined') {
+      const dhHtTypes = typesAft.filter(t => t === 'DH-HT' || t === 'D-HT');
+      const andereTypes = typesAft.filter(t => t !== 'DH-HT' && t !== 'D-HT');
+      const bufDhHt = AftrekkenTot10000BrugHt.genereer({ niveau, oefeningstypes: dhHtTypes, brug: brugVoorModule, aantalOefeningen: aantalAft });
+      const bufAndere = andereTypes.length > 0 ? AftrekkenTot10000BrugAftrekker.genereer({ niveau, oefeningstypes: andereTypes, brug: brugVoorModule, aantalOefeningen: aantalAft }) : [];
+      bufferAft = [...(bufDhHt || []), ...(bufAndere || [])];
+    }
 
     if (!bufferOpt?.length || !bufferAft?.length) return null;
 
