@@ -217,7 +217,8 @@ const Preview = (() => {
       // Alle elementen met data-antwoord — universeel
       document.querySelectorAll('[data-antwoord]').forEach(el => {
         const ant = String(el.dataset.antwoord ?? '').trim();
-        if (ant === '' || ant === 'undefined') return;
+        // Lege onthoud-cellen toch verwerken voor achtergrondkleur
+        if ((ant === '' || ant === 'undefined') && !el.classList.contains('cij-onthoud') && !el.classList.contains('komma-onthoud')) return;
 
       const isSchrijflijn  = el.classList.contains('schrijflijn');
       const isSplitsVak    = el.classList.contains('splits-vak') || el.classList.contains('splits-vak-groot');
@@ -226,7 +227,8 @@ const Preview = (() => {
       const isAanvulVraag  = el.classList.contains('aanvullen-vraag');
 
       if (_toonOplossingen) {
-        el.textContent = ant;
+        // Sla textContent over als cel spans heeft (doorstreep of gestapeld)
+        if (!el.querySelector('.cij-doorstreep-orig') && !el.dataset.gestapeld) el.textContent = ant;
         el.style.color      = '#006100';
         el.style.fontWeight = '700';
 
@@ -302,6 +304,34 @@ const Preview = (() => {
           el.style.lineHeight   = '14px';
           el.style.verticalAlign = 'bottom';
 
+        } else if (el.classList.contains('cij-getal')) {
+          // Cijferen getalrij: bij aftrekken met lenen → doorstreep via klasse
+          el.classList.add('cij-heeft-doorstreep');
+          return; // niet overschrijven met textContent
+        } else if (el.classList.contains('cij-oplossing')) {
+          // Cijferen oplossingsrij
+          el.style.background    = '#c6efce';
+          el.style.color         = '#006100';
+          el.style.fontWeight    = 'bold';
+          el.style.fontSize      = '14px';
+          el.style.textAlign     = 'center';
+          el.style.borderTop     = '2px solid #006100';
+        } else if (el.classList.contains('cij-onthoud') || el.classList.contains('komma-onthoud')) {
+          // Cijferen/komma onthoud-rij (brug)
+          el.style.background    = '#c6efce';
+          el.style.color         = '#006100';
+          el.style.fontWeight    = 'bold';
+          el.style.fontSize      = '11px';
+          el.style.textAlign     = 'center';
+          // Gestapelde getallen (twee bruggen): toon beide spans
+          const bovenSpan = el.querySelector('.cij-onth-boven');
+          const onderSpan = el.querySelector('.cij-onth-onder');
+          if (bovenSpan && onderSpan) {
+            bovenSpan.style.display = 'block';
+            onderSpan.style.display = 'block';
+            return; // spans zorgen voor de weergave, niet overschrijven
+          }
+          // Enkele waarde: textContent wordt hieronder gezet via normale flow
         } else if (el.classList.contains('punt-lijn')) {
           // Puntoefening vakje
           el.style.background   = '#c6efce';
@@ -324,7 +354,10 @@ const Preview = (() => {
           el.style.border        = '1.5px solid #00a650';
         }
       } else {
-        el.textContent = '';
+        // Verberg doorgestreepte originelen bij reset
+        el.classList.remove('cij-heeft-doorstreep');
+        el.querySelectorAll('.cij-onth-boven, .cij-onth-onder').forEach(s => s.style.display = 'none');
+        if (!el.classList.contains('cij-getal')) el.textContent = '';
         el.style.background     = '';
         el.style.color          = '';
         el.style.fontWeight     = '';
@@ -538,10 +571,10 @@ const Preview = (() => {
     const blokId        = blok.id;
     const isHerken      = blok.bewerking === 'herken-brug';
     const hulp          = blok.hulpmiddelen || [];
-    const heeftSplits   = hulp.includes('splitsbeen') || (oef.splitsDeel1 !== undefined);
-    const heeftLijnen   = hulp.includes('schrijflijnen') || (oef.splitsDeel1 !== undefined);
+    const heeftSplits   = hulp.includes('splitsbeen');
+    const heeftLijnen   = hulp.includes('schrijflijnen');
     const heeftAanvullen = hulp.includes('aanvullen');
-    const splitspositie = blok.splitspositie || (oef.splitsDeel1 !== undefined ? 'aftrekker' : 'aftrekker');
+    const splitspositie = blok.splitspositie || 'aftrekker';
     const bewerking     = blok.bewerking || 'optellen';
     const schrijflijnenAantal = oef.splitsDeel1 !== undefined ? 2 : (blok.schrijflijnenAantal || 2);
     const aanvullenVariant = blok.aanvullenVariant || 'zonder-schema';
@@ -593,7 +626,9 @@ const Preview = (() => {
         </div>`;
     }
     /* ── DH-HT / D-HT brug (ingebouwde splits) ─────────────── */
-    if (oef.splitsDeel1 !== undefined) {
+    // Deze "ingebouwde splits" mag enkel getoond worden als de
+    // gebruiker splitsbeen ook echt als hulpmiddel aanvinkte.
+    if (oef.splitsDeel1 !== undefined && heeftSplits) {
       const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
       const splGroot = (blok.niveau || 0) >= 10000;
       const vakKlasse = splGroot ? 'splits-vak-groot' : 'splits-vak';
@@ -658,45 +693,11 @@ const Preview = (() => {
       return _transformerenHTML(blokId, oef, idx, blok);
     }
 
-    /* ── Ingebouwde splits (DH-HT / D-HT brug) ──────────────── */
-    if ((oef.type === 'DH-HT' || oef.type === 'D-HT') && !hulp.includes('splitsbeen') && !hulp.includes('compenseren') && !hulp.includes('transformeren')) {
-      console.log('>>> GRID RENDERER GEBRUIKT:', oef.vraag, 'splitsDeel1:', oef.splitsDeel1);
-      const del = `<button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>`;
-      const splGroot = (blok.niveau || 0) >= 10000;
-      const vakKlasse = splGroot ? 'splits-vak-groot' : 'splits-vak';
-      const boomKlasse = splGroot ? 'splitsbeen-boom splitsbeen-boom-groot' : 'splitsbeen-boom';
-      const delen = oef.vraag.replace(' =', '').trim().split(' ');
-      // Bereken splits-waarden via centrale helper
-      const _spGrid = _berekenSplits(oef, blok.bewerking || 'optellen', blok.splitspositie || 'aftrekker', blok.config?.strategie, blok.schrijflijnenAantal || 2);
-      const d1Grid = _spGrid.d1;
-      const d2Grid = _spGrid.d2;
-      const sl1Grid = _spGrid.sl1;
-      const sl2Grid = _spGrid.sl2;
-      return `
-        <div class="oefening-item oefening-hulp" style="padding-bottom:4px;">
-          <div style="display:inline-grid;grid-template-columns:auto auto auto auto;align-items:center;gap:0 4px;">
-            <span class="oef-tekst" style="grid-column:1;">${esc(delen[0])}</span>
-            <span class="oef-tekst" style="grid-column:2;">${esc(delen[1])}</span>
-            <div style="grid-column:3;display:flex;flex-direction:column;align-items:center;">
-              <span class="oef-tekst">${esc(delen[2])}</span>
-              <div class="${boomKlasse}" style="margin-top:2px;"></div>
-              <div class="splitsbeen-vakjes">
-                <div class="${vakKlasse}" data-antwoord="${d1Grid}"></div>
-                <div class="${vakKlasse}" data-antwoord="${d2Grid}"></div>
-              </div>
-            </div>
-            <div style="grid-column:4;display:flex;align-items:flex-start;gap:4px;padding-top:2px;">
-              <span class="oef-tekst">=</span>
-              <span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}"></span>
-            </div>
-          </div>
-          <div class="hulp-schrijflijnen" style="margin-top:4px;">
-            <div class="schrijflijn" data-antwoord="${sl1Grid}"></div>
-            <div class="schrijflijn" data-antwoord="${sl2Grid}"></div>
-          </div>
-          ${del}
-        </div>`;
-    }
+    /* ── Ingebouwde splits (DH-HT / D-HT brug) — VERWIJDERD
+       Deze block tekende automatisch een splitsbeen voor DH-HT en D-HT
+       oefeningen wanneer splitsbeen NIET aangevinkt was. Dat veroorzaakte
+       ongewenste splitsbenen in gemengd tot 10.000 met brug. De
+       splitsbeen-rendering gebeurt nu alleen via het heeftSplits-pad. */
     if (oef.drieTermen) {
       const metVoorbeeld = blok.metVoorbeeld || false;
       const isVoorbeeld  = metVoorbeeld && idx === 0;
@@ -2004,6 +2005,31 @@ const Preview = (() => {
     const op     = esc(oef.operator);
     const g1Str  = esc(oef.g1Str);
     const g2Str  = esc(oef.g2Str);
+
+    // Bereken antwoord per kolom
+    const _isMin = oef.operator === '−' || oef.operator === '-';
+    const _g1v = parseFloat((oef.g1Str||'0').replace(',','.')) || 0;
+    const _g2v = parseFloat((oef.g2Str||'0').replace(',','.')) || 0;
+    const _antv = _isMin ? _g1v - _g2v : _g1v + _g2v;
+    const _antStr = Math.abs(_antv).toFixed(1).replace('.',',');
+    const _antParts = _antStr.split(',');
+    const _antGeh = parseInt(_antParts[0]) || 0;
+    const _antTiend = parseInt(_antParts[1]) || 0;
+    const _antE2 = _antGeh % 10;
+    const _antT2 = Math.floor(_antGeh / 10) % 10;
+
+    // Onthoud berekenen voor kommagetallen
+    const _kt1 = Number(oef.g1t_) || 0;  // tienden van g1
+    const _kt2 = Number(oef.g2t_) || 0;  // tienden van g2
+    const _ke1 = typeof oef.g1E === 'number' ? oef.g1E % 10 : (Number(oef.g1E) || 0);
+    const _ke2 = typeof oef.g2E === 'number' ? oef.g2E % 10 : (Number(oef.g2E) || 0);
+    // Optellen: tienden optellen >= 10 → onthoud 1 naar E-kolom
+    const _kOnthoudE = !_isMin && (_kt1 + _kt2 >= 10) ? '1' : '';
+    const _kNieuwE   = !_isMin && (_kt1 + _kt2 >= 10) ? '' : '';
+    // Aftrekken: tienden t1 < t2 → leen van E: toon 10 in t-kolom, E1-1 in E-onthoud
+    const _kLeenT    = _isMin && (_kt1 < _kt2) ? 1 : 0;
+    const _kOnthoudT = _kLeenT ? '10' : '';
+    const _kOnthoudEAf = _kLeenT ? String(_ke1 - 1) : '';
     const startpijl = cfg.startpijl !== false;
 
     // Schema kolommen: T(groen) | E(geel) | komma(grijs smal) | t(lichtgeel)
@@ -2038,10 +2064,20 @@ const Preview = (() => {
           '<table class="cij-schema komma-schema">' +
             '<thead><tr>' + hdrT + hdrE + hdrKomma + hdrT2 + '</tr></thead>' +
             '<tbody>' +
-              '<tr><td class="komma-onthoud"></td><td class="komma-onthoud"></td><td class="komma-onthoud komma-kolom"></td><td class="komma-onthoud"></td></tr>' +
+              '<tr>' +
+                '<td class="komma-onthoud" data-antwoord=""></td>' +
+                '<td class="komma-onthoud" data-antwoord="' + (_isMin ? _kOnthoudEAf : _kOnthoudE) + '"></td>' +
+                '<td class="komma-onthoud komma-kolom" data-antwoord=""></td>' +
+                '<td class="komma-onthoud" data-antwoord="' + _kOnthoudT + '"></td>' +
+              '</tr>' +
               rij('', g1E, g1t) +
               rij('', g2E, g2t) +
-              '<tr><td class="cij-oplossing" colspan="4"></td></tr>' +
+              '<tr>' +
+                '<td class="cij-oplossing" data-antwoord="' + (_antT2 || '') + '"></td>' +
+                '<td class="cij-oplossing" data-antwoord="' + _antE2 + '"></td>' +
+                '<td class="komma-kolom komma-dot">,</td>' +
+                '<td class="cij-oplossing" data-antwoord="' + _antTiend + '"></td>' +
+              '</tr>' +
             '</tbody>' +
           '</table>' +
         '</div>' +
@@ -2145,25 +2181,197 @@ const Preview = (() => {
     const hCelT = `<td class="cij-header cij-tien">T</td>`;
     const hCelE = `<td class="cij-header cij-een">E${pijlHTML}</td>`;
 
-    const oCelD = showD ? `<td class="cij-onthoud cij-duizend"></td>` : '';
-    const oCelH = showH ? `<td class="cij-onthoud cij-honderd"></td>` : '';
-    const oCelT = `<td class="cij-onthoud cij-tien"></td>`;
-    const oCelE = `<td class="cij-onthoud cij-een"></td>`;
+    // Bereken onthoudgetallen voor brug (optellen én aftrekken)
+    const _e1 = Number(oef.E1) || 0, _e2 = Number(oef.E2) || 0;
+    const _t1 = Number(oef.T1) || 0, _t2 = Number(oef.T2) || 0;
+    const _h1 = Number(oef.H1) || 0, _h2 = Number(oef.H2) || 0;
+    const _d1 = Number(oef.D1) || 0, _d2 = Number(oef.D2) || 0;
+    const _opStr = String(oef.operator||'');
+    const _isAftrekken = _opStr.includes('-') || _opStr === '−';
+    const _isOptellen = _opStr === '+';
+    const _isVermenig = _opStr === '×' || _opStr === '*' || _opStr === 'x';
 
-    const g1D = showD ? `<td class="cij-getal">${ingevuld ? esc(oef.D1||'') : ''}</td>` : '';
-    const g1H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H1) : ''}</td>` : '';
-    const g1T = `<td class="cij-getal">${ingevuld ? esc(oef.T1) : ''}</td>`;
-    const g1E = `<td class="cij-getal">${ingevuld ? esc(oef.E1) : ''}</td>`;
+    /* ── Voorloopnul-helpers ─────────────────────────────────
+       Als g1 bv. 53 is en het schema H-T-E toont, dan mogen de
+       voorloopnullen (H1="0") NIET getoond worden. We bepalen per
+       getal de hoogste kolom waarin er echt een cijfer staat. */
+    const _g1Num = Number(oef.g1) || 0;
+    const _g2Num = Number(oef.g2) || 0;
+    function _hoogsteKolom(n) {
+      // Geeft 'E', 'T', 'H' of 'D' terug op basis van grootte van n
+      if (n >= 1000) return 'D';
+      if (n >= 100)  return 'H';
+      if (n >= 10)   return 'T';
+      return 'E';
+    }
+    const _g1Hoog = _hoogsteKolom(_g1Num);
+    const _g2Hoog = _hoogsteKolom(_g2Num);
+    const _rang = { E:0, T:1, H:2, D:3 };
+    // toon(kol, hoog) = true als kolom binnen het werkelijke getal valt
+    function _toonCijfer(kol, hoog) {
+      return _rang[kol] <= _rang[hoog];
+    }
+    // Geeft de cijferwaarde terug óf een lege string als voorloopnul
+    function _cijferWaarde(oefWaarde, kol, hoog) {
+      if (!_toonCijfer(kol, hoog)) return '';
+      return oefWaarde == null ? '' : String(oefWaarde);
+    }
+    // Bij aftrekken kan een cel "geleend" hebben -> tonen ook als hoog het niet "doet"
+    function _cijferDataAntwoord(oefWaarde, kol, hoog, forceTonen = false) {
+      if (!forceTonen && !_toonCijfer(kol, hoog)) return '';
+      return oefWaarde == null ? '' : String(oefWaarde);
+    }
 
-    const g2D = showD ? `<td class="cij-getal">${ingevuld ? esc(oef.D2||'') : ''}</td>` : '';
-    const g2H = showH ? `<td class="cij-getal">${ingevuld ? esc(oef.H2) : ''}</td>` : '';
-    const g2T = `<td class="cij-getal">${ingevuld ? esc(oef.T2) : ''}</td>`;
-    const g2E = `<td class="cij-getal">${ingevuld ? esc(oef.E2) : ''}</td>`;
+    // OPTELLEN: onthoud 1 naar hogere kolom als som >= 10
+    const _onthoudT_opt = _isOptellen && (_e1 + _e2 >= 10) ? 1 : 0;
+    const _onthoudH_opt = _isOptellen && (_t1 + _t2 + _onthoudT_opt >= 10) ? 1 : 0;
+    const _onthoudD_opt = _isOptellen && (_h1 + _h2 + _onthoudH_opt >= 10) ? 1 : 0;
 
-    const opD = showD ? `<td class="cij-oplossing"></td>` : '';
-    const opH = showH ? `<td class="cij-oplossing"></td>` : '';
-    const opT = `<td class="cij-oplossing"></td>`;
-    const opE = `<td class="cij-oplossing"></td>`;
+    // VERMENIGVULDIGEN (éénvoudige variant: 2- of 3-cijferig × 1-cijferig).
+    // Bij g2 met meerdere cijfers blijven de onthoudkaders leeg (té complex
+    // voor dit schema, zou twee tussenproducten vergen).
+    let _onthoudT_mul = 0, _onthoudH_mul = 0, _onthoudD_mul = 0;
+    if (_isVermenig && _g2Num >= 1 && _g2Num <= 9 && _g1Num >= 10) {
+      // g2 is 1-cijferig → vermenigvuldiging kolom per kolom
+      const _vE = _g1Num % 10;
+      const _vT = Math.floor(_g1Num / 10) % 10;
+      const _vH = Math.floor(_g1Num / 100) % 10;
+      // E × g2
+      const _prodE = _vE * _g2Num;
+      _onthoudT_mul = Math.floor(_prodE / 10);       // carry naar T
+      // T × g2 + carry
+      const _prodT = _vT * _g2Num + _onthoudT_mul;
+      _onthoudH_mul = Math.floor(_prodT / 10);       // carry naar H
+      // H × g2 + carry
+      const _prodH = _vH * _g2Num + _onthoudH_mul;
+      _onthoudD_mul = Math.floor(_prodH / 10);       // carry naar D
+    }
+
+    // AFTREKKEN: lenen van hogere kolom als bovengetal < ondergetal
+    // E-kolom: als E1 < E2 → leen van T: toon 10 in onthoud-E, T1-1 in onthoud-T
+    // T-kolom: als (T1 - _leenT) < T2 → leen van H: toon 10 in onthoud-T (als T ook leende)
+    const _leenE = _isAftrekken && (_e1 < _e2) ? 1 : 0;          // leent E van T
+    const _t1eff = _t1 - _leenE;                                   // effectieve T1 na lenen
+    const _leenT = _isAftrekken && (_t1eff < _t2) ? 1 : 0;        // leent T van H
+    const _h1eff = _h1 - _leenT;
+    const _leenH = _isAftrekken && (_h1eff < _h2) ? 1 : 0;        // leent H van D
+
+
+    // Onthoud-cellen: gebruik data-antwoord voor toggle
+    // Cel met 1 getal: data-antwoord="X"
+    // Cel met 2 gestapelde getallen: data-antwoord="10" + data-antwoord2="X" via twee spans
+
+    function _oCel(klasse, boven, onder) {
+      // boven = bovenste getal (of leeg), onder = onderste getal (of leeg)
+      if (!boven && !onder) return `<td class="${klasse}" data-antwoord=""></td>`;
+      if (boven && onder) {
+        // Gestapeld: data-gestapeld attribuut zodat toggle weet wat te doen
+        return `<td class="${klasse}" data-antwoord="${boven}" data-gestapeld="${onder}"><span class="cij-onth-boven">${boven}</span><span class="cij-onth-onder">${onder}</span></td>`;
+      }
+      return `<td class="${klasse}" data-antwoord="${boven || onder}"></td>`;
+    }
+
+    // E-kolom: 10 als E leende van T
+    const oCelE_af = _oCel("cij-onthoud cij-een", _leenE ? "10" : "", "");
+
+    // T-kolom:
+    const _tBoven = _leenT ? "10" : "";
+    const _tOnder = (_leenE && (_t1 - 1) !== 0) ? String(_t1 - 1) : "";
+    const oCelT_af = _oCel("cij-onthoud cij-tien", _tBoven || _tOnder, _tBoven ? _tOnder : "");
+
+    // H-kolom:
+    const _hBoven = _leenH ? "10" : "";
+    const _hOnder = (_leenT && (_h1 - 1) !== 0) ? String(_h1 - 1) : "";
+    const oCelH_af = _oCel("cij-onthoud cij-honderd", _hBoven || _hOnder, _hBoven ? _hOnder : "");
+
+    // D-kolom: enkel verminderd als H leende
+    const oCelD_af = _oCel("cij-onthoud cij-duizend", _leenH ? String(_d1 - 1) : "", "");
+
+
+    const oCelD = showD ? (
+      _isAftrekken ? oCelD_af
+      : _isVermenig ? (_onthoudD_mul ? `<td class="cij-onthoud cij-duizend" data-antwoord="${_onthoudD_mul}"></td>` : `<td class="cij-onthoud cij-duizend"></td>`)
+      : (_onthoudD_opt ? `<td class="cij-onthoud cij-duizend" data-antwoord="1"></td>` : `<td class="cij-onthoud cij-duizend"></td>`)
+    ) : '';
+    const oCelH = showH ? (
+      _isAftrekken ? oCelH_af
+      : _isVermenig ? (_onthoudH_mul ? `<td class="cij-onthoud cij-honderd" data-antwoord="${_onthoudH_mul}"></td>` : `<td class="cij-onthoud cij-honderd"></td>`)
+      : (_onthoudH_opt ? `<td class="cij-onthoud cij-honderd" data-antwoord="1"></td>` : `<td class="cij-onthoud cij-honderd"></td>`)
+    ) : '';
+    const oCelT = (
+      _isAftrekken ? oCelT_af
+      : _isVermenig ? (_onthoudT_mul ? `<td class="cij-onthoud cij-tien" data-antwoord="${_onthoudT_mul}"></td>` : `<td class="cij-onthoud cij-tien"></td>`)
+      : (_onthoudT_opt ? `<td class="cij-onthoud cij-tien" data-antwoord="1"></td>` : `<td class="cij-onthoud cij-tien"></td>`)
+    );
+    const oCelE = _isAftrekken ? oCelE_af : `<td class="cij-onthoud cij-een"></td>`;
+
+    // ── g1 cellen ── (met voorloopnul-filter) ──────────────────
+    // Bij aftrekken: forceer "data-antwoord" voor de oorspronkelijke waarde
+    // als er geleend wordt, zodat de toggle het echte getal toont.
+    const g1D = showD
+      ? (_isAftrekken && _leenH
+          ? `<td class="cij-getal" data-antwoord="${_cijferDataAntwoord(_d1, 'D', _g1Hoog, true)}">${ingevuld ? esc(_cijferWaarde(oef.D1, 'D', _g1Hoog)) : ''}</td>`
+          : `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.D1, 'D', _g1Hoog)) : ''}</td>`)
+      : '';
+    const g1H = showH
+      ? (_isAftrekken && _leenT
+          ? `<td class="cij-getal" data-antwoord="${_cijferDataAntwoord(_h1, 'H', _g1Hoog, true)}">${ingevuld ? esc(_cijferWaarde(oef.H1, 'H', _g1Hoog)) : ''}</td>`
+          : `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.H1, 'H', _g1Hoog)) : ''}</td>`)
+      : '';
+    const g1T = (_isAftrekken && _leenE
+      ? `<td class="cij-getal" data-antwoord="${_cijferDataAntwoord(_t1, 'T', _g1Hoog, true)}">${ingevuld ? esc(_cijferWaarde(oef.T1, 'T', _g1Hoog)) : ''}</td>`
+      : `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.T1, 'T', _g1Hoog)) : ''}</td>`);
+    const g1E = `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.E1, 'E', _g1Hoog)) : ''}</td>`;
+
+    // ── g2 cellen ── (met voorloopnul-filter) ──────────────────
+    const g2D = showD ? `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.D2, 'D', _g2Hoog)) : ''}</td>` : '';
+    const g2H = showH ? `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.H2, 'H', _g2Hoog)) : ''}</td>` : '';
+    const g2T = `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.T2, 'T', _g2Hoog)) : ''}</td>`;
+    const g2E = `<td class="cij-getal">${ingevuld ? esc(_cijferWaarde(oef.E2, 'E', _g2Hoog)) : ''}</td>`;
+
+
+    // Antwoord per kolom
+    const _g1 = Number(oef.g1) || 0;
+    const _g2 = Number(oef.g2) || 0;
+    let _antE, _antT, _antH, _antD;
+    if (_isVermenig) {
+      // Vermenigvuldigen: bereken zélf het echte product (module-velden zijn
+      // vaak gebaseerd op optellogica en dus onbetrouwbaar voor ×).
+      const _prod = _g1 * _g2;
+      _antE = String(_prod % 10);
+      _antT = String(Math.floor((_prod / 10) % 10));
+      _antH = String(Math.floor((_prod / 100) % 10));
+      _antD = Math.floor(_prod / 1000) ? String(Math.floor(_prod / 1000)) : '';
+    } else if (oef.antE !== undefined && oef.antE !== '') {
+      // Gebruik velden van Cijferen module (opt/aft)
+      _antE = String(oef.antE); _antT = String(oef.antT||'');
+      _antH = String(oef.antH||''); _antD = String(oef.antD||'');
+    } else if (_isAftrekken) {
+      // Aftrekken met eventueel lenen
+      _antE = String((_e1 + _leenE * 10) - _e2);
+      _antT = String((_t1 - _leenE + _leenT * 10) - _t2);
+      _antH = String((_h1 - _leenT + _leenH * 10) - _h2);
+      _antD = String((_d1 - _leenH) - _d2) !== '0' || showD ? String((_d1 - _leenH) - _d2) : '';
+    } else {
+      // Optellen
+      const _antw = _g1 + _g2;
+      _antE = String(_antw % 10);
+      _antT = String(Math.floor((_antw / 10) % 10));
+      _antH = String(Math.floor((_antw / 100) % 10));
+      _antD = Math.floor(_antw / 1000) ? String(Math.floor(_antw / 1000)) : '';
+    }
+    // Voorloopnullen weghalen uit het antwoord: bepaal het volledige
+    // antwoord-getal en welke kolom de hoogste echte positie is.
+    const _antwNum = Number(String(_antD||'') + String(_antH||'0') + String(_antT||'0') + String(_antE||'0')) || 0;
+    const _antHoog = _hoogsteKolom(_antwNum);
+    const _antEShow = _cijferWaarde(_antE, 'E', _antHoog);
+    const _antTShow = _cijferWaarde(_antT, 'T', _antHoog);
+    const _antHShow = _cijferWaarde(_antH, 'H', _antHoog);
+    const _antDShow = _cijferWaarde(_antD, 'D', _antHoog);
+    const opD = showD ? `<td class="cij-oplossing" data-antwoord="${_antDShow}"></td>` : '';
+    const opH = showH ? `<td class="cij-oplossing" data-antwoord="${_antHShow}"></td>` : '';
+    const opT = `<td class="cij-oplossing" data-antwoord="${_antTShow}"></td>`;
+    const opE = `<td class="cij-oplossing" data-antwoord="${_antEShow}"></td>`;
 
     return `
       <div class="cij-oefening">
