@@ -241,7 +241,14 @@ const Cijferen = (() => {
       }
       const g1E = Math.floor(g1t/10), g1t_ = g1t%10;
       const g2E = Math.floor(g2t/10), g2t_ = g2t%10;
-      const heeftBrug = isPlus ? (g1t_+g2t_)>=10 : g1t_<g2t_;
+      // Brug in t-kolom (tienden): t1+t2>=10 of t1<t2
+      const brugT = isPlus ? (g1t_+g2t_)>=10 : g1t_<g2t_;
+      // Brug in E-kolom (eenheden): g1E+g2E+onthoudT >= 10
+      const onthoudT = isPlus && brugT ? 1 : 0;
+      const brugE = isPlus
+        ? (g1E + g2E + onthoudT >= 10)
+        : (g1E - (brugT ? 1 : 0) < g2E);
+      const heeftBrug = brugT || brugE;
       if (kommaBrug === 'met'    && !heeftBrug) continue;
       if (kommaBrug === 'zonder' &&  heeftBrug) continue;
       const op      = isPlus ? '+' : '\u2212';
