@@ -1932,13 +1932,36 @@ header .badge {
 .cij-tien    { background-color: #27ae60; }
 .cij-een     { background-color: #f1c40f; color: #333 !important; }
 
-.cij-onthoud { vertical-align: middle !important; padding-bottom: 0 !important; }
+.cij-onthoud { vertical-align: middle !important; padding: 4px 2px !important; line-height: 1.3 !important; font-size: 12px; font-weight: bold; text-align: center; }
 .cij-onthoud.cij-duizend { background-color: #f1948a; }
 .cij-onthoud.cij-honderd { background-color: #a9cce3; }
 .cij-onthoud.cij-tien    { background-color: #a3e4d7; }
 .cij-onthoud.cij-een     { background-color: #f9e79f; }
 
 .cij-getal    { background-color: #fdfdfd; }
+
+/* Doorgestreept origineel getal bij aftrekken met lenen */
+/* Doorstreep bij aftrekken met lenen */
+.cij-getal.cij-heeft-doorstreep {
+  text-decoration: line-through;
+  text-decoration-color: #c0392b;
+  text-decoration-thickness: 2px;
+  color: #c0392b !important;
+}
+
+/* Gestapelde onthoud-getallen (twee bruggen) */
+.cij-onth-boven, .cij-onth-onder {
+  display: none;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #006100;
+  text-align: center;
+}
+.cij-onth-boven {
+  font-size: 9px;
+  border-bottom: 1px solid #888;
+}
 .cij-oplossing {
   background-color: #fff;
   border-top: 3px solid #000 !important;
@@ -2238,7 +2261,11 @@ header .badge {
 
 /* Onthoud-rij in kommaschema: lichtgrijs, kleiner */
 .komma-onthoud {
-  height: 18px !important;
+  padding: 4px 2px !important;
+  line-height: 1.3 !important;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
   background-color: #e8e8e8 !important;
   border-color: #ccc !important;
   -webkit-print-color-adjust: exact;
