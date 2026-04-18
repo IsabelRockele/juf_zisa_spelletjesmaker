@@ -193,6 +193,9 @@ const Preview = (() => {
 
   function toggleOplossingen(btn) {
     _toonOplossingen = !_toonOplossingen;
+    // Body-klasse zodat CSS weet of oplossingen zichtbaar moeten zijn
+    // (gebruikt voor deel-dalend stippellijn en deel-boog)
+    document.body.classList.toggle('toont-oplossingen', _toonOplossingen);
     if (btn) {
       btn.textContent = _toonOplossingen ? '🙈 Verberg oplossingen' : '👁 Toon oplossingen';
       btn.style.background = _toonOplossingen ? '#27AE60' : '';
@@ -526,7 +529,13 @@ const Preview = (() => {
     else if (heeftCompenseren)                                             gridKlasse = 'comp-grid';
     else if (heeftTransformeren)                                           gridKlasse = 'trans-grid';
     else if (heeftHulp)                                                    gridKlasse = 'hulp-grid';
-    else if (isCijferen)                                                   gridKlasse = (blok.config?.bewerking === 'delen' || blok.config?.bereik >= 1000 || blok.config?.schatting) ? 'cijferen-grid-3' : 'cijferen-grid';
+    else if (isCijferen) {
+      // Bij HTE÷E is de deelkaart breder → 2 kolommen ipv 3
+      const isHTEDeel = blok.config?.bewerking === 'delen' && blok.config?.deelType === 'HTE:E';
+      if (isHTEDeel) gridKlasse = 'cijferen-grid';  // 2 kolommen
+      else if (blok.config?.bewerking === 'delen' || blok.config?.bereik >= 1000 || blok.config?.schatting) gridKlasse = 'cijferen-grid-3';
+      else gridKlasse = 'cijferen-grid';
+    }
     else                                                                   gridKlasse = '';
 
     const div = document.createElement('div');
@@ -2085,71 +2094,243 @@ const Preview = (() => {
     );
   }
 
-  /* ── Deelschema HTML (staartdeling TE÷E) ─────────────────── */
+  /* ── Deelschema HTML (staartdeling TE÷E of HTE÷E) ─────────── */
   function _deelOefHTML(blok, oef, idx) {
     const cfg      = blok.config || {};
     const ingevuld = cfg.invulling === 'ingevuld';
-    const T = (ingevuld && oef.T !== undefined) ? esc(String(oef.T)) : '';
-    const E = (ingevuld && oef.E !== undefined) ? esc(String(oef.E)) : '';
+    const isHTE    = (oef.deelType === 'HTE:E') || (cfg.deelType === 'HTE:E');
     const delerTxt = esc(String(oef.deler));
-    const metRest = oef.restE > 0;
-    const deeltal = esc(String(oef.deeltal));
+    const metRest  = oef.restE > 0;
+    const deeltal  = esc(String(oef.deeltal));
 
-    // Vraag bovenaan (zonder R bij zonder rest)
+    // Vraag bovenaan: bij met rest ook "R = ___" tonen (met data-antwoord voor toggle)
     const vraagHTML = metRest
-      ? '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt + ' = <span class="deel-lijn-antw"></span> R <span class="deel-lijn-antw"></span></div>'
-      : '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt + ' = <span class="deel-lijn-antw"></span></div>';
+      ? '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt +
+        ' = <span class="deel-lijn-antw" data-antwoord="' + esc(String(oef.quotiënt)) + '"></span>' +
+        ' R <span class="deel-lijn-antw" data-antwoord="' + esc(String(oef.restE)) + '"></span></div>'
+      : '<div class="deel-vraag">' + deeltal + ' : ' + delerTxt +
+        ' = <span class="deel-lijn-antw" data-antwoord="' + esc(String(oef.quotiënt)) + '"></span></div>';
 
+    // Headers
+    const hdrH = '<td class="deel-hdr deel-H">H</td>';
     const hdrT = '<td class="deel-hdr deel-T">T</td>';
     const hdrE = '<td class="deel-hdr deel-E">E</td>';
     const leeg = '<td class="deel-cel"></td>';
-    const rij1T = ingevuld ? '<td class="deel-cel">' + T + '</td>' : leeg;
-    const rij1E = ingevuld ? '<td class="deel-cel">' + E + '</td>' : leeg;
+    const min  = '<td class="deel-cel deel-min"></td>';
 
-    // Links schema — 7 datarijen:
-    // rij1: deeltal
-    // rij2: leeg
-    // rij3: eerste aftrek (dikke bovenlijn, min BOVEN die lijn)
-    // rij4: leeg
-    // rij5: leeg
-    // rij6: tweede aftrek (dikke bovenlijn, min BOVEN die lijn)
-    // rij7: eindrest
-    const schema = (
-      '<div class="deel-links">' +
-        '<table class="deel-tabel">' +
-          '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
-          '<tbody>' +
-            '<tr>' + rij1T + rij1E + '</tr>' +
-            '<tr>' + leeg + leeg + '</tr>' +
-            '<tr class="deel-aftrek-rij"><td class="deel-cel deel-min"></td>' + leeg + '</tr>' +
-            '<tr>' + leeg + leeg + '</tr>' +
-            '<tr>' + leeg + leeg + '</tr>' +
-            '<tr class="deel-aftrek-rij"><td class="deel-cel deel-min"></td>' + leeg + '</tr>' +
-            '<tr>' + leeg + leeg + '</tr>' +
-          '</tbody>' +
-        '</table>' +
-      '</div>'
-    );
+    // Helper: cel met data-antwoord (voor toggle oplossing) of met vaste waarde (bij ingevuld)
+    function antCel(waarde, extraKlasse = '') {
+      const w = (waarde === '' || waarde === undefined || waarde === null) ? '' : String(waarde);
+      return '<td class="deel-cel ' + extraKlasse + '" data-antwoord="' + esc(w) + '"></td>';
+    }
+    // Ingevulde cel (zonder toggle) — gebruikt bij rij 1 (deeltal) als invulling = 'ingevuld'
+    function vasteCel(waarde) {
+      return '<td class="deel-cel">' + esc(String(waarde ?? '')) + '</td>';
+    }
 
-    // Rechterschema: margin-top = 3 rijen (header+rij1+rij2)
-    // schrijflijn op hoogte rij1 (deeltal) — met deler ingevuld indien nodig
+    let schemaLinks;
+    if (isHTE) {
+      // ── HTE ÷ E ──
+      // We hebben 2 scenario's afhankelijk van oef.toonBoog:
+      //  A) toonBoog = false (H ≥ deler): quotient 3-cijferig, 3 aftrek-stappen → 7 datarijen
+      //     Rij 1: deeltal           H T E
+      //     Rij 2: aftrekH           (onder H) + min, dikke lijn eronder
+      //     Rij 3: restH + T         (restH in H, T in T-kolom — dalend)
+      //     Rij 4: aftrekT           + min, dikke lijn eronder
+      //     Rij 5: restT + E         (restT in T, E dalend)
+      //     Rij 6: aftrekE           + min, dikke lijn eronder
+      //     Rij 7: eindrest          (in E)
+      //  B) toonBoog = true (H < deler): quotient 2-cijferig, 2 aftrek-stappen → 5 datarijen
+      //     We gebruiken dezelfde 7-rij layout voor consistente hoogte, maar
+      //     laten rij 2 en 3 leeg; het eigenlijke schema zit in rij 4-7 en de
+      //     boog staat boven rij 1 (H+T).
+
+      const rij1H = ingevuld ? vasteCel(oef.H) : leeg;
+      const rij1T = ingevuld ? vasteCel(oef.T) : leeg;
+      const rij1E = ingevuld ? vasteCel(oef.E) : leeg;
+
+      // Rechtse uitlijning per aftrek
+      const aH_H = oef.aftrekH >= 10 ? Math.floor(oef.aftrekH/10) : oef.aftrekH;
+      const aH_T = oef.aftrekH >= 10 ? (oef.aftrekH % 10) : '';
+      const aT_H = oef.aftrekT >= 10 ? Math.floor(oef.aftrekT/10) : '';
+      const aT_T = oef.aftrekT % 10;
+      const aE_T = oef.aftrekE >= 10 ? Math.floor(oef.aftrekE/10) : '';
+      const aE_E = oef.aftrekE % 10;
+
+      // Voorbereid HTML-fragmenten per rij
+      let rij2, rij3, rij4, rij5, rij6, rij7;
+
+      if (oef.toonBoog) {
+        // Scenario B: aftrek direct onder H+T (rij 2), dan restT+E op rij 3, etc.
+        // Rij 6 en 7 blijven leeg.
+        // Rij 2: aftrek1 onder H+T — dikke lijn eronder + min
+        rij2 = '<tr class="deel-aftrek-onder">' +
+                 '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aT_H)) + '"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(aT_T)) + '"></td>' +
+                 '<td class="deel-cel"></td>' +
+               '</tr>';
+        // Rij 3: restT (in T) + E naar beneden
+        rij3 = '<tr>' +
+                 '<td class="deel-cel"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + (oef.restT === 0 ? '' : esc(String(oef.restT))) + '"></td>' +
+                 '<td class="deel-cel deel-dalend" data-antwoord="' + esc(String(oef.E)) + '"></td>' +
+               '</tr>';
+        // Rij 4: aftrek2 (aftrekE op E)
+        rij4 = '<tr class="deel-aftrek-onder">' +
+                 '<td class="deel-cel"></td>' +
+                 '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aE_T)) + '"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(aE_E)) + '"></td>' +
+               '</tr>';
+        // Rij 5: eindrest in E-kolom
+        rij5 = '<tr><td class="deel-cel"></td><td class="deel-cel"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(oef.restE)) + '"></td>' +
+               '</tr>';
+        // Rij 6, 7: leeg
+        rij6 = '<tr><td class="deel-cel"></td><td class="deel-cel"></td><td class="deel-cel"></td></tr>';
+        rij7 = '<tr><td class="deel-cel"></td><td class="deel-cel"></td><td class="deel-cel"></td></tr>';
+      } else {
+        // Scenario A: volledige 3 aftrek-stappen
+        // Rij 2: aftrekH onder H
+        rij2 = '<tr class="deel-aftrek-onder">' +
+                 '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aH_H)) + '"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(aH_T)) + '"></td>' +
+                 '<td class="deel-cel"></td>' +
+               '</tr>';
+        // Rij 3: restH (in H) + T dalend
+        rij3 = '<tr>' +
+                 '<td class="deel-cel" data-antwoord="' + (oef.restH === 0 ? '' : esc(String(oef.restH))) + '"></td>' +
+                 '<td class="deel-cel deel-dalend" data-antwoord="' + esc(String(oef.T)) + '"></td>' +
+                 '<td class="deel-cel"></td>' +
+               '</tr>';
+        // Rij 4: aftrekT uitgelijnd op T
+        rij4 = '<tr class="deel-aftrek-onder">' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(aT_H)) + '"></td>' +
+                 '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aT_T)) + '"></td>' +
+                 '<td class="deel-cel"></td>' +
+               '</tr>';
+        // Rij 5: restT (in T) + E dalend
+        rij5 = '<tr>' +
+                 '<td class="deel-cel"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + (oef.restT === 0 ? '' : esc(String(oef.restT))) + '"></td>' +
+                 '<td class="deel-cel deel-dalend" data-antwoord="' + esc(String(oef.E)) + '"></td>' +
+               '</tr>';
+        // Rij 6: aftrekE op E
+        rij6 = '<tr class="deel-aftrek-onder">' +
+                 '<td class="deel-cel"></td>' +
+                 '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aE_T)) + '"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(aE_E)) + '"></td>' +
+               '</tr>';
+        // Rij 7: eindrest
+        rij7 = '<tr><td class="deel-cel"></td><td class="deel-cel"></td>' +
+                 '<td class="deel-cel" data-antwoord="' + esc(String(oef.restE)) + '"></td>' +
+               '</tr>';
+      }
+
+      // Boogje boven deeltal (alleen bij scenario B)
+      const boogHTML = oef.toonBoog
+        ? '<div class="deel-boog deel-boog-HT"></div>'
+        : '';
+
+      schemaLinks = (
+        '<div class="deel-links">' +
+          boogHTML +
+          '<table class="deel-tabel">' +
+            '<thead><tr>' + hdrH + hdrT + hdrE + '</tr></thead>' +
+            '<tbody>' +
+              '<tr>' + rij1H + rij1T + rij1E + '</tr>' +
+              rij2 + rij3 + rij4 + rij5 + rij6 + rij7 +
+            '</tbody>' +
+          '</table>' +
+        '</div>'
+      );
+
+    } else {
+      // ── TE ÷ E: 2 kolommen, 5 datarijen ──
+      //   rij 1: deeltal
+      //   rij 2: aftrek1 onder T, dikke lijn ERONDER + min
+      //   rij 3: restT + E naar beneden (stippel)
+      //   rij 4: aftrek2, dikke lijn ERONDER + min
+      //   rij 5: eindrest
+      const rij1T = ingevuld ? vasteCel(oef.T) : leeg;
+      const rij1E = ingevuld ? vasteCel(oef.E) : leeg;
+
+      const aT_T = oef.aftrekT % 10;
+      const aE_T = oef.aftrekE >= 10 ? Math.floor(oef.aftrekE/10) : '';
+      const aE_E = oef.aftrekE % 10;
+
+      schemaLinks = (
+        '<div class="deel-links">' +
+          '<table class="deel-tabel">' +
+            '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
+            '<tbody>' +
+              '<tr>' + rij1T + rij1E + '</tr>' +
+              // Rij 2: aftrekT met dikke onderlijn + min
+              '<tr class="deel-aftrek-onder">' +
+                '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aT_T)) + '"></td>' +
+                '<td class="deel-cel"></td>' +
+              '</tr>' +
+              // Rij 3: restT in T + E naar beneden (dalend)
+              '<tr>' +
+                '<td class="deel-cel" data-antwoord="' + (oef.restT === 0 ? '' : esc(String(oef.restT))) + '"></td>' +
+                '<td class="deel-cel deel-dalend" data-antwoord="' + esc(String(oef.E)) + '"></td>' +
+              '</tr>' +
+              // Rij 4: aftrekE met dikke onderlijn + min
+              '<tr class="deel-aftrek-onder">' +
+                '<td class="deel-cel deel-min" data-antwoord="' + esc(String(aE_T)) + '"></td>' +
+                '<td class="deel-cel" data-antwoord="' + esc(String(aE_E)) + '"></td>' +
+              '</tr>' +
+              // Rij 5: eindrest in E
+              '<tr>' +
+                '<td class="deel-cel"></td>' +
+                '<td class="deel-cel" data-antwoord="' + esc(String(oef.restE)) + '"></td>' +
+              '</tr>' +
+            '</tbody>' +
+          '</table>' +
+        '</div>'
+      );
+    }
+
+    // Rechts: quotient-schema.
+    // TE÷E → 2 kolommen (T E), HTE÷E → 3 kolommen (H T E).
+    // Bij ingevuld staat de deler op de schrijflijn bovenaan. In de T/E-cellen
+    // (of H/T/E bij HTE) staan de cijfers van het quotient — maar alleen bij
+    // "toon oplossingen"-toggle, dus via data-antwoord.
     const schrijfInhoud = ingevuld ? delerTxt : '';
+    let quotSchemaInhoud;
+    if (isHTE) {
+      const qH = Math.floor(oef.quotiënt / 100);
+      const qT = Math.floor((oef.quotiënt % 100) / 10);
+      const qE = oef.quotiënt % 10;
+      quotSchemaInhoud =
+        '<thead><tr>' + hdrH + hdrT + hdrE + '</tr></thead>' +
+        '<tbody><tr>' +
+          antCel(qH === 0 ? '' : qH) +
+          antCel(qT === 0 && qH === 0 ? '' : qT) +
+          antCel(qE) +
+        '</tr></tbody>';
+    } else {
+      const qT = Math.floor(oef.quotiënt / 10);
+      const qE = oef.quotiënt % 10;
+      quotSchemaInhoud =
+        '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
+        '<tbody><tr>' +
+          antCel(qT === 0 ? '' : qT) +
+          antCel(qE) +
+        '</tr></tbody>';
+    }
     const quotSchema = (
       '<div class="deel-rechts">' +
         '<div class="deel-schrijflijn"><span class="deel-deler-val">' + schrijfInhoud + '</span></div>' +
-        '<table class="deel-tabel">' +
-          '<thead><tr>' + hdrT + hdrE + '</tr></thead>' +
-          '<tbody><tr>' + leeg + leeg + '</tr></tbody>' +
-        '</table>' +
+        '<table class="deel-tabel">' + quotSchemaInhoud + '</table>' +
       '</div>'
     );
 
     return (
-      '<div class="deel-oefening">' +
+      '<div class="deel-oefening' + (isHTE ? ' deel-hte' : '') + '">' +
         '<button class="btn-del-oef" onclick="App.verwijderOefening(\'' + blok.id + '\',' + idx + ')" title="Verwijder">&#x2715;</button>' +
         vraagHTML +
         '<div class="deel-schema-wrap">' +
-          schema +
+          schemaLinks +
           quotSchema +
         '</div>' +
       '</div>'
