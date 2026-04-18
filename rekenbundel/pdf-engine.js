@@ -1464,8 +1464,13 @@ function kommavakLeeg(x, y2, bg) {
     const _g2E_d = Math.floor(_g2t/10);
     // Onthoud bij optellen in de E-kolom: als t1+t2 >= 10, carry van t naar E
     const _onthoudE_komma = _isPlus && (_g1t_d + _g2t_d >= 10) ? 1 : 0;
+    // Onthoud bij optellen in de T-kolom: als E1+E2+onthoudE >= 10, carry van E naar T
+    const _onthoudT_komma = _isPlus && (_g1E_d + _g2E_d + _onthoudE_komma >= 10) ? 1 : 0;
     // Lenen bij aftrekken in t-kolom: als t1 < t2, leen van E
     const _leenE_komma = !_isPlus && (_g1t_d < _g2t_d) ? 1 : 0;
+    // Lenen bij aftrekken in E-kolom: als (E1 - leenE) < E2, leen van T
+    const _g1E_eff  = _g1E_d - _leenE_komma;
+    const _leenT_komma = !_isPlus && (_g1E_eff < _g2E_d) ? 1 : 0;
 
     // Antwoord-cijfers
     const _restE = Math.floor(_rest/10);
@@ -1484,11 +1489,15 @@ const onthoudH = c;
     onthoudCel(schemaX+2*c,    kW);
     onthoudCel(schemaX+2*c+kW, c);
 
-    // Onthoud-cijfer in E-kolom bij optellen (1), of "10" bij aftrekken/lenen van E
+    // Onthoud-cijfers in E-kolom (carry van t) en T-kolom (carry van E)
     if (_metAntwoorden) {
       if (_onthoudE_komma) {
         doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(0,100,0);
         doc.text('1', schemaX + c + c/2, sy + c + c - 2.5, { align: 'center' });
+      }
+      if (_onthoudT_komma) {
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(0,100,0);
+        doc.text('1', schemaX + c/2, sy + c + c - 2.5, { align: 'center' });
       }
       // (Aftrekken-lenen in PDF laten we voorlopig leeg voor de komma-variant)
     }
