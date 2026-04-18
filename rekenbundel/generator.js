@@ -94,6 +94,55 @@ const Generator = (() => {
     else if (isAanvullen)   oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
     else if (isCompenseren) oefeningen = module.genereer({ aantalOefeningen, oefeningstypes });
     else if (isTransformeren) oefeningen = module.genereer({ niveau, oefeningstypes, aantalOefeningen });
+    else if (bewerking === 'aftrekken' && niveau >= 10000 && brug !== 'zonder'
+             && (
+                  // Case A: expliciete mix van DH-HT/D-HT met andere types
+                  (isDhHtType && oefeningstypes.some(t => t !== 'DH-HT' && t !== 'D-HT'))
+                  // Case B: 'Gemengd' chip geselecteerd → alle 4 types uit beide modules
+                  || oefeningstypes.includes('Gemengd')
+                )) {
+      // Bij aftrekken tot 10.000 met brug + gemengde types (expliciet of via
+      // "Gemengd" chip): genereer apart uit AftrekkenTot10000BrugHt (voor
+      // DH-HT/D-HT) en AftrekkenTot10000BrugAftrekker (voor DH-H/DH-DH),
+      // dan mengen.
+      const heeftGemengdString = oefeningstypes.includes('Gemengd');
+      let dhHtTypes, andereTypes;
+      if (heeftGemengdString) {
+        // "Gemengd" chip: gebruik de 4 vaste types van dit niveau
+        dhHtTypes   = ['DH-HT', 'D-HT'];
+        andereTypes = ['DH-H',  'DH-DH'];
+      } else {
+        dhHtTypes   = oefeningstypes.filter(t => t === 'DH-HT' || t === 'D-HT');
+        andereTypes = oefeningstypes.filter(t => t !== 'DH-HT' && t !== 'D-HT');
+      }
+
+      // Verdeel aantal evenredig over beide groepen op basis van aantal types
+      const totaalTypes = Math.max(1, dhHtTypes.length + andereTypes.length);
+      const aantalDhHt   = dhHtTypes.length === 0 ? 0 :
+                           Math.max(1, Math.round(aantalOefeningen * dhHtTypes.length / totaalTypes));
+      const aantalAndere = Math.max(0, aantalOefeningen - aantalDhHt);
+
+      const bufDhHt = (dhHtTypes.length > 0)
+        ? (AftrekkenTot10000BrugHt.genereer({
+            niveau, oefeningstypes: dhHtTypes, brug: brugVoorModule,
+            aantalOefeningen: aantalDhHt * 2,
+          }) || [])
+        : [];
+      const bufAndere = (andereTypes.length > 0)
+        ? (AftrekkenTot10000BrugAftrekker.genereer({
+            niveau, oefeningstypes: andereTypes, brug: brugVoorModule,
+            aantalOefeningen: aantalAndere * 2,
+          }) || [])
+        : [];
+
+      const alleOef = [...bufDhHt.slice(0, aantalDhHt), ...bufAndere.slice(0, aantalAndere)];
+      // Shuffle
+      for (let i = alleOef.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [alleOef[i], alleOef[j]] = [alleOef[j], alleOef[i]];
+      }
+      oefeningen = alleOef;
+    }
     else                    oefeningen = module.genereer({ niveau, oefeningstypes, brug: brugVoorModule, aantalOefeningen });
     const wilGroot = oefeningstypes?.some(t => t.includes('Groot'));
     if (oefeningen.length < 2 && !wilGroot) return null;
