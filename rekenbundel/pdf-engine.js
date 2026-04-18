@@ -1145,7 +1145,33 @@ doc.setTextColor(30, 30, 30);
             doc.setLineWidth(1.2); doc.setDrawColor(30, 30, 30);
             doc.line(cx, cy, cx + c, cy);
             // Antwoordcijfer centraal
-            const antStr = col==='D'?(oef.antD||''):col==='H'?(oef.antH||''):col==='T'?(oef.antT||''):(oef.antE||'');
+            // Bij vermenigvuldigen zélf berekenen (module-velden zijn voor × onbetrouwbaar).
+            // Bepaal dan ook per kolom of we een voorloopnul moeten verbergen.
+            const _opStrA = String(oef.operator||'');
+            const _isVermA = _opStrA === '×' || _opStrA === '*' || _opStrA === 'x';
+            let _antE_P, _antT_P, _antH_P, _antD_P;
+            if (_isVermA) {
+              const _prodA = (Number(oef.g1)||0) * (Number(oef.g2)||0);
+              _antE_P = String(_prodA % 10);
+              _antT_P = String(Math.floor((_prodA/10)%10));
+              _antH_P = String(Math.floor((_prodA/100)%10));
+              _antD_P = Math.floor(_prodA/1000) ? String(Math.floor(_prodA/1000)) : '';
+            } else {
+              _antE_P = String(oef.antE||''); _antT_P = String(oef.antT||'');
+              _antH_P = String(oef.antH||''); _antD_P = String(oef.antD||'');
+            }
+            // Voorloopnul-filter op het antwoord
+            const _antNum_P = Number(String(_antD_P||'') + String(_antH_P||'0') + String(_antT_P||'0') + String(_antE_P||'0')) || 0;
+            const _hoog_P = _antNum_P >= 1000 ? 'D' : _antNum_P >= 100 ? 'H' : _antNum_P >= 10 ? 'T' : 'E';
+            const _rang_P = { E:0, T:1, H:2, D:3 };
+            const _mag_P  = _rang_P[col] <= _rang_P[_hoog_P];
+            let antStr = '';
+            if (_mag_P) {
+              if      (col==='E') antStr = _antE_P;
+              else if (col==='T') antStr = _antT_P;
+              else if (col==='H') antStr = _antH_P;
+              else /* col==='D' */ antStr = _antD_P;
+            }
             if (antStr) {
               doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(0,100,0);
               doc.text(antStr, cx + c/2, cy + c - 2, { align: 'center' });
@@ -1164,9 +1190,17 @@ doc.setTextColor(30, 30, 30);
           doc.setFillColor(253, 253, 253);
           doc.rect(cx, cy, c, c, 'FD');
           if (ingevuld) {
+            // Bepaal de hoogste kolom die bij het getal hoort, zodat we
+            // voorloopnullen niet tonen (bv. bij "53" mag er geen 0 in H).
+            const _gNum = ri === 2 ? (Number(oef.g1) || 0) : (Number(oef.g2) || 0);
+            const _hoogKol = _gNum >= 1000 ? 'D' : _gNum >= 100 ? 'H' : _gNum >= 10 ? 'T' : 'E';
+            const _rang = { E:0, T:1, H:2, D:3 };
+            const _mag  = _rang[col] <= _rang[_hoogKol];
             let txt = '';
-            if (ri === 2) txt = col==='D'?(oef.D1||''):col==='H'?(oef.H1||''):col==='T'?(oef.T1||''):(oef.E1||'');
-            else          txt = col==='D'?(oef.D2||''):col==='H'?(oef.H2||''):col==='T'?(oef.T2||''):(oef.E2||'');
+            if (_mag) {
+              if (ri === 2) txt = col==='D'?(oef.D1||''):col==='H'?(oef.H1||''):col==='T'?(oef.T1||''):(oef.E1||'');
+              else          txt = col==='D'?(oef.D2||''):col==='H'?(oef.H2||''):col==='T'?(oef.T2||''):(oef.E2||'');
+            }
             if (txt) {
               doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(30, 30, 30);
               doc.text(txt, cx + c / 2, cy + c - 2, { align: 'center' });
