@@ -472,9 +472,45 @@ var RekentaalPdfRenderer = (() => {
       );
 
       // Bewerkingslijn: altijd van BEW_X tot BEW_EIND
-      doc.setDrawColor(0, 0, 0);
+      doc.setDrawColor(layout.metAntwoorden ? 0 : 0, layout.metAntwoorden ? 130 : 0, layout.metAntwoorden ? 0 : 0);
       doc.setLineWidth(0.5);
       doc.line(BEW_X, cy + 1, BEW_EIND, cy + 1);
+
+      // Bij oplossingssleutel: toon de bewerking op de lijn
+      if (layout.metAntwoorden) {
+        var rtA = String(oef.a !== undefined ? oef.a : (oef.P !== undefined ? oef.P : ''));
+        var rtB = String(oef.b !== undefined ? oef.b : (oef.Q !== undefined ? oef.Q : ''));
+        var rtAnt = String(oef.antwoord !== undefined ? oef.antwoord : '');
+        var rtBew = oef.bewerking || blok.bewerking || '';
+        var rtTeken = '';
+        if (rtBew === 'optellen' || rtBew === '+') rtTeken = '+';
+        else if (rtBew === 'aftrekken' || rtBew === '-') rtTeken = '−';
+        else if (rtBew === 'vermenigvuldigen') rtTeken = '×';
+        else if (rtBew === 'delen') rtTeken = '÷';
+        // Dubbel/helft/kwart: hardcoded
+        var rtTmplId = oef.templateId || oef.id || '';
+        if (!rtTeken && rtTmplId) {
+          if (rtTmplId === 'dhk1' || rtTmplId === 'dhk2') { rtTeken = '×'; rtB = '2'; }
+          else if (rtTmplId === 'dhk3' || rtTmplId === 'dhk4') { rtTeken = '÷'; rtB = '2'; }
+          else if (rtTmplId === 'dhk5') { rtTeken = '÷'; rtB = '4'; }
+        }
+        // Fallback: afleiden
+        if (!rtTeken && rtA && rtB && rtAnt) {
+          if (Number(rtA) + Number(rtB) === Number(rtAnt)) rtTeken = '+';
+          else if (Number(rtA) - Number(rtB) === Number(rtAnt)) rtTeken = '−';
+          else if (Number(rtA) * Number(rtB) === Number(rtAnt)) rtTeken = '×';
+          else if (Math.round(Number(rtA) / Number(rtB)) === Number(rtAnt)) rtTeken = '÷';
+        }
+        if (rtTeken && rtA && rtB && rtAnt) {
+          var bewStr = rtA + ' ' + rtTeken + ' ' + rtB + ' = ' + rtAnt;
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(10);
+          doc.setTextColor(0, 130, 0);
+          doc.text(bewStr, BEW_X + 2, cy - 1);
+          doc.setTextColor(0, 0, 0);
+          doc.setFont('helvetica', 'normal');
+        }
+      }
 
       y += RIJ_H;
     });
