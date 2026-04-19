@@ -24,6 +24,44 @@ const App = (() => {
   function toonBewerking(bewerking, tabEl) {
     actieveBewerking = bewerking;
 
+    // Reset alle keuzes bij tab wissel
+    // 0. Alle radio-chips in brug-sub en brug-hoofd weer zichtbaar maken
+    //    (sommige kunnen verborgen zijn geweest door compenseren/transformeren)
+    ['brug-hoofd', 'brug-sub'].forEach(naam => {
+      document.querySelectorAll(`[name="${naam}"]`).forEach(r => {
+        const chip = r.closest('.radio-chip');
+        if (chip) chip.style.display = '';
+      });
+    });
+    // Brug-sub-rij ook weer op standaard (wordt later correct gezet door _updateBrugSubUI)
+    const rijSub = document.getElementById('rij-brug-sub');
+    if (rijSub) rijSub.style.display = '';
+    // 1. Hulpmiddelen
+    document.querySelectorAll('[name="hulpmiddelen"]').forEach(cb => {
+      cb.checked = false;
+      cb.closest('.vink-chip')?.classList.remove('geselecteerd');
+      const vb = cb.closest('.vink-chip')?.querySelector('.vink-box');
+      if (vb) vb.textContent = '';
+    });
+    // 2. Niveau → reset naar 20 (laagste)
+    document.querySelectorAll('[name="niveau"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === '20') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+    // 3. Brug → reset naar 'zonder'
+    document.querySelectorAll('[name="brug-hoofd"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === 'zonder') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+    // 4. Splitspositie → reset naar 'aftrekker'
+    document.querySelectorAll('[name="splitspositie"]').forEach(r => {
+      const chip = r.closest('.radio-chip');
+      if (r.value === 'aftrekker') { r.checked = true; chip?.classList.add('geselecteerd'); }
+      else { r.checked = false; chip?.classList.remove('geselecteerd'); }
+    });
+
     document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
     tabEl.classList.add('active');
 
@@ -39,6 +77,7 @@ const App = (() => {
     const isRekentaal    = bewerking === 'rekentaal';
     const isGemengd      = bewerking === 'gemengd';
     const isKomma        = bewerking === 'komma';
+    const isSchatten     = bewerking === 'schatten';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
@@ -49,7 +88,8 @@ const App = (() => {
     const tabCijferen     = document.getElementById('tab-cijferen');
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
     const tabRekentaal    = document.getElementById('tab-rekentaal');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma) ? 'block' : 'none';
+    const tabSchatten     = document.getElementById('tab-schatten');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten) ? 'block' : 'none';
     if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
     if (tabKomma)        tabKomma.style.display        = isKomma         ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
@@ -57,6 +97,9 @@ const App = (() => {
     if (tabCijferen)     tabCijferen.style.display     = isCijferen      ? 'block' : 'none';
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
     if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
+    if (tabSchatten)     tabSchatten.style.display     = isSchatten      ? 'block' : 'none';
+
+    if (isSchatten) { _updateSchattenUI(); _updateSchattenAfrondenUI(); return; }
 
     if (isKomma)   { return; }
     if (isGemengd) { _updateGemengdTypesUI(); return; }
@@ -117,6 +160,14 @@ const App = (() => {
     if (kaartNiveau) kaartNiveau.style.display = (isHerken || isSplitsingen) ? 'none' : 'block';
 
     _updateHulpmiddelenUI(isHerken || isSplitsingen ? 'zonder' : _getBrugWaarde());
+    _updateStrategieUI();
+    // Zorg dat splitspositie rij correct getoond/verborgen wordt na bewerking wissel
+    const rijPosB = document.getElementById('rij-splitspositie');
+    if (rijPosB) {
+      const brugNu = _getBrugWaarde();
+      const toonRijPos = (brugNu !== 'zonder') && (bewerking === 'aftrekken');
+      rijPosB.style.display = toonRijPos ? 'block' : 'none';
+    }
 
     // Types laden
     const niveau = isHerken ? 100
@@ -132,13 +183,18 @@ const App = (() => {
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     const hoofd  = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
     if (hoofd === 'zonder') return 'zonder';
+    // Tot 10.000: geen sub-keuze, enkel met/zonder
+    if (niveau >= 10000) {
+      if (hoofd === 'met' || hoofd === 'beide') return 'naar-duizendtal';
+      return 'zonder';
+    }
     // Tot 1000: subkeuze bepaalt de exacte brugwaarde
     if (niveau >= 1000) {
       const sub = document.querySelector('[name="brug-sub"]:checked')?.value || 'naar-tiental';
-      if (hoofd === 'met')  return sub;          // naar-tiental / naar-honderdtal / beide
-      if (hoofd === 'beide') return 'gemengd';   // zonder én met brug door elkaar
+      if (hoofd === 'met')   return sub;
+      if (hoofd === 'beide') return 'gemengd';
     }
-    // Tot 100: met brug = 'met', beide = 'gemengd'
+    // Tot 100
     if (hoofd === 'met')   return 'met';
     if (hoofd === 'beide') return 'gemengd';
     return 'zonder';
@@ -157,9 +213,10 @@ const App = (() => {
       r.closest('.radio-chip')?.classList.remove('geselecteerd'));
     el.classList.add('geselecteerd');
     _updateBrugSubUI();
+    _updateStrategieUI();
     const brug = _syncBrugInput();
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    _updateTypesUI(niveau, brug);
+    _updateTypesUI(niveau, brug, true);
     _updateHulpmiddelenUI(brug);
   }
 
@@ -169,8 +226,42 @@ const App = (() => {
     el.classList.add('geselecteerd');
     const brug = _syncBrugInput();
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    _updateTypesUI(niveau, brug);
+    _updateTypesUI(niveau, brug, true);
     _updateHulpmiddelenUI(brug);
+  }
+
+  function selecteerStrategie(waarde, el) {
+    document.querySelectorAll('[name="strategie"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    el.classList.add('geselecteerd');
+
+    // Sync splitspositie met strategie
+    const splitsRadio = document.querySelector(`[name="splitspositie"][value="${waarde}"]`);
+    if (splitsRadio) {
+      document.querySelectorAll('[name="splitspositie"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      splitsRadio.checked = true;
+      splitsRadio.closest('.radio-chip')?.classList.add('geselecteerd');
+    }
+
+    const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const brug = _syncBrugInput();
+    _updateTypesUI(niveau, brug);
+  }
+
+  function _getStrategie() {
+    return document.querySelector('[name="strategie"]:checked')?.value || 'aftrekker';
+  }
+
+  function _updateStrategieUI() {
+    const niveau    = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
+    const hoofd     = document.querySelector('[name="brug-hoofd"]:checked')?.value || 'zonder';
+    const bewerking = actieveBewerking;
+    const rijStr    = document.getElementById('rij-strategie');
+    if (!rijStr) return;
+    // Strategie-keuze enkel bij aftrekken + niveau 10000 + met brug
+    const toon = bewerking === 'aftrekken' && niveau >= 10000 && hoofd === 'met';
+    rijStr.style.display = toon ? 'block' : 'none';
   }
 
   // Toont/verbergt de subkeuze-rij + past beschikbare sub-opties aan bij compenseren
@@ -180,8 +271,8 @@ const App = (() => {
     const rijSub = document.getElementById('rij-brug-sub');
     if (!rijSub) return;
 
-    // Subkeuze enkel bij tot 1000 + met brug (niet bij 'beide' = gemengd)
-    const toonSub = niveau >= 1000 && hoofd === 'met';
+    // Subkeuze enkel bij tot 1000 + met brug (niet bij 'beide' = gemengd, niet bij 10000)
+    const toonSub = niveau >= 1000 && niveau < 10000 && hoofd === 'met';
     rijSub.style.display = toonSub ? 'block' : 'none';
 
     if (toonSub && compenseren) {
@@ -217,8 +308,9 @@ const App = (() => {
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
     if (naam === 'niveau') {
-      _updateTypesUI(parseInt(waarde), null);
+      _updateTypesUI(parseInt(waarde), null, true);
       _updateBrugSubUI();
+      _updateStrategieUI();
       const brug = _syncBrugInput();
       _updateHulpmiddelenUI(brug);
     }
@@ -241,9 +333,19 @@ const App = (() => {
     // Informatietekst tonen/verbergen
     if (infoEl) {
       if (gemengdActief) {
-        const gemengdTypes = actieveBewerking === 'aftrekken'
-          ? 'E-E, T-E, T-TE, TE-E, TE-T en TE-TE'
-          : 'E+E, T+E en TE+E';
+        // Welk niveau is actief? (nodig voor juiste tekst)
+        const niveauEl = document.querySelector('[name="niveau"]:checked');
+        const huidigNiveau = niveauEl ? parseInt(niveauEl.value) : 100;
+        const huidigBrug = _getBrugWaarde();
+
+        let gemengdTypes;
+        if (actieveBewerking === 'aftrekken' && huidigNiveau >= 10000 && huidigBrug !== 'zonder') {
+          gemengdTypes = 'DH-H, DH-DH, DH-HT en D-HT';
+        } else if (actieveBewerking === 'aftrekken') {
+          gemengdTypes = 'E-E, T-E, T-TE, TE-E, TE-T en TE-TE';
+        } else {
+          gemengdTypes = 'E+E, T+E en TE+E';
+        }
         infoEl.textContent = `ℹ️ Gemengd bevat: ${gemengdTypes} — Maak eerst 10 zit hier niet bij.`;
         infoEl.style.display = 'block';
       } else {
@@ -258,7 +360,14 @@ const App = (() => {
     if (!zinInp) return;
     const geselecteerd = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const alleenEerst10 = geselecteerd.length === 1 && geselecteerd[0] === 'Maak eerst 10';
-    if (alleenEerst10) {
+    const hulpmiddelen = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    if (hulpmiddelen.includes('aanvullen')) {
+      zinInp.value = 'Los op door aan te vullen.';
+    } else if (hulpmiddelen.includes('compenseren')) {
+      zinInp.value = 'Reken uit door te compenseren.';
+    } else if (hulpmiddelen.includes('transformeren')) {
+      zinInp.value = 'Reken uit door te transformeren.';
+    } else if (alleenEerst10) {
       zinInp.value = 'Onderstreep eerst wat samen 10 is en reken dan uit.';
     } else if (actieveBewerking === 'aftrekken') {
       zinInp.value = 'Trek af.';
@@ -288,8 +397,17 @@ const App = (() => {
     infoEl.id = 'types-info-tekst';
     infoEl.style.cssText = 'font-size:12px;color:#888;margin-top:6px;display:none;width:100%;';
 
+    const TYPE_LABELS = {
+      'aanvullen': 'Aanvullen',
+      'DH-H':  'DH − H',
+      'DH-DH': 'DH − DH',
+      'H+H':   'H + H',
+      'HT+HT': 'HT + HT',
+    };
+
     beschikbaar.forEach((type) => {
       const wasGeselecteerd = vorigeSelectie.includes(type);
+      const zichtbaarLabel  = TYPE_LABELS[type] || type;
 
       const label = document.createElement('label');
       label.className = 'vink-chip' + (wasGeselecteerd ? ' geselecteerd' : '');
@@ -297,7 +415,7 @@ const App = (() => {
       label.innerHTML = `
         <span class="vink-box">${wasGeselecteerd ? '✓' : ''}</span>
         <input type="checkbox" name="types" value="${type}" ${wasGeselecteerd ? 'checked' : ''} style="display:none">
-        <span>${type}</span>`;
+        <span>${zichtbaarLabel}</span>`;
 
       label.onclick = (e) => {
         e.preventDefault();
@@ -336,10 +454,22 @@ const App = (() => {
     container.appendChild(infoEl);
     _updateGemengdInfo(container, infoEl);
 
+    // Auto-aanvinken als er maar 1 type is
+    const alleChips = [...container.querySelectorAll('.vink-chip')];
+    if (alleChips.length === 1) {
+      const enigeChip = alleChips[0];
+      enigeChip.classList.add('geselecteerd');
+      enigeChip.querySelector('input').checked = true;
+      enigeChip.querySelector('.vink-box').textContent = '✓';
+    }
+
     // Brugkaart verbergen voor niveau 5 en 10
     const kaartBrug = document.getElementById('kaart-brug');
     if (kaartBrug) kaartBrug.style.display = (niveau <= 10) ? 'none' : 'block';
     if (niveau <= 10) _updateHulpmiddelenUI('zonder');
+    // Tot 10.000: geen brug-subkeuze (naar-tiental/naar-honderdtal), wel zonder/met
+    const kaartBrugSub = document.getElementById('kaart-brug-sub');
+    if (kaartBrugSub) kaartBrugSub.style.display = (niveau >= 10000) ? 'none' : '';
 
     // Splits-kaarten updaten op basis van standaard geselecteerd type
     _updateSplitsKaarten();
@@ -389,6 +519,22 @@ const App = (() => {
         if (rijComp) rijComp.style.display = 'none';
       }
     }
+
+    // Transformeren: bij optellen én aftrekken, tot 100 of tot 1000
+    const chipTransUI = document.getElementById('chip-transformeren');
+    if (chipTransUI) {
+      const verbergTrans = niveau <= 20 || (niveau > 100 && niveau < 1000);
+      chipTransUI.style.display = verbergTrans ? 'none' : '';
+      if (verbergTrans) {
+        const cb = chipTransUI.querySelector('input');
+        if (cb) cb.checked = false;
+        chipTransUI.classList.remove('geselecteerd');
+        const vb = chipTransUI.querySelector('.vink-box');
+        if (vb) vb.textContent = '';
+        const rijTrans = document.getElementById('rij-transformeren');
+        if (rijTrans) rijTrans.style.display = 'none';
+      }
+    }
   }
 
   /* ── Hulpmiddelen UI ────────────────────────────────────── */
@@ -400,7 +546,7 @@ const App = (() => {
     if (actieveBewerking === 'splitsingen') { kaart.style.display = 'none'; return; }
 
     const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-    const isBrug = ['naar-tiental','naar-honderdtal','beide','met'].includes(brug);
+    const isBrug = ['naar-tiental','naar-honderdtal','beide','met','naar-duizendtal'].includes(brug);
     const isZonderTot1000 = brug === 'zonder' && niveau >= 1000;
     if (niveau < 20) { kaart.style.display = 'none'; return; }
 
@@ -421,6 +567,8 @@ const App = (() => {
       if (rijAanv) rijAanv.style.display = 'none';
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = 'none';
+      const rijTrans = document.getElementById('rij-transformeren');
+      if (rijTrans) rijTrans.style.display = 'none';
       const rijLijnen = document.getElementById('rij-schrijflijnen-aantal');
       if (rijLijnen) rijLijnen.style.display = 'none';
     }
@@ -430,13 +578,19 @@ const App = (() => {
     const chipLijnen    = document.getElementById('chip-schrijflijnen');
     const chipAanvullen = document.getElementById('chip-aanvullen');
     const chipComp      = document.getElementById('chip-compenseren');
+    const chipTrans     = document.getElementById('chip-transformeren');
 
     if (isZonderTot1000) {
-      // Splitsbeen en schrijflijnen beschikbaar, rest niet
-      if (chipSplits)    chipSplits.style.display    = '';
+      // Zonder brug: splitsbeen enkel tot 1000, niet bij hogere niveaus
+      const isZonderBovén1000 = brug === 'zonder' && niveau > 1000;
+      if (chipSplits)    { 
+        if (isZonderBovén1000) { chipSplits.style.display = 'none'; _resetChip(chipSplits, 'rij-splitspositie'); }
+        else chipSplits.style.display = '';
+      }
       if (chipLijnen)    chipLijnen.style.display    = '';
       if (chipAanvullen) { chipAanvullen.style.display = 'none'; _resetChip(chipAanvullen, 'rij-aanvullen'); }
       if (chipComp)      { chipComp.style.display      = 'none'; _resetChip(chipComp, 'rij-compenseren'); }
+      if (chipTrans)     { chipTrans.style.display      = 'none'; _resetChip(chipTrans, 'rij-transformeren'); }
     } else if (isBrug) {
       // Alle chips zichtbaar (niveau-filter doet de rest)
       if (chipSplits) chipSplits.style.display = '';
@@ -466,9 +620,6 @@ const App = (() => {
     const types  = [...document.querySelectorAll('[name="types"]:checked')].map(c => c.value);
     const aantal = parseInt(document.getElementById('inp-aantal').value);
     const alleenEerst10 = types.length === 1 && types[0] === 'Maak eerst 10';
-    const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
-                   (alleenEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
-                   actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
 
     if (types.length === 0) {
       toonToast('⚠️ Kies minstens één oefentype!', '#E74C3C');
@@ -477,12 +628,28 @@ const App = (() => {
 
     const isHerken      = actieveBewerking === 'herken-brug';
     const isSplitsingen = actieveBewerking === 'splitsingen';
-    const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value);
+    const hulpmiddelen        = [...document.querySelectorAll('[name="hulpmiddelen"]:checked')].map(c => c.value)
+                          .filter(h => {
+                            // Splitsbeen niet toestaan bij zonder brug + niveau >= 10000
+                            if (h === 'splitsbeen' && brug === 'zonder' && niveau >= 10000) return false;
+                            return true;
+                          });
+    const hulpmiddelenZin = hulpmiddelen.includes('aanvullen')     ? 'Los op door aan te vullen.' :
+                            hulpmiddelen.includes('compenseren')   ? 'Reken uit door te compenseren.' :
+                            hulpmiddelen.includes('transformeren') ? 'Reken uit door te transformeren.' : null;
+    const zin    = document.getElementById('inp-opdrachtzin').value.trim() ||
+                   hulpmiddelenZin ||
+                   (alleenEerst10 ? 'Onderstreep eerst wat samen 10 is en reken dan uit.' :
+                   actieveBewerking === 'aftrekken' ? 'Trek af.' : 'Reken vlug uit.');
     const splitspositie       = document.querySelector('[name="splitspositie"]:checked')?.value || 'aftrekker';
     const aanvullenVariant    = document.querySelector('[name="aanvullen-variant"]:checked')?.value || 'zonder-schema';
     const compenserenVariant  = document.querySelector('[name="compenseren-variant"]:checked')?.value || 'met-tekens';
+    const transformerenVariant = document.querySelector('[name="transformeren-variant"]:checked')?.value || 'schema';
     const schrijflijnenAantal = parseInt(document.querySelector('[name="schrijflijnen-aantal"]:checked')?.value || '2');
-    const metVoorbeeld        = document.getElementById('cb-metvoorbeeld')?.checked || false;
+    const isTransformeren     = hulpmiddelen.includes('transformeren');
+    const metVoorbeeld        = isTransformeren
+      ? (document.getElementById('cb-trans-voorbeeld')?.checked || false)
+      : (document.getElementById('cb-metvoorbeeld')?.checked || false);
     const splitsVariant       = document.querySelector('[name="splits-variant"]:checked')?.value || 'afwisselend';
     const splitsConfig  = isSplitsingen ? _getSplitsConfig() : null;
     const wilGroot = types.some(t => t.includes('Groot'));
@@ -517,9 +684,11 @@ const App = (() => {
       splitspositie,
       aanvullenVariant,
       compenserenVariant,
+      transformerenVariant,
       schrijflijnenAantal,
       metVoorbeeld,
       splitsVariant,
+      strategie: _getStrategie(),
     });
 
     if (!blok) {
@@ -584,7 +753,19 @@ const App = (() => {
 
     if (waarde === 'splitsbeen') {
       const rijPos = document.getElementById('rij-splitspositie');
-      if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken') ? 'block' : 'none';
+      const heeftAndereHulp = ['compenseren','transformeren','aanvullen'].some(h =>
+        document.querySelector(`[name="hulpmiddelen"][value="${h}"]`)?.checked);
+      if (rijPos) rijPos.style.display = (!was && actieveBewerking === 'aftrekken' && !heeftAndereHulp) ? 'block' : 'none';
+    }
+    // Als comp/trans/aanvullen uitgezet wordt: check of splitsbeen nu zichtbaar moet worden
+    if (['compenseren','transformeren','aanvullen'].includes(waarde) && was) {
+      const splitsbeenActief = document.querySelector('[name="hulpmiddelen"][value="splitsbeen"]')?.checked;
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && splitsbeenActief && actieveBewerking === 'aftrekken') {
+        const nogAndereHulp = ['compenseren','transformeren','aanvullen'].filter(h => h !== waarde)
+          .some(h => document.querySelector(`[name="hulpmiddelen"][value="${h}"]`)?.checked);
+        rijPos.style.display = nogAndereHulp ? 'none' : 'block';
+      }
     }
     if (waarde === 'schrijflijnen') {
       const rijAantal = document.getElementById('rij-schrijflijnen-aantal');
@@ -593,17 +774,29 @@ const App = (() => {
     if (waarde === 'aanvullen') {
       const rijAanvullen = document.getElementById('rij-aanvullen');
       if (rijAanvullen) rijAanvullen.style.display = !was ? 'block' : 'none';
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-      _updateTypesUI(niveau, _getBrugWaarde());
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
     }
     if (waarde === 'compenseren') {
       const rijComp = document.getElementById('rij-compenseren');
       if (rijComp) rijComp.style.display = !was ? 'block' : 'none';
-      // Pas brug-subkeuze aan en herlaad types voor compenseren-module
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
       _updateBrugSubUI(!was);
       const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 20);
-      _updateTypesUI(niveau, _getBrugWaarde());
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
     }
+    if (waarde === 'transformeren') {
+      const rijTrans = document.getElementById('rij-transformeren');
+      if (rijTrans) rijTrans.style.display = !was ? 'block' : 'none';
+      const rijPos = document.getElementById('rij-splitspositie');
+      if (rijPos && !was) rijPos.style.display = 'none';
+      const niveau = parseInt(document.querySelector('[name="niveau"]:checked')?.value || 100);
+      _updateTypesUI(niveau, _getBrugWaarde(), true);
+    }
+    _updateOpdrachtzin();
   }
 
   /* ── Splits: niveau en specifieke getallen ───────────────── */
@@ -992,7 +1185,7 @@ function _getSplitsConfig() {
     const zin    = document.getElementById('inp-opdrachtzin-inzicht').value.trim() || _defaultZinInzicht();
 
     // ── Getallenlijn ─────────────────────────────────────────
-    if (_inzichtType === 'getallenlijn') {
+    if (_inzichtType === 'getallenlijn' && _inzichtBewerking !== 'delen-verdelen') {
       const oefeningen = TafelsGetallenlijn.genereer({
         modus:            _inzichtModus,
         tafels:           _inzichtTafel,
@@ -1101,6 +1294,13 @@ function _getSplitsConfig() {
     const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
     PdfEngine.genereer(bundelData, titel);
     toonToast('📄 PDF gedownload!', '#27AE60');
+  }
+
+  function downloadSleutel() {
+    if (bundelData.length === 0) return;
+    const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
+    PdfEngine.genereer(bundelData, titel, true);
+    toonToast('🔑 Oplossingssleutel gedownload!', '#27AE60');
   }
 
   /* ── Initialisatie ───────────────────────────────────────── */
@@ -1233,18 +1433,22 @@ function _getSplitsConfig() {
     const isDeel    = waarde === 'delen';
     const isKomma   = waarde === 'komma';
     const isPlusMin = !isKeer && !isDeel && !isKomma;
+    const isAftrek  = waarde === 'aftrekken';
 
-    const kaartBereik = document.getElementById('kaart-cijfer-bereik');
-    const kaartBrug   = document.getElementById('kaart-cijfer-brug');
-    const kaartVerm   = document.getElementById('kaart-cijfer-verm');
-    const kaartDeel   = document.getElementById('kaart-cijfer-deel');
-    const kaartKomma  = document.getElementById('kaart-cijfer-komma');
+    const kaartBereik   = document.getElementById('kaart-cijfer-bereik');
+    const kaartBrug     = document.getElementById('kaart-cijfer-brug');
+    const kaartVerm     = document.getElementById('kaart-cijfer-verm');
+    const kaartDeel     = document.getElementById('kaart-cijfer-deel');
+    const kaartKomma    = document.getElementById('kaart-cijfer-komma');
+    const chipBrugNul   = document.getElementById('chip-brug-over-nul');
 
     if (kaartBereik) kaartBereik.style.display = isPlusMin ? 'block' : 'none';
     if (kaartBrug)   kaartBrug.style.display   = isPlusMin ? 'block' : 'none';
     if (kaartVerm)   kaartVerm.style.display   = isKeer    ? 'block' : 'none';
     if (kaartDeel)   kaartDeel.style.display   = isDeel    ? 'block' : 'none';
     if (kaartKomma)  kaartKomma.style.display  = isKomma   ? 'block' : 'none';
+    // "Brug over nul" enkel zichtbaar bij aftrekken
+    if (chipBrugNul) chipBrugNul.style.display = isAftrek  ? '' : 'none';
 
     const zinInp = document.getElementById('inp-opdrachtzin-cijferen');
     if (zinInp) {
@@ -1428,6 +1632,161 @@ function _getSplitsConfig() {
     bundelData.push(blok);
     Preview.render(bundelData);
     toonToast(`✅ Rekentaalblok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#7c3aed');
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     SCHATTEND REKENEN
+     ══════════════════════════════════════════════════════════════ */
+
+  let _schattenType       = 'afronden';
+  let _schattenNiveau     = 10000;
+  let _schattenBewerking  = 'optellen';
+  let _schattenAfronden   = 'H';
+
+  function selecteerSchattenType(waarde, el) {
+    _schattenType = waarde;
+    document.querySelectorAll('[name="schatten-type"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+    _updateSchattenUI();
+    const zinInp = document.getElementById('inp-opdrachtzin-schatten');
+    if (zinInp) zinInp.value = _defaultZinSchatten();
+  }
+
+  function selecteerSchattenNiveau(waarde, el) {
+    _schattenNiveau = parseInt(waarde);
+    document.querySelectorAll('[name="schatten-niveau"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+    _updateSchattenAfrondenUI();
+  }
+
+  function _updateSchattenAfrondenUI() {
+    const tot1000 = _schattenNiveau <= 1000;
+    const chipT = document.getElementById('chip-schatten-T');
+    const chipH = document.getElementById('chip-schatten-H');
+    const chipD = document.getElementById('chip-schatten-D');
+    const hint  = document.getElementById('schatten-afronden-hint');
+
+    // Tot 1000: T en H zichtbaar, D verborgen
+    // Tot 10000: H en D zichtbaar, T verborgen
+    if (chipT) chipT.style.display = tot1000 ? '' : 'none';
+    if (chipD) chipD.style.display = tot1000 ? 'none' : '';
+
+    // Als huidige keuze niet meer geldig is: reset naar H
+    if (tot1000 && _schattenAfronden === 'D') {
+      _schattenAfronden = 'H';
+      document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      if (chipH) chipH.classList.add('geselecteerd');
+    }
+    if (!tot1000 && _schattenAfronden === 'T') {
+      _schattenAfronden = 'H';
+      document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+        r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+      if (chipH) chipH.classList.add('geselecteerd');
+    }
+
+    // Hint tekst aanpassen
+    if (hint) {
+      hint.textContent = tot1000
+        ? 'Tot 1.000: afronden naar tiental (bv. 852 → 850) of honderdtal (bv. 852 → 900).'
+        : 'Tot 10.000: afronden naar honderdtal of duizendtal.';
+    }
+  }
+
+  function selecteerSchattenBewerking(waarde, el) {
+    _schattenBewerking = waarde;
+    document.querySelectorAll('[name="schatten-bewerking"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function selecteerSchattenAfronden(waarde, el) {
+    _schattenAfronden = waarde;
+    document.querySelectorAll('[name="schatten-afronden"]').forEach(r =>
+      r.closest('.radio-chip')?.classList.remove('geselecteerd'));
+    if (el) el.classList.add('geselecteerd');
+  }
+
+  function _updateSchattenUI() {
+    const isAfronden = _schattenType === 'afronden';
+    const kaartBew = document.getElementById('kaart-schatten-bewerking');
+    if (kaartBew) kaartBew.style.display = isAfronden ? 'none' : 'block';
+    // Afronden-kaart: verborgen bij type 'afronden' (beide kolommen altijd getoond)
+    const kaartAf = document.getElementById('kaart-schatten-afronden');
+    if (kaartAf) kaartAf.style.display = isAfronden ? 'none' : 'block';
+    // Pas opdrachtzin aan
+    const zinInp = document.getElementById('inp-opdrachtzin-schatten');
+    if (zinInp) zinInp.value = _defaultZinSchatten();
+    _updateSchattenAfrondenUI();
+  }
+
+  function voegSchattenBlokToe() {
+    const aantal = parseInt(document.getElementById('inp-aantal-schatten').value) || 4;
+    const zin    = document.getElementById('inp-opdrachtzin-schatten').value.trim()
+                   || _defaultZinSchatten();
+    let oefeningen = [];
+
+    if (_schattenBewerking === 'gemengd' && _schattenType !== 'afronden') {
+      const aantalOpt = Math.ceil(aantal / 2);
+      const aantalAft = aantal - aantalOpt;
+      const fnMap = {
+        'schatting-tabel':   Schatten.genereerSchattingTabel,
+        'schatting-compact': Schatten.genereerSchattingCompact,
+        'mogelijk':          Schatten.genereerMogelijk,
+      };
+      const fn = fnMap[_schattenType] || Schatten.genereerSchattingTabel;
+      const opt = fn({ niveau: _schattenNiveau, bewerking: 'optellen', afrondenNaar: _schattenAfronden, aantalOefeningen: aantalOpt });
+      const aft = fn({ niveau: _schattenNiveau, bewerking: 'aftrekken', afrondenNaar: _schattenAfronden, aantalOefeningen: aantalAft });
+      const alle = [...opt, ...aft];
+      for (let i = alle.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [alle[i], alle[j]] = [alle[j], alle[i]];
+      }
+      oefeningen = alle;
+    } else if (_schattenType === 'afronden') {
+      oefeningen = Schatten.genereerAfronden({ niveau: _schattenNiveau, aantalOefeningen: aantal });
+    } else if (_schattenType === 'schatting-tabel') {
+      oefeningen = Schatten.genereerSchattingTabel({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    } else if (_schattenType === 'schatting-compact') {
+      oefeningen = Schatten.genereerSchattingCompact({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    } else if (_schattenType === 'mogelijk') {
+      oefeningen = Schatten.genereerMogelijk({ niveau: _schattenNiveau, bewerking: _schattenBewerking, afrondenNaar: _schattenAfronden, aantalOefeningen: aantal });
+    }
+
+    if (!oefeningen || oefeningen.length === 0) {
+      toonToast('⚠️ Geen oefeningen gevonden. Pas de instellingen aan.', '#E74C3C');
+      return;
+    }
+
+    const blok = {
+      id:          `blok-schatten-${Date.now()}`,
+      bewerking:   'schatten',
+      subtype:     _schattenType,
+      niveau:      _schattenNiveau,
+      opdrachtzin: zin,
+      hulpmiddelen: [],
+      oefeningen,
+      config: {
+        type:         _schattenType,
+        niveau:       _schattenNiveau,
+        bewerking:    _schattenBewerking,
+        afrondenNaar: _schattenAfronden,
+        aantalOefeningen: aantal,
+      },
+    };
+
+    bundelData.push(blok);
+    Preview.render(bundelData);
+    toonToast(`✅ Schattingsblok toegevoegd! (${oefeningen.length} oefeningen)`, '#e8780a');
+  }
+
+  function _defaultZinSchatten() {
+    if (_schattenType === 'afronden')        return 'Rond het getal af. Schrijf in de tabel.';
+    if (_schattenType === 'mogelijk')        return 'Is het antwoord mogelijk? Controleer door schattend te rekenen.';
+    if (_schattenType === 'schatting-tabel') return 'Maak bij elke oefening een goede schatting.';
+    return 'Reken schattend uit.';
   }
 
   /* ══════════════════════════════════════════════════════════════
@@ -1645,14 +2004,14 @@ function _getSplitsConfig() {
   }
 
   return {
-    init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
+    init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
     toggleTafel, toggleTafelType, selecteerTafelMax, selecteerTafelPositie, voegTafelBlokToe,
     selecteerInzichtModus, selecteerInzichtTafel, selecteerInzichtTafelMax, selecteerInzichtMaxUitkomst, selecteerInzichtEmoji, selecteerInzichtType, selecteerInzichtBewerking, selecteerGlVariantInzicht, voegInzichtBlokToe, selecteerVerdelenType,
     selecteerGlVariant, selecteerGlModus, selecteerGlTafel, selecteerGlTafelMax, selecteerGlMaxUitkomst, selecteerGlPositie, voegGlBlokToe,
     voegBlokToe, verwijderBlok, verwijderOefening,
     voegOefeningToe, bewerkZin, slaZinOp,
-    genereerPreview, downloadPDF,
+    genereerPreview, downloadPDF, downloadSleutel,
     selecteerCijferBewerking, selecteerCijferBereik, selecteerCijferBrug,
     selecteerCijferVermType, selecteerCijferVermBrug,
     selecteerCijferDeelType, selecteerCijferDeelRest,
@@ -1662,6 +2021,8 @@ function _getSplitsConfig() {
     voegCijferenBlokToe,
     voegVraagstukBlokToe,
     voegRekentaalBlokToe,
+    selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
+    voegSchattenBlokToe,
     selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
