@@ -459,6 +459,56 @@ window.resetTimer = function(){
   document.getElementById('timer-done').style.display = 'none';
 };
 
+// ── TIMER: verslepen (muis + touch) ──────────────────────────────────────
+(function setupTimerDrag(){
+  const popup  = document.getElementById('timer-popup');
+  const handle = document.getElementById('timer-drag-handle');
+  if(!popup || !handle) return;
+
+  let dragging = false, startX = 0, startY = 0, origX = 0, origY = 0;
+
+  function pointerFrom(e){
+    if(e.touches && e.touches.length) return { x:e.touches[0].clientX, y:e.touches[0].clientY };
+    return { x:e.clientX, y:e.clientY };
+  }
+
+  function onDown(e){
+    // Niet verslepen als je op de ✕-sluitknop klikt
+    if(e.target.tagName === 'BUTTON') return;
+    dragging = true;
+    const p = pointerFrom(e);
+    startX = p.x; startY = p.y;
+    const r = popup.getBoundingClientRect();
+    origX = r.left; origY = r.top;
+    // Van right-based naar left-based zodat we vrij kunnen verslepen
+    popup.style.right = 'auto';
+    popup.style.left = origX + 'px';
+    popup.style.top  = origY + 'px';
+    e.preventDefault();
+  }
+
+  function onMove(e){
+    if(!dragging) return;
+    const p = pointerFrom(e);
+    const newX = origX + (p.x - startX);
+    const newY = origY + (p.y - startY);
+    // Binnen viewport houden
+    const maxX = window.innerWidth  - popup.offsetWidth  - 5;
+    const maxY = window.innerHeight - popup.offsetHeight - 5;
+    popup.style.left = Math.max(5, Math.min(maxX, newX)) + 'px';
+    popup.style.top  = Math.max(5, Math.min(maxY, newY)) + 'px';
+  }
+
+  function onUp(){ dragging = false; }
+
+  handle.addEventListener('mousedown',  onDown);
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup',   onUp);
+  handle.addEventListener('touchstart',  onDown, {passive:false});
+  document.addEventListener('touchmove', onMove, {passive:false});
+  document.addEventListener('touchend',  onUp);
+})();
+
 // ── INIT ──────────────────────────────────────────────────────────────────
 function init(){
   if(!graadId){
