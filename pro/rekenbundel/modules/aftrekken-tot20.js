@@ -67,7 +67,7 @@ const AftrekkenTot20 = (() => {
       let a, b;
 
       switch (type) {
-             case 'E-E': {
+        case 'E-E': {
   a = rand(1, Math.min(9, max));
 
   // Af en toe eens -0 bij tot 5 en tot 10, maar niet te vaak
