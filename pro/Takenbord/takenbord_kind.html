@@ -2376,10 +2376,27 @@ function renderEmojiPicker(){
     });
     wrap.appendChild(btn);
   });
+  // Sync ook de grote emoji-knop zodat de gekozen emoji meteen zichtbaar is
+  const kbBtn = document.getElementById('kb-emoji-btn');
+  if(kbBtn) kbBtn.textContent = selectedEmoji;
 }
 
 function addCustomTask(){
-  const input = document.getElementById('customTaskInput');
+  // Zoek het zichtbare invoerveld (er zijn twee mogelijke id's door UI-herontwerp)
+  const candidates = ['newTaskInput', 'customTaskInput'];
+  let input = null;
+  for(const id of candidates){
+    const el = document.getElementById(id);
+    if(el && el.offsetParent !== null){ input = el; break; }
+  }
+  // Fallback: als geen van beide zichtbaar is, pak gewoon de eerste die bestaat
+  if(!input){
+    for(const id of candidates){
+      const el = document.getElementById(id);
+      if(el){ input = el; break; }
+    }
+  }
+  if(!input) return;
   const label = input.value.trim();
   if(!label){
     alert('Typ eerst een taaknaam.');
@@ -2398,8 +2415,16 @@ function addCustomTask(){
   });
   saveState();
   input.value = '';
+  // Reset emoji-keuze naar ⭐ zodat de volgende taak weer fris begint
+  selectedEmoji = '⭐';
+  renderEmojiPicker();
   teacherSelectedTasks = new Set([...teacherSelectedTasks, state.customTasks[state.customTasks.length - 1].id]);
-  renderTeacherModal();
+  // Render de juiste UI: nieuwe kindbord-wizard heeft voorrang als die actief is
+  if(typeof kbRenderTaken === 'function' && document.getElementById('kb-paneel-taken')){
+    kbRenderTaken();
+  } else {
+    renderTeacherModal();
+  }
 }
 
 function selectAllPupils(){
