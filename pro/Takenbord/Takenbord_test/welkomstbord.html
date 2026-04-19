@@ -155,6 +155,24 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
 .graad-stap-compact-nr { flex-shrink:0; width:20px; height:20px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-weight:800; font-size:11px; display:flex; align-items:center; justify-content:center; }
 .graad-stap-compact strong { color:#1e1b4b; }
 
+/* ── WAARSCHUWING: onvoldoende klasborden ── */
+.graad-warn { background:#fffbeb; border:2px solid #fde68a; border-radius:12px; padding:11px 13px; margin-bottom:10px; }
+.graad-warn-titel { display:flex; align-items:flex-start; gap:8px; font-size:13px; font-weight:800; color:#92400e; line-height:1.4; margin-bottom:6px; }
+.graad-warn-titel-icon { flex-shrink:0; font-size:15px; }
+.graad-warn-tekst { font-size:12px; color:#78350f; line-height:1.5; margin-bottom:9px; }
+.graad-warn-tekst strong { color:#92400e; }
+.graad-warn-telling { display:inline-block; background:#fef3c7; color:#92400e; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:800; margin-right:4px; }
+.graad-warn-btn { width:100%; background:linear-gradient(135deg,#fb923c,#f97316); color:#fff; border:none; border-radius:9px; padding:9px 12px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; }
+.graad-warn-btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(249,115,22,.25); }
+
+/* Highlight-pulse wanneer we naar klasbord scrollen */
+@keyframes graadHighlightPulse {
+  0%, 100% { box-shadow:0 0 0 0 rgba(249,115,22,0); }
+  20%, 80% { box-shadow:0 0 0 5px rgba(249,115,22,.5); }
+  50% { box-shadow:0 0 0 10px rgba(249,115,22,.25); }
+}
+.wb-sectie.graad-highlight { animation:graadHighlightPulse 1.8s ease-out; border-color:#fb923c !important; }
+
 .wb-sectie-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1.5px solid rgba(0,0,0,.06); }
 .wb-hdr-klas { background:#fff7ed; border-radius:18px 18px 0 0; }
 .wb-hdr-kind { background:#f0e7ff; border-radius:18px 18px 0 0; }
@@ -393,11 +411,14 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
             </div>
           </div>
 
+          <!-- Dynamische waarschuwing als er nog te weinig klasborden zijn -->
+          <div id="graad-warn-container"></div>
+
           <!-- Compacte stappen -->
           <div class="graad-stappen-compact">
             <div class="graad-stap-compact">
               <div class="graad-stap-compact-nr">1</div>
-              <div>Maak eerst <strong>2 klasborden</strong> (bv. 3A en 4A).</div>
+              <div>Maak eerst <strong>2 klasborden</strong> in de <strong>📋 Klasbord-sectie</strong> hiernaast (bv. één voor 3A en één voor 4A).</div>
             </div>
             <div class="graad-stap-compact">
               <div class="graad-stap-compact-nr">2</div>
@@ -713,11 +734,36 @@ function renderGraadLijst(){
   if(!lijst) return;
 
   const klasborden = getBorden('klasbord');
+  const aantal = klasborden.length;
+
+  // ── Dynamische waarschuwing: toon alleen als er minder dan 2 klasborden zijn
+  const warnEl = document.getElementById('graad-warn-container');
+  if(warnEl){
+    if(aantal < 2){
+      const hoeveel = aantal;
+      const nogNodig = 2 - aantal;
+      const tellingHtml = hoeveel === 0
+        ? '<span class="graad-warn-telling">0 klasborden</span>'
+        : '<span class="graad-warn-telling">' + hoeveel + ' klasbord ✓</span>';
+      const tekst = hoeveel === 0
+        ? 'Je hebt nog geen klasborden. Ga eerst naar <strong>📋 Klasbord</strong> hiernaast en maak er <strong>2 aan</strong> (bv. één voor 3A en één voor 4A).'
+        : 'Je hebt al <strong>1 klasbord</strong>. Maak nog <strong>' + nogNodig + ' klasbord</strong> in <strong>📋 Klasbord</strong> hiernaast — dan kan je ze als graadsklas koppelen.';
+      warnEl.innerHTML =
+        '<div class="graad-warn">' +
+          '<div class="graad-warn-titel"><span class="graad-warn-titel-icon">⚠️</span><span>Eerst 2 klasborden nodig</span></div>' +
+          '<div class="graad-warn-tekst">' + tellingHtml + tekst + '</div>' +
+          '<button type="button" class="graad-warn-btn" onclick="scrollNaarKlasbord()">📋 Ga naar Klasbord</button>' +
+        '</div>';
+    } else {
+      warnEl.innerHTML = '';
+    }
+  }
+
   const btn = document.getElementById('graad-nieuw-btn');
   if(btn){
-    if(klasborden.length < 2){
+    if(aantal < 2){
       btn.disabled = true;
-      btn.textContent = '➕ Eerst 2 klasborden aanmaken hierboven';
+      btn.textContent = '➕ Eerst 2 klasborden nodig';
     } else {
       btn.disabled = false;
       btn.textContent = '➕ Graadsklas-weergave aanmaken';
@@ -749,28 +795,106 @@ function renderGraadLijst(){
     openLink.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(gk.id);
     openLink.textContent = '▶ Openen';
 
-    const sbLink = document.createElement('a');
-    sbLink.className = 'bord-rij-sb';
-    sbLink.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(gk.id) + '&modus=smartboard';
-    sbLink.textContent = '📺 Smartboard';
-    sbLink.title = 'Open in smartboardmodus — alle beheerknoppen verborgen';
+    // ··· menu-knop met dropdown (consistent met klas/kindbord)
+    const actiesWrap = document.createElement('div');
+    actiesWrap.style.cssText = 'position:relative;flex-shrink:0;';
 
-    const delBtn = document.createElement('button');
-    delBtn.className = 'graad-rij-del';
-    delBtn.textContent = '🗑';
-    delBtn.title = 'Verwijderen';
-    delBtn.onclick = (function(id){ return function(e){ e.stopPropagation(); openGraadDel(id); }; })(gk.id);
+    const menuBtn = document.createElement('button');
+    menuBtn.className = 'wb-bord-menu-btn';
+    menuBtn.textContent = '···';
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'wb-bord-dropdown';
+    dropdown.innerHTML =
+        '<button class="wb-drop-item" data-act="sb">📺 Smartboard / iPad</button>'
+      + '<button class="wb-drop-item" data-act="ren">✎ Naam wijzigen</button>'
+      + '<div class="wb-drop-sep"></div>'
+      + '<button class="wb-drop-item danger" data-act="del">🗑 Verwijderen</button>';
+
+    dropdown.addEventListener('click', (function(id){ return function(e){
+      e.stopPropagation();
+      const act = e.target.closest('[data-act]');
+      if(!act) return;
+      dropdown.classList.remove('open');
+      if(act.dataset.act === 'sb')  openGraadSB(id);
+      if(act.dataset.act === 'ren') hernoemGraadsklas(id);
+      if(act.dataset.act === 'del') openGraadDel(id);
+    }; })(gk.id));
+
+    menuBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      document.querySelectorAll('.wb-bord-dropdown.open').forEach(function(d){ if(d!==dropdown) d.classList.remove('open'); });
+      dropdown.classList.toggle('open');
+      if(dropdown.classList.contains('open')){
+        const rect = menuBtn.getBoundingClientRect();
+        const spaceBelow = window.innerHeight - rect.bottom;
+        if(spaceBelow < 160){
+          dropdown.style.top = 'auto';
+          dropdown.style.bottom = 'calc(100% + 4px)';
+        } else {
+          dropdown.style.top = 'calc(100% + 4px)';
+          dropdown.style.bottom = 'auto';
+        }
+      }
+    });
+
+    actiesWrap.appendChild(menuBtn);
+    actiesWrap.appendChild(dropdown);
 
     rij.innerHTML = '<div class="graad-rij-icon">📊</div>';
     rij.appendChild(info);
-    rij.appendChild(delBtn);
-    rij.appendChild(sbLink);
+    rij.appendChild(actiesWrap);
     rij.appendChild(openLink);
     lijst.appendChild(rij);
   });
 }
 
+// Scroll naar de klasbord-sectie en geef hem een korte oranje pulse
+// zodat de leerkracht meteen ziet waar ze moet zijn.
+function scrollNaarKlasbord(){
+  const sectie = document.getElementById('sectie-klasbord');
+  if(!sectie) return;
+  sectie.scrollIntoView({ behavior:'smooth', block:'center' });
+  // Pulse pas na de scroll, anders valt ze niet op
+  setTimeout(function(){
+    sectie.classList.remove('graad-highlight');
+    // Trigger reflow om de animatie opnieuw af te spelen
+    void sectie.offsetWidth;
+    sectie.classList.add('graad-highlight');
+    setTimeout(function(){ sectie.classList.remove('graad-highlight'); }, 2000);
+  }, 400);
+}
+
 let _bewerkGraadId = null;
+
+function hernoemGraadsklas(id){
+  const gk = getGraadsklassen().find(function(g){ return g.id === id; });
+  if(!gk) return;
+
+  // Zet in bewerk-modus en vul de velden in met bestaande waarden
+  _bewerkGraadId = id;
+  document.getElementById('graad-modal-titel').textContent = '📊 Graadsklas-weergave bewerken';
+  document.getElementById('graad-bewaar-btn').textContent = 'Opslaan';
+  document.getElementById('graad-naam-input').value = gk.naam || '';
+  document.getElementById('graad-label-1').value = (gk.bord1 && gk.bord1.klaslabel) || '';
+  document.getElementById('graad-label-2').value = (gk.bord2 && gk.bord2.klaslabel) || '';
+  document.getElementById('graad-fout').style.display = 'none';
+
+  // Vul de bord-keuzes (selects) in met de bestaande borden + selecteer huidige keuze
+  const bordenLijst = getBorden('klasbord');
+  [1,2].forEach(function(n){
+    const sel = document.getElementById('graad-bord-'+n);
+    sel.innerHTML = '<option value="">Kies een bord…</option>' +
+      bordenLijst.map(function(b){
+        return '<option value="'+esc(b.id)+'">'+esc(b.naam)+'</option>';
+      }).join('');
+    const huidigId = (n === 1 ? gk.bord1 : gk.bord2)?.bordid;
+    if(huidigId) sel.value = huidigId;
+  });
+
+  document.getElementById('modal-graad-nieuw').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('graad-naam-input').focus(); }, 50);
+}
 
 function opendNieuweGraadsklas(){
   _bewerkGraadId = null;
@@ -1258,14 +1382,35 @@ function bevestigDel(){
 var sbBordId = '';
 var qrKlaar = false;
 
-function openSB(id){ sbBordId=id; qrKlaar=false; document.getElementById('qr-sectie').classList.remove('visible'); document.getElementById('qr-canvas').innerHTML=''; document.getElementById('modal-sb').style.display='flex'; }
+function openSB(id){ sbIsGraad=false; sbBordId=id; qrKlaar=false; document.getElementById('qr-sectie').classList.remove('visible'); document.getElementById('qr-canvas').innerHTML=''; document.getElementById('modal-sb').style.display='flex'; }
 function sluitSB(){ document.getElementById('modal-sb').style.display='none'; }
 
+// Graadsklas-variant: zelfde modal, maar met vlag zodat getBordUrl de graadsklas-URL genereert
+var sbIsGraad = false;
+function openGraadSB(id){
+  sbIsGraad = true;
+  sbBordId = id; // we hergebruiken deze variabele voor de graadsklas-id
+  qrKlaar = false;
+  document.getElementById('qr-sectie').classList.remove('visible');
+  document.getElementById('qr-canvas').innerHTML = '';
+  document.getElementById('modal-sb').style.display = 'flex';
+}
+
 function getBordUrl(modus){
+  var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
+  // Graadsklas-URL's
+  if(sbIsGraad){
+    if(modus === 'ipad'){
+      // iPad-keuzescherm (kind kiest eerst zijn klas)
+      return base + 'klasbord_kind_graad.html?graadid=' + encodeURIComponent(sbBordId);
+    }
+    // Smartboardmodus voor leerkracht
+    return base + 'klasbord_graad.html?graadid=' + encodeURIComponent(sbBordId) + '&modus=smartboard';
+  }
+  // Bestaande klas/kindbord-logica
   var borden = getBorden(huidigType);
   var bord = borden.find(function(b){ return b.id===sbBordId; });
   if(!bord) return '';
-  var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
  var pagina;
 if(huidigType === 'klasbord'){
   pagina = modus === 'ipad' ? 'klasbord_kind.html' : 'klasbord.html';
