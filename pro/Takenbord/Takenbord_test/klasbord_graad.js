@@ -97,6 +97,7 @@ function applyData(slot, data){
   if(!s.taskLabelOverrides || typeof s.taskLabelOverrides !== 'object') s.taskLabelOverrides = {};
   if(!s.customIcons || typeof s.customIcons !== 'object') s.customIcons = {};
   if(!s.pupilPhotos || typeof s.pupilPhotos !== 'object') s.pupilPhotos = {};
+  if(!s.notes || typeof s.notes !== 'object') s.notes = {};
   slot.state = s;
 }
 
@@ -179,11 +180,18 @@ function renderSlot(slot){
       ? '<img class="gb-name-photo" src="'+state.pupilPhotos[p.id]+'" alt=""/>'
       : '';
 
+    // Notes-knop: gele stijl als er al bevindingen zijn, anders gewoon
+    const hasNotes = !!(state.notes && state.notes[p.id]);
+    const notesBtnHtml = '<button class="gb-notes-btn'+(hasNotes?' has-notes':'')+'" '
+      + 'onclick="event.stopPropagation();openNotesModal('+slot.idx+',\''+p.id+'\')" '
+      + 'title="'+(hasNotes?'Opmerking bekijken/bewerken':'Opmerking toevoegen')+'">🔒</button>';
+
     let row = '<tr class="gb-row'+(isComplete?' complete':'')+'">';
     row += '<td class="gb-name-td"><div class="gb-name-inner">';
     row += '<span class="'+dotCls+'"></span>';
     row += photoHtml;
     row += '<div class="gb-name-text"><div class="gb-name-voor">'+esc(displayName(p))+'</div></div>';
+    row += notesBtnHtml;
     row += '</div></td>';
 
     tasks.forEach(t => {
@@ -232,6 +240,56 @@ window.cycleStatus = function(slotIdx, pid, tid){
 
   saveSlot(slot);
   renderSlot(slot);
+};
+
+// ── 🔒 NOTES-MODAL (bevindingen per leerling) ────────────────────────────
+// Notes worden opgeslagen in state.notes[pid] — identiek aan klasbord.js.
+// Zo komen ze ook automatisch mee in het PDF-rapport van dat klasbord.
+let _notesEditingSlot = null;
+let _notesEditingPid = null;
+
+window.openNotesModal = function(slotIdx, pid){
+  const slot = slots[slotIdx-1];
+  if(!slot || !slot.state) return;
+  const pupil = slot.state.pupils.find(function(p){ return p.id === pid; });
+  if(!pupil) return;
+
+  _notesEditingSlot = slot;
+  _notesEditingPid  = pid;
+
+  // Klas-badge kleuren op basis van welk bord (1=oranje, 2=blauw)
+  const badge = document.getElementById('notes-klas-badge');
+  badge.textContent = slot.klaslabel || ('Bord ' + slotIdx);
+  badge.classList.remove('kleur-1','kleur-2');
+  badge.classList.add('kleur-'+slotIdx);
+
+  document.getElementById('notes-pupil-name').textContent = displayName(pupil);
+  document.getElementById('notes-input').value = (slot.state.notes && slot.state.notes[pid]) || '';
+  document.getElementById('notes-overlay').classList.remove('hidden');
+  setTimeout(function(){ document.getElementById('notes-input').focus(); }, 50);
+};
+
+window.saveNotes = function(){
+  if(!_notesEditingSlot || !_notesEditingPid) return;
+  const slot = _notesEditingSlot;
+  if(!slot.state.notes) slot.state.notes = {};
+
+  const val = document.getElementById('notes-input').value.trim();
+  if(val){
+    slot.state.notes[_notesEditingPid] = val;
+  } else {
+    delete slot.state.notes[_notesEditingPid];
+  }
+
+  saveSlot(slot);
+  renderSlot(slot);
+  closeNotesModal();
+};
+
+window.closeNotesModal = function(){
+  document.getElementById('notes-overlay').classList.add('hidden');
+  _notesEditingSlot = null;
+  _notesEditingPid  = null;
 };
 
 // ── Opslaan naar Firestore ────────────────────────────────────────────────
