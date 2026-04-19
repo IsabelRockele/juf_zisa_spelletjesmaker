@@ -47,9 +47,9 @@ const PdfEngine = (() => {
       doc.setLineWidth(0.6);
       doc.roundedRect(x, y, w, h, 2, 2, 'FD');
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(13);
+      doc.setFontSize(14);
       doc.setTextColor(0, 100, 0);
-      doc.text(String(antwoord), x + w / 2, y + h / 2 + 2, { align: 'center' });
+      doc.text(String(antwoord), x + w / 2, y + h / 2 + 2.5, { align: 'center' });
       doc.setTextColor(0, 0, 0);
     } else {
       // Leeg wit vakje
@@ -102,12 +102,12 @@ y += 5;
     const kadH = RIJHOOGTE - 1;
 
     // Minimum vakbreedte afhankelijk van niveau
-    //   tot 20: 1 cijfer (min 10)
-    //   tot 100: 2-3 cijfers (min 12)
-    //   tot 1000: 3-4 cijfers (min 14)
-    //   tot 10000 of hoger: 4-5 cijfers (min 18)
+    //   tot 20: 1 cijfer (min 10, max 14)
+    //   tot 100: 2-3 cijfers (min 12, max 16)
+    //   tot 1000: 3-4 cijfers (min 14, max 18)
+    //   tot 10000 of hoger: 4-5 cijfers (min 18, max 22)
     const vakMin = niveau >= 10000 ? 18 : niveau >= 1000 ? 14 : niveau >= 100 ? 12 : 10;
-    const vakMax = Math.max(vakMin + 4, 22);
+    const vakMax = niveau >= 10000 ? 22 : niveau >= 1000 ? 18 : niveau >= 100 ? 16 : 14;
 
     oefeningen.forEach((oef, kol) => {
       const ox = ML + kol * kolB + 2;
@@ -372,10 +372,10 @@ const somTekst = (delen.length >= 3)
       const somY = oy + 7;
       doc.text(somTekst, somStartX, somY);
 
-      // Invulvakje — direct na = teken, breed genoeg voor 4-cijferig antwoord
+      // Invulvakje — direct na = teken, breedte schaalt met niveau
       const somBreedte = doc.getTextWidth(somTekst);
       const vakY  = oy + 2;
-      const vakW  = 16;
+      const vakW  = blokNiveau >= 10000 ? 18 : blokNiveau >= 1000 ? 14 : blokNiveau >= 100 ? 12 : 10;
       const vakH  = 9;
       const vakX  = somStartX + somBreedte + 2;
       _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
@@ -404,7 +404,7 @@ const somTekst = (delen.length >= 3)
             doc.line(lX1, lY, lX2, lY);
             if (_metAntwoorden && lijnAntw3[li] && lijnAntw3[li] !== '') {
               doc.setFont('helvetica', 'bold');
-              doc.setFontSize(10);
+              doc.setFontSize(12);
               doc.setTextColor(0, 100, 0);
               doc.text(String(lijnAntw3[li]), lX1 + 2, lY - 2);
               doc.setTextColor(30, 30, 30);
@@ -775,7 +775,7 @@ const somTekst = (delen.length >= 3)
               const teken = isAftrekken ? '-' : '+';
               const tussenTeken = isAftrekken ? '+' : '-';
               const oplStr = `${oef.andereGetal} ${teken} ${oef.tiental} ${tussenTeken} ${oef.compenseerDelta} = ${oef.antwoord}`;
-              doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(0, 100, 0);
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(0, 100, 0);
               doc.text(oplStr, xL + 1, somY - 0.5);
               doc.setTextColor(44, 62, 80);
               doc.setFont('helvetica', 'normal');
@@ -927,7 +927,7 @@ const avX = somX + somTotaalB + 4.5;
         doc.setLineWidth(0.5);
         doc.roundedRect(avX, avY, avW, avH, 1.5, 1.5, 'FD');
         if (_metAntwoorden) {
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(0, 100, 0);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(0, 100, 0);
           doc.text(String(oef.antwoord), avX + avW/2, avY + avH - 2, {align:'center'});
           doc.setTextColor(44, 62, 80);
         }
@@ -1019,11 +1019,11 @@ const avX = somX + somTotaalB + 4.5;
   doc.text(teken1, teken1X, blokY + 6);
   doc.text(teken2, teken2X, blokY + 6);
   if (_metAntwoorden) {
-    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(0, 100, 0);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(0, 100, 0);
     const antTxt1 = String(oef.tiental);
-    doc.text(antTxt1, hokje1X + (getalW - doc.getTextWidth(antTxt1))/2, blokY + 6);
+    doc.text(antTxt1, hokje1X + (getalW - doc.getTextWidth(antTxt1))/2, blokY + 6.5);
     const antTxt2 = String(oef.compenseerDelta);
-    doc.text(antTxt2, hokje2X + (getalW - doc.getTextWidth(antTxt2))/2, blokY + 6);
+    doc.text(antTxt2, hokje2X + (getalW - doc.getTextWidth(antTxt2))/2, blokY + 6.5);
     doc.setTextColor(44, 62, 80);
   }
 } else {
@@ -1045,13 +1045,13 @@ const avX = somX + somTotaalB + 4.5;
           doc.line(lijnStartX, lY1, lijnEindX, lY1);
           doc.line(lijnStartX, lY2, lijnEindX, lY2);
           // Bij voorbeeld OF oplossingssleutel: schrijflijnen invullen
-          if (isVoorbeeld || _metAntwoorden) {
-            doc.setFontSize(10);
+          if (isVoorbeeld) {
+            doc.setFontSize(12);
             doc.setTextColor(80, 80, 80);
             doc.text(oef.schrijflijn1, lijnStartX, lY1 - 1);
             doc.text(oef.schrijflijn2, lijnStartX, lY2 - 1);
           } else if (_metAntwoorden) {
-            doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor(0, 100, 0);
+            doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(0, 100, 0);
             if (oef.schrijflijn1) doc.text(String(oef.schrijflijn1), lijnStartX, lY1 - 1);
             if (oef.schrijflijn2) doc.text(String(oef.schrijflijn2), lijnStartX, lY2 - 1);
             doc.setTextColor(44, 62, 80);
@@ -2105,7 +2105,15 @@ const onthoudH = c;
           }
         }
       } else {
-        if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
+        // Aftrekken A - B - C: zoek welke aftrekker ervoor zorgt dat A - X = 10
+        if (getallen.length >= 3) {
+          const doel = getallen[0] - 10;
+          if (getallen[1] === doel) {
+            onderstreepPos = [0, 1];
+          } else if (getallen[2] === doel) {
+            onderstreepPos = [0, 2];
+          }
+        } else if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
           onderstreepPos = [0, 1];
         }
       }
@@ -2163,14 +2171,16 @@ const onthoudH = c;
           if (!isAftrek) {
             oplStr = `10 ${tekens[0] || '+'} ${restGetal} = ${oef.antwoord}`;
           } else {
-            oplStr = `10 ${tekens[1] || '-'} ${restGetal} = ${oef.antwoord}`;
+            // Aftrekken: teken VÓÓR de resterende aftrekker
+            const tekenIdx = Math.max(0, restIdx - 1);
+            oplStr = `10 ${tekens[tekenIdx] || '-'} ${restGetal} = ${oef.antwoord}`;
           }
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
           doc.setTextColor(0, 100, 0);
           doc.text(oplStr, lijnX1 + 1, somY);
         } else if ((_metAntwoorden || isVoorbeeld)) {
           // Geen onderstreping gevonden: toon gewoon het antwoord
-          doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(14);
           doc.setTextColor(0, 100, 0);
           doc.text(String(oef.antwoord), lijnX1 + 1, somY);
         }
@@ -2716,7 +2726,18 @@ doc.setTextColor(26, 58, 92);
     const kolBreedte    = CW / perRij;
     const rijH          = isBewerkingen ? SBW_TOT_H + 8 : isPunt ? PUNT_RIJ_H : SH_RIJ_H;
 
-    checkRuimte(SPL_ZINR + rijH);
+    // Bereken hoogte van de EERSTE rij (nodig voor correcte paginering bij
+    // grote splitshuizen — die kunnen hoger zijn dan standaard rijH).
+    let eersteRijH = rijH;
+    for (let kol = 0; kol < perRij; kol++) {
+      const oef = blok.oefeningen[kol];
+      if (oef?.type === 'groot-splitshuis') {
+        eersteRijH = Math.max(eersteRijH, _grootHuisHoogte(oef) + 12);
+      }
+    }
+
+    // checkRuimte op basis van écht benodigde hoogte van eerste rij
+    checkRuimte(VOOR_ZIN + SPL_ZINR + eersteRijH);
     y += VOOR_ZIN;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -2732,7 +2753,9 @@ doc.setTextColor(26, 58, 92);
           maxH = Math.max(maxH, _grootHuisHoogte(oef) + 12);
         }
       }
-      if (rij > 0) checkRuimte(maxH);
+      // Checkruimte voor ELKE rij, ook rij 0 (al gedekt door blok-check
+      // hierboven, maar dubbel-check schaadt niet en vangt randgevallen).
+      checkRuimte(maxH);
       for (let kol = 0; kol < perRij; kol++) {
         const oef = blok.oefeningen[rij * perRij + kol];
         if (!oef) continue;
@@ -3093,7 +3116,7 @@ doc.setTextColor(26, 58, 92);
 
     // Bereken antwoord uit tekst
     const _pTekst = oef.tekst || [];
-    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷','*','/'].includes(x));
+    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷',':','*','/'].includes(x));
     const _pEqIdx = _pTekst.indexOf('=');
     function _pBerekenAntw(nullPos) {
       if (_pEqIdx === -1 || !_pOp) return null;
@@ -3102,17 +3125,17 @@ doc.setTextColor(26, 58, 92);
         if (_pOp === '+') return (a||0) + (b||0);
         if (_pOp === '-') return (a||0) - (b||0);
         if (_pOp === '×' || _pOp === '*') return (a||0) * (b||0);
-        if (_pOp === '÷' || _pOp === '/') return (a||0) / (b||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (a||0) / (b||0);
       } else if (nullPos === 0) {
         if (_pOp === '+') return (c||0) - (b||0);
         if (_pOp === '-') return (c||0) + (b||0);
         if (_pOp === '×' || _pOp === '*') return (c||0) / (b||0);
-        if (_pOp === '÷' || _pOp === '/') return (c||0) * (b||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (c||0) * (b||0);
       } else {
         if (_pOp === '+') return (c||0) - (a||0);
         if (_pOp === '-') return (a||0) - (c||0);
         if (_pOp === '×' || _pOp === '*') return (c||0) / (a||0);
-        if (_pOp === '÷' || _pOp === '/') return (a||0) * (c||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (a||0) * (c||0);
       }
       return null;
     }
@@ -5613,13 +5636,59 @@ doc.setTextColor(26, 58, 92);
 
   /* ── Rekentaal blok ─────────────────────────────────────────── */
   function _tekenRekentaalBlok(blok) {
+    // Fix: unicode-minteken (U+2212), deelteken (U+00F7) en
+    // vermenigvuldigingsteken (U+00D7) worden door standaard jsPDF
+    // helvetica niet correct ondersteund (ze renderen als bv. "). We
+    // wrappen doc.text() zodat ALLE strings die de rekentaal-renderer
+    // probeert te tekenen automatisch worden omgezet naar ASCII-varianten
+    // of Vlaamse notatie. Dit dekt zowel strings uit de data als strings
+    // die de renderer zelf construeert.
+    const fixStr = (s) => {
+      if (typeof s !== 'string') return s;
+      return s
+        .replace(/\u2212/g, '-')   // U+2212 minus sign  → hyphen
+        .replace(/\u00f7/g, ':')   // U+00F7 division    → dubbelpunt (Vlaams)
+        .replace(/\u00d7/g, 'x');  // U+00D7 times       → x
+    };
+
+    // Ook de data voorzorg: diepe kopie met gefixte strings
+    const safeBlok = JSON.parse(JSON.stringify(blok));
+    const fixObj = (o) => {
+      if (!o || typeof o !== 'object') return;
+      for (const key of Object.keys(o)) {
+        const v = o[key];
+        if (typeof v === 'string') o[key] = fixStr(v);
+        else if (typeof v === 'object') fixObj(v);
+      }
+    };
+    fixObj(safeBlok);
+
+    // doc.text() monkey-patchen binnen de scope van tekenBlok
+    const origText = doc.text.bind(doc);
+    doc.text = function(...args) {
+      // eerste argument kan string OF array-van-strings zijn
+      if (typeof args[0] === 'string') {
+        args[0] = fixStr(args[0]);
+      } else if (Array.isArray(args[0])) {
+        args[0] = args[0].map(fixStr);
+      }
+      return origText(...args);
+    };
+
     const layout = {
       ML, CW, PH, MB,
       VOOR_ZIN, ZINRUIMTE, NABLOK,
       tekenVoettekst: _tekenVoettekst,
       metAntwoorden: _metAntwoorden,
+      oplossingFontSize: 14,
     };
-    y = RekentaalPdfRenderer.tekenBlok(doc, blok, y, layout);
+
+    try {
+      y = RekentaalPdfRenderer.tekenBlok(doc, safeBlok, y, layout);
+    } finally {
+      // Altijd doc.text herstellen, ook bij een fout
+      doc.text = origText;
+    }
   }
 
   return { genereer };
