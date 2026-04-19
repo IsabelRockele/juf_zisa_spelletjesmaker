@@ -8,6 +8,45 @@
 // ── URL-parameters ────────────────────────────────────────────────────────
 const params  = new URLSearchParams(window.location.search);
 const graadId = params.get('graadid');
+const isSmartboard = params.get('modus') === 'smartboard';
+
+// ── SMARTBOARDMODUS: knoppen verbergen, elementen vergroten ──────────────
+// Activeert als ?modus=smartboard in de URL staat. Discreet slotje rechts-
+// onder om terug te keren. Volledig conform de smartboard-modus van het
+// gewone klasbord.
+if(isSmartboard){
+  // body-class wordt zo vroeg mogelijk gezet zodat CSS al bij eerste render
+  // de juiste weergave toont (geen flash-of-unhidden-buttons)
+  document.addEventListener('DOMContentLoaded', function(){
+    document.body.classList.add('smartboard');
+  });
+  // Als DOMContentLoaded al voorbij is:
+  if(document.readyState !== 'loading') document.body.classList.add('smartboard');
+}
+
+window.startSmartboard = function(){
+  // Huidige URL + modus=smartboard → herlaadt in smartboard-modus
+  const u = new URL(window.location.href);
+  u.searchParams.set('modus', 'smartboard');
+  window.location.href = u.toString();
+};
+
+window.handleSmartboardExit = function(){
+  document.getElementById('smartboard-exit-overlay').classList.remove('hidden');
+};
+window.sluitSmartboardExit = function(){
+  document.getElementById('smartboard-exit-overlay').classList.add('hidden');
+};
+window.exitSmartboard = function(dest){
+  if(dest === 'welkom'){
+    window.location.href = 'welkomstbord.html';
+  } else {
+    // Terug naar normale weergave: verwijder modus-param uit URL
+    const u = new URL(window.location.href);
+    u.searchParams.delete('modus');
+    window.location.href = u.toString();
+  }
+};
 
 // ── DEFAULT_TASKS (identiek aan klasbord.js) ──────────────────────────────
 const DEFAULT_TASKS = [
