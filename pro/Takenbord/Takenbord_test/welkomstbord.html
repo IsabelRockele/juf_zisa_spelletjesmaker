@@ -356,7 +356,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
     <!-- Tip onderaan -->
     <div class="wb-tip">
       <div class="wb-tip-dot"></div>
-      Je kan zoveel borden aanmaken als je wil. De 3 meest recente worden bewaard, oudere verdwijnen automatisch.
+      Je kan zoveel borden aanmaken als je wil. De 4 meest recente worden bewaard, oudere verdwijnen automatisch.
     </div>
 
     <!-- ── GRAADSKLAS-WEERGAVE ── -->
@@ -524,7 +524,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
 
 <script>
 // ── STORAGE (FIREBASE) ────────────────────────────────────────────────────
-const MAX_BORDEN = 3;
+const MAX_BORDEN = 4;
 const BORDEN_KEY = 'borden_v1'; // lokale cache
 
 // In-memory meta cache
@@ -886,7 +886,7 @@ function renderSectie(type){
     if(resterend <= 1 && borden.length > 0){
       infoEl.innerHTML = resterend === 0
         ? '<div class="wb-limiet-warn">⚠️ Maximum bereikt. Nieuw bord verwijdert het oudste (' + esc(borden[0].naam) + ').</div>'
-        : '<div class="wb-limiet-warn">⚠️ Nog 1 bord vrij. Bij een 4de bord wordt het oudste automatisch verwijderd.</div>';
+        : '<div class="wb-limiet-warn">⚠️ Nog 1 bord vrij. Bij een 5de bord wordt het oudste automatisch verwijderd.</div>';
     } else {
       infoEl.innerHTML = '';
     }
@@ -954,17 +954,17 @@ function renderBordenLijst_OLD(){
     // 4-borden limiet uitleg
     if(resterend === 1){
       infoHtml += '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:9px 14px;font-size:12px;color:#92400e;line-height:1.6;">'
-        + '⚠️ Je kan nog <strong>1 bord</strong> aanmaken. Bij een 4de bord wordt het oudste bord automatisch verwijderd. '
+        + '⚠️ Je kan nog <strong>1 bord</strong> aanmaken. Bij een 5de bord wordt het oudste bord automatisch verwijderd. '
         + 'Download eerst een <strong>PDF rapport</strong> van dat bord als je de gegevens nog nodig hebt.'
         + '</div>';
     } else if(resterend === 0){
       infoHtml += '<div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:9px 14px;font-size:12px;color:#dc2626;line-height:1.6;">'
-        + '⚠️ Je hebt het maximum van 3 borden bereikt. Als je een nieuw bord aanmaakt, wordt het oudste bord (<strong>' + esc(borden[0].naam) + '</strong>) verwijderd. '
+        + '⚠️ Je hebt het maximum van 4 borden bereikt. Als je een nieuw bord aanmaakt, wordt het oudste bord (<strong>' + esc(borden[0].naam) + '</strong>) verwijderd. '
         + 'Download eerst een <strong>PDF rapport</strong> van dat bord als je die gegevens nog nodig hebt.'
         + '</div>';
     } else if(aantalBorden > 0 && resterend > 1){
       infoHtml += '<div style="background:#f8fafc;border:1px solid #e0e7ff;border-radius:10px;padding:9px 14px;font-size:12px;color:#6b7280;line-height:1.6;">'
-        + 'Je kan maximaal 3 borden per type bewaren, bij aanmaak van een nieuw bord verdwijnt het oudste. Je hebt er nog <strong>' + resterend + '</strong> vrij.'
+        + 'Je kan maximaal 4 borden per type bewaren, bij aanmaak van een nieuw bord verdwijnt het oudste. Je hebt er nog <strong>' + resterend + '</strong> vrij.'
         + '</div>';
     }
 
