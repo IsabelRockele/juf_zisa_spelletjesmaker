@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Klasbord — Juf Zisa</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+
+/* ── PRO HEADER ── */
+.pro-header{display:flex;align-items:center;justify-content:space-between;background:linear-gradient(90deg,#0b3060 0%,#1a5fa8 100%);color:#fff;padding:8px 20px;font-family:Nunito,sans-serif;position:fixed;top:0;left:0;right:0;z-index:1000;height:32px;box-sizing:border-box;font-size:0.85rem;font-weight:700;letter-spacing:0.02em;}
+.pro-back-btn{border:none;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+.pro-back-btn:hover{background:rgba(255,255,255,.25);}
+.pro-header-title{font-size:14px;font-weight:700;opacity:.9;}
+.pro-badge{background:#f5c200;color:#0b3060;border-radius:6px;padding:2px 9px;font-size:0.78rem;font-weight:800;}
+body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding-top:32px !important;overflow:auto !important;height:auto !important;}
+#app{min-height:100vh;background:#f0f4fb;padding:0;}
+
+/* ── SCHERM 1: type kiezen ── */
+.type-box{background:#fff;border-radius:24px;padding:32px 36px;max-width:540px;width:100%;box-shadow:0 4px 24px rgba(99,102,241,.1);}
+.type-box h2{font-size:26px;font-weight:800;color:#1e1b4b;margin:0 0 6px;text-align:center;}
+.type-box p{font-size:14px;color:#6b7280;text-align:center;margin:0 0 28px;}
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.type-card{border:3px solid #e0e7ff;background:#f8fafc;border-radius:18px;padding:22px 16px;cursor:pointer;text-align:center;transition:all .15s;font-family:inherit;}
+.type-card:hover{border-color:#6366f1;background:#eef2ff;transform:translateY(-2px);}
+.type-card.kind:hover{border-color:#059669;background:#ecfdf5;}
+.type-card-icon{font-size:40px;margin-bottom:10px;}
+.type-card-title{font-size:17px;font-weight:800;color:#1e1b4b;margin-bottom:5px;}
+.type-card-sub{font-size:12px;color:#6b7280;line-height:1.5;}
+.type-hint{background:#eef2ff;border-radius:12px;padding:12px 16px;font-size:12px;color:#4338ca;line-height:1.8;text-align:left;}
+
+/* ── SCHERM 2: borden van dit type ── */
+.borden-box{background:#fff;border-radius:24px;padding:28px 32px;max-width:700px;width:100%;box-shadow:0 4px 24px rgba(99,102,241,.1);}
+.borden-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.borden-back{border:none;background:#f3f4f6;color:#6b7280;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+.borden-back:hover{background:#e5e7eb;}
+.borden-title{font-size:20px;font-weight:800;color:#1e1b4b;}
+.borden-type-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
+.badge-klas{background:#eef2ff;color:#4338ca;}
+.badge-kind{background:#ecfdf5;color:#059669;}
+
+/* Borden lijst */
+.borden-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.bord-rij{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#f8fafc;border:2px solid #e0e7ff;border-radius:14px;cursor:pointer;transition:all .12s;}
+.bord-rij:hover{border-color:#6366f1;background:#eef2ff;}
+.bord-rij.kind-rij:hover{border-color:#059669;background:#ecfdf5;}
+.bord-rij-icon{font-size:26px;flex-shrink:0;}
+.bord-rij-info{flex:1;min-width:0;}
+.bord-rij-naam{font-size:15px;font-weight:800;color:#1e1b4b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bord-rij-meta{font-size:11px;color:#9ca3af;margin-top:2px;}
+.bord-rij-open{border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.bord-rij.kind-rij .bord-rij-open{background:linear-gradient(135deg,#059669,#10b981);}
+.bord-rij-acties{display:flex;gap:4px;flex-shrink:0;}
+.bord-rij-btn{border:none;background:rgba(0,0,0,.05);color:#9ca3af;border-radius:7px;width:28px;height:28px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.bord-rij-btn:hover{background:rgba(0,0,0,.1);color:#374151;}
+.bord-rij-sb{border:1.5px dashed #c7d2fe;background:none;color:#6366f1;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;flex-shrink:0;}
+.bord-rij.kind-rij .bord-rij-sb{border-color:#a7f3d0;color:#059669;}
+
+/* Nieuw bord knop */
+.nieuw-bord-btn{width:100%;border:2.5px dashed #c7d2fe;background:#f8fafc;color:#6366f1;border-radius:14px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .12s;}
+.nieuw-bord-btn:hover{background:#eef2ff;border-color:#6366f1;}
+.nieuw-bord-btn.kind{border-color:#a7f3d0;color:#059669;}
+.nieuw-bord-btn.kind:hover{background:#ecfdf5;border-color:#059669;}
+
+/* ── MODALS ── */
+.overlay-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;}
+.modal-kaart{background:#fff;border-radius:18px;padding:28px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.modal-kaart h3{font-size:19px;font-weight:800;color:#1e1b4b;margin:0 0 6px;}
+.modal-kaart p{font-size:13px;color:#4b5563;margin:0 0 16px;line-height:1.6;}
+.modal-input{width:100%;border:2px solid #e0e7ff;border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;margin-bottom:16px;box-sizing:border-box;}
+.modal-input:focus{outline:none;border-color:#6366f1;}
+.modal-btns{display:flex;gap:8px;}
+.modal-btn-ok{flex:1;border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+.modal-btn-ok.kind{background:linear-gradient(135deg,#059669,#10b981);}
+.modal-btn-cancel{border:none;background:#f3f4f6;color:#6b7280;border-radius:12px;padding:11px 18px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+/* Verwijder / max borden modal */
+.warn-box{background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:#374151;line-height:1.6;}
+.tip-box{background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:12px;color:#92400e;line-height:1.6;}
+.modal-btn-danger{width:100%;border:none;background:#dc2626;color:#fff;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:7px;}
+.modal-btn-sec{width:100%;border:none;background:#e0e7ff;color:#4338ca;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;margin-bottom:7px;}
+/* QR */
+.qr-section{display:none;border-top:2px solid #e0e7ff;padding-top:16px;margin-top:4px;}
+.qr-section.visible{display:block;}
+.qr-box{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap;}
+.qr-url{font-size:10px;color:#6366f1;word-break:break-all;background:#eef2ff;border-radius:7px;padding:7px;margin-bottom:7px;font-family:monospace;line-height:1.5;}
+.qr-note{font-size:11px;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px;margin-top:8px;line-height:1.5;}
+@media print{body>*:not(#qr-print-area){display:none!important;}#qr-print-area{display:block!important;}}
+#qr-print-area{display:none;padding:30px;text-align:center;font-family:Nunito,sans-serif;}
+
+/* ── DASHBOARD WELKOMSTBORD ── */
+
+
+.wb-welcome-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:28px; padding:0 32px; }
+.wb-welcome-title { font-size:28px; font-weight:800; color:#1e1b4b; }
+.wb-welcome-sub { font-size:15px; color:#64748b; margin-top:4px; }
+.wb-autosave-pill { background:#f0fdf4; border:1.5px solid #86efac; border-radius:20px; padding:8px 18px; font-size:14px; font-weight:800; color:#15803d; white-space:nowrap; }
+
+.wb-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; padding:12px 20px 0; }
+@media(max-width:640px){ .wb-grid { grid-template-columns:1fr; } }
+
+.wb-sectie { background:#fff; border-radius:20px; border:2.5px solid transparent; overflow:visible; display:flex; flex-direction:column; position:relative; }
+
+/* ── GRAADSKLAS-SECTIE ── */
+.graad-sectie { background:#fff; border-radius:20px; border:2.5px solid #e0e7ff; margin:14px 20px 20px; padding:18px 20px; box-shadow:0 2px 8px rgba(99,102,241,.05); }
+.graad-sectie-hdr { display:flex; align-items:flex-start; gap:12px; margin-bottom:14px; }
+.graad-sectie-icon { font-size:30px; width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg,#eef2ff,#f5f3ff); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.graad-sectie-info { flex:1; min-width:0; }
+.graad-sectie-titel { font-size:18px; font-weight:800; color:#1e1b4b; }
+.graad-sectie-sub { font-size:13px; color:#64748b; margin-top:3px; line-height:1.5; }
+.graad-sectie-badge { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border-radius:14px; padding:4px 12px; font-size:11px; font-weight:800; flex-shrink:0; white-space:nowrap; }
+.graad-lijst { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.graad-rij { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#f8fafc; border:1.5px solid #e8eef8; border-radius:14px; transition:all .12s; }
+.graad-rij:hover { border-color:#c7d2fe; background:#eef2ff; }
+.graad-rij-icon { font-size:22px; flex-shrink:0; }
+.graad-rij-info { flex:1; min-width:0; }
+.graad-rij-titel { font-size:14px; font-weight:800; color:#1e1b4b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.graad-rij-sub { font-size:11px; color:#9ca3af; margin-top:2px; }
+.graad-rij-btn { border:none; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border-radius:10px; padding:8px 14px; font-size:12px; font-weight:800; cursor:pointer; font-family:inherit; flex-shrink:0; text-decoration:none; display:inline-block; }
+.graad-rij-btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(99,102,241,.25); }
+.graad-rij-del { border:none; background:#fee2e2; color:#dc2626; border-radius:8px; width:30px; height:30px; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.graad-rij-del:hover { background:#fecaca; }
+.graad-nieuw-btn { width:100%; border:2.5px dashed #c7d2fe; background:#f8fafc; color:#6366f1; border-radius:14px; padding:14px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .12s; }
+.graad-nieuw-btn:hover { background:#eef2ff; border-color:#6366f1; }
+.graad-nieuw-btn:disabled { opacity:.5; cursor:not-allowed; }
+.graad-modal-keuzes { display:flex; flex-direction:column; gap:10px; margin-bottom:14px; }
+.graad-keuze-groep { border:2px solid #e0e7ff; border-radius:14px; padding:12px 14px; }
+.graad-keuze-hdr { font-size:12px; font-weight:800; color:#6366f1; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+.graad-keuze-velden { display:grid; grid-template-columns:100px 1fr; gap:8px; align-items:center; }
+.graad-keuze-label-input { width:100%; border:2px solid #e0e7ff; border-radius:8px; padding:8px 10px; font-size:15px; font-family:inherit; font-weight:800; color:#1e1b4b; text-align:center; box-sizing:border-box; }
+.graad-keuze-label-input:focus { outline:none; border-color:#6366f1; }
+.graad-keuze-select { width:100%; border:2px solid #e0e7ff; border-radius:8px; padding:8px 10px; font-size:14px; font-family:inherit; color:#374151; background:#fff; box-sizing:border-box; }
+.graad-keuze-select:focus { outline:none; border-color:#6366f1; }
+.graad-klas-hint { font-size:11px; color:#64748b; margin-top:4px; line-height:1.4; }
+
+.wb-sectie-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1.5px solid rgba(0,0,0,.06); }
+.wb-hdr-klas { background:#fff7ed; border-radius:18px 18px 0 0; }
+.wb-hdr-kind { background:#f0e7ff; border-radius:18px 18px 0 0; }
+
+.wb-sectie-icon { font-size:30px; width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.wb-hdr-klas .wb-sectie-icon { background:#fef3c7; }
+.wb-hdr-kind .wb-sectie-icon { background:#ede9fe; }
+
+.wb-sectie-info { flex:1; }
+.wb-sectie-titel { font-size:18px; font-weight:800; color:#1e1b4b; }
+.wb-sectie-sub { font-size:13px; color:#64748b; margin-top:3px; line-height:1.5; }
+
+.wb-type-badge { font-size:12px; font-weight:800; padding:5px 12px; border-radius:20px; flex-shrink:0; white-space:nowrap; }
+.wb-hdr-klas .wb-type-badge { background:#fef3c7; color:#92400e; }
+.wb-hdr-kind .wb-type-badge { background:#ede9fe; color:#6d28d9; }
+
+.wb-borden-lijst { padding:8px 12px 0; flex:1; overflow:visible; }
+
+.wb-bord-rij { display:flex; align-items:center; gap:12px; padding:13px 16px; background:#f8fafc; border:1.5px solid #e8eef8; border-radius:14px; margin-bottom:10px; transition:all .12s; }
+.wb-bord-rij:hover { border-color:#fde68a; background:#fffbeb; }
+.wb-bord-rij.kind:hover { border-color:#ddd6fe; background:#f5f3ff; }
+
+.wb-bord-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.wb-bord-rij:not(.kind) .wb-bord-dot { background:#f59e0b; }
+.wb-bord-rij.kind .wb-bord-dot { background:#8b5cf6; }
+
+.wb-bord-naam { font-size:15px; font-weight:800; color:#1e1b4b; }
+.wb-bord-meta { font-size:12px; color:#94a3b8; margin-top:3px; }
+
+.wb-bord-open { border:none; border-radius:10px; padding:10px 20px; font-size:14px; font-weight:800; cursor:pointer; font-family:inherit; flex-shrink:0; color:#fff; white-space:nowrap; }
+.wb-bord-rij:not(.kind) .wb-bord-open { background:#d97706; }
+.wb-bord-rij.kind .wb-bord-open { background:#7c3aed; }
+
+.wb-leeg { text-align:center; padding:24px 12px; color:#9ca3af; font-size:14px; line-height:1.7; }
+.wb-leeg-icon { font-size:30px; margin-bottom:8px; }
+
+.wb-nieuw-btn { width:100%; border:2px dashed #fde68a; background:none; color:#d97706; border-radius:12px; padding:10px; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .12s; margin:0 0 10px; }
+.wb-nieuw-btn:hover { background:#fffbeb; border-color:#f59e0b; }
+.wb-nieuw-kind { border-color:#ddd6fe; color:#7c3aed; }
+.wb-nieuw-kind:hover { background:#f5f3ff; border-color:#8b5cf6; }
+
+.wb-tip { background:#fff; border:1.5px solid #e9d5ff; border-radius:14px; padding:16px 20px; font-size:14px; color:#6d28d9; line-height:1.7; display:flex; align-items:flex-start; gap:12px; }
+.wb-tip-dot { width:8px; height:8px; border-radius:50%; background:#a78bfa; flex-shrink:0; margin-top:6px; }
+
+.wb-limiet-warn { background:#fff5f5; border:1px solid #fecaca; border-radius:10px; padding:10px 14px; font-size:13px; color:#dc2626; line-height:1.5; margin:0 16px 12px; }
+.wb-limiet-info { display:none; }
+
+/* Uitleg-toggle */
+.wb-info-btn { width:26px; height:26px; border-radius:50%; border:1.5px solid #c7d2fe; background:#eef2ff; color:#6366f1; font-size:13px; font-weight:800; cursor:pointer; font-family:inherit; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+.wb-info-btn:hover { background:#e0e7ff; }
+.wb-hdr-kind .wb-info-btn { border-color:#a7f3d0; background:#ecfdf5; color:#059669; }
+.wb-hdr-kind .wb-info-btn:hover { background:#d1fae5; }
+.wb-uitleg { font-size:13px; color:#374151; line-height:1.7; padding:12px 18px; background:#f8fafc; border-bottom:1.5px solid #e0e7ff; }
+.wb-uitleg.hidden { display:none; }
+
+/* Drie-puntjes menu */
+.wb-bord-menu-btn { width:34px; height:34px; border-radius:9px; border:1.5px solid #e0e7ff; background:#f8fafc; color:#9ca3af; font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:all .12s; font-weight:800; letter-spacing:1px; line-height:1; }
+.wb-bord-menu-btn:hover { background:#e0e7ff; color:#6366f1; border-color:#c7d2fe; }
+.wb-bord-dropdown { position:absolute; right:0; top:calc(100% + 4px); background:#fff; border:1.5px solid #e0e7ff; border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18); min-width:200px; z-index:9999; padding:6px; display:none; }
+.wb-bord-dropdown.open { display:block; }
+.wb-drop-item { display:flex; align-items:center; gap:10px; width:100%; border:none; background:none; padding:10px 12px; border-radius:9px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; color:#374151; text-align:left; transition:background .1s; }
+.wb-drop-item:hover { background:#f1f5f9; }
+.wb-drop-item.danger { color:#dc2626; }
+.wb-drop-item.danger:hover { background:#fff5f5; }
+.wb-drop-sep { height:1px; background:#f1f5f9; margin:4px 0; }
+.wb-bord-acties { position:relative; }
+
+
+/* ══ BORD-ILLUSTRATIES ══════════════════════════════════════════════════ */
+.wb-illus { border-radius:10px; overflow:hidden; margin:0 auto 12px; border:1.5px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.07); max-width:360px; display:block; }
+.wb-illus-bar { padding:5px 10px; display:flex; align-items:center; gap:5px; }
+.wb-illus-bar-klas { background:#1e1b4b; }
+.wb-illus-bar-kind { background:#4c1d95; }
+.wb-illus-dot { width:6px; height:6px; border-radius:50%; }
+.wb-illus-lbl { font-size:8px; color:rgba(255,255,255,.55); margin-left:4px; font-weight:700; }
+
+/* Klasbord grid */
+.kb-illus-body { background:#f0f4fb; padding:5px; height:90px; overflow:hidden; }
+.kb-illus-grid { display:grid; grid-template-columns:52px repeat(4,1fr); gap:2px; width:100%; }
+.kb-illus-cell { border-radius:4px; padding:3px 4px; font-size:8px; font-weight:700; text-align:center; }
+.kb-illus-head-n { background:#e0e7ff; color:#3730a3; }
+.kb-illus-head-t { background:#fef3c7; color:#92400e; font-size:8px; }
+.kb-illus-naam { background:#f8fafc; color:#374151; text-align:left; }
+.kb-illus-v { display:flex; align-items:center; justify-content:center; font-size:9px; }
+.kb-illus-leeg { background:#f1f5f9; }
+.kb-illus-bezig { background:#fef9c3; }
+.kb-illus-klaar { background:#dcfce7; color:#16a34a; }
+
+/* Kindbord kaartjes */
+.kn-illus-body { background:#faf5ff; padding:5px; display:grid; grid-template-columns:repeat(4,1fr); gap:3px; height:90px; overflow:hidden; align-content:start; }
+.kn-illus-kaart { background:#fff; border-radius:6px; padding:4px 3px; text-align:center; border:1px solid #ede9fe; }
+.kn-illus-av { width:18px; height:18px; border-radius:50%; margin:0 auto 2px; display:flex; align-items:center; justify-content:center; font-size:7px; font-weight:800; color:#fff; }
+.kn-illus-naam { font-size:7px; font-weight:800; color:#1e1b4b; }
+.kn-illus-bar { height:2px; border-radius:2px; background:#e2e8f0; margin-top:2px; overflow:hidden; }
+.kn-illus-fill { height:100%; border-radius:2px; }
+</style>
+
+</head>
+<body>
+<div class="pro-header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="pro-badge">⭐ PRO</span>
+    <span class="pro-header-title">📋 Klasbord — Juf Zisa PRO</span>
+  </div>
+  <a href="../../app.html" style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:5px 14px;font-size:13px;font-weight:800;text-decoration:none;font-family:Nunito,sans-serif;border:1px solid rgba(255,255,255,.25);">☰ Keuzemenu</a>
+</div>
+<div id="app"><div id="dashboard"><!-- Welkomstregel -->
+    <div style="background:#4c1d95;padding:12px 32px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <div>
+        <div style="font-size:28px;font-weight:800;color:#fff;">👋 Welkom bij Takenbord</div>
+        <div style="font-size:15px;color:rgba(255,255,255,.65);margin-top:4px;">Kies een bord om te openen, of maak een nieuw bord aan.</div>
+      </div>
+      <div style="background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:20px;padding:8px 18px;font-size:14px;font-weight:800;color:#fff;white-space:nowrap;">✅ Alles automatisch bewaard</div>
+    </div>
+
+    <!-- Twee secties naast elkaar -->
+    <div class="wb-grid">
+
+      <!-- KLASBORD sectie -->
+      <div class="wb-sectie" id="sectie-klasbord">
+        <div class="wb-sectie-hdr wb-hdr-klas">
+          <div class="wb-sectie-icon">📋</div>
+          <div class="wb-sectie-info">
+            <div class="wb-sectie-titel">Klasbord</div>
+            <div class="wb-sectie-sub">Alle kinderen &amp; taken op één bord — ideaal voor hoekenwerk of contractwerk</div>
+          </div>
+          <div class="wb-type-badge">Heel de klas</div>
+          <button class="wb-info-btn" onclick="toggleUitleg('klas')">?</button>
+        </div>
+        <div class="wb-uitleg hidden" id="uitleg-klas">
+          Alle leerlingen staan in rijen, de taken in kolommen. Jij of de leerling klikt een hokje aan: leeg → bezig → klaar. Per kind kan je een taak verbergen of een extra taak toevoegen.
+        </div>
+        <div class="wb-illus">
+          <div class="wb-illus-bar wb-illus-bar-klas">
+            <div class="wb-illus-dot" style="background:#f59e0b;"></div>
+            <div class="wb-illus-dot" style="background:#fde68a;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Zo ziet het eruit — namen × taken</span>
+          </div>
+          <div class="kb-illus-body">
+            <div class="kb-illus-grid">
+              <div class="kb-illus-cell kb-illus-head-n">Leerling</div>
+              <div class="kb-illus-cell kb-illus-head-t">📖 Lezen</div>
+              <div class="kb-illus-cell kb-illus-head-t">🔢 Rekenen</div>
+              <div class="kb-illus-cell kb-illus-head-t">✏️ Schrijven</div>
+              <div class="kb-illus-cell kb-illus-head-t">🎨 Tekenen</div>
+              <div class="kb-illus-cell kb-illus-naam">Bram</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Elif</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Finn</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-naam">Noor</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-bezig kb-illus-v">🔄</div>
+              <div class="kb-illus-cell kb-illus-naam">Liam</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-klaar kb-illus-v">✓</div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+              <div class="kb-illus-cell kb-illus-leeg kb-illus-v"></div>
+            </div>
+          </div>
+        </div>
+        <div class="wb-borden-lijst" id="lijst-klasbord"></div>
+        <div id="info-klasbord" style="margin-bottom:8px;"></div>
+        <button type="button" class="wb-nieuw-btn" onclick="dashNieuw('klasbord')">➕ Nieuw klasbord aanmaken</button>
+      </div>
+
+      <!-- KINDBORD sectie -->
+      <div class="wb-sectie" id="sectie-kindbord">
+        <div class="wb-sectie-hdr wb-hdr-kind">
+          <div class="wb-sectie-icon">👤</div>
+          <div class="wb-sectie-info">
+            <div class="wb-sectie-titel">Kindbord</div>
+            <div class="wb-sectie-sub">Kinderen klikken op hun naam en zien hun eigen taken — ideaal voor differentiatie</div>
+          </div>
+          <div class="wb-type-badge">Per kind</div>
+          <button class="wb-info-btn" onclick="toggleUitleg('kind')">?</button>
+        </div>
+        <div class="wb-uitleg hidden" id="uitleg-kind">
+          Op het smartboard zie je enkel de namen. Een kind klikt op zijn naam en ziet zijn persoonlijke takenlijst. Handig als elk kind andere taken heeft.
+        </div>
+        <div class="wb-illus">
+          <div class="wb-illus-bar wb-illus-bar-kind">
+            <div class="wb-illus-dot" style="background:#a78bfa;"></div>
+            <div class="wb-illus-dot" style="background:#ddd6fe;"></div>
+            <div class="wb-illus-dot" style="background:rgba(255,255,255,.3);"></div>
+            <span class="wb-illus-lbl">Zo ziet het eruit — klik op je naam</span>
+          </div>
+          <div class="kn-illus-body">
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#f97316;">B</div><div class="kn-illus-naam">Bram</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:60%;background:#f97316;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#8b5cf6;">E</div><div class="kn-illus-naam">Elif</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:75%;background:#8b5cf6;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#22c55e;">F</div><div class="kn-illus-naam">Finn</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#ec4899;">N</div><div class="kn-illus-naam">Noor</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:30%;background:#ec4899;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#0ea5e9;">L</div><div class="kn-illus-naam">Liam</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:50%;background:#0ea5e9;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#d97706;">A</div><div class="kn-illus-naam">Amira</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:100%;background:#22c55e;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#7c3aed;">T</div><div class="kn-illus-naam">Tibo</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:40%;background:#7c3aed;"></div></div></div>
+            <div class="kn-illus-kaart"><div class="kn-illus-av" style="background:#0d9488;">S</div><div class="kn-illus-naam">Sara</div><div class="kn-illus-bar"><div class="kn-illus-fill" style="width:80%;background:#0d9488;"></div></div></div>
+
+          </div>
+        </div>
+        <div class="wb-borden-lijst" id="lijst-kindbord"></div>
+        <div id="info-kindbord" style="margin-bottom:8px;"></div>
+        <button type="button" class="wb-nieuw-btn wb-nieuw-kind" onclick="dashNieuw('kindbord')">➕ Nieuw kindbord aanmaken</button>
+      </div>
+
+    </div>
+
+    <!-- Tip onderaan -->
+    <div class="wb-tip">
+      <div class="wb-tip-dot"></div>
+      Je kan zoveel borden aanmaken als je wil. De 3 meest recente worden bewaard, oudere verdwijnen automatisch.
+    </div>
+
+    <!-- ── GRAADSKLAS-WEERGAVE ── -->
+    <div class="graad-sectie">
+      <div class="graad-sectie-hdr">
+        <div class="graad-sectie-icon">📊</div>
+        <div class="graad-sectie-info">
+          <div class="graad-sectie-titel">Graadsklas-weergave</div>
+          <div class="graad-sectie-sub">Heb je een graadsklas (bv. 3de + 4de leerjaar)? Toon twee klasborden naast elkaar op het smartboard — elk met eigen naamlijst en taken, elk in een eigen kleur.</div>
+        </div>
+        <div class="graad-sectie-badge">✨ Nieuw</div>
+      </div>
+      <div id="graad-lijst" class="graad-lijst"></div>
+      <button type="button" class="graad-nieuw-btn" onclick="opendNieuweGraadsklas()" id="graad-nieuw-btn">➕ Graadsklas-weergave aanmaken</button>
+    </div>
+
+  </div>
+
+  <!-- Verborgen schermen voor JS-compatibiliteit -->
+  <div id="scherm-type" style="display:none;"></div>
+  <div id="scherm-borden" style="display:none;">
+    <div id="borden-list"></div>
+    <div id="borden-info"></div>
+    <span id="borden-titel"></span>
+    <span id="borden-badge"></span>
+    <button id="nieuw-bord-btn"></button>
+  </div>
+
+</div>
+
+<!-- ── GRAADSKLAS NIEUW/BEWERK MODAL ── -->
+<div class="overlay-bg" id="modal-graad-nieuw" style="display:none;" onclick="if(event.target===this)sluitGraadNieuw()">
+  <div class="modal-kaart" style="max-width:540px;">
+    <h3 id="graad-modal-titel">📊 Graadsklas-weergave aanmaken</h3>
+    <p>Kies 2 bestaande klasborden en geef elk een korte klaslabel (bv. 3A, 4A, Rupsjes…). Zo zie je beide borden mooi naast elkaar op het smartboard.</p>
+
+    <label style="font-size:12px;font-weight:800;color:#374151;display:block;margin-bottom:6px;">Naam van deze graadsklas-weergave</label>
+    <input type="text" class="modal-input" id="graad-naam-input" placeholder="bv. Mijn graadsklas 3-4">
+
+    <div class="graad-modal-keuzes">
+      <div class="graad-keuze-groep">
+        <div class="graad-keuze-hdr">Eerste bord (links — warm oranje)</div>
+        <div class="graad-keuze-velden">
+          <input type="text" class="graad-keuze-label-input" id="graad-label-1" placeholder="3A" maxlength="6">
+          <select class="graad-keuze-select" id="graad-bord-1">
+            <option value="">Kies een bord…</option>
+          </select>
+        </div>
+        <div class="graad-klas-hint">💡 Korte klaslabel zoals <strong>3A</strong>, <strong>Rupsjes</strong> of wat je wil.</div>
+      </div>
+      <div class="graad-keuze-groep">
+        <div class="graad-keuze-hdr">Tweede bord (rechts — zacht blauw)</div>
+        <div class="graad-keuze-velden">
+          <input type="text" class="graad-keuze-label-input" id="graad-label-2" placeholder="4A" maxlength="6">
+          <select class="graad-keuze-select" id="graad-bord-2">
+            <option value="">Kies een bord…</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="graad-fout" style="display:none;background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:10px;font-size:13px;margin-bottom:12px;"></div>
+
+    <div class="modal-btns">
+      <button type="button" class="modal-btn-cancel" onclick="sluitGraadNieuw()">Annuleren</button>
+      <button type="button" class="modal-btn-ok" onclick="bewaarGraadsklas()" id="graad-bewaar-btn">Aanmaken en openen</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── GRAADSKLAS VERWIJDER-BEVESTIGING ── -->
+<div class="overlay-bg" id="modal-graad-del" style="display:none;" onclick="if(event.target===this)sluitGraadDel()">
+  <div class="modal-kaart">
+    <h3>🗑️ Graadsklas-weergave verwijderen</h3>
+    <p>Weet je zeker dat je deze graadsklas-weergave wil verwijderen?</p>
+    <div class="warn-box" style="background:#f0fdf4;border-color:#86efac;color:#15803d;">
+      ✅ <strong>Je klasborden zelf blijven bestaan.</strong><br/>
+      Enkel de koppeling tussen de 2 borden verdwijnt. De QR-code werkt daarna niet meer.
+    </div>
+    <div id="graad-del-info" style="font-size:13px;color:#374151;padding:10px 14px;background:#f8fafc;border-radius:10px;margin-bottom:14px;"></div>
+    <button class="modal-btn-danger" onclick="bevestigGraadDel()">Ja, verwijder de graadsklas-weergave</button>
+    <button class="modal-btn-sec" onclick="sluitGraadDel()">Annuleren</button>
+  </div>
+</div>
+
+<!-- NIEUW BORD MODAL -->
+<div class="overlay-bg" id="modal-nieuw" style="display:none;" onclick="if(event.target===this)sluitNieuw()">
+  <div class="modal-kaart">
+    <h3>➕ Nieuw bord aanmaken</h3>
+    <p>Geef het een naam zodat je het makkelijk terugvindt.</p>
+
+    <label style="font-size:12px;font-weight:800;color:#374151;display:block;margin-bottom:6px;">Naam van dit bord</label>
+    <input type="text" class="modal-input" id="nieuw-naam"
+           placeholder="bv. Mijn klas of Hoekwerk week 14"
+           onkeydown="if(event.key==='Enter')maakNieuwBord()">
+
+    <!-- Basis van bestaand bord: enkel tonen als er al borden zijn -->
+    <div id="nieuw-basis-sectie" style="display:none;margin-bottom:6px;">
+      <label style="font-size:12px;font-weight:800;color:#374151;display:block;margin-bottom:6px;">Vertrek van een bestaand bord?</label>
+      <select id="nieuw-basis-keuze" style="width:100%;border:2px solid #e0e7ff;border-radius:10px;padding:9px 12px;font-size:14px;font-family:inherit;color:#374151;background:#fff;margin-bottom:6px;" onchange="updateBasisInfo()"></select>
+      <div id="nieuw-basis-info" style="font-size:11px;color:#6b7280;line-height:1.6;padding:8px 10px;background:#f8fafc;border-radius:8px;display:none;"></div>
+    </div>
+
+    <div class="modal-btns">
+      <button type="button" class="modal-btn-cancel" onclick="sluitNieuw()">Annuleren</button>
+      <button type="button" class="modal-btn-ok" id="modal-nieuw-ok" onclick="maakNieuwBord()">Aanmaken en openen</button>
+    </div>
+  </div>
+</div>
+
+<!-- VERWIJDER BEVESTIGING --><!-- VERWIJDER BEVESTIGING -->
+<div class="overlay-bg" id="modal-del" style="display:none;">
+  <div class="modal-kaart">
+    <h3>🗑️ Bord verwijderen?</h3>
+    <div class="warn-box" id="del-info"></div>
+    <p style="font-size:12px;color:#6b7280;">Dit verwijdert alle leerlingen, taken en voortgang. Dit kan niet ongedaan gemaakt worden.</p>
+    <div class="modal-btns">
+      <button type="button" class="modal-btn-cancel" onclick="sluitDel()">Annuleren</button>
+      <button type="button" class="modal-btn-danger" style="flex:1;margin-bottom:0;" onclick="bevestigDel()">🗑️ Definitief verwijderen</button>
+    </div>
+  </div>
+</div>
+
+<!-- SMARTBOARD / QR MODAL -->
+<div class="overlay-bg" id="modal-sb" style="display:none;" onclick="if(event.target===this)sluitSB()">
+  <div class="modal-kaart" style="max-width:500px;max-height:92vh;overflow-y:auto;">
+    <h3>📺 Smartboard / iPad</h3>
+    <p>Beheerknoppen zijn verborgen. Kinderen zien enkel namen en taken.<br/>
+    <strong>Terugkeren:</strong> klik het kleine 🔒 rechtsonder.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+      <button type="button" class="modal-btn-ok" onclick="gaNaarSmartboard()">📺 Openen op dit scherm</button>
+      <button type="button" style="border:2px solid #86efac;background:#f0fdf4;color:#15803d;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="toggleQR()">📱 QR-code voor iPad tonen</button>
+      <button type="button" class="modal-btn-cancel" onclick="sluitSB()">Annuleren</button>
+    </div>
+    <div class="qr-section" id="qr-sectie">
+      <div style="font-size:14px;font-weight:800;color:#1e1b4b;margin-bottom:4px;">📱 QR-code voor iPad</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:12px;">Kinderen scannen met de iPad-camera. Tip: druk af en hang op in de klas.</div>
+      <div class="qr-box">
+        <div id="qr-canvas" style="flex-shrink:0;border-radius:10px;border:3px solid #e0e7ff;padding:6px;background:#fff;"></div>
+        <div style="flex:1;min-width:140px;">
+          <div class="qr-url" id="qr-url-tekst"></div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <button type="button" style="border:none;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:8px;padding:7px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="printQR()">🖨️ Afdrukken</button>
+            <button type="button" style="border:none;background:#e0e7ff;color:#4338ca;border-radius:8px;padding:7px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;" onclick="kopieerQR()">📋 Link kopiëren</button>
+          </div>
+        </div>
+      </div>
+      <div class="qr-note">⚠️ iPad en dit toestel moeten op hetzelfde WiFi-netwerk staan. Wijzigingen op iPad zijn voorlopig niet zichtbaar op het smartboard.</div>
+    </div>
+  </div>
+</div>
+
+<div id="qr-print-area">
+  <h2 id="qr-print-titel"></h2>
+  <p>Scan met de iPad-camera.</p>
+  <div id="qr-print-canvas" style="margin:0 auto 12px;"></div>
+  <div id="qr-print-url" style="font-size:11px;color:#6b7280;word-break:break-all;max-width:280px;margin:0 auto;"></div>
+</div>
+
+  <!-- Firebase — moet voor inline script laden -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-klasbord.js"></script>
+
+<script>
+// ── STORAGE (FIREBASE) ────────────────────────────────────────────────────
+const MAX_BORDEN = 3;
+const BORDEN_KEY = 'borden_v1'; // lokale cache
+
+// In-memory meta cache
+let _metaCache = null;
+
+function getBorden(type){
+  if(_metaCache) return _metaCache[type] || [];
+  try { return JSON.parse(localStorage.getItem(BORDEN_KEY) || '{}')[type] || []; }
+  catch { return []; }
+}
+function saveBorden(type, lijst){
+  // Update cache
+  if(!_metaCache) _metaCache = {};
+  _metaCache[type] = lijst;
+  // Sla op in localStorage als fallback
+  try {
+    const all = JSON.parse(localStorage.getItem(BORDEN_KEY)||'{}');
+    all[type] = lijst;
+    localStorage.setItem(BORDEN_KEY, JSON.stringify(all));
+  } catch {}
+  // Sla op in Firestore
+  if(_metaCache) window.fbSaveMeta(_metaCache).catch(console.warn);
+}
+function uid(){ return '_'+Math.random().toString(36).slice(2)+Date.now(); }
+function fmtDatum(ts){
+  if(!ts) return '';
+  try { return new Date(ts).toLocaleDateString('nl-BE',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+  catch { return ''; }
+}
+
+// Migreer bestaande data
+function migreer(){
+  const all = JSON.parse(localStorage.getItem(BORDEN_KEY)||'{}');
+  // Klasbord
+  if((!all.klasbord || !all.klasbord.length)){
+    try {
+      const d = JSON.parse(localStorage.getItem('taakbord_test_v4')||'{}');
+      if(d.pupils && d.pupils.length){
+        const id = uid();
+        all.klasbord = [{ id, naam:'Mijn klasbord', storageKey:'taakbord_test_v4', aangemaakt:Date.now(), bijgewerkt:Date.now() }];
+        localStorage.setItem(BORDEN_KEY, JSON.stringify(all));
+      }
+    } catch {}
+  }
+  // Kindbord
+  if(!all.kindbord || !all.kindbord.length){
+    try {
+      const d = JSON.parse(localStorage.getItem('takenbord_kind_v1')||'{}');
+      if(d.pupils && d.pupils.length){
+        const id = uid();
+        all.kindbord = [{ id, naam:'Mijn kindbord', storageKey:'takenbord_kind_v1', aangemaakt:Date.now(), bijgewerkt:Date.now() }];
+        localStorage.setItem(BORDEN_KEY, JSON.stringify(all));
+      }
+    } catch {}
+  }
+}
+
+// ── NAVIGATIE ─────────────────────────────────────────────────────────────
+var huidigType = 'klasbord'; // default voor modals
+
+function toonType(){ renderDashboard(); }
+function toonBorden(type){ huidigType = type; renderDashboard(); }
+
+function dashNieuw(type){
+  huidigType = type;
+  openNieuwBord();
+}
+
+function renderDashboard(){
+  renderSectie('klasbord');
+  renderSectie('kindbord');
+  renderGraadLijst();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ═══ GRAADSKLAS-WEERGAVE BEHEER ═══════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════
+function getGraadsklassen(){
+  if(_metaCache && Array.isArray(_metaCache.graadsklassen)) return _metaCache.graadsklassen;
+  try {
+    const m = JSON.parse(localStorage.getItem(BORDEN_KEY) || '{}');
+    return Array.isArray(m.graadsklassen) ? m.graadsklassen : [];
+  } catch { return []; }
+}
+
+function saveGraadsklassen(lijst){
+  if(!_metaCache) _metaCache = {};
+  _metaCache.graadsklassen = lijst;
+  try {
+    const all = JSON.parse(localStorage.getItem(BORDEN_KEY)||'{}');
+    all.graadsklassen = lijst;
+    localStorage.setItem(BORDEN_KEY, JSON.stringify(all));
+  } catch {}
+  if(window.fbSaveMeta) window.fbSaveMeta(_metaCache).catch(console.warn);
+}
+
+function renderGraadLijst(){
+  const lijst = document.getElementById('graad-lijst');
+  if(!lijst) return;
+
+  const klasborden = getBorden('klasbord');
+  const btn = document.getElementById('graad-nieuw-btn');
+  if(btn){
+    if(klasborden.length < 2){
+      btn.disabled = true;
+      btn.textContent = '➕ Eerst 2 klasborden aanmaken hierboven';
+    } else {
+      btn.disabled = false;
+      btn.textContent = '➕ Graadsklas-weergave aanmaken';
+    }
+  }
+
+  const graden = getGraadsklassen();
+  lijst.innerHTML = '';
+
+  if(!graden.length){
+    lijst.innerHTML = '<div style="text-align:center;padding:18px;color:#9ca3af;font-size:13px;">Nog geen graadsklas-weergaves aangemaakt.</div>';
+    return;
+  }
+
+  graden.forEach(function(gk){
+    const rij = document.createElement('div');
+    rij.className = 'graad-rij';
+
+    const info = document.createElement('div');
+    info.className = 'graad-rij-info';
+    const label1 = (gk.bord1 && gk.bord1.klaslabel) || '?';
+    const label2 = (gk.bord2 && gk.bord2.klaslabel) || '?';
+    info.innerHTML =
+      '<div class="graad-rij-titel">' + esc(gk.naam || (label1 + ' + ' + label2)) + '</div>' +
+      '<div class="graad-rij-sub">' + esc(label1) + ' + ' + esc(label2) + ' · Bijgewerkt: ' + fmtDatum(gk.bijgewerkt||gk.aangemaakt) + '</div>';
+
+    const openLink = document.createElement('a');
+    openLink.className = 'graad-rij-btn';
+    openLink.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(gk.id);
+    openLink.textContent = '▶ Openen';
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'graad-rij-del';
+    delBtn.textContent = '🗑';
+    delBtn.title = 'Verwijderen';
+    delBtn.onclick = (function(id){ return function(e){ e.stopPropagation(); openGraadDel(id); }; })(gk.id);
+
+    rij.innerHTML = '<div class="graad-rij-icon">📊</div>';
+    rij.appendChild(info);
+    rij.appendChild(delBtn);
+    rij.appendChild(openLink);
+    lijst.appendChild(rij);
+  });
+}
+
+let _bewerkGraadId = null;
+
+function opendNieuweGraadsklas(){
+  _bewerkGraadId = null;
+  document.getElementById('graad-modal-titel').textContent = '📊 Graadsklas-weergave aanmaken';
+  document.getElementById('graad-bewaar-btn').textContent = 'Aanmaken en openen';
+  document.getElementById('graad-naam-input').value = '';
+  document.getElementById('graad-label-1').value = '';
+  document.getElementById('graad-label-2').value = '';
+  document.getElementById('graad-fout').style.display = 'none';
+
+  const bordenLijst = getBorden('klasbord');
+  [1,2].forEach(function(n){
+    const sel = document.getElementById('graad-bord-'+n);
+    sel.innerHTML = '<option value="">Kies een bord…</option>' +
+      bordenLijst.map(function(b){
+        return '<option value="'+esc(b.id)+'">'+esc(b.naam)+'</option>';
+      }).join('');
+  });
+
+  document.getElementById('modal-graad-nieuw').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('graad-naam-input').focus(); }, 50);
+}
+
+function sluitGraadNieuw(){
+  document.getElementById('modal-graad-nieuw').style.display = 'none';
+}
+
+function bewaarGraadsklas(){
+  const naam = document.getElementById('graad-naam-input').value.trim();
+  const label1 = document.getElementById('graad-label-1').value.trim();
+  const label2 = document.getElementById('graad-label-2').value.trim();
+  const bordid1 = document.getElementById('graad-bord-1').value;
+  const bordid2 = document.getElementById('graad-bord-2').value;
+  const foutEl = document.getElementById('graad-fout');
+
+  function toonFout(msg){
+    foutEl.textContent = msg;
+    foutEl.style.display = '';
+  }
+
+  if(!naam){ toonFout('Geef je graadsklas-weergave een naam.'); return; }
+  if(!label1 || !label2){ toonFout('Geef beide borden een klaslabel (bv. 3A en 4A).'); return; }
+  if(!bordid1 || !bordid2){ toonFout('Kies beide borden.'); return; }
+  if(bordid1 === bordid2){ toonFout('Kies 2 verschillende borden.'); return; }
+
+  const bordenLijst = getBorden('klasbord');
+  const bord1 = bordenLijst.find(function(b){ return b.id === bordid1; });
+  const bord2 = bordenLijst.find(function(b){ return b.id === bordid2; });
+  if(!bord1 || !bord2){ toonFout('Een van de gekozen borden bestaat niet meer.'); return; }
+
+  const graden = getGraadsklassen();
+  const id = _bewerkGraadId || uid();
+
+  const nieuweGraad = {
+    id: id,
+    naam: naam,
+    bord1: { bordid: bord1.id, storageKey: bord1.storageKey, klaslabel: label1, bordnaam: bord1.naam },
+    bord2: { bordid: bord2.id, storageKey: bord2.storageKey, klaslabel: label2, bordnaam: bord2.naam },
+    aangemaakt: _bewerkGraadId ? (graden.find(function(g){return g.id===id;}) || {}).aangemaakt || Date.now() : Date.now(),
+    bijgewerkt: Date.now()
+  };
+
+  if(_bewerkGraadId){
+    const i = graden.findIndex(function(g){ return g.id === _bewerkGraadId; });
+    if(i >= 0) graden[i] = nieuweGraad; else graden.push(nieuweGraad);
+  } else {
+    graden.push(nieuweGraad);
+  }
+
+  saveGraadsklassen(graden);
+
+  if(window.fbSaveShared){
+    const sharedDoc = {
+      naam: naam,
+      bord1: nieuweGraad.bord1,
+      bord2: nieuweGraad.bord2,
+      bijgewerkt: Date.now()
+    };
+    window.fbSaveShared('graadsklas_'+id, sharedDoc).catch(console.warn);
+    try{ localStorage.setItem('graadsklas_'+id, JSON.stringify(sharedDoc)); }catch(e){}
+  }
+
+  sluitGraadNieuw();
+  window.location.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(id);
+}
+
+let _delGraadId = null;
+
+function openGraadDel(id){
+  _delGraadId = id;
+  const gk = getGraadsklassen().find(function(g){ return g.id === id; });
+  if(!gk) return;
+  const label1 = (gk.bord1 && gk.bord1.klaslabel) || '?';
+  const label2 = (gk.bord2 && gk.bord2.klaslabel) || '?';
+  document.getElementById('graad-del-info').innerHTML =
+    '<strong>' + esc(gk.naam) + '</strong><br/>Koppelt: ' + esc(label1) + ' + ' + esc(label2);
+  document.getElementById('modal-graad-del').style.display = 'flex';
+}
+
+function sluitGraadDel(){
+  document.getElementById('modal-graad-del').style.display = 'none';
+}
+
+function bevestigGraadDel(){
+  if(!_delGraadId) return;
+  const graden = getGraadsklassen().filter(function(g){ return g.id !== _delGraadId; });
+  saveGraadsklassen(graden);
+  sluitGraadDel();
+  _delGraadId = null;
+  renderGraadLijst();
+}
+
+function renderSectie(type){
+  var isKind = type === 'kindbord';
+  var sectieEl = document.querySelector('#sectie-' + type);
+  if(sectieEl) sectieEl.style.border = isKind ? '2.5px solid #ddd6fe' : '2.5px solid #fde68a';
+  var lijst = document.getElementById('lijst-' + type);
+  var infoEl = document.getElementById('info-' + type);
+  if(!lijst) return;
+
+  var borden = getBorden(type);
+  lijst.innerHTML = '';
+
+  if(!borden.length){
+    lijst.innerHTML = '<div class="wb-leeg"><div class="wb-leeg-icon">' + (isKind ? '👤' : '📋') + '</div>Nog geen borden aangemaakt.<br/>Klik hieronder om te starten.</div>';
+  } else {
+    borden.forEach(function(bord){
+      var n = 0;
+      try { n = (JSON.parse(localStorage.getItem(bord.storageKey)||'{}')).pupils.length || 0; } catch {}
+      var rij = document.createElement('div');
+      rij.className = 'wb-bord-rij' + (isKind ? ' kind' : '');
+
+      // Stip
+      var dot = document.createElement('div');
+      dot.className = 'wb-bord-dot';
+
+      // Info
+      var info = document.createElement('div');
+      info.style.cssText = 'flex:1;min-width:0;';
+      info.innerHTML = '<div class="wb-bord-naam">' + esc(bord.naam) + '</div>'
+        + '<div class="wb-bord-meta">' + (n ? n + ' leerlingen · ' : '') + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>';
+
+      // Openen
+      var openBtn = document.createElement('button');
+      openBtn.className = 'wb-bord-open';
+      openBtn.textContent = '▶ Openen';
+      openBtn.onclick = (function(t,id){ return function(e){ e.stopPropagation(); huidigType=t; openBord(id); }; })(type, bord.id);
+
+      // ··· knop + dropdown
+      var actiesWrap = document.createElement('div');
+      actiesWrap.style.cssText = 'position:relative;flex-shrink:0;';
+
+      var menuBtn = document.createElement('button');
+      menuBtn.className = 'wb-bord-menu-btn';
+      menuBtn.textContent = '···';
+
+      var dropdown = document.createElement('div');
+      dropdown.className = 'wb-bord-dropdown';
+      dropdown.innerHTML =
+          '<button class="wb-drop-item" data-act="sb">📺 Smartboard / iPad</button>'
+        + '<button class="wb-drop-item" data-act="ren">✎ Naam wijzigen</button>'
+        + '<div class="wb-drop-sep"></div>'
+        + '<button class="wb-drop-item danger" data-act="del">🗑 Verwijderen</button>';
+
+      dropdown.addEventListener('click', (function(t,id){ return function(e){
+        e.stopPropagation();
+        var act = e.target.closest('[data-act]');
+        if(!act) return;
+        dropdown.classList.remove('open');
+        huidigType = t;
+        if(act.dataset.act === 'sb')  openSB(id);
+        if(act.dataset.act === 'ren') hernoemBord(id);
+        if(act.dataset.act === 'del') openDel(id);
+      }; })(type, bord.id));
+
+      menuBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        document.querySelectorAll('.wb-bord-dropdown.open').forEach(function(d){ if(d!==dropdown) d.classList.remove('open'); });
+        dropdown.classList.toggle('open');
+        if(dropdown.classList.contains('open')){
+          // Boven of onder openen afhankelijk van beschikbare ruimte
+          var rect = menuBtn.getBoundingClientRect();
+          var spaceBelow = window.innerHeight - rect.bottom;
+          if(spaceBelow < 160){
+            dropdown.style.top = 'auto';
+            dropdown.style.bottom = 'calc(100% + 4px)';
+          } else {
+            dropdown.style.top = 'calc(100% + 4px)';
+            dropdown.style.bottom = 'auto';
+          }
+        }
+      });
+
+      actiesWrap.appendChild(menuBtn);
+      actiesWrap.appendChild(dropdown);
+
+      rij.appendChild(dot);
+      rij.appendChild(info);
+      rij.appendChild(actiesWrap);
+      rij.appendChild(openBtn);
+      lijst.appendChild(rij);
+    });
+  }
+
+  if(infoEl){
+    var resterend = MAX_BORDEN - borden.length;
+    if(resterend <= 1 && borden.length > 0){
+      infoEl.innerHTML = resterend === 0
+        ? '<div class="wb-limiet-warn">⚠️ Maximum bereikt. Nieuw bord verwijdert het oudste (' + esc(borden[0].naam) + ').</div>'
+        : '<div class="wb-limiet-warn">⚠️ Nog 1 bord vrij. Bij een 4de bord wordt het oudste automatisch verwijderd.</div>';
+    } else {
+      infoEl.innerHTML = '';
+    }
+  }
+}
+
+
+function toggleUitleg(type){
+  var el = document.getElementById('uitleg-' + type);
+  if(el) el.classList.toggle('hidden');
+}
+
+function renderBordenLijst(){ renderDashboard(); }
+function renderBordenLijst_OLD(){
+  const lijst = document.getElementById('borden-list');
+  lijst.innerHTML = '';
+  const borden = getBorden(huidigType);
+
+  if(!borden.length){
+    lijst.innerHTML = '<div style="text-align:center;padding:20px;color:#9ca3af;font-size:14px;">Nog geen borden. Klik hieronder om je eerste bord aan te maken.</div>';
+    return;
+  }
+
+  borden.forEach(function(bord){
+    let leerlingen = '';
+    try {
+      const d = JSON.parse(localStorage.getItem(bord.storageKey)||'{}');
+      const n = (d.pupils||[]).length;
+      leerlingen = n > 0 ? n + ' leerlingen · ' : '';
+    } catch {}
+
+    const rij = document.createElement('div');
+    rij.className = 'bord-rij' + (huidigType === 'kindbord' ? ' kind-rij' : '');
+    rij.innerHTML =
+      '<div class="bord-rij-icon">' + (huidigType === 'klasbord' ? '📋' : '👤') + '</div>'
+      + '<div class="bord-rij-info">'
+        + '<div class="bord-rij-naam">' + esc(bord.naam) + '</div>'
+        + '<div class="bord-rij-meta">' + leerlingen + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt||bord.aangemaakt) + '</div>'
+      + '</div>'
+      + '<button class="bord-rij-sb" onclick="event.stopPropagation();openSB(\'' + bord.id + '\')" title="Smartboard of iPad-weergave openen — alle beheerknoppen verborgen">📺 Smartboard / iPad</button>'
+      + '<div class="bord-rij-acties">'
+        + '<button class="bord-rij-btn" onclick="event.stopPropagation();hernoemBord(\'' + bord.id + '\')" title="Naam wijzigen">✎</button>'
+        + '<button class="bord-rij-btn" style="color:#fca5a5;" onclick="event.stopPropagation();openDel(\'' + bord.id + '\')" title="Verwijderen">🗑</button>'
+      + '</div>'
+      + '<button class="bord-rij-open" onclick="openBord(\'' + bord.id + '\')">▶ Openen</button>';
+    lijst.appendChild(rij);
+  });
+
+  // Info-tekst bijwerken
+  var infoEl = document.getElementById('borden-info');
+  if(infoEl){
+    var aantalBorden = borden.length;
+    var resterend = MAX_BORDEN - aantalBorden;
+    var infoHtml = '';
+
+    // Smartboard uitleg (altijd tonen als er minstens 1 bord is)
+    if(aantalBorden > 0){
+      infoHtml += '<div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px;padding:10px 14px;margin-bottom:8px;font-size:12px;color:#0369a1;line-height:1.7;">'
+        + '<strong>📺 Smartboard / iPad</strong> — opent het bord zonder beheerknoppen. '
+        + 'Kinderen zien enkel namen en taken. Via QR-code kunnen kinderen op een iPad werken. '
+        + 'Terugkeren naar beheer: klik het kleine 🔒 rechtsonder.'
+        + '</div>';
+    }
+
+    // 4-borden limiet uitleg
+    if(resterend === 1){
+      infoHtml += '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:9px 14px;font-size:12px;color:#92400e;line-height:1.6;">'
+        + '⚠️ Je kan nog <strong>1 bord</strong> aanmaken. Bij een 4de bord wordt het oudste bord automatisch verwijderd. '
+        + 'Download eerst een <strong>PDF rapport</strong> van dat bord als je de gegevens nog nodig hebt.'
+        + '</div>';
+    } else if(resterend === 0){
+      infoHtml += '<div style="background:#fff5f5;border:1.5px solid #fecaca;border-radius:10px;padding:9px 14px;font-size:12px;color:#dc2626;line-height:1.6;">'
+        + '⚠️ Je hebt het maximum van 3 borden bereikt. Als je een nieuw bord aanmaakt, wordt het oudste bord (<strong>' + esc(borden[0].naam) + '</strong>) verwijderd. '
+        + 'Download eerst een <strong>PDF rapport</strong> van dat bord als je die gegevens nog nodig hebt.'
+        + '</div>';
+    } else if(aantalBorden > 0 && resterend > 1){
+      infoHtml += '<div style="background:#f8fafc;border:1px solid #e0e7ff;border-radius:10px;padding:9px 14px;font-size:12px;color:#6b7280;line-height:1.6;">'
+        + 'Je kan maximaal 3 borden per type bewaren, bij aanmaak van een nieuw bord verdwijnt het oudste. Je hebt er nog <strong>' + resterend + '</strong> vrij.'
+        + '</div>';
+    }
+
+    infoEl.innerHTML = infoHtml;
+  }
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+// ── BORD OPENEN ───────────────────────────────────────────────────────────
+function openBord(id){
+  const borden = getBorden(huidigType);
+  const bord = borden.find(function(b){ return b.id === id; });
+  if(!bord) return;
+  bord.bijgewerkt = Date.now();
+  saveBorden(huidigType, borden);
+  if(huidigType === 'klasbord'){
+    window.location.href = 'klasbord.html?bordid=' + id + '&type=klasbord';
+  } else {
+    window.location.href = 'takenbord_kind.html?bordid=' + id + '&type=kindbord';
+  }
+}
+
+// ── NIEUW BORD ────────────────────────────────────────────────────────────
+function openNieuwBord(){
+  document.getElementById('nieuw-naam').value = '';
+  document.getElementById('modal-nieuw-ok').className =
+    'modal-btn-ok' + (huidigType === 'kindbord' ? ' kind' : '');
+
+  // Toon "vertrek van bestaand bord" als er al borden zijn
+  var borden = getBorden(huidigType);
+  var basisSectie = document.getElementById('nieuw-basis-sectie');
+  var basisKeuze = document.getElementById('nieuw-basis-keuze');
+  if(borden.length > 0){
+    basisSectie.style.display = 'block';
+    basisKeuze.innerHTML = '<option value="">Leeg bord starten</option>'
+      + borden.map(function(b){
+          var n = 0;
+          try { n = (JSON.parse(localStorage.getItem(b.storageKey)||'{}')).pupils.length || 0; } catch{}
+          return '<option value="' + b.id + '">' + esc(b.naam) + (n ? ' — ' + n + ' leerlingen' : '') + '</option>';
+        }).join('');
+    document.getElementById('nieuw-basis-info').style.display = 'none';
+  } else {
+    basisSectie.style.display = 'none';
+  }
+
+  document.getElementById('modal-nieuw').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('nieuw-naam').focus(); }, 100);
+}
+
+function updateBasisInfo(){
+  var id = document.getElementById('nieuw-basis-keuze').value;
+  var infoEl = document.getElementById('nieuw-basis-info');
+  if(!id){ infoEl.style.display = 'none'; return; }
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id === id; });
+  if(!bord){ infoEl.style.display = 'none'; return; }
+  try {
+    var d = JSON.parse(localStorage.getItem(bord.storageKey)||'{}');
+    var nLeerlingen = (d.pupils||[]).length;
+    var nEigen = (d.customTasks||[]).length;
+    var nActief = (d.activeTasks||[]).length;
+    infoEl.innerHTML = '👥 ' + nLeerlingen + ' leerlingen · '
+      + '📋 ' + nActief + ' actieve taken'
+      + (nEigen ? ' + ' + nEigen + ' eigen taken' : '')
+      + '<br/>Voortgang en bevindingen starten leeg.';
+    infoEl.style.display = 'block';
+  } catch { infoEl.style.display = 'none'; }
+}
+
+function sluitNieuw(){ document.getElementById('modal-nieuw').style.display = 'none'; }
+
+function maakNieuwBord(){
+  var naam = document.getElementById('nieuw-naam').value.trim();
+  if(!naam){ document.getElementById('nieuw-naam').focus(); return; }
+  var borden = getBorden(huidigType);
+  if(borden.length >= MAX_BORDEN){
+    sluitNieuw();
+    // Toon max-borden melding
+    var oldest = borden[0];
+    var leerlingen = '';
+    try { var d = JSON.parse(localStorage.getItem(oldest.storageKey)||'{}'); leerlingen = (d.pupils||[]).length + ' leerlingen · '; } catch {}
+    document.getElementById('max-oldest-info').innerHTML =
+      '<strong>' + esc(oldest.naam) + '</strong><br/>'
+      + leerlingen + 'Aangemaakt: ' + fmtDatum(oldest.aangemaakt);
+    pendingNaam = naam;
+    document.getElementById('modal-max').style.display = 'flex';
+    return;
+  }
+  doeAanmaken(naam);
+}
+
+var pendingNaam = '';
+
+function doeAanmaken(naam){
+  var id = uid();
+  var storageKey = (huidigType === 'klasbord' ? 'klas_' : 'kind_') + id;
+  var borden = getBorden(huidigType);
+  borden.push({ id:id, naam:naam, storageKey:storageKey, aangemaakt:Date.now(), bijgewerkt:Date.now() });
+  saveBorden(huidigType, borden);
+
+  // Haal basis-bord op als geselecteerd
+  var basisId = '';
+  var basisKeuze = document.getElementById('nieuw-basis-keuze');
+  if(basisKeuze) basisId = basisKeuze.value;
+
+  var nieuweState = huidigType === 'klasbord'
+    ? {pupils:[],activeTasks:[],progress:{},customTasks:[],pupilTaskOverrides:{},notes:{},showNumbers:false,showLastname:false,showSmileys:false,customIcons:{},pupilPhotos:{},taskLabelOverrides:{},boardSize:'normal'}
+    : {pupils:[],activeTasks:[],progress:{},customTasks:[],personalAssignments:{},kindBoardOnlyPersonal:false,nameOrder:'voornaam',showLastname:false,customIcons:{},pupilPhotos:{},taskLabelOverrides:{},notes:{},boardSize:'normal'};
+
+  if(basisId){
+    var basisBord = getBorden(huidigType).find(function(b){ return b.id === basisId; });
+    if(basisBord){
+      try {
+        var bron = JSON.parse(localStorage.getItem(basisBord.storageKey)||'{}');
+        // Leerlingen — nieuwe IDs, geen voortgang
+        nieuweState.pupils = (bron.pupils||[]).map(function(p){
+          return {id:'_'+Math.random().toString(36).slice(2)+Date.now(), voornaam:p.voornaam, achternaam:p.achternaam||''};
+        });
+        nieuweState.pupilPhotos = bron.pupilPhotos || {};
+        nieuweState.showLastname = bron.showLastname || false;
+        if('showNumbers' in nieuweState) nieuweState.showNumbers = bron.showNumbers || false;
+        if('nameOrder' in nieuweState) nieuweState.nameOrder = bron.nameOrder || 'voornaam';
+        // Taken + afbeeldingen + namen
+        nieuweState.activeTasks = bron.activeTasks || [];
+        nieuweState.customTasks = (bron.customTasks||[]).map(function(t){ return Object.assign({},t); });
+        nieuweState.taskLabelOverrides = bron.taskLabelOverrides || {};
+        nieuweState.customIcons = bron.customIcons || {};
+        if('showSmileys' in nieuweState) nieuweState.showSmileys = bron.showSmileys || false;
+        nieuweState.boardSize = bron.boardSize || 'normal';
+      } catch(e){}
+    }
+  }
+
+  localStorage.setItem(storageKey, JSON.stringify(nieuweState));
+  if(huidigType === 'klasbord'){
+    window.location.href = 'klasbord.html?bordid=' + id + '&type=klasbord';
+  } else {
+    window.location.href = 'takenbord_kind.html?bordid=' + id + '&type=kindbord';
+  }
+}
+
+function sluitMax(){ document.getElementById('modal-max').style.display = 'none'; }
+function verwijderOudsteEnMaak(){
+  var borden = getBorden(huidigType);
+  if(borden.length > 0){
+    localStorage.removeItem(borden[0].storageKey);
+    borden.shift();
+    saveBorden(huidigType, borden);
+  }
+  sluitMax();
+  doeAanmaken(pendingNaam);
+}
+function openOudsteVoorPdf(){
+  var borden = getBorden(huidigType);
+  if(borden.length > 0){
+    sluitMax();
+    openBord(borden[0].id);
+  }
+}
+
+// ── HERNOEMEN / VERWIJDEREN ───────────────────────────────────────────────
+function hernoemBord(id){
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===id; });
+  if(!bord) return;
+  var n = prompt('Nieuwe naam voor dit bord:', bord.naam);
+  if(!n || !n.trim()) return;
+  bord.naam = n.trim();
+  saveBorden(huidigType, borden);
+  renderBordenLijst();
+}
+
+var delId = '';
+function openDel(id){
+  delId = id;
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===id; });
+  if(!bord) return;
+  var leerlingen = '';
+  try { var d = JSON.parse(localStorage.getItem(bord.storageKey)||'{}'); leerlingen = (d.pupils||[]).length + ' leerlingen · '; } catch {}
+  document.getElementById('del-info').innerHTML =
+    '<strong>' + esc(bord.naam) + '</strong><br/>' + leerlingen + 'Bijgewerkt: ' + fmtDatum(bord.bijgewerkt);
+  document.getElementById('modal-del').style.display = 'flex';
+}
+function sluitDel(){ document.getElementById('modal-del').style.display = 'none'; }
+function bevestigDel(){
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===delId; });
+  if(bord) localStorage.removeItem(bord.storageKey);
+  saveBorden(huidigType, borden.filter(function(b){ return b.id!==delId; }));
+  sluitDel();
+  renderBordenLijst();
+}
+
+// ── SMARTBOARD / QR ───────────────────────────────────────────────────────
+var sbBordId = '';
+var qrKlaar = false;
+
+function openSB(id){ sbBordId=id; qrKlaar=false; document.getElementById('qr-sectie').classList.remove('visible'); document.getElementById('qr-canvas').innerHTML=''; document.getElementById('modal-sb').style.display='flex'; }
+function sluitSB(){ document.getElementById('modal-sb').style.display='none'; }
+
+function getBordUrl(modus){
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===sbBordId; });
+  if(!bord) return '';
+  var base = window.location.href.replace(/welkomstbord\.html.*$/,'');
+ var pagina;
+if(huidigType === 'klasbord'){
+  pagina = modus === 'ipad' ? 'klasbord_kind.html' : 'klasbord.html';
+} else {
+  pagina = modus === 'ipad' ? 'takenbord_kind_public.html' : 'takenbord_kind.html';
+}
+return base + pagina + '?bordid=' + sbBordId + '&type=' + huidigType + '&modus=' + modus;
+}
+function gaNaarSmartboard(){ window.location.href = getBordUrl('smartboard'); }
+function toggleQR(){
+  var s = document.getElementById('qr-sectie');
+  if(s.classList.contains('visible')){ s.classList.remove('visible'); return; }
+  s.classList.add('visible');
+  if(!qrKlaar) maakQR();
+}
+function maakQR(){
+  var url = getBordUrl('ipad');
+  document.getElementById('qr-url-tekst').textContent = url;
+  document.getElementById('qr-canvas').innerHTML = '';
+  if(typeof QRCode === 'undefined'){ document.getElementById('qr-canvas').innerHTML='<div style="padding:12px;font-size:12px;color:#dc2626;">QR-bibliotheek niet geladen.</div>'; return; }
+  new QRCode(document.getElementById('qr-canvas'),{text:url,width:150,height:150,colorDark:'#1e1b4b',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  qrKlaar = true;
+}
+function kopieerQR(){
+  var url = getBordUrl('ipad');
+  if(navigator.clipboard) navigator.clipboard.writeText(url).then(function(){ alert('Link gekopieerd!'); });
+  else prompt('Kopieer:', url);
+}
+function printQR(){
+  var url = getBordUrl('ipad');
+  var borden = getBorden(huidigType);
+  var bord = borden.find(function(b){ return b.id===sbBordId; });
+  document.getElementById('qr-print-titel').textContent = 'Scan om ' + (bord?bord.naam:'het bord') + ' te openen';
+  document.getElementById('qr-print-url').textContent = url;
+  var pc = document.getElementById('qr-print-canvas'); pc.innerHTML='';
+  if(typeof QRCode!=='undefined') new QRCode(pc,{text:url,width:220,height:220,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.M});
+  setTimeout(function(){ window.print(); }, 300);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+// Verberg schermen tot auth klaar is
+document.getElementById('scherm-type').style.display = 'none';
+document.getElementById('scherm-borden').style.display = 'none';
+document.getElementById('dashboard').style.display = 'none';
+
+// Toon laadmelding
+var laadEl = document.createElement('div');
+laadEl.id = 'laad-melding';
+laadEl.style.cssText = 'text-align:center;padding:60px 20px;font-family:Nunito,sans-serif;';
+laadEl.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">📋</div><div style="font-size:18px;font-weight:800;color:#1e1b4b;">Klasbord laden...</div><div style="font-size:13px;color:#9ca3af;margin-top:8px;">Even geduld</div>';
+document.getElementById('app').appendChild(laadEl);
+
+(function wachтOpFb(pogingen){
+  if(typeof window.fbOnReady === 'function'){
+    window.fbOnReady(async function(uid) {
+  // Verwijder laadmelding
+  var lm = document.getElementById('laad-melding');
+  if(lm) lm.remove();
+
+  if(!uid) {
+    // Niet ingelogd
+    var niel = document.createElement('div');
+    niel.style.cssText = 'text-align:center;padding:60px 20px;font-family:Nunito,sans-serif;';
+    niel.innerHTML = '<div style="font-size:48px;margin-bottom:16px;">🔒</div>'
+      + '<div style="font-size:18px;font-weight:800;color:#1e1b4b;">Je bent niet ingelogd</div>'
+      + '<div style="font-size:14px;color:#6b7280;margin-top:8px;">Log eerst in via Spelgenerator PRO.</div>'
+      + '<a href="../../app.html" style="display:inline-block;margin-top:20px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:12px;padding:12px 24px;font-weight:800;text-decoration:none;">← Naar Spelgenerator</a>';
+    document.getElementById('app').appendChild(niel);
+    return;
+  }
+
+  // Laad meta uit Firestore
+  try {
+    var meta = await window.fbLoadMeta();
+    if(meta && (meta.klasbord || meta.kindbord)) {
+      _metaCache = meta;
+      localStorage.setItem(BORDEN_KEY, JSON.stringify(meta));
+    } else {
+      await migreer();
+    }
+  } catch(e) {
+    console.warn('Meta laden mislukt:', e);
+    migreer();
+  }
+
+  // Toon het dashboard
+  renderDashboard();
+  document.getElementById('dashboard').style.display = '';
+});
+  } else if(pogingen > 0){
+    setTimeout(function(){ wachтOpFb(pogingen-1); }, 100);
+  }
+})(30);
+</script>
+  <script src="../../device-id.js"></script>
+  <script src="../../guard.js"></script>
+</body>
+</html>
