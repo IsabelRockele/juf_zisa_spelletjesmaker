@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kies je klas — Juf Zisa</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="firebase-klasbord.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:linear-gradient(160deg,#f0f9ff,#fef9ff);overflow:hidden;}
+
+#loading{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;padding:20px;}
+.loading-card{background:#fff;border-radius:24px;padding:28px 24px;max-width:420px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.08);text-align:center;}
+.loading-card .emoji{font-size:42px;margin-bottom:10px;}
+.loading-card .title{font-size:22px;font-weight:800;color:#1e1b4b;}
+.loading-card .sub{font-size:14px;color:#64748b;margin-top:6px;line-height:1.6;}
+
+#error-screen{display:none;position:fixed;inset:0;z-index:998;background:linear-gradient(160deg,#fff5f5,#fef2f2);align-items:center;justify-content:center;padding:20px;}
+#error-screen.show{display:flex;}
+.error-card{background:#fff;border-radius:24px;padding:32px 28px;max-width:400px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,.08);text-align:center;}
+
+#keuze-wrap{display:none;position:fixed;inset:0;padding:20px;align-items:center;justify-content:center;overflow:auto;}
+#keuze-wrap.show{display:flex;}
+.keuze-card{background:#fff;border-radius:28px;padding:36px 28px;max-width:680px;width:100%;box-shadow:0 20px 60px rgba(99,102,241,.15);text-align:center;}
+.keuze-emoji{font-size:56px;margin-bottom:10px;}
+.keuze-title{font-size:28px;font-weight:900;color:#1e1b4b;margin-bottom:6px;line-height:1.2;}
+.keuze-sub{font-size:15px;color:#64748b;font-weight:600;margin-bottom:26px;line-height:1.5;}
+
+.keuze-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media(max-width:560px){.keuze-grid{grid-template-columns:1fr;}}
+
+.keuze-knop{cursor:pointer;border:3px solid #e0e7ff;border-radius:22px;padding:26px 18px;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .15s;min-height:180px;}
+.keuze-knop:nth-child(1){background:linear-gradient(160deg,#fef3c7,#fef9c3);border-color:#fde68a;}
+.keuze-knop:nth-child(1):hover,.keuze-knop:nth-child(1):active{border-color:#f59e0b;transform:translateY(-3px);box-shadow:0 12px 30px rgba(245,158,11,.25);}
+.keuze-knop:nth-child(2){background:linear-gradient(160deg,#e0f2fe,#f0f9ff);border-color:#bae6fd;}
+.keuze-knop:nth-child(2):hover,.keuze-knop:nth-child(2):active{border-color:#0ea5e9;transform:translateY(-3px);box-shadow:0 12px 30px rgba(14,165,233,.25);}
+
+.keuze-knop-icon{font-size:46px;}
+.keuze-knop-label{font-size:32px;font-weight:900;color:#1e1b4b;line-height:1;}
+.keuze-knop-naam{font-size:13px;font-weight:700;color:#64748b;}
+.keuze-knop-aantal{font-size:13px;font-weight:800;color:#6366f1;background:#fff;padding:4px 12px;border-radius:14px;}
+
+.keuze-hint{margin-top:22px;font-size:12px;color:#9ca3af;font-weight:600;}
+
+.error-btn{display:inline-block;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border-radius:12px;padding:10px 20px;font-weight:800;text-decoration:none;font-size:14px;margin-top:14px;}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loading-card">
+    <div class="emoji">📋</div>
+    <div class="title">Borden laden…</div>
+    <div class="sub">Even geduld.</div>
+  </div>
+</div>
+
+<div id="error-screen">
+  <div class="error-card">
+    <div style="font-size:42px;margin-bottom:10px;">⚠️</div>
+    <div style="font-size:20px;font-weight:800;color:#991b1b;margin-bottom:8px;">Oeps</div>
+    <div id="error-msg" style="font-size:14px;color:#64748b;line-height:1.6;">De graadsklas kon niet geladen worden.</div>
+  </div>
+</div>
+
+<div id="keuze-wrap">
+  <div class="keuze-card">
+    <div class="keuze-emoji">👋</div>
+    <div class="keuze-title">In welke klas zit jij?</div>
+    <div class="keuze-sub">Tik op jouw klas om je bord te openen.</div>
+    <div class="keuze-grid">
+      <button class="keuze-knop" onclick="kiesKlas(1)">
+        <span class="keuze-knop-icon">🦒</span>
+        <span class="keuze-knop-label" id="label-1">–</span>
+        <span class="keuze-knop-naam" id="naam-1"></span>
+        <span class="keuze-knop-aantal" id="aantal-1"></span>
+      </button>
+      <button class="keuze-knop" onclick="kiesKlas(2)">
+        <span class="keuze-knop-icon">🦓</span>
+        <span class="keuze-knop-label" id="label-2">–</span>
+        <span class="keuze-knop-naam" id="naam-2"></span>
+        <span class="keuze-knop-aantal" id="aantal-2"></span>
+      </button>
+    </div>
+    <div class="keuze-hint">Zit je naam er niet bij? Kies de andere klas!</div>
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const graadId = params.get('graadid');
+
+const klassen = [
+  { bordid:null, storageKey:null, klaslabel:'', bordnaam:'', aantalLeerlingen:0 },
+  { bordid:null, storageKey:null, klaslabel:'', bordnaam:'', aantalLeerlingen:0 }
+];
+
+function toonFout(msg){
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('keuze-wrap').classList.remove('show');
+  document.getElementById('error-msg').textContent = msg;
+  document.getElementById('error-screen').classList.add('show');
+}
+
+function kiesKlas(idx){
+  const k = klassen[idx-1];
+  if(!k || !k.bordid){ toonFout('Bord niet gevonden.'); return; }
+  // Stuur door naar bestaand kindbord met juiste bordid
+  const base = window.location.href.replace(/klasbord_kind_graad\.html.*$/,'');
+  window.location.href = base + 'klasbord_kind.html?bordid=' + encodeURIComponent(k.bordid) + '&type=klasbord&modus=ipad';
+}
+
+function init(){
+  if(!graadId){
+    toonFout('Geen graadsklas-code in de link. Vraag de juf of meester om een nieuwe QR.');
+    return;
+  }
+
+  if(typeof window.fbOnReady !== 'function'){ setTimeout(init, 100); return; }
+
+  window.fbOnReady(function(){
+    if(!window.fbLoadShared){
+      toonFout('Kan niet verbinden met de server. Probeer opnieuw.');
+      return;
+    }
+
+    window.fbLoadShared('graadsklas_'+graadId).then(function(setData){
+      if(!setData || !setData.bord1 || !setData.bord2){
+        toonFout('Deze graadsklas bestaat niet meer. Vraag de juf om een nieuwe QR.');
+        return;
+      }
+
+      klassen[0].bordid     = setData.bord1.bordid;
+      klassen[0].storageKey = setData.bord1.storageKey || ('klas_'+setData.bord1.bordid);
+      klassen[0].klaslabel  = setData.bord1.klaslabel || 'Klas 1';
+      klassen[0].bordnaam   = setData.bord1.bordnaam  || '';
+
+      klassen[1].bordid     = setData.bord2.bordid;
+      klassen[1].storageKey = setData.bord2.storageKey || ('klas_'+setData.bord2.bordid);
+      klassen[1].klaslabel  = setData.bord2.klaslabel || 'Klas 2';
+      klassen[1].bordnaam   = setData.bord2.bordnaam  || '';
+
+      // Tel leerlingen per bord uit gedeelde state
+      const aantalLaad1 = window.fbLoadShared(klassen[0].storageKey).catch(function(){return null;});
+      const aantalLaad2 = window.fbLoadShared(klassen[1].storageKey).catch(function(){return null;});
+
+      Promise.all([aantalLaad1, aantalLaad2]).then(function(results){
+        if(results[0] && Array.isArray(results[0].pupils)) klassen[0].aantalLeerlingen = results[0].pupils.length;
+        if(results[1] && Array.isArray(results[1].pupils)) klassen[1].aantalLeerlingen = results[1].pupils.length;
+
+        document.getElementById('label-1').textContent  = klassen[0].klaslabel;
+        document.getElementById('label-2').textContent  = klassen[1].klaslabel;
+        document.getElementById('naam-1').textContent   = klassen[0].bordnaam;
+        document.getElementById('naam-2').textContent   = klassen[1].bordnaam;
+        document.getElementById('aantal-1').textContent = klassen[0].aantalLeerlingen + ' leerlingen';
+        document.getElementById('aantal-2').textContent = klassen[1].aantalLeerlingen + ' leerlingen';
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('keuze-wrap').classList.add('show');
+      });
+    }).catch(function(){
+      toonFout('Er ging iets mis. Probeer opnieuw of vraag de juf om hulp.');
+    });
+  });
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+
+</body>
+</html>
