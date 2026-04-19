@@ -5,6 +5,7 @@
 const Preview = (() => {
 
   let _toonOplossingen = false;
+  let _laatsteBundelData = [];
 
   /* ── Bereken splits-waarden vanuit oefening-vraag ─────────
      Werkt voor optellen en aftrekken tot 20/100/1000/10000
@@ -200,6 +201,23 @@ const Preview = (() => {
       btn.textContent = _toonOplossingen ? '🙈 Verberg oplossingen' : '👁 Toon oplossingen';
       btn.style.background = _toonOplossingen ? '#27AE60' : '';
       btn.style.color = _toonOplossingen ? '#fff' : '';
+    }
+
+    // Als er compenseer-blokken met zonder-hulp variant zijn: volledige
+    // re-render nodig, want de oplossing zit ingebed in de HTML (geen data-antwoord)
+    const heeftCompZonderHulp = _laatsteBundelData.some(blok =>
+      blok.hulpmiddelen?.includes('compenseren') &&
+      blok.compenserenVariant === 'zonder-hulp'
+    );
+    if (heeftCompZonderHulp) {
+      render(_laatsteBundelData);
+      // Toggle knop state behouden na re-render
+      if (btn) {
+        btn.textContent = _toonOplossingen ? '🙈 Verberg oplossingen' : '👁 Toon oplossingen';
+        btn.style.background = _toonOplossingen ? '#27AE60' : '';
+        btn.style.color = _toonOplossingen ? '#fff' : '';
+      }
+      return;
     }
     // Herrender voor compenseren/transformeren, daarna data-antwoord loop
     const _doToggleUpdate = () => {
@@ -420,6 +438,10 @@ const Preview = (() => {
   }
 
   function render(bundelData) {
+    // Bewaar bundelData zodat toggleOplossingen kan re-renderen voor
+    // compenseer-blokken met zonder-hulp variant (oplossing zit in HTML,
+    // niet als data-antwoord)
+    _laatsteBundelData = bundelData;
     const container   = document.getElementById('preview-inhoud');
     const btnGenereer = document.getElementById('btn-genereer');
     const btnPdf      = document.getElementById('btn-pdf');
@@ -1079,6 +1101,10 @@ const Preview = (() => {
 
     const antw1 = isVb ? `<span class="antwoord-vak antwoord-ingevuld">${som}</span>` : `<span class="antwoord-vak" data-antwoord="${oef.antwoord ?? ''}" ></span>`;
 
+    // aIsTg: true als het eerste getal in de vraag het "te-geven-getal" (tg) is
+    // (bepaalt de tekens van de pijlen in de transformatie)
+    const aIsTg = (String(tg) === (oef.vraag || '').split(' ')[0]);
+
     // Pijltekens: bij optellen: tg +d, ag -d (of omgekeerd)
     // Bij aftrekken: beide +d of beide -d
     const pijlTxtL = isAftrek
@@ -1140,7 +1166,6 @@ const Preview = (() => {
       </div>`;
     } else {
       const totaalSom = tg + ag;
-      const aIsTg = (String(tg) === oef.vraag.split(' ')[0]);
       // Rij 1: a links, b rechts — zelfde volgorde als de som
       const rA1 = Math.min(80, Math.max(20, (aIsTg ? tg : ag) / totaalSom * 100)).toFixed(1);
       const rB1 = (100 - parseFloat(rA1)).toFixed(1);
