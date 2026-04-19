@@ -46,7 +46,8 @@ const OptellenTot20 = (() => {
 
     for (let poging = 0; poging < 200; poging++) {
       switch (type) {
-         case 'E+E': {
+
+    case 'E+E': {
   // Af en toe eens +0 bij tot 5 en tot 10, maar niet te vaak
  const kansNul = max <= 5 ? 0.18 : 0.08;
 const metNul = max <= 10 && Math.random() < kansNul;
@@ -124,7 +125,7 @@ const metNul = max <= 10 && Math.random() < kansNul;
       if (a === undefined || b === undefined) continue;
       const som = a + b;
       if (som <= 0 || som > max) continue;
-        if (a < 0 || b < 0) continue;
+      if (a < 0 || b < 0) continue;
 
       const brug = heeftBrug(a, b, niveau);
       if (metBrug === 'met'    && !brug) continue;
