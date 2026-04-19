@@ -76,7 +76,12 @@ const slots = [
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-function displayName(p){ return p.voornaam + (p.achternaam ? ' '+p.achternaam : ''); }
+function displayName(p, state){
+  // Als state meegegeven is en showLastname uitstaat → enkel voornaam.
+  // Zo volgen we de instelling die de leerkracht in het klasbord zelf zette.
+  if(state && !state.showLastname) return p.voornaam;
+  return p.voornaam + (p.achternaam ? ' '+p.achternaam : '');
+}
 
 function emptyState(){
   return {
@@ -161,7 +166,7 @@ function renderSlot(slot){
   let bodyHtml = '';
   let klaarTotal = 0, takenTotal = 0;
 
-  pupils.forEach(p => {
+  pupils.forEach((p, pupilIdx) => {
     const mineTasks = pupilTasks(state, p.id);
     const mineIds = new Set(mineTasks.map(t => t.id));
     let klaarCount = 0;
@@ -186,11 +191,14 @@ function renderSlot(slot){
       + 'onclick="event.stopPropagation();openNotesModal('+slot.idx+',\''+p.id+'\')" '
       + 'title="'+(hasNotes?'Opmerking bekijken/bewerken':'Opmerking toevoegen')+'">🔒</button>';
 
+    // Nummer tonen als state.showNumbers aanstaat (respecteer leerkracht-instelling)
+    const nummerPrefix = state.showNumbers ? (pupilIdx+1)+'. ' : '';
+
     let row = '<tr class="gb-row'+(isComplete?' complete':'')+'">';
     row += '<td class="gb-name-td"><div class="gb-name-inner">';
     row += '<span class="'+dotCls+'"></span>';
     row += photoHtml;
-    row += '<div class="gb-name-text"><div class="gb-name-voor">'+esc(displayName(p))+'</div></div>';
+    row += '<div class="gb-name-text"><div class="gb-name-voor">'+esc(nummerPrefix+displayName(p, state))+'</div></div>';
     row += notesBtnHtml;
     row += '</div></td>';
 
@@ -263,7 +271,7 @@ window.openNotesModal = function(slotIdx, pid){
   badge.classList.remove('kleur-1','kleur-2');
   badge.classList.add('kleur-'+slotIdx);
 
-  document.getElementById('notes-pupil-name').textContent = displayName(pupil);
+  document.getElementById('notes-pupil-name').textContent = displayName(pupil, slot.state);
   document.getElementById('notes-input').value = (slot.state.notes && slot.state.notes[pid]) || '';
   document.getElementById('notes-overlay').classList.remove('hidden');
   setTimeout(function(){ document.getElementById('notes-input').focus(); }, 50);
