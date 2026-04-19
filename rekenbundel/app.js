@@ -422,14 +422,23 @@ const App = (() => {
         const checkbox = label.querySelector('input');
 
         if (type === 'Gemengd') {
-          container.querySelectorAll('.vink-chip').forEach(l => {
-            l.classList.remove('geselecteerd');
-            l.querySelector('input').checked = false;
-            l.querySelector('.vink-box').textContent = '';
-          });
-          label.classList.add('geselecteerd');
-          checkbox.checked = true;
-          label.querySelector('.vink-box').textContent = '✓';
+          const wasChecked = checkbox.checked;
+          if (wasChecked) {
+            // Gemengd uitvinken → gewoon deze chip uitzetten, andere chips blijven zoals ze waren
+            checkbox.checked = false;
+            label.classList.remove('geselecteerd');
+            label.querySelector('.vink-box').textContent = '';
+          } else {
+            // Gemengd aanvinken → alle andere chips uitvinken
+            container.querySelectorAll('.vink-chip').forEach(l => {
+              l.classList.remove('geselecteerd');
+              l.querySelector('input').checked = false;
+              l.querySelector('.vink-box').textContent = '';
+            });
+            label.classList.add('geselecteerd');
+            checkbox.checked = true;
+            label.querySelector('.vink-box').textContent = '✓';
+          }
         } else {
           const gemengdLabel = [...container.querySelectorAll('.vink-chip')]
             .find(l => l.querySelector('input').value === 'Gemengd');
