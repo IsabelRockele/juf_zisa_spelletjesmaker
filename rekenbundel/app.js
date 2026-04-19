@@ -25,6 +25,17 @@ const App = (() => {
     actieveBewerking = bewerking;
 
     // Reset alle keuzes bij tab wissel
+    // 0. Alle radio-chips in brug-sub en brug-hoofd weer zichtbaar maken
+    //    (sommige kunnen verborgen zijn geweest door compenseren/transformeren)
+    ['brug-hoofd', 'brug-sub'].forEach(naam => {
+      document.querySelectorAll(`[name="${naam}"]`).forEach(r => {
+        const chip = r.closest('.radio-chip');
+        if (chip) chip.style.display = '';
+      });
+    });
+    // Brug-sub-rij ook weer op standaard (wordt later correct gezet door _updateBrugSubUI)
+    const rijSub = document.getElementById('rij-brug-sub');
+    if (rijSub) rijSub.style.display = '';
     // 1. Hulpmiddelen
     document.querySelectorAll('[name="hulpmiddelen"]').forEach(cb => {
       cb.checked = false;
