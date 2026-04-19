@@ -608,6 +608,8 @@ const somTekst = (delen.length >= 3)
     const eKlein = klein % 10;
     const dGroot = Math.floor(groot / 1000);
     const hGroot = Math.floor((groot % 1000) / 100);
+    const tGroot = Math.floor((groot % 100) / 10);
+    const eGroot = groot % 10;
     const metD   = dGroot > 0;
     const metH   = hGroot > 0 || dGroot > 0;
 
@@ -677,6 +679,27 @@ const somTekst = (delen.length >= 3)
                            (kol.label === 'T' && metLegeRijT) ||
                            (kol.label === 'H' && metLegeRijH);
 
+      // Bereken hoeveel schijfjes aangevuld moeten worden (voor oplossing)
+      // Werkt per kolom: kolGroot - kolKlein. Bij brug kan dit negatief zijn;
+      // dan geldt (10 - kolKlein) + kolGroot, en de volgende hogere kolom krijgt +1.
+      // Voor de visuele inkleuring in DEZE kolom tellen we hoe veel schijfjes
+      // over blijven: eerst de resterende lege schijfjes in de 10-schijfjes-kolom,
+      // vervolgens (indien brug) extra schijfjes in de lege aanvulrij.
+      let aantalAanvullen = 0;
+      if (_metAntwoorden) {
+        const kolGroot = kol.label === 'E' ? eGroot :
+                         kol.label === 'T' ? tGroot :
+                         kol.label === 'H' ? hGroot :
+                         kol.label === 'D' ? dGroot : 0;
+        const verschil = kolGroot - kol.aantalVoor;
+        if (verschil >= 0) {
+          aantalAanvullen = verschil;
+        } else {
+          // brug: we vullen aan tot 10 in deze kolom
+          aantalAanvullen = 10 - kol.aantalVoor;
+        }
+      }
+
       // Teken de 10 gewone schijfjes
       for (let i = 0; i < TOTAAL; i++) {
         const rijNr = Math.floor(i / rijGrootte);
@@ -684,9 +707,16 @@ const somTekst = (delen.length >= 3)
         const sx = kolX + gap + posInRij * (schijfD + gap) + schijfD / 2;
         const sy = schY + kopH + gap + rijNr * rijH + schijfD / 2;
         const isVoor = i < kol.aantalVoor;
+        // Bij oplossingen: kleur schijfjes na aantalVoor blauw tot we genoeg hebben
+        const isAanTeVullen = _metAntwoorden && !isVoor &&
+                              i >= kol.aantalVoor &&
+                              i < kol.aantalVoor + aantalAanvullen;
         if (isVoor) {
           doc.setFillColor(...kol.kleur);
           doc.setDrawColor(kol.kleur[0]-40, kol.kleur[1]-40, kol.kleur[2]-40);
+        } else if (isAanTeVullen) {
+          doc.setFillColor(74, 144, 217);   // blauw
+          doc.setDrawColor(40, 100, 180);
         } else {
           doc.setFillColor(255, 255, 255);
           doc.setDrawColor(180, 180, 180);
@@ -704,12 +734,22 @@ const somTekst = (delen.length >= 3)
       // Teken extra lege rij voor aanvullen inkleuren
       if (heeftLegeRij) {
         const legeRijNr = Math.ceil(TOTAAL / rijGrootte);
+        // Overflow in aanvulrij = hoeveel aangevuld moet worden maar niet
+        // meer in de 10-schijfjes-kolom paste
+        const overflowNaarAanvulrij = Math.max(0, kol.aantalVoor + aantalAanvullen - TOTAAL);
         for (let i = 0; i < LEGE_RIJ; i++) {
           const sx = kolX + gap + i * (schijfD + gap) + schijfD / 2;
           const sy = schY + kopH + gap + legeRijNr * rijH + schijfD / 2;
-          doc.setFillColor(248, 250, 252);
-          doc.setDrawColor(200, 210, 220);
-          doc.setLineWidth(0.25);
+          const isAanTeVullen = _metAntwoorden && i < overflowNaarAanvulrij;
+          if (isAanTeVullen) {
+            doc.setFillColor(74, 144, 217);   // blauw
+            doc.setDrawColor(40, 100, 180);
+            doc.setLineWidth(0.3);
+          } else {
+            doc.setFillColor(248, 250, 252);
+            doc.setDrawColor(200, 210, 220);
+            doc.setLineWidth(0.25);
+          }
           doc.circle(sx, sy, schijfD / 2, 'FD');
         }
       }
@@ -2988,9 +3028,21 @@ doc.setTextColor(26, 58, 92);
     const beenY2 = beenY1 + 9;
     const vakY   = beenY2 + 1;
 
-    function hokje(cx, cy, waarde) {
-      doc.setFillColor(255, 255, 255);
-      doc.setDrawColor(...DONKER);
+    // Bereken ontbrekende waarden (nodig voor oplossingen in splitsbeen-hokjes)
+    const _sbT0 = oef.totaal !== null ? oef.totaal : (oef.links !== null && oef.rechts !== null ? oef.links + oef.rechts : null);
+    const _sbL0 = oef.links  !== null ? oef.links  : (oef.totaal !== null && oef.rechts !== null ? oef.totaal - oef.rechts : null);
+    const _sbR0 = oef.rechts !== null ? oef.rechts : (oef.totaal !== null && oef.links  !== null ? oef.totaal - oef.links  : null);
+
+    function hokje(cx, cy, waarde, antwoord) {
+      const toonAntw = _metAntwoorden && waarde === null && antwoord !== null && antwoord !== undefined;
+      if (toonAntw) {
+        // Groen vakje met antwoord
+        doc.setFillColor(198, 239, 206);
+        doc.setDrawColor(0, 150, 50);
+      } else {
+        doc.setFillColor(255, 255, 255);
+        doc.setDrawColor(...DONKER);
+      }
       doc.setLineWidth(0.5);
       doc.roundedRect(cx - vakW / 2, cy, vakW, vakH, 1.5, 1.5, 'FD');
       if (waarde !== null) {
@@ -2998,16 +3050,22 @@ doc.setTextColor(26, 58, 92);
         doc.setFontSize(11);
         doc.setTextColor(...DONKER);
         doc.text(String(waarde), cx, cy + vakH / 2 + 2.3, { align: 'center' });
+      } else if (toonAntw) {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(0, 100, 0);
+        doc.text(String(antwoord), cx, cy + vakH / 2 + 2.3, { align: 'center' });
+        doc.setTextColor(...DONKER);
       }
     }
 
-    hokje(midX, topY, oef.totaal);
+    hokje(midX, topY, oef.totaal, _sbT0);
     doc.setDrawColor(...BLAUW);
     doc.setLineWidth(0.6);
     doc.line(midX, beenY1, linksX, beenY2);
     doc.line(midX, beenY1, rechtsX, beenY2);
-    hokje(linksX,  vakY, oef.links);
-    hokje(rechtsX, vakY, oef.rechts);
+    hokje(linksX,  vakY, oef.links,  _sbL0);
+    hokje(rechtsX, vakY, oef.rechts, _sbR0);
 
     // ── Scheidingslijn tussen been en bewerkingen ─────────────
     const scheidY = oy + SBW_BEEN_H + 2;
@@ -4203,17 +4261,85 @@ doc.setTextColor(26, 58, 92);
 
       // ── LINKS: emoji's ───────────────────────────────────
       if (oef.type === 'delen-aftrekking' || oef.type === 'delen-rest') {
-        // Alle emoji's samen, geen kader, bovenaan
-        const cols   = emoKols(oef.uitkomst);
-        const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
-        const startX = ox + OEF_PAD_H;
-        const startY = oy + OEF_PAD_V;
-        for (let i = 0; i < oef.uitkomst; i++) {
-          const ec = i % cols, er = Math.floor(i / cols);
-          doc.addImage(emojiDataUrl, 'PNG',
-            startX + ec * (emoMm + 1.5),
-            startY + er * (emoMm + 1.5),
-            emoMm, emoMm);
+        // Bij oplossingen: teken net zoals gewone tak, met groepsvakjes
+        if (_metAntwoorden) {
+          const grGroot  = oef.type === 'delen-rest' ? oef.deler : oef.groepGrootte;
+          const aantalGr = oef.type === 'delen-rest' ? oef.quotient : oef.groepen;
+          const heeftRest = oef.type === 'delen-rest' && oef.rest > 0;
+          const totaalVakjes = aantalGr + (heeftRest ? 1 : 0); // +1 losse "rest-vakje"
+
+          const maxInRij = Math.min(totaalVakjes, MAX_GPER_RIJ);
+          const vakjeB   = Math.min(20, (linksW - OEF_PAD_H * 2 - (maxInRij - 1) * VAKJE_GAP) / maxInRij);
+          // Voor grootte-berekening: gebruik het grootste aantal (groep of rest)
+          const maxInhoud = Math.max(grGroot, heeftRest ? oef.rest : 0);
+          const { cols: emoKolsN, rows: emoRijenN, emoMm, h: vH } = vakjeAfm(maxInhoud, vakjeB);
+          const gRijen   = Math.ceil(totaalVakjes / MAX_GPER_RIJ);
+          const linksH   = gRijen * vH + (gRijen - 1) * VAKJE_GAP;
+          const linksOY  = oy + (oh - linksH) / 2;
+
+          // Per rij: teken groepsvakjes
+          let vakIdx = 0;
+          for (let gr = 0; gr < gRijen; gr++) {
+            const vakjesInRij = Math.min(MAX_GPER_RIJ, totaalVakjes - gr * MAX_GPER_RIJ);
+            const totB = vakjesInRij * vakjeB + (vakjesInRij - 1) * VAKJE_GAP;
+            let vx     = ox + OEF_PAD_H + (linksW - OEF_PAD_H - totB) / 2;
+            const vy   = linksOY + gr * (vH + VAKJE_GAP);
+
+            for (let v = 0; v < vakjesInRij; v++) {
+              const isRestVak = heeftRest && vakIdx === aantalGr;
+              const inhoud    = isRestVak ? oef.rest : grGroot;
+
+              // Kader: groep = gekleurd, rest = grijs gestippeld
+              doc.setFillColor(255, 255, 255);
+              if (isRestVak) {
+                doc.setDrawColor(150, 150, 150);
+                doc.setLineWidth(0.5);
+                doc.setLineDashPattern([0.8, 0.8], 0);
+              } else {
+                doc.setDrawColor(230, 74, 25);
+                doc.setLineWidth(0.6);
+              }
+              doc.roundedRect(vx, vy, vakjeB, vH, 1.5, 1.5, 'FD');
+              if (isRestVak) doc.setLineDashPattern([], 0);
+
+              // Emoji's in dit vakje
+              // Voor rest-vak: bepaal eigen grid-afmetingen (kan kleiner zijn)
+              const lokCols = isRestVak ? Math.min(5, Math.ceil(Math.sqrt(inhoud))) : emoKolsN;
+              const lokRows = isRestVak ? Math.ceil(inhoud / lokCols) : emoRijenN;
+              const colW_e = (vakjeB - 2.5) / lokCols;
+              const rowH_e = (vH - 2.5) / lokRows;
+              for (let b = 0; b < inhoud; b++) {
+                const ec = b % lokCols, er = Math.floor(b / lokCols);
+                const ex = vx + 1.25 + ec * colW_e + (colW_e - emoMm) / 2;
+                const ey = vy + 1.25 + er * rowH_e + (rowH_e - emoMm) / 2;
+                doc.addImage(emojiDataUrl, 'PNG', ex, ey, emoMm, emoMm);
+              }
+
+              // Label "R" onderaan het rest-vakje
+              if (isRestVak) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(7);
+                doc.setTextColor(130, 130, 130);
+                doc.text('rest', vx + vakjeB / 2, vy + vH - 0.5, { align: 'center' });
+              }
+
+              vx += vakjeB + VAKJE_GAP;
+              vakIdx++;
+            }
+          }
+        } else {
+          // Geen oplossing: alle emoji's samen, geen kader, bovenaan
+          const cols   = emoKols(oef.uitkomst);
+          const emoMm  = Math.min(7, (linksW - OEF_PAD_H * 2) / cols);
+          const startX = ox + OEF_PAD_H;
+          const startY = oy + OEF_PAD_V;
+          for (let i = 0; i < oef.uitkomst; i++) {
+            const ec = i % cols, er = Math.floor(i / cols);
+            doc.addImage(emojiDataUrl, 'PNG',
+              startX + ec * (emoMm + 1.5),
+              startY + er * (emoMm + 1.5),
+              emoMm, emoMm);
+          }
         }
       } else {
         const maxInRij = Math.min(oef.groepen, MAX_GPER_RIJ);
