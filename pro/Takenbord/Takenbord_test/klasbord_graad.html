@@ -107,6 +107,29 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 .gb-name-voor{font-weight:800;font-size:var(--name-font);color:#1e1b4b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
 .gb-row.complete .gb-name-voor{color:#15803d;}
 
+/* ── 🔒 NOTES-KNOP per leerling (bevindingen) ── */
+.gb-notes-btn{flex-shrink:0;width:26px;height:26px;border-radius:50%;border:1.5px solid var(--bord-border);background:#fff;color:var(--bord-accent);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-family:inherit;padding:0;line-height:1;transition:all .12s;}
+.gb-notes-btn:hover{background:var(--bord-accent-bg);transform:scale(1.1);}
+.gb-notes-btn.has-notes{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#f59e0b;color:#92400e;}
+.gb-notes-btn.has-notes:hover{background:#fde68a;}
+body.smartboard .gb-notes-btn{display:none;}  /* Verberg in smartboardmodus */
+
+/* Notes modal */
+#notes-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;}
+#notes-overlay.hidden{display:none;}
+.notes-modal{background:#fff;border-radius:18px;padding:24px 28px;max-width:500px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.notes-modal-title{font-size:18px;font-weight:800;color:#1e1b4b;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.notes-klas-badge{font-size:11px;font-weight:800;padding:3px 10px;border-radius:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+.notes-klas-badge.kleur-1{background:linear-gradient(135deg,#fb923c,#f97316);}
+.notes-klas-badge.kleur-2{background:linear-gradient(135deg,#38bdf8,#0ea5e9);}
+.notes-modal-sub{font-size:12px;color:#6b7280;margin-bottom:12px;line-height:1.6;}
+.notes-modal textarea{width:100%;min-height:140px;border:2px solid #e0e7ff;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;color:#374151;}
+.notes-modal textarea:focus{outline:none;border-color:#6366f1;}
+.notes-modal-btns{display:flex;gap:8px;margin-top:14px;}
+.notes-modal-btn{flex:1;border:none;border-radius:10px;padding:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;}
+.notes-btn-ok{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+.notes-btn-cancel{background:#f3f4f6;color:#6b7280;}
+
 .gb-task-td{width:var(--col-task);min-width:var(--col-task);text-align:center;padding:6px 0;}
 .gb-btn{width:46px;height:46px;border-radius:10px;border:2px dashed var(--bord-border);background:var(--bord-accent-bg);cursor:pointer;font-size:18px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;color:var(--bord-border);position:relative;transition:transform .1s;font-family:inherit;}
 .gb-btn::after{content:'○';position:absolute;font-size:20px;color:var(--bord-border);font-weight:400;}
@@ -304,6 +327,23 @@ body.smartboard #smartboard-exit-btn{display:flex;}
   <h2 id="qr-print-titel" style="font-size:22px;color:#1e1b4b;margin-bottom:20px;">Scan om je klas te kiezen</h2>
   <div id="qr-print-canvas" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
   <div id="qr-print-url" style="font-size:11px;color:#6b7280;word-break:break-all;"></div>
+</div>
+
+<!-- NOTES (BEVINDINGEN) MODAL -->
+<div id="notes-overlay" class="hidden" onclick="if(event.target===this)closeNotesModal()">
+  <div class="notes-modal">
+    <div class="notes-modal-title">
+      <span>🔒 Bevindingen:</span>
+      <span class="notes-klas-badge" id="notes-klas-badge">3A</span>
+      <span id="notes-pupil-name">Naam</span>
+    </div>
+    <p class="notes-modal-sub">Deze notities zijn <strong>alleen voor jou</strong> — nooit zichtbaar op het smartboard of bij de kinderen. Ze worden opgeslagen en komen in het PDF-rapport van dat klasbord.</p>
+    <textarea id="notes-input" placeholder="bv. Had veel hulp nodig · Werkte vlot en zelfstandig · Verstoorde de rust · Meer uitdaging nodig…"></textarea>
+    <div class="notes-modal-btns">
+      <button class="notes-modal-btn notes-btn-cancel" onclick="closeNotesModal()">Annuleren</button>
+      <button class="notes-modal-btn notes-btn-ok" onclick="saveNotes()">Opslaan</button>
+    </div>
+  </div>
 </div>
 
 <!-- TIMER POPUP -->
