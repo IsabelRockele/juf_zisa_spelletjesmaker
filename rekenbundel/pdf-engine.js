@@ -96,10 +96,18 @@ y += 5;
   }
 
   /* ── Gewone oefeningen rij ───────────────────────────────── */
-  function _tekenRij(oefeningen, aantalKolommen = KOLOMMEN) {
+  function _tekenRij(oefeningen, aantalKolommen = KOLOMMEN, niveau = 100) {
     const kolB = CW / aantalKolommen;
     const kadW = kolB - 4;
     const kadH = RIJHOOGTE - 1;
+
+    // Minimum vakbreedte afhankelijk van niveau
+    //   tot 20: 1 cijfer (min 10)
+    //   tot 100: 2-3 cijfers (min 12)
+    //   tot 1000: 3-4 cijfers (min 14)
+    //   tot 10000 of hoger: 4-5 cijfers (min 18)
+    const vakMin = niveau >= 10000 ? 18 : niveau >= 1000 ? 14 : niveau >= 100 ? 12 : 10;
+    const vakMax = Math.max(vakMin + 4, 22);
 
     oefeningen.forEach((oef, kol) => {
       const ox = ML + kol * kolB + 2;
@@ -116,7 +124,7 @@ y += 5;
       doc.text(oef.vraag, ox + 3, oy + kadH / 2 + 2);
 
       const tekstB = doc.getTextWidth(oef.vraag);
-      const vakW   = Math.max(16, Math.min(22, ox + kadW - 4 - (ox + 3 + tekstB + 2)));
+      const vakW   = Math.max(vakMin, Math.min(vakMax, ox + kadW - 4 - (ox + 3 + tekstB + 2)));
       const vakH   = kadH - 5;
       const vakX   = ox + 3 + tekstB + 2;
       const vakY   = oy + (kadH - vakH) / 2;
@@ -760,6 +768,18 @@ const somTekst = (delen.length >= 3)
             const xL = ox + marge + doc.getTextWidth(somStr) + 2;
             doc.setDrawColor(180, 195, 210); doc.setLineWidth(0.4);
             doc.line(xL, somY, ox + kadW - marge, somY);
+            // Bij antwoordenversie: toon de volledige compenseer-oplossing op de lijn
+            // Bv. "34 + 9 = 34 + 10 - 1 = 43"
+            if (_metAntwoorden) {
+              const isAftrekken = oef.vraag.includes(' - ');
+              const teken = isAftrekken ? '-' : '+';
+              const tussenTeken = isAftrekken ? '+' : '-';
+              const oplStr = `${oef.andereGetal} ${teken} ${oef.tiental} ${tussenTeken} ${oef.compenseerDelta} = ${oef.antwoord}`;
+              doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(0, 100, 0);
+              doc.text(oplStr, xL + 1, somY - 0.5);
+              doc.setTextColor(44, 62, 80);
+              doc.setFont('helvetica', 'normal');
+            }
           }
         });
         y += KAAL_RIJ;
@@ -801,7 +821,9 @@ doc.setTextColor(26, 58, 92);
         doc.setLineWidth(0.6);
         doc.roundedRect(ox, oy, kadW, COMP_KAD_H, 2, 2, 'FD');
 
-        const zelfKringen = (variant === 'zelf-kringen') && !isVoorbeeld;
+        // Bij antwoordenversie: kringen/pijlen/blokY zoals normale variant,
+        // zodat pijl getekend wordt en vak niet verspringt naar boven
+        const zelfKringen = (variant === 'zelf-kringen') && !isVoorbeeld && !_metAntwoorden;
 
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(12);
@@ -829,38 +851,73 @@ const kringB  = doc.getTextWidth(kringTxt);
 if (prefix) doc.text(prefix, somX, somY);
 
 // Alleen het getal in de kring
-const kringPadL = zelfKringen ? 0 : 0.8;
-const kringPadR = zelfKringen ? 0 : 0.8;
+const kringPadL = 0.8;
+const kringPadR = 0.8;
 const kringBinnenW = kringB + kringPadL + kringPadR;
 
-// Smallere ovaal, enkel rond het getal
-const kringRx = zelfKringen ? 0 : Math.max(kringBinnenW / 2, 4.6);
-const kringRy = zelfKringen ? 0 : 3.2;
+// Smallere ovaal, enkel rond het getal (voor positionering bij "met-kringen" varianten)
+const kringRx = Math.max(kringBinnenW / 2, 4.6);
+const kringRy = 3.2;
 
-// Middelpunt en tekstpositie van alleen het kringgetal
-const kringMidX = somX + prefixB + kringRx;
-const kringMidY = somY - 1.5;
-const kringTxtX = kringMidX - (kringB / 2);
+if (zelfKringen) {
+  // Som tekenen als één rij tekst zonder extra spatiëring, zodat er géén
+  // visuele hint is welk getal moet worden omkringd.
+  // We hebben prefix al niet getekend, dus we tekenen nu de hele som opnieuw.
+  const volledigeSom = compIsLinks
+    ? `${compGetal}${teken}${andereGetal} =`
+    : `${andereGetal}${teken}${compGetal} =`;
+  // Wis eerst de reeds getekende prefix (overschrijven kan niet in jsPDF,
+  // dus we gebruiken een witte rechthoek over de prefix-zone)
+  if (prefix) {
+    const wW = prefixB + 0.5;
+    doc.setFillColor(isVoorbeeld ? 255 : 255, isVoorbeeld ? 243 : 255, isVoorbeeld ? 205 : 255);
+    doc.rect(somX - 0.3, somY - 5, wW, 7, 'F');
+  }
+  doc.text(volledigeSom, somX, somY);
+} else {
+  // Normale kring-variant: middelpunt en tekstpositie
+  const kringMidX = somX + prefixB + kringRx;
+  const kringMidY = somY - 1.5;
+  const kringTxtX = kringMidX - (kringB / 2);
 
-// Kring tekenen
-if (!zelfKringen) {
+  // Kring tekenen
   doc.setDrawColor(120, 120, 120);
   doc.setLineWidth(0.35);
   doc.ellipse(kringMidX, kringMidY, kringRx, kringRy, 'S');
+
+  // Getal in de kring
+  doc.text(kringTxt, kringTxtX, somY);
+
+  // Suffix pas NA de volledige ovaal
+  const suffixGap = compIsLinks ? 0.8 : 2.2;
+  const suffixX = somX + prefixB + (kringRx * 2) + suffixGap;
+  doc.text(suffix, suffixX, somY);
 }
 
-// Getal in de kring
-doc.text(kringTxt, kringTxtX, somY);
-
-// Suffix pas NA de volledige ovaal
-const suffixGap = zelfKringen ? 0 : (compIsLinks ? 0.8 : 2.2);
-const suffixX = somX + prefixB + (kringRx * 2) + suffixGap;
-doc.text(suffix, suffixX, somY);
+// Kring-positie (enkel voor pijl-berekening; wordt niet getekend bij zelf-kringen)
+const kringMidX = somX + prefixB + kringRx;
+const kringMidY = somY - 1.5;
 
 // Antwoordvak nog iets verder
-const somTotaalB = prefixB + (kringRx * 2) + suffixGap + doc.getTextWidth(suffix);
+let somTotaalB;
+if (zelfKringen) {
+  // Werkelijke breedte van de som zoals ze getekend is (één string zonder kring-spatiëring)
+  const volledigeSomTxt = compIsLinks
+    ? `${compGetal}${teken}${andereGetal} =`
+    : `${andereGetal}${teken}${compGetal} =`;
+  somTotaalB = doc.getTextWidth(volledigeSomTxt);
+} else {
+  somTotaalB = prefixB + (kringRx * 2) + (compIsLinks ? 0.8 : 2.2) + doc.getTextWidth(suffix);
+}
 const avX = somX + somTotaalB + 4.5;
-        const avW = 10, avH = 9;
+        // Vakbreedte schaalt mee met het niveau: meer cijfers = breder vak
+        //   tot 20: 1 cijfer (breedte 8)
+        //   tot 100: 2 cijfers (breedte 10)
+        //   tot 1000: 3 cijfers (breedte 14)
+        //   tot 10000 of hoger: 4+ cijfers (breedte 18)
+        const _niv = blok.niveau || 100;
+        const avW = _niv >= 10000 ? 18 : _niv >= 1000 ? 14 : _niv >= 100 ? 12 : 10;
+        const avH = 9;
         const avY = oy + 2;
         if (_metAntwoorden) {
           doc.setFillColor(198, 239, 206); doc.setDrawColor(0, 150, 50);
@@ -888,8 +945,9 @@ const avX = somX + somTotaalB + 4.5;
         }
 
         // Compenseervak: [ + ] [ hokje ] [ - ] [ hokje ]
-        // Bij zelf-kringen: geen pijl getekend, blokY start iets hoger
-        const blokY  = (zelfKringen ? pijlTopY : pijlBotY) + 2;
+        // blokY op dezelfde positie voor alle varianten (kring/pijl-hoogte is nu
+        // uniform, alleen de tekening wordt weggelaten bij zelf-kringen).
+        const blokY = pijlBotY + 2;
         const hokH   = 8;
         const tekenW = 5;    // breedte van + of - teken
         const getalW = 11;   // breedte invulhokje getal
@@ -1964,7 +2022,7 @@ const onthoudH = c;
   blok.niveau || 100
 );
     } else {
-      _tekenRij(rijOef, _kolommen);
+      _tekenRij(rijOef, _kolommen, blok.niveau || 100);
     }
   }
 
@@ -2013,10 +2071,10 @@ const onthoudH = c;
       const ox = ML + kol * kolB + 2;
       const oy = y;
 
-      // Kader: geel bij voorbeeld, wit anders
-      if (isVoorbeeld || _metAntwoorden) {
-        doc.setFillColor(255, 243, 205);   // #FFF3CD
-        doc.setDrawColor(240, 165, 0);     // #F0A500
+      // Kader: geel bij voorbeeld, wit anders. Bij _metAntwoorden normale kleuren.
+      if (isVoorbeeld) {
+        doc.setFillColor(255, 243, 205);
+        doc.setDrawColor(240, 165, 0);
       } else {
         doc.setFillColor(255, 255, 255);
         doc.setDrawColor(180, 200, 225);
@@ -2024,28 +2082,98 @@ const onthoudH = c;
       doc.setLineWidth(isVoorbeeld ? 0.8 : 0.6);
       doc.roundedRect(ox, oy, kadW, kadH, 1.5, 1.5, 'FD');
 
-      // Tekst van de som
+      // Parse tokens uit de vraag
+      const rawZonderIs = oef.vraag.replace(' =', '').trim();
+      const tokens = rawZonderIs.split(/\s+/);  // ['6', '+', '1', '+', '4']
+      const getallen = [];
+      const tekens = [];
+      tokens.forEach((t, i) => {
+        if (i % 2 === 0) getallen.push(parseInt(t, 10));
+        else tekens.push(t);
+      });
+
+      // Bepaal welke 2 posities samen 10 zijn
+      let onderstreepPos = [];
+      const isAftrek = tekens.some(t => t === '-' || t === '−');
+      if (!isAftrek) {
+        for (let i = 0; i < getallen.length && onderstreepPos.length === 0; i++) {
+          for (let j = i + 1; j < getallen.length; j++) {
+            if (getallen[i] + getallen[j] === 10) {
+              onderstreepPos = [i, j];
+              break;
+            }
+          }
+        }
+      } else {
+        if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
+          onderstreepPos = [0, 1];
+        }
+      }
+
+      // Teken de som token voor token, zodat we de positie van elk getal kennen
       doc.setFont('helvetica', isVoorbeeld ? 'bold' : 'normal');
       doc.setFontSize(12);
       doc.setTextColor(44, 62, 80);
-      doc.text(oef.vraag, ox + 3, oy + kadH / 2 + 2);
+      const somY = oy + kadH / 2 + 2;
+      let curX = ox + 3;
+      const getalPosities = [];  // { getalIdx, x, w, y }
+      tokens.forEach((t, i) => {
+        const spatie = (i > 0) ? ' ' : '';
+        const txt = spatie + t;
+        const tw = doc.getTextWidth(txt);
+        // Alleen voor getallen onthouden we positie (voor onderstreping)
+        if (i % 2 === 0) {
+          const getalIdx = i / 2;
+          const getalStart = curX + doc.getTextWidth(spatie);
+          const getalW = doc.getTextWidth(t);
+          getalPosities.push({ getalIdx, x: getalStart, w: getalW });
+        }
+        doc.text(txt, curX, somY);
+        curX += tw;
+      });
+      // " =" toevoegen
+      const isTekst = ' =';
+      const isW = doc.getTextWidth(isTekst);
+      doc.text(isTekst, curX, somY);
+      curX += isW;
 
-      // Antwoordvak
-      const vakW = 16, vakH = kadH - 5;
-      const tekstB = doc.getTextWidth(oef.vraag);
-      const vakX = ox + 3 + tekstB + 2;
-      const vakY = oy + (kadH - vakH) / 2;
-
-      if (isVoorbeeld || _metAntwoorden) {
-        // Antwoordvak geel ingevuld met antwoord (voorbeeld)
-        doc.setFillColor(255, 224, 130);
-        doc.setDrawColor(240, 165, 0);
+      // Onderstreep groen bij _metAntwoorden (of isVoorbeeld)
+      if ((_metAntwoorden || isVoorbeeld) && onderstreepPos.length === 2) {
+        doc.setDrawColor(0, 150, 50);
         doc.setLineWidth(0.8);
-        doc.roundedRect(vakX, vakY, vakW, vakH, 2, 2, 'FD');
-        doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(93, 58, 0);
-        doc.text(String(oef.antwoord), vakX + vakW / 2, vakY + vakH / 2 + 1.5, { align: 'center' });
-      } else {
-        _antwoordVak(vakX, vakY, vakW, vakH, oef.antwoord);
+        onderstreepPos.forEach(pos => {
+          const gp = getalPosities.find(g => g.getalIdx === pos);
+          if (gp) doc.line(gp.x, somY + 1, gp.x + gp.w, somY + 1);
+        });
+      }
+
+      // Schrijflijn na " =" voor uitschrijven of tonen oplossing
+      const lijnX1 = curX + 2;
+      const lijnX2 = ox + kadW - 3;
+      if (lijnX2 > lijnX1 + 10) {
+        doc.setDrawColor(180, 195, 210);
+        doc.setLineWidth(0.5);
+        doc.line(lijnX1, somY + 1, lijnX2, somY + 1);
+
+        // Bij oplossingen of voorbeeld: tekst op de schrijflijn
+        if ((_metAntwoorden || isVoorbeeld) && onderstreepPos.length === 2) {
+          const restIdx = [0,1,2].find(i => !onderstreepPos.includes(i));
+          const restGetal = getallen[restIdx];
+          let oplStr;
+          if (!isAftrek) {
+            oplStr = `10 ${tekens[0] || '+'} ${restGetal} = ${oef.antwoord}`;
+          } else {
+            oplStr = `10 ${tekens[1] || '-'} ${restGetal} = ${oef.antwoord}`;
+          }
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+          doc.setTextColor(0, 100, 0);
+          doc.text(oplStr, lijnX1 + 1, somY);
+        } else if ((_metAntwoorden || isVoorbeeld)) {
+          // Geen onderstreping gevonden: toon gewoon het antwoord
+          doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+          doc.setTextColor(0, 100, 0);
+          doc.text(String(oef.antwoord), lijnX1 + 1, somY);
+        }
       }
     });
 
