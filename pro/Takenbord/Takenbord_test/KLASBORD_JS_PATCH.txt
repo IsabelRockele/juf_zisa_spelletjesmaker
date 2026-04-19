@@ -1,0 +1,35 @@
+PATCH VOOR klasbord.js (1 kleine wijziging)
+=============================================
+
+Deze patch zorgt dat de "📄 PDF"-knop vanuit de graadsklas-weergave
+automatisch het PDF-exportvenster opent van het bestaande klasbord.
+
+Zoek in klasbord.js naar deze regel (staat ongeveer rond regel 1640):
+
+---------------------------------------------------------
+  renderShell();
+
+  // Scroll-pijl listener
+---------------------------------------------------------
+
+En vervang door:
+
+---------------------------------------------------------
+  renderShell();
+
+  // Auto-open PDF-modal als ?autopdf=1 in de URL staat
+  // (gebruikt vanuit graadsklas-weergave om PDF-export te triggeren)
+  if(urlParams.get('autopdf') === '1'){
+    setTimeout(function(){
+      if(typeof openPdfModal === 'function') openPdfModal();
+    }, 500);
+  }
+
+  // Scroll-pijl listener
+---------------------------------------------------------
+
+
+Dat is alles! Deze 4 regels extra zorgen ervoor dat klikken op "📄 PDF 3A"
+in de graadsklas-weergave meteen het PDF-dialoog opent van dat specifieke
+klasbord, klaar voor export. Zo hergebruik je de bestaande PDF-logica
+volledig, zonder duplicatie.
