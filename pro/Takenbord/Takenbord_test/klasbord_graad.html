@@ -151,6 +151,46 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
 
 @media print{body>*:not(#qr-print-area){display:none!important;}#qr-print-area{display:block!important;}}
 #qr-print-area{display:none;padding:30px;text-align:center;font-family:Nunito,sans-serif;}
+
+/* ══════════════════════════════════════════════════════════════════════
+   SMARTBOARD-MODUS — alle beheer-knoppen verbergen, elementen vergroten
+   ══════════════════════════════════════════════════════════════════════ */
+body.smartboard{--col-name:260px;--col-task:140px;--name-font:18px;}
+body.smartboard .pro-header{display:none;}
+body.smartboard #wrap{padding-top:0;}
+body.smartboard .graad-bord-hdr-acties{display:none;}  /* Beheer-knoppen weg */
+body.smartboard #pdf-btn-1,
+body.smartboard #pdf-btn-2,
+body.smartboard .graad-btn.pdf-1,
+body.smartboard .graad-btn.pdf-2{display:none;}       /* PDF-knoppen weg */
+body.smartboard .graad-btn-qr,
+body.smartboard .graad-btn-sluiten{display:none;}      /* QR en Sluiten weg */
+body.smartboard .graad-btn-smartboard{display:none;}   /* Smartboard-knop zelf ook weg */
+body.smartboard .graad-bord-stats{font-size:16px;}
+body.smartboard .graad-bord-klaslabel{font-size:22px;padding:8px 18px;}
+body.smartboard .graad-bord-naam{font-size:16px;}
+body.smartboard .graad-title{font-size:22px;}
+body.smartboard .gb-t-icon{font-size:36px;}
+body.smartboard .gb-t-label{font-size:14px;}
+body.smartboard .gb-btn{width:66px;height:66px;font-size:26px;}
+body.smartboard .gb-btn::after{font-size:30px;}
+body.smartboard .gb-smiley{font-size:22px;}
+body.smartboard .gb-name-photo{width:44px;height:44px;}
+
+/* Discreet slotje om smartboardmodus te verlaten */
+#smartboard-exit-btn{display:none;position:fixed;bottom:14px;right:14px;z-index:9000;width:42px;height:42px;border-radius:50%;background:rgba(30,27,75,.6);color:#fff;border:2px solid rgba(255,255,255,.35);font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.25);font-family:inherit;align-items:center;justify-content:center;padding:0;line-height:1;}
+body.smartboard #smartboard-exit-btn{display:flex;}
+#smartboard-exit-btn:hover{background:rgba(30,27,75,.85);transform:scale(1.08);}
+
+/* Smartboard-exit overlay */
+#smartboard-exit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;display:flex;align-items:center;justify-content:center;padding:20px;}
+#smartboard-exit-overlay.hidden{display:none;}
+#smartboard-exit-overlay .modal{max-width:420px;}
+#smartboard-exit-overlay .exit-btns{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+#smartboard-exit-overlay .exit-btn{border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;}
+#smartboard-exit-overlay .exit-btn-prim{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;}
+#smartboard-exit-overlay .exit-btn-sec{background:#e0e7ff;color:#4338ca;}
+#smartboard-exit-overlay .exit-btn-ghost{background:#f3f4f6;color:#6b7280;}
 </style>
 </head>
 <body>
@@ -190,9 +230,10 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
     <div class="graad-btns">
       <button class="graad-btn pdf-1" id="pdf-btn-1" onclick="openPDF(1)" title="PDF-rapport van bord 1">📄 <span id="pdf-lbl-1">PDF</span></button>
       <button class="graad-btn pdf-2" id="pdf-btn-2" onclick="openPDF(2)" title="PDF-rapport van bord 2">📄 <span id="pdf-lbl-2">PDF</span></button>
-      <button class="graad-btn" onclick="openQR()">📱 QR voor iPad</button>
+      <button class="graad-btn graad-btn-qr" onclick="openQR()">📱 QR voor iPad</button>
+      <button class="graad-btn graad-btn-smartboard" onclick="startSmartboard()" title="Smartboardmodus — alle beheer verborgen">📺 Smartboard</button>
       <button class="graad-btn" onclick="toggleTimer()">⏱️ Timer</button>
-      <a href="welkomstbord.html" class="graad-btn danger">✕ Sluiten</a>
+      <a href="welkomstbord.html" class="graad-btn danger graad-btn-sluiten">✕ Sluiten</a>
     </div>
   </div>
 
@@ -301,6 +342,22 @@ html,body{height:100%;font-family:'Nunito','Segoe UI',sans-serif;background:#eef
     <div style="font-size:40px;margin-bottom:6px;">🔔</div>
     <div style="font-size:18px;font-weight:800;color:#16a34a;margin-bottom:10px;">Tijd is om!</div>
     <button onclick="resetTimer()" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;border-radius:12px;padding:9px 0;font-size:14px;font-weight:800;cursor:pointer;width:100%;">Nieuwe timer</button>
+  </div>
+</div>
+
+<!-- Discreet slotje om smartboardmodus te verlaten -->
+<button id="smartboard-exit-btn" onclick="handleSmartboardExit()" title="Smartboardmodus verlaten">🔒</button>
+
+<!-- Exit-overlay -->
+<div id="smartboard-exit-overlay" class="hidden" onclick="if(event.target===this)sluitSmartboardExit()">
+  <div class="modal">
+    <h3>🔒 Smartboardmodus verlaten</h3>
+    <p>Wat wil je doen?</p>
+    <div class="exit-btns">
+      <button class="exit-btn exit-btn-prim" onclick="exitSmartboard('bord')">↩️ Terug naar normale weergave</button>
+      <button class="exit-btn exit-btn-sec" onclick="exitSmartboard('welkom')">🏠 Terug naar overzicht</button>
+      <button class="exit-btn exit-btn-ghost" onclick="sluitSmartboardExit()">Annuleren</button>
+    </div>
   </div>
 </div>
 
