@@ -662,6 +662,12 @@ function renderGraadLijst(){
     openLink.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(gk.id);
     openLink.textContent = '▶ Openen';
 
+    const sbLink = document.createElement('a');
+    sbLink.className = 'bord-rij-sb';
+    sbLink.href = 'klasbord_graad.html?graadid=' + encodeURIComponent(gk.id) + '&modus=smartboard';
+    sbLink.textContent = '📺 Smartboard';
+    sbLink.title = 'Open in smartboardmodus — alle beheerknoppen verborgen';
+
     const delBtn = document.createElement('button');
     delBtn.className = 'graad-rij-del';
     delBtn.textContent = '🗑';
@@ -671,6 +677,7 @@ function renderGraadLijst(){
     rij.innerHTML = '<div class="graad-rij-icon">📊</div>';
     rij.appendChild(info);
     rij.appendChild(delBtn);
+    rij.appendChild(sbLink);
     rij.appendChild(openLink);
     lijst.appendChild(rij);
   });
