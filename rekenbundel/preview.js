@@ -775,8 +775,18 @@ const Preview = (() => {
           }
         }
       } else {
-        // Aftrekken: eerste − tweede = 10
-        if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
+        // Aftrekken A - B - C: zoek welke aftrekker (pos 1 of 2) ervoor zorgt
+        // dat A minus die aftrekker exact 10 is.
+        //   17 - 7 - 9: A=17, A-10=7, pos 1 is 7 → onderstreep [0, 1]
+        //   17 - 6 - 7: A=17, A-10=7, pos 2 is 7 → onderstreep [0, 2]
+        if (getallen.length >= 3) {
+          const doel = getallen[0] - 10;
+          if (getallen[1] === doel) {
+            onderstreepPos = [0, 1];
+          } else if (getallen[2] === doel) {
+            onderstreepPos = [0, 2];
+          }
+        } else if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
           onderstreepPos = [0, 1];
         }
       }
@@ -808,8 +818,11 @@ const Preview = (() => {
           // 6 + 1 + 4 met 6+4=10 → "10 + 1 = 11"
           oplStr = `10 ${tekens[0] || '+'} ${restGetal} = ${oef.antwoord}`;
         } else {
-          // 13 - 3 - 4 met 13-3=10 → "10 - 4 = 6"
-          oplStr = `10 ${tekens[1] || '-'} ${restGetal} = ${oef.antwoord}`;
+          // Aftrekken: het teken VÓÓR de resterende aftrekker
+          //   17 - 7 - 9 (rest pos=2) → "10 - 9 = 1" (teken pos 1)
+          //   17 - 6 - 7 (rest pos=1) → "10 - 6 = 4" (teken pos 0)
+          const tekenIdx = Math.max(0, restIdx - 1);
+          oplStr = `10 ${tekens[tekenIdx] || '-'} ${restGetal} = ${oef.antwoord}`;
         }
       } else {
         // Geen onderstreping gevonden: toon gewoon het antwoord
@@ -1311,7 +1324,7 @@ const Preview = (() => {
     // Bereken antwoord uit tekst: [a, op, b, '=', c] - een van a/b/c is null
     const _pTekst = oef.tekst || [];
     const _pNums  = _pTekst.filter(x => typeof x === 'number');
-    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷','*','/'].includes(x));
+    const _pOp    = _pTekst.find(x => typeof x === 'string' && ['+','-','×','÷',':','*','/'].includes(x));
     const _pEqIdx = _pTekst.indexOf('=');
     function _pBerekenAntw(nullPos) {
       if (_pEqIdx === -1 || !_pOp) return '';
@@ -1320,17 +1333,17 @@ const Preview = (() => {
         if (_pOp === '+' || _pOp === '+') return (a||0) + (b||0);
         if (_pOp === '-') return (a||0) - (b||0);
         if (_pOp === '×' || _pOp === '*') return (a||0) * (b||0);
-        if (_pOp === '÷' || _pOp === '/') return (a||0) / (b||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (a||0) / (b||0);
       } else if (nullPos === 0) { // a = c OP-inv b
         if (_pOp === '+') return (c||0) - (b||0);
         if (_pOp === '-') return (c||0) + (b||0);
         if (_pOp === '×' || _pOp === '*') return (c||0) / (b||0);
-        if (_pOp === '÷' || _pOp === '/') return (c||0) * (b||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (c||0) * (b||0);
       } else { // b = c OP-inv a
         if (_pOp === '+') return (c||0) - (a||0);
         if (_pOp === '-') return (a||0) - (c||0);
         if (_pOp === '×' || _pOp === '*') return (c||0) / (a||0);
-        if (_pOp === '÷' || _pOp === '/') return (a||0) * (c||0);
+        if (_pOp === '÷' || _pOp === '/' || _pOp === ':') return (a||0) * (c||0);
       }
       return '';
     }
@@ -2904,16 +2917,16 @@ const Preview = (() => {
       if (_rtBew === 'optellen' || _rtBew === '+') _rtTeken = '+';
       else if (_rtBew === 'aftrekken' || _rtBew === '-') _rtTeken = '-';
       else if (_rtBew === 'vermenigvuldigen') _rtTeken = '×';
-      else if (_rtBew === 'delen') _rtTeken = '÷';  // ÷ = ÷
+      else if (_rtBew === 'delen') _rtTeken = ':';  // Vlaamse notatie
       // Dubbel/helft/kwart: hardcoded bewerking op basis van templateId
       const _rtTmplId = oef.templateId || oef.id || '';
       if (!_rtTeken && _rtTmplId) {
         if (_rtTmplId === 'dhk1' || _rtTmplId === 'dhk2') {
           _rtTeken = '×'; _rtB = '2';
         } else if (_rtTmplId === 'dhk3' || _rtTmplId === 'dhk4') {
-          _rtTeken = '÷'; _rtB = '2';
+          _rtTeken = ':'; _rtB = '2';
         } else if (_rtTmplId === 'dhk5') {
-          _rtTeken = '÷'; _rtB = '4';
+          _rtTeken = ':'; _rtB = '4';
         }
       }
       // Fallback: afleiden uit getallen
@@ -2921,7 +2934,7 @@ const Preview = (() => {
         if (Number(_rtA) + Number(_rtB) === Number(_rtAnt)) _rtTeken = '+';
         else if (Number(_rtA) - Number(_rtB) === Number(_rtAnt)) _rtTeken = '−';
         else if (Number(_rtA) * Number(_rtB) === Number(_rtAnt)) _rtTeken = '×';
-        else if (Math.round(Number(_rtA) / Number(_rtB)) === Number(_rtAnt)) _rtTeken = '÷';
+        else if (Math.round(Number(_rtA) / Number(_rtB)) === Number(_rtAnt)) _rtTeken = ':';
       }
       const _rtOplStr = (_rtA !== '' && _rtB !== '' && _rtTeken && _rtAnt !== '')
         ? _rtA + ' ' + _rtTeken + ' ' + _rtB + ' = ' + _rtAnt
