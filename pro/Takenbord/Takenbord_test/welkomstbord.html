@@ -173,6 +173,33 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
 }
 .wb-sectie.graad-highlight { animation:graadHighlightPulse 1.8s ease-out; border-color:#fb923c !important; }
 
+/* ── SAMENVATTING & METAFOOR ── */
+.graad-samenvatting { background:#eef2ff; border:1.5px solid #c7d2fe; border-radius:10px; padding:8px 11px; margin-bottom:10px; font-size:12px; color:#4338ca; line-height:1.5; }
+.graad-samenvatting strong { color:#1e1b4b; }
+
+.graad-metafoor { display:flex; align-items:center; justify-content:center; gap:6px; padding:10px 8px; background:#fafaff; border:1.5px dashed #c7d2fe; border-radius:10px; margin-bottom:10px; font-size:11px; font-weight:700; flex-wrap:wrap; }
+.graad-meta-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 9px; border-radius:20px; white-space:nowrap; }
+.graad-meta-pill.oranje { background:#fff7ed; border:1.5px solid #fed7aa; color:#c2410c; }
+.graad-meta-pill.blauw { background:#f0f9ff; border:1.5px solid #bae6fd; color:#075985; }
+.graad-meta-pill.indigo { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; border:1.5px solid transparent; }
+.graad-meta-plus, .graad-meta-arrow { font-weight:800; color:#6366f1; font-size:13px; }
+
+/* ── UITKLAPBARE VOORBEELD-SECTIE ── */
+.graad-voorbeeld-details { margin-bottom:10px; }
+.graad-voorbeeld-summary { cursor:pointer; background:#f8fafc; border:1.5px solid #e0e7ff; border-radius:9px; padding:8px 11px; font-size:12px; font-weight:800; color:#4338ca; list-style:none; display:flex; align-items:center; gap:6px; transition:all .12s; }
+.graad-voorbeeld-summary::-webkit-details-marker { display:none; }
+.graad-voorbeeld-summary:hover { background:#eef2ff; border-color:#c7d2fe; }
+.graad-voorbeeld-summary::after { content:'▼'; margin-left:auto; font-size:9px; transition:transform .2s; }
+details[open] .graad-voorbeeld-summary::after { transform:rotate(180deg); }
+.graad-voorbeeld-inhoud { background:#fafaff; border:1.5px solid #e0e7ff; border-top:none; border-radius:0 0 9px 9px; padding:11px 13px; margin-top:-1px; }
+.graad-voorbeeld-naam { font-size:13px; font-weight:800; color:#6366f1; margin-bottom:6px; }
+.graad-voorbeeld-lijst { font-size:12px; color:#374151; line-height:1.7; margin:0 0 10px; padding-left:18px; }
+.graad-voorbeeld-lijst li { margin-bottom:3px; }
+.graad-voorbeeld-lijst strong { color:#1e1b4b; }
+.graad-gerust { background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:8px; padding:7px 10px; font-size:11px; color:#15803d; line-height:1.5; display:flex; align-items:flex-start; gap:6px; }
+.graad-gerust-icon { flex-shrink:0; }
+.graad-gerust strong { color:#14532d; }
+
 .wb-sectie-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1.5px solid rgba(0,0,0,.06); }
 .wb-hdr-klas { background:#fff7ed; border-radius:18px 18px 0 0; }
 .wb-hdr-kind { background:#f0e7ff; border-radius:18px 18px 0 0; }
@@ -414,6 +441,20 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
           <!-- Dynamische waarschuwing als er nog te weinig klasborden zijn -->
           <div id="graad-warn-container"></div>
 
+          <!-- Korte samenvatting -->
+          <div class="graad-samenvatting">
+            <strong>💡 Wat is dit?</strong> Een graadsklas-weergave toont <strong>2 klasborden tegelijk</strong> op je smartboard. Elk bord blijft apart bestaan en werkt gewoon — je maakt geen nieuw bord aan, je koppelt enkel 2 bestaande klasborden voor weergave.
+          </div>
+
+          <!-- Visuele metafoor met pijltjes -->
+          <div class="graad-metafoor">
+            <span class="graad-meta-pill oranje">📋 Klasbord "3A"</span>
+            <span class="graad-meta-plus">+</span>
+            <span class="graad-meta-pill blauw">📋 Klasbord "4A"</span>
+            <span class="graad-meta-arrow">→</span>
+            <span class="graad-meta-pill indigo">📊 Graadsklas-weergave</span>
+          </div>
+
           <!-- Compacte stappen -->
           <div class="graad-stappen-compact">
             <div class="graad-stap-compact">
@@ -429,6 +470,24 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
               <div>Open op <strong>smartboard</strong> → 2 borden naast elkaar.</div>
             </div>
           </div>
+
+          <!-- Uitklapbaar voorbeeld -->
+          <details class="graad-voorbeeld-details">
+            <summary class="graad-voorbeeld-summary">📖 Lees een concreet voorbeeld</summary>
+            <div class="graad-voorbeeld-inhoud">
+              <div class="graad-voorbeeld-naam">Juf Sara geeft les in 3A + 4A</div>
+              <ol class="graad-voorbeeld-lijst">
+                <li>In <strong>📋 Klasbord</strong> maakt ze <strong>klasbord "3A"</strong> aan — met haar 15 derdeklassers en hun taken (lezen, rekenen, schrijven…).</li>
+                <li>Ze maakt daarnaast een <strong>tweede klasbord "4A"</strong> aan — met haar 12 vierdeklassers en hún taken.</li>
+                <li>Hier in <strong>📊 Graadsklas-weergave</strong> klikt ze op <em>"aanmaken"</em> en kiest ze haar 2 klasborden (3A + 4A).</li>
+                <li>Klaar! Op het smartboard ziet ze nu <strong>beide klassen naast elkaar</strong>, elk in een eigen kleur.</li>
+              </ol>
+              <div class="graad-gerust">
+                <span class="graad-gerust-icon">✓</span>
+                <div><strong>Je klasborden blijven gewoon werken.</strong> Je kan 3A en 4A nog altijd los openen, bewerken of met de iPad laten gebruiken door de kinderen. Niks verandert aan de klasborden zelf.</div>
+              </div>
+            </div>
+          </details>
 
           <div id="graad-lijst" class="graad-lijst"></div>
           <button type="button" class="graad-nieuw-btn" onclick="opendNieuweGraadsklas()" id="graad-nieuw-btn">➕ Graadsklas-weergave aanmaken</button>
