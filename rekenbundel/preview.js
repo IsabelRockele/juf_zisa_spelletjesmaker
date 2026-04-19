@@ -241,7 +241,7 @@ const Preview = (() => {
         // Lege onthoud-cellen toch verwerken voor achtergrondkleur
         if ((ant === '' || ant === 'undefined') && !el.classList.contains('cij-onthoud') && !el.classList.contains('komma-onthoud')) return;
 
-      const isSchrijflijn  = el.classList.contains('schrijflijn');
+      const isSchrijflijn  = el.classList.contains('schrijflijn') || el.classList.contains('eerst10-schrijflijn');
       const isSplitsVak    = el.classList.contains('splits-vak') || el.classList.contains('splits-vak-groot');
       const isAntwoordVak  = el.classList.contains('antwoord-vak');
       const isInvulhokje   = el.classList.contains('invulhokje');
@@ -413,6 +413,21 @@ const Preview = (() => {
           el.style.background = '';
           el.style.border = '2px solid #333';
           el.style.color = '';
+        }
+      });
+
+      // Maak eerst 10: onderstreep 2 getallen die samen 10 vormen
+      document.querySelectorAll('.eerst10-onderstreep').forEach(el => {
+        if (_toonOplossingen) {
+          el.style.borderBottom = '2px solid #00a650';
+          el.style.paddingBottom = '1px';
+          el.style.color = '#006100';
+          el.style.fontWeight = 'bold';
+        } else {
+          el.style.borderBottom = '';
+          el.style.paddingBottom = '';
+          el.style.color = '';
+          el.style.fontWeight = '';
         }
       });
     }; // einde _doToggleUpdate
@@ -732,10 +747,83 @@ const Preview = (() => {
     if (oef.drieTermen) {
       const metVoorbeeld = blok.metVoorbeeld || false;
       const isVoorbeeld  = metVoorbeeld && idx === 0;
+
+      // Parse getallen en tekens uit de vraag
+      // Vraag is bv "6 + 1 + 4 =" of "13 - 3 - 4 ="
+      const rawZonderIs = oef.vraag.replace(' =', '').trim();
+      const tokens = rawZonderIs.split(/\s+/);  // ['6', '+', '1', '+', '4']
+      const getallen = [];
+      const tekens = [];
+      tokens.forEach((t, i) => {
+        if (i % 2 === 0) getallen.push(parseInt(t, 10));
+        else tekens.push(t);
+      });
+
+      // Bepaal welke 2 posities samen 10 zijn (voor underline-hint)
+      // Bij optellen: zoek 2 getallen die samen 10 zijn
+      // Bij aftrekken: meestal de eerste 2 (A - B = 10)
+      let onderstreepPos = [];
+      const isAftrek = tekens.some(t => t === '-' || t === '−');
+      if (!isAftrek) {
+        // Optellen: zoek 2 posities met som = 10
+        for (let i = 0; i < getallen.length && onderstreepPos.length === 0; i++) {
+          for (let j = i + 1; j < getallen.length; j++) {
+            if (getallen[i] + getallen[j] === 10) {
+              onderstreepPos = [i, j];
+              break;
+            }
+          }
+        }
+      } else {
+        // Aftrekken: eerste − tweede = 10
+        if (getallen.length >= 2 && (getallen[0] - getallen[1]) === 10) {
+          onderstreepPos = [0, 1];
+        }
+      }
+
+      // Bouw de som HTML met ruimte voor onderstreping op specifieke getallen
+      let somHTML = '';
+      tokens.forEach((t, i) => {
+        if (i % 2 === 0) {
+          // Getal
+          const getalIdx = i / 2;
+          if (onderstreepPos.includes(getalIdx)) {
+            somHTML += `<span class="eerst10-onderstreep" data-onderstreep="true">${esc(t)}</span>`;
+          } else {
+            somHTML += esc(t);
+          }
+        } else {
+          somHTML += ' ' + esc(t) + ' ';
+        }
+      });
+      somHTML += ' =';
+
+      // Antwoordlijn — kind schrijft "10 + 1 = 11" of iets dergelijks
+      // Bij voorbeeld of bij toonOplossingen: tonen we het uitgewerkte antwoord
+      let oplStr = '';
+      if (onderstreepPos.length === 2) {
+        const restIdx = [0,1,2].find(i => !onderstreepPos.includes(i));
+        const restGetal = getallen[restIdx];
+        if (!isAftrek) {
+          // 6 + 1 + 4 met 6+4=10 → "10 + 1 = 11"
+          oplStr = `10 ${tekens[0] || '+'} ${restGetal} = ${oef.antwoord}`;
+        } else {
+          // 13 - 3 - 4 met 13-3=10 → "10 - 4 = 6"
+          oplStr = `10 ${tekens[1] || '-'} ${restGetal} = ${oef.antwoord}`;
+        }
+      } else {
+        // Geen onderstreping gevonden: toon gewoon het antwoord
+        oplStr = String(oef.antwoord ?? '');
+      }
+
+      const antwoordHTML = isVoorbeeld
+        ? `<span class="eerst10-schrijflijn eerst10-ingevuld">${esc(oplStr)}</span>`
+        : `<span class="eerst10-schrijflijn" data-antwoord="${esc(oplStr)}"></span>`;
+
       return `
         <div class="oefening-item oefening-eerst10${isVoorbeeld ? ' eerst10-voorbeeld' : ''}">
-          <span class="oef-tekst">${esc(oef.vraag)}</span>
-          <span class="antwoord-vak${isVoorbeeld ? ' antwoord-ingevuld' : ''}">${isVoorbeeld ? String(oef.antwoord) : ''}</span>
+          <span class="oef-tekst">${somHTML}</span>
+          ${antwoordHTML}
           <button class="btn-del-oef" onclick="App.verwijderOefening('${blokId}',${idx})" title="Verwijder">✕</button>
         </div>`;
     }
