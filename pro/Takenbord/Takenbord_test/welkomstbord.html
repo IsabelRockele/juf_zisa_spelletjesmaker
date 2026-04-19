@@ -134,6 +134,33 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
 .graad-keuze-select:focus { outline:none; border-color:#6366f1; }
 .graad-klas-hint { font-size:11px; color:#64748b; margin-top:4px; line-height:1.4; }
 
+/* ── GRAADSKLAS UITLEG + VOORBEELD ── */
+.graad-uitleg { background:#fafaff; border:1.5px solid #e0e7ff; border-radius:14px; padding:14px 16px; margin-bottom:14px; display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:center; }
+@media(max-width:700px){ .graad-uitleg { grid-template-columns:1fr; } }
+.graad-stappen { display:flex; flex-direction:column; gap:10px; }
+.graad-stap { display:flex; gap:10px; align-items:flex-start; font-size:13px; color:#374151; line-height:1.5; }
+.graad-stap-nr { flex-shrink:0; width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; }
+.graad-stap strong { color:#1e1b4b; }
+
+.graad-voorbeeld { border-radius:12px; overflow:hidden; border:1.5px solid rgba(0,0,0,.08); box-shadow:0 2px 6px rgba(0,0,0,.07); }
+.graad-voorbeeld-bar { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; padding:6px 10px; font-size:10px; font-weight:700; display:flex; align-items:center; gap:6px; }
+.graad-voorbeeld-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.4); }
+.graad-voorbeeld-body { display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:6px; background:#f1f5f9; }
+.graad-voorbeeld-kolom { background:#fff; border-radius:8px; padding:8px; }
+.graad-voorbeeld-kolom.kleur-oranje { background:#fff7ed; border:1.5px solid #fed7aa; }
+.graad-voorbeeld-kolom.kleur-blauw { background:#f0f9ff; border:1.5px solid #bae6fd; }
+.graad-voorbeeld-hdr { display:flex; align-items:center; gap:5px; margin-bottom:6px; }
+.graad-voorbeeld-label { font-size:11px; font-weight:800; padding:2px 7px; border-radius:8px; color:#fff; }
+.graad-voorbeeld-label.oranje { background:linear-gradient(135deg,#fb923c,#f97316); }
+.graad-voorbeeld-label.blauw { background:linear-gradient(135deg,#38bdf8,#0ea5e9); }
+.graad-voorbeeld-sub { font-size:9px; font-weight:700; color:#6b7280; }
+.graad-voorbeeld-grid { display:grid; grid-template-columns:auto 1fr 1fr 1fr; gap:2px; font-size:9px; }
+.graad-voorbeeld-cel { padding:2px 3px; background:#fff; border-radius:2px; text-align:center; }
+.graad-voorbeeld-cel.naam { text-align:left; font-weight:700; color:#374151; }
+.graad-voorbeeld-cel.hdr { background:transparent; color:#6b7280; font-weight:700; font-size:9px; }
+.graad-voorbeeld-cel.klaar { background:#dcfce7; color:#15803d; font-weight:700; }
+.graad-voorbeeld-cel.bezig { background:#fef9c3; color:#d97706; }
+
 .wb-sectie-hdr { display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1.5px solid rgba(0,0,0,.06); }
 .wb-hdr-klas { background:#fff7ed; border-radius:18px 18px 0 0; }
 .wb-hdr-kind { background:#f0e7ff; border-radius:18px 18px 0 0; }
@@ -353,13 +380,7 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
 
     </div>
 
-    <!-- Tip onderaan -->
-    <div class="wb-tip">
-      <div class="wb-tip-dot"></div>
-      Je kan zoveel borden aanmaken als je wil. De 4 meest recente worden bewaard, oudere verdwijnen automatisch.
-    </div>
-
-    <!-- ── GRAADSKLAS-WEERGAVE ── -->
+    <!-- ── GRAADSKLAS-WEERGAVE (tussen klas/kind-grid en tip onderaan) ── -->
     <div class="graad-sectie">
       <div class="graad-sectie-hdr">
         <div class="graad-sectie-icon">📊</div>
@@ -369,8 +390,85 @@ body{min-height:100vh;overflow:auto;margin:0;padding-top:32px;}html,body{padding
         </div>
         <div class="graad-sectie-badge">✨ Nieuw</div>
       </div>
+
+      <!-- Uitleg + voorbeeld -->
+      <div class="graad-uitleg">
+        <div class="graad-stappen">
+          <div class="graad-stap">
+            <div class="graad-stap-nr">1</div>
+            <div>Maak eerst <strong>een klasbord per leerjaar</strong> aan hierboven.<br/><span style="color:#6b7280;font-size:12px;">Bijvoorbeeld één "3A" met je derdeleerjaars, en één "4A" met je vierdeleerjaars — elk met hun eigen namen, taken, foto's…</span></div>
+          </div>
+          <div class="graad-stap">
+            <div class="graad-stap-nr">2</div>
+            <div>Klik hieronder op <strong>"➕ Graadsklas-weergave aanmaken"</strong>.<br/><span style="color:#6b7280;font-size:12px;">Kies welke 2 borden je wil koppelen en geef elk een kort klaslabel (3A, 4A…).</span></div>
+          </div>
+          <div class="graad-stap">
+            <div class="graad-stap-nr">3</div>
+            <div>Open de graadsklas op je <strong>smartboard</strong>.<br/><span style="color:#6b7280;font-size:12px;">Je ziet beide klassen naast elkaar. Beheer (namen, taken…) blijft via elk klasbord apart.</span></div>
+          </div>
+        </div>
+
+        <!-- Visueel voorbeeld -->
+        <div class="graad-voorbeeld">
+          <div class="graad-voorbeeld-bar">
+            <div class="graad-voorbeeld-dot"></div>
+            <div class="graad-voorbeeld-dot"></div>
+            <div class="graad-voorbeeld-dot"></div>
+            <span style="margin-left:4px;">Zo ziet het eruit op het smartboard</span>
+          </div>
+          <div class="graad-voorbeeld-body">
+            <div class="graad-voorbeeld-kolom kleur-oranje">
+              <div class="graad-voorbeeld-hdr">
+                <span class="graad-voorbeeld-label oranje">3A</span>
+                <span class="graad-voorbeeld-sub">Derde lj.</span>
+              </div>
+              <div class="graad-voorbeeld-grid">
+                <div class="graad-voorbeeld-cel hdr"></div>
+                <div class="graad-voorbeeld-cel hdr">📖</div>
+                <div class="graad-voorbeeld-cel hdr">🔢</div>
+                <div class="graad-voorbeeld-cel hdr">✏️</div>
+                <div class="graad-voorbeeld-cel naam">Jana</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel bezig">🔄</div>
+                <div class="graad-voorbeeld-cel naam">Bram</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel bezig">🔄</div>
+                <div class="graad-voorbeeld-cel"></div>
+              </div>
+            </div>
+            <div class="graad-voorbeeld-kolom kleur-blauw">
+              <div class="graad-voorbeeld-hdr">
+                <span class="graad-voorbeeld-label blauw">4A</span>
+                <span class="graad-voorbeeld-sub">Vierde lj.</span>
+              </div>
+              <div class="graad-voorbeeld-grid">
+                <div class="graad-voorbeeld-cel hdr"></div>
+                <div class="graad-voorbeeld-cel hdr">📐</div>
+                <div class="graad-voorbeeld-cel hdr">🔤</div>
+                <div class="graad-voorbeeld-cel hdr">📄</div>
+                <div class="graad-voorbeeld-cel naam">Finn</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel bezig">🔄</div>
+                <div class="graad-voorbeeld-cel naam">Amira</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+                <div class="graad-voorbeeld-cel klaar">✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="graad-lijst" class="graad-lijst"></div>
       <button type="button" class="graad-nieuw-btn" onclick="opendNieuweGraadsklas()" id="graad-nieuw-btn">➕ Graadsklas-weergave aanmaken</button>
+    </div>
+
+    <!-- Tip onderaan -->
+    <div class="wb-tip">
+      <div class="wb-tip-dot"></div>
+      Je kan zoveel borden aanmaken als je wil. De 4 meest recente worden bewaard, oudere verdwijnen automatisch.
     </div>
 
   </div>
