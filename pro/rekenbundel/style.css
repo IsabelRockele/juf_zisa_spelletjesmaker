@@ -528,6 +528,17 @@ header .badge {
   padding: 4px;
   background: var(--wit);
 }
+
+/* Ingekleurd bij oplossing: brugoefening */
+.lamp-brug-oplossing {
+  background: #c6efce !important;
+  border-color: #27ae60 !important;
+}
+
+/* Getallenlijn zelf: boogjes verborgen tot oplossing getoond - opacity via JS */
+.gl-boog-oplossing {
+  /* opacity geregeld via setAttribute in toggle */
+}
 .zisa-lamp {
   height: 52px;
   width: auto;
@@ -741,12 +752,20 @@ header .badge {
   flex-direction: column;
   align-items: flex-start;
   gap: 0;
-  padding: 10px 10px 14px 10px;
+  padding: 10px 10px 18px 10px;
   background: #ffffff;
   position: relative;
   min-height: 128px;
+  /* Kader past zich automatisch aan schrijflijnen aan */
+  height: auto;
+}
+
+/* Groter kader bij 3 schrijflijnen */
+.oefening-hulp .hulp-schrijflijnen:has(.schrijflijn:nth-child(3)) {
+  margin-bottom: 6px;
 }
 .oefening-hulp.aftrektal-hulp { padding-left: 30px; }
+.oefening-hulp.aftrektal-hulp.aftrektal-hulp-groot { padding-left: 54px; }
 
 .hulp-som-rij {
   display: flex; align-items: center; white-space: nowrap;
@@ -780,6 +799,18 @@ header .badge {
   border: 1.5px solid var(--blauw);
   border-radius: 4px; background: white;
 }
+/* Bredere vakjes voor getallen tot 10.000 */
+.splits-vak-groot {
+  width: 30px; height: 22px;
+  border: 1.5px solid var(--blauw);
+  border-radius: 4px; background: white;
+}
+.splitsbeen-boom-groot {
+  width: 72px; height: 16px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='16'%3E%3Cpolyline points='4,16 36,2 68,16' fill='none' stroke='%231a3a5c' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-size: 72px 16px;
+}
 .hulp-schrijflijnen {
   position: absolute;
   left: 128px;
@@ -789,6 +820,15 @@ header .badge {
   flex-direction: column;
   gap: 4px;
   padding: 0;
+}
+
+/* Bij 3 schrijflijnen: kader moet groter */
+.oefening-hulp:has(.schrijflijn:nth-child(3)) {
+  min-height: 168px !important;
+  padding-bottom: 24px !important;
+}
+.oefening-hulp.niveau-10000 .hulp-schrijflijnen {
+  left: 158px;
 }
 
 .hulp-schrijflijnen .schrijflijn {
@@ -888,7 +928,10 @@ header .badge {
 .schijfjes-kolom {
   display: flex;
   flex-direction: column;
-  min-width: 80px;
+  min-width: 72px;
+}
+.schijfjes-kolom-d {
+  min-width: 60px;
 }
 .schijfjes-kolom + .schijfjes-kolom {
   border-left: 1.5px solid #aaa;
@@ -899,6 +942,10 @@ header .badge {
   font-weight: 700;
   padding: 3px 0;
   border-bottom: 1.5px solid #aaa;
+}
+.schijfjes-kop-d {
+  background: #E74C3C;
+  color: #fff;
 }
 .schijfjes-kop-h {
   background: #85C1E9;
@@ -928,6 +975,11 @@ header .badge {
   font-size: 9px;
   font-weight: 700;
 }
+.schijfje-d {
+  background: #E74C3C;
+  border: 1.5px solid #922B21;
+  color: #fff;
+}
 .schijfje-h {
   background: #5DADE2;
   border: 1.5px solid #1A5276;
@@ -946,6 +998,13 @@ header .badge {
 .schijfje-leeg {
   background: white;
   border: 1.5px dashed #BDC3C7;
+}
+
+/* Extra lege schijfjes onderaan voor aanvullen inkleuren */
+.schijfje-aanvul {
+  background: #fafcff;
+  border: 1.5px dashed #d8e4ef;
+  opacity: 0.55;
 }
 
 /* ══════════════════════════════════════════════════════
@@ -1645,18 +1704,27 @@ header .badge {
 
 .gl-lijn {
   display: inline-block;
+  min-width: 16px;
   width: 16px;
   border-bottom: 1.5px solid #777;
   height: 16px;
   flex-shrink: 0;
+  text-align: center;
+  line-height: 14px;
+  vertical-align: bottom;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 .gl-lijn.kort {
+  min-width: 18px;
   width: 18px;
 }
 
 .gl-lijn.breed {
-  width: 22px;
+  min-width: 22px;
+  width: auto;
+  padding: 0 3px;
 }
 
 .gl-plus,
@@ -1859,16 +1927,41 @@ header .badge {
   -webkit-print-color-adjust: exact;
   print-color-adjust: exact;
 }
+.cij-duizend { background-color: #e74c3c; color: #fff !important; }
 .cij-honderd { background-color: #2980b9; }
 .cij-tien    { background-color: #27ae60; }
 .cij-een     { background-color: #f1c40f; color: #333 !important; }
 
-.cij-onthoud { vertical-align: middle !important; padding-bottom: 0 !important; }
+.cij-onthoud { vertical-align: middle !important; padding: 4px 2px !important; line-height: 1.3 !important; font-size: 12px; font-weight: bold; text-align: center; }
+.cij-onthoud.cij-duizend { background-color: #f1948a; }
 .cij-onthoud.cij-honderd { background-color: #a9cce3; }
 .cij-onthoud.cij-tien    { background-color: #a3e4d7; }
 .cij-onthoud.cij-een     { background-color: #f9e79f; }
 
 .cij-getal    { background-color: #fdfdfd; }
+
+/* Doorgestreept origineel getal bij aftrekken met lenen */
+/* Doorstreep bij aftrekken met lenen */
+.cij-getal.cij-heeft-doorstreep {
+  text-decoration: line-through;
+  text-decoration-color: #c0392b;
+  text-decoration-thickness: 2px;
+  color: #c0392b !important;
+}
+
+/* Gestapelde onthoud-getallen (twee bruggen) */
+.cij-onth-boven, .cij-onth-onder {
+  display: none;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1.3;
+  color: #006100;
+  text-align: center;
+}
+.cij-onth-boven {
+  font-size: 9px;
+  border-bottom: 1px solid #888;
+}
 .cij-oplossing {
   background-color: #fff;
   border-top: 3px solid #000 !important;
@@ -1936,6 +2029,7 @@ header .badge {
 }
 .deel-T { background-color: #27ae60; }
 .deel-E { background-color: #f1c40f; color: #333 !important; }
+.deel-H { background-color: #2980b9; color: #fff; }
 
 .deel-cel {
   background-color: #fdfdfd;
@@ -2088,15 +2182,75 @@ header .badge {
 }
 .deel-T { background-color: #27ae60 !important; }
 .deel-E { background-color: #f1c40f !important; color: #333 !important; }
+.deel-H { background-color: #2980b9 !important; color: #fff !important; }
 
 /* Gewone invulcellen */
 .deel-cel {
   background-color: #fff;
+  position: relative;
 }
 
-/* Aftrekrijen: dikke bovenlijn */
+/* Aftrekrijen met dikke bovenlijn (oude styling, behouden voor andere usages) */
 .deel-aftrek-rij td {
   border-top: 3px solid #222 !important;
+}
+
+/* Nieuwe aftrek-rij: dikke lijn ONDER de rij met het aftrek-getal */
+.deel-aftrek-onder td {
+  border-bottom: 3px solid #222 !important;
+}
+
+/* Dikke bovenlijn per cel (voor compatibiliteit met oudere HTE-rendering) */
+.deel-dikboven {
+  border-top: 3px solid #222 !important;
+}
+
+/* Dalend cijfer: verticale stippellijn boven de cel, blauwgroen.
+   Alleen zichtbaar als de body de klasse .toont-oplossingen heeft
+   (anders moet de leerling zelf de cijfers naar beneden halen). */
+.deel-dalend::before {
+  content: '';
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 12px;
+  border-left: 2px dotted #1abc9c;
+  pointer-events: none;
+  z-index: 2;
+  display: none;
+}
+body.toont-oplossingen .deel-dalend::before {
+  display: block;
+}
+
+/* Boogje boven H+T (alleen bij HTE:E scenario B: H < deler) */
+.deel-links {
+  position: relative;
+}
+.deel-boog {
+  position: absolute;
+  top: -8px;
+  height: 6px;
+  border: 2px solid #1abc9c;
+  border-bottom: none;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  pointer-events: none;
+  z-index: 3;
+  display: none;
+}
+body.toont-oplossingen .deel-boog {
+  display: block;
+}
+/* Boogje over H + T (kolom 0 en 1 van 3) — centreer over de eerste twee cellen.
+   Stel in dat cellen ~32px breed zijn (deel-cel heeft typically die breedte).
+   We positioneren de boog boven kolom 0 (links) met breedte = 2 kolommen. */
+.deel-boog-HT {
+  left: 1px;
+  width: calc(2 * var(--deel-cel-w, 32px) - 6px);
+  top: 32px;  /* ongeveer onder de headerrij, boven rij 1 */
 }
 
 /* Minteken: verschijnt net BOVEN de dikke lijn van de aftrekrij */
@@ -2168,7 +2322,11 @@ header .badge {
 
 /* Onthoud-rij in kommaschema: lichtgrijs, kleiner */
 .komma-onthoud {
-  height: 18px !important;
+  padding: 4px 2px !important;
+  line-height: 1.3 !important;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
   background-color: #e8e8e8 !important;
   border-color: #ccc !important;
   -webkit-print-color-adjust: exact;
@@ -2299,3 +2457,474 @@ header .badge {
 .voeg-toe-knop:hover {
   background: #5b21b6;
 }
+
+/* ══════════════════════════════════════════════════════════
+   TRANSFORMEREN (optellingswip) — preview stijlen
+   Volgt exact hetzelfde patroon als compenseren
+══════════════════════════════════════════════════════════ */
+
+.oefeningen-grid.trans-grid {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+/* Oefening: flex row — trans-layout links, schrijflijnen rechts */
+.oefening-trans {
+  display: flex !important;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 28px 12px 10px;
+  position: relative;
+}
+.oefening-trans.trans-voorbeeld {
+  background: #FFF3CD !important;
+  border-color: #F0A500 !important;
+}
+
+/* ── Schema-balkjes boven de som ── */
+.trans-balk-rij {
+  display: flex;
+  width: 100%;
+  height: 28px;
+  gap: 3px;
+  margin-bottom: 2px;
+}
+.trans-balk-b {
+  background: #b5d4f4;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 20px;
+}
+.trans-balk-g {
+  background: #fde68a;
+  border-radius: 4px;
+  position: relative;
+  flex-shrink: 0;
+  min-width: 10px;
+}
+.trans-balk-num {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #1e3a8a;
+  overflow: hidden;
+}
+.trans-balk-num-g {
+  position: absolute;
+  top: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 600; color: #78350f;
+  overflow: hidden;
+}
+.trans-balk-schrijf {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(30,58,138,0.3);
+}
+.trans-balk-schrijf-g {
+  position: absolute;
+  bottom: 4px; left: 5px; right: 5px;
+  border-bottom: 1px solid rgba(120,53,15,0.3);
+}
+.trans-balk-inv {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #1e3a8a;
+}
+.trans-balk-inv-g {
+  position: absolute;
+  bottom: 3px; left: 0; right: 0;
+  text-align: center;
+  font-size: 11px; font-weight: 700; color: #78350f;
+}
+
+/* ── Som-tabel (pijlen + rijen) ──
+   Exact als comp-grid maar dan een tabel-layout
+   kol1=tg(30%)  kol2=+(8%)  kol3=ag(30%)  kol4==(8%)  kol5=antw
+*/
+.trans-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+.trans-tabel td { padding: 0; }
+.trans-td-getal-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: bottom;
+}
+.trans-td-teken {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-getal-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: bottom;
+}
+.trans-td-is {
+  width: 8%; text-align: center;
+  vertical-align: bottom;
+}
+.trans-td-antw { vertical-align: bottom; }
+
+/* Pijl-rij */
+.trans-td-pijl-l {
+  width: 30%; text-align: right;
+  padding-right: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-td-pijl-r {
+  width: 30%; text-align: left;
+  padding-left: 4px; vertical-align: top;
+  padding-top: 3px;
+}
+.trans-pijl-cel-l {
+  display: flex; align-items: flex-start;
+  justify-content: flex-end; gap: 3px;
+}
+.trans-pijl-cel-r {
+  display: flex; align-items: flex-start;
+  justify-content: flex-start; gap: 3px;
+}
+.trans-pijl-svg { color: var(--tekst); display: block; }
+
+/* Schrijflijn naast pijl */
+.trans-schrijflijn-pijl {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid #B0C4D8;
+  margin-top: 10px;
+  vertical-align: bottom;
+}
+/* Ingevulde waarde naast pijl (voorbeeld) */
+.trans-pijl-waarde {
+  display: inline-block;
+  min-width: 26px;
+  border-bottom: 1.5px solid currentColor;
+  margin-top: 10px;
+  vertical-align: bottom;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.trans-pijl-waarde.blauw { color: #1d4ed8; }
+.trans-pijl-waarde.geel  { color: #b45309; }
+
+/* Onderste rij: schrijflijnen of ingevuld */
+.trans-tr-onder td { padding-top: 10px; vertical-align: bottom; font-weight: 400; color: var(--muted); }
+.trans-schrijflijn {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+}
+.trans-ingevuld {
+  display: inline-block;
+  min-width: 44px;
+  border-bottom: 1.5px solid #B0C4D8;
+  vertical-align: bottom;
+  padding-top: 8px;
+  font-weight: 600;
+  color: var(--tekst);
+}
+
+/* Kaal variant */
+.oefening-trans-kaal {
+  padding: 8px 28px 8px 10px;
+}
+.trans-kaal-som {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+  font-size: 15px; font-weight: 600;
+  color: var(--tekst);
+}
+.trans-kaal-getal {
+  min-width: 36px; text-align: right;
+  padding-bottom: 3px;
+}
+.trans-kaal-teken { margin: 0 5px; padding-bottom: 3px; }
+.trans-kaal-lijn {
+  display: inline-block;
+  flex: 1;
+  min-width: 120px;
+  border-bottom: 1.5px solid #B0C4D8;
+}
+.trans-kaal-vb {
+  font-size: 14px; font-weight: 600;
+  color: var(--blauw); line-height: 2;
+  padding: 4px 2px;
+}
+.trans-kaal-stap { color: #1d4ed8; }
+
+/* ══════════════════════════════════════════════════════════════
+   SCHATTEN — preview stijlen
+   ══════════════════════════════════════════════════════════════ */
+
+/* Tab kleur: warm oranje */
+.tab-schatten { background-color: #ffe0b2; color: #1A3A5C; }
+.tab-schatten:hover { background-color: #ffcc80; }
+.tab-schatten.active {
+  background-color: #e8780a !important;
+  color: #ffffff;
+  border-bottom-color: #b35a00 !important;
+  font-weight: 800;
+}
+
+/* Schrijflijn generiek */
+.scht-lijn {
+  display: inline-block;
+  border-bottom: 1.5px solid #555;
+  min-width: 44px;
+  height: 18px;
+  margin: 0 2px;
+  vertical-align: bottom;
+  flex-shrink: 0;
+}
+.scht-lijn.smal  { min-width: 32px; }
+.scht-lijn.breed { min-width: 90px; flex: 1; }
+
+/* Bewerkingsteken (+ of -) in schrijfformules */
+.scht-teken { font-size: 14px; font-weight: 700; color: #e8780a; flex-shrink: 0; }
+
+/* Voorbeeld-klassen */
+.scht-vb-blauw  { font-size: 14px; font-weight: 700; color: #2980b9; }
+.scht-vb-oranje { font-size: 15px; font-weight: 800; color: #e8780a; }
+.scht-vb { background: #fff8e8 !important; border-color: #f0a500 !important; }
+
+/* ── Type 1: Afronden ────────────────────────────────────── */
+.schatten-afronden-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.scht-afronden {
+  flex-direction: column !important; align-items: flex-start !important;
+  padding: 10px 28px 10px 10px; gap: 8px; min-height: 80px;
+}
+.scht-af-getal {
+  font-size: 18px; font-weight: 800; color: #1a3a5c;
+  text-align: center; width: 100%; padding-bottom: 5px;
+  border-bottom: 1px solid #dce8f0;
+}
+.scht-af-rijen { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.scht-af-rij   { display: flex; align-items: flex-end; gap: 6px; }
+.scht-af-label { font-size: 13px; color: #555; white-space: nowrap; flex-shrink: 0; padding-bottom: 2px; }
+
+/* ── Type 2: Schatting tabel ─────────────────────────────── */
+.schatten-tabel-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #b0c4d8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header rij boven tabel */
+.scht-tabel-header {
+  display: grid;
+  grid-template-columns: 140px 150px 1fr 80px;
+  background: #c5d8ec;
+  border-bottom: 2px solid #90aac8;
+}
+.scht-hdr-cel {
+  padding: 7px 8px;
+  font-size: 12px; font-weight: 700; color: #1a3a5c;
+  border-right: 1px solid #90aac8;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+}
+.scht-hdr-cel:last-child { border-right: none; justify-content: center; }
+
+/* Data rijen */
+.scht-tabel-rij {
+  display: grid !important;
+  grid-template-columns: 140px 150px 1fr 80px;
+  gap: 0; align-items: center;
+  padding: 0 !important; border: none !important;
+  border-bottom: 1px solid #dce8f5 !important;
+  border-radius: 0 !important; min-height: 40px;
+  position: relative;
+}
+.scht-tabel-rij:last-child { border-bottom: none !important; }
+.scht-tabel-rij > div {
+  padding: 8px 8px; border-right: 1px solid #dce8f5;
+  font-size: 14px; font-weight: 600;
+  display: flex; align-items: center; gap: 4px; min-height: 40px;
+  overflow: hidden;
+}
+.scht-tabel-rij > div:last-child { border-right: none; }
+.scht-t-som  { color: #1a3a5c; font-weight: 700; white-space: nowrap; }
+.scht-t-col4 { justify-content: center; }
+/* Verwijder-knop in tabel */
+.scht-tabel-rij .btn-del-oef { position: absolute !important; top: 4px; right: 4px; }
+
+/* ── Type 3: Schatting compact ───────────────────────────── */
+.schatten-compact-grid {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1.5px solid #a8d5a8; border-radius: 8px; overflow: hidden;
+}
+
+/* Header balk boven compact lijst */
+.scht-compact-header {
+  background: #c8e8c8;
+  padding: 7px 12px;
+  font-size: 12px; font-weight: 700; color: #1a5c1a;
+  border-bottom: 2px solid #88c488;
+  text-align: center;
+}
+
+.scht-compact {
+  display: flex !important; flex-direction: row; align-items: center;
+  gap: 12px; padding: 11px 34px 11px 12px !important;
+  border: none !important; border-bottom: 1px solid #c8e8c8 !important;
+  border-radius: 0 !important; min-height: 44px;
+}
+.scht-compact:last-child { border-bottom: none !important; }
+.scht-comp-som   { font-size: 14px; font-weight: 700; color: #1a3a5c; white-space: nowrap; flex-shrink: 0; min-width: 140px; }
+.scht-pijl       { font-size: 15px; color: #666; flex-shrink: 0; }
+.scht-comp-inhoud { display: flex; align-items: center; gap: 4px; flex: 1; flex-wrap: nowrap; }
+
+/* ── Type 4: Mogelijk/niet mogelijk ─────────────────────── */
+.schatten-mogelijk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+
+/* Hogere specificiteit via .oefeningen-grid zodat !important van .oefening-item niet wint */
+.schatten-mogelijk-grid .oefening-item.scht-mogelijk {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  padding: 14px 32px 18px 14px !important;
+  gap: 0 !important;
+  border: 2px solid #e8a040 !important;
+  border-radius: 8px !important;
+  min-height: 210px !important;
+  box-sizing: border-box;
+  font-size: 16px !important;
+}
+
+/* Geel vraagkadertje */
+.schatten-mogelijk-grid .scht-mog-vraag {
+  background: #fff8e8 !important;
+  border: 1.5px solid #f0c050 !important;
+  border-radius: 6px !important;
+  padding: 12px 14px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.7 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  color: #333 !important;
+}
+
+/* Ik schat rij */
+.schatten-mogelijk-grid .scht-mog-schat {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  flex-wrap: nowrap !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  margin-bottom: 14px !important;
+}
+.schatten-mogelijk-grid .scht-mog-label {
+  font-size: 13px !important;
+  font-style: italic !important;
+  color: #666 !important;
+  flex-shrink: 0 !important;
+  padding-bottom: 2px !important;
+}
+
+/* Aankruisvakjes */
+.schatten-mogelijk-grid .scht-mog-keuze {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.schatten-mogelijk-grid .scht-checkbox {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #222 !important;
+  cursor: pointer !important;
+}
+.schatten-mogelijk-grid .scht-checkbox input[type="checkbox"] {
+  width: 17px !important;
+  height: 17px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Toggle oplossingen knop ─────────────────────────────── */
+.btn-toggle-oplossingen {
+  padding: 9px 20px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1.5px solid #ccc;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-toggle-oplossingen:hover { background: #e0e0e0; }
+.btn-toggle-oplossingen:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Antwoord-vak in preview — leeg of ingevuld */
+.antwoord-vak {
+  display: inline-block;
+  min-width: 28px;
+  height: 20px;
+  border: 1.5px solid #1a3a5c;
+  border-radius: 4px;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: background .2s, color .2s;
+}
+
+/* ── Maak eerst 10: schrijflijn en onderstreping ───────────── */
+.eerst10-schrijflijn {
+  display: inline-block;
+  min-width: 120px;
+  height: 20px;
+  border-bottom: 1.5px solid #1a3a5c;
+  margin-left: 4px;
+  padding: 0 4px;
+  vertical-align: middle;
+  line-height: 20px;
+}
+.eerst10-schrijflijn.eerst10-ingevuld {
+  color: #006100;
+  font-weight: 700;
+  border-bottom-color: #00a650;
+}
+.eerst10-onderstreep {
+  display: inline-block;
+  padding-bottom: 1px;
+  transition: border-bottom .15s, color .15s;
+}
+
+/* ── Oplossingssleutel download knop ─────────────────────── */
+.btn-sleutel {
+  padding: 9px 20px;
+  background: #27AE60;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .2s;
+}
+.btn-sleutel:hover { background: #1e8449; }
+.btn-sleutel:disabled { opacity: .4; cursor: not-allowed; }
