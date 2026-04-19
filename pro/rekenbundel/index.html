@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — Juf Zisa PRO</title>
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=99">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
-  <link rel="stylesheet" href="rekentaal.css?v=1">
+  <link rel="stylesheet" href="rekentaal.css?v=2">
   <style>
     /* ── PRO BANNER ─────────────────────────────────────────── */
     .pro-banner {
@@ -200,6 +200,7 @@
   <div class="sidebar-tab tab-tafels" onclick="App.toonBewerking('tafels',this)">✖️ Tafels</div>
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
+  <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
   <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
@@ -252,8 +253,8 @@
               <label class="radio-chip" onclick="App.selecteerRadio('niveau','1000',this)">
                 <input type="radio" name="niveau" value="1000">Tot 1 000
               </label>
-              <label class="radio-chip radio-chip-binnenkort">
-                <input type="radio" name="niveau" value="10000" disabled>Tot 10 000
+              <label class="radio-chip" onclick="App.selecteerRadio('niveau','10000',this)">
+                <input type="radio" name="niveau" value="10000">Tot 10 000
               </label>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -304,6 +305,21 @@
             </label>
           </div>
         </div>
+        <!-- Strategie-keuze: enkel bij aftrekken + tot 10000 + met brug -->
+        <div class="form-rij" id="rij-strategie" style="display:none">
+          <label>Strategie</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerStrategie('aftrekker',this)">
+              <input type="radio" name="strategie" value="aftrekker" checked>Via aftrekker splitsen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerStrategie('aftrektal',this)">
+              <input type="radio" name="strategie" value="aftrektal">Via aftrektal splitsen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerStrategie('rekenfeiten',this)">
+              <input type="radio" name="strategie" value="rekenfeiten">Via rekenfeiten
+            </label>
+          </div>
+        </div>
         <!-- Verborgen input die de echte brugwaarde bijhoudt voor rest van de app -->
         <input type="radio" name="brug" value="zonder" checked style="display:none">
       </div>
@@ -336,6 +352,11 @@
               <span class="vink-box"></span>
               <input type="checkbox" name="hulpmiddelen" value="compenseren" style="display:none">
               <span>Compenseren</span>
+            </label>
+            <label class="vink-chip" id="chip-transformeren" onclick="App.toggleHulpmiddel(this,'transformeren')">
+              <span class="vink-box"></span>
+              <input type="checkbox" name="hulpmiddelen" value="transformeren" style="display:none">
+              <span>Transformeren (optellingswip)</span>
             </label>
           </div>
         </div>
@@ -394,11 +415,36 @@
             <label class="radio-chip" onclick="App.selecteerRadio('compenseren-variant','zelf-kringen',this)">
               <input type="radio" name="compenseren-variant" value="zelf-kringen">Kind kringt zelf + tekent pijl
             </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('compenseren-variant','zonder-hulp',this)">
+              <input type="radio" name="compenseren-variant" value="zonder-hulp">Zonder hulp (lange schrijflijn)
+            </label>
           </div>
           <div style="margin-top:8px">
             <label class="vink-chip" id="chip-metvoorbeeld" onclick="App.toggleVoorbeeld(this)">
               <span class="vink-box"></span>
               <input type="checkbox" id="cb-metvoorbeeld" style="display:none">
+              <span>Eerste oefening als uitgewerkt voorbeeld</span>
+            </label>
+          </div>
+        </div>
+        <!-- Transformeren sub-opties -->
+        <div class="form-rij" id="rij-transformeren" style="display:none">
+          <label>Optellingswip weergeven als</label>
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('transformeren-variant','schema',this)">
+              <input type="radio" name="transformeren-variant" value="schema" checked>Met schema (balkjes + pijltjes)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('transformeren-variant','pijltjes',this)">
+              <input type="radio" name="transformeren-variant" value="pijltjes">Met pijltjes (zonder schema)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerRadio('transformeren-variant','kaal',this)">
+              <input type="radio" name="transformeren-variant" value="kaal">Zonder hulp
+            </label>
+          </div>
+          <div style="margin-top:8px">
+            <label class="vink-chip" id="chip-trans-voorbeeld" onclick="App.toggleVoorbeeld(this)">
+              <span class="vink-box"></span>
+              <input type="checkbox" id="cb-trans-voorbeeld" style="display:none">
               <span>Eerste oefening als uitgewerkt voorbeeld</span>
             </label>
           </div>
@@ -608,8 +654,8 @@
               <label class="radio-chip" onclick="App.selecteerGemengdNiveau(1000,this)">
                 <input type="radio" name="gem-niveau" value="1000">Tot 1 000
               </label>
-              <label class="radio-chip radio-chip-binnenkort">
-                <input type="radio" name="gem-niveau" value="10000" disabled>Tot 10 000
+              <label class="radio-chip" onclick="App.selecteerGemengdNiveau(10000,this)">
+                <input type="radio" name="gem-niveau" value="10000">Tot 10 000
               </label>
             </div>
             <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
@@ -1191,6 +1237,9 @@
             <label class="radio-chip" onclick="App.selecteerCijferBereik(1000,this)">
               <input type="radio" name="cijfer-bereik" value="1000">Tot 1000
             </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBereik(10000,this)">
+              <input type="radio" name="cijfer-bereik" value="10000">Tot 10.000
+            </label>
           </div>
         </div>
       </div>
@@ -1202,15 +1251,21 @@
           Brug
         </div>
         <div class="form-rij">
-          <div class="radio-groep">
+          <div class="radio-groep" id="cijfer-brug-opties">
             <label class="radio-chip geselecteerd" onclick="App.selecteerCijferBrug('beide',this)">
               <input type="radio" name="cijfer-brug" value="beide" checked>Beide
             </label>
-            <label class="radio-chip" onclick="App.selecteerCijferBrug('met',this)">
-              <input type="radio" name="cijfer-brug" value="met">Met brug
-            </label>
             <label class="radio-chip" onclick="App.selecteerCijferBrug('zonder',this)">
               <input type="radio" name="cijfer-brug" value="zonder">Zonder brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('met_een',this)">
+              <input type="radio" name="cijfer-brug" value="met_een">Met één brug
+            </label>
+            <label class="radio-chip" onclick="App.selecteerCijferBrug('meer_dan_een',this)">
+              <input type="radio" name="cijfer-brug" value="meer_dan_een">Meer dan één brug
+            </label>
+            <label class="radio-chip" id="chip-brug-over-nul" style="display:none" onclick="App.selecteerCijferBrug('over_nul',this)">
+              <input type="radio" name="cijfer-brug" value="over_nul">Brug over nul
             </label>
           </div>
         </div>
@@ -1306,6 +1361,9 @@
             <label class="radio-chip geselecteerd" onclick="App.selecteerCijferDeelType('TE:E',this)">
               <input type="radio" name="cijfer-deel-type" value="TE:E" checked>TE ÷ E
             </label>
+            <label class="radio-chip" onclick="App.selecteerCijferDeelType('HTE:E',this)">
+              <input type="radio" name="cijfer-deel-type" value="HTE:E">HTE ÷ E
+            </label>
           </div>
         </div>
         <div class="form-rij">
@@ -1398,6 +1456,120 @@
       </button>
 
     </div><!-- /tab-cijferen -->
+
+    <!-- ── SCHATTEND REKENEN SIDEBAR CONTENT ─────────────────────── -->
+    <div class="sidebar-content" id="tab-schatten" style="display:none">
+
+      <div class="sectie-titel">🔮 Schattend rekenen</div>
+
+      <!-- 1. Niveau (eerst!) -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🎯</div>Niveau</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip" onclick="App.selecteerSchattenNiveau(1000,this)">
+              <input type="radio" name="schatten-niveau" value="1000">Tot 1.000
+            </label>
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenNiveau(10000,this)">
+              <input type="radio" name="schatten-niveau" value="10000" checked>Tot 10.000
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Oefentype -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🔢</div>Oefentype</div>
+        <div class="form-rij">
+          <div class="radio-groep" style="flex-direction:column;gap:6px">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenType('afronden',this)">
+              <input type="radio" name="schatten-type" value="afronden" checked>
+              🎯 Afronden
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('schatting-tabel',this)">
+              <input type="radio" name="schatten-type" value="schatting-tabel">
+              📊 Schatting met tabel (4 kolommen)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('schatting-compact',this)">
+              <input type="radio" name="schatten-type" value="schatting-compact">
+              ➡️ Schatting compact (1 lijn)
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenType('mogelijk',this)">
+              <input type="radio" name="schatten-type" value="mogelijk">
+              ✅ Is het antwoord mogelijk?
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Bewerking (verborgen bij afronden) -->
+      <div class="config-kaart" id="kaart-schatten-bewerking" style="display:none">
+        <div class="kaart-titel"><div class="icon">➕</div>Bewerking</div>
+        <div class="form-rij">
+          <div class="radio-groep">
+            <label class="radio-chip geselecteerd" onclick="App.selecteerSchattenBewerking('optellen',this)">
+              <input type="radio" name="schatten-bewerking" value="optellen" checked>Optellen
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenBewerking('aftrekken',this)">
+              <input type="radio" name="schatten-bewerking" value="aftrekken">Aftrekken
+            </label>
+            <label class="radio-chip" onclick="App.selecteerSchattenBewerking('gemengd',this)">
+              <input type="radio" name="schatten-bewerking" value="gemengd">Gemengd
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Afronden naar (verborgen bij afronden-type, want dan altijd beide) -->
+      <div class="config-kaart" id="kaart-schatten-afronden" style="display:none">
+        <div class="kaart-titel"><div class="icon">🔵</div>Afronden naar</div>
+        <div class="form-rij">
+          <div class="radio-groep" id="rg-schatten-afronden">
+            <!-- Tot 1.000: T en H zichtbaar; tot 10.000: H en D zichtbaar -->
+            <label class="radio-chip" id="chip-schatten-T" onclick="App.selecteerSchattenAfronden('T',this)" style="display:none">
+              <input type="radio" name="schatten-afronden" value="T">
+              Dichtstbij gelegen <strong style="color:#27ae60">T</strong>iental
+            </label>
+            <label class="radio-chip geselecteerd" id="chip-schatten-H" onclick="App.selecteerSchattenAfronden('H',this)">
+              <input type="radio" name="schatten-afronden" value="H" checked>
+              Dichtstbij gelegen <strong style="color:#2980b9">H</strong>onderdtal
+            </label>
+            <label class="radio-chip" id="chip-schatten-D" onclick="App.selecteerSchattenAfronden('D',this)">
+              <input type="radio" name="schatten-afronden" value="D">
+              Dichtstbij gelegen <strong style="color:#e74c3c">D</strong>uizendtal
+            </label>
+          </div>
+        </div>
+        <div id="schatten-afronden-hint" style="font-size:11px;color:#888;margin-top:4px">
+          Tot 10.000: afronden naar honderdtal of duizendtal.
+        </div>
+      </div>
+
+      <!-- 5. Opdracht & aantal -->
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdracht &amp; hoeveelheid</div>
+        <div class="form-rij">
+          <label>Opdrachtzin</label>
+          <input type="text" id="inp-opdrachtzin-schatten" value="Rond het getal af. Schrijf in de tabel." />
+        </div>
+        <div class="form-rij">
+          <label>Aantal oefeningen</label>
+          <select id="inp-aantal-schatten">
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="8">8</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn-toevoegen" onclick="App.voegSchattenBlokToe()" style="background:#e8780a">
+        ＋ Voeg schattingsblok toe
+      </button>
+
+    </div><!-- /tab-schatten -->
+
 
     <!-- ── TAB: VRAAGSTUKKEN ─────────────────────────────────── -->
     <div class="sidebar-content" id="tab-vraagstukken" style="display:none">
@@ -1887,6 +2059,10 @@
         onclick="App.genereerPreview()" disabled>▶ Genereer preview</button>
       <button class="btn-pdf" id="btn-pdf"
         onclick="App.downloadPDF()" disabled>⬇ Download PDF</button>
+      <button class="btn-sleutel" id="btn-sleutel"
+        onclick="App.downloadSleutel()" disabled>🔑 Oplossingssleutel</button>
+      <button class="btn-toggle-oplossingen" id="btn-toggle-oplossingen"
+        onclick="Preview.toggleOplossingen(this)" disabled>👁 Toon oplossingen</button>
     </div>
 
     <div class="preview-inhoud" id="preview-inhoud">
@@ -1904,7 +2080,7 @@
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="config.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
-<script src="modules/cijferen.js?v=1"></script>
+<script src="modules/cijferen.js?v=99"></script>
 <script src="modules/tafels.js?v=1"></script>
 <script src="modules/tafels-inzicht.js?v=1"></script>
 <script src="modules/tafels-getallenlijn.js?v=1"></script>
@@ -1914,23 +2090,42 @@
 <script src="modules/aftrekken-tot100.js?v=3"></script>
 <script src="modules/herken-brug-tot100.js?v=3"></script>
 <script src="modules/aanvullen-tot1000.js?v=1"></script>
-<script src="modules/aanvullen-tot100.js?v=3"></script>
+<script src="modules/aanvullen-tot10000.js?v=1"></script>
+<script src="modules/aanvullen-tot100.js?v=4"></script>
 <script src="modules/compenseren-optellen.js?v=3"></script>
 <script src="modules/compenseren-optellen-tot1000.js?v=7"></script>
+  <script src="modules/compenseren-optellen-tot10000.js?v=1"></script>
+  <script src="modules/compenseren-optellen-tot10000-dh-ht.js?v=1"></script>
 <script src="modules/compenseren-aftrekken-tot1000.js?v=2"></script>
+  <script src="modules/compenseren-aftrekken-tot10000.js?v=1"></script>
 <script src="modules/compenseren-aftrekken.js?v=2"></script>
+  <script src="modules/transformeren-optellen.js?v=1"></script>
+  <script src="modules/transformeren-optellen-tot10000.js?v=1"></script>
+  <script src="modules/transformeren-optellen-tot10000-dh-ht.js?v=1"></script>
+  <script src="modules/transformeren-aftrekken.js?v=1"></script>
+  <script src="modules/transformeren-aftrekken-tot10000.js?v=1"></script>
 <script src="modules/optellen-tot1000.js?v=8"></script>
+  <script src="modules/optellen-tot10000.js?v=1"></script>
+  <script src="modules/optellen-tot10000-brug.js?v=1"></script>
 <script src="modules/aftrekken-tot1000.js?v=8"></script>
+  <script src="modules/aftrekken-tot10000.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-aftrekker.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-aftrektal.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-rekenfeiten.js?v=1"></script>
+  <script src="modules/aftrekken-tot10000-brug-ht.js?v=1"></script>
+  <script src="modules/compenseren-aftrekken-tot10000-dh-ht.js?v=1"></script>
+  <script src="modules/transformeren-aftrekken-tot10000-dh-ht.js?v=1"></script>
 
 <script src="hulpmiddelen.js?v=3"></script>
-<script src="generator.js?v=12"></script>
-<script src="preview.js?v=41"></script>
-<script src="pdf-engine.js?v=51"></script>
+<script src="modules/schatten.js?v=1"></script>
+<script src="generator.js?v=99"></script>
+<script src="preview.js?v=45"></script>
+<script src="pdf-engine.js?v=99"></script>
 <script src="vraagstukken.js?v=34"></script>
 
-<script src="modules/rekentaal.js?v=14"></script>
+<script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=33"></script>
+<script src="app.js?v=35"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
@@ -2010,9 +2205,11 @@ function scrollTabsLeft(){
 function scrollNaarActieveTab(tabEl) {
   const tabs = document.querySelector(".sidebar-tabs");
   if (!tabs || !tabEl) return;
+  // Bereken positie van de tab relatief aan de scrollcontainer
   const tabLinks  = tabEl.offsetLeft;
   const tabBreedte = tabEl.offsetWidth;
   const containerBreedte = tabs.offsetWidth;
+  // Scroll zodat de tab gecentreerd staat (met min. 60px ruimte aan elke kant)
   const gewensteScroll = tabLinks - (containerBreedte / 2) + (tabBreedte / 2);
   tabs.scrollTo({
     left: Math.max(0, gewensteScroll),
@@ -2021,7 +2218,6 @@ function scrollNaarActieveTab(tabEl) {
 }
 
 // Kommagetallen-tab wordt afgehandeld via App.toonBewerking('komma')
-
 </script>
 
 <!-- Uitleg modal -->
@@ -2065,6 +2261,7 @@ function scrollNaarActieveTab(tabEl) {
 .vs-acc-pijl{font-size:11px;color:#888;transition:transform 0.2s}
 .vs-acc-blok.open .vs-acc-pijl{transform:rotate(180deg)}
 .vs-acc-body{padding:10px 12px;background:#fff;border-top:1px solid #e0e8f5}
+
 </style>
 <script>
 function vsUpdateBrugZichtbaarheid(){
