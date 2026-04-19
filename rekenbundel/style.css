@@ -2888,6 +2888,28 @@ body.toont-oplossingen .deel-boog {
   transition: background .2s, color .2s;
 }
 
+/* ── Maak eerst 10: schrijflijn en onderstreping ───────────── */
+.eerst10-schrijflijn {
+  display: inline-block;
+  min-width: 120px;
+  height: 20px;
+  border-bottom: 1.5px solid #1a3a5c;
+  margin-left: 4px;
+  padding: 0 4px;
+  vertical-align: middle;
+  line-height: 20px;
+}
+.eerst10-schrijflijn.eerst10-ingevuld {
+  color: #006100;
+  font-weight: 700;
+  border-bottom-color: #00a650;
+}
+.eerst10-onderstreep {
+  display: inline-block;
+  padding-bottom: 1px;
+  transition: border-bottom .15s, color .15s;
+}
+
 /* ── Oplossingssleutel download knop ─────────────────────── */
 .btn-sleutel {
   padding: 9px 20px;
