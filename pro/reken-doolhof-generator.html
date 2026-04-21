@@ -576,7 +576,7 @@ button:active{transform:scale(.97);}
         <option value="add">Alleen optellen (+)</option>
         <option value="sub">Alleen aftrekken (−)</option>
         <option value="addsub" selected>Gemengd + en −</option>
-        <option value="mul">× en ÷ gemengd (tafels)</option>
+        <option value="mul">× en : gemengd (tafels)</option>
         <option value="all">Alle bewerkingen gemengd</option>
       </select>
     </div>
@@ -610,7 +610,7 @@ button:active{transform:scale(.97);}
     <div id="rp-hint" style="align-self:flex-end;padding-bottom:10px;font-size:.75rem;font-weight:700;color:#5a7fa8;"></div>
   </div>
 
-  <!-- Tafels sub-block voor × en ÷ -->
+  <!-- Tafels sub-block voor × en : -->
   <div class="sub-block hidden" id="rp-b-tafels">
     <div class="sub-block-title">Welke tafels? (vink aan)</div>
     <div class="cb-grid">
@@ -632,17 +632,17 @@ button:active{transform:scale(.97);}
 
     <!-- Niveau-instelling -->
     <div style="margin-top:12px;border-top:1px solid #d0e6f8;padding-top:10px;">
-      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor ÷ in het pad)</div>
+      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor : in het pad)</div>
       <div class="radio-group" style="flex-direction:column;gap:6px;">
         <label class="radio-item" style="align-items:flex-start;gap:8px;">
           <input type="radio" name="rp-niveau" value="basis" checked style="margin-top:2px;">
           <span><strong>2de–3de leerjaar</strong> — enkel delingen die voorkomen in de deeltafel<br>
-          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 ÷ 4 = 5 ✓ &nbsp;|&nbsp; 60 ÷ 3 = 20 ✗</span></span>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 : 4 = 5 ✓ &nbsp;|&nbsp; 60 : 3 = 20 ✗</span></span>
         </label>
         <label class="radio-item" style="align-items:flex-start;gap:8px;">
           <input type="radio" name="rp-niveau" value="uitgebreid" style="margin-top:2px;">
           <span><strong>4de leerjaar en hoger</strong> — delingen buiten de deeltafel toegestaan<br>
-          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 ÷ 3 = 20 ✓ &nbsp;|&nbsp; 50 ÷ 2 = 25 ✓</span></span>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 : 3 = 20 ✓ &nbsp;|&nbsp; 50 : 2 = 25 ✓</span></span>
         </label>
       </div>
     </div>
@@ -1830,7 +1830,9 @@ function renderRekenpadSVG(paden) {
 
         if (!opBlank) {
           // Operator + getal boven pijl in klein kader
-          const lbl = `${step.op} ${step.operand}`;
+          // Toon ":" in plaats van "÷" voor delen (Vlaamse notatie)
+          const opShow = step.op === '÷' ? ':' : step.op;
+          const lbl = `${opShow} ${step.operand}`;
           const lw  = lbl.length > 4 ? 46 : 38;
           s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
             fill="${col.box}" stroke="${col.str}" stroke-width="1.2"/>`;
@@ -1838,11 +1840,12 @@ function renderRekenpadSVG(paden) {
             font-size="12" font-weight="900" fill="${col.txt}">${lbl}</text>`;
         } else {
           // Leeg kader: operator zichtbaar, getal invullen
+          const opShow = step.op === '÷' ? ':' : step.op;
           const lw = 46;
           s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
             fill="white" stroke="${col.str}" stroke-width="1.8"/>`;
           s += `<text x="${mx - lw/2 + 8}" y="${midY - 16}" dominant-baseline="central"
-            font-size="12" font-weight="900" fill="${col.str}">${step.op}</text>`;
+            font-size="12" font-weight="900" fill="${col.str}">${opShow}</text>`;
           // Invullijn
           s += `<line x1="${mx - lw/2 + 18}" y1="${midY - 10}"
             x2="${mx + lw/2 - 5}" y2="${midY - 10}"
