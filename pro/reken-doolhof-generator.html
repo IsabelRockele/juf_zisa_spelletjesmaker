@@ -458,8 +458,9 @@ button:active{transform:scale(.97);}
     <div class="field">
       <label>Opdrachtzin</label>
       <select id="iu-opdracht">
-        <option value="Kies een getal uit de rij. Schrijf het bij IN en reken elke tafel uit bij UIT.">Kies IN, bereken UIT</option>
-        <option value="Kies elk keer een ander getal uit de rij bovenaan. Bereken alle uitkomsten bij UIT.">Kies een getal en reken</option>
+        <option value="Kies een IN-getal. Reken de tafels uit en zoek elke uitkomst in de rij.">Kies IN, zoek UIT in de rij</option>
+        <option value="De rij bevat de IN-getallen én alle uitkomsten. Vul de machine in.">Rij bevat IN + UIT</option>
+        <option value="Schrijf een IN-getal in het vakje en bereken elke tafel. Check je antwoord in de rij.">Schrijf IN, check in de rij</option>
       </select>
     </div>
   </div>
@@ -1403,53 +1404,46 @@ function getInPool() {
   return pool;
 }
 
-// Bouw getallenrij: bevat GEGARANDEERD in1, in2 en alle uitkomsten
-// Aangevuld met afleidingsgetallen tot totalCount
+// Bouw getallenrij: bevat PRECIES de 2 IN-getallen + alle UIT-uitkomsten.
+// Geen afleiders: elk getal is ofwel een geldig IN, ofwel een correct UIT-antwoord.
+// Dit geeft de leerling ingebouwde zelfcontrole.
 function buildGetallenRijMetUitkomsten(m1tafels, m2tafels, totalCount) {
   const inPool = [...getInPool()];
   shuffle(inPool);
 
-  // Kies in1 en in2 uit de pool (verschillend)
-  const in1 = inPool[0];
-  const in2 = inPool.find(n => n !== in1) || inPool[1] || inPool[0];
+  // Kies in1 en in2 uit de pool (verschillend, indien mogelijk)
+  // Vermijd in-getallen die dubbele uitkomsten geven (bv. in=1 → 1×5=5 én 5 staat al in rij)
+  // Simpele aanpak: kies in1, kies dan in2 zodanig dat uitkomstensets zo weinig mogelijk overlappen.
+  let in1 = inPool[0];
+  let in2 = inPool.find(n => n !== in1) || inPool[1] || inPool[0];
+
+  // Probeer een in2 te vinden zodat de totale set (in1, in2, alle uitkomsten) zo dicht mogelijk
+  // bij totalCount unieke waarden heeft. Als de pool dat toelaat.
+  let bestIn2 = in2;
+  let bestUnique = 0;
+  for (const kandidaat of inPool) {
+    if (kandidaat === in1) continue;
+    const set = new Set([in1, kandidaat,
+      ...m1tafels.map(t => in1 * t),
+      ...m2tafels.map(t => kandidaat * t)
+    ]);
+    if (set.size > bestUnique) {
+      bestUnique = set.size;
+      bestIn2 = kandidaat;
+      if (set.size === totalCount) break; // perfect
+    }
+  }
+  in2 = bestIn2;
 
   // Bereken alle uitkomsten
   const uits1 = m1tafels.map(t => in1 * t);
   const uits2 = m2tafels.map(t => in2 * t);
 
-  // Verplichte getallen: IN-getallen + alle uitkomsten
-  const verplicht = new Set([in1, in2, ...uits1, ...uits2]);
-  const verplichtArr = [...verplicht];
-
-  // Aanvullen met afleidingsgetallen:
-  // Andere IN-getallen uit de pool + hun uitkomsten (maar NIET in1/in2 uitkomsten toevoegen als afleidingen die verwarren)
-  const afleiding = new Set();
-  for (const n of inPool) {
-    if (n === in1 || n === in2) continue;
-    afleiding.add(n); // het getal zelf als afleider
-    // Voeg 1 willekeurige uitkomst toe als afleiding
-    const t = m1tafels[rnd(0, m1tafels.length-1)];
-    afleiding.add(n * t);
-    if (afleiding.size + verplichtArr.length >= totalCount * 2) break;
-  }
-
-  // Combineer: verplicht vooraan, aanvullen met afleiding, tot totalCount
-  const kandidaten = [...verplichtArr];
-  for (const n of shuffle([...afleiding])) {
-    if (kandidaten.length >= totalCount) break;
-    if (!verplicht.has(n)) kandidaten.push(n);
-  }
-
-  // Als we nog te weinig hebben: gewoon extra getallen erbij
-  let extra = 1;
-  while (kandidaten.length < totalCount) {
-    if (!verplicht.has(extra) && !kandidaten.includes(extra)) kandidaten.push(extra);
-    extra++;
-  }
-
-  // Neem precies totalCount, shuffle zodat verplichte getallen niet herkenbaar zijn
-  const rij = kandidaten.slice(0, totalCount);
+  // Rij = 2 IN + alle UIT (dedupliceren als er toch overlap is)
+  const rijSet = new Set([in1, in2, ...uits1, ...uits2]);
+  const rij = [...rijSet];
   shuffle(rij);
+
   return { rij, in1, in2, uits1, uits2 };
 }
 
