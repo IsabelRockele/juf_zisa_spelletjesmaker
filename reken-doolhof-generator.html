@@ -418,8 +418,9 @@ button:active{transform:scale(.97);}
     <div class="field">
       <label>Opdrachtzin</label>
       <select id="iu-opdracht">
-        <option value="Kies een getal uit de rij. Schrijf het bij IN en reken elke tafel uit bij UIT.">Kies IN, bereken UIT</option>
-        <option value="Kies elk keer een ander getal uit de rij bovenaan. Bereken alle uitkomsten bij UIT.">Kies een getal en reken</option>
+        <option value="Kies een IN-getal. Reken de tafels uit en zoek elke uitkomst in de rij.">Kies IN, zoek UIT in de rij</option>
+        <option value="De rij bevat de IN-getallen én alle uitkomsten. Vul de machine in.">Rij bevat IN + UIT</option>
+        <option value="Schrijf een IN-getal in het vakje en bereken elke tafel. Check je antwoord in de rij.">Schrijf IN, check in de rij</option>
       </select>
     </div>
   </div>
@@ -535,7 +536,7 @@ button:active{transform:scale(.97);}
         <option value="add">Alleen optellen (+)</option>
         <option value="sub">Alleen aftrekken (−)</option>
         <option value="addsub" selected>Gemengd + en −</option>
-        <option value="mul">× en ÷ gemengd (tafels)</option>
+        <option value="mul">× en : gemengd (tafels)</option>
         <option value="all">Alle bewerkingen gemengd</option>
       </select>
     </div>
@@ -569,7 +570,7 @@ button:active{transform:scale(.97);}
     <div id="rp-hint" style="align-self:flex-end;padding-bottom:10px;font-size:.75rem;font-weight:700;color:#5a7fa8;"></div>
   </div>
 
-  <!-- Tafels sub-block voor × en ÷ -->
+  <!-- Tafels sub-block voor × en : -->
   <div class="sub-block hidden" id="rp-b-tafels">
     <div class="sub-block-title">Welke tafels? (vink aan)</div>
     <div class="cb-grid">
@@ -591,17 +592,17 @@ button:active{transform:scale(.97);}
 
     <!-- Niveau-instelling -->
     <div style="margin-top:12px;border-top:1px solid #d0e6f8;padding-top:10px;">
-      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor ÷ in het pad)</div>
+      <div class="sub-block-title" style="margin-bottom:6px;">🎓 Niveau (voor : in het pad)</div>
       <div class="radio-group" style="flex-direction:column;gap:6px;">
         <label class="radio-item" style="align-items:flex-start;gap:8px;">
           <input type="radio" name="rp-niveau" value="basis" checked style="margin-top:2px;">
           <span><strong>2de–3de leerjaar</strong> — enkel delingen die voorkomen in de deeltafel<br>
-          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 ÷ 4 = 5 ✓ &nbsp;|&nbsp; 60 ÷ 3 = 20 ✗</span></span>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 20 : 4 = 5 ✓ &nbsp;|&nbsp; 60 : 3 = 20 ✗</span></span>
         </label>
         <label class="radio-item" style="align-items:flex-start;gap:8px;">
           <input type="radio" name="rp-niveau" value="uitgebreid" style="margin-top:2px;">
           <span><strong>4de leerjaar en hoger</strong> — delingen buiten de deeltafel toegestaan<br>
-          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 ÷ 3 = 20 ✓ &nbsp;|&nbsp; 50 ÷ 2 = 25 ✓</span></span>
+          <span style="font-size:.77rem;color:#5a7fa8;font-weight:600;">Bv. 60 : 3 = 20 ✓ &nbsp;|&nbsp; 50 : 2 = 25 ✓</span></span>
         </label>
       </div>
     </div>
@@ -1363,53 +1364,46 @@ function getInPool() {
   return pool;
 }
 
-// Bouw getallenrij: bevat GEGARANDEERD in1, in2 en alle uitkomsten
-// Aangevuld met afleidingsgetallen tot totalCount
+// Bouw getallenrij: bevat PRECIES de 2 IN-getallen + alle UIT-uitkomsten.
+// Geen afleiders: elk getal is ofwel een geldig IN, ofwel een correct UIT-antwoord.
+// Dit geeft de leerling ingebouwde zelfcontrole.
 function buildGetallenRijMetUitkomsten(m1tafels, m2tafels, totalCount) {
   const inPool = [...getInPool()];
   shuffle(inPool);
 
-  // Kies in1 en in2 uit de pool (verschillend)
-  const in1 = inPool[0];
-  const in2 = inPool.find(n => n !== in1) || inPool[1] || inPool[0];
+  // Kies in1 en in2 uit de pool (verschillend, indien mogelijk)
+  // Vermijd in-getallen die dubbele uitkomsten geven (bv. in=1 → 1×5=5 én 5 staat al in rij)
+  // Simpele aanpak: kies in1, kies dan in2 zodanig dat uitkomstensets zo weinig mogelijk overlappen.
+  let in1 = inPool[0];
+  let in2 = inPool.find(n => n !== in1) || inPool[1] || inPool[0];
+
+  // Probeer een in2 te vinden zodat de totale set (in1, in2, alle uitkomsten) zo dicht mogelijk
+  // bij totalCount unieke waarden heeft. Als de pool dat toelaat.
+  let bestIn2 = in2;
+  let bestUnique = 0;
+  for (const kandidaat of inPool) {
+    if (kandidaat === in1) continue;
+    const set = new Set([in1, kandidaat,
+      ...m1tafels.map(t => in1 * t),
+      ...m2tafels.map(t => kandidaat * t)
+    ]);
+    if (set.size > bestUnique) {
+      bestUnique = set.size;
+      bestIn2 = kandidaat;
+      if (set.size === totalCount) break; // perfect
+    }
+  }
+  in2 = bestIn2;
 
   // Bereken alle uitkomsten
   const uits1 = m1tafels.map(t => in1 * t);
   const uits2 = m2tafels.map(t => in2 * t);
 
-  // Verplichte getallen: IN-getallen + alle uitkomsten
-  const verplicht = new Set([in1, in2, ...uits1, ...uits2]);
-  const verplichtArr = [...verplicht];
-
-  // Aanvullen met afleidingsgetallen:
-  // Andere IN-getallen uit de pool + hun uitkomsten (maar NIET in1/in2 uitkomsten toevoegen als afleidingen die verwarren)
-  const afleiding = new Set();
-  for (const n of inPool) {
-    if (n === in1 || n === in2) continue;
-    afleiding.add(n); // het getal zelf als afleider
-    // Voeg 1 willekeurige uitkomst toe als afleiding
-    const t = m1tafels[rnd(0, m1tafels.length-1)];
-    afleiding.add(n * t);
-    if (afleiding.size + verplichtArr.length >= totalCount * 2) break;
-  }
-
-  // Combineer: verplicht vooraan, aanvullen met afleiding, tot totalCount
-  const kandidaten = [...verplichtArr];
-  for (const n of shuffle([...afleiding])) {
-    if (kandidaten.length >= totalCount) break;
-    if (!verplicht.has(n)) kandidaten.push(n);
-  }
-
-  // Als we nog te weinig hebben: gewoon extra getallen erbij
-  let extra = 1;
-  while (kandidaten.length < totalCount) {
-    if (!verplicht.has(extra) && !kandidaten.includes(extra)) kandidaten.push(extra);
-    extra++;
-  }
-
-  // Neem precies totalCount, shuffle zodat verplichte getallen niet herkenbaar zijn
-  const rij = kandidaten.slice(0, totalCount);
+  // Rij = 2 IN + alle UIT (dedupliceren als er toch overlap is)
+  const rijSet = new Set([in1, in2, ...uits1, ...uits2]);
+  const rij = [...rijSet];
   shuffle(rij);
+
   return { rij, in1, in2, uits1, uits2 };
 }
 
@@ -1796,7 +1790,9 @@ function renderRekenpadSVG(paden) {
 
         if (!opBlank) {
           // Operator + getal boven pijl in klein kader
-          const lbl = `${step.op} ${step.operand}`;
+          // Toon ":" in plaats van "÷" voor delen (Vlaamse notatie)
+          const opShow = step.op === '÷' ? ':' : step.op;
+          const lbl = `${opShow} ${step.operand}`;
           const lw  = lbl.length > 4 ? 46 : 38;
           s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
             fill="${col.box}" stroke="${col.str}" stroke-width="1.2"/>`;
@@ -1804,11 +1800,12 @@ function renderRekenpadSVG(paden) {
             font-size="12" font-weight="900" fill="${col.txt}">${lbl}</text>`;
         } else {
           // Leeg kader: operator zichtbaar, getal invullen
+          const opShow = step.op === '÷' ? ':' : step.op;
           const lw = 46;
           s += `<rect x="${mx - lw/2}" y="${midY - 26}" width="${lw}" height="20" rx="6"
             fill="white" stroke="${col.str}" stroke-width="1.8"/>`;
           s += `<text x="${mx - lw/2 + 8}" y="${midY - 16}" dominant-baseline="central"
-            font-size="12" font-weight="900" fill="${col.str}">${step.op}</text>`;
+            font-size="12" font-weight="900" fill="${col.str}">${opShow}</text>`;
           // Invullijn
           s += `<line x1="${mx - lw/2 + 18}" y1="${midY - 10}"
             x2="${mx + lw/2 - 5}" y2="${midY - 10}"
