@@ -72,11 +72,10 @@ window.VraagstukkenModule = (() => {
     const tafelsDeel = [];
     document.querySelectorAll('#vs-tafels-deel input[type="checkbox"]:checked').forEach(cb => tafelsDeel.push(cb.value));
     const deelVisie   = document.querySelector('input[name="vs-deel-visie"]:checked')?.value   || 'verdelen';
-    const deelNotatie = document.querySelector('input[name="vs-deel-notatie"]:checked')?.value || 'vooraan';
     const deelBereik  = document.querySelector('input[name="vs-deel-bereik"]:checked')?.value  || 'tee';
     const deelRest    = document.querySelector('input[name="vs-deel-rest"]:checked')?.value    || 'nee';
 
-    return { bewerking, niveau, brug, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelNotatie, deelBereik, deelRest };
+    return { bewerking, niveau, brug, leerjaar, aantalGetallen, thema, berekening, schema, antwoordzin, aantalBulk, cijferKolommen, kommaDecimalen, kommaPrefix, tafelsVerm, vermNotatie, vermBereik, tafelsDeel, deelVisie, deelBereik, deelRest };
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
@@ -193,9 +192,7 @@ window.VraagstukkenModule = (() => {
       const visie = inst.deelVisie === 'aftrekking'
         ? 'Deelvisie: HERHAALDE AFTREKKING. Het kind verdeelt door herhaaldelijk af te trekken. Stel de situatie zo voor dat gevraagd wordt HOEVEEL GROEPJES je kan maken (bv. "Je hebt 10 snoepjes en stopt ze per 2 in een zakje — hoeveel zakjes?"). De antwoordzin vraagt naar het aantal groepjes.'
         : 'Deelvisie: EERLIJK VERDELEN. Deel een hoeveelheid eerlijk over een aantal groepen. Stel de situatie zo voor dat gevraagd wordt HOEVEEL ER PER GROEP is (bv. "Verdeel 10 snoepjes eerlijk over 2 zakjes — hoeveel per zakje?"). De antwoordzin vraagt naar het aantal per groep.';
-      const notatie = inst.deelNotatie === 'achteraan'
-        ? 'Schrijf de deling als: deler in deeltal (bv. 2 in 10).'
-        : 'Schrijf de deling als: deeltal ÷ deler (bv. 10 ÷ 2).';
+      const notatie = 'Schrijf de deling als: deeltal : deler (bv. 10 : 2).';
       const restLabel = inst.deelRest === 'ja'
         ? 'De deling MOET een rest hebben (rest ≠ 0). Kies getallen die NIET exact deelbaar zijn zodat er een rest overblijft. Vermeld de rest NIET in het vraagstuk zelf — het kind berekent die zelf.'
         : 'De deling moet EXACT opgaan, GEEN rest. Kies getallen zodat de rest nul is.';
