@@ -78,20 +78,36 @@ function genereerGemengdMaalDeel(config) {
 // config: { max: 20|100, type: 'mab'|'honderdveld'|'notatie'|'rekenrek'|'mix' }
 function genereerGetalbeeld(config) {
   const max = config.max || 100;
-  const getal = randInt(1, max);
 
   let weergave = config.type || 'mab';
   if (weergave === 'mix') {
-    // Kies random tussen mab, honderdveld, notatie (rekenrek niet in mix tenzij max<=20)
     const opties = max <= 20
       ? ['mab', 'honderdveld', 'notatie', 'rekenrek']
       : ['mab', 'honderdveld', 'notatie'];
     weergave = opties[randInt(0, opties.length - 1)];
   }
 
-  // Rekenrek is beperkt tot 20 - als we mix hebben en rekenrek kiezen voor >20, fallback mab
-  if (weergave === 'rekenrek' && getal > 20) {
+  // Rekenrek is beperkt tot 20
+  if (weergave === 'rekenrek' && max > 20) {
     weergave = 'mab';
+  }
+
+  let getal;
+  if (weergave === 'notatie') {
+    // Voor notatie: vermijd ronde getallen (10, 20, 30...) en getallen <10,
+    // want die hebben geen T+E combo en dus geen omdraai-uitdaging.
+    // Kies een getal met zowel een tiental als een eenheid.
+    if (max <= 20) {
+      // 11-19
+      getal = randInt(11, 19);
+    } else {
+      // 11-99, geen veelvouden van 10
+      do {
+        getal = randInt(11, 99);
+      } while (getal % 10 === 0);
+    }
+  } else {
+    getal = randInt(1, max);
   }
 
   return {
@@ -1063,59 +1079,89 @@ function renderRekenrekHTML(getal) {
 }
 
 // Tekent een splitsing in de PDF op positie (centerX, centerY) met max breedte en hoogte
+// Tekent een splitsing in de PDF op positie (centerX, centerY) met max breedte en hoogte
+// Gebruikt voor het dagblad (grote boompjes, 2×5)
 function tekenSplitsingOpPdf(doc, vraag, centerX, centerY, maxBreedte, maxHoogte, nummer, modus) {
-  const cirkelR = Math.min(maxHoogte * 0.18, maxBreedte * 0.18, 12); // straal in mm
-  const vSpan = maxBreedte * 0.55; // horizontaal bereik van de V onderaan
-  const vHeight = maxHoogte * 0.38; // verticale afstand tussen top en kinderen
+  // Voor dagblad: A4 portrait, 2×5 raster
+  // Beschikbare ruimte per splitsing: ~90mm × 45mm
+  // We willen grote duidelijke boompjes
 
-  const topY = centerY - maxHoogte * 0.32;
-  const kindY = centerY + maxHoogte * 0.18;
+  // Cirkel: groot genoeg zodat ze goed leesbaar zijn op papier
+  // 3 cirkels moeten passen in de breedte: kindLeft + vSpan + kindRight + marge
+  // Met vSpan = 3.5*cirkelR en 3 cirkels van diameter 2*cirkelR past het in 7.5*cirkelR
+  // Dus cirkelR ≤ maxBreedte/7.5 als we losstaande cirkels willen
+  // Maar we willen ook grote cirkels, dus we gaan voor ~12mm maar tolereren minder afstand
+  const cirkelR = Math.min(maxBreedte / 5.5, maxHoogte / 4, 13);
+  const vSpan = cirkelR * 3.2;   // afstand tussen kinderen
+  const vHeight = cirkelR * 3.6; // verticale afstand top-kind
+
+  const topY = centerY - vHeight / 2 + cirkelR * 0.2;
+  const kindY = centerY + vHeight / 2 + cirkelR * 0.2;
   const kindLinksX = centerX - vSpan / 2;
   const kindRechtsX = centerX + vSpan / 2;
 
-  // Nummer linksboven
+  // Nummer linksboven, buiten de splitsing
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.setTextColor(160, 160, 160);
-  doc.text(`${nummer}.`, centerX - maxBreedte / 2 + 2, centerY - maxHoogte / 2 + 6);
+  doc.setTextColor(140, 140, 140);
+  doc.text(`${nummer}.`, centerX - maxBreedte / 2 + 2, topY - cirkelR - 1);
+
+  tekenSplitsingElementen(doc, { top: topY, kindY, left: kindLinksX, right: kindRechtsX, cx: centerX }, vraag, cirkelR, 'cirkel');
+}
+
+// Tekent een mini-boompje in smalle kolom (voor weekblad)
+// Het ontbrekende getal wordt getoond als een leeg VIERKANT vakje waar kinderen kunnen invullen
+function tekenMiniSplitsing(doc, vraag, centerX, centerY, maxBreedte, maxHoogte) {
+  // Zeer compact voor smalle weekblad-kolom
+  const cirkelR = Math.min(maxBreedte * 0.14, maxHoogte * 0.17, 5.5);
+  const vSpan = cirkelR * 4;
+  const vHeight = cirkelR * 3;
+
+  const topY = centerY - vHeight / 2;
+  const kindY = centerY + vHeight / 2;
+  const kindLinksX = centerX - vSpan / 2;
+  const kindRechtsX = centerX + vSpan / 2;
+
+  tekenSplitsingElementen(doc, { top: topY, kindY, left: kindLinksX, right: kindRechtsX, cx: centerX }, vraag, cirkelR, 'vakje');
+}
+
+// Gedeelde teken-logica - variant 'cirkel' (dagblad) of 'vakje' (weekblad)
+function tekenSplitsingElementen(doc, pos, vraag, cirkelR, vorm) {
+  const { top: topY, kindY, left: kindLinksX, right: kindRechtsX, cx: centerX } = pos;
 
   // V-lijnen
-  doc.setDrawColor(107, 76, 155); // paars
-  doc.setLineWidth(0.8);
+  doc.setDrawColor(107, 76, 155);
+  doc.setLineWidth(vorm === 'cirkel' ? 1.1 : 0.7);
   doc.line(centerX, topY + cirkelR, kindLinksX, kindY - cirkelR);
   doc.line(centerX, topY + cirkelR, kindRechtsX, kindY - cirkelR);
 
-  // Teken cirkels
-  function tekenCirkel(x, y, waarde, ontbrekend) {
+  // Teken 3 elementen
+  function tekenElement(x, y, waarde, ontbrekend) {
     if (ontbrekend) {
-      // Gestippeld
-      doc.setDrawColor(232, 121, 167); // roze
-      doc.setLineWidth(0.6);
-      doc.setLineDashPattern([1.5, 1.2], 0);
-      doc.setFillColor(253, 238, 245);
-    } else {
+      // Leeg vakje (rechthoekig, waar kind in schrijft) - duidelijker dan gestippelde cirkel
       doc.setDrawColor(107, 76, 155);
-      doc.setLineWidth(0.8);
-      doc.setLineDashPattern([], 0);
+      doc.setLineWidth(vorm === 'cirkel' ? 0.8 : 0.5);
       doc.setFillColor(255, 255, 255);
-    }
-    doc.circle(x, y, cirkelR, 'FD');
-    doc.setLineDashPattern([], 0); // reset
+      const vakBreedte = cirkelR * 2;
+      const vakHoogte = cirkelR * 2;
+      doc.roundedRect(x - vakBreedte/2, y - vakHoogte/2, vakBreedte, vakHoogte, 1, 1, 'FD');
+    } else {
+      // Gevulde cirkel met waarde
+      doc.setDrawColor(107, 76, 155);
+      doc.setLineWidth(vorm === 'cirkel' ? 1.1 : 0.7);
+      doc.setFillColor(255, 255, 255);
+      doc.circle(x, y, cirkelR, 'FD');
 
-    // Waarde binnenin (alleen als niet ontbrekend)
-    if (!ontbrekend) {
       doc.setTextColor(107, 76, 155);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(cirkelR * 1.8); // schaal met cirkel
+      doc.setFontSize(cirkelR * (vorm === 'cirkel' ? 2.4 : 2.0));
       doc.text(String(waarde), x, y + cirkelR * 0.55, { align: 'center' });
     }
-    // Bij papier-modus: leeg laten (invullijn is de cirkel zelf)
-    // Bij antwoordblad: ook leeg, dat is het doel
   }
 
-  tekenCirkel(centerX, topY, vraag.top, vraag.top === null);
-  tekenCirkel(kindLinksX, kindY, vraag.links, vraag.links === null);
-  tekenCirkel(kindRechtsX, kindY, vraag.rechts, vraag.rechts === null);
+  tekenElement(centerX, topY, vraag.top, vraag.top === null);
+  tekenElement(kindLinksX, kindY, vraag.links, vraag.links === null);
+  tekenElement(kindRechtsX, kindY, vraag.rechts, vraag.rechts === null);
 }
 
 // ============================================
@@ -1623,44 +1669,57 @@ function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
         doc.line(x + 10, y + 1, x + kolomBreedte - 3, y + 1);
       }
     } else {
-      d.oefeningen.forEach((o, i) => {
-        const y = oefStartY + i * oefHoogte + 6;
+      // Check of dit splitsingen zijn → dan mini-boompjes in 2×5 grid
+      const isSplitsingenDag = d.oefeningen.length > 0
+        && typeof d.oefeningen[0].vraag === 'object'
+        && d.oefeningen[0].vraag.type === 'splitsing';
 
-        // Nummer
-        doc.setFontSize(8);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(160, 160, 160);
-        doc.text(`${i + 1}.`, x + 2, y);
+      if (isSplitsingenDag) {
+        // 2 boompjes naast elkaar × 5 rijen = 10 oefeningen
+        const subKolomBreedte = kolomBreedte / 2;
+        const rijHoogte = (hoogte - oefStartY - marge - 4) / 5;
 
-        // Vraag
-        doc.setFontSize(11);
-        doc.setFont('helvetica', 'bold');
-        doc.setTextColor(45, 42, 38);
+        d.oefeningen.forEach((o, i) => {
+          const subKolom = i % 2;      // 0 = links, 1 = rechts
+          const rij = Math.floor(i / 2); // 0 t.e.m. 4
 
-        let vraagText;
-        if (typeof o.vraag === 'string') {
-          vraagText = o.vraag;
-        } else if (o.vraag.type === 'splitsing') {
-          const t = o.vraag.top === null ? '?' : o.vraag.top;
-          const l = o.vraag.links === null ? '?' : o.vraag.links;
-          const r = o.vraag.rechts === null ? '?' : o.vraag.rechts;
-          vraagText = `${t} = ${l}+${r}`;
-        } else {
-          vraagText = '___';
-        }
+          const centerX = x + subKolom * subKolomBreedte + subKolomBreedte / 2;
+          const centerY = oefStartY + rij * rijHoogte + rijHoogte / 2;
 
-        if (o.vraag && o.vraag.type === 'splitsing') {
-          doc.text(vraagText, x + 7, y);
-        } else {
+          // Nummer linksboven het boompje
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(7);
+          doc.setTextColor(160, 160, 160);
+          doc.text(`${i + 1}.`, x + subKolom * subKolomBreedte + 1.5, centerY - rijHoogte / 2 + 3);
+
+          tekenMiniSplitsing(doc, o.vraag, centerX, centerY, subKolomBreedte * 0.9, rijHoogte * 0.85);
+        });
+      } else {
+        // Gewone tekstuele weergave voor andere oefeningtypes
+        d.oefeningen.forEach((o, i) => {
+          const y = oefStartY + i * oefHoogte + 6;
+
+          // Nummer
+          doc.setFontSize(8);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(160, 160, 160);
+          doc.text(`${i + 1}.`, x + 2, y);
+
+          // Vraag
+          doc.setFontSize(11);
+          doc.setFont('helvetica', 'bold');
+          doc.setTextColor(45, 42, 38);
+
+          const vraagText = typeof o.vraag === 'string' ? o.vraag : '___';
           doc.text(`${vraagText}  =`, x + 7, y);
-        }
 
-        // Invullijntje rechts
-        doc.setDrawColor(200, 200, 200);
-        doc.setLineWidth(0.3);
-        const lijnX = x + kolomBreedte - 18;
-        doc.line(lijnX, y + 1, lijnX + 15, y + 1);
-      });
+          // Invullijntje rechts
+          doc.setDrawColor(200, 200, 200);
+          doc.setLineWidth(0.3);
+          const lijnX = x + kolomBreedte - 18;
+          doc.line(lijnX, y + 1, lijnX + 15, y + 1);
+        });
+      }
     }
 
     // Lichte scheiding tussen kolommen
@@ -1719,7 +1778,8 @@ function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         if (o.vraag && o.vraag.type === 'splitsing') {
-          doc.text(`${i + 1}. ${vraagText} →`, x + 2, y);
+          // Geen aparte = nodig, de vraag bevat al een =
+          doc.text(`${i + 1}. ${vraagText}`, x + 2, y);
         } else {
           doc.text(`${i + 1}. ${vraagText} =`, x + 2, y);
         }
@@ -1771,6 +1831,7 @@ function renderModi() {
 // Init
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('%c⚡ Tempotoetsen v5 — weekblad met Week van + Invulblad-modus', 'color:#6b4c9b;font-weight:700;font-size:1.1em;');
   renderTabs();
   renderConfig();
   renderModi();
