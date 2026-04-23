@@ -834,6 +834,17 @@ header.hero p {
   box-shadow: var(--shadow-md);
 }
 
+/* 20-veld: 2 rijen × 10 - grotere vakjes */
+.honderdveld.twintigveld .honderdveld-vak {
+  width: clamp(32px, 5vw, 56px);
+  height: clamp(32px, 5vw, 56px);
+}
+
+/* Geen middelste horizontale scheidslijn bij 20-veld */
+.honderdveld.twintigveld .honderdveld-rij:nth-child(5) {
+  border-top: none;
+}
+
 .honderdveld-rij {
   display: flex;
   gap: 0;
@@ -868,21 +879,19 @@ header.hero p {
   background: #ffd84d;
 }
 
-/* Notatie (4E 7T) */
+/* Notatie (4E 7T) - zwart, kinderen moeten zelf denken welke T en welke E is */
 .notatie {
   font-size: clamp(3rem, 12vw, 8rem);
   font-weight: 900;
   display: flex;
   gap: 0.4em;
   align-items: baseline;
+  color: var(--donker) !important;
 }
 
-.notatie-tient {
-  color: #4a8a28;
-}
-
+.notatie-tient,
 .notatie-eenh {
-  color: #c99900;
+  color: var(--donker) !important;
 }
 
 /* Splitsingen */
