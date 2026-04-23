@@ -977,27 +977,34 @@ function renderMABHTML(getal) {
 }
 
 function renderHonderdveldHTML(getal) {
-  // 10×10 grid: eenheden onderaan (rij 9), tientallen vullen van onder naar boven
-  // Een getal zoals 58: rij 9 = 8 eenheden geel, rijen 5-8 (bovenste 4 rijen daarvan eigenlijk 5-8 zijnde tientallen 1-5) = groen
-  // Beter: bouw van onder naar boven, maar render van boven naar onder (flex-direction: column, normaal)
+  // Als getal ≤ 20: 20-veld (2 rijen × 10) — compacter en duidelijker voor kleine getallen
+  // Anders: 100-veld (10×10)
+  const isTwintigVeld = getal <= 20;
+  const totaalRijen = isTwintigVeld ? 2 : 10;
+
   const tientallen = Math.floor(getal / 10);
   const eenheden = getal % 10;
 
-  let html = `<div class="getalbeeld-wrap"><div class="honderdveld">`;
+  let html = `<div class="getalbeeld-wrap"><div class="honderdveld ${isTwintigVeld ? 'twintigveld' : ''}">`;
 
-  // We tekenen 10 rijen. Rij 0 (bovenaan) = de hoogste, rij 9 (onderaan) = de laagste
-  // Beginnend vanaf onderaan: rij 9 heeft de eenheden, daarboven hebben we tientallen oplopend
-  // Als getal=58: rij 9=eenheden (8 geel + 2 leeg), rijen 4-8 = groen (5 tientallen), rijen 0-3 = leeg
-  for (let rij = 0; rij < 10; rij++) {
-    // Positie vanaf onderaan: onderste rij = 0
-    const vanafOnder = 9 - rij;
+  // Rij 0 bovenaan, totaalRijen-1 onderaan
+  // Eenheden staan op onderste rij, tientallen op rijen daarboven
+  for (let rij = 0; rij < totaalRijen; rij++) {
+    const vanafOnder = (totaalRijen - 1) - rij;
 
     html += `<div class="honderdveld-rij">`;
     for (let k = 0; k < 10; k++) {
       let kleur = 'leeg';
       if (vanafOnder === 0) {
-        // Onderste rij: eenheden (links) + lege rest
-        if (k < eenheden) kleur = 'geel';
+        // Onderste rij
+        if (eenheden > 0) {
+          // Er zijn eenheden: toon ze geel
+          if (k < eenheden) kleur = 'geel';
+        } else if (tientallen > totaalRijen - 1) {
+          // Geen eenheden maar wel "te veel" tientallen voor de bovenste rijen
+          // → onderste rij vormt een extra tiental
+          kleur = 'groen';
+        }
       } else {
         // Hogere rijen: vol groen als binnen tientallen-bereik
         if (vanafOnder <= tientallen) kleur = 'groen';
@@ -1152,10 +1159,12 @@ function tekenSplitsingElementen(doc, pos, vraag, cirkelR, vorm) {
       doc.setFillColor(255, 255, 255);
       doc.circle(x, y, cirkelR, 'FD');
 
+      // Groter font, perfect gecentreerd met baseline:'middle'
+      const fontSize = cirkelR * (vorm === 'cirkel' ? 2.6 : 2.3);
       doc.setTextColor(107, 76, 155);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(cirkelR * (vorm === 'cirkel' ? 2.4 : 2.0));
-      doc.text(String(waarde), x, y + cirkelR * 0.55, { align: 'center' });
+      doc.setFontSize(fontSize);
+      doc.text(String(waarde), x, y, { align: 'center', baseline: 'middle' });
     }
   }
 
