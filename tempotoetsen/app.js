@@ -1265,7 +1265,11 @@ function genereerPdf({ titel, oefeningen, modus }) {
     && typeof oefeningen[0].vraag === 'object'
     && oefeningen[0].vraag.type === 'splitsing';
 
-  if (isSplitsingen) {
+  // Bij invulblad (antwoordblad): splitsingen tonen als lege lijnen, niet als boompjes
+  // (Kinderen schrijven gewoon het antwoord op terwijl je flitst)
+  const splitsingenAlsTekening = isSplitsingen && modus !== 'antwoordblad';
+
+  if (splitsingenAlsTekening) {
     // Splitsingen: 2 rijen × 5 kolommen
     const startY = 68;
     const kolomBreedte = (breedte - marge * 2) / 5;
