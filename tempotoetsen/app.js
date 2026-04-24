@@ -1479,38 +1479,63 @@ function renderWeekDagen() {
   const c = document.getElementById('week-dagen-lijst');
   let html = '';
 
+  const typeLabels = {
+    'maaltafels': 'Maaltafels',
+    'deeltafels': 'Deeltafels',
+    'gemengd-maal-deel': 'Gemengd × en :',
+    'splitsingen': 'Splitsingen',
+    'getalbeelden': 'Getalbeelden',
+    'optel-aftrek-10': '+ en − tot 10',
+    'optel-aftrek-20': '+ en − tot 20',
+    'optel-aftrek-100': '+ en − tot 100'
+  };
+
   weekdagen.forEach(d => {
     const st = weekState[d.id];
-    const typeLabels = {
-      'maaltafels': 'Maaltafels',
-      'deeltafels': 'Deeltafels',
-      'gemengd-maal-deel': 'Gemengd × en :',
-      'splitsingen': 'Splitsingen',
-      'getalbeelden': 'Getalbeelden',
-      'optel-aftrek-10': '+ en − tot 10',
-      'optel-aftrek-20': '+ en − tot 20',
-      'optel-aftrek-100': '+ en − tot 100'
-    };
+    const heeftEigenConfig = st.config !== null;
 
     html += `<div class="week-dag ${st.actief ? 'actief' : 'inactief'}" data-dag="${d.id}">
       <label class="week-dag-hoofd">
         <input type="checkbox" ${st.actief ? 'checked' : ''} data-dag-actief="${d.id}">
         <span class="week-dag-label">${d.label}</span>
-      </label>
-      <div class="week-dag-instellingen" ${st.actief ? '' : 'style="display:none;"'}>
-        <label class="week-dag-type-label">Oefeningtype:</label>
-        <select class="week-dag-type" data-dag-type="${d.id}">
-          ${Object.entries(typeLabels).map(([v, l]) =>
-            `<option value="${v}" ${st.type === v ? 'selected' : ''}>${l}</option>`
-          ).join('')}
-        </select>
-      </div>
-    </div>`;
+        ${heeftEigenConfig ? '<span class="week-dag-aangepast">aangepast</span>' : ''}
+      </label>`;
+
+    if (st.actief) {
+      html += `<div class="week-dag-instellingen">
+        <div class="week-dag-type-rij">
+          <label class="week-dag-type-label">Oefeningtype:</label>
+          <select class="week-dag-type" data-dag-type="${d.id}">
+            ${Object.entries(typeLabels).map(([v, l]) =>
+              `<option value="${v}" ${st.type === v ? 'selected' : ''}>${l}</option>`
+            ).join('')}
+          </select>
+          <button type="button" class="week-dag-aanpas-btn" data-dag-aanpas="${d.id}">
+            ${st.configUitgeklapt ? '▲ Dicht' : (heeftEigenConfig ? '⚙ Aanpassen' : '⚙ Aanpassen')}
+          </button>
+        </div>`;
+
+      if (st.configUitgeklapt) {
+        const huidigeConfig = st.config || { ...state.config[st.type] };
+        html += `<div class="week-dag-config-blok">
+          ${renderDagConfigHTML(d.id, st.type, huidigeConfig)}
+          <div class="week-dag-config-acties">
+            ${heeftEigenConfig
+              ? `<button type="button" class="week-dag-reset-btn" data-dag-reset="${d.id}">↺ Terug naar hoofdinstelling</button>`
+              : '<span class="week-dag-hint-text">Pas iets aan om deze dag een eigen configuratie te geven</span>'}
+          </div>
+        </div>`;
+      }
+
+      html += `</div>`;
+    }
+
+    html += `</div>`;
   });
 
   html += `<p class="week-hint">
-    💡 Tip: de oefeningen voor elke dag gebruiken de <strong>huidige instellingen</strong> van dat oefeningtype
-    (welke tafels, met/zonder brug, ...). Pas die eerst aan in het hoofdscherm als je dat wil wijzigen.
+    💡 Zonder aanpassing gebruikt elke dag de instellingen van het <strong>hoofdscherm</strong>.
+    Klik <strong>⚙ Aanpassen</strong> om een dag eigen tafels of opties te geven.
   </p>`;
 
   c.innerHTML = html;
@@ -1526,7 +1551,201 @@ function renderWeekDagen() {
   c.querySelectorAll('[data-dag-type]').forEach(sel => {
     sel.addEventListener('change', () => {
       const dag = sel.dataset.dagType;
-      weekState[dag].type = sel.value;
+      const nieuwType = sel.value;
+      const st = weekState[dag];
+      // Als type wijzigt: reset de eigen config (die past niet meer)
+      if (st.type !== nieuwType) {
+        st.config = null;
+      }
+      st.type = nieuwType;
+      renderWeekDagen();
+    });
+  });
+  c.querySelectorAll('[data-dag-aanpas]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dag = btn.dataset.dagAanpas;
+      weekState[dag].configUitgeklapt = !weekState[dag].configUitgeklapt;
+      renderWeekDagen();
+    });
+  });
+  c.querySelectorAll('[data-dag-reset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dag = btn.dataset.dagReset;
+      weekState[dag].config = null;
+      renderWeekDagen();
+    });
+  });
+
+  // Event handlers voor de config-velden binnen elke dag
+  koppelDagConfigEvents(c);
+}
+
+// Genereert de config-UI voor een specifieke dag (subset van hoofdconfig)
+function renderDagConfigHTML(dagId, type, conf) {
+  let html = '';
+
+  if (type === 'maaltafels' || type === 'deeltafels') {
+    const label = type === 'maaltafels' ? 'Welke maaltafels?' : 'Welke deeltafels?';
+    html += `<div class="dag-config-groep">
+      <label>${label}</label>
+      <div class="dag-tafels-chips" data-dag-tafels="${dagId}">
+        ${[2,3,4,5,6,7,8,9,10].map(t =>
+          `<button type="button" class="chip-tafel ${conf.tafels.includes(t) ? 'geselecteerd' : ''}" data-tafel="${t}">${t}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (type === 'gemengd-maal-deel') {
+    html += `<div class="dag-config-groep">
+      <label>Welke maaltafels?</label>
+      <div class="dag-tafels-chips" data-dag-tafels-keer="${dagId}">
+        ${[2,3,4,5,6,7,8,9,10].map(t =>
+          `<button type="button" class="chip-tafel ${conf.tafelsKeer.includes(t) ? 'geselecteerd' : ''}" data-tafel="${t}">${t}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="dag-config-groep">
+      <label>Welke deeltafels?</label>
+      <div class="dag-tafels-chips" data-dag-tafels-deel="${dagId}">
+        ${[2,3,4,5,6,7,8,9,10].map(t =>
+          `<button type="button" class="chip-tafel ${conf.tafelsDeel.includes(t) ? 'geselecteerd' : ''}" data-tafel="${t}">${t}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (type === 'splitsingen') {
+    html += `<div class="dag-config-groep">
+      <label>Splitsingen tot en met</label>
+      <div class="dag-radio-rij" data-dag-radio="${dagId}-totaal">
+        ${[5,6,7,8,9,10].map(n =>
+          `<button type="button" class="chip-radio ${conf.totaal === n ? 'geselecteerd' : ''}" data-waarde="${n}">tot ${n}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="dag-config-groep">
+      <label>Wat ontbreekt?</label>
+      <div class="dag-radio-rij" data-dag-radio="${dagId}-variant">
+        ${[
+          {v:'top',l:'Totaal boven'},
+          {v:'kind',l:'Getal onder'},
+          {v:'mix',l:'Door elkaar'}
+        ].map(o =>
+          `<button type="button" class="chip-radio ${conf.variant === o.v ? 'geselecteerd' : ''}" data-waarde="${o.v}">${o.l}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (type === 'optel-aftrek-10') {
+    html += `<div class="dag-config-groep">
+      <label>Bewerking</label>
+      <div class="dag-radio-rij" data-dag-radio="${dagId}-bewerking">
+        ${[{v:'plus',l:'+'},{v:'min',l:'−'},{v:'gemengd',l:'Gemengd'}].map(o =>
+          `<button type="button" class="chip-radio ${conf.bewerking === o.v ? 'geselecteerd' : ''}" data-waarde="${o.v}">${o.l}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (type === 'optel-aftrek-20' || type === 'optel-aftrek-100') {
+    html += `<div class="dag-config-groep">
+      <label>Bewerking</label>
+      <div class="dag-radio-rij" data-dag-radio="${dagId}-bewerking">
+        ${[{v:'plus',l:'+'},{v:'min',l:'−'},{v:'gemengd',l:'Gemengd'}].map(o =>
+          `<button type="button" class="chip-radio ${conf.bewerking === o.v ? 'geselecteerd' : ''}" data-waarde="${o.v}">${o.l}</button>`
+        ).join('')}
+      </div>
+    </div>
+    <div class="dag-config-groep">
+      <label>Brug over het tiental</label>
+      <div class="dag-radio-rij" data-dag-radio="${dagId}-brug">
+        ${[{v:'zonder',l:'Zonder'},{v:'met',l:'Met'},{v:'gemengd',l:'Gemengd'}].map(o =>
+          `<button type="button" class="chip-radio ${conf.brug === o.v ? 'geselecteerd' : ''}" data-waarde="${o.v}">${o.l}</button>`
+        ).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if (type === 'getalbeelden') {
+    html += `<div class="dag-config-info">
+      💡 Getalbeelden werken enkel in invulblad-modus (flits) — instellingen via hoofdscherm.
+    </div>`;
+  }
+
+  return html;
+}
+
+// Zorgt voor een eigen config-object voor een dag (kopie van hoofdconfig)
+function zorgVoorEigenConfig(dagId) {
+  const st = weekState[dagId];
+  if (!st.config) {
+    // Diepe kopie van hoofdconfig voor dit type
+    st.config = JSON.parse(JSON.stringify(state.config[st.type]));
+  }
+  return st.config;
+}
+
+function koppelDagConfigEvents(c) {
+  // Tafel-chips (maaltafels/deeltafels)
+  c.querySelectorAll('[data-dag-tafels]').forEach(container => {
+    const dagId = container.dataset.dagTafels;
+    container.querySelectorAll('button[data-tafel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const conf = zorgVoorEigenConfig(dagId);
+        const t = parseInt(btn.dataset.tafel, 10);
+        const idx = conf.tafels.indexOf(t);
+        if (idx >= 0) conf.tafels.splice(idx, 1);
+        else conf.tafels.push(t);
+        conf.tafels.sort((a, b) => a - b);
+        renderWeekDagen();
+      });
+    });
+  });
+
+  // Tafels keer (gemengd)
+  c.querySelectorAll('[data-dag-tafels-keer]').forEach(container => {
+    const dagId = container.dataset.dagTafelsKeer;
+    container.querySelectorAll('button[data-tafel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const conf = zorgVoorEigenConfig(dagId);
+        const t = parseInt(btn.dataset.tafel, 10);
+        const idx = conf.tafelsKeer.indexOf(t);
+        if (idx >= 0) conf.tafelsKeer.splice(idx, 1);
+        else conf.tafelsKeer.push(t);
+        conf.tafelsKeer.sort((a, b) => a - b);
+        renderWeekDagen();
+      });
+    });
+  });
+  c.querySelectorAll('[data-dag-tafels-deel]').forEach(container => {
+    const dagId = container.dataset.dagTafelsDeel;
+    container.querySelectorAll('button[data-tafel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const conf = zorgVoorEigenConfig(dagId);
+        const t = parseInt(btn.dataset.tafel, 10);
+        const idx = conf.tafelsDeel.indexOf(t);
+        if (idx >= 0) conf.tafelsDeel.splice(idx, 1);
+        else conf.tafelsDeel.push(t);
+        conf.tafelsDeel.sort((a, b) => a - b);
+        renderWeekDagen();
+      });
+    });
+  });
+
+  // Radio-groepen (splitsingen totaal/variant, bewerking, brug)
+  c.querySelectorAll('[data-dag-radio]').forEach(container => {
+    const [dagId, veld] = container.dataset.dagRadio.split('-');
+    container.querySelectorAll('button[data-waarde]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const conf = zorgVoorEigenConfig(dagId);
+        let waarde = btn.dataset.waarde;
+        // Convert numeric fields
+        if (veld === 'totaal') waarde = parseInt(waarde, 10);
+        conf[veld] = waarde;
+        renderWeekDagen();
+      });
     });
   });
 }
@@ -1541,18 +1760,27 @@ function maakWeekbladPdf() {
 
   const modus = weekState.modus || 'oefeningen';
 
-  // Bij oefeningen-modus: check configs (zoals voorheen)
-  // Bij invulblad-modus: geen check nodig - er staan enkel nummers op
+  // Helper: kies de juiste config voor deze dag (eigen als aangepast, anders hoofd)
+  const getConfigVoorDag = (dagId) => {
+    const st = weekState[dagId];
+    return st.config || state.config[st.type];
+  };
+
+  // Bij oefeningen-modus: check configs
   if (modus === 'oefeningen') {
     for (const d of actieveDagen) {
       const type = weekState[d.id].type;
-      const conf = state.config[type];
+      const conf = getConfigVoorDag(d.id);
+      const bron = weekState[d.id].config
+        ? `aangepaste instellingen van ${d.label}`
+        : 'hoofdscherm';
+
       if ((type === 'maaltafels' || type === 'deeltafels') && conf.tafels.length === 0) {
-        alert(`Voor ${d.label} (${type}): kies eerst minstens één tafel in het hoofdscherm.`);
+        alert(`Voor ${d.label} (${type}): kies eerst minstens één tafel (in ${bron}).`);
         return false;
       }
       if (type === 'gemengd-maal-deel' && (conf.tafelsKeer.length === 0 || conf.tafelsDeel.length === 0)) {
-        alert(`Voor ${d.label} (gemengd × en :): kies eerst minstens één maal- en deeltafel.`);
+        alert(`Voor ${d.label} (gemengd × en :): kies eerst minstens één maal- en deeltafel (in ${bron}).`);
         return false;
       }
       if (type === 'getalbeelden') {
@@ -1562,15 +1790,15 @@ function maakWeekbladPdf() {
     }
   }
 
-  // Genereer oefeningen per dag (alleen nodig voor oefeningen-modus)
+  // Genereer oefeningen per dag met de juiste config
   const dagenMetOef = actieveDagen.map(d => {
     const type = weekState[d.id].type;
     return {
       ...d,
       type,
       oefeningen: modus === 'invulblad'
-        ? null  // geen oefeningen bij invulblad
-        : window.TempotoetsenGen.genereerToets(type, state.config[type], 10)
+        ? null
+        : window.TempotoetsenGen.genereerToets(type, getConfigVoorDag(d.id), 10)
     };
   });
 
@@ -1837,12 +2065,477 @@ function renderModi() {
 }
 
 // ============================================
+// UITLEG — stapsgewijze rondleiding
+// ============================================
+const uitlegStappen = [
+  {
+    titel: 'Welkom!',
+    illustratie: 'welkom',
+    tekst: `<p><strong>De Tempotoetsen Generator</strong> maakt elke dag een nieuwe tempotoets voor je klas, in enkele klikken.</p>
+      <p>In deze korte rondleiding laat ik je zien:</p>
+      <ul>
+        <li>Welke oefeningtypes er zijn</li>
+        <li>Hoe je instellingen kiest</li>
+        <li>De 4 manieren om de toets te gebruiken</li>
+        <li>Hoe je een volledig weekblad maakt</li>
+      </ul>`
+  },
+  {
+    titel: 'Stap 1 — Kies een oefeningtype',
+    illustratie: 'tabs',
+    tekst: `<p>Bovenaan staan de <strong>tabbladen</strong> met alle oefeningtypes:</p>
+      <ul>
+        <li><strong>Maaltafels</strong> — klassieke tafels 2 tot 10</li>
+        <li><strong>Deeltafels</strong> — delingen, altijd met teken <code>:</code></li>
+        <li><strong>Gemengd × en :</strong> — 5 maal + 5 deel (gegarandeerd 50/50)</li>
+        <li><strong>Splitsingen</strong> — tot 5, 6, 7, 8, 9 of 10</li>
+        <li><strong>Getalbeelden</strong> — MAB, 100-veld, notatie (4E 7T), rekenrek</li>
+        <li><strong>+ en − tot 10 / 20 / 100</strong> — met of zonder brug</li>
+      </ul>
+      <p class="tip">💡 Je kan altijd op <strong>"Alle"</strong>, <strong>"Geen"</strong> of een snelle keuze zoals <strong>"2-5-10"</strong> klikken om snel tafels te selecteren.</p>`
+  },
+  {
+    titel: 'Stap 2 — Stel je oefeningen in',
+    illustratie: 'config',
+    tekst: `<p>In het <strong>Instellingen</strong>-paneel kies je wat in de toets komt.</p>
+      <p>Afhankelijk van het type zie je verschillende opties:</p>
+      <ul>
+        <li><strong>Tafels</strong>: klik op de tafels die je wil oefenen (bv. 2 en 5)</li>
+        <li><strong>Volgorde</strong>: <em>tafel × factor</em>, <em>factor × tafel</em>, of <em>beide door elkaar</em></li>
+        <li><strong>Bewerking</strong>: alleen +, alleen −, of gemengd (dan altijd 5 plus + 5 min)</li>
+        <li><strong>Brug</strong>: zonder brug, met brug, of gemengd</li>
+      </ul>
+      <p>In het <strong>Voorbeeld</strong> zie je meteen 10 oefeningen. Klik <strong>🔄 Nieuwe voorbeelden</strong> voor een andere set.</p>`
+  },
+  {
+    titel: 'Stap 3 — De 4 manieren',
+    illustratie: 'modi',
+    tekst: `<p>Onderaan kies je hoe je de toets gebruikt:</p>
+      <ul>
+        <li><strong>⚡ Flits-modus</strong> — oefeningen één voor één op het smartbord, met timer per oefening</li>
+        <li><strong>📝 Invulblad</strong> — PDF met enkel genummerde lijnen, voor tijdens het flitsen</li>
+        <li><strong>📄 Dagblad</strong> — PDF met alle 10 oefeningen, de kinderen krijgen 1 minuut</li>
+        <li><strong>📅 Weekblad</strong> — liggend A4 met een hele week op 1 blad</li>
+      </ul>
+      <p class="tip">💡 Bij het dagblad krijg je automatisch een <strong>antwoordblad</strong> op pagina 2 om snel te verbeteren.</p>`
+  },
+  {
+    titel: 'Stap 4 — Het weekblad',
+    illustratie: 'weekblad',
+    tekst: `<p>Met één klik op <strong>📅 Weekblad</strong> opent een dialoogvenster waar je een hele week in elkaar zet.</p>
+      <p>Per dag kun je:</p>
+      <ul>
+        <li>De dag <strong>aan- of uitvinken</strong> (bv. woensdag weglaten bij een brugdag)</li>
+        <li>Een <strong>oefeningtype</strong> kiezen (elke dag kan anders)</li>
+        <li>Op <strong>⚙ Aanpassen</strong> klikken om die dag eigen tafels/opties te geven</li>
+      </ul>
+      <p>Standaard erft elke dag de instellingen van het hoofdscherm. Zodra je iets aanpast, verschijnt een paarse <strong>AANGEPAST</strong> badge naast de dagnaam.</p>`
+  },
+  {
+    titel: 'Stap 5 — Weekblad: oefeningen of invulblad?',
+    illustratie: 'weekmodus',
+    tekst: `<p>In de weekblad-dialoog kies je <strong>Soort blad</strong>:</p>
+      <ul>
+        <li><strong>📄 Met oefeningen (op papier)</strong> — elke dag staan de 10 oefeningen klaar, kinderen timen zelf</li>
+        <li><strong>📝 Invulblad (leeg, bij flitsen op smartbord)</strong> — enkel genummerde lijnen, kinderen vullen antwoorden in terwijl jij flitst</li>
+      </ul>
+      <p>Bij <strong>Week van</strong> kun je de datum alvast invullen (bv. <em>5 mei 2026</em>). Laat je dit leeg, dan staat er een invullijn op de PDF.</p>
+      <p>Elke dag krijgt een wit <strong>___/10</strong> score-vakje rechts in de paarse balk om punten te noteren.</p>`
+  },
+  {
+    titel: 'Stap 6 — Didactisch voorbeeld',
+    illustratie: 'voorbeeld',
+    tekst: `<p><strong>De tafel van 5 inoefenen over een week?</strong></p>
+      <p>Dat doe je zo:</p>
+      <ol>
+        <li>Ga naar <strong>Maaltafels</strong>, kies <strong>tafel 5</strong> op het hoofdscherm</li>
+        <li>Klik <strong>📅 Weekblad</strong></li>
+        <li>Voor woensdag en vrijdag: klik <strong>⚙ Aanpassen</strong> en voeg <strong>tafel 2</strong> toe (gemengd inoefenen)</li>
+        <li>Klik <strong>📄 Weekblad maken</strong></li>
+      </ol>
+      <p>Resultaat: maandag, dinsdag en donderdag alleen tafel 5 → woensdag en vrijdag tafels 2 + 5 door elkaar. Stevig opbouwen in één blad.</p>`
+  },
+  {
+    titel: 'Klaar!',
+    illustratie: 'klaar',
+    tekst: `<p>Je weet nu hoe alles werkt. Tijd om je eerste tempotoets te maken!</p>
+      <p class="tip">💡 <strong>Tips voor dagelijks gebruik:</strong></p>
+      <ul>
+        <li>Wissel regelmatig tussen oefeningtypes om kinderen scherp te houden</li>
+        <li>Begin met <em>alleen plus</em> of <em>alleen min</em>, pas daarna <em>gemengd</em></li>
+        <li>De flits-modus werkt fantastisch op een smartbord — combineer met invulblad voor snelle correctie</li>
+        <li>Voor getalbeelden: gebruik altijd flits-modus of het weekblad-invulblad</li>
+      </ul>
+      <p>Deze uitleg kun je altijd opnieuw openen met de <strong>❓ Hoe werkt dit?</strong> knop bovenaan.</p>
+      <p style="text-align:center;font-size:1.2em;margin-top:20px;">🦓 <em>Veel succes! — juf Zisa</em></p>`
+  }
+];
+
+function illustratieSvg(type) {
+  const p = '#6b4c9b', o = '#f59f3b', g = '#7ab648', gl = '#ffd84d', r = '#e879a7', c = '#fdf8ef';
+
+  switch (type) {
+    case 'welkom':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <rect x="40" y="30" width="320" height="36" rx="8" fill="${o}"/>
+        <text x="200" y="54" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="18" fill="white">⚡ Tempotoetsen Generator</text>
+        <rect x="40" y="80" width="80" height="50" rx="8" fill="white" stroke="${p}" stroke-width="2"/>
+        <text x="80" y="110" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="12" fill="${p}">Flits</text>
+        <rect x="130" y="80" width="80" height="50" rx="8" fill="white" stroke="${p}" stroke-width="2"/>
+        <text x="170" y="110" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="12" fill="${p}">Invulblad</text>
+        <rect x="220" y="80" width="80" height="50" rx="8" fill="white" stroke="${p}" stroke-width="2"/>
+        <text x="260" y="110" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="12" fill="${p}">Dagblad</text>
+        <rect x="310" y="80" width="70" height="50" rx="8" fill="${o}" fill-opacity="0.2" stroke="${o}" stroke-width="2"/>
+        <text x="345" y="110" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="12" fill="${o}">Weekblad</text>
+        <text x="200" y="160" text-anchor="middle" font-family="Nunito" font-size="13" fill="#666">Één tool, 4 manieren om te gebruiken</text>
+      </svg>`;
+
+    case 'tabs':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <g font-family="Nunito" font-weight="700" font-size="11">
+          <rect x="15" y="30" width="60" height="28" rx="14" fill="${o}"/>
+          <text x="45" y="48" text-anchor="middle" fill="white">Maaltafels</text>
+          <rect x="82" y="30" width="58" height="28" rx="14" fill="white" stroke="#ddd"/>
+          <text x="111" y="48" text-anchor="middle" fill="#333">Deeltafels</text>
+          <rect x="147" y="30" width="58" height="28" rx="14" fill="white" stroke="#ddd"/>
+          <text x="176" y="48" text-anchor="middle" fill="#333">× en :</text>
+          <rect x="212" y="30" width="60" height="28" rx="14" fill="white" stroke="#ddd"/>
+          <text x="242" y="48" text-anchor="middle" fill="#333">Splitsingen</text>
+          <rect x="279" y="30" width="65" height="28" rx="14" fill="white" stroke="#ddd"/>
+          <text x="311" y="48" text-anchor="middle" fill="#333">Getalbeelden</text>
+          <rect x="351" y="30" width="35" height="28" rx="14" fill="white" stroke="#ddd"/>
+          <text x="368" y="48" text-anchor="middle" fill="#333">+/−</text>
+        </g>
+        <rect x="15" y="78" width="370" height="85" rx="12" fill="white" stroke="#eee"/>
+        <text x="30" y="98" font-family="Nunito" font-weight="700" font-size="12" fill="${p}">Welke maaltafels?</text>
+        <g font-family="Nunito" font-weight="700" font-size="12">
+          <rect x="30" y="110" width="30" height="30" rx="6" fill="${o}"/>
+          <text x="45" y="130" text-anchor="middle" fill="white">2</text>
+          <rect x="66" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="81" y="130" text-anchor="middle" fill="#888">3</text>
+          <rect x="102" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="117" y="130" text-anchor="middle" fill="#888">4</text>
+          <rect x="138" y="110" width="30" height="30" rx="6" fill="${o}"/>
+          <text x="153" y="130" text-anchor="middle" fill="white">5</text>
+          <rect x="174" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="189" y="130" text-anchor="middle" fill="#888">6</text>
+          <rect x="210" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="225" y="130" text-anchor="middle" fill="#888">7</text>
+          <rect x="246" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="261" y="130" text-anchor="middle" fill="#888">8</text>
+          <rect x="282" y="110" width="30" height="30" rx="6" fill="white" stroke="#ddd"/>
+          <text x="297" y="130" text-anchor="middle" fill="#888">9</text>
+          <rect x="318" y="110" width="35" height="30" rx="6" fill="${o}"/>
+          <text x="335" y="130" text-anchor="middle" fill="white">10</text>
+        </g>
+      </svg>`;
+
+    case 'config':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <rect x="15" y="15" width="370" height="150" rx="12" fill="white" stroke="#eee"/>
+        <text x="30" y="38" font-family="Nunito" font-weight="700" font-size="13" fill="${p}">Instellingen</text>
+        <text x="30" y="60" font-family="Nunito" font-weight="700" font-size="11">Bewerking</text>
+        <g font-family="Nunito" font-weight="700" font-size="11">
+          <rect x="30" y="68" width="55" height="26" rx="13" fill="white" stroke="#ddd"/>
+          <text x="57" y="85" text-anchor="middle" fill="#333">Alleen +</text>
+          <rect x="92" y="68" width="55" height="26" rx="13" fill="white" stroke="#ddd"/>
+          <text x="119" y="85" text-anchor="middle" fill="#333">Alleen −</text>
+          <rect x="154" y="68" width="70" height="26" rx="13" fill="${p}"/>
+          <text x="189" y="85" text-anchor="middle" fill="white">Gemengd</text>
+        </g>
+        <text x="30" y="114" font-family="Nunito" font-weight="700" font-size="11">Brug over het tiental</text>
+        <g font-family="Nunito" font-weight="700" font-size="11">
+          <rect x="30" y="122" width="62" height="26" rx="13" fill="${p}"/>
+          <text x="61" y="139" text-anchor="middle" fill="white">Zonder</text>
+          <rect x="99" y="122" width="48" height="26" rx="13" fill="white" stroke="#ddd"/>
+          <text x="123" y="139" text-anchor="middle" fill="#333">Met</text>
+          <rect x="154" y="122" width="70" height="26" rx="13" fill="white" stroke="#ddd"/>
+          <text x="189" y="139" text-anchor="middle" fill="#333">Gemengd</text>
+        </g>
+      </svg>`;
+
+    case 'modi':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <text x="200" y="28" text-anchor="middle" font-family="Nunito" font-weight="700" font-size="14" fill="${p}">Hoe wil je de toets gebruiken?</text>
+        <g font-family="Nunito">
+          <rect x="15" y="45" width="85" height="120" rx="12" fill="white" stroke="#eee"/>
+          <text x="57" y="80" text-anchor="middle" font-size="28">⚡</text>
+          <text x="57" y="110" text-anchor="middle" font-weight="700" font-size="12" fill="${p}">Flits</text>
+          <text x="57" y="128" text-anchor="middle" font-size="9" fill="#888">op smartbord</text>
+
+          <rect x="110" y="45" width="85" height="120" rx="12" fill="white" stroke="#eee"/>
+          <text x="152" y="80" text-anchor="middle" font-size="28">📝</text>
+          <text x="152" y="110" text-anchor="middle" font-weight="700" font-size="12" fill="${p}">Invulblad</text>
+          <text x="152" y="128" text-anchor="middle" font-size="9" fill="#888">enkel nummers</text>
+
+          <rect x="205" y="45" width="85" height="120" rx="12" fill="white" stroke="#eee"/>
+          <text x="247" y="80" text-anchor="middle" font-size="28">📄</text>
+          <text x="247" y="110" text-anchor="middle" font-weight="700" font-size="12" fill="${p}">Dagblad</text>
+          <text x="247" y="128" text-anchor="middle" font-size="9" fill="#888">1 dag, 1 minuut</text>
+
+          <rect x="300" y="45" width="85" height="120" rx="12" fill="${o}" fill-opacity="0.15" stroke="${o}" stroke-width="2"/>
+          <text x="342" y="80" text-anchor="middle" font-size="28">📅</text>
+          <text x="342" y="110" text-anchor="middle" font-weight="700" font-size="12" fill="${p}">Weekblad</text>
+          <text x="342" y="128" text-anchor="middle" font-size="9" fill="#888">5 dagen op 1 blad</text>
+          <rect x="332" y="38" width="38" height="14" rx="7" fill="${r}"/>
+          <text x="351" y="48" text-anchor="middle" font-weight="800" font-size="8" fill="white">NIEUW</text>
+        </g>
+      </svg>`;
+
+    case 'weekblad':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <g font-family="Nunito">
+          <rect x="20" y="20" width="360" height="34" rx="8" fill="${o}" fill-opacity="0.12" stroke="${o}" stroke-width="2"/>
+          <text x="30" y="42" font-weight="700" font-size="12" fill="${p}">📅 Weekblad samenstellen</text>
+
+          <g transform="translate(20, 65)">
+            <rect width="170" height="28" rx="8" fill="${o}" fill-opacity="0.15" stroke="${o}"/>
+            <rect x="8" y="8" width="12" height="12" rx="2" fill="${o}"/>
+            <text x="30" y="19" font-weight="700" font-size="11" fill="#333">Maandag</text>
+            <rect x="82" y="6" width="55" height="16" rx="4" fill="${p}"/>
+            <text x="109" y="17" text-anchor="middle" font-weight="700" font-size="8" fill="white">AANGEPAST</text>
+            <rect x="142" y="6" width="20" height="16" rx="4" fill="white" stroke="#ccc"/>
+            <text x="152" y="17" text-anchor="middle" font-size="10" fill="${p}">⚙</text>
+          </g>
+
+          <g transform="translate(210, 65)">
+            <rect width="170" height="28" rx="8" fill="${o}" fill-opacity="0.15" stroke="${o}"/>
+            <rect x="8" y="8" width="12" height="12" rx="2" fill="${o}"/>
+            <text x="30" y="19" font-weight="700" font-size="11" fill="#333">Dinsdag</text>
+          </g>
+
+          <g transform="translate(20, 100)">
+            <rect width="170" height="28" rx="8" fill="white" stroke="#ddd"/>
+            <rect x="10" y="8" width="12" height="12" rx="2" fill="white" stroke="#aaa"/>
+            <text x="30" y="19" font-weight="700" font-size="11" fill="#888">Woensdag</text>
+            <text x="100" y="19" font-size="9" fill="#888">(brugdag - uit)</text>
+          </g>
+
+          <g transform="translate(210, 100)">
+            <rect width="170" height="28" rx="8" fill="${o}" fill-opacity="0.15" stroke="${o}"/>
+            <rect x="8" y="8" width="12" height="12" rx="2" fill="${o}"/>
+            <text x="30" y="19" font-weight="700" font-size="11" fill="#333">Donderdag</text>
+          </g>
+
+          <g transform="translate(115, 140)">
+            <rect width="170" height="28" rx="8" fill="${o}" fill-opacity="0.15" stroke="${o}"/>
+            <rect x="8" y="8" width="12" height="12" rx="2" fill="${o}"/>
+            <text x="30" y="19" font-weight="700" font-size="11" fill="#333">Vrijdag</text>
+          </g>
+        </g>
+      </svg>`;
+
+    case 'weekmodus':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <g font-family="Nunito">
+          <text x="20" y="25" font-weight="700" font-size="11" fill="#333">Week van</text>
+          <rect x="20" y="32" width="360" height="24" rx="8" fill="white" stroke="${p}" stroke-width="2"/>
+          <text x="30" y="49" font-size="11" fill="#333">5 mei 2026</text>
+
+          <text x="20" y="80" font-weight="700" font-size="11" fill="#333">Soort blad</text>
+          <rect x="20" y="87" width="175" height="30" rx="8" fill="${p}"/>
+          <text x="107" y="107" text-anchor="middle" font-weight="700" font-size="11" fill="white">📄 Met oefeningen</text>
+          <rect x="205" y="87" width="175" height="30" rx="8" fill="white" stroke="#ddd"/>
+          <text x="292" y="107" text-anchor="middle" font-weight="700" font-size="11" fill="#333">📝 Invulblad</text>
+
+          <text x="20" y="140" font-weight="700" font-size="10" fill="#888">Elke dag krijgt een score-vakje:</text>
+          <g transform="translate(20, 148)">
+            <rect width="70" height="20" rx="5" fill="${p}"/>
+            <text x="8" y="14" font-weight="700" font-size="9" fill="white">Maandag</text>
+            <rect x="45" y="3" width="22" height="14" rx="3" fill="white"/>
+            <text x="56" y="13" text-anchor="middle" font-weight="700" font-size="8" fill="${p}">__/10</text>
+          </g>
+          <g transform="translate(98, 148)">
+            <rect width="70" height="20" rx="5" fill="${p}"/>
+            <text x="8" y="14" font-weight="700" font-size="9" fill="white">Dinsdag</text>
+            <rect x="45" y="3" width="22" height="14" rx="3" fill="white"/>
+            <text x="56" y="13" text-anchor="middle" font-weight="700" font-size="8" fill="${p}">__/10</text>
+          </g>
+          <g transform="translate(176, 148)">
+            <rect width="70" height="20" rx="5" fill="${p}"/>
+            <text x="8" y="14" font-weight="700" font-size="9" fill="white">Woensdag</text>
+            <rect x="45" y="3" width="22" height="14" rx="3" fill="white"/>
+            <text x="56" y="13" text-anchor="middle" font-weight="700" font-size="8" fill="${p}">__/10</text>
+          </g>
+        </g>
+      </svg>`;
+
+    case 'voorbeeld':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <g font-family="Nunito" font-weight="700">
+          <text x="200" y="20" text-anchor="middle" font-size="12" fill="${p}">Tafel van 5 — week-opbouw</text>
+
+          <g transform="translate(10, 35)"><rect width="70" height="130" rx="8" fill="${o}" fill-opacity="0.15"/>
+            <rect width="70" height="22" rx="6" fill="${p}"/>
+            <text x="35" y="16" text-anchor="middle" font-size="11" fill="white">Ma</text>
+            <text x="35" y="50" text-anchor="middle" font-size="10" fill="${p}">tafel 5</text>
+            <text x="35" y="68" text-anchor="middle" font-size="9" fill="#666">2 × 5</text>
+            <text x="35" y="82" text-anchor="middle" font-size="9" fill="#666">5 × 5</text>
+            <text x="35" y="96" text-anchor="middle" font-size="9" fill="#666">9 × 5</text>
+            <text x="35" y="110" text-anchor="middle" font-size="9" fill="#666">5 × 10</text>
+          </g>
+          <g transform="translate(88, 35)"><rect width="70" height="130" rx="8" fill="${o}" fill-opacity="0.15"/>
+            <rect width="70" height="22" rx="6" fill="${p}"/>
+            <text x="35" y="16" text-anchor="middle" font-size="11" fill="white">Di</text>
+            <text x="35" y="50" text-anchor="middle" font-size="10" fill="${p}">tafel 5</text>
+            <text x="35" y="68" text-anchor="middle" font-size="9" fill="#666">5 × 3</text>
+            <text x="35" y="82" text-anchor="middle" font-size="9" fill="#666">7 × 5</text>
+            <text x="35" y="96" text-anchor="middle" font-size="9" fill="#666">5 × 4</text>
+            <text x="35" y="110" text-anchor="middle" font-size="9" fill="#666">8 × 5</text>
+          </g>
+          <g transform="translate(166, 35)"><rect width="70" height="130" rx="8" fill="${o}" fill-opacity="0.25" stroke="${o}" stroke-width="1"/>
+            <rect width="70" height="22" rx="6" fill="${p}"/>
+            <text x="35" y="16" text-anchor="middle" font-size="11" fill="white">Wo</text>
+            <text x="35" y="50" text-anchor="middle" font-size="9" fill="${p}">tafels 2+5</text>
+            <text x="35" y="68" text-anchor="middle" font-size="9" fill="#666">2 × 4</text>
+            <text x="35" y="82" text-anchor="middle" font-size="9" fill="#666">5 × 7</text>
+            <text x="35" y="96" text-anchor="middle" font-size="9" fill="#666">9 × 2</text>
+            <text x="35" y="110" text-anchor="middle" font-size="9" fill="#666">3 × 5</text>
+          </g>
+          <g transform="translate(244, 35)"><rect width="70" height="130" rx="8" fill="${o}" fill-opacity="0.15"/>
+            <rect width="70" height="22" rx="6" fill="${p}"/>
+            <text x="35" y="16" text-anchor="middle" font-size="11" fill="white">Do</text>
+            <text x="35" y="50" text-anchor="middle" font-size="10" fill="${p}">tafel 5</text>
+            <text x="35" y="68" text-anchor="middle" font-size="9" fill="#666">5 × 6</text>
+            <text x="35" y="82" text-anchor="middle" font-size="9" fill="#666">1 × 5</text>
+            <text x="35" y="96" text-anchor="middle" font-size="9" fill="#666">5 × 2</text>
+            <text x="35" y="110" text-anchor="middle" font-size="9" fill="#666">4 × 5</text>
+          </g>
+          <g transform="translate(322, 35)"><rect width="70" height="130" rx="8" fill="${o}" fill-opacity="0.25" stroke="${o}" stroke-width="1"/>
+            <rect width="70" height="22" rx="6" fill="${p}"/>
+            <text x="35" y="16" text-anchor="middle" font-size="11" fill="white">Vr</text>
+            <text x="35" y="50" text-anchor="middle" font-size="9" fill="${p}">tafels 2+5</text>
+            <text x="35" y="68" text-anchor="middle" font-size="9" fill="#666">7 × 2</text>
+            <text x="35" y="82" text-anchor="middle" font-size="9" fill="#666">5 × 8</text>
+            <text x="35" y="96" text-anchor="middle" font-size="9" fill="#666">3 × 2</text>
+            <text x="35" y="110" text-anchor="middle" font-size="9" fill="#666">5 × 9</text>
+          </g>
+        </g>
+      </svg>`;
+
+    case 'klaar':
+      return `<svg viewBox="0 0 400 180" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="180" fill="${c}"/>
+        <text x="200" y="80" text-anchor="middle" font-size="64">🎉</text>
+        <text x="200" y="120" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="20" fill="${p}">Je bent klaar!</text>
+        <text x="200" y="145" text-anchor="middle" font-family="Nunito" font-size="13" fill="#666">Veel plezier met je klas 🦓</text>
+      </svg>`;
+
+    default:
+      return '';
+  }
+}
+
+let uitlegIdx = 0;
+
+function openUitleg() {
+  uitlegIdx = 0;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'uitleg-overlay';
+  overlay.id = 'uitleg-overlay';
+  overlay.innerHTML = `
+    <div class="uitleg-dialoog">
+      <button class="uitleg-sluit" aria-label="Sluiten">×</button>
+      <div class="uitleg-inhoud" id="uitleg-inhoud"></div>
+      <div class="uitleg-voet">
+        <div class="uitleg-stip-rij" id="uitleg-stippen"></div>
+        <div class="uitleg-knop-rij">
+          <button class="knop knop-secundair" id="uitleg-vorige">← Vorige</button>
+          <button class="knop knop-primair" id="uitleg-volgende">Volgende →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  renderUitlegStap();
+
+  overlay.querySelector('.uitleg-sluit').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+  overlay.querySelector('#uitleg-vorige').addEventListener('click', () => {
+    if (uitlegIdx > 0) {
+      uitlegIdx--;
+      renderUitlegStap();
+    }
+  });
+  overlay.querySelector('#uitleg-volgende').addEventListener('click', () => {
+    if (uitlegIdx < uitlegStappen.length - 1) {
+      uitlegIdx++;
+      renderUitlegStap();
+    } else {
+      overlay.remove();
+    }
+  });
+
+  const toetsHandler = (e) => {
+    if (!document.getElementById('uitleg-overlay')) {
+      document.removeEventListener('keydown', toetsHandler);
+      return;
+    }
+    if (e.key === 'Escape') overlay.remove();
+    else if (e.key === 'ArrowRight' && uitlegIdx < uitlegStappen.length - 1) {
+      uitlegIdx++;
+      renderUitlegStap();
+    } else if (e.key === 'ArrowLeft' && uitlegIdx > 0) {
+      uitlegIdx--;
+      renderUitlegStap();
+    }
+  };
+  document.addEventListener('keydown', toetsHandler);
+}
+
+function renderUitlegStap() {
+  const stap = uitlegStappen[uitlegIdx];
+  const inhoud = document.getElementById('uitleg-inhoud');
+
+  inhoud.innerHTML = `
+    <div class="uitleg-stap-teller">Stap ${uitlegIdx + 1} van ${uitlegStappen.length}</div>
+    <h2>${stap.titel}</h2>
+    <div class="uitleg-illustratie">${illustratieSvg(stap.illustratie)}</div>
+    <div class="uitleg-tekst">${stap.tekst}</div>
+  `;
+
+  const stippen = document.getElementById('uitleg-stippen');
+  stippen.innerHTML = uitlegStappen.map((_, i) =>
+    `<span class="uitleg-stip ${i === uitlegIdx ? 'actief' : ''}" data-idx="${i}"></span>`
+  ).join('');
+  stippen.querySelectorAll('.uitleg-stip').forEach(s => {
+    s.addEventListener('click', () => {
+      uitlegIdx = parseInt(s.dataset.idx, 10);
+      renderUitlegStap();
+    });
+  });
+
+  const vorigeBtn = document.getElementById('uitleg-vorige');
+  const volgendeBtn = document.getElementById('uitleg-volgende');
+  vorigeBtn.disabled = uitlegIdx === 0;
+  vorigeBtn.style.visibility = uitlegIdx === 0 ? 'hidden' : 'visible';
+  volgendeBtn.textContent = uitlegIdx === uitlegStappen.length - 1
+    ? '✓ Aan de slag!'
+    : 'Volgende →';
+}
+
+// ============================================
 // Init
 // ============================================
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('%c⚡ Tempotoetsen v5 — weekblad met Week van + Invulblad-modus', 'color:#6b4c9b;font-weight:700;font-size:1.1em;');
   renderTabs();
   renderConfig();
   renderModi();
   updatePreview();
+
+  const uitlegBtn = document.getElementById('uitleg-knop');
+  if (uitlegBtn) {
+    uitlegBtn.addEventListener('click', openUitleg);
+  }
 });
