@@ -64,6 +64,7 @@ header.hero::before {
   height: 180px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 50%;
+  pointer-events: none;
 }
 
 header.hero::after {
@@ -75,6 +76,7 @@ header.hero::after {
   height: 120px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 50%;
+  pointer-events: none;
 }
 
 header.hero h1 {
@@ -449,9 +451,144 @@ header.hero p {
   margin-top: 10px;
   padding-left: 30px;
   display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.week-dag-type-rij {
+  display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.week-dag-aangepast {
+  display: inline-block;
+  background: var(--paars);
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 8px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.week-dag-aanpas-btn {
+  background: white;
+  border: 2px solid var(--grijs-licht);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--paars);
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.week-dag-aanpas-btn:hover {
+  border-color: var(--paars);
+  background: var(--paars-licht);
+}
+
+.week-dag-config-blok {
+  background: white;
+  border: 2px solid var(--paars-licht);
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dag-config-groep {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dag-config-groep > label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--donker);
+}
+
+.dag-tafels-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.chip-tafel,
+.chip-radio {
+  background: white;
+  border: 2px solid var(--grijs-licht);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--donker);
+  cursor: pointer;
+  min-width: 32px;
+  transition: all 0.1s;
+}
+
+.chip-tafel:hover,
+.chip-radio:hover {
+  border-color: var(--paars);
+}
+
+.chip-tafel.geselecteerd,
+.chip-radio.geselecteerd {
+  background: var(--paars);
+  border-color: var(--paars);
+  color: white;
+}
+
+.dag-radio-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.week-dag-config-acties {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+.week-dag-reset-btn {
+  background: none;
+  border: none;
+  color: var(--roze);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+}
+
+.week-dag-reset-btn:hover {
+  color: var(--paars);
+}
+
+.week-dag-hint-text {
+  font-size: 0.78rem;
+  color: var(--grijs);
+  font-style: italic;
+}
+
+.dag-config-info {
+  background: var(--paars-licht);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: var(--donker);
 }
 
 .week-dag-type-label {
@@ -877,6 +1014,253 @@ header.hero p {
 
 .honderdveld-vak.geel {
   background: #ffd84d;
+}
+
+/* ============================================
+   UITLEG — knop in hero + dialoog
+   ============================================ */
+
+.hero-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.uitleg-knop {
+  background: white;
+  color: var(--paars);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.uitleg-knop:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(107, 76, 155, 0.3);
+}
+
+.uitleg-knop:active {
+  transform: translateY(0);
+}
+
+/* Dialoog */
+.uitleg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: uitleg-fade-in 0.2s ease-out;
+}
+
+@keyframes uitleg-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.uitleg-dialoog {
+  background: white;
+  border-radius: 20px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: uitleg-pop-in 0.25s ease-out;
+}
+
+@keyframes uitleg-pop-in {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.uitleg-sluit {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: var(--creme);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--donker);
+  z-index: 2;
+  line-height: 1;
+}
+
+.uitleg-sluit:hover {
+  background: var(--grijs-licht);
+}
+
+.uitleg-inhoud {
+  padding: 30px 30px 20px 30px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.uitleg-stap-teller {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--paars);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.uitleg-inhoud h2 {
+  margin: 0 0 18px 0;
+  color: var(--donker);
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.uitleg-illustratie {
+  margin: 0 0 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--creme);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.uitleg-illustratie svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.uitleg-tekst {
+  color: var(--donker);
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+.uitleg-tekst p {
+  margin: 0 0 12px 0;
+}
+
+.uitleg-tekst ul,
+.uitleg-tekst ol {
+  margin: 0 0 12px 0;
+  padding-left: 22px;
+}
+
+.uitleg-tekst li {
+  margin-bottom: 6px;
+}
+
+.uitleg-tekst code {
+  background: var(--paars-licht);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: var(--paars);
+}
+
+.uitleg-tekst strong {
+  color: var(--paars);
+}
+
+.uitleg-tekst .tip {
+  background: var(--paars-licht);
+  border-left: 3px solid var(--paars);
+  padding: 10px 14px;
+  border-radius: 0 8px 8px 0;
+  margin: 14px 0;
+}
+
+.uitleg-tekst .tip strong {
+  color: var(--donker);
+}
+
+/* Voet met stippen + knoppen */
+.uitleg-voet {
+  padding: 16px 30px 20px 30px;
+  border-top: 1px solid var(--grijs-licht);
+  background: var(--creme);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.uitleg-stip-rij {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.uitleg-stip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--grijs-licht);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.uitleg-stip:hover {
+  background: var(--paars-licht);
+}
+
+.uitleg-stip.actief {
+  background: var(--paars);
+  transform: scale(1.25);
+}
+
+.uitleg-knop-rij {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.uitleg-knop-rij .knop {
+  flex: 1;
+  max-width: 180px;
+}
+
+/* Mobiel */
+@media (max-width: 600px) {
+  .hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .uitleg-knop {
+    align-self: flex-start;
+    font-size: 0.9rem;
+    padding: 10px 16px;
+  }
+
+  .uitleg-inhoud {
+    padding: 20px;
+  }
+
+  .uitleg-inhoud h2 {
+    font-size: 1.2rem;
+  }
 }
 
 /* Notatie (4E 7T) - zwart, kinderen moeten zelf denken welke T en welke E is */
