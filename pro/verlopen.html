@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <title>Zisa PRO – Verleng je toegang</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#ffcf56" />
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <link rel="icon" href="../start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="../start_afbeeldingen/Zisa_spelgenerator-192.png">
+
+  <style>
+    :root{
+      --bg: #e8e0d0;
+      --card: #fffaf2;
+      --card-2: #ffffff;
+      --line: #ead8b8;
+      --shadow: 0 14px 36px rgba(80, 50, 10, 0.14);
+      --yellow: #ffcf56;
+      --yellow-dark: #f2b300;
+      --orange-soft: #ffe4b5;
+      --orange-bd: #f4c987;
+      --orange-tx: #7c4a00;
+      --brown: #6f4300;
+      --brown-dark: #442700;
+      --text: #2f2a22;
+      --muted: #746a5b;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+    }
+
+    body{
+      min-height: 100vh;
+      font-family: "Comic Sans MS", "Trebuchet MS", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(255, 207, 86, 0.35), transparent 22%),
+        radial-gradient(circle at left bottom, rgba(255, 255, 255, 0.45), transparent 26%),
+        var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .wrap{
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .header{
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 0 6px;
+    }
+    .header img{
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--yellow);
+      padding: 5px;
+      object-fit: contain;
+      box-shadow: 0 4px 10px rgba(80, 50, 10, 0.18);
+    }
+    .header h1{
+      margin: 0;
+      font-size: 1.3rem;
+      color: var(--brown-dark);
+    }
+    .header .sub{
+      margin: 2px 0 0;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+
+    .card{
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 28px 26px;
+    }
+
+    .alert{
+      background: var(--orange-soft);
+      border: 1px solid var(--orange-bd);
+      color: var(--orange-tx);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+    .alert strong{ color: var(--brown-dark); }
+
+    h2{
+      margin: 0 0 10px;
+      color: var(--brown-dark);
+      font-size: 1.5rem;
+    }
+    .lead{
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .options{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+    @media (max-width: 560px){
+      .options{ grid-template-columns: 1fr; }
+    }
+
+    .option{
+      background: var(--card-2);
+      border: 2px solid var(--line);
+      border-radius: 14px;
+      padding: 20px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+    .option:hover{
+      transform: translateY(-2px);
+      border-color: var(--yellow);
+      box-shadow: 0 8px 18px rgba(80, 50, 10, 0.10);
+    }
+    .option.recommended{
+      border-color: var(--yellow);
+    }
+    .badge{
+      position: absolute;
+      top: -10px;
+      right: 14px;
+      background: var(--yellow);
+      color: var(--brown-dark);
+      font-weight: 700;
+      font-size: .8rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(80, 50, 10, 0.15);
+    }
+    .option h3{
+      margin: 0;
+      color: var(--brown-dark);
+      font-size: 1.15rem;
+    }
+    .price{
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--brown-dark);
+      margin: 0;
+    }
+    .price .per{
+      font-size: .9rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    .desc{
+      margin: 0;
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.45;
+      flex: 1;
+    }
+    .btn{
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--brown-dark);
+      background: var(--yellow);
+      color: var(--brown-dark);
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s ease, transform .1s ease;
+    }
+    .btn:hover{
+      background: var(--yellow-dark);
+    }
+    .btn:active{
+      transform: translateY(1px);
+    }
+    .btn-secondary{
+      background: var(--card-2);
+    }
+    .btn-secondary:hover{
+      background: var(--yellow);
+    }
+
+    .foot{
+      margin-top: 22px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--line);
+      text-align: center;
+      font-size: .88rem;
+      color: var(--muted);
+    }
+    .foot a{
+      color: var(--brown);
+      text-decoration: underline;
+    }
+    .foot a:hover{
+      color: var(--brown-dark);
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap" role="main">
+
+    <div class="header">
+      <img src="../start_afbeeldingen/zisa.png" alt="Juf Zisa" />
+      <div>
+        <h1>Welkom terug bij Zisa PRO!</h1>
+        <p class="sub">Fijn dat je verder wil werken met de Spelletjesmaker.</p>
+      </div>
+    </div>
+
+    <div class="card">
+
+      <!-- Dynamische melding op basis van ?reason= -->
+      <div id="renewAlert" class="alert" hidden></div>
+
+      <h2>Verleng je toegang</h2>
+      <p class="lead">Kies hieronder hoe je verder wil. Je kan kiezen voor een flexibel maandabonnement of een voordeliger jaarabonnement.</p>
+
+      <div class="options">
+
+        <!-- Maand -->
+        <div class="option">
+          <h3>Maandabonnement</h3>
+          <p class="price">€6 <span class="per">/ maand</span></p>
+          <p class="desc">Flexibel: maandelijks opzegbaar. Ideaal als je het eerst eens wil proberen of tijdelijk toegang wil.</p>
+          <a class="btn btn-secondary" href="./maand.html">Kies maand</a>
+        </div>
+
+        <!-- Jaar -->
+        <div class="option recommended">
+          <span class="badge">Voordeligst</span>
+          <h3>Jaarabonnement</h3>
+          <p class="price">€40 <span class="per">/ jaar</span></p>
+          <p class="desc">Beste prijs: bespaar t.o.v. het maandtarief. Toegang voor een heel schooljaar.</p>
+          <a class="btn" href="./koop.html">Kies jaar</a>
+        </div>
+
+      </div>
+
+      <div class="foot">
+        Eerst meer weten? <a href="https://www.jufzisa.be/spelgenerator" target="_blank" rel="noopener">Lees alles over Zisa PRO</a>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // Toon nette melding op basis van ?reason=… en ?until=...
+    (function(){
+      var p = new URLSearchParams(location.search);
+      var r = (p.get("reason") || "").toLowerCase();
+      var until = p.get("until"); // ISO timestamp
+      var box = document.getElementById("renewAlert");
+      if (!box) return;
+
+      // Datum formatteren als die er is
+      var datumTekst = "";
+      if (until) {
+        try {
+          var d = new Date(until);
+          if (!isNaN(d.getTime())) {
+            datumTekst = " op " + d.toLocaleDateString("nl-BE", {
+              day: "numeric",
+              month: "long",
+              year: "numeric"
+            });
+          }
+        } catch(e){}
+      }
+
+      var msgs = {
+        expired:    "<strong>Je PRO-abonnement is verlopen" + datumTekst + ".</strong> Verleng hieronder om verder te werken — je gegevens en instellingen blijven bewaard.",
+        no_license: "<strong>We vinden geen actief PRO-abonnement bij dit account.</strong> Kies hieronder een abonnement om toegang te krijgen.",
+        no_access:  "<strong>Er is momenteel geen toegang.</strong> Kies hieronder een abonnement om verder te werken.",
+        inactive:   "<strong>Je abonnement is op dit moment niet actief.</strong> Verleng hieronder om verder te werken."
+      };
+
+      if (msgs[r]) {
+        box.innerHTML = msgs[r];
+        box.hidden = false;
+      } else {
+        // Geen reason: toon algemene welkom-tekst
+        box.innerHTML = "<strong>Welkom terug!</strong> Kies hieronder hoe je verder wil met Zisa PRO.";
+        box.hidden = false;
+      }
+    })();
+  </script>
+</body>
+</html>
