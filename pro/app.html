@@ -1011,13 +1011,43 @@
     if (window.VraagstukkenModule && user.email) {
       VraagstukkenModule.setUser(user.email);
     }
-    statusEl.className = 'status good';
+
+    // ── Bereken dagen tot afloop voor slimme waarschuwing ──
+    let dagenTotAfloop = null;
+    let datumStr = "";
     try {
-      const datum = new Date(expiresAt).toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
-      statusEl.textContent = `PRO actief — geldig tot ${datum}  (max. ${limit ?? 2} toestellen)`;
-    } catch {
-      statusEl.textContent = `PRO actief  (max. ${limit ?? 2} toestellen)`;
+      const eindDatum = new Date(expiresAt);
+      const nu = new Date();
+      const diffMs = eindDatum.getTime() - nu.getTime();
+      dagenTotAfloop = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      datumStr = eindDatum.toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
+    } catch {}
+
+    // Verleng-knop (alleen tonen bij waarschuwing)
+    const verlengKnop = `<a href="./verlopen.html?reason=expiring_soon&until=${encodeURIComponent(expiresAt || '')}" style="margin-left:12px;display:inline-block;padding:4px 12px;background:#a05000;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:0.85rem">Verleng nu</a>`;
+
+    if (dagenTotAfloop !== null && dagenTotAfloop > 1 && dagenTotAfloop <= 7) {
+      // Waarschuwing: 2-7 dagen
+      statusEl.className = 'status warn';
+      statusEl.innerHTML = `⚠️ Je PRO-abonnement loopt af over ${dagenTotAfloop} dagen (${datumStr}).${verlengKnop}`;
+    } else if (dagenTotAfloop === 1) {
+      // Urgent: morgen
+      statusEl.className = 'status warn';
+      statusEl.innerHTML = `⚠️ Let op: je PRO-abonnement loopt morgen af (${datumStr}).${verlengKnop}`;
+    } else if (dagenTotAfloop !== null && dagenTotAfloop <= 0) {
+      // Vandaag of in het verleden (theoretisch — guard.js redirect normaal al)
+      statusEl.className = 'status warn';
+      statusEl.innerHTML = `⚠️ Je PRO-abonnement loopt vandaag af.${verlengKnop}`;
+    } else {
+      // Normaal: meer dan 7 dagen geldig (ongewijzigd t.o.v. voorheen)
+      statusEl.className = 'status good';
+      if (datumStr) {
+        statusEl.textContent = `PRO actief — geldig tot ${datumStr}  (max. ${limit ?? 2} toestellen)`;
+      } else {
+        statusEl.textContent = `PRO actief  (max. ${limit ?? 2} toestellen)`;
+      }
     }
+
     contentEl.style.display = 'flex';
   };
 
