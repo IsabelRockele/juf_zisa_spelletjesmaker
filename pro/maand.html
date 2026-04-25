@@ -13,12 +13,16 @@
     button{margin-top:12px;padding:.75rem 1rem;border:0;border-radius:12px;background:#111827;color:#fff;font-weight:600;cursor:pointer}
     #err{color:#b91c1c;margin-top:8px;white-space:pre-wrap}
     #ok{color:#065f46;margin-top:8px}
+    .alert{background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;padding:12px;border-radius:10px;margin-bottom:12px;font-size:.95rem}
   </style>
 </head>
 <body>
   <main class="card">
     <h1>Zisa PRO – Maandabonnement</h1>
     <p>Flexibel plan: <strong>€6/maand</strong> (maandelijks opzegbaar). Jaarplan <strong>€40/jaar</strong> blijft voordeliger.</p>
+
+    <!-- Melding bij verlopen/ontbrekende licentie -->
+    <div id="renewAlert" class="alert" hidden></div>
 
     <label for="email">E-mailadres</label>
     <input id="email" type="email" placeholder="je e-mailadres" autocomplete="email" required>
@@ -28,6 +32,20 @@
   </main>
 
   <script>
+    // Toon nette melding op basis van ?reason=…
+    (function(){
+      var p = new URLSearchParams(location.search);
+      var r = (p.get("reason") || "").toLowerCase();
+      var box = document.getElementById("renewAlert");
+      if (!box) return;
+      var msgs = {
+        expired: "<strong>Je PRO-abonnement is verlopen.</strong> Verleng hieronder met een maandabonnement.",
+        no_license: "<strong>Geen actief PRO-abonnement gevonden.</strong> Start hieronder je maandabonnement.",
+        no_access: "<strong>Er is momenteel geen toegang.</strong> Start hieronder je maandabonnement."
+      };
+      if (msgs[r]) { box.innerHTML = msgs[r]; box.hidden = false; }
+    })();
+
     const ENDPOINT = "https://europe-west1-zisa-spelletjesmaker-pro.cloudfunctions.net/createMonthlyFirstPayment";
     const $ = id => document.getElementById(id);
     const emailEl = $("email"), startBtn = $("start"), errEl = $("err"), okEl = $("ok");
