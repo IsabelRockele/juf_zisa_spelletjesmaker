@@ -19,7 +19,7 @@ const CURRENT_PAGE = (() => {
   const f = (location.pathname.split("/").pop() || "").toLowerCase();
   return f || "index.html";
 })();
-const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html", "maand.html"]); // publiek
+const SKIP_PAGES = new Set(["index.html", "koop.html", "bedankt.html", "maand.html", "verlopen.html"]); // publiek
 
 function safeGo(to, reason) {
   try {
@@ -32,10 +32,25 @@ function safeGo(to, reason) {
   const q = reason ? ("?reason=" + encodeURIComponent(reason)) : "";
   location.href = to + q;
 }
-const goLogin   = () => safeGo("./index.html");
-const goApp     = (r) => safeGo("./app.html", r);
-const goDevices = () => safeGo("./apparaten.html");
-const goKoop    = (r) => safeGo("./koop.html", r);
+function safeGoWithUntil(to, reason, untilIso) {
+  try {
+    const dest = (to.split("/").pop() || "").toLowerCase();
+    if (dest === CURRENT_PAGE) {
+      console.warn("[GUARD] Self-redirect voorkomen:", to, reason);
+      return;
+    }
+  } catch {}
+  const params = new URLSearchParams();
+  if (reason) params.set("reason", reason);
+  if (untilIso) params.set("until", untilIso);
+  const qs = params.toString();
+  location.href = to + (qs ? ("?" + qs) : "");
+}
+const goLogin    = () => safeGo("./index.html");
+const goApp      = (r) => safeGo("./app.html", r);
+const goDevices  = () => safeGo("./apparaten.html");
+const goKoop     = (r) => safeGo("./koop.html", r);
+const goVerlopen = (r, until) => safeGoWithUntil("./verlopen.html", r, until);
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, onIdTokenChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -112,7 +127,7 @@ if (!GUARD_OFF) {
         console.error("getAccessStatus error:", e);
         goLogin(); return;
       }
-      if (!status.allowed) { goKoop(status?.reason || "no_access"); return; }
+      if (!status.allowed) { goVerlopen(status?.reason || "no_access", status?.expiresAt); return; }
 
       if (!IS_DEVICES_PAGE) {
         const deviceId = window.ZisaDevice.getOrCreateDeviceId();
