@@ -12,6 +12,7 @@
 */
 
 import { onRequest, onCall, HttpsError } from "firebase-functions/v2/https";
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as logger from "firebase-functions/logger";
 import { initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
@@ -1194,3 +1195,240 @@ export const proLink = onRequest({ region: REGION }, async (req, res) => {
     res.status(500).send("Interne fout.");
   }
 });
+
+// ──────────────────────────────────────────────────────────────────────────
+// HELPER: HTML-template voor herinneringsmail in warme Zisa-stijl
+// ──────────────────────────────────────────────────────────────────────────
+function reminderEmailHtml(opts: {
+  dagenResterend: number;
+  vervalDatumStr: string;
+  verlengUrl: string;
+}) {
+  const { dagenResterend, vervalDatumStr, verlengUrl } = opts;
+
+  // Tekst aangepast op urgentie
+  const titel = dagenResterend === 1
+    ? "Even een seintje — je abonnement loopt morgen af!"
+    : `Even een seintje — je abonnement loopt over ${dagenResterend} dagen af`;
+
+  const intro = dagenResterend === 1
+    ? `Je PRO-abonnement op de Spelletjesmaker loopt <strong>morgen (${vervalDatumStr})</strong> af. Wil je zonder onderbreking verder kunnen werken? Verleng dan vandaag nog je abonnement.`
+    : `Je PRO-abonnement op de Spelletjesmaker loopt af op <strong>${vervalDatumStr}</strong>. Dat is over ${dagenResterend} dagen. Verleng nu zodat je zonder onderbreking verder kan werken.`;
+
+  return `
+  <div style="font-family:'Comic Sans MS','Trebuchet MS',Arial,sans-serif;font-size:16px;line-height:1.6;color:#2f2a22;max-width:560px;margin:0 auto;padding:24px;background:#fffaf2;border-radius:14px;border:1px solid #ead8b8">
+
+    <div style="text-align:center;margin-bottom:20px">
+      <span style="font-size:48px">🦓</span>
+    </div>
+
+    <h2 style="color:#442700;margin:0 0 16px;font-size:1.3rem;text-align:center">${titel}</h2>
+
+    <p>Hallo!</p>
+
+    <p>${intro}</p>
+
+    <p>Je gegevens en instellingen blijven gewoon bewaard wanneer je verlengt — je kan meteen verder waar je gebleven was.</p>
+
+    <p style="text-align:center;margin:28px 0">
+      <a href="${verlengUrl}"
+         style="display:inline-block;padding:12px 24px;background:#ffcf56;color:#442700;text-decoration:none;border-radius:12px;font-weight:700;font-size:1rem;border:2px solid #442700">
+        Verleng mijn abonnement
+      </a>
+    </p>
+
+    <p style="font-size:0.9rem;color:#746a5b;margin-top:24px">
+      Je kan kiezen tussen een maandabonnement (€6/maand) of een jaarabonnement (€40/jaar — voordeligst).
+    </p>
+
+    <hr style="border:none;border-top:1px dashed #ead8b8;margin:24px 0">
+
+    <p style="font-size:0.85rem;color:#746a5b">
+      Vragen? Antwoord gerust op deze mail of stuur een berichtje naar
+      <a href="mailto:zebrapost@jufzisa.be" style="color:#6f4300">zebrapost@jufzisa.be</a>.
+    </p>
+
+    <p style="font-size:0.85rem;color:#746a5b;margin-top:16px">
+      Lieve groetjes,<br>
+      Juf Zisa 🦓
+    </p>
+
+  </div>`;
+}
+
+
+// ──────────────────────────────────────────────────────────────────────────
+// SCHEDULED FUNCTION: dagelijkse check op aflopende abonnementen
+// ──────────────────────────────────────────────────────────────────────────
+//
+// Draait elke dag om 08:00 's ochtends (Brussel-tijd).
+// Stuurt mails bij:
+//   - 7 dagen voor afloop  (warning)
+//   - 1 dag voor afloop    (urgent)
+//
+// Markeert verzonden mails in het licentiedocument zodat een klant nooit
+// twee keer dezelfde reminder krijgt.
+//
+// Velden die in elke licentie worden bijgehouden:
+//   - reminder7Days_forExpiresAt:  ISO-string van de expiresAt waarvoor
+//                                   de 7-dagen mail is verstuurd
+//   - reminder1Day_forExpiresAt:   idem voor de 1-dag mail
+//
+// Door de expiresAt op te slaan WAARVOOR de mail is verstuurd, herkennen
+// we automatisch dat een verlenging een nieuwe cyclus is (want de
+// expiresAt verandert bij elke verlenging) en wordt er opnieuw gemaild
+// in de volgende cyclus. Geen reset nodig in mollieWebhook.
+// ──────────────────────────────────────────────────────────────────────────
+
+export const checkExpiringLicenses = onSchedule(
+  {
+    schedule: "0 8 * * *",               // elke dag om 08:00
+    timeZone: "Europe/Brussels",
+    region: REGION,
+    retryCount: 2,                        // bij crash: 2x opnieuw proberen
+  },
+  async (event) => {
+    const now = Date.now();
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+    // Vensters: een licentie krijgt een mail als zijn expiresAt valt binnen
+    // het venster [target - 12u, target + 12u]. Zo vangen we ook licenties
+    // die op een andere tijd op de dag aflopen.
+    const window7Start  = now + (7 * ONE_DAY_MS) - (12 * 60 * 60 * 1000);
+    const window7End    = now + (7 * ONE_DAY_MS) + (12 * 60 * 60 * 1000);
+    const window1Start  = now + (1 * ONE_DAY_MS) - (12 * 60 * 60 * 1000);
+    const window1End    = now + (1 * ONE_DAY_MS) + (12 * 60 * 60 * 1000);
+
+    let totaal7 = 0;
+    let totaal1 = 0;
+    let fouten = 0;
+
+    // Helper om de huidige expiresAt als unieke "cyclus-key" op te slaan
+    const expiresKey = (lic: any): string => {
+      const d = lic.expiresAt?.toDate?.() ?? new Date(lic.expiresAt);
+      return d.toISOString();
+    };
+
+    // Doorloop alle licentie-collecties (licenses + Licenties)
+    for (const col of LICENSE_COLLECTIONS) {
+      // ── 7-DAGEN venster ──
+      try {
+        const qs7 = await db
+          .collection(col)
+          .where("expiresAt", ">=", new Date(window7Start))
+          .where("expiresAt", "<=", new Date(window7End))
+          .get();
+
+        for (const doc of qs7.docs) {
+          const lic = doc.data() as any;
+          const huidigeKey = expiresKey(lic);
+
+          // Skip als al verstuurd VOOR DEZE expiresAt-cyclus
+          if (lic.reminder7Days_forExpiresAt === huidigeKey) continue;
+
+          // Skip als status niet actief
+          const isActive = String(lic.status || "").toLowerCase() === "actief"
+                        || String(lic.status || "").toLowerCase() === "active";
+          if (!isActive) continue;
+
+          // Skip als geen email
+          const email = (lic.email || "").toString().trim().toLowerCase();
+          if (!email) continue;
+
+          try {
+            const eindDatum = lic.expiresAt?.toDate?.() ?? new Date(lic.expiresAt);
+            const datumStr = eindDatum.toLocaleDateString("nl-BE", {
+              year: "numeric", month: "long", day: "numeric"
+            });
+            const verlengUrl = `${FRONTEND_REPO}/pro/verlopen.html?reason=expiring_soon&until=${encodeURIComponent(eindDatum.toISOString())}`;
+
+            await queueEmail(
+              email,
+              "Even een seintje — je Zisa PRO loopt over een week af",
+              reminderEmailHtml({
+                dagenResterend: 7,
+                vervalDatumStr: datumStr,
+                verlengUrl,
+              })
+            );
+
+            // Markeer voor deze cyclus (niet opnieuw mailen tot expiresAt wijzigt)
+            await doc.ref.update({
+              reminder7Days_forExpiresAt: huidigeKey,
+              reminder7Days_sentAt: FieldValue.serverTimestamp(),
+            });
+
+            totaal7++;
+            logger.info("[reminder-7d] verzonden", { email, licId: doc.id });
+          } catch (e) {
+            fouten++;
+            logger.error("[reminder-7d] fout bij verzenden", { licId: doc.id, error: String(e) });
+          }
+        }
+      } catch (e) {
+        logger.error(`[reminder-7d] query-fout in collectie '${col}'`, { error: String(e) });
+      }
+
+      // ── 1-DAG venster ──
+      try {
+        const qs1 = await db
+          .collection(col)
+          .where("expiresAt", ">=", new Date(window1Start))
+          .where("expiresAt", "<=", new Date(window1End))
+          .get();
+
+        for (const doc of qs1.docs) {
+          const lic = doc.data() as any;
+          const huidigeKey = expiresKey(lic);
+
+          // Skip als al verstuurd VOOR DEZE expiresAt-cyclus
+          if (lic.reminder1Day_forExpiresAt === huidigeKey) continue;
+
+          const isActive = String(lic.status || "").toLowerCase() === "actief"
+                        || String(lic.status || "").toLowerCase() === "active";
+          if (!isActive) continue;
+
+          const email = (lic.email || "").toString().trim().toLowerCase();
+          if (!email) continue;
+
+          try {
+            const eindDatum = lic.expiresAt?.toDate?.() ?? new Date(lic.expiresAt);
+            const datumStr = eindDatum.toLocaleDateString("nl-BE", {
+              year: "numeric", month: "long", day: "numeric"
+            });
+            const verlengUrl = `${FRONTEND_REPO}/pro/verlopen.html?reason=expiring_soon&until=${encodeURIComponent(eindDatum.toISOString())}`;
+
+            await queueEmail(
+              email,
+              "⚠️ Je Zisa PRO loopt morgen af",
+              reminderEmailHtml({
+                dagenResterend: 1,
+                vervalDatumStr: datumStr,
+                verlengUrl,
+              })
+            );
+
+            await doc.ref.update({
+              reminder1Day_forExpiresAt: huidigeKey,
+              reminder1Day_sentAt: FieldValue.serverTimestamp(),
+            });
+
+            totaal1++;
+            logger.info("[reminder-1d] verzonden", { email, licId: doc.id });
+          } catch (e) {
+            fouten++;
+            logger.error("[reminder-1d] fout bij verzenden", { licId: doc.id, error: String(e) });
+          }
+        }
+      } catch (e) {
+        logger.error(`[reminder-1d] query-fout in collectie '${col}'`, { error: String(e) });
+      }
+    }
+
+    logger.info("[checkExpiringLicenses] klaar", {
+      verzonden_7dagen: totaal7,
+      verzonden_1dag: totaal1,
+      fouten,
+    });
+  }
+);
