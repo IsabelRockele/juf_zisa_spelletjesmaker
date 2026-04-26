@@ -166,6 +166,26 @@
     }
     .btn-logout:hover { background: #ffd97d; transform: scale(1.03); }
 
+    /* Admin-knop: alleen zichtbaar voor owner-accounts */
+    .btn-admin {
+      width: 100%;
+      background: #6B4E9B;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      text-decoration: none;
+      display: none; /* standaard verborgen, JS toont voor owners */
+      text-align: center;
+      margin-bottom: 6px;
+    }
+    .btn-admin:hover { background: #543B7D; transform: scale(1.03); }
+
     .help-btn {
       width: 100%;
       background: #484848;
@@ -600,6 +620,7 @@
 
   <div class="sidebar-bottom">
     <div id="user-pill" class="user-pill" style="display:none;">-</div>
+    <a href="./admin-school.html" id="admin-link" class="btn-admin">🏫 Admin school</a>
     <button id="logout" class="btn-logout">↩ Uitloggen</button>
     <a href="../Handleiding spelletjesmaker.pdf" class="help-btn" download>❓ Handleiding</a>
     <a href="./privacy.html" class="help-btn" target="_blank">🔒 Privacyverklaring</a>
@@ -1011,6 +1032,16 @@
     if (window.VraagstukkenModule && user.email) {
       VraagstukkenModule.setUser(user.email);
     }
+
+    // ★ Admin-knop tonen voor owner-accounts (Isabel + Jorn)
+    try {
+      const ownerEmails = ["isabel.rockele@gmail.com", "jorn.neeus@gmail.com"];
+      const userEmail = (user.email || "").toLowerCase();
+      if (ownerEmails.includes(userEmail)) {
+        const adminLink = document.getElementById('admin-link');
+        if (adminLink) adminLink.style.display = 'block';
+      }
+    } catch {}
 
     // ── Bereken dagen tot afloop voor slimme waarschuwing ──
     let dagenTotAfloop = null;
