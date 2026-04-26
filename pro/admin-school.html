@@ -331,6 +331,16 @@
           <div class="preview-blok" id="context-blok" style="background:#FFF4E0; color:#8B5A1A; border-left:4px solid #F5A55E;">
             <strong id="context-titel">⏳ Bezig met checken...</strong>
             <span id="context-detail" style="display:block; margin-top:4px; font-size:13.5px;"></span>
+            <details id="context-teachers" style="margin-top:10px; display:none;">
+              <summary style="cursor:pointer; font-weight:600; font-size:13.5px; user-select:none;">
+                ▼ Toon bestaande leerkrachten
+              </summary>
+              <ul id="context-teachers-list" style="margin-top:8px; padding-left:18px; font-size:13.5px; line-height:1.7;">
+              </ul>
+              <p style="margin-top:8px; font-size:12.5px; font-style:italic; opacity:0.8;">
+                💡 Voeg hieronder enkel <strong>nieuwe</strong> mailadressen toe. Bestaande adressen worden automatisch overgeslagen.
+              </p>
+            </details>
           </div>
 
           <div class="preview-blok" id="preview-blok">
@@ -387,6 +397,9 @@
 
       // Helpers
       const $ = (id) => document.getElementById(id);
+      const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
       const emailsInput = $('emails');
       const schoolInput = $('schoolName');
       const previewBlok = $('preview-blok');
@@ -434,10 +447,13 @@
       const contextBlok = $('context-blok');
       const contextTitel = $('context-titel');
       const contextDetail = $('context-detail');
+      const contextTeachers = $('context-teachers');
+      const contextTeachersList = $('context-teachers-list');
 
       function showContext(ctx) {
         if (!ctx || !ctx.exists) {
           contextBlok.classList.remove('zichtbaar');
+          contextTeachers.style.display = 'none';
           currentContext = null;
           return;
         }
@@ -460,8 +476,25 @@
             `Vervaldatum: <strong>${datumStr.split('/').slice(0,2).join('/')}/${parseInt(datumStr.split('/')[2])+1}</strong>`;
         } else {
           contextBlok.classList.remove('zichtbaar');
+          contextTeachers.style.display = 'none';
           return;
         }
+
+        // ★ Toon lijst van bestaande leerkrachten
+        if (ctx.teachers && ctx.teachers.length > 0) {
+          contextTeachersList.innerHTML = ctx.teachers
+            .map(t => {
+              const dat = t.expiresAt
+                ? new Date(t.expiresAt).toLocaleDateString('nl-BE', { day:'2-digit', month:'2-digit', year:'numeric' })
+                : '?';
+              return `<li>📧 <code style="background:#fff;padding:1px 5px;border-radius:3px;font-size:12.5px;">${escapeHtml(t.email)}</code> <span style="font-size:12px;opacity:0.75;">(vervalt ${dat})</span></li>`;
+            })
+            .join('');
+          contextTeachers.style.display = 'block';
+        } else {
+          contextTeachers.style.display = 'none';
+        }
+
         contextBlok.classList.add('zichtbaar');
       }
 
