@@ -61,6 +61,18 @@ const PRICE_EUR_MONTH    = "6.00";
 const DEVICE_LIMIT       = 2;
 const ENTITLEMENT_ID     = "zisa-pro-1y";
 
+// ------- SCHOOL ADMIN: wie mag schoollicenties aanmaken? --------------------
+const SCHOOL_ADMIN_EMAILS = new Set<string>([
+  "isabel.rockele@gmail.com",
+  "jorn.neeus@gmail.com",
+]);
+
+// ------- OWNER ACCOUNTS: testaccounts die nooit aflopen ---------------------
+const OWNER_EMAILS = new Set<string>([
+  "isabel.rockele@gmail.com",
+  "jorn.neeus@gmail.com",
+]);
+
 const MOLLIE_API_URL = "https://api.mollie.com/v2";
 const MOLLIE_API_KEY = (process.env.MOLLIE_LIVE_KEY || process.env.MOLLIE_API_KEY || "");
 
@@ -970,6 +982,21 @@ export const getAccessStatus = onCall({ region: REGION, enforceAppCheck: true },
 
   const nowMs = Date.now();
 
+  // ★ OWNER-CHECK: Isabel en Jorn hebben altijd toegang (testaccounts)
+  if (tokenEmail && OWNER_EMAILS.has(tokenEmail)) {
+    logger.info("[getAccessStatus] Owner account — onbeperkte toegang", {
+      uid,
+      email: tokenEmail,
+    });
+    return {
+      allowed: true,
+      reason: "owner",
+      expiresAt: null,
+      entitlement: ENTITLEMENT_ID,
+      deviceLimit: 99,
+    };
+  }
+
   // helper: haal per collectie de nieuwste licentie op (orderBy expiresAt desc)
   const newestBy = async (field: "uid" | "email", value: string) => {
     let best: FirebaseFirestore.QueryDocumentSnapshot | null = null;
@@ -1432,3 +1459,219 @@ export const checkExpiringLicenses = onSchedule(
     });
   }
 );
+
+// ============================================================================
+// SCHOOL-LICENTIES — Admin functie
+// Maakt voor één leerkracht in één klap aan:
+//  - Firebase Auth user (of hergebruik bestaande)
+//  - Licentiedocument in beide LICENSE_COLLECTIONS
+//  - Bestelling-document in ORDER_COLLECTIONS met source: "school"
+//  - Stuurt welkomstmail met wachtwoord-reset-link
+//
+// Gebruikt SCHOOL_ADMIN_EMAILS bovenaan dit bestand voor toegangscontrole.
+// ============================================================================
+
+// ------- E-mail template specifiek voor school-leerkrachten ------------------
+function emailHtmlSchool(opts: {
+  email: string;
+  passwordLink: string;
+  schoolName: string;
+}) {
+  const { email, passwordLink, schoolName } = opts;
+  const btn = (href: string, label: string) =>
+    `<a href="${href}" style="display:inline-block;padding:12px 20px;background:#6B4E9B;color:#fff;text-decoration:none;border-radius:10px;font-weight:700;font-family:Arial,Helvetica,sans-serif">${label}</a>`;
+  return `
+  <div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.6;color:#0f172a;max-width:560px">
+    <p>Dag,</p>
+    <p>Welkom bij <strong>Zisa PRO</strong>! 🦓</p>
+    <p>Jouw school <strong>${schoolName}</strong> heeft voor jou een jaarabonnement op de Spelgenerator PRO aangevraagd. Je account is klaar om in gebruik te nemen.</p>
+    <p style="margin-top:18px"><strong>Stap 1 — Stel je wachtwoord in:</strong></p>
+    <p>${btn(passwordLink, "Mijn wachtwoord instellen")}</p>
+    <p style="margin-top:18px"><strong>Stap 2 — Open Zisa PRO:</strong></p>
+    <p>${btn(APP_INDEX_URL, "Open Zisa PRO")}</p>
+    <p style="margin-top:18px;font-size:14px;color:#5E5E5E">
+      Je logt in met dit e-mailadres: <code>${email}</code><br>
+      Het abonnement loopt 12 maanden vanaf vandaag.<br>
+      Tip: bewaar deze mail voor later — als je je wachtwoord ooit kwijt bent, kan je via de inlogpagina een nieuw wachtwoord aanvragen.
+    </p>
+    <p style="margin-top:20px">Veel plezier met de tools!</p>
+    <p>Warme groeten,<br>juf Zisa 🦓<br>${SELLER_EMAIL}</p>
+  </div>`;
+}
+
+// ------- Helper: schoollicentie-code (afwijkend patroon zodat herkenbaar) ----
+function makeSchoolLicenseCode(): string {
+  // Format: SCHL-YYYY-XXXX-XXXX (jaartal + 8 willekeurige tekens)
+  const year = new Date().getFullYear();
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // zonder verwarrende I/O/0/1
+  const pick = (n: number) => Array.from({ length: n }, () =>
+    chars[Math.floor(Math.random() * chars.length)]).join("");
+  return `SCHL-${year}-${pick(4)}-${pick(4)}`;
+}
+
+// ------- De hoofdfunctie -----------------------------------------------------
+/**
+ * adminGrantSchoolLicense — maakt voor één leerkracht in één klap aan:
+ *  - Firebase Auth user (of hergebruik bestaande)
+ *  - Licentiedocument in beide LICENSE_COLLECTIONS
+ *  - Bestelling-document in ORDER_COLLECTIONS met source: "school"
+ *  - Stuurt welkomstmail met wachtwoord-reset-link
+ *
+ * Input (data):
+ *  - email           (verplicht) — mailadres leerkracht
+ *  - schoolName      (verplicht) — naam van de school (komt op factuur/bestelling)
+ *  - invoiceNumber   (optioneel) — Dexxter-factuurnummer voor in de Bestelling
+ *  - notes           (optioneel) — vrij notitieveld
+ *
+ * Output:
+ *  - { ok: true, licenseCode, uid, expiresAt, alreadyExisted }
+ *  - bij fout: HttpsError
+ */
+export const adminGrantSchoolLicense = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    // 1) AUTH: alleen jij mag dit aanroepen
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      logger.warn("[adminGrantSchoolLicense] Ongeoorloofde poging", {
+        callerEmail,
+        uid: req.auth.uid,
+      });
+      throw new HttpsError("permission-denied", "Je hebt geen toegang tot deze functie.");
+    }
+
+    // 2) INPUT VALIDATIE
+    const data = req.data || {};
+    const emailRaw = String(data.email || "").trim();
+    const schoolName = String(data.schoolName || "").trim();
+    const invoiceNumber = String(data.invoiceNumber || "").trim();
+    const notes = String(data.notes || "").trim();
+
+    if (!emailRaw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
+      throw new HttpsError("invalid-argument", "Ongeldig e-mailadres.");
+    }
+    if (!schoolName) {
+      throw new HttpsError("invalid-argument", "Schoolnaam is verplicht.");
+    }
+
+    const email = toLowerEmail(emailRaw);
+
+    // 3) IDEMPOTENT CHECK: bestaat er al een actieve licentie voor dit mailadres?
+    const existing = await findLicenseByEmail(email);
+    if (existing) {
+      const lic = existing as any;
+      const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+      const stillActive =
+        (String(lic.status || "").toLowerCase() === "active" ||
+         String(lic.status || "").toLowerCase() === "actief") &&
+        expMs > Date.now();
+
+      if (stillActive) {
+        logger.info("[adminGrantSchoolLicense] Bestaande actieve licentie gevonden, overgeslagen", {
+          email,
+          licenseCode: lic.code,
+        });
+        return {
+          ok: true,
+          alreadyExisted: true,
+          licenseCode: lic.code,
+          uid: lic.uid,
+          expiresAt: lic.expiresAt?.toDate?.()?.toISOString?.() || null,
+          message: "Deze leerkracht heeft al een actieve licentie. Geen nieuwe aangemaakt.",
+        };
+      }
+    }
+
+    // 4) AUTH USER: hergebruik bestaande of maak nieuwe
+    const uid = await ensureUser(email);
+
+    // 5) LICENTIE GENEREREN
+    const licenseCode = makeSchoolLicenseCode();
+    const expiresAt = calcExpiry();
+    const orderId = `school-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    const licenseDoc = {
+      code: licenseCode,
+      email,
+      uid,
+      entitlement: ENTITLEMENT_ID,
+      productId: "zisa-pro-jaarlijks",
+      deviceLimit: DEVICE_LIMIT,
+      createdAt: FieldValue.serverTimestamp(),
+      expiresAt,
+      orderId,
+      status: "active",
+      source: "school",            // handig om te onderscheiden van koop
+      schoolName,                  // voor latere rapportage
+    };
+
+    await writeLicenseAll(licenseCode, licenseDoc);
+
+    // 6) BESTELLING REGISTREREN
+    const orderDoc = {
+      amountEUR: PRICE_EUR_KOOP,        // "40.00"
+      createdAt: FieldValue.serverTimestamp(),
+      paidAt: FieldValue.serverTimestamp(),
+      description: `Zisa PRO - jaarlicentie (school: ${schoolName})`,
+      email,
+      uid,
+      licenseCode,
+      source: "school",
+      status: "betaald",
+      schoolName,
+      invoiceNumber: invoiceNumber || null,
+      invoiceSeries: "live",
+      notes: notes || null,
+      grantedBy: callerEmail,           // wie heeft dit aangemaakt
+    };
+    await writeOrderAll(orderId, orderDoc);
+
+    // 7) WACHTWOORD-RESET MAIL VERSTUREN
+    let mailSent = false;
+    try {
+      const passwordLink = await generatePasswordLink(email);
+      await queueEmail(
+        email,
+        "Je Zisa PRO account staat klaar 🦓",
+        emailHtmlSchool({ email, passwordLink, schoolName }),
+      );
+      mailSent = true;
+    } catch (e: any) {
+      logger.error("[adminGrantSchoolLicense] Mail verzenden mislukt", {
+        email,
+        error: e?.message || String(e),
+      });
+      // We gooien hier GEEN error: licentie staat al goed.
+      // De admin krijgt te zien dat de mail mislukte en kan handmatig resetten.
+    }
+
+    logger.info("[adminGrantSchoolLicense] Succesvol", {
+      email,
+      uid,
+      licenseCode,
+      schoolName,
+      invoiceNumber,
+      mailSent,
+      callerEmail,
+    });
+
+    return {
+      ok: true,
+      alreadyExisted: false,
+      licenseCode,
+      uid,
+      expiresAt: expiresAt.toDate().toISOString(),
+      mailSent,
+      message: mailSent
+        ? "Account aangemaakt en welkomstmail verzonden."
+        : "Account aangemaakt, maar welkomstmail kon niet verzonden worden. Stuur de wachtwoord-reset handmatig.",
+    };
+  }
+);
+
+// ============================================================================
+// EINDE SCHOOL-LICENTIES
+// ============================================================================
