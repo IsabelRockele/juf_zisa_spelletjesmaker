@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School-licenties beheren — juf Zisa Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --paars: #6B4E9B;
+      --paars-donker: #543B7D;
+      --lilac: #B9A7D1;
+      --lilac-licht: #E5DCF0;
+      --geel: #F4C952;
+      --oranje: #F5A55E;
+      --creme: #FAF6ED;
+      --creme-donker: #F0E9D7;
+      --tekst: #2C2C2C;
+      --tekst-licht: #5E5E5E;
+      --rood: #D05454;
+      --groen: #5DA66E;
+      --wit: #FFFFFF;
+      --shadow-zacht: 0 4px 16px rgba(107, 78, 155, 0.08);
+      --shadow-medium: 0 8px 24px rgba(107, 78, 155, 0.15);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--tekst);
+      background: var(--creme);
+      line-height: 1.6;
+      font-size: 16px;
+      min-height: 100vh;
+    }
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      color: var(--paars);
+    }
+
+    /* Header */
+    .pro-header {
+      background: linear-gradient(135deg, var(--paars) 0%, var(--paars-donker) 100%);
+      color: var(--wit);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-zacht);
+    }
+    .pro-header h1 {
+      color: var(--wit);
+      font-size: 20px;
+      margin: 0;
+    }
+    .terug-knop {
+      color: var(--wit);
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    .terug-knop:hover { opacity: 1; }
+
+    /* Container */
+    .container {
+      max-width: 800px;
+      margin: 28px auto;
+      padding: 0 20px 60px;
+    }
+    .card {
+      background: var(--wit);
+      border-radius: var(--radius);
+      padding: 32px 30px;
+      box-shadow: var(--shadow-zacht);
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+    .card-intro {
+      color: var(--tekst-licht);
+      font-size: 14.5px;
+      margin-bottom: 22px;
+    }
+
+    /* Formulier */
+    .form-row { margin-bottom: 16px; }
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--paars-donker);
+      margin-bottom: 5px;
+    }
+    label .verplicht { color: var(--rood); }
+    label .optioneel {
+      font-weight: 400;
+      color: var(--tekst-licht);
+      font-size: 12.5px;
+    }
+    input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid var(--creme-donker);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14.5px;
+      background: var(--wit);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: var(--paars);
+      box-shadow: 0 0 0 3px var(--lilac-licht);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: 'Courier New', monospace;
+      font-size: 13.5px;
+    }
+    .hint {
+      display: block;
+      font-size: 12px;
+      color: var(--tekst-licht);
+      margin-top: 4px;
+      font-style: italic;
+    }
+    .form-row.two-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .form-row.two-cols { grid-template-columns: 1fr; }
+    }
+
+    /* Knop */
+    button.primary {
+      background: var(--paars);
+      color: var(--wit);
+      border: none;
+      padding: 14px 32px;
+      font-family: 'Fraunces', serif;
+      font-size: 17px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-medium);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+      width: 100%;
+    }
+    button.primary:hover:not(:disabled) {
+      background: var(--paars-donker);
+      transform: translateY(-1px);
+    }
+    button.primary:disabled {
+      background: var(--lilac);
+      cursor: wait;
+    }
+
+    /* Voorbeschouwing */
+    .preview-blok {
+      background: var(--lilac-licht);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 16px 0 4px;
+      font-size: 14px;
+      color: var(--paars-donker);
+      display: none;
+    }
+    .preview-blok.zichtbaar { display: block; }
+    .preview-blok strong { color: var(--paars); }
+
+    /* Resultaten */
+    .resultaten {
+      margin-top: 8px;
+    }
+    .resultaat-rij {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--creme);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      border-left: 4px solid var(--lilac);
+    }
+    .resultaat-rij.bezig { border-color: var(--geel); background: #FFF8E5; }
+    .resultaat-rij.ok { border-color: var(--groen); background: #E6F4EA; }
+    .resultaat-rij.fout { border-color: var(--rood); background: #FDE8E8; }
+    .resultaat-rij.skip { border-color: var(--lilac); background: var(--lilac-licht); }
+    .resultaat-icoon {
+      font-size: 18px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .resultaat-tekst {
+      flex: 1;
+      min-width: 0;
+      word-break: break-word;
+    }
+    .resultaat-tekst strong { color: var(--paars-donker); }
+    .resultaat-tekst .detail {
+      display: block;
+      font-size: 12.5px;
+      color: var(--tekst-licht);
+      margin-top: 3px;
+    }
+    code.ll {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: rgba(255,255,255,0.6);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    /* Status onderaan */
+    .status-balk {
+      background: var(--paars);
+      color: var(--wit);
+      padding: 14px 18px;
+      border-radius: 10px;
+      margin-top: 18px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+    .status-balk.zichtbaar { display: block; }
+    .status-balk.fout { background: var(--rood); }
+
+    /* Sectie scheidingen */
+    .scheiding {
+      margin: 22px 0;
+      border-top: 2px dashed var(--creme-donker);
+    }
+
+    /* Info-bloks */
+    .nota {
+      padding: 12px 16px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      margin: 12px 0;
+      line-height: 1.5;
+    }
+    .nota.blauw { background: var(--lilac-licht); color: var(--paars-donker); border-left: 4px solid var(--paars); }
+    .nota.oranje { background: #FFF4E0; color: #8B5A1A; border-left: 4px solid var(--oranje); }
+    .nota.rood { background: #FDE8E8; color: var(--rood); border-left: 4px solid var(--rood); }
+    .nota.groen { background: #E6F4EA; color: var(--groen); border-left: 4px solid var(--groen); }
+
+    /* Login-prompt (voor wanneer guard.js redirect) */
+    .login-prompt {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 40px;
+      background: var(--wit);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-medium);
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Verborgen tot guard.js bevestigt dat je bent ingelogd -->
+  <div id="app" style="display:none;">
+
+    <header class="pro-header">
+      <h1>🦓 School-licenties beheren</h1>
+      <a href="./app.html" class="terug-knop">← Terug naar app</a>
+    </header>
+
+    <div class="container">
+
+      <div class="card">
+        <h2>Nieuwe schoolbestelling activeren</h2>
+        <p class="card-intro">Vul de gegevens in en plak de mailadressen van de leerkrachten. Met één klik worden alle accounts aangemaakt + welkomstmails verzonden.</p>
+
+        <div class="nota oranje">
+          ⚠️ <strong>Activeer pas na ontvangst van de betaling.</strong> Eens je op de knop drukt, krijgen alle leerkrachten meteen een welkomstmail.
+        </div>
+
+        <form id="school-admin-form">
+
+          <div class="form-row">
+            <label for="schoolName">Schoolnaam <span class="verplicht">*</span></label>
+            <input type="text" id="schoolName" required placeholder="bv. BS Atheneum Aalst" />
+            <span class="hint">Komt in de bevestigingsmail aan de leerkrachten ("Jouw school X heeft...") en in je interne logging.</span>
+          </div>
+
+          <div class="form-row two-cols">
+            <div>
+              <label for="invoiceNumber">Dexxter-factuurnummer <span class="optioneel">(optioneel)</span></label>
+              <input type="text" id="invoiceNumber" placeholder="bv. 2026-0010" />
+            </div>
+            <div>
+              <label for="notes">Interne notitie <span class="optioneel">(optioneel)</span></label>
+              <input type="text" id="notes" placeholder="bv. Christy Vermeulen, betaald 26/04" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="emails">Mailadressen leerkrachten <span class="verplicht">*</span></label>
+            <textarea id="emails" required placeholder="anja.peeters@schoolnaam.be&#10;tom.janssens@schoolnaam.be"></textarea>
+            <span class="hint">Eén mailadres per lijn. Hoofdletters worden automatisch omgezet naar kleine letters.</span>
+          </div>
+
+          <div class="preview-blok" id="preview-blok">
+            <strong id="preview-aantal">0</strong> mailadres(sen) geldig — klaar om <strong id="preview-school">deze school</strong> te activeren.
+          </div>
+
+          <button type="submit" class="primary" id="btn-activate">
+            🦓 Activeer alle accounts
+          </button>
+        </form>
+      </div>
+
+      <!-- Resultatenkaart (verschijnt na klik) -->
+      <div class="card" id="resultaten-card" style="display:none;">
+        <h2>Resultaten</h2>
+        <div class="resultaten" id="resultaten-lijst"></div>
+        <div class="status-balk" id="status-balk"></div>
+
+        <div class="scheiding"></div>
+        <button type="button" class="primary" id="btn-nieuw" style="background:var(--lilac); color:var(--paars-donker);">
+          + Nieuwe schoolbestelling
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toon dit als guard.js bezig is -->
+  <div id="laden" class="login-prompt">
+    <h2 style="margin-bottom:10px;">⏳ Even geduld...</h2>
+    <p style="color:var(--tekst-licht);">Bezig met inloggen verifiëren.</p>
+  </div>
+
+  <script type="module">
+    import { getApps, getApp, initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+    // Wordt aangeroepen door guard.js wanneer login + licentie OK zijn
+    window.onProReady = function ({ user }) {
+      // Toon de app, verberg laad-scherm
+      document.getElementById('laden').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      // Initialiseer Firebase Functions client
+      const app = getApps().length ? getApp() : null;
+      if (!app) {
+        showStatus('Fout: Firebase niet geïnitialiseerd.', 'fout');
+        return;
+      }
+      const fns = getFunctions(app, "europe-west1");
+      const adminGrantSchoolLicense = httpsCallable(fns, "adminGrantSchoolLicense");
+
+      // Helpers
+      const $ = (id) => document.getElementById(id);
+      const emailsInput = $('emails');
+      const schoolInput = $('schoolName');
+      const previewBlok = $('preview-blok');
+      const previewAantal = $('preview-aantal');
+      const previewSchool = $('preview-school');
+      const form = $('school-admin-form');
+      const btn = $('btn-activate');
+      const resultatenCard = $('resultaten-card');
+      const resultatenLijst = $('resultaten-lijst');
+      const statusBalk = $('status-balk');
+      const btnNieuw = $('btn-nieuw');
+
+      function showStatus(text, type = 'ok') {
+        statusBalk.textContent = text;
+        statusBalk.classList.toggle('fout', type === 'fout');
+        statusBalk.classList.add('zichtbaar');
+      }
+
+      function parseEmails(raw) {
+        return raw.split(/\n/)
+          .map(r => r.trim().toLowerCase())
+          .filter(r => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r));
+      }
+
+      function updatePreview() {
+        const emails = parseEmails(emailsInput.value);
+        const school = schoolInput.value.trim();
+        if (emails.length > 0 && school) {
+          previewAantal.textContent = emails.length;
+          previewSchool.textContent = school;
+          previewBlok.classList.add('zichtbaar');
+        } else {
+          previewBlok.classList.remove('zichtbaar');
+        }
+      }
+
+      emailsInput.addEventListener('input', updatePreview);
+      schoolInput.addEventListener('input', updatePreview);
+
+      function addResultRow(email, status, message, detail) {
+        const div = document.createElement('div');
+        div.className = `resultaat-rij ${status}`;
+        const icon = status === 'bezig' ? '⏳'
+          : status === 'ok' ? '✅'
+          : status === 'skip' ? 'ℹ️'
+          : '❌';
+        div.innerHTML = `
+          <div class="resultaat-icoon">${icon}</div>
+          <div class="resultaat-tekst">
+            <strong>${email}</strong> — ${message}
+            ${detail ? `<span class="detail">${detail}</span>` : ''}
+          </div>
+        `;
+        resultatenLijst.appendChild(div);
+        return div;
+      }
+
+      function updateResultRow(rowEl, status, message, detail) {
+        rowEl.className = `resultaat-rij ${status}`;
+        const icon = status === 'bezig' ? '⏳'
+          : status === 'ok' ? '✅'
+          : status === 'skip' ? 'ℹ️'
+          : '❌';
+        rowEl.querySelector('.resultaat-icoon').textContent = icon;
+        const txt = rowEl.querySelector('.resultaat-tekst');
+        const email = txt.querySelector('strong').textContent;
+        txt.innerHTML = `
+          <strong>${email}</strong> — ${message}
+          ${detail ? `<span class="detail">${detail}</span>` : ''}
+        `;
+      }
+
+      // Hoofdactie: formulier verzenden
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const schoolName = schoolInput.value.trim();
+        const invoiceNumber = $('invoiceNumber').value.trim();
+        const notes = $('notes').value.trim();
+        const emails = parseEmails(emailsInput.value);
+
+        if (!schoolName) {
+          alert('Vul de schoolnaam in.');
+          schoolInput.focus();
+          return;
+        }
+        if (emails.length === 0) {
+          alert('Vul minstens één geldig mailadres in.');
+          emailsInput.focus();
+          return;
+        }
+
+        const bevestiging = confirm(
+          `Je staat op het punt om voor ${emails.length} leerkracht${emails.length === 1 ? '' : 'en'} ` +
+          `van "${schoolName}" een PRO-account aan te maken.\n\n` +
+          `Elke leerkracht krijgt onmiddellijk een welkomstmail met een wachtwoord-reset link.\n\n` +
+          `Doorgaan?`
+        );
+        if (!bevestiging) return;
+
+        // UI in actie-modus
+        btn.disabled = true;
+        btn.textContent = 'Bezig met activeren...';
+        resultatenCard.style.display = 'block';
+        resultatenLijst.innerHTML = '';
+        statusBalk.classList.remove('zichtbaar');
+        resultatenCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        let okCount = 0, skipCount = 0, errCount = 0;
+
+        // Activeer elke leerkracht ÉÉN VOOR ÉÉN (zodat ze allemaal apart gelogd worden)
+        for (const email of emails) {
+          const row = addResultRow(email, 'bezig', 'Account aanmaken...');
+
+          try {
+            const res = await adminGrantSchoolLicense({
+              email,
+              schoolName,
+              invoiceNumber: invoiceNumber || undefined,
+              notes: notes || undefined,
+            });
+            const r = res?.data || {};
+
+            if (r.alreadyExisted) {
+              skipCount++;
+              updateResultRow(row, 'skip',
+                'Bestond al — overgeslagen.',
+                `Licentie: <code class="ll">${r.licenseCode || '-'}</code> (al actief tot ${formatDate(r.expiresAt)})`
+              );
+            } else if (r.ok) {
+              okCount++;
+              updateResultRow(row, 'ok',
+                r.mailSent ? 'Account + mail verzonden.' : 'Account aangemaakt — ⚠️ mail mislukte.',
+                `Licentie: <code class="ll">${r.licenseCode}</code> · vervalt ${formatDate(r.expiresAt)}`
+              );
+            } else {
+              errCount++;
+              updateResultRow(row, 'fout', 'Onbekende fout.', JSON.stringify(r));
+            }
+          } catch (err) {
+            errCount++;
+            const msg = err?.message || String(err);
+            updateResultRow(row, 'fout', 'Fout bij aanmaken.', msg);
+          }
+        }
+
+        // Eindstatus
+        const totaal = okCount + skipCount + errCount;
+        if (errCount === 0) {
+          showStatus(
+            `🎉 Klaar! ${okCount} nieuwe account${okCount === 1 ? '' : 's'}` +
+            (skipCount ? ` (${skipCount} bestond${skipCount === 1 ? '' : 'en'} al)` : '') +
+            ' — alle welkomstmails zijn onderweg.',
+            'ok'
+          );
+        } else {
+          showStatus(
+            `${okCount} succesvol, ${errCount} mislukt van ${totaal}. Bekijk hierboven welke vastliepen.`,
+            'fout'
+          );
+        }
+
+        btn.disabled = false;
+        btn.textContent = '🦓 Activeer alle accounts';
+      });
+
+      // Reset-knop
+      btnNieuw.addEventListener('click', () => {
+        form.reset();
+        previewBlok.classList.remove('zichtbaar');
+        resultatenCard.style.display = 'none';
+        resultatenLijst.innerHTML = '';
+        statusBalk.classList.remove('zichtbaar');
+        schoolInput.focus();
+      });
+
+      function formatDate(iso) {
+        if (!iso) return '-';
+        try {
+          const d = new Date(iso);
+          return d.toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        } catch { return iso; }
+      }
+    };
+  </script>
+
+  <!-- Guard zorgt voor login-check + redirect.
+       BELANGRIJK: deze pagina werkt alleen als jij ingelogd bent met een mailadres
+       dat in SCHOOL_ADMIN_EMAILS staat in de Cloud Function. -->
+  <script type="module" src="./js/guard.js"></script>
+
+</body>
+</html>
