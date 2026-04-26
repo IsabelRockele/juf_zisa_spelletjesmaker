@@ -1015,18 +1015,31 @@
     // ── Bereken dagen tot afloop voor slimme waarschuwing ──
     let dagenTotAfloop = null;
     let datumStr = "";
+    let isOwner = false;
     try {
-      const eindDatum = new Date(expiresAt);
-      const nu = new Date();
-      const diffMs = eindDatum.getTime() - nu.getTime();
-      dagenTotAfloop = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-      datumStr = eindDatum.toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
+      // ★ Owner-accounts: expiresAt is null → geen banner, gewoon "PRO actief"
+      if (expiresAt === null || expiresAt === undefined || expiresAt === "") {
+        isOwner = true;
+      } else {
+        const eindDatum = new Date(expiresAt);
+        // Check of de datum geldig is (anders krijg je rare resultaten)
+        if (!isNaN(eindDatum.getTime())) {
+          const nu = new Date();
+          const diffMs = eindDatum.getTime() - nu.getTime();
+          dagenTotAfloop = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+          datumStr = eindDatum.toLocaleDateString('nl-BE', { year:'numeric', month:'2-digit', day:'2-digit' });
+        }
+      }
     } catch {}
 
     // Verleng-knop (alleen tonen bij waarschuwing)
     const verlengKnop = `<a href="./verlopen.html?reason=expiring_soon&until=${encodeURIComponent(expiresAt || '')}" style="margin-left:12px;display:inline-block;padding:4px 12px;background:#a05000;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;font-size:0.85rem">Verleng nu</a>`;
 
-    if (dagenTotAfloop !== null && dagenTotAfloop > 1 && dagenTotAfloop <= 7) {
+    if (isOwner) {
+      // ★ Owner-account (Isabel/Jorn): geen vervaldatum, gewoon actief
+      statusEl.className = 'status good';
+      statusEl.textContent = `PRO actief  (max. ${limit ?? 2} toestellen)`;
+    } else if (dagenTotAfloop !== null && dagenTotAfloop > 1 && dagenTotAfloop <= 7) {
       // Waarschuwing: 2-7 dagen
       statusEl.className = 'status warn';
       statusEl.innerHTML = `⚠️ Je PRO-abonnement loopt af over ${dagenTotAfloop} dagen (${datumStr}).${verlengKnop}`;
