@@ -1458,9 +1458,158 @@ export const checkExpiringLicenses = onSchedule(
       }
     }
 
+    // ─── SCHOOL HERINNERINGEN (FASE 2 verleng-systeem) ───────────────────
+    // Stuurt naar schoolContact: 30 dagen + 7 dagen vooraf
+    // Eén mail per school per cyclus (niet per leerkracht!)
+
+    const window30Start = now + (30 * ONE_DAY_MS) - (12 * 60 * 60 * 1000);
+    const window30End   = now + (30 * ONE_DAY_MS) + (12 * 60 * 60 * 1000);
+
+    let school30Sent = 0;
+    let school7Sent = 0;
+
+    // Helper: vind alle scholen waarvan een licentie binnen het venster valt
+    const findSchoolsExpiring = async (windowStart: number, windowEnd: number): Promise<Set<string>> => {
+      const schools = new Set<string>();
+      for (const col of LICENSE_COLLECTIONS) {
+        try {
+          const qs = await db
+            .collection(col)
+            .where("source", "==", "school")
+            .where("expiresAt", ">=", new Date(windowStart))
+            .where("expiresAt", "<=", new Date(windowEnd))
+            .get();
+          for (const doc of qs.docs) {
+            const lic = doc.data() as any;
+            const isActive = String(lic.status || "").toLowerCase() === "active"
+                          || String(lic.status || "").toLowerCase() === "actief";
+            if (!isActive) continue;
+            if (lic.schoolName) schools.add(String(lic.schoolName).trim());
+          }
+        } catch (e) {
+          logger.error(`[school-reminder] query in '${col}'`, { error: String(e) });
+        }
+      }
+      return schools;
+    };
+
+    // 30-dagen schoolherinnering
+    try {
+      const schools30 = await findSchoolsExpiring(window30Start, window30End);
+      for (const schoolName of schools30) {
+        try {
+          // Haal token op
+          const tokenSnap = await db.collection(RENEWAL_TOKEN_COLLECTION)
+            .where("schoolName", "==", schoolName)
+            .limit(1)
+            .get();
+          if (tokenSnap.empty) {
+            logger.warn("[school-reminder-30] Geen token voor school", { schoolName });
+            continue;
+          }
+          const tokenData = tokenSnap.docs[0].data() as any;
+
+          // Check of al verstuurd voor deze cyclus (jaar-maand)
+          const cycleKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+          if (tokenData.reminder30_lastCycle === cycleKey) continue;
+
+          const contact = String(tokenData.schoolContact || "").toLowerCase();
+          if (!contact) {
+            logger.warn("[school-reminder-30] Geen contactpersoon", { schoolName });
+            continue;
+          }
+
+          // Haal teachers op voor mail-info
+          const teachers = await getActiveTeachersOfSchool(schoolName);
+          const verlengUrl = `${RENEWAL_PAGE_BASE_URL}?token=${encodeURIComponent(tokenData.token)}`;
+
+          await queueEmail(
+            contact,
+            `🦓 Verleng uw Spelgenerator PRO — ${schoolName}`,
+            `<p>Beste,</p>
+             <p>Het Spelgenerator PRO abonnement voor <strong>${schoolName}</strong> loopt af over <strong>±30 dagen</strong>.</p>
+             <p>U heeft momenteel <strong>${teachers.length}</strong> actieve licentie${teachers.length === 1 ? '' : 's'}.</p>
+             <p style="margin-top:18px"><a href="${verlengUrl}" style="display:inline-block;padding:12px 22px;background:#6B4E9B;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Verleng nu</a></p>
+             <p style="font-size:14px;color:#5E5E5E;margin-top:18px">
+               Op de verleng-pagina kunt u:<br>
+               • Bestaande licenties verlengen<br>
+               • Nieuwe leerkrachten toevoegen (pro rata berekend)<br>
+               • De contactpersoon wijzigen
+             </p>
+             <p style="font-size:13px;color:#888;margin-top:18px">
+               Tijdig verlengen voorkomt onderbrekingen. We sturen ook nog een herinnering 7 dagen vooraf.
+             </p>
+             <p>Met vriendelijke groet,<br>juf Zisa 🦓<br>${SELLER_EMAIL}</p>`
+          );
+
+          await tokenSnap.docs[0].ref.update({
+            reminder30_lastCycle: cycleKey,
+            reminder30_lastSentAt: FieldValue.serverTimestamp(),
+          });
+          school30Sent++;
+        } catch (e) {
+          logger.error("[school-reminder-30] mail mislukt", { schoolName, error: String(e) });
+          fouten++;
+        }
+      }
+    } catch (e) {
+      logger.error("[school-reminder-30] algemene fout", { error: String(e) });
+    }
+
+    // 7-dagen schoolherinnering (gebruikt zelfde venster als individueel)
+    try {
+      const schools7 = await findSchoolsExpiring(window7Start, window7End);
+      for (const schoolName of schools7) {
+        try {
+          const tokenSnap = await db.collection(RENEWAL_TOKEN_COLLECTION)
+            .where("schoolName", "==", schoolName)
+            .limit(1)
+            .get();
+          if (tokenSnap.empty) continue;
+          const tokenData = tokenSnap.docs[0].data() as any;
+
+          const cycleKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+          if (tokenData.reminder7_lastCycle === cycleKey) continue;
+
+          const contact = String(tokenData.schoolContact || "").toLowerCase();
+          if (!contact) continue;
+
+          const teachers = await getActiveTeachersOfSchool(schoolName);
+          const verlengUrl = `${RENEWAL_PAGE_BASE_URL}?token=${encodeURIComponent(tokenData.token)}`;
+
+          await queueEmail(
+            contact,
+            `⏰ Laatste week — verleng Spelgenerator PRO voor ${schoolName}`,
+            `<p>Beste,</p>
+             <p>Het Spelgenerator PRO abonnement voor <strong>${schoolName}</strong> loopt af over <strong>±7 dagen</strong>.</p>
+             <p>Indien u nog niet hebt verlengd, doe dat dan deze week.</p>
+             <p>U heeft momenteel <strong>${teachers.length}</strong> actieve licentie${teachers.length === 1 ? '' : 's'}.</p>
+             <p style="margin-top:18px"><a href="${verlengUrl}" style="display:inline-block;padding:12px 22px;background:#6B4E9B;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Verleng nu</a></p>
+             <p style="font-size:14px;color:#5E5E5E;margin-top:18px">
+               Zonder verlenging worden de accounts inactief op de vervaldatum. Er volgen geen verdere herinneringen.
+             </p>
+             <p>Met vriendelijke groet,<br>juf Zisa 🦓<br>${SELLER_EMAIL}</p>`
+          );
+
+          await tokenSnap.docs[0].ref.update({
+            reminder7_lastCycle: cycleKey,
+            reminder7_lastSentAt: FieldValue.serverTimestamp(),
+          });
+          school7Sent++;
+        } catch (e) {
+          logger.error("[school-reminder-7] mail mislukt", { schoolName, error: String(e) });
+          fouten++;
+        }
+      }
+    } catch (e) {
+      logger.error("[school-reminder-7] algemene fout", { error: String(e) });
+    }
+
     logger.info("[checkExpiringLicenses] klaar", {
       verzonden_7dagen: totaal7,
       verzonden_1dag: totaal1,
+      school_30dagen: school30Sent,
+      school_7dagen: school7Sent,
       fouten,
     });
   }
@@ -1513,6 +1662,120 @@ function makeSchoolLicenseCode(): string {
   const pick = (n: number) => Array.from({ length: n }, () =>
     chars[Math.floor(Math.random() * chars.length)]).join("");
   return `SCHL-${year}-${pick(4)}-${pick(4)}`;
+}
+
+// ----------------------------------------------------------------------------
+// PRO RATA HELPERS — voor toevoegen leerkrachten aan bestaande school
+// ----------------------------------------------------------------------------
+
+/**
+ * Bereken pro rata prijs op basis van resterende dagen.
+ * Regels:
+ *  - Pro rata: (resterende dagen / 365) * jaartarief
+ *  - Afgerond naar boven op hele euro's
+ *  - Minimum €6 (zoals maandabonnement)
+ */
+function berekenProRataPrijs(resterendeDagen: number, jaartarief: number = 40): number {
+  const exact = (resterendeDagen / 365) * jaartarief;
+  const naarBoven = Math.ceil(exact);
+  return Math.max(6, naarBoven);
+}
+
+/**
+ * Bepaal "school context" voor een nieuwe leerkracht-toevoeging.
+ * Output:
+ *   - exists: of er al actieve leerkrachten zijn voor deze school
+ *   - latestExpiresAt: laatste vervaldatum onder actieve leerkrachten
+ *   - daysRemaining: aantal dagen tot die vervaldatum
+ *   - synchronized: of we synchroniseren met bestaande vervaldatum
+ *   - suggestedExpiry: voorgestelde vervaldatum voor nieuwe leerkracht
+ *   - suggestedPrice: voorgestelde prijs (in euro's)
+ *   - mode: "new_school" | "sync_prorata" | "sync_plus_year"
+ */
+async function getSchoolContext(schoolName: string): Promise<{
+  exists: boolean;
+  latestExpiresAt: Date | null;
+  daysRemaining: number;
+  synchronized: boolean;
+  suggestedExpiry: Timestamp;
+  suggestedPrice: number;
+  mode: "new_school" | "sync_prorata" | "sync_plus_year";
+  activeTeacherCount: number;
+}> {
+  // Zoek alle actieve licenties voor deze school
+  const trimmedName = schoolName.trim();
+  let latestMs = 0;
+  let activeCount = 0;
+
+  for (const col of LICENSE_COLLECTIONS) {
+    try {
+      const qs = await db
+        .collection(col)
+        .where("schoolName", "==", trimmedName)
+        .where("source", "==", "school")
+        .get();
+      for (const doc of qs.docs) {
+        const lic = doc.data() as any;
+        const status = String(lic.status || "").toLowerCase();
+        if (status !== "active" && status !== "actief") continue;
+        const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+        if (expMs > Date.now()) {
+          activeCount++;
+          if (expMs > latestMs) latestMs = expMs;
+        }
+      }
+    } catch {}
+  }
+
+  if (latestMs === 0) {
+    // Nieuwe school — gewoon volledig jaar vanaf vandaag
+    return {
+      exists: false,
+      latestExpiresAt: null,
+      daysRemaining: 365,
+      synchronized: false,
+      suggestedExpiry: calcExpiry(),
+      suggestedPrice: 40,
+      mode: "new_school",
+      activeTeacherCount: 0,
+    };
+  }
+
+  const nowMs = Date.now();
+  const daysRemaining = Math.ceil((latestMs - nowMs) / (1000 * 60 * 60 * 24));
+
+  if (daysRemaining < 90) {
+    // < 3 maanden: volledig jaar PLUS resterende dagen erbovenop
+    const proRata = berekenProRataPrijs(daysRemaining);
+    const totalPrice = 40 + proRata;
+    // Vervaldatum: bestaande + 1 jaar
+    const newExpiry = new Date(latestMs);
+    newExpiry.setFullYear(newExpiry.getFullYear() + 1);
+
+    return {
+      exists: true,
+      latestExpiresAt: new Date(latestMs),
+      daysRemaining,
+      synchronized: true,
+      suggestedExpiry: Timestamp.fromDate(newExpiry),
+      suggestedPrice: totalPrice,
+      mode: "sync_plus_year",
+      activeTeacherCount: activeCount,
+    };
+  } else {
+    // ≥ 3 maanden: pro rata tot bestaande vervaldatum
+    const proRataPrice = berekenProRataPrijs(daysRemaining);
+    return {
+      exists: true,
+      latestExpiresAt: new Date(latestMs),
+      daysRemaining,
+      synchronized: true,
+      suggestedExpiry: Timestamp.fromMillis(latestMs),
+      suggestedPrice: proRataPrice,
+      mode: "sync_prorata",
+      activeTeacherCount: activeCount,
+    };
+  }
 }
 
 // ------- De hoofdfunctie -----------------------------------------------------
@@ -1600,9 +1863,32 @@ export const adminGrantSchoolLicense = onCall(
     // 4) AUTH USER: hergebruik bestaande of maak nieuwe
     const uid = await ensureUser(email);
 
+    // 4.5) ★ Bepaal schoolcontext (bestaande school of nieuw?)
+    //      → bepaalt vervaldatum + prijs (pro rata of volledig jaar)
+    //      → kan worden overschreven met data.forceFullYear = true
+    const forceFullYear = !!data.forceFullYear;
+    const schoolCtx = await getSchoolContext(schoolName);
+
+    // Bepaal effectieve vervaldatum + prijs voor DEZE leerkracht
+    let licenseExpiresAt: Timestamp;
+    let licensePrice: number;
+    let licenseMode: string;
+
+    if (!schoolCtx.exists || forceFullYear) {
+      // Nieuwe school OF expliciet volledig jaar gevraagd
+      licenseExpiresAt = calcExpiry();
+      licensePrice = 40;
+      licenseMode = forceFullYear ? "force_full_year" : "new_school";
+    } else {
+      // Bestaande school: gebruik suggestie van schoolCtx
+      licenseExpiresAt = schoolCtx.suggestedExpiry;
+      licensePrice = schoolCtx.suggestedPrice;
+      licenseMode = schoolCtx.mode;
+    }
+
     // 5) LICENTIE GENEREREN
     const licenseCode = makeSchoolLicenseCode();
-    const expiresAt = calcExpiry();
+    const expiresAt = licenseExpiresAt;
     const orderId = `school-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     const licenseDoc = {
@@ -1619,16 +1905,17 @@ export const adminGrantSchoolLicense = onCall(
       source: "school",            // handig om te onderscheiden van koop
       schoolName,                  // voor latere rapportage
       schoolContact: schoolContact || null,  // contact voor verleng-herinneringen
+      pricingMode: licenseMode,    // "new_school", "sync_prorata", "sync_plus_year", "force_full_year"
     };
 
     await writeLicenseAll(licenseCode, licenseDoc);
 
     // 6) BESTELLING REGISTREREN
     const orderDoc = {
-      amountEUR: PRICE_EUR_KOOP,        // "40.00"
+      amountEUR: licensePrice.toFixed(2),  // bv. "40.00", "27.00", "47.00"
       createdAt: FieldValue.serverTimestamp(),
       paidAt: FieldValue.serverTimestamp(),
-      description: `Zisa PRO - jaarlicentie (school: ${schoolName})`,
+      description: `Zisa PRO - jaarlicentie (school: ${schoolName})${licenseMode === "sync_prorata" ? " - pro rata" : licenseMode === "sync_plus_year" ? " - volledig jaar + pro rata" : ""}`,
       email,
       uid,
       licenseCode,
@@ -1640,8 +1927,17 @@ export const adminGrantSchoolLicense = onCall(
       invoiceSeries: "live",
       notes: notes || null,
       grantedBy: callerEmail,           // wie heeft dit aangemaakt
+      pricingMode: licenseMode,
     };
     await writeOrderAll(orderId, orderDoc);
+
+    // 6.5) ★ Zorg voor renewal-token voor deze school (FASE 2 verleng-systeem)
+    try {
+      await ensureSchoolToken(schoolName, schoolContact);
+    } catch (e) {
+      logger.warn("[adminGrantSchoolLicense] Token aanmaken mislukt", { error: String(e) });
+      // Niet fataal — orderverwerking is al gedaan
+    }
 
     // 7) WACHTWOORD-RESET MAIL VERSTUREN
     let mailSent = false;
@@ -1679,9 +1975,11 @@ export const adminGrantSchoolLicense = onCall(
       uid,
       expiresAt: expiresAt.toDate().toISOString(),
       mailSent,
+      pricingMode: licenseMode,
+      pricingPrice: licensePrice,
       message: mailSent
-        ? "Account aangemaakt en welkomstmail verzonden."
-        : "Account aangemaakt, maar welkomstmail kon niet verzonden worden. Stuur de wachtwoord-reset handmatig.",
+        ? `Account aangemaakt (€${licensePrice}, ${licenseMode}) en welkomstmail verzonden.`
+        : `Account aangemaakt (€${licensePrice}), maar welkomstmail kon niet verzonden worden. Stuur de wachtwoord-reset handmatig.`,
     };
   }
 );
@@ -1689,6 +1987,53 @@ export const adminGrantSchoolLicense = onCall(
 // ============================================================================
 // EINDE SCHOOL-LICENTIES
 // ============================================================================
+
+// ============================================================================
+// SCHOOL-CONTEXT — voor admin om vooraf prijs/vervaldatum te tonen
+// ============================================================================
+
+/**
+ * Haalt schoolcontext op voor de admin-pagina.
+ * Wordt aangeroepen wanneer de admin een schoolnaam invult, om te tonen
+ * of er al actieve leerkrachten zijn en welke prijs voorgesteld wordt.
+ *
+ * Input:
+ *  - schoolName (verplicht)
+ * Output:
+ *  - exists, latestExpiresAt, daysRemaining, suggestedPrice, mode, activeTeacherCount
+ */
+export const adminGetSchoolContext = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const schoolName = String(data.schoolName || "").trim();
+    if (!schoolName) {
+      throw new HttpsError("invalid-argument", "Schoolnaam is verplicht.");
+    }
+
+    const ctx = await getSchoolContext(schoolName);
+
+    return {
+      ok: true,
+      schoolName,
+      exists: ctx.exists,
+      latestExpiresAt: ctx.latestExpiresAt?.toISOString() || null,
+      daysRemaining: ctx.daysRemaining,
+      suggestedPrice: ctx.suggestedPrice,
+      mode: ctx.mode,
+      activeTeacherCount: ctx.activeTeacherCount,
+    };
+  }
+);
+
 // ============================================================================
 // SCHOOL-OVERZICHT — Drie admin functies
 // Voeg dit blok toe aan het einde van pro_backend/src/index.ts
@@ -2320,4 +2665,758 @@ export const adminDeleteTeacher = onCall(
 
 // ============================================================================
 // EINDE ARCHIVEREN/VERWIJDEREN
+// ============================================================================
+
+
+// ============================================================================
+// SCHOOL VERLENG-SYSTEEM (FASE 2)
+// ============================================================================
+//
+// Werking:
+// - Bij eerste schoolbestelling wordt een uniek RENEWAL_TOKEN gegenereerd
+//   (per school, niet per leerkracht). Dit token wordt opgeslagen in de
+//   collectie "schoolTokens".
+// - 30 en 7 dagen vóór vervaldatum stuurt checkExpiringLicenses een mail
+//   naar schoolContact met een verleng-link: scholen/verleng.html?token=XXX
+// - School opent de pagina, ziet hun gegevens, kan verlengen + leerkrachten
+//   toevoegen + contactpersoon wijzigen.
+// - Bij submit komt er een document in collectie "verleng_aanvragen".
+// - Isabel ziet deze in admin en activeert na betaling.
+//
+// PUBLIEKE functies (App Check, GEEN auth nodig — werken via token):
+//   - getRenewalInfo({ token }) — haalt school-info op
+//   - submitRenewalRequest({ token, ... }) — dient aanvraag in
+//   - updateSchoolContact({ token, newContact }) — wijzigt contactpersoon
+//
+// ADMIN functies (App Check + auth + SCHOOL_ADMIN_EMAILS):
+//   - adminListRenewalRequests() — lijst openstaande aanvragen
+//   - adminProcessRenewalRequest({ requestId, invoiceNumber }) — activeer
+//   - adminRejectRenewalRequest({ requestId, reason }) — weiger
+//
+// ============================================================================
+
+const RENEWAL_TOKEN_COLLECTION = "schoolTokens";
+const RENEWAL_REQUESTS_COLLECTION = "verleng_aanvragen";
+const RENEWAL_PAGE_BASE_URL = "https://isabelrockele.github.io/scholen/verleng.html";
+
+// ----------------------------------------------------------------------------
+// Helper: genereer of haal token op voor een school
+// ----------------------------------------------------------------------------
+function generateRenewalToken(): string {
+  // 32-char random string (URL-safe)
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  return Array.from({ length: 32 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+}
+
+/**
+ * Krijg of maak een token voor een school. Token is uniek per schoolName.
+ */
+async function ensureSchoolToken(schoolName: string, schoolContact: string): Promise<string> {
+  const trimmed = schoolName.trim();
+  // Zoek bestaand token
+  const existing = await db
+    .collection(RENEWAL_TOKEN_COLLECTION)
+    .where("schoolName", "==", trimmed)
+    .limit(1)
+    .get();
+
+  if (!existing.empty) {
+    const data = existing.docs[0].data();
+    // Update contactpersoon als die anders is
+    if (schoolContact && schoolContact !== data.schoolContact) {
+      await existing.docs[0].ref.update({
+        schoolContact: schoolContact.toLowerCase(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    }
+    return String(data.token || "");
+  }
+
+  // Maak nieuw token
+  const token = generateRenewalToken();
+  await db.collection(RENEWAL_TOKEN_COLLECTION).add({
+    schoolName: trimmed,
+    schoolContact: schoolContact ? schoolContact.toLowerCase() : "",
+    token,
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  return token;
+}
+
+/**
+ * Zoek school op basis van token (voor publieke functies).
+ */
+async function findSchoolByToken(token: string): Promise<{
+  schoolName: string;
+  schoolContact: string;
+  tokenDocRef: FirebaseFirestore.DocumentReference;
+} | null> {
+  if (!token || token.length < 16) return null;
+  const qs = await db
+    .collection(RENEWAL_TOKEN_COLLECTION)
+    .where("token", "==", token)
+    .limit(1)
+    .get();
+  if (qs.empty) return null;
+  const data = qs.docs[0].data();
+  return {
+    schoolName: String(data.schoolName || ""),
+    schoolContact: String(data.schoolContact || ""),
+    tokenDocRef: qs.docs[0].ref,
+  };
+}
+
+/**
+ * Haal alle actieve leerkrachten van een school op (voor renewal pagina).
+ */
+async function getActiveTeachersOfSchool(schoolName: string): Promise<Array<{
+  email: string;
+  licenseCode: string;
+  expiresAt: Date | null;
+  daysUntilExpiry: number | null;
+}>> {
+  const trimmed = schoolName.trim();
+  const seenCodes = new Set<string>();
+  const teachers: any[] = [];
+  const nowMs = Date.now();
+
+  for (const col of LICENSE_COLLECTIONS) {
+    try {
+      const qs = await db
+        .collection(col)
+        .where("schoolName", "==", trimmed)
+        .where("source", "==", "school")
+        .get();
+      for (const doc of qs.docs) {
+        const lic = doc.data() as any;
+        const code = String(lic.code || "");
+        if (!code || seenCodes.has(code)) continue;
+        const status = String(lic.status || "").toLowerCase();
+        if (status !== "active" && status !== "actief") continue;
+        const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+        if (expMs <= 0) continue;
+        seenCodes.add(code);
+        teachers.push({
+          email: String(lic.email || ""),
+          licenseCode: code,
+          expiresAt: new Date(expMs),
+          daysUntilExpiry: Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)),
+        });
+      }
+    } catch {}
+  }
+  // Sorteer op email
+  teachers.sort((a, b) => a.email.localeCompare(b.email));
+  return teachers;
+}
+
+// ----------------------------------------------------------------------------
+// PUBLIEK: getRenewalInfo
+// ----------------------------------------------------------------------------
+/**
+ * Geeft school-info terug op basis van token.
+ * Geen auth nodig — beveiliging via token.
+ */
+export const getRenewalInfo = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    const data = req.data || {};
+    const token = String(data.token || "").trim();
+
+    const found = await findSchoolByToken(token);
+    if (!found) {
+      throw new HttpsError("not-found", "Ongeldige of verlopen verleng-link.");
+    }
+
+    const teachers = await getActiveTeachersOfSchool(found.schoolName);
+
+    // Bepaal gemeenschappelijke vervaldatum (laatste = referentie)
+    let latestExpiresMs = 0;
+    for (const t of teachers) {
+      const ms = t.expiresAt?.getTime() ?? 0;
+      if (ms > latestExpiresMs) latestExpiresMs = ms;
+    }
+    const daysUntilExpiry = latestExpiresMs > 0
+      ? Math.ceil((latestExpiresMs - Date.now()) / (1000 * 60 * 60 * 24))
+      : null;
+
+    return {
+      ok: true,
+      schoolName: found.schoolName,
+      schoolContact: found.schoolContact,
+      teachers: teachers.map(t => ({
+        email: t.email,
+        licenseCode: t.licenseCode,
+        expiresAt: t.expiresAt?.toISOString() || null,
+        daysUntilExpiry: t.daysUntilExpiry,
+      })),
+      commonExpiresAt: latestExpiresMs > 0 ? new Date(latestExpiresMs).toISOString() : null,
+      daysUntilExpiry,
+      pricePerYear: 40,
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// PUBLIEK: updateSchoolContact (B3 — met notificatie)
+// ----------------------------------------------------------------------------
+/**
+ * Wijzig contactpersoon van een school.
+ * - Wijziging gebeurt direct
+ * - Info-mail naar OUDE adres (waarschuwing)
+ * - Info-mail naar Isabel (notificatie)
+ */
+export const updateSchoolContact = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    const data = req.data || {};
+    const token = String(data.token || "").trim();
+    const newContactRaw = String(data.newContact || "").trim();
+
+    if (!newContactRaw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newContactRaw)) {
+      throw new HttpsError("invalid-argument", "Ongeldig e-mailadres.");
+    }
+    const newContact = newContactRaw.toLowerCase();
+
+    const found = await findSchoolByToken(token);
+    if (!found) {
+      throw new HttpsError("not-found", "Ongeldige verleng-link.");
+    }
+
+    const oldContact = found.schoolContact;
+    if (oldContact === newContact) {
+      return { ok: true, message: "Contactpersoon ongewijzigd.", changed: false };
+    }
+
+    // Update token-document
+    await found.tokenDocRef.update({
+      schoolContact: newContact,
+      previousContact: oldContact || null,
+      updatedAt: FieldValue.serverTimestamp(),
+      contactChangeAt: FieldValue.serverTimestamp(),
+    });
+
+    // Update ook alle licenties + bestellingen voor deze school
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col)
+          .where("schoolName", "==", found.schoolName)
+          .where("source", "==", "school")
+          .get();
+        for (const doc of qs.docs) {
+          await doc.ref.update({ schoolContact: newContact });
+        }
+      } catch {}
+    }
+    for (const col of ORDER_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col)
+          .where("schoolName", "==", found.schoolName)
+          .where("source", "==", "school")
+          .get();
+        for (const doc of qs.docs) {
+          await doc.ref.update({ schoolContact: newContact });
+        }
+      } catch {}
+    }
+
+    // Mail naar OUDE adres (informeren)
+    if (oldContact) {
+      try {
+        await queueEmail(
+          oldContact,
+          `Contactpersoon gewijzigd voor ${found.schoolName}`,
+          `<p>Beste,</p>
+           <p>De contactpersoon voor de Spelgenerator PRO licenties van <strong>${found.schoolName}</strong> is zonet gewijzigd van <code>${oldContact}</code> naar <code>${newContact}</code>.</p>
+           <p>Als u deze wijziging niet zelf heeft aangevraagd, neem dan zo snel mogelijk contact op via <a href="mailto:${SELLER_EMAIL}">${SELLER_EMAIL}</a>.</p>
+           <p>Met vriendelijke groet,<br>juf Zisa 🦓</p>`
+        );
+      } catch (e) {
+        logger.warn("[updateSchoolContact] Mail naar oude contact mislukt", { error: String(e) });
+      }
+    }
+
+    // Mail naar Isabel (admin notificatie)
+    try {
+      await queueEmail(
+        SELLER_EMAIL,
+        `🔔 Contactpersoon gewijzigd: ${found.schoolName}`,
+        `<p>Hallo,</p>
+         <p>De contactpersoon voor <strong>${found.schoolName}</strong> is gewijzigd:</p>
+         <ul>
+           <li>Oud: <code>${oldContact || "(geen)"}</code></li>
+           <li>Nieuw: <code>${newContact}</code></li>
+         </ul>
+         <p>De wijziging is door de school zelf gedaan via de verleng-pagina.</p>
+         <p>Indien verdacht, neem contact op met de school.</p>`
+      );
+    } catch (e) {
+      logger.warn("[updateSchoolContact] Mail naar Isabel mislukt", { error: String(e) });
+    }
+
+    logger.info("[updateSchoolContact] Wijziging", {
+      schoolName: found.schoolName,
+      oldContact,
+      newContact,
+    });
+
+    return {
+      ok: true,
+      changed: true,
+      message: "Contactpersoon gewijzigd. Een bevestigingsmail werd naar het oude adres gestuurd.",
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// PUBLIEK: submitRenewalRequest
+// ----------------------------------------------------------------------------
+/**
+ * School dient een verleng-aanvraag in.
+ * Komt in collectie verleng_aanvragen, status: "in_afwachting"
+ *
+ * Input:
+ *  - token (verplicht)
+ *  - renewExisting: array van licenseCode-strings (welke leerkrachten verlengen)
+ *  - newTeachers: array van email-strings (nieuwe leerkrachten toevoegen)
+ *  - notes: optionele opmerking van school
+ */
+export const submitRenewalRequest = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    const data = req.data || {};
+    const token = String(data.token || "").trim();
+    const renewExisting = Array.isArray(data.renewExisting) ? data.renewExisting : [];
+    const newTeachersRaw = Array.isArray(data.newTeachers) ? data.newTeachers : [];
+    const notes = String(data.notes || "").trim();
+
+    const found = await findSchoolByToken(token);
+    if (!found) {
+      throw new HttpsError("not-found", "Ongeldige verleng-link.");
+    }
+
+    // Valideer + normaliseer
+    const renewCodes: string[] = renewExisting
+      .map((c: any) => String(c || "").trim())
+      .filter((c: string) => c.length > 0);
+
+    const newEmails: string[] = newTeachersRaw
+      .map((e: any) => String(e || "").trim().toLowerCase())
+      .filter((e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+
+    if (renewCodes.length === 0 && newEmails.length === 0) {
+      throw new HttpsError("invalid-argument", "Selecteer minstens één leerkracht om te verlengen of voeg een nieuwe toe.");
+    }
+
+    // Bereken bedrag
+    const renewalPrice = renewCodes.length * 40;
+    const newPrice = newEmails.length * 40;
+    const totalPrice = renewalPrice + newPrice;
+
+    // Bewaar aanvraag
+    const requestId = `renewal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    await db.collection(RENEWAL_REQUESTS_COLLECTION).doc(requestId).set({
+      requestId,
+      schoolName: found.schoolName,
+      schoolContact: found.schoolContact,
+      renewLicenseCodes: renewCodes,
+      newTeacherEmails: newEmails,
+      notes: notes || null,
+      totalPrice,
+      pricePerYear: 40,
+      status: "in_afwachting",
+      createdAt: FieldValue.serverTimestamp(),
+    });
+
+    // Mail naar Isabel
+    try {
+      const teachersHtml = renewCodes.length > 0
+        ? `<p><strong>Verlengen (${renewCodes.length}):</strong></p><ul>${renewCodes.map(c => `<li><code>${c}</code></li>`).join("")}</ul>`
+        : "";
+      const newHtml = newEmails.length > 0
+        ? `<p><strong>Nieuwe leerkrachten (${newEmails.length}):</strong></p><ul>${newEmails.map(e => `<li>${e}</li>`).join("")}</ul>`
+        : "";
+      await queueEmail(
+        SELLER_EMAIL,
+        `🦓 Verleng-aanvraag: ${found.schoolName}`,
+        `<p>Hallo,</p>
+         <p>Een nieuwe verleng-aanvraag van <strong>${found.schoolName}</strong>:</p>
+         ${teachersHtml}
+         ${newHtml}
+         <p><strong>Totaal: €${totalPrice}</strong></p>
+         <p>Contactpersoon: <code>${found.schoolContact || "(onbekend)"}</code></p>
+         ${notes ? `<p>Opmerking school: ${notes}</p>` : ""}
+         <p>Open de admin-pagina om dit te verwerken.</p>`
+      );
+    } catch (e) {
+      logger.warn("[submitRenewalRequest] Mail naar Isabel mislukt", { error: String(e) });
+    }
+
+    // Bevestigingsmail naar school
+    if (found.schoolContact) {
+      try {
+        await queueEmail(
+          found.schoolContact,
+          `Verleng-aanvraag ontvangen — ${found.schoolName}`,
+          `<p>Beste,</p>
+           <p>We hebben uw verleng-aanvraag voor <strong>${found.schoolName}</strong> goed ontvangen.</p>
+           <p>Samenvatting:</p>
+           <ul>
+             <li>Verlengen: ${renewCodes.length} leerkracht(en)</li>
+             <li>Nieuwe leerkrachten: ${newEmails.length}</li>
+             <li>Totaalbedrag: <strong>€${totalPrice}</strong></li>
+           </ul>
+           <p>U ontvangt binnenkort de factuur via Peppol of e-mail.</p>
+           <p>Pas na ontvangst van de betaling worden de accounts geactiveerd.</p>
+           <p>Met vriendelijke groet,<br>juf Zisa 🦓<br>${SELLER_EMAIL}</p>`
+        );
+      } catch (e) {
+        logger.warn("[submitRenewalRequest] Bevestiging naar school mislukt", { error: String(e) });
+      }
+    }
+
+    logger.info("[submitRenewalRequest] Aanvraag", {
+      schoolName: found.schoolName,
+      renewCount: renewCodes.length,
+      newCount: newEmails.length,
+      totalPrice,
+    });
+
+    return {
+      ok: true,
+      requestId,
+      totalPrice,
+      message: "Verleng-aanvraag ontvangen! U krijgt binnenkort de factuur per mail.",
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// ADMIN: adminListRenewalRequests
+// ----------------------------------------------------------------------------
+export const adminListRenewalRequests = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang.");
+    }
+
+    const data = req.data || {};
+    const includeProcessed = !!data.includeProcessed;
+
+    const qs = await db.collection(RENEWAL_REQUESTS_COLLECTION)
+      .orderBy("createdAt", "desc")
+      .limit(200)
+      .get();
+
+    const requests = qs.docs
+      .map(d => {
+        const data = d.data() as any;
+        return {
+          requestId: d.id,
+          schoolName: String(data.schoolName || ""),
+          schoolContact: String(data.schoolContact || ""),
+          renewLicenseCodes: data.renewLicenseCodes || [],
+          newTeacherEmails: data.newTeacherEmails || [],
+          notes: data.notes || null,
+          totalPrice: Number(data.totalPrice || 0),
+          status: String(data.status || "in_afwachting"),
+          createdAt: data.createdAt?.toDate?.()?.toISOString?.() || null,
+          processedAt: data.processedAt?.toDate?.()?.toISOString?.() || null,
+          invoiceNumber: data.invoiceNumber || null,
+        };
+      })
+      .filter(r => includeProcessed || r.status === "in_afwachting");
+
+    return { ok: true, requests };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// ADMIN: adminProcessRenewalRequest
+// ----------------------------------------------------------------------------
+/**
+ * Verwerk een verleng-aanvraag: verlengt bestaande licenties + maakt nieuwe accounts aan.
+ * Pas uitvoeren NA ontvangst betaling!
+ *
+ * Input:
+ *  - requestId
+ *  - invoiceNumber (optioneel)
+ */
+export const adminProcessRenewalRequest = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang.");
+    }
+
+    const data = req.data || {};
+    const requestId = String(data.requestId || "").trim();
+    const invoiceNumber = String(data.invoiceNumber || "").trim();
+
+    if (!requestId) {
+      throw new HttpsError("invalid-argument", "requestId is verplicht.");
+    }
+
+    const docRef = db.collection(RENEWAL_REQUESTS_COLLECTION).doc(requestId);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) {
+      throw new HttpsError("not-found", "Aanvraag niet gevonden.");
+    }
+    const reqData = docSnap.data() as any;
+    if (reqData.status === "verwerkt") {
+      throw new HttpsError("already-exists", "Deze aanvraag is al verwerkt.");
+    }
+
+    const schoolName = String(reqData.schoolName || "");
+    const schoolContact = String(reqData.schoolContact || "");
+    const renewCodes: string[] = reqData.renewLicenseCodes || [];
+    const newEmails: string[] = reqData.newTeacherEmails || [];
+
+    const results = { renewed: 0, newCreated: 0, errors: [] as string[] };
+
+    // 1) Verleng bestaande licenties met 1 jaar
+    for (const code of renewCodes) {
+      try {
+        let foundDoc: { ref: FirebaseFirestore.DocumentReference; data: any } | null = null;
+        for (const col of LICENSE_COLLECTIONS) {
+          const qs = await db.collection(col).where("code", "==", code).limit(1).get();
+          if (!qs.empty) {
+            foundDoc = { ref: qs.docs[0].ref, data: qs.docs[0].data() };
+            break;
+          }
+        }
+        if (!foundDoc) {
+          results.errors.push(`Licentie ${code} niet gevonden`);
+          continue;
+        }
+        const currentExpMs = foundDoc.data.expiresAt?.toMillis?.() ?? 0;
+        const startMs = Math.max(Date.now(), currentExpMs);
+        const newExpMs = startMs + 365 * 24 * 60 * 60 * 1000;
+        const newExpiresAt = Timestamp.fromMillis(newExpMs);
+
+        // Update in beide collecties
+        for (const col of LICENSE_COLLECTIONS) {
+          const qs = await db.collection(col).where("code", "==", code).limit(1).get();
+          if (!qs.empty) {
+            await qs.docs[0].ref.update({
+              expiresAt: newExpiresAt,
+              status: "active",
+              lastExtendedAt: FieldValue.serverTimestamp(),
+              lastExtendedBy: callerEmail,
+            });
+          }
+        }
+
+        // Order doc
+        const orderId = `school-renew-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+        await writeOrderAll(orderId, {
+          amountEUR: "40.00",
+          createdAt: FieldValue.serverTimestamp(),
+          paidAt: FieldValue.serverTimestamp(),
+          description: `Zisa PRO - jaarverlenging (${schoolName})`,
+          email: foundDoc.data.email,
+          uid: foundDoc.data.uid,
+          licenseCode: code,
+          source: "school",
+          status: "betaald",
+          schoolName,
+          schoolContact: schoolContact || null,
+          invoiceNumber: invoiceNumber || null,
+          invoiceSeries: "live",
+          isExtension: true,
+          renewalRequestId: requestId,
+          grantedBy: callerEmail,
+        });
+
+        results.renewed++;
+      } catch (e: any) {
+        results.errors.push(`${code}: ${e?.message || e}`);
+      }
+    }
+
+    // 2) Maak nieuwe accounts aan voor nieuwe leerkrachten
+    for (const newEmail of newEmails) {
+      try {
+        // Check of er al een actieve licentie is
+        const existing = await findLicenseByEmail(newEmail);
+        if (existing) {
+          const lic = existing as any;
+          const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+          const stillActive = String(lic.status || "").toLowerCase() === "active" && expMs > Date.now();
+          if (stillActive) {
+            results.errors.push(`${newEmail}: heeft al actieve licentie, overgeslagen`);
+            continue;
+          }
+        }
+
+        const uid = await ensureUser(newEmail);
+        const ctx = await getSchoolContext(schoolName);
+
+        let licenseExpiresAt: Timestamp;
+        let licensePrice: number;
+        let licenseMode: string;
+
+        if (!ctx.exists) {
+          licenseExpiresAt = calcExpiry();
+          licensePrice = 40;
+          licenseMode = "new_school";
+        } else {
+          licenseExpiresAt = ctx.suggestedExpiry;
+          licensePrice = ctx.suggestedPrice;
+          licenseMode = ctx.mode;
+        }
+
+        const licenseCode = makeSchoolLicenseCode();
+        const orderId = `school-new-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+        const licenseDoc = {
+          code: licenseCode,
+          email: newEmail,
+          uid,
+          entitlement: ENTITLEMENT_ID,
+          productId: "zisa-pro-jaarlijks",
+          deviceLimit: DEVICE_LIMIT,
+          createdAt: FieldValue.serverTimestamp(),
+          expiresAt: licenseExpiresAt,
+          orderId,
+          status: "active",
+          source: "school",
+          schoolName,
+          schoolContact: schoolContact || null,
+          pricingMode: licenseMode,
+        };
+        await writeLicenseAll(licenseCode, licenseDoc);
+
+        await writeOrderAll(orderId, {
+          amountEUR: licensePrice.toFixed(2),
+          createdAt: FieldValue.serverTimestamp(),
+          paidAt: FieldValue.serverTimestamp(),
+          description: `Zisa PRO - jaarlicentie (school: ${schoolName}) - via verleng-aanvraag`,
+          email: newEmail,
+          uid,
+          licenseCode,
+          source: "school",
+          status: "betaald",
+          schoolName,
+          schoolContact: schoolContact || null,
+          invoiceNumber: invoiceNumber || null,
+          invoiceSeries: "live",
+          renewalRequestId: requestId,
+          pricingMode: licenseMode,
+          grantedBy: callerEmail,
+        });
+
+        // Welkomstmail
+        try {
+          const passwordLink = await generatePasswordLink(newEmail);
+          await queueEmail(
+            newEmail,
+            "Je Zisa PRO account staat klaar 🦓",
+            emailHtmlSchool({ email: newEmail, passwordLink, schoolName })
+          );
+        } catch (e) {
+          logger.warn("[adminProcessRenewalRequest] Welkomstmail mislukt", { newEmail, error: String(e) });
+        }
+
+        results.newCreated++;
+      } catch (e: any) {
+        results.errors.push(`${newEmail}: ${e?.message || e}`);
+      }
+    }
+
+    // 3) Markeer aanvraag als verwerkt
+    await docRef.update({
+      status: "verwerkt",
+      processedAt: FieldValue.serverTimestamp(),
+      processedBy: callerEmail,
+      invoiceNumber: invoiceNumber || null,
+      results,
+    });
+
+    // 4) Notificatie aan school
+    if (schoolContact) {
+      try {
+        await queueEmail(
+          schoolContact,
+          `✅ Verlenging verwerkt — ${schoolName}`,
+          `<p>Beste,</p>
+           <p>De verlenging voor <strong>${schoolName}</strong> is succesvol verwerkt.</p>
+           <ul>
+             <li>${results.renewed} bestaande licentie(s) verlengd</li>
+             <li>${results.newCreated} nieuwe leerkracht(en) aangemaakt</li>
+           </ul>
+           <p>Nieuwe leerkrachten ontvangen apart een welkomstmail.</p>
+           <p>Met vriendelijke groet,<br>juf Zisa 🦓</p>`
+        );
+      } catch (e) {
+        logger.warn("[adminProcessRenewalRequest] Mail naar school mislukt", { error: String(e) });
+      }
+    }
+
+    logger.info("[adminProcessRenewalRequest] Verwerkt", {
+      requestId, schoolName, results, callerEmail,
+    });
+
+    return {
+      ok: true,
+      requestId,
+      results,
+      message: `${results.renewed} verlengd, ${results.newCreated} nieuwe accounts aangemaakt.`,
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// ADMIN: adminRejectRenewalRequest
+// ----------------------------------------------------------------------------
+export const adminRejectRenewalRequest = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang.");
+    }
+
+    const data = req.data || {};
+    const requestId = String(data.requestId || "").trim();
+    const reason = String(data.reason || "").trim();
+
+    if (!requestId) {
+      throw new HttpsError("invalid-argument", "requestId is verplicht.");
+    }
+
+    const docRef = db.collection(RENEWAL_REQUESTS_COLLECTION).doc(requestId);
+    const docSnap = await docRef.get();
+    if (!docSnap.exists) {
+      throw new HttpsError("not-found", "Aanvraag niet gevonden.");
+    }
+
+    await docRef.update({
+      status: "geweigerd",
+      rejectedAt: FieldValue.serverTimestamp(),
+      rejectedBy: callerEmail,
+      rejectionReason: reason || null,
+    });
+
+    logger.info("[adminRejectRenewalRequest] Geweigerd", { requestId, reason, callerEmail });
+
+    return { ok: true, message: "Aanvraag geweigerd." };
+  }
+);
+
+// ============================================================================
+// EINDE VERLENG-SYSTEEM
 // ============================================================================
