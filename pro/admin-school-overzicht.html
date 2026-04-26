@@ -221,6 +221,16 @@
     .btn-restore:hover:not(:disabled) { background: #C8E6CF; }
     .btn-delete { background: #FDE8E8; color: var(--rood); }
     .btn-delete:hover:not(:disabled) { background: #F8C8C8; }
+    .btn-delete-school {
+      background: #FDE8E8;
+      color: var(--rood);
+      font-weight: 700;
+      border: 2px solid var(--rood);
+    }
+    .btn-delete-school:hover:not(:disabled) {
+      background: var(--rood);
+      color: #fff;
+    }
 
     /* Gearchiveerde rij — visueel onderscheidend */
     .teacher-row.is-archived {
@@ -667,14 +677,23 @@
               </div>
               <div class="school-toggle">Details</div>
             </div>
+            <div class="school-actions" style="display:none; padding:10px 0; border-bottom:1px dashed var(--creme-donker); margin-bottom:10px;">
+              <button class="btn-mini btn-delete-school" data-action="delete-school" data-school="${escapeHtml(school.schoolName)}" data-count="${school.teachers.length}">
+                🗑️ Verwijder hele school definitief
+              </button>
+            </div>
             <div class="teacher-list">
               ${teacherRows}
             </div>
           `;
 
-          // Toggle openen/sluiten bij klik op header
+          // Toggle openen/sluiten bij klik op header (en toon school-actions bij open)
           const header = card.querySelector('.school-header');
-          header.addEventListener('click', () => card.classList.toggle('open'));
+          const actionsBar = card.querySelector('.school-actions');
+          header.addEventListener('click', () => {
+            card.classList.toggle('open');
+            actionsBar.style.display = card.classList.contains('open') ? 'block' : 'none';
+          });
 
           lijstNew.appendChild(card);
         }
@@ -689,6 +708,59 @@
         e.stopPropagation();
 
         const action = btn.dataset.action;
+
+        // ★ Bulk: hele school verwijderen
+        if (action === 'delete-school') {
+          const schoolName = btn.dataset.school;
+          const count = parseInt(btn.dataset.count, 10) || 0;
+
+          // Vind de school in de huidige data
+          const school = alleSchoolData.find(s => s.schoolName === schoolName);
+          if (!school) {
+            showToast('School niet gevonden in data.', 'error');
+            return;
+          }
+
+          const getypt = prompt(
+            `⚠️ HELE SCHOOL DEFINITIEF VERWIJDEREN\n\n` +
+            `School: ${schoolName}\n` +
+            `Aantal leerkrachten: ${count}\n\n` +
+            `Dit verwijdert ALLE leerkrachten + accounts + bestellingen.\n` +
+            `Dit kan NIET ongedaan worden gemaakt.\n\n` +
+            `Typ de schoolnaam exact om te bevestigen:`
+          );
+          if (getypt === null) return;
+          if (getypt.trim() !== schoolName) {
+            showToast('Schoolnaam komt niet overeen. Verwijdering geannuleerd.', 'error');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+
+          let succes = 0, mislukt = 0;
+          for (const teacher of school.teachers) {
+            try {
+              await adminDeleteTeacher({
+                licenseCode: teacher.licenseCode,
+                confirmEmail: teacher.email
+              });
+              succes++;
+            } catch (err) {
+              console.error(`Fout bij verwijderen ${teacher.email}:`, err);
+              mislukt++;
+            }
+          }
+
+          if (mislukt === 0) {
+            showToast(`✅ ${succes} leerkracht${succes === 1 ? '' : 'en'} verwijderd. School is weg.`, 'ok');
+          } else {
+            showToast(`${succes} verwijderd, ${mislukt} mislukt. Check console.`, 'error');
+          }
+          await loadOrders();
+          return;
+        }
+
         if (action === 'resend') {
           const email = btn.dataset.email;
           const school = btn.dataset.school;
@@ -764,27 +836,17 @@
         else if (action === 'delete') {
           const code = btn.dataset.code;
           const email = btn.dataset.email;
-          // Dubbele bevestiging voor definitief verwijderen
-          const eersteBevestiging = confirm(
-            `⚠️ DEFINITIEF VERWIJDEREN ⚠️\n\n` +
+          // Eén combinatie-pop-up: alle info + typ VERWIJDER
+          const getypt = prompt(
+            `⚠️ DEFINITIEF VERWIJDEREN\n\n` +
             `Leerkracht: ${email}\n` +
             `Licentie: ${code}\n\n` +
-            `Dit verwijdert ALLES en is NIET ongedaan te maken:\n` +
-            `• Het Auth-account\n` +
-            `• De licentie\n` +
-            `• De bestelling\n` +
-            `• Alle apparaat-registraties\n\n` +
-            `Doorgaan naar bevestiging?`
-          );
-          if (!eersteBevestiging) return;
-
-          // Tweede stap: typ het mailadres om te bevestigen
-          const getypt = prompt(
-            `Typ het volledige mailadres om te bevestigen:\n\n${email}`
+            `Dit kan NIET ongedaan worden gemaakt.\n\n` +
+            `Typ VERWIJDER om te bevestigen:`
           );
           if (getypt === null) return;
-          if (getypt.trim().toLowerCase() !== email.toLowerCase()) {
-            showToast('Mailadres komt niet overeen. Verwijdering geannuleerd.', 'error');
+          if (getypt.trim().toUpperCase() !== 'VERWIJDER') {
+            showToast('Verwijderen geannuleerd (typ VERWIJDER om te bevestigen).', 'error');
             return;
           }
 
