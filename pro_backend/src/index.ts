@@ -2021,6 +2021,11 @@ export const adminGetSchoolContext = onCall(
 
     const ctx = await getSchoolContext(schoolName);
 
+    // ★ Haal ook de actieve leerkrachten op (voor display in admin)
+    const teachers = ctx.exists
+      ? await getActiveTeachersOfSchool(schoolName)
+      : [];
+
     return {
       ok: true,
       schoolName,
@@ -2030,6 +2035,11 @@ export const adminGetSchoolContext = onCall(
       suggestedPrice: ctx.suggestedPrice,
       mode: ctx.mode,
       activeTeacherCount: ctx.activeTeacherCount,
+      teachers: teachers.map(t => ({
+        email: t.email,
+        licenseCode: t.licenseCode,
+        expiresAt: t.expiresAt?.toISOString() || null,
+      })),
     };
   }
 );
