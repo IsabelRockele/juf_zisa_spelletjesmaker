@@ -328,6 +328,11 @@
             <span class="hint">Eén mailadres per lijn. Hoofdletters worden automatisch omgezet naar kleine letters.</span>
           </div>
 
+          <div class="preview-blok" id="context-blok" style="background:#FFF4E0; color:#8B5A1A; border-left:4px solid #F5A55E;">
+            <strong id="context-titel">⏳ Bezig met checken...</strong>
+            <span id="context-detail" style="display:block; margin-top:4px; font-size:13.5px;"></span>
+          </div>
+
           <div class="preview-blok" id="preview-blok">
             <strong id="preview-aantal">0</strong> mailadres(sen) geldig — klaar om <strong id="preview-school">deze school</strong> te activeren.
           </div>
@@ -378,6 +383,7 @@
       }
       const fns = getFunctions(app, "europe-west1");
       const adminGrantSchoolLicense = httpsCallable(fns, "adminGrantSchoolLicense");
+      const adminGetSchoolContext = httpsCallable(fns, "adminGetSchoolContext");
 
       // Helpers
       const $ = (id) => document.getElementById(id);
@@ -419,6 +425,77 @@
 
       emailsInput.addEventListener('input', updatePreview);
       schoolInput.addEventListener('input', updatePreview);
+
+      // ★ Pro rata: school context ophalen wanneer schoolnaam wijzigt
+      let lastContextLookup = null;
+      let contextDebounce = null;
+      let currentContext = null; // bewaar voor submit
+
+      const contextBlok = $('context-blok');
+      const contextTitel = $('context-titel');
+      const contextDetail = $('context-detail');
+
+      function showContext(ctx) {
+        if (!ctx || !ctx.exists) {
+          contextBlok.classList.remove('zichtbaar');
+          currentContext = null;
+          return;
+        }
+        currentContext = ctx;
+        const datumStr = ctx.latestExpiresAt
+          ? new Date(ctx.latestExpiresAt).toLocaleDateString('nl-BE', { day:'2-digit', month:'2-digit', year:'numeric' })
+          : '?';
+
+        if (ctx.mode === 'sync_prorata') {
+          contextTitel.innerHTML = `🎯 Bestaande school met ${ctx.activeTeacherCount} actieve leerkracht${ctx.activeTeacherCount === 1 ? '' : 'en'}`;
+          contextDetail.innerHTML =
+            `Vervaldatum: <strong>${datumStr}</strong> (nog ${ctx.daysRemaining} dagen)<br>` +
+            `Pro rata prijs voor nieuwe leerkracht: <strong>€${ctx.suggestedPrice}</strong> (i.p.v. €40)<br>` +
+            `Nieuwe leerkrachten krijgen dezelfde vervaldatum, alles loopt synchroon.`;
+        } else if (ctx.mode === 'sync_plus_year') {
+          contextTitel.innerHTML = `⏰ Bestaande school - vervalt binnen 3 maanden`;
+          contextDetail.innerHTML =
+            `Huidige vervaldatum: <strong>${datumStr}</strong> (nog ${ctx.daysRemaining} dagen)<br>` +
+            `Prijs nieuwe leerkracht: <strong>€${ctx.suggestedPrice}</strong> (volledig jaar + ${ctx.daysRemaining} extra dagen)<br>` +
+            `Vervaldatum: <strong>${datumStr.split('/').slice(0,2).join('/')}/${parseInt(datumStr.split('/')[2])+1}</strong>`;
+        } else {
+          contextBlok.classList.remove('zichtbaar');
+          return;
+        }
+        contextBlok.classList.add('zichtbaar');
+      }
+
+      function lookupContext() {
+        const name = schoolInput.value.trim();
+        if (!name || name.length < 3) {
+          contextBlok.classList.remove('zichtbaar');
+          currentContext = null;
+          return;
+        }
+        if (lastContextLookup === name) return;
+        lastContextLookup = name;
+
+        contextBlok.classList.add('zichtbaar');
+        contextTitel.textContent = '⏳ Bezig met checken...';
+        contextDetail.textContent = '';
+
+        adminGetSchoolContext({ schoolName: name })
+          .then(res => {
+            const ctx = res?.data || {};
+            if (ctx.schoolName !== name) return; // andere lookup intussen gestart
+            showContext(ctx);
+          })
+          .catch(err => {
+            console.error('Context lookup error:', err);
+            contextBlok.classList.remove('zichtbaar');
+            currentContext = null;
+          });
+      }
+
+      schoolInput.addEventListener('input', () => {
+        clearTimeout(contextDebounce);
+        contextDebounce = setTimeout(lookupContext, 600);
+      });
 
       function addResultRow(email, status, message, detail) {
         const div = document.createElement('div');
@@ -479,9 +556,28 @@
           return;
         }
 
+        // Bouw bevestigingstekst op basis van context
+        let prijsInfo = '';
+        let totaalPrijs = emails.length * 40;
+        if (currentContext) {
+          if (currentContext.mode === 'sync_prorata') {
+            totaalPrijs = emails.length * currentContext.suggestedPrice;
+            prijsInfo = `\n\nPrijs: ${emails.length} × €${currentContext.suggestedPrice} pro rata = €${totaalPrijs}\n` +
+                        `(synchroon met bestaande vervaldatum)`;
+          } else if (currentContext.mode === 'sync_plus_year') {
+            totaalPrijs = emails.length * currentContext.suggestedPrice;
+            prijsInfo = `\n\nPrijs: ${emails.length} × €${currentContext.suggestedPrice} = €${totaalPrijs}\n` +
+                        `(volledig jaar + ${currentContext.daysRemaining} extra dagen)`;
+          } else {
+            prijsInfo = `\n\nPrijs: ${emails.length} × €40 = €${totaalPrijs}`;
+          }
+        } else {
+          prijsInfo = `\n\nPrijs: ${emails.length} × €40 = €${totaalPrijs}`;
+        }
+
         const bevestiging = confirm(
           `Je staat op het punt om voor ${emails.length} leerkracht${emails.length === 1 ? '' : 'en'} ` +
-          `van "${schoolName}" een PRO-account aan te maken.\n\n` +
+          `van "${schoolName}" een PRO-account aan te maken.${prijsInfo}\n\n` +
           `Elke leerkracht krijgt onmiddellijk een welkomstmail met een wachtwoord-reset link.\n\n` +
           `Verleng-herinneringen worden later naar ${schoolContact} gestuurd.\n\n` +
           `Doorgaan?`
@@ -520,8 +616,12 @@
               );
             } else if (r.ok) {
               okCount++;
+              const prijsLabel = r.pricingPrice ? `€${r.pricingPrice}` : '€40';
+              const modeLabel = r.pricingMode === 'sync_prorata' ? 'pro rata' :
+                               r.pricingMode === 'sync_plus_year' ? 'volledig jaar + pro rata' :
+                               r.pricingMode === 'force_full_year' ? 'volledig jaar' : '';
               updateResultRow(row, 'ok',
-                r.mailSent ? 'Account + mail verzonden.' : 'Account aangemaakt — ⚠️ mail mislukte.',
+                r.mailSent ? `Account + mail verzonden (${prijsLabel}${modeLabel ? ', ' + modeLabel : ''}).` : `Account aangemaakt (${prijsLabel}) — ⚠️ mail mislukte.`,
                 `Licentie: <code class="ll">${r.licenseCode}</code> · vervalt ${formatDate(r.expiresAt)}`
               );
             } else {
