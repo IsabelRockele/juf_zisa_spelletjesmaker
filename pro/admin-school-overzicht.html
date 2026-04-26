@@ -191,6 +191,7 @@
     .status-badge.active { background: #E6F4EA; color: var(--groen); }
     .status-badge.expiring_soon { background: #FFF4E0; color: #8B5A1A; }
     .status-badge.expired { background: #FDE8E8; color: var(--rood); }
+    .status-badge.archived { background: #E8E8E8; color: #666; }
     .status-badge.unknown { background: var(--lilac-licht); color: var(--paars-donker); }
 
     .teacher-actions {
@@ -214,6 +215,34 @@
     .btn-reset:hover:not(:disabled) { background: var(--lilac); }
     .btn-extend { background: #FFF4E0; color: #8B5A1A; }
     .btn-extend:hover:not(:disabled) { background: var(--geel); color: #5C3D11; }
+    .btn-archive { background: #E8E8E8; color: #555; }
+    .btn-archive:hover:not(:disabled) { background: #D5D5D5; }
+    .btn-restore { background: #E6F4EA; color: var(--groen); }
+    .btn-restore:hover:not(:disabled) { background: #C8E6CF; }
+    .btn-delete { background: #FDE8E8; color: var(--rood); }
+    .btn-delete:hover:not(:disabled) { background: #F8C8C8; }
+
+    /* Gearchiveerde rij — visueel onderscheidend */
+    .teacher-row.is-archived {
+      opacity: 0.7;
+      background: #FAFAFA;
+      border-left: 4px solid #BBB;
+    }
+    .teacher-row.is-archived .teacher-info strong::before {
+      content: "📦 ";
+    }
+
+    /* Toggle voor gearchiveerde */
+    .toggle-archived {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      color: var(--tekst-licht);
+      cursor: pointer;
+      user-select: none;
+    }
+    .toggle-archived input { cursor: pointer; }
 
     /* Status messages */
     .toast {
@@ -296,6 +325,10 @@
 
         <div class="top-bar">
           <input type="text" id="zoek-veld" class="zoek-veld" placeholder="🔍 Zoek op schoolnaam, mailadres, factuurnummer of licentiecode..." />
+          <label class="toggle-archived">
+            <input type="checkbox" id="toggle-archived" />
+            📦 Toon gearchiveerde
+          </label>
           <div class="stats" id="stats">
             <span class="stat"><strong id="stat-scholen">0</strong> scholen</span>
             <span class="stat"><strong id="stat-leerkrachten">0</strong> leerkrachten</span>
@@ -342,6 +375,9 @@
       const adminListSchoolOrders = httpsCallable(fns, "adminListSchoolOrders");
       const adminResendPasswordReset = httpsCallable(fns, "adminResendPasswordReset");
       const adminExtendLicense = httpsCallable(fns, "adminExtendLicense");
+      const adminArchiveTeacher = httpsCallable(fns, "adminArchiveTeacher");
+      const adminUnarchiveTeacher = httpsCallable(fns, "adminUnarchiveTeacher");
+      const adminDeleteTeacher = httpsCallable(fns, "adminDeleteTeacher");
 
       // Helpers
       const $ = (id) => document.getElementById(id);
@@ -371,6 +407,55 @@
         return `<span class="status-badge ${status}">${labels[status] || status}</span>`;
       }
 
+      function renderTeacherRow(t, school) {
+        const isArchived = t.status === 'archived';
+        const archivedClass = isArchived ? ' is-archived' : '';
+
+        // Bepaal welke knoppen zichtbaar zijn
+        let actionsHtml = '';
+        if (isArchived) {
+          // Gearchiveerd: alleen Herstel en Verwijder
+          actionsHtml = `
+            <button class="btn-mini btn-restore" data-action="unarchive" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
+              ♻️ Herstel
+            </button>
+            <button class="btn-mini btn-delete" data-action="delete" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
+              🗑️ Verwijder definitief
+            </button>
+          `;
+        } else {
+          // Actief / verlopen: Reset, Verleng, Archiveren
+          actionsHtml = `
+            <button class="btn-mini btn-reset" data-action="resend" data-email="${escapeHtml(t.email)}" data-school="${escapeHtml(school.schoolName)}">
+              🔑 Reset wachtwoord
+            </button>
+            <button class="btn-mini btn-extend" data-action="extend" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
+              ⏰ Verleng 1 jaar
+            </button>
+            <button class="btn-mini btn-archive" data-action="archive" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
+              📦 Archiveer
+            </button>
+          `;
+        }
+
+        return `
+          <div class="teacher-row${archivedClass}">
+            <div class="teacher-info">
+              <strong>${escapeHtml(t.email)}</strong>
+              <span class="detail">
+                Licentie <code>${escapeHtml(t.licenseCode)}</code> ·
+                Aangemaakt ${formatDate(t.createdAt)} ·
+                Vervalt ${formatDate(t.expiresAt)}
+              </span>
+            </div>
+            ${statusBadgeHtml(t.status, t.daysUntilExpiry)}
+            <div class="teacher-actions">
+              ${actionsHtml}
+            </div>
+          </div>
+        `;
+      }
+
       function renderSchools(schools) {
         const lijst = $('lijst');
         lijst.innerHTML = '';
@@ -386,27 +471,7 @@
         for (const school of schools) {
           const card = document.createElement('div');
           card.className = 'school-card';
-          const teacherRows = school.teachers.map(t => `
-            <div class="teacher-row">
-              <div class="teacher-info">
-                <strong>${escapeHtml(t.email)}</strong>
-                <span class="detail">
-                  Licentie <code>${escapeHtml(t.licenseCode)}</code> ·
-                  Aangemaakt ${formatDate(t.createdAt)} ·
-                  Vervalt ${formatDate(t.expiresAt)}
-                </span>
-              </div>
-              ${statusBadgeHtml(t.status, t.daysUntilExpiry)}
-              <div class="teacher-actions">
-                <button class="btn-mini btn-reset" data-action="resend" data-email="${escapeHtml(t.email)}" data-school="${escapeHtml(school.schoolName)}">
-                  🔑 Reset wachtwoord
-                </button>
-                <button class="btn-mini btn-extend" data-action="extend" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
-                  ⏰ Verleng 1 jaar
-                </button>
-              </div>
-            </div>
-          `).join('');
+          const teacherRows = school.teachers.map(t => renderTeacherRow(t, school)).join('');
 
           card.innerHTML = `
             <div class="school-header">
@@ -483,6 +548,80 @@
             btn.textContent = '⏰ Verleng 1 jaar';
           }
         }
+        else if (action === 'archive') {
+          const code = btn.dataset.code;
+          const email = btn.dataset.email;
+          if (!confirm(`Leerkracht ${email} archiveren?\n\nHet account werkt niet meer, maar de gegevens blijven bewaard.\nJe kan dit altijd terugdraaien via "📦 Toon gearchiveerde" → ♻️ Herstel.`)) return;
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+          try {
+            const res = await adminArchiveTeacher({ licenseCode: code });
+            showToast(res?.data?.message || 'Gearchiveerd.', 'ok');
+            await loadOrders();
+          } catch (err) {
+            showToast(`Fout: ${err?.message || err}`, 'error');
+            btn.disabled = false;
+            btn.textContent = '📦 Archiveer';
+          }
+        }
+        else if (action === 'unarchive') {
+          const code = btn.dataset.code;
+          const email = btn.dataset.email;
+          if (!confirm(`Leerkracht ${email} herstellen?\n\nHet account wordt weer actief.\nLET OP: als de licentie verlopen is, gebruik daarna ⏰ Verleng om opnieuw toegang te geven.`)) return;
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+          try {
+            const res = await adminUnarchiveTeacher({ licenseCode: code });
+            showToast(res?.data?.message || 'Hersteld.', 'ok');
+            await loadOrders();
+          } catch (err) {
+            showToast(`Fout: ${err?.message || err}`, 'error');
+            btn.disabled = false;
+            btn.textContent = '♻️ Herstel';
+          }
+        }
+        else if (action === 'delete') {
+          const code = btn.dataset.code;
+          const email = btn.dataset.email;
+          // Dubbele bevestiging voor definitief verwijderen
+          const eersteBevestiging = confirm(
+            `⚠️ DEFINITIEF VERWIJDEREN ⚠️\n\n` +
+            `Leerkracht: ${email}\n` +
+            `Licentie: ${code}\n\n` +
+            `Dit verwijdert ALLES en is NIET ongedaan te maken:\n` +
+            `• Het Auth-account\n` +
+            `• De licentie\n` +
+            `• De bestelling\n` +
+            `• Alle apparaat-registraties\n\n` +
+            `Doorgaan naar bevestiging?`
+          );
+          if (!eersteBevestiging) return;
+
+          // Tweede stap: typ het mailadres om te bevestigen
+          const getypt = prompt(
+            `Typ het volledige mailadres om te bevestigen:\n\n${email}`
+          );
+          if (getypt === null) return;
+          if (getypt.trim().toLowerCase() !== email.toLowerCase()) {
+            showToast('Mailadres komt niet overeen. Verwijdering geannuleerd.', 'error');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+          try {
+            const res = await adminDeleteTeacher({
+              licenseCode: code,
+              confirmEmail: email
+            });
+            showToast(res?.data?.message || 'Verwijderd.', 'ok');
+            await loadOrders();
+          } catch (err) {
+            showToast(`Fout: ${err?.message || err}`, 'error');
+            btn.disabled = false;
+            btn.textContent = '🗑️ Verwijder definitief';
+          }
+        }
       }
 
       function applyFilter(zoekterm) {
@@ -517,7 +656,8 @@
         $('laden').style.display = 'block';
         $('lijst').innerHTML = '';
         try {
-          const res = await adminListSchoolOrders({});
+          const includeArchived = $('toggle-archived').checked;
+          const res = await adminListSchoolOrders({ includeArchived });
           const schools = res?.data?.schools || [];
           alleSchoolData = schools;
 
@@ -538,6 +678,9 @@
 
       // Zoek-veld
       $('zoek-veld').addEventListener('input', (e) => applyFilter(e.target.value));
+
+      // Toggle gearchiveerde — herlaad data
+      $('toggle-archived').addEventListener('change', () => loadOrders());
 
       // Init
       loadOrders();
