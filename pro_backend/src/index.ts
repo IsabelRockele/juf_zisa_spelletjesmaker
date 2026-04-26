@@ -1730,6 +1730,9 @@ export const adminListSchoolOrders = onCall(
       throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
     }
 
+    const data = req.data || {};
+    const includeArchived = !!data.includeArchived;
+
     // 2) Haal alle bestellingen op met source: "school"
     //    We zoeken in alle ORDER_COLLECTIONS, maar in praktijk is "Bestellingen" de hoofdcollectie
     const allOrders: any[] = [];
@@ -1778,17 +1781,20 @@ export const adminListSchoolOrders = onCall(
         // Bereken status
         const expMs = licenseDoc?.expiresAt?.toMillis?.() ?? 0;
         const daysUntilExpiry = expMs > 0 ? Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)) : null;
-        let teacherStatus: "active" | "expiring_soon" | "expired" | "unknown" = "unknown";
+        let teacherStatus: "active" | "expiring_soon" | "expired" | "archived" | "unknown" = "unknown";
         if (licenseDoc) {
-          const isActive =
-            String(licenseDoc.status || "").toLowerCase() === "active" ||
-            String(licenseDoc.status || "").toLowerCase() === "actief";
-          if (!isActive || (expMs > 0 && expMs < nowMs)) {
-            teacherStatus = "expired";
-          } else if (daysUntilExpiry !== null && daysUntilExpiry <= 30) {
-            teacherStatus = "expiring_soon";
+          const statusLower = String(licenseDoc.status || "").toLowerCase();
+          if (statusLower === "archived" || licenseDoc.archived === true) {
+            teacherStatus = "archived";
           } else {
-            teacherStatus = "active";
+            const isActive = statusLower === "active" || statusLower === "actief";
+            if (!isActive || (expMs > 0 && expMs < nowMs)) {
+              teacherStatus = "expired";
+            } else if (daysUntilExpiry !== null && daysUntilExpiry <= 30) {
+              teacherStatus = "expiring_soon";
+            } else {
+              teacherStatus = "active";
+            }
           }
         }
 
@@ -1811,6 +1817,9 @@ export const adminListSchoolOrders = onCall(
     // 5) Groepeer per schoolnaam
     const schoolMap = new Map<string, any>();
     for (const t of teachersWithStatus) {
+      // ★ Filter gearchiveerde tenzij expliciet gevraagd
+      if (!includeArchived && t.status === "archived") continue;
+
       const name = t.schoolName || "(onbekend)";
       if (!schoolMap.has(name)) {
         schoolMap.set(name, {
@@ -2027,4 +2036,274 @@ export const adminExtendLicense = onCall(
 
 // ============================================================================
 // EINDE SCHOOL-OVERZICHT FUNCTIES
+// ============================================================================
+
+
+// ============================================================================
+// SCHOOL-OVERZICHT — Archiveren / herstellen / definitief verwijderen
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// 4) adminArchiveTeacher — Archiveer een leerkracht (account werkt niet meer)
+// ----------------------------------------------------------------------------
+/**
+ * Zet status op "archived". Account werkt niet meer maar data blijft bewaard.
+ * Input: licenseCode (verplicht)
+ */
+export const adminArchiveTeacher = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const licenseCode = String(data.licenseCode || "").trim();
+    if (!licenseCode) {
+      throw new HttpsError("invalid-argument", "Licentiecode is verplicht.");
+    }
+
+    let updatedCount = 0;
+    let teacherEmail = "";
+    let schoolName = "";
+
+    // Update licenties in beide collecties
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).limit(1).get();
+        if (!qs.empty) {
+          const docData = qs.docs[0].data() as any;
+          teacherEmail = teacherEmail || String(docData.email || "");
+          schoolName = schoolName || String(docData.schoolName || "");
+          await qs.docs[0].ref.update({
+            status: "archived",
+            archived: true,
+            archivedAt: FieldValue.serverTimestamp(),
+            archivedBy: callerEmail,
+            previousStatus: docData.status || null,
+          });
+          updatedCount++;
+        }
+      } catch (e) {
+        logger.warn(`[adminArchiveTeacher] Update mislukt in ${col}`, { error: String(e) });
+      }
+    }
+
+    if (updatedCount === 0) {
+      throw new HttpsError("not-found", `Licentie ${licenseCode} niet gevonden.`);
+    }
+
+    logger.info("[adminArchiveTeacher] Succesvol", {
+      licenseCode, teacherEmail, schoolName, callerEmail, updatedCount,
+    });
+
+    return {
+      ok: true,
+      licenseCode,
+      message: `Leerkracht ${teacherEmail || licenseCode} gearchiveerd.`,
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// 5) adminUnarchiveTeacher — Herstel een gearchiveerde leerkracht
+// ----------------------------------------------------------------------------
+/**
+ * Maakt een gearchiveerde leerkracht weer actief.
+ * Als de licentie al verlopen was: blijft verlopen — gebruik adminExtendLicense daarna.
+ * Input: licenseCode (verplicht)
+ */
+export const adminUnarchiveTeacher = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const licenseCode = String(data.licenseCode || "").trim();
+    if (!licenseCode) {
+      throw new HttpsError("invalid-argument", "Licentiecode is verplicht.");
+    }
+
+    let updatedCount = 0;
+
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).limit(1).get();
+        if (!qs.empty) {
+          await qs.docs[0].ref.update({
+            status: "active",
+            archived: false,
+            archivedAt: FieldValue.delete(),
+            archivedBy: FieldValue.delete(),
+            unarchivedAt: FieldValue.serverTimestamp(),
+            unarchivedBy: callerEmail,
+          });
+          updatedCount++;
+        }
+      } catch (e) {
+        logger.warn(`[adminUnarchiveTeacher] Update mislukt in ${col}`, { error: String(e) });
+      }
+    }
+
+    if (updatedCount === 0) {
+      throw new HttpsError("not-found", `Licentie ${licenseCode} niet gevonden.`);
+    }
+
+    logger.info("[adminUnarchiveTeacher] Succesvol", { licenseCode, callerEmail, updatedCount });
+
+    return {
+      ok: true,
+      licenseCode,
+      message: `Leerkracht hersteld. Let op: indien de vervaldatum verlopen is, gebruik 'Verleng' om opnieuw toegang te geven.`,
+    };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// 6) adminDeleteTeacher — DEFINITIEF verwijderen (Auth + alle Firestore docs)
+// ----------------------------------------------------------------------------
+/**
+ * Verwijdert ALLES van een leerkracht definitief:
+ *  - Firebase Auth user
+ *  - Licentie in beide LICENSE_COLLECTIONS
+ *  - Bestelling-documenten in alle ORDER_COLLECTIONS
+ *  - Apparaat-documenten in users/{uid}/devices
+ * NIET ongedaan te maken!
+ *
+ * Input:
+ *   - licenseCode (verplicht) — om de licentie te identificeren
+ *   - confirmEmail (verplicht) — moet matchen met email van de licentie (extra veiligheid)
+ */
+export const adminDeleteTeacher = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const licenseCode = String(data.licenseCode || "").trim();
+    const confirmEmail = String(data.confirmEmail || "").trim().toLowerCase();
+    if (!licenseCode) {
+      throw new HttpsError("invalid-argument", "Licentiecode is verplicht.");
+    }
+    if (!confirmEmail) {
+      throw new HttpsError("invalid-argument", "Bevestigings-e-mail is verplicht.");
+    }
+
+    // Zoek de licentie en haal email + uid op
+    let foundLicense: any = null;
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).limit(1).get();
+        if (!qs.empty) {
+          foundLicense = qs.docs[0].data();
+          break;
+        }
+      } catch {}
+    }
+    if (!foundLicense) {
+      throw new HttpsError("not-found", `Licentie ${licenseCode} niet gevonden.`);
+    }
+
+    const licenseEmail = String(foundLicense.email || "").toLowerCase();
+    const uid = String(foundLicense.uid || "");
+
+    // Veiligheidscheck: confirmEmail moet matchen
+    if (licenseEmail !== confirmEmail) {
+      logger.warn("[adminDeleteTeacher] Email mismatch", { licenseCode, licenseEmail, confirmEmail });
+      throw new HttpsError(
+        "failed-precondition",
+        `Bevestigings-e-mail komt niet overeen met de licentie (${licenseEmail}).`
+      );
+    }
+
+    let deletedCounts = {
+      licenses: 0,
+      orders: 0,
+      devices: 0,
+      authUser: false,
+    };
+
+    // 1) Verwijder licenties
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).get();
+        for (const doc of qs.docs) {
+          await doc.ref.delete();
+          deletedCounts.licenses++;
+        }
+      } catch (e) {
+        logger.warn(`[adminDeleteTeacher] Licentie delete mislukt ${col}`, { error: String(e) });
+      }
+    }
+
+    // 2) Verwijder bestellingen (alle docs met deze licenseCode of email)
+    for (const col of ORDER_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("licenseCode", "==", licenseCode).get();
+        for (const doc of qs.docs) {
+          await doc.ref.delete();
+          deletedCounts.orders++;
+        }
+      } catch (e) {
+        logger.warn(`[adminDeleteTeacher] Order delete mislukt ${col}`, { error: String(e) });
+      }
+    }
+
+    // 3) Verwijder apparaat-documenten
+    if (uid) {
+      try {
+        const devSnap = await db.collection("users").doc(uid).collection("devices").get();
+        for (const doc of devSnap.docs) {
+          await doc.ref.delete();
+          deletedCounts.devices++;
+        }
+      } catch (e) {
+        logger.warn(`[adminDeleteTeacher] Devices delete mislukt`, { error: String(e) });
+      }
+    }
+
+    // 4) Verwijder Auth user (als er andere leerkrachten dit uid niet meer gebruiken)
+    if (uid) {
+      try {
+        await auth.deleteUser(uid);
+        deletedCounts.authUser = true;
+      } catch (e: any) {
+        // Als user niet bestaat: niet erg
+        if (e?.code !== "auth/user-not-found") {
+          logger.warn(`[adminDeleteTeacher] Auth delete mislukt`, { error: String(e) });
+        }
+      }
+    }
+
+    logger.info("[adminDeleteTeacher] Succesvol", {
+      licenseCode, licenseEmail, uid, callerEmail, deletedCounts,
+    });
+
+    return {
+      ok: true,
+      licenseCode,
+      message: `Leerkracht ${licenseEmail} definitief verwijderd. Alle data weg.`,
+      deletedCounts,
+    };
+  }
+);
+
+// ============================================================================
+// EINDE ARCHIVEREN/VERWIJDEREN
 // ============================================================================
