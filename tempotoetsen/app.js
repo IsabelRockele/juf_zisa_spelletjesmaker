@@ -121,6 +121,27 @@ function genereerGetalbeeld(config) {
 // ============================================
 // config: { bewerking: 'plus' | 'min' | 'gemengd' }
 // patroon: 'plus' of 'min' (voor gemengd, vanuit genereerToets)
+// ============================================
+// OPTELLEN / AFTREKKEN TOT 5
+// ============================================
+// config: { bewerking: 'plus'|'min'|'gemengd' }
+function genereerOptelAftrek5(config, patroon) {
+  const bewerking = patroon
+    || (config.bewerking === 'gemengd'
+      ? (Math.random() < 0.5 ? 'plus' : 'min')
+      : config.bewerking);
+
+  if (bewerking === 'plus') {
+    const a = randInt(0, 5);
+    const b = randInt(0, 5 - a);
+    return { vraag: `${a} + ${b}`, antwoord: a + b };
+  } else {
+    const a = randInt(0, 5);
+    const b = randInt(0, a);
+    return { vraag: `${a} - ${b}`, antwoord: a - b };
+  }
+}
+
 function genereerOptelAftrek10(config, patroon) {
   const bewerking = patroon
     || (config.bewerking === 'gemengd'
@@ -333,6 +354,8 @@ function genereerToets(type, config, aantal = 10) {
         break;
       case 'getalbeelden':
         oef = genereerGetalbeeld(config); break;
+      case 'optel-aftrek-5':
+        oef = genereerOptelAftrek5(config, patroon ? patroon[idx] : null); break;
       case 'optel-aftrek-10':
         oef = genereerOptelAftrek10(config, patroon ? patroon[idx] : null); break;
       case 'optel-aftrek-20':
@@ -384,6 +407,7 @@ const state = {
     deeltafels: { tafels: [2, 10] },
     'gemengd-maal-deel': { tafelsKeer: [2, 10], tafelsDeel: [2, 10], richting: 'beide' },
     getalbeelden: { max: 100, type: 'mix' },
+    'optel-aftrek-5': { bewerking: 'gemengd' },
     'optel-aftrek-10': { bewerking: 'gemengd' },
     'optel-aftrek-20': { bewerking: 'gemengd', brug: 'gemengd' },
     'optel-aftrek-100': { bewerking: 'gemengd', brug: 'gemengd' },
@@ -406,6 +430,7 @@ const tabConfig = [
   { id: 'gemengd-maal-deel', label: 'Gemengd × en :' },
   { id: 'splitsingen', label: 'Splitsingen' },
   { id: 'getalbeelden', label: 'Getalbeelden' },
+  { id: 'optel-aftrek-5', label: '+ en − tot 5' },
   { id: 'optel-aftrek-10', label: '+ en − tot 10' },
   { id: 'optel-aftrek-20', label: '+ en − tot 20' },
   { id: 'optel-aftrek-100', label: '+ en − tot 100' }
@@ -526,6 +551,17 @@ function renderConfig() {
     ]);
     html += `<div class="info-strook">
       💡 <strong>Tot 7</strong> betekent: splitsingen van 2, 3, 4, 5, 6 en 7.
+    </div>`;
+  }
+
+  else if (type === 'optel-aftrek-5') {
+    html += radioGroep('Bewerking', 'opt5-bew', conf.bewerking, [
+      { v: 'plus', l: 'Alleen +' },
+      { v: 'min', l: 'Alleen −' },
+      { v: 'gemengd', l: 'Gemengd' }
+    ]);
+    html += `<div class="info-strook">
+      💡 Voor de eerste oefeningen in het 1e leerjaar — getallen blijven onder of gelijk aan 5.
     </div>`;
   }
 
@@ -675,6 +711,7 @@ function updateRadio(naam, waarde) {
     'mix-richting': ['gemengd-maal-deel', 'richting', waarde],
     'gb-type': ['getalbeelden', 'type', waarde],
     'gb-max': ['getalbeelden', 'max', parseInt(waarde, 10)],
+    'opt5-bew': ['optel-aftrek-5', 'bewerking', waarde],
     'opt10-bew': ['optel-aftrek-10', 'bewerking', waarde],
     'opt20-bew': ['optel-aftrek-20', 'bewerking', waarde],
     'opt20-brug': ['optel-aftrek-20', 'brug', waarde],
@@ -1210,9 +1247,10 @@ function toetsTitel() {
     'deeltafels': 'Tempotoets — Deeltafels',
     'gemengd-maal-deel': 'Tempotoets — × en :',
     'getalbeelden': 'Tempotoets — Getalbeelden',
-    'optel-aftrek-10': 'Tempotoets — + en − tot 10',
-    'optel-aftrek-20': 'Tempotoets — + en − tot 20',
-    'optel-aftrek-100': 'Tempotoets — + en − tot 100',
+    'optel-aftrek-5': 'Tempotoets — + en - tot 5',
+    'optel-aftrek-10': 'Tempotoets — + en - tot 10',
+    'optel-aftrek-20': 'Tempotoets — + en - tot 20',
+    'optel-aftrek-100': 'Tempotoets — + en - tot 100',
     'splitsingen': 'Tempotoets — Splitsingen'
   };
   return labels[state.type] || 'Tempotoets';
@@ -1489,6 +1527,7 @@ function renderWeekDagen() {
     'gemengd-maal-deel': 'Gemengd × en :',
     'splitsingen': 'Splitsingen',
     'getalbeelden': 'Getalbeelden',
+    'optel-aftrek-5': '+ en − tot 5',
     'optel-aftrek-10': '+ en − tot 10',
     'optel-aftrek-20': '+ en − tot 20',
     'optel-aftrek-100': '+ en − tot 100'
@@ -1642,7 +1681,7 @@ function renderDagConfigHTML(dagId, type, conf) {
     </div>`;
   }
 
-  else if (type === 'optel-aftrek-10') {
+  else if (type === 'optel-aftrek-5' || type === 'optel-aftrek-10') {
     html += `<div class="dag-config-groep">
       <label>Bewerking</label>
       <div class="dag-radio-rij" data-dag-radio="${dagId}-bewerking">
@@ -2094,7 +2133,7 @@ const uitlegStappen = [
         <li><strong>Gemengd × en :</strong> — 5 maal + 5 deel (gegarandeerd 50/50)</li>
         <li><strong>Splitsingen</strong> — tot 5, 6, 7, 8, 9 of 10</li>
         <li><strong>Getalbeelden</strong> — MAB, 100-veld, notatie (4E 7T), rekenrek</li>
-        <li><strong>+ en − tot 10 / 20 / 100</strong> — met of zonder brug</li>
+        <li><strong>+ en − tot 5 / 10 / 20 / 100</strong> — voor 1e t.e.m. 4e leerjaar, met of zonder brug</li>
       </ul>
       <p class="tip">💡 Je kan altijd op <strong>"Alle"</strong>, <strong>"Geen"</strong> of een snelle keuze zoals <strong>"2-5-10"</strong> klikken om snel tafels te selecteren.</p>`
   },
