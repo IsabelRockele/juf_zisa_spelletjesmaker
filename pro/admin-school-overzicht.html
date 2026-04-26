@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overzicht schoolbestellingen — juf Zisa Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --paars: #6B4E9B;
+      --paars-donker: #543B7D;
+      --lilac: #B9A7D1;
+      --lilac-licht: #E5DCF0;
+      --geel: #F4C952;
+      --oranje: #F5A55E;
+      --creme: #FAF6ED;
+      --creme-donker: #F0E9D7;
+      --tekst: #2C2C2C;
+      --tekst-licht: #5E5E5E;
+      --rood: #D05454;
+      --groen: #5DA66E;
+      --wit: #FFFFFF;
+      --shadow-zacht: 0 4px 16px rgba(107, 78, 155, 0.08);
+      --shadow-medium: 0 8px 24px rgba(107, 78, 155, 0.15);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--tekst);
+      background: var(--creme);
+      line-height: 1.6;
+      font-size: 16px;
+      min-height: 100vh;
+    }
+    h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 700; color: var(--paars); }
+
+    .pro-header {
+      background: linear-gradient(135deg, var(--paars) 0%, var(--paars-donker) 100%);
+      color: var(--wit);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-zacht);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .pro-header h1 { color: var(--wit); font-size: 20px; margin: 0; }
+    .terug-knop { color: var(--wit); text-decoration: none; font-size: 14px; opacity: 0.9; }
+    .terug-knop:hover { opacity: 1; }
+
+    .container { max-width: 1100px; margin: 28px auto; padding: 0 20px 60px; }
+
+    .card {
+      background: var(--wit);
+      border-radius: var(--radius);
+      padding: 28px 30px;
+      box-shadow: var(--shadow-zacht);
+      margin-bottom: 20px;
+    }
+    .card h2 { font-size: 22px; margin-bottom: 6px; }
+    .card-intro { color: var(--tekst-licht); font-size: 14.5px; margin-bottom: 22px; }
+
+    /* Zoekveld + samenvatting */
+    .top-bar {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+    }
+    .zoek-veld {
+      flex: 1;
+      min-width: 260px;
+      padding: 11px 14px;
+      border: 2px solid var(--creme-donker);
+      border-radius: 10px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14.5px;
+      background: var(--wit);
+    }
+    .zoek-veld:focus { outline: none; border-color: var(--paars); box-shadow: 0 0 0 3px var(--lilac-licht); }
+    .stats {
+      display: flex;
+      gap: 12px;
+      font-size: 13.5px;
+      color: var(--tekst-licht);
+    }
+    .stat {
+      background: var(--lilac-licht);
+      color: var(--paars-donker);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .stat strong { color: var(--paars); }
+
+    /* School cards */
+    .school-card {
+      background: var(--creme);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 14px;
+      border-left: 5px solid var(--paars);
+      transition: box-shadow 0.15s;
+    }
+    .school-card:hover { box-shadow: var(--shadow-zacht); }
+    .school-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+      flex-wrap: wrap;
+    }
+    .school-info h3 {
+      font-size: 17px;
+      color: var(--paars-donker);
+      margin-bottom: 4px;
+      font-family: 'Fraunces', serif;
+    }
+    .school-meta {
+      font-size: 13px;
+      color: var(--tekst-licht);
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .school-meta span { white-space: nowrap; }
+    .school-meta strong { color: var(--tekst); font-weight: 700; }
+    .school-toggle {
+      font-size: 13px;
+      color: var(--paars);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .school-card.open .school-toggle::after { content: " ▲"; }
+    .school-card:not(.open) .school-toggle::after { content: " ▼"; }
+
+    /* Teacher list */
+    .teacher-list {
+      display: none;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--creme-donker);
+    }
+    .school-card.open .teacher-list { display: block; }
+
+    .teacher-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--wit);
+      border-radius: 9px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      align-items: center;
+    }
+    @media (max-width: 700px) {
+      .teacher-row { grid-template-columns: 1fr; }
+    }
+    .teacher-info strong { display: block; color: var(--paars-donker); margin-bottom: 2px; }
+    .teacher-info .detail {
+      display: block;
+      font-size: 12.5px;
+      color: var(--tekst-licht);
+      margin-top: 2px;
+    }
+    .teacher-info code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: var(--creme);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .status-badge.active { background: #E6F4EA; color: var(--groen); }
+    .status-badge.expiring_soon { background: #FFF4E0; color: #8B5A1A; }
+    .status-badge.expired { background: #FDE8E8; color: var(--rood); }
+    .status-badge.unknown { background: var(--lilac-licht); color: var(--paars-donker); }
+
+    .teacher-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .btn-mini {
+      font-family: inherit;
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn-mini:disabled { opacity: 0.5; cursor: wait; }
+    .btn-reset { background: var(--lilac-licht); color: var(--paars-donker); }
+    .btn-reset:hover:not(:disabled) { background: var(--lilac); }
+    .btn-extend { background: #FFF4E0; color: #8B5A1A; }
+    .btn-extend:hover:not(:disabled) { background: var(--geel); color: #5C3D11; }
+
+    /* Status messages */
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--wit);
+      padding: 14px 20px;
+      border-radius: 10px;
+      box-shadow: var(--shadow-medium);
+      font-size: 14px;
+      z-index: 1000;
+      max-width: 360px;
+      border-left: 5px solid var(--groen);
+      opacity: 0;
+      transform: translateX(20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.show { opacity: 1; transform: translateX(0); }
+    .toast.error { border-left-color: var(--rood); }
+
+    .nota {
+      padding: 12px 16px;
+      border-radius: 9px;
+      font-size: 13.5px;
+      margin: 12px 0;
+      line-height: 1.5;
+    }
+    .nota.blauw { background: var(--lilac-licht); color: var(--paars-donker); border-left: 4px solid var(--paars); }
+    .nota.groen { background: #E6F4EA; color: var(--groen); border-left: 4px solid var(--groen); }
+    .nota.oranje { background: #FFF4E0; color: #8B5A1A; border-left: 4px solid var(--oranje); }
+    .nota.rood { background: #FDE8E8; color: var(--rood); border-left: 4px solid var(--rood); }
+
+    .laden-tekst {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--tekst-licht);
+    }
+
+    .leeg-state {
+      text-align: center;
+      padding: 50px 20px;
+      color: var(--tekst-licht);
+    }
+    .leeg-state .emoji { font-size: 48px; display: block; margin-bottom: 14px; }
+
+    /* Login-prompt */
+    .login-prompt {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 40px;
+      background: var(--wit);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-medium);
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="app" style="display:none;">
+
+    <header class="pro-header">
+      <h1>📋 Overzicht schoolbestellingen</h1>
+      <div style="display:flex; gap:14px; align-items:center;">
+        <a href="./admin-school.html" class="terug-knop"
+           style="background:rgba(255,255,255,0.15); padding:7px 14px; border-radius:8px;">
+          🦓 Nieuwe activeren
+        </a>
+        <a href="./app.html" class="terug-knop">← Terug naar app</a>
+      </div>
+    </header>
+
+    <div class="container">
+
+      <div class="card">
+        <h2>Alle schoolbestellingen</h2>
+        <p class="card-intro">Klik op een school om de leerkrachten en hun licentiestatus te zien. Vanuit hier kan je wachtwoord-resets opnieuw versturen of licenties verlengen.</p>
+
+        <div class="top-bar">
+          <input type="text" id="zoek-veld" class="zoek-veld" placeholder="🔍 Zoek op schoolnaam, mailadres, factuurnummer of licentiecode..." />
+          <div class="stats" id="stats">
+            <span class="stat"><strong id="stat-scholen">0</strong> scholen</span>
+            <span class="stat"><strong id="stat-leerkrachten">0</strong> leerkrachten</span>
+          </div>
+        </div>
+
+        <div id="laden" class="laden-tekst">⏳ Bestellingen laden...</div>
+        <div id="lijst"></div>
+        <div id="leeg-state" class="leeg-state" style="display:none;">
+          <span class="emoji">🦓</span>
+          <p>Nog geen schoolbestellingen.</p>
+          <p style="margin-top:8px; font-size:13.5px;">Activeer er eentje via <a href="./admin-school.html" style="color:var(--paars);">de admin-pagina</a>.</p>
+        </div>
+        <div id="geen-resultaat" class="leeg-state" style="display:none;">
+          <span class="emoji">🔍</span>
+          <p>Geen resultaten voor je zoekopdracht.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="laden-prompt" class="login-prompt">
+    <h2 style="margin-bottom:10px;">⏳ Even geduld...</h2>
+    <p style="color:var(--tekst-licht);">Bezig met inloggen verifiëren.</p>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+    let alleSchoolData = []; // bewaar volledige dataset voor zoeken
+
+    window.onProReady = async function ({ user }) {
+      document.getElementById('laden-prompt').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+
+      const app = getApps().length ? getApp() : null;
+      if (!app) { showToast('Fout: Firebase niet geïnitialiseerd.', 'error'); return; }
+
+      const fns = getFunctions(app, "europe-west1");
+      const adminListSchoolOrders = httpsCallable(fns, "adminListSchoolOrders");
+      const adminResendPasswordReset = httpsCallable(fns, "adminResendPasswordReset");
+      const adminExtendLicense = httpsCallable(fns, "adminExtendLicense");
+
+      // Helpers
+      const $ = (id) => document.getElementById(id);
+      const escapeHtml = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+      const formatDate = (iso) => {
+        if (!iso) return '-';
+        try { return new Date(iso).toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
+        catch { return iso; }
+      };
+
+      function showToast(msg, type) {
+        const t = $('toast');
+        t.textContent = msg;
+        t.className = 'toast' + (type === 'error' ? ' error' : '') + ' show';
+        setTimeout(() => { t.className = 'toast' + (type === 'error' ? ' error' : ''); }, 4500);
+      }
+
+      function statusBadgeHtml(status, daysUntilExpiry) {
+        const labels = {
+          active: `✅ Actief${daysUntilExpiry ? ' (' + daysUntilExpiry + 'd)' : ''}`,
+          expiring_soon: `⚠️ Vervalt binnen ${daysUntilExpiry || '?'}d`,
+          expired: '❌ Verlopen',
+          unknown: '❓ Onbekend',
+        };
+        return `<span class="status-badge ${status}">${labels[status] || status}</span>`;
+      }
+
+      function renderSchools(schools) {
+        const lijst = $('lijst');
+        lijst.innerHTML = '';
+
+        if (schools.length === 0) {
+          $('geen-resultaat').style.display = alleSchoolData.length > 0 ? 'block' : 'none';
+          $('leeg-state').style.display = alleSchoolData.length === 0 ? 'block' : 'none';
+          return;
+        }
+        $('geen-resultaat').style.display = 'none';
+        $('leeg-state').style.display = 'none';
+
+        for (const school of schools) {
+          const card = document.createElement('div');
+          card.className = 'school-card';
+          const teacherRows = school.teachers.map(t => `
+            <div class="teacher-row">
+              <div class="teacher-info">
+                <strong>${escapeHtml(t.email)}</strong>
+                <span class="detail">
+                  Licentie <code>${escapeHtml(t.licenseCode)}</code> ·
+                  Aangemaakt ${formatDate(t.createdAt)} ·
+                  Vervalt ${formatDate(t.expiresAt)}
+                </span>
+              </div>
+              ${statusBadgeHtml(t.status, t.daysUntilExpiry)}
+              <div class="teacher-actions">
+                <button class="btn-mini btn-reset" data-action="resend" data-email="${escapeHtml(t.email)}" data-school="${escapeHtml(school.schoolName)}">
+                  🔑 Reset wachtwoord
+                </button>
+                <button class="btn-mini btn-extend" data-action="extend" data-code="${escapeHtml(t.licenseCode)}" data-email="${escapeHtml(t.email)}">
+                  ⏰ Verleng 1 jaar
+                </button>
+              </div>
+            </div>
+          `).join('');
+
+          card.innerHTML = `
+            <div class="school-header">
+              <div class="school-info">
+                <h3>🏫 ${escapeHtml(school.schoolName)}</h3>
+                <div class="school-meta">
+                  ${school.invoiceNumber ? `<span>📄 Factuur: <strong>${escapeHtml(school.invoiceNumber)}</strong></span>` : ''}
+                  <span>📅 Eerste activatie: <strong>${formatDate(school.firstOrderDate)}</strong></span>
+                  <span>👥 <strong>${school.teachers.length}</strong> leerkracht${school.teachers.length === 1 ? '' : 'en'}</span>
+                  ${school.notes ? `<span>📝 ${escapeHtml(school.notes)}</span>` : ''}
+                </div>
+              </div>
+              <div class="school-toggle">Details</div>
+            </div>
+            <div class="teacher-list">
+              ${teacherRows}
+            </div>
+          `;
+
+          // Toggle openen/sluiten bij klik op header
+          const header = card.querySelector('.school-header');
+          header.addEventListener('click', () => card.classList.toggle('open'));
+
+          lijst.appendChild(card);
+        }
+
+        // Knop event-handlers
+        lijst.addEventListener('click', handleActionClick);
+      }
+
+      async function handleActionClick(e) {
+        const btn = e.target.closest('.btn-mini');
+        if (!btn) return;
+        e.stopPropagation();
+
+        const action = btn.dataset.action;
+        if (action === 'resend') {
+          const email = btn.dataset.email;
+          const school = btn.dataset.school;
+          if (!confirm(`Stuur opnieuw een welkomstmail naar ${email}?\n\nDe leerkracht krijgt een nieuwe wachtwoord-reset link.`)) return;
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+          try {
+            const res = await adminResendPasswordReset({ email, schoolName: school });
+            showToast(res?.data?.message || 'Mail opnieuw verzonden.', 'ok');
+          } catch (err) {
+            showToast(`Fout: ${err?.message || err}`, 'error');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = '🔑 Reset wachtwoord';
+          }
+        }
+        else if (action === 'extend') {
+          const code = btn.dataset.code;
+          const email = btn.dataset.email;
+          const factuur = prompt(`Verleng licentie ${code} (${email}) met 1 jaar.\n\nEvent. nieuw factuurnummer voor administratie (optioneel):`);
+          // Als gebruiker Cancel klikt → factuur === null → annuleren
+          if (factuur === null) return;
+          if (!confirm(`Bevestig: licentie ${code} met 1 jaar verlengen?`)) return;
+          btn.disabled = true;
+          btn.textContent = '⏳ Bezig...';
+          try {
+            const res = await adminExtendLicense({
+              licenseCode: code,
+              extendDays: 365,
+              newInvoiceNumber: factuur || ""
+            });
+            showToast(res?.data?.message || 'Verlengd.', 'ok');
+            // Herlaad data om nieuwe vervaldatum te tonen
+            await loadOrders();
+          } catch (err) {
+            showToast(`Fout: ${err?.message || err}`, 'error');
+            btn.disabled = false;
+            btn.textContent = '⏰ Verleng 1 jaar';
+          }
+        }
+      }
+
+      function applyFilter(zoekterm) {
+        const term = zoekterm.toLowerCase().trim();
+        if (!term) { renderSchools(alleSchoolData); return; }
+
+        const gefilterd = alleSchoolData
+          .map(school => {
+            const schoolMatch =
+              school.schoolName.toLowerCase().includes(term) ||
+              (school.invoiceNumber || "").toLowerCase().includes(term) ||
+              (school.notes || "").toLowerCase().includes(term);
+            const matchedTeachers = school.teachers.filter(t =>
+              t.email.toLowerCase().includes(term) ||
+              t.licenseCode.toLowerCase().includes(term)
+            );
+            if (schoolMatch || matchedTeachers.length > 0) {
+              // Als school zelf match: toon alle leerkrachten. Anders alleen de gematchte.
+              return {
+                ...school,
+                teachers: schoolMatch ? school.teachers : matchedTeachers
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
+
+        renderSchools(gefilterd);
+      }
+
+      async function loadOrders() {
+        $('laden').style.display = 'block';
+        $('lijst').innerHTML = '';
+        try {
+          const res = await adminListSchoolOrders({});
+          const schools = res?.data?.schools || [];
+          alleSchoolData = schools;
+
+          // Statistieken
+          const totalTeachers = schools.reduce((sum, s) => sum + s.teachers.length, 0);
+          $('stat-scholen').textContent = schools.length;
+          $('stat-leerkrachten').textContent = totalTeachers;
+
+          $('laden').style.display = 'none';
+
+          const zoekterm = $('zoek-veld').value;
+          applyFilter(zoekterm);
+        } catch (err) {
+          $('laden').textContent = `❌ Fout bij laden: ${err?.message || err}`;
+          showToast(`Fout bij laden: ${err?.message || err}`, 'error');
+        }
+      }
+
+      // Zoek-veld
+      $('zoek-veld').addEventListener('input', (e) => applyFilter(e.target.value));
+
+      // Init
+      loadOrders();
+    };
+  </script>
+
+  <script type="module" src="./guard.js"></script>
+
+</body>
+</html>
