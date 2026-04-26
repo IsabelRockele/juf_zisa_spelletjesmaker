@@ -1675,3 +1675,350 @@ export const adminGrantSchoolLicense = onCall(
 // ============================================================================
 // EINDE SCHOOL-LICENTIES
 // ============================================================================
+// ============================================================================
+// SCHOOL-OVERZICHT — Drie admin functies
+// Voeg dit blok toe aan het einde van pro_backend/src/index.ts
+// (NA de bestaande adminGrantSchoolLicense functie)
+//
+// Gebruikt SCHOOL_ADMIN_EMAILS (al gedefinieerd bovenaan index.ts).
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// 1) adminListSchoolOrders — Haal alle schoolbestellingen op, gegroepeerd per school
+// ----------------------------------------------------------------------------
+/**
+ * Returns alle schoolbestellingen, met per leerkracht ook de huidige licentie-status.
+ * Output:
+ *   {
+ *     schools: [
+ *       {
+ *         schoolName: "BS Atheneum Aalst",
+ *         invoiceNumber: "2026-0010",
+ *         notes: "...",
+ *         firstOrderDate: "2026-04-26T...",
+ *         teachers: [
+ *           {
+ *             email: "...",
+ *             licenseCode: "SCHL-...",
+ *             createdAt: "...",
+ *             expiresAt: "...",
+ *             status: "active" | "expiring_soon" | "expired",
+ *             daysUntilExpiry: 365,
+ *             uid: "..."
+ *           }
+ *         ]
+ *       }
+ *     ]
+ *   }
+ */
+export const adminListSchoolOrders = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    // 1) AUTH CHECK
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      logger.warn("[adminListSchoolOrders] Ongeoorloofde poging", { callerEmail });
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    // 2) Haal alle bestellingen op met source: "school"
+    //    We zoeken in alle ORDER_COLLECTIONS, maar in praktijk is "Bestellingen" de hoofdcollectie
+    const allOrders: any[] = [];
+    for (const col of ORDER_COLLECTIONS) {
+      try {
+        const qs = await db
+          .collection(col)
+          .where("source", "==", "school")
+          .get();
+        for (const doc of qs.docs) {
+          const data = doc.data() as any;
+          allOrders.push({ ...data, _docId: doc.id, _collection: col });
+        }
+      } catch (e) {
+        logger.warn(`[adminListSchoolOrders] Fout bij ophalen ${col}`, { error: String(e) });
+      }
+    }
+
+    // 3) Dedupliceer op licenseCode (kan in meerdere collecties staan)
+    const seenCodes = new Set<string>();
+    const uniqueOrders = allOrders.filter((o) => {
+      const code = String(o.licenseCode || "").trim();
+      if (!code || seenCodes.has(code)) return false;
+      seenCodes.add(code);
+      return true;
+    });
+
+    // 4) Voor elke bestelling: haal de huidige licentie-status op
+    const nowMs = Date.now();
+    const teachersWithStatus = await Promise.all(
+      uniqueOrders.map(async (order) => {
+        const code = String(order.licenseCode || "").trim();
+        let licenseDoc: any = null;
+
+        // Zoek in beide LICENSE_COLLECTIONS
+        for (const col of LICENSE_COLLECTIONS) {
+          try {
+            const qs = await db.collection(col).where("code", "==", code).limit(1).get();
+            if (!qs.empty) {
+              licenseDoc = qs.docs[0].data();
+              break;
+            }
+          } catch {}
+        }
+
+        // Bereken status
+        const expMs = licenseDoc?.expiresAt?.toMillis?.() ?? 0;
+        const daysUntilExpiry = expMs > 0 ? Math.ceil((expMs - nowMs) / (1000 * 60 * 60 * 24)) : null;
+        let teacherStatus: "active" | "expiring_soon" | "expired" | "unknown" = "unknown";
+        if (licenseDoc) {
+          const isActive =
+            String(licenseDoc.status || "").toLowerCase() === "active" ||
+            String(licenseDoc.status || "").toLowerCase() === "actief";
+          if (!isActive || (expMs > 0 && expMs < nowMs)) {
+            teacherStatus = "expired";
+          } else if (daysUntilExpiry !== null && daysUntilExpiry <= 30) {
+            teacherStatus = "expiring_soon";
+          } else {
+            teacherStatus = "active";
+          }
+        }
+
+        return {
+          email: String(order.email || ""),
+          licenseCode: code,
+          createdAt: order.createdAt?.toDate?.()?.toISOString?.() || null,
+          expiresAt: licenseDoc?.expiresAt?.toDate?.()?.toISOString?.() || null,
+          status: teacherStatus,
+          daysUntilExpiry,
+          uid: licenseDoc?.uid || order.uid || null,
+          schoolName: String(order.schoolName || "(onbekend)"),
+          invoiceNumber: String(order.invoiceNumber || ""),
+          notes: String(order.notes || ""),
+          orderDate: order.createdAt?.toDate?.()?.toISOString?.() || null,
+        };
+      })
+    );
+
+    // 5) Groepeer per schoolnaam
+    const schoolMap = new Map<string, any>();
+    for (const t of teachersWithStatus) {
+      const name = t.schoolName || "(onbekend)";
+      if (!schoolMap.has(name)) {
+        schoolMap.set(name, {
+          schoolName: name,
+          invoiceNumber: t.invoiceNumber,
+          notes: t.notes,
+          firstOrderDate: t.orderDate,
+          teachers: [],
+        });
+      }
+      const s = schoolMap.get(name);
+      // Hou de oudste invoicedate als eerste activatiedatum
+      if (t.orderDate && (!s.firstOrderDate || t.orderDate < s.firstOrderDate)) {
+        s.firstOrderDate = t.orderDate;
+      }
+      // Voeg leerkracht-info toe (zonder dubbele schoolvelden)
+      s.teachers.push({
+        email: t.email,
+        licenseCode: t.licenseCode,
+        createdAt: t.createdAt,
+        expiresAt: t.expiresAt,
+        status: t.status,
+        daysUntilExpiry: t.daysUntilExpiry,
+        uid: t.uid,
+      });
+    }
+
+    // 6) Sorteer scholen op meest recent eerst, en leerkrachten op email
+    const schools = Array.from(schoolMap.values()).sort((a, b) => {
+      const aT = a.firstOrderDate || "";
+      const bT = b.firstOrderDate || "";
+      return bT.localeCompare(aT);
+    });
+    for (const s of schools) {
+      s.teachers.sort((a: any, b: any) => a.email.localeCompare(b.email));
+    }
+
+    logger.info("[adminListSchoolOrders] Resultaat", {
+      callerEmail,
+      schoolCount: schools.length,
+      teacherCount: teachersWithStatus.length,
+    });
+
+    return { ok: true, schools };
+  }
+);
+
+// ----------------------------------------------------------------------------
+// 2) adminResendPasswordReset — Stuur wachtwoord-reset mail opnieuw
+// ----------------------------------------------------------------------------
+/**
+ * Genereert nieuwe password-reset link en stuurt opnieuw welkomstmail.
+ * Input:
+ *   - email (verplicht)
+ *   - schoolName (optioneel, voor in de mail)
+ */
+export const adminResendPasswordReset = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const emailRaw = String(data.email || "").trim();
+    const schoolName = String(data.schoolName || "").trim() || "je school";
+
+    if (!emailRaw || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
+      throw new HttpsError("invalid-argument", "Ongeldig e-mailadres.");
+    }
+
+    const email = toLowerEmail(emailRaw);
+
+    // Genereer en verstuur
+    try {
+      const passwordLink = await generatePasswordLink(email);
+      await queueEmail(
+        email,
+        "Je Zisa PRO wachtwoord opnieuw instellen 🦓",
+        emailHtmlSchool({ email, passwordLink, schoolName }),
+      );
+      logger.info("[adminResendPasswordReset] Succesvol", { email, callerEmail });
+      return {
+        ok: true,
+        message: `Welkomstmail opnieuw verzonden naar ${email}.`,
+      };
+    } catch (e: any) {
+      logger.error("[adminResendPasswordReset] Fout", { email, error: e?.message || String(e) });
+      throw new HttpsError("internal", `Mail verzenden mislukt: ${e?.message || "onbekende fout"}`);
+    }
+  }
+);
+
+// ----------------------------------------------------------------------------
+// 3) adminExtendLicense — Verleng een licentie met 1 jaar (of opgegeven aantal dagen)
+// ----------------------------------------------------------------------------
+/**
+ * Verlengt een licentie. Standaard met 1 jaar (365 dagen).
+ * Input:
+ *   - licenseCode (verplicht)
+ *   - extendDays (optioneel, default 365)
+ *   - newInvoiceNumber (optioneel, voor administratie)
+ */
+export const adminExtendLicense = onCall(
+  { region: REGION, enforceAppCheck: true },
+  async (req) => {
+    if (!req.auth) {
+      throw new HttpsError("unauthenticated", "Login vereist.");
+    }
+    const callerEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+    if (!SCHOOL_ADMIN_EMAILS.has(callerEmail)) {
+      throw new HttpsError("permission-denied", "Geen toegang tot deze functie.");
+    }
+
+    const data = req.data || {};
+    const licenseCode = String(data.licenseCode || "").trim();
+    const extendDays = Number.isFinite(data.extendDays) ? Number(data.extendDays) : 365;
+    const newInvoiceNumber = String(data.newInvoiceNumber || "").trim();
+
+    if (!licenseCode) {
+      throw new HttpsError("invalid-argument", "Licentiecode is verplicht.");
+    }
+    if (extendDays < 1 || extendDays > 1825) {
+      throw new HttpsError("invalid-argument", "Verlengperiode moet tussen 1 en 1825 dagen liggen.");
+    }
+
+    // Zoek de bestaande licentie in beide collecties
+    let foundDoc: { ref: FirebaseFirestore.DocumentReference; data: any; col: string } | null = null;
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).limit(1).get();
+        if (!qs.empty) {
+          foundDoc = { ref: qs.docs[0].ref, data: qs.docs[0].data(), col };
+          break;
+        }
+      } catch {}
+    }
+    if (!foundDoc) {
+      throw new HttpsError("not-found", `Licentie ${licenseCode} niet gevonden.`);
+    }
+
+    // Bereken nieuwe vervaldatum: start vanaf huidige expiresAt OF vandaag (welke later)
+    const nowMs = Date.now();
+    const currentExpMs = foundDoc.data.expiresAt?.toMillis?.() ?? 0;
+    const startMs = Math.max(nowMs, currentExpMs);
+    const newExpMs = startMs + extendDays * 24 * 60 * 60 * 1000;
+    const newExpiresAt = Timestamp.fromMillis(newExpMs);
+
+    // Update in BEIDE collecties
+    let updatedCount = 0;
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("code", "==", licenseCode).limit(1).get();
+        if (!qs.empty) {
+          await qs.docs[0].ref.update({
+            expiresAt: newExpiresAt,
+            status: "active",  // herzet status voor het geval die op "expired" stond
+            lastExtendedAt: FieldValue.serverTimestamp(),
+            lastExtendedBy: callerEmail,
+          });
+          updatedCount++;
+        }
+      } catch (e) {
+        logger.warn(`[adminExtendLicense] Update mislukt in ${col}`, { error: String(e) });
+      }
+    }
+
+    // Voeg ook een nieuwe Bestelling toe als verlengingsbewijs
+    const orderId = `school-extend-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const orderDoc = {
+      amountEUR: PRICE_EUR_KOOP,
+      createdAt: FieldValue.serverTimestamp(),
+      paidAt: FieldValue.serverTimestamp(),
+      description: `Zisa PRO - jaarverlenging (${foundDoc.data.schoolName || "school"})`,
+      email: foundDoc.data.email,
+      uid: foundDoc.data.uid,
+      licenseCode,
+      source: "school",
+      status: "betaald",
+      schoolName: foundDoc.data.schoolName || "",
+      invoiceNumber: newInvoiceNumber || null,
+      invoiceSeries: "live",
+      isExtension: true,
+      extendDays,
+      grantedBy: callerEmail,
+    };
+    try {
+      await writeOrderAll(orderId, orderDoc);
+    } catch (e) {
+      logger.warn("[adminExtendLicense] Order doc niet aangemaakt", { error: String(e) });
+    }
+
+    logger.info("[adminExtendLicense] Succesvol", {
+      licenseCode,
+      newExpiresAt: newExpiresAt.toDate().toISOString(),
+      extendDays,
+      callerEmail,
+      updatedCount,
+    });
+
+    return {
+      ok: true,
+      licenseCode,
+      newExpiresAt: newExpiresAt.toDate().toISOString(),
+      extendDays,
+      message: `Licentie verlengd tot ${newExpiresAt.toDate().toLocaleDateString("nl-BE")}.`,
+    };
+  }
+);
+
+// ============================================================================
+// EINDE SCHOOL-OVERZICHT FUNCTIES
+// ============================================================================
