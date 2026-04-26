@@ -324,7 +324,7 @@
         <p class="card-intro">Klik op een school om de leerkrachten en hun licentiestatus te zien. Vanuit hier kan je wachtwoord-resets opnieuw versturen of licenties verlengen.</p>
 
         <div class="top-bar">
-          <input type="text" id="zoek-veld" class="zoek-veld" placeholder="🔍 Zoek op schoolnaam, mailadres, factuurnummer of licentiecode..." />
+          <input type="text" id="zoek-veld" class="zoek-veld" placeholder="🔍 Zoek op schoolnaam, mailadres, contactpersoon, factuur of licentiecode..." />
           <label class="toggle-archived">
             <input type="checkbox" id="toggle-archived" />
             📦 Toon gearchiveerde
@@ -481,6 +481,7 @@
                   ${school.invoiceNumber ? `<span>📄 Factuur: <strong>${escapeHtml(school.invoiceNumber)}</strong></span>` : ''}
                   <span>📅 Eerste activatie: <strong>${formatDate(school.firstOrderDate)}</strong></span>
                   <span>👥 <strong>${school.teachers.length}</strong> leerkracht${school.teachers.length === 1 ? '' : 'en'}</span>
+                  ${school.schoolContact ? `<span>📧 Contact: <strong>${escapeHtml(school.schoolContact)}</strong></span>` : '<span style="color:var(--rood);">⚠️ Geen contactpersoon</span>'}
                   ${school.notes ? `<span>📝 ${escapeHtml(school.notes)}</span>` : ''}
                 </div>
               </div>
@@ -633,6 +634,7 @@
             const schoolMatch =
               school.schoolName.toLowerCase().includes(term) ||
               (school.invoiceNumber || "").toLowerCase().includes(term) ||
+              (school.schoolContact || "").toLowerCase().includes(term) ||
               (school.notes || "").toLowerCase().includes(term);
             const matchedTeachers = school.teachers.filter(t =>
               t.email.toLowerCase().includes(term) ||
