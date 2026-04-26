@@ -1553,6 +1553,7 @@ export const adminGrantSchoolLicense = onCall(
     const data = req.data || {};
     const emailRaw = String(data.email || "").trim();
     const schoolName = String(data.schoolName || "").trim();
+    const schoolContactRaw = String(data.schoolContact || "").trim();
     const invoiceNumber = String(data.invoiceNumber || "").trim();
     const notes = String(data.notes || "").trim();
 
@@ -1562,6 +1563,11 @@ export const adminGrantSchoolLicense = onCall(
     if (!schoolName) {
       throw new HttpsError("invalid-argument", "Schoolnaam is verplicht.");
     }
+    // schoolContact is optioneel voor backwards-compatibility, maar als ingevuld moet het geldig zijn
+    if (schoolContactRaw && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolContactRaw)) {
+      throw new HttpsError("invalid-argument", "Ongeldig contactpersoon e-mailadres.");
+    }
+    const schoolContact = schoolContactRaw ? toLowerEmail(schoolContactRaw) : "";
 
     const email = toLowerEmail(emailRaw);
 
@@ -1612,6 +1618,7 @@ export const adminGrantSchoolLicense = onCall(
       status: "active",
       source: "school",            // handig om te onderscheiden van koop
       schoolName,                  // voor latere rapportage
+      schoolContact: schoolContact || null,  // contact voor verleng-herinneringen
     };
 
     await writeLicenseAll(licenseCode, licenseDoc);
@@ -1628,6 +1635,7 @@ export const adminGrantSchoolLicense = onCall(
       source: "school",
       status: "betaald",
       schoolName,
+      schoolContact: schoolContact || null,  // contact voor verleng-herinneringen
       invoiceNumber: invoiceNumber || null,
       invoiceSeries: "live",
       notes: notes || null,
@@ -1807,6 +1815,7 @@ export const adminListSchoolOrders = onCall(
           daysUntilExpiry,
           uid: licenseDoc?.uid || order.uid || null,
           schoolName: String(order.schoolName || "(onbekend)"),
+          schoolContact: String(order.schoolContact || licenseDoc?.schoolContact || ""),
           invoiceNumber: String(order.invoiceNumber || ""),
           notes: String(order.notes || ""),
           orderDate: order.createdAt?.toDate?.()?.toISOString?.() || null,
@@ -1824,6 +1833,7 @@ export const adminListSchoolOrders = onCall(
       if (!schoolMap.has(name)) {
         schoolMap.set(name, {
           schoolName: name,
+          schoolContact: t.schoolContact || "",
           invoiceNumber: t.invoiceNumber,
           notes: t.notes,
           firstOrderDate: t.orderDate,
@@ -1831,6 +1841,10 @@ export const adminListSchoolOrders = onCall(
         });
       }
       const s = schoolMap.get(name);
+      // Update schoolContact als deze leerkracht er een heeft maar de school nog niet
+      if (!s.schoolContact && t.schoolContact) {
+        s.schoolContact = t.schoolContact;
+      }
       // Hou de oudste invoicedate als eerste activatiedatum
       if (t.orderDate && (!s.firstOrderDate || t.orderDate < s.firstOrderDate)) {
         s.firstOrderDate = t.orderDate;
