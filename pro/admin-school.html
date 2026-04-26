@@ -297,11 +297,19 @@
 
         <form id="school-admin-form">
 
-          <div class="form-row">
-            <label for="schoolName">Schoolnaam <span class="verplicht">*</span></label>
-            <input type="text" id="schoolName" required placeholder="bv. BS Atheneum Aalst" />
-            <span class="hint">Komt in de bevestigingsmail aan de leerkrachten ("Jouw school X heeft...") en in je interne logging.</span>
+          <div class="form-row two-cols">
+            <div>
+              <label for="schoolName">Schoolnaam <span class="verplicht">*</span></label>
+              <input type="text" id="schoolName" required placeholder="bv. BS Atheneum Aalst" />
+            </div>
+            <div>
+              <label for="schoolContact">Contactpersoon (e-mail) <span class="verplicht">*</span></label>
+              <input type="email" id="schoolContact" required placeholder="bv. directeur@school.be" />
+            </div>
           </div>
+          <span class="hint" style="display:block; margin-top:-8px; margin-bottom:16px;">
+            ℹ️ Schoolnaam komt in de welkomstmail aan leerkrachten. Contactpersoon krijgt later een automatische verleng-herinnering ~30 dagen voor afloop.
+          </span>
 
           <div class="form-row two-cols">
             <div>
@@ -450,6 +458,7 @@
         e.preventDefault();
 
         const schoolName = schoolInput.value.trim();
+        const schoolContact = $('schoolContact').value.trim().toLowerCase();
         const invoiceNumber = $('invoiceNumber').value.trim();
         const notes = $('notes').value.trim();
         const emails = parseEmails(emailsInput.value);
@@ -457,6 +466,11 @@
         if (!schoolName) {
           alert('Vul de schoolnaam in.');
           schoolInput.focus();
+          return;
+        }
+        if (!schoolContact || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(schoolContact)) {
+          alert('Vul een geldig e-mailadres in voor de contactpersoon.');
+          $('schoolContact').focus();
           return;
         }
         if (emails.length === 0) {
@@ -469,6 +483,7 @@
           `Je staat op het punt om voor ${emails.length} leerkracht${emails.length === 1 ? '' : 'en'} ` +
           `van "${schoolName}" een PRO-account aan te maken.\n\n` +
           `Elke leerkracht krijgt onmiddellijk een welkomstmail met een wachtwoord-reset link.\n\n` +
+          `Verleng-herinneringen worden later naar ${schoolContact} gestuurd.\n\n` +
           `Doorgaan?`
         );
         if (!bevestiging) return;
@@ -491,6 +506,7 @@
             const res = await adminGrantSchoolLicense({
               email,
               schoolName,
+              schoolContact,
               invoiceNumber: invoiceNumber || undefined,
               notes: notes || undefined,
             });
