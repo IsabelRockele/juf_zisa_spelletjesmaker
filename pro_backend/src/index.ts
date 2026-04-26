@@ -933,23 +933,29 @@ export const registerDevice = onCall({ region: REGION, enforceAppCheck: true }, 
   const deviceId = String((req.data as any)?.deviceId || "").trim();
   if (!deviceId) throw new HttpsError("invalid-argument", "deviceId ontbreekt");
 
+  const tokenEmail = String((req.auth.token as any)?.email || "").toLowerCase();
+  const isOwner = tokenEmail && OWNER_EMAILS.has(tokenEmail);
+
   const col = db.collection("users").doc(uid).collection("devices");
 
   // Idempotent: bestaat dit deviceId al?
   const exists = await col.where("deviceId", "==", deviceId).limit(1).get();
   if (!exists.empty) return { ok: true };
 
-  const countSnap = await col.count().get();
-  const n = Number(countSnap.data().count || 0);
-  if (n >= DEVICE_LIMIT) {
-    throw new HttpsError("resource-exhausted", "DEVICE_LIMIT");
+  // ★ Owner-accounts: geen limiet
+  if (!isOwner) {
+    const countSnap = await col.count().get();
+    const n = Number(countSnap.data().count || 0);
+    if (n >= DEVICE_LIMIT) {
+      throw new HttpsError("resource-exhausted", "DEVICE_LIMIT");
+    }
   }
 
   await col.add({
     deviceId,
     createdAt: FieldValue.serverTimestamp(),
     userAgent: (req.rawRequest?.headers?.["user-agent"] as string) || "",
-    email: (req.auth.token as any)?.email || null,
+    email: tokenEmail || null,
   });
   return { ok: true };
 });
