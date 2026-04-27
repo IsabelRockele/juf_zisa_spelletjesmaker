@@ -3,47 +3,288 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Koop Zisa PRO</title>
+  <title>Koop Zisa PRO — juf Zisa</title>
   <meta http-equiv="Cache-Control" content="no-store" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700;900&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet" />
+
   <style>
-    :root { --bg:#f7faf9; --card:#fff; --txt:#0f172a; --muted:#475569; --btn:#111827; }
-    body{font-family:system-ui,Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100dvh;margin:0;background:var(--bg)}
-    .card{max-width:720px;width:100%;background:var(--card);border:1px solid #e5e7eb;border-radius:14px;box-shadow:0 10px 24px rgba(0,0,0,.06);padding:24px}
-    h1{margin:.2rem 0 1rem 0;color:var(--txt);font-size:2rem}
-    p{color:var(--muted);margin:.4rem 0 1rem}
-    label{font-weight:600;display:block;margin:.6rem 0 .25rem;color:var(--txt)}
-    input[type=email]{width:100%;padding:.8rem;border:1px solid #d1d5db;border-radius:.6rem;font-size:1rem}
-    .row{display:flex;gap:.8rem;align-items:center;margin-top:1rem;flex-wrap:wrap}
-    button{padding:.8rem 1.1rem;border-radius:.6rem;border:1px solid #0f1729;background:var(--btn);color:#fff;cursor:pointer;font-weight:700}
-    button[disabled]{opacity:.65;cursor:not-allowed}
-    .muted{color:var(--muted);text-decoration:none}
-    .price{display:inline-block;background:#e0f2fe;color:#075985;border-radius:.6rem;padding:.25rem .6rem;font-weight:700}
-    .err{color:#b91c1c;margin-top:.6rem;min-height:1.2em}
-    /* melding bij verlopen/ontbrekende licentie */
-    .alert{
-      background:#fff7ed;border:1px solid #fed7aa;color:#7c2d12;
-      padding:12px;border-radius:10px;margin-bottom:12px;font-size:.95rem
+    :root {
+      --paars: #6B4E9B;
+      --paars-donker: #543B7D;
+      --lilac: #B9A7D1;
+      --lilac-licht: #E5DCF0;
+      --geel: #F4C952;
+      --geel-donker: #E5B838;
+      --oranje: #F5A55E;
+      --creme: #FAF6ED;
+      --creme-donker: #F0E9D7;
+      --tekst: #2C2C2C;
+      --tekst-licht: #5E5E5E;
+      --rood: #D05454;
+      --groen: #5DA66E;
+      --wit: #FFFFFF;
+      --shadow-zacht: 0 4px 16px rgba(107, 78, 155, 0.08);
+      --shadow-medium: 0 8px 24px rgba(107, 78, 155, 0.15);
+      --radius: 14px;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      color: var(--tekst);
+      background: var(--creme);
+      line-height: 1.6;
+      font-size: 16px;
+      min-height: 100dvh;
+    }
+    h1, h2, h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 700;
+      color: var(--paars);
+      line-height: 1.25;
+    }
+    a { color: var(--paars); }
+
+    /* Hero */
+    .hero {
+      background: linear-gradient(135deg, var(--paars) 0%, var(--paars-donker) 100%);
+      color: var(--wit);
+      padding: 28px 20px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      background: var(--geel);
+      opacity: 0.12;
+      border-radius: 50%;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -90px; left: 40%;
+      width: 200px; height: 200px;
+      background: var(--lilac);
+      opacity: 0.15;
+      border-radius: 50%;
+    }
+    .hero-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero img.zisa {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+      flex-shrink: 0;
+    }
+    .hero-text h1 {
+      color: var(--wit);
+      font-size: clamp(20px, 3.5vw, 28px);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .hero-text p {
+      font-size: 14px;
+      opacity: 0.92;
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+    }
+
+    /* Container & card */
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+    .card {
+      background: var(--wit);
+      border-radius: var(--radius);
+      padding: 32px 30px;
+      box-shadow: var(--shadow-zacht);
+    }
+    @media (max-width: 600px) {
+      .card { padding: 24px 20px; }
+    }
+
+    .prijs-strook {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 10px;
+      background: linear-gradient(135deg, var(--geel) 0%, var(--oranje) 100%);
+      padding: 10px 18px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-zacht);
+    }
+    .prijs-strook .bedrag {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--paars-donker);
+      line-height: 1;
+    }
+    .prijs-strook .periode {
+      font-size: 12px;
+      color: var(--paars-donker);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .intro {
+      color: var(--tekst);
+      font-size: 14.5px;
+      margin-bottom: 22px;
+    }
+    .intro strong { color: var(--paars-donker); }
+
+    /* Alert (verlopen/geen licentie) */
+    .alert {
+      background: var(--lilac-licht);
+      border-left: 4px solid var(--paars);
+      color: var(--paars-donker);
+      padding: 14px 16px;
+      border-radius: 9px;
+      margin-bottom: 18px;
+      font-size: 14px;
+    }
+    .alert strong { color: var(--paars-donker); }
+
+    /* Form */
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--paars-donker);
+      margin-bottom: 4px;
+    }
+    input[type="email"] {
+      width: 100%;
+      padding: 10px 13px;
+      border: 2px solid var(--creme-donker);
+      border-radius: 9px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14.5px;
+      color: var(--tekst);
+      background: var(--wit);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input[type="email"]:focus {
+      outline: none;
+      border-color: var(--paars);
+      box-shadow: 0 0 0 3px var(--lilac-licht);
+    }
+
+    .row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    button#buyBtn {
+      background: var(--paars);
+      color: var(--wit);
+      border: none;
+      padding: 13px 28px;
+      font-family: 'Fraunces', serif;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: var(--shadow-medium);
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    button#buyBtn:hover {
+      background: var(--paars-donker);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(107, 78, 155, 0.25);
+    }
+    button#buyBtn:disabled {
+      background: var(--lilac);
+      cursor: wait;
+      transform: none;
+    }
+    .annuleer {
+      color: var(--tekst-licht);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .annuleer:hover { color: var(--paars); text-decoration: underline; }
+
+    .err {
+      color: var(--rood);
+      margin-top: 12px;
+      min-height: 1.2em;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--tekst-licht);
+      font-size: 13px;
+    }
+    footer a { color: var(--paars); }
   </style>
 </head>
 <body>
-  <main class="card" role="main">
-    <h1>Zisa PRO</h1>
-    <p><span class="price">Jaarabonnement</span></p>
-    <p>Vul uw e-mailadres in. Na de betaling wordt uw PRO-licentie automatisch geactiveerd en ontvangt u de mail “Wachtwoord instellen”. (Het kan enkele minuten duren. Kijk ook uw spammap na.)</p>
 
-    <!-- NIEUW: melding bij verlopen/ontbrekende licentie -->
-    <div id="renewAlert" class="alert" hidden></div>
-
-    <label for="email">E-mail voor uw licentie</label>
-    <input id="email" type="email" placeholder="je e-mailadres" autocomplete="email" required />
-
-    <div class="row">
-      <button id="buyBtn">Verder naar betaling</button>
-      <a class="muted" href="./">Annuleren</a>
+  <header class="hero">
+    <div class="hero-inner">
+      <img src="start_afbeeldingen/zisa.png" alt="juf Zisa zebra" class="zisa" />
+      <div class="hero-text">
+        <h1>Zisa PRO — Jaarabonnement</h1>
+        <p>Eén jaar onbeperkt toegang tot alle generatoren</p>
+      </div>
     </div>
-    <div id="msg" class="err" role="alert" aria-live="polite"></div>
+  </header>
+
+  <main class="container">
+    <section class="card" role="main">
+      <div class="prijs-strook">
+        <span class="bedrag">€40</span>
+        <span class="periode">per jaar</span>
+      </div>
+
+      <p class="intro">
+        Vul je <strong>e-mailadres</strong> in. Na de betaling wordt je PRO-licentie automatisch geactiveerd en ontvang je de mail <strong>"Wachtwoord instellen"</strong>. <em>(Het kan enkele minuten duren — kijk ook even in je spammap.)</em>
+      </p>
+
+      <!-- Melding bij verlopen/ontbrekende licentie -->
+      <div id="renewAlert" class="alert" hidden></div>
+
+      <label for="email">E-mail voor je licentie</label>
+      <input id="email" type="email" placeholder="je e-mailadres" autocomplete="email" required />
+
+      <div class="row">
+        <button id="buyBtn">Verder naar betaling</button>
+        <a class="annuleer" href="./">← Annuleren</a>
+      </div>
+      <div id="msg" class="err" role="alert" aria-live="polite"></div>
+    </section>
   </main>
+
+  <footer>
+    <p>juf Zisa — Spelgenerator PRO — <a href="https://www.jufzisa.be" target="_blank" rel="noopener">www.jufzisa.be</a></p>
+    <p style="margin-top: 6px; font-size: 12px;">Vragen? Mail naar <a href="mailto:zebrapost@jufzisa.be">zebrapost@jufzisa.be</a></p>
+  </footer>
 
   <script>
     // Toon nette melding op basis van ?reason=…
@@ -53,9 +294,9 @@
       var box = document.getElementById("renewAlert");
       if (!box) return;
       var msgs = {
-        expired: "<strong>Uw PRO-licentie is verlopen.</strong> Verleng hieronder om verder te gebruiken.",
-        no_license: "<strong>Geen geldige PRO-licentie gevonden.</strong> Koop hieronder uw jaarlicentie om toegang te krijgen.",
-        no_access: "<strong>Er is geen toegang.</strong> Koop of verleng uw licentie om verder te gaan."
+        expired: "<strong>Je PRO-licentie is verlopen.</strong> Verleng hieronder om verder te gebruiken.",
+        no_license: "<strong>Geen geldige PRO-licentie gevonden.</strong> Koop hieronder je jaarlicentie om toegang te krijgen.",
+        no_access: "<strong>Er is geen toegang.</strong> Koop of verleng je licentie om verder te gaan."
       };
       if (msgs[r]) { box.innerHTML = msgs[r]; box.hidden = false; }
     })();
@@ -109,4 +350,3 @@
   </script>
 </body>
 </html>
-
