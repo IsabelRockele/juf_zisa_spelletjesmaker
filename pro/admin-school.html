@@ -644,8 +644,17 @@
             if (r.alreadyExisted) {
               skipCount++;
               updateResultRow(row, 'skip',
-                'Bestond al — overgeslagen.',
+                'Al deel van deze school — overgeslagen.',
                 `Licentie: <code class="ll">${r.licenseCode || '-'}</code> (al actief tot ${formatDate(r.expiresAt)})`
+              );
+            } else if (r.merged) {
+              // Smart merge: bestaand individueel abonnement → school-licentie + extra dagen
+              okCount++;
+              const prijsLabel = r.pricingPrice ? `€${r.pricingPrice}` : '€40';
+              const dagen = r.mergeExtraDays || 0;
+              updateResultRow(row, 'ok',
+                `🔄 Samengevoegd met bestaand abonnement (${prijsLabel}). +${dagen} dag${dagen === 1 ? '' : 'en'} extra meegerekend.`,
+                `Licentie: <code class="ll">${r.licenseCode}</code> · vervalt ${formatDate(r.expiresAt)} · ${r.mailSent ? 'upgrade-mail verzonden' : '⚠️ mail mislukte'}`
               );
             } else if (r.ok) {
               okCount++;
