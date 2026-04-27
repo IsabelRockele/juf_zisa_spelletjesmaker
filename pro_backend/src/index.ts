@@ -1512,6 +1512,9 @@ export const checkExpiringLicenses = onSchedule(
           // Check of al verstuurd voor deze cyclus (jaar-maand)
           const cycleKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
           if (tokenData.reminder30_lastCycle === cycleKey) continue;
+          // ★ Extra anti-dubbele check: niet sturen als laatste mail < 21 dagen geleden
+          const lastSentMs = tokenData.reminder30_lastSentAt?.toMillis?.() ?? 0;
+          if (lastSentMs > 0 && (Date.now() - lastSentMs) < 21 * ONE_DAY_MS) continue;
 
           const contact = String(tokenData.schoolContact || "").toLowerCase();
           if (!contact) {
@@ -1570,6 +1573,9 @@ export const checkExpiringLicenses = onSchedule(
 
           const cycleKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
           if (tokenData.reminder7_lastCycle === cycleKey) continue;
+          // ★ Extra anti-dubbele check: niet sturen als laatste mail < 5 dagen geleden
+          const lastSentMs7 = tokenData.reminder7_lastSentAt?.toMillis?.() ?? 0;
+          if (lastSentMs7 > 0 && (Date.now() - lastSentMs7) < 5 * ONE_DAY_MS) continue;
 
           const contact = String(tokenData.schoolContact || "").toLowerCase();
           if (!contact) continue;
@@ -1834,8 +1840,13 @@ export const adminGrantSchoolLicense = onCall(
 
     const email = toLowerEmail(emailRaw);
 
-    // 3) IDEMPOTENT CHECK: bestaat er al een actieve licentie voor dit mailadres?
+    // 3) IDEMPOTENT CHECK: bestaat er al een licentie voor dit mailadres?
+    //    → Verlopen: vervangen (gewone flow verder)
+    //    → Nog actief: SMART MERGE (resterende dagen erbij optellen)
+    //      tenzij de licentie al een school-licentie is van DEZELFDE school (= echt overslaan)
     const existing = await findLicenseByEmail(email);
+    let mergeFromExisting: { extraDays: number; existingLicenseCode: string; existingExpiresAt: Date } | null = null;
+
     if (existing) {
       const lic = existing as any;
       const expMs = lic.expiresAt?.toMillis?.() ?? 0;
@@ -1845,18 +1856,37 @@ export const adminGrantSchoolLicense = onCall(
         expMs > Date.now();
 
       if (stillActive) {
-        logger.info("[adminGrantSchoolLicense] Bestaande actieve licentie gevonden, overgeslagen", {
-          email,
-          licenseCode: lic.code,
-        });
-        return {
-          ok: true,
-          alreadyExisted: true,
-          licenseCode: lic.code,
-          uid: lic.uid,
-          expiresAt: lic.expiresAt?.toDate?.()?.toISOString?.() || null,
-          message: "Deze leerkracht heeft al een actieve licentie. Geen nieuwe aangemaakt.",
+        // Check: is dit al een licentie van DEZELFDE school?
+        const existingSource = String(lic.source || "").toLowerCase();
+        const existingSchoolName = String(lic.schoolName || "").trim();
+
+        if (existingSource === "school" && existingSchoolName === schoolName) {
+          // Echt al deel van deze school → overslaan zoals voorheen
+          logger.info("[adminGrantSchoolLicense] Bestaande school-licentie van DEZELFDE school, overgeslagen", {
+            email, licenseCode: lic.code, schoolName,
+          });
+          return {
+            ok: true,
+            alreadyExisted: true,
+            licenseCode: lic.code,
+            uid: lic.uid,
+            expiresAt: lic.expiresAt?.toDate?.()?.toISOString?.() || null,
+            message: "Deze leerkracht is al deel van deze school.",
+          };
+        }
+
+        // Smart merge: bestaande licentie is een ander type (individueel maand/jaar) of andere school
+        // → resterende dagen erbij tellen op de school-vervaldatum
+        const remainingMs = expMs - Date.now();
+        const remainingDays = Math.ceil(remainingMs / (1000 * 60 * 60 * 24));
+        mergeFromExisting = {
+          extraDays: remainingDays,
+          existingLicenseCode: String(lic.code || ""),
+          existingExpiresAt: new Date(expMs),
         };
+        logger.info("[adminGrantSchoolLicense] Bestaande actieve licentie → smart merge", {
+          email, existingCode: lic.code, remainingDays,
+        });
       }
     }
 
@@ -1886,8 +1916,15 @@ export const adminGrantSchoolLicense = onCall(
       licenseMode = schoolCtx.mode;
     }
 
-    // 5) LICENTIE GENEREREN
-    const licenseCode = makeSchoolLicenseCode();
+    // ★ SMART MERGE: tel resterende dagen van bestaande individuele licentie erbij
+    if (mergeFromExisting && mergeFromExisting.extraDays > 0) {
+      const newMs = licenseExpiresAt.toMillis() + mergeFromExisting.extraDays * 24 * 60 * 60 * 1000;
+      licenseExpiresAt = Timestamp.fromMillis(newMs);
+      licenseMode = `${licenseMode}_merged`; // bv. "new_school_merged" of "sync_prorata_merged"
+    }
+
+    // 5) LICENTIE GENEREREN (bij merge: hergebruik bestaande licentiecode)
+    const licenseCode = mergeFromExisting?.existingLicenseCode || makeSchoolLicenseCode();
     const expiresAt = licenseExpiresAt;
     const orderId = `school-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
@@ -1940,15 +1977,38 @@ export const adminGrantSchoolLicense = onCall(
     }
 
     // 7) WACHTWOORD-RESET MAIL VERSTUREN
+    //    → Bij merge (leerkracht had al actief account) sturen we een UPGRADE-mail
+    //      ipv welkomstmail. Geen wachtwoord-reset nodig — ze heeft al toegang.
     let mailSent = false;
     try {
-      const passwordLink = await generatePasswordLink(email);
-      await queueEmail(
-        email,
-        "Je Zisa PRO account staat klaar 🦓",
-        emailHtmlSchool({ email, passwordLink, schoolName }),
-      );
-      mailSent = true;
+      if (mergeFromExisting) {
+        // Upgrade-mail: melden dat hun individuele licentie is uitgebreid via de school
+        await queueEmail(
+          email,
+          `Je Zisa PRO licentie is uitgebreid via ${schoolName} 🦓`,
+          `<p>Dag,</p>
+           <p>Goed nieuws! Je <strong>${schoolName}</strong> heeft je opgenomen in een schoolabonnement op de Spelgenerator PRO.</p>
+           <p><strong>Wat verandert er voor jou:</strong></p>
+           <ul>
+             <li>Je behoudt je bestaande account, wachtwoord en gegevens (klasbord, takenbord, huistaken — alles blijft).</li>
+             <li>Je <strong>${mergeFromExisting.extraDays} resterende dag${mergeFromExisting.extraDays === 1 ? '' : 'en'}</strong> van je individuele abonnement zijn meegerekend.</li>
+             <li>Je nieuwe vervaldatum is <strong>${expiresAt.toDate().toLocaleDateString('nl-BE', { day: '2-digit', month: '2-digit', year: 'numeric' })}</strong>.</li>
+             <li>Je hoeft niets te doen — log gewoon verder in zoals voorheen.</li>
+           </ul>
+           <p style="margin-top:18px"><a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/app.html" style="display:inline-block;padding:12px 22px;background:#6B4E9B;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">Open Zisa PRO</a></p>
+           <p>Met vriendelijke groet,<br>juf Zisa 🦓<br>${SELLER_EMAIL}</p>`
+        );
+        mailSent = true;
+      } else {
+        // Normale welkomstmail
+        const passwordLink = await generatePasswordLink(email);
+        await queueEmail(
+          email,
+          "Je Zisa PRO account staat klaar 🦓",
+          emailHtmlSchool({ email, passwordLink, schoolName }),
+        );
+        mailSent = true;
+      }
     } catch (e: any) {
       logger.error("[adminGrantSchoolLicense] Mail verzenden mislukt", {
         email,
@@ -1965,21 +2025,36 @@ export const adminGrantSchoolLicense = onCall(
       schoolName,
       invoiceNumber,
       mailSent,
+      merged: !!mergeFromExisting,
+      extraDays: mergeFromExisting?.extraDays || 0,
       callerEmail,
     });
+
+    // Bouw bericht op basis van of er gemerged is
+    let resultMessage: string;
+    if (mergeFromExisting) {
+      const extraDays = mergeFromExisting.extraDays;
+      resultMessage = mailSent
+        ? `🔄 Samengevoegd met bestaand account (€${licensePrice}). ${extraDays} dag${extraDays === 1 ? '' : 'en'} extra meegerekend. Upgrade-mail verzonden.`
+        : `🔄 Samengevoegd met bestaand account (€${licensePrice}). ${extraDays} dag${extraDays === 1 ? '' : 'en'} extra meegerekend. ⚠️ Mail mislukte.`;
+    } else {
+      resultMessage = mailSent
+        ? `Account aangemaakt (€${licensePrice}, ${licenseMode}) en welkomstmail verzonden.`
+        : `Account aangemaakt (€${licensePrice}), maar welkomstmail kon niet verzonden worden. Stuur de wachtwoord-reset handmatig.`;
+    }
 
     return {
       ok: true,
       alreadyExisted: false,
+      merged: !!mergeFromExisting,
+      mergeExtraDays: mergeFromExisting?.extraDays || 0,
       licenseCode,
       uid,
       expiresAt: expiresAt.toDate().toISOString(),
       mailSent,
       pricingMode: licenseMode,
       pricingPrice: licensePrice,
-      message: mailSent
-        ? `Account aangemaakt (€${licensePrice}, ${licenseMode}) en welkomstmail verzonden.`
-        : `Account aangemaakt (€${licensePrice}), maar welkomstmail kon niet verzonden worden. Stuur de wachtwoord-reset handmatig.`,
+      message: resultMessage,
     };
   }
 );
@@ -3429,4 +3504,311 @@ export const adminRejectRenewalRequest = onCall(
 
 // ============================================================================
 // EINDE VERLENG-SYSTEEM
+// ============================================================================
+
+
+// ============================================================================
+// SCHEDULED LICENSE CLEANUP — verwijder data van vervallen accounts
+// ============================================================================
+//
+// Regels (Pakket A):
+//  - Trigger: licentie vervallen meer dan 24 maanden geleden
+//  - Waarschuwingsmail: bij 22 maanden vervallen (= 60 dagen vooraf)
+//  - Verwijdering: bij 24 maanden vervallen
+//
+// Wat wordt verwijderd:
+//   - Firebase Auth user (als alle licenties van die uid voldoen)
+//   - klasbord/{uid}/...
+//   - pro_huistaken/{uid}/...
+//   - users/{uid}/... (devices, consent, etc.)
+//   - Licenties + licenses documenten van die uid
+//
+// Wat NIET wordt verwijderd:
+//   - Owner accounts (NOOIT)
+//   - Anonymous accounts (NOOIT — kinderen via QR)
+//   - klasbord_shared/* (mogelijk nog door anderen gebruikt)
+//   - Bestellingen (boekhouding 7 jaar bewaren!)
+//   - schoolTokens (klein, niet belangrijk)
+//
+// Logging: collectie cleanup_log met datum + email + uid + reason
+//
+// ============================================================================
+
+const CLEANUP_LOG_COLLECTION = "cleanup_log";
+
+export const scheduledLicenseCleanup = onSchedule(
+  {
+    schedule: "0 3 * * 0",  // elke zondag om 03:00
+    timeZone: "Europe/Brussels",
+    region: REGION,
+    retryCount: 1,
+  },
+  async (event) => {
+    const now = Date.now();
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+    // Drempels (in dagen)
+    const WARNING_THRESHOLD = 22 * 30;  // ≈ 660 dagen (22 maanden)
+    const DELETE_THRESHOLD  = 24 * 30;  // ≈ 730 dagen (24 maanden)
+
+    // Bouw eerst per uid een lijst van vervaldatums (laatste = bepalend)
+    const uidToLatestExpiry: Map<string, { latestExpMs: number; email: string; licenses: any[] }> = new Map();
+
+    // Loop alle Licenties (hoofdletter — primaire collectie)
+    let licensesScanned = 0;
+    try {
+      const qs = await db.collection("Licenties").get();
+      for (const doc of qs.docs) {
+        const lic = doc.data() as any;
+        licensesScanned++;
+        const uid = String(lic.uid || "").trim();
+        const email = String(lic.email || "").toLowerCase();
+        if (!uid || !email) continue;
+
+        // Sla owners ALTIJD over
+        if (OWNER_EMAILS.has(email)) continue;
+
+        const expMs = lic.expiresAt?.toMillis?.() ?? 0;
+        if (expMs === 0) continue;
+
+        const cur = uidToLatestExpiry.get(uid);
+        if (!cur || expMs > cur.latestExpMs) {
+          uidToLatestExpiry.set(uid, {
+            latestExpMs: expMs,
+            email,
+            licenses: [{ ref: doc.ref, data: lic }],
+          });
+        } else {
+          cur.licenses.push({ ref: doc.ref, data: lic });
+        }
+      }
+    } catch (e) {
+      logger.error("[cleanup] kon Licenties niet ophalen", { error: String(e) });
+      return;
+    }
+
+    let warned = 0;
+    let deleted = 0;
+    let skipped = 0;
+    let errors = 0;
+
+    // Per uid: bepaal actie
+    for (const [uid, info] of uidToLatestExpiry) {
+      try {
+        const daysExpired = Math.floor((now - info.latestExpMs) / ONE_DAY_MS);
+
+        // Niet verlopen of net verlopen → niets doen
+        if (daysExpired < WARNING_THRESHOLD) {
+          skipped++;
+          continue;
+        }
+
+        // Heeft deze uid nog een ANDERE actieve licentie? (bv. nieuwe school-licentie)
+        // Dan niet verwijderen.
+        const hasActiveOther = info.licenses.some((l: any) => {
+          const lic = l.data;
+          const status = String(lic.status || "").toLowerCase();
+          const exp = lic.expiresAt?.toMillis?.() ?? 0;
+          return (status === "active" || status === "actief") && exp > now;
+        });
+        if (hasActiveOther) {
+          skipped++;
+          continue;
+        }
+
+        // ─── 24+ maanden vervallen: VERWIJDEREN ─────────────────────────
+        if (daysExpired >= DELETE_THRESHOLD) {
+          const result = await deleteUserData(uid, info.email, daysExpired);
+          if (result.ok) {
+            deleted++;
+            logger.info("[cleanup] verwijderd", { uid, email: info.email, daysExpired, ...result });
+          } else {
+            errors++;
+            logger.error("[cleanup] verwijderen mislukt", { uid, email: info.email, error: result.error });
+          }
+          continue;
+        }
+
+        // ─── 22-23 maanden: WAARSCHUWINGSMAIL ────────────────────────────
+        // Check of we al een waarschuwing stuurden voor deze uid
+        const warnDocRef = db.collection("cleanup_warnings").doc(uid);
+        const warnDoc = await warnDocRef.get();
+        if (warnDoc.exists) {
+          // Al gewaarschuwd, niet opnieuw
+          skipped++;
+          continue;
+        }
+
+        // Stuur waarschuwingsmail
+        const verwijderDatum = new Date(info.latestExpMs + DELETE_THRESHOLD * ONE_DAY_MS);
+        try {
+          await queueEmail(
+            info.email,
+            `⏰ Je Zisa PRO gegevens worden binnenkort verwijderd`,
+            `<p>Beste,</p>
+             <p>Het is meer dan <strong>22 maanden</strong> geleden dat je Spelgenerator PRO abonnement is verlopen.</p>
+             <p>Volgens onze privacyverklaring worden gegevens van inactieve accounts na 24 maanden verwijderd. Concreet:</p>
+             <ul>
+               <li>📅 <strong>Verwijdering gepland:</strong> rond ${verwijderDatum.toLocaleDateString("nl-BE", { day: "2-digit", month: "long", year: "numeric" })}</li>
+               <li>📋 <strong>Wat wordt verwijderd:</strong> klasbord, takenbord, huistaken-opvolgen, account-instellingen</li>
+               <li>📦 <strong>Wat blijft:</strong> bestellingsdocumenten (verplichte boekhouding van 7 jaar)</li>
+             </ul>
+             <p><strong>Wil je je gegevens behouden?</strong> Hernieuw je abonnement op <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/koop.html">jufzisa.be</a> vóór die datum. Dan blijven al je gegevens veilig bewaard.</p>
+             <p>Heb je vragen? Stuur gerust een mail naar <a href="mailto:${SELLER_EMAIL}">${SELLER_EMAIL}</a>.</p>
+             <p>Met vriendelijke groet,<br>juf Zisa 🦓</p>`
+          );
+          await warnDocRef.set({
+            uid,
+            email: info.email,
+            warnedAt: FieldValue.serverTimestamp(),
+            scheduledDeleteAt: Timestamp.fromDate(verwijderDatum),
+            daysExpiredAtWarning: daysExpired,
+          });
+          warned++;
+          logger.info("[cleanup] waarschuwing verzonden", { uid, email: info.email, daysExpired });
+        } catch (e: any) {
+          errors++;
+          logger.error("[cleanup] waarschuwingsmail mislukt", { uid, email: info.email, error: e?.message || String(e) });
+        }
+      } catch (e: any) {
+        errors++;
+        logger.error("[cleanup] fout bij verwerken uid", { uid, error: e?.message || String(e) });
+      }
+    }
+
+    logger.info("[cleanup] klaar", {
+      licensesScanned,
+      uniqueUids: uidToLatestExpiry.size,
+      warned,
+      deleted,
+      skipped,
+      errors,
+    });
+  }
+);
+
+/**
+ * Verwijder ALLE data van één uid + email.
+ * - Firebase Auth
+ * - klasbord/{uid}/... (recursief)
+ * - pro_huistaken/{uid}/... (recursief)
+ * - users/{uid}/... (recursief)
+ * - Licenties + licenses (alle docs van deze email)
+ *
+ * BEWAAR:
+ * - Bestellingen (boekhouding!)
+ * - klasbord_shared/* (mogelijk nog door anderen gebruikt)
+ */
+async function deleteUserData(uid: string, email: string, daysExpired: number): Promise<{
+  ok: boolean;
+  error?: string;
+  collectionsDeleted?: string[];
+  licensesDeleted?: number;
+}> {
+  const collectionsDeleted: string[] = [];
+
+  try {
+    // 1) Auth user
+    try {
+      await auth.deleteUser(uid);
+      collectionsDeleted.push("auth");
+    } catch (e: any) {
+      // user-not-found is OK (al weg)
+      if (e?.code !== "auth/user-not-found") {
+        logger.warn("[cleanup] auth delete fout", { uid, error: String(e) });
+      }
+    }
+
+    // 2) klasbord/{uid}/...
+    try {
+      await deleteCollectionRecursive(`klasbord/${uid}`);
+      collectionsDeleted.push("klasbord");
+    } catch (e) {
+      logger.warn("[cleanup] klasbord delete fout", { uid, error: String(e) });
+    }
+
+    // 3) pro_huistaken/{uid}/...
+    try {
+      await deleteCollectionRecursive(`pro_huistaken/${uid}`);
+      collectionsDeleted.push("pro_huistaken");
+    } catch (e) {
+      logger.warn("[cleanup] pro_huistaken delete fout", { uid, error: String(e) });
+    }
+
+    // 4) users/{uid}/...
+    try {
+      await deleteCollectionRecursive(`users/${uid}`);
+      collectionsDeleted.push("users");
+    } catch (e) {
+      logger.warn("[cleanup] users delete fout", { uid, error: String(e) });
+    }
+
+    // 5) Licenties + licenses voor deze email
+    let licensesDeleted = 0;
+    for (const col of LICENSE_COLLECTIONS) {
+      try {
+        const qs = await db.collection(col).where("email", "==", email).get();
+        for (const doc of qs.docs) {
+          await doc.ref.delete();
+          licensesDeleted++;
+        }
+      } catch (e) {
+        logger.warn(`[cleanup] ${col} delete fout`, { email, error: String(e) });
+      }
+    }
+
+    // 6) cleanup_warnings doc opruimen (was tijdelijk)
+    try {
+      await db.collection("cleanup_warnings").doc(uid).delete();
+    } catch {}
+
+    // 7) Log de cleanup
+    await db.collection(CLEANUP_LOG_COLLECTION).add({
+      uid,
+      email,
+      deletedAt: FieldValue.serverTimestamp(),
+      daysExpired,
+      reason: "license_expired_24m",
+      collectionsDeleted,
+      licensesDeleted,
+    });
+
+    return { ok: true, collectionsDeleted, licensesDeleted };
+  } catch (e: any) {
+    return { ok: false, error: e?.message || String(e) };
+  }
+}
+
+/**
+ * Recursief verwijderen van alle documenten + subcollecties onder een document path.
+ * Werkt batch per batch (max 100 docs per keer).
+ */
+async function deleteCollectionRecursive(docPath: string): Promise<void> {
+  const docRef = db.doc(docPath);
+  // Verwijder eerst subcollecties
+  const subcols = await docRef.listCollections();
+  for (const subcol of subcols) {
+    let done = false;
+    while (!done) {
+      const qs = await subcol.limit(100).get();
+      if (qs.empty) {
+        done = true;
+        break;
+      }
+      const batch = db.batch();
+      for (const d of qs.docs) {
+        batch.delete(d.ref);
+      }
+      await batch.commit();
+      if (qs.docs.length < 100) done = true;
+    }
+  }
+  // Verwijder het document zelf
+  try {
+    await docRef.delete();
+  } catch {}
+}
+
+// ============================================================================
+// EINDE LICENSE CLEANUP
 // ============================================================================
