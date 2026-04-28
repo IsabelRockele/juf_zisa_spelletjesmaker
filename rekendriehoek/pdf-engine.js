@@ -307,17 +307,32 @@ const PdfEngine = (() => {
   }
 
   // ── Layout: hoeveel driehoeken per pagina/rij ────────────────────────────
-  function berekenLayout(aantal) {
+  // Bij magisch/mengeling kiezen we ruimere layout (2 kolommen) want elke
+  // driehoek heeft een "Vul in:" cijferreeks die ruimte vraagt.
+  function berekenLayout(aantal, heeftMagisch) {
     let kolommen, size;
-    if (aantal === 1) { kolommen = 1; size = 130; }
-    else if (aantal === 2) { kolommen = 2; size = 88; }
-    else if (aantal === 4) { kolommen = 2; size = 88; }
-    else if (aantal === 6) { kolommen = 3; size = 60; }
-    else { kolommen = 3; size = 56; } // 9 — iets kleiner zodat 3 rijen + header passen
+
+    if (heeftMagisch) {
+      // Ruimere layout met 2 kolommen
+      if (aantal === 1) { kolommen = 1; size = 120; }
+      else if (aantal === 2) { kolommen = 2; size = 85; }
+      else if (aantal === 4) { kolommen = 2; size = 85; }
+      else if (aantal === 6) { kolommen = 2; size = 80; }
+      else { kolommen = 2; size = 70; } // 9 — 5 rijen, 2-3 per pagina
+    } else {
+      // Klassieke layout (compacter)
+      if (aantal === 1) { kolommen = 1; size = 130; }
+      else if (aantal === 2) { kolommen = 2; size = 88; }
+      else if (aantal === 4) { kolommen = 2; size = 88; }
+      else if (aantal === 6) { kolommen = 3; size = 60; }
+      else { kolommen = 3; size = 56; } // 9
+    }
 
     const beschikbBreedte = PAGE_W - 2 * MARGIN_X;
     const totaleColBreedte = kolommen * size;
-    const tussenruimte = (beschikbBreedte - totaleColBreedte) / Math.max(1, kolommen - 1);
+    const tussenruimte = kolommen > 1
+      ? (beschikbBreedte - totaleColBreedte) / (kolommen - 1)
+      : 0;
 
     return { kolommen, size, tussenruimte };
   }
@@ -331,10 +346,10 @@ const PdfEngine = (() => {
     const opdracht = opties.opdracht || 'Tel de getallen in de driehoek bij elkaar op. Schrijf de uitkomst in het vakje buiten de driehoek.';
     const toonOplossing = opties.toonOplossing || false;
 
-    const layout = berekenLayout(driehoeken.length);
-    // Check of er magische driehoeken in zitten — die hebben extra ruimte nodig voor "Vul in:" tekst
+    // Heeft set magische driehoeken? → andere layout
     const heeftMagisch = driehoeken.some(d => d.type === 'magisch');
-    const extraRuimte = heeftMagisch ? 18 : 14;
+    const layout = berekenLayout(driehoeken.length, heeftMagisch);
+    const extraRuimte = heeftMagisch ? 26 : 14;
     const driehoekHoogte = layout.size + extraRuimte;
 
     let y = tekenHeader(doc, toonOplossing ? `${titel} — Sleutel` : titel, opdracht);
@@ -352,6 +367,22 @@ const PdfEngine = (() => {
       }
 
       const x = MARGIN_X + kolomIdx * (layout.size + layout.tussenruimte);
+
+      // Subtiel kader rondom elke magische driehoek
+      if (driehoeken[p].type === 'magisch') {
+        const padding = 5; // ruimte tussen kader en inhoud
+        doc.setLineWidth(0.3);
+        doc.setDrawColor(220, 230, 240);
+        doc.setFillColor(252, 254, 255);
+        doc.roundedRect(
+          x - padding,
+          y - padding,
+          layout.size + padding * 2,
+          driehoekHoogte - 8,
+          3, 3, 'FD'
+        );
+      }
+
       tekenDriehoek(doc, driehoeken[p], x, y, layout.size, toonOplossing, p + 1);
 
       kolomIdx++;
