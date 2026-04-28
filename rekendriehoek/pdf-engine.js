@@ -307,34 +307,55 @@ const PdfEngine = (() => {
   }
 
   // ── Layout: hoeveel driehoeken per pagina/rij ────────────────────────────
-  // Bij magisch/mengeling kiezen we ruimere layout (2 kolommen) want elke
-  // driehoek heeft een "Vul in:" cijferreeks die ruimte vraagt.
+  // Bij klassieke driehoeken steken de som-vakken uit aan zij/onderkant van de
+  // driehoek-zone (size). Het kader moet die uitstekende vakken omvatten.
+  // We maken de horizontale "kader-padding" daarom evenredig met size.
+  const KADER_PAD_TOP = 5;
+  const KADER_PAD_BOT = 5;
+  const MIN_GAP = 5;
+
   function berekenLayout(aantal, heeftMagisch) {
-    let kolommen, size;
+    let kolommen, voorkeurSize;
 
     if (heeftMagisch) {
-      // Ruimere layout met 2 kolommen
-      if (aantal === 1) { kolommen = 1; size = 120; }
-      else if (aantal === 2) { kolommen = 2; size = 85; }
-      else if (aantal === 4) { kolommen = 2; size = 85; }
-      else if (aantal === 6) { kolommen = 2; size = 80; }
-      else { kolommen = 2; size = 70; } // 9 — 5 rijen, 2-3 per pagina
+      if (aantal === 1) { kolommen = 1; voorkeurSize = 120; }
+      else if (aantal === 2) { kolommen = 2; voorkeurSize = 85; }
+      else if (aantal === 4) { kolommen = 2; voorkeurSize = 85; }
+      else if (aantal === 6) { kolommen = 2; voorkeurSize = 80; }
+      else { kolommen = 2; voorkeurSize = 70; }
     } else {
-      // Klassieke layout (compacter)
-      if (aantal === 1) { kolommen = 1; size = 130; }
-      else if (aantal === 2) { kolommen = 2; size = 88; }
-      else if (aantal === 4) { kolommen = 2; size = 88; }
-      else if (aantal === 6) { kolommen = 3; size = 60; }
-      else { kolommen = 3; size = 56; } // 9
+      if (aantal === 1) { kolommen = 1; voorkeurSize = 130; }
+      else if (aantal === 2) { kolommen = 2; voorkeurSize = 88; }
+      else if (aantal === 4) { kolommen = 2; voorkeurSize = 80; }
+      else if (aantal === 6) { kolommen = 3; voorkeurSize = 50; }
+      else { kolommen = 3; voorkeurSize = 46; }
     }
 
     const beschikbBreedte = PAGE_W - 2 * MARGIN_X;
-    const totaleColBreedte = kolommen * size;
-    const tussenruimte = kolommen > 1
-      ? (beschikbBreedte - totaleColBreedte) / (kolommen - 1)
+
+    function berekenPadHor(s, isMagisch) {
+      // Klassieke: somvakken steken iets uit aan zijkanten (~5% van size).
+      // Magisch: cirkels schalen ook met cijfers, dus iets meer marge.
+      return isMagisch ? 5 : Math.max(5, s * 0.06);
+    }
+
+    let size = voorkeurSize;
+    for (let i = 0; i < 5; i++) {
+      const padHor = berekenPadHor(size, heeftMagisch);
+      const kaderBreedte = size + 2 * padHor;
+      const totaalNodig = kolommen * kaderBreedte + (kolommen - 1) * MIN_GAP;
+      if (totaalNodig <= beschikbBreedte) break;
+      // Verklein size proportioneel
+      size = size * (beschikbBreedte - (kolommen - 1) * MIN_GAP) / (kolommen * kaderBreedte);
+    }
+
+    const padHor = berekenPadHor(size, heeftMagisch);
+    const kaderBreedte = size + 2 * padHor;
+    const gap = kolommen > 1
+      ? (beschikbBreedte - kolommen * kaderBreedte) / (kolommen - 1)
       : 0;
 
-    return { kolommen, size, tussenruimte };
+    return { kolommen, size, kaderBreedte, gap, padHor };
   }
 
   // ── Hoofdfunctie ─────────────────────────────────────────────────────────
@@ -349,7 +370,8 @@ const PdfEngine = (() => {
     // Heeft set magische driehoeken? → andere layout
     const heeftMagisch = driehoeken.some(d => d.type === 'magisch');
     const layout = berekenLayout(driehoeken.length, heeftMagisch);
-    const extraRuimte = heeftMagisch ? 26 : 14;
+    // Extra ruimte: zowel klassiek als magisch krijgen ademruimte tussen rijen
+    const extraRuimte = heeftMagisch ? 26 : 22;
     const driehoekHoogte = layout.size + extraRuimte;
 
     let y = tekenHeader(doc, toonOplossing ? `${titel} — Sleutel` : titel, opdracht);
@@ -366,22 +388,21 @@ const PdfEngine = (() => {
         kolomIdx = 0;
       }
 
-      const x = MARGIN_X + kolomIdx * (layout.size + layout.tussenruimte);
+      // Kader-positie en driehoek-positie
+      const kaderX = MARGIN_X + kolomIdx * (layout.kaderBreedte + layout.gap);
+      const x = kaderX + layout.padHor;
 
-      // Subtiel kader rondom elke magische driehoek
-      if (driehoeken[p].type === 'magisch') {
-        const padding = 5; // ruimte tussen kader en inhoud
-        doc.setLineWidth(0.3);
-        doc.setDrawColor(220, 230, 240);
-        doc.setFillColor(252, 254, 255);
-        doc.roundedRect(
-          x - padding,
-          y - padding,
-          layout.size + padding * 2,
-          driehoekHoogte - 8,
-          3, 3, 'FD'
-        );
-      }
+      // Subtiel kader rondom elke driehoek (klassiek én magisch)
+      doc.setLineWidth(0.3);
+      doc.setDrawColor(220, 230, 240);
+      doc.setFillColor(252, 254, 255);
+      doc.roundedRect(
+        kaderX,
+        y - KADER_PAD_TOP,
+        layout.kaderBreedte,
+        driehoekHoogte - 8,
+        3, 3, 'FD'
+      );
 
       tekenDriehoek(doc, driehoeken[p], x, y, layout.size, toonOplossing, p + 1);
 
