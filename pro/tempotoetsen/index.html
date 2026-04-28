@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tempotoetsen Generator — Juf Zisa PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ── PRO BANNER ──────────────────────────────────────────────────────── */
+  .pro-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 20px;
+    background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+  .pro-header span:first-child {
+    background: #f5c200;
+    color: #0b3060;
+    border-radius: 6px;
+    padding: 2px 9px;
+    font-size: 0.78rem;
+  }
+  .pro-header a {
+    color: rgba(255,255,255,0.80);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+  .pro-header a:hover { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- PRO BANNER -->
+<div class="pro-header">
+  <span>⭐ PRO</span>
+  <span>Tempotoetsen Generator — Juf Zisa PRO</span>
+  <a href="../app.html" class="back-link">← Terug naar menu</a>
+</div>
+
+<div class="app">
+
+  <header class="hero">
+    <a href="../app.html" class="terug-link">← Terug naar menu</a>
+    <div class="hero-content">
+      <div>
+        <h1>⚡ Tempotoetsen Generator</h1>
+        <p>Elke dag een frisse tempotoets — flitsen, invullen of op papier.</p>
+      </div>
+      <button class="uitleg-knop" id="uitleg-knop">❓ Hoe werkt dit?</button>
+    </div>
+  </header>
+
+  <!-- Tabbladen -->
+  <div id="tabs" class="tabs"></div>
+
+  <!-- Configuratie -->
+  <section id="config-paneel" class="config-kaart"></section>
+
+  <!-- Preview -->
+  <section id="preview" class="preview-wrap"></section>
+
+  <!-- Modi -->
+  <h2 style="margin:28px 0 12px;color:var(--paars);">Hoe wil je de toets gebruiken?</h2>
+  <div id="modi" class="modus-grid"></div>
+
+</div>
+
+<!-- jsPDF voor PDF-export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- Vlag voor gratis/PRO -->
+<script>window.ISPRO = true;</script>
+
+<!-- Alles in 1 bestand -->
+<script src="app.js"></script>
+
+<!-- PRO guards -->
+<script src="../device-id.js"></script>
+<script src="../guard.js"></script>
+
+</body>
+</html>
