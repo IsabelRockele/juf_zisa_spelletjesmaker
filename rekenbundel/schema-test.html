@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Schema test — Juf Zisa</title>
+  <link rel="stylesheet" href="vraagstukken.css">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; max-width: 800px; }
+    h2 { color: #1565c0; }
+    .test-blok { margin-bottom: 30px; }
+    .test-label { font-size: 13px; color: #888; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<h2>🧪 Schema test — Juf Zisa</h2>
+
+<script>
+// Helper: rooster HTML
+function rooster() {
+  let html = '<div class="vs-rooster">';
+  for(let r=0;r<8;r++){
+    html+='<div class="vs-rooster-rij">';
+    for(let k=0;k<12;k++) html+='<div class="vs-rooster-cel"></div>';
+    html+='</div>';
+  }
+  return html+'</div>';
+}
+
+// Helper: cijferschema
+// kolommen: array van {label, kleur, tekstkleur, isKomma}
+function cijferSchema(kolommen, stap) {
+  const stapHTML = stap ? `<div class="vs-cs-staplabel">${stap}</div>` : '';
+  const cols = kolommen.map(k => k.isKomma ? '14px' : '32px').join(' ');
+  
+  let html = `${stapHTML}<div class="vs-cijfer-schema-blok"><div class="vs-cs-grid" style="grid-template-columns:${cols}">`;
+  
+  // Headers
+  kolommen.forEach(k => {
+    if(k.isKomma) {
+      html += `<div class="vs-cs-komma-header">,</div>`;
+    } else {
+      html += `<div class="vs-cs-header" style="background:${k.kleur};color:${k.tekst}">${k.label}</div>`;
+    }
+  });
+  
+  // Rij 1: grijs
+  kolommen.forEach(k => {
+    html += k.isKomma ? '<div class="vs-cs-komma-cel vs-cs-grijs"></div>' : '<div class="vs-cs-cel vs-cs-grijs"></div>';
+  });
+  
+  // Rij 2: wit
+  kolommen.forEach(k => {
+    html += k.isKomma ? '<div class="vs-cs-komma-cel"></div>' : '<div class="vs-cs-cel"></div>';
+  });
+  
+  // Rij 3: wit met dikke onderlijn
+  kolommen.forEach(k => {
+    html += k.isKomma ? '<div class="vs-cs-komma-cel vs-cs-dik-onder"></div>' : '<div class="vs-cs-cel vs-cs-dik-onder"></div>';
+  });
+  
+  // Rij 4: resultaat
+  kolommen.forEach(k => {
+    html += k.isKomma ? '<div class="vs-cs-komma-cel"></div>' : '<div class="vs-cs-cel"></div>';
+  });
+  
+  html += '</div></div>';
+  return html;
+}
+
+// Kleur helpers
+const G  = {kleur:'#81c784', tekst:'#1b5e20'};  // groen — T
+const GD = {kleur:'#c8e6c9', tekst:'#1b5e20'};  // lichtgroen — TD (tienduizendtal)
+const R  = {kleur:'#ffcdd2', tekst:'#b71c1c'};  // rood — D (duizendtal)
+const B  = {kleur:'#bbdefb', tekst:'#0d47a1'};  // blauw — H (honderdtal)
+const Y  = {kleur:'#FFC107', tekst:'#333'};      // geel — E
+const L  = {kleur:'#fff9c4', tekst:'#f57f17'};  // lichtgeel — decimalen
+const K  = {isKomma:true};                        // kommakolom
+
+// Schema definities — correcte namen: E / T·E / H·T·E / D·H·T·E / TD·D·H·T·E
+const E      = [{label:'E',...Y}];
+const TE     = [{label:'T',...G},{label:'E',...Y}];
+const HTE    = [{label:'H',...B},{label:'T',...G},{label:'E',...Y}];
+const DHTE   = [{label:'D',...R},{label:'H',...B},{label:'T',...G},{label:'E',...Y}];
+const TDHTE  = [{label:'TD',...GD},{label:'D',...R},{label:'H',...B},{label:'T',...G},{label:'E',...Y}];
+const KOMt   = [{label:'E',...Y},K,{label:'t',...L}];
+const KOMth  = [{label:'E',...Y},K,{label:'t',...L},{label:'h',...L}];
+const KOMthd = [{label:'E',...Y},K,{label:'t',...L},{label:'h',...L},{label:'d',...L}];
+const TEKOMt = [{label:'T',...G},{label:'E',...Y},K,{label:'t',...L}];
+const HTEKOMt= [{label:'H',...B},{label:'T',...G},{label:'E',...Y},K,{label:'t',...L}];
+
+function kaart(titel, vraagstuk, antwoordzin, schemaLinksHTML, schemaRechtsHTML) {
+  document.write(`
+  <div class="test-blok">
+    <div class="test-label">${titel}</div>
+    <div class="vs-kaart">
+      <div class="vs-kaart-tekst">${vraagstuk}</div>
+      <div class="vs-schema-zone">
+        <div class="vs-schema-links">
+          <div class="vs-schema-label">Schema:</div>
+          ${schemaLinksHTML}
+        </div>
+        <div class="vs-schema-rechts">
+          ${schemaRechtsHTML}
+        </div>
+      </div>
+      <div class="vs-antwoordzin-rij">
+        <span class="vs-antw-label">Antwoordzin:</span>
+        <span class="vs-antw-tekst">${antwoordzin}</span>
+      </div>
+    </div>
+  </div>`);
+}
+
+function bew(stappen) {
+  if(stappen===1) return `<div class="vs-bewerking-blok"><div class="vs-bew-label">Bewerking:</div><div class="vs-bew-lijn"></div><div class="vs-bew-lijn"></div><div class="vs-bew-lijn"></div></div>`;
+  return `<div class="vs-bewerking-blok"><div class="vs-bew-label">Bewerking:</div><div class="vs-bew-stap">STAP 1</div><div class="vs-bew-lijn"></div><div class="vs-bew-stap">STAP 2</div><div class="vs-bew-lijn"></div></div>`;
+}
+
+// ── TEST 1: Rooster + bewerking (2 getallen)
+kaart('Test 1: Rooster + bewerking (2 getallen) — tot 20',
+  'Emma vindt 23 paaseieren en Luca vindt er 15.<br>Hoeveel paaseieren vinden ze samen?',
+  'Emma en Luca vinden samen ___ paaseieren.',
+  rooster(), bew(1));
+
+// ── TEST 2: Rooster + bewerking (3 getallen)
+kaart('Test 2: Rooster + bewerking (3 getallen) — tot 20',
+  'In de klas zijn 12 meisjes, 14 jongens en 3 juffen.<br>Hoeveel mensen zijn er in totaal?',
+  'Er zijn in totaal ___ mensen.',
+  rooster(), bew(2));
+
+// ── TEST 3: Rooster + cijfer T·E (tot 100)
+kaart('Test 3: Rooster + cijfer T·E (tot 100)',
+  'Bij kassa 1 staan 19 klanten. Bij kassa 2 staan 17 klanten.<br>Hoeveel klanten zijn dat samen?',
+  'Dat zijn samen ___ klanten.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(TE,''));
+
+// ── TEST 4: Rooster + cijfer H·T·E (tot 1000)
+kaart('Test 4: Rooster + cijfer H·T·E (tot 1 000)',
+  'In het museum hangen 234 schilderijen en 156 foto\'s.<br>Hoeveel werken zijn er in totaal?',
+  'Er zijn in totaal ___ werken.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(HTE,''));
+
+// ── TEST 5: Rooster + cijfer H·T·E (3 getallen = 2 stappen)
+kaart('Test 5: Rooster + cijfer H·T·E (tot 1 000, 3 getallen)',
+  'Een boer heeft 234 kippen, 156 eenden en 87 ganzen.<br>Hoeveel vogels heeft hij in totaal?',
+  'De boer heeft ___ vogels in totaal.',
+  rooster(),
+  bew(2) + '<div class="vs-cijfer-label">Ik cijfer.</div><div class="vs-cijfer-stappen">'
+    + cijferSchema(HTE,'STAP 1') + cijferSchema(HTE,'STAP 2') + '</div>');
+
+// ── TEST 6: D·H·T·E (tot 10 000)
+kaart('Test 6: Rooster + cijfer D·H·T·E (tot 10 000)',
+  'Een school heeft 1 234 leerlingen en een andere 856.<br>Hoeveel leerlingen zijn dat samen?',
+  'Dat zijn samen ___ leerlingen.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(DHTE,''));
+
+// ── TEST 7: TD·D·H·T·E (tot 100 000)
+kaart('Test 7: Rooster + cijfer TD·D·H·T·E (tot 100 000)',
+  'Een stad heeft 24 567 inwoners en een andere stad 13 890.<br>Hoeveel inwoners zijn dat samen?',
+  'Dat zijn samen ___ inwoners.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(TDHTE,''));
+
+// ── TEST 8: Kommagetallen E,t (1 decimaal)
+kaart('Test 8: Kommagetallen E,t (1 decimaal)',
+  'Lisa koopt een brood van 2,4 euro en melk van 1,3 euro.<br>Hoeveel betaalt ze in totaal?',
+  'Lisa betaalt ___ euro.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(KOMt,''));
+
+// ── TEST 9: Kommagetallen E,th (2 decimalen)
+kaart('Test 9: Kommagetallen E,th (2 decimalen)',
+  'Jan meet een plank van 3,45 m en een lat van 1,28 m.<br>Hoe lang zijn ze samen?',
+  'Ze zijn samen ___ meter lang.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(KOMth,''));
+
+// ── TEST 10: Kommagetallen E,thd (3 decimalen)
+kaart('Test 10: Kommagetallen E,thd (3 decimalen)',
+  'Een wetenschapper meet 1,234 liter en 0,567 liter vloeistof.<br>Hoeveel liter is dat samen?',
+  'Dat is samen ___ liter.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(KOMthd,''));
+
+// ── TEST 11: Kommagetallen T·E,t
+kaart('Test 11: Kommagetallen T·E,t (tientallen + 1 decimaal)',
+  'Sarah rijdt 13,4 km naar school en 24,2 km terug.<br>Hoeveel km rijdt ze in totaal?',
+  'Sarah rijdt ___ km in totaal.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(TEKOMt,''));
+
+// ── TEST 12: Kommagetallen H·T·E,t
+kaart('Test 12: Kommagetallen H·T·E,t (honderdtallen + 1 decimaal)',
+  'Een fles bevat 123,4 ml en een andere 245,2 ml.<br>Hoeveel ml is dat samen?',
+  'Dat is samen ___ ml.',
+  rooster(),
+  bew(1) + '<div class="vs-cijfer-label">Ik cijfer.</div>' + cijferSchema(HTEKOMt,''));
+</script>
+
+</body>
+</html>
