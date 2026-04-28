@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Juf Zisa - Rekenpiramide Generator Pro</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    /* ── PRO BANNER ─────────────────────────────────────────────────────── */
+    .pro-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      gap: 12px;
+    }
+    .pro-header .pro-badge {
+      background: #f5c200;
+      color: #0b3060;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+    }
+    .pro-header a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .pro-header a:hover { color: #fff; }
+
+    /* Sticky header start net onder pro-banner */
+    .app-header { top: 0; }
+  </style>
+</head>
+<body>
+
+<!-- PRO BANNER -->
+<div class="pro-header">
+  <span class="pro-badge">⭐ PRO</span>
+  <span>Rekenpiramide Generator — Juf Zisa PRO</span>
+  <a href="../app.html">← Terug naar menu</a>
+</div>
+
+<div class="app-shell">
+
+  <header class="app-header">
+    <div class="app-header-left">
+      <button type="button" class="back-btn" onclick="window.location.href='../app.html'">← Keuzemenu</button>
+    </div>
+    <div class="app-header-center">
+      <h1>Rekenpiramide Generator</h1>
+      <p>Stel het type, de hoogte en de moeilijkheidsgraad in.</p>
+    </div>
+    <div class="app-header-right">
+      <button id="infoBtn" type="button" class="info-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Hoe werkt dit?
+      </button>
+      <button id="genereerBtn" type="button" class="primary-btn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Hergenereren
+      </button>
+    </div>
+  </header>
+
+  <main class="app-main">
+
+    <aside class="settings-panel">
+
+      <!-- TABS -->
+      <div class="tab-bar">
+        <button type="button" class="tab-btn active" data-tab="optellen">➕ Optelpiramides</button>
+        <button type="button" class="tab-btn" data-tab="vermenigvuldigen">✖️ Vermenigvuldigpiramides</button>
+      </div>
+
+      <!-- TAB: OPTELPIRAMIDES -->
+      <div class="tab-content active" id="tab-optellen">
+
+        <div class="setting-card">
+          <div class="setting-card-header"><h3>📐 Algemeen</h3></div>
+          <div class="setting-card-body">
+            <div class="form-row">
+              <span class="form-label">Aantal piramides:</span>
+              <select class="cfg-select" id="opt-aantal">
+                <option value="6">6</option>
+                <option value="9">9</option>
+                <option value="12" selected>12</option>
+                <option value="15">15</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Hoogte (rijen):</span>
+              <select class="cfg-select" id="opt-hoogte">
+                <option value="3" selected>3 rijen</option>
+                <option value="4">4 rijen</option>
+                <option value="5">5 rijen</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-card-header"><h3>🔢 Moeilijkheidsgraad</h3></div>
+          <div class="setting-card-body">
+            <div class="form-row">
+              <span class="form-label">Maximaal getal (top):</span>
+              <select class="cfg-select" id="opt-max">
+                <option value="10">tot 10</option>
+                <option value="20">tot 20</option>
+                <option value="50" selected>tot 50</option>
+                <option value="100">tot 100</option>
+                <option value="200">tot 200</option>
+                <option value="500">tot 500</option>
+                <option value="1000">tot 1000</option>
+              </select>
+            </div>
+
+            <div>
+              <div class="form-label" style="margin-bottom:6px;">Brug:</div>
+              <div class="radio-group">
+                <span class="radio-chip"><input type="radio" name="opt-brug" id="opt-brug-zonder" value="zonder"><label for="opt-brug-zonder">Zonder</label></span>
+                <span class="radio-chip"><input type="radio" name="opt-brug" id="opt-brug-met" value="met"><label for="opt-brug-met">Met</label></span>
+                <span class="radio-chip"><input type="radio" name="opt-brug" id="opt-brug-beide" value="beide" checked><label for="opt-brug-beide">Beide</label></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-card-header"><h3>✏️ Type oefening</h3></div>
+          <div class="setting-card-body">
+            <div class="radio-group">
+              <span class="radio-chip"><input type="radio" name="opt-type" id="opt-type-makkelijk" value="makkelijk"><label for="opt-type-makkelijk">Makkelijk</label></span>
+              <span class="radio-chip"><input type="radio" name="opt-type" id="opt-type-gemengd" value="gemengd" checked><label for="opt-type-gemengd">Gemengd</label></span>
+              <span class="radio-chip"><input type="radio" name="opt-type" id="opt-type-moeilijk" value="moeilijk"><label for="opt-type-moeilijk">Moeilijk</label></span>
+            </div>
+            <p style="margin:0; font-size:0.78rem; color:var(--text-soft); line-height:1.5;">
+              Er staan altijd <strong>net genoeg</strong> getallen om de hele piramide te kunnen aanvullen.<br>
+              <strong>Makkelijk:</strong> wat extra hints, vooral onderaan.<br>
+              <strong>Gemengd:</strong> verspreid over alle rijen.<br>
+              <strong>Moeilijk:</strong> minimum hints — veel terugrekenen.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB: VERMENIGVULDIGPIRAMIDES -->
+      <div class="tab-content" id="tab-vermenigvuldigen">
+
+        <div style="padding:11px 13px; background:#eaf3ff; border:1px solid #a0c8f0; border-radius:10px; font-size:0.82rem; line-height:1.6; color:#1a3352;">
+          <strong>ℹ️ Voor wie?</strong> Tafelpiramides zijn geschikt vanaf het <strong>4de leerjaar</strong>. In een 2de/3de leerjaar gaan de tafels niet verder dan hun einduitkomst (tafel van 2 tot 20, van 5 tot 50). Bij een piramide worden de getallen al snel groter dan dat — daarom werkt dit pas vanaf 4de leerjaar.
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-card-header"><h3>📐 Algemeen</h3></div>
+          <div class="setting-card-body">
+            <div class="form-row">
+              <span class="form-label">Aantal piramides:</span>
+              <select class="cfg-select" id="ver-aantal">
+                <option value="6">6</option>
+                <option value="9">9</option>
+                <option value="12" selected>12</option>
+                <option value="15">15</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <span class="form-label">Hoogte (rijen):</span>
+              <select class="cfg-select" id="ver-hoogte">
+                <option value="2">2 rijen</option>
+                <option value="3" selected>3 rijen</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-card-header">
+            <h3>🔢 Tafels</h3>
+            <div class="card-btns">
+              <button type="button" class="regen-text-btn" id="ver-tafels-alles">Alles</button>
+              <button type="button" class="regen-text-btn" id="ver-tafels-niets">Geen</button>
+            </div>
+          </div>
+          <div class="setting-card-body">
+            <div class="radio-group tafel-chips" id="ver-tafels"></div>
+            <p style="margin:0; font-size:0.78rem; color:var(--text-soft);">Kies minstens 1 tafel.</p>
+          </div>
+        </div>
+
+        <div class="setting-card">
+          <div class="setting-card-header"><h3>✏️ Type oefening</h3></div>
+          <div class="setting-card-body">
+            <div class="radio-group">
+              <span class="radio-chip"><input type="radio" name="ver-type" id="ver-type-makkelijk" value="makkelijk"><label for="ver-type-makkelijk">Makkelijk</label></span>
+              <span class="radio-chip"><input type="radio" name="ver-type" id="ver-type-gemengd" value="gemengd" checked><label for="ver-type-gemengd">Gemengd</label></span>
+              <span class="radio-chip"><input type="radio" name="ver-type" id="ver-type-moeilijk" value="moeilijk"><label for="ver-type-moeilijk">Moeilijk</label></span>
+            </div>
+            <p style="margin:0; font-size:0.78rem; color:var(--text-soft); line-height:1.5;">
+              Er staan altijd <strong>net genoeg</strong> getallen om de hele piramide te kunnen aanvullen.<br>
+              <strong>Makkelijk:</strong> wat extra hints, vooral onderaan.<br>
+              <strong>Gemengd:</strong> verspreid over alle rijen.<br>
+              <strong>Moeilijk:</strong> minimum hints — veel terugrekenen.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div id="meldingContainer" class="message-box"></div>
+
+    </aside>
+
+    <section class="preview-panel">
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div>
+            <h2>Voorbeeld</h2>
+            <p>Live weergave van het werkblad.</p>
+          </div>
+          <div class="preview-actions">
+            <button id="toonOplossing" type="button" class="oplossing-btn">👁 Toon oplossing</button>
+            <button id="downloadPdfBtn" type="button" class="primary-btn">↓ PDF werkblad</button>
+            <button id="downloadPdfOplBtn" type="button" class="secondary-btn" style="border-color:#f5c97a;color:var(--accent);">↓ PDF sleutel</button>
+          </div>
+        </div>
+        <div class="preview-card-body">
+          <div class="canvas-frame">
+            <div id="previewContainer"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- INFO MODAL -->
+<div id="infoModal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Hoe werkt de Rekenpiramide Generator?</h2>
+      <button id="infoModalClose" class="modal-close-btn" title="Sluiten">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="info-section">
+        <h3>📐 Wat is een rekenpiramide?</h3>
+        <p>Een rekenpiramide is een driehoek van vakjes. Elk vakje bevat de <strong>som</strong> (of het <strong>product</strong>) van de twee vakjes eronder. De leerling vult de lege vakjes zelf in.</p>
+        <p style="margin-top:6px;">Voorbeeld (3 rijen, optellen): onderste rij <em>2, 3, 4</em> → middenrij wordt <em>5, 7</em> → top wordt <em>12</em>.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>📑 Tabs</h3>
+        <ul>
+          <li><strong>Optelpiramides:</strong> elk vakje is de som van de twee vakjes eronder.</li>
+          <li><strong>Vermenigvuldigpiramides:</strong> elk vakje is het product van de twee vakjes eronder. Werkt het beste met 2 of 3 rijen.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>📐 Hoogte</h3>
+        <ul>
+          <li><strong>3 rijen:</strong> 3 vakjes onderaan, 2 in het midden, 1 bovenaan. Geschikt voor 1ste–3de leerjaar.</li>
+          <li><strong>4–5 rijen:</strong> uitdagender, voor sterkere rekenaars (alleen optellen).</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>🔢 Moeilijkheidsgraad</h3>
+        <ul>
+          <li><strong>Maximaal getal:</strong> de top van de piramide blijft onder dit getal. De getallen onderaan worden automatisch kleiner gekozen zodat dit klopt.</li>
+          <li><strong>Brug:</strong> zonder tiental-overschrijding (bv. 3+4), met overschrijding (bv. 7+5), of beide gemengd.</li>
+          <li><strong>Tafels (vermenigvuldigen):</strong> kies welke tafels gebruikt mogen worden in de onderste rij.</li>
+        </ul>
+      </div>
+
+      <div class="info-section">
+        <h3>✏️ Moeilijkheidsgraad</h3>
+        <p>In een echte rekenpiramide staan getallen <strong>verspreid over alle rijen</strong>. De leerling moet zelf bepalen welk vakje ze eerst kunnen oplossen — soms naar boven rekenen, soms terugrekenen. Er staan altijd <strong>net genoeg</strong> getallen om de hele piramide aan te vullen, zonder dat het te makkelijk wordt.</p>
+        <ul>
+          <li><strong>Makkelijk:</strong> 1-2 extra hints bovenop het minimum, vooral onderaan.</li>
+          <li><strong>Gemengd:</strong> 1 extra hint, verspreid over de rijen.</li>
+          <li><strong>Moeilijk:</strong> absolute minimum — net genoeg om de piramide oplosbaar te houden. Veel terugrekenen.</li>
+        </ul>
+        <p style="margin-top:6px; padding:7px 10px; background:#eaf3ff; border-radius:8px; font-size:0.85rem;">💡 Elke piramide is altijd <strong>oplosbaar</strong> — de generator controleert dit automatisch.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>🔄 Hergeneren</h3>
+        <p>Klik op <strong>Hergenereren</strong> in de header om een nieuwe set piramides te genereren met dezelfde instellingen. Ideaal als je een specifieke som wil vermijden of een andere variatie wil.</p>
+      </div>
+
+      <div class="info-section">
+        <h3>👁 Oplossing &amp; PDF downloaden</h3>
+        <ul>
+          <li><strong>Toon oplossing:</strong> vult alle lege vakjes in (groen). Klik opnieuw om te verbergen.</li>
+          <li><strong>PDF werkblad:</strong> bovenaan invullijnen voor naam en datum, titel gecentreerd, opdrachtzin in een kader.</li>
+          <li><strong>PDF sleutel:</strong> zelfde opmaak, alle antwoorden in groen ingevuld — voor de leerkracht.</li>
+        </ul>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button id="infoModalClose2" class="primary-btn">Sluiten</button>
+    </div>
+  </div>
+</div>
+
+<script src="generator.js"></script>
+<script src="preview.js"></script>
+<script src="pdf-engine.js"></script>
+<script src="app.js"></script>
+<script src="../device-id.js"></script>
+<script src="../guard.js"></script>
+</body>
+</html>
