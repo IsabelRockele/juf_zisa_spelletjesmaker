@@ -672,11 +672,6 @@ const somTekst = (delen.length >= 3)
     }
 
     // Teken schijfjes per kolom
-    // Totaal aan te kleuren schijfjes = groot - klein (het antwoord)
-    // Dit wordt ALTIJD bij de eenheden gestart. Bij brug loopt het over naar
-    // de aanvulrij onder E, en desnoods naar T-kolom (bij aanvullen > 10).
-    const totaalBlauw = Math.max(0, groot - klein);
-
     kolommen.forEach((kol, ki) => {
       const kolX = ox + marge + ki * kolW;
       // Bepaal of deze kolom een lege aanvulrij krijgt
@@ -684,27 +679,24 @@ const somTekst = (delen.length >= 3)
                            (kol.label === 'T' && metLegeRijT) ||
                            (kol.label === 'H' && metLegeRijH);
 
-      // Bereken hoeveel blauwe schijfjes in DEZE kolom bij oplossingen.
-      // Alle schijfjes gaan bij de E-kolom (dat is wat het kind moet doen:
-      // eenheden aanvullen tot het antwoord bereikt is). T-kolom krijgt
-      // alleen blauw als er overloop is uit de E-aanvulrij (aantal > 10 eenheden).
-      let blauwInKolom10  = 0; // hoeveel schijfjes in de 10-schijfjes rij blauw
-      let blauwInAanvulrij = 0; // hoeveel in de lege aanvulrij blauw
+      // Bereken hoeveel schijfjes aangevuld moeten worden (voor oplossing)
+      // Werkt per kolom: kolGroot - kolKlein. Bij brug kan dit negatief zijn;
+      // dan geldt (10 - kolKlein) + kolGroot, en de volgende hogere kolom krijgt +1.
+      // Voor de visuele inkleuring in DEZE kolom tellen we hoe veel schijfjes
+      // over blijven: eerst de resterende lege schijfjes in de 10-schijfjes-kolom,
+      // vervolgens (indien brug) extra schijfjes in de lege aanvulrij.
+      let aantalAanvullen = 0;
       if (_metAntwoorden) {
-        if (kol.label === 'E') {
-          // E-kolom: vul eerst de lege posities in de 10-kolom,
-          // overloop gaat naar de E-aanvulrij, daarna naar T-aanvulrij.
-          const ruimteInKolom10 = TOTAAL - kol.aantalVoor;
-          blauwInKolom10   = Math.min(totaalBlauw, ruimteInKolom10);
-          const overE      = Math.max(0, totaalBlauw - ruimteInKolom10);
-          blauwInAanvulrij = Math.min(overE, LEGE_RIJ);
-        } else if (kol.label === 'T') {
-          // T-aanvulrij krijgt alleen overloop uit E > 10 + 5 = 15 eenheden
-          // (zeer zeldzaam). We laten de 10-kolom hier ongemoeid.
-          const ruimteEKolom10  = TOTAAL - (kolommen.find(k => k.label === 'E')?.aantalVoor || 0);
-          const overE           = Math.max(0, totaalBlauw - ruimteEKolom10);
-          const overEAanvulrij  = Math.max(0, overE - LEGE_RIJ);
-          blauwInAanvulrij      = Math.min(overEAanvulrij, LEGE_RIJ);
+        const kolGroot = kol.label === 'E' ? eGroot :
+                         kol.label === 'T' ? tGroot :
+                         kol.label === 'H' ? hGroot :
+                         kol.label === 'D' ? dGroot : 0;
+        const verschil = kolGroot - kol.aantalVoor;
+        if (verschil >= 0) {
+          aantalAanvullen = verschil;
+        } else {
+          // brug: we vullen aan tot 10 in deze kolom
+          aantalAanvullen = 10 - kol.aantalVoor;
         }
       }
 
@@ -715,10 +707,10 @@ const somTekst = (delen.length >= 3)
         const sx = kolX + gap + posInRij * (schijfD + gap) + schijfD / 2;
         const sy = schY + kopH + gap + rijNr * rijH + schijfD / 2;
         const isVoor = i < kol.aantalVoor;
-        // Bij oplossingen: alleen E-kolom krijgt blauw in 10-kolom rij
+        // Bij oplossingen: kleur schijfjes na aantalVoor blauw tot we genoeg hebben
         const isAanTeVullen = _metAntwoorden && !isVoor &&
                               i >= kol.aantalVoor &&
-                              i < kol.aantalVoor + blauwInKolom10;
+                              i < kol.aantalVoor + aantalAanvullen;
         if (isVoor) {
           doc.setFillColor(...kol.kleur);
           doc.setDrawColor(kol.kleur[0]-40, kol.kleur[1]-40, kol.kleur[2]-40);
@@ -742,10 +734,13 @@ const somTekst = (delen.length >= 3)
       // Teken extra lege rij voor aanvullen inkleuren
       if (heeftLegeRij) {
         const legeRijNr = Math.ceil(TOTAAL / rijGrootte);
+        // Overflow in aanvulrij = hoeveel aangevuld moet worden maar niet
+        // meer in de 10-schijfjes-kolom paste
+        const overflowNaarAanvulrij = Math.max(0, kol.aantalVoor + aantalAanvullen - TOTAAL);
         for (let i = 0; i < LEGE_RIJ; i++) {
           const sx = kolX + gap + i * (schijfD + gap) + schijfD / 2;
           const sy = schY + kopH + gap + legeRijNr * rijH + schijfD / 2;
-          const isAanTeVullen = _metAntwoorden && i < blauwInAanvulrij;
+          const isAanTeVullen = _metAntwoorden && i < overflowNaarAanvulrij;
           if (isAanTeVullen) {
             doc.setFillColor(74, 144, 217);   // blauw
             doc.setDrawColor(40, 100, 180);
@@ -4146,20 +4141,76 @@ lijnKort(fx, formY);
 
   /* ── Tafels inzicht blok tekenen ────────────────────────── */
   /* ── Canvas-helper: emoji → PNG data-URL (gecached) ──────── */
+  // Veel emoji's (🚗 🌸 🐟 🦋 🍦 🍎 ...) hebben ingebouwde transparante padding
+  // rond hun glyph, waardoor ze visueel veel kleiner lijken dan bv. ⭐.
+  // Oplossing: render emoji groot op canvas, crop de transparante randen weg,
+  // en herrender op een vierkant canvas zodat élke emoji zijn box volledig vult.
   const _emojiCache = {};
   function _emojiPng(emoji, px = 48) {
     const key = emoji + px;
     if (_emojiCache[key]) return _emojiCache[key];
-    const canvas = document.createElement('canvas');
-    canvas.width  = px;
-    canvas.height = px;
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, px, px);
-    ctx.font = `${Math.round(px * 0.75)}px serif`;
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(emoji, px / 2, px / 2);
-    const url = canvas.toDataURL('image/png');
+
+    // Stap 1: render emoji op groot canvas met ruime marge
+    const big = 256;
+    const c1 = document.createElement('canvas');
+    c1.width = big; c1.height = big;
+    const ctx1 = c1.getContext('2d');
+    ctx1.clearRect(0, 0, big, big);
+    ctx1.font = `${Math.round(big * 0.85)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",serif`;
+    ctx1.textAlign = 'center';
+    ctx1.textBaseline = 'middle';
+    ctx1.fillText(emoji, big / 2, big / 2);
+
+    // Stap 2: vind bounding box van niet-transparante pixels
+    let minX = big, minY = big, maxX = -1, maxY = -1;
+    try {
+      const data = ctx1.getImageData(0, 0, big, big).data;
+      for (let y = 0; y < big; y++) {
+        for (let x = 0; x < big; x++) {
+          if (data[(y * big + x) * 4 + 3] > 8) {  // alpha > 8
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+    } catch (e) {
+      maxX = -1;
+    }
+
+    // Fallback als emoji niet gerenderd kon worden of canvas tainted is
+    if (maxX < 0) {
+      const fb = document.createElement('canvas');
+      fb.width = px; fb.height = px;
+      const ctxFb = fb.getContext('2d');
+      ctxFb.font = `${Math.round(px * 0.85)}px serif`;
+      ctxFb.textAlign = 'center';
+      ctxFb.textBaseline = 'middle';
+      ctxFb.fillText(emoji, px / 2, px / 2);
+      const url = fb.toDataURL('image/png');
+      _emojiCache[key] = url;
+      return url;
+    }
+
+    // Stap 3: crop naar vierkante box rond glyph (met kleine marge van 4%)
+    const w = maxX - minX + 1;
+    const h = maxY - minY + 1;
+    const side = Math.max(w, h);
+    const margin = Math.round(side * 0.04);
+    const boxSide = side + margin * 2;
+    const boxX = minX + (w - side) / 2 - margin;
+    const boxY = minY + (h - side) / 2 - margin;
+
+    // Stap 4: schaal gecropte box naar gewenste px × px output
+    const c2 = document.createElement('canvas');
+    c2.width = px; c2.height = px;
+    const ctx2 = c2.getContext('2d');
+    ctx2.imageSmoothingEnabled = true;
+    ctx2.imageSmoothingQuality = 'high';
+    ctx2.drawImage(c1, boxX, boxY, boxSide, boxSide, 0, 0, px, px);
+
+    const url = c2.toDataURL('image/png');
     _emojiCache[key] = url;
     return url;
   }
