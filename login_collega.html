@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Inloggen — Juf Zisa's Spelgenerator</title>
+
+<link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="start_afbeeldingen/Zisa_spelgenerator-192.png" sizes="192x192" type="image/png">
+<meta name="theme-color" content="#ffcf56">
+
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: #e8e0d0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .login-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+    max-width: 480px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .login-header {
+    background: #2a2a2a;
+    color: white;
+    padding: 32px 28px 24px;
+    text-align: center;
+  }
+
+  .login-logo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #ffcf56;
+    padding: 5px;
+    object-fit: contain;
+    margin: 0 auto 14px;
+    display: block;
+  }
+
+  .login-header h1 {
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+    color: #ffcf56;
+  }
+
+  .login-header p {
+    font-size: 0.95rem;
+    color: #ddd;
+    line-height: 1.4;
+  }
+
+  .pro-notice {
+    background: #fff8e7;
+    border-left: 4px solid #ffcf56;
+    padding: 14px 18px;
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: #5a4a1a;
+  }
+
+  .pro-notice strong {
+    color: #2a2a2a;
+  }
+
+  .pro-notice a {
+    color: #c98000;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .pro-notice a:hover {
+    text-decoration: underline;
+  }
+
+  .login-form {
+    padding: 24px 28px 28px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #2a2a2a;
+    margin-bottom: 6px;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: #ffcf56;
+  }
+
+  .login-btn {
+    width: 100%;
+    background: #ffcf56;
+    color: #5a4a1a;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 4px;
+  }
+
+  .login-btn:hover {
+    background: #ffd97d;
+  }
+
+  .login-btn:active {
+    transform: scale(0.98);
+  }
+
+  .login-btn:disabled {
+    background: #e0e0e0;
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .forgot-link {
+    display: block;
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.85rem;
+    color: #888;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: none;
+    width: 100%;
+    font-family: inherit;
+  }
+
+  .forgot-link:hover {
+    color: #c98000;
+    text-decoration: underline;
+  }
+
+  .message {
+    padding: 11px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    line-height: 1.5;
+    display: none;
+  }
+
+  .message.show {
+    display: block;
+  }
+
+  .message.error {
+    background: #fde8e8;
+    color: #8b2424;
+    border-left: 4px solid #c0392b;
+  }
+
+  .message.success {
+    background: #e8f7e8;
+    color: #2d5a2d;
+    border-left: 4px solid #27ae60;
+  }
+
+  .message.warning {
+    background: #fff4e0;
+    color: #6b4a10;
+    border-left: 4px solid #f39c12;
+  }
+
+  .message a {
+    color: inherit;
+    font-weight: bold;
+  }
+
+  .login-footer {
+    background: #f7f3eb;
+    padding: 16px 28px;
+    text-align: center;
+    font-size: 0.82rem;
+    color: #777;
+    border-top: 1px solid #e8e0d0;
+  }
+
+  .login-footer a {
+    color: #c98000;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  .login-footer a:hover {
+    text-decoration: underline;
+  }
+
+  /* Loading spinner in knop */
+  .spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #5a4a1a;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-left: 8px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+
+  <div class="login-header">
+    <img src="start_afbeeldingen/Zisa_spelgenerator-192.png" alt="Juf Zisa" class="login-logo" onerror="this.style.display='none'">
+    <h1>🦓 Hallo!</h1>
+    <p>Fijn dat je er bent.<br>Log in om aan de slag te gaan.</p>
+  </div>
+
+  <div class="pro-notice">
+    💎 <strong>Ben je een PRO-koper?</strong><br>
+    Je zit hier op de <strong>gratis collega-versie</strong>. 
+    <a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/app.html">Ga naar Spelgenerator PRO →</a>
+  </div>
+
+  <form class="login-form" id="loginForm">
+
+    <div id="messageBox" class="message"></div>
+
+    <div class="form-group">
+      <label for="email">E-mailadres</label>
+      <input type="email" id="email" name="email" required autocomplete="email" placeholder="naam@voorbeeld.be">
+    </div>
+
+    <div class="form-group">
+      <label for="password">Wachtwoord</label>
+      <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••">
+    </div>
+
+    <button type="submit" class="login-btn" id="loginBtn">Inloggen</button>
+
+    <button type="button" class="forgot-link" id="forgotBtn">Wachtwoord vergeten?</button>
+
+  </form>
+
+  <div class="login-footer">
+    Meer info over Spelgenerator?<br>
+    <a href="https://www.jufzisa.be">Bezoek www.jufzisa.be</a>
+  </div>
+
+</div>
+
+<!-- Firebase SDK + Auth -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence
+  } from "https://www.gstatic.com/firebasejs/12.12.1/firebase-auth.js";
+
+  // Firebase configuratie voor zisa-collegas
+const firebaseConfig = {
+  apiKey: "AIzaSyCYkB9CSNahs1UNv9pduNC7TTsj0LNNHSU",
+  authDomain: "zisa-collegas.firebaseapp.com",
+  projectId: "zisa-collegas",
+  storageBucket: "zisa-collegas.firebasestorage.app",
+  messagingSenderId: "1029178227426",
+  appId: "1:1029178227426:web:cb21cf199072c44b30bcbb"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Zorg dat sessie bewaard blijft (collega's blijven ingelogd)
+  setPersistence(auth, browserLocalPersistence);
+
+  // Als al ingelogd → direct doorsturen naar gratis versie
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "index.html";
+    }
+  });
+
+  const form = document.getElementById('loginForm');
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('loginBtn');
+  const forgotBtn = document.getElementById('forgotBtn');
+  const messageBox = document.getElementById('messageBox');
+
+  function showMessage(text, type) {
+    messageBox.innerHTML = text;
+    messageBox.className = 'message show ' + type;
+  }
+
+  function hideMessage() {
+    messageBox.className = 'message';
+  }
+
+  // Login afhandelen
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideMessage();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!email || !password) return;
+
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = 'Bezig met inloggen<span class="spinner"></span>';
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // Succes! onAuthStateChanged stuurt automatisch door naar index.html
+      showMessage('✅ Welkom! Je wordt doorgestuurd...', 'success');
+    } catch (error) {
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Inloggen';
+
+      // Foutmelding aangepast aan situatie
+      const code = error.code || '';
+
+      if (code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
+        // Mogelijk een PRO-koper die hier verkeerd zit
+        showMessage(
+          '❌ <strong>E-mail of wachtwoord onjuist.</strong><br><br>' +
+          '💎 Ben je een <strong>PRO-koper</strong>? ' +
+          'Dit is de gratis collega-versie. ' +
+          '<a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/app.html">Ga naar PRO →</a>',
+          'error'
+        );
+      } else if (code === 'auth/invalid-email') {
+        showMessage('❌ Vul een geldig e-mailadres in.', 'error');
+      } else if (code === 'auth/too-many-requests') {
+        showMessage('⏰ Te veel pogingen. Probeer het over enkele minuten opnieuw.', 'warning');
+      } else if (code === 'auth/network-request-failed') {
+        showMessage('🌐 Geen internetverbinding. Controleer je wifi en probeer opnieuw.', 'warning');
+      } else {
+        showMessage('❌ Er ging iets mis. Probeer het opnieuw.<br><small>(' + code + ')</small>', 'error');
+      }
+    }
+  });
+
+  // Wachtwoord vergeten
+  forgotBtn.addEventListener('click', async () => {
+    hideMessage();
+    const email = emailInput.value.trim();
+
+    if (!email) {
+      showMessage('📧 Vul eerst je e-mailadres in en klik dan opnieuw op "Wachtwoord vergeten".', 'warning');
+      emailInput.focus();
+      return;
+    }
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMessage(
+        '✅ <strong>Mail verstuurd!</strong><br>' +
+        'Check je inbox (en spam-folder) voor een mailtje om je wachtwoord opnieuw in te stellen.',
+        'success'
+      );
+    } catch (error) {
+      const code = error.code || '';
+      if (code === 'auth/user-not-found') {
+        showMessage(
+          '❌ Dit e-mailadres is hier niet bekend.<br><br>' +
+          '💎 Ben je een PRO-koper? ' +
+          '<a href="https://isabelrockele.github.io/juf_zisa_spelletjesmaker/pro/app.html">Ga naar PRO →</a>',
+          'error'
+        );
+      } else if (code === 'auth/invalid-email') {
+        showMessage('❌ Vul een geldig e-mailadres in.', 'error');
+      } else {
+        showMessage('❌ Er ging iets mis. Probeer het opnieuw.', 'error');
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
