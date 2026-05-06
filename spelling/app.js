@@ -46,9 +46,7 @@
         if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
       });
       if (window.SpellingWoordenkiezer) {
-        // Hergebruik dezelfde info-update maar mik op het OV01-veld
         window.SpellingWoordenkiezer.updateSidebarInfo();
-        // Plus: update OV01-eigen info-veld
         const aantal = (window._weekdictee_gekozenWoorden || []).length;
         const info = document.querySelector("#ov01-keuze-info");
         if (info) {
@@ -62,17 +60,10 @@
         }
       }
 
-      // Niveau-knoppen (basis/kern/verdieping)
-      const niveauUitlegOV01 = {
-        basis: "<strong>Basis:</strong> plaatje + woord eronder, kind kopieert.",
-        kern: "<strong>Kern:</strong> alleen plaatje, kind roept woord op.",
-        verdieping: "<strong>Verdieping:</strong> alleen plaatje + zin maken met gekozen woord."
-      };
-      container.querySelectorAll("#ov01-niveau button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          maakActief("#ov01-niveau button", btn);
-          const u = document.querySelector("#ov01-niveau-uitleg");
-          if (u) u.innerHTML = niveauUitlegOV01[btn.dataset.niveau] || "";
+      // Niveau-vinkjes (basis/kern/verdieping)
+      container.querySelectorAll("#ov01-niveaus input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          cb.closest(".ov-niveau-vink").classList.toggle("actief", cb.checked);
         });
       });
 
@@ -80,8 +71,14 @@
       container.querySelectorAll("#ov01-lijnhoogte button").forEach(btn => {
         btn.addEventListener("click", () => {
           maakActief("#ov01-lijnhoogte button", btn);
+          // Hertekén schrijflijn-previews bij hoogtewissel
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
         });
       });
+
+      // Teken de mini-voorbeelden bij de schrijflijntype-knoppen
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+
       return;
     }
 
@@ -94,12 +91,17 @@
       // Update sidebar-info met huidige keuze
       if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.updateSidebarInfo();
 
-      // Zinstijl-knoppen (kleur vs zwart)
-      container.querySelectorAll("#wd-zinstijl button").forEach(btn => {
+      // Lijnhoogte-knoppen (middel/klein)
+      container.querySelectorAll("#wd-lijnhoogte button").forEach(btn => {
         btn.addEventListener("click", () => {
-          maakActief("#wd-zinstijl button", btn);
+          maakActief("#wd-lijnhoogte button", btn);
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
         });
       });
+
+      // Teken de mini-voorbeelden bij de schrijflijntype-knoppen
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+
       return;
     }
 
