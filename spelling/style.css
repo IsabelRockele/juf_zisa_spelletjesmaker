@@ -570,6 +570,126 @@ body {
   display: none !important;
 }
 
+/* ============================================================
+   OV02 — Woord 3x overschrijven
+   ============================================================ */
+.ov02-blad {
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  width: 21cm;
+  box-sizing: border-box;
+  padding: 1.5cm 1.8cm !important;
+  margin: 0 auto;
+  background: white;
+  color: #222;
+  box-shadow: none !important;
+  position: relative;
+}
+.preview-modus .ov02-blad + .ov02-blad {
+  margin-top: 20px;
+}
+
+/* Rooster van rijen — elke rij is één woord */
+.ov02-rooster {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Eén rij = plaatje + woord + 3 schrijflijnen */
+.ov02-rij {
+  display: grid;
+  grid-template-columns: auto 110px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+  border-bottom: 1px dashed #ddd;
+}
+.ov02-rij:last-child {
+  border-bottom: none;
+}
+
+/* Plaatje-cel */
+.ov02-plaatje {
+  font-size: 2.2rem;
+  text-align: center;
+  width: 50px;
+  line-height: 1;
+}
+
+/* Woord-cel (in vetgedrukt zwart) */
+.ov02-woord {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+/* 3 schrijflijnen naast elkaar */
+.ov02-lijnen-blok {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+.ov02-lijn-cel {
+  position: relative;
+}
+.ov02-lijn-cel canvas.schrijflijn-canvas {
+  display: block;
+  width: 100%;
+}
+
+/* Antwoord op de schrijfregel (oplossingen) */
+.ov02-lijn-antwoord {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2196F3;
+  z-index: 2;
+  font-family: 'Comic Sans MS', sans-serif;
+  background: white;
+  padding: 0 3px;
+  line-height: 1;
+}
+
+/* Bij "geen plaatje": sluit de plaatje-kolom */
+.ov02-rij:not(:has(.ov02-plaatje)) {
+  grid-template-columns: 110px 1fr;
+}
+
+/* Helpers voor instellingen-blokken (consistent met OV01) */
+.ov-instel-blok {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e0e0e0;
+}
+.ov-instel-blok:last-of-type {
+  border-bottom: none;
+}
+.ov-instel-titel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--zisa-blauw);
+  margin-bottom: 6px;
+}
+.ov-instel-nr {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--zisa-blauw);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
 /* ===== BEWERKEN-MODUS ===== */
 /* Wanneer body.bewerk-aan, krijgen alle [data-bewerk-id] elementen
    een gele achtergrond zodat duidelijk is wat aanpasbaar is. */
