@@ -100,10 +100,37 @@ window.SpellingWoordenkiezer = (function() {
     if (t) t.textContent = gekozen.length;
   }
 
+  /* Bepaal actieve graad: eerst uit sidebar, dan uit modal-dropdown, dan default 1 */
+  function actieveGraad() {
+    const sidebar = document.querySelector(".graad-knop.actief");
+    if (sidebar?.dataset?.graad) return parseInt(sidebar.dataset.graad, 10);
+    const modal = document.querySelector("#wk-leerjaar");
+    if (modal?.value) return parseInt(modal.value, 10);
+    return 1;
+  }
+
   function herrender() {
-    const leerjaar = parseInt(document.querySelector("#wk-leerjaar")?.value || "1", 10);
+    const leerjaar = actieveGraad();
+    // Sync de modal-dropdown met de huidige graad
+    const modal = document.querySelector("#wk-leerjaar");
+    if (modal && modal.value !== String(leerjaar)) modal.value = String(leerjaar);
+
     const container = document.querySelector("#wk-categorieen");
-    if (container) container.innerHTML = renderCategorieen(leerjaar);
+    if (!container) return;
+
+    const wb = window.SpellingWoordenbibliotheek;
+    if (!wb || !wb.graadHeeftWoorden(leerjaar)) {
+      container.innerHTML = `
+        <div class="wk-leeg-graad">
+          <h3>Graad ${leerjaar} — binnenkort beschikbaar</h3>
+          <p>De woordenset voor graad ${leerjaar} is nog in ontwikkeling.
+          Voorlopig kan je alleen woorden kiezen voor graad 1.</p>
+        </div>`;
+      updateTeller();
+      return;
+    }
+
+    container.innerHTML = renderCategorieen(leerjaar);
     updateTeller();
   }
 
@@ -171,7 +198,7 @@ window.SpellingWoordenkiezer = (function() {
         const tekst = e.target.dataset.woordTekst;
         const lidwoord = e.target.dataset.woordLidwoord || null;
         const cat = e.target.dataset.cat;
-        const leerjaar = parseInt(document.querySelector("#wk-leerjaar")?.value || "1", 10);
+        const leerjaar = actieveGraad();
         const id = `${leerjaar}|${cat}|${tekst}`;
 
         if (e.target.checked) {
@@ -182,9 +209,7 @@ window.SpellingWoordenkiezer = (function() {
           gekozen = gekozen.filter(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` !== id);
         }
         bewaar();
-        // Update visuele staat zonder volledige re-render
         e.target.closest(".wk-woord-vinkje").classList.toggle("gekozen", e.target.checked);
-        // Update teller in categorie-titel
         herrenderCategorieTeller(cat);
         updateTeller();
       }
@@ -194,7 +219,7 @@ window.SpellingWoordenkiezer = (function() {
       if (e.target.matches(".wk-cat-mini-btn")) {
         const actie = e.target.dataset.actie;
         const catId = e.target.dataset.cat;
-        const leerjaar = parseInt(document.querySelector("#wk-leerjaar")?.value || "1", 10);
+        const leerjaar = actieveGraad();
         const wb = window.SpellingWoordenbibliotheek;
         const cat = wb[`graad${leerjaar}`]?.[catId];
         if (!cat) return;
@@ -220,17 +245,21 @@ window.SpellingWoordenkiezer = (function() {
     herrender();
   }
 
-  /* ----- Update de info-tekst in de sidebar (stap 1) ----- */
+  /* ----- Update info-tekst in de sidebar (alle modules die het hebben) ----- */
   function updateSidebarInfo() {
-    const info = document.querySelector("#wd-keuze-info");
-    if (!info) return;
-    if (gekozen.length === 0) {
-      info.textContent = "Nog geen woorden gekozen.";
-      info.style.color = "#888";
-    } else {
-      info.innerHTML = `<strong>${gekozen.length}</strong> woord${gekozen.length === 1 ? '' : 'en'} gekozen ✓`;
-      info.style.color = "var(--zisa-blauw)";
-    }
+    const aantal = gekozen.length;
+    // Update voor weekdictee én ov01 als ze in DOM staan
+    ["#wd-keuze-info", "#ov01-keuze-info"].forEach(sel => {
+      const info = document.querySelector(sel);
+      if (!info) return;
+      if (aantal === 0) {
+        info.textContent = "Nog geen woorden gekozen.";
+        info.style.color = "#888";
+      } else {
+        info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+        info.style.color = "var(--zisa-blauw)";
+      }
+    });
   }
 
   /* ----- Public API ----- */
