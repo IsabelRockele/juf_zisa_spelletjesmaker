@@ -88,15 +88,30 @@
         <!-- module-specifieke instellingen worden hier ingeladen -->
       </section>
 
-      <section class="block">
-        <h2>Bundel</h2>
-        <label>Aantal bladen <input type="number" id="aantal-bladen" min="1" max="20" value="2"></label>
-        <label>Naam bundel <input type="text" id="bundel-naam" placeholder="bv. Klankzuiver mkm"></label>
+      <!-- BUNDEL: verzamel meerdere werkbladen tot één PDF -->
+      <section class="block" id="bundel-sectie">
+        <h2>📚 Bundel</h2>
+        <p class="bundel-info">
+          Maak meerdere werkbladen, voeg ze toe aan je bundel, download ze samen als één PDF.
+        </p>
+        <div id="bundel-lijst">
+          <p class="bundel-leeg">Nog geen bladen in je bundel.</p>
+        </div>
+        <button id="bundel-download" class="bundel-knop verborgen" type="button">
+          📥 Download bundel als PDF
+        </button>
+        <button id="bundel-download-oplossingen" class="bundel-knop verborgen" type="button">
+          📥 Download oplossingen-bundel
+        </button>
+        <button id="bundel-wis" class="bundel-knop-wis verborgen" type="button">
+          🗑️ Wis bundel
+        </button>
       </section>
 
       <div class="actie-knoppen">
         <button id="ververs-preview" class="primair">↻ Vernieuw voorbeeld</button>
         <button id="bewerken-toggle" class="secundair" type="button">✏️ Bewerken: uit</button>
+        <button id="bundel-toevoegen" class="secundair" type="button">➕ Voeg toe aan bundel</button>
         <button id="download-pdf" class="secundair">⬇ Download PDF</button>
         <button id="download-oplossing" class="secundair">⬇ Oplossingen</button>
       </div>
@@ -183,6 +198,7 @@
   <script src="generator.js"></script>
   <script src="preview.js"></script>
   <script src="pdf-engine.js"></script>
+  <script src="bundel.js"></script>
   <script src="app.js"></script>
 
 </body>
