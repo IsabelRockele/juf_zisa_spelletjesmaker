@@ -211,14 +211,17 @@ window.SpellingBundel = {
   _maakLabel: function(opties) {
     // Module-naam op basis van actieve categorie
     const cat = document.querySelector(".cat-knop.actief")?.dataset.categorie || "?";
-    const moduleNaam = (cat === "ov01") ? "Schrijf bij plaatje" : cat;
+    let moduleNaam;
+    if (cat === "ov01") moduleNaam = "Schrijf bij plaatje";
+    else if (cat === "ov02") moduleNaam = "Woord 3× overschrijven";
+    else moduleNaam = cat;
 
-    // Module-specifieke opties zitten genest: opties.ov01.* / opties.weekdictee.*
+    // Module-specifieke opties zitten genest: opties.ov01.* / opties.weekdictee.* / opties.ov02.*
     const modOpties = opties[cat] || {};
 
-    // Niveaus
+    // Niveaus (alleen ov01 heeft die)
     const niveaus = modOpties.niveaus || [];
-    const niveauTekst = niveaus.length > 0 ? niveaus.join("+") : "basis";
+    const niveauTekst = niveaus.length > 0 ? niveaus.join("+") : "";
 
     // Aantal woorden
     const aantal = modOpties.aantalWoorden || "?";
@@ -226,7 +229,9 @@ window.SpellingBundel = {
     // Ondertitel als opgegeven
     const ondertitel = modOpties.ondertitel ? ` — ${modOpties.ondertitel}` : "";
 
-    return `${moduleNaam} (${niveauTekst}, ${aantal} woorden)${ondertitel}`;
+    // Stel label samen — voor ov02 geen niveau-info
+    const niveauDeel = niveauTekst ? `${niveauTekst}, ` : "";
+    return `${moduleNaam} (${niveauDeel}${aantal} woorden)${ondertitel}`;
   },
 
   /* === Update zijbalk-UI op basis van bundel === */
