@@ -105,21 +105,40 @@
       if (u) { await u.getIdToken(true); }
     }
 
-    async function apiFetch(path, body) {
-      await ensureTokensReady();
-      const u = auth.currentUser;
-      if (!u) throw new Error("not signed in");
-      const idToken = await u.getIdToken(false);
-      const r = await fetch(`${API_BASE}/${path}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${idToken}`
-        },
-        body: JSON.stringify(body || {})
-      });
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      return await r.json();
+    // ★ NIEUW: helper om even te wachten
+    function sleep(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    // ★ AANGEPAST: apiFetch met automatische retry bij netwerkfouten
+    async function apiFetch(path, body, retryCount = 0) {
+      const MAX_RETRIES = 2;
+      try {
+        await ensureTokensReady();
+        const u = auth.currentUser;
+        if (!u) throw new Error("not signed in");
+        const idToken = await u.getIdToken(false);
+        const r = await fetch(`${API_BASE}/${path}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${idToken}`
+          },
+          body: JSON.stringify(body || {})
+        });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return await r.json();
+      } catch (e) {
+        // Bij eerste/tweede mislukking: even wachten en opnieuw proberen.
+        // Dit vangt timing-issues op (bv. token nog niet ververst, App Check
+        // nog niet klaar) die typisch na 1-2 seconden vanzelf oplossen.
+        if (retryCount < MAX_RETRIES) {
+          console.warn(`apiFetch mislukt (poging ${retryCount + 1}/${MAX_RETRIES + 1}), opnieuw proberen…`, e);
+          await sleep(1500);
+          return apiFetch(path, body, retryCount + 1);
+        }
+        throw e;
+      }
     }
 
     function showHint(message) {
@@ -161,6 +180,7 @@
 
     async function load(fromRemoval = false){
       listEl.innerHTML = '<li class="muted">(Laden…)</li>';
+      msgEl.textContent = ""; // ★ NIEUW: oude foutmelding wissen bij nieuwe poging
       hideHint();
       try {
         const data = await apiFetch("listDevicesHttp", {});
@@ -184,8 +204,10 @@
         }
       } catch (e) {
         console.error(e);
-        msgEl.textContent = "Laden mislukt. Vernieuw de pagina of probeer later opnieuw.";
+        // ★ AANGEPAST: gebruiksvriendelijke foutmelding met probeer-opnieuw knop
+        msgEl.innerHTML = `Laden lukte niet. <button class="btn" id="retryBtn" style="margin-left:8px">Probeer opnieuw</button>`;
         listEl.innerHTML = "";
+        document.getElementById("retryBtn")?.addEventListener("click", () => load(false));
       }
     }
 
@@ -195,7 +217,9 @@
     onAuthStateChanged(auth, (user) => {
       if (!user) { window.location.href = "./index.html"; return; }
       userPill.textContent = user.email || user.uid;
-      setTimeout(() => { if (!PRO_READY) load(); }, 2000);
+      // ★ AANGEPAST: 5 seconden i.p.v. 2 — geeft guard.js voldoende tijd
+      // op tragere netwerken (bv. schoolnetwerk)
+      setTimeout(() => { if (!PRO_READY) load(); }, 5000);
     });
 
     window.onProReady = ({ user, expiresAt, limit }) => {
@@ -215,6 +239,3 @@
   </script>
 </body>
 </html>
-
-
-
