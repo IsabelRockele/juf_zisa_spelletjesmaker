@@ -31,8 +31,16 @@ window.SpellingAfbeeldingen = {
     boek: "📖", koek: "🍪", voet: "🦶", bloem: "🌸", stoel: "🪑",
     haai: "🦈", kraai: "🐦‍⬛",
     mooi: "✨", kooi: "🦜",
-    leeuw: "🦁", sneeuw: "❄️",
-    nieuw: "🆕"
+    leeuw: "🦁", sneeuw: "❄️", spreeuw: "🐦", meeuw: "🪿", eeuw: "💯",
+    nieuw: "🆕", opnieuw: "🔁", kieuw: "🐟",
+    // Lange klanken
+    haan: "🐓", maan: "🌙", paard: "🐴", taart: "🍰", kaas: "🧀",
+    boom: "🌳", doos: "📦", boot: "⛵", school: "🏫", bloem: "🌸",
+    been: "🦵", zee: "🌊", beek: "💧", veer: "🪶", eend: "🦆",
+    muur: "🧱", vuur: "🔥",
+    // ng/nk
+    ring: "💍", slang: "🐍", long: "🫁", tong: "👅", wang: "😊",
+    bank: "🏦", tank: "🛢️", vink: "🐦", plank: "🪵", pink: "🤙"
   },
 
   /* Geef HTML voor de afbeelding bij een woord.
@@ -46,5 +54,10 @@ window.SpellingAfbeeldingen = {
       src="${padNaarAfbeelding}"
       alt="${woord}"
       onerror="this.outerHTML='<span class=&quot;woord-emoji&quot;>${emoji}</span>'">`;
+  },
+
+  /* Geef alleen de emoji voor een woord (geen img-tag) — gebruikt door OV01 */
+  emojiVoor: function(woord) {
+    return this.emojiFallback[woord] || "📷";
   }
 };
