@@ -217,27 +217,21 @@ window.SpellingModules.ov01 = {
       gedeeldeKeuze = this._kiesWoorden(gekozenWoorden, aantalWoorden);
     }
 
-    // OPLOSSINGENPAGINA: alle niveaus achter elkaar
-    if (metAntwoorden) {
-      return niveaus.map(niveau => {
-        const woorden = zelfdeWoorden
-          ? gedeeldeKeuze
-          : this._kiesWoorden(gekozenWoorden, aantalWoorden);
-        return this._renderOplossingen(woorden, niveau, ondertitel);
-      }).join("");
-    }
+    // ÉÉN werkblad-template voor zowel werkblad als oplossingen.
+    // metAntwoorden=true triggert: antwoord-spans op schrijflijnen,
+    // groen hokje bij basis, OPLOSSINGEN-badge in titel.
 
-    // WERKBLADEN: één per niveau
+    // WERKBLADEN: één per niveau (eventueel met antwoorden)
     return niveaus.map((niveau, idx) => {
       const woorden = zelfdeWoorden
         ? gedeeldeKeuze
         : this._kiesWoorden(gekozenWoorden, aantalWoorden);
 
       const stappenHTML = this._renderStappen(niveau);
-      const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype);
+      const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype, metAntwoorden);
       let verdiepingHTML = "";
       if (niveau === "verdieping") {
-        verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype);
+        verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype, metAntwoorden);
       }
 
       const niveauLabel = {
@@ -246,8 +240,14 @@ window.SpellingModules.ov01 = {
         verdieping: "Verdieping"
       }[niveau];
 
+      // Bij oplossingen: extra badge naast titel + extra class
+      const oplBadge = metAntwoorden
+        ? `<span class="oplossingen-badge">OPLOSSINGEN</span>`
+        : "";
+      const oplClass = metAntwoorden ? " ov01-oplossing-blad" : "";
+
       return `
-        <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}" data-niveau="${niveau}">
+        <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}${oplClass}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}" data-niveau="${niveau}">
           <div class="ov01-header">
             <div class="ov01-naam-rij">
               <span data-bewerk-id="naamlabel-${niveau}">Naam:</span>
@@ -258,6 +258,7 @@ window.SpellingModules.ov01 = {
             <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}">
               Mijn spellingavontuur
               <span class="ov01-niveau-badge ov01-niveau-${niveau}">${niveauLabel}</span>
+              ${oplBadge}
             </h2>
             ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}">${ondertitel}</p>` : ""}
           </div>
@@ -312,7 +313,7 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- Plaatjes-rooster: 3 kolommen × n rijen ----- */
-  _renderPlaatjesRooster: function(woorden, niveau, aantalLijnen, lijnhoogte, lijntype) {
+  _renderPlaatjesRooster: function(woorden, niveau, aantalLijnen, lijnhoogte, lijntype, metAntwoorden) {
     const rijen = [];
     for (let i = 0; i < woorden.length; i += 3) {
       rijen.push(woorden.slice(i, i + 3));
@@ -333,24 +334,31 @@ window.SpellingModules.ov01 = {
         if (niveau === "basis" && af) {
           // BASIS: 3 keuze-hokjes met afleiders
           const afleiders = af.maakAfleiders(w, w.categorie);
-          // Schikken in random volgorde (gebruik onze eigen seed-random)
           const opties = af.schikWillekeurig(w.tekst, afleiders, () => this._random());
           onderHtml = `
             <div class="ov01-cel-keuze">
-              ${opties.map(opt => `<div class="ov01-keuze-hokje">${opt}</div>`).join("")}
+              ${opties.map(opt => {
+                // Bij oplossingen: juiste hokje krijgt class "juist" (groene achtergrond)
+                const juistClass = (metAntwoorden && opt === w.tekst) ? " juist" : "";
+                return `<div class="ov01-keuze-hokje${juistClass}">${opt}</div>`;
+              }).join("")}
             </div>`;
         } else if (niveau === "kern" || niveau === "verdieping") {
           // KERN/VERDIEPING: alleen plaatje, geen woord
           onderHtml = `<div class="ov01-cel-woord-leeg"></div>`;
         }
 
-        // Schrijflijnen via canvas
+        // Schrijflijnen via canvas — bij oplossingen: woord erop
         let lijnen = "";
         for (let i = 0; i < aantalLijnen; i++) {
+          // Antwoord alleen op de EERSTE schrijflijn (i === 0)
+          const antwoordSpan = (metAntwoorden && i === 0)
+            ? `<span class="ov01-lijn-antwoord">${tonen}</span>`
+            : "";
           if (sl) {
-            lijnen += `<div class="ov01-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 200)}</div>`;
+            lijnen += `<div class="ov01-canvas-wrap">${antwoordSpan}${sl.htmlCanvas(lijntype, lijnhoogte, 200)}</div>`;
           } else {
-            lijnen += `<div class="ov01-schrijflijn"></div>`;
+            lijnen += `<div class="ov01-schrijflijn">${antwoordSpan}</div>`;
           }
         }
         html += `
@@ -367,11 +375,17 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- Verdieping: zin-opdracht onderaan ----- */
-  _renderZinOpdracht: function(lijnhoogte, lijntype) {
+  _renderZinOpdracht: function(lijnhoogte, lijntype, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
     const zinLijn = sl
       ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 600)}</div>`
       : `<div class="ov01-zin-lijn"></div>`;
+    
+    // Bij oplossingen: tekst onder zin-vak met richtlijn voor de juf
+    const oplTekst = metAntwoorden
+      ? `<p class="ov01-zin-richtlijn">Verwacht: een correcte zin met hoofdletter, leesteken op het einde, en een woord uit de oefening.</p>`
+      : "";
+    
     return `
       <div class="ov01-zin-blok">
         <div class="ov01-stappen-label" data-bewerk-id="opdracht2-label">Opdracht 2 (zin):</div>
@@ -379,40 +393,7 @@ window.SpellingModules.ov01 = {
           Kies 1 woord van de vorige oefening en maak een goede zin met dit woord.
         </p>
         ${zinLijn}
-      </div>
-    `;
-  },
-
-  /* ----- Oplossingenpagina ----- */
-  _renderOplossingen: function(woorden, niveau, ondertitel) {
-    const lijst = woorden.map(w => {
-      const tonen = this._toonWoord(w);
-      const emoji = this._zoekEmoji(w.tekst);
-      return `<li class="ov01-opl-item">
-        <span class="ov01-opl-emoji">${emoji}</span>
-        <span class="ov01-opl-woord">${tonen}</span>
-      </li>`;
-    }).join("");
-
-    return `
-      <div class="werkblad ov01-blad ov01-oplossing">
-        <div class="ov01-header">
-          <h2 class="ov01-titel">
-            Mijn spellingavontuur
-            <span class="oplossingen-badge">OPLOSSINGEN</span>
-          </h2>
-          ${ondertitel ? `<p class="ov01-ondertitel">${ondertitel}</p>` : ""}
-        </div>
-        <p class="ov01-opl-uitleg">Verwachte woorden bij elke prent:</p>
-        <ol class="ov01-opl-lijst">${lijst}</ol>
-        ${niveau === "verdieping" ? `
-          <div class="ov01-opl-zin">
-            <strong>Voor de zin-opdracht:</strong> verwacht een correcte zin
-            met hoofdletter, leesteken op het einde, en een woord uit de lijst.
-          </div>
-        ` : ""}
-
-        <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
+        ${oplTekst}
       </div>
     `;
   },
