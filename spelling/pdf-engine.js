@@ -53,9 +53,14 @@ window.SpellingPDF = {
     verborgen.style.position = "absolute";
     verborgen.style.left = "-9999px";
     verborgen.style.top = "0";
-    verborgen.style.width = "21cm";  // moet zichtbaar formaat hebben voor html2canvas
+    verborgen.style.width = "21cm";
     verborgen.innerHTML = window.SpellingGenerator.genereerBundel(opties, true);
     document.body.appendChild(verborgen);
+
+    // Teken eventuele schrijflijn-canvases binnen de verborgen container
+    if (window.SpellingSchrijflijnen) {
+      window.SpellingSchrijflijnen.tekenAlle(verborgen);
+    }
 
     const knop = document.querySelector("#download-oplossing");
     this._exporteer(verborgen, bestandsnaam, knop, () => {
@@ -115,6 +120,8 @@ window.SpellingPDF = {
       basis = opties.bundelNaam.replace(/[^a-z0-9 _-]/gi, "").trim() || basis;
     } else if (opties.categorie === "weekdictee") {
       basis = "weekdictee";
+    } else if (opties.categorie === "ov01") {
+      basis = `OV01-plaatje-naar-woord-${opties.ov01?.niveau || "basis"}`;
     } else if (opties.subcat === "kort") {
       basis = `klankzuiver-${opties.structuur}-${opties.niveau}`;
     } else if (opties.subcat === "tweeklank") {
