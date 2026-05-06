@@ -22,10 +22,10 @@ window.SpellingSchrijflijnen = {
 
   /* Geef hoogte (px tussen lijnen) voor elke voorinstelling */
   hoogteInPx: function(naam) {
-    if (naam === "klein")  return 7;
-    if (naam === "middel") return 9;
-    if (naam === "groot")  return 12;
-    return 9; // default middel
+    if (naam === "klein")  return 14;
+    if (naam === "middel") return 20;
+    if (naam === "groot")  return 28;  // verborgen optie maar API blijft werken
+    return 20; // default middel
   },
 
   /* Bereken totale canvas-hoogte = top-marge + 3*regelafstand + bottom-marge */
@@ -58,6 +58,42 @@ window.SpellingSchrijflijnen = {
 
     const mid1Y = offs[1].dy;
     const baseY = offs[2].dy;
+
+    // TYPE 6: één enkele zwarte lijn, gecentreerd binnen canvas.
+    // Werkt zowel voor mini-previews (h=32) als grote canvases.
+    if (type === "type6") {
+      // Centrum van canvas voor lijn
+      const lijnY = h / 2;
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, lijnY);
+      ctx.lineTo(w, lijnY);
+      ctx.stroke();
+      return;
+    }
+
+    // TYPE 7: twee parallelle lijnen, gecentreerd binnen canvas.
+    if (type === "type7") {
+      // Bepaal x-hoogte op basis van ingestelde hoogte L, maar zorg dat lijnen
+      // binnen de canvas vallen.
+      const xHoogte = Math.min(L, h * 0.5);
+      const middenY = h / 2;
+      const topY = middenY - xHoogte / 2;
+      const basisY = middenY + xHoogte / 2;
+      ctx.strokeStyle = "#000";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, topY);
+      ctx.lineTo(w, topY);
+      ctx.stroke();
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, basisY);
+      ctx.lineTo(w, basisY);
+      ctx.stroke();
+      return;
+    }
 
     // Inkleuring middenzone (x-hoogte) per type
     if (type === "type1") {
@@ -156,6 +192,17 @@ window.SpellingSchrijflijnen = {
       const type = canvas.dataset.type || "type3";
       const hoogte = canvas.dataset.hoogte || "middel";
       this.tekenCanvas(canvas, type, hoogte);
+    });
+  },
+
+  /* Teken de mini-voorbeelden bij de lijntype-keuze-knoppen.
+     Deze canvases zitten in de sidebar (data-preview-type attribuut). */
+  tekenLijntypePreviews: function() {
+    const previews = document.querySelectorAll("canvas.lijntype-preview[data-preview-type]");
+    previews.forEach(canvas => {
+      const type = canvas.dataset.previewType;
+      // Mini-preview: gebruik kleine hoogte voor compacte weergave
+      this.tekenCanvas(canvas, type, "klein");
     });
   }
 };
