@@ -1,0 +1,1201 @@
+/* ==========================================================
+   Spellinggenerator – Juf Zisa
+   Stijl in lijn met andere PRO-tools
+   ========================================================== */
+
+:root {
+  --zisa-blauw: #2C5F8D;
+  --zisa-blauw-licht: #E8F1F8;
+  --zisa-geel: #F5C842;
+  --zisa-grijs: #F4F4F4;
+  --zisa-tekst: #2A2A2A;
+  --zisa-rand: #DADADA;
+  --zisa-groen: #6BAE5A;
+  --zisa-rood: #D9534F;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--zisa-grijs);
+  color: var(--zisa-tekst);
+}
+
+/* ===== Topbar ===== */
+.topbar {
+  background: var(--zisa-blauw);
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.topbar h1 { margin: 0; font-size: 1.2rem; flex: 1; }
+.terug {
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.15);
+}
+.terug:hover { background: rgba(255,255,255,0.25); }
+.badge {
+  background: var(--zisa-geel);
+  color: var(--zisa-blauw);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+/* ===== Layout ===== */
+.layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  height: fit-content;
+}
+.block { margin-bottom: 20px; }
+.block h2 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--zisa-blauw);
+  margin: 0 0 8px 0;
+}
+.block label {
+  display: block;
+  margin: 6px 0;
+  font-size: 0.9rem;
+}
+.block input[type="number"],
+.block input[type="text"],
+.block select {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  margin-top: 2px;
+  font-family: inherit;
+}
+
+/* ===== Knoppen ===== */
+.cat-knop, .graad-knop, .niveau-knop {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 4px;
+  border: 1px solid var(--zisa-rand);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+}
+.cat-knop:hover:not(.disabled),
+.graad-knop:hover:not(.disabled),
+.niveau-knop:hover {
+  background: var(--zisa-blauw-licht);
+  border-color: var(--zisa-blauw);
+}
+.cat-knop.actief, .graad-knop.actief, .niveau-knop.actief {
+  background: var(--zisa-blauw);
+  color: white;
+  border-color: var(--zisa-blauw);
+  font-weight: 600;
+}
+.cat-knop.disabled, .graad-knop.disabled {
+  color: #999;
+  background: #f8f8f8;
+  cursor: not-allowed;
+}
+.binnenkort {
+  font-size: 0.7rem;
+  color: #aaa;
+  font-style: italic;
+  float: right;
+}
+
+.niveau-knoppen {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+.niveau-knoppen button {
+  margin: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  padding: 8px 4px;
+}
+.niveau-uitleg {
+  font-size: 0.8rem;
+  color: #666;
+  background: var(--zisa-blauw-licht);
+  padding: 8px 10px;
+  border-radius: 4px;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+
+/* ===== Module instellingen (subtype-knoppen) ===== */
+.subtype-knoppen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+}
+.subtype-knoppen button {
+  margin: 0;
+  padding: 6px;
+  font-size: 0.8rem;
+  border: 1px solid var(--zisa-rand);
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.subtype-knoppen button.actief {
+  background: var(--zisa-geel);
+  border-color: var(--zisa-geel);
+  font-weight: 600;
+}
+.oefenvorm-lijst label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 0.88rem;
+}
+
+/* 3-koloms variant voor subcat-knoppen (Korte / Tweeklanken / Verwar) */
+.subcat-3kol {
+  grid-template-columns: 1fr 1fr 1fr !important;
+}
+
+/* Ontbrekende letter: rooster met vakje + rest van het woord */
+.ontbreekt-rooster {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px 24px;
+  margin-top: 10px;
+}
+.ontbreekt-cel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.3rem;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+}
+.ontbreekt-nr {
+  font-weight: bold;
+  color: var(--zisa-blauw);
+  min-width: 24px;
+  font-size: 1rem;
+}
+.ontbreekt-vakje {
+  display: inline-block;
+  width: 32px;
+  height: 36px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  background: #fff;
+}
+.ontbreekt-rest {
+  letter-spacing: 1px;
+}
+
+/* Inline variant (in zinnen) */
+.ontbreekt-vakje-inline {
+  display: inline-block;
+  width: 26px;
+  height: 28px;
+  border: 2px solid #444;
+  border-radius: 4px;
+  background: #fff;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+/* Klankgroep checkboxes (ie/eu/ui/oe/aai/ooi/oei/eeuw/ieuw) */
+.klankgroep-keuze {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 10px;
+  margin-top: 4px;
+}
+.klankgroep-keuze label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.88rem;
+  padding: 2px 0;
+}
+
+/* ===== Lijntype knoppen (globaal) ===== */
+.lijn-knoppen {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+.lijn-knop {
+  padding: 8px 4px;
+  border: 1px solid var(--zisa-rand);
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.78rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.lijn-knop.actief {
+  background: var(--zisa-blauw);
+  color: white;
+  border-color: var(--zisa-blauw);
+  font-weight: 600;
+}
+/* Mini-preview boven het label van de knop */
+.lijn-mini {
+  width: 38px;
+  height: 18px;
+  background-position: left center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+.lijn-mini.enkel    { border-bottom: 1.5px solid currentColor; }
+.lijn-mini.dubbel   { border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; }
+.lijn-mini.vier {
+  border: none;
+  background:
+    linear-gradient(to bottom, currentColor 1.5px, transparent 1.5px) top    / 100% 100% no-repeat,
+    linear-gradient(to bottom, currentColor 1px,   transparent 1px)   0 33%  / 100% 100% no-repeat,
+    linear-gradient(to bottom, currentColor 1.5px, transparent 1.5px) 0 66%  / 100% 100% no-repeat,
+    linear-gradient(to bottom, currentColor 1px,   transparent 1px)   bottom / 100% 100% no-repeat;
+  opacity: 0.85;
+}
+
+/* Per-oefenvorm override: kleine select naast de checkbox */
+.oefenvorm-rij {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 4px 2px 4px;
+  font-size: 0.88rem;
+  background: #FAFAFA;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.oefenvorm-rij:hover {
+  background: var(--zisa-blauw-licht);
+}
+.oefenvorm-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  cursor: pointer;
+}
+.oef-icoon {
+  font-size: 1.1rem;
+  width: 22px;
+  text-align: center;
+}
+.oef-naam {
+  flex: 1;
+  font-weight: 500;
+}
+.oefenvorm-rij select {
+  padding: 2px 4px;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  background: white;
+  max-width: 90px;
+}
+.oef-uitleg {
+  font-size: 0.75rem;
+  color: #666;
+  padding: 0 4px 8px 32px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+/* ===== Tabs voor niveau-overzicht in oefenvormen ===== */
+.oef-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2px;
+  background: var(--zisa-rand);
+  padding: 2px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+.oef-tab {
+  border: none;
+  background: white;
+  padding: 6px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  color: #666;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.oef-tab:hover {
+  background: var(--zisa-blauw-licht);
+}
+.oef-tab.actief {
+  background: var(--zisa-blauw);
+  color: white;
+  font-weight: 600;
+}
+
+/* Mini-reset knop in oefenvormen-titel */
+.mini-btn {
+  background: white;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: #666;
+  font-family: inherit;
+}
+.mini-btn:hover {
+  background: var(--zisa-blauw-licht);
+  border-color: var(--zisa-blauw);
+  color: var(--zisa-blauw);
+}
+
+/* ===== Actie knoppen ===== */
+.actie-knoppen {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 16px;
+}
+.primair, .secundair {
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  border: none;
+  transition: filter 0.15s;
+}
+.primair {
+  background: var(--zisa-blauw);
+  color: white;
+}
+.secundair {
+  background: white;
+  color: var(--zisa-blauw);
+  border: 1px solid var(--zisa-blauw);
+}
+.primair:hover, .secundair:hover { filter: brightness(0.95); }
+
+/* ===== BEWERKEN-MODUS ===== */
+/* Wanneer body.bewerk-aan, krijgen alle [data-bewerk-id] elementen
+   een gele achtergrond zodat duidelijk is wat aanpasbaar is. */
+body.bewerk-aan [data-bewerk-id] {
+  background: #FFF8C4;
+  outline: 1.5px dashed #D4A800;
+  outline-offset: 2px;
+  border-radius: 3px;
+  cursor: text;
+  transition: background 0.15s;
+}
+body.bewerk-aan [data-bewerk-id]:hover {
+  background: #FFEC8A;
+}
+body.bewerk-aan [data-bewerk-id]:focus {
+  background: #FFFFFF;
+  outline: 2px solid var(--zisa-blauw);
+  outline-offset: 2px;
+}
+
+/* Knop in actieve staat */
+#bewerken-toggle.actief {
+  background: var(--zisa-geel);
+  color: var(--zisa-blauw);
+  border-color: var(--zisa-geel);
+  font-weight: 600;
+}
+
+/* ===== Preview paneel ===== */
+.preview-paneel {
+  background: white;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  min-height: 600px;
+}
+
+/* ===== OPLOSSINGEN-MODUS ===== */
+/* Antwoorden in rood, op of in de schrijflijnen/vakjes */
+.antwoord {
+  color: #D9534F;
+  font-weight: bold;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+}
+/* Antwoord ON een schrijflijn: positioneer rechtboven de lijn */
+.dictee-lijn .antwoord,
+.schrijflijn .antwoord {
+  display: inline-block;
+  padding: 0 4px;
+  position: relative;
+  top: -2px;
+}
+/* Antwoord IN een vakje (b/d ontbrekende letter) */
+.ontbreekt-vakje .antwoord,
+.ontbreekt-vakje-inline .antwoord {
+  font-size: 1.1rem;
+  display: inline-block;
+  padding-top: 4px;
+}
+/* Badge "OPLOSSINGEN" in de header */
+.oplossingen-badge {
+  display: inline-block;
+  margin-left: 12px;
+  background: #D9534F;
+  color: white;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  vertical-align: middle;
+}
+/* Het werkblad zelf krijgt een rode rand om het visueel te onderscheiden */
+.werkblad.met-antwoorden {
+  border-left: 4px solid #D9534F;
+}
+
+/* ============================================================
+   WOORDENKIEZER MODAL
+   ============================================================ */
+.wk-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.wk-modal-inhoud {
+  background: white;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+.wk-modal-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--zisa-rand);
+}
+.wk-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--zisa-blauw);
+}
+.wk-teller-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wk-teller {
+  font-size: 0.9rem;
+  color: #555;
+  background: var(--zisa-blauw-licht);
+  padding: 4px 12px;
+  border-radius: 12px;
+}
+.wk-teller strong {
+  color: var(--zisa-blauw);
+  font-size: 1rem;
+}
+.wk-sluiten {
+  border: none;
+  background: transparent;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #888;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.wk-sluiten:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+.wk-mini-btn {
+  background: white;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  color: #666;
+  font-family: inherit;
+}
+.wk-mini-btn:hover {
+  background: var(--zisa-blauw-licht);
+  color: var(--zisa-blauw);
+}
+
+.wk-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+/* Tabs */
+.wk-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--zisa-rand);
+  margin-bottom: 16px;
+}
+.wk-tab {
+  border: none;
+  background: transparent;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: #666;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.wk-tab:hover {
+  color: var(--zisa-blauw);
+}
+.wk-tab.actief {
+  color: var(--zisa-blauw);
+  font-weight: 600;
+  border-bottom-color: var(--zisa-blauw);
+}
+
+.wk-leerjaar-keuze {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.wk-leerjaar-keuze select {
+  padding: 6px 10px;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+/* Categorie-blokken */
+.wk-categorie-blok {
+  margin-bottom: 16px;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.wk-groep-titel {
+  background: var(--zisa-blauw);
+  color: white;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.wk-cat-titel {
+  background: var(--zisa-blauw-licht);
+  padding: 6px 14px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--zisa-blauw);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--zisa-rand);
+}
+.wk-cat-titel:first-child { border-top: none; }
+.wk-cat-acties {
+  display: flex;
+  gap: 4px;
+}
+.wk-cat-mini-btn {
+  background: white;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 3px;
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.wk-cat-mini-btn:hover {
+  background: var(--zisa-blauw);
+  color: white;
+}
+
+.wk-woordenrooster {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 4px;
+  padding: 8px 14px;
+  background: white;
+}
+.wk-woord-vinkje {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.wk-woord-vinkje:hover {
+  background: var(--zisa-blauw-licht);
+}
+.wk-woord-vinkje input {
+  flex-shrink: 0;
+}
+.wk-woord-vinkje.gekozen {
+  background: #FFF8C4;
+  font-weight: 500;
+}
+
+.wk-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--zisa-rand);
+}
+
+.wk-binnenkort {
+  font-size: 0.95rem;
+  background: var(--zisa-blauw-licht);
+  padding: 16px;
+  border-radius: 6px;
+  color: #555;
+  line-height: 1.6;
+}
+
+/* ===== WEEKDICTEE WIZARD STAPPEN ===== */
+.wd-stap {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--zisa-rand);
+}
+.wd-stap:last-child {
+  border-bottom: none;
+}
+.wd-stap-kop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.wd-stap-nr {
+  background: var(--zisa-blauw);
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+.wd-stap-titel {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--zisa-blauw);
+}
+.wd-kiezer-knop {
+  width: 100%;
+  padding: 10px;
+  background: var(--zisa-geel);
+  color: var(--zisa-blauw);
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+.wd-kiezer-knop:hover {
+  filter: brightness(0.95);
+}
+.wd-stap-info {
+  font-size: 0.82rem;
+  margin: 6px 0 0 0;
+  color: #888;
+}
+
+/* Empty state als nog geen woorden gekozen */
+.weekdictee-empty {
+  text-align: center;
+  padding: 60px 30px;
+  color: #888;
+}
+.weekdictee-empty h3 {
+  color: var(--zisa-blauw);
+  margin: 0 0 12px 0;
+}
+
+/* Dagen-lijst compacter (geen dropdown meer) */
+.weekdictee-dagen-lijst {
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  padding: 8px 10px;
+  background: white;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+}
+
+/* ===== WEEKDICTEE ===== */
+
+.weekdictee-blad {
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  padding: 1.2cm 1.5cm !important;
+}
+
+.weekdictee-header {
+  margin-bottom: 16px;
+}
+.weekdictee-naam-rij {
+  font-size: 0.95rem;
+  margin-bottom: 8px;
+}
+.naam-lijn-lang {
+  display: inline-block;
+  border-bottom: 1px solid #444;
+  width: 250px;
+  margin-left: 6px;
+}
+.weekdictee-titel {
+  background: #1a1a1a;
+  color: white;
+  text-align: center;
+  font-size: 1.3rem;
+  margin: 0 0 16px 0;
+  padding: 10px 16px;
+  font-weight: bold;
+}
+
+/* Dag-blok = de complete cel met zwarte rand */
+.dag-blok {
+  border: 2px solid #1a1a1a;
+  margin-bottom: 14px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Kop van een dag (grijze balk) */
+.dag-blok-kop {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  background: #C8C8C8;
+  border-bottom: 2px solid #1a1a1a;
+}
+.dag-kop-links {
+  padding: 8px 12px;
+  font-size: 1rem;
+  border-right: 2px solid #1a1a1a;
+}
+.dag-kop-rechts {
+  padding: 8px 12px;
+  font-size: 1rem;
+  text-align: center;
+}
+
+/* Body: woorden links, verbetering rechts */
+.dag-blok-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  background: white;
+}
+.dag-woorden {
+  padding: 12px 16px;
+  border-right: 2px solid #1a1a1a;
+}
+.dag-verbeter {
+  padding: 12px 16px;
+}
+
+/* Schrijflijn voor woorden (linkerkant) */
+.dag-woord-lijn {
+  border-bottom: 1px solid #444;
+  height: 26px;
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+  padding-left: 2px;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* Verbeter-rooster: 3 kolommen */
+.verbeter-rij {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.verbeter-cel {
+  border-bottom: 1px solid #444;
+  height: 26px;
+}
+
+/* Zinvak: het complete kleurgecodeerde lijnvlak */
+.dag-zinnen {
+  border-top: 2px solid #1a1a1a;
+  padding: 0;
+  background: white;
+}
+.zinvak {
+  height: 36px;
+  position: relative;
+  margin: 0;
+}
+
+/* Kleur-versie: rode toplijn, lichtblauw vlak voor x-hoogte, groene onderlijn */
+.zinvak-kleur {
+  background:
+    /* Rode bovenlijn (ascender) */
+    linear-gradient(to bottom, #E74C3C 1.5px, transparent 1.5px) top / 100% 100% no-repeat,
+    /* Lichtblauw vlak tussen middenlijnen */
+    linear-gradient(to bottom,
+      transparent 33%,
+      #B3E5FC 33%,
+      #B3E5FC 66%,
+      transparent 66%
+    ),
+    /* Groene basislijn */
+    linear-gradient(to bottom, #2E7D32 1.5px, transparent 1.5px) bottom / 100% 100% no-repeat;
+}
+
+/* Zwart vierlijn-alternatief */
+.zinvak-zwart {
+  background:
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) top    / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) 0 33%   / 100% 100% no-repeat,
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) 0 66%  / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) bottom  / 100% 100% no-repeat;
+}
+
+/* Antwoord op zinvak (bij oplossingen) */
+.zin-antwoord {
+  position: absolute;
+  left: 8px;
+  top: 4px;
+  font-size: 0.95rem;
+}
+
+/* Reflectie onderaan laatste pagina */
+.weekdictee-reflectie {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 2px solid #1a1a1a;
+  page-break-inside: avoid;
+}
+.weekdictee-reflectie-vraag {
+  margin: 0 0 10px 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.weekdictee-reflectie-vakjes {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 10px;
+  text-align: center;
+}
+.reflectie-emoji {
+  font-size: 1.8rem;
+  padding: 8px;
+  border: 1.5px solid #888;
+  border-radius: 6px;
+  background: white;
+}
+
+/* Sidebar UI voor weekdictee */
+.weekdictee-dagen-lijst {
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  padding: 6px;
+  background: #FAFAFA;
+}
+.weekdictee-dag-rij {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 0;
+}
+.weekdictee-dag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+.weekdictee-dag-rij select {
+  padding: 3px 4px;
+  border: 1px solid var(--zisa-rand);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  background: white;
+}
+
+/* ===== Werkblad styling (in preview EN PDF) ===== */
+.werkblad {
+  background: white;
+  width: 21cm;
+  min-height: 29.7cm;
+  padding: 1.5cm 2cm;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  color: #222;
+  position: relative;
+}
+/* Elke werkblad behalve het eerste begint op een nieuwe PDF-pagina */
+.werkblad + .werkblad {
+  page-break-before: always;
+  break-before: page;
+}
+.werkblad-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--zisa-blauw);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+.werkblad-titel {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: var(--zisa-blauw);
+  margin: 0;
+}
+.werkblad-naam {
+  font-size: 0.9rem;
+  color: #666;
+}
+.werkblad-naam .naam-lijn {
+  display: inline-block;
+  border-bottom: 1px solid #999;
+  width: 120px;
+  margin-left: 6px;
+}
+
+.opdracht {
+  margin-bottom: 18px;
+}
+.opdracht-instructie {
+  font-weight: bold;
+  color: var(--zisa-blauw);
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+/* Oefenvorm: invul met keuzewoorden */
+.invul-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.keuzewoord-balk {
+  background: var(--zisa-blauw-licht);
+  border: 1px dashed var(--zisa-blauw);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Oefenvorm: woord met plaatje */
+.woord-plaatje-rooster {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.woord-plaatje-cel {
+  text-align: center;
+  border: 1px solid #ddd;
+  padding: 8px;
+  border-radius: 6px;
+}
+.woord-plaatje-cel .plaatje {
+  height: 60px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.woord-plaatje-cel .woord-afbeelding {
+  max-height: 60px;
+  max-width: 100%;
+  object-fit: contain;
+}
+.woord-plaatje-cel .woord-emoji {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+.woord-label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+/* ==========================================================
+   SCHRIJFLIJNEN — 3 types
+   Werkt door een class .lijn-{type} op .werkblad te zetten.
+   Elke schrijflijn (.schrijflijn of .dictee-lijn) past zich aan.
+   ========================================================== */
+
+/* Basisreservering: alle schrijflijnen gebruiken een vaste hoogte
+   zodat de lay-out niet verschuift bij een ander lijntype. */
+.schrijflijn,
+.dictee-lijn {
+  position: relative;
+  height: 32px;
+  margin: 6px auto;
+  width: 100%;
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+
+/* --- Type 1: ENKELE LIJN --- */
+.lijn-enkel .schrijflijn,
+.lijn-enkel .dictee-lijn {
+  border-bottom: 1.5px solid #333;
+  background: none;
+}
+
+/* --- Type 2: DUBBELE LIJN (cahier) --- */
+.lijn-dubbel .schrijflijn,
+.lijn-dubbel .dictee-lijn {
+  border-bottom: 1.5px solid #333;
+  border-top: 1.5px solid #333;
+  background: none;
+}
+
+/* --- Type 3: VIERLIJNSSYSTEEM --- */
+/* 4 lijnen: bovenlijn (ascenderhoogte), middenlijn-boven (x-hoogte top),
+   middenlijn-onder (basislijn), onderlijn (descenderhoogte).
+   Wij tekenen ze met repeating-linear-gradient. */
+.lijn-vier .schrijflijn,
+.lijn-vier .dictee-lijn {
+  height: 36px;
+  border: none;
+  background:
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) top    / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) 0 33%   / 100% 100% no-repeat,
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) 0 66%  / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) bottom  / 100% 100% no-repeat;
+}
+
+/* Oefenvorm: categoriseren (sorteren) */
+.sorteer-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 12px;
+}
+.sorteer-tabel th {
+  background: var(--zisa-blauw-licht);
+  border: 1.5px solid var(--zisa-blauw);
+  padding: 8px;
+  font-size: 1rem;
+}
+.sorteer-tabel td {
+  border: 1px solid #aaa;
+  height: 38px;
+  padding: 4px 8px;
+  vertical-align: top;
+}
+
+/* Oefenvorm: dictee zinnen */
+.dictee-zin {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.dictee-nr {
+  font-weight: bold;
+  color: var(--zisa-blauw);
+  min-width: 22px;
+}
+.dictee-lijn {
+  flex: 1;
+  /* hoogte en visueel uiterlijk worden door .lijn-{type} bepaald */
+}
+
+/* Oefenvorm: fouten verbeteren */
+.fouten-zin {
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+}
+.fouten-correctie {
+  display: inline-block;
+  min-width: 200px;
+  height: 24px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+/* Lijntype toepassen op fouten-correctie */
+.lijn-enkel .fouten-correctie { border-bottom: 1.5px solid #333; }
+.lijn-dubbel .fouten-correctie { border-bottom: 1.5px solid #333; border-top: 1.5px solid #333; }
+.lijn-vier .fouten-correctie {
+  height: 32px;
+  background:
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) top    / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) 0 33%   / 100% 100% no-repeat,
+    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) 0 66%  / 100% 100% no-repeat,
+    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) bottom  / 100% 100% no-repeat;
+}
+
+/* PDF print versie */
+@media print {
+  body { background: white; }
+  .topbar, .sidebar, .actie-knoppen { display: none; }
+  .preview-paneel { box-shadow: none; padding: 0; }
+  .werkblad { box-shadow: none; margin: 0; page-break-after: always; }
+}
