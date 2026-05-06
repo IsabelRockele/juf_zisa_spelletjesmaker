@@ -51,6 +51,18 @@ window.SpellingGenerator = {
       };
     }
 
+    // === OV02-specifieke opties (Woord 3x overschrijven) ===
+    let ov02 = null;
+    if (cat === "ov02") {
+      ov02 = {
+        metPlaatje: document.querySelector("#ov02-met-plaatje")?.checked !== false,
+        aantalWoorden: parseInt(document.querySelector("#ov02-aantal-woorden")?.value || "8", 10),
+        lijnhoogte: document.querySelector("#ov02-lijnhoogte button.actief")?.dataset.hoogte || "middel",
+        lijntype: document.querySelector("#ov02-lijntype input[name='ov02-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov02-ondertitel")?.value || ""
+      };
+    }
+
     // Sub-categorie binnen klankzuiver: 'kort', 'tweeklank' of 'verwar'
     const subcat = document.querySelector("#subcat-knoppen button.actief")?.dataset.subcat || "kort";
 
@@ -97,7 +109,8 @@ window.SpellingGenerator = {
       aantalBladen,
       bundelNaam,
       weekdictee,
-      ov01
+      ov01,
+      ov02
     };
   },
 
