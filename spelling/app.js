@@ -26,10 +26,11 @@
     const container = document.querySelector("#module-instellingen");
     container.innerHTML = module.renderInstellingen();
 
-    // Voor weekdictee + ov01: andere UI-elementen verbergen
+    // Voor weekdictee + ov01 + ov02: andere UI-elementen verbergen
     const isWeekdictee = (cat === "weekdictee");
     const isOV01 = (cat === "ov01");
-    const verbergStandaard = isWeekdictee || isOV01;
+    const isOV02 = (cat === "ov02");
+    const verbergStandaard = isWeekdictee || isOV01 || isOV02;
     document.querySelectorAll(".sidebar .block").forEach(blok => {
       const h2 = blok.querySelector("h2")?.textContent || "";
       if (verbergStandaard && (h2.startsWith("3.") || h2.startsWith("4."))) {
@@ -38,6 +39,41 @@
         blok.style.display = "";
       }
     });
+
+    // === Categorie-specifieke bedrading ===
+    if (isOV02) {
+      // Open woordenkiezer
+      container.querySelector("#ov02-open-kiezer")?.addEventListener("click", () => {
+        if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
+      });
+      if (window.SpellingWoordenkiezer) {
+        window.SpellingWoordenkiezer.updateSidebarInfo();
+        const aantal = (window._weekdictee_gekozenWoorden || []).length;
+        const info = document.querySelector("#ov02-keuze-info");
+        if (info) {
+          if (aantal === 0) {
+            info.textContent = "Nog geen woorden gekozen.";
+            info.style.color = "#888";
+          } else {
+            info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+            info.style.color = "var(--zisa-blauw)";
+          }
+        }
+      }
+
+      // Lijnhoogte-knoppen
+      container.querySelectorAll("#ov02-lijnhoogte button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov02-lijnhoogte button", btn);
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+        });
+      });
+
+      // Teken mini-voorbeelden bij de schrijflijntype-knoppen
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+
+      return;
+    }
 
     // === Categorie-specifieke bedrading ===
     if (isOV01) {
