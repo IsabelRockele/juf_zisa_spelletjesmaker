@@ -747,20 +747,47 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .ov01-canvas-wrap {
   width: 100%;
   margin-bottom: 4px;
+  position: relative; /* zodat antwoord absoluut gepositioneerd kan worden */
 }
 .ov01-canvas-wrap canvas.schrijflijn-canvas {
   display: block;
   width: 100%;
 }
 
+/* Antwoord op de schrijfregel (oplossing OV01).
+   Gepositioneerd op verticaal midden = de schrijfzone tussen mid1 en base lijnen. */
+.ov01-lijn-antwoord {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #2196F3;
+  z-index: 2;
+  font-family: 'Comic Sans MS', sans-serif;
+  background: white;
+  padding: 0 4px;
+  line-height: 1;
+}
+
 /* Zin-blok canvas */
 .ov01-zin-canvas-wrap {
   width: 100%;
   margin-top: 6px;
+  position: relative;
 }
 .ov01-zin-canvas-wrap canvas.schrijflijn-canvas {
   display: block;
   width: 100%;
+}
+
+/* Richtlijn-tekst onder zin-vak in oplossing */
+.ov01-zin-richtlijn {
+  margin: 8px 0 0 0;
+  font-size: 0.85rem;
+  color: #666;
+  font-style: italic;
 }
 
 /* Fallback (oude eenvoudige basislijntjes — alleen als canvas-module niet werkt) */
@@ -1127,6 +1154,12 @@ body.bewerk-aan [data-bewerk-id]:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+/* Bij oplossingen: juiste hokje krijgt groene achtergrond */
+.ov01-keuze-hokje.juist {
+  background: #c8e6c9;
+  border-color: #4caf50;
+  border-width: 2px;
 }
 .ov01-cel-lijnen {
   width: 100%;
