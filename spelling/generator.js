@@ -31,6 +31,19 @@ window.SpellingGenerator = {
       };
     }
 
+    // === OV01-specifieke opties ===
+    let ov01 = null;
+    if (cat === "ov01") {
+      ov01 = {
+        niveau: document.querySelector("#ov01-niveau button.actief")?.dataset.niveau || "basis",
+        aantalWoorden: parseInt(document.querySelector("#ov01-aantal-woorden")?.value || "9", 10),
+        aantalLijnen: parseInt(document.querySelector("#ov01-aantal-lijnen")?.value || "2", 10),
+        lijnhoogte: document.querySelector("#ov01-lijnhoogte button.actief")?.dataset.hoogte || "middel",
+        lijntype: document.querySelector("#ov01-lijntype input[name='ov01-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov01-ondertitel")?.value || ""
+      };
+    }
+
     // Sub-categorie binnen klankzuiver: 'kort', 'tweeklank' of 'verwar'
     const subcat = document.querySelector("#subcat-knoppen button.actief")?.dataset.subcat || "kort";
 
@@ -76,7 +89,8 @@ window.SpellingGenerator = {
       aantalOef,
       aantalBladen,
       bundelNaam,
-      weekdictee
+      weekdictee,
+      ov01
     };
   },
 
@@ -92,8 +106,8 @@ window.SpellingGenerator = {
       this._laatsteSeed = Date.now() & 0xFFFFFFFF;
     }
 
-    // Weekdictee: 1 blad = 1 hele week (intern al meerdere pagina's)
-    if (opties.categorie === "weekdictee") {
+    // Weekdictee + OV01: 1 blad per generatie (intern al meerdere pagina's mogelijk)
+    if (opties.categorie === "weekdictee" || opties.categorie === "ov01") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
