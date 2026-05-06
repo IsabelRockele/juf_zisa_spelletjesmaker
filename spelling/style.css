@@ -710,6 +710,327 @@ body.bewerk-aan [data-bewerk-id]:focus {
   line-height: 1.6;
 }
 
+/* Schrijflijn — canvas-versie (5 types uit schrijfgenerator) */
+.ov01-canvas-wrap {
+  width: 100%;
+  margin-bottom: 4px;
+}
+.ov01-canvas-wrap canvas.schrijflijn-canvas {
+  display: block;
+  width: 100%;
+}
+
+/* Zin-blok canvas */
+.ov01-zin-canvas-wrap {
+  width: 100%;
+  margin-top: 6px;
+}
+.ov01-zin-canvas-wrap canvas.schrijflijn-canvas {
+  display: block;
+  width: 100%;
+}
+
+/* Fallback (oude eenvoudige basislijntjes — alleen als canvas-module niet werkt) */
+.ov01-schrijflijn {
+  border-bottom: 1.2px solid #333;
+  width: 100%;
+  display: block;
+}
+.ov01-blad.lijnhoogte-middel .ov01-schrijflijn { 
+  height: 16px; 
+  min-height: 16px;
+}
+.ov01-blad.lijnhoogte-klein .ov01-schrijflijn  { 
+  height: 11px;
+  min-height: 11px;
+}
+
+/* Lijntype-keuze — 5 radio-opties als kleine knop-cards */
+.lijntype-keuze {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 4px;
+}
+.lijntype-radio {
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.7rem;
+  position: relative;
+}
+.lijntype-radio input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.lijntype-radio .lijntype-naam {
+  display: block;
+  padding: 6px 2px;
+  border: 1.5px solid var(--zisa-rand);
+  border-radius: 4px;
+  background: white;
+  color: #555;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  font-weight: 600;
+  transition: all 0.1s;
+}
+.lijntype-radio .lijntype-naam small {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: normal;
+  color: #888;
+  margin-top: 1px;
+}
+.lijntype-radio:hover .lijntype-naam {
+  border-color: var(--zisa-blauw);
+  background: var(--zisa-blauw-licht);
+}
+.lijntype-radio input[type="radio"]:checked + .lijntype-naam {
+  border-color: var(--zisa-blauw);
+  background: var(--zisa-blauw);
+  color: white;
+}
+.lijntype-radio input[type="radio"]:checked + .lijntype-naam small {
+  color: rgba(255,255,255,0.85);
+}
+
+/* Empty-state als graad geen woorden heeft */
+.wk-leeg-graad {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+.wk-leeg-graad h3 {
+  color: var(--zisa-blauw);
+  margin: 0 0 12px 0;
+}
+
+/* ============================================================
+   OV01 — Plaatje → woord schrijven
+   ============================================================ */
+.ov01-blad {
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  padding: 1.2cm 1.5cm !important;
+}
+
+.ov01-header {
+  margin-bottom: 14px;
+}
+.ov01-naam-rij {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.92rem;
+  margin-bottom: 8px;
+}
+.ov01-lijn-naam, .ov01-lijn-datum {
+  display: inline-block;
+  border-bottom: 1px solid #444;
+  height: 18px;
+}
+.ov01-lijn-naam { flex: 2; min-width: 180px; }
+.ov01-lijn-datum { flex: 1; min-width: 100px; margin-left: 6px; }
+
+.ov01-titel {
+  background: #1a1a1a;
+  color: white;
+  text-align: center;
+  font-size: 1.3rem;
+  margin: 8px 0 6px 0;
+  padding: 8px 16px;
+  font-weight: bold;
+}
+.ov01-ondertitel {
+  text-align: center;
+  font-size: 0.95rem;
+  color: #555;
+  margin: 0 0 12px 0;
+  font-style: italic;
+}
+
+/* 3 stappen-instructie */
+.ov01-stappen {
+  background: #FFF8E1;
+  border: 1.5px solid #F4B400;
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+}
+.ov01-stappen-label {
+  font-weight: bold;
+  font-size: 0.95rem;
+  color: #333;
+  margin-bottom: 6px;
+}
+.ov01-stap-rij {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  font-size: 0.95rem;
+}
+.ov01-vakje {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #333;
+  background: white;
+  flex-shrink: 0;
+}
+
+/* Plaatjes-rooster */
+.ov01-rooster {
+  margin-bottom: 14px;
+}
+.ov01-rooster-rij {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.ov01-cel {
+  flex: 1 1 0;
+  min-width: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 6px;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.ov01-cel-leeg {
+  border: 1px dashed #eee;
+}
+.ov01-cel-plaatje {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.ov01-cel-woord {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 6px;
+  text-align: center;
+}
+.ov01-cel-woord-leeg {
+  height: 6px;
+}
+.ov01-cel-lijnen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Schrijflijn — eenvoudige basislijn voor nu (canvas komt later) */
+.ov01-schrijflijn {
+  border-bottom: 1.2px solid #333;
+  width: 100%;
+  display: block;
+}
+
+/* Hoogtevarianten — gebruiken margin-top voor afstand tussen lijnen */
+.ov01-blad.lijnhoogte-middel .ov01-schrijflijn { 
+  height: 16px; 
+  min-height: 16px;
+}
+.ov01-blad.lijnhoogte-klein .ov01-schrijflijn  { 
+  height: 11px;
+  min-height: 11px;
+}
+
+/* Verdieping: zin-opdracht onderaan */
+.ov01-zin-blok {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #E8F5E9;
+  border: 1.5px solid #66BB6A;
+  border-radius: 6px;
+}
+.ov01-zin-vraag {
+  margin: 4px 0 8px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.ov01-zin-lijn {
+  border-bottom: 1.5px solid #1a1a1a;
+  height: 22px;
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* Oplossingenpagina */
+.ov01-oplossing {
+  background: white;
+}
+.ov01-opl-uitleg {
+  font-size: 0.95rem;
+  color: #555;
+  margin: 8px 0;
+}
+.ov01-opl-lijst {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.ov01-opl-item {
+  flex: 1 1 30%;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #FAFAFA;
+}
+.ov01-opl-emoji {
+  font-size: 1.6rem;
+}
+.ov01-opl-woord {
+  font-weight: 600;
+  color: var(--zisa-blauw);
+}
+.ov01-opl-zin {
+  margin-top: 14px;
+  padding: 10px;
+  background: #E8F5E9;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+/* Sidebar: niveau-knoppen voor OV01 */
+.ov-niveau-knoppen {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.ov-niveau-knoppen button {
+  flex: 1;
+  padding: 6px 4px;
+  border: 1px solid var(--zisa-rand);
+  background: white;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: #555;
+}
+.ov-niveau-knoppen button.actief {
+  background: var(--zisa-blauw);
+  color: white;
+  border-color: var(--zisa-blauw);
+  font-weight: 600;
+}
+
 /* ===== WEEKDICTEE WIZARD STAPPEN ===== */
 .wd-stap {
   margin-bottom: 18px;
