@@ -26,19 +26,65 @@
     const container = document.querySelector("#module-instellingen");
     container.innerHTML = module.renderInstellingen();
 
-    // Voor weekdictee: andere UI-elementen verbergen die niet relevant zijn
+    // Voor weekdictee + ov01: andere UI-elementen verbergen
     const isWeekdictee = (cat === "weekdictee");
+    const isOV01 = (cat === "ov01");
+    const verbergStandaard = isWeekdictee || isOV01;
     document.querySelectorAll(".sidebar .block").forEach(blok => {
       const h2 = blok.querySelector("h2")?.textContent || "";
-      // Verberg: 3. Niveau, 4. Schrijflijn bij weekdictee
-      if (isWeekdictee && (h2.startsWith("3.") || h2.startsWith("4."))) {
+      if (verbergStandaard && (h2.startsWith("3.") || h2.startsWith("4."))) {
         blok.style.display = "none";
-      } else if (!isWeekdictee && (h2.startsWith("3.") || h2.startsWith("4."))) {
+      } else if (!verbergStandaard && (h2.startsWith("3.") || h2.startsWith("4."))) {
         blok.style.display = "";
       }
     });
 
     // === Categorie-specifieke bedrading ===
+    if (isOV01) {
+      // Open woordenkiezer
+      container.querySelector("#ov01-open-kiezer")?.addEventListener("click", () => {
+        if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
+      });
+      if (window.SpellingWoordenkiezer) {
+        // Hergebruik dezelfde info-update maar mik op het OV01-veld
+        window.SpellingWoordenkiezer.updateSidebarInfo();
+        // Plus: update OV01-eigen info-veld
+        const aantal = (window._weekdictee_gekozenWoorden || []).length;
+        const info = document.querySelector("#ov01-keuze-info");
+        if (info) {
+          if (aantal === 0) {
+            info.textContent = "Nog geen woorden gekozen.";
+            info.style.color = "#888";
+          } else {
+            info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+            info.style.color = "var(--zisa-blauw)";
+          }
+        }
+      }
+
+      // Niveau-knoppen (basis/kern/verdieping)
+      const niveauUitlegOV01 = {
+        basis: "<strong>Basis:</strong> plaatje + woord eronder, kind kopieert.",
+        kern: "<strong>Kern:</strong> alleen plaatje, kind roept woord op.",
+        verdieping: "<strong>Verdieping:</strong> alleen plaatje + zin maken met gekozen woord."
+      };
+      container.querySelectorAll("#ov01-niveau button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov01-niveau button", btn);
+          const u = document.querySelector("#ov01-niveau-uitleg");
+          if (u) u.innerHTML = niveauUitlegOV01[btn.dataset.niveau] || "";
+        });
+      });
+
+      // Lijnhoogte-knoppen
+      container.querySelectorAll("#ov01-lijnhoogte button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov01-lijnhoogte button", btn);
+        });
+      });
+      return;
+    }
+
     if (isWeekdictee) {
       // Open-knop voor woordenkiezer
       container.querySelector("#wd-open-kiezer")?.addEventListener("click", () => {
@@ -232,10 +278,16 @@
       });
     });
 
-    // Graad (nu enkel graad 1 actief)
+    // Graad — bij wisselen woordenkiezer-render herhalen indien open
     document.querySelectorAll(".graad-knop:not([disabled])").forEach(btn => {
       btn.addEventListener("click", () => {
         maakActief(".graad-knop", btn);
+        // Als de modal openstaat, herrender
+        const modal = document.querySelector("#wk-modal");
+        if (modal && modal.style.display === "flex" && window.SpellingWoordenkiezer) {
+          // Forceer herrender via open() (laadt LS opnieuw + tekent)
+          window.SpellingWoordenkiezer.open();
+        }
       });
     });
 
