@@ -42,19 +42,46 @@ window.SpellingModules.ov01 = {
         </p>
       </div>
 
-      <!-- STAP 2: Niveau -->
+      <!-- STAP 2: Niveau(s) -->
       <div class="wd-stap">
         <div class="wd-stap-kop">
           <span class="wd-stap-nr">2</span>
-          <span class="wd-stap-titel">Niveau</span>
+          <span class="wd-stap-titel">Niveau(s)</span>
         </div>
-        <div class="ov-niveau-knoppen" id="ov01-niveau">
-          <button class="actief" data-niveau="basis" type="button">Basis</button>
-          <button data-niveau="kern" type="button">Kern</button>
-          <button data-niveau="verdieping" type="button">Verdieping</button>
+        <p class="wd-stap-info">
+          Vink één of meer niveaus aan. Voor elk niveau wordt een werkblad gemaakt — handig voor differentiatie.
+        </p>
+        <div class="ov-niveau-vinkjes" id="ov01-niveaus">
+          <label class="ov-niveau-vink actief">
+            <input type="checkbox" data-niveau="basis" checked>
+            <span class="ov-niveau-naam">
+              <strong>Basis</strong>
+              <small>kleur juiste woord uit 3 keuzes</small>
+            </span>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="kern">
+            <span class="ov-niveau-naam">
+              <strong>Kern</strong>
+              <small>alleen plaatje, kind roept woord op</small>
+            </span>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="verdieping">
+            <span class="ov-niveau-naam">
+              <strong>Verdieping</strong>
+              <small>plaatje + zin maken</small>
+            </span>
+          </label>
         </div>
-        <p class="wd-stap-info" id="ov01-niveau-uitleg">
-          <strong>Basis:</strong> plaatje + woord eronder, kind kopieert.
+
+        <label style="margin-top:10px; display:flex; align-items:center; gap:6px; font-size:0.85rem;">
+          <input type="checkbox" id="ov01-zelfde-woorden" checked>
+          Zelfde woorden voor alle niveaus
+        </label>
+        <p class="wd-stap-info" style="margin-top:2px">
+          <em>Aan</em>: alle niveaus krijgen dezelfde plaatjes (handig voor differentiatie binnen één klas).<br>
+          <em>Uit</em>: elk niveau krijgt eigen woordkeuze.
         </p>
       </div>
 
@@ -69,7 +96,7 @@ window.SpellingModules.ov01 = {
             <input type="number" id="ov01-aantal-woorden" min="3" max="15" value="9">
           </label>
           <label>Schrijflijnen per plaatje
-            <input type="number" id="ov01-aantal-lijnen" min="1" max="3" value="2">
+            <input type="number" id="ov01-aantal-lijnen" min="1" max="3" value="1">
           </label>
         </div>
       </div>
@@ -84,23 +111,52 @@ window.SpellingModules.ov01 = {
         <div class="lijntype-keuze" id="ov01-lijntype">
           <label class="lijntype-radio">
             <input type="radio" name="ov01-lt" value="type1">
-            <span class="lijntype-naam">Type 1<br><small>klassiek hulp</small></span>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type1" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 1<br><small>klassiek hulp</small></span>
+            </span>
           </label>
           <label class="lijntype-radio">
             <input type="radio" name="ov01-lt" value="type2">
-            <span class="lijntype-naam">Type 2<br><small>standaard</small></span>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type2" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 2<br><small>standaard</small></span>
+            </span>
           </label>
           <label class="lijntype-radio">
             <input type="radio" name="ov01-lt" value="type3" checked>
-            <span class="lijntype-naam">Type 3<br><small>kleurgecodeerd</small></span>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type3" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 3<br><small>kleurgecodeerd</small></span>
+            </span>
           </label>
           <label class="lijntype-radio">
             <input type="radio" name="ov01-lt" value="type4">
-            <span class="lijntype-naam">Type 4<br><small>grijs-blauw</small></span>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type4" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 4<br><small>grijs-blauw</small></span>
+            </span>
           </label>
           <label class="lijntype-radio">
             <input type="radio" name="ov01-lt" value="type5">
-            <span class="lijntype-naam">Type 5<br><small>intens kleur</small></span>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type5" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 5<br><small>intens kleur</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type6">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type6" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 6<br><small>enkele lijn</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type7">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type7" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 7<br><small>twee lijnen</small></span>
+            </span>
           </label>
         </div>
 
@@ -123,14 +179,14 @@ window.SpellingModules.ov01 = {
   /* ---------- WERKBLAD GENEREREN ---------- */
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov01 || {};
-    const niveau         = o.niveau || "basis";
+    const niveaus        = o.niveaus || ["basis"];
+    const zelfdeWoorden  = o.zelfdeWoorden !== false;
     const aantalWoorden  = o.aantalWoorden || 9;
     const aantalLijnen   = o.aantalLijnen || 2;
     const lijnhoogte     = o.lijnhoogte || "middel";
     const lijntype       = o.lijntype || "type3";
     const ondertitel     = o.ondertitel || "";
 
-    // Gekozen woorden uit de kiezer
     const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
 
     if (gekozenWoorden.length === 0) {
@@ -142,45 +198,78 @@ window.SpellingModules.ov01 = {
       </div>`;
     }
 
-    // Kies woorden voor dit blad
-    this._seed = this._seed || Date.now();
-    const gekozen = this._kiesWoorden(gekozenWoorden, aantalWoorden);
-
-    // OPLOSSINGENPAGINA
-    if (metAntwoorden) {
-      return this._renderOplossingen(gekozen, niveau, ondertitel);
-    }
-
-    // Stap-instructies per niveau
-    const stappenHTML = this._renderStappen(niveau);
-
-    // Plaatjes-rooster met canvas-schrijflijnen
-    const plaatjesHTML = this._renderPlaatjesRooster(gekozen, niveau, aantalLijnen, lijnhoogte, lijntype);
-
-    // Verdieping: extra zin-opdracht
-    let verdiepingHTML = "";
-    if (niveau === "verdieping") {
-      verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype);
-    }
-
-    return `
-      <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}">
-        <div class="ov01-header">
-          <div class="ov01-naam-rij">
-            <span data-bewerk-id="naamlabel">Naam:</span>
-            <span class="ov01-lijn-naam"></span>
-            <span data-bewerk-id="datumlabel">Datum:</span>
-            <span class="ov01-lijn-datum"></span>
-          </div>
-          <h2 class="ov01-titel" data-bewerk-id="titel">Mijn spellingavontuur</h2>
-          ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel">${ondertitel}</p>` : ""}
+    if (niveaus.length === 0) {
+      return `<div class="werkblad">
+        <div class="weekdictee-empty">
+          <h3>📋 Geen niveau aangevinkt</h3>
+          <p>Vink minstens één niveau aan in de zijbalk (basis / kern / verdieping).</p>
         </div>
+      </div>`;
+    }
 
-        ${stappenHTML}
-        ${plaatjesHTML}
-        ${verdiepingHTML}
-      </div>
-    `;
+    this._seed = this._seed || Date.now();
+
+    // Voor zelfde-woorden modus: kies één keer en gebruik voor alle niveaus
+    let gedeeldeKeuze = null;
+    if (zelfdeWoorden) {
+      const gemeenschappelijkeSeed = this._seed;
+      this._seed = gemeenschappelijkeSeed;
+      gedeeldeKeuze = this._kiesWoorden(gekozenWoorden, aantalWoorden);
+    }
+
+    // OPLOSSINGENPAGINA: alle niveaus achter elkaar
+    if (metAntwoorden) {
+      return niveaus.map(niveau => {
+        const woorden = zelfdeWoorden
+          ? gedeeldeKeuze
+          : this._kiesWoorden(gekozenWoorden, aantalWoorden);
+        return this._renderOplossingen(woorden, niveau, ondertitel);
+      }).join("");
+    }
+
+    // WERKBLADEN: één per niveau
+    return niveaus.map((niveau, idx) => {
+      const woorden = zelfdeWoorden
+        ? gedeeldeKeuze
+        : this._kiesWoorden(gekozenWoorden, aantalWoorden);
+
+      const stappenHTML = this._renderStappen(niveau);
+      const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype);
+      let verdiepingHTML = "";
+      if (niveau === "verdieping") {
+        verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype);
+      }
+
+      const niveauLabel = {
+        basis: "Basis",
+        kern: "Kern",
+        verdieping: "Verdieping"
+      }[niveau];
+
+      return `
+        <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}" data-niveau="${niveau}">
+          <div class="ov01-header">
+            <div class="ov01-naam-rij">
+              <span data-bewerk-id="naamlabel-${niveau}">Naam:</span>
+              <span class="ov01-lijn-naam"></span>
+              <span data-bewerk-id="datumlabel-${niveau}">Datum:</span>
+              <span class="ov01-lijn-datum"></span>
+            </div>
+            <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}">
+              Mijn spellingavontuur
+              <span class="ov01-niveau-badge ov01-niveau-${niveau}">${niveauLabel}</span>
+            </h2>
+            ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}">${ondertitel}</p>` : ""}
+          </div>
+
+          ${stappenHTML}
+          ${plaatjesHTML}
+          ${verdiepingHTML}
+
+          <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
+        </div>
+      `;
+    }).join("");
   },
 
   /* ----- 3 stappen per niveau, met aanvinkrechthoekjes ----- */
@@ -189,7 +278,7 @@ window.SpellingModules.ov01 = {
     if (niveau === "basis") {
       opdrachtLabel = "Opdracht:";
       stappen = [
-        "Lees het woord.",
+        "Kleur het juiste woord.",
         "Schrijf het woord op.",
         "Kijk het woord nog eens na."
       ];
@@ -230,6 +319,7 @@ window.SpellingModules.ov01 = {
     }
 
     const sl = window.SpellingSchrijflijnen;
+    const af = window.SpellingAfleiders;
 
     let html = `<div class="ov01-rooster">`;
     for (const rij of rijen) {
@@ -237,9 +327,23 @@ window.SpellingModules.ov01 = {
       for (const w of rij) {
         const tonen = this._toonWoord(w);
         const emoji = this._zoekEmoji(w.tekst);
-        const woordOnder = (niveau === "basis")
-          ? `<div class="ov01-cel-woord">${tonen}</div>`
-          : `<div class="ov01-cel-woord-leeg"></div>`;
+
+        // Inhoud onder plaatje hangt af van niveau
+        let onderHtml = "";
+        if (niveau === "basis" && af) {
+          // BASIS: 3 keuze-hokjes met afleiders
+          const afleiders = af.maakAfleiders(w, w.categorie);
+          // Schikken in random volgorde (gebruik onze eigen seed-random)
+          const opties = af.schikWillekeurig(w.tekst, afleiders, () => this._random());
+          onderHtml = `
+            <div class="ov01-cel-keuze">
+              ${opties.map(opt => `<div class="ov01-keuze-hokje">${opt}</div>`).join("")}
+            </div>`;
+        } else if (niveau === "kern" || niveau === "verdieping") {
+          // KERN/VERDIEPING: alleen plaatje, geen woord
+          onderHtml = `<div class="ov01-cel-woord-leeg"></div>`;
+        }
+
         // Schrijflijnen via canvas
         let lijnen = "";
         for (let i = 0; i < aantalLijnen; i++) {
@@ -252,7 +356,7 @@ window.SpellingModules.ov01 = {
         html += `
           <div class="ov01-cel">
             <div class="ov01-cel-plaatje">${emoji}</div>
-            ${woordOnder}
+            ${onderHtml}
             <div class="ov01-cel-lijnen">${lijnen}</div>
           </div>`;
       }
@@ -307,6 +411,8 @@ window.SpellingModules.ov01 = {
             met hoofdletter, leesteken op het einde, en een woord uit de lijst.
           </div>
         ` : ""}
+
+        <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
       </div>
     `;
   },
