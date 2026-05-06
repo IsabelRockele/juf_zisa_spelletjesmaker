@@ -74,13 +74,37 @@ window.SpellingModules.ov01 = {
         </div>
       </div>
 
-      <!-- STAP 4: Stijl -->
+      <!-- STAP 4: Schrijflijntype + hoogte -->
       <div class="wd-stap">
         <div class="wd-stap-kop">
           <span class="wd-stap-nr">4</span>
-          <span class="wd-stap-titel">Stijl</span>
+          <span class="wd-stap-titel">Schrijflijnen</span>
         </div>
-        <label>Schrijflijnhoogte</label>
+        <label>Type schrijflijn</label>
+        <div class="lijntype-keuze" id="ov01-lijntype">
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type1">
+            <span class="lijntype-naam">Type 1<br><small>klassiek hulp</small></span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type2">
+            <span class="lijntype-naam">Type 2<br><small>standaard</small></span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type3" checked>
+            <span class="lijntype-naam">Type 3<br><small>kleurgecodeerd</small></span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type4">
+            <span class="lijntype-naam">Type 4<br><small>grijs-blauw</small></span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="ov01-lt" value="type5">
+            <span class="lijntype-naam">Type 5<br><small>intens kleur</small></span>
+          </label>
+        </div>
+
+        <label style="margin-top:10px">Hoogte</label>
         <div class="subtype-knoppen" id="ov01-lijnhoogte">
           <button class="actief" data-hoogte="middel" type="button">Middel</button>
           <button data-hoogte="klein" type="button">Klein</button>
@@ -103,6 +127,7 @@ window.SpellingModules.ov01 = {
     const aantalWoorden  = o.aantalWoorden || 9;
     const aantalLijnen   = o.aantalLijnen || 2;
     const lijnhoogte     = o.lijnhoogte || "middel";
+    const lijntype       = o.lijntype || "type3";
     const ondertitel     = o.ondertitel || "";
 
     // Gekozen woorden uit de kiezer
@@ -121,7 +146,7 @@ window.SpellingModules.ov01 = {
     this._seed = this._seed || Date.now();
     const gekozen = this._kiesWoorden(gekozenWoorden, aantalWoorden);
 
-    // OPLOSSINGENPAGINA: aparte lijst met plaatjes + woorden
+    // OPLOSSINGENPAGINA
     if (metAntwoorden) {
       return this._renderOplossingen(gekozen, niveau, ondertitel);
     }
@@ -129,18 +154,17 @@ window.SpellingModules.ov01 = {
     // Stap-instructies per niveau
     const stappenHTML = this._renderStappen(niveau);
 
-    // Plaatjes-rooster
-    const plaatjesHTML = this._renderPlaatjesRooster(gekozen, niveau, aantalLijnen, lijnhoogte);
+    // Plaatjes-rooster met canvas-schrijflijnen
+    const plaatjesHTML = this._renderPlaatjesRooster(gekozen, niveau, aantalLijnen, lijnhoogte, lijntype);
 
-    // Verdieping: extra zin-opdracht onderaan
+    // Verdieping: extra zin-opdracht
     let verdiepingHTML = "";
     if (niveau === "verdieping") {
-      verdiepingHTML = this._renderZinOpdracht(lijnhoogte);
+      verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype);
     }
 
-    // Volledige werkblad
     return `
-      <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}">
+      <div class="werkblad ov01-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}">
         <div class="ov01-header">
           <div class="ov01-naam-rij">
             <span data-bewerk-id="naamlabel">Naam:</span>
@@ -199,11 +223,13 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- Plaatjes-rooster: 3 kolommen × n rijen ----- */
-  _renderPlaatjesRooster: function(woorden, niveau, aantalLijnen, lijnhoogte) {
+  _renderPlaatjesRooster: function(woorden, niveau, aantalLijnen, lijnhoogte, lijntype) {
     const rijen = [];
     for (let i = 0; i < woorden.length; i += 3) {
       rijen.push(woorden.slice(i, i + 3));
     }
+
+    const sl = window.SpellingSchrijflijnen;
 
     let html = `<div class="ov01-rooster">`;
     for (const rij of rijen) {
@@ -214,10 +240,14 @@ window.SpellingModules.ov01 = {
         const woordOnder = (niveau === "basis")
           ? `<div class="ov01-cel-woord">${tonen}</div>`
           : `<div class="ov01-cel-woord-leeg"></div>`;
-        // Schrijflijnen
+        // Schrijflijnen via canvas
         let lijnen = "";
         for (let i = 0; i < aantalLijnen; i++) {
-          lijnen += `<div class="ov01-schrijflijn"></div>`;
+          if (sl) {
+            lijnen += `<div class="ov01-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 200)}</div>`;
+          } else {
+            lijnen += `<div class="ov01-schrijflijn"></div>`;
+          }
         }
         html += `
           <div class="ov01-cel">
@@ -226,13 +256,6 @@ window.SpellingModules.ov01 = {
             <div class="ov01-cel-lijnen">${lijnen}</div>
           </div>`;
       }
-      // Vul rij aan met lege cellen als < 3
-      while (html.endsWith("</div>") && rij.length < 3) {
-        for (let i = rij.length; i < 3; i++) {
-          html += `<div class="ov01-cel ov01-cel-leeg"></div>`;
-        }
-        break;
-      }
       html += `</div>`;
     }
     html += `</div>`;
@@ -240,14 +263,18 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- Verdieping: zin-opdracht onderaan ----- */
-  _renderZinOpdracht: function(lijnhoogte) {
+  _renderZinOpdracht: function(lijnhoogte, lijntype) {
+    const sl = window.SpellingSchrijflijnen;
+    const zinLijn = sl
+      ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 600)}</div>`
+      : `<div class="ov01-zin-lijn"></div>`;
     return `
       <div class="ov01-zin-blok">
         <div class="ov01-stappen-label" data-bewerk-id="opdracht2-label">Opdracht 2 (zin):</div>
         <p class="ov01-zin-vraag" data-bewerk-id="zin-opdracht">
           Kies 1 woord van de vorige oefening en maak een goede zin met dit woord.
         </p>
-        <div class="ov01-zin-lijn"></div>
+        ${zinLijn}
       </div>
     `;
   },
