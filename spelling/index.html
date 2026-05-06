@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spellinggenerator – Juf Zisa</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <a href="../index.html" class="terug">← Terug naar menu</a>
+    <h1>Spellinggenerator</h1>
+  </header>
+
+  <div class="layout">
+
+    <!-- LINKS: instellingen -->
+    <aside class="sidebar">
+
+      <section class="block">
+        <h2>1. Categorie</h2>
+        <div class="categorie-knoppen">
+          <button class="cat-knop actief" data-categorie="klankzuiver">Klankzuivere woorden</button>
+          <button class="cat-knop" data-categorie="weekdictee">Weekdictee</button>
+          <button class="cat-knop disabled" disabled>Verdubbelaars <span class="binnenkort">binnenkort</span></button>
+          <button class="cat-knop disabled" disabled>Verenkelaars <span class="binnenkort">binnenkort</span></button>
+          <button class="cat-knop disabled" disabled>Open/gesloten lettergreep <span class="binnenkort">binnenkort</span></button>
+          <button class="cat-knop disabled" disabled>ei / ij <span class="binnenkort">binnenkort</span></button>
+          <button class="cat-knop disabled" disabled>eu / ui <span class="binnenkort">binnenkort</span></button>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>2. Graad</h2>
+        <div class="graad-knoppen">
+          <button class="graad-knop actief" data-graad="1">Graad 1</button>
+          <button class="graad-knop disabled" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
+          <button class="graad-knop disabled" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>3. Niveau</h2>
+        <div class="niveau-knoppen">
+          <button class="niveau-knop actief" data-niveau="basis">Basis</button>
+          <button class="niveau-knop" data-niveau="kern">Kern</button>
+          <button class="niveau-knop" data-niveau="verdieping">Verdieping</button>
+        </div>
+        <p class="niveau-uitleg" id="niveau-uitleg">
+          <strong>Basis:</strong> herkennen en kopiëren met visuele steun.
+        </p>
+      </section>
+
+      <section class="block">
+        <h2>4. Schrijflijn</h2>
+        <div class="lijn-knoppen" id="lijn-knoppen">
+          <button class="lijn-knop actief" data-lijn="vier" title="Vierlijnssysteem">
+            <span class="lijn-mini vier"></span>
+            <span>Vierlijn</span>
+          </button>
+          <button class="lijn-knop" data-lijn="dubbel" title="Dubbele lijn (cahier)">
+            <span class="lijn-mini dubbel"></span>
+            <span>Dubbel</span>
+          </button>
+          <button class="lijn-knop" data-lijn="enkel" title="Enkele lijn">
+            <span class="lijn-mini enkel"></span>
+            <span>Enkel</span>
+          </button>
+        </div>
+        <p style="font-size:0.75rem; color:#666; margin:6px 0 0 0">
+          Globale keuze. Per oefenvorm kan dit overschreven worden.
+        </p>
+      </section>
+
+      <section class="block" id="module-instellingen">
+        <!-- module-specifieke instellingen worden hier ingeladen -->
+      </section>
+
+      <section class="block">
+        <h2>Bundel</h2>
+        <label>Aantal bladen <input type="number" id="aantal-bladen" min="1" max="20" value="2"></label>
+        <label>Naam bundel <input type="text" id="bundel-naam" placeholder="bv. Klankzuiver mkm"></label>
+      </section>
+
+      <div class="actie-knoppen">
+        <button id="ververs-preview" class="primair">↻ Vernieuw voorbeeld</button>
+        <button id="bewerken-toggle" class="secundair" type="button">✏️ Bewerken: uit</button>
+        <button id="download-pdf" class="secundair">⬇ Download PDF</button>
+        <button id="download-oplossing" class="secundair">⬇ Oplossingen</button>
+      </div>
+
+    </aside>
+
+    <!-- RECHTS: preview -->
+    <main class="preview-paneel">
+      <div id="preview"></div>
+    </main>
+
+  </div>
+
+  <!-- ============================================================
+       WOORDENKIEZER MODAL (voor weekdictee — etappe 1)
+       ============================================================ -->
+  <div class="wk-modal" id="wk-modal" style="display:none">
+    <div class="wk-modal-inhoud">
+      <div class="wk-modal-header">
+        <h2>Kies je woorden</h2>
+        <div class="wk-teller-rij">
+          <span class="wk-teller">
+            <strong id="wk-aantal-gekozen">0</strong> woorden gekozen
+          </span>
+          <button class="wk-mini-btn" id="wk-reset" type="button">↻ Reset</button>
+        </div>
+        <button class="wk-sluiten" id="wk-sluiten" type="button">✕</button>
+      </div>
+
+      <div class="wk-modal-body">
+        <!-- Tabs Standaard / Mijn lijsten -->
+        <div class="wk-tabs">
+          <button class="wk-tab actief" data-wk-tab="standaard" type="button">📚 Standaard</button>
+          <button class="wk-tab" data-wk-tab="mijn" type="button">⭐ Mijn lijsten</button>
+        </div>
+
+        <!-- Tab inhoud STANDAARD -->
+        <div class="wk-tab-inhoud" id="wk-standaard">
+          <div class="wk-leerjaar-keuze">
+            <label>Leerjaar:</label>
+            <select id="wk-leerjaar">
+              <option value="1">Graad 1 (lj 1-2)</option>
+              <option value="2" disabled>Graad 2 — binnenkort</option>
+              <option value="3" disabled>Graad 3 — binnenkort</option>
+            </select>
+          </div>
+          <div class="wk-categorieen" id="wk-categorieen">
+            <!-- Wordt dynamisch gevuld -->
+          </div>
+        </div>
+
+        <!-- Tab inhoud MIJN LIJSTEN -->
+        <div class="wk-tab-inhoud" id="wk-mijn" style="display:none">
+          <p class="wk-binnenkort">
+            ⭐ <strong>Mijn lijsten</strong> komt in een volgende update.
+            Dan kan je je gekozen woorden bewaren onder een eigen titel
+            (bv. "Thema 1 - Op school") en die jaar na jaar hergebruiken
+            of bewerken.
+          </p>
+        </div>
+      </div>
+
+      <div class="wk-modal-footer">
+        <button class="secundair" id="wk-annuleren" type="button">Annuleren</button>
+        <button class="primair" id="wk-bevestigen" type="button">Gebruik deze woorden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- html2pdf.js voor PDF-export, geladen via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+  <!-- Volgorde: eerst modules registreren, dan generator/preview/pdf -->
+  <script src="afbeeldingen.js"></script>
+  <script src="woordenbibliotheek.js"></script>
+  <script src="woordenkiezer.js"></script>
+  <script src="modules/klankzuiver.js"></script>
+  <script src="modules/weekdictee.js"></script>
+  <script src="generator.js"></script>
+  <script src="preview.js"></script>
+  <script src="pdf-engine.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
