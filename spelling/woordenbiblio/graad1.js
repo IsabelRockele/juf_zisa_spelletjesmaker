@@ -1,0 +1,411 @@
+/* ==========================================================
+   woordenbiblio/graad1.js
+   Woordenset voor graad 1 (eerste + tweede leerjaar)
+   ========================================================== */
+
+window.SpellingWoordenbibliotheek.registreerGraad(1, {
+
+  // ===== KORTE KLANKEN (klankzuiver, lj 1) =====
+  "mkm-a": {
+    naam: "MKM met -a-",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "bal", lidwoord: "de" },
+      { tekst: "kat", lidwoord: "de" },
+      { tekst: "tas", lidwoord: "de" },
+      { tekst: "man", lidwoord: "de" },
+      { tekst: "pan", lidwoord: "de" },
+      { tekst: "dak", lidwoord: "het" },
+      { tekst: "mat", lidwoord: "de" },
+      { tekst: "kam", lidwoord: "de" },
+      { tekst: "bak", lidwoord: "de" },
+      { tekst: "tak", lidwoord: "de" },
+      { tekst: "zak", lidwoord: "de" },
+      { tekst: "lap", lidwoord: "de" },
+      { tekst: "rat", lidwoord: "de" },
+      { tekst: "vat", lidwoord: "het" },
+      { tekst: "wal", lidwoord: "de" },
+      { tekst: "lat", lidwoord: "de" },
+      { tekst: "kar", lidwoord: "de" },
+      { tekst: "hand", lidwoord: "de" }
+    ]
+  },
+  "mkm-e": {
+    naam: "MKM met -e-",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "bel", lidwoord: "de" },
+      { tekst: "pet", lidwoord: "de" },
+      { tekst: "hek", lidwoord: "het" },
+      { tekst: "pen", lidwoord: "de" },
+      { tekst: "mes", lidwoord: "het" },
+      { tekst: "bed", lidwoord: "het" },
+      { tekst: "net", lidwoord: "het" },
+      { tekst: "vel", lidwoord: "het" },
+      { tekst: "les", lidwoord: "de" },
+      { tekst: "wet", lidwoord: "de" },
+      { tekst: "vest", lidwoord: "het" },
+      { tekst: "hen", lidwoord: "de" }
+    ]
+  },
+  "mkm-i": {
+    naam: "MKM met -i-",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "kip", lidwoord: "de" },
+      { tekst: "vis", lidwoord: "de" },
+      { tekst: "lip", lidwoord: "de" },
+      { tekst: "pit", lidwoord: "de" },
+      { tekst: "rib", lidwoord: "de" },
+      { tekst: "wit", lidwoord: null },
+      { tekst: "bil", lidwoord: "de" },
+      { tekst: "tik", lidwoord: "de" },
+      { tekst: "kin", lidwoord: "de" },
+      { tekst: "dik", lidwoord: null },
+      { tekst: "vink", lidwoord: "de" }
+    ]
+  },
+  "mkm-o": {
+    naam: "MKM met -o-",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "pop", lidwoord: "de" },
+      { tekst: "rok", lidwoord: "de" },
+      { tekst: "vos", lidwoord: "de" },
+      { tekst: "kom", lidwoord: "de" },
+      { tekst: "pot", lidwoord: "de" },
+      { tekst: "zon", lidwoord: "de" },
+      { tekst: "mol", lidwoord: "de" },
+      { tekst: "bok", lidwoord: "de" },
+      { tekst: "dop", lidwoord: "de" },
+      { tekst: "kop", lidwoord: "de" },
+      { tekst: "bon", lidwoord: "de" },
+      { tekst: "los", lidwoord: null }
+    ]
+  },
+  "mkm-u": {
+    naam: "MKM met -u-",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "bus", lidwoord: "de" },
+      { tekst: "hut", lidwoord: "de" },
+      { tekst: "mus", lidwoord: "de" },
+      { tekst: "pup", lidwoord: "de" },
+      { tekst: "kus", lidwoord: "de" },
+      { tekst: "rug", lidwoord: "de" },
+      { tekst: "put", lidwoord: "de" },
+      { tekst: "lus", lidwoord: "de" },
+      { tekst: "stuk", lidwoord: "het" },
+      { tekst: "duf", lidwoord: null }
+    ]
+  },
+  "mk-km": {
+    naam: "MK / KM-woorden",
+    groep: "korte-klanken",
+    woorden: [
+      { tekst: "om", lidwoord: null },
+      { tekst: "in", lidwoord: null },
+      { tekst: "op", lidwoord: null },
+      { tekst: "en", lidwoord: null },
+      { tekst: "uit", lidwoord: null },
+      { tekst: "ma", lidwoord: null },
+      { tekst: "na", lidwoord: null },
+      { tekst: "je", lidwoord: null },
+      { tekst: "we", lidwoord: null },
+      { tekst: "ik", lidwoord: null },
+      { tekst: "is", lidwoord: null },
+      { tekst: "af", lidwoord: null },
+      { tekst: "as", lidwoord: "de" },
+      { tekst: "ei", lidwoord: "het" }
+    ]
+  },
+
+  // ===== TWEEKLANKEN =====
+  "tw-ie": {
+    naam: "ie",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "riet", lidwoord: "het" },
+      { tekst: "biet", lidwoord: "de" },
+      { tekst: "wiel", lidwoord: "het" },
+      { tekst: "fiets", lidwoord: "de" },
+      { tekst: "stier", lidwoord: "de" },
+      { tekst: "knie", lidwoord: "de" },
+      { tekst: "mier", lidwoord: "de" },
+      { tekst: "bier", lidwoord: "het" },
+      { tekst: "vier", lidwoord: null },
+      { tekst: "tien", lidwoord: null },
+      { tekst: "lief", lidwoord: null },
+      { tekst: "diep", lidwoord: null },
+      { tekst: "niet", lidwoord: null },
+      { tekst: "zie", lidwoord: null },
+      { tekst: "die", lidwoord: null }
+    ]
+  },
+  "tw-eu": {
+    naam: "eu",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "neus", lidwoord: "de" },
+      { tekst: "deur", lidwoord: "de" },
+      { tekst: "kleur", lidwoord: "de" },
+      { tekst: "geur", lidwoord: "de" },
+      { tekst: "reus", lidwoord: "de" },
+      { tekst: "beuk", lidwoord: "de" },
+      { tekst: "scheur", lidwoord: "de" },
+      { tekst: "leuk", lidwoord: null },
+      { tekst: "treur", lidwoord: null },
+      { tekst: "kreun", lidwoord: null }
+    ]
+  },
+  "tw-ui": {
+    naam: "ui",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "huis", lidwoord: "het" },
+      { tekst: "muis", lidwoord: "de" },
+      { tekst: "tuin", lidwoord: "de" },
+      { tekst: "duin", lidwoord: "het" },
+      { tekst: "kruis", lidwoord: "het" },
+      { tekst: "fluit", lidwoord: "de" },
+      { tekst: "buik", lidwoord: "de" },
+      { tekst: "duif", lidwoord: "de" },
+      { tekst: "ruit", lidwoord: "de" },
+      { tekst: "bui", lidwoord: "de" },
+      { tekst: "lui", lidwoord: null },
+      { tekst: "stuit", lidwoord: null }
+    ]
+  },
+  "tw-oe": {
+    naam: "oe",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "boek", lidwoord: "het" },
+      { tekst: "koek", lidwoord: "de" },
+      { tekst: "doek", lidwoord: "de" },
+      { tekst: "voet", lidwoord: "de" },
+      { tekst: "bloem", lidwoord: "de" },
+      { tekst: "stoel", lidwoord: "de" },
+      { tekst: "snoep", lidwoord: "het" },
+      { tekst: "vloer", lidwoord: "de" },
+      { tekst: "schoen", lidwoord: "de" },
+      { tekst: "broek", lidwoord: "de" },
+      { tekst: "loep", lidwoord: "de" },
+      { tekst: "moe", lidwoord: null },
+      { tekst: "groen", lidwoord: null }
+    ]
+  },
+  "tw-aai": {
+    naam: "aai",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "haai", lidwoord: "de" },
+      { tekst: "kraai", lidwoord: "de" },
+      { tekst: "draai", lidwoord: "de" },
+      { tekst: "lawaai", lidwoord: "het" },
+      { tekst: "zwaai", lidwoord: "de" },
+      { tekst: "saai", lidwoord: null },
+      { tekst: "fraai", lidwoord: null },
+      { tekst: "naai", lidwoord: null },
+      { tekst: "maai", lidwoord: null },
+      { tekst: "zaai", lidwoord: null }
+    ]
+  },
+  "tw-ooi": {
+    naam: "ooi",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "kooi", lidwoord: "de" },
+      { tekst: "tooi", lidwoord: "de" },
+      { tekst: "mooi", lidwoord: null },
+      { tekst: "rooi", lidwoord: null },
+      { tekst: "gooi", lidwoord: null },
+      { tekst: "strooi", lidwoord: null }
+    ]
+  },
+  "tw-oei": {
+    naam: "oei",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "boei", lidwoord: "de" },
+      { tekst: "groei", lidwoord: "de" },
+      { tekst: "bloei", lidwoord: "de" },
+      { tekst: "stoei", lidwoord: null },
+      { tekst: "loei", lidwoord: null },
+      { tekst: "vloei", lidwoord: null },
+      { tekst: "roei", lidwoord: null },
+      { tekst: "foei", lidwoord: null }
+    ]
+  },
+  "tw-eeuw": {
+    naam: "eeuw",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "leeuw", lidwoord: "de" },
+      { tekst: "sneeuw", lidwoord: "de" },
+      { tekst: "eeuw", lidwoord: "de" },
+      { tekst: "spreeuw", lidwoord: "de" },
+      { tekst: "meeuw", lidwoord: "de" },
+      { tekst: "geeuw", lidwoord: "de" }
+    ]
+  },
+  "tw-ieuw": {
+    naam: "ieuw",
+    groep: "tweeklanken",
+    woorden: [
+      { tekst: "kieuw", lidwoord: "de" },
+      { tekst: "nieuw", lidwoord: null },
+      { tekst: "opnieuw", lidwoord: null },
+      { tekst: "nieuws", lidwoord: "het" }
+    ]
+  },
+
+  // ===== ng / nk WOORDEN =====
+  "ng-woorden": {
+    naam: "-ng woorden",
+    groep: "ng-nk",
+    woorden: [
+      { tekst: "ring", lidwoord: "de" },
+      { tekst: "slang", lidwoord: "de" },
+      { tekst: "kring", lidwoord: "de" },
+      { tekst: "long", lidwoord: "de" },
+      { tekst: "tong", lidwoord: "de" },
+      { tekst: "wang", lidwoord: "de" },
+      { tekst: "ding", lidwoord: "het" },
+      { tekst: "sprong", lidwoord: "de" },
+      { tekst: "bang", lidwoord: null },
+      { tekst: "zing", lidwoord: null },
+      { tekst: "spring", lidwoord: null },
+      { tekst: "hang", lidwoord: null }
+    ]
+  },
+  "nk-woorden": {
+    naam: "-nk woorden",
+    groep: "ng-nk",
+    woorden: [
+      { tekst: "bank", lidwoord: "de" },
+      { tekst: "tank", lidwoord: "de" },
+      { tekst: "vink", lidwoord: "de" },
+      { tekst: "plank", lidwoord: "de" },
+      { tekst: "klank", lidwoord: "de" },
+      { tekst: "pink", lidwoord: "de" },
+      { tekst: "drink", lidwoord: null },
+      { tekst: "stink", lidwoord: null },
+      { tekst: "schenk", lidwoord: null },
+      { tekst: "denk", lidwoord: null },
+      { tekst: "flink", lidwoord: null }
+    ]
+  },
+
+  // ===== VERDUBBELAARS =====
+  "verdubbelaars": {
+    naam: "verdubbelaars",
+    groep: "verdubbel-verenkel",
+    woorden: [
+      { tekst: "bommen", lidwoord: "de" },
+      { tekst: "kassen", lidwoord: "de" },
+      { tekst: "pannen", lidwoord: "de" },
+      { tekst: "dassen", lidwoord: "de" },
+      { tekst: "ballen", lidwoord: "de" },
+      { tekst: "bellen", lidwoord: "de" },
+      { tekst: "kippen", lidwoord: "de" },
+      { tekst: "rokken", lidwoord: "de" },
+      { tekst: "vossen", lidwoord: "de" },
+      { tekst: "bussen", lidwoord: "de" },
+      { tekst: "muggen", lidwoord: "de" },
+      { tekst: "mussen", lidwoord: "de" },
+      { tekst: "stippen", lidwoord: "de" },
+      { tekst: "petten", lidwoord: "de" }
+    ]
+  },
+
+  // ===== VERENKELAARS =====
+  "verenkelaars": {
+    naam: "verenkelaars",
+    groep: "verdubbel-verenkel",
+    woorden: [
+      { tekst: "bomen", lidwoord: "de" },
+      { tekst: "kazen", lidwoord: "de" },
+      { tekst: "namen", lidwoord: "de" },
+      { tekst: "manen", lidwoord: "de" },
+      { tekst: "vazen", lidwoord: "de" },
+      { tekst: "muren", lidwoord: "de" },
+      { tekst: "buren", lidwoord: "de" },
+      { tekst: "uren", lidwoord: "de" },
+      { tekst: "haren", lidwoord: "de" },
+      { tekst: "garen", lidwoord: "het" },
+      { tekst: "zalen", lidwoord: "de" },
+      { tekst: "palen", lidwoord: "de" },
+      { tekst: "dieren", lidwoord: "de" },
+      { tekst: "schoenen", lidwoord: "de" },
+      { tekst: "boeken", lidwoord: "de" }
+    ]
+  },
+
+  // ===== LANGE KLANKEN =====
+  "lk-aa": {
+    naam: "aa",
+    groep: "lange-klanken",
+    woorden: [
+      { tekst: "haan", lidwoord: "de" },
+      { tekst: "maan", lidwoord: "de" },
+      { tekst: "naam", lidwoord: "de" },
+      { tekst: "taart", lidwoord: "de" },
+      { tekst: "kaas", lidwoord: "de" },
+      { tekst: "vaas", lidwoord: "de" },
+      { tekst: "paard", lidwoord: "het" },
+      { tekst: "baan", lidwoord: "de" },
+      { tekst: "schaar", lidwoord: "de" },
+      { tekst: "taak", lidwoord: "de" },
+      { tekst: "vaak", lidwoord: null }
+    ]
+  },
+  "lk-ee": {
+    naam: "ee",
+    groep: "lange-klanken",
+    woorden: [
+      { tekst: "been", lidwoord: "het" },
+      { tekst: "fee", lidwoord: "de" },
+      { tekst: "zee", lidwoord: "de" },
+      { tekst: "thee", lidwoord: "de" },
+      { tekst: "beek", lidwoord: "de" },
+      { tekst: "veer", lidwoord: "de" },
+      { tekst: "meer", lidwoord: "het" },
+      { tekst: "eend", lidwoord: "de" },
+      { tekst: "heel", lidwoord: null },
+      { tekst: "leeg", lidwoord: null },
+      { tekst: "geel", lidwoord: null }
+    ]
+  },
+  "lk-oo": {
+    naam: "oo",
+    groep: "lange-klanken",
+    woorden: [
+      { tekst: "boom", lidwoord: "de" },
+      { tekst: "doos", lidwoord: "de" },
+      { tekst: "boot", lidwoord: "de" },
+      { tekst: "kroon", lidwoord: "de" },
+      { tekst: "school", lidwoord: "de" },
+      { tekst: "zoon", lidwoord: "de" },
+      { tekst: "droom", lidwoord: "de" },
+      { tekst: "rook", lidwoord: "de" },
+      { tekst: "voor", lidwoord: null },
+      { tekst: "door", lidwoord: null },
+      { tekst: "groot", lidwoord: null },
+      { tekst: "rood", lidwoord: null }
+    ]
+  },
+  "lk-uu": {
+    naam: "uu",
+    groep: "lange-klanken",
+    woorden: [
+      { tekst: "muur", lidwoord: "de" },
+      { tekst: "vuur", lidwoord: "het" },
+      { tekst: "uur", lidwoord: "het" },
+      { tekst: "buur", lidwoord: "de" },
+      { tekst: "stuur", lidwoord: "het" },
+      { tekst: "puur", lidwoord: null },
+      { tekst: "huur", lidwoord: "de" }
+    ]
+  }
+});
