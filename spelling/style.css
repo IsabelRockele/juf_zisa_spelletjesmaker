@@ -136,6 +136,39 @@ body {
   float: right;
 }
 
+/* Lijstje "Binnenkort beschikbaar" onder categorie-knoppen */
+.binnenkort-blok {
+  margin-top: 12px;
+  padding: 8px 10px;
+  background: #f8f8f8;
+  border-left: 3px solid #ddd;
+  border-radius: 4px;
+}
+.binnenkort-titel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #888;
+  margin: 0 0 4px 0;
+}
+.binnenkort-lijst {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.74rem;
+  color: #999;
+  line-height: 1.5;
+}
+.binnenkort-lijst li {
+  padding-left: 12px;
+  position: relative;
+}
+.binnenkort-lijst li::before {
+  content: "•";
+  position: absolute;
+  left: 4px;
+  color: #ccc;
+}
+
 .niveau-knoppen {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -745,7 +778,7 @@ body.bewerk-aan [data-bewerk-id]:focus {
   min-height: 11px;
 }
 
-/* Lijntype-keuze — 5 radio-opties als kleine knop-cards */
+/* Lijntype-keuze — 5 radio-opties als kleine knop-cards met canvas-voorbeeld */
 .lijntype-keuze {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -767,19 +800,30 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .lijntype-radio .lijntype-naam {
   display: block;
-  padding: 6px 2px;
+  padding: 4px 2px 6px 2px;
   border: 1.5px solid var(--zisa-rand);
   border-radius: 4px;
   background: white;
   color: #555;
-  font-size: 0.72rem;
-  line-height: 1.2;
-  font-weight: 600;
   transition: all 0.1s;
 }
-.lijntype-radio .lijntype-naam small {
+.lijntype-radio .lijntype-preview {
   display: block;
-  font-size: 0.62rem;
+  width: 100%;
+  height: 28px;
+  margin-bottom: 2px;
+  background: white;
+  border-radius: 2px;
+}
+.lijntype-radio .lijntype-label {
+  display: block;
+  font-size: 0.7rem;
+  line-height: 1.1;
+  font-weight: 600;
+}
+.lijntype-radio .lijntype-label small {
+  display: block;
+  font-size: 0.6rem;
   font-weight: normal;
   color: #888;
   margin-top: 1px;
@@ -790,11 +834,81 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .lijntype-radio input[type="radio"]:checked + .lijntype-naam {
   border-color: var(--zisa-blauw);
-  background: var(--zisa-blauw);
-  color: white;
+  border-width: 2.5px;
+  background: var(--zisa-blauw-licht);
 }
-.lijntype-radio input[type="radio"]:checked + .lijntype-naam small {
-  color: rgba(255,255,255,0.85);
+.lijntype-radio input[type="radio"]:checked + .lijntype-naam .lijntype-label {
+  color: var(--zisa-blauw);
+}
+
+/* === Niveau-vinkjes (differentiatie-bundel) === */
+.ov-niveau-vinkjes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.ov-niveau-vink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--zisa-rand);
+  border-radius: 4px;
+  cursor: pointer;
+  background: white;
+  transition: all 0.1s;
+}
+.ov-niveau-vink:hover {
+  border-color: var(--zisa-blauw);
+  background: var(--zisa-blauw-licht);
+}
+.ov-niveau-vink.actief {
+  border-color: var(--zisa-blauw);
+  background: var(--zisa-blauw-licht);
+}
+.ov-niveau-vink input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ov-niveau-vink .ov-niveau-naam {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 0.85rem;
+}
+.ov-niveau-vink .ov-niveau-naam strong {
+  color: var(--zisa-blauw);
+}
+.ov-niveau-vink .ov-niveau-naam small {
+  color: #888;
+  font-size: 0.72rem;
+}
+
+/* === Niveau-badge op werkblad === */
+.ov01-niveau-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: normal;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+  background: white;
+}
+.ov01-niveau-basis {
+  background: #B6E7A0;
+  color: #2F6B2F;
+}
+.ov01-niveau-kern {
+  background: #FFF2CC;
+  color: #996600;
+}
+.ov01-niveau-verdieping {
+  background: #DAE8FC;
+  color: #1F4E78;
 }
 
 /* Empty-state als graad geen woorden heeft */
@@ -808,16 +922,77 @@ body.bewerk-aan [data-bewerk-id]:focus {
   margin: 0 0 12px 0;
 }
 
+.ov01-voettekst {
+  /* Voettekst direct na de werkblad-inhoud. Niet meer absoluut gepositioneerd
+     omdat min-height: 27cm verwijderd is (om lege PDF-pagina te voorkomen).
+     Met margin-top: auto in een flex-container zou het altijd onderaan staan,
+     maar voor de eenvoud nu gewoon margin-top voor wat lucht. */
+  margin-top: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #999;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  font-style: italic;
+  letter-spacing: 0.3px;
+}
+
+/* === A4-grens marker (alleen in preview, niet in PDF) === */
+/* Toont onder elk werkblad een rode tekst die markeert waar de A4-pagina eindigt.
+   Werkt via .preview-modus class die JS toevoegt aan #preview maar NIET aan de
+   PDF-render-container. */
+.preview-modus .ov01-blad {
+  position: relative;
+}
+.preview-modus .ov01-blad::after {
+  content: "➖➖➖ hier valt A4-grens ➖➖➖";
+  display: block;
+  position: absolute;
+  /* 28.5cm laat ruimte voor printer-marges (hardware snijdt vaak 0.5cm van elke kant). 
+     Als content óver deze lijn valt, dreigt afsnijding bij print. */
+  top: 28.5cm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #d9534f;
+  font-size: 0.75rem;
+  font-family: 'Comic Sans MS', sans-serif;
+  font-weight: bold;
+  letter-spacing: 1px;
+  pointer-events: none;
+}
+
 /* ============================================================
    OV01 — Plaatje → woord schrijven
    ============================================================ */
 .ov01-blad {
   font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
-  padding: 1.2cm 1.5cm !important;
+  width: 21cm;
+  /* GEEN min-height — kan over A4 duwen. Inhoud bepaalt hoogte. */
+  box-sizing: border-box;
+  padding: 1.5cm 1.8cm !important;
+  margin: 0 auto;
+  background: white;
+  color: #222;
+  box-shadow: none !important;
+  position: relative;
+}
+/* Visuele scheiding tussen werkbladen alleen in preview */
+.preview-modus .ov01-blad + .ov01-blad {
+  margin-top: 20px;
+}
+/* Page-break ALLEEN tussen meerdere bladen onder elkaar (bundel) — niet voor enkel blad */
+.ov01-blad + .ov01-blad {
+  page-break-before: always;
+  break-before: page;
 }
 
 .ov01-header {
   margin-bottom: 14px;
+  /* Header mag NIET afbreken: naam+datum+titel horen bij elkaar */
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .ov01-naam-rij {
   display: flex;
@@ -858,6 +1033,9 @@ body.bewerk-aan [data-bewerk-id]:focus {
   border-radius: 6px;
   padding: 10px 14px;
   margin-bottom: 16px;
+  /* Stappen-blok mag NIET afbreken */
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .ov01-stappen-label {
   font-weight: bold;
@@ -890,6 +1068,9 @@ body.bewerk-aan [data-bewerk-id]:focus {
   flex-direction: row;
   gap: 10px;
   margin-bottom: 10px;
+  /* Een rij mag niet afbreken — plaatjes blijven samen op dezelfde pagina */
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .ov01-cel {
   flex: 1 1 0;
@@ -920,6 +1101,32 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .ov01-cel-woord-leeg {
   height: 6px;
+}
+
+/* === BASIS-niveau: 3 keuze-hokjes onder plaatje === */
+.ov01-cel-keuze {
+  display: flex;
+  gap: 4px;
+  margin: 4px 0 8px 0;
+  width: 100%;
+  justify-content: center;
+}
+.ov01-keuze-hokje {
+  flex: 1;
+  text-align: center;
+  padding: 6px 4px;
+  border: 1.5px solid #555;
+  border-radius: 3px;
+  background: white;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  /* Wat compactere lettergrootte zodat 3 woorden naast elkaar passen */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .ov01-cel-lijnen {
   width: 100%;
@@ -952,6 +1159,8 @@ body.bewerk-aan [data-bewerk-id]:focus {
   background: #E8F5E9;
   border: 1.5px solid #66BB6A;
   border-radius: 6px;
+  page-break-inside: avoid;
+  break-inside: avoid;
 }
 .ov01-zin-vraag {
   margin: 4px 0 8px 0;
@@ -1111,15 +1320,18 @@ body.bewerk-aan [data-bewerk-id]:focus {
 
 .weekdictee-blad {
   font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
-  padding: 1.2cm 1.5cm !important;
+  /* Compactere padding: 1.0cm boven/onder, 1.8cm links/rechts. 
+     Zo passen werkbladen binnen A4 (29.7cm). Links/rechts blijft ruimer
+     voor printer-marges. */
+  padding: 1.0cm 1.8cm !important;
 }
 
 .weekdictee-header {
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .weekdictee-naam-rij {
-  font-size: 0.95rem;
-  margin-bottom: 8px;
+  font-size: 0.9rem;
+  margin-bottom: 5px;
 }
 .naam-lijn-lang {
   display: inline-block;
@@ -1131,9 +1343,9 @@ body.bewerk-aan [data-bewerk-id]:focus {
   background: #1a1a1a;
   color: white;
   text-align: center;
-  font-size: 1.3rem;
-  margin: 0 0 16px 0;
-  padding: 10px 16px;
+  font-size: 1.1rem;
+  margin: 0 0 8px 0;
+  padding: 6px 16px;
   font-weight: bold;
 }
 
@@ -1177,72 +1389,100 @@ body.bewerk-aan [data-bewerk-id]:focus {
   padding: 12px 16px;
 }
 
-/* Schrijflijn voor woorden (linkerkant) */
-.dag-woord-lijn {
-  border-bottom: 1px solid #444;
-  height: 26px;
+/* === Schrijflijn voor woorden (linkerkant) — nu via canvas === */
+.dag-woord-rij {
   margin-bottom: 8px;
-  font-size: 1.05rem;
-  padding-left: 2px;
-  display: flex;
-  align-items: flex-end;
+  position: relative;
+  display: block;
+}
+.dag-woord-rij {
+  margin-bottom: 8px;
+  position: relative;
+  display: block;
+}
+/* Antwoord positioneren OP de schrijfregel (tussen mid1 en base lijnen).
+   De canvas heeft 4 lijnen: top, mid1 (boven x-hoogte), base, bottom.
+   De x-hoogte zone is tussen mid1 en base. Daar moet het antwoord staan.
+   Bij hoogte "klein" (14px tussen lijnen): canvas-h = 5+14*3+5 = 52px.
+   - top: 5, mid1: 19, base: 33, bottom: 47
+   - schrijfzone midden: ~26px (van top)
+   - relatief: 26/52 = ~50%
+   Bij hoogte "middel" (20px tussen lijnen): canvas-h = 5+20*3+5 = 70px.
+   - top: 5, mid1: 25, base: 45, bottom: 65
+   - schrijfzone midden: ~35px
+   - relatief: 35/70 = ~50%
+   Dus 50% werkt voor beide! */
+.dag-woord-rij .antwoord {
+  position: absolute;
+  top: 50%;
+  left: 6px;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2196F3;
+  z-index: 2;
+  font-family: 'Comic Sans MS', sans-serif;
+  /* Witte achtergrond zodat de schrijflijnen erachter niet door de letters lopen */
+  background: white;
+  padding: 0 3px;
+  /* Lijn-hoogte iets lager dan font-size zodat tekst compact blijft */
+  line-height: 1;
+}
+.wd-canvas-wrap {
+  display: block;
+  width: 100%;
+}
+.wd-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* Verbeter-rooster: 3 kolommen */
+/* Verbeter-rooster: 2 kolommen (verbeter het hier - meestal 1 of 2 fouten max per woord) */
 .verbeter-rij {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
   margin-bottom: 8px;
 }
 .verbeter-cel {
-  border-bottom: 1px solid #444;
-  height: 26px;
+  display: block;
 }
 
-/* Zinvak: het complete kleurgecodeerde lijnvlak */
+/* Zinvak — nu canvas i.p.v. blauw vlak */
 .dag-zinnen {
   border-top: 2px solid #1a1a1a;
-  padding: 0;
+  padding: 6px 16px;
   background: white;
 }
-.zinvak {
-  height: 36px;
+.wd-zin-rij {
   position: relative;
-  margin: 0;
+  margin: 4px 0;
+}
+.wd-zin-canvas-wrap {
+  display: block;
+  width: 100%;
+}
+.wd-zin-canvas-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-/* Kleur-versie: rode toplijn, lichtblauw vlak voor x-hoogte, groene onderlijn */
-.zinvak-kleur {
-  background:
-    /* Rode bovenlijn (ascender) */
-    linear-gradient(to bottom, #E74C3C 1.5px, transparent 1.5px) top / 100% 100% no-repeat,
-    /* Lichtblauw vlak tussen middenlijnen */
-    linear-gradient(to bottom,
-      transparent 33%,
-      #B3E5FC 33%,
-      #B3E5FC 66%,
-      transparent 66%
-    ),
-    /* Groene basislijn */
-    linear-gradient(to bottom, #2E7D32 1.5px, transparent 1.5px) bottom / 100% 100% no-repeat;
-}
-
-/* Zwart vierlijn-alternatief */
-.zinvak-zwart {
-  background:
-    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) top    / 100% 100% no-repeat,
-    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) 0 33%   / 100% 100% no-repeat,
-    linear-gradient(to bottom, #444 1.5px, transparent 1.5px) 0 66%  / 100% 100% no-repeat,
-    linear-gradient(to bottom, #c8c8c8 1px, transparent 1px) bottom  / 100% 100% no-repeat;
-}
-
-/* Antwoord op zinvak (bij oplossingen) */
+/* Antwoord op zinvak (bij oplossingen) — gepositioneerd op de schrijfregel */
 .zin-antwoord {
   position: absolute;
-  left: 8px;
-  top: 4px;
-  font-size: 0.95rem;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  font-family: 'Comic Sans MS', sans-serif;
+  color: #2196F3;
+  font-weight: 600;
+  z-index: 2;
+  background: white;
+  padding: 0 4px;
+  line-height: 1;
 }
 
 /* Reflectie onderaan laatste pagina */
@@ -1304,13 +1544,20 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .werkblad {
   background: white;
   width: 21cm;
-  min-height: 29.7cm;
+  /* GEEN min-height — kan over A4 duwen wat lege pagina veroorzaakt.
+     De inhoud bepaalt de hoogte. Voettekst staat na de content via
+     normaal flow (margin-top auto via flex), niet meer absoluut. */
+  box-sizing: border-box;
   padding: 1.5cm 2cm;
-  margin: 0 auto 20px auto;
+  margin: 0 auto;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
   color: #222;
   position: relative;
+}
+/* In preview iets ruimte tussen werkbladen voor visuele scheiding */
+.preview-modus .werkblad + .werkblad {
+  margin-top: 20px;
 }
 /* Elke werkblad behalve het eerste begint op een nieuwe PDF-pagina */
 .werkblad + .werkblad {
