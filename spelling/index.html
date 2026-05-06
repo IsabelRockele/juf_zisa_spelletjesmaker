@@ -30,10 +30,24 @@
       <section class="block">
         <h2>2. Categorie</h2>
         <div class="categorie-knoppen">
-          <button class="cat-knop actief" data-categorie="ov01">📷 Plaatje → woord (OV01)</button>
+          <button class="cat-knop actief" data-categorie="ov01">📷 Schrijf bij het plaatje</button>
           <button class="cat-knop" data-categorie="weekdictee">📅 Weekdictee</button>
-          <button class="cat-knop" data-categorie="klankzuiver">📝 Klankzuiver (oud)</button>
-          <button class="cat-knop disabled" disabled>OV02-12 <span class="binnenkort">binnenkort</span></button>
+        </div>
+        <div class="binnenkort-blok">
+          <p class="binnenkort-titel">🚧 Binnenkort beschikbaar:</p>
+          <ul class="binnenkort-lijst">
+            <li>Woord 3x overschrijven</li>
+            <li>Letters door elkaar</li>
+            <li>Klank ontbreekt + invullen</li>
+            <li>Klank kiezen + inkleuren</li>
+            <li>Zinnen invullen</li>
+            <li>Categoriseren op klank</li>
+            <li>Stappenplan regelwoorden</li>
+            <li>Verlengen om te horen</li>
+            <li>Verkleinwoord maken</li>
+            <li>Meervoud maken</li>
+            <li>Hoofdletters &amp; leestekens</li>
+          </ul>
         </div>
       </section>
 
@@ -91,7 +105,7 @@
 
     <!-- RECHTS: preview -->
     <main class="preview-paneel">
-      <div id="preview"></div>
+      <div id="preview" class="preview-modus"></div>
     </main>
 
   </div>
@@ -158,12 +172,12 @@
   <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
   <script src="afbeeldingen.js"></script>
   <script src="schrijflijnen.js"></script>
+  <script src="afleiders.js"></script>
   <script src="woordenbibliotheek.js"></script>
   <script src="woordenbiblio/graad1.js"></script>
   <script src="woordenbiblio/graad2.js"></script>
   <script src="woordenbiblio/graad3.js"></script>
   <script src="woordenkiezer.js"></script>
-  <script src="modules/klankzuiver.js"></script>
   <script src="modules/weekdictee.js"></script>
   <script src="modules/ov01.js"></script>
   <script src="generator.js"></script>
