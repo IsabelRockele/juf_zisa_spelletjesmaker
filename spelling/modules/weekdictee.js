@@ -1,7 +1,7 @@
 /* ==========================================================
    Module: Weekdictee
    Dagelijks dictee voor 1-5 dagen.
-   - Globale of per-dag woordbron
+   - Woordenkiezer-modal levert de pool van woorden
    - Aantal woorden + aantal zinnen per dag (instelbaar)
    - Verbetering: 3x overschrijven in 3 kolommen
    - Optioneel kleurgecodeerd zinvak (rood-blauw-groen)
@@ -22,26 +22,6 @@ window.SpellingModules.weekdictee = {
     { id: "do", label: "donderdag" },
     { id: "vr", label: "vrijdag" }
   ],
-
-  /* Woordbronnen die de leerkracht kan kiezen.
-     We hergebruiken de woordenlijsten uit de klankzuiver-module. */
-  woordbronnen: function() {
-    const k = window.SpellingModules.klankzuiver;
-    if (!k) return [];
-    return [
-      { id: "kort-mkm",   label: "Klankzuiver mkm (bal)",   bron: () => Object.values(k.woordenlijsten.mkm).flat() },
-      { id: "kort-mmkm",  label: "Klankzuiver mmkm (stal)", bron: () => Object.values(k.woordenlijsten.mmkm).flat() },
-      { id: "kort-mkmm",  label: "Klankzuiver mkmm (lamp)", bron: () => Object.values(k.woordenlijsten.mkmm).flat() },
-      { id: "kort-mmkmm", label: "Klankzuiver mmkmm (stamp)", bron: () => Object.values(k.woordenlijsten.mmkmm).flat() },
-      { id: "tw-ie",      label: "Tweeklank ie (vier)",     bron: () => k.woordenlijsten.ie || [] },
-      { id: "tw-eu",      label: "Tweeklank eu (neus)",     bron: () => k.woordenlijsten.eu || [] },
-      { id: "tw-ui",      label: "Tweeklank ui (huis)",     bron: () => k.woordenlijsten.ui || [] },
-      { id: "tw-oe",      label: "Tweeklank oe (boek)",     bron: () => k.woordenlijsten.oe || [] },
-      { id: "verwar-bd",  label: "Verwar b/d",              bron: () => [...k.woordenlijsten.verwar.b, ...k.woordenlijsten.verwar.d] },
-      { id: "verwar-vf",  label: "Verwar v/f",              bron: () => [...k.woordenlijsten.verwar.v, ...k.woordenlijsten.verwar.f] },
-      { id: "verwar-zs",  label: "Verwar z/s",              bron: () => [...k.woordenlijsten.verwar.z, ...k.woordenlijsten.verwar.s] }
-    ];
-  },
 
   /* ---------- INSTELLINGEN UI ---------- */
   renderInstellingen: function() {
@@ -102,19 +82,79 @@ window.SpellingModules.weekdictee = {
         </label>
       </div>
 
-      <!-- STAP 4: Stijl -->
+      <!-- STAP 4: Schrijflijnen -->
       <div class="wd-stap">
         <div class="wd-stap-kop">
           <span class="wd-stap-nr">4</span>
-          <span class="wd-stap-titel">Stijl</span>
+          <span class="wd-stap-titel">Schrijflijnen</span>
         </div>
-        <label>Zinvak</label>
-        <div class="subtype-knoppen" id="wd-zinstijl">
-          <button class="actief" data-stijl="kleur" type="button">Kleur</button>
-          <button data-stijl="zwart" type="button">Zwart vierlijn</button>
+        <label>Type schrijflijn</label>
+        <div class="lijntype-keuze" id="wd-lijntype">
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type1">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type1" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 1<br><small>klassiek hulp</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type2">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type2" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 2<br><small>standaard</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type3" checked>
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type3" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 3<br><small>kleurgecodeerd</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type4">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type4" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 4<br><small>grijs-blauw</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type5">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type5" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 5<br><small>intens kleur</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type6">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type6" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 6<br><small>enkele lijn</small></span>
+            </span>
+          </label>
+          <label class="lijntype-radio">
+            <input type="radio" name="wd-lt" value="type7">
+            <span class="lijntype-naam">
+              <canvas class="lijntype-preview" data-preview-type="type7" width="80" height="32"></canvas>
+              <span class="lijntype-label">Type 7<br><small>twee lijnen</small></span>
+            </span>
+          </label>
         </div>
 
-        <label style="margin-top:10px; display:flex; align-items:center; gap:6px;">
+        <label style="margin-top:10px">Hoogte</label>
+        <div class="subtype-knoppen" id="wd-lijnhoogte">
+          <button data-hoogte="middel" type="button">Middel</button>
+          <button class="actief" data-hoogte="klein" type="button">Klein</button>
+        </div>
+      </div>
+
+      <!-- STAP 5: Reflectie -->
+      <div class="wd-stap">
+        <div class="wd-stap-kop">
+          <span class="wd-stap-nr">5</span>
+          <span class="wd-stap-titel">Reflectie</span>
+        </div>
+        <label style="display:flex; align-items:center; gap:6px;">
           <input type="checkbox" id="wd-reflectie" checked>
           Reflectievraag onderaan
         </label>
@@ -215,20 +255,20 @@ window.SpellingModules.weekdictee = {
   },
 
   _renderDagBlok: function(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden) {
-    // Globale pool van woorden (uit de woordenkiezer)
     const pool = gekozenWoorden || [];
-
-    // Slim verdelen: woorden uniek per dag waar mogelijk
-    // We gebruiken een index-offset per dag om geen overlap te krijgen
     const dagIdx = this.dagen.findIndex(d => d.id === dag.id);
     const startIdx = dagIdx * (aantalWoorden + aantalZinnen);
 
-    // Kies woorden voor deze dag (deterministisch via seed + dag-offset)
     const sel = this._kiesWoordenVoorDag(pool, aantalWoorden + aantalZinnen, startIdx);
     const woordenVoorDag = sel.slice(0, aantalWoorden);
     const woordenVoorZin = sel.slice(aantalWoorden, aantalWoorden + aantalZinnen);
 
-    // Woord-lijntjes (links)
+    // Lijntype + hoogte uit opties (komen uit instellingen)
+    const lijntype = opties.weekdictee?.lijntype || "type3";
+    const lijnhoogte = opties.weekdictee?.lijnhoogte || "middel";
+    const sl = window.SpellingSchrijflijnen;
+
+    // Woord-lijntjes (links) — schrijflijn-canvas in plaats van CSS-onderlijn
     let woordLijntjes = "";
     for (let i = 0; i < aantalWoorden; i++) {
       const w = woordenVoorDag[i];
@@ -236,29 +276,37 @@ window.SpellingModules.weekdictee = {
       const inhoud = metAntwoorden && tonen
         ? `<span class="antwoord">${tonen}</span>`
         : "";
-      woordLijntjes += `<div class="dag-woord-lijn">${inhoud}</div>`;
+      const lijn = sl
+        ? `<div class="wd-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 220)}</div>`
+        : `<div class="dag-woord-lijn-fallback"></div>`;
+      woordLijntjes += `<div class="dag-woord-rij">${inhoud}${lijn}</div>`;
     }
 
-    // Verbeter-rooster (3 kolommen, één rij per woord)
+    // Verbeter-rooster (2 kolommen × n rijen, elk met canvas-schrijflijn)
     let verbeterRooster = "";
     for (let i = 0; i < aantalWoorden; i++) {
-      verbeterRooster += `
-        <div class="verbeter-rij">
-          <div class="verbeter-cel"></div>
-          <div class="verbeter-cel"></div>
-          <div class="verbeter-cel"></div>
-        </div>`;
+      let rij = `<div class="verbeter-rij">`;
+      for (let k = 0; k < 2; k++) {
+        const cellijn = sl
+          ? `<div class="wd-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 180)}</div>`
+          : `<div class="verbeter-cel-fallback"></div>`;
+        rij += `<div class="verbeter-cel">${cellijn}</div>`;
+      }
+      rij += `</div>`;
+      verbeterRooster += rij;
     }
 
-    // Zin(nen) onderaan dag
+    // Zinnen onderaan dag — schrijflijn-canvas in plaats van blauw zinvak
     let zinSectie = "";
     for (let i = 0; i < aantalZinnen; i++) {
       const zinWoord = woordenVoorZin[i] || woordenVoorDag[0];
-      const tonen = zinWoord ? this._toonWoord(zinWoord) : "";
-      const zinInhoud = metAntwoorden && tonen
-        ? `<span class="antwoord zin-antwoord">${this._maakZin(tonen)}</span>`
+      const zinInhoud = metAntwoorden && zinWoord
+        ? `<span class="antwoord zin-antwoord">${this._maakZin(zinWoord)}</span>`
         : "";
-      zinSectie += `<div class="zinvak zinvak-${zinStijl}">${zinInhoud}</div>`;
+      const zinLijn = sl
+        ? `<div class="wd-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 700)}</div>`
+        : `<div class="zinvak zinvak-${zinStijl}-fallback"></div>`;
+      zinSectie += `<div class="wd-zin-rij">${zinInhoud}${zinLijn}</div>`;
     }
 
     return `
@@ -292,16 +340,26 @@ window.SpellingModules.weekdictee = {
     return w.tekst;
   },
 
-  /* Maak een eenvoudige zin met een woord erin */
-  _maakZin: function(woord) {
+  /* Maak een eenvoudige zin met een woord erin.
+     Gebruikt het juiste lidwoord uit het woord-object zodat we niet
+     "de het hek" krijgen bij een 'het'-woord. */
+  _maakZin: function(woordObj) {
+    // Ondersteun zowel string als object
+    const woord = (typeof woordObj === "string") ? woordObj : woordObj.tekst;
+    const lidwoord = (typeof woordObj === "object" && woordObj.lidwoord) ? woordObj.lidwoord : "de";
+    
+    // Hoofdletter-versie van het lidwoord voor zinnen die ermee beginnen
+    const Lidwoord = lidwoord.charAt(0).toUpperCase() + lidwoord.slice(1);
+    
+    // Bezittelijk voornaamwoord past bij alle woordsoorten
     const sjablonen = [
-      `Ik zie de ${woord}.`,
-      `De ${woord} is mooi.`,
+      `Ik zie ${lidwoord} ${woord}.`,
+      `${Lidwoord} ${woord} is mooi.`,
       `Mijn ${woord} ligt hier.`,
       `Hij heeft een ${woord}.`,
-      `Wij kijken naar de ${woord}.`
+      `Wij kijken naar ${lidwoord} ${woord}.`
     ];
-    // Gebruik de seed voor reproduceerbaarheid
+    
     const idx = Math.floor(this._random() * sjablonen.length);
     return sjablonen[idx];
   },
