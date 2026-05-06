@@ -19,24 +19,21 @@
     <aside class="sidebar">
 
       <section class="block">
-        <h2>1. Categorie</h2>
-        <div class="categorie-knoppen">
-          <button class="cat-knop actief" data-categorie="klankzuiver">Klankzuivere woorden</button>
-          <button class="cat-knop" data-categorie="weekdictee">Weekdictee</button>
-          <button class="cat-knop disabled" disabled>Verdubbelaars <span class="binnenkort">binnenkort</span></button>
-          <button class="cat-knop disabled" disabled>Verenkelaars <span class="binnenkort">binnenkort</span></button>
-          <button class="cat-knop disabled" disabled>Open/gesloten lettergreep <span class="binnenkort">binnenkort</span></button>
-          <button class="cat-knop disabled" disabled>ei / ij <span class="binnenkort">binnenkort</span></button>
-          <button class="cat-knop disabled" disabled>eu / ui <span class="binnenkort">binnenkort</span></button>
+        <h2>1. Graad</h2>
+        <div class="graad-knoppen">
+          <button class="graad-knop actief" data-graad="1">Graad 1</button>
+          <button class="graad-knop" data-graad="2" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
+          <button class="graad-knop" data-graad="3" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
         </div>
       </section>
 
       <section class="block">
-        <h2>2. Graad</h2>
-        <div class="graad-knoppen">
-          <button class="graad-knop actief" data-graad="1">Graad 1</button>
-          <button class="graad-knop disabled" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
-          <button class="graad-knop disabled" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
+        <h2>2. Categorie</h2>
+        <div class="categorie-knoppen">
+          <button class="cat-knop actief" data-categorie="ov01">📷 Plaatje → woord (OV01)</button>
+          <button class="cat-knop" data-categorie="weekdictee">📅 Weekdictee</button>
+          <button class="cat-knop" data-categorie="klankzuiver">📝 Klankzuiver (oud)</button>
+          <button class="cat-knop disabled" disabled>OV02-12 <span class="binnenkort">binnenkort</span></button>
         </div>
       </section>
 
@@ -128,8 +125,8 @@
             <label>Leerjaar:</label>
             <select id="wk-leerjaar">
               <option value="1">Graad 1 (lj 1-2)</option>
-              <option value="2" disabled>Graad 2 — binnenkort</option>
-              <option value="3" disabled>Graad 3 — binnenkort</option>
+              <option value="2">Graad 2 (lj 3-4)</option>
+              <option value="3">Graad 3 (lj 5-6)</option>
             </select>
           </div>
           <div class="wk-categorieen" id="wk-categorieen">
@@ -158,12 +155,17 @@
   <!-- html2pdf.js voor PDF-export, geladen via CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-  <!-- Volgorde: eerst modules registreren, dan generator/preview/pdf -->
+  <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
   <script src="afbeeldingen.js"></script>
+  <script src="schrijflijnen.js"></script>
   <script src="woordenbibliotheek.js"></script>
+  <script src="woordenbiblio/graad1.js"></script>
+  <script src="woordenbiblio/graad2.js"></script>
+  <script src="woordenbiblio/graad3.js"></script>
   <script src="woordenkiezer.js"></script>
   <script src="modules/klankzuiver.js"></script>
   <script src="modules/weekdictee.js"></script>
+  <script src="modules/ov01.js"></script>
   <script src="generator.js"></script>
   <script src="preview.js"></script>
   <script src="pdf-engine.js"></script>
