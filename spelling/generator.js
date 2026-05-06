@@ -23,10 +23,11 @@ window.SpellingGenerator = {
         dagen: dagenAan,
         aantalWoorden: parseInt(document.querySelector("#wd-woorden")?.value || "5", 10),
         aantalZinnen: parseInt(document.querySelector("#wd-zinnen")?.value || "1", 10),
-        zinStijl: document.querySelector("#wd-zinstijl button.actief")?.dataset.stijl || "kleur",
         vrijdagHerhaling: document.querySelector("#wd-vrijdag-herhaling")?.checked || false,
         reflectieAan: document.querySelector("#wd-reflectie")?.checked !== false,
         reflectieText: document.querySelector("#wd-reflectie-tekst")?.value || "Wat vond ik van de dagelijkse spelling deze week?",
+        lijntype: document.querySelector('input[name="wd-lt"]:checked')?.value || "type3",
+        lijnhoogte: document.querySelector("#wd-lijnhoogte button.actief")?.dataset.hoogte || "klein",
         titel: "Dagelijkse kost spelling"
       };
     }
@@ -34,10 +35,16 @@ window.SpellingGenerator = {
     // === OV01-specifieke opties ===
     let ov01 = null;
     if (cat === "ov01") {
+      // Verzamel actieve niveau-vinkjes
+      const niveaus = [];
+      document.querySelectorAll("#ov01-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
       ov01 = {
-        niveau: document.querySelector("#ov01-niveau button.actief")?.dataset.niveau || "basis",
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        zelfdeWoorden: document.querySelector("#ov01-zelfde-woorden")?.checked !== false,
         aantalWoorden: parseInt(document.querySelector("#ov01-aantal-woorden")?.value || "9", 10),
-        aantalLijnen: parseInt(document.querySelector("#ov01-aantal-lijnen")?.value || "2", 10),
+        aantalLijnen: parseInt(document.querySelector("#ov01-aantal-lijnen")?.value || "1", 10),
         lijnhoogte: document.querySelector("#ov01-lijnhoogte button.actief")?.dataset.hoogte || "middel",
         lijntype: document.querySelector("#ov01-lijntype input[name='ov01-lt']:checked")?.value || "type3",
         ondertitel: document.querySelector("#ov01-ondertitel")?.value || ""
