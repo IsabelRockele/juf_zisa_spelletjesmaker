@@ -377,7 +377,8 @@ window.SpellingModules.ov06 = {
       const zinHTML = this._zinMetStreepCanvas(z.zin, z.woord, canvas, metAntwoorden);
       
       html += `
-        <div class="ov06-zin-rij ov06-zin-rij-basis">
+        <div class="ov06-zin-rij ov06-zin-rij-basis" data-woord="${z.woord.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${z.woord.tekst}" title="Verwijder deze zin van het werkblad" type="button">✕</button>
           <span class="ov06-nr">${idx + 1}.</span>
           <div class="ov06-keuze-rij">${optiesHTML}</div>
           <div class="ov06-zin-tekst">${zinHTML}</div>
@@ -410,7 +411,8 @@ window.SpellingModules.ov06 = {
       const zinHTML = this._zinMetStreepCanvas(z.zin, z.woord, canvas, metAntwoorden);
       
       html += `
-        <div class="ov06-zin-rij">
+        <div class="ov06-zin-rij" data-woord="${z.woord.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${z.woord.tekst}" title="Verwijder deze zin van het werkblad" type="button">✕</button>
           <span class="ov06-nr">${idx + 1}.</span>
           <div class="ov06-zin-tekst">${zinHTML}</div>
         </div>`;
@@ -435,7 +437,8 @@ window.SpellingModules.ov06 = {
         : "";
       
       html += `
-        <div class="ov06-uitbreiding-rij">
+        <div class="ov06-uitbreiding-rij" data-woord="${w.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           <div class="ov06-uitbreiding-woord">${w.tekst}:</div>
           <div class="ov06-uitbreiding-lijn">${canvas}</div>
           ${opl}
