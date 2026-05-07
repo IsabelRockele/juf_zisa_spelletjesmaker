@@ -244,7 +244,8 @@ window.SpellingModules.ov03 = {
       }
 
       rijenHTML += `
-        <div class="${rijClass}">
+        <div class="${rijClass}" data-woord="${w.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
           <div class="ov03-letters">${hokjesMetKleurHTML}</div>
           <div class="ov03-lijn-cel">${antwoordSpan}${canvas}</div>
