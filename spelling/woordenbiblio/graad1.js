@@ -148,6 +148,74 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "die", lidwoord: null }
     ]
   },
+  "tw-ei": {
+    naam: "ei",
+    groep: "ei-ij",
+    woorden: [
+      { tekst: "trein", lidwoord: "de" },
+      { tekst: "klein", lidwoord: null },
+      { tekst: "geit", lidwoord: "de" },
+      { tekst: "ei", lidwoord: "het" },
+      { tekst: "weide", lidwoord: "de" },
+      { tekst: "reis", lidwoord: "de" },
+      { tekst: "meid", lidwoord: "de" },
+      { tekst: "lei", lidwoord: "de" },
+      { tekst: "vlees", lidwoord: "het" },
+      { tekst: "feit", lidwoord: "het" },
+      { tekst: "leiding", lidwoord: "de" },
+      { tekst: "fontein", lidwoord: "de" }
+    ]
+  },
+  "tw-ij": {
+    naam: "ij",
+    groep: "ei-ij",
+    woorden: [
+      { tekst: "tijd", lidwoord: "de" },
+      { tekst: "vijf", lidwoord: null },
+      { tekst: "fijn", lidwoord: null },
+      { tekst: "wijn", lidwoord: "de" },
+      { tekst: "rijst", lidwoord: "de" },
+      { tekst: "lijn", lidwoord: "de" },
+      { tekst: "pijp", lidwoord: "de" },
+      { tekst: "rijm", lidwoord: "het" },
+      { tekst: "kijk", lidwoord: null },
+      { tekst: "mijn", lidwoord: null },
+      { tekst: "schrijf", lidwoord: null },
+      { tekst: "bij", lidwoord: "de" },
+      { tekst: "ijs", lidwoord: "het" }
+    ]
+  },
+  "tw-ou": {
+    naam: "ou",
+    groep: "au-ou",
+    woorden: [
+      { tekst: "koud", lidwoord: null },
+      { tekst: "oud", lidwoord: null },
+      { tekst: "bout", lidwoord: "de" },
+      { tekst: "hout", lidwoord: "het" },
+      { tekst: "fout", lidwoord: "de" },
+      { tekst: "goud", lidwoord: "het" },
+      { tekst: "schouder", lidwoord: "de" },
+      { tekst: "vrouw", lidwoord: "de" },
+      { tekst: "blouse", lidwoord: "de" },
+      { tekst: "mouw", lidwoord: "de" },
+      { tekst: "touw", lidwoord: "het" }
+    ]
+  },
+  "tw-au": {
+    naam: "au",
+    groep: "au-ou",
+    woorden: [
+      { tekst: "pauw", lidwoord: "de" },
+      { tekst: "saus", lidwoord: "de" },
+      { tekst: "dauw", lidwoord: "de" },
+      { tekst: "blauw", lidwoord: null },
+      { tekst: "klauw", lidwoord: "de" },
+      { tekst: "miauw", lidwoord: null },
+      { tekst: "auto", lidwoord: "de" },
+      { tekst: "augustus", lidwoord: null }
+    ]
+  },
   "tw-eu": {
     naam: "eu",
     groep: "tweeklanken",
