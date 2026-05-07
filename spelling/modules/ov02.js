@@ -181,7 +181,8 @@ window.SpellingModules.ov02 = {
       }
 
       rijenHTML += `
-        <div class="ov02-rij">
+        <div class="ov02-rij" data-woord="${w.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
           <div class="ov02-woord">${tonen}</div>
           <div class="ov02-lijnen-blok">${lijnenHTML}</div>
