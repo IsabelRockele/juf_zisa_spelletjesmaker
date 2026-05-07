@@ -55,22 +55,29 @@ window.SpellingModules.ov01 = {
           <label class="ov-niveau-vink actief">
             <input type="checkbox" data-niveau="basis" checked>
             <span class="ov-niveau-naam">
-              <strong>Basis</strong>
+              <strong>⭐ Oefenen</strong>
               <small>kleur juiste woord uit 3 keuzes</small>
             </span>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <span class="ov-niveau-naam">
-              <strong>Kern</strong>
+              <strong>⭐⭐ Toepassen</strong>
               <small>alleen plaatje, kind roept woord op</small>
             </span>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <span class="ov-niveau-naam">
-              <strong>Verdieping</strong>
+              <strong>⭐⭐⭐ Verdiepen</strong>
               <small>plaatje + zin maken</small>
+            </span>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="uitbreiding">
+            <span class="ov-niveau-naam">
+              <strong>⭐⭐⭐⭐ Uitbreiden</strong>
+              <small>plaatje + woord + meervoud + verkleinwoord</small>
             </span>
           </label>
         </div>
@@ -233,11 +240,16 @@ window.SpellingModules.ov01 = {
       if (niveau === "verdieping") {
         verdiepingHTML = this._renderZinOpdracht(lijnhoogte, lijntype, metAntwoorden);
       }
+      let uitbreidingHTML = "";
+      if (niveau === "uitbreiding") {
+        uitbreidingHTML = this._renderUitbreidingOpdracht(woorden, lijnhoogte, lijntype, metAntwoorden);
+      }
 
       const niveauLabel = {
-        basis: "Basis",
-        kern: "Kern",
-        verdieping: "Verdieping"
+        basis: "⭐",
+        kern: "⭐⭐",
+        verdieping: "⭐⭐⭐",
+        uitbreiding: "⭐⭐⭐⭐"
       }[niveau];
 
       // Bij oplossingen: extra badge naast titel + extra class
@@ -266,6 +278,7 @@ window.SpellingModules.ov01 = {
           ${stappenHTML}
           ${plaatjesHTML}
           ${verdiepingHTML}
+          ${uitbreidingHTML}
 
           <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
         </div>
@@ -289,6 +302,13 @@ window.SpellingModules.ov01 = {
         "Bekijk de prent.",
         "Schrijf het woord op.",
         "Kijk het woord nog eens goed na."
+      ];
+    } else if (niveau === "uitbreiding") {
+      opdrachtLabel = "Opdracht 1 (plaatjes):";
+      stappen = [
+        "Bekijk de prent.",
+        "Schrijf het woord op.",
+        "Kies daarna 1 woord voor de extra opdracht onderaan."
       ];
     } else {
       opdrachtLabel = "Opdracht 1 (plaatjes):";
@@ -343,7 +363,7 @@ window.SpellingModules.ov01 = {
                 return `<div class="ov01-keuze-hokje${juistClass}">${opt}</div>`;
               }).join("")}
             </div>`;
-        } else if (niveau === "kern" || niveau === "verdieping") {
+        } else if (niveau === "kern" || niveau === "verdieping" || niveau === "uitbreiding") {
           // KERN/VERDIEPING: alleen plaatje, geen woord
           onderHtml = `<div class="ov01-cel-woord-leeg"></div>`;
         }
@@ -375,6 +395,31 @@ window.SpellingModules.ov01 = {
   },
 
   /* ----- Verdieping: zin-opdracht onderaan ----- */
+  /* ----- Uitbreiding: kies een woord en maak meervoud + verkleinwoord ----- */
+  _renderUitbreidingOpdracht: function(woorden, lijnhoogte, lijntype, metAntwoorden) {
+    const sl = window.SpellingSchrijflijnen;
+    const lijn = (label) => sl
+      ? `<div class="ov01-zin-canvas-wrap"><div class="ov01-uit-label">${label}</div>${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
+      : `<div class="ov01-zin-lijn"></div>`;
+    
+    const oplTekst = metAntwoorden
+      ? `<p class="ov01-zin-richtlijn">Verwacht: kind kiest een woord uit de oefening en schrijft correct het meervoud en verkleinwoord. Bv. boom → bomen → boompje.</p>`
+      : "";
+    
+    return `
+      <div class="ov01-zin-blok ov01-uitbreiding-blok">
+        <div class="ov01-stappen-label" data-bewerk-id="uitbreiding-label">⭐⭐⭐⭐ Extra opdracht (uitbreiden):</div>
+        <p class="ov01-zin-vraag" data-bewerk-id="uitbreiding-opdracht">
+          Kies 1 woord en schrijf het meervoud (veel) en het verkleinwoord erbij.
+        </p>
+        ${lijn("Het woord:")}
+        ${lijn("Het meervoud (veel):")}
+        ${lijn("Het verkleinwoord:")}
+        ${oplTekst}
+      </div>
+    `;
+  },
+
   _renderZinOpdracht: function(lijnhoogte, lijntype, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
     const zinLijn = sl
