@@ -50,22 +50,29 @@ window.SpellingModules.ov04 = {
           <label class="ov-niveau-vink actief">
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
-              <strong>Basis</strong>
+              <strong>⭐ Oefenen</strong>
               <small>kind kleurt klank en sorteert</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
-              <strong>Kern</strong>
+              <strong>⭐⭐ Toepassen</strong>
               <small>klank ontbreekt — eerst aanvullen, dan sorteren</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
-              <strong>Verdieping</strong>
+              <strong>⭐⭐⭐ Verdiepen</strong>
               <small>kind bedenkt zelf 3 woorden per kolom</small>
+            </div>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="uitbreiding">
+            <div class="ov-niveau-vink-tekst">
+              <strong>⭐⭐⭐⭐ Uitbreiden</strong>
+              <small>5 woorden per kolom + zin maken met één woord</small>
             </div>
           </label>
         </div>
@@ -252,8 +259,8 @@ window.SpellingModules.ov04 = {
     }
 
     return niveaus.map(niveau => {
-      const woorden = (niveau === "verdieping") 
-        ? [] // Verdieping heeft geen woorden
+      const woorden = (niveau === "verdieping" || niveau === "uitbreiding") 
+        ? [] // Geen woorden — kind bedenkt zelf
         : this._kiesWoorden(gekozenWoorden, aantalWoorden);
       return this._renderEenBlad(niveau, woorden, kolommen, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
@@ -307,10 +314,13 @@ window.SpellingModules.ov04 = {
     }
 
     // Kolommen onderaan met schrijflijnen
-    // Verdieping krijgt 3 lijnen per kolom (kind moet 3 woorden bedenken)
-    // Basis/Kern krijgen genoeg lijnen voor de woorden (bv. aantalWoorden / aantalKolommen + 1)
+    // Verdieping: 3 lijnen per kolom — kind bedenkt 3 woorden per kolom
+    // Uitbreiding: 5 lijnen per kolom — kind bedenkt 5 woorden per kolom
+    // Basis/Kern: genoeg lijnen voor woorden (bv. aantalWoorden / aantalKolommen + 1)
     const aantalLijnenPerKolom = niveau === "verdieping" 
       ? 3 
+      : niveau === "uitbreiding"
+      ? 5
       : Math.ceil((woorden.length / kolommen.length) + 1);
 
     const kolommenHTML = kolommen.map(cat => {
@@ -318,7 +328,7 @@ window.SpellingModules.ov04 = {
       for (let i = 0; i < aantalLijnenPerKolom; i++) {
         // Bij oplossingen voor basis/kern: woord in juiste kolom invullen
         let antwoord = "";
-        if (metAntwoorden && niveau !== "verdieping" && kh) {
+        if (metAntwoorden && niveau !== "verdieping" && niveau !== "uitbreiding" && kh) {
           // Vind woorden die in deze kolom horen
           const woordenInKolom = woorden.filter(w => 
             kh.matchKolom(w.categorie, cat.klank)
@@ -341,7 +351,7 @@ window.SpellingModules.ov04 = {
     }).join("");
 
     const niveauLabel = {
-      basis: "Basis", kern: "Kern", verdieping: "Verdieping"
+      basis: "⭐", kern: "⭐⭐", verdieping: "⭐⭐⭐", uitbreiding: "⭐⭐⭐⭐"
     }[niveau];
 
     const oplBadge = metAntwoorden
@@ -358,6 +368,10 @@ window.SpellingModules.ov04 = {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de ontbrekende klank in.</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`;
+    } else if (niveau === "uitbreiding") {
+      opdrachtTekst = `
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk 5 woorden voor elke categorie.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak in je schrift een zin met één woord uit elke kolom.</span></div>`;
     } else {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk woorden voor elke categorie.</span></div>
