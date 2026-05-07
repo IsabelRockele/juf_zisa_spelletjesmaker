@@ -560,8 +560,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
 
   // ===== MEERVOUDEN =====
   // ALLEEN -en vorm (geen 's). Kind moet ze zelf vormen.
+  // Drie categorieën: gemengd, verdubbel-regel, verenkel-regel.
+  
+  // Gemengde set — alle regels door elkaar (voor automatisering)
   "meervoud-en": {
-    naam: "Meervoud op -en",
+    naam: "Meervoud op -en (gemengd)",
     groep: "meervouden",
     woorden: [
       { tekst: "boom", lidwoord: "de", meervoud: "bomen" },
@@ -581,6 +584,60 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "trein", lidwoord: "de", meervoud: "treinen" },
       { tekst: "tuin", lidwoord: "de", meervoud: "tuinen" },
       { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" }
+    ]
+  },
+  
+  // Verdubbel-regel: korte klank → medeklinker dubbel
+  // (kat → katten, kip → kippen)
+  "meervoud-verdubbel": {
+    naam: "Meervoud verdubbelen (kort)",
+    groep: "meervouden",
+    woorden: [
+      { tekst: "kat", lidwoord: "de", meervoud: "katten" },
+      { tekst: "kip", lidwoord: "de", meervoud: "kippen" },
+      { tekst: "kop", lidwoord: "de", meervoud: "koppen" },
+      { tekst: "pen", lidwoord: "de", meervoud: "pennen" },
+      { tekst: "pan", lidwoord: "de", meervoud: "pannen" },
+      { tekst: "bal", lidwoord: "de", meervoud: "ballen" },
+      { tekst: "bel", lidwoord: "de", meervoud: "bellen" },
+      { tekst: "rat", lidwoord: "de", meervoud: "ratten" },
+      { tekst: "tak", lidwoord: "de", meervoud: "takken" },
+      { tekst: "rok", lidwoord: "de", meervoud: "rokken" },
+      { tekst: "bak", lidwoord: "de", meervoud: "bakken" },
+      { tekst: "zak", lidwoord: "de", meervoud: "zakken" },
+      { tekst: "lat", lidwoord: "de", meervoud: "latten" },
+      { tekst: "vos", lidwoord: "de", meervoud: "vossen" },
+      { tekst: "lap", lidwoord: "de", meervoud: "lappen" },
+      { tekst: "mat", lidwoord: "de", meervoud: "matten" },
+      { tekst: "bom", lidwoord: "de", meervoud: "bommen" },
+      { tekst: "das", lidwoord: "de", meervoud: "dassen" }
+    ]
+  },
+  
+  // Verenkel-regel: lange klank → klinker enkel
+  // (boom → bomen, boot → boten)
+  "meervoud-verenkel": {
+    naam: "Meervoud verenkelen (lang)",
+    groep: "meervouden",
+    woorden: [
+      { tekst: "boom", lidwoord: "de", meervoud: "bomen" },
+      { tekst: "boot", lidwoord: "de", meervoud: "boten" },
+      { tekst: "kaas", lidwoord: "de", meervoud: "kazen" },
+      { tekst: "naam", lidwoord: "de", meervoud: "namen" },
+      { tekst: "maan", lidwoord: "de", meervoud: "manen" },
+      { tekst: "vaas", lidwoord: "de", meervoud: "vazen" },
+      { tekst: "muur", lidwoord: "de", meervoud: "muren" },
+      { tekst: "buur", lidwoord: "de", meervoud: "buren" },
+      { tekst: "uur", lidwoord: "het", meervoud: "uren" },
+      { tekst: "haar", lidwoord: "het", meervoud: "haren" },
+      { tekst: "schaap", lidwoord: "het", meervoud: "schapen" },
+      { tekst: "kraan", lidwoord: "de", meervoud: "kranen" },
+      { tekst: "raam", lidwoord: "het", meervoud: "ramen" },
+      { tekst: "paal", lidwoord: "de", meervoud: "palen" },
+      { tekst: "haan", lidwoord: "de", meervoud: "hanen" },
+      { tekst: "veer", lidwoord: "de", meervoud: "veren" },
+      { tekst: "boer", lidwoord: "de", meervoud: "boeren" },
+      { tekst: "muur", lidwoord: "de", meervoud: "muren" }
     ]
   }
 });
