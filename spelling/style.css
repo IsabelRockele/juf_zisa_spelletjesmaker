@@ -553,9 +553,191 @@ body {
   display: none !important;
 }
 
+/* +1 woord knop linksboven het werkblad (alleen in preview, niet in PDF) */
+.bundel-item-plus-knop {
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #4caf50;
+  color: white;
+  border: 2px solid #388e3c;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.bundel-item-plus-knop:hover {
+  background: #388e3c;
+  transform: scale(1.05);
+}
+/* In PDF-export verbergen */
+.pdf-render .bundel-item-plus-knop {
+  display: none !important;
+}
+
 /* Verborgen-class voor knoppen die nog niet relevant zijn */
 .verborgen {
   display: none !important;
+}
+
+/* ============================================================
+   OV06 — Zinnen invullen
+   ============================================================ */
+.ov06-blad {
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  width: 21cm;
+  box-sizing: border-box;
+  padding: 1.5cm 1.8cm !important;
+  margin: 0 auto;
+  background: white;
+  color: #222;
+  box-shadow: none !important;
+  position: relative;
+}
+.preview-modus .ov06-blad + .ov06-blad {
+  margin-top: 20px;
+}
+
+/* Woordbank bovenaan */
+.ov06-woordbank {
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #fff8e1;
+  border: 2px dashed #ffa500;
+  border-radius: 8px;
+}
+.ov06-bank-titel {
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #444;
+}
+.ov06-bank-woorden {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+}
+.ov06-bank-woord {
+  font-size: 1.05rem;
+  font-weight: 600;
+  background: white;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+/* Zinnen-lijst */
+.ov06-zinnen-lijst {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ov06-zin-rij {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px;
+}
+.ov06-nr {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #444;
+  min-width: 24px;
+  flex-shrink: 0;
+}
+.ov06-zin-inhoud {
+  flex: 1;
+}
+/* ⭐ Oefenen: keuzewoorden + zin op één rij */
+.ov06-zin-rij-basis {
+  flex-wrap: wrap;
+}
+.ov06-zin-rij-basis .ov06-keuze-rij {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+.ov06-keuze-rij {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 600;
+  align-items: center;
+}
+.ov06-keuze-woord {
+  display: inline-block;
+  border: 2px solid #444;
+  border-radius: 16px;
+  padding: 2px 12px;
+  background: white;
+  font-size: 0.95rem;
+}
+.ov06-keuze-juist {
+  background: #c8e6c9;
+  border-color: #4caf50;
+  border-width: 2.5px;
+}
+.ov06-zin-tekst {
+  flex: 1;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  line-height: 1.6;
+}
+
+/* Inline streep (canvas in tekst) */
+.ov06-streep-inline {
+  display: inline-block;
+  vertical-align: middle;
+  width: 200px;
+  margin: 0 4px;
+}
+.ov06-streep-inline canvas.schrijflijn-canvas {
+  display: inline-block;
+  vertical-align: middle;
+  width: 200px;
+}
+.ov06-streep-fallback {
+  display: inline-block;
+  border-bottom: 2px solid #888;
+  width: 180px;
+  margin: 0 4px;
+}
+.ov06-antwoord-inline {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1f4e78;
+  padding: 0 6px;
+  border-radius: 3px;
+  font-weight: 700;
+  margin: 0 2px;
+}
+
+/* Uitbreiding-niveau: woord links, schrijflijn rechts (zo veel mogelijk ruimte) */
+.ov06-uitbreiding-rij {
+  padding: 8px 4px;
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.ov06-uitbreiding-woord {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #444;
+  padding-right: 4px;
+  text-align: left;
+}
+.ov06-uitbreiding-lijn canvas.schrijflijn-canvas {
+  display: block;
+  width: 100%;
 }
 
 /* ============================================================
@@ -1550,6 +1732,21 @@ body.bewerk-aan [data-bewerk-id]:focus {
   vertical-align: middle;
   background: white;
 }
+/* Uitbreidings-blok (4 sterren) */
+.ov01-uitbreiding-blok {
+  border: 2px dashed #FFA500;
+  background: #FFF8E1;
+  padding: 10px 14px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+.ov01-uit-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 2px;
+  font-weight: 600;
+}
+
 .ov01-niveau-basis {
   background: #B6E7A0;
   color: #2F6B2F;
@@ -1561,6 +1758,11 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .ov01-niveau-verdieping {
   background: #DAE8FC;
   color: #1F4E78;
+}
+.ov01-niveau-uitbreiding {
+  background: #FFE4B5;
+  color: #8B4513;
+  font-weight: 700;
 }
 
 /* Empty-state als graad geen woorden heeft */
