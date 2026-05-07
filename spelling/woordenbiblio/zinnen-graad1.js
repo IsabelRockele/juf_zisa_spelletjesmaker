@@ -185,7 +185,10 @@ window.SpellingZinnen.graad1 = {
   "vink": [
     "De vink zingt mooi.",
     "Een vink op de tak.",
-    "De vink heeft kleurige veren."
+    "De vink heeft kleurige veren.",
+    "De vink zingt in de tuin.",
+    "Op de tak zit een vink.",
+    "De kleine vink pikt zaadjes."
   ],
 
   // ----- MKM-E (11 woorden — bed naar verlengingsregel) -----
@@ -1136,6 +1139,642 @@ window.SpellingZinnen.graad1 = {
     "Na het lopen ben ik moe.",
     "De baby is moe en gaat slapen.",
     "Sam is te moe om te spelen."
+  ],
+
+  /* ============================================================
+     DRIEKLANKEN
+     ============================================================ */
+
+  // ----- TW-AAI (10 woorden) -----
+  "haai": [
+    "De haai zwemt door de zee.",
+    "Ik zag een grote haai in de film.",
+    "De haai heeft scherpe tanden."
+  ],
+  "kraai": [
+    "Op het dak zit een zwarte kraai.",
+    "De kraai roept luid.",
+    "Een kraai vliegt over het veld."
+  ],
+  "lawaai": [
+    "De vrachtwagen maakt veel lawaai.",
+    "Door het lawaai kan ik niet slapen.",
+    "Wat een lawaai in de klas!"
+  ],
+  "saai": [
+    "Dit boek is heel saai.",
+    "De film vind ik saai.",
+    "Een saai liedje hoor ik niet graag."
+  ],
+  "zwaai": [
+    "Geef oma een zwaai met je hand.",
+    "Met een grote zwaai gooi ik de bal.",
+    "Ik zwaai naar mama en papa."
+  ],
+  "taai": [
+    "Het vlees is taai.",
+    "De spaghetti is nog niet taai.",
+    "Een taai stukje brood."
+  ],
+  "draai": [
+    "Geef het wiel een draai.",
+    "Maak een draai met je fiets.",
+    "De draai is te scherp."
+  ],
+  "fraai": [
+    "Wat een fraai huis!",
+    "De prinses draagt een fraai kleed.",
+    "Een fraai schilderij hangt aan de muur."
+  ],
+  "baai": [
+    "De boot ligt in de baai.",
+    "In de baai zwemmen vissen.",
+    "Vanaf de baai zie ik het strand."
+  ],
+  "maaien": [
+    "Papa gaat het gras maaien.",
+    "Ik help papa met het gras te maaien.",
+    "Vandaag mag ik niet maaien, het regent."
+  ],
+
+  // ----- TW-OOI (6 woorden) -----
+  "mooi": [
+    "Wat een mooi kleed!",
+    "De zonsondergang is mooi.",
+    "Lien tekent een mooi huis."
+  ],
+  "kooi": [
+    "De vogel zit in de kooi.",
+    "In de dierentuin staat een grote kooi.",
+    "De kooi van mijn cavia is rond."
+  ],
+  "hooi": [
+    "Het paard eet hooi.",
+    "In de schuur ligt veel hooi.",
+    "De boer maakt een baal hooi."
+  ],
+  "gooi": [
+    "Gooi de bal naar mij!",
+    "Gooi het papier in de bak.",
+    "Met een grote gooi raak ik de doos."
+  ],
+  "dooi": [
+    "Na de winter komt de dooi.",
+    "Bij dooi smelt de sneeuw.",
+    "De dooi is begonnen."
+  ],
+  "vlooien": [
+    "De hond heeft vlooien.",
+    "Vlooien springen heel ver.",
+    "Pas op voor de vlooien op de kat!"
+  ],
+
+  // ----- TW-OEI (12 woorden, met verbuigingen) -----
+  "bloei": [
+    "De bloemen staan in volle bloei.",
+    "In de lente komt alles in bloei.",
+    "De boom in onze tuin staat in bloei."
+  ],
+  "bloeit": [
+    "De roos bloeit in de tuin.",
+    "Mijn plant bloeit elk jaar.",
+    "In mei bloeit alles fel."
+  ],
+  "groei": [
+    "Mama meet mijn groei elk jaar.",
+    "De groei van de plant gaat snel.",
+    "Met goede zorg krijg je flinke groei."
+  ],
+  "groeit": [
+    "De boom groeit elk jaar hoger.",
+    "Mijn haar groeit snel.",
+    "In de tuin groeit een tomaat."
+  ],
+  "groeien": [
+    "De plantjes groeien snel in de zon.",
+    "Mijn nagels groeien hard.",
+    "Hier groeien veel bloemen."
+  ],
+  "boei": [
+    "In de zee drijft een rode boei.",
+    "De boot is vastgemaakt aan de boei.",
+    "Pas op voor de boei in het water!"
+  ],
+  "snoei": [
+    "Geef de struik een snoei.",
+    "Na de snoei groeit de plant beter.",
+    "De boom kreeg een grondige snoei."
+  ],
+  "snoeit": [
+    "Papa snoeit de heg.",
+    "Opa snoeit zijn rozen.",
+    "De tuinman snoeit de boom."
+  ],
+  "roei": [
+    "Ik roei met de peddel over het meer.",
+    "Roei je mee in de boot?",
+    "Met de riemen roei ik vooruit."
+  ],
+  "roeit": [
+    "De man roeit naar de overkant.",
+    "Mama roeit goed.",
+    "Sam roeit met de peddel."
+  ],
+  "roeien": [
+    "Papa kan goed roeien op de zee.",
+    "We gaan samen roeien op het meer.",
+    "Roeien is een mooie sport."
+  ],
+  "koeien": [
+    "In de wei staan veel koeien.",
+    "De koeien geven melk.",
+    "De boer voert de koeien."
+  ],
+
+  // ----- TW-EEUW (9 woorden, met verbuigingen) -----
+  "leeuw": [
+    "De leeuw brult luid in de dierentuin.",
+    "Een leeuw heeft manen.",
+    "De leeuw woont in Afrika."
+  ],
+  "sneeuw": [
+    "In de winter ligt er sneeuw.",
+    "Met de sneeuw bouwen we een sneeuwpop.",
+    "De sneeuw is wit en koud."
+  ],
+  "eeuw": [
+    "Een eeuw is honderd jaar.",
+    "In de vorige eeuw was er nog geen tv.",
+    "Mijn opa is bijna een eeuw oud."
+  ],
+  "meeuw": [
+    "De meeuw vliegt boven de zee.",
+    "Een meeuw stal mijn boterham!",
+    "De meeuw roept luid op het strand."
+  ],
+  "spreeuw": [
+    "Op de tak zit een spreeuw.",
+    "De spreeuw zingt mooi.",
+    "Een spreeuw heeft glanzende veren."
+  ],
+  "schreeuw": [
+    "Geef geen schreeuw in de klas.",
+    "Plots hoorde ik een luide schreeuw.",
+    "De schreeuw kwam uit de tuin."
+  ],
+  "geeuw": [
+    "Met een grote geeuw word ik wakker.",
+    "Wat een diepe geeuw!",
+    "Een geeuw besmet de hele klas."
+  ],
+  "geeuwen": [
+    "Als ik moe ben, moet ik geeuwen.",
+    "We zitten allemaal te geeuwen.",
+    "Probeer niet te geeuwen tijdens de les."
+  ],
+  "eeuwig": [
+    "Onze vakantie duurt niet eeuwig.",
+    "Wachten lijkt soms eeuwig lang.",
+    "Een diamant is eeuwig."
+  ],
+
+  // ----- TW-IEUW (4 woorden) -----
+  "nieuw": [
+    "Mijn fiets is nieuw.",
+    "We hebben een nieuw boek in de klas.",
+    "Lien draagt een nieuw kleed."
+  ],
+  "opnieuw": [
+    "Lees de zin nog eens opnieuw.",
+    "Probeer het opnieuw, je kan het!",
+    "Mama wast de vaat opnieuw."
+  ],
+  "kieuw": [
+    "Een vis ademt door zijn kieuw.",
+    "De kieuw zit aan de zijkant van de vis.",
+    "Door de kieuw haalt de vis lucht uit het water."
+  ],
+  "benieuwd": [
+    "Ik ben benieuwd naar het cadeau.",
+    "Mama is benieuwd naar mijn rapport.",
+    "Sam is heel benieuwd hoe het verhaal eindigt."
+  ],
+
+  /* ============================================================
+     NG / NK
+     ============================================================ */
+
+  // ----- NG-WOORDEN (12 woorden) -----
+  "ring": [
+    "Mama draagt een mooie ring.",
+    "Papa geeft mama een ring.",
+    "De ring past niet om mijn vinger."
+  ],
+  "slang": [
+    "In de tuin ligt een slang.",
+    "De slang sist in het gras.",
+    "Pas op voor de slang!"
+  ],
+  "long": [
+    "Mijn long doet pijn als ik hoest.",
+    "Een long zit in je borstkas.",
+    "Met je long adem je lucht in."
+  ],
+  "tong": [
+    "Lien steekt haar tong uit.",
+    "Met je tong proef je het eten.",
+    "Mijn tong is rood."
+  ],
+  "wang": [
+    "Oma kust mijn wang.",
+    "Op mijn wang zit een vlek.",
+    "Door de kou is mijn wang rood."
+  ],
+  "jong": [
+    "De pup is nog jong.",
+    "Mijn broertje is jong.",
+    "Een jong katje speelt met de bal."
+  ],
+  "zang": [
+    "De zang van de vogel is mooi.",
+    "Op school doen we zang en dans.",
+    "Mama houdt van zang."
+  ],
+  "lang": [
+    "Het touw is heel lang.",
+    "Ik wacht al lang op de bus.",
+    "Mijn haar is lang."
+  ],
+  "bang": [
+    "De hond is bang voor het onweer.",
+    "Wees niet bang in het donker.",
+    "Sam is bang van spinnen."
+  ],
+  "ding": [
+    "Wat is dat voor een ding?",
+    "Op tafel ligt een vreemd ding.",
+    "Geef mij dat ding eens."
+  ],
+  "koning": [
+    "De koning woont in een paleis.",
+    "De koning draagt een kroon.",
+    "In het sprookje is er een koning."
+  ],
+  "paling": [
+    "Een paling zwemt in de rivier.",
+    "De paling lijkt op een slang.",
+    "Papa eet graag gerookte paling."
+  ],
+
+  // ----- NK-WOORDEN (11 woorden) -----
+  "bank": [
+    "Op de bank zit oma te lezen.",
+    "We zetten de bank in de tuin.",
+    "De bank is rood en zacht."
+  ],
+  "tank": [
+    "De tank rijdt door het zand.",
+    "In de oorlog reed er een tank.",
+    "Op het plaatje staat een grote tank."
+  ],
+  "plank": [
+    "Op de plank ligt een boek.",
+    "De plank is van hout.",
+    "Aan de muur hangt een lange plank."
+  ],
+  "pink": [
+    "Mijn pink doet pijn.",
+    "Op mijn pink draag ik een ring.",
+    "De pink is mijn kleinste vinger."
+  ],
+  "klank": [
+    "Welke klank hoor je in dit woord?",
+    "De klank van de bel is luid.",
+    "Een mooie klank uit de piano."
+  ],
+  "drank": [
+    "In het glas zit lekkere drank.",
+    "Mama maakt warme drank.",
+    "Wil je een koude drank?"
+  ],
+  "dank": [
+    "Veel dank voor het cadeau!",
+    "Met dank aan iedereen.",
+    "Een woordje van dank is genoeg."
+  ],
+  "denk": [
+    "Ik denk aan oma.",
+    "Denk goed na voor je antwoordt.",
+    "Sam, denk eens mee!"
+  ],
+  "dronk": [
+    "Papa dronk een glas water.",
+    "De kat dronk uit de kom.",
+    "Lien dronk haar melk op."
+  ],
+  "stank": [
+    "In de keuken hangt een vieze stank.",
+    "Door de stank ren ik weg.",
+    "De stank van bedorven eten is erg."
+  ],
+
+  /* ============================================================
+     MEERVOUDEN (verdubbelaars + verenkelaars + meervoud-en)
+     Bevat de meervoudsvormen die in graad1.js voorkomen onder de
+     categorieën verdubbelaars, verenkelaars, meervoud-en,
+     meervoud-verdubbel en meervoud-verenkel.
+     De enkelvouden (kat, boom, etc.) staan al elders in deze bib.
+     ============================================================ */
+
+  "ballen": [
+    "In de zak zitten veel ballen.",
+    "Sam gooit drie ballen in de mand.",
+    "De ballen rollen over de speelplaats."
+  ],
+  "bellen": [
+    "Op de fietsen zitten luide bellen.",
+    "De bellen rinkelen om 8 uur.",
+    "Lien hoort de bellen van de kerk."
+  ],
+  "bommen": [
+    "In de oorlog vielen er bommen.",
+    "De bommen ontploften met een knal.",
+    "Op het scherm zie ik bommen vallen."
+  ],
+  "dassen": [
+    "Papa heeft drie dassen in de kast.",
+    "Mannen dragen vaak dassen.",
+    "Mijn dassen zijn van zijde."
+  ],
+  "kassen": [
+    "In de tuin staan twee grote kassen.",
+    "De kassen zijn vol planten.",
+    "In de kassen groeien tomaten."
+  ],
+  "katten": [
+    "Er lopen twee katten in de tuin.",
+    "Mijn oma heeft drie katten.",
+    "De katten spelen met een bal."
+  ],
+  "kippen": [
+    "Op de boerderij lopen veel kippen.",
+    "De kippen leggen elke dag eieren.",
+    "Twee kippen pikken graan."
+  ],
+  "koppen": [
+    "Op tafel staan vijf koppen koffie.",
+    "De koppen zijn van porselein.",
+    "Mama vult de koppen met thee."
+  ],
+  "muggen": [
+    "In de zomer zijn er veel muggen.",
+    "De muggen steken mij overal.",
+    "Bij het water vliegen muggen rond."
+  ],
+  "mussen": [
+    "In de boom zitten kleine mussen.",
+    "De mussen pikken zaadjes.",
+    "Een groep mussen vliegt weg."
+  ],
+
+  "pannen": [
+    "In de keuken hangen veel pannen.",
+    "Mama wast de pannen af.",
+    "De pannen staan op het vuur."
+  ],
+  "pennen": [
+    "In mijn pennenzak zitten vijf pennen.",
+    "De pennen zijn allemaal blauw.",
+    "Lien deelt de pennen uit in de klas."
+  ],
+  "petten": [
+    "De jongens dragen rode petten.",
+    "Op het rek hangen drie petten.",
+    "Onze petten zijn van de school."
+  ],
+  "ratten": [
+    "In de schuur lopen ratten.",
+    "De ratten verstoppen zich onder de planken.",
+    "Pas op voor de ratten in de oude kelder!"
+  ],
+  "rokken": [
+    "In de winkel hangen veel rokken.",
+    "De rokken zijn lang of kort.",
+    "Lien heeft drie rokken in haar kast."
+  ],
+  "stippen": [
+    "Op de jurk staan rode stippen.",
+    "De pen maakt kleine stippen.",
+    "Tel de stippen op het lieveheersbeestje."
+  ],
+  "vossen": [
+    "In het bos lopen twee vossen.",
+    "De vossen sluipen langs de weg.",
+    "Vossen jagen op kleine dieren."
+  ],
+  "bakken": [
+    "In de keuken staan vier bakken.",
+    "De bakken zijn vol speelgoed.",
+    "Mama vult de bakken met water."
+  ],
+  "bussen": [
+    "Voor de school stoppen drie bussen.",
+    "De bussen brengen kinderen naar huis.",
+    "In de stad rijden veel bussen."
+  ],
+  "lappen": [
+    "Mama wast de lappen schoon.",
+    "De lappen zijn nat van het water.",
+    "Met de lappen veeg ik de tafel."
+  ],
+
+  "latten": [
+    "Op de vloer liggen lange latten.",
+    "De latten zijn van hout.",
+    "Met de latten meten we de tafel."
+  ],
+  "zakken": [
+    "In de winkel liggen veel zakken.",
+    "De zakken zitten vol snoep.",
+    "Papa draagt de zakken naar de auto."
+  ],
+  "takken": [
+    "Onder de boom liggen takken.",
+    "De takken zijn dik en dun.",
+    "Met de takken maken we een hut."
+  ],
+  "matten": [
+    "In de turnzaal liggen blauwe matten.",
+    "De matten zijn zacht.",
+    "We springen op de matten."
+  ],
+  "bomen": [
+    "In het bos staan hoge bomen.",
+    "De bomen verliezen hun bladeren.",
+    "Vogels zitten in de bomen."
+  ],
+  "boten": [
+    "In de haven liggen veel boten.",
+    "De boten varen op zee.",
+    "Twee boten komen aan de kade."
+  ],
+  "kazen": [
+    "In de winkel liggen vele kazen.",
+    "De kazen komen uit Holland.",
+    "Op het bord liggen drie soorten kazen."
+  ],
+  "namen": [
+    "Op de lijst staan alle namen.",
+    "De namen zijn van de kinderen.",
+    "Lees de namen voor."
+  ],
+  "manen": [
+    "De leeuw heeft mooie manen.",
+    "Wij zien de manen van het paard wapperen.",
+    "De manen zijn lang en goudkleurig."
+  ],
+  "vazen": [
+    "Op de tafel staan twee vazen.",
+    "In de vazen staan bloemen.",
+    "Mama heeft mooie vazen in de kast."
+  ],
+
+  "muren": [
+    "De muren in de klas zijn wit.",
+    "Aan de muren hangen tekeningen.",
+    "We schilderen de muren blauw."
+  ],
+  "buren": [
+    "Onze buren wonen naast ons.",
+    "De buren hebben een grote tuin.",
+    "Mama gaat op visite bij de buren."
+  ],
+  "uren": [
+    "Een dag heeft vierentwintig uren.",
+    "We wachten al uren op de bus.",
+    "De uren vliegen voorbij in het pretpark."
+  ],
+  "haren": [
+    "Mijn haren zijn lang.",
+    "Lien borstelt haar haren elke morgen.",
+    "De haren van de hond liggen overal."
+  ],
+  "palen": [
+    "Langs de weg staan palen.",
+    "De palen zijn van hout.",
+    "Tussen de palen hangt een touw."
+  ],
+  "zalen": [
+    "In het sportcomplex zijn veel zalen.",
+    "De zalen zijn groot en licht.",
+    "We turnen in twee zalen."
+  ],
+  "dieren": [
+    "In de dierentuin wonen veel dieren.",
+    "De dieren krijgen elke dag eten.",
+    "Welke dieren zijn jouw favoriet?"
+  ],
+  "hanen": [
+    "Op de boerderij kraaien drie hanen.",
+    "De hanen wekken iedereen.",
+    "Twee hanen vechten om voer."
+  ],
+  "dieven": [
+    "De dieven stelen geld.",
+    "De politie zoekt de dieven.",
+    "In het verhaal sluipen drie dieven binnen."
+  ],
+  "kranen": [
+    "In de keuken zijn twee kranen.",
+    "De kranen lekken water.",
+    "Bij de bouw staan grote kranen."
+  ],
+
+  "boeren": [
+    "Op het platteland werken boeren.",
+    "De boeren staan vroeg op.",
+    "Twee boeren komen met hun tractor."
+  ],
+  "deuren": [
+    "In ons huis zijn vijf deuren.",
+    "De deuren staan open.",
+    "Op school sluiten we de deuren."
+  ],
+  "leeuwen": [
+    "In de dierentuin wonen leeuwen.",
+    "De leeuwen brullen luid.",
+    "Twee leeuwen liggen in de zon."
+  ],
+  "honden": [
+    "In het park lopen veel honden.",
+    "De honden blaffen luid.",
+    "Mijn buren hebben drie honden."
+  ],
+  "huizen": [
+    "In onze straat staan grote huizen.",
+    "De huizen zijn van baksteen.",
+    "Aan de overkant staan vijf huizen."
+  ],
+  "schapen": [
+    "Op de wei lopen veel schapen.",
+    "De schapen geven wol.",
+    "Twee schapen liggen in het gras."
+  ],
+  "stoelen": [
+    "In de klas staan twintig stoelen.",
+    "De stoelen zijn rood.",
+    "Zet de stoelen op de tafel."
+  ],
+
+  "boeken": [
+    "In de kast staan veel boeken.",
+    "De boeken liggen op tafel.",
+    "Op zondag lees ik graag boeken."
+  ],
+  "garen": [
+    "In het naaidoosje liggen klosjes garen.",
+    "Mama naait met sterk garen.",
+    "De kat speelt met het garen."
+  ],
+  "muizen": [
+    "In de schuur lopen kleine muizen.",
+    "De kat jaagt op muizen.",
+    "Twee muizen verstoppen zich onder de kast."
+  ],
+  "neuzen": [
+    "Bij vrieskou worden onze neuzen rood.",
+    "Snuit jullie neuzen goed!",
+    "De neuzen van de clowns zijn groot en rond."
+  ],
+  "ramen": [
+    "In ons huis zijn grote ramen.",
+    "De ramen geven veel licht.",
+    "Mama wast de ramen schoon."
+  ],
+  "schoenen": [
+    "In de gang staan vijf paar schoenen.",
+    "Mijn schoenen zijn nat van de regen.",
+    "Trek je schoenen uit voor je binnen komt."
+  ],
+  "treinen": [
+    "In het station stoppen veel treinen.",
+    "De treinen rijden snel.",
+    "Drie treinen vertrekken tegelijk."
+  ],
+  "tuinen": [
+    "In onze straat zijn mooie tuinen.",
+    "De tuinen staan vol bloemen.",
+    "Achter de huizen liggen grote tuinen."
+  ],
+  "veren": [
+    "Op de grond liggen kleine veren.",
+    "De vogel verliest zijn veren.",
+    "Lien verzamelt mooie veren."
+  ],
+  "voeten": [
+    "Mijn voeten doen pijn na het wandelen.",
+    "Was je voeten goed.",
+    "We staan met onze voeten in het zand."
   ]
 
 };
