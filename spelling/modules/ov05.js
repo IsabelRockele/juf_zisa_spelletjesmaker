@@ -326,7 +326,8 @@ window.SpellingModules.ov05 = {
       // Layout: plaatje bovenaan, midden, schrijflijn onder (verticaal)
       const rijClass = `ov05-rij ov05-rij-${niveau}`;
       rijenHTML += `
-        <div class="${rijClass}">
+        <div class="${rijClass}" data-woord="${w.tekst}">
+          <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
           ${middenHTML ? `<div class="ov05-midden">${middenHTML}</div>` : ""}
           ${lijnHTML}
