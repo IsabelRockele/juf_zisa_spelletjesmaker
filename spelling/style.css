@@ -585,6 +585,63 @@ body {
   display: none !important;
 }
 
+/* ✕ verwijder-knop op individuele woord/zin-rijen.
+   Standaard verborgen — wordt alleen zichtbaar binnen .bundel-item-wrap
+   (= in de preview). In de PDF zitten werkbladen niet in een wrap, dus
+   knoppen blijven verborgen.
+   Positie: linksboven van de rij, klein, rood, lichte hover-feedback. */
+.rij-verwijder-knop {
+  display: none;
+}
+.bundel-item-wrap .rij-verwijder-knop {
+  display: flex;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fff;
+  color: #c33;
+  border: 1.5px solid #c33;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 5;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: all 0.12s;
+  opacity: 0;
+}
+/* De rij waar deze knop in zit moet position:relative hebben — anders
+   plaatst de knop zich op het werkblad-niveau. We voegen relative toe
+   aan elke rij die een ✕-knop bevat. */
+.bundel-item-wrap .ov01-cel,
+.bundel-item-wrap .ov02-rij,
+.bundel-item-wrap .ov03-rij,
+.bundel-item-wrap .ov05-rij,
+.bundel-item-wrap .ov06-zin-rij,
+.bundel-item-wrap .ov06-uitbreiding-rij {
+  position: relative;
+}
+/* Knop verschijnt op hover van de rij — minder visueel rommelig */
+.bundel-item-wrap .ov01-cel:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov02-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov03-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov05-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov06-zin-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov06-uitbreiding-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .rij-verwijder-knop:hover {
+  opacity: 1;
+}
+.bundel-item-wrap .rij-verwijder-knop:hover {
+  background: #c33;
+  color: white;
+  transform: scale(1.15);
+}
+
 /* ============================================================
    OV06 — Zinnen invullen
    ============================================================ */
@@ -1777,11 +1834,15 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 
 .ov01-voettekst {
-  /* Voettekst direct na de werkblad-inhoud. Niet meer absoluut gepositioneerd
-     omdat min-height: 27cm verwijderd is (om lege PDF-pagina te voorkomen).
-     Met margin-top: auto in een flex-container zou het altijd onderaan staan,
-     maar voor de eenvoud nu gewoon margin-top voor wat lucht. */
-  margin-top: 24px;
+  /* Absoluut gepositioneerd onderaan het werkblad. Werkblad is 29cm hoog,
+     A4 is 29.7cm. Door bottom: 0.8cm te gebruiken staat de voettekst op
+     ~1.5cm vanaf de papierrand (29.7 - 29 + 0.8 = 1.5cm). 
+     left/right: 1.8cm minimum past bij alle blad-varianten met hun eigen
+     horizontale padding. */
+  position: absolute;
+  bottom: 0.8cm;
+  left: 1.8cm;
+  right: 1.8cm;
   padding-top: 8px;
   border-top: 1px solid #ddd;
   text-align: center;
@@ -2404,9 +2465,10 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .werkblad {
   background: white;
   width: 21cm;
-  /* GEEN min-height — kan over A4 duwen wat lege pagina veroorzaakt.
-     De inhoud bepaalt de hoogte. Voettekst staat na de content via
-     normaal flow (margin-top auto via flex), niet meer absoluut. */
+  /* min-height: 29cm — kleiner dan A4 (29.7cm) om te voorkomen dat
+     subpixel-rounding bij PDF-rendering een lege tweede pagina veroorzaakt.
+     De voettekst (bottom: 0.8cm) staat dan op ~1.5cm vanaf de papierrand. */
+  min-height: 29cm;
   box-sizing: border-box;
   padding: 1.5cm 2cm;
   margin: 0 auto;
@@ -2414,6 +2476,18 @@ body.bewerk-aan [data-bewerk-id]:focus {
   font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
   color: #222;
   position: relative;
+}
+/* Specifieke blad-classes (ov01-blad t/m ov06-blad) overschrijven .werkblad
+   met eigen padding. Daarom dwingen we hier de min-height ook af op die
+   specifieke selectors, zodat de voettekst altijd onderaan kan blijven staan.
+   Weekdictee uitgesloten omdat daar geen voettekst zit. */
+.werkblad.ov01-blad,
+.werkblad.ov02-blad,
+.werkblad.ov03-blad,
+.werkblad.ov04-blad,
+.werkblad.ov05-blad,
+.werkblad.ov06-blad {
+  min-height: 29cm;
 }
 /* In preview iets ruimte tussen werkbladen voor visuele scheiding */
 .preview-modus .werkblad + .werkblad {
