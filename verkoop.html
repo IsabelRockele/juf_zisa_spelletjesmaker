@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spelgenerator PRO — De werkbladmachine van juf Zisa</title>
+<meta name="description" content="Maak in enkele klikken werkbladen op maat voor je klas. Tientallen generatoren voor reken, taal, klokkijken, geld en meer. Door een leerkracht, voor leerkrachten.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Basis ---------- */
+  :root{
+    --geel:#FFD23F;
+    --geel-zacht:#FFF1B8;
+    --geel-diep:#F5B400;
+    --zwart:#1A1A1A;
+    --inkt:#2B2B2B;
+    --crème:#FFF8E7;
+    --papier:#FFFBF0;
+    --rood:#E94B3C;
+    --groen:#3FA34D;
+    --blauw:#3D5AFE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Nunito',sans-serif;
+    color:var(--inkt);
+    background:var(--papier);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  /* Subtiele papier-textuur achtergrond */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:
+      radial-gradient(circle at 20% 30%,rgba(255,210,63,.08) 0,transparent 40%),
+      radial-gradient(circle at 80% 70%,rgba(255,210,63,.06) 0,transparent 40%);
+    pointer-events:none;z-index:0;
+  }
+
+  /* Zebra streep-element (decoratief) */
+  .stripe-band{
+    position:absolute;
+    background:repeating-linear-gradient(
+      45deg,
+      var(--zwart) 0 14px,
+      transparent 14px 28px
+    );
+    opacity:.08;
+    pointer-events:none;
+    z-index:1;
+  }
+
+  h1,h2,h3{font-family:'Fraunces',serif;line-height:1.15;color:var(--zwart)}
+  .handgeschreven{font-family:'Caveat',cursive;font-weight:700}
+
+  a{color:inherit;text-decoration:none}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+
+  .container{max-width:1180px;margin:0 auto;padding:0 24px;position:relative;z-index:2}
+
+  /* ---------- Navigatie ---------- */
+  .nav{
+    position:sticky;top:0;z-index:50;
+    background:rgba(255,251,240,.92);
+    backdrop-filter:blur(10px);
+    border-bottom:2px solid var(--zwart);
+  }
+  .nav-inner{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 24px;max-width:1180px;margin:0 auto;
+  }
+  .logo{
+    font-family:'Fraunces',serif;font-weight:900;font-size:1.4rem;
+    display:flex;align-items:center;gap:10px;
+  }
+  .logo-mark{
+    width:38px;height:38px;border-radius:50%;
+    background:var(--geel);
+    border:2.5px solid var(--zwart);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.3rem;
+    box-shadow:3px 3px 0 var(--zwart);
+  }
+  .nav-links{display:flex;gap:28px;align-items:center;font-weight:700;font-size:.95rem}
+  .nav-links a{transition:color .2s}
+  .nav-links a:hover{color:var(--rood)}
+  .nav-cta{
+    background:var(--zwart);color:var(--papier);
+    padding:10px 20px;border-radius:999px;
+    font-weight:800;font-size:.9rem;
+    transition:transform .2s;
+  }
+  .nav-cta:hover{transform:translateY(-2px)}
+  @media(max-width:780px){.nav-links a:not(.nav-cta){display:none}}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative;
+    padding:80px 24px 100px;
+    overflow:hidden;
+  }
+  .hero .stripe-band.top-right{
+    top:-40px;right:-60px;width:280px;height:280px;
+    transform:rotate(15deg);border-radius:50%;
+  }
+  .hero-inner{
+    max-width:1180px;margin:0 auto;
+    display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;
+    position:relative;z-index:2;
+  }
+  @media(max-width:880px){.hero-inner{grid-template-columns:1fr;gap:40px}}
+
+  .hero-badge{
+    display:inline-block;
+    background:var(--geel);
+    border:2px solid var(--zwart);
+    padding:6px 16px;border-radius:999px;
+    font-weight:800;font-size:.85rem;
+    box-shadow:3px 3px 0 var(--zwart);
+    margin-bottom:24px;
+    transform:rotate(-2deg);
+  }
+  .hero h1{
+    font-size:clamp(2.4rem,5vw,4rem);
+    font-weight:900;
+    margin-bottom:20px;
+    letter-spacing:-.02em;
+  }
+  .hero h1 .accent{
+    background:linear-gradient(180deg,transparent 60%,var(--geel) 60%);
+    padding:0 4px;
+  }
+  .hero h1 .scribble{
+    font-family:'Caveat',cursive;font-weight:700;
+    color:var(--rood);font-size:1.1em;
+    display:inline-block;transform:rotate(-3deg);
+  }
+  .hero-lead{
+    font-size:1.2rem;color:#444;
+    max-width:540px;margin-bottom:32px;
+  }
+  .hero-cta-row{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:14px 28px;border-radius:999px;
+    font-weight:800;font-size:1rem;
+    transition:transform .2s,box-shadow .2s;
+    border:2.5px solid var(--zwart);
+  }
+  .btn-primary{background:var(--zwart);color:var(--papier);box-shadow:5px 5px 0 var(--geel)}
+  .btn-primary:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--geel)}
+  .btn-secondary{background:var(--papier);color:var(--zwart);box-shadow:5px 5px 0 var(--zwart)}
+  .btn-secondary:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--zwart)}
+  .hero-note{font-size:.9rem;color:#666;display:flex;align-items:center;gap:8px}
+
+  /* Hero illustratie / mockup */
+  .hero-visual{
+    position:relative;aspect-ratio:1/1;max-width:480px;justify-self:center;width:100%;
+  }
+  .hero-card{
+    position:absolute;
+    background:white;
+    border:2.5px solid var(--zwart);
+    border-radius:20px;
+    box-shadow:8px 8px 0 var(--zwart);
+    padding:20px;
+    font-family:'Caveat',cursive;
+  }
+  .hero-card-1{
+    top:0;left:0;width:62%;height:62%;
+    transform:rotate(-4deg);
+    background:linear-gradient(135deg,var(--geel-zacht),white);
+  }
+  .hero-card-2{
+    bottom:5%;right:0;width:58%;height:58%;
+    transform:rotate(5deg);
+    background:white;
+    z-index:2;
+  }
+  .hero-card-3{
+    top:15%;right:15%;width:30%;height:30%;
+    background:var(--rood);color:white;
+    transform:rotate(-12deg);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.4rem;font-weight:700;text-align:center;
+    z-index:3;
+  }
+  .mock-line{height:8px;background:#e8e8e8;border-radius:4px;margin:8px 0}
+  .mock-line.short{width:60%}
+  .mock-line.yellow{background:var(--geel)}
+  .mock-title{
+    font-family:'Fraunces',serif;font-weight:800;font-size:1rem;
+    color:var(--zwart);margin-bottom:10px;
+  }
+  .mock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+  .mock-cell{aspect-ratio:1;background:var(--geel-zacht);border:1.5px solid var(--zwart);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:var(--zwart);font-family:'Nunito',sans-serif}
+
+  /* ---------- Section algemeen ---------- */
+  section{padding:80px 24px;position:relative}
+  .section-eyebrow{
+    display:inline-block;
+    color:var(--rood);font-family:'Caveat',cursive;font-weight:700;
+    font-size:1.4rem;margin-bottom:8px;
+  }
+  .section-title{
+    font-size:clamp(1.8rem,3.5vw,2.8rem);
+    font-weight:800;margin-bottom:16px;
+    max-width:780px;
+  }
+  .section-lead{font-size:1.1rem;color:#444;max-width:680px;margin-bottom:50px}
+
+  /* ---------- Voordelen ---------- */
+  .voordelen{background:var(--crème);border-top:2px solid var(--zwart);border-bottom:2px solid var(--zwart)}
+  .voordeel-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+    gap:24px;
+  }
+  .voordeel{
+    background:white;
+    border:2.5px solid var(--zwart);
+    border-radius:18px;
+    padding:28px;
+    transition:transform .25s;
+    position:relative;
+  }
+  .voordeel:hover{transform:translateY(-4px) rotate(-.5deg)}
+  .voordeel-icon{
+    width:54px;height:54px;border-radius:14px;
+    background:var(--geel);
+    border:2.5px solid var(--zwart);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;margin-bottom:18px;
+    box-shadow:3px 3px 0 var(--zwart);
+  }
+  .voordeel:nth-child(2) .voordeel-icon{background:var(--rood);color:white}
+  .voordeel:nth-child(3) .voordeel-icon{background:var(--groen);color:white}
+  .voordeel:nth-child(4) .voordeel-icon{background:var(--blauw);color:white}
+  .voordeel h3{font-size:1.25rem;margin-bottom:10px}
+  .voordeel p{color:#555;font-size:.97rem}
+
+  /* ---------- Generatoren-categorieën ---------- */
+  .cat-lijst{display:flex;flex-direction:column;gap:14px}
+  .cat-item{
+    background:white;
+    border:2.5px solid var(--zwart);
+    border-radius:16px;
+    overflow:hidden;
+    transition:box-shadow .2s,transform .2s;
+  }
+  .cat-item[open]{box-shadow:5px 5px 0 var(--cat-kleur,var(--geel))}
+  .cat-item summary{
+    list-style:none;cursor:pointer;
+    display:flex;align-items:center;gap:14px;
+    padding:18px 22px;
+    font-family:'Fraunces',serif;font-weight:800;
+    transition:background .2s;
+  }
+  .cat-item summary::-webkit-details-marker{display:none}
+  .cat-item summary:hover{background:var(--crème)}
+  .cat-item .cat-icon{
+    font-size:1.6rem;
+    width:46px;height:46px;border-radius:12px;
+    background:var(--cat-kleur,var(--geel));
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    border:2px solid var(--zwart);
+    box-shadow:2px 2px 0 var(--zwart);
+  }
+  .cat-item .cat-naam{
+    flex-grow:1;font-size:1.25rem;color:var(--zwart);
+  }
+  .cat-item .cat-aantal{
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:.85rem;
+    background:var(--crème);
+    color:var(--zwart);
+    padding:5px 12px;border-radius:999px;
+    border:1.5px solid var(--zwart);
+  }
+  .cat-item summary::after{
+    content:'+';font-size:1.8rem;font-weight:300;
+    color:var(--cat-kleur,var(--zwart));
+    transition:transform .25s;
+    margin-left:8px;
+    line-height:1;
+  }
+  .cat-item[open] summary::after{transform:rotate(45deg)}
+  .cat-grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+    gap:12px;
+    padding:8px 22px 22px;
+    border-top:1.5px dashed rgba(0,0,0,.12);
+    margin-top:0;
+    padding-top:20px;
+  }
+  .gen-card{
+    background:var(--papier);
+    border:2px solid var(--zwart);
+    border-radius:12px;
+    padding:14px;
+    display:flex;align-items:center;gap:10px;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .gen-card:hover{transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--cat-kleur,var(--zwart))}
+  .gen-emoji{font-size:1.4rem;line-height:1;flex-shrink:0}
+  .gen-text strong{
+    display:block;font-family:'Fraunces',serif;font-weight:700;
+    color:var(--zwart);font-size:.95rem;line-height:1.25;
+  }
+  .cat-noot{
+    margin:14px 22px 22px;padding:12px 16px;
+    background:var(--crème);
+    border:1.5px dashed var(--zwart);
+    border-radius:10px;
+    font-size:.9rem;color:#444;
+  }
+  .cat-bottom-note{
+    margin-top:32px;text-align:center;
+    font-size:1.05rem;color:#444;
+  }
+
+  /* ---------- Screenshots ---------- */
+  .screenshots{background:linear-gradient(180deg,var(--papier),var(--crème))}
+  .screen-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;
+  }
+  .screen{
+    background:white;
+    border:2.5px solid var(--zwart);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:6px 6px 0 var(--zwart);
+    transition:transform .25s;
+  }
+  .screen:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--zwart)}
+  .screen-placeholder{
+    aspect-ratio:4/3;
+    background:repeating-linear-gradient(
+      45deg,
+      var(--geel-zacht) 0 20px,
+      var(--papier) 20px 40px
+    );
+    display:flex;align-items:center;justify-content:center;
+    color:var(--zwart);font-family:'Caveat',cursive;font-weight:700;font-size:1.6rem;
+    border-bottom:2.5px solid var(--zwart);
+    text-align:center;padding:20px;
+  }
+  .screen-caption{padding:14px 18px;font-weight:700}
+  .screen-caption span{font-weight:400;color:#666;font-size:.9rem;display:block}
+
+  /* ---------- Prijzen ---------- */
+  .prijzen{background:var(--zwart);color:var(--papier);border-top:2px solid var(--zwart)}
+  .prijzen .section-title{color:var(--papier)}
+  .prijzen .section-lead{color:#bbb}
+  .prijzen .section-eyebrow{color:var(--geel)}
+
+  .prijs-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:24px;align-items:stretch;
+  }
+  .prijs-kaart{
+    background:white;color:var(--inkt);
+    border:2.5px solid var(--geel);
+    border-radius:20px;
+    padding:34px 28px;
+    display:flex;flex-direction:column;
+    position:relative;
+    transition:transform .25s;
+  }
+  .prijs-kaart:hover{transform:translateY(-6px)}
+  .prijs-kaart.uitgelicht{
+    background:var(--geel);
+    border-color:var(--papier);
+    transform:scale(1.03);
+  }
+  .prijs-kaart.uitgelicht:hover{transform:scale(1.03) translateY(-6px)}
+  .prijs-label{
+    position:absolute;top:-14px;right:24px;
+    background:var(--rood);color:white;
+    padding:6px 14px;border-radius:999px;
+    font-weight:800;font-size:.8rem;
+    border:2px solid var(--zwart);
+    transform:rotate(3deg);
+  }
+  .prijs-kaart h3{font-size:1.5rem;margin-bottom:6px}
+  .prijs-onder{color:#555;font-size:.95rem;margin-bottom:20px;min-height:42px}
+  .prijs-bedrag{
+    font-family:'Fraunces',serif;font-weight:900;
+    font-size:3rem;line-height:1;
+    margin-bottom:6px;display:flex;align-items:baseline;gap:6px;
+  }
+  .prijs-bedrag .euro{font-size:1.6rem;font-weight:700}
+  .prijs-bedrag .periode{font-size:.95rem;font-weight:600;color:#555;font-family:'Nunito',sans-serif}
+  .prijs-vinkjes{list-style:none;margin:24px 0;flex-grow:1}
+  .prijs-vinkjes li{
+    padding:8px 0 8px 28px;position:relative;font-size:.97rem;
+    border-bottom:1px dashed rgba(0,0,0,.12);
+  }
+  .prijs-vinkjes li:last-child{border-bottom:none}
+  .prijs-vinkjes li::before{
+    content:'✓';position:absolute;left:0;top:8px;
+    color:var(--zwart);font-weight:900;font-size:1.1rem;
+  }
+  .prijs-cta{
+    display:block;text-align:center;
+    background:var(--zwart);color:var(--papier);
+    padding:14px 20px;border-radius:999px;
+    font-weight:800;
+    border:2.5px solid var(--zwart);
+    transition:transform .2s;
+  }
+  .prijs-cta:hover{transform:translateY(-2px)}
+  .prijs-kaart.uitgelicht .prijs-cta{background:var(--papier);color:var(--zwart)}
+
+  /* ---------- FAQ ---------- */
+  .faq-lijst{max-width:780px;margin:0 auto}
+  .faq-item{
+    background:white;
+    border:2.5px solid var(--zwart);
+    border-radius:14px;
+    margin-bottom:14px;
+    overflow:hidden;
+    transition:box-shadow .2s;
+  }
+  .faq-item[open]{box-shadow:5px 5px 0 var(--geel)}
+  .faq-item summary{
+    padding:20px 24px;
+    font-weight:800;font-size:1.05rem;
+    cursor:pointer;
+    list-style:none;
+    display:flex;justify-content:space-between;align-items:center;gap:16px;
+    font-family:'Fraunces',serif;
+  }
+  .faq-item summary::-webkit-details-marker{display:none}
+  .faq-item summary::after{
+    content:'+';font-size:1.6rem;font-weight:300;
+    transition:transform .25s;color:var(--rood);
+  }
+  .faq-item[open] summary::after{transform:rotate(45deg)}
+  .faq-item-body{padding:0 24px 22px;color:#444}
+
+  /* ---------- Eindblok ---------- */
+  .slot{
+    background:var(--geel);
+    border-top:2px solid var(--zwart);
+    text-align:center;position:relative;overflow:hidden;
+  }
+  .slot .stripe-band.bg{
+    inset:0;width:100%;height:100%;opacity:.06;
+  }
+  .slot h2{font-size:clamp(2rem,4vw,3rem);margin-bottom:16px}
+  .slot p{font-size:1.15rem;margin-bottom:28px;max-width:600px;margin-left:auto;margin-right:auto}
+
+  /* ---------- Footer ---------- */
+  footer{
+    background:var(--zwart);color:#bbb;
+    padding:40px 24px 30px;text-align:center;font-size:.9rem;
+  }
+  footer a{color:var(--geel);font-weight:700}
+
+  /* ---------- Animaties ---------- */
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .hero-card-3{animation:float 4s ease-in-out infinite}
+  .hero-card-1{animation:float 5s ease-in-out infinite reverse}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+  .fade-up{animation:fadeUp .8s ease-out backwards}
+  .fade-up.d1{animation-delay:.1s}
+  .fade-up.d2{animation-delay:.25s}
+  .fade-up.d3{animation-delay:.4s}
+</style>
+</head>
+<body>
+
+<!-- ===================== NAVIGATIE ===================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <span class="logo-mark">🦓</span>
+      <span>Spelgenerator <em style="color:var(--rood);font-style:normal">PRO</em></span>
+    </a>
+    <div class="nav-links">
+      <a href="#voordelen">Voordelen</a>
+      <a href="#generatoren">Generatoren</a>
+      <a href="#prijzen">Prijzen</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://tools.jufzisa.be/pro/koop.html" class="nav-cta">Word PRO →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== HERO ===================== -->
+<header class="hero">
+  <div class="stripe-band top-right"></div>
+  <div class="hero-inner">
+    <div class="fade-up">
+      <span class="hero-badge">🦓 Door een leerkracht, voor leerkrachten</span>
+      <h1>
+        Werkbladen op maat —<br>
+        <span class="accent">in een paar klikken</span><br>
+        <span class="scribble">klaar!</span>
+      </h1>
+      <p class="hero-lead">
+        Spelgenerator PRO is jouw digitale werkbladmachine. Tientallen generatoren voor reken,
+        taal, klokkijken, geld en zoveel meer. Stel in, klik op "PDF" en je oefenblad rolt eruit —
+        precies zoals jouw klas het nodig heeft.
+      </p>
+      <div class="hero-cta-row">
+        <a href="https://tools.jufzisa.be/pro/koop.html" class="btn btn-primary">Word PRO voor €40/jaar</a>
+        <a href="#prijzen" class="btn btn-secondary">Bekijk alle opties</a>
+      </div>
+      <p class="hero-note">⚡ Direct toegang na betaling · 🔒 Nooit automatische verlenging</p>
+    </div>
+
+    <div class="hero-visual fade-up d2" aria-hidden="true">
+      <div class="hero-card hero-card-1">
+        <div class="mock-title">Rekenbundel</div>
+        <div class="mock-line yellow"></div>
+        <div class="mock-line"></div>
+        <div class="mock-line short"></div>
+        <div class="mock-grid">
+          <div class="mock-cell">3+5</div>
+          <div class="mock-cell">7+2</div>
+          <div class="mock-cell">4+6</div>
+          <div class="mock-cell">8+1</div>
+          <div class="mock-cell">5+5</div>
+          <div class="mock-cell">6+3</div>
+        </div>
+      </div>
+      <div class="hero-card hero-card-2">
+        <div class="mock-title">Klokkijken</div>
+        <div style="display:flex;gap:10px;justify-content:center;margin:14px 0;font-size:2rem">🕐 🕒 🕔</div>
+        <div class="mock-line"></div>
+        <div class="mock-line short"></div>
+        <div style="margin-top:12px;font-family:'Caveat',cursive;font-size:1.4rem;color:var(--rood);text-align:center">Geweldig!</div>
+      </div>
+      <div class="hero-card hero-card-3">
+        PDF<br>klaar!
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== VOORDELEN ===================== -->
+<section id="voordelen" class="voordelen">
+  <div class="container">
+    <span class="section-eyebrow">Waarom Spelgenerator PRO?</span>
+    <h2 class="section-title">Tijd voor je klas, niet voor je werkbladen.</h2>
+    <p class="section-lead">
+      Geen knip- en plakwerk meer in Word, geen uren zoeken naar oefeningen op het juiste niveau.
+      Stel in wat je nodig hebt, klik op print, en geef de tijdwinst terug aan wat écht telt: jouw kinderen.
+    </p>
+
+    <div class="voordeel-grid">
+      <div class="voordeel">
+        <div class="voordeel-icon">⏱️</div>
+        <h3>Uren tijdwinst per week</h3>
+        <p>Een werkblad dat normaal 30 minuten kost, staat hier in 30 seconden klaar — telkens met andere oefeningen.</p>
+      </div>
+      <div class="voordeel">
+        <div class="voordeel-icon">🎯</div>
+        <h3>Differentiatie in één klik</h3>
+        <p>Twee niveaus parallel? Drie? Geen probleem. Pas het niveau aan en draai een nieuwe variant uit voor elke leerling.</p>
+      </div>
+      <div class="voordeel">
+        <div class="voordeel-icon">📚</div>
+        <h3>Voor elk net bruikbaar</h3>
+        <p>Bewust ontworpen zodat leerkrachten uit alle onderwijsnetten ermee aan de slag kunnen. Door een Vlaamse leerkracht gebouwd, met de nieuwe minimumdoelen in het achterhoofd — en de instellingen geven jou de ruimte om alles aan jouw klas en leerplan aan te passen.</p>
+      </div>
+      <div class="voordeel">
+        <div class="voordeel-icon">🔓</div>
+        <h3>Nooit automatische verlenging</h3>
+        <p>Bewust gekozen: je betaalt één keer en het stopt. Geen verrassingen op je rekening, geen "vergeten op te zeggen". Verlengen doe jíj — wanneer het jou uitkomt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== GENERATOREN ===================== -->
+<section id="generatoren">
+  <div class="container">
+    <span class="section-eyebrow">Wat zit erin?</span>
+    <h2 class="section-title">Tientallen tools, netjes per categorie.</h2>
+    <p class="section-lead">
+      Klap een categorie open om te zien welke tools erin zitten. Van rekenbundels tot bouwplaten, van klokkijken tot klasmanagement — telkens met instellingen waarmee jij bepaalt wat er op het blad komt.
+    </p>
+
+    <div class="cat-lijst">
+
+      <!-- REKENEN (open) -->
+      <details class="cat-item" open style="--cat-kleur:#e67e00">
+        <summary>
+          <span class="cat-icon">🧮</span>
+          <span class="cat-naam">Reken-oefeningen</span>
+          <span class="cat-aantal">16 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">🟦</span><div class="gen-text"><strong>Rekenvierkant</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🛤️</span><div class="gen-text"><strong>Rekenweg</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔺</span><div class="gen-text"><strong>Rekenpiramide</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🎨</span><div class="gen-text"><strong>Reken en kleur</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🟧</span><div class="gen-text"><strong>Rekenrooster</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔻</span><div class="gen-text"><strong>Rekendriehoek</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">⭕</span><div class="gen-text"><strong>Rekencirkel</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📘</span><div class="gen-text"><strong>Bundel bewerkingen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔢</span><div class="gen-text"><strong>Werkblad getalinzicht</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">✏️</span><div class="gen-text"><strong>Werkblad cijferen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">💰</span><div class="gen-text"><strong>Bundel geld</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">💕</span><div class="gen-text"><strong>Verliefde harten</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">⚡</span><div class="gen-text"><strong>Tempotoetsen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🏃</span><div class="gen-text"><strong>Loopspel</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🌀</span><div class="gen-text"><strong>Rekenspellen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📐</span><div class="gen-text"><strong>MAB en schema</strong></div></div>
+        </div>
+      </details>
+
+      <!-- TAAL EN LETTERS -->
+      <details class="cat-item" style="--cat-kleur:#2980b9">
+        <summary>
+          <span class="cat-icon">🅰️</span>
+          <span class="cat-naam">Taal en letters</span>
+          <span class="cat-aantal">9 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">🔍</span><div class="gen-text"><strong>Woordzoeker</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📋</span><div class="gen-text"><strong>Kruiswoordpuzzel</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔤</span><div class="gen-text"><strong>Lettercode</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📜</span><div class="gen-text"><strong>Geheime boodschap</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🎮</span><div class="gen-text"><strong>Lettertetris</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🎯</span><div class="gen-text"><strong>Galgje</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📖</span><div class="gen-text"><strong>Lezen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🃏</span><div class="gen-text"><strong>Leeskaartjes per AVI</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">✍️</span><div class="gen-text"><strong>Handschrift</strong></div></div>
+        </div>
+      </details>
+
+      <!-- PUZZELS & LOGICA -->
+      <details class="cat-item" style="--cat-kleur:#8e44ad">
+        <summary>
+          <span class="cat-icon">🧩</span>
+          <span class="cat-naam">Puzzels &amp; logica</span>
+          <span class="cat-aantal">6 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">🔢</span><div class="gen-text"><strong>Sudoku</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔎</span><div class="gen-text"><strong>Zoek de verschillen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🌀</span><div class="gen-text"><strong>Doolhof</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🐍</span><div class="gen-text"><strong>Slangendoolhof</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">⬡</span><div class="gen-text"><strong>Hexagonaal raster</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">👤</span><div class="gen-text"><strong>Schaduw</strong></div></div>
+        </div>
+      </details>
+
+      <!-- CREATIEF EN BOUWEN -->
+      <details class="cat-item" style="--cat-kleur:#27ae60">
+        <summary>
+          <span class="cat-icon">🎨</span>
+          <span class="cat-naam">Creatief en bouwen</span>
+          <span class="cat-aantal">6 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">📍</span><div class="gen-text"><strong>Punttekening</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🟦</span><div class="gen-text"><strong>Pixelart</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🏗️</span><div class="gen-text"><strong>Bouwplaten</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">💻</span><div class="gen-text"><strong>Coderen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🧱</span><div class="gen-text"><strong>Blokkenbouwsels</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🗺️</span><div class="gen-text"><strong>Plattegrond</strong></div></div>
+        </div>
+      </details>
+
+      <!-- SPELVORMEN -->
+      <details class="cat-item" style="--cat-kleur:#c0392b">
+        <summary>
+          <span class="cat-icon">🎲</span>
+          <span class="cat-naam">Spelvormen</span>
+          <span class="cat-aantal">4 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">🎰</span><div class="gen-text"><strong>Bingo</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🔴</span><div class="gen-text"><strong>Vier op een rij</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">🎡</span><div class="gen-text"><strong>Rad</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📱</span><div class="gen-text"><strong>QR-generator</strong></div></div>
+        </div>
+      </details>
+
+      <!-- TIJD EN KLOK -->
+      <details class="cat-item" style="--cat-kleur:#16a085">
+        <summary>
+          <span class="cat-icon">⏰</span>
+          <span class="cat-naam">Tijd en klok</span>
+          <span class="cat-aantal">3 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">🕐</span><div class="gen-text"><strong>Bundel kloklezen</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">📅</span><div class="gen-text"><strong>Bundel kalenders</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">⏱️</span><div class="gen-text"><strong>Timer</strong></div></div>
+        </div>
+      </details>
+
+      <!-- KLASMANAGEMENT -->
+      <details class="cat-item" style="--cat-kleur:#5b7cfa">
+        <summary>
+          <span class="cat-icon">📋</span>
+          <span class="cat-naam">Klasmanagement</span>
+          <span class="cat-aantal">2 tools</span>
+        </summary>
+        <div class="cat-grid">
+          <div class="gen-card"><span class="gen-emoji">📚</span><div class="gen-text"><strong>Opvolging huistaken</strong></div></div>
+          <div class="gen-card"><span class="gen-emoji">✅</span><div class="gen-text"><strong>Takenbord</strong></div></div>
+        </div>
+        <p class="cat-noot">🔒 Hier werk je met voornamen van leerlingen — je geeft de eerste keer expliciet akkoord met de privacyverklaring voor je deze tools kan gebruiken.</p>
+      </details>
+
+    </div>
+
+    <p class="cat-bottom-note">
+      ✨ <strong>En er komen er regelmatig bij.</strong> Nieuwe tools zitten gewoon in je abonnement, zonder extra kosten.
+    </p>
+  </div>
+</section>
+
+<!-- ===================== SCREENSHOTS ===================== -->
+<section id="voorbeelden" class="screenshots">
+  <div class="container">
+    <span class="section-eyebrow">Zien is geloven</span>
+    <h2 class="section-title">Zo zien de werkbladen eruit.</h2>
+    <p class="section-lead">
+      Heldere lay-out, precies de oefeningen die je nodig hebt, en een correctiesleutel die meekomt. Elk blad ziet er klaar-om-te-printen uit.
+    </p>
+
+    <div class="screen-grid">
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Rekenbundel</div>
+        <div class="screen-caption">Rekenbundel — staartdeling<span>Met hulpmiddelen en correctiesleutel</span></div>
+      </div>
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Klokkijken</div>
+        <div class="screen-caption">Kloklezen — graad 1<span>Analoog ↔ digitaal</span></div>
+      </div>
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Geld Maker</div>
+        <div class="screen-caption">Geld Maker — winkeltje<span>Werken met euro's en centen</span></div>
+      </div>
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Kalender</div>
+        <div class="screen-caption">Kalender — maanden &amp; dagen<span>Inclusief schoolvakanties Vlaanderen</span></div>
+      </div>
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Rekendoolhof</div>
+        <div class="screen-caption">Rekendoolhof<span>Spelend oefenen</span></div>
+      </div>
+      <div class="screen">
+        <div class="screen-placeholder">📸 Screenshot<br>Vraagstukken</div>
+        <div class="screen-caption">Vraagstukken — AI<span>Op maat van jouw klasthema</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PRIJZEN ===================== -->
+<section id="prijzen" class="prijzen">
+  <div class="container">
+    <span class="section-eyebrow">Kies wat bij jou past</span>
+    <h2 class="section-title">Eerlijke prijzen. Geen verborgen kosten.</h2>
+    <p class="section-lead">
+      Eén keer kiezen, alles erbij. Of je nu een maand wil uitproberen, het hele schooljaar wil profiteren, of met je hele team aan de slag wil — er is een formule die past.
+    </p>
+
+    <div class="prijs-grid">
+
+      <!-- MAAND -->
+      <div class="prijs-kaart">
+        <h3>Maand</h3>
+        <p class="prijs-onder">Voor wie even wil proeven of een drukke periode wil overbruggen.</p>
+        <div class="prijs-bedrag"><span class="euro">€</span>6<span class="periode">/ maand</span></div>
+        <ul class="prijs-vinkjes">
+          <li>Toegang tot alle generatoren</li>
+          <li>Onbeperkt werkbladen maken</li>
+          <li>Nooit automatische verlenging</li>
+          <li>Nieuwe tools meteen beschikbaar</li>
+        </ul>
+        <a href="https://tools.jufzisa.be/pro/maand.html" class="prijs-cta">Start met maand →</a>
+      </div>
+
+      <!-- JAAR (uitgelicht) -->
+      <div class="prijs-kaart uitgelicht">
+        <span class="prijs-label">Voordeligst</span>
+        <h3>Schooljaar</h3>
+        <p class="prijs-onder">De populairste keuze. Bespaar tegenover de maandformule en zit goed voor het hele jaar.</p>
+        <div class="prijs-bedrag"><span class="euro">€</span>40<span class="periode">/ jaar</span></div>
+        <ul class="prijs-vinkjes">
+          <li>Alles uit het maandpakket</li>
+          <li>Méér dan 40% goedkoper dan maand</li>
+          <li>Nooit automatische verlenging</li>
+          <li>Voorrang op nieuwe generatoren</li>
+        </ul>
+        <a href="https://tools.jufzisa.be/pro/koop.html" class="prijs-cta">Word PRO voor €40 →</a>
+      </div>
+
+      <!-- SCHOLEN -->
+      <div class="prijs-kaart">
+        <h3>Voor scholen</h3>
+        <p class="prijs-onder">Eén bestelling, je hele lerarenteam mee. Ideaal voor schoolbreed gebruik.</p>
+        <div class="prijs-bedrag"><span class="euro">€</span>40<span class="periode">/ leerkracht / jaar</span></div>
+        <ul class="prijs-vinkjes">
+          <li>Aparte toegang per leerkracht</li>
+          <li>Eén factuur voor de hele school</li>
+          <li>Vanaf 10 leerkrachten: neem even contact op</li>
+          <li>Persoonlijk aanspreekpunt</li>
+        </ul>
+        <a href="https://isabelrockele.github.io/scholen/" class="prijs-cta">Vraag schoolpakket aan →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section id="faq">
+  <div class="container">
+    <span class="section-eyebrow">Veelgestelde vragen</span>
+    <h2 class="section-title">Alles wat je je waarschijnlijk afvraagt.</h2>
+
+    <div class="faq-lijst">
+
+      <details class="faq-item">
+        <summary>Hoe werkt het precies — wat krijg ik na betaling?</summary>
+        <div class="faq-item-body">
+          Na betaling krijg je een persoonlijk account waarmee je inlogt op de PRO-omgeving. Daar vind je alle generatoren in één overzicht. Je stelt in wat je nodig hebt (niveau, type oefening, aantal), klikt op "Genereer PDF" en je werkblad rolt eruit. Geen software te installeren, alles werkt in je browser.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Op welke leeftijd / graad is het afgestemd?</summary>
+        <div class="faq-item-body">
+          De generatoren bestrijken het volledige Vlaamse basisonderwijs (graad 1 t.e.m. graad 3). Per generator kies je het niveau, zodat je voor zowel een eersteklasser als een zesdeklasser passende oefeningen krijgt. Spelgenerator PRO is ontworpen voor leerkrachten uit <strong>alle netten</strong> en houdt rekening met de nieuwe minimumdoelen. Omdat leerplannen tussen netten verschillen, geef ik je vooral veel instelmogelijkheden — zo stem jij elke oefening af op het leerplan dat jij volgt.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Mag ik de werkbladen uitprinten en in mijn klas gebruiken?</summary>
+        <div class="faq-item-body">
+          Uiteraard! Je mag de gegenereerde werkbladen voor je eigen klas onbeperkt printen, kopiëren en digitaal uitdelen. Wat niet mag, is je login delen met collega's of de werkbladen verkopen. Voor schoolbreed gebruik is er het aparte schoolpakket.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is er een proefversie?</summary>
+        <div class="faq-item-body">
+          Op <strong>probeer.jufzisa.be</strong> kan je enkele tools en demo's gratis uitproberen, zodat je een gevoel krijgt van hoe het werkt. Wil je het volledige pakket testen, dan is het maandabonnement (€6) de drempelloze manier om een maand alles te ontdekken.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Komen er nieuwe generatoren bij? Moet ik daar extra voor betalen?</summary>
+        <div class="faq-item-body">
+          Ja, er komen regelmatig nieuwe tools bij — die zitten gewoon in je abonnement. Op de roadmap staan onder andere getallen tot 100.000, kommagetallen, meercijferig vermenigvuldigen en breuken. Geen extra kosten voor PRO-leden.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Werkt het ook op een Chromebook of tablet?</summary>
+        <div class="faq-item-body">
+          Ja. De generatoren werken in elke moderne browser (Chrome, Edge, Firefox, Safari). De PDF wordt in je browser zelf gemaakt, je hoeft niets te installeren. Op een tablet werkt het ook, al is een laptop comfortabeler voor het instellen.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Wat als ik wil stoppen — moet ik opzeggen?</summary>
+        <div class="faq-item-body">
+          <strong>Nee, je hoeft nooit op te zeggen.</strong> Bij Spelgenerator PRO worden abonnementen <em>nooit</em> automatisch verlengd — niet bij het maandabonnement, niet bij het jaarabonnement. Je betaalt één keer voor de gekozen periode en op het einde stopt het gewoon. Wil je verder? Dan vernieuw je zelf, op het moment dat het jou uitkomt. Geen bankafschrijvingen waar je over struikelt, geen "oh nee, ik vergat te annuleren" — jij houdt het volledig in de hand.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Mijn school wil het schoolbreed afnemen — hoe regelen we dat?</summary>
+        <div class="faq-item-body">
+          Vraag het schoolpakket aan via de knop hierboven of mail rechtstreeks naar <strong>zebrapost@jufzisa.be</strong>. Je krijgt één factuur voor het hele team, en elke leerkracht een eigen toegang. Vanaf 10 leerkrachten is het handig om even contact op te nemen, zodat we samen kunnen bekijken wat het beste past voor jullie school.
+        </div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Hoe veilig is het met de gegevens van mijn leerlingen?</summary>
+        <div class="faq-item-body">
+          Voor de meeste generatoren heb je <strong>geen leerlinggegevens</strong> nodig: je stelt enkel in wat voor werkblad je wil (type, niveau, aantal) en de PDF wordt rechtstreeks in je browser gemaakt. Geen klaslijsten, geen scores, niets opgeslagen.
+          <br><br>
+          Bij de <strong>klasmanagement-tools</strong> (Klasbord, Takenbord per kind, Huistaken-opvolging) werk je wél met de voornamen van je leerlingen, omdat dat nodig is om de tool zinvol te laten werken. Die namen worden veilig opgeslagen en zijn enkel zichtbaar voor jou en jouw leerlingen via een persoonlijke QR-code. De eerste keer dat je zo'n tool gebruikt, moet je expliciet akkoord geven met de verwerking — pas daarna kan je aan de slag. Je kan op elk moment je gegevens wissen.
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- ===================== EINDBLOK ===================== -->
+<section class="slot">
+  <div class="stripe-band bg"></div>
+  <div class="container" style="position:relative;z-index:2">
+    <h2>Klaar om uren tijd terug te winnen?</h2>
+    <p>Word lid van Spelgenerator PRO en geef je voorbereidingstijd terug aan wat écht telt — jouw klas.</p>
+    <div class="hero-cta-row" style="justify-content:center">
+      <a href="https://tools.jufzisa.be/pro/koop.html" class="btn btn-primary">Word PRO voor €40/jaar</a>
+      <a href="https://tools.jufzisa.be/pro/maand.html" class="btn btn-secondary">Of probeer een maand</a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FOOTER ===================== -->
+<footer>
+  <div>🦓 Spelgenerator PRO is een product van <a href="https://jufzisa.be">jufzisa.be</a></div>
+  <div style="margin-top:8px">Vragen? Mail <a href="mailto:zebrapost@jufzisa.be">zebrapost@jufzisa.be</a></div>
+</footer>
+
+</body>
+</html>
