@@ -81,22 +81,29 @@ window.SpellingModules.ov05 = {
           <label class="ov-niveau-vink actief">
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
-              <strong>Basis</strong>
+              <strong>⭐ Oefenen</strong>
               <small>plaatje + 2 cirkel-opties (omcirkelen)</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
-              <strong>Kern</strong>
+              <strong>⭐⭐ Toepassen</strong>
               <small>plaatje + streepje (klank invullen)</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
-              <strong>Verdieping</strong>
-              <small>alleen plaatje (hele woord schrijven)</small>
+              <strong>⭐⭐⭐ Verdiepen</strong>
+              <small>plaatje + hele woord schrijven</small>
+            </div>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="uitbreiding">
+            <div class="ov-niveau-vink-tekst">
+              <strong>⭐⭐⭐⭐ Uitbreiden</strong>
+              <small>woord schrijven + zin maken</small>
             </div>
           </label>
         </div>
@@ -107,15 +114,15 @@ window.SpellingModules.ov05 = {
           <span class="ov-instel-nr">4</span> Plaatje
         </label>
         <p class="wd-stap-info" style="margin-bottom:6px;">
-          Bij <strong>Basis</strong> staat het plaatje altijd. Bij Kern en Verdieping kan je kiezen.
+          Bij <strong>⭐ Oefenen</strong> staat het plaatje altijd. Bij andere niveaus kan je kiezen.
         </p>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
           <input type="checkbox" id="ov05-plaatje-kern" checked>
-          <span>Plaatje tonen bij <strong>Kern</strong></span>
+          <span>Plaatje tonen bij <strong>⭐⭐ Toepassen</strong></span>
         </label>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
           <input type="checkbox" id="ov05-plaatje-verdieping" checked>
-          <span>Plaatje tonen bij <strong>Verdieping</strong></span>
+          <span>Plaatje tonen bij <strong>⭐⭐⭐ Verdiepen</strong> en <strong>⭐⭐⭐⭐ Uitbreiden</strong></span>
         </label>
       </div>
 
@@ -234,7 +241,7 @@ window.SpellingModules.ov05 = {
       const woorden = this._kiesWoorden(gekozenWoorden, aantalWoorden);
       const metPlaatje = (niveau === "basis") || 
                         (niveau === "kern" && plaatjeKern) || 
-                        (niveau === "verdieping" && plaatjeVerdieping);
+                        ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping);
       return this._renderEenBlad(niveau, woorden, klankPaar, klankPaarKey, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
   },
@@ -327,7 +334,7 @@ window.SpellingModules.ov05 = {
     }
 
     const niveauLabel = {
-      basis: "Basis", kern: "Kern", verdieping: "Verdieping"
+      basis: "⭐", kern: "⭐⭐", verdieping: "⭐⭐⭐", uitbreiding: "⭐⭐⭐⭐"
     }[niveau];
 
     const oplBadge = metAntwoorden
@@ -379,7 +386,30 @@ window.SpellingModules.ov05 = {
           ${rijenHTML}
         </div>
 
+        ${niveau === "uitbreiding" ? this._renderUitbreidingBlok(lijntype, lijnhoogte, metAntwoorden) : ""}
+
         <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
+      </div>
+    `;
+  },
+
+  /* Uitbreidings-blok onderaan ov05: zin maken met een woord */
+  _renderUitbreidingBlok: function(lijntype, lijnhoogte, metAntwoorden) {
+    const sl = window.SpellingSchrijflijnen;
+    const lijn = () => sl
+      ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
+      : `<div class="ov01-zin-lijn"></div>`;
+    
+    const opl = metAntwoorden
+      ? `<p class="ov01-zin-richtlijn">Verwacht: een correcte zin met hoofdletter en leesteken, met een woord uit de oefening.</p>`
+      : "";
+    
+    return `
+      <div class="ov01-zin-blok ov01-uitbreiding-blok">
+        <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht (uitbreiden):</div>
+        <p class="ov01-zin-vraag">Kies 1 woord van hierboven en maak er een goede zin mee.</p>
+        ${lijn()}
+        ${opl}
       </div>
     `;
   },
