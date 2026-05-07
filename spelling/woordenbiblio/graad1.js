@@ -27,7 +27,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "wal", lidwoord: "de" },
       { tekst: "lat", lidwoord: "de" },
       { tekst: "kar", lidwoord: "de" },
-      { tekst: "hand", lidwoord: "de" }
+      { tekst: "hand", lidwoord: "de" },
+      { tekst: "vlag", lidwoord: "de" },
+      { tekst: "krab", lidwoord: "de" },
+      { tekst: "schat", lidwoord: "de" },
+      { tekst: "tand", lidwoord: "de" },
+      { tekst: "plant", lidwoord: "de" },
+      { tekst: "kast", lidwoord: "de" }
     ]
   },
   "mkm-e": {
@@ -406,6 +412,175 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "stuur", lidwoord: "het" },
       { tekst: "puur", lidwoord: null },
       { tekst: "huur", lidwoord: "de" }
+    ]
+  },
+
+  // ===== SCH-WOORDEN =====
+  // Klank "sch" aan begin van woord. Belangrijk voor lj 1.
+  "sch-woorden": {
+    naam: "sch-woorden",
+    groep: "moeilijke-klanken",
+    woorden: [
+      { tekst: "school", lidwoord: "de" },
+      { tekst: "schoen", lidwoord: "de" },
+      { tekst: "schip", lidwoord: "het" },
+      { tekst: "schaar", lidwoord: "de" },
+      { tekst: "schaap", lidwoord: "het" },
+      { tekst: "schaal", lidwoord: "de" },
+      { tekst: "schat", lidwoord: "de" },
+      { tekst: "schoon", lidwoord: null },
+      { tekst: "scheef", lidwoord: null },
+      { tekst: "schop", lidwoord: "de" },
+      { tekst: "schil", lidwoord: "de" },
+      { tekst: "schar", lidwoord: "de" }
+    ]
+  },
+
+  // ===== DOFFE KLANK OP HET EINDE =====
+  // -el, -en, -er einden. Belangrijk in lj 1 tweede helft.
+  "df-el": {
+    naam: "Eindigt op -el",
+    groep: "doffe-klank",
+    woorden: [
+      { tekst: "tafel", lidwoord: "de" },
+      { tekst: "appel", lidwoord: "de" },
+      { tekst: "vogel", lidwoord: "de" },
+      { tekst: "engel", lidwoord: "de" },
+      { tekst: "fakkel", lidwoord: "de" },
+      { tekst: "wortel", lidwoord: "de" },
+      { tekst: "lepel", lidwoord: "de" },
+      { tekst: "winkel", lidwoord: "de" },
+      { tekst: "kabel", lidwoord: "de" },
+      { tekst: "bril", lidwoord: "de" },
+      { tekst: "fiets", lidwoord: "de" },
+      { tekst: "sleutel", lidwoord: "de" },
+      { tekst: "zadel", lidwoord: "het" },
+      { tekst: "nagel", lidwoord: "de" }
+    ]
+  },
+  "df-en": {
+    naam: "Eindigt op -en",
+    groep: "doffe-klank",
+    woorden: [
+      { tekst: "lopen", lidwoord: null },
+      { tekst: "eten", lidwoord: null },
+      { tekst: "drinken", lidwoord: null },
+      { tekst: "spelen", lidwoord: null },
+      { tekst: "lezen", lidwoord: null },
+      { tekst: "kijken", lidwoord: null },
+      { tekst: "fluiten", lidwoord: null },
+      { tekst: "praten", lidwoord: null },
+      { tekst: "wonen", lidwoord: null },
+      { tekst: "slapen", lidwoord: null },
+      { tekst: "vragen", lidwoord: null },
+      { tekst: "geven", lidwoord: null }
+    ]
+  },
+  "df-er": {
+    naam: "Eindigt op -er",
+    groep: "doffe-klank",
+    woorden: [
+      { tekst: "vader", lidwoord: "de" },
+      { tekst: "moeder", lidwoord: "de" },
+      { tekst: "broer", lidwoord: "de" },
+      { tekst: "zuster", lidwoord: "de" },
+      { tekst: "winter", lidwoord: "de" },
+      { tekst: "zomer", lidwoord: "de" },
+      { tekst: "water", lidwoord: "het" },
+      { tekst: "boter", lidwoord: "de" },
+      { tekst: "letter", lidwoord: "de" },
+      { tekst: "hamer", lidwoord: "de" },
+      { tekst: "kleuter", lidwoord: "de" },
+      { tekst: "meester", lidwoord: "de" },
+      { tekst: "tover", lidwoord: null },
+      { tekst: "bakker", lidwoord: "de" }
+    ]
+  },
+
+  // ===== VERKLEINWOORDEN — ZUIVERE VORMEN =====
+  // ALLEEN waar je -je / -tje / -pje rechtstreeks achter kan plakken
+  // ZONDER klankverdubbeling. Het kind kan ze "horen" en zelf vormen.
+  // GEEN bal→balletje (klankverdubbeling), GEEN lam→lammetje (-etje).
+  "verklein-je": {
+    naam: "Verkleinwoord op -je",
+    groep: "verkleinwoorden",
+    woorden: [
+      // Eindigt op p/k/f/s/ch/t — dan plak je gewoon -je achter
+      // (woorden met meerklank ervoor, geen klankverdubbeling nodig)
+      { tekst: "boek", lidwoord: "het", verklein: "boekje" },
+      { tekst: "huis", lidwoord: "het", verklein: "huisje" },
+      { tekst: "muis", lidwoord: "de", verklein: "muisje" },
+      { tekst: "neus", lidwoord: "de", verklein: "neusje" },
+      { tekst: "voet", lidwoord: "de", verklein: "voetje" },
+      { tekst: "fiets", lidwoord: "de", verklein: "fietsje" },
+      { tekst: "hoofd", lidwoord: "het", verklein: "hoofdje" },
+      { tekst: "vest", lidwoord: "het", verklein: "vestje" },
+      { tekst: "hand", lidwoord: "de", verklein: "handje" },
+      { tekst: "dorp", lidwoord: "het", verklein: "dorpje" },
+      { tekst: "buik", lidwoord: "de", verklein: "buikje" },
+      { tekst: "schip", lidwoord: "het", verklein: "schipje" }
+    ]
+  },
+  "verklein-tje": {
+    naam: "Verkleinwoord op -tje",
+    groep: "verkleinwoorden",
+    woorden: [
+      // Eindigt op -l, -n, -r met lange klank ervoor — dan -tje
+      // (geen klankverdubbeling: bal→balletje is NIET zuiver)
+      { tekst: "stoel", lidwoord: "de", verklein: "stoeltje" },
+      { tekst: "deur", lidwoord: "de", verklein: "deurtje" },
+      { tekst: "schoen", lidwoord: "de", verklein: "schoentje" },
+      { tekst: "trein", lidwoord: "de", verklein: "treintje" },
+      { tekst: "kraan", lidwoord: "de", verklein: "kraantje" },
+      { tekst: "tuin", lidwoord: "de", verklein: "tuintje" },
+      { tekst: "muur", lidwoord: "de", verklein: "muurtje" },
+      { tekst: "broer", lidwoord: "de", verklein: "broertje" },
+      { tekst: "vader", lidwoord: "de", verklein: "vadertje" },
+      { tekst: "moeder", lidwoord: "de", verklein: "moedertje" },
+      { tekst: "stoel", lidwoord: "de", verklein: "stoeltje" },
+      { tekst: "boer", lidwoord: "de", verklein: "boertje" }
+    ]
+  },
+  "verklein-pje": {
+    naam: "Verkleinwoord op -pje",
+    groep: "verkleinwoorden",
+    woorden: [
+      // Eindigt op -m met lange klank ervoor — dan -pje
+      // (geen klankverdubbeling: kam→kammetje is NIET zuiver)
+      { tekst: "boom", lidwoord: "de", verklein: "boompje" },
+      { tekst: "duim", lidwoord: "de", verklein: "duimpje" },
+      { tekst: "arm", lidwoord: "de", verklein: "armpje" },
+      { tekst: "raam", lidwoord: "het", verklein: "raampje" },
+      { tekst: "bloem", lidwoord: "de", verklein: "bloempje" },
+      { tekst: "droom", lidwoord: "de", verklein: "droompje" },
+      { tekst: "riem", lidwoord: "de", verklein: "riempje" },
+      { tekst: "doem", lidwoord: null, verklein: "doempje" }
+    ]
+  },
+
+  // ===== MEERVOUDEN =====
+  // ALLEEN -en vorm (geen 's). Kind moet ze zelf vormen.
+  "meervoud-en": {
+    naam: "Meervoud op -en",
+    groep: "meervouden",
+    woorden: [
+      { tekst: "boom", lidwoord: "de", meervoud: "bomen" },
+      { tekst: "voet", lidwoord: "de", meervoud: "voeten" },
+      { tekst: "hond", lidwoord: "de", meervoud: "honden" },
+      { tekst: "boot", lidwoord: "de", meervoud: "boten" },
+      { tekst: "stoel", lidwoord: "de", meervoud: "stoelen" },
+      { tekst: "huis", lidwoord: "het", meervoud: "huizen" },
+      { tekst: "boek", lidwoord: "het", meervoud: "boeken" },
+      { tekst: "kraan", lidwoord: "de", meervoud: "kranen" },
+      { tekst: "dief", lidwoord: "de", meervoud: "dieven" },
+      { tekst: "leeuw", lidwoord: "de", meervoud: "leeuwen" },
+      { tekst: "schaap", lidwoord: "het", meervoud: "schapen" },
+      { tekst: "deur", lidwoord: "de", meervoud: "deuren" },
+      { tekst: "neus", lidwoord: "de", meervoud: "neuzen" },
+      { tekst: "muis", lidwoord: "de", meervoud: "muizen" },
+      { tekst: "trein", lidwoord: "de", meervoud: "treinen" },
+      { tekst: "tuin", lidwoord: "de", meervoud: "tuinen" },
+      { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" }
     ]
   }
 });
