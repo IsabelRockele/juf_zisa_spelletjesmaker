@@ -34,6 +34,7 @@ window.SpellingBundel = {
     document.querySelector("#download-basis")?.addEventListener("click", () => this.download("basis", false));
     document.querySelector("#download-kern")?.addEventListener("click", () => this.download("kern", false));
     document.querySelector("#download-verdieping")?.addEventListener("click", () => this.download("verdieping", false));
+    document.querySelector("#download-uitbreiding")?.addEventListener("click", () => this.download("uitbreiding", false));
     document.querySelector("#download-oplossingen-alles")?.addEventListener("click", () => this.download(null, true));
 
     this._updateUI();
@@ -175,10 +176,16 @@ window.SpellingBundel = {
 
     let html = "";
     for (const item of this.items) {
-      // Wikkel werkblad in een container met ✕ knop
+      // Wikkel werkblad in een container met ✕ knop en eventueel +1 knop
+      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06"].includes(item.categorie);
+      const plus1Label = item.categorie === "ov06" ? "➕ 1 zin erbij" : "➕ 1 woord erbij";
+      const plusKnop = supportsPlus1
+        ? `<button class="bundel-item-plus-knop" data-item-id="${item.id}" title="Voeg 1 ${item.categorie === 'ov06' ? 'zin' : 'woord'} toe">${plus1Label}</button>`
+        : "";
       html += `
         <div class="bundel-item-wrap" data-item-id="${item.id}">
           <button class="bundel-item-verwijder-knop" data-item-id="${item.id}" title="Verwijder dit werkblad">✕</button>
+          ${plusKnop}
           ${item.html}
         </div>`;
     }
@@ -196,6 +203,51 @@ window.SpellingBundel = {
         this.verwijder(btn.dataset.itemId);
       });
     });
+    
+    // +1 woord knoppen koppelen
+    preview.querySelectorAll(".bundel-item-plus-knop").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        this.voegEenWoordToe(btn.dataset.itemId);
+      });
+    });
+  },
+
+  /* === Voeg 1 woord/zin toe aan een specifiek bundel-item === */
+  voegEenWoordToe: function(itemId) {
+    const item = this.items.find(i => i.id === itemId);
+    if (!item) return;
+    
+    const cat = item.categorie;
+    const modOpties = item.opties[cat];
+    if (!modOpties) {
+      console.warn("Geen opties gevonden voor item:", itemId);
+      return;
+    }
+    
+    // OV06 heeft 'aantalZinnen' i.p.v. 'aantalWoorden'
+    const tellerKey = (cat === "ov06") ? "aantalZinnen" : "aantalWoorden";
+    if (typeof modOpties[tellerKey] !== "number") {
+      console.warn(`Kan ${tellerKey} niet vinden voor item:`, itemId);
+      return;
+    }
+    
+    // Check of er nog woorden beschikbaar zijn in de woordenkiezer
+    const beschikbaar = (window._weekdictee_gekozenWoorden || []).length;
+    if (modOpties[tellerKey] >= beschikbaar) {
+      const eenheid = (cat === "ov06") ? "zinnen (= woorden)" : "woorden";
+      alert(`Geen extra ${eenheid} beschikbaar. Je hebt ${beschikbaar} woorden gekozen, het werkblad gebruikt er al ${modOpties[tellerKey]}. Voeg meer woorden toe in de woordenkiezer.`);
+      return;
+    }
+    
+    modOpties[tellerKey] += 1;
+    
+    const module = window.SpellingModules?.[cat];
+    if (!module) return;
+    module._seed = item.seed;
+    item.html = module.genereerBlad(item.opties, false);
+    
+    this._renderPreview();
   },
 
   /* === Update download/wis knoppen op basis van bundel-status === */
@@ -229,7 +281,7 @@ window.SpellingBundel = {
 
     // Toon niveau-knop alleen als er een werkblad van dat niveau in zit
     // (OV02 zonder niveau telt als 'geldig voor alle niveaus' alleen als er ook niveaus aanwezig zijn)
-    ["basis", "kern", "verdieping"].forEach(niv => {
+    ["basis", "kern", "verdieping", "uitbreiding"].forEach(niv => {
       const knop = document.querySelector(`#download-${niv}`);
       if (!knop) return;
       knop.classList.toggle("verborgen", !niveausInBundel.has(niv));
