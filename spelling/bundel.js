@@ -72,9 +72,13 @@ window.SpellingBundel = {
     if (window.SpellingGenerator) {
       window.SpellingGenerator._laatsteSeed = seed;
     }
-    module._seed = seed;
     
-    const werkbladHTML = module.genereerBlad(opties, false);
+    // Snapshot maken van de gekozen woorden van dit moment.
+    // Bij "✕ verwijder woord" en "+1 woord erbij" werken we op deze snapshot,
+    // niet op de globale woordenkiezer-pool. Zo blijft het werkblad voorspelbaar
+    // ook al verandert de leerkracht later van woordenkiezer-selectie.
+    const huidigeGekozen = window._weekdictee_gekozenWoorden || [];
+    const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(huidigeGekozen));
 
     // Snapshot van opties (voor latere her-render bij oplossingen of niveau-filter)
     const item = {
@@ -82,8 +86,10 @@ window.SpellingBundel = {
       categorie: actieveCat,
       opties: JSON.parse(JSON.stringify(opties)),
       seed: seed,
-      html: werkbladHTML
+      gekozenWoordenSnapshot: gekozenWoordenSnapshot,
+      html: ""
     };
+    item.html = this._renderItemHTML(item, false);
 
     this.items.push(item);
     this._renderPreview();
@@ -124,9 +130,10 @@ window.SpellingBundel = {
     for (const item of this.items) {
       const module = window.SpellingModules?.[item.categorie];
       if (!module) continue;
-      module._seed = item.seed;
+      // Gebruik _renderItemHTML zodat de gekozenWoordenSnapshot wordt gerespecteerd
+      // (d.w.z. verwijderde woorden komen niet alsnog terug in de PDF).
       const itemHTML = metAntwoorden 
-        ? module.genereerBlad(item.opties, true)
+        ? this._renderItemHTML(item, true)
         : item.html;
       const tijdelijkDiv = document.createElement("div");
       tijdelijkDiv.innerHTML = itemHTML;
@@ -211,6 +218,22 @@ window.SpellingBundel = {
         this.voegEenWoordToe(btn.dataset.itemId);
       });
     });
+    
+    // ✕ verwijder-knoppen op individuele woorden/zinnen koppelen.
+    // We gebruiken event-delegation op de wrap zodat we niet voor elke knop
+    // apart een listener moeten registreren — er kunnen er veel zijn.
+    preview.querySelectorAll(".bundel-item-wrap").forEach(wrap => {
+      const itemId = wrap.dataset.itemId;
+      wrap.addEventListener("click", (e) => {
+        const knop = e.target.closest(".rij-verwijder-knop");
+        if (!knop) return;
+        e.stopPropagation();
+        const woordTekst = knop.dataset.woord;
+        if (woordTekst) {
+          this.verwijderWoordVanItem(itemId, woordTekst);
+        }
+      });
+    });
   },
 
   /* === Voeg 1 woord/zin toe aan een specifiek bundel-item === */
@@ -242,12 +265,85 @@ window.SpellingBundel = {
     
     modOpties[tellerKey] += 1;
     
+    // Voeg ook één woord aan de snapshot toe — zodat de module ALTIJD
+    // de juiste pool ziet (snapshot + nieuw woord erbij). We kiezen het
+    // eerste woord uit de globale pool dat nog niet in de snapshot zit.
+    if (item.gekozenWoordenSnapshot && Array.isArray(item.gekozenWoordenSnapshot)) {
+      const globalePool = window._weekdictee_gekozenWoorden || [];
+      const snapshotTeksten = new Set(item.gekozenWoordenSnapshot.map(w => w.tekst));
+      const nieuwWoord = globalePool.find(w => !snapshotTeksten.has(w.tekst));
+      if (nieuwWoord) {
+        item.gekozenWoordenSnapshot.push(JSON.parse(JSON.stringify(nieuwWoord)));
+      }
+    }
+    
     const module = window.SpellingModules?.[cat];
     if (!module) return;
-    module._seed = item.seed;
-    item.html = module.genereerBlad(item.opties, false);
+    item.html = this._renderItemHTML(item, false);
     
     this._renderPreview();
+  },
+
+  /* === Verwijder één specifiek woord/zin uit een bundel-item === */
+  verwijderWoordVanItem: function(itemId, woordTekst) {
+    const item = this.items.find(i => i.id === itemId);
+    if (!item) return;
+    
+    const cat = item.categorie;
+    const modOpties = item.opties[cat];
+    if (!modOpties) return;
+    
+    // Zorg dat snapshot bestaat (oude items hebben hem misschien niet)
+    if (!item.gekozenWoordenSnapshot || !Array.isArray(item.gekozenWoordenSnapshot)) {
+      item.gekozenWoordenSnapshot = JSON.parse(JSON.stringify(window._weekdictee_gekozenWoorden || []));
+    }
+    
+    // Filter het woord eruit
+    item.gekozenWoordenSnapshot = item.gekozenWoordenSnapshot.filter(
+      w => w.tekst !== woordTekst
+    );
+    
+    // Verlaag aantal-teller
+    const tellerKey = (cat === "ov06") ? "aantalZinnen" : "aantalWoorden";
+    if (typeof modOpties[tellerKey] === "number" && modOpties[tellerKey] > 0) {
+      modOpties[tellerKey] -= 1;
+    }
+    
+    // Edge case: als er niets meer overblijft, verwijder het hele item
+    if (item.gekozenWoordenSnapshot.length === 0 || modOpties[tellerKey] === 0) {
+      if (confirm("Dit was het laatste woord. Werkblad helemaal verwijderen?")) {
+        this.verwijder(itemId);
+      } else {
+        // Ongedaan maken: woord teruglezen niet meer mogelijk vanuit hier,
+        // dus we verhogen alleen de teller weer en hopen dat de leerkracht
+        // de woordenkiezer opnieuw opent.
+        modOpties[tellerKey] += 1;
+      }
+      return;
+    }
+    
+    item.html = this._renderItemHTML(item, false);
+    this._renderPreview();
+  },
+
+  /* === Render de HTML voor één bundel-item, met snapshot tijdelijk in plaats
+       van de globale woordenpool === */
+  _renderItemHTML: function(item, metAntwoorden) {
+    const module = window.SpellingModules?.[item.categorie];
+    if (!module) return "";
+    module._seed = item.seed;
+    
+    // Gebruik snapshot als die bestaat, anders val terug op globale pool
+    const origineel = window._weekdictee_gekozenWoorden;
+    if (item.gekozenWoordenSnapshot && Array.isArray(item.gekozenWoordenSnapshot)) {
+      window._weekdictee_gekozenWoorden = item.gekozenWoordenSnapshot;
+    }
+    
+    const html = module.genereerBlad(item.opties, metAntwoorden);
+    
+    // Restore
+    window._weekdictee_gekozenWoorden = origineel;
+    return html;
   },
 
   /* === Update download/wis knoppen op basis van bundel-status === */
