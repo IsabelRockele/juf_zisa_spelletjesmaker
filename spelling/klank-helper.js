@@ -24,7 +24,13 @@ window.SpellingKlank = {
     "tw-au": { klank: "au", soort: "andere", specifiek: "tw-au" },
     "tw-ui": { klank: "ui", soort: "andere", specifiek: "tw-ui" },
     "tw-eu": { klank: "eu", soort: "andere", specifiek: "tw-eu" },
-    "tw-oe": { klank: "oe", soort: "andere", specifiek: "tw-oe" }
+    "tw-oe": { klank: "oe", soort: "andere", specifiek: "tw-oe" },
+    "tw-aai": { klank: "aai", soort: "andere", specifiek: "tw-aai" },
+    "tw-ooi": { klank: "ooi", soort: "andere", specifiek: "tw-ooi" },
+    "tw-oei": { klank: "oei", soort: "andere", specifiek: "tw-oei" },
+    "tw-eeuw": { klank: "eeuw", soort: "andere", specifiek: "tw-eeuw" },
+    "tw-ieuw": { klank: "ieuw", soort: "andere", specifiek: "tw-ieuw" },
+    "sch-woorden": { klank: "sch", soort: "andere", specifiek: "sch" }
   },
 
   KOLOM_KLANK_OPTIES: [
@@ -48,8 +54,14 @@ window.SpellingKlank = {
     { value: "tw-oe", label: "oe-woorden",  groep: "Tweeklanken" },
     { value: "tw-eu", label: "eu-woorden",  groep: "Tweeklanken" },
     { value: "tw-ui", label: "ui-woorden",  groep: "Tweeklanken" },
+    { value: "tw-aai",  label: "aai-woorden",  groep: "Drieklanken" },
+    { value: "tw-ooi",  label: "ooi-woorden",  groep: "Drieklanken" },
+    { value: "tw-oei",  label: "oei-woorden",  groep: "Drieklanken" },
+    { value: "tw-eeuw", label: "eeuw-woorden", groep: "Drieklanken" },
+    { value: "tw-ieuw", label: "ieuw-woorden", groep: "Drieklanken" },
     { value: "ng", label: "ng-woorden", groep: "ng / nk" },
-    { value: "nk", label: "nk-woorden", groep: "ng / nk" }
+    { value: "nk", label: "nk-woorden", groep: "ng / nk" },
+    { value: "sch", label: "sch-woorden", groep: "Andere" }
   ],
 
   STANDAARD_TITELS: {
@@ -63,7 +75,10 @@ window.SpellingKlank = {
     "tw-ei": "ei-woorden", "tw-ij": "ij-woorden", "tw-ou": "ou-woorden",
     "tw-au": "au-woorden", "tw-oe": "oe-woorden", "tw-eu": "eu-woorden",
     "tw-ui": "ui-woorden",
-    "ng": "ng-woorden", "nk": "nk-woorden"
+    "tw-aai": "aai-woorden", "tw-ooi": "ooi-woorden", "tw-oei": "oei-woorden",
+    "tw-eeuw": "eeuw-woorden", "tw-ieuw": "ieuw-woorden",
+    "ng": "ng-woorden", "nk": "nk-woorden",
+    "sch": "sch-woorden"
   },
 
   detecteerKlank: function(woord, categorie) {
