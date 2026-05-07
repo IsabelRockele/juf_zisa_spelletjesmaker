@@ -382,7 +382,8 @@ window.SpellingModules.ov01 = {
           }
         }
         html += `
-          <div class="ov01-cel">
+          <div class="ov01-cel" data-woord="${w.tekst}">
+            <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
             <div class="ov01-cel-plaatje">${emoji}</div>
             ${onderHtml}
             <div class="ov01-cel-lijnen">${lijnen}</div>
