@@ -214,6 +214,8 @@ window.SpellingBundel = {
     let moduleNaam;
     if (cat === "ov01") moduleNaam = "Schrijf bij plaatje";
     else if (cat === "ov02") moduleNaam = "Woord 3× overschrijven";
+    else if (cat === "ov03") moduleNaam = "Letters door elkaar";
+    else if (cat === "ov04") moduleNaam = "Klanken sorteren";
     else moduleNaam = cat;
 
     // Module-specifieke opties zitten genest: opties.ov01.* / opties.weekdictee.* / opties.ov02.*
