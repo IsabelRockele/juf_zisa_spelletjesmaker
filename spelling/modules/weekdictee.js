@@ -162,6 +162,22 @@ window.SpellingModules.weekdictee = {
           <input type="text" id="wd-reflectie-tekst" value="Wat vond ik van de dagelijkse spelling deze week?">
         </label>
       </div>
+
+      <!-- WEEKDICTEE EIGEN ACTIES -->
+      <div class="ov-instel-blok wd-acties-blok">
+        <button id="wd-vernieuw" class="primair" type="button" style="width:100%;">
+          ↻ Vernieuw voorbeeld
+        </button>
+        <button id="wd-download" class="secundair" type="button" style="width:100%; margin-top:6px;">
+          ⬇ Download weekdictee als PDF
+        </button>
+        <button id="wd-download-opl" class="secundair" type="button" style="width:100%; margin-top:6px;">
+          ⬇ Download oplossingen
+        </button>
+        <p class="wd-stap-info" style="margin-top:8px;">
+          Tip: weekdictee staat los van de bundel. Het is al een complete reeks per week.
+        </p>
+      </div>
     `;
   },
 
@@ -342,24 +358,57 @@ window.SpellingModules.weekdictee = {
 
   /* Maak een eenvoudige zin met een woord erin.
      Gebruikt het juiste lidwoord uit het woord-object zodat we niet
-     "de het hek" krijgen bij een 'het'-woord. */
+     "de het hek" krijgen bij een 'het'-woord.
+     Veel sjablonen voor variatie — geschikt voor lj 1-3. */
   _maakZin: function(woordObj) {
-    // Ondersteun zowel string als object
     const woord = (typeof woordObj === "string") ? woordObj : woordObj.tekst;
     const lidwoord = (typeof woordObj === "object" && woordObj.lidwoord) ? woordObj.lidwoord : "de";
-    
-    // Hoofdletter-versie van het lidwoord voor zinnen die ermee beginnen
     const Lidwoord = lidwoord.charAt(0).toUpperCase() + lidwoord.slice(1);
-    
-    // Bezittelijk voornaamwoord past bij alle woordsoorten
+
     const sjablonen = [
+      // Zien & vinden
       `Ik zie ${lidwoord} ${woord}.`,
-      `${Lidwoord} ${woord} is mooi.`,
-      `Mijn ${woord} ligt hier.`,
+      `Ik vind ${lidwoord} ${woord} mooi.`,
+      `Mama ziet ${lidwoord} ${woord}.`,
+      `Papa kijkt naar ${lidwoord} ${woord}.`,
+      `Wij kijken naar ${lidwoord} ${woord}.`,
+      `Tom kijkt naar ${lidwoord} ${woord}.`,
+      
+      // Hebben & krijgen
       `Hij heeft een ${woord}.`,
-      `Wij kijken naar ${lidwoord} ${woord}.`
+      `Zij heeft een ${woord}.`,
+      `Ik heb een nieuwe ${woord}.`,
+      `Ik krijg een ${woord}.`,
+      `Jij krijgt een ${woord}.`,
+      `Sara heeft een ${woord}.`,
+      
+      // Beschrijvend met "is"
+      `${Lidwoord} ${woord} is mooi.`,
+      `${Lidwoord} ${woord} is groot.`,
+      `${Lidwoord} ${woord} is klein.`,
+      `${Lidwoord} ${woord} is rood.`,
+      `${Lidwoord} ${woord} is leuk.`,
+      `${Lidwoord} ${woord} is nieuw.`,
+      
+      // Bezittelijk
+      `Mijn ${woord} ligt hier.`,
+      `Mijn ${woord} is mooi.`,
+      `Jouw ${woord} ligt daar.`,
+      `Onze ${woord} is groot.`,
+      
+      // Doe-zinnen
+      `Lien speelt met ${lidwoord} ${woord}.`,
+      `Ik wil ${lidwoord} ${woord}.`,
+      `Sam pakt ${lidwoord} ${woord}.`,
+      `Pak ${lidwoord} ${woord} eens vast.`,
+      
+      // Locatie
+      `${Lidwoord} ${woord} staat in de tuin.`,
+      `${Lidwoord} ${woord} ligt op tafel.`,
+      `Daar is ${lidwoord} ${woord}.`,
+      `Hier ligt ${lidwoord} ${woord}.`
     ];
-    
+
     const idx = Math.floor(this._random() * sjablonen.length);
     return sjablonen[idx];
   },
