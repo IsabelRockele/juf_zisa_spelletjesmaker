@@ -26,11 +26,13 @@
     const container = document.querySelector("#module-instellingen");
     container.innerHTML = module.renderInstellingen();
 
-    // Voor weekdictee + ov01 + ov02: andere UI-elementen verbergen
+    // Voor weekdictee + ov01-04: andere UI-elementen verbergen
     const isWeekdictee = (cat === "weekdictee");
     const isOV01 = (cat === "ov01");
     const isOV02 = (cat === "ov02");
-    const verbergStandaard = isWeekdictee || isOV01 || isOV02;
+    const isOV03 = (cat === "ov03");
+    const isOV04 = (cat === "ov04");
+    const verbergStandaard = isWeekdictee || isOV01 || isOV02 || isOV03 || isOV04;
     document.querySelectorAll(".sidebar .block").forEach(blok => {
       const h2 = blok.querySelector("h2")?.textContent || "";
       if (verbergStandaard && (h2.startsWith("3.") || h2.startsWith("4."))) {
@@ -39,6 +41,120 @@
         blok.style.display = "";
       }
     });
+
+    // === OV04-specifieke bedrading ===
+    if (isOV04) {
+      // Open woordenkiezer
+      container.querySelector("#ov04-open-kiezer")?.addEventListener("click", () => {
+        if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
+      });
+      if (window.SpellingWoordenkiezer) {
+        window.SpellingWoordenkiezer.updateSidebarInfo();
+        const aantal = (window._weekdictee_gekozenWoorden || []).length;
+        const info = document.querySelector("#ov04-keuze-info");
+        if (info) {
+          if (aantal === 0) {
+            info.textContent = "Nog geen woorden gekozen.";
+            info.style.color = "#888";
+          } else {
+            info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+            info.style.color = "var(--zisa-blauw)";
+          }
+        }
+      }
+
+      // Niveau-vinkjes
+      container.querySelectorAll("#ov04-niveaus input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          cb.closest(".ov-niveau-vink").classList.toggle("actief", cb.checked);
+        });
+      });
+
+      // Aantal kolommen knoppen — verberg/toon kolom 3
+      container.querySelectorAll("#ov04-aantal-kolommen button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov04-aantal-kolommen button", btn);
+          const aantal = parseInt(btn.dataset.aantal, 10);
+          const kolom3 = container.querySelector('.ov04-kolom-rij[data-kolom="3"]');
+          if (kolom3) {
+            kolom3.style.display = aantal === 3 ? "" : "none";
+          }
+        });
+      });
+      // Default: 3 kolommen, dus kolom 3 zichtbaar (niets te doen)
+
+      // Klank-dropdown verandert → titel automatisch updaten
+      container.querySelectorAll("select.ov04-klank").forEach(select => {
+        // Stel default klank-keuze in op basis van standaard-titel
+        const defaultTitel = select.dataset.defaultTitel;
+        const kh = window.SpellingKlank;
+        if (kh) {
+          const defaultKlank = Object.keys(kh.STANDAARD_TITELS).find(k => kh.STANDAARD_TITELS[k] === defaultTitel);
+          if (defaultKlank) select.value = defaultKlank;
+        }
+
+        // Bij wijzigen: titel-veld updaten
+        select.addEventListener("change", () => {
+          const kolomNr = select.id.replace("ov04-klank-", "");
+          const titelVeld = container.querySelector(`#ov04-titel-${kolomNr}`);
+          if (titelVeld && window.SpellingKlank) {
+            titelVeld.value = window.SpellingKlank.STANDAARD_TITELS[select.value] || "";
+          }
+        });
+      });
+
+      // Lijnhoogte
+      container.querySelectorAll("#ov04-lijnhoogte button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov04-lijnhoogte button", btn);
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+        });
+      });
+
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+      return;
+    }
+
+    // === OV03-specifieke bedrading ===
+    if (isOV03) {
+      // Open woordenkiezer
+      container.querySelector("#ov03-open-kiezer")?.addEventListener("click", () => {
+        if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
+      });
+      if (window.SpellingWoordenkiezer) {
+        window.SpellingWoordenkiezer.updateSidebarInfo();
+        const aantal = (window._weekdictee_gekozenWoorden || []).length;
+        const info = document.querySelector("#ov03-keuze-info");
+        if (info) {
+          if (aantal === 0) {
+            info.textContent = "Nog geen woorden gekozen.";
+            info.style.color = "#888";
+          } else {
+            info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+            info.style.color = "var(--zisa-blauw)";
+          }
+        }
+      }
+
+      // Niveau-vinkjes (basis/kern/verdieping)
+      container.querySelectorAll("#ov03-niveaus input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          cb.closest(".ov-niveau-vink").classList.toggle("actief", cb.checked);
+        });
+      });
+
+      // Lijnhoogte-knoppen
+      container.querySelectorAll("#ov03-lijnhoogte button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov03-lijnhoogte button", btn);
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+        });
+      });
+
+      // Teken mini-voorbeelden
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+      return;
+    }
 
     // === Categorie-specifieke bedrading ===
     if (isOV02) {
