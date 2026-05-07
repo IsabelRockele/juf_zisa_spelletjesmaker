@@ -47,22 +47,29 @@ window.SpellingModules.ov03 = {
           <label class="ov-niveau-vink actief">
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
-              <strong>Basis</strong>
+              <strong>⭐ Oefenen</strong>
               <small>plaatje + letters door elkaar</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
-              <strong>Kern</strong>
+              <strong>⭐⭐ Toepassen</strong>
               <small>letters door elkaar, eerste letter gekleurd</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
-              <strong>Verdieping</strong>
+              <strong>⭐⭐⭐ Verdiepen</strong>
               <small>alleen letters door elkaar</small>
+            </div>
+          </label>
+          <label class="ov-niveau-vink">
+            <input type="checkbox" data-niveau="uitbreiding">
+            <div class="ov-niveau-vink-tekst">
+              <strong>⭐⭐⭐⭐ Uitbreiden</strong>
+              <small>letters door elkaar + bedenk 2 eigen woorden</small>
             </div>
           </label>
         </div>
@@ -245,9 +252,10 @@ window.SpellingModules.ov03 = {
     }
 
     const niveauLabel = {
-      basis: "Basis",
-      kern: "Kern",
-      verdieping: "Verdieping"
+      basis: "⭐",
+      kern: "⭐⭐",
+      verdieping: "⭐⭐⭐",
+      uitbreiding: "⭐⭐⭐⭐"
     }[niveau];
 
     const oplBadge = metAntwoorden
@@ -291,7 +299,31 @@ window.SpellingModules.ov03 = {
           ${rijenHTML}
         </div>
 
+        ${niveau === "uitbreiding" ? this._renderUitbreidingBlok(lijntype, lijnhoogte, metAntwoorden) : ""}
+
         <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
+      </div>
+    `;
+  },
+
+  /* ----- Uitbreiding-blok onderaan ov03 ----- */
+  _renderUitbreidingBlok: function(lijntype, lijnhoogte, metAntwoorden) {
+    const sl = window.SpellingSchrijflijnen;
+    const lijn = () => sl
+      ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
+      : `<div class="ov01-zin-lijn"></div>`;
+    
+    const opl = metAntwoorden
+      ? `<p class="ov01-zin-richtlijn">Verwacht: het kind bedenkt 2 eigen woorden van dezelfde soort en schrijft ze correct.</p>`
+      : "";
+    
+    return `
+      <div class="ov01-zin-blok ov01-uitbreiding-blok">
+        <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht (uitbreiden):</div>
+        <p class="ov01-zin-vraag">Bedenk zelf nog 2 woorden en schrijf ze op de lijntjes.</p>
+        ${lijn()}
+        ${lijn()}
+        ${opl}
       </div>
     `;
   },
