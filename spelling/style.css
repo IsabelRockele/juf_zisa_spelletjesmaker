@@ -450,122 +450,110 @@ body {
 }
 .primair:hover, .secundair:hover { filter: brightness(0.95); }
 
-/* ===== BUNDEL ===== */
-#bundel-sectie {
-  border: 1.5px dashed #999;
-  border-radius: 8px;
-  padding: 12px;
-  background: #fafafa;
-}
-#bundel-sectie h2 {
-  margin: 0 0 8px 0;
+/* Hoofdknop "Voeg toe" — extra zichtbaar */
+.primair-groot {
   font-size: 1rem;
-  color: #333;
+  padding: 14px 16px;
+  background: #4caf50; /* groen om "toevoegen" te markeren */
 }
-.bundel-info {
+
+/* Download-groep onder de hoofdknop */
+.download-groep {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed #ccc;
+}
+.download-groep-titel {
   font-size: 0.78rem;
   color: #666;
-  margin: 0 0 10px 0;
-  line-height: 1.4;
-}
-.bundel-leeg {
-  text-align: center;
-  color: #999;
-  font-size: 0.85rem;
-  font-style: italic;
-  padding: 10px;
-  margin: 0;
-}
-.bundel-items {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 8px 0;
-  counter-reset: bundel;
-}
-.bundel-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  font-size: 0.82rem;
-  counter-increment: bundel;
-}
-.bundel-item::before {
-  content: counter(bundel) ".";
+  margin: 0 0 6px 0;
   font-weight: 600;
-  color: var(--zisa-blauw);
-  min-width: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
-.bundel-item-label {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.download-knop {
+  width: 100%;
+  margin-bottom: 4px;
 }
-.bundel-item-verwijder {
-  background: #fee;
-  border: 1px solid #d99;
+.download-niveaus {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  margin: 4px 0;
+}
+.download-niveau-knop {
+  font-size: 0.78rem;
+  padding: 6px 4px;
+}
+
+/* Wis-knop — rood om te waarschuwen */
+.secundair-rood {
+  margin-top: 10px;
+  padding: 8px;
+  background: white;
   color: #c33;
-  width: 22px;
-  height: 22px;
-  border-radius: 4px;
-  font-size: 0.85rem;
+  border: 1px solid #d99;
+  border-radius: 6px;
   cursor: pointer;
-  padding: 0;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.secundair-rood:hover {
+  background: #fee;
+}
+
+/* Welkomst-tekst in lege bundel */
+.preview-leeg {
+  text-align: center;
+  padding: 60px 30px;
+  color: #666;
+}
+.preview-leeg h3 {
+  margin-bottom: 12px;
+  color: #333;
+}
+.preview-leeg p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Wikkel rond elk werkblad in de bundel-preview met ✕ knop */
+.bundel-item-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+.bundel-item-verwijder-knop {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fff;
+  color: #c33;
+  border: 2px solid #c33;
+  font-size: 1.05rem;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: all 0.15s;
 }
-.bundel-item-verwijder:hover {
-  background: #fdd;
-}
-.bundel-aantal {
-  font-size: 0.78rem;
-  color: #666;
-  margin: 6px 0 10px 0;
-  text-align: center;
-}
-.bundel-knop {
-  display: block;
-  width: 100%;
-  padding: 8px;
-  background: #4caf50;
+.bundel-item-verwijder-knop:hover {
+  background: #c33;
   color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.85rem;
-  font-family: inherit;
-  margin-bottom: 4px;
+  transform: scale(1.1);
 }
-.bundel-knop:hover {
-  filter: brightness(0.95);
+/* In PDF-export verbergen we de ✕ knop */
+.pdf-render .bundel-item-verwijder-knop {
+  display: none !important;
 }
-.bundel-knop:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.bundel-knop-wis {
-  display: block;
-  width: 100%;
-  padding: 6px;
-  background: white;
-  color: #c33;
-  border: 1px solid #d99;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-family: inherit;
-  margin-top: 6px;
-}
-.bundel-knop-wis:hover {
-  background: #fee;
-}
+
+/* Verborgen-class voor knoppen die nog niet relevant zijn */
 .verborgen {
   display: none !important;
 }
@@ -2092,6 +2080,11 @@ body.bewerk-aan [data-bewerk-id]:focus {
 .werkblad + .werkblad {
   page-break-before: always;
   break-before: page;
+}
+/* Class-gebaseerde versie voor bundel-PDF — html2pdf "before" config */
+.pagina-break-voor {
+  page-break-before: always !important;
+  break-before: page !important;
 }
 .werkblad-header {
   display: flex;
