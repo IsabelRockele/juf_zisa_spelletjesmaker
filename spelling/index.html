@@ -88,32 +88,24 @@
         <!-- module-specifieke instellingen worden hier ingeladen -->
       </section>
 
-      <!-- BUNDEL: verzamel meerdere werkbladen tot één PDF -->
-      <section class="block" id="bundel-sectie">
-        <h2>📚 Bundel</h2>
-        <p class="bundel-info">
-          Maak meerdere werkbladen, voeg ze toe aan je bundel, download ze samen als één PDF.
-        </p>
-        <div id="bundel-lijst">
-          <p class="bundel-leeg">Nog geen bladen in je bundel.</p>
-        </div>
-        <button id="bundel-download" class="bundel-knop verborgen" type="button">
-          📥 Download bundel als PDF
-        </button>
-        <button id="bundel-download-oplossingen" class="bundel-knop verborgen" type="button">
-          📥 Download oplossingen-bundel
-        </button>
-        <button id="bundel-wis" class="bundel-knop-wis verborgen" type="button">
-          🗑️ Wis bundel
-        </button>
-      </section>
-
       <div class="actie-knoppen">
-        <button id="ververs-preview" class="primair">↻ Vernieuw voorbeeld</button>
+        <button id="bundel-voeg-toe" class="primair primair-groot" type="button">
+          ➕ Voeg toe aan bundel
+        </button>
         <button id="bewerken-toggle" class="secundair" type="button">✏️ Bewerken: uit</button>
-        <button id="bundel-toevoegen" class="secundair" type="button">➕ Voeg toe aan bundel</button>
-        <button id="download-pdf" class="secundair">⬇ Download PDF</button>
-        <button id="download-oplossing" class="secundair">⬇ Oplossingen</button>
+
+        <div class="download-groep">
+          <p class="download-groep-titel">Downloaden:</p>
+          <button id="download-alles" class="secundair download-knop verborgen" type="button">⬇ Alle werkbladen</button>
+          <div class="download-niveaus">
+            <button id="download-basis" class="secundair download-niveau-knop verborgen" type="button">⬇ Basis</button>
+            <button id="download-kern" class="secundair download-niveau-knop verborgen" type="button">⬇ Kern</button>
+            <button id="download-verdieping" class="secundair download-niveau-knop verborgen" type="button">⬇ Verdieping</button>
+          </div>
+          <button id="download-oplossingen-alles" class="secundair download-knop verborgen" type="button">⬇ Oplossingen alles</button>
+        </div>
+
+        <button id="bundel-wis" class="secundair-rood verborgen" type="button">🗑️ Wis bundel</button>
       </div>
 
     </aside>
