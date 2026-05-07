@@ -2,9 +2,7 @@
    woordenbiblio/graad1.js
    Woordenset voor graad 1 (eerste + tweede leerjaar)
    ========================================================== */
-
 window.SpellingWoordenbibliotheek.registreerGraad(1, {
-
   // ===== KORTE KLANKEN (klankzuiver, lj 1) =====
   "mkm-a": {
     naam: "MKM met -a-",
@@ -27,11 +25,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "wal", lidwoord: "de" },
       { tekst: "lat", lidwoord: "de" },
       { tekst: "kar", lidwoord: "de" },
-      { tekst: "hand", lidwoord: "de" },
       { tekst: "vlag", lidwoord: "de" },
-      { tekst: "krab", lidwoord: "de" },
       { tekst: "schat", lidwoord: "de" },
-      { tekst: "tand", lidwoord: "de" },
       { tekst: "plant", lidwoord: "de" },
       { tekst: "kast", lidwoord: "de" }
     ]
@@ -45,7 +40,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hek", lidwoord: "het" },
       { tekst: "pen", lidwoord: "de" },
       { tekst: "mes", lidwoord: "het" },
-      { tekst: "bed", lidwoord: "het" },
       { tekst: "net", lidwoord: "het" },
       { tekst: "vel", lidwoord: "het" },
       { tekst: "les", lidwoord: "de" },
@@ -62,7 +56,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "vis", lidwoord: "de" },
       { tekst: "lip", lidwoord: "de" },
       { tekst: "pit", lidwoord: "de" },
-      { tekst: "rib", lidwoord: "de" },
       { tekst: "wit", lidwoord: null },
       { tekst: "bil", lidwoord: "de" },
       { tekst: "tik", lidwoord: "de" },
@@ -125,7 +118,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "ei", lidwoord: "het" }
     ]
   },
-
   // ===== TWEEKLANKEN =====
   "tw-ie": {
     naam: "ie",
@@ -160,7 +152,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "reis", lidwoord: "de" },
       { tekst: "meid", lidwoord: "de" },
       { tekst: "lei", lidwoord: "de" },
-      { tekst: "vlees", lidwoord: "het" },
+      { tekst: "zeil", lidwoord: "het" },
+      { tekst: "eiland", lidwoord: "het" },
+      { tekst: "eik", lidwoord: "de" },
+      { tekst: "kei", lidwoord: "de" },
+      { tekst: "klei", lidwoord: "de" },
+      { tekst: "plein", lidwoord: "het" },
+      { tekst: "einde", lidwoord: "het" },
       { tekst: "feit", lidwoord: "het" },
       { tekst: "leiding", lidwoord: "de" },
       { tekst: "fontein", lidwoord: "de" }
@@ -177,6 +175,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "rijst", lidwoord: "de" },
       { tekst: "lijn", lidwoord: "de" },
       { tekst: "pijp", lidwoord: "de" },
+      { tekst: "pijn", lidwoord: "de" },
+      { tekst: "prijs", lidwoord: "de" },
       { tekst: "rijm", lidwoord: "het" },
       { tekst: "kijk", lidwoord: null },
       { tekst: "mijn", lidwoord: null },
@@ -197,7 +197,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "goud", lidwoord: "het" },
       { tekst: "schouder", lidwoord: "de" },
       { tekst: "vrouw", lidwoord: "de" },
-      { tekst: "blouse", lidwoord: "de" },
+      { tekst: "trouw", lidwoord: "de" },
       { tekst: "mouw", lidwoord: "de" },
       { tekst: "touw", lidwoord: "het" }
     ]
@@ -210,6 +210,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "saus", lidwoord: "de" },
       { tekst: "dauw", lidwoord: "de" },
       { tekst: "blauw", lidwoord: null },
+      { tekst: "flauw", lidwoord: null },
+      { tekst: "nauw", lidwoord: null },
+      { tekst: "paus", lidwoord: "de" },
       { tekst: "klauw", lidwoord: "de" },
       { tekst: "miauw", lidwoord: null },
       { tekst: "auto", lidwoord: "de" },
@@ -291,6 +294,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "kooi", lidwoord: "de" },
       { tekst: "tooi", lidwoord: "de" },
+      { tekst: "hooi", lidwoord: "het" },
       { tekst: "mooi", lidwoord: null },
       { tekst: "rooi", lidwoord: null },
       { tekst: "gooi", lidwoord: null },
@@ -306,7 +310,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "bloei", lidwoord: "de" },
       { tekst: "stoei", lidwoord: null },
       { tekst: "loei", lidwoord: null },
-      { tekst: "vloei", lidwoord: null },
+      { tekst: "knoei", lidwoord: null },
       { tekst: "roei", lidwoord: null },
       { tekst: "foei", lidwoord: null }
     ]
@@ -333,7 +337,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "nieuws", lidwoord: "het" }
     ]
   },
-
   // ===== ng / nk WOORDEN =====
   "ng-woorden": {
     naam: "-ng woorden",
@@ -370,7 +373,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "flink", lidwoord: null }
     ]
   },
-
   // ===== VERDUBBELAARS =====
   "verdubbelaars": {
     naam: "verdubbelaars",
@@ -392,7 +394,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "petten", lidwoord: "de" }
     ]
   },
-
   // ===== VERENKELAARS =====
   "verenkelaars": {
     naam: "verenkelaars",
@@ -415,7 +416,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "boeken", lidwoord: "de" }
     ]
   },
-
   // ===== LANGE KLANKEN =====
   "lk-aa": {
     naam: "aa",
@@ -482,9 +482,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "huur", lidwoord: "de" }
     ]
   },
-
   // ===== SCH-WOORDEN =====
-  // Klank "sch" aan begin van woord. Belangrijk voor lj 1.
   "sch-woorden": {
     naam: "sch-woorden",
     groep: "moeilijke-klanken",
@@ -503,9 +501,27 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schar", lidwoord: "de" }
     ]
   },
-
+  // ===== VERLENGINGSREGEL-WOORDEN =====
+  // Woorden waar je niet hoort of het op b/p of d/t eindigt.
+  // Hoort bij oefenvorm "Verlengen om te horen" — NIET voor zinnen-invuloefeningen!
+  "verlengingsregel": {
+    naam: "Verlengen om te horen",
+    groep: "verlengen",
+    woorden: [
+      { tekst: "hand", lidwoord: "de", verlengd: "handen" },
+      { tekst: "krab", lidwoord: "de", verlengd: "krabben" },
+      { tekst: "tand", lidwoord: "de", verlengd: "tanden" },
+      { tekst: "bed", lidwoord: "het", verlengd: "bedden" },
+      { tekst: "rib", lidwoord: "de", verlengd: "ribben" },
+      { tekst: "hond", lidwoord: "de", verlengd: "honden" },
+      { tekst: "wind", lidwoord: "de", verlengd: "winden" },
+      { tekst: "land", lidwoord: "het", verlengd: "landen" },
+      { tekst: "mond", lidwoord: "de", verlengd: "monden" },
+      { tekst: "rand", lidwoord: "de", verlengd: "randen" },
+      { tekst: "vond", lidwoord: null, verlengd: "vonden" }
+    ]
+  },
   // ===== DOFFE KLANK OP HET EINDE =====
-  // -el, -en, -er einden. Belangrijk in lj 1 tweede helft.
   "df-el": {
     naam: "Eindigt op -el",
     groep: "doffe-klank",
@@ -564,17 +580,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "bakker", lidwoord: "de" }
     ]
   },
-
   // ===== VERKLEINWOORDEN — ZUIVERE VORMEN =====
-  // ALLEEN waar je -je / -tje / -pje rechtstreeks achter kan plakken
-  // ZONDER klankverdubbeling. Het kind kan ze "horen" en zelf vormen.
-  // GEEN bal→balletje (klankverdubbeling), GEEN lam→lammetje (-etje).
   "verklein-je": {
     naam: "Verkleinwoord op -je",
     groep: "verkleinwoorden",
     woorden: [
-      // Eindigt op p/k/f/s/ch/t — dan plak je gewoon -je achter
-      // (woorden met meerklank ervoor, geen klankverdubbeling nodig)
       { tekst: "boek", lidwoord: "het", verklein: "boekje" },
       { tekst: "huis", lidwoord: "het", verklein: "huisje" },
       { tekst: "muis", lidwoord: "de", verklein: "muisje" },
@@ -593,8 +603,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     naam: "Verkleinwoord op -tje",
     groep: "verkleinwoorden",
     woorden: [
-      // Eindigt op -l, -n, -r met lange klank ervoor — dan -tje
-      // (geen klankverdubbeling: bal→balletje is NIET zuiver)
       { tekst: "stoel", lidwoord: "de", verklein: "stoeltje" },
       { tekst: "deur", lidwoord: "de", verklein: "deurtje" },
       { tekst: "schoen", lidwoord: "de", verklein: "schoentje" },
@@ -605,7 +613,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "broer", lidwoord: "de", verklein: "broertje" },
       { tekst: "vader", lidwoord: "de", verklein: "vadertje" },
       { tekst: "moeder", lidwoord: "de", verklein: "moedertje" },
-      { tekst: "stoel", lidwoord: "de", verklein: "stoeltje" },
       { tekst: "boer", lidwoord: "de", verklein: "boertje" }
     ]
   },
@@ -613,24 +620,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     naam: "Verkleinwoord op -pje",
     groep: "verkleinwoorden",
     woorden: [
-      // Eindigt op -m met lange klank ervoor — dan -pje
-      // (geen klankverdubbeling: kam→kammetje is NIET zuiver)
       { tekst: "boom", lidwoord: "de", verklein: "boompje" },
       { tekst: "duim", lidwoord: "de", verklein: "duimpje" },
       { tekst: "arm", lidwoord: "de", verklein: "armpje" },
       { tekst: "raam", lidwoord: "het", verklein: "raampje" },
       { tekst: "bloem", lidwoord: "de", verklein: "bloempje" },
       { tekst: "droom", lidwoord: "de", verklein: "droompje" },
-      { tekst: "riem", lidwoord: "de", verklein: "riempje" },
-      { tekst: "doem", lidwoord: null, verklein: "doempje" }
+      { tekst: "riem", lidwoord: "de", verklein: "riempje" }
     ]
   },
-
   // ===== MEERVOUDEN =====
-  // ALLEEN -en vorm (geen 's). Kind moet ze zelf vormen.
-  // Drie categorieën: gemengd, verdubbel-regel, verenkel-regel.
-  
-  // Gemengde set — alle regels door elkaar (voor automatisering)
   "meervoud-en": {
     naam: "Meervoud op -en (gemengd)",
     groep: "meervouden",
@@ -654,9 +653,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" }
     ]
   },
-  
-  // Verdubbel-regel: korte klank → medeklinker dubbel
-  // (kat → katten, kip → kippen)
   "meervoud-verdubbel": {
     naam: "Meervoud verdubbelen (kort)",
     groep: "meervouden",
@@ -681,9 +677,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "das", lidwoord: "de", meervoud: "dassen" }
     ]
   },
-  
-  // Verenkel-regel: lange klank → klinker enkel
-  // (boom → bomen, boot → boten)
   "meervoud-verenkel": {
     naam: "Meervoud verenkelen (lang)",
     groep: "meervouden",
@@ -704,8 +697,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "paal", lidwoord: "de", meervoud: "palen" },
       { tekst: "haan", lidwoord: "de", meervoud: "hanen" },
       { tekst: "veer", lidwoord: "de", meervoud: "veren" },
-      { tekst: "boer", lidwoord: "de", meervoud: "boeren" },
-      { tekst: "muur", lidwoord: "de", meervoud: "muren" }
+      { tekst: "boer", lidwoord: "de", meervoud: "boeren" }
     ]
   }
 });
