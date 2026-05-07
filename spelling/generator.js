@@ -51,6 +51,25 @@ window.SpellingGenerator = {
       };
     }
 
+    // === OV05-specifieke opties (Klank kiezen) ===
+    let ov05 = null;
+    if (cat === "ov05") {
+      const niveaus = [];
+      document.querySelectorAll("#ov05-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
+      ov05 = {
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        klankpaar: document.querySelector("#ov05-klankpaar")?.value || "ei-ij",
+        plaatjeKern: document.querySelector("#ov05-plaatje-kern")?.checked !== false,
+        plaatjeVerdieping: document.querySelector("#ov05-plaatje-verdieping")?.checked !== false,
+        aantalWoorden: parseInt(document.querySelector("#ov05-aantal-woorden")?.value || "8", 10),
+        lijnhoogte: document.querySelector("#ov05-lijnhoogte button.actief")?.dataset.hoogte || "middel",
+        lijntype: document.querySelector("#ov05-lijntype input[name='ov05-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov05-ondertitel")?.value || ""
+      };
+    }
+
     // === OV04-specifieke opties (Categoriseren op klank) ===
     let ov04 = null;
     if (cat === "ov04") {
@@ -155,7 +174,8 @@ window.SpellingGenerator = {
       ov01,
       ov02,
       ov03,
-      ov04
+      ov04,
+      ov05
     };
   },
 
@@ -175,7 +195,7 @@ window.SpellingGenerator = {
     // intern het maken van meerdere werkbladen (bv. één per niveau).
     if (opties.categorie === "weekdictee" || opties.categorie === "ov01" 
         || opties.categorie === "ov02" || opties.categorie === "ov03"
-        || opties.categorie === "ov04") {
+        || opties.categorie === "ov04" || opties.categorie === "ov05") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
