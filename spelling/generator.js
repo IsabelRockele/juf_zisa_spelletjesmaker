@@ -51,6 +51,49 @@ window.SpellingGenerator = {
       };
     }
 
+    // === OV04-specifieke opties (Categoriseren op klank) ===
+    let ov04 = null;
+    if (cat === "ov04") {
+      const niveaus = [];
+      document.querySelectorAll("#ov04-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
+      ov04 = {
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        aantalKolommen: parseInt(document.querySelector("#ov04-aantal-kolommen button.actief")?.dataset.aantal || "3", 10),
+        aantalWoorden: parseInt(document.querySelector("#ov04-aantal-woorden")?.value || "12", 10),
+        lijnhoogte: document.querySelector("#ov04-lijnhoogte button.actief")?.dataset.hoogte || "klein",
+        lijntype: document.querySelector("#ov04-lijntype input[name='ov04-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov04-ondertitel")?.value || "",
+        // Per kolom
+        kleur1: document.querySelector("#ov04-kleur-1")?.value || "#2196F3",
+        kleur2: document.querySelector("#ov04-kleur-2")?.value || "#4CAF50",
+        kleur3: document.querySelector("#ov04-kleur-3")?.value || "#FF9800",
+        klank1: document.querySelector("#ov04-klank-1")?.value || "groep-kort",
+        klank2: document.querySelector("#ov04-klank-2")?.value || "groep-lang",
+        klank3: document.querySelector("#ov04-klank-3")?.value || "groep-andere",
+        titel1: document.querySelector("#ov04-titel-1")?.value || "Korte klank",
+        titel2: document.querySelector("#ov04-titel-2")?.value || "Lange klank",
+        titel3: document.querySelector("#ov04-titel-3")?.value || "Andere klank"
+      };
+    }
+
+    // === OV03-specifieke opties (Letters door elkaar) ===
+    let ov03 = null;
+    if (cat === "ov03") {
+      const niveaus = [];
+      document.querySelectorAll("#ov03-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
+      ov03 = {
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        aantalWoorden: parseInt(document.querySelector("#ov03-aantal-woorden")?.value || "8", 10),
+        lijnhoogte: document.querySelector("#ov03-lijnhoogte button.actief")?.dataset.hoogte || "middel",
+        lijntype: document.querySelector("#ov03-lijntype input[name='ov03-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov03-ondertitel")?.value || ""
+      };
+    }
+
     // === OV02-specifieke opties (Woord 3x overschrijven) ===
     let ov02 = null;
     if (cat === "ov02") {
@@ -110,7 +153,9 @@ window.SpellingGenerator = {
       bundelNaam,
       weekdictee,
       ov01,
-      ov02
+      ov02,
+      ov03,
+      ov04
     };
   },
 
@@ -126,13 +171,16 @@ window.SpellingGenerator = {
       this._laatsteSeed = Date.now() & 0xFFFFFFFF;
     }
 
-    // Weekdictee + OV01: 1 blad per generatie (intern al meerdere pagina's mogelijk)
-    if (opties.categorie === "weekdictee" || opties.categorie === "ov01") {
+    // Weekdictee + OV01-04: 1 keer aanroepen, module verzorgt
+    // intern het maken van meerdere werkbladen (bv. één per niveau).
+    if (opties.categorie === "weekdictee" || opties.categorie === "ov01" 
+        || opties.categorie === "ov02" || opties.categorie === "ov03"
+        || opties.categorie === "ov04") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
 
-    // Standaard werkbladen: aantalBladen losse werkbladen genereren
+    // Standaard werkbladen (oude klankzuiver): aantalBladen losse werkbladen
     let html = "";
     for (let i = 0; i < opties.aantalBladen; i++) {
       module._seed = (this._laatsteSeed + i * 1000003) & 0xFFFFFFFF;
