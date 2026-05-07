@@ -254,6 +254,29 @@
       // Teken de mini-voorbeelden bij de schrijflijntype-knoppen
       window.SpellingSchrijflijnen?.tekenLijntypePreviews();
 
+      // EIGEN VERNIEUW + DOWNLOAD voor weekdictee
+      container.querySelector("#wd-vernieuw")?.addEventListener("click", () => {
+        // Render direct in preview (vervangt bundel-inhoud tijdelijk)
+        const opties = window.SpellingGenerator?.leesOpties();
+        if (!opties) return;
+        const html = window.SpellingGenerator.genereerBundel(opties);
+        const preview = document.querySelector("#preview");
+        if (preview) {
+          preview.innerHTML = html;
+          if (window.SpellingSchrijflijnen) {
+            requestAnimationFrame(() => window.SpellingSchrijflijnen.tekenAlle(preview));
+          }
+        }
+      });
+
+      container.querySelector("#wd-download")?.addEventListener("click", () => {
+        if (window.SpellingPDF) window.SpellingPDF.download(false);
+      });
+
+      container.querySelector("#wd-download-opl")?.addEventListener("click", () => {
+        if (window.SpellingPDF) window.SpellingPDF.download(true);
+      });
+
       return;
     }
 
@@ -513,41 +536,16 @@
       });
     }
 
-    document.querySelector("#ververs-preview").addEventListener("click", () => {
-      // 1. Verzamel wat de gebruiker écht heeft aangepast
-      const aanpassingen = verzamelGebruikersBewerkingen();
+    // Bewerken-toggle blijft werken zoals voorheen (op huidige preview)
 
-      // 2. Regenereer
-      window.SpellingPreview.ververs();
-
-      // 3. Snapshot de nieuwe originelen
-      snapshotOriginelen();
-
-      // 4. Pas de gebruikersaanpassingen weer toe (alleen waar dezelfde id bestaat)
-      pasAanpassingenToe(aanpassingen);
-
-      // 5. Bewerk-modus herstellen indien aan
-      if (document.body.classList.contains("bewerk-aan")) {
-        document.querySelectorAll("#preview [data-bewerk-id]").forEach(el => {
-          el.setAttribute("contenteditable", "true");
-        });
-      }
-    });
-
-    document.querySelector("#download-pdf").addEventListener("click", () => {
-      window.SpellingPDF.download(false);
-    });
-    document.querySelector("#download-oplossing").addEventListener("click", () => {
-      window.SpellingPDF.download(true);
-    });
-
-    // Eerste keer renderen
+    // Eerste keer: laad module-instellingen + initialiseer bundel preview
     laadModuleInstellingen();
     updateNiveauUitleg();
-    setTimeout(() => {
-      window.SpellingPreview.ververs();
-      snapshotOriginelen();
-    }, 100);
+    
+    // Bundel start leeg → toont welkomstboodschap
+    if (window.SpellingBundel) {
+      window.SpellingBundel._renderPreview();
+    }
   });
 
 })();
