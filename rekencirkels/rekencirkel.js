@@ -191,22 +191,52 @@ document.addEventListener("DOMContentLoaded", function() {
     ctx.restore();
   }
 
-  // GROUP LOGIC
-  function buildGroups() {
-    var groups = [];
+  // ROW LOGIC
+  // Cirkels worden per 2 op een rij gezet (in volgorde). Per rij wordt bepaald
+  // of beide cirkels van hetzelfde "soort" zijn (beide optellen, of beide
+  // maaltafel) → dan 1 gedeelde opdrachtzin boven het paar. Anders krijgt
+  // elke cirkel zijn eigen opdrachtzin boven zich.
+  function labelForCfg(cfg) {
+    return cfg.type === "maaltafel" ? "Vermenigvuldigen: Vul aan." : "Optellen: Vul aan.";
+  }
+
+  function isMaalCfg(cfg) {
+    return cfg.type === "maaltafel";
+  }
+
+  function buildRows() {
+    // Verzamel geldige indices in volgorde
+    var validIdx = [];
     for (var i = 0; i < generatedData.length; i++) {
-      if (!generatedData[i]) continue;
-      var cfg    = circleConfigs[i];
-      var isMaal = cfg.type === "maaltafel";
-      var label  = isMaal ? "Vermenigvuldigen: Vul aan." : "Optellen: Vul aan.";
-      var last   = groups[groups.length - 1];
-      if (last && last.isMaal === isMaal) {
-        last.indices.push(i);
-      } else {
-        groups.push({ label: label, isMaal: isMaal, indices: [i] });
-      }
+      if (generatedData[i]) validIdx.push(i);
     }
-    return groups;
+
+    var rows = [];
+    for (var k = 0; k < validIdx.length; k += 2) {
+      var leftIdx  = validIdx[k];
+      var rightIdx = (k + 1 < validIdx.length) ? validIdx[k + 1] : null;
+
+      var leftCfg  = circleConfigs[leftIdx];
+      var rightCfg = rightIdx !== null ? circleConfigs[rightIdx] : null;
+
+      var sharedLabel = null;
+      if (rightCfg && isMaalCfg(leftCfg) === isMaalCfg(rightCfg)) {
+        // Zelfde soort → één gedeelde zin
+        sharedLabel = labelForCfg(leftCfg);
+      } else if (!rightCfg) {
+        // Eenzame cirkel onderaan → één zin (gedeeld is hier dan gewoon boven die ene)
+        sharedLabel = labelForCfg(leftCfg);
+      }
+
+      rows.push({
+        leftIdx: leftIdx,
+        rightIdx: rightIdx,
+        sharedLabel: sharedLabel,                                         // null als verschillende soorten
+        leftLabel:  sharedLabel ? null : labelForCfg(leftCfg),
+        rightLabel: sharedLabel ? null : (rightCfg ? labelForCfg(rightCfg) : null)
+      });
+    }
+    return rows;
   }
 
   // CANVAS WORKSHEET (preview + PNG)
@@ -216,8 +246,8 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var vi = 0; vi < generatedData.length; vi++) { if (generatedData[vi]) validCount++; }
     if (validCount === 0) return null;
 
-    var groups = buildGroups();
-    var cols   = validCount === 1 ? 1 : 2;
+    var rows = buildRows();
+    var cols = validCount === 1 ? 1 : 2;
 
     var BASE_CELL   = 250;
     var BASE_PAD    = 28;
@@ -231,10 +261,10 @@ document.addEventListener("DOMContentLoaded", function() {
     var labelH  = BASE_LABEL  * scale;
     var botH    = BASE_BOT    * scale;
 
+    // Bereken totale hoogte: per rij ofwel 1 gedeelde label, ofwel ruimte voor labels boven cirkels
     var totalH = headerH + botH;
-    for (var gi = 0; gi < groups.length; gi++) {
-      var gr = Math.ceil(groups[gi].indices.length / cols);
-      totalH += labelH + pad + gr * (cell + pad);
+    for (var ri = 0; ri < rows.length; ri++) {
+      totalH += labelH + pad + cell + pad;
     }
     var W = cols * cell + (cols + 1) * pad;
 
@@ -277,43 +307,59 @@ document.addEventListener("DOMContentLoaded", function() {
     c.fillText("Rekencirkels", W / 2, 55 * scale);
     c.restore();
 
-    // Groepen
-    var cursorY = headerH;
-    var radius  = (cell / 2) * 0.86;
-
-    for (var gi2 = 0; gi2 < groups.length; gi2++) {
-      var g = groups[gi2];
-      var kaderX = pad;
-      var kaderW = W - pad * 2;
-      var kaderH = labelH - 6 * scale;
-
+    // Helper: teken één opdrachtzin-kader op gegeven x/breedte/y
+    function drawLabelBox(text, x, y, w) {
+      var h = labelH - 6 * scale;
       c.save();
       c.fillStyle = "#f0f0f0";
       c.strokeStyle = "#888888";
       c.lineWidth = 1.2 * scale;
-      drawRoundedRect(c, kaderX, cursorY, kaderW, kaderH, 7 * scale);
+      drawRoundedRect(c, x, y, w, h, 7 * scale);
       c.fill();
       c.stroke();
       c.font = "bold " + (13 * scale) + "px 'Segoe UI', Arial, sans-serif";
       c.fillStyle = "#111111";
       c.textAlign = "left";
       c.textBaseline = "middle";
-      c.fillText(g.label, kaderX + 12 * scale, cursorY + kaderH / 2);
+      c.fillText(text, x + 12 * scale, y + h / 2);
       c.restore();
+    }
 
+    var cursorY = headerH;
+    var radius  = (cell / 2) * 0.86;
+
+    for (var ri2 = 0; ri2 < rows.length; ri2++) {
+      var row = rows[ri2];
+
+      // 1) Opdrachtzin(nen) tekenen
+      if (row.sharedLabel) {
+        // Eén gedeelde zin over volledige breedte
+        drawLabelBox(row.sharedLabel, pad, cursorY, W - pad * 2);
+      } else {
+        // Twee aparte zinnen, elk boven hun eigen cirkel
+        if (row.leftLabel) {
+          drawLabelBox(row.leftLabel, pad, cursorY, cell);
+        }
+        if (row.rightLabel) {
+          drawLabelBox(row.rightLabel, pad + cell + pad, cursorY, cell);
+        }
+      }
       cursorY += labelH + 2 * scale;
 
-      var groupRows = Math.ceil(g.indices.length / cols);
-      for (var r = 0; r < groupRows; r++) {
-        for (var col = 0; col < cols; col++) {
-          var idx = g.indices[r * cols + col];
-          if (idx === undefined || !generatedData[idx]) continue;
-          var cx = pad + col * (cell + pad) + cell / 2;
-          var cy = cursorY + pad + cell / 2;
-          drawSingleCircle(c, generatedData[idx].display, cx, cy, radius);
-        }
-        cursorY += cell + pad;
+      // 2) Cirkels tekenen (links/rechts)
+      var leftCx  = pad + cell / 2;
+      var rightCx = pad + cell + pad + cell / 2;
+      var cy      = cursorY + pad + cell / 2;
+
+      if (row.leftIdx !== null && generatedData[row.leftIdx]) {
+        // Bij solo-cirkel (alleen 1 totaal): centreer
+        var lx = (validCount === 1) ? W / 2 : leftCx;
+        drawSingleCircle(c, generatedData[row.leftIdx].display, lx, cy, radius);
       }
+      if (row.rightIdx !== null && generatedData[row.rightIdx]) {
+        drawSingleCircle(c, generatedData[row.rightIdx].display, rightCx, cy, radius);
+      }
+      cursorY += cell + pad;
     }
 
     // Footer
@@ -350,7 +396,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   // NATIVE PDF RENDERING
-  function drawFieldPDF(doc, value, xMM, yMM, fontSize, radiusMM) {
+  function drawFieldPDF(doc, value, xMM, yMM, fontSize, radiusMM, solutionsMode) {
     if (value === "?") {
       // Invulhokje: breedte/hoogte gebaseerd op de beschikbare ruimte in de ring
       var boxW = radiusMM * 0.28;
@@ -364,13 +410,20 @@ document.addEventListener("DOMContentLoaded", function() {
       var baselineCorr = (fontSize / 2.835) * 0.35;
       doc.setFontSize(fontSize);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(20, 20, 20);
+      if (solutionsMode) {
+        doc.setTextColor(23, 122, 78); // groen, leesbaar op wit
+      } else {
+        doc.setTextColor(20, 20, 20);
+      }
       doc.text(String(value), xMM, yMM + baselineCorr, { align: "center" });
     }
   }
 
-  function drawCirclePDF(doc, data, cxMM, cyMM, radiusMM) {
+  function drawCirclePDF(doc, data, cxMM, cyMM, radiusMM, displayData) {
     if (!data) return;
+    // Als displayData meegegeven is, zijn we in solutions-mode: getallen die op het
+    // werkblad een "?" waren, kleuren we groen. De rest blijft zwart.
+    var solutionsMode = !!displayData;
     var cr  = radiusMM * 0.22;
     var ir  = radiusMM * 0.58;
     var or_ = radiusMM * 0.97;
@@ -409,7 +462,12 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
       doc.setFontSize(centerFS);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(20, 20, 20);
+      // Groen alleen als dit centrum op het werkblad een "?" was (zoals bij zoekSom)
+      if (solutionsMode && displayData.center === "?") {
+        doc.setTextColor(23, 122, 78);
+      } else {
+        doc.setTextColor(20, 20, 20);
+      }
       var centerBaseCorr = (centerFS / 2.835) * 0.35;
       doc.text(String(data.center), cxMM, cyMM + centerBaseCorr, { align: "center" });
     }
@@ -420,10 +478,13 @@ document.addEventListener("DOMContentLoaded", function() {
 
     for (var j = 0; j < NUM_SEGMENTS; j++) {
       var ang = (j / NUM_SEGMENTS) * 2 * Math.PI + (Math.PI / NUM_SEGMENTS);
+      // Per veld: groen als dit veld op het werkblad een "?" was
+      var innerWasQ = solutionsMode && displayData.pairs[j].inner === "?";
+      var outerWasQ = solutionsMode && displayData.pairs[j].outer === "?";
       drawFieldPDF(doc, data.pairs[j].inner,
-        cxMM + Math.cos(ang) * innerR, cyMM + Math.sin(ang) * innerR, pairFS, radiusMM);
+        cxMM + Math.cos(ang) * innerR, cyMM + Math.sin(ang) * innerR, pairFS, radiusMM, innerWasQ);
       drawFieldPDF(doc, data.pairs[j].outer,
-        cxMM + Math.cos(ang) * outerR, cyMM + Math.sin(ang) * outerR, pairFS, radiusMM);
+        cxMM + Math.cos(ang) * outerR, cyMM + Math.sin(ang) * outerR, pairFS, radiusMM, outerWasQ);
     }
   }
 
@@ -437,7 +498,18 @@ document.addEventListener("DOMContentLoaded", function() {
     );
   }
 
-  function drawPageHeader(doc, pageW, margin) {
+  function drawPageHeader(doc, pageW, margin, solutionsMode) {
+    if (solutionsMode) {
+      // Oplossingen: geen naam/datum, wel duidelijk gemarkeerde titel
+      doc.setFontSize(20);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(20, 20, 20);
+      doc.text("Rekencirkels \u2013 Oplossingen", pageW / 2, margin + 10, { align: "center" });
+      doc.setDrawColor(80, 80, 80);
+      doc.setLineWidth(0.5);
+      doc.line(margin, margin + 19, pageW - margin, margin + 19);
+      return;
+    }
     // Naam / Datum lijn
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
@@ -460,15 +532,18 @@ document.addEventListener("DOMContentLoaded", function() {
     doc.line(margin, margin + 19, pageW - margin, margin + 19);
   }
 
-  function downloadPDF() {
+  function downloadPDF(opts) {
+    opts = opts || {};
+    var solutionsMode = !!opts.solutions;
+
     var jsPDF = window.jspdf.jsPDF;
     var doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
     var pageW  = doc.internal.pageSize.getWidth();
     var pageH  = doc.internal.pageSize.getHeight();
     var margin = 14;
-    var footerH = 12; // ruimte onderaan voor footer
-    var headerH = 26; // naam + datum + titel
+    var footerH = 12;
+    var headerH = 26;
     var labelH  = 11;
     var labelGap = 3;
     var rowGap   = 4;
@@ -477,90 +552,85 @@ document.addEventListener("DOMContentLoaded", function() {
     for (var vi = 0; vi < generatedData.length; vi++) { if (generatedData[vi]) validCount++; }
     if (validCount === 0) return;
 
-    var groups = buildGroups();
-    var cols   = validCount === 1 ? 1 : 2;
+    var rows = buildRows();
+    var cols = validCount === 1 ? 1 : 2;
 
     var usableW  = pageW - margin * 2;
     var cellMM   = cols === 1 ? usableW * 0.7 : (usableW - 6) / 2;
     var gapMM    = 6;
     var radiusMM = (cellMM / 2) * 0.86;
 
-    // Maximale y per pagina (ruimte voor footer)
     var maxY = pageH - margin - footerH;
 
-    // Teken eerste pagina header
-    drawPageHeader(doc, pageW, margin);
-    var y = margin + headerH;
-    var isFirstPage = true;
-
-    for (var gi = 0; gi < groups.length; gi++) {
-      var g = groups[gi];
-      var groupRows = Math.ceil(g.indices.length / cols);
-
-      // Bereken hoeveel rijen op huidige pagina passen
-      // Opdrachtzin + minstens 1 rij moeten samen passen, anders nieuwe pagina
-      var spaceNeeded = labelH + labelGap + cellMM + rowGap;
-      if (!isFirstPage || y + spaceNeeded > maxY) {
-        // Nieuwe pagina nodig voor deze groep
-        drawFooter(doc, pageW, pageH);
-        doc.addPage();
-        drawPageHeader(doc, pageW, margin);
-        y = margin + headerH;
-        isFirstPage = false;
-      }
-
-      // Opdrachtzin kader
+    // Helper: één label-vakje tekenen
+    function drawLabelBoxPDF(text, x, y, w) {
       doc.setFillColor(240, 240, 240);
       doc.setDrawColor(120, 120, 120);
       doc.setLineWidth(0.4);
-      doc.roundedRect(margin, y, usableW, labelH, 2, 2, "FD");
+      doc.roundedRect(x, y, w, labelH, 2, 2, "FD");
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(20, 20, 20);
-      doc.text(g.label, margin + 4, y + labelH * 0.72);
-      y += labelH + labelGap;
-
-      // Rijen tekenen, met pagina-overgang per rij
-      for (var r = 0; r < groupRows; r++) {
-        var rowH = cellMM + rowGap;
-
-        // Past deze rij nog op de pagina?
-        if (y + rowH > maxY) {
-          drawFooter(doc, pageW, pageH);
-          doc.addPage();
-          drawPageHeader(doc, pageW, margin);
-          y = margin + headerH;
-          isFirstPage = false;
-
-          // Opdrachtzin herhalen bovenaan nieuwe pagina (vervolg)
-          doc.setFillColor(240, 240, 240);
-          doc.setDrawColor(120, 120, 120);
-          doc.setLineWidth(0.4);
-          doc.roundedRect(margin, y, usableW, labelH, 2, 2, "FD");
-          doc.setFontSize(12);
-          doc.setFont("helvetica", "bold");
-          doc.setTextColor(20, 20, 20);
-          doc.text(g.label + " (vervolg)", margin + 4, y + labelH * 0.72);
-          y += labelH + labelGap;
-        }
-
-        for (var col = 0; col < cols; col++) {
-          var idx = g.indices[r * cols + col];
-          if (idx === undefined || !generatedData[idx]) continue;
-          var startX = cols === 1 ? (pageW - cellMM) / 2 : margin;
-          var cx = startX + col * (cellMM + gapMM) + cellMM / 2;
-          var cy = y + cellMM / 2;
-          drawCirclePDF(doc, generatedData[idx].display, cx, cy, radiusMM);
-        }
-        y += rowH;
-      }
-      y += 3; // extra spatie tussen groepen
+      doc.text(text, x + 4, y + labelH * 0.72);
     }
 
-    // Footer op laatste pagina
-    drawFooter(doc, pageW, pageH);
+    drawPageHeader(doc, pageW, margin, solutionsMode);
+    var y = margin + headerH;
 
-    doc.save("rekencirkels-werkblad.pdf");
+    for (var ri = 0; ri < rows.length; ri++) {
+      var row = rows[ri];
+      var rowTotalH = labelH + labelGap + cellMM + rowGap;
+
+      // Past deze hele rij (label + cirkels) nog op de pagina?
+      if (y + rowTotalH > maxY) {
+        drawFooter(doc, pageW, pageH);
+        doc.addPage();
+        drawPageHeader(doc, pageW, margin, solutionsMode);
+        y = margin + headerH;
+      }
+
+      // 1) Opdrachtzin(nen) tekenen
+      if (row.sharedLabel) {
+        drawLabelBoxPDF(row.sharedLabel, margin, y, usableW);
+      } else {
+        if (row.leftLabel) {
+          drawLabelBoxPDF(row.leftLabel, margin, y, cellMM);
+        }
+        if (row.rightLabel) {
+          drawLabelBoxPDF(row.rightLabel, margin + cellMM + gapMM, y, cellMM);
+        }
+      }
+      y += labelH + labelGap;
+
+      // 2) Cirkels tekenen — display of solution afhankelijk van mode
+      var startX = cols === 1 ? (pageW - cellMM) / 2 : margin;
+      var leftCx  = startX + cellMM / 2;
+      var rightCx = startX + cellMM + gapMM + cellMM / 2;
+      var cy      = y + cellMM / 2;
+
+      if (row.leftIdx !== null && generatedData[row.leftIdx]) {
+        var leftData = solutionsMode
+          ? generatedData[row.leftIdx].solution
+          : generatedData[row.leftIdx].display;
+        var leftDisplay = solutionsMode ? generatedData[row.leftIdx].display : null;
+        drawCirclePDF(doc, leftData, leftCx, cy, radiusMM, leftDisplay);
+      }
+      if (row.rightIdx !== null && generatedData[row.rightIdx]) {
+        var rightData = solutionsMode
+          ? generatedData[row.rightIdx].solution
+          : generatedData[row.rightIdx].display;
+        var rightDisplay = solutionsMode ? generatedData[row.rightIdx].display : null;
+        drawCirclePDF(doc, rightData, rightCx, cy, radiusMM, rightDisplay);
+      }
+      y += cellMM + rowGap;
+    }
+
+    drawFooter(doc, pageW, pageH);
+    doc.save(solutionsMode ? "rekencirkels-oplossingen.pdf" : "rekencirkels-werkblad.pdf");
+  }
+
+  function downloadOplossingPDF() {
+    downloadPDF({ solutions: true });
   }
 
   function downloadPNG() {
@@ -793,7 +863,9 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("addCircleBtn").addEventListener("click", addCircle);
     document.getElementById("genereerBtn").addEventListener("click", regenerateAll);
     document.getElementById("downloadPngBtn").addEventListener("click", downloadPNG);
-    document.getElementById("downloadPdfBtn").addEventListener("click", downloadPDF);
+    document.getElementById("downloadPdfBtn").addEventListener("click", function() { downloadPDF(); });
+    var oplBtn = document.getElementById("downloadOplossingPdfBtn");
+    if (oplBtn) oplBtn.addEventListener("click", downloadOplossingPDF);
     document.getElementById("infoBtn").addEventListener("click", function() {
       document.getElementById("infoModal").style.display = "flex";
     });
