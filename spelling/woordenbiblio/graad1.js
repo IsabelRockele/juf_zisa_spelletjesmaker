@@ -16,19 +16,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "dak", lidwoord: "het" },
       { tekst: "mat", lidwoord: "de" },
       { tekst: "kam", lidwoord: "de" },
-      { tekst: "bak", lidwoord: "de" },
       { tekst: "tak", lidwoord: "de" },
       { tekst: "zak", lidwoord: "de" },
-      { tekst: "lap", lidwoord: "de" },
       { tekst: "rat", lidwoord: "de" },
-      { tekst: "vat", lidwoord: "het" },
-      { tekst: "wal", lidwoord: "de" },
       { tekst: "lat", lidwoord: "de" },
-      { tekst: "kar", lidwoord: "de" },
-      { tekst: "vlag", lidwoord: "de" },
-      { tekst: "schat", lidwoord: "de" },
-      { tekst: "plant", lidwoord: "de" },
-      { tekst: "kast", lidwoord: "de" }
+      { tekst: "kar", lidwoord: "de" }
     ]
   },
   "mkm-e": {
@@ -41,10 +33,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pen", lidwoord: "de" },
       { tekst: "mes", lidwoord: "het" },
       { tekst: "net", lidwoord: "het" },
-      { tekst: "vel", lidwoord: "het" },
       { tekst: "les", lidwoord: "de" },
-      { tekst: "wet", lidwoord: "de" },
-      { tekst: "vest", lidwoord: "het" },
+      { tekst: "bes", lidwoord: "de" },
+      { tekst: "bek", lidwoord: "de" },
       { tekst: "hen", lidwoord: "de" }
     ]
   },
@@ -58,10 +49,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pit", lidwoord: "de" },
       { tekst: "wit", lidwoord: null },
       { tekst: "bil", lidwoord: "de" },
-      { tekst: "tik", lidwoord: "de" },
       { tekst: "kin", lidwoord: "de" },
       { tekst: "dik", lidwoord: null },
-      { tekst: "vink", lidwoord: "de" }
+      { tekst: "sip", lidwoord: "de" }
     ]
   },
   "mkm-o": {
@@ -75,11 +65,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pot", lidwoord: "de" },
       { tekst: "zon", lidwoord: "de" },
       { tekst: "mol", lidwoord: "de" },
-      { tekst: "bok", lidwoord: "de" },
       { tekst: "dop", lidwoord: "de" },
       { tekst: "kop", lidwoord: "de" },
-      { tekst: "bon", lidwoord: "de" },
-      { tekst: "los", lidwoord: null }
+      { tekst: "mos", lidwoord: "het" },
+      { tekst: "bos", lidwoord: "het" }
     ]
   },
   "mkm-u": {
@@ -94,8 +83,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "rug", lidwoord: "de" },
       { tekst: "put", lidwoord: "de" },
       { tekst: "lus", lidwoord: "de" },
-      { tekst: "stuk", lidwoord: "het" },
-      { tekst: "duf", lidwoord: null }
+      { tekst: "nul", lidwoord: null }
     ]
   },
   "mk-km": {
@@ -510,6 +498,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "hand", lidwoord: "de", verlengd: "handen" },
       { tekst: "krab", lidwoord: "de", verlengd: "krabben" },
+      { tekst: "web", lidwoord: "het", verlengd: "webben" },
+      { tekst: "hoed", lidwoord: "de", verlengd: "hoeden" },
       { tekst: "tand", lidwoord: "de", verlengd: "tanden" },
       { tekst: "bed", lidwoord: "het", verlengd: "bedden" },
       { tekst: "rib", lidwoord: "de", verlengd: "ribben" },
@@ -518,7 +508,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "land", lidwoord: "het", verlengd: "landen" },
       { tekst: "mond", lidwoord: "de", verlengd: "monden" },
       { tekst: "rand", lidwoord: "de", verlengd: "randen" },
-      { tekst: "vond", lidwoord: null, verlengd: "vonden" }
+      { tekst: "baard", lidwoord: "de", verlengd: "baarden" },
+      { tekst: "poort", lidwoord: "de", verlengd: "poorten" },
+      { tekst: "taart", lidwoord: "de", verlengd: "taarten" },
+      { tekst: "paard", lidwoord: null, verlengd: "paarden" }
     ]
   },
   // ===== DOFFE KLANK OP HET EINDE =====
@@ -535,8 +528,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "lepel", lidwoord: "de" },
       { tekst: "winkel", lidwoord: "de" },
       { tekst: "kabel", lidwoord: "de" },
-      { tekst: "bril", lidwoord: "de" },
-      { tekst: "fiets", lidwoord: "de" },
+      { tekst: "vlinder", lidwoord: "de" },
+      { tekst: "dokter", lidwoord: "de" },
       { tekst: "sleutel", lidwoord: "de" },
       { tekst: "zadel", lidwoord: "het" },
       { tekst: "nagel", lidwoord: "de" }
@@ -596,6 +589,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hand", lidwoord: "de", verklein: "handje" },
       { tekst: "dorp", lidwoord: "het", verklein: "dorpje" },
       { tekst: "buik", lidwoord: "de", verklein: "buikje" },
+      { tekst: "plant", lidwoord: "de", verklein: "plantje" },
       { tekst: "schip", lidwoord: "het", verklein: "schipje" }
     ]
   },
@@ -650,6 +644,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "muis", lidwoord: "de", meervoud: "muizen" },
       { tekst: "trein", lidwoord: "de", meervoud: "treinen" },
       { tekst: "tuin", lidwoord: "de", meervoud: "tuinen" },
+      { tekst: "bij", lidwoord: "de", meervoud: "bijen" },
+      { tekst: "ui", lidwoord: "de", meervoud: "uien" },
+      { tekst: "koe", lidwoord: "de", meervoud: "koeien" },
       { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" }
     ]
   },
@@ -671,7 +668,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "zak", lidwoord: "de", meervoud: "zakken" },
       { tekst: "lat", lidwoord: "de", meervoud: "latten" },
       { tekst: "vos", lidwoord: "de", meervoud: "vossen" },
-      { tekst: "lap", lidwoord: "de", meervoud: "lappen" },
       { tekst: "mat", lidwoord: "de", meervoud: "matten" },
       { tekst: "bom", lidwoord: "de", meervoud: "bommen" },
       { tekst: "das", lidwoord: "de", meervoud: "dassen" }
@@ -697,7 +693,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "paal", lidwoord: "de", meervoud: "palen" },
       { tekst: "haan", lidwoord: "de", meervoud: "hanen" },
       { tekst: "veer", lidwoord: "de", meervoud: "veren" },
-      { tekst: "boer", lidwoord: "de", meervoud: "boeren" }
+      { tekst: "beer", lidwoord: "de", meervoud: "beren" }
     ]
   }
 });
