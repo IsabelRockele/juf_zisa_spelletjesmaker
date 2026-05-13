@@ -61,7 +61,12 @@ window.SpellingKlank = {
     { value: "tw-ieuw", label: "ieuw-woorden", groep: "Drieklanken" },
     { value: "ng", label: "ng-woorden", groep: "ng / nk" },
     { value: "nk", label: "nk-woorden", groep: "ng / nk" },
-    { value: "sch", label: "sch-woorden", groep: "Andere" }
+    { value: "sch", label: "sch-woorden", groep: "Andere" },
+    { value: "ch-cht", label: "ch / cht-woorden", groep: "Andere" },
+    // Regel-categorieën (verdubbel/verenkel/geen-regel) — voor 3-weg sortering
+    { value: "regel-verdubbel", label: "Verdubbelen", groep: "Regels" },
+    { value: "regel-verenkel",  label: "Verenkelen",  groep: "Regels" },
+    { value: "regel-geen",      label: "Schrijf wat je hoort", groep: "Regels" }
   ],
 
   STANDAARD_TITELS: {
@@ -78,7 +83,12 @@ window.SpellingKlank = {
     "tw-aai": "aai-woorden", "tw-ooi": "ooi-woorden", "tw-oei": "oei-woorden",
     "tw-eeuw": "eeuw-woorden", "tw-ieuw": "ieuw-woorden",
     "ng": "ng-woorden", "nk": "nk-woorden",
-    "sch": "sch-woorden"
+    "sch": "sch-woorden",
+    "ch-cht": "ch / cht-woorden",
+    // Regel-categorieën
+    "regel-verdubbel": "Verdubbelen",
+    "regel-verenkel":  "Verenkelen",
+    "regel-geen":      "Schrijf wat je hoort"
   },
 
   detecteerKlank: function(woord, categorie) {
@@ -114,6 +124,21 @@ window.SpellingKlank = {
   },
 
   matchKolom: function(woordCategorie, kolomKlank) {
+    // Regel-categorieën: koppel op woordCategorie-naam direct
+    // Werkt voor 3-weg sortering (verdubbel/verenkel/geen-regel)
+    if (kolomKlank === "regel-verdubbel") {
+      return woordCategorie === "stukjes-verdubbelen"
+          || woordCategorie === "meervoud-verdubbel";
+    }
+    if (kolomKlank === "regel-verenkel") {
+      return woordCategorie === "stukjes-verenkelen"
+          || woordCategorie === "meervoud-verenkel";
+    }
+    if (kolomKlank === "regel-geen") {
+      return woordCategorie === "stukjes-geen-regel";
+    }
+    
+    // Standaard klank-matching (bestaand gedrag)
     const info = this.CATEGORIE_NAAR_KLANK[woordCategorie];
     if (!info) return false;
     if (info.specifiek === kolomKlank) return true;
