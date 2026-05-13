@@ -18,71 +18,96 @@
     <!-- LINKS: instellingen -->
     <aside class="sidebar">
 
-      <section class="block">
-        <h2>1. Graad</h2>
-        <div class="graad-knoppen">
-          <button class="graad-knop actief" data-graad="1">Graad 1</button>
-          <button class="graad-knop" data-graad="2" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
-          <button class="graad-knop" data-graad="3" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
-        </div>
-      </section>
+      <!-- Tabs voor graad -->
+      <div class="graad-tabs" id="graad-tabs">
+        <button class="graad-tab actief" data-graad="1">Graad 1</button>
+        <button class="graad-tab" data-graad="2" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
+        <button class="graad-tab" data-graad="3" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
+      </div>
 
-      <section class="block">
-        <h2>2. Categorie</h2>
-        <div class="categorie-knoppen">
-          <button class="cat-knop actief" data-categorie="ov01">📷 Schrijf bij het plaatje</button>
-          <button class="cat-knop" data-categorie="ov02">✏️ Woord 3× overschrijven</button>
-          <button class="cat-knop" data-categorie="ov03">🔀 Letters door elkaar</button>
-          <button class="cat-knop" data-categorie="ov04">🎨 Klanken sorteren</button>
-          <button class="cat-knop" data-categorie="ov05">⭕ Klank kiezen</button>
-          <button class="cat-knop" data-categorie="ov06">📝 Zinnen invullen</button>
-          <button class="cat-knop" data-categorie="weekdictee">📅 Weekdictee</button>
+      <!-- Sectie 1: Wat wil je oefenen? (categorie-selector) -->
+      <details class="zb-sectie" id="zb-sec-categorie" open>
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">1</span>
+          <span class="zb-label">Wat wil je oefenen?</span>
+          <span class="zb-teller" id="zb-cat-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <p class="zb-uitleg">Vink de categorieën aan die in dit werkblad mogen voorkomen.</p>
+          <div id="hoofdgroep-selector">
+            <!-- Wordt dynamisch gevuld door app.js -->
+          </div>
         </div>
-        <div class="binnenkort-blok">
-          <p class="binnenkort-titel">🚧 Binnenkort beschikbaar:</p>
-          <ul class="binnenkort-lijst">
-            <li>Verkleinwoord maken</li>
-            <li>Meervoud maken</li>
-            <li>Stappenplan regelwoorden</li>
-            <li>Hoofdletters &amp; leestekens</li>
-          </ul>
-        </div>
-      </section>
+      </details>
 
-      <section class="block">
-        <h2>3. Niveau</h2>
-        <div class="niveau-knoppen">
-          <button class="niveau-knop actief" data-niveau="basis">Basis</button>
-          <button class="niveau-knop" data-niveau="kern">Kern</button>
-          <button class="niveau-knop" data-niveau="verdieping">Verdieping</button>
-        </div>
-        <p class="niveau-uitleg" id="niveau-uitleg">
-          <strong>Basis:</strong> herkennen en kopiëren met visuele steun.
-        </p>
-      </section>
-
-      <section class="block">
-        <h2>4. Schrijflijn</h2>
-        <div class="lijn-knoppen" id="lijn-knoppen">
-          <button class="lijn-knop actief" data-lijn="vier" title="Vierlijnssysteem">
-            <span class="lijn-mini vier"></span>
-            <span>Vierlijn</span>
+      <!-- Sectie 2: Bekijk en kies woorden -->
+      <details class="zb-sectie" id="zb-sec-woorden" open>
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">2</span>
+          <span class="zb-label">Bekijk en kies de woorden</span>
+          <span class="zb-teller" id="zb-woord-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <button id="open-woordenkiezer" class="zb-knop-groot" type="button" disabled>
+            📋 Open woordenkiezer
           </button>
-          <button class="lijn-knop" data-lijn="dubbel" title="Dubbele lijn (cahier)">
-            <span class="lijn-mini dubbel"></span>
-            <span>Dubbel</span>
-          </button>
-          <button class="lijn-knop" data-lijn="enkel" title="Enkele lijn">
-            <span class="lijn-mini enkel"></span>
-            <span>Enkel</span>
-          </button>
+          <p class="zb-info" id="zb-woord-info">
+            Kies eerst categorieën hierboven.
+          </p>
         </div>
-        <p style="font-size:0.75rem; color:#666; margin:6px 0 0 0">
-          Globale keuze. Per oefenvorm kan dit overschreven worden.
-        </p>
-      </section>
+      </details>
 
-      <section class="block" id="module-instellingen">
+      <!-- Sectie 3: Oefenvormen -->
+      <details class="zb-sectie" id="zb-sec-oefenvormen">
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">3</span>
+          <span class="zb-label">Oefenvormen</span>
+          <span class="zb-teller" id="zb-oef-teller"></span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <p class="zb-uitleg">Klik op een oefenvorm om hem aan/uit te zetten en in te stellen.</p>
+          <div id="oefenvorm-selector">
+            <!-- Wordt dynamisch gevuld -->
+          </div>
+        </div>
+      </details>
+
+      <!-- Sectie 4: Globale schrijflijn (fallback) -->
+      <details class="zb-sectie" id="zb-sec-schrijflijn">
+        <summary class="zb-sectie-titel">
+          <span class="zb-nr">4</span>
+          <span class="zb-label">Schrijflijn (globaal)</span>
+        </summary>
+        <div class="zb-sectie-inhoud">
+          <p class="zb-uitleg">Standaard schrijflijn. Per oefenvorm kan dit overschreven worden.</p>
+          <div class="lijn-knoppen" id="lijn-knoppen">
+            <button class="lijn-knop actief" data-lijn="vier" title="Vierlijnssysteem">
+              <span class="lijn-mini vier"></span>
+              <span>Vierlijn</span>
+            </button>
+            <button class="lijn-knop" data-lijn="dubbel" title="Dubbele lijn (cahier)">
+              <span class="lijn-mini dubbel"></span>
+              <span>Dubbel</span>
+            </button>
+            <button class="lijn-knop" data-lijn="enkel" title="Enkele lijn">
+              <span class="lijn-mini enkel"></span>
+              <span>Enkel</span>
+            </button>
+          </div>
+        </div>
+      </details>
+
+      <!-- Verborgen legacy elementen voor backwards-compat met app.js
+           (de bestaande oefenvorm-modules verwachten deze knoppen.
+            We renderen ze verborgen zodat hun event-handlers nog werken.) -->
+      <div id="legacy-knoppen" style="display:none">
+        <button class="cat-knop actief" data-categorie="ov01"></button>
+        <button class="niveau-knop actief" data-niveau="basis"></button>
+        <button class="graad-knop actief" data-graad="1"></button>
+      </div>
+
+      <!-- Module-instellingen container (voor de actieve oefenvorm in 'enkele werkblad'-modus) -->
+      <section class="block" id="module-instellingen" style="display:none">
         <!-- module-specifieke instellingen worden hier ingeladen -->
       </section>
 
@@ -193,10 +218,12 @@
   <script src="modules/ov04.js"></script>
   <script src="modules/ov05.js"></script>
   <script src="modules/ov06.js"></script>
+  <script src="modules/ov07.js"></script>
   <script src="generator.js"></script>
   <script src="preview.js"></script>
   <script src="pdf-engine.js"></script>
   <script src="bundel.js"></script>
+  <script src="zijbalk.js"></script>
   <script src="app.js"></script>
 
 </body>
