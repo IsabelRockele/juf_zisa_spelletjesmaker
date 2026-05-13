@@ -312,7 +312,7 @@ window.SpellingBundel = {
       // OV08 ⭐⭐⭐⭐ uitbreiding idem.
       const isOV07Uitbreiding = (item.categorie === "ov07" && item.niveau === "uitbreiding");
       const isOV08Uitbreiding = (item.categorie === "ov08" && item.niveau === "uitbreiding");
-      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07", "ov08"].includes(item.categorie)
+      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07", "ov08", "ov09"].includes(item.categorie)
                             && !isOV07Uitbreiding && !isOV08Uitbreiding;
       const plus1Label = item.categorie === "ov06" ? "➕ 1 zin erbij" : "➕ 1 woord erbij";
       const plusKnop = supportsPlus1
@@ -572,7 +572,7 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel"]
+            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij"]
           }
         };
 
