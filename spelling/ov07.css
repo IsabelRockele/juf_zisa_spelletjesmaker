@@ -1,0 +1,227 @@
+/* ==========================================================
+   OV07 — Verkleinwoorden — stylingblok
+   
+   Plak dit blok onderaan style.css (of in een aparte file ov07.css
+   en link 'm in index.html als je de modulair-css aanpak verkiest).
+   
+   Hergebruikt zoveel mogelijk bestaande ov01-* / ov06-* klassen
+   voor consistentie (header, voettekst, stappen, niveau-badge, ...).
+   ========================================================== */
+
+/* ---- Algemene container ---- */
+.ov07-blad {
+  /* niets speciaal — gebruikt .werkblad uit base CSS */
+}
+
+/* ---- Rooster (algemeen) ---- */
+.ov07-rooster {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+/* Kolom-koppen (alleen bij kern + verdieping) */
+.ov07-kol-koppen {
+  display: grid;
+  grid-template-columns: 1fr 40px 2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 36px 4px 4px; /* 36px rechts compenseert voor verwijderknop-ruimte */
+  border-bottom: 2px solid var(--zisa-blauw, #2196F3);
+  margin-bottom: 4px;
+}
+.ov07-kol-kop {
+  font-weight: bold;
+  color: var(--zisa-blauw, #2196F3);
+  font-size: 0.95rem;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+.ov07-pijl-kop { /* leeg */ }
+
+/* ---- Rij (algemeen) ---- */
+.ov07-rij {
+  display: grid;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #e0e0e0;
+  position: relative;
+  gap: 12px;
+}
+.ov07-rij:last-child {
+  border-bottom: none;
+}
+
+/* ---- ⭐ Basis-rij: [grondwoord] [keuzes] [schrijflijn] ---- */
+.ov07-rij-basis {
+  grid-template-columns: 80px auto 1fr;
+}
+.ov07-grondwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #333;
+}
+.ov07-uitgang-keuzes {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ov07-uitgang-keuze {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 2px solid #999;
+  border-radius: 999px;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.05rem;
+  color: #555;
+  background: #fff;
+  user-select: none;
+}
+.ov07-uitgang-juist {
+  /* alleen op oplossingen-pagina */
+  border-color: #4CAF50;
+  background: #E8F5E9;
+  color: #2E7D32;
+  font-weight: bold;
+}
+
+/* ---- ⭐⭐ Kern-rij: [grondwoord] → [schrijflijn] ---- */
+.ov07-rij-kern,
+.ov07-rij-verdieping {
+  grid-template-columns: 1fr 40px 2fr;
+}
+.ov07-kol-woord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+.ov07-kol-verklein {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+.ov07-pijl {
+  text-align: center;
+  font-size: 1.4rem;
+  color: var(--zisa-blauw, #2196F3);
+  font-weight: bold;
+}
+
+/* "Gegeven" cel bij ⭐⭐⭐ Verdiepen: ingevuld woord met grijze achtergrond */
+.ov07-gegeven {
+  background: #F5F5F5;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid #E0E0E0;
+  color: #333;
+  font-weight: bold;
+}
+
+/* Lijn-cel: schrijflijn met optioneel antwoord */
+.ov07-lijn-cel {
+  position: relative;
+  width: 100%;
+}
+.ov07-lijn-antwoord {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-55%);
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.2rem;
+  color: #c00;
+  font-weight: bold;
+  z-index: 2;
+  pointer-events: none;
+}
+.ov07-fallback-lijn {
+  border-bottom: 1.5px solid #333;
+  height: 24px;
+}
+
+/* ---- ⭐⭐⭐⭐ Uitbreiden: verhaaltje + schrijflijnen ---- */
+.ov07-uitbreiding-container {
+  margin-top: 14px;
+}
+.ov07-verhaal-origineel {
+  background: #FFFAE6;
+  border: 1.5px solid #F0D060;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+}
+.ov07-verhaal-titel {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: #B8860B;
+  margin-bottom: 6px;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+}
+.ov07-verhaal-zinnen {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+}
+.ov07-verhaal-zin {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 4px 0;
+  color: #222;
+}
+.ov07-zn-marker {
+  font-weight: bold;
+  color: #B8860B;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.ov07-zn-opl {
+  /* op oplossingenpagina staan er verkleinwoorden */
+  color: #c00;
+  text-decoration: none;
+}
+
+.ov07-verhaal-zinnen-oplossing {
+  background: #FFEBEE;
+  border: 1.5px solid #EF9A9A;
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+
+.ov07-verhaal-schrijf {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ov07-verhaal-lijn {
+  width: 100%;
+}
+
+/* ---- Compact-modus voor klein scherm-printen ---- */
+.ov07-blad.lijnhoogte-klein .ov07-rij {
+  padding: 3px 4px;
+}
+.ov07-blad.lijnhoogte-klein .ov07-grondwoord,
+.ov07-blad.lijnhoogte-klein .ov07-kol-woord {
+  font-size: 1.2rem;
+}
+
+/* ---- Uitgang-vinkjes in zijbalk-instellingen (compact) ---- */
+.ov07-uitgang-vink {
+  min-height: 56px;
+}
+.ov07-uitgang-vink strong {
+  font-size: 1.1rem;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+}
+
+/* ---- Vermijd page-break binnen kritieke blokken (PDF-export) ---- */
+.ov07-rij,
+.ov07-uitbreiding-container,
+.ov07-verhaal-origineel {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
