@@ -13,10 +13,38 @@
 window.SpellingWoordenkiezer = (function() {
 
   /* In-memory geheugen van vinkjes. Persistentie via localStorage zodat
-     ze ook na refresh terugkomen. */
+     ze ook na refresh terugkomen. Dit is de RUWE lijst (alles wat ooit
+     aangevinkt is). De FILTER op aangevinkte zijbalk-categorieën gebeurt
+     in syncActieveWoorden() — die zet window._weekdictee_gekozenWoorden. */
   let gekozen = [];
 
   const LS_KEY = "spelling-weekdictee-gekozen-v1";
+
+  /* Geef enkel woorden uit categorieën die momenteel aangevinkt zijn in
+     de zijbalk. Als er geen zijbalk is, alles teruggeven. */
+  function getActieveWoorden() {
+    const zb = window.SpellingZijbalk;
+    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") {
+      return gekozen;
+    }
+    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
+    if (actieveCats.size === 0) return [];
+    return gekozen.filter(w => actieveCats.has(w.categorie));
+  }
+
+  /* Hoeveel woorden zitten in de ruwe lijst die NIET actief zijn? */
+  function getVerborgenAantal() {
+    const zb = window.SpellingZijbalk;
+    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") return 0;
+    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
+    return gekozen.filter(w => !actieveCats.has(w.categorie)).length;
+  }
+
+  /* Sync window._weekdictee_gekozenWoorden met de FILTER actief. Wordt
+     aangeroepen na elke wijziging (vinkje, categorie-wissel, etc.) */
+  function syncActieveWoorden() {
+    window._weekdictee_gekozenWoorden = getActieveWoorden();
+  }
 
   /* ----- Init: laad opgeslagen keuzes uit localStorage ----- */
   function laadOpgeslagen() {
@@ -27,7 +55,7 @@ window.SpellingWoordenkiezer = (function() {
       console.warn("Kon opgeslagen keuzes niet laden:", e);
       gekozen = [];
     }
-    window._weekdictee_gekozenWoorden = gekozen;
+    syncActieveWoorden();
   }
 
   function bewaar() {
@@ -36,7 +64,7 @@ window.SpellingWoordenkiezer = (function() {
     } catch (e) {
       console.warn("Kon keuzes niet opslaan:", e);
     }
-    window._weekdictee_gekozenWoorden = gekozen;
+    syncActieveWoorden();
   }
 
   /* ----- Helpers: woord-id voor unieke identificatie ----- */
@@ -53,15 +81,34 @@ window.SpellingWoordenkiezer = (function() {
     const wb = window.SpellingWoordenbibliotheek;
     if (!wb) return "<p>Woordenbibliotheek niet beschikbaar.</p>";
 
+    // Lees zijbalk-filter: alleen aangevinkte categorieën tonen
+    const zijbalkFilter = window._zb_aangevinkteCategorieen;
+    const heeftFilter = zijbalkFilter && zijbalkFilter.size > 0;
+    
     const groepen = wb.categorieenPerGroep(leerjaar);
     let html = "";
+    
+    // Als zijbalk-filter actief is en geen enkele categorie aangevinkt:
+    if (zijbalkFilter && zijbalkFilter.size === 0) {
+      return `<div class="wk-leeg-graad">
+        <h3>Geen categorieën aangevinkt</h3>
+        <p>Sluit deze modal en vink in de zijbalk eerst categorieën aan onder "Wat wil je oefenen?".</p>
+      </div>`;
+    }
 
     for (const [groepId, cats] of Object.entries(groepen)) {
+      // Filter cats op zijbalk-aangevinkt
+      const filteredCats = heeftFilter 
+        ? cats.filter(c => zijbalkFilter.has(c.id))
+        : cats;
+      
+      if (filteredCats.length === 0) continue;
+      
       const groepLabel = wb.groepLabels[groepId] || groepId;
       html += `<div class="wk-categorie-blok">
         <div class="wk-groep-titel">${groepLabel}</div>`;
 
-      for (const cat of cats) {
+      for (const cat of filteredCats) {
         // Tel hoeveel woorden gekozen in deze categorie
         const aantalGekozenInCat = cat.woorden.filter(w => isGekozen(w, leerjaar, cat.id)).length;
 
@@ -169,6 +216,8 @@ window.SpellingWoordenkiezer = (function() {
       sluit();
       // Update info-tekst in sidebar
       updateSidebarInfo();
+      // Notificeer zijbalk dat woorden gewijzigd zijn
+      window.dispatchEvent(new Event("spelling:woorden-gewijzigd"));
       // Trigger preview ververs
       if (window.SpellingPreview) window.SpellingPreview.ververs();
     });
@@ -268,7 +317,10 @@ window.SpellingWoordenkiezer = (function() {
     open,
     sluit,
     updateSidebarInfo,
-    getGekozen: () => gekozen
+    syncActieveWoorden,             // herbereken filter (te roepen door zijbalk bij categorie-wissel)
+    getGekozen: () => gekozen,       // alle woorden (ruwe lijst, ook verborgen)
+    getActieveWoorden,               // alleen woorden uit aangevinkte categorieën
+    getVerborgenAantal               // hoeveel woorden zijn er momenteel verborgen
   };
 
 })();
