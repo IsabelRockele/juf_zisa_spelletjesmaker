@@ -70,6 +70,28 @@ window.SpellingGenerator = {
       };
     }
 
+    // === OV07-specifieke opties (Verkleinwoorden) ===
+    let ov07 = null;
+    if (cat === "ov07") {
+      const niveaus = [];
+      document.querySelectorAll("#ov07-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
+      const uitgangen = [];
+      document.querySelectorAll("#ov07-uitgangen input[type='checkbox'][data-uitgang]").forEach(cb => {
+        if (cb.checked) uitgangen.push(cb.dataset.uitgang);
+      });
+      ov07 = {
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        uitgangen: uitgangen.length > 0 ? uitgangen : ["je", "tje", "pje"],
+        aantalWoorden: parseInt(document.querySelector("#ov07-aantal-woorden")?.value || "8", 10),
+        verhaalIdx: parseInt(document.querySelector("#ov07-verhaal-keuze")?.value || "0", 10),
+        lijnhoogte: document.querySelector("#ov07-lijnhoogte button.actief")?.dataset.hoogte || "middel",
+        lijntype: document.querySelector("#ov07-lijntype input[name='ov07-lt']:checked")?.value || "type3",
+        ondertitel: document.querySelector("#ov07-ondertitel")?.value || ""
+      };
+    }
+
     // === OV05-specifieke opties (Klank kiezen) ===
     let ov05 = null;
     if (cat === "ov05") {
@@ -195,7 +217,8 @@ window.SpellingGenerator = {
       ov03,
       ov04,
       ov05,
-      ov06
+      ov06,
+      ov07
     };
   },
 
@@ -216,7 +239,7 @@ window.SpellingGenerator = {
     if (opties.categorie === "weekdictee" || opties.categorie === "ov01" 
         || opties.categorie === "ov02" || opties.categorie === "ov03"
         || opties.categorie === "ov04" || opties.categorie === "ov05"
-        || opties.categorie === "ov06") {
+        || opties.categorie === "ov06" || opties.categorie === "ov07") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
