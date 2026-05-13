@@ -208,7 +208,7 @@
     _renderOpdrachtTekst: function (niveau) {
       const stappen = {
         basis: [
-          "Lees het woord.",
+          "Lees het grondwoord.",
           "Kies of er -en of -s achter komt.",
           "Schrijf het meervoud op de lijn."
         ],
@@ -328,13 +328,19 @@
           : `<div class="ov07-fallback-lijn ov08-fallback-lijn"></div>`;
 
         if (richting === "vul-meervoud") {
+          // Enkelvoud staat klaar in kol1 (gegeven bubble),
+          // kind vult meervoud in op de lijn in kol2.
+          // Oplossing-tekst hoort op de LIJN in kol2 (meervoud-kant).
           kol1HTML = `<div class="ov07-kol-woord ov08-kol-woord ov07-gegeven ov08-gegeven">${w.tekst}</div>`;
           const antw = metAntwoorden ? `<span class="ov07-lijn-antwoord ov08-lijn-antwoord">${meervoud}</span>` : "";
-          kol2HTML = `<div class="ov07-kol-meervoud ov08-kol-meervoud">${antw}${canvas(220)}</div>`;
+          kol2HTML = `<div class="ov07-kol-verklein ov08-kol-meervoud">${antw}${canvas(220)}</div>`;
         } else {
+          // Meervoud staat klaar in kol2 (gegeven bubble),
+          // kind vult enkelvoud in op de lijn in kol1.
+          // Oplossing-tekst hoort op de LIJN in kol1 (enkelvoud-kant).
           const antw = metAntwoorden ? `<span class="ov07-lijn-antwoord ov08-lijn-antwoord">${w.tekst}</span>` : "";
           kol1HTML = `<div class="ov07-kol-woord ov08-kol-woord">${antw}${canvas(220)}</div>`;
-          kol2HTML = `<div class="ov07-kol-meervoud ov08-kol-meervoud ov07-gegeven ov08-gegeven">${meervoud}</div>`;
+          kol2HTML = `<div class="ov07-kol-verklein ov08-kol-meervoud ov07-gegeven ov08-gegeven">${meervoud}</div>`;
         }
 
         rijenHTML += `
