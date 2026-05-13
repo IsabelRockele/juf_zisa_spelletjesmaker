@@ -239,7 +239,8 @@ window.SpellingGenerator = {
     if (opties.categorie === "weekdictee" || opties.categorie === "ov01" 
         || opties.categorie === "ov02" || opties.categorie === "ov03"
         || opties.categorie === "ov04" || opties.categorie === "ov05"
-        || opties.categorie === "ov06" || opties.categorie === "ov07") {
+        || opties.categorie === "ov06" || opties.categorie === "ov07"
+        || opties.categorie === "ov08") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
