@@ -53,9 +53,16 @@ window.SpellingZijbalk = (function() {
       defaultAantal: 6
     },
     {
-      id: "ov07", label: "🧸 Verkleinwoorden",
+      id: "ov07", label: "🧸 Oefenvorm enkel voor verkleinwoorden",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
-      defaultAantal: 8
+      defaultAantal: 8,
+      enkelVoor: ["verkleinwoorden"]  // toon OV alleen als deze categorie-groep aangevinkt is
+    },
+    {
+      id: "ov08", label: "🔢 Oefenvorm enkel voor meervouden",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 8,
+      enkelVoor: ["meervouden"]
     },
     {
       id: "weekdictee", label: "📅 Weekdictee",
@@ -307,13 +314,96 @@ window.SpellingZijbalk = (function() {
     }
   }
 
-  /* ---------- Render: oefenvorm-selector ---------- */
+  /* ---------- Render: oefenvorm-selector ----------
+   
+     Mode-logica voor zichtbaarheid van oefenvormen:
+     - Specifieke OV's (met enkelVoor: ["groep-x"]) verschijnen ALLEEN als
+       een categorie met die groep aangevinkt is.
+     - Generieke OV's (geen enkelVoor) verschijnen ALLEEN als minstens één
+       categorie aangevinkt is die NIET tot een specifieke groep behoort.
+     - Weekdictee (uitzondering): altijd zichtbaar als er ÉÉN categorie
+       aangevinkt is, ongeacht type.
+     
+     Voorbeelden:
+     - Enkel "verklein-je" aangevinkt → OV07 + weekdictee
+     - Enkel "meervoud-zuiver" → OV08 + weekdictee
+     - Beide bovenstaande → OV07 + OV08 + weekdictee
+     - Enkel "mkm-a" → OV01-OV06 + weekdictee
+     - "mkm-a" + "verklein-je" → alles (OV01-OV08 + weekdictee) */
+  
+  /* Helper: verzamel alle "specifieke groep"-namen uit OEFENVORMEN. */
+  function _alleSpecifiekeGroepen() {
+    const s = new Set();
+    for (const oef of OEFENVORMEN) {
+      if (oef.enkelVoor) {
+        for (const g of oef.enkelVoor) s.add(g);
+      }
+    }
+    return s;
+  }
+  
+  /* Helper: detecteer welke "soorten" categorieën aangevinkt zijn.
+     Returns { specifiekeGroepen: Set<string>, heeftGenerieke: bool } */
+  function _detecteerCategorieSoorten() {
+    const wb = window.SpellingWoordenbibliotheek;
+    const result = { specifiekeGroepen: new Set(), heeftGenerieke: false };
+    if (!wb) return result;
+    const data = wb[`graad${actieveGraad}`];
+    if (!data) return result;
+    const aangevinkt = getAangevinkteCats();
+    if (aangevinkt.size === 0) return result;
+    
+    const specifiekeSet = _alleSpecifiekeGroepen();
+    for (const catId of aangevinkt) {
+      const cat = data[catId];
+      if (!cat) continue;
+      if (specifiekeSet.has(cat.groep)) {
+        result.specifiekeGroepen.add(cat.groep);
+      } else {
+        result.heeftGenerieke = true;
+      }
+    }
+    return result;
+  }
+  
+  /* Helper: bepaal of een oefenvorm zichtbaar mag zijn in de zijbalk. */
+  function _isOefenvormZichtbaar(oef) {
+    const soorten = _detecteerCategorieSoorten();
+    const ietsAangevinkt = soorten.heeftGenerieke || soorten.specifiekeGroepen.size > 0;
+    
+    // Weekdictee: zichtbaar zodra er iets aangevinkt is (anders heeft het geen woorden)
+    if (oef.id === "weekdictee") {
+      return ietsAangevinkt || true;  // altijd zichtbaar, zonder cats werkt het toch niet
+    }
+    
+    // Specifieke OV (heeft enkelVoor): toon ALLEEN als bijhorende cat aangevinkt
+    if (oef.enkelVoor && oef.enkelVoor.length > 0) {
+      return oef.enkelVoor.some(g => soorten.specifiekeGroepen.has(g));
+    }
+    
+    // Generieke OV (geen enkelVoor): toon ALLEEN als er minstens één
+    // generieke cat aangevinkt is (anders is er geen woordpool voor OV01-06).
+    // Als er helemaal niets aangevinkt is, ook tonen (default-toestand).
+    if (!ietsAangevinkt) return true;
+    return soorten.heeftGenerieke;
+  }
+  
   function renderOefenvormen() {
     const container = document.querySelector("#oefenvorm-selector");
     if (!container) return;
     
     let html = "";
     for (const oef of OEFENVORMEN) {
+      // Skip oefenvormen die niet bij de aangevinkte categorieën horen
+      if (!_isOefenvormZichtbaar(oef)) {
+        // Vink ook automatisch uit zodat hij niet stiekem aan blijft staan
+        const state = oefenvormState.find(s => s.id === oef.id);
+        if (state && state.aangevinkt) {
+          state.aangevinkt = false;
+        }
+        continue;
+      }
+      
       let state = oefenvormState.find(s => s.id === oef.id);
       if (!state) {
         state = _defaultStateVoor(oef);
@@ -407,6 +497,7 @@ window.SpellingZijbalk = (function() {
         }
         bewaarState();
         renderHoofdgroepSelector();
+        renderOefenvormen();  // OV07 in/uit bij graad-wissel
       });
     });
     
@@ -418,6 +509,7 @@ window.SpellingZijbalk = (function() {
         else set.delete(catId);
         bewaarState();
         renderHoofdgroepSelector();
+        renderOefenvormen();  // OV07 in/uit op basis van verkleinwoord-cats
       }
       else if (e.target.matches(".zb-hg-master")) {
         const hgId = e.target.dataset.hoofdgroep;
@@ -433,6 +525,7 @@ window.SpellingZijbalk = (function() {
         }
         bewaarState();
         renderHoofdgroepSelector();
+        renderOefenvormen();  // OV07 in/uit op basis van verkleinwoord-cats
       }
     });
     
@@ -459,8 +552,26 @@ window.SpellingZijbalk = (function() {
         const niv = e.target.dataset.niveau;
         const state = _getOrCreateState(oefId);
         if (state) {
-          if (e.target.checked) state.niveaus.add(niv);
-          else state.niveaus.delete(niv);
+          if (e.target.checked) {
+            state.niveaus.add(niv);
+            // UX: als jij een niveau aanvinkt, betekent dat dat je deze
+            // oefenvorm wilt gebruiken. Vink hem dus automatisch aan.
+            if (!state.aangevinkt) {
+              state.aangevinkt = true;
+              bewaarState();
+              renderOefenvormen();  // re-render om het hele blok geopend te tonen
+              return;
+            }
+          } else {
+            state.niveaus.delete(niv);
+            // Als geen enkel niveau meer aangevinkt is, oefenvorm zelf ook uit.
+            if (state.niveaus.size === 0 && state.aangevinkt) {
+              state.aangevinkt = false;
+              bewaarState();
+              renderOefenvormen();
+              return;
+            }
+          }
           bewaarState();
         }
       }
