@@ -40,17 +40,140 @@ window.SpellingBundel = {
     this._updateUI();
   },
 
-  /* === Voeg huidige werkblad-instellingen toe aan bundel === */
+  /* === Voeg huidige werkblad-instellingen toe aan bundel ===
+     
+     Twee modi:
+     1. Multi-mode (zijbalk redesign): SpellingZijbalk heeft één of meerdere
+        oefenvormen aangevinkt → maak voor elke combinatie (oefenvorm × niveau)
+        een apart werkblad-item.
+     2. Legacy-mode: oude flow met één actieve cat-knop. */
   voegToe: function() {
+    // Probeer eerst de nieuwe zijbalk-API
+    const zb = window.SpellingZijbalk;
+    if (zb && typeof zb.getAangevinkteOefenvormen === "function") {
+      const aangevinkt = zb.getAangevinkteOefenvormen();
+      if (aangevinkt.length > 0) {
+        return this._voegToeMulti(aangevinkt);
+      }
+    }
+    // Anders fallback op legacy
+    return this._voegToeLegacy();
+  },
+
+  /* === Multi-mode: 1 of meer oefenvormen aangevinkt in zijbalk === */
+  _voegToeMulti: function(aangevinkteOefenvormen) {
+    const huidigeGekozen = window._weekdictee_gekozenWoorden || [];
+    if (huidigeGekozen.length === 0) {
+      alert("Nog geen woorden gekozen. Klik in de zijbalk op 'Open woordenkiezer' om woorden te selecteren.");
+      return;
+    }
+
+    // Snapshot dedup (zoals legacy)
+    const gezien = new Set();
+    const ontdubbeld = [];
+    for (const w of huidigeGekozen) {
+      const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
+      if (!key || gezien.has(key)) continue;
+      gezien.add(key);
+      ontdubbeld.push(w);
+    }
+    const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(ontdubbeld));
+
+    let aantalToegevoegd = 0;
+    
+    for (const oef of aangevinkteOefenvormen) {
+      const module = window.SpellingModules?.[oef.id];
+      if (!module) {
+        console.warn("Module niet gevonden:", oef.id);
+        continue;
+      }
+
+      // Voor weekdictee: 1 item, geen niveau-loop
+      if (oef.id === "weekdictee") {
+        alert("Weekdictee kan niet in een gemengde bundel. Maak die apart.");
+        continue;
+      }
+
+      // Voor oefenvormen ZONDER niveaus (bv ov02): één item
+      const niveaus = oef.niveaus.length > 0 ? oef.niveaus : ["basis"];
+      
+      // Voor elke aangevinkte niveau: maak een apart item
+      for (const niveau of niveaus) {
+        const seed = (Date.now() + aantalToegevoegd * 7919) & 0xFFFFFFFF;
+        
+        // Bouw opties-object dat de module verwacht
+        const opties = this._bouwOptiesVoor(oef, niveau);
+        
+        const item = {
+          id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
+          categorie: oef.id,
+          opties: opties,
+          seed: seed,
+          gekozenWoordenSnapshot: gekozenWoordenSnapshot,
+          niveau: niveau,
+          html: ""
+        };
+        
+        try {
+          item.html = this._renderItemHTML(item, false);
+          this.items.push(item);
+          aantalToegevoegd++;
+        } catch (e) {
+          console.error("Kon item niet renderen voor", oef.id, niveau, e);
+        }
+      }
+    }
+    
+    if (aantalToegevoegd === 0) {
+      alert("Geen werkbladen toegevoegd. Vink minstens één niveau aan per oefenvorm.");
+      return;
+    }
+    
+    this._renderPreview();
+    this._updateUI();
+  },
+
+  /* Bouw een opties-object voor een specifieke oefenvorm + niveau,
+     zodat de bestaande modules het kunnen gebruiken zoals ze gewend zijn. */
+  _bouwOptiesVoor: function(oef, niveau) {
+    const zb = window.SpellingZijbalk;
+    const graad = zb ? zb.getActieveGraad() : 1;
+    
+    // Globale lijntype uit zijbalk-knop
+    const lijntypeGlobaal = document.querySelector(".lijn-knop.actief")?.dataset.lijn || "vier";
+    
+    // Per-oefenvorm sub-object dat module verwacht (oef01, ov06 etc)
+    const subOpties = {
+      niveaus: [niveau],
+      aantalWoorden: oef.aantal,
+      aantalZinnen: oef.aantal,        // ov06 gebruikt zinnen
+      lijnhoogte: oef.lijnhoogte || "middel",
+      lijntype: oef.lijntype || "type3",
+      ondertitel: ""
+    };
+    
+    return {
+      categorie: oef.id,
+      graad: graad,
+      niveau: niveau,
+      subcat: "kort",
+      lijntypeGlobaal: lijntypeGlobaal,
+      lijntypePerVorm: {},
+      oefenvormen: [oef.id],
+      [oef.id]: subOpties
+    };
+  },
+
+  /* === Legacy-mode (oude flow, voor backwards-compat) === */
+  _voegToeLegacy: function() {
     const actieveCat = document.querySelector(".cat-knop.actief")?.dataset.categorie;
     if (!actieveCat) {
-      alert("Geen oefenvorm geselecteerd.");
+      alert("Geen oefenvorm geselecteerd. Vink in de zijbalk minstens één oefenvorm aan.");
       return;
     }
 
     if (actieveCat === "weekdictee") {
-      // Weekdictee staat niet in de bundel — eigen flow
-      alert("Weekdictee kan niet aan een gemengde bundel worden toegevoegd. Het is al een complete reeks. Gebruik 'Download PDF' bij weekdictee zelf.");
+      alert("Weekdictee staat niet in de bundel.");
       return;
     }
 
@@ -60,27 +183,28 @@ window.SpellingBundel = {
       return;
     }
 
-    // Genereer werkblad-HTML
     const module = window.SpellingModules?.[actieveCat];
     if (!module) {
       alert("Module niet gevonden: " + actieveCat);
       return;
     }
     
-    // Nieuwe seed → andere woorden voor elke "Voeg toe" klik
     const seed = Date.now() & 0xFFFFFFFF;
     if (window.SpellingGenerator) {
       window.SpellingGenerator._laatsteSeed = seed;
     }
     
-    // Snapshot maken van de gekozen woorden van dit moment.
-    // Bij "✕ verwijder woord" en "+1 woord erbij" werken we op deze snapshot,
-    // niet op de globale woordenkiezer-pool. Zo blijft het werkblad voorspelbaar
-    // ook al verandert de leerkracht later van woordenkiezer-selectie.
     const huidigeGekozen = window._weekdictee_gekozenWoorden || [];
-    const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(huidigeGekozen));
+    const gezien = new Set();
+    const ontdubbeld = [];
+    for (const w of huidigeGekozen) {
+      const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
+      if (!key || gezien.has(key)) continue;
+      gezien.add(key);
+      ontdubbeld.push(w);
+    }
+    const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(ontdubbeld));
 
-    // Snapshot van opties (voor latere her-render bij oplossingen of niveau-filter)
     const item = {
       id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
       categorie: actieveCat,
@@ -183,8 +307,11 @@ window.SpellingBundel = {
 
     let html = "";
     for (const item of this.items) {
-      // Wikkel werkblad in een container met ✕ knop en eventueel +1 knop
-      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06"].includes(item.categorie);
+      // Wikkel werkblad in een container met ✕ knop en eventueel +1 knop.
+      // OV07 ⭐⭐⭐⭐ uitbreiding gebruikt een vast verhaal, geen woordenlijst → geen +1 knop.
+      const isOV07Uitbreiding = (item.categorie === "ov07" && item.niveau === "uitbreiding");
+      const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07"].includes(item.categorie)
+                            && !isOV07Uitbreiding;
       const plus1Label = item.categorie === "ov06" ? "➕ 1 zin erbij" : "➕ 1 woord erbij";
       const plusKnop = supportsPlus1
         ? `<button class="bundel-item-plus-knop" data-item-id="${item.id}" title="Voeg 1 ${item.categorie === 'ov06' ? 'zin' : 'woord'} toe">${plus1Label}</button>`
@@ -443,7 +570,7 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok"]
+            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel"]
           }
         };
 
