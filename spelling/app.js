@@ -34,7 +34,8 @@
     const isOV04 = (cat === "ov04");
     const isOV05 = (cat === "ov05");
     const isOV06 = (cat === "ov06");
-    const verbergStandaard = isWeekdictee || isOV01 || isOV02 || isOV03 || isOV04 || isOV05 || isOV06;
+    const isOV07 = (cat === "ov07");
+    const verbergStandaard = isWeekdictee || isOV01 || isOV02 || isOV03 || isOV04 || isOV05 || isOV06 || isOV07;
     document.querySelectorAll(".sidebar .block").forEach(blok => {
       const h2 = blok.querySelector("h2")?.textContent || "";
       if (verbergStandaard && (h2.startsWith("3.") || h2.startsWith("4."))) {
@@ -71,6 +72,45 @@
       container.querySelectorAll("#ov06-lijnhoogte button").forEach(btn => {
         btn.addEventListener("click", () => {
           maakActief("#ov06-lijnhoogte button", btn);
+          window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+        });
+      });
+      window.SpellingSchrijflijnen?.tekenLijntypePreviews();
+      return;
+    }
+
+    // === OV07-specifieke bedrading ===
+    if (isOV07) {
+      container.querySelector("#ov07-open-kiezer")?.addEventListener("click", () => {
+        if (window.SpellingWoordenkiezer) window.SpellingWoordenkiezer.open();
+      });
+      if (window.SpellingWoordenkiezer) {
+        window.SpellingWoordenkiezer.updateSidebarInfo();
+        const aantal = (window._weekdictee_gekozenWoorden || []).length;
+        const info = document.querySelector("#ov07-keuze-info");
+        if (info) {
+          if (aantal === 0) {
+            info.textContent = "Nog geen woorden gekozen.";
+            info.style.color = "#888";
+          } else {
+            info.innerHTML = `<strong>${aantal}</strong> woord${aantal === 1 ? '' : 'en'} gekozen ✓`;
+            info.style.color = "var(--zisa-blauw)";
+          }
+        }
+      }
+      container.querySelectorAll("#ov07-niveaus input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          cb.closest(".ov-niveau-vink").classList.toggle("actief", cb.checked);
+        });
+      });
+      container.querySelectorAll("#ov07-uitgangen input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", () => {
+          cb.closest(".ov-niveau-vink").classList.toggle("actief", cb.checked);
+        });
+      });
+      container.querySelectorAll("#ov07-lijnhoogte button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          maakActief("#ov07-lijnhoogte button", btn);
           window.SpellingSchrijflijnen?.tekenLijntypePreviews();
         });
       });
@@ -514,7 +554,8 @@
   /* ----- Niveau-uitleg updaten ----- */
   function updateNiveauUitleg() {
     const niveau = document.querySelector(".niveau-knop.actief")?.dataset.niveau;
-    document.querySelector("#niveau-uitleg").innerHTML = niveauUitleg[niveau] || "";
+    const el = document.querySelector("#niveau-uitleg");
+    if (el) el.innerHTML = niveauUitleg[niveau] || "";
   }
 
   /* ----- Init bij laden ----- */
