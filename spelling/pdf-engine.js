@@ -158,7 +158,7 @@ window.SpellingPDF = {
         before: ".pagina-break-voor",
         // .werkblad mag NOOIT gesplitst worden — anders krijgt elk werkblad
         // een lege restant-pagina. Een werkblad past op exact één A4.
-        avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel"]
+        avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel"]
       }
     };
 
