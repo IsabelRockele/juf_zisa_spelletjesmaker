@@ -1,0 +1,23 @@
+/* ==========================================================
+   WOORDENFILTER + WIS-KNOP styling
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   
+   Wat het doet:
+   - "+5 verborgen" hint krijgt grijze italics styling (minder
+     prominent dan het actieve aantal)
+   - Wis-knop blijft rood maar wat duidelijker
+   ========================================================== */
+
+.zb-verborgen-hint {
+  color: #888;
+  font-style: italic;
+  font-size: 0.85em;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+/* Wis-knop iets opvallender wanneer hij verschijnt */
+#bundel-wis {
+  font-weight: 600;
+}
