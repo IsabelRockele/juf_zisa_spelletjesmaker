@@ -1479,6 +1479,266 @@ window.SpellingZinnen.graad1 = {
   ],
 
   /* ============================================================
+     CH / CHT WOORDEN
+     Goedgekeurd door Isabel — batch toegevoegd na review.
+     ============================================================ */
+
+  // ----- CH / CHT-WOORDEN (18 woorden) -----
+  "ach": [
+    "Ach, mijn schoen is stuk.",
+    "Ach, wat een mooi liedje!",
+    "Sara roept: ach, kijk eens!"
+  ],
+  "lach": [
+    "Tom heeft een grote lach.",
+    "Mama heeft een mooie lach.",
+    "Op haar gezicht zie ik een lach."
+  ],
+  "pech": [
+    "Sam heeft pech met zijn fiets.",
+    "Wat een pech, het regent vandaag.",
+    "Papa heeft pech met de auto."
+  ],
+  "zich": [
+    "Tom wast zich in de badkamer.",
+    "Het meisje verstopt zich onder de tafel.",
+    "Sara verveelt zich."
+  ],
+  "toch": [
+    "Het regent, maar wij spelen toch buiten.",
+    "Pim is moe, en toch wil hij verder.",
+    "Mama zegt nee, en toch vraagt Lien het."
+  ],
+  "acht": [
+    "Mijn broertje is acht jaar.",
+    "Ik tel tot acht.",
+    "Sam wacht al acht minuten."
+  ],
+  "nacht": [
+    "In de nacht slaapt iedereen.",
+    "De maan schijnt in de nacht.",
+    "Pim droomt elke nacht mooi."
+  ],
+  "licht": [
+    "Doe het licht aan, het is donker.",
+    "De zon geeft veel licht.",
+    "In mijn kamer doe ik het licht aan."
+  ],
+  "lacht": [
+    "Lien lacht heel hard.",
+    "Mama lacht om mijn grap.",
+    "Wie lacht er zo luid?"
+  ],
+  "vecht": [
+    "Mijn poes vecht met de buurkat.",
+    "Hij vecht nooit met zijn zusje.",
+    "De ridder vecht met een zwaard."
+  ],
+  "recht": [
+    "Sta eens recht op je stoel.",
+    "De lijn moet recht zijn.",
+    "Loop recht naar de deur."
+  ],
+  "zucht": [
+    "Oma slaakt een diepe zucht.",
+    "Met een zucht ploft Tom neer.",
+    "Wat een zucht, ben je moe?"
+  ],
+  "vlucht": [
+    "De vogel neemt de vlucht.",
+    "De dief is op de vlucht.",
+    "Onze vlucht naar Spanje duurt drie uur."
+  ],
+  "wacht": [
+    "Wacht eens even op mij!",
+    "Ik wacht aan de poort.",
+    "Mama wacht op de bus."
+  ],
+  "dacht": [
+    "Ik dacht aan mijn mama.",
+    "Wat dacht je van een ijsje?",
+    "Lien dacht dat het zou regenen."
+  ],
+  "dicht": [
+    "Doe de deur dicht.",
+    "Het raam staat niet dicht.",
+    "De winkel is op zondag dicht."
+  ],
+  "echt": [
+    "Is dat een echt paard?",
+    "Is dit echt waar?",
+    "Dit is een echt leuk verhaal."
+  ],
+  "lucht": [
+    "Er drijft een wolk in de lucht.",
+    "Pim ziet een donkere wolk in de lucht.",
+    "Een vogel vliegt door de lucht."
+  ],
+
+  /* ============================================================
+     DOFFE KLANK — WERKWOORDEN OP -EN
+     Goedgekeurd door Isabel. Pas op voor weekdictee: deze
+     werkwoorden zijn vaak nog te complex voor schrijfniveau lj 1,
+     maar geschikt voor OV06 (kind hoort zin en vult woord in).
+     ============================================================ */
+
+  "lopen": [
+    "Sam gaat lopen op het strand.",
+    "Wij gaan elke ochtend lopen.",
+    "Pim wil hard lopen op de speelplaats."
+  ],
+  "eten": [
+    "Wat gaan we eten vandaag?",
+    "Tom wil graag een appel eten.",
+    "Sara gaat lekker eten."
+  ],
+  "drinken": [
+    "Ik wil iets drinken.",
+    "Lien houdt van melk drinken.",
+    "Papa gaat koffie drinken."
+  ],
+  "spelen": [
+    "Mag ik buiten spelen?",
+    "De kinderen gaan in de tuin spelen.",
+    "Sam wil met zijn auto spelen."
+  ],
+  "lezen": [
+    "Ik leer lezen op school.",
+    "Lien wil graag een boek lezen.",
+    "Mama gaat een verhaaltje lezen."
+  ],
+  "kijken": [
+    "Mag ik tv kijken?",
+    "Pim wil naar de film kijken.",
+    "We gaan naar de vogels kijken."
+  ],
+  "fluiten": [
+    "Papa kan hard fluiten.",
+    "De vogels beginnen te fluiten.",
+    "Tom leert fluiten op zijn vingers."
+  ],
+  "praten": [
+    "Mag ik even met je praten?",
+    "De juf wil met mama praten.",
+    "Lien wil met haar oma praten."
+  ],
+  "wonen": [
+    "Wij wonen in een groot huis.",
+    "Oma en opa wonen in het dorp.",
+    "Sam wil bij de zee wonen."
+  ],
+  "slapen": [
+    "De poes gaat slapen.",
+    "Ik wil nog niet slapen.",
+    "De poes gaat lekker slapen op de bank."
+  ],
+  "vragen": [
+    "Mama, ik moet iets vragen.",
+    "Mag ik wat vragen?",
+    "Sam wil de juf iets vragen."
+  ],
+  "geven": [
+    "Mama gaat mij een knuffel geven.",
+    "Wil je mij dat boek geven?",
+    "Papa zal mij een cadeau geven."
+  ],
+
+  /* ============================================================
+     MEERVOUD OP -S
+     Goedgekeurd door Isabel. Zinnen onder de meervoudsvorm-key,
+     net zoals andere meervoudsvormen in deze bibliotheek.
+     ============================================================ */
+
+  "kikkers": [
+    "In de vijver zwemmen veel kikkers.",
+    "De kikkers springen op het gras.",
+    "Pim hoort kikkers in de tuin."
+  ],
+  "ladders": [
+    "Papa heeft twee ladders in de schuur.",
+    "De brandweer gebruikt lange ladders.",
+    "Naast het huis staan ladders."
+  ],
+  "emmers": [
+    "In de tuin staan twee emmers met water.",
+    "Mama vult de emmers met zeepsop.",
+    "Tom draagt drie emmers naar buiten."
+  ],
+  "letters": [
+    "Op het bord staan veel letters.",
+    "Ik leer alle letters van het alfabet.",
+    "Sara schrijft mooie letters."
+  ],
+  "lepels": [
+    "Op tafel liggen vier lepels.",
+    "Mama doet de lepels in de la.",
+    "Wij eten soep met lepels."
+  ],
+  "vaders": [
+    "Lien en Sara hebben lieve vaders.",
+    "De vaders helpen bij het schoolfeest.",
+    "Onze vaders komen ons halen."
+  ],
+  "tafels": [
+    "In de klas staan zes tafels.",
+    "De tafels zijn netjes opgeruimd.",
+    "Wij zetten alle tafels op een rij."
+  ],
+  "tijgers": [
+    "In de zoo zien wij twee tijgers.",
+    "De tijgers slapen onder de boom.",
+    "Tijgers hebben oranje en zwarte strepen."
+  ],
+  "bekers": [
+    "In de kast staan veel bekers.",
+    "Mama vult de bekers met melk.",
+    "Sam telt zeven bekers op tafel."
+  ],
+  "wortels": [
+    "Het konijn eet graag wortels.",
+    "In de tuin groeien dikke wortels.",
+    "Mama snijdt de wortels in stukjes."
+  ],
+  "vlinders": [
+    "In de zomer vliegen veel vlinders rond.",
+    "Op de bloemen zitten kleurige vlinders.",
+    "Lien telt drie vlinders in de tuin."
+  ],
+  "winkels": [
+    "In het dorp staan veel winkels.",
+    "Mama gaat naar twee winkels vandaag.",
+    "De winkels zijn op zondag dicht."
+  ],
+  "dokters": [
+    "In het ziekenhuis werken veel dokters.",
+    "De dokters helpen zieke mensen.",
+    "Mijn ouders kennen twee dokters."
+  ],
+  "sleutels": [
+    "Mama zoekt haar sleutels in de tas.",
+    "Aan de haak hangen drie sleutels.",
+    "Papa heeft de sleutels van de auto."
+  ],
+  "jongens": [
+    "De jongens lachen op de speelplaats.",
+    "Drie jongens spelen samen voetbal.",
+    "Sam en Tom zijn vrolijke jongens."
+  ],
+
+  /* ============================================================
+     STUKJESWOORDEN — open lettergreep, één letter klinkt lang
+     Bv. water (wa-ter), vader (va-der), tafel (ta-fel), lepel
+     (le-pel), beker (be-ker). Je hoort een lange klank, maar
+     schrijft slechts één letter.
+     ============================================================ */
+
+  "water": [
+    "Lien drinkt een glas water.",
+    "In de fles zit koud water.",
+    "Mama zet water op het vuur."
+  ],
+
+  /* ============================================================
      MEERVOUDEN (verdubbelaars + verenkelaars + meervoud-en)
      Bevat de meervoudsvormen die in graad1.js voorkomen onder de
      categorieën verdubbelaars, verenkelaars, meervoud-en,
@@ -1775,6 +2035,895 @@ window.SpellingZinnen.graad1 = {
     "Mijn voeten doen pijn na het wandelen.",
     "Was je voeten goed.",
     "We staan met onze voeten in het zand."
+  ],
+
+  /* ============================================================
+     WAVE 1 — Aanvullende zinnen per categorie (Isabel sept 2026)
+     Goedgekeurd in batch-review. Werkwoord-stammen kregen
+     vervoegde varianten in graad1.js; zinnen volgen.
+     ============================================================ */
+
+  // ===== KORTE KLANKEN (MKM) =====
+  "sip": [
+    "Tom kijkt sip naar de grond.",
+    "Lien is sip omdat ze niet mee mag.",
+    "Sara trekt een sip gezicht."
+  ],
+  "nul": [
+    "Tom heeft nul punten.",
+    "Op het bord staat een dikke nul.",
+    "Drie min drie is nul."
+  ],
+  "bes": [
+    "Op de struik groeit een rode bes.",
+    "Ik eet een dikke bes.",
+    "De vogel pikt een bes op."
+  ],
+  "bek": [
+    "De vogel heeft een gele bek.",
+    "Doe je bek dicht!",
+    "De eend opent zijn bek."
+  ],
+  "mos": [
+    "Op de boom groeit groen mos.",
+    "In het bos ligt veel mos.",
+    "Het zachte mos is warm."
+  ],
+  "bos": [
+    "Wij wandelen door het bos.",
+    "In het bos staan veel bomen.",
+    "Sam ziet een ree in het bos."
+  ],
+
+  // ===== LANGE KLANKEN =====
+  "puur": [
+    "Dit is puur water.",
+    "De honing is puur.",
+    "Wij drinken puur sap."
+  ],
+  "huur": [
+    "Mama betaalt elke maand huur.",
+    "De huur van het huis is duur.",
+    "Wij hebben de huur betaald."
+  ],
+
+  // ===== TWEEKLANKEN =====
+  "loep": [
+    "Met een loep zie ik alles beter.",
+    "Sam bekijkt een mier door zijn loep.",
+    "Oma leest met een grote loep."
+  ],
+  "nieuws": [
+    "Mama kijkt naar het nieuws.",
+    "Heb je het nieuws al gehoord?",
+    "Op de radio komt het nieuws."
+  ],
+  "bout": [
+    "Papa draait een bout in de muur.",
+    "De bout zit los.",
+    "Sam zoekt een grote bout."
+  ],
+  "trouw": [
+    "Onze hond is heel trouw.",
+    "Mijn vriendin blijft altijd trouw.",
+    "Een trouw maatje is goud waard."
+  ],
+  "touw": [
+    "Tom springt over een touw.",
+    "Het touw is heel lang.",
+    "Bind het pakje met een touw."
+  ],
+  "paus": [
+    "De paus woont in Rome.",
+    "Op tv komt de paus.",
+    "De paus draagt witte kleren."
+  ],
+  "klauw": [
+    "De vogel heeft scherpe klauw.",
+    "Met zijn klauw pakt de kat een muis.",
+    "De adelaar klemt zijn klauw vast."
+  ],
+  "auto": [
+    "Papa rijdt met de auto.",
+    "Onze auto is rood.",
+    "De auto staat voor het huis."
+  ],
+  "augustus": [
+    "In augustus is het warm.",
+    "Wij gaan in augustus op reis.",
+    "Augustus is een vakantiemaand."
+  ],
+  "beuk": [
+    "In het bos staat een hoge beuk.",
+    "Onder de beuk speelt Tom.",
+    "De beuk heeft groene bladeren."
+  ],
+  "scheur": [
+    "In mijn broek zit een scheur.",
+    "Pas op voor de scheur in het kleed.",
+    "Mama herstelt de scheur."
+  ],
+  "buik": [
+    "Lien heeft pijn in haar buik.",
+    "Op zijn buik ligt een poes.",
+    "Mijn buik knort van de honger."
+  ],
+  "duif": [
+    "Op het dak zit een witte duif.",
+    "Een duif vliegt door de lucht.",
+    "Sam voert een duif brood."
+  ],
+  "bui": [
+    "Buiten komt een dikke bui.",
+    "Door de bui worden wij nat.",
+    "Na de bui schijnt de zon."
+  ],
+
+  // ===== DRIEKLANKEN =====
+  "naai": [
+    "Ik naai een knoop aan mijn jas.",
+    "Sara wil graag een rok naai.",
+    "Mama kan goed naai."
+  ],
+  "maai": [
+    "Ik maai het gras in onze tuin.",
+    "Wij maai samen het veld.",
+    "Met een grote machine maai ik snel."
+  ],
+  "zaai": [
+    "Ik zaai bloemen in de tuin.",
+    "Wij zaai groenten in de moestuin.",
+    "In de lente zaai ik wortels."
+  ],
+  "foei": [
+    "Foei, dat mag niet!",
+    "Mama roept: foei!",
+    "Foei, niet aan het glas komen."
+  ],
+
+  // ===== VERKLEINWOORDEN (grondvormen) =====
+  "hoofd": [
+    "Sam draagt een muts op zijn hoofd.",
+    "Lien knikt met haar hoofd.",
+    "Mijn hoofd doet pijn."
+  ],
+  "hand": [
+    "Ik geef oma een hand.",
+    "Tom heft zijn hand op in de klas.",
+    "Lien zwaait met haar hand."
+  ],
+  "dorp": [
+    "Wij wonen in een klein dorp.",
+    "In het dorp staat een kerk.",
+    "Het dorp heeft een mooie markt."
+  ],
+  "kraan": [
+    "De kraan in de keuken druppelt.",
+    "Draai de kraan dicht.",
+    "Uit de kraan komt koud water."
+  ],
+  "broer": [
+    "Mijn broer is acht jaar.",
+    "Sam speelt met zijn broer.",
+    "Lien houdt veel van haar broer."
+  ],
+  "vader": [
+    "Mijn vader is groot en sterk.",
+    "Tom helpt zijn vader in de tuin.",
+    "De vader van Lien is dokter."
+  ],
+  "boer": [
+    "De boer woont op een hoeve.",
+    "Een boer werkt op het veld.",
+    "De boer melkt zijn koeien."
+  ],
+  "duim": [
+    "Tom houdt zijn duim omhoog.",
+    "Met haar duim wijst Lien naar de lucht.",
+    "Mijn duim doet pijn."
+  ],
+  "arm": [
+    "Sam tilt zijn arm omhoog.",
+    "Mijn arm is heel sterk.",
+    "Papa heeft een lange arm."
+  ],
+  "riem": [
+    "Papa draagt een leren riem.",
+    "Doe een riem om je broek.",
+    "De hond heeft een rode riem."
+  ],
+
+  // ===== NG / NK =====
+  "kring": [
+    "Wij zitten in een kring op de grond.",
+    "Lien tekent een mooie kring.",
+    "Sam staat in de kring."
+  ],
+  "sprong": [
+    "Tom maakt een hoge sprong.",
+    "Met een sprong komt Sam over de bank.",
+    "De kikker maakt een grote sprong."
+  ],
+
+  // ===== MEERVOUDEN =====
+  "winters": [
+    "Strenge winters zijn leuk voor sneeuwpoppen.",
+    "Wij hebben al veel winters meegemaakt.",
+    "Koude winters duren heel lang."
+  ],
+  "bijen": [
+    "In de tuin vliegen veel bijen.",
+    "De bijen maken honing.",
+    "Bijen zoemen rond de bloem."
+  ],
+  "uien": [
+    "Mama snijdt twee uien voor de soep.",
+    "Van uien moet ik huilen.",
+    "In de pan bakken uien."
+  ],
+
+  // ===== VERVOEGDE WERKWOORDEN (3e persoon ev) =====
+  "naait": [
+    "Oma naait een knoop aan mijn jas.",
+    "Mama naait een rok voor Lien.",
+    "Sara naait haar pop een hoedje."
+  ],
+  "maait": [
+    "Papa maait het gras.",
+    "De boer maait zijn veld.",
+    "Tom maait nooit, hij is te klein."
+  ],
+  "zaait": [
+    "Mama zaait groenten in de tuin.",
+    "De boer zaait graan op het veld.",
+    "Sam zaait bloempjes in een potje."
+  ],
+  "gooit": [
+    "Tom gooit de bal in de mand.",
+    "Sara gooit haar jas op de stoel.",
+    "De keeper gooit de bal terug."
+  ],
+  "strooit": [
+    "Mama strooit zout op de stoep.",
+    "Sinterklaas strooit pepernoten.",
+    "Papa strooit suiker op de pannenkoek."
+  ],
+  "kreunt": [
+    "Oma kreunt van de pijn.",
+    "Door de pijn kreunt Sam.",
+    "Opa kreunt als hij opstaat."
+  ],
+  "stoeit": [
+    "Tom stoeit met zijn broer.",
+    "De hond stoeit met de poes.",
+    "Sara stoeit graag met haar vriendje."
+  ],
+  "loeit": [
+    "De koe loeit in de wei.",
+    "Ik hoor een koe loeien... ze loeit luid.",
+    "Op de boerderij loeit een kalf."
+  ],
+  "knoeit": [
+    "Sam knoeit altijd aan tafel.",
+    "Lien knoeit met haar verf.",
+    "De baby knoeit met zijn pap."
+  ],
+  "roeit": [
+    "Papa roeit de boot vooruit.",
+    "Sam roeit hard op het meer.",
+    "Tom roeit voor het eerst."
+  ],
+  "drinkt": [
+    "Tom drinkt water uit de fles.",
+    "Mama drinkt koffie 's morgens.",
+    "Lien drinkt melk uit haar beker."
+  ],
+  "stinkt": [
+    "De vuilbak stinkt heel erg.",
+    "Mijn schoen stinkt na het sporten.",
+    "Wat stinkt hier zo?"
+  ],
+  "schenkt": [
+    "Mama schenkt thee in mijn beker.",
+    "Papa schenkt melk in het glas.",
+    "Oma schenkt mij een glas sap."
+  ],
+  "zingt": [
+    "Lien zingt een lied.",
+    "Mama zingt voor mij.",
+    "De vogel zingt in de boom."
+  ],
+  "springt": [
+    "Tom springt hoog in de lucht.",
+    "De kikker springt in de vijver.",
+    "Sara springt over de bank."
+  ],
+  "hangt": [
+    "De lamp hangt aan het plafond.",
+    "Mama hangt de tekening op.",
+    "Mijn jas hangt aan de haak."
+  ],
+
+  /* ============================================================
+     WAVE 2 — Aanvullende zinnen voor middelgrote categorieën
+     (Isabel sept 2026). Strop weg uit graad1.js. paal/haar
+     enkelvouden niet hier (meervouden palen/haren bestaan al).
+     ============================================================ */
+
+  // ===== aa (lk-aa) =====
+  "naam": [
+    "Mijn naam staat op het bord.",
+    "Schrijf je naam op je werkblad.",
+    "Wat is jouw naam?"
+  ],
+  "vaas": [
+    "In de vaas staan rode bloemen.",
+    "Mama zet de vaas op tafel.",
+    "Pas op voor de vaas op de kast."
+  ],
+  "schaar": [
+    "Ik knip met een schaar.",
+    "Mama heeft een grote schaar.",
+    "Geef mij even de schaar."
+  ],
+  "taak": [
+    "Mijn taak is om af te wassen.",
+    "Iedereen heeft een taak in de klas.",
+    "Dit is een moeilijke taak."
+  ],
+  "vaak": [
+    "Tom gaat vaak naar oma.",
+    "Wij eten vaak pasta.",
+    "Lien lacht vaak."
+  ],
+
+  // ===== ee (lk-ee) =====
+  "fee": [
+    "In het sprookje vliegt een fee rond.",
+    "De fee toverde de kikker om.",
+    "Lien wil graag een fee zijn."
+  ],
+  "thee": [
+    "Mama drinkt warme thee.",
+    "Oma zet een pot thee.",
+    "Ik wil graag een kopje thee."
+  ],
+  "meer": [
+    "Wij zwemmen in het meer.",
+    "Aan het meer staan bomen.",
+    "Sam vist in het meer."
+  ],
+  "eend": [
+    "In de vijver zwemt een eend.",
+    "De eend heeft een gele bek.",
+    "Een eend kwaakt heel hard."
+  ],
+  "heel": [
+    "Sam is heel groot.",
+    "De zon is heel warm.",
+    "Mama is heel blij."
+  ],
+  "leeg": [
+    "Mijn glas is leeg.",
+    "De zak is bijna leeg.",
+    "De doos is helemaal leeg."
+  ],
+
+  // ===== ie (tw-ie) =====
+  "stier": [
+    "Op de weide staat een grote stier.",
+    "De stier kijkt boos.",
+    "Een stier heeft twee horens."
+  ],
+  "bier": [
+    "Papa drinkt soms een glas bier.",
+    "Het bier staat in de koelkast.",
+    "Bij het etentje schenkt papa bier."
+  ],
+  "tien": [
+    "Ik kan tot tien tellen.",
+    "Tom is tien jaar.",
+    "Geef mij tien snoepjes."
+  ],
+  "lief": [
+    "Mama is heel lief voor mij.",
+    "Onze hond is lief.",
+    "Sara is een lief meisje."
+  ],
+  "diep": [
+    "De put is heel diep.",
+    "Ga niet te diep in het water.",
+    "Het meer is diep en koud."
+  ],
+  "zie": [
+    "Ik zie een vogel in de boom.",
+    "Zie je de wolk in de lucht?",
+    "Sam zegt: zie eens hier!"
+  ],
+  "die": [
+    "Geef mij die bal eens.",
+    "Wie is die jongen daar?",
+    "Die appel is rood."
+  ],
+
+  // ===== ei (tw-ei) =====
+  "weide": [
+    "Op de weide staan koeien.",
+    "De schapen grazen in de weide.",
+    "Door de weide loopt een pad."
+  ],
+  "meid": [
+    "Lien is een flinke meid.",
+    "Wat een lieve meid!",
+    "Die meid kan goed lopen."
+  ],
+  "zeil": [
+    "Op de boot staat een wit zeil.",
+    "Het zeil flappert in de wind.",
+    "Papa hijst het zeil omhoog."
+  ],
+  "kei": [
+    "Op het pad ligt een kei.",
+    "Ik gooi een kei in het water.",
+    "Lien struikelt over een kei."
+  ],
+  "klei": [
+    "Wij kleien met rode klei.",
+    "Mijn handen zitten vol klei.",
+    "De klei is zacht en koud."
+  ],
+  "einde": [
+    "Het einde van het boek is mooi.",
+    "Wij rennen naar het einde van de straat.",
+    "Aan het einde van de dag ben ik moe."
+  ],
+  "feit": [
+    "Een feit is iets dat echt waar is.",
+    "De juf vertelt een feit over dieren.",
+    "Dat een vogel kan vliegen is een feit."
+  ],
+  "fontein": [
+    "Op het plein staat een fontein.",
+    "Uit de fontein spuit water.",
+    "Wij lopen rond de fontein."
+  ],
+
+  // ===== ij (tw-ij) =====
+  "fijn": [
+    "Het is fijn om buiten te spelen.",
+    "Sara heeft een fijn weekend gehad.",
+    "Wij vinden het fijn op school."
+  ],
+  "wijn": [
+    "Mama drinkt soms wijn bij het eten.",
+    "Papa schenkt rode wijn in.",
+    "De wijn staat in de kast."
+  ],
+  "pijp": [
+    "Opa rookt een pijp.",
+    "Door de pijp loopt water.",
+    "Onder de wastafel zit een pijp."
+  ],
+  "pijn": [
+    "Mijn buik doet pijn.",
+    "Sam heeft pijn aan zijn knie.",
+    "Lien kreunt van de pijn."
+  ],
+  "prijs": [
+    "De prijs van het boek is hoog.",
+    "Tom wint een mooie prijs.",
+    "De prijs staat op het etiket."
+  ],
+  "rijm": [
+    "Een gedicht heeft vaak rijm.",
+    "Kat en mat zijn een rijm.",
+    "Lien maakt een grappig rijm."
+  ],
+  "kijk": [
+    "Kijk eens naar deze tekening!",
+    "Ik kijk uit het raam.",
+    "Sam, kijk eens hier!"
+  ],
+  "schrijf": [
+    "Ik schrijf mijn naam op het blad.",
+    "Schrijf netjes in je schrift.",
+    "Ik schrijf een mooi verhaal."
+  ],
+  "kijkt": [
+    "Tom kijkt naar de film.",
+    "Mama kijkt naar het nieuws.",
+    "Lien kijkt uit het raam."
+  ],
+  "schrijft": [
+    "Sara schrijft een mooi verhaal.",
+    "Papa schrijft een kaartje aan oma.",
+    "De juf schrijft op het bord."
+  ],
+
+  // ===== sch-woorden =====
+  "schip": [
+    "Op de zee vaart een groot schip.",
+    "Het schip ligt in de haven.",
+    "Wij zien een schip op het water."
+  ],
+  "schaap": [
+    "Op de weide graast een schaap.",
+    "Het schaap heeft witte wol.",
+    "Tom telt elk schaap."
+  ],
+  "schaal": [
+    "In de schaal liggen appels.",
+    "Op tafel staat een rode schaal.",
+    "Mama vult de schaal met fruit."
+  ],
+  "schoon": [
+    "Mijn handen zijn schoon.",
+    "Het hemd is schoon en gestreken.",
+    "Maak je kamer schoon!"
+  ],
+  "scheef": [
+    "De toren staat scheef.",
+    "Het schilderij hangt scheef.",
+    "Tom heeft zijn muts scheef opgezet."
+  ],
+  "schop": [
+    "Sam graaft met een schop.",
+    "Geef mij even de schop.",
+    "De schop staat in de schuur."
+  ],
+  "schil": [
+    "De schil van de appel is rood.",
+    "Mama gooit de schil weg.",
+    "Op de grond ligt een schil."
+  ],
+  "schar": [
+    "De schar is een platte vis.",
+    "Mama bakt een schar in de pan.",
+    "Vissers vangen veel schar."
+  ],
+
+  // ===== 3 medeklinkers + klank + 1 medek (mmmkm) =====
+  "straat": [
+    "Onze straat is heel rustig.",
+    "In de straat staan grote bomen.",
+    "Sam fietst over de straat."
+  ],
+  "strik": [
+    "Lien heeft een rode strik in haar haar.",
+    "Tom maakt een strik in zijn veter.",
+    "Op het cadeau zit een grote strik."
+  ],
+  "straal": [
+    "Door het raam komt een straal zon.",
+    "De lamp werpt een straal licht.",
+    "Een straal water spuit omhoog."
+  ],
+  "stroop": [
+    "Op mijn pannenkoek doe ik stroop.",
+    "De stroop is dik en zoet.",
+    "Mama smeert stroop op de boterham."
+  ],
+  "spreuk": [
+    "Op de muur staat een mooie spreuk.",
+    "De juf leert ons een spreuk.",
+    "Lien schrijft een spreuk in haar boekje."
+  ],
+  "spraak": [
+    "Sam oefent zijn spraak elke dag.",
+    "De juf let op onze spraak.",
+    "Door de pijn was zijn spraak weg."
+  ],
+  "streep": [
+    "Op het blad staat een rechte streep.",
+    "Mama tekent een streep met haar pen.",
+    "Op de jas zit een witte streep."
+  ],
+  "struik": [
+    "Achter het huis staat een struik.",
+    "In de struik zit een vogel.",
+    "Sam verstopt zich achter de struik."
+  ],
+
+  // ===== Stukjeswoorden — enkel lepel/tafel/beker =====
+  "lepel": [
+    "Met een lepel eet ik soep.",
+    "Op tafel ligt een grote lepel.",
+    "Mama roert met de lepel."
+  ],
+  "tafel": [
+    "Aan de tafel zitten wij te eten.",
+    "Op de tafel staat een vaas.",
+    "Help mij de tafel dekken."
+  ],
+  "beker": [
+    "Tom drinkt uit een rode beker.",
+    "In de beker zit warme melk.",
+    "Mama vult de beker met water."
+  ],
+
+  // ===== Eindigt op -er =====
+  "zuster": [
+    "Mijn zuster is acht jaar.",
+    "Lien speelt met haar zuster.",
+    "Sara heeft een lieve zuster."
+  ],
+  "winter": [
+    "In de winter valt er soms sneeuw.",
+    "De winter is koud en lang.",
+    "Wij vieren kerstmis in de winter."
+  ],
+  "zomer": [
+    "In de zomer schijnt de zon.",
+    "De zomer is warm en zonnig.",
+    "Wij gaan in de zomer naar zee."
+  ],
+  "boter": [
+    "Op mijn boterham smeer ik boter.",
+    "De boter ligt in de koelkast.",
+    "Mama bakt eieren in boter."
+  ],
+  "letter": [
+    "Op het bord staat een grote letter.",
+    "Ik leer elke letter van het alfabet.",
+    "De eerste letter van mijn naam is L."
+  ],
+  "hamer": [
+    "Papa slaat een spijker met de hamer.",
+    "De hamer ligt op de werkbank.",
+    "Tom geeft de hamer aan papa."
+  ],
+  "kleuter": [
+    "Mijn broertje is nog een kleuter.",
+    "De kleuter speelt in de zandbak.",
+    "Elke kleuter krijgt een koekje."
+  ],
+  "meester": [
+    "Onze meester leest een verhaal voor.",
+    "De meester schrijft op het bord.",
+    "Bij de meester leren wij rekenen."
+  ],
+  "tover": [
+    "Ik tover een konijn uit mijn hoed.",
+    "Met deze stok tover ik graag.",
+    "Lien tover een muis in een bloem."
+  ],
+  "bakker": [
+    "De bakker bakt verse broden.",
+    "Bij de bakker geurt het lekker.",
+    "Mama gaat naar de bakker."
+  ],
+
+  // ===== Eindigt op -el =====
+  "appel": [
+    "Ik eet een rode appel.",
+    "In de tuin valt een appel van de boom.",
+    "Mama snijdt de appel in stukjes."
+  ],
+  "vogel": [
+    "In de boom zit een kleine vogel.",
+    "De vogel zingt een mooi lied.",
+    "Een vogel vliegt door de lucht."
+  ],
+  "engel": [
+    "Op de boom staat een engel.",
+    "Lien tekent een engel met vleugels.",
+    "De engel heeft een witte jurk."
+  ],
+  "fakkel": [
+    "De man draagt een brandende fakkel.",
+    "Met een fakkel zien wij in het donker.",
+    "De fakkel verlicht de grot."
+  ],
+  "kabel": [
+    "Onder de tafel ligt een kabel.",
+    "De kabel van de lamp is lang.",
+    "Pas op voor de kabel!"
+  ],
+  "zadel": [
+    "De fiets heeft een zwart zadel.",
+    "Het zadel is wat hard.",
+    "Tom poetst zijn zadel schoon."
+  ],
+  "nagel": [
+    "Op mijn vinger zit een lange nagel.",
+    "Lien knipt haar nagel.",
+    "In het hout zit een nagel."
+  ],
+
+  // ===== Klank + 3 medeklinkers achteraan =====
+  "worst": [
+    "Op mijn boterham ligt worst.",
+    "Mama snijdt een dikke worst.",
+    "Bij de slager kopen wij worst."
+  ],
+  "kerst": [
+    "Met kerst staat er een grote boom.",
+    "Tijdens kerst krijgen wij cadeaus.",
+    "Op kerst eet ik bij oma."
+  ],
+  "herfst": [
+    "In de herfst vallen de bladeren.",
+    "De herfst is koud en winderig.",
+    "Wij rapen kastanjes in de herfst."
+  ],
+  "dorst": [
+    "Ik heb dorst en wil water.",
+    "Door de hitte heeft Sam dorst.",
+    "Wat een dorst!"
+  ],
+  "borst": [
+    "Op zijn borst draagt papa een medaille.",
+    "De vogel heeft een rode borst.",
+    "Met mijn hand op mijn borst zing ik."
+  ],
+  "ernst": [
+    "Met ernst kijkt de juf ons aan.",
+    "Sam neemt zijn werk met ernst.",
+    "Dit moet je met ernst doen."
+  ],
+  "oogst": [
+    "De boer haalt de oogst binnen.",
+    "Dit jaar is de oogst goed.",
+    "Na de oogst is het veld leeg."
+  ],
+  "eerst": [
+    "Ik ga eerst mijn handen wassen.",
+    "Eerst leren, dan spelen.",
+    "Sam komt altijd als eerst."
+  ],
+  "angst": [
+    "Lien heeft angst voor het donker.",
+    "Met angst kijkt Tom omhoog.",
+    "De hond heeft angst voor onweer."
+  ],
+  "kunst": [
+    "Op school leren wij kunst.",
+    "In het museum hangt mooie kunst.",
+    "Toveren is een leuke kunst."
+  ],
+  "arts": [
+    "De arts onderzoekt mijn keel.",
+    "Mama gaat naar de arts.",
+    "Bij de arts krijg ik een pil."
+  ],
+  "markt": [
+    "Op zaterdag is er markt.",
+    "Op de markt kopen wij groenten.",
+    "De markt staat op het plein."
+  ],
+
+  // ===== MK / KM-woorden =====
+  "om": [
+    "Tom loopt om de tafel.",
+    "Het is tijd om te eten.",
+    "Mama vraagt: kom om vijf uur thuis."
+  ],
+  "in": [
+    "Sara zit in de auto.",
+    "De vis zwemt in het water.",
+    "Doe je jas in de kast."
+  ],
+  "op": [
+    "Het boek ligt op de tafel.",
+    "Tom klimt op de stoel.",
+    "Lien zit op de bank."
+  ],
+  "en": [
+    "Tom en Sara spelen samen.",
+    "Ik wil melk en koeken.",
+    "Mama en papa zijn thuis."
+  ],
+  "uit": [
+    "Sam komt uit het huis.",
+    "Doe je jas uit.",
+    "Achter de wolken komt de zon uit."
+  ],
+  "ma": [
+    "Mijn ma is heel lief.",
+    "Ma vraagt: ben je klaar?",
+    "Ik ga met ma naar de winkel."
+  ],
+  "na": [
+    "Na het eten gaan wij spelen.",
+    "Lien komt na haar zus binnen.",
+    "Wij wassen onze handen na het werken."
+  ],
+  "je": [
+    "Heb je een pen?",
+    "Ben je moe?",
+    "Wat zeg je?"
+  ],
+  "we": [
+    "We gaan naar school.",
+    "We spelen samen buiten.",
+    "We zijn vandaag jarig."
+  ],
+  "ik": [
+    "Ik ben acht jaar.",
+    "Ik ga naar de winkel.",
+    "Ik vind dit leuk."
+  ],
+  "is": [
+    "Mama is in de keuken.",
+    "Het boek is rood.",
+    "Tom is mijn vriend."
+  ],
+  "af": [
+    "Mijn werk is af.",
+    "Doe je jas af.",
+    "Tom is af in het spel."
+  ],
+  "as": [
+    "In de kachel ligt grijze as.",
+    "Mama veegt de as op.",
+    "Op de as ligt een korst."
+  ],
+
+  // ===== Verlengen om te horen =====
+  "krab": [
+    "Op het strand kruipt een krab.",
+    "De krab heeft scherpe scharen.",
+    "Sam pakt de krab voorzichtig op."
+  ],
+  "web": [
+    "In de hoek hangt een web.",
+    "Het web glinstert in de zon.",
+    "De spin maakt een groot web."
+  ],
+  "hoed": [
+    "Tom draagt een grote hoed.",
+    "Op de tafel ligt een rode hoed.",
+    "Mama heeft een mooie hoed op."
+  ],
+  "tand": [
+    "Mijn tand wiebelt.",
+    "De tandarts vult de tand.",
+    "De wolf heeft een scherpe tand."
+  ],
+  "bed": [
+    "Ik lig in mijn bed.",
+    "Sam springt op het bed.",
+    "Het bed staat in de slaapkamer."
+  ],
+  "rib": [
+    "In mijn lichaam zit een rib.",
+    "Sam heeft pijn aan zijn rib.",
+    "De dokter voelt aan de rib."
+  ],
+  "hond": [
+    "Onze hond heet Max.",
+    "De hond blaft naar de poes.",
+    "Tom aait de hond."
+  ],
+  "wind": [
+    "Buiten waait een sterke wind.",
+    "Door de wind valt mijn pet af.",
+    "De wind blaast de bladeren weg."
+  ],
+  "land": [
+    "Wij wonen in een mooi land.",
+    "Het land is groot en groen.",
+    "Op het land staat een boerderij."
+  ],
+  "mond": [
+    "Doe je mond open!",
+    "Sam steekt zijn mond vol.",
+    "In mijn mond staan witte tanden."
+  ],
+  "rand": [
+    "Aan de rand van de tafel ligt een glas.",
+    "Tom zit op de rand van de stoel.",
+    "Op de rand van de doos staat een naam."
+  ],
+  "baard": [
+    "Opa heeft een lange grijze baard.",
+    "De man met de baard zwaait.",
+    "In zijn baard zit een kruimel."
+  ],
+  "poort": [
+    "Voor het kasteel staat een grote poort.",
+    "Door de poort komt de prins.",
+    "De poort is dicht."
   ]
 
 };
