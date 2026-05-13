@@ -3470,3 +3470,270 @@ body.bewerk-aan [data-bewerk-id]:focus {
   background: #E8F5E9 !important;
   border-color: #81C784 !important;
 }
+
+/* ==========================================================
+   OV08 — MINIMALE EXTRA STYLING
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   (verwijder eerst alle eerdere ov08-* CSS-blokken die ik je gaf)
+   
+   OV08 gebruikt automatisch dezelfde styling als OV07 omdat alle
+   OV08-elementen ÓÓK de ov07-class hebben (zie ov08.js).
+   
+   Dit kleine blok voegt enkel toe wat OV08 nodig heeft maar OV07
+   niet heeft: het TELWOORD bij ⭐⭐ Toepassen.
+   ========================================================== */
+
+/* Telwoord (veel, twee, drie, ...) in ⭐⭐ Toepassen */
+.ov08-telwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.05rem;
+  color: var(--zisa-blauw, #2196F3);
+  font-style: italic;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* In compact-modus iets kleiner */
+.ov08-blad.lijnhoogte-klein .ov08-telwoord {
+  font-size: 0.95rem;
+  min-width: 40px;
+}
+
+/* OV08-specifieke grid-aanpassing voor ⭐⭐ Toepassen
+   (rij heeft extra telwoord-kolom dat OV07 niet heeft) */
+.ov08-rooster.ov08-tweekoloms .ov08-rij-kern {
+  grid-template-columns: auto 22px auto 1fr;
+  gap: 6px;
+  align-items: center;
+}
+/* ==========================================================
+   OV08 — MINIMALE EXTRA STYLING
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   (verwijder eerst alle eerdere ov08-* CSS-blokken die ik je gaf)
+   
+   OV08 gebruikt automatisch dezelfde styling als OV07 omdat alle
+   OV08-elementen ÓÓK de ov07-class hebben (zie ov08.js).
+   
+   Dit kleine blok voegt enkel toe wat OV08 nodig heeft maar OV07
+   niet heeft: het TELWOORD bij ⭐⭐ Toepassen.
+   ========================================================== */
+
+/* Telwoord (veel, twee, drie, ...) in ⭐⭐ Toepassen */
+.ov08-telwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.05rem;
+  color: var(--zisa-blauw, #2196F3);
+  font-style: italic;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* In compact-modus iets kleiner */
+.ov08-blad.lijnhoogte-klein .ov08-telwoord {
+  font-size: 0.95rem;
+  min-width: 40px;
+}
+
+/* OV08-specifieke grid-aanpassing voor ⭐⭐ Toepassen
+   (rij heeft extra telwoord-kolom dat OV07 niet heeft) */
+.ov08-rooster.ov08-tweekoloms .ov08-rij-kern {
+  grid-template-columns: auto 22px auto 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ===== ⭐⭐⭐⭐ UITBREIDEN — invul-zinnen met inline schrijflijn ===== */
+
+.ov08-invul-blok {
+  margin-bottom: 24px;
+}
+
+.ov08-invul-titel,
+.ov08-eigen-titel {
+  font-weight: bold;
+  color: var(--zisa-blauw, #2196F3);
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+}
+
+.ov08-invul-lijst {
+  list-style: decimal;
+  padding-left: 28px;
+  margin: 0;
+}
+
+.ov08-invul-zin {
+  padding: 10px 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+
+/* De inline schrijflijn naast (woord) */
+.ov08-invul-lijn {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  margin: 0 4px;
+  min-width: 180px;
+}
+
+.ov08-invul-lijn canvas {
+  vertical-align: middle;
+}
+
+.ov08-invul-antwoord {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-55%);
+  color: #2E7D32;
+  font-weight: bold;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ov08-fallback-lijn-inline {
+  display: inline-block;
+  width: 160px;
+  border-bottom: 1.5px solid #333;
+  vertical-align: middle;
+}
+
+/* ===== Eigen schrijfblok onderaan ===== */
+.ov08-eigen-blok {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1.5px dashed #ccc;
+}
+
+.ov08-eigen-lijn {
+  margin: 8px 0;
+}
+/* ==========================================================
+   OV08 — MINIMALE EXTRA STYLING
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   (verwijder eerst alle eerdere ov08-* CSS-blokken die ik je gaf)
+   
+   OV08 gebruikt automatisch dezelfde styling als OV07 omdat alle
+   OV08-elementen ÓÓK de ov07-class hebben (zie ov08.js).
+   
+   Dit kleine blok voegt enkel toe wat OV08 nodig heeft maar OV07
+   niet heeft: het TELWOORD bij ⭐⭐ Toepassen.
+   ========================================================== */
+
+/* Telwoord (veel, twee, drie, ...) in ⭐⭐ Toepassen */
+.ov08-telwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.05rem;
+  color: var(--zisa-blauw, #2196F3);
+  font-style: italic;
+  white-space: nowrap;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* In compact-modus iets kleiner */
+.ov08-blad.lijnhoogte-klein .ov08-telwoord {
+  font-size: 0.95rem;
+  min-width: 40px;
+}
+
+/* OV08-specifieke grid-aanpassing voor ⭐⭐ Toepassen
+   (rij heeft extra telwoord-kolom dat OV07 niet heeft) */
+.ov08-rooster.ov08-tweekoloms .ov08-rij-kern {
+  grid-template-columns: auto 22px auto 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ===== ⭐⭐⭐⭐ UITBREIDEN — invul-zinnen met inline schrijflijn ===== */
+
+.ov08-invul-blok {
+  margin-bottom: 24px;
+}
+
+.ov08-invul-titel,
+.ov08-eigen-titel {
+  font-weight: bold;
+  color: var(--zisa-blauw, #2196F3);
+  margin-bottom: 12px;
+  font-size: 1.05rem;
+}
+
+.ov08-invul-lijst {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+  counter-reset: ov08-tel;
+}
+
+.ov08-invul-zin {
+  padding: 12px 0;
+  font-size: 1.05rem;
+  line-height: 1.8;
+  position: relative;
+  padding-left: 32px;
+  counter-increment: ov08-tel;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ov08-invul-zin::before {
+  content: counter(ov08-tel) ".";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  color: #555;
+  width: 24px;
+  text-align: right;
+}
+
+/* De inline schrijflijn naast (woord) */
+.ov08-invul-lijn {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  margin: 0 4px;
+  min-width: 180px;
+}
+
+.ov08-invul-lijn canvas {
+  vertical-align: middle;
+}
+
+.ov08-invul-antwoord {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-55%);
+  color: #2E7D32;
+  font-weight: bold;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.ov08-fallback-lijn-inline {
+  display: inline-block;
+  width: 160px;
+  border-bottom: 1.5px solid #333;
+  vertical-align: middle;
+}
+
+/* ===== Eigen schrijfblok onderaan ===== */
+.ov08-eigen-blok {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1.5px dashed #ccc;
+}
+
+.ov08-eigen-lijn {
+  margin: 8px 0;
+}
