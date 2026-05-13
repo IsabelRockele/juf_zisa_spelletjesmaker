@@ -3736,4 +3736,281 @@ body.bewerk-aan [data-bewerk-id]:focus {
 
 .ov08-eigen-lijn {
   margin: 8px 0;
+}/* ==========================================================
+   OV09 — KLINKERDIEF STYLING
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   ========================================================== */
+
+/* ===== ⭐ Oefenen — afbeelding + 2 schrijfwijzen + lijn ===== */
+.ov09-basis-rooster {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.ov09-basis-cel {
+  position: relative;
+  padding: 12px;
+  background: #FAFAFA;
+  border-radius: 8px;
+  border: 1px solid #E0E0E0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.ov09-basis-afb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 95px;
+}
+
+.ov09-basis-keuzes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+.ov09-basis-keuze {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-weight: bold;
+}
+
+.ov09-basis-lijn {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.ov09-bolletje {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #555;
+  flex-shrink: 0;
+}
+
+.ov09-keuze-juist .ov09-bolletje {
+  background: #2E7D32;
+  border-color: #2E7D32;
+  position: relative;
+}
+
+.ov09-keuze-juist .ov09-bolletje::after {
+  content: "✓";
+  color: white;
+  font-size: 14px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: bold;
+}
+
+.ov09-keuze-juist {
+  color: #2E7D32;
+}
+
+/* ===== ⭐⭐ Toepassen — afbeelding + schrijflijn ===== */
+.ov09-kern-rooster {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.ov09-kern-cel {
+  position: relative;
+  padding: 12px;
+  background: #FAFAFA;
+  border-radius: 8px;
+  border: 1px solid #E0E0E0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ov09-kern-afb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 95px;
+}
+
+.ov09-kern-lijn {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* ===== ⭐⭐⭐ Verdiepen — afbeeldingen sorteer ===== */
+.ov09-verdieping-rooster {
+  margin-top: 16px;
+}
+
+.ov09-verdieping-afbeeldingen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: #FAFAFA;
+  border-radius: 8px;
+  border: 1px dashed #BBB;
+  margin-bottom: 20px;
+}
+
+.ov09-verdieping-cel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #DDD;
+  min-height: 110px;
+  position: relative;
+}
+
+.ov09-afb {
+  display: inline-block;
+}
+
+.ov09-afb-fallback {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #888;
+  font-style: italic;
+}
+
+.ov09-verdieping-kolommen {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+}
+
+.ov09-verdieping-kolom {
+  display: flex;
+  flex-direction: column;
+}
+
+.ov09-verdieping-kolom-kop {
+  padding: 8px 10px;
+  color: white;
+  font-weight: bold;
+  font-size: 0.95rem;
+  text-align: center;
+  border-radius: 6px 6px 0 0;
+}
+
+.ov09-verdieping-kolom-lijnen {
+  background: #FAFAFA;
+  padding: 12px 8px;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #E0E0E0;
+  border-top: none;
+  min-height: 120px;
+}
+
+.ov09-verdieping-kolom-lijn {
+  position: relative;
+  margin: 10px 0;
+}
+
+/* ===== ⭐⭐⭐⭐ Uitbreiden — foute zinnen ===== */
+.ov09-uitbreiding-rooster {
+  margin-top: 16px;
+}
+
+.ov09-uitbreiding-rij {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-bottom: 1px dashed #E0E0E0;
+  position: relative;
+}
+
+.ov09-uitbreiding-nr {
+  font-weight: bold;
+  color: #666;
+  grid-column: 1;
+  grid-row: 1 / span 2;
+}
+
+.ov09-uitbreiding-zin {
+  font-size: 1.05rem;
+  line-height: 1.6;
+  grid-column: 2;
+}
+
+.ov09-uitbreiding-correctie {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  grid-column: 2;
+}
+
+.ov09-uitbreiding-pijl {
+  color: var(--zisa-blauw, #2196F3);
+  font-size: 1.2rem;
+}
+
+.ov09-uitbreiding-lijn {
+  position: relative;
+  display: inline-block;
+}
+
+/* ===== Algemene elementen geërfd van OV07 ===== */
+.ov09-titel-balk {
+  /* erft van ov07-titel-balk */
+}
+
+.ov09-opdracht-blok {
+  /* erft van ov07-opdracht-blok */
+}
+
+.ov09-lijn-antwoord {
+  /* erft van ov07-lijn-antwoord (color groen) */
+}
+
+.ov09-lege-tekst {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.ov09-lege-tekst em {
+  color: var(--zisa-blauw, #2196F3);
+  font-style: normal;
+  font-weight: bold;
+}
+
+/* Doorgestreepte foute vorm bij oplossingen ⭐⭐⭐⭐ */
+.ov09-uitbreiding-fout {
+  text-decoration: line-through;
+  text-decoration-color: #C00;
+  text-decoration-thickness: 2px;
+  color: #C00;
+  font-weight: bold;
 }
