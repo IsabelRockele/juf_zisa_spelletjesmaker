@@ -2706,3 +2706,767 @@ body.bewerk-aan [data-bewerk-id]:focus {
   .preview-paneel { box-shadow: none; padding: 0; }
   .werkblad { box-shadow: none; margin: 0; page-break-after: always; }
 }
+/* =====================================================
+   ZIJBALK REDESIGN (mei 2026)
+   Graad-tabs, hoofdgroep-selector, oefenvorm-multiselect
+   ===================================================== */
+
+/* --- Graad-tabs bovenaan --- */
+.graad-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 16px;
+  border-bottom: 2px solid #e0e0e0;
+}
+.graad-tab {
+  flex: 1;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  position: relative;
+  top: 2px;
+  transition: all 0.15s;
+}
+.graad-tab:hover:not(:disabled):not(.actief) {
+  background: #eaf4ff;
+}
+.graad-tab.actief {
+  background: #fff;
+  color: var(--zisa-blauw, #2563eb);
+  border-color: #cdd9e8;
+  border-bottom: 2px solid #fff;
+}
+.graad-tab:disabled {
+  cursor: not-allowed;
+  color: #bbb;
+}
+.graad-tab .binnenkort {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: normal;
+  color: #999;
+}
+
+/* --- Uitklap-secties --- */
+.zb-sectie {
+  background: #fafbfc;
+  border: 1px solid #e0e6ec;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.zb-sectie[open] {
+  background: #fff;
+  border-color: #cdd9e8;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.zb-sectie-titel {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+  user-select: none;
+}
+.zb-sectie-titel::-webkit-details-marker { display: none; }
+.zb-sectie-titel::before {
+  content: "▸";
+  font-size: 0.85rem;
+  color: #888;
+  transition: transform 0.15s;
+}
+.zb-sectie[open] > .zb-sectie-titel::before {
+  transform: rotate(90deg);
+}
+.zb-nr {
+  display: inline-block;
+  background: var(--zisa-blauw, #2563eb);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: bold;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 22px;
+}
+.zb-label { flex: 1; }
+.zb-teller {
+  font-size: 0.78rem;
+  font-weight: normal;
+  color: var(--zisa-blauw, #2563eb);
+  background: #e7f0fb;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.zb-teller:empty { display: none; }
+.zb-sectie-inhoud {
+  padding: 4px 14px 14px;
+}
+.zb-uitleg {
+  font-size: 0.8rem;
+  color: #666;
+  margin: 0 0 10px 0;
+}
+
+/* --- Hoofdgroep-selector --- */
+.zb-hoofdgroep {
+  background: #fff;
+  border: 1px solid #e0e6ec;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.zb-hoofdgroep[open] {
+  background: #fcfdff;
+}
+.zb-hg-titel {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+}
+.zb-hg-titel::-webkit-details-marker { display: none; }
+.zb-hg-titel::before {
+  content: "▸";
+  font-size: 0.75rem;
+  color: #999;
+  transition: transform 0.15s;
+}
+.zb-hoofdgroep[open] > .zb-hg-titel::before {
+  transform: rotate(90deg);
+}
+.zb-hg-master {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--zisa-blauw, #2563eb);
+}
+.zb-hg-label {
+  flex: 1;
+  font-weight: 600;
+  color: #2c3e50;
+}
+.zb-hg-teller {
+  font-size: 0.75rem;
+  color: #888;
+  background: #f0f3f7;
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+.zb-hg-uitleg {
+  font-size: 0.75rem;
+  color: #777;
+  font-style: italic;
+  padding: 0 12px 8px 40px;
+}
+.zb-hg-inhoud {
+  padding: 4px 12px 10px 32px;
+}
+.zb-groep {
+  margin-bottom: 10px;
+}
+.zb-groep:last-child { margin-bottom: 0; }
+.zb-groep-titel {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+  margin-bottom: 4px;
+  letter-spacing: 0.04em;
+}
+.zb-cat-rij {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.zb-cat-vink {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  background: #f5f7fa;
+  border: 1px solid #e0e6ec;
+  border-radius: 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.12s;
+}
+.zb-cat-vink:hover {
+  border-color: #b6cce8;
+  background: #eef4fc;
+}
+.zb-cat-vink.aan {
+  background: #e7f0fb;
+  border-color: var(--zisa-blauw, #2563eb);
+  color: var(--zisa-blauw, #2563eb);
+  font-weight: 500;
+}
+.zb-cat-vink input {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--zisa-blauw, #2563eb);
+}
+.zb-cat-aantal {
+  font-size: 0.72rem;
+  color: #999;
+  font-weight: normal;
+}
+.zb-cat-vink.aan .zb-cat-aantal {
+  color: var(--zisa-blauw, #2563eb);
+  opacity: 0.7;
+}
+
+/* --- Sectie 2: Open woordenkiezer --- */
+.zb-knop-groot {
+  width: 100%;
+  background: var(--zisa-blauw, #2563eb);
+  color: white;
+  border: none;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.zb-knop-groot:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+.zb-knop-groot:disabled {
+  background: #b8c4d3;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.zb-info {
+  margin: 8px 0 0 0;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+/* --- Sectie 3: Oefenvormen --- */
+.zb-oefenvorm {
+  background: #fff;
+  border: 1px solid #e0e6ec;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  overflow: hidden;
+}
+.zb-oefenvorm.aan {
+  border-color: #82b3e8;
+  background: #f7fbff;
+}
+.zb-oef-titel {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none;
+}
+.zb-oef-titel::-webkit-details-marker { display: none; }
+.zb-oef-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--zisa-blauw, #2563eb);
+}
+.zb-oef-label {
+  flex: 1;
+  color: #2c3e50;
+}
+.zb-oefenvorm.aan .zb-oef-label {
+  font-weight: 600;
+  color: var(--zisa-blauw, #2563eb);
+}
+.zb-oef-instel {
+  padding: 8px 12px 12px 40px;
+  border-top: 1px solid #ecf1f7;
+  background: #fcfdff;
+}
+.zb-oef-rij {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.zb-oef-rij:last-child { margin-bottom: 0; }
+.zb-oef-rij > label {
+  font-size: 0.82rem;
+  color: #555;
+  font-weight: 500;
+  min-width: 110px;
+}
+.zb-oef-niveaus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+.zb-niveau-vink {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: #f0f3f7;
+  border: 1px solid #e0e6ec;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.zb-niveau-vink.aan {
+  background: #fff5e0;
+  border-color: #f0b840;
+  color: #8a5b00;
+}
+.zb-niveau-vink input { margin: 0; }
+.zb-oef-aantal {
+  width: 60px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  border: 1px solid #cdd9e8;
+  border-radius: 5px;
+}
+.zb-hoogte-knoppen {
+  display: flex;
+  gap: 4px;
+}
+.zb-hoogte-btn {
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  background: #f5f7fa;
+  border: 1px solid #e0e6ec;
+  border-radius: 5px;
+  cursor: pointer;
+  color: #555;
+}
+.zb-hoogte-btn.actief {
+  background: var(--zisa-blauw, #2563eb);
+  border-color: var(--zisa-blauw, #2563eb);
+  color: white;
+}
+
+/* --- Leeg-state voor graad zonder data --- */
+.zb-leeg {
+  font-style: italic;
+  color: #999;
+  text-align: center;
+  padding: 16px;
+}
+
+/* ==========================================================
+   OV07 — Verkleinwoorden — stijlblok
+   PLAK DIT BLOK ONDERAAN style.css
+   ========================================================== */
+
+.ov07-rooster {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.ov07-kol-koppen {
+  display: grid;
+  grid-template-columns: 1fr 40px 2fr;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 36px 4px 4px;
+  border-bottom: 2px solid var(--zisa-blauw, #2196F3);
+  margin-bottom: 4px;
+}
+.ov07-kol-kop {
+  font-weight: bold;
+  color: var(--zisa-blauw, #2196F3);
+  font-size: 0.95rem;
+  text-transform: lowercase;
+  letter-spacing: 0.05em;
+}
+
+.ov07-rij {
+  display: grid;
+  align-items: center;
+  padding: 6px 4px;
+  border-bottom: 1px dashed #e0e0e0;
+  position: relative;
+  gap: 12px;
+}
+.ov07-rij:last-child {
+  border-bottom: none;
+}
+
+.ov07-rij-basis {
+  grid-template-columns: 80px auto 1fr;
+}
+.ov07-grondwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #333;
+}
+.ov07-uitgang-keuzes {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ov07-uitgang-keuze {
+  display: inline-block;
+  padding: 4px 10px;
+  border: 2px solid #999;
+  border-radius: 999px;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.05rem;
+  color: #555;
+  background: #fff;
+  user-select: none;
+}
+.ov07-uitgang-juist {
+  border-color: #4CAF50;
+  background: #E8F5E9;
+  color: #2E7D32;
+  font-weight: bold;
+}
+
+.ov07-rij-kern,
+.ov07-rij-verdieping {
+  grid-template-columns: 1fr 40px 2fr;
+}
+.ov07-kol-woord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.35rem;
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+.ov07-kol-verklein {
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+.ov07-pijl {
+  text-align: center;
+  font-size: 1.4rem;
+  color: var(--zisa-blauw, #2196F3);
+  font-weight: bold;
+}
+
+.ov07-gegeven {
+  background: #F5F5F5;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid #E0E0E0;
+  color: #333;
+  font-weight: bold;
+}
+
+.ov07-lijn-cel {
+  position: relative;
+  width: 100%;
+}
+.ov07-lijn-antwoord {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-55%);
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.2rem;
+  color: #c00;
+  font-weight: bold;
+  z-index: 2;
+  pointer-events: none;
+}
+.ov07-fallback-lijn {
+  border-bottom: 1.5px solid #333;
+  height: 24px;
+}
+
+.ov07-uitbreiding-container {
+  margin-top: 14px;
+}
+.ov07-verhaal-origineel {
+  background: #FFFAE6;
+  border: 1.5px solid #F0D060;
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin-bottom: 16px;
+}
+.ov07-verhaal-titel {
+  font-weight: bold;
+  font-size: 1.05rem;
+  color: #B8860B;
+  margin-bottom: 6px;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+}
+.ov07-verhaal-zinnen {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+}
+.ov07-verhaal-zin {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin: 4px 0;
+  color: #222;
+}
+.ov07-zn-marker {
+  font-weight: bold;
+  color: #B8860B;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.ov07-zn-opl {
+  color: #c00;
+  text-decoration: none;
+}
+.ov07-verhaal-zinnen-oplossing {
+  background: #FFEBEE;
+  border: 1.5px solid #EF9A9A;
+  border-radius: 10px;
+  padding: 12px 18px;
+}
+.ov07-verhaal-schrijf {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ov07-verhaal-lijn {
+  width: 100%;
+}
+
+.ov07-blad.lijnhoogte-klein .ov07-rij {
+  padding: 3px 4px;
+}
+.ov07-blad.lijnhoogte-klein .ov07-grondwoord,
+.ov07-blad.lijnhoogte-klein .ov07-kol-woord {
+  font-size: 1.2rem;
+}
+
+.ov07-rij,
+.ov07-uitbreiding-container,
+.ov07-verhaal-origineel {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.preview-modus .werkblad {
+  position: relative;
+}
+
+.preview-modus .werkblad::after {
+  content: "➖➖➖ hier valt A4-grens — alles eronder valt op pagina 2 ➖➖➖";
+  display: block;
+  position: absolute;
+  top: 28.5cm;
+  left: 0;
+  right: 0;
+  text-align: center;
+  color: #d9534f;
+  font-size: 0.78rem;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  font-weight: bold;
+  letter-spacing: 1px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent 0%, transparent 45%, #d9534f 45%, #d9534f 55%, transparent 55%, transparent 100%);
+  padding: 4px 0;
+}
+/* ==========================================================
+   OV07 — 2-KOLOMS LAYOUT voor ⭐ Oefenen en ⭐⭐ Toepassen
+   
+   PLAK DIT BLOK ONDERAAN style.css
+   
+   Wat het doet:
+   - ⭐ Oefenen: cellen met woord/keuzes/lijn onder elkaar,
+     2 cellen naast elkaar → dubbel zoveel oefeningen per A4
+   - ⭐⭐ Toepassen: 2 rijen naast elkaar (woord → lijn)
+   - ⭐⭐⭐ Verdiepen blijft 1 kolom (al breed wegens beide kolommen)
+   - ⭐⭐⭐⭐ Uitbreiden blijft volle breedte (verhaal)
+   ========================================================== */
+
+/* === ⭐⭐ Toepassen: 2-koloms grid van rijen ===
+   Bestaat al uit drie kolommen (woord, pijl, lijn) per rij.
+   Met 2-koloms grid komen er per rij 2 zo'n compacte rijen naast elkaar. */
+.ov07-rooster.ov07-tweekoloms {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+.ov07-rooster.ov07-tweekoloms .ov07-rij-kern {
+  grid-template-columns: auto 25px 1fr;
+  padding: 4px 4px;
+  gap: 8px;
+}
+.ov07-rooster.ov07-tweekoloms .ov07-grondwoord,
+.ov07-rooster.ov07-tweekoloms .ov07-kol-woord {
+  font-size: 1.2rem;
+}
+
+/* === ⭐ Oefenen: cellen met inhoud onder elkaar, 2 cellen per rij === */
+.ov07-rooster.ov07-tweekoloms-cellen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  margin-top: 14px;
+}
+
+.ov07-cel-basis {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px 6px;
+  border-bottom: 1px dashed #e0e0e0;
+  position: relative;
+}
+.ov07-cel-basis .ov07-grondwoord {
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 2px;
+}
+.ov07-cel-basis .ov07-uitgang-keuzes {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 4px;
+}
+.ov07-cel-basis .ov07-lijn-cel {
+  width: 100%;
+}
+
+/* In compact-modus (lijnhoogte klein) nog krapper */
+.ov07-blad.lijnhoogte-klein .ov07-rooster.ov07-tweekoloms,
+.ov07-blad.lijnhoogte-klein .ov07-rooster.ov07-tweekoloms-cellen {
+  gap: 4px 18px;
+}
+.ov07-blad.lijnhoogte-klein .ov07-cel-basis {
+  padding: 4px 4px;
+}
+.ov07-blad.lijnhoogte-klein .ov07-cel-basis .ov07-grondwoord {
+  font-size: 1.15rem;
+}
+.ov07-blad.lijnhoogte-klein .ov07-rooster.ov07-tweekoloms .ov07-rij-kern {
+  padding: 2px 4px;
+}
+
+/* Verwijder-knop op hover binnen cel-layout */
+.bundel-item-wrap .ov07-cel-basis:hover .rij-verwijder-knop {
+  opacity: 1;
+}
+.ov07-cel-basis {
+  position: relative;
+}
+
+
+.bundel-item-wrap .ov07-rij:hover .rij-verwijder-knop,
+.bundel-item-wrap .ov07-cel:hover .rij-verwijder-knop {
+  opacity: 1;
+}
+
+/* OV07-rijen en -cellen moeten relatieve positie hebben zodat de ✕ knop
+   binnen de rij/cel komt te staan (niet bovenaan het hele werkblad). */
+.ov07-rij,
+.ov07-cel {
+  position: relative;
+}
+
+/* === Verdiepen-rij compactere grid (kleinere middencolom) === */
+.ov07-rooster-verdieping .ov07-rij-verdieping {
+  grid-template-columns: 1fr 30px 1fr;
+  gap: 14px;
+  padding: 4px 4px;
+  align-items: center;
+}
+
+/* === Cellen krijgen consistente hoogte gelijk aan de schrijflijn === */
+.ov07-rooster-verdieping .ov07-kol-woord,
+.ov07-rooster-verdieping .ov07-kol-verklein {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+}
+
+/* === Gegeven-cel: compacter, mooier, gecentreerd === */
+.ov07-rooster-verdieping .ov07-gegeven {
+  background: #F5F5F5;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1px solid #DDD;
+  color: #222;
+  font-weight: bold;
+  font-family: "Sassoon Primary", "Andika", sans-serif;
+  font-size: 1.25rem;
+  justify-content: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* === Pijl gecentreerd, niet te groot === */
+.ov07-rooster-verdieping .ov07-pijl {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--zisa-blauw, #2196F3);
+}
+
+/* === Compact-modus (klein) iets krapper === */
+.ov07-blad.lijnhoogte-klein .ov07-rooster-verdieping .ov07-rij-verdieping {
+  padding: 2px 4px;
+}
+.ov07-blad.lijnhoogte-klein .ov07-rooster-verdieping .ov07-kol-woord,
+.ov07-blad.lijnhoogte-klein .ov07-rooster-verdieping .ov07-kol-verklein {
+  min-height: 36px;
+  font-size: 1.1rem;
+}
+.ov07-blad.lijnhoogte-klein .ov07-rooster-verdieping .ov07-gegeven {
+  font-size: 1.1rem;
+  padding: 4px 10px;
+}
+
+/* === Verdiepen: koppen-grid matcht rij-grid === */
+.ov07-rooster-verdieping .ov07-kol-koppen {
+  grid-template-columns: 1fr 30px 1fr;
+  gap: 14px;
+  padding: 4px 36px 4px 4px;
+}
+
+/* === Koppen gecentreerd (zelfde alignment als cellen eronder) === */
+.ov07-rooster-verdieping .ov07-kol-koppen .ov07-kol-kop {
+  text-align: center;
+}
+
+/* === Kern (⭐⭐ Toepassen) gebruikt geen koppen meer maar voor safety === */
+.ov07-rooster-kern .ov07-kol-koppen .ov07-kol-kop {
+  text-align: center;
+}
+
+.ov07-lijn-antwoord {
+  color: #2E7D32 !important;
+}
+ 
+.ov07-zn-opl {
+  color: #2E7D32 !important;
+}
+ 
+.ov07-verhaal-zinnen-oplossing {
+  background: #E8F5E9 !important;
+  border-color: #81C784 !important;
+}
