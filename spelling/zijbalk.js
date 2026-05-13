@@ -65,6 +65,12 @@ window.SpellingZijbalk = (function() {
       enkelVoor: ["meervouden"]
     },
     {
+      id: "ov09", label: "🦹 Klinkerdief: verdubbelen & verenkelen",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 8,
+      enkelVoor: ["stukjeswoorden"]
+    },
+    {
       id: "weekdictee", label: "📅 Weekdictee",
       niveaus: [],
       defaultAantal: 5
@@ -354,10 +360,28 @@ window.SpellingZijbalk = (function() {
     if (aangevinkt.size === 0) return result;
     
     const specifiekeSet = _alleSpecifiekeGroepen();
+    
+    // Speciale categorie-namen die naar een specifieke groep mappen
+    // (omdat de normale `groep` veld te breed is)
+    const SPECIALE_MAPPING = {
+      "verkleinwoorden": "verkleinwoorden",
+      "meervoud-en": "meervouden",
+      "meervoud-s": "meervouden",
+      "meervoud-verdubbel": "meervouden",
+      "meervoud-verenkel": "meervouden",
+      "stukjes-verdubbelen": "stukjeswoorden",
+      "stukjes-verenkelen": "stukjeswoorden",
+      "stukjes-geen-regel": "stukjeswoorden"
+    };
+    
     for (const catId of aangevinkt) {
       const cat = data[catId];
       if (!cat) continue;
-      if (specifiekeSet.has(cat.groep)) {
+      
+      // Check eerst de speciale mapping
+      if (SPECIALE_MAPPING[catId] && specifiekeSet.has(SPECIALE_MAPPING[catId])) {
+        result.specifiekeGroepen.add(SPECIALE_MAPPING[catId]);
+      } else if (specifiekeSet.has(cat.groep)) {
         result.specifiekeGroepen.add(cat.groep);
       } else {
         result.heeftGenerieke = true;
