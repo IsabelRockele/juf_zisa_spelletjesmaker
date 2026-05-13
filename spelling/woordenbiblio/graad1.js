@@ -317,7 +317,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "bloei", lidwoord: "de" },
       { tekst: "stoei", lidwoord: null },
       { tekst: "stoeit", lidwoord: null },
-      { tekst: "loei", lidwoord: null },
       { tekst: "loeit", lidwoord: null },
       { tekst: "knoei", lidwoord: null },
       { tekst: "knoeit", lidwoord: null },
@@ -386,7 +385,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pink", lidwoord: "de" },
       { tekst: "drink", lidwoord: null },
       { tekst: "drinkt", lidwoord: null },
-      { tekst: "stink", lidwoord: null },
+      { tekst: "stank", lidwoord: "de" },
       { tekst: "stinkt", lidwoord: null },
       { tekst: "schenk", lidwoord: null },
       { tekst: "schenkt", lidwoord: null },
@@ -737,21 +736,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
   },
   // ===== MEERVOUDEN =====
   "meervoud-en": {
-    naam: "Meervoud op -en (gemengd)",
+    naam: "Meervoud op -en",
     groep: "meervouden",
     hoofdgroep: "regelwoord",
     woorden: [
-      { tekst: "boom", lidwoord: "de", meervoud: "bomen" },
+      // Zuivere -en meervouden (gewoon -en plakken, eventueel s↔z of f↔v wissel)
       { tekst: "voet", lidwoord: "de", meervoud: "voeten" },
       { tekst: "hond", lidwoord: "de", meervoud: "honden" },
-      { tekst: "boot", lidwoord: "de", meervoud: "boten" },
       { tekst: "stoel", lidwoord: "de", meervoud: "stoelen" },
       { tekst: "huis", lidwoord: "het", meervoud: "huizen" },
       { tekst: "boek", lidwoord: "het", meervoud: "boeken" },
-      { tekst: "kraan", lidwoord: "de", meervoud: "kranen" },
       { tekst: "dief", lidwoord: "de", meervoud: "dieven" },
       { tekst: "leeuw", lidwoord: "de", meervoud: "leeuwen" },
-      { tekst: "schaap", lidwoord: "het", meervoud: "schapen" },
       { tekst: "deur", lidwoord: "de", meervoud: "deuren" },
       { tekst: "neus", lidwoord: "de", meervoud: "neuzen" },
       { tekst: "muis", lidwoord: "de", meervoud: "muizen" },
@@ -760,7 +756,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "bij", lidwoord: "de", meervoud: "bijen" },
       { tekst: "ui", lidwoord: "de", meervoud: "uien" },
       { tekst: "koe", lidwoord: "de", meervoud: "koeien" },
-      { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" }
+      { tekst: "schoen", lidwoord: "de", meervoud: "schoenen" },
+      // Aanvullingen (jouw lijst)
+      { tekst: "meeuw", lidwoord: "de", meervoud: "meeuwen" },
+      { tekst: "wolk", lidwoord: "de", meervoud: "wolken" },
+      { tekst: "helm", lidwoord: "de", meervoud: "helmen" },
+      { tekst: "kast", lidwoord: "de", meervoud: "kasten" },
+      { tekst: "plant", lidwoord: "de", meervoud: "planten" },
+      { tekst: "bloem", lidwoord: "de", meervoud: "bloemen" },
+      { tekst: "struik", lidwoord: "de", meervoud: "struiken" },
+      { tekst: "berg", lidwoord: "de", meervoud: "bergen" },
+      { tekst: "broek", lidwoord: "de", meervoud: "broeken" },
+      { tekst: "maand", lidwoord: "de", meervoud: "maanden" }
     ]
   },
   "meervoud-verdubbel": {
@@ -836,7 +843,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "winkel", lidwoord: "de", meervoud: "winkels" },
       { tekst: "dokter", lidwoord: "de", meervoud: "dokters" },
       { tekst: "sleutel", lidwoord: "de", meervoud: "sleutels" },
-      { tekst: "jongen", lidwoord: "de", meervoud: "jongens" }
+      { tekst: "jongen", lidwoord: "de", meervoud: "jongens" },
+      { tekst: "appel", lidwoord: "de", meervoud: "appels" }
     ]
   },
 
