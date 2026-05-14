@@ -11,9 +11,64 @@
   <header class="topbar">
     <a href="../index.html" class="terug">← Terug naar menu</a>
     <h1>Spellinggenerator</h1>
+    <span id="modus-badge" class="modus-badge" style="display:none"></span>
+    <button id="modus-wisselen" class="modus-wisselen" type="button" style="display:none" title="Terug naar het startscherm">
+      ⇄ Modus wisselen
+    </button>
   </header>
 
-  <div class="layout">
+  <!-- ============================================================
+       STARTSCHERM — drie modi-kaarten
+       ============================================================ -->
+  <section id="modus-startscherm" class="modus-startscherm" style="display:none">
+    <div class="modus-startscherm-binnen">
+      <h2 class="modus-titel">Wat wil je maken?</h2>
+      <p class="modus-ondertitel">Kies een werkwijze. Je kan later altijd wisselen via de knop bovenaan.</p>
+
+      <div class="modus-kaarten">
+
+        <button class="modus-kaart modus-kaart-werkblad" data-modus="werkblad" type="button">
+          <div class="modus-kaart-icoon">📋</div>
+          <div class="modus-kaart-titel">Werkbladen per categorie</div>
+          <div class="modus-kaart-uitleg">
+            Maak losse oefenbladen — één oefenvorm per blad, per niveau.
+            Stel een bundel samen en download als PDF.
+          </div>
+          <div class="modus-kaart-cta">Aan de slag →</div>
+        </button>
+
+        <button class="modus-kaart modus-kaart-herhaling" data-modus="herhaling" type="button">
+          <div class="modus-kaart-icoon">📚</div>
+          <div class="modus-kaart-titel">Herhalingsbundel</div>
+          <div class="modus-kaart-uitleg">
+            Eén bundel met meerdere oefenvormen, op maat van een themapakket.
+            Ideaal voor toetsweken en differentiatie.
+          </div>
+          <div class="modus-kaart-cta modus-kaart-cta-binnenkort">Binnenkort →</div>
+        </button>
+
+        <button class="modus-kaart modus-kaart-weekdictee" data-modus="weekdictee" type="button">
+          <div class="modus-kaart-icoon">📅</div>
+          <div class="modus-kaart-titel">Weekdictee</div>
+          <div class="modus-kaart-uitleg">
+            Een week vol oefenen — elke dag een klein blokje met woorden
+            en zinnen, klaar om uit te delen op maandag.
+          </div>
+          <div class="modus-kaart-cta">Aan de slag →</div>
+        </button>
+
+      </div>
+
+      <div class="modus-startscherm-voet">
+        Spelen, schrijven, leren — bij Juf Zisa.
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MODUS: WERKBLAD — bestaande layout (zijbalk + preview)
+       ============================================================ -->
+  <div id="modus-werkblad" class="layout" style="display:none">
 
     <!-- LINKS: instellingen -->
     <aside class="sidebar">
@@ -139,10 +194,175 @@
       <div id="preview" class="preview-modus"></div>
     </main>
 
-  </div>
+  </div><!-- /#modus-werkblad -->
 
   <!-- ============================================================
-       WOORDENKIEZER MODAL (voor weekdictee — etappe 1)
+       MODUS: HERHALINGSBUNDEL — placeholder (etappe 2)
+       ============================================================ -->
+  <section id="modus-herhaling" class="modus-placeholder" style="display:none">
+    <div class="modus-placeholder-binnen">
+      <div class="modus-placeholder-icoon">📚</div>
+      <h2>Herhalingsbundel — binnenkort beschikbaar</h2>
+      <p class="modus-placeholder-lead">
+        Hier komt straks een bundel met meerdere oefenvormen na elkaar,
+        op maat van een thema of toetsperiode. Eén PDF, alles in één keer.
+      </p>
+      <ul class="modus-placeholder-checklist">
+        <li>✓ Meerdere oefenvormen per kind in één bundel</li>
+        <li>✓ Differentiatie per niveau in dezelfde set</li>
+        <li>✓ Slimme volgorde: van herkennen naar zelfstandig schrijven</li>
+      </ul>
+      <p class="modus-placeholder-voet">
+        Tot dan kan je losse werkbladen samenstellen via 
+        <strong>📋 Werkbladen per categorie</strong>.
+      </p>
+      <button class="primair modus-placeholder-knop" type="button" 
+              onclick="window.SpellingModus && window.SpellingModus.terugNaarStartscherm()">
+        ← Terug naar startscherm
+      </button>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       MODUS: WEEKDICTEE — eigen paneel
+       ============================================================ -->
+  <section id="modus-weekdictee" class="wd-paneel" style="display:none">
+    <div class="wd-paneel-layout">
+
+      <!-- LINKS: instellingen -->
+      <aside class="wd-paneel-zijbalk">
+
+        <!-- Stap 1: Graad -->
+        <div class="wd-paneel-blok">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">1</span>
+            <span class="wd-stap-titel">Voor welke graad?</span>
+          </div>
+          <div class="graad-tabs" id="wd-paneel-graad-tabs">
+            <button class="graad-tab actief" data-graad="1" type="button">Graad 1</button>
+            <button class="graad-tab" data-graad="2" type="button" disabled>Graad 2 <span class="binnenkort">binnenkort</span></button>
+            <button class="graad-tab" data-graad="3" type="button" disabled>Graad 3 <span class="binnenkort">binnenkort</span></button>
+          </div>
+        </div>
+
+        <!-- Stap 2: Categorieën -->
+        <div class="wd-paneel-blok">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">2</span>
+            <span class="wd-stap-titel">Welke categorieën?</span>
+          </div>
+          <p class="wd-paneel-uitleg">Vink aan welke spellingsregels deze week aan bod komen.</p>
+          <div id="wd-paneel-categorieen"></div>
+        </div>
+
+        <!-- Stap 3: Woorden -->
+        <div class="wd-paneel-blok">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">3</span>
+            <span class="wd-stap-titel">Kies de woorden</span>
+          </div>
+          <button id="wd-paneel-open-kiezer" class="zb-knop-groot" type="button" disabled>
+            📋 Open woordenkiezer
+          </button>
+          <p class="wd-paneel-info wd-info-grijs" id="wd-paneel-woord-info">
+            Kies eerst categorieën hierboven.
+          </p>
+        </div>
+
+        <!-- Stap 4: Schrijflijn -->
+        <div class="wd-paneel-blok">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">4</span>
+            <span class="wd-stap-titel">Schrijflijn</span>
+          </div>
+          <div class="lijn-knoppen" id="wd-paneel-lijntype">
+            <button class="lijn-knop actief" data-lijn="vier" type="button">
+              <span class="lijn-mini vier"></span><span>Vierlijn</span>
+            </button>
+            <button class="lijn-knop" data-lijn="dubbel" type="button">
+              <span class="lijn-mini dubbel"></span><span>Dubbel</span>
+            </button>
+            <button class="lijn-knop" data-lijn="enkel" type="button">
+              <span class="lijn-mini enkel"></span><span>Enkel</span>
+            </button>
+          </div>
+          <div class="wd-paneel-hoogte-rij">
+            <label class="wd-paneel-mini-label">Hoogte:</label>
+            <div class="zb-hoogte-knoppen" id="wd-paneel-lijnhoogte">
+              <button class="zb-hoogte-btn actief" data-hoogte="klein" type="button">Klein</button>
+              <button class="zb-hoogte-btn" data-hoogte="middel" type="button">Middel</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stap 5: Met of zonder zinnen -->
+        <div class="wd-paneel-blok">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">5</span>
+            <span class="wd-stap-titel">Type weekdictee</span>
+          </div>
+          <label class="wd-paneel-toggle">
+            <input type="checkbox" id="wd-paneel-met-zinnen" checked>
+            <span>Eén oefenzin per dag <small>(met het woord erin)</small></span>
+          </label>
+          <p class="wd-paneel-mini-uitleg">
+            Aan = elke dag krijgt onderaan één eenvoudige zin met een dictee-woord erin.
+            Uit = enkel woorden, geen zinnen.
+          </p>
+        </div>
+
+        <!-- Bewerken (alleen voor het dicteerblad — niet op het leerlingblad) -->
+        <div class="wd-paneel-blok wd-paneel-blok-preview">
+          <div class="wd-paneel-stap">
+            <span class="wd-stap-nr">✏️</span>
+            <span class="wd-stap-titel">Aanpassen</span>
+          </div>
+          <p class="wd-paneel-mini-uitleg-top">
+            De preview rechts is jouw <strong>dicteerblad</strong> — wat jij gaat voorlezen.
+            Klik op een woord of zin om aan te passen.
+          </p>
+          <button id="wd-paneel-bewerken" class="primair wd-paneel-bewerk-knop" type="button">
+            ✏️ Bewerken: uit
+          </button>
+          <p class="wd-paneel-mini-uitleg">
+            Zet aan om woorden of zinnen te wijzigen. Jouw aanpassingen
+            komen mee in het dicteerblad-PDF.
+          </p>
+        </div>
+
+        <!-- Acties -->
+        <div class="wd-paneel-acties">
+          <button id="wd-paneel-vernieuw" class="primair primair-groot wd-paneel-actie" type="button" disabled>
+            🔄 Vernieuw voorbeeld
+          </button>
+          <div class="wd-paneel-download-titel">Downloaden:</div>
+          <button id="wd-paneel-download" class="secundair wd-paneel-actie" type="button" disabled
+                  title="Lege schrijflijnen — wat de leerling krijgt om in te vullen">
+            📄 Leerling-blad
+          </button>
+          <button id="wd-paneel-download-opl" class="secundair wd-paneel-actie wd-paneel-download-leerkracht" type="button" disabled
+                  title="Mét alle woorden en zinnen — wat jij voorleest tijdens het dictee">
+            📋 Dicteerblad (mijn versie)
+          </button>
+        </div>
+
+      </aside>
+
+      <!-- RECHTS: preview -->
+      <main class="preview-paneel wd-paneel-preview-wrap">
+        <div id="wd-paneel-preview" class="preview-modus">
+          <div class="preview-leeg">
+            <h3>Welkom bij het weekdictee</h3>
+            <p>Volg de stappen links: graad → categorieën → woorden → schrijflijn,<br>en klik dan op <strong>Vernieuw voorbeeld</strong>.</p>
+          </div>
+        </div>
+      </main>
+
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WOORDENKIEZER MODAL (gedeeld door werkblad-modus en weekdictee-modus)
        ============================================================ -->
   <div class="wk-modal" id="wk-modal" style="display:none">
     <div class="wk-modal-inhoud">
@@ -213,6 +433,7 @@
   <script src="woordenbiblio/zinnen-graad1.js"></script>
   <script src="woordenbiblio/zinnen-meervoud-graad1.js"></script>
   <script src="woordenbiblio/zinnen-klinkerdief-graad1.js"></script>
+  <script src="woordenbiblio/dictee-zinnen-graad1.js"></script>
   <script src="woordenkiezer.js"></script>
   <script src="modules/weekdictee.js"></script>
   <script src="modules/ov01.js"></script>
@@ -224,12 +445,15 @@
   <script src="modules/ov07.js"></script>
   <script src="modules/ov08.js"></script>
   <script src="modules/ov09.js"></script>
+  <script src="modules/ov10.js"></script>
   <script src="generator.js"></script>
   <script src="preview.js"></script>
   <script src="pdf-engine.js"></script>
   <script src="bundel.js"></script>
   <script src="zijbalk.js"></script>
   <script src="app.js"></script>
+  <script src="weekdictee-paneel.js"></script>
+  <script src="modus.js"></script>
 
 </body>
 </html>
