@@ -1,16 +1,22 @@
 /* ==========================================================
-   Module: OV05 — Klank kiezen + inkleuren
+   Module: OV05 — Klank kiezen (hele-woord keuze)
    
-   Drie niveaus:
-   - BASIS:      plaatje + woord met 2 cirkel-opties (kind omcirkelt juiste)
-   - KERN:       plaatje + woord met streepje (kind schrijft klank in)
-   - VERDIEPING: alleen plaatje, kind schrijft hele woord op schrijflijn
+   Werkt alleen voor paren waarbij het kind kan kiezen uit
+   meerdere hele woord-varianten (juiste + foute schrijfwijzen):
+     - ei vs ij        (3 opties: reis/rijs/ries)
+     - au vs ou        (3 opties: hout/haut/howt)
+     - aai/ooi/oei     (3 opties)
+     - eeuw vs ieuw    (3 opties)
+     - verlengen d/t   (2 opties: hand/hant)
+     - verlengen b/p   (2 opties: krab/krap)
    
-   Leerkracht kiest klank-paar in zijbalk:
-   ei vs ij, ng vs nk, ou vs au, f vs v, s vs z, ch vs g, b vs p, d vs t
+   Auto-detecteert het paar uit de aangevinkte woorden — zoals OV4.
    
-   Tool kiest woorden uit beide categorieën van het paar
-   en weet welke keuze juist is per woord.
+   4 niveaus:
+     ⭐ basis        — plaatje + keuze tussen 2/3 hele woorden (omcirkelen)
+     ⭐⭐ kern         — keuze tussen 2/3 hele woorden + schrijflijn (plaatje optioneel)
+     ⭐⭐⭐ verdieping — plaatje alleen, kind schrijft hele woord op lijn
+     ⭐⭐⭐⭐ uitbreiding — woorden schrijven + zin maken onderaan
    ========================================================== */
 
 window.SpellingModules = window.SpellingModules || {};
@@ -20,24 +26,149 @@ window.SpellingModules.ov05 = {
   naam: "Klank kiezen",
   graad: 1,
 
-  /* Klank-paren met info over hoe ze in woorden voorkomen.
-     - klanken: array van 2 strings (de twee klanken om te kiezen)
-     - categorieen: array van 2 categorie-id's uit de woordenbieb
-     - zoekIn: "begin" / "midden" / "eind" — waar in het woord staat de klank
-     - alleenEen: voor klanken die in 1 categorie zitten (bv. au-ou)
-  */
-  KLANK_PAREN: {
-    "ei-ij":  { klanken: ["ei", "ij"], categorieen: ["tw-ei", "tw-ij"], zoekIn: "midden" },
-    "ng-nk":  { klanken: ["ng", "nk"], categorieen: ["ng-woorden", "nk-woorden"], zoekIn: "midden" },
-    "ou-au":  { klanken: ["ou", "au"], categorieen: ["tw-ou", "tw-au"], zoekIn: "midden" },
-    "f-v":    { klanken: ["f", "v"], categorieen: [], zoekIn: "vrij" },
-    "s-z":    { klanken: ["s", "z"], categorieen: [], zoekIn: "vrij" },
-    "ch-g":   { klanken: ["ch", "g"], categorieen: [], zoekIn: "vrij" },
-    "b-p":    { klanken: ["b", "p"], categorieen: [], zoekIn: "eind" },
-    "d-t":    { klanken: ["d", "t"], categorieen: [], zoekIn: "eind" }
+  /* Maximum aantal woorden per paar per niveau dat comfortabel op 1 A4 past. */
+  _maxPerNiveau: {
+    basis: 12,
+    kern: 12,
+    verdieping: 12,
+    uitbreiding: 9
   },
 
-  /* ---------- INSTELLINGEN UI ---------- */
+  /* Maximum letterlengte voor woorden in OV5.
+     Bij werkwoorden met prefix ('hij ligt', 'ik heb') tellen we
+     alleen het werkwoord-deel (laatste woord na spatie).
+     Lange woorden (> 6 letters) vallen weg omdat 3 keuze-hokjes
+     niet naast elkaar passen op het werkblad.
+     Minimum 4 woorden moet overblijven per paar, anders sla werkblad over. */
+  _maxLengte: 6,
+  _minAantal: 4,
+
+  /* Geeft het te tellen kerndeel van een woord terug.
+     'hij ligt' → 'ligt', 'ik heb' → 'heb', 'goud' → 'goud' */
+  _kernDeel: function(tekst) {
+    const delen = tekst.trim().split(/\s+/);
+    return delen[delen.length - 1];
+  },
+
+  /* Geeft eventuele prefix (alles vóór laatste woord) of "" */
+  _prefix: function(tekst) {
+    const delen = tekst.trim().split(/\s+/);
+    if (delen.length <= 1) return "";
+    return delen.slice(0, -1).join(" ");
+  },
+
+  /* =====================================================
+     KLANK-PAAR DETECTIE
+     Subset van OV4 — alleen paren waarvoor we pedagogisch
+     zinvolle hele-woord afleiders kunnen genereren.
+     ===================================================== */
+  KLANK_PAREN: [
+    {
+      id: "ei-ij",
+      titel: "ei vs ij",
+      trigger: (aangevinkteCats) => {
+        if (!(aangevinkteCats.includes("tw-ei") && aangevinkteCats.includes("tw-ij"))) return null;
+        return {
+          kolommen: [
+            { titel: "ei", kleur: "#E53935", filter: w => w.categorie === "tw-ei" },
+            { titel: "ij", kleur: "#1E88E5", filter: w => w.categorie === "tw-ij" }
+          ]
+        };
+      }
+    },
+    {
+      id: "au-ou",
+      titel: "au vs ou",
+      trigger: (aangevinkteCats) => {
+        if (!(aangevinkteCats.includes("tw-au") && aangevinkteCats.includes("tw-ou"))) return null;
+        return {
+          kolommen: [
+            { titel: "au", kleur: "#FB8C00", filter: w => w.categorie === "tw-au" },
+            { titel: "ou", kleur: "#8E24AA", filter: w => w.categorie === "tw-ou" }
+          ]
+        };
+      }
+    },
+    {
+      id: "aai-ooi-oei",
+      titel: "aai / ooi / oei",
+      trigger: (aangevinkteCats) => {
+        const k = [];
+        if (aangevinkteCats.includes("tw-aai")) k.push({ titel: "aai", kleur: "#E53935", filter: w => w.categorie === "tw-aai" });
+        if (aangevinkteCats.includes("tw-ooi")) k.push({ titel: "ooi", kleur: "#4CAF50", filter: w => w.categorie === "tw-ooi" });
+        if (aangevinkteCats.includes("tw-oei")) k.push({ titel: "oei", kleur: "#1E88E5", filter: w => w.categorie === "tw-oei" });
+        if (k.length < 2) return null;
+        return { kolommen: k };
+      }
+    },
+    {
+      id: "eeuw-ieuw",
+      titel: "eeuw / ieuw",
+      trigger: (aangevinkteCats) => {
+        if (!(aangevinkteCats.includes("tw-eeuw") && aangevinkteCats.includes("tw-ieuw"))) return null;
+        return {
+          kolommen: [
+            { titel: "eeuw", kleur: "#E53935", filter: w => w.categorie === "tw-eeuw" },
+            { titel: "ieuw", kleur: "#1E88E5", filter: w => w.categorie === "tw-ieuw" }
+          ]
+        };
+      }
+    },
+    {
+      id: "verlengen-dt",
+      titel: "Eindigt op -d of -t",
+      trigger: (aangevinkteCats) => {
+        if (!aangevinkteCats.includes("verlengingsregel")) return null;
+        const eindigtOpD = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("d");
+        const eindigtOpT = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("t");
+        return {
+          kolommen: [
+            { titel: "-d", kleur: "#E53935", filter: eindigtOpD },
+            { titel: "-t", kleur: "#43A047", filter: eindigtOpT }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    },
+    {
+      id: "verlengen-bp",
+      titel: "Eindigt op -b of -p",
+      trigger: (aangevinkteCats) => {
+        if (!aangevinkteCats.includes("verlengingsregel")) return null;
+        const eindigtOpB = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("b");
+        const eindigtOpP = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("p");
+        return {
+          kolommen: [
+            { titel: "-b", kleur: "#1E88E5", filter: eindigtOpB },
+            { titel: "-p", kleur: "#FB8C00", filter: eindigtOpP }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    }
+  ],
+
+  /* Detecteer welke klank-paren mogelijk zijn met de huidige woorden. */
+  _detecteerParen: function(gekozenWoorden) {
+    const aangevinkteCats = [...new Set(gekozenWoorden.map(w => w.categorie).filter(Boolean))];
+    const resultaat = [];
+    for (const paar of this.KLANK_PAREN) {
+      const detectie = paar.trigger(aangevinkteCats);
+      if (!detectie) continue;
+      if (detectie.minimumPerKolom) {
+        const ok = detectie.kolommen.every(kol => gekozenWoorden.some(w => kol.filter(w)));
+        if (!ok) continue;
+      }
+      resultaat.push({
+        id: paar.id,
+        titel: paar.titel,
+        kolommen: detectie.kolommen
+      });
+    }
+    return resultaat;
+  },
+
+  /* ---------- INSTELLINGEN UI (zijbalk) ---------- */
   renderInstellingen: function() {
     return `
       <h2>Instellingen</h2>
@@ -49,158 +180,34 @@ window.SpellingModules.ov05 = {
         <button class="wd-kiezer-knop" id="ov05-open-kiezer" type="button">
           📋 Open woordenkiezer
         </button>
-        <p class="wd-stap-info" id="ov05-keuze-info">
-          Nog geen woorden gekozen.
-        </p>
         <p class="wd-stap-info" style="margin-top:6px;">
-          Tip: kies woorden die het klank-paar bevatten (bv. ei + ij woorden voor 'ei vs ij').
+          De oefenvorm detecteert zelf welk klank-paar past bij de aangevinkte categorieën:
+          ei/ij, au/ou, aai/ooi/oei, eeuw/ieuw, of verlengingsregel (-d/-t, -b/-p).
         </p>
       </div>
 
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">2</span> Klank-paar
-        </label>
-        <select id="ov05-klankpaar" style="width:100%; padding:6px;">
-          <option value="ei-ij" selected>ei vs ij</option>
-          <option value="ng-nk">ng vs nk</option>
-          <option value="ou-au">ou vs au</option>
-          <option value="f-v">f vs v</option>
-          <option value="s-z">s vs z</option>
-          <option value="ch-g">ch vs g</option>
-          <option value="b-p">b vs p (eind)</option>
-          <option value="d-t">d vs t (eind)</option>
-        </select>
-      </div>
-
-      <div class="ov-instel-blok">
-        <label class="ov-instel-titel">
-          <span class="ov-instel-nr">3</span> Niveau(s)
-        </label>
-        <div id="ov05-niveaus">
-          <label class="ov-niveau-vink actief">
-            <input type="checkbox" data-niveau="basis" checked>
-            <div class="ov-niveau-vink-tekst">
-              <strong>⭐ Oefenen</strong>
-              <small>plaatje + 2 cirkel-opties (omcirkelen)</small>
-            </div>
-          </label>
-          <label class="ov-niveau-vink">
-            <input type="checkbox" data-niveau="kern">
-            <div class="ov-niveau-vink-tekst">
-              <strong>⭐⭐ Toepassen</strong>
-              <small>plaatje + streepje (klank invullen)</small>
-            </div>
-          </label>
-          <label class="ov-niveau-vink">
-            <input type="checkbox" data-niveau="verdieping">
-            <div class="ov-niveau-vink-tekst">
-              <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>plaatje + hele woord schrijven</small>
-            </div>
-          </label>
-          <label class="ov-niveau-vink">
-            <input type="checkbox" data-niveau="uitbreiding">
-            <div class="ov-niveau-vink-tekst">
-              <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>woord schrijven + zin maken</small>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <div class="ov-instel-blok">
-        <label class="ov-instel-titel">
-          <span class="ov-instel-nr">4</span> Plaatje
+          <span class="ov-instel-nr">2</span> Plaatje
         </label>
         <p class="wd-stap-info" style="margin-bottom:6px;">
-          Bij <strong>⭐ Oefenen</strong> staat het plaatje altijd. Bij andere niveaus kan je kiezen.
+          Bij <strong>⭐ basis</strong> staat het plaatje altijd. Voor andere niveaus kies je hier.
         </p>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
           <input type="checkbox" id="ov05-plaatje-kern" checked>
-          <span>Plaatje tonen bij <strong>⭐⭐ Toepassen</strong></span>
+          <span>Plaatje tonen bij <strong>⭐⭐ kern</strong></span>
         </label>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
           <input type="checkbox" id="ov05-plaatje-verdieping" checked>
-          <span>Plaatje tonen bij <strong>⭐⭐⭐ Verdiepen</strong> en <strong>⭐⭐⭐⭐ Uitbreiden</strong></span>
+          <span>Plaatje tonen bij <strong>⭐⭐⭐ verdieping</strong> en <strong>⭐⭐⭐⭐ uitbreiding</strong></span>
         </label>
       </div>
 
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">5</span> Aantal woorden
+          <span class="ov-instel-nr">3</span> Ondertitel (vrij)
         </label>
-        <input type="number" id="ov05-aantal-woorden" min="3" max="20" value="8">
-      </div>
-
-      <div class="ov-instel-blok">
-        <label class="ov-instel-titel">
-          <span class="ov-instel-nr">6</span> Schrijflijnen
-        </label>
-        <label style="margin-top:6px">Type schrijflijn</label>
-        <div class="lijntype-keuze" id="ov05-lijntype">
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type1">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type1" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 1<br><small>klassiek hulp</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type2">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type2" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 2<br><small>standaard</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type3" checked>
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type3" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 3<br><small>kleurgecodeerd</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type4">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type4" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 4<br><small>grijs-blauw</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type5">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type5" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 5<br><small>intens kleur</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type6">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type6" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 6<br><small>enkele lijn</small></span>
-            </span>
-          </label>
-          <label class="lijntype-radio">
-            <input type="radio" name="ov05-lt" value="type7">
-            <span class="lijntype-naam">
-              <canvas class="lijntype-preview" data-preview-type="type7" width="80" height="32"></canvas>
-              <span class="lijntype-label">Type 7<br><small>twee lijnen</small></span>
-            </span>
-          </label>
-        </div>
-        <label style="margin-top:10px">Hoogte</label>
-        <div class="subtype-knoppen" id="ov05-lijnhoogte">
-          <button class="actief" data-hoogte="middel" type="button">Middel</button>
-          <button data-hoogte="klein" type="button">Klein</button>
-        </div>
-      </div>
-
-      <div class="ov-instel-blok">
-        <label class="ov-instel-titel">
-          <span class="ov-instel-nr">7</span> Ondertitel (vrij)
-        </label>
-        <input type="text" id="ov05-ondertitel" placeholder="bv. Week 12 — ei en ij">
+        <input type="text" id="ov05-ondertitel" placeholder="bv. Week 12 — klank kiezen">
       </div>
     `;
   },
@@ -211,20 +218,11 @@ window.SpellingModules.ov05 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov05 || {};
     const niveaus = o.niveaus && o.niveaus.length > 0 ? o.niveaus : ["basis"];
-    const klankPaarKey = o.klankpaar || "ei-ij";
-    const aantalWoorden = o.aantalWoorden || 8;
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "middel";
     const ondertitel = o.ondertitel || "";
     const plaatjeKern = o.plaatjeKern !== false;
     const plaatjeVerdieping = o.plaatjeVerdieping !== false;
-
-    const klankPaar = this.KLANK_PAREN[klankPaarKey];
-    if (!klankPaar) {
-      return `<div class="werkblad ov05-blad">
-        <p>Onbekend klank-paar.</p>
-      </div>`;
-    }
 
     const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
 
@@ -237,96 +235,114 @@ window.SpellingModules.ov05 = {
       </div>`;
     }
 
-    return niveaus.map(niveau => {
-      const woorden = this._kiesWoorden(gekozenWoorden, aantalWoorden);
-      const metPlaatje = (niveau === "basis") || 
-                        (niveau === "kern" && plaatjeKern) || 
-                        ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping);
-      return this._renderEenBlad(niveau, woorden, klankPaar, klankPaarKey, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden);
-    }).join("");
-  },
+    const paren = this._detecteerParen(gekozenWoorden);
 
-  /* Vind de positie van een klank uit het paar in een woord.
-     Retourneert {klank, positie, lengte} of null. */
-  _vindKlankInWoord: function(woord, klankPaar) {
-    const lower = woord.toLowerCase();
-    for (const klank of klankPaar.klanken) {
-      const positie = lower.indexOf(klank);
-      if (positie !== -1) {
-        // Voor "eind" zoekIn-mode: alleen tellen als de klank aan het eind staat
-        if (klankPaar.zoekIn === "eind" && positie + klank.length !== woord.length) {
-          continue;
-        }
-        return { klank: klank, positie: positie, lengte: klank.length };
+    if (paren.length === 0) {
+      return `<div class="werkblad ov05-blad">
+        <div class="weekdictee-empty">
+          <h3>⭕ Klank kiezen niet mogelijk</h3>
+          <p>Deze oefenvorm werkt alleen voor:</p>
+          <ul style="text-align:left; max-width:500px; margin: 12px auto;">
+            <li>ei + ij woorden</li>
+            <li>au + ou woorden</li>
+            <li>aai/ooi/oei woorden</li>
+            <li>eeuw + ieuw woorden</li>
+            <li>Verlengingsregel (zowel -d én -t, of -b én -p woorden)</li>
+          </ul>
+        </div>
+      </div>`;
+    }
+
+    // Voor elk paar × elk niveau één werkblad — maar SKIP als
+    // er na lengte-filter te weinig woorden overblijven voor dat paar.
+    let html = "";
+    let aantalGeskipt = 0;
+    const geskipt = [];
+    for (const paar of paren) {
+      const passend = this._filterWoordenVoorPaar(gekozenWoorden, paar);
+      if (passend.length < this._minAantal) {
+        aantalGeskipt++;
+        geskipt.push(paar.titel);
+        continue;
+      }
+      for (const niveau of niveaus) {
+        const woorden = this._kiesWoorden(passend, this._maxPerNiveau[niveau] || 12);
+        const metPlaatje = (niveau === "basis")
+          || (niveau === "kern" && plaatjeKern)
+          || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping);
+        html += this._renderEenBlad(niveau, woorden, paar, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden);
       }
     }
-    return null;
+    
+    if (html === "" && aantalGeskipt > 0) {
+      return `<div class="werkblad ov05-blad">
+        <div class="weekdictee-empty">
+          <h3>⭕ Geen geschikte woorden</h3>
+          <p>De gekozen woorden zijn te lang (meer dan ${this._maxLengte} letters).
+          Bij klank kiezen passen 3 keuze-hokjes niet naast elkaar voor lange woorden.</p>
+          <p>Kies kortere woorden voor de paren: <em>${geskipt.join(", ")}</em>.</p>
+        </div>
+      </div>`;
+    }
+    return html;
   },
 
-  _renderEenBlad: function(niveau, woorden, klankPaar, klankPaarKey, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden) {
+  /* Filter woorden voor dit paar: alleen die in een kolom passen
+     ÉN waarvan de kern-lengte ≤ _maxLengte is. */
+  _filterWoordenVoorPaar: function(allWoorden, paar) {
+    return allWoorden.filter(w => 
+      paar.kolommen.some(k => k.filter(w))
+      && this._kernDeel(w.tekst).length <= this._maxLengte
+    );
+  },
+
+  _renderEenBlad: function(niveau, woorden, paar, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
+    const af = window.SpellingAfleiders;
 
     let rijenHTML = "";
     for (const w of woorden) {
-      const woord = w.tekst;
-      const emoji = metPlaatje ? this._zoekEmoji(w.tekst) : "";
+      const woordVol = w.tekst;
+      const kern = this._kernDeel(woordVol);     // bv. "ligt" of "heb"
+      const prefix = this._prefix(woordVol);     // bv. "hij" of "ik" of ""
+      
+      const emoji = metPlaatje ? this._zoekEmoji(woordVol) : "";
       const plaatjeCel = metPlaatje
         ? `<div class="ov05-plaatje">${emoji}</div>`
         : `<div class="ov05-plaatje-leeg"></div>`;
 
-      // Vind welke klank uit het paar in dit woord zit
-      const klankInfo = this._vindKlankInWoord(woord, klankPaar);
-      
-      // Middelste deel: keuze (basis) / streepje (kern) / niets (verdieping)
+      // Bouw keuze-hokjes voor basis en kern via afleiders (hele-woord keuze)
+      // Voor woorden met prefix ('hij ligt', 'ik heb'): toon alleen kern in hokjes
       let middenHTML = "";
-
-      if (niveau === "basis" && klankInfo) {
-        // Toon woord met 2 cirkel-opties op de positie van de klank
-        const voor = woord.slice(0, klankInfo.positie);
-        const na = woord.slice(klankInfo.positie + klankInfo.lengte);
-        const opties = klankPaar.klanken.map(k => {
-          const isJuist = (k === klankInfo.klank);
-          const cirkelClass = (metAntwoorden && isJuist) 
-            ? "ov05-cirkel ov05-cirkel-juist" 
-            : "ov05-cirkel";
-          return `<span class="${cirkelClass}">${k}</span>`;
+      if ((niveau === "basis" || niveau === "kern") && af) {
+        // Maak afleiders op basis van het KERN-deel zodat we niet 'hij ligd' krijgen
+        // maar 'ligd' — schoner in de keuze-hokjes.
+        const kernObj = { ...w, tekst: kern };
+        const afleiders = af.maakAfleiders(kernObj, w.categorie);
+        const opties = af.schikWillekeurig(kern, afleiders, () => this._random());
+        const hokjes = opties.map(opt => {
+          const isJuist = (opt === kern);
+          const juistClass = (metAntwoorden && isJuist) ? " ov05-keuze-juist" : "";
+          return `<div class="ov05-keuze-hokje${juistClass}">${opt}</div>`;
         }).join("");
-        middenHTML = `
-          <div class="ov05-woord-met-keuze">
-            <span class="ov05-woord-deel">${voor}</span>
-            ${opties}
-            <span class="ov05-woord-deel">${na}</span>
-          </div>`;
-      } else if (niveau === "kern" && klankInfo) {
-        // Toon woord met streepje waar de klank moet komen
-        const voor = woord.slice(0, klankInfo.positie);
-        const na = woord.slice(klankInfo.positie + klankInfo.lengte);
-        const antwoord = metAntwoorden 
-          ? `<span class="ov05-streepje-antwoord">${klankInfo.klank}</span>`
-          : `<span class="ov05-streepje">___</span>`;
-        middenHTML = `
-          <div class="ov05-woord-met-streepje">
-            <span class="ov05-woord-deel">${voor}</span>
-            ${antwoord}
-            <span class="ov05-woord-deel">${na}</span>
-          </div>`;
-      } else if (klankInfo === null && niveau !== "verdieping") {
-        middenHTML = `<div class="ov05-niet-passend">⚠️ ${woord} past niet bij dit klank-paar</div>`;
+        middenHTML = `<div class="ov05-keuzes">${hokjes}</div>`;
       }
 
-      // Schrijflijn — voor ALLE niveaus (basis+kern+verdieping)
+      // Schrijflijn voor alle niveaus.
+      // Bij prefix: toon prefix als hint vóór de schrijflijn ("ik ___")
       const antwoordSpan = metAntwoorden
-        ? `<span class="ov05-lijn-antwoord">${woord}</span>`
+        ? `<span class="ov05-lijn-antwoord">${woordVol}</span>`
+        : "";
+      const prefixSpan = prefix
+        ? `<span class="ov05-lijn-prefix">${prefix}</span>`
         : "";
       const canvas = sl
         ? sl.htmlCanvas(lijntype, lijnhoogte, 280)
         : `<div class="ov05-fallback-lijn"></div>`;
-      const lijnHTML = `<div class="ov05-lijn-cel">${antwoordSpan}${canvas}</div>`;
+      const lijnHTML = `<div class="ov05-lijn-cel">${prefixSpan}${antwoordSpan}${canvas}</div>`;
 
-      // Layout: plaatje bovenaan, midden, schrijflijn onder (verticaal)
-      const rijClass = `ov05-rij ov05-rij-${niveau}`;
       rijenHTML += `
-        <div class="${rijClass}" data-woord="${w.tekst}">
+        <div class="ov05-rij ov05-rij-${niveau}" data-woord="${w.tekst}">
           <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
           ${middenHTML ? `<div class="ov05-midden">${middenHTML}</div>` : ""}
@@ -343,39 +359,41 @@ window.SpellingModules.ov05 = {
       : "";
 
     // Opdracht-tekst per niveau
-    const klankenLabel = klankPaar.klanken.join(" of ");
     let opdrachtTekst = "";
     if (niveau === "basis") {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar het plaatje.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel de juiste klank: <strong>${klankenLabel}</strong>.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het hele woord op de lijn.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Omcirkel het juiste woord.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het op de lijn.</span></div>`;
     } else if (niveau === "kern") {
       opdrachtTekst = `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar het plaatje.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de juiste klank in: <strong>${klankenLabel}</strong>.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het hele woord op de lijn.</span></div>`;
-    } else {
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kies het juiste woord.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het op de lijn.</span></div>`;
+    } else if (niveau === "verdieping") {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kijk naar het plaatje.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het juiste woord op de lijn (let op: <strong>${klankenLabel}</strong>).</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf zelf het juiste woord op de lijn.</span></div>`;
+    } else if (niveau === "uitbreiding") {
+      opdrachtTekst = `
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf de woorden op de lijn.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak onderaan een zin met één van de woorden.</span></div>`;
     }
 
     return `
       <div class="werkblad ov05-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}" data-niveau="${niveau}">
         <div class="ov01-header">
           <div class="ov01-naam-rij">
-            <span data-bewerk-id="naamlabel-${niveau}">Naam:</span>
+            <span data-bewerk-id="naamlabel-${niveau}-${paar.id}">Naam:</span>
             <span class="ov01-lijn-naam"></span>
-            <span data-bewerk-id="datumlabel-${niveau}">Datum:</span>
+            <span data-bewerk-id="datumlabel-${niveau}-${paar.id}">Datum:</span>
             <span class="ov01-lijn-datum"></span>
           </div>
-          <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}">
-            Klank kiezen: ${klankenLabel}
+          <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}-${paar.id}">
+            Klank kiezen: ${paar.titel}
             <span class="ov01-niveau-badge ov01-niveau-${niveau}">${niveauLabel}</span>
             ${oplBadge}
           </h2>
-          ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}">${ondertitel}</p>` : ""}
+          ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}-${paar.id}">${ondertitel}</p>` : ""}
         </div>
 
         <div class="ov01-stappen">
@@ -394,20 +412,19 @@ window.SpellingModules.ov05 = {
     `;
   },
 
-  /* Uitbreidings-blok onderaan ov05: zin maken met een woord */
   _renderUitbreidingBlok: function(lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
     const lijn = () => sl
       ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
       : `<div class="ov01-zin-lijn"></div>`;
-    
+
     const opl = metAntwoorden
       ? `<p class="ov01-zin-richtlijn">Verwacht: een correcte zin met hoofdletter en leesteken, met een woord uit de oefening.</p>`
       : "";
-    
+
     return `
       <div class="ov01-zin-blok ov01-uitbreiding-blok">
-        <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht (uitbreiden):</div>
+        <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht:</div>
         <p class="ov01-zin-vraag">Kies 1 woord van hierboven en maak er een goede zin mee.</p>
         ${lijn()}
         ${opl}
