@@ -71,16 +71,24 @@ window.SpellingWoordenkiezer = (function() {
       + " | verwijderd uit: " + verwijderdeCats.join(","));
     
     if (voor !== na) {
-      try { localStorage.setItem(LS_KEY, JSON.stringify(gekozen)); } catch (e) {}
+      try { 
+        (window.SpellingModusStorage || localStorage).setItem(LS_KEY, JSON.stringify(gekozen)); 
+      } catch (e) {}
       syncActieveWoorden();
     }
+  }
+
+  /* Hulpfunctie: gebruik SpellingModusStorage als die er is, anders localStorage */
+  function _storage() {
+    return window.SpellingModusStorage || localStorage;
   }
 
   /* ----- Init: laad opgeslagen keuzes uit localStorage ----- */
   function laadOpgeslagen() {
     try {
-      const raw = localStorage.getItem(LS_KEY);
+      const raw = _storage().getItem(LS_KEY);
       if (raw) gekozen = JSON.parse(raw);
+      else gekozen = [];
     } catch (e) {
       console.warn("Kon opgeslagen keuzes niet laden:", e);
       gekozen = [];
@@ -90,7 +98,7 @@ window.SpellingWoordenkiezer = (function() {
 
   function bewaar() {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(gekozen));
+      _storage().setItem(LS_KEY, JSON.stringify(gekozen));
     } catch (e) {
       console.warn("Kon keuzes niet opslaan:", e);
     }
@@ -390,6 +398,21 @@ window.SpellingWoordenkiezer = (function() {
     });
   }
 
+  /* Herlaad uit storage — handig na modus-wissel */
+  function herlaad() {
+    laadOpgeslagen();
+  }
+
+  /* Zet de gekozen woorden volledig leeg (memory + storage)
+     — voor "Nieuwe bundel starten" */
+  function reset() {
+    gekozen = [];
+    try {
+      _storage().setItem(LS_KEY, JSON.stringify([]));
+    } catch (e) {}
+    syncActieveWoorden();
+  }
+
   /* ----- Public API ----- */
   return {
     init,
@@ -398,6 +421,8 @@ window.SpellingWoordenkiezer = (function() {
     updateSidebarInfo,
     syncActieveWoorden,             // herbereken filter (te roepen door zijbalk bij categorie-wissel)
     ruimUitgevinkteOp,              // verwijder woorden uit uitgevinkte cats uit ruwe lijst (permanent)
+    herlaad,                         // herlaad uit (nieuwe) storage-namespace
+    reset,                           // wis alle gekozen woorden
     getGekozen: () => gekozen,       // alle woorden (ruwe lijst, ook verborgen)
     getActieveWoorden,               // alleen woorden uit aangevinkte categorieën
     getVerborgenAantal               // hoeveel woorden zijn er momenteel verborgen
