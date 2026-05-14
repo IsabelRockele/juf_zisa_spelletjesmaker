@@ -15,6 +15,18 @@ window.SpellingModules.ov06 = {
   naam: "Zinnen invullen",
   graad: 1,
 
+  /* Maximum aantal zinnen per niveau dat comfortabel op 1 A4 past.
+     OV06 telt in 'aantalZinnen', niet 'aantalWoorden' — bundel.js
+     handelt dat verschil automatisch af via tellerKey.
+     Voor alle niveaus 6 zinnen — bij uitbreiding schrijft het kind
+     6 eigen zinnen ipv 4 zoals voorheen. */
+  _maxPerNiveau: {
+    basis: 6,
+    kern: 6,
+    verdieping: 6,
+    uitbreiding: 6
+  },
+
   /* Zin-sjablonen — werken met elk substantief.
      Elk sjabloon krijgt {lidwoord} en {woord} als placeholders. */
   ZIN_SJABLONEN: [
@@ -207,9 +219,7 @@ window.SpellingModules.ov06 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov06 || {};
     const niveaus = o.niveaus && o.niveaus.length > 0 ? o.niveaus : ["basis"];
-    const aantalZinnen = o.aantalZinnen || 6;
     const aantalAfleiders = o.aantalAfleiders || 3;
-    const aantalUitbreiding = o.aantalUitbreiding || 4;
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "middel";
     const ondertitel = o.ondertitel || "";
@@ -226,9 +236,30 @@ window.SpellingModules.ov06 = {
       </div>`;
     }
 
+    // Aantal zinnen komt uit _maxPerNiveau. Als opties.aantalZinnen
+    // expliciet ingesteld is en lager (door ✕'en), respecteer dat.
+    // aantalUitbreiding bestaat conceptueel niet meer apart — uitbreiding
+    // gebruikt gewoon _maxPerNiveau.uitbreiding.
+    const aantalVoor = (niveau) => {
+      const max = this._maxPerNiveau[niveau] || 6;
+      const expliciet = o.aantalZinnen;
+      if (typeof expliciet === "number" && expliciet > 0 && expliciet <= max) {
+        return expliciet;
+      }
+      return max;
+    };
+
     return niveaus.map(niveau => {
+      const nZinnen = aantalVoor(niveau);
       return this._renderEenBlad(niveau, gekozenWoorden, {
-        aantalZinnen, aantalAfleiders, aantalUitbreiding,
+        // Voor uitbreiding: gebruik aantalUitbreiding-veld zoals voorheen
+        // (de interne render-functie kijkt daarnaar). Voor andere niveaus:
+        // aantalZinnen. Het maakt feitelijk niet uit — _renderEenBlad
+        // gebruikt afhankelijk van niveau ofwel cfg.aantalZinnen ofwel
+        // cfg.aantalUitbreiding.
+        aantalZinnen: nZinnen,
+        aantalAfleiders,
+        aantalUitbreiding: nZinnen,
         lijntype, lijnhoogte, ondertitel, eigenZinnen
       }, metAntwoorden);
     }).join("");
