@@ -17,6 +17,20 @@ window.SpellingModules.ov03 = {
   naam: "Letters door elkaar",
   graad: 1,
 
+  /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+     Layout is 2 kolommen, dus altijd een even getal.
+     ⭐ basis = 8 (4×2, met afbeelding — extra hoogte door emoji)
+     ⭐⭐ kern = 10 (5×2, zonder afbeelding, eerste letter blauw)
+     ⭐⭐⭐ verdieping = 10 (5×2, zonder afbeelding, lidwoord erbij op de lijn)
+     ⭐⭐⭐⭐ uitbreiding = 8 (4×2) — minder woorden omdat er onderaan
+        nog een zin-opdracht met 2 extra schrijflijnen komt. */
+  _maxPerNiveau: {
+    basis: 8,
+    kern: 10,
+    verdieping: 10,
+    uitbreiding: 8
+  },
+
   /* ---------- INSTELLINGEN UI (zijbalk) ---------- */
   renderInstellingen: function() {
     return `
@@ -165,7 +179,6 @@ window.SpellingModules.ov03 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov03 || {};
     const niveaus = o.niveaus && o.niveaus.length > 0 ? o.niveaus : ["basis"];
-    const aantalWoorden = o.aantalWoorden || 8;
     const lijntype    = o.lijntype || "type3";
     const lijnhoogte  = o.lijnhoogte || "middel";
     const ondertitel  = o.ondertitel || "";
@@ -181,10 +194,21 @@ window.SpellingModules.ov03 = {
       </div>`;
     }
 
+    // Aantal woorden komt nu uit _maxPerNiveau. Als opties.aantalWoorden
+    // expliciet gezet is en kleiner dan max (na ✕'en in bundel), respecteer
+    // dat. Anders standaard naar max.
+    const aantalVoor = (niveau) => {
+      const max = this._maxPerNiveau[niveau] || 12;
+      const expliciet = o.aantalWoorden;
+      if (typeof expliciet === "number" && expliciet > 0 && expliciet <= max) {
+        return expliciet;
+      }
+      return max;
+    };
+
     // Voor elk gekozen niveau: één werkblad
     return niveaus.map(niveau => {
-      // Kies woorden (telkens dezelfde via seed)
-      const woorden = this._kiesWoorden(gekozenWoorden, aantalWoorden);
+      const woorden = this._kiesWoorden(gekozenWoorden, aantalVoor(niveau));
       return this._renderEenBlad(niveau, woorden, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
   },
@@ -195,45 +219,27 @@ window.SpellingModules.ov03 = {
     // Niveau-specifieke instellingen
     const metPlaatje = (niveau === "basis");
     const eersteLetterGekleurd = (niveau === "kern");
+    // Bij verdieping en uitbreiding schrijft het kind het lidwoord erbij.
+    // Dat is een extra pedagogische stap (de/het-keuze) bovenop het puzzel-deel.
+    const metLidwoord = (niveau === "verdieping" || niveau === "uitbreiding");
 
-    // Genereer rijen
-    let rijenHTML = "";
+    // Genereer cellen — 2 kolommen × n rijen via CSS grid (ov03-rooster-2kol).
+    // Elke cel bevat verticaal: [afbeelding?] [letters in hokjes] [schrijflijn]
+    let cellenHTML = "";
     for (const w of woorden) {
-      // GEEN lidwoord bij deze oefening — alleen het kale woord
+      // Kale woord-tekst (zonder lidwoord) voor het puzzel-deel
       const woord = w.tekst;
       const emoji = metPlaatje ? this._zoekEmoji(w.tekst) : "";
       
       // Letters schudden — niet in juiste volgorde
       const geschudte = this._schudLetters(woord);
       
-      // Render hokjes
-      const hokjesHTML = geschudte.map(letter => 
-        `<span class="ov03-hokje">${letter}</span>`
-      ).join("");
-
-      // Plaatje-cel (alleen bij basis)
-      const plaatjeCel = metPlaatje
-        ? `<div class="ov03-plaatje">${emoji}</div>`
-        : "";
-
-      // Schrijflijn met eventueel antwoord
-      const antwoordSpan = metAntwoorden
-        ? `<span class="ov03-lijn-antwoord">${this._maakAntwoord(woord, eersteLetterGekleurd)}</span>`
-        : "";
-      const canvas = sl
-        ? sl.htmlCanvas(lijntype, lijnhoogte, 280)
-        : `<div class="ov03-fallback-lijn"></div>`;
-
-      // Niveau-specifieke class voor styling
-      const rijClass = `ov03-rij ov03-rij-${niveau}`;
-      
-      // Bij kern: eerste letter van het juiste woord blauw kleuren — maar
-      // slechts ÉÉN keer, zelfs als die letter meerdere keren voorkomt.
-      // Bv. "pop" heeft 2 p's, alleen de eerste matchende krijgt blauw.
-      let hokjesMetKleurHTML = hokjesHTML;
+      // Render hokjes; bij kern krijgt eerste letter van het juiste woord
+      // blauwe kleur — slechts één hokje (de eerste voorkomende match)
+      let hokjesHTML;
       if (eersteLetterGekleurd) {
         let alGekleurd = false;
-        hokjesMetKleurHTML = geschudte.map(letter => {
+        hokjesHTML = geschudte.map(letter => {
           let kleurClass = "";
           if (!alGekleurd && letter === woord[0]) {
             kleurClass = " ov03-hokje-blauw";
@@ -241,14 +247,42 @@ window.SpellingModules.ov03 = {
           }
           return `<span class="ov03-hokje${kleurClass}">${letter}</span>`;
         }).join("");
+      } else {
+        hokjesHTML = geschudte.map(letter => 
+          `<span class="ov03-hokje">${letter}</span>`
+        ).join("");
       }
 
-      rijenHTML += `
-        <div class="${rijClass}" data-woord="${w.tekst}">
+      // Afbeelding-blok (alleen bij basis)
+      const plaatjeBlok = metPlaatje
+        ? `<div class="ov03-cel-plaatje">${emoji}</div>`
+        : "";
+
+      // Schrijflijn — bij verdieping en uitbreiding moet er ook een
+      // lidwoord op de lijn komen. Bij oplossingen tonen we het volledige
+      // antwoord (lidwoord + woord), of alleen het woord als er geen
+      // lidwoord is (bv. werkwoord-infinitief).
+      let antwoordTekst = woord;
+      if (metLidwoord && w.lidwoord) {
+        antwoordTekst = `${w.lidwoord} ${woord}`;
+      }
+      const antwoordSpan = metAntwoorden
+        ? `<span class="ov03-lijn-antwoord">${this._maakAntwoord(antwoordTekst, eersteLetterGekleurd)}</span>`
+        : "";
+      // Iets smallere canvas-breedte want 2 kolommen ipv 1 brede rij
+      const canvas = sl
+        ? sl.htmlCanvas(lijntype, lijnhoogte, 240)
+        : `<div class="ov03-fallback-lijn"></div>`;
+
+      // Niveau-specifieke class voor styling (basis heeft plaatje-styling enz.)
+      const celClass = `ov03-cel ov03-cel-${niveau}`;
+
+      cellenHTML += `
+        <div class="${celClass}" data-woord="${w.tekst}">
           <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
-          ${plaatjeCel}
-          <div class="ov03-letters">${hokjesMetKleurHTML}</div>
-          <div class="ov03-lijn-cel">${antwoordSpan}${canvas}</div>
+          ${plaatjeBlok}
+          <div class="ov03-cel-letters">${hokjesHTML}</div>
+          <div class="ov03-cel-lijn">${antwoordSpan}${canvas}</div>
         </div>`;
     }
 
@@ -288,7 +322,9 @@ window.SpellingModules.ov03 = {
           </div>
           <div class="ov01-stap-rij">
             <span class="ov01-vakje"></span>
-            <span>Schrijf het juiste woord op de lijn.</span>
+            <span>${metLidwoord
+              ? "Schrijf <strong>het lidwoord (de / het)</strong> én het juiste woord op de lijn."
+              : "Schrijf het juiste woord op de lijn."}</span>
           </div>
           <div class="ov01-stap-rij">
             <span class="ov01-vakje"></span>
@@ -296,8 +332,8 @@ window.SpellingModules.ov03 = {
           </div>
         </div>
 
-        <div class="ov03-rooster">
-          ${rijenHTML}
+        <div class="ov03-rooster ov03-rooster-2kol">
+          ${cellenHTML}
         </div>
 
         ${niveau === "uitbreiding" ? this._renderUitbreidingBlok(lijntype, lijnhoogte, metAntwoorden) : ""}
@@ -310,20 +346,23 @@ window.SpellingModules.ov03 = {
   /* ----- Uitbreiding-blok onderaan ov03 ----- */
   _renderUitbreidingBlok: function(lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
+    // Smallere canvases want 2 lijnen naast elkaar (was 580 voor 1 brede lijn)
     const lijn = () => sl
-      ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
+      ? `<div class="ov01-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 270)}</div>`
       : `<div class="ov01-zin-lijn"></div>`;
     
     const opl = metAntwoorden
-      ? `<p class="ov01-zin-richtlijn">Verwacht: het kind bedenkt 2 eigen woorden van dezelfde soort en schrijft ze correct.</p>`
+      ? `<p class="ov01-zin-richtlijn">Verwacht: het kind bedenkt 2 eigen woorden van dezelfde soort, met lidwoord ervoor (de/het).</p>`
       : "";
     
     return `
       <div class="ov01-zin-blok ov01-uitbreiding-blok">
         <div class="ov01-stappen-label">⭐⭐⭐⭐ Extra opdracht (uitbreiden):</div>
-        <p class="ov01-zin-vraag">Bedenk zelf nog 2 woorden en schrijf ze op de lijntjes.</p>
-        ${lijn()}
-        ${lijn()}
+        <p class="ov01-zin-vraag">Bedenk zelf nog 2 woorden en schrijf het lidwoord (de of het) erbij.</p>
+        <div class="ov03-uitbr-lijnen">
+          ${lijn()}
+          ${lijn()}
+        </div>
         ${opl}
       </div>
     `;
