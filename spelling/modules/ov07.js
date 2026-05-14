@@ -28,6 +28,19 @@ window.SpellingModules.ov07 = {
   naam: "Verkleinwoorden",
   graad: 1,
 
+  /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+     ⭐ basis = 8 (kind kruist uitgang aan + schrijft volledig verkleinwoord)
+     ⭐⭐ kern = 16 (2 kolommen, kind schrijft enkel verkleinwoord)
+     ⭐⭐⭐ verdieping = 7 (2 kolommen, om beurten kolom 1 of kolom 2 leeg)
+     ⭐⭐⭐⭐ uitbreiding = vast verhaaltje (5 zinnen, geen woordenlijst)
+        — _maxPerNiveau hier puur formeel, wordt niet gebruikt voor +1/✕. */
+  _maxPerNiveau: {
+    basis: 8,
+    kern: 16,
+    verdieping: 7,
+    uitbreiding: 1
+  },
+
   CAT_NAAR_UITGANG: {
     "verklein-je":  "je",
     "verklein-tje": "tje",
@@ -249,7 +262,6 @@ window.SpellingModules.ov07 = {
     const o = opties.ov07 || {};
     const niveaus = (o.niveaus && o.niveaus.length > 0) ? o.niveaus : ["basis"];
     const uitgangen = (o.uitgangen && o.uitgangen.length > 0) ? o.uitgangen : ["je", "tje", "pje"];
-    const aantalWoorden = o.aantalWoorden || 8;
     const verhaalIdx = parseInt(o.verhaalIdx || 0, 10);
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "middel";
@@ -272,6 +284,17 @@ window.SpellingModules.ov07 = {
       </div>`;
     }
 
+    // Aantal woorden komt uit _maxPerNiveau. Respecteer een expliciet
+    // lagere waarde uit opties.aantalWoorden (na ✕'en in bundel).
+    const aantalVoor = (niveau) => {
+      const max = this._maxPerNiveau[niveau] || 8;
+      const expliciet = o.aantalWoorden;
+      if (typeof expliciet === "number" && expliciet > 0 && expliciet <= max) {
+        return expliciet;
+      }
+      return max;
+    };
+
     const basisSeed = this._seed || Date.now();
     const SEED_OFFSET = {
       basis:       0,
@@ -283,7 +306,7 @@ window.SpellingModules.ov07 = {
     return niveaus.map(niveau => {
       this._seed = (basisSeed + (SEED_OFFSET[niveau] || 0)) & 0xFFFFFFFF;
       return this._renderEenBlad(niveau, beschikbaar, {
-        uitgangen, aantalWoorden, verhaalIdx, lijntype, lijnhoogte, ondertitel
+        uitgangen, aantalWoorden: aantalVoor(niveau), verhaalIdx, lijntype, lijnhoogte, ondertitel
       }, metAntwoorden);
     }).join("");
   },
