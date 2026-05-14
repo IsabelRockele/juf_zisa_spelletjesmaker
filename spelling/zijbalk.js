@@ -71,10 +71,14 @@ window.SpellingZijbalk = (function() {
       enkelVoor: ["stukjeswoorden"]
     },
     {
-      id: "weekdictee", label: "📅 Weekdictee",
-      niveaus: [],
-      defaultAantal: 5
+      id: "ov10", label: "🧩 Samenstellingen oefenen",
+      niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
+      defaultAantal: 6,
+      enkelVoor: ["samenstellingen"]
     }
+    // Weekdictee staat NIET meer in de oefenvormen-lijst van de werkbladen-modus.
+    // Hij heeft zijn eigen modus-knop op het startscherm en zijn eigen paneel
+    // (weekdictee-paneel.js + #modus-weekdictee in index.html).
   ];
 
   const NIVEAU_LABELS = {
