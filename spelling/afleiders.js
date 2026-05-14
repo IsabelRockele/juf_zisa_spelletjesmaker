@@ -1,291 +1,287 @@
 /* ==========================================================
    afleiders.js
    
-   Genereert 2 foute spellingvarianten ("afleiders") bij een woord.
-   Strategie hangt af van de categorie waar het woord uit komt.
+   Genereert pedagogisch zinvolle FOUTSCHRIJF-VARIANTEN voor woorden
+   waarbij kinderen vaak twijfelen over de spelling. Gebruikt door
+   OV01 (basis-niveau met tweeklanken) en OV05 (klank kiezen).
    
-   Gebruik:
-     SpellingAfleiders.maakAfleiders(woordObj, categorieId) → ["afleider1", "afleider2"]
+   Per klank-categorie zijn er courante fout-schrijfwijzen die op
+   het juiste woord lijken. Het kind moet uit de set kiezen welke
+   de juiste is.
    
-   Bij elk woord in de bibliotheek kan je optioneel handmatig afleiders
-   meegeven via { tekst: "kip", afleiders: ["kep", "kib"] }. Als die
-   aanwezig zijn, gebruiken we die in plaats van de automatische.
+   API:
+     SpellingAfleiders.voorWoord(woord, categorie, aantal) 
+       → [juist, fout1, fout2, ...] in willekeurige volgorde
+     
+     SpellingAfleiders.heeftAfleiders(categorie)
+       → true als deze categorie pedagogisch zinvolle afleiders heeft
    ========================================================== */
 
-window.SpellingAfleiders = {
+window.SpellingAfleiders = (function() {
 
-  /* === Hoofdfunctie === */
-  maakAfleiders: function(woordObj, categorieId) {
-    if (woordObj.afleiders && Array.isArray(woordObj.afleiders) && woordObj.afleiders.length >= 2) {
-      return [woordObj.afleiders[0], woordObj.afleiders[1]];
-    }
+  /* Per categorie: een functie die uit het juiste woord een lijst van
+     courante fout-varianten genereert. */
+  const REGELS = {
+    /* === KORTE KLANKEN (mkm) ===
+       Klassieke fouten:
+       - verdubbelen (kat → kaat) — verwarring met lange klank
+       - andere korte klinker (kat → kot) */
+    "mkm-a": (woord) => [
+      woord.replace(/a/i, "aa"),  // verdubbeld
+      woord.replace(/a/i, "o")    // andere korte klinker
+    ],
+    "mkm-e": (woord) => [
+      woord.replace(/e/i, "ee"),
+      woord.replace(/e/i, "i")
+    ],
+    "mkm-i": (woord) => [
+      woord.replace(/i/i, "ie"),
+      woord.replace(/i/i, "o")
+    ],
+    "mkm-o": (woord) => [
+      woord.replace(/o/i, "oo"),
+      woord.replace(/o/i, "a")
+    ],
+    "mkm-u": (woord) => [
+      woord.replace(/u/i, "uu"),
+      woord.replace(/u/i, "a")
+    ],
+    /* mk-km is een gemengde groep — neem eerste klinker en pas regel toe */
+    "mk-km": (woord) => {
+      const klinker = woord.match(/[aeiou]/i)?.[0]?.toLowerCase();
+      if (!klinker) return [];
+      const verdubbel = woord.replace(new RegExp(klinker, "i"), klinker + klinker);
+      const ANDER = { a: "o", e: "i", i: "o", o: "a", u: "a" };
+      const ander = woord.replace(new RegExp(klinker, "i"), ANDER[klinker] || klinker);
+      return [verdubbel, ander];
+    },
 
-    const woord = (typeof woordObj === "string") ? woordObj : woordObj.tekst;
-    if (!woord) return ["?", "?"];
+    /* === LANGE KLANKEN (lk) ===
+       Klassieke fouten:
+       - verkorten (maan → man) — verwarring met korte klank
+       - andere lange klinker (maan → meen of moon) */
+    "lk-aa": (woord) => [
+      woord.replace(/aa/i, "a"),    // verkort
+      woord.replace(/aa/i, "oo")    // andere lange klinker
+    ],
+    "lk-ee": (woord) => [
+      woord.replace(/ee/i, "e"),
+      woord.replace(/ee/i, "ie")
+    ],
+    "lk-oo": (woord) => [
+      woord.replace(/oo/i, "o"),
+      woord.replace(/oo/i, "aa")
+    ],
+    "lk-uu": (woord) => [
+      woord.replace(/uu/i, "u"),
+      woord.replace(/uu/i, "oe")
+    ],
 
-    const groep = this._categorieGroep(categorieId);
-
-    let varianten = [];
-    if (groep === "korte-klanken") {
-      varianten = this._mkmAfleiders(woord);
-    } else if (groep === "tweeklanken") {
-      varianten = this._tweeklankAfleiders(woord);
-    } else if (groep === "lange-klanken") {
-      varianten = this._langeKlankAfleiders(woord);
-    } else if (groep === "verdubbel-verenkel") {
-      varianten = this._verdubbelVerenkelAfleiders(woord);
-    } else if (groep === "ng-nk") {
-      varianten = this._ngNkAfleiders(woord);
-    } else {
-      varianten = this._algemeneAfleiders(woord);
-    }
-
-    varianten = varianten.filter(v => v && v !== woord);
-    const uniek = [...new Set(varianten)];
-
-    while (uniek.length < 2) {
-      const extra = this._algemeneAfleiders(woord);
-      let toegevoegd = false;
-      for (const e of extra) {
-        if (e && e !== woord && !uniek.includes(e)) {
-          uniek.push(e);
-          toegevoegd = true;
-          if (uniek.length >= 2) break;
-        }
-      }
-      if (!toegevoegd) break;
-    }
-
-    while (uniek.length < 2) uniek.push(woord + "x");
-    return uniek.slice(0, 2);
-  },
-
-  _categorieGroep: function(categorieId) {
-    if (!categorieId) return "algemeen";
-    const wb = window.SpellingWoordenbibliotheek;
-    if (!wb) return "algemeen";
-    for (const graad of [1, 2, 3]) {
-      const data = wb[`graad${graad}`];
-      if (data && data[categorieId]) {
-        return data[categorieId].groep || "algemeen";
-      }
-    }
-    return "algemeen";
-  },
-
-  /* MKM-woorden (kip, bal, mat) */
-  _mkmAfleiders: function(woord) {
-    const klinkers = ['a', 'e', 'i', 'o', 'u'];
-    const eindSwaps = {
-      'p': 'b', 'b': 'p',
-      't': 'd', 'd': 't',
-      'k': 'g', 's': 'z', 'z': 's',
-      'f': 'v', 'v': 'f'
-    };
-    const resultaat = [];
-
-    const klinkerIdx = this._vindEnkeleKlinkerIdx(woord);
-    if (klinkerIdx >= 0) {
-      const huidige = woord[klinkerIdx];
-      const anderen = klinkers.filter(k => k !== huidige);
-      const random = anderen[Math.floor(Math.random() * anderen.length)];
-      resultaat.push(woord.substring(0, klinkerIdx) + random + woord.substring(klinkerIdx + 1));
-    }
-
-    const laatste = woord[woord.length - 1];
-    if (eindSwaps[laatste]) {
-      resultaat.push(woord.substring(0, woord.length - 1) + eindSwaps[laatste]);
-    } else if (klinkerIdx >= 0 && resultaat.length < 2) {
-      // Tweede klinkerwissel
-      const huidige = woord[klinkerIdx];
-      const anderen = klinkers.filter(k => k !== huidige && !resultaat.some(r => r.includes(k + woord.substring(klinkerIdx + 1))));
-      if (anderen.length > 0) {
-        const r2 = anderen[0];
-        resultaat.push(woord.substring(0, klinkerIdx) + r2 + woord.substring(klinkerIdx + 1));
-      }
-    }
-
-    return resultaat;
-  },
-
-  /* Tweeklanken (boek, huis, leeuw) */
-  _tweeklankAfleiders: function(woord) {
-    const verwarringen = {
-      'ie': ['ee', 'i'],
-      'eu': ['u', 'eo'],
-      'ui': ['u', 'ie'],
-      'oe': ['o', 'oo'],
-      'aai': ['ai', 'aa'],
-      'ooi': ['oi', 'oo'],
-      'oei': ['oi', 'oe'],
-      'eeuw': ['euw', 'eew'],
-      'ieuw': ['iuw', 'iew'],
-      'au': ['ou', 'a'],
-      'ou': ['au', 'o'],
-      'ei': ['ij', 'e'],
-      'ij': ['ei', 'i']
-    };
-    const resultaat = [];
-    const tweeklanken = ['eeuw', 'ieuw', 'aai', 'ooi', 'oei', 'ie', 'eu', 'ui', 'oe', 'au', 'ou', 'ei', 'ij'];
-
-    let gevonden = null;
-    let positie = -1;
-    for (const tk of tweeklanken) {
-      const idx = woord.indexOf(tk);
-      if (idx >= 0) {
-        gevonden = tk;
-        positie = idx;
-        break;
-      }
-    }
-
-    if (gevonden && verwarringen[gevonden]) {
-      for (const optie of verwarringen[gevonden]) {
-        const variant = woord.substring(0, positie) + optie + woord.substring(positie + gevonden.length);
-        resultaat.push(variant);
-        if (resultaat.length >= 2) break;
-      }
-    }
-
-    return resultaat;
-  },
-
-  /* Lange klanken (boom, kaas, vuur) */
-  _langeKlankAfleiders: function(woord) {
-    const enkelMap = { 'aa': 'a', 'ee': 'e', 'oo': 'o', 'uu': 'u' };
-    const anderDubbel = { 'aa': 'oo', 'ee': 'oo', 'oo': 'aa', 'uu': 'oo' };
-    const resultaat = [];
-    
-    for (const dk of ['aa', 'ee', 'oo', 'uu']) {
-      const idx = woord.indexOf(dk);
-      if (idx >= 0) {
-        resultaat.push(woord.substring(0, idx) + enkelMap[dk] + woord.substring(idx + 2));
-        resultaat.push(woord.substring(0, idx) + anderDubbel[dk] + woord.substring(idx + 2));
-        break;
-      }
-    }
-    return resultaat;
-  },
-
-  /* Verdubbelaars + Verenkelaars */
-  _verdubbelVerenkelAfleiders: function(woord) {
-    const resultaat = [];
-    
-    const dubbelMed = woord.match(/([bcdfgklmnprstvz])\1/);
-    if (dubbelMed) {
-      const letter = dubbelMed[1];
-      const idx = dubbelMed.index;
-      // Strategie 1: één i.p.v. twee (bommen → bomen)
-      resultaat.push(woord.substring(0, idx) + letter + woord.substring(idx + 2));
-      // Strategie 2: dubbele klinker daarvoor (bommen → boommen)
-      if (idx > 0) {
-        const klinkerVoor = woord[idx - 1];
-        if ('aeiou'.includes(klinkerVoor)) {
-          resultaat.push(woord.substring(0, idx) + klinkerVoor + woord.substring(idx));
-        }
-      }
-    }
-
-    if (resultaat.length < 2) {
-      // Detecteer dubbele klinker (verenkelaar zoals bomen)
-      const dubbelKl = woord.match(/(aa|ee|oo|uu)/);
-      if (dubbelKl) {
-        const dk = dubbelKl[1];
-        const idx = dubbelKl.index;
-        const enkelMap = { 'aa': 'a', 'ee': 'e', 'oo': 'o', 'uu': 'u' };
-        const naIdx = idx + 2;
-        if (naIdx < woord.length) {
-          const medErna = woord[naIdx];
-          if ('bcdfgklmnprstvz'.includes(medErna)) {
-            // Strategie: bomen → bommen (verkeerd verdubbeld)
-            resultaat.push(woord.substring(0, idx) + enkelMap[dk] + medErna + medErna + woord.substring(naIdx + 1));
-            // Strategie: bomen → boomen (medeklinker erna verdubbeld zonder klinker te enkelen)
-            // Dit is een variant met dubbele medeklinker BIJ de dubbele klinker
-            if (resultaat.length < 2) {
-              resultaat.push(woord.substring(0, naIdx) + medErna + woord.substring(naIdx));
-            }
-          }
-        }
-      }
-    }
-
-    // Variant voor woorden met "ie" (zoals dieren, bieren) — niet hoofdcategorie maar gebeurt
-    if (resultaat.length < 2 && woord.includes('ie')) {
-      const idx = woord.indexOf('ie');
-      const naIdx = idx + 2;
-      if (naIdx < woord.length) {
-        const medErna = woord[naIdx];
-        if ('bcdfgklmnprstvz'.includes(medErna)) {
-          // dieren → diren (zonder e)
-          resultaat.push(woord.substring(0, idx) + 'i' + woord.substring(naIdx));
-        }
-      }
-    }
-
-    return resultaat;
-  },
-
-  /* ng/nk */
-  _ngNkAfleiders: function(woord) {
-    const resultaat = [];
-    if (woord.includes('ng')) {
-      resultaat.push(woord.replace('ng', 'nk'));
-      resultaat.push(woord.replace('ng', 'n'));
-    } else if (woord.includes('nk')) {
-      // Veelvoorkomende graad-1 fout: kinderen schrijven 'ngk' i.p.v. 'nk'
-      resultaat.push(woord.replace('nk', 'ngk'));
-      // Tweede typische fout: ng i.p.v. nk
-      resultaat.push(woord.replace('nk', 'ng'));
-    }
-    return resultaat;
-  },
-
-  /* Algemene fallback */
-  _algemeneAfleiders: function(woord) {
-    const resultaat = [];
-    const klinkers = ['a', 'e', 'i', 'o', 'u'];
-    
-    const klinkerIdx = this._vindEnkeleKlinkerIdx(woord);
-    if (klinkerIdx >= 0) {
-      const huidige = woord[klinkerIdx];
-      const anderen = klinkers.filter(k => k !== huidige);
-      // Twee verschillende klinker-swaps
-      if (anderen.length >= 2) {
-        resultaat.push(woord.substring(0, klinkerIdx) + anderen[0] + woord.substring(klinkerIdx + 1));
-        resultaat.push(woord.substring(0, klinkerIdx) + anderen[1] + woord.substring(klinkerIdx + 1));
+    /* === TWEEKLANKEN === */
+    /* eu, ui, oe, ie: klassieke verwarringen onder elkaar */
+    "tw-eu": (woord) => [
+      woord.replace(/eu/i, "oe"),   // neus → noes
+      woord.replace(/eu/i, "ui")    // neus → nuis
+    ],
+    "tw-ui": (woord) => [
+      woord.replace(/ui/i, "eu"),   // huis → heus
+      woord.replace(/ui/i, "oe")    // huis → hoes
+    ],
+    "tw-oe": (woord) => [
+      woord.replace(/oe/i, "ui"),   // boek → buik
+      woord.replace(/oe/i, "eu")    // boek → beuk
+    ],
+    "tw-ie": (woord) => [
+      woord.replace(/ie/i, "i"),    // fiets → fits
+      woord.replace(/ie/i, "ei")    // fiets → feits
+    ],
+    "tw-ei": (woord) => {
+      // ei → ij, ie
+      return [
+        woord.replace(/ei/i, "ij"),
+        woord.replace(/ei/i, "ie")
+      ];
+    },
+    "tw-ij": (woord) => {
+      // ij → ei, ie
+      return [
+        woord.replace(/ij/i, "ei"),
+        woord.replace(/ij/i, "ie")
+      ];
+    },
+    "tw-au": (woord) => {
+      // au → ou (klassieke verwarring), en au → aw (klanknotering)
+      // Maar als woord op 'auw' eindigt: 'paw' is courantere fout dan 'aww'
+      const opties = [];
+      opties.push(woord.replace(/au/i, "ou"));
+      if (/auw/i.test(woord)) {
+        // pauw → paw (vereenvoudigd)
+        opties.push(woord.replace(/auw/i, "aw"));
       } else {
-        resultaat.push(woord.substring(0, klinkerIdx) + anderen[0] + woord.substring(klinkerIdx + 1));
+        // gauw → gow, blauw → blow etc. — gewoon au → ow
+        opties.push(woord.replace(/au/i, "ow"));
       }
-    }
-
-    if (resultaat.length < 2 && woord.length >= 3) {
-      resultaat.push(woord + woord[woord.length - 1]);
-    }
-    return resultaat;
-  },
-
-  _vindEnkeleKlinkerIdx: function(woord) {
-    const klinkers = ['a', 'e', 'i', 'o', 'u'];
-    for (let i = 0; i < woord.length; i++) {
-      if (klinkers.includes(woord[i])) {
-        const next = woord[i + 1];
-        if (next && klinkers.includes(next)) continue;
-        return i;
+      return opties;
+    },
+    "tw-ou": (woord) => {
+      // ou → au, en ou → ow (klanknotering)
+      const opties = [];
+      opties.push(woord.replace(/ou/i, "au"));
+      if (/ouw/i.test(woord)) {
+        // mouw → mow (vereenvoudigd)
+        opties.push(woord.replace(/ouw/i, "ow"));
+      } else {
+        // hout → haut (al boven), of hout → howt
+        opties.push(woord.replace(/ou/i, "ow"));
       }
+      return opties;
+    },
+    "tw-aai": (woord) => {
+      // aai → aj, aaj, ai (kies willekeurig 2)
+      const opties = [
+        woord.replace(/aai/i, "aj"),
+        woord.replace(/aai/i, "aaj"),
+        woord.replace(/aai/i, "ai")
+      ];
+      return _kies2(opties);
+    },
+    "tw-ooi": (woord) => {
+      // ooi → oj, ooj, oi
+      const opties = [
+        woord.replace(/ooi/i, "oj"),
+        woord.replace(/ooi/i, "ooj"),
+        woord.replace(/ooi/i, "oi")
+      ];
+      return _kies2(opties);
+    },
+    "tw-oei": (woord) => {
+      // oei → oej, ooi, uj
+      const opties = [
+        woord.replace(/oei/i, "oej"),
+        woord.replace(/oei/i, "ooi"),
+        woord.replace(/oei/i, "uj")
+      ];
+      return _kies2(opties);
+    },
+    "tw-eeuw": (woord) => {
+      // eeuw → euw, eew
+      return [
+        woord.replace(/eeuw/i, "euw"),
+        woord.replace(/eeuw/i, "eew")
+      ];
+    },
+    "tw-ieuw": (woord) => {
+      // ieuw → iuw, iew
+      return [
+        woord.replace(/ieuw/i, "iuw"),
+        woord.replace(/ieuw/i, "iew")
+      ];
+    },
+    /* Verlengingsregel: vervang d-eind met t (en omgekeerd), of b met p. 
+       Werkt op de KALE eind-letter. */
+    "verlengingsregel": (woord) => {
+      // Bepaal eindletter (laatste alfabetische letter)
+      const match = woord.match(/([a-z])(\W*)$/i);
+      if (!match) return [];
+      const eindletter = match[1].toLowerCase();
+      const FLIP = { d: "t", t: "d", b: "p", p: "b" };
+      const flipped = FLIP[eindletter];
+      if (!flipped) return [];
+      // Vervang alleen de laatste alfabetische letter
+      const idx = woord.lastIndexOf(match[1]);
+      const fout = woord.slice(0, idx) + flipped + woord.slice(idx + 1);
+      return [fout];  // Slechts 1 zinvolle afleider (b↔p of d↔t)
     }
-    return -1;
-  },
+  };
 
-  /* Schik 3 woorden (juist + 2 afleiders) in willekeurige volgorde.
-     Optionele random-functie zodat de OV01-module de seed kan controleren. */
-  schikWillekeurig: function(juistWoord, afleiders, randomFn) {
-    const random = randomFn || Math.random;
-    const arr = [juistWoord, afleiders[0], afleiders[1]];
-    // Fisher-Yates shuffle
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  function _kies2(opties) {
+    const k = [...opties];
+    // willekeurig 2 selecteren
+    if (k.length <= 2) return k;
+    k.sort(() => Math.random() - 0.5);
+    return k.slice(0, 2);
   }
-};
+
+  /* PUBLIEK */
+  return {
+    /* Returns: [juist, fout1, fout2, ...] in willekeurige volgorde.
+       
+       Parameters:
+         woord       — string, de juiste schrijfwijze
+         categorie   — categorie-id van het woord
+         aantal      — gewenst aantal opties totaal (bv. 2 of 3)
+                       Standaard 3 voor aai/ooi/oei, 2 voor de rest. */
+    voorWoord: function(woord, categorie, aantal) {
+      const regel = REGELS[categorie];
+      if (!regel) return [woord];  // Geen afleiders voor deze categorie
+      
+      const fouten = regel(woord).filter(f => f && f !== woord);
+      
+      // Hoeveel afleiders willen we naast het juiste woord?
+      // - tweeklanken (ei, ij, au, ou, aai, ooi, oei, eeuw, ieuw): 2 afleiders → 3 opties
+      // - verlengingsregel: 1 afleider → 2 opties (d/t of b/p, geen 3e zinvolle)
+      let aantalFouten;
+      if (typeof aantal === "number") {
+        aantalFouten = aantal - 1;
+      } else if (categorie === "verlengingsregel") {
+        aantalFouten = 1;
+      } else {
+        aantalFouten = 2;
+      }
+      
+      const gekozenFouten = fouten.slice(0, aantalFouten);
+      
+      // Mix juiste + fouten in willekeurige volgorde
+      const alle = [woord, ...gekozenFouten];
+      alle.sort(() => Math.random() - 0.5);
+      return alle;
+    },
+    
+    /* Of een categorie pedagogisch zinvolle afleiders heeft. */
+    heeftAfleiders: function(categorie) {
+      return !!REGELS[categorie];
+    },
+    
+    /* Lijst van alle ondersteunde categorieën. */
+    CATEGORIEEN: Object.keys(REGELS),
+    
+    /* ============================================================
+       LEGACY API — voor backwards compatibility met OV01 (en andere
+       modules die de oude afleiders.js gebruikten).
+       
+       maakAfleiders(woord, categorie) → [fout1, fout2, ...]
+         Returns ALLEEN de foute schrijfwijzen (zonder het juiste woord).
+       
+       schikWillekeurig(juist, afleiders, randomFn) → [opt1, opt2, opt3]
+         Mengt juist + afleiders in willekeurige volgorde.
+       ============================================================ */
+    maakAfleiders: function(woordOfObj, categorie) {
+      // Accepteer zowel string als object met .tekst
+      const woord = (typeof woordOfObj === "string") ? woordOfObj : woordOfObj.tekst;
+      const cat = categorie || (typeof woordOfObj === "object" ? woordOfObj.categorie : null);
+      if (!cat) return [];
+      
+      const regel = REGELS[cat];
+      if (!regel) return [];
+      
+      const fouten = regel(woord).filter(f => f && f !== woord);
+      
+      // Aantal afleiders:
+      // - tweeklanken: 2 (zodat we 3 opties krijgen met het juiste)
+      // - verlengingsregel: 1 (2 opties totaal)
+      const aantalFouten = (cat === "verlengingsregel") ? 1 : 2;
+      return fouten.slice(0, aantalFouten);
+    },
+    
+    schikWillekeurig: function(juist, afleiders, randomFn) {
+      const r = randomFn || Math.random;
+      const alle = [juist, ...afleiders];
+      // Fisher-Yates met meegegeven random
+      for (let i = alle.length - 1; i > 0; i--) {
+        const j = Math.floor(r() * (i + 1));
+        [alle[i], alle[j]] = [alle[j], alle[i]];
+      }
+      return alle;
+    }
+  };
+})();
