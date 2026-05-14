@@ -40,12 +40,21 @@ window.SpellingZijbalk = (function() {
     {
       id: "ov04", label: "🎨 Klanken sorteren",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
-      defaultAantal: 12
+      defaultAantal: 12,
+      // OV4 heeft eigen runtime-detectie van klank-paren. Alleen zichtbaar
+      // als minstens één geldig paar mogelijk is met de huidige selectie.
+      // Géén enkelVoor want anders worden klank-groepen "specifiek" en
+      // verdwijnen de andere generieke OV's uit de zijbalk.
+      vereistGeldigePaar: true
     },
     {
       id: "ov05", label: "⭕ Klank kiezen",
       niveaus: ["basis", "kern", "verdieping", "uitbreiding"],
-      defaultAantal: 8
+      defaultAantal: 8,
+      // Werkt enkel voor specifieke klank-paren (ei/ij, au/ou, aai/ooi/oei,
+      // eeuw/ieuw, verlengen). Module detecteert zelf — alleen tonen als
+      // er een geldig paar mogelijk is.
+      vereistGeldigePaar: true
     },
     {
       id: "ov06", label: "📝 Gebruik in zinnen",
@@ -239,8 +248,19 @@ window.SpellingZijbalk = (function() {
       
       for (const [groepId, cats] of Object.entries(groepen)) {
         const groepLabel = wb.groepLabels[groepId] || groepId;
+        // Bepaal of alle/sommige cats van deze groep aangevinkt zijn
+        let groepAan = 0;
+        for (const cat of cats) if (aangevinkt.has(cat.id)) groepAan++;
+        const groepAlles = groepAan === cats.length && cats.length > 0;
+        const groepSome = groepAan > 0 && groepAan < cats.length;
+        
         html += `<div class="zb-groep">
-          <div class="zb-groep-titel">${groepLabel}</div>
+          <label class="zb-groep-titel">
+            <input type="checkbox" class="zb-groep-master" data-groep="${groepId}" 
+                   ${groepAlles ? 'checked' : ''} 
+                   ${groepSome ? 'data-indeterminate="true"' : ''}>
+            <span>${groepLabel}</span>
+          </label>
           <div class="zb-cat-rij">`;
         for (const cat of cats) {
           const checked = aangevinkt.has(cat.id);
@@ -261,6 +281,9 @@ window.SpellingZijbalk = (function() {
     container.innerHTML = html;
     
     container.querySelectorAll('.zb-hg-master[data-indeterminate]').forEach(el => {
+      el.indeterminate = true;
+    });
+    container.querySelectorAll('.zb-groep-master[data-indeterminate]').forEach(el => {
       el.indeterminate = true;
     });
     
@@ -284,8 +307,19 @@ window.SpellingZijbalk = (function() {
     // BUGFIX: zorg dat de woordenkiezer-filter wordt bijgewerkt op basis
     // van aangevinkte categorieën in zijbalk. Zo zien modules enkel
     // woorden uit categorieën die nu aan staan.
-    if (window.SpellingWoordenkiezer && typeof window.SpellingWoordenkiezer.syncActieveWoorden === "function") {
-      window.SpellingWoordenkiezer.syncActieveWoorden();
+    //
+    // We roepen ruimUitgevinkteOp() — die verwijdert woorden uit
+    // uitgevinkte categorieën PERMANENT uit de ruwe lijst. Anders blijven
+    // ze ook na uitvinken nog in de modal verschijnen bij heropenen.
+    // Fallback: syncActieveWoorden() voor oudere versies.
+    if (window.SpellingWoordenkiezer) {
+      if (typeof window.SpellingWoordenkiezer.ruimUitgevinkteOp === "function") {
+        console.log("[zijbalk] roep ruimUitgevinkteOp aan");
+        window.SpellingWoordenkiezer.ruimUitgevinkteOp();
+      } else if (typeof window.SpellingWoordenkiezer.syncActieveWoorden === "function") {
+        console.log("[zijbalk] WARNING: ruimUitgevinkteOp niet beschikbaar — val terug op syncActieveWoorden (oude code geladen?)");
+        window.SpellingWoordenkiezer.syncActieveWoorden();
+      }
     }
 
     const aantalActief = (window._weekdictee_gekozenWoorden || []).length;
@@ -409,6 +443,35 @@ window.SpellingZijbalk = (function() {
       return oef.enkelVoor.some(g => soorten.specifiekeGroepen.has(g));
     }
     
+    // OV met eigen detectie-logica (bv. OV4 — klank-paar-detectie):
+    // vraag de module zelf of er geldige paren mogelijk zijn met de
+    // huidige aangevinkte categorieën. Dit gebeurt LOSGEKOPPELD van
+    // de specifiek/generiek-classificatie, anders breken andere OV's.
+    if (oef.vereistGeldigePaar) {
+      const module = window.SpellingModules?.[oef.id];
+      if (module && typeof module._detecteerParen === "function") {
+        // Bouw een fictieve woordenpool op basis van aangevinkte cats
+        // (genoeg voor detectie — de echte pool heeft mogelijk meer/minder).
+        const aangevinkt = getAangevinkteCats();
+        if (aangevinkt.size === 0) return false;
+        const wb = window.SpellingWoordenbibliotheek;
+        const data = wb?.["graad" + actieveGraad] || {};
+        const fictievePool = [];
+        for (const catId of aangevinkt) {
+          const cat = data[catId];
+          if (!cat || !cat.woorden) continue;
+          // Neem alle woorden van die categorie (voor d/t/b/p-detectie
+          // is het exacte woord belangrijk, niet alleen het bestaan ervan).
+          for (const w of cat.woorden) {
+            fictievePool.push({ ...w, categorie: catId, leerjaar: actieveGraad });
+          }
+        }
+        const paren = module._detecteerParen(fictievePool, actieveGraad);
+        return paren.length > 0;
+      }
+      // Module heeft geen detectie-functie → val terug op generieke logica
+    }
+    
     // Generieke OV (geen enkelVoor): toon ALLEEN als er minstens één
     // generieke cat aangevinkt is (anders is er geen woordpool voor OV01-06).
     // Als er helemaal niets aangevinkt is, ook tonen (default-toestand).
@@ -480,6 +543,32 @@ window.SpellingZijbalk = (function() {
         html += `
           <div class="zb-oef-rij zb-oef-info">
             <small>Aantal woorden: automatisch (verwijder met ✕, voeg toe met ➕ op het werkblad).</small>
+          </div>`;
+      }
+      
+      // OV04: extra kleurpickers voor korte / lange / andere klanken
+      // (alleen relevant voor het korte-lange-andere paar; andere paren
+      // gebruiken vaste kleuren).
+      if (oef.id === "ov04" && window.SpellingModules?.ov04) {
+        const k = window.SpellingModules.ov04._leesKleuren();
+        html += `
+          <div class="zb-oef-rij zb-oef-kleuren">
+            <label>Kleuren <small>(korte/lange/andere)</small>:</label>
+            <div class="zb-ov04-kleuren">
+              <label class="zb-ov04-kleur-cel" title="Korte klank">
+                <input type="color" class="zb-ov04-kleur-input" data-sleutel="kort" value="${k.kort}">
+                <span>● kort</span>
+              </label>
+              <label class="zb-ov04-kleur-cel" title="Lange klank">
+                <input type="color" class="zb-ov04-kleur-input" data-sleutel="lang" value="${k.lang}">
+                <span>▬ lang</span>
+              </label>
+              <label class="zb-ov04-kleur-cel" title="Andere klank">
+                <input type="color" class="zb-ov04-kleur-input" data-sleutel="ander" value="${k.ander}">
+                <span>★ ander</span>
+              </label>
+              <button class="zb-ov04-kleur-reset" type="button" title="Standaard kleuren herstellen">↺</button>
+            </div>
           </div>`;
       }
       
@@ -556,7 +645,27 @@ window.SpellingZijbalk = (function() {
         }
         bewaarState();
         renderHoofdgroepSelector();
-        renderOefenvormen();  // OV07 in/uit op basis van verkleinwoord-cats
+        renderOefenvormen();
+      }
+      // Nieuwe handler: groep-master vinkje (bv. "Korte klanken", "Tweeklanken")
+      // togglet alle categorieën van die groep tegelijk.
+      else if (e.target.matches(".zb-groep-master")) {
+        const groepId = e.target.dataset.groep;
+        const wb = window.SpellingWoordenbibliotheek;
+        const data = wb.categorieenPerHoofdgroep(actieveGraad);
+        const set = getAangevinkteCats();
+        // Zoek alle cats in deze groep (binnen alle hoofdgroepen, voor het geval)
+        for (const groepen of Object.values(data)) {
+          const cats = groepen[groepId];
+          if (!cats) continue;
+          for (const cat of cats) {
+            if (e.target.checked) set.add(cat.id);
+            else set.delete(cat.id);
+          }
+        }
+        bewaarState();
+        renderHoofdgroepSelector();
+        renderOefenvormen();
       }
     });
     
@@ -614,11 +723,27 @@ window.SpellingZijbalk = (function() {
           bewaarState();
         }
       }
+      // OV04 kleurpicker: schrijf nieuwe kleur naar OV4-module
+      else if (e.target.matches(".zb-ov04-kleur-input")) {
+        const sleutel = e.target.dataset.sleutel;  // "kort" / "lang" / "ander"
+        const kleur = e.target.value;
+        if (sleutel && window.SpellingModules?.ov04?.setKleuren) {
+          window.SpellingModules.ov04.setKleuren({ [sleutel]: kleur });
+        }
+      }
     });
     
+    // Reset-knop voor OV4 kleuren (click ipv change)
     document.querySelector("#oefenvorm-selector")?.addEventListener("click", (e) => {
-      // Geen per-OV hoogte-handler meer — globale hoogte zit in sectie 4
-      // en wordt door app.js bedraad.
+      if (e.target.matches(".zb-ov04-kleur-reset")) {
+        e.preventDefault();
+        const ov4 = window.SpellingModules?.ov04;
+        if (!ov4) return;
+        const def = ov4._DEFAULT_KLEUREN;
+        ov4.setKleuren({ ...def });
+        // Re-render zodat de kleurpicker-velden ook terug op default staan
+        renderOefenvormen();
+      }
     });
   }
 
