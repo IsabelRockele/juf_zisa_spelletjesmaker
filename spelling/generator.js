@@ -12,6 +12,14 @@ window.SpellingGenerator = {
     const graad = parseInt(document.querySelector(".graad-knop.actief")?.dataset.graad || "1", 10);
     const niveau = document.querySelector(".niveau-knop.actief")?.dataset.niveau || "basis";
 
+    // === GLOBALE SCHRIJFLIJN-INSTELLINGEN (sectie 4 van zijbalk) ===
+    // Eén centrale keuze voor alle werkbladen, weekdictee en bundels.
+    // Vroeger had elke OV zijn eigen lijntype/lijnhoogte — dat zit
+    // nu allemaal globaal. De oude per-OV DOM-elementen
+    // (#ov0X-lijntype, #ov0X-lijnhoogte) bestaan niet meer in de UI.
+    const globaalLijntype = document.querySelector("#zb-lt-grid .zb-lt-knop.actief")?.dataset.lt || "type3";
+    const globaalLijnhoogte = document.querySelector("#zb-globale-hoogte .zb-hoogte-btn.actief")?.dataset.hoogte || "middel";
+
     // === Weekdictee-specifieke opties ===
     let weekdictee = null;
     if (cat === "weekdictee") {
@@ -26,8 +34,8 @@ window.SpellingGenerator = {
         vrijdagHerhaling: document.querySelector("#wd-vrijdag-herhaling")?.checked || false,
         reflectieAan: document.querySelector("#wd-reflectie")?.checked !== false,
         reflectieText: document.querySelector("#wd-reflectie-tekst")?.value || "Wat vond ik van de dagelijkse spelling deze week?",
-        lijntype: document.querySelector('input[name="wd-lt"]:checked')?.value || "type3",
-        lijnhoogte: document.querySelector("#wd-lijnhoogte button.actief")?.dataset.hoogte || "klein",
+        lijntype: globaalLijntype,
+        lijnhoogte: globaalLijnhoogte,
         titel: "Dagelijkse kost spelling"
       };
     }
@@ -35,7 +43,6 @@ window.SpellingGenerator = {
     // === OV01-specifieke opties ===
     let ov01 = null;
     if (cat === "ov01") {
-      // Verzamel actieve niveau-vinkjes
       const niveaus = [];
       document.querySelectorAll("#ov01-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
         if (cb.checked) niveaus.push(cb.dataset.niveau);
@@ -45,8 +52,8 @@ window.SpellingGenerator = {
         zelfdeWoorden: document.querySelector("#ov01-zelfde-woorden")?.checked !== false,
         aantalWoorden: parseInt(document.querySelector("#ov01-aantal-woorden")?.value || "9", 10),
         aantalLijnen: parseInt(document.querySelector("#ov01-aantal-lijnen")?.value || "1", 10),
-        lijnhoogte: document.querySelector("#ov01-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov01-lijntype input[name='ov01-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov01-ondertitel")?.value || ""
       };
     }
@@ -63,8 +70,8 @@ window.SpellingGenerator = {
         aantalZinnen: parseInt(document.querySelector("#ov06-aantal-zinnen")?.value || "6", 10),
         aantalAfleiders: parseInt(document.querySelector("#ov06-aantal-afleiders")?.value || "3", 10),
         aantalUitbreiding: parseInt(document.querySelector("#ov06-aantal-uitbreiding")?.value || "4", 10),
-        lijnhoogte: document.querySelector("#ov06-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov06-lijntype input[name='ov06-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov06-ondertitel")?.value || "",
         eigenZinnen: document.querySelector("#ov06-eigen-zinnen")?.value || ""
       };
@@ -86,8 +93,8 @@ window.SpellingGenerator = {
         uitgangen: uitgangen.length > 0 ? uitgangen : ["je", "tje", "pje"],
         aantalWoorden: parseInt(document.querySelector("#ov07-aantal-woorden")?.value || "8", 10),
         verhaalIdx: parseInt(document.querySelector("#ov07-verhaal-keuze")?.value || "0", 10),
-        lijnhoogte: document.querySelector("#ov07-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov07-lijntype input[name='ov07-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov07-ondertitel")?.value || ""
       };
     }
@@ -105,8 +112,8 @@ window.SpellingGenerator = {
         plaatjeKern: document.querySelector("#ov05-plaatje-kern")?.checked !== false,
         plaatjeVerdieping: document.querySelector("#ov05-plaatje-verdieping")?.checked !== false,
         aantalWoorden: parseInt(document.querySelector("#ov05-aantal-woorden")?.value || "8", 10),
-        lijnhoogte: document.querySelector("#ov05-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov05-lijntype input[name='ov05-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov05-ondertitel")?.value || ""
       };
     }
@@ -122,8 +129,8 @@ window.SpellingGenerator = {
         niveaus: niveaus.length > 0 ? niveaus : ["basis"],
         aantalKolommen: parseInt(document.querySelector("#ov04-aantal-kolommen button.actief")?.dataset.aantal || "3", 10),
         aantalWoorden: parseInt(document.querySelector("#ov04-aantal-woorden")?.value || "12", 10),
-        lijnhoogte: document.querySelector("#ov04-lijnhoogte button.actief")?.dataset.hoogte || "klein",
-        lijntype: document.querySelector("#ov04-lijntype input[name='ov04-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov04-ondertitel")?.value || "",
         // Per kolom
         kleur1: document.querySelector("#ov04-kleur-1")?.value || "#2196F3",
@@ -148,8 +155,8 @@ window.SpellingGenerator = {
       ov03 = {
         niveaus: niveaus.length > 0 ? niveaus : ["basis"],
         aantalWoorden: parseInt(document.querySelector("#ov03-aantal-woorden")?.value || "8", 10),
-        lijnhoogte: document.querySelector("#ov03-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov03-lijntype input[name='ov03-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov03-ondertitel")?.value || ""
       };
     }
@@ -160,9 +167,25 @@ window.SpellingGenerator = {
       ov02 = {
         metPlaatje: document.querySelector("#ov02-met-plaatje")?.checked !== false,
         aantalWoorden: parseInt(document.querySelector("#ov02-aantal-woorden")?.value || "8", 10),
-        lijnhoogte: document.querySelector("#ov02-lijnhoogte button.actief")?.dataset.hoogte || "middel",
-        lijntype: document.querySelector("#ov02-lijntype input[name='ov02-lt']:checked")?.value || "type3",
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
         ondertitel: document.querySelector("#ov02-ondertitel")?.value || ""
+      };
+    }
+
+    // === OV10-specifieke opties (Samenstellingen) ===
+    let ov10 = null;
+    if (cat === "ov10") {
+      const niveaus = [];
+      document.querySelectorAll("#ov10-niveaus input[type='checkbox'][data-niveau]").forEach(cb => {
+        if (cb.checked) niveaus.push(cb.dataset.niveau);
+      });
+      ov10 = {
+        niveaus: niveaus.length > 0 ? niveaus : ["basis"],
+        aantalWoorden: parseInt(document.querySelector("#ov10-aantal-woorden")?.value || "6", 10),
+        lijnhoogte: globaalLijnhoogte,
+        lijntype: globaalLijntype,
+        ondertitel: document.querySelector("#ov10-ondertitel")?.value || ""
       };
     }
 
@@ -189,8 +212,8 @@ window.SpellingGenerator = {
       if (k.lijntype) lijntypePerVorm[id] = k.lijntype;
     });
 
-    // Globale lijntype
-    const lijntypeGlobaal = document.querySelector(".lijn-knop.actief")?.dataset.lijn || "vier";
+    // lijntypeGlobaal = de globale keuze (type1-type7) uit sectie 4.
+    const lijntypeGlobaal = globaalLijntype;
 
     const aantalOef = parseInt(document.querySelector("#aantal-oef")?.value || "3", 10);
     const aantalBladen = parseInt(document.querySelector("#aantal-bladen")?.value || "2", 10);
@@ -208,6 +231,7 @@ window.SpellingGenerator = {
       oefenvormen,
       lijntypeGlobaal,
       lijntypePerVorm,
+      lijnhoogteGlobaal: globaalLijnhoogte,
       aantalOef,
       aantalBladen,
       bundelNaam,
@@ -218,7 +242,8 @@ window.SpellingGenerator = {
       ov04,
       ov05,
       ov06,
-      ov07
+      ov07,
+      ov10
     };
   },
 
@@ -240,7 +265,8 @@ window.SpellingGenerator = {
         || opties.categorie === "ov02" || opties.categorie === "ov03"
         || opties.categorie === "ov04" || opties.categorie === "ov05"
         || opties.categorie === "ov06" || opties.categorie === "ov07"
-        || opties.categorie === "ov08" || opties.categorie === "ov09") {
+        || opties.categorie === "ov08" || opties.categorie === "ov09"
+        || opties.categorie === "ov10") {
       module._seed = this._laatsteSeed;
       return module.genereerBlad(opties, metAntwoorden);
     }
