@@ -127,30 +127,66 @@
         </div>
       </details>
 
-      <!-- Sectie 4: Globale schrijflijn (fallback) -->
-      <details class="zb-sectie" id="zb-sec-schrijflijn">
+      <!-- Sectie 4: Schrijflijn (globaal voor alle werkbladen) -->
+      <details class="zb-sectie" id="zb-sec-schrijflijn" open>
         <summary class="zb-sectie-titel">
           <span class="zb-nr">4</span>
-          <span class="zb-label">Schrijflijn (globaal)</span>
+          <span class="zb-label">Schrijflijn</span>
         </summary>
         <div class="zb-sectie-inhoud">
-          <p class="zb-uitleg">Standaard schrijflijn. Per oefenvorm kan dit overschreven worden.</p>
-          <div class="lijn-knoppen" id="lijn-knoppen">
-            <button class="lijn-knop actief" data-lijn="vier" title="Vierlijnssysteem">
-              <span class="lijn-mini vier"></span>
-              <span>Vierlijn</span>
+          <p class="zb-uitleg">Geldt voor alle werkbladen en het weekdictee.</p>
+
+          <!-- Type-keuze met previews -->
+          <label class="zb-lt-label">Type schrijflijn:</label>
+          <div class="zb-lt-grid" id="zb-lt-grid">
+            <button class="zb-lt-knop" data-lt="type1" type="button" title="Type 1 — klassiek hulp">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type1" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 1</span>
             </button>
-            <button class="lijn-knop" data-lijn="dubbel" title="Dubbele lijn (cahier)">
-              <span class="lijn-mini dubbel"></span>
-              <span>Dubbel</span>
+            <button class="zb-lt-knop" data-lt="type2" type="button" title="Type 2 — standaard">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type2" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 2</span>
             </button>
-            <button class="lijn-knop" data-lijn="enkel" title="Enkele lijn">
-              <span class="lijn-mini enkel"></span>
-              <span>Enkel</span>
+            <button class="zb-lt-knop actief" data-lt="type3" type="button" title="Type 3 — kleurgecodeerd">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type3" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 3</span>
             </button>
+            <button class="zb-lt-knop" data-lt="type4" type="button" title="Type 4 — grijs-blauw">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type4" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 4</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type5" type="button" title="Type 5 — intens kleur">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type5" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 5</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type6" type="button" title="Type 6 — enkele lijn">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type6" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 6</span>
+            </button>
+            <button class="zb-lt-knop" data-lt="type7" type="button" title="Type 7 — twee lijnen">
+              <canvas class="zb-lt-preview lijntype-preview" data-preview-type="type7" width="90" height="52"></canvas>
+              <span class="zb-lt-naam">Type 7</span>
+            </button>
+          </div>
+
+          <!-- Hoogte-keuze -->
+          <label class="zb-lt-label" style="margin-top: 12px;">Hoogte:</label>
+          <div class="zb-hoogte-knoppen" id="zb-globale-hoogte">
+            <button class="zb-hoogte-btn" data-hoogte="klein" type="button">Klein</button>
+            <button class="zb-hoogte-btn actief" data-hoogte="middel" type="button">Middel</button>
           </div>
         </div>
       </details>
+
+      <!-- Verborgen legacy elementen voor backwards-compat met app.js.
+           De OUDE .lijn-knop[data-lijn=vier|dubbel|enkel] blijft hier
+           verborgen aanwezig zodat eventuele oude code die er nog naar
+           kijkt geen errors gooit. Niet meer in gebruik voor UI. -->
+      <div id="legacy-lijn-knoppen" style="display:none">
+        <button class="lijn-knop actief" data-lijn="vier"></button>
+        <button class="lijn-knop" data-lijn="dubbel"></button>
+        <button class="lijn-knop" data-lijn="enkel"></button>
+      </div>
 
       <!-- Verborgen legacy elementen voor backwards-compat met app.js
            (de bestaande oefenvorm-modules verwachten deze knoppen.
