@@ -177,6 +177,20 @@ window.SpellingAfleiders = (function() {
         woord.replace(/ieuw/i, "iew")
       ];
     },
+    /* === NG vs NK ===
+       Klassieke fouten:
+       - ng → n (eind-g weglaten: slang → slan)
+       - ng → nk (verkeerde keuze: slang → slank)
+       - nk → ngk (hyper-correctie: bank → bangk)
+       - nk → k (eind-n weglaten: bank → bak) */
+    "ng-woorden": (woord) => [
+      woord.replace(/ng/i, "n"),     // slang → slan
+      woord.replace(/ng/i, "nk")     // slang → slank
+    ],
+    "nk-woorden": (woord) => [
+      woord.replace(/nk/i, "ngk"),   // bank → bangk
+      woord.replace(/nk/i, "k")      // bank → bak
+    ],
     /* Verlengingsregel: vervang d-eind met t (en omgekeerd), of b met p. 
        Werkt op de KALE eind-letter. */
     "verlengingsregel": (woord) => {
