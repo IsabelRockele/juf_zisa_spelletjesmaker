@@ -23,6 +23,27 @@ window.SpellingModules.ov01 = {
   naam: "Plaatje → woord schrijven",
   graad: 1,
 
+  /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+     Net als bij OV10: vaste waarden — geen handmatige aantal-keuze.
+     Werkblad start automatisch op max, leerkracht kan met ✕ verwijderen
+     en met ➕ aanvullen. */
+  _maxPerNiveau: {
+    basis: 9,
+    kern: 12,
+    verdieping: 9,
+    uitbreiding: 9
+  },
+
+  /* Aantal schrijflijnen onder elk plaatje per niveau.
+     Voorheen koos de leerkracht 1/2/3 globaal — nu vast per niveau
+     omdat dat samenhangt met hoeveel woorden er op een blad passen. */
+  _lijnenPerNiveau: {
+    basis: 1,
+    kern: 1,
+    verdieping: 1,
+    uitbreiding: 1
+  },
+
   /* ---------- INSTELLINGEN UI ---------- */
   renderInstellingen: function() {
     return `
@@ -188,8 +209,6 @@ window.SpellingModules.ov01 = {
     const o = opties.ov01 || {};
     const niveaus        = o.niveaus || ["basis"];
     const zelfdeWoorden  = o.zelfdeWoorden !== false;
-    const aantalWoorden  = o.aantalWoorden || 9;
-    const aantalLijnen   = o.aantalLijnen || 2;
     const lijnhoogte     = o.lijnhoogte || "middel";
     const lijntype       = o.lijntype || "type3";
     const ondertitel     = o.ondertitel || "";
@@ -216,23 +235,38 @@ window.SpellingModules.ov01 = {
 
     this._seed = this._seed || Date.now();
 
-    // Voor zelfde-woorden modus: kies één keer en gebruik voor alle niveaus
+    // Hulpfunctie: aantal woorden voor dit niveau. Respecteer een
+    // expliciet ingestelde teller (na ✕'en door leerkracht), anders
+    // ga naar het comfort-max uit _maxPerNiveau.
+    const aantalVoor = (niveau) => {
+      const max = this._maxPerNiveau[niveau] || 9;
+      const expliciet = o.aantalWoorden;
+      if (typeof expliciet === "number" && expliciet > 0 && expliciet <= max) {
+        return expliciet;
+      }
+      return max;
+    };
+
+    // Voor zelfde-woorden modus: kies één keer met het GROOTSTE max
+    // van de gekozen niveaus, dan per niveau trimmen tot eigen max.
+    // Zo zien alle niveaus dezelfde "eerste" woorden — pedagogisch
+    // coherent voor differentiatie in dezelfde klas.
     let gedeeldeKeuze = null;
     if (zelfdeWoorden) {
+      const grootsteMax = Math.max(...niveaus.map(n => aantalVoor(n)));
       const gemeenschappelijkeSeed = this._seed;
       this._seed = gemeenschappelijkeSeed;
-      gedeeldeKeuze = this._kiesWoorden(gekozenWoorden, aantalWoorden);
+      gedeeldeKeuze = this._kiesWoorden(gekozenWoorden, grootsteMax);
     }
-
-    // ÉÉN werkblad-template voor zowel werkblad als oplossingen.
-    // metAntwoorden=true triggert: antwoord-spans op schrijflijnen,
-    // groen hokje bij basis, OPLOSSINGEN-badge in titel.
 
     // WERKBLADEN: één per niveau (eventueel met antwoorden)
     return niveaus.map((niveau, idx) => {
+      const aantalDitNiveau = aantalVoor(niveau);
       const woorden = zelfdeWoorden
-        ? gedeeldeKeuze
-        : this._kiesWoorden(gekozenWoorden, aantalWoorden);
+        ? gedeeldeKeuze.slice(0, aantalDitNiveau)
+        : this._kiesWoorden(gekozenWoorden, aantalDitNiveau);
+
+      const aantalLijnen = this._lijnenPerNiveau[niveau] || 1;
 
       const stappenHTML = this._renderStappen(niveau);
       const plaatjesHTML = this._renderPlaatjesRooster(woorden, niveau, aantalLijnen, lijnhoogte, lijntype, metAntwoorden);
@@ -399,9 +433,10 @@ window.SpellingModules.ov01 = {
   /* ----- Uitbreiding: kies een woord en maak meervoud + verkleinwoord ----- */
   _renderUitbreidingOpdracht: function(woorden, lijnhoogte, lijntype, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
+    // Smallere canvas-breedte want 3 kolommen naast elkaar (was 580 voor 1 kolom)
     const lijn = (label) => sl
-      ? `<div class="ov01-zin-canvas-wrap"><div class="ov01-uit-label">${label}</div>${sl.htmlCanvas(lijntype, lijnhoogte, 580)}</div>`
-      : `<div class="ov01-zin-lijn"></div>`;
+      ? `<div class="ov01-uit-kolom"><div class="ov01-uit-label">${label}</div>${sl.htmlCanvas(lijntype, lijnhoogte, 180)}</div>`
+      : `<div class="ov01-uit-kolom"><div class="ov01-uit-label">${label}</div><div class="ov01-zin-lijn"></div></div>`;
     
     const oplTekst = metAntwoorden
       ? `<p class="ov01-zin-richtlijn">Verwacht: kind kiest een woord uit de oefening en schrijft correct het meervoud en verkleinwoord. Bv. boom → bomen → boompje.</p>`
@@ -413,9 +448,11 @@ window.SpellingModules.ov01 = {
         <p class="ov01-zin-vraag" data-bewerk-id="uitbreiding-opdracht">
           Kies 1 woord en schrijf het meervoud (veel) en het verkleinwoord erbij.
         </p>
-        ${lijn("Het woord:")}
-        ${lijn("Het meervoud (veel):")}
-        ${lijn("Het verkleinwoord:")}
+        <div class="ov01-uit-kolommen">
+          ${lijn("Het woord:")}
+          ${lijn("Het meervoud (veel):")}
+          ${lijn("Het verkleinwoord:")}
+        </div>
         ${oplTekst}
       </div>
     `;
