@@ -94,6 +94,7 @@ window.SpellingWoordenbibliotheek = {
     "sch-woorden": "sch-woorden",
     "moeilijke-klanken": "Moeilijke klanken (sch)",
     "ch-cht-klank": "ch / cht woorden",
+    "ch-cht-gt": "ch / cht / gt woorden",
     "verlengen": "Verlengingsregel",
     "verkleinwoorden": "Verkleinwoorden",
     "meervouden": "Meervouden",
