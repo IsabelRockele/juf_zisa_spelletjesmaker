@@ -70,14 +70,20 @@ window.SpellingModus = (function() {
       if (startscherm) startscherm.style.display = "";
       if (modusBadge) modusBadge.style.display = "none";
       if (wisselKnop) wisselKnop.style.display = "none";
-      // Op het startscherm: "← Terug naar menu" wél zichtbaar
-      // (dat is dan de enige terug-actie en gaat naar jufzisa.be-hoofdmenu).
       if (terugNaarMenu) terugNaarMenu.style.display = "";
-      document.body.classList.remove("heeft-modus");
+      document.body.classList.remove("heeft-modus", "modus-actief-werkblad", "modus-actief-herhaling", "modus-actief-weekdictee");
       return;
     }
 
     document.body.classList.add("heeft-modus");
+    
+    // Body-class voor actieve modus (zodat SpellingModusStorage de
+    // juiste namespace gebruikt). Eerst alle modus-classes weg.
+    document.body.classList.remove("modus-actief-werkblad", "modus-actief-herhaling", "modus-actief-weekdictee");
+    if (modus) {
+      document.body.classList.add("modus-actief-" + modus);
+    }
+    
     if (modusBadge) {
       modusBadge.style.display = "";
       modusBadge.textContent = modusLabels[modus] || modus;
@@ -92,6 +98,8 @@ window.SpellingModus = (function() {
     }
     else if (modus === "herhaling" && herhaling) {
       herhaling.style.display = "";
+      // Notificeer herhalingsbundel-modus dat hij actief is
+      window.dispatchEvent(new Event("spelling:herhaling-actief"));
     }
     else if (modus === "weekdictee" && weekdictee) {
       weekdictee.style.display = "";
