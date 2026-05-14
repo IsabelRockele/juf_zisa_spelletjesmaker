@@ -158,7 +158,7 @@ window.SpellingPDF = {
         before: ".pagina-break-voor",
         // .werkblad mag NOOIT gesplitst worden — anders krijgt elk werkblad
         // een lege restant-pagina. Een werkblad past op exact één A4.
-        avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid"]
+        avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov02-rij"]
       }
     };
 
