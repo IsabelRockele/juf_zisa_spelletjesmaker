@@ -17,6 +17,285 @@ window.SpellingModules.ov04 = {
   naam: "Categoriseren op klank",
   graad: 1,
 
+  /* Maximum aantal woorden per paar per niveau dat comfortabel op 1 A4 past.
+     - basis/kern: 12 woorden voor sorteren
+     - verdieping: 9 woorden voor sorteren + 6 lijntjes per kolom voor eigen woorden
+     - uitbreiding: lege kolommen + 3 zin-schrijflijnen onderaan */
+  _maxPerNiveau: {
+    basis: 12,
+    kern: 12,
+    verdieping: 9,
+    uitbreiding: 0
+  },
+
+  /* =====================================================
+     KLANK-PAAR DETECTIE
+     
+     Bekijkt welke categorieën aangevinkt zijn en bepaalt welke
+     sorteer-werkbladen mogelijk zijn. Elk gevonden paar krijgt
+     één werkblad per niveau.
+     
+     Een "paar" is altijd minimum 2 kolommen die elk minstens 1
+     woord uit de aangevinkte selectie kunnen leveren. Anders is
+     sorteren niet zinvol.
+     
+     Per paar bewaren we:
+     - id          : unieke string (voor seed-variatie)
+     - titel       : werkblad-titel
+     - kolommen    : [{titel, kleur, classifier}]
+                     classifier(woord) → kolomnaam | null
+     ===================================================== */
+  /* ============================================================
+     KLEUR-VOORKEUREN voor het korte-lange-andere paar.
+     De leerkracht kan in de zijbalk eigen kleuren kiezen voor:
+       - korte klanken (default blauw)
+       - lange klanken (default groen)
+       - andere klanken (default oranje)
+     Opgeslagen in localStorage. Bij elke render leest OV4 deze
+     waardes voor het korte-lange paar. ============================*/
+  _DEFAULT_KLEUREN: {
+    kort: "#2196F3",
+    lang: "#4CAF50",
+    ander: "#FF9800"
+  },
+  _LS_KLEUREN: "spelling-ov04-kleuren-v1",
+  
+  _leesKleuren: function() {
+    try {
+      const raw = localStorage.getItem(this._LS_KLEUREN);
+      if (!raw) return { ...this._DEFAULT_KLEUREN };
+      const obj = JSON.parse(raw);
+      return {
+        kort: obj.kort || this._DEFAULT_KLEUREN.kort,
+        lang: obj.lang || this._DEFAULT_KLEUREN.lang,
+        ander: obj.ander || this._DEFAULT_KLEUREN.ander
+      };
+    } catch (e) {
+      return { ...this._DEFAULT_KLEUREN };
+    }
+  },
+  
+  /* PUBLIEK: bewaar nieuwe kleuren en trigger preview-vernieuwing */
+  setKleuren: function(kleuren) {
+    try {
+      const huidig = this._leesKleuren();
+      const nieuw = { ...huidig, ...kleuren };
+      localStorage.setItem(this._LS_KLEUREN, JSON.stringify(nieuw));
+      // Trigger preview-vernieuwing als die er is
+      if (window.SpellingPreview && typeof window.SpellingPreview.ververs === "function") {
+        window.SpellingPreview.ververs();
+      }
+    } catch (e) { /* localStorage niet beschikbaar */ }
+  },
+
+  KLANK_PAREN: [
+    {
+      id: "korte-lange",
+      titel: "Korte vs lange klanken",
+      // Eenvoudigste paar: bij ⭐ basis worden de woorden VOLUIT getoond
+      // (kind kleurt en sorteert). Symbool-hint pas vanaf ⭐⭐ kern.
+      basisVoluit: true,
+      // Trigger: zowel korte- als lange-klanken aangevinkt
+      trigger: function(aangevinkteCats, cats) {
+        const mod = window.SpellingModules.ov04;
+        const kleuren = mod ? mod._leesKleuren() : mod._DEFAULT_KLEUREN;
+        
+        const heeftKort = aangevinkteCats.some(id => cats[id]?.groep === "korte-klanken");
+        const heeftLang = aangevinkteCats.some(id => cats[id]?.groep === "lange-klanken");
+        if (!(heeftKort && heeftLang)) return null;
+        const heeftTwee = aangevinkteCats.some(id => 
+          cats[id]?.groep === "tweeklanken" 
+          || cats[id]?.groep === "ei-ij"
+          || cats[id]?.groep === "au-ou"
+        );
+        const kolommen = [
+          { 
+            titel: "Korte klank", kleur: kleuren.kort, symbool: "●",
+            filter: w => cats[w.categorie]?.groep === "korte-klanken",
+            klankRegex: /[aeiouy]+/i
+          },
+          { 
+            titel: "Lange klank", kleur: kleuren.lang, symbool: "▬",
+            filter: w => cats[w.categorie]?.groep === "lange-klanken",
+            klankRegex: /aa|ee|oo|uu|ie/i
+          }
+        ];
+        if (heeftTwee) {
+          kolommen.push({
+            titel: "Andere klank", kleur: kleuren.ander, symbool: "★",
+            filter: w => ["tweeklanken", "ei-ij", "au-ou"].includes(cats[w.categorie]?.groep),
+            klankRegex: /aai|ooi|oei|eeuw|ieuw|ei|ij|au|ou|eu|ui|oe|ie/i
+          });
+        }
+        return { kolommen };
+      }
+    },
+    {
+      id: "ei-ij",
+      titel: "ei vs ij",
+      trigger: (aangevinkteCats, cats) => {
+        const heeftEi = aangevinkteCats.includes("tw-ei");
+        const heeftIj = aangevinkteCats.includes("tw-ij");
+        if (!(heeftEi && heeftIj)) return null;
+        return {
+          kolommen: [
+            { titel: "ei", kleur: "#E53935", symbool: "▲", filter: w => w.categorie === "tw-ei", klankRegex: /ei/i },
+            { titel: "ij", kleur: "#1E88E5", symbool: "◆", filter: w => w.categorie === "tw-ij", klankRegex: /ij/i }
+          ]
+        };
+      }
+    },
+    {
+      id: "au-ou",
+      titel: "au vs ou",
+      trigger: (aangevinkteCats, cats) => {
+        const heeftAu = aangevinkteCats.includes("tw-au");
+        const heeftOu = aangevinkteCats.includes("tw-ou");
+        if (!(heeftAu && heeftOu)) return null;
+        return {
+          kolommen: [
+            { titel: "au", kleur: "#FB8C00", symbool: "▲", filter: w => w.categorie === "tw-au", klankRegex: /au/i },
+            { titel: "ou", kleur: "#8E24AA", symbool: "◆", filter: w => w.categorie === "tw-ou", klankRegex: /ou/i }
+          ]
+        };
+      }
+    },
+    {
+      id: "aai-ooi-oei",
+      titel: "aai / ooi / oei",
+      trigger: (aangevinkteCats, cats) => {
+        const kolommen = [];
+        if (aangevinkteCats.includes("tw-aai")) {
+          kolommen.push({ titel: "aai", kleur: "#E53935", symbool: "▲", filter: w => w.categorie === "tw-aai", klankRegex: /aai/i });
+        }
+        if (aangevinkteCats.includes("tw-ooi")) {
+          kolommen.push({ titel: "ooi", kleur: "#4CAF50", symbool: "◆", filter: w => w.categorie === "tw-ooi", klankRegex: /ooi/i });
+        }
+        if (aangevinkteCats.includes("tw-oei")) {
+          kolommen.push({ titel: "oei", kleur: "#1E88E5", symbool: "●", filter: w => w.categorie === "tw-oei", klankRegex: /oei/i });
+        }
+        if (kolommen.length < 2) return null;
+        return { kolommen };
+      }
+    },
+    {
+      id: "eeuw-ieuw",
+      titel: "eeuw / ieuw",
+      trigger: (aangevinkteCats, cats) => {
+        const heeftEeuw = aangevinkteCats.includes("tw-eeuw");
+        const heeftIeuw = aangevinkteCats.includes("tw-ieuw");
+        if (!(heeftEeuw && heeftIeuw)) return null;
+        return {
+          kolommen: [
+            { titel: "eeuw", kleur: "#E53935", symbool: "▲", filter: w => w.categorie === "tw-eeuw", klankRegex: /eeuw/i },
+            { titel: "ieuw", kleur: "#1E88E5", symbool: "◆", filter: w => w.categorie === "tw-ieuw", klankRegex: /ieuw/i }
+          ]
+        };
+      }
+    },
+    {
+      id: "cht-gt",
+      titel: "cht vs gt",
+      trigger: (aangevinkteCats, cats) => {
+        const heeftCht = aangevinkteCats.includes("cht-woorden");
+        const heeftGt = aangevinkteCats.includes("gt-woorden");
+        if (!(heeftCht && heeftGt)) return null;
+        return {
+          kolommen: [
+            { titel: "cht", kleur: "#E53935", symbool: "▲", filter: w => w.categorie === "cht-woorden", klankRegex: /cht/i },
+            { titel: "gt", kleur: "#43A047", symbool: "◆", filter: w => w.categorie === "gt-woorden", klankRegex: /gt/i }
+          ]
+        };
+      }
+    },
+    {
+      id: "ch-cht",
+      titel: "ch vs cht",
+      trigger: (aangevinkteCats, cats) => {
+        const heeftCh = aangevinkteCats.includes("ch-woorden");
+        const heeftCht = aangevinkteCats.includes("cht-woorden");
+        if (!(heeftCh && heeftCht)) return null;
+        return {
+          kolommen: [
+            { titel: "ch", kleur: "#9C27B0", symbool: "▲", filter: w => w.categorie === "ch-woorden", klankRegex: /ch(?!t)/i },
+            { titel: "cht", kleur: "#E53935", symbool: "◆", filter: w => w.categorie === "cht-woorden", klankRegex: /cht/i }
+          ]
+        };
+      }
+    },
+    {
+      id: "verlengen-dt",
+      titel: "Eindigt op -d of -t (verlengingsregel)",
+      trigger: (aangevinkteCats, cats) => {
+        if (!aangevinkteCats.includes("verlengingsregel")) return null;
+        const eindigtOpD = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("d");
+        const eindigtOpT = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("t");
+        return {
+          kolommen: [
+            { titel: "eindigt op -d", kleur: "#E53935", symbool: "▲", filter: eindigtOpD, klankRegex: /d$/i },
+            { titel: "eindigt op -t", kleur: "#43A047", symbool: "◆", filter: eindigtOpT, klankRegex: /t$/i }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    },
+    {
+      id: "verlengen-bp",
+      titel: "Eindigt op -b of -p (verlengingsregel)",
+      trigger: (aangevinkteCats, cats) => {
+        if (!aangevinkteCats.includes("verlengingsregel")) return null;
+        const eindigtOpB = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("b");
+        const eindigtOpP = w => w.categorie === "verlengingsregel" && w.tekst.replace(/[^a-z]/gi, '').toLowerCase().endsWith("p");
+        return {
+          kolommen: [
+            { titel: "eindigt op -b", kleur: "#1E88E5", symbool: "▲", filter: eindigtOpB, klankRegex: /b$/i },
+            { titel: "eindigt op -p", kleur: "#FB8C00", symbool: "◆", filter: eindigtOpP, klankRegex: /p$/i }
+          ],
+          minimumPerKolom: true
+        };
+      }
+    }
+  ],
+
+  /* Detecteert welke klank-paren mogelijk zijn op basis van de
+     aangevinkte categorieën EN de daadwerkelijk gekozen woorden.
+     Returns: [{id, titel, kolommen}, ...]
+     
+     Voor paren met `minimumPerKolom: true` checken we dat elke
+     kolom minstens 1 woord heeft in de woordenpool — anders
+     valt het paar weg (anders zou je een lege kolom krijgen). */
+  _detecteerParen: function(gekozenWoorden, leerjaar) {
+    const wb = window.SpellingWoordenbibliotheek;
+    if (!wb) return [];
+    const cats = wb["graad" + (leerjaar || 1)] || {};
+
+    // Bepaal welke categorieën aangevinkt zijn (op basis van woorden in pool)
+    const aangevinkteCats = [...new Set(gekozenWoorden.map(w => w.categorie).filter(Boolean))];
+
+    const resultaat = [];
+    for (const paar of this.KLANK_PAREN) {
+      const detectie = paar.trigger(aangevinkteCats, cats);
+      if (!detectie) continue;
+      
+      // Voor paren met minimumPerKolom-flag: check dat élke kolom
+      // minstens 1 woord heeft in de daadwerkelijke pool.
+      if (detectie.minimumPerKolom) {
+        const allKolommenOK = detectie.kolommen.every(kol => 
+          gekozenWoorden.some(w => kol.filter(w))
+        );
+        if (!allKolommenOK) continue;
+      }
+      
+      resultaat.push({
+        id: paar.id,
+        titel: paar.titel,
+        kolommen: detectie.kolommen,
+        basisVoluit: !!paar.basisVoluit
+      });
+    }
+    return resultaat;
+  },
+
   /* ---------- INSTELLINGEN UI (zijbalk) ---------- */
   renderInstellingen: function() {
     // Genereer dropdown-opties met optgroups
@@ -78,60 +357,47 @@ window.SpellingModules.ov04 = {
         </div>
       </div>
 
-      <!-- STAP 3: Aantal kolommen -->
+      <!-- STAP 3: Kleuren voor korte / lange / andere klanken -->
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">3</span> Aantal kolommen
-        </label>
-        <div class="subtype-knoppen" id="ov04-aantal-kolommen">
-          <button data-aantal="2" type="button">2 kolommen</button>
-          <button class="actief" data-aantal="3" type="button">3 kolommen</button>
-        </div>
-      </div>
-
-      <!-- STAP 4: Per kolom — kleur, klank, titel -->
-      <div class="ov-instel-blok">
-        <label class="ov-instel-titel">
-          <span class="ov-instel-nr">4</span> Kolom-instellingen
+          <span class="ov-instel-nr">3</span> Kleuren (korte / lange / andere klank)
         </label>
         <p class="wd-stap-info" style="margin-bottom:8px;">
-          Per kolom: kleur, klank-categorie en titel. Titel wordt automatisch aangepast bij keuze.
+          Pas de kleuren aan zodat ze overeenkomen met de kleuren in jouw taalmethode.
+          Geldt voor alle werkbladen die korte/lange/andere klank gebruiken.
         </p>
-        <div class="ov04-kolom-rij" data-kolom="1">
-          <input type="color" class="ov04-kleur" id="ov04-kleur-1" value="#2196F3" title="Kleur kolom 1">
-          <select class="ov04-klank" id="ov04-klank-1" data-default-titel="Korte klank">
-            ${dropdownHTML}
-          </select>
-          <input type="text" class="ov04-titel" id="ov04-titel-1" value="Korte klank" placeholder="Titel kolom 1">
+        <div class="ov04-kleuren-rij">
+          <label class="ov04-kleur-cel">
+            <input type="color" class="ov04-kleur-input" id="ov04-kleur-kort" value="${this._leesKleuren().kort}">
+            <span>● Korte klank</span>
+          </label>
+          <label class="ov04-kleur-cel">
+            <input type="color" class="ov04-kleur-input" id="ov04-kleur-lang" value="${this._leesKleuren().lang}">
+            <span>▬ Lange klank</span>
+          </label>
+          <label class="ov04-kleur-cel">
+            <input type="color" class="ov04-kleur-input" id="ov04-kleur-ander" value="${this._leesKleuren().ander}">
+            <span>★ Andere klank</span>
+          </label>
         </div>
-        <div class="ov04-kolom-rij" data-kolom="2">
-          <input type="color" class="ov04-kleur" id="ov04-kleur-2" value="#4CAF50" title="Kleur kolom 2">
-          <select class="ov04-klank" id="ov04-klank-2" data-default-titel="Lange klank">
-            ${dropdownHTML}
-          </select>
-          <input type="text" class="ov04-titel" id="ov04-titel-2" value="Lange klank" placeholder="Titel kolom 2">
-        </div>
-        <div class="ov04-kolom-rij" data-kolom="3">
-          <input type="color" class="ov04-kleur" id="ov04-kleur-3" value="#FF9800" title="Kleur kolom 3">
-          <select class="ov04-klank" id="ov04-klank-3" data-default-titel="Andere klank">
-            ${dropdownHTML}
-          </select>
-          <input type="text" class="ov04-titel" id="ov04-titel-3" value="Andere klank" placeholder="Titel kolom 3">
-        </div>
+        <button class="ov04-kleur-reset" id="ov04-kleur-reset" type="button" 
+                style="margin-top:8px; font-size:0.85rem; padding:4px 8px; cursor:pointer;">
+          Standaardkleuren herstellen
+        </button>
       </div>
 
-      <!-- STAP 5: Aantal woorden -->
+      <!-- STAP 4: Aantal woorden -->
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">5</span> Aantal woorden
+          <span class="ov-instel-nr">4</span> Aantal woorden
         </label>
         <input type="number" id="ov04-aantal-woorden" min="6" max="24" value="12">
       </div>
 
-      <!-- STAP 6: Schrijflijnen -->
+      <!-- STAP 5: Schrijflijnen -->
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">6</span> Schrijflijnen
+          <span class="ov-instel-nr">5</span> Schrijflijnen
         </label>
         <label style="margin-top:6px">Type schrijflijn</label>
         <div class="lijntype-keuze" id="ov04-lijntype">
@@ -192,10 +458,10 @@ window.SpellingModules.ov04 = {
         </div>
       </div>
 
-      <!-- STAP 7: Ondertitel -->
+      <!-- STAP 6: Ondertitel -->
       <div class="ov-instel-blok">
         <label class="ov-instel-titel">
-          <span class="ov-instel-nr">7</span> Ondertitel (vrij)
+          <span class="ov-instel-nr">6</span> Ondertitel (vrij)
         </label>
         <input type="text" id="ov04-ondertitel" placeholder="bv. Week 12 — Klanken sorteren">
       </div>
@@ -231,21 +497,10 @@ window.SpellingModules.ov04 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov04 || {};
     const niveaus = o.niveaus && o.niveaus.length > 0 ? o.niveaus : ["basis"];
-    const aantalKolommen = o.aantalKolommen || 3;
-    const aantalWoorden = o.aantalWoorden || 12;
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "klein";
     const ondertitel = o.ondertitel || "";
-    
-    // Kolommen samenstellen op basis van instellingen
-    const kolommen = [];
-    for (let i = 1; i <= aantalKolommen; i++) {
-      kolommen.push({
-        titel: o["titel" + i] || `Kolom ${i}`,
-        kleur: o["kleur" + i] || "#888888",
-        klank: o["klank" + i] || "groep-kort"
-      });
-    }
+    const leerjaar = opties.graad || 1;
 
     const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
 
@@ -258,84 +513,187 @@ window.SpellingModules.ov04 = {
       </div>`;
     }
 
-    return niveaus.map(niveau => {
-      const woorden = (niveau === "verdieping" || niveau === "uitbreiding") 
-        ? [] // Geen woorden — kind bedenkt zelf
-        : this._kiesWoorden(gekozenWoorden, aantalWoorden);
-      return this._renderEenBlad(niveau, woorden, kolommen, lijntype, lijnhoogte, ondertitel, metAntwoorden);
-    }).join("");
+    // Detecteer welke klank-paren mogelijk zijn
+    const paren = this._detecteerParen(gekozenWoorden, leerjaar);
+
+    if (paren.length === 0) {
+      return `<div class="werkblad ov04-blad">
+        <div class="weekdictee-empty">
+          <h3>🎨 Klanken sorteren niet mogelijk</h3>
+          <p>Vink categorieën aan die een klank-tegenstelling vormen, bijvoorbeeld:</p>
+          <ul style="text-align:left; max-width:500px; margin: 12px auto;">
+            <li>Korte klanken + Lange klanken</li>
+            <li>ei + ij</li>
+            <li>au + ou</li>
+            <li>cht + gt</li>
+            <li>Verlengingsregel (minstens woorden op -d én -t, of -b én -p)</li>
+          </ul>
+        </div>
+      </div>`;
+    }
+
+    // Voor elk paar × elk niveau één werkblad
+    let html = "";
+    for (const paar of paren) {
+      for (const niveau of niveaus) {
+        // Uitbreiding heeft geen sorteer-woorden (lege kolommen).
+        // Basis/kern/verdieping krijgen woorden volgens _maxPerNiveau.
+        const woorden = (niveau === "uitbreiding")
+          ? []
+          : this._kiesWoordenVoorParen(gekozenWoorden, paar, niveau);
+        html += this._renderEenBlad(niveau, woorden, paar, lijntype, lijnhoogte, ondertitel, metAntwoorden);
+      }
+    }
+    return html;
   },
 
-  _renderEenBlad: function(niveau, woorden, kolommen, lijntype, lijnhoogte, ondertitel, metAntwoorden) {
-    const sl = window.SpellingSchrijflijnen;
-    const kh = window.SpellingKlank;
+  /* Kies woorden voor één paar:
+     - alleen woorden die in een van de kolommen passen
+     - clamp op _maxPerNiveau (12 voor basis/kern)
+     - gebalanceerd over kolommen voor zover mogelijk */
+  _kiesWoordenVoorParen: function(allWoorden, paar, niveau) {
+    const max = this._maxPerNiveau[niveau] || 12;
+    // Filter: alleen woorden die in een kolom horen
+    const passend = allWoorden.filter(w => 
+      paar.kolommen.some(k => k.filter(w))
+    );
+    // Shuffle deterministisch, neem max
+    return this._kiesWoorden(passend, max);
+  },
 
-    // Legende bovenaan
+  /* Helper: maak van woord-tekst de hint-weergave voor een niveau.
+     - basis: vervang klank-match met symbool van kolom (in kolomkleur)
+       UITZONDERING: paren met basisVoluit=true tonen woord voluit op basis
+     - kern: vervang klank-match met onderstreepjes
+       UITZONDERING: paren met basisVoluit=true tonen symbool op kern (één niveau "verlaat")
+     - verdieping: onderstreepjes
+     - antwoorden-mode: heel woord, klank in kolomkleur */
+  _woordMetHint: function(woord, passendeKolom, niveau, metAntwoorden, paar) {
+    const kaal = woord.tekst;
+    if (!passendeKolom) return kaal;
+
+    // Antwoorden-mode: hele woord, klank in kolomkleur
+    if (metAntwoorden) {
+      if (passendeKolom.klankRegex) {
+        return kaal.replace(passendeKolom.klankRegex, (m) => 
+          `<span style="color:${passendeKolom.kleur}; font-weight:700">${m}</span>`
+        );
+      }
+      return kaal;
+    }
+
+    // Voor 'basisVoluit'-paren (korte/lange/andere klanken):
+    //   - basis = voluit, geen hint
+    //   - kern = symbool-hint
+    //   - verdieping = streepjes
+    // Voor andere paren:
+    //   - basis = symbool-hint
+    //   - kern = streepjes
+    //   - verdieping = streepjes
+    const isVoluit = paar && paar.basisVoluit;
+    let effectiefNiveau = niveau;
+    if (isVoluit) {
+      if (niveau === "basis") effectiefNiveau = "voluit";
+      else if (niveau === "kern") effectiefNiveau = "symbool";
+      // verdieping blijft verdieping (= streepjes)
+    } else {
+      if (niveau === "basis") effectiefNiveau = "symbool";
+      // kern + verdieping = streepjes
+    }
+
+    // Voluit: hele woord tonen
+    if (effectiefNiveau === "voluit") {
+      return kaal;
+    }
+
+    // Symbool op klank-plek (één teken in kolomkleur)
+    if (effectiefNiveau === "symbool") {
+      if (passendeKolom.klankRegex && passendeKolom.symbool) {
+        return kaal.replace(passendeKolom.klankRegex, () =>
+          `<span class="ov04-symbool" style="color:${passendeKolom.kleur}">${passendeKolom.symbool}</span>`
+        );
+      }
+      return kaal;
+    }
+
+    // Streepjes (kern + verdieping voor andere paren, of verdieping voor voluit-paren)
+    if (passendeKolom.klankRegex) {
+      return kaal.replace(passendeKolom.klankRegex, (m) => {
+        const aantal = Math.max(m.length, 2);
+        return `<span class="ov04-streepjes">${"_".repeat(aantal)}</span>`;
+      });
+    }
+    return kaal;
+  },
+
+  _renderEenBlad: function(niveau, woorden, paar, lijntype, lijnhoogte, ondertitel, metAntwoorden) {
+    const sl = window.SpellingSchrijflijnen;
+    const kolommen = paar.kolommen;
+
+    // Legende bovenaan: toon kolomkleur, symbool, en titel
     const legendeHTML = `
       <div class="ov04-legende">
         ${kolommen.map(cat => `
           <div class="ov04-legende-item">
-            <span class="ov04-legende-kleur" style="background:${cat.kleur}"></span>
+            <span class="ov04-legende-kleur" style="background:${cat.kleur}">${cat.symbool || ""}</span>
             <span class="ov04-legende-tekst">${cat.titel}</span>
           </div>
         `).join("")}
       </div>`;
 
-    // Woorden-blok (alleen voor basis + kern)
+    // Woorden-blok: voor basis, kern EN verdieping
     let woordenHTML = "";
-    if (niveau === "basis" || niveau === "kern") {
+    if (niveau === "basis" || niveau === "kern" || niveau === "verdieping") {
       const woordenLijst = woorden.map(w => {
-        const kaal = w.tekst; // GEEN lidwoord
-        let weergave = kaal;
-        
-        if (niveau === "kern") {
-          weergave = kh ? kh.woordMetStreepjes(kaal, w.categorie) : kaal;
-        }
-        
-        // Bij oplossingen: klank inkleuren
-        if (metAntwoorden && kh) {
-          const kolomNr = kh.bepaalKolom(w.categorie, kolommen.map(c => c.klank));
-          if (kolomNr) {
-            const cat = kolommen[kolomNr - 1];
-            weergave = kh.woordMetGekleurdeKlank(kaal, w.categorie, cat.kleur);
-          }
-        }
-        
+        const passendeKolom = kolommen.find(k => k.filter(w));
+        const weergave = this._woordMetHint(w, passendeKolom, niveau, metAntwoorden, paar);
         return `<span class="ov04-woord">${weergave}</span>`;
       }).join("");
       
-      const woordenTitel = niveau === "kern" 
-        ? "Vul de ontbrekende klank in en schrijf het woord in de juiste kolom:"
-        : "Kleur de klank in elk woord en schrijf het in de juiste kolom:";
+      let woordenTitel;
+      const isVoluit = paar.basisVoluit;
+      if (niveau === "basis") {
+        woordenTitel = isVoluit
+          ? "Kleur de klank in elk woord en schrijf het in de juiste kolom:"
+          : "Schrijf elk woord volledig in de juiste kolom:";
+      } else if (niveau === "kern") {
+        woordenTitel = "Vul de ontbrekende klank in en schrijf het woord in de juiste kolom:";
+      } else {
+        // verdieping
+        woordenTitel = "Vul aan en sorteer. Bedenk daarna zelf 3 woorden per kolom.";
+      }
       
       woordenHTML = `
         <div class="ov04-woorden-titel">${woordenTitel}</div>
         <div class="ov04-woorden-lijst">${woordenLijst}</div>`;
     }
 
-    // Kolommen onderaan met schrijflijnen
-    // Verdieping: 3 lijnen per kolom — kind bedenkt 3 woorden per kolom
-    // Uitbreiding: 5 lijnen per kolom — kind bedenkt 5 woorden per kolom
-    // Basis/Kern: genoeg lijnen voor woorden (bv. aantalWoorden / aantalKolommen + 1)
-    const aantalLijnenPerKolom = niveau === "verdieping" 
-      ? 3 
-      : niveau === "uitbreiding"
-      ? 5
-      : Math.ceil((woorden.length / kolommen.length) + 1);
+    // Bepaal aantal schrijflijnen per kolom
+    // Basis/Kern: net genoeg lijnen voor de gegeven woorden
+    // Verdieping: 6 lijnen per kolom (3 voor sorteer-woorden + 3 voor eigen woorden)
+    // Uitbreiding: 5 lijnen per kolom (kind bedenkt 5 woorden per kolom)
+    let aantalLijnenPerKolom;
+    if (niveau === "verdieping") {
+      aantalLijnenPerKolom = 6;
+    } else if (niveau === "uitbreiding") {
+      aantalLijnenPerKolom = 5;
+    } else {
+      // basis/kern: 1 lijn per woord (gemiddeld) + 1 buffer
+      aantalLijnenPerKolom = Math.ceil((woorden.length / kolommen.length) + 1);
+    }
 
     const kolommenHTML = kolommen.map(cat => {
+      // Voor oplossingen: vind de woorden die in deze kolom horen
+      // (geldt voor basis, kern EN verdieping — alle drie hebben woorden)
+      const woordenInKolom = (metAntwoorden && niveau !== "uitbreiding")
+        ? woorden.filter(w => cat.filter(w))
+        : [];
+      
       const lijnen = [];
       for (let i = 0; i < aantalLijnenPerKolom; i++) {
-        // Bij oplossingen voor basis/kern: woord in juiste kolom invullen
         let antwoord = "";
-        if (metAntwoorden && niveau !== "verdieping" && niveau !== "uitbreiding" && kh) {
-          // Vind woorden die in deze kolom horen
-          const woordenInKolom = woorden.filter(w => 
-            kh.matchKolom(w.categorie, cat.klank)
-          );
-          if (woordenInKolom[i]) {
-            antwoord = `<span class="ov04-lijn-antwoord">${woordenInKolom[i].tekst}</span>`;
-          }
+        if (woordenInKolom[i]) {
+          antwoord = `<span class="ov04-lijn-antwoord">${woordenInKolom[i].tekst}</span>`;
         }
         const canvas = sl
           ? sl.htmlCanvas(lijntype, lijnhoogte, 200)
@@ -350,6 +708,23 @@ window.SpellingModules.ov04 = {
         </div>`;
     }).join("");
 
+    // Bij uitbreiding: 3 zin-schrijflijnen onderaan (was vroeger "schrijf in schrift")
+    let uitbreidingsZinnen = "";
+    if (niveau === "uitbreiding") {
+      const zinLijnen = [1, 2, 3].map(() => 
+        sl ? sl.htmlCanvas(lijntype, lijnhoogte, 580) : `<div class="ov04-fallback-lijn"></div>`
+      ).join("");
+      const oplTekst = metAntwoorden
+        ? `<p class="ov01-zin-richtlijn">Verwacht: 3 zinnen, elk met minstens één woord uit een andere kolom.</p>`
+        : "";
+      uitbreidingsZinnen = `
+        <div class="ov04-zinnen-blok">
+          <div class="ov04-zinnen-titel">Maak nu 3 zinnen met telkens één woord uit een andere kolom:</div>
+          ${zinLijnen}
+          ${oplTekst}
+        </div>`;
+    }
+
     const niveauLabel = {
       basis: "⭐", kern: "⭐⭐", verdieping: "⭐⭐⭐", uitbreiding: "⭐⭐⭐⭐"
     }[niveau];
@@ -360,39 +735,51 @@ window.SpellingModules.ov04 = {
 
     // Opdracht-tekst per niveau
     let opdrachtTekst = "";
+    const isVoluit = paar.basisVoluit;
     if (niveau === "basis") {
-      opdrachtTekst = `
+      opdrachtTekst = isVoluit
+        ? `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kleur de klank in elk woord met de juiste kleur.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`
+        : `
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont welke soort klank ontbreekt.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het juiste woord in de juiste kolom.</span></div>`;
     } else if (niveau === "kern") {
-      opdrachtTekst = `
+      opdrachtTekst = isVoluit
+        ? `
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont welke soort klank ontbreekt.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de klank in en schrijf het woord in de juiste kolom.</span></div>`
+        : `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de ontbrekende klank in.</span></div>
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`;
+    } else if (niveau === "verdieping") {
+      opdrachtTekst = `
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de klanken in en schrijf elk woord in de juiste kolom.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk daarna zelf nog 3 woorden per kolom.</span></div>`;
     } else if (niveau === "uitbreiding") {
       opdrachtTekst = `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk 5 woorden voor elke categorie.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak in je schrift een zin met één woord uit elke kolom.</span></div>`;
-    } else {
-      opdrachtTekst = `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk woorden voor elke categorie.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf 3 woorden in elke kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk 5 woorden voor elke kolom.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak onderaan 3 zinnen, telkens met een woord uit een andere kolom.</span></div>`;
     }
+
+    // Werkblad-titel: gebruik paar.titel zodat leerkracht/kind ziet welk paar
+    const werkbladTitel = paar.titel || "Klanken sorteren";
 
     return `
       <div class="werkblad ov04-blad lijnhoogte-${lijnhoogte}" data-lijntype="${lijntype}" data-lijnhoogte="${lijnhoogte}" data-niveau="${niveau}">
         <div class="ov01-header">
           <div class="ov01-naam-rij">
-            <span data-bewerk-id="naamlabel-${niveau}">Naam:</span>
+            <span data-bewerk-id="naamlabel-${niveau}-${paar.id}">Naam:</span>
             <span class="ov01-lijn-naam"></span>
-            <span data-bewerk-id="datumlabel-${niveau}">Datum:</span>
+            <span data-bewerk-id="datumlabel-${niveau}-${paar.id}">Datum:</span>
             <span class="ov01-lijn-datum"></span>
           </div>
-          <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}">
-            Klanken sorteren
+          <h2 class="ov01-titel" data-bewerk-id="titel-${niveau}-${paar.id}">
+            ${werkbladTitel}
             <span class="ov01-niveau-badge ov01-niveau-${niveau}">${niveauLabel}</span>
             ${oplBadge}
           </h2>
-          ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}">${ondertitel}</p>` : ""}
+          ${ondertitel ? `<p class="ov01-ondertitel" data-bewerk-id="ondertitel-${niveau}-${paar.id}">${ondertitel}</p>` : ""}
         </div>
 
         <div class="ov01-stappen">
@@ -406,6 +793,8 @@ window.SpellingModules.ov04 = {
         <div class="ov04-kolommen ov04-kolommen-${kolommen.length}">
           ${kolommenHTML}
         </div>
+
+        ${uitbreidingsZinnen}
 
         <div class="ov01-voettekst">www.jufzisa.be — Juf Zisa's spellinggenerator</div>
       </div>
