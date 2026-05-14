@@ -41,7 +41,7 @@ window.SpellingWoordenbibliotheek = {
   categorieenPerHoofdgroep: function(leerjaar, aangevinkt) {
     const data = this[`graad${leerjaar}`];
     if (!data) return {};
-    const result = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, overig: {} };
+    const result = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, samenstelling: {}, overig: {} };
     for (const [id, cat] of Object.entries(data)) {
       if (typeof cat !== "object" || !cat.groep) continue;
       if (aangevinkt && !aangevinkt.has(id)) continue;
@@ -70,6 +70,7 @@ window.SpellingWoordenbibliotheek = {
     "hoorwoord": "🎵 Hoorwoorden",
     "onthoudwoord": "🧠 Onthoudwoorden",
     "regelwoord": "📋 Regelwoorden",
+    "samenstelling": "🧩 Samenstellingen",
     "overig": "📦 Overig"
   },
 
@@ -78,6 +79,7 @@ window.SpellingWoordenbibliotheek = {
     "hoorwoord": "Woorden waar je gewoon schrijft wat je hoort.",
     "onthoudwoord": "Woorden waar je de spelling moet onthouden (geen luisterregel).",
     "regelwoord": "Woorden waarbij je een regel moet toepassen (verlengen, verkleinen, meervoud).",
+    "samenstelling": "Woorden die uit twee delen bestaan die je aan elkaar plakt (klok + huis = klokhuis).",
     "overig": "Andere categorieën."
   },
 
@@ -99,6 +101,7 @@ window.SpellingWoordenbibliotheek = {
     "au-ou": "au / ou woorden",
     "ch-cht": "ch / cht woorden",
     "doffe-klank": "Doffe klanken",
-    "hoofdletters": "Hoofdletters & leestekens"
+    "hoofdletters": "Hoofdletters & leestekens",
+    "samenstellingen": "Samengestelde woorden"
   }
 };
