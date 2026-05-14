@@ -158,10 +158,17 @@ window.SpellingModules.ov02 = {
     // Kies woorden
     const woorden = this._kiesWoorden(gekozenWoorden, aantalWoorden);
 
-    // Genereer rijen
+    // Genereer rijen.
+    // Maximum 8 woorden per pagina. Bij meer woorden: rij 9 krijgt
+    // .pagina-break-voor (forceert page-break in PDF), en daarna alle
+    // rijen op pagina 2 krijgen .ov02-rij-pagina2 voor een visuele
+    // bovenmarge (anders staan ze tegen de bladrand omdat header/opdracht
+    // niet herhaald worden).
+    const WOORDEN_PER_PAGINA = 8;
     const sl = window.SpellingSchrijflijnen;
     let rijenHTML = "";
-    for (const w of woorden) {
+    for (let idx = 0; idx < woorden.length; idx++) {
+      const w = woorden[idx];
       const tonen = this._toonWoord(w);
       const emoji = metPlaatje ? this._zoekEmoji(w.tekst) : "";
       const plaatjeCel = metPlaatje
@@ -180,8 +187,18 @@ window.SpellingModules.ov02 = {
         lijnenHTML += `<div class="ov02-lijn-cel">${antwoordSpan}${canvas}</div>`;
       }
 
+      // Bepaal extra classes voor deze rij op basis van index
+      const extraClasses = [];
+      // Rij 9 (index 8) start een nieuwe pagina
+      if (idx === WOORDEN_PER_PAGINA) extraClasses.push("pagina-break-voor");
+      // Rijen op pagina 2+: extra marge bovenaan zodat ze niet tegen de rand staan.
+      // Alleen de EERSTE rij van pagina 2 krijgt deze marge (anders dubbele
+      // ruimte tussen rij 9 en 10).
+      if (idx === WOORDEN_PER_PAGINA) extraClasses.push("ov02-rij-pagina2-start");
+
+      const klasseStr = ["ov02-rij", ...extraClasses].join(" ");
       rijenHTML += `
-        <div class="ov02-rij" data-woord="${w.tekst}">
+        <div class="${klasseStr}" data-woord="${w.tekst}">
           <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
           ${plaatjeCel}
           <div class="ov02-woord">${tonen}</div>
