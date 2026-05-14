@@ -19,6 +19,18 @@
     graad: 1,
     oefenvormenPerNiveau: ["basis", "kern", "verdieping", "uitbreiding"],
 
+    /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+       ⭐ basis = 8 (grondwoord + keuze -en/-s + schrijflijn)
+       ⭐⭐ kern = 14 (compactere "1 huis → veel ___" rijen)
+       ⭐⭐⭐ verdieping = 7 (2 kolommen, om beurten kolom leeg)
+       ⭐⭐⭐⭐ uitbreiding = 5 (vast verhaal, geen woordenlijst — getal puur formeel) */
+    _maxPerNiveau: {
+      basis: 8,
+      kern: 14,
+      verdieping: 7,
+      uitbreiding: 5
+    },
+
     /* Telwoorden + bepalers die we wisselend gebruiken bij ⭐⭐ Toepassen */
     TELWOORDEN: [
       "veel", "twee", "drie", "vier", "vijf", "zes", "zeven",
@@ -116,7 +128,15 @@
       const o = (opties && opties.ov08) || opties || {};
       const niveaus = (o.niveaus && o.niveaus.length > 0) ? o.niveaus : [o.niveau || (opties && opties.niveau) || "basis"];
       const niveau = niveaus[0];
-      const aantal = o.aantalWoorden || o.aantal || 8;
+      
+      // Aantal uit _maxPerNiveau. Respecteer lagere expliciete waarde
+      // (na ✕'en in bundel). aantalWoorden/aantal vallen terug op max.
+      const maxVoorNiveau = this._maxPerNiveau[niveau] || 8;
+      const explicietAantal = o.aantalWoorden || o.aantal;
+      const aantal = (typeof explicietAantal === "number" && explicietAantal > 0 && explicietAantal <= maxVoorNiveau)
+        ? explicietAantal
+        : maxVoorNiveau;
+      
       const cfg = {
         lijntype: o.lijntype || "type3",
         lijnhoogte: o.lijnhoogte || "middel",
