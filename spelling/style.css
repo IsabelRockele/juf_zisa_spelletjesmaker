@@ -4670,10 +4670,10 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .ov10-basis-afb-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   margin: 0 auto 14px;
-  max-width: 600px;
+  max-width: 700px;
 }
 .ov10-basis-afb-cel {
   display: flex;
@@ -4958,4 +4958,139 @@ body.bewerk-aan [data-bewerk-id]:focus {
 }
 .ov10-vb-twee-kolommen .ov10-vb-noteer .ov10-basis-noteer-rij {
   padding: 2px 0;
+}
+
+
+/* ==========================================================
+   GLOBALE SCHRIJFLIJN-KEUZE (sectie 4 van zijbalk)
+   7 knoppen met canvas-previews + hoogte-keuze
+   ========================================================== */
+
+.zb-lt-label {
+  display: block;
+  font-size: 0.85rem;
+  color: #444;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+}
+
+.zb-lt-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.zb-lt-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  background: white;
+  border: 1.5px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.zb-lt-knop:hover {
+  border-color: #999;
+  background: #fafafa;
+}
+
+.zb-lt-knop.actief {
+  background: var(--zisa-geel, #ffd84d);
+  border-color: #d4a017;
+  box-shadow: 0 1px 3px rgba(212, 160, 23, 0.3);
+}
+
+.zb-lt-knop.actief .zb-lt-naam {
+  color: #5a4400;
+  font-weight: 700;
+}
+
+.zb-lt-preview {
+  display: block;
+  width: 100%;
+  height: 52px;
+  background: white;
+  border-radius: 2px;
+}
+
+.zb-lt-knop.actief .zb-lt-preview {
+  background: white;
+}
+
+.zb-lt-naam {
+  font-size: 0.72rem;
+  color: #555;
+  font-weight: 600;
+  text-align: center;
+}
+
+
+/* +1 woord knop in disabled-staat: uitgegrijsd maar duidelijk klikbaar
+   voor tooltip-leesbaarheid (anders snapt leerkracht niet waarom hij niets doet). */
+.bundel-item-plus-knop.is-uitgegrijsd,
+.bundel-item-plus-knop:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #eee;
+  color: #888;
+}
+.bundel-item-plus-knop.is-uitgegrijsd:hover,
+.bundel-item-plus-knop:disabled:hover {
+  background: #eee;
+  border-color: #ccc;
+}
+
+
+/* Info-regel in OV-instellingen voor OV's met vaste plafonds per niveau */
+.zb-oef-rij.zb-oef-info {
+  padding: 6px 10px;
+  background: #f7f9fc;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+.zb-oef-rij.zb-oef-info small {
+  color: #555;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  display: block;
+}
+
+
+/* OV01 uitbreiding: 3 kolommen naast elkaar (woord / meervoud / verklein) */
+.ov01-uit-kolommen {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-top: 6px;
+}
+.ov01-uit-kolom {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ov01-uit-kolom .ov01-uit-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+}
+
+
+/* OV02 — Page-break en pagina 2 marge.
+   Bij meer dan 8 woorden krijgt rij 9 een page-break voor + extra
+   bovenmarge zodat de inhoud niet tegen de bladrand staat (geen header/
+   opdracht zijn er meer op pagina 2). */
+.ov02-rij.pagina-break-voor {
+  page-break-before: always;
+  break-before: page;
+}
+.ov02-rij.ov02-rij-pagina2-start {
+  /* Visuele bovenmarge voor de eerste rij op pagina 2.
+     Komt overeen met header+opdracht-hoogte van pagina 1 (~3cm). */
+  padding-top: 2.5cm;
 }
