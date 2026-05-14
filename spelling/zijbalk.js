@@ -462,25 +462,28 @@ window.SpellingZijbalk = (function() {
         html += `</div></div>`;
       }
       
-      if (oef.id !== "weekdictee") {
+      // Toon de "Aantal woorden"-input alleen als de OV geen vaste
+      // maxima per niveau heeft. OV10 heeft _maxPerNiveau gedefinieerd
+      // → automatisch op max per niveau, geen handmatige keuze nodig.
+      // Verwijderen + 1-erbij gebeurt op het werkblad zelf.
+      const heeftVastePlafonds = !!window.SpellingModules?.[oef.id]?._maxPerNiveau;
+      if (oef.id !== "weekdictee" && !heeftVastePlafonds) {
         html += `
           <div class="zb-oef-rij">
             <label>Aantal woorden:</label>
             <input type="number" class="zb-oef-aantal" data-oef="${oef.id}" 
                    min="3" max="20" value="${state.aantal || oef.defaultAantal}">
           </div>`;
+      } else if (heeftVastePlafonds && oef.id !== "weekdictee") {
+        // Korte info-regel voor de leerkracht zodat zij weet dat het
+        // aantal automatisch geregeld wordt.
+        html += `
+          <div class="zb-oef-rij zb-oef-info">
+            <small>Aantal woorden: automatisch (verwijder met ✕, voeg toe met ➕ op het werkblad).</small>
+          </div>`;
       }
       
-      html += `
-        <div class="zb-oef-rij">
-          <label>Schrijflijn-hoogte:</label>
-          <div class="zb-hoogte-knoppen" data-oef="${oef.id}">
-            <button class="zb-hoogte-btn ${state.lijnhoogte === 'klein' ? 'actief' : ''}" 
-                    data-hoogte="klein" type="button">Klein</button>
-            <button class="zb-hoogte-btn ${(state.lijnhoogte || 'middel') === 'middel' ? 'actief' : ''}" 
-                    data-hoogte="middel" type="button">Middel</button>
-          </div>
-        </div>`;
+      // Schrijflijn-hoogte zit nu globaal in sectie 4, niet meer per OV.
       
       html += `</div></details>`;
     }
@@ -614,17 +617,8 @@ window.SpellingZijbalk = (function() {
     });
     
     document.querySelector("#oefenvorm-selector")?.addEventListener("click", (e) => {
-      if (e.target.matches(".zb-hoogte-btn")) {
-        const oefId = e.target.closest(".zb-hoogte-knoppen").dataset.oef;
-        const hoogte = e.target.dataset.hoogte;
-        const state = _getOrCreateState(oefId);
-        if (state) {
-          state.lijnhoogte = hoogte;
-          bewaarState();
-          e.target.parentElement.querySelectorAll(".zb-hoogte-btn").forEach(b => b.classList.remove("actief"));
-          e.target.classList.add("actief");
-        }
-      }
+      // Geen per-OV hoogte-handler meer — globale hoogte zit in sectie 4
+      // en wordt door app.js bedraad.
     });
   }
 
