@@ -569,29 +569,53 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schar", lidwoord: "de", afbeelding: false }
     ]
   },
-  "ch-cht-woorden": {
-    naam: "ch / cht-woorden",
-    groep: "ch-cht-klank",
+  "ch-woorden": {
+    naam: "ch-woorden",
+    groep: "ch-cht-gt",
     hoofdgroep: "onthoudwoord",
     woorden: [
       { tekst: "ach", lidwoord: null, afbeelding: false },
       { tekst: "lach", lidwoord: "de", afbeelding: false },
       { tekst: "pech", lidwoord: "de", afbeelding: false },
       { tekst: "zich", lidwoord: null, afbeelding: false },
-      { tekst: "toch", lidwoord: null, afbeelding: false },
+      { tekst: "toch", lidwoord: null, afbeelding: false }
+    ]
+  },
+  "cht-woorden": {
+    naam: "cht-woorden",
+    groep: "ch-cht-gt",
+    hoofdgroep: "onthoudwoord",
+    woorden: [
       { tekst: "acht", lidwoord: null, afbeelding: false },
       { tekst: "nacht", lidwoord: "de", afbeelding: false },
       { tekst: "licht", lidwoord: "het", afbeelding: false },
-      { tekst: "lacht", lidwoord: null, afbeelding: false },
-      { tekst: "vecht", lidwoord: null, afbeelding: false },
+      { tekst: "hij lacht", lidwoord: null, afbeelding: false },
+      { tekst: "hij vecht", lidwoord: null, afbeelding: false },
       { tekst: "recht", lidwoord: null, afbeelding: false },
-      { tekst: "zucht", lidwoord: "de", afbeelding: false },
+      { tekst: "hij zucht", lidwoord: null, afbeelding: false },
       { tekst: "vlucht", lidwoord: "de", afbeelding: false },
-      { tekst: "wacht", lidwoord: null, afbeelding: false },
-      { tekst: "dacht", lidwoord: null, afbeelding: false },
+      { tekst: "hij wacht", lidwoord: null, afbeelding: false },
+      { tekst: "hij dacht", lidwoord: null, afbeelding: false },
       { tekst: "dicht", lidwoord: null, afbeelding: false },
       { tekst: "echt", lidwoord: null, afbeelding: false },
       { tekst: "lucht", lidwoord: "de", afbeelding: false }
+    ]
+  },
+  "gt-woorden": {
+    naam: "gt-woorden",
+    groep: "ch-cht-gt",
+    hoofdgroep: "onthoudwoord",
+    woorden: [
+      { tekst: "hij zegt", lidwoord: null, afbeelding: false },
+      { tekst: "hij vraagt", lidwoord: null, afbeelding: false },
+      { tekst: "hij legt", lidwoord: null, afbeelding: false },
+      { tekst: "hij jaagt", lidwoord: null, afbeelding: false },
+      { tekst: "hij vliegt", lidwoord: null, afbeelding: false },
+      { tekst: "hij veegt", lidwoord: null, afbeelding: false },
+      { tekst: "hij liegt", lidwoord: null, afbeelding: false },
+      { tekst: "hij klaagt", lidwoord: null, afbeelding: false },
+      { tekst: "hij buigt", lidwoord: null, afbeelding: false },
+      { tekst: "hij ligt", lidwoord: null, afbeelding: false }
     ]
   },
   // ===== VERLENGINGSREGEL-WOORDEN =====
@@ -617,7 +641,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "baard", lidwoord: "de", verlengd: "baarden", afbeelding: false },
       { tekst: "poort", lidwoord: "de", verlengd: "poorten", afbeelding: false },
       { tekst: "taart", lidwoord: "de", verlengd: "taarten", afbeelding: false },
-      { tekst: "paard", lidwoord: null, verlengd: "paarden", afbeelding: false }
+      { tekst: "paard", lidwoord: null, verlengd: "paarden", afbeelding: false },
+      { tekst: "ik heb", lidwoord: null, verlengd: "wij hebben", afbeelding: false },
+      { tekst: "trap", lidwoord: "de", verlengd: "trappen", afbeelding: false },
+      { tekst: "step", lidwoord: "de", verlengd: "steppen", afbeelding: false },
+      { tekst: "klap", lidwoord: "de", verlengd: "klappen", afbeelding: false },
+      { tekst: "pop", lidwoord: "de", verlengd: "poppen", afbeelding: false },
+      { tekst: "kip", lidwoord: "de", verlengd: "kippen", afbeelding: false }
     ]
   },
   // ===== DOFFE KLANK OP HET EINDE =====
