@@ -142,11 +142,19 @@ window.SpellingBundel = {
     // Globale lijntype uit zijbalk-knop
     const lijntypeGlobaal = document.querySelector(".lijn-knop.actief")?.dataset.lijn || "vier";
     
+    // Bepaal initieel aantal woorden. Als de module een _maxPerNiveau-object
+    // heeft (bv. OV10), gebruik dan dat voor dit specifieke niveau —
+    // zo start het werkblad altijd op zijn comfort-max. Anders val terug
+    // op de zijbalk-keuze (oef.aantal).
+    const moduleVoorMax = window.SpellingModules?.[oef.id];
+    const maxVoorNiveau = moduleVoorMax?._maxPerNiveau?.[niveau];
+    const initieelAantal = (typeof maxVoorNiveau === "number") ? maxVoorNiveau : oef.aantal;
+    
     // Per-oefenvorm sub-object dat module verwacht (oef01, ov06 etc)
     const subOpties = {
       niveaus: [niveau],
-      aantalWoorden: oef.aantal,
-      aantalZinnen: oef.aantal,        // ov06 gebruikt zinnen
+      aantalWoorden: initieelAantal,
+      aantalZinnen: initieelAantal,    // ov06 gebruikt zinnen
       lijnhoogte: oef.lijnhoogte || "middel",
       lijntype: oef.lijntype || "type3",
       ondertitel: ""
@@ -314,9 +322,29 @@ window.SpellingBundel = {
       const isOV08Uitbreiding = (item.categorie === "ov08" && item.niveau === "uitbreiding");
       const supportsPlus1 = ["ov01", "ov02", "ov03", "ov05", "ov06", "ov07", "ov08", "ov09", "ov10"].includes(item.categorie)
                             && !isOV07Uitbreiding && !isOV08Uitbreiding;
+      
+      // Check of het max voor dit niveau al bereikt is. De module kan
+      // een _maxPerNiveau-object hebben dat per niveau het comfort-max
+      // op 1 A4 vastlegt. Als dat ontbreekt: oneindig (oude gedrag).
+      let maxBereikt = false;
+      let maxVoorNiveau = null;
+      if (supportsPlus1) {
+        const module = window.SpellingModules?.[item.categorie];
+        const max = module?._maxPerNiveau?.[item.niveau];
+        if (typeof max === "number") {
+          maxVoorNiveau = max;
+          const tellerKey = (item.categorie === "ov06") ? "aantalZinnen" : "aantalWoorden";
+          const huidig = item.opties?.[item.categorie]?.[tellerKey] || 0;
+          if (huidig >= max) maxBereikt = true;
+        }
+      }
+      
       const plus1Label = item.categorie === "ov06" ? "➕ 1 zin erbij" : "➕ 1 woord erbij";
+      const plus1Title = maxBereikt
+        ? `Maximum bereikt (${maxVoorNiveau} per blad) — verwijder eerst een woord met ✕`
+        : `Voeg 1 ${item.categorie === 'ov06' ? 'zin' : 'woord'} toe`;
       const plusKnop = supportsPlus1
-        ? `<button class="bundel-item-plus-knop" data-item-id="${item.id}" title="Voeg 1 ${item.categorie === 'ov06' ? 'zin' : 'woord'} toe">${plus1Label}</button>`
+        ? `<button class="bundel-item-plus-knop ${maxBereikt ? 'is-uitgegrijsd' : ''}" data-item-id="${item.id}" title="${plus1Title}" ${maxBereikt ? 'disabled' : ''}>${plus1Label}</button>`
         : "";
       html += `
         <div class="bundel-item-wrap" data-item-id="${item.id}">
@@ -384,7 +412,16 @@ window.SpellingBundel = {
       return;
     }
     
-    // Check of er nog woorden beschikbaar zijn in de woordenkiezer
+    // Check 1: max-per-niveau van de module respecteren (als gedefinieerd)
+    const module = window.SpellingModules?.[cat];
+    const maxVoorNiveau = module?._maxPerNiveau?.[item.niveau];
+    if (typeof maxVoorNiveau === "number" && modOpties[tellerKey] >= maxVoorNiveau) {
+      // Hoort niet voor te komen want de knop is disabled, maar
+      // defensief checken. Geen alert — gewoon stilletjes negeren.
+      return;
+    }
+    
+    // Check 2: zijn er nog woorden beschikbaar in de woordenkiezer?
     const beschikbaar = (window._weekdictee_gekozenWoorden || []).length;
     if (modOpties[tellerKey] >= beschikbaar) {
       const eenheid = (cat === "ov06") ? "zinnen (= woorden)" : "woorden";
@@ -406,7 +443,6 @@ window.SpellingBundel = {
       }
     }
     
-    const module = window.SpellingModules?.[cat];
     if (!module) return;
     item.html = this._renderItemHTML(item, false);
     
@@ -572,7 +608,7 @@ window.SpellingBundel = {
           pagebreak: {
             mode: "css",
             before: ".pagina-break-voor",
-            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid"]
+            avoid: [".werkblad", ".ov01-blad", ".ov07-blad", ".ov08-blad", ".ov09-blad", ".ov10-blad", ".weekdictee-blad", ".ov01-header", ".ov01-stappen", ".ov01-rooster-rij", ".ov01-zin-blok", ".dag-blok", ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container", ".ov07-verhaal-origineel", ".ov08-rij", ".ov08-cel", ".ov08-uitbreiding-container", ".ov08-verhaal-origineel", ".ov09-basis-rij", ".ov09-kern-rij", ".ov09-verdieping-cel", ".ov09-uitbreiding-rij", ".ov10-header", ".ov10-noteer-rij", ".ov10-wz-rij", ".ov10-kern-rij", ".ov10-ub-rij", ".ov10-afb-grid", ".ov10-vb-grid", ".ov02-rij"]
           }
         };
 
