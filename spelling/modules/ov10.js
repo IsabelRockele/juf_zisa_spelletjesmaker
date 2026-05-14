@@ -21,6 +21,17 @@ window.SpellingModules.ov10 = {
   naam: "Samenstellingen",
   graad: 1,
 
+  /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+     Wordt gebruikt door:
+     - render-functies (klemmen `aantal` op deze max)
+     - bundel.js +1-knop (mag alleen actief zijn als < max op het blad staat) */
+  _maxPerNiveau: {
+    basis: 8,
+    kern: 8,
+    verdieping: 12,
+    uitbreiding: 7
+  },
+
   /* ---------- INSTELLINGEN UI (zijbalk) ---------- */
   renderInstellingen: function() {
     return `
@@ -168,7 +179,6 @@ window.SpellingModules.ov10 = {
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov10 || {};
     const niveaus = o.niveaus && o.niveaus.length > 0 ? o.niveaus : ["basis"];
-    const aantalWoorden = o.aantalWoorden || 6;
     const lijntype    = o.lijntype || "type3";
     const lijnhoogte  = o.lijnhoogte || "middel";
     const ondertitel  = o.ondertitel || "";
@@ -199,9 +209,18 @@ window.SpellingModules.ov10 = {
     // Verrijk met delen/delenEmoji/beschrijving uit de bibliotheek
     const verrijkt = this._verrijkWoorden(samen);
 
-    // Voor elk gekozen niveau: één werkblad
+    // Voor elk gekozen niveau: één werkblad. Het aantal woorden is een
+    // vaste waarde per niveau (zie _maxPerNiveau). De leerkracht hoeft
+    // niets te kiezen — het werkblad zit altijd op zijn comfort-maximum.
+    // Via ✕ kan ze woorden verwijderen, via +1 weer aanvullen tot max.
+    // Als de teller (opties.ov10.aantalWoorden) lager staat door eerder
+    // verwijderen, respecteren we die — anders gebruiken we het max.
     return niveaus.map(niveau => {
-      const woorden = this._kiesWoorden(verrijkt, aantalWoorden);
+      const maxVoorNiveau = this._maxPerNiveau[niveau] || 6;
+      const aantalVoorDitNiveau = (typeof o.aantalWoorden === "number" && o.aantalWoorden > 0 && o.aantalWoorden <= maxVoorNiveau)
+        ? o.aantalWoorden
+        : maxVoorNiveau;
+      const woorden = this._kiesWoorden(verrijkt, aantalVoorDitNiveau);
       return this._renderEenBlad(niveau, woorden, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
   },
@@ -293,7 +312,9 @@ window.SpellingModules.ov10 = {
      ========================================================== */
   _inhoudBasis: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
-    const aantal = Math.min(woorden.length, 6);
+    // Plafond = aantal woorden in pool, maar niet meer dan het max
+    // dat comfortabel op 1 A4 past (zie _maxPerNiveau bovenaan).
+    const aantal = Math.min(woorden.length, this._maxPerNiveau.basis);
     const lijstWoorden = woorden.slice(0, aantal);
     const ROOSTER_BREED = 12;
 
@@ -354,7 +375,7 @@ window.SpellingModules.ov10 = {
      ========================================================== */
   _inhoudKern: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
-    const aantal = Math.min(woorden.length, 6);
+    const aantal = Math.min(woorden.length, this._maxPerNiveau.kern);
 
     let rijenHTML = "";
     for (let i = 0; i < aantal; i++) {
@@ -390,7 +411,7 @@ window.SpellingModules.ov10 = {
      ========================================================== */
   _inhoudVerdieping: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
-    const aantal = Math.min(woorden.length, 10);
+    const aantal = Math.min(woorden.length, this._maxPerNiveau.verdieping);
     const set = woorden.slice(0, aantal);
     const helft = Math.ceil(aantal / 2);
     const groep1 = set.slice(0, helft);          // mini-oef 1
@@ -454,7 +475,7 @@ window.SpellingModules.ov10 = {
      ========================================================== */
   _inhoudUitbreiding: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
-    const aantal = Math.min(woorden.length, 6);
+    const aantal = Math.min(woorden.length, this._maxPerNiveau.uitbreiding);
 
     let rijenHTML = "";
     for (let i = 0; i < aantal; i++) {
