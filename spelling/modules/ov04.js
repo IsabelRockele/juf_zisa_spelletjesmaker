@@ -62,7 +62,8 @@ window.SpellingModules.ov04 = {
   
   _leesKleuren: function() {
     try {
-      const raw = localStorage.getItem(this._LS_KLEUREN);
+      const storage = window.SpellingModusStorage || localStorage;
+      const raw = storage.getItem(this._LS_KLEUREN);
       if (!raw) return { ...this._DEFAULT_KLEUREN };
       const obj = JSON.parse(raw);
       return {
@@ -80,10 +81,15 @@ window.SpellingModules.ov04 = {
     try {
       const huidig = this._leesKleuren();
       const nieuw = { ...huidig, ...kleuren };
-      localStorage.setItem(this._LS_KLEUREN, JSON.stringify(nieuw));
+      const storage = window.SpellingModusStorage || localStorage;
+      storage.setItem(this._LS_KLEUREN, JSON.stringify(nieuw));
       // Trigger preview-vernieuwing als die er is
       if (window.SpellingPreview && typeof window.SpellingPreview.ververs === "function") {
         window.SpellingPreview.ververs();
+      }
+      // Ook herhalingsbundel-preview verversen
+      if (window.SpellingHerhalingsbundel?.renderPreview) {
+        window.SpellingHerhalingsbundel.renderPreview();
       }
     } catch (e) { /* localStorage niet beschikbaar */ }
   },
