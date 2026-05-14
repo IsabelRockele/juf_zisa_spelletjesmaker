@@ -183,38 +183,39 @@
         });
       });
 
-      // Aantal kolommen knoppen — verberg/toon kolom 3
-      container.querySelectorAll("#ov04-aantal-kolommen button").forEach(btn => {
-        btn.addEventListener("click", () => {
-          maakActief("#ov04-aantal-kolommen button", btn);
-          const aantal = parseInt(btn.dataset.aantal, 10);
-          const kolom3 = container.querySelector('.ov04-kolom-rij[data-kolom="3"]');
-          if (kolom3) {
-            kolom3.style.display = aantal === 3 ? "" : "none";
+      // Kleurpickers voor korte / lange / andere klank
+      const kleurMap = {
+        "ov04-kleur-kort": "kort",
+        "ov04-kleur-lang": "lang",
+        "ov04-kleur-ander": "ander"
+      };
+      Object.entries(kleurMap).forEach(([id, sleutel]) => {
+        const input = container.querySelector("#" + id);
+        if (!input) return;
+        input.addEventListener("input", () => {
+          if (window.SpellingModules?.ov04?.setKleuren) {
+            window.SpellingModules.ov04.setKleuren({ [sleutel]: input.value });
           }
         });
       });
-      // Default: 3 kolommen, dus kolom 3 zichtbaar (niets te doen)
-
-      // Klank-dropdown verandert → titel automatisch updaten
-      container.querySelectorAll("select.ov04-klank").forEach(select => {
-        // Stel default klank-keuze in op basis van standaard-titel
-        const defaultTitel = select.dataset.defaultTitel;
-        const kh = window.SpellingKlank;
-        if (kh) {
-          const defaultKlank = Object.keys(kh.STANDAARD_TITELS).find(k => kh.STANDAARD_TITELS[k] === defaultTitel);
-          if (defaultKlank) select.value = defaultKlank;
-        }
-
-        // Bij wijzigen: titel-veld updaten
-        select.addEventListener("change", () => {
-          const kolomNr = select.id.replace("ov04-klank-", "");
-          const titelVeld = container.querySelector(`#ov04-titel-${kolomNr}`);
-          if (titelVeld && window.SpellingKlank) {
-            titelVeld.value = window.SpellingKlank.STANDAARD_TITELS[select.value] || "";
-          }
+      
+      // Reset-knop voor kleuren
+      const resetKnop = container.querySelector("#ov04-kleur-reset");
+      if (resetKnop) {
+        resetKnop.addEventListener("click", () => {
+          const ov4 = window.SpellingModules?.ov04;
+          if (!ov4) return;
+          const def = ov4._DEFAULT_KLEUREN;
+          // Reset velden
+          const k = container.querySelector("#ov04-kleur-kort");
+          const l = container.querySelector("#ov04-kleur-lang");
+          const a = container.querySelector("#ov04-kleur-ander");
+          if (k) k.value = def.kort;
+          if (l) l.value = def.lang;
+          if (a) a.value = def.ander;
+          ov4.setKleuren({ ...def });
         });
-      });
+      }
 
       // Lijnhoogte
       container.querySelectorAll("#ov04-lijnhoogte button").forEach(btn => {
