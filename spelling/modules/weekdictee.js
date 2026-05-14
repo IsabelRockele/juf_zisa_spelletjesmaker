@@ -284,18 +284,32 @@ window.SpellingModules.weekdictee = {
     const lijnhoogte = opties.weekdictee?.lijnhoogte || "middel";
     const sl = window.SpellingSchrijflijnen;
 
+    // Bereken alle dictee-vormen die deze dag al voorkomen als WOORD.
+    // Die mogen niet ook in de oefenzin verschijnen — zo komt het woord
+    // niet dubbel voor en blijft de zin "verrassend" voor de leerling.
+    const vermijdInZin = woordenVoorDag
+      .map(w => this._dicteeVorm(w))
+      .filter(v => v && v.length > 0);
+
     // Woord-lijntjes (links) — schrijflijn-canvas in plaats van CSS-onderlijn
     let woordLijntjes = "";
     for (let i = 0; i < aantalWoorden; i++) {
       const w = woordenVoorDag[i];
       const tonen = w ? this._toonWoord(w) : "";
+      const woordTekst = w ? (typeof w === "string" ? w : w.tekst) : "";
       const inhoud = metAntwoorden && tonen
-        ? `<span class="antwoord">${tonen}</span>`
+        ? `<span class="antwoord" data-bewerk-id="wd-w-${dag.id}-${i}">${tonen}</span>`
         : "";
       const lijn = sl
         ? `<div class="wd-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 220)}</div>`
         : `<div class="dag-woord-lijn-fallback"></div>`;
-      woordLijntjes += `<div class="dag-woord-rij">${inhoud}${lijn}</div>`;
+      // data-woord-tekst gebruikt de GRONDVORM (woord.tekst) want dat is
+      // waarop _weekdictee_gekozenWoorden gefilterd wordt bij verwijderen.
+      // data-dictee-vorm bewaart de getoonde vorm voor UI (tooltip etc).
+      const dicteeVorm = this._dicteeVorm(w);
+      const dataAttr = woordTekst ? ` data-woord-tekst="${woordTekst.replace(/"/g, '&quot;')}"` : "";
+      const dataVorm = dicteeVorm ? ` data-dictee-vorm="${dicteeVorm.replace(/"/g, '&quot;')}"` : "";
+      woordLijntjes += `<div class="dag-woord-rij"${dataAttr}${dataVorm}>${inhoud}${lijn}</div>`;
     }
 
     // Verbeter-rooster (2 kolommen × n rijen, elk met canvas-schrijflijn)
@@ -312,17 +326,24 @@ window.SpellingModules.weekdictee = {
       verbeterRooster += rij;
     }
 
-    // Zinnen onderaan dag — schrijflijn-canvas in plaats van blauw zinvak
+    // Zinnen onderaan dag — schrijflijn-canvas in plaats van blauw zinvak.
+    // De zin gebruikt een woord uit woordenVoorZin (= de "extra" gekozen
+    // woorden die NIET in de woordkolom staan). Pedagogisch ideaal: zo
+    // krijgt de leerling een EXTRA stukjeswoord in een zin dat hij niet
+    // al apart heeft geschreven. We geven vermijdInZin mee zodat de
+    // zin geen ander dictee-woord van die dag bevat.
     let zinSectie = "";
     for (let i = 0; i < aantalZinnen; i++) {
       const zinWoord = woordenVoorZin[i] || woordenVoorDag[0];
+      const zinWoordTekst = zinWoord ? (typeof zinWoord === "string" ? zinWoord : zinWoord.tekst) : "";
       const zinInhoud = metAntwoorden && zinWoord
-        ? `<span class="antwoord zin-antwoord">${this._maakZin(zinWoord)}</span>`
+        ? `<span class="antwoord zin-antwoord" data-bewerk-id="wd-z-${dag.id}-${i}">${this._maakZin(zinWoord, vermijdInZin)}</span>`
         : "";
       const zinLijn = sl
         ? `<div class="wd-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 700)}</div>`
         : `<div class="zinvak zinvak-${zinStijl}-fallback"></div>`;
-      zinSectie += `<div class="wd-zin-rij">${zinInhoud}${zinLijn}</div>`;
+      const dataAttr = zinWoordTekst ? ` data-woord-tekst="${zinWoordTekst.replace(/"/g, '&quot;')}"` : "";
+      zinSectie += `<div class="wd-zin-rij"${dataAttr}>${zinInhoud}${zinLijn}</div>`;
     }
 
     return `
@@ -349,68 +370,186 @@ window.SpellingModules.weekdictee = {
     return this._kiesWoorden(verschoven, aantal);
   },
 
-  /* Geef tekst voor weergave (met of zonder lidwoord) */
+  /* Geef de tekst voor weergave in het DICTEE.
+     
+     Niet altijd is woord.tekst de juiste vorm: bij stukjeswoorden,
+     meervouden en verkleinwoorden staat de pedagogisch correcte vorm
+     in een ander veld (meervoud, verklein). De keuze hangt af van de
+     categorie-groep — die we ophalen uit de woordenbibliotheek.
+     
+     Voorbeelden:
+     - { tekst: "kat", meervoud: "katten" } in cat met groep "verdubbel-verenkel"
+       → toont "de katten" (regel speelt bij verdubbeling)
+     - { tekst: "boek", verklein: "boekje" } in cat met groep "verkleinwoorden"
+       → toont "het boekje"
+     - { tekst: "kat", meervoud: "katten" } in cat met groep "korte-klanken"
+       → toont "de kat" (klankzuiver dictee, regel speelt niet)
+     
+     Het woord-object zelf onthoudt zijn categorie niet — die wordt
+     meegegeven via de "categorie"-property die de woordenkiezer toevoegt
+     bij selectie. Als die ontbreekt valt het terug op woord.tekst. */
   _toonWoord: function(w) {
+    if (!w) return "";
     if (typeof w === "string") return w; // legacy
-    if (w.lidwoord) return `${w.lidwoord} ${w.tekst}`;
+
+    // Bepaal de te tonen vorm op basis van groep van de categorie waar
+    // dit woord onder is aangevinkt.
+    const vorm = this._dicteeVorm(w);
+    if (w.lidwoord) return `${w.lidwoord} ${vorm}`;
+    return vorm;
+  },
+
+  /* Geef alleen de woordtekst (zonder lidwoord) in zijn dictee-vorm.
+     
+     Belangrijk: de woordenkiezer kopieert alleen { tekst, lidwoord,
+     categorie, leerjaar } naar zijn gekozen-lijst — niet de meervoud/
+     verklein-velden. Daarom zoeken we die hier op uit de bibliotheek
+     via categorie + tekst. */
+  _dicteeVorm: function(w) {
+    if (!w) return "";
+    if (typeof w === "string") return w;
+
+    const groep = this._groepVoor(w);
+
+    // Voor stukjeswoord-categorieën (verdubbel-verenkel) en meervouden:
+    // toon de meervoud-vorm als die er is.
+    if (groep === "verdubbel-verenkel" || groep === "meervouden") {
+      const mv = w.meervoud || this._origineelVeld(w, "meervoud");
+      if (mv) return mv;
+    }
+    // Voor verkleinwoord-categorieën: toon de verklein-vorm.
+    if (groep === "verkleinwoorden") {
+      const vk = w.verklein || this._origineelVeld(w, "verklein");
+      if (vk) return vk;
+    }
+    // Alle andere groepen, of als het veld ontbreekt: de grondvorm.
+    // WW-infinitieven in stukjes-cats hebben hun infinitief in tekst — OK.
     return w.tekst;
   },
 
-  /* Maak een eenvoudige zin met een woord erin.
-     Gebruikt het juiste lidwoord uit het woord-object zodat we niet
-     "de het hek" krijgen bij een 'het'-woord.
-     Veel sjablonen voor variatie — geschikt voor lj 1-3. */
-  _maakZin: function(woordObj) {
-    const woord = (typeof woordObj === "string") ? woordObj : woordObj.tekst;
+  /* Zoek een veld op het ORIGINELE woord-object in de woordenbibliotheek.
+     Nodig omdat de woordenkiezer alleen tekst+lidwoord+categorie+leerjaar
+     overneemt; meervoud/verklein/ik staan alleen in de bibliotheek-bron. */
+  _origineelVeld: function(w, veldnaam) {
+    const wb = window.SpellingWoordenbibliotheek;
+    if (!wb || !w.categorie) return null;
+    const data = wb[`graad${w.leerjaar || 1}`];
+    if (!data) return null;
+    const cat = data[w.categorie];
+    if (!cat || !Array.isArray(cat.woorden)) return null;
+    const origineel = cat.woorden.find(o => o.tekst === w.tekst);
+    return origineel ? origineel[veldnaam] : null;
+  },
+
+  /* Helper: zoek de groep op van de categorie waar dit woord onder valt. */
+  _groepVoor: function(w) {
+    if (!w || !w.categorie) return null;
+    const wb = window.SpellingWoordenbibliotheek;
+    if (!wb) return null;
+    const graad = w.leerjaar || 1;
+    const data = wb[`graad${graad}`];
+    if (!data) return null;
+    const cat = data[w.categorie];
+    return cat ? cat.groep : null;
+  },
+
+  /* Maak een veilige zin met een woord erin.
+     
+     Strategie (in volgorde):
+     1. Probeer de handmatig-curated dictee-zinnen-bib
+        (window.SpellingDicteeZinnen). Dat zijn zinnen die jij zelf hebt
+        geschreven met de juiste lj-1-veilige woordenschat per (groep,
+        grondvorm)-combinatie. Pedagogisch sterkst.
+     2. Als die ontbreekt (null in de bib): val terug op auto-sjablonen
+        met enkel functiewoorden. Saaier maar altijd gemaakt.
+     
+     De Klinkerdief-bib (OV09) gebruiken we NIET — die zinnen bevatten
+     woorden die in lj 1 niet gegarandeerd gezien zijn.
+     
+     Argument `vermijdWoorden`: array van dictee-vormen die NIET in de zin
+     mogen voorkomen (de andere dictee-woorden van die dag). */
+  _maakZin: function(woordObj, vermijdWoorden) {
+    if (!woordObj) return "";
+    const vermijd = (vermijdWoorden || []).map(w => String(w).toLowerCase());
+    const dicteeVorm = this._dicteeVorm(woordObj);
+
+    // ---- Strategie 1: handmatige dictee-zinnen-bib ----
+    const bib = window.SpellingDicteeZinnen;
+    if (bib && typeof bib.zoekVoor === "function" && typeof woordObj === "object") {
+      const groep = this._groepVoor(woordObj);
+      if (groep) {
+        const zin = bib.zoekVoor(woordObj.tekst, groep, woordObj.leerjaar || 1);
+        if (zin) {
+          // Check ook hier de vermijd-filter — als de leerkracht een zin
+          // schreef die toevallig een ander dictee-woord van die dag bevat,
+          // vallen we terug op auto-sjabloon zodat het woord niet dubbel komt.
+          const lz = zin.toLowerCase();
+          const botst = vermijd.some(vw => vw && lz.includes(vw));
+          if (!botst) return zin;
+        }
+      }
+    }
+
+    // ---- Strategie 2: veilige auto-sjablonen met functiewoorden ----
+    const woord = dicteeVorm;
     const lidwoord = (typeof woordObj === "object" && woordObj.lidwoord) ? woordObj.lidwoord : "de";
     const Lidwoord = lidwoord.charAt(0).toUpperCase() + lidwoord.slice(1);
 
-    const sjablonen = [
-      // Zien & vinden
-      `Ik zie ${lidwoord} ${woord}.`,
-      `Ik vind ${lidwoord} ${woord} mooi.`,
-      `Mama ziet ${lidwoord} ${woord}.`,
-      `Papa kijkt naar ${lidwoord} ${woord}.`,
-      `Wij kijken naar ${lidwoord} ${woord}.`,
-      `Tom kijkt naar ${lidwoord} ${woord}.`,
-      
-      // Hebben & krijgen
-      `Hij heeft een ${woord}.`,
-      `Zij heeft een ${woord}.`,
-      `Ik heb een nieuwe ${woord}.`,
-      `Ik krijg een ${woord}.`,
-      `Jij krijgt een ${woord}.`,
-      `Sara heeft een ${woord}.`,
-      
-      // Beschrijvend met "is"
-      `${Lidwoord} ${woord} is mooi.`,
-      `${Lidwoord} ${woord} is groot.`,
-      `${Lidwoord} ${woord} is klein.`,
-      `${Lidwoord} ${woord} is rood.`,
-      `${Lidwoord} ${woord} is leuk.`,
-      `${Lidwoord} ${woord} is nieuw.`,
-      
-      // Bezittelijk
-      `Mijn ${woord} ligt hier.`,
-      `Mijn ${woord} is mooi.`,
-      `Jouw ${woord} ligt daar.`,
-      `Onze ${woord} is groot.`,
-      
-      // Doe-zinnen
-      `Lien speelt met ${lidwoord} ${woord}.`,
-      `Ik wil ${lidwoord} ${woord}.`,
-      `Sam pakt ${lidwoord} ${woord}.`,
-      `Pak ${lidwoord} ${woord} eens vast.`,
-      
-      // Locatie
-      `${Lidwoord} ${woord} staat in de tuin.`,
-      `${Lidwoord} ${woord} ligt op tafel.`,
-      `Daar is ${lidwoord} ${woord}.`,
-      `Hier ligt ${lidwoord} ${woord}.`
-    ];
+    // Detecteer of het om een MEERVOUD gaat. Verkleinwoorden zijn ook
+    // afgeleide vormen maar grammaticaal enkelvoud — die mogen NIET als
+    // meervoud behandeld worden (anders krijgen we "De boekje zijn hier").
+    const groep = this._groepVoor(woordObj);
+    const grondvorm = (typeof woordObj === "object") ? woordObj.tekst : woord;
+    const isMeervoud = lidwoord
+      && grondvorm && grondvorm !== woord
+      && (groep === "verdubbel-verenkel" || groep === "meervouden");
 
-    const idx = Math.floor(this._random() * sjablonen.length);
-    return sjablonen[idx];
+    let sjablonen;
+    if (isMeervoud) {
+      sjablonen = [
+        `Ik zie de ${woord}.`,
+        `Ik heb de ${woord}.`,
+        `Hier zijn de ${woord}.`,
+        `Daar zijn de ${woord}.`,
+        `De ${woord} zijn hier.`,
+        `De ${woord} zijn daar.`,
+        `Ja, ik zie de ${woord}.`,
+        `Ik heb veel ${woord}.`
+      ];
+    } else if (!woordObj.lidwoord) {
+      // WW-infinitief
+      sjablonen = [
+        `Ik kan ${woord}.`,
+        `Wij ${woord}.`,
+        `Zij ${woord}.`,
+        `Hier kan ik ${woord}.`,
+        `Daar kan ik ${woord}.`
+      ];
+    } else {
+      sjablonen = [
+        `Ik zie ${lidwoord} ${woord}.`,
+        `Ik heb ${lidwoord} ${woord}.`,
+        `Hier is ${lidwoord} ${woord}.`,
+        `Daar is ${lidwoord} ${woord}.`,
+        `${Lidwoord} ${woord} is hier.`,
+        `${Lidwoord} ${woord} is daar.`,
+        `Ja, ik zie ${lidwoord} ${woord}.`,
+        `Een ${woord}.`
+      ];
+    }
+
+    // Filter sjablonen die een te vermijden woord bevatten
+    const veiligeSjablonen = sjablonen.filter(z => {
+      const lz = z.toLowerCase();
+      return !vermijd.some(vw => vw && lz.includes(vw));
+    });
+    let fallback;
+    if (isMeervoud) fallback = `Ik zie ${woord}.`;
+    else if (!woordObj.lidwoord) fallback = `Ik kan ${woord}.`;
+    else fallback = `Ik zie ${lidwoord} ${woord}.`;
+    const pool = veiligeSjablonen.length > 0 ? veiligeSjablonen : [fallback];
+    const idx = Math.floor(this._random() * pool.length);
+    return pool[idx];
   },
 
   /* Pseudo-random met seed (zelfde aanpak als klankzuiver-module) */
