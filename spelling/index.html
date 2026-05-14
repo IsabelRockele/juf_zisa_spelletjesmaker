@@ -44,7 +44,7 @@
             Eén bundel met meerdere oefenvormen, op maat van een themapakket.
             Ideaal voor toetsweken en differentiatie.
           </div>
-          <div class="modus-kaart-cta modus-kaart-cta-binnenkort">Binnenkort →</div>
+          <div class="modus-kaart-cta">Aan de slag →</div>
         </button>
 
         <button class="modus-kaart modus-kaart-weekdictee" data-modus="weekdictee" type="button">
@@ -235,28 +235,73 @@
   <!-- ============================================================
        MODUS: HERHALINGSBUNDEL — placeholder (etappe 2)
        ============================================================ -->
-  <section id="modus-herhaling" class="modus-placeholder" style="display:none">
-    <div class="modus-placeholder-binnen">
-      <div class="modus-placeholder-icoon">📚</div>
-      <h2>Herhalingsbundel — binnenkort beschikbaar</h2>
-      <p class="modus-placeholder-lead">
-        Hier komt straks een bundel met meerdere oefenvormen na elkaar,
-        op maat van een thema of toetsperiode. Eén PDF, alles in één keer.
-      </p>
-      <ul class="modus-placeholder-checklist">
-        <li>✓ Meerdere oefenvormen per kind in één bundel</li>
-        <li>✓ Differentiatie per niveau in dezelfde set</li>
-        <li>✓ Slimme volgorde: van herkennen naar zelfstandig schrijven</li>
-      </ul>
-      <p class="modus-placeholder-voet">
-        Tot dan kan je losse werkbladen samenstellen via 
-        <strong>📋 Werkbladen per categorie</strong>.
-      </p>
-      <button class="primair modus-placeholder-knop" type="button" 
-              onclick="window.SpellingModus && window.SpellingModus.terugNaarStartscherm()">
-        ← Terug naar startscherm
-      </button>
-    </div>
+  <!-- ============================================================
+       MODUS: HERHALINGSBUNDEL — zijbalk + A4-pagina-preview met navigatie
+       ============================================================ -->
+  <section id="modus-herhaling" class="hb-layout" style="display:none">
+    
+    <!-- LINKS: zijbalk (gedeelde structuur met werkblad-modus) -->
+    <aside class="sidebar hb-sidebar" id="hb-sidebar">
+      <!-- De zijbalk-secties worden hier dynamisch ingeladen door zijbalk.js
+           (graad-tabs, categorieën, oefenvormen, schrijflijnen).
+           
+           Onderaan komt een aparte sectie met "Voeg toe aan bundel"-acties. -->
+      
+      <!-- PLACEHOLDER: wordt gevuld door app.js init -->
+      <div id="hb-sidebar-content"></div>
+      
+      <!-- Onderaan: bundel-acties -->
+      <div class="hb-bundel-acties">
+        <button id="hb-voeg-toe" class="primair primair-groot" type="button">
+          ➕ Voeg toe aan bundel
+        </button>
+        <button id="hb-wis" class="secundair" type="button">
+          🗑 Wis hele bundel
+        </button>
+        <button class="secundair" type="button" 
+                onclick="window.SpellingModus && window.SpellingModus.terugNaarStartscherm()">
+          ← Terug naar startscherm
+        </button>
+      </div>
+    </aside>
+    
+    <!-- RECHTS: A4-preview met paginanavigatie -->
+    <main class="hb-preview">
+      
+      <!-- Topbalk: titel + navigatie -->
+      <div class="hb-topbalk">
+        <div class="hb-topbalk-titel">
+          <span>📚</span>
+          <input type="text" id="hb-boekje-titel" 
+                 class="hb-titel-input"
+                 value="Mijn herhalingsbundel" 
+                 placeholder="Geef je boekje een naam">
+        </div>
+        <div class="hb-paginanav">
+          <button id="hb-vorig" class="hb-navknop" type="button" disabled>◀</button>
+          <span id="hb-paginanr" class="hb-paginanr-label">—</span>
+          <button id="hb-volgend" class="hb-navknop" type="button" disabled>▶</button>
+        </div>
+        <div class="hb-acties">
+          <button id="hb-bewerken-toggle" class="secundair" type="button" title="Schakel bewerken in om woorden te verwijderen">
+            ✏️ Bewerken: uit
+          </button>
+          <button id="hb-download" class="primair" type="button" title="Download bundel als PDF">
+            📥 Bundel
+          </button>
+          <button id="hb-download-oplossingen" class="secundair" type="button" title="Download met oplossingen">
+            📥 Met oplossingen
+          </button>
+        </div>
+      </div>
+      
+      <!-- Pagina-container: toont één A4 op echte grootte -->
+      <div class="hb-pages-wrapper">
+        <div id="hb-pages">
+          <!-- Pagina-HTML wordt hier ingeladen door herhalingsbundel.renderPreview() -->
+        </div>
+      </div>
+    </main>
   </section>
 
   <!-- ============================================================
@@ -457,6 +502,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <!-- Volgorde: eerst woordenbibliotheek + graad-bestanden, dan modules -->
+  <script src="modus-storage.js"></script>
   <script src="afbeeldingen.js"></script>
   <script src="afbeeldingen-helper.js"></script>
   <script src="schrijflijnen.js"></script>
@@ -486,6 +532,7 @@
   <script src="preview.js"></script>
   <script src="pdf-engine.js"></script>
   <script src="bundel.js"></script>
+  <script src="herhalingsbundel.js"></script>
   <script src="zijbalk.js"></script>
   <script src="app.js"></script>
   <script src="weekdictee-paneel.js"></script>
