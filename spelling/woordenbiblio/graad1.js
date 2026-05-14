@@ -11,17 +11,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "bal", lidwoord: "de", afbeelding: true },
       { tekst: "kat", lidwoord: "de", afbeelding: true },
-      { tekst: "tas", lidwoord: "de", afbeelding: false },
-      { tekst: "man", lidwoord: "de", afbeelding: false },
+      { tekst: "tas", lidwoord: "de", afbeelding: true },
+      { tekst: "man", lidwoord: "de", afbeelding: true },
       { tekst: "pan", lidwoord: "de", afbeelding: true },
-      { tekst: "dak", lidwoord: "het", afbeelding: false },
-      { tekst: "mat", lidwoord: "de", afbeelding: false },
-      { tekst: "kam", lidwoord: "de", afbeelding: false },
+      { tekst: "dak", lidwoord: "het", afbeelding: true },
+      { tekst: "mat", lidwoord: "de", afbeelding: true },
+      { tekst: "kam", lidwoord: "de", afbeelding: true},
       { tekst: "tak", lidwoord: "de", afbeelding: true },
       { tekst: "zak", lidwoord: "de", afbeelding: true },
-      { tekst: "rat", lidwoord: "de", afbeelding: false },
-      { tekst: "lat", lidwoord: "de", afbeelding: false },
-      { tekst: "kar", lidwoord: "de", afbeelding: false }
+      { tekst: "rat", lidwoord: "de", afbeelding: true },
+      { tekst: "lat", lidwoord: "de", afbeelding: true },
+      { tekst: "kar", lidwoord: "de", afbeelding: true}
     ]
   },
   "mkm-e": {
