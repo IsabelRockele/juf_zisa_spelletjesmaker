@@ -26,6 +26,18 @@
     graad: 1,
     oefenvormenPerNiveau: ["basis", "kern", "verdieping", "uitbreiding"],
 
+    /* Maximum aantal woorden per niveau dat comfortabel op 1 A4 past.
+       ⭐ basis = 6 (afbeelding + 2 keuzes naast elkaar + schrijflijn per rij)
+       ⭐⭐ kern = 9 (compactere rijen, afbeelding + schrijflijn)
+       ⭐⭐⭐ verdieping = 6 (2 kolommen, om beurten kolom leeg)
+       ⭐⭐⭐⭐ uitbreiding = 5 (vast 5 zinnen uit zinnenbib) */
+    _maxPerNiveau: {
+      basis: 6,
+      kern: 9,
+      verdieping: 6,
+      uitbreiding: 5
+    },
+
     /* Categorieën waaruit OV09 zijn woorden mag halen. */
     CAT_TOEGESTAAN: ["stukjes-verdubbelen", "stukjes-verenkelen", "stukjes-geen-regel"],
 
@@ -51,7 +63,17 @@
       const o = (opties && opties.ov09) || opties || {};
       const niveaus = (o.niveaus && o.niveaus.length > 0) ? o.niveaus : [o.niveau || (opties && opties.niveau) || "basis"];
       const niveau = niveaus[0];
-      const aantal = o.aantalWoorden || o.aantal || 8;
+      
+      // Aantal uit _maxPerNiveau. Respecteer lagere expliciete waarde
+      // (na ✕'en in bundel). Voor uitbreiding: dit wordt later sowieso
+      // geclampt door Math.min(5, woorden.length) in _renderUitbreiding,
+      // maar we leveren al de juiste pool aan.
+      const maxVoorNiveau = this._maxPerNiveau[niveau] || 8;
+      const explicietAantal = o.aantalWoorden || o.aantal;
+      const aantal = (typeof explicietAantal === "number" && explicietAantal > 0 && explicietAantal <= maxVoorNiveau)
+        ? explicietAantal
+        : maxVoorNiveau;
+      
       const cfg = {
         lijntype: o.lijntype || "type3",
         lijnhoogte: o.lijnhoogte || "middel",
