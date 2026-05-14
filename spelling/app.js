@@ -597,12 +597,70 @@
       });
     });
 
-    // Lijntype (globaal)
-    document.querySelectorAll(".lijn-knop").forEach(btn => {
+    // === Globale schrijflijn-type (type1-type7, sectie 4) ===
+    // De 7 knoppen met canvas-previews. LocalStorage onthoudt de keuze
+    // tussen sessies. Klik → actief-class wisselen, opslaan, preview vernieuwen.
+    const LS_LIJNTYPE = "spelling-globaal-lijntype-v1";
+    const LS_LIJNHOOGTE = "spelling-globaal-lijnhoogte-v1";
+
+    // Migratie: bij eerste laad, neem oude per-OV lijnhoogte uit oefenvormState
+    // als nieuwe globale waarde (als die nog niet expliciet is gezet).
+    try {
+      if (!localStorage.getItem(LS_LIJNHOOGTE)) {
+        const oudeState = localStorage.getItem("spelling-zb-oefenvormen-v1");
+        if (oudeState) {
+          const arr = JSON.parse(oudeState);
+          const counts = { klein: 0, middel: 0 };
+          for (const s of arr) {
+            if (s.lijnhoogte === "klein") counts.klein++;
+            else if (s.lijnhoogte === "middel") counts.middel++;
+          }
+          const meest = counts.klein > counts.middel ? "klein" : "middel";
+          localStorage.setItem(LS_LIJNHOOGTE, meest);
+        }
+      }
+    } catch (e) { /* private mode */ }
+
+    // Laad opgeslagen lijntype + hoogte uit LS en pas actief-class toe
+    try {
+      const lt = localStorage.getItem(LS_LIJNTYPE) || "type3";
+      document.querySelectorAll("#zb-lt-grid .zb-lt-knop").forEach(b => {
+        b.classList.toggle("actief", b.dataset.lt === lt);
+      });
+      const lh = localStorage.getItem(LS_LIJNHOOGTE) || "middel";
+      document.querySelectorAll("#zb-globale-hoogte .zb-hoogte-btn").forEach(b => {
+        b.classList.toggle("actief", b.dataset.hoogte === lh);
+      });
+    } catch (e) { /* private mode */ }
+
+    // Click-handler voor type-knoppen
+    document.querySelectorAll("#zb-lt-grid .zb-lt-knop").forEach(btn => {
       btn.addEventListener("click", () => {
-        maakActief(".lijn-knop", btn);
+        document.querySelectorAll("#zb-lt-grid .zb-lt-knop").forEach(b => b.classList.remove("actief"));
+        btn.classList.add("actief");
+        try { localStorage.setItem(LS_LIJNTYPE, btn.dataset.lt); } catch (e) {}
+        // Vernieuw preview zodat de leerkracht het effect ziet
+        if (window.SpellingPreview && typeof window.SpellingPreview.ververs === "function") {
+          window.SpellingPreview.ververs();
+        }
       });
     });
+
+    // Click-handler voor hoogte-knoppen
+    document.querySelectorAll("#zb-globale-hoogte .zb-hoogte-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#zb-globale-hoogte .zb-hoogte-btn").forEach(b => b.classList.remove("actief"));
+        btn.classList.add("actief");
+        try { localStorage.setItem(LS_LIJNHOOGTE, btn.dataset.hoogte); } catch (e) {}
+        if (window.SpellingPreview && typeof window.SpellingPreview.ververs === "function") {
+          window.SpellingPreview.ververs();
+        }
+      });
+    });
+
+    // === Legacy lijn-knop (vier/dubbel/enkel) blijft bestaan in verborgen
+    //     div #legacy-lijn-knoppen voor backward-compat, maar heeft geen
+    //     event-handler meer nodig. ===
 
     // ----- Bewerken toggle -----
     const bewerkBtn = document.querySelector("#bewerken-toggle");
@@ -655,6 +713,25 @@
     // Eerste keer: laad module-instellingen + initialiseer bundel preview
     laadModuleInstellingen();
     updateNiveauUitleg();
+    
+    // Teken de canvas-previews in de globale schrijflijn-keuze (sectie 4)
+    // zodat de leerkracht in de knoppen ziet hoe elk type eruit ziet.
+    // tekenLijntypePreviews() zoekt naar canvas.lijntype-preview[data-preview-type]
+    // — die class staat op alle 7 knoppen.
+    if (window.SpellingSchrijflijnen) {
+      requestAnimationFrame(() => {
+        window.SpellingSchrijflijnen.tekenLijntypePreviews();
+      });
+      // Bij open/sluiten van sectie 4 opnieuw tekenen (canvas heeft layout-breedte nodig)
+      const sectie4 = document.querySelector("#zb-sec-schrijflijn");
+      if (sectie4) {
+        sectie4.addEventListener("toggle", () => {
+          if (sectie4.open) {
+            requestAnimationFrame(() => window.SpellingSchrijflijnen.tekenLijntypePreviews());
+          }
+        });
+      }
+    }
     
     // Bundel start leeg → toont welkomstboodschap
     if (window.SpellingBundel) {
