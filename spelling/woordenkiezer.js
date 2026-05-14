@@ -46,6 +46,36 @@ window.SpellingWoordenkiezer = (function() {
     window._weekdictee_gekozenWoorden = getActieveWoorden();
   }
 
+  /* RUIM woorden op die in categorieën zitten die NIET MEER aangevinkt zijn.
+     Verschilt van syncActieveWoorden: dit past de RUWE LIJST aan zodat
+     uitgevinkte woorden permanent weg zijn (anders blijven ze in modal
+     verschijnen ook al worden ze gefilterd uit de actieve lijst).
+     
+     Wordt aangeroepen vanuit zijbalk wanneer een categorie wordt
+     uitgevinkt. */
+  function ruimUitgevinkteOp() {
+    const zb = window.SpellingZijbalk;
+    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") {
+      console.log("[ruimUitgevinkteOp] geen zijbalk-API beschikbaar");
+      return;
+    }
+    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
+    
+    const voor = gekozen.length;
+    const verwijderdeCats = [...new Set(gekozen.filter(w => !actieveCats.has(w.categorie)).map(w => w.categorie))];
+    gekozen = gekozen.filter(w => actieveCats.has(w.categorie));
+    const na = gekozen.length;
+    
+    console.log("[ruimUitgevinkteOp] voor=" + voor + " na=" + na 
+      + " | actieve cats: " + [...actieveCats].join(",") 
+      + " | verwijderd uit: " + verwijderdeCats.join(","));
+    
+    if (voor !== na) {
+      try { localStorage.setItem(LS_KEY, JSON.stringify(gekozen)); } catch (e) {}
+      syncActieveWoorden();
+    }
+  }
+
   /* ----- Init: laad opgeslagen keuzes uit localStorage ----- */
   function laadOpgeslagen() {
     try {
@@ -105,8 +135,26 @@ window.SpellingWoordenkiezer = (function() {
       if (filteredCats.length === 0) continue;
       
       const groepLabel = wb.groepLabels[groepId] || groepId;
+      
+      // Bepaal aan-status van groep: alle woorden van alle cats in deze groep
+      let totaalWoorden = 0, gekozenWoorden = 0;
+      for (const c of filteredCats) {
+        for (const w of c.woorden) {
+          totaalWoorden++;
+          if (isGekozen(w, leerjaar, c.id)) gekozenWoorden++;
+        }
+      }
+      const groepAlles = gekozenWoorden === totaalWoorden && totaalWoorden > 0;
+      const groepSome = gekozenWoorden > 0 && gekozenWoorden < totaalWoorden;
+      
       html += `<div class="wk-categorie-blok">
-        <div class="wk-groep-titel">${groepLabel}</div>`;
+        <label class="wk-groep-titel">
+          <input type="checkbox" class="wk-groep-master" data-groep="${groepId}"
+                 ${groepAlles ? 'checked' : ''}
+                 ${groepSome ? 'data-indeterminate="true"' : ''}>
+          <span>${groepLabel}</span>
+          <span class="wk-groep-teller"><small>(${gekozenWoorden}/${totaalWoorden})</small></span>
+        </label>`;
 
       for (const cat of filteredCats) {
         // Tel hoeveel woorden gekozen in deze categorie
@@ -178,6 +226,10 @@ window.SpellingWoordenkiezer = (function() {
     }
 
     container.innerHTML = renderCategorieen(leerjaar);
+    // Stel indeterminate state in voor groep-master checkboxes
+    container.querySelectorAll('.wk-groep-master[data-indeterminate]').forEach(el => {
+      el.indeterminate = true;
+    });
     updateTeller();
   }
 
@@ -243,7 +295,34 @@ window.SpellingWoordenkiezer = (function() {
 
     // Event-delegatie voor vinkjes en alles/geen-knoppen (categorieën worden dynamisch gerenderd)
     document.querySelector("#wk-categorieen")?.addEventListener("change", (e) => {
-      if (e.target.matches('input[type="checkbox"]')) {
+      // Groep-master vinkje: alle woorden van alle cats in groep aan/uit
+      if (e.target.matches(".wk-groep-master")) {
+        const groepId = e.target.dataset.groep;
+        const aan = e.target.checked;
+        const leerjaar = actieveGraad();
+        const wb = window.SpellingWoordenbibliotheek;
+        const data = wb.categorieenPerHoofdgroep(leerjaar);
+        for (const groepen of Object.values(data)) {
+          const cats = groepen[groepId];
+          if (!cats) continue;
+          for (const cat of cats) {
+            for (const w of cat.woorden) {
+              const id = `${leerjaar}|${cat.id}|${w.tekst}`;
+              const al = gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id);
+              if (aan && !al) {
+                gekozen.push({ tekst: w.tekst, lidwoord: w.lidwoord || null, categorie: cat.id, leerjaar });
+              } else if (!aan && al) {
+                gekozen = gekozen.filter(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` !== id);
+              }
+            }
+          }
+        }
+        bewaar();
+        herrender();
+        return;
+      }
+      
+      if (e.target.matches('input[type="checkbox"]') && e.target.dataset.woordTekst) {
         const tekst = e.target.dataset.woordTekst;
         const lidwoord = e.target.dataset.woordLidwoord || null;
         const cat = e.target.dataset.cat;
@@ -318,6 +397,7 @@ window.SpellingWoordenkiezer = (function() {
     sluit,
     updateSidebarInfo,
     syncActieveWoorden,             // herbereken filter (te roepen door zijbalk bij categorie-wissel)
+    ruimUitgevinkteOp,              // verwijder woorden uit uitgevinkte cats uit ruwe lijst (permanent)
     getGekozen: () => gekozen,       // alle woorden (ruwe lijst, ook verborgen)
     getActieveWoorden,               // alleen woorden uit aangevinkte categorieën
     getVerborgenAantal               // hoeveel woorden zijn er momenteel verborgen
