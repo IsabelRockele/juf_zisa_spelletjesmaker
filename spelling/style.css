@@ -1531,6 +1531,24 @@ body.bewerk-aan [data-bewerk-id]:focus {
   padding: 8px 14px;
   font-size: 0.95rem;
   font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.wk-groep-titel:hover {
+  filter: brightness(1.1);
+}
+.wk-groep-master {
+  cursor: pointer;
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+.wk-groep-teller {
+  margin-left: auto;
+  opacity: 0.9;
 }
 .wk-cat-titel {
   background: var(--zisa-blauw-licht);
@@ -5153,4 +5171,209 @@ body.bewerk-aan [data-bewerk-id]:focus {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 4px;
+}
+
+
+/* OV04 uitbreiding — 3 zin-schrijflijnen onderaan op de pagina */
+.ov04-zinnen-blok {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: #f3f8e8;
+  border: 1px solid #c8d8a8;
+  border-radius: 8px;
+}
+.ov04-zinnen-titel {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #333;
+}
+.ov04-zinnen-blok .ov01-zin-canvas-wrap,
+.ov04-zinnen-blok > canvas.schrijflijn-canvas {
+  margin-bottom: 6px;
+}
+
+
+/* OV04 symbool-hint (basis): groot, kleur van kolom */
+.ov04-woord .ov04-symbool {
+  font-weight: 700;
+  font-size: 1.05em;
+  display: inline-block;
+  margin: 0 1px;
+}
+/* OV04 streepjes-hint (kern/verdieping): leesbaar onderstreepje-blok */
+.ov04-woord .ov04-streepjes {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  font-weight: 700;
+  color: #444;
+}
+/* Legende: symbool in cirkel van kolomkleur */
+.ov04-legende-kleur {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  color: white;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+
+/* OV05 keuze-hokjes (hele woorden naast elkaar) — kind omcirkelt */
+.ov05-keuzes {
+  display: flex;
+  gap: 8px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  width: 100%;
+}
+.ov05-keuze-hokje {
+  flex: 1;
+  text-align: center;
+  padding: 8px 6px;
+  border: 1.5px solid #555;
+  border-radius: 4px;
+  background: white;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  min-width: 0;
+}
+/* Bij oplossingen: juiste hokje groen */
+.ov05-keuze-hokje.ov05-keuze-juist {
+  background: #c8e6c9;
+  border-color: #4caf50;
+  border-width: 2px;
+}
+
+
+/* OV05 prefix vóór de schrijflijn ('hij' / 'ik' bij werkwoorden) */
+.ov05-lijn-cel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: relative;
+}
+.ov05-lijn-prefix {
+  font-family: 'Comic Sans MS', 'Segoe Print', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+  white-space: nowrap;
+}
+
+
+/* OV04 kleurpickers in zijbalk-instellingen */
+.ov04-kleuren-rij {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ov04-kleur-cel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  background: #f7f7f7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+.ov04-kleur-cel:hover {
+  background: #efefef;
+}
+.ov04-kleur-input {
+  width: 36px;
+  height: 28px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 0;
+  cursor: pointer;
+}
+.ov04-kleur-reset {
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.ov04-kleur-reset:hover {
+  background: #f0f0f0;
+}
+
+
+/* OV04 kleurpickers in zijbalk-OV-instellingen (compacte vorm) */
+.zb-oef-kleuren {
+  display: flex !important;
+  flex-direction: column;
+  gap: 4px;
+}
+.zb-oef-kleuren > label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+}
+.zb-ov04-kleuren {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.zb-ov04-kleur-cel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.zb-ov04-kleur-cel:hover {
+  background: #f5f5f5;
+}
+.zb-ov04-kleur-input {
+  width: 26px;
+  height: 22px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  padding: 0;
+  cursor: pointer;
+}
+.zb-ov04-kleur-reset {
+  width: 26px;
+  height: 26px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.zb-ov04-kleur-reset:hover {
+  background: #f0f0f0;
+}
+
+
+/* Groep-titel met master-vinkje (klikbaar) */
+.zb-groep-titel {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 4px 0;
+  user-select: none;
+}
+.zb-groep-titel:hover {
+  color: var(--zisa-blauw, #2196F3);
+}
+.zb-groep-master {
+  cursor: pointer;
+  margin: 0;
 }
