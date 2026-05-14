@@ -115,6 +115,19 @@ window.SpellingModules.ov05 = {
       }
     },
     {
+      id: "ng-nk",
+      titel: "ng vs nk",
+      trigger: (aangevinkteCats) => {
+        if (!(aangevinkteCats.includes("ng-woorden") && aangevinkteCats.includes("nk-woorden"))) return null;
+        return {
+          kolommen: [
+            { titel: "ng", kleur: "#9C27B0", filter: w => w.categorie === "ng-woorden" },
+            { titel: "nk", kleur: "#00897B", filter: w => w.categorie === "nk-woorden" }
+          ]
+        };
+      }
+    },
+    {
       id: "verlengen-dt",
       titel: "Eindigt op -d of -t",
       trigger: (aangevinkteCats) => {
@@ -247,6 +260,7 @@ window.SpellingModules.ov05 = {
             <li>au + ou woorden</li>
             <li>aai/ooi/oei woorden</li>
             <li>eeuw + ieuw woorden</li>
+            <li>ng + nk woorden</li>
             <li>Verlengingsregel (zowel -d én -t, of -b én -p woorden)</li>
           </ul>
         </div>
