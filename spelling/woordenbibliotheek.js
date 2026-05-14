@@ -38,16 +38,66 @@ window.SpellingWoordenbibliotheek = {
      Structuur: { hoorwoord: { 'korte-klanken': [...categorieën], ...}, onthoudwoord: {...}, regelwoord: {...} }
      Als ?aangevinkt is meegegeven (Set van categorie-IDs), filtert hij die.
      Categorieën zonder hoofdgroep komen in 'overig'. */
+  /* Pedagogische volgorde van groepen binnen elke hoofdgroep.
+     Groepen die hier niet staan komen achteraan in alfabetische orde. */
+  GROEP_VOLGORDE: [
+    // hoorwoord
+    "korte-klanken",
+    "lange-klanken",
+    "tweeklanken",
+    "ei-ij",       // tweeklanken-onderdeel maar onthoudwoord
+    "au-ou",
+    "ng-nk",
+    "moeilijke-klanken",  // sch
+    "sch-woorden",
+    "clusters",
+    "ch-cht-klank",       // (oude naam voor compatibility)
+    "ch-cht-gt",
+    "doffe-klank",
+    // regelwoord
+    "verdubbel-verenkel",
+    "verlengen",
+    "verkleinwoorden",
+    "meervouden",
+    // samenstelling
+    "samenstellingen",
+    // overig
+    "hoofdletters"
+  ],
+
+  /* Sorteer groep-keys volgens GROEP_VOLGORDE.
+     Onbekende groepen komen alfabetisch achteraan. */
+  _sorteerGroepen: function(groepKeys) {
+    const volgorde = this.GROEP_VOLGORDE;
+    return [...groepKeys].sort((a, b) => {
+      const ia = volgorde.indexOf(a);
+      const ib = volgorde.indexOf(b);
+      if (ia === -1 && ib === -1) return a.localeCompare(b);
+      if (ia === -1) return 1;
+      if (ib === -1) return -1;
+      return ia - ib;
+    });
+  },
+
   categorieenPerHoofdgroep: function(leerjaar, aangevinkt) {
     const data = this[`graad${leerjaar}`];
     if (!data) return {};
-    const result = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, samenstelling: {}, overig: {} };
+    const ruw = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, samenstelling: {}, overig: {} };
     for (const [id, cat] of Object.entries(data)) {
       if (typeof cat !== "object" || !cat.groep) continue;
       if (aangevinkt && !aangevinkt.has(id)) continue;
       const hoofdgroep = cat.hoofdgroep || "overig";
-      if (!result[hoofdgroep][cat.groep]) result[hoofdgroep][cat.groep] = [];
-      result[hoofdgroep][cat.groep].push({ id, ...cat });
+      if (!ruw[hoofdgroep][cat.groep]) ruw[hoofdgroep][cat.groep] = [];
+      ruw[hoofdgroep][cat.groep].push({ id, ...cat });
+    }
+    // Sorteer groepen binnen elke hoofdgroep volgens pedagogische volgorde
+    const result = {};
+    for (const [hg, groepen] of Object.entries(ruw)) {
+      result[hg] = {};
+      const gesorteerd = this._sorteerGroepen(Object.keys(groepen));
+      for (const groepKey of gesorteerd) {
+        result[hg][groepKey] = groepen[groepKey];
+      }
     }
     return result;
   },
