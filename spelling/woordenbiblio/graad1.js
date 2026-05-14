@@ -979,5 +979,117 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "arts", lidwoord: "de", afbeelding: false },
       { tekst: "markt", lidwoord: "de", afbeelding: false }
     ]
+  },
+
+  /* ==========================================================
+     SAMENSTELLINGEN
+     Aparte hoofdgroep (vierde, naast hoor/onthoud/regel).
+     Een samenstelling is een woord dat bestaat uit twee delen
+     die elk een eigen betekenis hebben (klok + huis = klokhuis).
+     Pedagogisch: het kind leert de twee delen herkennen en
+     aan elkaar plakken zonder spatie of streepje.
+     
+     Per woord:
+     - delen: ["deel1", "deel2"] — voor splits/verbind-oefeningen
+     - delenEmoji: ["🕐","🏠"] — fallback voor wanneer er nog geen
+       eigen PNG is (eigen PNG via afbeelding: true wint)
+     - beschrijving: korte omschrijving voor raadoefening (⭐⭐⭐⭐)
+     ========================================================== */
+  "samenstellingen-basis": {
+    naam: "Samengestelde woorden",
+    groep: "samenstellingen",
+    hoofdgroep: "samenstelling",
+    woorden: [
+      {
+        tekst: "klokhuis", lidwoord: "het", afbeelding: false,
+        delen: ["klok", "huis"], delenEmoji: ["🕐", "🏠"],
+        beschrijving: "Het harde stukje in het midden van een appel."
+      },
+      {
+        tekst: "brooddoos", lidwoord: "de", afbeelding: false,
+        delen: ["brood", "doos"], delenEmoji: ["🍞", "📦"],
+        beschrijving: "Hierin doe je je eten voor 's middags."
+      },
+      {
+        tekst: "handdoek", lidwoord: "de", afbeelding: false,
+        delen: ["hand", "doek"], delenEmoji: ["✋", "🧻"],
+        beschrijving: "Hiermee droog je je af na het wassen."
+      },
+      {
+        tekst: "zakdoek", lidwoord: "de", afbeelding: false,
+        delen: ["zak", "doek"], delenEmoji: ["🤧", "🧻"],
+        beschrijving: "Hierin snuit je je neus."
+      },
+      {
+        tekst: "oorbel", lidwoord: "de", afbeelding: false,
+        delen: ["oor", "bel"], delenEmoji: ["👂", "🔔"],
+        beschrijving: "Een mooi sieraad dat in je oor hangt."
+      },
+      {
+        tekst: "neushoorn", lidwoord: "de", afbeelding: false,
+        delen: ["neus", "hoorn"], delenEmoji: ["👃", "🦏"],
+        beschrijving: "Een groot dier met een hoorn op zijn neus."
+      },
+      {
+        tekst: "slaapkamer", lidwoord: "de", afbeelding: false,
+        delen: ["slaap", "kamer"], delenEmoji: ["😴", "🛏️"],
+        beschrijving: "De kamer waar je gaat slapen."
+      },
+      {
+        tekst: "badkamer", lidwoord: "de", afbeelding: false,
+        delen: ["bad", "kamer"], delenEmoji: ["🛁", "🚪"],
+        beschrijving: "De kamer waar je je wast en in bad gaat."
+      },
+      {
+        tekst: "zwembad", lidwoord: "het", afbeelding: false,
+        delen: ["zwem", "bad"], delenEmoji: ["🏊", "🛁"],
+        beschrijving: "Hier ga je naartoe om te zwemmen."
+      },
+      {
+        tekst: "melkkan", lidwoord: "de", afbeelding: false,
+        delen: ["melk", "kan"], delenEmoji: ["🥛", "🫖"],
+        beschrijving: "Een kan waar melk in zit."
+      },
+      {
+        tekst: "voetbal", lidwoord: "de", afbeelding: false,
+        delen: ["voet", "bal"], delenEmoji: ["🦶", "⚽"],
+        beschrijving: "Een bal die je met je voet schopt."
+      },
+      {
+        tekst: "schooltas", lidwoord: "de", afbeelding: false,
+        delen: ["school", "tas"], delenEmoji: ["🏫", "👜"],
+        beschrijving: "De tas waar je boeken in zitten voor de klas."
+      },
+      {
+        tekst: "deurbel", lidwoord: "de", afbeelding: false,
+        delen: ["deur", "bel"], delenEmoji: ["🚪", "🔔"],
+        beschrijving: "Hierop druk je als je bij iemand aanbelt."
+      },
+      {
+        tekst: "regenjas", lidwoord: "de", afbeelding: false,
+        delen: ["regen", "jas"], delenEmoji: ["🌧️", "🧥"],
+        beschrijving: "Een jas die je draagt als het regent."
+      },
+      {
+        tekst: "tandpasta", lidwoord: "de", afbeelding: false,
+        delen: ["tand", "pasta"], delenEmoji: ["🦷", "🪥"],
+        beschrijving: "Hiermee poets je je tanden."
+      },
+      {
+        tekst: "boekentas", lidwoord: "de", afbeelding: false,
+        delen: ["boeken", "tas"], delenEmoji: ["📚", "👜"],
+        beschrijving: "Een tas vol boeken voor school."
+      },
+      {
+        tekst: "dagboek", lidwoord: "het", afbeelding: false,
+        delen: ["dag", "boek"], delenEmoji: ["☀️", "📔"],
+        beschrijving: "Een boek waarin je schrijft wat je elke dag doet."
+      },
+      {
+        tekst: "kerstboom", lidwoord: "de", afbeelding: false,
+        delen: ["kerst", "boom"], delenEmoji: ["🎁", "🌲"],
+        beschrijving: "De boom die je versiert met kerst."
+      }
+    ]
   }
 });
