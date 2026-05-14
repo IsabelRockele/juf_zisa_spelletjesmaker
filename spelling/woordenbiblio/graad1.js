@@ -506,11 +506,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "been", lidwoord: "het", afbeelding: false },
       { tekst: "fee", lidwoord: "de", afbeelding: false },
       { tekst: "zee", lidwoord: "de", afbeelding: false },
-      { tekst: "thee", lidwoord: "de", afbeelding: false },
+      { tekst: "nee", lidwoord: null, afbeelding: false },
       { tekst: "beek", lidwoord: "de", afbeelding: false },
       { tekst: "veer", lidwoord: "de", afbeelding: false },
       { tekst: "meer", lidwoord: "het", afbeelding: false },
-      { tekst: "eend", lidwoord: "de", afbeelding: false },
+      { tekst: "slee", lidwoord: "de", afbeelding: false },
       { tekst: "heel", lidwoord: null, afbeelding: false },
       { tekst: "leeg", lidwoord: null, afbeelding: false },
       { tekst: "geel", lidwoord: null, afbeelding: false }
