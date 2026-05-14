@@ -413,24 +413,41 @@ window.SpellingDicteeZinnen.graad1 = {
   // ==========================================================
   // ch / cht woorden (18 woorden)
   // ==========================================================
-  "ch-cht-klank|ach": "Ach, wat nu?",  //  (ach)
-  "ch-cht-klank|acht": "Ik ben acht jaar.",  //  (acht)
-  "ch-cht-klank|dacht": "Wat dacht je van dit?.",  //  (dacht)
-  "ch-cht-klank|dicht": "De deur is dicht.",  //  (dicht)
-  "ch-cht-klank|echt": "Dit is echt waar.",  //  (echt)
-  "ch-cht-klank|lach": "mama heeft een mooie lach.",  //  (de lach)
-  "ch-cht-klank|lacht": "Sep lacht met de mop.",  //  (lacht)
-  "ch-cht-klank|licht": "Doe het licht aan.",  //  (het licht)
-  "ch-cht-klank|lucht": "De lucht is blauw.",  //  (de lucht)
-  "ch-cht-klank|nacht": "Het is donker in de nacht.",  //  (de nacht)
-  "ch-cht-klank|pech": "Papa heeft pech met de auto",  //  (de pech)
-  "ch-cht-klank|recht": "Ga recht zitten.",  //  (recht)
-  "ch-cht-klank|toch": "Ik ben moe, toch ga ik door.",  //  (toch)
-  "ch-cht-klank|vecht": "Vecht niet met je broer!",  //  (vecht)
-  "ch-cht-klank|vlucht": "De dief vlucht snel weg.",  //  (de vlucht)
-  "ch-cht-klank|wacht": "Wacht op mij!",  //  (wacht)
-  "ch-cht-klank|zich": "Hij wast zich elke dag.",  //  (zich)
-  "ch-cht-klank|zucht": "Wat een zucht.",  //  (de zucht)
+  "ch-cht-gt|ach": "Ach, wat nu?",  //  (ach)
+  "ch-cht-gt|acht": "Ik ben acht jaar.",  //  (acht)
+  "ch-cht-gt|dacht": "Wat dacht je van dit?.",  //  (dacht)
+  "ch-cht-gt|hij dacht": "Wat dacht hij van dit?",  //  (hij dacht)
+  "ch-cht-gt|dicht": "De deur is dicht.",  //  (dicht)
+  "ch-cht-gt|echt": "Dit is echt waar.",  //  (echt)
+  "ch-cht-gt|lach": "mama heeft een mooie lach.",  //  (de lach)
+  "ch-cht-gt|lacht": "Sep lacht met de mop.",  //  (lacht)
+  "ch-cht-gt|hij lacht": "Hij lacht met de mop.",  //  (hij lacht)
+  "ch-cht-gt|licht": "Doe het licht aan.",  //  (het licht)
+  "ch-cht-gt|lucht": "De lucht is blauw.",  //  (de lucht)
+  "ch-cht-gt|nacht": "Het is donker in de nacht.",  //  (de nacht)
+  "ch-cht-gt|pech": "Papa heeft pech met de auto",  //  (de pech)
+  "ch-cht-gt|recht": "Ga recht zitten.",  //  (recht)
+  "ch-cht-gt|toch": "Ik ben moe, toch ga ik door.",  //  (toch)
+  "ch-cht-gt|vecht": "Vecht niet met je broer!",  //  (vecht)
+  "ch-cht-gt|hij vecht": "Hij vecht niet met zijn broer.",  //  (hij vecht)
+  "ch-cht-gt|vlucht": "De dief vlucht snel weg.",  //  (de vlucht)
+  "ch-cht-gt|wacht": "Wacht op mij!",  //  (wacht)
+  "ch-cht-gt|hij wacht": "Hij wacht op mij.",  //  (hij wacht)
+  "ch-cht-gt|zich": "Hij wast zich elke dag.",  //  (zich)
+  "ch-cht-gt|zucht": "Wat een zucht.",  //  (de zucht)
+  "ch-cht-gt|hij zucht": "Hij zucht heel diep.",  //  (hij zucht)
+
+  // === gt-werkwoorden (nieuwe categorie) ===
+  "ch-cht-gt|hij zegt": "Hij zegt iets grappigs.",  //  (hij zegt)
+  "ch-cht-gt|hij vraagt": "Hij vraagt een glas water.",  //  (hij vraagt)
+  "ch-cht-gt|hij legt": "Hij legt zijn boek op tafel.",  //  (hij legt)
+  "ch-cht-gt|hij jaagt": "De kat jaagt op een muis.",  //  (hij jaagt)
+  "ch-cht-gt|hij vliegt": "Hij vliegt naar het zuiden.",  //  (hij vliegt)
+  "ch-cht-gt|hij veegt": "Hij veegt de vloer schoon.",  //  (hij veegt)
+  "ch-cht-gt|hij liegt": "Hij liegt nooit tegen mama.",  //  (hij liegt)
+  "ch-cht-gt|hij klaagt": "Hij klaagt over de regen.",  //  (hij klaagt)
+  "ch-cht-gt|hij buigt": "Hij buigt voor de juf.",  //  (hij buigt)
+  "ch-cht-gt|hij ligt": "Hij ligt in zijn bed.",  //  (hij ligt)
 
   // ==========================================================
   // Verlengingsregel (16 woorden)
@@ -438,17 +455,23 @@ window.SpellingDicteeZinnen.graad1 = {
   "verlengen|baard": "Mijn opa heeft een lange baard.",  //  (de baard)
   "verlengen|bed": "Ik lig in mijn bed.",  //  (het bed)
   "verlengen|hand": "Geef elkaar een hand.",  //  (de hand)
+  "verlengen|ik heb": "Ik heb een leuke dag.",  //  (ik heb)
   "verlengen|hoed": "Mijn mama heeft een nieuwe hoed.",  //  (de hoed)
   "verlengen|hond": "De hond blaft.",  //  (de hond)
+  "verlengen|kip": "De kip legt een ei.",  //  (de kip)
+  "verlengen|klap": "Pas op, niet zo'n klap geven!",  //  (de klap)
   "verlengen|krab": "Ik zie een krab op het strand.",  //  (de krab)
   "verlengen|land": "Wij wonen in een mooi land.",  //  (het land)
   "verlengen|mond": "Doe je mond eens open.",  //  (de mond)
   "verlengen|paard": "In de wei loopt een paard.",  //  (paard)
+  "verlengen|pop": "Mijn zus speelt met een pop.",  //  (de pop)
   "verlengen|poort": "Sluit de poort.",  //  (de poort)
   "verlengen|rand": "Ik zie de rand.",  //  (de rand)
   "verlengen|rib": "In mijn lijf zit een rib.",  //  (de rib)
+  "verlengen|step": "Mijn step heeft twee wielen.",  //  (de step)
   "verlengen|taart": "Ik eet graag taart.",  //  (de taart)
   "verlengen|tand": "Mij tand doet pijn.",  //  (de tand)
+  "verlengen|trap": "Loop voorzichtig de trap af.",  //  (de trap)
   "verlengen|web": "Ik zie een spin in het web.",  //  (het web)
   "verlengen|wind": "Buiten waait er wind.",  //  (de wind)
 
@@ -702,29 +725,6 @@ window.SpellingDicteeZinnen.graad1 = {
   "verkleinwoorden|vader": "Ik speel met mijn vadertje.",  //  (de vadertje)
   "verkleinwoorden|vest": "Op de pop zit een vestje.",  //  (het vestje)
   "verkleinwoorden|voet": "De baby heeft een voetje.",  //  (de voetje)
-
-  // ==========================================================
-  // Samenstellingen (18 woorden) — eigen hoofdgroep
-  // De dictee-vorm is de grondvorm (geen meervoud).
-  // ==========================================================
-  "samenstellingen|klokhuis": "In de appel zit een klokhuis.",
-  "samenstellingen|brooddoos": "In mijn brooddoos zit een koek.",
-  "samenstellingen|handdoek": "Aan de haak hangt een handdoek.",
-  "samenstellingen|zakdoek": "In mijn zak zit een zakdoek.",
-  "samenstellingen|oorbel": "Mama draagt een mooie oorbel.",
-  "samenstellingen|neushoorn": "In de zoo staat een neushoorn.",
-  "samenstellingen|slaapkamer": "Mijn slaapkamer is blauw.",
-  "samenstellingen|badkamer": "In de badkamer is het warm.",
-  "samenstellingen|zwembad": "Wij gaan naar het zwembad.",
-  "samenstellingen|melkkan": "Op tafel staat een melkkan.",
-  "samenstellingen|voetbal": "Op het veld ligt een voetbal.",
-  "samenstellingen|schooltas": "Mijn schooltas is zwaar.",
-  "samenstellingen|deurbel": "Aan de deur hangt een deurbel.",
-  "samenstellingen|regenjas": "Buiten draag ik mijn regenjas.",
-  "samenstellingen|tandpasta": "Op de borstel zit tandpasta.",
-  "samenstellingen|boekentas": "In mijn boekentas zit een boek.",
-  "samenstellingen|dagboek": "Ik schrijf in mijn dagboek.",
-  "samenstellingen|kerstboom": "In de kamer staat een kerstboom."
 };
 
 /* ============================================================
