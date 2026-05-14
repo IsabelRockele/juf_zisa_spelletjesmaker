@@ -194,6 +194,19 @@ window.SpellingModules.ov04 = {
       }
     },
     {
+      id: "ng-nk",
+      titel: "ng vs nk",
+      trigger: (aangevinkteCats, cats) => {
+        if (!(aangevinkteCats.includes("ng-woorden") && aangevinkteCats.includes("nk-woorden"))) return null;
+        return {
+          kolommen: [
+            { titel: "ng", kleur: "#9C27B0", symbool: "▲", filter: w => w.categorie === "ng-woorden", klankRegex: /ng/i },
+            { titel: "nk", kleur: "#00897B", symbool: "◆", filter: w => w.categorie === "nk-woorden", klankRegex: /nk/i }
+          ]
+        };
+      }
+    },
+    {
       id: "cht-gt",
       titel: "cht vs gt",
       trigger: (aangevinkteCats, cats) => {
@@ -525,6 +538,7 @@ window.SpellingModules.ov04 = {
             <li>Korte klanken + Lange klanken</li>
             <li>ei + ij</li>
             <li>au + ou</li>
+            <li>ng + nk</li>
             <li>cht + gt</li>
             <li>Verlengingsregel (minstens woorden op -d én -t, of -b én -p)</li>
           </ul>
