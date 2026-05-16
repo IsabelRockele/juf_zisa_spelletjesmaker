@@ -1184,6 +1184,17 @@
     return null;
   }
 
+  /* Gestylede oproep om woord-suggesties te mailen — wordt onderaan elke 
+     uitleg-modal getoond zodat de leerkracht weet hoe ze invloed kan hebben. */
+  const WOORDEN_SUGGESTIE_HTML = `
+    <div style="margin-top:20px;padding:14px 16px;background:#fff8e1;border-left:4px solid #f5b942;border-radius:6px;">
+      <p style="margin:0;color:#5a4a1c;font-size:14px;">
+        <strong>💌 Mis je woorden?</strong> Zou je bepaalde woorden ook graag in deze bundels willen zien? 
+        Mail je suggesties gerust naar <a href="mailto:zebrapost@jufzisa.be" style="color:#1e3a5f;font-weight:600;">zebrapost@jufzisa.be</a>. Ik voeg ze met plezier toe!
+      </p>
+    </div>
+  `;
+
   /* Inhoud per modus voor de uitleg-modal. */
   const UITLEG_INHOUD = {
     werkblad: {
@@ -1202,6 +1213,7 @@
         </ol>
         
         <p><strong>Tip voor differentiatie:</strong> vink ⭐ Oefenen aan voor zwakkere lezers, ⭐⭐ Toepassen voor de meeste kinderen, en ⭐⭐⭐ Verdiepen of ⭐⭐⭐⭐ Uitbreiden voor sterke spellers. Iedereen werkt aan dezelfde categorie, maar elk op eigen niveau.</p>
+        ${WOORDEN_SUGGESTIE_HTML}
       `
     },
     herhaling: {
@@ -1221,6 +1233,7 @@
         </ol>
         
         <p><strong>Tip:</strong> begin met enkele OV's op ⭐ en ⭐⭐, voeg dan 1-2 verdiepingsoefeningen toe voor sterke leerlingen. Zo krijg je een bundel met natuurlijke moeilijkheidsopbouw.</p>
+        ${WOORDEN_SUGGESTIE_HTML}
       `
     },
     weekdictee: {
@@ -1253,6 +1266,7 @@
           <li>Het systeem zorgt dat geen enkele zin twee keer in dezelfde week voorkomt — ook vrijdag krijgt nieuwe zinnen voor dezelfde woorden.</li>
           <li><strong>Bewerken: aan</strong> om woorden of zinnen handmatig te wijzigen voor je downloadt.</li>
         </ul>
+        ${WOORDEN_SUGGESTIE_HTML}
       `
     },
     
@@ -1276,6 +1290,7 @@
         <p><strong>Tip:</strong> je selectie wordt onthouden — ook na een refresh. Wijzig je later de categorieën? Dan blijven woorden uit nog-aangevinkte categorieën gewoon staan; woorden uit weggehaalde categorieën verdwijnen automatisch.</p>
         
         <p><strong>Voor het weekdictee specifiek:</strong> kies hier de 15-25 woorden die deze week aan bod komen. Het systeem verdeelt ze over de dagen en zorgt dat vrijdag de herhaling van diezelfde woorden bevat.</p>
+        ${WOORDEN_SUGGESTIE_HTML}
       `
     }
   };
