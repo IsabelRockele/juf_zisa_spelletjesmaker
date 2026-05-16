@@ -1195,6 +1195,7 @@
         <p><strong>Hoe gebruik je dit?</strong></p>
         <ol>
           <li><strong>Kies categorieën</strong> in stap 1 (links): welke spellingsregel of klank wil je oefenen?</li>
+          <li><strong>Bekijk en kies de woorden</strong> in stap 2: klik op "Open woordenkiezer" om te zien welke woorden er bij die categorieën horen. Je kan woorden in of uit vinken. Dit zijn de woorden die in de werkbladen verschijnen.</li>
           <li><strong>Kies oefenvorm + niveau</strong> in stap 3: je kan meerdere niveaus aanvinken voor differentiatie. Onder elke ster-keuze staat een korte uitleg over wat het kind doet en voor wie het past.</li>
           <li><strong>Stel de schrijflijn in</strong> in stap 4 (geldt voor alle werkbladen).</li>
           <li><strong>Download</strong> alle werkbladen als één PDF, of preview eerst rechts.</li>
@@ -1212,6 +1213,7 @@
         <p><strong>Hoe gebruik je dit?</strong></p>
         <ol>
           <li><strong>Kies categorieën</strong> die in de bundel mogen voorkomen.</li>
+          <li><strong>Bekijk en kies de woorden</strong>: klik op "Open woordenkiezer" om te bepalen welke woorden meedoen. Bv. enkel de moeilijkste woorden voor herhaling, of een specifieke selectie per thema.</li>
           <li><strong>Klik op een oefenvorm</strong> in de zijbalk om hem open te klappen. Vink de gewenste niveaus aan en geef per niveau aan hoeveel woorden je wil (bv. max 9). De lege placeholder toont het maximum dat past op de pagina.</li>
           <li><strong>Klik op "+ Voeg toe aan bundel"</strong> om je selectie toe te voegen. Je kan meerdere keren op dezelfde oefenvorm klikken om verschillende niveaus toe te voegen.</li>
           <li><strong>Bewerk in de preview rechts</strong>: titel, instructies, woorden, antwoorden — alles is aanpasbaar. Volgorde wijzigen met de pijl-knoppen.</li>
@@ -1227,6 +1229,14 @@
         <p><strong>Wat is het weekdictee?</strong></p>
         <p>Een week vol oefenen — elke dag een klein blokje met woorden en zinnen, klaar om uit te delen op maandag. Vrijdag is herhaling: dezelfde woorden komen terug, maar met andere zinnen.</p>
         
+        <p><strong>Stappen om een weekdictee te maken:</strong></p>
+        <ol>
+          <li><strong>Kies categorieën</strong>: welke spellingsregels wil je deze week oefenen?</li>
+          <li><strong>Open de woordenkiezer</strong> en kies welke woorden in het weekdictee komen. Tip: niet alle woorden uit de categorie hoeven mee — selecteer net die woorden die past bij wat je deze week behandelt.</li>
+          <li><strong>Stel schrijflijn + type weekdictee</strong> in. Eventueel "Bewerken: aan" om woorden of zinnen aan te passen.</li>
+          <li><strong>Download het leerling-blad</strong> (zonder antwoorden, om uit te delen) en optioneel het <strong>dicteerblad (mijn versie)</strong> mét antwoorden voor jezelf.</li>
+        </ol>
+        
         <p><strong>Hoe ik (Juf Zisa) het in de klas gebruik:</strong></p>
         <p><strong>Maandag tot en met donderdag</strong> werk ik telkens zo:</p>
         <ul>
@@ -1240,10 +1250,32 @@
         
         <p><strong>Tips bij het maken:</strong></p>
         <ul>
-          <li>Zet <strong>"Bewerken: aan"</strong> om woorden of zinnen aan te passen voor je downloadt.</li>
-          <li><strong>Leerling-blad</strong> = zonder antwoorden (om uit te delen). <strong>Dicteerblad (mijn versie)</strong> = mét antwoorden (voor jou om uit te dicteren).</li>
           <li>Het systeem zorgt dat geen enkele zin twee keer in dezelfde week voorkomt — ook vrijdag krijgt nieuwe zinnen voor dezelfde woorden.</li>
+          <li><strong>Bewerken: aan</strong> om woorden of zinnen handmatig te wijzigen voor je downloadt.</li>
         </ul>
+      `
+    },
+    
+    /* Aparte uitleg voor de woordenkiezer — getoond bij klik op het ?-icoontje */
+    woordenkiezer: {
+      titel: "📋 Woordenkiezer — uitleg",
+      html: `
+        <p><strong>Wat doet de woordenkiezer?</strong></p>
+        <p>Hier kies je <em>welke woorden</em> écht meedoen in je werkbladen of weekdictee. Het is een tussenstap tussen "welke categorieën" (stap 1) en "welke oefeningen" (stap 3).</p>
+        
+        <p><strong>Waarom dit een aparte stap is:</strong></p>
+        <p>Een categorie zoals "Korte klanken (MK/KM/MKM)" bevat tientallen woorden. Maar deze week wil je misschien maar 8-12 woorden oefenen, of net specifiek de woorden die in je leesmethode aan bod komen. De woordenkiezer laat je daar gericht in kiezen.</p>
+        
+        <p><strong>Hoe gebruik je hem?</strong></p>
+        <ol>
+          <li><strong>Open de woordenkiezer</strong>: alle woorden uit de aangevinkte categorieën verschijnen in een lijst.</li>
+          <li><strong>Vink woorden aan of uit</strong>: gebruik de hoofdvinkjes om hele groepen tegelijk te selecteren, of klik woord-per-woord.</li>
+          <li><strong>Sluit de modal</strong>: enkel de aangevinkte woorden komen in je werkbladen/dictee terecht.</li>
+        </ol>
+        
+        <p><strong>Tip:</strong> je selectie wordt onthouden — ook na een refresh. Wijzig je later de categorieën? Dan blijven woorden uit nog-aangevinkte categorieën gewoon staan; woorden uit weggehaalde categorieën verdwijnen automatisch.</p>
+        
+        <p><strong>Voor het weekdictee specifiek:</strong> kies hier de 15-25 woorden die deze week aan bod komen. Het systeem verdeelt ze over de dagen en zorgt dat vrijdag de herhaling van diezelfde woorden bevat.</p>
       `
     }
   };
@@ -1267,6 +1299,14 @@
       const inhoud = UITLEG_INHOUD[modus];
       if (!inhoud) return;
       toonUitlegModal(inhoud.titel, inhoud.html);
+    });
+
+    // Bedraad ?-icoontjes voor woordenkiezer-uitleg (in alle modi, via event-delegatie)
+    document.addEventListener("click", (e) => {
+      if (e.target.matches(".woordenkiezer-help") || e.target.closest(".woordenkiezer-help")) {
+        const inhoud = UITLEG_INHOUD.woordenkiezer;
+        if (inhoud) toonUitlegModal(inhoud.titel, inhoud.html);
+      }
     });
   }
 
