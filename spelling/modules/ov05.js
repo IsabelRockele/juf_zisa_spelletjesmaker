@@ -207,7 +207,7 @@ window.SpellingModules.ov05 = {
           Bij <strong>⭐ basis</strong> staat het plaatje altijd. Voor andere niveaus kies je hier.
         </p>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-          <input type="checkbox" id="ov05-plaatje-kern" checked>
+          <input type="checkbox" id="ov05-plaatje-kern">
           <span>Plaatje tonen bij <strong>⭐⭐ kern</strong></span>
         </label>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
@@ -234,7 +234,7 @@ window.SpellingModules.ov05 = {
     const lijntype = o.lijntype || "type3";
     const lijnhoogte = o.lijnhoogte || "middel";
     const ondertitel = o.ondertitel || "";
-    const plaatjeKern = o.plaatjeKern !== false;
+    const plaatjeKern = o.plaatjeKern === true;
     const plaatjeVerdieping = o.plaatjeVerdieping !== false;
 
     const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
