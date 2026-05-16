@@ -381,7 +381,7 @@ window.SpellingModules.ov01 = {
       html += `<div class="ov01-rooster-rij">`;
       for (const w of rij) {
         const tonen = this._toonWoord(w);
-        const emoji = this._zoekEmoji(w.tekst);
+        const plaatjeHtml = this._plaatjeHtml(w);
 
         // Inhoud onder plaatje hangt af van niveau
         let onderHtml = "";
@@ -418,7 +418,7 @@ window.SpellingModules.ov01 = {
         html += `
           <div class="ov01-cel" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord van het werkblad" type="button">✕</button>
-            <div class="ov01-cel-plaatje">${emoji}</div>
+            <div class="ov01-cel-plaatje">${plaatjeHtml}</div>
             ${onderHtml}
             <div class="ov01-cel-lijnen">${lijnen}</div>
           </div>`;
@@ -495,6 +495,17 @@ window.SpellingModules.ov01 = {
     }
     // Fallback: een algemene plaatje-placeholder
     return "🖼️";
+  },
+
+  /* Geef HTML voor het plaatje bij een woord-object.
+     Probeert eerst echte PNG (afbeeldingen/graad{N}/{categorie}/{tekst}.png),
+     valt terug op emoji bij niet-beschikbaar. */
+  _plaatjeHtml: function(woord) {
+    if (window.SpellingAfbeeldingen && window.SpellingAfbeeldingen.htmlVoorWoord) {
+      return window.SpellingAfbeeldingen.htmlVoorWoord(woord);
+    }
+    // Fallback bij ontbrekende module
+    return `<span class="woord-emoji">🖼️</span>`;
   },
 
   /* ----- Pseudo-random met seed ----- */
