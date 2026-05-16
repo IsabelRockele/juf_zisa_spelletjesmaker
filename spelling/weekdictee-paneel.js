@@ -434,7 +434,15 @@ window.SpellingWeekdicteePaneel = (function() {
       }
     };
 
-    preview.innerHTML = module.genereerBlad(opties, metOplossingen);
+    // BELANGRIJK: bij "Dicteerblad (mijn versie)" (metOplossingen=true) tonen we
+    // EXACT wat in de preview staat. Niet regenereren — anders worden de zinnen
+    // opnieuw geshufeld en zie je iets anders dan in de preview.
+    // Bij "Leerling-blad" (metOplossingen=false) regenereren we wel: dat is een
+    // andere variant (zonder woorden) en we hebben geen bewerkingen die we 
+    // moeten behouden.
+    if (!metOplossingen) {
+      preview.innerHTML = module.genereerBlad(opties, metOplossingen);
+    }
     // Pas inline-wijzigingen toe (alleen relevant bij oplossingen — bij
     // werkblad zonder antwoorden zijn er geen .antwoord-spans om te wijzigen).
     if (metOplossingen) {
@@ -504,16 +512,12 @@ window.SpellingWeekdicteePaneel = (function() {
 
         const opruimen = () => {
           tijdelijk.remove();
-          // Herstel de preview in zijn "leerkracht-view" stand:
-          // - bij werkblad-export: het scherm toonde net het werkblad zonder
-          //   antwoorden (zelfs als toonWoorden aan stond), dus we moeten
-          //   terug naar de gewenste toonWoorden-stand.
-          // - bij oplossingen-export: idem, anders blijft het oplossingen-blad
-          //   op het scherm staan.
-          // We roepen gewoon vernieuwPreview() — die respecteert toonWoorden
-          // en hangt ✕-knoppen + bewerk-modus terug aan. Wijzigingen blijven
-          // bewaard in de `wijzigingen`-map.
-          vernieuwPreview();
+          // Herstel de preview alleen als we hem hebben gewijzigd (bij leerling-blad).
+          // Bij dicteerblad (mijn versie) hebben we niet geregenereerd, dus 
+          // de preview staat al exact zoals de gebruiker hem wilde behouden.
+          if (!metOplossingen) {
+            vernieuwPreview();
+          }
           if (downloadKnop) {
             downloadKnop.textContent = oudeTekst;
             downloadKnop.disabled = false;
