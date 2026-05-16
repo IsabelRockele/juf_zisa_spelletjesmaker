@@ -725,6 +725,30 @@ window.SpellingDicteeZinnen.graad1 = {
   "verkleinwoorden|vader": "Ik speel met mijn vadertje.",  //  (de vadertje)
   "verkleinwoorden|vest": "Op de pop zit een vestje.",  //  (het vestje)
   "verkleinwoorden|voet": "De baby heeft een voetje.",  //  (de voetje)
+
+  // ==========================================================
+  // Samenstellingen (18 woorden)
+  // Twee woorden aan elkaar geplakt zonder spatie of streepje.
+  // Pedagogisch: kind hoort de twee delen maar schrijft ze als één woord.
+  // ==========================================================
+  "samenstellingen|klokhuis": "In de appel zit een klokhuis.",  //  (het klokhuis)
+  "samenstellingen|brooddoos": "Mijn brooddoos zit in mijn tas.",  //  (de brooddoos)
+  "samenstellingen|handdoek": "Na het bad pak ik een handdoek.",  //  (de handdoek)
+  "samenstellingen|zakdoek": "Ik snuit mijn neus in een zakdoek.",  //  (de zakdoek)
+  "samenstellingen|oorbel": "In mijn oor zit een oorbel.",  //  (de oorbel)
+  "samenstellingen|neushoorn": "De neushoorn loopt in de zon.",  //  (de neushoorn)
+  "samenstellingen|slaapkamer": "Mijn bed staat in de slaapkamer.",  //  (de slaapkamer)
+  "samenstellingen|badkamer": "Ik poets mijn tanden in de badkamer.",  //  (de badkamer)
+  "samenstellingen|zwembad": "Wij gaan naar het zwembad.",  //  (het zwembad)
+  "samenstellingen|melkkan": "Op tafel staat een melkkan.",  //  (de melkkan)
+  "samenstellingen|voetbal": "Ik schop tegen de voetbal.",  //  (de voetbal)
+  "samenstellingen|balpen": "Ik krijg een nieuwe balpen.",  //  (de schooltas)
+  "samenstellingen|deurbel": "De deurbel gaat.",  //  (de deurbel)
+  "samenstellingen|regenjas": "Ik doe mijn regenjas aan.",  //  (de regenjas)
+  "samenstellingen|tandpasta": "Op mijn borstel doe ik tandpasta.",  //  (de tandpasta)
+  "samenstellingen|boekentas": "Mijn boekentas is heel zwaar.",  //  (de boekentas)
+  "samenstellingen|dagboek": "Elke dag schrijf ik in mijn dagboek.",  //  (het dagboek)
+  "samenstellingen|kerstboom": "Papa versiert de kerstboom.",  //  (de kerstboom)
 };
 
 /* ============================================================
