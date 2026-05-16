@@ -321,11 +321,17 @@
         const regex = new RegExp(`\\b${juist}\\b`, "gi");
         const zinMetFout = item.zin.replace(regex, fout);
 
-        const canvas = sl
-          ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 320)
+        // 2 schrijflijnen onder de zin: kind schrijft de hele juiste zin over.
+        const canvas1 = sl
+          ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 580)
           : `<div class="ov07-fallback-lijn ov09-fallback-lijn"></div>`;
+        const canvas2 = sl
+          ? sl.htmlCanvas(cfg.lijntype, cfg.lijnhoogte, 580)
+          : `<div class="ov07-fallback-lijn ov09-fallback-lijn"></div>`;
+        
+        // Antwoord = de hele JUISTE zin (de originele item.zin), niet alleen het woord
         const antw = metAntwoorden
-          ? `<span class="ov07-lijn-antwoord ov09-lijn-antwoord">${juist}</span>`
+          ? `<span class="ov07-lijn-antwoord ov09-lijn-antwoord">${item.zin}</span>`
           : "";
 
         // Maak de foute vorm visueel doorstreepbaar in oplossingen-modus
@@ -339,8 +345,8 @@
             <div class="ov09-uitbreiding-nr">${idx + 1}.</div>
             <div class="ov09-uitbreiding-zin">${zinHTML}</div>
             <div class="ov09-uitbreiding-correctie">
-              <span class="ov09-uitbreiding-pijl">→</span>
-              <span class="ov09-uitbreiding-lijn">${antw}${canvas}</span>
+              <div class="ov09-uitbreiding-lijn">${antw}${canvas1}</div>
+              <div class="ov09-uitbreiding-lijn">${canvas2}</div>
             </div>
           </div>`;
       });
@@ -561,7 +567,7 @@
         uitbreiding: [
           "Lees elke zin goed.",
           "De Klinkerdief heeft een woord verkeerd geschreven.",
-          "Streep het foute woord door en schrijf het goed op de lijn."
+          "Streep het foute woord door en schrijf de juiste zin op de lijnen."
         ]
       };
       return map[niveau] || map.basis;
