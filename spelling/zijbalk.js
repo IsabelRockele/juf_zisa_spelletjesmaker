@@ -97,6 +97,66 @@ window.SpellingZijbalk = (function() {
     uitbreiding: "⭐⭐⭐⭐ Uitbreiden"
   };
 
+  /* Pedagogische uitleg per (OV, niveau). Wordt onder de pil getoond zodat
+     de leerkracht direct ziet wat het kind op dit niveau doet en voor wie
+     het geschikt is. Korte zin (10-18 woorden), tone: "wat doet het kind". */
+  const NIVEAU_UITLEG = {
+    ov01: {
+      basis: "Kind ziet plaatje + 3 woorden. Kleurt het juiste woord en schrijft het over. Hulp om het schrijven te leren.",
+      kern: "Alleen het plaatje. Kind benoemt het woord zelf en schrijft het op. Standaard-oefening.",
+      verdieping: "Plaatje + 1 zin maken met dat woord. Voor wie het schrijven al vlot kan en aan zinsbouw mag oefenen.",
+      uitbreiding: "Plaatje + woord + meervoud + verkleinwoord. Voor sterke spellers die woordfamilies aankunnen."
+    },
+    ov03: {
+      basis: "Plaatje + letters door elkaar in hokjes. Kind schikt en schrijft. Plaatje helpt om het woord te vinden.",
+      kern: "Geen plaatje, wel eerste letter in blauw als hint. Kind moet het woord echt kennen.",
+      verdieping: "Alleen letters door elkaar, geen hint. Voor wie de woorden goed kent en zelfstandig kan zoeken.",
+      uitbreiding: "Letters door elkaar + kind bedenkt zelf nog 2 woorden uit de categorie. Creatieve uitbreiding."
+    },
+    ov04: {
+      basis: "Klanken sorteren met visuele steun (kleuren/kolommen). Kind onderscheidt de klanken.",
+      kern: "Sorteren zonder kleur-hint. Kind herkent de klank zelf en plaatst het woord juist.",
+      verdieping: "Meer woorden, snellere sortering. Werkt aan klankgevoeligheid.",
+      uitbreiding: "Sorteren + zelf woorden bedenken bij elke klank. Voor sterke spellers."
+    },
+    ov05: {
+      basis: "Plaatje + hokjes + lijn. Kind kiest welke klank past en schrijft het woord op. Veilige instap.",
+      kern: "Geen plaatje. Kind kiest klank op basis van de uitspraak alleen.",
+      verdieping: "Plaatje + lijn, kind schrijft zelfstandig met de juiste klank.",
+      uitbreiding: "Plaatje + lijn, kind moet helemaal zelfstandig juist schrijven. Volledig zelfstandig niveau."
+    },
+    ov06: {
+      basis: "Per zin een keuze uit 2 woorden. Kind kruist juiste aan en schrijft het op de lijn. Veilige instap.",
+      kern: "Woordbank bovenaan, kind kiest welk woord in welke zin past. Werkt aan zinsbegrip.",
+      verdieping: "Woordbank met extra woorden die niet passen. Kind moet kritisch lezen en de juiste eruit pikken.",
+      uitbreiding: "Geen voorgegeven zinnen. Kind krijgt een woord en schrijft er zelf een zin mee. Voor wie zinsbouw oefent."
+    },
+    ov07: {
+      basis: "Kind kruist juiste uitgang aan (-je, -tje of -pje) en schrijft dan het hele verkleinwoord op de lijn.",
+      kern: "Grondwoord staat er, kind schrijft het verkleinwoord ernaast. Kind moet de regel zelf toepassen.",
+      verdieping: "Twee richtingen door elkaar: soms grondwoord → verkleinwoord, soms andersom. Werkt het inzicht in beide richtingen.",
+      uitbreiding: "Kort verhaal met onderstreepte zelfstandige naamwoorden. Kind schrijft het verhaal over en zet die woorden in verkleinvorm."
+    },
+    ov08: {
+      basis: "Kind kruist juiste uitgang aan en schrijft het meervoud op. Hulp om de regel te leren.",
+      kern: "Grondwoord staat er, kind schrijft het meervoud met een telwoord ervoor (twee, drie...).",
+      verdieping: "Twee richtingen door elkaar: enkelvoud → meervoud én meervoud → enkelvoud.",
+      uitbreiding: "Genummerde invul-zinnen + kind schrijft zelf 3 zinnen met meervouden. Toepassing in context."
+    },
+    ov09: {
+      basis: "Plaatje + 2 radio-keuzes (verdubbeld vs verenkeld). Kind kiest welk woord juist is.",
+      kern: "Plaatje + lijn. Kind schrijft zelf het juiste woord met of zonder verdubbeling.",
+      verdieping: "3×3 plaatjes-grid + 3 sorteerkolommen. Kind sorteert volgens de regel.",
+      uitbreiding: "Kind streept de fout door en schrijft de juiste zin over. Volledige toepassing in context."
+    },
+    ov10: {
+      basis: "Woordzoeker met plaatjes. Kind zoekt elk samengesteld woord en schrijft het onderaan op de lijn.",
+      kern: "Twee plaatjes (deel + deel = samenstelling). Kind plakt de woorden aan elkaar zonder spatie en schrijft op.",
+      verdieping: "Twee kolommen woorden. Kind trekt lijntjes tussen passende delen en schrijft de samenstellingen op.",
+      uitbreiding: "Beschrijving lezen en zelf het samengesteld woord bedenken. Werkt aan woordenschat én spelling tegelijk."
+    }
+  };
+
   /* ---------- State ---------- */
   let actieveGraad = 1;
   let aangevinkteCategorieen = {};
@@ -553,7 +613,10 @@ window.SpellingZijbalk = (function() {
               <label class="zb-niveau-vink ${ningevinkt ? 'aan' : ''}">
                 <input type="checkbox" class="zb-niveau-cb" 
                        data-oef="${oef.id}" data-niveau="${niv}" ${ningevinkt ? 'checked' : ''}>
-                <span>${NIVEAU_LABELS[niv]}</span>
+                <div class="zb-niveau-tekst">
+                  <span class="zb-niveau-label">${NIVEAU_LABELS[niv]}</span>
+                  ${NIVEAU_UITLEG[oef.id]?.[niv] ? `<span class="zb-niveau-uitleg">${NIVEAU_UITLEG[oef.id][niv]}</span>` : ''}
+                </div>
               </label>
               ${aantalInputHTML}
             </div>`;
