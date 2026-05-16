@@ -160,6 +160,11 @@ window.SpellingBundel = {
       ondertitel: ""
     };
     
+    // OV02-specifiek: plaatje-toggle uit zijbalk-state
+    if (oef.id === "ov02") {
+      subOpties.metPlaatje = oef.metPlaatje === true;
+    }
+    
     return {
       categorie: oef.id,
       graad: graad,
