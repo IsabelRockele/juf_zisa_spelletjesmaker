@@ -425,13 +425,15 @@ window.SpellingModules.ov10 = {
 
       let linksHTML = `<div class="ov10-vb-kolom ov10-vb-links">`;
       for (const woord of linkerwoorden) {
-        linksHTML += `<div class="ov10-vb-item"><span>${woord}</span><span class="ov10-vb-punt">•</span></div>`;
+        // data-deel = het linker deel (= de "key" om mee te matchen in PDF)
+        linksHTML += `<div class="ov10-vb-item" data-deel="${woord}"><span>${woord}</span><span class="ov10-vb-punt">•</span></div>`;
       }
       linksHTML += `</div>`;
 
       let rechtsHTML = `<div class="ov10-vb-kolom ov10-vb-rechts">`;
       for (const woord of rechterwoorden) {
-        rechtsHTML += `<div class="ov10-vb-item"><span class="ov10-vb-punt">•</span><span>${woord}</span></div>`;
+        // data-deel = het rechter deel
+        rechtsHTML += `<div class="ov10-vb-item" data-deel="${woord}"><span class="ov10-vb-punt">•</span><span>${woord}</span></div>`;
       }
       rechtsHTML += `</div>`;
 
@@ -450,8 +452,17 @@ window.SpellingModules.ov10 = {
       }
       noteerHTML += `</div>`;
 
+      // Geef ook de paren expliciet mee als data-attribuut op de mini-container,
+      // zodat de PDF-renderer weet welk linker-deel met welk rechter-deel hoort.
+      // Formaat: "deel1a=deel1b,deel2a=deel2b,..."
+      const parenStr = groep.map(w => {
+        const a = (w.delen?.[0] || w.tekst).replace(/=/g, "");
+        const b = (w.delen?.[1] || "").replace(/=/g, "");
+        return `${a}=${b}`;
+      }).join(",");
+
       return `
-        <div class="ov10-vb-mini">
+        <div class="ov10-vb-mini" data-paren="${parenStr}">
           <div class="ov10-vb-grid">
             ${linksHTML}
             <div class="ov10-vb-midden"></div>
