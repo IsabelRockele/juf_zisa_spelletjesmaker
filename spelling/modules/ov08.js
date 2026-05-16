@@ -31,7 +31,18 @@
       uitbreiding: 5
     },
 
-    /* Telwoorden + bepalers die we wisselend gebruiken bij ⭐⭐ Toepassen */
+    /* Telwoorden + bepalers die we wisselend gebruiken bij ⭐⭐ Toepassen.
+       Gesplitst in twee groepen:
+       - KORT: passen ook bij lange grondwoorden (schoen, meeuw, dokter...)
+               want het meervoud is dan ook lang en moet op de schrijflijn passen
+       - LANG: alleen gebruiken bij korte grondwoorden (boom, tuin, muur, boer...) */
+    TELWOORDEN_KORT: [
+      "veel", "twee", "drie", "vier", "vijf", "zes", "alle", "vele"
+    ],
+    TELWOORDEN_LANG: [
+      "zeven", "enkele", "sommige"
+    ],
+    /* Achterwaarts-compatibele combinatie (alle telwoorden) */
     TELWOORDEN: [
       "veel", "twee", "drie", "vier", "vijf", "zes", "zeven",
       "enkele", "sommige", "alle", "vele"
@@ -300,8 +311,12 @@
         const juiste = this._uitgangVan(w);
         const meervoud = w.meervoud || (w.tekst + juiste);
 
-        // Wisselend telwoord per rij (deterministisch via seed)
-        const telwoord = this.TELWOORDEN[this._intRandom(this.TELWOORDEN.length, idx)];
+        // Telwoord-keuze afhankelijk van grondwoord-lengte:
+        // - Korte grondwoorden (≤4 letters): alle telwoorden mogen
+        // - Lange grondwoorden (≥5 letters): alleen korte telwoorden zodat
+        //   de schrijflijn lang genoeg blijft voor het meervoud (vb. "schoenen")
+        const pool = (w.tekst.length >= 5) ? this.TELWOORDEN_KORT : this.TELWOORDEN;
+        const telwoord = pool[this._intRandom(pool.length, idx)];
 
         const antwoord = metAntwoorden
           ? `<span class="ov07-lijn-antwoord ov08-lijn-antwoord">${meervoud}</span>`
@@ -314,7 +329,7 @@
         rijenHTML += `
           <div class="ov07-rij ov08-rij ov07-rij-kern ov08-rij-kern" data-woord="${w.tekst}">
             <button class="rij-verwijder-knop" data-woord="${w.tekst}" title="Verwijder dit woord" type="button">✕</button>
-            <div class="ov07-grondwoord ov08-grondwoord ov07-kol-woord ov08-kol-woord">1 ${w.tekst}</div>
+            <div class="ov07-grondwoord ov08-grondwoord ov07-kol-woord ov08-kol-woord">${w.tekst}</div>
             <div class="ov07-pijl ov08-pijl">→</div>
             <div class="ov07-telwoord ov08-telwoord">${telwoord}</div>
             <div class="ov07-lijn-cel ov08-lijn-cel ov07-kol-meervoud ov08-kol-meervoud">${antwoord}${canvas}</div>
