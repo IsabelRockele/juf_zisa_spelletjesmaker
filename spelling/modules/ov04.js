@@ -288,7 +288,6 @@ window.SpellingModules.ov04 = {
     if (!wb) return [];
     const cats = wb["graad" + (leerjaar || 1)] || {};
 
-    // Bepaal welke categorieën aangevinkt zijn (op basis van woorden in pool)
     const aangevinkteCats = [...new Set(gekozenWoorden.map(w => w.categorie).filter(Boolean))];
 
     const resultaat = [];
@@ -296,8 +295,6 @@ window.SpellingModules.ov04 = {
       const detectie = paar.trigger(aangevinkteCats, cats);
       if (!detectie) continue;
       
-      // Voor paren met minimumPerKolom-flag: check dat élke kolom
-      // minstens 1 woord heeft in de daadwerkelijke pool.
       if (detectie.minimumPerKolom) {
         const allKolommenOK = detectie.kolommen.every(kol => 
           gekozenWoorden.some(w => kol.filter(w))
@@ -753,33 +750,34 @@ window.SpellingModules.ov04 = {
       ? `<span class="oplossingen-badge">OPLOSSINGEN</span>`
       : "";
 
-    // Opdracht-tekst per niveau
+    // Opdracht-tekst per niveau (kort gehouden zodat legende ernaast past)
     let opdrachtTekst = "";
     const isVoluit = paar.basisVoluit;
     if (niveau === "basis") {
       opdrachtTekst = isVoluit
         ? `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kleur de klank in elk woord met de juiste kleur.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Kleur de klank in elk woord.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het in de juiste kolom.</span></div>`
         : `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont welke soort klank ontbreekt.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het juiste woord in de juiste kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont de klank.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf in de juiste kolom.</span></div>`;
     } else if (niveau === "kern") {
       opdrachtTekst = isVoluit
         ? `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont welke soort klank ontbreekt.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de klank in en schrijf het woord in de juiste kolom.</span></div>`
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Het symbool toont de klank.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul aan en schrijf in de juiste kolom.</span></div>`
         : `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de ontbrekende klank in.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf het woord in de juiste kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf in de juiste kolom.</span></div>`;
     } else if (niveau === "verdieping") {
       opdrachtTekst = `
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de klanken in en schrijf elk woord in de juiste kolom.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk daarna zelf nog 3 woorden per kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Vul de klanken in.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Schrijf elk woord in de juiste kolom.</span></div>
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk daarna nog 3 woorden per kolom.</span></div>`;
     } else if (niveau === "uitbreiding") {
       opdrachtTekst = `
         <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Bedenk 5 woorden voor elke kolom.</span></div>
-        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak onderaan 3 zinnen, telkens met een woord uit een andere kolom.</span></div>`;
+        <div class="ov01-stap-rij"><span class="ov01-vakje"></span><span>Maak 3 zinnen met telkens een woord uit een andere kolom.</span></div>`;
     }
 
     // Werkblad-titel: gebruik paar.titel zodat leerkracht/kind ziet welk paar
