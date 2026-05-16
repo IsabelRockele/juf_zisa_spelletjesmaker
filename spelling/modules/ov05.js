@@ -320,9 +320,9 @@ window.SpellingModules.ov05 = {
       const kern = this._kernDeel(woordVol);     // bv. "ligt" of "heb"
       const prefix = this._prefix(woordVol);     // bv. "hij" of "ik" of ""
       
-      const emoji = metPlaatje ? this._zoekEmoji(woordVol) : "";
+      const plaatjeHtml = metPlaatje ? this._plaatjeHtml(w) : "";
       const plaatjeCel = metPlaatje
-        ? `<div class="ov05-plaatje">${emoji}</div>`
+        ? `<div class="ov05-plaatje">${plaatjeHtml}</div>`
         : `<div class="ov05-plaatje-leeg"></div>`;
 
       // Bouw keuze-hokjes voor basis en kern via afleiders (hele-woord keuze)
@@ -451,6 +451,13 @@ window.SpellingModules.ov05 = {
       return window.SpellingAfbeeldingen.emojiVoor(tekst);
     }
     return "🖼️";
+  },
+
+  _plaatjeHtml: function(woord) {
+    if (window.SpellingAfbeeldingen && window.SpellingAfbeeldingen.htmlVoorWoord) {
+      return window.SpellingAfbeeldingen.htmlVoorWoord(woord);
+    }
+    return `<span class="woord-emoji">🖼️</span>`;
   },
 
   _seed: null,
