@@ -86,28 +86,28 @@ window.SpellingModules.ov06 = {
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
               <strong>⭐ Oefenen</strong>
-              <small>per zin keuze uit 2 woorden</small>
+              <small>Per zin een keuze uit 2 woorden. Kind kruist juiste aan en schrijft het op de lijn. Veilige instap.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐ Toepassen</strong>
-              <small>woordbank + invullen op streep</small>
+              <small>Woordbank bovenaan, kind kiest welk woord in welke zin past. Werkt aan zinsbegrip.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>woordbank met afleiders</small>
+              <small>Woordbank met extra woorden die niet passen. Kind moet kritisch lezen en de juiste eruit pikken.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="uitbreiding">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>kind schrijft eigen zinnen</small>
+              <small>Geen voorgegeven zinnen. Kind krijgt een woord en schrijft er zelf een zin mee. Voor wie zinsbouw oefent.</small>
             </div>
           </label>
         </div>
