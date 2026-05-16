@@ -4916,6 +4916,794 @@ window.SpellingHerhalingsbundelPDF = (function() {
     state.cursorY += 2;
   }
   
+  /* ==========================================================
+     OV10 — SAMENSTELLINGEN
+     
+     4 niveaus, heel divers:
+       ⭐ basis:       Woordzoeker — afbeeldingen-grid + letter-rooster + 
+                        2-koloms noteer-lijnen
+       ⭐⭐ kern:       Plaatje + plaatje = samenstelling op één lijn
+       ⭐⭐⭐ verdieping: 2 verbind-mini-oefeningen naast elkaar 
+                        (kolommen woorden met bolletjes + noteer-lijnen)
+       ⭐⭐⭐⭐ uitbreiding: beschrijving + schrijflijn per rij
+     ========================================================== */
+  
+  function tekenOV10(state, item) {
+    const pdf = state.pdf;
+    const itemEl = document.querySelector(`.hb-item[data-item-id="${item.id}"]`);
+    if (!itemEl) {
+      _tekenStubOV(state, item, "ov10");
+      return;
+    }
+    
+    const werkbladEl = itemEl.querySelector(".werkblad");
+    const lijntype = werkbladEl?.getAttribute("data-lijntype") || "type3";
+    const lijnhoogte = werkbladEl?.getAttribute("data-lijnhoogte") || "middel";
+    const niveau = werkbladEl?.getAttribute("data-niveau") || item.niveau || "basis";
+    const metOplossingen = item.metAntwoorden === true;
+    
+    let L = 5.5;
+    if (lijnhoogte === "klein") L = 4.0;
+    else if (lijnhoogte === "groot") L = 7.5;
+    const SCHRIJFLIJN_HOOGTE = 3 * L;
+    
+    const stappen = _haalOpdrachtStappen(itemEl, "ov10");
+    const opdrachtStappen = stappen.length > 0 ? stappen :
+      ["Lees de opdracht.", "Werk de samenstelling uit."];
+    const opdrachtHoogte = 2 * 4 + 7 + opdrachtStappen.length * 7.5;
+    
+    // Woord-lookup voor PNG's
+    const woordPool = [
+      ...(item.actieveWoorden || []),
+      ...(item.extraWoorden || []),
+      ...(item.gekozenWoordenSnapshot || [])
+    ];
+    const woordLookup = new Map();
+    for (const w of woordPool) {
+      if (w && w.tekst && !woordLookup.has(w.tekst)) {
+        if (!w.graad && !w.leerjaar && item.graad) w.graad = item.graad;
+        woordLookup.set(w.tekst, w);
+      }
+    }
+    
+    if (niveau === "basis") {
+      _tekenOV10Basis(state, itemEl, woordLookup, opdrachtStappen, opdrachtHoogte,
+                      lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen);
+    } else if (niveau === "kern") {
+      _tekenOV10Kern(state, itemEl, woordLookup, opdrachtStappen, opdrachtHoogte,
+                     lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen);
+    } else if (niveau === "verdieping") {
+      _tekenOV10Verdieping(state, itemEl, opdrachtStappen, opdrachtHoogte,
+                           lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen);
+    } else if (niveau === "uitbreiding") {
+      _tekenOV10Uitbreiding(state, itemEl, opdrachtStappen, opdrachtHoogte,
+                            lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen);
+    }
+  }
+  
+  /* ⭐ BASIS: Woordzoeker = afbeeldingen-grid + letter-rooster + noteer-lijnen */
+  function _tekenOV10Basis(state, itemEl, woordLookup, opdrachtStappen, opdrachtHoogte,
+                            lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen) {
+    const pdf = state.pdf;
+    const x = state.contentX;
+    const breedte = state.contentBreedte;
+    
+    // Verzamel afbeeldingen — combineer info uit de cel zelf met de woord-lookup
+    const afbeeldingen = [];
+    itemEl.querySelectorAll(".ov10-basis-afb-cel").forEach(celEl => {
+      const imgEl = celEl.querySelector("img");
+      const emojiEl = celEl.querySelector(".ov10-afb-emoji-combo");
+      
+      // Woord-naam achterhalen
+      let woordTekst = "";
+      if (imgEl) {
+        woordTekst = imgEl.getAttribute("alt") || "";
+      }
+      
+      // Probeer eerst woord-object uit de lookup (heeft delen, delenEmoji, etc.)
+      let woordObj = woordTekst ? woordLookup.get(woordTekst) : null;
+      
+      // Emoji-combo uit DOM lezen als fallback (als woordObj niets oplevert,
+      // of er gewoon een emoji-span staat).
+      let emojiCombo = "";
+      if (emojiEl) {
+        emojiCombo = emojiEl.textContent.trim();
+      }
+      
+      // Zorg dat woordObj de samenstellingen-categorie heeft als die ontbreekt;
+      // dat is nodig opdat afbeeldingPad() een PNG-URL kan bouwen.
+      if (woordObj && !woordObj.categorie) {
+        woordObj = Object.assign({}, woordObj, { categorie: "samenstellingen" });
+      } else if (!woordObj && woordTekst) {
+        woordObj = { tekst: woordTekst, categorie: "samenstellingen" };
+      }
+      
+      afbeeldingen.push({ woordObj, emojiCombo });
+    });
+    
+    // Verzamel rooster (letter per cel)
+    const rooster = [];
+    itemEl.querySelectorAll(".ov10-basis-rij").forEach(rijEl => {
+      const rij = [];
+      rijEl.querySelectorAll(".ov10-hokje").forEach(hokEl => {
+        rij.push({
+          letter: hokEl.textContent.trim(),
+          isTreffer: hokEl.classList.contains("ov10-hokje-treffer")
+        });
+      });
+      rooster.push(rij);
+    });
+    
+    // Verzamel noteer-rijen
+    const noteerRijen = [];
+    itemEl.querySelectorAll(".ov10-basis-noteer-rij").forEach(rijEl => {
+      const nrEl = rijEl.querySelector(".ov10-noteer-nr");
+      const antwoordEl = rijEl.querySelector(".ov10-lijn-antwoord");
+      noteerRijen.push({
+        nr: nrEl ? nrEl.textContent.trim() : "",
+        antwoord: antwoordEl ? antwoordEl.textContent.trim() : ""
+      });
+    });
+    
+    if (afbeeldingen.length === 0 && rooster.length === 0) {
+      _tekenStubOV(state, { id: itemEl.getAttribute("data-item-id") }, "ov10");
+      return;
+    }
+    
+    // === Layout ===
+    // Sectie 1: Afbeeldingen-grid (4 kolommen × 2 rijen = max 8)
+    const AFB_KOLOMMEN = 4;
+    const AFB_SPACING = 3;
+    const AFB_BREEDTE_CEL = (breedte - (AFB_KOLOMMEN - 1) * AFB_SPACING) / AFB_KOLOMMEN;
+    const AFB_HOOGTE_CEL = 18;
+    const afbRijen = Math.ceil(afbeeldingen.length / AFB_KOLOMMEN);
+    const afbSectieHoogte = afbRijen * AFB_HOOGTE_CEL + (afbRijen - 1) * AFB_SPACING;
+    
+    // Sectie 2: Letter-rooster (12 kolommen × N rijen)
+    const ROOSTER_KOLOMMEN = 12;
+    const HOK_SPACING = 0.8;
+    const ROOSTER_BREEDTE_TOTAAL = Math.min(breedte, 130);  // niet hele paginabreedte
+    const hokGrootte = (ROOSTER_BREEDTE_TOTAAL - (ROOSTER_KOLOMMEN - 1) * HOK_SPACING) / ROOSTER_KOLOMMEN;
+    const roosterRijen = rooster.length;
+    const roosterHoogte = roosterRijen * hokGrootte + (roosterRijen - 1) * HOK_SPACING;
+    
+    // Sectie 3: Noteer-label + 2-koloms lijnen (4 rijen × 2 kolommen)
+    const NOTEER_LABEL_HOOGTE = 8;
+    const NOTEER_KOLOMMEN = 2;
+    const NOTEER_KOL_SPACING = 6;
+    const NOTEER_NR_BREEDTE = 8;
+    const noteerRijenPerKol = Math.ceil(noteerRijen.length / NOTEER_KOLOMMEN);
+    const noteerRijHoogte = SCHRIJFLIJN_HOOGTE + 3;
+    const noteerSectieHoogte = NOTEER_LABEL_HOOGTE + noteerRijenPerKol * (noteerRijHoogte + 3);
+    
+    // Spacing tussen secties
+    const SPACING_SECTIE = 5;
+    
+    // === Reserveer ===
+    // Strategie: opdracht + woordzoeker (afbeeldingen + rooster) blijven samen.
+    // De noteer-lijnen mogen op een volgende pagina; ze zijn losse rijen.
+    const woordzoekerHoogte = opdrachtHoogte + 4 + afbSectieHoogte + SPACING_SECTIE + roosterHoogte;
+    reserveerRuimte(state, woordzoekerHoogte + 4);
+    
+    // === Opdracht ===
+    tekenGeleKader(pdf, x, state.cursorY, breedte, opdrachtStappen, {
+      label: "Opdracht",
+      aantalSterren: sterrenVoorNiveau(niveau)
+    });
+    state.cursorY += opdrachtHoogte + 6;
+    
+    // === Sectie 1: Afbeeldingen ===
+    for (let i = 0; i < afbeeldingen.length; i++) {
+      const r = Math.floor(i / AFB_KOLOMMEN);
+      const c = i % AFB_KOLOMMEN;
+      const cx = x + c * (AFB_BREEDTE_CEL + AFB_SPACING);
+      const cy = state.cursorY + r * (AFB_HOOGTE_CEL + AFB_SPACING);
+      
+      // Cel-kader
+      tekenKader(pdf, cx, cy, AFB_BREEDTE_CEL, AFB_HOOGTE_CEL, {
+        randKleur: KLEUR_LIJN_GRIJS,
+        randDikte: 0.3,
+        rondeHoeken: 2
+      });
+      
+      // Plaatje: probeer eerst echte PNG via tekenAfbeelding, anders
+      // teken we de 2 emoji's uit delenEmoji naast elkaar.
+      const afb = afbeeldingen[i];
+      const pad = afb.woordObj ? afbeeldingPad(afb.woordObj) : null;
+      const heeftPNG = pad && _afbeeldingCache[pad];
+      
+      if (heeftPNG && afb.woordObj) {
+        tekenAfbeelding(pdf, cx + 2, cy + 2, AFB_HOOGTE_CEL - 4, afb.woordObj, {
+          maxBreedte: AFB_BREEDTE_CEL - 4
+        });
+      } else if (afb.emojiCombo) {
+        // Split emoji-combo in losse emoji's en teken ze naast elkaar.
+        // Gebruik Array.from() omdat emoji's vaak multi-byte zijn.
+        const emojis = Array.from(afb.emojiCombo).filter(c => c.trim());
+        const emojiGrootte = Math.min(AFB_HOOGTE_CEL - 4, 12);
+        const totBreedte = emojis.length * emojiGrootte + (emojis.length - 1) * 1;
+        const startX = cx + (AFB_BREEDTE_CEL - totBreedte) / 2;
+        const startY = cy + (AFB_HOOGTE_CEL - emojiGrootte) / 2;
+        for (let k = 0; k < emojis.length; k++) {
+          tekenEmoji(pdf, startX + k * (emojiGrootte + 1), startY, emojiGrootte, emojis[k]);
+        }
+      } else if (afb.woordObj?.tekst) {
+        // Allerlaatste fallback: tekst
+        tekenTekst(pdf, cx + AFB_BREEDTE_CEL / 2, cy + AFB_HOOGTE_CEL / 2 + 2, afb.woordObj.tekst, {
+          size: 11,
+          kleur: KLEUR_TEKST,
+          gecentreerd: true
+        });
+      }
+    }
+    state.cursorY += afbSectieHoogte + SPACING_SECTIE;
+    
+    // === Sectie 2: Letter-rooster (gecentreerd) ===
+    const roosterStartX = x + (breedte - ROOSTER_BREEDTE_TOTAAL) / 2;
+    for (let r = 0; r < rooster.length; r++) {
+      const rij = rooster[r];
+      const rijY = state.cursorY + r * (hokGrootte + HOK_SPACING);
+      
+      for (let c = 0; c < rij.length; c++) {
+        const hok = rij[c];
+        const hokX = roosterStartX + c * (hokGrootte + HOK_SPACING);
+        
+        // Hokje-kader
+        const isTreffer = hok.isTreffer && metOplossingen;
+        tekenKader(pdf, hokX, rijY, hokGrootte, hokGrootte, {
+          vulKleur: isTreffer ? [255, 235, 100] : null,  // gele highlight bij oplossingen
+          randKleur: KLEUR_LIJN_GRIJS,
+          randDikte: 0.3,
+          rondeHoeken: 0.8
+        });
+        
+        // Letter gecentreerd
+        const letterFont = hokGrootte > 7 ? 11 : 9;  // schaal-aanpassing
+        tekenTekst(pdf, hokX + hokGrootte / 2, rijY + hokGrootte / 2 + letterFont * 0.13, hok.letter, {
+          size: letterFont,
+          kleur: KLEUR_TEKST,
+          vet: isTreffer,
+          gecentreerd: true
+        });
+      }
+    }
+    state.cursorY += roosterHoogte + SPACING_SECTIE;
+    
+    // === Sectie 3: Noteer-lijnen ===
+    // Label + minstens 1 noteer-rij samen op één pagina (geen wees-titel).
+    const noteerRijHoogte_lokaal = SCHRIJFLIJN_HOOGTE + 3;
+    reserveerRuimte(state, NOTEER_LABEL_HOOGTE + noteerRijHoogte_lokaal + 3);
+    
+    tekenTekst(pdf, x, state.cursorY + 5, "Schrijf de woorden die je vond:", {
+      size: FONT_GROOTTE_INHOUD,
+      kleur: KLEUR_TEKST,
+      vet: true
+    });
+    state.cursorY += NOTEER_LABEL_HOOGTE;
+    
+    // Noteer-lijnen mogen op een volgende pagina starten als de woordzoeker 
+    // niet alles meer toelaat — we reserveren per "rij" (= rij van 2 kolommen).
+    const noteerKolBreedte = (breedte - (NOTEER_KOLOMMEN - 1) * NOTEER_KOL_SPACING) / NOTEER_KOLOMMEN;
+    
+    for (let rIdx = 0; rIdx < noteerRijenPerKol; rIdx++) {
+      // Reserveer ruimte voor één rij (= 2 cellen naast elkaar)
+      if (rIdx > 0) reserveerRuimte(state, noteerRijHoogte + 3);
+      const rijY = state.cursorY;
+      
+      for (let kol = 0; kol < NOTEER_KOLOMMEN; kol++) {
+        const i = rIdx * NOTEER_KOLOMMEN + kol;
+        if (i >= noteerRijen.length) break;
+        
+        const rX = x + kol * (noteerKolBreedte + NOTEER_KOL_SPACING);
+        const lijnTopY = rijY;
+        const tekstBaseline = lijnTopY + 2 * L - 0.5;
+        
+        // Nummer
+        tekenTekst(pdf, rX, tekstBaseline, noteerRijen[i].nr, {
+          size: FONT_GROOTTE_INHOUD,
+          kleur: KLEUR_TEKST,
+          vet: true
+        });
+        
+        // Schrijflijn
+        const lijnX = rX + NOTEER_NR_BREEDTE;
+        const lijnBreedte = noteerKolBreedte - NOTEER_NR_BREEDTE;
+        tekenSchrijflijn(pdf, lijnX, lijnTopY, lijnBreedte, lijntype, lijnhoogte);
+        
+        if (metOplossingen && noteerRijen[i].antwoord) {
+          tekenTekst(pdf, lijnX + 2, tekstBaseline, noteerRijen[i].antwoord, {
+            size: FONT_GROOTTE_INHOUD,
+            kleur: KLEUR_TEKST
+          });
+        }
+      }
+      
+      state.cursorY = rijY + noteerRijHoogte + 3;
+    }
+    
+    state.cursorY += 4;
+  }
+  
+  /* ⭐⭐ KERN: Plaatje + plaatje = samenstelling */
+  function _tekenOV10Kern(state, itemEl, woordLookup, opdrachtStappen, opdrachtHoogte,
+                           lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen) {
+    const pdf = state.pdf;
+    const x = state.contentX;
+    const breedte = state.contentBreedte;
+    
+    // Verzamel rijen — elke rij heeft data-woord + plaatjes
+    const rijen = [];
+    itemEl.querySelectorAll(".ov10-kern-rij").forEach(rijEl => {
+      const woordTekst = rijEl.getAttribute("data-woord") || "";
+      const woordObj = woordLookup.get(woordTekst);
+      const antwoordEl = rijEl.querySelector(".ov10-lijn-antwoord");
+      
+      // Probeer de delen uit het woord-object te halen
+      const delen = woordObj?.delen || ["", ""];
+      
+      // Emoji's per deel direct uit DOM lezen (fallback voor als delenEmoji 
+      // niet in woordObj zit)
+      const deelEmojiEls = rijEl.querySelectorAll(".ov10-deel-emoji");
+      const deelEmojis = [];
+      deelEmojiEls.forEach(el => deelEmojis.push(el.textContent.trim()));
+      
+      rijen.push({
+        woord: woordTekst,
+        woordObj,
+        delen,
+        deelEmojis,
+        antwoord: antwoordEl ? antwoordEl.textContent.trim() : ""
+      });
+    });
+    
+    if (rijen.length === 0) {
+      _tekenStubOV(state, { id: itemEl.getAttribute("data-item-id") }, "ov10");
+      return;
+    }
+    
+    // Layout: per rij plaatje + plus + plaatje + is + schrijflijn
+    const PLAATJE_GROOTTE = 14;
+    const PLUS_BREEDTE = 6;
+    const IS_BREEDTE = 6;
+    const PLAATJES_BREEDTE = 2 * PLAATJE_GROOTTE + PLUS_BREEDTE + IS_BREEDTE + 8;
+    const SPACING_PLAATJES_LIJN = 4;
+    const lijnBreedte = breedte - PLAATJES_BREEDTE - SPACING_PLAATJES_LIJN;
+    
+    const rijHoogte = Math.max(PLAATJE_GROOTTE, SCHRIJFLIJN_HOOGTE) + 4;
+    const RIJ_SPACING = 5;
+    
+    reserveerRuimte(state, opdrachtHoogte + 4 + rijHoogte + RIJ_SPACING);
+    
+    tekenGeleKader(pdf, x, state.cursorY, breedte, opdrachtStappen, {
+      label: "Opdracht",
+      aantalSterren: sterrenVoorNiveau(niveau)
+    });
+    state.cursorY += opdrachtHoogte + 6;
+    
+    for (let i = 0; i < rijen.length; i++) {
+      if (i > 0) reserveerRuimte(state, rijHoogte + RIJ_SPACING);
+      
+      const r = rijen[i];
+      const rijY = state.cursorY;
+      const midY = rijY + rijHoogte / 2;
+      const lijnTopY = midY - SCHRIJFLIJN_HOOGTE / 2;
+      const tekstBaseline = lijnTopY + 2 * L - 0.5;
+      
+      // Plaatje 1
+      const plaatje1X = x;
+      _tekenOV10DeelPlaatje(pdf, plaatje1X, rijY + (rijHoogte - PLAATJE_GROOTTE) / 2, 
+                            PLAATJE_GROOTTE, r.woordObj, 0, r.deelEmojis[0]);
+      
+      // Plus
+      const plusX = plaatje1X + PLAATJE_GROOTTE + 1;
+      tekenTekst(pdf, plusX + PLUS_BREEDTE / 2, midY + 1.5, "+", {
+        size: 14,
+        kleur: KLEUR_TEKST,
+        vet: true,
+        gecentreerd: true
+      });
+      
+      // Plaatje 2
+      const plaatje2X = plusX + PLUS_BREEDTE + 1;
+      _tekenOV10DeelPlaatje(pdf, plaatje2X, rijY + (rijHoogte - PLAATJE_GROOTTE) / 2,
+                            PLAATJE_GROOTTE, r.woordObj, 1, r.deelEmojis[1]);
+      
+      // Is-teken
+      const isX = plaatje2X + PLAATJE_GROOTTE + 1;
+      tekenTekst(pdf, isX + IS_BREEDTE / 2, midY + 1.5, "=", {
+        size: 14,
+        kleur: KLEUR_TEKST,
+        vet: true,
+        gecentreerd: true
+      });
+      
+      // Schrijflijn
+      const lijnX = x + PLAATJES_BREEDTE + SPACING_PLAATJES_LIJN;
+      tekenSchrijflijn(pdf, lijnX, lijnTopY, lijnBreedte, lijntype, lijnhoogte);
+      
+      if (metOplossingen && r.antwoord) {
+        tekenTekst(pdf, lijnX + 2, tekstBaseline, r.antwoord, {
+          size: FONT_GROOTTE_INHOUD,
+          kleur: KLEUR_TEKST
+        });
+      }
+      
+      state.cursorY += rijHoogte + RIJ_SPACING;
+    }
+    
+    state.cursorY += 4;
+  }
+  
+  /* Helper: teken één deel-plaatje voor OV10 kern.
+     - Probeert eerst de emoji als die in de DOM stond
+     - Daarna eventuele toekomstige deel-PNG (nog niet ondersteund)
+     - Als laatste fallback: tekst-blokje met deel-tekst */
+  function _tekenOV10DeelPlaatje(pdf, x, y, grootte, woordObj, deelIdx, emoji) {
+    if (!woordObj && !emoji) {
+      // Lege placeholder
+      tekenKader(pdf, x, y, grootte, grootte, {
+        randKleur: KLEUR_LIJN_GRIJS,
+        randDikte: 0.3,
+        rondeHoeken: 1.5
+      });
+      return;
+    }
+    
+    // Cel-kader rond elk plaatje (zoals in preview)
+    tekenKader(pdf, x, y, grootte, grootte, {
+      randKleur: KLEUR_LIJN_GRIJS,
+      randDikte: 0.3,
+      rondeHoeken: 1.5,
+      vulKleur: [248, 249, 252]
+    });
+    
+    // Probeer emoji eerst (afkomstig uit DOM)
+    if (emoji) {
+      // Single emoji gecentreerd in het kader
+      const emojiGrootte = grootte - 2;
+      tekenEmoji(pdf, x + (grootte - emojiGrootte) / 2, y + (grootte - emojiGrootte) / 2,
+                 emojiGrootte, emoji);
+      return;
+    }
+    
+    // Als geen emoji: probeer woordObj.delenEmoji
+    if (woordObj && woordObj.delenEmoji && woordObj.delenEmoji[deelIdx]) {
+      const e = woordObj.delenEmoji[deelIdx];
+      const emojiGrootte = grootte - 2;
+      tekenEmoji(pdf, x + (grootte - emojiGrootte) / 2, y + (grootte - emojiGrootte) / 2,
+                 emojiGrootte, e);
+      return;
+    }
+    
+    // Allerlaatste fallback: tekst-blokje
+    const deelTekst = woordObj?.delen?.[deelIdx] || "";
+    if (deelTekst) {
+      const fontSize = deelTekst.length > 5 ? 8 : 10;
+      tekenTekst(pdf, x + grootte / 2, y + grootte / 2 + fontSize * 0.15, deelTekst, {
+        size: fontSize,
+        kleur: KLEUR_TEKST,
+        gecentreerd: true
+      });
+    }
+  }
+  
+  /* ⭐⭐⭐ VERDIEPING: 2 verbind-mini-oefeningen naast elkaar.
+     Elke mini: linkerwoorden + bolletjes + spacing + bolletjes + rechterwoorden,
+     daaronder genummerde schrijflijnen. */
+  function _tekenOV10Verdieping(state, itemEl, opdrachtStappen, opdrachtHoogte,
+                                 lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen) {
+    const pdf = state.pdf;
+    const x = state.contentX;
+    const breedte = state.contentBreedte;
+    
+    // Verzamel mini-oefeningen
+    const mini = [];
+    itemEl.querySelectorAll(".ov10-vb-mini").forEach(miniEl => {
+      const linksWoorden = [];
+      miniEl.querySelectorAll(".ov10-vb-links .ov10-vb-item").forEach(itEl => {
+        const span = itEl.querySelector("span:not(.ov10-vb-punt)");
+        linksWoorden.push(span ? span.textContent.trim() : "");
+      });
+      
+      const rechtsWoorden = [];
+      miniEl.querySelectorAll(".ov10-vb-rechts .ov10-vb-item").forEach(itEl => {
+        const span = itEl.querySelector("span:not(.ov10-vb-punt)");
+        rechtsWoorden.push(span ? span.textContent.trim() : "");
+      });
+      
+      // Paren uit data-paren: "deel1a=deel1b,deel2a=deel2b,..."
+      const parenStr = miniEl.getAttribute("data-paren") || "";
+      const paren = [];
+      if (parenStr) {
+        parenStr.split(",").forEach(p => {
+          const [a, b] = p.split("=");
+          if (a && b) paren.push({ links: a.trim(), rechts: b.trim() });
+        });
+      }
+      
+      // Noteer-rijen
+      const noteer = [];
+      miniEl.querySelectorAll(".ov10-basis-noteer-rij").forEach(rijEl => {
+        const nrEl = rijEl.querySelector(".ov10-noteer-nr");
+        const antwEl = rijEl.querySelector(".ov10-lijn-antwoord");
+        noteer.push({
+          nr: nrEl ? nrEl.textContent.trim() : "",
+          antwoord: antwEl ? antwEl.textContent.trim() : ""
+        });
+      });
+      
+      mini.push({ linksWoorden, rechtsWoorden, paren, noteer });
+    });
+    
+    if (mini.length === 0) {
+      _tekenStubOV(state, { id: itemEl.getAttribute("data-item-id") }, "ov10");
+      return;
+    }
+    
+    // === Layout ===
+    // 2 mini-oefeningen naast elkaar, elk in eigen kolom (~ helft van breedte)
+    const MINI_SPACING = 6;
+    const miniBreedte = (breedte - MINI_SPACING) / 2;
+    
+    // Binnen elke mini:
+    // - Verbind-deel: 2 kolommen met woorden, midden ruimte voor lijnen
+    // - Daaronder: noteer-lijnen
+    const VB_ITEM_HOOGTE = 7;
+    const VB_ITEM_SPACING = 2;
+    
+    const maxItems = Math.max(...mini.map(m => Math.max(m.linksWoorden.length, m.rechtsWoorden.length)));
+    const vbHoogte = maxItems * VB_ITEM_HOOGTE + (maxItems - 1) * VB_ITEM_SPACING + 8;
+    
+    const maxNoteer = Math.max(...mini.map(m => m.noteer.length));
+    const noteerRijHoogte = SCHRIJFLIJN_HOOGTE + 3;
+    
+    const SPACING_VB_NOTEER = 4;
+    
+    // Reserveer alleen opdracht + verbind-puzzel samen. De schrijflijnen daaronder
+    // mogen op een nieuwe pagina starten als nodig.
+    reserveerRuimte(state, opdrachtHoogte + 4 + vbHoogte + 6);
+    
+    // === Opdracht ===
+    tekenGeleKader(pdf, x, state.cursorY, breedte, opdrachtStappen, {
+      label: "Opdracht",
+      aantalSterren: sterrenVoorNiveau(niveau)
+    });
+    state.cursorY += opdrachtHoogte + 6;
+    
+    // === Verbind-puzzels (beide mini's naast elkaar) ===
+    const puzzelY = state.cursorY;
+    
+    for (let m = 0; m < mini.length; m++) {
+      const miniData = mini[m];
+      const miniX = x + m * (miniBreedte + MINI_SPACING);
+      
+      _tekenOV10MiniVerbindPuzzel(pdf, miniData, miniX, puzzelY, miniBreedte, vbHoogte, {
+        VB_ITEM_HOOGTE, VB_ITEM_SPACING, metOplossingen
+      });
+    }
+    
+    state.cursorY = puzzelY + vbHoogte + SPACING_VB_NOTEER;
+    
+    // === Noteer-lijnen — per rij splitsbaar ===
+    // We tekenen rij voor rij; rij i bevat noteer[i] uit mini 1 én noteer[i] uit mini 2 
+    // (als die bestaan).
+    for (let i = 0; i < maxNoteer; i++) {
+      reserveerRuimte(state, noteerRijHoogte + 2);
+      const rijY = state.cursorY;
+      
+      for (let m = 0; m < mini.length; m++) {
+        const noteerItem = mini[m].noteer[i];
+        if (!noteerItem) continue;
+        
+        const miniX = x + m * (miniBreedte + MINI_SPACING);
+        const NR_BREEDTE = 8;
+        const lijnTopY = rijY;
+        const tekstBaseline = lijnTopY + 2 * L - 0.5;
+        const lijnX = miniX + NR_BREEDTE;
+        const lijnBreedte = miniBreedte - NR_BREEDTE;
+        
+        // Nummer
+        tekenTekst(pdf, miniX, tekstBaseline, noteerItem.nr, {
+          size: FONT_GROOTTE_INHOUD,
+          kleur: KLEUR_TEKST,
+          vet: true
+        });
+        // Schrijflijn
+        tekenSchrijflijn(pdf, lijnX, lijnTopY, lijnBreedte, lijntype, lijnhoogte);
+        // Antwoord
+        if (metOplossingen && noteerItem.antwoord) {
+          tekenTekst(pdf, lijnX + 2, tekstBaseline, noteerItem.antwoord, {
+            size: FONT_GROOTTE_INHOUD,
+            kleur: KLEUR_TEKST
+          });
+        }
+      }
+      
+      state.cursorY = rijY + noteerRijHoogte + 2;
+    }
+    
+    state.cursorY += 4;
+  }
+  
+  /* Helper: teken één mini-verbind-puzzel (zonder noteer-lijnen).
+     Tekent links/rechts woord-pillen + bolletjes, en bij oplossingen
+     verbindlijnen tussen bolletjes van bij elkaar horende delen. */
+  function _tekenOV10MiniVerbindPuzzel(pdf, miniData, x, y, breedte, vbHoogte, cfg) {
+    // Lichtgrijs kader rond hele mini-vb-puzzel
+    tekenKader(pdf, x, y, breedte, vbHoogte, {
+      vulKleur: [245, 245, 250],
+      randKleur: KLEUR_LIJN_GRIJS,
+      randDikte: 0.3,
+      rondeHoeken: 3
+    });
+    
+    const KOL_WOORD_BREEDTE = 25;
+    const PAD = 4;
+    
+    const linksX = x + PAD;
+    const rechtsX = x + breedte - PAD - KOL_WOORD_BREEDTE;
+    
+    // Verzamel posities van linker en rechter bolletjes per item-index
+    // (in DOM-volgorde, die overeenkomt met linksWoorden[] / rechtsWoorden[]).
+    const linksBolletjes = [];  // [{ deel, x, y }, ...]
+    const rechtsBolletjes = [];
+    
+    const aantalItems = Math.max(miniData.linksWoorden.length, miniData.rechtsWoorden.length);
+    
+    for (let i = 0; i < aantalItems; i++) {
+      const itemY = y + PAD + i * (cfg.VB_ITEM_HOOGTE + cfg.VB_ITEM_SPACING);
+      const midY = itemY + cfg.VB_ITEM_HOOGTE / 2 + 1.5;
+      
+      // Linker woord
+      if (i < miniData.linksWoorden.length) {
+        const woord = miniData.linksWoorden[i];
+        tekenKader(pdf, linksX, itemY, KOL_WOORD_BREEDTE - 4, cfg.VB_ITEM_HOOGTE, {
+          vulKleur: [255, 255, 255],
+          randKleur: KLEUR_LIJN_GRIJS,
+          randDikte: 0.3,
+          rondeHoeken: 3
+        });
+        tekenTekst(pdf, linksX + (KOL_WOORD_BREEDTE - 4) / 2, midY, woord, {
+          size: 11,
+          kleur: KLEUR_TEKST,
+          gecentreerd: true,
+          vet: true
+        });
+        
+        // Bolletje rechts van linker woord
+        const bolX = linksX + KOL_WOORD_BREEDTE - 1.5;
+        const bolY = midY - 1.2;
+        pdf.setDrawColor(KLEUR_TEKST[0], KLEUR_TEKST[1], KLEUR_TEKST[2]);
+        pdf.setFillColor(KLEUR_TEKST[0], KLEUR_TEKST[1], KLEUR_TEKST[2]);
+        pdf.circle(bolX, bolY, 0.8, "FD");
+        
+        linksBolletjes.push({ deel: woord, x: bolX, y: bolY });
+      }
+      
+      // Rechter woord
+      if (i < miniData.rechtsWoorden.length) {
+        const woord = miniData.rechtsWoorden[i];
+        const bolX = rechtsX + 1.5;
+        const bolY = midY - 1.2;
+        pdf.setDrawColor(KLEUR_TEKST[0], KLEUR_TEKST[1], KLEUR_TEKST[2]);
+        pdf.setFillColor(KLEUR_TEKST[0], KLEUR_TEKST[1], KLEUR_TEKST[2]);
+        pdf.circle(bolX, bolY, 0.8, "FD");
+        
+        rechtsBolletjes.push({ deel: woord, x: bolX, y: bolY });
+        
+        tekenKader(pdf, rechtsX + 4, itemY, KOL_WOORD_BREEDTE - 4, cfg.VB_ITEM_HOOGTE, {
+          vulKleur: [255, 255, 255],
+          randKleur: KLEUR_LIJN_GRIJS,
+          randDikte: 0.3,
+          rondeHoeken: 3
+        });
+        tekenTekst(pdf, rechtsX + 4 + (KOL_WOORD_BREEDTE - 4) / 2, midY, woord, {
+          size: 11,
+          kleur: KLEUR_TEKST,
+          gecentreerd: true,
+          vet: true
+        });
+      }
+    }
+    
+    // Bij oplossingen: verbindlijnen tekenen tussen bij elkaar horende delen.
+    if (cfg.metOplossingen && miniData.paren && miniData.paren.length > 0) {
+      const KLEUR_VERBIND = [33, 150, 243];  // blauw
+      pdf.setDrawColor(KLEUR_VERBIND[0], KLEUR_VERBIND[1], KLEUR_VERBIND[2]);
+      pdf.setLineWidth(0.6);
+      
+      for (const paar of miniData.paren) {
+        const links = linksBolletjes.find(b => b.deel === paar.links);
+        const rechts = rechtsBolletjes.find(b => b.deel === paar.rechts);
+        if (links && rechts) {
+          pdf.line(links.x, links.y, rechts.x, rechts.y);
+        }
+      }
+    }
+  }
+  
+  /* ⭐⭐⭐⭐ UITBREIDING: Beschrijving + schrijflijn per rij */
+  function _tekenOV10Uitbreiding(state, itemEl, opdrachtStappen, opdrachtHoogte,
+                                  lijntype, lijnhoogte, L, SCHRIJFLIJN_HOOGTE, niveau, metOplossingen) {
+    const pdf = state.pdf;
+    const x = state.contentX;
+    const breedte = state.contentBreedte;
+    
+    // Verzamel rijen
+    const rijen = [];
+    itemEl.querySelectorAll(".ov10-ub-rij").forEach(rijEl => {
+      const nrEl = rijEl.querySelector(".ov10-noteer-nr");
+      const beschrijvingEl = rijEl.querySelector(".ov10-ub-beschrijving");
+      const antwoordEl = rijEl.querySelector(".ov10-lijn-antwoord");
+      rijen.push({
+        nr: nrEl ? nrEl.textContent.trim() : "",
+        beschrijving: beschrijvingEl ? beschrijvingEl.textContent.trim() : "",
+        antwoord: antwoordEl ? antwoordEl.textContent.trim() : ""
+      });
+    });
+    
+    if (rijen.length === 0) {
+      _tekenStubOV(state, { id: itemEl.getAttribute("data-item-id") }, "ov10");
+      return;
+    }
+    
+    // Layout
+    const NR_BREEDTE = 8;
+    const BESCHR_HOOGTE = 7;
+    const SPACING_BESCHR_LIJN = 3;
+    const rijHoogte = BESCHR_HOOGTE + SPACING_BESCHR_LIJN + SCHRIJFLIJN_HOOGTE + 4;
+    const RIJ_SPACING = 5;
+    
+    reserveerRuimte(state, opdrachtHoogte + 4 + rijHoogte + RIJ_SPACING);
+    
+    tekenGeleKader(pdf, x, state.cursorY, breedte, opdrachtStappen, {
+      label: "Opdracht",
+      aantalSterren: sterrenVoorNiveau(niveau)
+    });
+    state.cursorY += opdrachtHoogte + 6;
+    
+    for (let i = 0; i < rijen.length; i++) {
+      if (i > 0) reserveerRuimte(state, rijHoogte + RIJ_SPACING);
+      
+      const r = rijen[i];
+      const yStart = state.cursorY;
+      const beschrY = yStart + 5;
+      
+      // Nummer
+      tekenTekst(pdf, x, beschrY, r.nr, {
+        size: FONT_GROOTTE_INHOUD,
+        kleur: KLEUR_TEKST,
+        vet: true
+      });
+      
+      // Beschrijving (cursief)
+      tekenTekst(pdf, x + NR_BREEDTE, beschrY, r.beschrijving, {
+        size: FONT_GROOTTE_INHOUD,
+        kleur: KLEUR_TEKST,
+        cursief: true
+      });
+      
+      // Schrijflijn (volle breedte, met inspring voor nr)
+      const lijnTopY = yStart + BESCHR_HOOGTE + SPACING_BESCHR_LIJN;
+      const tekstBaseline = lijnTopY + 2 * L - 0.5;
+      const lijnX = x + NR_BREEDTE;
+      const lijnBreedte = breedte - NR_BREEDTE;
+      
+      tekenSchrijflijn(pdf, lijnX, lijnTopY, lijnBreedte, lijntype, lijnhoogte);
+      
+      if (metOplossingen && r.antwoord) {
+        tekenTekst(pdf, lijnX + 2, tekstBaseline, r.antwoord, {
+          size: FONT_GROOTTE_INHOUD,
+          kleur: KLEUR_TEKST
+        });
+      }
+      
+      state.cursorY = yStart + rijHoogte + RIJ_SPACING;
+    }
+    
+    state.cursorY += 2;
+  }
+  
   /* Stub-renderer: tekent gele opdracht-kader + placeholder-tekst.
      Per OV later vervangen door echte rendering. */
   function _tekenStubOV(state, item, ovId) {
@@ -4966,7 +5754,7 @@ window.SpellingHerhalingsbundelPDF = (function() {
     ov07: function(state, item) { tekenOV07(state, item); },
     ov08: function(state, item) { tekenOV08(state, item); },
     ov09: function(state, item) { tekenOV09(state, item); },
-    ov10: function(state, item) { _tekenStubOV(state, item, "ov10"); },
+    ov10: function(state, item) { tekenOV10(state, item); },
     weekdictee: function(state, item) { _tekenStubOV(state, item, "weekdictee"); }
   };
   
