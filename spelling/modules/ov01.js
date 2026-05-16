@@ -77,28 +77,28 @@ window.SpellingModules.ov01 = {
             <input type="checkbox" data-niveau="basis" checked>
             <span class="ov-niveau-naam">
               <strong>⭐ Oefenen</strong>
-              <small>kleur juiste woord uit 3 keuzes</small>
+              <small>Kind ziet plaatje + 3 woorden. Kleurt het juiste woord en schrijft het over. Hulp om het schrijven te leren.</small>
             </span>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <span class="ov-niveau-naam">
               <strong>⭐⭐ Toepassen</strong>
-              <small>alleen plaatje, kind roept woord op</small>
+              <small>Alleen het plaatje. Kind benoemt het woord zelf en schrijft het op. Standaard-oefening.</small>
             </span>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <span class="ov-niveau-naam">
               <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>plaatje + zin maken</small>
+              <small>Plaatje + 1 zin maken met dat woord. Voor wie het schrijven al vlot kan en aan zinsbouw mag oefenen.</small>
             </span>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="uitbreiding">
             <span class="ov-niveau-naam">
               <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>plaatje + woord + meervoud + verkleinwoord</small>
+              <small>Plaatje + woord + meervoud + verkleinwoord. Voor sterke spellers die woordfamilies aankunnen.</small>
             </span>
           </label>
         </div>
