@@ -62,28 +62,28 @@ window.SpellingModules.ov03 = {
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
               <strong>⭐ Oefenen</strong>
-              <small>plaatje + letters door elkaar</small>
+              <small>Plaatje + letters door elkaar in hokjes. Kind schikt en schrijft. Plaatje helpt om het woord te vinden.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐ Toepassen</strong>
-              <small>letters door elkaar, eerste letter gekleurd</small>
+              <small>Geen plaatje, wel eerste letter in blauw als hint. Kind moet het woord echt kennen.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>alleen letters door elkaar</small>
+              <small>Alleen letters door elkaar, geen hint. Voor wie de woorden goed kent en zelfstandig kan zoeken.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="uitbreiding">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>letters door elkaar + bedenk 2 eigen woorden</small>
+              <small>Letters door elkaar + kind bedenkt zelf nog 2 woorden uit de categorie. Creatieve uitbreiding.</small>
             </div>
           </label>
         </div>
