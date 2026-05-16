@@ -1166,6 +1166,147 @@
         hb.verwijder(e.target.dataset.itemId);
       }
     });
+
+    /* ============================================================
+       UITLEG-KNOP — context-bewuste modal per modus
+       ============================================================ */
+    bedraadUitlegKnop();
   });
+
+  /* Bepaal welke modus zichtbaar is, op basis van display + offsetParent. */
+  function detecteerActieveModus() {
+    const wd = document.querySelector("#modus-weekdictee");
+    if (wd && wd.style.display !== "none" && wd.offsetParent !== null) return "weekdictee";
+    const wb = document.querySelector("#modus-werkblad");
+    if (wb && wb.style.display !== "none" && wb.offsetParent !== null) return "werkblad";
+    const hb = document.querySelector("#modus-herhaling");
+    if (hb && hb.style.display !== "none" && hb.offsetParent !== null) return "herhaling";
+    return null;
+  }
+
+  /* Inhoud per modus voor de uitleg-modal. */
+  const UITLEG_INHOUD = {
+    werkblad: {
+      titel: "📋 Werkbladen — uitleg",
+      html: `
+        <p><strong>Wat zijn werkbladen?</strong></p>
+        <p>Losse oefenbladen per categorie en oefenvorm. Je kiest één oefenvorm (bv. "Schrijf bij het plaatje" of "Letters door elkaar"), en welke niveaus daarvoor moeten verschijnen. Voor elke aangevinkte combinatie maakt het systeem één blad.</p>
+        
+        <p><strong>Hoe gebruik je dit?</strong></p>
+        <ol>
+          <li><strong>Kies categorieën</strong> in stap 1 (links): welke spellingsregel of klank wil je oefenen?</li>
+          <li><strong>Kies oefenvorm + niveau</strong> in stap 3: je kan meerdere niveaus aanvinken voor differentiatie. Onder elke ster-keuze staat een korte uitleg over wat het kind doet en voor wie het past.</li>
+          <li><strong>Stel de schrijflijn in</strong> in stap 4 (geldt voor alle werkbladen).</li>
+          <li><strong>Download</strong> alle werkbladen als één PDF, of preview eerst rechts.</li>
+        </ol>
+        
+        <p><strong>Tip voor differentiatie:</strong> vink ⭐ Oefenen aan voor zwakkere lezers, ⭐⭐ Toepassen voor de meeste kinderen, en ⭐⭐⭐ Verdiepen of ⭐⭐⭐⭐ Uitbreiden voor sterke spellers. Iedereen werkt aan dezelfde categorie, maar elk op eigen niveau.</p>
+      `
+    },
+    herhaling: {
+      titel: "📚 Herhalingsbundel — uitleg",
+      html: `
+        <p><strong>Wat is een herhalingsbundel?</strong></p>
+        <p>Eén bundel met <em>meerdere</em> oefenvormen door elkaar — ideaal voor toetsweken, themapakketten of als afsluiter van een spellingblok. Het kind krijgt afwisseling: plaatjes, letters door elkaar, zinnen aanvullen, verbindlijnen...</p>
+        
+        <p><strong>Hoe gebruik je dit?</strong></p>
+        <ol>
+          <li><strong>Kies categorieën</strong> die in de bundel mogen voorkomen.</li>
+          <li><strong>Klik op een oefenvorm</strong> in de zijbalk om hem open te klappen. Vink de gewenste niveaus aan en geef per niveau aan hoeveel woorden je wil (bv. max 9). De lege placeholder toont het maximum dat past op de pagina.</li>
+          <li><strong>Klik op "+ Voeg toe aan bundel"</strong> om je selectie toe te voegen. Je kan meerdere keren op dezelfde oefenvorm klikken om verschillende niveaus toe te voegen.</li>
+          <li><strong>Bewerk in de preview rechts</strong>: titel, instructies, woorden, antwoorden — alles is aanpasbaar. Volgorde wijzigen met de pijl-knoppen.</li>
+          <li><strong>Download</strong> het hele boekje als één PDF, eventueel ook met oplossingen.</li>
+        </ol>
+        
+        <p><strong>Tip:</strong> begin met enkele OV's op ⭐ en ⭐⭐, voeg dan 1-2 verdiepingsoefeningen toe voor sterke leerlingen. Zo krijg je een bundel met natuurlijke moeilijkheidsopbouw.</p>
+      `
+    },
+    weekdictee: {
+      titel: "📅 Weekdictee — uitleg",
+      html: `
+        <p><strong>Wat is het weekdictee?</strong></p>
+        <p>Een week vol oefenen — elke dag een klein blokje met woorden en zinnen, klaar om uit te delen op maandag. Vrijdag is herhaling: dezelfde woorden komen terug, maar met andere zinnen.</p>
+        
+        <p><strong>Hoe ik (Juf Zisa) het in de klas gebruik:</strong></p>
+        <p><strong>Maandag tot en met donderdag</strong> werk ik telkens zo:</p>
+        <ul>
+          <li>Ik dicteer één woord. Samen denken we na: <em>wat is er moeilijk aan dit woord?</em></li>
+          <li>We hakken en plakken het woord samen, en pas dan schrijven de kinderen het op.</li>
+          <li>Bij erg lastige woorden schrijf ik na het bespreken het woord eerst voor op het bord, laat de kinderen kijken, en veeg het dan weg vóór ze schrijven.</li>
+          <li>Voor de zin: kinderen schrijven vaak woorden aan elkaar. Daarom laat ik eerst <em>de woorden in de zin tellen</em>. Ze zeggen uit hoeveel woorden de zin bestaat. Dan herhaal ik de zin in twee stukken en noteren ze hem.</li>
+        </ul>
+        
+        <p><strong>Vrijdag</strong> = écht dictee. Ik maak hen er expliciet op attent dat ze aan alle stappen moeten denken voor ze iets noteren: nadenken over moeilijkheden, hakken en plakken, woorden in een zin tellen.</p>
+        
+        <p><strong>Tips bij het maken:</strong></p>
+        <ul>
+          <li>Zet <strong>"Bewerken: aan"</strong> om woorden of zinnen aan te passen voor je downloadt.</li>
+          <li><strong>Leerling-blad</strong> = zonder antwoorden (om uit te delen). <strong>Dicteerblad (mijn versie)</strong> = mét antwoorden (voor jou om uit te dicteren).</li>
+          <li>Het systeem zorgt dat geen enkele zin twee keer in dezelfde week voorkomt — ook vrijdag krijgt nieuwe zinnen voor dezelfde woorden.</li>
+        </ul>
+      `
+    }
+  };
+
+  function bedraadUitlegKnop() {
+    const knop = document.querySelector("#modus-uitleg-knop");
+    if (!knop) return;
+
+    // Toon/verberg knop op basis van actieve modus (poll iedere 300ms — simpel en robuust)
+    function updateZichtbaarheid() {
+      const modus = detecteerActieveModus();
+      knop.style.display = modus ? "inline-block" : "none";
+    }
+    updateZichtbaarheid();
+    setInterval(updateZichtbaarheid, 300);
+
+    // Klik → open modal met inhoud van actieve modus
+    knop.addEventListener("click", () => {
+      const modus = detecteerActieveModus();
+      if (!modus) return;
+      const inhoud = UITLEG_INHOUD[modus];
+      if (!inhoud) return;
+      toonUitlegModal(inhoud.titel, inhoud.html);
+    });
+  }
+
+  function toonUitlegModal(titel, html) {
+    // Verwijder eventuele bestaande modal
+    document.querySelector("#uitleg-modal-overlay")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "uitleg-modal-overlay";
+    overlay.style.cssText = `
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 10000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    `;
+    overlay.innerHTML = `
+      <div id="uitleg-modal" style="
+        background: #fff; border-radius: 12px; max-width: 640px; width: 100%;
+        max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      ">
+        <div style="position:sticky;top:0;background:#fff;padding:20px 28px 12px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;border-radius:12px 12px 0 0;">
+          <h2 style="margin:0;font-size:20px;color:#1e3a5f;">${titel}</h2>
+          <button type="button" id="uitleg-modal-sluit" style="background:#f3f4f6;border:none;width:32px;height:32px;border-radius:50%;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;" title="Sluiten">✕</button>
+        </div>
+        <div style="padding: 16px 28px 24px; line-height: 1.6; color: #374151; font-size: 14.5px;">
+          ${html}
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Sluit-acties
+    overlay.querySelector("#uitleg-modal-sluit").addEventListener("click", () => overlay.remove());
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) overlay.remove();
+    });
+    document.addEventListener("keydown", function escSluit(e) {
+      if (e.key === "Escape") {
+        overlay.remove();
+        document.removeEventListener("keydown", escSluit);
+      }
+    });
+  }
 
 })();
