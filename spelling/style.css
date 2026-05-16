@@ -6285,31 +6285,19 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
   break-before: avoid !important;
 }
 
-/* ============================================================
-   HB-PDF-KEEP: nieuwe wrapper voor opdracht + eerste rij
-   Wordt door _prepareerVoorPDF aangemaakt in de PDF-kloon.
-   ============================================================ */
-
-/* Onsplitsbaar blok — html2pdf respecteert deze CSS-regels */
+/* HB-PDF-KEEP: wrapper voor opdracht + eerste rij in PDF-route */
 .hb-pdf-keep {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
   display: block !important;
   width: 100% !important;
-}
-
-/* Visueel transparant: geen border, geen padding — de wrapper mag 
-   nooit zichtbaar zijn in de PDF zelf. Inhoud van wrapper toont 
-   gewoon zijn eigen styling. */
-.hb-pdf-keep {
   background: transparent !important;
   border: none !important;
   padding: 0 !important;
   margin: 0 !important;
 }
 
-/* Kolommen-roosters (OV9 verdieping, OV10 grids): in PDF-kontext 
-   blijven ze als geheel op één pagina. Kinderen ook beschermd. */
+/* Kolommen-roosters in PDF-context onsplitsbaar */
 .hb-document .ov09-verdieping-kolommen,
 .hb-document .ov09-verdieping-kolom,
 .hb-document .ov10-vb-grid,
@@ -6318,4 +6306,73 @@ body.hb-bewerk-aan .hb-item-toevoeg-balk {
 .hb-document .ov10-afb-cel {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
+}
+/* ==========================================================
+   PLAATJES IN OV-CELLEN (preview)
+   Voor de nieuwe htmlVoorWoord output: <img class="woord-afbeelding">
+   of bij fallback <span class="woord-emoji">{emoji}</span>
+   ========================================================== */
+
+/* OV01 cel-plaatje */
+.ov01-cel-plaatje .woord-afbeelding {
+  height: 60px;        /* vaste hoogte: visueel consistent over alle afbeeldingen */
+  max-width: 100%;     /* mag tot volle cel-breedte uitstrekken indien nodig */
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.ov01-cel-plaatje .woord-emoji {
+  font-size: 3.5rem;
+  line-height: 1.1;
+  display: block;
+  text-align: center;
+}
+
+/* OV02 plaatje (kleine rij-plaatjes) */
+.ov02-plaatje .woord-afbeelding {
+  height: 32px;        /* vaste hoogte */
+  max-width: 100%;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.ov02-plaatje .woord-emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+  display: block;
+  text-align: center;
+}
+
+/* OV03 cel-plaatje */
+.ov03-cel-plaatje .woord-afbeelding {
+  height: 50px;        /* vaste hoogte */
+  max-width: 100%;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.ov03-cel-plaatje .woord-emoji {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  display: block;
+  text-align: center;
+}
+
+/* OV05 plaatje (kleine rij-plaatjes) */
+.ov05-plaatje .woord-afbeelding {
+  height: 32px;        /* vaste hoogte */
+  max-width: 100%;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.ov05-plaatje .woord-emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+  display: block;
+  text-align: center;
 }
