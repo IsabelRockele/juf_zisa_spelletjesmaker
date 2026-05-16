@@ -1086,9 +1086,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een bal die je met je voet schopt."
       },
       {
-        tekst: "schooltas", lidwoord: "de", afbeelding: false,
-        delen: ["school", "tas"], delenEmoji: ["🏫", "👜"],
-        beschrijving: "De tas waar je boeken in zitten voor de klas."
+        tekst: "balpen", lidwoord: "de", afbeelding: false,
+        delen: ["bal", "pen"], delenEmoji: ["⚽", "✏️"],
+        beschrijving: "Hiermee schrijf je en er komt blauwe inkt uit."
       },
       {
         tekst: "deurbel", lidwoord: "de", afbeelding: false,
