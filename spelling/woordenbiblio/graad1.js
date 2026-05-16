@@ -29,16 +29,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "korte-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "bel", lidwoord: "de", afbeelding: false },
-      { tekst: "pet", lidwoord: "de", afbeelding: false },
-      { tekst: "hek", lidwoord: "het", afbeelding: false },
-      { tekst: "pen", lidwoord: "de", afbeelding: false },
-      { tekst: "mes", lidwoord: "het", afbeelding: false },
-      { tekst: "net", lidwoord: "het", afbeelding: false },
+      { tekst: "bel", lidwoord: "de", afbeelding: true },
+      { tekst: "pet", lidwoord: "de", afbeelding: true },
+      { tekst: "hek", lidwoord: "het", afbeelding: true },
+      { tekst: "pen", lidwoord: "de", afbeelding: true },
+      { tekst: "mes", lidwoord: "het", afbeelding: true },
+      { tekst: "net", lidwoord: "het", afbeelding: true },
       { tekst: "les", lidwoord: "de", afbeelding: false },
-      { tekst: "bes", lidwoord: "de", afbeelding: false },
-      { tekst: "bek", lidwoord: "de", afbeelding: false },
-      { tekst: "hen", lidwoord: "de", afbeelding: false }
+      { tekst: "bes", lidwoord: "de", afbeelding: true },
+      { tekst: "bek", lidwoord: "de", afbeelding: true },
+      { tekst: "hen", lidwoord: "de", afbeelding: true }
     ]
   },
   "mkm-i": {
@@ -48,9 +48,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "kip", lidwoord: "de", afbeelding: true },
       { tekst: "vis", lidwoord: "de", afbeelding: true },
-      { tekst: "lip", lidwoord: "de", afbeelding: false },
-      { tekst: "pit", lidwoord: "de", afbeelding: false },
-      { tekst: "wit", lidwoord: null, afbeelding: false },
+      { tekst: "lip", lidwoord: "de", afbeelding: true },
+      { tekst: "pit", lidwoord: "de", afbeelding: true },
+      { tekst: "wit", lidwoord: null, afbeelding: true },
       { tekst: "bil", lidwoord: "de", afbeelding: false },
       { tekst: "kin", lidwoord: "de", afbeelding: false },
       { tekst: "dik", lidwoord: null, afbeelding: false },
