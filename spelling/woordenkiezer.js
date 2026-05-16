@@ -20,24 +20,49 @@ window.SpellingWoordenkiezer = (function() {
 
   const LS_KEY = "spelling-weekdictee-gekozen-v1";
 
-  /* Bepaal de actief-aangevinkte categorie-IDs.
-     Volgorde:
-     1. window._zb_aangevinkteCategorieen — wordt expliciet gezet door de
-        zijbalk EN het weekdictee-paneel vóór de woordenkiezer opent.
-        Dit is de NIEUWE canonieke bron (werkt in alle modi).
-     2. window.SpellingZijbalk.getAangevinkteCategorieIds() — oude bron
-        (alleen werkblad-modus). Fallback.
-     Returnt null als beide niet beschikbaar zijn → "geen filter actief". */
-  function getActieveCategorieIds() {
-    // 1. Nieuwe bron (werkt voor weekdictee + werkblad)
-    if (window._zb_aangevinkteCategorieen instanceof Set) {
-      return window._zb_aangevinkteCategorieen;
+  /* Detecteer welke modus momenteel actief is op basis van zichtbare 
+     modus-section. Returnt "weekdictee", "werkblad", "herhaling" of null. */
+  function getActieveModus() {
+    const wd = document.querySelector("#modus-weekdictee");
+    if (wd && wd.style.display !== "none" && wd.offsetParent !== null) {
+      return "weekdictee";
     }
-    // 2. Fallback: oude zijbalk-API (alleen werkblad)
+    const wb = document.querySelector("#modus-werkblad");
+    if (wb && wb.style.display !== "none" && wb.offsetParent !== null) {
+      return "werkblad";
+    }
+    const hb = document.querySelector("#modus-herhaling");
+    if (hb && hb.style.display !== "none" && hb.offsetParent !== null) {
+      return "herhaling";
+    }
+    return null;
+  }
+
+  /* Bepaal de actief-aangevinkte categorie-IDs.
+     De juiste bron hangt af van welke modus actief is:
+     - weekdictee-modus → window._zb_aangevinkteCategorieen (gezet door wd-paneel)
+     - werkblad/herhaling-modus → SpellingZijbalk.getAangevinkteCategorieIds()
+     Eerder gebruikten we alleen SpellingZijbalk, maar dat werkte niet voor 
+     weekdictee. Eerder fix gebruikte alleen _zb_aangevinkteCategorieen, maar 
+     dat lekte tussen modi heen. Nu kiezen we op basis van actieve modus. */
+  function getActieveCategorieIds() {
+    const modus = getActieveModus();
+    
+    if (modus === "weekdictee") {
+      // In weekdictee-modus is _zb_aangevinkteCategorieen de bron van waarheid
+      if (window._zb_aangevinkteCategorieen instanceof Set) {
+        return window._zb_aangevinkteCategorieen;
+      }
+      return new Set();  // weekdictee actief maar nog niets aangevinkt
+    }
+    
+    // Werkblad of herhalingsbundel: gebruik de zijbalk-API
     const zb = window.SpellingZijbalk;
     if (zb && typeof zb.getAangevinkteCategorieIds === "function") {
       return new Set(zb.getAangevinkteCategorieIds());
     }
+    
+    // Geen zijbalk én geen weekdictee → geen filter actief
     return null;
   }
 
