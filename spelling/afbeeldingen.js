@@ -44,15 +44,42 @@ window.SpellingAfbeeldingen = {
   },
 
   /* Geef HTML voor de afbeelding bij een woord.
-     Probeert eerst /afbeeldingen/{woord}.png te laden.
-     Bij fout valt het terug op de emoji of "📷". */
+     Accepteert OFWEL een woord-object {tekst, categorie, leerjaar/graad}
+     OFWEL een tekst-string (backwards-compat — dan alleen emoji-span).
+     
+     Bij woord-object:
+     - Bouwt pad: afbeeldingen/graad{N}/{categorie}/{tekst}.png
+     - Toont <img>; bij 404 vervangt onerror door emoji-span
+     
+     Bij string (geen categorie bekend):
+     - Toont alleen emoji-span (kan geen pad opbouwen) */
   htmlVoorWoord: function(woord) {
-    const emoji = this.emojiFallback[woord] || "📷";
-    const padNaarAfbeelding = `afbeeldingen/${woord}.png`;
-    // We tonen <img>; als die faalt, vervangt onerror hem door de emoji-span
+    // Bepaal tekst (voor emoji-lookup) en pad
+    let tekst, pad;
+    if (typeof woord === "string") {
+      tekst = woord;
+      pad = null;  // geen categorie → geen pad mogelijk
+    } else if (woord && typeof woord === "object") {
+      tekst = woord.tekst || "";
+      if (woord.categorie && tekst) {
+        const graadNr = woord.graad || woord.leerjaar || 1;
+        pad = `afbeeldingen/graad${graadNr}/${woord.categorie}/${tekst}.png`;
+      }
+    } else {
+      return `<span class="woord-emoji">📷</span>`;
+    }
+    
+    const emoji = this.emojiFallback[tekst] || "📷";
+    
+    if (!pad) {
+      // Geen pad → alleen emoji-span
+      return `<span class="woord-emoji">${emoji}</span>`;
+    }
+    
+    // <img> met onerror fallback naar emoji-span
     return `<img class="woord-afbeelding"
-      src="${padNaarAfbeelding}"
-      alt="${woord}"
+      src="${pad}"
+      alt="${tekst}"
       onerror="this.outerHTML='<span class=&quot;woord-emoji&quot;>${emoji}</span>'">`;
   },
 
