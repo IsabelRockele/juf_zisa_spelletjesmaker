@@ -265,238 +265,6 @@ window.SpellingHerhalingsbundel = (function() {
     });
   }
   
-  /* ==========================================================
-     _prepareerVoorPDF(root)
-     
-     De hartader van de PDF-fix. Wordt uitsluitend aangeroepen op
-     een KOPIE in een verborgen container — origineel blijft onaangetast.
-     
-     Doet drie dingen die html2pdf zelf niet correct kan:
-     
-     1. Opdracht + EERSTE rij oefeningen → samen in één <div class="hb-pdf-keep">
-        Wrapper heeft inline style: page-break-inside: avoid, break-inside: avoid,
-        display: block. Zo blijven ze GEGARANDEERD samen op één pagina.
-     
-     2. Kolommen-roosters (OV9 verdieping = 3 kolommen, etc.) → elke kolom
-        krijgt page-break-inside: avoid, en het hele kolommen-rooster ook.
-        Daarnaast worden de flex/grid containers omgezet naar block-flow
-        WAAR DAT VEILIG KAN. Specifiek: bij OV9-verdieping zetten we het 
-        grid-template om zodat html2canvas elke kolom als één renderbaar
-        verticaal blok ziet — niet als losse rijen die verspreid kunnen worden.
-     
-     3. Belangrijke flex/grid containers krijgen expliciete CSS-eigenschappen
-        die html2pdf wél kan parsen, zodat page-break-avoid op kinderen werkt.
-        (html2pdf negeert page-break op flex/grid items in sommige browsers.)
-     ========================================================== */
-  function _prepareerVoorPDF(root) {
-    
-    /* ---- STAP 1: Opdracht + eerste rij in één wrapper ---- */
-    
-    const OPDRACHT_SELECTORS = 
-      ".ov01-stappen, .ov02-instructies, .ov03-instructies, " +
-      ".ov04-instructies, .ov05-instructies, .ov06-instructies, " +
-      ".ov07-instructies, .ov08-instructies, .ov09-instructies, " +
-      ".ov10-instructies";
-    
-    // Rij-selectors: een "rij" is wat als eerste oefenrij telt na de opdracht.
-    // Voor kolom-layouts (OV9-verdieping) is de "eerste rij" eigenlijk het 
-    // hele kolommen-rooster.
-    const RIJ_SELECTORS = 
-      ".ov01-rooster-rij, .ov02-rij, .ov03-cel, " +
-      ".ov04-rij, .ov04-rooster-rij, " +
-      ".ov05-rij, .ov06-zin-rij, " +
-      ".ov07-rij, .ov08-rij, .ov08-invul-zin, " +
-      ".ov09-basis-cel, .ov09-verdieping-kolommen, " +
-      ".ov10-rij, .ov10-basis-rij, .ov10-noteer-rij";
-    
-    const opdrachten = root.querySelectorAll(OPDRACHT_SELECTORS);
-    
-    opdrachten.forEach(opdracht => {
-      // Skip als al gewrapt (defensief — mag niet 2x gebeuren)
-      if (opdracht.parentElement?.classList.contains("hb-pdf-keep")) return;
-      
-      // Zoek eerste rij die volgt op de opdracht
-      let eersteRij = null;
-      let volgend = opdracht.nextElementSibling;
-      
-      while (volgend && !eersteRij) {
-        if (volgend.matches(RIJ_SELECTORS)) {
-          eersteRij = volgend;
-          break;
-        }
-        const rijIn = volgend.querySelector(RIJ_SELECTORS);
-        if (rijIn) {
-          eersteRij = rijIn;
-          break;
-        }
-        volgend = volgend.nextElementSibling;
-      }
-      
-      if (!eersteRij) return;  // niets te koppelen
-      
-      // We willen opdracht + eersteRij samen in een wrapper.
-      // Maar eersteRij zit mogelijk diep in een rooster-container.
-      // Strategie: we wrappen de OPDRACHT en de directe parent-keten 
-      // omhoog totdat we het element vinden dat een sibling is van opdracht.
-      
-      // Zoek het element dat:
-      //  - eersteRij bevat (of IS)
-      //  - direct sibling van opdracht is (in dezelfde parent)
-      const opdrachtParent = opdracht.parentElement;
-      if (!opdrachtParent) return;
-      
-      let blokNaOpdracht = eersteRij;
-      while (blokNaOpdracht.parentElement && blokNaOpdracht.parentElement !== opdrachtParent) {
-        blokNaOpdracht = blokNaOpdracht.parentElement;
-      }
-      
-      // blokNaOpdracht is nu een directe sibling van opdracht (of eersteRij zelf)
-      if (blokNaOpdracht.parentElement !== opdrachtParent) return;
-      
-      // BELANGRIJK: we mogen het rooster-blok niet helemaal in de wrapper 
-      // stoppen, want dan kan het hele rooster (met 8 rijen) niet meer 
-      // splitsen. We willen ALLEEN de eerste rij eruit halen en bij opdracht 
-      // plaatsen, de rest van het rooster blijft buiten de wrapper.
-      
-      // Twee scenario's:
-      // A) blokNaOpdracht IS eersteRij (rij is directe sibling) 
-      //    → wrap opdracht + eersteRij samen
-      // B) blokNaOpdracht is een container met eersteRij erin (en meer rijen)
-      //    → wrap opdracht; eerste rij wordt visueel via ghost-anker erin 
-      //      gehouden (we klonen de eerste rij naar in de wrapper en 
-      //      verstoppen het origineel niet, maar we plaatsen een onsplitsbaar 
-      //      duplikaat in de wrapper). Probleem: dan staat de rij 2x.
-      //    BETER: we verplaatsen de eersteRij UIT het rooster naar de wrapper,
-      //    en herstellen dit na PDF-export. Maar dat is in een KLOON, dus
-      //    verplaatsen mag — origineel is veilig.
-      
-      const wrapper = document.createElement("div");
-      wrapper.className = "hb-pdf-keep";
-      // Inline styles — geen externe CSS nodig, werkt 100% in html2pdf
-      wrapper.style.cssText = 
-        "page-break-inside: avoid !important; " +
-        "break-inside: avoid !important; " +
-        "display: block; " +
-        "width: 100%;";
-      
-      // Plaats wrapper voor de opdracht
-      opdrachtParent.insertBefore(wrapper, opdracht);
-      // Verplaats opdracht IN wrapper
-      wrapper.appendChild(opdracht);
-      
-      if (blokNaOpdracht === eersteRij) {
-        // Scenario A: rij is directe sibling — verplaats hem ook in wrapper
-        wrapper.appendChild(eersteRij);
-      } else {
-        // Scenario B: eersteRij zit in een container met meer rijen.
-        // We willen de eerste rij UIT het rooster halen om in de wrapper 
-        // te plaatsen. MAAR: als het rooster een CSS grid is met een 
-        // grid-template-columns van meerdere kolommen, dan crasht de 
-        // grid-layout als we één cel weghalen.
-        //
-        // Veiligheidsregel: alleen verplaatsen als de container een 
-        // simpele verticale lijst is (display: block of flex-column).
-        // Bij grids met meerdere kolommen → wrap ALLEEN de opdracht, 
-        // laat eersteRij staan in zijn rooster. De rooster-styling 
-        // hierboven (page-break-inside: avoid op cellen + rooster) 
-        // moet dan de samenhang regelen.
-        
-        const oudeContainer = eersteRij.parentElement;
-        if (!oudeContainer || oudeContainer !== blokNaOpdracht) {
-          // Diepere nesting — niet veilig. Wrap alleen opdracht.
-          return;
-        }
-        
-        const display = window.getComputedStyle(oudeContainer).display;
-        const gridCols = window.getComputedStyle(oudeContainer).gridTemplateColumns;
-        const isMeerKolomGrid = display === "grid" && 
-          gridCols && gridCols !== "none" && 
-          gridCols.includes(" "); // bevat spatie = >1 kolom
-        
-        if (isMeerKolomGrid) {
-          // Grid met meerdere kolommen: NIET verplaatsen.
-          // Wrapper bevat alleen opdracht. De grid-cellen blijven samen 
-          // door de page-break-inside: avoid op de grid-container zelf 
-          // (toegevoegd in stap 2 hieronder).
-          return;
-        }
-        
-        // Simpele verticale lijst: verplaats eersteRij in wrapper, 
-        // bewaar styling via een mini-container met dezelfde classes.
-        const miniContainer = document.createElement("div");
-        miniContainer.className = oudeContainer.className;
-        miniContainer.style.cssText = "min-height: 0; margin: 0;";
-        wrapper.appendChild(miniContainer);
-        miniContainer.appendChild(eersteRij);
-      }
-    });
-    
-    /* ---- STAP 2: Kolommen-roosters onsplitsbaar maken ---- */
-    
-    // OV9 verdieping heeft 3 kolommen in een grid. Elk kolom-element is 
-    // op zichzelf verticaal en kan door html2pdf doorgesneden worden.
-    // We forceren beide eigenschappen:
-    //   - hele kolommen-rooster: page-break-inside avoid 
-    //     (zodat de drie kolommen samen op één pagina blijven)
-    //   - elke kolom: page-break-inside avoid 
-    //     (zodat geen kolom in zichzelf gesplitst wordt — backup)
-    
-    const KOLOMMEN_ROOSTERS = [
-      ".ov09-verdieping-kolommen",   // 3 kolommen OV9
-      ".ov09-verdieping-rooster",    // wrapper eromheen
-      ".ov10-vb-grid",               // OV10 verdieping grid
-      ".ov10-afb-grid",              // OV10 afbeeldingen grid
-    ];
-    
-    const KOLOM_CELLEN = [
-      ".ov09-verdieping-kolom",      // individuele kolom OV9
-      ".ov09-basis-cel",
-      ".ov10-vb-cel",
-      ".ov10-afb-cel",
-    ];
-    
-    // Hele rooster: niet splitsen
-    root.querySelectorAll(KOLOMMEN_ROOSTERS.join(", ")).forEach(el => {
-      const huidigeStijl = el.getAttribute("style") || "";
-      el.setAttribute("style", huidigeStijl + 
-        "; page-break-inside: avoid !important;" +
-        " break-inside: avoid !important;");
-    });
-    
-    // Individuele kolommen: ook niet splitsen (dubbele bescherming)
-    root.querySelectorAll(KOLOM_CELLEN.join(", ")).forEach(el => {
-      const huidigeStijl = el.getAttribute("style") || "";
-      el.setAttribute("style", huidigeStijl + 
-        "; page-break-inside: avoid !important;" +
-        " break-inside: avoid !important;");
-    });
-    
-    /* ---- STAP 3: Page-break regels op echte oefenrijen ---- */
-    
-    // Elke rij: niet middendoor splitsen
-    const RIJ_BLOKKEN = [
-      ".ov01-rooster-rij", ".ov01-cel", ".ov01-zin-blok",
-      ".ov02-rij",
-      ".ov03-cel", ".ov03-rij",
-      ".ov04-rij", ".ov04-rooster-rij",
-      ".ov05-rij",
-      ".ov06-zin-rij", ".ov06-uitbreiding-rij",
-      ".ov07-rij", ".ov07-cel", ".ov07-uitbreiding-container",
-      ".ov08-rij", ".ov08-invul-zin", ".ov08-eigen-blok", 
-      ".ov08-uitbreiding-container",
-      ".ov09-uitbreiding-rij",
-      ".ov10-rij", ".ov10-noteer-rij", ".ov10-kern-rij", 
-      ".ov10-wz-rij", ".ov10-ub-rij",
-      ".dag-blok"
-    ];
-    root.querySelectorAll(RIJ_BLOKKEN.join(", ")).forEach(el => {
-      const huidigeStijl = el.getAttribute("style") || "";
-      el.setAttribute("style", huidigeStijl + 
-        "; page-break-inside: avoid !important;" +
-        " break-inside: avoid !important;");
-    });
-  }
-  
   /* ----- Render één item (=oefening) compact ----- */
   function _renderItem(item, nummerInBoekje) {
     const mod = window.SpellingModules?.[item.ovId];
@@ -558,6 +326,15 @@ window.SpellingHerhalingsbundel = (function() {
     }
     
     try {
+      // Lees actuele zijbalk-instellingen (per-OV)
+      // OV02 plaatje-toggle: leerkracht-toggle uit zijbalk-state
+      let ov02MetPlaatje = false;
+      if (item.ovId === "ov02") {
+        const zb = window.SpellingZijbalk;
+        const ov02State = zb?.getOefenvormState ? zb.getOefenvormState("ov02") : null;
+        if (ov02State) ov02MetPlaatje = ov02State.metPlaatje === true;
+      }
+      
       // Roep module's genereerBlad aan met gepaste opties
       const opties = {
         graad: item.graad || 1,
@@ -568,6 +345,8 @@ window.SpellingHerhalingsbundel = (function() {
           ondertitel: "",
           plaatjeKern: true,
           plaatjeVerdieping: true,
+          // OV02-specifiek: leerkracht-toggle voor plaatjes
+          metPlaatje: ov02MetPlaatje,
           // aantalWoorden voor OV01, OV02, OV03 (die geen _maxPerNiveau hebben)
           aantalWoorden: effectiefAantal,
           ...(item.opties || {})
@@ -752,19 +531,10 @@ window.SpellingHerhalingsbundel = (function() {
   }
   
   /* Plaats horizontale lijnen + paginanummer-labels op de positie waar
-     de PDF zou splitsen. 
-     
-     NIEUWE AANPAK: we meten op een verborgen KLOON waar dezelfde 
-     _prepareerVoorPDF transform op is uitgevoerd. Zo zijn de hoogtes 
-     en blok-structuur identiek aan wat html2pdf gaat zien.
-     
-     Stap 1: kloon het document, voer _prepareerVoorPDF uit
-     Stap 2: meet de positie van elk top-level kind-blok (hb-pdf-keep, 
-             losse rijen, etc.) in de kloon
-     Stap 3: simuleer pagina-flow: vul pagina tot blok niet meer past, 
-             dan nieuwe pagina
-     Stap 4: vertaal die posities terug naar het origineel (zelfde 
-             y-coördinaten want kloon heeft dezelfde breedte) */
+     de PDF zou splitsen. Respecteert page-break-avoid regels:
+     - Snijdt nooit door een opdracht-blok
+     - Snijdt nooit door een individuele rij
+     De marker schuift omhoog naar de eerste plek waar splitsing OK is. */
   async function _plaatsPaginaMarkers(container) {
     const doc = container.querySelector(".hb-document");
     if (!doc) return;
@@ -773,119 +543,77 @@ window.SpellingHerhalingsbundel = (function() {
     container.querySelectorAll(".hb-pagina-marker").forEach(m => m.remove());
     
     // A4 werkbare ruimte ≈ 1097px (29cm op 96dpi)
-    // Houd rekening met pdfOpties margins: top 12mm + bottom 18mm = 30mm
-    // 30mm ≈ 113px → werkbare hoogte = 1123 - 113 = ~1010px
-    const PAGINA_HOOGTE_PX = 1010;
+    const PAGINA_HOOGTE_PX = 1097;
     
-    /* ---- Bouw verborgen kloon met dezelfde transform als PDF ---- */
-    const meetKloon = doc.cloneNode(true);
-    const meetWrapper = document.createElement("div");
-    meetWrapper.style.cssText = `
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: ${doc.offsetWidth}px;
-      visibility: hidden;
-      pointer-events: none;
-      z-index: -1;
-    `;
-    meetWrapper.appendChild(meetKloon);
-    document.body.appendChild(meetWrapper);
-    
-    // Voer dezelfde transform uit als PDF gaat doen
-    _prepareerVoorPDF(meetKloon);
-    
-    // Wacht 1 frame zodat layout berekend is
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    
-    /* ---- Verzamel alle "blok-elementen" die niet gesplitst mogen 
-       worden, in volgorde van top-positie ---- */
-    
-    // Top-level blokken: hb-pdf-keep wrappers + losse oefenrijen + 
-    // hb-doc-header + uitbreidings-blokken
-    const BLOK_SELECTORS = [
-      ".hb-pdf-keep",
-      ".hb-doc-header",
-      ".hb-item-header",
-      // Losse rijen die NIET in een hb-pdf-keep zitten 
-      // (= rijen na de eerste rij van een oefening)
-      ".ov01-rooster-rij", ".ov01-cel",
-      ".ov02-rij",
-      ".ov03-cel",
-      ".ov04-rij", ".ov04-rooster-rij",
-      ".ov05-rij",
-      ".ov06-zin-rij", ".ov06-uitbreiding-rij",
-      ".ov07-rij", ".ov07-cel",
-      ".ov08-rij", ".ov08-invul-zin",
-      ".ov09-basis-cel", ".ov09-verdieping-kolommen",
-      ".ov10-rij", ".ov10-noteer-rij",
-      // Uitbreidings-blokken
+    // Selectors voor elementen die NIET gesplitst mogen worden — moet 
+    // GELIJK zijn aan PDF avoid-lijst zodat preview-markers overeenkomen
+    // met echte PDF-page-breaks.
+    const NIET_SPLITSBAAR = [
+      // KRITIEK: opdracht-blok + eerste rij samenhouden
+      ".hb-opdracht-blok", ".hb-eerste-rij-na-opdracht",
+      ".hb-rooster-met-eerste-rij",
+      // Uitbreidings-blokken (groene/gele kaders met "kies 1 woord..." enz)
       ".ov01-uitbreiding-container", ".ov01-zin-blok",
       ".ov07-uitbreiding-container", ".ov08-uitbreiding-container",
       ".ov09-uitbreiding-rij", ".ov10-ub-rij",
-      ".dag-blok"
+      ".weekdictee-dag-blok", ".dag-blok",
+      // Individuele rijen mogen ook niet midden doorgesneden worden
+      ".ov01-cel", ".ov01-rooster-rij", 
+      ".ov02-rij", ".ov03-cel", ".ov04-rij", ".ov05-rij", 
+      ".ov06-zin-rij", ".ov06-uitbreiding-rij",
+      ".ov07-rij", ".ov08-rij", ".ov08-invul-zin",
+      ".ov09-basis-cel", ".ov09-verdieping-kolom",
+      ".ov10-rij", ".ov10-basis-rij",
+      ".hb-item-header"
     ].join(", ");
     
-    const blokken = [];
-    meetKloon.querySelectorAll(BLOK_SELECTORS).forEach(el => {
-      // Skip blokken die binnen een ander blok zitten 
-      // (anders tellen we dubbel — een hb-pdf-keep met rij erin 
-      // moet als één blok tellen, niet als wrapper + rij)
-      const parent = el.parentElement?.closest(BLOK_SELECTORS);
-      if (parent && meetKloon.contains(parent)) return;
-      
-      const rect = el.getBoundingClientRect();
-      const docRect = meetKloon.getBoundingClientRect();
-      blokken.push({
-        top: rect.top - docRect.top,
-        bottom: rect.bottom - docRect.top,
-        hoogte: rect.height
-      });
-    });
-    
-    // Sorteer op top-positie
-    blokken.sort((a, b) => a.top - b.top);
-    
-    /* ---- Simuleer pagina-flow ---- */
-    
-    const markerPosities = [];
-    let huidigeOnder = 0;       // onderkant van vorige break (= top van huidige pagina)
-    let aantalPaginas = 1;
-    
-    for (let i = 0; i < blokken.length; i++) {
-      const blok = blokken[i];
-      const onderkantBlok = blok.bottom;
-      const blokRelatief = blok.bottom - huidigeOnder;
-      
-      if (blokRelatief > PAGINA_HOOGTE_PX) {
-        // Blok past niet meer op huidige pagina. 
-        // Plaats marker net boven dit blok.
-        const markerY = blok.top - 4;
-        markerPosities.push({ y: markerY, paginaNr: aantalPaginas });
-        aantalPaginas++;
-        huidigeOnder = blok.top;
-      }
-      
-      // Veiligheidsklep
-      if (aantalPaginas > 50) break;
-    }
-    
-    /* ---- Plaats markers op originele document (zelfde coordinaten) ---- */
-    
+    const docHoogte = doc.offsetHeight;
     const docTop = doc.offsetTop;
-    markerPosities.forEach(({ y, paginaNr }) => {
+    
+    let aantalPaginas = 1;
+    let huidigePaginaOnder = PAGINA_HOOGTE_PX;
+    
+    while (huidigePaginaOnder < docHoogte) {
+      // Vind de beste positie voor deze marker:
+      // start bij huidigePaginaOnder en kijk naar boven naar elementen
+      // die de grens kruisen. Schuif marker naar boven de eerste die kruist.
+      let breakPositie = huidigePaginaOnder;
+      
+      // Vind alle niet-splitsbare elementen die de grens kruisen
+      const elementen = doc.querySelectorAll(NIET_SPLITSBAAR);
+      let kleinsteTopBoven = breakPositie;
+      
+      elementen.forEach(el => {
+        const elTop = el.offsetTop + _getParentTopOffset(el, doc);
+        const elBottom = elTop + el.offsetHeight;
+        // Element kruist de grens?
+        if (elTop < breakPositie && elBottom > breakPositie) {
+          // Schuif marker naar BOVEN dit element
+          if (elTop < kleinsteTopBoven) {
+            kleinsteTopBoven = elTop;
+          }
+        }
+      });
+      
+      // Veilig stel marker positie in
+      const markerY = kleinsteTopBoven - 4;
+      
+      // Plaats marker
       const marker = document.createElement("div");
       marker.className = "hb-pagina-marker";
-      marker.style.top = (docTop + y) + "px";
+      marker.style.top = (docTop + markerY) + "px";
       marker.innerHTML = `
         <div class="hb-pagina-marker-lijn"></div>
-        <div class="hb-pagina-marker-label">— Einde pagina ${paginaNr} / Begin pagina ${paginaNr + 1} —</div>
+        <div class="hb-pagina-marker-label">— Einde pagina ${aantalPaginas} / Begin pagina ${aantalPaginas + 1} —</div>
       `;
       container.appendChild(marker);
-    });
-    
-    // Cleanup meet-kloon
-    meetWrapper.remove();
+      
+      aantalPaginas++;
+      huidigePaginaOnder = markerY + PAGINA_HOOGTE_PX;
+      
+      // Veiligheidsklep tegen oneindige lus
+      if (aantalPaginas > 50) break;
+    }
     
     // Update navigatie-teller
     _updateNavigatie(1, aantalPaginas);
@@ -1147,12 +875,13 @@ window.SpellingHerhalingsbundel = (function() {
   }
   
   async function downloadPDF(metOplossingen = false) {
-    if (typeof html2pdf === "undefined") {
-      alert("PDF-bibliotheek nog aan het laden. Probeer over een paar seconden opnieuw.");
-      return;
-    }
     if (state.items.length === 0) {
       alert("Bundel is leeg — voeg eerst oefeningen toe.");
+      return;
+    }
+    
+    if (!window.SpellingHerhalingsbundelPDF) {
+      alert("PDF-engine niet geladen. Controleer dat herhalingsbundel-pdf.js is opgenomen in index.html.");
       return;
     }
     
@@ -1163,210 +892,46 @@ window.SpellingHerhalingsbundel = (function() {
       knop.disabled = true;
     }
     
-    // Mooie laadbalk-overlay (gebruiker ziet GEEN flits van werkbladen)
     const loader = document.createElement("div");
     loader.id = "hb-pdf-loader";
     loader.innerHTML = `
       <div class="hb-pdf-loader-box">
         <div class="hb-pdf-loader-spinner"></div>
         <h3>PDF wordt gemaakt…</h3>
-        <p>Even geduld, dit kan een paar seconden duren.</p>
+        <p>Even geduld.</p>
       </div>
     `;
     document.body.appendChild(loader);
     
-    await _meetItems();
-    
-    // Container: VOLLEDIG ONZICHTBAAR via dubbele bescherming:
-    // (1) Element zelf is opacity: 0
-    // (2) BOVENOP ligt de zwarte loader-overlay (z-index 100000)
-    // html2canvas kan het element correct capturen omdat het in de
-    // DOM staat met layout, alleen de gebruiker ziet niets door de
-    // overlay erbovenop.
-    const wrapper = document.createElement("div");
-    wrapper.id = "hb-pdf-wrapper";
-    wrapper.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 21cm;
-      background: #ffffff;
-      z-index: 1;
-      opacity: 0.01;
-      pointer-events: none;
-    `;
-    
-    const inner = document.createElement("div");
-    inner.id = "hb-pdf-inner";
-    inner.style.cssText = `
-      width: 21cm;
-      background: #ffffff;
-    `;
-    inner.innerHTML = _renderVolledigeBundelDocument(metOplossingen);
-    
-    wrapper.appendChild(inner);
-    document.body.appendChild(wrapper);
-    
-    // Forceer werkblad-overrides met !important
-    inner.querySelectorAll(".werkblad").forEach(el => {
-      el.style.setProperty("min-height", "auto", "important");
-      el.style.setProperty("width", "100%", "important");
-      el.style.setProperty("padding", "0", "important");
-      el.style.setProperty("margin", "0", "important");
-      el.style.setProperty("box-shadow", "none", "important");
-      el.style.setProperty("background", "transparent", "important");
-    });
-    
-    // Document zelf: alleen horizontale padding (top/bottom doet PDF via margin)
-    inner.querySelectorAll(".hb-document").forEach(el => {
-      el.style.setProperty("box-shadow", "none", "important");
-      el.style.setProperty("margin", "0", "important");
-      el.style.setProperty("padding", "0 1.5cm", "important");  // alleen left+right
-      el.style.setProperty("width", "100%", "important");
-      el.style.setProperty("box-sizing", "border-box", "important");
-    });
-    
-    // Document-header (Naam/Datum/Titel): krappe margin top
-    inner.querySelectorAll(".hb-doc-header").forEach(el => {
-      el.style.setProperty("margin-top", "0", "important");
-    });
-    
-    inner.querySelectorAll(".hb-item-acties").forEach(el => el.style.display = "none");
-    inner.querySelectorAll(".hb-item-header").forEach(el => el.style.display = "none");
-    inner.querySelectorAll(".hb-item").forEach(el => {
-      el.style.setProperty("border", "none", "important");
-      el.style.setProperty("background", "transparent", "important");
-      el.style.setProperty("margin-bottom", "12px", "important");
-    });
-    inner.querySelectorAll(".hb-item-inhoud").forEach(el => {
-      el.style.setProperty("background", "transparent", "important");
-      el.style.setProperty("padding", "0", "important");
-    });
-    
-    // KRITIEK: forceer alle werkblad-kinderen om binnen de pagina-breedte te passen
-    // (anders snijdt rechts af, bv. bij OV9 horizontale layouts)
-    inner.querySelectorAll(".hb-item-inhoud *").forEach(el => {
-      const computed = window.getComputedStyle(el);
-      // Alleen elementen die overflow zouden veroorzaken
-      if (el.scrollWidth > el.clientWidth + 5) {
-        el.style.setProperty("max-width", "100%", "important");
-        el.style.setProperty("overflow", "visible", "important");
-      }
-    });
-    
-    // Specifiek: rooster-containers met flex/grid layout — zorg dat ze wrappen
-    inner.querySelectorAll(
-      ".ov09-basis-rooster, .ov09-verdieping-rooster, " +
-      ".ov10-basis-rooster, .ov10-rij, .ov04-rooster"
-    ).forEach(el => {
-      el.style.setProperty("flex-wrap", "wrap", "important");
-      el.style.setProperty("max-width", "100%", "important");
-    });
-    
-    // Wacht op layout
-    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    
-    // Teken canvases
-    if (window.SpellingSchrijflijnen?.tekenAlle) {
-      window.SpellingSchrijflijnen.tekenAlle(inner);
-    }
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    
-    // KRITIEKE FIX: bereid de DOM voor op PDF-export:
-    //  (1) wrap opdracht + eerste rij in onsplitsbaar blok
-    //  (2) maak kolommen-roosters (OV9 verdieping, OV10) onsplitsbaar
-    //  (3) zet page-break-avoid op alle individuele oefenrijen
-    // Werkt UITSLUITEND op de verborgen kopie — origineel blijft intact.
-    _prepareerVoorPDF(inner);
-    
-    // Nog één frame wachten zodat browser de DOM-mutaties verwerkt heeft
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    
-    const titel = (state.titel || "herhalingsbundel").replace(/[^a-z0-9_-]/gi, "_");
-    const suffix = metOplossingen ? "_oplossingen" : "";
-    const bestand = `${titel}${suffix}.pdf`;
-    
-    const pdfOpties = {
-      margin: [12, 0, 18, 0],   // mm: top, right, bottom, left
-      filename: bestand,
-      image: { type: "jpeg", quality: 0.95 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
-        letterRendering: true, 
-        backgroundColor: "#ffffff",
-        scrollX: 0,
-        scrollY: 0
-      },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-      pagebreak: {
-        mode: ["css", "legacy"],
-        avoid: [
-          // KRITIEK: nieuwe wrapper voor opdracht + eerste rij (zie _prepareerVoorPDF)
-          ".hb-pdf-keep",
-          // Legacy: oude classes (mogen blijven als safety net)
-          ".hb-opdracht-blok", ".hb-eerste-rij-na-opdracht", 
-          ".hb-rooster-met-eerste-rij",
-          // Opdracht-blokken (gele/lichtgele kaders)
-          ".ov01-stappen", ".ov02-instructies", ".ov03-instructies", 
-          ".ov04-instructies", ".ov05-instructies", ".ov06-instructies",
-          ".ov07-instructies", ".ov08-instructies", ".ov09-instructies",
-          ".ov10-instructies",
-          // Uitbreidings-blokken (groene kaders)
-          ".ov01-uitbreiding-container", ".ov01-zin-blok",
-          ".ov07-uitbreiding-container", ".ov08-uitbreiding-container",
-          ".ov09-uitbreiding-rij", ".ov10-ub-rij",
-          // Individuele rijen per OV
-          ".ov01-rooster-rij", ".ov01-cel",
-          ".ov02-rij",
-          ".ov03-cel", ".ov03-rij",
-          ".ov04-rij", ".ov04-rooster-rij",
-          ".ov05-rij",
-          ".ov06-zin-rij", ".ov06-uitbreiding-rij",
-          ".ov07-rij", ".ov07-cel",
-          ".ov08-rij", ".ov08-invul-zin", ".ov08-eigen-blok",
-          // OV9: KRITIEK - kolommen-rooster én individuele kolommen
-          ".ov09-basis-cel", ".ov09-verdieping-kolom",
-          ".ov09-basis-rooster", ".ov09-verdieping-rooster",
-          ".ov09-verdieping-kolommen",
-          // OV10: alle rijen én verdieping/afbeeldingen-grids
-          ".ov10-rij", ".ov10-basis-rij", ".ov10-basis-noteer-rij",
-          ".ov10-noteer-rij", ".ov10-kern-rij", ".ov10-wz-rij",
-          ".ov10-vb-grid", ".ov10-afb-grid",
-          ".ov10-vb-cel", ".ov10-afb-cel",
-          // Weekdictee
-          ".dag-blok"
-        ]
-      }
-    };
+    const bewerkAanWas = document.body.classList.contains("hb-bewerk-aan");
+    if (bewerkAanWas) document.body.classList.remove("hb-bewerk-aan");
     
     try {
-      // Maak PDF en voeg voettekst + paginanummer per pagina toe
-      const worker = html2pdf().set(pdfOpties).from(inner).toPdf();
-      const pdf = await worker.get("pdf");
+      await renderPreview();
+      await new Promise(r => setTimeout(r, 50));
       
-      const totaalPaginas = pdf.internal.getNumberOfPages();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
+      const titel = (state.titel || "herhalingsbundel").replace(/[^a-z0-9 _-]/gi, "_");
+      const suffix = metOplossingen ? "_oplossingen" : "";
+      const bestand = `${titel}${suffix}.pdf`;
       
-      // Voeg voettekst + paginanummer toe op elke pagina
-      for (let i = 1; i <= totaalPaginas; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(8);
-        pdf.setTextColor(136, 136, 136);  // grijs
-        // Links: website
-        pdf.text("www.jufzisa.be — Juf Zisa's spellinggenerator", 15, pageHeight - 8);
-        // Rechts: paginanummer
-        pdf.text(`${i} / ${totaalPaginas}`, pageWidth - 15, pageHeight - 8, { align: "right" });
-      }
+      // Mark items voor de PDF-engine met oplossingen-vlag
+      const itemsMetOpl = state.items.map(it => ({
+        ...it,
+        metAntwoorden: metOplossingen
+      }));
       
-      pdf.save(bestand);
+      await window.SpellingHerhalingsbundelPDF.download({
+        items: itemsMetOpl,
+        titel: state.titel || "Mijn herhalingsbundel",
+        metOplossingen: metOplossingen,
+        bestandsnaam: bestand
+      });
     } catch (e) {
       console.error("PDF-export fout:", e);
       alert("Er ging iets mis bij PDF-export: " + e.message);
     } finally {
-      wrapper.remove();
       loader.remove();
+      if (bewerkAanWas) document.body.classList.add("hb-bewerk-aan");
       if (knop) {
         knop.textContent = oudeTekst;
         knop.disabled = false;
