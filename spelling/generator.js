@@ -109,7 +109,7 @@ window.SpellingGenerator = {
       ov05 = {
         niveaus: niveaus.length > 0 ? niveaus : ["basis"],
         klankpaar: document.querySelector("#ov05-klankpaar")?.value || "ei-ij",
-        plaatjeKern: document.querySelector("#ov05-plaatje-kern")?.checked !== false,
+        plaatjeKern: document.querySelector("#ov05-plaatje-kern")?.checked === true,
         plaatjeVerdieping: document.querySelector("#ov05-plaatje-verdieping")?.checked !== false,
         aantalWoorden: parseInt(document.querySelector("#ov05-aantal-woorden")?.value || "8", 10),
         lijnhoogte: globaalLijnhoogte,
