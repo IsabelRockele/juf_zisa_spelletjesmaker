@@ -63,28 +63,28 @@ window.SpellingModules.ov10 = {
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
               <strong>⭐ Oefenen</strong>
-              <small>woordzoeker met plaatjes</small>
+              <small>Woordzoeker met plaatjes. Kind zoekt elk samengesteld woord en schrijft het onderaan op de lijn.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐ Toepassen</strong>
-              <small>plaatje + plaatje = samenstelling</small>
+              <small>Twee plaatjes (deel + deel = samenstelling). Kind plakt de woorden aan elkaar zonder spatie en schrijft op.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>verbind twee woorden</small>
+              <small>Twee kolommen woorden. Kind trekt lijntjes tussen passende delen en schrijft de samenstellingen op.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="uitbreiding">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>raad de samenstelling bij een beschrijving</small>
+              <small>Beschrijving lezen en zelf het samengesteld woord bedenken. Werkt aan woordenschat én spelling tegelijk.</small>
             </div>
           </label>
         </div>
@@ -412,58 +412,10 @@ window.SpellingModules.ov10 = {
   _inhoudVerdieping: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
     const aantal = Math.min(woorden.length, this._maxPerNiveau.verdieping);
-    
-    // Pak alle kandidaat-woorden (met geldige delen) en splits zo dat 
-    // binnen elke mini-groep zowel de linker-delen als de rechter-delen 
-    // uniek zijn. Anders zou een kind 2 lijnen kunnen trekken naar hetzelfde 
-    // doel-deel (bv. "hand → doek" en "zak → doek").
-    const kandidaten = woorden.slice().filter(w => w.delen && w.delen.length === 2);
-    
-    const groep1 = [];
-    const linkerSet1 = new Set();
-    const rechterSet1 = new Set();
-    
-    const groep2 = [];
-    const linkerSet2 = new Set();
-    const rechterSet2 = new Set();
-    
-    const overschot = [];  // woorden die niet konden geplaatst worden (dubbele delen in beide groepen)
-    
+    const set = woorden.slice(0, aantal);
     const helft = Math.ceil(aantal / 2);
-    
-    // Verdeel woorden: probeer eerst groep 1 te vullen tot 'helft', dan groep 2 tot 'aantal-helft'
-    for (const w of kandidaten) {
-      if (groep1.length + groep2.length >= aantal) break;
-      
-      const links = w.delen[0];
-      const rechts = w.delen[1];
-      
-      // Probeer groep 1
-      if (groep1.length < helft && !linkerSet1.has(links) && !rechterSet1.has(rechts)) {
-        groep1.push(w);
-        linkerSet1.add(links);
-        rechterSet1.add(rechts);
-        continue;
-      }
-      // Probeer groep 2
-      if (groep2.length < (aantal - helft) && !linkerSet2.has(links) && !rechterSet2.has(rechts)) {
-        groep2.push(w);
-        linkerSet2.add(links);
-        rechterSet2.add(rechts);
-        continue;
-      }
-      // Niet plaatsbaar in een van beide groepen
-      overschot.push(w);
-    }
-    
-    // Fallback: als groep1 of groep2 te klein is, vul aan met overschot 
-    // (dan staan er evt. wel dubbele delen, maar dat is beter dan een lege groep)
-    while (groep1.length < helft && overschot.length > 0) {
-      groep1.push(overschot.shift());
-    }
-    while (groep2.length < (aantal - helft) && overschot.length > 0) {
-      groep2.push(overschot.shift());
-    }
+    const groep1 = set.slice(0, helft);          // mini-oef 1
+    const groep2 = set.slice(helft, aantal);     // mini-oef 2
 
     // Helper: bouw één mini-oefening (verbind-kolommen + schrijflijnen)
     const bouwMiniOef = (groep, startNr) => {
@@ -473,15 +425,13 @@ window.SpellingModules.ov10 = {
 
       let linksHTML = `<div class="ov10-vb-kolom ov10-vb-links">`;
       for (const woord of linkerwoorden) {
-        // data-deel = het linker deel (= de "key" om mee te matchen in PDF)
-        linksHTML += `<div class="ov10-vb-item" data-deel="${woord}"><span>${woord}</span><span class="ov10-vb-punt">•</span></div>`;
+        linksHTML += `<div class="ov10-vb-item"><span>${woord}</span><span class="ov10-vb-punt">•</span></div>`;
       }
       linksHTML += `</div>`;
 
       let rechtsHTML = `<div class="ov10-vb-kolom ov10-vb-rechts">`;
       for (const woord of rechterwoorden) {
-        // data-deel = het rechter deel
-        rechtsHTML += `<div class="ov10-vb-item" data-deel="${woord}"><span class="ov10-vb-punt">•</span><span>${woord}</span></div>`;
+        rechtsHTML += `<div class="ov10-vb-item"><span class="ov10-vb-punt">•</span><span>${woord}</span></div>`;
       }
       rechtsHTML += `</div>`;
 
@@ -500,17 +450,8 @@ window.SpellingModules.ov10 = {
       }
       noteerHTML += `</div>`;
 
-      // Geef ook de paren expliciet mee als data-attribuut op de mini-container,
-      // zodat de PDF-renderer weet welk linker-deel met welk rechter-deel hoort.
-      // Formaat: "deel1a=deel1b,deel2a=deel2b,..."
-      const parenStr = groep.map(w => {
-        const a = (w.delen?.[0] || w.tekst).replace(/=/g, "");
-        const b = (w.delen?.[1] || "").replace(/=/g, "");
-        return `${a}=${b}`;
-      }).join(",");
-
       return `
-        <div class="ov10-vb-mini" data-paren="${parenStr}">
+        <div class="ov10-vb-mini">
           <div class="ov10-vb-grid">
             ${linksHTML}
             <div class="ov10-vb-midden"></div>
