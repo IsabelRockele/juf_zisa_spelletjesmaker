@@ -111,7 +111,8 @@ window.SpellingZijbalk = (function() {
       niveaus: new Set(oef.niveaus.length > 0 ? ["basis"] : []),
       aantal: oef.defaultAantal,
       lijntype: "type3",
-      lijnhoogte: "middel"
+      lijnhoogte: "middel",
+      metPlaatje: false  // OV02-specifiek: alleen relevant voor "Woord 3x overschrijven"
     };
   }
 
@@ -130,13 +131,21 @@ window.SpellingZijbalk = (function() {
     oefenvormState = oefenvormState.filter(s => geldigeIds.has(s.id));
   }
 
+  function _storage() {
+    return window.SpellingModusStorage || localStorage;
+  }
+
   function laadState() {
+    // Reset in-memory state — anders blijft vorige modus zijn data behouden
+    aangevinkteCategorieen = {};
+    oefenvormState = [];
+    
     try {
-      actieveGraad = parseInt(localStorage.getItem(LS_GRAAD) || "1", 10);
+      actieveGraad = parseInt(_storage().getItem(LS_GRAAD) || "1", 10);
     } catch (e) { actieveGraad = 1; }
     
     try {
-      const raw = localStorage.getItem(LS_CATEGORIEEN);
+      const raw = _storage().getItem(LS_CATEGORIEEN);
       if (raw) {
         const obj = JSON.parse(raw);
         for (const [graad, lijst] of Object.entries(obj)) {
@@ -146,7 +155,7 @@ window.SpellingZijbalk = (function() {
     } catch (e) { /* leeg */ }
     
     try {
-      const raw = localStorage.getItem(LS_OEFENVORMEN);
+      const raw = _storage().getItem(LS_OEFENVORMEN);
       if (raw) {
         const lijst = JSON.parse(raw);
         oefenvormState = lijst.map(x => ({
@@ -166,19 +175,20 @@ window.SpellingZijbalk = (function() {
 
   function bewaarState() {
     try {
-      localStorage.setItem(LS_GRAAD, String(actieveGraad));
+      const s = _storage();
+      s.setItem(LS_GRAAD, String(actieveGraad));
       
       const catObj = {};
       for (const [g, set] of Object.entries(aangevinkteCategorieen)) {
         catObj[g] = [...set];
       }
-      localStorage.setItem(LS_CATEGORIEEN, JSON.stringify(catObj));
+      s.setItem(LS_CATEGORIEEN, JSON.stringify(catObj));
       
       const oefenLijst = oefenvormState.map(x => ({
         ...x,
         niveaus: [...x.niveaus]
       }));
-      localStorage.setItem(LS_OEFENVORMEN, JSON.stringify(oefenLijst));
+      s.setItem(LS_OEFENVORMEN, JSON.stringify(oefenLijst));
     } catch (e) {
       console.warn("Kon zijbalk-state niet bewaren:", e);
     }
@@ -512,37 +522,82 @@ window.SpellingZijbalk = (function() {
           <div class="zb-oef-instel">`;
       
       if (oef.niveaus.length > 0) {
+        // Check of we in herhalings-modus zijn (dan: aantal-input per niveau,
+        // ipv één globale aantal-input voor de hele OV)
+        const inHerhalingsModus = document.querySelector("#modus-herhaling")?.style.display !== "none"
+          && document.querySelector("#modus-herhaling") !== null;
+        
+        // Lees max per niveau uit module (voor placeholder-hint)
+        const maxPerNiveau = window.SpellingModules?.[oef.id]?._maxPerNiveau || {};
+        
         html += `<div class="zb-oef-rij"><label>Niveau(s):</label><div class="zb-oef-niveaus">`;
         for (const niv of oef.niveaus) {
           const ningevinkt = state.niveaus && state.niveaus.has(niv);
+          
+          // Aantal-input alleen in herhalings-modus + alleen als niveau aangevinkt
+          let aantalInputHTML = "";
+          if (inHerhalingsModus && ningevinkt) {
+            const huidig = state.aantalPerNiveau?.[niv] || "";
+            const maxHint = maxPerNiveau[niv] || oef.defaultAantal || 12;
+            aantalInputHTML = `
+              <input type="number" class="zb-niveau-aantal" 
+                     data-oef="${oef.id}" data-niveau="${niv}"
+                     min="1" max="30" 
+                     value="${huidig}"
+                     placeholder="max ${maxHint}"
+                     title="Aantal woorden (leeg = max ${maxHint})">`;
+          }
+          
           html += `
-            <label class="zb-niveau-vink ${ningevinkt ? 'aan' : ''}">
-              <input type="checkbox" class="zb-niveau-cb" 
-                     data-oef="${oef.id}" data-niveau="${niv}" ${ningevinkt ? 'checked' : ''}>
-              <span>${NIVEAU_LABELS[niv]}</span>
-            </label>`;
+            <div class="zb-niveau-rij">
+              <label class="zb-niveau-vink ${ningevinkt ? 'aan' : ''}">
+                <input type="checkbox" class="zb-niveau-cb" 
+                       data-oef="${oef.id}" data-niveau="${niv}" ${ningevinkt ? 'checked' : ''}>
+                <span>${NIVEAU_LABELS[niv]}</span>
+              </label>
+              ${aantalInputHTML}
+            </div>`;
         }
         html += `</div></div>`;
       }
+      
+      // Voor herhalings-modus: skip de standaard "Aantal woorden" en "info"-regel
+      // (we gebruiken nu per-niveau inputs hierboven)
+      const inHerhalingsModusCheck = document.querySelector("#modus-herhaling")?.style.display !== "none"
+        && document.querySelector("#modus-herhaling") !== null;
       
       // Toon de "Aantal woorden"-input alleen als de OV geen vaste
       // maxima per niveau heeft. OV10 heeft _maxPerNiveau gedefinieerd
       // → automatisch op max per niveau, geen handmatige keuze nodig.
       // Verwijderen + 1-erbij gebeurt op het werkblad zelf.
       const heeftVastePlafonds = !!window.SpellingModules?.[oef.id]?._maxPerNiveau;
-      if (oef.id !== "weekdictee" && !heeftVastePlafonds) {
+      if (!inHerhalingsModusCheck && oef.id !== "weekdictee" && !heeftVastePlafonds) {
         html += `
           <div class="zb-oef-rij">
             <label>Aantal woorden:</label>
             <input type="number" class="zb-oef-aantal" data-oef="${oef.id}" 
                    min="3" max="20" value="${state.aantal || oef.defaultAantal}">
           </div>`;
-      } else if (heeftVastePlafonds && oef.id !== "weekdictee") {
+      } else if (!inHerhalingsModusCheck && heeftVastePlafonds && oef.id !== "weekdictee") {
         // Korte info-regel voor de leerkracht zodat zij weet dat het
         // aantal automatisch geregeld wordt.
         html += `
           <div class="zb-oef-rij zb-oef-info">
             <small>Aantal woorden: automatisch (verwijder met ✕, voeg toe met ➕ op het werkblad).</small>
+          </div>`;
+      }
+      
+      // OV02: plaatje-toggle (alleen relevant voor OV02 — "Woord 3x overschrijven")
+      // Default uit; leerkracht kan aanvinken om plaatje bij elk woord te tonen
+      if (oef.id === "ov02") {
+        const metPlaatje = state.metPlaatje === true;  // default false
+        html += `
+          <div class="zb-oef-rij zb-oef-plaatje">
+            <label class="zb-oef-toggle">
+              <input type="checkbox" class="zb-ov02-met-plaatje" 
+                     data-oef="${oef.id}" ${metPlaatje ? 'checked' : ''}>
+              <span>Plaatje tonen bij elk woord</span>
+            </label>
           </div>`;
       }
       
@@ -713,6 +768,16 @@ window.SpellingZijbalk = (function() {
             }
           }
           bewaarState();
+          // In herhalings-modus: re-render zodat aantal-input zichtbaar wordt/verdwijnt
+          const inHerhMode = document.querySelector("#modus-herhaling")?.style.display !== "none"
+            && document.querySelector("#modus-herhaling") !== null;
+          if (inHerhMode) {
+            renderOefenvormen();
+          } else {
+            // Werkblad-modus: alleen visueel de label toggelen
+            const lbl = e.target.closest(".zb-niveau-vink");
+            if (lbl) lbl.classList.toggle("aan", e.target.checked);
+          }
         }
       }
       else if (e.target.matches(".zb-oef-aantal")) {
@@ -720,6 +785,31 @@ window.SpellingZijbalk = (function() {
         const state = _getOrCreateState(oefId);
         if (state) {
           state.aantal = parseInt(e.target.value, 10) || state.aantal;
+          bewaarState();
+        }
+      }
+      // Per-niveau aantal-input (alleen in herhalings-modus zichtbaar)
+      else if (e.target.matches(".zb-niveau-aantal")) {
+        const oefId = e.target.dataset.oef;
+        const niveau = e.target.dataset.niveau;
+        const state = _getOrCreateState(oefId);
+        if (state && niveau) {
+          if (!state.aantalPerNiveau) state.aantalPerNiveau = {};
+          const v = parseInt(e.target.value, 10);
+          if (v && v > 0) {
+            state.aantalPerNiveau[niveau] = v;
+          } else {
+            delete state.aantalPerNiveau[niveau];  // leeg = default
+          }
+          bewaarState();
+        }
+      }
+      // OV02 plaatje-toggle: bewaar in state zodat herhalingsbundel het kan lezen
+      else if (e.target.matches(".zb-ov02-met-plaatje")) {
+        const oefId = e.target.dataset.oef;
+        const state = _getOrCreateState(oefId);
+        if (state) {
+          state.metPlaatje = e.target.checked;
           bewaarState();
         }
       }
@@ -770,6 +860,25 @@ window.SpellingZijbalk = (function() {
     }));
   }
   
+  /* Geef state-object terug voor een specifieke oefenvorm (ook indien niet aangevinkt).
+     Returnt null als oefenvorm niet bestaat. */
+  function getOefenvormState(oefId) {
+    const s = oefenvormState.find(x => x.id === oefId);
+    if (!s) return null;
+    return {
+      ...s,
+      niveaus: [...s.niveaus]
+    };
+  }
+  
+  /* Helper voor herhalings-modus: lees het gekozen aantal voor een OV+niveau.
+     Retourneert null als leerkracht niets heeft ingevuld (= gebruik default). */
+  function getAantalVoorNiveau(oefId, niveau) {
+    const s = oefenvormState.find(x => x.id === oefId);
+    if (!s || !s.aantalPerNiveau) return null;
+    return s.aantalPerNiveau[niveau] || null;
+  }
+  
   function getAangevinkteCategorieIds() {
     return [...getAangevinkteCats()];
   }
@@ -794,11 +903,42 @@ window.SpellingZijbalk = (function() {
       updateWoordenkiezerKnop();
     });
   }
+  
+  /* Herlaad alle state uit storage (na modus-wissel).
+     Re-rendert hoofdgroep-selector + oefenvormen. */
+  function herlaad() {
+    laadState();
+    
+    // Update graad-tab visueel
+    document.querySelectorAll(".graad-tab").forEach(t => t.classList.remove("actief"));
+    document.querySelector(`.graad-tab[data-graad="${actieveGraad}"]`)?.classList.add("actief");
+    
+    renderHoofdgroepSelector();
+    renderOefenvormen();
+    syncLegacyCatKnop();
+    updateWoordenkiezerKnop();
+  }
+  
+  /* Reset alle state (voor "Nieuwe bundel starten" in herhalingsbundel).
+     Wis cats + OV + niveaus + aantal-per-niveau. Behoudt graad. */
+  function reset() {
+    aangevinkteCategorieen = {};
+    oefenvormState = OEFENVORMEN.map(_defaultStateVoor);
+    bewaarState();
+    renderHoofdgroepSelector();
+    renderOefenvormen();
+    syncLegacyCatKnop();
+    updateWoordenkiezerKnop();
+  }
 
   return {
     init,
+    herlaad,
+    reset,
     getActieveGraad,
     getAangevinkteOefenvormen,
+    getOefenvormState,
+    getAantalVoorNiveau,
     getAangevinkteCategorieIds,
     updateWoordenkiezerKnop
   };
