@@ -149,28 +149,28 @@ window.SpellingModules.ov07 = {
             <input type="checkbox" data-niveau="basis" checked>
             <div class="ov-niveau-vink-tekst">
               <strong>⭐ Oefenen</strong>
-              <small>uitgang aanvullen + woord opschrijven</small>
+              <small>Kind kruist juiste uitgang aan (-je, -tje of -pje) en schrijft dan het hele verkleinwoord op de lijn.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="kern">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐ Toepassen</strong>
-              <small>verkleinwoord schrijven naast grondwoord</small>
+              <small>Grondwoord staat er, kind schrijft het verkleinwoord ernaast. Kind moet de regel zelf toepassen.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="verdieping">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐ Verdiepen</strong>
-              <small>2 kolommen, beide richtingen gemixt</small>
+              <small>Twee richtingen door elkaar: soms grondwoord → verkleinwoord, soms andersom. Werkt het inzicht in beide richtingen.</small>
             </div>
           </label>
           <label class="ov-niveau-vink">
             <input type="checkbox" data-niveau="uitbreiding">
             <div class="ov-niveau-vink-tekst">
               <strong>⭐⭐⭐⭐ Uitbreiden</strong>
-              <small>kort verhaal overschrijven + verkleinen</small>
+              <small>Kort verhaal met onderstreepte zelfstandige naamwoorden. Kind schrijft het verhaal over en zet die woorden in verkleinvorm.</small>
             </div>
           </label>
         </div>
