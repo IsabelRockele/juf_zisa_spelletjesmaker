@@ -557,7 +557,17 @@ window.SpellingWeekdicteePaneel = (function() {
         if (e.target.checked) set.add(catId);
         else set.delete(catId);
         bewaarState();
+        // BELANGRIJK: deel de huidige set met de woordenkiezer + 
+        // andere modules zodat zij weten welke categorieën actief zijn.
+        // Anders blijven de keuzes van de woordenkiezer uitgevinkt 
+        // omdat hij denkt dat er geen categorieën aangevinkt zijn.
+        window._zb_aangevinkteCategorieen = set;
+        if (window.SpellingWoordenkiezer?.syncActieveWoorden) {
+          window.SpellingWoordenkiezer.syncActieveWoorden();
+        }
         renderCategorieKeuze();
+        // Ook de UI-state bijwerken (knoppen, teller)
+        updateWoordenkiezerKnop();
       }
     });
 
