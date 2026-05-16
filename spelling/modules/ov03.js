@@ -229,7 +229,7 @@ window.SpellingModules.ov03 = {
     for (const w of woorden) {
       // Kale woord-tekst (zonder lidwoord) voor het puzzel-deel
       const woord = w.tekst;
-      const emoji = metPlaatje ? this._zoekEmoji(w.tekst) : "";
+      const plaatjeHtml = metPlaatje ? this._plaatjeHtml(w) : "";
       
       // Letters schudden — niet in juiste volgorde
       const geschudte = this._schudLetters(woord);
@@ -255,7 +255,7 @@ window.SpellingModules.ov03 = {
 
       // Afbeelding-blok (alleen bij basis)
       const plaatjeBlok = metPlaatje
-        ? `<div class="ov03-cel-plaatje">${emoji}</div>`
+        ? `<div class="ov03-cel-plaatje">${plaatjeHtml}</div>`
         : "";
 
       // Schrijflijn — bij verdieping en uitbreiding moet er ook een
@@ -403,6 +403,13 @@ window.SpellingModules.ov03 = {
       return window.SpellingAfbeeldingen.emojiVoor(tekst);
     }
     return "🖼️";
+  },
+
+  _plaatjeHtml: function(woord) {
+    if (window.SpellingAfbeeldingen && window.SpellingAfbeeldingen.htmlVoorWoord) {
+      return window.SpellingAfbeeldingen.htmlVoorWoord(woord);
+    }
+    return `<span class="woord-emoji">🖼️</span>`;
   },
 
   _seed: null,
