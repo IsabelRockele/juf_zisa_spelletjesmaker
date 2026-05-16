@@ -412,10 +412,58 @@ window.SpellingModules.ov10 = {
   _inhoudVerdieping: function(woorden, lijntype, lijnhoogte, metAntwoorden) {
     const sl = window.SpellingSchrijflijnen;
     const aantal = Math.min(woorden.length, this._maxPerNiveau.verdieping);
-    const set = woorden.slice(0, aantal);
+    
+    // Pak alle kandidaat-woorden (met geldige delen) en splits zo dat 
+    // binnen elke mini-groep zowel de linker-delen als de rechter-delen 
+    // uniek zijn. Anders zou een kind 2 lijnen kunnen trekken naar hetzelfde 
+    // doel-deel (bv. "hand → doek" en "zak → doek").
+    const kandidaten = woorden.slice().filter(w => w.delen && w.delen.length === 2);
+    
+    const groep1 = [];
+    const linkerSet1 = new Set();
+    const rechterSet1 = new Set();
+    
+    const groep2 = [];
+    const linkerSet2 = new Set();
+    const rechterSet2 = new Set();
+    
+    const overschot = [];  // woorden die niet konden geplaatst worden (dubbele delen in beide groepen)
+    
     const helft = Math.ceil(aantal / 2);
-    const groep1 = set.slice(0, helft);          // mini-oef 1
-    const groep2 = set.slice(helft, aantal);     // mini-oef 2
+    
+    // Verdeel woorden: probeer eerst groep 1 te vullen tot 'helft', dan groep 2 tot 'aantal-helft'
+    for (const w of kandidaten) {
+      if (groep1.length + groep2.length >= aantal) break;
+      
+      const links = w.delen[0];
+      const rechts = w.delen[1];
+      
+      // Probeer groep 1
+      if (groep1.length < helft && !linkerSet1.has(links) && !rechterSet1.has(rechts)) {
+        groep1.push(w);
+        linkerSet1.add(links);
+        rechterSet1.add(rechts);
+        continue;
+      }
+      // Probeer groep 2
+      if (groep2.length < (aantal - helft) && !linkerSet2.has(links) && !rechterSet2.has(rechts)) {
+        groep2.push(w);
+        linkerSet2.add(links);
+        rechterSet2.add(rechts);
+        continue;
+      }
+      // Niet plaatsbaar in een van beide groepen
+      overschot.push(w);
+    }
+    
+    // Fallback: als groep1 of groep2 te klein is, vul aan met overschot 
+    // (dan staan er evt. wel dubbele delen, maar dat is beter dan een lege groep)
+    while (groep1.length < helft && overschot.length > 0) {
+      groep1.push(overschot.shift());
+    }
+    while (groep2.length < (aantal - helft) && overschot.length > 0) {
+      groep2.push(overschot.shift());
+    }
 
     // Helper: bouw één mini-oefening (verbind-kolommen + schrijflijnen)
     const bouwMiniOef = (groep, startNr) => {
