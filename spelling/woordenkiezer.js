@@ -20,23 +20,41 @@ window.SpellingWoordenkiezer = (function() {
 
   const LS_KEY = "spelling-weekdictee-gekozen-v1";
 
-  /* Geef enkel woorden uit categorieën die momenteel aangevinkt zijn in
-     de zijbalk. Als er geen zijbalk is, alles teruggeven. */
-  function getActieveWoorden() {
-    const zb = window.SpellingZijbalk;
-    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") {
-      return gekozen;
+  /* Bepaal de actief-aangevinkte categorie-IDs.
+     Volgorde:
+     1. window._zb_aangevinkteCategorieen — wordt expliciet gezet door de
+        zijbalk EN het weekdictee-paneel vóór de woordenkiezer opent.
+        Dit is de NIEUWE canonieke bron (werkt in alle modi).
+     2. window.SpellingZijbalk.getAangevinkteCategorieIds() — oude bron
+        (alleen werkblad-modus). Fallback.
+     Returnt null als beide niet beschikbaar zijn → "geen filter actief". */
+  function getActieveCategorieIds() {
+    // 1. Nieuwe bron (werkt voor weekdictee + werkblad)
+    if (window._zb_aangevinkteCategorieen instanceof Set) {
+      return window._zb_aangevinkteCategorieen;
     }
-    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
-    if (actieveCats.size === 0) return [];
+    // 2. Fallback: oude zijbalk-API (alleen werkblad)
+    const zb = window.SpellingZijbalk;
+    if (zb && typeof zb.getAangevinkteCategorieIds === "function") {
+      return new Set(zb.getAangevinkteCategorieIds());
+    }
+    return null;
+  }
+
+  /* Geef enkel woorden uit categorieën die momenteel aangevinkt zijn in
+     de zijbalk of het weekdictee-paneel. Als er geen filter actief is,
+     alles teruggeven. */
+  function getActieveWoorden() {
+    const actieveCats = getActieveCategorieIds();
+    if (actieveCats === null) return gekozen;  // geen filter beschikbaar
+    if (actieveCats.size === 0) return [];     // filter actief maar niets aangevinkt
     return gekozen.filter(w => actieveCats.has(w.categorie));
   }
 
   /* Hoeveel woorden zitten in de ruwe lijst die NIET actief zijn? */
   function getVerborgenAantal() {
-    const zb = window.SpellingZijbalk;
-    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") return 0;
-    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
+    const actieveCats = getActieveCategorieIds();
+    if (actieveCats === null) return 0;
     return gekozen.filter(w => !actieveCats.has(w.categorie)).length;
   }
 
@@ -54,12 +72,11 @@ window.SpellingWoordenkiezer = (function() {
      Wordt aangeroepen vanuit zijbalk wanneer een categorie wordt
      uitgevinkt. */
   function ruimUitgevinkteOp() {
-    const zb = window.SpellingZijbalk;
-    if (!zb || typeof zb.getAangevinkteCategorieIds !== "function") {
-      console.log("[ruimUitgevinkteOp] geen zijbalk-API beschikbaar");
+    const actieveCats = getActieveCategorieIds();
+    if (actieveCats === null) {
+      console.log("[ruimUitgevinkteOp] geen filter-bron beschikbaar");
       return;
     }
-    const actieveCats = new Set(zb.getAangevinkteCategorieIds());
     
     const voor = gekozen.length;
     const verwijderdeCats = [...new Set(gekozen.filter(w => !actieveCats.has(w.categorie)).map(w => w.categorie))];
