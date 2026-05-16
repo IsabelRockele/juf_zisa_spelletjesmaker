@@ -16,6 +16,84 @@
     document.querySelectorAll(groepSelector).forEach(b => b.classList.remove("actief"));
     knop.classList.add("actief");
   }
+  
+  /* Injecteer stijl-regels die de niveau-pillen uitklappen zodat de 
+     pedagogische uitleg in <small> zichtbaar is. Idempotent — doet niets 
+     als de stijl al ge-injecteerd is. Werkt voor zowel:
+     - OV-module's eigen render (.ov-niveau-vink-tekst small)
+     - zijbalk's render (.zb-niveau-vink + .zb-niveau-uitleg) */
+  function zorgVoorNiveauPilStijlen() {
+    if (document.getElementById("niveau-pil-uitleg-stijlen")) return;
+    const stijl = document.createElement("style");
+    stijl.id = "niveau-pil-uitleg-stijlen";
+    stijl.textContent = `
+      /* === OV-module render (.ov-niveau-vink) === */
+      .ov-niveau-vink {
+        align-items: flex-start;
+        padding: 8px 12px;
+        min-height: auto;
+      }
+      .ov-niveau-vink-tekst {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        flex: 1;
+      }
+      .ov-niveau-vink-tekst strong {
+        display: block;
+        font-size: 14px;
+        line-height: 1.2;
+      }
+      .ov-niveau-vink-tekst small {
+        display: block;
+        font-size: 11.5px;
+        line-height: 1.35;
+        color: #666;
+        font-weight: normal;
+        font-style: normal;
+        margin-top: 2px;
+      }
+      .ov-niveau-vink.actief .ov-niveau-vink-tekst small {
+        color: #4a4a4a;
+      }
+      
+      /* === Zijbalk render (.zb-niveau-vink) === */
+      .zb-niveau-rij {
+        margin-bottom: 8px;
+      }
+      .zb-niveau-vink {
+        align-items: flex-start !important;
+        padding: 8px 12px !important;
+        border-radius: 18px;
+        gap: 8px;
+      }
+      .zb-niveau-tekst {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        flex: 1;
+        min-width: 0;
+      }
+      .zb-niveau-label {
+        display: block;
+        font-size: 13.5px;
+        font-weight: 600;
+        line-height: 1.2;
+      }
+      .zb-niveau-uitleg {
+        display: block;
+        font-size: 11px;
+        line-height: 1.35;
+        color: #666;
+        font-weight: normal;
+        margin-top: 2px;
+      }
+      .zb-niveau-vink.aan .zb-niveau-uitleg {
+        color: #4a4a4a;
+      }
+    `;
+    document.head.appendChild(stijl);
+  }
 
   /* ----- Modulespecifieke instellingen renderen ----- */
   function laadModuleInstellingen() {
@@ -25,6 +103,9 @@
 
     const container = document.querySelector("#module-instellingen");
     container.innerHTML = module.renderInstellingen();
+    
+    // Zorg dat de pedagogische uitlegjes in de niveau-pillen zichtbaar zijn
+    zorgVoorNiveauPilStijlen();
 
     // Voor weekdictee + ov01-04: andere UI-elementen verbergen
     const isWeekdictee = (cat === "weekdictee");
@@ -578,6 +659,11 @@
 
   /* ----- Init bij laden ----- */
   document.addEventListener("DOMContentLoaded", () => {
+
+    // Injecteer stijlen voor niveau-pil-uitleg meteen bij init
+    // (werkt voor zowel werkblad-modus, herhalingsbundel-modus als 
+    // de OV-modules' eigen render)
+    zorgVoorNiveauPilStijlen();
 
     // Categorie
     document.querySelectorAll(".cat-knop:not([disabled])").forEach(btn => {
