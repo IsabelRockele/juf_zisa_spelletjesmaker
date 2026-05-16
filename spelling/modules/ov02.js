@@ -40,7 +40,7 @@ window.SpellingModules.ov02 = {
           <span class="ov-instel-nr">2</span> Plaatje
         </label>
         <label style="display:flex; align-items:center; gap:8px; margin-top:6px;">
-          <input type="checkbox" id="ov02-met-plaatje" checked>
+          <input type="checkbox" id="ov02-met-plaatje">
           <span>Plaatje tonen bij elk woord</span>
         </label>
         <p class="wd-stap-info" style="margin-top:6px;">
@@ -137,7 +137,18 @@ window.SpellingModules.ov02 = {
   /* ---------- WERKBLAD GENEREREN ---------- */
   genereerBlad: function(opties, metAntwoorden = false) {
     const o = opties.ov02 || {};
-    const metPlaatje  = o.metPlaatje !== false;
+    
+    // metPlaatje: leerkracht-toggle. Bij voorkeur uit opties (gezet door 
+    // bundel/herhalingsbundel), anders fallback op live DOM-checkbox (werkblad-modus preview).
+    let metPlaatje;
+    if (typeof o.metPlaatje === "boolean") {
+      metPlaatje = o.metPlaatje;
+    } else {
+      // Fallback: lees uit live zijbalk-checkbox
+      const cb = document.querySelector("#ov02-met-plaatje");
+      metPlaatje = cb ? cb.checked : false;
+    }
+    
     const aantalWoorden = o.aantalWoorden || 8;
     const lijntype    = o.lijntype || "type3";
     const lijnhoogte  = o.lijnhoogte || "middel";
@@ -170,9 +181,9 @@ window.SpellingModules.ov02 = {
     for (let idx = 0; idx < woorden.length; idx++) {
       const w = woorden[idx];
       const tonen = this._toonWoord(w);
-      const emoji = metPlaatje ? this._zoekEmoji(w.tekst) : "";
+      const plaatjeHtml = metPlaatje ? this._plaatjeHtml(w) : "";
       const plaatjeCel = metPlaatje
-        ? `<div class="ov02-plaatje">${emoji}</div>`
+        ? `<div class="ov02-plaatje">${plaatjeHtml}</div>`
         : "";
 
       // 3 schrijflijnen, eventueel met antwoord op elke (bij oplossing)
@@ -231,7 +242,7 @@ window.SpellingModules.ov02 = {
           <div class="ov01-stappen-label">Opdracht:</div>
           <div class="ov01-stap-rij">
             <span class="ov01-vakje"></span>
-            <span>Lees het woord.</span>
+            <span>Lees het woord goed en dek dan af.</span>
           </div>
           <div class="ov01-stap-rij">
             <span class="ov01-vakje"></span>
@@ -239,7 +250,7 @@ window.SpellingModules.ov02 = {
           </div>
           <div class="ov01-stap-rij">
             <span class="ov01-vakje"></span>
-            <span>Kijk goed na: zijn alle 3 dezelfde?</span>
+            <span>Kijk de woorden goed na.</span>
           </div>
         </div>
 
@@ -255,7 +266,8 @@ window.SpellingModules.ov02 = {
   /* ---------- HELPERS ---------- */
   _toonWoord: function(w) {
     if (typeof w === "string") return w;
-    if (w.lidwoord) return `${w.lidwoord} ${w.tekst}`;
+    // OV02: nooit lidwoord erbij — bij overschrijven oefent het kind 
+    // het pure woord, en de schrijflijntjes krijgen meer ruimte.
     return w.tekst;
   },
 
@@ -264,6 +276,13 @@ window.SpellingModules.ov02 = {
       return window.SpellingAfbeeldingen.emojiVoor(tekst);
     }
     return "🖼️";
+  },
+
+  _plaatjeHtml: function(woord) {
+    if (window.SpellingAfbeeldingen && window.SpellingAfbeeldingen.htmlVoorWoord) {
+      return window.SpellingAfbeeldingen.htmlVoorWoord(woord);
+    }
+    return `<span class="woord-emoji">🖼️</span>`;
   },
 
   _seed: null,
