@@ -221,6 +221,12 @@ window.SpellingModules.weekdictee = {
       paginaList.push(actieveDagen.slice(i, i + dagenPerPagina));
     }
 
+    // Set die bijhoudt welke zinnen al gebruikt zijn deze week. 
+    // Pedagogisch: vrijdag mag dezelfde WOORDEN herhalen, maar niet 
+    // exact dezelfde zinnen. Als een zin al gebruikt is, valt _maakZin
+    // terug op een auto-sjabloon zodat de leerling iets nieuws ziet.
+    const gebruikteZinnen = new Set();
+
     let html = "";
     paginaList.forEach((paginaDagen, paginaIdx) => {
       const isEerstePagina = paginaIdx === 0;
@@ -248,7 +254,7 @@ window.SpellingModules.weekdictee = {
         // die uit de pool zijn maar nog niet gekozen op andere dagen.
         // Voor nu: gewoon dezelfde pool gebruiken; vrijdagHerhaling toggle
         // gerespecteerd via aparte tekst boven (toekomst: smart re-selection).
-        html += this._renderDagBlok(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden);
+        html += this._renderDagBlok(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen);
       });
 
       if (isLaatstePagina && reflectieAan) {
@@ -270,7 +276,7 @@ window.SpellingModules.weekdictee = {
     return html;
   },
 
-  _renderDagBlok: function(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden) {
+  _renderDagBlok: function(dag, opties, aantalWoorden, aantalZinnen, zinStijl, gekozenWoorden, metAntwoorden, gebruikteZinnen) {
     const pool = gekozenWoorden || [];
     const dagIdx = this.dagen.findIndex(d => d.id === dag.id);
     const startIdx = dagIdx * (aantalWoorden + aantalZinnen);
@@ -332,12 +338,19 @@ window.SpellingModules.weekdictee = {
     // krijgt de leerling een EXTRA stukjeswoord in een zin dat hij niet
     // al apart heeft geschreven. We geven vermijdInZin mee zodat de
     // zin geen ander dictee-woord van die dag bevat.
+    // gebruikteZinnen tracking voorkomt dat dezelfde zin twee keer in de
+    // week verschijnt (belangrijk voor vrijdag-herhaling).
     let zinSectie = "";
     for (let i = 0; i < aantalZinnen; i++) {
       const zinWoord = woordenVoorZin[i] || woordenVoorDag[0];
       const zinWoordTekst = zinWoord ? (typeof zinWoord === "string" ? zinWoord : zinWoord.tekst) : "";
+      const gezinTekst = zinWoord ? this._maakZin(zinWoord, vermijdInZin, gebruikteZinnen) : "";
+      if (gezinTekst) {
+        // Onthoud de gegenereerde zin zodat hij niet opnieuw verschijnt.
+        if (gebruikteZinnen) gebruikteZinnen.add(gezinTekst.toLowerCase());
+      }
       const zinInhoud = metAntwoorden && zinWoord
-        ? `<span class="antwoord zin-antwoord" data-bewerk-id="wd-z-${dag.id}-${i}">${this._maakZin(zinWoord, vermijdInZin)}</span>`
+        ? `<span class="antwoord zin-antwoord" data-bewerk-id="wd-z-${dag.id}-${i}">${gezinTekst}</span>`
         : "";
       const zinLijn = sl
         ? `<div class="wd-zin-canvas-wrap">${sl.htmlCanvas(lijntype, lijnhoogte, 700)}</div>`
@@ -467,8 +480,11 @@ window.SpellingModules.weekdictee = {
      woorden die in lj 1 niet gegarandeerd gezien zijn.
      
      Argument `vermijdWoorden`: array van dictee-vormen die NIET in de zin
-     mogen voorkomen (de andere dictee-woorden van die dag). */
-  _maakZin: function(woordObj, vermijdWoorden) {
+     mogen voorkomen (de andere dictee-woorden van die dag).
+     Argument `gebruikteZinnen`: Set van zinnen die deze week al gebruikt
+     zijn (lowercase). Als de gevonden bib-zin al gebruikt is, vallen we 
+     terug op auto-sjabloon zodat de leerling iets nieuws ziet. */
+  _maakZin: function(woordObj, vermijdWoorden, gebruikteZinnen) {
     if (!woordObj) return "";
     const vermijd = (vermijdWoorden || []).map(w => String(w).toLowerCase());
     const dicteeVorm = this._dicteeVorm(woordObj);
@@ -485,7 +501,9 @@ window.SpellingModules.weekdictee = {
           // vallen we terug op auto-sjabloon zodat het woord niet dubbel komt.
           const lz = zin.toLowerCase();
           const botst = vermijd.some(vw => vw && lz.includes(vw));
-          if (!botst) return zin;
+          // Skip ook als deze zin al gebruikt is deze week (vrijdag-herhaling).
+          const alGebruikt = gebruikteZinnen && gebruikteZinnen.has(lz);
+          if (!botst && !alGebruikt) return zin;
         }
       }
     }
@@ -538,10 +556,12 @@ window.SpellingModules.weekdictee = {
       ];
     }
 
-    // Filter sjablonen die een te vermijden woord bevatten
+    // Filter sjablonen die een te vermijden woord bevatten OF al gebruikt zijn
     const veiligeSjablonen = sjablonen.filter(z => {
       const lz = z.toLowerCase();
-      return !vermijd.some(vw => vw && lz.includes(vw));
+      if (vermijd.some(vw => vw && lz.includes(vw))) return false;
+      if (gebruikteZinnen && gebruikteZinnen.has(lz)) return false;
+      return true;
     });
     let fallback;
     if (isMeervoud) fallback = `Ik zie ${woord}.`;
