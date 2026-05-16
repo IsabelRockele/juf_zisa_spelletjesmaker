@@ -89,6 +89,7 @@ window.SpellingHerhalingsbundel = (function() {
   /* ----- State ----- */
   let state = {
     titel: "Mijn herhalingsbundel",
+    titelGecentreerd: false,
     items: [],
     huidigePagina: 1
   };
@@ -104,11 +105,13 @@ window.SpellingHerhalingsbundel = (function() {
       if (raw) {
         const obj = JSON.parse(raw);
         state.titel = obj.titel || "Mijn herhalingsbundel";
+        state.titelGecentreerd = obj.titelGecentreerd === true;
         state.items = Array.isArray(obj.items) ? obj.items : [];
         state.huidigePagina = obj.huidigePagina || 1;
       } else {
         // Reset state — anders blijft vorige modus zijn data
         state.titel = "Mijn herhalingsbundel";
+        state.titelGecentreerd = false;
         state.items = [];
         state.huidigePagina = 1;
       }
@@ -343,7 +346,8 @@ window.SpellingHerhalingsbundel = (function() {
           lijntype: item.lijntype || "type3",
           lijnhoogte: item.lijnhoogte || "middel",
           ondertitel: "",
-          plaatjeKern: true,
+          plaatjeKern: false,        // ⭐⭐ kern toont géén plaatje 
+                                     // (verschil met ⭐ basis = pedagogische trap)
           plaatjeVerdieping: true,
           // OV02-specifiek: leerkracht-toggle voor plaatjes
           metPlaatje: ov02MetPlaatje,
@@ -445,13 +449,14 @@ window.SpellingHerhalingsbundel = (function() {
   function _renderPagina(items, paginaNr, totaalPaginas, startNummer) {
     const isEerste = paginaNr === 1;
     
+    const titelAlignClass = state.titelGecentreerd ? "hb-titel-center" : "";
     const headerHTML = isEerste ? `
       <div class="hb-pagina-header">
         <div class="hb-naam-rij">
           <span>Naam: </span><span class="hb-lijn-vrij"></span>
           <span>Datum: </span><span class="hb-lijn-vrij hb-lijn-vrij-kort"></span>
         </div>
-        <h1 class="hb-boekje-titel" contenteditable="true" id="hb-titel-editable">${state.titel}</h1>
+        <h1 class="hb-boekje-titel ${titelAlignClass}">${state.titel}</h1>
       </div>` : "";
     
     let itemsHTML = "";
@@ -469,6 +474,64 @@ window.SpellingHerhalingsbundel = (function() {
         <span class="hb-paginanr">${paginaNr} / ${totaalPaginas}</span>
       </div>
     </div>`;
+  }
+
+  /* Idempotente helper: injecteert stijlregels voor de titel-rij + 
+     centreer-knop één keer in <head>. Doet niets als ze er al staan. */
+  function _zorgVoorTitelStijlen() {
+    if (document.getElementById("hb-titel-stijlen")) return;
+    const stijl = document.createElement("style");
+    stijl.id = "hb-titel-stijlen";
+    stijl.textContent = `
+      .hb-titel-rij {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+      }
+      .hb-titel-rij.hb-titel-center {
+        justify-content: center;
+      }
+      .hb-titel-rij.hb-titel-center .hb-titel-align-knop {
+        position: absolute;
+        right: 0;
+      }
+      .hb-boekje-titel.hb-titel-center {
+        text-align: center;
+      }
+      .hb-boekje-titel[contenteditable="true"] {
+        cursor: text;
+        outline: 1px dashed transparent;
+        outline-offset: 4px;
+        padding: 2px 6px;
+        border-radius: 3px;
+        transition: outline-color 0.15s, background 0.15s;
+      }
+      .hb-boekje-titel[contenteditable="true"]:hover {
+        outline-color: #b0b0b0;
+        background: rgba(0,0,0,0.02);
+      }
+      .hb-boekje-titel[contenteditable="true"]:focus {
+        outline: 2px solid #5b9bd5;
+        outline-offset: 4px;
+        background: #fff;
+      }
+      .hb-titel-align-knop {
+        font-size: 12px;
+        padding: 4px 10px;
+        background: #f0f0f3;
+        border: 1px solid #c0c0c8;
+        border-radius: 4px;
+        cursor: pointer;
+        color: #444;
+        white-space: nowrap;
+      }
+      .hb-titel-align-knop:hover {
+        background: #e5e5ea;
+        border-color: #a0a0a8;
+      }
+    `;
+    document.head.appendChild(stijl);
   }
 
   /* ----- Render volledige preview ----- 
@@ -502,6 +565,12 @@ window.SpellingHerhalingsbundel = (function() {
       nr++;
     }
     
+    // Zorg dat onze titel-stijlen geïnjecteerd zijn (idempotent)
+    _zorgVoorTitelStijlen();
+    
+    const titelAlignClass = state.titelGecentreerd ? "hb-titel-center" : "";
+    const centreerLabel = state.titelGecentreerd ? "← Links uitlijnen" : "Centreren →";
+    
     container.innerHTML = `
       <div class="hb-document">
         <div class="hb-doc-header">
@@ -509,13 +578,48 @@ window.SpellingHerhalingsbundel = (function() {
             <span>Naam: </span><span class="hb-lijn-vrij"></span>
             <span>Datum: </span><span class="hb-lijn-vrij hb-lijn-vrij-kort"></span>
           </div>
-          <h1 class="hb-boekje-titel">${state.titel}</h1>
+          <div class="hb-titel-rij ${titelAlignClass}">
+            <h1 class="hb-boekje-titel" 
+                contenteditable="true" 
+                id="hb-titel-editable"
+                title="Klik om de titel aan te passen">${state.titel}</h1>
+            <button class="hb-titel-align-knop" id="hb-titel-align-knop" 
+                    type="button" 
+                    title="Wissel uitlijning">${centreerLabel}</button>
+          </div>
         </div>
         <div class="hb-doc-inhoud">
           ${itemsHTML}
         </div>
       </div>
     `;
+    
+    // Listeners voor titel-bewerken + centreer-knop
+    const titelEl = document.querySelector("#hb-titel-editable");
+    if (titelEl) {
+      titelEl.addEventListener("blur", () => {
+        const nieuwe = titelEl.textContent.trim() || "Mijn herhalingsbundel";
+        if (nieuwe !== state.titel) {
+          state.titel = nieuwe;
+          bewaar();
+        }
+      });
+      // Enter = bevestig (blur)
+      titelEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          titelEl.blur();
+        }
+      });
+    }
+    const alignKnop = document.querySelector("#hb-titel-align-knop");
+    if (alignKnop) {
+      alignKnop.addEventListener("click", () => {
+        state.titelGecentreerd = !state.titelGecentreerd;
+        bewaar();
+        renderPreview();
+      });
+    }
     
     // Plaats A4-grens-markers (visueel zien waar PDF zou splitsen)
     await _plaatsPaginaMarkers(container);
@@ -641,11 +745,21 @@ window.SpellingHerhalingsbundel = (function() {
   }
 
   /* ----- Publieke acties ----- */
+  let _alertGetoondInTick = false;  // voorkomt dat dezelfde alert 4× verschijnt 
+                                    // als voegToe in één klik meerdere keren faalt
+                                    // (bv. één aanroep per aangevinkt niveau)
+  
   function voegToe(ovId, niveau, aantal) {
     // Snapshot van huidige gekozen woorden + opties
     const gekozen = window._weekdictee_gekozenWoorden || [];
     if (gekozen.length === 0) {
-      alert("Vink eerst categorieën aan en open de woordenkiezer om woorden te selecteren.");
+      if (!_alertGetoondInTick) {
+        _alertGetoondInTick = true;
+        // Reset bij eerstvolgende microtask, zodat een volgende klik 
+        // wél opnieuw een alert kan tonen.
+        Promise.resolve().then(() => { _alertGetoondInTick = false; });
+        alert("Vink eerst categorieën aan en open de woordenkiezer om woorden te selecteren.");
+      }
       return false;
     }
     
@@ -860,6 +974,7 @@ window.SpellingHerhalingsbundel = (function() {
       nr++;
     }
     
+    const titelAlignClass = state.titelGecentreerd ? "hb-titel-center" : "";
     return `
       <div class="hb-document">
         <div class="hb-doc-header">
@@ -867,7 +982,7 @@ window.SpellingHerhalingsbundel = (function() {
             <span>Naam: </span><span class="hb-lijn-vrij"></span>
             <span>Datum: </span><span class="hb-lijn-vrij hb-lijn-vrij-kort"></span>
           </div>
-          <h1 class="hb-boekje-titel">${state.titel}</h1>
+          <h1 class="hb-boekje-titel ${titelAlignClass}">${state.titel}</h1>
         </div>
         <div class="hb-doc-inhoud">${itemsHTML}</div>
       </div>
@@ -906,6 +1021,12 @@ window.SpellingHerhalingsbundel = (function() {
     const bewerkAanWas = document.body.classList.contains("hb-bewerk-aan");
     if (bewerkAanWas) document.body.classList.remove("hb-bewerk-aan");
     
+    // Tijdelijk metAntwoorden vlag op alle items zetten, zodat renderPreview
+    // de DOM produceert MET oplossingen erin. De PDF-engine leest de DOM,
+    // dus moet die DOM ook de antwoorden bevatten.
+    const origMetAntw = state.items.map(i => i.metAntwoorden);
+    state.items.forEach(i => { i.metAntwoorden = metOplossingen; });
+    
     try {
       await renderPreview();
       await new Promise(r => setTimeout(r, 50));
@@ -923,6 +1044,7 @@ window.SpellingHerhalingsbundel = (function() {
       await window.SpellingHerhalingsbundelPDF.download({
         items: itemsMetOpl,
         titel: state.titel || "Mijn herhalingsbundel",
+        titelGecentreerd: state.titelGecentreerd === true,
         metOplossingen: metOplossingen,
         bestandsnaam: bestand
       });
@@ -930,6 +1052,11 @@ window.SpellingHerhalingsbundel = (function() {
       console.error("PDF-export fout:", e);
       alert("Er ging iets mis bij PDF-export: " + e.message);
     } finally {
+      // Herstel de originele metAntwoorden vlaggen en her-render
+      // zodat de preview weer het kale werkblad toont.
+      state.items.forEach((i, j) => { i.metAntwoorden = origMetAntw[j]; });
+      await renderPreview();
+      
       loader.remove();
       if (bewerkAanWas) document.body.classList.add("hb-bewerk-aan");
       if (knop) {
