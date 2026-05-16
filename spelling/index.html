@@ -106,9 +106,12 @@
           <span class="zb-teller" id="zb-woord-teller"></span>
         </summary>
         <div class="zb-sectie-inhoud">
-          <button id="open-woordenkiezer" class="zb-knop-groot" type="button" disabled>
-            📋 Open woordenkiezer
-          </button>
+          <div style="display:flex;gap:6px;align-items:stretch;">
+            <button id="open-woordenkiezer" class="zb-knop-groot" type="button" disabled style="flex:1;">
+              📋 Open woordenkiezer
+            </button>
+            <button type="button" class="woordenkiezer-help" title="Wat doet de woordenkiezer?" style="background:#e0f2e9;border:2px solid #2d8a4e;color:#2d8a4e;font-weight:700;width:42px;border-radius:8px;cursor:pointer;font-size:18px;" onmouseover="this.style.background='#c7e9d5'" onmouseout="this.style.background='#e0f2e9'">?</button>
+          </div>
           <p class="zb-info" id="zb-woord-info">
             Kies eerst categorieën hierboven.
           </p>
@@ -345,9 +348,12 @@
             <span class="wd-stap-nr">3</span>
             <span class="wd-stap-titel">Kies de woorden</span>
           </div>
-          <button id="wd-paneel-open-kiezer" class="zb-knop-groot" type="button" disabled>
-            📋 Open woordenkiezer
-          </button>
+          <div style="display:flex;gap:6px;align-items:stretch;">
+            <button id="wd-paneel-open-kiezer" class="zb-knop-groot" type="button" disabled style="flex:1;">
+              📋 Open woordenkiezer
+            </button>
+            <button type="button" class="woordenkiezer-help" title="Wat doet de woordenkiezer?" style="background:#e0f2e9;border:2px solid #2d8a4e;color:#2d8a4e;font-weight:700;width:42px;border-radius:8px;cursor:pointer;font-size:18px;" onmouseover="this.style.background='#c7e9d5'" onmouseout="this.style.background='#e0f2e9'">?</button>
+          </div>
           <p class="wd-paneel-info wd-info-grijs" id="wd-paneel-woord-info">
             Kies eerst categorieën hierboven.
           </p>
