@@ -297,7 +297,13 @@ window.SpellingHerhalingsbundel = (function() {
       pool = item.gekozenWoordenSnapshot || [];
       bewaarActieve = true;
     }
-    
+
+    // Vangnet: ontdubbel pool ook hier (voor items uit oude opslag
+    // die nog niet gededupliceerd waren).
+    if (window.SpellingDedup) {
+      pool = window.SpellingDedup.ontdubbel(pool);
+    }
+
     const origineel = window._weekdictee_gekozenWoorden;
     window._weekdictee_gekozenWoorden = pool;
     
@@ -770,14 +776,28 @@ window.SpellingHerhalingsbundel = (function() {
     if (!aantal && zb?.getAantalVoorNiveau) {
       aantal = zb.getAantalVoorNiveau(ovId, niveau);
     }
-    
+
+    // Snapshot ontdubbelen (kip/hen + lowercase-tekst) zodat de module
+    // nooit synoniem-duplicaten in zijn pool ziet.
+    const gededupliceerd = window.SpellingDedup
+      ? window.SpellingDedup.ontdubbel(gekozen)
+      : [...gekozen];
+
+    // Tekort-check: vraagt deze oefening om meer woorden dan er uniek zijn?
+    if (aantal && aantal > gededupliceerd.length && window.SpellingDedup) {
+      const mod = window.SpellingModules?.[ovId];
+      const naam = (mod?.naam || ovId)
+        + " " + (niveau ? niveau.charAt(0).toUpperCase() + niveau.slice(1) : "");
+      window.SpellingDedup.toonTekortMelding(aantal, gededupliceerd.length, naam.trim());
+    }
+
     const item = {
       id: "hb-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
       ovId: ovId,
       niveau: niveau,
       graad: graad,
       aantal: aantal || null,
-      gekozenWoordenSnapshot: JSON.parse(JSON.stringify(gekozen)),  // hele pool van toen
+      gekozenWoordenSnapshot: JSON.parse(JSON.stringify(gededupliceerd)),  // hele pool, ontdubbeld
       actieveWoorden: null,    // wordt na eerste render gevuld met de daadwerkelijk getoonde woorden
       extraWoorden: [],         // woorden via ➕ toegevoegd
       verwijderdeWoorden: [],   // woorden via ✕ uitgehaald
