@@ -250,7 +250,14 @@ window.SpellingGenerator = {
   /* Genereer alle bladen als één HTML string.
      Seed-mechanisme: het werkblad krijgt een random seed (gebaseerd op tijd).
      Die seed wordt bewaard in window.SpellingGenerator._laatsteSeed.
-     Als metAntwoorden=true, hergebruiken we die seed → exact dezelfde woorden. */
+     Als metAntwoorden=true, hergebruiken we die seed → exact dezelfde woorden.
+
+     DEDUP: voordat we de module aanroepen, vervangen we de globale
+     pool _weekdictee_gekozenWoorden tijdelijk door een gededupliceerde
+     versie (kip/hen → 1 woord, lowercase-dups → 1 woord). De modules
+     zien dus nooit duplicaten. Weekdictee is uitgesloten — daar
+     blijft de pool zoals hij is. Na de aanroep zetten we de originele
+     pool terug. */
   genereerBundel: function(opties, metAntwoorden = false) {
     const module = window.SpellingModules[opties.categorie];
     if (!module) return `<p>Module ${opties.categorie} nog niet beschikbaar.</p>`;
@@ -259,25 +266,40 @@ window.SpellingGenerator = {
       this._laatsteSeed = Date.now() & 0xFFFFFFFF;
     }
 
-    // Weekdictee + OV01-04: 1 keer aanroepen, module verzorgt
-    // intern het maken van meerdere werkbladen (bv. één per niveau).
-    if (opties.categorie === "weekdictee" || opties.categorie === "ov01" 
-        || opties.categorie === "ov02" || opties.categorie === "ov03"
-        || opties.categorie === "ov04" || opties.categorie === "ov05"
-        || opties.categorie === "ov06" || opties.categorie === "ov07"
-        || opties.categorie === "ov08" || opties.categorie === "ov09"
-        || opties.categorie === "ov10") {
-      module._seed = this._laatsteSeed;
-      return module.genereerBlad(opties, metAntwoorden);
+    // === Dedup-laag rond module-aanroep ===
+    // Bij weekdictee NIET ontdubbelen (eigen logica per dag).
+    const dedupAan = (opties.categorie !== "weekdictee") && !!window.SpellingDedup;
+    const origPool = window._weekdictee_gekozenWoorden;
+    if (dedupAan) {
+      window._weekdictee_gekozenWoorden = window.SpellingDedup.ontdubbel(origPool || []);
     }
 
-    // Standaard werkbladen (oude klankzuiver): aantalBladen losse werkbladen
-    let html = "";
-    for (let i = 0; i < opties.aantalBladen; i++) {
-      module._seed = (this._laatsteSeed + i * 1000003) & 0xFFFFFFFF;
-      html += module.genereerBlad(opties, metAntwoorden);
+    let resultaat = "";
+    try {
+      // Weekdictee + OV01-10: 1 keer aanroepen, module verzorgt
+      // intern het maken van meerdere werkbladen (bv. één per niveau).
+      if (opties.categorie === "weekdictee" || opties.categorie === "ov01"
+          || opties.categorie === "ov02" || opties.categorie === "ov03"
+          || opties.categorie === "ov04" || opties.categorie === "ov05"
+          || opties.categorie === "ov06" || opties.categorie === "ov07"
+          || opties.categorie === "ov08" || opties.categorie === "ov09"
+          || opties.categorie === "ov10") {
+        module._seed = this._laatsteSeed;
+        resultaat = module.genereerBlad(opties, metAntwoorden);
+      } else {
+        // Standaard werkbladen (oude klankzuiver): aantalBladen losse werkbladen
+        for (let i = 0; i < opties.aantalBladen; i++) {
+          module._seed = (this._laatsteSeed + i * 1000003) & 0xFFFFFFFF;
+          resultaat += module.genereerBlad(opties, metAntwoorden);
+        }
+      }
+    } finally {
+      // Herstel originele pool, ook bij fout.
+      if (dedupAan) {
+        window._weekdictee_gekozenWoorden = origPool;
+      }
     }
-    return html;
+    return resultaat;
   },
 
   _laatsteSeed: null
