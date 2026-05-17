@@ -505,7 +505,11 @@
       const meervoudCats = this.CAT_TOEGESTAAN;
       // Lees uit de globale woordpool (die door de bundel wordt aangepast via 
       // gekozenWoordenSnapshot). Dit is essentieel zodat rij-verwijderen werkt.
-      const pool = window._weekdictee_gekozenWoorden || [];
+      const _ruwePool = window._weekdictee_gekozenWoorden || [];
+      // Vangnet-laag: ontdubbel pool (kip/hen + tekst-dups)
+      const pool = window.SpellingDedup
+        ? window.SpellingDedup.ontdubbel(_ruwePool)
+        : _ruwePool;
       
       // Filter op meervoud-cats en verrijk met meervoud-veld uit woordenbib
       return pool
