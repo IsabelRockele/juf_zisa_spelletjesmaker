@@ -89,7 +89,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "rug", lidwoord: "de", afbeelding: true },
       { tekst: "put", lidwoord: "de", afbeelding: true },
       { tekst: "lus", lidwoord: "de", afbeelding: false },
-      { tekst: "nul", lidwoord: null, afbeelding: true }
+      { tekst: "nul", lidwoord: null, afbeelding: true, afbeelding_bestand: "nul_cijfer.png" }
     ]
   },
   "mk-km": {
