@@ -38,7 +38,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "les", lidwoord: "de", afbeelding: false },
       { tekst: "bes", lidwoord: "de", afbeelding: true },
       { tekst: "bek", lidwoord: "de", afbeelding: true },
-      { tekst: "hen", lidwoord: "de", afbeelding: true }
+      { tekst: "hen", lidwoord: "de", afbeelding: true, synoniemGroep: "kip" }
     ]
   },
   "mkm-i": {
@@ -46,7 +46,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "korte-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "kip", lidwoord: "de", afbeelding: true },
+      { tekst: "kip", lidwoord: "de", afbeelding: true, synoniemGroep: "kip" },
       { tekst: "vis", lidwoord: "de", afbeelding: true },
       { tekst: "lip", lidwoord: "de", afbeelding: true },
       { tekst: "pit", lidwoord: "de", afbeelding: true },
@@ -143,15 +143,15 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "trein", lidwoord: "de", afbeelding: true },
       { tekst: "klein", lidwoord: null, afbeelding: false },
-      { tekst: "geit", lidwoord: "de", afbeelding: true },
-      { tekst: "ei", lidwoord: "het", afbeelding: true },
-      { tekst: "weide", lidwoord: "de", afbeelding: true },
+      { tekst: "geit", lidwoord: "de", afbeelding: false },
+      { tekst: "ei", lidwoord: "het", afbeelding: false },
+      { tekst: "weide", lidwoord: "de", afbeelding: false },
       { tekst: "reis", lidwoord: "de", afbeelding: false },
-      { tekst: "meid", lidwoord: "de", afbeelding: true },
-      { tekst: "lei", lidwoord: "de", afbeelding: true },
-      { tekst: "zeil", lidwoord: "het", afbeelding: true },
-      { tekst: "eiland", lidwoord: "het", afbeelding: true },
-      { tekst: "eik", lidwoord: "de", afbeelding: true },
+      { tekst: "meid", lidwoord: "de", afbeelding: false },
+      { tekst: "lei", lidwoord: "de", afbeelding: false },
+      { tekst: "zeil", lidwoord: "het", afbeelding: false },
+      { tekst: "eiland", lidwoord: "het", afbeelding: false },
+      { tekst: "eik", lidwoord: "de", afbeelding: false },
       { tekst: "kei", lidwoord: "de", afbeelding: false },
       { tekst: "klei", lidwoord: "de", afbeelding: false },
       { tekst: "plein", lidwoord: "het", afbeelding: false },
