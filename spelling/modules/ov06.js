@@ -225,7 +225,12 @@ window.SpellingModules.ov06 = {
     const ondertitel = o.ondertitel || "";
     const eigenZinnen = (o.eigenZinnen || "").trim();
 
-    const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
+    const _ruwePool = window._weekdictee_gekozenWoorden || [];
+    // Vangnet-laag: ontdubbel pool zodat geen synoniem-paren
+    // (kip/hen) of tekst-dups twee keer op hetzelfde blad komen.
+    const gekozenWoorden = window.SpellingDedup
+      ? window.SpellingDedup.ontdubbel(_ruwePool)
+      : _ruwePool;
 
     if (gekozenWoorden.length === 0) {
       return `<div class="werkblad ov06-blad">
@@ -573,7 +578,6 @@ window.SpellingModules.ov06 = {
     
     // Stap 1: zoek voor elk doelwoord de categorie waarin het zit
     const gebruikteCategorieen = new Set();
-    const doelTeksten = new Set(doelwoorden.map(w => w.tekst));
     
     for (const doelwoord of doelwoorden) {
       // Als woord zelf een categorie-veld heeft, gebruik dat (snelste pad)
@@ -590,16 +594,25 @@ window.SpellingModules.ov06 = {
       }
     }
     
-    // Stap 2: verzamel alle woorden uit die categorieën, behalve doelwoorden
-    const pool = [];
+    // Stap 2: verzamel alle woorden uit die categorieën, behalve doelwoorden.
+    // We gebruiken SpellingDedup.verschilt zodat ook synoniemen (kip/hen)
+    // van een doelwoord uit de afleiders-pool vallen — anders zou "hen"
+    // als afleider naast doelwoord "kip" kunnen verschijnen.
+    let pool = [];
     for (const catId of gebruikteCategorieen) {
       const catData = data[catId];
       if (!catData || !catData.woorden) continue;
       for (const w of catData.woorden) {
-        if (!doelTeksten.has(w.tekst)) {
-          pool.push(w);
-        }
+        pool.push(w);
       }
+    }
+    if (window.SpellingDedup) {
+      pool = window.SpellingDedup.verschilt(pool, doelwoorden);
+      // Ook de pool zelf nog ontdubbelen (bv. zelfde woord in 2 cats)
+      pool = window.SpellingDedup.ontdubbel(pool);
+    } else {
+      const doelTeksten = new Set(doelwoorden.map(w => w.tekst));
+      pool = pool.filter(w => !doelTeksten.has(w.tekst));
     }
     
     // Stap 3: kies n willekeurige (via seed)
