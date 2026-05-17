@@ -359,7 +359,11 @@
     _haalActieveWoorden: function () {
       const wb = window.SpellingWoordenbibliotheek;
       const cats = this.CAT_TOEGESTAAN;
-      const pool = window._weekdictee_gekozenWoorden || [];
+      const _ruwePool = window._weekdictee_gekozenWoorden || [];
+      // Vangnet-laag: ontdubbel pool (kip/hen + tekst-dups)
+      const pool = window.SpellingDedup
+        ? window.SpellingDedup.ontdubbel(_ruwePool)
+        : _ruwePool;
       return pool
         .filter(w => w.categorie && cats.includes(w.categorie))
         .map(w => this._verrijk(w, wb));
