@@ -51,6 +51,7 @@ window.SpellingWoordenbibliotheek = {
     "ng-nk",
     "moeilijke-klanken",  // sch
     "sch-woorden",
+    "schr-woorden",       // graad 2 — sch- met r-cluster
     "clusters",
     "ch-cht-klank",       // (oude naam voor compatibility)
     "ch-cht-gt",
@@ -157,6 +158,7 @@ window.SpellingWoordenbibliotheek = {
     "medeklinker-cluster": "Medeklinkerclusters",
     "clusters": "Medeklinkerclusters",
     "sch-woorden": "sch-woorden",
+    "schr-woorden": "schr-woorden",
     "moeilijke-klanken": "Moeilijke klanken (sch)",
     "ch-cht-klank": "ch / cht woorden",
     "ch-cht-gt": "ch / cht / gt woorden",
