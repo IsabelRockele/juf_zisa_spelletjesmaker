@@ -267,7 +267,11 @@ window.SpellingModules.ov07 = {
     const lijnhoogte = o.lijnhoogte || "middel";
     const ondertitel = o.ondertitel || "";
 
-    const gekozen = window._weekdictee_gekozenWoorden || [];
+    const _ruwePool = window._weekdictee_gekozenWoorden || [];
+    // Vangnet-laag: ontdubbel pool (kip/hen + tekst-dups)
+    const gekozen = window.SpellingDedup
+      ? window.SpellingDedup.ontdubbel(_ruwePool)
+      : _ruwePool;
     let beschikbaar = this._filterVerkleinwoorden(gekozen);
     
     if (beschikbaar.length === 0) {
