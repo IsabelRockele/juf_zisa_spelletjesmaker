@@ -47,6 +47,7 @@ window.SpellingWoordenbibliotheek = {
     "tweeklanken",
     "ei-ij",       // tweeklanken-onderdeel maar onthoudwoord
     "au-ou",
+    "aai-ooi-oei-eeuw-ieuw-uw",  // graad 2 — uitgebreide tweeklanken
     "ng-nk",
     "moeilijke-klanken",  // sch
     "sch-woorden",
@@ -57,10 +58,22 @@ window.SpellingWoordenbibliotheek = {
     // regelwoord
     "verdubbel-verenkel",
     "verlengen",
+    "verlengen-tdpb",     // graad 2 — uitgebreid t/d + p/b
     "verkleinwoorden",
     "meervouden",
+    "doffe-klank-voorvoegsel",   // graad 2
+    "doffe-klank-achtervoegsel", // graad 2
+    // werkwoord (allemaal graad 2)
+    "werkwoorden-ott",
+    "werkwoorden-vtt",
+    "werkwoorden-ovt-zwak",
+    "werkwoorden-ovt-sterk",
+    "werkwoorden-vvt",
     // samenstelling
     "samenstellingen",
+    // onthoudwoord (graad 2)
+    "teit-heid",
+    "leenwoorden",
     // overig
     "hoofdletters"
   ],
@@ -82,7 +95,7 @@ window.SpellingWoordenbibliotheek = {
   categorieenPerHoofdgroep: function(leerjaar, aangevinkt) {
     const data = this[`graad${leerjaar}`];
     if (!data) return {};
-    const ruw = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, samenstelling: {}, overig: {} };
+    const ruw = { hoorwoord: {}, onthoudwoord: {}, regelwoord: {}, werkwoord: {}, samenstelling: {}, overig: {} };
     for (const [id, cat] of Object.entries(data)) {
       if (typeof cat !== "object" || !cat.groep) continue;
       if (aangevinkt && !aangevinkt.has(id)) continue;
@@ -120,6 +133,7 @@ window.SpellingWoordenbibliotheek = {
     "hoorwoord": "🎵 Hoorwoorden",
     "onthoudwoord": "🧠 Onthoudwoorden",
     "regelwoord": "📋 Regelwoorden",
+    "werkwoord": "✍️ Werkwoorden",
     "samenstelling": "🧩 Samenstellingen",
     "overig": "📦 Overig"
   },
@@ -129,6 +143,7 @@ window.SpellingWoordenbibliotheek = {
     "hoorwoord": "Woorden waar je gewoon schrijft wat je hoort.",
     "onthoudwoord": "Woorden waar je de spelling moet onthouden (geen luisterregel).",
     "regelwoord": "Woorden waarbij je een regel moet toepassen (verlengen, verkleinen, meervoud).",
+    "werkwoord": "Werkwoorden in verschillende tijden (tegenwoordige tijd, verleden tijd, voltooid).",
     "samenstelling": "Woorden die uit twee delen bestaan die je aan elkaar plakt (klok + huis = klokhuis).",
     "overig": "Andere categorieën."
   },
@@ -146,12 +161,23 @@ window.SpellingWoordenbibliotheek = {
     "ch-cht-klank": "ch / cht woorden",
     "ch-cht-gt": "ch / cht / gt woorden",
     "verlengen": "Verlengingsregel",
+    "verlengen-tdpb": "Verlengingsregel (t/d + p/b)",
     "verkleinwoorden": "Verkleinwoorden",
     "meervouden": "Meervouden",
     "ei-ij": "ei / ij woorden",
     "au-ou": "au / ou woorden",
+    "aai-ooi-oei-eeuw-ieuw-uw": "aai / ooi / oei / eeuw / ieuw / uw",
     "ch-cht": "ch / cht woorden",
     "doffe-klank": "Doffe klanken",
+    "doffe-klank-voorvoegsel": "Doffe klank in voorvoegsel (ge-, ver-, be-)",
+    "doffe-klank-achtervoegsel": "Doffe klank in achtervoegsel (-elen, -eren, -ig, -lijk)",
+    "werkwoorden-ott": "Onvoltooid tegenwoordige tijd (OTT)",
+    "werkwoorden-vtt": "Voltooid tegenwoordige tijd (VTT)",
+    "werkwoorden-ovt-zwak": "Zwakke werkwoorden in OVT",
+    "werkwoorden-ovt-sterk": "Sterke werkwoorden in OVT",
+    "werkwoorden-vvt": "Voltooid verleden tijd (VVT)",
+    "teit-heid": "Woorden op -teit en -heid",
+    "leenwoorden": "Leenwoorden",
     "hoofdletters": "Hoofdletters & leestekens",
     "samenstellingen": "Samengestelde woorden"
   }
