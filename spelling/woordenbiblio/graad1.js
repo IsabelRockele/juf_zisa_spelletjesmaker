@@ -51,10 +51,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "lip", lidwoord: "de", afbeelding: true },
       { tekst: "pit", lidwoord: "de", afbeelding: true },
       { tekst: "wit", lidwoord: null, afbeelding: true },
-      { tekst: "bil", lidwoord: "de", afbeelding: false },
-      { tekst: "kin", lidwoord: "de", afbeelding: false },
-      { tekst: "dik", lidwoord: null, afbeelding: false },
-      { tekst: "sip", lidwoord: "de", afbeelding: false }
+      { tekst: "bil", lidwoord: "de", afbeelding: true },
+      { tekst: "kin", lidwoord: "de", afbeelding: true },
+      { tekst: "dik", lidwoord: null, afbeelding: true },
+      { tekst: "sik", lidwoord: "de", afbeelding: true },
+      { tekst: "sip", lidwoord: "de", afbeelding: true }
     ]
   },
   "mkm-o": {
@@ -62,17 +63,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "korte-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "pop", lidwoord: "de", afbeelding: false },
-      { tekst: "rok", lidwoord: "de", afbeelding: false },
-      { tekst: "vos", lidwoord: "de", afbeelding: false },
-      { tekst: "kom", lidwoord: "de", afbeelding: false },
-      { tekst: "pot", lidwoord: "de", afbeelding: false },
-      { tekst: "zon", lidwoord: "de", afbeelding: false },
-      { tekst: "mol", lidwoord: "de", afbeelding: false },
-      { tekst: "dop", lidwoord: "de", afbeelding: false },
+      { tekst: "pop", lidwoord: "de", afbeelding: true },
+      { tekst: "rok", lidwoord: "de", afbeelding: true },
+      { tekst: "vos", lidwoord: "de", afbeelding: true },
+      { tekst: "kom", lidwoord: "de", afbeelding: true },
+      { tekst: "pot", lidwoord: "de", afbeelding: true },
+      { tekst: "zon", lidwoord: "de", afbeelding: true },
+      { tekst: "mol", lidwoord: "de", afbeelding: true },
+      { tekst: "dop", lidwoord: "de", afbeelding: true },
       { tekst: "kop", lidwoord: "de", afbeelding: false },
-      { tekst: "mos", lidwoord: "het", afbeelding: false },
-      { tekst: "bos", lidwoord: "het", afbeelding: false }
+      { tekst: "mos", lidwoord: "het", afbeelding: true },
+      { tekst: "bos", lidwoord: "het", afbeelding: true }
     ]
   },
   "mkm-u": {
@@ -80,10 +81,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "korte-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "bus", lidwoord: "de", afbeelding: false },
-      { tekst: "hut", lidwoord: "de", afbeelding: false },
-      { tekst: "mus", lidwoord: "de", afbeelding: false },
-      { tekst: "pup", lidwoord: "de", afbeelding: false },
+      { tekst: "bus", lidwoord: "de", afbeelding: true },
+      { tekst: "hut", lidwoord: "de", afbeelding: true },
+      { tekst: "mus", lidwoord: "de", afbeelding: true },
+      { tekst: "pup", lidwoord: "de", afbeelding: true },
       { tekst: "kus", lidwoord: "de", afbeelding: false },
       { tekst: "rug", lidwoord: "de", afbeelding: false },
       { tekst: "put", lidwoord: "de", afbeelding: false },
