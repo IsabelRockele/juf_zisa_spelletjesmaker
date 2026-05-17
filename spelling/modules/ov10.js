@@ -183,7 +183,12 @@ window.SpellingModules.ov10 = {
     const lijnhoogte  = o.lijnhoogte || "middel";
     const ondertitel  = o.ondertitel || "";
 
-    const gekozenWoorden = window._weekdictee_gekozenWoorden || [];
+    const _ruwePool = window._weekdictee_gekozenWoorden || [];
+    // Vangnet-laag: ontdubbel pool zodat geen synoniem-paren
+    // (kip/hen) of tekst-dups twee keer op hetzelfde blad komen.
+    const gekozenWoorden = window.SpellingDedup
+      ? window.SpellingDedup.ontdubbel(_ruwePool)
+      : _ruwePool;
 
     if (gekozenWoorden.length === 0) {
       return `<div class="werkblad ov10-blad">
