@@ -5,16 +5,6 @@ Totaal aantal afbeeldingen: 665
 Map-structuur: /spelling/afbeeldingen/graad1/{categorie}/{woord}.png
 
 
-## mkm-u (9 woorden)
-Map: /spelling/afbeeldingen/graad1/mkm-u/
-
-- [ ] (de) pup            → pup.png
-- [ ] (de) kus            → kus.png
-- [ ] (de) rug            → rug.png
-- [ ] (de) put            → put.png
-- [ ] (de) lus            → lus.png
-- [ ] nul            → nul.png
-
 ## mk-km (14 woorden)
 Map: /spelling/afbeeldingen/graad1/mk-km/
 
@@ -33,24 +23,6 @@ Map: /spelling/afbeeldingen/graad1/mk-km/
 - [ ] (de) as             → as.png
 - [ ] (het) ei             → ei.png
 
-## tw-ie (15 woorden)
-Map: /spelling/afbeeldingen/graad1/tw-ie/
-
-- [ ] (het) riet           → riet.png
-- [ ] (de) biet           → biet.png
-- [ ] (het) wiel           → wiel.png
-- [ ] (de) fiets          → fiets.png
-- [ ] (de) stier          → stier.png
-- [ ] (de) knie           → knie.png
-- [ ] (de) mier           → mier.png
-- [ ] (het) bier           → bier.png
-- [ ] vier           → vier.png
-- [ ] tien           → tien.png
-- [ ] lief           → lief.png
-- [ ] diep           → diep.png
-- [ ] niet           → niet.png
-- [ ] zie            → zie.png
-- [ ] die            → die.png
 
 ## tw-ei (18 woorden)
 Map: /spelling/afbeeldingen/graad1/tw-ei/
