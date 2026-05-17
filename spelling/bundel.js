@@ -68,19 +68,26 @@ window.SpellingBundel = {
       return;
     }
 
-    // Snapshot dedup (zoals legacy)
-    const gezien = new Set();
-    const ontdubbeld = [];
-    for (const w of huidigeGekozen) {
-      const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
-      if (!key || gezien.has(key)) continue;
-      gezien.add(key);
-      ontdubbeld.push(w);
+    // Snapshot dedup via centrale helper (kip/hen + lowercase-tekst).
+    // Fallback op oude lowercase-tekst-Set als SpellingDedup nog niet geladen is.
+    let ontdubbeld;
+    if (window.SpellingDedup) {
+      ontdubbeld = window.SpellingDedup.ontdubbel(huidigeGekozen);
+    } else {
+      const gezien = new Set();
+      ontdubbeld = [];
+      for (const w of huidigeGekozen) {
+        const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
+        if (!key || gezien.has(key)) continue;
+        gezien.add(key);
+        ontdubbeld.push(w);
+      }
     }
     const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(ontdubbeld));
+    const uniekBeschikbaar = ontdubbeld.length;
 
     let aantalToegevoegd = 0;
-    
+
     for (const oef of aangevinkteOefenvormen) {
       const module = window.SpellingModules?.[oef.id];
       if (!module) {
@@ -96,14 +103,26 @@ window.SpellingBundel = {
 
       // Voor oefenvormen ZONDER niveaus (bv ov02): één item
       const niveaus = oef.niveaus.length > 0 ? oef.niveaus : ["basis"];
-      
+
       // Voor elke aangevinkte niveau: maak een apart item
       for (const niveau of niveaus) {
         const seed = (Date.now() + aantalToegevoegd * 7919) & 0xFFFFFFFF;
-        
+
         // Bouw opties-object dat de module verwacht
         const opties = this._bouwOptiesVoor(oef, niveau);
-        
+
+        // Tekort-check: hoeveel woorden vraagt dit item, hoeveel zijn er uniek?
+        // _bouwOptiesVoor zet aantalWoorden/aantalZinnen in de sub-opties.
+        const sub = opties[oef.id] || {};
+        const gevraagd = (oef.id === "ov06")
+          ? (sub.aantalZinnen || 0)
+          : (sub.aantalWoorden || 0);
+        if (gevraagd > uniekBeschikbaar && window.SpellingDedup) {
+          const naam = (module.naam || oef.id)
+            + " " + (niveau.charAt(0).toUpperCase() + niveau.slice(1));
+          window.SpellingDedup.toonTekortMelding(gevraagd, uniekBeschikbaar, naam);
+        }
+
         const item = {
           id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
           categorie: oef.id,
@@ -113,7 +132,7 @@ window.SpellingBundel = {
           niveau: niveau,
           html: ""
         };
-        
+
         try {
           item.html = this._renderItemHTML(item, false);
           this.items.push(item);
@@ -123,12 +142,12 @@ window.SpellingBundel = {
         }
       }
     }
-    
+
     if (aantalToegevoegd === 0) {
       alert("Geen werkbladen toegevoegd. Vink minstens één niveau aan per oefenvorm.");
       return;
     }
-    
+
     this._renderPreview();
     this._updateUI();
   },
@@ -208,15 +227,27 @@ window.SpellingBundel = {
     }
     
     const huidigeGekozen = window._weekdictee_gekozenWoorden || [];
-    const gezien = new Set();
-    const ontdubbeld = [];
-    for (const w of huidigeGekozen) {
-      const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
-      if (!key || gezien.has(key)) continue;
-      gezien.add(key);
-      ontdubbeld.push(w);
+    let ontdubbeld;
+    if (window.SpellingDedup) {
+      ontdubbeld = window.SpellingDedup.ontdubbel(huidigeGekozen);
+    } else {
+      const gezien = new Set();
+      ontdubbeld = [];
+      for (const w of huidigeGekozen) {
+        const key = (w && w.tekst) ? w.tekst.toLowerCase() : null;
+        if (!key || gezien.has(key)) continue;
+        gezien.add(key);
+        ontdubbeld.push(w);
+      }
     }
     const gekozenWoordenSnapshot = JSON.parse(JSON.stringify(ontdubbeld));
+
+    // Tekort-check voor legacy (oude klankzuiver-flow)
+    const gevraagdLegacy = opties.aantalOef || 0;
+    if (gevraagdLegacy > ontdubbeld.length && window.SpellingDedup && ontdubbeld.length > 0) {
+      const naam = (module.naam || actieveCat);
+      window.SpellingDedup.toonTekortMelding(gevraagdLegacy, ontdubbeld.length, naam);
+    }
 
     const item = {
       id: "item-" + Date.now() + "-" + Math.random().toString(36).slice(2, 7),
