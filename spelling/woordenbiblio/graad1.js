@@ -85,11 +85,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hut", lidwoord: "de", afbeelding: true },
       { tekst: "mus", lidwoord: "de", afbeelding: true },
       { tekst: "pup", lidwoord: "de", afbeelding: true },
-      { tekst: "kus", lidwoord: "de", afbeelding: false },
-      { tekst: "rug", lidwoord: "de", afbeelding: false },
-      { tekst: "put", lidwoord: "de", afbeelding: false },
+      { tekst: "kus", lidwoord: "de", afbeelding: true },
+      { tekst: "rug", lidwoord: "de", afbeelding: true },
+      { tekst: "put", lidwoord: "de", afbeelding: true },
       { tekst: "lus", lidwoord: "de", afbeelding: false },
-      { tekst: "nul", lidwoord: null, afbeelding: false }
+      { tekst: "nul", lidwoord: null, afbeelding: true }
     ]
   },
   "mk-km": {
