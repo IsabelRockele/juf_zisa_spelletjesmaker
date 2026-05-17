@@ -63,7 +63,11 @@ window.SpellingAfbeeldingen = {
       tekst = woord.tekst || "";
       if (woord.categorie && tekst) {
         const graadNr = woord.graad || woord.leerjaar || 1;
-        pad = `afbeeldingen/graad${graadNr}/${woord.categorie}/${tekst}.png`;
+        // Optioneel afbeelding_bestand veld voor Windows-gereserveerde namen
+        // (nul, con, aux, prn, ...) of andere uitzonderingen.
+        // Valt terug op {tekst}.png als afbeelding_bestand niet gezet is.
+        const bestandsnaam = woord.afbeelding_bestand || `${tekst}.png`;
+        pad = `afbeeldingen/graad${graadNr}/${woord.categorie}/${bestandsnaam}`;
       }
     } else {
       return `<span class="woord-emoji">📷</span>`;
