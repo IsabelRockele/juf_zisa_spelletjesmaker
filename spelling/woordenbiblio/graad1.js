@@ -167,12 +167,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "onthoudwoord",
     woorden: [
       { tekst: "tijd", lidwoord: "de", afbeelding: false },
-      { tekst: "vijf", lidwoord: null, afbeelding: false },
+      { tekst: "vijf", lidwoord: null, afbeelding: tuee },
       { tekst: "fijn", lidwoord: null, afbeelding: false },
-      { tekst: "wijn", lidwoord: "de", afbeelding: false },
-      { tekst: "rijst", lidwoord: "de", afbeelding: false },
-      { tekst: "lijn", lidwoord: "de", afbeelding: false },
-      { tekst: "pijp", lidwoord: "de", afbeelding: false },
+      { tekst: "wijn", lidwoord: "de", afbeelding: true },
+      { tekst: "rijst", lidwoord: "de", afbeelding: true },
+      { tekst: "lijn", lidwoord: "de", afbeelding: true },
+      { tekst: "pijp", lidwoord: "de", afbeelding: true },
       { tekst: "pijn", lidwoord: "de", afbeelding: false },
       { tekst: "prijs", lidwoord: "de", afbeelding: false },
       { tekst: "rijm", lidwoord: "het", afbeelding: false },
@@ -180,7 +180,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "mijn", lidwoord: null, afbeelding: false },
       { tekst: "schrijf", lidwoord: null, afbeelding: false },
       { tekst: "bij", lidwoord: "de", afbeelding: true },
-      { tekst: "ijs", lidwoord: "het", afbeelding: false }
+      { tekst: "ijsje", lidwoord: "het", afbeelding: truee }
     ]
   },
   "tw-ou": {
