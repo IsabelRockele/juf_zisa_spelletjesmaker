@@ -526,6 +526,42 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
+  // ===== Stukjeswoorden — direct schrijven bij plaatje =====
+  // Type B-woorden: de verdubbel-/verenkelregel zit AL in de spelling, geen
+  // meervoudsvorming nodig. Een afbeelding is essentieel — zonder beeld zou
+  // het kind het woord gewoon overschrijven zonder de regel actief toe te passen.
+  // Met afbeelding moet het kind het woord zelf oproepen en correct produceren.
+  "stukjeswoorden-direct-g2": {
+    naam: "Stukjeswoorden — direct schrijven",
+    groep: "verdubbel-verenkel",   // zelfde groep als type A → wordt samen geclusterd in sidebar
+    hoofdgroep: "regelwoord",
+    beschrijving: "Woorden waar de verdubbel- of verenkelregel al in de spelling zit. " +
+                  "Kind schrijft het woord bij een plaatje en moet zelf de juiste spelling oproepen.",
+    woorden: [
+      // ===== Type B: VERDUBBELEN (korte klank → verdubbelde medeklinker zichtbaar) =====
+      { tekst: "appel",   lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "kikker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "ladder",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "bakker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "kussen",  lidwoord: "het", klanktype: "kort-verdubbeld", afbeelding: true },
+
+      // ===== Type B: VERENKELEN (lange klank → één medeklinker) =====
+      { tekst: "hamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "lepel",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "meter",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "zomer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "bezem",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "kamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+
+      // ===== Type B: ZOALS JE HET HOORT (korte klank + 2 verschillende medeklinkers) =====
+      { tekst: "wortel",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "dokter",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "sleutel", lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "kelder",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "masker",  lidwoord: "het", klanktype: "kort-2mk",        afbeelding: true }
+    ]
+  },
+
   // ===== Verkleinwoorden (incl. -etje en -kje) =====
   "verkleinwoorden-g2": {
     naam: "Verkleinwoorden",
