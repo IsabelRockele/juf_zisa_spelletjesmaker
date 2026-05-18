@@ -18,7 +18,14 @@ window.SpellingWoordenkiezer = (function() {
      in syncActieveWoorden() — die zet window._weekdictee_gekozenWoorden. */
   let gekozen = [];
 
+  /* UI-filter: als true, toont de kiezer alleen woorden met afbeelding=true.
+     Beïnvloedt NIET de gekozen-lijst (woorden die al aangevinkt waren maar
+     geen plaatje hebben blijven aangevinkt; ze zijn alleen verborgen).
+     Bewaard in localStorage zodat de toggle persistent is. */
+  let filterAfb = false;
+
   const LS_KEY = "spelling-weekdictee-gekozen-v1";
+  const LS_FILTER_KEY = "spelling-wk-filter-afb-v1";
 
   /* Detecteer welke modus momenteel actief is op basis van zichtbare 
      modus-section. Returnt "weekdictee", "werkblad", "herhaling" of null. */
@@ -135,6 +142,12 @@ window.SpellingWoordenkiezer = (function() {
       console.warn("Kon opgeslagen keuzes niet laden:", e);
       gekozen = [];
     }
+    // Filter-state laden (eenvoudige boolean in localStorage)
+    try {
+      filterAfb = _storage().getItem(LS_FILTER_KEY) === "1";
+    } catch (e) {
+      filterAfb = false;
+    }
     syncActieveWoorden();
   }
 
@@ -145,6 +158,12 @@ window.SpellingWoordenkiezer = (function() {
       console.warn("Kon keuzes niet opslaan:", e);
     }
     syncActieveWoorden();
+  }
+
+  function bewaarFilter() {
+    try {
+      _storage().setItem(LS_FILTER_KEY, filterAfb ? "1" : "0");
+    } catch (e) { /* SSR/private mode */ }
   }
 
   /* ----- Helpers: woord-id voor unieke identificatie ----- */
@@ -186,14 +205,19 @@ window.SpellingWoordenkiezer = (function() {
       
       const groepLabel = wb.groepLabels[groepId] || groepId;
       
-      // Bepaal aan-status van groep: alle woorden van alle cats in deze groep
+      // Bepaal aan-status van groep: alle zichtbare woorden van alle cats in deze groep
       let totaalWoorden = 0, gekozenWoorden = 0;
       for (const c of filteredCats) {
-        for (const w of c.woorden) {
+        const zichtbaar = filterAfb
+          ? c.woorden.filter(w => w.afbeelding === true)
+          : c.woorden;
+        for (const w of zichtbaar) {
           totaalWoorden++;
           if (isGekozen(w, leerjaar, c.id)) gekozenWoorden++;
         }
       }
+      // Als de hele groep door de filter leeg is geworden, sla hem over
+      if (totaalWoorden === 0) continue;
       const groepAlles = gekozenWoorden === totaalWoorden && totaalWoorden > 0;
       const groepSome = gekozenWoorden > 0 && gekozenWoorden < totaalWoorden;
       
@@ -207,12 +231,23 @@ window.SpellingWoordenkiezer = (function() {
         </label>`;
 
       for (const cat of filteredCats) {
-        // Tel hoeveel woorden gekozen in deze categorie
-        const aantalGekozenInCat = cat.woorden.filter(w => isGekozen(w, leerjaar, cat.id)).length;
+        // Filter woorden volgens filterAfb-toggle (UI-filter; gekozen-lijst
+        // blijft ongemoeid — een woord dat eerder is aangevinkt blijft 
+        // aangevinkt, het is alleen niet meer zichtbaar in de kiezer).
+        const zichtbareWoorden = filterAfb
+          ? cat.woorden.filter(w => w.afbeelding === true)
+          : cat.woorden;
+        
+        // Als filter aan staat en deze categorie heeft 0 woorden met plaatje,
+        // sla hem helemaal over (anders krijgt de leerkracht een lege cat-titel).
+        if (zichtbareWoorden.length === 0) continue;
+        
+        // Tel: zichtbare gekozen / zichtbaar totaal
+        const aantalGekozenInCat = zichtbareWoorden.filter(w => isGekozen(w, leerjaar, cat.id)).length;
 
         html += `
           <div class="wk-cat-titel">
-            <span>${cat.naam} <small>(${aantalGekozenInCat}/${cat.woorden.length})</small></span>
+            <span>${cat.naam} <small>(${aantalGekozenInCat}/${zichtbareWoorden.length})</small></span>
             <div class="wk-cat-acties">
               <button class="wk-cat-mini-btn" data-actie="alles" data-cat="${cat.id}" type="button">Alles</button>
               <button class="wk-cat-mini-btn" data-actie="geen" data-cat="${cat.id}" type="button">Geen</button>
@@ -220,17 +255,23 @@ window.SpellingWoordenkiezer = (function() {
           </div>
           <div class="wk-woordenrooster">`;
 
-        for (const woord of cat.woorden) {
+        for (const woord of zichtbareWoorden) {
           const checked = isGekozen(woord, leerjaar, cat.id);
           const tonen = wb.toonWoord(woord);
+          const heeftAfb = woord.afbeelding === true;
+          const sg = woord.synoniemGroep || "";
+          // 🖼️ alleen tonen bij woorden met afbeelding:true
+          const afbIcoon = heeftAfb ? `<span class="wk-afb-icoon" title="Heeft een afbeelding">🖼️</span>` : "";
           html += `
-            <label class="wk-woord-vinkje${checked ? ' gekozen' : ''}">
+            <label class="wk-woord-vinkje${checked ? ' gekozen' : ''}${heeftAfb ? ' wk-heeft-afb' : ' wk-geen-afb'}">
               <input type="checkbox"
                 ${checked ? 'checked' : ''}
                 data-woord-tekst="${woord.tekst}"
                 data-woord-lidwoord="${woord.lidwoord || ''}"
+                data-woord-afbeelding="${heeftAfb ? '1' : '0'}"
+                data-woord-synoniem="${sg}"
                 data-cat="${cat.id}">
-              <span>${tonen}</span>
+              <span>${tonen}${afbIcoon}</span>
             </label>`;
         }
         html += `</div>`;
@@ -286,6 +327,9 @@ window.SpellingWoordenkiezer = (function() {
   /* ----- Open de modal ----- */
   function open() {
     laadOpgeslagen();
+    // Sync filter-checkbox met de geladen state
+    const filterCb = document.querySelector("#wk-filter-afb");
+    if (filterCb) filterCb.checked = filterAfb;
     document.querySelector("#wk-modal").style.display = "flex";
     herrender();
   }
@@ -343,9 +387,18 @@ window.SpellingWoordenkiezer = (function() {
     // Leerjaar-keuze
     document.querySelector("#wk-leerjaar")?.addEventListener("change", herrender);
 
+    // Filter-toggle: toon enkel woorden met plaatje
+    document.querySelector("#wk-filter-afb")?.addEventListener("change", (e) => {
+      filterAfb = !!e.target.checked;
+      bewaarFilter();
+      herrender();
+    });
+
     // Event-delegatie voor vinkjes en alles/geen-knoppen (categorieën worden dynamisch gerenderd)
     document.querySelector("#wk-categorieen")?.addEventListener("change", (e) => {
-      // Groep-master vinkje: alle woorden van alle cats in groep aan/uit
+      // Groep-master vinkje: alle ZICHTBARE woorden van alle cats in groep aan/uit
+      // (als filterAfb actief is, raken we woorden zonder plaatje niet aan —
+      // anders zou je per ongeluk verborgen woorden afvinken).
       if (e.target.matches(".wk-groep-master")) {
         const groepId = e.target.dataset.groep;
         const aan = e.target.checked;
@@ -356,11 +409,21 @@ window.SpellingWoordenkiezer = (function() {
           const cats = groepen[groepId];
           if (!cats) continue;
           for (const cat of cats) {
-            for (const w of cat.woorden) {
+            const woordenInScope = filterAfb
+              ? cat.woorden.filter(w => w.afbeelding === true)
+              : cat.woorden;
+            for (const w of woordenInScope) {
               const id = `${leerjaar}|${cat.id}|${w.tekst}`;
               const al = gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id);
               if (aan && !al) {
-                gekozen.push({ tekst: w.tekst, lidwoord: w.lidwoord || null, categorie: cat.id, leerjaar });
+                gekozen.push({
+                  tekst: w.tekst,
+                  lidwoord: w.lidwoord || null,
+                  afbeelding: w.afbeelding === true,
+                  synoniemGroep: w.synoniemGroep || null,
+                  categorie: cat.id,
+                  leerjaar
+                });
               } else if (!aan && al) {
                 gekozen = gekozen.filter(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` !== id);
               }
@@ -375,13 +438,22 @@ window.SpellingWoordenkiezer = (function() {
       if (e.target.matches('input[type="checkbox"]') && e.target.dataset.woordTekst) {
         const tekst = e.target.dataset.woordTekst;
         const lidwoord = e.target.dataset.woordLidwoord || null;
+        const heeftAfb = e.target.dataset.woordAfbeelding === "1";
+        const synoniemGroep = e.target.dataset.woordSynoniem || null;
         const cat = e.target.dataset.cat;
         const leerjaar = actieveGraad();
         const id = `${leerjaar}|${cat}|${tekst}`;
 
         if (e.target.checked) {
           if (!gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id)) {
-            gekozen.push({ tekst, lidwoord: lidwoord || null, categorie: cat, leerjaar });
+            gekozen.push({
+              tekst,
+              lidwoord: lidwoord || null,
+              afbeelding: heeftAfb,
+              synoniemGroep: synoniemGroep || null,
+              categorie: cat,
+              leerjaar
+            });
           }
         } else {
           gekozen = gekozen.filter(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` !== id);
@@ -403,14 +475,35 @@ window.SpellingWoordenkiezer = (function() {
         if (!cat) return;
 
         if (actie === "alles") {
-          for (const w of cat.woorden) {
+          // Respecteer filter: alleen zichtbare woorden aanvinken.
+          const woordenInScope = filterAfb
+            ? cat.woorden.filter(w => w.afbeelding === true)
+            : cat.woorden;
+          for (const w of woordenInScope) {
             const id = `${leerjaar}|${catId}|${w.tekst}`;
             if (!gekozen.some(g => `${g.leerjaar}|${g.categorie}|${g.tekst}` === id)) {
-              gekozen.push({ tekst: w.tekst, lidwoord: w.lidwoord || null, categorie: catId, leerjaar });
+              gekozen.push({
+                tekst: w.tekst,
+                lidwoord: w.lidwoord || null,
+                afbeelding: w.afbeelding === true,
+                synoniemGroep: w.synoniemGroep || null,
+                categorie: catId,
+                leerjaar
+              });
             }
           }
         } else if (actie === "geen") {
-          gekozen = gekozen.filter(g => !(g.leerjaar === leerjaar && g.categorie === catId));
+          // Respecteer filter: alleen zichtbare woorden afvinken.
+          if (filterAfb) {
+            const zichtbareTeksten = new Set(
+              cat.woorden.filter(w => w.afbeelding === true).map(w => w.tekst)
+            );
+            gekozen = gekozen.filter(g => !(
+              g.leerjaar === leerjaar && g.categorie === catId && zichtbareTeksten.has(g.tekst)
+            ));
+          } else {
+            gekozen = gekozen.filter(g => !(g.leerjaar === leerjaar && g.categorie === catId));
+          }
         }
         bewaar();
         herrender();
