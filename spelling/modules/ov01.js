@@ -216,9 +216,26 @@ window.SpellingModules.ov01 = {
     const _ruwePool = window._weekdictee_gekozenWoorden || [];
     // Vangnet-laag: ontdubbel pool zodat geen synoniem-paren
     // (kip/hen) of tekst-dups twee keer op hetzelfde blad komen.
-    const gekozenWoorden = window.SpellingDedup
+    let gekozenWoorden = window.SpellingDedup
       ? window.SpellingDedup.ontdubbel(_ruwePool)
       : _ruwePool;
+
+    // Plaatje-filter: OV01 toont in ALLE niveaus plaatjes (basis/kern/verdieping/uitbreiding).
+    // Woorden zonder afbeelding=true vallen weg. Als de pool helemaal leeg
+    // wordt → pop-up + lege HTML.
+    if (window.SpellingDedup && gekozenWoorden.length > 0) {
+      const metPlaatje = window.SpellingDedup.filterMetAfbeelding(gekozenWoorden);
+      if (metPlaatje.length === 0) {
+        window.SpellingDedup.toonGeenPlaatjesMelding("Schrijf bij plaatje");
+        return `<div class="werkblad">
+          <div class="weekdictee-empty">
+            <h3>🖼️ Geen woorden met plaatje</h3>
+            <p>Deze oefenvorm gebruikt plaatjes. Kies in de woordenkiezer woorden mét 🖼️-icoon, of zet de filter "Toon enkel woorden met plaatje" aan.</p>
+          </div>
+        </div>`;
+      }
+      gekozenWoorden = metPlaatje;
+    }
 
     if (gekozenWoorden.length === 0) {
       return `<div class="werkblad">
