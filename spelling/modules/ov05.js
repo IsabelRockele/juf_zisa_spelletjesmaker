@@ -277,6 +277,7 @@ window.SpellingModules.ov05 = {
     let html = "";
     let aantalGeskipt = 0;
     const geskipt = [];
+    let geenPlaatjesGemeld = false;  // pop-up maar één keer per render
     for (const paar of paren) {
       const passend = this._filterWoordenVoorPaar(gekozenWoorden, paar);
       if (passend.length < this._minAantal) {
@@ -285,10 +286,26 @@ window.SpellingModules.ov05 = {
         continue;
       }
       for (const niveau of niveaus) {
-        const woorden = this._kiesWoorden(passend, this._maxPerNiveau[niveau] || 12);
         const metPlaatje = (niveau === "basis")
           || (niveau === "kern" && plaatjeKern)
           || ((niveau === "verdieping" || niveau === "uitbreiding") && plaatjeVerdieping);
+        
+        // Plaatje-filter alleen toepassen als dit niveau effectief plaatjes toont.
+        let poolDitNiveau = passend;
+        if (metPlaatje && window.SpellingDedup) {
+          const metAfb = window.SpellingDedup.filterMetAfbeelding(passend);
+          if (metAfb.length === 0) {
+            if (!geenPlaatjesGemeld) {
+              window.SpellingDedup.toonGeenPlaatjesMelding(`Klank kiezen — ${paar.titel} (${niveau})`);
+              geenPlaatjesGemeld = true;
+            }
+            // Sla dit specifieke werkblad over — geen lege HTML toevoegen
+            continue;
+          }
+          poolDitNiveau = metAfb;
+        }
+        
+        const woorden = this._kiesWoorden(poolDitNiveau, this._maxPerNiveau[niveau] || 12);
         html += this._renderEenBlad(niveau, woorden, paar, metPlaatje, lijntype, lijnhoogte, ondertitel, metAntwoorden);
       }
     }
