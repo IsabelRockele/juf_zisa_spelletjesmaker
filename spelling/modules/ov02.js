@@ -158,9 +158,26 @@ window.SpellingModules.ov02 = {
     const _ruwePool = window._weekdictee_gekozenWoorden || [];
     // Vangnet-laag: ontdubbel pool zodat geen synoniem-paren
     // (kip/hen) of tekst-dups twee keer op hetzelfde blad komen.
-    const gekozenWoorden = window.SpellingDedup
+    let gekozenWoorden = window.SpellingDedup
       ? window.SpellingDedup.ontdubbel(_ruwePool)
       : _ruwePool;
+
+    // Plaatje-filter: alleen als de toggle "plaatje tonen" aan staat.
+    // Anders is dit een puur tekstuele schrijfoefening en mogen woorden
+    // zonder afbeelding gewoon mee.
+    if (metPlaatje && window.SpellingDedup && gekozenWoorden.length > 0) {
+      const metAfb = window.SpellingDedup.filterMetAfbeelding(gekozenWoorden);
+      if (metAfb.length === 0) {
+        window.SpellingDedup.toonGeenPlaatjesMelding("Woord 3× overschrijven (met plaatje)");
+        return `<div class="werkblad ov02-blad">
+          <div class="weekdictee-empty">
+            <h3>🖼️ Geen woorden met plaatje</h3>
+            <p>Je hebt "plaatje tonen" aangevinkt, maar geen van je gekozen woorden heeft een afbeelding. Zet de toggle uit, of kies woorden met 🖼️ in de woordenkiezer.</p>
+          </div>
+        </div>`;
+      }
+      gekozenWoorden = metAfb;
+    }
 
     if (gekozenWoorden.length === 0) {
       return `<div class="werkblad ov02-blad">
