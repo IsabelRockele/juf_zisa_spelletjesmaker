@@ -220,12 +220,34 @@ window.SpellingModules.ov10 = {
     // Via ✕ kan ze woorden verwijderen, via +1 weer aanvullen tot max.
     // Als de teller (opties.ov10.aantalWoorden) lager staat door eerder
     // verwijderen, respecteren we die — anders gebruiken we het max.
+    // Voor elk gekozen niveau: één werkblad.
+    // BASIS en KERN tonen plaatjes — daarvoor filteren op afbeelding=true.
+    // VERDIEPING (2 kolommen woorden) en UITBREIDING (beschrijvingen) tonen
+    // geen plaatjes — die mogen alles in.
+    let geenPlaatjesGemeld = false;
     return niveaus.map(niveau => {
+      let poolDitNiveau = verrijkt;
+      if ((niveau === "basis" || niveau === "kern") && window.SpellingDedup) {
+        const metAfb = window.SpellingDedup.filterMetAfbeelding(verrijkt);
+        if (metAfb.length === 0) {
+          if (!geenPlaatjesGemeld) {
+            window.SpellingDedup.toonGeenPlaatjesMelding(`Samenstellingen — ${niveau.charAt(0).toUpperCase() + niveau.slice(1)}`);
+            geenPlaatjesGemeld = true;
+          }
+          return `<div class="werkblad ov10-blad">
+            <div class="weekdictee-empty">
+              <h3>🖼️ Geen woorden met plaatje voor ${niveau.charAt(0).toUpperCase() + niveau.slice(1)}</h3>
+              <p>Dit niveau toont plaatjes. Kies samenstellings-woorden met 🖼️ in de woordenkiezer.</p>
+            </div>
+          </div>`;
+        }
+        poolDitNiveau = metAfb;
+      }
       const maxVoorNiveau = this._maxPerNiveau[niveau] || 6;
       const aantalVoorDitNiveau = (typeof o.aantalWoorden === "number" && o.aantalWoorden > 0 && o.aantalWoorden <= maxVoorNiveau)
         ? o.aantalWoorden
         : maxVoorNiveau;
-      const woorden = this._kiesWoorden(verrijkt, aantalVoorDitNiveau);
+      const woorden = this._kiesWoorden(poolDitNiveau, aantalVoorDitNiveau);
       return this._renderEenBlad(niveau, woorden, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
   },
