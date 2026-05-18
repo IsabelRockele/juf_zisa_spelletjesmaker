@@ -211,9 +211,25 @@ window.SpellingModules.ov03 = {
       return max;
     };
 
-    // Voor elk gekozen niveau: één werkblad
+    // Voor elk gekozen niveau: één werkblad.
+    // BASIS toont plaatjes — daarvoor filteren we op woorden met afbeelding=true.
+    // Kern/verdieping/uitbreiding tonen geen plaatjes — daar mag alles in.
     return niveaus.map(niveau => {
-      const woorden = this._kiesWoorden(gekozenWoorden, aantalVoor(niveau));
+      let poolDitNiveau = gekozenWoorden;
+      if (niveau === "basis" && window.SpellingDedup) {
+        const metAfb = window.SpellingDedup.filterMetAfbeelding(gekozenWoorden);
+        if (metAfb.length === 0) {
+          window.SpellingDedup.toonGeenPlaatjesMelding("Letters door elkaar — Basis");
+          return `<div class="werkblad ov03-blad">
+            <div class="weekdictee-empty">
+              <h3>🖼️ Geen woorden met plaatje voor Basis</h3>
+              <p>Het basis-niveau van deze oefenvorm toont plaatjes. Kies woorden met 🖼️ in de woordenkiezer.</p>
+            </div>
+          </div>`;
+        }
+        poolDitNiveau = metAfb;
+      }
+      const woorden = this._kiesWoorden(poolDitNiveau, aantalVoor(niveau));
       return this._renderEenBlad(niveau, woorden, lijntype, lijnhoogte, ondertitel, metAntwoorden);
     }).join("");
   },
