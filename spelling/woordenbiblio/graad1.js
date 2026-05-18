@@ -150,15 +150,15 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "meid", lidwoord: "de", afbeelding: false },
       { tekst: "lei", lidwoord: "de", afbeelding: false },
       { tekst: "zeil", lidwoord: "het", afbeelding: true },
-      { tekst: "eiland", lidwoord: "het", afbeelding: false },
-      { tekst: "eik", lidwoord: "de", afbeelding: false },
-      { tekst: "kei", lidwoord: "de", afbeelding: false },
-      { tekst: "klei", lidwoord: "de", afbeelding: false },
-      { tekst: "plein", lidwoord: "het", afbeelding: false },
+      { tekst: "eiland", lidwoord: "het", afbeelding: true },
+      { tekst: "eik", lidwoord: "de", afbeelding: true },
+      { tekst: "kei", lidwoord: "de", afbeelding: true },
+      { tekst: "klei", lidwoord: "de", afbeelding: true },
+      { tekst: "plein", lidwoord: "het", afbeelding: true },
       { tekst: "einde", lidwoord: "het", afbeelding: false },
       { tekst: "feit", lidwoord: "het", afbeelding: false },
       { tekst: "leiding", lidwoord: "de", afbeelding: false },
-      { tekst: "fontein", lidwoord: "de", afbeelding: false }
+      { tekst: "fontein", lidwoord: "de", afbeelding: true }
     ]
   },
   "tw-ij": {
