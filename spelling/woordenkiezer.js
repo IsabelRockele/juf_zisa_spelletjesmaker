@@ -286,8 +286,13 @@ window.SpellingWoordenkiezer = (function() {
     if (t) t.textContent = gekozen.length;
   }
 
-  /* Bepaal actieve graad: eerst uit sidebar, dan uit modal-dropdown, dan default 1 */
+  /* Bepaal actieve graad: eerst uit sidebar (graad-tab of legacy graad-knop),
+     dan uit modal-dropdown, dan default 1 */
   function actieveGraad() {
+    // Nieuwe zijbalk gebruikt .graad-tab
+    const tab = document.querySelector(".graad-tab.actief");
+    if (tab?.dataset?.graad) return parseInt(tab.dataset.graad, 10);
+    // Legacy fallback voor oude .graad-knop
     const sidebar = document.querySelector(".graad-knop.actief");
     if (sidebar?.dataset?.graad) return parseInt(sidebar.dataset.graad, 10);
     const modal = document.querySelector("#wk-leerjaar");
