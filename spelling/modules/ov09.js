@@ -91,6 +91,22 @@
         return this._lege();
       }
 
+      // Plaatje-filter: alle OV09-niveaus tonen afbeeldingen.
+      // Woorden zonder afbeelding=true vallen weg. Lege pool → pop-up + lege HTML.
+      if (window.SpellingDedup) {
+        const metAfb = window.SpellingDedup.filterMetAfbeelding(beschikbaar);
+        if (metAfb.length === 0) {
+          window.SpellingDedup.toonGeenPlaatjesMelding("Stukjeswoord / Klinkerdief");
+          return `<div class="werkblad ov09-blad">
+            <div class="weekdictee-empty">
+              <h3>🖼️ Geen woorden met plaatje</h3>
+              <p>Deze oefenvorm toont in alle niveaus afbeeldingen. Kies woorden met 🖼️ in de woordenkiezer.</p>
+            </div>
+          </div>`;
+        }
+        beschikbaar = metAfb;
+      }
+
       const titel = this._titel(niveau);
       const opdrachtStappen = this._opdracht(niveau);
       const niveauLabels = { basis: "⭐ Oefenen", kern: "⭐⭐ Toepassen", verdieping: "⭐⭐⭐ Verdiepen", uitbreiding: "⭐⭐⭐⭐ Uitbreiden" };
