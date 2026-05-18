@@ -93,6 +93,39 @@ window.SpellingDedup = (function() {
     });
   }
 
+  /* Filter een lijst woorden tot enkel woorden met afbeelding=true.
+     Gebruikt door oefenvormen (of niveaus daarbinnen) die per definitie
+     plaatjes nodig hebben — bv. OV01 (Schrijf bij plaatje), OV09 (woordzoeker
+     met plaatjes), OV10 (samenstellingen met plaatjes), OV02 met plaatje-toggle aan,
+     OV03 basis, OV05 niveaus met plaatje-toggle aan.
+     
+     Het filter blijft puur defensief: als jij in de woordenkiezer al de
+     "alleen-met-plaatje"-toggle gebruikt, krijgen de OV's al een schone pool.
+     Maar als die toggle uit staat, vangt dit filter alsnog op dat er geen
+     woorden zonder plaatje in een plaatje-oefening verschijnen. */
+  function filterMetAfbeelding(woorden) {
+    if (!Array.isArray(woorden)) return [];
+    return woorden.filter(w => w && w.afbeelding === true);
+  }
+
+  /* Toon één alert wanneer een werkblad/niveau dat plaatjes vereist géén
+     enkel woord met afbeelding overhoudt. Eén alert per (label) per tick
+     (zelfde dedup-mechaniek als toonTekortMelding). */
+  let _leegGetoondInTick = new Set();
+  function toonGeenPlaatjesMelding(label) {
+    const naam = label || "werkblad";
+    if (_leegGetoondInTick.has(naam)) return;
+    _leegGetoondInTick.add(naam);
+    Promise.resolve().then(() => { _leegGetoondInTick.clear(); });
+
+    alert(
+      `Geen enkel woord met afbeelding voor "${naam}".\n\n` +
+      `Deze oefenvorm gebruikt plaatjes, maar geen van je gekozen woorden ` +
+      `heeft een afbeelding (🖼️ in de woordenkiezer).\n\n` +
+      `Kies extra woorden mét plaatje, of zet in de woordenkiezer ` +
+      `'Toon enkel woorden met plaatje' aan voor je woorden selecteert.`
+    );
+  }
   /* Toon één alert wanneer een werkblad om meer woorden vraagt dan
      er uniek beschikbaar zijn. Eén alert per oefenvorm-toevoeging —
      we deduplicaten meldingen binnen dezelfde event-tick zodat een
@@ -122,7 +155,9 @@ window.SpellingDedup = (function() {
     ontdubbel,
     telUniek,
     verschilt,
-    toonTekortMelding
+    filterMetAfbeelding,
+    toonTekortMelding,
+    toonGeenPlaatjesMelding
   };
 
 })();
