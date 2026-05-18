@@ -5,6 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spellinggenerator – Juf Zisa</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* === Woordenkiezer: afbeelding-icoon + filter (mei 2026) === */
+    .wk-info-balk {
+      background: #f0f7fb;
+      border: 1px solid #cfe2ef;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 0 0 12px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .wk-info-uitleg {
+      font-size: 13px;
+      color: #2c4d7a;
+      line-height: 1.4;
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .wk-info-uitleg .wk-afb-icoon {
+      flex: 0 0 auto;
+      font-size: 18px;
+    }
+    .wk-filter-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #2c4d7a;
+      cursor: pointer;
+      user-select: none;
+    }
+    .wk-filter-toggle input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+    }
+    .wk-afb-icoon {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 14px;
+      vertical-align: middle;
+      opacity: 0.85;
+    }
+    /* Subtiel onderscheid: woorden zonder plaatje krijgen iets fletsere achtergrond.
+       Niet doorstrepen of grijzen — ze zijn nog perfect bruikbaar in andere oefenvormen. */
+    .wk-woord-vinkje.wk-geen-afb {
+      background: rgba(0, 0, 0, 0.02);
+    }
+  </style>
 </head>
 <body>
 
@@ -476,6 +528,19 @@
 
         <!-- Tab inhoud STANDAARD -->
         <div class="wk-tab-inhoud" id="wk-standaard">
+
+          <!-- Uitleg-balk + filter-toggle -->
+          <div class="wk-info-balk">
+            <div class="wk-info-uitleg">
+              <span class="wk-afb-icoon">🖼️</span>
+              <span>Woorden met dit icoon hebben een afbeelding. Sommige oefenvormen (Schrijf bij plaatje, 3× overschrijven met plaatje, Klank kiezen met plaatje, Samenstellingen) kunnen alleen woorden mét afbeelding gebruiken.</span>
+            </div>
+            <label class="wk-filter-toggle">
+              <input type="checkbox" id="wk-filter-afb">
+              <span>Toon enkel woorden met plaatje 🖼️</span>
+            </label>
+          </div>
+
           <div class="wk-leerjaar-keuze">
             <label>Leerjaar:</label>
             <select id="wk-leerjaar">
