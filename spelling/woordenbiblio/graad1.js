@@ -189,7 +189,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "onthoudwoord",
     woorden: [
       { tekst: "koud", lidwoord: null, afbeelding: true },
-      { tekst: "oud", lidwoord: null, afbeelding: false },
+      { tekst: "oud", lidwoord: null, afbeelding: true },
       { tekst: "bout", lidwoord: "de", afbeelding: false },
       { tekst: "hout", lidwoord: "het", afbeelding: true },
       { tekst: "fout", lidwoord: "de", afbeelding: true },
@@ -206,16 +206,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "au-ou",
     hoofdgroep: "onthoudwoord",
     woorden: [
-      { tekst: "pauw", lidwoord: "de", afbeelding: false },
-      { tekst: "saus", lidwoord: "de", afbeelding: false },
+      { tekst: "pauw", lidwoord: "de", afbeelding: true },
+      { tekst: "saus", lidwoord: "de", afbeelding: true },
       { tekst: "dauw", lidwoord: "de", afbeelding: false },
-      { tekst: "blauw", lidwoord: null, afbeelding: false },
+      { tekst: "blauw", lidwoord: null, afbeelding: true },
       { tekst: "flauw", lidwoord: null, afbeelding: false },
       { tekst: "nauw", lidwoord: null, afbeelding: false },
-      { tekst: "paus", lidwoord: "de", afbeelding: false },
-      { tekst: "klauw", lidwoord: "de", afbeelding: false },
+      { tekst: "paus", lidwoord: "de", afbeelding: true },
+      { tekst: "klauw", lidwoord: "de", afbeelding: true },
       { tekst: "miauw", lidwoord: null, afbeelding: false },
-      { tekst: "auto", lidwoord: "de", afbeelding: false },
+      { tekst: "auto", lidwoord: "de", afbeelding: true },
       { tekst: "augustus", lidwoord: null, afbeelding: false }
     ]
   },
