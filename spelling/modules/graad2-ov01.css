@@ -1,0 +1,354 @@
+/* ==========================================================
+   graad2-ov01.css — Stukjeswoorden gemengd (graad 2)
+
+   Voeg toe aan style.css, of laad als apart bestand.
+   ========================================================== */
+
+/* ===== Header ===== */
+.g2-ov01-blad {
+  padding: 1.5cm;
+  background: #ffffff;
+  font-family: 'Comic Sans MS', 'Nunito', sans-serif;
+}
+
+.g2-ov01-header {
+  margin-bottom: 1em;
+  border-bottom: 2px dashed #aaa;
+  padding-bottom: 0.5em;
+}
+
+.g2-ov01-naam-rij {
+  display: flex;
+  gap: 0.8em;
+  font-size: 0.95em;
+  margin-bottom: 0.4em;
+  align-items: baseline;
+}
+
+.g2-ov01-lijn-naam,
+.g2-ov01-lijn-datum {
+  flex: 1;
+  border-bottom: 1px solid #555;
+  min-width: 4em;
+  height: 1.2em;
+}
+
+.g2-ov01-titel {
+  margin: 0;
+  color: #d4348c;          /* Juf Zisa roze */
+  font-size: 1.6em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.g2-ov01-niveau-badge {
+  display: inline-block;
+  background: #fff3e0;
+  border: 2px solid #ff9800;
+  border-radius: 8px;
+  padding: 0.1em 0.5em;
+  font-size: 0.8em;
+}
+
+.g2-ov01-niveau-basis      { background: #e3f2fd; border-color: #1976d2; }
+.g2-ov01-niveau-kern       { background: #f3e5f5; border-color: #8e24aa; }
+.g2-ov01-niveau-verdieping { background: #fff3e0; border-color: #ff9800; }
+
+.g2-ov01-ondertitel {
+  font-style: italic;
+  color: #666;
+  margin: 0.2em 0 0 0;
+  font-size: 0.95em;
+}
+
+/* ===== Modelleer-kader (alleen op basis) ===== */
+.g2-ov01-modelleer {
+  background: #fff8e1;
+  border: 2px solid #f9a825;
+  border-radius: 12px;
+  padding: 0.8em 1em;
+  margin-bottom: 1em;
+}
+
+.g2-ov01-modelleer h3 {
+  margin: 0 0 0.3em 0;
+  color: #e65100;
+  font-size: 1.15em;
+}
+
+.g2-ov01-modelleer-intro {
+  margin: 0.2em 0 0.5em 0;
+  font-size: 0.95em;
+}
+
+.g2-ov01-stappen {
+  margin: 0.3em 0 0.6em 1.2em;
+  padding: 0;
+  font-size: 0.92em;
+}
+
+.g2-ov01-stappen li {
+  margin-bottom: 0.2em;
+}
+
+.g2-ov01-voorbeelden {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88em;
+  background: #fff;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.g2-ov01-voorbeelden th {
+  background: #ffe0b2;
+  padding: 0.3em 0.5em;
+  text-align: left;
+  font-weight: bold;
+  border-bottom: 2px solid #f9a825;
+}
+
+.g2-ov01-voorbeelden td {
+  padding: 0.3em 0.5em;
+  border-bottom: 1px solid #fce4b6;
+}
+
+.g2-ov01-voorbeelden tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== BASIS: denkstappen-tabel ===== */
+.g2-ov01-tabel {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5em;
+  font-size: 0.95em;
+}
+
+.g2-ov01-tabel thead th {
+  background: #e8f5e9;
+  padding: 0.4em 0.5em;
+  text-align: center;
+  border: 1px solid #81c784;
+  font-weight: bold;
+}
+
+.g2-ov01-tabel tbody td {
+  padding: 0.5em;
+  border: 1px solid #c8e6c9;
+  vertical-align: middle;
+  text-align: center;
+}
+
+.g2-ov01-col-woord { width: 22%; }
+.g2-ov01-col-klank { width: 15%; }
+.g2-ov01-col-medeklinkers { width: 18%; }
+.g2-ov01-col-schrijf { width: 45%; }
+
+.g2-ov01-stimulus-woord {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.g2-ov01-plaatje-klein {
+  max-width: 50px;
+  max-height: 50px;
+  display: block;
+  margin: 0 auto;
+}
+
+.g2-ov01-kruisvak {
+  display: inline-block;
+  margin: 0 0.2em;
+  padding: 0.15em 0.4em;
+  border: 2px solid #999;
+  border-radius: 4px;
+  background: #fafafa;
+  font-size: 0.95em;
+  min-width: 1.5em;
+  cursor: default;
+}
+
+/* ===== Canvas-schrijflijn wrapper (zoals ov01 in graad 1) ===== */
+.g2-ov01-canvas-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.g2-ov01-canvas-wrap canvas {
+  display: block;
+}
+
+.g2-ov01-lijn-antwoord {
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  color: #2e7d32;
+  font-weight: bold;
+  font-style: italic;
+  z-index: 5;
+  pointer-events: none;
+}
+
+/* Fallback wanneer SpellingSchrijflijnen niet beschikbaar is */
+.g2-ov01-schrijflijn-fallback {
+  position: relative;
+  display: inline-block;
+  min-width: 6em;
+  border-bottom: 1.5px solid #333;
+  padding: 0.1em 0.3em;
+  min-height: 1.2em;
+}
+
+/* ===== KERN: 2-kolomraster met stimulus + schrijflijn ===== */
+.g2-ov01-kern-herinner {
+  background: #e1f5fe;
+  border-left: 4px solid #0288d1;
+  padding: 0.5em 0.8em;
+  margin-bottom: 1em;
+  font-size: 0.95em;
+  border-radius: 4px;
+}
+
+.g2-ov01-kern-herinner p {
+  margin: 0;
+}
+
+.g2-ov01-kern-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6em 1em;
+}
+
+.g2-ov01-kern-cel {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.3em 0.5em;
+  background: #fafafa;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.g2-ov01-kern-nr {
+  font-weight: bold;
+  color: #555;
+  min-width: 1.5em;
+}
+
+.g2-ov01-kern-enkelvoud {
+  min-width: 5em;
+  font-size: 1.05em;
+}
+
+.g2-ov01-kern-pijl {
+  font-weight: bold;
+  color: #1565c0;
+}
+
+.g2-ov01-plaatje {
+  max-width: 60px;
+  max-height: 60px;
+}
+
+.g2-ov01-kern-lijn {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ===== VERDIEPING: zinnen met gat ===== */
+.g2-ov01-verdieping-intro {
+  background: #fce4ec;
+  border-left: 4px solid #d4348c;
+  padding: 0.5em 0.8em;
+  margin-bottom: 1em;
+  font-size: 0.95em;
+  border-radius: 4px;
+}
+
+.g2-ov01-verdieping-intro p {
+  margin: 0;
+}
+
+.g2-ov01-verdieping-zinnen {
+  margin: 0;
+  padding-left: 1.5em;
+  font-size: 1.05em;
+  line-height: 2;
+}
+
+.g2-ov01-zin {
+  margin-bottom: 0.4em;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  flex-wrap: wrap;
+}
+
+.g2-ov01-zin-hint {
+  color: #1565c0;
+  font-style: italic;
+  font-size: 0.95em;
+}
+
+.g2-ov01-zin-plaatje {
+  max-width: 40px;
+  max-height: 40px;
+  vertical-align: middle;
+}
+
+/* ===== Voettekst ===== */
+.g2-ov01-voettekst {
+  text-align: center;
+  margin-top: 1.5em;
+  font-size: 0.78em;
+  color: #999;
+  font-style: italic;
+}
+
+/* ===== Modus-keuze in zijbalk ===== */
+.g2_ov01-modus-keuze {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+.g2_ov01-modus-radio {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.4em 0.6em;
+  background: #f5f5f5;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.g2_ov01-modus-radio:hover {
+  background: #e3f2fd;
+}
+
+.g2_ov01-modus-radio input[type="radio"] {
+  margin: 0;
+}
+
+/* ===== Page-break voor PDF ===== */
+.g2-ov01-blad {
+  page-break-after: always;
+}
+
+.g2-ov01-blad:last-child {
+  page-break-after: auto;
+}
+
+.g2-ov01-header,
+.g2-ov01-modelleer,
+.g2-ov01-tabel tr,
+.g2-ov01-kern-cel,
+.g2-ov01-zin {
+  page-break-inside: avoid;
+}
