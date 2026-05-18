@@ -144,11 +144,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "trein", lidwoord: "de", afbeelding: true },
       { tekst: "klein", lidwoord: null, afbeelding: false },
       { tekst: "geit", lidwoord: "de", afbeelding: true },
-      { tekst: "ei", lidwoord: "het", afbeelding: false },
+      { tekst: "ei", lidwoord: "het", afbeelding: true },
       { tekst: "weide", lidwoord: "de", afbeelding: true },
       { tekst: "reis", lidwoord: "de", afbeelding: false },
-      { tekst: "meid", lidwoord: "de", afbeelding: false },
-      { tekst: "lei", lidwoord: "de", afbeelding: false },
+      { tekst: "meid", lidwoord: "de", afbeelding: true },
+      { tekst: "lei", lidwoord: "de", afbeelding: true },
       { tekst: "zeil", lidwoord: "het", afbeelding: true },
       { tekst: "eiland", lidwoord: "het", afbeelding: true },
       { tekst: "eik", lidwoord: "de", afbeelding: true },
@@ -166,21 +166,21 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "ei-ij",
     hoofdgroep: "onthoudwoord",
     woorden: [
-      { tekst: "tijd", lidwoord: "de", afbeelding: false },
-      { tekst: "vijf", lidwoord: null, afbeelding: tuee },
+      { tekst: "tijd", lidwoord: "de", afbeelding: true },
+      { tekst: "vijf", lidwoord: null, afbeelding: true },
       { tekst: "fijn", lidwoord: null, afbeelding: false },
       { tekst: "wijn", lidwoord: "de", afbeelding: true },
       { tekst: "rijst", lidwoord: "de", afbeelding: true },
       { tekst: "lijn", lidwoord: "de", afbeelding: true },
       { tekst: "pijp", lidwoord: "de", afbeelding: true },
-      { tekst: "pijn", lidwoord: "de", afbeelding: false },
-      { tekst: "prijs", lidwoord: "de", afbeelding: false },
+      { tekst: "pijn", lidwoord: "de", afbeelding: true },
+      { tekst: "prijs", lidwoord: "de", afbeelding: true },
       { tekst: "rijm", lidwoord: "het", afbeelding: false },
       { tekst: "kijk", lidwoord: null, afbeelding: false },
       { tekst: "mijn", lidwoord: null, afbeelding: false },
       { tekst: "schrijf", lidwoord: null, afbeelding: false },
       { tekst: "bij", lidwoord: "de", afbeelding: true },
-      { tekst: "ijsje", lidwoord: "het", afbeelding: truee }
+      { tekst: "ijsje", lidwoord: "het", afbeelding: true }
     ]
   },
   "tw-ou": {
@@ -188,17 +188,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "au-ou",
     hoofdgroep: "onthoudwoord",
     woorden: [
-      { tekst: "koud", lidwoord: null, afbeelding: false },
+      { tekst: "koud", lidwoord: null, afbeelding: true },
       { tekst: "oud", lidwoord: null, afbeelding: false },
       { tekst: "bout", lidwoord: "de", afbeelding: false },
-      { tekst: "hout", lidwoord: "het", afbeelding: false },
-      { tekst: "fout", lidwoord: "de", afbeelding: false },
-      { tekst: "goud", lidwoord: "het", afbeelding: false },
-      { tekst: "schouder", lidwoord: "de", afbeelding: false },
-      { tekst: "vrouw", lidwoord: "de", afbeelding: false },
+      { tekst: "hout", lidwoord: "het", afbeelding: true },
+      { tekst: "fout", lidwoord: "de", afbeelding: true },
+      { tekst: "goud", lidwoord: "het", afbeelding: true },
+      { tekst: "schouder", lidwoord: "de", afbeelding: true },
+      { tekst: "vrouw", lidwoord: "de", afbeelding: true },
       { tekst: "trouw", lidwoord: "de", afbeelding: false },
-      { tekst: "mouw", lidwoord: "de", afbeelding: false },
-      { tekst: "touw", lidwoord: "het", afbeelding: false }
+      { tekst: "mouw", lidwoord: "de", afbeelding: true },
+      { tekst: "touw", lidwoord: "het", afbeelding: true }
     ]
   },
   "tw-au": {
