@@ -48,6 +48,7 @@ window.SpellingWoordenbibliotheek = {
     "ei-ij",       // tweeklanken-onderdeel maar onthoudwoord
     "au-ou",
     "aai-ooi-oei-eeuw-ieuw-uw",  // graad 2 — uitgebreide tweeklanken
+    "klinker-eind",       // woorden eindigend op klinker: ma, pa, menu, piano
     "ng-nk",
     "moeilijke-klanken",  // sch
     "sch-woorden",
@@ -75,6 +76,7 @@ window.SpellingWoordenbibliotheek = {
     // onthoudwoord (graad 2)
     "teit-heid",
     "leenwoorden",
+    "losse-onthoudwoorden",   // woorden die niet in een vaste categorie passen
     // overig
     "hoofdletters"
   ],
@@ -181,6 +183,8 @@ window.SpellingWoordenbibliotheek = {
     "teit-heid": "Woorden op -teit en -heid",
     "leenwoorden": "Leenwoorden",
     "hoofdletters": "Hoofdletters & leestekens",
-    "samenstellingen": "Samengestelde woorden"
+    "samenstellingen": "Samengestelde woorden",
+    "klinker-eind": "Woorden eindigend op een klinker",
+    "losse-onthoudwoorden": "Losse onthoudwoorden"
   }
 };
