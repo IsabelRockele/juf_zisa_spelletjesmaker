@@ -1069,17 +1069,49 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     ]
   },
 
-  // ===== LOSSE ONTHOUDWOORDEN =====
-  // Woorden die niet in een vaste klank-/regelcategorie passen, maar
-  // wel vaak in toetsen voorkomen. Het kind moet de schrijfwijze gewoon
-  // onthouden. Voeg hier nieuwe woorden toe wanneer ze opduiken in
-  // leerlingvolgsysteem of methode.
-  "losse-onthoudwoorden": {
-    naam: "Losse onthoudwoorden",
-    groep: "losse-onthoudwoorden",
-    hoofdgroep: "onthoudwoord",
+  // ===== VOORVOEGSELS MET DOFFE E =====
+  // Woorden die beginnen met ge-, ver-, be- of on-. Bij de eerste drie
+  // klinkt het voorvoegsel als een doffe "uh" — het kind moet leren dat 
+  // het toch met -e- geschreven wordt. "on-" is geen doffe e maar wel
+  // een voorvoegsel dat het kind als geheel moet leren herkennen.
+  // Pedagogisch: kind hoort de klank en moet onthouden dat het ge-/ver-/be-/on- is.
+  "df-voorvoegsel": {
+    naam: "Voorvoegsels (ge-/ver-/be-/on-)",
+    groep: "doffe-klank-voorvoegsel",
+    hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "ongeveer", lidwoord: null, afbeelding: false }
+      // ge-
+      { tekst: "gevaar", lidwoord: "het", afbeelding: false },
+      { tekst: "getal", lidwoord: "het", afbeelding: false },
+      { tekst: "geheim", lidwoord: "het", afbeelding: false },
+      { tekst: "gevoel", lidwoord: "het", afbeelding: false },
+      { tekst: "geluk", lidwoord: "het", afbeelding: false },
+      { tekst: "gezicht", lidwoord: "het", afbeelding: false },
+      { tekst: "geweer", lidwoord: "het", afbeelding: false },
+      { tekst: "gewoon", lidwoord: null, afbeelding: false },
+      // ver-
+      { tekst: "verhaal", lidwoord: "het", afbeelding: false },
+      { tekst: "vertel", lidwoord: null, afbeelding: false },
+      { tekst: "verdriet", lidwoord: "het", afbeelding: false },
+      { tekst: "vergeet", lidwoord: null, afbeelding: false },
+      { tekst: "vertrek", lidwoord: null, afbeelding: false },
+      { tekst: "verkeer", lidwoord: "het", afbeelding: false },
+      { tekst: "verkoop", lidwoord: "de", afbeelding: false },
+      // be-
+      { tekst: "begin", lidwoord: "het", afbeelding: false },
+      { tekst: "bedoeling", lidwoord: "de", afbeelding: false },
+      { tekst: "beker", lidwoord: "de", afbeelding: false },
+      { tekst: "beloven", lidwoord: null, afbeelding: false },
+      { tekst: "betalen", lidwoord: null, afbeelding: false },
+      { tekst: "beleefd", lidwoord: null, afbeelding: false },
+      { tekst: "bedankt", lidwoord: null, afbeelding: false },
+      // on-
+      { tekst: "ongeveer", lidwoord: null, afbeelding: false },
+      { tekst: "onnodig", lidwoord: null, afbeelding: false },
+      { tekst: "onbekend", lidwoord: null, afbeelding: false },
+      { tekst: "ongeluk", lidwoord: "het", afbeelding: false },
+      { tekst: "oneerlijk", lidwoord: null, afbeelding: false },
+      { tekst: "onrustig", lidwoord: null, afbeelding: false }
     ]
   },
 
