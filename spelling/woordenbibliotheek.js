@@ -57,14 +57,14 @@ window.SpellingWoordenbibliotheek = {
     "ch-cht-klank",       // (oude naam voor compatibility)
     "ch-cht-gt",
     "doffe-klank",
+    "doffe-klank-voorvoegsel",   // voorvoegsels ge-/ver-/be-/on- — kind hoort en schrijft
+    "doffe-klank-achtervoegsel", // graad 2
     // regelwoord
     "verdubbel-verenkel",
     "verlengen",
     "verlengen-tdpb",     // graad 2 — uitgebreid t/d + p/b
     "verkleinwoorden",
     "meervouden",
-    "doffe-klank-voorvoegsel",   // graad 2
-    "doffe-klank-achtervoegsel", // graad 2
     // werkwoord (allemaal graad 2)
     "werkwoorden-ott",
     "werkwoorden-vtt",
@@ -76,7 +76,6 @@ window.SpellingWoordenbibliotheek = {
     // onthoudwoord (graad 2)
     "teit-heid",
     "leenwoorden",
-    "losse-onthoudwoorden",   // woorden die niet in een vaste categorie passen
     // overig
     "hoofdletters"
   ],
@@ -184,7 +183,6 @@ window.SpellingWoordenbibliotheek = {
     "leenwoorden": "Leenwoorden",
     "hoofdletters": "Hoofdletters & leestekens",
     "samenstellingen": "Samengestelde woorden",
-    "klinker-eind": "Woorden eindigend op een klinker",
-    "losse-onthoudwoorden": "Losse onthoudwoorden"
+    "klinker-eind": "Woorden eindigend op een klinker"
   }
 };
