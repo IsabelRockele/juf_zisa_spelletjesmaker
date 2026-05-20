@@ -59,7 +59,7 @@ function exporteerBord() {
                 tekst: kind.querySelector('.item-tekst')?.innerText || '',
               });
             } else if (kind.classList.contains('checklist-witregel')) {
-              regels.push({ type: 'witregel' });
+              regels.push({ type: 'witregel', hoogte: kind.offsetHeight });
             }
           });
         }
