@@ -298,7 +298,6 @@ body {
   aspect-ratio: 16 / 9;
   background: #fefdf8;
   border-radius: 18px;
-  border: 2px solid #f0ecdf;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
@@ -310,36 +309,48 @@ body {
 .bord-header {
   background: linear-gradient(90deg, #FFE4B5 0%, #FFDAB5 100%);
   border-bottom: 2px solid #f5c989;
-  padding: 14px 24px;
+  padding: 18px 40px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 56px;
   flex-shrink: 0;
   border-radius: 16px 16px 0 0;
-  min-height: 70px;
+  min-height: 84px;
 }
 
 .bord-datum {
-  font-size: 12px;
+  font-size: 13px;
   color: #854F0B;
   font-weight: 600;
   letter-spacing: 1px;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  white-space: nowrap;
 }
 
 .bord-welkom {
-  font-size: 24px;
+  font-size: 38px;
   color: #633806;
   font-weight: 700;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
+  white-space: nowrap;
 }
 
-.bord-welkom .zon {
-  font-size: 24px;
-  color: #BA7517;
+.bord-welkom .zwaaihand {
+  font-size: 40px;
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: zwaaien 2.5s ease-in-out infinite;
+}
+
+@keyframes zwaaien {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(-12deg); }
+  20% { transform: rotate(14deg); }
+  30% { transform: rotate(-8deg); }
+  40% { transform: rotate(10deg); }
+  50% { transform: rotate(0deg); }
 }
 
 .weer-widget {
@@ -881,37 +892,103 @@ body {
   pointer-events: none;
 }
 
-/* === PRESENTATIE-MODUS === */
+/* === PRESENTATIE-MODUS ===
+   We schalen het echte bord met transform: scale() en plaatsen het op
+   fixed positie midden op het scherm. Geen kloon, geen aanpassingen aan
+   de bord-grootte zelf — vakken behouden hun relatieve posities.
+*/
+
+/* De overlay zelf wordt enkel als drager gebruikt voor de × knop */
 .presentatie {
   position: fixed;
   inset: 0;
-  background: #2a2a2a;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
+  background: transparent;
+  z-index: 1100;
+  pointer-events: none; /* clicks gaan door behalve op de × knop */
 }
 
 .presentatie.verborgen {
   display: none;
 }
 
-#presentatie-inhoud {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.presentatie .btn-sluit {
+  pointer-events: auto; /* knop blijft klikbaar */
+}
+
+/* In presentatie-modus: crème achtergrond zodat eventuele randen visueel doorlopen */
+body.in-presentatie {
+  background: #fefdf8;
   overflow: hidden;
 }
 
-#presentatie-inhoud #bord-pres {
-  /* Behoudt zijn oorspronkelijke pixel-afmetingen,
-     wordt geschaald via transform door JS */
-  flex-shrink: 0;
+/* Verberg de bewerk-UI (maar laat canvas-zone bestaan, want het bord zit erin) */
+body.in-presentatie .topbar,
+body.in-presentatie .zijpaneel {
+  display: none !important;
 }
 
+body.in-presentatie .werkruimte {
+  display: block;
+}
+
+body.in-presentatie .canvas-zone {
+  background: transparent;
+  padding: 0;
+  display: block;
+}
+
+/* Geen afgeronde hoeken, geen border, geen schaduw op bord in presentatie */
+body.in-presentatie #bord {
+  border-radius: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Header in presentatie: ook geen ronde hoeken bovenaan */
+body.in-presentatie .bord-header {
+  border-radius: 0 !important;
+}
+
+/* Verberg alle bewerk-affordances op het bord */
+body.in-presentatie .greep,
+body.in-presentatie .vak-acties,
+body.in-presentatie .checklist-knoppen,
+body.in-presentatie .checklist-toevoegen,
+body.in-presentatie .item-verwijder,
+body.in-presentatie .rotatie-greep {
+  display: none !important;
+}
+
+body.in-presentatie .vak,
+body.in-presentatie .vak-titel,
+body.in-presentatie .vak-inhoud,
+body.in-presentatie .item-tekst,
+body.in-presentatie .bord-header,
+body.in-presentatie .canvas-afbeelding {
+  cursor: default !important;
+}
+
+body.in-presentatie [contenteditable] {
+  -webkit-user-modify: read-only;
+  pointer-events: none;
+}
+
+body.in-presentatie .checklist-witregel {
+  background: none !important;
+  border: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+body.in-presentatie .checklist-witregel::after {
+  display: none !important;
+}
+
+body.in-presentatie .geselecteerd {
+  box-shadow: none !important;
+}
+
+/* === SLUITKNOP === */
 .btn-sluit {
   position: absolute;
   top: 16px;
@@ -920,53 +997,20 @@ body {
   height: 44px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  font-size: 24px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 28px;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 1200;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .btn-sluit:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* === IN PRESENTATIE: VAKKEN ZONDER BEWERK-AFFORDANCE === */
-.presentatie .vak {
-  cursor: default;
-}
-
-.presentatie .vak-titel,
-.presentatie .vak-inhoud,
-.presentatie .item-tekst {
-  cursor: default;
-}
-
-.presentatie .greep,
-.presentatie .vak-acties,
-.presentatie .checklist-knoppen,
-.presentatie .checklist-toevoegen,
-.presentatie .item-verwijder,
-.presentatie .rotatie-greep {
-  display: none !important;
-}
-
-/* In presentatie: witregel toont geen patroon, alleen ruimte */
-.presentatie .checklist-witregel {
-  background: none !important;
-  border: none !important;
-  opacity: 0 !important;
-  animation: none !important;
-}
-
-.presentatie .checklist-witregel::after {
-  display: none !important;
-}
-
-.presentatie .bord-header {
-  cursor: default;
+  background: white;
 }
 
 /* === HEADER BEWERKEN === */
@@ -1302,3 +1346,165 @@ body {
   font-size: 11px;
   font-weight: 500;
 }
+
+/* ============================================
+   WEER-VAK
+   ============================================ */
+.vak[data-vaktype="weer"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.weer-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  user-select: none;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.weer-rij {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.weer-icoon-groot {
+  font-size: 48px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.weer-temperatuur {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.weer-omschrijving {
+  font-size: 12px;
+  opacity: 0.7;
+  text-align: center;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Kleuren per vak-kleur (gebruikt currentColor via .kleur-* op de vak) */
+.vak.kleur-blauw .weer-temperatuur { color: #185FA5; }
+.vak.kleur-blauw .weer-omschrijving { color: #185FA5; }
+.vak.kleur-paars .weer-temperatuur { color: #534AB7; }
+.vak.kleur-paars .weer-omschrijving { color: #534AB7; }
+.vak.kleur-roze .weer-temperatuur { color: #993556; }
+.vak.kleur-roze .weer-omschrijving { color: #993556; }
+.vak.kleur-groen .weer-temperatuur { color: #3B6D11; }
+.vak.kleur-groen .weer-omschrijving { color: #3B6D11; }
+.vak.kleur-teal .weer-temperatuur { color: #0F6E56; }
+.vak.kleur-teal .weer-omschrijving { color: #0F6E56; }
+.vak.kleur-geel .weer-temperatuur { color: #854F0B; }
+.vak.kleur-geel .weer-omschrijving { color: #854F0B; }
+.vak.kleur-oranje .weer-temperatuur { color: #993C1D; }
+.vak.kleur-oranje .weer-omschrijving { color: #993C1D; }
+.vak.kleur-grijs .weer-temperatuur { color: #5F5E5A; }
+.vak.kleur-grijs .weer-omschrijving { color: #5F5E5A; }
+
+/* ============================================
+   WERKSTIJL-VAK
+   ============================================ */
+.vak[data-vaktype="werkstijl"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.werkstijl-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  user-select: none;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.werkstijl-visueel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: 70%;
+}
+
+.werkstijl-afbeelding {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.werkstijl-emoji {
+  font-size: 72px;
+  line-height: 1;
+}
+
+.werkstijl-label {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.werkstijl-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.werkstijl-knop {
+  flex: 1;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1.5px solid currentColor;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: inherit;
+  font-family: inherit;
+  opacity: 0.65;
+  transition: all 0.15s;
+}
+
+.werkstijl-knop:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.werkstijl-knop.actief {
+  opacity: 1;
+  background: currentColor;
+  color: white !important;
+  border-color: currentColor;
+}
+
+.vak.kleur-roze .werkstijl-knop.actief { background: #993556; }
+.vak.kleur-paars .werkstijl-knop.actief { background: #534AB7; }
+.vak.kleur-groen .werkstijl-knop.actief { background: #3B6D11; }
+.vak.kleur-teal .werkstijl-knop.actief { background: #0F6E56; }
+.vak.kleur-blauw .werkstijl-knop.actief { background: #185FA5; }
+.vak.kleur-geel .werkstijl-knop.actief { background: #854F0B; }
+.vak.kleur-oranje .werkstijl-knop.actief { background: #993C1D; }
+.vak.kleur-grijs .werkstijl-knop.actief { background: #5F5E5A; }
+
+/* In presentatie: knoppen blijven zichtbaar zodat juf kan wisselen */
