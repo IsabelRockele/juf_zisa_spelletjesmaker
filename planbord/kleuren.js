@@ -8,6 +8,8 @@ const STANDAARD_KLEUR = {
   vrij: 'paars',
   checklist: 'teal',
   timer: 'groen',
+  weer: 'blauw',
+  werkstijl: 'roze',
   verjaardag: 'roze',
   dagprogramma: 'blauw',
   mededeling: 'geel',
