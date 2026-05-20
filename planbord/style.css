@@ -34,12 +34,18 @@ body {
   z-index: 10;
 }
 
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .topbar-left h1 {
   font-size: 20px;
   font-weight: 700;
   color: #534AB7;
   display: inline-block;
-  margin-right: 12px;
+  margin-right: 4px;
 }
 
 .subtitle {
@@ -80,6 +86,24 @@ body {
 
 .btn-primary:hover {
   background: #443B9F;
+}
+
+/* === TERUG NAAR KEUZEMENU KNOP === */
+.btn-terug {
+  background: #0C447C;
+  color: white;
+  border-color: #0C447C;
+  text-decoration: none;
+  margin-right: 16px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-terug:hover {
+  background: #093461;
+  border-color: #093461;
+  color: white;
 }
 
 /* === WERKRUIMTE === */
@@ -355,6 +379,44 @@ body {
   30% { transform: rotate(-8deg); }
   40% { transform: rotate(10deg); }
   50% { transform: rotate(0deg); }
+}
+
+/* === JARIGE-STROOKJE === */
+.bord-jarige {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 26px;
+  font-weight: 700;
+  font-style: italic;
+  white-space: nowrap;
+  padding: 4px 16px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 100px;
+  animation: jarigeWiebel 3s ease-in-out infinite;
+}
+
+.bord-jarige.verborgen {
+  display: none;
+}
+
+.jarige-icoon {
+  height: 64px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.jarige-emoji {
+  font-size: 36px;
+  line-height: 1;
+}
+
+@keyframes jarigeWiebel {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-2deg) scale(1.02); }
+  75% { transform: rotate(2deg) scale(1.02); }
 }
 
 .weer-widget {
