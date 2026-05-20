@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   _initToetsen();
   _initBuitenklik();
   _initPresentatie();
+  _initTimerModal();
 });
 
 // === TABS IN ZIJPANEEL ===
@@ -96,28 +97,51 @@ function toonPresentatie() {
   const overlay = document.getElementById('presentatie');
   const inhoud = document.getElementById('presentatie-inhoud');
 
-  // Kloon het bord
+  // Lees de oorspronkelijke afmetingen VOORDAT we klonen
   const bord = document.getElementById('bord');
+  const origBreedte = bord.offsetWidth;
+  const origHoogte = bord.offsetHeight;
+
+  // Kloon het bord op zijn oorspronkelijke afmetingen
   const kloon = bord.cloneNode(true);
   kloon.id = 'bord-pres';
   kloon.style.maxWidth = 'none';
-  kloon.style.width = '100%';
-  kloon.style.height = '100%';
+  kloon.style.width = origBreedte + 'px';
+  kloon.style.height = origHoogte + 'px';
   kloon.style.aspectRatio = '';
 
   // Verwijder bewerk-affordances
   kloon.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
-  kloon.querySelectorAll('.greep, .vak-acties, .checklist-toevoegen, .item-verwijder').forEach((el) => el.remove());
+  kloon.querySelectorAll('.greep, .vak-acties, .checklist-knoppen, .checklist-toevoegen, .item-verwijder, .rotatie-greep').forEach((el) => el.remove());
   kloon.querySelectorAll('.geselecteerd').forEach((el) => el.classList.remove('geselecteerd'));
 
   inhoud.innerHTML = '';
   inhoud.appendChild(kloon);
-
   overlay.classList.remove('verborgen');
+
+  // Bereken schaalfactor zodat het bord het scherm vult met behoud van verhoudingen
+  _schaalPresentatie(kloon, origBreedte, origHoogte);
+
+  // Bij venster-resize ook opnieuw schalen
+  window._presentatieResize = () => _schaalPresentatie(kloon, origBreedte, origHoogte);
+  window.addEventListener('resize', window._presentatieResize);
+}
+
+function _schaalPresentatie(kloon, origBreedte, origHoogte) {
+  const inhoud = document.getElementById('presentatie-inhoud');
+  const beschBreedte = inhoud.clientWidth;
+  const beschHoogte = inhoud.clientHeight;
+  const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
+  kloon.style.transform = `scale(${schaal})`;
+  kloon.style.transformOrigin = 'center center';
 }
 
 function sluitPresentatie() {
   const overlay = document.getElementById('presentatie');
   overlay.classList.add('verborgen');
   document.getElementById('presentatie-inhoud').innerHTML = '';
+  if (window._presentatieResize) {
+    window.removeEventListener('resize', window._presentatieResize);
+    delete window._presentatieResize;
+  }
 }
