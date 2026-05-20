@@ -48,12 +48,19 @@
             <span class="vak-knop-naam">Checklist</span>
             <span class="vak-knop-hint">Lijstje met afbeelding + tekst</span>
           </button>
+
+          <button class="vak-knop" data-vaktype="timer">
+            <div class="vak-knop-preview" style="background: #FAEEDA; border-color: #FAC775;">
+              <span style="color: #854F0B; font-size: 18px;">⏱</span>
+            </div>
+            <span class="vak-knop-naam">Timer</span>
+            <span class="vak-knop-hint">Aftellen met visuele stijl</span>
+          </button>
         </div>
 
         <div class="binnenkort">
           <p class="hint-titel">Binnenkort beschikbaar:</p>
           <ul class="hint-lijst">
-            <li>Timer (werktijd)</li>
             <li>Verjaardag</li>
             <li>Dagprogramma</li>
             <li>Mededeling</li>
@@ -69,10 +76,10 @@
 
     <section class="canvas-zone">
       <div id="bord">
-        <header class="bord-header" id="bord-header">
+        <header class="bord-header" id="bord-header" title="Klik om aan te passen">
           <div class="bord-header-links">
             <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
-            <p class="bord-welkom"><span class="zon">☀</span> Goedemorgen klas!</p>
+            <p class="bord-welkom" id="bord-welkom"><span class="zon">☀</span> <span id="bord-welkom-tekst">Goedemorgen klas!</span></p>
           </div>
           <div class="bord-header-rechts">
             <div class="weer-widget">
@@ -111,9 +118,82 @@
     <button id="btn-sluit-presentatie" class="btn-sluit" aria-label="Sluit presentatie">×</button>
   </div>
 
+  <!-- === Header bewerken modal === -->
+  <div id="header-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud">
+      <h3>Header aanpassen</h3>
+      <label>Welkomtekst
+        <input type="text" id="header-tekst" placeholder="Goedemorgen klas!" />
+      </label>
+      <label>Achtergrondkleur
+        <div class="kleur-grid" id="header-kleur-grid">
+          <button class="kleur-knop" data-thema="zon" style="background: linear-gradient(90deg, #FFE4B5, #FFDAB5);" aria-label="Zon"></button>
+          <button class="kleur-knop" data-thema="paars" style="background: #EEEDFE;" aria-label="Paars"></button>
+          <button class="kleur-knop" data-thema="roze" style="background: #FBEAF0;" aria-label="Roze"></button>
+          <button class="kleur-knop" data-thema="groen" style="background: #EAF3DE;" aria-label="Groen"></button>
+          <button class="kleur-knop" data-thema="teal" style="background: #E1F5EE;" aria-label="Teal"></button>
+          <button class="kleur-knop" data-thema="blauw" style="background: #E6F1FB;" aria-label="Blauw"></button>
+          <button class="kleur-knop" data-thema="geel" style="background: #FAEEDA;" aria-label="Geel"></button>
+          <button class="kleur-knop" data-thema="oranje" style="background: #FAECE7;" aria-label="Oranje"></button>
+        </div>
+      </label>
+      <label>Tekstkleur
+        <input type="color" id="header-tekstkleur" value="#633806" />
+      </label>
+      <div class="modal-knoppen">
+        <button id="header-annuleer" class="btn">Annuleren</button>
+        <button id="header-ok" class="btn btn-primary">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Timer instellen modal === -->
+  <div id="timer-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud">
+      <h3>Timer instellen</h3>
+      <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <label style="flex:1;">Minuten
+          <input type="number" id="timer-minuten" value="5" min="0" max="120" />
+        </label>
+        <label style="flex:1;">Seconden
+          <input type="number" id="timer-seconden" value="0" min="0" max="59" />
+        </label>
+      </div>
+      <label>Visuele stijl
+        <div class="timer-stijl-grid">
+          <button class="timer-stijl-knop" type="button" data-stijl="cijfers">
+            <span class="stijl-icoon">🔢</span>
+            <span class="stijl-naam">Cijfers</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="klok">
+            <span class="stijl-icoon">🕐</span>
+            <span class="stijl-naam">Klok</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="taart">
+            <span class="stijl-icoon">🍰</span>
+            <span class="stijl-naam">Taart</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="zandloper">
+            <span class="stijl-icoon">⏳</span>
+            <span class="stijl-naam">Zandloper</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="balk">
+            <span class="stijl-icoon">▰▰▱</span>
+            <span class="stijl-naam">Voortgangsbalk</span>
+          </button>
+        </div>
+      </label>
+      <div class="modal-knoppen">
+        <button id="timer-annuleer" class="btn">Annuleren</button>
+        <button id="timer-ok" class="btn btn-primary">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
   <script src="kleuren.js"></script>
   <script src="bibliotheek.js"></script>
   <script src="vakken.js"></script>
+  <script src="timer.js"></script>
   <script src="interactie.js"></script>
   <script src="header.js"></script>
   <script src="opslag.js"></script>
