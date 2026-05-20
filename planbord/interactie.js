@@ -62,7 +62,7 @@ function _voegHoekgrepenToe(element) {
 }
 
 function _verwijderHoekgrepen(element) {
-  element.querySelectorAll('.greep').forEach((g) => g.remove());
+  element.querySelectorAll('.greep, .rotatie-greep').forEach((g) => g.remove());
 }
 
 // === ACTIE-KNOPPEN (kleur, tekstgrootte, verwijderen) ===
