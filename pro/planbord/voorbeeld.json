@@ -1,0 +1,176 @@
+{
+  "versie": 4,
+  "header": {
+    "tekst": "Goedemorgen zebraklas!",
+    "thema": "zon",
+    "tekstkleur": "#953aa1",
+    "jarige": "juf Zisa"
+  },
+  "canvas": {
+    "breedte": 1600,
+    "hoogte": 790
+  },
+  "elementen": [
+    {
+      "id": "vak-1779298488383-1",
+      "x": 18,
+      "y": 22.953,
+      "breedte": 696,
+      "hoogte": 735,
+      "type": "vak",
+      "vaktype": "checklist",
+      "kleur": "paars",
+      "titel": "BIJ BINNENKOMEN",
+      "titelNiveau": 9,
+      "itemsNiveau": 7,
+      "opsommingsstijl": "cijfer",
+      "regels": [
+        {
+          "type": "item",
+          "afbeelding": "",
+          "tekst": "Fruit en koek in de bakken"
+        },
+        {
+          "type": "witregel",
+          "hoogte": 43
+        },
+        {
+          "type": "item",
+          "afbeelding": "",
+          "tekst": "Drinkbus op de tafel"
+        },
+        {
+          "type": "witregel",
+          "hoogte": 48
+        },
+        {
+          "type": "item",
+          "afbeelding": "",
+          "tekst": "Huistaken afgeven"
+        },
+        {
+          "type": "witregel",
+          "hoogte": 51
+        },
+        {
+          "type": "item",
+          "afbeelding": "",
+          "tekst": "Dagelijkse kost"
+        },
+        {
+          "type": "witregel",
+          "hoogte": 47
+        },
+        {
+          "type": "item",
+          "afbeelding": "",
+          "tekst": "Lezen"
+        }
+      ]
+    },
+    {
+      "id": "vak-1779298488396-2",
+      "x": 783.849,
+      "y": 373.716,
+      "breedte": 374,
+      "hoogte": 366,
+      "type": "vak",
+      "vaktype": "timer",
+      "kleur": "geel",
+      "titel": "WERKTIJD",
+      "titelNiveau": 6,
+      "minuten": 5,
+      "seconden": 0,
+      "timerStijl": "klok",
+      "geluidsmodus": "normaal"
+    },
+    {
+      "id": "vak-1779298488405-3",
+      "x": 1132.02,
+      "y": 26.1993,
+      "breedte": 456,
+      "hoogte": 327,
+      "type": "afbeelding",
+      "bestand": "lente.png",
+      "rotatie": 360
+    },
+    {
+      "id": "vak-1779298488411-4",
+      "x": 388.552,
+      "y": 198.382,
+      "breedte": 61,
+      "hoogte": 87,
+      "type": "afbeelding",
+      "bestand": "drinkbus.png",
+      "rotatie": 0
+    },
+    {
+      "id": "vak-1779298488412-5",
+      "x": 367.76,
+      "y": 430.838,
+      "breedte": 164,
+      "hoogte": 178,
+      "type": "afbeelding",
+      "bestand": "dagelijkse_kost.png",
+      "rotatie": 10
+    },
+    {
+      "id": "vak-1779298488412-6",
+      "x": 487.407,
+      "y": 96.3034,
+      "breedte": 84,
+      "hoogte": 89,
+      "type": "afbeelding",
+      "bestand": "fruit.png",
+      "rotatie": 0
+    },
+    {
+      "id": "vak-1779298488413-7",
+      "x": 614.073,
+      "y": 97.2545,
+      "breedte": 74,
+      "hoogte": 80,
+      "type": "afbeelding",
+      "bestand": "koek.png",
+      "rotatie": 0
+    },
+    {
+      "id": "vak-1779298488413-8",
+      "x": 69.7461,
+      "y": 628.595,
+      "breedte": 112,
+      "hoogte": 109,
+      "type": "afbeelding",
+      "bestand": "lezen.png",
+      "rotatie": 0
+    },
+    {
+      "id": "vak-1779298488413-9",
+      "x": 1213.62,
+      "y": 374.192,
+      "breedte": 365,
+      "hoogte": 372,
+      "type": "vak",
+      "vaktype": "werkstijl",
+      "kleur": "roze",
+      "titel": "IK WERK IN",
+      "titelNiveau": 5,
+      "werkstijl": "stilte"
+    },
+    {
+      "id": "vak-1779298488419-10",
+      "x": 837.659,
+      "y": 72.4921,
+      "breedte": 235,
+      "hoogte": 200,
+      "type": "vak",
+      "vaktype": "weer",
+      "kleur": "blauw",
+      "titel": "HET WEER",
+      "titelNiveau": 5,
+      "weerLat": 51.1,
+      "weerLon": 4.24,
+      "weerNaam": "Bornem"
+    }
+  ]
+}
