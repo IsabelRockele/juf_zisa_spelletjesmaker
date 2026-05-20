@@ -10,7 +10,22 @@ document.addEventListener('DOMContentLoaded', () => {
   _initBuitenklik();
   _initPresentatie();
   _initTimerModal();
+  _initUitleg();
 });
+
+// === UITLEG-MODAL ===
+function _initUitleg() {
+  const knop = document.getElementById('btn-uitleg');
+  const modal = document.getElementById('uitleg-modal');
+  const sluitKnop = document.getElementById('uitleg-sluit');
+  if (!knop || !modal) return;
+
+  knop.addEventListener('click', () => modal.classList.remove('verborgen'));
+  if (sluitKnop) sluitKnop.addEventListener('click', () => modal.classList.add('verborgen'));
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('verborgen');
+  });
+}
 
 // === TABS IN ZIJPANEEL ===
 function _initTabs() {
