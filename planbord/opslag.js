@@ -18,10 +18,8 @@ function exporteerBord() {
     if (el.classList.contains('vak')) {
       const vaktype = el.dataset.vaktype;
       const kleur = el.dataset.kleur;
-      const tekstgrootte = parseInt(el.dataset.tekstgrootte, 10) || TEKSTGROOTTE_DEFAULT;
       const titelEl = el.querySelector('.vak-titel');
       const titel = titelEl?.innerText || '';
-      // Per-element niveaus (alleen opslaan als ze afwijken van het globale)
       const titelNiveau = titelEl?.dataset.tekstniveau != null ? parseInt(titelEl.dataset.tekstniveau, 10) : null;
 
       if (vaktype === 'vrij') {
@@ -33,7 +31,6 @@ function exporteerBord() {
           type: 'vak',
           vaktype: 'vrij',
           kleur,
-          tekstgrootte,
           titel,
           inhoud,
           titelNiveau,
@@ -43,7 +40,16 @@ function exporteerBord() {
         // Verzamel items én witregels in volgorde
         const regels = [];
         const lijst = el.querySelector('.checklist-items');
-        const itemsNiveau = lijst?.dataset.tekstniveau != null ? parseInt(lijst.dataset.tekstniveau, 10) : null;
+        // Niveau: eerst uit vak.dataset.itemNiveau (vaste keuze van leerkracht),
+        // anders uit eerste item-tekst
+        const eersteItem = el.querySelector('.item-tekst');
+        let itemsNiveau = null;
+        if (el.dataset.itemNiveau != null) {
+          itemsNiveau = parseInt(el.dataset.itemNiveau, 10);
+        } else if (eersteItem?.dataset.tekstniveau != null) {
+          itemsNiveau = parseInt(eersteItem.dataset.tekstniveau, 10);
+        }
+        const opsommingsstijl = el.dataset.opsommingsstijl || 'hokje';
         if (lijst) {
           Array.from(lijst.children).forEach((kind) => {
             if (kind.classList.contains('checklist-item')) {
@@ -62,11 +68,25 @@ function exporteerBord() {
           type: 'vak',
           vaktype: 'checklist',
           kleur,
-          tekstgrootte,
           titel,
           titelNiveau,
           itemsNiveau,
+          opsommingsstijl,
           regels,
+        });
+      } else if (vaktype === 'timer') {
+        const timerStijl = el.querySelector('.timer-visueel')?.dataset.stijl || 'cijfers';
+        elementen.push({
+          ...basis,
+          type: 'vak',
+          vaktype: 'timer',
+          kleur,
+          titel,
+          titelNiveau,
+          minuten: parseInt(el.dataset.minuten) || 5,
+          seconden: parseInt(el.dataset.seconden) || 0,
+          timerStijl,
+          geluidsmodus: el.dataset.geluidsmodus || 'normaal',
         });
       }
     } else if (el.classList.contains('canvas-afbeelding')) {
@@ -74,12 +94,14 @@ function exporteerBord() {
         ...basis,
         type: 'afbeelding',
         bestand: el.dataset.bestand,
+        rotatie: parseFloat(el.dataset.rotatie) || 0,
       });
     }
   });
 
   return {
-    versie: 3,
+    versie: 4,
+    header: (typeof getHeaderInstellingen === 'function') ? getHeaderInstellingen() : null,
     canvas: {
       breedte: canvas.clientWidth,
       hoogte: canvas.clientHeight,
@@ -118,6 +140,11 @@ function importeerBord(data) {
   deselecteer();
   canvas.querySelectorAll('.vak, .canvas-afbeelding').forEach((el) => el.remove());
 
+  // Header herstellen indien opgeslagen
+  if (data.header && typeof zetHeaderInstellingen === 'function') {
+    zetHeaderInstellingen(data.header);
+  }
+
   // Bouw opnieuw op
   data.elementen.forEach((el) => {
     if (el.type === 'vak') {
@@ -128,17 +155,11 @@ function importeerBord(data) {
       vak.style.height = el.hoogte + 'px';
       _wijzigKleur(vak, el.kleur);
 
-      // Tekstgrootte herstellen
-      if (typeof el.tekstgrootte === 'number') {
-        vak.dataset.tekstgrootte = el.tekstgrootte;
-        _pasTekstgrootteToe(vak);
-      }
-
       const titelEl = vak.querySelector('.vak-titel');
       if (titelEl) {
         titelEl.textContent = el.titel || '';
         if (typeof el.titelNiveau === 'number') {
-          _zetElementNiveau(titelEl, el.titelNiveau);
+          _zetNiveau(titelEl, el.titelNiveau);
         }
       }
 
@@ -147,7 +168,7 @@ function importeerBord(data) {
         if (inhoudEl) {
           inhoudEl.textContent = el.inhoud || '';
           if (typeof el.inhoudNiveau === 'number') {
-            _zetElementNiveau(inhoudEl, el.inhoudNiveau);
+            _zetNiveau(inhoudEl, el.inhoudNiveau);
           }
         }
       } else if (el.vaktype === 'checklist') {
@@ -169,10 +190,35 @@ function importeerBord(data) {
             _koppelChecklistRegelInteractie(regel);
           });
 
-          // Per-element niveau voor de hele items-lijst
-          if (typeof el.itemsNiveau === 'number') {
-            _zetElementNiveau(lijst, el.itemsNiveau);
+          // Opsommingsstijl herstellen
+          if (el.opsommingsstijl) {
+            zetOpsommingsstijl(vak, el.opsommingsstijl);
           }
+
+          // Per-item tekstniveaus herstellen (alle items hetzelfde niveau)
+          if (typeof el.itemsNiveau === 'number') {
+            vak.dataset.itemNiveau = el.itemsNiveau;
+            vak.querySelectorAll('.item-tekst').forEach((t) => _zetNiveau(t, el.itemsNiveau));
+          }
+        }
+      } else if (el.vaktype === 'timer') {
+        // Stop het standaard-interval dat voegVakToe gestart heeft
+        if (typeof _stopTimer === 'function') _stopTimer(vak.id);
+        vak.dataset.minuten = el.minuten || 5;
+        vak.dataset.seconden = el.seconden || 0;
+        vak.dataset.geluidsmodus = el.geluidsmodus || 'normaal';
+        // Herrender de timer-inhoud met de juiste stijl
+        vak.innerHTML = _maakTimerVakHTML({
+          titel: el.titel || '',
+          minuten: vak.dataset.minuten,
+          seconden: vak.dataset.seconden,
+          timerStijl: el.timerStijl || 'cijfers',
+          geluidsmodus: vak.dataset.geluidsmodus,
+        });
+        _initTimer(vak);
+        if (typeof el.titelNiveau === 'number') {
+          const t = vak.querySelector('.vak-titel');
+          if (t) _zetNiveau(t, el.titelNiveau);
         }
       }
     } else if (el.type === 'afbeelding') {
@@ -183,6 +229,10 @@ function importeerBord(data) {
         afb.style.top = el.y + 'px';
         afb.style.width = el.breedte + 'px';
         afb.style.height = el.hoogte + 'px';
+        if (typeof el.rotatie === 'number' && el.rotatie !== 0) {
+          afb.dataset.rotatie = el.rotatie;
+          afb.style.transform = `rotate(${el.rotatie}deg)`;
+        }
       }
     }
   });
