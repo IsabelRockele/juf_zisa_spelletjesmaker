@@ -21,9 +21,9 @@ const STANDAARD_TITEL = {
 };
 
 // === TEKSTGROOTTE-NIVEAUS ===
-// Per vak slaan we een niveau op (0-6). Default is 3 (medium).
+// Per vak slaan we een niveau op (0-N). Default is 2 (medium = 1.0×).
 // Elk niveau heeft een schaalfactor die in CSS wordt toegepast.
-const TEKSTGROOTTE_NIVEAUS = [0.7, 0.85, 1.0, 1.15, 1.35, 1.6, 1.9];
+const TEKSTGROOTTE_NIVEAUS = [0.7, 0.85, 1.0, 1.15, 1.35, 1.6, 1.9, 2.3, 2.8, 3.4, 4.2];
 const TEKSTGROOTTE_DEFAULT = 2; // index in array → 1.0 = standaard
 
 // Unieke ID-teller voor vakken
@@ -130,7 +130,11 @@ function _maakChecklistVakHTML(titel = STANDAARD_TITEL.checklist, items = null) 
 
 function _maakChecklistRegelHTML(regel) {
   if (regel.type === 'witregel') {
-    return `<div class="checklist-witregel" data-type="witregel"></div>`;
+    const hoogte = regel.hoogte ? ` style="height: ${regel.hoogte}px"` : '';
+    return `<div class="checklist-witregel" data-type="witregel"${hoogte}>
+      <button class="witregel-verwijder" type="button" title="Witregel verwijderen">×</button>
+      <div class="witregel-resize" title="Sleep om hoogte aan te passen"></div>
+    </div>`;
   }
   return _maakChecklistItemHTML(regel.afbeelding || '', regel.tekst || '');
 }
@@ -248,13 +252,24 @@ function _koppelChecklistRegelInteractie(regel) {
     itemAfb.title = 'Klik om afbeelding te verwijderen';
   }
 
-  // Witregel ook verwijderbaar (klik om te verwijderen — heeft geen knop want is leeg)
+  // Witregel: × knop verwijdert, resize-greep past hoogte aan
   if (regel.classList.contains('checklist-witregel')) {
-    regel.title = 'Klik om witregel te verwijderen';
-    regel.addEventListener('click', (e) => {
-      e.stopPropagation();
-      regel.remove();
-    });
+    const verwKnop = regel.querySelector('.witregel-verwijder');
+    if (verwKnop) {
+      verwKnop.addEventListener('mousedown', (e) => e.stopPropagation());
+      verwKnop.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regel.remove();
+      });
+    }
+    const resizeGreep = regel.querySelector('.witregel-resize');
+    if (resizeGreep) {
+      resizeGreep.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        _startWitregelResize(regel, e);
+      });
+    }
   }
 
   // Drop-target voor afbeeldingen uit bibliotheek
@@ -450,6 +465,35 @@ function wijzigTekstgrootte(vak, richting) {
   if (doelen[0] && doelen[0].classList.contains('item-tekst')) {
     vak.dataset.itemNiveau = nieuwNiveau;
   }
+}
+
+// === WITREGEL HOOGTE AANPASSEN ===
+let _witregelResize = null;
+
+function _startWitregelResize(witregel, e) {
+  const beginHoogte = witregel.offsetHeight;
+  const schaal = (typeof _huidigeBordSchaal === 'function') ? _huidigeBordSchaal() : 1;
+  _witregelResize = {
+    element: witregel,
+    startY: e.clientY,
+    beginHoogte,
+    schaal,
+  };
+  document.addEventListener('mousemove', _tijdensWitregelResize);
+  document.addEventListener('mouseup', _stopWitregelResize);
+}
+
+function _tijdensWitregelResize(e) {
+  if (!_witregelResize) return;
+  const dy = (e.clientY - _witregelResize.startY) / _witregelResize.schaal;
+  const nieuweHoogte = Math.max(8, Math.min(200, _witregelResize.beginHoogte + dy));
+  _witregelResize.element.style.height = nieuweHoogte + 'px';
+}
+
+function _stopWitregelResize() {
+  document.removeEventListener('mousemove', _tijdensWitregelResize);
+  document.removeEventListener('mouseup', _stopWitregelResize);
+  _witregelResize = null;
 }
 
 // === OPSOMMINGSSTIJL CHECKLIST ===
