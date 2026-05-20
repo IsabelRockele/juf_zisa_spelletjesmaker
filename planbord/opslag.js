@@ -88,6 +88,25 @@ function exporteerBord() {
           timerStijl,
           geluidsmodus: el.dataset.geluidsmodus || 'normaal',
         });
+      } else if (vaktype === 'weer') {
+        elementen.push({
+          ...basis,
+          type: 'vak',
+          vaktype: 'weer',
+          kleur,
+          titel,
+          titelNiveau,
+        });
+      } else if (vaktype === 'werkstijl') {
+        elementen.push({
+          ...basis,
+          type: 'vak',
+          vaktype: 'werkstijl',
+          kleur,
+          titel,
+          titelNiveau,
+          werkstijl: el.dataset.werkstijl || 'stilte',
+        });
       }
     } else if (el.classList.contains('canvas-afbeelding')) {
       elementen.push({
@@ -219,6 +238,23 @@ function importeerBord(data) {
         if (typeof el.titelNiveau === 'number') {
           const t = vak.querySelector('.vak-titel');
           if (t) _zetNiveau(t, el.titelNiveau);
+        }
+      } else if (el.vaktype === 'weer') {
+        // Titel herstellen
+        const t = vak.querySelector('.vak-titel');
+        if (t) {
+          t.textContent = el.titel || '';
+          if (typeof el.titelNiveau === 'number') _zetNiveau(t, el.titelNiveau);
+        }
+        // Weer wordt automatisch opgehaald door _initWeer (al uitgevoerd door voegVakToe)
+      } else if (el.vaktype === 'werkstijl') {
+        const t = vak.querySelector('.vak-titel');
+        if (t) {
+          t.textContent = el.titel || '';
+          if (typeof el.titelNiveau === 'number') _zetNiveau(t, el.titelNiveau);
+        }
+        if (el.werkstijl) {
+          zetWerkstijl(vak, el.werkstijl);
         }
       }
     } else if (el.type === 'afbeelding') {
