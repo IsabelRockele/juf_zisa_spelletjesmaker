@@ -6,12 +6,14 @@
 const STANDAARD_GROOTTE = {
   vrij:        { breedte: 280, hoogte: 200 },
   checklist:   { breedte: 320, hoogte: 260 },
+  timer:       { breedte: 280, hoogte: 240 },
 };
 
 // Standaard-titels per vak-type (leeg = leerkracht vult zelf in via placeholder)
 const STANDAARD_TITEL = {
   vrij:      '',
   checklist: '',
+  timer:     '',
 };
 
 // === TEKSTGROOTTE-NIVEAUS ===
@@ -54,13 +56,26 @@ function voegVakToe(vaktype) {
     vak.innerHTML = _maakVrijVakHTML();
   } else if (vaktype === 'checklist') {
     vak.innerHTML = _maakChecklistVakHTML();
+  } else if (vaktype === 'timer') {
+    vak.dataset.minuten = 5;
+    vak.dataset.seconden = 0;
+    vak.dataset.geluidsmodus = 'normaal';
+    vak.innerHTML = _maakTimerVakHTML({ minuten: 5, seconden: 0, timerStijl: 'cijfers' });
   }
-
-  // Tekstgrootte toepassen
-  _pasTekstgrootteToe(vak);
 
   canvas.appendChild(vak);
   _koppelVakInteractie(vak);
+
+  // Init opsommingsstijl (alleen voor checklist)
+  if (vaktype === 'checklist') {
+    _initChecklistStijl(vak);
+  }
+
+  // Init timer (alleen voor timer)
+  if (vaktype === 'timer') {
+    _initTimer(vak);
+  }
+
   selecteerVak(vak);
 
   return vak;
@@ -125,6 +140,8 @@ function _koppelVakInteractie(vak) {
     if (e.target.closest('.checklist-toevoegen')) return;
     if (e.target.closest('.item-verwijder')) return;
     if (e.target.closest('.item-afbeelding')) return;
+    if (e.target.closest('.timer-knop')) return;
+    if (e.target.closest('.timer-geluidsicoon')) return;
 
     selecteerVak(vak);
     _startSlepen(vak, e);
@@ -132,7 +149,11 @@ function _koppelVakInteractie(vak) {
 
   vak.addEventListener('click', (e) => {
     e.stopPropagation();
-    selecteerVak(vak);
+    // Alleen selecteren als nog niet geselecteerd
+    // (anders verliest een editable de focus bij elke klik)
+    if (!vak.classList.contains('geselecteerd')) {
+      selecteerVak(vak);
+    }
   });
 
   // Checklist-specifieke interactie
@@ -158,6 +179,20 @@ function _koppelChecklistInteractie(vak) {
       const regel = div.firstElementChild;
       lijst.appendChild(regel);
       _koppelChecklistRegelInteractie(regel);
+      _hernummerChecklist(vak);
+
+      // Nieuw item: erf het opgeslagen niveau van het vak (zodat alle items consistent blijven)
+      if (actie === 'item' && vak.dataset.itemNiveau != null) {
+        const niveau = parseInt(vak.dataset.itemNiveau, 10);
+        const itemTekst = regel.querySelector('.item-tekst');
+        if (itemTekst) _zetNiveau(itemTekst, niveau);
+      }
+
+      // Witregel: flash-animatie zodat de leerkracht ziet dat hij toegevoegd is
+      if (actie === 'witregel') {
+        regel.classList.add('net-toegevoegd');
+        setTimeout(() => regel.classList.remove('net-toegevoegd'), 1500);
+      }
 
       // Focus op tekstveld bij nieuw item
       if (actie === 'item') {
@@ -176,7 +211,9 @@ function _koppelChecklistRegelInteractie(regel) {
   if (verwijderKnop) {
     verwijderKnop.addEventListener('click', (e) => {
       e.stopPropagation();
+      const vakOuder = regel.closest('.vak');
       regel.remove();
+      if (vakOuder) _hernummerChecklist(vakOuder);
     });
   }
 
@@ -287,90 +324,167 @@ function _koppelAfbeeldingInteractie(afb) {
 }
 
 // === TEKSTGROOTTE ===
-// Twee niveaus: vak-globaal (op .vak via --tekstgrootte-factor) en per-element
-// (via inline style op .vak-titel, .vak-inhoud, .checklist-items).
-// Per-element overschrijft het globale.
+// Per-element tekstgrootte. Werkt op het element waar de cursor staat.
+// Default niveau = 2 (factor 1.0).
+//
+// Basisgroottes per element-type:
+//   .vak-titel: 13px
+//   .vak-inhoud: 15px
+//   .item-tekst: 14px
+//
+// Wanneer A+/A- geklikt wordt:
+//   - Cursor in .vak-titel  → enkel titel
+//   - Cursor in .vak-inhoud → enkel inhoud
+//   - Cursor in .item-tekst → alle item-teksten in dat vak (anders rommelige lijst)
+//   - Geen cursor in tekst  → alle bewerkbare tekst in het vak tegelijk
 
-function _pasTekstgrootteToe(vak) {
-  const niveau = parseInt(vak.dataset.tekstgrootte, 10);
-  const factor = TEKSTGROOTTE_NIVEAUS[niveau] || 1.0;
-  vak.style.setProperty('--tekstgrootte-factor', factor);
-}
+const TEKSTGROOTTE_BASIS = {
+  'vak-titel':  13,
+  'vak-inhoud': 15,
+  'item-tekst': 14,
+};
 
-// Bewaar welk tekst-element binnen een vak het laatst aangeklikt werd
-// Wordt gezet door interactie.js wanneer de gebruiker op een editable klikt.
-let _laatstActieveTekst = null; // verwijzing naar HTML-element
+// Onthou waar de cursor het laatst stond
+let _laatstActieveTekst = null;
 
 function _zetActieveTekst(element) {
   _laatstActieveTekst = element;
 }
 
-function _huidigActieveTekst(vak) {
-  if (_laatstActieveTekst && vak.contains(_laatstActieveTekst)) {
-    return _laatstActieveTekst;
-  }
-  return null;
-}
-
-// Helper: krijg of zet de per-element schaal-factor via data-attribuut
-function _getElementNiveau(el, fallbackVak) {
+// Krijg het huidige niveau van een tekst-element (default 2 = 1.0×)
+function _getNiveau(el) {
   if (el.dataset.tekstniveau != null) {
     return parseInt(el.dataset.tekstniveau, 10);
   }
-  // Geen eigen niveau → val terug op het globale vak-niveau
-  return parseInt(fallbackVak.dataset.tekstgrootte, 10) || TEKSTGROOTTE_DEFAULT;
+  return TEKSTGROOTTE_DEFAULT;
 }
 
-function _zetElementNiveau(el, niveau) {
+// Zet de tekstgrootte van één element op een bepaald niveau
+function _zetNiveau(el, niveau) {
   el.dataset.tekstniveau = niveau;
   const factor = TEKSTGROOTTE_NIVEAUS[niveau] || 1.0;
-  // Bepaal basis-grootte op basis van element-type
-  let basis = 15; // standaard inhoud
-  if (el.classList.contains('vak-titel')) basis = 13;
-  else if (el.classList.contains('checklist-items')) basis = 14;
+  let basis = 14;
+  for (const klasse in TEKSTGROOTTE_BASIS) {
+    if (el.classList.contains(klasse)) {
+      basis = TEKSTGROOTTE_BASIS[klasse];
+      break;
+    }
+  }
   el.style.fontSize = (basis * factor) + 'px';
 }
 
-// Bepaal welk doel-element de leerkracht wil resizen
-function _bepaalSchaalDoel(vak) {
-  const actief = _huidigActieveTekst(vak);
-  if (!actief) return { type: 'vak', el: vak };
+// Bepaal welke elementen samen aangepast moeten worden (kan 1 of meerdere zijn)
+function _bepaalSchaalDoelen(vak) {
+  // Eerst: kijk waar de cursor staat
+  const actief = document.activeElement;
+  const fallback = _laatstActieveTekst;
 
-  // Klik in checklist-item-tekst → resize de hele items-lijst (anders rommelig)
-  if (actief.classList.contains('item-tekst')) {
-    const lijst = vak.querySelector('.checklist-items');
-    if (lijst) return { type: 'element', el: lijst };
+  // Geef voorrang aan actieve element als het binnen het vak ligt
+  let bron = null;
+  if (actief && vak.contains(actief) && actief.isContentEditable) {
+    bron = actief;
+  } else if (fallback && vak.contains(fallback) && fallback.isContentEditable) {
+    bron = fallback;
   }
-  // Titel of inhoud → resize dat ene element
-  if (actief.classList.contains('vak-titel') || actief.classList.contains('vak-inhoud')) {
-    return { type: 'element', el: actief };
+
+  if (bron) {
+    if (bron.classList.contains('vak-titel')) {
+      return [bron];
+    }
+    if (bron.classList.contains('vak-inhoud')) {
+      return [bron];
+    }
+    if (bron.classList.contains('item-tekst')) {
+      // Alle item-teksten in dit vak samen
+      return Array.from(vak.querySelectorAll('.item-tekst'));
+    }
   }
-  return { type: 'vak', el: vak };
+
+  // Niets specifieks geselecteerd → alle bewerkbare tekst in het vak
+  const alle = [];
+  vak.querySelectorAll('.vak-titel, .vak-inhoud, .item-tekst').forEach((el) => alle.push(el));
+  return alle;
 }
 
 function wijzigTekstgrootte(vak, richting) {
-  const doel = _bepaalSchaalDoel(vak);
+  const doelen = _bepaalSchaalDoelen(vak);
+  if (doelen.length === 0) return;
 
-  if (doel.type === 'vak') {
-    // Vak-globaal: pas dataset.tekstgrootte aan
-    let niveau = parseInt(vak.dataset.tekstgrootte, 10);
-    if (richting === 'groter' && niveau < TEKSTGROOTTE_NIVEAUS.length - 1) {
-      niveau++;
-    } else if (richting === 'kleiner' && niveau > 0) {
-      niveau--;
-    }
-    vak.dataset.tekstgrootte = niveau;
-    _pasTekstgrootteToe(vak);
+  // Gebruik het niveau van het eerste element als referentie
+  // (zodat groepjes samen veranderen ook als ze nu niet allemaal hetzelfde niveau hebben)
+  let huidigNiveau = _getNiveau(doelen[0]);
+
+  let nieuwNiveau = huidigNiveau;
+  if (richting === 'groter' && huidigNiveau < TEKSTGROOTTE_NIVEAUS.length - 1) {
+    nieuwNiveau = huidigNiveau + 1;
+  } else if (richting === 'kleiner' && huidigNiveau > 0) {
+    nieuwNiveau = huidigNiveau - 1;
   } else {
-    // Per-element: lees huidig niveau, pas aan, zet inline font-size
-    let niveau = _getElementNiveau(doel.el, vak);
-    if (richting === 'groter' && niveau < TEKSTGROOTTE_NIVEAUS.length - 1) {
-      niveau++;
-    } else if (richting === 'kleiner' && niveau > 0) {
-      niveau--;
-    }
-    _zetElementNiveau(doel.el, niveau);
+    return; // geen verandering mogelijk
   }
+
+  doelen.forEach((el) => _zetNiveau(el, nieuwNiveau));
+
+  // Als we item-teksten hebben aangepast, bewaar het niveau ook op het vak
+  // zodat nieuwe items hetzelfde niveau krijgen
+  if (doelen[0] && doelen[0].classList.contains('item-tekst')) {
+    vak.dataset.itemNiveau = nieuwNiveau;
+  }
+}
+
+// === OPSOMMINGSSTIJL CHECKLIST ===
+// Stijlen: 'hokje' (□), 'cijfer' (1, 2, 3), 'bolletje' (•), 'geen'
+const OPSOMMINGSSTIJLEN = ['hokje', 'cijfer', 'bolletje', 'geen'];
+
+function _initChecklistStijl(vak) {
+  if (!vak.dataset.opsommingsstijl) {
+    vak.dataset.opsommingsstijl = 'hokje';
+  }
+  _pasOpsommingsstijlToe(vak);
+}
+
+function zetOpsommingsstijl(vak, stijl) {
+  vak.dataset.opsommingsstijl = stijl;
+  _pasOpsommingsstijlToe(vak);
+}
+
+function _pasOpsommingsstijlToe(vak) {
+  const stijl = vak.dataset.opsommingsstijl || 'hokje';
+  // Klassen op vak voor CSS-styling
+  OPSOMMINGSSTIJLEN.forEach((s) => vak.classList.remove('stijl-' + s));
+  vak.classList.add('stijl-' + stijl);
+
+  // Cijfer-stijl: vul de cijfers in de DOM in (1, 2, 3, ...)
+  if (stijl === 'cijfer') {
+    let nummer = 1;
+    vak.querySelectorAll('.checklist-items > *').forEach((kind) => {
+      const vinkje = kind.querySelector('.item-vinkje');
+      if (vinkje && kind.classList.contains('checklist-item')) {
+        vinkje.textContent = nummer + '.';
+        nummer++;
+      } else if (vinkje) {
+        vinkje.textContent = '';
+      }
+    });
+  } else {
+    // Voor andere stijlen: maak vinkjes leeg, CSS doet het werk
+    vak.querySelectorAll('.item-vinkje').forEach((v) => { v.textContent = ''; });
+  }
+}
+
+// Roep dit aan na elke wijziging in checklist-items (toevoegen/verwijderen)
+function _hernummerChecklist(vak) {
+  if (vak.dataset.opsommingsstijl === 'cijfer') {
+    _pasOpsommingsstijlToe(vak);
+  }
+}
+
+// === CHECKLIST OPSOMMINGSSTIJL ===
+const CHECKLIST_STIJLEN = ['hokjes', 'nummers', 'bolletjes'];
+
+function wijzigChecklistStijl(vak, nieuweStijl) {
+  if (!CHECKLIST_STIJLEN.includes(nieuweStijl)) return;
+  vak.dataset.stijl = nieuweStijl;
 }
 
 // === HULPFUNCTIES ===
