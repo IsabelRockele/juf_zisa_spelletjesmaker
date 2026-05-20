@@ -166,6 +166,7 @@ function _koppelVakInteractie(vak) {
     if (e.target.closest('.timer-knop')) return;
     if (e.target.closest('.timer-geluidsicoon')) return;
     if (e.target.closest('.werkstijl-knop')) return;
+    if (e.target.closest('.weer-instellen')) return;
 
     selecteerVak(vak);
     _startSlepen(vak, e);
