@@ -96,6 +96,9 @@ function exporteerBord() {
           kleur,
           titel,
           titelNiveau,
+          weerLat: parseFloat(el.dataset.weerLat) || null,
+          weerLon: parseFloat(el.dataset.weerLon) || null,
+          weerNaam: el.dataset.weerNaam || '',
         });
       } else if (vaktype === 'werkstijl') {
         elementen.push({
@@ -246,7 +249,14 @@ function importeerBord(data) {
           t.textContent = el.titel || '';
           if (typeof el.titelNiveau === 'number') _zetNiveau(t, el.titelNiveau);
         }
-        // Weer wordt automatisch opgehaald door _initWeer (al uitgevoerd door voegVakToe)
+        // Opgeslagen locatie herstellen en weer opnieuw ophalen
+        if (typeof el.weerLat === 'number' && typeof el.weerLon === 'number') {
+          vak.dataset.weerLat = el.weerLat;
+          vak.dataset.weerLon = el.weerLon;
+          vak.dataset.weerNaam = el.weerNaam || '';
+          if (typeof _toonLocatieLabel === 'function') _toonLocatieLabel(vak);
+          if (typeof _haalWeerOp === 'function') _haalWeerOp(vak, true);
+        }
       } else if (el.vaktype === 'werkstijl') {
         const t = vak.querySelector('.vak-titel');
         if (t) {
