@@ -394,12 +394,8 @@ body {
   z-index: 10;
 }
 
-.vak {
-  --tekstgrootte-factor: 1;
-}
-
 .vak-titel {
-  font-size: calc(13px * var(--tekstgrootte-factor));
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -421,7 +417,7 @@ body {
 
 .vak-inhoud {
   flex: 1;
-  font-size: calc(15px * var(--tekstgrootte-factor));
+  font-size: 15px;
   line-height: 1.5;
   cursor: text;
   outline: none;
@@ -487,7 +483,6 @@ body {
   gap: 10px;
   padding: 4px 6px;
   border-radius: 6px;
-  font-size: calc(14px * var(--tekstgrootte-factor));
   cursor: text;
 }
 
@@ -495,20 +490,54 @@ body {
   background: rgba(255, 255, 255, 0.5);
 }
 
-/* Afvinkvakje vóór elk item (schaalt mee met tekstgrootte) */
+/* Het symbool vóór elk item — past zich aan op stijl van het vak */
 .checklist-item .item-vinkje {
-  width: calc(18px * var(--tekstgrootte-factor));
-  height: calc(18px * var(--tekstgrootte-factor));
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Standaard verborgen, elke stijl maakt hem zichtbaar */
+  width: 0;
+  height: 0;
+}
+
+/* Stijl: HOKJE (default) */
+.vak.stijl-hokje .item-vinkje {
+  width: 1.2em;
+  height: 1.2em;
   border: 2px solid currentColor;
   border-radius: 4px;
-  flex-shrink: 0;
   opacity: 0.6;
   background: rgba(255, 255, 255, 0.5);
 }
 
+/* Stijl: CIJFER — tekst wordt door JS gevuld */
+.vak.stijl-cijfer .item-vinkje {
+  min-width: 1.2em;
+  height: 1.2em;
+  font-weight: 700;
+  font-size: 1em;
+  opacity: 0.85;
+}
+
+/* Stijl: BOLLETJE */
+.vak.stijl-bolletje .item-vinkje {
+  width: 0.5em;
+  height: 0.5em;
+  margin: 0 0.35em;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+/* Stijl: GEEN — vinkje volledig verbergen */
+.vak.stijl-geen .item-vinkje {
+  display: none;
+}
+
 .checklist-item .item-afbeelding {
-  width: calc(32px * var(--tekstgrootte-factor));
-  height: calc(32px * var(--tekstgrootte-factor));
+  width: 2.3em;
+  height: 2.3em;
   object-fit: contain;
   flex-shrink: 0;
   cursor: pointer;
@@ -526,8 +555,9 @@ body {
   outline: none;
   padding: 2px 4px;
   border-radius: 4px;
-  min-height: 20px;
+  min-height: 1.4em;
   cursor: text;
+  font-size: 14px;
 }
 
 .checklist-item .item-tekst:focus {
@@ -565,15 +595,24 @@ body {
 
 /* === WITREGEL === */
 .checklist-witregel {
-  height: 16px;
+  height: 18px;
   border-radius: 4px;
   cursor: pointer;
   position: relative;
-  opacity: 0.3;
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.35),
+    rgba(255, 255, 255, 0.35) 4px,
+    rgba(0, 0, 0, 0.04) 4px,
+    rgba(0, 0, 0, 0.04) 8px
+  );
+  border: 1px dashed rgba(0, 0, 0, 0.15);
+  opacity: 0.55;
+  transition: opacity 0.15s, background 0.15s;
 }
 
 .checklist-witregel:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.7);
   opacity: 1;
 }
 
@@ -588,10 +627,33 @@ body {
   opacity: 0;
   transition: opacity 0.15s;
   pointer-events: none;
+  font-style: italic;
 }
 
 .checklist-witregel:hover::after {
   opacity: 0.7;
+}
+
+/* Flash bij toevoegen — zodat leerkracht ziet dat hij verschenen is */
+.checklist-witregel.net-toegevoegd {
+  animation: witregelFlash 1.5s ease-out;
+}
+
+@keyframes witregelFlash {
+  0% {
+    background: #FFE4B5;
+    opacity: 1;
+    transform: scaleX(0.7);
+  }
+  30% {
+    background: #FFE4B5;
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scaleX(1);
+  }
 }
 
 /* === KNOPPEN-RIJ (+ Item, + Witregel) === */
@@ -661,6 +723,49 @@ body {
 .greep-e { right: -6px; }
 .greep-w { left: -6px; }
 
+/* === ROTATIE-GREEP === */
+.rotatie-greep {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  background: white;
+  border: 2px solid #534AB7;
+  border-radius: 50%;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #534AB7;
+  font-weight: 700;
+  user-select: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.rotatie-greep:hover {
+  background: #534AB7;
+  color: white;
+}
+
+.rotatie-greep:active {
+  cursor: grabbing;
+}
+
+/* Lijntje van rotatie-greep naar element (visueel verband) */
+.rotatie-greep::before {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 10px;
+  background: #534AB7;
+}
+
 /* === ACTIE-KNOPPEN OP GESELECTEERD VAK === */
 .vak-acties {
   position: absolute;
@@ -692,6 +797,16 @@ body {
 .vak-actie:hover {
   background: #f5f3ee;
   color: #534AB7;
+}
+
+.vak-actie.actief {
+  background: #534AB7;
+  color: white;
+}
+
+.vak-actie.actief:hover {
+  background: #443B9F;
+  color: white;
 }
 
 .kleur-puntje {
@@ -784,14 +899,17 @@ body {
 
 #presentatie-inhoud {
   width: 100%;
-  max-width: calc((100vh - 40px) * (16 / 9));
-  max-height: calc(100vh - 40px);
-  aspect-ratio: 16 / 9;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 #presentatie-inhoud #bord-pres {
-  width: 100%;
-  height: 100%;
+  /* Behoudt zijn oorspronkelijke pixel-afmetingen,
+     wordt geschaald via transform door JS */
+  flex-shrink: 0;
 }
 
 .btn-sluit {
@@ -828,7 +946,359 @@ body {
 
 .presentatie .greep,
 .presentatie .vak-acties,
+.presentatie .checklist-knoppen,
 .presentatie .checklist-toevoegen,
-.presentatie .item-verwijder {
+.presentatie .item-verwijder,
+.presentatie .rotatie-greep {
   display: none !important;
+}
+
+/* In presentatie: witregel toont geen patroon, alleen ruimte */
+.presentatie .checklist-witregel {
+  background: none !important;
+  border: none !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+.presentatie .checklist-witregel::after {
+  display: none !important;
+}
+
+.presentatie .bord-header {
+  cursor: default;
+}
+
+/* === HEADER BEWERKEN === */
+.bord-header {
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.bord-header:hover {
+  filter: brightness(0.97);
+}
+
+/* === MODAL OVERLAY (voor header-bewerker en timer-instellen) === */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.verborgen {
+  display: none;
+}
+
+.modal-overlay .modal-inhoud {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  min-width: 360px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-overlay h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #534AB7;
+  margin-bottom: 16px;
+}
+
+.modal-overlay label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.modal-overlay input[type="text"],
+.modal-overlay input[type="number"] {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  margin-top: 4px;
+  border: 1px solid #d4d1c5;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.modal-overlay input[type="color"] {
+  display: inline-block;
+  margin-top: 4px;
+  width: 40px;
+  height: 40px;
+  border: 1px solid #d4d1c5;
+  border-radius: 6px;
+  cursor: pointer;
+  background: none;
+}
+
+.modal-overlay .kleur-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.modal-overlay .kleur-knop {
+  width: 100%;
+  aspect-ratio: 1.6;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.modal-overlay .kleur-knop:hover {
+  transform: scale(1.05);
+}
+
+.modal-overlay .kleur-knop.actief {
+  border-color: #534AB7;
+  box-shadow: 0 0 0 2px white inset;
+}
+
+.modal-knoppen {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+/* ============================================
+   TIMER-VAK
+   ============================================ */
+.vak[data-vaktype="timer"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.timer-inhoud {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+}
+
+.timer-visueel {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: 60%;
+}
+
+.timer-visueel:empty {
+  display: none;
+}
+
+.timer-svg {
+  width: 100%;
+  height: 100%;
+  max-height: 130px;
+}
+
+.timer-cijfers {
+  font-size: 36px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.vak.kleur-groen .timer-cijfers { color: #3B6D11; }
+.vak.kleur-paars .timer-cijfers { color: #534AB7; }
+.vak.kleur-roze .timer-cijfers { color: #993556; }
+.vak.kleur-teal .timer-cijfers { color: #0F6E56; }
+.vak.kleur-blauw .timer-cijfers { color: #185FA5; }
+.vak.kleur-geel .timer-cijfers { color: #854F0B; }
+.vak.kleur-oranje .timer-cijfers { color: #993C1D; }
+.vak.kleur-grijs .timer-cijfers { color: #5F5E5A; }
+
+.timer-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.timer-knop {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1.5px solid currentColor;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 14px;
+  color: inherit;
+  font-family: inherit;
+  opacity: 0.75;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-knop:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.timer-knop:active {
+  transform: scale(0.95);
+}
+
+.timer-geluidsicoon {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 20px;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.timer-geluidsicoon:hover {
+  opacity: 1;
+}
+
+/* === KLOK-STIJL === */
+/* Time-timer rood-roze look, zoals een echte klassiek time-timer */
+.timer-klok .klok-rand {
+  fill: #fefdf8;
+  stroke: #d4d1c5;
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.timer-klok .klok-sector {
+  fill: #E76F51;
+  opacity: 0.9;
+}
+
+.timer-klok .klok-midden {
+  fill: #2a2a2a;
+}
+
+/* === TAART-STIJL === */
+.timer-taart .taart-segment {
+  stroke: white;
+  stroke-width: 1;
+}
+.timer-taart .taart-segment-0 { fill: #F4A261; }
+.timer-taart .taart-segment-1 { fill: #E76F51; }
+.timer-taart .taart-segment-2 { fill: #E9C46A; }
+.timer-taart .taart-segment-3 { fill: #F4A261; }
+.timer-taart .taart-midden {
+  fill: #b85820;
+}
+
+/* === ZANDLOPER-STIJL === */
+.timer-zandloper .zandloper-glas {
+  fill: rgba(255, 255, 255, 0.5);
+  stroke: #7F77DD;
+  stroke-width: 2;
+  opacity: 1;
+}
+
+.timer-zandloper .zandloper-zand-boven,
+.timer-zandloper .zandloper-zand-onder {
+  fill: #E9C46A;
+  opacity: 0.95;
+}
+
+.timer-zandloper .zandloper-deksel,
+.timer-zandloper .zandloper-bodem {
+  fill: #534AB7;
+  opacity: 0.85;
+}
+
+/* === VOORTGANGSBALK === */
+/* Lavendel-paars met paarsere vulling — vriendelijk en helder */
+.balk-buiten {
+  width: 90%;
+  height: 28px;
+  background: #EEEDFE;
+  border: 2px solid #CECBF6;
+  border-radius: 14px;
+  overflow: hidden;
+  opacity: 1;
+}
+
+.balk-vulling {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #7F77DD 0%, #534AB7 100%);
+  opacity: 1;
+  transition: width 0.3s;
+}
+
+/* === TIJD OM (knipperen) === */
+.vak.tijd-om {
+  animation: tijdomKnipper 0.6s ease-in-out 5;
+}
+
+@keyframes tijdomKnipper {
+  0%, 100% { background-color: var(--vak-bg, currentColor); }
+  50% { background-color: #FCEBEB; box-shadow: 0 0 0 4px #E24B4A; }
+}
+
+.vak.tijd-om .timer-cijfers {
+  color: #A32D2D !important;
+}
+
+/* === TIMER MODAL STIJL-KEUZE === */
+.timer-stijl-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.timer-stijl-knop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border: 2px solid #e5e2d8;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.timer-stijl-knop:hover {
+  border-color: #534AB7;
+  background: #FBFAF6;
+}
+
+.timer-stijl-knop.actief {
+  border-color: #534AB7;
+  background: #EEEDFE;
+  color: #534AB7;
+}
+
+.timer-stijl-knop .stijl-icoon {
+  font-size: 24px;
+}
+
+.timer-stijl-knop .stijl-naam {
+  font-size: 11px;
+  font-weight: 500;
 }
