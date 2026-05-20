@@ -283,19 +283,21 @@ body {
 /* === CANVAS-ZONE === */
 .canvas-zone {
   flex: 1;
-  background: #ebe8df;
+  background: #fefdf8;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 16px;
   overflow: hidden;
+  position: relative;
 }
 
 /* === HET BORD === */
+/* Vast intern formaat: 1600x900 (16:9). Wordt geschaald via JavaScript
+   in bewerk- en presentatie-modus zodat het identiek werkt op elk scherm. */
 #bord {
-  width: 100%;
-  max-width: calc((100vh - 140px) * (16 / 9));
-  aspect-ratio: 16 / 9;
+  width: 1600px;
+  height: 900px;
   background: #fefdf8;
   border-radius: 18px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
@@ -303,6 +305,8 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  flex-shrink: 0;
+  transform-origin: center center;
 }
 
 /* === HEADER VAN HET BORD === */
@@ -607,8 +611,8 @@ body {
 /* === WITREGEL === */
 .checklist-witregel {
   height: 18px;
+  min-height: 8px;
   border-radius: 4px;
-  cursor: pointer;
   position: relative;
   background: repeating-linear-gradient(
     45deg,
@@ -627,22 +631,61 @@ body {
   opacity: 1;
 }
 
-.checklist-witregel::after {
-  content: "↕ witregel — klik om te verwijderen";
+/* Verwijder-knopje (×) — alleen zichtbaar bij hover */
+.witregel-verwijder {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #993556;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
   opacity: 0;
-  transition: opacity 0.15s;
-  pointer-events: none;
-  font-style: italic;
+  transition: opacity 0.15s, background 0.15s;
+  font-family: inherit;
+  padding: 0;
+  line-height: 1;
 }
 
-.checklist-witregel:hover::after {
-  opacity: 0.7;
+.checklist-witregel:hover .witregel-verwijder {
+  opacity: 1;
+}
+
+.witregel-verwijder:hover {
+  background: white;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Resize-greep onderaan — vooral zichtbaar bij hover */
+.witregel-resize {
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.25);
+  cursor: ns-resize;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.checklist-witregel:hover .witregel-resize {
+  opacity: 1;
+}
+
+.witregel-resize:hover {
+  background: #534AB7;
 }
 
 /* Flash bij toevoegen — zodat leerkracht ziet dat hij verschenen is */
@@ -929,12 +972,17 @@ body.in-presentatie .zijpaneel {
 
 body.in-presentatie .werkruimte {
   display: block;
+  height: 100vh;
 }
 
 body.in-presentatie .canvas-zone {
   background: transparent;
   padding: 0;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
 }
 
 /* Geen afgeronde hoeken, geen border, geen schaduw op bord in presentatie */
@@ -980,7 +1028,9 @@ body.in-presentatie .checklist-witregel {
   animation: none !important;
 }
 
-body.in-presentatie .checklist-witregel::after {
+body.in-presentatie .checklist-witregel::after,
+body.in-presentatie .witregel-verwijder,
+body.in-presentatie .witregel-resize {
   display: none !important;
 }
 
