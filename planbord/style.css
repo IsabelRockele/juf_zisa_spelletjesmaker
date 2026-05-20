@@ -1,0 +1,834 @@
+/* ============================================
+   PLANBORD — STIJL
+   ============================================ */
+
+/* === RESET === */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Roboto, sans-serif;
+  background: #f5f3ee;
+  color: #2a2a2a;
+  overflow: hidden;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+/* === TOPBAR === */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: white;
+  border-bottom: 1px solid #e5e2d8;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.topbar-left h1 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #534AB7;
+  display: inline-block;
+  margin-right: 12px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.topbar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  padding: 8px 14px;
+  font-size: 14px;
+  border: 1px solid #d4d1c5;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #2a2a2a;
+  transition: background 0.15s, transform 0.1s;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: #f5f3ee;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: #534AB7;
+  color: white;
+  border-color: #534AB7;
+}
+
+.btn-primary:hover {
+  background: #443B9F;
+}
+
+/* === WERKRUIMTE === */
+.werkruimte {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* === ZIJPANEEL === */
+.zijpaneel {
+  width: 260px;
+  background: white;
+  border-right: 1px solid #e5e2d8;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e2d8;
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #888;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.tab:hover {
+  color: #534AB7;
+}
+
+.tab.actief {
+  color: #534AB7;
+  border-bottom-color: #534AB7;
+}
+
+.tab-inhoud {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.tab-inhoud.verborgen {
+  display: none;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+/* === VAK-KNOPPEN (in zijpaneel) === */
+.vakken-lijst {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.vak-knop {
+  background: white;
+  border: 1.5px solid #e5e2d8;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.vak-knop:hover {
+  border-color: #534AB7;
+  background: #FBFAF6;
+  transform: translateX(2px);
+}
+
+.vak-knop-preview {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 2px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.vak-knop-naam {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2a2a2a;
+}
+
+.vak-knop-hint {
+  display: block;
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.vak-knop > div + .vak-knop-naam {
+  flex: 1;
+}
+
+.vak-knop {
+  flex-wrap: wrap;
+}
+
+.vak-knop > .vak-knop-naam,
+.vak-knop > .vak-knop-hint {
+  flex-basis: calc(100% - 50px);
+}
+
+.binnenkort {
+  margin-top: 24px;
+  padding: 12px;
+  background: #fafaf6;
+  border-radius: 10px;
+}
+
+.hint-titel {
+  font-size: 11px;
+  font-weight: 600;
+  color: #888;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.hint-lijst {
+  list-style: none;
+  font-size: 12px;
+  color: #999;
+}
+
+.hint-lijst li {
+  padding: 2px 0;
+}
+
+.hint-lijst li::before {
+  content: "• ";
+  color: #ccc;
+}
+
+/* === BIBLIOTHEEK === */
+.bib-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.bib-item {
+  aspect-ratio: 1;
+  background: #fafaf6;
+  border: 1.5px solid #e5e2d8;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.15s;
+}
+
+.bib-item:hover {
+  border-color: #534AB7;
+  background: white;
+  transform: translateY(-2px);
+}
+
+.bib-item img {
+  max-width: 100%;
+  max-height: 50px;
+  object-fit: contain;
+}
+
+.bib-item .naam {
+  font-size: 10px;
+  color: #666;
+  margin-top: 4px;
+  text-align: center;
+}
+
+/* === CANVAS-ZONE === */
+.canvas-zone {
+  flex: 1;
+  background: #ebe8df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* === HET BORD === */
+#bord {
+  width: 100%;
+  max-width: calc((100vh - 140px) * (16 / 9));
+  aspect-ratio: 16 / 9;
+  background: #fefdf8;
+  border-radius: 18px;
+  border: 2px solid #f0ecdf;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* === HEADER VAN HET BORD === */
+.bord-header {
+  background: linear-gradient(90deg, #FFE4B5 0%, #FFDAB5 100%);
+  border-bottom: 2px solid #f5c989;
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 16px 16px 0 0;
+  min-height: 70px;
+}
+
+.bord-datum {
+  font-size: 12px;
+  color: #854F0B;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.bord-welkom {
+  font-size: 24px;
+  color: #633806;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bord-welkom .zon {
+  font-size: 24px;
+  color: #BA7517;
+}
+
+.weer-widget {
+  background: white;
+  border-radius: 12px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1.5px solid #f5c989;
+}
+
+.weer-icoon {
+  font-size: 22px;
+}
+
+.weer-temp {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0C447C;
+}
+
+/* === CANVAS-VLAK (waar vakken op staan) === */
+.bord-canvas {
+  flex: 1;
+  position: relative;
+  padding: 16px;
+  overflow: hidden;
+}
+
+/* === VAKKEN === */
+.vak {
+  position: absolute;
+  border-radius: 14px;
+  border: 2px solid;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  cursor: move;
+  user-select: none;
+  transition: box-shadow 0.15s;
+  min-width: 140px;
+  min-height: 100px;
+}
+
+.vak:hover {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.vak.geselecteerd {
+  box-shadow: 0 0 0 3px #534AB7, 0 4px 14px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.vak {
+  --tekstgrootte-factor: 1;
+}
+
+.vak-titel {
+  font-size: calc(13px * var(--tekstgrootte-factor));
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  cursor: text;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.vak-titel:focus {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.vak-titel:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+.vak-inhoud {
+  flex: 1;
+  font-size: calc(15px * var(--tekstgrootte-factor));
+  line-height: 1.5;
+  cursor: text;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.vak-inhoud:focus {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.vak-inhoud:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+/* === KLEUREN VOOR VAKKEN === */
+.vak.kleur-paars { background: #EEEDFE; border-color: #CECBF6; }
+.vak.kleur-paars .vak-titel { color: #534AB7; }
+.vak.kleur-paars .vak-inhoud { color: #26215C; }
+
+.vak.kleur-roze { background: #FBEAF0; border-color: #F4C0D1; }
+.vak.kleur-roze .vak-titel { color: #993556; }
+.vak.kleur-roze .vak-inhoud { color: #4B1528; }
+
+.vak.kleur-groen { background: #EAF3DE; border-color: #C0DD97; }
+.vak.kleur-groen .vak-titel { color: #3B6D11; }
+.vak.kleur-groen .vak-inhoud { color: #173404; }
+
+.vak.kleur-teal { background: #E1F5EE; border-color: #9FE1CB; }
+.vak.kleur-teal .vak-titel { color: #0F6E56; }
+.vak.kleur-teal .vak-inhoud { color: #04342C; }
+
+.vak.kleur-blauw { background: #E6F1FB; border-color: #B5D4F4; }
+.vak.kleur-blauw .vak-titel { color: #185FA5; }
+.vak.kleur-blauw .vak-inhoud { color: #042C53; }
+
+.vak.kleur-geel { background: #FAEEDA; border-color: #FAC775; }
+.vak.kleur-geel .vak-titel { color: #854F0B; }
+.vak.kleur-geel .vak-inhoud { color: #412402; }
+
+.vak.kleur-oranje { background: #FAECE7; border-color: #F5C4B3; }
+.vak.kleur-oranje .vak-titel { color: #993C1D; }
+.vak.kleur-oranje .vak-inhoud { color: #4A1B0C; }
+
+.vak.kleur-grijs { background: #F1EFE8; border-color: #D3D1C7; }
+.vak.kleur-grijs .vak-titel { color: #5F5E5A; }
+.vak.kleur-grijs .vak-inhoud { color: #2C2C2A; }
+
+/* === CHECKLIST-VAK === */
+.checklist-items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: calc(14px * var(--tekstgrootte-factor));
+  cursor: text;
+}
+
+.checklist-item:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Afvinkvakje vóór elk item (schaalt mee met tekstgrootte) */
+.checklist-item .item-vinkje {
+  width: calc(18px * var(--tekstgrootte-factor));
+  height: calc(18px * var(--tekstgrootte-factor));
+  border: 2px solid currentColor;
+  border-radius: 4px;
+  flex-shrink: 0;
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.checklist-item .item-afbeelding {
+  width: calc(32px * var(--tekstgrootte-factor));
+  height: calc(32px * var(--tekstgrootte-factor));
+  object-fit: contain;
+  flex-shrink: 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: outline 0.1s;
+}
+
+.checklist-item .item-afbeelding:hover {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.checklist-item .item-tekst {
+  flex: 1;
+  outline: none;
+  padding: 2px 4px;
+  border-radius: 4px;
+  min-height: 20px;
+  cursor: text;
+}
+
+.checklist-item .item-tekst:focus {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.checklist-item .item-tekst:empty::before {
+  content: attr(data-placeholder);
+  opacity: 0.5;
+}
+
+.checklist-item .item-verwijder {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.checklist-item:hover .item-verwijder {
+  opacity: 1;
+}
+
+/* === DROP-TARGET (afbeelding op item slepen) === */
+.checklist-item.drop-actief {
+  outline: 2px dashed currentColor;
+  outline-offset: -2px;
+  background: rgba(255, 255, 255, 0.7);
+}
+
+/* === WITREGEL === */
+.checklist-witregel {
+  height: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  opacity: 0.3;
+}
+
+.checklist-witregel:hover {
+  background: rgba(255, 255, 255, 0.4);
+  opacity: 1;
+}
+
+.checklist-witregel::after {
+  content: "↕ witregel — klik om te verwijderen";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.checklist-witregel:hover::after {
+  opacity: 0.7;
+}
+
+/* === KNOPPEN-RIJ (+ Item, + Witregel) === */
+.checklist-knoppen {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.checklist-toevoegen {
+  flex: 1;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1.5px dashed currentColor;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  opacity: 0.7;
+  font-family: inherit;
+  color: inherit;
+}
+
+.checklist-toevoegen:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.8);
+}
+
+/* === GREPEN (om vak/afbeelding te schalen) === */
+.greep {
+  position: absolute;
+  background: white;
+  border: 2px solid #534AB7;
+}
+
+/* Hoekgrepen: rond, schalen in beide richtingen */
+.greep-tl, .greep-tr, .greep-bl, .greep-br {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.greep-tl { top: -7px; left: -7px; cursor: nwse-resize; }
+.greep-tr { top: -7px; right: -7px; cursor: nesw-resize; }
+.greep-bl { bottom: -7px; left: -7px; cursor: nesw-resize; }
+.greep-br { bottom: -7px; right: -7px; cursor: nwse-resize; }
+
+/* Zijgrepen: rechthoekig, schalen in één richting */
+.greep-n, .greep-s {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 22px;
+  height: 10px;
+  border-radius: 3px;
+  cursor: ns-resize;
+}
+.greep-e, .greep-w {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 22px;
+  border-radius: 3px;
+  cursor: ew-resize;
+}
+
+.greep-n { top: -6px; }
+.greep-s { bottom: -6px; }
+.greep-e { right: -6px; }
+.greep-w { left: -6px; }
+
+/* === ACTIE-KNOPPEN OP GESELECTEERD VAK === */
+.vak-acties {
+  position: absolute;
+  top: -36px;
+  left: 0;
+  display: flex;
+  gap: 4px;
+  background: white;
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid #e5e2d8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vak-actie {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #555;
+}
+
+.vak-actie:hover {
+  background: #f5f3ee;
+  color: #534AB7;
+}
+
+.kleur-puntje {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  box-shadow: 0 0 0 1px #d4d1c5;
+}
+
+/* === KLEURKIEZER POPOVER === */
+.kleurkiezer {
+  position: fixed;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e5e2d8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+  z-index: 100;
+}
+
+.kleurkiezer.verborgen {
+  display: none;
+}
+
+.kleurkiezer-titel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 8px;
+}
+
+.kleur-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.kleur-knop {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.kleur-knop:hover {
+  transform: scale(1.1);
+  border-color: #534AB7;
+}
+
+/* === LOSSE AFBEELDINGEN OP CANVAS === */
+.canvas-afbeelding {
+  position: absolute;
+  cursor: move;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.canvas-afbeelding.geselecteerd {
+  outline: 3px solid #534AB7;
+  outline-offset: 3px;
+  border-radius: 4px;
+  z-index: 20;
+}
+
+.canvas-afbeelding img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* === PRESENTATIE-MODUS === */
+.presentatie {
+  position: fixed;
+  inset: 0;
+  background: #2a2a2a;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.presentatie.verborgen {
+  display: none;
+}
+
+#presentatie-inhoud {
+  width: 100%;
+  max-width: calc((100vh - 40px) * (16 / 9));
+  max-height: calc(100vh - 40px);
+  aspect-ratio: 16 / 9;
+}
+
+#presentatie-inhoud #bord-pres {
+  width: 100%;
+  height: 100%;
+}
+
+.btn-sluit {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-sluit:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* === IN PRESENTATIE: VAKKEN ZONDER BEWERK-AFFORDANCE === */
+.presentatie .vak {
+  cursor: default;
+}
+
+.presentatie .vak-titel,
+.presentatie .vak-inhoud,
+.presentatie .item-tekst {
+  cursor: default;
+}
+
+.presentatie .greep,
+.presentatie .vak-acties,
+.presentatie .checklist-toevoegen,
+.presentatie .item-verwijder {
+  display: none !important;
+}
