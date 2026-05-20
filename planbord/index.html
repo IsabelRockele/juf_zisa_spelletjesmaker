@@ -11,6 +11,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <a href="../index.html" class="btn btn-terug">← Terug naar keuzemenu</a>
+      <button id="btn-uitleg" class="btn btn-uitleg" title="Hoe werkt het Planbord?">❓ Uitleg</button>
       <h1>Planbord</h1>
       <span class="subtitle">Maak een vrolijk bord voor je klas</span>
     </div>
@@ -203,6 +204,66 @@
       <div class="modal-knoppen">
         <button id="timer-annuleer" class="btn">Annuleren</button>
         <button id="timer-ok" class="btn btn-primary">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === UITLEG MODAL === -->
+  <div id="uitleg-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud modal-inhoud-uitleg">
+      <h3>Welkom bij het Planbord</h3>
+
+      <p class="uitleg-intro">
+        Een rustig digitaal bord voor in je klas. Bedoeld om bij binnenkomst
+        meteen duidelijk te maken wat er die dag belangrijk is — zonder afleiding.
+      </p>
+
+      <h4>📌 Aan de slag</h4>
+      <ul>
+        <li>Klik links op een <strong>vak-knop</strong> (Vrij vak, Checklist, Timer, Weer, Werkstijl) om dat vak toe te voegen aan je bord.</li>
+        <li>Klik op een vak om het te <strong>selecteren</strong>. Dan kan je het verslepen, vergroten of bewerken.</li>
+        <li>Klik op het <strong>tabblad "Afbeeldingen"</strong> om plaatjes (fruit, drinkbus, dagelijkse kost, ...) op je bord te slepen.</li>
+        <li>Klik op de <strong>welkomstbalk bovenaan</strong> om de tekst, kleur of jarige aan te passen.</li>
+      </ul>
+
+      <h4>💾 Opslaan en openen</h4>
+      <p>
+        Wil je je bord bewaren voor een andere dag of meenemen naar school?
+      </p>
+      <ul>
+        <li>Klik op <strong>Opslaan</strong> rechtsboven → er wordt een bestand gedownload met de naam <code>planbord_DATUM.json</code>.</li>
+        <li>Bewaar dat bestand in een mapje op je computer, op een USB of in Google Drive.</li>
+        <li>Volgende keer: klik op <strong>Openen</strong> → kies je opgeslagen <code>.json</code>-bestand → je bord verschijnt weer zoals je het achterliet.</li>
+      </ul>
+
+      <div class="uitleg-waarschuwing">
+        <strong>⚠️ Belangrijk over JSON-bestanden:</strong>
+        <p>
+          Klik <strong>nooit dubbel</strong> op een <code>.json</code>-bestand vanuit Verkenner!
+          Dan opent Windows het in Kladblok of een andere editor en zie je alleen maar code.
+        </p>
+        <p>
+          Gebruik altijd de <strong>"Openen"</strong>-knop in het Planbord zelf. Daarmee leest het programma
+          het bestand correct in.
+        </p>
+      </div>
+
+      <h4>🖥️ Tonen op het digibord</h4>
+      <p>
+        Klik rechtsboven op <strong>"Toon op digibord"</strong>. Alle bewerk-knoppen verdwijnen
+        en je bord vult het hele scherm. Klik op de <strong>×</strong> rechtsboven om terug naar bewerken te gaan.
+      </p>
+
+      <h4>💡 Handige tips</h4>
+      <ul>
+        <li>Met de <strong>A+ en A−</strong> knoppen kan je tekst groter of kleiner maken.</li>
+        <li>Een geselecteerde afbeelding kan je <strong>draaien</strong> met het paarse cirkeltje erboven.</li>
+        <li>In een Checklist kan je een <strong>witregel toevoegen</strong> voor extra ruimte. Hover over een witregel om hem te verbreden (handle onderaan) of te verwijderen (× rechts).</li>
+        <li>Het <strong>Weer-vak</strong> haalt automatisch de actuele temperatuur op voor Bornem. Klik erop om te vernieuwen.</li>
+      </ul>
+
+      <div class="modal-knoppen">
+        <button id="uitleg-sluit" class="btn btn-primary">Begrepen!</button>
       </div>
     </div>
   </div>
