@@ -12,9 +12,11 @@ function selecteerVak(element) {
   element.classList.add('geselecteerd');
   _voegHoekgrepenToe(element);
 
-  // Acties enkel voor vakken (niet voor losse afbeeldingen — die hebben geen kleur/titel)
   if (element.classList.contains('vak')) {
     _voegActiesToe(element);
+  } else if (element.classList.contains('canvas-afbeelding')) {
+    _voegAfbeeldingActiesToe(element);
+    _voegRotatieGreepToe(element);
   }
 }
 
@@ -31,6 +33,10 @@ function deselecteer() {
 
 function verwijderGeselecteerd() {
   if (_geselecteerd) {
+    // Als het een timer is, stop het interval
+    if (_geselecteerd.dataset && _geselecteerd.dataset.vaktype === 'timer' && typeof _stopTimer === 'function') {
+      _stopTimer(_geselecteerd.id);
+    }
     _geselecteerd.remove();
     _geselecteerd = null;
     _laatstActieveTekst = null;
@@ -64,12 +70,16 @@ function _voegActiesToe(element) {
   const acties = document.createElement('div');
   acties.className = 'vak-acties';
 
+  // Helper: alle vak-acties moeten focus behouden op editable element
+  const houVast = (e) => { e.stopPropagation(); e.preventDefault(); };
+
   // Kleur-knop
   const kleurKnop = document.createElement('button');
   kleurKnop.className = 'vak-actie';
+  kleurKnop.tabIndex = -1;
   kleurKnop.setAttribute('aria-label', 'Kies kleur');
   kleurKnop.innerHTML = `<span class="kleur-puntje" style="background:${_kleurPreview(element.dataset.kleur)};"></span>`;
-  kleurKnop.addEventListener('mousedown', (e) => e.stopPropagation());
+  kleurKnop.addEventListener('mousedown', houVast);
   kleurKnop.addEventListener('click', (e) => {
     e.stopPropagation();
     _toonKleurkiezer(element, kleurKnop);
@@ -79,10 +89,11 @@ function _voegActiesToe(element) {
   // Tekstgrootte kleiner
   const kleinerKnop = document.createElement('button');
   kleinerKnop.className = 'vak-actie';
+  kleinerKnop.tabIndex = -1;
   kleinerKnop.setAttribute('aria-label', 'Tekst kleiner');
   kleinerKnop.title = 'Tekst kleiner';
   kleinerKnop.innerHTML = '<span style="font-size:11px; font-weight:700;">A−</span>';
-  kleinerKnop.addEventListener('mousedown', (e) => e.stopPropagation());
+  kleinerKnop.addEventListener('mousedown', houVast);
   kleinerKnop.addEventListener('click', (e) => {
     e.stopPropagation();
     wijzigTekstgrootte(element, 'kleiner');
@@ -92,22 +103,60 @@ function _voegActiesToe(element) {
   // Tekstgrootte groter
   const groterKnop = document.createElement('button');
   groterKnop.className = 'vak-actie';
+  groterKnop.tabIndex = -1;
   groterKnop.setAttribute('aria-label', 'Tekst groter');
   groterKnop.title = 'Tekst groter';
   groterKnop.innerHTML = '<span style="font-size:14px; font-weight:700;">A+</span>';
-  groterKnop.addEventListener('mousedown', (e) => e.stopPropagation());
+  groterKnop.addEventListener('mousedown', houVast);
   groterKnop.addEventListener('click', (e) => {
     e.stopPropagation();
     wijzigTekstgrootte(element, 'groter');
   });
   acties.appendChild(groterKnop);
 
+  // Opsommingsstijl-knoppen (alleen voor checklist-vakken)
+  if (element.dataset.vaktype === 'checklist') {
+    const stijlen = [
+      { stijl: 'hokje',    icoon: '☐', label: 'Hokjes' },
+      { stijl: 'cijfer',   icoon: '1.', label: 'Cijfers' },
+      { stijl: 'bolletje', icoon: '•', label: 'Bolletjes' },
+      { stijl: 'geen',     icoon: '–', label: 'Geen' },
+    ];
+
+    // Scheidingslijn
+    const scheid = document.createElement('div');
+    scheid.style.cssText = 'width:1px; background:#e5e2d8; margin:2px 4px;';
+    acties.appendChild(scheid);
+
+    stijlen.forEach((s) => {
+      const knop = document.createElement('button');
+      knop.className = 'vak-actie vak-actie-stijl';
+      knop.tabIndex = -1;
+      knop.setAttribute('aria-label', s.label);
+      knop.title = s.label;
+      knop.innerHTML = `<span style="font-size:13px; font-weight:600;">${s.icoon}</span>`;
+      if (element.dataset.opsommingsstijl === s.stijl) {
+        knop.classList.add('actief');
+      }
+      knop.addEventListener('mousedown', houVast);
+      knop.addEventListener('click', (e) => {
+        e.stopPropagation();
+        zetOpsommingsstijl(element, s.stijl);
+        // Update visuele "actief" markering
+        acties.querySelectorAll('.vak-actie-stijl').forEach((k) => k.classList.remove('actief'));
+        knop.classList.add('actief');
+      });
+      acties.appendChild(knop);
+    });
+  }
+
   // Verwijder-knop
   const verwKnop = document.createElement('button');
   verwKnop.className = 'vak-actie';
+  verwKnop.tabIndex = -1;
   verwKnop.setAttribute('aria-label', 'Verwijder vak');
   verwKnop.innerHTML = '🗑';
-  verwKnop.addEventListener('mousedown', (e) => e.stopPropagation());
+  verwKnop.addEventListener('mousedown', houVast);
   verwKnop.addEventListener('click', (e) => {
     e.stopPropagation();
     verwijderGeselecteerd();
@@ -120,6 +169,106 @@ function _voegActiesToe(element) {
 function _verwijderActies(element) {
   const acties = element.querySelector('.vak-acties');
   if (acties) acties.remove();
+}
+
+// === ACTIE-BALK VOOR LOSSE AFBEELDING ===
+function _voegAfbeeldingActiesToe(afb) {
+  const acties = document.createElement('div');
+  acties.className = 'vak-acties';
+
+  const houVast = (e) => { e.stopPropagation(); e.preventDefault(); };
+
+  // Rotatie resetten naar 0
+  const resetKnop = document.createElement('button');
+  resetKnop.className = 'vak-actie';
+  resetKnop.tabIndex = -1;
+  resetKnop.title = 'Rotatie resetten';
+  resetKnop.setAttribute('aria-label', 'Rotatie resetten');
+  resetKnop.innerHTML = '<span style="font-size:14px;">↺</span>';
+  resetKnop.addEventListener('mousedown', houVast);
+  resetKnop.addEventListener('click', (e) => {
+    e.stopPropagation();
+    _zetRotatie(afb, 0);
+  });
+  acties.appendChild(resetKnop);
+
+  // Verwijder
+  const verwKnop = document.createElement('button');
+  verwKnop.className = 'vak-actie';
+  verwKnop.tabIndex = -1;
+  verwKnop.setAttribute('aria-label', 'Verwijder');
+  verwKnop.innerHTML = '🗑';
+  verwKnop.addEventListener('mousedown', houVast);
+  verwKnop.addEventListener('click', (e) => {
+    e.stopPropagation();
+    verwijderGeselecteerd();
+  });
+  acties.appendChild(verwKnop);
+
+  afb.appendChild(acties);
+}
+
+// === ROTATIE-GREEP ===
+// Een aparte handle boven het element, sleepbaar om vrij te roteren
+function _voegRotatieGreepToe(element) {
+  const greep = document.createElement('div');
+  greep.className = 'rotatie-greep';
+  greep.title = 'Sleep om te draaien';
+  greep.innerHTML = '↻';
+  greep.addEventListener('mousedown', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    _startRoteren(element, e);
+  });
+  element.appendChild(greep);
+}
+
+function _zetRotatie(element, graden) {
+  element.dataset.rotatie = graden;
+  // Behoud bestaande transforms en pas alleen rotate toe
+  element.style.transform = `rotate(${graden}deg)`;
+}
+
+let _rotatieStatus = null;
+
+function _startRoteren(element, e) {
+  const rect = element.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const huidigeRotatie = parseFloat(element.dataset.rotatie) || 0;
+  // Hoek van muis tot centrum (in graden, 0° = rechts, 90° = onder)
+  const startHoek = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+
+  _rotatieStatus = {
+    element,
+    centerX,
+    centerY,
+    startHoek,
+    beginRotatie: huidigeRotatie,
+  };
+
+  document.addEventListener('mousemove', _tijdensRoteren);
+  document.addEventListener('mouseup', _stopRoteren);
+}
+
+function _tijdensRoteren(e) {
+  if (!_rotatieStatus) return;
+  const { element, centerX, centerY, startHoek, beginRotatie } = _rotatieStatus;
+  const huidigeHoek = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+  let nieuweRotatie = beginRotatie + (huidigeHoek - startHoek);
+  // Houd binnen 0-360
+  nieuweRotatie = ((nieuweRotatie % 360) + 360) % 360;
+  // Snap-to-15° als Shift ingedrukt
+  if (e.shiftKey) {
+    nieuweRotatie = Math.round(nieuweRotatie / 15) * 15;
+  }
+  _zetRotatie(element, Math.round(nieuweRotatie));
+}
+
+function _stopRoteren() {
+  document.removeEventListener('mousemove', _tijdensRoteren);
+  document.removeEventListener('mouseup', _stopRoteren);
+  _rotatieStatus = null;
 }
 
 function _kleurPreview(kleur) {
