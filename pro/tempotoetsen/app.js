@@ -1425,38 +1425,134 @@ function genereerPdf({ titel, oefeningen, modus }) {
 }
 
 // ============================================
-// WEEKBLAD
+// WEEKBLAD + HUISTAAKBLAD
 // ============================================
-const weekdagen = [
-  { id: 'ma', label: 'Maandag' },
-  { id: 'di', label: 'Dinsdag' },
-  { id: 'wo', label: 'Woensdag' },
-  { id: 'do', label: 'Donderdag' },
-  { id: 'vr', label: 'Vrijdag' }
+// 5 dagen voor weekblad (school), 7 dagen voor huistaakblad (thuis)
+const weekdagenSchool = [
+  { id: 'ma', label: 'Maandag', kort: 'Ma' },
+  { id: 'di', label: 'Dinsdag', kort: 'Di' },
+  { id: 'wo', label: 'Woensdag', kort: 'Wo' },
+  { id: 'do', label: 'Donderdag', kort: 'Do' },
+  { id: 'vr', label: 'Vrijdag', kort: 'Vr' }
+];
+const weekdagenAlle = [
+  ...weekdagenSchool,
+  { id: 'za', label: 'Zaterdag', kort: 'Za' },
+  { id: 'zo', label: 'Zondag', kort: 'Zo' }
 ];
 
-// State voor weekblad: per dag { actief, type, configOverschrijven, config }
-const weekState = {
-  ma: { actief: true, type: 'maaltafels', overschrijf: false, config: null },
-  di: { actief: true, type: 'maaltafels', overschrijf: false, config: null },
-  wo: { actief: true, type: 'maaltafels', overschrijf: false, config: null },
-  do: { actief: true, type: 'maaltafels', overschrijf: false, config: null },
-  vr: { actief: true, type: 'maaltafels', overschrijf: false, config: null }
-};
+// Huidige variant: 'weekblad' (school, max 5) of 'huistaak' (thuis, max 7)
+let huidigeWeekVariant = 'weekblad';
 
-function openWeekbladDialoog() {
+function getBeschikbareDagen() {
+  return huidigeWeekVariant === 'huistaak' ? weekdagenAlle : weekdagenSchool;
+}
+
+// State per dag: { actief, type, config, configUitgeklapt, datum }
+function maakLegeWeekState(dagen) {
+  const s = {};
+  dagen.forEach(d => {
+    s[d.id] = { actief: true, type: 'maaltafels', config: null, configUitgeklapt: false, datum: '' };
+  });
+  return s;
+}
+
+const weekStateSchool = maakLegeWeekState(weekdagenSchool);
+const weekStateHuistaak = maakLegeWeekState(weekdagenAlle);
+// Standaard huistaak: za/zo niet actief (kan aangevinkt worden)
+weekStateHuistaak.za.actief = false;
+weekStateHuistaak.zo.actief = false;
+
+// Volgorde-lijst voor PRO vrije-volgorde modus.
+// Lege array = standaard volgorde + actief-vinkjes.
+// Niet-lege array = lijst van dag-id's (bv. ['ma','di','ma','di','wo']) — overschrijft 'actief'.
+let weekVolgordeSchool = [];
+let weekVolgordeHuistaak = [];
+
+// "Vrije volgorde" toggle per variant (alleen PRO)
+let weekVrijeVolgordeSchool = false;
+let weekVrijeVolgordeHuistaak = false;
+
+// Metadata per variant
+const weekMetaSchool = { weekVan: '', modus: 'oefeningen' };
+const weekMetaHuistaak = { weekVan: '', modus: 'oefeningen' };
+
+function getHuidigeWeekState() {
+  return huidigeWeekVariant === 'huistaak' ? weekStateHuistaak : weekStateSchool;
+}
+function getHuidigeWeekMeta() {
+  return huidigeWeekVariant === 'huistaak' ? weekMetaHuistaak : weekMetaSchool;
+}
+function getHuidigeVolgorde() {
+  return huidigeWeekVariant === 'huistaak' ? weekVolgordeHuistaak : weekVolgordeSchool;
+}
+function setHuidigeVolgorde(arr) {
+  if (huidigeWeekVariant === 'huistaak') weekVolgordeHuistaak = arr;
+  else weekVolgordeSchool = arr;
+}
+function getHuidigeVrijeVolgorde() {
+  return huidigeWeekVariant === 'huistaak' ? weekVrijeVolgordeHuistaak : weekVrijeVolgordeSchool;
+}
+function setHuidigeVrijeVolgorde(v) {
+  if (huidigeWeekVariant === 'huistaak') weekVrijeVolgordeHuistaak = v;
+  else weekVrijeVolgordeSchool = v;
+}
+
+// Backwards-compat: `weekState` en `weekdagen` blijven werken via getters
+const weekState = new Proxy({}, {
+  get(_, prop) {
+    const s = getHuidigeWeekState();
+    if (prop in s) return s[prop];
+    const m = getHuidigeWeekMeta();
+    return m[prop];
+  },
+  set(_, prop, val) {
+    const s = getHuidigeWeekState();
+    if (prop in s) { s[prop] = val; return true; }
+    const m = getHuidigeWeekMeta();
+    m[prop] = val;
+    return true;
+  }
+});
+const weekdagen = new Proxy([], {
+  get(_, prop) {
+    const arr = getBeschikbareDagen();
+    if (prop === 'length') return arr.length;
+    if (prop === Symbol.iterator) return arr[Symbol.iterator].bind(arr);
+    if (typeof prop === 'string' && /^\d+$/.test(prop)) return arr[parseInt(prop, 10)];
+    if (typeof arr[prop] === 'function') return arr[prop].bind(arr);
+    return arr[prop];
+  }
+});
+
+function isPro() {
+  return !!window.ISPRO;
+}
+
+function openWeekbladDialoog(variant) {
+  // variant: 'weekblad' (school, 5 dagen) of 'huistaak' (thuis, max 7 dagen)
+  huidigeWeekVariant = variant === 'huistaak' ? 'huistaak' : 'weekblad';
+
   // Initialiseer: standaard gebruikt het actieve tab-type
-  weekdagen.forEach(d => {
+  getBeschikbareDagen().forEach(d => {
     if (!weekState[d.id].type) weekState[d.id].type = state.type;
   });
 
+  const isHuistaak = huidigeWeekVariant === 'huistaak';
+  const titel = isHuistaak ? '🏠 Huistaakblad samenstellen' : '📅 Weekblad samenstellen';
+  const intro = isHuistaak
+    ? 'Kies welke dagen het kind thuis oefent en welk oefeningtype per dag. Ouders noteren hoe lang het kind nodig had (doel: binnen 1 minuut).'
+    : 'Kies welke dagen op het blad komen en welk oefeningtype per dag.';
+  const knopTekst = isHuistaak ? '🏠 Huistaakblad maken' : '📄 Weekblad maken';
+
   const overlay = document.createElement('div');
   overlay.className = 'week-overlay';
+  overlay.dataset.variant = huidigeWeekVariant;
   overlay.innerHTML = `
     <div class="week-dialoog">
       <button class="week-sluit" aria-label="Sluiten">×</button>
-      <h2>📅 Weekblad samenstellen</h2>
-      <p class="week-intro">Kies welke dagen op het blad komen en welk oefeningtype per dag.</p>
+      <h2>${titel}</h2>
+      <p class="week-intro">${intro}</p>
 
       <div class="config-groep">
         <label for="week-van-input" style="font-weight:700;display:block;margin-bottom:6px;">Week van <span style="font-weight:400;color:var(--grijs);font-size:0.9em;">(optioneel — laat leeg voor invullijn)</span></label>
@@ -1477,12 +1573,20 @@ function openWeekbladDialoog() {
         </div>
       </div>
 
-      <h3 style="color:var(--paars);margin-top:18px;margin-bottom:10px;font-size:1.05rem;">Dagen</h3>
+      <div class="config-groep week-volgorde-toggle">
+        <label class="week-volgorde-knop">
+          <input type="checkbox" id="week-vrije-volgorde" ${getHuidigeVrijeVolgorde() ? 'checked' : ''}>
+          <span>🔀 Vrije volgorde — dagen herhalen of zelf rangschikken</span>
+        </label>
+        <p class="week-volgorde-hint">Handig bij korte schoolweken (bv. ma-di-ma-di-wo) of als je dezelfde dag 2x op één blad wil.</p>
+      </div>
+
+      <h3 class="week-dagen-titel">Dagen</h3>
       <div class="week-dagen-lijst" id="week-dagen-lijst"></div>
 
       <div class="week-knop-rij">
         <button class="knop knop-secundair" id="week-annuleer">Annuleren</button>
-        <button class="knop knop-primair" id="week-genereer">📄 Weekblad maken</button>
+        <button class="knop knop-primair" id="week-genereer">${knopTekst}</button>
       </div>
     </div>
   `;
@@ -1497,13 +1601,30 @@ function openWeekbladDialoog() {
   overlay.querySelectorAll('input[name="week-modus"]').forEach(r => {
     r.addEventListener('change', (e) => {
       weekState.modus = e.target.value;
-      // Update knop-tekst
       const btn = overlay.querySelector('#week-genereer');
-      btn.textContent = e.target.value === 'invulblad'
-        ? '📝 Invulblad maken'
-        : '📄 Weekblad maken';
+      if (e.target.value === 'invulblad') {
+        btn.textContent = '📝 Invulblad maken';
+      } else {
+        btn.textContent = isHuistaak ? '🏠 Huistaakblad maken' : '📄 Weekblad maken';
+      }
     });
   });
+
+  // Vrije-volgorde toggle (alleen PRO)
+  const vrijeCb = overlay.querySelector('#week-vrije-volgorde');
+  if (vrijeCb) {
+    vrijeCb.addEventListener('change', () => {
+      setHuidigeVrijeVolgorde(vrijeCb.checked);
+      if (vrijeCb.checked && getHuidigeVolgorde().length === 0) {
+        // Initialiseer volgorde uit actieve vinkjes
+        const init = getBeschikbareDagen()
+          .filter(d => weekState[d.id].actief)
+          .map(d => d.id);
+        setHuidigeVolgorde(init);
+      }
+      renderWeekDagen();
+    });
+  }
 
   overlay.querySelector('.week-sluit').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#week-annuleer').addEventListener('click', () => overlay.remove());
@@ -1511,7 +1632,6 @@ function openWeekbladDialoog() {
     if (maakWeekbladPdf()) overlay.remove();
   });
 
-  // Sluit bij klik buiten de dialoog
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) overlay.remove();
   });
@@ -1533,53 +1653,146 @@ function renderWeekDagen() {
     'optel-aftrek-100': '+ en − tot 100'
   };
 
-  weekdagen.forEach(d => {
-    const st = weekState[d.id];
-    const heeftEigenConfig = st.config !== null;
+  const vrijeVolgorde = getHuidigeVrijeVolgorde();
+  const beschikbareDagen = getBeschikbareDagen();
+  const isHuistaak = huidigeWeekVariant === 'huistaak';
 
-    html += `<div class="week-dag ${st.actief ? 'actief' : 'inactief'}" data-dag="${d.id}">
-      <label class="week-dag-hoofd">
-        <input type="checkbox" ${st.actief ? 'checked' : ''} data-dag-actief="${d.id}">
-        <span class="week-dag-label">${d.label}</span>
-        ${heeftEigenConfig ? '<span class="week-dag-aangepast">aangepast</span>' : ''}
-      </label>`;
+  // ============================================
+  // MODUS 1: Vrije volgorde (PRO)
+  // Toon een rij met dagen op volgorde, met +/− en verplaatsknoppen.
+  // ============================================
+  if (vrijeVolgorde) {
+    const volgorde = getHuidigeVolgorde();
 
-    if (st.actief) {
-      html += `<div class="week-dag-instellingen">
-        <div class="week-dag-type-rij">
-          <label class="week-dag-type-label">Oefeningtype:</label>
-          <select class="week-dag-type" data-dag-type="${d.id}">
-            ${Object.entries(typeLabels).map(([v, l]) =>
-              `<option value="${v}" ${st.type === v ? 'selected' : ''}>${l}</option>`
-            ).join('')}
-          </select>
-          <button type="button" class="week-dag-aanpas-btn" data-dag-aanpas="${d.id}">
-            ${st.configUitgeklapt ? '▲ Dicht' : (heeftEigenConfig ? '⚙ Aanpassen' : '⚙ Aanpassen')}
-          </button>
-        </div>`;
+    html += `<p class="week-volgorde-uitleg">Zet de dagen in de volgorde die je wil. Je kunt dezelfde dag meermaals toevoegen (bv. ma-di-ma-di-wo).</p>`;
 
-      if (st.configUitgeklapt) {
+    if (volgorde.length === 0) {
+      html += `<p class="week-leeg-melding">Nog geen dagen toegevoegd. Klik hieronder om een dag toe te voegen.</p>`;
+    }
+
+    volgorde.forEach((dagId, idx) => {
+      const dag = beschikbareDagen.find(d => d.id === dagId);
+      if (!dag) return;
+      const st = weekState[dagId];
+      const heeftEigenConfig = st.config !== null;
+      // Slot-state: configUitgeklapt per slot (idx), zodat 2x ma onafhankelijk uitklapt
+      const slotKey = `${dagId}__${idx}`;
+      const uitgeklapt = weekState.__slotsUit && weekState.__slotsUit[slotKey];
+
+      html += `<div class="week-dag actief week-slot" data-slot-idx="${idx}">
+        <div class="week-slot-hoofd">
+          <span class="week-slot-nummer">${idx + 1}</span>
+          <span class="week-dag-label">${dag.label}</span>
+          ${heeftEigenConfig ? '<span class="week-dag-aangepast">aangepast</span>' : ''}
+          <div class="week-slot-knoppen">
+            <button type="button" class="week-slot-knop" data-slot-up="${idx}" ${idx === 0 ? 'disabled' : ''} title="Naar boven">▲</button>
+            <button type="button" class="week-slot-knop" data-slot-down="${idx}" ${idx === volgorde.length - 1 ? 'disabled' : ''} title="Naar beneden">▼</button>
+            <button type="button" class="week-slot-knop week-slot-verwijder" data-slot-verwijder="${idx}" title="Verwijderen">✕</button>
+          </div>
+        </div>
+        <div class="week-dag-instellingen">
+          <div class="week-dag-datum-rij">
+            <label class="week-dag-datum-label">Datum (optioneel):</label>
+            <input type="text" class="week-dag-datum-input" data-dag-datum="${dagId}" placeholder="bv. 12/5" value="${st.datum || ''}">
+          </div>
+          <div class="week-dag-type-rij">
+            <label class="week-dag-type-label">Oefeningtype:</label>
+            <select class="week-dag-type" data-dag-type="${dagId}">
+              ${Object.entries(typeLabels).map(([v, l]) =>
+                `<option value="${v}" ${st.type === v ? 'selected' : ''}>${l}</option>`
+              ).join('')}
+            </select>
+            <button type="button" class="week-dag-aanpas-btn" data-slot-uit="${slotKey}">
+              ${uitgeklapt ? '▲ Dicht' : '⚙ Aanpassen'}
+            </button>
+          </div>`;
+
+      if (uitgeklapt) {
         const huidigeConfig = st.config || { ...state.config[st.type] };
         html += `<div class="week-dag-config-blok">
-          ${renderDagConfigHTML(d.id, st.type, huidigeConfig)}
+          ${renderDagConfigHTML(dagId, st.type, huidigeConfig)}
           <div class="week-dag-config-acties">
             ${heeftEigenConfig
-              ? `<button type="button" class="week-dag-reset-btn" data-dag-reset="${d.id}">↺ Terug naar hoofdinstelling</button>`
+              ? `<button type="button" class="week-dag-reset-btn" data-dag-reset="${dagId}">↺ Terug naar hoofdinstelling</button>`
               : '<span class="week-dag-hint-text">Pas iets aan om deze dag een eigen configuratie te geven</span>'}
           </div>
         </div>`;
       }
+      html += `</div></div>`;
+    });
 
-      html += `</div>`;
+    // "+ Dag toevoegen" knoppen
+    html += `<div class="week-toevoeg-rij">
+      <span class="week-toevoeg-label">+ Dag toevoegen:</span>
+      ${beschikbareDagen.map(d =>
+        `<button type="button" class="week-toevoeg-chip" data-toevoeg="${d.id}">${d.kort}</button>`
+      ).join('')}
+    </div>`;
+
+    html += `<p class="week-hint">
+      💡 Zonder aanpassing gebruikt elke dag de instellingen van het <strong>hoofdscherm</strong>.
+    </p>`;
+
+  } else {
+    // ============================================
+    // MODUS 2: Standaard vinkjes
+    // ============================================
+    if (isHuistaak) {
+      html += `<p class="week-volgorde-uitleg">Bij meer dan 5 dagen wordt het huistaakblad automatisch verdeeld over 2 bladen (4+2 of 4+3).</p>`;
     }
 
-    html += `</div>`;
-  });
+    beschikbareDagen.forEach(d => {
+      const st = weekState[d.id];
+      const heeftEigenConfig = st.config !== null;
 
-  html += `<p class="week-hint">
-    💡 Zonder aanpassing gebruikt elke dag de instellingen van het <strong>hoofdscherm</strong>.
-    Klik <strong>⚙ Aanpassen</strong> om een dag eigen tafels of opties te geven.
-  </p>`;
+      html += `<div class="week-dag ${st.actief ? 'actief' : 'inactief'}" data-dag="${d.id}">
+        <label class="week-dag-hoofd">
+          <input type="checkbox" ${st.actief ? 'checked' : ''} data-dag-actief="${d.id}">
+          <span class="week-dag-label">${d.label}</span>
+          ${heeftEigenConfig ? '<span class="week-dag-aangepast">aangepast</span>' : ''}
+        </label>`;
+
+      if (st.actief) {
+        html += `<div class="week-dag-instellingen">
+          <div class="week-dag-datum-rij">
+            <label class="week-dag-datum-label">Datum (optioneel):</label>
+            <input type="text" class="week-dag-datum-input" data-dag-datum="${d.id}" placeholder="bv. 12/5" value="${st.datum || ''}">
+          </div>
+          <div class="week-dag-type-rij">
+            <label class="week-dag-type-label">Oefeningtype:</label>
+            <select class="week-dag-type" data-dag-type="${d.id}">
+              ${Object.entries(typeLabels).map(([v, l]) =>
+                `<option value="${v}" ${st.type === v ? 'selected' : ''}>${l}</option>`
+              ).join('')}
+            </select>
+            <button type="button" class="week-dag-aanpas-btn" data-dag-aanpas="${d.id}">
+              ${st.configUitgeklapt ? '▲ Dicht' : '⚙ Aanpassen'}
+            </button>
+          </div>`;
+
+        if (st.configUitgeklapt) {
+          const huidigeConfig = st.config || { ...state.config[st.type] };
+          html += `<div class="week-dag-config-blok">
+            ${renderDagConfigHTML(d.id, st.type, huidigeConfig)}
+            <div class="week-dag-config-acties">
+              ${heeftEigenConfig
+                ? `<button type="button" class="week-dag-reset-btn" data-dag-reset="${d.id}">↺ Terug naar hoofdinstelling</button>`
+                : '<span class="week-dag-hint-text">Pas iets aan om deze dag een eigen configuratie te geven</span>'}
+            </div>
+          </div>`;
+        }
+
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+    });
+
+    html += `<p class="week-hint">
+      💡 Zonder aanpassing gebruikt elke dag de instellingen van het <strong>hoofdscherm</strong>.
+      Klik <strong>⚙ Aanpassen</strong> om een dag eigen tafels of opties te geven.
+    </p>`;
+  }
 
   c.innerHTML = html;
 
@@ -1615,6 +1828,74 @@ function renderWeekDagen() {
     btn.addEventListener('click', () => {
       const dag = btn.dataset.dagReset;
       weekState[dag].config = null;
+      renderWeekDagen();
+    });
+  });
+
+  // Datum-input per dag
+  c.querySelectorAll('[data-dag-datum]').forEach(input => {
+    input.addEventListener('input', () => {
+      const dag = input.dataset.dagDatum;
+      weekState[dag].datum = input.value;
+    });
+  });
+
+  // === Vrije-volgorde events ===
+  // Slot-uitklap (per slot-index zodat 2x ma onafhankelijk werkt)
+  c.querySelectorAll('[data-slot-uit]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.slotUit;
+      if (!weekState.__slotsUit) weekState.__slotsUit = {};
+      weekState.__slotsUit[key] = !weekState.__slotsUit[key];
+      renderWeekDagen();
+    });
+  });
+  // Slot up
+  c.querySelectorAll('[data-slot-up]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.slotUp, 10);
+      const volg = [...getHuidigeVolgorde()];
+      if (idx > 0) {
+        [volg[idx - 1], volg[idx]] = [volg[idx], volg[idx - 1]];
+        setHuidigeVolgorde(volg);
+        renderWeekDagen();
+      }
+    });
+  });
+  // Slot down
+  c.querySelectorAll('[data-slot-down]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.slotDown, 10);
+      const volg = [...getHuidigeVolgorde()];
+      if (idx < volg.length - 1) {
+        [volg[idx], volg[idx + 1]] = [volg[idx + 1], volg[idx]];
+        setHuidigeVolgorde(volg);
+        renderWeekDagen();
+      }
+    });
+  });
+  // Slot verwijderen
+  c.querySelectorAll('[data-slot-verwijder]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.slotVerwijder, 10);
+      const volg = [...getHuidigeVolgorde()];
+      volg.splice(idx, 1);
+      setHuidigeVolgorde(volg);
+      renderWeekDagen();
+    });
+  });
+  // Dag toevoegen aan volgorde
+  c.querySelectorAll('[data-toevoeg]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const dagId = btn.dataset.toevoeg;
+      const maxDagen = huidigeWeekVariant === 'huistaak' ? 7 : 5;
+      const volg = [...getHuidigeVolgorde()];
+      if (volg.length >= maxDagen) {
+        alert(`Maximum ${maxDagen} dagen per ${huidigeWeekVariant === 'huistaak' ? 'huistaakblad' : 'weekblad'}.`);
+        return;
+      }
+      volg.push(dagId);
+      setHuidigeVolgorde(volg);
       renderWeekDagen();
     });
   });
@@ -1794,62 +2075,101 @@ function koppelDagConfigEvents(c) {
 }
 
 function maakWeekbladPdf() {
-  // Verzamel actieve dagen
-  const actieveDagen = weekdagen.filter(d => weekState[d.id].actief);
-  if (actieveDagen.length === 0) {
-    alert('Kies minstens één dag.');
+  const vrijeVolgorde = getHuidigeVrijeVolgorde();
+  const beschikbareDagen = getBeschikbareDagen();
+  const isHuistaak = huidigeWeekVariant === 'huistaak';
+
+  // Bouw lijst van slots = wat er op het blad komt (per slot: dag-info + state-key)
+  // Bij vrije volgorde: kan een dag 2x voorkomen, daarom slot-indexering.
+  let slots;
+  if (vrijeVolgorde) {
+    slots = getHuidigeVolgorde().map(dagId => {
+      const dag = beschikbareDagen.find(d => d.id === dagId);
+      return dag ? { ...dag, stateKey: dagId } : null;
+    }).filter(Boolean);
+  } else {
+    slots = beschikbareDagen
+      .filter(d => weekState[d.id].actief)
+      .map(d => ({ ...d, stateKey: d.id }));
+  }
+
+  if (slots.length === 0) {
+    alert(vrijeVolgorde ? 'Voeg minstens één dag toe.' : 'Kies minstens één dag.');
+    return false;
+  }
+
+  // Max-controle
+  const maxDagen = isHuistaak ? 7 : 5;
+  if (slots.length > maxDagen) {
+    alert(`Maximum ${maxDagen} dagen per ${isHuistaak ? 'huistaakblad' : 'weekblad'}.`);
     return false;
   }
 
   const modus = weekState.modus || 'oefeningen';
 
-  // Helper: kies de juiste config voor deze dag (eigen als aangepast, anders hoofd)
   const getConfigVoorDag = (dagId) => {
     const st = weekState[dagId];
     return st.config || state.config[st.type];
   };
 
-  // Bij oefeningen-modus: check configs
+  // Validatie per slot
   if (modus === 'oefeningen') {
-    for (const d of actieveDagen) {
-      const type = weekState[d.id].type;
-      const conf = getConfigVoorDag(d.id);
-      const bron = weekState[d.id].config
-        ? `aangepaste instellingen van ${d.label}`
+    for (const slot of slots) {
+      const type = weekState[slot.stateKey].type;
+      const conf = getConfigVoorDag(slot.stateKey);
+      const bron = weekState[slot.stateKey].config
+        ? `aangepaste instellingen van ${slot.label}`
         : 'hoofdscherm';
 
       if ((type === 'maaltafels' || type === 'deeltafels') && conf.tafels.length === 0) {
-        alert(`Voor ${d.label} (${type}): kies eerst minstens één tafel (in ${bron}).`);
+        alert(`Voor ${slot.label} (${type}): kies eerst minstens één tafel (in ${bron}).`);
         return false;
       }
       if (type === 'gemengd-maal-deel' && (conf.tafelsKeer.length === 0 || conf.tafelsDeel.length === 0)) {
-        alert(`Voor ${d.label} (gemengd × en :): kies eerst minstens één maal- en deeltafel (in ${bron}).`);
+        alert(`Voor ${slot.label} (gemengd × en :): kies eerst minstens één maal- en deeltafel (in ${bron}).`);
         return false;
       }
       if (type === 'getalbeelden') {
-        alert(`Getalbeelden werken niet op papier — gebruik 'Invulblad (bij flitsen)' voor ${d.label} of kies een ander oefeningtype.`);
+        alert(`Getalbeelden werken niet op papier — gebruik 'Invulblad (bij flitsen)' voor ${slot.label} of kies een ander oefeningtype.`);
         return false;
       }
     }
   }
 
-  // Genereer oefeningen per dag met de juiste config
-  const dagenMetOef = actieveDagen.map(d => {
-    const type = weekState[d.id].type;
+  // Genereer oefeningen + voeg datum toe
+  const dagenMetOef = slots.map(slot => {
+    const st = weekState[slot.stateKey];
+    const type = st.type;
     return {
-      ...d,
+      id: slot.id,
+      label: slot.label,
+      kort: slot.kort,
+      datum: st.datum || '',
       type,
       oefeningen: modus === 'invulblad'
         ? null
-        : window.TempotoetsenGen.genereerToets(type, getConfigVoorDag(d.id), 10)
+        : window.TempotoetsenGen.genereerToets(type, getConfigVoorDag(slot.stateKey), 10)
     };
   });
 
-  genereerWeekbladPdf(dagenMetOef, modus, weekState.weekVan || '');
+  // === Split-logica ===
+  // 1–5 dagen → 1 blad. 6 dagen → 4+2. 7 dagen → 4+3.
+  const groepen = splitsInBladen(dagenMetOef);
+
+  genereerWeekbladPdf(groepen, modus, weekState.weekVan || '', isHuistaak);
   return true;
 }
 
-function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
+function splitsInBladen(dagen) {
+  const n = dagen.length;
+  if (n <= 5) return [dagen];
+  if (n === 6) return [dagen.slice(0, 4), dagen.slice(4)];   // 4+2
+  if (n === 7) return [dagen.slice(0, 4), dagen.slice(4)];   // 4+3
+  // veiligheid: meer dan 7 (zou niet mogen)
+  return [dagen.slice(0, 5), dagen.slice(5)];
+}
+
+function genereerWeekbladPdf(groepen, modus, weekVan, isHuistaak) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' });
   const breedte = 297;
@@ -1857,188 +2177,305 @@ function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
   const marge = 10;
 
   const isInvulblad = modus === 'invulblad';
+  const aantalBladen = groepen.length;
+  const totaalKolommen = groepen.reduce((s, g) => s + g.length, 0);
 
-  // --- Header ---
-  doc.setFillColor(245, 159, 59); // oranje
-  doc.rect(0, 0, breedte, 22, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.text(isInvulblad ? 'Tempotoets — Weekblad (invulblad)' : 'Tempotoets — Weekblad', marge, 15);
-
-  // Naam + datum
-  doc.setTextColor(45, 42, 38);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('Naam:', marge, 32);
-  doc.line(marge + 12, 32, marge + 75, 32);
-
-  doc.text('Week van:', marge + 85, 32);
-  if (weekVan && weekVan.trim()) {
-    // Vooraf ingevuld: geen lijn, gewoon tekst
+  // === Tekent één pagina met de gegeven dagen ===
+  function tekenPagina(dagenOpBlad, bladIdx) {
+    // --- Header ---
+    doc.setFillColor(245, 159, 59);
+    doc.rect(0, 0, breedte, 22, 'F');
+    doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.text(weekVan, marge + 103, 32);
+    doc.setFontSize(18);
+
+    let hoofdtitel;
+    if (isHuistaak) {
+      hoofdtitel = isInvulblad ? 'Mijn tempo-huistaak (invulblad)' : 'Mijn tempo-huistaak';
+    } else {
+      hoofdtitel = isInvulblad ? 'Tempotoets — Weekblad (invulblad)' : 'Tempotoets — Weekblad';
+    }
+    doc.text(hoofdtitel, marge, 15);
+
+    // Blad-aanduiding rechts in header bij 2 bladen
+    if (aantalBladen > 1) {
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Blad ${bladIdx + 1} van ${aantalBladen}`, breedte - marge, 15, { align: 'right' });
+    }
+
+    // Naam + Week van
+    doc.setTextColor(45, 42, 38);
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-  } else {
-    // Invullijn
-    doc.line(marge + 103, 32, marge + 160, 32);
+    doc.text('Naam:', marge, 32);
+    doc.line(marge + 12, 32, marge + 75, 32);
+
+    doc.text('Week van:', marge + 85, 32);
+    if (weekVan && weekVan.trim()) {
+      doc.setFont('helvetica', 'bold');
+      doc.text(weekVan, marge + 103, 32);
+      doc.setFont('helvetica', 'normal');
+    } else {
+      doc.line(marge + 103, 32, marge + 160, 32);
+    }
+
+    // Instructie-balk: bij huistaak hoger en meerregelig (uitleg voor ouders)
+    const instrY = 37;
+    let instrHoogte, kolomStartY;
+    if (isHuistaak) {
+      instrHoogte = 28;
+      doc.setFillColor(253, 236, 212);
+      doc.setDrawColor(245, 159, 59);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(marge, instrY, breedte - marge * 2, instrHoogte, 2.5, 2.5, 'FD');
+
+      // Titel-regel
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(197, 122, 28);
+      doc.text('Beste ouder', marge + 4, instrY + 5.5);
+
+      // Uitleg-regels
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 70, 50);
+      doc.text('Doel: je kind maakt elke kolom binnen 1 minuut en liefst foutloos. Noteer de gebruikte tijd in het tijd-vakje bovenaan.',
+        marge + 4, instrY + 11);
+
+      // BELANGRIJK: één kolom per dag — vet gemarkeerd
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(197, 122, 28);
+      doc.text('Belangrijk:', marge + 4, instrY + 17);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80, 70, 50);
+      doc.text(' maak elke dag maar 1 kolom. Dagelijks kort oefenen werkt veel beter dan alles op 1 dag invullen.',
+        marge + 22, instrY + 17);
+
+      doc.text('Lukt het nog niet binnen de minuut? Geen probleem — laat je kind extra oefenen met de flitskaartjes en probeer het later opnieuw. Veel succes!',
+        marge + 4, instrY + 23);
+
+      kolomStartY = instrY + instrHoogte + 4;
+    } else {
+      instrHoogte = 9;
+      doc.setFillColor(253, 236, 212);
+      doc.setDrawColor(245, 159, 59);
+      doc.setLineWidth(0.4);
+      doc.roundedRect(marge, instrY, breedte - marge * 2, instrHoogte, 2.5, 2.5, 'FD');
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(197, 122, 28);
+      doc.text('Elke dag krijg je 1 minuut om zoveel mogelijk oefeningen op te lossen. Klaar? Start!',
+        marge + 4, instrY + 6);
+      kolomStartY = instrY + instrHoogte + 6;
+    }
+
+    // --- Kolommen per dag ---
+    const startY = kolomStartY;
+    const beschikbareHoogte = hoogte - startY - marge;
+    const kolomMarge = 3;
+    // Cap kolombreedte op 'als-5-dagen'-breedte zodat 1-2 dagen niet te breed worden
+    const dagenOpBladN = dagenOpBlad.length;
+    const breedteAls5 = (breedte - marge * 2 - kolomMarge * 4) / 5;
+    const kolomBreedteVol = (breedte - marge * 2 - kolomMarge * (dagenOpBladN - 1)) / dagenOpBladN;
+    const kolomBreedte = Math.min(kolomBreedteVol, breedteAls5);
+    // Centreer bij minder dan 5 dagen
+    const totaleBreedte = kolomBreedte * dagenOpBladN + kolomMarge * (dagenOpBladN - 1);
+    const startX = (breedte - totaleBreedte) / 2;
+
+    // Header-hoogte iets groter als datum is ingevuld
+    const heeftDatums = dagenOpBlad.some(d => d.datum && d.datum.trim());
+    const dagHeaderHoogte = heeftDatums ? 14 : 10;
+    // Bij huistaak: extra ruimte onder header voor het tijd-vakje
+    const tijdVakHoogte = isHuistaak ? 11 : 0;
+    const oefStartY = startY + dagHeaderHoogte + tijdVakHoogte + 4;
+    const oefHoogte = (hoogte - oefStartY - marge - 4) / 10;
+
+    dagenOpBlad.forEach((d, dIdx) => {
+      const x = startX + dIdx * (kolomBreedte + kolomMarge);
+
+      // Dag-header (paarse balk)
+      doc.setFillColor(107, 76, 155);
+      doc.roundedRect(x, startY, kolomBreedte, dagHeaderHoogte, 2, 2, 'F');
+
+      // Dagnaam links
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(11);
+      doc.setFont('helvetica', 'bold');
+      doc.text(d.label, x + 4, startY + 6.7);
+
+      // Datum onder dagnaam (indien ingevuld)
+      if (d.datum && d.datum.trim()) {
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'normal');
+        doc.text(d.datum, x + 4, startY + 11.8);
+      }
+
+      // Score-vakje rechtsboven (in paarse balk)
+      const scoreBreedte = 16;
+      const scoreHoogte = 6;
+      const scoreX = x + kolomBreedte - scoreBreedte - 3;
+      const scoreY = startY + (dagHeaderHoogte - scoreHoogte) / 2;
+      doc.setFillColor(255, 255, 255);
+      doc.setDrawColor(255, 255, 255);
+      doc.roundedRect(scoreX, scoreY, scoreBreedte, scoreHoogte, 1.5, 1.5, 'F');
+      doc.setTextColor(107, 76, 155);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'bold');
+      doc.text('___/10', scoreX + scoreBreedte / 2, scoreY + 4.2, { align: 'center' });
+
+      // Bij huistaak: ruim tijd-vakje ONDER de paarse balk
+      if (isHuistaak) {
+        const tijdY = startY + dagHeaderHoogte + 1.5;
+        const tijdBreedte = kolomBreedte - 6;
+        const tijdHoogte = 9;
+        const tijdX = x + 3;
+
+        doc.setFillColor(253, 236, 212);
+        doc.setDrawColor(245, 159, 59);
+        doc.setLineWidth(0.4);
+        doc.roundedRect(tijdX, tijdY, tijdBreedte, tijdHoogte, 1.5, 1.5, 'FD');
+
+        // Label "Tijd:" links
+        doc.setTextColor(197, 122, 28);
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Tijd:', tijdX + 3, tijdY + 5.8);
+
+        // Layout: [Tijd:] [_] min [____] sec
+        // min = 1 cijfer (korte lijn), sec = 2 cijfers (langere lijn)
+        const labelEind = tijdX + 13;             // na "Tijd:"
+        const totaalBreedte = tijdBreedte - 16;   // ruimte na "Tijd:" tot rand
+        const lijnY = tijdY + 6.5;
+
+        // min-lijn: kort (één cijfer past), sec-lijn: ongeveer 2x zo lang
+        const minLabelX = labelEind + totaalBreedte * 0.22;
+        const secLabelX = labelEind + totaalBreedte - 8;
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.text('min', minLabelX, tijdY + 5.8);
+        doc.text('sec', secLabelX, tijdY + 5.8);
+
+        // Invullijn 1 (voor "min") — kort
+        doc.setDrawColor(197, 122, 28);
+        doc.setLineWidth(0.4);
+        doc.line(labelEind + 1, lijnY, minLabelX - 1, lijnY);
+
+        // Invullijn 2 (voor "sec") — lang, voor 2 cijfers
+        doc.line(minLabelX + 7, lijnY, secLabelX - 1, lijnY);
+      }
+
+      doc.setTextColor(45, 42, 38);
+
+      if (isInvulblad) {
+        for (let i = 0; i < 10; i++) {
+          const y = oefStartY + i * oefHoogte + 6;
+          doc.setFontSize(10);
+          doc.setFont('helvetica', 'normal');
+          doc.setTextColor(140, 140, 140);
+          doc.text(`${i + 1}.`, x + 3, y);
+
+          doc.setDrawColor(190, 190, 190);
+          doc.setLineWidth(0.3);
+          doc.line(x + 10, y + 1, x + kolomBreedte - 3, y + 1);
+        }
+      } else {
+        const isSplitsingenDag = d.oefeningen.length > 0
+          && typeof d.oefeningen[0].vraag === 'object'
+          && d.oefeningen[0].vraag.type === 'splitsing';
+
+        if (isSplitsingenDag) {
+          const subKolomBreedte = kolomBreedte / 2;
+          const rijHoogte = (hoogte - oefStartY - marge - 4) / 5;
+
+          d.oefeningen.forEach((o, i) => {
+            const subKolom = i % 2;
+            const rij = Math.floor(i / 2);
+            const centerX = x + subKolom * subKolomBreedte + subKolomBreedte / 2;
+            const centerY = oefStartY + rij * rijHoogte + rijHoogte / 2;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7);
+            doc.setTextColor(160, 160, 160);
+            doc.text(`${i + 1}.`, x + subKolom * subKolomBreedte + 1.5, centerY - rijHoogte / 2 + 3);
+
+            tekenMiniSplitsing(doc, o.vraag, centerX, centerY, subKolomBreedte * 0.9, rijHoogte * 0.85);
+          });
+        } else {
+          d.oefeningen.forEach((o, i) => {
+            const y = oefStartY + i * oefHoogte + 6;
+
+            doc.setFontSize(8);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(160, 160, 160);
+            doc.text(`${i + 1}.`, x + 2, y);
+
+            doc.setFontSize(11);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(45, 42, 38);
+
+            const vraagText = typeof o.vraag === 'string' ? o.vraag : '___';
+            doc.text(`${vraagText}  =`, x + 7, y);
+
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.3);
+            const lijnX = x + kolomBreedte - 18;
+            doc.line(lijnX, y + 1, lijnX + 15, y + 1);
+          });
+        }
+      }
+
+      // Lichte scheiding tussen kolommen
+      if (dIdx < dagenOpBlad.length - 1) {
+        doc.setDrawColor(230, 225, 215);
+        doc.setLineWidth(0.2);
+        const scheidingX = x + kolomBreedte + kolomMarge / 2;
+        doc.line(scheidingX, startY + dagHeaderHoogte + tijdVakHoogte + 2, scheidingX, hoogte - marge - 4);
+      }
+    });
+
+    // Footer
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(7);
+    doc.setTextColor(180, 180, 180);
+    doc.text('juf Zisa · jufzisa.be', marge, hoogte - 4);
   }
 
-  // Instructie
-  doc.setFillColor(253, 236, 212);
-  doc.setDrawColor(245, 159, 59);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(marge, 37, breedte - marge * 2, 9, 2.5, 2.5, 'FD');
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(197, 122, 28);
-  doc.text('Elke dag krijg je 1 minuut om zoveel mogelijk oefeningen op te lossen. Klaar? Start!',
-    marge + 4, 43);
-
-  // --- Kolommen per dag ---
-  const startY = 52;
-  const beschikbareHoogte = hoogte - startY - marge;
-  const kolomMarge = 3;
-  const kolomBreedte = (breedte - marge * 2 - kolomMarge * (dagenMetOef.length - 1)) / dagenMetOef.length;
-
-  const oefStartY = startY + 14;
-  const oefHoogte = (beschikbareHoogte - 14) / 10;
-
-  dagenMetOef.forEach((d, dIdx) => {
-    const x = marge + dIdx * (kolomBreedte + kolomMarge);
-
-    // Dag-header: paarse balk met dagnaam links, wit score-vakje rechts
-    doc.setFillColor(107, 76, 155); // paars
-    doc.roundedRect(x, startY, kolomBreedte, 10, 2, 2, 'F');
-
-    // Dagnaam links van midden
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(d.label, x + 4, startY + 6.7);
-
-    // Score-vakje rechts: wit rechthoekje met "___/10"
-    const scoreBreedte = 14;
-    const scoreHoogte = 6;
-    const scoreX = x + kolomBreedte - scoreBreedte - 3;
-    const scoreY = startY + 2;
-    doc.setFillColor(255, 255, 255);
-    doc.setDrawColor(255, 255, 255);
-    doc.roundedRect(scoreX, scoreY, scoreBreedte, scoreHoogte, 1.5, 1.5, 'F');
-    doc.setTextColor(107, 76, 155);
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text('___/10', scoreX + scoreBreedte / 2, scoreY + 4.2, { align: 'center' });
-
-    // Oefeningen (geen type-strook meer — oefStartY begint direct onder de paarse balk)
-    doc.setTextColor(45, 42, 38);
-
-    if (isInvulblad) {
-      // Invulblad: alleen nummer + lange invullijn
-      for (let i = 0; i < 10; i++) {
-        const y = oefStartY + i * oefHoogte + 6;
-
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.setTextColor(140, 140, 140);
-        doc.text(`${i + 1}.`, x + 3, y);
-
-        // Lange invullijn over bijna de hele kolombreedte
-        doc.setDrawColor(190, 190, 190);
-        doc.setLineWidth(0.3);
-        doc.line(x + 10, y + 1, x + kolomBreedte - 3, y + 1);
-      }
-    } else {
-      // Check of dit splitsingen zijn → dan mini-boompjes in 2×5 grid
-      const isSplitsingenDag = d.oefeningen.length > 0
-        && typeof d.oefeningen[0].vraag === 'object'
-        && d.oefeningen[0].vraag.type === 'splitsing';
-
-      if (isSplitsingenDag) {
-        // 2 boompjes naast elkaar × 5 rijen = 10 oefeningen
-        const subKolomBreedte = kolomBreedte / 2;
-        const rijHoogte = (hoogte - oefStartY - marge - 4) / 5;
-
-        d.oefeningen.forEach((o, i) => {
-          const subKolom = i % 2;      // 0 = links, 1 = rechts
-          const rij = Math.floor(i / 2); // 0 t.e.m. 4
-
-          const centerX = x + subKolom * subKolomBreedte + subKolomBreedte / 2;
-          const centerY = oefStartY + rij * rijHoogte + rijHoogte / 2;
-
-          // Nummer linksboven het boompje
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(7);
-          doc.setTextColor(160, 160, 160);
-          doc.text(`${i + 1}.`, x + subKolom * subKolomBreedte + 1.5, centerY - rijHoogte / 2 + 3);
-
-          tekenMiniSplitsing(doc, o.vraag, centerX, centerY, subKolomBreedte * 0.9, rijHoogte * 0.85);
-        });
-      } else {
-        // Gewone tekstuele weergave voor andere oefeningtypes
-        d.oefeningen.forEach((o, i) => {
-          const y = oefStartY + i * oefHoogte + 6;
-
-          // Nummer
-          doc.setFontSize(8);
-          doc.setFont('helvetica', 'normal');
-          doc.setTextColor(160, 160, 160);
-          doc.text(`${i + 1}.`, x + 2, y);
-
-          // Vraag
-          doc.setFontSize(11);
-          doc.setFont('helvetica', 'bold');
-          doc.setTextColor(45, 42, 38);
-
-          const vraagText = typeof o.vraag === 'string' ? o.vraag : '___';
-          doc.text(`${vraagText}  =`, x + 7, y);
-
-          // Invullijntje rechts
-          doc.setDrawColor(200, 200, 200);
-          doc.setLineWidth(0.3);
-          const lijnX = x + kolomBreedte - 18;
-          doc.line(lijnX, y + 1, lijnX + 15, y + 1);
-        });
-      }
-    }
-
-    // Lichte scheiding tussen kolommen
-    if (dIdx < dagenMetOef.length - 1) {
-      doc.setDrawColor(230, 225, 215);
-      doc.setLineWidth(0.2);
-      const scheidingX = x + kolomBreedte + kolomMarge / 2;
-      doc.line(scheidingX, startY + 12, scheidingX, hoogte - marge - 4);
-    }
-  });
-
-  // Footer
-  doc.setFont('helvetica', 'italic');
-  doc.setFontSize(7);
-  doc.setTextColor(180, 180, 180);
-  doc.text('juf Zisa · jufzisa.be', marge, hoogte - 4);
-
-  // --- Antwoordenblad op pagina 2 (alleen bij oefeningen-modus, niet bij invulblad) ---
-  if (!isInvulblad) {
-    doc.addPage('a4', 'landscape');
+  // === Tekent één antwoordbladpagina ===
+  function tekenAntwoordPagina(dagenOpBlad, bladIdx) {
     doc.setFillColor(107, 76, 155);
     doc.rect(0, 0, breedte, 18, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
-    doc.text('Antwoordenblad — Weekblad', marge, 12);
+    const antTitel = isHuistaak ? 'Antwoordenblad — Huistaak' : 'Antwoordenblad — Weekblad';
+    doc.text(antTitel, marge, 12);
+    if (aantalBladen > 1) {
+      doc.setFontSize(10);
+      doc.text(`Blad ${bladIdx + 1} van ${aantalBladen}`, breedte - marge, 12, { align: 'right' });
+    }
 
+    const kolomMarge = 3;
+    const dagenAntN = dagenOpBlad.length;
+    const breedteAls5Ant = (breedte - marge * 2 - kolomMarge * 4) / 5;
+    const kolomBreedteVolAnt = (breedte - marge * 2 - kolomMarge * (dagenAntN - 1)) / dagenAntN;
+    const kolomBreedte = Math.min(kolomBreedteVolAnt, breedteAls5Ant);
+    const totaleBreedteAnt = kolomBreedte * dagenAntN + kolomMarge * (dagenAntN - 1);
+    const startXAnt = (breedte - totaleBreedteAnt) / 2;
     const antStartY = 26;
     const antOefHoogte = (hoogte - antStartY - marge) / 10;
 
-    dagenMetOef.forEach((d, dIdx) => {
-      const x = marge + dIdx * (kolomBreedte + kolomMarge);
+    dagenOpBlad.forEach((d, dIdx) => {
+      const x = startXAnt + dIdx * (kolomBreedte + kolomMarge);
 
       doc.setFillColor(253, 236, 212);
       doc.roundedRect(x, antStartY, kolomBreedte, 8, 2, 2, 'F');
       doc.setTextColor(197, 122, 28);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
-      doc.text(d.label, x + kolomBreedte / 2, antStartY + 5.5, { align: 'center' });
+      const titelTxt = d.datum && d.datum.trim() ? `${d.label} (${d.datum})` : d.label;
+      doc.text(titelTxt, x + kolomBreedte / 2, antStartY + 5.5, { align: 'center' });
 
       d.oefeningen.forEach((o, i) => {
         const y = antStartY + 14 + i * antOefHoogte + 4;
@@ -2058,7 +2495,6 @@ function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
         doc.setFont('helvetica', 'normal');
         doc.setTextColor(100, 100, 100);
         if (o.vraag && o.vraag.type === 'splitsing') {
-          // Geen aparte = nodig, de vraag bevat al een =
           doc.text(`${i + 1}. ${vraagText}`, x + 2, y);
         } else {
           doc.text(`${i + 1}. ${vraagText} =`, x + 2, y);
@@ -2071,7 +2507,28 @@ function genereerWeekbladPdf(dagenMetOef, modus, weekVan) {
     });
   }
 
-  doc.save(isInvulblad ? 'Tempotoets-Weekblad-invulblad.pdf' : 'Tempotoets-Weekblad.pdf');
+  // === Render alle bladen ===
+  groepen.forEach((dagenOpBlad, bladIdx) => {
+    if (bladIdx > 0) doc.addPage('a4', 'landscape');
+    tekenPagina(dagenOpBlad, bladIdx);
+  });
+
+  // === Antwoordenbladen (alleen bij oefeningen-modus) ===
+  if (!isInvulblad) {
+    groepen.forEach((dagenOpBlad, bladIdx) => {
+      doc.addPage('a4', 'landscape');
+      tekenAntwoordPagina(dagenOpBlad, bladIdx);
+    });
+  }
+
+  // Bestandsnaam
+  let naam;
+  if (isHuistaak) {
+    naam = isInvulblad ? 'Tempotoets-Huistaak-invulblad.pdf' : 'Tempotoets-Huistaak.pdf';
+  } else {
+    naam = isInvulblad ? 'Tempotoets-Weekblad-invulblad.pdf' : 'Tempotoets-Weekblad.pdf';
+  }
+  doc.save(naam);
 }
 
 // ============================================
@@ -2098,13 +2555,19 @@ function renderModi() {
     <div class="modus-kaart modus-kaart-uitgelicht" id="modus-week">
       <div class="icoon">📅</div>
       <h3>Weekblad</h3>
-      <p>Liggend A4 met 5 dagen op 1 blad — kies welke dagen en wat per dag</p>
+      <p>Liggend A4 met tot 5 dagen — kies welke dagen, datum en wat per dag</p>
+    </div>
+    <div class="modus-kaart modus-kaart-uitgelicht modus-kaart-nieuw" id="modus-huistaak">
+      <div class="icoon">🏠</div>
+      <h3>Huistaakblad</h3>
+      <p>Voor thuis — tot 7 dagen (incl. weekend), met tijd-vakje per dag. Bij meer dan 5 dagen automatisch over 2 bladen.</p>
     </div>
   `;
   document.getElementById('modus-flits').addEventListener('click', startFlitsModus);
   document.getElementById('modus-papier').addEventListener('click', maakPdfPapier);
   document.getElementById('modus-antwblad').addEventListener('click', () => maakPdfAntwoordblad(false));
-  document.getElementById('modus-week').addEventListener('click', openWeekbladDialoog);
+  document.getElementById('modus-week').addEventListener('click', () => openWeekbladDialoog('weekblad'));
+  document.getElementById('modus-huistaak').addEventListener('click', () => openWeekbladDialoog('huistaak'));
 }
 
 // ============================================
