@@ -97,60 +97,47 @@ function toonPresentatie() {
   document.body.classList.add('in-presentatie');
   const overlay = document.getElementById('presentatie');
   overlay.classList.remove('verborgen');
-  _pasPresentatieSchaalToe();
-  // Bij venster-resize ook opnieuw schalen
-  window._presentatieResize = _pasPresentatieSchaalToe;
-  window.addEventListener('resize', window._presentatieResize);
-}
-
-function _pasPresentatieSchaalToe() {
-  const bord = document.getElementById('bord');
-  if (!bord || !document.body.classList.contains('in-presentatie')) return;
-
-  // Bepaal de originele afmetingen van het bord (zonder transform)
-  // We resetten eerst de schaal om te meten
-  bord.style.transform = '';
-  const origBreedte = bord.offsetWidth;
-  const origHoogte = bord.offsetHeight;
-
-  // Beschikbare ruimte = volledig venster
-  const beschBreedte = window.innerWidth;
-  const beschHoogte = window.innerHeight;
-
-  if (origBreedte === 0 || origHoogte === 0) return;
-
-  // Evenredig schalen met behoud van aspect-ratio (geen vervorming)
-  // De crème achtergrond op body.in-presentatie zorgt dat eventuele randen
-  // visueel doorlopen ipv als zwarte balken te tonen.
-  const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
-  const geschaaldeBreedte = origBreedte * schaal;
-  const geschaaldeHoogte = origHoogte * schaal;
-  const offsetX = (beschBreedte - geschaaldeBreedte) / 2;
-  const offsetY = (beschHoogte - geschaaldeHoogte) / 2;
-  bord.style.transform = `scale(${schaal})`;
-  bord.style.transformOrigin = 'top left';
-  bord.style.position = 'fixed';
-  bord.style.left = offsetX + 'px';
-  bord.style.top = offsetY + 'px';
-  bord.style.zIndex = '1050';
+  schaalBord();
 }
 
 function sluitPresentatie() {
   document.body.classList.remove('in-presentatie');
   const overlay = document.getElementById('presentatie');
   overlay.classList.add('verborgen');
-  // Reset inline styles op het bord
-  const bord = document.getElementById('bord');
-  if (bord) {
-    bord.style.transform = '';
-    bord.style.transformOrigin = '';
-    bord.style.position = '';
-    bord.style.left = '';
-    bord.style.top = '';
-    bord.style.zIndex = '';
-  }
-  if (window._presentatieResize) {
-    window.removeEventListener('resize', window._presentatieResize);
-    delete window._presentatieResize;
-  }
+  schaalBord();
 }
+
+// === BORD SCHALEN ===
+// Schaalt het 1600x900 bord zodat het past in zijn beschikbare ruimte.
+// Werkt voor zowel bewerk-modus als presentatie-modus.
+function schaalBord() {
+  const bord = document.getElementById('bord');
+  if (!bord) return;
+
+  // Beschikbare ruimte = de parent (canvas-zone) zijn afmetingen
+  const zone = bord.parentElement;
+  if (!zone) return;
+
+  const beschBreedte = zone.clientWidth;
+  const beschHoogte = zone.clientHeight;
+  if (beschBreedte === 0 || beschHoogte === 0) return;
+
+  const origBreedte = 1600;
+  const origHoogte = 900;
+
+  // Evenredig schalen met behoud van aspect-ratio
+  const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
+  bord.style.transform = `scale(${schaal})`;
+  bord.style.transformOrigin = 'center center';
+}
+
+// Schaal opnieuw bij venster-resize
+window.addEventListener('resize', () => {
+  if (typeof schaalBord === 'function') schaalBord();
+});
+
+// Schaal initieel na DOM-load
+document.addEventListener('DOMContentLoaded', () => {
+  // Wacht even tot CSS toegepast is
+  requestAnimationFrame(() => schaalBord());
+});
