@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planbord — Juf Zisa</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Planbord</h1>
+      <span class="subtitle">Maak een vrolijk bord voor je klas</span>
+    </div>
+    <div class="topbar-right">
+      <button id="btn-verwijder" class="btn">Verwijderen</button>
+      <button id="btn-import" class="btn">Openen</button>
+      <input type="file" id="file-import" accept="application/json" hidden />
+      <button id="btn-export" class="btn">Opslaan</button>
+      <button id="btn-presentatie" class="btn btn-primary">Toon op digibord</button>
+    </div>
+  </header>
+
+  <main class="werkruimte">
+
+    <aside class="zijpaneel">
+      <div class="tabs">
+        <button class="tab actief" data-tab="vakken">Vakken</button>
+        <button class="tab" data-tab="afbeeldingen">Afbeeldingen</button>
+      </div>
+
+      <div class="tab-inhoud" id="tab-vakken">
+        <p class="hint">Klik om toe te voegen aan je bord</p>
+        <div class="vakken-lijst">
+          <button class="vak-knop" data-vaktype="vrij">
+            <div class="vak-knop-preview" style="background: #EEEDFE; border-color: #CECBF6;">
+              <span style="color: #534AB7;">Aa</span>
+            </div>
+            <span class="vak-knop-naam">Vrij vak</span>
+            <span class="vak-knop-hint">Titel + tekst + afbeeldingen</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="checklist">
+            <div class="vak-knop-preview" style="background: #E1F5EE; border-color: #9FE1CB;">
+              <span style="color: #0F6E56; font-size: 18px;">☑</span>
+            </div>
+            <span class="vak-knop-naam">Checklist</span>
+            <span class="vak-knop-hint">Lijstje met afbeelding + tekst</span>
+          </button>
+        </div>
+
+        <div class="binnenkort">
+          <p class="hint-titel">Binnenkort beschikbaar:</p>
+          <ul class="hint-lijst">
+            <li>Timer (werktijd)</li>
+            <li>Verjaardag</li>
+            <li>Dagprogramma</li>
+            <li>Mededeling</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-inhoud verborgen" id="tab-afbeeldingen">
+        <p class="hint">Klik om toe te voegen aan je bord</p>
+        <div class="bib-grid" id="bib-grid"></div>
+      </div>
+    </aside>
+
+    <section class="canvas-zone">
+      <div id="bord">
+        <header class="bord-header" id="bord-header">
+          <div class="bord-header-links">
+            <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
+            <p class="bord-welkom"><span class="zon">☀</span> Goedemorgen klas!</p>
+          </div>
+          <div class="bord-header-rechts">
+            <div class="weer-widget">
+              <span class="weer-icoon">⛅</span>
+              <span class="weer-temp">13°</span>
+            </div>
+          </div>
+        </header>
+
+        <div class="bord-canvas" id="bord-canvas">
+          <!-- Vakken worden hier via JS toegevoegd -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- === Kleurkiezer popover === -->
+  <div id="kleurkiezer" class="kleurkiezer verborgen">
+    <p class="kleurkiezer-titel">Kies een kleur</p>
+    <div class="kleur-grid">
+      <button class="kleur-knop" data-kleur="paars" style="background: #CECBF6;" aria-label="Paars"></button>
+      <button class="kleur-knop" data-kleur="roze" style="background: #F4C0D1;" aria-label="Roze"></button>
+      <button class="kleur-knop" data-kleur="groen" style="background: #C0DD97;" aria-label="Groen"></button>
+      <button class="kleur-knop" data-kleur="teal" style="background: #9FE1CB;" aria-label="Teal"></button>
+      <button class="kleur-knop" data-kleur="blauw" style="background: #B5D4F4;" aria-label="Blauw"></button>
+      <button class="kleur-knop" data-kleur="geel" style="background: #FAC775;" aria-label="Geel"></button>
+      <button class="kleur-knop" data-kleur="oranje" style="background: #F5C4B3;" aria-label="Oranje"></button>
+      <button class="kleur-knop" data-kleur="grijs" style="background: #D3D1C7;" aria-label="Grijs"></button>
+    </div>
+  </div>
+
+  <!-- === Presentatie-modus overlay === -->
+  <div id="presentatie" class="presentatie verborgen">
+    <div id="presentatie-inhoud"></div>
+    <button id="btn-sluit-presentatie" class="btn-sluit" aria-label="Sluit presentatie">×</button>
+  </div>
+
+  <script src="kleuren.js"></script>
+  <script src="bibliotheek.js"></script>
+  <script src="vakken.js"></script>
+  <script src="interactie.js"></script>
+  <script src="header.js"></script>
+  <script src="opslag.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
