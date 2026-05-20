@@ -10,6 +10,7 @@
 
   <header class="topbar">
     <div class="topbar-left">
+      <a href="../index.html" class="btn btn-terug">← Terug naar keuzemenu</a>
       <h1>Planbord</h1>
       <span class="subtitle">Maak een vrolijk bord voor je klas</span>
     </div>
@@ -95,6 +96,11 @@
         <header class="bord-header" id="bord-header" title="Klik om aan te passen">
           <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
           <p class="bord-welkom" id="bord-welkom"><span class="zwaaihand">👋</span> <span id="bord-welkom-tekst">Goedemorgen klas!</span></p>
+          <div class="bord-jarige verborgen" id="bord-jarige">
+            <img class="jarige-icoon" src="afbeeldingen/jarige.png" alt="jarig" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="jarige-emoji" style="display:none;">🎂</span>
+            <span class="jarige-tekst" id="bord-jarige-tekst"></span>
+          </div>
         </header>
 
         <div class="bord-canvas" id="bord-canvas">
@@ -132,6 +138,9 @@
       <h3>Header aanpassen</h3>
       <label>Welkomtekst
         <input type="text" id="header-tekst" placeholder="Goedemorgen klas!" />
+      </label>
+      <label>Jarige(n) vandaag <span style="opacity: 0.6; font-weight: 400;">(optioneel)</span>
+        <input type="text" id="header-jarige" placeholder="bv. Lina en Sam" />
       </label>
       <label>Achtergrondkleur
         <div class="kleur-grid" id="header-kleur-grid">
