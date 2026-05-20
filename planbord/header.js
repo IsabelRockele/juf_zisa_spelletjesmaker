@@ -18,6 +18,7 @@ let _headerInstellingen = {
   tekst: 'Goedemorgen klas!',
   thema: 'zon',
   tekstkleur: '#633806',
+  jarige: '',
 };
 
 function _updateDatum() {
@@ -51,6 +52,23 @@ function _pasHeaderStijlToe() {
     const welkom = document.getElementById('bord-welkom');
     if (welkom) welkom.style.color = _headerInstellingen.tekstkleur;
   }
+
+  // Jarige-strookje
+  const jarigeEl = document.getElementById('bord-jarige');
+  const jarigeTekstEl = document.getElementById('bord-jarige-tekst');
+  if (jarigeEl && jarigeTekstEl) {
+    const jarige = (_headerInstellingen.jarige || '').trim();
+    if (jarige) {
+      // Tel namen door te splitsen op komma, " en ", " & " — meerdere namen → "zijn"
+      const namen = jarige.split(/,| en | & /i).map((n) => n.trim()).filter((n) => n.length > 0);
+      const werkwoord = namen.length > 1 ? 'zijn' : 'is';
+      jarigeTekstEl.textContent = `${jarige} ${werkwoord} jarig!`;
+      jarigeEl.classList.remove('verborgen');
+      jarigeEl.style.color = _headerInstellingen.tekstkleur;
+    } else {
+      jarigeEl.classList.add('verborgen');
+    }
+  }
 }
 
 function _initHeaderBewerker() {
@@ -63,6 +81,8 @@ function _initHeaderBewerker() {
     // Vul huidige waarden in
     document.getElementById('header-tekst').value = _headerInstellingen.tekst;
     document.getElementById('header-tekstkleur').value = _headerInstellingen.tekstkleur;
+    const jarigeInput = document.getElementById('header-jarige');
+    if (jarigeInput) jarigeInput.value = _headerInstellingen.jarige || '';
 
     // Markeer huidige thema-knop
     document.querySelectorAll('#header-kleur-grid .kleur-knop').forEach((k) => {
@@ -98,6 +118,8 @@ function _initHeaderBewerker() {
     _headerInstellingen.tekst = document.getElementById('header-tekst').value.trim() || 'Goedemorgen klas!';
     _headerInstellingen.tekstkleur = document.getElementById('header-tekstkleur').value;
     _headerInstellingen.thema = gekozenThema;
+    const jarigeInput = document.getElementById('header-jarige');
+    _headerInstellingen.jarige = jarigeInput ? jarigeInput.value.trim() : '';
     _pasHeaderStijlToe();
     modal.classList.add('verborgen');
   });
