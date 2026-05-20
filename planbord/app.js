@@ -94,52 +94,61 @@ function _initPresentatie() {
 
 function toonPresentatie() {
   deselecteer();
+  document.body.classList.add('in-presentatie');
   const overlay = document.getElementById('presentatie');
-  const inhoud = document.getElementById('presentatie-inhoud');
-
-  // Lees de oorspronkelijke afmetingen VOORDAT we klonen
-  const bord = document.getElementById('bord');
-  const origBreedte = bord.offsetWidth;
-  const origHoogte = bord.offsetHeight;
-
-  // Kloon het bord op zijn oorspronkelijke afmetingen
-  const kloon = bord.cloneNode(true);
-  kloon.id = 'bord-pres';
-  kloon.style.maxWidth = 'none';
-  kloon.style.width = origBreedte + 'px';
-  kloon.style.height = origHoogte + 'px';
-  kloon.style.aspectRatio = '';
-
-  // Verwijder bewerk-affordances
-  kloon.querySelectorAll('[contenteditable]').forEach((el) => el.removeAttribute('contenteditable'));
-  kloon.querySelectorAll('.greep, .vak-acties, .checklist-knoppen, .checklist-toevoegen, .item-verwijder, .rotatie-greep').forEach((el) => el.remove());
-  kloon.querySelectorAll('.geselecteerd').forEach((el) => el.classList.remove('geselecteerd'));
-
-  inhoud.innerHTML = '';
-  inhoud.appendChild(kloon);
   overlay.classList.remove('verborgen');
-
-  // Bereken schaalfactor zodat het bord het scherm vult met behoud van verhoudingen
-  _schaalPresentatie(kloon, origBreedte, origHoogte);
-
+  _pasPresentatieSchaalToe();
   // Bij venster-resize ook opnieuw schalen
-  window._presentatieResize = () => _schaalPresentatie(kloon, origBreedte, origHoogte);
+  window._presentatieResize = _pasPresentatieSchaalToe;
   window.addEventListener('resize', window._presentatieResize);
 }
 
-function _schaalPresentatie(kloon, origBreedte, origHoogte) {
-  const inhoud = document.getElementById('presentatie-inhoud');
-  const beschBreedte = inhoud.clientWidth;
-  const beschHoogte = inhoud.clientHeight;
+function _pasPresentatieSchaalToe() {
+  const bord = document.getElementById('bord');
+  if (!bord || !document.body.classList.contains('in-presentatie')) return;
+
+  // Bepaal de originele afmetingen van het bord (zonder transform)
+  // We resetten eerst de schaal om te meten
+  bord.style.transform = '';
+  const origBreedte = bord.offsetWidth;
+  const origHoogte = bord.offsetHeight;
+
+  // Beschikbare ruimte = volledig venster
+  const beschBreedte = window.innerWidth;
+  const beschHoogte = window.innerHeight;
+
+  if (origBreedte === 0 || origHoogte === 0) return;
+
+  // Evenredig schalen met behoud van aspect-ratio (geen vervorming)
+  // De crème achtergrond op body.in-presentatie zorgt dat eventuele randen
+  // visueel doorlopen ipv als zwarte balken te tonen.
   const schaal = Math.min(beschBreedte / origBreedte, beschHoogte / origHoogte);
-  kloon.style.transform = `scale(${schaal})`;
-  kloon.style.transformOrigin = 'center center';
+  const geschaaldeBreedte = origBreedte * schaal;
+  const geschaaldeHoogte = origHoogte * schaal;
+  const offsetX = (beschBreedte - geschaaldeBreedte) / 2;
+  const offsetY = (beschHoogte - geschaaldeHoogte) / 2;
+  bord.style.transform = `scale(${schaal})`;
+  bord.style.transformOrigin = 'top left';
+  bord.style.position = 'fixed';
+  bord.style.left = offsetX + 'px';
+  bord.style.top = offsetY + 'px';
+  bord.style.zIndex = '1050';
 }
 
 function sluitPresentatie() {
+  document.body.classList.remove('in-presentatie');
   const overlay = document.getElementById('presentatie');
   overlay.classList.add('verborgen');
-  document.getElementById('presentatie-inhoud').innerHTML = '';
+  // Reset inline styles op het bord
+  const bord = document.getElementById('bord');
+  if (bord) {
+    bord.style.transform = '';
+    bord.style.transformOrigin = '';
+    bord.style.position = '';
+    bord.style.left = '';
+    bord.style.top = '';
+    bord.style.zIndex = '';
+  }
   if (window._presentatieResize) {
     window.removeEventListener('resize', window._presentatieResize);
     delete window._presentatieResize;
