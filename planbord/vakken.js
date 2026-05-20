@@ -7,6 +7,8 @@ const STANDAARD_GROOTTE = {
   vrij:        { breedte: 280, hoogte: 200 },
   checklist:   { breedte: 320, hoogte: 260 },
   timer:       { breedte: 280, hoogte: 240 },
+  weer:        { breedte: 200, hoogte: 160 },
+  werkstijl:   { breedte: 240, hoogte: 260 },
 };
 
 // Standaard-titels per vak-type (leeg = leerkracht vult zelf in via placeholder)
@@ -14,6 +16,8 @@ const STANDAARD_TITEL = {
   vrij:      '',
   checklist: '',
   timer:     '',
+  weer:      '',
+  werkstijl: '',
 };
 
 // === TEKSTGROOTTE-NIVEAUS ===
@@ -61,6 +65,11 @@ function voegVakToe(vaktype) {
     vak.dataset.seconden = 0;
     vak.dataset.geluidsmodus = 'normaal';
     vak.innerHTML = _maakTimerVakHTML({ minuten: 5, seconden: 0, timerStijl: 'cijfers' });
+  } else if (vaktype === 'weer') {
+    vak.innerHTML = _maakWeerVakHTML();
+  } else if (vaktype === 'werkstijl') {
+    vak.dataset.werkstijl = 'stilte';
+    vak.innerHTML = _maakWerkstijlVakHTML({ werkstijl: 'stilte' });
   }
 
   canvas.appendChild(vak);
@@ -74,6 +83,16 @@ function voegVakToe(vaktype) {
   // Init timer (alleen voor timer)
   if (vaktype === 'timer') {
     _initTimer(vak);
+  }
+
+  // Init weer (alleen voor weer)
+  if (vaktype === 'weer') {
+    _initWeer(vak);
+  }
+
+  // Init werkstijl
+  if (vaktype === 'werkstijl') {
+    _initWerkstijl(vak);
   }
 
   selecteerVak(vak);
@@ -142,6 +161,7 @@ function _koppelVakInteractie(vak) {
     if (e.target.closest('.item-afbeelding')) return;
     if (e.target.closest('.timer-knop')) return;
     if (e.target.closest('.timer-geluidsicoon')) return;
+    if (e.target.closest('.werkstijl-knop')) return;
 
     selecteerVak(vak);
     _startSlepen(vak, e);
