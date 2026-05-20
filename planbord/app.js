@@ -25,6 +25,35 @@ function _initUitleg() {
   modal.addEventListener('click', (e) => {
     if (e.target === modal) modal.classList.add('verborgen');
   });
+
+  // Voorbeeldbord laden
+  const voorbeeldKnop = document.getElementById('btn-voorbeeld');
+  if (voorbeeldKnop) {
+    voorbeeldKnop.addEventListener('click', async () => {
+      // Vraag bevestiging als er al iets op het bord staat
+      const canvas = document.getElementById('bord-canvas');
+      const heeftInhoud = canvas && canvas.querySelector('.vak, .canvas-afbeelding');
+      if (heeftInhoud) {
+        const bevestigd = confirm('Dit vervangt je huidige bord. Doorgaan?');
+        if (!bevestigd) return;
+      }
+      try {
+        voorbeeldKnop.disabled = true;
+        voorbeeldKnop.textContent = '⏳ Aan het laden...';
+        const respons = await fetch('voorbeeld.json');
+        if (!respons.ok) throw new Error('Bestand niet gevonden');
+        const data = await respons.json();
+        importeerBord(data);
+        modal.classList.add('verborgen');
+      } catch (err) {
+        console.warn('Kon voorbeeldbord niet laden:', err);
+        alert('Kon het voorbeeldbord niet laden.\nPlaats het bestand "voorbeeld.json" naast index.html in de planbord-map.');
+      } finally {
+        voorbeeldKnop.disabled = false;
+        voorbeeldKnop.textContent = '📋 Voorbeeldbord laden';
+      }
+    });
+  }
 }
 
 // === TABS IN ZIJPANEEL ===
