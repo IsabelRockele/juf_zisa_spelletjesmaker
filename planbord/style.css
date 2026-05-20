@@ -106,6 +106,132 @@ body {
   color: white;
 }
 
+/* === UITLEG-KNOP === */
+.btn-uitleg {
+  background: #FAEEDA;
+  color: #854F0B;
+  border-color: #FAC775;
+  font-weight: 600;
+}
+
+.btn-uitleg:hover {
+  background: #FAC775;
+}
+
+/* === UITLEG-MODAL === */
+.modal-inhoud-uitleg {
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  line-height: 1.55;
+}
+
+.modal-inhoud-uitleg h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #534AB7;
+  margin-top: 18px;
+  margin-bottom: 8px;
+}
+
+.modal-inhoud-uitleg p,
+.modal-inhoud-uitleg ul {
+  font-size: 13.5px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.modal-inhoud-uitleg ul {
+  padding-left: 20px;
+}
+
+.modal-inhoud-uitleg li {
+  margin-bottom: 6px;
+}
+
+.modal-inhoud-uitleg code {
+  background: #f3f1ea;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  color: #534AB7;
+}
+
+.modal-inhoud-uitleg .uitleg-intro {
+  font-size: 14px;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 18px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing {
+  background: #FFF4E5;
+  border: 1.5px solid #FAC775;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 12px 0;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing > strong {
+  color: #993556;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p strong {
+  color: #993556;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.modal-inhoud-uitleg .uitleg-waarschuwing p:last-child {
+  margin-bottom: 0;
+}
+
+/* Voorbeeld-sectie */
+.modal-inhoud-uitleg .uitleg-voorbeeld {
+  background: #EEEDFE;
+  border: 1.5px solid #CECBF6;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin: 16px 0 4px 0;
+  text-align: center;
+}
+
+.modal-inhoud-uitleg .uitleg-voorbeeld > strong {
+  color: #534AB7;
+  font-size: 14px;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.modal-inhoud-uitleg .uitleg-voorbeeld p {
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.btn-voorbeeld {
+  background: #534AB7;
+  color: white;
+  border-color: #534AB7;
+  font-weight: 600;
+  padding: 8px 18px;
+}
+
+.btn-voorbeeld:hover {
+  background: #443B9F;
+}
+
+.btn-voorbeeld:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 /* === WERKRUIMTE === */
 .werkruimte {
   flex: 1;
@@ -1511,6 +1637,62 @@ body.in-presentatie .geselecteerd {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
+}
+
+/* Locatie-label onder weer (klein, subtiel) */
+.weer-locatie-label {
+  font-size: 10px;
+  opacity: 0.55;
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  margin-top: 2px;
+}
+
+.weer-locatie-label:empty {
+  display: none;
+}
+
+/* Instellen-knop ⚙ rechtsboven in weer-vak */
+.weer-instellen {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+  font-family: inherit;
+  padding: 0;
+  color: inherit;
+}
+
+.vak[data-vaktype="weer"]:hover .weer-instellen,
+.vak[data-vaktype="weer"].geselecteerd .weer-instellen {
+  opacity: 0.75;
+}
+
+.weer-instellen:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* In presentatie: ⚙ verbergen, leerkracht stelt vooraf in */
+body.in-presentatie .weer-instellen {
+  display: none !important;
 }
 
 /* Kleuren per vak-kleur (gebruikt currentColor via .kleur-* op de vak) */
