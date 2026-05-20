@@ -314,21 +314,35 @@ function _wijzigKleur(vak, nieuweKleur) {
 }
 
 // === SLEPEN ===
+// Belangrijk: het bord is geschaald (transform: scale), dus muis-coördinaten
+// moeten we delen door de schaal om de juiste interne verplaatsing te krijgen.
+function _huidigeBordSchaal() {
+  const bord = document.getElementById('bord');
+  if (!bord) return 1;
+  // offsetWidth = ongeschaalde breedte (1600); getBoundingClientRect = geschaalde breedte
+  const echtBreedte = bord.getBoundingClientRect().width;
+  const internBreedte = bord.offsetWidth;
+  return internBreedte > 0 ? echtBreedte / internBreedte : 1;
+}
+
 function _startSlepen(element, e) {
+  // Lees positie uit de inline style (intern formaat), niet uit getBoundingClientRect
+  const beginLeft = parseFloat(element.style.left) || 0;
+  const beginTop = parseFloat(element.style.top) || 0;
+
   const canvas = document.getElementById('bord-canvas');
-  const canvasRect = canvas.getBoundingClientRect();
-  const elementRect = element.getBoundingClientRect();
 
   _sleepStatus = {
     element,
     startX: e.clientX,
     startY: e.clientY,
-    beginLeft: elementRect.left - canvasRect.left,
-    beginTop: elementRect.top - canvasRect.top,
-    canvasBreedte: canvas.clientWidth,
-    canvasHoogte: canvas.clientHeight,
+    beginLeft,
+    beginTop,
+    canvasBreedte: canvas.offsetWidth,  // intern formaat
+    canvasHoogte: canvas.offsetHeight,
     elementBreedte: element.offsetWidth,
     elementHoogte: element.offsetHeight,
+    schaal: _huidigeBordSchaal(),
   };
 
   document.addEventListener('mousemove', _tijdensSlepen);
@@ -338,8 +352,9 @@ function _startSlepen(element, e) {
 
 function _tijdensSlepen(e) {
   if (!_sleepStatus) return;
-  const dx = e.clientX - _sleepStatus.startX;
-  const dy = e.clientY - _sleepStatus.startY;
+  // Schermverplaatsing omrekenen naar interne verplaatsing
+  const dx = (e.clientX - _sleepStatus.startX) / _sleepStatus.schaal;
+  const dy = (e.clientY - _sleepStatus.startY) / _sleepStatus.schaal;
   let nieuwLeft = _sleepStatus.beginLeft + dx;
   let nieuwTop = _sleepStatus.beginTop + dy;
 
@@ -360,8 +375,6 @@ function _stopSlepen() {
 // === SCHALEN ===
 function _startSchalen(element, positie, e) {
   const canvas = document.getElementById('bord-canvas');
-  const canvasRect = canvas.getBoundingClientRect();
-  const elementRect = element.getBoundingClientRect();
 
   // Afbeeldingen mogen kleiner worden dan vakken
   const isAfbeelding = element.classList.contains('canvas-afbeelding');
@@ -373,14 +386,15 @@ function _startSchalen(element, positie, e) {
     positie,
     startX: e.clientX,
     startY: e.clientY,
-    beginLeft: elementRect.left - canvasRect.left,
-    beginTop: elementRect.top - canvasRect.top,
+    beginLeft: parseFloat(element.style.left) || 0,
+    beginTop: parseFloat(element.style.top) || 0,
     beginBreedte: element.offsetWidth,
     beginHoogte: element.offsetHeight,
-    canvasBreedte: canvas.clientWidth,
-    canvasHoogte: canvas.clientHeight,
+    canvasBreedte: canvas.offsetWidth,   // intern
+    canvasHoogte: canvas.offsetHeight,
     minBreedte,
     minHoogte,
+    schaal: _huidigeBordSchaal(),
   };
 
   document.addEventListener('mousemove', _tijdensSchalen);
@@ -392,10 +406,11 @@ function _tijdensSchalen(e) {
   if (!_schaalStatus) return;
   const {
     positie, beginLeft, beginTop, beginBreedte, beginHoogte,
-    canvasBreedte, canvasHoogte, minBreedte, minHoogte,
+    canvasBreedte, canvasHoogte, minBreedte, minHoogte, schaal,
   } = _schaalStatus;
-  const dx = e.clientX - _schaalStatus.startX;
-  const dy = e.clientY - _schaalStatus.startY;
+  // Schermverplaatsing omrekenen naar interne verplaatsing
+  const dx = (e.clientX - _schaalStatus.startX) / schaal;
+  const dy = (e.clientY - _schaalStatus.startY) / schaal;
 
   let nieuwLeft = beginLeft;
   let nieuwTop = beginTop;
