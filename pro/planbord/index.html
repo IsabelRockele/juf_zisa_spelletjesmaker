@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planbord — Juf Zisa PRO</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── PRO BANNER ─────────────────────────────────────────── */
+    .pro-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      gap: 12px;
+      flex-shrink: 0;
+      z-index: 200;
+    }
+    .pro-banner .pro-badge {
+      background: #f5c200;
+      color: #0b3060;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.78rem;
+    }
+    .pro-banner a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+    .pro-banner a:hover { color: #fff; }
+    /* In presentatie-modus: PRO-banner ook verbergen */
+    body.in-presentatie .pro-banner {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+<!-- PRO BANNER -->
+<div class="pro-banner">
+  <span class="pro-badge">⭐ PRO</span>
+  <span>Planbord — Juf Zisa PRO</span>
+  <a href="../app.html">← Terug naar menu</a>
+</div>
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <a href="../app.html" class="btn btn-terug">← Terug naar keuzemenu</a>
+      <button id="btn-uitleg" class="btn btn-uitleg" title="Hoe werkt het Planbord?">❓ Uitleg</button>
+      <h1>Planbord</h1>
+      <span class="subtitle">Maak een vrolijk bord voor je klas</span>
+    </div>
+    <div class="topbar-right">
+      <button id="btn-verwijder" class="btn">Verwijderen</button>
+      <button id="btn-import" class="btn">Openen</button>
+      <input type="file" id="file-import" accept="application/json" hidden />
+      <button id="btn-export" class="btn">Opslaan</button>
+      <button id="btn-presentatie" class="btn btn-primary">Toon op digibord</button>
+    </div>
+  </header>
+
+  <main class="werkruimte">
+
+    <aside class="zijpaneel">
+      <div class="tabs">
+        <button class="tab actief" data-tab="vakken">Vakken</button>
+        <button class="tab" data-tab="afbeeldingen">Afbeeldingen</button>
+      </div>
+
+      <div class="tab-inhoud" id="tab-vakken">
+        <p class="hint">Klik om toe te voegen aan je bord</p>
+        <div class="vakken-lijst">
+          <button class="vak-knop" data-vaktype="vrij">
+            <div class="vak-knop-preview" style="background: #EEEDFE; border-color: #CECBF6;">
+              <span style="color: #534AB7;">Aa</span>
+            </div>
+            <span class="vak-knop-naam">Vrij vak</span>
+            <span class="vak-knop-hint">Titel + tekst + afbeeldingen</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="checklist">
+            <div class="vak-knop-preview" style="background: #E1F5EE; border-color: #9FE1CB;">
+              <span style="color: #0F6E56; font-size: 18px;">☑</span>
+            </div>
+            <span class="vak-knop-naam">Checklist</span>
+            <span class="vak-knop-hint">Lijstje met afbeelding + tekst</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="timer">
+            <div class="vak-knop-preview" style="background: #FAEEDA; border-color: #FAC775;">
+              <span style="color: #854F0B; font-size: 18px;">⏱</span>
+            </div>
+            <span class="vak-knop-naam">Timer</span>
+            <span class="vak-knop-hint">Aftellen met visuele stijl</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="weer">
+            <div class="vak-knop-preview" style="background: #E6F1FB; border-color: #B5D4F4;">
+              <span style="color: #185FA5; font-size: 18px;">⛅</span>
+            </div>
+            <span class="vak-knop-naam">Weer</span>
+            <span class="vak-knop-hint">Actuele temperatuur en weer</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="werkstijl">
+            <div class="vak-knop-preview" style="background: #FBEAF0; border-color: #F4C0D1;">
+              <span style="color: #993556; font-size: 18px;">🤫</span>
+            </div>
+            <span class="vak-knop-naam">Werkstijl</span>
+            <span class="vak-knop-hint">Stilte of fluisterstem</span>
+          </button>
+        </div>
+
+        <div class="binnenkort">
+          <p class="hint-titel">Binnenkort beschikbaar:</p>
+          <ul class="hint-lijst">
+            <li>Verjaardag</li>
+            <li>Dagprogramma</li>
+            <li>Mededeling</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-inhoud verborgen" id="tab-afbeeldingen">
+        <p class="hint">Klik om toe te voegen aan je bord</p>
+        <div class="bib-grid" id="bib-grid"></div>
+      </div>
+    </aside>
+
+    <section class="canvas-zone">
+      <div id="bord">
+        <header class="bord-header" id="bord-header" title="Klik om aan te passen">
+          <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
+          <p class="bord-welkom" id="bord-welkom"><span class="zwaaihand">👋</span> <span id="bord-welkom-tekst">Goedemorgen klas!</span></p>
+          <div class="bord-jarige verborgen" id="bord-jarige">
+            <img class="jarige-icoon" src="afbeeldingen/jarige.png" alt="jarig" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+            <span class="jarige-emoji" style="display:none;">🎂</span>
+            <span class="jarige-tekst" id="bord-jarige-tekst"></span>
+          </div>
+        </header>
+
+        <div class="bord-canvas" id="bord-canvas">
+          <!-- Vakken worden hier via JS toegevoegd -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- === Kleurkiezer popover === -->
+  <div id="kleurkiezer" class="kleurkiezer verborgen">
+    <p class="kleurkiezer-titel">Kies een kleur</p>
+    <div class="kleur-grid">
+      <button class="kleur-knop" data-kleur="paars" style="background: #CECBF6;" aria-label="Paars"></button>
+      <button class="kleur-knop" data-kleur="roze" style="background: #F4C0D1;" aria-label="Roze"></button>
+      <button class="kleur-knop" data-kleur="groen" style="background: #C0DD97;" aria-label="Groen"></button>
+      <button class="kleur-knop" data-kleur="teal" style="background: #9FE1CB;" aria-label="Teal"></button>
+      <button class="kleur-knop" data-kleur="blauw" style="background: #B5D4F4;" aria-label="Blauw"></button>
+      <button class="kleur-knop" data-kleur="geel" style="background: #FAC775;" aria-label="Geel"></button>
+      <button class="kleur-knop" data-kleur="oranje" style="background: #F5C4B3;" aria-label="Oranje"></button>
+      <button class="kleur-knop" data-kleur="grijs" style="background: #D3D1C7;" aria-label="Grijs"></button>
+    </div>
+  </div>
+
+  <!-- === Presentatie-modus overlay === -->
+  <div id="presentatie" class="presentatie verborgen">
+    <div id="presentatie-inhoud"></div>
+    <button id="btn-sluit-presentatie" class="btn-sluit" aria-label="Sluit presentatie">×</button>
+  </div>
+
+  <!-- === Header bewerken modal === -->
+  <div id="header-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud">
+      <h3>Header aanpassen</h3>
+      <label>Welkomtekst
+        <input type="text" id="header-tekst" placeholder="Goedemorgen klas!" />
+      </label>
+      <label>Jarige(n) vandaag <span style="opacity: 0.6; font-weight: 400;">(optioneel)</span>
+        <input type="text" id="header-jarige" placeholder="bv. Lina en Sam" />
+      </label>
+      <label>Achtergrondkleur
+        <div class="kleur-grid" id="header-kleur-grid">
+          <button class="kleur-knop" data-thema="zon" style="background: linear-gradient(90deg, #FFE4B5, #FFDAB5);" aria-label="Zon"></button>
+          <button class="kleur-knop" data-thema="paars" style="background: #EEEDFE;" aria-label="Paars"></button>
+          <button class="kleur-knop" data-thema="roze" style="background: #FBEAF0;" aria-label="Roze"></button>
+          <button class="kleur-knop" data-thema="groen" style="background: #EAF3DE;" aria-label="Groen"></button>
+          <button class="kleur-knop" data-thema="teal" style="background: #E1F5EE;" aria-label="Teal"></button>
+          <button class="kleur-knop" data-thema="blauw" style="background: #E6F1FB;" aria-label="Blauw"></button>
+          <button class="kleur-knop" data-thema="geel" style="background: #FAEEDA;" aria-label="Geel"></button>
+          <button class="kleur-knop" data-thema="oranje" style="background: #FAECE7;" aria-label="Oranje"></button>
+        </div>
+      </label>
+      <label>Tekstkleur
+        <input type="color" id="header-tekstkleur" value="#633806" />
+      </label>
+      <div class="modal-knoppen">
+        <button id="header-annuleer" class="btn">Annuleren</button>
+        <button id="header-ok" class="btn btn-primary">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === Timer instellen modal === -->
+  <div id="timer-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud">
+      <h3>Timer instellen</h3>
+      <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+        <label style="flex:1;">Minuten
+          <input type="number" id="timer-minuten" value="5" min="0" max="120" />
+        </label>
+        <label style="flex:1;">Seconden
+          <input type="number" id="timer-seconden" value="0" min="0" max="59" />
+        </label>
+      </div>
+      <label>Visuele stijl
+        <div class="timer-stijl-grid">
+          <button class="timer-stijl-knop" type="button" data-stijl="cijfers">
+            <span class="stijl-icoon">🔢</span>
+            <span class="stijl-naam">Cijfers</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="klok">
+            <span class="stijl-icoon">🕐</span>
+            <span class="stijl-naam">Klok</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="taart">
+            <span class="stijl-icoon">🍰</span>
+            <span class="stijl-naam">Taart</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="zandloper">
+            <span class="stijl-icoon">⏳</span>
+            <span class="stijl-naam">Zandloper</span>
+          </button>
+          <button class="timer-stijl-knop" type="button" data-stijl="balk">
+            <span class="stijl-icoon">▰▰▱</span>
+            <span class="stijl-naam">Voortgangsbalk</span>
+          </button>
+        </div>
+      </label>
+      <div class="modal-knoppen">
+        <button id="timer-annuleer" class="btn">Annuleren</button>
+        <button id="timer-ok" class="btn btn-primary">Toepassen</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- === UITLEG MODAL === -->
+  <div id="uitleg-modal" class="modal-overlay verborgen">
+    <div class="modal-inhoud modal-inhoud-uitleg">
+      <h3>Welkom bij het Planbord</h3>
+
+      <p class="uitleg-intro">
+        Een rustig digitaal bord voor in je klas. Bedoeld om bij binnenkomst
+        meteen duidelijk te maken wat er die dag belangrijk is — zonder afleiding.
+      </p>
+
+      <h4>📌 Aan de slag</h4>
+      <ul>
+        <li>Klik links op een <strong>vak-knop</strong> (Vrij vak, Checklist, Timer, Weer, Werkstijl) om dat vak toe te voegen aan je bord.</li>
+        <li>Klik op een vak om het te <strong>selecteren</strong>. Dan kan je het verslepen, vergroten of bewerken.</li>
+        <li>Klik op het <strong>tabblad "Afbeeldingen"</strong> om plaatjes (fruit, drinkbus, dagelijkse kost, ...) op je bord te slepen.</li>
+        <li>Klik op de <strong>welkomstbalk bovenaan</strong> om de tekst, kleur of jarige aan te passen.</li>
+      </ul>
+
+      <h4>💾 Opslaan en openen</h4>
+      <p>
+        Wil je je bord bewaren voor een andere dag of meenemen naar school?
+      </p>
+      <ul>
+        <li>Klik op <strong>Opslaan</strong> rechtsboven → er wordt een bestand gedownload met de naam <code>planbord_DATUM.json</code>.</li>
+        <li>Bewaar dat bestand in een mapje op je computer, op een USB of in Google Drive.</li>
+        <li>Volgende keer: klik op <strong>Openen</strong> → kies je opgeslagen <code>.json</code>-bestand → je bord verschijnt weer zoals je het achterliet.</li>
+      </ul>
+
+      <div class="uitleg-waarschuwing">
+        <strong>⚠️ Belangrijk over JSON-bestanden</strong>
+        <p>
+          Een <code>.json</code>-bestand is geen document, maar een data-bestand dat het Planbord
+          zelf moet inlezen.
+        </p>
+        <p>
+          Bewaar je <code>.json</code>-bestand op een gemakkelijke plek — bijvoorbeeld in een eigen map
+          in Verkenner of op Google Drive — zodat je hem later vlot terugvindt.
+        </p>
+        <p>
+          <strong>Dubbelklik niet</strong> op het bestand. Dan opent Windows het in Kladblok
+          en zie je alleen maar code. Open je bord altijd via de knop <strong>"Openen"</strong>
+          in het Planbord zelf. Zo leest het programma het bestand correct in.
+        </p>
+      </div>
+
+      <h4>🖥️ Tonen op het digibord</h4>
+      <p>
+        Klik rechtsboven op <strong>"Toon op digibord"</strong>. Alle bewerk-knoppen verdwijnen
+        en je bord vult het hele scherm. Klik op de <strong>×</strong> rechtsboven om terug naar bewerken te gaan.
+      </p>
+
+      <h4>💡 Handige tips</h4>
+      <ul>
+        <li>Met de <strong>A+ en A−</strong> knoppen kan je tekst groter of kleiner maken.</li>
+        <li>Een geselecteerde afbeelding kan je <strong>draaien</strong> met het paarse cirkeltje erboven.</li>
+        <li>In een Checklist kan je een <strong>witregel toevoegen</strong> voor extra ruimte. Hover over een witregel om hem te verbreden (handle onderaan) of te verwijderen (× rechts).</li>
+        <li>Het <strong>Weer-vak</strong> toont standaard de temperatuur voor Bornem. Klik op het tandwiel ⚙ rechtsboven in het weer-vak om een andere stad of dorp in te stellen (België, Nederland, of elders).</li>
+      </ul>
+
+      <div class="uitleg-voorbeeld">
+        <strong>🎁 Eerste keer hier?</strong>
+        <p>
+          Geen idee hoe te beginnen? Laad een voorbeeldbord en pas het aan naar jouw klas.
+        </p>
+        <button id="btn-voorbeeld" type="button" class="btn btn-voorbeeld">📋 Voorbeeldbord laden</button>
+      </div>
+
+      <div class="modal-knoppen">
+        <button id="uitleg-sluit" class="btn btn-primary">Begrepen!</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="kleuren.js"></script>
+  <script src="bibliotheek.js"></script>
+  <script src="vakken.js"></script>
+  <script src="timer.js"></script>
+  <script src="weer.js"></script>
+  <script src="werkstijl.js"></script>
+  <script src="interactie.js"></script>
+  <script src="header.js"></script>
+  <script src="opslag.js"></script>
+  <script src="app.js"></script>
+
+  <script src="../device-id.js"></script>
+  <script src="../guard.js"></script>
+
+</body>
+</html>
