@@ -16,11 +16,14 @@ const BIBLIOTHEEK = [
   { bestand: 'zomer.png', naam: 'zomer' },
   { bestand: 'herfst.png', naam: 'herfst' },
   { bestand: 'winter.png', naam: 'winter' },
+  { bestand: 'Sint.png', naam: 'Sint' },
   { bestand: 'kerst.png', naam: 'Kerst' },
   { bestand: 'carnaval.png', naam: 'carnaval' },
   { bestand: 'halloween.png', naam: 'Halloween' },
   { bestand: 'dikke_truien_dag.png', naam: 'Dikke truiendag' },
   { bestand: 'strapdag.png', naam: 'Strapdag' },
+  { bestand: 'stilte.png', naam: 'stilte' },
+  { bestand: 'fluisterstem.png', naam: 'fluisterstem' },
   // Voeg hier nieuwe afbeeldingen toe, bv.:
   // { bestand: 'leesboek.png', naam: 'leesboek' },
 ];
