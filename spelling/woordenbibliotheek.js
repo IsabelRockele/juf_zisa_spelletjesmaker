@@ -48,6 +48,7 @@ window.SpellingWoordenbibliotheek = {
     "ei-ij",       // tweeklanken-onderdeel maar onthoudwoord
     "au-ou",
     "aai-ooi-oei-eeuw-ieuw-uw",  // graad 2 — uitgebreide tweeklanken
+    "klinker-eind",       // woorden eindigend op klinker: ma, pa, menu, piano
     "ng-nk",
     "moeilijke-klanken",  // sch
     "sch-woorden",
@@ -56,14 +57,14 @@ window.SpellingWoordenbibliotheek = {
     "ch-cht-klank",       // (oude naam voor compatibility)
     "ch-cht-gt",
     "doffe-klank",
+    "doffe-klank-voorvoegsel",   // voorvoegsels ge-/ver-/be-/on- — kind hoort en schrijft
+    "doffe-klank-achtervoegsel", // graad 2
     // regelwoord
     "verdubbel-verenkel",
     "verlengen",
     "verlengen-tdpb",     // graad 2 — uitgebreid t/d + p/b
     "verkleinwoorden",
     "meervouden",
-    "doffe-klank-voorvoegsel",   // graad 2
-    "doffe-klank-achtervoegsel", // graad 2
     // werkwoord (allemaal graad 2)
     "werkwoorden-ott",
     "werkwoorden-vtt",
@@ -181,6 +182,7 @@ window.SpellingWoordenbibliotheek = {
     "teit-heid": "Woorden op -teit en -heid",
     "leenwoorden": "Leenwoorden",
     "hoofdletters": "Hoofdletters & leestekens",
-    "samenstellingen": "Samengestelde woorden"
+    "samenstellingen": "Samengestelde woorden",
+    "klinker-eind": "Woorden eindigend op een klinker"
   }
 };

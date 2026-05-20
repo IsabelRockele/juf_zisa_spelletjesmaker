@@ -291,7 +291,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "maai", lidwoord: null, afbeelding: false },
       { tekst: "maait", lidwoord: null, afbeelding: false },
       { tekst: "zaai", lidwoord: null, afbeelding: false },
-      { tekst: "zaait", lidwoord: null, afbeelding: false }
+      { tekst: "zaait", lidwoord: null, afbeelding: false },
+      { tekst: "taai", lidwoord: null, afbeelding: false }
     ]
   },
   "tw-ooi": {
@@ -305,7 +306,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "gooi", lidwoord: null, afbeelding: false },
       { tekst: "gooit", lidwoord: null, afbeelding: false },
       { tekst: "strooi", lidwoord: null, afbeelding: false },
-      { tekst: "strooit", lidwoord: null, afbeelding: false }
+      { tekst: "strooit", lidwoord: null, afbeelding: false },
+      { tekst: "prooi", lidwoord: "de", afbeelding: false }
     ]
   },
   "tw-oei": {
@@ -350,6 +352,38 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "nieuws", lidwoord: "het", afbeelding: false }
     ]
   },
+  "tw-uw": {
+    naam: "uw",
+    groep: "tweeklanken",
+    hoofdgroep: "hoorwoord",
+    woorden: [
+      { tekst: "duw", lidwoord: "de", afbeelding: false },
+      { tekst: "sluw", lidwoord: null, afbeelding: false },
+      { tekst: "ruw", lidwoord: null, afbeelding: false },
+      { tekst: "uw", lidwoord: null, afbeelding: false }
+    ]
+  },
+  // ===== WOORDEN DIE EINDIGEN OP EEN KLINKER =====
+  // Open lettergreep — kind hoort gewoon de klinker. In graad 2 leerplan
+  // komen vaak woorden voor zoals 'ma, pa, zo, menu, piano, paraplu' die 
+  // op een lange klank eindigen zonder eind-medeklinker.
+  "klinker-eind": {
+    naam: "Eindigt op een klinker",
+    groep: "klinker-eind",
+    hoofdgroep: "hoorwoord",
+    woorden: [
+      { tekst: "ma", lidwoord: "de", afbeelding: false },
+      { tekst: "pa", lidwoord: "de", afbeelding: false },
+      { tekst: "zo", lidwoord: null, afbeelding: false },
+      { tekst: "nu", lidwoord: null, afbeelding: false },
+      { tekst: "menu", lidwoord: "het", afbeelding: false },
+      { tekst: "salto", lidwoord: "de", afbeelding: false },
+      { tekst: "piano", lidwoord: "de", afbeelding: true },
+      { tekst: "paraplu", lidwoord: "de", afbeelding: true },
+      { tekst: "auto", lidwoord: "de", afbeelding: true },
+      { tekst: "foto", lidwoord: "de", afbeelding: true }
+    ]
+  },
   // ===== ng / nk WOORDEN =====
   "ng-woorden": {
     naam: "-ng woorden",
@@ -391,7 +425,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schenk", lidwoord: null, afbeelding: false },
       { tekst: "schenkt", lidwoord: null, afbeelding: false },
       { tekst: "denk", lidwoord: null, afbeelding: false },
-      { tekst: "flink", lidwoord: null, afbeelding: false }
+      { tekst: "flink", lidwoord: null, afbeelding: false },
+      { tekst: "venkel", lidwoord: "de", afbeelding: false }
     ]
   },
   // ===== VERDUBBELAARS =====
@@ -599,7 +634,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hij dacht", lidwoord: null, afbeelding: false },
       { tekst: "dicht", lidwoord: null, afbeelding: false },
       { tekst: "echt", lidwoord: null, afbeelding: false },
-      { tekst: "lucht", lidwoord: "de", afbeelding: false }
+      { tekst: "lucht", lidwoord: "de", afbeelding: false },
+      { tekst: "achter", lidwoord: null, afbeelding: false },
+      { tekst: "kracht", lidwoord: "de", afbeelding: false },
+      { tekst: "nicht", lidwoord: "de", afbeelding: false }
     ]
   },
   "gt-woorden": {
@@ -648,7 +686,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "step", lidwoord: "de", verlengd: "steppen", afbeelding: false },
       { tekst: "klap", lidwoord: "de", verlengd: "klappen", afbeelding: false },
       { tekst: "pop", lidwoord: "de", verlengd: "poppen", afbeelding: false },
-      { tekst: "kip", lidwoord: "de", verlengd: "kippen", afbeelding: false }
+      { tekst: "kip", lidwoord: "de", verlengd: "kippen", afbeelding: false },
+      { tekst: "glad", lidwoord: null, verlengd: "gladde", afbeelding: false },
+      { tekst: "beurt", lidwoord: "de", verlengd: "beurten", afbeelding: false }
     ]
   },
   // ===== DOFFE KLANK OP HET EINDE =====
@@ -670,7 +710,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "dokter", lidwoord: "de", afbeelding: false },
       { tekst: "sleutel", lidwoord: "de", afbeelding: false },
       { tekst: "zadel", lidwoord: "het", afbeelding: false },
-      { tekst: "nagel", lidwoord: "de", afbeelding: false }
+      { tekst: "nagel", lidwoord: "de", afbeelding: false },
+      { tekst: "mantel", lidwoord: "de", afbeelding: false }
     ]
   },
   "df-en": {
@@ -710,7 +751,21 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "kleuter", lidwoord: "de", afbeelding: false },
       { tekst: "meester", lidwoord: "de", afbeelding: false },
       { tekst: "tover", lidwoord: null, afbeelding: false },
-      { tekst: "bakker", lidwoord: "de", afbeelding: false }
+      { tekst: "bakker", lidwoord: "de", afbeelding: false },
+      { tekst: "ouder", lidwoord: "de", afbeelding: false },
+      { tekst: "ouders", lidwoord: "de", afbeelding: false }
+    ]
+  },
+  "df-e": {
+    naam: "Eindigt op -e",
+    groep: "doffe-klank",
+    hoofdgroep: "hoorwoord",
+    woorden: [
+      { tekst: "groente", lidwoord: "de", afbeelding: true },
+      { tekst: "hoogte", lidwoord: "de", afbeelding: false },
+      { tekst: "diepte", lidwoord: "de", afbeelding: false },
+      { tekst: "ruimte", lidwoord: "de", afbeelding: false },
+      { tekst: "vlakte", lidwoord: "de", afbeelding: false }
     ]
   },
   // ===== VERKLEINWOORDEN — ZUIVERE VORMEN =====
@@ -730,7 +785,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hand", lidwoord: "de", verklein: "handje", afbeelding: true },
       { tekst: "dorp", lidwoord: "het", verklein: "dorpje", afbeelding: false },
       { tekst: "buik", lidwoord: "de", verklein: "buikje", afbeelding: true },
-      { tekst: "plant", lidwoord: "de", verklein: "plantje", afbeelding: true }
+      { tekst: "plant", lidwoord: "de", verklein: "plantje", afbeelding: true },
+      { tekst: "brief", lidwoord: "de", verklein: "briefje", afbeelding: false }
     ]
   },
   "verklein-tje": {
@@ -748,7 +804,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "broer", lidwoord: "de", verklein: "broertje", afbeelding: false },
       { tekst: "vader", lidwoord: "de", verklein: "vadertje", afbeelding: false },
       { tekst: "moeder", lidwoord: "de", verklein: "moedertje", afbeelding: false },
-      { tekst: "boer", lidwoord: "de", verklein: "boertje", afbeelding: false }
+      { tekst: "boer", lidwoord: "de", verklein: "boertje", afbeelding: false },
+      { tekst: "emmer", lidwoord: "de", verklein: "emmertje", afbeelding: true }
     ]
   },
   "verklein-pje": {
@@ -1012,6 +1069,52 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     ]
   },
 
+  // ===== VOORVOEGSELS MET DOFFE E =====
+  // Woorden die beginnen met ge-, ver-, be- of on-. Bij de eerste drie
+  // klinkt het voorvoegsel als een doffe "uh" — het kind moet leren dat 
+  // het toch met -e- geschreven wordt. "on-" is geen doffe e maar wel
+  // een voorvoegsel dat het kind als geheel moet leren herkennen.
+  // Pedagogisch: kind hoort de klank en moet onthouden dat het ge-/ver-/be-/on- is.
+  "df-voorvoegsel": {
+    naam: "Voorvoegsels (ge-/ver-/be-/on-)",
+    groep: "doffe-klank-voorvoegsel",
+    hoofdgroep: "hoorwoord",
+    woorden: [
+      // ge-
+      { tekst: "gevaar", lidwoord: "het", afbeelding: false },
+      { tekst: "getal", lidwoord: "het", afbeelding: false },
+      { tekst: "geheim", lidwoord: "het", afbeelding: false },
+      { tekst: "gevoel", lidwoord: "het", afbeelding: false },
+      { tekst: "geluk", lidwoord: "het", afbeelding: false },
+      { tekst: "gezicht", lidwoord: "het", afbeelding: false },
+      { tekst: "geweer", lidwoord: "het", afbeelding: false },
+      { tekst: "gewoon", lidwoord: null, afbeelding: false },
+      // ver-
+      { tekst: "verhaal", lidwoord: "het", afbeelding: false },
+      { tekst: "vertel", lidwoord: null, afbeelding: false },
+      { tekst: "verdriet", lidwoord: "het", afbeelding: false },
+      { tekst: "vergeet", lidwoord: null, afbeelding: false },
+      { tekst: "vertrek", lidwoord: null, afbeelding: false },
+      { tekst: "verkeer", lidwoord: "het", afbeelding: false },
+      { tekst: "verkoop", lidwoord: "de", afbeelding: false },
+      // be-
+      { tekst: "begin", lidwoord: "het", afbeelding: false },
+      { tekst: "bedoeling", lidwoord: "de", afbeelding: false },
+      { tekst: "beker", lidwoord: "de", afbeelding: false },
+      { tekst: "beloven", lidwoord: null, afbeelding: false },
+      { tekst: "betalen", lidwoord: null, afbeelding: false },
+      { tekst: "beleefd", lidwoord: null, afbeelding: false },
+      { tekst: "bedankt", lidwoord: null, afbeelding: false },
+      // on-
+      { tekst: "ongeveer", lidwoord: null, afbeelding: false },
+      { tekst: "onnodig", lidwoord: null, afbeelding: false },
+      { tekst: "onbekend", lidwoord: null, afbeelding: false },
+      { tekst: "ongeluk", lidwoord: "het", afbeelding: false },
+      { tekst: "oneerlijk", lidwoord: null, afbeelding: false },
+      { tekst: "onrustig", lidwoord: null, afbeelding: false }
+    ]
+  },
+
   /* ==========================================================
      SAMENSTELLINGEN
      Aparte hoofdgroep (vierde, naast hoor/onthoud/regel).
@@ -1120,6 +1223,21 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         tekst: "kerstboom", lidwoord: "de", afbeelding: false,
         delen: ["kerst", "boom"], delenEmoji: ["🎁", "🌲"],
         beschrijving: "De boom die je versiert met kerst."
+      },
+      {
+        tekst: "barkruk", lidwoord: "de", afbeelding: false,
+        delen: ["bar", "kruk"], delenEmoji: ["🍹", "🪑"],
+        beschrijving: "Een hoge kruk waarop je aan de bar zit."
+      },
+      {
+        tekst: "bloemsuiker", lidwoord: "de", afbeelding: false,
+        delen: ["bloem", "suiker"], delenEmoji: ["🌸", "🍬"],
+        beschrijving: "Heel fijne, witte suiker die je over taart strooit."
+      },
+      {
+        tekst: "driehoek", lidwoord: "de", afbeelding: true,
+        delen: ["drie", "hoek"], delenEmoji: ["3️⃣", "📐"],
+        beschrijving: "Een vorm met drie hoeken."
       }
     ]
   }
