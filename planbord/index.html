@@ -56,6 +56,22 @@
             <span class="vak-knop-naam">Timer</span>
             <span class="vak-knop-hint">Aftellen met visuele stijl</span>
           </button>
+
+          <button class="vak-knop" data-vaktype="weer">
+            <div class="vak-knop-preview" style="background: #E6F1FB; border-color: #B5D4F4;">
+              <span style="color: #185FA5; font-size: 18px;">⛅</span>
+            </div>
+            <span class="vak-knop-naam">Weer</span>
+            <span class="vak-knop-hint">Actuele temperatuur en weer</span>
+          </button>
+
+          <button class="vak-knop" data-vaktype="werkstijl">
+            <div class="vak-knop-preview" style="background: #FBEAF0; border-color: #F4C0D1;">
+              <span style="color: #993556; font-size: 18px;">🤫</span>
+            </div>
+            <span class="vak-knop-naam">Werkstijl</span>
+            <span class="vak-knop-hint">Stilte of fluisterstem</span>
+          </button>
         </div>
 
         <div class="binnenkort">
@@ -77,16 +93,8 @@
     <section class="canvas-zone">
       <div id="bord">
         <header class="bord-header" id="bord-header" title="Klik om aan te passen">
-          <div class="bord-header-links">
-            <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
-            <p class="bord-welkom" id="bord-welkom"><span class="zon">☀</span> <span id="bord-welkom-tekst">Goedemorgen klas!</span></p>
-          </div>
-          <div class="bord-header-rechts">
-            <div class="weer-widget">
-              <span class="weer-icoon">⛅</span>
-              <span class="weer-temp">13°</span>
-            </div>
-          </div>
+          <p class="bord-datum" id="bord-datum">Woensdag 20 mei 2026</p>
+          <p class="bord-welkom" id="bord-welkom"><span class="zwaaihand">👋</span> <span id="bord-welkom-tekst">Goedemorgen klas!</span></p>
         </header>
 
         <div class="bord-canvas" id="bord-canvas">
@@ -194,6 +202,8 @@
   <script src="bibliotheek.js"></script>
   <script src="vakken.js"></script>
   <script src="timer.js"></script>
+  <script src="weer.js"></script>
+  <script src="werkstijl.js"></script>
   <script src="interactie.js"></script>
   <script src="header.js"></script>
   <script src="opslag.js"></script>
