@@ -1,13 +1,18 @@
 /* ==========================================================
    woordenbiblio/graad2.js
    Woordenset voor graad 2 (derde + vierde leerjaar)
-   
+
    Gebaseerd op de leerplandoelen voor schrijven L3 en L4:
    - Hoorwoord-categorieën: herhalen + uitbreiden met moeilijkere woorden
+   - Onthoudwoorden: ei/ij, au/ou (spelling onthouden, klanken klinken hetzelfde)
    - Regelwoorden: bestaande regels + nieuwe uitbreidingen (-etje, -kje, -'s, -eren)
    - Werkwoorden: volledig nieuw (OTT, VTT, OVT zwak/sterk, VVT)
    - Doffe klank in voor-/achtervoegsels: volledig nieuw
    - L4-specifiek: -teit/-heid, leenwoorden
+
+   Structuur: elke groep heeft één of meer aparte categorieën zodat de
+   leerkracht in de woordenkiezer per subcategorie kan aanvinken
+   (bv. enkel -aai-woorden, enkel verdubbelaars).
    ========================================================== */
 window.SpellingWoordenbibliotheek.registreerGraad(2, {
 
@@ -15,14 +20,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
      HOORWOORDEN — herhalen uit graad 1 + uitbreiden
      ============================================================ */
 
-  // ===== ng / nk woorden =====
-  "ng-nk-g2": {
-    naam: "ng / nk woorden",
+  // ===== ng woorden =====
+  "ng-g2": {
+    naam: "ng-woorden",
     groep: "ng-nk",
     hoofdgroep: "hoorwoord",
-    beschrijving: "Woorden met -ng of -nk, klank goed leren onderscheiden.",
+    beschrijving: "Woorden met -ng, klank goed leren onderscheiden van -nk.",
     woorden: [
-      // -ng woorden
       { tekst: "ring", lidwoord: "de", afbeelding: false },
       { tekst: "slang", lidwoord: "de", afbeelding: false },
       { tekst: "long", lidwoord: "de", afbeelding: false },
@@ -38,8 +42,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "regering", lidwoord: "de", afbeelding: false },
       { tekst: "vergadering", lidwoord: "de", afbeelding: false },
       { tekst: "aankondiging", lidwoord: "de", afbeelding: false },
-      { tekst: "verandering", lidwoord: "de", afbeelding: false },
-      // -nk woorden
+      { tekst: "verandering", lidwoord: "de", afbeelding: false }
+    ]
+  },
+
+  // ===== nk woorden =====
+  "nk-g2": {
+    naam: "nk-woorden",
+    groep: "ng-nk",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -nk, klank goed leren onderscheiden van -ng.",
+    woorden: [
       { tekst: "bank", lidwoord: "de", afbeelding: false },
       { tekst: "plank", lidwoord: "de", afbeelding: false },
       { tekst: "klank", lidwoord: "de", afbeelding: false },
@@ -134,127 +147,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== ei / ij woorden =====
-  "ei-ij-g2": {
-    naam: "ei / ij woorden",
-    groep: "ei-ij",
-    hoofdgroep: "hoorwoord",
-    beschrijving: "Woorden met ei of ij — beide klinken hetzelfde, schrijven onthouden.",
-    woorden: [
-      // ei-woorden (uit G1)
-      { tekst: "trein", lidwoord: "de", afbeelding: false },
-      { tekst: "klein", lidwoord: null, afbeelding: false },
-      { tekst: "geit", lidwoord: "de", afbeelding: false },
-      { tekst: "ei", lidwoord: "het", afbeelding: false },
-      { tekst: "weide", lidwoord: "de", afbeelding: false },
-      { tekst: "reis", lidwoord: "de", afbeelding: false },
-      { tekst: "meid", lidwoord: "de", afbeelding: false },
-      { tekst: "lei", lidwoord: "de", afbeelding: false },
-      { tekst: "zeil", lidwoord: "het", afbeelding: false },
-      { tekst: "eiland", lidwoord: "het", afbeelding: false },
-      { tekst: "eik", lidwoord: "de", afbeelding: false },
-      { tekst: "kei", lidwoord: "de", afbeelding: false },
-      { tekst: "klei", lidwoord: "de", afbeelding: false },
-      { tekst: "plein", lidwoord: "het", afbeelding: false },
-      { tekst: "einde", lidwoord: "het", afbeelding: false },
-      { tekst: "feit", lidwoord: "het", afbeelding: false },
-      { tekst: "leiding", lidwoord: "de", afbeelding: false },
-      { tekst: "fontein", lidwoord: "de", afbeelding: false },
-      // ei-woorden (nieuw G2)
-      { tekst: "kapitein", lidwoord: "de", afbeelding: false },
-      { tekst: "veilig", lidwoord: null, afbeelding: false },
-      { tekst: "bereiding", lidwoord: "de", afbeelding: false },
-      { tekst: "bereiken", lidwoord: null, afbeelding: false },
-      { tekst: "veiling", lidwoord: "de", afbeelding: false },
-      { tekst: "dweil", lidwoord: "de", afbeelding: false },
-      { tekst: "zeilen", lidwoord: null, afbeelding: false },
-      // ij-woorden (uit G1)
-      { tekst: "tijd", lidwoord: "de", afbeelding: false },
-      { tekst: "vijf", lidwoord: null, afbeelding: false },
-      { tekst: "fijn", lidwoord: null, afbeelding: false },
-      { tekst: "wijn", lidwoord: "de", afbeelding: false },
-      { tekst: "rijst", lidwoord: "de", afbeelding: false },
-      { tekst: "lijn", lidwoord: "de", afbeelding: false },
-      { tekst: "pijp", lidwoord: "de", afbeelding: false },
-      { tekst: "pijn", lidwoord: "de", afbeelding: false },
-      { tekst: "prijs", lidwoord: "de", afbeelding: false },
-      { tekst: "rijm", lidwoord: "het", afbeelding: false },
-      { tekst: "kijk", lidwoord: null, afbeelding: false },
-      { tekst: "mijn", lidwoord: null, afbeelding: false },
-      { tekst: "schrijf", lidwoord: null, afbeelding: false },
-      { tekst: "bij", lidwoord: "de", afbeelding: false },
-      { tekst: "ijs", lidwoord: "het", afbeelding: false },
-      // ij-woorden (nieuw G2)
-      { tekst: "schilderij", lidwoord: "de", afbeelding: false },
-      { tekst: "bakkerij", lidwoord: "de", afbeelding: false },
-      { tekst: "woestijn", lidwoord: "de", afbeelding: false },
-      { tekst: "partij", lidwoord: "de", afbeelding: false },
-      { tekst: "vrijdag", lidwoord: "de", afbeelding: false },
-      { tekst: "vrijheid", lidwoord: "de", afbeelding: false },
-      { tekst: "gelijkenis", lidwoord: "de", afbeelding: false },
-      { tekst: "gelijkmatig", lidwoord: null, afbeelding: false },
-      { tekst: "vergelijken", lidwoord: null, afbeelding: false }
-    ]
-  },
-
-  // ===== au / ou woorden =====
-  "au-ou-g2": {
-    naam: "au / ou woorden",
-    groep: "au-ou",
-    hoofdgroep: "hoorwoord",
-    beschrijving: "Woorden met au of ou — beide klinken hetzelfde, schrijven onthouden.",
-    woorden: [
-      // ou-woorden (uit G1)
-      { tekst: "koud", lidwoord: null, afbeelding: false },
-      { tekst: "oud", lidwoord: null, afbeelding: false },
-      { tekst: "bout", lidwoord: "de", afbeelding: false },
-      { tekst: "hout", lidwoord: "het", afbeelding: false },
-      { tekst: "fout", lidwoord: "de", afbeelding: false },
-      { tekst: "goud", lidwoord: "het", afbeelding: false },
-      { tekst: "schouder", lidwoord: "de", afbeelding: false },
-      { tekst: "vrouw", lidwoord: "de", afbeelding: false },
-      { tekst: "trouw", lidwoord: "de", afbeelding: false },
-      { tekst: "mouw", lidwoord: "de", afbeelding: false },
-      { tekst: "touw", lidwoord: "het", afbeelding: false },
-      // ou-woorden (nieuw G2)
-      { tekst: "bouwen", lidwoord: null, afbeelding: false },
-      { tekst: "vouwen", lidwoord: null, afbeelding: false },
-      { tekst: "stout", lidwoord: null, afbeelding: false },
-      { tekst: "zout", lidwoord: "het", afbeelding: false },
-      { tekst: "houden", lidwoord: null, afbeelding: false },
-      { tekst: "kabouter", lidwoord: "de", afbeelding: false },
-      { tekst: "kousen", lidwoord: "de", afbeelding: false },
-      { tekst: "ouders", lidwoord: "de", afbeelding: false },
-      // au-woorden (uit G1)
-      { tekst: "pauw", lidwoord: "de", afbeelding: false },
-      { tekst: "saus", lidwoord: "de", afbeelding: false },
-      { tekst: "dauw", lidwoord: "de", afbeelding: false },
-      { tekst: "blauw", lidwoord: null, afbeelding: false },
-      { tekst: "flauw", lidwoord: null, afbeelding: false },
-      { tekst: "nauw", lidwoord: null, afbeelding: false },
-      { tekst: "paus", lidwoord: "de", afbeelding: false },
-      { tekst: "klauw", lidwoord: "de", afbeelding: false },
-      { tekst: "miauw", lidwoord: null, afbeelding: false },
-      { tekst: "auto", lidwoord: "de", afbeelding: false },
-      { tekst: "augustus", lidwoord: null, afbeelding: false },
-      // au-woorden (nieuw G2)
-      { tekst: "applaus", lidwoord: "het", afbeelding: false },
-      { tekst: "astronaut", lidwoord: "de", afbeelding: false },
-      { tekst: "pauze", lidwoord: "de", afbeelding: false },
-      { tekst: "lauw", lidwoord: null, afbeelding: false },
-      { tekst: "mauwen", lidwoord: null, afbeelding: false },
-      { tekst: "rauw", lidwoord: null, afbeelding: false }
-    ]
-  },
-
-  // ===== aai / ooi / oei / eeuw / ieuw / uw =====
-  "aai-ooi-oei-eeuw-ieuw-uw-g2": {
-    naam: "aai / ooi / oei / eeuw / ieuw / uw",
+  // ===== aai woorden =====
+  "aai-g2": {
+    naam: "aai-woorden",
     groep: "aai-ooi-oei-eeuw-ieuw-uw",
     hoofdgroep: "hoorwoord",
-    beschrijving: "Woorden met de samengestelde klinker-medeklinker combinaties.",
+    beschrijving: "Woorden met -aai.",
     woorden: [
-      // -aai (uit G1 + nieuwe)
       { tekst: "haai", lidwoord: "de", afbeelding: false },
       { tekst: "kraai", lidwoord: "de", afbeelding: false },
       { tekst: "draai", lidwoord: "de", afbeelding: false },
@@ -266,8 +165,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "naait", lidwoord: null, afbeelding: false },
       { tekst: "maai", lidwoord: null, afbeelding: false },
       { tekst: "papegaai", lidwoord: "de", afbeelding: false },
-      { tekst: "kaai", lidwoord: "de", afbeelding: false },
-      // -ooi (uit G1 + nieuwe)
+      { tekst: "kaai", lidwoord: "de", afbeelding: false }
+    ]
+  },
+
+  // ===== ooi woorden =====
+  "ooi-g2": {
+    naam: "ooi-woorden",
+    groep: "aai-ooi-oei-eeuw-ieuw-uw",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -ooi.",
+    woorden: [
       { tekst: "kooi", lidwoord: "de", afbeelding: false },
       { tekst: "hooi", lidwoord: "het", afbeelding: false },
       { tekst: "mooi", lidwoord: null, afbeelding: false },
@@ -275,8 +183,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "strooi", lidwoord: null, afbeelding: false },
       { tekst: "vlooi", lidwoord: "de", afbeelding: false },
       { tekst: "plooi", lidwoord: "de", afbeelding: false },
-      { tekst: "rooi", lidwoord: null, afbeelding: false },
-      // -oei (uit G1 + nieuwe)
+      { tekst: "rooi", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== oei woorden =====
+  "oei-g2": {
+    naam: "oei-woorden",
+    groep: "aai-ooi-oei-eeuw-ieuw-uw",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -oei.",
+    woorden: [
       { tekst: "boei", lidwoord: "de", afbeelding: false },
       { tekst: "groei", lidwoord: "de", afbeelding: false },
       { tekst: "bloei", lidwoord: "de", afbeelding: false },
@@ -286,8 +203,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "foei", lidwoord: null, afbeelding: false },
       { tekst: "broei", lidwoord: "de", afbeelding: false },
       { tekst: "vermoeid", lidwoord: null, afbeelding: false },
-      { tekst: "boeiend", lidwoord: null, afbeelding: false },
-      // -eeuw (uit G1 + nieuwe)
+      { tekst: "boeiend", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== eeuw woorden =====
+  "eeuw-g2": {
+    naam: "eeuw-woorden",
+    groep: "aai-ooi-oei-eeuw-ieuw-uw",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -eeuw.",
+    woorden: [
       { tekst: "leeuw", lidwoord: "de", afbeelding: false },
       { tekst: "sneeuw", lidwoord: "de", afbeelding: false },
       { tekst: "eeuw", lidwoord: "de", afbeelding: false },
@@ -295,15 +221,33 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "meeuw", lidwoord: "de", afbeelding: false },
       { tekst: "geeuw", lidwoord: "de", afbeelding: false },
       { tekst: "eeuwig", lidwoord: null, afbeelding: false },
-      { tekst: "sneeuwbal", lidwoord: "de", afbeelding: false },
-      // -ieuw (uit G1 + nieuwe)
+      { tekst: "sneeuwbal", lidwoord: "de", afbeelding: false }
+    ]
+  },
+
+  // ===== ieuw woorden =====
+  "ieuw-g2": {
+    naam: "ieuw-woorden",
+    groep: "aai-ooi-oei-eeuw-ieuw-uw",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -ieuw.",
+    woorden: [
       { tekst: "kieuw", lidwoord: "de", afbeelding: false },
       { tekst: "nieuw", lidwoord: null, afbeelding: false },
       { tekst: "opnieuw", lidwoord: null, afbeelding: false },
       { tekst: "nieuws", lidwoord: "het", afbeelding: false },
       { tekst: "vernieuwen", lidwoord: null, afbeelding: false },
-      { tekst: "nieuwtje", lidwoord: "het", afbeelding: false },
-      // -uw (volledig nieuw in G2)
+      { tekst: "nieuwtje", lidwoord: "het", afbeelding: false }
+    ]
+  },
+
+  // ===== uw woorden =====
+  "uw-g2": {
+    naam: "uw-woorden",
+    groep: "aai-ooi-oei-eeuw-ieuw-uw",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -uw.",
+    woorden: [
       { tekst: "ruw", lidwoord: null, afbeelding: false },
       { tekst: "schuw", lidwoord: null, afbeelding: false },
       { tekst: "duw", lidwoord: "de", afbeelding: false },
@@ -313,22 +257,30 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== ch / cht / gt =====
-  "ch-cht-gt-g2": {
-    naam: "ch / cht / gt woorden",
+  // ===== ch woorden =====
+  "ch-g2": {
+    naam: "ch-woorden",
     groep: "ch-cht-gt",
     hoofdgroep: "hoorwoord",
-    beschrijving: "Woorden met -ch, -cht of -gt — klank vs spelling onderscheiden.",
+    beschrijving: "Woorden met -ch (zonder -t erna).",
     woorden: [
-      // ch-woorden
       { tekst: "ach", lidwoord: null, afbeelding: false },
       { tekst: "lach", lidwoord: "de", afbeelding: false },
       { tekst: "pech", lidwoord: "de", afbeelding: false },
       { tekst: "zich", lidwoord: null, afbeelding: false },
       { tekst: "toch", lidwoord: null, afbeelding: false },
       { tekst: "glimlach", lidwoord: "de", afbeelding: false },
-      { tekst: "kuch", lidwoord: "de", afbeelding: false },
-      // cht-woorden (uit G1)
+      { tekst: "kuch", lidwoord: "de", afbeelding: false }
+    ]
+  },
+
+  // ===== cht woorden =====
+  "cht-g2": {
+    naam: "cht-woorden",
+    groep: "ch-cht-gt",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Woorden met -cht.",
+    woorden: [
       { tekst: "acht", lidwoord: null, afbeelding: false },
       { tekst: "nacht", lidwoord: "de", afbeelding: false },
       { tekst: "licht", lidwoord: "het", afbeelding: false },
@@ -342,10 +294,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "dicht", lidwoord: null, afbeelding: false },
       { tekst: "echt", lidwoord: null, afbeelding: false },
       { tekst: "lucht", lidwoord: "de", afbeelding: false },
-      // cht-woorden (nieuw G2)
       { tekst: "gevecht", lidwoord: "het", afbeelding: false },
-      { tekst: "prachtig", lidwoord: null, afbeelding: false },
-      // gt-woorden (uit G1)
+      { tekst: "prachtig", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== gt woorden (werkwoordsvormen) =====
+  "gt-g2": {
+    naam: "gt-woorden",
+    groep: "ch-cht-gt",
+    hoofdgroep: "hoorwoord",
+    beschrijving: "Werkwoordsvormen met -gt (klinkt als -cht maar je schrijft -gt).",
+    woorden: [
       { tekst: "hij zegt", lidwoord: null, afbeelding: false },
       { tekst: "hij vraagt", lidwoord: null, afbeelding: false },
       { tekst: "hij legt", lidwoord: null, afbeelding: false },
@@ -356,7 +316,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "hij klaagt", lidwoord: null, afbeelding: false },
       { tekst: "hij buigt", lidwoord: null, afbeelding: false },
       { tekst: "hij ligt", lidwoord: null, afbeelding: false },
-      // gt-woorden (nieuw G2)
       { tekst: "hij beweegt", lidwoord: null, afbeelding: false },
       { tekst: "hij weegt", lidwoord: null, afbeelding: false }
     ]
@@ -423,17 +382,147 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
 
 
   /* ============================================================
-     REGELWOORDEN — bestaande regels + uitbreidingen
+     ONTHOUDWOORDEN — klanken klinken hetzelfde, je moet onthouden
+     hoe het geschreven wordt
      ============================================================ */
 
-  // ===== Verdubbelingsregel =====
-  "verdubbel-verenkel-g2": {
-    naam: "Verdubbelaars / Verenkelaars",
-    groep: "verdubbel-verenkel",
-    hoofdgroep: "regelwoord",
-    beschrijving: "Regel: korte klank vóór medeklinker → verdubbelen (teller, passer). Lange klank → verenkelen (kamer, lepel).",
+  // ===== ei woorden =====
+  "ei-g2": {
+    naam: "ei-woorden",
+    groep: "ei-ij",
+    hoofdgroep: "onthoudwoord",
+    beschrijving: "Woorden met ei — klinkt hetzelfde als ij, je moet onthouden welke je schrijft.",
     woorden: [
-      // ===== VERDUBBELAARS (korte klank → medeklinker verdubbelen bij meervoud) =====
+      { tekst: "trein", lidwoord: "de", afbeelding: false },
+      { tekst: "klein", lidwoord: null, afbeelding: false },
+      { tekst: "geit", lidwoord: "de", afbeelding: false },
+      { tekst: "ei", lidwoord: "het", afbeelding: false },
+      { tekst: "weide", lidwoord: "de", afbeelding: false },
+      { tekst: "reis", lidwoord: "de", afbeelding: false },
+      { tekst: "meid", lidwoord: "de", afbeelding: false },
+      { tekst: "lei", lidwoord: "de", afbeelding: false },
+      { tekst: "zeil", lidwoord: "het", afbeelding: false },
+      { tekst: "eiland", lidwoord: "het", afbeelding: false },
+      { tekst: "eik", lidwoord: "de", afbeelding: false },
+      { tekst: "kei", lidwoord: "de", afbeelding: false },
+      { tekst: "klei", lidwoord: "de", afbeelding: false },
+      { tekst: "plein", lidwoord: "het", afbeelding: false },
+      { tekst: "einde", lidwoord: "het", afbeelding: false },
+      { tekst: "feit", lidwoord: "het", afbeelding: false },
+      { tekst: "leiding", lidwoord: "de", afbeelding: false },
+      { tekst: "fontein", lidwoord: "de", afbeelding: false },
+      { tekst: "kapitein", lidwoord: "de", afbeelding: false },
+      { tekst: "veilig", lidwoord: null, afbeelding: false },
+      { tekst: "bereiding", lidwoord: "de", afbeelding: false },
+      { tekst: "bereiken", lidwoord: null, afbeelding: false },
+      { tekst: "veiling", lidwoord: "de", afbeelding: false },
+      { tekst: "dweil", lidwoord: "de", afbeelding: false },
+      { tekst: "zeilen", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== ij woorden =====
+  "ij-g2": {
+    naam: "ij-woorden",
+    groep: "ei-ij",
+    hoofdgroep: "onthoudwoord",
+    beschrijving: "Woorden met ij — klinkt hetzelfde als ei, je moet onthouden welke je schrijft.",
+    woorden: [
+      { tekst: "tijd", lidwoord: "de", afbeelding: false },
+      { tekst: "vijf", lidwoord: null, afbeelding: false },
+      { tekst: "fijn", lidwoord: null, afbeelding: false },
+      { tekst: "wijn", lidwoord: "de", afbeelding: false },
+      { tekst: "rijst", lidwoord: "de", afbeelding: false },
+      { tekst: "lijn", lidwoord: "de", afbeelding: false },
+      { tekst: "pijp", lidwoord: "de", afbeelding: false },
+      { tekst: "pijn", lidwoord: "de", afbeelding: false },
+      { tekst: "prijs", lidwoord: "de", afbeelding: false },
+      { tekst: "rijm", lidwoord: "het", afbeelding: false },
+      { tekst: "kijk", lidwoord: null, afbeelding: false },
+      { tekst: "mijn", lidwoord: null, afbeelding: false },
+      { tekst: "schrijf", lidwoord: null, afbeelding: false },
+      { tekst: "bij", lidwoord: "de", afbeelding: false },
+      { tekst: "ijs", lidwoord: "het", afbeelding: false },
+      { tekst: "schilderij", lidwoord: "de", afbeelding: false },
+      { tekst: "bakkerij", lidwoord: "de", afbeelding: false },
+      { tekst: "woestijn", lidwoord: "de", afbeelding: false },
+      { tekst: "partij", lidwoord: "de", afbeelding: false },
+      { tekst: "vrijdag", lidwoord: "de", afbeelding: false },
+      { tekst: "vrijheid", lidwoord: "de", afbeelding: false },
+      { tekst: "gelijkenis", lidwoord: "de", afbeelding: false },
+      { tekst: "gelijkmatig", lidwoord: null, afbeelding: false },
+      { tekst: "vergelijken", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== au woorden =====
+  "au-g2": {
+    naam: "au-woorden",
+    groep: "au-ou",
+    hoofdgroep: "onthoudwoord",
+    beschrijving: "Woorden met au — klinkt hetzelfde als ou, je moet onthouden welke je schrijft.",
+    woorden: [
+      { tekst: "pauw", lidwoord: "de", afbeelding: false },
+      { tekst: "saus", lidwoord: "de", afbeelding: false },
+      { tekst: "dauw", lidwoord: "de", afbeelding: false },
+      { tekst: "blauw", lidwoord: null, afbeelding: false },
+      { tekst: "flauw", lidwoord: null, afbeelding: false },
+      { tekst: "nauw", lidwoord: null, afbeelding: false },
+      { tekst: "paus", lidwoord: "de", afbeelding: false },
+      { tekst: "klauw", lidwoord: "de", afbeelding: false },
+      { tekst: "miauw", lidwoord: null, afbeelding: false },
+      { tekst: "auto", lidwoord: "de", afbeelding: false },
+      { tekst: "augustus", lidwoord: null, afbeelding: false },
+      { tekst: "applaus", lidwoord: "het", afbeelding: false },
+      { tekst: "astronaut", lidwoord: "de", afbeelding: false },
+      { tekst: "pauze", lidwoord: "de", afbeelding: false },
+      { tekst: "lauw", lidwoord: null, afbeelding: false },
+      { tekst: "mauwen", lidwoord: null, afbeelding: false },
+      { tekst: "rauw", lidwoord: null, afbeelding: false }
+    ]
+  },
+
+  // ===== ou woorden =====
+  "ou-g2": {
+    naam: "ou-woorden",
+    groep: "au-ou",
+    hoofdgroep: "onthoudwoord",
+    beschrijving: "Woorden met ou — klinkt hetzelfde als au, je moet onthouden welke je schrijft.",
+    woorden: [
+      { tekst: "koud", lidwoord: null, afbeelding: false },
+      { tekst: "oud", lidwoord: null, afbeelding: false },
+      { tekst: "bout", lidwoord: "de", afbeelding: false },
+      { tekst: "hout", lidwoord: "het", afbeelding: false },
+      { tekst: "fout", lidwoord: "de", afbeelding: false },
+      { tekst: "goud", lidwoord: "het", afbeelding: false },
+      { tekst: "schouder", lidwoord: "de", afbeelding: false },
+      { tekst: "vrouw", lidwoord: "de", afbeelding: false },
+      { tekst: "trouw", lidwoord: "de", afbeelding: false },
+      { tekst: "mouw", lidwoord: "de", afbeelding: false },
+      { tekst: "touw", lidwoord: "het", afbeelding: false },
+      { tekst: "bouwen", lidwoord: null, afbeelding: false },
+      { tekst: "vouwen", lidwoord: null, afbeelding: false },
+      { tekst: "stout", lidwoord: null, afbeelding: false },
+      { tekst: "zout", lidwoord: "het", afbeelding: false },
+      { tekst: "houden", lidwoord: null, afbeelding: false },
+      { tekst: "kabouter", lidwoord: "de", afbeelding: false },
+      { tekst: "kousen", lidwoord: "de", afbeelding: false },
+      { tekst: "ouders", lidwoord: "de", afbeelding: false }
+    ]
+  },
+
+
+  /* ============================================================
+     REGELWOORDEN — STUKJESWOORDEN (4 categorieën + direct-type-B)
+     ============================================================ */
+
+  // ===== Verdubbelaars (korte klank + 1 medeklinker → verdubbel bij meervoud) =====
+  "stukjes-verdubbelaars-g2": {
+    naam: "Verdubbelaars",
+    groep: "stukjeswoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Korte klank + 1 medeklinker. Bij meervoud verdubbel je de medeklinker (kat → katten, bom → bommen).",
+    woorden: [
       // Behouden uit G1
       { tekst: "kat", lidwoord: "de", meervoud: "katten", afbeelding: false },
       { tekst: "bal", lidwoord: "de", meervoud: "ballen", afbeelding: false },
@@ -451,8 +540,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "stem", lidwoord: "de", meervoud: "stemmen", afbeelding: false },
       { tekst: "mug", lidwoord: "de", meervoud: "muggen", afbeelding: false },
       { tekst: "ster", lidwoord: "de", meervoud: "sterren", afbeelding: false },
+      { tekst: "bom", lidwoord: "de", meervoud: "bommen", afbeelding: false },
+      { tekst: "pet", lidwoord: "de", meervoud: "petten", afbeelding: false }
+    ]
+  },
 
-      // ===== VERENKELAARS (lange klank → klinker enkelvoudig schrijven bij meervoud) =====
+  // ===== Verenkelaars (lange klank + 1 medeklinker → verenkel bij meervoud) =====
+  "stukjes-verenkelaars-g2": {
+    naam: "Verenkelaars",
+    groep: "stukjeswoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Lange klank + 1 medeklinker. Bij meervoud schrijf je de klinker enkelvoudig (boom → bomen, raam → ramen).",
+    woorden: [
       // Behouden uit G1
       { tekst: "boom", lidwoord: "de", meervoud: "bomen", afbeelding: false },
       { tekst: "muur", lidwoord: "de", meervoud: "muren", afbeelding: false },
@@ -469,19 +568,105 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "smaak", lidwoord: "de", meervoud: "smaken", afbeelding: false },
       { tekst: "stoof", lidwoord: "de", meervoud: "stoven", afbeelding: false },
       { tekst: "staaf", lidwoord: "de", meervoud: "staven", afbeelding: false },
-      { tekst: "zaag", lidwoord: "de", meervoud: "zagen", afbeelding: false }
+      { tekst: "zaag", lidwoord: "de", meervoud: "zagen", afbeelding: false },
+      { tekst: "raam", lidwoord: "het", meervoud: "ramen", afbeelding: false }
     ]
   },
 
-  // ===== Verlengingsregel (t/d + p/b uitbreiding) =====
-  "verlengen-tdpb-g2": {
-    naam: "Verlengingsregel (t/d + p/b)",
+  // ===== Korte klank + 2 medeklinkers (geen verdubbeling, niets veranderen) =====
+  "stukjes-kort-2mk-g2": {
+    naam: "Korte klank + 2 medeklinkers",
+    groep: "stukjeswoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Korte klank + 2 medeklinkers. Bij meervoud verandert er niets (kast → kasten, hond → honden).",
+    woorden: [
+      // Sommige woorden staan ook in verlengen-tdpb-g2 (voor verlengingsregel-OV).
+      // Dat is bewust — bij taal hoort één woord soms in meerdere categorieën.
+      { tekst: "kast", lidwoord: "de", meervoud: "kasten", afbeelding: false },
+      { tekst: "plant", lidwoord: "de", meervoud: "planten", afbeelding: false },
+      { tekst: "hand", lidwoord: "de", meervoud: "handen", afbeelding: false },
+      { tekst: "wind", lidwoord: "de", meervoud: "winden", afbeelding: false },
+      { tekst: "hemd", lidwoord: "het", meervoud: "hemden", afbeelding: false },
+      { tekst: "vest", lidwoord: "het", meervoud: "vesten", afbeelding: false },
+      { tekst: "kerk", lidwoord: "de", meervoud: "kerken", afbeelding: false },
+      { tekst: "balk", lidwoord: "de", meervoud: "balken", afbeelding: false },
+      { tekst: "hark", lidwoord: "de", meervoud: "harken", afbeelding: false },
+      { tekst: "perk", lidwoord: "het", meervoud: "perken", afbeelding: false },
+      { tekst: "lamp", lidwoord: "de", meervoud: "lampen", afbeelding: false },
+      { tekst: "korst", lidwoord: "de", meervoud: "korsten", afbeelding: false },
+      { tekst: "tent", lidwoord: "de", meervoud: "tenten", afbeelding: false },
+      { tekst: "hond", lidwoord: "de", meervoud: "honden", afbeelding: false },
+      { tekst: "mond", lidwoord: "de", meervoud: "monden", afbeelding: false },
+      { tekst: "rand", lidwoord: "de", meervoud: "randen", afbeelding: false },
+      { tekst: "bed", lidwoord: "het", meervoud: "bedden", afbeelding: false },
+      { tekst: "land", lidwoord: "het", meervoud: "landen", afbeelding: false }
+    ]
+  },
+
+  // ===== Lange klank + 2 medeklinkers (geen verenkeling, niets veranderen) =====
+  "stukjes-lang-2mk-g2": {
+    naam: "Lange klank + 2 medeklinkers",
+    groep: "stukjeswoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Lange klank + 2 medeklinkers. Bij meervoud verandert er niets (paard → paarden, baard → baarden).",
+    woorden: [
+      // Sommige woorden staan ook in verlengen-tdpb-g2 — bewust dubbel.
+      { tekst: "paard", lidwoord: "het", meervoud: "paarden", afbeelding: false },
+      { tekst: "baard", lidwoord: "de", meervoud: "baarden", afbeelding: false },
+      { tekst: "poort", lidwoord: "de", meervoud: "poorten", afbeelding: false },
+      { tekst: "taart", lidwoord: "de", meervoud: "taarten", afbeelding: false },
+      { tekst: "soort", lidwoord: "de", meervoud: "soorten", afbeelding: false },
+      { tekst: "staart", lidwoord: "de", meervoud: "staarten", afbeelding: false },
+      { tekst: "naald", lidwoord: "de", meervoud: "naalden", afbeelding: false },
+      { tekst: "maand", lidwoord: "de", meervoud: "maanden", afbeelding: false }
+    ]
+  },
+
+  // ===== Stukjeswoorden — direct schrijven bij plaatje (Type B) =====
+  "stukjeswoorden-direct-g2": {
+    naam: "Stukjeswoorden — direct schrijven",
+    groep: "stukjeswoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Woorden waar de verdubbel- of verenkelregel al in de spelling zit. " +
+                  "Kind schrijft het woord bij een plaatje en moet zelf de juiste spelling oproepen.",
+    woorden: [
+      // ===== VERDUBBELEN (korte klank → verdubbelde medeklinker zichtbaar) =====
+      { tekst: "appel",   lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "kikker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "ladder",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "bakker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
+      { tekst: "kussen",  lidwoord: "het", klanktype: "kort-verdubbeld", afbeelding: true },
+
+      // ===== VERENKELEN (lange klank → één medeklinker) =====
+      { tekst: "hamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "lepel",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "meter",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "zomer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "bezem",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+      { tekst: "kamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+
+      // ===== ZOALS JE HET HOORT (korte klank + 2 verschillende medeklinkers) =====
+      { tekst: "wortel",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "dokter",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "sleutel", lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "kelder",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
+      { tekst: "masker",  lidwoord: "het", klanktype: "kort-2mk",        afbeelding: true }
+    ]
+  },
+
+
+  /* ============================================================
+     REGELWOORDEN — VERLENGINGSREGEL (t/d + p/b)
+     ============================================================ */
+
+  // ===== Verlengingsregel t-d twijfel =====
+  "verlengen-td-g2": {
+    naam: "Verlengen: t of d?",
     groep: "verlengen-tdpb",
     hoofdgroep: "regelwoord",
-    beschrijving: "Verleng om te weten of je t/d of p/b schrijft: paart → paarden (paard), rip → ribben (rib).",
+    beschrijving: "Verleng om te weten of je t of d schrijft: paart → paarden (paard), hont → honden (hond).",
     woorden: [
-      // ===== t/d-TWIJFEL — klinkt als 't' maar je schrijft 't' of 'd' =====
-      // (uit G1 behouden)
+      // Behouden uit G1
       { tekst: "hand", lidwoord: "de", verlengd: "handen", twijfel: "t-d", afbeelding: false },
       { tekst: "hoed", lidwoord: "de", verlengd: "hoeden", twijfel: "t-d", afbeelding: false },
       { tekst: "tand", lidwoord: "de", verlengd: "tanden", twijfel: "t-d", afbeelding: false },
@@ -503,10 +688,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "post", lidwoord: "de", verlengd: "posten", twijfel: "t-d", afbeelding: false },
       { tekst: "markt", lidwoord: "de", verlengd: "markten", twijfel: "t-d", afbeelding: false },
       { tekst: "gezond", lidwoord: null, verlengd: "gezonder", twijfel: "t-d", afbeelding: false },
-      { tekst: "stad", lidwoord: "de", verlengd: "steden", twijfel: "t-d", afbeelding: false },
-      
-      // ===== p/b-TWIJFEL — klinkt als 'p' maar je schrijft 'p' of 'b' =====
-      // (uit G1 behouden)
+      { tekst: "stad", lidwoord: "de", verlengd: "steden", twijfel: "t-d", afbeelding: false }
+    ]
+  },
+
+  // ===== Verlengingsregel p-b twijfel =====
+  "verlengen-pb-g2": {
+    naam: "Verlengen: p of b?",
+    groep: "verlengen-tdpb",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Verleng om te weten of je p of b schrijft: rip → ribben (rib), krap → krabben (krab).",
+    woorden: [
+      // Behouden uit G1
       { tekst: "krab", lidwoord: "de", verlengd: "krabben", twijfel: "p-b", afbeelding: false },
       { tekst: "web", lidwoord: "het", verlengd: "webben", twijfel: "p-b", afbeelding: false },
       { tekst: "rib", lidwoord: "de", verlengd: "ribben", twijfel: "p-b", afbeelding: false },
@@ -526,50 +719,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== Stukjeswoorden — direct schrijven bij plaatje =====
-  // Type B-woorden: de verdubbel-/verenkelregel zit AL in de spelling, geen
-  // meervoudsvorming nodig. Een afbeelding is essentieel — zonder beeld zou
-  // het kind het woord gewoon overschrijven zonder de regel actief toe te passen.
-  // Met afbeelding moet het kind het woord zelf oproepen en correct produceren.
-  "stukjeswoorden-direct-g2": {
-    naam: "Stukjeswoorden — direct schrijven",
-    groep: "verdubbel-verenkel",   // zelfde groep als type A → wordt samen geclusterd in sidebar
-    hoofdgroep: "regelwoord",
-    beschrijving: "Woorden waar de verdubbel- of verenkelregel al in de spelling zit. " +
-                  "Kind schrijft het woord bij een plaatje en moet zelf de juiste spelling oproepen.",
-    woorden: [
-      // ===== Type B: VERDUBBELEN (korte klank → verdubbelde medeklinker zichtbaar) =====
-      { tekst: "appel",   lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
-      { tekst: "kikker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
-      { tekst: "ladder",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
-      { tekst: "bakker",  lidwoord: "de",  klanktype: "kort-verdubbeld", afbeelding: true },
-      { tekst: "kussen",  lidwoord: "het", klanktype: "kort-verdubbeld", afbeelding: true },
 
-      // ===== Type B: VERENKELEN (lange klank → één medeklinker) =====
-      { tekst: "hamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
-      { tekst: "lepel",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
-      { tekst: "meter",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
-      { tekst: "zomer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
-      { tekst: "bezem",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
-      { tekst: "kamer",   lidwoord: "de",  klanktype: "lang-verenkeld",  afbeelding: true },
+  /* ============================================================
+     REGELWOORDEN — VERKLEINWOORDEN (5 aparte categorieën)
+     ============================================================ */
 
-      // ===== Type B: ZOALS JE HET HOORT (korte klank + 2 verschillende medeklinkers) =====
-      { tekst: "wortel",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
-      { tekst: "dokter",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
-      { tekst: "sleutel", lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
-      { tekst: "kelder",  lidwoord: "de",  klanktype: "kort-2mk",        afbeelding: true },
-      { tekst: "masker",  lidwoord: "het", klanktype: "kort-2mk",        afbeelding: true }
-    ]
-  },
-
-  // ===== Verkleinwoorden (incl. -etje en -kje) =====
-  "verkleinwoorden-g2": {
-    naam: "Verkleinwoorden",
+  "verklein-je-g2": {
+    naam: "Verkleinwoord -je",
     groep: "verkleinwoorden",
     hoofdgroep: "regelwoord",
-    beschrijving: "Verkleinwoorden op -je, -tje, -pje, -etje en -kje (onregelmatig).",
+    beschrijving: "Standaardvorm: -je achter de meeste woorden (boek → boekje, huis → huisje).",
     woorden: [
-      // ===== -je (standaard) =====
       { tekst: "boek", lidwoord: "het", verklein: "boekje", uitgang: "je", afbeelding: false },
       { tekst: "huis", lidwoord: "het", verklein: "huisje", uitgang: "je", afbeelding: false },
       { tekst: "muis", lidwoord: "de", verklein: "muisje", uitgang: "je", afbeelding: false },
@@ -581,9 +741,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "buik", lidwoord: "de", verklein: "buikje", uitgang: "je", afbeelding: false },
       { tekst: "plant", lidwoord: "de", verklein: "plantje", uitgang: "je", afbeelding: false },
       { tekst: "doos", lidwoord: "de", verklein: "doosje", uitgang: "je", afbeelding: false },
-      { tekst: "kast", lidwoord: "de", verklein: "kastje", uitgang: "je", afbeelding: false },
+      { tekst: "kast", lidwoord: "de", verklein: "kastje", uitgang: "je", afbeelding: false }
+    ]
+  },
 
-      // ===== -tje (na lange klinker, l, n, r, w) =====
+  "verklein-tje-g2": {
+    naam: "Verkleinwoord -tje",
+    groep: "verkleinwoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Na lange klinker, -l, -n, -r of -w: -tje (stoel → stoeltje, auto → autootje).",
+    woorden: [
       { tekst: "stoel", lidwoord: "de", verklein: "stoeltje", uitgang: "tje", afbeelding: false },
       { tekst: "deur", lidwoord: "de", verklein: "deurtje", uitgang: "tje", afbeelding: false },
       { tekst: "schoen", lidwoord: "de", verklein: "schoentje", uitgang: "tje", afbeelding: false },
@@ -593,18 +760,32 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "muur", lidwoord: "de", verklein: "muurtje", uitgang: "tje", afbeelding: false },
       { tekst: "broer", lidwoord: "de", verklein: "broertje", uitgang: "tje", afbeelding: false },
       { tekst: "auto", lidwoord: "de", verklein: "autootje", uitgang: "tje", afbeelding: false },
-      { tekst: "koe", lidwoord: "de", verklein: "koetje", uitgang: "tje", afbeelding: false },
+      { tekst: "koe", lidwoord: "de", verklein: "koetje", uitgang: "tje", afbeelding: false }
+    ]
+  },
 
-      // ===== -pje (na -m met lange klank) =====
+  "verklein-pje-g2": {
+    naam: "Verkleinwoord -pje",
+    groep: "verkleinwoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Na -m met lange klank: -pje (boom → boompje, raam → raampje).",
+    woorden: [
       { tekst: "boom", lidwoord: "de", verklein: "boompje", uitgang: "pje", afbeelding: false },
       { tekst: "duim", lidwoord: "de", verklein: "duimpje", uitgang: "pje", afbeelding: false },
       { tekst: "arm", lidwoord: "de", verklein: "armpje", uitgang: "pje", afbeelding: false },
       { tekst: "raam", lidwoord: "het", verklein: "raampje", uitgang: "pje", afbeelding: false },
       { tekst: "bloem", lidwoord: "de", verklein: "bloempje", uitgang: "pje", afbeelding: false },
       { tekst: "droom", lidwoord: "de", verklein: "droompje", uitgang: "pje", afbeelding: false },
-      { tekst: "riem", lidwoord: "de", verklein: "riempje", uitgang: "pje", afbeelding: false },
+      { tekst: "riem", lidwoord: "de", verklein: "riempje", uitgang: "pje", afbeelding: false }
+    ]
+  },
 
-      // ===== -etje (korte klank + medeklinker verdubbelt, of -ing als suffix) =====
+  "verklein-etje-g2": {
+    naam: "Verkleinwoord -etje",
+    groep: "verkleinwoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Korte klank + 1 medeklinker → verdubbel medeklinker + -etje (bal → balletje, man → mannetje).",
+    woorden: [
       { tekst: "bel", lidwoord: "de", verklein: "belletje", uitgang: "etje", afbeelding: false },
       { tekst: "bal", lidwoord: "de", verklein: "balletje", uitgang: "etje", afbeelding: false },
       { tekst: "kam", lidwoord: "de", verklein: "kammetje", uitgang: "etje", afbeelding: false },
@@ -621,9 +802,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "jongen", lidwoord: "de", verklein: "jongetje", uitgang: "etje", afbeelding: false },
       { tekst: "tekening", lidwoord: "de", verklein: "tekeningetje", uitgang: "etje", afbeelding: false },
       { tekst: "regering", lidwoord: "de", verklein: "regeringetje", uitgang: "etje", afbeelding: false },
-      { tekst: "oefening", lidwoord: "de", verklein: "oefeningetje", uitgang: "etje", afbeelding: false },
+      { tekst: "oefening", lidwoord: "de", verklein: "oefeningetje", uitgang: "etje", afbeelding: false }
+    ]
+  },
 
-      // ===== -kje (meerlettergrepig op -ing waar -ing deel is van het woord, g valt weg) =====
+  "verklein-kje-g2": {
+    naam: "Verkleinwoord -kje",
+    groep: "verkleinwoorden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Meerlettergrepig op -ing met klemtoon vooraan: g valt weg, -kje (koning → koninkje).",
+    woorden: [
       { tekst: "koning", lidwoord: "de", verklein: "koninkje", uitgang: "kje", afbeelding: false },
       { tekst: "ketting", lidwoord: "de", verklein: "kettinkje", uitgang: "kje", afbeelding: false },
       { tekst: "pudding", lidwoord: "de", verklein: "puddinkje", uitgang: "kje", afbeelding: false },
@@ -643,14 +831,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== Meervouden (incl. -'s en -eren) =====
-  "meervouden-g2": {
-    naam: "Meervouden",
+
+  /* ============================================================
+     REGELWOORDEN — MEERVOUDEN (4 aparte categorieën)
+     ============================================================ */
+
+  "meervoud-en-g2": {
+    naam: "Meervoud op -en",
     groep: "meervouden",
     hoofdgroep: "regelwoord",
-    beschrijving: "Meervouden op -en, -s, -'s en -eren (kind → kinderen).",
+    beschrijving: "Standaard meervoud op -en (voet → voeten, hond → honden).",
     woorden: [
-      // ===== -en (standaard) =====
       { tekst: "voet", lidwoord: "de", meervoud: "voeten", uitgang: "en", afbeelding: false },
       { tekst: "hond", lidwoord: "de", meervoud: "honden", uitgang: "en", afbeelding: false },
       { tekst: "stoel", lidwoord: "de", meervoud: "stoelen", uitgang: "en", afbeelding: false },
@@ -670,9 +861,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "kerk", lidwoord: "de", meervoud: "kerken", uitgang: "en", afbeelding: false },
       { tekst: "vriend", lidwoord: "de", meervoud: "vrienden", uitgang: "en", afbeelding: false },
       { tekst: "vraag", lidwoord: "de", meervoud: "vragen", uitgang: "en", afbeelding: false },
-      { tekst: "koe", lidwoord: "de", meervoud: "koeien", uitgang: "en", afbeelding: false },
+      { tekst: "koe", lidwoord: "de", meervoud: "koeien", uitgang: "en", afbeelding: false }
+    ]
+  },
 
-      // ===== -s (na doffe klank: -el, -en, -er, -em) =====
+  "meervoud-s-g2": {
+    naam: "Meervoud op -s",
+    groep: "meervouden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Na doffe klank (-el, -en, -er, -em) → meervoud op -s (moeder → moeders, winkel → winkels).",
+    woorden: [
       { tekst: "moeder", lidwoord: "de", meervoud: "moeders", uitgang: "s", afbeelding: false },
       { tekst: "vader", lidwoord: "de", meervoud: "vaders", uitgang: "s", afbeelding: false },
       { tekst: "winkel", lidwoord: "de", meervoud: "winkels", uitgang: "s", afbeelding: false },
@@ -686,9 +884,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "broer", lidwoord: "de", meervoud: "broers", uitgang: "s", afbeelding: false },
       { tekst: "kleuter", lidwoord: "de", meervoud: "kleuters", uitgang: "s", afbeelding: false },
       { tekst: "vijver", lidwoord: "de", meervoud: "vijvers", uitgang: "s", afbeelding: false },
-      { tekst: "appel", lidwoord: "de", meervoud: "appels", uitgang: "s", afbeelding: false },
+      { tekst: "appel", lidwoord: "de", meervoud: "appels", uitgang: "s", afbeelding: false }
+    ]
+  },
 
-      // ===== -'s (na lange klinker, meestal leenwoorden) =====
+  "meervoud-apostrof-g2": {
+    naam: "Meervoud op -'s",
+    groep: "meervouden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Na lange klinker (a/o/u/i/y): apostrof + s (baby → baby's, auto → auto's).",
+    woorden: [
       { tekst: "baby", lidwoord: "de", meervoud: "baby's", uitgang: "'s", afbeelding: false },
       { tekst: "kiwi", lidwoord: "de", meervoud: "kiwi's", uitgang: "'s", afbeelding: false },
       { tekst: "auto", lidwoord: "de", meervoud: "auto's", uitgang: "'s", afbeelding: false },
@@ -700,9 +905,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "opa", lidwoord: "de", meervoud: "opa's", uitgang: "'s", afbeelding: false },
       { tekst: "menu", lidwoord: "het", meervoud: "menu's", uitgang: "'s", afbeelding: false },
       { tekst: "cola", lidwoord: "de", meervoud: "cola's", uitgang: "'s", afbeelding: false },
-      { tekst: "agenda", lidwoord: "de", meervoud: "agenda's", uitgang: "'s", afbeelding: false },
+      { tekst: "agenda", lidwoord: "de", meervoud: "agenda's", uitgang: "'s", afbeelding: false }
+    ]
+  },
 
-      // ===== -eren (onregelmatig) =====
+  "meervoud-eren-g2": {
+    naam: "Meervoud op -eren",
+    groep: "meervouden",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Onregelmatig — een klein lijstje woorden krijgt -eren (kind → kinderen).",
+    woorden: [
       { tekst: "kind", lidwoord: "het", meervoud: "kinderen", uitgang: "eren", afbeelding: false },
       { tekst: "volk", lidwoord: "het", meervoud: "volkeren", uitgang: "eren", afbeelding: false },
       { tekst: "ei", lidwoord: "het", meervoud: "eieren", uitgang: "eren", afbeelding: false },
@@ -710,14 +922,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== Doffe klank in voorvoegsel =====
-  "doffe-klank-voorvoegsel-g2": {
-    naam: "Doffe klank in voorvoegsel",
+
+  /* ============================================================
+     REGELWOORDEN — DOFFE KLANK IN VOORVOEGSEL (3 aparte)
+     ============================================================ */
+
+  "voorvoegsel-ge-g2": {
+    naam: "Voorvoegsel ge-",
     groep: "doffe-klank-voorvoegsel",
     hoofdgroep: "regelwoord",
-    beschrijving: "Doffe klank in voorvoegsels ge-, ver-, be- (gelopen, verkocht, beslapen).",
+    beschrijving: "Doffe klank in voorvoegsel ge- (getal, gevaar, geheim).",
     woorden: [
-      // ===== ge- =====
       { tekst: "getal", lidwoord: "het", voorvoegsel: "ge", afbeelding: false },
       { tekst: "gevaar", lidwoord: "het", voorvoegsel: "ge", afbeelding: false },
       { tekst: "geheim", lidwoord: "het", voorvoegsel: "ge", afbeelding: false },
@@ -727,9 +942,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "gevecht", lidwoord: "het", voorvoegsel: "ge", afbeelding: false },
       { tekst: "gelukkig", lidwoord: null, voorvoegsel: "ge", afbeelding: false },
       { tekst: "gezond", lidwoord: null, voorvoegsel: "ge", afbeelding: false },
-      { tekst: "gezellig", lidwoord: null, voorvoegsel: "ge", afbeelding: false },
+      { tekst: "gezellig", lidwoord: null, voorvoegsel: "ge", afbeelding: false }
+    ]
+  },
 
-      // ===== ver- =====
+  "voorvoegsel-ver-g2": {
+    naam: "Voorvoegsel ver-",
+    groep: "doffe-klank-voorvoegsel",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Doffe klank in voorvoegsel ver- (verhaal, verkeer, verjaardag).",
+    woorden: [
       { tekst: "verhaal", lidwoord: "het", voorvoegsel: "ver", afbeelding: false },
       { tekst: "verkeer", lidwoord: "het", voorvoegsel: "ver", afbeelding: false },
       { tekst: "verjaardag", lidwoord: "de", voorvoegsel: "ver", afbeelding: false },
@@ -739,9 +961,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "vervelend", lidwoord: null, voorvoegsel: "ver", afbeelding: false },
       { tekst: "verkoudheid", lidwoord: "de", voorvoegsel: "ver", afbeelding: false },
       { tekst: "vergissing", lidwoord: "de", voorvoegsel: "ver", afbeelding: false },
-      { tekst: "vertelling", lidwoord: "de", voorvoegsel: "ver", afbeelding: false },
+      { tekst: "vertelling", lidwoord: "de", voorvoegsel: "ver", afbeelding: false }
+    ]
+  },
 
-      // ===== be- =====
+  "voorvoegsel-be-g2": {
+    naam: "Voorvoegsel be-",
+    groep: "doffe-klank-voorvoegsel",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Doffe klank in voorvoegsel be- (begin, bezoek, belofte).",
+    woorden: [
       { tekst: "begin", lidwoord: "het", voorvoegsel: "be", afbeelding: false },
       { tekst: "bezoek", lidwoord: "het", voorvoegsel: "be", afbeelding: false },
       { tekst: "belofte", lidwoord: "de", voorvoegsel: "be", afbeelding: false },
@@ -755,14 +984,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     ]
   },
 
-  // ===== Doffe klank in achtervoegsel =====
-  "doffe-klank-achtervoegsel-g2": {
-    naam: "Doffe klank in achtervoegsel",
+
+  /* ============================================================
+     REGELWOORDEN — DOFFE KLANK IN ACHTERVOEGSEL (4 aparte)
+     ============================================================ */
+
+  "achtervoegsel-elen-g2": {
+    naam: "Achtervoegsel -elen",
     groep: "doffe-klank-achtervoegsel",
     hoofdgroep: "regelwoord",
-    beschrijving: "Doffe klank in achtervoegsels -elen, -eren, -ig, -lijk (wandelen, fluisteren, gelukkig, vriendelijk).",
+    beschrijving: "Doffe klank in werkwoorden op -elen (wandelen, mompelen, kabbelen).",
     woorden: [
-      // ===== -elen =====
       { tekst: "wandelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
       { tekst: "mompelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
       { tekst: "stempelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
@@ -772,9 +1004,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "kabbelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
       { tekst: "kriebelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
       { tekst: "krabbelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
-      { tekst: "knabbelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false },
+      { tekst: "knabbelen", lidwoord: null, achtervoegsel: "elen", afbeelding: false }
+    ]
+  },
 
-      // ===== -eren =====
+  "achtervoegsel-eren-g2": {
+    naam: "Achtervoegsel -eren",
+    groep: "doffe-klank-achtervoegsel",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Doffe klank in werkwoorden op -eren (fluisteren, glinsteren, knipperen).",
+    woorden: [
       { tekst: "fluisteren", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
       { tekst: "donderen", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
       { tekst: "glinsteren", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
@@ -785,9 +1024,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "wapperen", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
       { tekst: "klepperen", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
       { tekst: "peuteren", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
-      { tekst: "bladeren", lidwoord: null, achtervoegsel: "eren", afbeelding: false },
+      { tekst: "bladeren", lidwoord: null, achtervoegsel: "eren", afbeelding: false }
+    ]
+  },
 
-      // ===== -ig =====
+  "achtervoegsel-ig-g2": {
+    naam: "Achtervoegsel -ig",
+    groep: "doffe-klank-achtervoegsel",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Doffe klank in bijvoeglijke naamwoorden op -ig (gelukkig, handig, prachtig).",
+    woorden: [
       { tekst: "gelukkig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
       { tekst: "handig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
       { tekst: "modderig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
@@ -797,9 +1043,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "rustig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
       { tekst: "schattig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
       { tekst: "kleurig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
-      { tekst: "nuttig", lidwoord: null, achtervoegsel: "ig", afbeelding: false },
+      { tekst: "nuttig", lidwoord: null, achtervoegsel: "ig", afbeelding: false }
+    ]
+  },
 
-      // ===== -lijk =====
+  "achtervoegsel-lijk-g2": {
+    naam: "Achtervoegsel -lijk",
+    groep: "doffe-klank-achtervoegsel",
+    hoofdgroep: "regelwoord",
+    beschrijving: "Doffe klank in bijvoeglijke naamwoorden op -lijk (vrolijk, mogelijk, vriendelijk).",
+    woorden: [
       { tekst: "vrolijk", lidwoord: null, achtervoegsel: "lijk", afbeelding: false },
       { tekst: "mogelijk", lidwoord: null, achtervoegsel: "lijk", afbeelding: false },
       { tekst: "vriendelijk", lidwoord: null, achtervoegsel: "lijk", afbeelding: false },
@@ -818,31 +1071,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
 
   /* ============================================================
      WERKWOORDEN — volledig nieuw in graad 2
-     
+
      Structuur per werkwoord:
-     {
-       tekst: "werken",         // infinitief
-       type: "zwak",            // "zwak" | "sterk" | "onregelmatig"
-       stam: "werk",
-       
-       // OTT (Onvoltooid Tegenwoordige Tijd)
-       ott: {
-         ik: "werk", jij: "werkt", hij: "werkt",
-         wij: "werken", jullie: "werken", zij: "werken"
-       },
-       
-       // VTT (Voltooid Tegenwoordige Tijd) — hulpww + voltooid deelwoord
-       vtt: { hulpww: "hebben", deelwoord: "gewerkt" },
-       
-       // OVT (Onvoltooid Verleden Tijd)
-       ovt: {
-         ik: "werkte", jij: "werkte", hij: "werkte",
-         wij: "werkten", jullie: "werkten", zij: "werkten"
-       },
-       
-       // VVT (Voltooid Verleden Tijd) — hulpww OVT + voltooid deelwoord
-       vvt: { hulpww: "hebben", deelwoord: "gewerkt" }
-     }
+     { tekst, type, stam, ott, vtt, ovt, vvt }
+
+     Voor nu één gegroepeerde categorie per tijd. Splitsing in
+     zwak/sterk/onregelmatig komt later wanneer we de werkwoord-OV's bouwen.
      ============================================================ */
 
   // ===== Werkwoorden in OTT =====
@@ -852,7 +1086,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "werkwoord",
     beschrijving: "Vervoegen in de onvoltooid tegenwoordige tijd: stam + uitgang (ik werk, jij denkt, wij wandelen).",
     woorden: [
-      // ===== ZWAKKE WERKWOORDEN (stam + uitgang, klank blijft gelijk) =====
+      // ===== ZWAKKE WERKWOORDEN =====
       { tekst: "werken", type: "zwak", stam: "werk",
         ott: { ik: "werk", jij: "werkt", hij: "werkt", wij: "werken", jullie: "werken", zij: "werken" } },
       { tekst: "wandelen", type: "zwak", stam: "wandel",
@@ -885,8 +1119,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
         ott: { ik: "stop", jij: "stopt", hij: "stopt", wij: "stoppen", jullie: "stoppen", zij: "stoppen" } },
       { tekst: "antwoorden", type: "zwak", stam: "antwoord",
         ott: { ik: "antwoord", jij: "antwoordt", hij: "antwoordt", wij: "antwoorden", jullie: "antwoorden", zij: "antwoorden" } },
-      
-      // ===== STERKE WERKWOORDEN (in OTT regelmatig — verschil komt pas in OVT) =====
+
+      // ===== STERKE WERKWOORDEN =====
       { tekst: "lopen", type: "sterk", stam: "loop",
         ott: { ik: "loop", jij: "loopt", hij: "loopt", wij: "lopen", jullie: "lopen", zij: "lopen" } },
       { tekst: "eten", type: "sterk", stam: "eet",
@@ -913,7 +1147,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
         ott: { ik: "zwem", jij: "zwemt", hij: "zwemt", wij: "zwemmen", jullie: "zwemmen", zij: "zwemmen" } },
       { tekst: "rijden", type: "sterk", stam: "rijd",
         ott: { ik: "rijd", jij: "rijdt", hij: "rijdt", wij: "rijden", jullie: "rijden", zij: "rijden" } },
-      
+
       // ===== ONREGELMATIGE WERKWOORDEN =====
       { tekst: "hebben", type: "onregelmatig", stam: "heb",
         ott: { ik: "heb", jij: "hebt", hij: "heeft", wij: "hebben", jullie: "hebben", zij: "hebben" } },
@@ -929,7 +1163,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "werkwoord",
     beschrijving: "Voltooid tegenwoordige tijd: hebben/zijn + voltooid deelwoord (ik heb gewerkt, ik ben gekomen).",
     woorden: [
-      // ===== ZWAKKE WERKWOORDEN ('t kofschip: stam eindigt op k/f/s/c/h/p → ge- + stam + t, anders + d) =====
       { tekst: "werken", type: "zwak", stam: "werk", deelwoord: "gewerkt", hulpww: ["hebben"] },
       { tekst: "wandelen", type: "zwak", stam: "wandel", deelwoord: "gewandeld", hulpww: ["hebben", "zijn"] },
       { tekst: "luisteren", type: "zwak", stam: "luister", deelwoord: "geluisterd", hulpww: ["hebben"] },
@@ -946,8 +1179,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "kloppen", type: "zwak", stam: "klop", deelwoord: "geklopt", hulpww: ["hebben"] },
       { tekst: "stoppen", type: "zwak", stam: "stop", deelwoord: "gestopt", hulpww: ["hebben", "zijn"] },
       { tekst: "antwoorden", type: "zwak", stam: "antwoord", deelwoord: "geantwoord", hulpww: ["hebben"] },
-      
-      // ===== STERKE WERKWOORDEN (ge- + andere stam + en, klankverandering) =====
+
       { tekst: "lopen", type: "sterk", stam: "loop", deelwoord: "gelopen", hulpww: ["hebben", "zijn"] },
       { tekst: "eten", type: "sterk", stam: "eet", deelwoord: "gegeten", hulpww: ["hebben"] },
       { tekst: "drinken", type: "sterk", stam: "drink", deelwoord: "gedronken", hulpww: ["hebben"] },
@@ -961,8 +1193,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "worden", type: "sterk", stam: "word", deelwoord: "geworden", hulpww: ["zijn"] },
       { tekst: "zwemmen", type: "sterk", stam: "zwem", deelwoord: "gezwommen", hulpww: ["hebben", "zijn"] },
       { tekst: "rijden", type: "sterk", stam: "rijd", deelwoord: "gereden", hulpww: ["hebben", "zijn"] },
-      
-      // ===== ONREGELMATIGE WERKWOORDEN =====
+
       { tekst: "hebben", type: "onregelmatig", stam: "heb", deelwoord: "gehad", hulpww: ["hebben"] },
       { tekst: "zijn", type: "onregelmatig", stam: "ben", deelwoord: "geweest", hulpww: ["zijn"] }
     ]
@@ -975,7 +1206,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "werkwoord",
     beschrijving: "Verleden tijd zonder klankverandering: stam + de(n) of te(n) (ik werkte, wij wandelden).",
     woorden: [
-      // 't Kofschip: stam eindigt op k/f/s/c/h/p → -te, anders → -de
       { tekst: "werken", type: "zwak", stam: "werk", uitgang_ovt: "te",
         ovt: { ik: "werkte", jij: "werkte", hij: "werkte", wij: "werkten", jullie: "werkten", zij: "werkten" } },
       { tekst: "wandelen", type: "zwak", stam: "wandel", uitgang_ovt: "de",
@@ -1018,7 +1248,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "werkwoord",
     beschrijving: "Verleden tijd met klankverandering, geen vaste regel (jij dacht, hij ging, jullie aten).",
     woorden: [
-      // ===== STERKE WERKWOORDEN =====
       { tekst: "lopen", type: "sterk", stam: "loop",
         ovt: { ik: "liep", jij: "liep", hij: "liep", wij: "liepen", jullie: "liepen", zij: "liepen" } },
       { tekst: "eten", type: "sterk", stam: "eet",
@@ -1045,8 +1274,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
         ovt: { ik: "zwom", jij: "zwom", hij: "zwom", wij: "zwommen", jullie: "zwommen", zij: "zwommen" } },
       { tekst: "rijden", type: "sterk", stam: "rijd",
         ovt: { ik: "reed", jij: "reed", hij: "reed", wij: "reden", jullie: "reden", zij: "reden" } },
-      
-      // ===== ONREGELMATIGE WERKWOORDEN =====
+
       { tekst: "hebben", type: "onregelmatig", stam: "heb",
         ovt: { ik: "had", jij: "had", hij: "had", wij: "hadden", jullie: "hadden", zij: "hadden" } },
       { tekst: "zijn", type: "onregelmatig", stam: "ben",
@@ -1061,7 +1289,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "werkwoord",
     beschrijving: "Voltooid verleden tijd: had/was + voltooid deelwoord (ik had gewerkt, ik was gekomen).",
     woorden: [
-      // ===== ZWAKKE WERKWOORDEN =====
       { tekst: "werken", type: "zwak", stam: "werk", deelwoord: "gewerkt", hulpww_ovt: ["had"] },
       { tekst: "wandelen", type: "zwak", stam: "wandel", deelwoord: "gewandeld", hulpww_ovt: ["had", "was"] },
       { tekst: "luisteren", type: "zwak", stam: "luister", deelwoord: "geluisterd", hulpww_ovt: ["had"] },
@@ -1078,8 +1305,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "kloppen", type: "zwak", stam: "klop", deelwoord: "geklopt", hulpww_ovt: ["had"] },
       { tekst: "stoppen", type: "zwak", stam: "stop", deelwoord: "gestopt", hulpww_ovt: ["had", "was"] },
       { tekst: "antwoorden", type: "zwak", stam: "antwoord", deelwoord: "geantwoord", hulpww_ovt: ["had"] },
-      
-      // ===== STERKE WERKWOORDEN =====
+
       { tekst: "lopen", type: "sterk", stam: "loop", deelwoord: "gelopen", hulpww_ovt: ["had", "was"] },
       { tekst: "eten", type: "sterk", stam: "eet", deelwoord: "gegeten", hulpww_ovt: ["had"] },
       { tekst: "drinken", type: "sterk", stam: "drink", deelwoord: "gedronken", hulpww_ovt: ["had"] },
@@ -1093,8 +1319,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "worden", type: "sterk", stam: "word", deelwoord: "geworden", hulpww_ovt: ["was"] },
       { tekst: "zwemmen", type: "sterk", stam: "zwem", deelwoord: "gezwommen", hulpww_ovt: ["had", "was"] },
       { tekst: "rijden", type: "sterk", stam: "rijd", deelwoord: "gereden", hulpww_ovt: ["had", "was"] },
-      
-      // ===== ONREGELMATIGE WERKWOORDEN =====
+
       { tekst: "hebben", type: "onregelmatig", stam: "heb", deelwoord: "gehad", hulpww_ovt: ["had"] },
       { tekst: "zijn", type: "onregelmatig", stam: "ben", deelwoord: "geweest", hulpww_ovt: ["was"] }
     ]
@@ -1131,7 +1356,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "Limburg", type_hl: "geografisch", afbeelding: false },
       { tekst: "Mechelen", type_hl: "geografisch", afbeelding: false },
 
-      // ===== WINDSTREKEN (geografische verwijzing) =====
+      // ===== WINDSTREKEN =====
       { tekst: "Noord", type_hl: "windstreek", afbeelding: false },
       { tekst: "Zuid", type_hl: "windstreek", afbeelding: false },
       { tekst: "Oost", type_hl: "windstreek", afbeelding: false },
@@ -1159,7 +1384,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
 
 
   /* ============================================================
-     L4-SPECIFIEK
+     L4-SPECIFIEK — ONTHOUDWOORDEN
      ============================================================ */
 
   // ===== Woorden op -teit en -heid =====
@@ -1169,7 +1394,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
     hoofdgroep: "onthoudwoord",
     beschrijving: "Abstracte woorden met de uitgangen -teit (kwaliteit) en -heid (snelheid).",
     woorden: [
-      // ===== -teit (leenwoorden uit het Frans) =====
+      // ===== -teit =====
       { tekst: "kwaliteit", lidwoord: "de", uitgang: "teit", afbeelding: false },
       { tekst: "identiteit", lidwoord: "de", uitgang: "teit", afbeelding: false },
       { tekst: "universiteit", lidwoord: "de", uitgang: "teit", afbeelding: false },
@@ -1186,7 +1411,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(2, {
       { tekst: "publiciteit", lidwoord: "de", uitgang: "teit", afbeelding: false },
       { tekst: "productiviteit", lidwoord: "de", uitgang: "teit", afbeelding: false },
 
-      // ===== -heid (Nederlandse vorming: bijv. nw + heid) =====
+      // ===== -heid =====
       { tekst: "vrijheid", lidwoord: "de", uitgang: "heid", afbeelding: false },
       { tekst: "gezondheid", lidwoord: "de", uitgang: "heid", afbeelding: false },
       { tekst: "snelheid", lidwoord: "de", uitgang: "heid", afbeelding: false },
