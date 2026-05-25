@@ -198,6 +198,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "vrouw", lidwoord: "de", afbeelding: true },
       { tekst: "trouw", lidwoord: "de", afbeelding: false },
       { tekst: "mouw", lidwoord: "de", afbeelding: true },
+      { tekst: "zout", lidwoord: "het", afbeelding: true },
       { tekst: "touw", lidwoord: "het", afbeelding: true }
     ]
   },
@@ -228,7 +229,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "deur", lidwoord: "de", afbeelding: true },
       { tekst: "kleur", lidwoord: "de", afbeelding: false },
       { tekst: "geur", lidwoord: "de", afbeelding: false },
-      { tekst: "reus", lidwoord: "de", afbeelding: false },
+      { tekst: "reus", lidwoord: "de", afbeelding: true },
       { tekst: "beuk", lidwoord: "de", afbeelding: false },
       { tekst: "scheur", lidwoord: "de", afbeelding: false },
       { tekst: "leuk", lidwoord: null, afbeelding: false },
@@ -244,11 +245,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "huis", lidwoord: "het", afbeelding: true },
       { tekst: "muis", lidwoord: "de", afbeelding: true },
       { tekst: "tuin", lidwoord: "de", afbeelding: true },
-      { tekst: "duin", lidwoord: "het", afbeelding: false },
-      { tekst: "kruis", lidwoord: "het", afbeelding: false },
-      { tekst: "fluit", lidwoord: "de", afbeelding: false },
+      { tekst: "duim", lidwoord: "de", afbeelding: true },
+      { tekst: "kruis", lidwoord: "het", afbeelding: true },
+      { tekst: "fluit", lidwoord: "de", afbeelding: true },
+      { tekst: "fruit", lidwoord: "het", afbeelding: true },
       { tekst: "buik", lidwoord: "de", afbeelding: true },
-      { tekst: "duif", lidwoord: "de", afbeelding: false },
+      { tekst: "duif", lidwoord: "de", afbeelding: true },
       { tekst: "ruit", lidwoord: "de", afbeelding: false },
       { tekst: "bui", lidwoord: "de", afbeelding: false },
       { tekst: "lui", lidwoord: null, afbeelding: false },
@@ -260,18 +262,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "boek", lidwoord: "het", afbeelding: true },
-      { tekst: "koek", lidwoord: "de", afbeelding: false },
-      { tekst: "doek", lidwoord: "de", afbeelding: false },
-      { tekst: "voet", lidwoord: "de", afbeelding: false },
+      { tekst: "koek", lidwoord: "de", afbeelding: true },
+      { tekst: "doek", lidwoord: "de", afbeelding: true },
+      { tekst: "voet", lidwoord: "de", afbeelding: true },
       { tekst: "bloem", lidwoord: "de", afbeelding: true },
       { tekst: "stoel", lidwoord: "de", afbeelding: true },
-      { tekst: "snoep", lidwoord: "het", afbeelding: false },
-      { tekst: "vloer", lidwoord: "de", afbeelding: false },
+      { tekst: "snoep", lidwoord: "het", afbeelding: true },
+      { tekst: "vloer", lidwoord: "de", afbeelding: true },
       { tekst: "schoen", lidwoord: "de", afbeelding: true },
       { tekst: "broek", lidwoord: "de", afbeelding: true },
-      { tekst: "loep", lidwoord: "de", afbeelding: false },
+      { tekst: "loep", lidwoord: "de", afbeelding: true },
       { tekst: "moe", lidwoord: null, afbeelding: false },
-      { tekst: "groen", lidwoord: null, afbeelding: false }
+      { tekst: "groen", lidwoord: null, afbeelding: true }
     ]
   },
   "tw-aai": {
@@ -279,8 +281,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "tweeklanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "haai", lidwoord: "de", afbeelding: false },
-      { tekst: "kraai", lidwoord: "de", afbeelding: false },
+      { tekst: "haai", lidwoord: "de", afbeelding: true },
+      { tekst: "kraai", lidwoord: "de", afbeelding: true },
       { tekst: "draai", lidwoord: "de", afbeelding: false },
       { tekst: "lawaai", lidwoord: "het", afbeelding: false },
       { tekst: "zwaai", lidwoord: "de", afbeelding: false },
@@ -300,8 +302,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "tweeklanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "kooi", lidwoord: "de", afbeelding: false },
-      { tekst: "hooi", lidwoord: "het", afbeelding: false },
+      { tekst: "kooi", lidwoord: "de", afbeelding: true },
+      { tekst: "hooi", lidwoord: "het", afbeelding: true },
       { tekst: "mooi", lidwoord: null, afbeelding: false },
       { tekst: "gooi", lidwoord: null, afbeelding: false },
       { tekst: "gooit", lidwoord: null, afbeelding: false },
@@ -315,7 +317,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "tweeklanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "boei", lidwoord: "de", afbeelding: false },
+      { tekst: "boei", lidwoord: "de", afbeelding: true },
+      { tekst: "koeien", lidwoord: "de", afbeelding: true },
       { tekst: "groei", lidwoord: "de", afbeelding: false },
       { tekst: "bloei", lidwoord: "de", afbeelding: false },
       { tekst: "stoei", lidwoord: null, afbeelding: false },
@@ -334,11 +337,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "leeuw", lidwoord: "de", afbeelding: true },
-      { tekst: "sneeuw", lidwoord: "de", afbeelding: false },
+      { tekst: "sneeuw", lidwoord: "de", afbeelding: true },
       { tekst: "eeuw", lidwoord: "de", afbeelding: false },
-      { tekst: "spreeuw", lidwoord: "de", afbeelding: false },
+      { tekst: "spreeuw", lidwoord: "de", afbeelding: true },
       { tekst: "meeuw", lidwoord: "de", afbeelding: true },
-      { tekst: "geeuw", lidwoord: "de", afbeelding: false }
+      { tekst: "geeuw", lidwoord: "de", afbeelding: true }
     ]
   },
   "tw-ieuw": {
@@ -346,7 +349,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "tweeklanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "kieuw", lidwoord: "de", afbeelding: false },
+      { tekst: "kieuw", lidwoord: "de", afbeelding: true },
       { tekst: "nieuw", lidwoord: null, afbeelding: false },
       { tekst: "opnieuw", lidwoord: null, afbeelding: false },
       { tekst: "nieuws", lidwoord: "het", afbeelding: false }
@@ -1135,12 +1138,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "samenstelling",
     woorden: [
       {
-        tekst: "klokhuis", lidwoord: "het", afbeelding: false,
+        tekst: "klokhuis", lidwoord: "het", afbeelding: true,
         delen: ["klok", "huis"], delenEmoji: ["🕐", "🏠"],
         beschrijving: "Het harde stukje in het midden van een appel."
       },
       {
-        tekst: "brooddoos", lidwoord: "de", afbeelding: false,
+        tekst: "brooddoos", lidwoord: "de", afbeelding: true,
         delen: ["brood", "doos"], delenEmoji: ["🍞", "📦"],
         beschrijving: "Hierin doe je je eten voor 's middags."
       },
@@ -1155,7 +1158,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Hierin snuit je je neus."
       },
       {
-        tekst: "oorbel", lidwoord: "de", afbeelding: false,
+        tekst: "oorbel", lidwoord: "de", afbeelding: true,
         delen: ["oor", "bel"], delenEmoji: ["👂", "🔔"],
         beschrijving: "Een mooi sieraad dat in je oor hangt."
       },
@@ -1185,7 +1188,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een kan waar melk in zit."
       },
       {
-        tekst: "voetbal", lidwoord: "de", afbeelding: false,
+        tekst: "voetbal", lidwoord: "de", afbeelding: true,
         delen: ["voet", "bal"], delenEmoji: ["🦶", "⚽"],
         beschrijving: "Een bal die je met je voet schopt."
       },
