@@ -162,7 +162,10 @@ window.GI_Pdf = (() => {
           if (!node) return false;
           if (node.id === 'gi-pdf-overlay') return true;
           const cl = node.classList;
-          return cl && (
+          if (!cl) return false;
+          if (node.id === 'gi-score-in') return true;   // score-invulvak niet in PDF
+          if (cl.contains('edit-hint-btn')) return true;     // potloodje niet in PDF
+          return (
             cl.contains('title-add-btn')    ||
             cl.contains('title-delete-btn') ||
             cl.contains('delete-btn')       ||
