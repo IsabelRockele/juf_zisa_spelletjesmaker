@@ -151,6 +151,8 @@ piece.style.gridAutoRows = '34px';
   }
 
   card.appendChild(piece);
+  card.classList.add('row-delete-wrap');
+  card.appendChild(createRowDeleteButton(card));
   return card;
 }
 
@@ -182,13 +184,11 @@ if (field) {
 
   const key = 'hvpuzzle';
   ensureTitleOnce(sheet, key, 'Vul de ontbrekende getallen in.');
-  _registerAddFn(key, () => _eenToevoegen(addHvPuzzleExercises, '#hvpCount'));
+  _registerAddFn(key, () => _voegHvpItemToe(key));
 
   const block = document.createElement('div');
   block.className = 'hvp-block';
   block.dataset.titleKey = key;
-  block.appendChild(createDeleteButton(block));
-
   const grid = document.createElement('div');
   grid.className = 'hvp-grid';
 
@@ -312,20 +312,20 @@ function addHvIconsExercises(){
 
   const key = 'hvicons';
   ensureTitleOnce(sheet, key, 'Schrijf de getallen op bij elk pictogram.');
-  _registerAddFn(key, () => _eenToevoegen(addHvIconsExercises, '#hvIconsCount'));
+  _registerAddFn(key, () => _voegHvIconsItemToe(key));
 
  const block = document.createElement('div');
 block.className = 'hvicons-block';                 // niet alles samen vastzetten
 
 block.dataset.titleKey = key;
-block.appendChild(createDeleteButton(block));
 
   const grid = document.createElement('div');
   grid.className = 'hvicons-grid';
 
   for (let i = 0; i < nCards; i++){
     const card = document.createElement('div');
-    card.className = 'hvicons-card';
+    card.className = 'hvicons-card row-delete-wrap';
+    card.appendChild(createRowDeleteButton(card));
 
     // 100-veld
     const { wrap } = buildHundredGrid();
@@ -404,12 +404,11 @@ function addGetalbeelden1000(){
   const maxVal = parseInt((document.getElementById('gb1000Max') || {value:'999'}).value, 10) || 999;
   const key   = 'gb1000';
   ensureTitleOnce(sheet, key, 'Hoeveel tel je? Vul in.');
-  _registerAddFn(key, () => _eenToevoegen(addGetalbeelden1000, '#gb1000Count'));
+  _registerAddFn(key, () => _voegGb1000ItemToe(key));
 
   const block = document.createElement('div');
   block.className = 'gb1000-exercise-block';
   block.dataset.titleKey = key;
-  block.appendChild(createDeleteButton(block));
 
   const grid = document.createElement('div');
   grid.className = 'gb1000-grid';
@@ -417,7 +416,8 @@ function addGetalbeelden1000(){
   for(let i=0;i<count;i++){
     const num  = Math.floor(Math.random() * Math.min(maxVal, 999)) + 1;
     const card = document.createElement('div');
-    card.className = 'gb1000-card';
+    card.className = 'gb1000-card row-delete-wrap';
+    card.appendChild(createRowDeleteButton(card));
 
     const visual = createGetalbeeld1000Visual(num);
     // Bij tot 100: grote hvwrap + enkelvoudige visual (geen grid van 100px)
@@ -569,7 +569,7 @@ function addGetalbeelden1000(){
       delBtn.innerHTML = '\u00D7';
       delBtn.addEventListener('click', () => {
         document.querySelectorAll(`[data-title-key="${key}"]:not(.exercise-title)`).forEach(el => el.remove());
-        document.querySelectorAll('.honderdveld-row').forEach(r => { if (!r.children.length) r.remove(); });
+        // honderdveld-rows worden opgeruimd via de bubble-up logica
         row.remove();
         addedTitles.delete(key);
       });
@@ -621,7 +621,7 @@ function placeAfterLastOfKey(el, key){
         if (titleRow) titleRow.remove();
         addedTitles.delete(titleKey);
       }
-      if (parent?.classList?.contains('honderdveld-row') && parent.children.length === 0) parent.remove();
+      // honderdveld-row wordt automatisch opgeruimd door de bubble-up lus in createRowDeleteButton
     }, {once:true});
     return btn;
   };
@@ -656,7 +656,7 @@ function createRowDeleteButton(target){
         // Sla knoppen over
         if (cl.contains('delete-btn') || cl.contains('row-delete-btn') ||
             cl.contains('title-add-btn') || cl.contains('title-delete-btn')) return false;
-        // Sla lege container-divs over (mixed-grid, mixed-first, fillnext-grid, etc.)
+        // Sla lege layout-containers over (grid-wrappers zonder echte kinderen)
         const isLegeContainer = (
           cl.contains('mixed-grid') || cl.contains('mixed-first') ||
           cl.contains('fillnext-grid') || cl.contains('fillnext-first') ||
@@ -664,7 +664,8 @@ function createRowDeleteButton(target){
           cl.contains('hvp-grid') || cl.contains('hvp-first') ||
           cl.contains('gb1000-grid') || cl.contains('gb1000-first') ||
           cl.contains('pv-grid') || cl.contains('pv-first') ||
-          cl.contains('pv3-grid')
+          cl.contains('pv3-grid') ||
+          cl.contains('honderdveld-row')   // rij-wrapper; leeg = verwijderen
         ) && el.children.length === 0;
         if (isLegeContainer) return false;
         // Ook lege containers met enkel knoppen tellen niet mee
@@ -907,7 +908,7 @@ t.setAttribute('dominant-baseline','text-before-edge'); // stabieler in PDF
     const discover=$('#jumpDiscover').checked;
     const key = discover ? 'jump_discover' : 'jump_fixed';
     ensureTitleOnce(sheet, key, discover?'Welke sprong wordt er gemaakt? Vul de rij verder aan.':'Tel met sprongen.');
-    _registerAddFn(key, () => _eenToevoegen(addJumpExercise, '#jumpCount'));
+    _registerAddFn(key, () => _voegJumpItemToe(key));
     const block=document.createElement('div'); block.className='jump-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey = key;
     if (discover) {
       const p=document.createElement('div'); p.className='discover-jump-prompt';
@@ -1278,7 +1279,7 @@ function isCleanTen(n){ return n % 10 === 0; }
 
     const key=keyMap[type]; ensureTitleOnce(sheet, key, titles[type]);
     // + oefening: voegt 1 item toe aan het bestaande grid, niet een heel nieuw blok
-    _registerAddFn(key, () => _voegMixItemToe(key, type, max));
+    _registerAddFn(key, (type==='nextTen'||type==='nextHundred') ? () => _voegFillNextItemToe(key, type) : () => _voegMixItemToe(key, type, max));
     const block=document.createElement('div'); block.className='mixed-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
     let grid = document.createElement('div');
 if (type==='nextTen' || type==='nextHundred') {
@@ -1518,7 +1519,7 @@ placeAfterLastOfKey(block, key);
     const allIdx=[...seq.keys()]; if(lockEnds){ allIdx.shift(); allIdx.pop(); }
     const blankSet=new Set(); while(blankSet.size<blanks && allIdx.length){ const k=Math.floor(Math.random()*allIdx.length); blankSet.add(allIdx.splice(k,1)[0]); }
     const key='seq_fill'; ensureTitleOnce(sheet,key,'Vul de getallenrij verder aan.');
-    _registerAddFn(key, addSequenceExercise);
+    _registerAddFn(key, () => _voegSequenceItemToe(key));
     const block=document.createElement('div'); block.className='sequence-exercise-block'; block.appendChild(createDeleteButton(block)); block.dataset.titleKey=key;
     const row = document.createElement('div');
 row.className = 'seq-row row-delete-wrap';
@@ -1591,15 +1592,16 @@ function addHonderdveldExercise() {
   };
   const key = `honderdveld_${type}`;
   ensureTitleOnce(sheet, key, titles[type] || 'Honderdveld');
-  _registerAddFn(key, () => _eenToevoegen(addHonderdveldExercise, '#honderdveldCount'));
+  _registerAddFn(key, () => { const orig = document.getElementById('honderdveldCount')?.value; if(document.getElementById('honderdveldCount')) document.getElementById('honderdveldCount').value='1'; try{addHonderdveldExercise();}finally{if(document.getElementById('honderdveldCount')&&orig!==undefined) document.getElementById('honderdveldCount').value=orig;} });
 
   let rowContainer = null;
 
   for (let i = 0; i < count; i++) {
     // Blok + verwijderknop
     const block = document.createElement('div');
-    block.className = 'honderdveld-exercise-block';
+    block.className = 'honderdveld-exercise-block row-delete-wrap';
     block.dataset.titleKey = key;
+    block.appendChild(createRowDeleteButton(block));
     // Container
     const container = document.createElement('div');
     container.className = 'honderdveld-container';
@@ -1695,8 +1697,7 @@ function addHonderdveldExercise() {
 
     if (!lastRow || countIn(lastRow) >= perRij) {
       const newRow = document.createElement('div');
-      newRow.className = 'honderdveld-row row-delete-wrap';
-      newRow.appendChild(createRowDeleteButton(newRow));
+      newRow.className = 'honderdveld-row';
       if (!lastRow) {
         const titleRow = document.querySelector(`.exercise-title[data-title-key="${key}"]`)?.closest('.title-row');
         newRow.classList.add('keep-with-title');
@@ -1734,6 +1735,7 @@ function addHonderdveldExercise() {
       const isWhite = (type==='kleuren');
       const container = document.createElement('div');
       container.className = 'mab-tellen-container row-delete-wrap';
+      container.appendChild(createRowDeleteButton(container));
       const visual = createMabRepresentationHTE(isWhite?(includeHundreds?9:0):h, isWhite?9:t, isWhite?9:u, isWhite, includeHundreds);
       if (isWhite) {
         const numDiv = document.createElement('div'); numDiv.className='mab-connect-num'; numDiv.textContent=num;
@@ -1758,7 +1760,7 @@ function addHonderdveldExercise() {
       }
     });
 
-    const block=document.createElement('div'); block.className='mab-exercise-block'; block.dataset.titleKey=key; block.appendChild(createDeleteButton(block));
+    const block=document.createElement('div'); block.className='mab-exercise-block'; block.dataset.titleKey=key;
     const includeHundreds = max > 100;
 
     if (type==='tellen' || type==='kleuren'){
@@ -1771,7 +1773,7 @@ function addHonderdveldExercise() {
 
         const container = document.createElement('div');
 container.className = 'mab-tellen-container row-delete-wrap';
-// verwijdering via blok-niveau delete-knop
+container.appendChild(createRowDeleteButton(container));
 
         const visual=createMabRepresentationHTE(isWhite?(includeHundreds?9:0):h, isWhite?9:t, isWhite?9:u, isWhite, includeHundreds);
 
@@ -2070,7 +2072,7 @@ svg.style.height = h + 'px';
         : 'Geef de vakjes met dezelfde waarde dezelfde kleur.';
 
       ensureTitleOnce(sheet, key, title);
-      _registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
+      _registerAddFn(key, () => _voegPvConnectItemToe(key, mode));
 
       const block = document.createElement('div');
       block.className = 'placevalue-exercise-block';
@@ -2200,7 +2202,7 @@ addCells(botCards, bandBot, 'bot');   // punt bovenaan
     if (range === '1000') {
       const key = 'place_value_hte';
       ensureTitleOnce(sheet, key, 'Schrijf de waarde van elk cijfer (H/T/E).');
-      _registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
+      _registerAddFn(key, () => _voegPvHteItemToe(key));
 
       const block = document.createElement('div');
       block.className = 'placevalue-exercise-block';
@@ -2275,7 +2277,7 @@ block.appendChild(head);
     // TE-versie (tot 100) – vaste coördinaten zoals in uw oude werkende versie
 const key = 'place_value';
 ensureTitleOnce(sheet, key, 'Schrijf de waarde van elk cijfer.');
-_registerAddFn(key, () => _eenToevoegen(addPlaceValueExercise, '#pvCount'));
+_registerAddFn(key, () => _voegPvTeItemToe(key));
 const block = document.createElement('div');
 block.className = 'placevalue-exercise-block';
 block.dataset.titleKey = key;
@@ -2296,7 +2298,8 @@ if (range === '20') {
 }
 
   const item = document.createElement('div');
-  item.className = 'pv-item';
+  item.className = 'pv-item row-delete-wrap';
+  item.appendChild(createRowDeleteButton(item));
 
   const num = document.createElement('div');
   num.className = 'pv-number';
@@ -2388,11 +2391,287 @@ block.appendChild(grid);
 placeAfterLastOfKey(block, key);
 }
 
+  /* ══ "+ oefening" helpers — altijd exact 1 item toevoegen ══ */
+
+  function _voegJumpItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.jump-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addJumpExercise(); return; }
+    const blok = blokken[blokken.length - 1];
+    const ex = blok.querySelector('.jump-exercise') || blok;
+    const start=parseInt($('#jumpStart').value,10), step=parseInt($('#jumpStep').value,10);
+    const count=Math.max(1,parseInt($('#jumpCount').value,10));
+    const discover=$('#jumpDiscover').checked;
+    const row=document.createElement('div'); row.className='jump-row row-delete-wrap'; row.appendChild(createRowDeleteButton(row));
+    const seq=Array.from({length:count},(_,i)=>start+i*step);
+    if(discover){
+      const givenPosText=($('#jumpGivenPositions').value||'').trim();
+      const includeStart=$('#jumpIncludeStart').checked, includeEnd=$('#jumpIncludeEnd').checked;
+      const wantCount=Math.max(0,parseInt($('#jumpGivenCount').value,10)||0);
+      let indices=new Set();
+      if(givenPosText.length){ givenPosText.split(/[ ,;]+/).forEach(s=>{const k=parseInt(s,10);if(Number.isFinite(k)&&k>=1&&k<=count)indices.add(k-1);}); }
+      else { while(indices.size<Math.min(wantCount,count)) indices.add(Math.floor(Math.random()*count)); }
+      if(includeStart) indices.add(0); if(includeEnd) indices.add(count-1);
+      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=seq[0]; row.appendChild(startEl);
+      for(let i=1;i<count;i++){
+        if(indices.has(i)){const g=document.createElement('div');g.className='jump-given';g.textContent=seq[i];row.appendChild(g);}
+        else{const b=document.createElement('input');b.className='jump-box';row.appendChild(b);}
+      }
+    } else {
+      const startEl=document.createElement('div'); startEl.className='jump-start'; startEl.textContent=start; row.appendChild(startEl);
+      for(let i=0;i<count-1;i++){const box=document.createElement('input');box.className='jump-box';row.appendChild(box);}
+    }
+    ex.appendChild(row);
+    requestAnimationFrame(()=>drawJumpArcsInline(row,Array(count-1).fill(discover?'?':('+'+step))));
+  }
+
+  function _voegHvpItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.hvp-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addHvPuzzleExercises(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.hvp-grid');
+    const head = blok.querySelector('.hvp-first');
+    const sizeKey=(document.getElementById('hvpSize').value||'medium');
+    const rawGiven=parseInt(document.getElementById('hvpGiven').value,10);
+    const maxGiven=Math.max(1,hvpMaxCellsForSize(sizeKey)-1);
+    const given=Math.max(1,Math.min(Number.isFinite(rawGiven)?rawGiven:3,maxGiven));
+    const card=createHvPuzzleCard(given,sizeKey);
+    const headCount=head?head.querySelectorAll('.hvp-card').length:3;
+    if(head&&headCount<3) head.appendChild(card);
+    else if(grid) grid.appendChild(card);
+  }
+
+  function _voegHvIconsItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.hvicons-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addHvIconsExercises(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.hvicons-grid');
+    const head = blok.querySelector('.hvicons-first');
+    const perCard=parseInt(document.getElementById('hvIconsPerCard').value,10)||6;
+    const theme=document.getElementById('hvIconsTheme').value||'herfst';
+    const showNumbers=!!document.getElementById('hvIconsShowNumbers')?.checked;
+    const card=document.createElement('div'); card.className='hvicons-card row-delete-wrap'; card.appendChild(createRowDeleteButton(card));
+    const {wrap}=buildHundredGrid(); card.appendChild(wrap);
+    const items=placeIcons(wrap,perCard,theme,showNumbers); card.appendChild(buildLegend(items));
+    const headCount=head?head.querySelectorAll('.hvicons-card').length:1;
+    if(head&&headCount<1) head.appendChild(card);
+    else if(grid) grid.appendChild(card);
+  }
+
+  function _voegGb1000ItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.gb1000-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addGetalbeelden1000(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.gb1000-grid');
+    const head = blok.querySelector('.gb1000-first');
+    const maxVal=parseInt((document.getElementById('gb1000Max')||{value:'999'}).value,10)||999;
+    const num=Math.floor(Math.random()*Math.min(maxVal,999))+1;
+    const card=document.createElement('div'); card.className='gb1000-card row-delete-wrap'; card.appendChild(createRowDeleteButton(card));
+    const visual=createGetalbeeld1000Visual(num);
+    if(maxVal<=100){visual.querySelectorAll('.gb1000-hvwrap').forEach(el=>el.classList.add('gb1000-hvwrap-groot'));visual.classList.add('gb1000-visual-enkel');}
+    card.appendChild(visual);
+    const table=document.createElement('table'); table.className='honderdveld-te-table';
+    const numBox=document.createElement('input'); numBox.type='text'; numBox.className='honderdveld-num-box';
+    if(maxVal<=100){
+      table.innerHTML='<tr><td class="te-label t">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td></tr>';
+      card.style.cssText='display:flex;flex-direction:column;align-items:center;gap:8px;';
+      const task=document.createElement('div'); task.className='gb1000-task-onder'; task.append(table,numBox); card.appendChild(task);
+    } else {
+      table.innerHTML='<tr><td class="te-label h" style="background:#42a5f5;color:#fff">H</td><td class="te-label t">T</td><td class="te-label e">E</td></tr><tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>';
+      const task=document.createElement('div'); task.className='honderdveld-task'; task.append(table,numBox); card.appendChild(task);
+    }
+    const headCount=head?head.querySelectorAll('.gb1000-card').length:2;
+    if(head&&headCount<2) head.appendChild(card);
+    else if(grid) grid.appendChild(card);
+  }
+
+  function _voegSequenceItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.sequence-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addSequenceExercise(); return; }
+    const blok = blokken[blokken.length - 1];
+    const start=parseInt($('#seqStart').value,10), end=parseInt($('#seqEnd').value,10);
+    const lockEnds=$('#seqLockEnds').checked;
+    const blanksWanted=Math.max(0,parseInt($('#seqBlankCount').value,10)||0);
+    const step=start<end?1:-1;
+    const seq=[]; for(let v=start;(step>0?v<=end:v>=end);v+=step) seq.push(v);
+    const allIdx=[...seq.keys()]; if(lockEnds){allIdx.shift();allIdx.pop();}
+    const maxBlanks=lockEnds?Math.max(0,seq.length-2):seq.length;
+    const blanks=Math.min(blanksWanted,maxBlanks);
+    const blankSet=new Set();
+    while(blankSet.size<blanks&&allIdx.length){const k=Math.floor(Math.random()*allIdx.length);blankSet.add(allIdx.splice(k,1)[0]);}
+    const row=document.createElement('div'); row.className='seq-row row-delete-wrap'; row.appendChild(createRowDeleteButton(row));
+    seq.forEach((n,i)=>{
+      if(blankSet.has(i)){const inp=document.createElement('input');inp.type='text';inp.className='seq-box';row.appendChild(inp);}
+      else{const d=document.createElement('div');d.className='seq-num';d.textContent=n;row.appendChild(d);}
+    });
+    blok.appendChild(row);
+  }
+
+  function _voegPvConnectItemToe(key, mode) {
+    const blokken = Array.from(sheet.querySelectorAll(`.placevalue-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addPlaceValueExercise(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.pv-grid');
+    if (!grid) { addPlaceValueExercise(); return; }
+    const range=$('#pvRange').value||'100';
+    const row=document.createElement('div');
+    row.className=(mode==='connect'?'pv-connect3-row':'pv-color-row')+' row-delete-wrap';
+    row.appendChild(createRowDeleteButton(row));
+    const vals=[];
+    for(let i=0;i<3;i++){
+      let t,u;
+      if(range==='20'){const n=Math.floor(Math.random()*21);t=Math.floor(n/10);u=n%10;}
+      else{t=1+Math.floor(Math.random()*9);u=Math.floor(Math.random()*10);}
+      vals.push(t*10+u);
+    }
+    if(mode==='connect'){
+      const lefts=document.createElement('div'); lefts.className='pv-connect-col';
+      const rights=document.createElement('div'); rights.className='pv-connect-col pv-connect-right';
+      const shuffled=[...vals].sort(()=>Math.random()-.5);
+      vals.forEach(v=>{const cell=document.createElement('div');cell.className='pv-connect-cell';cell.textContent=exprForValue(v,range);lefts.appendChild(cell);});
+      shuffled.forEach(v=>{const cell=document.createElement('div');cell.className='pv-connect-cell pv-connect-num';cell.textContent=String(v);rights.appendChild(cell);});
+      row.append(lefts,rights);
+    } else {
+      const tbl=document.createElement('div'); tbl.className='pv-color-grid';
+      const items2=[];
+      vals.forEach(v=>{let a=exprForValue(v,range),b,guard=0;do{b=exprForValue(v,range);guard++;}while(b===a&&guard<10);items2.push(a,b);});
+      items2.sort(()=>Math.random()-.5);
+      items2.forEach(txt=>{const cell=document.createElement('div');cell.className='pv-color-cell';cell.textContent=String(txt);tbl.appendChild(cell);});
+      row.appendChild(tbl);
+    }
+    grid.appendChild(row);
+  }
+
+  function _voegPvHteItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.placevalue-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addPlaceValueExercise(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.pv3-grid'), head = blok.querySelector('.pv-first');
+    if (!grid) { addPlaceValueExercise(); return; }
+    const NS2='http://www.w3.org/2000/svg';
+    const h2=1+Math.floor(Math.random()*9), t2=Math.floor(Math.random()*10), u2=Math.floor(Math.random()*10);
+    const item=document.createElement('div'); item.className='pv3-item row-delete-wrap'; item.style.position='relative'; item.appendChild(createRowDeleteButton(item));
+    const num2=document.createElement('div'); num2.className='pv3-number';
+    const dh2=document.createElement('div'); dh2.className='pv3-digit hundreds'; dh2.textContent=h2;
+    const dt2=document.createElement('div'); dt2.className='pv3-digit tens'; dt2.textContent=t2;
+    const du2=document.createElement('div'); du2.className='pv3-digit units'; du2.textContent=u2;
+    num2.append(dh2,dt2,du2);
+    const ans2=document.createElement('div'); ans2.className='pv3-answers'; ans2.style.cssText='position:absolute;left:0;right:0;top:0;height:240px;';
+    const rE2=document.createElement('div'); rE2.className='pv3-row'; rE2.innerHTML='<input type="text" class="pv3-small"> <span class="pv3-label">E =</span> <input type="text" class="pv3-box">';
+    const rT2=document.createElement('div'); rT2.className='pv3-row'; rT2.innerHTML='<input type="text" class="pv3-small"> <span class="pv3-label">T =</span> <input type="text" class="pv3-box pv3-box-wide">';
+    const rH2=document.createElement('div'); rH2.className='pv3-row'; rH2.innerHTML='<input type="text" class="pv3-small"> <span class="pv3-label">H =</span> <input type="text" class="pv3-box"> <span class="pv3-label">T =</span> <input type="text" class="pv3-box pv3-box-wide">';
+    ans2.append(rE2,rT2,rH2);
+    const svg3=document.createElementNS(NS2,'svg'); svg3.classList.add('pv-arrows'); svg3.style.cssText='position:absolute;inset:0;z-index:0;';
+    item.append(num2,ans2,svg3);
+    const headCount=head?head.querySelectorAll('.pv3-item').length:2;
+    if(head&&headCount<2) head.appendChild(item); else grid.appendChild(item);
+    requestAnimationFrame(()=>alignPlaceValueHTE(item));
+  }
+
+  function _voegPvTeItemToe(key) {
+    const blokken = Array.from(sheet.querySelectorAll(`.placevalue-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addPlaceValueExercise(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.pv-grid'), head = blok.querySelector('.pv-first');
+    if (!grid) { addPlaceValueExercise(); return; }
+    const NS3='http://www.w3.org/2000/svg';
+    const range2=$('#pvRange').value||'100';
+    let t3,u3;
+    if(range2==='20'){const n2=Math.floor(Math.random()*21);t3=Math.floor(n2/10);u3=n2%10;}
+    else{t3=1+Math.floor(Math.random()*9);u3=Math.floor(Math.random()*10);}
+    const item3=document.createElement('div'); item3.className='pv-item row-delete-wrap'; item3.appendChild(createRowDeleteButton(item3));
+    const num3=document.createElement('div'); num3.className='pv-number';
+    const dt3=document.createElement('div'); dt3.className='pv-digit tens'; dt3.textContent=t3;
+    const du3=document.createElement('div'); du3.className='pv-digit units'; du3.textContent=u3;
+    num3.append(dt3,du3);
+    const ans3=document.createElement('div'); ans3.className='pv-answers'; ans3.style.transform='translateX(-44px)';
+    const rE3=document.createElement('div'); rE3.className='pv-row';
+    const eS3=document.createElement('input'); eS3.type='text'; eS3.className='pv-small';
+    const eL3=document.createElement('span'); eL3.className='pv-label'; eL3.textContent='E =';
+    const eB3=document.createElement('input'); eB3.type='text'; eB3.className='pv-box';
+    rE3.append(eS3,eL3,eB3);
+    const rT3=document.createElement('div'); rT3.className='pv-row';
+    const tS3=document.createElement('input'); tS3.type='text'; tS3.className='pv-small';
+    const tL3=document.createElement('span'); tL3.className='pv-label'; tL3.textContent='T =';
+    const tB3=document.createElement('input'); tB3.type='text'; tB3.className='pv-box';
+    const tLE3=document.createElement('span'); tLE3.className='pv-label'; tLE3.textContent='E =';
+    const tBE3=document.createElement('input'); tBE3.type='text'; tBE3.className='pv-box';
+    rT3.append(tS3,tL3,tB3,tLE3,tBE3);
+    ans3.append(rE3,rT3);
+    const mid3='pvArrow_'+Math.random().toString(36).slice(2);
+    const svg4=document.createElementNS(NS3,'svg'); svg4.classList.add('pv-arrows');
+    const defs4=document.createElementNS(NS3,'defs');
+    const mk4=document.createElementNS(NS3,'marker'); mk4.setAttribute('id',mid3); mk4.setAttribute('viewBox','0 0 8 8'); mk4.setAttribute('refX','7'); mk4.setAttribute('refY','4'); mk4.setAttribute('markerWidth','6'); mk4.setAttribute('markerHeight','6'); mk4.setAttribute('orient','auto-start-reverse');
+    const tip4=document.createElementNS(NS3,'path'); tip4.setAttribute('d','M 0 0 L 8 4 L 0 8 Z'); tip4.setAttribute('fill','#333');
+    mk4.appendChild(tip4); defs4.appendChild(mk4); svg4.appendChild(defs4);
+    const ep4=document.createElementNS(NS3,'path'); ep4.setAttribute('d','M 62 44 V 70 H 80'); ep4.setAttribute('fill','none'); ep4.setAttribute('stroke','#333'); ep4.setAttribute('stroke-width','1.5'); ep4.setAttribute('marker-end','url(#'+mid3+')');
+    const tp4=document.createElementNS(NS3,'path'); tp4.setAttribute('d','M 26 44 V 120 H 80'); tp4.setAttribute('fill','none'); tp4.setAttribute('stroke','#333'); tp4.setAttribute('stroke-width','1.5'); tp4.setAttribute('marker-end','url(#'+mid3+')');
+    svg4.append(ep4,tp4);
+    item3.append(num3,ans3,svg4);
+    const headCount2=head?head.querySelectorAll('.pv-item').length:2;
+    if(head&&headCount2<2) head.appendChild(item3); else grid.appendChild(item3);
+  }
+
+  function _voegFillNextItemToe(key, type) {
+    const blokken = Array.from(sheet.querySelectorAll(`.mixed-exercise-block[data-title-key="${key}"]`));
+    if (!blokken.length) { addMixedExercises(); return; }
+    const blok = blokken[blokken.length - 1];
+    const grid = blok.querySelector('.fillnext-grid');
+    if (!grid) { addMixedExercises(); return; }
+    const item=document.createElement('div'); item.className='mix-item row-delete-wrap'; item.appendChild(createRowDeleteButton(item));
+    const card=document.createElement('div');
+    if(type==='nextTen'){
+      const metSchema=document.getElementById('fillNextSchema')?.checked!==false;
+      let x; do{x=Math.floor(Math.random()*99)+1;}while(x%10===0);
+      const target=nextTen(x), diff=target-x, tens=Math.floor(x/10);
+      card.className=(metSchema?'fillnext-card fillnext-card-met-schema':'fillnext-card');
+      if(metSchema){
+        const schema=document.createElement('div'); schema.className='fillnext-schema';
+        const sg=document.createElement('div'); sg.className='honderdveld-grid';
+        for(let j=1;j<=100;j++){const cel=document.createElement('div');cel.className='honderdveld-cell';if(j<=tens*10)cel.classList.add('filled-ten');else if(j<=x)cel.classList.add('filled-unit');sg.appendChild(cel);}
+        schema.appendChild(sg); card.appendChild(schema);
+      }
+      const vr=document.createElement('div'); vr.className='fillnext-vragen';
+      vr.innerHTML=`<div class="fillnext-num-groot">${x}</div><div class="fillnext-line">Het volgende <strong>T</strong> is <input type="text" class="fillnext-box">.</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box"> erbij.</div>`;
+      card.appendChild(vr);
+    } else {
+      let x,tries=0; const n2=parseInt($('#mixedMax')?.value,10)||100; const cap=Math.min(990,n2);
+      if(cap>=110){do{const tc=Math.floor((cap-110)/10)+1;x=110+10*Math.floor(Math.random()*tc);tries++;if(tries>200)break;}while(x%100===0);}
+      else{do{x=10+10*Math.floor(Math.random()*9);tries++;if(tries>200)break;}while(x%100===0);}
+      const target=nextHundred(x);
+      card.className='fillnext-card';
+      card.innerHTML=`<div class="fillnext-top"><div class="fillnext-num">${x}</div></div><div class="fillnext-line">Het volgende <strong>H</strong> is <input type="text" class="fillnext-box"> .</div><div class="fillnext-line">Dat is <input type="text" class="fillnext-box"> erbij.</div>`;
+    }
+    item.appendChild(card);
+    const first=blok.querySelector('.fillnext-first');
+    const firstCount=first?first.querySelectorAll('.mix-item').length:2;
+    if(first&&firstCount<2){ first.appendChild(item); }
+    else {
+      const rows=Array.from(grid.querySelectorAll('.fillnext-row'));
+      const lastRow=rows[rows.length-1];
+      if(lastRow&&lastRow.querySelectorAll('.mix-item').length<2) lastRow.appendChild(item);
+      else{ const row2=document.createElement('div'); row2.className='fillnext-row'; row2.appendChild(item); grid.appendChild(row2); }
+    }
+  }
+
   /* ── Header & events ───────────────────────────────────── */
   function renderSheetHeader(){ if (sheet.querySelector('.sheetHeader')) return;
     const h=document.createElement('div'); h.className='sheetHeader';
-    // Naam/datum staan in de PDF-koptekst — hier enkel de werkblad-titel
-    h.innerHTML=`<h2 style="text-align:center;margin:18px 0 12px 0;font-size:26px;font-weight:700;color:#1A3A5C;">Extra oefenen op getalinzicht</h2>`;
+    h.style.cssText='text-align:center;margin:18px 0 12px 0;position:relative;';
+    const titleEl=document.createElement('h2');
+    titleEl.contentEditable='true'; titleEl.spellcheck=false;
+    titleEl.textContent='Extra oefenen op getalinzicht';
+    titleEl.style.cssText='display:inline-block;font-size:26px;font-weight:700;color:#1A3A5C;'
+      +'min-width:200px;outline:none;border-bottom:2px dashed transparent;cursor:text;'
+      +'transition:border-color .2s;padding:2px 6px;border-radius:4px;';
+    titleEl.title='Klik om de titel aan te passen';
+    titleEl.addEventListener('focus',()=>{ titleEl.style.borderBottomColor='#4A90D9'; titleEl.style.background='#f0f8ff'; });
+    titleEl.addEventListener('blur', ()=>{ titleEl.style.borderBottomColor='transparent'; titleEl.style.background=''; });
+    titleEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); titleEl.blur(); } });
+    const editHint=document.createElement('span');
+    editHint.textContent=' ✏️'; editHint.title='Klik op de titel om te bewerken';
+    editHint.style.cssText='font-size:14px;opacity:.5;cursor:text;vertical-align:middle;';
+    editHint.addEventListener('click',()=>titleEl.focus());
+    h.appendChild(titleEl); h.appendChild(editHint);
     sheet.insertBefore(h, sheet.firstChild);
   }
 
