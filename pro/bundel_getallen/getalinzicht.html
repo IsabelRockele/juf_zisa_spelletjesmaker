@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="getalinzicht.css">
   <link rel="stylesheet" href="getalinzicht-ui.css">
 </head>
-<body>
+<body class="modus-werkbundel">
 
 <!-- ── HEADER ─────────────────────────────────────────────── -->
 <header>
@@ -94,6 +94,16 @@
 
   <!-- ── SIDEBAR ───────────────────────────────────────────── -->
   <aside class="sidebar">
+
+    <!-- ── MODUS SCHAKELAAR ─────────────────────────────── -->
+    <div class="modus-schakelaar" id="modusSwitcher">
+      <button class="modus-btn active" id="btnModusWerkbundel" onclick="GI_UI.setModus('werkbundel')">
+        📄 Werkbundel
+      </button>
+      <button class="modus-btn" id="btnModusToets" onclick="GI_UI.setModus('toets')">
+        📝 Toets
+      </button>
+    </div>
 
     <div class="sidebar-tabs" id="sidebarTabs">
       <div class="sidebar-tab tab-getallenlijn active"   onclick="GI_UI.toonTab('getallenlijn',this)">📏 Getallenlijn</div>
@@ -876,8 +886,26 @@ const GI_UI = (() => {
     if (window.GI_Preview) window.GI_Preview.renderPreview();
   }
 
+  function setModus(m) {
+    // Schakelaar-knoppen updaten
+    document.getElementById('btnModusWerkbundel')?.classList.toggle('active', m === 'werkbundel');
+    document.getElementById('btnModusToets')?.classList.toggle('active', m === 'toets');
+    // Werkbladtitel aanpassen aan modus
+    const titelEl = document.querySelector('#sheet .sheetHeader h2');
+    if (titelEl) {
+      const huidig = titelEl.textContent.trim();
+      if (m === 'toets' && (huidig === 'Extra oefenen op getalinzicht' || huidig === 'Werkbundel')) {
+        titelEl.textContent = 'Toets getalinzicht';
+      } else if (m === 'werkbundel' && (huidig === 'Toets getalinzicht' || huidig === 'Toets')) {
+        titelEl.textContent = 'Extra oefenen op getalinzicht';
+      }
+    }
+    // Delegeer naar GI_Toets (geladen vanuit getalinzicht.js)
+    if (window.GI_Toets) window.GI_Toets.setModus(m);
+  }
+
   return {
-    toonTab, toggleHarm,
+    toonTab, toggleHarm, setModus,
     kiesGemengd, kiesHonderdveld, kiesMAB, kiesPV,
     toggleJumpDiscover, scrollTabsLeft, scrollTabsRight,
     toggleShowOnly, hertekenPreview,
