@@ -144,7 +144,7 @@
       <button id="saveBtn" class="secondary small">💾 Opslaan</button>
       <label class="ghost small" style="padding:6px 10px;border-radius:12px;cursor:pointer;font-weight:800;background:var(--soft);font-size:13px;margin:0">
         📂 Importeren
-        <input id="importFile" class="hidden" type="file" accept=".json,application/json">
+        <input id="importFile" class="hidden" type="file" accept=".json,.txt,application/json,text/plain,*/*" onclick="this.value=''">
       </label>
     </div>
   </div>
@@ -400,17 +400,16 @@
               <label for="m_repeated" style="margin:0">Heeft eerder een leerjaar overgedaan</label>
             </div>
             <div id="m_repeatedYearWrap" style="display:none">
-              <label>Welk leerjaar?</label>
-              <select id="m_repeatedYear">
-                <option value="">-</option>
-                <option value="kleuter">Kleuter</option>
-                <option value="1ste leerjaar">1ste leerjaar</option>
-                <option value="2de leerjaar">2de leerjaar</option>
-                <option value="3de leerjaar">3de leerjaar</option>
-                <option value="4de leerjaar">4de leerjaar</option>
-                <option value="5de leerjaar">5de leerjaar</option>
-                <option value="6de leerjaar">6de leerjaar</option>
-              </select>
+              <label>Welk leerjaar? (meerdere mogelijk)</label>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px">
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="kleuter" style="width:auto;margin:0"> Kleuter</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="1ste leerjaar" style="width:auto;margin:0"> 1ste</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="2de leerjaar" style="width:auto;margin:0"> 2de</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="3de leerjaar" style="width:auto;margin:0"> 3de</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="4de leerjaar" style="width:auto;margin:0"> 4de</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="5de leerjaar" style="width:auto;margin:0"> 5de</label>
+                <label style="display:flex;align-items:center;gap:5px;font-weight:normal;font-size:13px;background:var(--soft);padding:4px 10px;border-radius:8px;cursor:pointer;margin:0"><input type="checkbox" name="repeatedYear" value="6de leerjaar" style="width:auto;margin:0"> 6de</label>
+              </div>
             </div>
             <div class="checkbox-row">
               <input type="checkbox" id="m_newcomer">
@@ -455,6 +454,34 @@
           </div>
           <label>Notitie sociaal-emotioneel</label>
           <textarea id="m_socialNote" placeholder="Bv. thuissituatie (week-week regeling), is verlegen in groep, kan moeilijk verlies aanvaarden, ..."></textarea>
+        </div>
+      </div>
+
+      <!-- INKLAPBAAR: Zwemmen -->
+      <div class="accordion" data-section="zwemmen">
+        <button type="button" class="accordion-header" onclick="toggleAccordion('zwemmen')">
+          <h3>🏊 Zwemmen <span class="section-badge empty" id="badge_zwemmen">leeg</span></h3>
+          <span class="accordion-icon">▶</span>
+        </button>
+        <div class="accordion-body">
+          <label>Kleur badmuts</label>
+          <div class="pill-row" style="margin-bottom:0">
+            <label class="pill" id="pill_badmuts_geen" onclick="setBadmuts('')">
+              <input type="radio" name="badmuts" value=""> — geen / onbekend
+            </label>
+            <label class="pill" id="pill_badmuts_rood" onclick="setBadmuts('rood')" style="border-color:#e05555">
+              <input type="radio" name="badmuts" value="rood"> 🔴 Rood
+            </label>
+            <label class="pill" id="pill_badmuts_blauw_ondiep" onclick="setBadmuts('blauw_ondiep')" style="border-color:#5599dd">
+              <input type="radio" name="badmuts" value="blauw_ondiep"> 🔵 Blauw ondiep
+            </label>
+            <label class="pill" id="pill_badmuts_blauw_diep" onclick="setBadmuts('blauw_diep')" style="border-color:#1a4a9e">
+              <input type="radio" name="badmuts" value="blauw_diep"> 🔵 Blauw diep
+            </label>
+            <label class="pill" id="pill_badmuts_groen" onclick="setBadmuts('groen')" style="border-color:#3a9a5c">
+              <input type="radio" name="badmuts" value="groen"> 🟢 Groen
+            </label>
+          </div>
         </div>
       </div>
 
@@ -617,6 +644,9 @@ function updateSectionBadges(s) {
   // Algemeen
   badges.algemeen = s.notes ? 1 : 0;
 
+  // Zwemmen
+  badges.zwemmen = s.badmuts ? 1 : 0;
+
   // Update DOM
   Object.keys(badges).forEach(key => {
     const el = $('badge_' + key);
@@ -673,7 +703,8 @@ function openModal(studentId = null) {
     $('m_careNote').value = s.careNote || '';
     // Loopbaan
     $('m_repeated').checked = !!s.repeated;
-    $('m_repeatedYear').value = s.repeatedYear || '';
+    const ryVals = Array.isArray(s.repeatedYear) ? s.repeatedYear : (s.repeatedYear ? [s.repeatedYear] : []);
+    document.querySelectorAll('input[name="repeatedYear"]').forEach(cb => { cb.checked = ryVals.includes(cb.value); });
     $('m_newcomer').checked = !!s.newcomer;
     $('m_stayingThisYear').checked = !!s.stayingThisYear;
     // Therapie
@@ -689,6 +720,8 @@ function openModal(studentId = null) {
     $('m_socialNote').value = s.socialNote || '';
     // Algemeen
     $('m_notes').value = s.notes || '';
+    // Zwemmen
+    setBadmuts(s.badmuts || '');
 
     updateRepeatedYearUI();
     const badges = updateSectionBadges(s);
@@ -705,13 +738,14 @@ function openModal(studentId = null) {
     ['m_repeated','m_newcomer','m_stayingThisYear','m_therapy_logo','m_therapy_kine',
      'm_therapy_gon','m_therapy_clb','m_therapy_psy'
     ].forEach(id => $(id).checked = false);
-    $('m_repeatedYear').value = '';
+    document.querySelectorAll('input[name="repeatedYear"]').forEach(cb => { cb.checked = false; });
     $('m_gender').value = '-'; $('m_level').value = '3';
     $('m_reading').value = 'basis'; $('m_spelling').value = 'basis';
     $('m_math').value = 'basis'; $('m_writing').value = 'basis';
     $('m_care').value = 'laag'; $('m_iac').value = 'nee'; $('m_extraCare').value = 'nee';
     $('m_focus').value = 'ok'; $('m_behavior').value = 'ok';
     $('m_updatedDate').value = todayISO();
+    setBadmuts('');
     updateRepeatedYearUI();
     updateSectionBadges({});
   }
@@ -746,7 +780,7 @@ function saveStudent() {
     careNote: $('m_careNote').value.trim(),
     // Loopbaan
     repeated: $('m_repeated').checked,
-    repeatedYear: $('m_repeated').checked ? $('m_repeatedYear').value : '',
+    repeatedYear: $('m_repeated').checked ? [...document.querySelectorAll('input[name="repeatedYear"]:checked')].map(cb => cb.value) : [],
     newcomer: $('m_newcomer').checked,
     stayingThisYear: $('m_stayingThisYear').checked,
     // Therapie
@@ -762,7 +796,9 @@ function saveStudent() {
     friends: split($('m_friends').value), avoid: split($('m_avoid').value),
     socialNote: $('m_socialNote').value.trim(),
     // Algemeen
-    notes: $('m_notes').value.trim()
+    notes: $('m_notes').value.trim(),
+    // Zwemmen
+    badmuts: document.querySelector('input[name="badmuts"]:checked')?.value || ''
   };
   const editId = $('editId').value;
   if (editId) {
@@ -788,6 +824,17 @@ $('modalCancelBtn').onclick = closeModal;
 $('modalSaveBtn').onclick = saveStudent;
 $('modalDeleteBtn').onclick = deleteStudent;
 $('m_repeated').addEventListener('change', updateRepeatedYearUI);
+
+function setBadmuts(val) {
+  const vals = ['', 'rood', 'blauw_ondiep', 'blauw_diep', 'groen'];
+  vals.forEach(v => {
+    const key = v === '' ? 'geen' : v;
+    const pill = $('pill_badmuts_' + key);
+    if (pill) pill.classList.toggle('active', v === val);
+  });
+  const radio = document.querySelector(`input[name="badmuts"][value="${val}"]`);
+  if (radio) radio.checked = true;
+}
 $('studentModal').addEventListener('click', e => { if (e.target.id === 'studentModal') closeModal(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('studentModal').classList.contains('show')) closeModal(); });
 
@@ -813,7 +860,7 @@ function loadDemo() {
     focusNote: '', behaviorNote: '', careNote: '', socialNote: '',
     friends: [], avoid: [], notes: '', updatedAt: todayISO(),
     therapies: { logo:false, kine:false, gon:false, clb:false, psy:false, other:'' },
-    repeated: false, repeatedYear: '', newcomer: false, stayingThisYear: false
+    repeated: false, repeatedYear: [], newcomer: false, stayingThisYear: false
   }));
   state.groups = []; state.locks = {};
   markDirty(); renderStudents(); updateBadges(); switchTab('students');
@@ -1035,6 +1082,8 @@ function renderStudents() {
       if (t.clb) tags.push('<span class="mini-tag">CLB</span>');
       if (t.psy) tags.push('<span class="mini-tag">psy</span>');
       if (t.other) tags.push('<span class="mini-tag">therapie</span>');
+      const BADMUTS_EMOJI = {rood:'🔴',blauw_ondiep:'🔵',blauw_diep:'🔵',groen:'🟢'};
+      if (s.badmuts) tags.push(`<span class="mini-tag">${BADMUTS_EMOJI[s.badmuts]||'🏊'} badmuts</span>`);
       const displayName = s.lastName ? `<strong>${esc(s.lastName)}</strong>, ${esc(s.firstName)}` : `<strong>${esc(s.name)}</strong>`;
       return `<tr onclick="openModal('${s.id}')">
         <td>${displayName} ${genderBadge(s.gender)}</td>
@@ -1185,7 +1234,8 @@ function loadJSON(e) {
         if (!s.gender) s.gender = '-';
         if (!s.updatedAt) s.updatedAt = todayISO();
         if (typeof s.repeated !== 'boolean') s.repeated = false;
-        if (!s.repeatedYear) s.repeatedYear = '';
+        if (!s.repeatedYear) s.repeatedYear = [];
+        if (typeof s.repeatedYear === 'string') s.repeatedYear = s.repeatedYear ? [s.repeatedYear] : [];
         if (typeof s.newcomer !== 'boolean') s.newcomer = false;
         if (typeof s.stayingThisYear !== 'boolean') s.stayingThisYear = false;
         // Nieuwe velden voor vakken/notities
@@ -1226,7 +1276,7 @@ function loadJSON(e) {
       });
       e.target.value = '';
       writeSettings(); renderStudents(); renderGroups(); updateBadges(); markClean();
-    } catch (err) { alert('Dit JSON-bestand kon niet gelezen worden.\n\n' + err.message); }
+    } catch (err) { console.error('Import fout:', err); alert('Dit JSON-bestand kon niet gelezen worden.\n\n' + err.message + '\n\nTip: controleer of het bestand eindigt op .json en eerder met deze tool werd aangemaakt.'); }
   };
   r.readAsText(f);
 }
@@ -1330,7 +1380,7 @@ function makeTransfer() {
     if (t.psy) therapieList.push('psycholoog');
     if (t.other) therapieList.push(t.other);
     const loopbaanItems = [];
-    if (x.repeated) loopbaanItems.push('Heeft een leerjaar overgedaan' + (x.repeatedYear ? ` (${x.repeatedYear})` : ''));
+    if (x.repeated) loopbaanItems.push('Heeft een leerjaar overgedaan' + (() => { const j = Array.isArray(x.repeatedYear) ? x.repeatedYear.join(', ') : (x.repeatedYear || ''); return j ? ` (${j})` : ''; })());
     if (x.newcomer) loopbaanItems.push('Anderstalige nieuwkomer (OKAN/AN)');
 
     // Vakgebied-regels met optionele notities
@@ -1377,9 +1427,11 @@ function makeTransfer() {
     </div>` : ''}
 
     ${x.notes ? `<div class="fiche-block"><p class="fiche-block-title">Algemene notitie</p><p class="fiche-note-block">${esc(x.notes)}</p></div>` : ''}
+
+    ${x.badmuts ? `<div class="fiche-block"><p class="fiche-block-title">Zwemmen</p><p>Badmuts: <span class="badmuts-badge badmuts-${x.badmuts}">${{'rood':'🔴 Rood','blauw_ondiep':'🔵 Blauw ondiep','blauw_diep':'🔵 Blauw diep','groen':'🟢 Groen'}[x.badmuts]||esc(x.badmuts)}</span></p></div>` : ''}
   </section>`;
   }).join('');
-  const groupOverview = state.groups.length ? `<div class="blok"><h2>Huidige verdeling</h2>${state.groups.map(g => {
+  const groupOverview = state.groups.length ? `<div class="blok blok-verdeling"><h2>📋 Huidige verdeling</h2>${state.groups.map(g => {
     const list = g.ids.map(get).filter(Boolean).sort((a, b) => {
       const lc = (a.lastName || '').localeCompare(b.lastName || '', 'nl');
       return lc !== 0 ? lc : (a.firstName || '').localeCompare(b.firstName || '', 'nl');
@@ -1388,36 +1440,61 @@ function makeTransfer() {
   }).join('')}</div>` : '';
   win.document.write(`<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Overdracht — ${esc(state.projectName)}</title>
   <style>
-    body{font-family:Arial,sans-serif;padding:24px;color:#223044;max-width:900px;margin:auto}
-    h1{margin-bottom:4px} h2{border-bottom:2px solid #f6d76b;padding-bottom:4px;margin-top:24px} h3{margin-bottom:6px}
-    .blok,.fiche{border:1px solid #ddd;border-radius:12px;padding:14px;margin:0 0 14px;break-inside:avoid;page-break-inside:avoid}
-    .fiche{background:#fbfcfe} .updated{color:#65748b;font-size:12px;margin:0 0 8px} .empty{color:#65748b;font-style:italic}
-    .fiche-block{margin:10px 0;padding:8px 10px;background:#fff;border-radius:8px;border:1px solid #eef2f7}
-    .fiche-block-title{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:#65748b;font-weight:700;margin:0 0 4px}
-    .fiche-block p{margin:2px 0;font-size:14px;line-height:1.5}
+    @page{margin:12mm 10mm}
+    body{font-family:Arial,sans-serif;padding:0 16px 16px;color:#223044;max-width:860px;margin:auto;line-height:1.5}
+    h1{margin:0 0 4px;font-size:24px;font-weight:900}
+    .meta{color:#65748b;font-size:13px;margin:0 0 20px}
+    h2{padding:6px 14px;margin-top:0;margin-bottom:0;font-size:15px;font-weight:900;page-break-after:avoid;border-radius:7px 7px 0 0;border-left:5px solid transparent}
+    h3{margin:18px 0 5px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;padding-bottom:3px;page-break-after:avoid}
+    h3:first-of-type{margin-top:10px}
+    .blok{border:1px solid #dde2ec;border-radius:10px;padding:0 18px 14px;margin:14px 0;break-inside:avoid;page-break-inside:avoid;background:#fff}
+    .blok-lezen h2{background:#e0f2fe;color:#0c4a6e;border-left-color:#0ea5e9}
+    .blok-spelling h2{background:#fef9c3;color:#713f12;border-left-color:#eab308}
+    .blok-rekenen h2{background:#dcfce7;color:#14532d;border-left-color:#22c55e}
+    .blok-handschrift h2{background:#f3e8ff;color:#4a1d96;border-left-color:#a855f7}
+    .blok-zorg h2{background:#fee2e2;color:#7f1d1d;border-left-color:#ef4444}
+    .blok-loopbaan h2{background:#ffedd5;color:#7c2d12;border-left-color:#f97316}
+    .blok-therapie h2{background:#e0e7ff;color:#1e1b4b;border-left-color:#6366f1}
+    .blok-sociaal h2{background:#fce7f3;color:#831843;border-left-color:#ec4899}
+    .blok-verdeling h2{background:#f0fdf4;color:#14532d;border-left-color:#16a34a}
+    .blok-zwemmen h2{background:#cffafe;color:#164e63;border-left-color:#06b6d4}
+    .blok-blijfzitters h2{background:#fef3c7;color:#92400e;border-left-color:#d97706}
+    .fiche{border:1px solid #dde2ec;border-radius:10px;padding:0 18px 14px;margin:0 0 14px;break-inside:avoid;page-break-inside:avoid;background:#fbfcfe}
+    .fiche>h3.fiche-naam{margin:0 -18px 10px;padding:6px 14px;background:#f1f5f9;color:#0f172a;border-bottom:2px solid #94a3b8;border-radius:8px 8px 0 0;font-size:13px;letter-spacing:0;text-transform:none;width:calc(100% + 36px)}
+    .updated{color:#65748b;font-size:11px;margin:0 0 8px}
+    .empty{color:#65748b;font-style:italic;font-size:12px}
+    ul{margin:3px 0 6px 14px;padding:0}
+    li{margin-bottom:3px;font-size:13px}
+    .fiche-block{margin:5px 0;padding:7px 10px;background:#fff;border-radius:6px;border:1px solid #eef2f7}
+    .fiche-block-title{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#65748b;font-weight:700;margin:0 0 3px}
+    .fiche-block p{margin:2px 0;font-size:13px;line-height:1.4}
     .fiche-note{color:#475569;font-style:italic}
-    .fiche-note-block{background:#fef9e7;padding:6px 8px;border-radius:6px;border-left:3px solid #f6d76b}
-    .note-line{color:#475569;font-style:italic;font-size:13px;display:inline-block;margin-top:2px}
-    .gender-badge{font-size:11px;padding:2px 6px;border-radius:6px;font-weight:700}
+    .fiche-note-block{background:#fef9e7;padding:5px 9px;border-radius:5px;border-left:3px solid #f6d76b;margin-top:3px;font-size:12px}
+    .note-line{color:#475569;font-style:italic;font-size:12px;display:inline-block;margin-top:2px}
+    .gender-badge{font-size:11px;padding:2px 6px;border-radius:5px;font-weight:700}
     .gender-badge.j{background:#cfe8ff;color:#1e40af} .gender-badge.m{background:#ffd6e8;color:#9d174d} .gender-badge.x,.gender-badge.dash{background:#e5e7eb;color:#4b5563}
-    button{padding:10px 14px;border:0;border-radius:12px;background:#f6d76b;font-weight:bold;cursor:pointer;margin-right:8px}
-    .toolbar{position:sticky;top:0;background:#fff;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:16px;z-index:10}
-    @media print{.toolbar{display:none}}
-  </style></head><body>
+    .badmuts-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:6px;font-weight:700;margin-left:4px}
+    .badmuts-rood{background:#fee2e2;color:#991b1b} .badmuts-blauw_ondiep{background:#dbeafe;color:#1e40af}
+    .badmuts-blauw_diep{background:#bfdbfe;color:#1e3a8a} .badmuts-groen{background:#d1fae5;color:#065f46}
+    .zwem-groep{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 10px}
+    .zwem-leerling{font-size:12px;font-weight:700;padding:3px 8px;border-radius:6px}
+    button{padding:9px 14px;border:0;border-radius:10px;background:#f6d76b;font-weight:bold;cursor:pointer;margin-right:8px}
+    .toolbar{position:sticky;top:0;background:#fff;padding:10px 0;border-bottom:1px solid #eee;margin-bottom:16px;z-index:10}
+    @media print{.toolbar{display:none}.blok,.fiche{border-color:#ccc}[class*="blok-"] h2{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  <\/style><\/head><body>
     <div class="toolbar"><button onclick="window.print()">🖨️ Afdrukken / bewaren als PDF</button></div>
     <h1>Overdracht — ${esc(state.projectName)}</h1>
-    <p>Opgemaakt op ${new Date().toLocaleDateString('nl-BE')} · ${s.length} ${s.length === 1 ? 'leerling' : 'leerlingen'} over te dragen${stayers.length ? ` · ${stayers.length} ${stayers.length === 1 ? 'blijft' : 'blijven'} zitten` : ''}</p>
+    <p class="meta">Opgemaakt op ${new Date().toLocaleDateString('nl-BE')} · ${s.length} ${s.length === 1 ? 'leerling' : 'leerlingen'} over te dragen${stayers.length ? ' · ' + stayers.length + ' ' + (stayers.length === 1 ? 'blijft' : 'blijven') + ' zitten' : ''}</p>
     ${stayersBlock}
-    <div class="blok"><h2>Lezen</h2>
+    <div class="blok blok-lezen"><h2>📖 Lezen</h2>
       <h3>Sterke lezers</h3>${names(s.filter(x => x.reading === 'sterk'), {showAvi:true, noteKey:'readingNote'})}
       <h3>Zwakke lezers</h3>${names(s.filter(x => x.reading === 'zwak'), {showAvi:true, noteKey:'readingNote'})}
       ${(() => {
-        // Toon ook leerlingen met basis-niveau maar wel een leesnotitie
         const basisMetNotitie = s.filter(x => x.reading === 'basis' && x.readingNote);
         return basisMetNotitie.length ? `<h3>Bijkomende notities (basis)</h3>${names(basisMetNotitie, {showAvi:true, noteKey:'readingNote'})}` : '';
       })()}
     </div>
-    <div class="blok"><h2>Spelling</h2>
+    <div class="blok blok-spelling"><h2>✏️ Spelling</h2>
       <h3>Sterke spellers</h3>${names(s.filter(x => x.spelling === 'sterk'), {noteKey:'spellingNote'})}
       <h3>Zwakke spellers</h3>${names(s.filter(x => x.spelling === 'zwak'), {noteKey:'spellingNote'})}
       ${(() => {
@@ -1425,7 +1502,7 @@ function makeTransfer() {
         return basisMetNotitie.length ? `<h3>Bijkomende notities (basis)</h3>${names(basisMetNotitie, {noteKey:'spellingNote'})}` : '';
       })()}
     </div>
-    <div class="blok"><h2>Rekenen</h2>
+    <div class="blok blok-rekenen"><h2>🔢 Rekenen</h2>
       <h3>Sterke rekenaars</h3>${names(s.filter(x => x.math === 'sterk'), {noteKey:'mathNote'})}
       <h3>Zwakke rekenaars</h3>${names(s.filter(x => x.math === 'zwak'), {noteKey:'mathNote'})}
       ${(() => {
@@ -1433,7 +1510,7 @@ function makeTransfer() {
         return basisMetNotitie.length ? `<h3>Bijkomende notities (basis)</h3>${names(basisMetNotitie, {noteKey:'mathNote'})}` : '';
       })()}
     </div>
-    <div class="blok"><h2>Handschrift</h2>
+    <div class="blok blok-handschrift"><h2>🖊️ Handschrift</h2>
       <h3>Sterk handschrift</h3>${names(s.filter(x => x.writing === 'sterk'), {noteKey:'writingNote'})}
       <h3>Zwak handschrift</h3>${names(s.filter(x => x.writing === 'zwak'), {noteKey:'writingNote'})}
       ${(() => {
@@ -1441,20 +1518,23 @@ function makeTransfer() {
         return basisMetNotitie.length ? `<h3>Bijkomende notities (basis)</h3>${names(basisMetNotitie, {noteKey:'writingNote'})}` : '';
       })()}
     </div>
-    <div class="blok"><h2>Zorg en aandachtspunten</h2>
+    <div class="blok blok-zorg"><h2>❤️ Zorg en aandachtspunten</h2>
       <h3>IAC</h3>${names(s.filter(x => x.iac === 'ja'), {noteKey:'careNote'})}
       <h3>Extra zorg / hoge zorg</h3>${names(s.filter(x => x.extraCare === 'ja' || x.care === 'hoog'), {noteKey:'careNote'})}
       <h3>Concentratie</h3>${names(s.filter(x => x.focus !== 'ok'), {noteKey:'focusNote'})}
       <h3>Gedrag</h3>${names(s.filter(x => x.behavior !== 'ok'), {noteKey:'behaviorNote'})}
     </div>
-    <div class="blok"><h2>Schoolloopbaan</h2>
+    <div class="blok blok-loopbaan"><h2>🎓 Schoolloopbaan</h2>
       <h3>Anderstalige nieuwkomers (OKAN/AN)</h3>${names(s.filter(x => x.newcomer))}
       <h3>Heeft een leerjaar overgedaan</h3>${(() => {
         const repeated = s.filter(x => x.repeated).sort((a,b) => (a.lastName||'').localeCompare(b.lastName||'','nl'));
-        return repeated.length ? '<ul>' + repeated.map(x => `<li><strong>${esc(x.name)}</strong>${x.repeatedYear ? ' — ' + esc(x.repeatedYear) : ''}</li>`).join('') + '</ul>' : '<p class="empty">Geen leerlingen.</p>';
+        return repeated.length ? '<ul>' + repeated.map(x => {
+          const jaren = Array.isArray(x.repeatedYear) ? x.repeatedYear.join(', ') : (x.repeatedYear || '');
+          return `<li><strong>${esc(x.name)}</strong>${jaren ? ' — ' + esc(jaren) : ''}</li>`;
+        }).join('') + '</ul>' : '<p class="empty">Geen leerlingen.</p>';
       })()}
     </div>
-    <div class="blok"><h2>Therapieën en begeleiding</h2>
+    <div class="blok blok-therapie"><h2>🏥 Therapieën en begeleiding</h2>
       <h3>Logopedie</h3>${names(s.filter(x => x.therapies && x.therapies.logo))}
       <h3>Kinesitherapie</h3>${names(s.filter(x => x.therapies && x.therapies.kine))}
       <h3>GON / ondersteuningsnetwerk</h3>${names(s.filter(x => x.therapies && x.therapies.gon))}
@@ -1465,10 +1545,23 @@ function makeTransfer() {
         return others.length ? '<ul>' + others.map(x => `<li><strong>${esc(x.name)}</strong> — ${esc(x.therapies.other)}</li>`).join('') + '</ul>' : '<p class="empty">Geen leerlingen.</p>';
       })()}
     </div>
-    <div class="blok"><h2>Sociale relaties</h2><h3>Overzicht per leerling</h3>${buildSociogramList()}<h3>Visueel netwerk (graag samen met)</h3>${buildSociogramSVG()}</div>
+    <div class="blok blok-sociaal"><h2>🤝 Sociale relaties</h2><h3>Overzicht per leerling</h3>${buildSociogramList()}</div>
     ${groupOverview}
+    ${(() => {
+      const BADMUTS_LABELS = {rood:'🔴 Rood', blauw_ondiep:'🔵 Blauw ondiep', blauw_diep:'🔵 Blauw diep', groen:'🟢 Groen'};
+      const BADMUTS_ORDER = ['rood','blauw_ondiep','blauw_diep','groen'];
+      const heeftBadmuts = s.some(x => x.badmuts);
+      if (!heeftBadmuts) return '';
+      const groepen = BADMUTS_ORDER.map(kleur => {
+        const kids = s.filter(x => x.badmuts === kleur).sort((a,b) => (a.lastName||'').localeCompare(b.lastName||'','nl'));
+        return kids.length ? `<h3>${BADMUTS_LABELS[kleur]}</h3><div class="zwem-groep">${kids.map(x => `<span class="zwem-leerling badmuts-${kleur}">${esc(x.name)}</span>`).join('')}</div>` : '';
+      }).join('');
+      const onbekend = s.filter(x => !x.badmuts).sort((a,b) => (a.lastName||'').localeCompare(b.lastName||'','nl'));
+      const onbekendBlok = onbekend.length ? `<h3>Onbekend / nog in te vullen</h3><p class="empty">${onbekend.map(x => esc(x.name)).join(', ')}</p>` : '';
+      return `<div class="blok blok-zwemmen"><h2>🏊 Zwemgroepen (badmuts)</h2>${groepen}${onbekendBlok}</div>`;
+    })()}
     <h2>Fiches per leerling</h2>${fiches}
-  </body></html>`);
+  <\/body><\/html>`);
   win.document.close();
 }
 
