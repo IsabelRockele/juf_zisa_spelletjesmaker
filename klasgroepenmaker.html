@@ -126,6 +126,58 @@
     .modal-footer{flex-direction:column-reverse}
     .modal-footer button{width:100%}
   }
+  /* ---- Fiche-modal ---- */
+  .fiche-modal .modal{max-width:600px}
+  .fiche-view{padding:0}
+  .fiche-view-header{background:var(--soft);border-radius:14px 14px 0 0;padding:14px 18px 12px;border-bottom:1px solid var(--border)}
+  .fiche-view-naam{font-size:22px;font-weight:900;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .fiche-view-meta{font-size:12px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap}
+  .fiche-view-meta span{display:flex;align-items:center;gap:4px}
+  .fiche-view-body{padding:14px 18px}
+  .fiche-sectie{border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+  .fiche-sectie-header{display:flex;justify-content:space-between;align-items:center;padding:9px 14px;font-size:13px;font-weight:700}
+  .fiche-sectie-header .titel{display:flex;align-items:center;gap:6px}
+  .fiche-sectie-body{padding:10px 14px;font-size:13px;border-top:1px solid var(--border);background:#fff}
+  .fiche-sectie-body p{margin:3px 0;line-height:1.5}
+  .fiche-niveau{display:inline-block;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px}
+  .fiche-niveau.sterk{background:#dcfce7;color:#14532d}
+  .fiche-niveau.zwak{background:#fee2e2;color:#7f1d1d}
+  .fiche-niveau.basis{background:#f1f5f9;color:#475569}
+  .fiche-niveau.ok{background:#f1f5f9;color:#475569}
+  .fiche-niveau.aandacht{background:#fef9c3;color:#713f12}
+  .fiche-niveau.probleem{background:#fee2e2;color:#7f1d1d}
+  .fiche-notitie{display:block;margin-top:4px;font-style:italic;color:#475569;background:#fef9e7;border-left:3px solid var(--yellow);padding:4px 8px;border-radius:0 5px 5px 0;font-size:12px}
+  .fiche-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+  .fiche-tag{font-size:11px;padding:3px 8px;border-radius:6px;font-weight:700}
+  .fiche-tag.rood{background:#fee2e2;color:#991b1b}
+  .fiche-tag.blauw{background:#dbeafe;color:#1e40af}
+  .fiche-tag.groen{background:#d1fae5;color:#065f46}
+  .fiche-tag.geel{background:#fef9c3;color:#713f12}
+  .fiche-tag.grijs{background:#f1f5f9;color:#475569}
+  /* ---- Online overdracht ---- */
+  .transfer-section-btn{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:#fff;width:100%;text-align:left;margin-bottom:8px;transition:background .15s}
+  .transfer-section-btn:hover{background:var(--soft)}
+  .transfer-section-btn.active{background:var(--yellow);border-color:#d4a915}
+  .transfer-section-btn .tsb-count{margin-left:auto;font-size:12px;background:rgba(0,0,0,.1);padding:2px 8px;border-radius:8px}
+  .transfer-blok{display:none;background:#fff;border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden}
+  .transfer-blok.open{display:block}
+  .transfer-blok-title{font-size:15px;font-weight:900;padding:10px 16px 8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .transfer-subsectie{padding:12px 16px;border-bottom:1px solid #f0f3f7}
+  .transfer-subsectie:last-child{border-bottom:0}
+  .transfer-subsectie h4{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin:0 0 8px;padding-bottom:4px;border-bottom:1px solid #eef2f7}
+  .transfer-leerling-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #f7f8fb;font-size:13px}
+  .transfer-leerling-row:last-child{border-bottom:0}
+  .transfer-leerling-naam{font-weight:700;min-width:130px}
+  .transfer-leerling-extra{color:var(--muted);flex:1;font-size:12px}
+  .transfer-leerling-notitie{display:block;font-style:italic;color:#475569;background:#fef9e7;border-left:3px solid var(--yellow);padding:3px 7px;border-radius:0 4px 4px 0;margin-top:3px;font-size:12px}
+  .transfer-empty{color:var(--muted);font-style:italic;font-size:13px;padding:4px 0}
+  .transfer-leerling-klik{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(34,48,68,.3)}
+  .transfer-leerling-klik:hover{color:#1d4ed8}
+  .overdracht-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .on-btn{padding:7px 13px;border-radius:10px;font-size:13px;font-weight:700;border:1px solid var(--border);background:#fff;cursor:pointer}
+  .on-btn:hover{background:var(--soft)}
+  .on-btn.active{background:var(--yellow);border-color:#d4a915}
+  .transfer-sectie-wrap{margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -234,7 +286,7 @@
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
         <div>
           <h2 style="margin:0">Leerlingen</h2>
-          <p class="small" style="margin-top:4px">Klik op een leerling om de gegevens aan te passen.</p>
+          <p class="small" style="margin-top:4px">Klik op een leerling voor de fiche. Dubbelklik of gebruik ✏️ om te bewerken.</p>
         </div>
         <div class="actions">
           <button id="addStudentBtn">+ Leerling toevoegen</button>
@@ -261,12 +313,12 @@
 
   <div class="tab-panel" data-panel="transfer">
     <section class="panel">
-      <h2>Overdrachtsdocument</h2>
-      <p class="help">Maak een afdrukbaar document voor de leerkracht van volgend schooljaar. Het bevat lijsten per onderwerp (lezen, rekenen, zorg, gedrag), sociale relaties met visueel netwerk, en een fiche per leerling.</p>
-      <div class="help-box" style="margin-bottom:14px">
-        <strong>💡 Tip:</strong> Het document opent in een nieuw tabblad. Daar kan je het afdrukken of bewaren als PDF via "Afdrukken → Opslaan als PDF".
+      <h2>Overdracht bekijken</h2>
+      <p class="help">Blader per onderwerp door de overdracht, of open het volledige document als PDF.</p>
+      <div id="transferOnline"></div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <button id="transferBtn">📄 Volledig document openen (voor PDF)</button>
       </div>
-      <button id="transferBtn">📄 Overdrachtsdocument openen</button>
     </section>
   </div>
 
@@ -503,7 +555,23 @@
       <div class="actions">
         <button class="ghost" id="modalCancelBtn">Annuleren</button>
         <button id="modalSaveBtn">Opslaan</button>
+        <button id="modalSaveNextBtn" class="secondary">Opslaan → volgende</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fiche-modal: compacte weergave per leerling -->
+<div class="modal-overlay fiche-modal" id="ficheModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h2 id="ficheModalTitle">Leerlingfiche</h2>
+      <button class="modal-close" id="ficheModalClose" title="Sluiten">✕</button>
+    </div>
+    <div class="modal-body" style="padding:0" id="ficheModalBody"></div>
+    <div class="modal-footer" style="justify-content:flex-end">
+      <button class="ghost small" id="ficheEditBtn">✏️ Bewerken</button>
+      <button class="modal-close ghost small" onclick="closeFicheModal()">Sluiten</button>
     </div>
   </div>
 </div>
@@ -823,7 +891,30 @@ $('modalClose').onclick = closeModal;
 $('modalCancelBtn').onclick = closeModal;
 $('modalSaveBtn').onclick = saveStudent;
 $('modalDeleteBtn').onclick = deleteStudent;
+$('modalSaveNextBtn').onclick = saveAndNext;
 $('m_repeated').addEventListener('change', updateRepeatedYearUI);
+
+function getNextStudentId(currentId) {
+  const sorted = [...state.students].sort((a, b) => {
+    const lc = (a.lastName || '').localeCompare(b.lastName || '', 'nl');
+    return lc !== 0 ? lc : (a.firstName || '').localeCompare(b.firstName || '', 'nl');
+  });
+  const idx = sorted.findIndex(s => s.id === currentId);
+  if (idx === -1 || idx >= sorted.length - 1) return sorted[0]?.id || null;
+  return sorted[idx + 1].id;
+}
+
+function saveAndNext() {
+  const currentId = $('editId').value;
+  if (!currentId) { saveStudent(); return; } // nieuwe leerling: gewoon opslaan
+  const firstName = $('m_firstName').value.trim();
+  const lastName = $('m_lastName').value.trim();
+  if (!firstName) { alert('Vul een voornaam in.'); $('m_firstName').focus(); return; }
+  if (!lastName) { alert('Vul een achternaam in.'); $('m_lastName').focus(); return; }
+  const nextId = getNextStudentId(currentId);
+  saveStudent(); // slaat op én sluit modal
+  if (nextId) openModal(nextId);
+}
 
 function setBadmuts(val) {
   const vals = ['', 'rood', 'blauw_ondiep', 'blauw_diep', 'groen'];
@@ -1085,11 +1176,11 @@ function renderStudents() {
       const BADMUTS_EMOJI = {rood:'🔴',blauw_ondiep:'🔵',blauw_diep:'🔵',groen:'🟢'};
       if (s.badmuts) tags.push(`<span class="mini-tag">${BADMUTS_EMOJI[s.badmuts]||'🏊'} badmuts</span>`);
       const displayName = s.lastName ? `<strong>${esc(s.lastName)}</strong>, ${esc(s.firstName)}` : `<strong>${esc(s.name)}</strong>`;
-      return `<tr onclick="openModal('${s.id}')">
-        <td>${displayName} ${genderBadge(s.gender)}</td>
-        <td>${s.level}/5</td>
-        <td>${esc(s.reading)} ${s.avi ? '· AVI ' + esc(s.avi) : ''}<br><span class="small">spelling ${esc(s.spelling || 'basis')} · rekenen ${esc(s.math)} · handschrift ${esc(s.writing || 'basis')}</span></td>
-        <td>${tags.join(' ') || '<span class="small">—</span>'}</td>
+      return `<tr>
+        <td style="cursor:pointer" onclick="openFicheModal('${s.id}')" title="Klik voor fiche · dubbelklik om te bewerken" ondblclick="openModal('${s.id}')">${displayName} ${genderBadge(s.gender)} <span style="font-size:11px;color:var(--muted);margin-left:4px" title="Klik voor fiche">🔍</span></td>
+        <td onclick="openFicheModal('${s.id}')" style="cursor:pointer">${s.level}/5</td>
+        <td onclick="openFicheModal('${s.id}')" style="cursor:pointer">${esc(s.reading)} ${s.avi ? '· AVI ' + esc(s.avi) : ''}<br><span class="small">spelling ${esc(s.spelling || 'basis')} · rekenen ${esc(s.math)} · handschrift ${esc(s.writing || 'basis')}</span></td>
+        <td>${tags.join(' ') || '<span class="small">—</span>'} <button class="ghost small" style="padding:3px 8px;font-size:11px;float:right" onclick="openModal('${s.id}')">✏️</button></td>
       </tr>`;
     }).join('')}</tbody></table>`;
 }
@@ -1570,6 +1661,307 @@ function resetAll() {
   state.students = []; state.groups = []; state.locks = {};
   markDirty(); renderStudents(); renderGroups(); updateBadges();
 }
+
+// ===== FICHE MODAL =====
+function openFicheModal(studentId) {
+  const s = state.students.find(x => x.id === studentId);
+  if (!s) return;
+  $('ficheModalTitle').textContent = s.name;
+  $('ficheEditBtn').onclick = () => { closeFicheModal(); openModal(studentId); };
+
+  const t = s.therapies || {};
+  const therapieList = [];
+  if (t.logo) therapieList.push('logopedie');
+  if (t.kine) therapieList.push('kinesitherapie');
+  if (t.gon) therapieList.push('GON');
+  if (t.clb) therapieList.push('CLB');
+  if (t.psy) therapieList.push('psycholoog');
+  if (t.other) therapieList.push(t.other);
+
+  const BADMUTS_LABEL = {rood:'🔴 Rood',blauw_ondiep:'🔵 Blauw ondiep',blauw_diep:'🔵 Blauw diep',groen:'🟢 Groen'};
+  const BADMUTS_CLASS = {rood:'rood',blauw_ondiep:'blauw',blauw_diep:'blauw',groen:'groen'};
+
+  function niveauBadge(v) {
+    const map = {sterk:'sterk',zwak:'zwak',basis:'basis',ok:'ok',aandacht:'aandacht',probleem:'probleem'};
+    return `<span class="fiche-niveau ${map[v]||'basis'}">${esc(v)}</span>`;
+  }
+  function rij(label, val, note, extra='') {
+    return `<p><strong>${label}:</strong> ${niveauBadge(val)}${extra}${note ? `<span class="fiche-notitie">${esc(note)}</span>` : ''}</p>`;
+  }
+  function sectie(kleur, emoji, titel, inhoud, toonAltijd=false) {
+    if (!inhoud && !toonAltijd) return '';
+    const style = `background:${kleur};`;
+    return `<div class="fiche-sectie">
+      <div class="fiche-sectie-header" style="${style}">
+        <span class="titel">${emoji} ${titel}</span>
+      </div>
+      <div class="fiche-sectie-body">${inhoud || '<em style="color:var(--muted)">Geen bijzonderheden</em>'}</div>
+    </div>`;
+  }
+
+  // Vakgebieden
+  const aviExtra = s.avi ? ` <span style="font-size:11px;color:var(--muted)">· AVI ${esc(s.avi)}</span>` : '';
+  const vakken = rij('Lezen', s.reading||'basis', s.readingNote, aviExtra)
+    + rij('Spelling', s.spelling||'basis', s.spellingNote)
+    + rij('Rekenen', s.math||'basis', s.mathNote)
+    + rij('Handschrift', s.writing||'basis', s.writingNote);
+
+  // Gedrag
+  const gedragInhoud = (s.focus && s.focus !== 'ok') || (s.behavior && s.behavior !== 'ok') || s.focusNote || s.behaviorNote
+    ? rij('Concentratie', s.focus||'ok', s.focusNote) + rij('Gedrag', s.behavior||'ok', s.behaviorNote) : '';
+
+  // Zorg
+  let zorgInhoud = '';
+  if (s.care !== 'laag' || s.iac === 'ja' || s.extraCare === 'ja' || s.careNote) {
+    const items = [`zorgniveau: ${esc(s.care)}`];
+    if (s.iac === 'ja') items.push('IAC');
+    if (s.extraCare === 'ja') items.push('extra zorg');
+    zorgInhoud = `<p>${items.join(' · ')}</p>${s.careNote ? `<p><span class="fiche-notitie">${esc(s.careNote)}</span></p>` : ''}`;
+  }
+
+  // Loopbaan
+  let loopbaanInhoud = '';
+  const loopItems = [];
+  if (s.repeated) { const j = Array.isArray(s.repeatedYear) ? s.repeatedYear.join(', ') : (s.repeatedYear||''); loopItems.push('Heeft leerjaar overgedaan' + (j ? ` (${j})` : '')); }
+  if (s.newcomer) loopItems.push('Anderstalige nieuwkomer (AN/OKAN)');
+  if (loopItems.length) loopbaanInhoud = loopItems.map(x => `<p>• ${esc(x)}</p>`).join('');
+
+  // Therapie
+  const therapieInhoud = therapieList.length ? `<p>${therapieList.map(esc).join(', ')}</p>` : '';
+
+  // Sociaal
+  let sociaalInhoud = '';
+  if (s.friends && s.friends.length) sociaalInhoud += `<p><strong>Graag samen met:</strong> ${s.friends.map(esc).join(', ')}</p>`;
+  if (s.avoid && s.avoid.length) sociaalInhoud += `<p><strong>Liever niet met:</strong> ${s.avoid.map(esc).join(', ')}</p>`;
+  if (s.socialNote) sociaalInhoud += `<p><span class="fiche-notitie">${esc(s.socialNote)}</span></p>`;
+
+  // Algemene notitie
+  const algemeenInhoud = s.notes ? `<p><span class="fiche-notitie">${esc(s.notes)}</span></p>` : '';
+
+  // Zwemmen
+  const zwemInhoud = s.badmuts ? `<p><span class="fiche-tag ${BADMUTS_CLASS[s.badmuts]||'grijs'}" style="font-size:13px;padding:4px 10px">${BADMUTS_LABEL[s.badmuts]||esc(s.badmuts)}</span></p>` : '';
+
+  // Tags in header
+  const headerTags = [];
+  if (s.iac === 'ja') headerTags.push(`<span class="fiche-tag rood">IAC</span>`);
+  if (s.extraCare === 'ja') headerTags.push(`<span class="fiche-tag geel">extra zorg</span>`);
+  if (s.care === 'hoog') headerTags.push(`<span class="fiche-tag rood">hoge zorg</span>`);
+  if (s.behavior === 'probleem') headerTags.push(`<span class="fiche-tag rood">gedrag</span>`);
+  if (s.focus === 'probleem') headerTags.push(`<span class="fiche-tag rood">concentratie</span>`);
+  if (s.newcomer) headerTags.push(`<span class="fiche-tag grijs">AN</span>`);
+  if (s.repeated) headerTags.push(`<span class="fiche-tag grijs">bis</span>`);
+  if (s.stayingThisYear) headerTags.push(`<span class="fiche-tag geel">blijft zitten</span>`);
+
+  $('ficheModalBody').innerHTML = `
+    <div class="fiche-view">
+      <div class="fiche-view-header">
+        <div class="fiche-view-naam">${esc(s.name)} ${genderBadge(s.gender)}</div>
+        <div class="fiche-view-meta">
+          <span>📊 Niveau ${s.level}/5</span>
+          ${s.avi ? `<span>📖 AVI ${esc(s.avi)}</span>` : ''}
+          ${s.updatedAt ? `<span>🗓️ ${esc(s.updatedAt)}</span>` : ''}
+        </div>
+        ${headerTags.length ? `<div class="fiche-tags" style="margin-top:8px">${headerTags.join('')}</div>` : ''}
+      </div>
+      <div class="fiche-view-body">
+        ${sectie('#f0fdf4','📚','Vakgebieden', vakken, true)}
+        ${sectie('#fefce8','🧠','Gedrag & concentratie', gedragInhoud)}
+        ${sectie('#fef2f2','❤️','Zorg', zorgInhoud)}
+        ${sectie('#fff7ed','🎓','Schoolloopbaan', loopbaanInhoud)}
+        ${sectie('#eef2ff','💊','Therapieën & begeleiding', therapieInhoud)}
+        ${sectie('#fdf4ff','👥','Sociaal-emotioneel', sociaalInhoud)}
+        ${sectie('#cffafe','🏊','Zwemmen', zwemInhoud)}
+        ${sectie('#fefce8','📝','Algemene notitie', algemeenInhoud)}
+      </div>
+    </div>`;
+
+  $('ficheModal').classList.add('show');
+}
+function closeFicheModal() { $('ficheModal').classList.remove('show'); }
+$('ficheModal').addEventListener('click', e => { if (e.target.id === 'ficheModal') closeFicheModal(); });
+$('ficheModalClose').onclick = closeFicheModal;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('ficheModal').classList.contains('show')) closeFicheModal(); });
+
+// ===== ONLINE OVERDRACHT =====
+function renderTransferOnline() {
+  const allStudents = state.students;
+  const container = $('transferOnline');
+  if (!allStudents.length) {
+    container.innerHTML = `<div class="empty-state"><h3>Nog geen leerlingen</h3><p>Voeg eerst leerlingen toe in de tab "Leerlingen".</p></div>`;
+    return;
+  }
+  const stayers = allStudents.filter(x => x.stayingThisYear);
+  const s = allStudents.filter(x => !x.stayingThisYear);
+
+  function lnRij(student, opties={}) {
+    const noteVal = opties.noteKey ? student[opties.noteKey] : '';
+    const extra = opties.extra ? opties.extra(student) : '';
+    return `<div class="transfer-leerling-row">
+      <span class="transfer-leerling-naam transfer-leerling-klik" onclick="openFicheModal('${student.id}')">${esc(student.name)}</span>
+      <span class="transfer-leerling-extra">${extra}${noteVal ? `<span class="transfer-leerling-notitie">${esc(noteVal)}</span>` : ''}</span>
+    </div>`;
+  }
+  function subsectie(titel, lijst, opties={}) {
+    const sorted = [...lijst].sort((a,b) => (a.lastName||'').localeCompare(b.lastName||'','nl') || (a.firstName||'').localeCompare(b.firstName||'','nl'));
+    const inhoud = sorted.length ? sorted.map(st => lnRij(st, opties)).join('') : `<p class="transfer-empty">Geen leerlingen.</p>`;
+    return `<div class="transfer-subsectie"><h4>${titel}</h4>${inhoud}</div>`;
+  }
+
+  // Bouw secties
+  const secties = [];
+
+  // Nederlands (lezen + spelling + handschrift)
+  const lezenSterk = s.filter(x => x.reading === 'sterk');
+  const lezenZwak = s.filter(x => x.reading === 'zwak');
+  const lezenBasisNote = s.filter(x => x.reading === 'basis' && x.readingNote);
+  const spellSterk = s.filter(x => x.spelling === 'sterk');
+  const spellZwak = s.filter(x => x.spelling === 'zwak');
+  const hsSterk = s.filter(x => x.writing === 'sterk');
+  const hsZwak = s.filter(x => x.writing === 'zwak');
+  const nlCount = lezenSterk.length + lezenZwak.length + lezenBasisNote.length + spellSterk.length + spellZwak.length + hsSterk.length + hsZwak.length;
+  secties.push({ id:'nederlands', emoji:'📖', titel:'Nederlands', kleur:'#e0f2fe', count: nlCount,
+    inhoud: subsectie('Sterke lezers', lezenSterk, {noteKey:'readingNote', extra: x => x.avi ? `AVI ${esc(x.avi)} · ` : ''})
+      + subsectie('Zwakke lezers', lezenZwak, {noteKey:'readingNote', extra: x => x.avi ? `AVI ${esc(x.avi)} · ` : ''})
+      + (lezenBasisNote.length ? subsectie('Basis lezen – met notitie', lezenBasisNote, {noteKey:'readingNote'}) : '')
+      + subsectie('Sterke spellers', spellSterk, {noteKey:'spellingNote'})
+      + subsectie('Zwakke spellers', spellZwak, {noteKey:'spellingNote'})
+      + subsectie('Sterk handschrift', hsSterk, {noteKey:'writingNote'})
+      + subsectie('Zwak handschrift', hsZwak, {noteKey:'writingNote'})
+  });
+
+  // Wiskunde
+  const rekSterk = s.filter(x => x.math === 'sterk');
+  const rekZwak = s.filter(x => x.math === 'zwak');
+  const rekBasisNote = s.filter(x => x.math === 'basis' && x.mathNote);
+  const wisCount = rekSterk.length + rekZwak.length + rekBasisNote.length;
+  secties.push({ id:'wiskunde', emoji:'🔢', titel:'Wiskunde', kleur:'#dcfce7', count: wisCount,
+    inhoud: subsectie('Sterke rekenaars', rekSterk, {noteKey:'mathNote'})
+      + subsectie('Zwakke rekenaars', rekZwak, {noteKey:'mathNote'})
+      + (rekBasisNote.length ? subsectie('Basis rekenen – met notitie', rekBasisNote, {noteKey:'mathNote'}) : '')
+  });
+
+  // Gedrag & concentratie
+  const gedragProbl = s.filter(x => x.behavior === 'probleem');
+  const gedragAand = s.filter(x => x.behavior === 'aandacht');
+  const focusProbl = s.filter(x => x.focus === 'probleem');
+  const focusAand = s.filter(x => x.focus === 'aandacht');
+  const gedragCount = gedragProbl.length + gedragAand.length + focusProbl.length + focusAand.length;
+  secties.push({ id:'gedrag', emoji:'🧠', titel:'Gedrag & concentratie', kleur:'#fef9c3', count: gedragCount,
+    inhoud: subsectie('Gedrag – probleem', gedragProbl, {noteKey:'behaviorNote'})
+      + subsectie('Gedrag – aandachtspunt', gedragAand, {noteKey:'behaviorNote'})
+      + subsectie('Concentratie – probleem', focusProbl, {noteKey:'focusNote'})
+      + subsectie('Concentratie – aandachtspunt', focusAand, {noteKey:'focusNote'})
+  });
+
+  // Zorg
+  const zorgHoog = s.filter(x => x.care === 'hoog');
+  const zorgMid = s.filter(x => x.care === 'midden');
+  const iacJa = s.filter(x => x.iac === 'ja');
+  const extraZorg = s.filter(x => x.extraCare === 'ja');
+  const zorgCount = zorgHoog.length + zorgMid.length + iacJa.length + extraZorg.length;
+  secties.push({ id:'zorg', emoji:'❤️', titel:'Zorg', kleur:'#fee2e2', count: zorgCount,
+    inhoud: subsectie('IAC', iacJa, {noteKey:'careNote'})
+      + subsectie('Extra zorg', extraZorg, {noteKey:'careNote'})
+      + subsectie('Hoge zorg', zorgHoog, {noteKey:'careNote'})
+      + subsectie('Middelhoge zorg', zorgMid, {noteKey:'careNote'})
+  });
+
+  // Therapieën
+  const logoKids = s.filter(x => x.therapies && x.therapies.logo);
+  const kineKids = s.filter(x => x.therapies && x.therapies.kine);
+  const gonKids = s.filter(x => x.therapies && x.therapies.gon);
+  const clbKids = s.filter(x => x.therapies && x.therapies.clb);
+  const psyKids = s.filter(x => x.therapies && x.therapies.psy);
+  const otherKids = s.filter(x => x.therapies && x.therapies.other);
+  const therapieCount = logoKids.length + kineKids.length + gonKids.length + clbKids.length + psyKids.length + otherKids.length;
+  secties.push({ id:'therapie', emoji:'💊', titel:'Therapieën', kleur:'#e0e7ff', count: therapieCount,
+    inhoud: subsectie('Logopedie', logoKids)
+      + subsectie('Kinesitherapie', kineKids)
+      + subsectie('GON / ondersteuningsnetwerk', gonKids)
+      + subsectie('CLB-traject', clbKids)
+      + subsectie('Psycholoog', psyKids)
+      + (otherKids.length ? subsectie('Andere begeleiding', otherKids, {extra: x => x.therapies.other ? esc(x.therapies.other) : ''}) : '')
+  });
+
+  // Schoolloopbaan
+  const herhalers = s.filter(x => x.repeated);
+  const nieuwkomers = s.filter(x => x.newcomer);
+  const loopbaanCount = herhalers.length + nieuwkomers.length + stayers.length;
+  secties.push({ id:'loopbaan', emoji:'🎓', titel:'Schoolloopbaan', kleur:'#ffedd5', count: loopbaanCount,
+    inhoud: subsectie('Hebben leerjaar overgedaan', herhalers, {extra: x => { const j = Array.isArray(x.repeatedYear) ? x.repeatedYear.join(', ') : (x.repeatedYear||''); return j ? esc(j) : ''; }})
+      + subsectie('Anderstalige nieuwkomers (AN/OKAN)', nieuwkomers)
+      + (stayers.length ? subsectie('Blijven zitten — niet overdragen', stayers) : '')
+  });
+
+  // Zwemmen
+  const BADMUTS_ORDER = ['rood','blauw_ondiep','blauw_diep','groen'];
+  const BADMUTS_LABELS2 = {rood:'🔴 Rood', blauw_ondiep:'🔵 Blauw ondiep', blauw_diep:'🔵 Blauw diep', groen:'🟢 Groen'};
+  const zwemCount = s.filter(x => x.badmuts).length;
+  const zwemInhoud = BADMUTS_ORDER.map(k => {
+    const groep = s.filter(x => x.badmuts === k);
+    return groep.length ? subsectie(BADMUTS_LABELS2[k], groep) : '';
+  }).join('') + subsectie('Onbekend / nog in te vullen', s.filter(x => !x.badmuts));
+  secties.push({ id:'zwemmen', emoji:'🏊', titel:'Zwemmen', kleur:'#cffafe', count: zwemCount,
+    inhoud: zwemInhoud
+  });
+
+  // Sociaal
+  const sociaalCount = s.filter(x => (x.friends && x.friends.length) || (x.avoid && x.avoid.length) || x.socialNote).length;
+  const sociaalInhoud = (() => {
+    const lijst = s.filter(x => (x.friends && x.friends.length) || (x.avoid && x.avoid.length) || x.socialNote)
+      .sort((a,b) => (a.lastName||'').localeCompare(b.lastName||'','nl'));
+    if (!lijst.length) return `<div class="transfer-subsectie"><p class="transfer-empty">Geen sociale voorkeuren ingevuld.</p></div>`;
+    return `<div class="transfer-subsectie"><h4>Overzicht</h4>` + lijst.map(st => {
+      const f = st.friends && st.friends.length ? `<strong>graag met:</strong> ${st.friends.map(esc).join(', ')}` : '';
+      const a = st.avoid && st.avoid.length ? `<strong>liever niet met:</strong> ${st.avoid.map(esc).join(', ')}` : '';
+      const n = st.socialNote ? `<span class="transfer-leerling-notitie">${esc(st.socialNote)}</span>` : '';
+      return `<div class="transfer-leerling-row"><span class="transfer-leerling-naam transfer-leerling-klik" onclick="openFicheModal('${st.id}')">${esc(st.name)}</span><span class="transfer-leerling-extra">${[f,a].filter(Boolean).join(' · ')}${n}</span></div>`;
+    }).join('') + '</div>';
+  })();
+  secties.push({ id:'sociaal', emoji:'👥', titel:'Sociale relaties', kleur:'#fce7f3', count: sociaalCount,
+    inhoud: sociaalInhoud
+  });
+
+  // Render navigatieknoppen + blokken
+  let html = `<p class="help" style="margin-bottom:10px">Klik op een naam om de volledige fiche te bekijken. Klik op een knop om dat onderdeel te openen of te sluiten.</p>`;
+  html += `<div class="overdracht-nav">` + secties.map(sec =>
+    `<button class="on-btn" id="onbtn_${sec.id}" onclick="toggleTransferSectie('${sec.id}')">${sec.emoji} ${sec.titel}${sec.count > 0 ? ` <span style="font-size:11px;background:rgba(0,0,0,.12);padding:1px 7px;border-radius:8px;margin-left:4px">${sec.count}</span>` : ''}</button>`
+  ).join('') + `</div>`;
+
+  html += secties.map(sec =>
+    `<div class="transfer-blok transfer-sectie-wrap" id="tblok_${sec.id}">
+      <div class="transfer-blok-title" style="background:${sec.kleur}">${sec.emoji} ${sec.titel}</div>
+      ${sec.inhoud}
+    </div>`
+  ).join('');
+
+  container.innerHTML = html;
+}
+
+function toggleTransferSectie(id) {
+  const blok = document.getElementById('tblok_' + id);
+  const btn = document.getElementById('onbtn_' + id);
+  if (!blok) return;
+  const isOpen = blok.classList.contains('open');
+  blok.classList.toggle('open', !isOpen);
+  if (btn) btn.classList.toggle('active', !isOpen);
+}
+
+// Render online overdracht wanneer tab geopend wordt
+// We patchen de bestaande switchTab niet met override, maar koppelen de tabs opnieuw
+document.querySelectorAll('.tab').forEach(t => {
+  const clone = t.cloneNode(true);
+  t.parentNode.replaceChild(clone, t);
+});
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  const name = t.dataset.tab;
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x.dataset.tab === name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+  if (name === 'students') renderStudents();
+  if (name === 'distribution') renderGroups();
+  if (name === 'transfer') renderTransferOnline();
+}));
 
 $('autoBtn').onclick = autoDistribute;
 $('saveBtn').onclick = () => saveJSON(false);
