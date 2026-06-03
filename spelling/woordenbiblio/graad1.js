@@ -35,7 +35,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pen", lidwoord: "de", afbeelding: true },
       { tekst: "mes", lidwoord: "het", afbeelding: true },
       { tekst: "net", lidwoord: "het", afbeelding: true },
-      { tekst: "les", lidwoord: "de", afbeelding: false },
+      { tekst: "les", lidwoord: "de", afbeelding: true },
       { tekst: "bes", lidwoord: "de", afbeelding: true },
       { tekst: "bek", lidwoord: "de", afbeelding: true },
       { tekst: "hen", lidwoord: "de", afbeelding: true, synoniemGroep: "kip" }
@@ -71,7 +71,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "zon", lidwoord: "de", afbeelding: true },
       { tekst: "mol", lidwoord: "de", afbeelding: true },
       { tekst: "dop", lidwoord: "de", afbeelding: true },
-      { tekst: "kop", lidwoord: "de", afbeelding: false },
+      { tekst: "kop", lidwoord: "de", afbeelding: true },
       { tekst: "mos", lidwoord: "het", afbeelding: true },
       { tekst: "bos", lidwoord: "het", afbeelding: true }
     ]
@@ -88,7 +88,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "kus", lidwoord: "de", afbeelding: true },
       { tekst: "rug", lidwoord: "de", afbeelding: true },
       { tekst: "put", lidwoord: "de", afbeelding: true },
-      { tekst: "lus", lidwoord: "de", afbeelding: false },
+      { tekst: "lus", lidwoord: "de", afbeelding: true },
       { tekst: "nul", lidwoord: null, afbeelding: true, afbeelding_bestand: "nul_cijfer.png" }
     ]
   },
@@ -251,8 +251,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "fruit", lidwoord: "het", afbeelding: true },
       { tekst: "buik", lidwoord: "de", afbeelding: true },
       { tekst: "duif", lidwoord: "de", afbeelding: true },
-      { tekst: "ruit", lidwoord: "de", afbeelding: false },
-      { tekst: "bui", lidwoord: "de", afbeelding: false },
+      { tekst: "ruit", lidwoord: "de", afbeelding: true },
+      { tekst: "bui", lidwoord: "de", afbeelding: true },
       { tekst: "lui", lidwoord: null, afbeelding: false },
     ]
   },
@@ -781,7 +781,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "huis", lidwoord: "het", verklein: "huisje", afbeelding: true },
       { tekst: "muis", lidwoord: "de", verklein: "muisje", afbeelding: true },
       { tekst: "neus", lidwoord: "de", verklein: "neusje", afbeelding: true },
-      { tekst: "voet", lidwoord: "de", verklein: "voetje", afbeelding: false },
+      { tekst: "voet", lidwoord: "de", verklein: "voetje", afbeelding: true },
       { tekst: "fiets", lidwoord: "de", verklein: "fietsje", afbeelding: false },
       { tekst: "hoofd", lidwoord: "het", verklein: "hoofdje", afbeelding: true },
       { tekst: "vest", lidwoord: "het", verklein: "vestje", afbeelding: false },
