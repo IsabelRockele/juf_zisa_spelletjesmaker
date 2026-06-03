@@ -868,21 +868,21 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "kat", lidwoord: "de", meervoud: "katten", afbeelding: true },
       { tekst: "kip", lidwoord: "de", meervoud: "kippen", afbeelding: true },
-      { tekst: "kop", lidwoord: "de", meervoud: "koppen", afbeelding: false },
-      { tekst: "pen", lidwoord: "de", meervoud: "pennen", afbeelding: false },
+      { tekst: "kop", lidwoord: "de", meervoud: "koppen", afbeelding: true },
+      { tekst: "pen", lidwoord: "de", meervoud: "pennen", afbeelding: true },
       { tekst: "pan", lidwoord: "de", meervoud: "pannen", afbeelding: true },
       { tekst: "bal", lidwoord: "de", meervoud: "ballen", afbeelding: true },
-      { tekst: "bel", lidwoord: "de", meervoud: "bellen", afbeelding: false },
-      { tekst: "rat", lidwoord: "de", meervoud: "ratten", afbeelding: false },
+      { tekst: "bel", lidwoord: "de", meervoud: "bellen", afbeelding: true },
+      { tekst: "rat", lidwoord: "de", meervoud: "ratten", afbeelding: true },
       { tekst: "tak", lidwoord: "de", meervoud: "takken", afbeelding: true },
-      { tekst: "rok", lidwoord: "de", meervoud: "rokken", afbeelding: false },
-      { tekst: "bak", lidwoord: "de", meervoud: "bakken", afbeelding: false },
+      { tekst: "rok", lidwoord: "de", meervoud: "rokken", afbeelding: true },
+      { tekst: "bak", lidwoord: "de", meervoud: "bakken", afbeelding: true },
       { tekst: "zak", lidwoord: "de", meervoud: "zakken", afbeelding: true },
-      { tekst: "lat", lidwoord: "de", meervoud: "latten", afbeelding: false },
-      { tekst: "vos", lidwoord: "de", meervoud: "vossen", afbeelding: false },
-      { tekst: "mat", lidwoord: "de", meervoud: "matten", afbeelding: false },
+      { tekst: "lat", lidwoord: "de", meervoud: "latten", afbeelding: true },
+      { tekst: "vos", lidwoord: "de", meervoud: "vossen", afbeelding: true },
+      { tekst: "mat", lidwoord: "de", meervoud: "matten", afbeelding: true },
       { tekst: "bom", lidwoord: "de", meervoud: "bommen", afbeelding: true },
-      { tekst: "das", lidwoord: "de", meervoud: "dassen", afbeelding: false }
+      { tekst: "das", lidwoord: "de", meervoud: "dassen", afbeelding: true }
     ]
   },
   "meervoud-verenkel": {
