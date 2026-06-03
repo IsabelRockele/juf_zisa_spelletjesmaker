@@ -832,7 +832,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "regelwoord",
     woorden: [
       // Zuivere -en meervouden (gewoon -en plakken, eventueel s↔z of f↔v wissel)
-      { tekst: "voet", lidwoord: "de", meervoud: "voeten", afbeelding: false },
+      { tekst: "voet", lidwoord: "de", meervoud: "voeten", afbeelding: true },
       { tekst: "hond", lidwoord: "de", meervoud: "honden", afbeelding: true },
       { tekst: "stoel", lidwoord: "de", meervoud: "stoelen", afbeelding: true },
       { tekst: "huis", lidwoord: "het", meervoud: "huizen", afbeelding: true },
