@@ -235,28 +235,15 @@ textarea.s-input { min-height: 140px; resize: vertical; }
 .chip-geen   { background: #f8f8f8; color: #bbb;    border: 1px solid #eee; }
 
 /* ══ AFDRUK ══ */
-#afdruk { display: none; background: white; }
+#afdruk { background: #f5f0e8; }
 @media print {
   #setup, #spel, #maand { display: none !important; }
-  #afdruk { display: block !important; }
+  #afdruk { display: block !important; background: white; }
   .geen-print { display: none !important; }
-  .dip-pagina {
-    page-break-after: always;
-    page-break-inside: avoid;
-    width: 100%;
-    height: 148mm;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .dip-pagina:last-child { page-break-after: avoid; }
-  @page { size: A4 portrait; margin: 0; }
+  #diplomaContainer { display: block !important; }
+  @page { size: A4 portrait; margin: 8mm; }
 }
-.dip-pagina {
-  width: 100%;
-  height: 148mm;
-  display: flex; align-items: center; justify-content: center;
-  padding: 8mm;
-}
-.dip-pagina svg { width: 100%; height: 100%; max-height: 132mm; }
+#diplomaContainer { display: none; }
 
 .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 300; }
 </style>
@@ -352,17 +339,26 @@ textarea.s-input { min-height: 140px; resize: vertical; }
 </div>
 
 <!-- ══ AFDRUK ══ -->
-<div id="afdruk">
-  <div class="geen-print" style="padding:16px 20px;background:#FFF3E0;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<div id="afdruk" style="display:none;min-height:100vh;background:#f5f0e8">
+
+  <div class="geen-print" style="background:linear-gradient(135deg,#E67E22,#D35400);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
     <div>
-      <strong style="color:#E67E22;font-size:15px">🖨️ Diploma's afdrukken</strong>
-      <span style="color:#aaa;font-size:12px;margin-left:8px">2 per A4-blad · elk kind krijgt automatisch het juiste diploma</span>
+      <strong style="color:white;font-size:16px">🖨️ Diploma's</strong>
+      <span style="color:rgba(255,255,255,.75);font-size:13px;margin-left:10px">Elk kind krijgt automatisch het juiste diploma</span>
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="start-btn" style="width:auto;margin:0;padding:10px 20px;font-size:13px" onclick="window.print()">🖨️ Alles afdrukken</button>
-      <button class="reset-btn" style="margin:0;padding:10px 16px;border:2px solid #ddd;border-radius:10px;color:#666" onclick="naarSpel()">← Terug</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button onclick="naarSpel()" style="background:rgba(255,255,255,.2);border:none;color:white;border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">← Terug</button>
+      <button onclick="window.print()" style="background:white;border:none;color:#E67E22;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">🖨️ Alles afdrukken</button>
     </div>
   </div>
+
+  <!-- PREVIEW GRID — zichtbaar in browser -->
+  <div class="geen-print" style="padding:20px 24px 8px">
+    <p style="font-size:13px;color:#888;margin-bottom:16px">Scroll door alle diploma's hieronder. Bij afdrukken komen er 2 per A4-blad.</p>
+    <div id="diplomaPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px"></div>
+  </div>
+
+  <!-- PRINT CONTAINER — alleen bij afdrukken zichtbaar -->
   <div id="diplomaContainer"></div>
 </div>
 
@@ -655,127 +651,142 @@ function tekenMaand() {
 // ── AFDRUK ────────────────────────────────────────────────────────
 function naarAfdruk() { genereerDiplomas(); toon('afdruk'); }
 
-function diplomaSVG(naam, type, afspraakTekst) {
-  const cfg = {
-    goud:   { hemel:'#FFFDE7', rand:'#F9CA24', randDik:5, titel:'Gouden diploma', sterren:'⭐⭐⭐⭐', tekst:'heeft alle 4 weken de klasafspraak fantastisch gevolgd!', medaille:'🥇', zon:'#FFD700', lintKleur:'#F9CA24', lintTekst:'#6B4C00' },
-    zilver: { hemel:'#ECEFF1', rand:'#90A4AE', randDik:5, titel:'Zilveren diploma', sterren:'⭐⭐⭐',   tekst:'heeft 3 van de 4 weken de klasafspraak heel goed gevolgd!', medaille:'🥈', zon:'#CFD8DC', lintKleur:'#90A4AE', lintTekst:'#1C313A' },
-    brons:  { hemel:'#FFF3E0', rand:'#CD853F', randDik:5, titel:'Bronzen diploma',  sterren:'⭐⭐',    tekst:'heeft 2 weken goed haar/zijn best gedaan voor de klasafspraak!', medaille:'🥉', zon:'#FFB74D', lintKleur:'#CD853F', lintTekst:'#3E2723' },
-    aanm:   { hemel:'#E3F2FD', rand:'#64B5F6', randDik:5, titel:'Aanmoedigingskaartje', sterren:'⭐', tekst:'heeft een goede eerste stap gezet! Volgende maand lukt het nog beter!', medaille:'💛', zon:'#81D4FA', lintKleur:'#64B5F6', lintTekst:'#0D47A1' }
-  };
-  const c = cfg[type];
-  const nFs = naam.length > 14 ? 22 : naam.length > 10 ? 26 : 30;
-  const woorden = afspraakTekst.split(' ');
-  const regels = []; let huidig='';
-  woorden.forEach(w => { const t=huidig?huidig+' '+w:w; if(t.length>32){regels.push(huidig);huidig=w;}else huidig=t; });
-  if(huidig) regels.push(huidig);
-  const ar = regels.slice(0,3);
-  const tekst2 = c.tekst.length>46 ? c.tekst.slice(0,46)+'…' : c.tekst;
+// PNG afbeeldingen map (relatief t.o.v. HTML-bestand)
+const IMG = 'afbeeldingen/';
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 280" style="border-radius:16px;overflow:hidden;display:block;width:100%;height:auto">
-  <defs><radialGradient id="zg${type}" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="${c.zon}"/><stop offset="100%" stop-color="${c.zon}" stop-opacity="0"/></radialGradient></defs>
-  <rect width="420" height="280" fill="${c.hemel}"/>
-  <circle cx="370" cy="46" r="40" fill="url(#zg${type})" opacity=".5"/>
-  <circle cx="370" cy="46" r="24" fill="${c.zon}"/>
-  <g stroke="${c.zon}" stroke-width="2.5" opacity=".5">
-    <line x1="370" y1="14" x2="370" y2="7"/><line x1="370" y1="78" x2="370" y2="85"/>
-    <line x1="338" y1="46" x2="331" y2="46"/><line x1="402" y1="46" x2="409" y2="46"/>
-    <line x1="347" y1="23" x2="342" y2="18"/><line x1="393" y1="69" x2="398" y2="74"/>
-    <line x1="393" y1="23" x2="398" y2="18"/><line x1="347" y1="69" x2="342" y2="74"/>
-  </g>
-  <g opacity=".85"><ellipse cx="62" cy="36" rx="28" ry="13" fill="white"/><ellipse cx="80" cy="30" rx="20" ry="11" fill="white"/><ellipse cx="46" cy="32" rx="16" ry="9" fill="white"/></g>
-  <g opacity=".75"><ellipse cx="190" cy="26" rx="22" ry="10" fill="white"/><ellipse cx="207" cy="21" rx="16" ry="9" fill="white"/><ellipse cx="175" cy="23" rx="13" ry="7" fill="white"/></g>
-  <rect x="0" y="200" width="420" height="80" fill="#4A7A0A"/>
-  <rect x="0" y="194" width="420" height="18" fill="#7DB83A" rx="5"/>
-  <rect x="20" y="155" width="6" height="46" fill="#8B6914"/>
-  <ellipse cx="23" cy="148" rx="22" ry="15" fill="#5A8A1A"/><ellipse cx="14" cy="156" rx="14" ry="10" fill="#4A7A0A"/><ellipse cx="32" cy="154" rx="14" ry="10" fill="#4A7A0A"/>
-  <rect x="385" y="150" width="6" height="52" fill="#8B6914"/>
-  <ellipse cx="388" cy="143" rx="22" ry="15" fill="#5A8A1A"/><ellipse cx="379" cy="151" rx="14" ry="10" fill="#4A7A0A"/><ellipse cx="397" cy="149" rx="14" ry="10" fill="#4A7A0A"/>
-  <ellipse cx="54" cy="208" rx="18" ry="11" fill="white" stroke="#333" stroke-width="1.2"/>
-  <ellipse cx="66" cy="200" rx="10" ry="8" fill="white" stroke="#333" stroke-width="1.2"/>
-  <line x1="48" y1="199" x2="46" y2="209" stroke="#333" stroke-width="1.5"/><line x1="54" y1="198" x2="53" y2="209" stroke="#333" stroke-width="1.5"/><line x1="60" y1="199" x2="60" y2="209" stroke="#333" stroke-width="1.5"/>
-  <line x1="42" y1="217" x2="41" y2="228" stroke="#333" stroke-width="2"/><line x1="48" y1="218" x2="47" y2="228" stroke="#333" stroke-width="2"/><line x1="58" y1="218" x2="58" y2="228" stroke="#333" stroke-width="2"/><line x1="64" y1="217" x2="64" y2="228" stroke="#333" stroke-width="2"/>
-  <circle cx="69" cy="198" r="1.5" fill="#333"/><path d="M62 195 Q65 190 68 194" fill="none" stroke="#333" stroke-width="1.2"/>
-  <ellipse cx="366" cy="208" rx="18" ry="11" fill="white" stroke="#333" stroke-width="1.2"/>
-  <ellipse cx="354" cy="200" rx="10" ry="8" fill="white" stroke="#333" stroke-width="1.2"/>
-  <line x1="372" y1="199" x2="374" y2="209" stroke="#333" stroke-width="1.5"/><line x1="366" y1="198" x2="367" y2="209" stroke="#333" stroke-width="1.5"/><line x1="360" y1="199" x2="360" y2="209" stroke="#333" stroke-width="1.5"/>
-  <line x1="378" y1="217" x2="379" y2="228" stroke="#333" stroke-width="2"/><line x1="372" y1="218" x2="373" y2="228" stroke="#333" stroke-width="2"/><line x1="362" y1="218" x2="362" y2="228" stroke="#333" stroke-width="2"/><line x1="356" y1="217" x2="356" y2="228" stroke="#333" stroke-width="2"/>
-  <circle cx="351" cy="198" r="1.5" fill="#333"/><path d="M358 195 Q355 190 352 194" fill="none" stroke="#333" stroke-width="1.2"/>
-  <g stroke="#2A6A00" stroke-width="1.5" opacity=".6">
-    <line x1="90" y1="196" x2="88" y2="187"/><line x1="96" y1="195" x2="96" y2="185"/><line x1="102" y1="196" x2="104" y2="186"/>
-    <line x1="200" y1="196" x2="198" y2="187"/><line x1="210" y1="195" x2="210" y2="185"/><line x1="220" y1="196" x2="222" y2="186"/>
-    <line x1="316" y1="196" x2="314" y2="187"/><line x1="322" y1="195" x2="322" y2="185"/><line x1="328" y1="196" x2="330" y2="186"/>
-  </g>
-  <rect x="3" y="3" width="414" height="274" rx="13" fill="none" stroke="${c.rand}" stroke-width="${c.randDik}" opacity=".95"/>
-  <rect x="9" y="9" width="402" height="262" rx="10" fill="none" stroke="${c.rand}" stroke-width="1.5" opacity=".35"/>
-  <rect x="82" y="62" width="256" height="34" rx="8" fill="${c.lintKleur}"/>
-  <polygon points="82,62 74,79 82,96" fill="${c.lintKleur}" opacity=".7"/>
-  <polygon points="338,62 346,79 338,96" fill="${c.lintKleur}" opacity=".7"/>
-  <text x="210" y="86" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="13" font-weight="900" fill="${c.lintTekst}" letter-spacing="0.5">${c.titel.toUpperCase()}</text>
-  <text x="210" y="52" text-anchor="middle" font-family="serif" font-size="26">${c.medaille}</text>
-  <text x="210" y="124" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="${nFs}" font-weight="900" fill="#1A0A00">${naam}</text>
-  <line x1="112" y1="131" x2="308" y2="131" stroke="${c.rand}" stroke-width="1.5" opacity=".5"/>
-  <text x="210" y="148" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" fill="#444">${tekst2}</text>
-  <text x="210" y="163" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#888" font-style="italic">voor de klasafspraak:</text>
-  ${ar.map((r,i)=>`<text x="210" y="${175+i*13}" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="#333" font-style="italic">"${r}${i===ar.length-1?'"':''}"</text>`).join('')}
-  <text x="210" y="${175+ar.length*13+12}" text-anchor="middle" font-family="serif" font-size="16">${c.sterren}</text>
-</svg>`;
-}
+// Diploma config per type
+const DIP_CFG = {
+  goud:   { png: 'gouden_diploma.png',   sterren: '⭐⭐⭐⭐', tekst: 'heeft alle 4 weken de klasafspraak fantastisch gevolgd!' },
+  zilver: { png: 'zilveren_diploma.png', sterren: '⭐⭐⭐',   tekst: 'heeft 3 van de 4 weken de klasafspraak heel goed gevolgd!' },
+  brons:  { png: 'bronzen_diploma.png',  sterren: '⭐⭐',    tekst: 'heeft 2 weken goed haar/zijn best gedaan voor de klasafspraak!' },
+  aanm:   { png: 'aanmoediging.png',     sterren: '⭐',      tekst: 'heeft een goede eerste stap gezet! Volgende maand lukt het nog beter!' }
+};
 
-function afspraakkaartSVG(tekst) {
-  const woorden=tekst.split(' '); const regels=[]; let huidig='';
-  woorden.forEach(w=>{const t=huidig?huidig+' '+w:w;if(t.length>18){regels.push(huidig);huidig=w;}else huidig=t;});
-  if(huidig)regels.push(huidig);
-  const r=regels.slice(0,4);
-  const startY = 148 - (r.length-1)*20;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 280" style="border-radius:16px;overflow:hidden;display:block;width:100%;height:auto">
-  <rect width="420" height="280" fill="#FFF8F0"/>
-  <circle cx="370" cy="46" r="28" fill="#FFD700" opacity=".3"/><circle cx="370" cy="46" r="18" fill="#FFD700"/>
-  <g opacity=".8"><ellipse cx="80" cy="36" rx="28" ry="12" fill="white"/><ellipse cx="98" cy="30" rx="20" ry="10" fill="white"/><ellipse cx="64" cy="32" rx="16" ry="8" fill="white"/></g>
-  <rect x="0" y="200" width="420" height="80" fill="#4A7A0A"/>
-  <rect x="0" y="194" width="420" height="18" fill="#7DB83A" rx="5"/>
-  <rect x="20" y="155" width="6" height="46" fill="#8B6914"/>
-  <ellipse cx="23" cy="148" rx="22" ry="15" fill="#5A8A1A"/><ellipse cx="14" cy="156" rx="14" ry="10" fill="#4A7A0A"/><ellipse cx="32" cy="154" rx="14" ry="10" fill="#4A7A0A"/>
-  <rect x="385" y="150" width="6" height="52" fill="#8B6914"/>
-  <ellipse cx="388" cy="143" rx="22" ry="15" fill="#5A8A1A"/><ellipse cx="379" cy="151" rx="14" ry="10" fill="#4A7A0A"/><ellipse cx="397" cy="149" rx="14" ry="10" fill="#4A7A0A"/>
-  <ellipse cx="210" cy="208" rx="26" ry="13" fill="white" stroke="#333" stroke-width="1.5"/>
-  <ellipse cx="226" cy="197" rx="13" ry="9" fill="white" stroke="#333" stroke-width="1.5"/>
-  <line x1="200" y1="196" x2="197" y2="208" stroke="#333" stroke-width="2"/><line x1="210" y1="195" x2="209" y2="208" stroke="#333" stroke-width="2"/><line x1="220" y1="196" x2="220" y2="208" stroke="#333" stroke-width="2"/>
-  <line x1="194" y1="219" x2="193" y2="230" stroke="#333" stroke-width="2.5"/><line x1="202" y1="220" x2="201" y2="230" stroke="#333" stroke-width="2.5"/><line x1="216" y1="220" x2="216" y2="230" stroke="#333" stroke-width="2.5"/><line x1="224" y1="219" x2="224" y2="230" stroke="#333" stroke-width="2.5"/>
-  <circle cx="230" cy="195" r="2" fill="#333"/><path d="M222 192 Q226 187 230 191" fill="none" stroke="#333" stroke-width="1.5"/>
-  <rect x="3" y="3" width="414" height="274" rx="13" fill="none" stroke="#E67E22" stroke-width="5"/>
-  <rect x="9" y="9" width="402" height="262" rx="10" fill="none" stroke="#E67E22" stroke-width="1.5" opacity=".3"/>
-  <rect x="105" y="28" width="210" height="28" rx="8" fill="#E67E22"/>
-  <text x="210" y="48" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="12" font-weight="900" fill="white" letter-spacing="1">ONZE KLASAFSPRAAK</text>
-  <text x="210" y="90" text-anchor="middle" font-family="serif" font-size="34">🦓</text>
-  ${r.map((regel,i)=>`<text x="210" y="${startY+i*22}" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="${r.length>2?17:20}" font-weight="900" fill="#2C1A00">${regel}</text>`).join('')}
-</svg>`;
+function maakDiplomaHTML(naam, type, afspraakTekst) {
+  const c = DIP_CFG[type];
+  const naamFontSize = naam.length > 16 ? '28px' : naam.length > 12 ? '34px' : '42px';
+
+  // Kleur per type voor fallback achtergrond
+  const fallbackKleur = {
+    goud:   { rand: '#DAA520', bg: '#FFFDE7', titel: '#B8860B', tekst: '#6B4C00' },
+    zilver: { rand: '#90A4AE', bg: '#ECEFF1', titel: '#546E7A', tekst: '#263238' },
+    brons:  { rand: '#CD853F', bg: '#FFF3E0', titel: '#8D5524', tekst: '#4E342E' },
+    aanm:   { rand: '#64B5F6', bg: '#E3F2FD', titel: '#1565C0', tekst: '#0D47A1' }
+  }[type];
+
+  return `
+  <div style="
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.414;
+    border-radius: 12px;
+    overflow: hidden;
+    background: ${fallbackKleur.bg};
+    border: 3px solid ${fallbackKleur.rand};
+    box-sizing: border-box;
+  ">
+    <!-- PNG achtergrond -->
+    <img src="${IMG}${c.png}"
+         style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;"
+         onerror="this.style.display='none'" />
+
+    <!-- Fallback titel als PNG niet laadt -->
+    <div style="
+      position:absolute;top:8%;left:50%;transform:translateX(-50%);
+      font-family:'Comic Sans MS',Arial,sans-serif;font-size:clamp(14px,3%,22px);
+      font-weight:900;color:${fallbackKleur.titel};white-space:nowrap;
+      text-shadow:0 1px 2px rgba(255,255,255,0.8);
+      pointer-events:none;
+    " class="diploma-fallback-titel">🦓 ${c.png.replace('_diploma.png','').replace('aanmoediging','aanmoedigingskaartje').toUpperCase().replace('_',' ')}</div>
+
+    <!-- TEKST LAAG — midden van het diploma -->
+    <div style="
+      position: absolute;
+      left: 26%; right: 26%;
+      top: 35%; bottom: 16%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 5px;
+      z-index: 2;
+    ">
+      <div style="
+        font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif;
+        font-size: ${naamFontSize};
+        font-weight: 900;
+        color: #1A0A00;
+        line-height: 1.1;
+        text-shadow: 1px 1px 0 rgba(255,255,255,0.9);
+      ">${naam}</div>
+
+      <div style="
+        font-family: Arial, sans-serif;
+        font-size: clamp(10px, 1.4vw, 14px);
+        color: #444;
+        line-height: 1.4;
+        margin-top: 3px;
+      ">${c.tekst}</div>
+
+      <div style="
+        font-family: Arial, sans-serif;
+        font-size: clamp(9px, 1.2vw, 12px);
+        color: #888;
+        font-style: italic;
+        margin-top: 4px;
+      ">voor de klasafspraak:</div>
+
+      <div style="
+        font-family: Arial, sans-serif;
+        font-size: clamp(10px, 1.3vw, 13px);
+        font-weight: 700;
+        color: #333;
+        font-style: italic;
+        line-height: 1.4;
+        max-width: 100%;
+        word-break: break-word;
+      ">"${afspraakTekst}"</div>
+
+      <div style="font-size: clamp(14px, 2vw, 22px); margin-top: 5px; line-height:1;">${c.sterren}</div>
+    </div>
+  </div>`;
 }
 
 function genereerDiplomas() {
   const container = document.getElementById('diplomaContainer');
+  const preview = document.getElementById('diplomaPreviewGrid');
   container.innerHTML = '';
-  // Afspraakkaartje
-  const akDiv = document.createElement('div');
-  akDiv.className = 'dip-pagina';
-  akDiv.innerHTML = afspraakkaartSVG(actief||'Onze klasafspraak');
-  container.appendChild(akDiv);
-  // Diploma's: 2 per pagina
-  for (let i=0; i<namen.length; i+=2) {
-    const pagina = document.createElement('div');
-    pagina.style.cssText = 'page-break-after:always;page-break-inside:avoid;padding:4mm 8mm;box-sizing:border-box';
-    [0,1].forEach(offset => {
-      const naam = namen[i+offset];
-      if (!naam) return;
-      const m = med[naam]||[false,false,false,false];
-      const tot = m.filter(Boolean).length;
-      let type = tot>=4?'goud':tot===3?'zilver':tot===2?'brons':'aanm';
-      const d = document.createElement('div');
-      d.className = 'dip-pagina';
-      d.innerHTML = diplomaSVG(naam, type, actief||'');
-      pagina.appendChild(d);
-    });
-    container.appendChild(pagina);
-  }
+  preview.innerHTML = '';
+
+  namen.forEach((naam, idx) => {
+    const m = med[naam] || [false, false, false, false];
+    const tot = m.filter(Boolean).length;
+    const type = tot >= 4 ? 'goud' : tot === 3 ? 'zilver' : tot === 2 ? 'brons' : 'aanm';
+    const html = maakDiplomaHTML(naam, type, actief || '');
+
+    // Preview kaartje
+    const previewKaart = document.createElement('div');
+    previewKaart.style.cssText = 'background:white;border-radius:12px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.12)';
+    previewKaart.innerHTML = html;
+    preview.appendChild(previewKaart);
+
+    // Print container: 2 per pagina
+    if (idx % 2 === 0) {
+      const pagina = document.createElement('div');
+      pagina.style.cssText = 'page-break-after:always;page-break-inside:avoid;width:100%;box-sizing:border-box';
+      pagina.innerHTML = html;
+      // Tweede diploma op zelfde pagina
+      const naam2 = namen[idx + 1];
+      if (naam2) {
+        const m2 = med[naam2] || [false, false, false, false];
+        const tot2 = m2.filter(Boolean).length;
+        const type2 = tot2 >= 4 ? 'goud' : tot2 === 3 ? 'zilver' : tot2 === 2 ? 'brons' : 'aanm';
+        pagina.innerHTML += maakDiplomaHTML(naam2, type2, actief || '');
+      }
+      container.appendChild(pagina);
+    }
+  });
 }
 
 // ── NIEUW SCHOOLJAAR ──────────────────────────────────────────────
