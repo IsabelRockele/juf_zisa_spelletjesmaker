@@ -355,7 +355,7 @@ textarea.s-input { min-height: 140px; resize: vertical; }
   <!-- PREVIEW GRID — zichtbaar in browser -->
   <div class="geen-print" style="padding:20px 24px 8px">
     <p style="font-size:13px;color:#888;margin-bottom:16px">Scroll door alle diploma's hieronder. Bij afdrukken komen er 2 per A4-blad.</p>
-    <div id="diplomaPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px"></div>
+    <div id="diplomaPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(500px,1fr));gap:20px"></div>
   </div>
 
   <!-- PRINT CONTAINER — alleen bij afdrukken zichtbaar -->
@@ -656,99 +656,40 @@ const IMG = 'afbeeldingen/';
 
 // Diploma config per type
 const DIP_CFG = {
-  goud:   { png: 'gouden_diploma.png',   sterren: '⭐⭐⭐⭐', tekst: 'heeft alle 4 weken de klasafspraak fantastisch gevolgd!' },
-  zilver: { png: 'zilveren_diploma.png', sterren: '⭐⭐⭐',   tekst: 'heeft 3 van de 4 weken de klasafspraak heel goed gevolgd!' },
-  brons:  { png: 'bronzen_diploma.png',  sterren: '⭐⭐',    tekst: 'heeft 2 weken goed haar/zijn best gedaan voor de klasafspraak!' },
-  aanm:   { png: 'aanmoediging.png',     sterren: '⭐',      tekst: 'heeft een goede eerste stap gezet! Volgende maand lukt het nog beter!' }
+  goud:   { png: 'gouden_diploma.png',   sterren: '⭐⭐⭐⭐', tekst: 'heeft alle 4 weken de klasafspraak fantastisch gevolgd!',       pos: { left:'26%', right:'26%', top:'32%', bottom:'12%' } },
+  zilver: { png: 'zilveren_diploma.png', sterren: '⭐⭐⭐',   tekst: 'heeft 3 van de 4 weken de klasafspraak heel goed gevolgd!',     pos: { left:'26%', right:'26%', top:'32%', bottom:'12%' } },
+  brons:  { png: 'bronzen_diploma.png',  sterren: '⭐⭐',    tekst: 'heeft 2 weken goed haar/zijn best gedaan voor de klasafspraak!', pos: { left:'26%', right:'26%', top:'32%', bottom:'12%' } },
+  aanm:   { png: 'aanmoediging.png',     sterren: '⭐',      tekst: 'heeft een goede eerste stap gezet! Volgende maand lukt het nog beter!', pos: { left:'26%', right:'26%', top:'28%', bottom:'12%' } }
 };
 
 function maakDiplomaHTML(naam, type, afspraakTekst) {
   const c = DIP_CFG[type];
-  const naamFontSize = naam.length > 16 ? '28px' : naam.length > 12 ? '34px' : '42px';
+  const p = c.pos;
+  const naamFontSize = naam.length > 16 ? '30px' : naam.length > 12 ? '36px' : '44px';
 
-  // Kleur per type voor fallback achtergrond
   const fallbackKleur = {
-    goud:   { rand: '#DAA520', bg: '#FFFDE7', titel: '#B8860B', tekst: '#6B4C00' },
-    zilver: { rand: '#90A4AE', bg: '#ECEFF1', titel: '#546E7A', tekst: '#263238' },
-    brons:  { rand: '#CD853F', bg: '#FFF3E0', titel: '#8D5524', tekst: '#4E342E' },
-    aanm:   { rand: '#64B5F6', bg: '#E3F2FD', titel: '#1565C0', tekst: '#0D47A1' }
+    goud:   { rand: '#DAA520', bg: '#FFFDE7' },
+    zilver: { rand: '#90A4AE', bg: '#ECEFF1' },
+    brons:  { rand: '#CD853F', bg: '#FFF3E0' },
+    aanm:   { rand: '#7BC8A4', bg: '#F0FAF6' }
   }[type];
 
   return `
-  <div style="
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1.414;
-    border-radius: 12px;
-    overflow: hidden;
-    background: ${fallbackKleur.bg};
-    border: 3px solid ${fallbackKleur.rand};
-    box-sizing: border-box;
-  ">
-    <!-- PNG achtergrond -->
+  <div style="position:relative;width:100%;aspect-ratio:1.414;border-radius:12px;overflow:hidden;background:${fallbackKleur.bg};border:2px solid ${fallbackKleur.rand};box-sizing:border-box;">
     <img src="${IMG}${c.png}"
          style="position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;"
          onerror="this.style.display='none'" />
-
-    <!-- Fallback titel als PNG niet laadt -->
     <div style="
-      position:absolute;top:8%;left:50%;transform:translateX(-50%);
-      font-family:'Comic Sans MS',Arial,sans-serif;font-size:clamp(14px,3%,22px);
-      font-weight:900;color:${fallbackKleur.titel};white-space:nowrap;
-      text-shadow:0 1px 2px rgba(255,255,255,0.8);
-      pointer-events:none;
-    " class="diploma-fallback-titel">🦓 ${c.png.replace('_diploma.png','').replace('aanmoediging','aanmoedigingskaartje').toUpperCase().replace('_',' ')}</div>
-
-    <!-- TEKST LAAG — midden van het diploma -->
-    <div style="
-      position: absolute;
-      left: 26%; right: 26%;
-      top: 35%; bottom: 16%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      gap: 5px;
-      z-index: 2;
+      position:absolute;
+      left:${p.left};right:${p.right};top:${p.top};bottom:${p.bottom};
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      text-align:center;gap:5px;z-index:2;
     ">
-      <div style="
-        font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif;
-        font-size: ${naamFontSize};
-        font-weight: 900;
-        color: #1A0A00;
-        line-height: 1.1;
-        text-shadow: 1px 1px 0 rgba(255,255,255,0.9);
-      ">${naam}</div>
-
-      <div style="
-        font-family: Arial, sans-serif;
-        font-size: clamp(10px, 1.4vw, 14px);
-        color: #444;
-        line-height: 1.4;
-        margin-top: 3px;
-      ">${c.tekst}</div>
-
-      <div style="
-        font-family: Arial, sans-serif;
-        font-size: clamp(9px, 1.2vw, 12px);
-        color: #888;
-        font-style: italic;
-        margin-top: 4px;
-      ">voor de klasafspraak:</div>
-
-      <div style="
-        font-family: Arial, sans-serif;
-        font-size: clamp(10px, 1.3vw, 13px);
-        font-weight: 700;
-        color: #333;
-        font-style: italic;
-        line-height: 1.4;
-        max-width: 100%;
-        word-break: break-word;
-      ">"${afspraakTekst}"</div>
-
-      <div style="font-size: clamp(14px, 2vw, 22px); margin-top: 5px; line-height:1;">${c.sterren}</div>
+      <div style="font-family:'Comic Sans MS','Chalkboard SE',Arial,sans-serif;font-size:${naamFontSize};font-weight:900;color:#1A0A00;line-height:1.1;text-shadow:1px 1px 0 rgba(255,255,255,0.9);">${naam}</div>
+      <div style="font-family:Arial,sans-serif;font-size:15px;color:#444;line-height:1.5;margin-top:4px">${c.tekst}</div>
+      <div style="font-family:Arial,sans-serif;font-size:13px;color:#888;font-style:italic;margin-top:3px">voor de klasafspraak:</div>
+      <div style="font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#333;font-style:italic;line-height:1.4;word-break:break-word">"${afspraakTekst}"</div>
+      <div style="font-size:22px;margin-top:6px;line-height:1">${c.sterren}</div>
     </div>
   </div>`;
 }
@@ -767,7 +708,7 @@ function genereerDiplomas() {
 
     // Preview kaartje
     const previewKaart = document.createElement('div');
-    previewKaart.style.cssText = 'background:white;border-radius:12px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.12)';
+    previewKaart.style.cssText = 'background:white;border-radius:12px;overflow:hidden;box-shadow:0 3px 12px rgba(0,0,0,0.12);min-width:420px';
     previewKaart.innerHTML = html;
     preview.appendChild(previewKaart);
 
