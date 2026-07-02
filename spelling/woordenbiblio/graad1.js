@@ -189,7 +189,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "koud", lidwoord: null, afbeelding: true },
       { tekst: "oud", lidwoord: null, afbeelding: true },
-      { tekst: "bout", lidwoord: "de", afbeelding: false },
+      { tekst: "bout", lidwoord: "de", afbeelding: true },
       { tekst: "hout", lidwoord: "het", afbeelding: true },
       { tekst: "fout", lidwoord: "de", afbeelding: true },
       { tekst: "goud", lidwoord: "het", afbeelding: true },
@@ -208,13 +208,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "pauw", lidwoord: "de", afbeelding: true },
       { tekst: "saus", lidwoord: "de", afbeelding: true },
-      { tekst: "dauw", lidwoord: "de", afbeelding: false },
+      { tekst: "dauw", lidwoord: "de", afbeelding: true },
       { tekst: "blauw", lidwoord: null, afbeelding: true },
       { tekst: "flauw", lidwoord: null, afbeelding: false },
       { tekst: "nauw", lidwoord: null, afbeelding: false },
       { tekst: "paus", lidwoord: "de", afbeelding: true },
       { tekst: "klauw", lidwoord: "de", afbeelding: true },
-      { tekst: "miauw", lidwoord: null, afbeelding: false },
+      { tekst: "miauw", lidwoord: null, afbeelding: true },
       { tekst: "auto", lidwoord: "de", afbeelding: true },
       { tekst: "augustus", lidwoord: null, afbeelding: false }
     ]
@@ -229,8 +229,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "kleur", lidwoord: "de", afbeelding: false },
       { tekst: "geur", lidwoord: "de", afbeelding: false },
       { tekst: "reus", lidwoord: "de", afbeelding: true },
-      { tekst: "beuk", lidwoord: "de", afbeelding: false },
-      { tekst: "scheur", lidwoord: "de", afbeelding: false },
+      { tekst: "beuk", lidwoord: "de", afbeelding: true },
+      { tekst: "scheur", lidwoord: "de", afbeelding: true },
       { tekst: "leuk", lidwoord: null, afbeelding: false },
       { tekst: "kreun", lidwoord: null, afbeelding: false },
       { tekst: "kreunt", lidwoord: null, afbeelding: false }
@@ -271,7 +271,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schoen", lidwoord: "de", afbeelding: true },
       { tekst: "broek", lidwoord: "de", afbeelding: true },
       { tekst: "loep", lidwoord: "de", afbeelding: true },
-      { tekst: "moe", lidwoord: null, afbeelding: false },
+      { tekst: "moe", lidwoord: null, afbeelding: true },
       { tekst: "groen", lidwoord: null, afbeelding: true }
     ]
   },
@@ -395,10 +395,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "ring", lidwoord: "de", afbeelding: true },
       { tekst: "slang", lidwoord: "de", afbeelding: true },
       { tekst: "kring", lidwoord: "de", afbeelding: false },
-      { tekst: "long", lidwoord: "de", afbeelding: false },
-      { tekst: "tong", lidwoord: "de", afbeelding: false },
-      { tekst: "wang", lidwoord: "de", afbeelding: false },
-      { tekst: "ding", lidwoord: "het", afbeelding: false },
+      { tekst: "long", lidwoord: "de", afbeelding: true },
+      { tekst: "tong", lidwoord: "de", afbeelding: true },
+      { tekst: "wang", lidwoord: "de", afbeelding: true },
+      { tekst: "ding", lidwoord: "het", afbeelding: true },
       { tekst: "sprong", lidwoord: "de", afbeelding: false },
       { tekst: "bang", lidwoord: null, afbeelding: false },
       { tekst: "zing", lidwoord: null, afbeelding: false },
@@ -419,7 +419,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "vink", lidwoord: "de", afbeelding: true },
       { tekst: "plank", lidwoord: "de", afbeelding: true },
       { tekst: "klank", lidwoord: "de", afbeelding: false },
-      { tekst: "pink", lidwoord: "de", afbeelding: false },
+      { tekst: "pink", lidwoord: "de", afbeelding: true },
       { tekst: "drink", lidwoord: null, afbeelding: false },
       { tekst: "drinkt", lidwoord: null, afbeelding: false },
       { tekst: "stank", lidwoord: "de", afbeelding: false },
@@ -428,7 +428,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schenkt", lidwoord: null, afbeelding: false },
       { tekst: "denk", lidwoord: null, afbeelding: false },
       { tekst: "flink", lidwoord: null, afbeelding: false },
-      { tekst: "venkel", lidwoord: "de", afbeelding: false }
+      { tekst: "venkel", lidwoord: "de", afbeelding: true }
     ]
   },
   // ===== VERDUBBELAARS =====
