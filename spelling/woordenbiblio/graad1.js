@@ -109,7 +109,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "ik", lidwoord: null, afbeelding: false },
       { tekst: "is", lidwoord: null, afbeelding: false },
       { tekst: "af", lidwoord: null, afbeelding: false },
-      { tekst: "as", lidwoord: "de", afbeelding: false }
+      { tekst: "as", lidwoord: "de", afbeelding: true }
     ]
   },
   // ===== TWEEKLANKEN =====
@@ -226,8 +226,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "neus", lidwoord: "de", afbeelding: true },
       { tekst: "deur", lidwoord: "de", afbeelding: true },
-      { tekst: "kleur", lidwoord: "de", afbeelding: false },
-      { tekst: "geur", lidwoord: "de", afbeelding: false },
+      { tekst: "kleur", lidwoord: "de", afbeelding: true },
+      { tekst: "geur", lidwoord: "de", afbeelding: true },
       { tekst: "reus", lidwoord: "de", afbeelding: true },
       { tekst: "beuk", lidwoord: "de", afbeelding: true },
       { tekst: "scheur", lidwoord: "de", afbeelding: true },
@@ -283,15 +283,15 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "haai", lidwoord: "de", afbeelding: true },
       { tekst: "kraai", lidwoord: "de", afbeelding: true },
       { tekst: "draai", lidwoord: "de", afbeelding: false },
-      { tekst: "lawaai", lidwoord: "het", afbeelding: false },
-      { tekst: "zwaai", lidwoord: "de", afbeelding: false },
+      { tekst: "lawaai", lidwoord: "het", afbeelding: true },
+      { tekst: "zwaai", lidwoord: "de", afbeelding: true },
       { tekst: "saai", lidwoord: null, afbeelding: false },
       { tekst: "fraai", lidwoord: null, afbeelding: false },
-      { tekst: "naai", lidwoord: null, afbeelding: false },
+      { tekst: "naai", lidwoord: null, afbeelding: true },
       { tekst: "naait", lidwoord: null, afbeelding: false },
-      { tekst: "maai", lidwoord: null, afbeelding: false },
+      { tekst: "maai", lidwoord: null, afbeelding: true },
       { tekst: "maait", lidwoord: null, afbeelding: false },
-      { tekst: "zaai", lidwoord: null, afbeelding: false },
+      { tekst: "zaai", lidwoord: null, afbeelding: true },
       { tekst: "zaait", lidwoord: null, afbeelding: false },
       { tekst: "taai", lidwoord: null, afbeelding: false }
     ]
@@ -308,7 +308,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "gooit", lidwoord: null, afbeelding: false },
       { tekst: "strooi", lidwoord: null, afbeelding: false },
       { tekst: "strooit", lidwoord: null, afbeelding: false },
-      { tekst: "prooi", lidwoord: "de", afbeelding: false }
+      { tekst: "prooi", lidwoord: "de", afbeelding: true }
     ]
   },
   "tw-oei": {
@@ -325,7 +325,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "loeit", lidwoord: null, afbeelding: false },
       { tekst: "knoei", lidwoord: null, afbeelding: false },
       { tekst: "knoeit", lidwoord: null, afbeelding: false },
-      { tekst: "roei", lidwoord: null, afbeelding: false },
+      { tekst: "roei", lidwoord: null, afbeelding: true },
       { tekst: "roeit", lidwoord: null, afbeelding: false },
       { tekst: "foei", lidwoord: null, afbeelding: false }
     ]
@@ -359,7 +359,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "tweeklanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "duw", lidwoord: "de", afbeelding: false },
+      { tekst: "duw", lidwoord: "de", afbeelding: true },
       { tekst: "sluw", lidwoord: null, afbeelding: false },
       { tekst: "ruw", lidwoord: null, afbeelding: false },
       { tekst: "uw", lidwoord: null, afbeelding: false }
@@ -378,7 +378,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pa", lidwoord: "de", afbeelding: false },
       { tekst: "zo", lidwoord: null, afbeelding: false },
       { tekst: "nu", lidwoord: null, afbeelding: false },
-      { tekst: "menu", lidwoord: "het", afbeelding: false },
+      { tekst: "menu", lidwoord: "het", afbeelding: true },
       { tekst: "salto", lidwoord: "de", afbeelding: false },
       { tekst: "piano", lidwoord: "de", afbeelding: true },
       { tekst: "paraplu", lidwoord: "de", afbeelding: true },
