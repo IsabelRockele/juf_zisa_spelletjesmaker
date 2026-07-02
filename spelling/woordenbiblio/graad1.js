@@ -109,8 +109,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "ik", lidwoord: null, afbeelding: false },
       { tekst: "is", lidwoord: null, afbeelding: false },
       { tekst: "af", lidwoord: null, afbeelding: false },
-      { tekst: "as", lidwoord: "de", afbeelding: false },
-      { tekst: "ei", lidwoord: "het", afbeelding: false }
+      { tekst: "as", lidwoord: "de", afbeelding: false }
     ]
   },
   // ===== TWEEKLANKEN =====
