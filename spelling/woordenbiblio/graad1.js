@@ -141,7 +141,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "onthoudwoord",
     woorden: [
       { tekst: "trein", lidwoord: "de", afbeelding: true },
-      { tekst: "klein", lidwoord: null, afbeelding: false },
+      { tekst: "klein", lidwoord: null, afbeelding: true },
       { tekst: "geit", lidwoord: "de", afbeelding: true },
       { tekst: "ei", lidwoord: "het", afbeelding: true },
       { tekst: "weide", lidwoord: "de", afbeelding: true },
@@ -349,7 +349,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "kieuw", lidwoord: "de", afbeelding: true },
-      { tekst: "nieuw", lidwoord: null, afbeelding: false },
+      { tekst: "nieuw", lidwoord: null, afbeelding: true },
       { tekst: "opnieuw", lidwoord: null, afbeelding: false },
       { tekst: "nieuws", lidwoord: "het", afbeelding: false }
     ]
@@ -564,13 +564,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "boot", lidwoord: "de", afbeelding: true },
       { tekst: "kroon", lidwoord: "de", afbeelding: true },
       { tekst: "school", lidwoord: "de", afbeelding: true },
-      { tekst: "zoon", lidwoord: "de", afbeelding: false },
+      { tekst: "zoon", lidwoord: "de", afbeelding: true },
       { tekst: "droom", lidwoord: "de", afbeelding: true },
-      { tekst: "rook", lidwoord: "de", afbeelding: false },
+      { tekst: "rook", lidwoord: "de", afbeelding: true },
       { tekst: "voor", lidwoord: null, afbeelding: false },
       { tekst: "door", lidwoord: null, afbeelding: false },
-      { tekst: "groot", lidwoord: null, afbeelding: false },
-      { tekst: "rood", lidwoord: null, afbeelding: false }
+      { tekst: "groot", lidwoord: null, afbeelding: true },
+      { tekst: "rood", lidwoord: null, afbeelding: true }
     ]
   },
   "lk-uu": {
@@ -578,11 +578,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "lange-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "muur", lidwoord: "de", afbeelding: false },
-      { tekst: "vuur", lidwoord: "het", afbeelding: false },
-      { tekst: "uur", lidwoord: "het", afbeelding: false },
-      { tekst: "buur", lidwoord: "de", afbeelding: false },
-      { tekst: "stuur", lidwoord: "het", afbeelding: false },
+      { tekst: "muur", lidwoord: "de", afbeelding: true },
+      { tekst: "vuur", lidwoord: "het", afbeelding: true },
+      { tekst: "uur", lidwoord: "het", afbeelding: true },
+      { tekst: "buur", lidwoord: "de", afbeelding: true },
+      { tekst: "stuur", lidwoord: "het", afbeelding: true },
       { tekst: "puur", lidwoord: null, afbeelding: false },
       { tekst: "huur", lidwoord: "de", afbeelding: false }
     ]
@@ -593,16 +593,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "moeilijke-klanken",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "school", lidwoord: "de", afbeelding: false },
+      { tekst: "school", lidwoord: "de", afbeelding: true },
       { tekst: "schoen", lidwoord: "de", afbeelding: true },
-      { tekst: "schip", lidwoord: "het", afbeelding: false },
-      { tekst: "schaar", lidwoord: "de", afbeelding: false },
+      { tekst: "schip", lidwoord: "het", afbeelding: true },
+      { tekst: "schaar", lidwoord: "de", afbeelding: true },
       { tekst: "schaap", lidwoord: "het", afbeelding: true },
-      { tekst: "schaal", lidwoord: "de", afbeelding: false },
-      { tekst: "schat", lidwoord: "de", afbeelding: false },
+      { tekst: "schaal", lidwoord: "de", afbeelding: true },
+      { tekst: "schat", lidwoord: "de", afbeelding: true },
       { tekst: "schoon", lidwoord: null, afbeelding: false },
       { tekst: "scheef", lidwoord: null, afbeelding: false },
-      { tekst: "schop", lidwoord: "de", afbeelding: false },
+      { tekst: "schop", lidwoord: "de", afbeelding: true },
       { tekst: "schil", lidwoord: "de", afbeelding: false },
       { tekst: "schar", lidwoord: "de", afbeelding: false }
     ]
@@ -739,7 +739,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "doffe-klank",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "vader", lidwoord: "de", afbeelding: false },
+      { tekst: "vader", lidwoord: "de", afbeelding: true },
       { tekst: "moeder", lidwoord: "de", afbeelding: false },
       { tekst: "broer", lidwoord: "de", afbeelding: false },
       { tekst: "zuster", lidwoord: "de", afbeelding: false },
@@ -804,7 +804,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "tuin", lidwoord: "de", verklein: "tuintje", afbeelding: true },
       { tekst: "muur", lidwoord: "de", verklein: "muurtje", afbeelding: true },
       { tekst: "broer", lidwoord: "de", verklein: "broertje", afbeelding: false },
-      { tekst: "vader", lidwoord: "de", verklein: "vadertje", afbeelding: false },
+      { tekst: "vader", lidwoord: "de", verklein: "vadertje", afbeelding: true },
       { tekst: "moeder", lidwoord: "de", verklein: "moedertje", afbeelding: false },
       { tekst: "boer", lidwoord: "de", verklein: "boertje", afbeelding: false },
       { tekst: "emmer", lidwoord: "de", verklein: "emmertje", afbeelding: true }
