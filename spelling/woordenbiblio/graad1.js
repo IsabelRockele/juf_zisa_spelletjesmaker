@@ -1167,17 +1167,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een groot dier met een hoorn op zijn neus."
       },
       {
-        tekst: "slaapkamer", lidwoord: "de", afbeelding: false,
+        tekst: "slaapkamer", lidwoord: "de", afbeelding: true,
         delen: ["slaap", "kamer"], delenEmoji: ["😴", "🛏️"],
         beschrijving: "De kamer waar je gaat slapen."
       },
       {
-        tekst: "badkamer", lidwoord: "de", afbeelding: false,
+        tekst: "badkamer", lidwoord: "de", afbeelding: true,
         delen: ["bad", "kamer"], delenEmoji: ["🛁", "🚪"],
         beschrijving: "De kamer waar je je wast en in bad gaat."
       },
       {
-        tekst: "zwembad", lidwoord: "het", afbeelding: false,
+        tekst: "zwembad", lidwoord: "het", afbeelding: true,
         delen: ["zwem", "bad"], delenEmoji: ["🏊", "🛁"],
         beschrijving: "Hier ga je naartoe om te zwemmen."
       },
@@ -1232,7 +1232,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een hoge kruk waarop je aan de bar zit."
       },
       {
-        tekst: "bloemsuiker", lidwoord: "de", afbeelding: false,
+        tekst: "bloemsuiker", lidwoord: "de", afbeelding: true,
         delen: ["bloem", "suiker"], delenEmoji: ["🌸", "🍬"],
         beschrijving: "Heel fijne, witte suiker die je over taart strooit."
       },
