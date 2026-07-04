@@ -1147,12 +1147,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Hierin doe je je eten voor 's middags."
       },
       {
-        tekst: "handdoek", lidwoord: "de", afbeelding: false,
+        tekst: "handdoek", lidwoord: "de", afbeelding: true,
         delen: ["hand", "doek"], delenEmoji: ["✋", "🧻"],
         beschrijving: "Hiermee droog je je af na het wassen."
       },
       {
-        tekst: "zakdoek", lidwoord: "de", afbeelding: false,
+        tekst: "zakdoek", lidwoord: "de", afbeelding: true,
         delen: ["zak", "doek"], delenEmoji: ["🤧", "🧻"],
         beschrijving: "Hierin snuit je je neus."
       },
@@ -1162,7 +1162,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een mooi sieraad dat in je oor hangt."
       },
       {
-        tekst: "neushoorn", lidwoord: "de", afbeelding: false,
+        tekst: "neushoorn", lidwoord: "de", afbeelding: true,
         delen: ["neus", "hoorn"], delenEmoji: ["👃", "🦏"],
         beschrijving: "Een groot dier met een hoorn op zijn neus."
       },
@@ -1182,7 +1182,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Hier ga je naartoe om te zwemmen."
       },
       {
-        tekst: "melkkan", lidwoord: "de", afbeelding: false,
+        tekst: "melkkan", lidwoord: "de", afbeelding: true,
         delen: ["melk", "kan"], delenEmoji: ["🥛", "🫖"],
         beschrijving: "Een kan waar melk in zit."
       },
@@ -1192,17 +1192,17 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een bal die je met je voet schopt."
       },
       {
-        tekst: "balpen", lidwoord: "de", afbeelding: false,
+        tekst: "balpen", lidwoord: "de", afbeelding: true,
         delen: ["bal", "pen"], delenEmoji: ["⚽", "✏️"],
         beschrijving: "Hiermee schrijf je en er komt blauwe inkt uit."
       },
       {
-        tekst: "deurbel", lidwoord: "de", afbeelding: false,
+        tekst: "deurbel", lidwoord: "de", afbeelding: true,
         delen: ["deur", "bel"], delenEmoji: ["🚪", "🔔"],
         beschrijving: "Hierop druk je als je bij iemand aanbelt."
       },
       {
-        tekst: "regenjas", lidwoord: "de", afbeelding: false,
+        tekst: "regenjas", lidwoord: "de", afbeelding: true,
         delen: ["regen", "jas"], delenEmoji: ["🌧️", "🧥"],
         beschrijving: "Een jas die je draagt als het regent."
       },
