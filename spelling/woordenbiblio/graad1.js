@@ -1102,7 +1102,6 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       // be-
       { tekst: "begin", lidwoord: "het", afbeelding: false },
       { tekst: "bedoeling", lidwoord: "de", afbeelding: false },
-      { tekst: "beker", lidwoord: "de", afbeelding: true },
       { tekst: "beloven", lidwoord: null, afbeelding: false },
       { tekst: "betalen", lidwoord: null, afbeelding: false },
       { tekst: "beleefd", lidwoord: null, afbeelding: false },
