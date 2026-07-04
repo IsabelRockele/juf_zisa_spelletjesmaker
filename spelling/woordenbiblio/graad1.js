@@ -624,22 +624,22 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "ch-cht-gt",
     hoofdgroep: "onthoudwoord",
     woorden: [
-      { tekst: "acht", lidwoord: null, afbeelding: false },
-      { tekst: "nacht", lidwoord: "de", afbeelding: false },
-      { tekst: "licht", lidwoord: "het", afbeelding: false },
-      { tekst: "hij lacht", lidwoord: null, afbeelding: false },
+      { tekst: "acht", lidwoord: null, afbeelding: true },
+      { tekst: "nacht", lidwoord: "de", afbeelding: true },
+      { tekst: "licht", lidwoord: "het", afbeelding: true },
+      { tekst: "hij lacht", lidwoord: null, afbeelding: true },
       { tekst: "hij vecht", lidwoord: null, afbeelding: false },
       { tekst: "recht", lidwoord: null, afbeelding: false },
       { tekst: "hij zucht", lidwoord: null, afbeelding: false },
-      { tekst: "vlucht", lidwoord: "de", afbeelding: false },
+      { tekst: "vlucht", lidwoord: "de", afbeelding: true },
       { tekst: "hij wacht", lidwoord: null, afbeelding: false },
       { tekst: "hij dacht", lidwoord: null, afbeelding: false },
       { tekst: "dicht", lidwoord: null, afbeelding: false },
       { tekst: "echt", lidwoord: null, afbeelding: false },
-      { tekst: "lucht", lidwoord: "de", afbeelding: false },
+      { tekst: "lucht", lidwoord: "de", afbeelding: true },
       { tekst: "achter", lidwoord: null, afbeelding: false },
-      { tekst: "kracht", lidwoord: "de", afbeelding: false },
-      { tekst: "nicht", lidwoord: "de", afbeelding: false }
+      { tekst: "kracht", lidwoord: "de", afbeelding: true },
+      { tekst: "nicht", lidwoord: "de", afbeelding: true }
     ]
   },
   "gt-woorden": {
