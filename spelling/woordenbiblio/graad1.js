@@ -1207,27 +1207,27 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
         beschrijving: "Een jas die je draagt als het regent."
       },
       {
-        tekst: "tandpasta", lidwoord: "de", afbeelding: false,
+        tekst: "tandpasta", lidwoord: "de", afbeelding: true,
         delen: ["tand", "pasta"], delenEmoji: ["🦷", "🪥"],
         beschrijving: "Hiermee poets je je tanden."
       },
       {
-        tekst: "boekentas", lidwoord: "de", afbeelding: false,
+        tekst: "boekentas", lidwoord: "de", afbeelding: true,
         delen: ["boeken", "tas"], delenEmoji: ["📚", "👜"],
         beschrijving: "Een tas vol boeken voor school."
       },
       {
-        tekst: "dagboek", lidwoord: "het", afbeelding: false,
+        tekst: "dagboek", lidwoord: "het", afbeelding: true,
         delen: ["dag", "boek"], delenEmoji: ["☀️", "📔"],
         beschrijving: "Een boek waarin je schrijft wat je elke dag doet."
       },
       {
-        tekst: "kerstboom", lidwoord: "de", afbeelding: false,
+        tekst: "kerstboom", lidwoord: "de", afbeelding: true,
         delen: ["kerst", "boom"], delenEmoji: ["🎁", "🌲"],
         beschrijving: "De boom die je versiert met kerst."
       },
       {
-        tekst: "barkruk", lidwoord: "de", afbeelding: false,
+        tekst: "barkruk", lidwoord: "de", afbeelding: true,
         delen: ["bar", "kruk"], delenEmoji: ["🍹", "🪑"],
         beschrijving: "Een hoge kruk waarop je aan de bar zit."
       },
