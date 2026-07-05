@@ -603,8 +603,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schoon", lidwoord: null, afbeelding: false },
       { tekst: "scheef", lidwoord: null, afbeelding: false },
       { tekst: "schop", lidwoord: "de", afbeelding: true },
-      { tekst: "schil", lidwoord: "de", afbeelding: false },
-      { tekst: "schar", lidwoord: "de", afbeelding: false }
+      { tekst: "schil", lidwoord: "de", afbeelding: false }
     ]
   },
   "ch-woorden": {
