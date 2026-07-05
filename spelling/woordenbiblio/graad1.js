@@ -400,13 +400,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "wang", lidwoord: "de", afbeelding: true },
       { tekst: "ding", lidwoord: "het", afbeelding: true },
       { tekst: "sprong", lidwoord: "de", afbeelding: true },
-      { tekst: "bang", lidwoord: null, afbeelding: false },
-      { tekst: "zing", lidwoord: null, afbeelding: false },
-      { tekst: "zingt", lidwoord: null, afbeelding: false },
-      { tekst: "spring", lidwoord: null, afbeelding: false },
-      { tekst: "springt", lidwoord: null, afbeelding: false },
-      { tekst: "hang", lidwoord: null, afbeelding: false },
-      { tekst: "hangt", lidwoord: null, afbeelding: false }
+      { tekst: "bang", lidwoord: null, afbeelding: true },
+      { tekst: "zing", lidwoord: null, afbeelding: true },
+      { tekst: "zingt", lidwoord: null, afbeelding: true },
+      { tekst: "spring", lidwoord: null, afbeelding: true },
+      { tekst: "springt", lidwoord: null, afbeelding: true },
+      { tekst: "hang", lidwoord: null, afbeelding: true },
+      { tekst: "hangt", lidwoord: null, afbeelding: true }
     ]
   },
   "nk-woorden": {
@@ -420,14 +420,14 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "plank", lidwoord: "de", afbeelding: true },
       { tekst: "klank", lidwoord: "de", afbeelding: false },
       { tekst: "pink", lidwoord: "de", afbeelding: true },
-      { tekst: "drink", lidwoord: null, afbeelding: false },
-      { tekst: "drinkt", lidwoord: null, afbeelding: false },
+      { tekst: "drink", lidwoord: null, afbeelding: true },
+      { tekst: "drinkt", lidwoord: null, afbeelding: true },
       { tekst: "stank", lidwoord: "de", afbeelding: true },
-      { tekst: "stinkt", lidwoord: null, afbeelding: false },
-      { tekst: "schenk", lidwoord: null, afbeelding: false },
-      { tekst: "schenkt", lidwoord: null, afbeelding: false },
-      { tekst: "denk", lidwoord: null, afbeelding: false },
-      { tekst: "flink", lidwoord: null, afbeelding: false },
+      { tekst: "stinkt", lidwoord: null, afbeelding: true },
+      { tekst: "schenk", lidwoord: null, afbeelding: true },
+      { tekst: "schenkt", lidwoord: null, afbeelding: true },
+      { tekst: "denk", lidwoord: null, afbeelding: true },
+      { tekst: "flink", lidwoord: null, afbeelding: true },
       { tekst: "venkel", lidwoord: "de", afbeelding: true }
     ]
   },
