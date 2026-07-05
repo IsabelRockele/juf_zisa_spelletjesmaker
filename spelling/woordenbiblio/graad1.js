@@ -892,7 +892,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "boom", lidwoord: "de", meervoud: "bomen", afbeelding: true },
       { tekst: "boot", lidwoord: "de", meervoud: "boten", afbeelding: true },
       { tekst: "kaas", lidwoord: "de", meervoud: "kazen", afbeelding: true },
-      { tekst: "naam", lidwoord: "de", meervoud: "namen", afbeelding: false },
+      { tekst: "naam", lidwoord: "de", meervoud: "namen", afbeelding: true },
       { tekst: "maan", lidwoord: "de", meervoud: "manen", afbeelding: true },
       { tekst: "vaas", lidwoord: "de", meervoud: "vazen", afbeelding: true },
       { tekst: "muur", lidwoord: "de", meervoud: "muren", afbeelding: true },
@@ -917,23 +917,23 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       // Uit stukjes-verdubbelen (enkelvoud-stukjeswoorden)
       { tekst: "kikker", lidwoord: "de", meervoud: "kikkers", afbeelding: true },
       { tekst: "ladder", lidwoord: "de", meervoud: "ladders", afbeelding: true },
-      { tekst: "emmer", lidwoord: "de", meervoud: "emmers", afbeelding: false },
+      { tekst: "emmer", lidwoord: "de", meervoud: "emmers", afbeelding: true },
       { tekst: "letter", lidwoord: "de", meervoud: "letters", afbeelding: true },
       // Uit stukjes-verenkelen
       { tekst: "lepel", lidwoord: "de", meervoud: "lepels", afbeelding: true },
-      { tekst: "vader", lidwoord: "de", meervoud: "vaders", afbeelding: false },
+      { tekst: "vader", lidwoord: "de", meervoud: "vaders", afbeelding: true },
       { tekst: "tafel", lidwoord: "de", meervoud: "tafels", afbeelding: true },
-      { tekst: "tijger", lidwoord: "de", meervoud: "tijgers", afbeelding: false },
-      { tekst: "beker", lidwoord: "de", meervoud: "bekers", afbeelding: false },
+      { tekst: "tijger", lidwoord: "de", meervoud: "tijgers", afbeelding: true },
+      { tekst: "beker", lidwoord: "de", meervoud: "bekers", afbeelding: true },
       // Uit stukjes-geen-regel
       { tekst: "wortel", lidwoord: "de", meervoud: "wortels", afbeelding: true },
       { tekst: "winter", lidwoord: "de", meervoud: "winters", afbeelding: true },
       // Nieuwe woorden specifiek voor -s regel
       { tekst: "vlinder", lidwoord: "de", meervoud: "vlinders", afbeelding: true },
-      { tekst: "winkel", lidwoord: "de", meervoud: "winkels", afbeelding: false },
-      { tekst: "dokter", lidwoord: "de", meervoud: "dokters", afbeelding: false },
-      { tekst: "sleutel", lidwoord: "de", meervoud: "sleutels", afbeelding: false },
-      { tekst: "jongen", lidwoord: "de", meervoud: "jongens", afbeelding: false },
+      { tekst: "winkel", lidwoord: "de", meervoud: "winkels", afbeelding: true },
+      { tekst: "dokter", lidwoord: "de", meervoud: "dokters", afbeelding: true },
+      { tekst: "sleutel", lidwoord: "de", meervoud: "sleutels", afbeelding: true },
+      { tekst: "jongen", lidwoord: "de", meervoud: "jongens", afbeelding: true },
       { tekst: "appel", lidwoord: "de", meervoud: "appels", afbeelding: true }
     ]
   },
