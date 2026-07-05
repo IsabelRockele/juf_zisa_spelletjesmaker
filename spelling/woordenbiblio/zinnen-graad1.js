@@ -2576,11 +2576,6 @@ window.SpellingZinnen.graad1 = {
     "Mama gooit de schil weg.",
     "Op de grond ligt een schil."
   ],
-  "schar": [
-    "De schar is een platte vis.",
-    "Mama bakt een schar in de pan.",
-    "Vissers vangen veel schar."
-  ],
 
   // ===== 3 medeklinkers + klank + 1 medek (mmmkm) =====
   "straat": [
