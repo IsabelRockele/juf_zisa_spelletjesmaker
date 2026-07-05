@@ -890,22 +890,22 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "regelwoord",
     woorden: [
       { tekst: "boom", lidwoord: "de", meervoud: "bomen", afbeelding: true },
-      { tekst: "boot", lidwoord: "de", meervoud: "boten", afbeelding: false },
-      { tekst: "kaas", lidwoord: "de", meervoud: "kazen", afbeelding: false },
+      { tekst: "boot", lidwoord: "de", meervoud: "boten", afbeelding: true },
+      { tekst: "kaas", lidwoord: "de", meervoud: "kazen", afbeelding: true },
       { tekst: "naam", lidwoord: "de", meervoud: "namen", afbeelding: false },
-      { tekst: "maan", lidwoord: "de", meervoud: "manen", afbeelding: false },
-      { tekst: "vaas", lidwoord: "de", meervoud: "vazen", afbeelding: false },
+      { tekst: "maan", lidwoord: "de", meervoud: "manen", afbeelding: true },
+      { tekst: "vaas", lidwoord: "de", meervoud: "vazen", afbeelding: true },
       { tekst: "muur", lidwoord: "de", meervoud: "muren", afbeelding: true },
-      { tekst: "buur", lidwoord: "de", meervoud: "buren", afbeelding: false },
-      { tekst: "uur", lidwoord: "het", meervoud: "uren", afbeelding: false },
-      { tekst: "haar", lidwoord: "het", meervoud: "haren", afbeelding: false },
+      { tekst: "buur", lidwoord: "de", meervoud: "buren", afbeelding: true },
+      { tekst: "uur", lidwoord: "het", meervoud: "uren", afbeelding: true },
+      { tekst: "haar", lidwoord: "het", meervoud: "haren", afbeelding: true },
       { tekst: "schaap", lidwoord: "het", meervoud: "schapen", afbeelding: true },
       { tekst: "kraan", lidwoord: "de", meervoud: "kranen", afbeelding: true },
       { tekst: "raam", lidwoord: "het", meervoud: "ramen", afbeelding: true },
-      { tekst: "paal", lidwoord: "de", meervoud: "palen", afbeelding: false },
-      { tekst: "haan", lidwoord: "de", meervoud: "hanen", afbeelding: false },
-      { tekst: "veer", lidwoord: "de", meervoud: "veren", afbeelding: false },
-      { tekst: "beer", lidwoord: "de", meervoud: "beren", afbeelding: false }
+      { tekst: "paal", lidwoord: "de", meervoud: "palen", afbeelding: true },
+      { tekst: "haan", lidwoord: "de", meervoud: "hanen", afbeelding: true },
+      { tekst: "veer", lidwoord: "de", meervoud: "veren", afbeelding: true },
+      { tekst: "beer", lidwoord: "de", meervoud: "beren", afbeelding: true }
     ]
   },
 
