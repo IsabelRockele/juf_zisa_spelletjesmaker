@@ -1088,7 +1088,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "gevoel", lidwoord: "het", afbeelding: true },
       { tekst: "geluk", lidwoord: "het", afbeelding: true },
       { tekst: "gezicht", lidwoord: "het", afbeelding: true },
-      { tekst: "geweer", lidwoord: "het", afbeelding: false },
+      { tekst: "geweer", lidwoord: "het", afbeelding: true },
       { tekst: "gewoon", lidwoord: null, afbeelding: false },
       // ver-
       { tekst: "verhaal", lidwoord: "het", afbeelding: true },
