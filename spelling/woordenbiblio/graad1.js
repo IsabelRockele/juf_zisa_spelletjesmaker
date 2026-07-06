@@ -750,8 +750,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "letter", lidwoord: "de", afbeelding: true },
       { tekst: "hamer", lidwoord: "de", afbeelding: true },
       { tekst: "kleuter", lidwoord: "de", afbeelding: true },
-      { tekst: "meester", lidwoord: "de", afbeelding: false },
-      { tekst: "tover", lidwoord: null, afbeelding: false },
+      { tekst: "meester", lidwoord: "de", afbeelding: true },
+      { tekst: "tover", lidwoord: null, afbeelding: true },
       { tekst: "bakker", lidwoord: "de", afbeelding: true },
       { tekst: "ouder", lidwoord: "de", afbeelding: true },
       { tekst: "ouders", lidwoord: "de", afbeelding: true }
@@ -763,10 +763,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "groente", lidwoord: "de", afbeelding: true },
-      { tekst: "hoogte", lidwoord: "de", afbeelding: false },
-      { tekst: "diepte", lidwoord: "de", afbeelding: false },
-      { tekst: "ruimte", lidwoord: "de", afbeelding: false },
-      { tekst: "vlakte", lidwoord: "de", afbeelding: false }
+      { tekst: "hoogte", lidwoord: "de", afbeelding: true },
+      { tekst: "diepte", lidwoord: "de", afbeelding: true },
+      { tekst: "ruimte", lidwoord: "de", afbeelding: true },
+      { tekst: "vlakte", lidwoord: "de", afbeelding: true }
     ]
   },
   // ===== VERKLEINWOORDEN — ZUIVERE VORMEN =====
@@ -782,12 +782,12 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "voet", lidwoord: "de", verklein: "voetje", afbeelding: true },
       { tekst: "fiets", lidwoord: "de", verklein: "fietsje", afbeelding: true },
       { tekst: "hoofd", lidwoord: "het", verklein: "hoofdje", afbeelding: true },
-      { tekst: "vest", lidwoord: "het", verklein: "vestje", afbeelding: false },
+      { tekst: "vest", lidwoord: "het", verklein: "vestje", afbeelding: true },
       { tekst: "hand", lidwoord: "de", verklein: "handje", afbeelding: true },
-      { tekst: "dorp", lidwoord: "het", verklein: "dorpje", afbeelding: false },
+      { tekst: "dorp", lidwoord: "het", verklein: "dorpje", afbeelding: true },
       { tekst: "buik", lidwoord: "de", verklein: "buikje", afbeelding: true },
       { tekst: "plant", lidwoord: "de", verklein: "plantje", afbeelding: true },
-      { tekst: "brief", lidwoord: "de", verklein: "briefje", afbeelding: false }
+      { tekst: "brief", lidwoord: "de", verklein: "briefje", afbeelding: true }
     ]
   },
   "verklein-tje": {
@@ -805,7 +805,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "broer", lidwoord: "de", verklein: "broertje", afbeelding: true },
       { tekst: "vader", lidwoord: "de", verklein: "vadertje", afbeelding: true },
       { tekst: "moeder", lidwoord: "de", verklein: "moedertje", afbeelding: true },
-      { tekst: "boer", lidwoord: "de", verklein: "boertje", afbeelding: false },
+      { tekst: "boer", lidwoord: "de", verklein: "boertje", afbeelding: true },
       { tekst: "emmer", lidwoord: "de", verklein: "emmertje", afbeelding: true }
     ]
   },
@@ -820,7 +820,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "raam", lidwoord: "het", verklein: "raampje", afbeelding: true },
       { tekst: "bloem", lidwoord: "de", verklein: "bloempje", afbeelding: true },
       { tekst: "droom", lidwoord: "de", verklein: "droompje", afbeelding: true },
-      { tekst: "riem", lidwoord: "de", verklein: "riempje", afbeelding: false }
+      { tekst: "riem", lidwoord: "de", verklein: "riempje", afbeelding: true }
     ]
   },
   // ===== MEERVOUDEN =====
