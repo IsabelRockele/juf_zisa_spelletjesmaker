@@ -379,7 +379,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "zo", lidwoord: null, afbeelding: false },
       { tekst: "nu", lidwoord: null, afbeelding: false },
       { tekst: "menu", lidwoord: "het", afbeelding: true },
-      { tekst: "salto", lidwoord: "de", afbeelding: false },
+      { tekst: "salto", lidwoord: "de", afbeelding: true },
       { tekst: "piano", lidwoord: "de", afbeelding: true },
       { tekst: "paraplu", lidwoord: "de", afbeelding: true },
       { tekst: "auto", lidwoord: "de", afbeelding: true },
@@ -471,13 +471,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "emmer", lidwoord: "de", meervoud: "emmers", afbeelding: true },
       { tekst: "letter", lidwoord: "de", meervoud: "letters", afbeelding: true },
       // WW-infinitief (regel al in vorm, ik-veld voor OV10 toekomst)
-      { tekst: "rennen", lidwoord: null, ik: "ren", afbeelding: false },
-      { tekst: "zwemmen", lidwoord: null, ik: "zwem", afbeelding: false },
-      { tekst: "vallen", lidwoord: null, ik: "val", afbeelding: false },
-      { tekst: "zitten", lidwoord: null, ik: "zit", afbeelding: false },
-      { tekst: "tikken", lidwoord: null, ik: "tik", afbeelding: false },
-      { tekst: "stoppen", lidwoord: null, ik: "stop", afbeelding: false },
-      { tekst: "bakken", lidwoord: null, ik: "bak", afbeelding: false }
+      { tekst: "rennen", lidwoord: null, ik: "ren", afbeelding: true },
+      { tekst: "zwemmen", lidwoord: null, ik: "zwem", afbeelding: true },
+      { tekst: "vallen", lidwoord: null, ik: "val", afbeelding: true },
+      { tekst: "zitten", lidwoord: null, ik: "zit", afbeelding: true },
+      { tekst: "tikken", lidwoord: null, ik: "tik", afbeelding: true },
+      { tekst: "stoppen", lidwoord: null, ik: "stop", afbeelding: true },
+      { tekst: "bakken", lidwoord: null, ik: "bak", afbeelding: true }
     ]
   },
   "stukjes-verenkelen": {
@@ -488,7 +488,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       // ZNW-overgang (enkelvoud → meervoud, regel speelt bij vorming)
       { tekst: "boom", lidwoord: "de", meervoud: "bomen", afbeelding: true },
       { tekst: "muur", lidwoord: "de", meervoud: "muren", afbeelding: true },
-      { tekst: "naam", lidwoord: "de", meervoud: "namen", afbeelding: false },
+      { tekst: "naam", lidwoord: "de", meervoud: "namen", afbeelding: true },
       { tekst: "kaas", lidwoord: "de", meervoud: "kazen", afbeelding: true },
       { tekst: "vaas", lidwoord: "de", meervoud: "vazen", afbeelding: true },
       { tekst: "paal", lidwoord: "de", meervoud: "palen", afbeelding: true },
@@ -512,9 +512,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "water", lidwoord: "het", meervoud: null, afbeelding: true },
       { tekst: "beker", lidwoord: "de", meervoud: "bekers", afbeelding: true },
       // WW-infinitief (regel al in vorm, ik-veld voor OV10 toekomst)
-      { tekst: "lopen", lidwoord: null, ik: "loop", afbeelding: false },
-      { tekst: "slapen", lidwoord: null, ik: "slaap", afbeelding: false },
-      { tekst: "eten", lidwoord: null, ik: "eet", afbeelding: false }
+      { tekst: "lopen", lidwoord: null, ik: "loop", afbeelding: true },
+      { tekst: "slapen", lidwoord: null, ik: "slaap", afbeelding: true },
+      { tekst: "eten", lidwoord: null, ik: "eet", afbeelding: true }
     ]
   },
   // ===== LANGE KLANKEN =====
@@ -525,14 +525,14 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "haan", lidwoord: "de", afbeelding: true },
       { tekst: "maan", lidwoord: "de", afbeelding: true },
-      { tekst: "naam", lidwoord: "de", afbeelding: false },
+      { tekst: "naam", lidwoord: "de", afbeelding: true },
       { tekst: "taart", lidwoord: "de", afbeelding: true },
       { tekst: "kaas", lidwoord: "de", afbeelding: true },
       { tekst: "vaas", lidwoord: "de", afbeelding: true },
       { tekst: "paard", lidwoord: "het", afbeelding: true },
       { tekst: "baan", lidwoord: "de", afbeelding: true },
       { tekst: "schaar", lidwoord: "de", afbeelding: true },
-      { tekst: "taak", lidwoord: "de", afbeelding: false },
+      { tekst: "taak", lidwoord: "de", afbeelding: true },
       { tekst: "vaak", lidwoord: null, afbeelding: false }
     ]
   },
@@ -544,13 +544,13 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "been", lidwoord: "het", afbeelding: true },
       { tekst: "fee", lidwoord: "de", afbeelding: true },
       { tekst: "zee", lidwoord: "de", afbeelding: true },
-      { tekst: "nee", lidwoord: null, afbeelding: false },
+      { tekst: "nee", lidwoord: null, afbeelding: true },
       { tekst: "beek", lidwoord: "de", afbeelding: true },
       { tekst: "veer", lidwoord: "de", afbeelding: true },
       { tekst: "meer", lidwoord: "het", afbeelding: true },
       { tekst: "slee", lidwoord: "de", afbeelding: true },
       { tekst: "heel", lidwoord: null, afbeelding: false },
-      { tekst: "leeg", lidwoord: null, afbeelding: false },
+      { tekst: "leeg", lidwoord: null, afbeelding: true },
       { tekst: "geel", lidwoord: null, afbeelding: true }
     ]
   },
@@ -600,10 +600,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "schaap", lidwoord: "het", afbeelding: true },
       { tekst: "schaal", lidwoord: "de", afbeelding: true },
       { tekst: "schat", lidwoord: "de", afbeelding: true },
-      { tekst: "schoon", lidwoord: null, afbeelding: false },
-      { tekst: "scheef", lidwoord: null, afbeelding: false },
+      { tekst: "schoon", lidwoord: null, afbeelding: true },
+      { tekst: "scheef", lidwoord: null, afbeelding: true },
       { tekst: "schop", lidwoord: "de", afbeelding: true },
-      { tekst: "schil", lidwoord: "de", afbeelding: false }
+      { tekst: "schil", lidwoord: "de", afbeelding: true }
     ]
   },
   "ch-woorden": {
