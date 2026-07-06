@@ -282,7 +282,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "haai", lidwoord: "de", afbeelding: true },
       { tekst: "kraai", lidwoord: "de", afbeelding: true },
-      { tekst: "draai", lidwoord: "de", afbeelding: false },
+      { tekst: "draai", lidwoord: "de", afbeelding: true },
       { tekst: "lawaai", lidwoord: "het", afbeelding: true },
       { tekst: "zwaai", lidwoord: "de", afbeelding: true },
       { tekst: "saai", lidwoord: null, afbeelding: false },
@@ -293,7 +293,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "maait", lidwoord: null, afbeelding: true },
       { tekst: "zaai", lidwoord: null, afbeelding: true },
       { tekst: "zaait", lidwoord: null, afbeelding: true },
-      { tekst: "taai", lidwoord: null, afbeelding: false }
+      { tekst: "taai", lidwoord: null, afbeelding: true }
     ]
   },
   "tw-ooi": {
@@ -303,7 +303,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "kooi", lidwoord: "de", afbeelding: true },
       { tekst: "hooi", lidwoord: "het", afbeelding: true },
-      { tekst: "mooi", lidwoord: null, afbeelding: false },
+      { tekst: "mooi", lidwoord: null, afbeelding: true },
       { tekst: "gooi", lidwoord: null, afbeelding: true },
       { tekst: "gooit", lidwoord: null, afbeelding: true },
       { tekst: "strooi", lidwoord: null, afbeelding: true },
@@ -337,7 +337,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "leeuw", lidwoord: "de", afbeelding: true },
       { tekst: "sneeuw", lidwoord: "de", afbeelding: true },
-      { tekst: "eeuw", lidwoord: "de", afbeelding: false },
+      { tekst: "eeuw", lidwoord: "de", afbeelding: true },
       { tekst: "spreeuw", lidwoord: "de", afbeelding: true },
       { tekst: "meeuw", lidwoord: "de", afbeelding: true },
       { tekst: "geeuw", lidwoord: "de", afbeelding: true }
@@ -350,8 +350,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "kieuw", lidwoord: "de", afbeelding: true },
       { tekst: "nieuw", lidwoord: null, afbeelding: true },
-      { tekst: "opnieuw", lidwoord: null, afbeelding: false },
-      { tekst: "nieuws", lidwoord: "het", afbeelding: false }
+      { tekst: "opnieuw", lidwoord: null, afbeelding: true },
+      { tekst: "nieuws", lidwoord: "het", afbeelding: true }
     ]
   },
   "tw-uw": {
@@ -583,8 +583,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "uur", lidwoord: "het", afbeelding: true },
       { tekst: "buur", lidwoord: "de", afbeelding: true },
       { tekst: "stuur", lidwoord: "het", afbeelding: true },
-      { tekst: "puur", lidwoord: null, afbeelding: false },
-      { tekst: "huur", lidwoord: "de", afbeelding: false }
+      { tekst: "puur", lidwoord: null, afbeelding: true },
+      { tekst: "huur", lidwoord: "de", afbeelding: true }
     ]
   },
   // ===== SCH-WOORDEN =====
@@ -627,8 +627,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "nacht", lidwoord: "de", afbeelding: true },
       { tekst: "licht", lidwoord: "het", afbeelding: true },
       { tekst: "hij lacht", lidwoord: null, afbeelding: true },
-      { tekst: "hij vecht", lidwoord: null, afbeelding: false },
-      { tekst: "recht", lidwoord: null, afbeelding: false },
+      { tekst: "hij vecht", lidwoord: null, afbeelding: true },
+      { tekst: "recht", lidwoord: null, afbeelding: true },
       { tekst: "hij zucht", lidwoord: null, afbeelding: true },
       { tekst: "vlucht", lidwoord: "de", afbeelding: true },
       { tekst: "hij wacht", lidwoord: null, afbeelding: true },
@@ -688,8 +688,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "klap", lidwoord: "de", verlengd: "klappen", afbeelding: true },
       { tekst: "pop", lidwoord: "de", verlengd: "poppen", afbeelding: true },
       { tekst: "kip", lidwoord: "de", verlengd: "kippen", afbeelding: true },
-      { tekst: "glad", lidwoord: null, verlengd: "gladde", afbeelding: false },
-      { tekst: "beurt", lidwoord: "de", verlengd: "beurten", afbeelding: false }
+      { tekst: "glad", lidwoord: null, verlengd: "gladde", afbeelding: true },
+      { tekst: "beurt", lidwoord: "de", verlengd: "beurten", afbeelding: true }
     ]
   },
   // ===== DOFFE KLANK OP HET EINDE =====
@@ -1000,7 +1000,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "slim", lidwoord: null, afbeelding: false },
       { tekst: "vlag", lidwoord: "de", afbeelding: true },
       { tekst: "vlees", lidwoord: "het", afbeelding: true },
-      { tekst: "traag", lidwoord: null, afbeelding: false },
+      { tekst: "traag", lidwoord: null, afbeelding: true },
       { tekst: "bloem", lidwoord: "de", afbeelding: true },
       { tekst: "droom", lidwoord: "de", afbeelding: true },
       { tekst: "groen", lidwoord: null, afbeelding: true },
@@ -1016,8 +1016,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "strik", lidwoord: "de", afbeelding: true },
       { tekst: "straal", lidwoord: "de", afbeelding: true },
       { tekst: "stroop", lidwoord: "de", afbeelding: true },
-      { tekst: "spreuk", lidwoord: "de", afbeelding: false },
-      { tekst: "spraak", lidwoord: "de", afbeelding: false },
+      { tekst: "spreuk", lidwoord: "de", afbeelding: true },
+      { tekst: "spraak", lidwoord: "de", afbeelding: true },
       { tekst: "streep", lidwoord: "de", afbeelding: true },
       { tekst: "struik", lidwoord: "de", afbeelding: true }
     ]
@@ -1063,7 +1063,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "ernst", lidwoord: "de", afbeelding: false },
       { tekst: "oogst", lidwoord: "de", afbeelding: true },
       { tekst: "eerst", lidwoord: null, afbeelding: false },
-      { tekst: "angst", lidwoord: "de", afbeelding: false },
+      { tekst: "angst", lidwoord: "de", afbeelding: true },
       { tekst: "kunst", lidwoord: "de", afbeelding: true },
       { tekst: "arts", lidwoord: "de", afbeelding: true },
       { tekst: "markt", lidwoord: "de", afbeelding: true }
@@ -1094,16 +1094,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "verhaal", lidwoord: "het", afbeelding: true },
       { tekst: "vertel", lidwoord: null, afbeelding: true },
       { tekst: "verdriet", lidwoord: "het", afbeelding: true },
-      { tekst: "vergeet", lidwoord: null, afbeelding: false },
-      { tekst: "vertrek", lidwoord: null, afbeelding: false },
+      { tekst: "vergeet", lidwoord: null, afbeelding: true },
+      { tekst: "vertrek", lidwoord: null, afbeelding: true },
       { tekst: "verkeer", lidwoord: "het", afbeelding: true },
       { tekst: "verkoop", lidwoord: "de", afbeelding: true },
       // be-
       { tekst: "begin", lidwoord: "het", afbeelding: true },
       { tekst: "bedoeling", lidwoord: "de", afbeelding: false },
-      { tekst: "beloven", lidwoord: null, afbeelding: false },
+      { tekst: "beloven", lidwoord: null, afbeelding: true },
       { tekst: "betalen", lidwoord: null, afbeelding: true },
-      { tekst: "beleefd", lidwoord: null, afbeelding: false },
+      { tekst: "beleefd", lidwoord: null, afbeelding: true },
       { tekst: "bedankt", lidwoord: null, afbeelding: true },
       // on-
       { tekst: "ongeveer", lidwoord: null, afbeelding: false },
@@ -1111,7 +1111,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "onbekend", lidwoord: null, afbeelding: false },
       { tekst: "ongeluk", lidwoord: "het", afbeelding: true },
       { tekst: "oneerlijk", lidwoord: null, afbeelding: false },
-      { tekst: "onrustig", lidwoord: null, afbeelding: false }
+      { tekst: "onrustig", lidwoord: null, afbeelding: true }
     ]
   },
 
