@@ -612,8 +612,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "onthoudwoord",
     woorden: [
       { tekst: "ach", lidwoord: null, afbeelding: false },
-      { tekst: "lach", lidwoord: "de", afbeelding: false },
-      { tekst: "pech", lidwoord: "de", afbeelding: false },
+      { tekst: "lach", lidwoord: "de", afbeelding: true },
+      { tekst: "pech", lidwoord: "de", afbeelding: true },
       { tekst: "zich", lidwoord: null, afbeelding: false },
       { tekst: "toch", lidwoord: null, afbeelding: false }
     ]
@@ -629,14 +629,14 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hij lacht", lidwoord: null, afbeelding: true },
       { tekst: "hij vecht", lidwoord: null, afbeelding: false },
       { tekst: "recht", lidwoord: null, afbeelding: false },
-      { tekst: "hij zucht", lidwoord: null, afbeelding: false },
+      { tekst: "hij zucht", lidwoord: null, afbeelding: true },
       { tekst: "vlucht", lidwoord: "de", afbeelding: true },
-      { tekst: "hij wacht", lidwoord: null, afbeelding: false },
+      { tekst: "hij wacht", lidwoord: null, afbeelding: true },
       { tekst: "hij dacht", lidwoord: null, afbeelding: false },
-      { tekst: "dicht", lidwoord: null, afbeelding: false },
+      { tekst: "dicht", lidwoord: null, afbeelding: true },
       { tekst: "echt", lidwoord: null, afbeelding: false },
       { tekst: "lucht", lidwoord: "de", afbeelding: true },
-      { tekst: "achter", lidwoord: null, afbeelding: false },
+      { tekst: "achter", lidwoord: null, afbeelding: true },
       { tekst: "kracht", lidwoord: "de", afbeelding: true },
       { tekst: "nicht", lidwoord: "de", afbeelding: true }
     ]
@@ -646,8 +646,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "ch-cht-gt",
     hoofdgroep: "onthoudwoord",
     woorden: [
-      { tekst: "hij zegt", lidwoord: null, afbeelding: false },
-      { tekst: "hij vraagt", lidwoord: null, afbeelding: false },
+      { tekst: "hij zegt", lidwoord: null, afbeelding: true },
+      { tekst: "hij vraagt", lidwoord: null, afbeelding: true },
       { tekst: "hij legt", lidwoord: null, afbeelding: false },
       { tekst: "hij jaagt", lidwoord: null, afbeelding: false },
       { tekst: "hij vliegt", lidwoord: null, afbeelding: false },
