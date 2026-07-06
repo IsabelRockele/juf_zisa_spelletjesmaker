@@ -175,9 +175,9 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "pijn", lidwoord: "de", afbeelding: true },
       { tekst: "prijs", lidwoord: "de", afbeelding: true },
       { tekst: "rijm", lidwoord: "het", afbeelding: false },
-      { tekst: "kijk", lidwoord: null, afbeelding: false },
+      { tekst: "kijk", lidwoord: null, afbeelding: true },
       { tekst: "mijn", lidwoord: null, afbeelding: false },
-      { tekst: "schrijf", lidwoord: null, afbeelding: false },
+      { tekst: "schrijf", lidwoord: null, afbeelding: true },
       { tekst: "bij", lidwoord: "de", afbeelding: true },
       { tekst: "ijsje", lidwoord: "het", afbeelding: true }
     ]
@@ -232,8 +232,8 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "beuk", lidwoord: "de", afbeelding: true },
       { tekst: "scheur", lidwoord: "de", afbeelding: true },
       { tekst: "leuk", lidwoord: null, afbeelding: false },
-      { tekst: "kreun", lidwoord: null, afbeelding: false },
-      { tekst: "kreunt", lidwoord: null, afbeelding: false }
+      { tekst: "kreun", lidwoord: null, afbeelding: true },
+      { tekst: "kreunt", lidwoord: null, afbeelding: true }
     ]
   },
   "tw-ui": {
@@ -320,11 +320,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "koeien", lidwoord: "de", afbeelding: true },
       { tekst: "groei", lidwoord: "de", afbeelding: false },
       { tekst: "bloei", lidwoord: "de", afbeelding: false },
-      { tekst: "stoei", lidwoord: null, afbeelding: false },
-      { tekst: "stoeit", lidwoord: null, afbeelding: false },
-      { tekst: "loeit", lidwoord: null, afbeelding: false },
-      { tekst: "knoei", lidwoord: null, afbeelding: false },
-      { tekst: "knoeit", lidwoord: null, afbeelding: false },
+      { tekst: "stoei", lidwoord: null, afbeelding: true },
+      { tekst: "stoeit", lidwoord: null, afbeelding: true },
+      { tekst: "loeit", lidwoord: null, afbeelding: true },
+      { tekst: "knoei", lidwoord: null, afbeelding: true },
+      { tekst: "knoeit", lidwoord: null, afbeelding: true },
       { tekst: "roei", lidwoord: null, afbeelding: true },
       { tekst: "roeit", lidwoord: null, afbeelding: true },
       { tekst: "foei", lidwoord: null, afbeelding: false }
