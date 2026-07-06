@@ -979,16 +979,16 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     hoofdgroep: "hoorwoord",
     woorden: [
       { tekst: "stip", lidwoord: "de", afbeelding: true },
-      { tekst: "plat", lidwoord: null, afbeelding: false },
+      { tekst: "plat", lidwoord: null, afbeelding: true },
       { tekst: "brug", lidwoord: "de", afbeelding: true },
       { tekst: "kruk", lidwoord: "de", afbeelding: true },
       { tekst: "klok", lidwoord: "de", afbeelding: true },
-      { tekst: "stop", lidwoord: "de", afbeelding: false },
+      { tekst: "stop", lidwoord: "de", afbeelding: true },
       { tekst: "knop", lidwoord: "de", afbeelding: true },
-      { tekst: "smal", lidwoord: null, afbeelding: false },
+      { tekst: "smal", lidwoord: null, afbeelding: true },
       { tekst: "blad", lidwoord: "het", afbeelding: true },
-      { tekst: "plek", lidwoord: "de", afbeelding: false },
-      { tekst: "klas", lidwoord: "de", afbeelding: false },
+      { tekst: "plek", lidwoord: "de", afbeelding: true },
+      { tekst: "klas", lidwoord: "de", afbeelding: true },
       { tekst: "slot", lidwoord: "het", afbeelding: true },
       { tekst: "klap", lidwoord: "de", afbeelding: true },
       { tekst: "plas", lidwoord: "de", afbeelding: true },
@@ -1030,10 +1030,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "melk", lidwoord: "de", afbeelding: true },
       { tekst: "wolf", lidwoord: "de", afbeelding: true },
       { tekst: "hark", lidwoord: "de", afbeelding: true },
-      { tekst: "hulp", lidwoord: "de", afbeelding: false },
+      { tekst: "hulp", lidwoord: "de", afbeelding: true },
       { tekst: "balk", lidwoord: "de", afbeelding: true },
       { tekst: "helm", lidwoord: "de", afbeelding: true },
-      { tekst: "half", lidwoord: null, afbeelding: false },
+      { tekst: "half", lidwoord: null, afbeelding: true },
       { tekst: "hals", lidwoord: "de", afbeelding: true },
       { tekst: "dolk", lidwoord: "de", afbeelding: true },
       { tekst: "kalf", lidwoord: "het", afbeelding: true },
@@ -1046,7 +1046,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "hulk", lidwoord: "de", afbeelding: false },
       { tekst: "ramp", lidwoord: "de", afbeelding: true },
       { tekst: "lift", lidwoord: "de", afbeelding: true },
-      { tekst: "werk", lidwoord: "het", afbeelding: false },
+      { tekst: "werk", lidwoord: "het", afbeelding: true },
       { tekst: "elf", lidwoord: "de", afbeelding: true }
     ]
   },
@@ -1064,7 +1064,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "oogst", lidwoord: "de", afbeelding: true },
       { tekst: "eerst", lidwoord: null, afbeelding: false },
       { tekst: "angst", lidwoord: "de", afbeelding: false },
-      { tekst: "kunst", lidwoord: "de", afbeelding: false },
+      { tekst: "kunst", lidwoord: "de", afbeelding: true },
       { tekst: "arts", lidwoord: "de", afbeelding: true },
       { tekst: "markt", lidwoord: "de", afbeelding: true }
     ]
@@ -1083,11 +1083,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       // ge-
       { tekst: "gevaar", lidwoord: "het", afbeelding: false },
-      { tekst: "getal", lidwoord: "het", afbeelding: false },
+      { tekst: "getal", lidwoord: "het", afbeelding: true },
       { tekst: "geheim", lidwoord: "het", afbeelding: false },
       { tekst: "gevoel", lidwoord: "het", afbeelding: false },
       { tekst: "geluk", lidwoord: "het", afbeelding: false },
-      { tekst: "gezicht", lidwoord: "het", afbeelding: false },
+      { tekst: "gezicht", lidwoord: "het", afbeelding: true },
       { tekst: "geweer", lidwoord: "het", afbeelding: false },
       { tekst: "gewoon", lidwoord: null, afbeelding: false },
       // ver-
@@ -1096,7 +1096,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "verdriet", lidwoord: "het", afbeelding: false },
       { tekst: "vergeet", lidwoord: null, afbeelding: false },
       { tekst: "vertrek", lidwoord: null, afbeelding: false },
-      { tekst: "verkeer", lidwoord: "het", afbeelding: false },
+      { tekst: "verkeer", lidwoord: "het", afbeelding: true },
       { tekst: "verkoop", lidwoord: "de", afbeelding: false },
       // be-
       { tekst: "begin", lidwoord: "het", afbeelding: false },
