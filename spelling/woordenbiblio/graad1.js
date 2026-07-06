@@ -648,14 +648,14 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     woorden: [
       { tekst: "hij zegt", lidwoord: null, afbeelding: true },
       { tekst: "hij vraagt", lidwoord: null, afbeelding: true },
-      { tekst: "hij legt", lidwoord: null, afbeelding: false },
-      { tekst: "hij jaagt", lidwoord: null, afbeelding: false },
-      { tekst: "hij vliegt", lidwoord: null, afbeelding: false },
-      { tekst: "hij veegt", lidwoord: null, afbeelding: false },
+      { tekst: "hij legt", lidwoord: null, afbeelding: true },
+      { tekst: "hij jaagt", lidwoord: null, afbeelding: true },
+      { tekst: "hij vliegt", lidwoord: null, afbeelding: true },
+      { tekst: "hij veegt", lidwoord: null, afbeelding: true },
       { tekst: "hij liegt", lidwoord: null, afbeelding: false },
-      { tekst: "hij klaagt", lidwoord: null, afbeelding: false },
-      { tekst: "hij buigt", lidwoord: null, afbeelding: false },
-      { tekst: "hij ligt", lidwoord: null, afbeelding: false }
+      { tekst: "hij klaagt", lidwoord: null, afbeelding: true },
+      { tekst: "hij buigt", lidwoord: null, afbeelding: true },
+      { tekst: "hij ligt", lidwoord: null, afbeelding: true }
     ]
   },
   // ===== VERLENGINGSREGEL-WOORDEN =====
