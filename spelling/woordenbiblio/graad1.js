@@ -719,18 +719,18 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
     groep: "doffe-klank",
     hoofdgroep: "hoorwoord",
     woorden: [
-      { tekst: "lopen", lidwoord: null, afbeelding: false },
-      { tekst: "eten", lidwoord: null, afbeelding: false },
-      { tekst: "drinken", lidwoord: null, afbeelding: false },
-      { tekst: "spelen", lidwoord: null, afbeelding: false },
-      { tekst: "lezen", lidwoord: null, afbeelding: false },
-      { tekst: "kijken", lidwoord: null, afbeelding: false },
-      { tekst: "fluiten", lidwoord: null, afbeelding: false },
-      { tekst: "praten", lidwoord: null, afbeelding: false },
-      { tekst: "wonen", lidwoord: null, afbeelding: false },
-      { tekst: "slapen", lidwoord: null, afbeelding: false },
-      { tekst: "vragen", lidwoord: null, afbeelding: false },
-      { tekst: "geven", lidwoord: null, afbeelding: false }
+      { tekst: "lopen", lidwoord: null, afbeelding: true },
+      { tekst: "eten", lidwoord: null, afbeelding: true },
+      { tekst: "drinken", lidwoord: null, afbeelding: true },
+      { tekst: "spelen", lidwoord: null, afbeelding: true },
+      { tekst: "lezen", lidwoord: null, afbeelding: true },
+      { tekst: "kijken", lidwoord: null, afbeelding: true },
+      { tekst: "fluiten", lidwoord: null, afbeelding: true },
+      { tekst: "praten", lidwoord: null, afbeelding: true },
+      { tekst: "wonen", lidwoord: null, afbeelding: true },
+      { tekst: "slapen", lidwoord: null, afbeelding: true },
+      { tekst: "vragen", lidwoord: null, afbeelding: true },
+      { tekst: "geven", lidwoord: null, afbeelding: true }
     ]
   },
   "df-er": {
