@@ -288,11 +288,11 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "saai", lidwoord: null, afbeelding: false },
       { tekst: "fraai", lidwoord: null, afbeelding: false },
       { tekst: "naai", lidwoord: null, afbeelding: true },
-      { tekst: "naait", lidwoord: null, afbeelding: false },
+      { tekst: "naait", lidwoord: null, afbeelding: true },
       { tekst: "maai", lidwoord: null, afbeelding: true },
-      { tekst: "maait", lidwoord: null, afbeelding: false },
+      { tekst: "maait", lidwoord: null, afbeelding: true },
       { tekst: "zaai", lidwoord: null, afbeelding: true },
-      { tekst: "zaait", lidwoord: null, afbeelding: false },
+      { tekst: "zaait", lidwoord: null, afbeelding: true },
       { tekst: "taai", lidwoord: null, afbeelding: false }
     ]
   },
@@ -304,10 +304,10 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "kooi", lidwoord: "de", afbeelding: true },
       { tekst: "hooi", lidwoord: "het", afbeelding: true },
       { tekst: "mooi", lidwoord: null, afbeelding: false },
-      { tekst: "gooi", lidwoord: null, afbeelding: false },
-      { tekst: "gooit", lidwoord: null, afbeelding: false },
-      { tekst: "strooi", lidwoord: null, afbeelding: false },
-      { tekst: "strooit", lidwoord: null, afbeelding: false },
+      { tekst: "gooi", lidwoord: null, afbeelding: true },
+      { tekst: "gooit", lidwoord: null, afbeelding: true },
+      { tekst: "strooi", lidwoord: null, afbeelding: true },
+      { tekst: "strooit", lidwoord: null, afbeelding: true },
       { tekst: "prooi", lidwoord: "de", afbeelding: true }
     ]
   },
@@ -326,7 +326,7 @@ window.SpellingWoordenbibliotheek.registreerGraad(1, {
       { tekst: "knoei", lidwoord: null, afbeelding: false },
       { tekst: "knoeit", lidwoord: null, afbeelding: false },
       { tekst: "roei", lidwoord: null, afbeelding: true },
-      { tekst: "roeit", lidwoord: null, afbeelding: false },
+      { tekst: "roeit", lidwoord: null, afbeelding: true },
       { tekst: "foei", lidwoord: null, afbeelding: false }
     ]
   },
