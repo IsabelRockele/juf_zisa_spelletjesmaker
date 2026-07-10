@@ -50,7 +50,7 @@ window.VraagstukkenModule = (() => {
     const schema = [];
     document.querySelectorAll('input[name="vs-schema"]:checked').forEach(el => schema.push(el.value));
     const antwoordzin = document.querySelector('input[name="vs-antwoordzin"]:checked')?.value || 'deels';
-    const aantalBulk = parseInt(document.getElementById('vs-aantal-bulk')?.value || '1');
+    const aantalBulk = 1;
     const kommaDecimalen = document.querySelector('input[name="vs-komma-niveau"]:checked')?.value || 't';
     const kommaPrefix = document.querySelector('input[name="vs-komma-prefix"]:checked')?.value || 'E';
     const cijferKolommen = (() => {
@@ -79,7 +79,7 @@ window.VraagstukkenModule = (() => {
   }
 
   // ── PROMPT BOUWEN ────────────────────────────────────────────
-  function bouwPrompt(inst, aantal) {
+  function bouwPrompt(inst) {
     const bewerkingLabel = {
       optellen: 'optelling',
       aftrekken: 'aftrekking',
@@ -217,9 +217,7 @@ window.VraagstukkenModule = (() => {
     const setting = settings[Math.floor(Math.random() * settings.length)];
     const variatieInstructie = `- Gebruik de namen "${r1}" en/of "${r2}" en de setting "${setting}" als inspiratie voor een UNIEK verhaal. Kies zelf een origineel voorwerp of situatie — geen ballonnen, geen eieren tenzij het thema dat vraagt.`;
 
-    const aantalInstructie = aantal > 1
-      ? `Genereer ${aantal} VERSCHILLENDE vraagstukken. Elk vraagstuk heeft een ANDER verhaal, andere personages en andere situatie. Geef elk vraagstuk een nummer (1., 2., ...).`
-      : 'Genereer 1 vraagstuk.';
+    const aantalInstructie = 'Genereer precies 1 vraagstuk.';
 
     return `Je bent een Vlaamse onderwijsassistent die wiskundige vraagstukken maakt voor kinderen.
 
@@ -269,10 +267,10 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
   async function genereer() {
     const teller = await haalTellerOp();
     const inst = leesInstellingen();
-    const aantalNodig = inst.aantalBulk;
+    const aantalNodig = 1;
 
     if (teller + aantalNodig > 10) {
-      const resterend = Math.max(0, 20 - teller);
+      const resterend = Math.max(0, 10 - teller);
       toonMelding(
         resterend === 0
           ? '⏰ Je hebt je dagelijks limiet van 10 vraagstukken bereikt. Morgen kan je opnieuw!'
@@ -290,7 +288,7 @@ Geef ALLEEN het vraagstuk terug, zonder uitleg, zonder titel, zonder berekening.
     if (sidebar) sidebar.innerHTML = '<div class="vs-laden">✨ Claude bedenkt een vraagstuk...</div>';
 
     try {
-      const prompt = bouwPrompt(inst, aantalNodig);
+      const prompt = bouwPrompt(inst);
       const resultaat = await roepAPIaan(prompt);
 
       huidigVraagstuk = { ...resultaat, inst, tijdstip: new Date().toLocaleTimeString('nl-BE') };
