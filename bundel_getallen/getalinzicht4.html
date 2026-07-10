@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Getalinzicht 4de leerjaar - jufzisa.be</title>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script defer src="gi-pdf.js"></script>
+  <script defer src="getalinzicht4.js"></script>
+
+  <link rel="stylesheet" href="getalinzicht.css">
+  <link rel="stylesheet" href="getalinzicht-ui.css">
+  <link rel="stylesheet" href="getalinzicht4.css">
+</head>
+<body class="modus-werkbundel">
+
+<header>
+  <a href="getalkeuze.html" class="menu-knop">Terug</a>
+  <div class="logo">Getal<span>inzicht</span></div>
+  <div class="subtitle">- 4de leerjaar</div>
+  <div class="graad-badge">tot 10 000</div>
+  <div class="spacer"></div>
+  <div class="badge">GRATIS</div>
+</header>
+
+<div class="main">
+  <aside class="sidebar">
+    <div class="sidebar-tabs" id="sidebarTabs">
+      <div class="sidebar-tab tab-getallenlijn active" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
+      <div class="sidebar-tab tab-plaatswaarde" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
+      <div class="sidebar-tab tab-getallenrij" onclick="GI4_UI.toonTab('getallenas',this)">Getallenas</div>
+      <div class="sidebar-tab tab-sprongen" onclick="GI4_UI.toonTab('sprongen',this)">Sprongen</div>
+      <div class="sidebar-tab tab-gemengd" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
+      <div class="sidebar-tab tab-mab" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
+    </div>
+
+    <div class="sidebar-content" id="tab-analyse">
+      <div class="sectie-titel">Analyse van getallen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Splitsen in D/H/T/E</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="splitCount" type="number" min="1" max="12" value="6" style="width:56px"></label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="splitExample" type="checkbox" checked> Eerste oefening als voorbeeld
+        </label>
+        <p class="gi4-note">Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddSplit">Voeg splits-oefeningen toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-dhtemateriaal" style="display:none">
+      <div class="sectie-titel">D/H/T/E materiaal</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Hoeveelheden benoemen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="materialCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Weergave
+            <select id="materialMode" style="width:130px">
+              <option value="blocks">Blokken</option>
+              <option value="dots">Schijfjes</option>
+              <option value="mixed">Gemengd</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddMaterial">Voeg D/H/T/E-kaarten toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Verbind wat samen hoort</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="connectCount" type="number" min="3" max="4" value="4" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddConnect">Voeg verbind-oefening toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-getallenas" style="display:none">
+      <div class="sectie-titel">Getallenas aanvullen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Instellingen</div>
+        <div class="veld-rij">
+          <label>Aantal assen <input id="axisCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Stap
+            <select id="axisStep" style="width:105px">
+              <option value="1">1</option>
+              <option value="10">10</option>
+              <option value="100" selected>100</option>
+              <option value="1000">1000</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddAxis">Voeg getallenassen toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-sprongen" style="display:none">
+      <div class="sectie-titel">Tellen met sprongen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Instellingen</div>
+        <div class="veld-rij">
+          <label>Aantal rijen <input id="jumpCount4" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Soort
+            <select id="jumpMode4" style="width:145px">
+              <option value="known" selected>sprong gegeven</option>
+              <option value="discover">sprong ontdekken</option>
+            </select>
+          </label>
+          <label>Sprong
+            <select id="jumpStep4" style="width:105px">
+              <option value="1">1</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="1000">1000</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddJumps">Voeg sprongen toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-vergelijken" style="display:none">
+      <div class="sectie-titel">Vergelijken en ordenen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Vergelijken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="compareCount" type="number" min="2" max="12" value="6" style="width:56px"></label>
+          <label>Type
+            <select id="compareMode" style="width:135px">
+              <option value="numbers" selected>getal met getal</option>
+              <option value="value">getal met waarde</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddCompare">Voeg vergelijkingen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Rangschikken</div>
+        <div class="veld-rij">
+          <label>Reeksen <input id="orderCount" type="number" min="1" max="5" value="2" style="width:56px"></label>
+          <label>Volgorde
+            <select id="orderDirection" style="width:120px">
+              <option value="asc">klein naar groot</option>
+              <option value="desc">groot naar klein</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddOrder">Voeg rangschikken toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-waarde" style="display:none">
+      <div class="sectie-titel">Waarde van cijfers</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Getalwaarde-kaarten</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="valueCardCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Weergave
+            <select id="valueCardMode" style="width:150px">
+              <option value="schema" selected>met schijfjesschema</option>
+              <option value="card">zonder schema</option>
+              <option value="plain">enkel cijfers</option>
+            </select>
+          </label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="valueCardExample" type="checkbox" checked> Eerste kaart als voorbeeld
+        </label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddValueCards">Voeg waardekaarten toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Kleur wat evenveel is</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="equivRows" type="number" min="2" max="5" value="4" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddEquiv">Voeg evenveel-tabel toe</button>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-pdf" id="btnDownloadPdf">Download PDF</button>
+      <button class="btn-wissen" id="btnClearSheet">Leegmaken</button>
+    </div>
+  </aside>
+
+  <div class="werkblad-zone">
+    <div id="sheet"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const GI4_UI = (() => {
+  const TABS = {
+    analyse: 'tab-analyse',
+    dhtemateriaal: 'tab-dhtemateriaal',
+    getallenas: 'tab-getallenas',
+    sprongen: 'tab-sprongen',
+    vergelijken: 'tab-vergelijken',
+    waarde: 'tab-waarde',
+  };
+  function toonTab(naam, tabEl) {
+    Object.values(TABS).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
+    document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+    tabEl?.classList.add('active');
+    const el = document.getElementById(TABS[naam]);
+    if (el) el.style.display = 'block';
+  }
+  document.addEventListener('DOMContentLoaded', () => toonTab('analyse', document.querySelector('.sidebar-tab')));
+  return { toonTab };
+})();
+</script>
+
+</body>
+</html>
