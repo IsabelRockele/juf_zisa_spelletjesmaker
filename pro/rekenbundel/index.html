@@ -1838,7 +1838,7 @@
           </div>
         </div>
 
-        <!-- 7. Schema + Antwoordzin + Aantal -->
+        <!-- 7. Schema + Antwoordzin -->
         <div class="vs-acc-blok">
           <div class="vs-acc-header" onclick="vsAccToggle(this)">
             <span class="vs-acc-label">📐 Schema</span>
@@ -1863,13 +1863,6 @@
               <label class="radio-chip geselecteerd" onclick="App.selecteerRadio('vs-antwoordzin','deels',this)"><input type="radio" name="vs-antwoordzin" value="deels" checked>Deels (___)</label>
               <label class="radio-chip" onclick="App.selecteerRadio('vs-antwoordzin','leeg',this)"><input type="radio" name="vs-antwoordzin" value="leeg">Lege lijn</label>
             </div>
-            <div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;margin-bottom:4px">&#x1F4E6; Aantal</div>
-            <select id="vs-aantal-bulk" style="padding:4px 8px;border-radius:6px;border:1.5px solid #ddd;font-size:12px">
-              <option value="1" selected>1 vraagstuk</option>
-              <option value="2">2 vraagstukken</option>
-              <option value="3">3 vraagstukken</option>
-              <option value="5">5 vraagstukken</option>
-            </select>
           </div>
         </div>
 
@@ -1878,6 +1871,9 @@
       <button id="vs-btn-genereer" class="vs-btn-genereer" style="margin-top:10px" onclick="VraagstukkenModule.genereer()">
         &#x2728; Genereer vraagstuk
       </button>
+      <div style="font-size:12px;color:#555;line-height:1.5;margin:7px 0 10px;padding:8px 10px;background:#f5f8ff;border:1px solid #dbe8ff;border-radius:8px">
+        Elk klikje maakt 1 vraagstuk. Wil je er meerdere of wil je een andere bewerking? Voeg dit vraagstuk toe aan je bundel, pas je keuzes aan en genereer opnieuw.
+      </div>
 
       <div class="vs-preview-sectie">
         <div class="vs-preview-label">Gegenereerd vraagstuk</div>
@@ -2238,7 +2234,8 @@ function scrollNaarActieveTab(tabEl) {
         <div>• Thema en soort berekening zijn optioneel</div>
         <div>• Bij Helft/dubbel kies je geheel getal of komma mag</div>
         <div>• Bij Geld kies je euro+cent, enkel € of wisselgeld</div>
-        <div>• Je hebt 30 genereringen per dag</div>
+        <div>• Je hebt 10 genereringen per dag</div>
+        <div>• Elk klikje maakt 1 vraagstuk. Voor meerdere vraagstukken voeg je telkens toe aan je bundel en genereer je daarna opnieuw.</div>
         <div>• <b>Schema ververst niet automatisch</b> bij wijzigingen aan bereik of rest — klik het schema-vinkje even uit en terug aan om de preview bij te werken</div>
       </div>
     </div>
