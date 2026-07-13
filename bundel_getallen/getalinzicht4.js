@@ -163,6 +163,45 @@
     b.appendChild(grid);
   }
 
+  function previousMultiple(n, base){ return Math.floor(n / base) * base; }
+  function nextMultiple(n, base){ return Math.ceil(n / base) * base; }
+
+  function makeNeighborTable(kind, rows, example){
+    const base = kind === 'number' ? 1 : kind === 'ten' ? 10 : kind === 'hundred' ? 100 : 1000;
+    const labels = {
+      number: ['vorig getal', 'volgend getal', 'gi4-neighbor-yellow'],
+      ten: ['vorig tiental', 'volgend tiental', 'gi4-neighbor-green'],
+      hundred: ['vorig honderdtal', 'volgend honderdtal', 'gi4-neighbor-blue'],
+      thousand: ['vorig duizendtal', 'volgend duizendtal', 'gi4-neighbor-red'],
+    }[kind];
+    const table = document.createElement('table');
+    table.className = 'gi4-neighbor-table';
+    table.innerHTML = `<thead><tr><th class="${labels[2]}">${labels[0]}</th><th></th><th class="${labels[2]}">${labels[1]}</th></tr></thead>`;
+    const body = document.createElement('tbody');
+    rows.forEach((n, i) => {
+      const tr = document.createElement('tr');
+      const prev = kind === 'number' ? n - 1 : previousMultiple(n, base);
+      const next = kind === 'number' ? n + 1 : nextMultiple(n + 1, base);
+      const filled = example && i === 0;
+      tr.innerHTML = `<td>${filled ? fmt(prev) : '<span class="gi4-line long"></span>'}</td><td>${fmt(n)}</td><td>${filled ? fmt(next) : '<span class="gi4-line long"></span>'}</td>`;
+      if (filled) tr.classList.add('example');
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    return table;
+  }
+
+  function addNeighbors(extraCount){
+    const key = 'gi4_neighbors';
+    const rows = extraCount || Math.max(2, parseInt($('#neighborRows').value, 10) || 3);
+    const nums = uniqueNumbers(rows);
+    const b = block(key, 'Schrijf de buurgetallen, buurtientallen, buurhonderdtallen of buurtduizendtallen.', addNeighbors);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-neighbor-grid';
+    ['number', 'ten', 'hundred', 'thousand'].forEach(kind => grid.appendChild(makeNeighborTable(kind, nums, true)));
+    b.appendChild(grid);
+  }
+
   function placeTable(n, mode, opts = {}){
     const ds = digits(n);
     const table = document.createElement('table');
@@ -193,6 +232,7 @@
     if (shape === 'dot') {
       const span = document.createElement('span');
       span.className = `gi4-dot ${key === 'd' ? 'gi4-d' : key === 'h' ? 'gi4-h' : key === 't' ? 'gi4-t' : 'gi4-e'}`;
+      if (opts.connect) span.classList.add('connect');
       span.textContent = key === 'd' ? '1000' : key === 'h' ? '100' : key === 't' ? '10' : '1';
       return span;
     }
@@ -378,15 +418,106 @@
     b.appendChild(grid);
   }
 
-  function makeConnectRow(n, answerNumber){
+  function outlineDot(key){
+    const span = materialPiece('dot', key, { connect: true });
+    span.classList.add('outline');
+    span.textContent = '';
+    return span;
+  }
+
+  function completeNumber(target){
+    if (target === 'thousand') {
+      let n = rnd(11, 98) * 100;
+      if (n % 1000 === 0) n += 100;
+      return n;
+    }
+    let n = rnd(101, 989) * 10;
+    if (n % 100 === 0) n += 10;
+    return n;
+  }
+
+  function completeVisual(n, target){
+    const ds = digits(n);
+    const places = target === 'thousand' ? PLACE.slice(0, 2) : PLACE.slice(0, 3);
+    const table = document.createElement('table');
+    table.className = 'gi4-complete-table';
+    table.innerHTML = '<thead><tr>' + places.map(p => `<th class="${p.color}">${p.label}</th>`).join('') + '</tr></thead>';
+    const tr = document.createElement('tr');
+    places.forEach(p => {
+      const td = document.createElement('td');
+      const wrap = document.createElement('div');
+      wrap.className = 'gi4-complete-material';
+      for (let i = 0; i < ds[p.key]; i++) wrap.appendChild(materialPiece('dot', p.key, { connect: true }));
+      if ((target === 'thousand' && p.key === 'h') || (target === 'hundred' && p.key === 't')) {
+        const missing = 10 - ds[p.key];
+        for (let i = 0; i < missing; i++) wrap.appendChild(outlineDot(p.key));
+      }
+      td.appendChild(wrap);
+      tr.appendChild(td);
+    });
+    const body = document.createElement('tbody');
+    body.appendChild(tr);
+    table.appendChild(body);
+    return table;
+  }
+
+  function makeCompleteCard(n, target, example){
+    const base = target === 'thousand' ? 1000 : 100;
+    const targetNum = nextMultiple(n, base);
+    const add = targetNum - n;
+    const card = document.createElement('div');
+    card.className = `gi4-complete-card row-delete-wrap${example ? ' example' : ''}`;
+    card.appendChild(rowDel(card));
+    card.appendChild(completeVisual(n, target));
+    const lines = document.createElement('div');
+    lines.className = 'gi4-complete-lines';
+    if (example) {
+      lines.innerHTML = `<p>Dit is <strong>${fmt(n)}</strong>.</p><p>Ik vul aan tot <strong>${fmt(targetNum)}</strong>.</p><p>Dat is <strong>${fmt(add)}</strong> erbij.</p>`;
+    } else {
+      lines.innerHTML = '<p>Dit is <span class="gi4-line long"></span>.</p><p>Ik vul aan tot <span class="gi4-line long"></span>.</p><p>Dat is <span class="gi4-line"></span> erbij.</p>';
+    }
+    card.appendChild(lines);
+    return card;
+  }
+
+  function addComplete(extraCount, forcedTarget){
+    const target = forcedTarget || $('#completeTarget')?.value || 'hundred';
+    const key = target === 'thousand' ? 'gi4_complete_thousand' : 'gi4_complete_hundred';
+    const count = extraCount || Math.max(1, parseInt($('#completeCount').value, 10) || 4);
+    const example = $('#completeExample')?.checked;
+    const title = target === 'thousand'
+      ? 'Schrijf het getal. Teken bij tot het volgende duizendtal. Vul in.'
+      : 'Schrijf het getal. Kleur bij tot het volgende honderdtal. Vul in.';
+    const b = block(key, title, addCount => addComplete(addCount || 1, target));
+    const grid = document.createElement('div');
+    grid.className = 'gi4-grid two';
+    for (let i = 0; i < count; i++) grid.appendChild(makeCompleteCard(completeNumber(target), target, example && i === 0));
+    b.appendChild(grid);
+  }
+
+  function connectDotsCard(n){
+    const ds = digits(n);
+    const card = document.createElement('div');
+    card.className = 'gi4-connect-dot-card';
+    PLACE.forEach(p => {
+      const group = document.createElement('div');
+      group.className = 'gi4-connect-dot-group';
+      for (let i = 0; i < ds[p.key]; i++) group.appendChild(materialPiece('dot', p.key, { connect: true }));
+      card.appendChild(group);
+    });
+    return card;
+  }
+
+  function makeConnectRow(n, answerNumber, mode){
     const row = document.createElement('div');
-    row.className = 'gi4-connect-row row-delete-wrap';
+    row.className = `gi4-connect-row row-delete-wrap ${mode === 'dots' ? 'dots' : 'blocks'}`;
     row.dataset.number = String(n);
     row.appendChild(rowDel(row));
 
     const card = document.createElement('div');
     card.className = 'gi4-connect-card';
-    card.appendChild(placeTable(n, 'blocks', { compact: true, connect: true }));
+    if (mode === 'dots') card.appendChild(connectDotsCard(n));
+    else card.appendChild(placeTable(n, 'blocks', { compact: true, connect: true }));
 
     const lineSpace = document.createElement('div');
     lineSpace.className = 'gi4-connect-space';
@@ -398,16 +529,24 @@
 
     const answer = document.createElement('div');
     answer.className = 'gi4-connect-answer';
-    answer.append(pencil(answerNumber, true));
+    if (mode === 'dots') {
+      const number = document.createElement('span');
+      number.className = 'gi4-connect-answer-number';
+      number.textContent = fmt(answerNumber);
+      answer.append(number);
+    } else {
+      answer.append(pencil(answerNumber, true));
+    }
 
     row.append(card, lineSpace, answer);
     return row;
   }
 
-  function renderConnectRows(wrap, nums){
+  function renderConnectRows(wrap, nums, mode){
     clearNode(wrap);
     const answers = derangedAnswers(nums);
-    nums.forEach((n, i) => wrap.appendChild(makeConnectRow(n, answers[i])));
+    wrap.dataset.mode = mode;
+    nums.forEach((n, i) => wrap.appendChild(makeConnectRow(n, answers[i], mode)));
   }
 
   function addConnect(extraCount){
@@ -416,22 +555,26 @@
       const existing = lastBlock(key);
       const wrap = existing?.querySelector('.gi4-connect-list');
       if (wrap) {
+        const mode = wrap.dataset.mode || 'blocks';
         const nums = Array.from(wrap.querySelectorAll('.gi4-connect-row'))
           .map(row => parseInt(row.dataset.number, 10))
           .filter(Number.isFinite);
         let n = randomNumber();
         while (nums.includes(n)) n = randomNumber();
         nums.push(n);
-        renderConnectRows(wrap, nums);
+        renderConnectRows(wrap, nums, mode);
         return;
       }
     }
-    const count = extraCount || Math.min(4, Math.max(3, parseInt($('#connectCount').value, 10) || 4));
+    const mode = $('#connectMode')?.value || 'blocks';
+    const maxCount = mode === 'dots' ? 5 : 4;
+    const count = extraCount || Math.min(maxCount, Math.max(3, parseInt($('#connectCount').value, 10) || 4));
     const nums = uniqueNumbers(count);
-    const b = block(key, 'Verbind wat samen hoort.', addConnect);
+    const title = mode === 'dots' ? 'Verbind de getalbeelden met het juiste getal.' : 'Verbind wat samen hoort.';
+    const b = block(key, title, addConnect);
     const wrap = document.createElement('div');
-    wrap.className = 'gi4-connect-list';
-    renderConnectRows(wrap, nums);
+    wrap.className = `gi4-connect-list ${mode === 'dots' ? 'dots' : 'blocks'}`;
+    renderConnectRows(wrap, nums, mode);
     b.appendChild(wrap);
   }
 
@@ -471,6 +614,58 @@
       }
       wrap.appendChild(row);
     }
+    b.appendChild(wrap);
+  }
+
+  function makeAxisConnectRow(fine){
+    const start = fine ? rnd(68, 74) * 100 : rnd(5, 7) * 1000;
+    const unit = fine ? 10 : 100;
+    const range = fine ? 500 : 2000;
+    const end = start + range;
+    const labels = fine
+      ? [start, start + 50, start + 150, start + 250, start + 350, end]
+      : [start, start + 500, start + 1000, start + 1500, end];
+    const answers = fine
+      ? [start + 40, start + 90, start + 180, start + 260, start + 330]
+      : [start + 300, start + 900, start + 1100, start + 1400, start + 1800];
+    const row = document.createElement('div');
+    row.className = 'gi4-axis-connect-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const axis = document.createElement('div');
+    axis.className = 'gi4-axis-connect-axis';
+    axis.appendChild(Object.assign(document.createElement('div'), { className: 'gi4-axis-connect-line' }));
+    for (let v = start; v <= end; v += unit) {
+      const tick = document.createElement('span');
+      tick.className = labels.includes(v) ? 'major' : '';
+      tick.style.left = `${((v - start) / range) * 100}%`;
+      axis.appendChild(tick);
+    }
+    labels.forEach(v => {
+      const label = document.createElement('div');
+      label.className = 'gi4-axis-connect-label';
+      label.style.left = `${((v - start) / range) * 100}%`;
+      label.textContent = fmt(v);
+      axis.appendChild(label);
+    });
+    const cards = document.createElement('div');
+    cards.className = 'gi4-axis-connect-cards';
+    answers.sort(() => Math.random() - .5).forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'gi4-axis-connect-card';
+      card.textContent = fmt(v);
+      cards.appendChild(card);
+    });
+    row.append(axis, cards);
+    return row;
+  }
+
+  function addAxisConnect(extraCount){
+    const key = 'gi4_axis_connect';
+    const count = extraCount || Math.max(1, parseInt($('#axisConnectCount').value, 10) || 2);
+    const b = block(key, 'Verbind de kaartjes met de juiste plaats op de getallenas.', addAxisConnect);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-axis-connect';
+    for (let i = 0; i < count; i++) wrap.appendChild(makeAxisConnectRow(i % 2 === 1));
     b.appendChild(wrap);
   }
 
@@ -745,9 +940,12 @@
   document.addEventListener('DOMContentLoaded', () => {
     renderSheetHeader();
     bind('#btnAddSplit', addSplit);
+    bind('#btnAddNeighbors', addNeighbors);
     bind('#btnAddMaterial', addMaterial);
     bind('#btnAddConnect', addConnect);
+    bind('#btnAddComplete', addComplete);
     bind('#btnAddAxis', addAxis);
+    bind('#btnAddAxisConnect', addAxisConnect);
     bind('#btnAddJumps', addJumps);
     bind('#btnAddCompare', addCompare);
     bind('#btnAddOrder', addOrder);
