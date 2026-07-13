@@ -30,10 +30,12 @@
     <div class="sidebar-tabs" id="sidebarTabs">
       <div class="sidebar-tab tab-getallenlijn active" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
       <div class="sidebar-tab tab-plaatswaarde" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
+      <div class="sidebar-tab tab-plaatswaarde" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
       <div class="sidebar-tab tab-getallenrij" onclick="GI4_UI.toonTab('getallenas',this)">Getallenas</div>
       <div class="sidebar-tab tab-sprongen" onclick="GI4_UI.toonTab('sprongen',this)">Sprongen</div>
       <div class="sidebar-tab tab-gemengd" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
       <div class="sidebar-tab tab-mab" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
+      <div class="sidebar-tab tab-breuken" onclick="GI4_UI.toonTab('breuken',this)">Breuken</div>
     </div>
 
     <div class="sidebar-content" id="tab-analyse">
@@ -49,6 +51,14 @@
         <p class="gi4-note">Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.</p>
       </div>
       <button class="btn-toevoegen" id="btnAddSplit">Voeg splits-oefeningen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Buurgetallen</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="neighborRows" type="number" min="2" max="5" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddNeighbors">Voeg buur-oefening toe</button>
     </div>
 
     <div class="sidebar-content" id="tab-dhtemateriaal" style="display:none">
@@ -71,10 +81,37 @@
       <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Verbind wat samen hoort</div>
         <div class="veld-rij">
-          <label>Aantal <input id="connectCount" type="number" min="3" max="4" value="4" style="width:56px"></label>
+          <label>Aantal <input id="connectCount" type="number" min="3" max="5" value="4" style="width:56px"></label>
+          <label>Weergave
+            <select id="connectMode" style="width:130px">
+              <option value="blocks">MAB-blokken</option>
+              <option value="dots">Schijfjes</option>
+            </select>
+          </label>
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddConnect">Voeg verbind-oefening toe</button>
+
+    </div>
+
+    <div class="sidebar-content" id="tab-aanvullen" style="display:none">
+      <div class="sectie-titel">Aanvullen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Aanvullen tot een rond getal</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="completeCount" type="number" min="1" max="6" value="4" style="width:56px"></label>
+          <label>Tot
+            <select id="completeTarget" style="width:135px">
+              <option value="hundred">volgend honderdtal</option>
+              <option value="thousand">volgend duizendtal</option>
+            </select>
+          </label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="completeExample" type="checkbox" checked> Eerste kaart als voorbeeld
+        </label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddComplete">Voeg aanvul-oefening toe</button>
     </div>
 
     <div class="sidebar-content" id="tab-getallenas" style="display:none">
@@ -94,6 +131,14 @@
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddAxis">Voeg getallenassen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Verbinden met getallenas</div>
+        <div class="veld-rij">
+          <label>Aantal assen <input id="axisConnectCount" type="number" min="1" max="4" value="2" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddAxisConnect">Voeg verbind-getallenas toe</button>
     </div>
 
     <div class="sidebar-content" id="tab-sprongen" style="display:none">
@@ -184,6 +229,46 @@
       <button class="btn-toevoegen" id="btnAddEquiv">Voeg evenveel-tabel toe</button>
     </div>
 
+    <div class="sidebar-content" id="tab-breuken" style="display:none">
+      <div class="sectie-titel">Echte breuken</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Geheel, teller en noemer</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionPartsCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionParts">Voeg breukkaarten toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Kleur de breuk</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionColorCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionColor">Voeg kleur-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Getallenas en stroken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionLineCount" type="number" min="1" max="4" value="2" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionLines">Voeg getallenas toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Begrippen</div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionConcepts">Voeg begrippen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Teken het geheel</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionWholeCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionWhole">Voeg geheel-oefening toe</button>
+    </div>
+
     <div class="sidebar-footer">
       <button class="btn-pdf" id="btnDownloadPdf">Download PDF</button>
       <button class="btn-wissen" id="btnClearSheet">Leegmaken</button>
@@ -202,10 +287,12 @@ const GI4_UI = (() => {
   const TABS = {
     analyse: 'tab-analyse',
     dhtemateriaal: 'tab-dhtemateriaal',
+    aanvullen: 'tab-aanvullen',
     getallenas: 'tab-getallenas',
     sprongen: 'tab-sprongen',
     vergelijken: 'tab-vergelijken',
     waarde: 'tab-waarde',
+    breuken: 'tab-breuken',
   };
   function toonTab(naam, tabEl) {
     Object.values(TABS).forEach(id => {
