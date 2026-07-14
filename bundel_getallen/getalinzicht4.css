@@ -17,6 +17,64 @@
   line-height: 1.4;
 }
 
+.config-kaart .btn-toevoegen.in-config {
+  margin-top: 14px;
+  border-radius: 8px;
+  padding: 9px 12px;
+  box-shadow: none;
+}
+
+.sheet-title-hint {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.gi4-solution-answer {
+  display: none;
+  color: #0f8dc4;
+  font-weight: 800;
+}
+
+.solutions-mode .gi4-solution-answer {
+  display: inline;
+}
+
+.solutions-mode .gi4-symbol-box {
+  display: inline-grid;
+  place-items: center;
+}
+
+.solutions-mode .gi4-line {
+  text-align: center;
+}
+
+.solutions-mode .gi4-tick-box {
+  display: grid;
+  place-items: center;
+  color: #0f8dc4;
+  font-weight: 800;
+}
+
+.gi4-svg-solution-answer,
+.solution-only {
+  display: none;
+}
+
+.solutions-mode .gi4-svg-solution-answer,
+.solutions-mode .solution-only {
+  display: initial;
+}
+
+.btn-solutions {
+  background: #16a34a;
+}
+
+.gi4-block > .delete-btn {
+  display: none;
+}
+
 .gi4-block {
   position: relative;
   margin: 10px 0 18px;
@@ -24,8 +82,8 @@
   background: #fff;
   border: 1px solid #dbeafe;
   border-radius: 8px;
-  break-inside: avoid;
-  page-break-inside: avoid;
+  break-inside: auto;
+  page-break-inside: auto;
 }
 
 .gi4-block-title {
@@ -33,6 +91,26 @@
   font-weight: 800;
   color: #1A3A5C;
   font-size: 15px;
+}
+
+.gi4-local-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: end;
+  margin: 12px 0 0 auto;
+  padding: 6px 12px;
+  border: 1px solid #9bb7d4;
+  border-radius: 999px;
+  background: #fff;
+  color: #1A3A5C;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gi4-local-add-btn:hover {
+  background: #eef6ff;
 }
 
 .gi4-grid {
@@ -180,10 +258,1995 @@
   font-weight: 500;
 }
 
+.gi4-neighbor-table .gi4-line.long {
+  min-width: 0;
+  width: 74%;
+  max-width: 100%;
+}
+
 .gi4-neighbor-yellow { background: #ffd414; }
 .gi4-neighbor-green { background: #4fb94f; }
 .gi4-neighbor-blue { background: #8aa9cf; }
 .gi4-neighbor-red { background: #ef2b2d; }
+
+.gi4-fraction-card,
+.gi4-fraction-color-card,
+.gi4-fraction-whole-card {
+  position: relative;
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-fraction-card {
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  align-items: center;
+  gap: 8px;
+  min-height: 106px;
+}
+
+.gi4-fraction-shape {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  height: 92px;
+  margin: 0 auto;
+}
+
+.gi4-fraction-side {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.gi4-fraction-instructions {
+  display: grid;
+  gap: 7px;
+  margin: 0 0 16px;
+  color: #1f2937;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.gi4-fraction-instruction {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  align-items: start;
+  gap: 8px;
+}
+
+.gi4-check-box {
+  width: 13px;
+  height: 13px;
+  margin-top: 4px;
+  border: 1.6px solid #9fc2cc;
+  background: #fff;
+}
+
+.gi4-fraction-box {
+  display: inline-grid;
+  grid-template-rows: 28px 6px 28px;
+  width: 40px;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 6px;
+}
+
+.gi4-fraction-cell {
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #cbd5e1;
+  min-height: 28px;
+  font-weight: 700;
+  background: #fff;
+  border-radius: 6px;
+}
+
+.gi4-fraction-stroke {
+  display: block;
+  width: 38px;
+  height: 0;
+  border-top: 2px solid #6b7280;
+  justify-self: center;
+}
+
+.gi4-fraction-color-card {
+  min-height: 210px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.gi4-fraction-color-text {
+  display: grid;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.gi4-fraction-lines {
+  display: grid;
+  gap: 22px;
+}
+
+.gi4-fraction-line-row {
+  position: relative;
+  padding: 20px 8px 10px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-fraction-axis {
+  position: relative;
+  height: 92px;
+  border-bottom: 2px solid #9bc4cf;
+  margin: 0 18px 10px;
+}
+
+.gi4-fraction-axis::after {
+  content: "";
+  position: absolute;
+  right: -7px;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid #9bc4cf;
+  border-right: 2px solid #9bc4cf;
+  transform: rotate(45deg);
+}
+
+.gi4-fraction-axis > span {
+  position: absolute;
+  bottom: 4px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.gi4-fraction-axis > span:first-child { left: -12px; }
+.gi4-fraction-axis > span:nth-child(2) { right: -10px; }
+
+.gi4-fraction-axis i {
+  position: absolute;
+  bottom: -1px;
+  height: 12px;
+  border-left: 1.5px solid #9bc4cf;
+}
+
+.gi4-fraction-axis-answer {
+  position: absolute;
+  bottom: 16px;
+  transform: translateX(-50%);
+}
+
+.gi4-fraction-axis-answer .gi4-fraction-box {
+  margin: 0;
+}
+
+.gi4-fraction-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  height: 18px;
+  margin: 6px 20px;
+  background: #fff;
+}
+
+.gi4-fraction-bar span {
+  border: 1px solid #dbe7ec;
+  border-left-width: 0;
+  background: #fff;
+}
+
+.gi4-fraction-bar span:first-child {
+  border-left-width: 1px;
+}
+
+.gi4-fraction-bar.green span.filled { background: #4fb94f; }
+.gi4-fraction-bar.yellow span.filled { background: #ffd414; }
+.gi4-fraction-bar.orange span.filled { background: #ff8f1f; }
+
+.gi4-fraction-concepts {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gi4-fraction-concepts td {
+  border: 1px solid #d3dee8;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.gi4-fraction-concepts td:first-child {
+  width: 70px;
+  color: #1f2937;
+  font-weight: 800;
+}
+
+.gi4-concept-fraction .blue {
+  color: #0f8dc4;
+}
+
+.solutions-mode .gi4-fraction-concepts td.gi4-concept-correct {
+  background: #dff3ff;
+  color: #0f8dc4;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 2px #0f8dc4;
+}
+
+.gi4-concept-fraction.stacked {
+  display: inline-grid;
+  grid-template-rows: 18px 3px 18px;
+  min-width: 26px;
+  align-items: center;
+  justify-items: center;
+  line-height: 1;
+}
+
+.gi4-concept-fraction.stacked span:nth-child(2) {
+  display: block;
+  width: 26px;
+  height: 0;
+  border-top: 2px solid currentColor;
+}
+
+.gi4-fraction-whole-card {
+  display: grid;
+  gap: 12px;
+  font-size: 15px;
+}
+
+.gi4-fraction-whole-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 22px);
+  grid-template-rows: repeat(2, 22px);
+  justify-content: center;
+  gap: 0;
+  margin: 8px auto 14px;
+}
+
+.gi4-fraction-whole-grid span {
+  width: 22px;
+  height: 22px;
+  border: 1px solid #bfd0d8;
+  background: #fff;
+  margin: -1px 0 0 -1px;
+}
+
+.gi4-fraction-whole-grid span.filled {
+  background: #9b8ac6;
+}
+
+.gi4-fraction-whole-grid span.solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-fraction-whole-grid span.solution-fill {
+  background: #9b8ac6;
+}
+
+.gi4-fraction-tip {
+  margin: -4px 0 14px;
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.gi4-fraction-tip strong {
+  color: #8cc63f;
+  font-size: 20px;
+}
+
+.gi4-fraction-equiv-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gi4-fraction-equiv-grid.cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gi4-fraction-equiv-grid.axis,
+.gi4-fraction-equiv-grid.bars {
+  grid-template-columns: 1fr;
+}
+
+.gi4-fraction-equiv-card,
+.gi4-fraction-equiv-bars,
+.gi4-fraction-equiv-axis {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-fraction-equiv-visuals {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  min-height: 108px;
+}
+
+.gi4-fraction-equiv-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 24px;
+}
+
+.gi4-fraction-equiv-answer.three,
+.gi4-fraction-equiv-answer.many {
+  flex-wrap: wrap;
+}
+
+.gi4-eq-mini-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  height: 36px;
+  border: 1.5px solid #6b7280;
+  background: #fff;
+}
+
+.gi4-eq-mini-bar span {
+  border-left: 1.3px solid #6b7280;
+}
+
+.gi4-eq-mini-bar span:first-child {
+  border-left: 0;
+}
+
+.gi4-eq-mini-bar span.solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-eq-mini-bar span.solution-fill {
+  background: var(--eq-fill, #b9d87a);
+}
+
+.gi4-eq-bar-row {
+  margin: 10px 8px 16px;
+}
+
+.gi4-eq-axis {
+  position: relative;
+  height: 82px;
+  margin: 6px 38px 14px 76px;
+  border-bottom: 2px solid #8bb9c4;
+}
+
+.gi4-eq-axis::before,
+.gi4-eq-axis::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  height: 18px;
+  border-left: 2px solid #8bb9c4;
+}
+
+.gi4-eq-axis::before { left: 0; }
+.gi4-eq-axis::after { right: 0; }
+
+.gi4-eq-axis .division-tick {
+  position: absolute;
+  bottom: -1px;
+  height: 18px;
+  border-left: 2px solid #8bb9c4;
+}
+
+.gi4-eq-axis > span,
+.gi4-eq-axis > strong {
+  position: absolute;
+  color: #1f2937;
+}
+
+.gi4-eq-axis > span {
+  bottom: -29px;
+  font-size: 20px;
+}
+
+.gi4-eq-axis > strong {
+  bottom: 8px;
+  color: #1f2937;
+  font-size: 20px;
+}
+
+.gi4-eq-axis > span.zero { left: -8px; }
+.gi4-eq-axis > span.one { right: -8px; }
+.gi4-eq-axis > strong {
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-rows: 18px 2px 18px;
+  min-width: 28px;
+  text-align: center;
+  line-height: 1;
+}
+
+.gi4-eq-axis > strong small {
+  display: block;
+  border-top: 2px solid currentColor;
+}
+
+.gi4-eq-axis-row {
+  display: grid;
+  grid-template-columns: 58px 1fr;
+  align-items: center;
+  gap: 18px;
+  margin: 20px 38px 20px 0;
+}
+
+.gi4-fraction-equiv-axis .gi4-eq-mini-bar {
+  height: 42px;
+}
+
+.gi4-fraction-common-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gi4-fraction-common-grid.explain,
+.gi4-fraction-common-grid.recognize,
+.gi4-fraction-common-grid.three {
+  grid-template-columns: 1fr;
+}
+
+.gi4-fraction-common-grid.equivalent {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-fraction-common-explain,
+.gi4-fraction-common-table,
+.gi4-fraction-common-card,
+.gi4-fraction-common-arrow,
+.gi4-fraction-common-two,
+.gi4-fraction-common-three {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-fraction-common-explain {
+  background: #e7f4d7;
+  border-color: #8cc63f;
+}
+
+.gi4-common-learn-badge {
+  display: inline-block;
+  margin: -8px 0 8px;
+  padding: 4px 18px;
+  border-radius: 6px;
+  background: #8cc63f;
+  color: #fff;
+  font-weight: 800;
+}
+
+.gi4-fraction-common-explain h3 {
+  margin: 0 0 8px;
+  text-align: center;
+  font-size: 20px;
+}
+
+.gi4-common-explain-top,
+.gi4-common-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 92px) 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.gi4-common-steps {
+  grid-template-columns: minmax(360px, 430px) 1fr;
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.gi4-common-step-visual {
+  display: grid;
+  gap: 9px;
+  align-content: start;
+  padding: 12px;
+  border: 1.5px solid rgba(26, 58, 92, .18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .62);
+}
+
+.gi4-common-step-label {
+  color: #1A3A5C;
+  font-size: 15px;
+}
+
+.gi4-common-convert-bars,
+.gi4-common-compare-bars {
+  display: grid;
+  align-items: center;
+  gap: 14px;
+}
+
+.gi4-common-convert-bars {
+  grid-template-columns: 1fr 1fr;
+}
+
+.gi4-common-compare-bars {
+  grid-template-columns: 1fr auto 1fr;
+}
+
+.gi4-common-convert-bars > div,
+.gi4-common-compare-bars > div:not(.gi4-common-compare-symbol) {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.gi4-common-step-visual .gi4-eq-mini-bar {
+  width: 100%;
+  min-width: 120px;
+  height: 34px;
+}
+
+.gi4-common-compare-symbol {
+  color: #1A3A5C;
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.gi4-common-step-visual .gi4-common-answer {
+  margin: 0;
+}
+
+.gi4-common-step-visual .gi4-common-multiply {
+  justify-content: center;
+}
+
+.gi4-fraction-common-table table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gi4-fraction-common-table td {
+  border: 1.5px solid #d5dde7;
+  text-align: center;
+  padding: 10px 8px;
+}
+
+.solutions-mode .gi4-common-den-0 { background: #fff2b8; }
+.solutions-mode .gi4-common-den-1 { background: #d9f5d6; }
+.solutions-mode .gi4-common-den-2 { background: #d7ecff; }
+.solutions-mode .gi4-common-den-3 { background: #ffdce8; }
+.solutions-mode .gi4-common-den-4 { background: #efe2ff; }
+
+.gi4-common-visuals {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  min-height: 106px;
+}
+
+.gi4-fraction-common-card .gi4-common-visuals {
+  grid-template-columns: 1fr 1fr;
+}
+
+.gi4-common-answer,
+.gi4-common-final,
+.gi4-common-given {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 22px;
+}
+
+.gi4-common-work,
+.gi4-common-two-work {
+  display: grid;
+  place-items: center;
+  gap: 7px;
+  margin-top: 8px;
+}
+
+.gi4-common-multiply {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  width: 134px;
+  margin: 0 auto;
+  color: #1f2937;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.gi4-common-multiply.bottom {
+  margin-top: -4px;
+}
+
+.gi4-common-multiply svg {
+  width: 88px;
+  height: 24px;
+}
+
+.gi4-common-factor-line {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: start;
+  margin-left: 8px;
+}
+
+.gi4-common-factor-line .gi4-line {
+  min-width: 48px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.gi4-common-given {
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.gi4-common-final {
+  margin-top: 14px;
+  justify-content: center;
+  text-align: center;
+}
+
+.gi4-common-three-work {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.gi4-common-three-conversion {
+  display: grid;
+  place-items: center;
+  gap: 8px;
+}
+
+.gi4-fraction-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.exporting .gi4-fraction-compare-grid.material {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.exporting .gi4-fraction-compare-grid.arrows {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.gi4-fraction-compare-grid.arrows {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-fraction-compare-grid.order {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-fraction-compare-card,
+.gi4-fraction-compare-order {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.exporting .gi4-fraction-compare-card.material {
+  padding: 10px 12px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-top {
+  grid-template-columns: minmax(0, 1fr) 54px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-work {
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-common-work .gi4-fraction-box,
+.exporting .gi4-fraction-compare-card.arrows .gi4-common-work .gi4-fraction-box {
+  width: 40px;
+  grid-template-rows: 28px 6px 28px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-common-work .gi4-fraction-cell,
+.exporting .gi4-fraction-compare-card.arrows .gi4-common-work .gi4-fraction-cell {
+  min-height: 28px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-top .gi4-fraction-shape {
+  max-width: 112px;
+  height: 78px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-target-visual .gi4-fraction-shape {
+  max-width: 116px;
+  height: 80px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-down-arrow {
+  width: 20px;
+  height: 32px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-common-work {
+  gap: 3px;
+  margin-top: 0;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-common-multiply {
+  width: 112px;
+  font-size: 15px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-common-multiply svg {
+  width: 70px;
+  height: 20px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-final,
+.exporting .gi4-fraction-compare-card.arrows .gi4-frac-compare-final {
+  margin-top: 18px;
+  gap: 5px;
+  flex-wrap: nowrap;
+  align-content: center;
+  font-size: 14px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-fraction-box,
+.exporting .gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-fraction-box {
+  width: 34px;
+  grid-template-rows: 30px 6px 30px;
+  margin: 0 1px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-fraction-cell,
+.exporting .gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-fraction-cell {
+  min-height: 30px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-fraction-stroke,
+.exporting .gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-fraction-stroke {
+  width: 32px;
+}
+
+.exporting .gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-compare-symbol-box,
+.exporting .gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-compare-symbol-box {
+  width: 32px;
+  min-width: 32px;
+  flex-basis: 32px;
+}
+
+.gi4-fraction-compare-card .gi4-fraction-box,
+.gi4-fraction-compare-order .gi4-fraction-box {
+  grid-template-rows: 34px 7px 34px;
+  width: 46px;
+}
+
+.gi4-fraction-compare-card .gi4-fraction-cell,
+.gi4-fraction-compare-order .gi4-fraction-cell {
+  min-height: 34px;
+  border-radius: 7px;
+}
+
+.gi4-fraction-compare-card .gi4-fraction-stroke,
+.gi4-fraction-compare-order .gi4-fraction-stroke {
+  width: 44px;
+}
+
+.gi4-frac-compare-top {
+  display: grid;
+  grid-template-columns: 1fr 52px 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.gi4-frac-compare-top > div {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.gi4-frac-compare-top > div:last-child {
+  grid-template-columns: 1fr auto;
+}
+
+.gi4-fraction-compare-card.material .gi4-frac-compare-top .gi4-fraction-shape {
+  max-width: 122px;
+  height: 86px;
+}
+
+.gi4-compare-symbol-box {
+  display: inline-grid;
+  place-items: center;
+  width: 52px;
+  min-width: 52px;
+  flex: 0 0 52px;
+  height: 30px;
+  border: 2px solid #2b3440;
+  background: #fff;
+  color: #0f8dc4;
+  font-weight: 900;
+  box-sizing: border-box;
+}
+
+.exporting .gi4-compare-symbol-box {
+  width: 50px;
+  min-width: 50px;
+  flex-basis: 50px;
+}
+
+.gi4-frac-compare-work {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 12px;
+  margin: 12px 0 18px;
+}
+
+.gi4-frac-convert-visual {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 0;
+}
+
+.gi4-frac-target-visual {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  justify-items: center;
+}
+
+.gi4-frac-compare-card.material .gi4-frac-target-visual .gi4-fraction-shape {
+  max-width: 132px;
+  height: 92px;
+}
+
+.gi4-frac-compare-card.material .gi4-frac-down-arrow {
+  width: 24px;
+  height: 42px;
+  margin: 0;
+}
+
+.gi4-frac-big-arrow {
+  width: 56px;
+  height: 84px;
+  color: #1f2937;
+  margin-top: -12px;
+}
+
+.gi4-fraction-compare-card.material .gi4-common-work .gi4-fraction-box {
+  width: 40px;
+  grid-template-rows: 28px 6px 28px;
+}
+
+.gi4-fraction-compare-card.material .gi4-common-work .gi4-fraction-cell {
+  min-height: 28px;
+}
+
+.gi4-frac-compare-final {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  margin-top: 24px;
+  font-weight: 700;
+}
+
+.gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-fraction-box,
+.gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-fraction-box {
+  width: 42px;
+  margin: 0 1px;
+}
+
+.gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-fraction-stroke,
+.gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-fraction-stroke {
+  width: 40px;
+}
+
+.gi4-fraction-compare-card.material .gi4-frac-compare-final .gi4-compare-symbol-box,
+.gi4-fraction-compare-card.arrows .gi4-frac-compare-final .gi4-compare-symbol-box {
+  width: 40px;
+  min-width: 40px;
+  flex-basis: 40px;
+}
+
+.gi4-frac-compare-inline {
+  display: grid;
+  grid-template-columns: 92px 44px 92px;
+  align-items: center;
+  justify-content: start;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-left: 18px;
+}
+
+.gi4-frac-compare-inline > div {
+  display: grid;
+  justify-items: center;
+}
+
+.gi4-frac-compare-arrow-work {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.gi4-frac-arrow-slot {
+  display: grid;
+  justify-items: center;
+  align-self: start;
+  padding-top: 0;
+}
+
+.gi4-fraction-compare-card.arrows.convert-right .gi4-frac-compare-inline {
+  padding-left: 86px;
+}
+
+.gi4-fraction-compare-card.arrows.convert-right .gi4-frac-compare-arrow-work {
+  grid-template-columns: 1fr 130px;
+}
+
+.gi4-fraction-compare-card.arrows.convert-right .gi4-frac-arrow-slot {
+  grid-column: 2;
+  grid-row: 1;
+  justify-items: center;
+  transform: translateX(-86px);
+}
+
+.gi4-fraction-compare-card.arrows.convert-right .gi4-frac-conversion-slot {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.gi4-fraction-compare-card.arrows .gi4-common-answer {
+  font-size: 20px;
+}
+
+.gi4-frac-order-top {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+.gi4-frac-order-top > div {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+}
+
+.gi4-frac-down-arrow {
+  width: 24px;
+  height: 42px;
+  color: #1f2937;
+}
+
+.gi4-frac-order-final {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  font-weight: 800;
+}
+
+.gi4-fraction-estimate-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.gi4-fraction-estimate-grid.order,
+.gi4-fraction-estimate-grid.figures {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-fraction-estimate-grid.compare {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gi4-fraction-estimate-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-fraction-estimate-card.strips {
+  display: grid;
+  grid-template-columns: 46px minmax(190px, 1fr) minmax(180px, .9fr);
+  gap: 10px;
+}
+
+.gi4-estimate-axis {
+  position: relative;
+  grid-column: 2;
+  height: 70px;
+  margin: 0 0 4px 0;
+  border-bottom: 2px solid #8bb9c4;
+}
+
+.gi4-estimate-axis::after {
+  content: "";
+  position: absolute;
+  right: -3px;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  border-top: 2px solid #8bb9c4;
+  border-right: 2px solid #8bb9c4;
+  transform: rotate(45deg);
+}
+
+.gi4-estimate-axis::before,
+.gi4-estimate-axis i {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  height: 16px;
+  border-left: 2px solid #8bb9c4;
+}
+
+.gi4-estimate-axis::before { left: 0; }
+.gi4-estimate-axis i { left: 50%; }
+
+.gi4-estimate-axis span {
+  position: absolute;
+  bottom: -28px;
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.gi4-estimate-axis .zero { left: -8px; }
+.gi4-estimate-axis .one { right: -8px; }
+.gi4-estimate-axis .half {
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-rows: 18px 2px 18px;
+  text-align: center;
+  line-height: 1;
+}
+
+.gi4-estimate-axis .half small {
+  display: block;
+  border-top: 2px solid currentColor;
+}
+
+.gi4-estimate-strip-rows {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.gi4-estimate-strip-row {
+  display: grid;
+  grid-template-columns: 46px minmax(190px, 1fr) minmax(180px, .9fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.gi4-plain-fraction {
+  display: inline-grid;
+  grid-template-rows: 18px 2px 18px;
+  min-width: 28px;
+  text-align: center;
+  line-height: 1;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.gi4-plain-fraction b {
+  display: block;
+  width: 24px;
+  margin: 0 auto;
+  border-top: 2px solid currentColor;
+}
+
+.gi4-estimate-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  height: 22px;
+  border: 1.5px solid #8f9aa8;
+  background: #fff;
+}
+
+.gi4-estimate-bar span {
+  border-left: 1.2px solid #8f9aa8;
+  background: #fff;
+}
+
+.gi4-estimate-bar span:first-child {
+  border-left: 0;
+}
+
+.solutions-mode .gi4-estimate-bar span.solution-fill {
+  background: #b9d87a;
+}
+
+.gi4-estimate-near {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-size: 15px;
+}
+
+.gi4-estimate-order {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  font-weight: 800;
+}
+
+.gi4-fraction-estimate-card.compare {
+  display: grid;
+  gap: 12px;
+  align-content: center;
+}
+
+.gi4-estimate-compare-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.gi4-estimate-compare-row {
+  display: grid;
+  grid-template-columns: auto 46px auto;
+  align-items: center;
+  gap: 8px;
+  justify-items: center;
+}
+
+.gi4-fraction-estimate-card.compare .gi4-fraction-box {
+  width: 40px;
+  grid-template-rows: 28px 5px 28px;
+  margin: 0;
+}
+
+.gi4-fraction-estimate-card.compare .gi4-fraction-cell {
+  min-height: 28px;
+}
+
+.gi4-fraction-estimate-card.compare .gi4-fraction-stroke {
+  width: 38px;
+}
+
+.gi4-fraction-estimate-card.order {
+  display: grid;
+  gap: 16px;
+  align-content: center;
+  min-height: 150px;
+}
+
+.gi4-estimate-given {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+}
+
+.gi4-fraction-estimate-card.figures {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.gi4-estimate-figure {
+  display: grid;
+  justify-items: center;
+}
+
+.gi4-estimate-figure-svg {
+  width: 108px;
+  height: 88px;
+}
+
+.solutions-mode .gi4-estimate-figure-svg .solution-fill {
+  fill: #fff7c2;
+}
+
+.exporting .gi4-fraction-estimate-grid {
+  gap: 14px;
+}
+
+.exporting .gi4-fraction-estimate-card {
+  padding: 12px;
+}
+
+.exporting .gi4-estimate-strip-row {
+  grid-template-columns: 40px minmax(170px, 1fr) minmax(160px, .85fr);
+  gap: 8px;
+}
+
+.exporting .gi4-estimate-figure-svg {
+  width: 96px;
+  height: 80px;
+}
+
+.gi4-mixed-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.gi4-mixed-grid.convert,
+.gi4-mixed-grid.visual,
+.gi4-mixed-grid.axis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-mixed-grid.explain,
+.gi4-mixed-grid.classify,
+.gi4-mixed-grid.connect,
+.gi4-mixed-grid.solve {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.gi4-mixed-grid.table {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-mixed-grid.orderExplain,
+.gi4-mixed-grid.orderStripAxis,
+.gi4-mixed-grid.betweenNaturals,
+.gi4-mixed-grid.axisConnectOrder,
+.gi4-mixed-grid.mixedSequence,
+.gi4-mixed-grid.mixedBeforeAfter {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.gi4-mixed-explain,
+.gi4-mixed-convert-card,
+.gi4-mixed-classify-card,
+.gi4-mixed-visual-card,
+.gi4-mixed-axis-card,
+.gi4-mixed-connect-card,
+.gi4-mixed-table-card,
+.gi4-mixed-solve-card,
+.gi4-mixed-order-card,
+.gi4-mixed-order-explain,
+.gi4-mixed-sequence-card,
+.gi4-mixed-before-after-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-mixed-explain {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  background: #eef8dd;
+  border-color: #8dcc37;
+}
+
+.gi4-mixed-explain-box {
+  display: grid;
+  gap: 8px;
+  min-height: 210px;
+  padding: 12px;
+  border: 1.5px solid #8dcc37;
+  border-radius: 8px;
+  background: #fff;
+  text-align: center;
+}
+
+.gi4-mixed-explain-box p {
+  margin: 0;
+  font-size: 15px;
+}
+
+.gi4-mixed-example,
+.gi4-mixed-equation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.gi4-mixed-number {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  vertical-align: middle;
+}
+
+.gi4-mixed-whole {
+  min-width: 18px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.gi4-mixed-whole.empty {
+  align-self: center;
+  min-width: 30px;
+  height: 24px;
+  border-bottom: 1.6px solid #cbd5e1;
+}
+
+.gi4-mixed-whole.empty .gi4-solution-answer {
+  line-height: 22px;
+}
+
+.gi4-mixed-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-height: 74px;
+  overflow: visible;
+}
+
+.gi4-mixed-visual .gi4-fraction-shape {
+  flex: 0 0 76px;
+  width: 76px;
+  min-width: 76px;
+  height: 62px;
+  max-width: none;
+  overflow: visible;
+}
+
+.gi4-mixed-visual.circles .gi4-fraction-shape {
+  flex-basis: 88px;
+  width: 88px;
+  min-width: 88px;
+  height: 66px;
+}
+
+.gi4-mixed-bar {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  width: 120px;
+  height: 22px;
+  border: 1.4px solid #6b7280;
+  background: #fff;
+}
+
+.gi4-mixed-bar span {
+  border-left: 1px solid #6b7280;
+}
+
+.gi4-mixed-bar span:first-child {
+  border-left: 0;
+}
+
+.gi4-mixed-bar .filled {
+  background: #a9d7e8;
+}
+
+.gi4-mixed-bar .filled.solution-only {
+  display: block;
+  background: #fff;
+}
+
+.solutions-mode .gi4-mixed-bar .filled.solution-only {
+  background: #a9d7e8;
+}
+
+.gi4-mixed-swap-arrows {
+  width: 100%;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.gi4-mixed-convert-card,
+.gi4-mixed-visual-card,
+.gi4-mixed-axis-card {
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.gi4-mixed-card-top {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.gi4-mixed-classify-card {
+  display: grid;
+  gap: 16px;
+}
+
+.gi4-mixed-legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  font-size: 16px;
+}
+
+.gi4-mixed-legend .orange { color: #f59e0b; }
+.gi4-mixed-legend .green { color: #22c55e; }
+.gi4-mixed-legend .blue { color: #0ea5e9; }
+
+.gi4-mixed-classify-grid,
+.gi4-mixed-connect-row {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+}
+
+.gi4-mixed-tile {
+  position: relative;
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  justify-content: center;
+  border: 1.4px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.solutions-mode .gi4-mixed-tile.classify.unit { background: #fed7aa; }
+.solutions-mode .gi4-mixed-tile.classify.improper { background: #bbf7d0; }
+.solutions-mode .gi4-mixed-tile.classify.mixed { background: #bae6fd; }
+
+.gi4-mixed-fill-sentence {
+  font-size: 16px;
+}
+
+.gi4-mixed-axis {
+  position: relative;
+  height: 100px;
+  margin: 74px 18px 30px;
+  border-bottom: 2px solid #9ca3af;
+}
+
+.gi4-mixed-axis > span {
+  position: absolute;
+  bottom: -30px;
+  transform: translateX(-50%);
+  font-weight: 700;
+}
+
+.gi4-mixed-axis > i {
+  position: absolute;
+  bottom: -1px;
+  height: 12px;
+  border-left: 1.3px solid #9ca3af;
+}
+
+.gi4-mixed-axis > i.whole {
+  height: 22px;
+}
+
+.gi4-mixed-axis-marker {
+  position: absolute;
+  left: var(--pos);
+  top: -58px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 188px;
+  justify-content: center;
+  padding: 8px 14px;
+  background: #fff;
+  border: 2px solid #60c9e8;
+  border-radius: 8px;
+  z-index: 1;
+  font-weight: 700;
+}
+
+.gi4-mixed-axis-marker.edge-right {
+  transform: translateX(-82%);
+}
+
+.gi4-mixed-axis-marker.edge-left {
+  transform: translateX(-18%);
+}
+
+.gi4-mixed-axis-marker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  height: 58px;
+  border-left: 2px solid #111827;
+}
+
+.gi4-mixed-axis-marker.edge-right::after {
+  left: 82%;
+}
+
+.gi4-mixed-axis-marker.edge-left::after {
+  left: 18%;
+}
+
+.gi4-mixed-axis-marker .gi4-fraction-box {
+  width: 36px;
+  grid-template-rows: 20px 4px 20px;
+  margin: 0;
+}
+
+.gi4-mixed-axis-marker .gi4-fraction-cell {
+  min-height: 20px;
+  border: 0;
+  border-radius: 0;
+}
+
+.gi4-mixed-axis-marker .gi4-fraction-stroke {
+  width: 32px;
+}
+
+.gi4-mixed-axis-whole-line {
+  min-width: 50px;
+}
+
+.gi4-mixed-axis-rest {
+  display: inline-grid;
+  grid-template-rows: 18px 4px 18px;
+  min-width: 46px;
+  align-items: center;
+  justify-items: center;
+  line-height: 1;
+}
+
+.gi4-mixed-axis-rest i {
+  position: static;
+  display: block;
+  width: 42px;
+  height: 0;
+  border-left: 0;
+  border-top: 1.8px solid #6b7280;
+}
+
+.gi4-mixed-axis-rest span {
+  position: static;
+  transform: none;
+  font-weight: 700;
+}
+
+.solutions-mode .gi4-mixed-axis-rest > span {
+  position: relative;
+  color: transparent;
+}
+
+.solutions-mode .gi4-mixed-axis-rest .gi4-solution-answer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #0f8dc4;
+}
+
+.gi4-mixed-axis-sum {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.gi4-mixed-connect-card {
+  display: grid;
+  gap: 122px;
+  padding: 18px 34px;
+}
+
+.gi4-mixed-connect-card .gi4-connect-dot {
+  position: absolute;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #111827;
+  transform: translateX(-50%);
+}
+
+.gi4-mixed-connect-card .gi4-connect-dot.right { bottom: -28px; }
+.gi4-mixed-connect-card .gi4-connect-dot.left { top: -28px; }
+
+.gi4-mixed-connect-row.bottom {
+  padding: 0 28px;
+}
+
+.gi4-mixed-table-card table {
+  width: 100%;
+  margin: 0 auto;
+  border-collapse: collapse;
+}
+
+.gi4-mixed-table-card th {
+  background: #bde7f2;
+  font-weight: 800;
+}
+
+.gi4-mixed-table-card th,
+.gi4-mixed-table-card td {
+  border: 1px solid #cbd5e1;
+  text-align: center;
+  padding: 6px;
+}
+
+.gi4-mixed-solve-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 24px;
+}
+
+.gi4-mixed-solve-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 58px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.gi4-mixed-plain {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: 800;
+}
+
+.gi4-mixed-order-explain {
+  display: grid;
+  gap: 12px;
+  background: #eef8dd;
+  border-color: #8dcc37;
+}
+
+.gi4-mixed-order-text {
+  display: grid;
+  gap: 6px;
+  font-size: 17px;
+}
+
+.gi4-mixed-order-text p {
+  margin: 0;
+}
+
+.gi4-mixed-order-demo-axis,
+.gi4-mixed-order-axis {
+  position: relative;
+  height: 128px;
+  margin: 54px 46px 96px;
+  border-bottom: 2px solid #111827;
+}
+
+.gi4-mixed-order-demo-axis {
+  height: 58px;
+  margin-top: 10px;
+  margin-bottom: 36px;
+}
+
+.gi4-mixed-order-demo-axis::after,
+.gi4-mixed-order-axis::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  bottom: -6px;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid #111827;
+  border-top: 2px solid #111827;
+  transform: rotate(45deg);
+}
+
+.gi4-mixed-order-axis-label {
+  position: absolute;
+  bottom: -34px;
+  transform: translateX(-50%);
+  font-weight: 800;
+}
+
+.gi4-mixed-order-axis .gi4-mixed-order-axis-label {
+  color: #ef233c;
+  font-size: 18px;
+}
+
+.gi4-mixed-order-demo-axis .gi4-mixed-order-axis-label {
+  color: #ef233c;
+  font-size: 19px;
+}
+
+.gi4-mixed-order-demo-axis > i,
+.gi4-mixed-order-axis > i {
+  position: absolute;
+  bottom: 0;
+  height: 16px;
+  border-left: 1.6px solid #111827;
+}
+
+.gi4-mixed-order-demo-axis > i.whole,
+.gi4-mixed-order-axis > i.whole {
+  height: 28px;
+}
+
+.gi4-mixed-order-demo-label {
+  position: absolute;
+  bottom: -40px;
+  transform: translateX(-50%);
+  min-width: 42px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.gi4-mixed-order-chain {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+.gi4-mixed-order-chain .natural {
+  color: #ef233c;
+}
+
+.gi4-mixed-order-card {
+  display: grid;
+  gap: 18px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-mixed-order-marker {
+  position: absolute;
+  transform: translateX(-50%);
+  min-width: 76px;
+  min-height: 56px;
+  display: grid;
+  place-items: center;
+  padding: 4px 7px;
+  border: 2px solid #aeb4bc;
+  border-radius: 9px;
+  background: #fff;
+  z-index: 2;
+}
+
+.gi4-mixed-order-marker.top {
+  bottom: 42px;
+}
+
+.gi4-mixed-order-marker.bottom {
+  top: 138px;
+}
+
+.gi4-mixed-order-marker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  height: 34px;
+  border-left: 2px solid #6b7280;
+  transform: translateX(-50%);
+}
+
+.gi4-mixed-order-marker.top::after {
+  top: 100%;
+}
+
+.gi4-mixed-order-marker.bottom::after {
+  bottom: 100%;
+}
+
+.gi4-mixed-order-marker.blue {
+  border-color: #60c9e8;
+}
+
+.gi4-mixed-order-strip {
+  display: grid;
+  grid-template-columns: repeat(var(--segments), minmax(0, 1fr));
+  width: calc(100% - 92px);
+  height: 42px;
+  margin: 10px 46px 0;
+  border: 1.5px solid #6b7280;
+}
+
+.gi4-mixed-order-strip span {
+  border-left: 1px solid #6b7280;
+  background: #fff;
+}
+
+.gi4-mixed-order-strip span:first-child {
+  border-left: 0;
+}
+
+.gi4-mixed-order-strip .filled {
+  background: #a9d7e8;
+}
+
+.gi4-mixed-order-sentence {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 17px;
+}
+
+.gi4-mixed-axis-connect-cards {
+  display: grid;
+  grid-template-columns: repeat(var(--connect-count, 5), minmax(0, 1fr));
+  gap: 14px;
+  align-items: center;
+  width: min(980px, 88%);
+  margin: 52px auto 0;
+}
+
+.gi4-mixed-order-connect-tile {
+  position: relative;
+  min-width: 0;
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  border: 1.4px solid #aeb4bc;
+  border-radius: 8px;
+}
+
+.gi4-mixed-order-connect-tile .gi4-connect-dot {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #111827;
+  transform: translateX(-50%);
+}
+
+.gi4-mixed-order-compare {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+}
+
+.gi4-mixed-order-compare > span {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.gi4-mixed-sequence-card {
+  display: grid;
+  gap: 20px;
+}
+
+.gi4-mixed-sequence-row {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 5px solid #bae6fd;
+}
+
+.gi4-mixed-sequence-row.color-2 {
+  border-color: #fed7aa;
+}
+
+.gi4-mixed-sequence-row.color-3 {
+  border-color: #bbf7d0;
+}
+
+.gi4-mixed-sequence-tile {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1.4px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.gi4-mixed-before-after-card table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.gi4-mixed-before-after-card th {
+  background: #bde7f2;
+  font-weight: 800;
+}
+
+.gi4-mixed-before-after-card th,
+.gi4-mixed-before-after-card td {
+  border: 1px solid #cbd5e1;
+  text-align: center;
+  padding: 10px;
+}
+
+.gi4-mixed-before-after-card td {
+  height: 62px;
+}
+
+.exporting .gi4-mixed-order-card,
+.exporting .gi4-mixed-order-explain,
+.exporting .gi4-mixed-sequence-card,
+.exporting .gi4-mixed-before-after-card {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.exporting .gi4-mixed-grid.convert,
+.exporting .gi4-mixed-grid.visual,
+.exporting .gi4-mixed-grid.axis {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.exporting .gi4-mixed-explain {
+  gap: 8px;
+}
+
+.exporting .gi4-mixed-explain-box {
+  min-height: 180px;
+  padding: 8px;
+}
+
+.exporting .gi4-mixed-visual .gi4-fraction-shape {
+  flex-basis: 82px;
+  width: 82px;
+  min-width: 82px;
+  height: 62px;
+  max-width: none;
+  overflow: visible;
+}
+
+.exporting .gi4-mixed-visual.circles .gi4-fraction-shape {
+  flex-basis: 90px;
+  width: 90px;
+  min-width: 90px;
+  height: 66px;
+}
 
 .gi4-row {
   position: relative;
@@ -298,12 +2361,12 @@
 
 .gi4-axis-connect {
   display: grid;
-  gap: 22px;
+  gap: 34px;
 }
 
 .gi4-axis-connect-row {
   position: relative;
-  padding: 6px 0 12px;
+  padding: 10px 0 20px;
   border-bottom: 1px solid #d8edf3;
   break-inside: avoid;
   page-break-inside: avoid;
@@ -316,7 +2379,7 @@
 .gi4-axis-connect-axis {
   position: relative;
   height: 72px;
-  margin: 0 16px 10px;
+  margin: 0 16px 24px;
 }
 
 .gi4-axis-connect-line {
@@ -325,12 +2388,13 @@
   right: 0;
   top: 46px;
   border-top: 2px solid #8bb9c4;
+  pointer-events: none;
 }
 
 .gi4-axis-connect-line::after {
   content: "";
   position: absolute;
-  right: -6px;
+  right: -2px;
   top: -5px;
   width: 9px;
   height: 9px;
@@ -345,6 +2409,7 @@
   height: 17px;
   border-left: 2px solid #8bb9c4;
   transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .gi4-axis-connect-axis > span.major {
@@ -372,6 +2437,7 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 16px;
   padding: 0 62px 0 70px;
+  margin-top: 8px;
 }
 
 .gi4-axis-connect-card {
@@ -409,12 +2475,13 @@
   right: 14px;
   top: 34px;
   border-top: 2px solid #75aebd;
+  pointer-events: none;
 }
 
 .gi4-axis-line::after {
   content: "";
   position: absolute;
-  right: -6px;
+  right: -2px;
   top: -5px;
   width: 9px;
   height: 9px;
@@ -429,6 +2496,7 @@
   width: 1px;
   height: 11px;
   border-left: 2px solid #75aebd;
+  pointer-events: none;
 }
 
 .gi4-tick-label {
@@ -471,6 +2539,11 @@
   font-weight: 700;
   color: #334155;
   padding-bottom: 3px;
+}
+
+.gi4-jump-row .gi4-jump-cell:last-child {
+  justify-self: start;
+  width: 64px;
 }
 
 .gi4-jump-arrow {
@@ -574,6 +2647,7 @@
 .gi4-connect-list {
   display: grid;
   gap: 9px;
+  position: relative;
 }
 
 .gi4-connect-row {
@@ -637,11 +2711,21 @@
 }
 
 .gi4-connect-space {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   min-height: 92px;
   padding: 0 12px;
+}
+
+.gi4-connect-solution {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  display: none;
 }
 
 .gi4-connect-row.dots .gi4-connect-space {
@@ -672,6 +2756,20 @@
   font-size: 22px;
   font-weight: 500;
   line-height: 1;
+}
+
+.gi4-solution-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.gi4-solution-svg line {
+  stroke: #0f8dc4;
+  stroke-width: 2.2;
+  stroke-linecap: round;
 }
 
 .gi4-dot {
@@ -713,12 +2811,20 @@
   margin: 8px 0;
 }
 
-.gi4-pencil span {
+.gi4-pencil > span {
   height: 30px;
   display: grid;
   place-items: center;
   border: 1px solid #8a8f99;
   font-weight: 900;
+}
+
+.gi4-pencil .gi4-solution-answer {
+  display: none;
+}
+
+.solutions-mode .gi4-pencil .gi4-solution-answer {
+  display: inline;
 }
 
 .gi4-pencil .gi4-pencil-tip {
@@ -771,6 +2877,19 @@
   border: 1.5px solid #d5dde7;
   text-align: center;
   padding: 7px 6px;
+}
+
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-0 td { background: #fff2b8; }
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-1 td { background: #d9f5d6; }
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-2 td { background: #d7ecff; }
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-3 td { background: #ffdce8; }
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-4 td { background: #efe2ff; }
+.solutions-mode .gi4-equivalent-table tr.gi4-equivalent-solution-5 td { background: #ffe4c4; }
+
+.solutions-mode .gi4-equivalent-table td {
+  color: #1f2937;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1.5px rgba(15, 23, 42, .18);
 }
 
 @media (max-width: 900px) {
