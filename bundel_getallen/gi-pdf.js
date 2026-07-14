@@ -76,7 +76,7 @@ window.GI_Pdf = (() => {
   /* ── Pagineer het canvas in A4-plakjes ────────────────────── */
   function _snijInPaginas(canvas, sheetRect, domBlokken, pxPerMm, pageH_mm) {
     const factor    = canvas.width / sheetRect.width;
-    const pageH_px  = (pageH_mm - 14 - 14) * pxPerMm;   // MT=MB=14mm
+    const pageH_px  = (pageH_mm - 13 - 11) * pxPerMm;   // veilige A4-hoogte met iets meer bruikbare ruimte
 
     const yTop = el => (el.getBoundingClientRect().top - sheetRect.top) * factor;
     const yBottom = el => (el.getBoundingClientRect().bottom - sheetRect.top) * factor;
@@ -89,6 +89,7 @@ window.GI_Pdf = (() => {
     const voorkeursGrenzen = new Set();
     const verboden = [];
     const kaartStarts = [];
+    const startPakketten = [];
 
     function addVoorkeursGrens(y) {
       if (y <= 0 || y >= canvas.height) return;
@@ -211,15 +212,25 @@ window.GI_Pdf = (() => {
       });
     }
 
+    function registreerZachteElementen(selector, padding = 6) {
+      document.querySelectorAll(selector).forEach(el => {
+        const start = Math.max(0, yTop(el) - padding * factor);
+        const end = yBottom(el) + padding * factor;
+        addGrens(grenzen, start);
+        addGrens(grenzen, end);
+        addVoorkeursGrens(end);
+      });
+    }
+
     document.querySelectorAll('#sheet .row-delete-wrap').forEach(card => {
       registreerKaartStart(card, 14);
       const top = yTop(card);
-      const guard = verbodenInterval(Math.max(0, top - 28 * factor), top + 80 * factor);
+      const guard = verbodenInterval(Math.max(0, top - 6 * factor), top + 12 * factor);
       if (guard) verboden.push(guard);
     });
     registreerAlleKaders();
 
-    beschermHeleElementen([
+    registreerZachteElementen([
       '#sheet .row-delete-wrap',
       '#sheet .gi4-value-card',
       '#sheet .gi4-complete-card',
@@ -250,7 +261,7 @@ window.GI_Pdf = (() => {
       '#sheet .gi4-mixed-order-explain',
       '#sheet .gi4-mixed-sequence-card',
       '#sheet .gi4-mixed-before-after-card'
-    ].join(', '), 10);
+    ].join(', '), 6);
 
     document.querySelectorAll('#sheet .title-row').forEach(titleRow => {
       const firstRow = eersteOefenRijNaTitel(titleRow);
@@ -260,12 +271,13 @@ window.GI_Pdf = (() => {
       const firstBottom = firstRow.length
         ? Math.max(...firstRow.map(yBottom))
         : yBottom(firstItem);
-      const safeEnd = Math.min(canvas.height, firstBottom + 10 * factor);
-      const safeTop = Math.max(0, titleTop - 18 * factor);
+      const safeEnd = Math.min(canvas.height, firstBottom + 2 * factor);
+      const safeTop = Math.max(0, titleTop - 3 * factor);
       addGrens(grenzen, safeTop);
       addGrens(grenzen, titleTop);
       addGrens(grenzen, yBottom(titleRow));
       addVoorkeursGrens(safeEnd);
+      startPakketten.push({ start: Math.round(safeTop), end: Math.round(safeEnd) });
       const protectedHeight = safeEnd - safeTop;
       if (protectedHeight <= pageH_px - 18 * factor) {
         const iv = verbodenInterval(safeTop, safeEnd);
@@ -273,25 +285,17 @@ window.GI_Pdf = (() => {
       }
     });
 
-    document.querySelectorAll('#sheet .gi4-fraction-compare-grid').forEach(grid => {
-      const cards = Array.from(grid.querySelectorAll(':scope > .gi4-fraction-compare-card, :scope > .gi4-fraction-compare-order'));
-      const rows = new Map();
-      cards.forEach(card => {
-        const cardStart = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 6 * factor));
-        const cardEnd = yBottom(card) + 6 * factor;
-        addGrens(grenzen, cardStart);
-        addGrens(grenzen, cardEnd);
-        addVoorkeursGrens(cardEnd);
-        const cardIv = verbodenInterval(cardStart, cardEnd);
-        if (cardIv) verboden.push(cardIv);
-
-        const top = Math.round(card.getBoundingClientRect().top);
-        if (!rows.has(top)) rows.set(top, []);
-        rows.get(top).push(card);
+    document.querySelectorAll('#sheet .gi4-compare-grid').forEach(grid => {
+      const rows = Array.from(grid.querySelectorAll(':scope > .gi4-compare-row'));
+      const visualRows = new Map();
+      rows.forEach(row => {
+        const top = Math.round(row.getBoundingClientRect().top / 4) * 4;
+        if (!visualRows.has(top)) visualRows.set(top, []);
+        visualRows.get(top).push(row);
       });
-      rows.forEach(rowCards => {
-        const start = Math.max(0, Math.min(...rowCards.map(yTop)) - 8 * factor);
-        const end = Math.max(...rowCards.map(yBottom)) + 8 * factor;
+      visualRows.forEach(rowGroup => {
+        const start = Math.max(0, Math.min(...rowGroup.map(yTop)) - 4 * factor);
+        const end = Math.max(...rowGroup.map(yBottom)) + 4 * factor;
         addGrens(grenzen, start);
         addGrens(grenzen, end);
         addVoorkeursGrens(end);
@@ -300,28 +304,46 @@ window.GI_Pdf = (() => {
       });
     });
 
+    document.querySelectorAll('#sheet .gi4-fraction-compare-grid').forEach(grid => {
+      const cards = Array.from(grid.querySelectorAll(':scope > .gi4-fraction-compare-card, :scope > .gi4-fraction-compare-order'));
+      const rows = new Map();
+      cards.forEach(card => {
+        const cardStart = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 4 * factor));
+        const cardEnd = yBottom(card) + 4 * factor;
+        addGrens(grenzen, cardStart);
+        addGrens(grenzen, cardEnd);
+        addVoorkeursGrens(cardEnd);
+
+        const top = Math.round(card.getBoundingClientRect().top);
+        if (!rows.has(top)) rows.set(top, []);
+        rows.get(top).push(card);
+      });
+      rows.forEach(rowCards => {
+        const start = Math.max(0, Math.min(...rowCards.map(yTop)) - 5 * factor);
+        const end = Math.max(...rowCards.map(yBottom)) + 5 * factor;
+        addGrens(grenzen, start);
+        addGrens(grenzen, end);
+        addVoorkeursGrens(end);
+      });
+    });
+
     document.querySelectorAll('#sheet .gi4-fraction-estimate-card').forEach(card => {
-      const start = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 8 * factor));
-      const end = yBottom(card) + 8 * factor;
+      const start = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 5 * factor));
+      const end = yBottom(card) + 5 * factor;
       addGrens(grenzen, start);
       addGrens(grenzen, end);
       addVoorkeursGrens(end);
-      const iv = verbodenInterval(start, end);
-      if (iv) verboden.push(iv);
     });
 
     document.querySelectorAll('#sheet .gi4-mixed-order-card, #sheet .gi4-mixed-order-explain, #sheet .gi4-mixed-sequence-card, #sheet .gi4-mixed-before-after-card').forEach(card => {
-      const start = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 10 * factor));
-      const end = yBottom(card) + 10 * factor;
+      const start = startMetTitelAlsEersteBlok(card, Math.max(0, yTop(card) - 6 * factor));
+      const end = yBottom(card) + 6 * factor;
       addGrens(grenzen, start);
       addGrens(grenzen, end);
       addVoorkeursGrens(end);
-      if (end - start > pageH_px - 18 * factor) return;
-      const iv = verbodenInterval(start, end);
-      if (iv) verboden.push(iv);
     });
 
-    document.querySelectorAll('#sheet .gi4-block[data-title-key="gi4_connect"], #sheet .gi4-block[data-title-key="gi4_axis_connect"], #sheet .keep-together').forEach(blok => {
+    document.querySelectorAll('#sheet .gi4-block[data-title-key="gi4_connect"], #sheet .keep-together').forEach(blok => {
       const titleRow = blok.previousElementSibling?.classList?.contains('title-row')
         ? blok.previousElementSibling
         : null;
@@ -336,9 +358,14 @@ window.GI_Pdf = (() => {
 
     const gesorteerd = Array.from(grenzen).sort((a, b) => a - b);
     const voorkeuren = Array.from(voorkeursGrenzen).sort((a, b) => a - b);
+    const alleKandidaten = Array.from(new Set([
+      ...gesorteerd,
+      ...voorkeuren,
+      ...verboden.flatMap(iv => [iv.start, iv.end])
+    ])).sort((a, b) => a - b);
     const isVerbodenSnede = y => verboden.some(iv => y > iv.start && y < iv.end);
     const intervalRond = y => verboden.find(iv => y > iv.start && y < iv.end);
-    const isKaartRand = y => kaartStarts.some(k => y >= k.top - 18 * factor && y <= k.top + 80 * factor);
+    const isKaartRand = y => kaartStarts.some(k => y >= k.top - 8 * factor && y <= k.top + 14 * factor);
 
     const plakjes = [];
     let startY = 0;
@@ -364,11 +391,23 @@ window.GI_Pdf = (() => {
           k.before > startY + 24 &&
           k.before < maxY &&
           snij >= k.top - 4 * factor &&
-          snij <= k.top + 96 * factor
+          snij <= k.top + 48 * factor
         )
         .sort((a, b) => b.before - a.before)[0];
       if (snedeOpKaartRand) {
         snij = snedeOpKaartRand.before;
+      }
+
+      const volgendeStarter = startPakketten
+        .filter(p =>
+          p.start > startY + 24 &&
+          p.end <= maxY - 2 * factor &&
+          p.end > snij + 8 * factor &&
+          !isKaartRand(p.end)
+        )
+        .sort((a, b) => b.end - a.end)[0];
+      if (volgendeStarter && maxY - snij > pageH_px * 0.18) {
+        snij = volgendeStarter.end;
       }
 
       if (snij === startY) {
@@ -379,6 +418,22 @@ window.GI_Pdf = (() => {
           snij = Math.min(maxY, canvas.height);
         }
       }
+
+      const isBijnaLegePagina = snij - startY < pageH_px * (startY === 0 ? 0.66 : 0.52);
+      const isNietLaatstePagina = canvas.height - startY > pageH_px * 0.65;
+      if (isBijnaLegePagina && isNietLaatstePagina) {
+        const minimumY = startY + pageH_px * (startY === 0 ? 0.66 : 0.52);
+        const latereSnede = alleKandidaten
+          .filter(g => g > minimumY && g <= maxY && !isVerbodenSnede(g) && !isKaartRand(g))
+          .sort((a, b) => b - a)[0];
+        if (latereSnede) {
+          snij = latereSnede;
+        } else if (snij - startY < pageH_px * (startY === 0 ? 0.25 : 0.18)) {
+          snij = Math.min(maxY, canvas.height);
+        }
+      }
+
+      if (snij <= startY) snij = Math.min(maxY, canvas.height);
       plakjes.push({ y: startY, h: snij - startY });
       startY = snij;
     }
@@ -511,7 +566,7 @@ window.GI_Pdf = (() => {
           ? Math.min(Math.round(pxPerMm * 3), Math.max(0, sl.h - 1))
           : 0;
         const bovenHerstelPx = i > 0
-          ? Math.min(Math.round(pxPerMm * 2), sl.y)
+          ? Math.min(Math.round(pxPerMm * 3.5), sl.y)
           : 0;
         const bronY = Math.max(0, sl.y - bovenHerstelPx);
         const renderH = Math.max(
