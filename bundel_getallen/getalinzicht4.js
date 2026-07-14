@@ -784,6 +784,7 @@
     for (let v = start; v <= end; v += unit) {
       const tick = document.createElement('span');
       tick.className = labels.includes(v) ? 'major' : '';
+      tick.dataset.value = String(v);
       tick.style.left = `${axisPct(v - start, range)}%`;
       axis.appendChild(tick);
     }
@@ -907,12 +908,12 @@
     b.appendChild(grid);
   }
 
-  function addOrder(extraCount){
-    const key = 'gi4_order';
-    const dir = $('#orderDirection').value;
+  function addOrder(extraCount, forcedDir){
+    const dir = forcedDir || $('#orderDirection').value;
+    const key = `gi4_order_${dir}`;
     const count = extraCount || Math.max(1, parseInt($('#orderCount').value, 10) || 2);
     const title = dir === 'asc' ? 'Rangschik de getallen van klein naar groot.' : 'Rangschik de getallen van groot naar klein.';
-    const b = block(key, title, addOrder);
+    const b = block(key, title, addCount => addOrder(addCount || 1, dir));
     const grid = document.createElement('div');
     grid.className = 'gi4-order-grid';
     for (let i = 0; i < count; i++) {
@@ -1020,12 +1021,20 @@
         }));
       } else {
         svg.appendChild(svgLine(20, y, 62, y, '#d8dee8', 1.4));
+        const digitAnswer = svgText(String(ds[p.key]), 41, y - 5, {
+          size: '18',
+          weight: '800',
+          fill: '#0f8dc4',
+          anchor: 'middle',
+        });
+        digitAnswer.classList.add('gi4-svg-solution-answer');
+        svg.appendChild(digitAnswer);
         svg.appendChild(svgText(`${p.label} =`, 70, y + 5, {
           size: '18',
           weight: '700',
         }));
         svg.appendChild(svgLine(112, y, 172, y, '#d8dee8', 1.4));
-        const answer = svgText(`${ds[p.key]} ${p.label} = ${fmt(val)}`, 24, y - 5, {
+        const answer = svgText(fmt(val), 122, y - 5, {
           size: '18',
           weight: '800',
           fill: '#0f8dc4',
@@ -2856,6 +2865,7 @@
     }
     for (let i = 0; i <= max * den; i++) {
       const tick = document.createElement('i');
+      tick.dataset.value = String(i);
       tick.style.left = `${axisPct(i, max * den)}%`;
       if (i % den === 0) tick.classList.add('whole');
       axis.appendChild(tick);
@@ -3151,6 +3161,14 @@
     return line;
   }
 
+  function svgSolutionDot(x, y, r = 3.4){
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', x.toFixed(1));
+    dot.setAttribute('cy', y.toFixed(1));
+    dot.setAttribute('r', r.toFixed(1));
+    return dot;
+  }
+
   function makeOverlay(target, className){
     const rect = target.getBoundingClientRect();
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -3220,7 +3238,6 @@
       if (!axis || !axisLine || !cards.length || !Number.isFinite(start) || !Number.isFinite(range) || range <= 0) return;
       const svg = makeOverlay(row, 'gi4-axis-connect-solution-svg');
       const rowRect = row.getBoundingClientRect();
-      const axisRect = axis.getBoundingClientRect();
       const lineRect = axisLine.getBoundingClientRect();
       cards.forEach(card => {
         const value = parseInt(card.dataset.value, 10);
@@ -3228,11 +3245,51 @@
         const cardRect = card.getBoundingClientRect();
         const x1 = cardRect.left - rowRect.left + cardRect.width / 2;
         const y1 = cardRect.top - rowRect.top - 8;
-        const x2 = axisRect.left - rowRect.left + ((value - start) / range) * axisRect.width;
-        const y2 = lineRect.top - rowRect.top;
+        const tick = axis.querySelector(`span[data-value="${value}"]`);
+        const tickRect = tick?.getBoundingClientRect();
+        const x2 = tickRect
+          ? tickRect.left - rowRect.left + tickRect.width / 2
+          : lineRect.left - rowRect.left + ((value - start) / range) * lineRect.width;
+        const y2 = lineRect.top - rowRect.top + 11;
         svg.appendChild(svgSolutionLine(x1, y1, x2, y2));
+        svg.appendChild(svgSolutionDot(x2, y2, 3.2));
       });
       row.appendChild(svg);
+    });
+  }
+
+  function drawMixedAxisConnectSolutionLines(){
+    sheet.querySelectorAll('.gi4-mixed-axis-connect-order').forEach(card => {
+      const axis = card.querySelector('.gi4-mixed-order-axis');
+      const tiles = Array.from(card.querySelectorAll('.gi4-mixed-order-connect-tile'));
+      if (!axis || !tiles.length) return;
+      const den = Math.max(...tiles.map(tile => {
+        const frac = tile.querySelector('.gi4-fraction-box');
+        return parseInt(frac?.lastElementChild?.textContent || '0', 10);
+      }).filter(Number.isFinite));
+      const maxLabel = Math.max(...Array.from(axis.querySelectorAll('.gi4-mixed-order-axis-label'))
+        .map(label => parseInt(label.textContent || '0', 10))
+        .filter(Number.isFinite));
+      if (!Number.isFinite(den) || den <= 0 || !Number.isFinite(maxLabel) || maxLabel <= 0) return;
+      const svg = makeOverlay(card, 'gi4-mixed-axis-connect-solution-svg');
+      const cardRect = card.getBoundingClientRect();
+      const axisRect = axis.getBoundingClientRect();
+      const axisY = axisRect.bottom - cardRect.top;
+      tiles.forEach(tile => {
+        const value = parseInt(tile.dataset.value, 10);
+        if (!Number.isFinite(value)) return;
+        const dot = tile.querySelector('.gi4-connect-dot.top') || tile;
+        const p1 = centerRelative(dot, card);
+        const tick = axis.querySelector(`i[data-value="${value}"]`);
+        const tickRect = tick?.getBoundingClientRect();
+        const x2 = tickRect
+          ? tickRect.left - cardRect.left + tickRect.width / 2
+          : axisRect.left - cardRect.left + axisPct(value, maxLabel * den) / 100 * axisRect.width;
+        const y2 = axisY + 20;
+        svg.appendChild(svgSolutionLine(p1.x, p1.y, x2, y2));
+        svg.appendChild(svgSolutionDot(x2, y2, 3.2));
+      });
+      card.appendChild(svg);
     });
   }
 
@@ -3242,6 +3299,7 @@
     drawConnectSolutionLines();
     drawMixedConnectSolutionLines();
     drawAxisConnectSolutionLines();
+    drawMixedAxisConnectSolutionLines();
   }
 
   function setSolutionsMode(on){
