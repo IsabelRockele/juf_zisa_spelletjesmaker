@@ -1487,7 +1487,7 @@ html.exporting .jump-row .jump-arcs-svg text.jump-label{ transform: none !import
   position: absolute;
   top: -8px;
   right: -8px;
-  z-index: 20;
+  z-index: 200;
   width: 22px; height: 22px;
   line-height: 22px; text-align: center;
   border-radius: 50%;
