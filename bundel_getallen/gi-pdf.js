@@ -214,7 +214,7 @@ window.GI_Pdf = (() => {
     document.querySelectorAll('#sheet .row-delete-wrap').forEach(card => {
       registreerKaartStart(card, 14);
       const top = yTop(card);
-      const guard = verbodenInterval(Math.max(0, top - 28 * factor), top + 22 * factor);
+      const guard = verbodenInterval(Math.max(0, top - 28 * factor), top + 80 * factor);
       if (guard) verboden.push(guard);
     });
     registreerAlleKaders();
@@ -338,7 +338,7 @@ window.GI_Pdf = (() => {
     const voorkeuren = Array.from(voorkeursGrenzen).sort((a, b) => a - b);
     const isVerbodenSnede = y => verboden.some(iv => y > iv.start && y < iv.end);
     const intervalRond = y => verboden.find(iv => y > iv.start && y < iv.end);
-    const isKaartRand = y => kaartStarts.some(k => y >= k.top - 18 * factor && y <= k.top + 10 * factor);
+    const isKaartRand = y => kaartStarts.some(k => y >= k.top - 18 * factor && y <= k.top + 80 * factor);
 
     const plakjes = [];
     let startY = 0;
@@ -364,7 +364,7 @@ window.GI_Pdf = (() => {
           k.before > startY + 24 &&
           k.before < maxY &&
           snij >= k.top - 4 * factor &&
-          snij <= k.top + 52 * factor
+          snij <= k.top + 96 * factor
         )
         .sort((a, b) => b.before - a.before)[0];
       if (snedeOpKaartRand) {
@@ -421,7 +421,7 @@ window.GI_Pdf = (() => {
     '.gb1000-first', '.gb1000-grid .gb1000-card:nth-child(2n)',
     '.mixed-grid.hte-2col .mix-item:nth-child(2n)',
     '.mixed-grid:not(.hte-2col) .mix-item:nth-child(3n)',
-    '.gi4-block', '.row-delete-wrap',
+    '.row-delete-wrap',
     '.gi4-value-card', '.gi4-complete-card', '.gi4-neighbor-table',
     '.gi4-axis-row', '.gi4-axis-connect-row', '.gi4-jump-row',
     '.gi4-compare-row', '.gi4-order-row', '.gi4-connect-row',
@@ -502,13 +502,28 @@ window.GI_Pdf = (() => {
         if (i > 0) pdf.addPage();
         _koptekst(pdf, i + 1, plakjes.length);
 
-        // Knip dit plakje uit het canvas
+        // Knip dit plakje uit het canvas. Bij html2canvas kan een afgeronde
+        // snede soms nog 1-2 randpixels van het volgende kaartje meenemen.
+        // Daarom tonen we onderaan niet-laatste pagina's een minieme marge minder.
+        // Vervolgpagina's nemen tegelijk een klein stukje boven de snede mee,
+        // zodat de bovenrand van een oefenkader op de nieuwe pagina behouden blijft.
+        const onderTrimPx = i < plakjes.length - 1
+          ? Math.min(Math.round(pxPerMm * 3), Math.max(0, sl.h - 1))
+          : 0;
+        const bovenHerstelPx = i > 0
+          ? Math.min(Math.round(pxPerMm * 2), sl.y)
+          : 0;
+        const bronY = Math.max(0, sl.y - bovenHerstelPx);
+        const renderH = Math.max(
+          1,
+          Math.min(canvas.height - bronY, sl.h + bovenHerstelPx - onderTrimPx)
+        );
         const c   = document.createElement('canvas');
         c.width   = canvas.width;
-        c.height  = sl.h;
-        c.getContext('2d').drawImage(canvas, 0, sl.y, canvas.width, sl.h, 0, 0, canvas.width, sl.h);
+        c.height  = renderH;
+        c.getContext('2d').drawImage(canvas, 0, bronY, canvas.width, renderH, 0, 0, canvas.width, renderH);
 
-        const imgH = sl.h / pxPerMm;
+        const imgH = renderH / pxPerMm;
         pdf.addImage(c.toDataURL('image/jpeg', 0.93), 'JPEG', ML, MT, usableW, imgH);
       });
 
