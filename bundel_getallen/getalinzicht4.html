@@ -257,6 +257,14 @@
 
       <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Begrippen</div>
+        <div class="veld-rij">
+          <label>Schrijfwijze
+            <select id="fractionConceptStyle" style="width:145px">
+              <option value="inline" selected>3/4</option>
+              <option value="stacked">onder elkaar</option>
+            </select>
+          </label>
+        </div>
       </div>
       <button class="btn-toevoegen" id="btnAddFractionConcepts">Voeg begrippen toe</button>
 
@@ -267,10 +275,102 @@
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddFractionWhole">Voeg geheel-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijkwaardige breuken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionEqCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionEqMode" style="width:145px">
+              <option value="cards" selected>kaartjes</option>
+              <option value="bars">stroken</option>
+              <option value="axis">getallenas</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionEquiv">Voeg gelijkwaardige breuken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijknamige breuken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionCommonCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionCommonMode" style="width:155px">
+              <option value="explain" selected>uitlegschema</option>
+              <option value="recognize">dezelfde noemer kleuren</option>
+              <option value="equivalent">naar zelfde noemer</option>
+              <option value="arrows">pijlen invullen</option>
+              <option value="two">2 breuken gelijknamig</option>
+              <option value="three">3 breuken gelijknamig</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionCommon">Voeg gelijknamige breuken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Breuken vergelijken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionCompareCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionCompareMode" style="width:155px">
+              <option value="material" selected>met materiaal</option>
+              <option value="arrows">met pijlen</option>
+              <option value="order">3 breuken ordenen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionCompare">Voeg vergelijk-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Breuken schatten</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionEstimateCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionEstimateMode" style="width:155px">
+              <option value="strips" selected>stroken en getallenas</option>
+              <option value="compare">vergelijken</option>
+              <option value="order">rangschikken</option>
+              <option value="figures">figuurtjes</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionEstimate">Voeg schat-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Onechte breuken en gemengde getallen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionMixedCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionMixedMode" style="width:155px">
+              <option value="explain" selected>uitlegschema</option>
+              <option value="convert">onecht naar gemengd</option>
+              <option value="classify">soorten kleuren</option>
+              <option value="visual">beelden invullen</option>
+              <option value="axis">op de getallenlijn</option>
+              <option value="connect">verbind evenveel</option>
+              <option value="table">tabel omzetten</option>
+              <option value="solve">los op</option>
+              <option value="orderExplain">ordenen: onthouden</option>
+              <option value="orderStripAxis">ordenen met strook en as</option>
+              <option value="betweenNaturals">tussen natuurlijke getallen</option>
+              <option value="axisConnectOrder">verbinden op de as</option>
+              <option value="mixedSequence">reeksen aanvullen</option>
+              <option value="mixedBeforeAfter">net voor / net na</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionMixed">Voeg onechte breuken toe</button>
     </div>
 
     <div class="sidebar-footer">
       <button class="btn-pdf" id="btnDownloadPdf">Download PDF</button>
+      <button class="btn-pdf btn-solutions" id="btnToggleSolutions">Toon oplossingen</button>
+      <button class="btn-pdf btn-solutions" id="btnDownloadSolutions">Download oplossingen</button>
       <button class="btn-wissen" id="btnClearSheet">Leegmaken</button>
     </div>
   </aside>
