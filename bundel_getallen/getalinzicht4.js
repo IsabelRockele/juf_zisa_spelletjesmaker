@@ -14,6 +14,8 @@
 
   function rnd(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr){ return arr[rnd(0, arr.length - 1)]; }
+  const AXIS_END_PCT = 96;
+  const axisPct = (value, max) => (value / max) * AXIS_END_PCT;
   function signaturePart(value){
     if (Array.isArray(value)) return `[${value.map(signaturePart).join(',')}]`;
     if (value && typeof value === 'object') {
@@ -730,7 +732,7 @@
       const row = document.createElement('div');
       row.className = 'gi4-axis-row row-delete-wrap';
       row.appendChild(rowDel(row));
-      row.innerHTML += '<div class="gi4-axis-line"></div>';
+      row.appendChild(Object.assign(document.createElement('div'), { className: 'gi4-axis-line' }));
       for (let i = 0; i < 7; i++) {
         const left = 7 + i * 14;
         const tick = document.createElement('span');
@@ -782,13 +784,13 @@
     for (let v = start; v <= end; v += unit) {
       const tick = document.createElement('span');
       tick.className = labels.includes(v) ? 'major' : '';
-      tick.style.left = `${((v - start) / range) * 100}%`;
+      tick.style.left = `${axisPct(v - start, range)}%`;
       axis.appendChild(tick);
     }
     labels.forEach(v => {
       const label = document.createElement('div');
       label.className = 'gi4-axis-connect-label';
-      label.style.left = `${((v - start) / range) * 100}%`;
+      label.style.left = `${axisPct(v - start, range)}%`;
       label.textContent = fmt(v);
       axis.appendChild(label);
     });
@@ -1307,13 +1309,13 @@
       axis.innerHTML = '<span>0</span><span>1</span>';
       for (let i = 0; i <= den; i++) {
         const tick = document.createElement('i');
-        tick.style.left = `${(i / den) * 100}%`;
+        tick.style.left = `${axisPct(i, den)}%`;
         axis.appendChild(tick);
       }
       nums.forEach(num => {
         const box = document.createElement('div');
         box.className = 'gi4-fraction-axis-answer';
-        box.style.left = `${(num / den) * 100}%`;
+        box.style.left = `${axisPct(num, den)}%`;
         const f = fractionBox('', '');
         f.querySelector('.gi4-fraction-cell:first-child')?.appendChild(sol(String(num)));
         f.querySelector('.gi4-fraction-cell:last-child')?.appendChild(sol(String(den)));
@@ -1509,11 +1511,11 @@
     for (let i = 1; i < base.den; i++) {
       const tick = document.createElement('i');
       tick.className = 'division-tick';
-      tick.style.left = `${(i / base.den) * 100}%`;
+      tick.style.left = `${axisPct(i, base.den)}%`;
       axis.appendChild(tick);
     }
     const label = document.createElement('strong');
-    label.style.left = `${(base.num / base.den) * 100}%`;
+    label.style.left = `${axisPct(base.num, base.den)}%`;
     label.innerHTML = `${base.num}<small></small>${base.den}`;
     axis.appendChild(label);
     card.appendChild(axis);
@@ -2670,7 +2672,7 @@
     card.appendChild(rowDel(card));
     const axis = document.createElement('div');
     axis.className = 'gi4-mixed-axis';
-    const axisPos = (seed.num / seed.den) / max * 100;
+    const axisPos = axisPct(seed.num / seed.den, max);
     axis.style.setProperty('--pos', `${axisPos}%`);
     const marker = document.createElement('div');
     marker.className = 'gi4-mixed-axis-marker';
@@ -2686,13 +2688,13 @@
     axis.appendChild(marker);
     for (let i = 0; i <= max; i++) {
       const lab = document.createElement('span');
-      lab.style.left = `${i / max * 100}%`;
+      lab.style.left = `${axisPct(i, max)}%`;
       lab.textContent = i;
       axis.appendChild(lab);
     }
     for (let i = 1; i < max * seed.den; i++) {
       const tick = document.createElement('i');
-      tick.style.left = `${i / (max * seed.den) * 100}%`;
+      tick.style.left = `${axisPct(i, max * seed.den)}%`;
       if (i % seed.den === 0) tick.classList.add('whole');
       axis.appendChild(tick);
     }
@@ -2848,13 +2850,13 @@
     for (let i = 0; i <= max; i++) {
       const lab = document.createElement('span');
       lab.className = 'gi4-mixed-order-axis-label';
-      lab.style.left = `${i / max * 100}%`;
+      lab.style.left = `${axisPct(i, max)}%`;
       lab.textContent = i;
       axis.appendChild(lab);
     }
     for (let i = 0; i <= max * den; i++) {
       const tick = document.createElement('i');
-      tick.style.left = `${i / (max * den) * 100}%`;
+      tick.style.left = `${axisPct(i, max * den)}%`;
       if (i % den === 0) tick.classList.add('whole');
       axis.appendChild(tick);
     }
@@ -2888,7 +2890,7 @@
     ].forEach(([step, node]) => {
       const lab = document.createElement('div');
       lab.className = 'gi4-mixed-order-demo-label';
-      lab.style.left = `${step / 8 * 100}%`;
+      lab.style.left = `${axisPct(step, 8)}%`;
       lab.textContent = node;
       axis.appendChild(lab);
     });
@@ -2917,7 +2919,7 @@
     [seed.filled, neighbor].filter(v => v > 0 && v < seed.max * seed.den).forEach((value, idx) => {
       const marker = document.createElement('div');
       marker.className = `gi4-mixed-order-marker ${value === seed.filled ? 'blue' : 'gray'} ${idx % 2 ? 'bottom' : 'top'}`;
-      marker.style.left = `${value / (seed.max * seed.den) * 100}%`;
+      marker.style.left = `${axisPct(value, seed.max * seed.den)}%`;
       marker.appendChild(mixedBoxFromImproper(value, seed.den, true));
       axis.appendChild(marker);
     });
@@ -2942,7 +2944,7 @@
     seed.nums.forEach((value, idx) => {
       const marker = document.createElement('div');
       marker.className = `gi4-mixed-order-marker gray ${idx % 2 ? 'bottom' : 'top'}`;
-      marker.style.left = `${value / (seed.max * seed.den) * 100}%`;
+      marker.style.left = `${axisPct(value, seed.max * seed.den)}%`;
       marker.appendChild(mixedBoxFromImproper(value, seed.den, true));
       axis.appendChild(marker);
     });
