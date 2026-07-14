@@ -1568,6 +1568,7 @@
 
 .gi4-mixed-explain-box {
   display: grid;
+  grid-template-rows: auto auto auto minmax(78px, auto);
   gap: 8px;
   min-height: 235px;
   padding: 12px;
@@ -1575,6 +1576,7 @@
   border-radius: 8px;
   background: #fff;
   text-align: center;
+  overflow: visible;
 }
 
 .gi4-mixed-explain-box p {
@@ -1645,7 +1647,8 @@
 
 .gi4-mixed-explain .gi4-mixed-visual {
   min-height: 78px;
-  align-self: end;
+  align-self: center;
+  justify-self: center;
 }
 
 .gi4-mixed-explain .gi4-mixed-visual.circles .gi4-fraction-shape {
@@ -2254,8 +2257,10 @@
 }
 
 .exporting .gi4-mixed-explain-box {
-  min-height: 218px;
-  padding: 8px;
+  grid-template-rows: auto auto auto minmax(78px, auto);
+  min-height: 235px;
+  padding: 10px;
+  overflow: visible;
 }
 
 .exporting .gi4-mixed-visual .gi4-fraction-shape {
@@ -2275,14 +2280,16 @@
 }
 
 .exporting .gi4-mixed-explain .gi4-mixed-visual {
-  min-height: 68px;
+  min-height: 78px;
+  align-self: center;
+  justify-self: center;
 }
 
 .exporting .gi4-mixed-explain .gi4-mixed-visual.circles .gi4-fraction-shape {
-  flex-basis: 62px;
-  width: 62px;
-  min-width: 62px;
-  height: 62px;
+  flex-basis: 72px;
+  width: 72px;
+  min-width: 72px;
+  height: 72px;
 }
 
 .gi4-row {
