@@ -1027,7 +1027,7 @@
           fill: '#0f8dc4',
           anchor: 'middle',
         });
-        digitAnswer.classList.add('gi4-svg-solution-answer');
+        digitAnswer.classList.add('gi4-svg-solution-answer', 'solution-only');
         svg.appendChild(digitAnswer);
         svg.appendChild(svgText(`${p.label} =`, 70, y + 5, {
           size: '18',
@@ -1039,7 +1039,7 @@
           weight: '800',
           fill: '#0f8dc4',
         });
-        answer.classList.add('gi4-svg-solution-answer');
+        answer.classList.add('gi4-svg-solution-answer', 'solution-only');
         svg.appendChild(answer);
       }
 
@@ -3140,10 +3140,67 @@
     return `${t}/10`;
   }
 
+  function ensureDecimalLayoutStyles(){
+    if (document.getElementById('gi4-decimal-layout-fixes')) return;
+    const style = document.createElement('style');
+    style.id = 'gi4-decimal-layout-fixes';
+    style.textContent = `
+      .row-delete-wrap{overflow:visible!important;position:relative;padding-right:6px}
+      .row-delete-btn{z-index:500!important;top:-10px!important;right:-10px!important;pointer-events:auto!important}
+      .gi4-solution-answer,.gi4-svg-solution-answer{display:none!important}
+      .solutions-mode .gi4-solution-answer{display:inline!important}
+      .solutions-mode .gi4-svg-solution-answer{display:initial!important}
+      .solution-only{display:none!important}
+      .solutions-mode .solution-only{display:inline-flex!important}
+      .solutions-mode svg .solution-only{display:initial!important}
+      .solution-highlight{background:transparent!important;box-shadow:none!important}
+      .solutions-mode .solution-highlight{background:#dbeafe!important;box-shadow:0 0 0 2px #0ea5e9 inset!important}
+      .gi4-decimal-grid{overflow:visible!important}
+      .gi4-decimal-axis{--gi4-axis-end:96%;overflow:visible}
+      .gi4-decimal-axis-line{left:0;right:auto;width:calc(var(--gi4-axis-end,96%) + 10px)}
+      .gi4-decimal-axis-line::after{right:-10px}
+      .gi4-decimal-strip{width:var(--gi4-axis-end,96%)!important;max-width:var(--gi4-axis-end,96%)!important;margin-left:0;margin-right:auto;box-sizing:border-box;flex:0 0 var(--gi4-axis-end,96%)}
+      .gi4-decimal-missing-card{grid-column:1 / -1;overflow:visible}
+      .gi4-decimal-missing-axis{padding:18px 88px 82px;overflow:visible}
+      .gi4-decimal-missing-chip{min-width:58px;transform:translateX(-50%);white-space:nowrap}
+      .gi4-decimal-jump-card,.gi4-decimal-greatest-card,.gi4-decimal-contents-card{overflow:visible}
+      .gi4-decimal-jump-tag{display:inline-flex;align-self:flex-start;margin-bottom:10px;background:#fed7aa;border:1.5px solid #fb923c;border-radius:7px;padding:5px 10px;font-weight:700}
+      .gi4-decimal-greatest-card{display:flex;align-items:center;justify-content:space-around;gap:14px;flex-wrap:wrap;padding:18px 20px}
+      .gi4-decimal-greatest-choice{min-width:118px;min-height:66px;border:1.5px solid #b7c9d8;border-radius:8px;display:flex;align-items:center;justify-content:center;background:#fff}
+      .gi4-decimal-compare-card.reference{padding:12px 14px 14px;min-height:218px;display:flex;flex-direction:column;gap:10px}
+      .gi4-decimal-compare-card.reference .gi4-decimal-axis{height:46px;margin:0 12px 0}
+      .gi4-decimal-reference-grid{display:grid;grid-template-columns:1fr 52px 1fr;gap:14px;margin-top:12px;align-items:start}
+      .gi4-decimal-reference-grid > .gi4-compare-box{align-self:start;margin-top:20px}
+      .gi4-decimal-reference-stack{display:flex;flex-direction:column;align-items:center;gap:7px}
+      .gi4-decimal-reference-stack .gi4-decimal-compare-value{min-height:42px;display:flex;align-items:center;justify-content:center;text-align:center}
+      .gi4-decimal-compare-row.reference{display:grid;grid-template-columns:1fr 52px 1fr;align-items:center;gap:14px;margin-top:0}
+      .gi4-decimal-compare-row.reference .gi4-decimal-compare-value{text-align:center}
+      .gi4-decimal-reference-arrow{width:0;height:24px;border-left:2px solid #111;position:relative;font-size:0;line-height:0}
+      .gi4-decimal-reference-arrow::after{content:"";position:absolute;left:-5px;bottom:-1px;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #111}
+      .gi4-decimal-reference-answer{border:1.5px solid #b7c9d8;border-radius:9px;padding:7px 10px;background:#fff;min-width:132px;min-height:38px;text-align:center;display:flex;align-items:center;justify-content:center;line-height:1.2}
+      .gi4-reference-solution-note{font-size:.85em;color:#0284c7;font-weight:700}
+      .gi4-decimal-contents-answer{display:flex;flex-direction:column;align-items:center;gap:8px}
+      .gi4-decimal-contents-order-line{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin-top:8px;font-weight:700}
+      .gi4-decimal-contents-blank{display:inline-block;width:64px;height:18px;border-bottom:1.8px solid #cbd5e1}
+      .gi4-decimal-order-list{display:grid;grid-template-columns:repeat(11,minmax(30px,1fr));gap:4px;align-items:start;margin-top:10px}
+      .gi4-decimal-order-col{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+      .gi4-decimal-order-decimal{min-width:34px;padding:4px 6px;border:1.4px solid #d8b600;background:#fff1a8;border-radius:7px;font-weight:800;line-height:1.05;text-align:center;box-sizing:border-box}
+      .gi4-decimal-order-decimal.whole{color:#e11d48}
+      .gi4-decimal-order-fraction{min-width:32px;padding:2px 4px;border:1.2px solid #b7d98b;border-radius:6px;background:#fff;display:inline-grid;grid-template-rows:auto 1px auto;justify-items:center;align-items:center;gap:2px;font-weight:800;line-height:1;box-sizing:border-box}
+      .gi4-decimal-order-fraction i{width:22px;border-top:1.4px solid #1f2937}
+      .gi4-decimal-order-fraction.simple{margin-top:4px}
+    `;
+    (document.head || document.documentElement).appendChild(style);
+  }
+  ensureDecimalLayoutStyles();
+
   function decimalStrip(t, opts = {}){
-    const { show = true, color = '#9bd2ea', compact = false } = opts;
+    const { show = true, color = '#9bd2ea', compact = false, axisEnd = 96 } = opts;
     const strip = document.createElement('div');
     strip.className = `gi4-decimal-strip${compact ? ' compact' : ''}`;
+    strip.style.setProperty('--gi4-axis-end', `${axisEnd}%`);
+    strip.style.width = `${axisEnd}%`;
+    strip.style.maxWidth = `${axisEnd}%`;
     for (let i = 0; i < 10; i++) {
       const cell = document.createElement('span');
       if (i < t) {
@@ -3156,27 +3213,29 @@
   }
 
   function decimalAxis(t = null, opts = {}){
-    const { labels = true, decimals = false } = opts;
+    const { labels = true, decimals = false, axisEnd = 96 } = opts;
+    const pos = value => value / 10 * axisEnd;
     const axis = document.createElement('div');
     axis.className = 'gi4-decimal-axis';
+    axis.style.setProperty('--gi4-axis-end', `${axisEnd}%`);
     const line = document.createElement('div');
     line.className = 'gi4-decimal-axis-line';
     axis.appendChild(line);
     for (let i = 0; i <= 10; i++) {
       const tick = document.createElement('span');
       tick.className = `gi4-decimal-axis-tick${i === 0 || i === 5 || i === 10 ? ' major' : ''}`;
-      tick.style.left = `${i * 10}%`;
+      tick.style.left = `${pos(i)}%`;
       axis.appendChild(tick);
       if (decimals && i > 0 && i < 10) {
         const d = document.createElement('span');
         d.className = 'gi4-decimal-axis-decimal';
-        d.style.left = `${i * 10}%`;
+        d.style.left = `${pos(i)}%`;
         d.textContent = decimalComma(i / 10);
         axis.appendChild(d);
       }
     }
     if (labels) {
-      [['0', 0], ['1/2', 50], ['1', 100]].forEach(([text, left]) => {
+      [['0', 0], ['1/2', axisEnd / 2], ['1', axisEnd]].forEach(([text, left]) => {
         const lab = document.createElement('span');
         lab.className = 'gi4-decimal-axis-label';
         lab.style.left = `${left}%`;
@@ -3187,7 +3246,7 @@
     if (t !== null) {
       const marker = document.createElement('span');
       marker.className = 'gi4-decimal-axis-marker';
-      marker.style.left = `${t * 10}%`;
+      marker.style.left = `${pos(t)}%`;
       axis.appendChild(marker);
     }
     return axis;
@@ -3412,9 +3471,14 @@
     let a = rnd(1, 9);
     let b = rnd(1, 9);
     if (a === b && Math.random() > .25) b = a === 9 ? 8 : a + 1;
-    const leftIsFraction = mode !== 'plain' && Math.random() > .5;
-    const rightIsFraction = mode !== 'plain' && Math.random() > .5;
-    return { a, b, leftIsFraction, rightIsFraction, mode };
+    let leftIsFraction = mode !== 'plain' && Math.random() > .5;
+    let rightIsFraction = mode !== 'plain' && Math.random() > .5;
+    if (mode === 'reference') {
+      leftIsFraction = Math.random() > .5;
+      rightIsFraction = !leftIsFraction;
+    }
+    const referenceKind = mode === 'reference' ? pick(['near', 'half']) : null;
+    return { a, b, leftIsFraction, rightIsFraction, mode, referenceKind };
   }
 
   function compareSymbol(a, b){ return a === b ? '=' : (a < b ? '<' : '>'); }
@@ -3427,14 +3491,50 @@
     return wrap;
   }
 
+  function decimalReferenceBoxText(value, kind){
+    if (kind === 'half') return value === 5 ? 'minder dan / juist / meer dan de helft' : 'minder / meer dan de helft';
+    return value === 5 ? 'dicht bij 0 / 1/2 / 1' : 'dicht bij 0 / 1';
+  }
+
+  function decimalReferenceSolution(value, kind){
+    if (kind === 'half') return value === 5 ? 'juist de helft' : (value < 5 ? 'minder dan de helft' : 'meer dan de helft');
+    return value === 5 ? 'dicht bij 1/2' : (value < 5 ? 'dicht bij 0' : 'dicht bij 1');
+  }
+
   function makeDecimalCompareCard(mode){
     const data = makeUnique(`gi4_decimal_compare_${mode}`, () => randomDecimalComparePair(mode));
     if (!data) return null;
     const card = document.createElement('div');
     card.className = `gi4-decimal-compare-card ${mode} row-delete-wrap`;
     card.appendChild(rowDel(card));
+    if (mode === 'reference') card.appendChild(decimalAxis(null, { labels: true, axisEnd: 92 }));
+    if (mode === 'reference') {
+      const grid = document.createElement('div');
+      grid.className = 'gi4-decimal-reference-grid';
+      const sign = document.createElement('span');
+      sign.className = 'gi4-compare-box';
+      sign.appendChild(sol(compareSymbol(data.a, data.b)));
+      const makeReferenceStack = (value, isFraction) => {
+        const stack = document.createElement('span');
+        stack.className = 'gi4-decimal-reference-stack';
+        const arrow = document.createElement('span');
+        arrow.className = 'gi4-decimal-reference-arrow';
+        const answer = document.createElement('span');
+        answer.className = 'gi4-decimal-reference-answer';
+        answer.textContent = decimalReferenceBoxText(value, data.referenceKind);
+        const solution = sol(decimalReferenceSolution(value, data.referenceKind));
+        solution.classList.add('gi4-reference-solution-note');
+        answer.append(document.createTextNode(' '), solution);
+        stack.append(decimalCompareItem(value, isFraction), arrow, answer);
+        return stack;
+      };
+      grid.append(makeReferenceStack(data.a, data.leftIsFraction), sign, makeReferenceStack(data.b, data.rightIsFraction));
+      card.appendChild(grid);
+      return card;
+    }
     const top = document.createElement('div');
     top.className = 'gi4-decimal-compare-row';
+    if (mode === 'reference') top.classList.add('reference');
     const sign = document.createElement('span');
     sign.className = 'gi4-compare-box';
     sign.appendChild(sol(compareSymbol(data.a, data.b)));
@@ -3445,15 +3545,6 @@
       work.className = 'gi4-decimal-convert-work';
       work.append(decimalAnswerBox(data.a, false), document.createTextNode(' en '), decimalAnswerBox(data.b, false));
       card.appendChild(work);
-    } else if (mode === 'reference') {
-      const ref = document.createElement('div');
-      ref.className = 'gi4-decimal-reference-row';
-      [data.a, data.b].forEach(v => {
-        const chip = document.createElement('span');
-        chip.append(lineWithSolution(v < 5 ? 'dicht bij 0' : v === 5 ? 'juist de helft' : 'dicht bij 1', 'long'));
-        ref.appendChild(chip);
-      });
-      card.appendChild(ref);
     } else if (mode === 'visual') {
       const visuals = document.createElement('div');
       visuals.className = 'gi4-decimal-visual-compare';
@@ -3477,7 +3568,9 @@
     }
     const title = mode === 'plain' ? 'Kommagetallen: vergelijk kort.' : mode === 'reference' ? 'Kommagetallen: vergelijk met referentiepunten.' : 'Kommagetallen en breuken vergelijken.';
     const b = block(key, title, addCount => addDecimalCompare(addCount || 1, mode));
-    addFractionInstructions(b, ['Vergelijk de hoeveelheden.', 'Schrijf &lt;, &gt; of =.']);
+    addFractionInstructions(b, mode === 'reference'
+      ? ['Vergelijk de hoeveelheden met de referentiepunten.', 'Markeer wat past.', 'Schrijf &lt;, &gt; of =.', '<strong>Tip!</strong> Verbind de hoeveelheden met hun plaats.']
+      : ['Vergelijk de hoeveelheden.', 'Schrijf &lt;, &gt; of =.']);
     const grid = document.createElement('div');
     grid.className = 'gi4-decimal-grid compare';
     for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeDecimalCompareCard(mode));
@@ -3490,15 +3583,40 @@
     const card = document.createElement('div');
     card.className = 'gi4-decimal-intro order';
     card.innerHTML = '<div class="gi4-decimal-intro-title">Onthoud</div><p>Van 0 tot 1 kan je de lijn verdelen in tienden. Elk stapje is 0,1.</p>';
-    const axis = decimalAxis(null, { decimals: true });
+    const axis = decimalAxis(null, { decimals: false });
     card.appendChild(axis);
     const strip = document.createElement('div');
     strip.className = 'gi4-decimal-order-list';
+    const simplified = {
+      2: ['1', '5'],
+      4: ['2', '5'],
+      5: ['1', '2'],
+      6: ['3', '5'],
+      8: ['4', '5'],
+    };
+    const makeFraction = (topText, bottomText, extraClass = '') => {
+      const frac = document.createElement('span');
+      frac.className = `gi4-decimal-order-fraction${extraClass ? ` ${extraClass}` : ''}`;
+      const top = document.createElement('span');
+      top.textContent = topText;
+      const bar = document.createElement('i');
+      const bottom = document.createElement('span');
+      bottom.textContent = bottomText;
+      frac.append(top, bar, bottom);
+      return frac;
+    };
     ['0', '0,1', '0,2', '0,3', '0,4', '0,5', '0,6', '0,7', '0,8', '0,9', '1'].forEach((txt, i) => {
+      const col = document.createElement('div');
+      col.className = 'gi4-decimal-order-col';
       const chip = document.createElement('span');
-      chip.className = i === 0 || i === 10 ? 'whole' : '';
+      chip.className = `gi4-decimal-order-decimal${i === 0 || i === 10 ? ' whole' : ''}`;
       chip.textContent = txt;
-      strip.appendChild(chip);
+      col.appendChild(chip);
+      if (i > 0 && i < 10) {
+        col.appendChild(makeFraction(String(i), '10'));
+        if (simplified[i]) col.appendChild(makeFraction(simplified[i][0], simplified[i][1], 'simple'));
+      }
+      strip.appendChild(col);
     });
     card.appendChild(strip);
     b.appendChild(card);
@@ -3517,7 +3635,7 @@
       chip.className = 'gi4-decimal-missing-chip';
       chip.style.left = `${i * 10}%`;
       if (known.includes(i)) chip.textContent = decimalComma(i / 10);
-      else chip.appendChild(sol(decimalComma(i / 10)));
+      else chip.appendChild(markSolution(sol(decimalComma(i / 10))));
       axis.appendChild(chip);
     }
     card.appendChild(axis);
@@ -3540,7 +3658,7 @@
     values.forEach((v, i) => {
       const cell = document.createElement('span');
       if (i === 0 || i === 2 || i === values.length - 1) cell.textContent = decimalComma(v / 10);
-      else cell.appendChild(sol(decimalComma(v / 10)));
+      else cell.appendChild(markSolution(sol(decimalComma(v / 10))));
       row.appendChild(cell);
     });
     card.appendChild(row);
@@ -3559,7 +3677,12 @@
     const card = document.createElement('div');
     card.className = 'gi4-decimal-greatest-card row-delete-wrap';
     card.appendChild(rowDel(card));
-    values.forEach(v => card.appendChild(decimalCompareItem(v.t, v.asFraction)));
+    values.forEach(v => {
+      const choice = document.createElement('span');
+      choice.className = 'gi4-decimal-greatest-choice';
+      choice.appendChild(decimalCompareItem(v.t, v.asFraction));
+      card.appendChild(choice);
+    });
     const max = Math.max(...values.map(v => v.t));
     values.forEach((v, idx) => {
       if (v.t === max) card.children[idx + 1]?.classList.add('solution-highlight');
@@ -3589,9 +3712,18 @@
       fig.innerHTML = `<span>${item.label}</span><small>${idx + 1}</small>`;
       row.appendChild(fig);
     });
-    const sorted = [...order].sort((a, b) => a.value - b.value).map(item => String(order.indexOf(item) + 1)).join(' < ');
+    const descending = Math.random() > .5;
+    const sortedItems = [...order].sort((a, b) => descending ? b.value - a.value : a.value - b.value);
+    const sorted = sortedItems.map(item => String(order.indexOf(item) + 1)).join(descending ? ' > ' : ' < ');
     const answer = document.createElement('div');
     answer.className = 'gi4-decimal-contents-answer';
+    const blanks = document.createElement('div');
+    blanks.className = 'gi4-decimal-contents-order-line';
+    order.forEach((_, idx) => {
+      blanks.appendChild(Object.assign(document.createElement('span'), { className: 'gi4-decimal-contents-blank' }));
+      if (idx < order.length - 1) blanks.appendChild(document.createTextNode(descending ? '>' : '<'));
+    });
+    answer.appendChild(blanks);
     answer.append(lineWithSolution(sorted, 'long'));
     card.append(row, answer);
     return card;
