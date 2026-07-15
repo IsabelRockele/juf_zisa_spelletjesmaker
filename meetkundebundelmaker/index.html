@@ -98,31 +98,30 @@ function lineSVG(type,w=300,h=115){
   const arrow='<marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="#161616"/></marker>';
   let d='';
   if(type==='parallel')d='<path d="M35 30H265 M35 85H265" '+st+'/>';
-  if(type==='perpendicular')d='<path d="M70 88V25 M70 88H225" '+st+'/><path d="M70 72h16v16" '+st+'/>';
-  if(type==='perpendicularCross')d='<path d="M35 58H265 M150 15V101" '+st+'/><path d="M150 58h15v15h-15" '+st+'/>';
+  if(type==='perpendicular')d='<path d="M70 88V25 M70 88H225" '+st+'/><path d="M70 74 A14 14 0 0 1 84 88" fill="none" stroke="#666" stroke-width="1.4"/>';
+  if(type==='perpendicularCross')d='<path d="M35 58H265 M150 15V101" '+st+'/><path d="M150 44 A14 14 0 0 1 164 58" fill="none" stroke="#666" stroke-width="1.4"/>';
   if(type==='intersecting')d='<path d="M40 90L255 25 M55 20L245 98" '+st+'/>';
   if(type==='curved')d='<path d="M35 80 C85 5 135 110 185 35 S250 35 270 70" '+st+'/>';
   if(type==='broken')d='<polyline points="30,85 82,28 135,78 190,22 270,75" '+st+'/>';
   if(type==='straightLine')d='<path d="M35 62H265" '+st+'/>';
-  if(type==='segment')d='<path d="M65 62H235" '+st+'/><circle cx="65" cy="62" r="5" fill="#161616"/><circle cx="235" cy="62" r="5" fill="#161616"/>';
-  if(type==='ray')d='<defs>'+arrow+'</defs><path d="M65 62H255" '+st+' marker-end="url(#arr)"/><circle cx="65" cy="62" r="5" fill="#161616"/>';
-  if(type==='infiniteLine')d='<defs>'+arrow+'</defs><path d="M38 62H262" '+st+' marker-start="url(#arr)" marker-end="url(#arr)"/>';
+  if(type==='segment')d='<path d="M65 62H235 M65 52V72 M235 52V72" '+st+'/>';
+  if(type==='ray')d='<path d="M65 62H255 M65 52V72" '+st+'/>';
+  if(type==='infiniteLine')d='<path d="M38 62H262" '+st+'/>';
   return `<svg viewBox="0 0 300 115" width="${w}" height="${h}" aria-label="${type}">${d}</svg>`;
 }
 function angleDegreesForType(type){if(type==='acute')return rnd([25,35,45,55,65,75]);if(type==='right')return 90;if(type==='obtuse')return rnd([105,115,125,135,145,155]);return 180}
 function angleSVG(deg,w=280,h=125,labels=false){
   const cx=72,cy=96,len=165,rad=-deg*Math.PI/180,x2=cx+len*Math.cos(rad),y2=cy+len*Math.sin(rad);
   const arcR=35,ax=cx+arcR*Math.cos(rad),ay=cy+arcR*Math.sin(rad),large=deg>180?1:0;
-  const arc=deg===180?'':`<path d="M${cx+arcR} ${cy} A${arcR} ${arcR} 0 ${large} 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#555" stroke-width="2"/>`;
-  const right=deg===90?`<path d="M${cx+18} ${cy}v-18h-18" fill="none" stroke="#555" stroke-width="2"/>`:'';
+  const arc=deg===180?'':`<path d="M${cx+arcR} ${cy} A${arcR} ${arcR} 0 ${large} 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#666" stroke-width="1.4"/>`;
   const lab=labels?`<path d="M${cx+65} ${cy-3}L${cx+102} ${cy+18}" stroke="#555"/><path d="M${cx+25} ${cy-55}L${cx+65} ${cy-74}" stroke="#555"/><path d="M${cx-2} ${cy+1}L${cx-42} ${cy+22}" stroke="#555"/>`:'';
-  return `<svg viewBox="0 0 280 125" width="${w}" height="${h}"><path d="M${cx} ${cy}H${cx+len}" stroke="#161616" stroke-width="3" stroke-linecap="round"/><path d="M${cx} ${cy}L${x2.toFixed(1)} ${y2.toFixed(1)}" stroke="#161616" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="4" fill="#161616"/>${arc}${right}${lab}</svg>`;
+  return `<svg viewBox="0 0 280 125" width="${w}" height="${h}"><path d="M${cx} ${cy}H${cx+len}" stroke="#161616" stroke-width="3" stroke-linecap="round"/><path d="M${cx} ${cy}L${x2.toFixed(1)} ${y2.toFixed(1)}" stroke="#161616" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${cy}" r="4" fill="#161616"/>${arc}${lab}</svg>`;
 }
 function anglePartsSVG(deg){
   const cx=205,cy=160,len=145,rad=-deg*Math.PI/180;
   const x2=cx+len*Math.cos(rad),y2=cy+len*Math.sin(rad);
   const arcR=34,ax=cx+arcR*Math.cos(rad),ay=cy+arcR*Math.sin(rad);
-  const arc=`<path d="M${cx+arcR} ${cy} A${arcR} ${arcR} 0 0 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#666" stroke-width="2"/>`;
+  const arc=`<path d="M${cx+arcR} ${cy} A${arcR} ${arcR} 0 0 0 ${ax.toFixed(1)} ${ay.toFixed(1)}" fill="none" stroke="#666" stroke-width="1.4"/>`;
   // Aanwijslijn naar het horizontale been met invullijn er direct naast.
   const lowerTargetX=cx+92, lowerTargetY=cy;
   const lowerCallout=`<path d="M${lowerTargetX} ${lowerTargetY} L355 196 H475" fill="none" stroke="#555" stroke-width="1.5"/>`;
