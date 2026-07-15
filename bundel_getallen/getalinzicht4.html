@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Getalinzicht 4de leerjaar - jufzisa.be</title>
+  <title>Getalinzicht 4de tot en met 6de leerjaar - jufzisa.be</title>
 
   <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
@@ -19,8 +19,8 @@
 <header>
   <a href="getalkeuze.html" class="menu-knop">Terug</a>
   <div class="logo">Getal<span>inzicht</span></div>
-  <div class="subtitle">- 4de leerjaar</div>
-  <div class="graad-badge">tot 10 000</div>
+  <div class="subtitle">- 4de tot en met 6de leerjaar</div>
+  <div class="graad-badge">tot 100 000</div>
   <div class="spacer"></div>
   <div class="badge">GRATIS</div>
 </header>
@@ -29,13 +29,14 @@
   <aside class="sidebar">
     <div class="sidebar-tabs" id="sidebarTabs">
       <div class="sidebar-tab tab-getallenlijn active" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
-      <div class="sidebar-tab tab-plaatswaarde" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
-      <div class="sidebar-tab tab-plaatswaarde" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
+      <div class="sidebar-tab tab-dhte" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
+      <div class="sidebar-tab tab-aanvullen" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
       <div class="sidebar-tab tab-getallenrij" onclick="GI4_UI.toonTab('getallenas',this)">Getallenas</div>
       <div class="sidebar-tab tab-sprongen" onclick="GI4_UI.toonTab('sprongen',this)">Sprongen</div>
       <div class="sidebar-tab tab-gemengd" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
-      <div class="sidebar-tab tab-mab" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
+      <div class="sidebar-tab tab-waarde" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
       <div class="sidebar-tab tab-breuken" onclick="GI4_UI.toonTab('breuken',this)">Breuken</div>
+      <div class="sidebar-tab tab-kommagetallen" onclick="GI4_UI.toonTab('kommagetallen',this)">Kommagetallen</div>
     </div>
 
     <div class="sidebar-content" id="tab-analyse">
@@ -367,6 +368,73 @@
       <button class="btn-toevoegen" id="btnAddFractionMixed">Voeg onechte breuken toe</button>
     </div>
 
+    <div class="sidebar-content" id="tab-kommagetallen" style="display:none">
+      <div class="sectie-titel">Kommagetallen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Onthoud: tienden</div>
+        <p class="gi4-note">Eigen schema over tienden, tiendelige breuken en kommagetallen.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalIntro">Voeg onthoudblok toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Tienden kleuren</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalColorCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalColor">Voeg kleur-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Welk deel zie je?</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="decimalTableCount" type="number" min="2" max="8" value="5" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalTable">Voeg tabel toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Strook en getallenas</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalLineCount" type="number" min="1" max="6" value="4" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalLine">Voeg as-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Vergelijken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalCompareCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalCompareMode" style="width:145px">
+              <option value="convert" selected>omzetten naar /10</option>
+              <option value="reference">referentiepunten</option>
+              <option value="plain">kort vergelijken</option>
+              <option value="visual">met figuren</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalCompare">Voeg vergelijk-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Ordenen en schatten</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalOrderCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalOrderMode" style="width:145px">
+              <option value="intro" selected>onthoudblok</option>
+              <option value="missing">as aanvullen</option>
+              <option value="jumps">sprongen</option>
+              <option value="greatest">grootste kleuren</option>
+              <option value="compare">vergelijken</option>
+              <option value="contents">inhouden ordenen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalOrder">Voeg orden-oefening toe</button>
+    </div>
+
     <div class="sidebar-footer">
       <button class="btn-pdf" id="btnDownloadPdf">Download PDF</button>
       <button class="btn-pdf btn-solutions" id="btnToggleSolutions">Toon oplossingen</button>
@@ -393,6 +461,7 @@ const GI4_UI = (() => {
     vergelijken: 'tab-vergelijken',
     waarde: 'tab-waarde',
     breuken: 'tab-breuken',
+    kommagetallen: 'tab-kommagetallen',
   };
   function toonTab(naam, tabEl) {
     Object.values(TABS).forEach(id => {
