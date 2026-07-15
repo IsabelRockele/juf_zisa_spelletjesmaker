@@ -71,8 +71,60 @@
   background: #16a34a;
 }
 
+#sidebarTabs .tab-dhte {
+  background: #fee2e2;
+  color: #7f1d1d;
+}
+
+#sidebarTabs .tab-dhte.active {
+  background: #fecaca;
+}
+
+#sidebarTabs .tab-aanvullen {
+  background: #ffedd5;
+  color: #7c2d12;
+}
+
+#sidebarTabs .tab-aanvullen.active {
+  background: #fed7aa;
+}
+
+#sidebarTabs .tab-waarde {
+  background: #ccfbf1;
+  color: #134e4a;
+}
+
+#sidebarTabs .tab-waarde.active {
+  background: #99f6e4;
+}
+
+#sidebarTabs .tab-breuken {
+  background: #fae8ff;
+  color: #701a75;
+}
+
+#sidebarTabs .tab-breuken.active {
+  background: #f5d0fe;
+}
+
+#sidebarTabs .tab-kommagetallen {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+#sidebarTabs .tab-kommagetallen.active {
+  background: #bae6fd;
+}
+
 .gi4-block > .delete-btn {
   display: none;
+}
+
+#werkblad .row-delete-btn {
+  top: 8px !important;
+  right: 8px !important;
+  transform: none !important;
+  z-index: 40;
 }
 
 .gi4-block {
@@ -2947,10 +2999,494 @@
   box-shadow: inset 0 0 0 1.5px rgba(15, 23, 42, .18);
 }
 
+.gi4-decimal-intro {
+  background: #eef9df;
+  border: 1.5px solid #88c63f;
+  border-radius: 8px;
+  padding: 12px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-decimal-intro-title {
+  font-weight: 900;
+  color: #1A3A5C;
+  margin-bottom: 5px;
+}
+
+.gi4-decimal-intro p {
+  margin: 5px 0;
+}
+
+.gi4-decimal-intro-grid,
+.gi4-decimal-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.gi4-decimal-intro-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
+.gi4-decimal-grid.cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gi4-decimal-grid.two,
+.gi4-decimal-grid.compare {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-decimal-grid.order {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.gi4-decimal-grid.order.greatest,
+.gi4-decimal-grid.order.compare {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.gi4-decimal-intro-card,
+.gi4-decimal-card,
+.gi4-decimal-line-card,
+.gi4-decimal-compare-card,
+.gi4-decimal-missing-card,
+.gi4-decimal-jump-card,
+.gi4-decimal-greatest-card,
+.gi4-decimal-contents-card {
+  position: relative;
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  overflow: hidden;
+}
+
+.gi4-decimal-card-title {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.gi4-decimal-strip {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  height: 26px;
+  border: 1.5px solid #9aa8b7;
+  background: #fff;
+}
+
+.gi4-decimal-strip.compact {
+  height: 19px;
+}
+
+.gi4-decimal-strip span {
+  border-right: 1px solid #cbd5e1;
+}
+
+.gi4-decimal-strip span:last-child {
+  border-right: 0;
+}
+
+.gi4-decimal-strip .solution-fill,
+.gi4-decimal-grid-visual .solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-decimal-strip .solution-fill,
+.solutions-mode .gi4-decimal-grid-visual .solution-fill {
+  background: #9bd2ea;
+}
+
+.gi4-decimal-circle {
+  width: 88px;
+  height: 88px;
+  display: block;
+  margin: 4px auto;
+  overflow: visible;
+}
+
+.gi4-decimal-circle .solution-fill-svg {
+  fill: #fff;
+}
+
+.solutions-mode .gi4-decimal-circle .solution-fill-svg {
+  fill: #9bd2ea;
+}
+
+.gi4-decimal-grid-visual {
+  display: grid;
+  grid-template-columns: repeat(5, 24px);
+  grid-auto-rows: 24px;
+  width: max-content;
+  margin: 8px auto;
+  border: 1.5px solid #9aa8b7;
+  background: #fff;
+}
+
+.gi4-decimal-grid-visual span {
+  border-right: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.gi4-decimal-grid-visual span:nth-child(5n) {
+  border-right: 0;
+}
+
+.gi4-decimal-grid-visual span:nth-last-child(-n + 5) {
+  border-bottom: 0;
+}
+
+.gi4-decimal-eggs {
+  display: grid;
+  grid-template-columns: repeat(5, 20px);
+  gap: 4px 6px;
+  justify-content: center;
+  margin: 8px auto;
+}
+
+.gi4-decimal-eggs span {
+  width: 18px;
+  height: 24px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 50% 50% 45% 45%;
+  background: #fff;
+}
+
+.gi4-decimal-eggs span.filled {
+  background: #d6b38d;
+}
+
+.solutions-mode .gi4-decimal-eggs .solution-fill {
+  background: #d6b38d;
+}
+
+.gi4-decimal-axis {
+  position: relative;
+  height: 58px;
+  margin: 8px 18px 2px;
+}
+
+.gi4-decimal-axis-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 28px;
+  border-top: 1.6px solid #7aa8b7;
+}
+
+.gi4-decimal-axis-line::after {
+  content: "";
+  position: absolute;
+  right: -9px;
+  top: -5px;
+  width: 9px;
+  height: 9px;
+  border-top: 1.6px solid #7aa8b7;
+  border-right: 1.6px solid #7aa8b7;
+  transform: rotate(45deg);
+  background: transparent;
+}
+
+.gi4-decimal-axis-tick {
+  position: absolute;
+  top: 20px;
+  height: 16px;
+  border-left: 1px solid #7aa8b7;
+  transform: translateX(-.5px);
+}
+
+.gi4-decimal-axis-tick.major {
+  top: 14px;
+  height: 22px;
+  border-left-width: 1.5px;
+}
+
+.gi4-decimal-axis-label,
+.gi4-decimal-axis-decimal {
+  position: absolute;
+  top: 36px;
+  transform: translateX(-50%);
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.gi4-decimal-axis-decimal {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gi4-decimal-axis-marker {
+  position: absolute;
+  top: 12px;
+  height: 26px;
+  border-left: 2px solid #111827;
+  transform: translateX(-1px);
+}
+
+.gi4-decimal-axis-visual {
+  margin-top: 4px;
+}
+
+.gi4-decimal-answer-box,
+.gi4-decimal-convert-work,
+.gi4-decimal-reference-row,
+.gi4-decimal-visual-compare {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.gi4-decimal-answer-box {
+  margin-top: 9px;
+}
+
+.gi4-decimal-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gi4-decimal-table th {
+  background: #c7eefa;
+  padding: 6px;
+  border: 1px solid #d8e3ec;
+}
+
+.gi4-decimal-table td {
+  border: 1px solid #d8e3ec;
+  padding: 7px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.gi4-decimal-table th:first-child,
+.gi4-decimal-table td:first-child {
+  width: 38%;
+}
+
+.gi4-decimal-table .gi4-table-row-actions {
+  width: 34px;
+  padding: 4px;
+  text-align: center;
+}
+
+.gi4-decimal-table .gi4-table-row-actions .row-delete-btn {
+  position: static !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: none !important;
+}
+
+@media print {
+  .gi4-decimal-table .gi4-table-row-actions {
+    display: none !important;
+  }
+}
+
+html.exporting .gi4-decimal-table .gi4-table-row-actions {
+  display: none !important;
+}
+
+.gi4-decimal-compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+  font-size: 18px;
+  min-height: 46px;
+}
+
+.gi4-compare-box {
+  display: inline-grid;
+  place-items: center;
+  width: 46px;
+  height: 34px;
+  border: 2px solid #1f2937;
+  background: #fff;
+}
+
+.gi4-decimal-compare-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  font-weight: 800;
+}
+
+.gi4-decimal-convert-work,
+.gi4-decimal-reference-row {
+  margin-top: 10px;
+}
+
+.gi4-decimal-reference-row chip,
+.gi4-decimal-reference-row span {
+  display: inline-flex;
+  min-width: 115px;
+}
+
+.gi4-decimal-visual-compare {
+  justify-content: space-around;
+  margin: 2px 0 8px;
+}
+
+.gi4-decimal-order-list {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.gi4-decimal-order-list span {
+  background: #fff7c2;
+  border: 1px solid #e0b800;
+  border-radius: 6px;
+  padding: 3px;
+  font-weight: 800;
+}
+
+.gi4-decimal-order-list .whole {
+  color: #e11d48;
+}
+
+.gi4-decimal-missing-axis {
+  position: relative;
+  padding-bottom: 40px;
+}
+
+.gi4-decimal-missing-chip {
+  position: absolute;
+  top: 54px;
+  transform: translateX(-50%);
+  min-width: 42px;
+  min-height: 28px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: #fff7c2;
+  font-weight: 800;
+}
+
+.gi4-decimal-jump-tag {
+  display: inline-block;
+  background: #ffcf75;
+  border: 1px solid #f59e0b;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.gi4-decimal-jump-row {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border: 1px solid #d8e3ec;
+}
+
+.gi4-decimal-jump-row span {
+  min-height: 32px;
+  display: grid;
+  place-items: center;
+  border-right: 1px solid #d8e3ec;
+}
+
+.gi4-decimal-jump-row span:last-child {
+  border-right: 0;
+}
+
+.gi4-decimal-greatest-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  min-height: 74px;
+}
+
+.solutions-mode .gi4-decimal-greatest-card .solution-highlight {
+  background: #d9f5d6;
+  border-radius: 8px;
+  box-shadow: 0 0 0 6px #d9f5d6;
+}
+
+.gi4-decimal-contents-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: end;
+  gap: 8px;
+}
+
+.gi4-decimal-container-icon {
+  width: 62px;
+  height: 80px;
+  border: 1px solid #9aa8b7;
+  background: #e0f2fe;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  font-weight: 900;
+}
+
+.gi4-decimal-container-icon.blik {
+  background: #fecaca;
+  border-radius: 14px;
+}
+
+.gi4-decimal-container-icon.melk {
+  background: #dbeafe;
+}
+
+.gi4-decimal-container-icon.water {
+  background: #ccfbf1;
+}
+
+.gi4-decimal-container-icon.beker {
+  background: #bae6fd;
+  border-radius: 8px 8px 18px 18px;
+}
+
+.gi4-decimal-container-icon.fles {
+  background: #ddd6fe;
+  border-radius: 20px 20px 8px 8px;
+}
+
+.gi4-decimal-container-icon.sap {
+  background: #fed7aa;
+}
+
+.gi4-decimal-container-icon small {
+  position: absolute;
+  bottom: -22px;
+  width: 22px;
+  height: 20px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+}
+
+.gi4-decimal-contents-answer {
+  margin-top: 32px;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .gi4-grid.two,
   .gi4-grid.three,
-  .gi4-compare-grid {
+  .gi4-compare-grid,
+  .gi4-decimal-intro-grid,
+  .gi4-decimal-grid.cards,
+  .gi4-decimal-grid.two,
+  .gi4-decimal-grid.compare,
+  .gi4-decimal-grid.order,
+  .gi4-decimal-grid.order.greatest,
+  .gi4-decimal-grid.order.compare {
     grid-template-columns: 1fr;
   }
 
