@@ -3484,7 +3484,8 @@
     return model;
   }
 
-  function decimalMixedStripAxis(tenths, maxWhole = 2){
+  function decimalMixedStripAxis(tenths, maxWhole = 2, opts = {}){
+    const { show = true } = opts;
     const wrap = document.createElement('div');
     wrap.className = 'gi4-decimal-mixed-scale';
     wrap.style.setProperty('--gi4-mixed-max', String(maxWhole));
@@ -3494,7 +3495,7 @@
     strips.style.gridTemplateColumns = `repeat(${total}, 1fr)`;
     for (let i = 0; i < total; i++) {
       const cell = document.createElement('span');
-      if (i < tenths) cell.classList.add('filled');
+      if (i < tenths) cell.classList.add(show ? 'filled' : 'solution-fill');
       if (i % 10 === 0) cell.classList.add('start');
       strips.appendChild(cell);
     }
@@ -3520,6 +3521,13 @@
     axis.appendChild(marker);
     wrap.append(strips, axis);
     return wrap;
+  }
+
+  function decimalMixedWords(tenths){
+    const { whole, rest } = decimalMixedLabel(tenths);
+    const wholeTxt = whole === 1 ? '1 geheel' : `${whole} gehelen`;
+    const restTxt = rest === 1 ? '1 tiende' : `${rest} tienden`;
+    return `${wholeTxt} en ${restTxt}`;
   }
 
   function addDecimalMixedIntro(){
@@ -3569,6 +3577,441 @@
     equation.append(fractionBox('', '10', String(value), ''), document.createTextNode(' = '), decimalMixedNumber(value, true), document.createTextNode(' = '), lineWithSolution(decimal, 'short'));
     card.append(visual, sentence, total, equation);
     return card;
+  }
+
+  function makeDecimalMixedStripAxisCard(example = false){
+    const value = decimalMixedSeed('gi4_decimal_mixed_strip_axis');
+    if (!value) return null;
+    const { decimal } = decimalMixedLabel(value);
+    const max = Math.max(2, Math.ceil(value / 10));
+    const card = document.createElement('div');
+    card.className = `gi4-decimal-mixed-strip-axis-card row-delete-wrap${example ? ' example' : ''}`;
+    card.appendChild(rowDel(card));
+    const title = document.createElement('div');
+    title.className = 'gi4-decimal-card-title';
+    title.innerHTML = `<strong>${decimalMixedWords(value)}</strong> van het geheel`;
+    const scale = decimalMixedStripAxis(value, max, { show: example });
+    const equation = document.createElement('div');
+    equation.className = 'gi4-decimal-mixed-equation-box';
+    equation.append(decimalMixedNumber(value, !example), document.createTextNode(' = '), fractionBox(example ? value : '', '10', example ? '' : String(value), ''), document.createTextNode(' = '), example ? document.createTextNode(decimal) : lineWithSolution(decimal, 'short'));
+    card.append(title, scale, equation);
+    return card;
+  }
+
+  function makeDecimalMixedEquivalentCard(){
+    const groups = [
+      { value: 12, items: ['12 tienden', '12/10', '1,2'] },
+      { value: 14, items: ['1 4/10', '1,4', '14/10'] },
+      { value: 17, items: ['17 tienden', '1,7', '1 7/10'] },
+      { value: 21, items: ['2 gehelen en 1 tiende', '2,1', '21/10'] },
+      { value: 24, items: ['24/10', '2,4', '2 4/10'] },
+    ];
+    const cells = groups.sort(() => Math.random() - .5).slice(0, 4)
+      .flatMap(group => group.items.map(text => ({ text, value: group.value })))
+      .sort(() => Math.random() - .5);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-equivalent-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-mixed-equivalent-table';
+    for (let r = 0; r < 2; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < 6; c++) {
+        const item = cells[r * 6 + c];
+        const td = document.createElement('td');
+        td.dataset.value = String(item.value);
+        td.innerHTML = item.text.replace(/(\d+)\/10/g, '<span class="gi4-inline-frac">$1<small></small>10</span>');
+        tr.appendChild(td);
+      }
+      table.appendChild(tr);
+    }
+    card.appendChild(table);
+    return card;
+  }
+
+  function decimalPlaceValueWorkSvg(places, values){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-place-work-svg');
+    svg.setAttribute('viewBox', '0 0 360 165');
+    svg.setAttribute('aria-hidden', 'true');
+
+    const miniY = 8;
+    const miniH = 34;
+    const commaW = 14;
+    const cellW = places.length === 2 ? 58 : 50;
+    const miniX = 185;
+    const commaIndex = places.indexOf('t');
+    const centers = {};
+
+    places.forEach((place, idx) => {
+      const x = miniX + idx * cellW + (idx < commaIndex ? 0 : commaW);
+      centers[place] = x + cellW / 2;
+      const fill = place === 'T' ? '#48bf4f' : place === 'E' ? '#ffd51c' : '#ffe69a';
+      svg.appendChild(svgRect(x, miniY, cellW, miniH, fill, '#7a7f86'));
+    });
+    const commaX = miniX + commaIndex * cellW;
+    svg.appendChild(svgRect(commaX, miniY, commaW, miniH, '#c8c8c8', '#7a7f86'));
+    svg.appendChild(svgText(',', commaX + commaW / 2, miniY + 22, { anchor: 'middle', size: 18, weight: 900 }));
+
+    const rowYs = places.length === 2 ? { E: 82, t: 122 } : { T: 68, E: 105, t: 142 };
+    const labelX = 64;
+    const leftLineX1 = 0;
+    const leftLineX2 = 48;
+    const rightLineX1 = 98;
+    const rightLineX2 = 154;
+
+    places.forEach(place => {
+      const y = rowYs[place];
+      const bendY = y - 12;
+      const xArrowEnd = rightLineX2 + 10;
+      svg.appendChild(svgPath(`M${centers[place]} ${miniY + miniH} V${bendY} H${xArrowEnd}`, 'none', '#555', 1.4));
+      svg.appendChild(svgPath(`M${xArrowEnd} ${bendY} l8 -4 v8 z`, '#555', '#555', 1));
+      svg.appendChild(svgLine(leftLineX1, y, leftLineX2, y, '#cbd5e1', 1.3));
+      svg.appendChild(svgText(`${place} =`, labelX, y + 5, { size: 18, weight: 700 }));
+      svg.appendChild(svgLine(rightLineX1, y, rightLineX2, y, '#cbd5e1', 1.3));
+
+      const leftSolution = svgText(String(values[place].count), (leftLineX1 + leftLineX2) / 2, y - 4, { size: 13, anchor: 'middle', fill: '#0284c7' });
+      leftSolution.classList.add('solution-only');
+      const rightSolution = svgText(values[place].value, (rightLineX1 + rightLineX2) / 2, y - 4, { size: 13, anchor: 'middle', fill: '#0284c7' });
+      rightSolution.classList.add('solution-only');
+      svg.append(leftSolution, rightSolution);
+    });
+    return svg;
+  }
+
+  function decimalPlaceValueCard(value, places = ['E', 't']){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-place-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const whole = Math.floor(value / 10);
+    const rest = value % 10;
+    const tens = Math.floor(whole / 10);
+    const ones = whole % 10;
+    const board = document.createElement('div');
+    board.className = `gi4-decimal-place-board cols-${places.length}`;
+    places.forEach(place => {
+      const col = document.createElement('div');
+      col.className = `place ${place === 'T' ? 'tens' : place === 'E' ? 'ones' : 'tenths'}`;
+      col.innerHTML = `<strong>${place}</strong>`;
+      const count = place === 'T' ? tens : place === 'E' ? ones : rest;
+      for (let i = 0; i < count; i++) {
+        const token = document.createElement('span');
+        token.className = 'gi4-decimal-place-token';
+        token.textContent = place === 'T' ? '10' : place === 'E' ? '1' : '0,1';
+        col.appendChild(token);
+      }
+      board.appendChild(col);
+    });
+    const values = {
+      T: { count: tens, value: String(tens * 10) },
+      E: { count: ones, value: String(ones) },
+      t: { count: rest, value: decimalComma(rest / 10) },
+    };
+    const decimal = document.createElement('div');
+    decimal.className = 'gi4-decimal-place-decimal';
+    decimal.append('Dit is ', lineWithSolution(decimalComma(value / 10), 'short'));
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-place-work';
+    work.appendChild(decimalPlaceValueWorkSvg(places, values));
+    card.append(board, work, decimal);
+    return card;
+  }
+
+  function makeDecimalPlaceValueGrid(){
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-place-grid';
+    [31, 46, 42, 153].forEach((value, idx) => grid.appendChild(decimalPlaceValueCard(value, idx < 2 ? ['E', 't'] : ['T', 'E', 't'])));
+    return grid;
+  }
+
+  function decimalWritePromptPool(){
+    return [
+      ['3 tienden', '0,3'],
+      ['16 tienden', '1,6'],
+      ['1 geheel 7 tienden', '1,7'],
+      ['2 E 3 t', '2,3'],
+      ['1 T 5 E 2 t', '15,2'],
+      ['4 t', '0,4'],
+      ['8,6', ['8 E', '6 t']],
+      ['0,9', ['0 E', '9 t']],
+      ['38,1', ['3 T', '8 E', '1 t']],
+      ['203,4', ['2 H', '0 T', '3 E', '4 t']],
+      ['7,2', ['7 E', '2 t']],
+      ['41,5', ['4 T', '1 E', '5 t']],
+    ];
+  }
+
+  function makeDecimalWriteRow(item){
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-write-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    if (Array.isArray(item[1])) {
+      const [num, parts] = item;
+      row.classList.add('values');
+      row.append(`${num} = `);
+      parts.forEach(part => {
+        const [count, place] = part.split(' ');
+        row.append(lineWithSolution(count, 'tiny'), ` ${place} `);
+      });
+    } else {
+      const [q, a] = item;
+      row.append(Object.assign(document.createElement('span'), { textContent: `${q} =` }), lineWithSolution(a, 'short'));
+    }
+    return row;
+  }
+
+  function appendDecimalWriteRows(container, amount){
+    const existing = Array.from(container.querySelectorAll('.gi4-decimal-write-row'))
+      .map(row => row.dataset.promptKey)
+      .filter(Boolean);
+    const pool = decimalWritePromptPool().map(item => ({ item, key: signaturePart(item[0]) }));
+    for (let i = 0; i < amount; i++) {
+      const next = pool.find(entry => !existing.includes(entry.key)) || pick(pool);
+      const row = makeDecimalWriteRow(next.item);
+      row.dataset.promptKey = next.key;
+      container.appendChild(row);
+      existing.push(next.key);
+    }
+  }
+
+  function makeDecimalWriteValueCard(count = 10){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-write-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const list = document.createElement('div');
+    list.className = 'gi4-decimal-write-list';
+    appendDecimalWriteRows(list, count);
+    card.appendChild(list);
+    return card;
+  }
+
+  function decimalMixedOrderFraction(num, den, mixedWhole = null){
+    const wrap = document.createElement('span');
+    wrap.className = 'gi4-decimal-mixed-order-fraction';
+    if (mixedWhole !== null) wrap.appendChild(Object.assign(document.createElement('b'), { textContent: `${mixedWhole} ` }));
+    wrap.appendChild(fractionBox(num, den));
+    return wrap;
+  }
+
+  function decimalMixedOrderValue(tenths, variant = 'decimal'){
+    const wrap = document.createElement('span');
+    wrap.className = 'gi4-decimal-mixed-order-value';
+    if (variant === 'fraction') {
+      wrap.appendChild(decimalMixedOrderFraction(tenths, 10));
+    } else if (variant === 'mixed') {
+      const { whole, rest } = decimalMixedLabel(tenths);
+      wrap.appendChild(whole > 0 ? decimalMixedOrderFraction(rest, 10, whole) : decimalMixedOrderFraction(tenths, 10));
+    } else {
+      wrap.textContent = decimalComma(tenths / 10);
+    }
+    return wrap;
+  }
+
+  function makeDecimalMixedOrderIntro(){
+    const b = block('gi4_decimal_mixed_order_intro', 'Kommagetallen groter dan 1 ordenen: onthouden.', null);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-order-intro keep-together';
+    card.innerHTML = '<div class="gi4-decimal-intro-title">Onthoud</div><p>Je kan kommagetallen, breuken en gemengde getallen op dezelfde getallenas plaatsen.</p>';
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-mixed-order-axis';
+    axis.appendChild(Object.assign(document.createElement('div'), { className: 'axis-line' }));
+    const axisPos = i => `calc(34px + (100% - 78px) * ${i / 20})`;
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = axisPos(i);
+      axis.appendChild(tick);
+      if (i % 10 === 0) {
+        const whole = document.createElement('span');
+        whole.className = 'whole-chip';
+        whole.style.left = axisPos(i);
+        whole.textContent = String(i / 10);
+        axis.appendChild(whole);
+      } else {
+        const dec = document.createElement('span');
+        dec.className = `decimal-chip ${i % 2 ? 'bottom' : 'top'}`;
+        dec.style.left = axisPos(i);
+        dec.textContent = decimalComma(i / 10);
+        axis.appendChild(dec);
+        const frac = document.createElement('span');
+        frac.className = `fraction-chip ${i % 2 ? 'bottom' : 'top'}`;
+        frac.style.left = axisPos(i);
+        if (i < 10) frac.appendChild(fractionBox(i, 10));
+        else frac.appendChild(decimalMixedOrderFraction(i - 10, 10, 1));
+        axis.appendChild(frac);
+      }
+    }
+    card.appendChild(axis);
+    b.appendChild(card);
+  }
+
+  function decimalMixedMissingVariant(){
+    const variants = [
+      { points: [1, 4, 7, 10, 13, 16, 19], shown: [1, 16] },
+      { points: [2, 5, 8, 11, 14, 17], shown: [5, 14] },
+      { points: [3, 6, 9, 12, 15, 18], shown: [3, 18] },
+      { points: [2, 6, 10, 13, 17], shown: [6] },
+    ];
+    return pickUnused('gi4_decimal_mixed_order_missing', variants, v => [v.points, v.shown]);
+  }
+
+  function makeDecimalMixedOrderMissingCard(){
+    const variant = decimalMixedMissingVariant();
+    if (!variant) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-order-missing-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-missing-axis mixed';
+    const track = document.createElement('div');
+    track.className = 'gi4-decimal-missing-track';
+    track.appendChild(Object.assign(document.createElement('div'), { className: 'gi4-decimal-missing-line' }));
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.className = `gi4-decimal-missing-tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i * 5}%`;
+      track.appendChild(tick);
+      if (i % 10 === 0) {
+        const end = document.createElement('span');
+        end.className = 'gi4-decimal-missing-end';
+        end.style.left = `${i * 5}%`;
+        end.textContent = String(i / 10);
+        track.appendChild(end);
+      }
+    }
+    axis.appendChild(track);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-missing-grid mixed';
+    variant.points.forEach(i => {
+      const col = document.createElement('div');
+      col.className = 'gi4-decimal-missing-col';
+      col.style.left = `${i * 5}%`;
+      const chip = document.createElement('span');
+      chip.className = 'gi4-decimal-missing-chip';
+      if (variant.shown.includes(i)) chip.textContent = decimalComma(i / 10);
+      else chip.appendChild(markSolution(sol(decimalComma(i / 10))));
+      col.appendChild(chip);
+
+      const showNumerator = i % 4 === 0;
+      col.appendChild(decimalOrderFraction(showNumerator ? String(i) : '', '10', showNumerator ? '' : String(i)));
+
+      if (i > 10) {
+        const rest = i - 10;
+        const showRest = i % 4 !== 0;
+        const frac = decimalOrderFraction(showRest ? String(rest) : '', '10', showRest ? '' : String(rest), '', 'simple');
+        const mixed = document.createElement('span');
+        mixed.className = 'gi4-decimal-mixed-missing-mixed';
+        mixed.append('1 ', frac);
+        col.appendChild(mixed);
+      }
+      grid.appendChild(col);
+    });
+    axis.appendChild(grid);
+    card.appendChild(axis);
+    return card;
+  }
+
+  function decimalMixedJumpVariant(){
+    const variants = [
+      { step: 1, start: 30, length: 11, show: [2, 3, 4, 8] },
+      { step: 1, start: 14, length: 11, show: [0, 4, 5, 9] },
+      { step: 2, start: 10, length: 6, show: [0, 1, 5] },
+      { step: 2, start: 24, length: 6, show: [0, 2, 5] },
+      { step: -2, start: 46, length: 6, show: [0, 1, 5] },
+      { step: -2, start: 58, length: 6, show: [0, 3, 5] },
+      { step: 5, start: 30, length: 11, show: [2, 3, 4, 8, 9] },
+      { step: 5, start: 15, length: 8, show: [0, 1, 4, 7] },
+      { step: -5, start: 75, length: 8, show: [0, 2, 5, 7] },
+    ];
+    return pickUnused('gi4_decimal_mixed_order_jump_row', variants, v => [v.step, v.start, v.length]);
+  }
+
+  function makeDecimalMixedOrderJumpsCard(){
+    const rowData = decimalMixedJumpVariant();
+    if (!rowData) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-order-jumps-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const tag = document.createElement('div');
+    tag.className = 'gi4-decimal-jump-tag';
+    tag.textContent = `Maak sprongen van ${decimalComma(Math.abs(rowData.step) / 10)}.`;
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-jump-row mixed';
+    row.style.gridTemplateColumns = `repeat(${rowData.length}, 1fr)`;
+    for (let i = 0; i < rowData.length; i++) {
+      const value = rowData.start + i * rowData.step;
+      const cell = document.createElement('span');
+      if (rowData.show.includes(i)) cell.textContent = decimalComma(value / 10);
+      else cell.appendChild(markSolution(sol(decimalComma(value / 10))));
+      row.appendChild(cell);
+    }
+    card.append(tag, row);
+    return card;
+  }
+
+  function decimalMixedGreatestSet(){
+    const sets = [
+      [12, 13, 16],
+      [2, 15, 5],
+      [14, 19, 17],
+      [51, 52, 53],
+      [68, 63, 62],
+      [34, 35, 30],
+      [21, 17, 12],
+      [24, 23, 28],
+    ];
+    return pickUnused('gi4_decimal_mixed_order_greatest', sets, set => set.join('-'));
+  }
+
+  function makeDecimalMixedOrderGreatestCard(){
+    const set = decimalMixedGreatestSet();
+    if (!set) return null;
+    const variants = ['mixed', 'decimal', 'fraction'].sort(() => Math.random() - .5);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-order-greatest-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach((value, idx) => {
+      const choice = document.createElement('span');
+      choice.className = 'gi4-decimal-greatest-choice';
+      choice.appendChild(decimalMixedOrderValue(value, variants[idx]));
+      if (value === Math.max(...set)) choice.classList.add('solution-highlight');
+      card.appendChild(choice);
+    });
+    return card;
+  }
+
+  function decimalMixedComparePair(){
+    const pairs = [
+      [34, 64], [49, 45], [38, 308], [8, 13], [50, 5], [82, 90],
+      [12, 16], [19, 17], [24, 21], [35, 34], [68, 63], [51, 53],
+    ];
+    return pickUnused('gi4_decimal_mixed_order_compare_pair', pairs, pair => pair.join('-'));
+  }
+
+  function makeDecimalMixedOrderCompareCard(){
+    const pair = decimalMixedComparePair();
+    if (!pair) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-order-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-mixed-compare-row';
+    const sign = document.createElement('span');
+    sign.className = 'gi4-compare-box';
+    sign.appendChild(sol(compareSymbol(pair[0], pair[1])));
+    row.append(decimalMixedOrderValue(pair[0], 'decimal'), sign, decimalMixedOrderValue(pair[1], 'decimal'));
+    card.appendChild(row);
+    return card;
+  }
+
+  function makeDecimalMixedModeCard(mode){
+    if (mode === 'connect') return makeDecimalMixedConnectCard();
+    if (mode === 'stripAxis') return makeDecimalMixedStripAxisCard(false);
+    if (mode === 'orderMissing') return makeDecimalMixedOrderMissingCard();
+    if (mode === 'orderJumps') return makeDecimalMixedOrderJumpsCard();
+    if (mode === 'orderGreatest') return makeDecimalMixedOrderGreatestCard();
+    if (mode === 'orderCompare') return makeDecimalMixedOrderCompareCard();
+    return makeDecimalMixedFillCard();
   }
 
   function makeDecimalMixedConnectCard(){
@@ -3653,34 +4096,74 @@
       addDecimalMixedIntro();
       return;
     }
+    if (mode === 'orderIntro') {
+      makeDecimalMixedOrderIntro();
+      return;
+    }
     const key = `gi4_decimal_mixed_${mode}`;
     const requested = Math.max(1, Math.min(6, parseInt($('#decimalMixedCount')?.value, 10) || 3));
     const count = extraCount || requested;
     if (extraCount) {
       const existing = containerInLastBlock(key, '.gi4-decimal-mixed-grid', `gi4-decimal-mixed-grid ${mode}`);
+      if (mode === 'writeValue') {
+        const list = containerInLastBlock(key, '.gi4-decimal-write-list', 'gi4-decimal-write-list');
+        if (list) {
+          appendDecimalWriteRows(list, count);
+          return;
+        }
+      }
       if (existing) {
-        for (let i = 0; i < count; i++) appendNewExercise(existing, () => mode === 'connect' ? makeDecimalMixedConnectCard() : makeDecimalMixedFillCard());
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeDecimalMixedModeCard(mode));
         return;
       }
     }
     const titles = {
       fill: 'Kommagetallen groter dan 1: vul aan.',
+      stripAxis: 'Kommagetallen groter dan 1: strook en getallenas.',
       connect: 'Kommagetallen groter dan 1: verbind.',
       table: 'Kommagetallen groter dan 1: tabel.',
+      equivalent: 'Kommagetallen groter dan 1: geef dezelfde waarde dezelfde kleur.',
+      placeValue: 'Kommagetallen groter dan 1: plaatswaarde.',
+      writeValue: 'Kommagetallen groter dan 1: schrijf en bepaal de waarde.',
+      orderMissing: 'Kommagetallen groter dan 1 ordenen: vul de getallenas aan.',
+      orderJumps: 'Kommagetallen groter dan 1 ordenen: tel verder of terug.',
+      orderGreatest: 'Kommagetallen groter dan 1 ordenen: kleur de grootste waarde.',
+      orderCompare: 'Kommagetallen groter dan 1 ordenen: vergelijk.',
     };
     const b = block(key, titles[mode] || 'Kommagetallen groter dan 1.', addCount => addDecimalMixed(addCount || 1, mode));
     const instructions = {
       fill: ['Vul de ontbrekende gegevens in.', 'Schrijf als onechte breuk, gemengd getal en kommagetal.'],
+      stripAxis: ['Stel de hoeveelheid voor op de stroken. Kleur in.', 'Schrijf het gemengd getal en de onechte breuk.', 'Schrijf het kommagetal.'],
       connect: ['Verbind elke voorstelling met de juiste onechte breuk.', 'Schrijf de onechte breuk als gemengd getal.', 'Verbind met het juiste kommagetal.'],
       table: ['Vul de tabel aan.'],
+      equivalent: ['Geef wat evenveel is dezelfde kleur.'],
+      placeValue: ['Hoeveel gehelen? Schrijf de eenheden (E).', 'Hoeveel tienden? Schrijf de tienden (t).', 'Schrijf het kommagetal.'],
+      writeValue: ['Schrijf de kommagetallen.', 'Schrijf de waarde van elk cijfer.'],
+      orderMissing: ['Vul de ontbrekende kommagetallen aan.', 'Vul de ontbrekende breuken aan.', 'Vul de ontbrekende breukdelen bij de gemengde getallen aan.'],
+      orderJumps: ['Tel verder of tel terug.'],
+      orderGreatest: ['Kleur de grootste waarde in elke reeks van 3.', '<strong>Tip!</strong> Je kan alles als breuk met noemer 10 schrijven.'],
+      orderCompare: ['Vergelijk eerst de gehelen. Vergelijk daarna de tienden.', 'Schrijf: &lt; of &gt;.'],
     };
     addFractionInstructions(b, instructions[mode] || ['Vul aan.']);
-    if (mode === 'table') {
+    if (mode === 'stripAxis') {
+      const grid = document.createElement('div');
+      grid.className = 'gi4-decimal-mixed-grid stripAxis';
+      for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeDecimalMixedStripAxisCard(i === 0));
+      b.appendChild(grid);
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixed(1, mode));
+    } else if (mode === 'table') {
       b.appendChild(makeDecimalMixedTable());
+    } else if (mode === 'equivalent') {
+      b.appendChild(makeDecimalMixedEquivalentCard());
+    } else if (mode === 'placeValue') {
+      b.appendChild(makeDecimalPlaceValueGrid());
+    } else if (mode === 'writeValue') {
+      b.appendChild(makeDecimalWriteValueCard(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixed(1, mode));
     } else {
       const grid = document.createElement('div');
       grid.className = `gi4-decimal-mixed-grid ${mode}`;
-      for (let i = 0; i < count; i++) appendNewExercise(grid, () => mode === 'connect' ? makeDecimalMixedConnectCard() : makeDecimalMixedFillCard());
+      for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeDecimalMixedModeCard(mode));
       b.appendChild(grid);
       addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixed(1, mode));
     }
