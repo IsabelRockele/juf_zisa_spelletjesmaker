@@ -3604,7 +3604,7 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
 .gi4-decimal-mixed-intro,
 .gi4-decimal-mixed-fill-card,
 .gi4-decimal-mixed-connect-card,
-.gi4-decimal-mixed-table {
+.gi4-decimal-mixed-table-card {
   position: relative;
   border: 1.5px solid #c2c8d0;
   border-radius: 8px;
@@ -3653,57 +3653,51 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
   display: flex;
   align-items: end;
   justify-content: center;
-  gap: 9px;
-  min-height: 62px;
+  gap: 13px;
+  min-height: 76px;
   flex-wrap: wrap;
 }
 
 .gi4-decimal-mixed-model.compact {
-  min-height: 44px;
-  gap: 6px;
-}
-
-.gi4-decimal-mixed-whole-block {
-  width: 54px;
-  height: 48px;
-  border: 1.3px solid #8a6a00;
-  background:
-    linear-gradient(30deg, rgba(255,255,255,.25) 0 28%, transparent 28%),
-    repeating-linear-gradient(0deg, transparent 0 4px, rgba(80,60,0,.38) 4px 5px),
-    repeating-linear-gradient(90deg, #ffd533 0 4px, #e5b900 4px 5px);
-  box-shadow: 8px -7px 0 #caa100, 8px -7px 0 1px #8a6a00;
-  transform: skewY(-1deg);
-}
-
-.gi4-decimal-mixed-model.compact .gi4-decimal-mixed-whole-block {
-  width: 38px;
-  height: 34px;
-  box-shadow: 6px -5px 0 #caa100, 6px -5px 0 1px #8a6a00;
+  min-height: 54px;
+  gap: 9px;
 }
 
 .gi4-decimal-mixed-plates {
   display: grid;
-  grid-template-columns: repeat(5, 34px);
-  gap: 6px;
+  grid-template-columns: repeat(5, 62px);
+  gap: 7px 8px;
   align-items: center;
+  padding-bottom: 3px;
 }
 
 .gi4-decimal-mixed-model.compact .gi4-decimal-mixed-plates {
-  grid-template-columns: repeat(5, 24px);
-  gap: 4px;
+  grid-template-columns: repeat(5, 44px);
+  gap: 4px 5px;
 }
 
-.gi4-decimal-mixed-plates .plate {
-  width: 34px;
-  height: 13px;
-  border: 1.2px solid #8a6a00;
-  background: repeating-linear-gradient(90deg, #ffd533 0 4px, #e5b900 4px 5px);
-  box-shadow: 5px -4px 0 #caa100, 5px -4px 0 1px #8a6a00;
+.gi4-decimal-mixed-cube-svg {
+  width: 74px;
+  height: 65px;
+  flex: 0 0 auto;
+  overflow: visible;
 }
 
-.gi4-decimal-mixed-model.compact .gi4-decimal-mixed-plates .plate {
-  width: 24px;
-  height: 10px;
+.gi4-decimal-mixed-plate-svg {
+  width: 62px;
+  height: 30px;
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.gi4-decimal-mixed-cube-svg.compact {
+  width: 50px;
+  height: 44px;
+}
+
+.gi4-decimal-mixed-plate-svg.compact {
+  width: 44px;
+  height: 22px;
 }
 
 .gi4-decimal-mixed-model.strips {
@@ -3740,7 +3734,7 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
 
 .gi4-decimal-mixed-scale-strips {
   display: grid;
-  grid-template-columns: repeat(calc(var(--gi4-mixed-max) * 10), 1fr);
+  grid-template-columns: repeat(20, 1fr);
   height: 20px;
   border: 1.2px solid #8aa0ad;
   background: #fff;
