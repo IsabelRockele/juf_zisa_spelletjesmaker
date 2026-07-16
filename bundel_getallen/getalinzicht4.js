@@ -3380,15 +3380,92 @@
     return wrap;
   }
 
+  function decimalMixedCubeSvg(compact = false){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-mixed-cube-svg');
+    if (compact) svg.classList.add('compact');
+    svg.setAttribute('viewBox', '0 0 82 72');
+    svg.setAttribute('aria-hidden', 'true');
+    const front = { x: 8, y: 20, w: 46, h: 46 };
+    const dx = 16, dy = -12;
+    const yellow = '#ffd83d';
+    const top = '#ffe56e';
+    const side = '#caa100';
+    const stroke = '#8a6a00';
+    const grid = '#9d7a00';
+
+    svg.appendChild(svgPolygon(
+      `${front.x},${front.y} ${front.x + dx},${front.y + dy} ${front.x + front.w + dx},${front.y + dy} ${front.x + front.w},${front.y}`,
+      top,
+      stroke
+    ));
+    svg.appendChild(svgPolygon(
+      `${front.x + front.w},${front.y} ${front.x + front.w + dx},${front.y + dy} ${front.x + front.w + dx},${front.y + front.h + dy} ${front.x + front.w},${front.y + front.h}`,
+      side,
+      stroke
+    ));
+    svg.appendChild(svgRect(front.x, front.y, front.w, front.h, yellow, stroke));
+
+    for (let i = 1; i < 10; i++) {
+      const p = i / 10;
+      const x = front.x + front.w * p;
+      const y = front.y + front.h * p;
+      svg.appendChild(svgLine(x, front.y, x, front.y + front.h, grid, .55));
+      svg.appendChild(svgLine(front.x, y, front.x + front.w, y, grid, .55));
+
+      svg.appendChild(svgLine(front.x + front.w * p, front.y, front.x + dx + front.w * p, front.y + dy, grid, .45));
+      svg.appendChild(svgLine(front.x + front.w, front.y + front.h * p, front.x + front.w + dx, front.y + dy + front.h * p, grid, .45));
+    }
+    for (let i = 1; i < 5; i++) {
+      const p = i / 5;
+      svg.appendChild(svgLine(front.x + dx * p, front.y + dy * p, front.x + front.w + dx * p, front.y + dy * p, grid, .4));
+      svg.appendChild(svgLine(front.x + front.w + dx * p, front.y + dy * p, front.x + front.w + dx * p, front.y + front.h + dy * p, grid, .4));
+    }
+    return svg;
+  }
+
+  function decimalMixedPlateSvg(compact = false){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-mixed-plate-svg');
+    if (compact) svg.classList.add('compact');
+    svg.setAttribute('viewBox', '0 0 76 36');
+    svg.setAttribute('aria-hidden', 'true');
+    const A = { x: 8, y: 15 }, B = { x: 56, y: 15 }, C = { x: 68, y: 8 }, D = { x: 20, y: 8 };
+    const A2 = { x: 8, y: 21 }, B2 = { x: 56, y: 21 }, C2 = { x: 68, y: 14 };
+    const fill = '#ffd83d';
+    const side = '#caa100';
+    const stroke = '#8a6a00';
+    const grid = '#9d7a00';
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e4b900', stroke));
+    svg.appendChild(svgPolygon(`${B.x},${B.y} ${C.x},${C.y} ${C2.x},${C2.y} ${B2.x},${B2.y}`, side, stroke));
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}`, fill, stroke));
+
+    const lerp = (p, q, t) => ({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
+    for (let i = 1; i < 10; i++) {
+      const t = i / 10;
+      const top1 = lerp(D, C, t);
+      const bot1 = lerp(A, B, t);
+      svg.appendChild(svgLine(top1.x, top1.y, bot1.x, bot1.y, grid, .5));
+      const left = lerp(A, D, t);
+      const right = lerp(B, C, t);
+      svg.appendChild(svgLine(left.x, left.y, right.x, right.y, grid, .5));
+    }
+    return svg;
+  }
+
   function decimalMixedModel(tenths, opts = {}){
     const { compact = false, strips = false, showPartial = true } = opts;
     const { whole, rest } = decimalMixedLabel(tenths);
     const model = document.createElement('div');
     model.className = `gi4-decimal-mixed-model${compact ? ' compact' : ''}${strips ? ' strips' : ''}`;
     for (let i = 0; i < whole; i++) {
-      const block = document.createElement('span');
-      block.className = strips ? 'gi4-decimal-mixed-strip-full' : 'gi4-decimal-mixed-whole-block';
-      model.appendChild(block);
+      if (strips) {
+        const block = document.createElement('span');
+        block.className = 'gi4-decimal-mixed-strip-full';
+        model.appendChild(block);
+      } else {
+        model.appendChild(decimalMixedCubeSvg(compact));
+      }
     }
     if (rest || showPartial) {
       const partial = document.createElement('span');
@@ -3400,7 +3477,7 @@
           partial.appendChild(cell);
         }
       } else {
-        for (let i = 0; i < rest; i++) partial.appendChild(Object.assign(document.createElement('i'), { className: 'plate' }));
+        for (let i = 0; i < rest; i++) partial.appendChild(decimalMixedPlateSvg(compact));
       }
       model.appendChild(partial);
     }
@@ -3545,9 +3622,11 @@
   function makeDecimalMixedTable(){
     const values = [12, 15, 17, 24].sort(() => Math.random() - .5);
     const kinds = ['blocks', 'strips', 'axis', 'blocks'];
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-table-card row-delete-wrap';
+    card.appendChild(rowDel(card));
     const table = document.createElement('table');
-    table.className = 'gi4-decimal-mixed-table row-delete-wrap';
-    table.appendChild(rowDel(table));
+    table.className = 'gi4-decimal-mixed-table';
     table.innerHTML = '<thead><tr><th>voorstelling</th><th>gemengd getal</th><th>onechte breuk</th><th>kommagetal</th></tr></thead>';
     const body = document.createElement('tbody');
     values.forEach((value, idx) => {
@@ -3564,7 +3643,8 @@
       body.appendChild(tr);
     });
     table.appendChild(body);
-    return table;
+    card.appendChild(table);
+    return card;
   }
 
   function addDecimalMixed(extraCount, forcedMode){
