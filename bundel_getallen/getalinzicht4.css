@@ -3665,15 +3665,15 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
 
 .gi4-decimal-mixed-plates {
   display: grid;
-  grid-template-columns: repeat(5, 62px);
-  gap: 7px 8px;
+  grid-template-columns: repeat(5, 78px);
+  gap: 7px 10px;
   align-items: center;
   padding-bottom: 3px;
 }
 
 .gi4-decimal-mixed-model.compact .gi4-decimal-mixed-plates {
-  grid-template-columns: repeat(5, 44px);
-  gap: 4px 5px;
+  grid-template-columns: repeat(5, 54px);
+  gap: 4px 6px;
 }
 
 .gi4-decimal-mixed-cube-svg {
@@ -3684,8 +3684,8 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
 }
 
 .gi4-decimal-mixed-plate-svg {
-  width: 62px;
-  height: 30px;
+  width: 78px;
+  height: 40px;
   flex: 0 0 auto;
   overflow: visible;
 }
@@ -3696,8 +3696,8 @@ html.exporting .gi4-decimal-table .gi4-table-row-actions {
 }
 
 .gi4-decimal-mixed-plate-svg.compact {
-  width: 44px;
-  height: 22px;
+  width: 54px;
+  height: 28px;
 }
 
 .gi4-decimal-mixed-model.strips {
