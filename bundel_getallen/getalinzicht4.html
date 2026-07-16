@@ -377,22 +377,6 @@
       <button class="btn-toevoegen" id="btnAddDecimalIntro">Voeg onthoudblok toe</button>
 
       <div class="config-kaart" style="margin-top:12px">
-        <div class="kaart-titel">Kommagetallen groter dan 1</div>
-        <div class="veld-rij">
-          <label>Aantal <input id="decimalMixedCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
-          <label>Soort
-            <select id="decimalMixedMode" style="width:145px">
-              <option value="intro" selected>onthoudkaart</option>
-              <option value="fill">vul aan</option>
-              <option value="connect">verbind</option>
-              <option value="table">tabel</option>
-            </select>
-          </label>
-        </div>
-      </div>
-      <button class="btn-toevoegen" id="btnAddDecimalMixed">Voeg > 1-oefening toe</button>
-
-      <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Tienden kleuren</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalColorCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
@@ -449,6 +433,31 @@
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddDecimalOrder">Voeg orden-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Kommagetallen groter dan 1</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalMixedCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalMixedMode" style="width:145px">
+              <option value="intro" selected>onthoudkaart</option>
+              <option value="fill">vul aan</option>
+              <option value="stripAxis">strook en as</option>
+              <option value="connect">verbind</option>
+              <option value="table">tabel</option>
+              <option value="equivalent">zelfde waarde kleuren</option>
+              <option value="placeValue">plaatswaarde</option>
+              <option value="writeValue">schrijf en waarde</option>
+              <option value="orderIntro">ordenen onthoud</option>
+              <option value="orderMissing">ordenen as aanvullen</option>
+              <option value="orderJumps">ordenen sprongen</option>
+              <option value="orderGreatest">grootste waarde</option>
+              <option value="orderCompare">vergelijken</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalMixed">Voeg > 1-oefening toe</button>
     </div>
 
     <div class="sidebar-footer">
