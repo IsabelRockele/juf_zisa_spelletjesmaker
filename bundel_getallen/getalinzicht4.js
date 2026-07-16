@@ -3428,15 +3428,15 @@
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('gi4-decimal-mixed-plate-svg');
     if (compact) svg.classList.add('compact');
-    svg.setAttribute('viewBox', '0 0 76 36');
+    svg.setAttribute('viewBox', '0 0 96 48');
     svg.setAttribute('aria-hidden', 'true');
-    const A = { x: 8, y: 15 }, B = { x: 56, y: 15 }, C = { x: 68, y: 8 }, D = { x: 20, y: 8 };
-    const A2 = { x: 8, y: 21 }, B2 = { x: 56, y: 21 }, C2 = { x: 68, y: 14 };
+    const A = { x: 9, y: 28 }, B = { x: 69, y: 28 }, C = { x: 88, y: 14 }, D = { x: 28, y: 14 };
+    const A2 = { x: 9, y: 34 }, B2 = { x: 69, y: 34 }, C2 = { x: 88, y: 20 };
     const fill = '#ffd83d';
     const side = '#caa100';
     const stroke = '#8a6a00';
     const grid = '#9d7a00';
-    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e4b900', stroke));
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e5b900', stroke));
     svg.appendChild(svgPolygon(`${B.x},${B.y} ${C.x},${C.y} ${C2.x},${C2.y} ${B2.x},${B2.y}`, side, stroke));
     svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}`, fill, stroke));
 
@@ -3445,10 +3445,10 @@
       const t = i / 10;
       const top1 = lerp(D, C, t);
       const bot1 = lerp(A, B, t);
-      svg.appendChild(svgLine(top1.x, top1.y, bot1.x, bot1.y, grid, .5));
+      svg.appendChild(svgLine(top1.x, top1.y, bot1.x, bot1.y, grid, .65));
       const left = lerp(A, D, t);
       const right = lerp(B, C, t);
-      svg.appendChild(svgLine(left.x, left.y, right.x, right.y, grid, .5));
+      svg.appendChild(svgLine(left.x, left.y, right.x, right.y, grid, .65));
     }
     return svg;
   }
