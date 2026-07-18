@@ -1,4 +1,4 @@
-/* 4de leerjaar - getalinzicht tot 10 000 */
+/* 4de tot en met 6de leerjaar - getalinzicht tot 100 000 */
 
 .graad-badge {
   background: #fff7ed;
@@ -8,6 +8,37 @@
   padding: 5px 10px;
   font-weight: 900;
   font-size: 12px;
+}
+
+.gi4-level-panel {
+  margin: 0 0 12px;
+  background: linear-gradient(135deg, #f8fbff, #f3fbef);
+  border-color: #bfdbfe;
+}
+
+.gi4-level-panel .veld-rij {
+  gap: 8px;
+}
+
+.gi4-level-note {
+  margin: 8px 0 0;
+  color: #1A3A5C;
+  font-size: 12px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.gi4-show-all-levels {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #475569;
+  font-weight: 800;
+}
+
+body.gi4-range-100000 .graad-badge {
+  background: #ecfeff;
+  color: #155e75;
+  border-color: #a5f3fc;
 }
 
 .gi4-note {
@@ -76,6 +107,15 @@
   color: #7f1d1d;
 }
 
+#sidebarTabs .tab-100000 {
+  background: #e0f7ec;
+  color: #14532d;
+}
+
+#sidebarTabs .tab-100000.active {
+  background: #bdf0d2;
+}
+
 #sidebarTabs .tab-dhte.active {
   background: #fecaca;
 }
@@ -118,6 +158,41 @@
 
 .gi4-block > .delete-btn {
   display: none;
+}
+
+.gi4-block-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px dashed #d8e4ef;
+}
+
+.gi4-block-remove-btn {
+  border: 1px solid #f3a7b3;
+  background: #fff5f7;
+  color: #b4233b;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.gi4-block-remove-btn:hover {
+  background: #ffe3e8;
+}
+
+@media print {
+  .gi4-block-controls {
+    display: none !important;
+  }
+}
+
+html.exporting .gi4-block-controls {
+  display: none !important;
 }
 
 #werkblad .row-delete-btn {
@@ -279,6 +354,695 @@
   color: #0f8dc4;
 }
 
+.gi4-next-thousand-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 18px;
+}
+
+.gi4-next-thousand-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 10px;
+  padding: 18px 18px 16px;
+  min-height: 174px;
+  display: grid;
+  gap: 13px;
+  align-content: start;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-next-thousand-card.example {
+  background: #ffddb0;
+  border-color: #fb923c;
+}
+
+.gi4-next-thousand-number {
+  justify-self: center;
+  min-width: 150px;
+  padding: 5px 12px;
+  border: 1.4px solid #606a76;
+  background: #fff;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.gi4-next-thousand-card p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.45;
+}
+
+.gi4-next-thousand-card strong {
+  color: #0f8dc4;
+}
+
+.gi4-next-thousand-card .gi4-line.long {
+  min-width: 138px;
+}
+
+.gi4-g5-axis-order {
+  display: grid;
+  gap: 38px;
+}
+
+.gi4-g5-axis-order-row {
+  position: relative;
+  display: grid;
+  gap: 34px;
+  padding: 8px 0 24px;
+  border-bottom: 1px solid #d8edf3;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-g5-axis-order-row:last-child {
+  border-bottom: 0;
+}
+
+.gi4-g5-axis {
+  position: relative;
+  height: 86px;
+  margin: 0 14px;
+}
+
+.gi4-g5-axis-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 54px;
+  border-top: 2px solid #6e9faf;
+}
+
+.gi4-g5-axis-line::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #6e9faf;
+  border-right: 2px solid #6e9faf;
+  transform: rotate(45deg);
+}
+
+.gi4-g5-axis > span {
+  position: absolute;
+  top: 45px;
+  height: 16px;
+  border-left: 1.5px solid #6e9faf;
+  transform: translateX(-50%);
+}
+
+.gi4-g5-axis > span.major {
+  top: 27px;
+  height: 34px;
+  border-left-width: 2px;
+}
+
+.gi4-g5-axis-label {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  border: 1.6px solid #6e9faf;
+  background: #fff;
+  padding: 4px 7px;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.gi4-g5-axis-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px 34px;
+  padding-top: 16px;
+}
+
+.gi4-g5-axis-card {
+  position: relative;
+  min-width: 96px;
+  padding: 8px 13px;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  text-align: center;
+  font-size: 18px;
+}
+
+.gi4-g5-axis-card::before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #111827;
+}
+
+.gi4-g5-place-compare,
+.gi4-g5-plain-compare {
+  display: grid;
+  gap: 14px;
+}
+
+.gi4-g5-plain-compare {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 18px;
+}
+
+.gi4-g5-place-compare-card,
+.gi4-g5-plain-compare-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 10px;
+  padding: 12px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-g5-place-compare-tables {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.gi4-g5-place-compare-card .gi4-place-table.compact td {
+  height: 48px;
+}
+
+.gi4-g5-place-compare-card .gi4-material.compact {
+  min-height: 36px;
+  gap: 3px;
+}
+
+.gi4-g5-place-compare-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 18px;
+}
+
+.gi4-g5-plain-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+}
+
+.gi4-g5-plain-compare-row {
+  display: grid;
+  grid-template-columns: 1fr 40px 1fr;
+  align-items: center;
+  justify-items: center;
+  padding: 12px 10px;
+  border-right: 2px solid #6e9faf;
+  border-bottom: 2px solid #6e9faf;
+  font-size: 18px;
+  position: relative;
+}
+
+.gi4-g5-plain-compare-row:nth-child(3n) {
+  border-right: 0;
+}
+
+.gi4-g5-plain-compare > .gi4-g5-plain-compare-row {
+  border: 1.5px solid #d7e4ec;
+  border-radius: 8px;
+  grid-template-columns: max-content 42px max-content;
+  justify-content: center;
+  gap: 16px;
+  min-height: 58px;
+  padding: 10px 14px;
+}
+
+.gi4-g5-order-list {
+  display: grid;
+  gap: 18px;
+}
+
+.gi4-g5-order-line {
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  padding: 16px 16px 22px;
+  border: 1.5px solid #d7e4ec;
+  border-radius: 8px;
+  font-size: 18px;
+  position: relative;
+}
+
+.gi4-g5-order-source {
+  font-size: 18px;
+}
+
+.gi4-g5-order-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 80%;
+  margin-top: 12px;
+}
+
+.gi4-g5-order-answer .gi4-line.long {
+  flex: 1;
+  min-width: 0;
+}
+
+.gi4-g5-neighbor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 28px;
+}
+
+.gi4-g5-neighbor-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 17px;
+}
+
+.gi4-g5-neighbor-table th,
+.gi4-g5-neighbor-table td {
+  border: 1.3px solid #cbd5e1;
+  text-align: center;
+  height: 38px;
+}
+
+.gi4-g5-neighbor-table th {
+  color: #111827;
+  font-weight: 900;
+  font-size: 18px;
+}
+
+.gi4-g5-neighbor-table .gi4-g5-neighbor-actions {
+  width: 32px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+#werkblad .gi4-g5-neighbor-actions .row-delete-btn {
+  position: static !important;
+  transform: none !important;
+  width: 22px;
+  height: 22px;
+  line-height: 18px;
+  margin: 0 auto;
+}
+
+.gi4-g5-neighbor-table tr.example td {
+  background: #ffddb0;
+}
+
+.gi4-g5-neighbor-table tr.example .gi4-g5-neighbor-actions {
+  background: transparent;
+}
+
+@media print {
+  .gi4-g5-neighbor-table .gi4-g5-neighbor-actions {
+    display: none !important;
+  }
+}
+
+html.exporting .gi4-g5-neighbor-table .gi4-g5-neighbor-actions {
+  display: none !important;
+}
+
+.gi4-g5-jumps {
+  display: grid;
+  gap: 24px;
+}
+
+.gi4-g5-jump-row {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-g5-jump-tag {
+  justify-self: start;
+  border: 1.8px solid #fb7c20;
+  border-radius: 12px;
+  background: #ffd5a8;
+  padding: 8px 22px;
+  font-size: 18px;
+}
+
+.gi4-g5-jump-axis {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #6e9faf;
+}
+
+.gi4-g5-jump-axis::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  bottom: 15px;
+  width: 10px;
+  height: 10px;
+  border-top: 2px solid #6e9faf;
+  border-right: 2px solid #6e9faf;
+  transform: rotate(45deg);
+}
+
+.gi4-g5-jump-axis > div {
+  position: relative;
+  min-height: 44px;
+  border: 1.6px solid #6e9faf;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
+
+.gi4-g5-jump-axis > div::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -21px;
+  height: 20px;
+  border-left: 2px solid #6e9faf;
+}
+
+.gi4-g5-jump-axis > div.center {
+  background: #ffddb0;
+  border-color: #fb7c20;
+  font-size: 18px;
+}
+
+.gi4-g5-riddle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.gi4-g5-riddle-card {
+  position: relative;
+  border: 1.8px solid #fb7c20;
+  border-radius: 12px;
+  padding: 16px 20px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-g5-riddle-card p {
+  margin: 0 0 9px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.gi4-g5-riddle-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 18px;
+}
+
+.gi4-g5-simplify-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.gi4-g5-simplify-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 14px 16px 16px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-g5-simplify-strip {
+  display: grid;
+  gap: 0;
+  margin-bottom: 14px;
+}
+
+.gi4-g5-simplify-strip-row {
+  display: grid;
+  grid-template-columns: repeat(var(--den), 1fr);
+  height: 24px;
+  border: 1.4px solid #6b7280;
+  border-bottom-width: 0;
+  background: #fff;
+}
+
+.gi4-g5-simplify-strip-row:last-child {
+  border-bottom-width: 1.4px;
+}
+
+.gi4-g5-simplify-strip-row span {
+  border-left: 1.2px solid #6b7280;
+}
+
+.gi4-g5-simplify-strip-row span:first-child {
+  border-left: 0;
+}
+
+.gi4-g5-simplify-strip-row span.solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-g5-simplify-strip-row span.solution-fill {
+  background: var(--eq-fill, #b9d87a);
+}
+
+.gi4-g5-simplify-calc {
+  display: grid;
+  grid-template-columns: 34px 62px 46px 22px 46px 34px 62px;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 10px 0 12px;
+  font-size: 18px;
+}
+
+.gi4-g5-simplify-calc.compact {
+  grid-template-columns: 28px 56px 46px 22px 46px 28px 56px;
+}
+
+.gi4-g5-simplify-calc.arrows-only {
+  min-height: 112px;
+}
+
+.gi4-g5-fraction-arrow-work {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px auto 16px;
+  min-height: 160px;
+  width: 260px;
+}
+
+.gi4-g5-fraction-arrow-label {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  font-size: 18px;
+  width: 98px;
+  left: 88px;
+}
+
+.gi4-g5-fraction-arrow-label.top {
+  top: 6px;
+}
+
+.gi4-g5-fraction-arrow-label.bottom {
+  bottom: 4px;
+}
+
+.gi4-g5-fraction-arrow-label .gi4-line.short {
+  min-width: 58px;
+}
+
+.gi4-g5-fraction-arrow-equation {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-size: 20px;
+}
+
+.gi4-g5-fraction-arrow-svg {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 160px;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 3;
+}
+
+.gi4-g5-fraction-arrow-path {
+  fill: none;
+  stroke: #222;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.gi4-g5-fraction-arrow-svg marker path {
+  fill: #222;
+}
+
+.gi4-g5-simplify-info,
+.gi4-g5-simplify-final {
+  margin-top: 9px;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.gi4-g5-simplify-final {
+  font-weight: 700;
+}
+
+.gi4-g5-equivalent-card {
+  position: relative;
+}
+
+.gi4-g5-arrow-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+
+.gi4-g5-arrow-card {
+  position: relative;
+  border: 1.5px solid #aeb4bc;
+  border-radius: 8px;
+  padding: 10px 12px;
+  min-height: 186px;
+  display: grid;
+  align-items: center;
+}
+
+.gi4-g5-fraction-short-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 46px;
+  padding: 8px 12px 14px;
+}
+
+.gi4-g5-fraction-short-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 58px;
+  font-size: 18px;
+}
+
+.gi4-g5-fraction-series-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  align-items: start;
+}
+
+.gi4-g5-fraction-series {
+  position: relative;
+  display: grid;
+  grid-template-columns: 76px repeat(4, minmax(58px, 1fr));
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+}
+
+.gi4-g5-fraction-flower,
+.gi4-g5-fraction-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  border: 1.2px solid #cbd5e1;
+  background: #fff;
+}
+
+.gi4-g5-fraction-flower {
+  border: 0;
+  background: #9ed38f;
+  border-radius: 48% 52% 44% 56%;
+  font-weight: 800;
+}
+
+.solutions-mode .gi4-g5-fraction-option.solution-equivalent {
+  background: #e5f4d7;
+}
+
+.solutions-mode .gi4-g5-fraction-option.solution-simplest {
+  outline: 3px solid #79b854;
+  outline-offset: -4px;
+}
+
+.gi4-g5-fraction-color-wrap {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.gi4-g5-fraction-color-table {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, 74px);
+  border: 1.3px solid #cbd5e1;
+}
+
+.gi4-g5-fraction-color-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 54px;
+  border-right: 1.2px solid #cbd5e1;
+  border-bottom: 1.2px solid #cbd5e1;
+  background: #fff;
+}
+
+.gi4-g5-fraction-color-cell:nth-child(6n + 1) {
+  border-left: 0;
+}
+
+.solutions-mode .gi4-g5-fraction-color-cell.solution-group-0 {
+  background: #dbeafe;
+}
+
+.solutions-mode .gi4-g5-fraction-color-cell.solution-group-1 {
+  background: #dcfce7;
+}
+
+.solutions-mode .gi4-g5-fraction-color-cell.solution-group-2 {
+  background: #fef3c7;
+}
+
+.solutions-mode .gi4-g5-fraction-color-cell.solution-group-3 {
+  background: #fce7f3;
+}
+
 .gi4-neighbor-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -338,6 +1102,112 @@
 .gi4-neighbor-green { background: #4fb94f; }
 .gi4-neighbor-blue { background: #8aa9cf; }
 .gi4-neighbor-red { background: #ef2b2d; }
+.gi4-neighbor-purple { background: #c4a5fd; }
+
+.gi4-build-number-card {
+  display: grid;
+  grid-template-columns: minmax(230px, 34%) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  --build-row-height: 30px;
+}
+
+.gi4-build-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.gi4-build-table th,
+.gi4-build-table td {
+  border: 1.3px solid #8fa1b5;
+  text-align: center;
+  height: var(--build-row-height);
+}
+
+.gi4-build-table th {
+  color: #111827;
+  font-weight: 900;
+}
+
+.gi4-build-table .gi4-line {
+  width: 78%;
+}
+
+.gi4-build-number-list {
+  display: grid;
+  grid-template-rows: repeat(var(--build-rows), var(--build-row-height));
+  gap: 0;
+  font-size: 17px;
+  padding-top: var(--build-row-height);
+}
+
+.gi4-build-number-row {
+  display: grid;
+  grid-template-columns: minmax(150px, max-content) minmax(120px, 1fr);
+  align-items: end;
+  gap: 8px;
+  min-height: var(--build-row-height);
+}
+
+.gi4-short-value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px 14px;
+}
+
+.gi4-short-value-card {
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  padding: 9px 10px 10px;
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+}
+
+.gi4-short-value-number {
+  display: inline-flex;
+  border: 1.4px solid #8a8f99;
+  background: #fff;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.gi4-short-value-number span {
+  min-width: 22px;
+  padding: 3px 5px;
+  text-align: center;
+}
+
+.gi4-short-value-number .marked {
+  position: relative;
+}
+
+.gi4-short-value-number .marked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  right: 5px;
+  bottom: 2px;
+  border-bottom: 2px solid #111827;
+}
+
+.gi4-short-value-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.gi4-equivalent-leftover {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 16px;
+}
 
 .gi4-fraction-card,
 .gi4-fraction-color-card,
@@ -610,8 +1480,15 @@
 }
 
 .gi4-quantity-grid.quick,
-.gi4-quantity-grid.questions,
 .gi4-quantity-grid.same {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.gi4-quantity-grid.questions,
+.gi4-quantity-grid.compareSamePart,
+.gi4-quantity-grid.compareSameWhole,
+.gi4-quantity-grid.compareSolve,
+.gi4-quantity-grid.compareQuick {
   grid-template-columns: minmax(0, 1fr);
 }
 
@@ -620,7 +1497,10 @@
 .gi4-quantity-operator-card,
 .gi4-quantity-questions-card,
 .gi4-quantity-quick-card,
-.gi4-quantity-same-card {
+.gi4-quantity-same-card,
+.gi4-quantity-compare-card,
+.gi4-quantity-compare-solve-card,
+.gi4-quantity-compare-quick-card {
   position: relative;
   border: 1.5px solid #aeb4bc;
   border-radius: 8px;
@@ -877,10 +1757,10 @@
 .gi4-quantity-note-lines {
   grid-column: 1 / -1;
   height: 34px;
-  width: 72%;
+  width: 50%;
   justify-self: end;
   margin-top: 10px;
-  transform: translateX(10px);
+  transform: translateX(24px);
   border-top: 1.4px solid #cbd5e1;
   border-bottom: 1.4px solid #cbd5e1;
 }
@@ -896,6 +1776,77 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
+}
+
+.gi4-quantity-compare-card {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+}
+
+.gi4-quantity-compare-strips {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.gi4-quantity-compare-strip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+}
+
+.gi4-quantity-compare-strip .gi4-quantity-bar-wrap {
+  width: 100%;
+}
+
+.gi4-quantity-compare-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-wrap: wrap;
+  font-weight: 700;
+}
+
+.gi4-quantity-compare-solve-card {
+  display: grid;
+  gap: 12px;
+}
+
+.gi4-quantity-compare-solve-top,
+.gi4-quantity-compare-solve-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.gi4-quantity-compare-solve-card .gi4-quantity-operator-card {
+  border: 0;
+  padding: 0;
+  min-height: 0;
+}
+
+.gi4-quantity-compare-quick-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 28px;
+}
+
+.gi4-quantity-compare-quick-row {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: auto auto 46px auto auto;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+}
+
+.gi4-quantity-compare-quick-row .row-delete-btn {
+  top: -10px !important;
+  right: -10px !important;
 }
 
 .solutions-mode .gi4-quantity-same-card > span[data-answer="18"],
@@ -3032,6 +3983,7 @@
   font-size: 18px;
 }
 
+.gi4-td { background: #b57de8; color: #111827; }
 .gi4-d { background: #ef2b2d; color: #111827; }
 .gi4-h { background: #6d95c7; }
 .gi4-t { background: #4fb94f; }
@@ -3229,6 +4181,11 @@
   color: #111827;
 }
 
+.gi4-dot.gi4-td {
+  color: #111827;
+  font-size: 6px;
+}
+
 .gi4-unit {
   display: inline-block;
   width: 13px;
@@ -3242,6 +4199,10 @@
   grid-template-columns: repeat(4, 34px) 20px;
   align-items: center;
   margin: 8px 0;
+}
+
+.gi4-pencil.wide {
+  grid-template-columns: repeat(5, 31px) 18px;
 }
 
 .gi4-pencil > span {
