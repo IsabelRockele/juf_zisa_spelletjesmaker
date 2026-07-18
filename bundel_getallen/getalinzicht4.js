@@ -2500,6 +2500,417 @@
     b.appendChild(grid);
   }
 
+  function fractionQuantitySeeds(){
+    return [
+      { num: 1, den: 5, total: 10 }, { num: 3, den: 4, total: 8 },
+      { num: 3, den: 4, total: 12 }, { num: 4, den: 7, total: 14 },
+      { num: 4, den: 5, total: 15 }, { num: 2, den: 3, total: 9 },
+      { num: 1, den: 6, total: 24 }, { num: 1, den: 8, total: 16 },
+      { num: 4, den: 5, total: 20 }, { num: 5, den: 9, total: 27 },
+      { num: 2, den: 6, total: 18 }, { num: 3, den: 4, total: 32 },
+      { num: 2, den: 7, total: 21 }, { num: 7, den: 9, total: 54 },
+      { num: 4, den: 5, total: 40 }, { num: 3, den: 5, total: 35 },
+      { num: 5, den: 8, total: 72 }, { num: 6, den: 7, total: 56 },
+    ];
+  }
+
+  function fractionQuantitySeed(namespace){
+    return pickUnused(namespace, fractionQuantitySeeds(), item => `${item.num}/${item.den}-${item.total}`);
+  }
+
+  function fractionQuantityResult(seed){ return seed.total / seed.den * seed.num; }
+
+  function fractionQuantityArray(kind, total, colored, den = 1, opts = {}){
+    const { fillColor = kind === 'blocks' ? '#2563eb' : '#22c55e', emptyColor = kind === 'blocks' ? '#ef4444' : '#fef3c7', columns = den } = opts;
+    const wrap = document.createElement('div');
+    wrap.className = `gi4-quantity-array ${kind}`;
+    wrap.style.setProperty('--qty-den', String(den));
+    wrap.style.setProperty('--qty-cols', String(columns));
+    for (let i = 0; i < total; i++) {
+      const item = document.createElement('span');
+      item.className = i < colored ? 'filled' : '';
+      item.style.setProperty('--qty-color', fillColor);
+      item.style.setProperty('--qty-empty', emptyColor);
+      wrap.appendChild(item);
+    }
+    return wrap;
+  }
+
+  function fractionQuantityBar(seed, showFill = true){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-quantity-bar-wrap';
+    const total = document.createElement('div');
+    total.className = 'gi4-quantity-bar-total';
+    total.textContent = String(seed.total);
+    const bar = document.createElement('div');
+    bar.className = 'gi4-quantity-bar';
+    bar.style.gridTemplateColumns = `repeat(${seed.den}, 1fr)`;
+    for (let i = 0; i < seed.den; i++) {
+      const group = document.createElement('span');
+      if (showFill && i < seed.num) group.classList.add('filled');
+      bar.appendChild(group);
+    }
+    const brace = document.createElement('div');
+    brace.className = 'gi4-quantity-bar-brace';
+    brace.style.width = `${seed.num / seed.den * 100}%`;
+    brace.textContent = '?';
+    wrap.append(total, bar, brace);
+    return wrap;
+  }
+
+  function makeFractionQuantityIntro(){
+    const b = block('gi4_fraction_quantity_intro', 'Breuk van een hoeveelheid: kijk en leer.', null);
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-intro keep-together';
+    card.innerHTML = '<div class="gi4-common-learn-badge">Kijk en leer!</div><h3>de breuk als operator</h3>';
+    const grid = document.createElement('div');
+    grid.className = 'gi4-quantity-intro-grid';
+    [
+      { num: 1, den: 5, total: 10, kind: 'balls' },
+      { num: 3, den: 4, total: 8, kind: 'bar' },
+    ].forEach(seed => {
+      const box = document.createElement('div');
+      box.className = 'gi4-quantity-intro-card';
+      const title = document.createElement('strong');
+      title.append('Hoeveel is ', fractionBox(seed.num, seed.den), ` van ${seed.total}?`);
+      box.appendChild(title);
+      if (seed.kind === 'balls') box.appendChild(fractionQuantityArray('balls', seed.total, fractionQuantityResult(seed), seed.den));
+      else box.appendChild(fractionQuantityBar(seed));
+      const work = document.createElement('div');
+      work.className = 'gi4-quantity-work';
+      work.innerHTML = `<span>geheel &rarr; ${seed.total}</span><span>1 breukdeel &rarr; ${seed.total / seed.den}</span>`;
+      if (seed.num > 1) work.innerHTML += `<span>${seed.num} breukdelen &rarr; ${fractionQuantityResult(seed)}</span>`;
+      const answer = document.createElement('strong');
+      answer.className = 'gi4-quantity-answer';
+      answer.append(fractionBox(seed.num, seed.den), ` van ${seed.total} = ${fractionQuantityResult(seed)}`);
+      box.append(work, answer);
+      grid.appendChild(box);
+    });
+    card.appendChild(grid);
+    b.appendChild(card);
+  }
+
+  function makeFractionQuantityPartCard(){
+    const variants = [
+      { kind: 'balls', total: 6, colored: 4, den: 3, cols: 3, label: 'balletjes', color: 'groen', fill: '#22c55e', empty: '#fecaca' },
+      { kind: 'blocks', total: 12, colored: 6, den: 2, cols: 6, label: 'blokjes', color: 'blauw', fill: '#2563eb', empty: '#fee2e2' },
+      { kind: 'balls', total: 9, colored: 6, den: 3, cols: 3, label: 'balletjes', color: 'oranje', fill: '#fb923c', empty: '#bbf7d0' },
+      { kind: 'blocks', total: 15, colored: 5, den: 3, cols: 3, label: 'blokjes', color: 'blauw', fill: '#2563eb', empty: '#fef3c7' },
+    ];
+    const seed = pickUnused('gi4_fraction_quantity_part', variants, item => `${item.kind}-${item.total}-${item.colored}`);
+    if (!seed) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-part-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(fractionQuantityArray(seed.kind, seed.total, seed.colored, seed.den, { fillColor: seed.fill, emptyColor: seed.empty, columns: seed.cols }));
+    const text = document.createElement('div');
+    text.className = 'gi4-quantity-part-text';
+    text.innerHTML = `<strong>Welk deel van de ${seed.label} is ${seed.color}?</strong>`;
+    text.append(
+      Object.assign(document.createElement('span'), { innerHTML: `Hoeveel is het <strong>geheel?</strong> ` }),
+      lineWithSolution(String(seed.total), 'tiny'),
+      Object.assign(document.createElement('span'), { innerHTML: `In hoeveel <strong>gelijke delen</strong> verdeel ik het geheel? ` }),
+      lineWithSolution(String(seed.den), 'tiny'),
+      Object.assign(document.createElement('span'), { innerHTML: `<strong>Hoeveel breukdelen</strong> zijn ${seed.color}? ` }),
+      lineWithSolution(String(seed.colored / (seed.total / seed.den)), 'tiny')
+    );
+    const fracLine = document.createElement('div');
+    fracLine.className = 'gi4-quantity-frac-line';
+    fracLine.append('-> ', fractionBox('', '', seed.colored / (seed.total / seed.den), seed.den), ` van de ${seed.label} is ${seed.color}.`);
+    text.appendChild(fracLine);
+    card.appendChild(text);
+    return card;
+  }
+
+  function makeFractionQuantityOperatorCard(mode = 'operator'){
+    const seed = fractionQuantitySeed(`gi4_fraction_quantity_${mode}`);
+    if (!seed) return null;
+    const card = document.createElement('div');
+    card.className = `gi4-quantity-operator-card ${mode} row-delete-wrap`;
+    card.appendChild(rowDel(card));
+    const title = document.createElement('strong');
+    title.className = 'gi4-quantity-card-title';
+    title.append('Hoeveel is ', fractionBox(seed.num, seed.den), ` van ${seed.total}?`);
+    card.appendChild(title);
+    if (mode === 'operator') {
+      const model = document.createElement('div');
+      model.className = 'gi4-quantity-strip-model';
+      model.appendChild(fractionQuantityBar(seed, true));
+      card.appendChild(model);
+    }
+    const work = document.createElement('div');
+    work.className = 'gi4-quantity-operator-work';
+    const workRow = (label, answer, op = '', opAnswer = '') => {
+      const row = document.createElement('div');
+      row.className = 'gi4-quantity-work-row';
+      row.append(Object.assign(document.createElement('span'), { className: 'gi4-quantity-work-label', textContent: label }), lineWithSolution(String(answer), 'tiny'));
+      if (op) row.append(Object.assign(document.createElement('b'), { textContent: op }), lineWithSolution(String(opAnswer), 'tiny'));
+      else row.append(Object.assign(document.createElement('b'), { textContent: '' }), Object.assign(document.createElement('span'), { className: 'gi4-quantity-empty-slot' }));
+      return row;
+    };
+    work.appendChild(workRow('geheel ->', seed.total, ':', seed.den));
+    work.appendChild(workRow('1 breukdeel ->', seed.total / seed.den));
+    if (seed.num > 1) {
+      work.appendChild(workRow(`${seed.num} breukdelen ->`, fractionQuantityResult(seed), 'x', seed.num));
+    }
+    const answer = document.createElement('div');
+    answer.className = 'gi4-quantity-final';
+    answer.append(fractionBox(seed.num, seed.den), ` van ${seed.total} = `, lineWithSolution(String(fractionQuantityResult(seed)), 'tiny'));
+    card.append(work, answer);
+    return card;
+  }
+
+  function makeFractionQuantityQuestionsCard(){
+    const variants = [
+      { total: 12, blue: 3, red: 9, groups: 4 },
+      { total: 10, blue: 6, red: 4, groups: 5 },
+      { total: 15, blue: 6, red: 9, groups: 5 },
+      { total: 8, blue: 4, red: 4, groups: 4 },
+    ];
+    const seed = pickUnused('gi4_fraction_quantity_questions', variants, item => `${item.total}-${item.blue}-${item.groups}`);
+    if (!seed) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-questions-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(fractionQuantityArray('blocks', seed.total, seed.blue, seed.groups, { fillColor: '#2563eb', emptyColor: '#ef4444', columns: seed.groups }));
+    const blueParts = seed.blue / (seed.total / seed.groups);
+    const redParts = seed.red / (seed.total / seed.groups);
+    const lines = document.createElement('div');
+    lines.className = 'gi4-quantity-question-lines';
+    lines.append(
+      `Het geheel is `, lineWithSolution(String(seed.total), 'tiny'), ` blokken. Het geheel is verdeeld in `, lineWithSolution(String(seed.groups), 'tiny'), ` gelijke groepen.`,
+    );
+    const questionRow = document.createElement('div');
+    questionRow.className = 'gi4-quantity-color-question-row';
+    const blue = document.createElement('span');
+    blue.append('Welk deel van de blokken is blauw? ', fractionBox('', '', blueParts, seed.groups));
+    const red = document.createElement('span');
+    red.append('Welk deel van de blokken is rood? ', fractionBox('', '', redParts, seed.groups));
+    questionRow.append(blue, red);
+    lines.appendChild(questionRow);
+    card.appendChild(lines);
+    return card;
+  }
+
+  function makeFractionQuantityQuickItem(seed){
+    const item = document.createElement('div');
+    item.className = 'gi4-quantity-quick-item row-delete-wrap';
+    item.dataset.promptKey = `${seed.num}/${seed.den}-${seed.total}`;
+    item.appendChild(rowDel(item));
+    item.append(fractionBox(seed.num, seed.den), ` van ${seed.total} = `, lineWithSolution(String(fractionQuantityResult(seed)), 'tiny'));
+    item.appendChild(Object.assign(document.createElement('span'), { className: 'gi4-quantity-note-lines' }));
+    return item;
+  }
+
+  function appendFractionQuantityQuickItems(list, amount){
+    const existing = Array.from(list.querySelectorAll('.gi4-quantity-quick-item')).map(item => item.dataset.promptKey);
+    const pool = fractionQuantitySeeds().filter(s => s.total >= 20);
+    for (let i = 0; i < amount; i++) {
+      const seed = pool.find(item => !existing.includes(`${item.num}/${item.den}-${item.total}`)) || pick(pool);
+      list.appendChild(makeFractionQuantityQuickItem(seed));
+      existing.push(`${seed.num}/${seed.den}-${seed.total}`);
+    }
+  }
+
+  function makeFractionQuantityQuickCard(count = 6){
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-quick-card';
+    const list = document.createElement('div');
+    list.className = 'gi4-quantity-quick-grid';
+    appendFractionQuantityQuickItems(list, count);
+    card.appendChild(list);
+    return card;
+  }
+
+  function makeFractionQuantitySameCard(){
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-same-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const values = [
+      { num: 3, den: 7, total: 49 }, { num: 4, den: 6, total: 36 },
+      { num: 5, den: 8, total: 32 }, { num: 2, den: 7, total: 63 },
+      { num: 2, den: 6, total: 60 }, { num: 7, den: 9, total: 27 },
+      { num: 3, den: 8, total: 48 }, { num: 3, den: 5, total: 40 },
+    ];
+    values.forEach(seed => {
+      const item = document.createElement('span');
+      item.dataset.answer = String(fractionQuantityResult(seed));
+      item.append(fractionBox(seed.num, seed.den), ` van ${seed.total}`);
+      card.appendChild(item);
+    });
+    return card;
+  }
+
+  function fractionQuantityCompareSeeds(mode){
+    if (mode === 'compareSameWhole') return [
+      [{ num: 1, den: 5, total: 10 }, { num: 3, den: 5, total: 10 }],
+      [{ num: 5, den: 6, total: 24 }, { num: 2, den: 6, total: 24 }],
+      [{ num: 2, den: 7, total: 21 }, { num: 5, den: 7, total: 21 }],
+      [{ num: 1, den: 4, total: 16 }, { num: 3, den: 4, total: 16 }],
+    ];
+    if (mode === 'compareSolve') return [
+      [{ num: 1, den: 4, total: 12 }, { num: 1, den: 4, total: 8 }],
+      [{ num: 2, den: 3, total: 9 }, { num: 2, den: 3, total: 15 }],
+      [{ num: 3, den: 5, total: 20 }, { num: 3, den: 5, total: 15 }],
+      [{ num: 4, den: 6, total: 24 }, { num: 4, den: 6, total: 18 }],
+    ];
+    return [
+      [{ num: 1, den: 5, total: 10 }, { num: 1, den: 5, total: 15 }],
+      [{ num: 5, den: 6, total: 24 }, { num: 5, den: 6, total: 12 }],
+      [{ num: 2, den: 7, total: 21 }, { num: 2, den: 7, total: 35 }],
+      [{ num: 3, den: 8, total: 16 }, { num: 3, den: 8, total: 24 }],
+    ];
+  }
+
+  function fractionQuantityComparePair(mode){
+    return pickUnused(`gi4_fraction_quantity_${mode}`, fractionQuantityCompareSeeds(mode), pair => pair.map(s => `${s.num}/${s.den}-${s.total}`).join('|'));
+  }
+
+  function fractionQuantityCompareStrip(seed){
+    const box = document.createElement('div');
+    box.className = 'gi4-quantity-compare-strip';
+    box.appendChild(fractionQuantityBar(seed, true));
+    box.appendChild(fractionBox(seed.num, seed.den));
+    return box;
+  }
+
+  function makeFractionQuantityCompareCard(mode){
+    const pair = fractionQuantityComparePair(mode);
+    if (!pair) return null;
+    const card = document.createElement('div');
+    card.className = `gi4-quantity-compare-card ${mode} row-delete-wrap`;
+    card.appendChild(rowDel(card));
+    const strips = document.createElement('div');
+    strips.className = 'gi4-quantity-compare-strips';
+    pair.forEach(seed => strips.appendChild(fractionQuantityCompareStrip(seed)));
+    const compare = document.createElement('div');
+    compare.className = 'gi4-quantity-compare-line';
+    const symbol = compareSymbol(fractionQuantityResult(pair[0]), fractionQuantityResult(pair[1]));
+    compare.append(fractionBox(pair[0].num, pair[0].den), ` van ${pair[0].total} `, compareBox(symbol), fractionBox(pair[1].num, pair[1].den), ` van ${pair[1].total}`);
+    card.append(strips, compare);
+    return card;
+  }
+
+  function makeFractionQuantityCompareSolveCard(){
+    const pair = fractionQuantityComparePair('compareSolve');
+    if (!pair) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-compare-solve-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'gi4-quantity-compare-solve-top';
+    pair.forEach(seed => top.appendChild(fractionQuantityBar(seed, true)));
+    const solve = document.createElement('div');
+    solve.className = 'gi4-quantity-compare-solve-grid';
+    pair.forEach(seed => solve.appendChild(makeFractionQuantityOperatorCard('solve')));
+    const line = document.createElement('div');
+    line.className = 'gi4-quantity-compare-line';
+    line.append(`${pair[0].total} `, compareBox(compareSymbol(pair[0].total, pair[1].total)), ` ${pair[1].total}`);
+    line.append(document.createElement('br'));
+    line.append(fractionBox(pair[0].num, pair[0].den), ` van ${pair[0].total} `, compareBox(compareSymbol(fractionQuantityResult(pair[0]), fractionQuantityResult(pair[1]))), fractionBox(pair[1].num, pair[1].den), ` van ${pair[1].total}`);
+    card.append(top, solve, line);
+    return card;
+  }
+
+  function makeFractionQuantityCompareQuickCard(){
+    const pairs = [
+      [{ num: 1, den: 4, total: 16 }, { num: 1, den: 4, total: 8 }],
+      [{ num: 2, den: 3, total: 15 }, { num: 2, den: 3, total: 21 }],
+      [{ num: 5, den: 7, total: 14 }, { num: 5, den: 7, total: 21 }],
+      [{ num: 7, den: 10, total: 70 }, { num: 7, den: 10, total: 80 }],
+      [{ num: 1, den: 9, total: 18 }, { num: 4, den: 9, total: 18 }],
+      [{ num: 5, den: 6, total: 54 }, { num: 2, den: 6, total: 54 }],
+      [{ num: 4, den: 5, total: 30 }, { num: 2, den: 5, total: 30 }],
+      [{ num: 2, den: 3, total: 24 }, { num: 1, den: 3, total: 24 }],
+      [{ num: 2, den: 6, total: 36 }, { num: 2, den: 6, total: 24 }],
+      [{ num: 7, den: 8, total: 56 }, { num: 7, den: 8, total: 48 }],
+    ];
+    const picked = pairs.sort(() => Math.random() - .5).slice(0, 10);
+    const card = document.createElement('div');
+    card.className = 'gi4-quantity-compare-quick-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    picked.forEach(pair => {
+      const row = document.createElement('div');
+      row.className = 'gi4-quantity-compare-quick-row';
+      row.append(fractionBox(pair[0].num, pair[0].den), ` van ${pair[0].total}`, compareBox(compareSymbol(fractionQuantityResult(pair[0]), fractionQuantityResult(pair[1]))), fractionBox(pair[1].num, pair[1].den), ` van ${pair[1].total}`);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeFractionQuantityCard(mode){
+    if (mode === 'part') return makeFractionQuantityPartCard();
+    if (mode === 'operator') return makeFractionQuantityOperatorCard('operator');
+    if (mode === 'solve') return makeFractionQuantityOperatorCard('solve');
+    if (mode === 'questions') return makeFractionQuantityQuestionsCard();
+    if (mode === 'quick') return makeFractionQuantityQuickItem(fractionQuantitySeed('gi4_fraction_quantity_quick_item'));
+    if (mode === 'compareSamePart' || mode === 'compareSameWhole') return makeFractionQuantityCompareCard(mode);
+    if (mode === 'compareSolve') return makeFractionQuantityCompareSolveCard();
+    if (mode === 'compareQuick') return makeFractionQuantityCompareQuickCard();
+    if (mode === 'same') return makeFractionQuantitySameCard();
+    return null;
+  }
+
+  function addFractionQuantity(extraCount, forcedMode){
+    const mode = forcedMode || $('#fractionQuantityMode')?.value || 'intro';
+    if (mode === 'intro') {
+      makeFractionQuantityIntro();
+      return;
+    }
+    const key = `gi4_fraction_quantity_${mode}`;
+    const requested = Math.max(1, Math.min(8, parseInt($('#fractionQuantityCount')?.value, 10) || 4));
+    const count = extraCount || requested;
+    if (extraCount) {
+      if (mode === 'quick') {
+        const list = containerInLastBlock(key, '.gi4-quantity-quick-grid', 'gi4-quantity-quick-grid');
+        if (list) {
+          appendFractionQuantityQuickItems(list, count);
+          return;
+        }
+      }
+      const existing = containerInLastBlock(key, `.gi4-quantity-grid.${mode}`, `gi4-quantity-grid ${mode}`);
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeFractionQuantityCard(mode));
+        return;
+      }
+    }
+    const titles = {
+      part: 'Breuk van een hoeveelheid: benoem de breuk.',
+      operator: 'Breuk van een hoeveelheid: met stroken.',
+      solve: 'Breuk van een hoeveelheid: los op.',
+      questions: 'Breuk van een hoeveelheid: breukvragen.',
+      compareSamePart: 'Breuken: hoeveelheden vergelijken.',
+      compareSameWhole: 'Breuken: hoeveelheden vergelijken.',
+      compareSolve: 'Breuken: hoeveelheden vergelijken en oplossen.',
+      compareQuick: 'Breuken: hoeveelheden vergelijken.',
+      quick: 'Breuk van een hoeveelheid: korte opgaven.',
+      same: 'Breuk van een hoeveelheid: dezelfde uitkomst.',
+    };
+    const instructions = {
+      part: ['Vul aan.', 'Benoem de breuk van het geheel.'],
+      operator: ['Gebruik de strook.', 'Vul aan.', 'Noteer de juiste hoeveelheid.'],
+      solve: ['Los op.', 'Gebruik indien nodig je klikblokjes.'],
+      questions: ['Los op met behulp van de breukvragen.'],
+      compareSamePart: ['Neem hetzelfde deel van elk geheel.', 'Vul in: &lt; of &gt;.'],
+      compareSameWhole: ['Neem een ander aantal breukdelen van eenzelfde geheel.', 'Vul in: &lt; of &gt;.'],
+      compareSolve: ['Los op.', 'Gebruik indien nodig je klikblokjes.', 'Vergelijk.', 'Vul in: &lt; of &gt;.'],
+      compareQuick: ['Denk na: zijn de gehelen gelijk? Kijk dan naar het aantal breukdelen.', 'Zijn de gehelen niet gelijk? Kijk dan naar de grootte van het geheel en de breukdelen.', 'Vul in: &lt; of &gt;.'],
+      quick: ['Los op.', 'Je mag indien nodig tussenstappen noteren.'],
+      same: ['Omcirkel met dezelfde kleur de oefeningen met dezelfde uitkomst.'],
+    };
+    const b = block(key, titles[mode], addCount => addFractionQuantity(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode] || ['Vul aan.']);
+    if (mode === 'quick') {
+      b.appendChild(makeFractionQuantityQuickCard(count));
+    } else {
+      const grid = document.createElement('div');
+      grid.className = `gi4-quantity-grid ${mode}`;
+      for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeFractionQuantityCard(mode));
+      b.appendChild(grid);
+    }
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addFractionQuantity(1, mode));
+  }
+
   function mixedSeeds(){
     return [
       { num: 7, den: 4, kind: 'circle' }, { num: 9, den: 5, kind: 'circle' },
@@ -4917,6 +5328,7 @@
     bind('#btnAddFractionCommon', addFractionCommon);
     bind('#btnAddFractionCompare', addFractionCompare);
     bind('#btnAddFractionEstimate', addFractionEstimate);
+    bind('#btnAddFractionQuantity', addFractionQuantity);
     bind('#btnAddFractionMixed', addFractionMixed);
     bind('#btnAddDecimalIntro', addDecimalIntro);
     bind('#btnAddDecimalMixed', addDecimalMixed);
