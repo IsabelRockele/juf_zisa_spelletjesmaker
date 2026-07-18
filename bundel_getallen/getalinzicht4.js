@@ -6,11 +6,13 @@
   const addFns = {};
   const usedExerciseSignatures = new Set();
   const PLACE = [
+    { key: 'td', label: 'TD', color: 'gi4-td', value: 10000 },
     { key: 'd', label: 'D', color: 'gi4-d', value: 1000 },
     { key: 'h', label: 'H', color: 'gi4-h', value: 100 },
     { key: 't', label: 'T', color: 'gi4-t', value: 10 },
     { key: 'e', label: 'E', color: 'gi4-e', value: 1 },
   ];
+  const levelState = { level: 'grade4', range: 'auto' };
 
   function rnd(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
   function pick(arr){ return arr[rnd(0, arr.length - 1)]; }
@@ -50,16 +52,39 @@
     return true;
   }
   function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function activeRange(){
+    if (levelState.range === '10000') return 10000;
+    if (levelState.range === '100000') return 100000;
+    return levelState.level === 'grade4' ? 10000 : 100000;
+  }
+  function activeMax(){ return activeRange() === 100000 ? 99999 : 9999; }
+  function activeMin(){ return activeRange() === 100000 ? 10000 : 1000; }
+  function activePlaces(){
+    return activeRange() === 100000 ? PLACE : PLACE.slice(1);
+  }
+  function placesForNumber(n){
+    return n >= 10000 ? PLACE : PLACE.slice(1);
+  }
+  function placeExpansion(n){
+    const ds = digits(n);
+    return placesForNumber(n).map(p => `${ds[p.key]} ${p.label}`).join(' + ');
+  }
+  function placeQuestionText(){
+    return activeRange() === 100000
+      ? 'tienduizendtallen, duizendtallen, honderdtallen, tientallen en eenheden'
+      : 'duizendtallen, honderdtallen, tientallen en eenheden';
+  }
   function digits(n){
     return {
-      d: Math.floor(n / 1000),
+      td: Math.floor(n / 10000),
+      d: Math.floor(n / 1000) % 10,
       h: Math.floor(n / 100) % 10,
       t: Math.floor(n / 10) % 10,
       e: n % 10,
     };
   }
-  function numberFromDigits(ds){ return ds.d * 1000 + ds.h * 100 + ds.t * 10 + ds.e; }
-  function randomNumber(){ return rnd(1000, 9999); }
+  function numberFromDigits(ds){ return (ds.td || 0) * 10000 + ds.d * 1000 + ds.h * 100 + ds.t * 10 + ds.e; }
+  function randomNumber(){ return rnd(activeMin(), activeMax()); }
   function uniqueNumbers(count){
     const set = new Set();
     let guard = 0;
@@ -166,6 +191,12 @@
     return container;
   }
 
+  function appendToLastContainer(key, selector, className, maker, tag = 'div'){
+    const existing = containerInLastBlock(key, selector, className, tag);
+    if (!existing) return false;
+    return appendNewExercise(existing, maker);
+  }
+
   function clearNode(node){
     while (node.firstChild) node.removeChild(node.firstChild);
   }
@@ -200,6 +231,17 @@
     removeTitleIfEmpty(key);
   }
 
+  function removeExerciseBlockGroup(key, currentBlock){
+    const keys = key === 'gi4_g5_neighbors' || key === 'gi4_g5_neighbors_big'
+      ? ['gi4_g5_neighbors', 'gi4_g5_neighbors_big']
+      : [key];
+    keys.forEach(k => {
+      if (k === key) currentBlock?.remove();
+      else document.querySelectorAll(`[data-title-key="${k}"]:not(.exercise-title)`).forEach(el => el.remove());
+      removeTitleIfEmpty(k);
+    });
+  }
+
   function rowDel(target){
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -211,7 +253,7 @@
       const blockEl = target.closest('.gi4-block');
       const parent = target.parentElement;
       target.remove();
-      if (parent && !parent.querySelector(':scope > *:not(.row-delete-btn)')) parent.remove();
+      if (parent && parent.tagName !== 'TBODY' && !parent.querySelector(':scope > *:not(.row-delete-btn)')) parent.remove();
       cleanupEmptyExerciseBlock(blockEl);
     };
     btn.addEventListener('pointerdown', e => {
@@ -227,6 +269,40 @@
     const b = document.createElement('div');
     b.className = 'gi4-block';
     b.dataset.titleKey = key;
+    const controls = document.createElement('div');
+    controls.className = 'gi4-block-controls';
+    if (addFn) {
+      const add = document.createElement('button');
+      add.type = 'button';
+      add.className = 'title-add-btn gi4-block-add-btn';
+      add.textContent = '+ oefening';
+      add.addEventListener('click', () => addFns[key]?.(1));
+      controls.appendChild(add);
+    }
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'gi4-block-remove-btn';
+    del.textContent = 'verwijder opdracht';
+    del.addEventListener('click', () => {
+      removeExerciseBlockGroup(key, b);
+    });
+    controls.appendChild(del);
+    const nativeAppendChild = b.appendChild.bind(b);
+    const nativeAppend = b.append.bind(b);
+    nativeAppendChild(controls);
+    b.appendChild = node => {
+      if (node === controls) return nativeAppendChild(node);
+      return b.insertBefore(node, controls);
+    };
+    b.append = (...nodes) => {
+      nodes.forEach(node => b.insertBefore(typeof node === 'string' ? document.createTextNode(node) : node, controls));
+    };
+    const watchLocalButtons = () => {
+      const explicit = b.querySelector('.gi4-local-add-btn');
+      const generic = controls.querySelector('.gi4-block-add-btn');
+      if (generic) generic.hidden = !!explicit;
+    };
+    new MutationObserver(watchLocalButtons).observe(b, { childList: true, subtree: true });
     if (blockTitle) {
       const t = document.createElement('div');
       t.className = 'gi4-block-title';
@@ -234,6 +310,7 @@
       b.appendChild(t);
     }
     placeBlock(b, key);
+    watchLocalButtons();
     return b;
   }
 
@@ -249,15 +326,20 @@
 
   function makeSplitRow(n, example){
     const ds = digits(n);
+    const places = placesForNumber(n);
     const row = document.createElement('div');
     row.className = 'gi4-row row-delete-wrap';
     row.appendChild(rowDel(row));
     if (example) {
-      row.innerHTML += `<strong>${fmt(n)}</strong> = ${ds.d} D + ${ds.h} H + ${ds.t} T + ${ds.e} E`;
+      row.innerHTML += `<strong>${fmt(n)}</strong> = ${placeExpansion(n)}`;
     } else {
       const strong = document.createElement('strong');
       strong.textContent = fmt(n);
-      row.append(strong, ' = ', lineWithSolution(String(ds.d)), ' D + ', lineWithSolution(String(ds.h)), ' H + ', lineWithSolution(String(ds.t)), ' T + ', lineWithSolution(String(ds.e)), ' E');
+      row.append(strong, ' = ');
+      places.forEach((p, i) => {
+        if (i > 0) row.append(' + ');
+        row.append(lineWithSolution(String(ds[p.key])), ` ${p.label}`);
+      });
     }
     return row;
   }
@@ -266,23 +348,82 @@
     const key = 'gi4_split';
     const count = extraCount || Math.max(1, parseInt($('#splitCount').value, 10) || 6);
     const withExample = !extraCount && $('#splitExample')?.checked;
-    const b = block(key, 'Splits de getallen in duizendtallen, honderdtallen, tientallen en eenheden.', addSplit);
+    const b = block(key, `Splits de getallen in ${placeQuestionText()}.`, addSplit);
     const grid = document.createElement('div');
     grid.className = 'gi4-grid';
     uniqueNumbers(count).forEach((n, i) => grid.appendChild(makeSplitRow(n, withExample && i === 0)));
     b.appendChild(grid);
   }
 
+  function placeExpressionForNumber(n, allowRegroup = true){
+    const ds = digits(n);
+    const places = placesForNumber(n);
+    const terms = [];
+    if (allowRegroup && activeRange() === 100000 && Math.random() < .35) {
+      const thousands = ds.td * 10 + ds.d;
+      if (thousands) terms.push(`${thousands} D`);
+      if (ds.h) terms.push(`${ds.h} H`);
+      if (ds.t) terms.push(`${ds.t} T`);
+      if (ds.e) terms.push(`${ds.e} E`);
+    } else {
+      places.forEach(p => {
+        if (ds[p.key]) terms.push(`${ds[p.key]} ${p.label}`);
+      });
+    }
+    return terms.length ? terms.join(' ') : '0 E';
+  }
+
+  function makePlaceValuePracticeTable(rows){
+    const places = activePlaces();
+    const table = document.createElement('table');
+    table.className = 'gi4-build-table';
+    table.innerHTML = '<thead><tr>' + places.map(p => `<th class="${p.color}">${p.label}</th>`).join('') + '</tr></thead>';
+    const body = document.createElement('tbody');
+    for (let i = 0; i < rows; i++) {
+      const tr = document.createElement('tr');
+      places.forEach(() => {
+        const td = document.createElement('td');
+        td.appendChild(lineWithSolution('', 'short'));
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    }
+    table.appendChild(body);
+    return table;
+  }
+
+  function addBuildNumbers(extraCount){
+    const key = 'gi4_build_numbers';
+    const rows = extraCount || Math.max(2, parseInt($('#buildNumberCount')?.value, 10) || 5);
+    const b = block(key, 'Schrijf de getallen. Gebruik indien nodig de plaatswaardekaart.', addBuildNumbers);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-build-number-card row-delete-wrap';
+    wrap.style.setProperty('--build-rows', String(rows));
+    wrap.appendChild(rowDel(wrap));
+    wrap.appendChild(makePlaceValuePracticeTable(rows));
+    const list = document.createElement('div');
+    list.className = 'gi4-build-number-list';
+    uniqueNumbers(rows).forEach(n => {
+      const row = document.createElement('div');
+      row.className = 'gi4-build-number-row';
+      row.append(document.createTextNode(`${placeExpressionForNumber(n)} = `), lineWithSolution(fmt(n), 'long'));
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
+    b.appendChild(wrap);
+  }
+
   function previousMultiple(n, base){ return Math.floor(n / base) * base; }
   function nextMultiple(n, base){ return Math.ceil(n / base) * base; }
 
   function makeNeighborTable(kind, rows, example){
-    const base = kind === 'number' ? 1 : kind === 'ten' ? 10 : kind === 'hundred' ? 100 : 1000;
+    const base = kind === 'number' ? 1 : kind === 'ten' ? 10 : kind === 'hundred' ? 100 : kind === 'thousand' ? 1000 : 10000;
     const labels = {
       number: ['vorig getal', 'volgend getal', 'gi4-neighbor-yellow'],
       ten: ['vorig tiental', 'volgend tiental', 'gi4-neighbor-green'],
       hundred: ['vorig honderdtal', 'volgend honderdtal', 'gi4-neighbor-blue'],
       thousand: ['vorig duizendtal', 'volgend duizendtal', 'gi4-neighbor-red'],
+      tenThousand: ['vorig tienduizendtal', 'volgend tienduizendtal', 'gi4-neighbor-purple'],
     }[kind];
     const table = document.createElement('table');
     table.className = 'gi4-neighbor-table';
@@ -313,29 +454,34 @@
     const key = 'gi4_neighbors';
     const rows = extraCount || Math.max(2, parseInt($('#neighborRows').value, 10) || 3);
     const nums = uniqueNumbers(rows);
-    const b = block(key, 'Schrijf de buurgetallen, buurtientallen, buurhonderdtallen of buurtduizendtallen.', addNeighbors);
+    const includeTenThousands = activeRange() === 100000;
+    const b = block(key, includeTenThousands
+      ? 'Schrijf de buurgetallen, buurtientallen, buurhonderdtallen, buurtduizendtallen of buurtienduizendtallen.'
+      : 'Schrijf de buurgetallen, buurtientallen, buurhonderdtallen of buurtduizendtallen.', addNeighbors);
     const grid = document.createElement('div');
     grid.className = 'gi4-neighbor-grid';
-    ['number', 'ten', 'hundred', 'thousand'].forEach(kind => grid.appendChild(makeNeighborTable(kind, nums, !extraCount)));
+    const kinds = includeTenThousands ? ['number', 'ten', 'hundred', 'thousand', 'tenThousand'] : ['number', 'ten', 'hundred', 'thousand'];
+    kinds.forEach(kind => grid.appendChild(makeNeighborTable(kind, nums, !extraCount)));
     b.appendChild(grid);
   }
 
   function placeTable(n, mode, opts = {}){
     const ds = digits(n);
+    const places = opts.places || placesForNumber(n);
     const table = document.createElement('table');
     table.className = 'gi4-place-table';
     if (opts.compact) table.classList.add('compact');
     if (opts.connect) table.classList.add('connect');
-    table.innerHTML = '<thead><tr>' + PLACE.map(p => `<th class="${p.color}">${p.label}</th>`).join('') + '</tr></thead>';
+    table.innerHTML = '<thead><tr>' + places.map(p => `<th class="${p.color}">${p.label}</th>`).join('') + '</tr></thead>';
     const tr = document.createElement('tr');
-    PLACE.forEach(p => {
+    places.forEach(p => {
       const td = document.createElement('td');
       const wrap = document.createElement('div');
       wrap.className = 'gi4-material';
       if (opts.compact) wrap.classList.add('compact');
       if (opts.connect) wrap.classList.add('connect');
       const amount = ds[p.key];
-      const shape = mode === 'dots' ? 'dot' : p.key;
+      const shape = mode === 'dots' || p.key === 'td' ? 'dot' : p.key;
       for (let i = 0; i < amount; i++) wrap.appendChild(materialPiece(shape, p.key, opts));
       td.appendChild(wrap);
       tr.appendChild(td);
@@ -349,9 +495,9 @@
   function materialPiece(shape, key, opts = {}){
     if (shape === 'dot') {
       const span = document.createElement('span');
-      span.className = `gi4-dot ${key === 'd' ? 'gi4-d' : key === 'h' ? 'gi4-h' : key === 't' ? 'gi4-t' : 'gi4-e'}`;
+      span.className = `gi4-dot ${key === 'td' ? 'gi4-td' : key === 'd' ? 'gi4-d' : key === 'h' ? 'gi4-h' : key === 't' ? 'gi4-t' : 'gi4-e'}`;
       if (opts.connect) span.classList.add('connect');
-      span.textContent = key === 'd' ? '1000' : key === 'h' ? '100' : key === 't' ? '10' : '1';
+      span.textContent = key === 'td' ? '10 000' : key === 'd' ? '1000' : key === 'h' ? '100' : key === 't' ? '10' : '1';
       return span;
     }
     return makeMaterialSvg(key, opts);
@@ -492,9 +638,11 @@
 
   function pencil(n, filled){
     const ds = digits(n);
+    const places = placesForNumber(n);
     const p = document.createElement('div');
     p.className = 'gi4-pencil';
-    PLACE.forEach(part => {
+    if (places.length === 5) p.classList.add('wide');
+    places.forEach(part => {
       const span = document.createElement('span');
       span.className = part.color;
       if (filled) span.textContent = ds[part.key];
@@ -518,11 +666,11 @@
     return items.map((_, i) => items[(i + offset) % items.length]);
   }
 
-  function addMaterial(extraCount){
+  function addMaterial(extraCount, forcedMode){
     const key = 'gi4_material';
     const count = extraCount || Math.max(1, parseInt($('#materialCount').value, 10) || 4);
-    const mode = $('#materialMode').value;
-    const b = block(key, 'Hoeveel duizendtallen, honderdtallen, tientallen en eenheden zie je?', addMaterial);
+    const mode = forcedMode || $('#materialMode').value;
+    const b = block(key, `Hoeveel ${placeQuestionText()} zie je?`, addMaterial);
     const grid = document.createElement('div');
     grid.className = 'gi4-material-grid';
     uniqueNumbers(count).forEach(n => {
@@ -531,14 +679,13 @@
       card.appendChild(rowDel(card));
       card.appendChild(placeTable(n, mode === 'mixed' ? pick(['blocks', 'dots']) : mode, { compact: true }));
       const ds = digits(n);
+      const places = placesForNumber(n);
       const row = document.createElement('div');
       row.className = 'gi4-row';
-      row.append(
-        lineWithSolution(String(ds.d)), ' D ',
-        lineWithSolution(String(ds.h)), ' H ',
-        lineWithSolution(String(ds.t)), ' T ',
-        lineWithSolution(String(ds.e)), ' E'
-      );
+      places.forEach((p, index) => {
+        if (index > 0) row.append(' ');
+        row.append(lineWithSolution(String(ds[p.key])), ` ${p.label}`);
+      });
       const label = document.createElement('div');
       label.textContent = 'Dit is:';
       card.append(row, label);
@@ -556,6 +703,11 @@
   }
 
   function completeNumber(target){
+    if (target === 'tenThousand') {
+      let n = rnd(11, 98) * 1000;
+      if (n % 10000 === 0) n += 1000;
+      return n;
+    }
     if (target === 'thousand') {
       let n = rnd(11, 98) * 100;
       if (n % 1000 === 0) n += 100;
@@ -568,7 +720,7 @@
 
   function completeVisual(n, target){
     const ds = digits(n);
-    const places = target === 'thousand' ? PLACE.slice(0, 2) : PLACE.slice(0, 3);
+    const places = target === 'tenThousand' ? PLACE.slice(0, 2) : target === 'thousand' ? PLACE.slice(1, 3) : PLACE.slice(2, 4);
     const table = document.createElement('table');
     table.className = 'gi4-complete-table';
     table.innerHTML = '<thead><tr>' + places.map(p => `<th class="${p.color}">${p.label}</th>`).join('') + '</tr></thead>';
@@ -578,7 +730,7 @@
       const wrap = document.createElement('div');
       wrap.className = 'gi4-complete-material';
       for (let i = 0; i < ds[p.key]; i++) wrap.appendChild(materialPiece('dot', p.key, { connect: true }));
-      if ((target === 'thousand' && p.key === 'h') || (target === 'hundred' && p.key === 't')) {
+      if ((target === 'tenThousand' && p.key === 'd') || (target === 'thousand' && p.key === 'h') || (target === 'hundred' && p.key === 't')) {
         const missing = 10 - ds[p.key];
         for (let i = 0; i < missing; i++) wrap.appendChild(outlineDot(p.key));
       }
@@ -592,7 +744,7 @@
   }
 
   function makeCompleteCard(n, target, example){
-    const base = target === 'thousand' ? 1000 : 100;
+    const base = target === 'tenThousand' ? 10000 : target === 'thousand' ? 1000 : 100;
     const targetNum = nextMultiple(n, base);
     const add = targetNum - n;
     const card = document.createElement('div');
@@ -618,12 +770,14 @@
 
   function addComplete(extraCount, forcedTarget){
     const target = forcedTarget || $('#completeTarget')?.value || 'hundred';
-    const key = target === 'thousand' ? 'gi4_complete_thousand' : 'gi4_complete_hundred';
+    const key = target === 'tenThousand' ? 'gi4_complete_ten_thousand' : target === 'thousand' ? 'gi4_complete_thousand' : 'gi4_complete_hundred';
     const count = extraCount || Math.max(1, parseInt($('#completeCount').value, 10) || 4);
     const example = !extraCount && $('#completeExample')?.checked;
-    const title = target === 'thousand'
-      ? 'Schrijf het getal. Teken bij tot het volgende duizendtal. Vul in.'
-      : 'Schrijf het getal. Kleur bij tot het volgende honderdtal. Vul in.';
+    const title = target === 'tenThousand'
+      ? 'Schrijf het getal. Teken bij tot het volgende tienduizendtal. Vul in.'
+      : target === 'thousand'
+        ? 'Schrijf het getal. Teken bij tot het volgende duizendtal. Vul in.'
+        : 'Schrijf het getal. Kleur bij tot het volgende honderdtal. Vul in.';
     const b = block(key, title, addCount => addComplete(addCount || 1, target));
     const grid = document.createElement('div');
     grid.className = 'gi4-grid two';
@@ -636,9 +790,11 @@
 
   function connectDotsCard(n){
     const ds = digits(n);
+    const places = placesForNumber(n);
     const card = document.createElement('div');
     card.className = 'gi4-connect-dot-card';
-    PLACE.forEach(p => {
+    if (places.length === 5) card.classList.add('wide');
+    places.forEach(p => {
       const group = document.createElement('div');
       group.className = 'gi4-connect-dot-group';
       for (let i = 0; i < ds[p.key]; i++) group.appendChild(materialPiece('dot', p.key, { connect: true }));
@@ -721,12 +877,14 @@
   function addAxis(extraCount){
     const key = 'gi4_axis';
     const count = extraCount || Math.max(1, parseInt($('#axisCount').value, 10) || 3);
-    const step = Math.max(1, parseInt($('#axisStep').value, 10) || 100);
+    let step = Math.max(1, parseInt($('#axisStep').value, 10) || 100);
+    if (activeRange() === 10000 && step > 1000) step = 1000;
     const b = block(key, 'Vul de getallenassen aan.', addAxis);
     const wrap = document.createElement('div');
     wrap.className = 'gi4-axis';
+    const maxStart = Math.max(activeMin(), activeMax() - step * 6);
     for (let r = 0; r < count; r++) {
-      const item = makeUnique('gi4_axis_row', () => ({ step, start: Math.floor(rnd(1000, 9000) / step) * step }));
+      const item = makeUnique('gi4_axis_row', () => ({ step, start: Math.floor(rnd(activeMin(), maxStart) / step) * step }));
       if (!item) continue;
       const { start } = item;
       const row = document.createElement('div');
@@ -761,11 +919,18 @@
   }
 
   function makeAxisConnectRow(fine){
-    const item = makeUnique('gi4_axis_connect_row', () => ({ fine, start: fine ? rnd(60, 90) * 100 : rnd(45, 80) * 100 }));
+    const big = activeRange() === 100000;
+    const item = makeUnique('gi4_axis_connect_row', () => ({
+      fine,
+      big,
+      start: big
+        ? (fine ? rnd(60, 90) * 1000 : rnd(15, 70) * 1000)
+        : (fine ? rnd(60, 90) * 100 : rnd(45, 80) * 100)
+    }));
     if (!item) return null;
     const { start } = item;
-    const unit = fine ? 10 : 100;
-    const range = fine ? 500 : 2000;
+    const unit = big ? (fine ? 100 : 1000) : (fine ? 10 : 100);
+    const range = big ? (fine ? 5000 : 20000) : (fine ? 500 : 2000);
     const end = start + range;
     const labels = fine
       ? [start, start + 50, start + 150, start + 250, start + 350, end]
@@ -823,7 +988,8 @@
     const forcedCount = typeof extraCount === 'number' ? extraCount : 0;
     const key = mode === 'discover' ? 'gi4_jumps_discover' : 'gi4_jumps';
     const count = forcedCount || Math.max(1, parseInt($('#jumpCount4').value, 10) || 4);
-    const step = Math.max(1, parseInt($('#jumpStep4').value, 10) || 100);
+    let step = Math.max(1, parseInt($('#jumpStep4').value, 10) || 100);
+    if (activeRange() === 10000 && step > 1000) step = 1000;
     const title = mode === 'discover'
       ? 'Ontdek de sprong. Vul de ontbrekende getallen aan.'
       : `Tel met sprongen van ${fmt(step)}.`;
@@ -837,10 +1003,11 @@
     const wrap = document.createElement('div');
     wrap.className = 'gi4-jumps';
     for (let r = 0; r < count; r++) {
+      const maxStart = Math.max(activeMin(), activeMax() - step * 5);
       const item = makeUnique('gi4_jumps_row', () => ({
         mode,
         step,
-        start: rnd(1000, Math.max(1000, 9999 - step * 5)),
+        start: rnd(activeMin(), maxStart),
         visible: mode === 'discover'
           ? pick([[0, 1, 4], [0, 2, 3], [1, 2, 5], [2, 3, 5], [3, 4, 5], [0, 4, 5]])
           : [0, 1, 5],
@@ -879,11 +1046,13 @@
       const item = makeUnique('gi4_compare_row', () => {
         const a = randomNumber();
         const equal = Math.random() < .22;
-        const delta = pick([1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]);
+        const delta = pick(activeRange() === 100000
+          ? [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]
+          : [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000]);
         const sign = Math.random() < .5 ? -1 : 1;
         let bNum = equal ? a : a + sign * delta;
-        if (bNum < 1000 || bNum > 9999) bNum = a - sign * delta;
-        if (bNum < 1000 || bNum > 9999) bNum = randomNumber();
+        if (bNum < activeMin() || bNum > activeMax()) bNum = a - sign * delta;
+        if (bNum < activeMin() || bNum > activeMax()) bNum = randomNumber();
         return { mode, a, bNum, numberFirst: Math.random() < .5 };
       });
       if (!item) continue;
@@ -969,20 +1138,21 @@
 
   function valueWorkSvg(n, example, mode){
     const ds = digits(n);
+    const places = placesForNumber(n);
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('gi4-value-work-svg');
-    svg.setAttribute('viewBox', '0 0 360 205');
+    svg.setAttribute('viewBox', `0 0 430 ${places.length === 5 ? 235 : 205}`);
     svg.setAttribute('aria-hidden', 'true');
 
-    const colors = ['#ef2b2d', '#6d95c7', '#4fb94f', '#ffd414'];
-    const digitCenters = [186, 220, 254, 288];
-    const cardX = 169;
+    const colors = places.map(p => p.key === 'td' ? '#b57de8' : p.key === 'd' ? '#ef2b2d' : p.key === 'h' ? '#6d95c7' : p.key === 't' ? '#4fb94f' : '#ffd414');
+    const cardX = places.length === 5 ? 190 : 190;
     const cardY = 10;
     const cellW = 34;
     const cellH = 30;
+    const digitCenters = places.map((_, i) => cardX + i * cellW + cellW / 2);
 
     if (mode === 'plain') {
-      PLACE.forEach((p, i) => {
+      places.forEach((p, i) => {
         svg.appendChild(svgText(String(ds[p.key]), digitCenters[i], 33, {
           size: '21',
           weight: '700',
@@ -990,7 +1160,7 @@
         }));
       });
     } else {
-      PLACE.forEach((p, i) => {
+      places.forEach((p, i) => {
         svg.appendChild(svgRect(cardX + i * cellW, cardY, cellW, cellH, colors[i], '#8a8f99'));
         svg.appendChild(svgText(String(ds[p.key]), cardX + i * cellW + cellW / 2, cardY + 20, {
           size: '16',
@@ -999,18 +1169,18 @@
         }));
       });
       svg.appendChild(svgPolygon(
-        `${cardX + 4 * cellW},${cardY} ${cardX + 4 * cellW + 20},${cardY + cellH / 2} ${cardX + 4 * cellW},${cardY + cellH}`,
+        `${cardX + places.length * cellW},${cardY} ${cardX + places.length * cellW + 20},${cardY + cellH / 2} ${cardX + places.length * cellW},${cardY + cellH}`,
         '#ffd414',
         '#8a8f99'
       ));
     }
 
-    const rows = [
-      { p: PLACE[0], y: 82, x: digitCenters[0], kind: 'down' },
-      { p: PLACE[1], y: 114, x: digitCenters[1], kind: 'left' },
-      { p: PLACE[2], y: 146, x: digitCenters[2], kind: 'left' },
-      { p: PLACE[3], y: 178, x: digitCenters[3], kind: 'left' },
-    ];
+    const rows = places.map((p, i) => ({
+      p,
+      y: 82 + i * 32,
+      x: digitCenters[i],
+      kind: 'left',
+    }));
 
     rows.forEach(({ p, y, x, kind }) => {
       const val = ds[p.key] * p.value;
@@ -1033,7 +1203,7 @@
           size: '18',
           weight: '700',
         }));
-        svg.appendChild(svgLine(112, y, 172, y, '#d8dee8', 1.4));
+        svg.appendChild(svgLine(112, y, 178, y, '#d8dee8', 1.4));
         const answer = svgText(fmt(val), 122, y - 5, {
           size: '18',
           weight: '800',
@@ -1047,7 +1217,7 @@
         svg.appendChild(svgLine(x, cardY + cellH, x, y - 18, '#111827', 2.3));
         svg.appendChild(svgPolygon(`${x - 5},${y - 20} ${x + 5},${y - 20} ${x},${y - 11}`, '#111827', '#111827'));
       } else {
-        const endX = example ? 145 : 185;
+        const endX = example ? Math.min(178, x - 24) : 190;
         svg.appendChild(svgLine(x, cardY + cellH, x, y - 2, '#111827', 2.3));
         svg.appendChild(svgLine(x, y - 2, endX, y - 2, '#111827', 2.3));
         svg.appendChild(svgPolygon(`${endX},${y - 2} ${endX + 9},${y - 8} ${endX + 9},${y + 4}`, '#111827', '#111827'));
@@ -1067,22 +1237,56 @@
     return card;
   }
 
+  function addShortValues(extraCount){
+    const key = 'gi4_short_values';
+    const count = extraCount || Math.max(2, parseInt($('#shortValueCount')?.value, 10) || 6);
+    const b = block(key, 'Schrijf de waarde van het aangeduide cijfer.', addShortValues);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-short-value-grid';
+    uniqueNumbers(count).forEach(n => {
+      const ds = digits(n);
+      const candidates = placesForNumber(n).filter(p => ds[p.key] > 0);
+      const p = pick(candidates);
+      const card = document.createElement('div');
+      card.className = 'gi4-short-value-card row-delete-wrap';
+      card.appendChild(rowDel(card));
+      const number = document.createElement('div');
+      number.className = 'gi4-short-value-number';
+      placesForNumber(n).forEach(part => {
+        const span = document.createElement('span');
+        span.textContent = String(ds[part.key]);
+        if (part.key === p.key) span.className = 'marked';
+        number.appendChild(span);
+      });
+      const row = document.createElement('div');
+      row.className = 'gi4-short-value-row';
+      row.append(document.createTextNode(`${ds[p.key]} ${p.label} = `), lineWithSolution(fmt(ds[p.key] * p.value), 'long'));
+      card.append(number, row);
+      grid.appendChild(card);
+    });
+    b.appendChild(grid);
+  }
+
   function valueExpr(n){
     const ds = digits(n);
-    return `${ds.d} D ${ds.h} H ${ds.t} T ${ds.e} E`;
+    return placesForNumber(n).map(p => `${ds[p.key]} ${p.label}`).join(' ');
   }
 
   function exprFor(n){
     const ds = digits(n);
+    const places = placesForNumber(n);
+    const fullExpr = places.map(p => `${ds[p.key]} ${p.label}`).join(' ');
     const choices = [
       fmt(n),
-      `${ds.d} D ${ds.h} H ${ds.t} T`.trim(),
-      `${ds.d} D ${ds.h} H ${ds.e} E`.trim(),
-      `${ds.d} D ${ds.t} T ${ds.e} E`.trim(),
-      `${ds.d} D ${ds.h} H ${ds.t} T ${ds.e} E`.trim(),
+      fullExpr,
+      places.slice(0, -1).map(p => `${ds[p.key]} ${p.label}`).join(' '),
+      places.filter((_, i) => i !== 1).map(p => `${ds[p.key]} ${p.label}`).join(' '),
+      places.filter((_, i) => i !== places.length - 2).map(p => `${ds[p.key]} ${p.label}`).join(' '),
     ];
     if (ds.d > 1 && ds.h > 0) choices.push(`${ds.h} H meer dan ${ds.d} D`);
     if (ds.t > 1 && ds.d > 0 && ds.h > 0) choices.push(`${ds.t} T meer dan ${ds.d} D en ${ds.h} H`);
+    if (ds.td > 1 && ds.d > 0) choices.push(`${ds.d} D meer dan ${ds.td} TD`);
+    if (ds.h > 1 && ds.td > 0) choices.push(`${ds.h} H meer dan ${fmt(ds.td * 10000)}`);
     return pick(choices);
   }
 
@@ -1105,6 +1309,834 @@
       table.appendChild(tr);
     });
     b.appendChild(table);
+  }
+
+  function addG5Material(extraCount){
+    const count = extraCount || Math.max(1, parseInt($('#g5MaterialCount')?.value, 10) || 4);
+    addMaterial(count, 'dots');
+  }
+
+  function addG5ValueCards(extraCount){
+    const count = extraCount || Math.max(1, parseInt($('#g5ValueCardCount')?.value, 10) || 4);
+    const example = !extraCount && $('#g5ValueCardExample')?.checked;
+    const key = 'gi4_g5_valuecards';
+    const b = block(key, 'Schrijf de waarde van de cijfers.', addG5ValueCards);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-grid two';
+    uniqueNumbers(count).forEach((n, i) => grid.appendChild(makeValueCard(n, example && i === 0, 'plain')));
+    b.appendChild(grid);
+  }
+
+  function addG5BuildNumbers(extraCount){
+    const count = extraCount || Math.max(2, parseInt($('#g5BuildNumberCount')?.value, 10) || 5);
+    addBuildNumbers(count);
+  }
+
+  function nextThousandNumber(){
+    const thousands = rnd(10, 98);
+    const rest = rnd(1, 9) * 100;
+    return thousands * 1000 + rest;
+  }
+
+  function makeNextThousandCard(n, example){
+    const next = nextMultiple(n, 1000);
+    const diff = next - n;
+    const card = document.createElement('div');
+    card.className = `gi4-next-thousand-card row-delete-wrap${example ? ' example' : ''}`;
+    card.appendChild(rowDel(card));
+    const number = document.createElement('div');
+    number.className = 'gi4-next-thousand-number';
+    number.textContent = fmt(n);
+    const line1 = document.createElement('p');
+    line1.append('Het volgende duizendtal is ');
+    if (example) {
+      const strong = document.createElement('strong');
+      strong.textContent = fmt(next);
+      line1.append(strong, '.');
+    } else {
+      line1.append(lineWithSolution(fmt(next), 'long'), '.');
+    }
+    const line2 = document.createElement('p');
+    line2.append('Dat is ');
+    if (example) {
+      const strong = document.createElement('strong');
+      strong.textContent = fmt(diff);
+      line2.append(strong, ' erbij.');
+    } else {
+      line2.append(lineWithSolution(fmt(diff)), ' erbij.');
+    }
+    card.append(number, line1, line2);
+    return card;
+  }
+
+  function addG5NextThousand(extraCount){
+    const key = 'gi4_g5_next_thousand';
+    const count = extraCount || Math.max(1, parseInt($('#g5NextThousandCount')?.value, 10) || 3);
+    const example = !extraCount && $('#g5NextThousandExample')?.checked;
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-next-thousand-grid', 'gi4-next-thousand-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) {
+          const n = makeUnique('gi4_next_thousand_row', nextThousandNumber);
+          if (n) existing.appendChild(makeNextThousandCard(n, false));
+        }
+        return;
+      }
+    }
+    const b = block(key, 'Wat is het volgende duizendtal? Vul aan tot het volgende duizendtal.', addG5NextThousand);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-next-thousand-grid';
+    for (let i = 0; i < count; i++) {
+      const n = makeUnique('gi4_next_thousand_row', nextThousandNumber);
+      if (n) grid.appendChild(makeNextThousandCard(n, example && i === 0));
+    }
+    b.appendChild(grid);
+  }
+
+  function makeG5Axis(min, max, majorStep, minorStep){
+    const axis = document.createElement('div');
+    axis.className = 'gi4-g5-axis';
+    axis.dataset.min = String(min);
+    axis.dataset.max = String(max);
+    const line = document.createElement('div');
+    line.className = 'gi4-g5-axis-line';
+    axis.appendChild(line);
+    for (let v = min; v <= max; v += minorStep) {
+      const pct = ((v - min) / (max - min)) * 100;
+      const tick = document.createElement('span');
+      tick.className = v % majorStep === 0 ? 'major' : '';
+      tick.style.left = `${pct}%`;
+      axis.appendChild(tick);
+      if (v % majorStep === 0) {
+        const label = document.createElement('div');
+        label.className = 'gi4-g5-axis-label';
+        label.style.left = `${pct}%`;
+        label.textContent = fmt(v);
+        axis.appendChild(label);
+      }
+    }
+    return axis;
+  }
+
+  function g5AxisConnectExercise(fine){
+    const start = fine ? rnd(650, 850) * 100 : rnd(2, 6) * 10000;
+    const range = fine ? 5000 : 20000;
+    const majorStep = fine ? 1000 : 5000;
+    const minorStep = fine ? 100 : 1000;
+    const end = start + range;
+    const cardValues = fine
+      ? [start + 400, start + 1200, start + 2300, start + 3100, start + 3700, start + 4600]
+      : [start + 2000, start + 4000, start + 9000, start + 11000, start + 16000, start + 18000];
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-axis-order-row row-delete-wrap';
+    row.dataset.axisStart = String(start);
+    row.dataset.axisRange = String(range);
+    row.appendChild(rowDel(row));
+    row.appendChild(makeG5Axis(start, end, majorStep, minorStep));
+    const cards = document.createElement('div');
+    cards.className = 'gi4-g5-axis-cards';
+    cardValues.sort(() => Math.random() - .5).forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'gi4-g5-axis-card';
+      card.dataset.value = String(v);
+      card.textContent = fmt(v);
+      cards.appendChild(card);
+    });
+    row.appendChild(cards);
+    return row;
+  }
+
+  function g5ApproxAxisExercise(){
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-axis-order-row approx row-delete-wrap';
+    row.dataset.axisStart = '0';
+    row.dataset.axisRange = '100000';
+    row.appendChild(rowDel(row));
+    row.appendChild(makeG5Axis(0, 100000, 10000, 5000));
+    const cards = document.createElement('div');
+    cards.className = 'gi4-g5-axis-cards narrow';
+    [rnd(20, 28) * 1000 + rnd(1, 9) * 10, rnd(31, 39) * 1000 + rnd(1, 9) * 100, rnd(55, 65) * 1000 + rnd(1, 9) * 25, rnd(92, 98) * 1000 + rnd(1, 9) * 10]
+      .forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'gi4-g5-axis-card';
+        card.dataset.value = String(v);
+        card.textContent = fmt(v);
+        cards.appendChild(card);
+      });
+    row.appendChild(cards);
+    return row;
+  }
+
+  function addG5AxisOrder(extraCount, forcedMode){
+    const mode = forcedMode || $('#g5AxisOrderMode')?.value || 'connect';
+    const key = `gi4_g5_axis_order_${mode}`;
+    const count = extraCount || Math.max(1, parseInt($('#g5AxisOrderCount')?.value, 10) || 2);
+    const title = mode === 'approx'
+      ? 'Waar liggen de getallen ongeveer? Verbind de kaartjes met de juiste plaats op de getallenas.'
+      : 'Verbind de kaartjes met de juiste plaats op de getallenas.';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-axis-order', 'gi4-g5-axis-order');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(mode === 'approx' ? g5ApproxAxisExercise() : g5AxisConnectExercise(existing.children.length % 2 === 1));
+        return;
+      }
+    }
+    const b = block(key, title, addCount => addG5AxisOrder(addCount || 1, mode));
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-axis-order';
+    for (let i = 0; i < count; i++) wrap.appendChild(mode === 'approx' ? g5ApproxAxisExercise() : g5AxisConnectExercise(i % 2 === 1));
+    b.appendChild(wrap);
+  }
+
+  function makeG5PlaceCompareCard(){
+    let a = randomNumber();
+    let bNum = a + pick([-1, 1]) * pick([1, 2, 5, 10, 20, 100, 1000]);
+    if (bNum < 10000 || bNum > 99999) bNum = randomNumber();
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-place-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const tables = document.createElement('div');
+    tables.className = 'gi4-g5-place-compare-tables';
+    tables.appendChild(placeTable(a, 'dots', { compact: true }));
+    tables.appendChild(placeTable(bNum, 'dots', { compact: true }));
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-place-compare-row';
+    row.append('Dus: ', document.createTextNode(fmt(a)), Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' }), document.createTextNode(fmt(bNum)));
+    row.querySelector('.gi4-symbol-box').appendChild(sol(a < bNum ? '<' : a > bNum ? '>' : '='));
+    card.append(tables, row);
+    return card;
+  }
+
+  function makeG5PlainCompareRow(){
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-plain-compare-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const a = randomNumber();
+    let bNum = a + pick([-1, 1]) * pick([1, 7, 10, 100, 1000, 5000]);
+    if (bNum < 10000 || bNum > 99999) bNum = randomNumber();
+    const box = Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' });
+    box.appendChild(sol(a < bNum ? '<' : a > bNum ? '>' : '='));
+    row.append(fmt(a), box, fmt(bNum));
+    return row;
+  }
+
+  function addG5Compare(extraCount, forcedMode){
+    const mode = forcedMode || $('#g5CompareMode')?.value || 'plain';
+    const key = `gi4_g5_compare_${mode}`;
+    const count = extraCount || Math.max(1, parseInt($('#g5CompareCount')?.value, 10) || 4);
+    const selector = mode === 'place' ? '.gi4-g5-place-compare' : '.gi4-g5-plain-compare';
+    const className = mode === 'place' ? 'gi4-g5-place-compare' : 'gi4-g5-plain-compare';
+    const maker = mode === 'place' ? makeG5PlaceCompareCard : makeG5PlainCompareRow;
+    if (extraCount) {
+      const existing = containerInLastBlock(key, selector, className);
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(maker());
+        return;
+      }
+    }
+    const b = block(key, 'Vergelijk. Vul in: <, > of =.', addCount => addG5Compare(addCount || 1, mode));
+    const wrap = document.createElement('div');
+    wrap.className = className;
+    for (let i = 0; i < count; i++) wrap.appendChild(maker());
+    b.appendChild(wrap);
+  }
+
+  function makeG5OrderRow(dir){
+    const nums = uniqueNumbers(4).sort(() => Math.random() - .5);
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-order-line row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const title = document.createElement('div');
+    title.textContent = dir === 'asc'
+      ? 'Rangschik de getallen van klein naar groot.'
+      : 'Rangschik de getallen van groot naar klein.';
+    const source = document.createElement('div');
+    source.className = 'gi4-g5-order-source';
+    source.textContent = nums.map(fmt).join(' - ');
+    const ans = document.createElement('div');
+    ans.className = 'gi4-g5-order-answer';
+    nums.slice().sort((a, b) => dir === 'asc' ? a - b : b - a).forEach((n, i) => {
+      if (i) ans.append(dir === 'asc' ? ' < ' : ' > ');
+      ans.appendChild(lineWithSolution(fmt(n), 'long'));
+    });
+    row.append(title, source, ans);
+    return row;
+  }
+
+  function addG5Order(extraCount, forcedDir){
+    const dir = forcedDir || $('#g5OrderDirection')?.value || 'asc';
+    const key = `gi4_g5_order_${dir}`;
+    const count = extraCount || Math.max(1, parseInt($('#g5OrderCount')?.value, 10) || 2);
+    const title = dir === 'asc'
+      ? 'Rangschik de getallen van klein naar groot.'
+      : 'Rangschik de getallen van groot naar klein.';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-order-list', 'gi4-g5-order-list');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeG5OrderRow(dir));
+        return;
+      }
+    }
+    const b = block(key, title, addCount => addG5Order(addCount || 1, dir));
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-order-list';
+    for (let i = 0; i < count; i++) wrap.appendChild(makeG5OrderRow(dir));
+    b.appendChild(wrap);
+  }
+
+  function makeG5NeighborTable(kind, nums, withExample = false){
+    const base = kind === 'number' ? 1 : kind === 'hundred' ? 100 : kind === 'thousand' ? 1000 : 10000;
+    const labels = {
+      number: ['vorig getal', 'volgend getal', 'gi4-neighbor-yellow'],
+      hundred: ['vorig honderdtal', 'volgend honderdtal', 'gi4-neighbor-blue'],
+      thousand: ['vorig duizendtal', 'volgend duizendtal', 'gi4-neighbor-red'],
+      tenThousand: ['vorig tienduizendtal', 'volgend tienduizendtal', 'gi4-neighbor-purple'],
+    }[kind];
+    const makeRow = (n, example) => {
+      const tr = document.createElement('tr');
+      tr.className = 'row-delete-wrap';
+      const prev = kind === 'number' ? n - 1 : previousMultiple(n, base);
+      const next = kind === 'number' ? n + 1 : nextMultiple(n + 1, base);
+      const left = document.createElement('td');
+      const middle = document.createElement('td');
+      const right = document.createElement('td');
+      const actions = document.createElement('td');
+      actions.className = 'gi4-g5-neighbor-actions';
+      actions.appendChild(rowDel(tr));
+      if (example) left.textContent = fmt(prev);
+      else left.appendChild(lineWithSolution(fmt(prev), 'long'));
+      middle.textContent = fmt(n);
+      if (example) right.textContent = fmt(next);
+      else right.appendChild(lineWithSolution(fmt(next), 'long'));
+      if (example) tr.className = 'example';
+      tr.classList.add('row-delete-wrap');
+      tr.append(left, middle, right, actions);
+      return tr;
+    };
+    const table = document.createElement('table');
+    table.className = 'gi4-g5-neighbor-table';
+    table.dataset.kind = kind;
+    table.innerHTML = `<thead><tr><th class="${labels[2]}">${labels[0]}</th><th></th><th class="${labels[2]}">${labels[1]}</th><th class="gi4-g5-neighbor-actions"></th></tr></thead>`;
+    const body = document.createElement('tbody');
+    nums.forEach((n, i) => body.appendChild(makeRow(n, withExample && i === 0)));
+    table.appendChild(body);
+    return table;
+  }
+
+  function makeG5NeighborRow(kind, n){
+    const body = makeG5NeighborTable(kind, [n], false).querySelector('tbody');
+    return body?.firstElementChild;
+  }
+
+  function addG5Neighbors(extraCount){
+    const key = 'gi4_g5_neighbors';
+    const rows = extraCount || Math.max(1, parseInt($('#g5NeighborRows')?.value, 10) || 3);
+    if (extraCount) {
+      const small = lastBlock(key);
+      const big = lastBlock(`${key}_big`);
+      const targets = [
+        [small, 'number'],
+        [small, 'hundred'],
+        [big, 'thousand'],
+        [big, 'tenThousand'],
+      ];
+      let appended = false;
+      targets.forEach(([blockEl, kind]) => {
+        const body = blockEl?.querySelector(`.gi4-g5-neighbor-table[data-kind="${kind}"] tbody`);
+        if (!body) return;
+        uniqueNumbers(rows).forEach(n => {
+          const tr = makeG5NeighborRow(kind, n);
+          if (tr) body.appendChild(tr);
+        });
+        appended = true;
+      });
+      if (appended) return;
+    }
+    const numsA = uniqueNumbers(rows);
+    const numsB = uniqueNumbers(rows);
+    const withExample = $('#g5NeighborExample')?.checked;
+    const b1 = block(key, 'Schrijf de buurtallen of de buurhonderdtallen.', addG5Neighbors);
+    const grid1 = document.createElement('div');
+    grid1.className = 'gi4-g5-neighbor-grid';
+    grid1.append(makeG5NeighborTable('number', numsA, withExample), makeG5NeighborTable('hundred', numsB, withExample));
+    b1.appendChild(grid1);
+    const b2 = block(`${key}_big`, 'Schrijf de buurduizendtallen of de buurtienduizendtallen.', addG5Neighbors);
+    const grid2 = document.createElement('div');
+    grid2.className = 'gi4-g5-neighbor-grid';
+    grid2.append(makeG5NeighborTable('thousand', uniqueNumbers(rows), withExample), makeG5NeighborTable('tenThousand', uniqueNumbers(rows), withExample));
+    b2.appendChild(grid2);
+  }
+
+  function makeG5JumpRow(step){
+    const centerIndex = 3;
+    const start = Math.floor(rnd(15000, 90000 - step * 3) / step) * step;
+    const center = start + centerIndex * step;
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-jump-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const tag = document.createElement('div');
+    tag.className = 'gi4-g5-jump-tag';
+    tag.textContent = `Maak sprongen van ${fmt(step)}.`;
+    const axis = document.createElement('div');
+    axis.className = 'gi4-g5-jump-axis';
+    for (let i = 0; i < 7; i++) {
+      const value = start + i * step;
+      const cell = document.createElement('div');
+      cell.className = i === centerIndex ? 'center' : '';
+      if (i === centerIndex || Math.random() < .25) cell.textContent = fmt(value);
+      else cell.appendChild(lineWithSolution(fmt(value), 'long'));
+      axis.appendChild(cell);
+    }
+    row.append(tag, axis);
+    return row;
+  }
+
+  function g5JumpSteps(count){
+    const base = [100, 200, 500, 1000, 2000, 3000, 5000, 10000];
+    const shuffled = [...base].sort(() => Math.random() - .5);
+    const steps = [];
+    for (let i = 0; i < count; i++) steps.push(shuffled[i % shuffled.length]);
+    return steps;
+  }
+
+  function addG5Jumps(extraCount){
+    const key = 'gi4_g5_jumps';
+    const rows = extraCount || Math.max(1, parseInt($('#g5JumpRows')?.value, 10) || 3);
+    const steps = g5JumpSteps(rows);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-jumps', 'gi4-g5-jumps');
+      if (existing) {
+        for (let i = 0; i < rows; i++) existing.appendChild(makeG5JumpRow(steps[i]));
+        return;
+      }
+    }
+    const b = block(key, 'Maak sprongen op de getallenas. Vul de getallen aan.', addG5Jumps);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-jumps';
+    for (let i = 0; i < rows; i++) wrap.appendChild(makeG5JumpRow(steps[i % steps.length]));
+    b.appendChild(wrap);
+  }
+
+  function addG5Riddles(extraCount){
+    const key = 'gi4_g5_riddles';
+    const count = extraCount || Math.max(1, parseInt($('#g5RiddleCount')?.value, 10) || 3);
+    const riddles = [
+      {
+        lines: ['Het grootste getal dat je kunt maken met vijf verschillende cijfers is:', 'Het kleinste getal dat je kunt maken met vijf verschillende cijfers is:'],
+        answers: ['98 765', '10 234'],
+        join: ' en '
+      },
+      {
+        lines: ['Ik zoek 2 getallen.', 'Beide getallen liggen tussen 45 600 en 45 700.', 'In elk getal komt elk cijfer slechts 1 keer voor.', 'De som van de cijfers is bij elk getal precies 20.'],
+        answers: ['45 623', '45 632'],
+        join: ' en '
+      },
+      {
+        lines: ['Ik zoek twee getallen.', 'Beide getallen liggen tussen 82 850 en 82 950.', 'Elk getal heeft slechts 2 verschillende cijfers.'],
+        answers: ['82 882', '82 888'],
+        join: ' en '
+      },
+      {
+        lines: ['Ik zoek een getal tussen 60 000 en 70 000.', 'Het honderdtal is 8.', 'Het tiental is dubbel zoveel als het eenheidscijfer.'],
+        answers: ['bv. 60 821'],
+        join: ''
+      },
+    ];
+    const makeCard = index => {
+      const templateIndex = index % riddles.length;
+      const riddle = riddles[templateIndex];
+      const card = document.createElement('div');
+      card.className = 'gi4-g5-riddle-card row-delete-wrap';
+      card.appendChild(rowDel(card));
+      riddle.lines.forEach(line => {
+        const p = document.createElement('p');
+        p.textContent = line;
+        card.appendChild(p);
+      });
+      const answer = document.createElement('div');
+      answer.className = 'gi4-g5-riddle-answer';
+      riddle.answers.forEach((answerText, answerIndex) => {
+        if (answerIndex) answer.append(riddle.join || ' ');
+        answer.appendChild(lineWithSolution(answerText, 'long'));
+      });
+      card.appendChild(answer);
+      return card;
+    };
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-riddle-grid', 'gi4-g5-riddle-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeCard(existing.children.length + i));
+        return;
+      }
+    }
+    const b = block(key, 'Lees de getalraadsels. Vul in.', addG5Riddles);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-riddle-grid';
+    for (let i = 0; i < count; i++) {
+      const card = makeCard(i);
+      grid.appendChild(card);
+    }
+    b.appendChild(grid);
+  }
+
+  function addG5Equiv(extraCount){
+    const rows = extraCount || Math.max(2, parseInt($('#g5EquivRows')?.value, 10) || 4);
+    addEquiv(rows);
+  }
+
+  function gcd(a, b){
+    while (b) {
+      const t = b;
+      b = a % b;
+      a = t;
+    }
+    return Math.abs(a);
+  }
+
+  function g5SimplifySeeds(){
+    return [
+      { num: 6, den: 10, color: '#f49b83' },
+      { num: 4, den: 12, color: '#b9dca8' },
+      { num: 6, den: 8, color: '#ffe09a' },
+      { num: 9, den: 12, color: '#7ed0ee' },
+      { num: 8, den: 12, color: '#c7b8e8' },
+      { num: 10, den: 15, color: '#f8c37d' },
+      { num: 12, den: 16, color: '#9fd7c5' },
+      { num: 15, den: 20, color: '#f4a9c4' },
+    ];
+  }
+
+  function pickUnusedOrAny(namespace, items, keyFn = item => item){
+    return pickUnused(namespace, items, keyFn) || pick(items);
+  }
+
+  function makeG5SimplifyStrip(num, den, simplifiedNum, simplifiedDen, color){
+    const visual = document.createElement('div');
+    visual.className = 'gi4-g5-simplify-strip';
+    const top = document.createElement('div');
+    const bottom = document.createElement('div');
+    top.className = 'gi4-g5-simplify-strip-row';
+    bottom.className = 'gi4-g5-simplify-strip-row';
+    top.style.setProperty('--den', den);
+    bottom.style.setProperty('--den', simplifiedDen);
+    for (let i = 0; i < den; i++) {
+      const cell = document.createElement('span');
+      if (i < num) cell.style.background = color;
+      top.appendChild(cell);
+    }
+    for (let i = 0; i < simplifiedDen; i++) {
+      const cell = document.createElement('span');
+      if (i < simplifiedNum) cell.classList.add('solution-fill');
+      cell.style.setProperty('--eq-fill', color);
+      bottom.appendChild(cell);
+    }
+    visual.append(top, bottom);
+    return visual;
+  }
+
+  function makeG5FractionSimplifyCard(){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_simplify_seed', g5SimplifySeeds(), s => `${s.num}/${s.den}`);
+    if (!seed) return null;
+    const divisor = gcd(seed.num, seed.den);
+    const simpleNum = seed.num / divisor;
+    const simpleDen = seed.den / divisor;
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-simplify-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(makeG5SimplifyStrip(seed.num, seed.den, simpleNum, simpleDen, seed.color));
+
+    const calc = makeG5FractionArrowWork({
+      num: seed.num,
+      den: seed.den,
+      resultNum: simpleNum,
+      resultDen: simpleDen,
+      op: ':',
+      factor: divisor,
+      showResultDen: true
+    });
+
+    const info = document.createElement('div');
+    info.className = 'gi4-g5-simplify-info';
+    info.append('De GGD van ', seed.num, ' en ', seed.den, ' is ', lineWithSolution(String(divisor), 'short'), '.');
+    const step = document.createElement('div');
+    step.className = 'gi4-g5-simplify-info';
+    step.append('Ik deel teller en noemer door ', lineWithSolution(String(divisor), 'short'), '.');
+    const final = document.createElement('div');
+    final.className = 'gi4-g5-simplify-final';
+    final.append('Ik vereenvoudig ', fractionBox(seed.num, seed.den), ' naar ', fractionBox('', '', simpleNum, simpleDen), '.');
+    card.append(calc, info, step, final);
+    return card;
+  }
+
+  function makeG5FractionArrowWork({ num, den, resultNum, resultDen, op = ':', factor = '', showResultDen = true }){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-fraction-arrow-work';
+    const top = document.createElement('div');
+    top.className = 'gi4-g5-fraction-arrow-label top';
+    top.append(`${op} `, lineWithSolution(String(factor), 'short'));
+    const arrows = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrows.setAttribute('class', 'gi4-g5-fraction-arrow-svg');
+    arrows.setAttribute('viewBox', '0 0 260 160');
+    arrows.innerHTML = `
+      <defs>
+        <marker id="gi4ArrowHead" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z"></path>
+        </marker>
+      </defs>
+      <path class="gi4-g5-fraction-arrow-path" d="M 101 63 C 116 27, 144 27, 159 63" marker-end="url(#gi4ArrowHead)"></path>
+      <path class="gi4-g5-fraction-arrow-path" d="M 101 97 C 116 133, 144 133, 159 97" marker-end="url(#gi4ArrowHead)"></path>
+    `;
+    const eq = document.createElement('div');
+    eq.className = 'gi4-g5-fraction-arrow-equation';
+    eq.append(fractionBox(num, den), ' = ', fractionBox('', showResultDen ? resultDen : '', resultNum, showResultDen ? '' : resultDen));
+    const bottom = document.createElement('div');
+    bottom.className = 'gi4-g5-fraction-arrow-label bottom';
+    bottom.append(`${op} `, lineWithSolution(String(factor), 'short'));
+    wrap.append(arrows, top, eq, bottom);
+    return wrap;
+  }
+
+  function addG5FractionSimplify(extraCount){
+    const key = 'gi4_g5_fraction_simplify';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionSimplifyCount')?.value, 10) || 4);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-simplify-grid', 'gi4-g5-simplify-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionSimplifyCard);
+        return;
+      }
+    }
+    const b = block(key, 'Vereenvoudig de breuken. Vul in.', addG5FractionSimplify);
+    addFractionInstructions(b, ['Vereenvoudig de breuken.', 'Kleur de eenvoudigste gelijkwaardige breuk.', 'Schrijf de eenvoudigste gelijkwaardige breuk.', 'Vul in.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-simplify-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeG5FractionSimplifyCard);
+    b.appendChild(grid);
+  }
+
+  function g5EquivalentSeeds(){
+    return [
+      { num: 1, den: 2, factor: 3, color: '#f8c879' },
+      { num: 2, den: 3, factor: 4, color: '#9fd7c5' },
+      { num: 2, den: 10, factor: 2, color: '#c8a4cf', simplify: true },
+      { num: 6, den: 9, factor: 3, color: '#f4a9b6', simplify: true },
+      { num: 3, den: 4, factor: 3, color: '#b9dca8' },
+      { num: 4, den: 5, factor: 2, color: '#7ed0ee' },
+      { num: 5, den: 6, factor: 2, color: '#ffe09a' },
+      { num: 8, den: 12, factor: 4, color: '#b7d9f2', simplify: true },
+    ];
+  }
+
+  function g5PickEquivalentSeed(namespace, mode = 'mixed'){
+    const seeds = g5EquivalentSeeds().filter(seed => {
+      if (mode === 'expand') return !seed.simplify;
+      if (mode === 'simplify') return seed.simplify;
+      return true;
+    });
+    return pickUnusedOrAny(namespace, seeds, s => `${s.num}/${s.den}/${s.factor}/${s.simplify ? 's' : 'e'}`);
+  }
+
+  function makeG5FractionEquivalentCard(mode = 'mixed'){
+    const seed = g5PickEquivalentSeed(`gi4_g5_fraction_equivalent_${mode}`, mode);
+    if (!seed) return null;
+    const simplify = !!seed.simplify;
+    const divisor = seed.factor;
+    const sourceNum = seed.num;
+    const sourceDen = seed.den;
+    const targetNum = simplify ? sourceNum / divisor : sourceNum * divisor;
+    const targetDen = simplify ? sourceDen / divisor : sourceDen * divisor;
+    const card = document.createElement('div');
+    card.className = `gi4-g5-equivalent-card row-delete-wrap ${simplify ? 'simplify' : 'expand'}`;
+    card.appendChild(rowDel(card));
+    card.appendChild(makeG5SimplifyStrip(sourceNum, sourceDen, targetNum, targetDen, seed.color));
+    const op = simplify ? ':' : 'x';
+    const calc = makeG5FractionArrowWork({
+      num: sourceNum,
+      den: sourceDen,
+      resultNum: targetNum,
+      resultDen: targetDen,
+      op,
+      factor: divisor,
+      showResultDen: true
+    });
+    card.appendChild(calc);
+    const final = document.createElement('div');
+    final.className = 'gi4-g5-simplify-final';
+    if (simplify) final.append('Ik vereenvoudig ', fractionBox(sourceNum, sourceDen), ' naar ', fractionBox('', '', targetNum, targetDen), '.');
+    else final.append('Ik maak ', fractionBox(sourceNum, sourceDen), ' gelijkwaardig met ', fractionBox('', targetDen, targetNum, ''), '.');
+    card.appendChild(final);
+    return card;
+  }
+
+  function addG5FractionEquivalent(extraCount, forcedMode){
+    const mode = forcedMode || $('#g5FractionEquivalentMode')?.value || 'mixed';
+    const key = `gi4_g5_fraction_equivalent_${mode}`;
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionEquivalentCount')?.value, 10) || 4);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-simplify-grid', 'gi4-g5-simplify-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeG5FractionEquivalentCard(mode));
+        return;
+      }
+    }
+    const b = block(key, 'Kleur de gelijkwaardige breuken. Vul de pijlen aan.', addCount => addG5FractionEquivalent(addCount || 1, mode));
+    addFractionInstructions(b, ['Kleur de gelijkwaardige breuken.', 'Vul de pijlen aan.', 'Schrijf de gelijkwaardige breuken.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-simplify-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeG5FractionEquivalentCard(mode));
+    b.appendChild(grid);
+  }
+
+  function makeG5FractionArrowCard(){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_arrows', g5SimplifySeeds(), s => `${s.num}/${s.den}`);
+    if (!seed) return null;
+    const divisor = gcd(seed.num, seed.den);
+    const simpleNum = seed.num / divisor;
+    const simpleDen = seed.den / divisor;
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-arrow-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const calc = makeG5FractionArrowWork({
+      num: seed.num,
+      den: seed.den,
+      resultNum: simpleNum,
+      resultDen: simpleDen,
+      op: ':',
+      factor: divisor,
+      showResultDen: false
+    });
+    card.appendChild(calc);
+    return card;
+  }
+
+  function addG5FractionArrows(extraCount){
+    const key = 'gi4_g5_fraction_arrows';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionArrowCount')?.value, 10) || 6);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-arrow-grid', 'gi4-g5-arrow-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionArrowCard);
+        return;
+      }
+    }
+    const b = block(key, 'Vereenvoudig de breuken. Vul de pijlen aan.', addG5FractionArrows);
+    addFractionInstructions(b, ['Denk na: wat is de GGD van de teller en de noemer?', 'Noteer indien nodig op een wisbordje.', 'Vul de pijlen aan.', 'Vereenvoudig de breuken.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-arrow-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeG5FractionArrowCard);
+    b.appendChild(grid);
+  }
+
+  function makeG5FractionShortRow(){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_short', g5SimplifySeeds(), s => `${s.num}/${s.den}`);
+    if (!seed) return null;
+    const divisor = gcd(seed.num, seed.den);
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-fraction-short-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    row.append(fractionBox(seed.num, seed.den), ' = ', fractionBox('', '', seed.num / divisor, seed.den / divisor));
+    return row;
+  }
+
+  function addG5FractionShort(extraCount){
+    const key = 'gi4_g5_fraction_short';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionShortCount')?.value, 10) || 6);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-fraction-short-grid', 'gi4-g5-fraction-short-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionShortRow);
+        return;
+      }
+    }
+    const b = block(key, 'Vereenvoudig de breuken.', addG5FractionShort);
+    addFractionInstructions(b, ['Vereenvoudig de breuken.', 'Je mag pijlen tekenen indien nodig.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-fraction-short-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeG5FractionShortRow);
+    b.appendChild(grid);
+  }
+
+  function makeG5FractionSeriesRow(){
+    const series = [
+      { base: { num: 3, den: 9 }, options: [{ num: 2, den: 3 }, { num: 1, den: 3 }, { num: 1, den: 6 }, { num: 6, den: 18 }] },
+      { base: { num: 6, den: 12 }, options: [{ num: 2, den: 6 }, { num: 2, den: 4 }, { num: 12, den: 24 }, { num: 1, den: 2 }] },
+      { base: { num: 4, den: 10 }, options: [{ num: 2, den: 5 }, { num: 4, den: 20 }, { num: 8, den: 20 }, { num: 1, den: 5 }] },
+      { base: { num: 8, den: 24 }, options: [{ num: 1, den: 3 }, { num: 2, den: 6 }, { num: 4, den: 12 }, { num: 3, den: 8 }] },
+    ];
+    const item = pickUnusedOrAny('gi4_g5_fraction_series', series, s => `${s.base.num}/${s.base.den}`);
+    if (!item) return null;
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-fraction-series row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const base = document.createElement('div');
+    base.className = 'gi4-g5-fraction-flower';
+    base.appendChild(fractionBox(item.base.num, item.base.den));
+    row.appendChild(base);
+    item.options.forEach(opt => {
+      const cell = document.createElement('div');
+      cell.className = 'gi4-g5-fraction-option';
+      if (item.base.num * opt.den === opt.num * item.base.den) cell.classList.add('solution-equivalent');
+      if (gcd(opt.num, opt.den) === 1 && item.base.num * opt.den === opt.num * item.base.den) cell.classList.add('solution-simplest');
+      cell.appendChild(fractionBox(opt.num, opt.den));
+      row.appendChild(cell);
+    });
+    return row;
+  }
+
+  function addG5FractionSeries(extraCount){
+    const key = 'gi4_g5_fraction_series';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionSeriesCount')?.value, 10) || 2);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-fraction-series-grid', 'gi4-g5-fraction-series-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionSeriesRow);
+        return;
+      }
+    }
+    const b = block(key, 'Kleur alle gelijkwaardige breuken. Omkring de eenvoudigste breuk.', addG5FractionSeries);
+    addFractionInstructions(b, ['Kleur in elke reeks alle gelijkwaardige breuken.', 'Omkring van deze gelijkwaardige breuken de eenvoudigste breuk.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-fraction-series-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeG5FractionSeriesRow);
+    b.appendChild(grid);
+  }
+
+  function makeG5FractionColorTable(){
+    const groups = [
+      [{ num: 2, den: 3 }, { num: 4, den: 6 }, { num: 6, den: 9 }],
+      [{ num: 1, den: 2 }, { num: 5, den: 10 }, { num: 10, den: 20 }],
+      [{ num: 3, den: 4 }, { num: 6, den: 8 }, { num: 9, den: 12 }],
+      [{ num: 5, den: 7 }, { num: 10, den: 14 }, { num: 15, den: 21 }],
+    ];
+    const cells = groups.flatMap((group, groupIndex) => group.map(value => ({ ...value, groupIndex }))).sort(() => Math.random() - .5);
+    const table = document.createElement('div');
+    table.className = 'gi4-g5-fraction-color-table row-delete-wrap';
+    table.appendChild(rowDel(table));
+    cells.forEach(cellData => {
+      const cell = document.createElement('div');
+      cell.className = `gi4-g5-fraction-color-cell solution-group-${cellData.groupIndex}`;
+      cell.appendChild(fractionBox(cellData.num, cellData.den));
+      table.appendChild(cell);
+    });
+    return table;
+  }
+
+  function addG5FractionColorTable(extraCount){
+    const key = 'gi4_g5_fraction_color_table';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionColorTableCount')?.value, 10) || 1);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-fraction-color-wrap', 'gi4-g5-fraction-color-wrap');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionColorTable);
+        return;
+      }
+    }
+    const b = block(key, 'Geef de gelijkwaardige breuken dezelfde kleur.', addG5FractionColorTable);
+    addFractionInstructions(b, ['Geef de gelijkwaardige breuken eenzelfde kleur.']);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-fraction-color-wrap';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, makeG5FractionColorTable);
+    b.appendChild(wrap);
   }
 
   function fractionBox(num, den, solutionNum = '', solutionDen = ''){
@@ -2622,12 +3654,12 @@
     return card;
   }
 
-  function makeFractionQuantityOperatorCard(mode = 'operator'){
-    const seed = fractionQuantitySeed(`gi4_fraction_quantity_${mode}`);
+  function makeFractionQuantityOperatorCard(mode = 'operator', fixedSeed = null, withDelete = true){
+    const seed = fixedSeed || fractionQuantitySeed(`gi4_fraction_quantity_${mode}`);
     if (!seed) return null;
     const card = document.createElement('div');
     card.className = `gi4-quantity-operator-card ${mode} row-delete-wrap`;
-    card.appendChild(rowDel(card));
+    if (withDelete) card.appendChild(rowDel(card));
     const title = document.createElement('strong');
     title.className = 'gi4-quantity-card-title';
     title.append('Hoeveel is ', fractionBox(seed.num, seed.den), ` van ${seed.total}?`);
@@ -2802,7 +3834,7 @@
     pair.forEach(seed => top.appendChild(fractionQuantityBar(seed, true)));
     const solve = document.createElement('div');
     solve.className = 'gi4-quantity-compare-solve-grid';
-    pair.forEach(seed => solve.appendChild(makeFractionQuantityOperatorCard('solve')));
+    pair.forEach(seed => solve.appendChild(makeFractionQuantityOperatorCard('solve', seed, false)));
     const line = document.createElement('div');
     line.className = 'gi4-quantity-compare-line';
     line.append(`${pair[0].total} `, compareBox(compareSymbol(pair[0].total, pair[1].total)), ` ${pair[1].total}`);
@@ -2812,8 +3844,8 @@
     return card;
   }
 
-  function makeFractionQuantityCompareQuickCard(){
-    const pairs = [
+  function fractionQuantityCompareQuickPairs(){
+    return [
       [{ num: 1, den: 4, total: 16 }, { num: 1, den: 4, total: 8 }],
       [{ num: 2, den: 3, total: 15 }, { num: 2, den: 3, total: 21 }],
       [{ num: 5, den: 7, total: 14 }, { num: 5, den: 7, total: 21 }],
@@ -2825,17 +3857,16 @@
       [{ num: 2, den: 6, total: 36 }, { num: 2, den: 6, total: 24 }],
       [{ num: 7, den: 8, total: 56 }, { num: 7, den: 8, total: 48 }],
     ];
-    const picked = pairs.sort(() => Math.random() - .5).slice(0, 10);
-    const card = document.createElement('div');
-    card.className = 'gi4-quantity-compare-quick-card row-delete-wrap';
-    card.appendChild(rowDel(card));
-    picked.forEach(pair => {
-      const row = document.createElement('div');
-      row.className = 'gi4-quantity-compare-quick-row';
-      row.append(fractionBox(pair[0].num, pair[0].den), ` van ${pair[0].total}`, compareBox(compareSymbol(fractionQuantityResult(pair[0]), fractionQuantityResult(pair[1]))), fractionBox(pair[1].num, pair[1].den), ` van ${pair[1].total}`);
-      card.appendChild(row);
-    });
-    return card;
+  }
+
+  function makeFractionQuantityCompareQuickRow(){
+    const pair = pickUnused('gi4_fraction_quantity_compare_quick_row', fractionQuantityCompareQuickPairs(), pair => pair.map(s => `${s.num}/${s.den}-${s.total}`).join('|'));
+    if (!pair) return null;
+    const row = document.createElement('div');
+    row.className = 'gi4-quantity-compare-quick-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    row.append(fractionBox(pair[0].num, pair[0].den), ` van ${pair[0].total}`, compareBox(compareSymbol(fractionQuantityResult(pair[0]), fractionQuantityResult(pair[1]))), fractionBox(pair[1].num, pair[1].den), ` van ${pair[1].total}`);
+    return row;
   }
 
   function makeFractionQuantityCard(mode){
@@ -2846,7 +3877,7 @@
     if (mode === 'quick') return makeFractionQuantityQuickItem(fractionQuantitySeed('gi4_fraction_quantity_quick_item'));
     if (mode === 'compareSamePart' || mode === 'compareSameWhole') return makeFractionQuantityCompareCard(mode);
     if (mode === 'compareSolve') return makeFractionQuantityCompareSolveCard();
-    if (mode === 'compareQuick') return makeFractionQuantityCompareQuickCard();
+    if (mode === 'compareQuick') return makeFractionQuantityCompareQuickRow();
     if (mode === 'same') return makeFractionQuantitySameCard();
     return null;
   }
@@ -2858,7 +3889,7 @@
       return;
     }
     const key = `gi4_fraction_quantity_${mode}`;
-    const requested = Math.max(1, Math.min(8, parseInt($('#fractionQuantityCount')?.value, 10) || 4));
+    const requested = Math.max(1, Math.min(10, parseInt($('#fractionQuantityCount')?.value, 10) || 4));
     const count = extraCount || requested;
     if (extraCount) {
       if (mode === 'quick') {
@@ -5242,6 +6273,31 @@
     });
   }
 
+  function drawG5AxisConnectSolutionLines(){
+    sheet.querySelectorAll('.gi4-g5-axis-order-row').forEach(row => {
+      const axisLine = row.querySelector('.gi4-g5-axis-line');
+      const cards = Array.from(row.querySelectorAll('.gi4-g5-axis-card[data-value]'));
+      const start = parseInt(row.dataset.axisStart, 10);
+      const range = parseInt(row.dataset.axisRange, 10);
+      if (!axisLine || !cards.length || !Number.isFinite(start) || !Number.isFinite(range) || range <= 0) return;
+      const svg = makeOverlay(row, 'gi4-axis-connect-solution-svg');
+      const rowRect = row.getBoundingClientRect();
+      const lineRect = axisLine.getBoundingClientRect();
+      cards.forEach(card => {
+        const value = parseInt(card.dataset.value, 10);
+        if (!Number.isFinite(value)) return;
+        const cardRect = card.getBoundingClientRect();
+        const x1 = cardRect.left - rowRect.left + cardRect.width / 2;
+        const y1 = cardRect.top - rowRect.top - 12;
+        const x2 = lineRect.left - rowRect.left + ((value - start) / range) * lineRect.width;
+        const y2 = lineRect.top - rowRect.top + 10;
+        svg.appendChild(svgSolutionLine(x1, y1, x2, y2));
+        svg.appendChild(svgSolutionDot(x2, y2, 3.2));
+      });
+      row.appendChild(svg);
+    });
+  }
+
   function drawMixedAxisConnectSolutionLines(){
     sheet.querySelectorAll('.gi4-mixed-axis-connect-order').forEach(card => {
       const axis = card.querySelector('.gi4-mixed-order-axis');
@@ -5283,6 +6339,7 @@
     drawConnectSolutionLines();
     drawMixedConnectSolutionLines();
     drawAxisConnectSolutionLines();
+    drawG5AxisConnectSolutionLines();
     drawMixedAxisConnectSolutionLines();
   }
 
@@ -5304,10 +6361,99 @@
     requestAnimationFrame(drawSolutionLines);
   }
 
+  function levelLabel(){
+    if (levelState.level === 'grade5') return '5de leerjaar';
+    if (levelState.level === 'grade6') return '6de leerjaar';
+    if (levelState.level === 'custom') return 'Eigen keuze';
+    return '4de leerjaar';
+  }
+
+  function updateLevelUi(){
+    const range = activeRange();
+    document.body.classList.toggle('gi4-range-100000', range === 100000);
+    const badge = document.querySelector('.graad-badge');
+    if (badge) badge.textContent = range === 100000 ? 'tot 100 000' : 'tot 10 000';
+
+    const note = $('#gi4LevelNote');
+    if (note) {
+      const extra = levelState.level === 'grade6'
+        ? 'De uitbreidingen met kommagetallen, breuken en procenten kunnen later verder groeien.'
+        : levelState.level === 'custom'
+          ? 'Eigen keuze: je kiest zelf of deze tool tot 10 000 of tot 100 000 werkt.'
+          : '';
+      note.textContent = `${levelLabel()}: getallen ${range === 100000 ? 'tot 100 000 met TD / D / H / T / E' : 'tot 10 000 met D / H / T / E'}.${extra ? ` ${extra}` : ''}`;
+    }
+
+    const splitNote = $('#splitRangeNote');
+    if (splitNote) {
+      splitNote.textContent = range === 100000
+        ? 'Voorbeeld: 41 970 = 4 TD + 1 D + 9 H + 7 T + 0 E.'
+        : 'Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.';
+    }
+
+    const title = sheet?.querySelector('.sheetHeader h2');
+    if (title && !title.dataset.userEdited) {
+      title.textContent = range === 100000
+        ? 'Extra oefenen op getalinzicht tot 100 000'
+        : 'Extra oefenen op getalinzicht tot 10 000';
+    }
+    applyLevelVisibility();
+  }
+
+  function applyLevelVisibility(){
+    const showAll = $('#gi4ShowAllLevels')?.checked;
+    document.querySelectorAll('[data-levels]').forEach(el => {
+      const levels = (el.dataset.levels || '').split(/\s+/).filter(Boolean);
+      el.hidden = !showAll && !levels.includes(levelState.level);
+    });
+    const activeTab = document.querySelector('.sidebar-tab.active');
+    if (activeTab?.hidden) {
+      const firstVisible = document.querySelector('.sidebar-tab:not([hidden])');
+      firstVisible?.click?.();
+    }
+  }
+
+  function initLevelControls(){
+    const level = $('#gi4Level');
+    const range = $('#gi4Range');
+    if (!level || !range) return;
+    level.addEventListener('change', () => {
+      levelState.level = level.value;
+      updateLevelUi();
+    });
+    range.addEventListener('change', () => {
+      levelState.range = range.value;
+      updateLevelUi();
+    });
+    $('#gi4ShowAllLevels')?.addEventListener('change', updateLevelUi);
+    const title = sheet?.querySelector('.sheetHeader h2');
+    title?.addEventListener('input', () => { title.dataset.userEdited = '1'; });
+    updateLevelUi();
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
     renderSheetHeader();
+    initLevelControls();
     attachSidebarButtons();
     bind('#btnAddSplit', addSplit);
+    bind('#btnAddG5Material', addG5Material);
+    bind('#btnAddG5ValueCards', addG5ValueCards);
+    bind('#btnAddG5BuildNumbers', addG5BuildNumbers);
+    bind('#btnAddG5NextThousand', addG5NextThousand);
+    bind('#btnAddG5AxisOrder', addG5AxisOrder);
+    bind('#btnAddG5Compare', addG5Compare);
+    bind('#btnAddG5Order', addG5Order);
+    bind('#btnAddG5Neighbors', addG5Neighbors);
+    bind('#btnAddG5Jumps', addG5Jumps);
+    bind('#btnAddG5Riddles', addG5Riddles);
+    bind('#btnAddG5Equiv', addG5Equiv);
+    bind('#btnAddG5FractionSimplify', addG5FractionSimplify);
+    bind('#btnAddG5FractionEquivalent', addG5FractionEquivalent);
+    bind('#btnAddG5FractionArrows', addG5FractionArrows);
+    bind('#btnAddG5FractionShort', addG5FractionShort);
+    bind('#btnAddG5FractionSeries', addG5FractionSeries);
+    bind('#btnAddG5FractionColorTable', addG5FractionColorTable);
+    bind('#btnAddBuildNumbers', addBuildNumbers);
     bind('#btnAddNeighbors', addNeighbors);
     bind('#btnAddMaterial', addMaterial);
     bind('#btnAddConnect', addConnect);
@@ -5318,6 +6464,7 @@
     bind('#btnAddCompare', addCompare);
     bind('#btnAddOrder', addOrder);
     bind('#btnAddValueCards', addValueCards);
+    bind('#btnAddShortValues', addShortValues);
     bind('#btnAddEquiv', addEquiv);
     bind('#btnAddFractionParts', addFractionParts);
     bind('#btnAddFractionColor', addFractionColor);
