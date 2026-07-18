@@ -27,19 +27,223 @@
 
 <div class="main">
   <aside class="sidebar">
-    <div class="sidebar-tabs" id="sidebarTabs">
-      <div class="sidebar-tab tab-getallenlijn active" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
-      <div class="sidebar-tab tab-dhte" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
-      <div class="sidebar-tab tab-aanvullen" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
-      <div class="sidebar-tab tab-getallenrij" onclick="GI4_UI.toonTab('getallenas',this)">Getallenas</div>
-      <div class="sidebar-tab tab-sprongen" onclick="GI4_UI.toonTab('sprongen',this)">Sprongen</div>
-      <div class="sidebar-tab tab-gemengd" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
-      <div class="sidebar-tab tab-waarde" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
-      <div class="sidebar-tab tab-breuken" onclick="GI4_UI.toonTab('breuken',this)">Breuken</div>
-      <div class="sidebar-tab tab-kommagetallen" onclick="GI4_UI.toonTab('kommagetallen',this)">Kommagetallen</div>
+    <div class="config-kaart gi4-level-panel">
+      <div class="kaart-titel">Niveau en bereik</div>
+      <div class="veld-rij">
+        <label>Niveau
+          <select id="gi4Level" style="width:145px">
+            <option value="grade4" selected>4de leerjaar</option>
+            <option value="grade5">5de leerjaar</option>
+            <option value="grade6">6de leerjaar</option>
+            <option value="custom">Eigen keuze</option>
+          </select>
+        </label>
+        <label>Bereik
+          <select id="gi4Range" style="width:145px">
+            <option value="auto" selected>automatisch</option>
+            <option value="10000">tot 10 000</option>
+            <option value="100000">tot 100 000</option>
+          </select>
+        </label>
+      </div>
+      <p class="gi4-level-note" id="gi4LevelNote">4de leerjaar: getallen tot 10 000.</p>
+      <label class="check-label gi4-show-all-levels">
+        <input id="gi4ShowAllLevels" type="checkbox"> Toon ook oefeningen van andere niveaus
+      </label>
     </div>
 
-    <div class="sidebar-content" id="tab-analyse">
+    <div class="sidebar-tabs" id="sidebarTabs">
+      <div class="sidebar-tab tab-100000" data-levels="grade5 grade6 custom" onclick="GI4_UI.toonTab('tot100000',this)">Tot 100 000</div>
+      <div class="sidebar-tab tab-breuken" data-levels="grade5 grade6 custom" onclick="GI4_UI.toonTab('breuken5',this)">Breuken</div>
+      <div class="sidebar-tab tab-getallenlijn active" data-levels="grade4 custom" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
+      <div class="sidebar-tab tab-dhte" data-levels="grade4 custom" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
+      <div class="sidebar-tab tab-aanvullen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
+      <div class="sidebar-tab tab-getallenrij" data-levels="grade4 custom" onclick="GI4_UI.toonTab('getallenas',this)">Getallenas</div>
+      <div class="sidebar-tab tab-sprongen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('sprongen',this)">Sprongen</div>
+      <div class="sidebar-tab tab-gemengd" data-levels="grade4 custom" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
+      <div class="sidebar-tab tab-waarde" data-levels="grade4 custom" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
+      <div class="sidebar-tab tab-breuken" data-levels="grade4 custom" onclick="GI4_UI.toonTab('breuken',this)">Breuken</div>
+      <div class="sidebar-tab tab-kommagetallen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('kommagetallen',this)">Kommagetallen</div>
+    </div>
+
+    <div class="sidebar-content" id="tab-tot100000" data-levels="grade5 grade6 custom" style="display:none">
+      <div class="sectie-titel">Getallen tot 100 000</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">TD/D/H/T/E herkennen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5MaterialCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+        </div>
+        <p class="gi4-note">Hoeveel tienduizendtallen, duizendtallen, honderdtallen, tientallen en eenheden?</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Material">Voeg herken-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Waarde van de cijfers</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5ValueCardCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="g5ValueCardExample" type="checkbox" checked> Eerste kaart als voorbeeld
+        </label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5ValueCards">Voeg waarde-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Getallen schrijven</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5BuildNumberCount" type="number" min="2" max="8" value="5" style="width:56px"></label>
+        </div>
+        <p class="gi4-note">Bijvoorbeeld: 8 TD 2 D 4 H = 82 400.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5BuildNumbers">Voeg schrijf-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Volgend duizendtal</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5NextThousandCount" type="number" min="1" max="9" value="3" style="width:56px"></label>
+        </div>
+        <label class="check-label" style="margin-top:8px">
+          <input id="g5NextThousandExample" type="checkbox" checked> Eerste kaart als voorbeeld
+        </label>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5NextThousand">Voeg volgend-duizendtal toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Ordenen op de getallenas</div>
+        <div class="veld-rij">
+          <label>Assen <input id="g5AxisOrderCount" type="number" min="1" max="4" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="g5AxisOrderMode" style="width:145px">
+              <option value="connect" selected>kaartjes verbinden</option>
+              <option value="approx">ongeveer plaatsen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5AxisOrder">Voeg getallenas toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Getallen vergelijken</div>
+        <div class="veld-rij">
+          <label>Paren <input id="g5CompareCount" type="number" min="1" max="12" value="6" style="width:56px"></label>
+          <label>Soort
+            <select id="g5CompareMode" style="width:145px">
+              <option value="plain" selected>getallen</option>
+              <option value="place">met schijfjestabel</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Compare">Voeg vergelijken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Rangschikken</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5OrderCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+          <label>Richting
+            <select id="g5OrderDirection" style="width:125px">
+              <option value="asc" selected>klein naar groot</option>
+              <option value="desc">groot naar klein</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Order">Voeg rangschikken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Buurgetallen</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5NeighborRows" type="number" min="1" max="5" value="3" style="width:56px"></label>
+          <label><input id="g5NeighborExample" type="checkbox"> eerste rij als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Neighbors">Voeg buurgetallen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Sprongen op de getallenas</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5JumpRows" type="number" min="1" max="5" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Jumps">Voeg sprongen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Getalraadsels</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5RiddleCount" type="number" min="1" max="4" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Riddles">Voeg raadsels toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Kleur wat evenveel is</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5EquivRows" type="number" min="2" max="5" value="4" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Equiv">Voeg evenveel-tabel toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-breuken5" data-levels="grade5 grade6 custom" style="display:none">
+      <div class="sectie-titel">Breuken 5de leerjaar</div>
+      <div class="config-kaart">
+        <div class="kaart-titel">Vereenvoudig de breuken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionSimplifyCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+        </div>
+        <p class="gi4-note">Kleur de eenvoudigste gelijkwaardige breuk en vul de stappen aan.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionSimplify">Voeg vereenvoudigen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijkwaardige breuken maken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionEquivalentCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Soort
+            <select id="g5FractionEquivalentMode" style="width:130px">
+              <option value="mixed" selected>gemengd</option>
+              <option value="expand">vergroten</option>
+              <option value="simplify">vereenvoudigen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionEquivalent">Voeg gelijkwaardig maken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Vereenvoudigen met pijlen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionArrowCount" type="number" min="1" max="9" value="6" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionArrows">Voeg pijloefeningen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Korte vereenvoudigopgaven</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionShortCount" type="number" min="1" max="12" value="6" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionShort">Voeg korte opgaven toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijkwaardige breuken zoeken</div>
+        <div class="veld-rij">
+          <label>Reeksen <input id="g5FractionSeriesCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionSeries">Voeg reeksen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Zelfde kleur geven</div>
+        <div class="veld-rij">
+          <label>Tabellen <input id="g5FractionColorTableCount" type="number" min="1" max="3" value="1" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionColorTable">Voeg kleurentabel toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-analyse" data-levels="grade4 custom">
       <div class="sectie-titel">Analyse van getallen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Splitsen in D/H/T/E</div>
@@ -49,9 +253,18 @@
         <label class="check-label" style="margin-top:8px">
           <input id="splitExample" type="checkbox" checked> Eerste oefening als voorbeeld
         </label>
-        <p class="gi4-note">Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.</p>
+        <p class="gi4-note" id="splitRangeNote">Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.</p>
       </div>
       <button class="btn-toevoegen" id="btnAddSplit">Voeg splits-oefeningen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">Getallen schrijven uit plaatswaarde</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="buildNumberCount" type="number" min="2" max="8" value="5" style="width:56px"></label>
+        </div>
+        <p class="gi4-note">Voorbeeld: 4 TD 2 D 3 H 7 T 8 E = 42 378.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddBuildNumbers" data-levels="grade5 grade6 custom">Voeg schrijf-oefening toe</button>
 
       <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Buurgetallen</div>
@@ -62,7 +275,7 @@
       <button class="btn-toevoegen" id="btnAddNeighbors">Voeg buur-oefening toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-dhtemateriaal" style="display:none">
+    <div class="sidebar-content" id="tab-dhtemateriaal" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">D/H/T/E materiaal</div>
       <div class="config-kaart">
         <div class="kaart-titel">Hoeveelheden benoemen</div>
@@ -95,7 +308,7 @@
 
     </div>
 
-    <div class="sidebar-content" id="tab-aanvullen" style="display:none">
+    <div class="sidebar-content" id="tab-aanvullen" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Aanvullen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Aanvullen tot een rond getal</div>
@@ -105,6 +318,7 @@
             <select id="completeTarget" style="width:135px">
               <option value="hundred">volgend honderdtal</option>
               <option value="thousand">volgend duizendtal</option>
+              <option value="tenThousand">volgend tienduizendtal</option>
             </select>
           </label>
         </div>
@@ -115,7 +329,7 @@
       <button class="btn-toevoegen" id="btnAddComplete">Voeg aanvul-oefening toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-getallenas" style="display:none">
+    <div class="sidebar-content" id="tab-getallenas" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Getallenas aanvullen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Instellingen</div>
@@ -127,6 +341,7 @@
               <option value="10">10</option>
               <option value="100" selected>100</option>
               <option value="1000">1000</option>
+              <option value="10000">10 000</option>
             </select>
           </label>
         </div>
@@ -142,7 +357,7 @@
       <button class="btn-toevoegen" id="btnAddAxisConnect">Voeg verbind-getallenas toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-sprongen" style="display:none">
+    <div class="sidebar-content" id="tab-sprongen" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Tellen met sprongen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Instellingen</div>
@@ -163,6 +378,7 @@
               <option value="50">50</option>
               <option value="100" selected>100</option>
               <option value="1000">1000</option>
+              <option value="10000">10 000</option>
             </select>
           </label>
         </div>
@@ -170,7 +386,7 @@
       <button class="btn-toevoegen" id="btnAddJumps">Voeg sprongen toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-vergelijken" style="display:none">
+    <div class="sidebar-content" id="tab-vergelijken" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Vergelijken en ordenen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Vergelijken</div>
@@ -201,7 +417,7 @@
       <button class="btn-toevoegen" id="btnAddOrder">Voeg rangschikken toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-waarde" style="display:none">
+    <div class="sidebar-content" id="tab-waarde" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Waarde van cijfers</div>
       <div class="config-kaart">
         <div class="kaart-titel">Getalwaarde-kaarten</div>
@@ -221,6 +437,14 @@
       </div>
       <button class="btn-toevoegen" id="btnAddValueCards">Voeg waardekaarten toe</button>
 
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">Korte waarde-opgaven</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="shortValueCount" type="number" min="2" max="12" value="6" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddShortValues" data-levels="grade5 grade6 custom">Voeg korte waarde-opgaven toe</button>
+
       <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Kleur wat evenveel is</div>
         <div class="veld-rij">
@@ -230,7 +454,7 @@
       <button class="btn-toevoegen" id="btnAddEquiv">Voeg evenveel-tabel toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-breuken" style="display:none">
+    <div class="sidebar-content" id="tab-breuken" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Echte breuken</div>
       <div class="config-kaart">
         <div class="kaart-titel">Geheel, teller en noemer</div>
@@ -280,7 +504,7 @@
       <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Breuk van een hoeveelheid</div>
         <div class="veld-rij">
-          <label>Aantal <input id="fractionQuantityCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Aantal <input id="fractionQuantityCount" type="number" min="1" max="10" value="4" style="width:56px"></label>
           <label>Soort
             <select id="fractionQuantityMode" style="width:155px">
               <option value="intro" selected>kijk en leer</option>
@@ -391,7 +615,7 @@
       <button class="btn-toevoegen" id="btnAddFractionMixed">Voeg onechte breuken toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-kommagetallen" style="display:none">
+    <div class="sidebar-content" id="tab-kommagetallen" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Kommagetallen</div>
       <div class="config-kaart">
         <div class="kaart-titel">Onthoud: tienden</div>
@@ -501,6 +725,7 @@
 <script>
 const GI4_UI = (() => {
   const TABS = {
+    tot100000: 'tab-tot100000',
     analyse: 'tab-analyse',
     dhtemateriaal: 'tab-dhtemateriaal',
     aanvullen: 'tab-aanvullen',
@@ -509,6 +734,7 @@ const GI4_UI = (() => {
     vergelijken: 'tab-vergelijken',
     waarde: 'tab-waarde',
     breuken: 'tab-breuken',
+    breuken5: 'tab-breuken5',
     kommagetallen: 'tab-kommagetallen',
   };
   function toonTab(naam, tabEl) {
