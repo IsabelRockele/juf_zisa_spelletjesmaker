@@ -278,6 +278,29 @@
       <button class="btn-toevoegen" id="btnAddFractionWhole">Voeg geheel-oefening toe</button>
 
       <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Breuk van een hoeveelheid</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionQuantityCount" type="number" min="1" max="8" value="4" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionQuantityMode" style="width:155px">
+              <option value="intro" selected>kijk en leer</option>
+              <option value="part">welk deel?</option>
+              <option value="operator">met stroken</option>
+              <option value="solve">los op</option>
+              <option value="quick">korte opgaven</option>
+              <option value="questions">breukvragen</option>
+              <option value="compareSamePart">vergelijken: zelfde breukdeel</option>
+              <option value="compareSameWhole">vergelijken: zelfde geheel</option>
+              <option value="compareSolve">vergelijken met stroken</option>
+              <option value="compareQuick">vergelijk kort</option>
+              <option value="same">zelfde uitkomst</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionQuantity">Voeg hoeveelheid-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Gelijkwaardige breuken</div>
         <div class="veld-rij">
           <label>Aantal <input id="fractionEqCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
