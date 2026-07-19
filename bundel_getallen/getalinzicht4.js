@@ -2272,6 +2272,500 @@
     b.appendChild(wrap);
   }
 
+  function g5FractionOperationColorItems(){
+    return [
+      { group: 0, parts: [{ f: [1, 3] }, ' + ', { f: [8, 9] }] },
+      { group: 1, parts: ['4 x ', { f: [4, 10] }] },
+      { group: 1, parts: [{ m: [1, 3, 5] }] },
+      { group: 2, parts: [{ f: [4, 6] }, ' van 42'] },
+      { group: 3, parts: [{ f: [6, 9] }, ' x 18'] },
+      { group: 4, parts: [{ m: [1, 4, 6] }] },
+      { group: 3, parts: [{ f: [1, 2] }, ' van 24'] },
+      { group: 0, parts: [{ f: [11, 9] }] },
+      { group: 5, parts: ['5 x ', { f: [4, 9] }] },
+      { group: 4, parts: [{ m: [1, 2, 3] }] },
+      { group: 1, parts: [{ f: [16, 10] }] },
+      { group: 2, parts: [{ f: [7, 3] }, ' x 12'] },
+      { group: 4, parts: ['2 - ', { f: [2, 6] }] },
+      { group: 0, parts: [{ m: [1, 2, 9] }] },
+      { group: 5, parts: [{ m: [2, 2, 9] }] },
+    ];
+  }
+
+  function appendG5FractionOperationParts(target, parts){
+    parts.forEach(part => {
+      if (typeof part === 'string') {
+        target.appendChild(document.createTextNode(part));
+      } else if (part.f) {
+        target.appendChild(fractionBox(part.f[0], part.f[1]));
+      } else if (part.m) {
+        target.appendChild(mixedNumberBox(part.m[0], part.m[1], part.m[2]));
+      }
+    });
+  }
+
+  function makeG5FractionOperationColorTable(){
+    const table = document.createElement('div');
+    table.className = 'gi4-g5-fraction-operation-color-table row-delete-wrap';
+    table.appendChild(rowDel(table));
+    g5FractionOperationColorItems().forEach(item => {
+      const cell = document.createElement('div');
+      cell.className = `gi4-g5-fraction-operation-color-cell solution-group-${item.group}`;
+      appendG5FractionOperationParts(cell, item.parts);
+      table.appendChild(cell);
+    });
+    return table;
+  }
+
+  function addG5FractionOperationColor(extraCount){
+    const key = 'gi4_g5_fraction_operation_color';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionOperationColorCount')?.value, 10) || 1);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-fraction-operation-color-wrap', 'gi4-g5-fraction-operation-color-wrap');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionOperationColorTable);
+        return;
+      }
+    }
+    const b = block(key, 'Geef wat evenveel is dezelfde kleur.', addG5FractionOperationColor);
+    addFractionInstructions(b, ['Geef wat evenveel is dezelfde kleur.']);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-fraction-operation-color-wrap';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, makeG5FractionOperationColorTable);
+    b.appendChild(wrap);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addG5FractionOperationColor(1));
+  }
+
+  function g5FractionOperatorSeeds(){
+    return [
+      { num: 4, den: 7, total: 63 },
+      { num: 3, den: 5, total: 20 },
+      { num: 3, den: 4, total: 12 },
+      { num: 5, den: 8, total: 56 },
+      { num: 2, den: 9, total: 72 },
+      { num: 7, den: 10, total: 90 },
+      { num: 4, den: 6, total: 48 },
+      { num: 5, den: 12, total: 84 },
+      { num: 6, den: 11, total: 99 },
+      { num: 3, den: 8, total: 64 },
+    ];
+  }
+
+  function g5FractionOperatorSeed(namespace){
+    return pickUnused(namespace, g5FractionOperatorSeeds(), seed => `${seed.num}/${seed.den}-${seed.total}`);
+  }
+
+  function g5FractionOperatorResult(seed){
+    return seed.total / seed.den * seed.num;
+  }
+
+  function greenText(text){
+    const span = document.createElement('span');
+    span.className = 'gi4-green-text';
+    span.textContent = text;
+    return span;
+  }
+
+  function g5OperatorValueSlot(value, reduced = '', reducedPos = 'above', solutionOnly = true){
+    const slot = document.createElement('span');
+    slot.className = 'gi4-g5-operator-op-slot';
+    const placeholder = Object.assign(document.createElement('span'), { className: 'op-placeholder', textContent: '.' });
+    const answer = document.createElement('span');
+    answer.className = solutionOnly ? 'gi4-solution-answer op-answer' : 'op-answer always';
+    answer.textContent = String(value);
+    if (reduced !== '') {
+      answer.classList.add('is-cancelled');
+      const small = document.createElement('span');
+      small.className = `op-reduced ${reducedPos}`;
+      small.textContent = String(reduced);
+      answer.appendChild(small);
+    }
+    if (solutionOnly) slot.append(placeholder, answer);
+    else slot.appendChild(answer);
+    return slot;
+  }
+
+  function g5OperatorCancelledFraction(seed, solutionOnly = true){
+    const part = seed.total / seed.den;
+    const converted = document.createElement('span');
+    converted.className = 'gi4-g5-operator-converted';
+    const top = document.createElement('span');
+    top.className = 'op-top';
+    top.append(
+      g5OperatorValueSlot(seed.num, '', 'above', solutionOnly),
+      Object.assign(document.createElement('b'), { textContent: 'x' }),
+      g5OperatorValueSlot(seed.total, part, 'above', solutionOnly)
+    );
+    const line = Object.assign(document.createElement('span'), { className: 'op-line' });
+    const bottom = document.createElement('span');
+    bottom.className = 'op-bottom';
+    bottom.appendChild(g5OperatorValueSlot(seed.den, 1, 'below', solutionOnly));
+    converted.append(top, line, bottom);
+    return converted;
+  }
+
+  function makeG5FractionOperatorIntro(){
+    const blockEl = block('gi4_g5_fraction_operator_intro', 'Breuk als operator: kijk en leer.', addCount => addG5FractionOperator(addCount || 1, 'intro'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-operator-intro keep-together';
+    card.innerHTML = '<div class="gi4-common-learn-badge">Kijk en leer!</div><h3>Breuk als operator</h3>';
+
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-operator-intro-grid';
+
+    const model = document.createElement('div');
+    model.className = 'gi4-g5-operator-intro-panel';
+    const seed = { num: 3, den: 4, total: 12 };
+    const modelTitle = document.createElement('strong');
+    modelTitle.append('Hoeveel is ', fractionBox(seed.num, seed.den), ` van ${seed.total}?`);
+    const bar = fractionQuantityBar(seed, true);
+    const steps = document.createElement('div');
+    steps.className = 'gi4-g5-operator-steps';
+    steps.innerHTML = `<span>het geheel &rarr; ${seed.total}</span><span>1 breukdeel &rarr; ${seed.total} : ${seed.den} = ${seed.total / seed.den}</span><span>${seed.num} breukdelen &rarr; ${seed.num} x ${seed.total / seed.den} = ${g5FractionOperatorResult(seed)}</span>`;
+    model.append(modelTitle, bar, steps);
+
+    const algebra = document.createElement('div');
+    algebra.className = 'gi4-g5-operator-intro-panel algebra';
+    const title = document.createElement('strong');
+    title.className = 'gi4-g5-operator-title-line';
+    title.append(fractionBox(seed.num, seed.den), greenText(' van '), `${seed.total} = `, fractionBox(seed.num, seed.den), greenText(' x '), String(seed.total));
+    const calcWrap = document.createElement('div');
+    calcWrap.className = 'gi4-g5-operator-intro-calc-wrap';
+    const calc = document.createElement('div');
+    calc.className = 'gi4-g5-operator-calc';
+    const calcLine1 = document.createElement('div');
+    calcLine1.className = 'gi4-g5-operator-calc-line';
+    calcLine1.append(
+      fractionBox(seed.num, seed.den),
+      ` x ${seed.total} = `,
+      g5OperatorCancelledFraction(seed, false)
+    );
+    const calcLine2 = document.createElement('div');
+    calcLine2.className = 'gi4-g5-operator-calc-line indent';
+    calcLine2.textContent = `= ${seed.num} x ${seed.total / seed.den}`;
+    const calcLine3 = document.createElement('div');
+    calcLine3.className = 'gi4-g5-operator-calc-line indent strong';
+    calcLine3.textContent = `= ${g5FractionOperatorResult(seed)}`;
+    calc.append(calcLine1, calcLine2, calcLine3);
+    const rule = document.createElement('div');
+    rule.className = 'gi4-g5-operator-rule';
+    rule.innerHTML = '<span>geheel</span><span>&darr;</span><span>1 breukdeel</span><span>&darr;</span><span>breukdelen</span>';
+    calcWrap.append(calc, rule);
+    const answer = document.createElement('strong');
+    answer.className = 'gi4-g5-operator-answer';
+    answer.append(fractionBox(seed.num, seed.den), greenText(' van '), `${seed.total} = `, fractionBox(seed.num, seed.den), greenText(' x '), `${seed.total} = ${g5FractionOperatorResult(seed)}`);
+    algebra.append(title, calcWrap, answer);
+
+    grid.append(model, algebra);
+    card.appendChild(grid);
+    blockEl.appendChild(card);
+  }
+
+  function makeG5FractionOperatorCard(){
+    const seed = g5FractionOperatorSeed('gi4_g5_fraction_operator_card');
+    if (!seed) return null;
+    const part = seed.total / seed.den;
+    const result = g5FractionOperatorResult(seed);
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-operator-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const title = document.createElement('div');
+    title.className = 'gi4-g5-operator-card-title';
+    title.append(fractionBox(seed.num, seed.den), greenText(' van '), `${seed.total} = `, fractionBox(seed.num, seed.den), greenText(' x '), String(seed.total));
+
+    const equation = document.createElement('div');
+    equation.className = 'gi4-g5-operator-equation';
+    equation.append(
+      fractionBox(seed.num, seed.den),
+      ` x ${seed.total} = `,
+      g5OperatorCancelledFraction(seed, true),
+      ' = ',
+      Object.assign(lineWithSolution(String(result), 'tiny'), { className: 'gi4-line tiny boxed-solution' })
+    );
+
+    const notes = document.createElement('div');
+    notes.className = 'gi4-g5-operator-note-lines';
+    const divideLine = document.createElement('span');
+    divideLine.appendChild(sol(`${seed.total} : ${seed.den} = ${part}`));
+    const multiplyLine = document.createElement('span');
+    multiplyLine.appendChild(sol(`${seed.num} x ${part} = ${result}`));
+    notes.append(divideLine, multiplyLine);
+
+    const final = document.createElement('div');
+    final.className = 'gi4-g5-operator-final';
+    final.append(fractionBox(seed.num, seed.den), ` van ${seed.total} = `, lineWithSolution(String(result), 'short'));
+
+    card.append(title, equation, notes, final);
+    return card;
+  }
+
+  function g5FractionOperatorMultiplySeeds(){
+    return [
+      { num: 2, den: 7, total: 21 },
+      { num: 3, den: 8, total: 24 },
+      { num: 5, den: 6, total: 12 },
+      { num: 3, den: 10, total: 40 },
+      { num: 5, den: 9, total: 27 },
+      { num: 3, den: 5, total: 35 },
+      { num: 4, den: 7, total: 63 },
+      { num: 7, den: 8, total: 32 },
+      { num: 6, den: 11, total: 55 },
+      { num: 5, den: 12, total: 48 },
+    ];
+  }
+
+  function makeG5FractionOperatorMultiplyRow(){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_operator_multiply_row', g5FractionOperatorMultiplySeeds(), s => `${s.num}/${s.den}-${s.total}`);
+    const part = seed.total / seed.den;
+    const result = g5FractionOperatorResult(seed);
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-operator-list-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const prompt = document.createElement('span');
+    prompt.className = 'gi4-g5-operator-list-prompt';
+    prompt.append(fractionBox(seed.num, seed.den), ` x ${seed.total} = `);
+    const answerLine = document.createElement('span');
+    answerLine.className = 'gi4-g5-operator-list-answer';
+    const solution = document.createElement('span');
+    solution.className = 'solution-only gi4-g5-operator-list-solution';
+    solution.append(g5OperatorCancelledFraction(seed, false), ` = ${result}`);
+    const helper = document.createElement('span');
+    helper.className = 'solution-only gi4-g5-operator-list-helper';
+    helper.textContent = `${seed.total} : ${seed.den} = ${part}`;
+    answerLine.append(solution, helper);
+    row.append(prompt, answerLine);
+    return row;
+  }
+
+  function g5FractionMultiplySeeds(){
+    return [
+      { whole: 5, num: 2, den: 5 },
+      { whole: 7, num: 2, den: 9 },
+      { whole: 4, num: 5, den: 6 },
+      { whole: 3, num: 4, den: 7 },
+      { whole: 2, num: 5, den: 8 },
+      { whole: 4, num: 2, den: 3 },
+      { whole: 6, num: 3, den: 4 },
+      { whole: 8, num: 5, den: 12 },
+      { whole: 9, num: 2, den: 5 },
+      { whole: 3, num: 7, den: 10 },
+    ];
+  }
+
+  function g5FractionProductSolution(seed){
+    const productNum = seed.whole * seed.num;
+    const den = seed.den;
+    const wrap = document.createElement('span');
+    wrap.className = 'solution-only gi4-g5-fraction-product-solution';
+    wrap.append(fractionBox(productNum, den));
+    if (productNum % den === 0) {
+      wrap.append(` = ${productNum / den}`);
+      return wrap;
+    }
+    const whole = Math.floor(productNum / den);
+    const rem = productNum % den;
+    wrap.append(' = ', mixedNumberBox(whole, rem, den));
+    const d = gcd(rem, den);
+    if (d > 1) wrap.append(' = ', mixedNumberBox(whole, rem / d, den / d));
+    return wrap;
+  }
+
+  function makeG5FractionMultiplyRow(){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_multiply_row', g5FractionMultiplySeeds(), s => `${s.whole}-${s.num}/${s.den}`);
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-operator-list-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const prompt = document.createElement('span');
+    prompt.className = 'gi4-g5-operator-list-prompt';
+    prompt.append(`${seed.whole} x `, fractionBox(seed.num, seed.den), ' = ');
+    const answerLine = document.createElement('span');
+    answerLine.className = 'gi4-g5-operator-list-answer';
+    answerLine.appendChild(g5FractionProductSolution(seed));
+    row.append(prompt, answerLine);
+    return row;
+  }
+
+  function g5OperatorMatchAnswerKey(seed){
+    const productNum = seed.kind === 'wholeFraction' ? seed.whole * seed.num : seed.total / seed.den * seed.num;
+    if (seed.kind === 'fractionTotal') return String(productNum);
+    if (productNum % seed.den === 0) return String(productNum / seed.den);
+    const whole = Math.floor(productNum / seed.den);
+    const rem = productNum % seed.den;
+    const d = gcd(rem, seed.den);
+    const finalNum = rem / d;
+    const finalDen = seed.den / d;
+    return whole > 0 ? `${whole}-${finalNum}/${finalDen}` : `${finalNum}/${finalDen}`;
+  }
+
+  function g5OperatorMatchAnswerLabel(key){
+    if (key === '2-1/4') return mixedNumberBox(2, 1, 4);
+    if (key === '3/4') return fractionBox(3, 4);
+    return document.createTextNode(key);
+  }
+
+  function g5OperatorMatchProductWork(seed){
+    const wrap = document.createElement('span');
+    wrap.className = 'solution-only gi4-g5-operator-match-work';
+    if (seed.kind === 'fractionTotal') {
+      const part = seed.total / seed.den;
+      wrap.textContent = `${seed.num} x ${part} = ${seed.num * part}`;
+      return wrap;
+    }
+
+    const productNum = seed.whole * seed.num;
+    wrap.append(fractionBox(productNum, seed.den));
+    if (productNum % seed.den === 0) {
+      wrap.append(` = ${productNum / seed.den}`);
+      return wrap;
+    }
+    const whole = Math.floor(productNum / seed.den);
+    const rem = productNum % seed.den;
+    if (whole > 0) wrap.append(' = ', mixedNumberBox(whole, rem, seed.den));
+    const d = gcd(rem, seed.den);
+    if (d > 1) {
+      if (whole > 0) wrap.append(' = ', mixedNumberBox(whole, rem / d, seed.den / d));
+      else wrap.append(' = ', fractionBox(productNum / d, seed.den / d));
+    }
+    return wrap;
+  }
+
+  function g5OperatorMatchSeeds(){
+    return [
+      { side: 'left', color: '#38bdf8', kind: 'wholeFraction', whole: 9, num: 3, den: 12 },
+      { side: 'left', color: '#ef4444', kind: 'fractionTotal', num: 3, den: 5, total: 35 },
+      { side: 'left', color: '#fb923c', kind: 'wholeFraction', whole: 3, num: 2, den: 8 },
+      { side: 'left', color: '#b565c0', kind: 'fractionTotal', num: 4, den: 5, total: 35 },
+      { side: 'right', color: '#fb7185', kind: 'fractionTotal', num: 7, den: 8, total: 32 },
+      { side: 'right', color: '#4ade80', kind: 'fractionTotal', num: 3, den: 4, total: 28 },
+      { side: 'right', color: '#0ea5e9', kind: 'wholeFraction', whole: 6, num: 3, den: 8 },
+      { side: 'right', color: '#a78b7b', kind: 'wholeFraction', whole: 3, num: 3, den: 12 },
+    ].map(seed => ({ ...seed, answer: g5OperatorMatchAnswerKey(seed) }));
+  }
+
+  function makeG5OperatorMatchExercise(seed){
+    const row = document.createElement('div');
+    row.className = `gi4-g5-operator-match-exercise ${seed.side}`;
+    row.dataset.answer = seed.answer;
+    row.style.setProperty('--match-color', seed.color);
+    const dot = document.createElement('span');
+    dot.className = seed.side === 'left' ? 'gi4-connect-dot right' : 'gi4-connect-dot left';
+    const prompt = document.createElement('span');
+    prompt.className = 'gi4-g5-operator-match-prompt';
+    if (seed.kind === 'fractionTotal') prompt.append(fractionBox(seed.num, seed.den), ` x ${seed.total} = `);
+    else prompt.append(`${seed.whole} x `, fractionBox(seed.num, seed.den), ' = ');
+    const answer = document.createElement('span');
+    answer.className = 'gi4-g5-operator-match-line';
+    answer.appendChild(g5OperatorMatchProductWork(seed));
+    row.append(prompt, answer, dot);
+    return row;
+  }
+
+  function makeG5OperatorMatchResult(key){
+    const circle = document.createElement('div');
+    circle.className = 'gi4-g5-operator-match-result';
+    circle.dataset.answer = key;
+    circle.append(
+      Object.assign(document.createElement('span'), { className: 'gi4-connect-dot left' }),
+      Object.assign(document.createElement('span'), { className: 'gi4-connect-dot right' }),
+      g5OperatorMatchAnswerLabel(key)
+    );
+    return circle;
+  }
+
+  function makeG5FractionOperatorMatchCard(){
+    const seeds = g5OperatorMatchSeeds();
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-operator-match-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const left = document.createElement('div');
+    left.className = 'gi4-g5-operator-match-col';
+    seeds.filter(seed => seed.side === 'left').forEach(seed => left.appendChild(makeG5OperatorMatchExercise(seed)));
+
+    const center = document.createElement('div');
+    center.className = 'gi4-g5-operator-match-center';
+    ['21', '3/4', '2-1/4', '28'].forEach(key => center.appendChild(makeG5OperatorMatchResult(key)));
+
+    const right = document.createElement('div');
+    right.className = 'gi4-g5-operator-match-col';
+    seeds.filter(seed => seed.side === 'right').forEach(seed => right.appendChild(makeG5OperatorMatchExercise(seed)));
+
+    card.append(left, center, right);
+    return card;
+  }
+
+  function makeG5FractionOperatorListGrid(count, maker){
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-operator-list-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, maker);
+    return grid;
+  }
+
+  function addG5FractionOperator(extraCount, forcedMode){
+    const mode = forcedMode || $('#g5FractionOperatorMode')?.value || 'cards';
+    if (mode === 'intro') {
+      makeG5FractionOperatorIntro();
+      return;
+    }
+    if (mode === 'matchResults') {
+      const key = 'gi4_g5_fraction_operator_match';
+      if (extraCount) {
+        const existing = containerInLastBlock(key, '.gi4-g5-operator-match-wrap', 'gi4-g5-operator-match-wrap');
+        if (existing) {
+          appendNewExercise(existing, makeG5FractionOperatorMatchCard);
+          requestAnimationFrame(drawSolutionLines);
+          return;
+        }
+      }
+      const blockEl = block(key, 'Verbind de oefeningen met de juiste oplossing.', addCount => addG5FractionOperator(addCount || 1, 'matchResults'));
+      addFractionInstructions(blockEl, ['Denk goed na. Wat moet je zoeken?', 'Werk uit.', 'Verbind de oefeningen met de juiste oplossing.']);
+      const wrap = document.createElement('div');
+      wrap.className = 'gi4-g5-operator-match-wrap';
+      appendNewExercise(wrap, makeG5FractionOperatorMatchCard);
+      blockEl.appendChild(wrap);
+      addLocalExerciseButton(blockEl, '+ oefening bij deze keuze', () => addG5FractionOperator(1, 'matchResults'));
+      requestAnimationFrame(drawSolutionLines);
+      return;
+    }
+    if (mode === 'multiplyOperator' || mode === 'multiplyFraction') {
+      const key = `gi4_g5_fraction_operator_${mode}`;
+      const maker = mode === 'multiplyOperator' ? makeG5FractionOperatorMultiplyRow : makeG5FractionMultiplyRow;
+      const count = extraCount || Math.max(1, Math.min(12, parseInt($('#g5FractionOperatorCount')?.value, 10) || 6));
+      if (extraCount) {
+        const existing = containerInLastBlock(key, '.gi4-g5-operator-list-grid', 'gi4-g5-operator-list-grid');
+        if (existing) {
+          for (let i = 0; i < count; i++) appendNewExercise(existing, maker);
+          return;
+        }
+      }
+      const title = mode === 'multiplyOperator' ? 'Los de vermenigvuldigingen op.' : 'Vermenigvuldig de breuken.';
+      const blockEl = block(key, title, addCount => addG5FractionOperator(addCount || 1, mode));
+      addFractionInstructions(blockEl, mode === 'multiplyOperator'
+        ? ['Los de vermenigvuldigingen op.']
+        : ['Vermenigvuldig de breuken.', 'Schrijf je uitkomst steeds in de eenvoudigste vorm of als gemengd getal.']);
+      blockEl.appendChild(makeG5FractionOperatorListGrid(count, maker));
+      addLocalExerciseButton(blockEl, '+ oefening bij deze keuze', () => addG5FractionOperator(1, mode));
+      return;
+    }
+    const key = 'gi4_g5_fraction_operator_cards';
+    const count = extraCount || Math.max(1, Math.min(8, parseInt($('#g5FractionOperatorCount')?.value, 10) || 2));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-operator-grid', 'gi4-g5-operator-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeG5FractionOperatorCard);
+        return;
+      }
+    }
+    const blockEl = block(key, 'Breuk als operator.', addCount => addG5FractionOperator(addCount || 1, 'cards'));
+    addFractionInstructions(blockEl, ['Los samen stap voor stap op.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-operator-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeG5FractionOperatorCard);
+    blockEl.appendChild(grid);
+    addLocalExerciseButton(blockEl, '+ oefening bij deze keuze', () => addG5FractionOperator(1, 'cards'));
+  }
+
   function divisorsOf(n){
     const result = [];
     for (let i = 1; i <= n; i++) if (n % i === 0) result.push(i);
@@ -7095,11 +7589,13 @@
 
   function decimalMixedHundredthsCompareValue(item){
     if (typeof item === 'number') return item;
+    if (item?.kind === 'fraction100') return item.value;
     return item.whole * 100 + Math.round(item.frac.num / item.frac.den * 100);
   }
 
   function decimalMixedHundredthsCompareDisplay(item){
     if (typeof item === 'number') return document.createTextNode(decimalMixedHundredthsLabel(item).decimal);
+    if (item?.kind === 'fraction100') return fractionBox(item.value, 100);
     const span = document.createElement('span');
     span.className = 'gi4-mixed-inline';
     span.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
@@ -7126,6 +7622,145 @@
     return wrap;
   }
 
+  function decimalMixedHundredthsGreatestSets(){
+    return [
+      [{ whole: 2, frac: { num: 3, den: 4 } }, 285, { whole: 2, frac: { num: 1, den: 5 } }],
+      [{ whole: 3, frac: { num: 1, den: 2 } }, 365, 530],
+      [{ kind: 'fraction100', value: 113 }, { whole: 1, frac: { num: 3, den: 10 } }, 123],
+      [{ whole: 4, frac: { num: 4, den: 5 } }, 440, { whole: 4, frac: { num: 1, den: 4 } }],
+      [{ kind: 'fraction100', value: 168 }, 68, { whole: 1, frac: { num: 3, den: 4 } }],
+      [{ whole: 2, frac: { num: 9, den: 10 } }, { whole: 2, frac: { num: 1, den: 5 } }, 230],
+      [{ whole: 6, frac: { num: 1, den: 4 } }, 605, { kind: 'fraction100', value: 618 }],
+      [475, { whole: 4, frac: { num: 3, den: 5 } }, { kind: 'fraction100', value: 491 }],
+    ];
+  }
+
+  function decimalMixedHundredthsGreatestCard(){
+    const set = pickUnusedOrAny('gi4_decimal_mixed_hundred_greatest', decimalMixedHundredthsGreatestSets(), values => values.map(v => JSON.stringify(v)).join('-'));
+    const max = Math.max(...set.map(decimalMixedHundredthsCompareValue));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-hundred-greatest-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(item => {
+      const choice = document.createElement('span');
+      choice.className = 'gi4-decimal-greatest-choice';
+      choice.appendChild(decimalMixedHundredthsCompareDisplay(item));
+      if (decimalMixedHundredthsCompareValue(item) === max) choice.classList.add('solution-highlight');
+      card.appendChild(choice);
+    });
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsGreatestGrid(count = 6){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-hundred-greatest-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsGreatestCard);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsAxisApproxSeeds(){
+    return [
+      { start: 80, labels: 10, cards: [87, 112, 145, { whole: 1, frac: { num: 1, den: 4 } }, { kind: 'fraction100', value: 162 }, { whole: 1, frac: { num: 1, den: 2 } }] },
+      { start: 210, labels: 10, cards: [218, 236, { whole: 2, frac: { num: 1, den: 2 } }, 287, 303, { whole: 3, frac: { num: 1, den: 4 } }] },
+      { start: 430, labels: 10, cards: [438, 472, { whole: 4, frac: { num: 3, den: 5 } }, 511, 546, { whole: 5, frac: { num: 1, den: 2 } }] },
+      { start: 690, labels: 10, cards: [707, { whole: 7, frac: { num: 1, den: 4 } }, 768, 802, { whole: 8, frac: { num: 3, den: 10 } }, 861] },
+    ];
+  }
+
+  function decimalMixedAxisCardValue(item){
+    if (typeof item === 'number') return item;
+    if (item?.kind === 'fraction100') return item.value;
+    return decimalMixedHundredthsCompareValue(item);
+  }
+
+  function decimalMixedAxisCardDisplay(item){
+    if (item?.kind === 'fraction100') return fractionBox(item.value, 100);
+    return decimalMixedHundredthsCompareDisplay(item);
+  }
+
+  function decimalMixedHundredthsAxisApproxCard(){
+    const seed = pickUnusedOrAny('gi4_decimal_mixed_hundred_axis_approx', decimalMixedHundredthsAxisApproxSeeds(), s => `${s.start}-${s.cards.map(c => typeof c === 'number' ? c : c.kind === 'fraction100' ? `${c.value}/100` : `${c.whole}-${c.frac.num}/${c.frac.den}`).join('-')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-axis-approx row-delete-wrap';
+    card.dataset.axisStart = String(seed.start);
+    card.dataset.axisRange = String(seed.labels * 10);
+    card.appendChild(rowDel(card));
+
+    const labels = document.createElement('div');
+    labels.className = 'gi4-decimal-mixed-axis-approx-labels';
+    for (let i = 0; i <= seed.labels; i++) {
+      const value = seed.start + i * 10;
+      const label = document.createElement('div');
+      label.className = 'gi4-decimal-mixed-axis-approx-label';
+      label.style.left = `${i * 100 / seed.labels}%`;
+      label.textContent = decimalMixedHundredthsLabel(value).decimal;
+      labels.appendChild(label);
+    }
+
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-mixed-axis-approx-axis';
+    for (let i = 0; i <= seed.labels; i++) {
+      const tick = document.createElement('span');
+      tick.style.left = `${i * 100 / seed.labels}%`;
+      axis.appendChild(tick);
+    }
+
+    const cards = document.createElement('div');
+    cards.className = 'gi4-decimal-axis-connect-cards mixed-approx';
+    [...seed.cards].sort(() => Math.random() - .5).forEach(item => {
+      const tile = document.createElement('div');
+      tile.className = 'gi4-decimal-axis-connect-card mixed';
+      tile.dataset.value = String(decimalMixedAxisCardValue(item));
+      const dot = document.createElement('span');
+      dot.className = 'gi4-connect-dot top';
+      tile.append(dot, decimalMixedAxisCardDisplay(item));
+      cards.appendChild(tile);
+    });
+    card.append(labels, axis, cards);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsAxisApproxGrid(count = 1){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-axis-approx-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsAxisApproxCard);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsPatternSeeds(){
+    return [
+      { start: 259, step: 1, length: 11, shown: [0, 1, 2] },
+      { start: 495, step: 2, length: 11, shown: [0, 1, 2] },
+      { start: 925, step: -5, length: 11, shown: [0, 1, 2] },
+      { start: 348, step: 3, length: 9, shown: [0, 1, 2] },
+      { start: 770, step: -2, length: 9, shown: [0, 1, 2] },
+      { start: 118, step: 5, length: 10, shown: [0, 1, 2] },
+      { start: 605, step: -1, length: 10, shown: [0, 1, 2] },
+    ];
+  }
+
+  function decimalMixedHundredthsPatternRow(){
+    const data = pickUnusedOrAny('gi4_decimal_mixed_hundred_patterns', decimalMixedHundredthsPatternSeeds(), r => `${r.start}-${r.step}-${r.length}`);
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-mixed-pattern-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    for (let i = 0; i < data.length; i++) {
+      const value = data.start + i * data.step;
+      const cell = document.createElement('span');
+      if (data.shown.includes(i)) cell.textContent = decimalMixedHundredthsLabel(value).decimal;
+      else cell.appendChild(lineWithSolution(decimalMixedHundredthsLabel(value).decimal, 'short'));
+      row.appendChild(cell);
+    }
+    return row;
+  }
+
+  function makeDecimalMixedHundredthsPatternGrid(count = 3){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-pattern-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsPatternRow);
+    return wrap;
+  }
+
   function makeDecimalMixedHundredthsCard(mode){
     if (mode === 'axis') return makeDecimalMixedHundredthsAxisCard();
     if (mode === 'place') return makeDecimalMixedHundredthsPlaceCard();
@@ -7137,6 +7772,9 @@
     if (mode === 'compareHundredCompact') return decimalMixedHundredthsCompactCompareCard();
     if (mode === 'compareReference') return decimalMixedHundredthsReferenceCard();
     if (mode === 'compareShort') return decimalMixedHundredthsShortCompareCard();
+    if (mode === 'compareGreatest') return decimalMixedHundredthsGreatestCard();
+    if (mode === 'axisApprox') return decimalMixedHundredthsAxisApproxCard();
+    if (mode === 'patterns') return decimalMixedHundredthsPatternRow();
     if (mode === 'writeValue') return makeDecimalMixedHundredthsWriteDecimalCard();
     return makeDecimalMixedHundredthsMaterialsCard();
   }
@@ -7197,6 +7835,27 @@
           return;
         }
       }
+      if (mode === 'compareGreatest') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-mixed-hundred-greatest-grid');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsGreatestCard);
+          return;
+        }
+      }
+      if (mode === 'axisApprox') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-mixed-axis-approx-grid');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsAxisApproxCard);
+          return;
+        }
+      }
+      if (mode === 'patterns') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-mixed-pattern-grid');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsPatternRow);
+          return;
+        }
+      }
       const existing = containerInLastBlock(key, '.gi4-decimal-mixed-hundred-grid', `gi4-decimal-mixed-hundred-grid ${mode}`);
       if (existing) {
         for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeDecimalMixedHundredthsCard(mode));
@@ -7215,6 +7874,9 @@
       compareHundredCompact: 'Kommagetallen (> 1): zet op noemer 100 en vergelijk.',
       compareReference: 'Kommagetallen (> 1): vergelijk met referentiepunten.',
       compareShort: 'Kommagetallen (> 1): vergelijk kort.',
+      compareGreatest: 'Kommagetallen (> 1): kleur de grootste waarde.',
+      axisApprox: 'Kommagetallen (> 1): ongeveer op de getallenas.',
+      patterns: 'Kommagetallen (> 1): vul de patronen aan.',
       writeValue: 'Kommagetallen (> 1): schrijf de kommagetallen.',
     };
     const b = block(key, titles[mode], addCount => addDecimalMixedHundredths(addCount || 1, mode));
@@ -7230,6 +7892,9 @@
       compareHundredCompact: ['Zet de breukdelen op noemer 100 (= decimale breuk).', 'Vergelijk daarna de hoeveelheden met elkaar.', 'Schrijf &lt;, &gt; of =.', '<strong>Tip!</strong> Voeg waar nodig nullen toe aan het kommagetal om makkelijker te vergelijken.'],
       compareReference: ['Vergelijk de getallen of de breukdelen met <strong>de referentiepunten</strong>.', 'Markeer wat past.', 'Schrijf &lt;, &gt; of =.'],
       compareShort: ['Denk na: zijn de gehelen gelijk?', 'Vergelijk de breukdelen met referentiepunten.', 'Schrijf &lt;, &gt; of =.'],
+      compareGreatest: ['Vergelijk de getallen met elkaar.', 'Denk aan de referentiepunten of schrijf de breukdelen met noemer 100.', 'Kleur de grootste waarde in elke reeks van 3.'],
+      axisApprox: ['Waar liggen de getallen ongeveer?', 'Verbind de kaartjes met de juiste plaats op de getallenas.'],
+      patterns: ['Kijk goed: tel je verder of terug? Welke sprong moet je maken?', 'Vul de patronen aan.'],
       writeValue: ['Schrijf de kommagetallen.'],
     };
     addFractionInstructions(b, instructions[mode] || ['Vul in.']);
@@ -7267,6 +7932,21 @@
     }
     if (mode === 'compareShort') {
       b.appendChild(makeDecimalMixedHundredthsShortCompareGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'compareGreatest') {
+      b.appendChild(makeDecimalMixedHundredthsGreatestGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'axisApprox') {
+      b.appendChild(makeDecimalMixedHundredthsAxisApproxGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'patterns') {
+      b.appendChild(makeDecimalMixedHundredthsPatternGrid(count));
       addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
       return;
     }
@@ -8738,6 +9418,55 @@
     });
   }
 
+  function drawDecimalMixedAxisApproxSolutionLines(){
+    sheet.querySelectorAll('.gi4-decimal-mixed-axis-approx').forEach(row => {
+      const axisLine = row.querySelector('.gi4-decimal-mixed-axis-approx-axis');
+      const cards = Array.from(row.querySelectorAll('.gi4-decimal-axis-connect-card[data-value]'));
+      if (!axisLine || !cards.length) return;
+      const svg = makeOverlay(row, 'gi4-axis-connect-solution-svg');
+      const rowRect = row.getBoundingClientRect();
+      const lineRect = axisLine.getBoundingClientRect();
+      const start = parseInt(row.dataset.axisStart || '0', 10);
+      const range = parseInt(row.dataset.axisRange || '100', 10);
+      cards.forEach(card => {
+        const value = parseInt(card.dataset.value, 10);
+        if (!Number.isFinite(value)) return;
+        const dot = card.querySelector('.gi4-connect-dot.top') || card;
+        const p1 = centerRelative(dot, row);
+        const ratio = Math.max(0, Math.min(1, (value - start) / range));
+        const x2 = lineRect.left - rowRect.left + ratio * lineRect.width;
+        const y2 = lineRect.top - rowRect.top + lineRect.height;
+        svg.appendChild(svgSolutionLine(p1.x, p1.y, x2, y2));
+        svg.appendChild(svgSolutionDot(x2, y2, 3.2));
+      });
+      row.appendChild(svg);
+    });
+  }
+
+  function drawG5OperatorMatchSolutionLines(){
+    sheet.querySelectorAll('.gi4-g5-operator-match-card').forEach(card => {
+      const exercises = Array.from(card.querySelectorAll('.gi4-g5-operator-match-exercise[data-answer]'));
+      const results = Array.from(card.querySelectorAll('.gi4-g5-operator-match-result[data-answer]'));
+      if (!exercises.length || !results.length) return;
+      const svg = makeOverlay(card, 'gi4-g5-operator-match-solution-svg');
+      exercises.forEach(exercise => {
+        const result = results.find(item => item.dataset.answer === exercise.dataset.answer);
+        if (!result) return;
+        const from = exercise.classList.contains('left')
+          ? exercise.querySelector('.gi4-connect-dot.right')
+          : exercise.querySelector('.gi4-connect-dot.left');
+        const to = exercise.classList.contains('left')
+          ? result.querySelector('.gi4-connect-dot.left')
+          : result.querySelector('.gi4-connect-dot.right');
+        if (!from || !to) return;
+        const p1 = centerRelative(from, card);
+        const p2 = centerRelative(to, card);
+        svg.appendChild(svgSolutionLine(p1.x, p1.y, p2.x, p2.y));
+      });
+      card.appendChild(svg);
+    });
+  }
+
   function drawSolutionLines(){
     removeSolutionLines();
     if (!sheet.classList.contains('solutions-mode')) return;
@@ -8747,6 +9476,8 @@
     drawG5AxisConnectSolutionLines();
     drawMixedAxisConnectSolutionLines();
     drawDecimalHundredthsAxisConnectSolutionLines();
+    drawDecimalMixedAxisApproxSolutionLines();
+    drawG5OperatorMatchSolutionLines();
   }
 
   function setSolutionsMode(on){
@@ -8861,6 +9592,8 @@
     bind('#btnAddG5FractionShort', addG5FractionShort);
     bind('#btnAddG5FractionSeries', addG5FractionSeries);
     bind('#btnAddG5FractionColorTable', addG5FractionColorTable);
+    bind('#btnAddG5FractionOperationColor', addG5FractionOperationColor);
+    bind('#btnAddG5FractionOperator', addG5FractionOperator);
     bind('#btnAddG5GcdLcmInfo', addG5GcdLcmInfo);
     bind('#btnAddG5Divisibility', addG5Divisibility);
     bind('#btnAddG5Divisors', addG5Divisors);
