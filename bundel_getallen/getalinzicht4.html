@@ -260,6 +260,31 @@
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddG5FractionColorTable">Voeg kleurentabel toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Zelfde kleur: bewerkingen</div>
+        <div class="veld-rij">
+          <label>Tabellen <input id="g5FractionOperationColorCount" type="number" min="1" max="3" value="1" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionOperationColor">Voeg bewerkingentabel toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Breuk als operator</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionOperatorCount" type="number" min="1" max="8" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="g5FractionOperatorMode" style="width:130px">
+              <option value="cards" selected>oefeningen</option>
+              <option value="intro">uitlegkader</option>
+              <option value="multiplyOperator">vermenigvuldigen oplossen</option>
+              <option value="multiplyFraction">breuken vermenigvuldigen</option>
+              <option value="matchResults">verbind oplossingen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionOperator">Voeg operator-oefening toe</button>
     </div>
 
     <div class="sidebar-content" id="tab-ggdkgv" data-levels="grade5 grade6 custom" style="display:none">
@@ -783,6 +808,9 @@
               <option value="compareHundredCompact">vergelijken noemer 100 compact</option>
               <option value="compareReference">vergelijken referentiepunten</option>
               <option value="compareShort">kort vergelijken</option>
+              <option value="compareGreatest">grootste waarde in reeks</option>
+              <option value="axisApprox">ongeveer op getallenas</option>
+              <option value="patterns">patronen</option>
             </select>
           </label>
           <label><input id="decimalMixedHundredthsExample" type="checkbox"> eerste als voorbeeld</label>
