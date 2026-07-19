@@ -253,6 +253,10 @@
       const blockEl = target.closest('.gi4-block');
       const parent = target.parentElement;
       target.remove();
+      if (parent && parent.tagName === 'TBODY' && !parent.querySelector('tr')) {
+        const tableCard = parent.closest('.row-delete-wrap');
+        if (tableCard && tableCard !== target) tableCard.remove();
+      }
       if (parent && parent.tagName !== 'TBODY' && !parent.querySelector(':scope > *:not(.row-delete-btn)')) parent.remove();
       cleanupEmptyExerciseBlock(blockEl);
     };
@@ -1793,6 +1797,10 @@
     return Math.abs(a);
   }
 
+  function lcm(a, b){
+    return Math.abs(a * b) / gcd(a, b);
+  }
+
   function g5SimplifySeeds(){
     return [
       { num: 6, den: 10, color: '#f49b83' },
@@ -1987,6 +1995,131 @@
     b.appendChild(grid);
   }
 
+  function g5CommonCompareSeeds(){
+    return [
+      { a: { num: 1, den: 2 }, b: { num: 3, den: 10 } },
+      { a: { num: 5, den: 6 }, b: { num: 9, den: 12 } },
+      { a: { num: 2, den: 3 }, b: { num: 7, den: 9 } },
+      { a: { num: 1, den: 2 }, b: { num: 2, den: 5 } },
+      { a: { num: 3, den: 4 }, b: { num: 4, den: 6 } },
+      { a: { num: 2, den: 3 }, b: { num: 3, den: 4 } },
+      { a: { num: 5, den: 8 }, b: { num: 2, den: 3 } },
+      { a: { num: 4, den: 5 }, b: { num: 7, den: 10 } },
+    ];
+  }
+
+  function g5CompareRelation(a, b){
+    return a < b ? '<' : a > b ? '>' : '=';
+  }
+
+  function makeG5CommonCompareCard(example = false){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_common_compare', g5CommonCompareSeeds(), s => `${s.a.num}/${s.a.den}-${s.b.num}/${s.b.den}`);
+    if (!seed) return null;
+    const commonDen = lcm(seed.a.den, seed.b.den);
+    const factorA = commonDen / seed.a.den;
+    const factorB = commonDen / seed.b.den;
+    const commonA = { num: seed.a.num * factorA, den: commonDen };
+    const commonB = { num: seed.b.num * factorB, den: commonDen };
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-common-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'gi4-g5-common-top';
+    const topBox = Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' });
+    const relation = g5CompareRelation(seed.a.num / seed.a.den, seed.b.num / seed.b.den);
+    if (example) topBox.textContent = relation;
+    else topBox.appendChild(sol(relation));
+    top.append(fractionBox(seed.a.num, seed.a.den), topBox, fractionBox(seed.b.num, seed.b.den));
+
+    const work = document.createElement('div');
+    work.className = 'gi4-g5-common-work';
+    work.append(
+      makeG5FractionArrowWork({ num: seed.a.num, den: seed.a.den, resultNum: commonA.num, resultDen: commonA.den, op: 'x', factor: factorA, showResultDen: true }),
+      makeG5FractionArrowWork({ num: seed.b.num, den: seed.b.den, resultNum: commonB.num, resultDen: commonB.den, op: 'x', factor: factorB, showResultDen: true })
+    );
+    const bottom = document.createElement('div');
+    bottom.className = 'gi4-g5-common-bottom';
+    const bottomBox = Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' });
+    if (example) bottomBox.textContent = g5CompareRelation(commonA.num, commonB.num);
+    else bottomBox.appendChild(sol(g5CompareRelation(commonA.num, commonB.num)));
+    bottom.append(
+      example ? fractionBox(commonA.num, commonDen) : fractionBox('', commonDen, commonA.num, ''),
+      bottomBox,
+      example ? fractionBox(commonB.num, commonDen) : fractionBox('', commonDen, commonB.num, '')
+    );
+    if (example) card.classList.add('example');
+    card.append(top, work, bottom);
+    return card;
+  }
+
+  function addG5FractionCommonCompare(extraCount){
+    const key = 'gi4_g5_fraction_common_compare';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionCommonCompareCount')?.value, 10) || 3);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-common-grid', 'gi4-g5-common-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeG5CommonCompareCard(false));
+        return;
+      }
+    }
+    const withExample = $('#g5FractionCommonExample')?.checked;
+    const b = block(key, 'Maak de breuken gelijknamig. Vergelijk daarna de breuken.', addG5FractionCommonCompare);
+    addFractionInstructions(b, ['Maak de breuken gelijknamig.', 'Vergelijk daarna de breuken. Vul aan: <, > of =.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-common-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeG5CommonCompareCard(withExample && i === 0));
+    b.appendChild(grid);
+  }
+
+  function makeG5CommonShortCard(example = false){
+    const seed = pickUnusedOrAny('gi4_g5_fraction_common_short', g5CommonCompareSeeds(), s => `${s.a.num}/${s.a.den}-${s.b.num}/${s.b.den}`);
+    if (!seed) return null;
+    const commonDen = lcm(seed.a.den, seed.b.den);
+    const commonA = { num: seed.a.num * (commonDen / seed.a.den), den: commonDen };
+    const commonB = { num: seed.b.num * (commonDen / seed.b.den), den: commonDen };
+    const relation = g5CompareRelation(commonA.num, commonB.num);
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-common-short-card row-delete-wrap';
+    if (example) card.classList.add('example');
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'gi4-g5-common-short-top';
+    const box = Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' });
+    if (example) box.textContent = relation;
+    else box.appendChild(sol(relation));
+    top.append(fractionBox(seed.a.num, seed.a.den), box, fractionBox(seed.b.num, seed.b.den));
+    const arrows = document.createElement('div');
+    arrows.className = 'gi4-g5-common-down-arrows';
+    arrows.innerHTML = '<span></span><span></span>';
+    const bottom = document.createElement('div');
+    bottom.className = 'gi4-g5-common-short-bottom';
+    bottom.append(
+      example ? fractionBox(commonA.num, commonA.den) : fractionBox('', '', commonA.num, commonA.den),
+      example ? fractionBox(commonB.num, commonB.den) : fractionBox('', '', commonB.num, commonB.den)
+    );
+    card.append(top, arrows, bottom);
+    return card;
+  }
+
+  function addG5FractionCommonShort(extraCount){
+    const key = 'gi4_g5_fraction_common_short';
+    const count = extraCount || Math.max(1, parseInt($('#g5FractionCommonShortCount')?.value, 10) || 6);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-common-short-grid', 'gi4-g5-common-short-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeG5CommonShortCard(false));
+        return;
+      }
+    }
+    const withExample = $('#g5FractionCommonShortExample')?.checked;
+    const b = block(key, 'Maak de breuken gelijknamig. Vergelijk daarna de breuken.', addG5FractionCommonShort);
+    addFractionInstructions(b, ['Maak de breuken gelijknamig.', 'Vergelijk daarna de breuken. Vul in: <, > of =.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-common-short-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeG5CommonShortCard(withExample && i === 0));
+    b.appendChild(grid);
+  }
+
   function makeG5FractionArrowCard(){
     const seed = pickUnusedOrAny('gi4_g5_fraction_arrows', g5SimplifySeeds(), s => `${s.num}/${s.den}`);
     if (!seed) return null;
@@ -2137,6 +2270,311 @@
     wrap.className = 'gi4-g5-fraction-color-wrap';
     for (let i = 0; i < count; i++) appendNewExercise(wrap, makeG5FractionColorTable);
     b.appendChild(wrap);
+  }
+
+  function divisorsOf(n){
+    const result = [];
+    for (let i = 1; i <= n; i++) if (n % i === 0) result.push(i);
+    return result;
+  }
+
+  function divisorPairsOf(n){
+    const pairs = [];
+    for (let i = 1; i <= Math.sqrt(n); i++) {
+      if (n % i === 0) pairs.push([i, n / i]);
+    }
+    return pairs;
+  }
+
+  function multiplesOf(n, count = 9){
+    return Array.from({ length: count }, (_, i) => n * i);
+  }
+
+  function addG5GcdLcmInfo(){
+    const key = 'gi4_g5_gcd_lcm_info';
+    const b = block(key, 'GGD en KGV: kijk en leer.', addG5GcdLcmInfo);
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-info-card row-delete-wrap';
+    card.innerHTML = `
+      <div class="gi4-g5-info-title">GGD en KGV</div>
+      <div class="gi4-g5-info-cols">
+        <section>
+          <h4>Grootste gemeenschappelijke deler (GGD)</h4>
+          <p><strong>Delers</strong> zijn alle getallen waardoor ik een getal kan delen.</p>
+          <ol><li>Ik zoek de delers van elk getal.</li><li>Ik duid de gemeenschappelijke delers aan.</li><li>Ik kies de grootste gemeenschappelijke deler.</li></ol>
+          <div class="gi4-g5-info-example">
+            <div class="gi4-g5-info-divisors"><strong>6</strong><div><span>1</span><span>6</span><span class="hit">2</span><span>3</span></div></div>
+            <div class="gi4-g5-info-divisors"><strong>10</strong><div><span>1</span><span>10</span><span class="hit">2</span><span>5</span></div></div>
+          </div>
+          <p class="example">De GGD van 6 en 10 is 2.</p>
+        </section>
+        <section>
+          <h4>Kleinste gemeenschappelijk veelvoud (KGV)</h4>
+          <p><strong>Veelvouden</strong> zijn producten van dat getal.</p>
+          <ol><li>Ik schrijf veelvouden van elk getal.</li><li>Ik duid de gemeenschappelijke veelvouden aan.</li><li>Ik kies het kleinste gemeenschappelijk veelvoud groter dan 0.</li></ol>
+          <div class="gi4-g5-info-example">
+            <div class="gi4-g5-info-multiples"><strong>4</strong><span>0 - 4 - 8 - <b>12</b> - 16 - 20 - 24 - ...</span></div>
+            <div class="gi4-g5-info-multiples"><strong>6</strong><span>0 - 6 - <b>12</b> - 18 - 24 - 30 - ...</span></div>
+          </div>
+          <p class="example">Het KGV van 4 en 6 is 12.</p>
+        </section>
+      </div>`;
+    card.appendChild(rowDel(card));
+    b.appendChild(card);
+  }
+
+  function addG5Divisibility(extraCount){
+    const key = 'gi4_g5_divisibility';
+    const count = extraCount || Math.max(6, parseInt($('#g5DivisibilityCount')?.value, 10) || 10);
+    const nums = Array.from({ length: count }, () => rnd(12, 100));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-divisibility-cloud', 'gi4-g5-divisibility-cloud');
+      if (existing) {
+        nums.forEach(n => existing.appendChild(makeG5DivisibilityNumber(n)));
+        return;
+      }
+    }
+    const b = block(key, 'Omkring de getallen die deelbaar zijn door 10, 5, 2 en 3.', addG5Divisibility);
+    addFractionInstructions(b, ['Omkring de getallen die deelbaar zijn door 10 met groen.', 'Omkring de getallen die deelbaar zijn door 5 met rood.', 'Omkring de getallen die deelbaar zijn door 2 met blauw.', 'Omkring de getallen die deelbaar zijn door 3 met geel.']);
+    const cloud = document.createElement('div');
+    cloud.className = 'gi4-g5-divisibility-cloud row-delete-wrap';
+    cloud.appendChild(rowDel(cloud));
+    nums.forEach(n => cloud.appendChild(makeG5DivisibilityNumber(n)));
+    b.append(cloud, makeG5DivisibilityRules());
+  }
+
+  function makeG5DivisibilityNumber(n){
+    const item = document.createElement('span');
+    item.textContent = n;
+    [10, 5, 2, 3].forEach(d => { if (n % d === 0) item.classList.add(`div-by-${d}`); });
+    return item;
+  }
+
+  function makeG5DivisibilityRules(){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-divisibility-rules row-delete-wrap';
+    wrap.appendChild(rowDel(wrap));
+    const left = [
+      'Een getal is deelbaar door 10 ...',
+      'Een getal is deelbaar door 2 ...',
+      'Een getal is deelbaar door 5 ...',
+      'Een getal is deelbaar door 3 ...',
+    ];
+    const right = [
+      '... als het getal eindigt op 0.',
+      '... als het getal eindigt op 0 of 5.',
+      '... als het getal eindigt op 0, 2, 4, 6 of 8.',
+      '... als de som van de cijfers deelbaar is door 3.',
+    ];
+    const leftCol = document.createElement('div');
+    const rightCol = document.createElement('div');
+    left.forEach(text => leftCol.appendChild(makeG5ConnectRule(text, 'right')));
+    right.sort(() => Math.random() - .5).forEach(text => rightCol.appendChild(makeG5ConnectRule(text, 'left')));
+    wrap.append(leftCol, rightCol);
+    return wrap;
+  }
+
+  function makeG5ConnectRule(text, dotSide){
+    const item = document.createElement('div');
+    item.className = `gi4-g5-connect-rule dot-${dotSide}`;
+    item.textContent = text;
+    item.appendChild(document.createElement('i'));
+    return item;
+  }
+
+  function makeG5DivisorsCard(n, example = false){
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-divisors-card row-delete-wrap';
+    if (example) card.classList.add('example');
+    card.appendChild(rowDel(card));
+    const title = document.createElement('strong');
+    title.textContent = n;
+    const list = document.createElement('div');
+    list.className = 'gi4-g5-divisor-list';
+    const pairs = divisorPairsOf(n);
+    for (let i = 0; i < Math.max(4, pairs.length); i++) {
+      const pair = pairs[i] || ['', ''];
+      pair.forEach(value => {
+        const line = document.createElement('span');
+        if (example && value !== '') line.textContent = value;
+        else if (value !== '') line.appendChild(sol(String(value)));
+        list.appendChild(line);
+      });
+    }
+    card.append(title, list);
+    return card;
+  }
+
+  function addG5Divisors(extraCount){
+    const key = 'gi4_g5_divisors';
+    const count = extraCount || Math.max(1, parseInt($('#g5DivisorsCount')?.value, 10) || 6);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-divisors-grid', 'gi4-g5-divisors-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeG5DivisorsCard(pick([12, 15, 16, 18, 21, 24, 28, 30]), false));
+        return;
+      }
+    }
+    const withExample = $('#g5DivisorsExample')?.checked;
+    const b = block(key, 'Schrijf alle delers bij elk getal.', addG5Divisors);
+    addFractionInstructions(b, ['Schrijf alle delers bij elk getal.', 'Je hoeft elke deler maar 1 keer te noteren.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-divisors-grid';
+    const nums = [12, 15, 21, 16, 24, 18, 28, 30].sort(() => Math.random() - .5).slice(0, count);
+    nums.forEach((n, i) => grid.appendChild(makeG5DivisorsCard(n, withExample && i === 0)));
+    b.appendChild(grid);
+  }
+
+  function makeG5GcdCard(a, bNum){
+    const common = divisorsOf(a).filter(d => bNum % d === 0);
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-gcd-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const title = document.createElement('strong');
+    title.textContent = `Zoek de GGD van ${a} en ${bNum}.`;
+    const cols = document.createElement('div');
+    cols.className = 'gi4-g5-gcd-cols';
+    [a, bNum].forEach(n => {
+      const col = document.createElement('div');
+      const heading = document.createElement('strong');
+      heading.textContent = n;
+      const writing = document.createElement('span');
+      writing.className = 'gi4-g5-gcd-writing-line';
+      const answers = document.createElement('span');
+      answers.className = 'gi4-g5-gcd-col-solutions';
+      const divs = divisorsOf(n);
+      answers.appendChild(sol(divs.join(', ')));
+      col.append(heading, writing, answers);
+      cols.appendChild(col);
+    });
+    const line1 = document.createElement('p');
+    line1.append(`De gemeenschappelijke delers van ${a} en ${bNum} zijn `, lineWithSolution(common.join(', '), 'long'), '.');
+    const line2 = document.createElement('p');
+    line2.append(`De grootste gemeenschappelijke deler van ${a} en ${bNum} is `, lineWithSolution(String(gcd(a, bNum)), 'short'), '.');
+    card.append(title, cols, line1, line2);
+    return card;
+  }
+
+  function addG5Gcd(extraCount){
+    const key = 'gi4_g5_gcd';
+    const count = extraCount || Math.max(1, parseInt($('#g5GcdCount')?.value, 10) || 2);
+    const pairs = [[20,15],[12,21],[18,30],[24,36],[40,60],[28,42]];
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-gcd-grid', 'gi4-g5-gcd-grid');
+      if (existing) { for (let i = 0; i < count; i++) existing.appendChild(makeG5GcdCard(...pick(pairs))); return; }
+    }
+    const b = block(key, 'Schrijf alle delers. Onderstreep de gemeenschappelijke delers. Omkring de GGD.', addG5Gcd);
+    addFractionInstructions(b, ['Schrijf alle delers bij elk getal.', 'Onderstreep de gemeenschappelijke delers.', 'Omkring de GGD.', 'Vul aan.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-gcd-grid';
+    pairs.sort(() => Math.random() - .5).slice(0, count).forEach(pair => grid.appendChild(makeG5GcdCard(...pair)));
+    b.appendChild(grid);
+  }
+
+  function addG5Multiples(extraCount){
+    const key = 'gi4_g5_multiples';
+    const rows = extraCount || Math.max(2, parseInt($('#g5MultiplesCount')?.value, 10) || 4);
+    const withExample = !extraCount && $('#g5MultiplesExample')?.checked;
+    const nums = [2, 3, 4, 5, 6, 7, 8, 9].sort(() => Math.random() - .5).slice(0, rows);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-multiples-table tbody', '', 'tbody');
+      if (existing) {
+        nums.forEach(n => existing.appendChild(makeG5MultiplesRow(n, false)));
+        return;
+      }
+    }
+    const b = block(key, 'Schrijf de eerste 9 veelvouden bij elk getal.', addG5Multiples);
+    const table = document.createElement('table');
+    table.className = 'gi4-g5-multiples-table';
+    const body = document.createElement('tbody');
+    nums.forEach((n, i) => body.appendChild(makeG5MultiplesRow(n, withExample && i === 0)));
+    table.appendChild(body);
+    b.appendChild(table);
+  }
+
+  function makeG5MultiplesRow(n, example = false){
+    const tr = document.createElement('tr');
+    tr.className = 'row-delete-wrap';
+    if (example) tr.classList.add('example');
+    const label = document.createElement('th');
+    label.textContent = `veelvouden van ${n}`;
+    const td = document.createElement('td');
+    const text = multiplesOf(n).join(', ');
+    if (example) td.textContent = text;
+    else td.appendChild(lineWithSolution(text, 'long'));
+    const remove = document.createElement('td');
+    remove.className = 'gi4-table-delete-cell';
+    remove.appendChild(rowDel(tr));
+    tr.append(label, td, remove);
+    return tr;
+  }
+
+  function makeG5LcmCard(a, bNum){
+    const common = multiplesOf(a, 16).filter(v => v > 0 && v % bNum === 0).slice(0, 5);
+    const card = document.createElement('div');
+    card.className = 'gi4-g5-lcm-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const title = document.createElement('strong');
+    title.textContent = `Zoek het KGV van ${a} en ${bNum}.`;
+    const table = document.createElement('table');
+    table.className = 'gi4-g5-lcm-lines';
+    [a, bNum].forEach(n => {
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.textContent = n;
+      const td = document.createElement('td');
+      td.appendChild(lineWithSolution(multiplesOf(n, 9).join(', '), 'long'));
+      tr.append(th, td);
+      table.appendChild(tr);
+    });
+    const line1 = document.createElement('p');
+    line1.append(`De gemeenschappelijke veelvouden van ${a} en ${bNum} zijn `, lineWithSolution(common.join(', '), 'long'), '.');
+    const line2 = document.createElement('p');
+    line2.append(`Het kleinste gemeenschappelijke veelvoud van ${a} en ${bNum} is `, lineWithSolution(String(lcm(a, bNum)), 'short'), '.');
+    card.append(title, table, line1, line2);
+    return card;
+  }
+
+  function addG5Lcm(extraCount){
+    const key = 'gi4_g5_lcm';
+    const count = extraCount || Math.max(1, parseInt($('#g5LcmCount')?.value, 10) || 2);
+    const pairs = [[3,4],[6,9],[4,6],[8,3],[6,3],[5,10]];
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-lcm-grid', 'gi4-g5-lcm-grid');
+      if (existing) { for (let i = 0; i < count; i++) existing.appendChild(makeG5LcmCard(...pick(pairs))); return; }
+    }
+    const b = block(key, 'Schrijf de eerste 9 veelvouden. Onderstreep de gemeenschappelijke veelvouden. Omkring het KGV.', addG5Lcm);
+    addFractionInstructions(b, ['Schrijf bij elk getal de eerste 9 veelvouden.', 'Onderstreep de gemeenschappelijke veelvouden.', 'Omkring het KGV.', 'Vul aan.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-lcm-grid';
+    pairs.sort(() => Math.random() - .5).slice(0, count).forEach(pair => grid.appendChild(makeG5LcmCard(...pair)));
+    b.appendChild(grid);
+  }
+
+  function addG5GcdLcmMatch(extraCount){
+    const key = 'gi4_g5_gcd_lcm_match';
+    const count = extraCount || Math.max(4, parseInt($('#g5GcdLcmMatchCount')?.value, 10) || 8);
+    const items = [
+      ['KGV', 6, 4], ['GGD', 18, 30], ['KGV', 4, 10], ['GGD', 24, 48],
+      ['KGV', 8, 3], ['GGD', 40, 60], ['KGV', 6, 3], ['GGD', 24, 36],
+      ['KGV', 5, 10], ['GGD', 28, 42], ['KGV', 3, 4], ['GGD', 12, 21],
+    ].sort(() => Math.random() - .5).slice(0, count);
+    const b = block(key, 'Zoek de GGD of het KGV. Geef oefeningen met hetzelfde resultaat dezelfde kleur.', addG5GcdLcmMatch);
+    addFractionInstructions(b, ['Zoek de GGD of het KGV van de getallen op het kaartje.', 'Geef oefeningen die hetzelfde resultaat hebben eenzelfde kleur.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-match-grid';
+    items.forEach(([kind, a, bNum]) => {
+      const card = document.createElement('div');
+      card.className = `gi4-g5-match-card solution-${kind === 'KGV' ? lcm(a,bNum) : gcd(a,bNum)} row-delete-wrap`;
+      card.appendChild(rowDel(card));
+      const kindText = document.createElement('strong');
+      kindText.textContent = `${kind} van`;
+      const nums = document.createElement('span');
+      nums.textContent = `${a} en ${bNum}`;
+      card.append(kindText, nums);
+      grid.appendChild(card);
+    });
+    b.appendChild(grid);
   }
 
   function fractionBox(num, den, solutionNum = '', solutionDen = ''){
@@ -4578,6 +5016,26 @@
     return `${words[t] || t} tiende${t === 1 ? '' : 'n'}`;
   }
 
+  function decimalHundredComma(value){
+    return Number(value / 100).toFixed(2).replace('.', ',');
+  }
+
+  function decimalNumberWord(n){
+    const ones = ['nul','een','twee','drie','vier','vijf','zes','zeven','acht','negen'];
+    const teens = ['tien','elf','twaalf','dertien','veertien','vijftien','zestien','zeventien','achttien','negentien'];
+    const tens = ['', '', 'twintig', 'dertig', 'veertig', 'vijftig', 'zestig', 'zeventig', 'tachtig', 'negentig'];
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n - 10];
+    const t = Math.floor(n / 10);
+    const o = n % 10;
+    if (o === 0) return tens[t];
+    return `${ones[o]}en${tens[t]}`;
+  }
+
+  function decimalHundredWord(h){
+    return `${decimalNumberWord(h)} honderdste${h === 1 ? '' : 'n'}`;
+  }
+
   function decimalFractionText(t){
     return `${t}/10`;
   }
@@ -4780,6 +5238,887 @@
     return box;
   }
 
+  function decimalHundredthsAnswerBox(h){
+    const box = document.createElement('div');
+    box.className = 'gi4-decimal-answer-box';
+    box.append(fractionBox('', '100', String(h), ''));
+    const eq = document.createElement('span');
+    eq.textContent = '=';
+    box.append(eq, lineWithSolution(decimalHundredComma(h), 'short'));
+    return box;
+  }
+
+  function makeDecimalTenthsCircleCard(t){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-tenths-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const title = document.createElement('div');
+    title.className = 'gi4-decimal-card-title';
+    title.innerHTML = `<strong>${decimalWord(t)}</strong> van het geheel`;
+    card.append(title, decimalCircle(t, false), decimalAnswerBox(t));
+    return card;
+  }
+
+  function makeDecimalTenthsAxisQuestion(t){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-tenths-axis-question row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const arrow = document.createElement('span');
+    arrow.className = 'gi4-decimal-tenths-axis-arrow';
+    const sentence = document.createElement('div');
+    sentence.className = 'gi4-decimal-tenths-axis-sentence';
+    sentence.append(lineWithSolution(String(t), 'short'), document.createTextNode(' tienden van het geheel'));
+    card.append(arrow, sentence, decimalAnswerBox(t));
+    return card;
+  }
+
+  function makeDecimalTenthsIntroExercise(){
+    const data = pickUnused('gi4_decimal_tenths_intro', [
+      [7, 4, 2, 8],
+      [3, 6, 1, 9],
+      [5, 8, 4, 7],
+      [2, 9, 3, 6],
+    ], set => set.join('-'));
+    if (!data) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-tenths-intro row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const circleGrid = document.createElement('div');
+    circleGrid.className = 'gi4-decimal-tenths-circle-grid';
+    circleGrid.append(makeDecimalTenthsCircleCard(data[0]), makeDecimalTenthsCircleCard(data[1]));
+
+    const axisWrap = document.createElement('div');
+    axisWrap.className = 'gi4-decimal-tenths-axis-wrap';
+    const axis = decimalAxis(null, { labels: false, axisEnd: 92 });
+    const zero = document.createElement('span');
+    zero.className = 'gi4-decimal-tenths-axis-end';
+    zero.style.left = '0%';
+    zero.textContent = '0';
+    const one = document.createElement('span');
+    one.className = 'gi4-decimal-tenths-axis-end';
+    one.style.left = '92%';
+    one.textContent = '1';
+    axis.append(zero, one);
+    [data[2], data[3]].forEach((t, idx) => {
+      const marker = document.createElement('span');
+      marker.className = 'gi4-decimal-tenths-pointer';
+      marker.style.left = `${t / 10 * 92}%`;
+      marker.style.setProperty('--pointer-drop', idx === 0 ? '30px' : '54px');
+      axis.appendChild(marker);
+    });
+    const questions = document.createElement('div');
+    questions.className = 'gi4-decimal-tenths-axis-questions';
+    questions.append(makeDecimalTenthsAxisQuestion(data[2]), makeDecimalTenthsAxisQuestion(data[3]));
+    axisWrap.append(axis, questions);
+    card.append(circleGrid, axisWrap);
+    return card;
+  }
+
+  function addDecimalTenthsIntro(extraCount){
+    const key = 'gi4_decimal_tenths_intro';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalTenthsIntroCount')?.value, 10) || 1));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-decimal-tenths-stack', 'gi4-decimal-tenths-stack');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalTenthsIntroExercise);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: tienden en tiendelige breuken.', addCount => addDecimalTenthsIntro(addCount || 1));
+    addFractionInstructions(b, ['Kleur het deel van het geheel.', 'Schrijf de tiendelige breuk en het kommagetal.', 'Welk deel van het geheel is aangeduid? Vul in.']);
+    const stack = document.createElement('div');
+    stack.className = 'gi4-decimal-tenths-stack';
+    for (let i = 0; i < count; i++) appendNewExercise(stack, makeDecimalTenthsIntroExercise);
+    b.appendChild(stack);
+  }
+
+  function decimalHundredthsGrid(h, show = false){
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-hundred-grid-visual';
+    for (let i = 0; i < 100; i++) {
+      const cell = document.createElement('span');
+      if (i < h) {
+        if (show) cell.style.background = '#9bd2ea';
+        else cell.classList.add('solution-fill');
+      }
+      grid.appendChild(cell);
+    }
+    return grid;
+  }
+
+  function decimalHundredthsPuzzle(h, show = false){
+    const grid = decimalHundredthsGrid(h, show);
+    grid.classList.add('puzzle');
+    return grid;
+  }
+
+  function decimalHundredthsCircle(h, show = false){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 110 110');
+    svg.classList.add('gi4-decimal-hundred-circle');
+    const cx = 55, cy = 55, r = 43;
+    if (h > 0 && show) {
+      const a1 = -90;
+      const a2 = -90 + h * 3.6;
+      const large = h > 50 ? 1 : 0;
+      const p1 = [cx + r * Math.cos(a1 * Math.PI / 180), cy + r * Math.sin(a1 * Math.PI / 180)];
+      const p2 = [cx + r * Math.cos(a2 * Math.PI / 180), cy + r * Math.sin(a2 * Math.PI / 180)];
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${cx} ${cy} L ${p1[0]} ${p1[1]} A ${r} ${r} 0 ${large} 1 ${p2[0]} ${p2[1]} Z`);
+      path.setAttribute('fill', '#9bd2ea');
+      path.setAttribute('stroke', 'none');
+      svg.appendChild(path);
+    }
+    const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    ring.setAttribute('cx', cx);
+    ring.setAttribute('cy', cy);
+    ring.setAttribute('r', r);
+    ring.setAttribute('fill', 'none');
+    ring.setAttribute('stroke', '#475569');
+    ring.setAttribute('stroke-width', '1.3');
+    svg.appendChild(ring);
+    for (let i = 0; i < 10; i++) {
+      const a = (-90 + i * 36) * Math.PI / 180;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', cx);
+      line.setAttribute('y1', cy);
+      line.setAttribute('x2', cx + Math.cos(a) * r);
+      line.setAttribute('y2', cy + Math.sin(a) * r);
+      line.setAttribute('stroke', '#94a3b8');
+      line.setAttribute('stroke-width', '1.1');
+      svg.appendChild(line);
+    }
+    for (let i = 0; i < 100; i++) {
+      const a = (-90 + i * 3.6) * Math.PI / 180;
+      const isTen = i % 10 === 0;
+      const outer = r + 1;
+      const inner = r - (isTen ? 7 : 4);
+      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tick.setAttribute('x1', cx + Math.cos(a) * inner);
+      tick.setAttribute('y1', cy + Math.sin(a) * inner);
+      tick.setAttribute('x2', cx + Math.cos(a) * outer);
+      tick.setAttribute('y2', cy + Math.sin(a) * outer);
+      tick.setAttribute('stroke', isTen ? '#64748b' : '#aeb8c4');
+      tick.setAttribute('stroke-width', isTen ? '1' : '.65');
+      svg.appendChild(tick);
+    }
+    return svg;
+  }
+
+  function decimalHundredthsVisual(h, type){
+    if (type === 'circle') return decimalHundredthsCircle(h, false);
+    if (type === 'puzzle') return decimalHundredthsPuzzle(h, false);
+    return decimalHundredthsGrid(h, false);
+  }
+
+  function decimalHundredthsVisualFilled(h, type){
+    if (type === 'circle') return decimalHundredthsCircle(h, true);
+    if (type === 'axis') return decimalHundredthsAxisVisual(h);
+    if (type === 'bars') return decimalHundredthsBarsVisual(h);
+    if (type === 'puzzle') return decimalHundredthsPuzzle(h, true);
+    return decimalHundredthsGrid(h, true);
+  }
+
+  function decimalHundredthsBarsVisual(h){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-bars';
+    const tenths = Math.floor(h / 10);
+    const rest = h % 10;
+    for (let r = 0; r < 10; r++) {
+      const bar = document.createElement('div');
+      bar.className = 'gi4-decimal-hundred-bar';
+      for (let i = 0; i < 10; i++) {
+        const cell = document.createElement('span');
+        if (r < tenths || (r === tenths && i < rest)) cell.className = 'filled';
+        bar.appendChild(cell);
+      }
+      wrap.appendChild(bar);
+    }
+    return wrap;
+  }
+
+  function decimalHundredthsAxisVisual(h){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-axis-visual';
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-hundred-axis';
+    for (let i = 0; i <= 100; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' tenth' : ''}`;
+      tick.style.left = `${i}%`;
+      axis.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.style.left = `${i}%`;
+        label.textContent = i === 0 ? '0' : i === 100 ? '1' : decimalComma(i / 100);
+        axis.appendChild(label);
+      }
+    }
+    const marker = document.createElement('span');
+    marker.className = 'marker';
+    marker.style.left = `${h}%`;
+    axis.appendChild(marker);
+    const arc = document.createElement('span');
+    arc.className = 'arc';
+    arc.style.width = `${h}%`;
+    axis.appendChild(arc);
+    wrap.appendChild(axis);
+    return wrap;
+  }
+
+  function makeDecimalHundredthsCard(){
+    const item = pickUnused('gi4_decimal_hundredths', [
+      { h: 4, type: 'puzzle' }, { h: 70, type: 'circle' }, { h: 46, type: 'grid' },
+      { h: 25, type: 'grid' }, { h: 8, type: 'puzzle' }, { h: 62, type: 'circle' },
+      { h: 35, type: 'grid' }, { h: 90, type: 'circle' }, { h: 13, type: 'puzzle' },
+    ], item => `${item.h}-${item.type}`);
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(decimalHundredthsVisual(item.h, item.type));
+    const title = document.createElement('div');
+    title.className = 'gi4-decimal-card-title center';
+    title.innerHTML = `<strong>${decimalHundredWord(item.h)}</strong><br>van het geheel`;
+    card.append(title, decimalHundredthsAnswerBox(item.h));
+    return card;
+  }
+
+  function addDecimalHundredths(extraCount){
+    const key = 'gi4_decimal_hundredths';
+    const count = extraCount || Math.max(1, Math.min(9, parseInt($('#decimalHundredthsCount')?.value, 10) || 3));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-decimal-grid.hundredths', 'gi4-decimal-grid hundredths');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalHundredthsCard);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: honderdsten en decimale breuken.', addCount => addDecimalHundredths(addCount || 1));
+    addFractionInstructions(b, ['Kleur het gevraagde deel.', 'Schrijf de passende breuk.', 'Schrijf het passend kommagetal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-grid hundredths';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalHundredthsCard);
+    b.appendChild(grid);
+  }
+
+  function decimalHundredthsTableRow(){
+    const item = pickUnused('gi4_decimal_hundredths_table', [
+      { h: 43, type: 'puzzle' },
+      { h: 26, type: 'circle' },
+      { h: 72, type: 'bars' },
+      { h: 89, type: 'grid' },
+      { h: 61, type: 'axis' },
+      { h: 35, type: 'grid' },
+      { h: 58, type: 'circle' },
+      { h: 47, type: 'puzzle' },
+      { h: 64, type: 'axis' },
+    ], item => `${item.h}-${item.type}`);
+    if (!item) return null;
+    const h = item.h;
+    const tenths = Math.floor(h / 10);
+    const hundredths = h % 10;
+    const tr = document.createElement('tr');
+    tr.className = 'row-delete-wrap';
+    const visual = document.createElement('td');
+    visual.className = 'gi4-decimal-hundred-table-visual';
+    visual.appendChild(rowDel(tr));
+    visual.appendChild(decimalHundredthsVisualFilled(h, item.type));
+
+    const amount = document.createElement('td');
+    amount.className = 'gi4-decimal-hundred-table-amount';
+    amount.append(
+      lineWithSolution(String(tenths), 'short'), document.createTextNode(' tienden'),
+      document.createElement('br'),
+      document.createTextNode('en '), lineWithSolution(String(hundredths), 'short'), document.createTextNode(' honderdsten'),
+      document.createElement('br'),
+      Object.assign(document.createElement('strong'), { textContent: 'OF' }),
+      document.createElement('br'),
+      lineWithSolution(String(h), 'short'), document.createTextNode(' honderdsten')
+    );
+
+    const fraction = document.createElement('td');
+    fraction.className = 'gi4-decimal-hundred-table-fraction';
+    const topLine = document.createElement('div');
+    topLine.className = 'gi4-decimal-hundred-table-mixed-fractions';
+    topLine.append(fractionBox('', '10', String(tenths), ''), document.createTextNode(' en '), fractionBox('', '100', String(hundredths), ''));
+    const of = Object.assign(document.createElement('div'), { className: 'gi4-decimal-hundred-table-of', textContent: 'OF' });
+    fraction.append(topLine, of, fractionBox('', '100', String(h), ''));
+
+    const comma = document.createElement('td');
+    comma.className = 'gi4-decimal-hundred-table-comma';
+    comma.appendChild(lineWithSolution(decimalHundredComma(h), 'long'));
+    tr.append(visual, amount, fraction, comma);
+    return tr;
+  }
+
+  function addDecimalHundredthsTable(extraCount){
+    const key = 'gi4_decimal_hundredths_table';
+    const count = extraCount || Math.max(2, Math.min(6, parseInt($('#decimalHundredthsTableCount')?.value, 10) || 5));
+    if (extraCount) {
+      const body = containerInLastBlock(key, '.gi4-decimal-hundred-table tbody', '', 'tbody');
+      if (body) {
+        for (let i = 0; i < count; i++) appendNewExercise(body, decimalHundredthsTableRow);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: welk deel van het geheel zie je?', addCount => addDecimalHundredthsTable(addCount || 1));
+    addFractionInstructions(b, ['Welk deel van het geheel zie je? Vul in.', 'Schrijf de honderddelige breuk.', 'Schrijf het kommagetal.']);
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-hundred-table';
+    table.innerHTML = '<thead><tr><th>Welk deel van het geheel?</th><th>Dit zijn ...</th><th>breuk</th><th>kommagetal</th></tr></thead>';
+    const body = document.createElement('tbody');
+    for (let i = 0; i < count; i++) appendNewExercise(body, decimalHundredthsTableRow);
+    table.appendChild(body);
+    b.appendChild(table);
+  }
+
+  function decimalHundredthsConvertSeed(mode){
+    const sets = {
+      grid: [
+        { h: 28, color: '#f8d48a' },
+        { h: 76, color: '#f6b3c1' },
+        { h: 42, color: '#a7d9c7' },
+        { h: 65, color: '#b9d6f2' },
+        { h: 93, color: '#f2a38b' },
+        { h: 17, color: '#d7c3ed' },
+      ],
+      axis: [
+        { h: 67 },
+        { h: 5 },
+        { h: 38 },
+        { h: 74 },
+        { h: 91 },
+        { h: 26 },
+      ],
+    };
+    return pickUnused(`gi4_decimal_hundredths_convert_${mode}`, sets[mode] || sets.grid, item => item.h);
+  }
+
+  function decimalHundredthsFilledGrid(h, color = '#f8d48a'){
+    const grid = decimalHundredthsGrid(h, true);
+    grid.classList.add('large');
+    grid.querySelectorAll('span').forEach((cell, idx) => {
+      if (idx < h) cell.style.background = color;
+    });
+    return grid;
+  }
+
+  function makeDecimalHundredthsConvertWork(h, compact = false){
+    const tenths = Math.floor(h / 10);
+    const rest = h % 10;
+    const wrap = document.createElement('div');
+    wrap.className = `gi4-decimal-hundred-convert-work${compact ? ' compact' : ''}`;
+    const hundredSum = document.createElement('div');
+    hundredSum.className = 'hundred-sum';
+    const groupedHundredths = document.createElement('span');
+    groupedHundredths.className = 'hundred-sum-group';
+    groupedHundredths.append(
+      fractionBox('', '100', String(tenths * 10), ''),
+      document.createTextNode(' + '),
+      fractionBox('', '100', String(rest), '')
+    );
+    hundredSum.append(
+      groupedHundredths,
+      document.createTextNode(' = '),
+      fractionBox('', '100', String(h), '')
+    );
+    const tenthSum = document.createElement('div');
+    tenthSum.className = 'tenth-sum';
+    tenthSum.append(
+      fractionBox('', '10', String(tenths), ''),
+      document.createTextNode(' + '),
+      fractionBox('', '100', String(rest), '')
+    );
+    wrap.append(hundredSum, tenthSum);
+    return wrap;
+  }
+
+  function makeDecimalHundredthsConvertGridCard(){
+    const item = decimalHundredthsConvertSeed('grid');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-convert-card grid row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const visual = document.createElement('div');
+    visual.className = 'gi4-decimal-hundred-convert-visual';
+    visual.appendChild(decimalHundredthsFilledGrid(item.h, item.color));
+    const table = document.createElement('div');
+    table.className = 'gi4-decimal-hundred-convert-table';
+    const headA = Object.assign(document.createElement('div'), { textContent: 'breuk' });
+    const headB = Object.assign(document.createElement('div'), { textContent: 'kommagetal' });
+    const fraction = document.createElement('div');
+    fraction.appendChild(makeDecimalHundredthsConvertWork(item.h));
+    const decimal = document.createElement('div');
+    decimal.appendChild(lineWithSolution(decimalHundredComma(item.h), 'long'));
+    table.append(headA, headB, fraction, decimal);
+    card.append(visual, table);
+    return card;
+  }
+
+  function makeDecimalHundredthsConvertAxisCard(){
+    const item = decimalHundredthsConvertSeed('axis');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-convert-card axis row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(decimalHundredthsAxisVisual(item.h));
+    const answer = document.createElement('div');
+    answer.className = 'gi4-decimal-hundred-axis-answer';
+    answer.append(
+      lineWithSolution(String(Math.floor(item.h / 10)), 'short'),
+      document.createTextNode(' tienden en '),
+      lineWithSolution(String(item.h % 10), 'short'),
+      document.createTextNode(' honderdsten = '),
+      fractionBox('', '100', String(item.h), ''),
+      document.createTextNode(' = '),
+      lineWithSolution(decimalHundredComma(item.h), 'long')
+    );
+    card.appendChild(answer);
+    return card;
+  }
+
+  function addDecimalHundredthsConvert(extraCount, forcedMode){
+    const mode = forcedMode || $('#decimalHundredthsConvertMode')?.value || 'grid';
+    const key = `gi4_decimal_hundredths_convert_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#decimalHundredthsConvertCount')?.value, 10) || 2));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, `.gi4-decimal-hundred-convert-grid.${mode}`, `gi4-decimal-hundred-convert-grid ${mode}`);
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, mode === 'axis' ? makeDecimalHundredthsConvertAxisCard : makeDecimalHundredthsConvertGridCard);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: schrijf als breuk en kommagetal.', addCount => addDecimalHundredthsConvert(addCount || 1, mode));
+    addFractionInstructions(b, ['Welk deel van het geheel zie je?', 'Schrijf als breuk en kommagetal.']);
+    const grid = document.createElement('div');
+    grid.className = `gi4-decimal-hundred-convert-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, mode === 'axis' ? makeDecimalHundredthsConvertAxisCard : makeDecimalHundredthsConvertGridCard);
+    b.appendChild(grid);
+  }
+
+  function decimalHundredthsCompareSeeds(mode){
+    const sets = {
+      hundred: [
+        { h: 34, frac: { num: 1, den: 4 } },
+        { h: 50, frac: { num: 5, den: 10 } },
+        { h: 78, frac: { num: 3, den: 5 } },
+        { h: 62, frac: { num: 3, den: 4 } },
+        { h: 15, frac: { num: 1, den: 5 } },
+        { h: 88, frac: { num: 4, den: 5 } },
+      ],
+      reference: [
+        { h: 52, frac: { num: 8, den: 10 }, labels: ['dicht bij 0,25', '0,50', '0,75'] },
+        { h: 34, frac: { num: 3, den: 4 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'] },
+        { h: 15, frac: { num: 3, den: 5 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'] },
+        { h: 74, frac: { num: 7, den: 10 }, labels: ['dicht bij 0,25', '0,50', '0,75'] },
+        { h: 48, frac: { num: 1, den: 4 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'] },
+        { h: 83, frac: { num: 4, den: 5 }, labels: ['dicht bij 0,25', '0,50', '0,75'] },
+      ],
+      image: [
+        { type: 'grid', left: 62, right: 74 },
+        { type: 'grid', left: 38, right: 55 },
+        { type: 'grid', left: 86, right: 69 },
+        { type: 'strip', left: { num: 4, den: 5 }, right: { num: 3, den: 4 } },
+        { type: 'strip', left: { num: 2, den: 5 }, right: { num: 3, den: 5 } },
+        { type: 'strip', left: { num: 1, den: 4 }, right: { num: 2, den: 5 } },
+      ],
+    };
+    return pickUnusedOrAny(`gi4_decimal_hundredths_compare_${mode}`, sets[mode] || sets.hundred, item => item.type === 'grid'
+      ? `${item.type}-${item.left}-${item.right}`
+      : item.frac
+        ? `${item.h}-${item.frac.num}/${item.frac.den}`
+        : `${item.type}-${item.left.num}/${item.left.den}-${item.right.num}/${item.right.den}`);
+  }
+
+  function decimalCompareSymbolBox(a, b){
+    const box = document.createElement('span');
+    box.className = 'gi4-symbol-box';
+    box.appendChild(sol(compareSymbol(a, b)));
+    return box;
+  }
+
+  function decimalCompareFractionValue(frac){
+    return Math.round((frac.num / frac.den) * 100);
+  }
+
+  function decimalCompareConversionArrow(dir){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', `decimal-conversion-arrow ${dir}`);
+    svg.setAttribute('viewBox', '0 0 118 34');
+    svg.innerHTML = `
+      <defs>
+        <marker id="gi4DecimalCompareArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z"></path>
+        </marker>
+      </defs>
+      <path d="${dir === 'top' ? 'M 12 29 C 38 3, 80 3, 106 29' : 'M 12 5 C 38 31, 80 31, 106 5'}" marker-end="url(#gi4DecimalCompareArrow)"></path>
+    `;
+    return svg;
+  }
+
+  function makeDecimalHundredthsHundredCard(){
+    const item = decimalHundredthsCompareSeeds('hundred');
+    if (!item) return null;
+    const h = item.h;
+    const frac = item.frac;
+    const factor = 100 / frac.den;
+    const fracHundred = frac.num * factor;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-compare-card hundred row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-compare-top';
+    top.append(decimalHundredComma(h), decimalCompareSymbolBox(h, fracHundred), fractionBox(frac.num, frac.den));
+
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-hundred-compare-work';
+    const dec = document.createElement('div');
+    dec.className = 'decimal-side';
+    dec.append(
+      Object.assign(document.createElement('span'), { className: 'down-arrow' }),
+      fractionBox('', '100', String(h), '')
+    );
+    const fracWork = document.createElement('div');
+    fracWork.className = 'fraction-side';
+    const opTop = document.createElement('div');
+    opTop.className = 'op-label top';
+    opTop.append('x ', lineWithSolution(String(factor), 'short'));
+    const opBottom = document.createElement('div');
+    opBottom.className = 'op-label bottom';
+    opBottom.append('x ', lineWithSolution(String(factor), 'short'));
+    const eq = document.createElement('div');
+    eq.className = 'fraction-conversion';
+    eq.append(fractionBox(frac.num, frac.den), ' = ', fractionBox('', '100', String(fracHundred), ''));
+    fracWork.append(opTop, decimalCompareConversionArrow('top'), eq, decimalCompareConversionArrow('bottom'), opBottom);
+    work.append(dec, fracWork);
+    card.append(top, work);
+    return card;
+  }
+
+  function decimalReferenceText(value, labels){
+    if (labels?.some(label => label.includes('0,25'))) {
+      const refs = [25, 50, 75];
+      const nearest = refs.reduce((best, ref) => Math.abs(value - ref) < Math.abs(value - best) ? ref : best, refs[0]);
+      return nearest === 25 ? 'dicht bij 0,25' : nearest === 50 ? 'dicht bij 0,50' : 'dicht bij 0,75';
+    }
+    if (value < 50) return 'minder dan de helft';
+    if (value === 50) return 'juist de helft';
+    return 'meer dan de helft';
+  }
+
+  function makeDecimalReferenceBox(labels, activeText){
+    const box = document.createElement('div');
+    box.className = 'gi4-decimal-reference-choice';
+    labels.forEach((label, idx) => {
+      if (idx) box.appendChild(document.createTextNode(' / '));
+      const part = document.createElement('span');
+      part.textContent = label;
+      if (label === activeText || (activeText === 'dicht bij 0,50' && label === '0,50') || (activeText === 'dicht bij 0,75' && label === '0,75')) {
+        part.className = 'solution-highlight';
+      }
+      box.appendChild(part);
+    });
+    return box;
+  }
+
+  function makeDecimalHundredthsReferenceAxis(){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-reference-axis';
+    [0, 25, 50, 75, 100].forEach(pos => {
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.style.left = `${pos}%`;
+      label.textContent = pos === 0 ? '0' : pos === 100 ? '1' : decimalHundredComma(pos);
+      wrap.appendChild(label);
+    });
+    for (let i = 0; i <= 16; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 4 === 0 ? ' main' : ''}`;
+      tick.style.left = `${i * 6.25}%`;
+      wrap.appendChild(tick);
+    }
+    return wrap;
+  }
+
+  function makeDecimalHundredthsReferenceCard(){
+    const item = decimalHundredthsCompareSeeds('reference');
+    if (!item) return null;
+    const fracValue = decimalCompareFractionValue(item.frac);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-compare-card reference row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-compare-top';
+    top.append(decimalHundredComma(item.h), decimalCompareSymbolBox(item.h, fracValue), fractionBox(item.frac.num, item.frac.den));
+    const options = document.createElement('div');
+    options.className = 'gi4-decimal-reference-options';
+    [item.h, fracValue].forEach(value => {
+      const side = document.createElement('div');
+      side.className = 'gi4-decimal-reference-side';
+      side.appendChild(Object.assign(document.createElement('span'), { className: 'down-arrow' }));
+      const active = decimalReferenceText(value, item.labels);
+      const labels = item.labels?.some(label => label.includes('0,25'))
+        ? ['dicht bij 0,25', '0,50', '0,75']
+        : ['minder dan de helft', 'juist de helft', 'meer dan de helft'];
+      side.appendChild(makeDecimalReferenceBox(labels, active));
+      options.appendChild(side);
+    });
+    card.append(top, options);
+    return card;
+  }
+
+  function decimalHundredthsCompareStrip(frac){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-image-strip';
+    wrap.style.gridTemplateColumns = `repeat(${frac.den}, 1fr)`;
+    for (let i = 0; i < frac.den; i++) {
+      const cell = document.createElement('span');
+      if (i < frac.num) cell.className = 'filled';
+      wrap.appendChild(cell);
+    }
+    return wrap;
+  }
+
+  function makeDecimalImageAnswer(value){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-image-answer';
+    wrap.append(fractionBox('', '100', String(value), ''), document.createTextNode(' = '), lineWithSolution(decimalHundredComma(value), 'short'));
+    return wrap;
+  }
+
+  function makeDecimalImageStripAnswer(frac){
+    const factor = 100 / frac.den;
+    const value = frac.num * factor;
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-image-strip-answer';
+    const conversion = document.createElement('div');
+    conversion.className = 'strip-conversion';
+    const top = document.createElement('span');
+    top.className = 'op-label top';
+    top.append('x ', lineWithSolution(String(factor), 'short'));
+    const bottom = document.createElement('span');
+    bottom.className = 'op-label bottom';
+    bottom.append('x ', lineWithSolution(String(factor), 'short'));
+    const arrows = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    arrows.setAttribute('class', 'strip-arrow-svg');
+    arrows.setAttribute('viewBox', '0 0 150 130');
+    arrows.innerHTML = `
+      <defs>
+        <marker id="gi4StripCompareArrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z"></path>
+        </marker>
+      </defs>
+      <path class="top-arrow" d="M 34 18 C 60 2, 90 2, 116 18" marker-end="url(#gi4StripCompareArrow)"></path>
+      <path class="bottom-arrow" d="M 34 105 C 60 121, 90 121, 116 105" marker-end="url(#gi4StripCompareArrow)"></path>
+    `;
+    conversion.append(
+      fractionBox('', String(frac.den), String(frac.num), ''),
+      document.createTextNode(' = '),
+      fractionBox('', '100', String(value), ''),
+      document.createTextNode(' = '),
+      lineWithSolution(decimalHundredComma(value), 'short'),
+      arrows,
+      top,
+      bottom
+    );
+    wrap.appendChild(conversion);
+    return wrap;
+  }
+
+  function makeDecimalHundredthsImageCard(){
+    const item = decimalHundredthsCompareSeeds('image');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = `gi4-decimal-hundred-image-card ${item.type} row-delete-wrap`;
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-image-top';
+    const leftValue = item.type === 'grid' ? item.left : decimalCompareFractionValue(item.left);
+    const rightValue = item.type === 'grid' ? item.right : decimalCompareFractionValue(item.right);
+    const left = document.createElement('div');
+    left.className = 'image-side';
+    const right = document.createElement('div');
+    right.className = 'image-side';
+    if (item.type === 'grid') {
+      const leftVisual = decimalHundredthsFilledGrid(item.left, '#f8d48a');
+      const rightVisual = decimalHundredthsFilledGrid(item.right, '#f8d48a');
+      leftVisual.classList.add('image-compare');
+      rightVisual.classList.add('image-compare');
+      left.append(leftVisual, makeDecimalImageAnswer(item.left));
+      right.append(rightVisual, makeDecimalImageAnswer(item.right));
+    } else {
+      left.append(decimalHundredthsCompareStrip(item.left), makeDecimalImageStripAnswer(item.left));
+      right.append(decimalHundredthsCompareStrip(item.right), makeDecimalImageStripAnswer(item.right));
+    }
+    top.append(left, decimalCompareSymbolBox(leftValue, rightValue), right);
+    card.appendChild(top);
+    return card;
+  }
+
+  function addDecimalHundredthsCompare(extraCount, forcedMode){
+    const mode = forcedMode || $('#decimalHundredthsCompareMode')?.value || 'hundred';
+    const key = `gi4_decimal_hundredths_compare_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#decimalHundredthsCompareCount')?.value, 10) || 3));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, `.gi4-decimal-hundred-compare-grid.${mode}`, `gi4-decimal-hundred-compare-grid ${mode}`);
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, mode === 'image' ? makeDecimalHundredthsImageCard : mode === 'reference' ? makeDecimalHundredthsReferenceCard : makeDecimalHundredthsHundredCard);
+        return;
+      }
+    }
+    const title = mode === 'image'
+      ? 'Kommagetallen tot 1: vergelijk met afbeeldingen.'
+      : mode === 'reference'
+        ? 'Kommagetallen tot 1: vergelijk met referentiepunten.'
+        : 'Kommagetallen tot 1: zet op noemer 100 en vergelijk.';
+    const b = block(key, title, addCount => addDecimalHundredthsCompare(addCount || 1, mode));
+    addFractionInstructions(b, mode === 'image'
+      ? ['Schrijf de breuk.', 'Schrijf het kommagetal.', 'Vergelijk. Schrijf <, > of =.']
+      : mode === 'reference'
+        ? ['Vergelijk de hoeveelheden met de referentiepunten.', 'Markeer wat past.', 'Schrijf <, > of =.']
+        : ['Zet beide hoeveelheden op <strong>noemer 100</strong>.', 'Vergelijk daarna de hoeveelheden met elkaar.', 'Schrijf <, > of =.']
+    );
+    if (mode === 'reference') b.appendChild(makeDecimalHundredthsReferenceAxis());
+    const grid = document.createElement('div');
+    grid.className = `gi4-decimal-hundred-compare-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, mode === 'image' ? makeDecimalHundredthsImageCard : mode === 'reference' ? makeDecimalHundredthsReferenceCard : makeDecimalHundredthsHundredCard);
+    b.appendChild(grid);
+  }
+
+  function decimalHundredthsAxisConnectSeed(){
+    const sets = [
+      { hidden: [4, 5, 6, 7, 8], cards: [35, 48, 73, 65, 87] },
+      { hidden: [1, 3, 5, 6, 8], cards: [12, 29, 54, 67, 83] },
+      { hidden: [2, 4, 5, 7, 9], cards: [18, 36, 44, 71, 92] },
+      { hidden: [1, 2, 6, 8, 9], cards: [7, 24, 58, 76, 91] },
+    ];
+    return pickUnusedOrAny('gi4_decimal_hundredths_axis_connect', sets, set => `${set.hidden.join('-')}-${set.cards.join('-')}`);
+  }
+
+  function makeDecimalHundredthsAxisConnectCard(){
+    const seed = decimalHundredthsAxisConnectSeed();
+    if (!seed) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-axis-connect row-delete-wrap';
+    card.dataset.axisStart = '0';
+    card.dataset.axisRange = '100';
+    card.appendChild(rowDel(card));
+
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-axis-connect-labels';
+    for (let i = 0; i <= 10; i++) {
+      const label = document.createElement('div');
+      label.className = 'gi4-decimal-axis-connect-label';
+      label.style.left = `${i * 10}%`;
+      if (seed.hidden.includes(i)) {
+        label.appendChild(lineWithSolution(decimalComma(i / 10), 'short'));
+        label.classList.add('empty');
+      } else {
+        label.textContent = i === 0 ? '0' : i === 10 ? '1' : decimalComma(i / 10);
+      }
+      top.appendChild(label);
+    }
+
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-axis-connect-axis';
+    for (let i = 0; i <= 100; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' tenth' : ''}`;
+      tick.style.left = `${i}%`;
+      tick.dataset.value = String(i);
+      axis.appendChild(tick);
+    }
+
+    const cards = document.createElement('div');
+    cards.className = 'gi4-decimal-axis-connect-cards';
+    [...seed.cards].sort(() => Math.random() - .5).forEach(value => {
+      const tile = document.createElement('div');
+      tile.className = 'gi4-decimal-axis-connect-card';
+      tile.dataset.value = String(value);
+      const dot = document.createElement('span');
+      dot.className = 'gi4-connect-dot top';
+      tile.append(dot, document.createTextNode(decimalHundredComma(value)));
+      cards.appendChild(tile);
+    });
+    card.append(top, axis, cards);
+    return card;
+  }
+
+  function addDecimalHundredthsAxisConnect(extraCount){
+    const key = 'gi4_decimal_hundredths_axis_connect';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalHundredthsAxisConnectCount')?.value, 10) || 1));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-decimal-axis-connect-grid', 'gi4-decimal-axis-connect-grid');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalHundredthsAxisConnectCard);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: vul aan op de getallenas.', addDecimalHundredthsAxisConnect);
+    addFractionInstructions(b, ['Welke getallen ontbreken? Vul aan.', 'Verbind de kaartjes met de juiste plaats op de getallenas.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-axis-connect-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalHundredthsAxisConnectCard);
+    b.appendChild(grid);
+  }
+
+  function decimalHundredthsJumpSeed(){
+    const rows = [
+      { step: 1, start: 56, length: 11, shown: [0, 4, 5, 6, 8] },
+      { step: 2, start: 22, length: 6, shown: [3, 4] },
+      { step: 5, start: 25, length: 6, shown: [2, 3] },
+      { step: -1, start: 84, length: 9, shown: [0, 3, 5] },
+      { step: -2, start: 70, length: 7, shown: [1, 3, 6] },
+      { step: 5, start: 5, length: 7, shown: [1, 4] },
+      { step: 2, start: 64, length: 7, shown: [0, 2, 5] },
+      { step: -5, start: 95, length: 7, shown: [0, 3, 5] },
+    ];
+    return pickUnusedOrAny('gi4_decimal_hundredths_jumps', rows, row => `${row.step}-${row.start}-${row.length}`);
+  }
+
+  function makeDecimalHundredthsJumpRow(){
+    const data = decimalHundredthsJumpSeed();
+    if (!data) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-jump-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const tag = document.createElement('div');
+    tag.className = 'gi4-decimal-hundred-jump-tag';
+    tag.textContent = `Maak sprongen van ${decimalHundredComma(Math.abs(data.step))}.`;
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-hundred-jump-row';
+    for (let i = 0; i < data.length; i++) {
+      const value = data.start + i * data.step;
+      const cell = document.createElement('span');
+      if (data.shown.includes(i)) cell.textContent = decimalHundredComma(value);
+      else cell.appendChild(lineWithSolution(decimalHundredComma(value), 'short'));
+      row.appendChild(cell);
+    }
+    card.append(tag, row);
+    return card;
+  }
+
+  function addDecimalHundredthsJumps(extraCount){
+    const key = 'gi4_decimal_hundredths_jumps';
+    const count = extraCount || Math.max(1, Math.min(8, parseInt($('#decimalHundredthsJumpsCount')?.value, 10) || 3));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-decimal-hundred-jumps', 'gi4-decimal-hundred-jumps');
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalHundredthsJumpRow);
+        return;
+      }
+    }
+    const b = block(key, 'Kommagetallen tot 1: tel verder of tel terug.', addDecimalHundredthsJumps);
+    addFractionInstructions(b, ['Tel verder of tel terug.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-hundred-jumps';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalHundredthsJumpRow);
+    b.appendChild(grid);
+  }
+
   function addDecimalIntro(){
     const b = block('gi4_decimal_intro', 'Kommagetallen: tienden onthouden.', null);
     const card = document.createElement('div');
@@ -4893,6 +6232,1050 @@
       svg.appendChild(svgLine(left.x, left.y, right.x, right.y, grid, .65));
     }
     return svg;
+  }
+
+  function decimalMixedRodSvg(compact = false){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-mixed-rod-svg');
+    if (compact) svg.classList.add('compact');
+    svg.setAttribute('viewBox', '0 0 112 32');
+    svg.setAttribute('aria-hidden', 'true');
+    const A = { x: 8, y: 17 }, B = { x: 91, y: 17 }, C = { x: 103, y: 10 }, D = { x: 20, y: 10 };
+    const A2 = { x: 8, y: 24 }, B2 = { x: 91, y: 24 }, C2 = { x: 103, y: 17 };
+    const fill = '#ffd83d';
+    const side = '#caa100';
+    const stroke = '#8a6a00';
+    const grid = '#9d7a00';
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e5b900', stroke));
+    svg.appendChild(svgPolygon(`${B.x},${B.y} ${C.x},${C.y} ${C2.x},${C2.y} ${B2.x},${B2.y}`, side, stroke));
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}`, fill, stroke));
+    const lerp = (p, q, t) => ({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
+    for (let i = 1; i < 10; i++) {
+      const t = i / 10;
+      const top = lerp(D, C, t);
+      const bot = lerp(A, B, t);
+      svg.appendChild(svgLine(top.x, top.y, bot.x, bot.y, grid, .65));
+    }
+    return svg;
+  }
+
+  function decimalMixedHundredthsLabel(totalHundredths){
+    const whole = Math.floor(totalHundredths / 100);
+    const rest = totalHundredths % 100;
+    const tenths = Math.floor(rest / 10);
+    const hundredths = rest % 10;
+    return {
+      whole,
+      tenths,
+      hundredths,
+      decimal: Number(totalHundredths / 100).toFixed(2).replace('.', ','),
+    };
+  }
+
+  function decimalMixedHundredthsSeed(namespace){
+    return pickUnusedOrAny(namespace, [
+      { whole: 1, tenths: 3, hundredths: 2 },
+      { whole: 1, tenths: 5, hundredths: 8 },
+      { whole: 1, tenths: 7, hundredths: 4 },
+      { whole: 1, tenths: 9, hundredths: 6 },
+      { whole: 2, tenths: 1, hundredths: 5 },
+      { whole: 2, tenths: 4, hundredths: 3 },
+      { whole: 3, tenths: 0, hundredths: 7 },
+      { whole: 4, tenths: 6, hundredths: 8 },
+    ], item => `${item.whole}-${item.tenths}-${item.hundredths}`);
+  }
+
+  function decimalMixedHundredthsAxisSeed(){
+    return pickUnusedOrAny('gi4_decimal_mixed_hundred_axis', [
+      { whole: 1, tenths: 2, hundredths: 8 },
+      { whole: 1, tenths: 4, hundredths: 6 },
+      { whole: 1, tenths: 5, hundredths: 3 },
+      { whole: 1, tenths: 6, hundredths: 9 },
+      { whole: 1, tenths: 7, hundredths: 4 },
+      { whole: 1, tenths: 8, hundredths: 1 },
+      { whole: 1, tenths: 9, hundredths: 5 },
+    ], item => `${item.whole}-${item.tenths}-${item.hundredths}`);
+  }
+
+  function decimalMixedHundredthsStripSeed(){
+    return pickUnusedOrAny('gi4_decimal_mixed_hundred_strip_table', [
+      { whole: 2, tenths: 7, hundredths: 3 },
+      { whole: 3, tenths: 4, hundredths: 5 },
+      { whole: 4, tenths: 8, hundredths: 2 },
+      { whole: 5, tenths: 1, hundredths: 9 },
+      { whole: 6, tenths: 3, hundredths: 7 },
+      { whole: 7, tenths: 6, hundredths: 8 },
+      { whole: 8, tenths: 2, hundredths: 4 },
+    ], item => `${item.whole}-${item.tenths}-${item.hundredths}`);
+  }
+
+  function decimalMixedHundredthsTotal(item){
+    return item.whole * 100 + item.tenths * 10 + item.hundredths;
+  }
+
+  function decimalMixedHundredthsModel(item){
+    const model = document.createElement('div');
+    model.className = 'gi4-decimal-mixed-hundred-model';
+    const cubes = document.createElement('div');
+    cubes.className = 'model-cubes';
+    for (let i = 0; i < item.whole; i++) cubes.appendChild(decimalMixedCubeSvg(true));
+    const plates = document.createElement('div');
+    plates.className = 'model-plates';
+    for (let i = 0; i < item.tenths; i++) plates.appendChild(decimalMixedPlateSvg(true));
+    const rods = document.createElement('div');
+    rods.className = 'model-rods';
+    for (let i = 0; i < item.hundredths; i++) rods.appendChild(decimalMixedRodSvg(true));
+    model.append(cubes, plates, rods);
+    return model;
+  }
+
+  function decimalMixedHundredthsSentences(item){
+    const total = decimalMixedHundredthsTotal(item);
+    const { decimal } = decimalMixedHundredthsLabel(total);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-hundred-text';
+    const row1 = document.createElement('div');
+    row1.append('Dit is ', lineWithSolution(String(item.whole), 'tiny'), ' geheel, ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden en ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten.');
+    const row2 = document.createElement('div');
+    row2.append('Samen zijn dat ', lineWithSolution(String(total), 'short'), ' honderdsten.');
+    const row3 = document.createElement('div');
+    row3.className = 'equation';
+    row3.append(fractionBox('', '100', String(total), ''), document.createTextNode(' = '), lineWithSolution(String(item.whole), 'tiny'), fractionBox('', '100', String(item.tenths * 10 + item.hundredths), ''), document.createTextNode(' = '), lineWithSolution(decimal, 'short'));
+    wrap.append(row1, row2, row3);
+    return wrap;
+  }
+
+  function makeDecimalMixedHundredthsMaterialsCard(){
+    const item = decimalMixedHundredthsSeed('gi4_decimal_mixed_hundred_materials');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-hundred-card materials row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(decimalMixedHundredthsModel(item), decimalMixedHundredthsSentences(item));
+    return card;
+  }
+
+  function decimalMixedHundredthsAxis(item){
+    const total = decimalMixedHundredthsTotal(item);
+    const max = Math.max(2, Math.ceil(total / 100));
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-hundred-axis';
+    wrap.style.setProperty('--mixed-h-max', String(max));
+    const axis = document.createElement('div');
+    axis.className = 'axis';
+    axis.appendChild(Object.assign(document.createElement('div'), { className: 'axis-line' }));
+    for (let i = 0; i <= max * 10; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i / (max * 10) * 100}%`;
+      axis.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.style.left = `${i / (max * 10) * 100}%`;
+        label.textContent = String(i / 10);
+        axis.appendChild(label);
+      }
+    }
+    const marker = document.createElement('span');
+    marker.className = 'marker';
+    marker.style.left = `${total / (max * 100) * 100}%`;
+    axis.appendChild(marker);
+    const topBracket = document.createElement('span');
+    topBracket.className = 'top-bracket';
+    topBracket.style.left = '0%';
+    topBracket.style.width = `${total / (max * 100) * 100}%`;
+    axis.appendChild(topBracket);
+
+    const makeRuler = (kind, width, showMarker = false) => {
+      const ruler = document.createElement('div');
+      ruler.className = `ruler ${kind}`;
+      const rulerBracket = document.createElement('span');
+      rulerBracket.className = 'ruler-bracket';
+      rulerBracket.style.left = '0%';
+      rulerBracket.style.width = `${width}%`;
+      ruler.appendChild(rulerBracket);
+      for (let i = 0; i <= 100; i++) {
+        const tick = document.createElement('span');
+        tick.className = `ruler-tick${i % 10 === 0 ? ' major' : ''}`;
+        tick.style.left = `${i}%`;
+        ruler.appendChild(tick);
+      }
+      if (showMarker) {
+        const rulerMarker = document.createElement('span');
+        rulerMarker.className = 'ruler-marker';
+        rulerMarker.style.left = `${width}%`;
+        ruler.appendChild(rulerMarker);
+      }
+      return ruler;
+    };
+    const rulers = document.createElement('div');
+    rulers.className = 'rulers';
+    rulers.append(makeRuler('whole', 100), makeRuler('rest', total % 100, true));
+    wrap.append(axis, rulers);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsStrip(item, show = true){
+    const total = decimalMixedHundredthsTotal(item);
+    const value = total / 100;
+    const start = Math.max(0, item.whole - 1);
+    const end = start + 2;
+    const position = (value - start) / (end - start) * 100;
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-hundred-strip';
+    const labels = document.createElement('div');
+    labels.className = 'strip-labels';
+    for (let i = start; i <= end; i++) {
+      const label = document.createElement('span');
+      label.style.left = `${(i - start) / (end - start) * 100}%`;
+      label.textContent = String(i);
+      labels.appendChild(label);
+    }
+    const fill = document.createElement('div');
+    fill.className = 'strip-fill';
+    fill.style.width = `${position}%`;
+    if (!show) fill.classList.add('solution-fill');
+    const axis = document.createElement('div');
+    axis.className = 'strip-axis';
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i / 20 * 100}%`;
+      axis.appendChild(tick);
+    }
+    const marker = document.createElement('span');
+    marker.className = 'strip-marker';
+    marker.style.left = `${position}%`;
+    const lens = document.createElement('span');
+    lens.className = 'lens-detail';
+    const lensFill = document.createElement('span');
+    lensFill.className = 'lens-fill';
+    lensFill.style.width = `${item.hundredths * 10}%`;
+    lens.appendChild(lensFill);
+    for (let i = 0; i < 10; i++) {
+      const cell = document.createElement('span');
+      cell.className = `lens-cell${i < item.hundredths ? ' filled' : ''}`;
+      cell.style.left = `${i * 10}%`;
+      lens.appendChild(cell);
+    }
+    for (let i = 0; i <= 10; i++) {
+      const tick = document.createElement('span');
+      tick.className = `lens-tick${i === item.hundredths ? ' red' : ''}`;
+      tick.style.left = `${i * 10}%`;
+      lens.appendChild(tick);
+    }
+    marker.appendChild(lens);
+    axis.append(marker, Object.assign(document.createElement('span'), { className: 'axis-line' }));
+    wrap.append(labels, fill, axis);
+    return wrap;
+  }
+
+  function makeDecimalMixedHundredthsStripTableCard(example = false){
+    const item = decimalMixedHundredthsStripSeed();
+    if (!item) return null;
+    const total = decimalMixedHundredthsTotal(item);
+    const rest = item.tenths * 10 + item.hundredths;
+    const { decimal } = decimalMixedHundredthsLabel(total);
+    const card = document.createElement('div');
+    card.className = `gi4-decimal-mixed-hundred-strip-card row-delete-wrap${example ? ' example' : ''}`;
+    card.appendChild(rowDel(card));
+    const title = document.createElement('div');
+    title.className = 'strip-title';
+    title.textContent = `${item.whole} geheel en ${item.tenths} tienden en ${item.hundredths} honderdsten van het geheel`;
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-mixed-hundred-strip-table';
+    table.innerHTML = '<thead><tr><th>Dit is ...</th><th>gemengd getal</th><th>onechte breuk</th><th>kommagetal</th></tr></thead>';
+    const row = document.createElement('tr');
+    const first = document.createElement('td');
+    if (example) first.append(document.createTextNode(`${item.whole} + `));
+    else first.append(lineWithSolution(String(item.whole), 'tiny'), document.createTextNode(' + '));
+    first.append(
+      example ? fractionBox(item.tenths, 10) : fractionBox('', '10', String(item.tenths), ''),
+      document.createTextNode(' + '),
+      example ? fractionBox(item.hundredths, 100) : fractionBox('', '100', String(item.hundredths), '')
+    );
+    const mixed = document.createElement('td');
+    mixed.append(example ? document.createTextNode(`${item.whole} `) : lineWithSolution(String(item.whole), 'tiny'), example ? fractionBox(rest, 100) : fractionBox('', '100', String(rest), ''));
+    const improper = document.createElement('td');
+    improper.appendChild(example ? fractionBox(total, 100) : fractionBox('', '100', String(total), ''));
+    const dec = document.createElement('td');
+    dec.appendChild(example ? document.createTextNode(decimal) : lineWithSolution(decimal, 'short'));
+    row.append(first, mixed, improper, dec);
+    table.appendChild(row);
+    card.append(title, decimalMixedHundredthsStrip(item, example), table);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsAxisCard(){
+    const item = decimalMixedHundredthsAxisSeed();
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-hundred-card axis-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(decimalMixedHundredthsAxis(item), decimalMixedHundredthsSentences(item));
+    return card;
+  }
+
+  function decimalHundredPlaceWorkSvg(item){
+    const places = ['E', 't', 'h'];
+    const values = {
+      E: { count: item.whole, value: String(item.whole) },
+      t: { count: item.tenths, value: decimalComma(item.tenths / 10) },
+      h: { count: item.hundredths, value: Number(item.hundredths / 100).toFixed(2).replace('.', ',') },
+    };
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-place-work-svg');
+    svg.setAttribute('viewBox', '0 0 360 175');
+    svg.setAttribute('aria-hidden', 'true');
+    const miniX = 160;
+    const miniY = 8;
+    const cellW = 50;
+    const commaW = 12;
+    const miniH = 34;
+    const centers = {};
+    places.forEach((place, idx) => {
+      const x = miniX + idx * cellW + (idx > 0 ? commaW : 0);
+      centers[place] = x + cellW / 2;
+      svg.appendChild(svgRect(x, miniY, cellW, miniH, place === 'E' ? '#ffd51c' : '#ffe69a', '#7a7f86'));
+    });
+    const commaX = miniX + cellW;
+    svg.appendChild(svgRect(commaX, miniY, commaW, miniH, '#c8c8c8', '#7a7f86'));
+    svg.appendChild(svgText(',', commaX + commaW / 2, miniY + 22, { anchor: 'middle', size: 18, weight: 900 }));
+    const rows = { E: 78, t: 116, h: 154 };
+    const labelX = 60;
+    const leftX1 = 0;
+    const leftX2 = 48;
+    const rightX1 = 96;
+    const rightX2 = 156;
+    places.forEach(place => {
+      const y = rows[place];
+      const bendY = y - 13;
+      const end = rightX2 + 8;
+      svg.appendChild(svgPath(`M${centers[place]} ${miniY + miniH} V${bendY} H${end}`, 'none', '#555', 1.4));
+      svg.appendChild(svgPath(`M${end} ${bendY} l8 -4 v8 z`, '#555', '#555', 1));
+      svg.appendChild(svgLine(leftX1, y, leftX2, y, '#cbd5e1', 1.3));
+      svg.appendChild(svgText(`${place} =`, labelX, y + 5, { size: 18, weight: 700 }));
+      svg.appendChild(svgLine(rightX1, y, rightX2, y, '#cbd5e1', 1.3));
+      const leftSol = svgText(String(values[place].count), (leftX1 + leftX2) / 2, y - 4, { size: 13, anchor: 'middle', fill: '#0284c7' });
+      const rightSol = svgText(values[place].value, (rightX1 + rightX2) / 2, y - 4, { size: 13, anchor: 'middle', fill: '#0284c7' });
+      leftSol.classList.add('solution-only');
+      rightSol.classList.add('solution-only');
+      svg.append(leftSol, rightSol);
+    });
+    return svg;
+  }
+
+  function makeDecimalMixedHundredthsPlaceCard(){
+    const item = decimalMixedHundredthsSeed('gi4_decimal_mixed_hundred_place');
+    if (!item) return null;
+    const total = decimalMixedHundredthsTotal(item);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-hundred-place-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const board = document.createElement('div');
+    board.className = 'gi4-decimal-place-board cols-3 hundredths';
+    [
+      ['E', 'ones', item.whole, '1'],
+      ['t', 'tenths', item.tenths, '0,1'],
+      ['h', 'hundredths', item.hundredths, '0,01'],
+    ].forEach(([label, cls, count, tokenText]) => {
+      const col = document.createElement('div');
+      col.className = `place ${cls}`;
+      col.innerHTML = `<strong>${label}</strong>`;
+      for (let i = 0; i < count; i++) {
+        const token = document.createElement('span');
+        token.className = 'gi4-decimal-place-token';
+        token.textContent = tokenText;
+        col.appendChild(token);
+      }
+      board.appendChild(col);
+    });
+    const sentence = document.createElement('div');
+    sentence.className = 'gi4-decimal-place-counts';
+    sentence.append(lineWithSolution(String(item.whole), 'tiny'), ' eenheden, ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden en ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten');
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-place-work hundredths';
+    work.appendChild(decimalHundredPlaceWorkSvg(item));
+    const decimal = document.createElement('div');
+    decimal.className = 'gi4-decimal-place-decimal';
+    decimal.append('Dit is ', lineWithSolution(decimalMixedHundredthsLabel(total).decimal, 'short'));
+    card.append(board, sentence, work, decimal);
+    return card;
+  }
+
+  function decimalMixedHundredthsTableVisual(item){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-hundred-table-visual';
+    wrap.appendChild(decimalMixedHundredthsModel(item));
+    const sum = document.createElement('div');
+    sum.className = 'visual-sum';
+    const rest = item.tenths * 10 + item.hundredths;
+    sum.append(
+      markSolution(sol(String(item.whole)), 'answer-pill'),
+      document.createTextNode(' + '),
+      fractionBox('', '10', String(item.tenths), ''),
+      document.createTextNode(' = '),
+      fractionBox('', '100', String(item.tenths * 10), ''),
+      document.createTextNode(' + '),
+      fractionBox('', '100', String(item.hundredths), '')
+    );
+    sum.dataset.rest = String(rest);
+    wrap.appendChild(sum);
+    return wrap;
+  }
+
+  function makeDecimalMixedHundredthsTableRow(){
+    const item = decimalMixedHundredthsSeed('gi4_decimal_mixed_hundred_table');
+    if (!item) return null;
+    const total = decimalMixedHundredthsTotal(item);
+    const rest = item.tenths * 10 + item.hundredths;
+    const tr = document.createElement('tr');
+    tr.className = 'row-delete-wrap';
+    const visual = document.createElement('td');
+    visual.append(rowDel(tr), decimalMixedHundredthsTableVisual(item));
+    const mixed = document.createElement('td');
+    mixed.append(lineWithSolution(String(item.whole), 'tiny'), fractionBox('', '100', String(rest), ''));
+    const improper = document.createElement('td');
+    improper.appendChild(fractionBox('', '100', String(total), ''));
+    const decimal = document.createElement('td');
+    decimal.appendChild(lineWithSolution(decimalMixedHundredthsLabel(total).decimal, 'short'));
+    tr.append(visual, mixed, improper, decimal);
+    return tr;
+  }
+
+  function appendDecimalMixedHundredthsTableRows(body, count){
+    for (let i = 0; i < count; i++) {
+      const row = makeDecimalMixedHundredthsTableRow();
+      if (row) body.appendChild(row);
+    }
+  }
+
+  function makeDecimalMixedHundredthsTable(rowCount = 2){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-hundred-table-card row-delete-wrap';
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-mixed-hundred-table';
+    table.innerHTML = '<thead><tr><th></th><th>gemengd<br>getal</th><th>onechte<br>breuk</th><th>komma-<br>getal</th></tr></thead>';
+    const body = document.createElement('tbody');
+    appendDecimalMixedHundredthsTableRows(body, rowCount);
+    table.appendChild(body);
+    card.appendChild(table);
+    return body.children.length ? card : null;
+  }
+
+  function decimalMixedHundredthsWritePromptPool(){
+    const mixedHundredthsPrompt = (whole, numerator) => {
+      const span = document.createElement('span');
+      span.append(String(whole), ' ', fractionBox(numerator, 100));
+      return span;
+    };
+    return [
+      [fractionBox(15, 100), '0,15'],
+      [mixedHundredthsPrompt(1, 37), '1,37'],
+      [fractionBox(264, 100), '2,64'],
+      ['3 E 4 t 2 h', '3,42'],
+      ['6 E 1 t 3 h', '6,13'],
+      ['8 E 2 h', '8,02'],
+      ['704 honderdsten', '7,04'],
+      ['5 T 2 E 9 t 3 h', '52,93'],
+      ['6 tienden 8 honderdsten', '0,68'],
+      ['3 H 2 E 4 t 1 h', '302,41'],
+      ['2 E 7 h', '2,07'],
+      ['9 E 8 t 5 h', '9,85'],
+    ];
+  }
+
+  function makeDecimalMixedHundredthsWriteRow(item){
+    const row = document.createElement('div');
+    row.className = 'gi4-decimal-write-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const [prompt, answer] = item;
+    const promptEl = document.createElement('span');
+    promptEl.className = 'gi4-decimal-write-prompt';
+    if (prompt instanceof Node) promptEl.appendChild(prompt);
+    else promptEl.textContent = prompt;
+    row.append(
+      promptEl,
+      Object.assign(document.createElement('span'), { className: 'gi4-decimal-write-equals', textContent: '=' }),
+      lineWithSolution(answer, 'short')
+    );
+    return row;
+  }
+
+  function appendDecimalMixedHundredthsWriteRows(list, amount){
+    const used = Array.from(list.querySelectorAll('.gi4-decimal-write-row'))
+      .map(row => row.dataset.promptKey)
+      .filter(Boolean);
+    const pool = decimalMixedHundredthsWritePromptPool().map(item => ({
+      item,
+      key: signaturePart(item[0] instanceof Node ? item[0].textContent : item[0]),
+    }));
+    for (let i = 0; i < amount; i++) {
+      if (used.length === 6 && !list.querySelector('.gi4-decimal-write-group-line')) {
+        const sep = document.createElement('div');
+        sep.className = 'gi4-decimal-write-group-line';
+        list.appendChild(sep);
+      }
+      const next = pool.find(entry => !used.includes(entry.key)) || pick(pool);
+      const row = makeDecimalMixedHundredthsWriteRow(next.item);
+      row.dataset.promptKey = next.key;
+      list.appendChild(row);
+      used.push(next.key);
+    }
+  }
+
+  function decimalHundredDigitValueSvg(value, example = false){
+    const raw = String(value);
+    const hasTens = raw.length > 3;
+    const digits = raw.padStart(hasTens ? 4 : 3, '0').split('').map(Number);
+    const labels = hasTens ? ['T', 'E', 't', 'h'] : ['E', 't', 'h'];
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-hundred-value-svg');
+    svg.setAttribute('viewBox', `0 0 ${hasTens ? 350 : 320} ${hasTens ? 270 : 230}`);
+    svg.setAttribute('aria-hidden', 'true');
+    const digitX = hasTens ? [212, 248, 288, 328] : [188, 238, 278];
+    const topY = 22;
+    digits.forEach((d, i) => {
+      svg.appendChild(svgText(String(d), digitX[i], topY, { size: 18, weight: 700, anchor: 'middle' }));
+      if ((!hasTens && i === 0) || (hasTens && i === 1)) {
+        svg.appendChild(svgText(',', (digitX[i] + digitX[i + 1]) / 2, topY, { size: 18, weight: 900, anchor: 'middle' }));
+      }
+      const y = 92 + i * 44;
+      const arrowEnd = 168;
+      const arrowY = y - 12;
+      svg.appendChild(svgLine(digitX[i], topY + 12, digitX[i], arrowY, '#555', 1.25));
+      svg.appendChild(svgPath(`M${digitX[i]} ${arrowY} H${arrowEnd}`, 'none', '#555', 1.25));
+      svg.appendChild(svgPath(`M${arrowEnd} ${arrowY} l8 -4 v8 z`, '#555', '#555', 1));
+      svg.appendChild(svgLine(16, y, 64, y, '#cbd5e1', 1.3));
+      svg.appendChild(svgText(`${labels[i]} =`, 76, y + 5, { size: 16, weight: 700 }));
+      svg.appendChild(svgLine(116, y, 156, y, '#cbd5e1', 1.3));
+      const val = labels[i] === 'T' ? String(d * 10) : labels[i] === 'E' ? String(d) : labels[i] === 't' ? decimalComma(d / 10) : Number(d / 100).toFixed(2).replace('.', ',');
+      const left = svgText(String(d), 40, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle' });
+      const right = svgText(val, 136, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle' });
+      if (!example) {
+        left.classList.add('solution-only');
+        right.classList.add('solution-only');
+      }
+      svg.append(left, right);
+    });
+    return svg;
+  }
+
+  function makeDecimalMixedHundredthsValueCard(example = false){
+    const value = pickUnusedOrAny('gi4_decimal_mixed_hundred_value_card', [152, 925, 7036, 817, 8249, 534, 246, 608], v => String(v));
+    const card = document.createElement('div');
+    card.className = `gi4-decimal-hundred-value-card row-delete-wrap${example ? ' example' : ''}`;
+    card.appendChild(rowDel(card));
+    card.appendChild(decimalHundredDigitValueSvg(value, example));
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsWriteValueCard(count = 8, example = false){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-write-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const list = document.createElement('div');
+    list.className = 'gi4-decimal-write-list hundredths';
+    appendDecimalMixedHundredthsWriteRows(list, count);
+    const sep = document.createElement('div');
+    sep.className = 'gi4-decimal-write-separator';
+    const values = document.createElement('div');
+    values.className = 'gi4-decimal-hundred-value-grid';
+    for (let i = 0; i < 3; i++) values.appendChild(makeDecimalMixedHundredthsValueCard(example && i === 0));
+    card.append(list, sep, values);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsWriteDecimalCard(count = 8){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-write-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const list = document.createElement('div');
+    list.className = 'gi4-decimal-write-list hundredths';
+    appendDecimalMixedHundredthsWriteRows(list, count);
+    card.appendChild(list);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsDigitValueGrid(count = 3, example = false){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-value-grid';
+    for (let i = 0; i < count; i++) wrap.appendChild(makeDecimalMixedHundredthsValueCard(example && i === 0));
+    return wrap;
+  }
+
+  function decimalMixedHundredthsCompareSeeds(){
+    return [
+      { decimal: 136, whole: 1, frac: { num: 1, den: 5 } },
+      { decimal: 345, whole: 3, frac: { num: 1, den: 2 } },
+      { decimal: 260, whole: 2, frac: { num: 3, den: 5 } },
+      { decimal: 480, whole: 4, frac: { num: 3, den: 4 } },
+      { decimal: 712, whole: 7, frac: { num: 1, den: 10 } },
+      { decimal: 625, whole: 6, frac: { num: 1, den: 4 } },
+      { decimal: 508, whole: 5, frac: { num: 1, den: 20 } },
+      { decimal: 291, whole: 2, frac: { num: 9, den: 10 } },
+      { decimal: 854, whole: 8, frac: { num: 3, den: 5 } },
+      { decimal: 175, whole: 1, frac: { num: 4, den: 5 } },
+    ];
+  }
+
+  function decimalMixedHundredthsCompareCard(){
+    const item = pickUnusedOrAny('gi4_decimal_mixed_hundred_compare_100', decimalMixedHundredthsCompareSeeds(), s => `${s.decimal}-${s.whole}-${s.frac.num}/${s.frac.den}`);
+    const decWhole = Math.floor(item.decimal / 100);
+    const decRest = item.decimal % 100;
+    const factor = 100 / item.frac.den;
+    const fracHundred = item.frac.num * factor;
+    const mixedTotal = item.whole * 100 + fracHundred;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-compare-card mixed-hundred row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-compare-top mixed';
+    const mixed = document.createElement('span');
+    mixed.className = 'gi4-mixed-inline';
+    mixed.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
+    top.append(decimalMixedHundredthsLabel(item.decimal).decimal, decimalCompareSymbolBox(item.decimal, mixedTotal), mixed);
+
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-hundred-compare-work mixed';
+    const dec = document.createElement('div');
+    dec.className = 'decimal-side';
+    const decResult = document.createElement('div');
+    decResult.className = 'gi4-decimal-mixed-hundred-compare-result';
+    decResult.append(
+      lineWithSolution(String(decWhole), 'tiny'),
+      fractionBox('', '100', String(decRest), '')
+    );
+    dec.append(Object.assign(document.createElement('span'), { className: 'down-arrow' }), decResult);
+
+    const fracWork = document.createElement('div');
+    fracWork.className = 'fraction-side';
+    const opTop = document.createElement('div');
+    opTop.className = 'op-label top';
+    opTop.append('x ', lineWithSolution(String(factor), 'short'));
+    const opBottom = document.createElement('div');
+    opBottom.className = 'op-label bottom';
+    opBottom.append('x ', lineWithSolution(String(factor), 'short'));
+    const eq = document.createElement('div');
+    eq.className = 'fraction-conversion mixed';
+    const converted = document.createElement('span');
+    converted.className = 'gi4-mixed-inline';
+    converted.append(String(item.whole), ' ', fractionBox('', '100', String(fracHundred), ''));
+    const original = document.createElement('span');
+    original.className = 'gi4-mixed-inline';
+    original.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
+    eq.append(original, ' = ', converted);
+    fracWork.append(opTop, decimalCompareConversionArrow('top'), eq, decimalCompareConversionArrow('bottom'), opBottom);
+    work.append(dec, fracWork);
+    card.append(top, work);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsCompareGrid(count = 2){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-compare-grid mixed-hundred';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsCompareCard);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsCompactCompareSeeds(){
+    return [
+      { decimal: 372, whole: 3, frac: { num: 3, den: 4 }, decimalSide: 'left' },
+      { decimal: 120, whole: 1, frac: { num: 2, den: 5 }, decimalSide: 'right' },
+      { decimal: 532, whole: 5, frac: { num: 1, den: 2 }, decimalSide: 'right' },
+      { decimal: 248, whole: 2, frac: { num: 1, den: 2 }, decimalSide: 'left' },
+      { decimal: 684, whole: 6, frac: { num: 4, den: 5 }, decimalSide: 'left' },
+      { decimal: 715, whole: 7, frac: { num: 1, den: 10 }, decimalSide: 'right' },
+      { decimal: 450, whole: 4, frac: { num: 3, den: 5 }, decimalSide: 'right' },
+      { decimal: 891, whole: 8, frac: { num: 9, den: 10 }, decimalSide: 'left' },
+    ];
+  }
+
+  function makeDecimalMixedHundredthsDecimalWork(total){
+    const decWhole = Math.floor(total / 100);
+    const decRest = total % 100;
+    const dec = document.createElement('div');
+    dec.className = 'decimal-side';
+    const decResult = document.createElement('div');
+    decResult.className = 'gi4-decimal-mixed-hundred-compare-result';
+    decResult.append(
+      lineWithSolution(String(decWhole), 'tiny'),
+      fractionBox('', '100', String(decRest), '')
+    );
+    dec.append(Object.assign(document.createElement('span'), { className: 'down-arrow' }), decResult);
+    return dec;
+  }
+
+  function makeDecimalMixedHundredthsFractionWork(item){
+    const factor = 100 / item.frac.den;
+    const fracHundred = item.frac.num * factor;
+    const fracWork = document.createElement('div');
+    fracWork.className = 'fraction-side';
+    const opTop = document.createElement('div');
+    opTop.className = 'op-label top';
+    opTop.append('x ', lineWithSolution(String(factor), 'short'));
+    const opBottom = document.createElement('div');
+    opBottom.className = 'op-label bottom';
+    opBottom.append('x ', lineWithSolution(String(factor), 'short'));
+    const eq = document.createElement('div');
+    eq.className = 'fraction-conversion mixed';
+    const converted = document.createElement('span');
+    converted.className = 'gi4-mixed-inline';
+    converted.append(String(item.whole), ' ', fractionBox('', '100', String(fracHundred), ''));
+    const original = document.createElement('span');
+    original.className = 'gi4-mixed-inline';
+    original.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
+    eq.append(original, ' = ', converted);
+    fracWork.append(opTop, decimalCompareConversionArrow('top'), eq, decimalCompareConversionArrow('bottom'), opBottom);
+    return fracWork;
+  }
+
+  function decimalMixedHundredthsCompactCompareCard(){
+    const item = pickUnusedOrAny('gi4_decimal_mixed_hundred_compare_compact', decimalMixedHundredthsCompactCompareSeeds(), s => `${s.decimal}-${s.whole}-${s.frac.num}/${s.frac.den}-${s.decimalSide}`);
+    const fracHundred = item.frac.num * (100 / item.frac.den);
+    const mixedTotal = item.whole * 100 + fracHundred;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-compare-card mixed-hundred compact row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const decTop = document.createElement('span');
+    decTop.textContent = decimalMixedHundredthsLabel(item.decimal).decimal;
+    const mixedTop = document.createElement('span');
+    mixedTop.className = 'gi4-mixed-inline';
+    mixedTop.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-compare-top mixed compact';
+    const sign = decimalCompareSymbolBox(item.decimal, mixedTotal);
+    top.append(item.decimalSide === 'left' ? decTop : mixedTop, sign, item.decimalSide === 'left' ? mixedTop : decTop);
+
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-hundred-compare-work mixed compact';
+    const decimalWork = makeDecimalMixedHundredthsDecimalWork(item.decimal);
+    const fractionWork = makeDecimalMixedHundredthsFractionWork(item);
+    decimalWork.classList.add(item.decimalSide === 'left' ? 'side-left' : 'side-right');
+    fractionWork.classList.add(item.decimalSide === 'left' ? 'side-right' : 'side-left');
+    if (item.decimalSide === 'left') work.append(decimalWork, document.createElement('span'), fractionWork);
+    else work.append(fractionWork, document.createElement('span'), decimalWork);
+    card.append(top, work);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsCompactCompareGrid(count = 3){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-compare-grid mixed-hundred compact';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsCompactCompareCard);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsReferenceSeeds(){
+    return [
+      { min: 0, max: 2, decimal: 152, whole: 1, frac: { num: 9, den: 10 }, labels: ['1', '1,50', '2'], kind: 'near' },
+      { min: 2, max: 4, decimal: 328, whole: 3, frac: { num: 4, den: 5 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'], kind: 'half' },
+      { min: 1, max: 3, decimal: 174, whole: 2, frac: { num: 1, den: 4 }, labels: ['1', '1,50', '2'], kind: 'near' },
+      { min: 4, max: 6, decimal: 462, whole: 4, frac: { num: 3, den: 4 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'], kind: 'half' },
+      { min: 5, max: 7, decimal: 641, whole: 6, frac: { num: 3, den: 5 }, labels: ['minder dan de helft', 'juist de helft', 'meer dan de helft'], kind: 'half' },
+      { min: 7, max: 9, decimal: 782, whole: 8, frac: { num: 1, den: 5 }, labels: ['7', '7,50', '8'], kind: 'near' },
+    ];
+  }
+
+  function decimalMixedReferenceAxis(seed){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-reference-axis';
+    const steps = (seed.max - seed.min) * 10;
+    [0, 0.5, 1, 1.5, 2].forEach(offset => {
+      const value = seed.min + offset;
+      const pos = (offset / (seed.max - seed.min)) * 100;
+      const label = document.createElement('span');
+      label.className = 'label';
+      label.style.left = `${pos}%`;
+      label.textContent = Number.isInteger(value) ? String(value) : decimalComma(value);
+      wrap.appendChild(label);
+    });
+    for (let i = 0; i <= steps; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 5 === 0 ? ' main' : ''}`;
+      tick.style.left = `${(i / steps) * 100}%`;
+      wrap.appendChild(tick);
+    }
+    return wrap;
+  }
+
+  function decimalMixedReferenceText(value, seed){
+    const rest = value % 100;
+    if (seed.kind === 'half') {
+      if (rest < 50) return 'minder dan de helft';
+      if (rest === 50) return 'juist de helft';
+      return 'meer dan de helft';
+    }
+    const refs = seed.labels.map(label => Math.round(Number(label.replace(',', '.')) * 100));
+    const nearest = refs.reduce((best, ref) => Math.abs(value - ref) < Math.abs(value - best) ? ref : best, refs[0]);
+    return decimalHundredComma(nearest);
+  }
+
+  function makeDecimalMixedReferenceChoice(seed, active){
+    const box = document.createElement('div');
+    box.className = 'gi4-decimal-reference-choice mixed';
+    if (seed.kind === 'near') {
+      box.append(document.createTextNode('ligt dicht bij '));
+      seed.labels.forEach((label, idx) => {
+        if (idx) box.append(document.createTextNode(' / '));
+        const span = document.createElement('span');
+        span.textContent = label;
+        if (label === active) span.className = 'solution-highlight';
+        box.appendChild(span);
+      });
+      box.append(document.createTextNode('.'));
+      return box;
+    }
+    seed.labels.forEach((label, idx) => {
+      if (idx) box.append(document.createTextNode(' / '));
+      const span = document.createElement('span');
+      span.textContent = label;
+      if (label === active) span.className = 'solution-highlight';
+      box.appendChild(span);
+    });
+    return box;
+  }
+
+  function decimalMixedHundredthsReferenceCard(){
+    const seed = pickUnusedOrAny('gi4_decimal_mixed_hundred_reference', decimalMixedHundredthsReferenceSeeds(), s => `${s.min}-${s.max}-${s.decimal}-${s.whole}-${s.frac.num}/${s.frac.den}`);
+    const fracValue = seed.whole * 100 + Math.round((seed.frac.num / seed.frac.den) * 100);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-hundred-compare-card mixed-reference row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(decimalMixedReferenceAxis(seed));
+    const top = document.createElement('div');
+    top.className = 'gi4-decimal-hundred-compare-top mixed-reference';
+    const mixed = document.createElement('span');
+    mixed.className = 'gi4-mixed-inline';
+    mixed.append(String(seed.whole), ' ', fractionBox(seed.frac.num, seed.frac.den));
+    top.append(decimalMixedHundredthsLabel(seed.decimal).decimal, decimalCompareSymbolBox(seed.decimal, fracValue), mixed);
+    const options = document.createElement('div');
+    options.className = 'gi4-decimal-reference-options mixed';
+    [
+      { value: seed.decimal, title: 'Het <strong>kommagetal</strong>' },
+      { value: fracValue, title: 'Het <strong>gemengd getal</strong>' },
+    ].forEach(item => {
+      const side = document.createElement('div');
+      side.className = 'gi4-decimal-reference-side';
+      side.appendChild(Object.assign(document.createElement('span'), { className: 'down-arrow' }));
+      const title = document.createElement('div');
+      title.className = 'gi4-decimal-reference-title';
+      title.innerHTML = item.title;
+      const active = decimalMixedReferenceText(item.value, seed);
+      side.append(title, makeDecimalMixedReferenceChoice(seed, active));
+      options.appendChild(side);
+    });
+    card.append(top, options);
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsReferenceGrid(count = 2){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-hundred-compare-grid mixed-reference';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsReferenceCard);
+    return wrap;
+  }
+
+  function decimalMixedHundredthsShortCompareSeeds(){
+    return [
+      { left: { whole: 4, frac: { num: 1, den: 5 } }, right: 475 },
+      { left: 250, right: { whole: 2, frac: { num: 2, den: 4 } } },
+      { left: { whole: 3, frac: { num: 4, den: 5 } }, right: 312 },
+      { left: 640, right: { whole: 6, frac: { num: 3, den: 5 } } },
+      { left: { whole: 8, frac: { num: 1, den: 4 } }, right: 825 },
+      { left: 705, right: { whole: 7, frac: { num: 1, den: 10 } } },
+      { left: { whole: 5, frac: { num: 3, den: 4 } }, right: 552 },
+      { left: 918, right: { whole: 9, frac: { num: 1, den: 5 } } },
+      { left: { whole: 1, frac: { num: 2, den: 5 } }, right: 145 },
+    ];
+  }
+
+  function decimalMixedHundredthsCompareValue(item){
+    if (typeof item === 'number') return item;
+    return item.whole * 100 + Math.round(item.frac.num / item.frac.den * 100);
+  }
+
+  function decimalMixedHundredthsCompareDisplay(item){
+    if (typeof item === 'number') return document.createTextNode(decimalMixedHundredthsLabel(item).decimal);
+    const span = document.createElement('span');
+    span.className = 'gi4-mixed-inline';
+    span.append(String(item.whole), ' ', fractionBox(item.frac.num, item.frac.den));
+    return span;
+  }
+
+  function decimalMixedHundredthsShortCompareCard(){
+    const seed = pickUnusedOrAny('gi4_decimal_mixed_hundred_short_compare', decimalMixedHundredthsShortCompareSeeds(), s => `${JSON.stringify(s.left)}-${JSON.stringify(s.right)}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-mixed-short-compare row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(
+      decimalMixedHundredthsCompareDisplay(seed.left),
+      decimalCompareSymbolBox(decimalMixedHundredthsCompareValue(seed.left), decimalMixedHundredthsCompareValue(seed.right)),
+      decimalMixedHundredthsCompareDisplay(seed.right)
+    );
+    return card;
+  }
+
+  function makeDecimalMixedHundredthsShortCompareGrid(count = 3){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-mixed-short-compare-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(wrap, decimalMixedHundredthsShortCompareCard);
+    return wrap;
+  }
+
+  function makeDecimalMixedHundredthsCard(mode){
+    if (mode === 'axis') return makeDecimalMixedHundredthsAxisCard();
+    if (mode === 'place') return makeDecimalMixedHundredthsPlaceCard();
+    if (mode === 'table') return makeDecimalMixedHundredthsTable();
+    if (mode === 'stripTable') return makeDecimalMixedHundredthsStripTableCard(false);
+    if (mode === 'writeDecimal') return makeDecimalMixedHundredthsWriteDecimalCard();
+    if (mode === 'digitValue') return makeDecimalMixedHundredthsValueCard();
+    if (mode === 'compareHundred') return decimalMixedHundredthsCompareCard();
+    if (mode === 'compareHundredCompact') return decimalMixedHundredthsCompactCompareCard();
+    if (mode === 'compareReference') return decimalMixedHundredthsReferenceCard();
+    if (mode === 'compareShort') return decimalMixedHundredthsShortCompareCard();
+    if (mode === 'writeValue') return makeDecimalMixedHundredthsWriteDecimalCard();
+    return makeDecimalMixedHundredthsMaterialsCard();
+  }
+
+  function addDecimalMixedHundredths(extraCount, forcedMode){
+    const mode = forcedMode || $('#decimalMixedHundredthsMode')?.value || 'materials';
+    const maxCount = mode === 'writeDecimal' || mode === 'writeValue' ? 12 : mode === 'digitValue' ? 6 : 6;
+    const requested = Math.max(1, Math.min(maxCount, parseInt($('#decimalMixedHundredthsCount')?.value, 10) || 2));
+    const count = extraCount || requested;
+    const key = `gi4_decimal_mixed_hundredths_${mode}`;
+    if (extraCount) {
+      if (mode === 'table') {
+        const body = containerInLastBlock(key, '.gi4-decimal-mixed-hundred-table tbody');
+        if (body) {
+          appendDecimalMixedHundredthsTableRows(body, count);
+          return;
+        }
+      }
+      if (mode === 'writeDecimal' || mode === 'writeValue') {
+        const list = containerInLastBlock(key, '.gi4-decimal-write-list.hundredths');
+        if (list) {
+          appendDecimalMixedHundredthsWriteRows(list, count);
+          return;
+        }
+      }
+      if (mode === 'digitValue') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-hundred-value-grid');
+        if (grid) {
+          for (let i = 0; i < count; i++) grid.appendChild(makeDecimalMixedHundredthsValueCard(false));
+          return;
+        }
+      }
+      if (mode === 'compareHundred') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-hundred-compare-grid.mixed-hundred');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsCompareCard);
+          return;
+        }
+      }
+      if (mode === 'compareHundredCompact') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-hundred-compare-grid.mixed-hundred.compact');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsCompactCompareCard);
+          return;
+        }
+      }
+      if (mode === 'compareReference') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-hundred-compare-grid.mixed-reference');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsReferenceCard);
+          return;
+        }
+      }
+      if (mode === 'compareShort') {
+        const grid = containerInLastBlock(key, '.gi4-decimal-mixed-short-compare-grid');
+        if (grid) {
+          for (let i = 0; i < count; i++) appendNewExercise(grid, decimalMixedHundredthsShortCompareCard);
+          return;
+        }
+      }
+      const existing = containerInLastBlock(key, '.gi4-decimal-mixed-hundred-grid', `gi4-decimal-mixed-hundred-grid ${mode}`);
+      if (existing) {
+        for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeDecimalMixedHundredthsCard(mode));
+        return;
+      }
+    }
+    const titles = {
+      materials: 'Kommagetallen (> 1): onechte breuk, gemengd getal en decimaal getal.',
+      axis: 'Kommagetallen (> 1): getallenas en honderdsten.',
+      place: 'Kommagetallen (> 1): plaatswaarde met honderdsten.',
+      table: 'Kommagetallen (> 1): vul de tabel aan.',
+      stripTable: 'Kommagetallen (> 1): strook, gemengd getal en onechte breuk.',
+      writeDecimal: 'Kommagetallen (> 1): schrijf de kommagetallen.',
+      digitValue: 'Kommagetallen (> 1): schrijf de waarde van de cijfers.',
+      compareHundred: 'Kommagetallen (> 1): zet op noemer 100 en vergelijk.',
+      compareHundredCompact: 'Kommagetallen (> 1): zet op noemer 100 en vergelijk.',
+      compareReference: 'Kommagetallen (> 1): vergelijk met referentiepunten.',
+      compareShort: 'Kommagetallen (> 1): vergelijk kort.',
+      writeValue: 'Kommagetallen (> 1): schrijf de kommagetallen.',
+    };
+    const b = block(key, titles[mode], addCount => addDecimalMixedHundredths(addCount || 1, mode));
+    const instructions = {
+      materials: ['Vul in.'],
+      axis: ['Vul in.'],
+      place: ['Hoeveel eenheden? Hoeveel tienden? Hoeveel honderdsten?', 'Schrijf het kommagetal.'],
+      table: ['Vul de tabel aan.'],
+      stripTable: ['Schrijf het gemengd getal en de onechte breuk.', 'Schrijf het kommagetal.'],
+      writeDecimal: ['Schrijf de kommagetallen.'],
+      digitValue: ['Geef de waarde van de cijfers.'],
+      compareHundred: ['Zet de breukdelen op <strong>noemer 100</strong>.', 'Vergelijk daarna de hoeveelheden met elkaar.', 'Schrijf &lt;, &gt; of =.'],
+      compareHundredCompact: ['Zet de breukdelen op noemer 100 (= decimale breuk).', 'Vergelijk daarna de hoeveelheden met elkaar.', 'Schrijf &lt;, &gt; of =.', '<strong>Tip!</strong> Voeg waar nodig nullen toe aan het kommagetal om makkelijker te vergelijken.'],
+      compareReference: ['Vergelijk de getallen of de breukdelen met <strong>de referentiepunten</strong>.', 'Markeer wat past.', 'Schrijf &lt;, &gt; of =.'],
+      compareShort: ['Denk na: zijn de gehelen gelijk?', 'Vergelijk de breukdelen met referentiepunten.', 'Schrijf &lt;, &gt; of =.'],
+      writeValue: ['Schrijf de kommagetallen.'],
+    };
+    addFractionInstructions(b, instructions[mode] || ['Vul in.']);
+    if (mode === 'table') {
+      const table = makeDecimalMixedHundredthsTable(count);
+      if (table) b.appendChild(table);
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'writeDecimal' || mode === 'writeValue') {
+      b.appendChild(makeDecimalMixedHundredthsWriteDecimalCard(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'digitValue') {
+      const example = !!$('#decimalMixedHundredthsExample')?.checked;
+      b.appendChild(makeDecimalMixedHundredthsDigitValueGrid(count, example));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'compareHundred') {
+      b.appendChild(makeDecimalMixedHundredthsCompareGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'compareHundredCompact') {
+      b.appendChild(makeDecimalMixedHundredthsCompactCompareGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'compareReference') {
+      b.appendChild(makeDecimalMixedHundredthsReferenceGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    if (mode === 'compareShort') {
+      b.appendChild(makeDecimalMixedHundredthsShortCompareGrid(count));
+      addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
+      return;
+    }
+    const grid = document.createElement('div');
+    grid.className = `gi4-decimal-mixed-hundred-grid ${mode}`;
+    const example = mode === 'stripTable' && !!$('#decimalMixedHundredthsExample')?.checked;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => mode === 'stripTable' ? makeDecimalMixedHundredthsStripTableCard(example && i === 0) : makeDecimalMixedHundredthsCard(mode));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalMixedHundredths(1, mode));
   }
 
   function decimalMixedModel(tenths, opts = {}){
@@ -6333,6 +8716,28 @@
     });
   }
 
+  function drawDecimalHundredthsAxisConnectSolutionLines(){
+    sheet.querySelectorAll('.gi4-decimal-hundred-axis-connect').forEach(row => {
+      const axisLine = row.querySelector('.gi4-decimal-axis-connect-axis');
+      const cards = Array.from(row.querySelectorAll('.gi4-decimal-axis-connect-card[data-value]'));
+      if (!axisLine || !cards.length) return;
+      const svg = makeOverlay(row, 'gi4-axis-connect-solution-svg');
+      const rowRect = row.getBoundingClientRect();
+      const lineRect = axisLine.getBoundingClientRect();
+      cards.forEach(card => {
+        const value = parseInt(card.dataset.value, 10);
+        if (!Number.isFinite(value)) return;
+        const dot = card.querySelector('.gi4-connect-dot.top') || card;
+        const p1 = centerRelative(dot, row);
+        const x2 = lineRect.left - rowRect.left + (value / 100) * lineRect.width;
+        const y2 = lineRect.top - rowRect.top;
+        svg.appendChild(svgSolutionLine(p1.x, p1.y, x2, y2));
+        svg.appendChild(svgSolutionDot(x2, y2, 3.2));
+      });
+      row.appendChild(svg);
+    });
+  }
+
   function drawSolutionLines(){
     removeSolutionLines();
     if (!sheet.classList.contains('solutions-mode')) return;
@@ -6341,6 +8746,7 @@
     drawAxisConnectSolutionLines();
     drawG5AxisConnectSolutionLines();
     drawMixedAxisConnectSolutionLines();
+    drawDecimalHundredthsAxisConnectSolutionLines();
   }
 
   function setSolutionsMode(on){
@@ -6449,10 +8855,19 @@
     bind('#btnAddG5Equiv', addG5Equiv);
     bind('#btnAddG5FractionSimplify', addG5FractionSimplify);
     bind('#btnAddG5FractionEquivalent', addG5FractionEquivalent);
+    bind('#btnAddG5FractionCommonCompare', addG5FractionCommonCompare);
+    bind('#btnAddG5FractionCommonShort', addG5FractionCommonShort);
     bind('#btnAddG5FractionArrows', addG5FractionArrows);
     bind('#btnAddG5FractionShort', addG5FractionShort);
     bind('#btnAddG5FractionSeries', addG5FractionSeries);
     bind('#btnAddG5FractionColorTable', addG5FractionColorTable);
+    bind('#btnAddG5GcdLcmInfo', addG5GcdLcmInfo);
+    bind('#btnAddG5Divisibility', addG5Divisibility);
+    bind('#btnAddG5Divisors', addG5Divisors);
+    bind('#btnAddG5Gcd', addG5Gcd);
+    bind('#btnAddG5Multiples', addG5Multiples);
+    bind('#btnAddG5Lcm', addG5Lcm);
+    bind('#btnAddG5GcdLcmMatch', addG5GcdLcmMatch);
     bind('#btnAddBuildNumbers', addBuildNumbers);
     bind('#btnAddNeighbors', addNeighbors);
     bind('#btnAddMaterial', addMaterial);
@@ -6478,6 +8893,14 @@
     bind('#btnAddFractionQuantity', addFractionQuantity);
     bind('#btnAddFractionMixed', addFractionMixed);
     bind('#btnAddDecimalIntro', addDecimalIntro);
+    bind('#btnAddDecimalTenthsIntro', addDecimalTenthsIntro);
+    bind('#btnAddDecimalHundredths', addDecimalHundredths);
+    bind('#btnAddDecimalHundredthsTable', addDecimalHundredthsTable);
+    bind('#btnAddDecimalHundredthsConvert', addDecimalHundredthsConvert);
+    bind('#btnAddDecimalHundredthsCompare', addDecimalHundredthsCompare);
+    bind('#btnAddDecimalHundredthsAxisConnect', addDecimalHundredthsAxisConnect);
+    bind('#btnAddDecimalHundredthsJumps', addDecimalHundredthsJumps);
+    bind('#btnAddDecimalMixedHundredths', addDecimalMixedHundredths);
     bind('#btnAddDecimalMixed', addDecimalMixed);
     bind('#btnAddDecimalColor', addDecimalColor);
     bind('#btnAddDecimalTable', addDecimalTable);
