@@ -55,6 +55,7 @@
     <div class="sidebar-tabs" id="sidebarTabs">
       <div class="sidebar-tab tab-100000" data-levels="grade5 grade6 custom" onclick="GI4_UI.toonTab('tot100000',this)">Tot 100 000</div>
       <div class="sidebar-tab tab-breuken" data-levels="grade5 grade6 custom" onclick="GI4_UI.toonTab('breuken5',this)">Breuken</div>
+      <div class="sidebar-tab tab-gemengd" data-levels="grade5 grade6 custom" onclick="GI4_UI.toonTab('ggdkgv',this)">GGD en KGV</div>
       <div class="sidebar-tab tab-getallenlijn active" data-levels="grade4 custom" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
       <div class="sidebar-tab tab-dhte" data-levels="grade4 custom" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
       <div class="sidebar-tab tab-aanvullen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
@@ -63,7 +64,7 @@
       <div class="sidebar-tab tab-gemengd" data-levels="grade4 custom" onclick="GI4_UI.toonTab('vergelijken',this)">Vergelijken</div>
       <div class="sidebar-tab tab-waarde" data-levels="grade4 custom" onclick="GI4_UI.toonTab('waarde',this)">Waarde</div>
       <div class="sidebar-tab tab-breuken" data-levels="grade4 custom" onclick="GI4_UI.toonTab('breuken',this)">Breuken</div>
-      <div class="sidebar-tab tab-kommagetallen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('kommagetallen',this)">Kommagetallen</div>
+      <div class="sidebar-tab tab-kommagetallen" data-levels="grade4 grade5 grade6 custom" onclick="GI4_UI.toonTab('kommagetallen',this)">Kommagetallen</div>
     </div>
 
     <div class="sidebar-content" id="tab-tot100000" data-levels="grade5 grade6 custom" style="display:none">
@@ -211,6 +212,24 @@
       <button class="btn-toevoegen" id="btnAddG5FractionEquivalent">Voeg gelijkwaardig maken toe</button>
 
       <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijknamig maken en vergelijken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionCommonCompareCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label><input id="g5FractionCommonExample" type="checkbox" checked> eerste kaart als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionCommonCompare">Voeg gelijknamig vergelijken toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Gelijknamig maken kort</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5FractionCommonShortCount" type="number" min="1" max="9" value="6" style="width:56px"></label>
+          <label><input id="g5FractionCommonShortExample" type="checkbox" checked> eerste kaart als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5FractionCommonShort">Voeg korte gelijknamig-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Vereenvoudigen met pijlen</div>
         <div class="veld-rij">
           <label>Aantal <input id="g5FractionArrowCount" type="number" min="1" max="9" value="6" style="width:56px"></label>
@@ -241,6 +260,66 @@
         </div>
       </div>
       <button class="btn-toevoegen" id="btnAddG5FractionColorTable">Voeg kleurentabel toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-ggdkgv" data-levels="grade5 grade6 custom" style="display:none">
+      <div class="sectie-titel">GGD en KGV</div>
+
+      <div class="config-kaart">
+        <div class="kaart-titel">Uitlegkader</div>
+        <p class="gi4-note">Kijk en leer: delers, veelvouden, GGD en KGV.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5GcdLcmInfo">Voeg uitlegkader toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Deelbaarheid herkennen</div>
+        <div class="veld-rij">
+          <label>Aantal getallen <input id="g5DivisibilityCount" type="number" min="6" max="16" value="10" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Divisibility">Voeg deelbaarheid toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Alle delers</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5DivisorsCount" type="number" min="1" max="8" value="6" style="width:56px"></label>
+          <label><input id="g5DivisorsExample" type="checkbox" checked> eerste kaart als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Divisors">Voeg delers toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">GGD zoeken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5GcdCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Gcd">Voeg GGD toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">Veelvouden</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="g5MultiplesCount" type="number" min="2" max="8" value="4" style="width:56px"></label>
+          <label><input id="g5MultiplesExample" type="checkbox" checked> eerste rij als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Multiples">Voeg veelvouden toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">KGV zoeken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5LcmCount" type="number" min="1" max="5" value="2" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5Lcm">Voeg KGV toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
+        <div class="kaart-titel">GGD of KGV kaartjes</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="g5GcdLcmMatchCount" type="number" min="4" max="12" value="8" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddG5GcdLcmMatch">Voeg kaartjes toe</button>
     </div>
 
     <div class="sidebar-content" id="tab-analyse" data-levels="grade4 custom">
@@ -615,39 +694,133 @@
       <button class="btn-toevoegen" id="btnAddFractionMixed">Voeg onechte breuken toe</button>
     </div>
 
-    <div class="sidebar-content" id="tab-kommagetallen" data-levels="grade4 custom" style="display:none">
+    <div class="sidebar-content" id="tab-kommagetallen" data-levels="grade4 grade5 grade6 custom" style="display:none">
       <div class="sectie-titel">Kommagetallen</div>
-      <div class="config-kaart">
+
+      <div class="config-kaart" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&lt;= 1: tienden herkennen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalTenthsIntroCount" type="number" min="1" max="4" value="1" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalTenthsIntro" data-levels="grade5 grade6 custom">Voeg tienden-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&lt;= 1: honderdsten</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalHundredthsCount" type="number" min="1" max="9" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredths" data-levels="grade5 grade6 custom">Voeg honderdsten toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">Honderdsten in tabel</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="decimalHundredthsTableCount" type="number" min="2" max="6" value="5" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredthsTable" data-levels="grade5 grade6 custom">Voeg honderdsten-tabel toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">Breuk en kommagetal</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalHundredthsConvertCount" type="number" min="1" max="6" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalHundredthsConvertMode" style="width:120px">
+              <option value="grid" selected>100-veld</option>
+              <option value="axis">getallenas</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredthsConvert" data-levels="grade5 grade6 custom">Voeg breuk/kommagetal toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&lt;= 1: vergelijken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalHundredthsCompareCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalHundredthsCompareMode" style="width:150px">
+              <option value="hundred" selected>noemer 100</option>
+              <option value="reference">referentiepunten</option>
+              <option value="image">afbeeldingen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredthsCompare" data-levels="grade5 grade6 custom">Voeg vergelijk-oefening toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&lt;= 1: getallenas</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalHundredthsAxisConnectCount" type="number" min="1" max="4" value="1" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredthsAxisConnect" data-levels="grade5 grade6 custom">Voeg getallenas toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&lt;= 1: sprongen</div>
+        <div class="veld-rij">
+          <label>Rijen <input id="decimalHundredthsJumpsCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalHundredthsJumps" data-levels="grade5 grade6 custom">Voeg sprongen toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 grade6 custom">
+        <div class="kaart-titel">&gt; 1: onechte breuk en kommagetal</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalMixedHundredthsCount" type="number" min="1" max="12" value="2" style="width:56px"></label>
+          <label>Soort
+            <select id="decimalMixedHundredthsMode" style="width:150px">
+              <option value="materials" selected>materiaal</option>
+              <option value="axis">getallenas</option>
+              <option value="place">plaatswaarde</option>
+              <option value="table">tabel aanvullen</option>
+              <option value="stripTable">strook en tabel</option>
+              <option value="writeDecimal">schrijf kommagetal</option>
+              <option value="digitValue">schrijf de waarde</option>
+              <option value="compareHundred">vergelijken noemer 100</option>
+              <option value="compareHundredCompact">vergelijken noemer 100 compact</option>
+              <option value="compareReference">vergelijken referentiepunten</option>
+              <option value="compareShort">kort vergelijken</option>
+            </select>
+          </label>
+          <label><input id="decimalMixedHundredthsExample" type="checkbox"> eerste als voorbeeld</label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalMixedHundredths" data-levels="grade5 grade6 custom">Voeg &gt; 1 met honderdsten toe</button>
+
+      <div class="config-kaart" data-levels="grade4 custom">
         <div class="kaart-titel">Onthoud: tienden</div>
         <p class="gi4-note">Eigen schema over tienden, tiendelige breuken en kommagetallen.</p>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalIntro">Voeg onthoudblok toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalIntro" data-levels="grade4 custom">Voeg onthoudblok toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Tienden kleuren</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalColorCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalColor">Voeg kleur-oefening toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalColor" data-levels="grade4 custom">Voeg kleur-oefening toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Welk deel zie je?</div>
         <div class="veld-rij">
           <label>Rijen <input id="decimalTableCount" type="number" min="2" max="8" value="5" style="width:56px"></label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalTable">Voeg tabel toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalTable" data-levels="grade4 custom">Voeg tabel toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Strook en getallenas</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalLineCount" type="number" min="1" max="6" value="4" style="width:56px"></label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalLine">Voeg as-oefening toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalLine" data-levels="grade4 custom">Voeg as-oefening toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Vergelijken</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalCompareCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
@@ -661,9 +834,9 @@
           </label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalCompare">Voeg vergelijk-oefening toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalCompare" data-levels="grade4 custom">Voeg vergelijk-oefening toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Ordenen en schatten</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalOrderCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
@@ -679,9 +852,9 @@
           </label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalOrder">Voeg orden-oefening toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalOrder" data-levels="grade4 custom">Voeg orden-oefening toe</button>
 
-      <div class="config-kaart" style="margin-top:12px">
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade4 custom">
         <div class="kaart-titel">Kommagetallen groter dan 1</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalMixedCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
@@ -704,7 +877,7 @@
           </label>
         </div>
       </div>
-      <button class="btn-toevoegen" id="btnAddDecimalMixed">Voeg > 1-oefening toe</button>
+      <button class="btn-toevoegen" id="btnAddDecimalMixed" data-levels="grade4 custom">Voeg > 1-oefening toe</button>
     </div>
 
     <div class="sidebar-footer">
@@ -735,6 +908,7 @@ const GI4_UI = (() => {
     waarde: 'tab-waarde',
     breuken: 'tab-breuken',
     breuken5: 'tab-breuken5',
+    ggdkgv: 'tab-ggdkgv',
     kommagetallen: 'tab-kommagetallen',
   };
   function toonTab(naam, tabEl) {
