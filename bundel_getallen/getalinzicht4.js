@@ -5,7 +5,10 @@
   const titles = new Set();
   const addFns = {};
   const usedExerciseSignatures = new Set();
+  const lastExerciseSignatures = new Map();
   const PLACE = [
+    { key: 'm', label: 'M', color: 'gi4-m', value: 1000000 },
+    { key: 'hd', label: 'HD', color: 'gi4-hd', value: 100000 },
     { key: 'td', label: 'TD', color: 'gi4-td', value: 10000 },
     { key: 'd', label: 'D', color: 'gi4-d', value: 1000 },
     { key: 'h', label: 'H', color: 'gi4-h', value: 100 },
@@ -29,6 +32,7 @@
     const key = `${namespace}::${signaturePart(value)}`;
     if (usedExerciseSignatures.has(key)) return false;
     usedExerciseSignatures.add(key);
+    lastExerciseSignatures.set(namespace, signaturePart(value));
     return true;
   }
   function pickUnused(namespace, items, keyFn = item => item){
@@ -55,35 +59,57 @@
   function activeRange(){
     if (levelState.range === '10000') return 10000;
     if (levelState.range === '100000') return 100000;
+    if (levelState.range === '1000000') return 1000000;
+    if (levelState.range === '10000000') return 10000000;
+    if (levelState.level === 'grade6') return 1000000;
     return levelState.level === 'grade4' ? 10000 : 100000;
   }
-  function activeMax(){ return activeRange() === 100000 ? 99999 : 9999; }
-  function activeMin(){ return activeRange() === 100000 ? 10000 : 1000; }
+  function withRange(range, fn){
+    const previous = levelState.range;
+    levelState.range = String(range);
+    try { return fn(); }
+    finally { levelState.range = previous; }
+  }
+  function upperPrefix(){ return activeRange() === 10000000 ? 'g7' : 'g6'; }
+  function upperKey(name){ return activeRange() === 10000000 ? `gi4_g7_${name}` : `gi4_g6_${name}`; }
+  function upperInput(name){ return $(`#${upperPrefix()}${name}`); }
+  function activeMax(){ return activeRange() === 10000000 ? 9999999 : activeRange() === 1000000 ? 999999 : activeRange() === 100000 ? 99999 : 9999; }
+  function activeMin(){ return activeRange() === 10000000 ? 1000000 : activeRange() === 1000000 ? 100000 : activeRange() === 100000 ? 10000 : 1000; }
   function activePlaces(){
-    return activeRange() === 100000 ? PLACE : PLACE.slice(1);
+    if (activeRange() === 10000000) return PLACE;
+    if (activeRange() === 1000000) return PLACE.slice(1);
+    return activeRange() === 100000 ? PLACE.slice(2) : PLACE.slice(3);
   }
   function placesForNumber(n){
-    return n >= 10000 ? PLACE : PLACE.slice(1);
+    if (n >= 1000000) return PLACE;
+    if (n >= 100000) return PLACE.slice(1);
+    return n >= 10000 ? PLACE.slice(2) : PLACE.slice(3);
   }
   function placeExpansion(n){
     const ds = digits(n);
     return placesForNumber(n).map(p => `${ds[p.key]} ${p.label}`).join(' + ');
   }
   function placeQuestionText(){
-    return activeRange() === 100000
+    return activeRange() === 10000000
+      ? 'miljoenen, honderdduizendtallen, tienduizendtallen, duizendtallen, honderdtallen, tientallen en eenheden'
+      : activeRange() === 1000000
+      ? 'honderdduizendtallen, tienduizendtallen, duizendtallen, honderdtallen, tientallen en eenheden'
+      : activeRange() === 100000
       ? 'tienduizendtallen, duizendtallen, honderdtallen, tientallen en eenheden'
       : 'duizendtallen, honderdtallen, tientallen en eenheden';
   }
   function digits(n){
     return {
-      td: Math.floor(n / 10000),
+      m: Math.floor(n / 1000000),
+      hd: Math.floor(n / 100000) % 10,
+      td: Math.floor(n / 10000) % 10,
       d: Math.floor(n / 1000) % 10,
       h: Math.floor(n / 100) % 10,
       t: Math.floor(n / 10) % 10,
       e: n % 10,
     };
   }
-  function numberFromDigits(ds){ return (ds.td || 0) * 10000 + ds.d * 1000 + ds.h * 100 + ds.t * 10 + ds.e; }
+  function numberFromDigits(ds){ return (ds.m || 0) * 1000000 + (ds.hd || 0) * 100000 + (ds.td || 0) * 10000 + ds.d * 1000 + ds.h * 100 + ds.t * 10 + ds.e; }
   function randomNumber(){ return rnd(activeMin(), activeMax()); }
   function uniqueNumbers(count){
     const set = new Set();
@@ -363,7 +389,31 @@
     const ds = digits(n);
     const places = placesForNumber(n);
     const terms = [];
-    if (allowRegroup && activeRange() === 100000 && Math.random() < .35) {
+    if (allowRegroup && activeRange() === 10000000 && Math.random() < .4) {
+      if (Math.random() < .35) {
+        const hundredThousands = ds.m * 10 + ds.hd;
+        if (hundredThousands) terms.push(`${hundredThousands} HD`);
+      } else {
+        if (ds.m) terms.push(`${ds.m} M`);
+        if (ds.hd) terms.push(`${ds.hd} HD`);
+      }
+      if (ds.td) terms.push(`${ds.td} TD`);
+      if (ds.d) terms.push(`${ds.d} D`);
+      if (ds.h) terms.push(`${ds.h} H`);
+      if (ds.t) terms.push(`${ds.t} T`);
+      if (ds.e) terms.push(`${ds.e} E`);
+    } else if (allowRegroup && activeRange() === 1000000 && Math.random() < .4) {
+      if (Math.random() < .5) {
+        const tenThousands = ds.hd * 10 + ds.td;
+        if (tenThousands) terms.push(`${tenThousands} TD`);
+      } else if (ds.hd) {
+        terms.push(`${ds.hd} HD`);
+      }
+      if (ds.d) terms.push(`${ds.d} D`);
+      if (ds.h) terms.push(`${ds.h} H`);
+      if (ds.t) terms.push(`${ds.t} T`);
+      if (ds.e) terms.push(`${ds.e} E`);
+    } else if (allowRegroup && activeRange() === 100000 && Math.random() < .35) {
       const thousands = ds.td * 10 + ds.d;
       if (thousands) terms.push(`${thousands} D`);
       if (ds.h) terms.push(`${ds.h} H`);
@@ -485,7 +535,7 @@
       if (opts.compact) wrap.classList.add('compact');
       if (opts.connect) wrap.classList.add('connect');
       const amount = ds[p.key];
-      const shape = mode === 'dots' || p.key === 'td' ? 'dot' : p.key;
+      const shape = mode === 'dots' || p.key === 'm' || p.key === 'hd' || p.key === 'td' ? 'dot' : p.key;
       for (let i = 0; i < amount; i++) wrap.appendChild(materialPiece(shape, p.key, opts));
       td.appendChild(wrap);
       tr.appendChild(td);
@@ -499,9 +549,9 @@
   function materialPiece(shape, key, opts = {}){
     if (shape === 'dot') {
       const span = document.createElement('span');
-      span.className = `gi4-dot ${key === 'td' ? 'gi4-td' : key === 'd' ? 'gi4-d' : key === 'h' ? 'gi4-h' : key === 't' ? 'gi4-t' : 'gi4-e'}`;
+      span.className = `gi4-dot ${key === 'm' ? 'gi4-m' : key === 'hd' ? 'gi4-hd' : key === 'td' ? 'gi4-td' : key === 'd' ? 'gi4-d' : key === 'h' ? 'gi4-h' : key === 't' ? 'gi4-t' : 'gi4-e'}`;
       if (opts.connect) span.classList.add('connect');
-      span.textContent = key === 'td' ? '10 000' : key === 'd' ? '1000' : key === 'h' ? '100' : key === 't' ? '10' : '1';
+      span.textContent = '';
       return span;
     }
     return makeMaterialSvg(key, opts);
@@ -1145,11 +1195,12 @@
     const places = placesForNumber(n);
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('gi4-value-work-svg');
-    svg.setAttribute('viewBox', `0 0 430 ${places.length === 5 ? 235 : 205}`);
+    const svgW = places.length === 7 ? 540 : places.length === 6 ? 500 : 430;
+    svg.setAttribute('viewBox', `0 0 ${svgW} ${92 + places.length * 32}`);
     svg.setAttribute('aria-hidden', 'true');
 
-    const colors = places.map(p => p.key === 'td' ? '#b57de8' : p.key === 'd' ? '#ef2b2d' : p.key === 'h' ? '#6d95c7' : p.key === 't' ? '#4fb94f' : '#ffd414');
-    const cardX = places.length === 5 ? 190 : 190;
+    const colors = places.map(p => p.key === 'm' ? '#f36b5b' : p.key === 'hd' ? '#57c7dc' : p.key === 'td' ? '#a7cf5f' : p.key === 'd' ? '#ef2b2d' : p.key === 'h' ? '#1976ad' : p.key === 't' ? '#4fb94f' : '#ffd414');
+    const cardX = places.length === 7 ? 276 : places.length === 6 ? 282 : 190;
     const cardY = 10;
     const cellW = 34;
     const cellH = 30;
@@ -1207,7 +1258,7 @@
           size: '18',
           weight: '700',
         }));
-        svg.appendChild(svgLine(112, y, 178, y, '#d8dee8', 1.4));
+        svg.appendChild(svgLine(112, y, places.length >= 6 ? 206 : 178, y, '#d8dee8', 1.4));
         const answer = svgText(fmt(val), 122, y - 5, {
           size: '18',
           weight: '800',
@@ -1221,7 +1272,9 @@
         svg.appendChild(svgLine(x, cardY + cellH, x, y - 18, '#111827', 2.3));
         svg.appendChild(svgPolygon(`${x - 5},${y - 20} ${x + 5},${y - 20} ${x},${y - 11}`, '#111827', '#111827'));
       } else {
-        const endX = example ? Math.min(178, x - 24) : 190;
+        const exampleEndX = places.length >= 6 ? 246 : 178;
+        const practiceEndX = places.length >= 6 ? 220 : 190;
+        const endX = example ? Math.min(exampleEndX, x - 24) : practiceEndX;
         svg.appendChild(svgLine(x, cardY + cellH, x, y - 2, '#111827', 2.3));
         svg.appendChild(svgLine(x, y - 2, endX, y - 2, '#111827', 2.3));
         svg.appendChild(svgPolygon(`${endX},${y - 2} ${endX + 9},${y - 8} ${endX + 9},${y + 4}`, '#111827', '#111827'));
@@ -1235,9 +1288,37 @@
     const ds = digits(n);
     const card = document.createElement('div');
     card.className = `gi4-value-card gi4-value-card-${mode} row-delete-wrap` + (example ? ' example' : '');
+    if (placesForNumber(n).length >= 6) card.classList.add('gi4-value-card-upper');
     card.appendChild(rowDel(card));
     if (mode === 'schema') card.appendChild(placeTable(n, 'dots', { compact: true }));
     card.appendChild(valueWorkSvg(n, example, mode));
+    return card;
+  }
+
+  function makeShortValueCard(n){
+    const ds = digits(n);
+    const candidates = placesForNumber(n).filter(p => ds[p.key] > 0);
+    const p = pick(candidates);
+    const card = document.createElement('div');
+    card.className = 'gi4-short-value-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const number = document.createElement('div');
+    number.className = 'gi4-short-value-number';
+    placesForNumber(n).forEach(part => {
+      const span = document.createElement('span');
+      span.textContent = String(ds[part.key]);
+      if (part.key === p.key) span.className = 'marked';
+      number.appendChild(span);
+    });
+    const row = document.createElement('div');
+    row.className = 'gi4-short-value-row';
+    row.append(
+      document.createTextNode(String(ds[p.key])),
+      lineWithSolution(p.label, 'short'),
+      document.createTextNode(' = '),
+      lineWithSolution(fmt(ds[p.key] * p.value), 'long')
+    );
+    card.append(number, row);
     return card;
   }
 
@@ -1248,25 +1329,7 @@
     const grid = document.createElement('div');
     grid.className = 'gi4-short-value-grid';
     uniqueNumbers(count).forEach(n => {
-      const ds = digits(n);
-      const candidates = placesForNumber(n).filter(p => ds[p.key] > 0);
-      const p = pick(candidates);
-      const card = document.createElement('div');
-      card.className = 'gi4-short-value-card row-delete-wrap';
-      card.appendChild(rowDel(card));
-      const number = document.createElement('div');
-      number.className = 'gi4-short-value-number';
-      placesForNumber(n).forEach(part => {
-        const span = document.createElement('span');
-        span.textContent = String(ds[part.key]);
-        if (part.key === p.key) span.className = 'marked';
-        number.appendChild(span);
-      });
-      const row = document.createElement('div');
-      row.className = 'gi4-short-value-row';
-      row.append(document.createTextNode(`${ds[p.key]} ${p.label} = `), lineWithSolution(fmt(ds[p.key] * p.value), 'long'));
-      card.append(number, row);
-      grid.appendChild(card);
+      grid.appendChild(makeShortValueCard(n));
     });
     b.appendChild(grid);
   }
@@ -1291,6 +1354,9 @@
     if (ds.t > 1 && ds.d > 0 && ds.h > 0) choices.push(`${ds.t} T meer dan ${ds.d} D en ${ds.h} H`);
     if (ds.td > 1 && ds.d > 0) choices.push(`${ds.d} D meer dan ${ds.td} TD`);
     if (ds.h > 1 && ds.td > 0) choices.push(`${ds.h} H meer dan ${fmt(ds.td * 10000)}`);
+    if (ds.hd > 0 && ds.td > 0) choices.push(`${ds.hd} HD ${ds.td} TD ${ds.d} D`);
+    if (ds.hd > 0 && ds.d > 1) choices.push(`${ds.d} D meer dan ${ds.hd} HD`);
+    if (ds.t > 1 && ds.td > 0) choices.push(`${ds.t} T meer dan ${ds.td} TD`);
     return pick(choices);
   }
 
@@ -1402,11 +1468,12 @@
     axis.className = 'gi4-g5-axis';
     axis.dataset.min = String(min);
     axis.dataset.max = String(max);
+    const axisEnd = 96;
     const line = document.createElement('div');
     line.className = 'gi4-g5-axis-line';
     axis.appendChild(line);
     for (let v = min; v <= max; v += minorStep) {
-      const pct = ((v - min) / (max - min)) * 100;
+      const pct = ((v - min) / (max - min)) * axisEnd;
       const tick = document.createElement('span');
       tick.className = v % majorStep === 0 ? 'major' : '';
       tick.style.left = `${pct}%`;
@@ -1414,6 +1481,8 @@
       if (v % majorStep === 0) {
         const label = document.createElement('div');
         label.className = 'gi4-g5-axis-label';
+        if (v === min) label.classList.add('edge-left');
+        if (v === max) label.classList.add('edge-right');
         label.style.left = `${pct}%`;
         label.textContent = fmt(v);
         axis.appendChild(label);
@@ -1589,12 +1658,14 @@
   }
 
   function makeG5NeighborTable(kind, nums, withExample = false){
-    const base = kind === 'number' ? 1 : kind === 'hundred' ? 100 : kind === 'thousand' ? 1000 : 10000;
+    const base = kind === 'number' ? 1 : kind === 'hundred' ? 100 : kind === 'thousand' ? 1000 : kind === 'tenThousand' ? 10000 : kind === 'hundredThousand' ? 100000 : 1000000;
     const labels = {
       number: ['vorig getal', 'volgend getal', 'gi4-neighbor-yellow'],
       hundred: ['vorig honderdtal', 'volgend honderdtal', 'gi4-neighbor-blue'],
       thousand: ['vorig duizendtal', 'volgend duizendtal', 'gi4-neighbor-red'],
       tenThousand: ['vorig tienduizendtal', 'volgend tienduizendtal', 'gi4-neighbor-purple'],
+      hundredThousand: ['vorig honderdduizendtal', 'volgend honderdduizendtal', 'gi4-hd'],
+      million: ['vorig miljoen', 'volgend miljoen', 'gi4-m'],
     }[kind];
     const makeRow = (n, example) => {
       const tr = document.createElement('tr');
@@ -1788,6 +1859,520 @@
     addEquiv(rows);
   }
 
+  function makeG6MaterialCard(n){
+    const ds = digits(n);
+    const places = placesForNumber(n);
+    const card = document.createElement('div');
+    card.className = 'gi4-g6-material-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(placeTable(n, 'dots', { compact: true }));
+    const counts = document.createElement('div');
+    counts.className = 'gi4-g6-material-counts';
+    places.forEach(p => counts.append(lineWithSolution(String(ds[p.key]), 'tiny'), ` ${p.label} `));
+    const numberLine = document.createElement('div');
+    numberLine.className = 'gi4-g6-material-number';
+    numberLine.append('Dit is: ', lineWithSolution(fmt(n), 'long'));
+    card.append(counts, numberLine);
+    return card;
+  }
+
+  function addG6Material(extraCount){
+    const range = activeRange();
+    const key = upperKey('material');
+    const count = extraCount || Math.max(1, parseInt(upperInput('MaterialCount')?.value, 10) || 2);
+    const addSelf = addCount => withRange(range, () => addG6Material(addCount || 1));
+    const question = placeQuestionText();
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g6-material-grid', 'gi4-g6-material-grid');
+      if (existing) {
+        uniqueNumbers(count).forEach(n => existing.appendChild(makeG6MaterialCard(n)));
+        return;
+      }
+    }
+    const b = block(key, `Hoeveel ${question}? Schrijf op.`, addSelf);
+    addFractionInstructions(b, [`Hoeveel ${question}? Schrijf op.`, 'Schrijf het juiste getal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g6-material-grid';
+    uniqueNumbers(count).forEach(n => grid.appendChild(makeG6MaterialCard(n)));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addSelf(1));
+  }
+
+  function addG6ValueCards(extraCount){
+    const range = activeRange();
+    const key = upperKey('valuecards');
+    const count = extraCount || Math.max(1, parseInt(upperInput('ValueCardCount')?.value, 10) || 2);
+    const example = !extraCount && upperInput('ValueCardExample')?.checked;
+    const addSelf = addCount => withRange(range, () => addG6ValueCards(addCount || 1));
+    const gridClass = 'gi4-grid gi4-upper-value-grid';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-upper-value-grid', gridClass);
+      if (existing) {
+        uniqueNumbers(count).forEach(n => existing.appendChild(makeValueCard(n, false, 'plain')));
+        return;
+      }
+    }
+    const b = block(key, 'Schrijf de waarde van de cijfers.', addSelf);
+    addFractionInstructions(b, ['Schrijf de waarde van de cijfers.']);
+    const grid = document.createElement('div');
+    grid.className = gridClass;
+    uniqueNumbers(count).forEach((n, i) => grid.appendChild(makeValueCard(n, example && i === 0, 'plain')));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addSelf(1));
+  }
+
+  function addG6ShortValues(extraCount){
+    const range = activeRange();
+    const key = upperKey('short_values');
+    const count = extraCount || Math.max(1, parseInt(upperInput('ShortValueCount')?.value, 10) || 3);
+    const addSelf = addCount => withRange(range, () => addG6ShortValues(addCount || 1));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-short-value-grid', 'gi4-short-value-grid');
+      if (existing) {
+        uniqueNumbers(count).forEach(n => existing.appendChild(makeShortValueCard(n)));
+        return;
+      }
+    }
+    const b = block(key, 'Schrijf de waarde van het aangeduide cijfer.', addSelf);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-short-value-grid';
+    uniqueNumbers(count).forEach(n => grid.appendChild(makeShortValueCard(n)));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addSelf(1));
+  }
+
+  function addG6BuildNumbers(extraCount){
+    const range = activeRange();
+    const key = upperKey('build_numbers');
+    const rows = extraCount || Math.max(2, parseInt(upperInput('BuildNumberCount')?.value, 10) || 6);
+    const addSelf = addCount => withRange(range, () => addG6BuildNumbers(addCount || 1));
+    const exampleText = range === 10000000 ? '1 200 000 (of 1.200.000)' : '120 000 (of 120.000)';
+    const b = block(key, 'Schrijf de getallen. Gebruik indien nodig de plaatswaardekaart.', addSelf);
+    addFractionInstructions(b, ['Schrijf de getallen.', 'Je mag de getallen indien nodig eerst op de plaatswaardekaart noteren.', `<strong>Tip!</strong> Denk aan de juiste schrijfwijze van de getallen, bv. ${exampleText}.`]);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-build-number-card gi4-g6-build row-delete-wrap';
+    wrap.style.setProperty('--build-rows', String(rows));
+    wrap.appendChild(rowDel(wrap));
+    wrap.appendChild(makePlaceValuePracticeTable(rows));
+    const list = document.createElement('div');
+    list.className = 'gi4-build-number-list';
+    uniqueNumbers(rows).forEach(n => {
+      const row = document.createElement('div');
+      row.className = 'gi4-build-number-row';
+      row.append(document.createTextNode(`${placeExpressionForNumber(n)} = `), lineWithSolution(fmt(n), 'long'));
+      list.appendChild(row);
+    });
+    wrap.appendChild(list);
+    b.appendChild(wrap);
+  }
+
+  function g6NextTenThousandNumber(){
+    if (activeRange() === 10000000) return rnd(12, 98) * 100000 + rnd(1, 9) * 10000;
+    return rnd(12, 98) * 10000 + rnd(1, 9) * 1000;
+  }
+
+  function makeG6NextTenThousandRow(n, example){
+    const base = activeRange() === 10000000 ? 1000000 : 10000;
+    const label = activeRange() === 10000000 ? 'miljoen' : 'tienduizendtal';
+    const next = nextMultiple(n + 1, base);
+    const diff = next - n;
+    const row = document.createElement('div');
+    row.className = `gi4-g6-next-row row-delete-wrap${example ? ' example' : ''}`;
+    row.appendChild(rowDel(row));
+    const number = document.createElement('strong');
+    number.textContent = fmt(n);
+    row.append(number, ` \u2192 Het volgende ${label} is `);
+    if (example) {
+      const answer = document.createElement('strong');
+      answer.textContent = fmt(next);
+      row.append(answer);
+    } else {
+      row.appendChild(lineWithSolution(fmt(next), 'long'));
+    }
+    row.append('. Dat is ');
+    if (example) {
+      const answer = document.createElement('strong');
+      answer.textContent = fmt(diff);
+      row.append(answer, ' erbij.');
+    } else {
+      row.append(lineWithSolution(fmt(diff), 'medium'), ' erbij.');
+    }
+    return row;
+  }
+
+  function addG6NextTenThousand(extraCount){
+    const range = activeRange();
+    const isTenMillion = range === 10000000;
+    const key = upperKey(isTenMillion ? 'next_million' : 'next_ten_thousand');
+    const count = extraCount || Math.max(1, parseInt(upperInput(isTenMillion ? 'NextMillionCount' : 'NextTenThousandCount')?.value, 10) || 4);
+    const example = !extraCount && upperInput(isTenMillion ? 'NextMillionExample' : 'NextTenThousandExample')?.checked;
+    const addSelf = addCount => withRange(range, () => addG6NextTenThousand(addCount || 1));
+    const label = isTenMillion ? 'miljoen' : 'tienduizendtal';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g6-next-list', 'gi4-g6-next-list');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeG6NextTenThousandRow(makeUnique(key, g6NextTenThousandNumber) || g6NextTenThousandNumber(), false));
+        return;
+      }
+    }
+    const b = block(key, `Wat is het volgende ${label}? Vul aan tot het volgende ${label}.`, addSelf);
+    addFractionInstructions(b, [`Wat is het volgende ${label}? Schrijf op.`, `Vul aan tot het volgende ${label}.`]);
+    const list = document.createElement('div');
+    list.className = 'gi4-g6-next-list';
+    for (let i = 0; i < count; i++) list.appendChild(makeG6NextTenThousandRow(makeUnique(key, g6NextTenThousandNumber) || g6NextTenThousandNumber(), example && i === 0));
+    b.appendChild(list);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addSelf(1));
+  }
+
+  function addG6Equiv(extraCount){
+    const range = activeRange();
+    const key = upperKey('equiv');
+    const rows = extraCount || Math.max(2, parseInt(upperInput('EquivRows')?.value, 10) || 4);
+    const addSelf = addCount => withRange(range, () => addG6Equiv(addCount || 1));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-equivalent-table', 'gi4-equivalent-table');
+      if (existing) {
+        const nums = uniqueNumbers(rows);
+        nums.forEach((n, rowIndex) => {
+          const tr = document.createElement('tr');
+          tr.className = `gi4-equivalent-solution-${(existing.rows.length + rowIndex) % 6}`;
+          const cells = [fmt(n), exprFor(n), exprFor(n)].sort(() => Math.random() - .5);
+          cells.forEach(text => {
+            const td = document.createElement('td');
+            td.textContent = text;
+            tr.appendChild(td);
+          });
+          existing.appendChild(tr);
+        });
+        return;
+      }
+    }
+    const b = block(key, 'Geef wat evenveel is dezelfde kleur.', addSelf);
+    addFractionInstructions(b, ['Geef wat evenveel is dezelfde kleur.']);
+    const table = document.createElement('table');
+    table.className = 'gi4-equivalent-table';
+    uniqueNumbers(rows).forEach((n, rowIndex) => {
+      const tr = document.createElement('tr');
+      tr.className = `gi4-equivalent-solution-${rowIndex % 6}`;
+      const cells = [fmt(n), exprFor(n), exprFor(n)].sort(() => Math.random() - .5);
+      cells.forEach(text => {
+        const td = document.createElement('td');
+        td.textContent = text;
+        tr.appendChild(td);
+      });
+      table.appendChild(tr);
+    });
+    b.appendChild(table);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addSelf(1));
+  }
+
+  function g6ExactExpression(n){
+    const ds = digits(n);
+    const terms = activePlaces()
+      .filter(p => ds[p.key] > 0)
+      .map(p => `${ds[p.key]} ${p.label}`);
+    return terms.length ? terms.join(' ') : '0 E';
+  }
+
+  function makeG6PlaceTableRow(n){
+    const tr = document.createElement('tr');
+    tr.className = 'row-delete-wrap';
+    const numberCell = document.createElement('td');
+    numberCell.className = 'gi4-g6-place-number';
+    numberCell.append(document.createTextNode(`${fmt(n)} \u2192`), rowDel(tr));
+    tr.appendChild(numberCell);
+    const ds = digits(n);
+    activePlaces().forEach(p => {
+      const td = document.createElement('td');
+      td.appendChild(lineWithSolution(String(ds[p.key]), 'short'));
+      tr.appendChild(td);
+    });
+    return tr;
+  }
+
+  function addG6PlaceTable(extraCount){
+    const range = activeRange();
+    const key = upperKey('place_table');
+    const rows = extraCount || Math.max(1, parseInt(upperInput('PlaceTableRows')?.value, 10) || 5);
+    const addSelf = addCount => withRange(range, () => addG6PlaceTable(addCount || 1));
+    if (extraCount) {
+      const body = lastBlock(key)?.querySelector('.gi4-g6-place-table tbody');
+      if (body) {
+        uniqueNumbers(rows).forEach(n => body.appendChild(makeG6PlaceTableRow(n)));
+        return;
+      }
+    }
+    const b = block(key, 'Noteer de getallen in de plaatswaardetabel.', addSelf);
+    addFractionInstructions(b, ['Noteer de getallen in de plaatswaardetabel.']);
+    const table = document.createElement('table');
+    table.className = 'gi4-g6-place-table';
+    table.innerHTML = `<thead><tr><th></th>${activePlaces().map(p => `<th class="${p.color}">${p.label}</th>`).join('')}</tr></thead>`;
+    const body = document.createElement('tbody');
+    uniqueNumbers(rows).forEach(n => body.appendChild(makeG6PlaceTableRow(n)));
+    table.appendChild(body);
+    b.appendChild(table);
+  }
+
+  function g6AxisConnectExercise(fine){
+    const tenMillion = activeRange() === 10000000;
+    const start = tenMillion
+      ? (fine ? rnd(76, 82) * 100000 : rnd(3, 6) * 1000000)
+      : (fine ? rnd(760, 820) * 1000 : rnd(3, 6) * 100000);
+    const range = tenMillion ? (fine ? 600000 : 2000000) : (fine ? 60000 : 200000);
+    const majorStep = tenMillion ? (fine ? 100000 : 500000) : (fine ? 10000 : 50000);
+    const minorStep = tenMillion ? (fine ? 10000 : 100000) : (fine ? 1000 : 10000);
+    const end = start + range;
+    const cardValues = tenMillion
+      ? (fine
+        ? [start + 90000, start + 210000, start + 360000, start + 520000]
+        : [start + 200000, start + 800000, start + 1400000, start + 1800000])
+      : (fine
+        ? [start + 9000, start + 21000, start + 36000, start + 52000]
+        : [start + 20000, start + 80000, start + 140000, start + 180000]);
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-axis-order-row gi4-g6-axis-row row-delete-wrap';
+    row.dataset.axisStart = String(start);
+    row.dataset.axisRange = String(range);
+    row.appendChild(rowDel(row));
+    row.appendChild(makeG5Axis(start, end, majorStep, minorStep));
+    const cards = document.createElement('div');
+    cards.className = 'gi4-g5-axis-cards';
+    cardValues.sort(() => Math.random() - .5).forEach(v => {
+      const card = document.createElement('div');
+      card.className = 'gi4-g5-axis-card';
+      card.dataset.value = String(v);
+      card.textContent = fmt(v);
+      cards.appendChild(card);
+    });
+    row.appendChild(cards);
+    return row;
+  }
+
+  function g6ApproxAxisExercise(){
+    const max = activeRange() === 10000000 ? 10000000 : 1000000;
+    const major = activeRange() === 10000000 ? 1000000 : 100000;
+    const minor = activeRange() === 10000000 ? 500000 : 50000;
+    const cardsList = activeRange() === 10000000
+      ? [rnd(12, 19) * 100000 + rnd(1, 9) * 1000, rnd(31, 48) * 100000 + rnd(1, 9) * 10000, rnd(62, 79) * 100000 + rnd(1, 9) * 1000, rnd(91, 98) * 100000 + rnd(1, 9) * 10000, rnd(4, 8) * 1000000 + 500000]
+      : [rnd(12, 19) * 10000 + rnd(1, 9) * 100 + rnd(1, 9), rnd(31, 48) * 10000 + rnd(1, 9) * 1000, rnd(62, 79) * 10000 + rnd(1, 9) * 100, rnd(91, 98) * 10000 + rnd(1, 9) * 1000, rnd(4, 8) * 100000 + 50000];
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-axis-order-row approx gi4-g6-axis-row row-delete-wrap';
+    row.dataset.axisStart = '0';
+    row.dataset.axisRange = String(max);
+    row.appendChild(rowDel(row));
+    row.appendChild(makeG5Axis(0, max, major, minor));
+    const cards = document.createElement('div');
+    cards.className = 'gi4-g5-axis-cards narrow';
+    cardsList.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'gi4-g5-axis-card';
+        card.dataset.value = String(v);
+        card.textContent = fmt(v);
+        cards.appendChild(card);
+      });
+    row.appendChild(cards);
+    return row;
+  }
+
+  function addG6AxisOrder(extraCount, forcedMode){
+    const range = activeRange();
+    const mode = forcedMode || upperInput('AxisOrderMode')?.value || 'connect';
+    const key = `${upperKey('axis_order')}_${mode}`;
+    const count = extraCount || Math.max(1, parseInt(upperInput('AxisOrderCount')?.value, 10) || 2);
+    const addSelf = addCount => withRange(range, () => addG6AxisOrder(addCount || 1, mode));
+    const title = mode === 'approx'
+      ? 'Waar liggen de getallen ongeveer? Verbind de kaartjes met de juiste plaats op de getallenas.'
+      : 'Verbind de kaartjes met de juiste plaats op de getallenas.';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-axis-order', 'gi4-g5-axis-order');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(mode === 'approx' ? g6ApproxAxisExercise() : g6AxisConnectExercise(existing.children.length % 2 === 1));
+        return;
+      }
+    }
+    const b = block(key, title, addSelf);
+    addFractionInstructions(b, mode === 'approx'
+      ? ['Waar liggen de getallen ongeveer?', 'Verbind de kaartjes met de juiste plaats op de getallenas.']
+      : ['Verbind de kaartjes met de juiste plaats op de getallenas.']);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-axis-order';
+    for (let i = 0; i < count; i++) wrap.appendChild(mode === 'approx' ? g6ApproxAxisExercise() : g6AxisConnectExercise(i % 2 === 1));
+    b.appendChild(wrap);
+  }
+
+  function addG6Neighbors(extraCount){
+    const range = activeRange();
+    const key = upperKey('neighbors');
+    const rows = extraCount || Math.max(1, parseInt(upperInput('NeighborRows')?.value, 10) || 2);
+    const addSelf = addCount => withRange(range, () => addG6Neighbors(addCount || 1));
+    const kinds = range === 10000000
+      ? ['number', 'thousand', 'hundredThousand', 'million']
+      : ['number', 'thousand', 'tenThousand', 'hundredThousand'];
+    if (extraCount) {
+      const target = lastBlock(key);
+      let appended = false;
+      kinds.forEach(kind => {
+        const body = target?.querySelector(`.gi4-g5-neighbor-table[data-kind="${kind}"] tbody`);
+        if (!body) return;
+        uniqueNumbers(rows).forEach(n => {
+          const tr = makeG5NeighborRow(kind, n);
+          if (tr) body.appendChild(tr);
+        });
+        appended = true;
+      });
+      if (appended) return;
+    }
+    const b = block(key, range === 10000000 ? 'Schrijf de buurtallen, buurduizendtallen, buurhonderdduizendtallen of buurmiljoenen.' : 'Schrijf de buurtallen, buurduizendtallen, buurtienduizendtallen of buurhonderdduizendtallen.', addSelf);
+    addFractionInstructions(b, range === 10000000
+      ? ['Schrijf de buurtallen of de buurduizendtallen.', 'Schrijf de buurhonderdduizendtallen of de buurmiljoenen.']
+      : ['Schrijf de buurtallen of de buurduizendtallen.', 'Schrijf de buurtienduizendtallen of de buurhonderdduizendtallen.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g5-neighbor-grid';
+    const withExample = upperInput('NeighborExample')?.checked;
+    kinds.forEach(kind => grid.appendChild(makeG5NeighborTable(kind, uniqueNumbers(rows), withExample)));
+    b.appendChild(grid);
+  }
+
+  function makeG6JumpRow(step){
+    const centerIndex = 3;
+    const minStart = Math.max(activeMin(), step * 3);
+    const maxStart = activeMax() - step * 6;
+    const start = Math.floor(rnd(minStart, Math.max(minStart, maxStart)) / step) * step;
+    const center = start + centerIndex * step;
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-jump-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const tag = document.createElement('div');
+    tag.className = 'gi4-g5-jump-tag';
+    tag.textContent = `Maak sprongen van ${fmt(step)}.`;
+    const axis = document.createElement('div');
+    axis.className = 'gi4-g5-jump-axis';
+    for (let i = 0; i < 7; i++) {
+      const value = start + i * step;
+      const cell = document.createElement('div');
+      cell.className = i === centerIndex ? 'center' : '';
+      if (i === centerIndex || Math.random() < .25) cell.textContent = fmt(value);
+      else cell.appendChild(lineWithSolution(fmt(value), 'long'));
+      axis.appendChild(cell);
+    }
+    row.append(tag, axis);
+    row.dataset.center = String(center);
+    return row;
+  }
+
+  function g6JumpSteps(count){
+    const base = activeRange() === 10000000
+      ? [10000, 20000, 50000, 100000, 200000, 500000, 1000000]
+      : [1000, 2000, 5000, 10000, 20000, 50000, 100000];
+    const shuffled = [...base].sort(() => Math.random() - .5);
+    return Array.from({ length: count }, (_, i) => shuffled[i % shuffled.length]);
+  }
+
+  function addG6Jumps(extraCount){
+    const range = activeRange();
+    const key = upperKey('jumps');
+    const rows = extraCount || Math.max(1, parseInt(upperInput('JumpRows')?.value, 10) || 3);
+    const addSelf = addCount => withRange(range, () => addG6Jumps(addCount || 1));
+    const steps = g6JumpSteps(rows);
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-jumps', 'gi4-g5-jumps');
+      if (existing) {
+        for (let i = 0; i < rows; i++) existing.appendChild(makeG6JumpRow(steps[i]));
+        return;
+      }
+    }
+    const b = block(key, 'Maak sprongen op de getallenas. Vul de getallen aan.', addSelf);
+    addFractionInstructions(b, ['Maak sprongen op de getallenas.', 'Vul de getallen aan.']);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-jumps';
+    steps.forEach(step => wrap.appendChild(makeG6JumpRow(step)));
+    b.appendChild(wrap);
+  }
+
+  function makeG6CompareRow(mode){
+    const row = document.createElement('div');
+    row.className = 'gi4-g5-plain-compare-row row-delete-wrap';
+    row.appendChild(rowDel(row));
+    const a = randomNumber();
+    let left = fmt(a);
+    let rightValue = a;
+    let right = fmt(a);
+    if (mode === 'equal') {
+      if (Math.random() < .55) {
+        left = Math.random() < .5 ? fmt(a) : g6ExactExpression(a);
+        right = Math.random() < .5 ? fmt(a) : g6ExactExpression(a);
+      } else {
+        rightValue = Math.min(activeMax(), Math.max(activeMin(), a + pick([-1, 1]) * pick([1, 10, 100, 1000, 10000, 100000])));
+        right = Math.random() < .5 ? fmt(rightValue) : g6ExactExpression(rightValue);
+      }
+    } else {
+      rightValue = Math.min(activeMax(), Math.max(activeMin(), a + pick([-1, 1]) * pick([1, 10, 100, 1000, 5000, 10000, 50000, 100000, 500000])));
+      right = fmt(rightValue);
+    }
+    const box = Object.assign(document.createElement('span'), { className: 'gi4-symbol-box' });
+    box.appendChild(sol(mode === 'equal' ? (a === rightValue ? '=' : '\u2260') : (a < rightValue ? '<' : a > rightValue ? '>' : '=')));
+    row.append(left, box, right);
+    return row;
+  }
+
+  function addG6Compare(extraCount, forcedMode){
+    const range = activeRange();
+    const mode = forcedMode || upperInput('CompareMode')?.value || 'plain';
+    const key = `${upperKey('compare')}_${mode}`;
+    const count = extraCount || Math.max(1, parseInt(upperInput('CompareCount')?.value, 10) || 6);
+    const addSelf = addCount => withRange(range, () => addG6Compare(addCount || 1, mode));
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-plain-compare', 'gi4-g5-plain-compare');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeG6CompareRow(mode));
+        return;
+      }
+    }
+    const b = block(key, mode === 'equal' ? 'Vergelijk. Vul in: = of \u2260.' : 'Vergelijk. Vul in: <, > of =.', addSelf);
+    addFractionInstructions(b, [mode === 'equal' ? 'Vergelijk. Vul in: = of \u2260.' : 'Vergelijk. Vul in: <, > of =.']);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-plain-compare';
+    for (let i = 0; i < count; i++) wrap.appendChild(makeG6CompareRow(mode));
+    b.appendChild(wrap);
+  }
+
+  function addG6Order(extraCount, forcedDir){
+    const range = activeRange();
+    const dir = forcedDir || upperInput('OrderDirection')?.value || 'asc';
+    const key = `${upperKey('order')}_${dir}`;
+    const count = extraCount || Math.max(1, parseInt(upperInput('OrderCount')?.value, 10) || 2);
+    const addSelf = addCount => withRange(range, () => addG6Order(addCount || 1, dir));
+    const title = dir === 'asc'
+      ? 'Rangschik de getallen van klein naar groot.'
+      : 'Rangschik de getallen van groot naar klein.';
+    if (extraCount) {
+      const existing = containerInLastBlock(key, '.gi4-g5-order-list', 'gi4-g5-order-list');
+      if (existing) {
+        for (let i = 0; i < count; i++) existing.appendChild(makeG5OrderRow(dir));
+        return;
+      }
+    }
+    const b = block(key, title, addSelf);
+    addFractionInstructions(b, [title]);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-g5-order-list';
+    for (let i = 0; i < count; i++) wrap.appendChild(makeG5OrderRow(dir));
+    b.appendChild(wrap);
+  }
+
+  function addG7Material(extraCount){ return withRange(10000000, () => addG6Material(extraCount)); }
+  function addG7ValueCards(extraCount){ return withRange(10000000, () => addG6ValueCards(extraCount)); }
+  function addG7ShortValues(extraCount){ return withRange(10000000, () => addG6ShortValues(extraCount)); }
+  function addG7BuildNumbers(extraCount){ return withRange(10000000, () => addG6BuildNumbers(extraCount)); }
+  function addG7PlaceTable(extraCount){ return withRange(10000000, () => addG6PlaceTable(extraCount)); }
+  function addG7NextMillion(extraCount){ return withRange(10000000, () => addG6NextTenThousand(extraCount)); }
+  function addG7AxisOrder(extraCount, forcedMode){ return withRange(10000000, () => addG6AxisOrder(extraCount, forcedMode)); }
+  function addG7Neighbors(extraCount){ return withRange(10000000, () => addG6Neighbors(extraCount)); }
+  function addG7Jumps(extraCount){ return withRange(10000000, () => addG6Jumps(extraCount)); }
+  function addG7Compare(extraCount, forcedMode){ return withRange(10000000, () => addG6Compare(extraCount, forcedMode)); }
+  function addG7Order(extraCount, forcedDir){ return withRange(10000000, () => addG6Order(extraCount, forcedDir)); }
+  function addG7Equiv(extraCount){ return withRange(10000000, () => addG6Equiv(extraCount)); }
+
   function gcd(a, b){
     while (b) {
       const t = b;
@@ -1815,7 +2400,13 @@
   }
 
   function pickUnusedOrAny(namespace, items, keyFn = item => item){
-    return pickUnused(namespace, items, keyFn) || pick(items);
+    const unused = pickUnused(namespace, items, keyFn);
+    if (unused) return unused;
+    const last = lastExerciseSignatures.get(namespace);
+    const alternatives = items.filter(item => signaturePart(keyFn(item)) !== last);
+    const chosen = pick(alternatives.length ? alternatives : items);
+    lastExerciseSignatures.set(namespace, signaturePart(keyFn(chosen)));
+    return chosen;
   }
 
   function makeG5SimplifyStrip(num, den, simplifiedNum, simplifiedDen, color){
@@ -5587,8 +6178,8 @@
       .gi4-decimal-contents-answer{display:flex;flex-direction:column;align-items:center;gap:8px}
       .gi4-decimal-contents-order-line{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;margin-top:8px;font-weight:700}
       .gi4-decimal-contents-blank{display:inline-block;width:64px;height:18px;border-bottom:1.8px solid #cbd5e1}
-      .gi4-decimal-order-list{display:grid;grid-template-columns:repeat(11,minmax(30px,1fr));gap:4px;align-items:start;margin-top:10px}
-      .gi4-decimal-order-col{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+      .gi4-decimal-order-list{position:relative;height:176px;margin:8px 18px 0;text-align:center}
+      .gi4-decimal-order-col{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:5px;min-width:40px}
       .gi4-decimal-order-decimal{min-width:34px;padding:4px 6px;border:1.4px solid #d8b600;background:#fff1a8;border-radius:7px;font-weight:800;line-height:1.05;text-align:center;box-sizing:border-box}
       .gi4-decimal-order-decimal.whole{color:#e11d48}
       .gi4-decimal-order-fraction{min-width:32px;padding:2px 4px;border:1.2px solid #b7d98b;border-radius:6px;background:#fff;display:inline-grid;grid-template-rows:auto 1px auto;justify-items:center;align-items:center;gap:2px;font-weight:800;line-height:1;box-sizing:border-box}
@@ -6703,15 +7294,16 @@
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('gi4-decimal-mixed-plate-svg');
     if (compact) svg.classList.add('compact');
-    svg.setAttribute('viewBox', '0 0 96 48');
+    svg.setAttribute('viewBox', '0 0 142 62');
     svg.setAttribute('aria-hidden', 'true');
-    const A = { x: 9, y: 28 }, B = { x: 69, y: 28 }, C = { x: 88, y: 14 }, D = { x: 28, y: 14 };
-    const A2 = { x: 9, y: 34 }, B2 = { x: 69, y: 34 }, C2 = { x: 88, y: 20 };
+    const A = { x: 10, y: 39 }, B = { x: 104, y: 39 }, C = { x: 132, y: 20 }, D = { x: 38, y: 20 };
+    const A2 = { x: 10, y: 49 }, B2 = { x: 104, y: 49 }, C2 = { x: 132, y: 30 };
     const fill = '#ffd83d';
     const side = '#caa100';
+    const front = '#ffd51c';
     const stroke = '#8a6a00';
     const grid = '#9d7a00';
-    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e5b900', stroke));
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, front, stroke));
     svg.appendChild(svgPolygon(`${B.x},${B.y} ${C.x},${C.y} ${C2.x},${C2.y} ${B2.x},${B2.y}`, side, stroke));
     svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}`, fill, stroke));
 
@@ -6725,6 +7317,15 @@
       const right = lerp(B, C, t);
       svg.appendChild(svgLine(left.x, left.y, right.x, right.y, grid, .65));
     }
+    for (let i = 1; i < 5; i++) {
+      const t = i / 5;
+      const frontTop = lerp(A, B, t);
+      const frontBottom = lerp(A2, B2, t);
+      svg.appendChild(svgLine(frontTop.x, frontTop.y, frontBottom.x, frontBottom.y, grid, .45));
+      const sideTop = lerp(B, C, t);
+      const sideBottom = lerp(B2, C2, t);
+      svg.appendChild(svgLine(sideTop.x, sideTop.y, sideBottom.x, sideBottom.y, grid, .4));
+    }
     return svg;
   }
 
@@ -6732,15 +7333,16 @@
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.classList.add('gi4-decimal-mixed-rod-svg');
     if (compact) svg.classList.add('compact');
-    svg.setAttribute('viewBox', '0 0 112 32');
+    svg.setAttribute('viewBox', '0 0 150 46');
     svg.setAttribute('aria-hidden', 'true');
-    const A = { x: 8, y: 17 }, B = { x: 91, y: 17 }, C = { x: 103, y: 10 }, D = { x: 20, y: 10 };
-    const A2 = { x: 8, y: 24 }, B2 = { x: 91, y: 24 }, C2 = { x: 103, y: 17 };
+    const A = { x: 8, y: 19 }, B = { x: 128, y: 19 }, C = { x: 142, y: 10 }, D = { x: 22, y: 10 };
+    const A2 = { x: 8, y: 38 }, B2 = { x: 128, y: 38 }, C2 = { x: 142, y: 29 };
     const fill = '#ffd83d';
     const side = '#caa100';
+    const front = '#ffd51c';
     const stroke = '#8a6a00';
     const grid = '#9d7a00';
-    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, '#e5b900', stroke));
+    svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${B2.x},${B2.y} ${A2.x},${A2.y}`, front, stroke));
     svg.appendChild(svgPolygon(`${B.x},${B.y} ${C.x},${C.y} ${C2.x},${C2.y} ${B2.x},${B2.y}`, side, stroke));
     svg.appendChild(svgPolygon(`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}`, fill, stroke));
     const lerp = (p, q, t) => ({ x: p.x + (q.x - p.x) * t, y: p.y + (q.y - p.y) * t });
@@ -6749,7 +7351,33 @@
       const top = lerp(D, C, t);
       const bot = lerp(A, B, t);
       svg.appendChild(svgLine(top.x, top.y, bot.x, bot.y, grid, .65));
+      const frontTop = lerp(A, B, t);
+      const frontBottom = lerp(A2, B2, t);
+      svg.appendChild(svgLine(frontTop.x, frontTop.y, frontBottom.x, frontBottom.y, grid, .65));
+      const sideTop = lerp(B, C, t);
+      const sideBottom = lerp(B2, C2, t);
+      svg.appendChild(svgLine(sideTop.x, sideTop.y, sideBottom.x, sideBottom.y, grid, .45));
     }
+    svg.appendChild(svgLine(A.x, A.y, A2.x, A2.y, grid, .65));
+    svg.appendChild(svgLine(B.x, B.y, B2.x, B2.y, grid, .65));
+    return svg;
+  }
+
+  function decimalMixedUnitCubeSvg(compact = false){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-unit-cube-svg');
+    if (compact) svg.classList.add('compact');
+    svg.setAttribute('viewBox', '0 0 34 34');
+    svg.setAttribute('aria-hidden', 'true');
+    const fill = '#ffd51c';
+    const top = '#ffe56e';
+    const side = '#caa100';
+    const stroke = '#8a6a00';
+    svg.appendChild(svgPolygon('8,10 15,4 27,4 20,10', top, stroke));
+    svg.appendChild(svgPolygon('20,10 27,4 27,22 20,29', side, stroke));
+    svg.appendChild(svgPolygon('8,10 20,10 20,29 8,29', fill, stroke));
+    svg.appendChild(svgLine(20, 10, 27, 4, stroke, 1));
+    svg.appendChild(svgLine(20, 29, 27, 22, stroke, 1));
     return svg;
   }
 
@@ -7297,6 +7925,1418 @@
     wrap.className = 'gi4-decimal-hundred-value-grid';
     for (let i = 0; i < count; i++) wrap.appendChild(makeDecimalMixedHundredthsValueCard(example && i === 0));
     return wrap;
+  }
+
+  function decimalThousandthsSeeds(){
+    return [
+      { whole: 1, tenths: 3, hundredths: 4, thousandths: 7 },
+      { whole: 1, tenths: 5, hundredths: 2, thousandths: 6 },
+      { whole: 1, tenths: 8, hundredths: 0, thousandths: 9 },
+      { whole: 2, tenths: 1, hundredths: 6, thousandths: 4 },
+      { whole: 2, tenths: 7, hundredths: 3, thousandths: 5 },
+      { whole: 3, tenths: 0, hundredths: 8, thousandths: 2 },
+      { whole: 4, tenths: 6, hundredths: 1, thousandths: 8 },
+      { whole: 5, tenths: 4, hundredths: 8, thousandths: 7 },
+      { whole: 7, tenths: 6, hundredths: 8, thousandths: 3 },
+      { whole: 9, tenths: 0, hundredths: 2, thousandths: 3 },
+    ];
+  }
+
+  function decimalThousandthsSeed(namespace){
+    return pickUnusedOrAny(namespace, decimalThousandthsSeeds(), item => `${item.whole}-${item.tenths}-${item.hundredths}-${item.thousandths}`);
+  }
+
+  function decimalThousandthsAmountSeed(namespace){
+    const seeds = decimalThousandthsSeeds().filter(item => item.whole >= 1 && item.whole <= 3);
+    return pickUnusedOrAny(namespace, seeds, item => `${item.whole}-${item.tenths}-${item.hundredths}-${item.thousandths}`);
+  }
+
+  function decimalThousandthsAxisMixedSeed(namespace){
+    const seeds = decimalThousandthsSeeds().filter(item => item.whole >= 1 && item.whole <= 9 && decimalThousandthsTotal(item) % 1000 > 0);
+    return pickUnusedOrAny(namespace, seeds, item => `${item.whole}-${item.tenths}-${item.hundredths}-${item.thousandths}`);
+  }
+
+  function decimalThousandthsTotal(item){
+    return item.whole * 1000 + item.tenths * 100 + item.hundredths * 10 + item.thousandths;
+  }
+
+  function decimalThousandthsLabel(total){
+    return Number(total / 1000).toFixed(3).replace('.', ',');
+  }
+
+  function decimalThousandthsMiniCube(){
+    const cube = decimalMixedUnitCubeSvg(true);
+    cube.classList.add('gi4-decimal-thousand-mini-cube');
+    return cube;
+  }
+
+  function decimalThousandthsModel(item, includeThousandths = true){
+    const model = document.createElement('div');
+    model.className = `gi4-decimal-thousand-model${includeThousandths ? '' : ' no-thousandths'}`;
+    const cubes = document.createElement('div');
+    cubes.className = 'model-cubes';
+    for (let i = 0; i < item.whole; i++) cubes.appendChild(decimalMixedCubeSvg(true));
+    const plates = document.createElement('div');
+    plates.className = 'model-plates';
+    for (let i = 0; i < item.tenths; i++) plates.appendChild(decimalMixedPlateSvg(true));
+    const rods = document.createElement('div');
+    rods.className = 'model-rods';
+    for (let i = 0; i < item.hundredths; i++) rods.appendChild(decimalMixedRodSvg(true));
+    model.append(cubes, plates, rods);
+    if (includeThousandths) {
+      const minis = document.createElement('div');
+      minis.className = 'model-minis';
+      for (let i = 0; i < item.thousandths; i++) minis.appendChild(decimalThousandthsMiniCube());
+      model.appendChild(minis);
+    }
+    return model;
+  }
+
+  function decimalThousandthsSentences(item, includeThousandths = true){
+    const total = decimalThousandthsTotal(item);
+    const decimal = decimalThousandthsLabel(total);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-text';
+    const row1 = document.createElement('div');
+    if (includeThousandths) {
+      row1.append('Dit is ', lineWithSolution(String(item.whole), 'tiny'), ' geheel, ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden, ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten en ', lineWithSolution(String(item.thousandths), 'tiny'), ' duizendsten.');
+    } else {
+      row1.append('Dit is ', lineWithSolution(String(item.whole), 'tiny'), ' geheel, ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden en ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten.');
+    }
+    const row2 = document.createElement('div');
+    row2.append('Samen zijn dat ', lineWithSolution(String(total), 'short'), ' duizendsten.');
+    const row3 = document.createElement('div');
+    row3.className = 'equation';
+    row3.append(fractionBox('', '1000', String(total), ''), document.createTextNode(' = '), lineWithSolution(String(item.whole), 'tiny'), fractionBox('', '1000', String(total % 1000), ''), document.createTextNode(' = '), lineWithSolution(decimal, 'short'));
+    wrap.append(row1, row2, row3);
+    return wrap;
+  }
+
+  function decimalThousandthsAxis(item, max = 2){
+    const total = decimalThousandthsTotal(item);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-axis';
+    const labels = document.createElement('div');
+    labels.className = 'axis-labels';
+    for (let i = 0; i <= max; i++) {
+      const label = document.createElement('span');
+      label.style.left = `${i / max * 100}%`;
+      label.textContent = String(i);
+      labels.appendChild(label);
+    }
+    const axis = document.createElement('div');
+    axis.className = 'axis';
+    for (let i = 0; i <= max * 10; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i / (max * 10) * 100}%`;
+      axis.appendChild(tick);
+    }
+    const fill = document.createElement('span');
+    fill.className = 'fill';
+    fill.style.width = `${Math.min(100, total / (max * 1000) * 100)}%`;
+    const marker = document.createElement('span');
+    marker.className = 'marker';
+    marker.style.left = `${Math.min(100, total / (max * 1000) * 100)}%`;
+    axis.append(fill, marker);
+    wrap.append(labels, axis);
+    return wrap;
+  }
+
+  function decimalThousandthsZoomAxis(item){
+    const total = decimalThousandthsTotal(item);
+    const rest = total % 1000;
+    const start = Math.floor(rest / 100) / 10;
+    const end = start + 0.1;
+    const local = rest - Math.floor(rest / 100) * 100;
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-zoom';
+    const strip = document.createElement('div');
+    strip.className = 'strip';
+    strip.style.setProperty('--filled', `${rest / 10}%`);
+    for (let i = 0; i <= 10; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 5 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i * 10}%`;
+      strip.appendChild(tick);
+    }
+    const marker = document.createElement('span');
+    marker.className = 'marker';
+    marker.style.left = `${rest / 10}%`;
+    strip.appendChild(marker);
+    const ruler = document.createElement('div');
+    ruler.className = 'ruler';
+    for (let i = 0; i <= 100; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i}%`;
+      ruler.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.style.left = `${i}%`;
+        label.textContent = Number(start + i / 1000).toFixed(2).replace('.', ',');
+        ruler.appendChild(label);
+      }
+    }
+    const rulerMarker = document.createElement('span');
+    rulerMarker.className = 'marker';
+    rulerMarker.style.left = `${local}%`;
+    ruler.appendChild(rulerMarker);
+    wrap.append(strip, ruler);
+    return wrap;
+  }
+
+  function decimalThousandthsPlaceSvg(item){
+    const places = ['E', 't', 'h', 'd'];
+    const values = {
+      E: { count: item.whole, value: String(item.whole) },
+      t: { count: item.tenths, value: decimalComma(item.tenths / 10) },
+      h: { count: item.hundredths, value: Number(item.hundredths / 100).toFixed(2).replace('.', ',') },
+      d: { count: item.thousandths, value: Number(item.thousandths / 1000).toFixed(3).replace('.', ',') },
+    };
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-thousand-value-svg');
+    svg.setAttribute('viewBox', '0 0 420 300');
+    svg.setAttribute('aria-hidden', 'true');
+    const digitX = [226, 270, 314, 358];
+    const topY = 24;
+    const digits = [item.whole, item.tenths, item.hundredths, item.thousandths];
+    digits.forEach((d, i) => {
+      svg.appendChild(svgText(String(d), digitX[i], topY, { size: 18, weight: 700, anchor: 'middle' }));
+      if (i === 0) svg.appendChild(svgText(',', (digitX[0] + digitX[1]) / 2, topY, { size: 18, weight: 900, anchor: 'middle' }));
+      const y = 104 + i * 52;
+      const arrowEnd = 168;
+      const arrowY = y - 20;
+      svg.appendChild(svgLine(digitX[i], topY + 12, digitX[i], arrowY, '#555', 1.2));
+      svg.appendChild(svgPath(`M${digitX[i]} ${arrowY} H${arrowEnd}`, 'none', '#555', 1.2));
+      svg.appendChild(svgPath(`M${arrowEnd} ${arrowY} l8 -4 v8 z`, '#555', '#555', 1));
+      svg.appendChild(svgLine(14, y, 70, y, '#cbd5e1', 1.3));
+      svg.appendChild(svgText(`${places[i]} =`, 84, y + 5, { size: 16, weight: 700 }));
+      svg.appendChild(svgLine(126, y, 166, y, '#cbd5e1', 1.3));
+      const left = svgText(String(values[places[i]].count), 42, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle' });
+      const right = svgText(values[places[i]].value, 146, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle' });
+      left.classList.add('solution-only');
+      right.classList.add('solution-only');
+      svg.append(left, right);
+    });
+    return svg;
+  }
+
+  function decimalThousandthsPlaceBoard(item){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-place-wrap';
+    const board = document.createElement('div');
+    board.className = 'gi4-decimal-place-board cols-4 thousandths';
+    [
+      ['E', 'ones', item.whole, '1'],
+      ['t', 'tenths', item.tenths, '0,1'],
+      ['h', 'hundredths', item.hundredths, '0,01'],
+      ['d', 'thousandths', item.thousandths, '0,001'],
+    ].forEach(([label, cls, count, tokenText]) => {
+      const col = document.createElement('div');
+      col.className = `place ${cls}`;
+      col.innerHTML = `<strong>${label}</strong>`;
+      for (let i = 0; i < count; i++) {
+        const token = document.createElement('span');
+        token.className = 'gi4-decimal-place-token';
+        token.textContent = tokenText;
+        col.appendChild(token);
+      }
+      board.appendChild(col);
+    });
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-thousand-place-work';
+    work.appendChild(decimalThousandthsPlaceSvg(item));
+    wrap.append(board, work);
+    return wrap;
+  }
+
+  function blankLine(cls = ''){
+    const span = document.createElement('span');
+    span.className = `gi4-line ${cls}`.trim();
+    return span;
+  }
+
+  function decimalThousandthsFractionPrompt(numerator = '', denominator = '1000'){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-fraction-prompt';
+    wrap.appendChild(fractionBox('', '', numerator, denominator));
+    return wrap;
+  }
+
+  function decimalThousandthsMaterialExercise(item){
+    const total = decimalThousandthsTotal(item);
+    const rest = total % 1000;
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-material-exercise';
+    wrap.appendChild(decimalThousandthsModel(item, true));
+
+    const fractions = document.createElement('div');
+    fractions.className = 'gi4-decimal-thousand-material-fractions';
+    fractions.append(
+      lineWithSolution(String(item.whole), 'short'),
+      decimalThousandthsFractionPrompt(String(item.tenths), '10'),
+      decimalThousandthsFractionPrompt(String(item.hundredths), '100'),
+      decimalThousandthsFractionPrompt(String(item.thousandths), '1000')
+    );
+    wrap.appendChild(fractions);
+
+    const text = document.createElement('div');
+    text.className = 'gi4-decimal-thousand-material-text';
+    const row1 = document.createElement('div');
+    row1.append('Dit is ', lineWithSolution(String(item.whole), 'tiny'), ' geheel, ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden, ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten en ', lineWithSolution(String(item.thousandths), 'tiny'), ' duizendsten.');
+    const row2 = document.createElement('div');
+    row2.append('Dit zijn samen ', lineWithSolution(String(total), 'long'), ' duizendsten.');
+    const row3 = document.createElement('div');
+    row3.className = 'equation';
+    row3.append('Dit is ', fractionBox('', '', String(total), '1000'), document.createTextNode(' = '), fractionBox('', '', String(rest), '1000'), document.createTextNode(' = '), lineWithSolution(decimalThousandthsLabel(total), 'long'));
+    text.append(row1, row2, row3);
+    wrap.appendChild(text);
+    return wrap;
+  }
+
+  function decimalThousandthsZoomExercise(item){
+    const total = decimalThousandthsTotal(item);
+    const rest = total % 1000;
+    const start = Math.floor(rest / 100) / 10;
+    const local = rest - Math.floor(rest / 100) * 100;
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-zoom-exercise';
+
+    const strip = document.createElement('div');
+    strip.className = 'zoom-strip';
+    for (let col = 0; col < 100; col++) {
+      for (let row = 0; row < 10; row++) {
+        const cell = document.createElement('span');
+        cell.className = `zoom-cell${col * 10 + row < rest ? ' filled' : ''}${(col + 1) % 10 === 0 ? ' tenth-boundary' : ''}`;
+        cell.style.gridColumn = String(col + 1);
+        cell.style.gridRow = String(row + 1);
+        strip.appendChild(cell);
+      }
+    }
+    wrap.appendChild(strip);
+
+    const mainAxis = document.createElement('div');
+    mainAxis.className = 'zoom-main-axis';
+    for (let i = 0; i <= 100; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i}%`;
+      mainAxis.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('b');
+        label.style.left = `${i}%`;
+        label.textContent = i === 0 ? '0' : i === 100 ? '1' : decimalComma(i / 100);
+        mainAxis.appendChild(label);
+      }
+    }
+    const zoomWindow = document.createElement('div');
+    zoomWindow.className = 'zoom-window';
+    zoomWindow.appendChild(mainAxis);
+
+    const connectors = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    connectors.classList.add('zoom-connectors');
+    connectors.setAttribute('viewBox', '0 0 100 178');
+    connectors.setAttribute('preserveAspectRatio', 'none');
+    const focusStart = Math.floor(rest / 100) * 10;
+    const focusEnd = focusStart + 10;
+    const leftLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    leftLine.setAttribute('x1', String(focusStart));
+    leftLine.setAttribute('y1', '58');
+    leftLine.setAttribute('x2', '0');
+    leftLine.setAttribute('y2', '178');
+    leftLine.setAttribute('stroke', '#ff8a1f');
+    leftLine.setAttribute('stroke-width', '1.7');
+    leftLine.setAttribute('style', 'stroke:#ff8a1f;stroke-width:1.9');
+    const rightLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rightLine.setAttribute('x1', String(focusEnd));
+    rightLine.setAttribute('y1', '58');
+    rightLine.setAttribute('x2', '100');
+    rightLine.setAttribute('y2', '178');
+    rightLine.setAttribute('stroke', '#ff8a1f');
+    rightLine.setAttribute('stroke-width', '1.7');
+    rightLine.setAttribute('style', 'stroke:#ff8a1f;stroke-width:1.9');
+    const markerLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    markerLine.setAttribute('x1', String(focusStart + local / 10));
+    markerLine.setAttribute('y1', '58');
+    markerLine.setAttribute('x2', String(local));
+    markerLine.setAttribute('y2', '178');
+    markerLine.setAttribute('stroke', '#ff8a1f');
+    markerLine.setAttribute('stroke-width', '1.7');
+    markerLine.setAttribute('stroke-dasharray', '4 3');
+    markerLine.setAttribute('style', 'stroke:#ff8a1f;stroke-width:1.9');
+    connectors.append(leftLine, rightLine, markerLine);
+    zoomWindow.appendChild(connectors);
+
+    const zoom = document.createElement('div');
+    zoom.className = 'zoom-detail';
+    zoom.style.setProperty('--marker', `${local}%`);
+    for (let i = 0; i <= 100; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i}%`;
+      zoom.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('b');
+        label.style.left = `${i}%`;
+        label.textContent = Number(start + i / 1000).toFixed(2).replace('.', ',');
+        zoom.appendChild(label);
+      }
+    }
+    const marker = document.createElement('i');
+    marker.className = 'marker';
+    marker.style.left = `${local}%`;
+    zoom.appendChild(marker);
+    zoomWindow.appendChild(zoom);
+    wrap.appendChild(zoomWindow);
+
+    const text = document.createElement('div');
+    text.className = 'gi4-decimal-thousand-zoom-text';
+    const line1 = document.createElement('div');
+    line1.append('Dit zijn ', lineWithSolution(String(item.tenths), 'tiny'), ' tienden + ', lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten + ', lineWithSolution(String(item.thousandths), 'tiny'), ' duizendsten.');
+    const line2 = document.createElement('div');
+    line2.append('Dit is ', lineWithSolution(decimalComma(item.tenths / 10), 'long'), ' + ', lineWithSolution(Number(item.hundredths / 100).toFixed(2).replace('.', ','), 'long'), ' + ', lineWithSolution(Number(item.thousandths / 1000).toFixed(3).replace('.', ','), 'long'), ' = ', lineWithSolution(decimalThousandthsLabel(rest), 'long'));
+    text.append(line1, line2);
+    wrap.appendChild(text);
+    return wrap;
+  }
+
+  function makeDecimalThousandthsIntroCard(){
+    const item = decimalThousandthsSeed('gi4_decimal_thousand_intro');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(
+      decimalThousandthsMaterialExercise(item),
+      decimalThousandthsZoomExercise(item),
+      decimalThousandthsPlaceBoard(item)
+    );
+    return card;
+  }
+
+  function makeDecimalThousandthsValueCard(){
+    const item = decimalThousandthsSeed('gi4_decimal_thousand_value');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-value-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(decimalThousandthsPlaceSvg(item));
+    return card;
+  }
+
+  function decimalThousandthsAmountMaterial(item){
+    const total = decimalThousandthsTotal(item);
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-amount-material';
+
+    const model = decimalThousandthsModel(item, true);
+    model.classList.add('amount-model');
+    wrap.appendChild(model);
+
+    const work = document.createElement('div');
+    work.className = 'gi4-decimal-thousand-amount-work';
+
+    const whole = document.createElement('div');
+    whole.className = 'amount-part whole';
+    whole.append(lineWithSolution(String(item.whole), 'short'), ' gehelen', document.createElement('br'), ' = ', fractionBox('', '1000', String(item.whole * 1000), ''));
+
+    const tenths = document.createElement('div');
+    tenths.className = 'amount-part';
+    tenths.append(fractionBox('', '10', String(item.tenths), ''), ' = ', fractionBox('', '1000', String(item.tenths * 100), ''));
+
+    const hundredths = document.createElement('div');
+    hundredths.className = 'amount-part';
+    hundredths.append(fractionBox('', '100', String(item.hundredths), ''), ' = ', fractionBox('', '1000', String(item.hundredths * 10), ''));
+
+    const thousandths = document.createElement('div');
+    thousandths.className = 'amount-part';
+    thousandths.append(fractionBox('', '1000', String(item.thousandths), ''));
+    work.append(whole, tenths, hundredths, thousandths);
+    wrap.appendChild(work);
+
+    const totalBox = document.createElement('div');
+    totalBox.className = 'gi4-decimal-thousand-amount-total';
+    totalBox.append('Dit zijn samen ', fractionBox('', '1000', String(total), ''), ' = ', fractionBox('', '1000', String(total), ''), ' = ', lineWithSolution(decimalThousandthsLabel(total), 'long'));
+    wrap.appendChild(totalBox);
+    return wrap;
+  }
+
+  function decimalThousandthsPlaceMiniTable(item){
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-place-mini';
+    const board = document.createElement('div');
+    board.className = 'gi4-decimal-place-board cols-4 thousandths mini';
+    [
+      ['E', 'ones', item.whole, ''],
+      ['t', 'tenths', item.tenths, ''],
+      ['h', 'hundredths', item.hundredths, ''],
+      ['d', 'thousandths', item.thousandths, ''],
+    ].forEach(([label, cls, count]) => {
+      const col = document.createElement('div');
+      col.className = `place ${cls}`;
+      col.innerHTML = `<strong>${label}</strong>`;
+      for (let i = 0; i < count; i++) {
+        const token = document.createElement('span');
+        token.className = 'gi4-decimal-place-token dot-token';
+        col.appendChild(token);
+      }
+      board.appendChild(col);
+    });
+
+    const counts = document.createElement('div');
+    counts.className = 'gi4-decimal-thousand-place-mini-counts';
+    counts.append(
+      lineWithSolution(String(item.whole), 'tiny'), ' eenheden, ',
+      lineWithSolution(String(item.tenths), 'tiny'), ' tienden,',
+      document.createElement('br'),
+      lineWithSolution(String(item.hundredths), 'tiny'), ' honderdsten en ',
+      lineWithSolution(String(item.thousandths), 'tiny'), ' duizendsten.'
+    );
+
+    const answer = document.createElement('div');
+    answer.className = 'gi4-decimal-thousand-place-mini-answer';
+    const strong = document.createElement('strong');
+    strong.textContent = 'kommagetal:';
+    answer.append('Dit is het ', strong, lineWithSolution(decimalThousandthsLabel(decimalThousandthsTotal(item)), 'long boxed'));
+
+    card.append(board, counts, answer);
+    return card;
+  }
+
+  function decimalThousandthsPlaceMiniPair(item, second){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-place-mini-pair';
+    wrap.append(decimalThousandthsPlaceMiniTable(item), decimalThousandthsPlaceMiniTable(second || item));
+    return wrap;
+  }
+
+  function decimalThousandthsWriteSets(){
+    return [
+      [
+        { prompt: fractionBox('134', '1000'), answer: '0,134' },
+        { prompt: fractionBox('3 859', '1000'), answer: '3,859' },
+        { prompt: fractionBox('4 560', '1000'), answer: '4,560' },
+        { prompt: '8 E 1 t 7 h 7 d', answer: '8,177' },
+        { prompt: '6 E 5 t 3 d', answer: '6,503' },
+        { prompt: '18 E 4 h 9 d', answer: '18,409' },
+        { prompt: '704 duizendsten', answer: '0,704' },
+        { prompt: '6 T 3 E 2 t 9 h 8 d', answer: '63,298' },
+        { prompt: '8 tienden 4 honderdsten 2 duizendsten', answer: '0,842' },
+        { prompt: '6 H 2 T 4 h 5 d', answer: '620,045' },
+      ],
+      [
+        { prompt: fractionBox('527', '1000'), answer: '0,527' },
+        { prompt: fractionBox('2 408', '1000'), answer: '2,408' },
+        { prompt: fractionBox('7 030', '1000'), answer: '7,030' },
+        { prompt: '4 E 9 t 2 h 6 d', answer: '4,926' },
+        { prompt: '8 E 3 h 5 d', answer: '8,035' },
+        { prompt: '12 E 7 t 4 d', answer: '12,704' },
+        { prompt: '95 duizendsten', answer: '0,095' },
+        { prompt: '4 T 8 E 6 t 1 h 3 d', answer: '48,613' },
+        { prompt: '3 tienden 7 honderdsten 9 duizendsten', answer: '0,379' },
+        { prompt: '2 H 5 T 6 E 8 h 1 d', answer: '256,081' },
+      ],
+      [
+        { prompt: fractionBox('806', '1000'), answer: '0,806' },
+        { prompt: fractionBox('5 091', '1000'), answer: '5,091' },
+        { prompt: fractionBox('9 604', '1000'), answer: '9,604' },
+        { prompt: '3 E 4 t 8 h 2 d', answer: '3,482' },
+        { prompt: '7 E 6 t 9 d', answer: '7,609' },
+        { prompt: '15 E 2 h 1 d', answer: '15,021' },
+        { prompt: '610 duizendsten', answer: '0,610' },
+        { prompt: '9 T 2 E 5 t 0 h 4 d', answer: '92,504' },
+        { prompt: '6 tienden 0 honderdsten 8 duizendsten', answer: '0,608' },
+        { prompt: '4 H 1 T 3 E 7 h 2 d', answer: '413,072' },
+      ],
+      [
+        { prompt: fractionBox('45', '1000'), answer: '0,045' },
+        { prompt: fractionBox('6 700', '1000'), answer: '6,700' },
+        { prompt: fractionBox('8 219', '1000'), answer: '8,219' },
+        { prompt: '5 E 0 t 4 h 7 d', answer: '5,047' },
+        { prompt: '9 E 8 t 1 d', answer: '9,801' },
+        { prompt: '21 E 6 h 3 d', answer: '21,063' },
+        { prompt: '318 duizendsten', answer: '0,318' },
+        { prompt: '7 T 0 E 9 t 5 h 6 d', answer: '70,956' },
+        { prompt: '2 tienden 5 honderdsten 0 duizendsten', answer: '0,250' },
+        { prompt: '8 H 4 T 9 E 3 h 6 d', answer: '849,036' },
+      ],
+    ];
+  }
+
+  function makeDecimalThousandthsWriteCard(){
+    const prompts = pickUnusedOrAny('gi4_decimal_thousand_write_card', decimalThousandthsWriteSets(), set => set.map(item => item.answer).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-write-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-write-list';
+    prompts.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'gi4-decimal-thousand-write-row';
+      if (typeof item.prompt === 'string') row.append(item.prompt);
+      else row.appendChild(item.prompt);
+      row.append(' = ', lineWithSolution(item.answer, 'long'));
+      grid.appendChild(row);
+    });
+    card.appendChild(grid);
+    return card;
+  }
+
+  function decimalThousandthsDigitValue(item){
+    const total = decimalThousandthsTotal(item);
+    return decimalThousandthsLabel(total);
+  }
+
+  function decimalThousandthsDigitRows(item){
+    return [
+      { digit: item.whole, place: 'E', value: String(item.whole) },
+      { digit: item.tenths, place: 't', value: decimalComma(item.tenths / 10) },
+      { digit: item.hundredths, place: 'h', value: Number(item.hundredths / 100).toFixed(2).replace('.', ',') },
+      { digit: item.thousandths, place: 'd', value: Number(item.thousandths / 1000).toFixed(3).replace('.', ',') },
+    ];
+  }
+
+  function decimalThousandthsDigitValueSvg(item){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-decimal-thousand-digit-value-svg');
+    svg.setAttribute('viewBox', '0 0 420 300');
+    svg.setAttribute('aria-hidden', 'true');
+    const digits = [item.whole, item.tenths, item.hundredths, item.thousandths];
+    const rows = decimalThousandthsDigitRows(item);
+    const digitX = [226, 270, 314, 358];
+    const topY = 24;
+    digits.forEach((digit, index) => {
+      svg.appendChild(svgText(String(digit), digitX[index], topY, { size: 18, weight: 700, anchor: 'middle' }));
+      if (index === 0) svg.appendChild(svgText(',', (digitX[0] + digitX[1]) / 2, topY, { size: 18, weight: 900, anchor: 'middle' }));
+      const y = 104 + index * 52;
+      const arrowEnd = 214;
+      const arrowY = y - 20;
+      svg.appendChild(svgLine(digitX[index], topY + 12, digitX[index], arrowY, '#333', 1.25));
+      svg.appendChild(svgPath(`M${digitX[index]} ${arrowY} H${arrowEnd}`, 'none', '#333', 1.25));
+      svg.appendChild(svgPath(`M${arrowEnd} ${arrowY} l8 -4 v8 z`, '#333', '#333', 1));
+      svg.appendChild(svgText(String(rows[index].digit), 26, y + 5, { size: 17, weight: 500, anchor: 'middle' }));
+      svg.appendChild(svgLine(46, y, 96, y, '#cbd5e1', 1.3));
+      svg.appendChild(svgText('=', 112, y + 5, { size: 16, weight: 700, anchor: 'middle' }));
+      svg.appendChild(svgLine(132, y, 212, y, '#cbd5e1', 1.3));
+      const placeAnswer = svgText(rows[index].place, 71, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle', weight: 700 });
+      const valueAnswer = svgText(rows[index].value, 172, y - 5, { size: 13, fill: '#0284c7', anchor: 'middle', weight: 700 });
+      placeAnswer.classList.add('solution-only');
+      valueAnswer.classList.add('solution-only');
+      svg.append(placeAnswer, valueAnswer);
+    });
+    return svg;
+  }
+
+  function makeDecimalThousandthsDigitValueCard(){
+    const item = decimalThousandthsSeed('gi4_decimal_thousand_digit_value');
+    if (!item) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-digit-value-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(decimalThousandthsDigitValueSvg(item));
+    return card;
+  }
+
+  function decimalThousandthsFormatInt(value, decimals = 3){
+    return Number(value / 1000).toFixed(decimals).replace('.', ',');
+  }
+
+  function decimalThousandthsTrimInt(value){
+    return Number(value / 1000).toFixed(3).replace(/0+$/, '').replace(/\.$/, '').replace('.', ',');
+  }
+
+  function decimalThousandthsEquivalentColorCells(index = 0){
+    const inlineSum = (...parts) => {
+      const span = document.createElement('span');
+      span.className = 'inline-sum';
+      span.append(...parts);
+      return span;
+    };
+    const sets = [
+      [
+        { group: 0, make: () => ['2 075', document.createElement('br'), 'duizendsten'] },
+        { group: 1, make: () => '420 h' },
+        { group: 2, make: () => '42 d' },
+        { group: 3, make: () => '275 h' },
+        { group: 4, make: () => '0,075' },
+        { group: 0, make: () => '2 E 7 h 5 d' },
+        { group: 3, make: () => mixedNumberBox(2, 3, 4) },
+        { group: 1, make: () => '4,2' },
+        { group: 2, make: () => '0,042' },
+        { group: 0, make: () => '2,075' },
+        { group: 4, make: () => ['25 d minder', document.createElement('br'), 'dan 1 tiende'] },
+        { group: 1, make: () => mixedNumberBox(4, 1, 5) },
+        { group: 3, make: () => '2,75' },
+        { group: 3, make: () => inlineSum('2 + ', fractionBox(1, 2), ' + ', fractionBox(1, 4)) },
+        { group: 5, make: () => '0,5' },
+        { group: 6, make: () => mixedNumberBox(1, 1, 4) },
+        { group: 1, make: () => fractionBox(42, 10) },
+        { group: 6, make: () => '1,25' },
+        { group: 0, make: () => '2 E 75 d' },
+        { group: 6, make: () => mixedNumberBox(1, 250, 1000) },
+        { group: 5, make: () => fractionBox(500, 1000) },
+      ],
+      [
+        { group: 0, make: () => '3,125' },
+        { group: 1, make: () => '608 h' },
+        { group: 2, make: () => '84 d' },
+        { group: 3, make: () => '1,5' },
+        { group: 4, make: () => '0,325' },
+        { group: 5, make: () => mixedNumberBox(7, 1, 10) },
+        { group: 6, make: () => fractionBox(750, 1000) },
+        { group: 2, make: () => '0,084' },
+        { group: 0, make: () => mixedNumberBox(3, 125, 1000) },
+        { group: 4, make: () => '325 duizendsten' },
+        { group: 1, make: () => '6,08' },
+        { group: 5, make: () => '7 E 1 t' },
+        { group: 6, make: () => '0,75' },
+        { group: 3, make: () => inlineSum('1 + ', fractionBox(1, 2)) },
+        { group: 5, make: () => '710 d' },
+        { group: 4, make: () => fractionBox(325, 1000) },
+        { group: 3, make: () => fractionBox(15, 10) },
+        { group: 2, make: () => ['84', document.createElement('br'), 'duizendsten'] },
+        { group: 6, make: () => mixedNumberBox(0, 3, 4) },
+        { group: 0, make: () => '3 E 1 t 2 h 5 d' },
+        { group: 1, make: () => mixedNumberBox(6, 8, 100) },
+      ],
+      [
+        { group: 0, make: () => '9,004' },
+        { group: 1, make: () => '2,09' },
+        { group: 2, make: () => '0,6' },
+        { group: 3, make: () => '5 E 3 h' },
+        { group: 4, make: () => '1 875 duizendsten' },
+        { group: 5, make: () => fractionBox(125, 1000) },
+        { group: 6, make: () => '740 d' },
+        { group: 2, make: () => fractionBox(6, 10) },
+        { group: 4, make: () => mixedNumberBox(1, 7, 8) },
+        { group: 0, make: () => '9 E 4 d' },
+        { group: 1, make: () => '209 h' },
+        { group: 6, make: () => '0,740' },
+        { group: 5, make: () => '0,125' },
+        { group: 3, make: () => '5,03' },
+        { group: 4, make: () => '1,875' },
+        { group: 0, make: () => fractionBox(9004, 1000) },
+        { group: 1, make: () => mixedNumberBox(2, 90, 1000) },
+        { group: 6, make: () => fractionBox(74, 100) },
+        { group: 3, make: () => '503 h' },
+        { group: 2, make: () => '600 duizendsten' },
+        { group: 5, make: () => mixedNumberBox(0, 1, 8) },
+      ],
+    ];
+    return sets[index % sets.length];
+  }
+
+  function makeDecimalThousandthsEquivalentColorCard(){
+    const variant = pickUnusedOrAny('gi4_decimal_thousand_equivalent_color_card', [0, 1, 2], value => String(value));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-equivalent-color-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-thousand-equivalent-color-table';
+    const body = document.createElement('tbody');
+    const cells = decimalThousandthsEquivalentColorCells(variant);
+    for (let r = 0; r < 3; r++) {
+      const tr = document.createElement('tr');
+      for (let c = 0; c < 7; c++) {
+        const data = cells[r * 7 + c];
+        const td = document.createElement('td');
+        td.className = `solution-group-${data.group}`;
+        const content = data.make();
+        if (Array.isArray(content)) td.append(...content);
+        else if (content instanceof Node) td.appendChild(content);
+        else td.textContent = content;
+        tr.appendChild(td);
+      }
+      body.appendChild(tr);
+    }
+    table.appendChild(body);
+    card.appendChild(table);
+    return card;
+  }
+
+  function decimalThousandthsAxisMixedCard(){
+    const item = decimalThousandthsAxisMixedSeed('gi4_decimal_thousand_axis_mixed');
+    if (!item) return null;
+    const total = decimalThousandthsTotal(item);
+    const rest = total % 1000;
+    const restPercent = rest / 10;
+    const axisStart = item.whole - 1;
+    const axisMid = item.whole;
+    const axisEnd = item.whole + 1;
+    const totalPercent = 50 + rest / 20;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-axis-mixed-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const title = document.createElement('div');
+    title.className = 'gi4-decimal-thousand-axis-mixed-title';
+    title.textContent = `${item.whole} ${item.whole === 1 ? 'geheel' : 'gehelen'} en ${item.tenths} tienden en ${item.hundredths} honderdsten en ${item.thousandths} duizendsten van het geheel`;
+
+    const overview = document.createElement('div');
+    overview.className = 'gi4-decimal-thousand-axis-overview';
+    const overviewFill = document.createElement('span');
+    overviewFill.className = 'axis-fill';
+    overviewFill.style.width = `${totalPercent}%`;
+    const overviewMarker = document.createElement('span');
+    overviewMarker.className = 'axis-marker';
+    overviewMarker.style.left = `${totalPercent}%`;
+    overview.append(overviewFill, overviewMarker);
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.className = `tick${i % 10 === 0 ? ' major' : ''}`;
+      tick.style.left = `${i * 5}%`;
+      overview.appendChild(tick);
+      if (i % 10 === 0) {
+        const label = document.createElement('b');
+        label.style.left = `${i * 5}%`;
+        label.textContent = String(i === 0 ? axisStart : i === 10 ? axisMid : axisEnd);
+        overview.appendChild(label);
+      }
+    }
+
+    const zoomWrap = document.createElement('div');
+    zoomWrap.className = 'gi4-decimal-thousand-axis-zoom-wrap';
+    const connectors = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    connectors.classList.add('axis-zoom-connectors');
+    connectors.setAttribute('viewBox', '0 0 100 126');
+    connectors.setAttribute('preserveAspectRatio', 'none');
+    const leftLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    leftLine.setAttribute('x1', '50');
+    leftLine.setAttribute('y1', '0');
+    leftLine.setAttribute('x2', '0');
+    leftLine.setAttribute('y2', '126');
+    const rightLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    rightLine.setAttribute('x1', String(totalPercent));
+    rightLine.setAttribute('y1', '0');
+    rightLine.setAttribute('x2', String(restPercent));
+    rightLine.setAttribute('y2', '126');
+    rightLine.setAttribute('stroke-dasharray', '4 3');
+    const endLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    endLine.setAttribute('x1', '100');
+    endLine.setAttribute('y1', '0');
+    endLine.setAttribute('x2', '100');
+    endLine.setAttribute('y2', '126');
+    connectors.append(leftLine, rightLine, endLine);
+
+    const zoom = document.createElement('div');
+    zoom.className = 'gi4-decimal-thousand-axis-zoom';
+    for (let col = 0; col < 100; col++) {
+      for (let row = 0; row < 10; row++) {
+        const cell = document.createElement('span');
+        cell.className = `zoom-cell${col * 10 + row < rest ? ' filled' : ''}${(col + 1) % 10 === 0 ? ' tenth-boundary' : ''}`;
+        cell.style.gridColumn = String(col + 1);
+        cell.style.gridRow = String(row + 1);
+        zoom.appendChild(cell);
+      }
+    }
+    const zoomMarker = document.createElement('i');
+    zoomMarker.className = 'zoom-marker';
+    zoomMarker.style.left = `${restPercent}%`;
+    zoom.appendChild(zoomMarker);
+    const zoomStart = document.createElement('b');
+    zoomStart.className = 'start';
+    zoomStart.textContent = String(axisMid);
+    const zoomEnd = document.createElement('b');
+    zoomEnd.className = 'end';
+    zoomEnd.textContent = String(axisEnd);
+    zoom.append(zoomStart, zoomEnd);
+    zoomWrap.append(connectors, zoom);
+
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-thousand-axis-result';
+    table.innerHTML = '<thead><tr><th>Dit is ...</th><th>gemengd getal</th><th>onechte breuk</th><th>kommagetal</th></tr></thead>';
+    const body = document.createElement('tbody');
+    const row = document.createElement('tr');
+    const decomposed = document.createElement('td');
+    decomposed.append(
+      lineWithSolution(String(item.whole), 'small'), ' + ',
+      fractionBox('', '10', String(item.tenths), ''), ' + ',
+      fractionBox('', '100', String(item.hundredths), ''), ' + ',
+      fractionBox('', '1000', String(item.thousandths), '')
+    );
+    const mixed = document.createElement('td');
+    mixed.append(mixedNumberBox('', '', '', String(item.whole), String(rest), '1000'));
+    const improper = document.createElement('td');
+    improper.append(fractionBox('', '', String(total), '1000'));
+    const decimal = document.createElement('td');
+    decimal.append(lineWithSolution(decimalThousandthsLabel(total), 'long'));
+    row.append(decomposed, mixed, improper, decimal);
+    body.appendChild(row);
+    table.appendChild(body);
+
+    card.append(title, overview, zoomWrap, table);
+    return card;
+  }
+
+  function makeDecimalThousandthsMixedCard(){
+    const amountItem = decimalThousandthsAmountSeed('gi4_decimal_thousand_mixed_amount');
+    const placeA = decimalThousandthsSeed('gi4_decimal_thousand_mixed_place_a');
+    const placeB = decimalThousandthsSeed('gi4_decimal_thousand_mixed_place_b');
+    if (!amountItem || !placeA) return null;
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-card amount row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.append(
+      decimalThousandthsAmountMaterial(amountItem),
+      decimalThousandthsPlaceMiniPair(placeA, placeB)
+    );
+    return card;
+  }
+
+  function addDecimalThousandthsIntro(extraCount){
+    const key = 'gi4_decimal_thousand_intro_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsIntroCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-grid', 'gi4-decimal-thousand-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsIntroCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: materiaal, getallenas en plaatswaarde.', addCount => addDecimalThousandthsIntro(addCount || 1));
+    addFractionInstructions(b, ['Vul aan.', 'Duid dezelfde hoeveelheid aan op de voorstelling hieronder.', 'Noteer het kommagetal en de waarde van elk cijfer.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsIntroCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsIntro(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsValue(extraCount){
+    const key = 'gi4_decimal_thousand_value_block';
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#decimalThousandthsValueCount')?.value, 10) || 2));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-value-grid', 'gi4-decimal-thousand-value-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsValueCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: schrijf de waarde van de cijfers.', addCount => addDecimalThousandthsValue(addCount || 1));
+    addFractionInstructions(b, ['Geef de juiste waarde van elk cijfer in het getal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-value-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsValueCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsValue(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsMixed(extraCount){
+    const key = 'gi4_decimal_thousand_mixed_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsMixedCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-grid', 'gi4-decimal-thousand-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsMixedCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: hoeveelheid en kommagetal.', addCount => addDecimalThousandthsMixed(addCount || 1));
+    addFractionInstructions(b, ['Welke hoeveelheid zie je? Vul passend aan.', 'Lees de plaatswaardetabel en noteer het kommagetal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsMixedCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsMixed(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsAxisMixed(extraCount){
+    const key = 'gi4_decimal_thousand_axis_mixed_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsAxisMixedCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-axis-mixed-grid', 'gi4-decimal-thousand-axis-mixed-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, decimalThousandthsAxisMixedCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: getallenas, gemengd getal en breuk.', addCount => addDecimalThousandthsAxisMixed(addCount || 1));
+    addFractionInstructions(b, ['Hoeveel gehelen? Hoeveel tienden? Hoeveel honderdsten? Hoeveel duizendsten?', 'Vul in.', 'Schrijf het gemengd getal en de onechte breuk.', 'Schrijf het kommagetal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-axis-mixed-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, decimalThousandthsAxisMixedCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsAxisMixed(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsWrite(extraCount){
+    const key = 'gi4_decimal_thousand_write_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsWriteCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-write-grid', 'gi4-decimal-thousand-write-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsWriteCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: schrijf de kommagetallen.', addCount => addDecimalThousandthsWrite(addCount || 1));
+    addFractionInstructions(b, ['Schrijf de kommagetallen.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-write-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsWriteCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsWrite(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsDigitValue(extraCount){
+    const key = 'gi4_decimal_thousand_digit_value_block';
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#decimalThousandthsDigitValueCount')?.value, 10) || 2));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-digit-value-grid', 'gi4-decimal-thousand-digit-value-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsDigitValueCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: geef de waarde van de cijfers.', addCount => addDecimalThousandthsDigitValue(addCount || 1));
+    addFractionInstructions(b, ['Geef de waarde van de cijfers.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-digit-value-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsDigitValueCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsDigitValue(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsEquivalentColor(extraCount){
+    const key = 'gi4_decimal_thousand_equivalent_color_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsEquivalentColorCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-equivalent-color-grid', 'gi4-decimal-thousand-equivalent-color-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsEquivalentColorCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: geef wat evenveel is dezelfde kleur.', addCount => addDecimalThousandthsEquivalentColor(addCount || 1));
+    addFractionInstructions(b, ['Geef wat evenveel is dezelfde kleur.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-equivalent-color-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsEquivalentColorCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsEquivalentColor(1));
+    sheet.appendChild(b);
+  }
+
+  function decimalThousandthsAxisSets(){
+    return [
+      {
+        rows: [
+          { start: 5000, step: 100, ticks: 10, decimals: 1, labels: { 0: 5000, 1: 5100, 3: 5300, 6: 5600, 7: 5700, 8: 5800, 10: 6000 } },
+          { start: 5400, step: 10, ticks: 10, decimals: 2, labels: { 0: 5400, 1: 5410, 7: 5470, 10: 5500 } },
+          { start: 5430, step: 1, ticks: 10, decimals: 3, labels: { 0: 5430, 1: 5431, 3: 5433, 10: 5440 } },
+        ],
+      },
+      {
+        rows: [
+          { start: 7000, step: 100, ticks: 10, decimals: 1, labels: { 0: 7000, 2: 7200, 5: 7500, 8: 7800, 10: 8000 } },
+          { start: 3210, step: 10, ticks: 10, decimals: 2, labels: { 0: 3210, 2: 3230, 5: 3260, 9: 3300, 10: 3310 } },
+          { start: 8910, step: 1, ticks: 10, decimals: 3, labels: { 0: 8910, 2: 8912, 5: 8915, 8: 8918, 10: 8920 } },
+        ],
+      },
+      {
+        rows: [
+          { start: 12000, step: 100, ticks: 10, decimals: 1, labels: { 0: 12000, 1: 12100, 4: 12400, 6: 12600, 10: 13000 } },
+          { start: 9750, step: 10, ticks: 10, decimals: 2, labels: { 0: 9750, 1: 9760, 4: 9790, 7: 9820, 10: 9850 } },
+          { start: 2430, step: 1, ticks: 10, decimals: 3, labels: { 0: 2430, 1: 2431, 4: 2434, 6: 2436, 10: 2440 } },
+        ],
+      },
+    ];
+  }
+
+  function makeThousandthsSimpleAxis(row){
+    const wrap = document.createElement('div');
+    wrap.className = 'gi4-decimal-thousand-simple-axis';
+    const axis = document.createElement('div');
+    axis.className = 'axis';
+    for (let i = 0; i <= row.ticks; i++) {
+      const tick = document.createElement('span');
+      tick.className = i === 0 || i === row.ticks ? 'major' : '';
+      tick.style.left = `${(i / row.ticks) * 100}%`;
+      axis.appendChild(tick);
+      const label = document.createElement('b');
+      label.style.left = `${(i / row.ticks) * 100}%`;
+      const value = row.start + i * row.step;
+      if (Object.prototype.hasOwnProperty.call(row.labels, i)) label.textContent = decimalThousandthsFormatInt(value, row.decimals);
+      else label.appendChild(lineWithSolution(decimalThousandthsFormatInt(value, row.decimals), 'tiny'));
+      axis.appendChild(label);
+    }
+    wrap.appendChild(axis);
+    return wrap;
+  }
+
+  function makeDecimalThousandthsAxisFillCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_axis_fill_card', decimalThousandthsAxisSets(), item => item.rows.map(row => row.start).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-axis-fill-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.rows.forEach(row => card.appendChild(makeThousandthsSimpleAxis(row)));
+    return card;
+  }
+
+  function decimalThousandthsEstimateOrderSets(){
+    return [
+      { start: 2600, end: 2800, labels: [2600, 2700, 2800], values: [2674, 2647, 2615, 2795, 2759], decimals: 1 },
+      { start: 18900, end: 19800, labels: [19000, 19500], values: [18925, 19205, 19548, 19334, 19728, 19601], decimals: 1 },
+      { start: 4350, end: 4370, labels: [4350, 4360, 4370], values: [4352, 4358, 4369, 4365], decimals: 2 },
+      { start: 6400, end: 6600, labels: [6400, 6500, 6600], values: [6528, 6471, 6555, 6585], decimals: 1 },
+    ];
+  }
+
+  function makeDecimalThousandthsEstimateOrderCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_estimate_order_card', decimalThousandthsEstimateOrderSets(), item => item.values.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-estimate-order-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const axis = document.createElement('div');
+    axis.className = 'estimate-axis';
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.className = i % 10 === 0 ? 'major' : '';
+      tick.style.left = `${i * 5}%`;
+      axis.appendChild(tick);
+    }
+    set.labels.forEach(value => {
+      const label = document.createElement('b');
+      label.style.left = `${((value - set.start) / (set.end - set.start)) * 100}%`;
+      label.textContent = decimalThousandthsFormatInt(value, set.decimals);
+      axis.appendChild(label);
+    });
+    const connectors = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    connectors.classList.add('estimate-solution-connectors');
+    connectors.setAttribute('viewBox', '0 0 100 130');
+    connectors.setAttribute('preserveAspectRatio', 'none');
+    const chips = document.createElement('div');
+    chips.className = 'estimate-chips';
+    const chipCount = set.values.length;
+    set.values.forEach((value, index) => {
+      const chip = document.createElement('span');
+      chip.className = 'estimate-chip';
+      const dot = document.createElement('i');
+      const axisPos = ((value - set.start) / (set.end - set.start)) * 100;
+      const chipPos = ((index + 0.5) / chipCount) * 100;
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', String(chipPos));
+      line.setAttribute('y1', '118');
+      line.setAttribute('x2', String(Math.max(0, Math.min(100, axisPos))));
+      line.setAttribute('y2', '0');
+      connectors.appendChild(line);
+      chip.append(dot, document.createTextNode(decimalThousandthsFormatInt(value, 3)));
+      chips.appendChild(chip);
+    });
+    const order = document.createElement('p');
+    order.className = 'estimate-order-line';
+    const solution = set.values.slice().sort((a, b) => b - a).map(value => decimalThousandthsFormatInt(value, 3)).join('  >  ');
+    order.append('Ik rangschik van groot naar klein: ', lineWithSolution(solution, 'wide'));
+    card.append(axis, connectors, chips, order);
+    return card;
+  }
+
+  function decimalThousandthsRoundSets(){
+    return [
+      { table: [4813, 6374, 9127], mixed: [{ n: 8756, mode: 'nearest', place: 'tiende' }, { n: 5234, mode: 'nearest', place: 'honderdste' }, { n: 17631, mode: 'up', place: 'tiende' }, { n: 28825, mode: 'down', place: 'honderdste' }] },
+      { table: [2748, 5905, 1386], mixed: [{ n: 7468, mode: 'nearest', place: 'tiende' }, { n: 3816, mode: 'nearest', place: 'honderdste' }, { n: 12941, mode: 'up', place: 'honderdste' }, { n: 6509, mode: 'down', place: 'tiende' }] },
+      { table: [3059, 7281, 4095], mixed: [{ n: 9074, mode: 'nearest', place: 'honderdste' }, { n: 2465, mode: 'nearest', place: 'tiende' }, { n: 19802, mode: 'up', place: 'tiende' }, { n: 4349, mode: 'down', place: 'honderdste' }] },
+    ];
+  }
+
+  function roundThousandthInt(value, place, mode = 'nearest'){
+    const factor = place === 'tiende' ? 100 : 10;
+    if (mode === 'up') return Math.ceil(value / factor) * factor;
+    if (mode === 'down') return Math.floor(value / factor) * factor;
+    return Math.round(value / factor) * factor;
+  }
+
+  function placeDecimals(place){
+    return place === 'tiende' ? 1 : 2;
+  }
+
+  function makeDecimalThousandthsRoundCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_round_card', decimalThousandthsRoundSets(), item => item.table.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-round-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('table');
+    table.innerHTML = '<thead><tr><th></th><th>tot op een honderdste</th><th>tot op een tiende</th></tr></thead>';
+    const body = document.createElement('tbody');
+    set.table.forEach(value => {
+      const tr = document.createElement('tr');
+      const head = document.createElement('th');
+      head.textContent = decimalThousandthsFormatInt(value, 3);
+      const hundred = document.createElement('td');
+      hundred.appendChild(lineWithSolution(decimalThousandthsFormatInt(roundThousandthInt(value, 'honderdste'), 2), 'medium'));
+      const tenth = document.createElement('td');
+      tenth.appendChild(lineWithSolution(decimalThousandthsFormatInt(roundThousandthInt(value, 'tiende'), 1), 'medium'));
+      tr.append(head, hundred, tenth);
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    const list = document.createElement('div');
+    list.className = 'round-list';
+    set.mixed.forEach(item => {
+      const row = document.createElement('p');
+      const modeText = item.mode === 'up' ? 'rond af naar boven' : item.mode === 'down' ? 'rond af naar beneden' : 'rond af tot op het dichtstbijgelegen';
+      const answer = decimalThousandthsFormatInt(roundThousandthInt(item.n, item.place, item.mode), placeDecimals(item.place));
+      row.append(`${decimalThousandthsFormatInt(item.n, 3)} -> ${modeText} ${item.place} -> `, lineWithSolution(answer, 'medium'));
+      list.appendChild(row);
+    });
+    card.append(table, list);
+    return card;
+  }
+
+  function decimalThousandthsStepSets(){
+    return [
+      [
+        { title: 'Maak sprongen van 0,001.', start: 870, step: 1, given: [0, 4, 5, 8], length: 11 },
+        { title: 'Maak sprongen van 0,002.', start: 123, step: 2, given: [3, 4], length: 6 },
+        { title: 'Maak sprongen van 0,005.', start: 365, step: 5, given: [1, 2], length: 6 },
+      ],
+      [
+        { title: 'Maak sprongen van 0,001.', start: 2435, step: 1, given: [0, 3, 6], length: 9 },
+        { title: 'Maak sprongen van 0,002.', start: 750, step: 2, given: [1, 5], length: 7 },
+        { title: 'Maak sprongen van 0,005.', start: 1190, step: 5, given: [0, 4], length: 7 },
+      ],
+      [
+        { title: 'Maak sprongen van 0,001.', start: 8096, step: 1, given: [2, 3, 7], length: 10 },
+        { title: 'Maak sprongen van 0,002.', start: 498, step: 2, given: [0, 4], length: 7 },
+        { title: 'Maak sprongen van 0,005.', start: 2715, step: 5, given: [2, 3], length: 7 },
+      ],
+    ];
+  }
+
+  function makeDecimalThousandthsStepCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_step_card', decimalThousandthsStepSets(), item => item.map(row => row.start).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-step-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(row => {
+      const group = document.createElement('div');
+      group.className = 'step-group';
+      const title = document.createElement('strong');
+      title.textContent = row.title;
+      const cells = document.createElement('div');
+      cells.className = 'step-cells';
+      for (let i = 0; i < row.length; i++) {
+        const cell = document.createElement('span');
+        const value = row.start + i * row.step;
+        if (row.given.includes(i)) cell.textContent = decimalThousandthsFormatInt(value, 3);
+        else cell.appendChild(lineWithSolution(decimalThousandthsFormatInt(value, 3), 'tiny'));
+        cells.appendChild(cell);
+      }
+      group.append(title, cells);
+      card.appendChild(group);
+    });
+    return card;
+  }
+
+  function fractionInline(num, den){
+    const span = document.createElement('span');
+    span.className = 'gi4-thousand-inline-frac';
+    span.appendChild(fractionBox(num, den));
+    return span;
+  }
+
+  function mixedInline(whole, num, den){
+    const span = document.createElement('span');
+    span.className = 'gi4-thousand-inline-mixed';
+    span.append(String(whole), ' ', fractionBox(num, den));
+    return span;
+  }
+
+  function decimalThousandthsCompareSets(){
+    return [
+      [
+        { left: '2,85', right: '2,856', symbol: '<' },
+        { left: '0,4', right: fractionInline(400, 1000), symbol: '=' },
+        { left: fractionInline(17, 10), right: '1,701', symbol: '<' },
+        { left: '3,6', right: '3,600', symbol: '=' },
+        { left: '0,63', right: '0,306', symbol: '>' },
+        { left: '1,025', right: mixedInline(1, 1, 4), symbol: '<' },
+      ],
+      [
+        { left: '4,125', right: mixedInline(4, 1, 8), symbol: '=' },
+        { left: fractionInline(2750, 1000), right: '2,705', symbol: '>' },
+        { left: '0,08', right: fractionInline(8, 100), symbol: '=' },
+        { left: '6,309', right: '6,39', symbol: '<' },
+        { left: fractionInline(9, 10), right: '0,899', symbol: '>' },
+        { left: mixedInline(2, 3, 4), right: '2,75', symbol: '=' },
+      ],
+      [
+        { left: '7,005', right: '7,05', symbol: '<' },
+        { left: fractionInline(125, 1000), right: '0,12', symbol: '>' },
+        { left: mixedInline(3, 2, 5), right: '3,4', symbol: '=' },
+        { left: '0,701', right: fractionInline(7, 10), symbol: '>' },
+        { left: '5,099', right: '5,1', symbol: '<' },
+        { left: fractionInline(4500, 1000), right: '4,5', symbol: '=' },
+      ],
+    ];
+  }
+
+  function appendMaybeNode(parent, content){
+    if (content instanceof Node) parent.appendChild(content);
+    else parent.append(String(content));
+  }
+
+  function contentKey(content){
+    return content instanceof Node ? content.textContent.replace(/\s+/g, ' ').trim() : String(content);
+  }
+
+  function makeDecimalThousandthsCompareCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_compare_card', decimalThousandthsCompareSets(), item => item.map(row => `${contentKey(row.left)}${row.symbol}${contentKey(row.right)}`).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'compare-row';
+      appendMaybeNode(row, item.left);
+      row.appendChild(compareBox(item.symbol));
+      appendMaybeNode(row, item.right);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function decimalThousandthsGreatestSets(){
+    return [
+      [[mixedInline(2, 1, 2), '2,499', '2,06'], [mixedInline(3, 3, 4), fractionInline(41, 10), '4,012'], [mixedInline(5, 19, 100), mixedInline(5, 1, 5), '5,199'], [mixedInline(1, 35, 100), '1,402', mixedInline(1, 3, 5)], [fractionInline(375, 100), '1,726', mixedInline(2, 3, 4)], ['0,08', '0,785', fractionInline(4, 5)]],
+      [['6,205', '6,250', mixedInline(6, 1, 5)], [fractionInline(905, 100), '9,049', '9,5'], ['0,333', fractionInline(34, 100), mixedInline(0, 3, 10)], [mixedInline(4, 1, 4), '4,204', fractionInline(4210, 1000)], ['7,7', '7,077', fractionInline(7700, 1000)], ['1,125', mixedInline(1, 1, 8), '1,12']],
+      [['8,09', '8,109', fractionInline(81, 10)], [mixedInline(2, 3, 5), '2,599', '2,06'], ['0,905', fractionInline(9, 10), '0,95'], [fractionInline(1250, 1000), mixedInline(1, 1, 4), '1,205'], ['3,04', '3,400', fractionInline(34, 10)], [mixedInline(6, 7, 10), '6,699', '6,709']],
+    ];
+  }
+
+  function makeDecimalThousandthsGreatestCard(){
+    const set = pickUnusedOrAny('gi4_decimal_thousand_greatest_card', decimalThousandthsGreatestSets(), item => item.map(group => group.map(contentKey).join('-')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-thousand-greatest-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(group => {
+      const values = group.map(content => {
+        if (typeof content === 'string') return Number(content.replace(',', '.'));
+        const text = content.textContent.replace(/\s+/g, ' ').trim();
+        if (/^\d+\s+\d+\s+\d+$/.test(text)) {
+          const [w, n, d] = text.split(/\s+/).map(Number);
+          return w + n / d;
+        }
+        if (/^\d+\s+\d+$/.test(text)) {
+          const [n, d] = text.split(/\s+/).map(Number);
+          return n / d;
+        }
+        return -Infinity;
+      });
+      const max = Math.max(...values);
+      const row = document.createElement('div');
+      row.className = 'greatest-row';
+      group.forEach((content, index) => {
+        const cell = document.createElement('span');
+        if (Math.abs(values[index] - max) < 0.000001) cell.classList.add('solution-greatest');
+        appendMaybeNode(cell, content);
+        row.appendChild(cell);
+      });
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function addDecimalThousandthsEstimateOrder(extraCount){
+    const key = 'gi4_decimal_thousand_estimate_order_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsEstimateOrderCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-estimate-order-grid', 'gi4-decimal-thousand-estimate-order-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsEstimateOrderCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: schatten en ordenen.', addCount => addDecimalThousandthsEstimateOrder(addCount || 1));
+    addFractionInstructions(b, ['Waar liggen de getallen ongeveer? Verbind.', 'Rangschik de getallen daarna van groot naar klein.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-estimate-order-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsEstimateOrderCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsEstimateOrder(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsRound(extraCount){
+    const key = 'gi4_decimal_thousand_round_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsRoundCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-round-grid', 'gi4-decimal-thousand-round-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsRoundCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: afronden.', addCount => addDecimalThousandthsRound(addCount || 1));
+    addFractionInstructions(b, ['Rond af zoals gevraagd.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-round-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsRoundCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsRound(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsAxisFill(extraCount){
+    const key = 'gi4_decimal_thousand_axis_fill_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsAxisFillCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-axis-fill-grid', 'gi4-decimal-thousand-axis-fill-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsAxisFillCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: getallenassen aanvullen.', addCount => addDecimalThousandthsAxisFill(addCount || 1));
+    addFractionInstructions(b, ['Welke sprong zie je?', 'Vul de ontbrekende getallen op de getallenassen aan.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-axis-fill-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsAxisFillCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsAxisFill(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsStep(extraCount){
+    const key = 'gi4_decimal_thousand_step_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsStepCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-step-grid', 'gi4-decimal-thousand-step-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsStepCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: tel verder of tel terug.', addCount => addDecimalThousandthsStep(addCount || 1));
+    addFractionInstructions(b, ['Tel verder of tel terug.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-step-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsStepCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsStep(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsCompare(extraCount){
+    const key = 'gi4_decimal_thousand_compare_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsCompareCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-compare-grid', 'gi4-decimal-thousand-compare-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsCompareCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: vergelijken.', addCount => addDecimalThousandthsCompare(addCount || 1));
+    addFractionInstructions(b, ['Vergelijk. Schrijf &lt;, &gt; of =.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-compare-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsCompareCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsCompare(1));
+    sheet.appendChild(b);
+  }
+
+  function addDecimalThousandthsGreatest(extraCount){
+    const key = 'gi4_decimal_thousand_greatest_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalThousandthsGreatestCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-thousand-greatest-grid', 'gi4-decimal-thousand-greatest-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalThousandthsGreatestCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen tot op een duizendste: grootste waarde.', addCount => addDecimalThousandthsGreatest(addCount || 1));
+    addFractionInstructions(b, ['Vergelijk de getallen.', 'Kleur de grootste waarde in elke reeks van 3.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-thousand-greatest-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalThousandthsGreatestCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalThousandthsGreatest(1));
+    sheet.appendChild(b);
   }
 
   function decimalMixedHundredthsCompareSeeds(){
@@ -8710,6 +10750,70 @@
     addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalColor(1));
   }
 
+  function decimalStripColorSets(){
+    return [
+      [
+        { label: '0,5', value: 5 },
+        { label: '3 tienden', value: 3 },
+        { label: fractionBox(1, 10), value: 1 },
+      ],
+      [
+        { label: '0,7', value: 7 },
+        { label: '2 tienden', value: 2 },
+        { label: fractionBox(4, 10), value: 4 },
+      ],
+      [
+        { label: '0,9', value: 9 },
+        { label: '6 tienden', value: 6 },
+        { label: fractionBox(8, 10), value: 8 },
+      ],
+      [
+        { label: '0,4', value: 4 },
+        { label: '5 tienden', value: 5 },
+        { label: fractionBox(7, 10), value: 7 },
+      ],
+    ];
+  }
+
+  function appendLabelContent(parent, content){
+    if (content instanceof Node) parent.appendChild(content);
+    else parent.textContent = content;
+  }
+
+  function makeDecimalStripColorCard(){
+    const items = pickUnusedOrAny('gi4_decimal_strip_color_card', decimalStripColorSets(), set => set.map(item => item.value).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-strip-color-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'gi4-decimal-strip-color-row';
+      const label = document.createElement('div');
+      label.className = 'strip-label';
+      appendLabelContent(label, item.label);
+      row.append(label, decimalStrip(item.value, { show: false, axisEnd: 100 }));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function addDecimalStripColor(extraCount){
+    const key = 'gi4_decimal_strip_color_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalStripColorCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-strip-color-grid', 'gi4-decimal-strip-color-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalStripColorCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen: kleur het gevraagde deel van het geheel.', addCount => addDecimalStripColor(addCount || 1));
+    addFractionInstructions(b, ['Kleur het gevraagde deel van het geheel.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-strip-color-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalStripColorCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalStripColor(1));
+  }
+
   function makeDecimalTableRow(){
     const t = rnd(1, 9);
     const type = pick(['eggs', 'circle', 'grid', 'axis', 'strip']);
@@ -8752,6 +10856,1007 @@
     table.appendChild(body);
     b.appendChild(table);
     addLocalExerciseButton(b, '+ rij bij deze keuze', () => addDecimalTable(1));
+  }
+
+  function decimalPlaceTableSets(){
+    const fracPrompt = (whole, num, den) => {
+      const span = document.createElement('span');
+      span.className = 'gi4-decimal-place-table-prompt-inline';
+      span.append(`${whole} geheel en `, fractionBox(num, den));
+      return span;
+    };
+    return [
+      [
+        { prompt: '3 tienden', h: '', te: '', e: '0', t: '3', answer: '0,3' },
+        { prompt: '1 T 2 t', h: '', te: '1', e: '0', t: '2', answer: '10,2' },
+        { prompt: fracPrompt(1, 7, 10), h: '', te: '', e: '1', t: '7', answer: '1,7' },
+        { prompt: '15 gehelen en 3 t', h: '', te: '1', e: '5', t: '3', answer: '15,3' },
+        { prompt: '2 H 3 E 7 t', h: '2', te: '0', e: '3', t: '7', answer: '203,7' },
+      ],
+      [
+        { prompt: '8 tienden', h: '', te: '', e: '0', t: '8', answer: '0,8' },
+        { prompt: '4 T 6 t', h: '', te: '4', e: '0', t: '6', answer: '40,6' },
+        { prompt: fracPrompt(2, 5, 10), h: '', te: '', e: '2', t: '5', answer: '2,5' },
+        { prompt: '23 gehelen en 9 t', h: '', te: '2', e: '3', t: '9', answer: '23,9' },
+        { prompt: '1 H 4 T 8 t', h: '1', te: '4', e: '0', t: '8', answer: '140,8' },
+      ],
+      [
+        { prompt: '6 tienden', h: '', te: '', e: '0', t: '6', answer: '0,6' },
+        { prompt: '7 E 4 t', h: '', te: '', e: '7', t: '4', answer: '7,4' },
+        { prompt: fracPrompt(3, 2, 10), h: '', te: '', e: '3', t: '2', answer: '3,2' },
+        { prompt: '48 gehelen en 5 t', h: '', te: '4', e: '8', t: '5', answer: '48,5' },
+        { prompt: '3 H 2 T 1 E 9 t', h: '3', te: '2', e: '1', t: '9', answer: '321,9' },
+      ],
+      [
+        { prompt: '1 tiende', h: '', te: '', e: '0', t: '1', answer: '0,1' },
+        { prompt: '9 T 3 t', h: '', te: '9', e: '0', t: '3', answer: '90,3' },
+        { prompt: fracPrompt(5, 8, 10), h: '', te: '', e: '5', t: '8', answer: '5,8' },
+        { prompt: '64 gehelen en 2 t', h: '', te: '6', e: '4', t: '2', answer: '64,2' },
+        { prompt: '5 H 7 E 6 t', h: '5', te: '0', e: '7', t: '6', answer: '507,6' },
+      ],
+    ];
+  }
+
+  function appendDecimalPlacePrompt(cell, content){
+    if (content instanceof Node) cell.appendChild(content);
+    else cell.textContent = content;
+  }
+
+  function placeValueCell(value){
+    const td = document.createElement('td');
+    if (value !== '') td.appendChild(sol(String(value)));
+    return td;
+  }
+
+  function makeDecimalPlaceTableCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_place_table_card', decimalPlaceTableSets(), set => set.map(row => row.answer).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-place-table-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('table');
+    table.className = 'gi4-decimal-place-table';
+    table.innerHTML = '<thead><tr><th class="prompt-col"></th><th>H</th><th>T</th><th>E</th><th class="comma-col">,</th><th>t</th><th class="answer-col">kommagetal</th></tr></thead>';
+    const body = document.createElement('tbody');
+    rows.forEach(rowData => {
+      const tr = document.createElement('tr');
+      const prompt = document.createElement('td');
+      prompt.className = 'prompt-col';
+      appendDecimalPlacePrompt(prompt, rowData.prompt);
+      const comma = document.createElement('td');
+      comma.className = 'comma-col';
+      comma.textContent = ',';
+      const answer = document.createElement('td');
+      answer.className = 'answer-col';
+      answer.appendChild(lineWithSolution(rowData.answer, 'medium'));
+      tr.append(prompt, placeValueCell(rowData.h), placeValueCell(rowData.te), placeValueCell(rowData.e), comma, placeValueCell(rowData.t), answer);
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    card.appendChild(table);
+    return card;
+  }
+
+  function addDecimalPlaceTable(extraCount){
+    const key = 'gi4_decimal_place_table';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalPlaceTableCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-place-table-grid', 'gi4-decimal-place-table-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalPlaceTableCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen: cijfers in de tabel en schrijven als kommagetal.', addCount => addDecimalPlaceTable(addCount || 1));
+    addFractionInstructions(b, ['Schrijf de cijfers in de tabel.', 'Schrijf als kommagetal.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-place-table-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalPlaceTableCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalPlaceTable(1));
+  }
+
+  function decimalRiddleSets(){
+    return [
+      [
+        { text: 'Ik sta precies in het midden tussen 9 en 10.', answer: '9,5' },
+        { text: 'Ik ben 2 t minder dan 5 gehelen.', answer: '4,8' },
+        { text: 'Ik ben 3 t groter dan 7,8.', answer: '8,1' },
+        { text: 'Je vindt mij precies in het midden tussen 3,8 en 4,2.', answer: '4' },
+        { text: 'Ik ben een geheel getal en ik kom net na 3,9.', answer: '4' },
+        { text: 'Ik besta uit 1 T en 2 t.', answer: '10,2' },
+        { text: 'Ik ben evenveel als 32/10.', answer: '3,2' },
+      ],
+      [
+        { text: 'Ik sta precies in het midden tussen 6 en 7.', answer: '6,5' },
+        { text: 'Ik ben 4 t minder dan 8 gehelen.', answer: '7,6' },
+        { text: 'Ik ben 2 t groter dan 5,7.', answer: '5,9' },
+        { text: 'Je vindt mij precies in het midden tussen 1,6 en 2.', answer: '1,8' },
+        { text: 'Ik ben een geheel getal en ik kom net na 8,9.', answer: '9' },
+        { text: 'Ik besta uit 3 T en 5 t.', answer: '30,5' },
+        { text: 'Ik ben evenveel als 47/10.', answer: '4,7' },
+      ],
+      [
+        { text: 'Ik sta precies in het midden tussen 2 en 3.', answer: '2,5' },
+        { text: 'Ik ben 1 t minder dan 4 gehelen.', answer: '3,9' },
+        { text: 'Ik ben 5 t groter dan 6,2.', answer: '6,7' },
+        { text: 'Je vindt mij precies in het midden tussen 7,1 en 7,5.', answer: '7,3' },
+        { text: 'Ik ben een geheel getal en ik kom net na 5,9.', answer: '6' },
+        { text: 'Ik besta uit 2 T en 8 t.', answer: '20,8' },
+        { text: 'Ik ben evenveel als 19/10.', answer: '1,9' },
+      ],
+      [
+        { text: 'Ik sta precies in het midden tussen 0 en 1.', answer: '0,5' },
+        { text: 'Ik ben 3 t minder dan 7 gehelen.', answer: '6,7' },
+        { text: 'Ik ben 4 t groter dan 2,3.', answer: '2,7' },
+        { text: 'Je vindt mij precies in het midden tussen 4,4 en 4,8.', answer: '4,6' },
+        { text: 'Ik ben een geheel getal en ik kom net na 9,9.', answer: '10' },
+        { text: 'Ik besta uit 6 E en 1 t.', answer: '6,1' },
+        { text: 'Ik ben evenveel als 84/10.', answer: '8,4' },
+      ],
+    ];
+  }
+
+  function makeDecimalRiddleCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_riddle_card', decimalRiddleSets(), set => set.map(row => row.answer).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-riddle-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(rowData => {
+      const row = document.createElement('div');
+      row.className = 'gi4-decimal-riddle-row';
+      const text = document.createElement('span');
+      text.textContent = rowData.text;
+      row.append(text, lineWithSolution(rowData.answer, 'medium'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function addDecimalRiddle(extraCount){
+    const key = 'gi4_decimal_riddle_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalRiddleCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-riddle-grid', 'gi4-decimal-riddle-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalRiddleCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen: zoek het passende kommagetal.', addCount => addDecimalRiddle(addCount || 1));
+    addFractionInstructions(b, ['Zoek het passende kommagetal.', 'Schrijf het op.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-riddle-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalRiddleCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalRiddle(1));
+  }
+
+  function decimalHundredthsComma(value){
+    return Number(value / 100).toFixed(2).replace('.', ',');
+  }
+
+  function decimalG4HundredGrid(value, show = false){
+    const grid = document.createElement('div');
+    grid.className = 'gi4-g4-hundred-grid-visual';
+    for (let i = 0; i < 100; i++) {
+      const cell = document.createElement('span');
+      if (i < value) {
+        if (show) cell.classList.add('filled-now');
+        else cell.classList.add('solution-fill');
+      }
+      grid.appendChild(cell);
+    }
+    return grid;
+  }
+
+  function makeDecimalG4HundredIntroCard(){
+    const values = pickUnusedOrAny('gi4_decimal_g4_hundred_intro', [[56, 75], [24, 38], [62, 91], [47, 83]], set => set.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-intro-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'hundred-intro-top';
+    top.append(decimalG4HundredGrid(100, true), Object.assign(document.createElement('span'), { textContent: '100/100 = 100 h = 1,00' }));
+    card.appendChild(top);
+    const rows = document.createElement('div');
+    rows.className = 'hundred-intro-rows';
+    values.forEach(value => {
+      const row = document.createElement('div');
+      row.className = 'hundred-intro-row';
+      row.append(decimalG4HundredGrid(value, false), fractionBox('', '', String(value), '100'), ' = ', lineWithSolution(`${value} h`, 'short'), ' = ', lineWithSolution(decimalHundredthsComma(value), 'short'));
+      rows.appendChild(row);
+    });
+    card.appendChild(rows);
+    return card;
+  }
+
+  function makeDecimalG4HundredGridWriteCard(){
+    const set = pickUnusedOrAny('gi4_decimal_g4_hundred_grid_write', [
+      { singles: [60, 10, 75, 90], mixed: [{ whole: 1, part: 26 }, { whole: 2, part: 64 }] },
+      { singles: [35, 8, 82, 50], mixed: [{ whole: 1, part: 47 }, { whole: 3, part: 5 }] },
+      { singles: [42, 20, 68, 95], mixed: [{ whole: 2, part: 18 }, { whole: 1, part: 72 }] },
+    ], item => `${item.singles.join('-')}-${item.mixed.map(v => `${v.whole},${v.part}`).join('-')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-grid-write-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const example = document.createElement('div');
+    example.className = 'grid-write-example';
+    example.append(decimalG4HundredGrid(100, true), Object.assign(document.createElement('span'), { textContent: 'een geheel' }), '1 = ', fractionBox('100', '100'), ' = 1,00');
+    card.appendChild(example);
+    const singles = document.createElement('div');
+    singles.className = 'grid-write-singles';
+    set.singles.forEach(value => {
+      const item = document.createElement('div');
+      item.className = 'grid-write-item';
+      item.append(decimalG4HundredGrid(value, true), document.createElement('br'), fractionBox('', '100', String(value), ''), ' = ', lineWithSolution(decimalHundredthsComma(value), 'short'));
+      singles.appendChild(item);
+    });
+    const mixed = document.createElement('div');
+    mixed.className = 'grid-write-mixed';
+    set.mixed.forEach(itemData => {
+      const item = document.createElement('div');
+      item.className = 'grid-write-mixed-item';
+      const visuals = document.createElement('div');
+      visuals.className = 'grid-write-mixed-visuals';
+      for (let i = 0; i < itemData.whole; i++) visuals.appendChild(decimalG4HundredGrid(100, true));
+      visuals.appendChild(decimalG4HundredGrid(itemData.part, true));
+      item.append(visuals, lineWithSolution(String(itemData.whole), 'medium'), ` ${itemData.whole === 1 ? 'geheel' : 'gehelen'} en `, fractionBox('', '100', String(itemData.part), ''), ' = ', lineWithSolution(decimalHundredthsComma(itemData.whole * 100 + itemData.part), 'medium'));
+      mixed.appendChild(item);
+    });
+    card.append(singles, mixed);
+    return card;
+  }
+
+  function makeDecimalG4HundredFractionToDecimalCard(){
+    const items = pickUnusedOrAny('gi4_decimal_g4_hundred_frac_to_decimal', [
+      [{ n: 8, d: 10, a: '0,8' }, { n: 2, d: 10, a: '0,2' }, { n: 45, d: 100, a: '0,45' }, { n: 2, d: 100, a: '0,02' }, { n: 99, d: 100, a: '0,99' }, { text: '1 geheel en', n: 5, d: 10, a: '1,5' }],
+      [{ n: 6, d: 10, a: '0,6' }, { n: 9, d: 10, a: '0,9' }, { n: 37, d: 100, a: '0,37' }, { n: 7, d: 100, a: '0,07' }, { n: 84, d: 100, a: '0,84' }, { text: '2 gehelen en', n: 3, d: 10, a: '2,3' }],
+      [{ n: 4, d: 10, a: '0,4' }, { n: 1, d: 10, a: '0,1' }, { n: 58, d: 100, a: '0,58' }, { n: 12, d: 100, a: '0,12' }, { n: 90, d: 100, a: '0,90' }, { text: '3 gehelen en', n: 25, d: 100, a: '3,25' }],
+    ], set => set.map(item => item.a).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-fraction-decimal-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      if (item.text) row.append(item.text, ' ');
+      row.append(fractionBox(item.n, item.d), ' = ', lineWithSolution(item.a, 'medium'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredDecimalToFractionCard(){
+    const items = pickUnusedOrAny('gi4_decimal_g4_hundred_decimal_to_fraction', [
+      [{ v: '0,72', n: 72, d: 100 }, { v: '0,24', n: 24, d: 100 }, { v: '0,87', n: 87, d: 100 }, { v: '0,4', n: 4, d: 10 }, { v: '0,05', n: 5, d: 100 }, { v: '0,9', n: 9, d: 10 }, { v: '2,25', whole: 2, n: 25, d: 100 }],
+      [{ v: '0,36', n: 36, d: 100 }, { v: '0,68', n: 68, d: 100 }, { v: '0,7', n: 7, d: 10 }, { v: '0,09', n: 9, d: 100 }, { v: '1,40', whole: 1, n: 40, d: 100 }, { v: '3,8', whole: 3, n: 8, d: 10 }],
+    ], set => set.map(item => item.v).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-decimal-fraction-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      if (item.whole !== undefined) row.append(`${item.v} = `, lineWithSolution(String(item.whole), 'medium'), ' gehelen en ', fractionBox('', '', String(item.n), String(item.d)));
+      else row.append(`${item.v} = `, fractionBox('', '', String(item.n), String(item.d)));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredDigitValueCard(){
+    const values = pickUnusedOrAny('gi4_decimal_g4_hundred_digit_value', [
+      [{ display: '34,12', parts: [['3', 'T'], ['4', 'E'], ['1', 't'], ['2', 'h']] }, { display: '127,36', parts: [['1', 'H'], ['2', 'T'], ['7', 'E'], ['3', 't'], ['6', 'h']] }],
+      [{ display: '56,08', parts: [['5', 'T'], ['6', 'E'], ['0', 't'], ['8', 'h']] }, { display: '203,45', parts: [['2', 'H'], ['0', 'T'], ['3', 'E'], ['4', 't'], ['5', 'h']] }],
+    ], set => set.map(item => item.display).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-digit-value-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    values.forEach(item => {
+      const blockEl = document.createElement('div');
+      blockEl.className = 'digit-value-block';
+      const number = document.createElement('strong');
+      number.textContent = item.display;
+      const rows = document.createElement('div');
+      rows.className = 'digit-value-rows';
+      [...item.parts].reverse().forEach(([digit, place]) => {
+        const row = document.createElement('div');
+        row.append(Object.assign(document.createElement('span'), { textContent: digit }), lineWithSolution(place, 'tiny'));
+        rows.appendChild(row);
+      });
+      const split = document.createElement('div');
+      split.className = 'digit-value-split';
+      split.append(`${item.display} = `);
+      item.parts.forEach(([digit, place], index) => {
+        if (index) split.append(' + ');
+        split.append(lineWithSolution(`${digit} ${place}`, 'medium'));
+      });
+      blockEl.append(number, rows, split);
+      card.appendChild(blockEl);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredSplitCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_g4_hundred_split', [
+      [['0,36', ['0,3', '0,06']], ['1,75', ['1', '0,7', '0,05']], ['8,04', ['8', '0,04']], ['0,82', ['0,8', '0,02']], ['2,41', ['2', '0,4', '0,01']], ['16,5', ['10', '6', '0,5']], ['0,99', ['0,9', '0,09']], ['6,66', ['6', '0,6', '0,06']], ['20,3', ['20', '0,3']]],
+      [['0,48', ['0,4', '0,08']], ['3,25', ['3', '0,2', '0,05']], ['7,09', ['7', '0,09']], ['0,57', ['0,5', '0,07']], ['4,62', ['4', '0,6', '0,02']], ['12,8', ['10', '2', '0,8']], ['0,74', ['0,7', '0,04']], ['5,55', ['5', '0,5', '0,05']], ['30,6', ['30', '0,6']]],
+    ], set => set.map(row => row[0]).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-split-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(([value, parts]) => {
+      const row = document.createElement('div');
+      row.append(`${value} = `);
+      parts.forEach((part, index) => {
+        if (index) row.append(' + ');
+        row.append(lineWithSolution(part, 'short'));
+      });
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredComposeCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_g4_hundred_compose', [
+      [['2 H + 4 T + 3 E + 4 t', '243,4'], ['1 T + 5 E + 5 t + 1 h', '15,51'], ['4 T + 3 E + 5 t + 6 h', '43,56'], ['2 H + 3 E + 4 t + 2 h', '203,42'], ['5 T + 2 E + 2 t + 5 h', '52,25'], ['1 D + 1 h', '1000,01']],
+      [['3 H + 2 T + 7 E + 8 h', '327,08'], ['6 T + 9 E + 3 t', '69,3'], ['8 E + 4 t + 5 h', '8,45'], ['1 H + 4 T + 6 h', '140,06'], ['7 T + 1 E + 9 t + 2 h', '71,92'], ['2 D + 5 E + 7 h', '2005,07']],
+    ], set => set.map(row => row[1]).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-compose-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(([prompt, answer]) => {
+      const row = document.createElement('div');
+      row.append(`${prompt} = `, lineWithSolution(answer, 'long'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredRoundCard(){
+    const seed = pickUnusedOrAny('gi4_decimal_g4_hundred_round', [
+      {
+        unit: [830, 280, 1350, 512, 1861, 2519],
+        tenth: [557, 912, 1566, 247, 1191, 767],
+      },
+      {
+        unit: [347, 675, 1249, 905, 2034, 997],
+        tenth: [438, 671, 1205, 834, 1499, 305],
+      },
+      {
+        unit: [792, 419, 1588, 1207, 3333, 506],
+        tenth: [284, 659, 1116, 520, 1782, 945],
+      },
+    ], item => `${item.unit.join('-')}|${item.tenth.join('-')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-round-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const makeSection = (title, values, mode) => {
+      const section = document.createElement('div');
+      section.className = 'round-section';
+      section.appendChild(Object.assign(document.createElement('h4'), { textContent: title }));
+      values.forEach(value => {
+        const row = document.createElement('div');
+        row.className = 'round-row';
+        if (mode === 'unit') {
+          const low = Math.floor(value / 100);
+          const high = low + 1;
+          const nearest = value % 100 < 50 ? low : high;
+          row.append(lineWithSolution(String(low), 'short'), Object.assign(document.createElement('strong'), { textContent: decimalHundredthsComma(value) }), lineWithSolution(String(high), 'short'), lineWithSolution(String(nearest), 'tiny'));
+        } else {
+          const low = Math.floor(value / 10) / 10;
+          const high = low + 0.1;
+          const nearest = value % 10 < 5 ? low : high;
+          row.append(lineWithSolution(decimalComma(low), 'short'), Object.assign(document.createElement('strong'), { textContent: decimalHundredthsComma(value) }), lineWithSolution(decimalComma(high), 'short'), lineWithSolution(decimalComma(nearest), 'tiny'));
+        }
+        section.appendChild(row);
+      });
+      return section;
+    };
+    card.append(
+      makeSection('Rond af tot op de dichtstbijzijnde eenheid.', seed.unit, 'unit'),
+      makeSection('Rond af tot op het dichtstbijzijnde tiende.', seed.tenth, 'tenth')
+    );
+    return card;
+  }
+
+  function makeDecimalG4HundredMeterCard(){
+    const sets = [
+      [{ cm: 9 }, { cm: 85 }, { m: 1, cm: 20 }, { m: 2, cm: 5 }],
+      [{ cm: 7 }, { cm: 63 }, { m: 3, cm: 45 }, { m: 4, cm: 8 }],
+      [{ cm: 12 }, { cm: 96 }, { m: 5, cm: 30 }, { m: 6, cm: 2 }],
+    ];
+    const items = pickUnusedOrAny('gi4_decimal_g4_hundred_meter', sets, set => set.map(item => `${item.m || 0}-${item.cm}`).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-meter-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'meter-row';
+      if (item.m) {
+        const answer = `${item.m},${String(item.cm).padStart(2, '0')}`;
+        row.append(`${item.m} m ${item.cm} cm = `, lineWithSolution(String(item.m), 'tiny'), ' m en ', fractionBox('', '100', String(item.cm), ''), ' m = ', lineWithSolution(answer, 'medium'), ' m');
+      } else {
+        row.append(`${item.cm} cm = `, fractionBox('', '100', String(item.cm), ''), ' m = ', lineWithSolution(decimalHundredthsComma(item.cm), 'medium'), ' m');
+      }
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredPlaceCard(){
+    const sets = [
+      [{ prompt: '3 E 2 t 5 h', h: '', te: '', e: '3', t: '2', hu: '5', answer: '3,25' }, { prompt: '1 H 5 t 5 h', h: '1', te: '0', e: '0', t: '5', hu: '5', answer: '100,55' }, { prompt: '75 h', h: '', te: '', e: '0', t: '7', hu: '5', answer: '0,75' }],
+      [{ prompt: '4 E 6 h', h: '', te: '', e: '4', t: '0', hu: '6', answer: '4,06' }, { prompt: '2 T 8 t 3 h', h: '', te: '2', e: '0', t: '8', hu: '3', answer: '20,83' }, { prompt: '19 h', h: '', te: '', e: '0', t: '1', hu: '9', answer: '0,19' }],
+      [{ prompt: '7 E 4 t 2 h', h: '', te: '', e: '7', t: '4', hu: '2', answer: '7,42' }, { prompt: '3 H 5 E 8 h', h: '3', te: '0', e: '5', t: '0', hu: '8', answer: '305,08' }, { prompt: '64 h', h: '', te: '', e: '0', t: '6', hu: '4', answer: '0,64' }],
+    ];
+    const rows = pickUnusedOrAny('gi4_decimal_g4_hundred_place', sets, set => set.map(row => row.answer).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-place-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('table');
+    table.className = 'gi4-g4-hundred-place-table';
+    table.innerHTML = '<thead><tr><th></th><th>H</th><th>T</th><th>E</th><th>,</th><th>t</th><th>h</th><th></th></tr></thead>';
+    const body = document.createElement('tbody');
+    rows.forEach(rowData => {
+      const tr = document.createElement('tr');
+      const prompt = Object.assign(document.createElement('td'), { className: 'prompt', textContent: rowData.prompt });
+      const comma = Object.assign(document.createElement('td'), { className: 'comma', textContent: ',' });
+      const answer = document.createElement('td');
+      answer.className = 'answer';
+      answer.appendChild(lineWithSolution(rowData.answer, 'medium'));
+      tr.append(prompt, placeValueCell(rowData.h), placeValueCell(rowData.te), placeValueCell(rowData.e), comma, placeValueCell(rowData.t), placeValueCell(rowData.hu), answer);
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    card.appendChild(table);
+    return card;
+  }
+
+  function makeDecimalG4HundredWholeCard(){
+    const between = pickUnusedOrAny('gi4_decimal_g4_hundred_between', [[345, 10901, 75], [612, 2307, 995], [408, 7801, 125]], set => set.join('|'));
+    const fills = pickUnusedOrAny('gi4_decimal_g4_hundred_fill', [[395, 545, 950, 75, 208], [275, 625, 890, 150, 407]], set => set.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-whole-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const betweenBox = document.createElement('div');
+    betweenBox.className = 'between-box';
+    between.forEach(value => {
+      const low = Math.floor(value / 100);
+      const high = low + 1;
+      const row = document.createElement('div');
+      row.append(lineWithSolution(String(low), 'short'), ' < ', decimalHundredthsComma(value), ' < ', lineWithSolution(String(high), 'short'));
+      betweenBox.appendChild(row);
+    });
+    const fillBox = document.createElement('div');
+    fillBox.className = 'fill-box';
+    fills.forEach(value => {
+      const next = Math.ceil(value / 100) * 100;
+      const add = next - value;
+      const row = document.createElement('div');
+      row.append(decimalHundredthsComma(value), ' + ', lineWithSolution(decimalHundredthsComma(add), 'short'), ' = ', lineWithSolution(decimalHundredthsComma(next).replace(',00', ''), 'short'));
+      fillBox.appendChild(row);
+    });
+    card.append(betweenBox, fillBox);
+    return card;
+  }
+
+  function makeDecimalG4HundredAxisCard(){
+    const set = pickUnusedOrAny('gi4_decimal_g4_hundred_axis', [
+      { start: 451, labels: { 3: '4,51', 4: '4,52' }, blanks: [1, 6, 9] },
+      { start: 148, labels: { 3: '1,48', 5: '1,50' }, blanks: [0, 4, 8] },
+      { start: 1040, labels: { 0: '10,4', 10: '10,5' }, blanks: [4, 7] },
+    ], item => `${item.start}-${item.blanks.join('-')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-axis-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const axis = document.createElement('div');
+    axis.className = 'g4-hundred-axis';
+    for (let i = 0; i <= 12; i++) {
+      const tick = document.createElement('span');
+      tick.style.left = `${i / 12 * 100}%`;
+      axis.appendChild(tick);
+      if (set.labels[i]) {
+        const lab = Object.assign(document.createElement('b'), { textContent: set.labels[i] });
+        lab.style.left = `${i / 12 * 100}%`;
+        axis.appendChild(lab);
+      }
+      if (set.blanks.includes(i)) {
+        const blank = document.createElement('em');
+        blank.style.left = `${i / 12 * 100}%`;
+        blank.appendChild(lineWithSolution(decimalHundredthsComma(set.start + i), 'tiny'));
+        axis.appendChild(blank);
+      }
+    }
+    card.appendChild(axis);
+    return card;
+  }
+
+  function makeDecimalG4HundredZoomAxisCard(){
+    const set = pickUnusedOrAny('gi4_decimal_g4_hundred_zoom_axis', [
+      { topStart: 0, zoomStart: 50, topLabels: { 0: '0', 1: '0,1', 5: '0,5', 6: '0,6', 10: '1,0' }, topBlanks: [3, 8], bottomLabels: { 0: '0,5', 1: '0,51', 10: '0,6' }, bottomBlanks: [3, 6, 8] },
+      { topStart: 2, zoomStart: 240, topLabels: { 0: '2', 1: '2,1', 4: '2,4', 5: '2,5', 10: '3,0' }, topBlanks: [2, 7], bottomLabels: { 0: '2,4', 1: '2,41', 10: '2,5' }, bottomBlanks: [4, 6, 9] },
+      { topStart: 7, zoomStart: 780, topLabels: { 0: '7', 2: '7,2', 8: '7,8', 9: '7,9', 10: '8,0' }, topBlanks: [4, 6], bottomLabels: { 0: '7,8', 1: '7,81', 10: '7,9' }, bottomBlanks: [2, 5, 7] },
+    ], item => `${item.topStart}-${item.zoomStart}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-zoom-axis-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+
+    const makeAxis = (className, labels, blanks, valueAtTick) => {
+      const axis = document.createElement('div');
+      axis.className = className;
+      for (let i = 0; i <= 12; i++) {
+        const tick = document.createElement('span');
+        tick.className = 'zoom-tick';
+        tick.style.left = `${i / 12 * 100}%`;
+        axis.appendChild(tick);
+        if (labels[i]) {
+          const lab = Object.assign(document.createElement('b'), { textContent: labels[i] });
+          lab.style.left = `${i / 12 * 100}%`;
+          axis.appendChild(lab);
+        }
+        if (blanks.includes(i)) {
+          const blank = document.createElement('em');
+          blank.style.left = `${i / 12 * 100}%`;
+          blank.appendChild(lineWithSolution(valueAtTick(i), 'tiny'));
+          axis.appendChild(blank);
+        }
+      }
+      return axis;
+    };
+
+    const top = makeAxis('zoom-top-axis', set.topLabels, set.topBlanks, i => decimalDisplayFromHundred(set.topStart * 100 + i * 10));
+    const bottom = makeAxis('zoom-bottom-axis', set.bottomLabels, set.bottomBlanks, i => decimalHundredthsComma(set.zoomStart + i));
+    const makeStepArc = (cls, text) => {
+      const arc = document.createElement('div');
+      arc.className = `step-arc ${cls}`;
+      const label = document.createElement('div');
+      label.className = 'step-arc-label';
+      label.textContent = text;
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 100 46');
+      svg.setAttribute('preserveAspectRatio', 'none');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M2 42 Q50 4 98 42');
+      const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      head.setAttribute('d', 'M55 20 L65 25 L56 31');
+      svg.append(path, head);
+      arc.append(label, svg);
+      return arc;
+    };
+    const topJump = makeStepArc('top-jump', '+ 0,1');
+    const bottomJump = makeStepArc('bottom-jump', '+ 0,01');
+    const topZoomTick = Math.round((set.zoomStart - set.topStart * 100) / 10);
+    topJump.style.setProperty('--arc-left', '0');
+    bottomJump.style.setProperty('--arc-left', '1');
+    const lines = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    lines.classList.add('zoom-lines');
+    lines.setAttribute('viewBox', '0 0 100 100');
+    lines.setAttribute('preserveAspectRatio', 'none');
+    [
+      [topZoomTick / 12 * 100, 0, 0, 100],
+      [(topZoomTick + 1) / 12 * 100, 0, 10 / 12 * 100, 100],
+    ].forEach(points => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', String(points[0]));
+      line.setAttribute('y1', String(points[1]));
+      line.setAttribute('x2', String(points[2]));
+      line.setAttribute('y2', String(points[3]));
+      lines.appendChild(line);
+    });
+    card.append(topJump, top, lines, bottomJump, bottom);
+    return card;
+  }
+
+  function makeDecimalG4HundredConnectCard(){
+    const pairs = [
+      [['3,1', 310], ['31 h', 31], ['3 t', 30], ['3 E 1 t 8 h', 318]],
+      [['0,31', 31], ['0,3', 30], ['3,18', 318], ['3,10', 310]],
+    ];
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-connect-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    pairs.forEach((side, sideIndex) => {
+      const col = document.createElement('div');
+      col.className = 'connect-col';
+      side.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `solution-group-${item[1]}`;
+        row.textContent = item[0];
+        const dot = document.createElement('i');
+        if (sideIndex === 0) row.appendChild(dot);
+        else row.prepend(dot);
+        col.appendChild(row);
+      });
+      card.appendChild(col);
+    });
+    return card;
+  }
+
+  function decimalDisplayFromHundred(value){
+    const fixed = Number(value / 100).toFixed(2).replace('.', ',');
+    if (fixed.endsWith(',00')) return fixed.slice(0, -3);
+    if (fixed.endsWith('0')) return fixed.slice(0, -1);
+    return fixed;
+  }
+
+  function makeDecimalG4HundredJumpsCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_g4_hundred_jumps', [
+      [
+        { start: 300, step: 25, given: 5, blanks: 5 },
+        { start: 960, step: -10, given: 5, blanks: 5 },
+        { start: 1200, steps: [50, 100, 50, 100], blanks: 5 },
+        { start: 2000, steps: [-5, -95, -5, -95], blanks: 5 },
+      ],
+      [
+        { start: 125, step: 25, given: 5, blanks: 5 },
+        { start: 840, step: -20, given: 5, blanks: 5 },
+        { start: 600, steps: [50, 25, 50, 25], blanks: 5 },
+        { start: 1500, steps: [-10, -40, -10, -40], blanks: 5 },
+      ],
+    ], set => set.map(row => row.start).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-jumps-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(rowData => {
+      const row = document.createElement('div');
+      row.className = 'jump-row';
+      const values = [rowData.start];
+      const total = (rowData.given || 5) + rowData.blanks;
+      for (let i = 1; i < total; i++) {
+        const step = rowData.steps ? rowData.steps[(i - 1) % rowData.steps.length] : rowData.step;
+        values.push(values[i - 1] + step);
+      }
+      const firstStep = values[1] - values[0];
+      const secondStep = values[2] - values[1];
+      const arrows = document.createElement('div');
+      arrows.className = 'jump-arrows';
+      const makeArrow = (index, step, dotted = false) => {
+        const arrow = document.createElement('div');
+        arrow.className = `jump-arrow-note${dotted ? ' dotted' : ''}`;
+        arrow.style.setProperty('--jump-left', `calc(${index * 10 + 5}% + ${index - 4.5}px)`);
+        const answer = document.createElement('div');
+        answer.className = 'jump-answer-line';
+        answer.appendChild(lineWithSolution(decimalDisplayFromHundred(step), 'tiny'));
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 100 46');
+        svg.setAttribute('preserveAspectRatio', 'none');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M2 42 Q50 4 98 42');
+        const head = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        head.setAttribute('d', 'M55 20 L65 25 L56 31');
+        svg.append(path, head);
+        arrow.append(answer, svg);
+        arrows.appendChild(arrow);
+      };
+      makeArrow(0, firstStep);
+      if (Math.abs(secondStep - firstStep) > 0.001) makeArrow(1, secondStep, true);
+      const sequence = document.createElement('div');
+      sequence.className = 'jump-values';
+      values.forEach((value, index) => {
+        const cell = document.createElement('span');
+        cell.className = index >= (rowData.given || 5) ? 'blank-value' : '';
+        if (index < (rowData.given || 5)) cell.textContent = decimalDisplayFromHundred(value);
+        else cell.appendChild(lineWithSolution(decimalDisplayFromHundred(value), 'tiny'));
+        sequence.appendChild(cell);
+      });
+      row.append(arrows, sequence);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredCompareCard(){
+    const sets = [
+      [
+        ['0,4', '0,04', '>'],
+        ['2,15', '20,15', '<'],
+        ['1,1', '1,10', '='],
+        ['3,19', '3,8', '<'],
+        ['3,9', '3,40', '>'],
+        ['20,99', '30', '<'],
+      ],
+      [
+        ['0,75', '0,7', '>'],
+        ['4,05', '4,5', '<'],
+        ['6,30', '6,3', '='],
+        ['12,01', '12,10', '<'],
+        ['9,99', '10', '<'],
+        ['5,08', '5,80', '<'],
+      ],
+      [
+        ['8,2', '8,20', '='],
+        ['0,09', '0,9', '<'],
+        ['14,45', '14,4', '>'],
+        ['7,07', '7,70', '<'],
+        ['2,50', '2,5', '='],
+        ['11,19', '11,09', '>'],
+      ],
+    ];
+    const items = pickUnusedOrAny('gi4_decimal_g4_hundred_compare', sets, set => set.map(row => row.join('')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-g4-hundred-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'compare-item';
+      row.append(item[0], compareBox(item[2]), item[1]);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeDecimalG4HundredCard(mode){
+    if (mode === 'gridWrite') return makeDecimalG4HundredGridWriteCard();
+    if (mode === 'fracToDecimal') return makeDecimalG4HundredFractionToDecimalCard();
+    if (mode === 'decimalToFrac') return makeDecimalG4HundredDecimalToFractionCard();
+    if (mode === 'meter') return makeDecimalG4HundredMeterCard();
+    if (mode === 'place') return makeDecimalG4HundredPlaceCard();
+    if (mode === 'digitValue') return makeDecimalG4HundredDigitValueCard();
+    if (mode === 'split') return makeDecimalG4HundredSplitCard();
+    if (mode === 'compose') return makeDecimalG4HundredComposeCard();
+    if (mode === 'round') return makeDecimalG4HundredRoundCard();
+    if (mode === 'whole') return makeDecimalG4HundredWholeCard();
+    if (mode === 'axis') return makeDecimalG4HundredAxisCard();
+    if (mode === 'zoomAxis') return makeDecimalG4HundredZoomAxisCard();
+    if (mode === 'jumps') return makeDecimalG4HundredJumpsCard();
+    if (mode === 'compare') return makeDecimalG4HundredCompareCard();
+    if (mode === 'connect') return makeDecimalG4HundredConnectCard();
+    return makeDecimalG4HundredIntroCard();
+  }
+
+  function addDecimalG4Hundredths(extraCount, forcedMode){
+    const mode = forcedMode || $('#decimalG4HundredthsMode')?.value || 'intro';
+    const key = `gi4_decimal_g4_hundred_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalG4HundredthsCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-g4-hundred-grid.${mode}`, `gi4-g4-hundred-grid ${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeDecimalG4HundredCard(mode));
+      return;
+    }
+    const titles = {
+      intro: 'Extra 4de leerjaar: honderdsten op het 100-veld.',
+      gridWrite: 'Extra 4de leerjaar: welk deel is gekleurd?',
+      fracToDecimal: 'Extra 4de leerjaar: breuken als kommagetal.',
+      decimalToFrac: 'Extra 4de leerjaar: kommagetallen als breuk.',
+      meter: 'Extra 4de leerjaar: zet om in meter.',
+      place: 'Extra 4de leerjaar: cijfers in de juiste kolom.',
+      digitValue: 'Extra 4de leerjaar: waarde van elk cijfer.',
+      split: 'Extra 4de leerjaar: splits de getallen.',
+      compose: 'Extra 4de leerjaar: noteer het getal.',
+      round: 'Extra 4de leerjaar: kommagetallen afronden.',
+      whole: 'Extra 4de leerjaar: tussen gehelen en aanvullen tot het volgende geheel.',
+      axis: 'Extra 4de leerjaar: honderdsten op de getallenas.',
+      zoomAxis: 'Extra 4de leerjaar: ingezoomde getallenas tot op 0,01.',
+      jumps: 'Extra 4de leerjaar: sprongen met honderdsten.',
+      compare: 'Extra 4de leerjaar: honderdsten vergelijken.',
+      connect: 'Extra 4de leerjaar: verbind wat gelijk is.',
+    };
+    const instructions = {
+      intro: ['Kijk wat er staat. Vul aan.'],
+      gridWrite: ['Welk deel is gekleurd? Schrijf als breuk en als kommagetal.'],
+      fracToDecimal: ['Schrijf de breuken als een kommagetal.'],
+      decimalToFrac: ['Schrijf de kommagetallen als breuk.'],
+      meter: ['Zet om in meter.'],
+      place: ['Schrijf de cijfers in de juiste kolom.', 'Noteer het kommagetal naast de tabel.'],
+      digitValue: ['Lees eerst het getal.', 'Noteer nadien de waarde van elk cijfer.'],
+      split: ['Splits de getallen.'],
+      compose: ['Noteer het getal.'],
+      round: ['Vul in tussen welke getallen het kommagetal ligt.', 'Pas de afrondingsregel toe.'],
+      whole: ['Tussen welke gehelen ligt het kommagetal? Noteer ze.', 'Vul aan tot het volgende geheel.'],
+      axis: ['Vul aan met de passende kommagetallen.'],
+      zoomAxis: ['Vul de passende kommagetallen in.'],
+      jumps: ['Hoe groot is de sprong? Vul in.', 'Zet de rij verder.'],
+      compare: ['Vul in: &lt;, &gt; of =.', 'Je mag hulpnullen toevoegen.'],
+      connect: ['Verbind wat gelijk is.'],
+    };
+    const b = block(key, titles[mode], addCount => addDecimalG4Hundredths(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-g4-hundred-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeDecimalG4HundredCard(mode));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalG4Hundredths(1, mode));
+  }
+
+  function negativeTempText(value){
+    return `${value} °C`;
+  }
+
+  function negativeThermometerSvg(value){
+    const temp = Math.max(-10, Math.min(30, value));
+    const yTop = 54;
+    const yBottom = 230;
+    const y = yBottom - ((temp + 10) / 40) * (yBottom - yTop);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-negative-thermometer');
+    svg.setAttribute('viewBox', '0 0 175 315');
+    svg.setAttribute('role', 'img');
+    const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    bg.setAttribute('x', '12');
+    bg.setAttribute('y', '8');
+    bg.setAttribute('width', '145');
+    bg.setAttribute('height', '295');
+    bg.setAttribute('rx', '20');
+    bg.setAttribute('fill', '#e0f7fa');
+    bg.setAttribute('stroke', '#0e7490');
+    bg.setAttribute('stroke-width', '4');
+    const tube = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    tube.setAttribute('d', 'M43 58 a8 8 0 0 1 16 0 v204 a24 24 0 1 1 -16 0 z');
+    tube.setAttribute('fill', '#fff');
+    tube.setAttribute('stroke', '#134e4a');
+    tube.setAttribute('stroke-width', '2');
+    const fill = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    fill.setAttribute('x', '44');
+    fill.setAttribute('y', y.toFixed(1));
+    fill.setAttribute('width', '14');
+    fill.setAttribute('height', String(282 - y));
+    fill.setAttribute('fill', '#ef233c');
+    const bulb = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    bulb.setAttribute('cx', '51');
+    bulb.setAttribute('cy', '286');
+    bulb.setAttribute('r', '24');
+    bulb.setAttribute('fill', '#ef233c');
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', '92');
+    label.setAttribute('y', '38');
+    label.textContent = '°C';
+    label.setAttribute('class', 'thermo-title');
+    svg.append(bg, tube, fill, bulb, label);
+    for (let t = -10; t <= 30; t += 1) {
+      const ty = yBottom - ((t + 10) / 40) * (yBottom - yTop);
+      const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      tick.setAttribute('x1', '68');
+      tick.setAttribute('x2', t % 5 === 0 ? '112' : '86');
+      tick.setAttribute('y1', String(ty));
+      tick.setAttribute('y2', String(ty));
+      tick.setAttribute('class', t % 5 === 0 ? 'major' : 'minor');
+      svg.appendChild(tick);
+      if (t % 5 === 0) {
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', '122');
+        text.setAttribute('y', String(ty + 5));
+        text.textContent = String(t);
+        text.setAttribute('class', 'thermo-label');
+        svg.appendChild(text);
+      }
+    }
+    const mark = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    mark.setAttribute('x1', '24');
+    mark.setAttribute('x2', '40');
+    mark.setAttribute('y1', String(y));
+    mark.setAttribute('y2', String(y));
+    mark.setAttribute('class', 'reading-mark');
+    svg.appendChild(mark);
+    return svg;
+  }
+
+  function makeNegativeAxisCard(){
+    const set = pickUnusedOrAny('gi4_negative_axis', [
+      { start: -7, len: 14, given: [-7, 0, 3] },
+      { start: -10, len: 15, given: [-10, -4, 0] },
+      { start: -6, len: 13, given: [-2, 0, 6] },
+    ], item => `${item.start}-${item.len}-${item.given.join('|')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-negative-axis-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const axis = document.createElement('div');
+    axis.className = 'negative-axis';
+    for (let i = 0; i < set.len; i++) {
+      const value = set.start + i;
+      const tick = document.createElement('span');
+      tick.style.left = `${i / (set.len - 1) * 100}%`;
+      axis.appendChild(tick);
+      const box = document.createElement('em');
+      box.style.left = `${i / (set.len - 1) * 100}%`;
+      if (set.given.includes(value)) box.textContent = String(value).replace('-', '−');
+      else box.appendChild(lineWithSolution(String(value).replace('-', '−'), 'tiny'));
+      axis.appendChild(box);
+    }
+    card.appendChild(axis);
+    return card;
+  }
+
+  function makeNegativeOrderCard(){
+    const temps = pickUnusedOrAny('gi4_negative_order', [
+      [8, -5, -3, 5, 2, -2],
+      [6, -8, 0, -4, 3, -1],
+      [-7, 4, -2, 9, 1, -5],
+    ], item => item.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-negative-order-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const list = document.createElement('div');
+    list.className = 'temp-list';
+    list.textContent = temps.map(negativeTempText).join(' / ');
+    const answer = temps.slice().sort((a, b) => a - b).map(negativeTempText).join(' / ');
+    card.append(list, lineWithSolution(answer, 'long'));
+    return card;
+  }
+
+  function makeNegativeTrueFalseCard(){
+    const rows = pickUnusedOrAny('gi4_negative_true_false', [
+      [['−5 °C is kouder dan −2 °C.', 'waar'], ['Verdieping −2 ligt 2 verdiepingen boven het gelijkvloers.', 'niet waar'], ['Verdieping −5 is lager dan verdieping −2.', 'waar']],
+      [['−1 °C is warmer dan −6 °C.', 'waar'], ['Verdieping −3 ligt lager dan verdieping −7.', 'niet waar'], ['0 °C is warmer dan −4 °C.', 'waar']],
+      [['−8 °C is kouder dan −10 °C.', 'niet waar'], ['Verdieping −1 ligt net onder het gelijkvloers.', 'waar'], ['−3 is kleiner dan 2.', 'waar']],
+    ], item => item.map(row => row.join(':')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-negative-true-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(([statement, answer]) => {
+      const row = document.createElement('div');
+      row.append(statement, lineWithSolution(answer, 'medium'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeNegativeThermometerCard(){
+    const item = pickUnusedOrAny('gi4_negative_thermometer', [
+      { min: -6, max: 0 },
+      { min: -8, max: 5 },
+      { min: -2, max: 12 },
+      { min: -9, max: 3 },
+      { min: -4, max: 17 },
+    ], item => `${item.min}-${item.max}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-negative-thermo-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const table = document.createElement('div');
+    table.className = 'negative-thermo-table';
+    [['minimumtemperatuur', item.min], ['maximumtemperatuur', item.max]].forEach(([title, value]) => {
+      const col = document.createElement('div');
+      col.className = 'thermo-col';
+      col.appendChild(Object.assign(document.createElement('h4'), { textContent: title }));
+      const body = document.createElement('div');
+      body.className = 'thermo-body';
+      const sentence = document.createElement('div');
+      sentence.className = 'thermo-sentence';
+      sentence.append('Het is ', lineWithSolution(String(value), 'tiny'), ' ° Celsius.');
+      body.append(negativeThermometerSvg(value), sentence);
+      col.appendChild(body);
+      table.appendChild(col);
+    });
+    const diff = document.createElement('div');
+    diff.className = 'thermo-diff';
+    diff.appendChild(Object.assign(document.createElement('h4'), { textContent: 'temperatuurverschil' }));
+    const diffBody = document.createElement('div');
+    diffBody.append('Het temperatuurverschil bedraagt ', lineWithSolution(String(item.max - item.min), 'tiny'), ' ° Celsius.');
+    diff.appendChild(diffBody);
+    table.appendChild(diff);
+    card.appendChild(table);
+    return card;
+  }
+
+  function makeNegativeCard(mode){
+    if (mode === 'order') return makeNegativeOrderCard();
+    if (mode === 'trueFalse') return makeNegativeTrueFalseCard();
+    if (mode === 'thermometer') return makeNegativeThermometerCard();
+    return makeNegativeAxisCard();
+  }
+
+  function addNegative(extraCount, forcedMode){
+    const mode = forcedMode || $('#negativeMode')?.value || 'axis';
+    const key = `gi4_negative_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#negativeCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-negative-grid.${mode}`, `gi4-negative-grid ${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeNegativeCard(mode));
+      return;
+    }
+    const titles = {
+      axis: 'Negatieve getallen: getallenas aanvullen.',
+      order: 'Negatieve getallen: temperaturen ordenen.',
+      trueFalse: 'Negatieve getallen: waar of niet waar.',
+      thermometer: 'Negatieve getallen: thermometer en temperatuurverschil.',
+    };
+    const instructions = {
+      axis: ['Vul de getallenas aan.'],
+      order: ['Rangschik de temperaturen van koud naar warm.'],
+      trueFalse: ['Waar of niet waar?'],
+      thermometer: ['Noteer de temperatuur.', 'Bereken het temperatuurverschil.'],
+    };
+    const b = block(key, titles[mode], addCount => addNegative(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-negative-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeNegativeCard(mode));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addNegative(1, mode));
   }
 
   function makeDecimalLineCard(){
@@ -8928,6 +12033,7 @@
     ['0', '0,1', '0,2', '0,3', '0,4', '0,5', '0,6', '0,7', '0,8', '0,9', '1'].forEach((txt, i) => {
       const col = document.createElement('div');
       col.className = 'gi4-decimal-order-col';
+      col.style.left = `${i / 10 * 96}%`;
       const chip = document.createElement('span');
       chip.className = `gi4-decimal-order-decimal${i === 0 || i === 10 ? ' whole' : ''}`;
       chip.textContent = txt;
@@ -9508,29 +12614,46 @@
   function updateLevelUi(){
     const range = activeRange();
     document.body.classList.toggle('gi4-range-100000', range === 100000);
+    document.body.classList.toggle('gi4-range-1000000', range === 1000000);
+    document.body.classList.toggle('gi4-range-10000000', range === 10000000);
     const badge = document.querySelector('.graad-badge');
-    if (badge) badge.textContent = range === 100000 ? 'tot 100 000' : 'tot 10 000';
+    if (badge) badge.textContent = range === 10000000 ? 'tot 10 000 000' : range === 1000000 ? 'tot 1 000 000' : range === 100000 ? 'tot 100 000' : 'tot 10 000';
 
     const note = $('#gi4LevelNote');
     if (note) {
       const extra = levelState.level === 'grade6'
-        ? 'De uitbreidingen met kommagetallen, breuken en procenten kunnen later verder groeien.'
+        ? 'Eigen tabs met HD / TD / D / H / T / E en M / HD / TD / D / H / T / E.'
         : levelState.level === 'custom'
-          ? 'Eigen keuze: je kiest zelf of deze tool tot 10 000 of tot 100 000 werkt.'
+          ? 'Eigen keuze: je kiest zelf of deze tool tot 10 000, 100 000, 1 000 000 of 10 000 000 werkt.'
           : '';
-      note.textContent = `${levelLabel()}: getallen ${range === 100000 ? 'tot 100 000 met TD / D / H / T / E' : 'tot 10 000 met D / H / T / E'}.${extra ? ` ${extra}` : ''}`;
+      const rangeText = range === 10000000
+        ? 'tot 10 000 000 met M / HD / TD / D / H / T / E'
+        : range === 1000000
+        ? 'tot 1 000 000 met HD / TD / D / H / T / E'
+        : range === 100000
+          ? 'tot 100 000 met TD / D / H / T / E'
+          : 'tot 10 000 met D / H / T / E';
+      note.textContent = `${levelLabel()}: getallen ${rangeText}.${extra ? ` ${extra}` : ''}`;
     }
 
     const splitNote = $('#splitRangeNote');
     if (splitNote) {
-      splitNote.textContent = range === 100000
+      splitNote.textContent = range === 10000000
+        ? 'Voorbeeld: 3 241 970 = 3 M + 2 HD + 4 TD + 1 D + 9 H + 7 T + 0 E.'
+        : range === 1000000
+        ? 'Voorbeeld: 341 970 = 3 HD + 4 TD + 1 D + 9 H + 7 T + 0 E.'
+        : range === 100000
         ? 'Voorbeeld: 41 970 = 4 TD + 1 D + 9 H + 7 T + 0 E.'
         : 'Voorbeeld: 1 970 = 1 D + 9 H + 7 T + 0 E.';
     }
 
     const title = sheet?.querySelector('.sheetHeader h2');
     if (title && !title.dataset.userEdited) {
-      title.textContent = range === 100000
+      title.textContent = range === 10000000
+        ? 'Extra oefenen op getalinzicht tot 10 000 000'
+        : range === 1000000
+        ? 'Extra oefenen op getalinzicht tot 1 000 000'
+        : range === 100000
         ? 'Extra oefenen op getalinzicht tot 100 000'
         : 'Extra oefenen op getalinzicht tot 10 000';
     }
@@ -9584,6 +12707,30 @@
     bind('#btnAddG5Jumps', addG5Jumps);
     bind('#btnAddG5Riddles', addG5Riddles);
     bind('#btnAddG5Equiv', addG5Equiv);
+    bind('#btnAddG6Material', addG6Material);
+    bind('#btnAddG6ValueCards', addG6ValueCards);
+    bind('#btnAddG6ShortValues', addG6ShortValues);
+    bind('#btnAddG6BuildNumbers', addG6BuildNumbers);
+    bind('#btnAddG6PlaceTable', addG6PlaceTable);
+    bind('#btnAddG6NextTenThousand', addG6NextTenThousand);
+    bind('#btnAddG6AxisOrder', addG6AxisOrder);
+    bind('#btnAddG6Neighbors', addG6Neighbors);
+    bind('#btnAddG6Jumps', addG6Jumps);
+    bind('#btnAddG6Compare', addG6Compare);
+    bind('#btnAddG6Order', addG6Order);
+    bind('#btnAddG6Equiv', addG6Equiv);
+    bind('#btnAddG7Material', addG7Material);
+    bind('#btnAddG7ValueCards', addG7ValueCards);
+    bind('#btnAddG7ShortValues', addG7ShortValues);
+    bind('#btnAddG7BuildNumbers', addG7BuildNumbers);
+    bind('#btnAddG7PlaceTable', addG7PlaceTable);
+    bind('#btnAddG7NextMillion', addG7NextMillion);
+    bind('#btnAddG7AxisOrder', addG7AxisOrder);
+    bind('#btnAddG7Neighbors', addG7Neighbors);
+    bind('#btnAddG7Jumps', addG7Jumps);
+    bind('#btnAddG7Compare', addG7Compare);
+    bind('#btnAddG7Order', addG7Order);
+    bind('#btnAddG7Equiv', addG7Equiv);
     bind('#btnAddG5FractionSimplify', addG5FractionSimplify);
     bind('#btnAddG5FractionEquivalent', addG5FractionEquivalent);
     bind('#btnAddG5FractionCommonCompare', addG5FractionCommonCompare);
@@ -9633,13 +12780,31 @@
     bind('#btnAddDecimalHundredthsCompare', addDecimalHundredthsCompare);
     bind('#btnAddDecimalHundredthsAxisConnect', addDecimalHundredthsAxisConnect);
     bind('#btnAddDecimalHundredthsJumps', addDecimalHundredthsJumps);
+    bind('#btnAddDecimalThousandthsIntro', addDecimalThousandthsIntro);
+    bind('#btnAddDecimalThousandthsValue', addDecimalThousandthsValue);
+    bind('#btnAddDecimalThousandthsMixed', addDecimalThousandthsMixed);
+    bind('#btnAddDecimalThousandthsAxisMixed', addDecimalThousandthsAxisMixed);
+    bind('#btnAddDecimalThousandthsWrite', addDecimalThousandthsWrite);
+    bind('#btnAddDecimalThousandthsDigitValue', addDecimalThousandthsDigitValue);
+    bind('#btnAddDecimalThousandthsEquivalentColor', addDecimalThousandthsEquivalentColor);
+    bind('#btnAddDecimalThousandthsEstimateOrder', addDecimalThousandthsEstimateOrder);
+    bind('#btnAddDecimalThousandthsRound', addDecimalThousandthsRound);
+    bind('#btnAddDecimalThousandthsAxisFill', addDecimalThousandthsAxisFill);
+    bind('#btnAddDecimalThousandthsStep', addDecimalThousandthsStep);
+    bind('#btnAddDecimalThousandthsCompare', addDecimalThousandthsCompare);
+    bind('#btnAddDecimalThousandthsGreatest', addDecimalThousandthsGreatest);
     bind('#btnAddDecimalMixedHundredths', addDecimalMixedHundredths);
     bind('#btnAddDecimalMixed', addDecimalMixed);
     bind('#btnAddDecimalColor', addDecimalColor);
+    bind('#btnAddDecimalStripColor', addDecimalStripColor);
     bind('#btnAddDecimalTable', addDecimalTable);
+    bind('#btnAddDecimalPlaceTable', addDecimalPlaceTable);
+    bind('#btnAddDecimalRiddle', addDecimalRiddle);
+    bind('#btnAddDecimalG4Hundredths', addDecimalG4Hundredths);
     bind('#btnAddDecimalLine', addDecimalLine);
     bind('#btnAddDecimalCompare', addDecimalCompare);
     bind('#btnAddDecimalOrder', addDecimalOrder);
+    bind('#btnAddNegative', addNegative);
     $('#btnToggleSolutions')?.addEventListener('click', () => setSolutionsMode(!sheet.classList.contains('solutions-mode')));
     $('#btnDownloadSolutions')?.addEventListener('click', async () => {
       const wasOn = sheet.classList.contains('solutions-mode');
