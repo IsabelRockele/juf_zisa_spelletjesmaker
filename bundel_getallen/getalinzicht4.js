@@ -3662,6 +3662,1187 @@
     b.appendChild(grid);
   }
 
+  function percentSimpleFraction(value){
+    const div = gcd(value, 100);
+    return { num: value / div, den: 100 / div };
+  }
+
+  function percentHundredGrid(value, show = false, black = false){
+    const grid = document.createElement('div');
+    grid.className = `gi4-percent-hundred-grid${black ? ' black' : ''}`;
+    const blackPositions = [2, 8, 14, 22, 29, 35, 36, 41, 47, 53, 54, 60, 66, 72, 79, 84, 88, 93, 97, 5, 18, 31, 44, 57, 70, 83, 96, 11, 25, 39, 62, 76, 90, 1, 16];
+    const blackSet = new Set(blackPositions.slice(0, value));
+    for (let i = 0; i < 100; i++) {
+      const cell = document.createElement('span');
+      if (black ? blackSet.has(i) : i < value) cell.className = show ? 'filled-now' : 'solution-fill';
+      grid.appendChild(cell);
+    }
+    return grid;
+  }
+
+  function percentLine(text, cls = 'short'){
+    return lineWithSolution(String(text), cls);
+  }
+
+  function appendPercentReadText(parent, value, compact = false){
+    const line1 = document.createElement('div');
+    line1.append('Er zijn ', percentLine(value, 'tiny'), ' vakjes gekleurd.');
+    const line2 = document.createElement('div');
+    line2.append('Dat is ', percentLine(value, compact ? 'medium' : 'tiny'), compact ? ' vakjes.' : ' per 100 vakjes.');
+    const line3 = document.createElement('div');
+    line3.append('Dat is ', fractionBox('', '', String(value), '100'), compact ? '.' : '');
+    const line4 = document.createElement('div');
+    line4.append('Dat is ', percentLine(value, 'tiny'), ' %');
+    const line5 = Object.assign(document.createElement('div'), { textContent: 'van het honderdveld.' });
+    parent.append(line1, line2, line3, line4, line5);
+  }
+
+  function makePercentReadCard(){
+    const values = pickUnusedOrAny('gi4_percent_read_card', [[25, 48, 63], [32, 57, 76], [18, 40, 85], [45, 68, 92]], set => set.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-read-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    values.forEach((value, index) => {
+      const item = document.createElement('div');
+      item.className = 'percent-read-item';
+      item.appendChild(percentHundredGrid(value, true));
+      const text = document.createElement('div');
+      text.className = 'percent-read-text';
+      appendPercentReadText(text, value, index > 0);
+      item.appendChild(text);
+      card.appendChild(item);
+    });
+    return card;
+  }
+
+  function makePercentColorCard(){
+    const values = pickUnusedOrAny('gi4_percent_color_card', [[20, 75, 60], [35, 50, 90], [10, 40, 85], [25, 65, 100]], set => set.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-color-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    values.forEach((value, index) => {
+      const prompts = [`Kleur ${value} van de 100 vakjes.`, `Kleur ${value} op 100 van het honderdveld.`, `Kleur ${value} % van het honderdveld.`];
+      const item = document.createElement('div');
+      item.className = 'percent-color-item';
+      item.append(Object.assign(document.createElement('div'), { className: 'percent-color-prompt', textContent: prompts[index % prompts.length] }), percentHundredGrid(value));
+      card.appendChild(item);
+    });
+    return card;
+  }
+
+  function makePercentMixedCard(){
+    const set = pickUnusedOrAny('gi4_percent_mixed_card', [
+      { read: 41, color: [43, 80] },
+      { read: 56, color: [25, 70] },
+      { read: 34, color: [60, 90] },
+      { read: 72, color: [10, 50] },
+    ], item => `${item.read}-${item.color.join('-')}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-mixed-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const read = document.createElement('div');
+    read.className = 'percent-mixed-item';
+    read.appendChild(percentHundredGrid(set.read, true));
+    const readText = document.createElement('div');
+    readText.className = 'percent-read-text';
+    appendPercentReadText(readText, set.read, false);
+    read.appendChild(readText);
+    card.appendChild(read);
+    set.color.forEach(value => {
+      const item = document.createElement('div');
+      item.className = 'percent-mixed-item';
+      item.append(percentHundredGrid(value), Object.assign(document.createElement('div'), { className: 'percent-color-prompt', textContent: `Kleur ${value} vakjes.` }));
+      const text = document.createElement('div');
+      text.className = 'percent-read-text';
+      const line1 = document.createElement('div');
+      line1.append('Dat is ', percentLine(`${value} per 100`, 'wide'), '.');
+      const line2 = document.createElement('div');
+      line2.append('Dat is ', fractionBox('', '', String(value), '100'), '.');
+      const line3 = document.createElement('div');
+      line3.append('Dat is ', percentLine(`${value} %`, 'medium'), '.');
+      text.append(line1, line2, line3);
+      item.appendChild(text);
+      card.appendChild(item);
+    });
+    return card;
+  }
+
+  function makePercentKeyCard(){
+    const items = [
+      { value: 50, text: 'Kleur 50 % van het honderdveld.', answer: 'de helft of 1/2' },
+      { value: 100, text: 'Kleur het honderdveld volledig.', answer: '100' },
+      { value: 10, text: 'Kleur 10 % van het honderdveld.', answer: 'een tiende of 1/10' },
+      { value: 25, text: 'Kleur 25 % van het honderdveld.', answer: 'een kwart of 1/4' },
+    ];
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-key-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    items.forEach(item => {
+      const box = document.createElement('div');
+      box.className = 'percent-key-item';
+      const sentence = document.createElement('div');
+      sentence.append(item.value === 100 ? 'Je kleurde ' : `${item.value} % is `, percentLine(item.answer, 'wide'), item.value === 100 ? ' %.' : ' van het honderdveld.');
+      box.append(Object.assign(document.createElement('div'), { textContent: item.text }), sentence, percentHundredGrid(item.value));
+      card.appendChild(box);
+    });
+    return card;
+  }
+
+  function makePercentConvertCard(){
+    const rows = pickUnusedOrAny('gi4_percent_convert_card', [
+      [['frac', 20], ['fracKnown', 75], ['percentKnown', 50], ['percentKnown', 70], ['word', 25, 'een kwart'], ['word', 50, 'de helft'], ['doubleA', 60], ['doubleB', 80]],
+      [['frac', 40], ['fracKnown', 25], ['percentKnown', 10], ['percentKnown', 90], ['word', 10, 'een tiende'], ['word', 75, 'drie kwart'], ['doubleA', 50], ['doubleB', 40]],
+    ], set => set.map(row => row.join('-')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-convert-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(rowData => {
+      const row = document.createElement('div');
+      const value = rowData[1];
+      const simple = percentSimpleFraction(value);
+      if (rowData[0] === 'frac') row.append(fractionBox(value, 100), ' is ', fractionBox('', '', String(simple.num), String(simple.den)), ' is ', percentLine(`${value} %`, 'medium'), '.');
+      else if (rowData[0] === 'fracKnown') row.append(fractionBox(simple.num, simple.den), ' is ', fractionBox('', '', String(value), '100'), ' is ', percentLine(`${value} %`, 'medium'), '.');
+      else if (rowData[0] === 'percentKnown') row.append(`${value} % is `, fractionBox('', '', String(value), '100'), ' is ', percentLine(`${simple.num}/${simple.den}`, 'medium'), '.');
+      else if (rowData[0] === 'word') row.append(`${rowData[2]} is `, percentLine(`${value} %`, 'medium'), ' of ', percentLine(`${simple.num}/${simple.den}`, 'medium'), '.');
+      else if (rowData[0] === 'doubleA') row.append(`het dubbel van ${value / 2} % is `, percentLine(`${value} %`, 'medium'), ' of ', percentLine(`${simple.num}/${simple.den}`, 'medium'), '.');
+      else row.append(`${value} % is het dubbel van `, percentLine(`${value / 2} %`, 'medium'), ' of ', percentLine(`${percentSimpleFraction(value / 2).num}/${percentSimpleFraction(value / 2).den}`, 'medium'), '.');
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makePercentFiguresCard(){
+    const set = pickUnusedOrAny('gi4_percent_figures_card', [[20, 30], [40, 60], [25, 70]], set => set.join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-figures-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(value => {
+      const simple = percentSimpleFraction(value);
+      const panel = document.createElement('div');
+      panel.className = 'percent-figure-panel';
+      panel.append(percentHundredGrid(value, true), Object.assign(document.createElement('div'), { textContent: 'Welk deel is gekleurd?' }), lineWithSolution(`${simple.num}/${simple.den}`, 'medium'), Object.assign(document.createElement('div'), { textContent: 'Schrijf de breuk met noemer 100.' }), fractionBox('', '', String(value), '100'), Object.assign(document.createElement('div'), { textContent: 'Hoeveel percent is gekleurd?' }), percentLine(`${value} %`, 'medium'), Object.assign(document.createElement('div'), { textContent: 'Hoeveel percent blijft wit?' }), percentLine(`${100 - value} %`, 'medium'));
+      card.appendChild(panel);
+    });
+    return card;
+  }
+
+  function makePercentCrosswordCard(){
+    const value = pickUnusedOrAny('gi4_percent_crossword_card', [18, 22, 27, 35], item => item);
+    const simpleBlack = percentSimpleFraction(value);
+    const simpleWhite = percentSimpleFraction(100 - value);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-crossword-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const questions = document.createElement('div');
+    questions.className = 'percent-crossword-questions';
+    [
+      ['Hoeveel vakjes zijn in dit kruiswoordraadsel zwart gekleurd?', `${value}`],
+      ['Hoeveel percent van de vakjes is zwart gekleurd?', `${value} %`],
+      ['Schrijf als breuk met noemer 100.', `${value}/100`],
+      ['Maak de breuk zo eenvoudig mogelijk.', `${simpleBlack.num}/${simpleBlack.den}`],
+      ['Hoeveel percent is wit gebleven?', `${100 - value} %`],
+      ['Schrijf als breuk met noemer 100.', `${100 - value}/100`],
+      ['Maak de breuk zo eenvoudig mogelijk.', `${simpleWhite.num}/${simpleWhite.den}`],
+      ['Hoeveel percent heb je als je wit en zwart optelt?', '100 %'],
+      ['100 % is', 'het geheel'],
+    ].forEach(([q, a]) => {
+      const row = document.createElement('div');
+      row.append(q, ' ', lineWithSolution(a, 'wide'));
+      questions.appendChild(row);
+    });
+    card.append(questions, percentHundredGrid(value, true, true));
+    return card;
+  }
+
+  function percentValueText(value){
+    const simple = percentSimpleFraction(value);
+    if (simple.den === 1) return String(simple.num);
+    return `${simple.num}/${simple.den}`;
+  }
+
+  function makePercentCompleteCard(){
+    const set = pickUnusedOrAny('gi4_percent_complete_card', [
+      { rect: 50, line: 20 },
+      { rect: 25, line: 40 },
+      { rect: 75, line: 10 },
+      { rect: 60, line: 30 },
+    ], item => `${item.rect}-${item.line}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-complete-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    [
+      { kind: 'rect', value: set.rect, text: `Deze rechthoek stelt ${set.rect} % van het geheel voor.` },
+      { kind: 'line', value: set.line, text: `Dit lijnstuk stelt ${set.line} % van het geheel voor.` },
+    ].forEach(item => {
+      const blockEl = document.createElement('div');
+      blockEl.className = 'percent-complete-item';
+      const prompt = document.createElement('div');
+      prompt.append(item.text, document.createElement('br'), 'Vul aan tot het geheel of 100 %.');
+      const visual = document.createElement('div');
+      visual.className = `percent-complete-${item.kind}`;
+      visual.style.setProperty('--part', `${item.value}%`);
+      visual.style.setProperty('--whole-scale', `${100 / item.value}`);
+      const known = document.createElement('span');
+      known.className = 'known-part';
+      const missing = document.createElement('span');
+      missing.className = 'missing-part solution-only';
+      visual.append(known, missing);
+      blockEl.append(prompt, visual);
+      card.appendChild(blockEl);
+    });
+    return card;
+  }
+
+  function percentColorLegend(items){
+    const legend = document.createElement('div');
+    legend.className = 'percent-color-legend';
+    items.forEach(item => {
+      const row = document.createElement('div');
+      row.append(Object.assign(document.createElement('span'), { className: `legend-swatch ${item.cls}` }), item.label);
+      legend.appendChild(row);
+    });
+    return legend;
+  }
+
+  function makePercentSurveyGrid(items){
+    const grid = document.createElement('div');
+    grid.className = 'percent-survey-grid';
+    const cells = items.flatMap(item => Array.from({ length: item.count }, () => item.cls));
+    cells.sort(() => Math.random() - .5).forEach(cls => {
+      grid.appendChild(Object.assign(document.createElement('span'), { className: cls }));
+    });
+    return grid;
+  }
+
+  function makePercentSurveyCard(){
+    const set = pickUnusedOrAny('gi4_percent_survey_card', [
+      {
+        intro: 'We deden een rondvraag over het favoriete fruit in de klas.',
+        total: 20,
+        items: [
+          { label: 'appel', count: 5, cls: 'swatch-a' },
+          { label: 'banaan', count: 4, cls: 'swatch-b' },
+          { label: 'aardbei', count: 7, cls: 'swatch-c' },
+          { label: 'peer', count: 4, cls: 'swatch-d' },
+        ],
+      },
+      {
+        intro: 'De leerlingen kozen een activiteit voor de projectnamiddag.',
+        total: 25,
+        items: [
+          { label: 'knutselen', count: 6, cls: 'swatch-a' },
+          { label: 'techniek', count: 5, cls: 'swatch-b' },
+          { label: 'muziek', count: 9, cls: 'swatch-c' },
+          { label: 'toneel', count: 5, cls: 'swatch-d' },
+        ],
+      },
+      {
+        intro: 'De klas stemde op een drankje voor het klasfeest.',
+        total: 20,
+        items: [
+          { label: 'water', count: 8, cls: 'swatch-a' },
+          { label: 'sap', count: 6, cls: 'swatch-b' },
+          { label: 'melk', count: 3, cls: 'swatch-c' },
+          { label: 'thee', count: 3, cls: 'swatch-d' },
+        ],
+      },
+    ], item => item.intro);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-survey-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const top = document.createElement('div');
+    top.className = 'percent-survey-top';
+    top.append(Object.assign(document.createElement('p'), { textContent: set.intro }), makePercentSurveyGrid(set.items), percentColorLegend(set.items));
+    const table = document.createElement('table');
+    table.className = 'percent-table';
+    table.innerHTML = '<thead><tr><th></th><th>breuk</th><th>breuk op 100</th><th>percent</th></tr></thead>';
+    const body = document.createElement('tbody');
+    set.items.forEach(item => {
+      const value = item.count * (100 / set.total);
+      const simple = percentSimpleFraction(value);
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.textContent = item.label;
+      const td1 = document.createElement('td');
+      td1.appendChild(fractionBox('', '', String(item.count), String(set.total)));
+      const td2 = document.createElement('td');
+      td2.appendChild(fractionBox('', '', String(value), '100'));
+      const td3 = document.createElement('td');
+      td3.appendChild(lineWithSolution(`${value} %`, 'medium'));
+      tr.append(th, td1, td2, td3);
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    card.append(top, table);
+    return card;
+  }
+
+  function makePercentScoreTableCard(){
+    const set = pickUnusedOrAny('gi4_percent_score_card', [
+      {
+        intro: 'Vier kinderen maken een spellingquiz. Hoeveel percent van de woorden is juist?',
+        names: ['Noor', 'Milan', 'Lina', 'Otis'],
+        totalLabel: 'aantal woorden',
+        goodLabel: 'juist',
+        badLabel: 'fout',
+        rows: [{ t: 20, g: 15 }, { t: 25, g: 10 }, { t: 10, g: 9 }, { t: 50, g: 35 }],
+      },
+      {
+        intro: 'Tijdens de leesuitdaging worden bladwijzers verdiend. Hoeveel percent lukte?',
+        names: ['Amira', 'Finn', 'Lotte', 'Sam'],
+        totalLabel: 'doel',
+        goodLabel: 'behaald',
+        badLabel: 'nog te gaan',
+        rows: [{ t: 40, g: 20 }, { t: 50, g: 45 }, { t: 20, g: 12 }, { t: 25, g: 18 }],
+      },
+      {
+        intro: 'In de techniekles testen de kinderen hun brug. Hoeveel percent van de testen lukte?',
+        names: ['Rayan', 'Febe', 'Nora', 'Ilyas'],
+        totalLabel: 'aantal testen',
+        goodLabel: 'gelukt',
+        badLabel: 'niet gelukt',
+        rows: [{ t: 10, g: 7 }, { t: 20, g: 16 }, { t: 25, g: 15 }, { t: 50, g: 40 }],
+      },
+    ], item => item.intro);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-score-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(Object.assign(document.createElement('p'), { textContent: set.intro }));
+    const table = document.createElement('table');
+    table.className = 'percent-table percent-score-table';
+    const thead = document.createElement('thead');
+    thead.innerHTML = `<tr><th></th><th>${set.totalLabel}</th><th>${set.goodLabel}</th><th>${set.badLabel}</th><th>breuk</th><th>breuk op 100</th><th>percent</th></tr>`;
+    const body = document.createElement('tbody');
+    set.rows.forEach((row, index) => {
+      const value = row.g * (100 / row.t);
+      const tr = document.createElement('tr');
+      const th = document.createElement('th');
+      th.textContent = set.names[index];
+      const total = document.createElement('td');
+      total.textContent = row.t;
+      const good = document.createElement('td');
+      if (index === 1) good.appendChild(lineWithSolution(String(row.g), 'medium'));
+      else good.textContent = row.g;
+      const bad = document.createElement('td');
+      if (index === 0) bad.appendChild(lineWithSolution(String(row.t - row.g), 'medium'));
+      else bad.textContent = row.t - row.g;
+      const frac = document.createElement('td');
+      frac.appendChild(fractionBox('', '', String(row.g), String(row.t)));
+      const over100 = document.createElement('td');
+      over100.appendChild(fractionBox('', '', String(value), '100'));
+      const percent = document.createElement('td');
+      percent.appendChild(lineWithSolution(`${value} %`, 'medium'));
+      tr.append(th, total, good, bad, frac, over100, percent);
+      body.appendChild(tr);
+    });
+    table.append(thead, body);
+    const question = document.createElement('div');
+    const best = set.names[set.rows.reduce((bestIndex, row, index) => row.g / row.t > set.rows[bestIndex].g / set.rows[bestIndex].t ? index : bestIndex, 0)];
+    question.className = 'percent-table-question';
+    question.append('Wie scoorde procentueel het hoogst? ', lineWithSolution(best, 'wide'));
+    card.append(table, question);
+    return card;
+  }
+
+  function makePercentCompareCard(){
+    const set = pickUnusedOrAny('gi4_percent_compare_card', [
+      [[20, '1/5'], ['1/10', 10], ['1/50', 50], [75, '1/2'], ['1/4', 25], [60, '3/5']],
+      [[5, '1/20'], ['3/4', 70], [40, '2/5'], ['1/2', 50], [90, '9/10'], ['1/5', 25]],
+      [[10, '1/10'], ['1/4', 20], [80, '4/5'], ['3/5', 75], [50, '1/2'], ['1/100', 5]],
+    ], item => item.map(pair => pair.join(':')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-compare-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(([left, right]) => {
+      const leftValue = typeof left === 'number' ? left : Math.round((Number(left.split('/')[0]) / Number(left.split('/')[1])) * 100);
+      const rightValue = typeof right === 'number' ? right : Math.round((Number(right.split('/')[0]) / Number(right.split('/')[1])) * 100);
+      const row = document.createElement('div');
+      const symbol = leftValue < rightValue ? '<' : leftValue > rightValue ? '>' : '=';
+      row.append(formatPercentCompareValue(left), lineWithSolution(symbol, 'symbol'), formatPercentCompareValue(right));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function formatPercentCompareValue(value){
+    if (typeof value === 'number') return document.createTextNode(`${value} %`);
+    const [num, den] = value.split('/');
+    return fractionBox(num, den);
+  }
+
+  function percentDecimal(value){
+    return String(value / 100).replace('.', ',');
+  }
+
+  function percentFractionText(value, den = 100){
+    const num = value * den / 100;
+    return `${num}/${den}`;
+  }
+
+  function percentRelationFraction(value, den = 100){
+    const num = value * den / 100;
+    return fractionBox('', '', String(num), String(den));
+  }
+
+  function makePercentRelationHundredCard(){
+    const set = pickUnusedOrAny('gi4_percent_relation_hundred_card', [
+      { a: 45, b: 24 },
+      { a: 35, b: 18 },
+      { a: 52, b: 36 },
+      { a: 70, b: 15 },
+    ], item => `${item.a}-${item.b}`);
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-hundred-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const text = document.createElement('div');
+    text.className = 'percent-relation-hundred-text';
+    const l1 = document.createElement('div');
+    l1.append('Het volledige honderdveld is 100 %.');
+    const l2 = document.createElement('div');
+    l2.append('100 % is ', lineWithSolution('1', 'medium'), ' geheel.');
+    const l3 = document.createElement('div');
+    l3.append(`Kleur ${set.a} vakjes van het honderdveld blauw.`);
+    const l4 = document.createElement('div');
+    l4.append(`${set.a} van de `, lineWithSolution('100', 'medium'), ' vakjes is ', lineWithSolution(`${set.a}`, 'tiny'), ' % = ', percentRelationFraction(set.a), ' = ', lineWithSolution(percentValueText(set.a), 'tiny'), '.');
+    const l5 = document.createElement('div');
+    l5.append(`Kleur ${set.b} % van het honderdveld groen.`);
+    const l6 = document.createElement('div');
+    l6.append(lineWithSolution(`${set.b}`, 'tiny'), ' % = ', percentRelationFraction(set.b), ' = ', lineWithSolution(percentValueText(set.b), 'tiny'), '.');
+    const l7 = document.createElement('div');
+    l7.append('Hoeveel percent is wit? ', lineWithSolution(`${100 - set.a - set.b} %`, 'wide'));
+    text.append(l1, l2, l3, l4, l5, l6, l7);
+    const grid = percentHundredGrid(set.a + set.b, false);
+    grid.classList.add('relation-two-color');
+    grid.style.setProperty('--blue-count', set.a);
+    for (let i = 0; i < grid.children.length; i++) {
+      if (i < set.a) grid.children[i].classList.add('blue-fill');
+      else if (i < set.a + set.b) grid.children[i].classList.add('green-fill');
+    }
+    card.append(text, grid);
+    return card;
+  }
+
+  function makePercentRelationStripCard(){
+    const set = pickUnusedOrAny('gi4_percent_relation_strip_card', [
+      { parts: [2, 4, 3, 1], colors: ['rood', 'geel', 'groen', 'blauw'] },
+      { parts: [3, 2, 4, 1], colors: ['oranje', 'paars', 'groen', 'blauw'] },
+      { parts: [1, 5, 2, 2], colors: ['rood', 'geel', 'groen', 'blauw'] },
+    ], item => item.parts.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-strip-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const visual = document.createElement('div');
+    visual.className = 'percent-strip-wrap';
+    const strip = document.createElement('div');
+    strip.className = 'percent-strip';
+    set.parts.forEach((count, index) => {
+      for (let i = 0; i < count; i++) strip.appendChild(Object.assign(document.createElement('span'), { className: `strip-color-${index}` }));
+    });
+    const axis = document.createElement('div');
+    axis.className = 'percent-strip-axis';
+    for (let i = 0; i <= 10; i++) {
+      const tick = document.createElement('span');
+      tick.style.left = `${i * 10}%`;
+      axis.appendChild(tick);
+    }
+    axis.append(Object.assign(document.createElement('b'), { className: 'left', textContent: '0' }), Object.assign(document.createElement('b'), { className: 'right', textContent: '1' }));
+    visual.append(strip, axis);
+    const questions = document.createElement('div');
+    questions.className = 'percent-strip-questions';
+    set.parts.forEach((count, index) => {
+      const value = count * 10;
+      const q1 = document.createElement('div');
+      q1.append(`Hoeveel percent is ${set.colors[index]} gekleurd? `, percentRelationFraction(value, 10), ' = ', percentRelationFraction(value), ' = ', lineWithSolution(`${value} %`, 'medium'));
+      const q2 = document.createElement('div');
+      q2.append(`Welk kommagetal hoort bij de lengte van het ${set.colors[index]} deel? `, lineWithSolution(percentDecimal(value), 'medium'));
+      questions.append(q1, q2);
+    });
+    card.append(visual, questions);
+    return card;
+  }
+
+  function makePercentRelationSituationCard(){
+    const set = pickUnusedOrAny('gi4_percent_relation_situation_card', [
+      {
+        intro: 'Er werd aan de leerlingen gevraagd welk drankje ze tijdens de speeltijd drinken. 45 % drinkt water. Drie op tien leerlingen drinkt vruchtensap. Een vijfde drinkt chocomelk.',
+        rows: [
+          ['water', 45, '45 %'],
+          ['vruchtensap', 30, '3 op 10'],
+          ['chocomelk', 20, 'een vijfde'],
+        ],
+        rest: 'geen van de drie',
+      },
+      {
+        intro: 'In de klas werd gevraagd welk huisdier de kinderen het liefst willen. 35 % kiest een hond. Twee op tien kiest een kat. Een kwart kiest een konijn.',
+        rows: [
+          ['hond', 35, '35 %'],
+          ['kat', 20, '2 op 10'],
+          ['konijn', 25, 'een kwart'],
+        ],
+        rest: 'iets anders',
+      },
+      {
+        intro: 'De leerlingen kiezen een pauzespel. 40 % kiest voetbal. Een kwart kiest touwtje springen. Drie op twintig kiest tekenen met krijt.',
+        rows: [
+          ['voetbal', 40, '40 %'],
+          ['touwtje springen', 25, 'een kwart'],
+          ['krijt tekenen', 15, '3 op 20'],
+        ],
+        rest: 'geen van deze',
+      },
+    ], item => item.intro);
+    const total = set.rows.reduce((sum, row) => sum + row[1], 0);
+    const rows = [...set.rows, [set.rest, 100 - total, '']];
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-situation-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(Object.assign(document.createElement('p'), { textContent: set.intro }));
+    const table = document.createElement('table');
+    table.className = 'percent-table relation-situation-table';
+    table.innerHTML = '<thead><tr><th></th><th>verhouding</th><th>breuk met noemer 20</th><th>breuk met noemer 100</th><th>percent</th></tr></thead>';
+    const body = document.createElement('tbody');
+    rows.forEach(([label, value, clue]) => {
+      const tr = document.createElement('tr');
+      const th = Object.assign(document.createElement('th'), { textContent: label });
+      const ratio = document.createElement('td');
+      ratio.appendChild(lineWithSolution(clue || percentValueText(value), 'wide'));
+      const over20 = document.createElement('td');
+      over20.appendChild(percentRelationFraction(value, 20));
+      const over100 = document.createElement('td');
+      over100.appendChild(percentRelationFraction(value, 100));
+      const percent = document.createElement('td');
+      percent.appendChild(lineWithSolution(`${value} %`, 'medium'));
+      tr.append(th, ratio, over20, over100, percent);
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    const answer = document.createElement('div');
+    answer.className = 'percent-relation-answer';
+    answer.append(`Hoeveel percent kiest ${set.rest}? `, lineWithSolution(`${100 - total} %`, 'wide'));
+    card.append(table, answer);
+    return card;
+  }
+
+  function makePercentRelationEquivalentCard(){
+    const rows = pickUnusedOrAny('gi4_percent_relation_equivalent_card', [
+      [
+        { simple: '1/5', over100: '20/100', percent: '20 %', decimal: '0,2' },
+        { simple: '1/20', over100: '5/100', percent: '5 %', decimal: '0,05' },
+        { simple: '1/10', over100: '10/100', percent: '10 %', decimal: '0,1' },
+        { simple: '1/50', over100: '2/100', percent: '2 %', decimal: '0,02' },
+      ],
+      [
+        { simple: '1/4', over100: '25/100', percent: '25 %', decimal: '0,25' },
+        { simple: '1/2', over100: '50/100', percent: '50 %', decimal: '0,5' },
+        { simple: '3/4', over100: '75/100', percent: '75 %', decimal: '0,75' },
+        { simple: '1/100', over100: '1/100', percent: '1 %', decimal: '0,01' },
+      ],
+    ], set => set.map(row => row.simple).join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-equivalent-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const bank = document.createElement('div');
+    bank.className = 'percent-equivalent-bank';
+    rows.flatMap(row => [row.simple, row.over100, row.percent, row.decimal]).sort(() => Math.random() - .5).forEach(value => {
+      bank.appendChild(Object.assign(document.createElement('span'), { textContent: value }));
+    });
+    const table = document.createElement('table');
+    table.className = 'percent-table';
+    table.innerHTML = '<thead><tr><th>eenvoudigste breuk</th><th>breuk op 100</th><th>percent</th><th>kommagetal</th></tr></thead>';
+    const body = document.createElement('tbody');
+    rows.forEach(row => {
+      const tr = document.createElement('tr');
+      ['simple', 'over100', 'percent', 'decimal'].forEach(key => {
+        const td = document.createElement('td');
+        td.appendChild(lineWithSolution(row[key], 'wide'));
+        tr.appendChild(td);
+      });
+      body.appendChild(tr);
+    });
+    table.appendChild(body);
+    card.append(bank, table);
+    return card;
+  }
+
+  function makePercentRelationAxisCard(){
+    const set = pickUnusedOrAny('gi4_percent_relation_axis_card', [
+      ['100 %', '0,2', '60 %', '150 %', '1,3', '200 %'],
+      ['50 %', '0,75', '125 %', '1,6', '20 %', '180 %'],
+      ['25 %', '1,1', '90 %', '0,4', '175 %', '2'],
+    ], row => row.join('-'));
+    const ordered = [...set].sort((a, b) => percentMixedValue(a) - percentMixedValue(b));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-axis-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const prompt = document.createElement('div');
+    prompt.textContent = `Noteer op de getallenas: ${set.join(' - ')}`;
+    const axis = document.createElement('div');
+    axis.className = 'percent-relation-axis';
+    for (let i = 0; i <= 20; i++) {
+      const tick = document.createElement('span');
+      tick.style.left = `${i * 5}%`;
+      axis.appendChild(tick);
+    }
+    axis.append(Object.assign(document.createElement('b'), { className: 'zero', textContent: '0' }), Object.assign(document.createElement('b'), { className: 'one', textContent: '1' }));
+    const circles = document.createElement('div');
+    circles.className = 'percent-order-circles';
+    ordered.forEach(value => circles.appendChild(lineWithSolution(value, 'medium')));
+    const helper = document.createElement('div');
+    helper.className = 'percent-axis-helper';
+    for (let i = 0; i < 34; i++) helper.appendChild(document.createElement('span'));
+    card.append(prompt, axis, Object.assign(document.createElement('div'), { textContent: 'Rangschik van klein naar groot:' }), circles, helper);
+    return card;
+  }
+
+  function percentMixedValue(value){
+    if (String(value).includes('%')) return parseFloat(String(value).replace('%', '').trim()) / 100;
+    if (String(value).includes('/')) {
+      const [num, den] = String(value).split('/').map(Number);
+      return num / den;
+    }
+    return parseFloat(String(value).replace(',', '.'));
+  }
+
+  function makePercentRelationMistakeCard(){
+    const rows = pickUnusedOrAny('gi4_percent_relation_mistake_card', [
+      [
+        {
+          items: [
+            { before: '4/5 = ', value: '80 %', after: ' = 0,8' },
+            { before: '1/4 = ', value: '25 %', after: ' = 2,5', wrong: true },
+            { before: '7/20 = ', value: '35 %', after: ' = 0,35' },
+          ],
+          answer: '0,25',
+        },
+        {
+          items: [
+            { before: '1/2 = ', value: '50 %', after: ' = 0,5' },
+            { before: '3/10 = ', value: '30 %', after: ' = 0,3' },
+            { before: '9/100 = ', value: '90 %', after: ' = 0,09', wrong: true },
+          ],
+          answer: '9 %',
+        },
+      ],
+      [
+        {
+          items: [
+            { before: '1/5 = ', value: '20 %', after: ' = 0,2' },
+            { before: '2/50 = ', value: '40 %', after: ' = 0,04', wrong: true },
+            { before: '3/4 = ', value: '75 %', after: ' = 0,75' },
+          ],
+          answer: '4 %',
+        },
+        {
+          items: [
+            { before: '1/10 = ', value: '10 %', after: ' = 0,1' },
+            { before: '3/5 = ', value: '60 %', after: ' = 0,6' },
+            { before: '1/2 = ', value: '50 %', after: ' = 0,05', wrong: true },
+          ],
+          answer: '0,5',
+        },
+      ],
+      [
+        {
+          items: [
+            { before: '1/20 = ', value: '5 %', after: ' = 0,05' },
+            { before: '2/5 = ', value: '40 %', after: ' = 0,4' },
+            { before: '3/10 = ', value: '3 %', after: ' = 0,3', wrong: true },
+          ],
+          answer: '30 %',
+        },
+        {
+          items: [
+            { before: '1/100 = ', value: '1 %', after: ' = 0,01' },
+            { before: '1/4 = ', value: '25 %', after: ' = 0,25' },
+            { before: '4/5 = ', value: '80 %', after: ' = 0,08', wrong: true },
+          ],
+          answer: '0,8',
+        },
+      ],
+    ], set => set.map(row => `${row.items.map(item => `${item.before}${item.value}${item.after}${item.wrong ? '*' : ''}`).join('/')}:${row.answer}`).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-relation-mistake-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(rowData => {
+      const row = document.createElement('div');
+      row.className = 'percent-mistake-row';
+      const statements = document.createElement('div');
+      statements.className = 'percent-mistake-statements';
+      rowData.items.forEach(item => {
+        const statement = document.createElement('span');
+        const value = Object.assign(document.createElement('span'), { className: item.wrong ? 'percent-wrong-part' : '', textContent: item.value });
+        statement.append(item.before, value, item.after);
+        statements.appendChild(statement);
+      });
+      row.append(statements, lineWithSolution(rowData.answer, 'wide'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makePercentRelationCard(mode){
+    if (mode === 'strip') return makePercentRelationStripCard();
+    if (mode === 'situation') return makePercentRelationSituationCard();
+    if (mode === 'equivalent') return makePercentRelationEquivalentCard();
+    if (mode === 'axis') return makePercentRelationAxisCard();
+    if (mode === 'mistake') return makePercentRelationMistakeCard();
+    return makePercentRelationHundredCard();
+  }
+
+  function addPercentRelation(extraCount, forcedMode){
+    const mode = forcedMode || $('#percentRelationMode')?.value || 'hundred';
+    const key = `gi4_percent_relation_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#percentRelationCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-percent-grid.relation-${mode}`, `gi4-percent-grid relation-${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makePercentRelationCard(mode));
+      return;
+    }
+    const titles = {
+      hundred: 'Percent: relatie eenvoudige breuk, kommagetal en percent.',
+      strip: 'Percent: strook, breuk, kommagetal en percent.',
+      situation: 'Percent: situatie in tabel.',
+      equivalent: 'Percent: gelijke waarden zoeken.',
+      axis: 'Percent: noteren en ordenen.',
+      mistake: 'Percent: fout zoeken en verbeteren.',
+    };
+    const instructions = {
+      hundred: ['Vul aan.', 'Kleur en schrijf als breuk, kommagetal en percent.'],
+      strip: ['Vul aan.', 'Schrijf bij elk deel de breuk, het percent en het kommagetal.'],
+      situation: ['Lees de situatie.', 'Vul de tabel aan.'],
+      equivalent: ['Schrijf de getallen met dezelfde waarde naast elkaar in de tabel.'],
+      axis: ['Noteer de waarden op de getallenas.', 'Rangschik daarna van klein naar groot.'],
+      mistake: ['In elke rij is één getal fout.', 'Doorstreep het getal dat fout is.', 'Verbeter het doorgestreepte getal op de invullijn.'],
+    };
+    const b = block(key, titles[mode], addCount => addPercentRelation(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-percent-grid relation-${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makePercentRelationCard(mode));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addPercentRelation(1, mode));
+  }
+
+  const ROMAN_VALUES = [
+    ['M', 1000], ['CM', 900], ['D', 500], ['CD', 400],
+    ['C', 100], ['XC', 90], ['L', 50], ['XL', 40],
+    ['X', 10], ['IX', 9], ['V', 5], ['IV', 4], ['I', 1],
+  ];
+  const ROMAN_SINGLE = { M: 1000, D: 500, C: 100, L: 50, X: 10, V: 5, I: 1 };
+
+  function toRoman(num){
+    let n = num;
+    let out = '';
+    ROMAN_VALUES.forEach(([sym, val]) => {
+      while (n >= val) {
+        out += sym;
+        n -= val;
+      }
+    });
+    return out;
+  }
+
+  function fromRoman(roman){
+    let total = 0;
+    for (let i = 0; i < roman.length; i++) {
+      const current = ROMAN_SINGLE[roman[i]];
+      const next = ROMAN_SINGLE[roman[i + 1]] || 0;
+      total += current < next ? -current : current;
+    }
+    return total;
+  }
+
+  function romanGroups(roman){
+    const groups = [];
+    for (let i = 0; i < roman.length; i++) {
+      const current = ROMAN_SINGLE[roman[i]];
+      const next = ROMAN_SINGLE[roman[i + 1]] || 0;
+      if (current < next) {
+        groups.push({ text: `${roman[i]}${roman[i + 1]}`, calc: `${fmt(next)} - ${fmt(current)}`, value: next - current });
+        i++;
+      } else {
+        groups.push({ text: roman[i], calc: fmt(current), value: current });
+      }
+    }
+    return groups;
+  }
+
+  function romanCalcText(roman){
+    return romanGroups(roman).map(group => group.calc).join(' + ');
+  }
+
+  function romanSumText(roman){
+    return romanGroups(roman).map(group => fmt(group.value)).join(' + ');
+  }
+
+  function romanLine(roman, includeMiddle = false){
+    const row = document.createElement('div');
+    row.className = `roman-calc-row${includeMiddle ? ' wide' : ''}`;
+    row.append(Object.assign(document.createElement('strong'), { textContent: roman }), ' = ', lineWithSolution(romanCalcText(roman), 'long'));
+    if (includeMiddle) row.append(' = ', lineWithSolution(romanSumText(roman), 'long'));
+    row.append(' = ', lineWithSolution(fmt(fromRoman(roman)), 'medium'));
+    return row;
+  }
+
+  function makeRomanMemoCard(){
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-memo-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const values = document.createElement('div');
+    values.className = 'roman-values-grid';
+    [
+      ['M', '1 000'], ['D', '500'], ['C', '100'], ['L', '50'], ['X', '10'], ['V', '5'], ['I', '1'],
+    ].forEach(([sym, value]) => {
+      const item = document.createElement('div');
+      item.innerHTML = `<strong>${sym}</strong><span>= ${value}</span>`;
+      values.appendChild(item);
+    });
+    const rules = document.createElement('div');
+    rules.className = 'roman-rules';
+    [
+      'De symbolen worden meestal gerangschikt van groot naar klein. We lezen van links naar rechts.',
+      'Een lagere waarde achter een hogere waarde tel je erbij.',
+      'Een lagere waarde voor een hogere waarde trek je af.',
+      'Aftrekken kan bij CM, CD, XC, XL, IX en IV.',
+      'D, L en V mogen maar een keer voorkomen.',
+      'M, C, X en I mogen maximaal drie keer na elkaar voorkomen.',
+    ].forEach(text => rules.appendChild(Object.assign(document.createElement('p'), { textContent: text })));
+    const example = document.createElement('div');
+    example.className = 'roman-memo-example';
+    example.append('Voorbeeld: ', Object.assign(document.createElement('strong'), { textContent: 'MCMIX' }), ' = 1 000 + (1 000 - 100) + (10 - 1) = ', Object.assign(document.createElement('strong'), { textContent: '1 909' }));
+    card.append(values, rules, example);
+    return card;
+  }
+
+  function makeRomanAdditiveCard(){
+    const set = pickUnusedOrAny('gi4_roman_additive_card', [
+      ['VI', 'XII', 'LX', 'MC', 'DLXV'],
+      ['VII', 'XXI', 'LXXX', 'MDC', 'CLVI'],
+      ['XI', 'XV', 'CX', 'MD', 'DCCL'],
+    ], row => row.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-calc-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(Object.assign(document.createElement('div'), { className: 'roman-tip', textContent: 'Tip! Kijk naar het onthoudkader.' }));
+    set.forEach(roman => card.appendChild(romanLine(roman, false)));
+    return card;
+  }
+
+  function makeRomanSubtractiveCard(){
+    const set = pickUnusedOrAny('gi4_roman_subtractive_card', [
+      ['CM', 'IV', 'IX', 'CDL', 'MCMIX'],
+      ['XL', 'XC', 'CD', 'MXLIV', 'MCXC'],
+      ['XCIV', 'CMXL', 'CDIX', 'MCDXL', 'MMIX'],
+    ], row => row.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-calc-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    card.appendChild(Object.assign(document.createElement('div'), { className: 'roman-tip', textContent: 'Tip! Let op de positie van de Romeinse cijfers.' }));
+    set.forEach(roman => card.appendChild(romanLine(roman, true)));
+    return card;
+  }
+
+  function makeRomanMatchCard(){
+    const values = pickUnusedOrAny('gi4_roman_match_card', [
+      [202, 1500, 51, 23, 300, 3],
+      [49, 64, 2160, 999, 622, 444],
+      [84, 512, 1909, 90, 14, 275],
+    ], row => row.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-match-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const left = document.createElement('div');
+    left.className = 'roman-match-col';
+    values.forEach(n => left.appendChild(romanMatchChip(fmt(n), toRoman(n))));
+    const right = document.createElement('div');
+    right.className = 'roman-match-col';
+    [...values].sort(() => Math.random() - .5).forEach(n => right.appendChild(romanMatchChip(toRoman(n), toRoman(n))));
+    card.append(left, right);
+    return card;
+  }
+
+  function romanMatchChip(label, key){
+    const chip = document.createElement('div');
+    chip.className = `roman-match-chip solution-${key}`;
+    chip.dataset.answer = key;
+    chip.style.setProperty('--roman-match-color', romanMatchColor(key));
+    chip.append(Object.assign(document.createElement('strong'), { textContent: label }), Object.assign(document.createElement('span'), { className: 'roman-dot' }));
+    return chip;
+  }
+
+  function romanMatchColor(key){
+    let sum = 0;
+    for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i) * (i + 1);
+    return `hsl(${sum % 360} 78% 88%)`;
+  }
+
+  function makeRomanSplitCard(){
+    const nums = pickUnusedOrAny('gi4_roman_split_set', [
+      [162, 2015, 444],
+      [1909, 944, 2064],
+      [1492, 788, 399],
+    ], row => row.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-split-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    nums.forEach(n => {
+      const roman = toRoman(n);
+      const groups = romanGroups(roman);
+      const item = document.createElement('div');
+      item.className = 'roman-split-item';
+      item.appendChild(Object.assign(document.createElement('strong'), { className: 'roman-split-number', textContent: roman }));
+      const parts = document.createElement('div');
+      parts.className = 'roman-split-parts';
+      groups.forEach(group => {
+        const row = document.createElement('div');
+        row.append(group.text, ' = ', lineWithSolution(fmt(group.value), 'medium'));
+        parts.appendChild(row);
+      });
+      const answer = document.createElement('div');
+      answer.className = 'roman-split-answer';
+      answer.append(`${roman} = `, lineWithSolution(fmt(n), 'wide'));
+      item.append(parts, answer);
+      card.appendChild(item);
+    });
+    return card;
+  }
+
+  function makeRomanOrderCard(){
+    const set = pickUnusedOrAny('gi4_roman_order_card', [
+      [114, 116, 709, 94, 214],
+      [49, 64, 2160, 999, 622],
+      [444, 1909, 90, 275, 84],
+    ], row => row.join('-'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-order-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const source = document.createElement('div');
+    source.className = 'roman-order-source';
+    source.textContent = set.map(toRoman).join(' - ');
+    const order = document.createElement('div');
+    order.className = 'roman-order-line';
+    [...set].sort((a, b) => b - a).forEach((n, index) => {
+      order.appendChild(lineWithSolution(toRoman(n), 'wide'));
+      if (index < set.length - 1) order.append(' > ');
+    });
+    const grid = document.createElement('div');
+    grid.className = 'roman-helper-grid';
+    for (let i = 0; i < 96; i++) grid.appendChild(document.createElement('span'));
+    card.append(source, order, grid);
+    return card;
+  }
+
+  function makeRomanMistakeCard(){
+    const set = pickUnusedOrAny('gi4_roman_mistake_card', [
+      [
+        {
+          items: [
+            { before: 'IV = ', value: '4', after: '' },
+            { before: 'XX = ', value: '20', after: '' },
+            { before: '', value: 'IL', after: ' = 49', wrong: true },
+          ],
+          answer: 'XLIX',
+        },
+        {
+          items: [
+            { before: 'VI = ', value: '6', after: '' },
+            { before: 'XL = ', value: '60', after: '', wrong: true },
+            { before: '', value: 'CM', after: ' = 900' },
+          ],
+          answer: '40',
+        },
+      ],
+      [
+        {
+          items: [
+            { before: 'IX = ', value: '9', after: '' },
+            { before: '', value: 'IIII', after: ' = 4', wrong: true },
+            { before: 'L = ', value: '50', after: '' },
+          ],
+          answer: 'IV',
+        },
+        {
+          items: [
+            { before: '', value: 'XC', after: ' = 90' },
+            { before: '', value: 'IC', after: ' = 99', wrong: true },
+            { before: 'CD = ', value: '400', after: '' },
+          ],
+          answer: 'XCIX',
+        },
+      ],
+      [
+        {
+          items: [
+            { before: 'XC = ', value: '90', after: '' },
+            { before: '', value: 'VIIII', after: ' = 9', wrong: true },
+            { before: 'D = ', value: '500', after: '' },
+          ],
+          answer: 'IX',
+        },
+        {
+          items: [
+            { before: '', value: 'CD', after: ' = 400' },
+            { before: '', value: 'IM', after: ' = 999', wrong: true },
+            { before: '', value: 'LXIV', after: ' = 64' },
+          ],
+          answer: 'CMXCIX',
+        },
+      ],
+    ], rows => rows.map(row => `${row.items.map(item => `${item.before}${item.value}${item.after}${item.wrong ? '*' : ''}`).join('/')}:${row.answer}`).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-roman-mistake-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(rowData => {
+      const row = document.createElement('div');
+      row.className = 'roman-mistake-row';
+      const statements = document.createElement('div');
+      statements.className = 'roman-mistake-statements';
+      rowData.items.forEach(item => {
+        const statement = document.createElement('span');
+        const value = Object.assign(document.createElement('span'), { className: item.wrong ? 'roman-wrong-part' : '', textContent: item.value });
+        statement.append(item.before, value, item.after);
+        statements.appendChild(statement);
+      });
+      row.append(statements, lineWithSolution(rowData.answer, 'wide'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeRomanCard(mode){
+    if (mode === 'additive') return makeRomanAdditiveCard();
+    if (mode === 'subtractive') return makeRomanSubtractiveCard();
+    if (mode === 'match') return makeRomanMatchCard();
+    if (mode === 'split') return makeRomanSplitCard();
+    if (mode === 'order') return makeRomanOrderCard();
+    if (mode === 'mistake') return makeRomanMistakeCard();
+    return makeRomanMemoCard();
+  }
+
+  function addRoman(extraCount, forcedMode){
+    const mode = forcedMode || $('#romanMode')?.value || 'memo';
+    const key = `gi4_roman_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(6, parseInt($('#romanCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-roman-grid.${mode}`, `gi4-roman-grid ${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeRomanCard(mode));
+      return;
+    }
+    const titles = {
+      memo: 'Romeinse cijfers: onthoudkader.',
+      additive: 'Romeinse cijfers: waarde berekenen.',
+      subtractive: 'Romeinse cijfers: positie en aftrekken.',
+      match: 'Romeinse cijfers: verbind wat bij elkaar hoort.',
+      split: 'Romeinse cijfers: splits en bereken.',
+      order: 'Romeinse cijfers: ordenen.',
+      mistake: 'Romeinse cijfers: fout zoeken.',
+    };
+    const instructions = {
+      memo: ['Lees het onthoudkader.'],
+      additive: ['Noteer telkens de berekening die je maakt om de waarde van het getal te bepalen.', 'Maak de som.', 'Noteer de totale waarde van het getal.'],
+      subtractive: ['Noteer telkens de berekening die je maakt om de waarde van het getal te bepalen.', 'Reken de totale waarde van het getal uit.'],
+      match: ['Verbind wat bij elkaar hoort.'],
+      split: ['Schrijf de getallen in Arabische cijfers.'],
+      order: ['Orden van groot naar klein.'],
+      mistake: ['In elke rij staat iets fout.', 'Doorstreep wat fout is.', 'Verbeter op de invullijn.'],
+    };
+    const b = block(key, titles[mode], addCount => addRoman(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-roman-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeRomanCard(mode));
+    b.appendChild(grid);
+    if (mode !== 'memo') addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addRoman(1, mode));
+  }
+
+  function percentWordProblems(){
+    return [
+      { title: 'tank auto', text: 'We gaan met de auto op reis. Een volle tank van onze auto is 80 liter. De tank is nog voor 25 % gevuld. Hoeveel liter kan er maximaal nog in de tank bij?', answer: '60 liter' },
+      { title: 'sportdag', text: 'Op de sportdag doen 240 leerlingen mee. 25 % van de leerlingen kiest voor atletiek. Hoeveel leerlingen kiezen atletiek?', answer: '60 leerlingen' },
+      { title: 'korting', text: 'Een rugzak kost 60 euro. In de winkel krijg je 20 % korting. Hoeveel euro korting krijg je? Hoeveel betaal je nog?', answer: '12 euro korting, 48 euro betalen' },
+      { title: 'bibliotheek', text: 'In de klasbibliotheek staan 120 boeken. 30 % daarvan zijn strips. Hoeveel strips staan er in de klasbibliotheek?', answer: '36 strips' },
+      { title: 'plantjes', text: 'De leerlingen planten 80 bloembollen. 75 % komt uit. Hoeveel bloembollen komen uit? Hoeveel komen niet uit?', answer: '60 komen uit, 20 niet' },
+      { title: 'spelletjesnamiddag', text: 'Er zijn 150 kaartjes voor de spelletjesnamiddag. 40 % is al verkocht. Hoeveel kaartjes zijn verkocht? Hoeveel kaartjes zijn er nog over?', answer: '60 verkocht, 90 over' },
+    ];
+  }
+
+  function makePercentWordCard(forcedIndex = null){
+    const problems = percentWordProblems();
+    const problem = forcedIndex === null ? pickUnusedOrAny('gi4_percent_word_card', problems, item => item.title) : problems[forcedIndex % problems.length];
+    const card = document.createElement('div');
+    card.className = 'gi4-percent-word-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const answer = document.createElement('div');
+    answer.className = 'percent-word-answer';
+    answer.append('Antwoord: ', lineWithSolution(problem.answer, 'wide'));
+    card.append(Object.assign(document.createElement('p'), { textContent: problem.text }), answer);
+    return card;
+  }
+
+  function makePercentCard(mode, forcedWordIndex = null){
+    if (mode === 'color') return makePercentColorCard();
+    if (mode === 'mixed') return makePercentMixedCard();
+    if (mode === 'key') return makePercentKeyCard();
+    if (mode === 'convert') return makePercentConvertCard();
+    if (mode === 'figures') return makePercentFiguresCard();
+    if (mode === 'crossword') return makePercentCrosswordCard();
+    if (mode === 'complete') return makePercentCompleteCard();
+    if (mode === 'survey') return makePercentSurveyCard();
+    if (mode === 'score') return makePercentScoreTableCard();
+    if (mode === 'compare') return makePercentCompareCard();
+    if (mode === 'word') return makePercentWordCard(forcedWordIndex);
+    return makePercentReadCard();
+  }
+
+  function addPercent(extraCount, forcedMode, forcedWordIndex = null){
+    const mode = forcedMode || $('#percentMode')?.value || 'read';
+    const choice = $('#percentWordChoice')?.value || 'random';
+    const selectedWordIndex = forcedWordIndex !== null ? forcedWordIndex : choice === 'random' ? null : parseInt(choice, 10);
+    const key = `gi4_percent_${mode}`;
+    const requested = Math.max(1, Math.min(mode === 'word' ? 6 : 4, parseInt($('#percentCount')?.value, 10) || 1));
+    const count = extraCount || (mode === 'word' && selectedWordIndex !== null ? 1 : requested);
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-percent-grid.${mode}`, `gi4-percent-grid ${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makePercentCard(mode, selectedWordIndex));
+      return;
+    }
+    const titles = {
+      read: 'Percenten: hoeveel percent is gekleurd?',
+      color: 'Percenten: kleur wat gevraagd wordt.',
+      mixed: 'Percenten: kijken en kleuren.',
+      key: 'Percenten: bekende percenten.',
+      convert: 'Percenten: omzetten naar breuk en omgekeerd.',
+      figures: 'Percenten: figuur, breuk en percent.',
+      crossword: 'Percenten: kruiswoordveld.',
+      complete: 'Percenten: aanvullen tot 100%.',
+      survey: 'Percenten: tabel met kleuren.',
+      score: 'Percenten: percent in tabel.',
+      compare: 'Percenten: vergelijken.',
+      word: 'Percenten: vraagstukken.',
+    };
+    const instructions = {
+      read: ['Hoeveel percent van het geheel is gekleurd?'],
+      color: ['Kleur wat gevraagd wordt.'],
+      mixed: ['Kijk naar de honderdvelden of kleur.', 'Hoeveel percent van het geheel is gekleurd?'],
+      key: ['Kleur het gevraagde percent van het honderdveld.', 'Vul aan.'],
+      convert: ['Vul aan met een breuk of percent.', 'Vereenvoudig de breuken.'],
+      figures: ['Vul aan.'],
+      crossword: ['Los op met het honderdveld.'],
+      complete: ['Vul aan tot het geheel of 100 %.'],
+      survey: ['Kijk naar de kleuren.', 'Noteer in de tabel welk deel bij elke kleur hoort.'],
+      score: ['Vul het schema aan.', 'Bereken het percent.'],
+      compare: ['Vul in: <, > of =.'],
+      word: ['Lees het vraagstuk.', 'Bereken en noteer je antwoord.'],
+    };
+    const b = block(key, titles[mode], addCount => addPercent(addCount || 1, mode, selectedWordIndex));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-percent-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makePercentCard(mode, selectedWordIndex));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addPercent(1, mode, selectedWordIndex));
+  }
+
   function fractionBox(num, den, solutionNum = '', solutionDen = ''){
     const span = document.createElement('span');
     span.className = 'gi4-fraction-box';
@@ -6392,6 +7573,13 @@
     return Number(value / 100).toFixed(2).replace('.', ',');
   }
 
+  function decimalFractionComma(num, den){
+    const value = num / den;
+    if (Number.isInteger(value)) return String(value);
+    const decimals = den === 10 || den === 2 || den === 5 ? 1 : 2;
+    return value.toFixed(decimals).replace('.', ',');
+  }
+
   function decimalNumberWord(n){
     const ones = ['nul','een','twee','drie','vier','vijf','zes','zeven','acht','negen'];
     const teens = ['tien','elf','twaalf','dertien','veertien','vijftien','zestien','zeventien','achttien','negentien'];
@@ -7068,6 +8256,120 @@
     grid.className = `gi4-decimal-hundred-convert-grid ${mode}`;
     for (let i = 0; i < count; i++) appendNewExercise(grid, mode === 'axis' ? makeDecimalHundredthsConvertAxisCard : makeDecimalHundredthsConvertGridCard);
     b.appendChild(grid);
+  }
+
+  function decimalFractionTableSets(){
+    return [
+      [
+        { num: 1, den: 2 },
+        { num: 8, den: 8 },
+        { num: 2, den: 5 },
+        { num: 7, den: 10 },
+        { num: 1, den: 4 },
+        { num: 3, den: 4 },
+      ],
+      [
+        { num: 1, den: 5 },
+        { num: 3, den: 10 },
+        { num: 2, den: 4 },
+        { num: 6, den: 8 },
+        { num: 4, den: 5 },
+        { num: 1, den: 10 },
+      ],
+      [
+        { num: 5, den: 10 },
+        { num: 1, den: 8 },
+        { num: 3, den: 5 },
+        { num: 2, den: 10 },
+        { num: 3, den: 4 },
+        { num: 4, den: 8 },
+      ],
+      [
+        { num: 2, den: 8 },
+        { num: 9, den: 10 },
+        { num: 1, den: 4 },
+        { num: 3, den: 5 },
+        { num: 1, den: 2 },
+        { num: 7, den: 8 },
+      ],
+    ];
+  }
+
+  function makeDecimalFractionTableAxis(){
+    const axis = document.createElement('div');
+    axis.className = 'gi4-decimal-fraction-table-axis';
+    const line = document.createElement('div');
+    line.className = 'axis-line';
+    for (let i = 0; i <= 10; i++) {
+      const tick = document.createElement('span');
+      tick.className = 'axis-tick';
+      tick.style.left = `${i * 10}%`;
+      if (i === 0 || i === 5 || i === 10) {
+        const label = document.createElement('b');
+        label.textContent = i === 0 ? '0' : i === 5 ? '0,5' : '1';
+        tick.appendChild(label);
+      }
+      line.appendChild(tick);
+    }
+    axis.appendChild(line);
+    return axis;
+  }
+
+  function makeDecimalFractionTableStrip(frac){
+    const strip = document.createElement('div');
+    strip.className = 'gi4-decimal-fraction-table-strip';
+    strip.style.setProperty('--parts', String(frac.den));
+    for (let i = 0; i < frac.den; i++) {
+      const part = document.createElement('span');
+      if (i < frac.num) part.className = 'solution-fill';
+      strip.appendChild(part);
+    }
+    return strip;
+  }
+
+  function makeDecimalFractionTableCard(){
+    const rows = pickUnusedOrAny('gi4_decimal_fraction_table_card', decimalFractionTableSets(), set => set.map(simpleFractionText).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-decimal-fraction-table-card row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const visual = document.createElement('div');
+    visual.className = 'fraction-table-visual';
+    visual.appendChild(makeDecimalFractionTableAxis());
+    const table = document.createElement('div');
+    table.className = 'fraction-table-strips';
+    rows.forEach(frac => {
+      const label = document.createElement('div');
+      label.className = 'fraction-table-label';
+      label.appendChild(fractionBox(frac.num, frac.den));
+      table.append(label, makeDecimalFractionTableStrip(frac));
+    });
+    visual.appendChild(table);
+    const answers = document.createElement('div');
+    answers.className = 'fraction-table-answers';
+    rows.forEach(frac => {
+      const row = document.createElement('div');
+      row.append(fractionBox(frac.num, frac.den), ' = ', lineWithSolution(decimalFractionComma(frac.num, frac.den), 'medium'));
+      answers.appendChild(row);
+    });
+    card.append(visual, answers);
+    return card;
+  }
+
+  function addDecimalFractionTable(extraCount){
+    const key = 'gi4_decimal_fraction_table_block';
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#decimalFractionTableCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, '.gi4-decimal-fraction-table-grid', 'gi4-decimal-fraction-table-grid') : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, makeDecimalFractionTableCard);
+      return;
+    }
+    const b = block(key, 'Kommagetallen: breuken in tabel.', addCount => addDecimalFractionTable(addCount || 1));
+    addFractionInstructions(b, ['Kleur de gevraagde breuk in de tabel.', 'Noteer het kommagetal dat overeenkomt met de breuk.']);
+    const grid = document.createElement('div');
+    grid.className = 'gi4-decimal-fraction-table-grid';
+    for (let i = 0; i < count; i++) appendNewExercise(grid, makeDecimalFractionTableCard);
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addDecimalFractionTable(1));
   }
 
   function decimalHundredthsCompareSeeds(mode){
@@ -13035,6 +14337,9 @@
     bind('#btnAddG5Multiples', addG5Multiples);
     bind('#btnAddG5Lcm', addG5Lcm);
     bind('#btnAddG5GcdLcmMatch', addG5GcdLcmMatch);
+    bind('#btnAddPercent', addPercent);
+    bind('#btnAddPercentRelation', addPercentRelation);
+    bind('#btnAddRoman', addRoman);
     bind('#btnAddBuildNumbers', addBuildNumbers);
     bind('#btnAddNeighbors', addNeighbors);
     bind('#btnAddMaterial', addMaterial);
@@ -13065,6 +14370,7 @@
     bind('#btnAddDecimalHundredths', addDecimalHundredths);
     bind('#btnAddDecimalHundredthsTable', addDecimalHundredthsTable);
     bind('#btnAddDecimalHundredthsConvert', addDecimalHundredthsConvert);
+    bind('#btnAddDecimalFractionTable', addDecimalFractionTable);
     bind('#btnAddDecimalHundredthsCompare', addDecimalHundredthsCompare);
     bind('#btnAddDecimalHundredthsAxisConnect', addDecimalHundredthsAxisConnect);
     bind('#btnAddDecimalHundredthsJumps', addDecimalHundredthsJumps);
