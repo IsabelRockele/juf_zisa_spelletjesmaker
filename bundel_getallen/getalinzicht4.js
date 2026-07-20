@@ -3753,6 +3753,30 @@
       return svg;
     }
 
+    if (kind === 'pentagon') {
+      const cx = 60, cy = 47, r = 35;
+      const points = Array.from({ length: den }, (_, i) => {
+        const a = -Math.PI / 2 + i * 2 * Math.PI / den;
+        return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+      });
+      for (let i = 0; i < num; i++) {
+        const p1 = points[i % den];
+        const p2 = points[(i + 1) % den];
+        svg.appendChild(markSolution(svgPolygon(`${cx},${cy} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]}`, fill, 'none')));
+      }
+      svg.appendChild(svgPolygon(points.map(p => `${p[0]},${p[1]}`).join(' '), 'none', stroke));
+      points.forEach(p => svg.appendChild(svgLine(cx, cy, p[0], p[1], stroke, 1)));
+      const ringPoints = Array.from({ length: den }, (_, i) => {
+        const a = -Math.PI / 2 + i * 2 * Math.PI / den;
+        return `${cx + Math.cos(a) * (r + 7)},${cy + Math.sin(a) * (r + 7)}`;
+      }).join(' ');
+      const ring = svgPolygon(ringPoints, 'none', '#0f8dc4');
+      ring.setAttribute('stroke-width', '2.4');
+      ring.setAttribute('stroke-dasharray', '6 4');
+      svg.appendChild(markSolution(ring));
+      return svg;
+    }
+
     const x = 22, y = 18, w = 76, h = 54;
     for (let i = 0; i < num; i++) svg.appendChild(markSolution(svgRect(x + i * (w / den), y, w / den, h, fill, 'none')));
     svg.appendChild(svgRect(x, y, w, h, 'none', stroke));
@@ -3775,6 +3799,269 @@
     side.appendChild(fractionBox(opts.showNum ? num : '', opts.showDen ? den : '', '', opts.showDen ? '' : den));
     card.appendChild(side);
     return card;
+  }
+
+  function fractionValue(frac){
+    return frac.num / frac.den;
+  }
+
+  function simpleFractionText(frac){
+    return `${frac.num}/${frac.den}`;
+  }
+
+  function makeFractionStemDivideCard(){
+    const set = pickUnusedOrAny('gi4_fraction_stem_divide', [
+      [{ num: 3, den: 4, kind: 'rect' }, { num: 1, den: 2, kind: 'circle' }, { num: 2, den: 5, kind: 'pentagon' }, { num: 2, den: 3, kind: 'rect' }],
+      [{ num: 1, den: 4, kind: 'rect' }, { num: 3, den: 6, kind: 'circle' }, { num: 1, den: 5, kind: 'pentagon' }, { num: 4, den: 8, kind: 'grid' }],
+      [{ num: 2, den: 6, kind: 'rect' }, { num: 1, den: 3, kind: 'circle' }, { num: 3, den: 5, kind: 'pentagon' }, { num: 5, den: 8, kind: 'grid' }],
+      [{ num: 5, den: 6, kind: 'rect' }, { num: 2, den: 4, kind: 'circle' }, { num: 4, den: 5, kind: 'pentagon' }, { num: 1, den: 3, kind: 'rect' }],
+    ], set => set.map(f => simpleFractionText(f)).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-divide row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(item => {
+      const box = document.createElement('div');
+      box.className = 'stem-divide-item';
+      box.appendChild(fractionSvg(item.den, item.num, item.kind));
+      box.appendChild(fractionBox(item.num, item.den));
+      card.appendChild(box);
+    });
+    return card;
+  }
+
+  function makeFractionStemRecognizeCard(){
+    const items = pickUnusedOrAny('gi4_fraction_stem_recognize', [
+      [{ num: 3, den: 6 }, { num: 3, den: 4 }, { num: 2, den: 4 }, { num: 2, den: 6 }, { num: 3, den: 5 }, { num: 1, den: 2 }, { num: 1, den: 5 }, { num: 4, den: 6 }, { num: 1, den: 4 }, { num: 1, den: 6 }, { num: 6, den: 6 }, { num: 5, den: 6 }],
+      [{ num: 1, den: 3 }, { num: 2, den: 6 }, { num: 2, den: 3 }, { num: 4, den: 8 }, { num: 1, den: 4 }, { num: 3, den: 9 }, { num: 3, den: 4 }, { num: 6, den: 8 }, { num: 1, den: 5 }, { num: 2, den: 10 }, { num: 5, den: 5 }, { num: 4, den: 5 }],
+      [{ num: 1, den: 7 }, { num: 2, den: 7 }, { num: 3, den: 6 }, { num: 1, den: 6 }, { num: 4, den: 4 }, { num: 5, den: 10 }, { num: 1, den: 10 }, { num: 2, den: 5 }, { num: 3, den: 8 }, { num: 6, den: 8 }, { num: 1, den: 8 }, { num: 7, den: 8 }],
+      [{ num: 2, den: 3 }, { num: 1, den: 9 }, { num: 4, den: 6 }, { num: 1, den: 6 }, { num: 2, den: 8 }, { num: 1, den: 4 }, { num: 7, den: 7 }, { num: 3, den: 5 }, { num: 1, den: 5 }, { num: 6, den: 10 }, { num: 5, den: 10 }, { num: 1, den: 2 }],
+    ], set => set.map(simpleFractionText).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-recognize row-delete-wrap';
+    card.appendChild(rowDel(card));
+    const denCounts = items.reduce((counts, frac) => {
+      counts[frac.den] = (counts[frac.den] || 0) + 1;
+      return counts;
+    }, {});
+    items.forEach(frac => {
+      const hasEquivalent = items.some(other => other !== frac && other.num * frac.den === frac.num * other.den);
+      const hasSameDenominator = denCounts[frac.den] > 1;
+      const span = document.createElement('span');
+      span.className = `stem-frac${hasSameDenominator ? ` same-den-${frac.den}` : ''}${frac.num === 1 ? ' unit-fraction' : ''}${frac.num === frac.den ? ' whole-fraction' : ''}${hasEquivalent ? ' equivalent-fraction' : ''}`;
+      if (frac.num === 1 || frac.num === frac.den) {
+        span.appendChild(sol(frac.num === 1 ? 'stambreuk' : 'geheel'));
+      }
+      span.appendChild(fractionBox(frac.num, frac.den));
+      card.appendChild(span);
+    });
+    return card;
+  }
+
+  function makeFractionStemAmountCard(){
+    const rows = pickUnusedOrAny('gi4_fraction_stem_amount', [
+      [[1, 3, 21], [2, 3, 21], [1, 6, 54], [5, 6, 54], [1, 3, 210], [2, 3, 210], [1, 6, 540], [3, 6, 540], [1, 10, 5000], [7, 10, 5000], [3, 4, 10000], [3, 5, 10000]],
+      [[1, 4, 32], [3, 4, 32], [1, 5, 75], [4, 5, 75], [1, 8, 400], [5, 8, 400], [1, 10, 900], [9, 10, 900], [2, 3, 120], [5, 6, 360], [3, 5, 2500], [7, 10, 8000]],
+      [[1, 2, 48], [1, 3, 90], [2, 5, 250], [3, 5, 250], [1, 4, 600], [3, 4, 600], [1, 6, 720], [5, 6, 720], [1, 8, 1600], [3, 8, 1600], [1, 10, 12000], [4, 10, 12000]],
+      [[1, 5, 125], [2, 5, 125], [1, 7, 84], [3, 7, 84], [1, 9, 810], [5, 9, 810], [1, 4, 2400], [2, 4, 2400], [1, 10, 7000], [6, 10, 7000], [1, 3, 6000], [2, 3, 6000]],
+    ], set => set.map(row => row.join('/')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-amount row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(([num, den, whole]) => {
+      const row = document.createElement('div');
+      row.append(fractionBox(num, den), ` van ${fmt(whole)} = `, lineWithSolution(String((whole / den) * num), 'medium'));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeFractionStemOrderCard(){
+    const groups = pickUnusedOrAny('gi4_fraction_stem_order', [
+      [[{ num: 1, den: 4 }, { num: 1, den: 9 }, { num: 1, den: 1 }, { num: 1, den: 6 }, { num: 1, den: 8 }], [{ num: 1, den: 10 }, { num: 5, den: 10 }, { num: 3, den: 10 }, { num: 7, den: 10 }, { num: 2, den: 10 }]],
+      [[{ num: 1, den: 2 }, { num: 1, den: 5 }, { num: 1, den: 3 }, { num: 1, den: 8 }, { num: 1, den: 4 }], [{ num: 2, den: 6 }, { num: 5, den: 6 }, { num: 1, den: 6 }, { num: 4, den: 6 }, { num: 3, den: 6 }]],
+      [[{ num: 1, den: 10 }, { num: 1, den: 7 }, { num: 1, den: 5 }, { num: 1, den: 9 }, { num: 1, den: 3 }], [{ num: 3, den: 8 }, { num: 7, den: 8 }, { num: 1, den: 8 }, { num: 5, den: 8 }, { num: 2, den: 8 }]],
+      [[{ num: 1, den: 6 }, { num: 1, den: 2 }, { num: 1, den: 12 }, { num: 1, den: 4 }, { num: 1, den: 3 }], [{ num: 4, den: 9 }, { num: 1, den: 9 }, { num: 8, den: 9 }, { num: 5, den: 9 }, { num: 2, den: 9 }]],
+    ], groups => groups.flat().map(simpleFractionText).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-order row-delete-wrap';
+    card.appendChild(rowDel(card));
+    groups.forEach(group => {
+      const row = document.createElement('div');
+      row.className = 'stem-order-row';
+      const top = document.createElement('div');
+      top.className = 'stem-order-fracs';
+      group.forEach(frac => top.appendChild(fractionBox(frac.num, frac.den)));
+      const sorted = group.slice().sort((a, b) => fractionValue(b) - fractionValue(a));
+      const ans = document.createElement('div');
+      ans.className = 'stem-order-answer';
+      sorted.forEach((frac, index) => {
+        if (index) ans.append(' > ');
+        ans.appendChild(fractionBox('', '', String(frac.num), String(frac.den)));
+      });
+      row.append(top, ans);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function fractionStemBarSvg(den, num){
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('gi4-fraction-stem-order-visual', 'bar');
+    svg.setAttribute('viewBox', '0 0 120 150');
+    svg.setAttribute('width', '120');
+    svg.setAttribute('height', '150');
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    svg.setAttribute('aria-hidden', 'true');
+    const x = 45, y = 10, w = 30, h = 126;
+    const partH = h / den;
+    for (let i = 0; i < num; i++) {
+      svg.appendChild(svgRect(x, y + h - (i + 1) * partH, w, partH, '#f46d58', 'none'));
+    }
+    svg.appendChild(svgRect(x, y, w, h, 'none', '#3f3f46'));
+    for (let i = 1; i < den; i++) {
+      const yy = y + i * partH;
+      svg.appendChild(svgLine(x, yy, x + w, yy, '#3f3f46', 1.4));
+    }
+    return svg;
+  }
+
+  function fractionStemDrawingOrderVisual(item){
+    if (item.kind === 'bar') return fractionStemBarSvg(item.den, item.num);
+    return revealFractionFill(fractionSvg(item.den, item.num, 'circle'));
+  }
+
+  function makeFractionStemDrawingOrderCard(){
+    const rows = pickUnusedOrAny('gi4_fraction_stem_drawing_order', [
+      [
+        [{ num: 2, den: 8, kind: 'circle' }, { num: 1, den: 8, kind: 'circle' }, { num: 3, den: 8, kind: 'circle' }, { num: 7, den: 8, kind: 'circle' }],
+        [{ num: 1, den: 8, kind: 'bar' }, { num: 4, den: 6, kind: 'bar' }, { num: 2, den: 8, kind: 'bar' }, { num: 1, den: 3, kind: 'bar' }],
+      ],
+      [
+        [{ num: 1, den: 6, kind: 'circle' }, { num: 4, den: 6, kind: 'circle' }, { num: 2, den: 6, kind: 'circle' }, { num: 5, den: 6, kind: 'circle' }],
+        [{ num: 2, den: 10, kind: 'bar' }, { num: 5, den: 10, kind: 'bar' }, { num: 1, den: 10, kind: 'bar' }, { num: 7, den: 10, kind: 'bar' }],
+      ],
+      [
+        [{ num: 3, den: 10, kind: 'circle' }, { num: 1, den: 10, kind: 'circle' }, { num: 6, den: 10, kind: 'circle' }, { num: 8, den: 10, kind: 'circle' }],
+        [{ num: 1, den: 5, kind: 'bar' }, { num: 3, den: 5, kind: 'bar' }, { num: 4, den: 5, kind: 'bar' }, { num: 2, den: 5, kind: 'bar' }],
+      ],
+      [
+        [{ num: 2, den: 7, kind: 'circle' }, { num: 5, den: 7, kind: 'circle' }, { num: 1, den: 7, kind: 'circle' }, { num: 4, den: 7, kind: 'circle' }],
+        [{ num: 3, den: 8, kind: 'bar' }, { num: 6, den: 8, kind: 'bar' }, { num: 2, den: 8, kind: 'bar' }, { num: 5, den: 8, kind: 'bar' }],
+      ],
+    ], rows => rows.flat().map(simpleFractionText).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-drawing-order row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(rowSet => {
+      const row = document.createElement('div');
+      row.className = 'stem-drawing-order-row';
+      const table = document.createElement('div');
+      table.className = 'stem-drawing-order-table';
+      rowSet.forEach(item => {
+        const cell = document.createElement('div');
+        cell.className = 'stem-drawing-order-cell';
+        cell.appendChild(fractionStemDrawingOrderVisual(item));
+        cell.appendChild(fractionBox('', '', String(item.num), String(item.den)));
+        table.appendChild(cell);
+      });
+      const sorted = rowSet.slice().sort((a, b) => fractionValue(a) - fractionValue(b));
+      const answer = document.createElement('div');
+      answer.className = 'stem-drawing-order-answer';
+      sorted.forEach((item, index) => {
+        if (index) answer.append(' < ');
+        answer.appendChild(fractionBox('', '', String(item.num), String(item.den)));
+      });
+      row.append(table, answer);
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeFractionStemDrawingCard(){
+    const set = pickUnusedOrAny('gi4_fraction_stem_drawing', [
+      [{ start: { num: 2, den: 7 }, add: { num: 3, den: 7 } }, { start: { num: 7, den: 8 }, add: { num: -1, den: 8 } }],
+      [{ start: { num: 1, den: 6 }, add: { num: 4, den: 6 } }, { start: { num: 5, den: 9 }, add: { num: -2, den: 9 } }],
+      [{ start: { num: 3, den: 10 }, add: { num: 4, den: 10 } }, { start: { num: 6, den: 7 }, add: { num: -3, den: 7 } }],
+      [{ start: { num: 2, den: 8 }, add: { num: 5, den: 8 } }, { start: { num: 8, den: 10 }, add: { num: -2, den: 10 } }],
+    ], set => set.map(item => `${simpleFractionText(item.start)}:${item.add.num}`).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-drawing row-delete-wrap';
+    card.appendChild(rowDel(card));
+    set.forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'stem-drawing-row';
+      const result = { num: item.start.num + item.add.num, den: item.start.den };
+      const visual = revealFractionFill(fractionSvg(item.start.den, Math.max(item.start.num, result.num), 'rect'));
+      const opText = item.add.num >= 0 ? ' + ' : ' - ';
+      row.append(visual, fractionBox(item.start.num, item.start.den), opText, fractionBox('', item.start.den, String(Math.abs(item.add.num)), ''), ' = ', fractionBox('', item.start.den, String(result.num), ''));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeFractionStemCalculateCard(){
+    const rows = pickUnusedOrAny('gi4_fraction_stem_calculate', [
+      [[1, 3, '+', 1, 3], [1, 10, '+', 9, 10], [3, 5, '+', 1, 5], [2, 4, '-', 1, 4], [4, 5, '-', 2, 5], [5, 9, '-', 2, 9], [3, 8, '+', 4, 8], [3, 3, '-', 1, 3]],
+      [[1, 6, '+', 3, 6], [2, 10, '+', 5, 10], [2, 7, '+', 4, 7], [5, 6, '-', 1, 6], [7, 8, '-', 3, 8], [4, 9, '-', 1, 9], [1, 4, '+', 2, 4], [5, 5, '-', 1, 5]],
+      [[2, 9, '+', 4, 9], [1, 8, '+', 5, 8], [3, 10, '+', 6, 10], [6, 7, '-', 2, 7], [8, 10, '-', 3, 10], [5, 6, '-', 4, 6], [1, 5, '+', 3, 5], [4, 4, '-', 1, 4]],
+      [[2, 6, '+', 3, 6], [4, 8, '+', 1, 8], [5, 10, '+', 2, 10], [9, 10, '-', 7, 10], [7, 9, '-', 2, 9], [3, 5, '-', 1, 5], [1, 7, '+', 5, 7], [6, 6, '-', 2, 6]],
+    ], set => set.map(row => row.join('/')).join('|'));
+    const card = document.createElement('div');
+    card.className = 'gi4-fraction-stem-calculate row-delete-wrap';
+    card.appendChild(rowDel(card));
+    rows.forEach(([a, den, op, b]) => {
+      const num = op === '+' ? a + b : a - b;
+      const row = document.createElement('div');
+      row.append(fractionBox(a, den), ` ${op} `, fractionBox(b, den), ' = ', fractionBox('', '', String(num), String(den)));
+      card.appendChild(row);
+    });
+    return card;
+  }
+
+  function makeFractionStemCard(mode){
+    if (mode === 'recognize') return makeFractionStemRecognizeCard();
+    if (mode === 'amount') return makeFractionStemAmountCard();
+    if (mode === 'order') return makeFractionStemOrderCard();
+    if (mode === 'drawingOrder') return makeFractionStemDrawingOrderCard();
+    if (mode === 'drawing') return makeFractionStemDrawingCard();
+    if (mode === 'calculate') return makeFractionStemCalculateCard();
+    return makeFractionStemDivideCard();
+  }
+
+  function addFractionStem(extraCount, forcedMode){
+    const mode = forcedMode || $('#fractionStemMode')?.value || 'divide';
+    const key = `gi4_fraction_stem_${mode}`;
+    const count = extraCount || Math.max(1, Math.min(4, parseInt($('#fractionStemCount')?.value, 10) || 1));
+    const existing = extraCount ? containerInLastBlock(key, `.gi4-fraction-stem-grid.${mode}`, `gi4-fraction-stem-grid ${mode}`) : null;
+    if (existing) {
+      for (let i = 0; i < count; i++) appendNewExercise(existing, () => makeFractionStemCard(mode));
+      return;
+    }
+    const titles = {
+      divide: 'Stambreuken en echte breuken: verdeel en kleur.',
+      recognize: 'Stambreuken en echte breuken: herkennen.',
+      amount: 'Stambreuken en echte breuken: breuk van een getal.',
+      order: 'Stambreuken en echte breuken: rangschikken.',
+      drawingOrder: 'Stambreuken en echte breuken: tekeningen ordenen.',
+      drawing: 'Stambreuken en echte breuken: kijk naar de tekening.',
+      calculate: 'Stambreuken en echte breuken: los op.',
+    };
+    const instructions = {
+      divide: ['Verdeel het geheel in gelijke delen.', 'Kleur het juiste aantal delen van het geheel.'],
+      recognize: ['Omkring de stambreuken.', 'Kleur de gelijknamige breuken in dezelfde kleur.', 'Trek een kruis door de gelijkwaardige breuken.'],
+      amount: ['Reken uit.'],
+      order: ['Rangschik de breuken van groot naar klein.'],
+      drawingOrder: ['Noteer onder elke tekening de juiste breuk.', 'Rangschik de breuken daarna van klein naar groot.'],
+      drawing: ['Kijk goed naar de tekening.', 'Noteer de passende oefening.'],
+      calculate: ['Los op.'],
+    };
+    const b = block(key, titles[mode], addCount => addFractionStem(addCount || 1, mode));
+    addFractionInstructions(b, instructions[mode]);
+    const grid = document.createElement('div');
+    grid.className = `gi4-fraction-stem-grid ${mode}`;
+    for (let i = 0; i < count; i++) appendNewExercise(grid, () => makeFractionStemCard(mode));
+    b.appendChild(grid);
+    addLocalExerciseButton(b, '+ oefening bij deze keuze', () => addFractionStem(1, mode));
   }
 
   function revealFractionFill(svg){
@@ -12761,6 +13048,7 @@
     bind('#btnAddValueCards', addValueCards);
     bind('#btnAddShortValues', addShortValues);
     bind('#btnAddEquiv', addEquiv);
+    bind('#btnAddFractionStem', addFractionStem);
     bind('#btnAddFractionParts', addFractionParts);
     bind('#btnAddFractionColor', addFractionColor);
     bind('#btnAddFractionLines', addFractionLines);
