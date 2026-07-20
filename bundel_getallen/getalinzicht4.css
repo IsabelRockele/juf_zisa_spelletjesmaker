@@ -88,6 +88,47 @@ body.gi4-range-10000000 .graad-badge {
   border-color: #67e8f9;
 }
 
+.sidebar-tab.tab-percenten {
+  background: linear-gradient(135deg, #ffedd5, #fed7aa);
+  border-color: #fb923c;
+}
+
+.sidebar-tab.tab-romeins {
+  background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+  border-color: #8b5cf6;
+}
+
+.gi4-percent-panel {
+  background: linear-gradient(135deg, #fff7ed, #fff1e6);
+  border-color: #fb923c;
+  box-shadow: inset 4px 0 0 #f97316;
+}
+
+.gi4-percent-panel .kaart-titel {
+  color: #c2410c;
+}
+
+.gi4-percent-relation-panel {
+  margin-top: 14px;
+  background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+  border-color: #fb7185;
+  box-shadow: inset 4px 0 0 #e11d48;
+}
+
+.gi4-percent-relation-panel .kaart-titel {
+  color: #be123c;
+}
+
+.gi4-roman-panel {
+  background: linear-gradient(135deg, #f5f3ff, #ede9fe);
+  border-color: #8b5cf6;
+  box-shadow: inset 4px 0 0 #7c3aed;
+}
+
+.gi4-roman-panel .kaart-titel {
+  color: #5b21b6;
+}
+
 .gi4-note {
   margin: 8px 0 0;
   color: #64748b;
@@ -271,8 +312,22 @@ html.exporting .gi4-block-controls {
 
 .title-row,
 .gi4-fraction-instructions {
+  break-inside: avoid;
+  page-break-inside: avoid;
   break-after: avoid;
   page-break-after: avoid;
+}
+
+.title-row + *,
+.gi4-block-title + *,
+.gi4-fraction-instructions + * {
+  break-before: avoid;
+  page-break-before: avoid;
+}
+
+.gi4-fraction-instructions + * > :first-child {
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 .gi4-block > :is(.gi4-grid, .gi4-fraction-lines, .gi4-fraction-equiv-grid, .gi4-fraction-common-grid, .gi4-fraction-compare-grid, .gi4-fraction-estimate-grid, .gi4-mixed-grid, .gi4-decimal-grid, .gi4-decimal-mixed-grid, .gi4-decimal-place-grid, .gi4-quantity-grid) > .row-delete-wrap:first-child {
@@ -6173,6 +6228,1060 @@ html.exporting .gi4-g5-neighbor-table .gi4-g5-neighbor-actions {
 
 .gi4-decimal-hundred-table-comma .gi4-line.long {
   min-width: 92px;
+}
+
+.gi4-decimal-fraction-table-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.gi4-decimal-fraction-table-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 26px;
+  align-items: start;
+  padding: 18px 20px;
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.gi4-decimal-fraction-table-axis {
+  margin: 4px 10px 26px 64px;
+}
+
+.gi4-decimal-fraction-table-axis .axis-line {
+  position: relative;
+  height: 34px;
+  border-bottom: 2px solid #2f8996;
+}
+
+.gi4-decimal-fraction-table-axis .axis-line::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  bottom: -6px;
+  width: 11px;
+  height: 11px;
+  border-top: 2px solid #2f8996;
+  border-right: 2px solid #2f8996;
+  transform: rotate(45deg);
+}
+
+.gi4-decimal-fraction-table-axis .axis-tick {
+  position: absolute;
+  bottom: -2px;
+  width: 0;
+  height: 15px;
+  border-left: 2px solid #2f8996;
+}
+
+.gi4-decimal-fraction-table-axis .axis-tick b {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  font-size: 18px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.fraction-table-strips {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  border: 1.4px solid #8fa0af;
+  border-bottom: 0;
+}
+
+.fraction-table-label {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1.4px solid #8fa0af;
+  background: #fff;
+}
+
+.gi4-decimal-fraction-table-strip {
+  display: grid;
+  grid-template-columns: repeat(var(--parts), minmax(0, 1fr));
+  min-height: 44px;
+  border-bottom: 1.4px solid #8fa0af;
+  background: #fff;
+}
+
+.gi4-decimal-fraction-table-strip span {
+  border-right: 1.2px solid #8fa0af;
+}
+
+.gi4-decimal-fraction-table-strip span:last-child {
+  border-right: 0;
+}
+
+.gi4-decimal-fraction-table-strip .solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-decimal-fraction-table-strip .solution-fill {
+  background: #f46d58;
+}
+
+.fraction-table-answers {
+  display: grid;
+  gap: 12px;
+  padding-top: 86px;
+  font-size: 18px;
+}
+
+.fraction-table-answers > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.fraction-table-answers .gi4-line.medium {
+  min-width: 92px;
+}
+
+.gi4-percent-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.gi4-percent-read-card,
+.gi4-percent-color-card,
+.gi4-percent-mixed-card,
+.gi4-percent-key-card,
+.gi4-percent-convert-card,
+.gi4-percent-figures-card,
+.gi4-percent-crossword-card,
+.gi4-percent-complete-card,
+.gi4-percent-survey-card,
+.gi4-percent-score-card,
+.gi4-percent-compare-card,
+.gi4-percent-relation-hundred-card,
+.gi4-percent-relation-strip-card,
+.gi4-percent-relation-situation-card,
+.gi4-percent-relation-equivalent-card,
+.gi4-percent-relation-axis-card,
+.gi4-percent-relation-mistake-card,
+.gi4-percent-word-card {
+  padding: 18px 20px;
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  background: #fff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-percent-read-card,
+.gi4-percent-color-card,
+.gi4-percent-mixed-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.gi4-percent-hundred-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  width: 210px;
+  aspect-ratio: 1;
+  border: 1.4px solid #b56ab9;
+  background: #fff;
+}
+
+.gi4-percent-hundred-grid span {
+  border-right: 1px solid #d99bd6;
+  border-bottom: 1px solid #d99bd6;
+}
+
+.gi4-percent-hundred-grid span:nth-child(10n) {
+  border-right: 0;
+}
+
+.gi4-percent-hundred-grid span:nth-last-child(-n + 10) {
+  border-bottom: 0;
+}
+
+.gi4-percent-hundred-grid span:nth-child(5n) {
+  border-right-color: #b56ab9;
+  border-right-width: 2px;
+}
+
+.gi4-percent-hundred-grid span:nth-child(n + 41):nth-child(-n + 50) {
+  border-bottom-color: #b56ab9;
+  border-bottom-width: 2px;
+}
+
+.gi4-percent-hundred-grid .solution-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-percent-hundred-grid .solution-fill,
+.gi4-percent-hundred-grid .filled-now {
+  background: #f56c5b;
+}
+
+.gi4-percent-hundred-grid.black .filled-now {
+  background: #22131f;
+}
+
+.percent-read-item,
+.percent-color-item,
+.percent-mixed-item {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+  align-content: start;
+}
+
+.percent-read-text {
+  width: 100%;
+  display: grid;
+  gap: 10px;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.percent-color-prompt {
+  min-height: 48px;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.gi4-percent-key-card {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  gap: 24px 48px;
+}
+
+.percent-key-item {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  font-size: 18px;
+}
+
+.percent-key-item .gi4-line.wide {
+  min-width: 190px;
+}
+
+.gi4-percent-convert-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 52px;
+  font-size: 18px;
+}
+
+.gi4-percent-convert-card > div {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.gi4-percent-figures-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.percent-figure-panel {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  justify-items: start;
+  font-size: 17px;
+}
+
+.gi4-percent-crossword-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 28px;
+  align-items: center;
+}
+
+.percent-crossword-questions {
+  display: grid;
+  gap: 14px;
+  font-size: 17px;
+}
+
+.gi4-percent-word-card {
+  display: grid;
+  gap: 14px;
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.gi4-percent-word-card p {
+  margin: 0;
+}
+
+.gi4-percent-complete-card {
+  display: grid;
+  gap: 26px;
+  font-size: 17px;
+}
+
+.percent-complete-item {
+  display: grid;
+  gap: 12px;
+  align-items: start;
+}
+
+.percent-complete-rect,
+.percent-complete-line {
+  --part: 50%;
+  --whole-scale: 2;
+  position: relative;
+  width: min(100%, calc(170px * var(--whole-scale)));
+  height: 52px;
+}
+
+.percent-complete-rect .known-part,
+.percent-complete-rect .missing-part {
+  position: absolute;
+  top: 0;
+  height: 44px;
+  border: 2px solid #3b3b3b;
+}
+
+.percent-complete-rect .known-part {
+  left: 0;
+  width: var(--part);
+  background: #c9c0df;
+}
+
+.percent-complete-rect .missing-part {
+  left: var(--part);
+  right: 0;
+  border-left: 0;
+  background: rgba(201, 192, 223, .18);
+}
+
+.percent-complete-line {
+  height: 34px;
+}
+
+.percent-complete-line .known-part,
+.percent-complete-line .missing-part {
+  position: absolute;
+  top: 17px;
+  height: 0;
+  border-top: 2px solid #333;
+}
+
+.percent-complete-line .known-part {
+  left: 0;
+  width: var(--part);
+}
+
+.percent-complete-line .missing-part {
+  left: var(--part);
+  right: 0;
+  border-top-style: dashed;
+}
+
+.percent-complete-line .known-part::before,
+.percent-complete-line .known-part::after,
+.percent-complete-line .missing-part::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  height: 14px;
+  border-left: 2px solid #333;
+}
+
+.percent-complete-line .known-part::before {
+  left: 0;
+}
+
+.percent-complete-line .known-part::after {
+  right: 0;
+}
+
+.percent-complete-line .missing-part::after {
+  right: 0;
+}
+
+.gi4-percent-survey-card {
+  display: grid;
+  gap: 16px;
+}
+
+.percent-survey-top {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  gap: 22px;
+  align-items: center;
+}
+
+.percent-survey-top p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.percent-survey-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 24px);
+  grid-auto-rows: 24px;
+  border: 1.3px solid #8db2bd;
+}
+
+.percent-survey-grid span {
+  border-right: 1px solid #8db2bd;
+  border-bottom: 1px solid #8db2bd;
+}
+
+.percent-survey-grid span:nth-child(5n) {
+  border-right: 0;
+}
+
+.percent-survey-grid span:nth-last-child(-n + 5) {
+  border-bottom: 0;
+}
+
+.percent-color-legend {
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+}
+
+.percent-color-legend > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-swatch {
+  width: 24px;
+  height: 18px;
+  border: 1px solid #8db2bd;
+}
+
+.swatch-a {
+  background: #f7c66a;
+}
+
+.swatch-b {
+  background: #78c892;
+}
+
+.swatch-c {
+  background: #a7d8ef;
+}
+
+.swatch-d {
+  background: #fff29c;
+}
+
+.percent-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 16px;
+}
+
+.percent-table th,
+.percent-table td {
+  border: 1.3px solid #a8c8d0;
+  min-height: 48px;
+  padding: 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.percent-table thead th,
+.percent-table tbody th {
+  background: #e8f2dd;
+  font-weight: 700;
+}
+
+.gi4-percent-score-card {
+  display: grid;
+  gap: 14px;
+}
+
+.gi4-percent-score-card p {
+  margin: 0;
+  font-size: 17px;
+}
+
+.percent-score-table {
+  font-size: 15px;
+}
+
+.percent-score-table th,
+.percent-score-table td {
+  padding: 6px;
+}
+
+.percent-score-table .gi4-fraction-box {
+  transform: scale(.88);
+}
+
+.percent-table-question {
+  font-size: 17px;
+  border-top: 1px solid #d8e1e8;
+  padding-top: 10px;
+}
+
+.gi4-percent-compare-card {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 44px;
+  font-size: 18px;
+}
+
+.gi4-percent-compare-card > div {
+  display: grid;
+  grid-template-columns: 80px 48px 80px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.gi4-percent-compare-card .gi4-line.symbol {
+  min-width: 42px;
+  text-align: center;
+}
+
+.gi4-percent-relation-hundred-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 28px;
+  align-items: center;
+}
+
+.percent-relation-hundred-text {
+  display: grid;
+  gap: 12px;
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.gi4-percent-hundred-grid.relation-two-color .blue-fill,
+.gi4-percent-hundred-grid.relation-two-color .green-fill {
+  background: #fff;
+}
+
+.solutions-mode .gi4-percent-hundred-grid.relation-two-color .blue-fill {
+  background: #8fd1e8;
+}
+
+.solutions-mode .gi4-percent-hundred-grid.relation-two-color .green-fill {
+  background: #94d18e;
+}
+
+.gi4-percent-relation-strip-card {
+  display: grid;
+  gap: 18px;
+}
+
+.percent-strip-wrap {
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.percent-strip {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  height: 44px;
+  border: 2px solid #2f2f2f;
+}
+
+.percent-strip span {
+  border-right: 2px solid #2f2f2f;
+}
+
+.percent-strip span:last-child {
+  border-right: 0;
+}
+
+.strip-color-0 {
+  background: #f46d58;
+}
+
+.strip-color-1 {
+  background: #fff29c;
+}
+
+.strip-color-2 {
+  background: #78c892;
+}
+
+.strip-color-3 {
+  background: #0f78a8;
+}
+
+.percent-strip-axis {
+  position: relative;
+  height: 38px;
+  border: 2px solid #ffc46a;
+  border-top: 0;
+  background: #ffe2a8;
+}
+
+.percent-strip-axis span {
+  position: absolute;
+  top: 0;
+  height: 16px;
+  border-left: 2px solid #2f2f2f;
+  transform: translateX(-1px);
+}
+
+.percent-strip-axis b {
+  position: absolute;
+  bottom: 3px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.percent-strip-axis .left {
+  left: 0;
+}
+
+.percent-strip-axis .right {
+  right: 0;
+}
+
+.percent-strip-questions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 28px;
+  font-size: 16px;
+}
+
+.percent-strip-questions > div {
+  min-height: 34px;
+}
+
+.gi4-percent-relation-situation-card {
+  display: grid;
+  gap: 14px;
+}
+
+.gi4-percent-relation-situation-card p {
+  margin: 0;
+  max-width: 880px;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.relation-situation-table th,
+.relation-situation-table td {
+  padding: 7px;
+}
+
+.percent-relation-answer {
+  font-size: 17px;
+  border-top: 1px solid #d8e1e8;
+  padding-top: 10px;
+}
+
+.gi4-percent-relation-equivalent-card {
+  display: grid;
+  gap: 18px;
+}
+
+.percent-equivalent-bank {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(70px, 1fr));
+  gap: 10px 28px;
+  font-size: 18px;
+}
+
+.percent-equivalent-bank span {
+  min-height: 30px;
+}
+
+.gi4-percent-relation-axis-card {
+  display: grid;
+  gap: 18px;
+  font-size: 17px;
+}
+
+.percent-relation-axis {
+  position: relative;
+  height: 54px;
+  margin: 8px 36px 0;
+  border-bottom: 2px solid #3f93a1;
+}
+
+.percent-relation-axis::after {
+  content: "";
+  position: absolute;
+  right: -12px;
+  bottom: -7px;
+  width: 12px;
+  height: 12px;
+  border-top: 2px solid #3f93a1;
+  border-right: 2px solid #3f93a1;
+  transform: rotate(45deg);
+}
+
+.percent-relation-axis span {
+  position: absolute;
+  bottom: -1px;
+  height: 18px;
+  border-left: 2px solid #3f93a1;
+}
+
+.percent-relation-axis b {
+  position: absolute;
+  bottom: -30px;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.percent-relation-axis .zero {
+  left: 0;
+}
+
+.percent-relation-axis .one {
+  left: 50%;
+}
+
+.percent-order-circles {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(72px, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.percent-order-circles .gi4-line {
+  display: grid;
+  place-items: center;
+  min-width: 72px;
+  height: 72px;
+  border: 2px solid #3b3b3b;
+  border-radius: 999px;
+  background: #dcebc4;
+}
+
+.percent-axis-helper {
+  display: grid;
+  grid-template-columns: repeat(34, 1fr);
+  height: 88px;
+  border: 1.2px solid #d2e0e7;
+}
+
+.percent-axis-helper span {
+  border-right: 1px solid #d2e0e7;
+  border-bottom: 1px solid #d2e0e7;
+}
+
+.gi4-percent-relation-mistake-card {
+  display: grid;
+  gap: 14px;
+  font-size: 18px;
+}
+
+.percent-mistake-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 22px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid #d8e1e8;
+  border-radius: 8px;
+}
+
+.percent-mistake-statements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: center;
+}
+
+.percent-mistake-statements > span {
+  white-space: nowrap;
+}
+
+.gi4-percent-relation-mistake-card .gi4-line.wide {
+  min-width: 130px;
+}
+
+.solutions-mode .percent-wrong-part {
+  color: #dc2626;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  font-weight: 800;
+}
+
+.gi4-roman-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.gi4-roman-memo-card,
+.gi4-roman-calc-card,
+.gi4-roman-match-card,
+.gi4-roman-split-card,
+.gi4-roman-order-card,
+.gi4-roman-mistake-card {
+  padding: 18px 20px;
+  border: 1.5px solid #c2c8d0;
+  border-radius: 8px;
+  background: #fff;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.gi4-roman-memo-card {
+  border-color: #fb923c;
+  background: #fff3e4;
+  display: grid;
+  gap: 14px;
+  box-shadow: inset 0 0 0 2px rgba(251, 146, 60, .25);
+}
+
+.roman-values-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.roman-values-grid > div {
+  display: grid;
+  place-items: center;
+  min-height: 54px;
+  border: 1.3px solid #f6b56f;
+  border-radius: 8px;
+  background: #fffaf3;
+  font-size: 17px;
+}
+
+.roman-values-grid strong {
+  font-size: 24px;
+  color: #7c2d12;
+}
+
+.roman-rules {
+  display: grid;
+  gap: 5px;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.roman-rules p {
+  margin: 0;
+}
+
+.roman-memo-example {
+  padding-top: 10px;
+  border-top: 1px solid #f6b56f;
+  font-size: 17px;
+}
+
+.gi4-roman-calc-card {
+  display: grid;
+  gap: 12px;
+  font-size: 18px;
+}
+
+.roman-tip {
+  color: #f97316;
+  font-weight: 800;
+}
+
+.roman-calc-row {
+  display: grid;
+  grid-template-columns: 78px 18px minmax(260px, 1fr) 18px 110px;
+  gap: 7px;
+  align-items: center;
+}
+
+.roman-calc-row.wide {
+  grid-template-columns: 78px 18px minmax(250px, 1fr) 18px minmax(170px, .6fr) 18px 100px;
+}
+
+.roman-calc-row .gi4-line.long {
+  min-width: 230px;
+}
+
+.roman-calc-row .gi4-line.medium {
+  min-width: 90px;
+}
+
+.gi4-roman-match-card {
+  display: grid;
+  grid-template-columns: minmax(130px, 260px) minmax(130px, 260px);
+  justify-content: center;
+  gap: 160px;
+}
+
+.roman-match-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.roman-match-chip {
+  position: relative;
+  min-height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid #aab4c0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 18px;
+}
+
+.roman-match-chip strong {
+  margin: 0;
+}
+
+.solutions-mode .roman-match-chip {
+  background: var(--roman-match-color, #eef2ff);
+  border-color: #7c3aed;
+}
+
+.solutions-mode .roman-match-chip::after {
+  content: attr(data-answer);
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  color: #0f8dc4;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.roman-dot {
+  position: absolute;
+  right: -18px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #111827;
+  transform: translateY(-50%);
+}
+
+.roman-match-col:last-child .roman-dot {
+  left: -18px;
+  right: auto;
+}
+
+.gi4-roman-split-card {
+  display: grid;
+  gap: 20px;
+}
+
+.roman-split-item {
+  display: grid;
+  grid-template-columns: 110px minmax(190px, 260px) minmax(210px, 1fr);
+  gap: 22px;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid #d8e1e8;
+  border-radius: 8px;
+  background: #fbfdff;
+}
+
+.roman-split-number {
+  font-size: 22px;
+  text-align: right;
+  color: #1A3A5C;
+}
+
+.roman-split-parts {
+  display: grid;
+  gap: 8px;
+  padding-left: 14px;
+  border-left: 2px solid #9ca3af;
+  border-right: 1px solid #d8e1e8;
+  padding-right: 18px;
+}
+
+.roman-split-answer {
+  font-size: 18px;
+}
+
+.gi4-roman-order-card {
+  display: grid;
+  gap: 18px;
+  font-size: 18px;
+}
+
+.roman-order-source {
+  font-weight: 700;
+}
+
+.roman-order-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.roman-order-line .gi4-line.wide {
+  min-width: 120px;
+}
+
+.roman-helper-grid {
+  display: grid;
+  grid-template-columns: repeat(32, 1fr);
+  height: 96px;
+  border: 1.2px solid #d2e0e7;
+}
+
+.roman-helper-grid span {
+  border-right: 1px solid #d2e0e7;
+  border-bottom: 1px solid #d2e0e7;
+}
+
+.gi4-roman-mistake-card {
+  display: grid;
+  gap: 14px;
+  font-size: 18px;
+}
+
+.roman-mistake-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 22px;
+  min-height: 48px;
+  padding: 8px 10px;
+  border: 1px solid #d8e1e8;
+  border-radius: 8px;
+}
+
+.roman-mistake-statements {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: center;
+}
+
+.roman-mistake-statements > span {
+  white-space: nowrap;
+}
+
+.gi4-roman-mistake-card .gi4-line.wide {
+  min-width: 130px;
+}
+
+.solutions-mode .roman-wrong-part {
+  color: #dc2626;
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  font-weight: 800;
+}
+
+.percent-word-answer {
+  color: #6ba6b3;
+  font-weight: 800;
+  border-top: 1px solid #d8e1e8;
+  padding-top: 10px;
 }
 
 .gi4-decimal-hundred-bars {
