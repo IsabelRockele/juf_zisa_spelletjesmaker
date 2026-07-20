@@ -60,6 +60,8 @@
       <div class="sidebar-tab tab-10000000" data-levels="grade6 custom" onclick="GI4_UI.toonTab('tot10000000',this)">Tot 10 000 000</div>
       <div class="sidebar-tab tab-breuken" data-levels="grade5 custom" onclick="GI4_UI.toonTab('breuken5',this)">Breuken</div>
       <div class="sidebar-tab tab-gemengd" data-levels="grade5 custom" onclick="GI4_UI.toonTab('ggdkgv',this)">GGD en KGV</div>
+      <div class="sidebar-tab tab-percenten" data-levels="grade5 custom" onclick="GI4_UI.toonTab('percenten',this)">Percenten</div>
+      <div class="sidebar-tab tab-romeins" data-levels="grade5 custom" onclick="GI4_UI.toonTab('romeins',this)">Romeinse cijfers</div>
       <div class="sidebar-tab tab-getallenlijn active" data-levels="grade4 custom" onclick="GI4_UI.toonTab('analyse',this)">Analyse</div>
       <div class="sidebar-tab tab-dhte" data-levels="grade4 custom" onclick="GI4_UI.toonTab('dhtemateriaal',this)">D/H/T/E</div>
       <div class="sidebar-tab tab-aanvullen" data-levels="grade4 custom" onclick="GI4_UI.toonTab('aanvullen',this)">Aanvullen</div>
@@ -608,6 +610,84 @@
       <button class="btn-toevoegen" id="btnAddG5GcdLcmMatch">Voeg kaartjes toe</button>
     </div>
 
+    <div class="sidebar-content" id="tab-percenten" data-levels="grade5 custom" style="display:none">
+      <div class="sectie-titel">Percenten</div>
+      <div class="config-kaart gi4-percent-panel">
+        <div class="kaart-titel">Percenten oefenen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="percentCount" type="number" min="1" max="6" value="1" style="width:56px"></label>
+          <label>Soort
+            <select id="percentMode" style="width:175px">
+              <option value="read" selected>percent aflezen</option>
+              <option value="color">kleur gevraagd</option>
+              <option value="mixed">kijken en kleuren</option>
+              <option value="key">bekende percenten</option>
+              <option value="convert">omzetten</option>
+              <option value="figures">figuur naar percent</option>
+              <option value="crossword">kruiswoordveld</option>
+              <option value="complete">aanvullen tot 100%</option>
+              <option value="survey">tabel met kleuren</option>
+              <option value="score">percent in tabel</option>
+              <option value="compare">vergelijken</option>
+              <option value="word">vraagstukken</option>
+            </select>
+          </label>
+          <label>Vraagstuk
+            <select id="percentWordChoice" style="width:155px">
+              <option value="random" selected>wissel af</option>
+              <option value="0">tank auto</option>
+              <option value="1">sportdag</option>
+              <option value="2">korting</option>
+              <option value="3">bibliotheek</option>
+              <option value="4">plantjes</option>
+              <option value="5">spelletjesnamiddag</option>
+            </select>
+          </label>
+        </div>
+        <p class="gi4-note">Bij vraagstukken kan je maximaal 6 tegelijk kiezen. Kies een specifiek vraagstuk om in een bestaande bundel eens te wisselen.</p>
+      </div>
+      <button class="btn-toevoegen" id="btnAddPercent">Voeg percentenoefening toe</button>
+      <div class="config-kaart gi4-percent-panel gi4-percent-relation-panel">
+        <div class="kaart-titel">Relatie breuk - kommagetal - percent</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="percentRelationCount" type="number" min="1" max="6" value="1" style="width:56px"></label>
+          <label>Soort
+            <select id="percentRelationMode" style="width:205px">
+              <option value="hundred" selected>honderdveld aanvullen</option>
+              <option value="strip">strook naar kommagetal</option>
+              <option value="situation">situatie in tabel</option>
+              <option value="equivalent">gelijke waarden</option>
+              <option value="axis">getallenas en ordenen</option>
+              <option value="mistake">fout zoeken</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddPercentRelation">Voeg relatie-oefening toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-romeins" data-levels="grade5 custom" style="display:none">
+      <div class="sectie-titel">Romeinse cijfers</div>
+      <div class="config-kaart gi4-roman-panel">
+        <div class="kaart-titel">Romeinse cijfers oefenen</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="romanCount" type="number" min="1" max="6" value="1" style="width:56px"></label>
+          <label>Soort
+            <select id="romanMode" style="width:205px">
+              <option value="memo" selected>onthoudkader</option>
+              <option value="additive">waarde berekenen</option>
+              <option value="subtractive">positie en aftrekken</option>
+              <option value="match">verbind wat hoort</option>
+              <option value="split">splits en bereken</option>
+              <option value="order">ordenen</option>
+              <option value="mistake">fout zoeken</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddRoman">Voeg Romeinse oefening toe</button>
+    </div>
+
     <div class="sidebar-content" id="tab-analyse" data-levels="grade4 custom">
       <div class="sectie-titel">Analyse van getallen</div>
       <div class="config-kaart">
@@ -1145,6 +1225,14 @@
       <button class="btn-toevoegen" id="btnAddDecimalHundredthsConvert" data-levels="grade5 custom">Voeg breuk/kommagetal toe</button>
 
       <div class="config-kaart" style="margin-top:12px" data-levels="grade5 custom">
+        <div class="kaart-titel">Breuken in tabel</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="decimalFractionTableCount" type="number" min="1" max="4" value="1" style="width:56px"></label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddDecimalFractionTable" data-levels="grade5 custom">Voeg breuken-tabel toe</button>
+
+      <div class="config-kaart" style="margin-top:12px" data-levels="grade5 custom">
         <div class="kaart-titel">&lt;= 1: vergelijken</div>
         <div class="veld-rij">
           <label>Aantal <input id="decimalHundredthsCompareCount" type="number" min="1" max="6" value="3" style="width:56px"></label>
@@ -1394,6 +1482,8 @@ const GI4_UI = (() => {
     breuken: 'tab-breuken',
     breuken5: 'tab-breuken5',
     ggdkgv: 'tab-ggdkgv',
+    percenten: 'tab-percenten',
+    romeins: 'tab-romeins',
     kommagetallen: 'tab-kommagetallen',
     negatief: 'tab-negatief',
   };
