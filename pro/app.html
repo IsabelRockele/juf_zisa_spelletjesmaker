@@ -658,7 +658,7 @@
 <!-- ═══ HOOFDINHOUD ═══ -->
 <main class="main" id="content">
 
-  <!-- UPDATES KNOP — wordt alleen getoond als er updates zijn van minder dan 14 dagen geleden -->
+  <!-- UPDATES KNOP - wordt alleen getoond zolang er een actieve update is -->
   <button class="updates-knop" id="updatesKnop" style="display:none;" onclick="document.getElementById('updatesOverlay').classList.add('open')">
     🆕 Bekijk hier alle updates
   </button>
@@ -669,42 +669,10 @@
       <button class="updates-modal-close" onclick="document.getElementById('updatesOverlay').classList.remove('open')">✕</button>
       <h3>🆕 Laatste updates</h3>
       <ul>
-        <li data-datum="2026-05-20">
-          <span class="update-datum">mei 2026</span>
-          <span><span class="update-tool">Planbord</span> — Nieuw bij Klasmanagement! Een rustig digitaal bord dat bij binnenkomst meteen toont wat de kinderen moeten doen. Combineer een checklist (fruit in de bak, agendamap, huistaak afgeven, dagelijkse kost), een werktijd-timer met visuele stijl, het actuele weer voor jouw stad, en een werkstijl-vakje (stilte of fluisterstem). Pas de welkomtekst aan, vermeld jarigen, en toon alles schermvullend op je digibord. Eigen indelingen kan je opslaan en later terug openen — ideaal om per dag of weektype een vast plan klaar te hebben.</span>
+        <li data-datum="2026-07-20" data-tot="2026-10-01">
+          <span class="update-datum">juli 2026</span>
+          <span><span class="update-tool">Bundel getallen</span> - De getallenbundel is uitgebreid met een vernieuwde bovenbouwmodule voor 4de, 5de en 6de leerjaar. Je vindt er nu extra oefeningen rond kommagetallen, breuken, percenten, Romeinse cijfers en negatieve getallen. De keuzepagina kreeg ook een duidelijker overzicht met onderbouw en bovenbouw apart.</span>
         </li>
-        <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Kalender Generator</span> — Nieuw bij Tijd en klok! Bouw een kalender-werkblad met eigen events, herhaalbare events (bv. elke woensdag zwemmen), schoolvakanties, eigen vragen, antwoordblad voor de leerkracht en oefentabs Dagen (3 niveaus), Maanden, Tellen en Algemene kennis.</span>
-        </li>
-        <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Bundel Kloklezen</span> — Uitgebreid met nieuwe tabs: Ordenen op dagdeel, Rangschikken, Maateenheden, Schrijven en Begrippen. Alle tabs combineerbaar in één bundel.</span>
-        </li>
-        <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Blokkenbouwsels</span> — Nieuw bij creatief en bouwen! Maak je eigen bundel met oefeningen rond blokkenbouwsels.</span>
-        </li>
-        <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Handschrift</span> — Nieuw bij Taal en letters! Voorschrijven op het bord en automatisch laten herhalen zodat kinderen goed de schrijfbeweging zien. Ook de mogelijkheid om je eigen werkbladen te maken als herhaling of extra inoefening.</span>
-        </li>
-         <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Leeskaartjes per Avi</span> — Nieuw bij Taal en letters! Genereer leeskaartjes op leesniveau (van Avi start tot en met E7). Deze kan je gebruiken tijdens hoekenwerk, ruil & wissel, eventueel om te laten dicteren aan elkaar,...</span>
-        </li>
-         <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Takenbord</span> — Nieuw bij Klasmanagement! Toon een digitaal takenbord op het smartboard. Kinderen klikken op hun naam en zien welke taken ze nog moeten maken — ideaal voor hoekenwerk of contractwerk. Stel taken in voor de hele klas of geef elk kind een eigen takenpakket voor maximale differentiatie. Met voortgangsoverzicht, smileybeoordeling en PDF-rapport per leerling.</span>
-        </li>
-         <li data-datum="2026-04-14">
-          <span class="update-datum">apr 2026</span>
-          <span><span class="update-tool">Opvolgen huistaken</span> — Nieuw bij Klasmanagement! Hou per kind bij of huistaken tijdig, te laat, onvolledig, niet afgegeven werden of het kind ziek was. Voeg opmerkingen toe per kind. Download een PDF-rapport per leerling of een klasoverzicht om in één oogopslag te zien hoe het in de klas zit — handig voor rapporten, oudercontacten of gesprekken met het CLB. Voeg je schoollogo toe voor een schooleigen rapport.</span>
-        </li>
-          <li data-datum="2026-04-28">
-  <span class="update-datum">apr 2026</span>
-  <span><span class="update-tool">Tempotoetsen</span> — Nieuw bij Reken-oefeningen! Élke dag een frisse tempotoets klaarzetten kost handenvol tijd — daarom doet deze generator het werk voor jou. Stel in een paar kliks een tempotoets op maat van jouw klas samen: maaltafels, deeltafels, gemengd × en :, getalbeelden tot 100, of optellen en aftrekken tot 10, 20 of 100 (met of zonder brug). Daarna kies je hoe je ze gebruikt: print als PDF-werkblad of flits klassikaal op het bord. Elke generatie levert een nieuwe set op — geen twee dagen hetzelfde!</span>
-</li>
       </ul>
     </div>
   </div>
@@ -730,7 +698,7 @@
         <img alt="Bewerkingen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/werkblad_bewerkingen.webp" loading="eager"/>
         <span class="img-label">Bundel bewerkingen</span>
       </a>
-      <a class="img-link" href="./bundel_getallen/getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/getalinzicht.webp" loading="eager"/><span class="img-label">Werkblad getalinzicht</span></a>
+      <a class="img-link" href="./bundel_getallen/getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/getalinzicht.webp" loading="eager"/><span class="img-label">Bundel getalinzicht</span></a>
       <a class="img-link" href="./cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/cijferen.webp" loading="eager"/><span class="img-label">Werkblad cijferen</span></a>
       <a class="img-link" href="./geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/geld.webp" loading="eager"/><span class="img-label">Bundel geld</span></a>
       <a class="img-link" href="./harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="../drukknop_afbeeldingen/harten.webp" loading="eager"/><span class="img-label">Verliefde harten</span></a>
@@ -1164,15 +1132,19 @@
     if (e.target === this) this.classList.remove('open');
   });
 
-  // Toon de updates-knop alleen als er een update is van minder dan 14 dagen geleden
+  // Toon de updates-knop zolang er een actieve update is.
   (function() {
     const nu = new Date();
     const items = document.querySelectorAll('#updatesOverlay li[data-datum]');
-    const heeftRecente = Array.from(items).some(li => {
-      const d = new Date(li.dataset.datum);
-      return (nu - d) < 14 * 24 * 60 * 60 * 1000;
+    const heeftActieveUpdate = Array.from(items).some(li => {
+      if (li.dataset.tot) {
+        const eind = new Date(li.dataset.tot);
+        return !isNaN(eind.getTime()) && nu < eind;
+      }
+      const start = new Date(li.dataset.datum);
+      return !isNaN(start.getTime()) && (nu - start) < 14 * 24 * 60 * 60 * 1000;
     });
-    if (heeftRecente) {
+    if (heeftActieveUpdate) {
       document.getElementById('updatesKnop').style.display = '';
     }
   })();
