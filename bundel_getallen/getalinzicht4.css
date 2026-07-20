@@ -45,6 +45,16 @@
   color: #0e7490;
 }
 
+.gi4-fraction-stem-panel {
+  background: linear-gradient(135deg, #fff7ed, #fffbeb);
+  border-color: #fdba74;
+  box-shadow: inset 4px 0 0 #f97316;
+}
+
+.gi4-fraction-stem-panel .kaart-titel {
+  color: #c2410c;
+}
+
 body.gi4-range-100000 .graad-badge {
   background: #ecfeff;
   color: #155e75;
@@ -2137,6 +2147,250 @@ html.exporting .gi4-g5-neighbor-table .gi4-g5-neighbor-actions {
 
 .solutions-mode .gi4-fraction-whole-grid span.solution-fill {
   background: #9b8ac6;
+}
+
+.gi4-fraction-stem-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.gi4-fraction-stem-divide,
+.gi4-fraction-stem-recognize,
+.gi4-fraction-stem-amount,
+.gi4-fraction-stem-order,
+.gi4-fraction-stem-drawing-order,
+.gi4-fraction-stem-drawing,
+.gi4-fraction-stem-calculate {
+  padding: 16px 20px;
+  border: 1.4px solid #c2c8d0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.gi4-fraction-stem-divide {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  align-items: end;
+}
+
+.gi4-fraction-stem-divide .stem-divide-item {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+.gi4-fraction-stem-recognize {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 128px;
+}
+
+.gi4-fraction-stem-recognize .stem-frac {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .equivalent-fraction::before,
+.solutions-mode .gi4-fraction-stem-recognize .equivalent-fraction::after {
+  content: "";
+  position: absolute;
+  left: 9px;
+  right: 9px;
+  top: 19px;
+  height: 3px;
+  background: #dc2626;
+  border-radius: 999px;
+  z-index: 3;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .equivalent-fraction::before {
+  transform: rotate(34deg);
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .equivalent-fraction::after {
+  transform: rotate(-34deg);
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .unit-fraction {
+  outline: 2px solid #0f8dc4;
+  outline-offset: 5px;
+  border-radius: 999px;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .whole-fraction {
+  text-decoration: line-through;
+  text-decoration-color: #dc2626;
+  text-decoration-thickness: 3px;
+}
+
+.gi4-fraction-stem-recognize .gi4-solution-answer {
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-2 .gi4-fraction-box {
+  background: #dbeafe;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #dbeafe;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-3 .gi4-fraction-box {
+  background: #dcfce7;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #dcfce7;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-4 .gi4-fraction-box {
+  background: #fef3c7;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #fef3c7;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-5 .gi4-fraction-box {
+  background: #fce7f3;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #fce7f3;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-6 .gi4-fraction-box {
+  background: #ede9fe;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #ede9fe;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-7 .gi4-fraction-box {
+  background: #ffedd5;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #ffedd5;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-8 .gi4-fraction-box {
+  background: #cffafe;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #cffafe;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-9 .gi4-fraction-box {
+  background: #fee2e2;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #fee2e2;
+}
+
+.solutions-mode .gi4-fraction-stem-recognize .stem-frac.same-den-10 .gi4-fraction-box {
+  background: #ecfccb;
+  border-radius: 8px;
+  box-shadow: 0 0 0 5px #ecfccb;
+}
+
+.gi4-fraction-stem-amount,
+.gi4-fraction-stem-calculate {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px 42px;
+  font-size: 18px;
+}
+
+.gi4-fraction-stem-amount > div,
+.gi4-fraction-stem-calculate > div {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.gi4-fraction-stem-order {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.gi4-fraction-stem-order .stem-order-row {
+  display: grid;
+  gap: 12px;
+}
+
+.gi4-fraction-stem-order .stem-order-fracs,
+.gi4-fraction-stem-order .stem-order-answer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+
+.gi4-fraction-stem-drawing-order {
+  display: grid;
+  gap: 28px;
+}
+
+.stem-drawing-order-row {
+  display: grid;
+  gap: 14px;
+}
+
+.stem-drawing-order-table {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1.4px solid #a9bfca;
+}
+
+.stem-drawing-order-cell {
+  min-height: 190px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  justify-items: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 14px;
+  border-right: 1.2px solid #a9bfca;
+}
+
+.stem-drawing-order-cell:last-child {
+  border-right: 0;
+}
+
+.stem-drawing-order-cell .gi4-fraction-shape {
+  width: 130px;
+  height: 98px;
+}
+
+.gi4-fraction-stem-order-visual.bar {
+  width: 92px;
+  height: 140px;
+}
+
+.stem-drawing-order-answer {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+}
+
+.gi4-fraction-stem-drawing {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 26px;
+}
+
+.gi4-fraction-stem-drawing .stem-drawing-row {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 18px;
+}
+
+.gi4-fraction-stem-drawing .stem-drawing-row .gi4-fraction-shape {
+  flex: 0 0 100%;
 }
 
 .gi4-quantity-grid {
