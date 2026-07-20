@@ -821,7 +821,26 @@
 
     <div class="sidebar-content" id="tab-breuken" data-levels="grade4 custom" style="display:none">
       <div class="sectie-titel">Echte breuken</div>
-      <div class="config-kaart">
+      <div class="config-kaart gi4-fraction-stem-panel">
+        <div class="kaart-titel">Stambreuken en echte breuken</div>
+        <div class="veld-rij">
+          <label>Aantal <input id="fractionStemCount" type="number" min="1" max="4" value="1" style="width:56px"></label>
+          <label>Soort
+            <select id="fractionStemMode" style="width:165px">
+              <option value="divide" selected>verdeel en kleur</option>
+              <option value="recognize">herken en kleur</option>
+              <option value="amount">breuk van getal</option>
+              <option value="order">rangschikken</option>
+              <option value="drawingOrder">tekeningen ordenen</option>
+              <option value="drawing">tekening naar oefening</option>
+              <option value="calculate">bewerkingen</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <button class="btn-toevoegen" id="btnAddFractionStem">Voeg stambreuken/echt toe</button>
+
+      <div class="config-kaart" style="margin-top:12px">
         <div class="kaart-titel">Geheel, teller en noemer</div>
         <div class="veld-rij">
           <label>Aantal <input id="fractionPartsCount" type="number" min="1" max="8" value="3" style="width:56px"></label>
