@@ -2005,6 +2005,7 @@ const onthoudH = c;
   }
 
  async function _tekenBlok(blok) {
+  if (blok.bewerking === 'breuken')                                  { _tekenBreukenBlok(blok); return; }
   if (blok.bewerking === 'schatten')                                          { _tekenSchattenBlok(blok); return; }
   if (blok.bewerking === 'vraagstukken')                              { _tekenVraagstukBlok(blok); return; }
   if (blok.bewerking === 'rekentaal')                                  { _tekenRekentaalBlok(blok); return; }
@@ -2069,6 +2070,174 @@ const onthoudH = c;
   y += NABLOK;
   lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
 }
+
+  function _pdfBreuk(cx, cy, n, d, leeg = false) {
+    const w = 8;
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(35,35,35);
+    if (leeg) {
+      doc.setDrawColor(165,175,185); doc.setLineWidth(.4);
+      doc.roundedRect(cx-w/2,cy-8,w,7,1,1,'S'); doc.roundedRect(cx-w/2,cy+1,w,7,1,1,'S');
+      // Duidelijke breukstreep tussen het teller- en noemervak.
+      doc.setDrawColor(45,45,45); doc.setLineWidth(.55); doc.line(cx-w/2-1,cy,cx+w/2+1,cy);
+      if (_metAntwoorden) {
+        doc.setTextColor(0,130,0); doc.setFont('helvetica','bold');
+        doc.text(String(n),cx,cy-2.3,{align:'center'}); doc.text(String(d),cx,cy+5.7,{align:'center'});
+        doc.setTextColor(35,35,35); doc.setFont('helvetica','normal');
+      }
+    } else {
+      doc.text(String(n), cx, cy - 2.3, { align:'center' });
+      doc.setDrawColor(35,35,35); doc.setLineWidth(0.4); doc.line(cx-w/2,cy,cx+w/2,cy);
+      doc.text(String(d), cx, cy + 5, { align:'center' });
+    }
+  }
+
+  function _tekenBreukSom(oef, x, top, w, schema, keten = false) {
+    const cy = top + 11;
+    if (keten) {
+      const sx=x+w/2-32, step=8;
+      _pdfBreuk(sx,cy,oef.n1,oef.d1); doc.setFontSize(10); doc.text(oef.op,sx+step,cy+2); _pdfBreuk(sx+2*step,cy,oef.n2,oef.d2);
+      doc.text('=',sx+3*step,cy+2); _pdfBreuk(sx+4*step,cy,oef.g1,oef.doel,true); doc.text(oef.op,sx+5*step,cy+2);
+      _pdfBreuk(sx+6*step,cy,oef.g2,oef.doel,true); doc.text('=',sx+7*step,cy+2); _pdfBreuk(sx+8*step,cy,oef.teller,oef.doel,true);
+      return;
+    }
+    if (!schema) {
+      const p1=x+15, p2=x+w*.50, p3=x+w-15;
+      _pdfBreuk(p1,cy,oef.n1,oef.d1); doc.setFontSize(12); doc.text(oef.op,(p1+p2)/2,cy+2,{align:'center'});
+      _pdfBreuk(p2,cy,oef.n2,oef.d2); doc.text('=',(p2+p3)/2,cy+2,{align:'center'}); _pdfBreuk(p3,cy,oef.teller,oef.doel,true); return;
+    }
+    // Compacte ketting: ook het laatste antwoordvak blijft binnen het kader.
+    const sx=x+w/2-32, step=8;
+    _pdfBreuk(sx,cy,oef.n1,oef.d1); doc.setFontSize(10); doc.text(oef.op,sx+step,cy+2); _pdfBreuk(sx+2*step,cy,oef.n2,oef.d2);
+    doc.text('=',sx+3*step,cy+2); _pdfBreuk(sx+4*step,cy,oef.g1,oef.doel,true); doc.text(oef.op,sx+5*step,cy+2);
+    _pdfBreuk(sx+6*step,cy,oef.g2,oef.doel,true); doc.text('=',sx+7*step,cy+2); _pdfBreuk(sx+8*step,cy,oef.teller,oef.doel,true);
+    const conv=oef.factor1>1?[oef.n1,oef.d1,oef.g1,oef.factor1]:[oef.n2,oef.d2,oef.g2,oef.factor2];
+    const bx=x+w/2, sy=top+48; _pdfBreuk(bx-19,sy,conv[0],conv[1]); doc.text('=',bx,sy+2); _pdfBreuk(bx+19,sy,conv[2],oef.doel,true);
+    doc.setDrawColor(35,35,35); doc.setLineWidth(.45);
+    // Bogen lopen van rechts naast de bron naar links naast het antwoordvak.
+    doc.lines([[7,-7,19,-7,27,0]],bx-13,sy-7,[1,1],'S');
+    doc.lines([[7,7,19,7,27,0]],bx-13,sy+7,[1,1],'S');
+    doc.setFillColor(35,35,35);
+    doc.triangle(bx+14,sy-7,bx+11.1,sy-7.5,bx+13.1,sy-9.8,'F');
+    doc.triangle(bx+14,sy+7,bx+13.1,sy+9.8,bx+11.1,sy+7.5,'F');
+    doc.setFontSize(11); const factor=_metAntwoorden?String(conv[3]):'______';
+    doc.text(`× ${factor}`,bx-8,sy-17); doc.text(`× ${factor}`,bx-8,sy+22);
+  }
+
+  function _tekenBreukenBlok(blok) {
+    if (blok.config?.soort === 'gemengde-getallen') { _tekenGemengdeBreukenBlok(blok); return; }
+    const isOngelijk = blok.config?.soort === 'ongelijknamig';
+    const keten = isOngelijk && blok.config?.variant === 'kort';
+    const schema = isOngelijk && !keten;
+    const rijH = schema ? 80 : (keten ? 32 : 28), kolW = CW/2, rijen=Math.ceil(blok.oefeningen.length/2);
+    // Opdrachtzin en de volledige eerste rij blijven altijd samen.
+    checkRuimte(VOOR_ZIN + ZINRUIMTE + rijH + 4);
+    y += VOOR_ZIN; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(26,58,92); doc.text(blok.opdrachtzin,ML,y); y += ZINRUIMTE;
+    for(let r=0;r<rijen;r++){
+      if(r>0) checkRuimte(rijH);
+      blok.oefeningen.slice(r*2,r*2+2).forEach((o,i)=>{
+        const x=ML+i*kolW+2,w=kolW-5;
+        doc.setFillColor(255,255,255); doc.setDrawColor(180,190,200); doc.setLineWidth(.45); doc.roundedRect(x,y,w,rijH-5,2,2,'FD');
+        _tekenBreukSom(o,x,y,w,schema,keten);
+      });
+      y += rijH;
+    }
+    y += NABLOK; lijn(ML,y-4,ML+CW,y-4,[210,220,230],.4);
+  }
+
+  function _pdfGemengdGetal(cx,cy,w,n,d,leeg=false) {
+    doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor(35,35,35);
+    if(w){
+      if(leeg){ doc.setDrawColor(165,175,185); doc.roundedRect(cx-8.5,cy-7,7,14,1,1,'S'); if(_metAntwoorden){doc.setTextColor(0,130,0);doc.setFont('helvetica','bold');doc.text(String(w),cx-5,cy+2,{align:'center'});} }
+      else doc.text(String(w),cx-5,cy+2,{align:'center'});
+    }
+    if(n!==0 || !w)_pdfBreuk(w?cx+4:cx-3,cy,n,d,leeg);
+  }
+
+  function _pdfMgStroken(x,sy,w,n,d,inkleuren,strookBreedte=13,strookHoogte=6,maxPerRij=99) {
+    const sw=strookBreedte,h=strookHoogte,g=1.8,totaal=w+((n>0||w===0)?1:0);
+    for(let s=0;s<totaal;s++){
+      const sx=x+(s%maxPerRij)*(sw+g), rijY=sy+Math.floor(s/maxPerRij)*(h+1.5), gevuld=s<w?d:n;
+      if(s<w){
+        if(inkleuren||_metAntwoorden){doc.setFillColor(121,169,207);doc.rect(sx,rijY,sw,h,'F');}
+        doc.setDrawColor(100,100,100);doc.setLineWidth(.25);doc.rect(sx,rijY,sw,h,'S');
+        continue;
+      }
+      for(let i=0;i<d;i++){
+        if((inkleuren||_metAntwoorden)&&i<gevuld){doc.setFillColor(121,169,207);doc.rect(sx+i*sw/d,rijY,sw/d,h,'F');}
+        doc.setDrawColor(100,100,100);doc.setLineWidth(.25);doc.rect(sx+i*sw/d,rijY,sw/d,h,'S');
+      }
+    }
+  }
+
+  function _pdfMgOmzet(o,x,oy,schrijf=false,vasteBronX=null) {
+    if(!o.ongelijknamig)return;
+    const v=o.factor1>1?[o.n1,o.d1,o.cn1,o.factor1]:[o.n2,o.d2,o.cn2,o.factor2];
+    doc.setDrawColor(6,150,215);doc.setFillColor(6,150,215);doc.setLineWidth(1);
+    if(!schrijf){
+      doc.line(x,oy,x,oy+15);doc.triangle(x,oy+19,x-3,oy+14,x+3,oy+14,'F');
+      _pdfBreuk(x,oy+31,v[2],o.doel,true);return;
+    }
+    const bx=vasteBronX??x+20, eindX=bx-7;
+    doc.line(x,oy,x,oy+24);doc.line(x,oy+24,eindX,oy+24);
+    if(eindX>=x)doc.triangle(eindX+3,oy+24,eindX-2,oy+21,eindX-2,oy+27,'F');
+    else doc.triangle(eindX-3,oy+24,eindX+2,oy+21,eindX+2,oy+27,'F');
+    const by=oy+40;_pdfBreuk(bx,by,v[0],v[1]);doc.setTextColor(35,35,35);doc.text('=',bx+11,by+2);_pdfBreuk(bx+23,by,v[2],o.doel,true);
+    doc.setDrawColor(35,35,35);doc.setFillColor(35,35,35);doc.setLineWidth(.45);
+    doc.lines([[4,-5,9,-5,13,0]],bx+3,by-7,[1,1],'S');doc.lines([[4,5,9,5,13,0]],bx+3,by+7,[1,1],'S');
+    doc.triangle(bx+17,by-7,bx+13.5,by-8.5,bx+14.5,by-4.5,'F');doc.triangle(bx+17,by+7,bx+14.5,by+4.5,bx+13.5,by+8.5,'F');
+    doc.setFontSize(9);doc.text(`× ${_metAntwoorden?v[3]:'____'}`,bx+8,by-14);doc.text(`× ${_metAntwoorden?v[3]:'____'}`,bx+8,by+19);
+  }
+
+  function _tekenGemengdeBreukenBlok(blok) {
+    const variant=blok.config?.variant||'inkleuren', heeftOngelijk=blok.oefeningen.some(o=>o.ongelijknamig);
+    const kolAantal=variant==='zonder'?2:1;
+    const rijH=variant==='zonder'?30:(variant==='afbeelding'?(heeftOngelijk?92:72):(heeftOngelijk?175:130)), kolW=CW/kolAantal, rijen=Math.ceil(blok.oefeningen.length/kolAantal);
+    checkRuimte(VOOR_ZIN+ZINRUIMTE+rijH+4); y+=VOOR_ZIN; doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=ZINRUIMTE;
+    for(let r=0;r<rijen;r++){
+      if(r>0)checkRuimte(rijH);
+      blok.oefeningen.slice(r*kolAantal,(r+1)*kolAantal).forEach((o,i)=>{
+        const x=ML+i*kolW+2,w=kolW-5,c=x+w/2;
+        doc.setFillColor(255,255,255);doc.setDrawColor(180,190,200);doc.roundedRect(x,y,w,rijH-5,2,2,'FD');
+        if(variant==='zonder'){
+          _pdfGemengdGetal(c-25,y+11,o.w1,o.n1,o.d1);doc.text(o.op,c-11,y+13);_pdfGemengdGetal(c+2,y+11,o.w2,o.n2,o.d2);doc.text('=',c+16,y+13);
+          doc.setDrawColor(130,140,150);doc.line(c+21,y+14,x+w-4,y+14);
+          if(_metAntwoorden){doc.setTextColor(0,130,0);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text(o.antwoord,c+23,y+12);}
+        }else if(variant==='afbeelding'){
+          const links=x+8,rechts=x+w/2+5;
+          _pdfMgStroken(x+12,y+9,o.w1,o.n1,o.d1,true,o.w1?14:40,11);doc.setFontSize(12);doc.setTextColor(35,35,35);doc.text(o.op,x+w/2,y+17,{align:'center'});_pdfMgStroken(x+w/2+8,y+9,o.w2,o.n2,o.d2,true,o.w2?14:40,11);
+          const somY=y+35;
+          _pdfGemengdGetal(x+12,somY,o.w1,o.n1,o.d1,true);doc.text(o.op,x+25,somY+2);_pdfGemengdGetal(x+37,somY,o.w2,o.n2,o.d2,true);doc.text('=',x+49,somY+2);_pdfBreuk(x+60,somY,o.totaal,o.doel,true);doc.text('=',x+70,somY+2);_pdfGemengdGetal(x+82,somY,o.heel,o.rest,o.doel,true);
+          if(o.ongelijknamig){
+            const ax=o.factor1>1?x+12:x+37;doc.setDrawColor(6,150,215);doc.setFillColor(6,150,215);doc.setLineWidth(1);doc.line(ax,somY+9,ax,somY+28);doc.line(ax,somY+28,ax+7,somY+28);doc.triangle(ax+10,somY+28,ax+5,somY+25,ax+5,somY+31,'F');
+            _pdfBreuk(ax+20,somY+32,o.factor1>1?o.n1:o.n2,o.factor1>1?o.d1:o.d2,true);doc.setTextColor(35,35,35);doc.text('=',ax+30,somY+34);_pdfBreuk(ax+40,somY+32,o.factor1>1?o.cn1:o.cn2,o.doel,true);
+          }
+        }else{
+          const gevuld=false, linksW=w*.59, rechtsX=x+linksW+4, rechtsW=w-linksW-8;
+          doc.setFontSize(10);doc.setTextColor(35,35,35);
+          _pdfGemengdGetal(x+16,y+10,o.w1,o.n1,o.d1);doc.text(o.op,x+30,y+12);_pdfGemengdGetal(x+43,y+10,o.w2,o.n2,o.d2);doc.text('= ?',x+57,y+12);
+          const startY=y+32;
+          _pdfGemengdGetal(x+36,startY-14,o.w1,o.n1,o.d1);_pdfMgStroken(x+18,startY-5,o.w1,o.n1,o.d1,gevuld,o.w1?18:38,10,o.w1?2:1);
+          doc.text(o.op,x+58,startY+1);_pdfMgStroken(x+64,startY-5,o.w2,o.n2,o.d2,gevuld,o.w2?15:32,10,o.w2?2:1);
+          _pdfGemengdGetal(x+80,startY-14,o.w2,o.n2,o.d2);
+          if(o.ongelijknamig)_pdfMgOmzet(o,o.factor1>1?x+36:x+80,startY+15);
+          const werkY=o.ongelijknamig?startY+78:startY+34;
+          _pdfGemengdGetal(x+36,werkY-14,o.w1,o.cn1,o.doel,true);_pdfMgStroken(x+18,werkY-5,o.w1,o.cn1,o.doel,gevuld,o.w1?18:38,10,o.w1?2:1);
+          doc.text(o.op,x+58,werkY+1);_pdfMgStroken(x+64,werkY-5,o.w2,o.cn2,o.doel,gevuld,o.w2?15:32,10,o.w2?2:1);
+          _pdfGemengdGetal(x+80,werkY-14,o.w2,o.cn2,o.doel,true);
+          doc.setDrawColor(35,35,35);doc.setFillColor(35,35,35);doc.setLineWidth(.7);doc.line(x+55,werkY+7,x+55,werkY+22);doc.triangle(x+55,werkY+27,x+52.5,werkY+21,x+57.5,werkY+21,'F');
+          _pdfGemengdGetal(x+36,werkY+28,o.heel,o.rest,o.doel,true);_pdfMgStroken(x+18,werkY+37,o.heel,o.rest,o.doel,gevuld,o.heel<=1?28:18,10,o.heel>1?2:1);
+
+          doc.setFillColor(255,255,255);doc.setDrawColor(180,185,190);doc.setLineWidth(.5);doc.roundedRect(rechtsX,y+7,rechtsW,rijH-19,3,3,'FD');
+          doc.setFont('helvetica','italic');doc.setFontSize(11);doc.setTextColor(60,60,60);doc.text('Ik schrijf:',rechtsX+5,y+15);
+          doc.setFont('helvetica','normal');doc.setFontSize(10);
+          _pdfGemengdGetal(rechtsX+11,y+29,o.w1,o.n1,o.d1);doc.text(o.op,rechtsX+24,y+31);_pdfGemengdGetal(rechtsX+36,y+29,o.w2,o.n2,o.d2);doc.text('=',rechtsX+48,y+31);_pdfBreuk(rechtsX+58,y+29,o.totaal,o.doel,true);
+          if(o.ongelijknamig)_pdfMgOmzet(o,o.factor1>1?rechtsX+11:rechtsX+36,y+39,true,rechtsX+16);
+          const antY=o.ongelijknamig?y+142:y+92;doc.text('=',rechtsX+32,antY+2);_pdfGemengdGetal(rechtsX+49,antY,o.heel,o.rest,o.doel,true);
+        }
+      }); y+=rijH;
+    }
+    y+=NABLOK;lijn(ML,y-4,ML+CW,y-4,[210,220,230],.4);
+  }
 
   /* ── Maak eerst 10: 3-termen optellen/aftrekken ─────────── */
   // 3 kolommen (tekst is breder), optioneel geel voorbeeldkader
@@ -3979,7 +4148,11 @@ lijnKort(fx, formY);
 }
 
   /* ── Publieke API ────────────────────────────────────────── */
-  async function genereer(bundelData, titel, metAntw = false) {
+  async function genereer(bundelData, titel, metAntw = false, onProgress = null) {
+    const meldVoortgang = (procent, tekst) => {
+      if (typeof onProgress === 'function') onProgress(procent, tekst);
+    };
+    meldVoortgang(2, 'Document voorbereiden…');
     const { jsPDF } = window.jspdf;
     doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     _lampBase64Cache = null;
@@ -3989,21 +4162,67 @@ lijnKort(fx, formY);
 
     // Oplossingssleutel: andere koptekst
     if (metAntw) {
-      _tekenKoptekstSleutel(titel || 'Rekenbundel');
+      const heeftSplitsstappen = bundelData.some(b => b.bewerking === 'splitsingen' || b.hulpmiddelen?.includes('splitsbeen'));
+      _tekenKoptekstSleutel(titel || 'Rekenbundel', heeftSplitsstappen);
     } else {
       _tekenKoptekst(titel || 'Rekenbundel');
     }
 
-    for (const blok of bundelData) {
+    const alleenAfbeeldingsBlokken=bundelData.length>0&&bundelData.every(b=>b.config?.soort==='gemengde-getallen'||b.config?.soort==='kommagetallen');
+    const aantalPreviewKaarten=alleenAfbeeldingsBlokken?bundelData.reduce((som,blok)=>{const el=document.querySelector(`.preview-blok[data-id="${blok.id}"]`);return som+(el?.querySelectorAll(blok.config?.soort==='kommagetallen'?'.komma-oef':'.mg-oef').length||0);},0):0;
+    if(alleenAfbeeldingsBlokken&&window.html2canvas&&aantalPreviewKaarten>0){
+      const body=document.body,had=body.classList.contains('toont-oplossingen'),hadPdfOpname=body.classList.contains('pdf-opname');
+      const totaalKaarten=aantalPreviewKaarten;
+      let verwerkteKaarten=0;
+      body.classList.toggle('toont-oplossingen',metAntw);
+      body.classList.add('pdf-opname');
+      try { for(const blok of bundelData){
+        const el=document.querySelector(`.preview-blok[data-id="${blok.id}"]`);
+        if(!el)continue;
+        const kaartSelector=blok.config?.soort==='kommagetallen'?'.komma-oef':'.mg-oef';
+        const kaarten=[];for(const kaart of el.querySelectorAll(kaartSelector)){
+          meldVoortgang(5+Math.round(82*verwerkteKaarten/totaalKaarten),`Oefening ${verwerkteKaarten+1} van ${totaalKaarten} verwerken…`);
+          kaarten.push(await window.html2canvas(kaart,{
+            scale:2,
+            backgroundColor:'#fff',
+            useCORS:true,
+            foreignObjectRendering:false,
+            ignoreElements:n=>n.classList?.contains('btn-del-oef')||n.classList?.contains('pdf-progress-overlay'),
+            onclone:gekloondDocument=>{
+              const voortgang=gekloondDocument.getElementById('pdf-progress-overlay');
+              if(voortgang)voortgang.style.display='none';
+            }
+          }));
+          verwerkteKaarten++;
+          meldVoortgang(5+Math.round(82*verwerkteKaarten/totaalKaarten),`Oefening ${verwerkteKaarten} van ${totaalKaarten} verwerkt`);
+        }
+        const compact=blok.config?.soort==='kommagetallen'||blok.config?.variant==='afbeelding'||blok.config?.variant==='zonder',doelW=compact?(CW-5)/2:CW;
+        const eersteAantal=compact?Math.min(2,kaarten.length):Math.min(1,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));checkRuimte(8+eersteH+5);
+        doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=8;
+        let kol=0,rijMax=0;
+        for(const canvas of kaarten){const h=doelW*canvas.height/canvas.width;if(!compact){checkRuimte(h+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',ML,y,doelW,h);y+=h+5;continue;}if(kol===0){checkRuimte(h+5);rijMax=0;}const px=ML+kol*(doelW+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',px,y,doelW,h);rijMax=Math.max(rijMax,h);kol++;if(kol===2){y+=rijMax+5;kol=0;}}
+        if(compact&&kol)y+=rijMax+5;
+      }} finally { body.classList.toggle('toont-oplossingen',had); body.classList.toggle('pdf-opname',hadPdfOpname); }
+      meldVoortgang(94,'PDF samenstellen…');
+      const naam=(titel||'rekenbundel').replace(/\s+/g,'-').toLowerCase()+(metAntw?'-oplossingssleutel':'')+'.pdf';
+      meldVoortgang(98,'Download opslaan…');doc.save(naam);await new Promise(resolve=>setTimeout(resolve,100));meldVoortgang(100,'Klaar');return;
+    }
+
+    for (let blokIndex=0; blokIndex<bundelData.length; blokIndex++) {
+      const blok=bundelData[blokIndex];
+      meldVoortgang(5+Math.round(88*blokIndex/Math.max(1,bundelData.length)),`Onderdeel ${blokIndex+1} van ${bundelData.length} verwerken…`);
       await _tekenBlok(blok);
     }
 
     const bestandsnaam = (titel || 'rekenbundel').replace(/\s+/g, '-').toLowerCase();
     const suffix = metAntw ? '-oplossingssleutel' : '';
+    meldVoortgang(98,'Download opslaan…');
     doc.save(`${bestandsnaam}${suffix}.pdf`);
+    await new Promise(resolve=>setTimeout(resolve,100));
+    meldVoortgang(100,'Klaar');
   }
 
-  function _tekenKoptekstSleutel(titel) {
+  function _tekenKoptekstSleutel(titel, toonSplitsOpm = false) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(11);
     doc.setTextColor(80, 80, 80);
@@ -4018,14 +4237,11 @@ lijnKort(fx, formY);
     y += 7;
     lijn(ML, y, ML + CW, y, [0,150,50], 1.0);
     y += 7;
-    // Opmerking over tussenstappen
-    doc.setFont('helvetica', 'italic');
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    const opmTekst = '* De tussenstappen bij splitsoefeningen kunnen afwijken van de gebruikte methode in de klas.';
-    const opmRegels = doc.splitTextToSize(opmTekst, CW);
-    doc.text(opmRegels, ML, y);
-    y += opmRegels.length * 5 + 3;
+    if (toonSplitsOpm) {
+      doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(120,120,120);
+      const opmRegels = doc.splitTextToSize('* De tussenstappen bij splitsoefeningen kunnen afwijken van de gebruikte methode in de klas.', CW);
+      doc.text(opmRegels,ML,y); y += opmRegels.length*5+3;
+    }
   }
 
   /* ── Tafels blok tekenen ─────────────────────────────────── */
