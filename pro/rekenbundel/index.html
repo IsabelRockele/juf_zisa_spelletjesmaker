@@ -201,6 +201,7 @@
   <div class="sidebar-tab tab-tafels-inzicht" onclick="App.toonBewerking('tafels-inzicht',this)">🔍 Tafels inzicht</div>
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
   <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
+  <div class="sidebar-tab tab-breuken" onclick="App.toonBewerking('breuken',this)">🍰 Breuken</div>
   <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
@@ -815,6 +816,7 @@
     <!-- ── KOMMAGETALLEN SIDEBAR CONTENT ─────────────────────── -->
     <div class="sidebar-content" id="tab-komma" style="display:none">
       <div class="sectie-titel">🔢 Kommagetallen</div>
+      <div style="display:none" aria-hidden="true">
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:16px;">
         <div style="font-size:48px;">🚧</div>
         <div style="font-size:16px;font-weight:700;color:#1A3A5C;">Binnenkort beschikbaar!</div>
@@ -834,6 +836,24 @@
           </div>
         </div>
       </div>
+      </div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">➕</div>Optellen tot op een tiende</div>
+        <div class="form-rij"><label>Brug over het gehele getal</label><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-brug','zonder',this)"><input type="radio" name="komma-brug" value="zonder" checked>Zonder brug</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-brug','met',this)"><input type="radio" name="komma-brug" value="met">Met brug</label>
+        </div></div>
+      </div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">✏️</div>Oefenvorm</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-variant','kort',this)"><input type="radio" name="komma-variant" value="kort" checked>Korte sommen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen',this)"><input type="radio" name="komma-variant" value="splitsen">Via splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tienden',this)"><input type="radio" name="komma-variant" value="tienden">Schrijf als tienden</label>
+      </div></div>
+      <div class="config-kaart komma-strategie-keuze"><div class="kaart-titel"><div class="icon">🧠</div>Rekenstrategie</div><div class="radio-groep">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','compenseren',this)"><input type="radio" name="komma-variant" value="compenseren">Compenseren</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','transformeren',this)"><input type="radio" name="komma-variant" value="transformeren">Transformeren</label>
+      </div></div>
+      <div class="config-kaart"><div class="form-rij"><label>Aantal oefeningen</label><input type="number" id="inp-aantal-komma" min="1" max="24" value="8"></div><div class="form-rij"><label>Opdrachtzin</label><input type="text" id="inp-opdrachtzin-komma" value="Los de optellingen op."></div></div>
+      <button class="btn-toevoegen" onclick="App.voegKommaBlokToe()">＋ Voeg kommablok toe</button>
     </div><!-- /tab-komma -->
 
     <!-- ── TAFELS SIDEBAR CONTENT ──────────────────────────── -->
@@ -1570,6 +1590,56 @@
 
     </div><!-- /tab-schatten -->
 
+    <div class="sidebar-content" id="tab-breuken" style="display:none">
+      <div class="sectie-titel">Breuken optellen en aftrekken</div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">🍰</div>Soort breuken</div>
+        <div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-soort','gelijknamig',this)"><input type="radio" name="breuk-soort" value="gelijknamig" checked>Gelijknamig</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-soort','ongelijknamig',this)"><input type="radio" name="breuk-soort" value="ongelijknamig">Ongelijknamig</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-soort','gemengde-getallen',this)"><input type="radio" name="breuk-soort" value="gemengde-getallen">Gemengde getallen</label>
+        </div>
+        <p class="config-hint">Bij ongelijknamige breuken verschijnt het schema met de gebogen ×-pijlen om gelijknamig te maken.</p>
+      </div>
+      <div class="config-kaart" id="kaart-gemengde-werkvorm" style="display:none">
+        <div class="kaart-titel"><div class="icon">🎨</div>Werkvorm gemengde getallen</div>
+        <div class="radio-groep" style="flex-direction:column;align-items:stretch">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('gemengde-variant','inkleuren',this)"><input type="radio" name="gemengde-variant" value="inkleuren" checked>Met inkleurschema’s</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('gemengde-variant','afbeelding',this)"><input type="radio" name="gemengde-variant" value="afbeelding">Kijk naar de afbeelding</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('gemengde-variant','zonder',this)"><input type="radio" name="gemengde-variant" value="zonder">Zonder hulpschema</label>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-gemengde-noemers" style="display:none">
+        <div class="kaart-titel"><div class="icon">🔢</div>Noemers bij gemengde getallen</div>
+        <div class="radio-groep">
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('gemengde-noemers','gelijknamig',this)"><input type="radio" name="gemengde-noemers" value="gelijknamig">Gelijknamig</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('gemengde-noemers','ongelijknamig',this)"><input type="radio" name="gemengde-noemers" value="ongelijknamig">Ongelijknamig</label>
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('gemengde-noemers','gemengd',this)"><input type="radio" name="gemengde-noemers" value="gemengd" checked>Gemengd</label>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-breuk-werkvorm" style="display:none">
+        <div class="kaart-titel"><div class="icon">✏️</div>Werkvorm ongelijknamige breuken</div>
+        <div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-variant','schema',this)"><input type="radio" name="breuk-variant" value="schema" checked>Met tussenstap en pijlen</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-variant','kort',this)"><input type="radio" name="breuk-variant" value="kort">Korte oefeningen</label>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">➕➖</div>Bewerking</div>
+        <div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-bewerking','optellen',this)"><input type="radio" name="breuk-bewerking" value="optellen" checked>Optellen</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-bewerking','aftrekken',this)"><input type="radio" name="breuk-bewerking" value="aftrekken">Aftrekken</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-bewerking','gemengd',this)"><input type="radio" name="breuk-bewerking" value="gemengd">Gemengd</label>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdracht &amp; hoeveelheid</div>
+        <div class="form-rij"><label>Opdrachtzin</label><input type="text" id="inp-opdrachtzin-breuken" value="Los de bewerkingen met breuken op." /></div>
+        <div class="form-rij"><label>Aantal oefeningen</label><select id="inp-aantal-breuken"><option>4</option><option selected>6</option><option>8</option><option>10</option><option>12</option></select></div>
+      </div>
+      <button class="btn-toevoegen" onclick="App.voegBreukenBlokToe()" style="background:#6f9f24">＋ Voeg breukenblok toe</button>
+    </div>
+
 
     <!-- ── TAB: VRAAGSTUKKEN ─────────────────────────────────── -->
     <div class="sidebar-content" id="tab-vraagstukken" style="display:none">
@@ -1578,7 +1648,7 @@
         <label style="font-weight:700;color:#1565c0;font-size:14px">✨ AI Vraagstukken</label>
         <div style="display:flex;align-items:center;gap:6px">
           <button onclick="document.getElementById('vs-uitleg-modal').style.display='flex'" style="padding:3px 10px;border-radius:12px;border:1.5px solid #90caf9;background:#e3f2fd;color:#1565c0;font-size:12px;font-weight:600;cursor:pointer">❓ Uitleg</button>
-          <span id="vs-limiet-badge" class="vs-limiet-badge">?/20 vandaag</span>
+          <span id="vs-limiet-badge" class="vs-limiet-badge">?/10 vandaag</span>
         </div>
       </div>
 
@@ -2066,10 +2136,19 @@
 
 <!-- ── TOAST ─────────────────────────────────────────────────── -->
 <div class="toast" id="toast"></div>
+<div class="pdf-progress-overlay" id="pdf-progress-overlay" aria-hidden="true">
+  <div class="pdf-progress-kaart" role="status" aria-live="polite">
+    <div class="pdf-progress-titel" id="pdf-progress-titel">PDF voorbereiden…</div>
+    <div class="pdf-progress-balk" aria-hidden="true"><div class="pdf-progress-vulling" id="pdf-progress-vulling"></div></div>
+    <div class="pdf-progress-status" id="pdf-progress-status">Even geduld…</div>
+    <div class="pdf-progress-percentage" id="pdf-progress-percentage">0%</div>
+  </div>
+</div>
 
 <!-- ── SCRIPTS (volgorde is belangrijk!) ────────────────────── -->
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="config.js?v=2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="modules/splitsingen.js?v=1"></script>
 <script src="modules/cijferen.js?v=99"></script>
 <script src="modules/tafels.js?v=1"></script>
@@ -2109,6 +2188,8 @@
 
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="modules/schatten.js?v=1"></script>
+<script src="modules/breuken.js?v=1"></script>
+<script src="modules/kommagetallen.js?v=1"></script>
 <script src="generator.js?v=99"></script>
 <script src="preview.js?v=45"></script>
 <script src="pdf-engine.js?v=99"></script>
