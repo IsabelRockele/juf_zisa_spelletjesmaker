@@ -2928,3 +2928,237 @@ body.toont-oplossingen .deel-boog {
 }
 .btn-sleutel:hover { background: #1e8449; }
 .btn-sleutel:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Breuken */
+.sidebar-tab.tab-breuken { background-color:#dcedc8; color:#1A3A5C; border-color:#83b735 !important; }
+.sidebar-tab.tab-breuken:hover { background-color:#c5e1a5; }
+.sidebar-tab.tab-breuken.active { background-color:#6f9f24 !important; color:#fff; border-bottom-color:#416814 !important; font-weight:800; }
+.breuken-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.breuken-grid.mg-grid { grid-template-columns:1fr; }
+.breuken-grid.mg-grid-kijk { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.breuken-grid.mg-grid-zonder { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.breuk-oef-kort,.breuk-oef-schema { position:relative; min-height:86px; padding:18px 34px 16px 14px; flex-direction:column; }
+.breuk-oef-keten { min-height:118px; justify-content:center; }
+.breuk-oef-schema { min-height:230px; align-items:stretch; }
+.breuk-som,.breuk-gelijknamig { display:flex; align-items:center; justify-content:center; gap:8px; font-size:21px; }
+.breuk { display:inline-flex; flex-direction:column; align-items:center; line-height:1.05; min-width:27px; vertical-align:middle; }
+.breuk-teller { width:100%; text-align:center; border-bottom:1.5px solid currentColor; padding:0 3px 2px; min-height:19px; box-sizing:border-box; }
+.breuk-noemer { padding-top:2px; text-align:center; }
+.breuk-invul { position:relative; gap:7px; min-width:34px; }
+.breuk-invul::after { content:""; position:absolute; left:0; right:0; top:50%; border-top:2px solid #263238; transform:translateY(-1px); z-index:2; }
+.breuk-invul .breuk-teller,.breuk-invul .breuk-noemer { border:1.5px solid #adb5bd; border-radius:5px; width:28px; min-width:28px; height:34px; min-height:34px; padding:4px 2px; line-height:24px; box-sizing:border-box; background:#fff; z-index:1; }
+.breuk-invul .breuk-teller { margin-bottom:0; }
+.breuk-som-lang { gap:5px; font-size:18px; flex-wrap:nowrap; }
+.breuk-schema { display:flex; justify-content:center; margin:16px 0 0; padding:8px; border:1.5px solid #aab5c0; border-radius:9px; min-height:152px; }
+.breuk-conversie { position:relative; width:210px; height:144px; font-size:18px; }
+.breuk-conv-bron,.breuk-conv-doel { position:absolute; top:48px; z-index:2; }
+.breuk-conv-bron { left:18px; }.breuk-conv-doel { right:18px; }
+.breuk-conv-gelijk { position:absolute; left:99px; top:69px; }
+.breuk-conversie svg { position:absolute; left:20px; top:20px; width:170px; height:108px; overflow:visible; }
+.breuk-conversie path { fill:none; stroke:#222; stroke-width:2; }
+.breuk-conversie polygon { fill:#222; stroke:none; }
+.breuk-factor { position:absolute; left:76px; color:#333; font-size:16px; line-height:20px; z-index:3; }
+.breuk-factor.boven { top:3px; }.breuk-factor.onder { top:130px; }
+.breuk-factor i { display:inline-block; width:36px; min-height:20px; border-bottom:1.5px solid #777; font-style:normal; text-align:center; }
+body.toont-oplossingen .breuk-antwoord { background:#e5f6e8; border-color:#27ae60; color:#006100; }
+body.toont-oplossingen .breuk-factor i { color:#006100; border-bottom-color:#27ae60; font-weight:700; }
+.mg-oef { position:relative; min-height:190px; padding:16px 34px 16px 14px; flex-direction:column; gap:16px; align-items:stretch; }
+.mg-oef.mg-uitgewerkt { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr); gap:18px; min-height:330px; align-items:stretch; }
+.mg-werk { position:relative; display:flex; flex-direction:column; gap:12px; min-width:0; padding:2px 4px 8px; }
+.mg-vraag { display:flex; align-items:center; gap:8px; font-size:21px; min-height:44px; }
+.mg-schema-start,.mg-schema-rij { display:grid; grid-template-columns:58px minmax(105px,1fr) 22px minmax(105px,1fr) 58px; align-items:center; gap:6px; min-height:48px; }
+.mg-gelijknamig .mg-schema-start,.mg-gelijknamig .mg-schema-rij { grid-template-columns:58px auto 22px auto 58px; justify-content:center; column-gap:8px; }
+.mg-gelijknamig .mg-werk { max-width:520px; width:100%; margin:0 auto; }
+.mg-gelijknamig.mg-uitgewerkt { min-height:285px; }
+.mg-schema-start>.mg-stroken,.mg-schema-rij>.mg-stroken { max-width:none; justify-content:flex-start; }
+.mg-schema-omzet { width:58px; height:126px; margin:-10px 0 -4px; }
+.mg-schema-omzet.mg-omzet-links { align-self:flex-start; }
+.mg-schema-omzet.mg-omzet-rechts { align-self:flex-end; }
+.mg-schema-omzet .mg-omzet { margin:0; }
+.mg-schema-pijl { color:#222; font-size:34px; line-height:24px; text-align:center; margin:-8px 0 -5px; }
+.mg-schema-eind { grid-template-columns:64px minmax(130px,1fr); }
+.mg-schema-totaal { grid-template-columns:64px minmax(130px,1fr); }
+.mg-aftrek-werk{gap:8px}
+.mg-aftrek-rij{display:grid;grid-template-columns:minmax(180px,1fr) minmax(150px,.72fr);align-items:center;gap:14px;min-height:64px}
+.mg-aftrek-rij>.mg-stroken{max-width:none;justify-content:flex-start}
+.mg-aftrek-notatie{display:flex;align-items:center;gap:8px;font-size:20px;white-space:nowrap}
+.mg-aftrek-eerste .mg-schema-pijl{width:60%;margin:-3px 40% -3px 0}
+.mg-aftrek-kijk{display:flex;min-height:310px;justify-content:center;align-items:center;padding:18px 28px 24px;gap:15px}
+.mg-aftrek-plaat{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;max-width:320px}
+.mg-aftrek-vorm{position:relative;display:inline-flex}
+.mg-aftrek-vorm>.mg-stroken{max-width:none}
+.mg-rood-overlay{position:absolute;inset:0;z-index:5;width:100%;height:100%;overflow:visible;pointer-events:none}
+.mg-rood-overlay line{stroke:#ef5350;stroke-width:1.6;stroke-linecap:round;vector-effect:non-scaling-stroke}
+body.pdf-opname .mg-rood-overlay line{stroke-width:2.2}
+.mg-aftrek-zwarte-pijl{font-size:35px;line-height:30px;color:#222;text-align:center}
+.mg-aftrek-kijk-regels{display:flex;flex-direction:column;align-items:center;gap:15px;font-size:20px}
+.mg-aftrek-kijk-regels>div{display:flex;align-items:center;justify-content:center;gap:8px;white-space:nowrap}
+body.pdf-opname .mg-aftrek-kijk{min-height:410px;padding:24px 34px 38px;gap:22px}
+body.pdf-opname .mg-aftrek-plaat{max-width:390px;gap:11px}
+body.pdf-opname .mg-aftrek-kijk-regels{font-size:26px;gap:22px}
+body.pdf-opname .mg-aftrek-zwarte-pijl{font-size:46px;line-height:40px}
+.komma-header{background:linear-gradient(135deg,#27885a,#3bb978)!important}
+.komma-strategie-keuze{border:2px solid #70b995;background:#f1fbf5}
+.komma-strategie-keuze .kaart-titel{color:#176b45}
+.komma-getallen-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.komma-getallen-grid.komma-splitsen,.komma-getallen-grid.komma-tienden{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-compenseren,.komma-getallen-grid.komma-transformeren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-oef{position:relative;min-height:92px;padding:22px 34px 20px 20px;font-size:22px;display:flex;align-items:center;gap:10px}
+.komma-kort{justify-content:flex-start}
+.komma-antwoord{display:inline-block;min-width:78px;min-height:28px;border-bottom:1.5px solid #8795a3;color:#0672b8;font-weight:700;text-align:center}
+.komma-tienden{min-height:118px;white-space:nowrap;font-size:19px}
+.komma-lijn{display:inline-block;width:58px;height:24px;border-bottom:1.5px solid #9aa5ae}
+.komma-splits{min-height:190px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}
+.komma-hoofdsom{display:flex;align-items:flex-start;justify-content:flex-start;gap:8px;font-size:22px;white-space:nowrap}
+.komma-term-splits{position:relative;display:inline-flex;justify-content:center;min-width:42px}
+.komma-splitsbeen{position:absolute;display:flex;gap:10px;padding-top:34px;top:30px;left:50%;transform:translateX(-50%)}
+.komma-splitsbeen::before,.komma-splitsbeen::after{content:"";position:absolute;top:4px;width:38px;height:22px;border-top:1.5px solid #8db3c7}
+.komma-splitsbeen::before{left:15px;transform:rotate(-27deg)}.komma-splitsbeen::after{left:50px;transform:rotate(27deg)}
+.komma-vak{width:42px;height:38px;border:1.5px solid #9fbfce;border-radius:3px;display:flex;align-items:center;justify-content:center;color:#0672b8;font-weight:700}
+.komma-tussenlijnen{display:flex;flex-direction:column;align-items:flex-start;gap:27px;padding-top:102px;margin-left:116px}
+.komma-tussenlijnen>span{display:block;width:78%;min-height:25px;border-bottom:1px solid #aeb8c0;color:#0672b8;font-size:17px;padding-left:8px;box-sizing:border-box}
+body.pdf-opname .komma-oef{min-height:145px;font-size:29px;padding:28px 38px}
+body.pdf-opname .komma-antwoord{min-width:110px;min-height:39px;font-size:28px}
+body.pdf-opname .komma-tienden{min-height:165px;font-size:25px}
+body.pdf-opname .komma-lijn{width:78px;height:32px}
+body.pdf-opname .komma-splits{min-height:245px}
+body.pdf-opname .komma-hoofdsom{font-size:29px}
+body.pdf-opname .komma-vak{width:55px;height:50px;font-size:24px}
+body.pdf-opname .komma-splitsbeen{top:42px;gap:14px;padding-top:42px}
+body.pdf-opname .komma-tussenlijnen{padding-top:142px;margin-left:155px;gap:34px}
+body.pdf-opname .komma-tussenlijnen>span{width:76%;min-height:34px;font-size:23px;padding-left:12px}
+.komma-strategie{min-height:230px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;font-size:19px}
+.komma-strategie-som,.komma-strategie-stap{display:flex;align-items:center;justify-content:center;gap:9px;white-space:nowrap}
+.komma-strategie-lijn{display:inline-block;min-width:55px;min-height:24px;border-bottom:1.4px solid #9ba8b3;color:#0672b8;text-align:center}
+.komma-comp-correctie{padding:6px 14px;border:1.5px solid #b4c9d8;border-radius:7px;color:#0672b8}
+.komma-rond-term{text-decoration:underline;text-decoration-color:#4e7f9d;text-underline-offset:4px}
+.komma-trans-correcties{width:190px;display:flex;justify-content:space-between;color:#0672b8;margin-top:4px}
+.komma-trans-correcties>span{display:flex;align-items:center;gap:3px}
+.komma-trans-pijlen{width:180px;display:flex;justify-content:space-between;font-size:27px;line-height:22px;margin:-8px 0}
+body.pdf-opname .komma-strategie{min-height:315px;gap:19px;font-size:25px;padding:28px 38px}
+body.pdf-opname .komma-strategie-lijn{min-width:75px;min-height:32px;font-size:24px}
+body.pdf-opname .komma-comp-correctie{padding:8px 20px}
+body.pdf-opname .komma-trans-correcties{width:250px}
+body.pdf-opname .komma-trans-pijlen{width:235px;font-size:36px}
+@media(max-width:900px){.komma-getallen-grid,.komma-getallen-grid.komma-splitsen,.komma-getallen-grid.komma-tienden{grid-template-columns:1fr}}
+body.pdf-opname .mg-aftrek-rij{grid-template-columns:minmax(230px,1fr) minmax(190px,.72fr);min-height:92px;gap:20px}
+body.pdf-opname .mg-aftrek-notatie{font-size:25px;gap:11px}
+body.pdf-opname .mg-aftrek-eerste{min-height:520px}
+.mg-schrijf { border:2px solid #b8bec4; border-radius:14px; padding:18px 20px; display:flex; flex-direction:column; gap:24px; min-height:310px; }
+.mg-schrijf>em { font-size:20px; color:#444; text-align:left; }
+.mg-schrijf-som { display:flex; align-items:center; justify-content:center; gap:10px; font-size:18px; flex-wrap:nowrap; }
+.mg-schrijf-term { position:relative; display:inline-flex; align-items:center; }
+.mg-term-pijl{position:absolute;left:50%;top:calc(100% + 5px);width:48px;height:76px;transform:translateX(-16px);z-index:4;border-left:4px solid #0696d7;border-bottom:4px solid #0696d7;border-radius:0 0 0 2px;box-sizing:border-box}
+.mg-term-pijl::after{content:"";position:absolute;right:-4px;bottom:-9px;border-left:13px solid #0696d7;border-top:7px solid transparent;border-bottom:7px solid transparent}
+.mg-term-pijl.mg-term-pijl-links{transform:translateX(-32px);border-left:0;border-right:4px solid #0696d7;border-radius:0 0 2px 0}
+.mg-term-pijl.mg-term-pijl-links::after{right:auto;left:-4px;border-left:0;border-right:13px solid #0696d7}
+.mg-schrijf-conversie { position:relative; height:122px; margin:18px 0 -8px 4px; }
+.mg-conv-mini { position:absolute; left:calc(50% + 48px); top:0; width:150px; height:98px; transform:translateX(-50%); display:flex; align-items:center; gap:12px; font-size:18px; }
+.mg-schrijf-conversie.mg-conv-links .mg-conv-mini { left:105px; }
+.mg-conv-mini svg { position:absolute; left:0; top:0; width:102px; height:98px; overflow:visible; }
+.mg-conv-mini svg path { fill:none; stroke:#222; stroke-width:2; }
+.mg-conv-mini svg polygon { fill:#222; }
+.mg-conv-mini>span,.mg-conv-mini>b { position:relative; z-index:2; }
+.mg-factor { position:absolute!important; left:36px; font-size:16px; white-space:nowrap; }
+.mg-factor-boven { top:-13px; }.mg-factor-onder { bottom:-14px; }
+.mg-factor i { display:inline-block; width:36px; border-bottom:1.5px solid #777; min-height:18px; }
+.mg-schrijf-uitkomst { margin-top:auto; }
+.mg-zonder { min-height:105px; justify-content:center; }
+.mg-zonder .mg-som{width:100%;justify-content:flex-start;padding-left:18px;font-size:22px}
+.mg-zonder .mg-lange-lijn{flex:1;max-width:260px;margin-left:4px}
+body.pdf-opname .mg-zonder{min-height:145px;padding:24px 30px}
+body.pdf-opname .mg-zonder .mg-som{font-size:28px;gap:13px}
+body.pdf-opname .mg-zonder .mg-lange-lijn{max-width:none;min-width:190px;height:34px}
+.mg-kijk { min-height:300px; padding:18px 34px 18px 18px; display:flex; flex-direction:column; gap:20px; justify-content:flex-start; }
+.mg-kijk-beelden { min-height:115px; display:flex; align-items:center; justify-content:center; gap:10px; }
+.mg-kijk-beelden>span { display:flex; justify-content:center; min-width:125px; }
+.mg-kijk-beelden .mg-stroken { max-width:210px; }
+.mg-kijk-som { display:flex; align-items:center; justify-content:center; gap:7px; min-height:82px; font-size:18px; white-space:nowrap; }
+.mg-kijk-omzet { position:relative; height:112px; width:210px; margin-top:-18px; }
+.mg-kijk-omzet.mg-kijk-links { align-self:flex-start; margin-left:22px; }
+.mg-kijk-omzet.mg-kijk-rechts { align-self:flex-end; margin-right:18px; }
+.mg-kijk-l-pijl { position:absolute; left:8px; top:0; width:29px; height:56px; border-left:4px solid #0696d7; border-bottom:4px solid #0696d7; }
+.mg-kijk-l-pijl::after { content:""; position:absolute; right:-9px; bottom:-9px; border-left:13px solid #0696d7; border-top:7px solid transparent; border-bottom:7px solid transparent; }
+.mg-kijk-omzetregel { position:absolute; left:48px; top:42px; display:flex; align-items:center; gap:12px; font-size:18px; }
+.mg-som,.mg-beelden { display:flex; align-items:center; justify-content:center; gap:9px; font-size:19px; }
+.mg-getal { display:inline-flex; align-items:center; gap:3px; }
+.mg-heel { display:inline-flex; width:25px; height:31px; border:1.5px solid #adb5bd; border-radius:5px; align-items:center; justify-content:center; }
+.mg-stroken { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; max-width:230px; }
+.mg-strook { display:inline-flex; width:88px; height:34px; border:1.5px solid #666; box-sizing:border-box; }
+.mg-strook-heel { background:#fff; }
+.mg-taarten { align-items:center; }
+.mg-taart { display:inline-block; width:62px; height:62px; border:2px solid #444; border-radius:50%; box-sizing:border-box; }
+body.toont-oplossingen .mg-taart:not(.mg-voorgekleurd) path[data-deel-gevuld="true"] { fill:#79a9cf!important; }
+.mg-schrijf-term,.mg-schrijf,.mg-schrijf-som { overflow:visible; }
+.mg-puntbreuk .breuk-teller,.mg-puntbreuk .breuk-noemer { min-width:30px; font-size:20px; }
+.mg-geheel-lijn { display:inline-block; width:30px; height:24px; border-bottom:1.5px solid #888; }
+.mg-puntgetal { gap:5px; }
+.mg-strook i { flex:1; border-right:1px solid #888; }
+.mg-strook i:last-child { border-right:0; }
+.mg-voorgekleurd i[data-gevuld="true"],.mg-voorgekleurd .mg-strook-heel[data-gevuld="true"],body.toont-oplossingen .mg-stroken:not(.mg-voorgekleurd) i[data-gevuld="true"],body.toont-oplossingen .mg-stroken:not(.mg-voorgekleurd) .mg-strook-heel[data-gevuld="true"] { background:#79a9cf; }
+.mg-resultaat { padding-top:8px; border-top:1px solid #d8dee5; }
+.mg-lange-lijn { display:inline-block; min-width:150px; min-height:25px; border-bottom:1.5px solid #888; color:#006100; }
+.mg-omzet { position:relative; width:58px; height:126px; margin:0 auto; }
+.mg-omzet-doel { position:absolute; left:18px; bottom:0; }
+.mg-blauwe-pijl { position:absolute; left:28px; top:0; width:0; height:37px; border-left:4px solid #0696d7; }
+.mg-blauwe-pijl::after { content:""; position:absolute; left:-9px; bottom:-9px; border-top:12px solid #0696d7; border-left:7px solid transparent; border-right:7px solid transparent; }
+body.toont-oplossingen .mg-heel { background:#e5f6e8; border-color:#27ae60; color:#006100; font-weight:700; }
+@media (max-width:700px){.breuken-grid{grid-template-columns:1fr}}
+@media (max-width:900px){.mg-oef.mg-uitgewerkt{grid-template-columns:1fr}.mg-schrijf{min-height:230px}.breuken-grid.mg-grid-kijk{grid-template-columns:1fr}}
+.pdf-progress-overlay{position:fixed;right:24px;bottom:24px;z-index:100000;display:none;background:transparent}
+.pdf-progress-overlay.zichtbaar{display:block}
+.pdf-progress-kaart{width:min(430px,calc(100vw - 40px));padding:24px 26px 22px;border-radius:16px;background:#fff;box-shadow:0 18px 55px rgba(0,0,0,.28);color:#17385d;text-align:center}
+.pdf-progress-titel{margin-bottom:16px;font-size:20px;font-weight:800}
+.pdf-progress-balk{height:18px;overflow:hidden;border:1px solid #b9c9da;border-radius:999px;background:#e9f0f7;box-shadow:inset 0 1px 2px rgba(0,0,0,.08)}
+.pdf-progress-vulling{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#3186d5,#20b879);transition:width .22s ease}
+.pdf-progress-status{min-height:21px;margin-top:12px;font-size:15px;color:#52677d}
+.pdf-progress-percentage{margin-top:3px;font-size:17px;font-weight:800;color:#176db5}
+body.pdf-opname .breuk-invul{min-width:46px;gap:9px}
+body.pdf-opname .breuk-invul .breuk-teller,body.pdf-opname .breuk-invul .breuk-noemer{width:40px;min-width:40px;height:44px;min-height:44px;font-size:23px;line-height:32px}
+body.pdf-opname .mg-heel{width:36px;height:42px;font-size:22px}
+body.pdf-opname .mg-puntbreuk .breuk-teller,body.pdf-opname .mg-puntbreuk .breuk-noemer{min-width:38px;min-height:27px;font-size:23px}
+body.pdf-opname .mg-geheel-lijn{width:42px;height:30px}
+body.pdf-opname .mg-factor{font-size:19px}
+body.pdf-opname .mg-factor{left:14px}
+body.pdf-opname .mg-factor i{width:42px;min-height:23px}
+body.pdf-opname .mg-conv-mini{width:175px;gap:16px}
+body.pdf-opname .mg-schrijf-conversie{height:142px;margin-top:26px;margin-bottom:2px}
+body.pdf-opname .mg-schrijf{min-height:350px;padding-bottom:30px}
+body.pdf-opname .mg-schrijf-uitkomst{padding-bottom:8px}
+body.pdf-opname .mg-kijk{min-height:365px;padding:22px 30px 38px 20px;gap:24px}
+body.pdf-opname .mg-kijk-beelden{min-height:135px}
+body.pdf-opname .mg-kijk-som{font-size:22px;min-height:92px;gap:9px}
+body.pdf-opname .mg-kijk-omzet{height:142px;margin-top:-12px;margin-bottom:6px}
+body.pdf-opname .mg-kijk-omzetregel{top:48px;font-size:21px}
+body.pdf-opname .mg-taart{width:68px;height:68px}
+body.pdf-opname .mg-strook{width:102px;height:40px}
+body.pdf-opname .mg-oef{font-size:24px}
+body.pdf-opname .mg-vraag{font-size:28px;min-height:58px}
+body.pdf-opname .mg-oef .breuk{min-width:38px;font-size:24px}
+body.pdf-opname .mg-oef .breuk-teller{min-height:25px;padding-bottom:3px}
+body.pdf-opname .mg-oef .breuk-noemer{padding-top:3px}
+body.pdf-opname .mg-schrijf>em{font-size:27px}
+body.pdf-opname .mg-schrijf-som{font-size:25px;gap:14px}
+body.pdf-opname .mg-schema-start,body.pdf-opname .mg-schema-rij{font-size:24px;min-height:64px}
+body.pdf-opname .mg-taart{width:88px;height:88px}
+body.pdf-opname .mg-strook{width:124px;height:48px}
+body.pdf-opname .mg-kijk-beelden{min-height:175px;gap:16px}
+body.pdf-opname .mg-kijk-beelden>span{min-width:155px}
+body.pdf-opname .mg-kijk-beelden .mg-stroken{max-width:275px}
+body.pdf-opname .mg-kijk-som{font-size:26px;min-height:108px}
+body.pdf-opname .breuk-invul{min-width:54px}
+body.pdf-opname .breuk-invul .breuk-teller,body.pdf-opname .breuk-invul .breuk-noemer{width:48px;min-width:48px;height:50px;min-height:50px;font-size:27px;line-height:36px}
+body.pdf-opname .mg-heel{width:43px;height:49px;font-size:25px}
+body.pdf-opname .mg-puntbreuk .breuk-teller,body.pdf-opname .mg-puntbreuk .breuk-noemer{min-width:45px;min-height:31px;font-size:27px}
+body.pdf-opname .mg-geheel-lijn{width:50px;height:35px}
+body.pdf-opname .mg-kijk{min-height:455px;padding-bottom:48px}
+body.pdf-opname .mg-schrijf{min-height:430px}
+body.pdf-opname .mg-schrijf-conversie{height:190px;margin-top:34px;margin-bottom:10px}
+body.pdf-opname .mg-conv-mini{left:calc(50% + 62px);top:4px;width:220px;height:142px;gap:22px;font-size:25px}
+body.pdf-opname .mg-schrijf-conversie.mg-conv-links .mg-conv-mini{left:142px}
+body.pdf-opname .mg-conv-mini svg{left:2px;top:0;width:142px;height:136px}
+body.pdf-opname .mg-conv-mini svg path{stroke-width:2.5}
+body.pdf-opname .mg-factor{left:27px;font-size:22px}
+body.pdf-opname .mg-factor-boven{top:-24px}
+body.pdf-opname .mg-factor-onder{bottom:-30px}
+body.pdf-opname .mg-factor i{width:52px;min-height:27px}
