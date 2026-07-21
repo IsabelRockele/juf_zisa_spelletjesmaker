@@ -78,6 +78,7 @@ const App = (() => {
     const isGemengd      = bewerking === 'gemengd';
     const isKomma        = bewerking === 'komma';
     const isSchatten     = bewerking === 'schatten';
+    const isBreuken      = bewerking === 'breuken';
 
     // Schakel tussen de sidebar-content blokken
     const tabHoofd        = document.getElementById('tab-hoofdrekenen');
@@ -89,7 +90,8 @@ const App = (() => {
     const tabVraagstukken = document.getElementById('tab-vraagstukken');
     const tabRekentaal    = document.getElementById('tab-rekentaal');
     const tabSchatten     = document.getElementById('tab-schatten');
-    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten) ? 'block' : 'none';
+    const tabBreuken      = document.getElementById('tab-breuken');
+    if (tabHoofd)        tabHoofd.style.display        = (!isTafels && !isInzicht && !isCijferen && !isVraagstukken && !isRekentaal && !isGemengd && !isKomma && !isSchatten && !isBreuken) ? 'block' : 'none';
     if (tabGemengd)      tabGemengd.style.display      = isGemengd       ? 'block' : 'none';
     if (tabKomma)        tabKomma.style.display        = isKomma         ? 'block' : 'none';
     if (tabTafels)       tabTafels.style.display       = isTafels        ? 'block' : 'none';
@@ -98,6 +100,9 @@ const App = (() => {
     if (tabVraagstukken) tabVraagstukken.style.display = isVraagstukken  ? 'block' : 'none';
     if (tabRekentaal)    tabRekentaal.style.display    = isRekentaal     ? 'block' : 'none';
     if (tabSchatten)     tabSchatten.style.display     = isSchatten      ? 'block' : 'none';
+    if (tabBreuken)      tabBreuken.style.display      = isBreuken       ? 'block' : 'none';
+
+    if (isBreuken) return;
 
     if (isSchatten) { _updateSchattenUI(); _updateSchattenAfrondenUI(); return; }
 
@@ -1298,19 +1303,50 @@ function _getSplitsConfig() {
     toonToast('✅ Preview bijgewerkt');
   }
 
-  function downloadPDF() {
+  function _toonPdfVoortgang(titel) {
+    const overlay = document.getElementById('pdf-progress-overlay');
+    document.getElementById('pdf-progress-titel').textContent = titel;
+    document.getElementById('pdf-progress-vulling').style.width = '0%';
+    document.getElementById('pdf-progress-status').textContent = 'PDF voorbereiden…';
+    document.getElementById('pdf-progress-percentage').textContent = '0%';
+    overlay.classList.add('zichtbaar');
+    overlay.setAttribute('aria-hidden', 'false');
+  }
+  function _updatePdfVoortgang(procent, status) {
+    const waarde = Math.max(0, Math.min(100, Math.round(procent || 0)));
+    document.getElementById('pdf-progress-vulling').style.width = `${waarde}%`;
+    document.getElementById('pdf-progress-percentage').textContent = `${waarde}%`;
+    if (status) document.getElementById('pdf-progress-status').textContent = status;
+  }
+  function _verbergPdfVoortgang() {
+    const overlay = document.getElementById('pdf-progress-overlay');
+    overlay.classList.remove('zichtbaar');
+    overlay.setAttribute('aria-hidden', 'true');
+  }
+  async function _maakPdf(metAntwoorden) {
     if (bundelData.length === 0) return;
     const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
-    PdfEngine.genereer(bundelData, titel);
-    toonToast('📄 PDF gedownload!', '#27AE60');
+    const btnPdf = document.getElementById('btn-pdf');
+    const btnSleutel = document.getElementById('btn-sleutel');
+    btnPdf.disabled = true; btnSleutel.disabled = true;
+    _toonPdfVoortgang(metAntwoorden ? 'Oplossingssleutel maken' : 'PDF maken');
+    try {
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await PdfEngine.genereer(bundelData, titel, metAntwoorden, _updatePdfVoortgang);
+      _updatePdfVoortgang(100, 'Klaar! De download wordt geopend.');
+      await new Promise(resolve => setTimeout(resolve, 450));
+      toonToast(metAntwoorden ? '🔑 Oplossingssleutel gedownload!' : '📄 PDF gedownload!', '#27AE60');
+    } catch (fout) {
+      console.error('PDF maken mislukt:', fout);
+      toonToast('❌ De PDF kon niet worden gemaakt. Probeer het opnieuw.', '#E74C3C');
+    } finally {
+      _verbergPdfVoortgang();
+      btnPdf.disabled = bundelData.length === 0;
+      btnSleutel.disabled = bundelData.length === 0;
+    }
   }
-
-  function downloadSleutel() {
-    if (bundelData.length === 0) return;
-    const titel = document.getElementById('bundel-titel').value.trim() || 'Rekenbundel';
-    PdfEngine.genereer(bundelData, titel, true);
-    toonToast('🔑 Oplossingssleutel gedownload!', '#27AE60');
-  }
+  async function downloadPDF() { return _maakPdf(false); }
+  async function downloadSleutel() { return _maakPdf(true); }
 
   /* ── Initialisatie ───────────────────────────────────────── */
   function init() {
@@ -2012,6 +2048,57 @@ function _getSplitsConfig() {
     toonToast(`✅ Gemengd blok toegevoegd! (${blok.oefeningen.length} oefeningen)`, '#FF8C00');
   }
 
+  function selecteerBreukRadio(naam, waarde, el) {
+    document.querySelectorAll(`[name="${naam}"]`).forEach(r => {
+      r.checked = r.value === waarde;
+      r.closest('.radio-chip')?.classList.toggle('geselecteerd', r.checked);
+    });
+    if (naam === 'breuk-soort') {
+      const inp = document.getElementById('inp-opdrachtzin-breuken');
+      const werkvorm = document.getElementById('kaart-breuk-werkvorm');
+      if (werkvorm) werkvorm.style.display = waarde === 'ongelijknamig' ? 'block' : 'none';
+      const gemengdeWerkvorm = document.getElementById('kaart-gemengde-werkvorm');
+      if (gemengdeWerkvorm) gemengdeWerkvorm.style.display = waarde === 'gemengde-getallen' ? 'block' : 'none';
+      const gemengdeNoemers = document.getElementById('kaart-gemengde-noemers');
+      if (gemengdeNoemers) gemengdeNoemers.style.display = waarde === 'gemengde-getallen' ? 'block' : 'none';
+      if (inp) inp.value = waarde === 'ongelijknamig'
+        ? 'Maak de breuken gelijknamig. Los daarna de bewerkingen op.'
+        : waarde === 'gemengde-getallen'
+          ? 'Maak de som. Schrijf de uitkomst als een gemengd getal.'
+          : 'Los de bewerkingen met gelijknamige breuken op.';
+    }
+    const soort=document.querySelector('[name="breuk-soort"]:checked')?.value;
+    if(soort==='gemengde-getallen'&&(naam==='breuk-bewerking'||naam==='gemengde-variant')){
+      const bewerking=document.querySelector('[name="breuk-bewerking"]:checked')?.value||'optellen';
+      const variant=document.querySelector('[name="gemengde-variant"]:checked')?.value||'inkleuren';
+      const inp=document.getElementById('inp-opdrachtzin-breuken');
+      if(inp&&bewerking==='aftrekken')inp.value=variant==='zonder'
+        ? 'Zoek het verschil. Je mag tussenstappen noteren.'
+        : variant==='afbeelding'
+          ? 'Kijk naar de afbeelding. Schrijf de aftrekking. Los op.'
+          : 'Kleur de stroken juist in. Zoek het verschil.';
+      else if(inp&&bewerking==='optellen')inp.value='Maak de som. Schrijf de uitkomst als een gemengd getal.';
+    }
+  }
+
+  function voegBreukenBlokToe() {
+    const soort = document.querySelector('[name="breuk-soort"]:checked')?.value || 'gelijknamig';
+    const bewerking = document.querySelector('[name="breuk-bewerking"]:checked')?.value || 'optellen';
+    const variant = soort === 'ongelijknamig'
+      ? (document.querySelector('[name="breuk-variant"]:checked')?.value || 'schema')
+      : soort === 'gemengde-getallen'
+        ? (document.querySelector('[name="gemengde-variant"]:checked')?.value || 'inkleuren')
+        : 'kort';
+    const aantalOefeningen = parseInt(document.getElementById('inp-aantal-breuken')?.value || '6');
+    const gemengdeNoemers = document.querySelector('[name="gemengde-noemers"]:checked')?.value || 'gemengd';
+    const opdrachtzin = document.getElementById('inp-opdrachtzin-breuken')?.value.trim()
+      || (soort === 'ongelijknamig' ? 'Maak de breuken gelijknamig. Los daarna de bewerkingen op.' : 'Los de bewerkingen op.');
+    const oefeningen = Breuken.genereer({ soort, bewerking, gemengdeNoemers, aantalOefeningen });
+    bundelData.push({ id: `blok-breuken-${Date.now()}`, bewerking: 'breuken', subtype: soort, niveau: 'breuken', opdrachtzin, hulpmiddelen: [], oefeningen, config: { soort, bewerking, variant, gemengdeNoemers, aantalOefeningen } });
+    Preview.render(bundelData);
+    toonToast(`Breukenblok toegevoegd! (${oefeningen.length} oefeningen)`, '#6f9f24');
+  }
+
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
@@ -2032,6 +2119,7 @@ function _getSplitsConfig() {
     voegRekentaalBlokToe,
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,
+    selecteerBreukRadio, voegBreukenBlokToe,
     selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
