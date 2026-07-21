@@ -733,6 +733,15 @@ const App = (() => {
     const blok = bundelData.find(b => b.id === blokId);
     if (!blok) return;
 
+    if(blok.bewerking==='kommagetallen'){
+      const bestaand=new Set(blok.oefeningen.map(o=>`${o.a}+${o.b}`));
+      const kandidaten=Kommagetallen.genereer({...blok.config,aantalOefeningen:12});
+      const nieuw=kandidaten.find(o=>!bestaand.has(`${o.a}+${o.b}`));
+      if(nieuw){blok.oefeningen.push(nieuw);Preview.render(bundelData);toonToast('➕ Oefening toegevoegd','#27AE60');}
+      else toonToast('⚠️ Geen nieuwe unieke oefening beschikbaar','#E74C3C');
+      return;
+    }
+
     // Rekentaal gaat via Generator.voegOefeningToe (zie generator.js)
     const gelukt = Generator.voegOefeningToe(blok);
     if (gelukt) {
@@ -2099,6 +2108,23 @@ function _getSplitsConfig() {
     toonToast(`Breukenblok toegevoegd! (${oefeningen.length} oefeningen)`, '#6f9f24');
   }
 
+  function selecteerKommaRadio(naam,waarde,el){
+    document.querySelectorAll(`[name="${naam}"]`).forEach(r=>{r.checked=r.value===waarde;r.closest('.radio-chip')?.classList.toggle('geselecteerd',r.checked);});
+    if(naam==='komma-variant'){
+      const zinnen={kort:'Los de optellingen op.',splitsen:'Vul de splitsing in. Schrijf de tussenstappen. Schrijf de som.',tienden:'Schrijf beide termen als tienden. Maak de som. Schrijf het kommagetal.',compenseren:'Los de optellingen op door te compenseren.',transformeren:'Los de optellingen op door te transformeren.'};
+      const inp=document.getElementById('inp-opdrachtzin-komma');if(inp)inp.value=zinnen[waarde];
+    }
+  }
+  function voegKommaBlokToe(){
+    const brug=document.querySelector('[name="komma-brug"]:checked')?.value||'zonder';
+    const variant=document.querySelector('[name="komma-variant"]:checked')?.value||'kort';
+    const aantalOefeningen=parseInt(document.getElementById('inp-aantal-komma')?.value||'8');
+    const opdrachtzin=document.getElementById('inp-opdrachtzin-komma')?.value.trim()||'Los de optellingen op.';
+    const oefeningen=Kommagetallen.genereer({brug,variant,aantalOefeningen});
+    bundelData.push({id:`blok-komma-${Date.now()}`,bewerking:'kommagetallen',niveau:'tienden',opdrachtzin,hulpmiddelen:[],oefeningen,config:{soort:'kommagetallen',bewerking:'optellen',decimalen:1,brug,variant,aantalOefeningen}});
+    Preview.render(bundelData);toonToast(`Kommablok toegevoegd! (${oefeningen.length} oefeningen)`,'#2e9d62');
+  }
+
   return {
     init, toonBewerking, selecteerRadio, selecteerBrugHoofd, selecteerBrugSub, selecteerStrategie, _updateHulpmiddelenUI, toggleHulpmiddel, toggleVoorbeeld,
     selecteerSplitsNiveau, toggleSplitsGetal, toggleGrootGetal, selecteerPuntBrug,
@@ -2119,7 +2145,7 @@ function _getSplitsConfig() {
     voegRekentaalBlokToe,
     selecteerSchattenType, selecteerSchattenNiveau, selecteerSchattenBewerking, selecteerSchattenAfronden,
     voegSchattenBlokToe,
-    selecteerBreukRadio, voegBreukenBlokToe,
+    selecteerBreukRadio, voegBreukenBlokToe, selecteerKommaRadio, voegKommaBlokToe,
     selecteerGemengdNiveau, selecteerGemengdBrugHoofd, selecteerGemengdBrugSub, selecteerGemengdVerhouding, selecteerGemengdRadio, toggleGemengdHulpmiddel, voegGemengdBlokToe,
     toonToast,
   };
