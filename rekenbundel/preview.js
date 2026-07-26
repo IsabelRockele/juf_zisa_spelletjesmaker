@@ -398,7 +398,16 @@ const Preview = (() => {
         el.style.display        = '';
       }
     });
-    
+
+      // Strategievelden: dwing de zichtbare tekst af. Deze elementen hebben
+      // afwijkende flex/grid-opmaak en mogen niet alleen groen kleuren.
+      document.querySelectorAll('.komma-strategie [data-antwoord]').forEach(el => {
+        el.textContent = _toonOplossingen ? String(el.dataset.antwoord ?? '') : '';
+        if (_toonOplossingen) {
+          el.style.color = '#006100';
+          el.style.fontWeight = '700';
+        }
+      });
 
       // Mogelijk checkboxen tonen/verbergen
       document.querySelectorAll('.mogelijk-check').forEach(el => {
@@ -3308,13 +3317,37 @@ const Preview = (() => {
     const ant=`<span class="komma-antwoord breuk-antwoord" data-antwoord="${o.antwoord}"></span>`;
     const mooi=n=>n%10===0?String(n/10):Kommagetallen.fmt(n);
     const leeg=(waarde,cls='')=>`<span class="komma-strategie-lijn breuk-antwoord ${cls}" data-antwoord="${waarde}"></span>`;
+    const schijven=(aantal,label,weg=0)=>Array.from({length:aantal},(_,i)=>`<i class="komma-schijf ${i>=aantal-weg?'weg':''}">${label}</i>`).join('');
+    const strategieWaarde=(waarde,cls='')=>o.voorbeeld?`<span class="${cls} komma-voorbeeld-antwoord">${waarde}</span>`:`<span class="${cls} breuk-antwoord" data-antwoord="${waarde}"></span>`;
+    if(o.rooster){
+      const teken=o.bewerking==='aftrekken'?'−':'+';
+      return `<div class="oefening-item komma-oef komma-rooster-oef"><table class="komma-rekenrooster"><thead><tr><th class="rooster-hoek"><span>${teken}</span></th>${o.kolommen.map(k=>`<th>${mooi(k)}</th>`).join('')}</tr></thead><tbody>${o.rijen.map((r,ri)=>`<tr><th>${mooi(r)}</th>${o.kolommen.map((_,ki)=>`<td><span class="breuk-antwoord" data-antwoord="${o.antwoorden[ri][ki]}"></span></td>`).join('')}</tr>`).join('')}</tbody></table>${del}</div>`;
+    }
+    if(o.variant==='aftrek-brug-splitsen'){const eerste=o.aT===0&&o.bE===0;return `<div class="oefening-item komma-oef komma-aftrek-brug-splits ${o.voorbeeld?'komma-voorbeeld':''}">${o.voorbeeld?'<span class="komma-voorbeeld-label">Voorbeeld</span>':''}<div class="komma-brug-hoofd komma-brug-somdelen"><span>${o.aTekst}</span><b>−</b><span>${o.bTekst}</span><b>=</b>${strategieWaarde(o.antwoord,'komma-brug-antwoord')}</div><div class="komma-split-boom ${eerste?'split-eerste':'split-tweede'}"><i></i>${strategieWaarde(o.split1Tekst,'komma-split-vak')}${strategieWaarde(o.split2Tekst,'komma-split-vak')}</div><div class="komma-brug-stappen">${strategieWaarde(o.stap1,'komma-brug-lijn')}${strategieWaarde(o.stap2,'komma-brug-lijn')}</div>${del}</div>`;}
+    if(o.variant==='aftrek-brug-schijfjes'){
+      const heleBoven=Math.max(0,o.aE-1),wegHele=Math.min(o.bE,heleBoven);
+      return `<div class="oefening-item komma-oef komma-aftrek-brug-schema ${o.voorbeeld?'komma-voorbeeld':''}"><div class="komma-wissel-schema"><div class="komma-wissel-kop"><b>E</b><b>,</b><b>t</b></div><div class="komma-wissel-boven"><span>${schijven(heleBoven,'1',wegHele)}</span><span>${schijven(o.aT,'0,1')}</span></div><div class="komma-wissel-onder"><span>${schijven(1,'1',1)}</span><span>${schijven(10,'0,1',o.bT)}</span></div></div><div class="komma-brug-hoofd"><span>${o.aTekst} − ${o.bTekst} =</span>${strategieWaarde(o.antwoord,'komma-brug-antwoord')}</div><div class="komma-brug-stappen">${strategieWaarde(o.stap1,'komma-brug-lijn')}${strategieWaarde(o.stap2,'komma-brug-lijn')}</div>${del}</div>`;
+    }
+    if(o.variant==='aftrek-brug-tienden')return `<div class="oefening-item komma-oef komma-tienden komma-brug-tienden"><div>${o.aTekst} − ${o.bTekst} = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.a}"></span> t − <span class="komma-lijn breuk-antwoord" data-antwoord="${o.b}"></span> t = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.verschil}"></span> t = ${ant}</div>${del}</div>`;
+    if(o.variant==='aftrek-brug-aanvullen')return `<div class="oefening-item komma-oef komma-aanvullen komma-brug-aanvullen"><div class="komma-aanvul-balk"><div>${o.aTekst}</div><div>${o.bTekst}</div><div class="komma-aanvul-vraag">?</div></div><div class="komma-aanvul-regels"><span>${o.aTekst} − ${o.bTekst} = ${ant}</span><b>want</b><span>${o.bTekst} + <span class="komma-lijn breuk-antwoord" data-antwoord="${o.antwoord}"></span> = ${o.aTekst}</span></div>${del}</div>`;
+    if(o.variant==='aftrek-brug-kort')return `<div class="oefening-item komma-oef komma-brug-kort"><span>${o.aTekst} − ${o.bTekst} =</span><span class="komma-brug-lange-lijn breuk-antwoord" data-antwoord="${o.antwoord}"></span>${del}</div>`;
+    if(o.variant==='aftrek-schijfjes')return `<div class="oefening-item komma-oef komma-aftrek-schijfjes"><div class="komma-plaats-schema"><div class="komma-plaats-kop"><b>E</b><b>t</b></div><div class="komma-plaats-rij"><span>${schijven(o.aE,'1',o.bE)}</span><span>${schijven(o.aT,'0,1',o.bT)}</span></div></div><div class="komma-aftrek-som">${o.aTekst} − ${o.bTekst} = ${ant}</div>${del}</div>`;
+    if(o.variant==='aftrek-tienden')return `<div class="oefening-item komma-oef komma-tienden"><div>${o.aTekst} − ${o.bTekst} = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.a}"></span> t − <span class="komma-lijn breuk-antwoord" data-antwoord="${o.b}"></span> t = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.verschil}"></span> t = ${ant}</div>${del}</div>`;
+    if(o.variant==='aftrek-aanvullen')return `<div class="oefening-item komma-oef komma-aanvullen"><div class="komma-aanvul-balk"><div>${o.aTekst}</div><div>${o.bTekst}</div><div class="komma-aanvul-vraag">?</div></div><div class="komma-aanvul-regels"><span>${o.aTekst} − ${o.bTekst} = ${ant}</span><span>${o.bTekst} + <span class="komma-lijn breuk-antwoord" data-antwoord="${o.antwoord}"></span> = ${o.aTekst}</span></div>${del}</div>`;
+    if(o.variant==='aftrek-kort')return `<div class="oefening-item komma-oef komma-kort"><span>${o.aTekst} − ${o.bTekst} =</span>${ant}${del}</div>`;
+    if(o.variant==='aftrek-brug-compenseren'){
+      return `<div class="oefening-item komma-oef komma-strategie komma-compenseren komma-aftrek-compenseren"><div class="komma-strategie-som"><span>${o.aTekst}</span><b>−</b><span class="komma-rond-term">${o.bTekst}</span><b>=</b>${ant}</div><div class="komma-comp-werk"><div class="komma-comp-correctie"><span class="breuk-antwoord" data-antwoord="− ${mooi(o.afgerond)} + ${mooi(o.correctie)}"></span></div><div class="komma-schrijfregels"><i class="breuk-antwoord" data-antwoord="${o.aTekst} − ${mooi(o.afgerond)} = ${mooi(o.tussenverschil)}"></i><i class="breuk-antwoord" data-antwoord="${mooi(o.tussenverschil)} + ${mooi(o.correctie)} = ${o.antwoord}"></i></div></div>${del}</div>`;
+    }
+    if(o.variant==='aftrek-brug-transformeren'){
+      const corr=`${o.transformCorr>0?'+':'−'} ${mooi(Math.abs(o.transformCorr))}`;
+      return `<div class="oefening-item komma-oef komma-aftrek-transform ${o.transformCorr>0?'transform-plus':'transform-min'}"><div class="komma-aftrek-trans-schema"><span class="correctie breuk-antwoord" data-antwoord="${corr}"></span><span class="term-a">${o.aTekst}</span><span class="correctie breuk-antwoord" data-antwoord="${corr}"></span><span class="term-b">${o.bTekst}</span><span class="vraag">?</span></div><div class="komma-aftrek-trans-som"><span>${o.aTekst}</span><b>−</b><span>${o.bTekst}</span><b>=</b>${ant}</div><div class="komma-aftrek-trans-pijlen"><span><i class="breuk-antwoord" data-antwoord="${corr}"></i><b>↓</b></span><span><i class="breuk-antwoord" data-antwoord="${corr}"></i><b>↓</b></span></div><div class="komma-aftrek-trans-nieuw"><span class="breuk-antwoord" data-antwoord="${mooi(o.nieuwA)}"></span><b>−</b><span class="breuk-antwoord" data-antwoord="${mooi(o.nieuwB)}"></span><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
+    }
     if(o.variant==='compenseren'){
-      const links=o.strategieTerm==='a',eerste=links?mooi(o.afgerond):o.aTekst,tweede=links?o.bTekst:mooi(o.afgerond);
-      return `<div class="oefening-item komma-oef komma-strategie"><div class="komma-strategie-som"><span class="komma-rond-term">${o.aTekst}</span><b>+</b><span class="komma-rond-term">${o.bTekst}</span><b>=</b>${ant}</div><div class="komma-comp-correctie">+ ${leeg(mooi(o.correctie))}</div><div class="komma-strategie-stap">${eerste} + ${tweede} = ${leeg(mooi(o.tussensom))}</div><div class="komma-strategie-stap">${mooi(o.tussensom)} − ${mooi(o.correctie)} = ${leeg(o.antwoord)}</div>${del}</div>`;
+      return `<div class="oefening-item komma-oef komma-strategie komma-compenseren"><div class="komma-strategie-som"><span>${o.aTekst}</span><b>+</b><span class="komma-rond-term">${o.bTekst}</span><b>=</b>${ant}</div><div class="komma-comp-werk"><div class="komma-comp-correctie"><span class="breuk-antwoord" data-antwoord="+ ${mooi(o.afgerond)} − ${mooi(o.correctie)}"></span></div><div class="komma-schrijfregels"><i class="breuk-antwoord" data-antwoord="${o.aTekst} + ${mooi(o.afgerond)} = ${mooi(o.tussensom)}"></i><i class="breuk-antwoord" data-antwoord="${mooi(o.tussensom)} − ${mooi(o.correctie)} = ${o.antwoord}"></i></div></div>${del}</div>`;
     }
     if(o.variant==='transformeren'){
-      const plusA=o.richting==='naar-a',corr=mooi(o.verschuif);
-      return `<div class="oefening-item komma-oef komma-strategie komma-transform"><div class="komma-strategie-som">${o.aTekst}<b>+</b>${o.bTekst}<b>=</b>${ant}</div><div class="komma-trans-correcties"><span>${plusA?'+':'−'} ${leeg(corr)}</span><span>${plusA?'−':'+'} ${leeg(corr)}</span></div><div class="komma-trans-pijlen"><i>↓</i><i>↓</i></div><div class="komma-strategie-stap">${leeg(mooi(o.nieuwA))} + ${leeg(mooi(o.nieuwB))} = ${leeg(o.antwoord)}</div>${del}</div>`;
+      const corr=mooi(o.verschuif);
+      return `<div class="oefening-item komma-oef komma-strategie komma-transform"><div class="komma-trans-balk"><span class="blauw">${o.aTekst}</span><span class="geel">${o.bTekst}</span><span class="blauw onder breuk-antwoord" data-antwoord="${mooi(o.nieuwA)}"></span><span class="geel onder breuk-antwoord" data-antwoord="${mooi(o.nieuwB)}"></span></div><div class="komma-strategie-som">${o.aTekst}<b>+</b>${o.bTekst}<b>=</b>${ant}</div><div class="komma-trans-onder"><span class="komma-trans-term"><b>↓</b><i class="breuk-antwoord" data-antwoord="− ${corr}"></i></span><span class="komma-trans-term"><b>↓</b><i class="breuk-antwoord" data-antwoord="+ ${corr}"></i></span></div><div class="komma-trans-nieuw"><span class="breuk-antwoord" data-antwoord="${mooi(o.nieuwA)}"></span><b>+</b><span class="breuk-antwoord" data-antwoord="${mooi(o.nieuwB)}"></span><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
     }
     if(o.variant==='tienden')return `<div class="oefening-item komma-oef komma-tienden"><div>${o.aTekst} + ${o.bTekst} = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.a}"></span> t + <span class="komma-lijn breuk-antwoord" data-antwoord="${o.b}"></span> t = <span class="komma-lijn breuk-antwoord" data-antwoord="${o.som}"></span> t = ${ant}</div>${del}</div>`;
     if(o.variant==='splitsen'){
@@ -3325,7 +3358,8 @@ const Preview = (() => {
   }
   function _maakKommaGetallenElement(blok){
     const div=document.createElement('div');div.className='preview-blok';div.dataset.id=blok.id;
-    div.innerHTML=`<div class="preview-blok-header komma-header"><span class="blok-type-badge">🔢 Kommagetallen</span><span class="blok-niveau">Tot op een tiende · ${blok.config.brug==='met'?'met brug':'zonder brug'}</span><div class="spacer"></div><button class="btn-blok-actie verwijder" onclick="App.verwijderBlok('${blok.id}')">✕</button></div><div class="preview-blok-body"><div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">${_zinWeergave(blok)}</div><div class="oefeningen-grid komma-getallen-grid komma-${blok.config.variant}">${blok.oefeningen.map((o,i)=>_kommaGetalOefHTML(blok,o,i)).join('')}</div></div><div class="preview-blok-footer"><span class="footer-info">${blok.oefeningen.length} oefeningen</span><button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button></div>`;return div;
+    const brugLabel=blok.config.brug==='gemengd'?'gemengd':blok.config.brug==='met'?'met brug':'zonder brug';
+    div.innerHTML=`<div class="preview-blok-header komma-header"><span class="blok-type-badge">🔢 Kommagetallen</span><span class="blok-niveau">Tot op een tiende · ${blok.config.bewerking==='aftrekken'?'aftrekken':'optellen'} · ${brugLabel}</span><div class="spacer"></div><button class="btn-blok-actie verwijder" onclick="App.verwijderBlok('${blok.id}')">✕</button></div><div class="preview-blok-body"><div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">${_zinWeergave(blok)}</div><div class="oefeningen-grid komma-getallen-grid komma-${blok.config.variant}">${blok.oefeningen.map((o,i)=>_kommaGetalOefHTML(blok,o,i)).join('')}</div></div><div class="preview-blok-footer"><span class="footer-info">${blok.oefeningen.length} oefeningen</span><button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button></div>`;return div;
   }
 
   return { render, toonZinEditor, toggleOplossingen };
