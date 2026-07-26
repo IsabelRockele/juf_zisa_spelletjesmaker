@@ -779,18 +779,42 @@
     <!-- ── KOMMAGETALLEN SIDEBAR CONTENT ─────────────────────── -->
     <div class="sidebar-content" id="tab-komma" style="display:none">
       <div class="sectie-titel">🔢 Kommagetallen</div>
-      <div class="config-kaart"><div class="kaart-titel"><div class="icon">➕</div>Optellen tot op een tiende</div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">🧮</div>Bewerking tot op een tiende</div>
+        <div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-bewerking','optellen',this)"><input type="radio" name="komma-bewerking" value="optellen" checked>Optellen</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','aftrekken',this)"><input type="radio" name="komma-bewerking" value="aftrekken">Aftrekken</label>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-komma-brug"><div class="kaart-titel"><div class="icon" id="komma-brug-icon">➕</div><span id="komma-brug-titel">Optellen tot op een tiende</span></div>
         <div class="form-rij"><label>Brug over het gehele getal</label><div class="radio-groep">
           <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-brug','zonder',this)"><input type="radio" name="komma-brug" value="zonder" checked>Zonder brug</label>
-          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-brug','met',this)"><input type="radio" name="komma-brug" value="met">Met brug</label>
+          <label class="radio-chip" id="komma-met-brug-chip" onclick="App.selecteerKommaRadio('komma-brug','met',this)"><input type="radio" name="komma-brug" value="met">Met brug</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-brug','gemengd',this)"><input type="radio" name="komma-brug" value="gemengd">Gemengd</label>
         </div></div>
       </div>
-      <div class="config-kaart"><div class="kaart-titel"><div class="icon">✏️</div>Oefenvorm</div><div class="radio-groep radio-groep-kolom">
+      <div class="config-kaart" id="kaart-komma-optelvormen"><div class="kaart-titel"><div class="icon">✏️</div>Oefenvorm</div><div class="radio-groep radio-groep-kolom">
         <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-variant','kort',this)"><input type="radio" name="komma-variant" value="kort" checked>Korte sommen</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen',this)"><input type="radio" name="komma-variant" value="splitsen">Via splitsen</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tienden',this)"><input type="radio" name="komma-variant" value="tienden">Schrijf als tienden</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','rooster',this)"><input type="radio" name="komma-variant" value="rooster">Rekenrooster</label>
       </div></div>
-      <div class="config-kaart komma-strategie-keuze"><div class="kaart-titel"><div class="icon">🧠</div>Rekenstrategie</div><div class="radio-groep">
+      <div class="config-kaart" id="kaart-komma-aftrekvormen" style="display:none"><div class="kaart-titel"><div class="icon">➖</div>Oefenvorm aftrekken</div><div class="radio-groep radio-groep-kolom" id="komma-aftrek-zonder-vormen">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-schijfjes',this)"><input type="radio" name="komma-variant" value="aftrek-schijfjes">Schema met schijfjes</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-tienden',this)"><input type="radio" name="komma-variant" value="aftrek-tienden">Schrijf als tienden</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-aanvullen',this)"><input type="radio" name="komma-variant" value="aftrek-aanvullen">Aanvullen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-kort',this)"><input type="radio" name="komma-variant" value="aftrek-kort">Zonder hulp</label>
+      </div><div class="radio-groep radio-groep-kolom" id="komma-aftrek-met-vormen" style="display:none">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-splitsen',this)"><input type="radio" name="komma-variant" value="aftrek-brug-splitsen">Via splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-schijfjes',this)"><input type="radio" name="komma-variant" value="aftrek-brug-schijfjes">Schema met schijfjes</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-tienden',this)"><input type="radio" name="komma-variant" value="aftrek-brug-tienden">Schrijf als tienden</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-aanvullen',this)"><input type="radio" name="komma-variant" value="aftrek-brug-aanvullen">Aanvullen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-compenseren',this)"><input type="radio" name="komma-variant" value="aftrek-brug-compenseren">Compenseren</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-transformeren',this)"><input type="radio" name="komma-variant" value="aftrek-brug-transformeren">Transformeren</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-brug-kort',this)"><input type="radio" name="komma-variant" value="aftrek-brug-kort">Gewone oefeningen</label>
+        <label class="komma-voorbeeld-keuze" style="display:none"><input type="checkbox" id="inp-komma-voorbeeld"> <span>Toon één opgeloste voorbeeldoefening</span></label>
+      </div></div>
+      <div class="config-kaart komma-aftrek-rooster-keuze" style="display:none"><label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-rooster',this)"><input type="radio" name="komma-variant" value="aftrek-rooster">Rekenrooster</label></div>
+      <div class="config-kaart komma-strategie-keuze" style="display:none"><div class="kaart-titel"><div class="icon">🧠</div>Rekenstrategie — alleen met brug</div><div class="radio-groep">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','compenseren',this)"><input type="radio" name="komma-variant" value="compenseren">Compenseren</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','transformeren',this)"><input type="radio" name="komma-variant" value="transformeren">Transformeren</label>
       </div></div>
