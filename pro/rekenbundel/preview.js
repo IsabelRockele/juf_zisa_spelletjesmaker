@@ -3395,6 +3395,22 @@ const Preview = (() => {
     const leeg=(waarde,cls='')=>`<span class="komma-strategie-lijn breuk-antwoord ${cls}" data-antwoord="${waarde}"></span>`;
     const schijven=(aantal,label,weg=0)=>Array.from({length:aantal},(_,i)=>`<i class="komma-schijf ${i>=aantal-weg?'weg':''}">${label}</i>`).join('');
     const strategieWaarde=(waarde,cls='')=>o.voorbeeld?`<span class="${cls} komma-voorbeeld-antwoord">${waarde}</span>`:`<span class="${cls} breuk-antwoord" data-antwoord="${waarde}"></span>`;
+    if(o.variant==='vermenigvuldigen-nulregel')return `<div class="oefening-item komma-oef komma-nulregel"><span>${o.aTekst} × ${o.bTekst} =</span><span class="komma-antwoord breuk-antwoord" data-antwoord="${o.antwoord}"></span>${del}</div>`;
+    if(o.variant==='vermenigvuldigen-factoren')return `<div class="oefening-item komma-oef komma-factoren"><div><span>${o.kommaTekst} × ${o.geheelTekst}</span><b>=</b><span class="breuk-antwoord" data-antwoord="${o.ontbinding}"></span></div><div><b>=</b><span class="breuk-antwoord" data-antwoord="${o.schakeling}"></span></div><div><b>=</b><span class="breuk-antwoord" data-antwoord="${o.tussenstap}"></span></div><div class="komma-factoren-product"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
+    if(o.variant==='delen-nulregel')return `<div class="oefening-item komma-oef komma-nulregel"><span>${o.deeltalTekst} : ${o.delerTekst} =</span><span class="komma-antwoord breuk-antwoord" data-antwoord="${o.antwoord}"></span>${del}</div>`;
+    if(o.variant==='delen-factoren')return `<div class="oefening-item komma-oef komma-factoren komma-deel-factoren"><div><span>${o.deeltalTekst} : ${o.delerTekst}</span><b>=</b><span class="breuk-antwoord" data-antwoord="${o.ontbinding}"></span></div><div><b>=</b><span class="breuk-antwoord" data-antwoord="${o.tussenstap}"></span></div><div class="komma-factoren-product"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
+    if(o.variant==='delen-haakjes'||o.variant==='delen-zelf'){
+      const eerste=o.variant==='delen-haakjes'
+        ? `<span>${o.deeltalTekst} : ${o.deler} = (</span><span class="komma-deel-vak breuk-antwoord" data-antwoord="${o.eersteDeel} : ${o.deler}"></span><span>) + (</span><span class="komma-deel-vak breuk-antwoord" data-antwoord="${o.tweedeDeelTekst} : ${o.deler}"></span><span>)</span>`
+        : `<span>${o.deeltalTekst} : ${o.deler} =</span><span class="komma-maal-regel breuk-antwoord" data-antwoord="${o.splitsing}"></span>`;
+      return `<div class="oefening-item komma-oef komma-vermenigvuldigen komma-delen"><div class="komma-maal-eerste">${eerste}</div><div class="komma-maal-stap"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.tussenstap}"></span></div><div class="komma-maal-stap komma-maal-product"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
+    }
+    if(o.variant==='vermenigvuldigen-compenseren-haakjes'||o.variant==='vermenigvuldigen-compenseren-zelf'){
+      const eerste=o.variant==='vermenigvuldigen-compenseren-haakjes'
+        ? `<span>${o.factor} × ${o.kommaTekst} = (</span><span class="komma-maal-comp-vak breuk-antwoord" data-antwoord="${o.factor} × ${o.afgerond}"></span><span>) − (</span><span class="komma-maal-comp-vak breuk-antwoord" data-antwoord="${o.factor} × ${o.correctieTekst}"></span><span>)</span>`
+        : `<span>${o.factor} × ${o.kommaTekst} =</span><span class="komma-maal-regel breuk-antwoord" data-antwoord="${o.compensatie}"></span>`;
+      return `<div class="oefening-item komma-oef komma-vermenigvuldigen komma-vermenigvuldigen-compenseren"><div class="komma-maal-eerste">${eerste}</div><div class="komma-maal-stap"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.tussenstap}"></span></div><div class="komma-maal-stap komma-maal-product"><b>=</b><span class="breuk-antwoord" data-antwoord="${o.antwoord}"></span></div>${del}</div>`;
+    }
     if(o.variant==='vermenigvuldigen-haakjes'||o.variant==='vermenigvuldigen-zelf'){
       const eerste=o.variant==='vermenigvuldigen-haakjes'
         ? `<span>${o.factor} × ${o.kommaTekst} = (</span><span class="komma-maal-klein breuk-antwoord" data-antwoord="${o.factor}"></span><span>×</span><span class="komma-maal-klein breuk-antwoord" data-antwoord="${o.geheel}"></span><span>) + (</span><span class="komma-maal-klein breuk-antwoord" data-antwoord="${o.factor}"></span><span>×</span><span class="komma-maal-klein breuk-antwoord" data-antwoord="0,${o.tienden}"></span><span>)</span>`
@@ -3464,12 +3480,12 @@ const Preview = (() => {
     return `<div class="oefening-item komma-oef komma-kort"><span>${o.aTekst} + ${o.bTekst} =</span>${ant}${del}</div>`;
   }
   function _maakKommaGetallenElement(blok){
-    const div=document.createElement('div');div.className=`preview-blok${blok.config.bewerking==='vermenigvuldigen'?' komma-vermenigvuldig-blok':''}`;div.dataset.id=blok.id;
+    const div=document.createElement('div');div.className=`preview-blok${['vermenigvuldigen','delen'].includes(blok.config.bewerking)?' komma-vermenigvuldig-blok':''}`;div.dataset.id=blok.id;
     const brugLabel=blok.config.brug==='gemengd'?'gemengd':blok.config.brug==='met'?'met brug':'zonder brug';
     const niveauLabel=blok.config.decimalen===2?'Tot op een honderdste':'Tot op een tiende';
-    const bewerkingLabel=blok.config.bewerking==='vermenigvuldigen'?'vermenigvuldigen':blok.config.bewerking==='gemengd'?'optellen en aftrekken':blok.config.bewerking==='aftrekken'?'aftrekken':'optellen';
-    const strategieLabel=blok.config.bewerking==='vermenigvuldigen'?'splitsen en verdelen':brugLabel;
-    const zinWeergave=blok.config.bewerking==='vermenigvuldigen'?_zinWeergave(blok).replace(/\. /g,'.<br>'):_zinWeergave(blok);
+    const bewerkingLabel=blok.config.bewerking==='delen'?'delen':blok.config.bewerking==='vermenigvuldigen'?'vermenigvuldigen':blok.config.bewerking==='gemengd'?'optellen en aftrekken':blok.config.bewerking==='aftrekken'?'aftrekken':'optellen';
+    const strategieLabel=blok.config.bewerking==='delen'?(blok.config.variant==='delen-nulregel'?'nulregel':blok.config.variant==='delen-factoren'?'ontbinden in factoren':blok.config.restsoort==='gemengd'?'gemengd met en zonder rest':blok.config.restsoort==='met'?'met rest':'zonder rest'):blok.config.bewerking==='vermenigvuldigen'?(blok.config.variant==='vermenigvuldigen-nulregel'?'nulregel':blok.config.variant==='vermenigvuldigen-factoren'?'ontbinden in factoren':blok.config.variant.includes('compenseren')?'compenseren':'splitsen en verdelen'):brugLabel;
+    const zinWeergave=['vermenigvuldigen','delen'].includes(blok.config.bewerking)?_zinWeergave(blok).replace(/\. /g,'.<br>'):_zinWeergave(blok);
     div.innerHTML=`<div class="preview-blok-header komma-header"><span class="blok-type-badge">🔢 Kommagetallen</span><span class="blok-niveau">${niveauLabel} · ${bewerkingLabel} · ${strategieLabel}</span><div class="spacer"></div><button class="btn-blok-actie verwijder" onclick="App.verwijderBlok('${blok.id}')">✕</button></div><div class="preview-blok-body"><div class="opdrachtzin-wrapper" id="zin-wrapper-${blok.id}">${zinWeergave}</div><div class="oefeningen-grid komma-getallen-grid komma-${blok.config.variant}">${blok.oefeningen.map((o,i)=>_kommaGetalOefHTML(blok,o,i)).join('')}</div></div><div class="preview-blok-footer"><span class="footer-info">${blok.oefeningen.length} oefeningen</span><button class="btn-add-oef" onclick="App.voegOefeningToe('${blok.id}')">+ Oefening</button></div>`;return div;
   }
 
