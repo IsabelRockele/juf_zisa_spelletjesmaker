@@ -5,6 +5,12 @@ const Kommagetallen = (() => {
     if(rest==='00')return String(geheel);
     return `${geheel},${rest[1]==='0'?rest[0]:rest}`;
   };
+  const fmtAlgemeen = n => {
+    const afgerond=Math.round((n+Number.EPSILON)*1000000)/1000000;
+    const delen=String(afgerond).split('.');
+    delen[0]=delen[0].replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+    return delen.length===2?`${delen[0]},${delen[1]}`:delen[0];
+  };
   const willekeurig=(min,max)=>min+Math.floor(Math.random()*(max-min+1));
   function uniekeGetallen(aantal,maak){
     const waarden=[],gezien=new Set();
@@ -236,6 +242,110 @@ const Kommagetallen = (() => {
       tussenstap:`${factor*geheel} + ${fmt(factor*tienden)}`
     };
   }
+  function maakVermenigvuldigingCompenseren(variant,index){
+    const factor=willekeurig(2,9);
+    const geheel=willekeurig(1,6);
+    const tienden=willekeurig(7,9);
+    const komma=geheel*10+tienden;
+    const afgerond=geheel+1;
+    const correctie=10-tienden;
+    const product=factor*komma;
+    return {
+      sleutel:`kvmc-${factor}-${komma}-${variant}-${index}`,
+      variant,bewerking:'vermenigvuldigen',decimalen:1,
+      factor,komma,geheel,tienden,afgerond,correctie,product,
+      kommaTekst:fmt(komma),
+      correctieTekst:`0,${correctie}`,
+      antwoord:fmt(product),
+      compensatie:`(${factor} × ${afgerond}) − (${factor} × 0,${correctie})`,
+      tussenstap:`${factor*afgerond} − ${fmt(factor*correctie)}`
+    };
+  }
+  function maakDeling(variant,metRest,index){
+    let deler,eerstQuotient,tweedeQuotient,rest,eersteDeel,tweedeDeel,deeltal;
+    for(let poging=0;poging<200;poging++){
+      deler=willekeurig(2,9);
+      eerstQuotient=willekeurig(1,2);
+      tweedeQuotient=willekeurig(1,8);
+      rest=metRest?willekeurig(1,deler-1):0;
+      eersteDeel=deler*eerstQuotient;
+      tweedeDeel=deler*tweedeQuotient+rest;
+      deeltal=eersteDeel*10+tweedeDeel;
+      if(!metRest&&tweedeDeel%10===0)continue;
+      if(deeltal<=99&&tweedeDeel<40)break;
+    }
+    const quotient=eerstQuotient*10+tweedeQuotient;
+    const restTekst=rest?` R0,${rest}`:'';
+    return {
+      sleutel:`kvd-${deeltal}-${deler}-${rest}-${variant}-${index}`,
+      variant,bewerking:'delen',decimalen:1,metRest,
+      deeltal,deler,eersteDeel,tweedeDeel,quotient,rest,
+      deeltalTekst:fmt(deeltal),
+      tweedeDeelTekst:fmt(tweedeDeel),
+      antwoord:`${fmt(quotient)}${restTekst}`,
+      splitsing:`(${eersteDeel} : ${deler}) + (${fmt(tweedeDeel)} : ${deler})`,
+      tussenstap:`${eerstQuotient} + ${fmt(tweedeQuotient)}${restTekst}`
+    };
+  }
+  function maakNulregel(index){
+    const decimalen=willekeurig(1,3),schaal=10**decimalen;
+    const geheel=index%4===0?0:willekeurig(0,25),fractie=willekeurig(1,schaal-1);
+    const getal=(geheel*schaal+fractie)/schaal;
+    const macht=[10,100,1000][index%3];
+    const omgekeerd=index%2===1;
+    return {
+      sleutel:`kvn-${getal}-${macht}-${omgekeerd}`,
+      variant:'vermenigvuldigen-nulregel',bewerking:'vermenigvuldigen',nulregel:true,
+      aTekst:omgekeerd?fmtAlgemeen(macht):fmtAlgemeen(getal),
+      bTekst:omgekeerd?fmtAlgemeen(getal):fmtAlgemeen(macht),
+      antwoord:fmtAlgemeen(getal*macht)
+    };
+  }
+  function maakFactoren(index){
+    let kommaRaw=willekeurig(2,99);
+    if(kommaRaw%10===0)kommaRaw++;
+    const komma=kommaRaw/10;
+    const factor=willekeurig(2,9);
+    const macht=[10,100,1000][index%3];
+    const geheel=factor*macht;
+    const tussen=komma*factor;
+    return {
+      sleutel:`kvf-${komma}-${factor}-${macht}`,
+      variant:'vermenigvuldigen-factoren',bewerking:'vermenigvuldigen',factoren:true,
+      kommaTekst:fmtAlgemeen(komma),factor,macht,geheelTekst:fmtAlgemeen(geheel),
+      ontbinding:`${fmtAlgemeen(komma)} × (${factor} × ${fmtAlgemeen(macht)})`,
+      schakeling:`(${fmtAlgemeen(komma)} × ${factor}) × ${fmtAlgemeen(macht)}`,
+      tussenstap:`${fmtAlgemeen(tussen)} × ${fmtAlgemeen(macht)}`,
+      antwoord:fmtAlgemeen(tussen*macht)
+    };
+  }
+  function maakDeelNulregel(index){
+    const decimalen=willekeurig(0,2),schaal=10**decimalen;
+    const geheel=index%4===0?willekeurig(1,9):willekeurig(1,99);
+    const fractie=decimalen?willekeurig(1,schaal-1):0;
+    const getal=(geheel*schaal+fractie)/schaal;
+    const macht=[10,100,1000][index%3];
+    return {
+      sleutel:`kdn-${getal}-${macht}`,
+      variant:'delen-nulregel',bewerking:'delen',nulregel:true,
+      deeltalTekst:fmtAlgemeen(getal),delerTekst:fmtAlgemeen(macht),
+      antwoord:fmtAlgemeen(getal/macht)
+    };
+  }
+  function maakDeelFactoren(index){
+    const factor=willekeurig(2,9),macht=[10,100,1000][index%3];
+    let tussenRaw=index%3===2?willekeurig(1,25)*10:willekeurig(1,99);
+    if(tussenRaw%10===0&&index%3!==2)tussenRaw++;
+    const tussen=tussenRaw/10,deeltal=tussen*factor,deler=factor*macht;
+    return {
+      sleutel:`kdf-${deeltal}-${factor}-${macht}`,
+      variant:'delen-factoren',bewerking:'delen',factoren:true,
+      deeltalTekst:fmtAlgemeen(deeltal),delerTekst:fmtAlgemeen(deler),
+      ontbinding:`(${fmtAlgemeen(deeltal)} : ${factor}) : ${fmtAlgemeen(macht)}`,
+      tussenstap:`${fmtAlgemeen(tussen)} : ${fmtAlgemeen(macht)}`,
+      antwoord:fmtAlgemeen(tussen/macht)
+    };
+  }
   function maakAftrek(brug,variant,index,voorbeeld=false){
     let a,b;
     for(let p=0;p<200;p++){
@@ -339,7 +449,42 @@ const Kommagetallen = (() => {
       antwoorden:rijen.map(r=>kolommen.map(k=>fmt(aftrek?r-k:r+k)))
     };
   }
-  function genereer({bewerking='optellen',brug='zonder',variant='kort',aantalOefeningen=6,toonVoorbeeld=false,decimalen=1}={}){
+  function genereer({bewerking='optellen',brug='zonder',variant='kort',aantalOefeningen=6,toonVoorbeeld=false,decimalen=1,restsoort='zonder'}={}){
+    if(variant==='delen-nulregel'||variant==='delen-factoren'){
+      const uit=[],gezien=new Set(),maakOef=variant==='delen-nulregel'?maakDeelNulregel:maakDeelFactoren;
+      for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
+        const oef=maakOef(i);
+        if(!gezien.has(oef.sleutel)){gezien.add(oef.sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
+    if(variant==='vermenigvuldigen-nulregel'||variant==='vermenigvuldigen-factoren'){
+      const uit=[],gezien=new Set(),maakOef=variant==='vermenigvuldigen-nulregel'?maakNulregel:maakFactoren;
+      for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
+        const oef=maakOef(i);
+        if(!gezien.has(oef.sleutel)){gezien.add(oef.sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
+    if(variant==='delen-haakjes'||variant==='delen-zelf'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*60&&uit.length<aantalOefeningen;i++){
+        const metRest=restsoort==='gemengd'?uit.length%2===1:restsoort==='met';
+        const oef=maakDeling(variant,metRest,i);
+        const sleutel=`${oef.deeltal}-${oef.deler}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(oef);}
+      }
+      return restsoort==='gemengd'?uit.sort(()=>Math.random()-.5):uit;
+    }
+    if(variant==='vermenigvuldigen-compenseren-haakjes'||variant==='vermenigvuldigen-compenseren-zelf'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
+        const oef=maakVermenigvuldigingCompenseren(variant,i);
+        const sleutel=`${oef.factor}-${oef.komma}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
     if(variant==='vermenigvuldigen-haakjes'||variant==='vermenigvuldigen-zelf'){
       const uit=[],gezien=new Set();
       for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
@@ -465,5 +610,5 @@ const Kommagetallen = (() => {
     }
     return uit;
   }
-  return {genereer,fmt,fmt100};
+  return {genereer,fmt,fmt100,fmtAlgemeen};
 })();
