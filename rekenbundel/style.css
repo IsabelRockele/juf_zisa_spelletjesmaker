@@ -3103,11 +3103,20 @@ body.pdf-opname .mg-aftrek-zwarte-pijl{font-size:46px;line-height:40px}
 .komma-getallen-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 .komma-getallen-grid.komma-splitsen,.komma-getallen-grid.komma-tienden{grid-template-columns:repeat(2,minmax(0,1fr))}
 .komma-getallen-grid.komma-vermenigvuldigen-haakjes,.komma-getallen-grid.komma-vermenigvuldigen-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-compenseren-haakjes,.komma-getallen-grid.komma-vermenigvuldigen-compenseren-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-haakjes,.komma-getallen-grid.komma-delen-zelf{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-nulregel{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-vermenigvuldigen-factoren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-nulregel{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-delen-factoren{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-maal-keuzetitel{margin:12px 0 7px;color:#176b45;font-size:13px;font-weight:800}
 .komma-vermenigvuldig-blok .opdrachtzin-wrapper{align-items:flex-start}
 .komma-vermenigvuldig-blok .opdrachtzin-tekst{display:block;min-width:0;max-width:900px;white-space:normal;line-height:1.35;overflow-wrap:break-word}
 .komma-oef.komma-vermenigvuldigen{min-height:205px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:22px;padding:24px 34px 22px 20px}
 .komma-maal-eerste{display:flex;align-items:center;flex-wrap:nowrap;gap:4px;font-size:18px;white-space:nowrap}
 .komma-maal-klein{display:inline-block;min-width:34px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+.komma-maal-comp-vak{display:inline-block;min-width:92px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
+.komma-deel-vak{display:inline-block;min-width:92px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;text-align:center}
 .komma-maal-regel{display:inline-block;flex:1;min-width:170px;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8}
 .komma-maal-stap{display:grid;width:calc(100% - 55px);grid-template-columns:30px minmax(0,1fr);align-items:end;margin-left:55px;font-size:19px;box-sizing:border-box}
 .komma-maal-stap>span{display:block;min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;padding-left:8px}
@@ -3117,6 +3126,29 @@ body.pdf-opname .komma-vermenigvuldig-blok .opdrachtzin-wrapper{min-height:92px;
 body.pdf-opname .komma-vermenigvuldig-blok .opdrachtzin-tekst{max-width:820px;font-size:21px;line-height:1.45}
 body.pdf-opname .komma-maal-eerste{font-size:22px;gap:4px}
 body.pdf-opname .komma-maal-klein{min-width:38px;min-height:34px}
+body.pdf-opname .komma-vermenigvuldigen-compenseren .komma-maal-eerste{font-size:24px}
+body.pdf-opname .komma-maal-comp-vak{min-width:86px;min-height:38px}
+body.pdf-opname .komma-delen .komma-maal-eerste{font-size:20px}
+body.pdf-opname .komma-deel-vak{min-width:82px;min-height:34px}
+.komma-nulregel{min-height:78px;padding:16px 34px 16px 18px;display:flex;align-items:center;gap:7px;font-size:19px;white-space:nowrap}
+.komma-nulregel .komma-antwoord{flex:1;min-width:55px}
+.komma-getallen-grid.komma-delen-nulregel .komma-nulregel{padding:14px 28px 14px 14px;font-size:17px}
+body.pdf-opname .komma-nulregel{min-height:92px;padding:20px 38px 20px 22px;font-size:23px}
+body.pdf-opname .komma-getallen-grid.komma-delen-nulregel .komma-nulregel{padding:18px 32px 18px 18px;font-size:20px}
+.komma-oef.komma-factoren{min-height:285px;padding:22px 34px 22px 20px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:25px;font-size:18px}
+.komma-factoren>div{display:grid;grid-template-columns:125px 26px minmax(0,1fr);align-items:end}
+.komma-factoren>div:not(:first-child){grid-template-columns:125px 26px minmax(0,1fr)}
+.komma-factoren>div:not(:first-child)>b{grid-column:2}
+.komma-factoren>div>span:last-child{min-height:27px;border-bottom:1px solid #aeb8c0;color:#0672b8;padding-left:6px}
+.komma-factoren-product>span{font-weight:800}
+body.pdf-opname .komma-factoren{min-height:370px;gap:34px;padding:30px 42px 30px 28px;font-size:23px}
+body.pdf-opname .komma-factoren>div{grid-template-columns:165px 34px minmax(0,1fr)}
+body.pdf-opname .komma-factoren>div:not(:first-child){grid-template-columns:165px 34px minmax(0,1fr)}
+body.pdf-opname .komma-factoren>div>span:last-child{min-height:36px}
+.komma-deel-factoren{min-height:225px}
+.komma-deel-factoren>div:not(:first-child){grid-template-columns:55px 26px minmax(0,1fr)}
+body.pdf-opname .komma-deel-factoren{min-height:305px}
+body.pdf-opname .komma-deel-factoren>div:not(:first-child){grid-template-columns:72px 34px minmax(0,1fr)}
 body.pdf-opname .komma-maal-regel{min-height:37px}
 body.pdf-opname .komma-maal-stap{width:calc(100% - 72px);grid-template-columns:40px minmax(0,1fr);margin-left:72px;font-size:26px}
 body.pdf-opname .komma-maal-stap>span{min-height:37px}
