@@ -4393,11 +4393,11 @@ lijnKort(fx, formY);
         }
         const isRekenrooster=blok.config?.variant==='rooster'||blok.config?.variant==='aftrek-rooster'||blok.config?.variant==='rooster-honderdsten'||blok.config?.variant==='aftrek-rooster-honderdsten'||blok.config?.variant==='rooster-bewerkingen-gemengd';
         const schrijfAlsHonderdsten=blok.config?.soort==='kommagetallen'&&['honderdsten','honderdsten-brug','aftrek-honderdsten','aftrek-honderdsten-brug'].includes(blok.config?.variant);
-        const gewoneTiendensom=blok.config?.soort==='kommagetallen'&&['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten','aftrek-kort-honderdsten-brug','kort-honderdsten-gemengd','aftrek-kort-honderdsten-gemengd','kort-bewerkingen-gemengd'].includes(blok.config?.variant);
+        const gewoneTiendensom=blok.config?.soort==='kommagetallen'&&['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten','aftrek-kort-honderdsten-brug','kort-honderdsten-gemengd','aftrek-kort-honderdsten-gemengd','kort-bewerkingen-gemengd','vermenigvuldigen-nulregel','delen-nulregel'].includes(blok.config?.variant);
         const compact=(blok.config?.soort==='kommagetallen'&&!isRekenrooster&&!schrijfAlsHonderdsten)||blok.config?.variant==='afbeelding'||blok.config?.variant==='zonder';
         const kolommenPerRij=compact?(gewoneTiendensom?3:2):1,doelW=(CW-(kolommenPerRij-1)*5)/kolommenPerRij;
         const eersteAantal=Math.min(kolommenPerRij,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));
-        const opdrachtRegels=blok.config?.bewerking==='vermenigvuldigen'
+        const opdrachtRegels=['vermenigvuldigen','delen'].includes(blok.config?.bewerking)
           ? (blok.opdrachtzin.match(/[^.!?]+[.!?]?/g)||[blok.opdrachtzin]).map(regel=>regel.trim()).filter(Boolean)
           : [blok.opdrachtzin];
         const opdrachtHoogte=opdrachtRegels.length*6;
