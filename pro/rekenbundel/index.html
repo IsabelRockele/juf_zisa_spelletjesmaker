@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekenbundel Generator — Juf Zisa PRO</title>
-  <link rel="stylesheet" href="style.css?v=99">
+  <link rel="stylesheet" href="style.css?v=118">
   <link rel="stylesheet" href="vraagstukken.css?v=3">
   <link rel="stylesheet" href="rekentaal.css?v=2">
   <style>
@@ -202,6 +202,7 @@
 <div class="sidebar-tab tab-cijferen" onclick="App.toonBewerking('cijferen',this)">🧮 Cijferen</div>
   <div class="sidebar-tab tab-schatten" onclick="App.toonBewerking('schatten',this)">🔮 Schatten</div>
   <div class="sidebar-tab tab-breuken" onclick="App.toonBewerking('breuken',this)">🍰 Breuken</div>
+  <div class="sidebar-tab tab-percentages" onclick="App.toonBewerking('percentages',this)">📊 Percentages</div>
   <div class="sidebar-tab tab-vraagstukken" onclick="App.toonBewerking('vraagstukken',this)">📖 Vraagstukken</div>
 </div>
 
@@ -847,6 +848,8 @@
         <div class="radio-groep">
           <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-bewerking','optellen',this)"><input type="radio" name="komma-bewerking" value="optellen" checked>Optellen</label>
           <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','aftrekken',this)"><input type="radio" name="komma-bewerking" value="aftrekken">Aftrekken</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','gemengd',this)"><input type="radio" name="komma-bewerking" value="gemengd">Optellen en aftrekken</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','vermenigvuldigen',this)"><input type="radio" name="komma-bewerking" value="vermenigvuldigen">Vermenigvuldigen</label>
         </div>
       </div>
       <div class="config-kaart" id="kaart-komma-brug"><div class="kaart-titel"><div class="icon" id="komma-brug-icon">➕</div><span id="komma-brug-titel">Optellen tot op een tiende</span></div>
@@ -861,6 +864,10 @@
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen',this)"><input type="radio" name="komma-variant" value="splitsen">Via splitsen</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tienden',this)"><input type="radio" name="komma-variant" value="tienden">Schrijf als tienden</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','rooster',this)"><input type="radio" name="komma-variant" value="rooster">Rekenrooster</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-vermenigvuldigvormen" style="display:none"><div class="kaart-titel"><div class="icon">✖️</div>Vermenigvuldigen door te splitsen en te verdelen</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-haakjes',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-haakjes">Haakjes staan klaar</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-zelf',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-zelf">Zelf de haakjes zetten</label>
       </div></div>
       <div class="config-kaart" id="kaart-komma-honderdste-vormen" style="display:none"><div class="kaart-titel"><div class="icon">✏️</div>Optellen zonder brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','honderdsten',this)"><input type="radio" name="komma-variant" value="honderdsten">Schrijf als honderdsten</label>
@@ -888,8 +895,14 @@
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-splitsen-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="aftrek-splitsen-honderdsten-brug">Splitsen</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-compenseren-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-compenseren-honderdsten">Compenseren</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-transformeren-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-transformeren-honderdsten">Transformeren</label>
-        <label class="radio-chip komma-aftrek-transform-h-schema-keuze" style="display:none"><input type="checkbox" id="inp-komma-aftrek-transform-schema-h"> Toon het gekleurde transformschema</label>
+        <label class="komma-aftrek-transform-h-schema-keuze" style="display:none"><input type="checkbox" id="inp-komma-aftrek-transform-schema-h"> <span>Toon het gekleurde hulpschema</span></label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="aftrek-honderdsten-brug">Schrijf als honderdsten</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-kort-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="aftrek-kort-honderdsten-brug">Gewone oefeningen</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-gemengd-vormen" style="display:none"><div class="kaart-titel"><div class="icon">🔀</div>Gemengde oefeningen</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','komma-gemengd-kort',this)"><input type="radio" name="komma-variant" value="komma-gemengd-kort">Gewone oefeningen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','getalpuzzel',this)"><input type="radio" name="komma-variant" value="getalpuzzel">Getalpuzzels (+ en −)</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','komma-gemengd-rooster',this)"><input type="radio" name="komma-variant" value="komma-gemengd-rooster">Rekenrooster</label>
       </div></div>
       <div class="config-kaart" id="kaart-komma-aftrekvormen" style="display:none"><div class="kaart-titel"><div class="icon">➖</div>Oefenvorm aftrekken</div><div class="radio-groep radio-groep-kolom" id="komma-aftrek-zonder-vormen">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-schijfjes',this)"><input type="radio" name="komma-variant" value="aftrek-schijfjes">Schema met schijfjes</label>
@@ -1657,6 +1670,7 @@
           <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-soort','gelijknamig',this)"><input type="radio" name="breuk-soort" value="gelijknamig" checked>Gelijknamig</label>
           <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-soort','ongelijknamig',this)"><input type="radio" name="breuk-soort" value="ongelijknamig">Ongelijknamig</label>
           <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-soort','gemengde-getallen',this)"><input type="radio" name="breuk-soort" value="gemengde-getallen">Gemengde getallen</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-soort','vermenigvuldigen',this)"><input type="radio" name="breuk-soort" value="vermenigvuldigen">Vermenigvuldigen</label>
         </div>
         <p class="config-hint">Bij ongelijknamige breuken verschijnt het schema met de gebogen ×-pijlen om gelijknamig te maken.</p>
       </div>
@@ -1683,7 +1697,18 @@
           <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-variant','kort',this)"><input type="radio" name="breuk-variant" value="kort">Korte oefeningen</label>
         </div>
       </div>
-      <div class="config-kaart">
+      <div class="config-kaart" id="kaart-breuk-vermenigvuldigen" style="display:none">
+        <div class="kaart-titel"><div class="icon">✖️</div>Vermenigvuldigen met breuken</div>
+        <div class="radio-groep" style="flex-direction:column;align-items:stretch">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','van-getal',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="van-getal" checked>Een breuk van een getal — met tussenstappen</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','breuk-maal-getal',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="breuk-maal-getal">Breuk × geheel getal</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','getal-maal-breuk',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="getal-maal-breuk">Geheel getal × breuk</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','gemengd-vermenigvuldigen',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="gemengd-vermenigvuldigen">Gemengde bewerkingen</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','verbinden',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="verbinden">Verbind met de juiste oplossing</label>
+          <label class="radio-chip" onclick="App.selecteerBreukRadio('breuk-vermenigvuldig-variant','vraagstukken',this)"><input type="radio" name="breuk-vermenigvuldig-variant" value="vraagstukken">Vraagstukken met schema</label>
+        </div>
+      </div>
+      <div class="config-kaart" id="kaart-breuk-bewerking">
         <div class="kaart-titel"><div class="icon">➕➖</div>Bewerking</div>
         <div class="radio-groep">
           <label class="radio-chip geselecteerd" onclick="App.selecteerBreukRadio('breuk-bewerking','optellen',this)"><input type="radio" name="breuk-bewerking" value="optellen" checked>Optellen</label>
@@ -1697,6 +1722,23 @@
         <div class="form-rij"><label>Aantal oefeningen</label><select id="inp-aantal-breuken"><option>4</option><option selected>6</option><option>8</option><option>10</option><option>12</option></select></div>
       </div>
       <button class="btn-toevoegen" onclick="App.voegBreukenBlokToe()" style="background:#6f9f24">＋ Voeg breukenblok toe</button>
+    </div>
+
+    <div class="sidebar-content" id="tab-percentages" style="display:none">
+      <div class="sectie-titel">Percentages berekenen</div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📊</div>Oefenvorm</div>
+        <div class="radio-groep" style="flex-direction:column;align-items:stretch">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerPercentageRadio('stappen',this)"><input type="radio" name="percentage-variant" value="stappen" checked>Met verhoudingstappen</label>
+          <label class="radio-chip" onclick="App.selecteerPercentageRadio('lange-breukstreep',this)"><input type="radio" name="percentage-variant" value="lange-breukstreep">Met de lange breukstreep</label>
+        </div>
+      </div>
+      <div class="config-kaart">
+        <div class="kaart-titel"><div class="icon">📝</div>Opdracht &amp; hoeveelheid</div>
+        <div class="form-rij"><label>Opdrachtzin</label><input type="text" id="inp-opdrachtzin-percentages" value="Bereken het percentage van het getal." /></div>
+        <div class="form-rij"><label>Aantal oefeningen</label><select id="inp-aantal-percentages"><option selected>4</option><option>6</option><option>8</option><option>10</option></select></div>
+      </div>
+      <button class="btn-toevoegen" onclick="App.voegPercentageBlokToe()" style="background:#2b93ad">＋ Voeg percentageblok toe</button>
     </div>
 
 
@@ -1934,6 +1976,7 @@
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('verschil berekenen: vergelijkende vraag (hoeveel meer of hoeveel minder heeft de ene dan de andere)',this);vsSetWaarde('vs-val-berekening','Verschil')">➖ Verschil</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('rest berekenen: iemand heeft een hoeveelheid, geeft of verliest een deel, de vraag is hoeveel er nog overblijft. De vraagtekst eindigt altijd op een vraag als: Hoeveel blijft er nog over? of Hoeveel heeft hij/zij nog? De antwoordzin vermeldt het resterende aantal.',this);vsSetWaarde('vs-val-berekening','Hoeveel over?')">🔢 Hoeveel over?</button>
               <button type="button" class="vs-thema-chip" id="chip-geld" onclick="vsKiesGeld(this)">💶 Geld</button>
+              <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('winst of verlies berekenen met de begrippen inkoopprijs en verkoopprijs',this);vsKiesWinstVerlies(this)">📈 Winst of verlies</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('tijd berekenen',this);vsSetWaarde('vs-val-berekening','Tijd')">🕐 Tijd</button>
               <button type="button" class="vs-thema-chip" onclick="VraagstukkenModule._kiesBerekening('gewicht of inhoud berekenen',this);vsSetWaarde('vs-val-berekening','Gewicht')">⚖️ Gewicht</button>
               <button type="button" class="vs-thema-chip" id="chip-helft" onclick="vsKiesHelft(this)">✌️ Helft/dubbel</button>
@@ -2247,16 +2290,17 @@
 
 <script src="hulpmiddelen.js?v=3"></script>
 <script src="modules/schatten.js?v=1"></script>
-<script src="modules/breuken.js?v=1"></script>
-<script src="modules/kommagetallen.js?v=1"></script>
+<script src="modules/breuken.js?v=5"></script>
+<script src="modules/percentages.js?v=1"></script>
+<script src="modules/kommagetallen.js?v=3"></script>
 <script src="generator.js?v=99"></script>
-<script src="preview.js?v=45"></script>
-<script src="pdf-engine.js?v=99"></script>
-<script src="vraagstukken.js?v=34"></script>
+<script src="preview.js?v=64"></script>
+<script src="pdf-engine.js?v=116"></script>
+<script src="vraagstukken.js?v=35"></script>
 
 <script src="modules/rekentaal.js?v=15"></script>
 
-<script src="app.js?v=35"></script>
+<script src="app.js?v=43"></script>
 <script>
 // Initialiseer vraagstukken module wanneer Firebase klaar is
 document.addEventListener('DOMContentLoaded', () => {
@@ -2486,6 +2530,18 @@ function vsKiesGeldSub(w,l,el){
   document.getElementById('vs-geld-subkeuze').querySelectorAll('button').forEach(function(b){b.style.background='#fff';b.style.color='#333';b.style.borderColor='#ddd';});
   el.style.background='#1565c0';el.style.color='#fff';el.style.borderColor='#1565c0';
   document.getElementById('vs-berekening').value=w;vsSetWaarde('vs-val-berekening','Geld: '+l);
+}
+function vsKiesWinstVerlies(el){
+  document.querySelectorAll('.vs-thema-chip').forEach(function(c){c.classList.remove('actief');});
+  vsHideAllSub();el.classList.add('actief');
+  var omschrijving='winst of verlies berekenen met de begrippen inkoopprijs en verkoopprijs';
+  document.getElementById('vs-berekening').value=omschrijving;
+  vsSetWaarde('vs-val-berekening','Winst of verlies');
+  var aftrekChip=document.querySelector('.vs-bew-chip[data-bew="aftrekken"]');
+  if(aftrekChip&&window.VraagstukkenModule){
+    VraagstukkenModule._kiesBewerking('aftrekken',aftrekChip);
+    vsSetWaarde('vs-val-bewerking','Aftrekken');vsToggleVermDeel('geen');vsUpdateBrugZichtbaarheid();
+  }
 }
 function vsKiesHelft(el){
   var was=el.classList.contains('actief');

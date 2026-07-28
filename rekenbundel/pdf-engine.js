@@ -2006,6 +2006,7 @@ const onthoudH = c;
 
  async function _tekenBlok(blok) {
   if (blok.bewerking === 'breuken')                                  { _tekenBreukenBlok(blok); return; }
+  if (blok.bewerking === 'percentages')                              { _tekenPercentageBlok(blok); return; }
   if (blok.bewerking === 'schatten')                                          { _tekenSchattenBlok(blok); return; }
   if (blok.bewerking === 'vraagstukken')                              { _tekenVraagstukBlok(blok); return; }
   if (blok.bewerking === 'rekentaal')                                  { _tekenRekentaalBlok(blok); return; }
@@ -2071,8 +2072,8 @@ const onthoudH = c;
   lijn(ML, y - 4, ML + CW, y - 4, [210,220,230], 0.4);
 }
 
-  function _pdfBreuk(cx, cy, n, d, leeg = false) {
-    const w = 8;
+  function _pdfBreuk(cx, cy, n, d, leeg = false, vakW = 8) {
+    const w = vakW;
     doc.setFont('helvetica', 'normal'); doc.setFontSize(11); doc.setTextColor(35,35,35);
     if (leeg) {
       doc.setDrawColor(165,175,185); doc.setLineWidth(.4);
@@ -2124,6 +2125,7 @@ const onthoudH = c;
   }
 
   function _tekenBreukenBlok(blok) {
+    if (blok.config?.soort === 'vermenigvuldigen') { _tekenBreukVermenigvuldigBlok(blok); return; }
     if (blok.config?.soort === 'gemengde-getallen') { _tekenGemengdeBreukenBlok(blok); return; }
     const isOngelijk = blok.config?.soort === 'ongelijknamig';
     const keten = isOngelijk && blok.config?.variant === 'kort';
@@ -2142,6 +2144,198 @@ const onthoudH = c;
       y += rijH;
     }
     y += NABLOK; lijn(ML,y-4,ML+CW,y-4,[210,220,230],.4);
+  }
+
+  function _tekenPercentageBlok(blok){
+    const stappen=blok.config?.variant==='stappen';
+    const kolommen=stappen?2:1,rijH=stappen?105:28,kolW=CW/kolommen;
+    checkRuimte(VOOR_ZIN+ZINRUIMTE+rijH+3);y+=VOOR_ZIN;
+    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=ZINRUIMTE;
+    const antwoord=(tekst,x0,y0,w=20)=>{
+      doc.setDrawColor(130,170,185);doc.rect(x0,y0-9,w,12,'S');
+      if(_metAntwoorden){doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text(String(tekst),x0+w/2,y0,{align:'center'});}
+    };
+    for(let r=0;r<Math.ceil(blok.oefeningen.length/kolommen);r++){
+      if(r>0)checkRuimte(rijH);
+      blok.oefeningen.slice(r*kolommen,(r+1)*kolommen).forEach((o,i)=>{
+        const x=ML+i*kolW+2,w=kolW-5;
+        if(stappen){
+          doc.setFillColor(255,255,255);doc.setDrawColor(170,180,188);doc.roundedRect(x,y,w,rijH-5,3,3,'FD');
+          doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(35,35,35);doc.text(`Hoeveel is ${o.procent}% van ${o.geheel}?`,x+6,y+10);
+          const bx=x+w-45,by=y+17;
+          doc.setDrawColor(105,158,170);doc.setLineWidth(.7);doc.roundedRect(bx,by,40,23,4,4,'S');
+          doc.setTextColor(105,158,170);doc.setFont('helvetica','normal');doc.setFontSize(11.5);doc.text(`${o.procent}% =`,bx+5,by+14);
+          _pdfBreuk(bx+24,by+12,o.stapTeller,o.stapNoemer,true,11);
+          const pijlX=x+29,pijlY=y+18,pijlEind=bx-1.5;
+          doc.setDrawColor(105,158,170);doc.setFillColor(105,158,170);doc.setLineWidth(.8);
+          doc.line(pijlX,pijlY,pijlX,y+31);doc.line(pijlX,y+31,pijlEind,y+31);
+          doc.triangle(bx+1.5,y+31,bx-2.2,y+28.8,bx-2.2,y+33.2,'F');
+          const regels=o.stapNoemer===100
+            ? [{label:'100% ->',antwoord:String(o.geheel)},{label:'1% ->',antwoord:`${o.geheel} : 100 = ${o.eenProcent}`},{label:`${o.procent}% ->`,antwoord:`${o.procent} x ${o.eenProcent} = ${o.antwoord}`}]
+            : [{label:'geheel ->',antwoord:String(o.geheel)},{label:'1 breukdeel ->',antwoord:`${o.geheel} : ${o.stapNoemer} = ${o.eenBreukdeel}`},{label:`${o.stapTeller} breukdelen ->`,antwoord:`${o.stapTeller} x ${o.eenBreukdeel} = ${o.antwoord}`}];
+          doc.setFontSize(10.5);doc.setFont('helvetica','normal');
+          regels.forEach((regel,j)=>{
+            const ry=y+53+j*13,labelW=doc.getTextWidth(regel.label);
+            doc.setTextColor(35,35,35);doc.setFont('helvetica','normal');doc.text(regel.label,x+20,ry);
+            doc.setDrawColor(180,190,198);doc.line(x+22+labelW,ry+2,x+w-7,ry+2);
+            if(_metAntwoorden){doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.text(regel.antwoord,x+24+labelW,ry);doc.setFont('helvetica','normal');}
+          });
+          const slotTekst=`${o.procent}% van ${o.geheel} =`,slotX=x+20;
+          doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(35,35,35);doc.text(slotTekst,slotX,y+96);
+          antwoord(o.antwoord,slotX+doc.getTextWidth(slotTekst)+3,y+96,14);
+        }else{
+          doc.setFont('helvetica','normal');doc.setFontSize(12);doc.setTextColor(35,35,35);
+          const cy=y+13,lx=x+8,begin=`${o.procent}% van ${o.geheel} =`;
+          const punt=(waarde,px,py)=>{doc.setTextColor(_metAntwoorden?0:35,_metAntwoorden?125:35,_metAntwoorden?180:35);doc.setFont('helvetica',_metAntwoorden?'bold':'normal');doc.text(_metAntwoorden?String(waarde):'.',px,py,{align:'center'});};
+          doc.text(begin,lx,cy);
+          const eersteX=lx+doc.getTextWidth(begin)+8;
+          punt(o.stapTeller,eersteX,cy-4);doc.setDrawColor(35,35,35);doc.setLineWidth(.45);doc.line(eersteX-6,cy-1,eersteX+6,cy-1);punt(o.stapNoemer,eersteX,cy+7);
+          doc.setTextColor(35,35,35);doc.setFont('helvetica','normal');doc.text(`x ${o.geheel} =`,eersteX+10,cy);
+          const fx=eersteX+49;
+          if(_metAntwoorden){
+            const g=(a,b)=>b?g(b,a%b):a,deel=g(o.geheel,o.stapNoemer);
+            doc.setTextColor(0,125,180);doc.setFont('helvetica','normal');doc.setFontSize(11);
+            doc.text(String(o.stapTeller),fx-14,cy-5,{align:'center'});
+            doc.text('x',fx-2,cy-5,{align:'center'});
+            doc.text(String(o.geheel),fx+14,cy-5,{align:'center'});
+            doc.setDrawColor(35,35,35);doc.setLineWidth(.45);doc.line(fx-23,cy-2,fx+28,cy-2);
+            doc.text(String(o.stapNoemer),fx+2,cy+8,{align:'center'});
+            doc.setDrawColor(0,125,180);doc.setLineWidth(.7);
+            doc.line(fx+6,cy-1,fx+23,cy-11);
+            doc.line(fx-5,cy+10,fx+8,cy+1);
+            doc.setFontSize(7);
+            doc.text(String(o.geheel/deel),fx+25,cy-10);
+            doc.text(String(o.stapNoemer/deel),fx+10,cy+7);
+          }else{
+            punt(o.stapTeller*o.geheel,fx,cy-5);
+            doc.setDrawColor(35,35,35);doc.setLineWidth(.45);doc.line(fx-20,cy-2,fx+20,cy-2);
+            punt(o.stapNoemer,fx,cy+8);
+          }
+          doc.setFontSize(12);doc.setTextColor(35,35,35);doc.setFont('helvetica','normal');doc.text('=',fx+27,cy);
+          doc.setDrawColor(175,185,195);doc.line(fx+37,cy+1,fx+57,cy+1);
+          if(_metAntwoorden){doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.text(String(o.antwoord),fx+39,cy);}
+        }
+      });
+      y+=rijH;
+    }
+    y+=NABLOK;lijn(ML,y-4,ML+CW,y-4,[210,220,230],.4);
+  }
+
+  function _tekenBreukVermenigvuldigBlok(blok){
+    const uitgebreid=blok.config?.variant==='van-getal',verbinden=blok.config?.variant==='verbinden',gemengd=blok.config?.variant==='gemengd-vermenigvuldigen',vraagstukken=blok.config?.variant==='vraagstukken';
+    const kolommen=uitgebreid||verbinden||vraagstukken?1:2,rijH=vraagstukken?126:verbinden?150:uitgebreid?94:34,kolW=CW/kolommen;
+    checkRuimte(VOOR_ZIN+ZINRUIMTE+rijH+4);y+=VOOR_ZIN;
+    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=ZINRUIMTE;
+    const schrijfAntwoord=(tekst,x0,y0,w=28)=>{doc.setDrawColor(170,180,190);doc.line(x0,y0,x0+w,y0);if(_metAntwoorden){doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.text(String(tekst),x0+2,y0-1);}};
+    for(let r=0;r<Math.ceil(blok.oefeningen.length/kolommen);r++){
+      if(r>0)checkRuimte(rijH);
+      if(gemengd){doc.setDrawColor(115,160,175);doc.setLineWidth(.45);doc.line(ML+CW/2,y,ML+CW/2,y+rijH);}
+      blok.oefeningen.slice(r*kolommen,(r+1)*kolommen).forEach((o,i)=>{
+        const x=ML+i*kolW+2,w=kolW-5,c=x+w/2;
+        if(!gemengd){doc.setFillColor(255,255,255);doc.setDrawColor(190,200,210);doc.roundedRect(x,y,w,rijH-5,2,2,'FD');}
+        if(o.vorm==='vraagstuk'){
+          doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(35,35,35);
+          doc.setDrawColor(165,175,185);doc.roundedRect(x+4,y+4,w-8,43,3,3,'S');
+          let ty=y+12;
+          o.regels.forEach(regel=>{doc.text(regel,x+9,ty);ty+=7;});
+          doc.setFont('helvetica','bold');doc.text(o.vraag,x+9,ty+1);
+          const vakY=y+57,vakW=(w-20)/2,vakH=42;
+          const raster=(rx,ry,rw,rh)=>{
+            doc.setDrawColor(205,220,226);doc.setLineWidth(.25);doc.rect(rx,ry,rw,rh,'S');
+            for(let gx=rx+6;gx<rx+rw;gx+=6)doc.line(gx,ry,gx,ry+rh);
+            for(let gy=ry+7;gy<ry+rh;gy+=7)doc.line(rx,gy,rx+rw,gy);
+          };
+          doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(105,155,168);
+          doc.text('Schema:',x+6,vakY-3);doc.text('Bewerking:',x+14+vakW,vakY-3);
+          raster(x+6,vakY,vakW,vakH);raster(x+14+vakW,vakY,vakW,vakH);
+          if(_metAntwoorden){
+            doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.setFontSize(9);
+            const regels=o.zoekGeheel
+              ? [`${o.n} breukdelen -> ${o.gegeven}`,`1 breukdeel -> ${o.gegeven} : ${o.n} = ${o.deelPerBreuk}`,`${o.d} breukdelen -> ${o.d} x ${o.deelPerBreuk} = ${o.antwoord}`]
+              : [`geheel -> ${o.gegeven}`,`1 breukdeel -> ${o.gegeven} : ${o.d} = ${o.deelPerBreuk}`,`${o.n} breukdelen -> ${o.n} x ${o.deelPerBreuk} = ${o.antwoord}`];
+            regels.forEach((regel,j)=>doc.text(regel,x+17+vakW,vakY+10+j*9));
+            doc.setFontSize(11);doc.text(o.zoekGeheel?'?':String(o.gegeven),x+6+vakW/2,vakY+10,{align:'center'});
+            doc.text(`${o.n}/${o.d}`,x+12,vakY+31);doc.text(String(o.gegeven),x+6+vakW*.58,vakY+31);
+          }
+          doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(105,155,168);doc.text('Antwoordzin:',x+6,y+112);
+          doc.setDrawColor(165,175,185);doc.line(x+31,y+113,x+w-7,y+113);
+          if(_metAntwoorden){doc.setTextColor(0,125,180);doc.setFont('helvetica','bold');doc.text(o.antwoordzin,x+32,y+111);}
+          return;
+        }
+        if(o.vorm==='verbinden'){
+          const links=o.items.filter(v=>v.kant==='links'),rechts=o.items.filter(v=>v.kant==='rechts');
+          o.doelen.forEach((d,j)=>{const cy=y+25+j*28;doc.setDrawColor(240,170,30);doc.circle(c,cy,8,'S');doc.setTextColor(35,35,35);doc.setFontSize(10);doc.text(d,c,cy+2,{align:'center'});});
+          [links,rechts].forEach((items,k)=>items.forEach((v,j)=>{const cy=y+25+j*28,bx=k===0?x+8:c+18;_pdfBreuk(bx,cy,v.n,v.d);doc.setTextColor(35,35,35);doc.setFontSize(10);doc.text(`x ${v.getal} =`,bx+8,cy+2);schrijfAntwoord(v.antwoord,bx+28,cy+3,25);}));
+          return;
+        }
+        if(uitgebreid){
+          const lx=x+25;
+          // Uitlegzin: breuk van getal = breuk × getal
+          _pdfBreuk(lx,y+15,o.n,o.d);
+          doc.setFont('helvetica','normal');doc.setFontSize(12);doc.setTextColor(35,35,35);
+          doc.text(`van ${o.getal} =`,lx+11,y+17);
+          _pdfBreuk(lx+39,y+15,o.n,o.d);
+          doc.text(`x ${o.getal}`,lx+50,y+17);
+          // Volledige bewerking met de lange breukstreep
+          _pdfBreuk(lx-2,y+37,o.n,o.d);doc.text(`x ${o.getal} =`,lx+9,y+39);
+          const fx=lx+46,fy=y+34;
+          doc.setFont('helvetica','bold');doc.text(String(o.n),fx-14,fy);
+          doc.setFont('helvetica','normal');doc.text('x',fx-3,fy);
+          doc.setFont('helvetica','bold');doc.text(String(o.getal),fx+9,fy);
+          doc.setDrawColor(35,35,35);doc.setLineWidth(.45);doc.line(fx-19,fy+4,fx+25,fy+4);
+          doc.text(String(o.d),fx+1,fy+14,{align:'center'});
+          doc.setFont('helvetica','normal');doc.text('=',fx+31,fy+7);
+          schrijfAntwoord(o.antwoord,fx+41,fy+8,34);
+          if(_metAntwoorden){
+            doc.setDrawColor(0,125,180);doc.setLineWidth(.7);
+            doc.line(fx-2,fy+16,fx+4,fy+8);doc.line(fx+7,fy+2,fx+23,fy-7);
+            doc.setTextColor(0,125,180);doc.setFontSize(7);
+            doc.text('1',fx+6,fy+14);doc.text(String(o.deel),fx+22,fy-5);
+          }
+          // Twee vrije werklijnen; alleen de oplossingssleutel vult ze in.
+          doc.setDrawColor(175,185,195);doc.setLineWidth(.35);
+          doc.line(lx+10,y+57,lx+88,y+57);doc.line(lx+10,y+72,lx+88,y+72);
+          if(_metAntwoorden){
+            doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,125,180);
+            doc.text(`${o.getal} : ${o.d} = ${o.deel}`,lx+11,y+55);
+            doc.text(`${o.n} x ${o.deel} = ${o.antwoord}`,lx+11,y+70);
+          }
+          // Slotzin links onderaan.
+          _pdfBreuk(lx+2,y+84,o.n,o.d);
+          doc.setFont('helvetica','normal');doc.setFontSize(11);doc.setTextColor(35,35,35);
+          doc.text(`van ${o.getal} =`,lx+13,y+86);
+          schrijfAntwoord(o.antwoord,lx+40,y+87,35);
+          return;
+        }
+        const sy=y+17;
+        if(o.vorm==='getal-maal-breuk'){doc.setFontSize(12);doc.setTextColor(35,35,35);doc.text(`${o.getal} x`,c-35,sy+2);_pdfBreuk(c-19,sy,o.n,o.d);}
+        else{_pdfBreuk(c-38,sy,o.n,o.d);doc.setFontSize(12);doc.setTextColor(35,35,35);doc.text(`${o.vorm==='van-getal'?'van':'x'} ${o.getal}`,c-28,sy+2);}
+        doc.text('=',c+2,sy+2);
+        if(_metAntwoorden&&o.vorm==='getal-maal-breuk'){
+          const heelRuw=Math.floor(o.product/o.d),restRuw=o.product%o.d;
+          doc.setTextColor(0,125,180);_pdfBreuk(c+11,sy,o.product,o.d);doc.setTextColor(0,125,180);doc.text('=',c+21,sy+2);
+          if(heelRuw){_pdfGemengdGetal(c+31,sy,heelRuw,restRuw,o.d);doc.setTextColor(0,125,180);doc.text('=',c+42,sy+2);doc.setFont('helvetica','bold');doc.text(o.antwoord,c+48,sy+2);}
+          else{doc.setFont('helvetica','bold');doc.text(o.antwoord,c+27,sy+2);}
+        }else schrijfAntwoord(o.antwoord,c+10,sy+3,30);
+        if(uitgebreid){
+          doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(35,35,35);
+          {
+            const fx=c-14,fy=y+37;doc.setTextColor(_metAntwoorden?0:35,_metAntwoorden?125:35,_metAntwoorden?180:35);doc.setFont('helvetica',_metAntwoorden?'bold':'normal');doc.text(String(o.n),fx-22,fy);doc.text('x',fx-10,fy);doc.text(String(o.getal),fx+1,fy);
+            doc.setDrawColor(35,35,35);doc.setLineWidth(.45);doc.line(fx-27,fy+3,fx+15,fy+3);doc.text(String(o.d),fx-10,fy+12);
+            if(_metAntwoorden){
+            doc.setDrawColor(0,125,180);doc.setLineWidth(.7);doc.line(fx-13,fy+14,fx-6,fy+6);doc.line(fx-1,fy+2,fx+12,fy-7);
+            doc.setFontSize(7);doc.text('1',fx-4,fy+12);doc.text(String(o.deel),fx+11,fy-5);
+            }
+          }
+          doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(35,35,35);
+          doc.text(`${o.getal} : ${o.d} =`,x+25,y+55);schrijfAntwoord(o.deel,x+53,y+56,25);
+          doc.text(`${o.n} x ${o.deel} =`,x+25,y+70);schrijfAntwoord(o.antwoord,x+53,y+71,25);
+          _pdfBreuk(x+w-60,y+80,o.n,o.d);doc.text(`van ${o.getal} =`,x+w-49,y+82);schrijfAntwoord(o.antwoord,x+w-25,y+83,20);
+        }
+      });
+      y+=rijH;
+    }
+    y+=NABLOK;lijn(ML,y-4,ML+CW,y-4,[210,220,230],.4);
   }
 
   function _pdfGemengdGetal(cx,cy,w,n,d,leeg=false) {
@@ -4197,13 +4391,18 @@ lijnKort(fx, formY);
           verwerkteKaarten++;
           meldVoortgang(5+Math.round(82*verwerkteKaarten/totaalKaarten),`Oefening ${verwerkteKaarten} van ${totaalKaarten} verwerkt`);
         }
-        const isRekenrooster=blok.config?.variant==='rooster'||blok.config?.variant==='aftrek-rooster'||blok.config?.variant==='rooster-honderdsten'||blok.config?.variant==='aftrek-rooster-honderdsten';
-        const schrijfAlsHonderdsten=blok.config?.soort==='kommagetallen'&&['honderdsten','honderdsten-brug','aftrek-honderdsten'].includes(blok.config?.variant);
-        const gewoneTiendensom=blok.config?.soort==='kommagetallen'&&['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten'].includes(blok.config?.variant);
+        const isRekenrooster=blok.config?.variant==='rooster'||blok.config?.variant==='aftrek-rooster'||blok.config?.variant==='rooster-honderdsten'||blok.config?.variant==='aftrek-rooster-honderdsten'||blok.config?.variant==='rooster-bewerkingen-gemengd';
+        const schrijfAlsHonderdsten=blok.config?.soort==='kommagetallen'&&['honderdsten','honderdsten-brug','aftrek-honderdsten','aftrek-honderdsten-brug'].includes(blok.config?.variant);
+        const gewoneTiendensom=blok.config?.soort==='kommagetallen'&&['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten','aftrek-kort-honderdsten-brug','kort-honderdsten-gemengd','aftrek-kort-honderdsten-gemengd','kort-bewerkingen-gemengd'].includes(blok.config?.variant);
         const compact=(blok.config?.soort==='kommagetallen'&&!isRekenrooster&&!schrijfAlsHonderdsten)||blok.config?.variant==='afbeelding'||blok.config?.variant==='zonder';
         const kolommenPerRij=compact?(gewoneTiendensom?3:2):1,doelW=(CW-(kolommenPerRij-1)*5)/kolommenPerRij;
-        const eersteAantal=Math.min(kolommenPerRij,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));checkRuimte(6+eersteH+5);
-        doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=6;
+        const eersteAantal=Math.min(kolommenPerRij,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));
+        const opdrachtRegels=blok.config?.bewerking==='vermenigvuldigen'
+          ? (blok.opdrachtzin.match(/[^.!?]+[.!?]?/g)||[blok.opdrachtzin]).map(regel=>regel.trim()).filter(Boolean)
+          : [blok.opdrachtzin];
+        const opdrachtHoogte=opdrachtRegels.length*6;
+        checkRuimte(opdrachtHoogte+eersteH+5);
+        doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(opdrachtRegels,ML,y);y+=opdrachtHoogte;
         let kol=0,rijMax=0;
         for(const canvas of kaarten){const h=doelW*canvas.height/canvas.width;if(!compact){checkRuimte(h+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',ML,y,doelW,h);y+=h+5;continue;}if(kol===0){checkRuimte(h+5);rijMax=0;}const px=ML+kol*(doelW+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',px,y,doelW,h);rijMax=Math.max(rijMax,h);kol++;if(kol===kolommenPerRij){y+=rijMax+5;kol=0;}}
         if(compact&&kol)y+=rijMax+5;

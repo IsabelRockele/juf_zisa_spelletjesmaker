@@ -133,6 +133,14 @@ window.VraagstukkenModule = (() => {
     const berekeningInstructie = inst.berekening
       ? `- Soort berekening: het vraagstuk moet gaan over "${inst.berekening}"`
       : '';
+    const winstVerliesInstructie = inst.berekening?.includes('winst of verlies')
+      ? `- WINST OF VERLIES: gebruik in de vraagtekst verplicht letterlijk de woorden "inkoopprijs" en "verkoopprijs".
+- Kies willekeurig één van deze twee correcte situaties:
+  1. WINST: verkoopprijs is groter dan inkoopprijs; winst = verkoopprijs - inkoopprijs.
+  2. VERLIES: inkoopprijs is groter dan verkoopprijs; verlies = inkoopprijs - verkoopprijs.
+- Vraag uitdrukkelijk hoeveel winst OF hoeveel verlies er is. Gebruik nooit een negatieve uitkomst.
+- Gebruik realistische bedragen in euro en zorg dat de antwoordzin het juiste woord "winst" of "verlies" bevat.`
+      : '';
 
     let brugInstructie = '';
     if ((inst.bewerking === 'optellen' || inst.bewerking === 'aftrekken') &&
@@ -230,6 +238,7 @@ ${niveauInstructie}
 - Aantal getallen: ${aantalGetallenLabel}
 ${themaInstructie}
 ${berekeningInstructie ? berekeningInstructie : ''}
+${winstVerliesInstructie ? winstVerliesInstructie : ''}
 ${brugInstructie ? brugInstructie : ''}
 ${vermInstructie ? vermInstructie : ''}
 ${deelInstructie ? deelInstructie : ''}

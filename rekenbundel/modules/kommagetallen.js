@@ -41,20 +41,17 @@ const Kommagetallen = (() => {
       variant,brug:'zonder',decimalen:2,honderdsten:true,aHonderdsten:a,bHonderdsten:b,somHonderdsten:som,
       delen,deelTeksten:delen.map(d=>d>=100?String(d/100):d>=10?`0,${d/10}0`:`0,0${d}`),stappen};
   }
-  function maakRoosterHonderdste(){
-    const rijen=uniekeGetallen(2,()=>willekeurig(1,5)*100+willekeurig(0,5)*10+willekeurig(0,5));
-    const maxE=Math.max(...rijen.map(n=>Math.floor(n/100)));
-    const maxT=Math.max(...rijen.map(n=>Math.floor(n/10)%10));
-    const maxH=Math.max(...rijen.map(n=>n%10));
-    const kolommen=uniekeGetallen(5,(positie)=>{
-      let e=willekeurig(0,9-maxE),t=willekeurig(0,9-maxT),h=willekeurig(0,9-maxH);
-      if(positie%4===0){t=0;h=0;}
-      if(positie%4===1){e=0;h=0;}
-      if(positie%4===2){e=0;t=0;}
-      return e*100+t*10+h||1;
-    });
+  function maakRoosterHonderdste(brug='zonder'){
+    let rijen=[],kolommen=[],geldig=false;
+    for(let poging=0;poging<400&&!geldig;poging++){
+      rijen=uniekeGetallen(2,()=>willekeurig(1,5)*100+willekeurig(0,9)*10+willekeurig(0,9));
+      kolommen=uniekeGetallen(5,()=>willekeurig(0,3)*100+willekeurig(0,9)*10+willekeurig(0,9)||1);
+      const bruggen=rijen.flatMap(r=>kolommen.map(k=>r%100+k%100>=100));
+      geldig=rijen.every(r=>kolommen.every(k=>r+k<1000))&&
+        (brug==='zonder'?bruggen.every(v=>!v):brug==='met'?bruggen.every(Boolean):bruggen.some(Boolean)&&bruggen.some(v=>!v));
+    }
     const inhoud=`${rijen.join(',')}|${kolommen.join(',')}`;
-    return {sleutel:`krh-${inhoud}`,variant:'rooster-honderdsten',rooster:true,bewerking:'optellen',brug:'zonder',
+    return {sleutel:`krh-${brug}-${inhoud}`,variant:'rooster-honderdsten',rooster:true,bewerking:'optellen',brug,
       decimalen:2,honderdsten:true,rijen,kolommen,antwoorden:rijen.map(r=>kolommen.map(k=>fmt100(r+k)))};
   }
   function maakAftrekHonderdste(variant,index){
@@ -78,14 +75,17 @@ const Kommagetallen = (() => {
       aHonderdsten:a,bHonderdsten:b,verschilHonderdsten:verschil,
       aE:Math.floor(a/100),aT:Math.floor(a/10)%10,aH:a%10,bE,bT,bH,delen,deelTeksten:delen.map(deelTekst),stappen};
   }
-  function maakAftrekRoosterHonderdste(){
-    const kolommen=uniekeGetallen(5,()=>willekeurig(0,3)*100+willekeurig(0,5)*10+willekeurig(0,5));
-    const maxE=Math.max(...kolommen.map(n=>Math.floor(n/100)));
-    const maxT=Math.max(...kolommen.map(n=>Math.floor(n/10)%10));
-    const maxH=Math.max(...kolommen.map(n=>n%10));
-    const rijen=uniekeGetallen(2,()=>willekeurig(Math.max(4,maxE+1),9)*100+willekeurig(maxT,9)*10+willekeurig(maxH,9));
+  function maakAftrekRoosterHonderdste(brug='zonder'){
+    let rijen=[],kolommen=[],geldig=false;
+    for(let poging=0;poging<400&&!geldig;poging++){
+      rijen=uniekeGetallen(2,()=>willekeurig(5,9)*100+willekeurig(0,9)*10+willekeurig(0,9));
+      kolommen=uniekeGetallen(5,()=>willekeurig(0,4)*100+willekeurig(0,9)*10+willekeurig(0,9)||1);
+      const bruggen=rijen.flatMap(r=>kolommen.map(k=>r%100<k%100));
+      geldig=rijen.every(r=>kolommen.every(k=>r>k))&&
+        (brug==='zonder'?bruggen.every(v=>!v):brug==='met'?bruggen.every(Boolean):bruggen.some(Boolean)&&bruggen.some(v=>!v));
+    }
     const inhoud=`${rijen.join(',')}|${kolommen.join(',')}`;
-    return {sleutel:`karh-${inhoud}`,variant:'aftrek-rooster-honderdsten',rooster:true,bewerking:'aftrekken',brug:'zonder',
+    return {sleutel:`karh-${brug}-${inhoud}`,variant:'aftrek-rooster-honderdsten',rooster:true,bewerking:'aftrekken',brug,
       decimalen:2,honderdsten:true,rijen,kolommen,antwoorden:rijen.map(r=>kolommen.map(k=>fmt100(r-k)))};
   }
   function maakAftrekHonderdsteBrug(variant,index){
@@ -105,7 +105,7 @@ const Kommagetallen = (() => {
     }
     for(let p=0;p<300;p++){
       a=willekeurig(3,9)*100+willekeurig(0,9)*10+willekeurig(0,9);
-      b=willekeurig(1,Math.floor(a/100)-1)*100+willekeurig(0,9)*10+willekeurig(1,9);
+      b=willekeurig(1,Math.floor(a/100)-1)*100+willekeurig(1,9)*10+willekeurig(1,9);
       const brugH=a%10<b%10,brugT=Math.floor(a/10)%10-(brugH?1:0)<Math.floor(b/10)%10;
       if(a>b&&(brugH||brugT))break;
     }
@@ -117,6 +117,21 @@ const Kommagetallen = (() => {
     return {sleutel:`kahb-${a}-${b}-${variant}-${index}`,a,b,som:verschil,verschil,antwoord:fmt100(verschil),
       aTekst:fmt100(a),bTekst:fmt100(b),variant,brug:'met',bewerking:'aftrekken',decimalen:2,honderdsten:true,
       aHonderdsten:a,bHonderdsten:b,verschilHonderdsten:verschil,delen,deelTeksten:delen.map(deelTekst),stappen};
+  }
+  function maakGetalpuzzel(decimalen=2,index=0){
+    const schaal=decimalen===2?100:10,maximum=decimalen===2?1400:140;
+    let waarden;
+    for(let poging=0;poging<200;poging++){
+      waarden=Array.from({length:4},()=>willekeurig(schaal,maximum));
+      if(new Set(waarden).size===4)break;
+    }
+    const tekst=n=>decimalen===2?fmt100(n):fmt(n);
+    const bewerkingen=waarden.map((n,i)=>{
+      const verschil=waarden[(i+1)%4]-n;
+      return `${verschil>=0?'+':'−'} ${tekst(Math.abs(verschil))}`;
+    });
+    return {sleutel:`kp-${decimalen}-${waarden.join('-')}-${index}`,variant:'getalpuzzel',puzzel:true,decimalen,
+      waarden,antwoorden:[tekst(waarden[1]),tekst(waarden[3])],bewerkingen,antwoord:tekst(waarden[1])};
   }
   function maakHonderdsteBrug(variant,index){
     let a,b;
@@ -204,6 +219,22 @@ const Kommagetallen = (() => {
       o.verschuif=verschuif;o.nieuwA=a-verschuif;o.nieuwB=b+verschuif;o.richting='naar-b';
     }
     return o;
+  }
+  function maakVermenigvuldiging(variant,index){
+    const factor=willekeurig(2,9);
+    const geheel=willekeurig(1,5);
+    const tienden=willekeurig(1,9);
+    const komma=geheel*10+tienden;
+    const product=factor*komma;
+    return {
+      sleutel:`kvm-${factor}-${komma}-${variant}-${index}`,
+      variant,bewerking:'vermenigvuldigen',decimalen:1,
+      factor,komma,geheel,tienden,product,
+      kommaTekst:fmt(komma),
+      antwoord:fmt(product),
+      splitsing:`(${factor} × ${geheel}) + (${factor} × 0,${tienden})`,
+      tussenstap:`${factor*geheel} + ${fmt(factor*tienden)}`
+    };
   }
   function maakAftrek(brug,variant,index,voorbeeld=false){
     let a,b;
@@ -308,12 +339,75 @@ const Kommagetallen = (() => {
       antwoorden:rijen.map(r=>kolommen.map(k=>fmt(aftrek?r-k:r+k)))
     };
   }
-  function genereer({bewerking='optellen',brug='zonder',variant='kort',aantalOefeningen=6,toonVoorbeeld=false}={}){
+  function genereer({bewerking='optellen',brug='zonder',variant='kort',aantalOefeningen=6,toonVoorbeeld=false,decimalen=1}={}){
+    if(variant==='vermenigvuldigen-haakjes'||variant==='vermenigvuldigen-zelf'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
+        const oef=maakVermenigvuldiging(variant,i);
+        const sleutel=`${oef.factor}-${oef.komma}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
+    if(variant==='getalpuzzel'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*30&&uit.length<aantalOefeningen;i++){
+        const oef=maakGetalpuzzel(decimalen,i);
+        if(!gezien.has(oef.sleutel)){gezien.add(oef.sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
+    if(variant==='kort-bewerkingen-gemengd'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*80&&uit.length<aantalOefeningen;i++){
+        const aftrek=uit.length%2===1;
+        const gekozenBrug=brug==='gemengd'?(Math.floor(uit.length/2)%2===0?'zonder':'met'):brug;
+        let oef;
+        if(decimalen===2){
+          if(aftrek){
+            const v=gekozenBrug==='met'?'aftrek-kort-honderdsten-brug':'aftrek-kort-honderdsten';
+            oef=gekozenBrug==='met'?maakAftrekHonderdsteBrug(v,i):maakAftrekHonderdste(v,i);
+          }else{
+            const v=gekozenBrug==='met'?'kort-honderdsten-brug':'kort-honderdsten';
+            oef=gekozenBrug==='met'?maakHonderdsteBrug(v,i):maakHonderdste(v,i);
+          }
+        }else{
+          const v=aftrek?'aftrek-kort':'kort';
+          oef=aftrek?maakAftrek(gekozenBrug,v,i):maak(gekozenBrug,v,i);
+        }
+        oef.brug=gekozenBrug;oef.bewerking=aftrek?'aftrekken':'optellen';
+        const sleutel=`${oef.bewerking}-${oef.a}-${oef.b}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(oef);}
+      }
+      return uit.sort(()=>Math.random()-.5);
+    }
+    if(variant==='rooster-bewerkingen-gemengd'){
+      const uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*80&&uit.length<aantalOefeningen;i++){
+        const aftrek=uit.length%2===1;
+        const gekozenBrug=brug==='gemengd'?(Math.floor(uit.length/2)%2===0?'zonder':'met'):brug;
+        const oef=decimalen===2?(aftrek?maakAftrekRoosterHonderdste(gekozenBrug):maakRoosterHonderdste(gekozenBrug)):maakRooster(aftrek?'aftrekken':'optellen',gekozenBrug);
+        if(!gezien.has(oef.sleutel)){gezien.add(oef.sleutel);uit.push(oef);}
+      }
+      return uit;
+    }
+    if(variant==='kort-honderdsten-gemengd'||variant==='aftrek-kort-honderdsten-gemengd'){
+      const aftrek=variant.startsWith('aftrek-'),uit=[],gezien=new Set();
+      for(let i=0;i<aantalOefeningen*60&&uit.length<aantalOefeningen;i++){
+        const met=uit.length%2===1;
+        const basis=aftrek?(met?'aftrek-honderdsten-brug':'aftrek-kort-honderdsten'):(met?'kort-honderdsten-brug':'kort-honderdsten');
+        const oef=aftrek?(met?maakAftrekHonderdsteBrug(basis,i):maakAftrekHonderdste(basis,i)):(met?maakHonderdsteBrug(basis,i):maakHonderdste(basis,i));
+        oef.variant=variant;oef.brug=met?'met':'zonder';
+        const sleutel=`${oef.a}-${oef.b}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(oef);}
+      }
+      return uit.sort(()=>Math.random()-.5);
+    }
     if(variant==='rooster-honderdsten'){
-      return uniekeRoosters(()=>maakRoosterHonderdste(),aantalOefeningen);
+      return uniekeRoosters(()=>maakRoosterHonderdste(brug),aantalOefeningen);
     }
     if(variant==='aftrek-rooster-honderdsten'){
-      return uniekeRoosters(()=>maakAftrekRoosterHonderdste(),aantalOefeningen);
+      return uniekeRoosters(()=>maakAftrekRoosterHonderdste(brug),aantalOefeningen);
     }
     if(['aftrek-schijfjes-honderdsten','aftrek-splitsen-honderdsten','aftrek-honderdsten','aftrek-kort-honderdsten'].includes(variant)){
       const uit=[],gezien=new Set();
@@ -323,7 +417,7 @@ const Kommagetallen = (() => {
       }
       return uit;
     }
-    if(['aftrek-splitsen-honderdsten-brug','aftrek-compenseren-honderdsten','aftrek-transformeren-honderdsten','aftrek-honderdsten-brug'].includes(variant)){
+    if(['aftrek-splitsen-honderdsten-brug','aftrek-compenseren-honderdsten','aftrek-transformeren-honderdsten','aftrek-honderdsten-brug','aftrek-kort-honderdsten-brug'].includes(variant)){
       const uit=[],gezien=new Set();
       for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
         const oef=maakAftrekHonderdsteBrug(variant,i),sleutel=`${oef.a}-${oef.b}`;
@@ -344,6 +438,17 @@ const Kommagetallen = (() => {
     }
     if(variant==='rooster'||variant==='aftrek-rooster'){
       return uniekeRoosters(()=>maakRooster(bewerking,brug),aantalOefeningen);
+    }
+    if(brug==='gemengd'&&(variant==='kort'||variant==='aftrek-kort')){
+      const uit=[],gezien=new Set(),aftrek=bewerking==='aftrekken';
+      for(let i=0;i<aantalOefeningen*50&&uit.length<aantalOefeningen;i++){
+        const soort=uit.length%2===0?'zonder':'met';
+        const o=aftrek?maakAftrek(soort,variant,i):maak(soort,variant,i);
+        o.brug=soort;
+        const sleutel=`${o.a}-${o.b}`;
+        if(!gezien.has(sleutel)){gezien.add(sleutel);uit.push(o);}
+      }
+      return uit.sort(()=>Math.random()-.5);
     }
     const uit=[],gezien=new Set();
     for(let i=0;i<aantalOefeningen*40&&uit.length<aantalOefeningen;i++){
