@@ -2112,8 +2112,46 @@ function _getSplitsConfig() {
 
   function selecteerKommaRadio(naam,waarde,el){
     document.querySelectorAll(`[name="${naam}"]`).forEach(r=>{r.checked=r.value===waarde;r.closest('.radio-chip')?.classList.toggle('geselecteerd',r.checked);});
+    if(naam==='komma-niveau'){
+      const honderdste=waarde==='honderdste';
+      const kaartH=document.getElementById('kaart-komma-honderdste-vormen');
+      const kaartHM=document.getElementById('kaart-komma-honderdste-met-vormen');
+      const kaartHA=document.getElementById('kaart-komma-honderdste-aftrek-vormen');
+      const kaartHAM=document.getElementById('kaart-komma-honderdste-aftrek-met-vormen');
+      if(honderdste){
+        const aftrek=document.querySelector('[name="komma-bewerking"]:checked')?.value==='aftrekken';
+        const zonder=document.querySelector('[name="komma-brug"][value="zonder"]');
+        if(zonder)selecteerKommaRadio('komma-brug','zonder',zonder.closest('.radio-chip'));
+        document.getElementById('kaart-komma-optelvormen').style.display='none';
+        document.getElementById('kaart-komma-aftrekvormen').style.display='none';
+        document.querySelector('.komma-strategie-keuze').style.display='none';
+        document.querySelector('.komma-aftrek-rooster-keuze').style.display='none';
+        if(kaartH)kaartH.style.display=aftrek?'none':'';
+        if(kaartHM)kaartHM.style.display='none';
+        if(kaartHA)kaartHA.style.display=aftrek?'':'none';
+        if(kaartHAM)kaartHAM.style.display='none';
+        document.getElementById('komma-brug-titel').textContent=`${aftrek?'Aftrekken':'Optellen'} tot op een honderdste`;
+        const nieuw=aftrek?'aftrek-schijfjes-honderdsten':'honderdsten';
+        const radio=document.querySelector(`[name="komma-variant"][value="${nieuw}"]`);
+        if(radio)selecteerKommaRadio('komma-variant',nieuw,radio.closest('.radio-chip'));
+      }else{
+        if(kaartH)kaartH.style.display='none';
+        if(kaartHM)kaartHM.style.display='none';
+        if(kaartHA)kaartHA.style.display='none';
+        if(kaartHAM)kaartHAM.style.display='none';
+        const huidig=document.querySelector('[name="komma-bewerking"]:checked')?.value||'optellen';
+        const radio=document.querySelector(`[name="komma-bewerking"][value="${huidig}"]`);
+        if(radio)selecteerKommaRadio('komma-bewerking',huidig,radio.closest('.radio-chip'));
+      }
+      return;
+    }
     if(naam==='komma-bewerking'){
       const aftrek=waarde==='aftrekken';
+      if(document.querySelector('[name="komma-niveau"]:checked')?.value==='honderdste'){
+        const zonder=document.querySelector('[name="komma-brug"][value="zonder"]');
+        if(zonder)selecteerKommaRadio('komma-brug','zonder',zonder.closest('.radio-chip'));
+        return;
+      }
       document.getElementById('kaart-komma-brug').style.display='';
       document.getElementById('komma-brug-titel').textContent=aftrek?'Aftrekken tot op een tiende':'Optellen tot op een tiende';
       document.getElementById('komma-brug-icon').textContent=aftrek?'➖':'➕';
@@ -2138,9 +2176,34 @@ function _getSplitsConfig() {
       return;
     }
     if(naam==='komma-brug'){
+      if(waarde==='gemengd'&&document.querySelector('[name="komma-niveau"]:checked')?.value==='honderdste'){
+        const niveau=document.querySelector('[name="komma-niveau"][value="tiende"]');
+        if(niveau)selecteerKommaRadio('komma-niveau','tiende',niveau.closest('.radio-chip'));
+      }
       const met=waarde==='met';
       const gemengd=waarde==='gemengd';
       const aftrek=document.querySelector('[name="komma-bewerking"]:checked')?.value==='aftrekken';
+      const honderdste=document.querySelector('[name="komma-niveau"]:checked')?.value==='honderdste';
+      if(honderdste){
+        if(aftrek&&gemengd){
+          const zonder=document.querySelector('[name="komma-brug"][value="zonder"]');
+          if(zonder)selecteerKommaRadio('komma-brug','zonder',zonder.closest('.radio-chip'));
+          return;
+        }
+        document.getElementById('kaart-komma-optelvormen').style.display='none';
+        document.getElementById('kaart-komma-aftrekvormen').style.display='none';
+        document.querySelector('.komma-strategie-keuze').style.display='none';
+        document.querySelector('.komma-aftrek-rooster-keuze').style.display='none';
+        document.getElementById('kaart-komma-honderdste-vormen').style.display=aftrek||met?'none':'';
+        document.getElementById('kaart-komma-honderdste-met-vormen').style.display=!aftrek&&met?'':'none';
+        document.getElementById('kaart-komma-honderdste-aftrek-vormen').style.display=aftrek&&!met?'':'none';
+        document.getElementById('kaart-komma-honderdste-aftrek-met-vormen').style.display=aftrek&&met?'':'none';
+        document.getElementById('komma-brug-titel').textContent=`${aftrek?'Aftrekken':'Optellen'} tot op een honderdste`;
+        const nieuw=aftrek?(met?'aftrek-splitsen-honderdsten-brug':'aftrek-schijfjes-honderdsten'):met?'splitsen-honderdsten-brug':'honderdsten';
+        const radio=document.querySelector(`[name="komma-variant"][value="${nieuw}"]`);
+        if(radio)selecteerKommaRadio('komma-variant',nieuw,radio.closest('.radio-chip'));
+        return;
+      }
       document.querySelector('.komma-strategie-keuze').style.display=met&&!aftrek?'':'none';
       document.getElementById('komma-aftrek-zonder-vormen').style.display=aftrek&&!met&&!gemengd?'':'none';
       document.getElementById('komma-aftrek-met-vormen').style.display=aftrek&&met?'':'none';
@@ -2162,26 +2225,36 @@ function _getSplitsConfig() {
     if(naam==='komma-variant'){
       const voorbeeldKeuze=document.querySelector('.komma-voorbeeld-keuze');
       if(voorbeeldKeuze)voorbeeldKeuze.style.display=waarde==='aftrek-brug-schijfjes'?'flex':'none';
+      const schemaH=document.querySelector('.komma-transform-h-schema-keuze');
+      if(schemaH)schemaH.style.display=waarde==='transformeren-honderdsten'?'flex':'none';
+      const aftrekSchemaH=document.querySelector('.komma-aftrek-transform-h-schema-keuze');
+      if(aftrekSchemaH)aftrekSchemaH.style.display=waarde==='aftrek-transformeren-honderdsten'?'flex':'none';
       if(waarde==='compenseren'||waarde==='transformeren'){
         const brug=document.querySelector('[name="komma-brug"][value="met"]');
         if(brug)selecteerKommaRadio('komma-brug','met',brug.closest('.radio-chip'));
       }
-      const zinnen={kort:'Los de optellingen op.',rooster:'Vul het rekenrooster in.',splitsen:'Vul de splitsing in. Schrijf de tussenstappen. Schrijf de som.',tienden:'Schrijf beide termen als tienden. Maak de som. Schrijf het kommagetal.',compenseren:'Los op via compenseren.',transformeren:'Los op via transformeren.','aftrek-rooster':'Vul het rekenrooster in.','aftrek-schijfjes':'Streep door wat je weg doet. Los op.','aftrek-tienden':'Schrijf beide termen als tienden. Maak de aftrekking. Schrijf het kommagetal.','aftrek-aanvullen':'Los op door aan te vullen.','aftrek-kort':'Los de aftrekkingen op.','aftrek-brug-splitsen':'Teken de splitsing. Schrijf de tussenstappen. Los de aftrekking op.','aftrek-brug-schijfjes':'Bekijk het schema met schijfjes. Schrijf de tussenstappen. Los de aftrekking op.','aftrek-brug-tienden':'Schrijf beide termen als tienden. Los de aftrekking op. Schrijf het kommagetal.','aftrek-brug-aanvullen':'Los op door aan te vullen.','aftrek-brug-compenseren':'Los de aftrekkingen op door te compenseren.','aftrek-brug-transformeren':'Los de aftrekkingen op door te transformeren.','aftrek-brug-kort':'Los de aftrekkingen op.'};
+      const zinnen={kort:'Los de optellingen op.',rooster:'Vul het rekenrooster in.',splitsen:'Vul de splitsing in. Schrijf de tussenstappen. Schrijf de som.',tienden:'Schrijf beide termen als tienden. Maak de som. Schrijf het kommagetal.',honderdsten:'Schrijf beide termen als honderdsten. Maak de som. Schrijf het kommagetal.','honderdsten-brug':'Schrijf beide termen als honderdsten. Maak de som. Schrijf het kommagetal.','tussenstappen-honderdsten-brug':'Los op. Je mag splitsen en tussenstappen noteren. Schrijf de som.','kort-honderdsten-brug':'Los de optellingen op. Kies zelf hoe je daarbij te werk gaat.','splitsen-honderdsten':'Vul de splitsing in. Schrijf de tussenstappen en de som.','kort-honderdsten':'Maak de som.','rooster-honderdsten':'Vul het rekenrooster in.','splitsen-honderdsten-brug':'Los op via splitsen.','compenseren-honderdsten':'Los op via compenseren.','transformeren-honderdsten':'Los op via transformeren.',compenseren:'Los op via compenseren.',transformeren:'Los op via transformeren.','aftrek-rooster':'Vul het rekenrooster in.','aftrek-schijfjes':'Streep door wat je weg doet. Los op.','aftrek-tienden':'Schrijf beide termen als tienden. Maak de aftrekking. Schrijf het kommagetal.','aftrek-aanvullen':'Los op door aan te vullen.','aftrek-kort':'Los de aftrekkingen op.','aftrek-brug-splitsen':'Teken de splitsing. Schrijf de tussenstappen. Los de aftrekking op.','aftrek-brug-schijfjes':'Bekijk het schema met schijfjes. Schrijf de tussenstappen. Los de aftrekking op.','aftrek-brug-tienden':'Schrijf beide termen als tienden. Los de aftrekking op. Schrijf het kommagetal.','aftrek-brug-aanvullen':'Los op door aan te vullen.','aftrek-brug-compenseren':'Los de aftrekkingen op door te compenseren.','aftrek-brug-transformeren':'Los de aftrekkingen op door te transformeren.','aftrek-brug-kort':'Los de aftrekkingen op.'};
+      Object.assign(zinnen,{'aftrek-schijfjes-honderdsten':'Schrap wat je er af haalt. Schrijf het verschil.','aftrek-splitsen-honderdsten':'Schrijf de splitsing en de tussenstappen. Schrijf het verschil.','aftrek-honderdsten':'Schrijf beide termen als honderdsten. Zoek het verschil. Schrijf het kommagetal.','aftrek-kort-honderdsten':'Los de aftrekkingen op.','aftrek-rooster-honderdsten':'Vul het rekenrooster in.'});
+      Object.assign(zinnen,{'aftrek-splitsen-honderdsten-brug':'Los op via splitsen.','aftrek-compenseren-honderdsten':'Los op via compenseren.','aftrek-transformeren-honderdsten':'Los op via transformeren.','aftrek-honderdsten-brug':'Schrijf beide termen als honderdsten. Zoek het verschil. Schrijf het kommagetal.'});
       const inp=document.getElementById('inp-opdrachtzin-komma');if(inp)inp.value=zinnen[waarde];
-      if(waarde==='rooster'||waarde==='aftrek-rooster'){
+      if(waarde==='rooster'||waarde==='aftrek-rooster'||waarde==='rooster-honderdsten'||waarde==='aftrek-rooster-honderdsten'){
         const aantal=document.getElementById('inp-aantal-komma');if(aantal)aantal.value='1';
       }
     }
   }
   function voegKommaBlokToe(){
     const bewerking=document.querySelector('[name="komma-bewerking"]:checked')?.value||'optellen';
+    const niveau=document.querySelector('[name="komma-niveau"]:checked')?.value||'tiende';
     const brug=document.querySelector('[name="komma-brug"]:checked')?.value||'zonder';
     const variant=document.querySelector('[name="komma-variant"]:checked')?.value||'kort';
     const aantalOefeningen=parseInt(document.getElementById('inp-aantal-komma')?.value||'8');
     const toonVoorbeeld=!!document.getElementById('inp-komma-voorbeeld')?.checked&&variant==='aftrek-brug-schijfjes';
+    const toonTransformSchemaH=!!document.getElementById('inp-komma-transform-schema-h')?.checked&&variant==='transformeren-honderdsten';
+    const toonAftrekTransformSchemaH=!!document.getElementById('inp-komma-aftrek-transform-schema-h')?.checked&&variant==='aftrek-transformeren-honderdsten';
     const opdrachtzin=document.getElementById('inp-opdrachtzin-komma')?.value.trim()||'Los de optellingen op.';
     const oefeningen=Kommagetallen.genereer({bewerking,brug,variant,aantalOefeningen,toonVoorbeeld});
-    bundelData.push({id:`blok-komma-${Date.now()}`,bewerking:'kommagetallen',niveau:'tienden',opdrachtzin,hulpmiddelen:[],oefeningen,config:{soort:'kommagetallen',bewerking,decimalen:1,brug,variant,aantalOefeningen,toonVoorbeeld}});
+    const decimalen=niveau==='honderdste'?2:1;
+    bundelData.push({id:`blok-komma-${Date.now()}`,bewerking:'kommagetallen',niveau:niveau==='honderdste'?'honderdsten':'tienden',opdrachtzin,hulpmiddelen:[],oefeningen,config:{soort:'kommagetallen',bewerking,decimalen,niveau,brug,variant,aantalOefeningen,toonVoorbeeld,toonTransformSchemaH,toonAftrekTransformSchemaH}});
     Preview.render(bundelData);toonToast(`Kommablok toegevoegd! (${oefeningen.length} oefeningen)`,'#2e9d62');
   }
 

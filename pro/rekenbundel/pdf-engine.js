@@ -4175,7 +4175,6 @@ lijnKort(fx, formY);
       const totaalKaarten=aantalPreviewKaarten;
       let verwerkteKaarten=0;
       body.classList.toggle('toont-oplossingen',metAntw);
-      body.classList.add('pdf-opname');
       try { for(const blok of bundelData){
         const el=document.querySelector(`.preview-blok[data-id="${blok.id}"]`);
         if(!el)continue;
@@ -4189,6 +4188,8 @@ lijnKort(fx, formY);
             foreignObjectRendering:false,
             ignoreElements:n=>n.classList?.contains('btn-del-oef')||n.classList?.contains('pdf-progress-overlay'),
             onclone:gekloondDocument=>{
+              gekloondDocument.body.classList.add('pdf-opname');
+              gekloondDocument.body.classList.toggle('toont-oplossingen',metAntw);
               const voortgang=gekloondDocument.getElementById('pdf-progress-overlay');
               if(voortgang)voortgang.style.display='none';
             }
@@ -4196,14 +4197,17 @@ lijnKort(fx, formY);
           verwerkteKaarten++;
           meldVoortgang(5+Math.round(82*verwerkteKaarten/totaalKaarten),`Oefening ${verwerkteKaarten} van ${totaalKaarten} verwerkt`);
         }
-        const isRekenrooster=blok.config?.variant==='rooster'||blok.config?.variant==='aftrek-rooster';
-        const compact=(blok.config?.soort==='kommagetallen'&&!isRekenrooster)||blok.config?.variant==='afbeelding'||blok.config?.variant==='zonder',doelW=compact?(CW-5)/2:CW;
-        const eersteAantal=compact?Math.min(2,kaarten.length):Math.min(1,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));checkRuimte(8+eersteH+5);
-        doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=8;
+        const isRekenrooster=blok.config?.variant==='rooster'||blok.config?.variant==='aftrek-rooster'||blok.config?.variant==='rooster-honderdsten'||blok.config?.variant==='aftrek-rooster-honderdsten';
+        const schrijfAlsHonderdsten=blok.config?.soort==='kommagetallen'&&['honderdsten','honderdsten-brug','aftrek-honderdsten'].includes(blok.config?.variant);
+        const gewoneTiendensom=blok.config?.soort==='kommagetallen'&&['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten'].includes(blok.config?.variant);
+        const compact=(blok.config?.soort==='kommagetallen'&&!isRekenrooster&&!schrijfAlsHonderdsten)||blok.config?.variant==='afbeelding'||blok.config?.variant==='zonder';
+        const kolommenPerRij=compact?(gewoneTiendensom?3:2):1,doelW=(CW-(kolommenPerRij-1)*5)/kolommenPerRij;
+        const eersteAantal=Math.min(kolommenPerRij,kaarten.length),eersteH=Math.max(0,...kaarten.slice(0,eersteAantal).map(c=>doelW*c.height/c.width));checkRuimte(6+eersteH+5);
+        doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(26,58,92);doc.text(blok.opdrachtzin,ML,y);y+=6;
         let kol=0,rijMax=0;
-        for(const canvas of kaarten){const h=doelW*canvas.height/canvas.width;if(!compact){checkRuimte(h+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',ML,y,doelW,h);y+=h+5;continue;}if(kol===0){checkRuimte(h+5);rijMax=0;}const px=ML+kol*(doelW+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',px,y,doelW,h);rijMax=Math.max(rijMax,h);kol++;if(kol===2){y+=rijMax+5;kol=0;}}
+        for(const canvas of kaarten){const h=doelW*canvas.height/canvas.width;if(!compact){checkRuimte(h+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',ML,y,doelW,h);y+=h+5;continue;}if(kol===0){checkRuimte(h+5);rijMax=0;}const px=ML+kol*(doelW+5);doc.addImage(canvas.toDataURL('image/png'),'PNG',px,y,doelW,h);rijMax=Math.max(rijMax,h);kol++;if(kol===kolommenPerRij){y+=rijMax+5;kol=0;}}
         if(compact&&kol)y+=rijMax+5;
-        if(isRekenrooster)y+=8;
+        if(isRekenrooster)y+=10;else y+=7;
       }} finally { body.classList.toggle('toont-oplossingen',had); body.classList.toggle('pdf-opname',hadPdfOpname); }
       meldVoortgang(94,'PDF samenstellen…');
       const naam=(titel||'rekenbundel').replace(/\s+/g,'-').toLowerCase()+(metAntw?'-oplossingssleutel':'')+'.pdf';

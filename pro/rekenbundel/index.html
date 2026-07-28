@@ -816,6 +816,12 @@
     <!-- ── KOMMAGETALLEN SIDEBAR CONTENT ─────────────────────── -->
     <div class="sidebar-content" id="tab-komma" style="display:none">
       <div class="sectie-titel">🔢 Kommagetallen</div>
+      <div class="config-kaart"><div class="kaart-titel"><div class="icon">🎯</div>Nauwkeurigheid</div>
+        <div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-niveau','tiende',this)"><input type="radio" name="komma-niveau" value="tiende" checked>Tot op een tiende</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-niveau','honderdste',this)"><input type="radio" name="komma-niveau" value="honderdste">Tot op een honderdste</label>
+        </div>
+      </div>
       <div style="display:none" aria-hidden="true">
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;gap:16px;">
         <div style="font-size:48px;">🚧</div>
@@ -855,6 +861,35 @@
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen',this)"><input type="radio" name="komma-variant" value="splitsen">Via splitsen</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tienden',this)"><input type="radio" name="komma-variant" value="tienden">Schrijf als tienden</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','rooster',this)"><input type="radio" name="komma-variant" value="rooster">Rekenrooster</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-honderdste-vormen" style="display:none"><div class="kaart-titel"><div class="icon">✏️</div>Optellen zonder brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','honderdsten',this)"><input type="radio" name="komma-variant" value="honderdsten">Schrijf als honderdsten</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen-honderdsten',this)"><input type="radio" name="komma-variant" value="splitsen-honderdsten">Splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','kort-honderdsten',this)"><input type="radio" name="komma-variant" value="kort-honderdsten">Gewone oefeningen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','rooster-honderdsten',this)"><input type="radio" name="komma-variant" value="rooster-honderdsten">Rekenrooster</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-honderdste-met-vormen" style="display:none"><div class="kaart-titel"><div class="icon">🌉</div>Optellen met brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="splitsen-honderdsten-brug">Splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','compenseren-honderdsten',this)"><input type="radio" name="komma-variant" value="compenseren-honderdsten">Compenseren</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','transformeren-honderdsten',this)"><input type="radio" name="komma-variant" value="transformeren-honderdsten">Transformeren</label>
+        <label class="komma-transform-h-schema-keuze" style="display:none"><input type="checkbox" id="inp-komma-transform-schema-h"> <span>Toon het gekleurde hulpschema</span></label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','honderdsten-brug',this)"><input type="radio" name="komma-variant" value="honderdsten-brug">Schrijf als honderdsten</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tussenstappen-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="tussenstappen-honderdsten-brug">Met tussenstappen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','kort-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="kort-honderdsten-brug">Gewone oefeningen</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-honderdste-aftrek-vormen" style="display:none"><div class="kaart-titel"><div class="icon">➖</div>Aftrekken zonder brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-schijfjes-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-schijfjes-honderdsten">Schema met schijfjes</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-splitsen-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-splitsen-honderdsten">Splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-honderdsten">Schrijf als honderdsten</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-kort-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-kort-honderdsten">Gewone oefeningen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-rooster-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-rooster-honderdsten">Rekenrooster</label>
+      </div></div>
+      <div class="config-kaart" id="kaart-komma-honderdste-aftrek-met-vormen" style="display:none"><div class="kaart-titel"><div class="icon">➖</div>Aftrekken met brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-splitsen-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="aftrek-splitsen-honderdsten-brug">Splitsen</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-compenseren-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-compenseren-honderdsten">Compenseren</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-transformeren-honderdsten',this)"><input type="radio" name="komma-variant" value="aftrek-transformeren-honderdsten">Transformeren</label>
+        <label class="radio-chip komma-aftrek-transform-h-schema-keuze" style="display:none"><input type="checkbox" id="inp-komma-aftrek-transform-schema-h"> Toon het gekleurde transformschema</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-honderdsten-brug',this)"><input type="radio" name="komma-variant" value="aftrek-honderdsten-brug">Schrijf als honderdsten</label>
       </div></div>
       <div class="config-kaart" id="kaart-komma-aftrekvormen" style="display:none"><div class="kaart-titel"><div class="icon">➖</div>Oefenvorm aftrekken</div><div class="radio-groep radio-groep-kolom" id="komma-aftrek-zonder-vormen">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','aftrek-schijfjes',this)"><input type="radio" name="komma-variant" value="aftrek-schijfjes">Schema met schijfjes</label>

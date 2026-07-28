@@ -3006,6 +3006,15 @@ body.pdf-opname .mg-aftrek-zwarte-pijl{font-size:46px;line-height:40px}
 .komma-oef{position:relative;min-height:92px;padding:22px 34px 20px 20px;font-size:22px;display:flex;align-items:center;gap:10px}
 .komma-kort{justify-content:flex-start}
 .komma-antwoord{display:inline-block;min-width:78px;min-height:28px;border-bottom:1.5px solid #8795a3;color:#0672b8;font-weight:700;text-align:center}
+body.pdf-opname .komma-kort{
+  min-height:64px;
+  padding:10px 18px;
+  font-size:19px;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+body.pdf-opname .komma-kort>span:first-child{white-space:nowrap}
+body.pdf-opname .komma-kort .komma-antwoord{min-width:90px}
 .komma-tienden{min-height:118px;white-space:nowrap;font-size:19px}
 .komma-lijn{display:inline-block;width:58px;height:24px;border-bottom:1.5px solid #9aa5ae}
 .komma-splits{min-height:190px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start}
@@ -3445,3 +3454,137 @@ body.pdf-opname .komma-aftrek-trans-pijlen b{font-size:49px;top:12px}
 body.pdf-opname .komma-aftrek-trans-pijlen i{top:35px;width:74px;font-size:20px}
 body.pdf-opname .komma-aftrek-trans-pijlen>span:first-child i{right:64px}
 body.pdf-opname .komma-aftrek-trans-pijlen>span:last-child i{left:64px}
+
+/* Optellen zonder brug tot op een honderdste. */
+.komma-getallen-grid.komma-honderdsten,
+.komma-getallen-grid.komma-splitsen-honderdsten{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+.komma-getallen-grid.komma-honderdsten,
+.komma-getallen-grid.komma-honderdsten-brug{grid-template-columns:minmax(0,1fr)}
+.komma-honderdsten{
+  min-height:138px;
+  padding:22px 14px;
+  font-size:17px;
+  line-height:1.7;
+  white-space:nowrap;
+}
+.komma-honderdsten .komma-lijn{width:52px;height:29px}
+.komma-honderdsten .komma-antwoord{width:52px;min-width:52px}
+.komma-splits-honderdsten{
+  min-height:270px;
+  display:grid;
+  grid-template-columns:225px minmax(190px,1fr);
+  align-items:start;
+  gap:18px;
+  padding:22px 28px 20px 20px;
+}
+.komma-h-hoofdsom{display:flex;align-items:flex-start;gap:7px;font-size:20px;white-space:nowrap}
+.komma-h-term{position:relative;display:inline-flex;justify-content:center;min-width:58px}
+.komma-h-splitsbeen{
+  position:absolute;
+  left:50%;
+  top:31px;
+  width:180px;
+  transform:translateX(-50%);
+  display:grid;
+  grid-template-columns:repeat(3,54px);
+  gap:9px;
+  padding-top:38px;
+}
+.komma-h-splitsbeen svg{position:absolute;left:0;top:0;width:180px;height:38px;overflow:visible}
+.komma-h-splitsbeen svg line{stroke:#8db3c7;stroke-width:1.5}
+.komma-h-splitsbeen .komma-vak{width:54px;height:46px;box-sizing:border-box;display:flex;align-items:center;justify-content:center}
+.komma-h-stappen{display:flex;flex-direction:column;gap:22px;padding-top:47px}
+.komma-h-stappen>span{display:block;min-height:27px;border-bottom:1px solid #aeb8c0;color:#087ab7;font-size:18px}
+body.pdf-opname .komma-honderdsten{min-height:190px;padding:32px 24px;font-size:27px}
+body.pdf-opname .komma-honderdsten .komma-lijn{width:82px;height:39px}
+body.pdf-opname .komma-honderdsten .komma-antwoord{width:82px;min-width:82px}
+body.pdf-opname .komma-splits-honderdsten{min-height:365px;grid-template-columns:267px minmax(255px,1fr);gap:12px;padding:30px 38px 28px 27px}
+body.pdf-opname .komma-h-hoofdsom{font-size:27px}
+body.pdf-opname .komma-h-splitsbeen{top:42px;width:240px;grid-template-columns:repeat(3,72px);gap:12px;padding-top:51px}
+body.pdf-opname .komma-h-splitsbeen svg{width:240px;height:51px}
+body.pdf-opname .komma-h-splitsbeen .komma-vak{width:72px;height:62px;font-size:23px}
+body.pdf-opname .komma-h-stappen{gap:30px;padding-top:63px}
+body.pdf-opname .komma-h-stappen>span{min-height:37px;font-size:24px}
+
+.komma-getallen-grid.komma-kort-honderdsten{grid-template-columns:repeat(3,minmax(0,1fr))}
+.komma-getallen-grid.komma-kort-honderdsten-brug,
+.komma-getallen-grid.komma-tussenstappen-honderdsten-brug{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-kort-honderdsten{min-height:105px;padding:18px 26px;font-size:20px;gap:9px}
+.komma-kort-honderdsten .komma-brug-lange-lijn{min-width:95px}
+.komma-getallen-grid.komma-rooster-honderdsten{grid-template-columns:minmax(0,1fr)}
+body.pdf-opname .komma-kort-honderdsten{
+  min-height:100px;
+  padding:16px 18px;
+  font-size:23px;
+  flex-direction:row;
+  flex-wrap:nowrap;
+  align-items:center;
+  gap:12px;
+}
+body.pdf-opname .komma-kort-honderdsten>span:first-child{white-space:nowrap;flex:0 0 auto}
+body.pdf-opname .komma-kort-honderdsten .komma-brug-lange-lijn{width:auto;min-width:90px;max-width:125px;flex:1 1 105px}
+.komma-h-werk{min-height:245px;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;padding:24px 30px;gap:25px}
+.komma-h-werk-som{display:flex;align-items:center;gap:14px;font-size:21px;white-space:nowrap}
+.komma-h-werk-som .komma-antwoord{min-width:82px;height:36px;border:1px solid #9fc0d0}
+.komma-h-werk-regels{display:flex;flex-direction:column;gap:22px;padding-left:38%}
+.komma-h-werk-regels>span{display:block;min-height:28px;border-bottom:1px solid #aeb8c0;color:#087ab7;text-align:left}
+body.pdf-opname .komma-h-werk{min-height:310px;padding:32px 40px;gap:32px}
+body.pdf-opname .komma-h-werk-som{font-size:28px;gap:18px}
+body.pdf-opname .komma-h-werk-som .komma-antwoord{min-width:110px;height:48px}
+body.pdf-opname .komma-h-werk-regels{gap:29px}
+body.pdf-opname .komma-h-werk-regels>span{min-height:38px;font-size:23px}
+
+/* Optellen met brug tot op een honderdste. */
+.komma-getallen-grid.komma-splitsen-honderdsten-brug,
+.komma-getallen-grid.komma-compenseren-honderdsten,
+.komma-getallen-grid.komma-transformeren-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-h-comp{min-height:235px}
+.komma-transform-h-schema-keuze{align-items:center;gap:8px;margin-top:9px;padding:9px 10px;border:1px solid #8fc9da;border-radius:7px;background:#eefaff;font-size:13px;font-weight:600}
+.komma-transform-h-schema-keuze input{width:17px;height:17px;accent-color:#168fbd}
+.komma-h-transform{min-height:240px;flex-direction:column;justify-content:flex-start;gap:8px;padding:18px 26px 20px}
+.komma-h-transform.met-schema{min-height:325px}
+.komma-h-trans-schema{width:88%;display:grid;grid-template-columns:2fr 1fr;grid-template-rows:43px 43px;margin-bottom:8px;font-size:19px}
+.komma-h-trans-schema>span{display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+.komma-trans-balk>span:nth-child(n+3),
+.komma-h-trans-schema>span:nth-child(n+3){border-top:2px solid #fff}
+.komma-h-trans-schema .blauw{background:#c9eaf3}
+.komma-h-trans-schema .geel{background:#fff0bc}
+.komma-h-trans-schema .breuk-antwoord{min-height:29px;padding-top:7px;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-h-trans-som,.komma-h-trans-nieuw{width:320px;display:grid;grid-template-columns:72px 22px 72px 22px 88px;gap:5px;align-items:center;justify-content:center;text-align:center;font-size:20px}
+.komma-h-trans-som .komma-antwoord,.komma-h-trans-nieuw .breuk-antwoord{min-height:28px;border-bottom:1px solid #aeb8c0;color:#087ab7}
+.komma-h-trans-pijlen{width:320px;display:grid;grid-template-columns:72px 22px 72px 22px 88px;gap:5px;justify-content:center;margin:-7px 0 -5px}
+.komma-h-trans-pijlen>span{position:relative;height:67px}
+.komma-h-trans-pijlen>span:first-child{grid-column:1}.komma-h-trans-pijlen>span:last-child{grid-column:3}
+.komma-h-trans-pijlen b{position:absolute;left:50%;top:8px;transform:translateX(-50%) scaleY(1.2);font-size:37px;font-weight:400;line-height:1}
+.komma-h-trans-pijlen i{position:absolute;top:24px;width:58px;min-height:21px;border-bottom:1px solid #aeb8c0;color:#087ab7;font-style:normal;font-size:15px}
+.komma-h-trans-pijlen>span:first-child i{right:48px;text-align:right}.komma-h-trans-pijlen>span:last-child i{left:48px;text-align:left}
+body.pdf-opname .komma-h-comp{min-height:320px}
+body.pdf-opname .komma-h-transform{min-height:325px;padding:25px 35px 28px}
+body.pdf-opname .komma-h-transform.met-schema{min-height:440px}
+body.pdf-opname .komma-h-trans-schema{grid-template-rows:58px 58px;font-size:26px}
+body.pdf-opname .komma-h-trans-som,body.pdf-opname .komma-h-trans-nieuw{width:430px;grid-template-columns:96px 30px 96px 30px 118px;gap:7px;font-size:27px}
+body.pdf-opname .komma-h-trans-pijlen{width:430px;grid-template-columns:96px 30px 96px 30px 118px;gap:7px}
+body.pdf-opname .komma-h-trans-pijlen>span{height:88px}
+body.pdf-opname .komma-h-trans-pijlen b{font-size:49px;top:10px}
+body.pdf-opname .komma-h-trans-pijlen i{top:34px;width:78px;font-size:20px}
+body.pdf-opname .komma-h-trans-pijlen>span:first-child i{right:66px}body.pdf-opname .komma-h-trans-pijlen>span:last-child i{left:66px}
+
+/* Aftrekken zonder brug tot op een honderdste. */
+.komma-getallen-grid.komma-aftrek-schijfjes-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-getallen-grid.komma-aftrek-honderdsten,
+.komma-getallen-grid.komma-aftrek-rooster-honderdsten{grid-template-columns:minmax(0,1fr)}
+.komma-getallen-grid.komma-aftrek-splitsen-honderdsten{grid-template-columns:repeat(2,minmax(0,1fr))}
+.komma-h-schijfjes{min-height:205px;flex-direction:column;align-items:stretch;padding:18px 24px;gap:18px}
+.komma-h-plaats{border:1px solid #777}
+.komma-h-plaats-kop,.komma-h-plaats-rij{display:grid;grid-template-columns:1fr 14px 1fr 1fr}
+.komma-h-plaats-kop>b{padding:7px 4px;text-align:center;background:#ffe498;border-right:1px solid #777}.komma-h-plaats-kop>b:first-child{background:#ffd400}.komma-h-plaats-kop>b:last-child{border-right:0}
+.komma-h-plaats-rij>span{min-height:62px;padding:6px;display:flex;flex-wrap:wrap;align-content:flex-start;gap:3px;background:#eee;border-right:1px solid #777}.komma-h-plaats-rij>span:last-child{border-right:0}
+.komma-h-plaats-kop>b:nth-child(2),.komma-h-plaats-rij>span:nth-child(2){background:#aaa;padding-left:0;padding-right:0;border-right:1px solid #666}
+.komma-h-plaats-rij .komma-schijf{width:21px;height:21px;font-size:8px}
+.komma-h-schijf-som{text-align:center;font-size:20px}
+body.pdf-opname .komma-h-schijfjes{min-height:275px;padding:24px 32px;gap:24px}
+body.pdf-opname .komma-h-plaats-rij>span{min-height:84px;padding:8px;gap:4px}
+body.pdf-opname .komma-h-plaats-rij .komma-schijf{width:28px;height:28px;font-size:10px}
+body.pdf-opname .komma-h-schijf-som{font-size:27px}
