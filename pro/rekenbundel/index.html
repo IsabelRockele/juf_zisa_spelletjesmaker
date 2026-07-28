@@ -850,6 +850,7 @@
           <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','aftrekken',this)"><input type="radio" name="komma-bewerking" value="aftrekken">Aftrekken</label>
           <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','gemengd',this)"><input type="radio" name="komma-bewerking" value="gemengd">Optellen en aftrekken</label>
           <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','vermenigvuldigen',this)"><input type="radio" name="komma-bewerking" value="vermenigvuldigen">Vermenigvuldigen</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-bewerking','delen',this)"><input type="radio" name="komma-bewerking" value="delen">Delen</label>
         </div>
       </div>
       <div class="config-kaart" id="kaart-komma-brug"><div class="kaart-titel"><div class="icon" id="komma-brug-icon">➕</div><span id="komma-brug-titel">Optellen tot op een tiende</span></div>
@@ -865,10 +866,29 @@
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','tienden',this)"><input type="radio" name="komma-variant" value="tienden">Schrijf als tienden</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','rooster',this)"><input type="radio" name="komma-variant" value="rooster">Rekenrooster</label>
       </div></div>
-      <div class="config-kaart" id="kaart-komma-vermenigvuldigvormen" style="display:none"><div class="kaart-titel"><div class="icon">✖️</div>Vermenigvuldigen door te splitsen en te verdelen</div><div class="radio-groep radio-groep-kolom">
+      <div class="config-kaart" id="kaart-komma-vermenigvuldigvormen" style="display:none"><div class="kaart-titel"><div class="icon">✖️</div>Oefenvorm vermenigvuldigen</div><div class="komma-maal-keuzetitel">Splitsen en verdelen</div><div class="radio-groep radio-groep-kolom">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-haakjes',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-haakjes">Haakjes staan klaar</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-zelf',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-zelf">Zelf de haakjes zetten</label>
+      </div><div class="komma-maal-keuzetitel">Compenseren</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-compenseren-haakjes',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-compenseren-haakjes">Haakjes staan klaar</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-compenseren-zelf',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-compenseren-zelf">Zelf de haakjes zetten</label>
+      </div><div class="komma-maal-keuzetitel">Nulregel en factoren</div><div class="radio-groep radio-groep-kolom">
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-nulregel',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-nulregel">Vermenigvuldigen met 10, 100 en 1 000</label>
+        <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','vermenigvuldigen-factoren',this)"><input type="radio" name="komma-variant" value="vermenigvuldigen-factoren">Ontbinden in factoren</label>
       </div></div>
+      <div class="config-kaart" id="kaart-komma-deelvormen" style="display:none"><div class="kaart-titel"><div class="icon">➗</div>Oefenvorm delen</div>
+        <div class="komma-deel-rest-keuze"><div class="komma-maal-keuzetitel">Rest</div><div class="radio-groep">
+          <label class="radio-chip geselecteerd" onclick="App.selecteerKommaRadio('komma-deel-rest','zonder',this)"><input type="radio" name="komma-deel-rest" value="zonder" checked>Zonder rest</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-deel-rest','met',this)"><input type="radio" name="komma-deel-rest" value="met">Met rest</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-deel-rest','gemengd',this)"><input type="radio" name="komma-deel-rest" value="gemengd">Gemengd</label>
+        </div></div><div class="komma-maal-keuzetitel">Splitsen en verdelen</div><div class="radio-groep radio-groep-kolom">
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','delen-haakjes',this)"><input type="radio" name="komma-variant" value="delen-haakjes">Haakjes staan klaar</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','delen-zelf',this)"><input type="radio" name="komma-variant" value="delen-zelf">Zelf de haakjes zetten</label>
+        </div><div class="komma-maal-keuzetitel">Nulregel en factoren</div><div class="radio-groep radio-groep-kolom">
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','delen-nulregel',this)"><input type="radio" name="komma-variant" value="delen-nulregel">Delen door 10, 100 en 1 000</label>
+          <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','delen-factoren',this)"><input type="radio" name="komma-variant" value="delen-factoren">Ontbinden in factoren</label>
+        </div>
+      </div>
       <div class="config-kaart" id="kaart-komma-honderdste-vormen" style="display:none"><div class="kaart-titel"><div class="icon">✏️</div>Optellen zonder brug tot op een honderdste</div><div class="radio-groep radio-groep-kolom">
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','honderdsten',this)"><input type="radio" name="komma-variant" value="honderdsten">Schrijf als honderdsten</label>
         <label class="radio-chip" onclick="App.selecteerKommaRadio('komma-variant','splitsen-honderdsten',this)"><input type="radio" name="komma-variant" value="splitsen-honderdsten">Splitsen</label>
