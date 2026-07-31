@@ -4416,6 +4416,10 @@ lijnKort(fx, formY);
     for (let blokIndex=0; blokIndex<bundelData.length; blokIndex++) {
       const blok=bundelData[blokIndex];
       meldVoortgang(5+Math.round(88*blokIndex/Math.max(1,bundelData.length)),`Onderdeel ${blokIndex+1} van ${bundelData.length} verwerken…`);
+      if (blok.bewerking === 'kommagetallen') {
+        await _tekenKommagetallenUitPreview(blok, meldVoortgang, blokIndex, bundelData.length);
+        continue;
+      }
       await _tekenBlok(blok);
     }
 
@@ -4425,6 +4429,72 @@ lijnKort(fx, formY);
     doc.save(`${bestandsnaam}${suffix}.pdf`);
     await new Promise(resolve=>setTimeout(resolve,100));
     meldVoortgang(100,'Klaar');
+  }
+
+  async function _tekenKommagetallenUitPreview(blok, meldVoortgang, blokIndex, totaalBlokken) {
+    if (!window.html2canvas) throw new Error('De PDF-module voor kommagetallen is niet geladen.');
+    const previewBlok = document.querySelector(`.preview-blok[data-id="${blok.id}"]`);
+    if (!previewBlok) throw new Error('De preview van het kommagetallenblok ontbreekt.');
+    const kaarten = Array.from(previewBlok.querySelectorAll('.komma-oef'));
+    if (kaarten.length === 0) throw new Error('Het kommagetallenblok bevat geen zichtbare oefeningen.');
+
+    const body = document.body;
+    const hadOplossingen = body.classList.contains('toont-oplossingen');
+    const hadPdfOpname = body.classList.contains('pdf-opname');
+    const canvassen = [];
+    body.classList.toggle('toont-oplossingen', _metAntwoorden);
+    try {
+      for (let i = 0; i < kaarten.length; i++) {
+        meldVoortgang(5 + Math.round(88 * (blokIndex + i / kaarten.length) / Math.max(1, totaalBlokken)), `Kommagetal ${i + 1} van ${kaarten.length} verwerken…`);
+        canvassen.push(await window.html2canvas(kaarten[i], {
+          scale: 2,
+          backgroundColor: '#fff',
+          useCORS: true,
+          foreignObjectRendering: false,
+          ignoreElements: n => n.classList?.contains('btn-del-oef') || n.classList?.contains('pdf-progress-overlay'),
+          onclone: gekloondDocument => {
+            gekloondDocument.body.classList.add('pdf-opname');
+            gekloondDocument.body.classList.toggle('toont-oplossingen', _metAntwoorden);
+            const voortgang = gekloondDocument.getElementById('pdf-progress-overlay');
+            if (voortgang) voortgang.style.display = 'none';
+          }
+        }));
+      }
+    } finally {
+      body.classList.toggle('toont-oplossingen', hadOplossingen);
+      body.classList.toggle('pdf-opname', hadPdfOpname);
+    }
+
+    const variant = blok.config?.variant;
+    const isRekenrooster = ['rooster','aftrek-rooster','rooster-honderdsten','aftrek-rooster-honderdsten','rooster-bewerkingen-gemengd'].includes(variant);
+    const schrijfAlsHonderdsten = ['honderdsten','honderdsten-brug','aftrek-honderdsten','aftrek-honderdsten-brug'].includes(variant);
+    const gewoneTiendensom = ['kort','aftrek-kort','aftrek-brug-kort','aftrek-kort-honderdsten','aftrek-kort-honderdsten-brug','kort-honderdsten-gemengd','aftrek-kort-honderdsten-gemengd','kort-bewerkingen-gemengd','vermenigvuldigen-nulregel','delen-nulregel'].includes(variant);
+    const compact = !isRekenrooster && !schrijfAlsHonderdsten;
+    const kolommenPerRij = compact ? (gewoneTiendensom ? 3 : 2) : 1;
+    const doelW = (CW - (kolommenPerRij - 1) * 5) / kolommenPerRij;
+    const opdrachtRegels = ['vermenigvuldigen','delen'].includes(blok.config?.bewerking)
+      ? (blok.opdrachtzin.match(/[^.!?]+[.!?]?/g) || [blok.opdrachtzin]).map(regel => regel.trim()).filter(Boolean)
+      : [blok.opdrachtzin];
+    const eersteAantal = Math.min(kolommenPerRij, canvassen.length);
+    const eersteH = Math.max(0, ...canvassen.slice(0, eersteAantal).map(canvas => doelW * canvas.height / canvas.width));
+    const opdrachtHoogte = opdrachtRegels.length * 6;
+    checkRuimte(opdrachtHoogte + eersteH + 5);
+    doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(26,58,92);
+    doc.text(opdrachtRegels, ML, y); y += opdrachtHoogte;
+
+    let kolom = 0, rijMax = 0;
+    for (const canvas of canvassen) {
+      const h = doelW * canvas.height / canvas.width;
+      if (!compact) {
+        checkRuimte(h + 5); doc.addImage(canvas.toDataURL('image/png'),'PNG',ML,y,doelW,h); y += h + 5; continue;
+      }
+      if (kolom === 0) { checkRuimte(h + 5); rijMax = 0; }
+      doc.addImage(canvas.toDataURL('image/png'),'PNG',ML + kolom * (doelW + 5),y,doelW,h);
+      rijMax = Math.max(rijMax,h); kolom++;
+      if (kolom === kolommenPerRij) { y += rijMax + 5; kolom = 0; }
+    }
+    if (compact && kolom) y += rijMax + 5;
+    y += isRekenrooster ? 10 : 7;
   }
 
   function _tekenKoptekstSleutel(titel, toonSplitsOpm = false) {
