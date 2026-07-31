@@ -379,7 +379,7 @@
 <main class="main">
   <div class="overview-toolbar">
     <div class="overview-welcome"><strong>Wat wil je vandaag maken?</strong><span>Kies een categorie of zoek meteen naar een tool.</span></div>
-    <label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="toolSearch" name="zisa-tool-zoeken" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Zoek bv. bingo, kloklezen of spelling…"></label>
+    <label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="toolSearch" name="zisa-tool-zoeken" type="search" autocomplete="new-password" autocapitalize="none" spellcheck="false" readonly placeholder="Zoek bv. bingo, kloklezen of spelling…"></label>
     <span class="search-result-count" id="searchResultCount"></span>
   </div>
 
@@ -624,7 +624,22 @@
   const toolSearch = document.getElementById('toolSearch');
   const searchResultCount = document.getElementById('searchResultCount');
   const noToolResults = document.getElementById('noToolResults');
+  let searchActivated = false;
+  function activateToolSearch() {
+    searchActivated = true;
+    toolSearch.readOnly = false;
+    if (toolSearch.value) {
+      toolSearch.value = '';
+      filterTools();
+    }
+  }
+  toolSearch.addEventListener('pointerdown', activateToolSearch, { once:true });
+  toolSearch.addEventListener('keydown', activateToolSearch, { once:true });
   function filterTools() {
+    // Negeer automatische invulling door een wachtwoordbeheerder.
+    if (!searchActivated) {
+      toolSearch.value = '';
+    }
     const query = toolSearch.value.trim().toLocaleLowerCase('nl'); let visible = 0;
     document.querySelectorAll('a.img-link').forEach(link => {
       const match = !query || link.textContent.toLocaleLowerCase('nl').includes(query) || (link.querySelector('img')?.alt || '').toLocaleLowerCase('nl').includes(query);
@@ -638,8 +653,17 @@
   // Wachtwoordbeheerders vullen soms het eerste invoerveld na een login in.
   // Het tooloverzicht moet bij openen altijd zonder zoekfilter starten.
   window.addEventListener('pageshow', () => {
+    searchActivated = false;
+    toolSearch.readOnly = true;
     toolSearch.value = '';
     filterTools();
+    // Sommige wachtwoordbeheerders vullen pas na het laden in.
+    [100, 500, 1500, 3000].forEach(delay => setTimeout(() => {
+      if (!searchActivated && toolSearch.value) {
+        toolSearch.value = '';
+        filterTools();
+      }
+    }, delay));
   });
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
