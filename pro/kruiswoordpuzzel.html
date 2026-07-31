@@ -2,13 +2,11 @@
 <html lang="nl">
 <head>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Kruiswoordpuzzel Generator</title>
 
     <!-- Styles liggen buiten /pro/ -->
     <link href="../kruiswoordpuzzel.css" rel="stylesheet"/>
-
-    <!-- Alle relatieve paden resolven t.o.v. /pro/ op GitHub Pages -->
-    <base href="/juf_zisa_spelletjesmaker/pro/">
 
     <!-- voorkom Google-Translate overlay / CSP-consolemelding -->
     <meta name="google" content="notranslate">
@@ -28,31 +26,34 @@
             cursor:pointer; display:inline-block; white-space:nowrap;
             /* float:left;  ← verwijderd: was overbodig en gaf console-waarschuwing */
         }
-        body { margin-top: 60px; }
     </style>
 </head>
 <body>
-<header class="pro-header">
-    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-</header>
+<div class="pro-banner">
+    <span class="pro-badge">★ PRO</span>
+    <span>Kruiswoordpuzzel Generator — Juf Zisa PRO</span>
+    <a href="app.html">← Terug naar menu</a>
+</div>
 
-<header>
-    <div class="header-knoppen">
-        <button id="terugNaarKeuzeBtn" class="verborgen">Andere Puzzel Kiezen</button>
+<header class="app-header">
+    <div class="app-header-left"><button class="back-btn" onclick="window.location.href='app.html'">← Keuzemenu</button></div>
+    <div class="app-header-center">
+        <h1>Kruiswoordpuzzel Generator</h1>
+        <p>Kies een puzzeltype, vul je woorden in en maak meteen een werkblad.</p>
     </div>
-    <h1>Kruiswoordpuzzel Generator</h1>
+    <div class="app-header-right"><button id="terugNaarKeuzeBtn" class="secondary-btn verborgen">← Andere puzzel kiezen</button></div>
 </header>
 
 <div id="keuzescherm">
     <h2>Kies het type puzzel dat je wilt maken</h2>
     <div class="puzzel-opties">
         <div class="puzzel-keuze" id="kies-klassiek">
-            <img src="pro/start_afbeeldingen/kruiswoordpuzzel1.png" alt="Klassieke Kruiswoordpuzzel">
-            <p>Klassieke Kruiswoordpuzzel</p>
+            <img src="../start_afbeeldingen/kruiswoordpuzzel1.png" alt="Klassieke Kruiswoordpuzzel">
+            <div class="puzzel-keuze-inhoud"><p>Klassieke kruiswoordpuzzel</p><span>Woorden kruisen horizontaal en verticaal.</span></div>
         </div>
         <div class="puzzel-keuze" id="kies-verborgenwoord">
-            <img src="pro/start_afbeeldingen/kruiswoordpuzzel2.png" alt="Verborgen Woord Puzzel">
-            <p>Verborgen Woord Puzzel</p>
+            <img src="../start_afbeeldingen/kruiswoordpuzzel2.png" alt="Verborgen Woord Puzzel">
+            <div class="puzzel-keuze-inhoud"><p>Verborgen woord</p><span>Ontdek het geheime woord met omschrijvingen.</span></div>
         </div>
     </div>
 </div>

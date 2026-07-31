@@ -408,3 +408,186 @@ hr {
         border: none;
     }
 }
+
+/* ================================================================
+   Vernieuwde appstijl — afgestemd op de Rekendriehoek Generator
+   ================================================================ */
+:root {
+    --bg: #eef4f8;
+    --panel: #ffffff;
+    --panel-soft: #f5f9fc;
+    --line: #dce8f2;
+    --text: #162d44;
+    --text-soft: #5f7a8f;
+    --primary: #0b4f99;
+    --primary-dark: #083d77;
+    --primary-soft: #eaf3ff;
+    --accent: #e67e00;
+    --shadow-sm: 0 2px 8px rgba(16, 40, 70, .08);
+    --shadow-lg: 0 12px 40px rgba(16, 40, 70, .12);
+    --r-sm: 10px;
+    --r-md: 14px;
+    --r-lg: 18px;
+    --r-xl: 24px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", system-ui, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+body { display: block; min-height: 100vh; text-align: left; }
+
+.pro-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 20px;
+    background: linear-gradient(90deg, #0b3060 0%, #1a5fa8 100%);
+    color: #fff;
+    font-size: .85rem;
+    font-weight: 700;
+}
+.pro-banner .pro-badge { background: #f5c200; color: #0b3060; border-radius: 6px; padding: 2px 9px; font-size: .78rem; }
+.pro-banner a { color: rgba(255,255,255,.85); text-decoration: none; font-size: .82rem; }
+.pro-banner a:hover { color: #fff; }
+
+body > .app-header {
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 18px 28px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-sm);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.app-header-center h1 { margin: 0; color: var(--primary); font-size: 1.65rem; font-weight: 700; letter-spacing: -.02em; }
+.app-header-center p { margin: 4px 0 0; color: var(--text-soft); font-size: .9rem; }
+.app-header-right { display: flex; justify-content: flex-end; }
+
+button {
+    font: inherit;
+    margin: 0;
+    padding: 11px 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--r-md);
+    background: var(--primary);
+    color: #fff;
+    font-size: .92rem;
+    font-weight: 700;
+    line-height: 1.2;
+    box-shadow: 0 3px 10px rgba(11,79,153,.22);
+    transition: all .17s ease;
+}
+button:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(11,79,153,.28); }
+button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.back-btn { background: #0b3060; padding: 10px 18px; font-size: .88rem; box-shadow: 0 3px 10px rgba(10,40,90,.22); }
+.back-btn:hover { background: #082448; }
+.secondary-btn, #downloadPngBtn, #vwDownloadPngBtn, #vwPrintBtn {
+    background: #fff;
+    color: var(--primary);
+    border: 1.5px solid #c5d8ed;
+    box-shadow: none;
+}
+.secondary-btn:hover, #downloadPngBtn:hover, #vwDownloadPngBtn:hover, #vwPrintBtn:hover { background: var(--primary-soft); border-color: #a0c0e0; }
+
+#keuzescherm { width: min(100% - 32px, 1240px); margin: 38px auto; text-align: center; }
+#keuzescherm h2 { margin: 0 0 6px; color: #122b46; font-size: 1.35rem; }
+#keuzescherm h2::after { content: "Klik op een kaart om te beginnen."; display: block; margin-top: 5px; color: var(--text-soft); font-size: .9rem; font-weight: 400; }
+.puzzel-opties { margin-top: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.puzzel-keuze {
+    width: auto;
+    padding: 18px;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+    text-align: center;
+    background: var(--panel);
+    border: 1.5px solid var(--line);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow-sm);
+}
+.puzzel-keuze:hover { transform: translateY(-3px); border-color: #9fc1df; box-shadow: var(--shadow-lg); }
+.puzzel-keuze img { width: 100%; height: 390px; padding: 10px; object-fit: contain; border-radius: var(--r-lg); background: linear-gradient(160deg, #f6fafd, #eef4f8); box-shadow: none; }
+.puzzel-keuze-inhoud p { margin: 0 0 6px; color: var(--primary); font-size: 1.08rem; font-weight: 700; }
+.puzzel-keuze-inhoud span { color: var(--text-soft); font-size: .86rem; line-height: 1.5; }
+
+.generator-container { width: 100%; padding: 24px; }
+#klassiek-keuzescherm { width: min(100%, 720px); margin: 0 auto; padding: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); }
+#klassiek-keuzescherm h3 { margin: 0 0 16px; color: #122b46; font-size: 1.15rem; }
+.sub-keuze-opties { gap: 10px; margin: 0; flex-wrap: wrap; }
+.sub-keuze-knop { font-size: .9rem; padding: 11px 18px; }
+
+#main-content { max-width: 1440px; gap: 24px; margin: 0 auto; }
+#left-panel, #right-panel-buttons, .clue-box, .vw-setup-paneel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+}
+#left-panel { padding: 18px; gap: 14px; }
+#right-panel-buttons { padding: 16px; }
+#right-panel-buttons .control-group { gap: 8px; }
+#center-panel { max-width: 650px; }
+#right-panel { padding: 20px; background: linear-gradient(160deg, #f6fafd, #eef4f8); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); overflow: auto; }
+#mainCanvas { max-width: 100%; height: auto; border: 1px solid #c5d8ed; border-radius: var(--r-sm); box-shadow: var(--shadow-sm); }
+.clue-box { padding: 16px; }
+.clue-box h2 { color: #122b46; font-size: 1rem; }
+
+label { color: #2b4a65; font-size: .88rem; font-weight: 600; }
+textarea, input[type="text"], input[type="number"] {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1.5px solid #ccdce8;
+    border-radius: var(--r-sm);
+    background: #fff;
+    color: var(--text);
+    font: inherit;
+    font-size: .9rem;
+}
+textarea:focus, input:focus { outline: none; border-color: #7aaee0; box-shadow: 0 0 0 3px rgba(126,174,224,.18); }
+#meldingContainer { padding: 10px 12px; min-height: 0 !important; border-radius: var(--r-sm); background: #fff9ee; }
+#meldingContainer:empty { display: none; }
+
+.vw-container { max-width: 1440px; gap: 24px; }
+.vw-setup-paneel { padding: 20px; text-align: left; }
+.vw-setup-paneel h2 { color: #1a3352; font-size: 1rem; }
+#vwWerkbladContainer { border-color: var(--line); border-radius: var(--r-xl); box-shadow: var(--shadow-lg); }
+#vw-export-knoppen { gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 900px) {
+    body > .app-header { grid-template-columns: auto 1fr; padding: 14px 16px; }
+    .app-header-right { grid-column: 1 / -1; justify-content: flex-start; }
+    .puzzel-opties { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+    body > .app-header { grid-template-columns: 1fr; gap: 12px; }
+    .app-header-center h1 { font-size: 1.35rem; }
+    .pro-banner { align-items: flex-start; flex-wrap: wrap; }
+    .puzzel-keuze { grid-template-columns: 1fr; text-align: center; }
+    .puzzel-keuze img { width: 100%; height: 290px; }
+    .generator-container { padding: 16px; }
+    .sub-keuze-opties { flex-direction: column; }
+    .vw-container { flex-direction: column; }
+}
