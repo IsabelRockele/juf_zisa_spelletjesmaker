@@ -411,15 +411,15 @@ function squareRectangleChoiceSVG(variant,target=''){
   return cmGridSVG(18,4,orders[variant%orders.length].map((t,i)=>shape(t,slots[i])).join(''),'zes losstaande figuren waarvan horizontale en verticale zijden exact op de roosterlijnen liggen');
 }
 function finishSquareRectangleSVG(){
-  const square=state.solutionMode?'<rect x="25" y="10" width="30" height="30" stroke="#22924a" stroke-width="1"/>':'<path d="M25 10V40M25 10H55"/>',rectangle=state.solutionMode?'<rect x="10" y="10" width="50" height="25" stroke="#22924a" stroke-width="1"/>':'<path d="M10 10H60M60 10V35"/>';
+  const square=state.solutionMode?'<rect x="20" y="10" width="30" height="30" stroke="#22924a" stroke-width="1"/>':'<path d="M20 10V40M20 10H50"/>',rectangle=state.solutionMode?'<rect x="10" y="10" width="50" height="20" stroke="#22924a" stroke-width="1"/>':'<path d="M10 10H60M60 10V30"/>';
   return `<div class="finish-pair"><div class="finish-box">Teken een vierkant${cmGridSVG(7,5,square,'onvolledig vierkant')}</div><div class="finish-box">Teken een rechthoek die geen vierkant is${cmGridSVG(7,5,rectangle,'onvolledige rechthoek')}</div></div>`;
 }
 function oppositeSquareRectangleSVG(){
-  return cmGridSVG(16,5,'<rect x="15" y="10" width="55" height="25"/><rect x="105" y="8" width="30" height="30"/>','een rechthoek en een vierkant om zijden en hoeken aan te duiden');
+  return cmGridSVG(16,5,'<rect x="10" y="10" width="50" height="30"/><rect x="110" y="10" width="30" height="30"/>','een rechthoek en een vierkant waarvan alle zijden exact over roosterlijnen lopen');
 }
 function countSquaresSVG(variant){
   const cols=variant%2?4:3,rows=variant%2?3:4;
-  return cmGridSVG(7,6,`<rect x="15" y="10" width="${cols*10}" height="${rows*10}" stroke-width="1"${state.solutionMode?' fill="#b9e8c5"':''}/>`,'een rechthoek opgebouwd uit vierkanten van één centimeter');
+  return cmGridSVG(7,6,`<rect x="10" y="10" width="${cols*10}" height="${rows*10}" stroke-width="1"${state.solutionMode?' fill="#b9e8c5"':''}/>`,'een rechthoek waarvan alle zijden exact over roosterlijnen lopen, opgebouwd uit vierkanten van één centimeter');
 }
 function printerGridSVG(rows,filled=true){let cells='',grid='';for(let y=0;y<7;y++)for(let x=0;x<7;x++){if(filled&&rows[y][x]==='1')cells+=`<rect x="${x*10}" y="${y*10}" width="10" height="10" fill="#222"/>`;grid+=`<rect x="${x*10}" y="${y*10}" width="10" height="10"/>`}return `<svg class="printer-grid" viewBox="0 0 70 70"><g>${cells}</g><g fill="none" stroke="#aebfcd" stroke-width=".35">${grid}</g></svg>`}
 function printerBinary(rows){return rows.map(r=>`<div>${r.split('').join('&nbsp;&nbsp;')}</div>`).join('')}
