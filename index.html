@@ -379,7 +379,7 @@
 <main class="main">
   <div class="overview-toolbar">
     <div class="overview-welcome"><strong>Wat wil je vandaag maken?</strong><span>Kies een categorie of zoek meteen naar een tool.</span></div>
-    <label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="toolSearch" type="search" placeholder="Zoek bv. bingo, kloklezen of spelling…"></label>
+    <label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="toolSearch" name="zisa-tool-zoeken" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Zoek bv. bingo, kloklezen of spelling…"></label>
     <span class="search-result-count" id="searchResultCount"></span>
   </div>
 
@@ -624,7 +624,7 @@
   const toolSearch = document.getElementById('toolSearch');
   const searchResultCount = document.getElementById('searchResultCount');
   const noToolResults = document.getElementById('noToolResults');
-  toolSearch.addEventListener('input', () => {
+  function filterTools() {
     const query = toolSearch.value.trim().toLocaleLowerCase('nl'); let visible = 0;
     document.querySelectorAll('a.img-link').forEach(link => {
       const match = !query || link.textContent.toLocaleLowerCase('nl').includes(query) || (link.querySelector('img')?.alt || '').toLocaleLowerCase('nl').includes(query);
@@ -633,6 +633,13 @@
     document.querySelectorAll('.section-panel').forEach(panel => { const hasMatch = panel.querySelector('a.img-link:not(.tool-hidden)'); panel.style.display = query ? (hasMatch ? 'flex' : 'none') : ''; });
     noToolResults.classList.toggle('visible', visible === 0);
     searchResultCount.textContent = query ? `${visible} ${visible === 1 ? 'tool' : 'tools'} gevonden` : '';
+  }
+  toolSearch.addEventListener('input', filterTools);
+  // Wachtwoordbeheerders vullen soms het eerste invoerveld na een login in.
+  // Het tooloverzicht moet bij openen altijd zonder zoekfilter starten.
+  window.addEventListener('pageshow', () => {
+    toolSearch.value = '';
+    filterTools();
   });
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
