@@ -35,7 +35,16 @@ document.documentElement.style.visibility = 'hidden';
 
 let currentUser = null;
 
+// Veilige voorbeeldmodus voor VS Code Live Server.
+// Alleen lokale adressen slaan de login over; online blijft login verplicht.
+const isLocalPreview = ['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname);
+if (isLocalPreview) {
+  document.documentElement.style.visibility = 'visible';
+  document.documentElement.dataset.previewMode = 'local';
+}
+
 onAuthStateChanged(auth, (user) => {
+  if (isLocalPreview) return;
   if (!user) {
     // Niet ingelogd → naar login
     window.location.replace("login_collega.html");

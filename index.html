@@ -324,6 +324,9 @@
     .nav-btn { width: auto; padding: 7px 10px; font-size: 0.7rem; }
     .main { padding: 16px; }
   }
+  /* Rustiger en duidelijker tooloverzicht */
+  .main{background:#faf7f1;padding-top:22px}.overview-toolbar{display:flex;align-items:center;gap:14px;margin-bottom:24px;background:#fff;border:1px solid #e7dfd2;border-radius:16px;padding:14px 16px;box-shadow:0 5px 18px rgba(70,45,10,.06)}.overview-welcome{min-width:210px}.overview-welcome strong{display:block;color:#2a2a2a;font-size:1rem}.overview-welcome span{display:block;color:#766b5b;font-size:.74rem;margin-top:2px}.tool-search-wrap{position:relative;flex:1}.tool-search-wrap::before{content:'🔎';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:.9rem}.tool-search{width:100%;border:1px solid #d8d0c5;border-radius:11px;padding:11px 13px 11px 40px;font-family:inherit;font-size:.86rem;color:#2a2a2a;background:#fff}.tool-search:focus{outline:3px solid rgba(255,207,86,.35);border-color:#d2a525}.search-result-count{color:#806f56;font-size:.72rem;white-space:nowrap}.section-header{margin-bottom:14px}.section-header h2{font-size:1.45rem}.button-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:16px;align-items:stretch}a.img-link{align-items:stretch;gap:0;padding:10px 10px 12px;border-radius:15px;background:#fff;border:1px solid #e7dfd2;box-shadow:0 4px 13px rgba(70,45,10,.055);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}a.img-link:hover{transform:translateY(-3px);box-shadow:0 9px 20px rgba(70,45,10,.11);border-color:#dcc78f}.tool-image-stage{min-height:118px;display:grid;place-items:center;border-radius:11px;background:#fbf7ee;overflow:hidden;margin-bottom:9px}.drukknop-afbeelding{width:112px;max-width:88%;max-height:112px;object-fit:contain}a.img-link:hover .drukknop-afbeelding{transform:scale(1.035)}.img-label{color:#332d25;font-size:.82rem;min-height:2.2em;display:grid;place-items:center}.tool-hidden{display:none!important}.no-results{display:none;padding:28px;text-align:center;color:#756a5b;background:#fff;border:1px dashed #d8d0c5;border-radius:14px}.no-results.visible{display:block}.feedback-btn{margin-top:6px;background:#383838;color:#ffcf56;border:1px solid #65572d}.feedback-overlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.58);align-items:center;justify-content:center;padding:20px}.feedback-overlay.open{display:flex}.feedback-dialog{width:min(430px,100%);background:#fff;border-radius:16px;padding:22px;color:#2a2a2a;box-shadow:0 18px 50px rgba(0,0,0,.25)}.feedback-dialog h3{margin:0 0 5px;color:#7a5200}.feedback-dialog p{color:#666;font-size:.8rem;margin-bottom:14px}.feedback-dialog label{display:block;font-size:.78rem;font-weight:bold;margin:10px 0 5px}.feedback-dialog input,.feedback-dialog textarea{width:100%;padding:10px;border:1px solid #ccc;border-radius:9px;font-family:inherit}.feedback-dialog textarea{min-height:110px;resize:vertical}.feedback-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.feedback-actions button{border:0;border-radius:9px;padding:9px 13px;font-family:inherit;cursor:pointer}.feedback-send{background:#ffcf56;color:#664300;font-weight:bold}.feedback-status{min-height:20px;margin-top:8px;font-size:.75rem}@media(max-width:700px){.overview-toolbar{align-items:stretch;flex-direction:column}.overview-welcome{min-width:0}.search-result-count{white-space:normal}.button-grid{grid-template-columns:repeat(auto-fill,minmax(135px,1fr))}}
+  .tool-image-stage{border-bottom:3px solid #e7d7b4}.tool-image-stage.stage-reken{background:#fff8e9;border-color:#e67e00}.tool-image-stage.stage-taal{background:#eef7fc;border-color:#2980b9}.tool-image-stage.stage-puzzels{background:#f7f0fa;border-color:#8e44ad}.tool-image-stage.stage-creatief{background:#eff9f2;border-color:#27ae60}.tool-image-stage.stage-spel{background:#fcf1ef;border-color:#c0392b}.tool-image-stage.stage-tijd{background:#edf8f6;border-color:#16a085}.tool-image-stage.stage-klas{background:#fff4ec;border-color:#d35400}.img-label{min-height:1.5em}.tool-description{display:block;color:#796f61;font-family:Arial,sans-serif;font-size:.68rem;line-height:1.3;text-align:center;min-height:2.6em;margin-top:4px;padding:0 3px}
 </style>
 </head>
 <body>
@@ -367,12 +370,18 @@
     <a href="Handleiding spelletjesmaker.pdf" class="help-btn" download>
       ❓ Handleiding
     </a>
+    <button type="button" class="help-btn feedback-btn" id="freeFeedbackOpen">💡 Foutje of idee melden</button>
   </div>
 
 </nav>
 
 <!-- ═══ HOOFDINHOUD ═══ -->
 <main class="main">
+  <div class="overview-toolbar">
+    <div class="overview-welcome"><strong>Wat wil je vandaag maken?</strong><span>Kies een categorie of zoek meteen naar een tool.</span></div>
+    <label class="tool-search-wrap"><span style="position:absolute;left:-9999px">Zoek een tool</span><input class="tool-search" id="toolSearch" type="search" placeholder="Zoek bv. bingo, kloklezen of spelling…"></label>
+    <span class="search-result-count" id="searchResultCount"></span>
+  </div>
 
   <!-- REKEN-OEFENINGEN -->
   <div class="section-panel active" id="panel-reken">
@@ -382,23 +391,23 @@
       <div class="section-bar" style="background:#e67e00"></div>
     </div>
     <div class="button-grid">
-      <a class="img-link" href="rekenvierkanten/index.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenvierkant.webp" loading="eager"/><span class="img-label">Rekenvierkant</span></a>
-      <a class="img-link" href="rekenweg/rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenweg.webp" loading="eager"/><span class="img-label">Rekenweg</span></a>
-      <a class="img-link" href="rekenpiramide/index.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenpiramide.webp" loading="eager"/><span class="img-label">Rekenpiramide</span></a>
-      <a class="img-link" href="reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="drukknop_afbeeldingen/reken_en_kleur.webp" loading="eager"/><span class="img-label">Reken en kleur</span></a>
-      <a class="img-link" href="rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenrooster.webp" loading="eager"/><span class="img-label">Rekenrooster</span></a>
-      <a class="img-link" href="rekendriehoek/index.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekendriehoek.webp" loading="eager"/><span class="img-label">Rekendriehoek</span></a>
-      <a class="img-link" href="rekencirkels/rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekencirkel.webp" loading="eager"/><span class="img-label">Rekencirkel</span></a>
-      <a class="img-link" href="rekenbundel/index.html"><img alt="Bundel bewerkingen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/werkblad_bewerkingen.webp" loading="eager"/><span class="img-label">Bundel bewerkingen</span></a>
-      <a class="img-link" href="meetkundebundelmaker/index.html"><img alt="Vlakke figuren voor de meetkundebundel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/meetkundebundel.webp" loading="eager"/><span class="img-label">Bundel meetkunde</span></a>
-      <a class="img-link" href="bundel_getallen/getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="drukknop_afbeeldingen/getalinzicht.webp" loading="eager"/><span class="img-label">Bundel getalinzicht</span></a>
-      <a class="img-link" href="cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/cijferen.webp" loading="eager"/><span class="img-label">Werkblad cijferen</span></a>
-      <a class="img-link" href="geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="drukknop_afbeeldingen/geld.webp" loading="eager"/><span class="img-label">Bundel geld</span></a>
-       <a class="img-link" href="tempotoetsen/index.html"><img alt="Tempotoetsen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/tempotoetsen.webp" loading="eager"/><span class="img-label">Tempotoetsen</span></a>
-      <a class="img-link" href="harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="drukknop_afbeeldingen/harten.webp" loading="eager"/><span class="img-label">Verliefde harten</span></a>
-      <a class="img-link" href="loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/loop.webp" loading="eager"/><span class="img-label">Loopspel</span></a>
-      <a class="img-link" href="reken-doolhof-generator.html"><img alt="Rekenspellen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/rekenspellen.webp" loading="eager"/><span class="img-label">Rekenspellen</span></a>
-      <a class="img-link" href="keuze-hulpschema.html"><img alt="MAB en schema" class="drukknop-afbeelding" src="drukknop_afbeeldingen/MAB.webp" loading="eager"/><span class="img-label">MAB en schema</span></a>
+      <a class="img-link" href="rekenbundel/index.html"><img alt="Bundel bewerkingen" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/werkblad_bewerkingen.png" loading="eager"/><span class="img-label">Bundel bewerkingen</span></a>
+      <a class="img-link" href="tempotoetsen/index.html"><img alt="Tempotoetsen" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/tempotoetsen.png" loading="eager"/><span class="img-label">Tempotoetsen</span></a>
+      <a class="img-link" href="bundel_getallen/getalkeuze.html"><img alt="Getalinzicht" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/getalinzicht.png" loading="eager"/><span class="img-label">Bundel getalinzicht</span></a>
+      <a class="img-link" href="cijferen.html"><img alt="Cijferen" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/cijferen.png" loading="eager"/><span class="img-label">Werkblad cijferen</span></a>
+      <a class="img-link" href="geldrekenen/index.html"><img alt="Bundel geld" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/geld.png" loading="eager"/><span class="img-label">Bundel geld</span></a>
+      <a class="img-link" href="meetkundebundelmaker/index.html"><img alt="Vlakke figuren voor de meetkundebundel" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/meetkundebundel.png" loading="eager"/><span class="img-label">Bundel meetkunde</span></a>
+      <a class="img-link" href="reken_en_kleur.html"><img alt="Reken en kleur" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/reken_en_kleur.png" loading="eager"/><span class="img-label">Reken en kleur</span></a>
+      <a class="img-link" href="rekenweg/rekenweg.html"><img alt="Rekenweg" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekenweg.png" loading="eager"/><span class="img-label">Rekenweg</span></a>
+      <a class="img-link" href="rekenvierkanten/index.html"><img alt="Rekenvierkant" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekenvierkant.png" loading="eager"/><span class="img-label">Rekenvierkant</span></a>
+      <a class="img-link" href="rekenpiramide/index.html"><img alt="Rekenpiramide" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekenpiramide.png" loading="eager"/><span class="img-label">Rekenpiramide</span></a>
+      <a class="img-link" href="rekendriehoek/index.html"><img alt="Rekendriehoek" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekendriehoek.png" loading="eager"/><span class="img-label">Rekendriehoek</span></a>
+      <a class="img-link" href="rekencirkels/rekencirkel.html"><img alt="Rekencirkel" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekencirkel.png" loading="eager"/><span class="img-label">Rekencirkel</span></a>
+      <a class="img-link" href="rekenrooster.html"><img alt="Rekenrooster" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekenrooster.png" loading="eager"/><span class="img-label">Rekenrooster</span></a>
+      <a class="img-link" href="reken-doolhof-generator.html"><img alt="Rekenspellen" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/rekenspellen.png" loading="eager"/><span class="img-label">Rekenspellen</span></a>
+      <a class="img-link" href="loopspel.html"><img alt="Loopspel" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/loop.png" loading="eager"/><span class="img-label">Loopspel</span></a>
+      <a class="img-link" href="harten.html"><img alt="Verliefde harten" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/harten.png" loading="eager"/><span class="img-label">Verliefde harten</span></a>
+      <a class="img-link" href="keuze-hulpschema.html"><img alt="MAB en schema" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/MAB.png" loading="eager"/><span class="img-label">MAB en schema</span></a>
     </div>
     <div class="section-footer">
       <div class="footer-banner" style="background:#e67e00">
@@ -423,16 +432,16 @@
       <div class="section-bar" style="background:#2980b9"></div>
     </div>
     <div class="button-grid">
-      <a class="img-link" href="woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="drukknop_afbeeldingen/woordzoeker.webp" loading="lazy"/><span class="img-label">Woordzoeker</span></a>
-      <a class="img-link" href="kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="drukknop_afbeeldingen/kruiswoordpuzzel.webp" loading="lazy"/><span class="img-label">Kruiswoordpuzzel</span></a>
-      <a class="img-link" href="lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettercode.webp" loading="lazy"/><span class="img-label">Lettercode</span></a>
-      <a class="img-link" href="geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="drukknop_afbeeldingen/geheime_boodschap.webp" loading="lazy"/><span class="img-label">Geheime boodschap</span></a>
-      <a class="img-link" href="lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lettertetris.webp" loading="lazy"/><span class="img-label">Lettertetris</span></a>
-      <a class="img-link" href="galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="drukknop_afbeeldingen/galgje.webp" loading="lazy"/><span class="img-label">Galgje</span></a>
-      <a class="img-link" href="lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen/lees.webp" loading="lazy"/><span class="img-label">Lezen</span></a>
-       <a class="img-link" href="Leeskaartjes/leeskaartjes.html"><img alt="Leeskaartjes per AVI" class="drukknop-afbeelding" src="drukknop_afbeeldingen/leeskaartjes.webp" loading="eager"/><span class="img-label">Leeskaartjes per AVI</span></a>
-       <a class="img-link" href="schrijfgenerator.html"><img alt="Handschrift" class="drukknop-afbeelding" src="drukknop_afbeeldingen/handschrift.webp" loading="lazy"/><span class="img-label">Handschrift</span></a>
-        <a class="img-link" href="spelling/index.html"><img alt="Bundel spelling" class="drukknop-afbeelding" src="drukknop_afbeeldingen/spelling.webp" loading="eager"/><span class="img-label">Bundel spelling</span></a>
+      <a class="img-link" href="spelling/index.html"><img alt="Bundel spelling" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/spelling.png" loading="eager"/><span class="img-label">Bundel spelling</span></a>
+      <a class="img-link" href="Leeskaartjes/leeskaartjes.html"><img alt="Leeskaartjes per AVI" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/leeskaartjes.png" loading="eager"/><span class="img-label">Leeskaartjes per AVI</span></a>
+      <a class="img-link" href="lees.html"><img alt="Lezen" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/lees.png" loading="lazy"/><span class="img-label">Lezen</span></a>
+      <a class="img-link" href="schrijfgenerator.html"><img alt="Handschrift" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/handschrift.png" loading="lazy"/><span class="img-label">Handschrift</span></a>
+      <a class="img-link" href="woordzoeker.html"><img alt="Woordzoeker" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/woordzoeker.png" loading="lazy"/><span class="img-label">Woordzoeker</span></a>
+      <a class="img-link" href="kruiswoordpuzzel.html"><img alt="Kruiswoordpuzzel" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/kruiswoordpuzzel.png" loading="lazy"/><span class="img-label">Kruiswoordpuzzel</span></a>
+      <a class="img-link" href="geheimeboodschap.html"><img alt="Geheime boodschap" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/geheime_boodschap.png" loading="lazy"/><span class="img-label">Geheime boodschap</span></a>
+      <a class="img-link" href="lettercode.html"><img alt="Lettercode" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/lettercode.png" loading="lazy"/><span class="img-label">Lettercode</span></a>
+      <a class="img-link" href="lettertetris.html"><img alt="Lettertetris" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/lettertetris.png" loading="lazy"/><span class="img-label">Lettertetris</span></a>
+      <a class="img-link" href="galgje.html"><img alt="Galgje" class="drukknop-afbeelding" src="drukknop_afbeeldingen_v3/galgje.png" loading="lazy"/><span class="img-label">Galgje</span></a>
     </div>
     <div class="section-footer">
       <div class="footer-banner" style="background:#2980b9">
@@ -595,7 +604,36 @@
     </div>
   </div>
 
+  <div class="no-results" id="noToolResults">Geen tool gevonden. Probeer een andere zoekterm.</div>
+
 <script>
+  const toolDescriptions = {
+    'Rekenvierkant':'Vul het rooster aan met de juiste bewerkingen.','Rekenweg':'Maak een rekenpad met opdrachten op maat.','Rekenpiramide':'Oefen verbanden tussen getallen in een piramide.','Rekenrooster':'Combineer getallen en bewerkingen in een rooster.','Rekendriehoek':'Oefen splitsingen en getalfamilies.','Rekencirkel':'Reken vanuit het midden naar buiten.','MAB en schema':'Visualiseer getallen met MAB-materiaal en schema’s.','Verliefde harten':'Oefen getallenparen die samen een geheel vormen.','Lettercode':'Ontcijfer woorden met letters en symbolen.','Geheime boodschap':'Maak een gecodeerde taalopdracht.','Lettertetris':'Bouw woorden met vallende lettervormen.','Hexagonaal raster':'Maak opdrachten in een zeshoekig speelraster.','Schaduw':'Zoek of maak de passende schaduwvorm.','Punttekening':'Verbind punten tot een figuur.','Plattegrond':'Oefen plaats, richting en ruimtelijk inzicht.','Coderen':'Volg codes om een figuur te maken.','Blokkenbouwsels':'Bouw en bekijk constructies met blokken.','QR-generator':'Maak een QR-code voor tekst of een link.'
+  };
+  document.querySelectorAll('a.img-link').forEach(link => {
+    const img = link.querySelector('.drukknop-afbeelding');
+    if (img && !img.parentElement.classList.contains('tool-image-stage')) {
+      const stage = document.createElement('span'); stage.className = 'tool-image-stage';
+      img.parentNode.insertBefore(stage, img); stage.appendChild(img);
+    }
+    const category = link.closest('.section-panel')?.id.replace('panel-','');
+    if (category) link.querySelector('.tool-image-stage')?.classList.add(`stage-${category}`);
+    const label = link.querySelector('.img-label')?.textContent.trim();
+    if (label && toolDescriptions[label]) { const description=document.createElement('span'); description.className='tool-description'; description.textContent=toolDescriptions[label]; link.appendChild(description); }
+  });
+  const toolSearch = document.getElementById('toolSearch');
+  const searchResultCount = document.getElementById('searchResultCount');
+  const noToolResults = document.getElementById('noToolResults');
+  toolSearch.addEventListener('input', () => {
+    const query = toolSearch.value.trim().toLocaleLowerCase('nl'); let visible = 0;
+    document.querySelectorAll('a.img-link').forEach(link => {
+      const match = !query || link.textContent.toLocaleLowerCase('nl').includes(query) || (link.querySelector('img')?.alt || '').toLocaleLowerCase('nl').includes(query);
+      link.classList.toggle('tool-hidden', !match); if (match) visible++;
+    });
+    document.querySelectorAll('.section-panel').forEach(panel => { const hasMatch = panel.querySelector('a.img-link:not(.tool-hidden)'); panel.style.display = query ? (hasMatch ? 'flex' : 'none') : ''; });
+    noToolResults.classList.toggle('visible', visible === 0);
+    searchResultCount.textContent = query ? `${visible} ${visible === 1 ? 'tool' : 'tools'} gevonden` : '';
+  });
   document.querySelectorAll('.nav-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.target;
@@ -635,6 +673,22 @@ window.addEventListener('load', () => {
     if (panel) panel.classList.add('active');
   }
 });
+</script>
+<div class="feedback-overlay" id="freeFeedbackOverlay"><div class="feedback-dialog" role="dialog" aria-modal="true" aria-labelledby="freeFeedbackTitle"><h3 id="freeFeedbackTitle">💡 Foutje of idee melden</h3><p>Je feedback helpt om de Spelgenerator beter te maken.</p><label for="freeFeedbackName">Naam (optioneel)</label><input id="freeFeedbackName" type="text"><label for="freeFeedbackMessage">Je bericht</label><textarea id="freeFeedbackMessage"></textarea><div class="feedback-status" id="freeFeedbackStatus"></div><div class="feedback-actions"><button type="button" id="freeFeedbackCancel">Annuleren</button><button type="button" class="feedback-send" id="freeFeedbackSend">Versturen</button></div></div></div>
+<script>
+  const freeFeedbackOverlay=document.getElementById('freeFeedbackOverlay');
+  document.getElementById('freeFeedbackOpen').addEventListener('click',()=>freeFeedbackOverlay.classList.add('open'));
+  document.getElementById('freeFeedbackCancel').addEventListener('click',()=>freeFeedbackOverlay.classList.remove('open'));
+  freeFeedbackOverlay.addEventListener('click',e=>{if(e.target===freeFeedbackOverlay)freeFeedbackOverlay.classList.remove('open')});
+  document.getElementById('freeFeedbackSend').addEventListener('click',async()=>{const bericht=document.getElementById('freeFeedbackMessage').value.trim();const status=document.getElementById('freeFeedbackStatus');if(!bericht){status.textContent='Vul eerst je feedback in.';return}status.textContent='Versturen…';try{const response=await fetch('https://formspree.io/f/xpqopoqy',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({naam:document.getElementById('freeFeedbackName').value.trim()||'(collega)',bericht,omgeving:'gratis testversie'})});if(!response.ok)throw new Error();status.textContent='✅ Bedankt! Je feedback is verstuurd.';document.getElementById('freeFeedbackMessage').value='';setTimeout(()=>freeFeedbackOverlay.classList.remove('open'),1800)}catch{status.textContent='❌ Versturen lukte niet. Probeer later opnieuw.'}});
+</script>
+<script>
+  (()=>{
+    const vernieuwd=new Set(['sudoku','zoek_de_verschillen','doolhof','slangendoolhof','hexagon','schaduw','pixelart','coderen','punttekening','blokkenbouwsels','bouwplaat','plattegrond','bingo','vieropeenrij','rad','QR','werkblad_kloklezen','kalender','timer','planbord']);
+    document.querySelectorAll('img.drukknop-afbeelding').forEach(img=>{const naam=(img.getAttribute('src').split('/').pop()||'').replace(/\.webp$/,'');if(vernieuwd.has(naam))img.src=`drukknop_afbeeldingen_v3/${naam}.png`});
+    const orden={puzzels:['Sudoku','Doolhof','Zoek de verschillen','Slangendoolhof','Hexagonaal raster','Schaduw'],creatief:['Pixelart','Coderen','Punttekening','Blokkenbouwsels','Bouwplaten','Plattegrond']};
+    Object.entries(orden).forEach(([categorie,namen])=>{const grid=document.querySelector(`#panel-${categorie} .button-grid`);if(!grid)return;const links=[...grid.querySelectorAll(':scope > a.img-link')];namen.forEach(naam=>{const link=links.find(item=>item.querySelector('.img-label')?.textContent.trim()===naam);if(link)grid.appendChild(link)})});
+  })();
 </script>
 </body>
 </html>
