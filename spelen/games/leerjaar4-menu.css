@@ -1,0 +1,5 @@
+body.grade-4 { --accent:#d26a25; --soft:#fff0dc; --deep:#70401e; }
+body.grade-4 .hero { background:linear-gradient(135deg,#fff1d7,#dff5ef); }
+body.grade-4 .world-pattern { background:radial-gradient(circle at 20% 20%,#ffd98a88,transparent 28%),radial-gradient(circle at 80% 65%,#75d5bd55,transparent 31%); }
+.adventure-picture { background:linear-gradient(145deg,#dff6ec,#ffe2a8); }
+.adventure-picture img { object-fit:contain!important; }

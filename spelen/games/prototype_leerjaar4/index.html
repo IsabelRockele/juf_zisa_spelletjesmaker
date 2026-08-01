@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>De Rekenkern — tafelavontuur met Lana</title>
+  <link rel="stylesheet" href="game.css">
+  <link rel="stylesheet" href="timer.css">
+</head>
+<body>
+<main id="gameShell">
+  <canvas id="game" aria-label="Lana loopt door De Rekenkern"></canvas>
+  <a class="stop-game" href="../start_leerjaar4.html">■ Spel stoppen</a>
+
+  <header class="hud">
+    <div class="level-box"><small>HUIDIG GEBIED</small><strong id="levelName">1 · Energiebos</strong></div>
+    <div class="level-map" id="levelMap" aria-label="Vijf levels"></div>
+    <div class="score-box"><span>⚡ <b id="scoreText">0 / 5</b></span><span id="shields" aria-label="Energieschilden">◆ ◆ ◆</span></div>
+  </header>
+
+  <section id="challenge" class="challenge" hidden>
+    <div class="challenge-label">KIES DE JUISTE ENERGIEKERN</div>
+    <h2 id="question">6 × 7 = ?</h2>
+    <div class="time-track" aria-label="Resterende antwoordtijd"><span id="timeBar"></span></div>
+    <div id="answers" class="answers"></div>
+    <p id="feedback" aria-live="polite">Tik op het juiste antwoord. Lana springt er zelf naartoe.</p>
+  </section>
+
+  <div id="runnerMessage" class="runner-message">Lana is op weg naar de eerste tafelkern…</div>
+
+  <section id="intro" class="overlay">
+    <article class="card intro-card">
+      <div>
+        <span class="badge">4DE LEERJAAR · NIEUWE SPELVERSIE</span>
+        <h1>De Rekenkern</h1>
+        <p>Lana loopt vanzelf. Voor elke energiekern verschijnt de tafelsom al duidelijk in beeld.</p>
+        <fieldset class="mode-picker">
+          <legend>Wat wil je oefenen?</legend>
+          <label><input type="radio" name="mode" value="multiply"> <span>Alleen maaltafels</span></label>
+          <label><input type="radio" name="mode" value="divide"> <span>Alleen deeltafels</span></label>
+          <label><input type="radio" name="mode" value="mixed" checked> <span>Maal en deel door elkaar</span></label>
+        </fieldset>
+        <div class="how-grid">
+          <div><span>1</span><b>Bekijk de tafel</b><small>De wereld stopt even.</small></div>
+          <div><span>2</span><b>Kies een antwoord</b><small>Tik op één van de drie kernen.</small></div>
+          <div><span>3</span><b>Word steeds sneller</b><small>Elk level geeft iets minder tijd.</small></div>
+        </div>
+        <button id="startButton" type="button">▶ Start level 1</button>
+      </div>
+      <img src="assets/lana-full.png" alt="Lana">
+    </article>
+  </section>
+
+  <section id="levelComplete" class="overlay" hidden>
+    <article class="card complete-card">
+      <div class="stars">★ ★ ★</div>
+      <span class="badge">LEVEL VOLTOOID</span>
+      <h1 id="completeTitle">Het Energiebos straalt weer!</h1>
+      <p id="completeText">Je hebt vijf tafelkernen verzameld.</p>
+      <button id="nextButton" type="button">Naar level 2 →</button>
+    </article>
+  </section>
+
+  <section id="levelFailed" class="overlay" hidden>
+    <article class="card complete-card">
+      <div class="core-win">◇</div>
+      <span class="badge">LEVEL MISLUKT</span>
+      <h1>Je schilden zijn leeg</h1>
+      <p>Probeer dit gebied opnieuw. De oefeningen worden opnieuw gemengd.</p>
+      <button id="retryButton" type="button">Level opnieuw proberen</button>
+    </article>
+  </section>
+
+  <section id="gameOver" class="overlay" hidden>
+    <article class="card complete-card">
+      <div class="core-win">⚡</div>
+      <span class="badge">DE REKENKERN IS HERSTELD</span>
+      <h1>Alle vijf gebieden voltooid!</h1>
+      <p>Deze spelbeurt is klaar. Er werd geen persoonlijk geheugen opgeslagen.</p>
+      <button id="againButton" type="button">Opnieuw spelen</button>
+    </article>
+  </section>
+</main>
+<script type="module" src="../zisa-play-guard.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

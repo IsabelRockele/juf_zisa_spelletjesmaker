@@ -1,0 +1,2 @@
+.grade-card:nth-child(4){--accent:#d26a25}
+@media(min-width:721px){.grade-grid:has(.grade-card:nth-child(4)){grid-template-columns:repeat(2,1fr)}}

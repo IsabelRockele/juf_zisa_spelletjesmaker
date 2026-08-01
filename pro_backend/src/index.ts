@@ -1270,6 +1270,7 @@ function normalisePlayConfig(value: any) {
     grade1: value?.grade1 !== false,
     grade2: value?.grade2 !== false,
     grade3: value?.grade3 !== false,
+    grade4: value?.grade4 !== false,
   };
 }
 
