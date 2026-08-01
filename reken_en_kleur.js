@@ -18,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let currentColorName = "Achtergrond";
     let isDrawing = false;
     let catalogData = {};
+    let cachedExercisePreview = null;
 
     const colorPaletteDiv = document.getElementById('colorPalette');
     const undoBtn = document.getElementById('undoBtn');
@@ -59,6 +60,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const werkbladLegendContent = document.getElementById('werkblad-legend-content');
     const werkbladDownloadPdfBtn = document.getElementById('werkblad-download-pdf');
     const werkbladDownloadPngBtn = document.getElementById('werkblad-download-png');
+    const werkbladBewerkenBtn = document.getElementById('werkblad-bewerken');
+    const worksheetTitleInput = document.getElementById('worksheetTitleInput');
+    const worksheetInstructionInput = document.getElementById('worksheetInstructionInput');
+    const worksheetPreviewTitle = document.getElementById('worksheet-preview-title');
+    const worksheetPreviewInstruction = document.getElementById('worksheet-preview-instruction');
+    const worksheetPaper = document.querySelector('.worksheet-paper');
+    const centerPanel = document.getElementById('center-panel');
+    const settingsTabButtons = document.querySelectorAll('[data-settings-tab]');
 
 
     const COLOR_INFO_MAP = [
@@ -83,6 +92,43 @@ document.addEventListener("DOMContentLoaded", () => {
     
     function clearMelding() {
         meldingContainer.textContent = '';
+    }
+
+    const WORKSHEET_TEXTS = {
+        oefeningen: { title: 'Reken en kleur', instruction: 'Los de oefeningen op en kleur de vakjes volgens de kleurcode.' },
+        natekenen: { title: 'Natekenen in een raster', instruction: 'Teken de voorbeeldtekening vakje per vakje na in het lege raster.' },
+        pixeltekening: { title: 'Maak de pixeltekening', instruction: 'Volg de kleurinstructies bij elke rij en ontdek de tekening.' },
+        spiegelen: { title: 'Spiegel de tekening', instruction: 'Vul het ontbrekende spiegelbeeld aan de andere kant van de spiegelas aan.' }
+    };
+    function selectedWorksheetType() { return document.querySelector('input[name="worksheetType"]:checked').value; }
+    function applyDefaultWorksheetText() { const text = WORKSHEET_TEXTS[selectedWorksheetType()]; worksheetTitleInput.value = text.title; worksheetInstructionInput.value = text.instruction; }
+    function updateWorksheetHeaderPreview() { worksheetPreviewTitle.textContent = worksheetTitleInput.value.trim() || WORKSHEET_TEXTS[selectedWorksheetType()].title; worksheetPreviewInstruction.textContent = worksheetInstructionInput.value.trim() || WORKSHEET_TEXTS[selectedWorksheetType()].instruction; }
+    function previewPageMetrics(reservedBottom = 0) {
+        const pageWidth = worksheetPaper.clientWidth;
+        const pageHeight = pageWidth * 297 / 210;
+        worksheetPaper.style.height = `${pageHeight}px`;
+        const width = Math.max(180, pageWidth - 64);
+        return {width, maxCanvasHeight: Math.max(180, pageHeight - 190 - reservedBottom)};
+    }
+    function addPdfWorksheetHeader(doc, pageWidth, margin) {
+        const title = worksheetTitleInput.value.trim() || WORKSHEET_TEXTS[selectedWorksheetType()].title;
+        const instruction = worksheetInstructionInput.value.trim() || WORKSHEET_TEXTS[selectedWorksheetType()].instruction;
+        doc.setTextColor(23,63,102); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('Naam:', margin, 13); doc.line(margin + 14, 14, pageWidth / 2 - 8, 14); doc.text('Datum:', pageWidth / 2 + 8, 13); doc.line(pageWidth / 2 + 24, 14, pageWidth - margin, 14);
+        doc.setTextColor(15,79,134); doc.setFontSize(17); doc.text(title, pageWidth / 2, 25, {align:'center'}); doc.setDrawColor(40,119,184); doc.setLineWidth(.8); doc.line(margin, 30, pageWidth - margin, 30);
+        doc.setFillColor(237,245,255); doc.setDrawColor(142,187,224); doc.roundedRect(margin, 35, pageWidth - 2 * margin, 12, 2, 2, 'FD'); doc.setTextColor(23,74,115); doc.setFont('helvetica','italic'); doc.setFontSize(10); doc.text(instruction, margin + 4, 42.5, {maxWidth: pageWidth - 2 * margin - 8});
+        doc.setTextColor(0,0,0); doc.setFont('helvetica','normal'); return 53;
+    }
+    function showSettingsTab(tab) {
+        document.querySelectorAll('.drawing-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='drawing'));
+        document.querySelectorAll('.worksheet-setting').forEach(el=>el.classList.toggle('settings-hidden',tab!=='worksheet'));
+        settingsTabButtons.forEach(btn=>btn.classList.toggle('active',btn.dataset.settingsTab===tab));
+        document.getElementById('left-panel').scrollTo({top:0,behavior:'smooth'});
+    }
+    function setWorksheetPreviewMode(active) {
+        centerPanel.classList.toggle('preview-active',active);
+        document.body.classList.toggle('worksheet-preview-open',active);
+        werkbladModal.style.display=active?'flex':'none';
+        if(active)centerPanel.scrollIntoView({behavior:'smooth',block:'start'});
     }
 
     // --- Functies voor de teken-modus ---
@@ -211,9 +257,11 @@ document.addEventListener("DOMContentLoaded", () => {
     function applyAllTablesState() { const all = allTablesCheckbox.checked; document.querySelectorAll('input[name="tafel"]').forEach(cb => { if (cb.value !== 'all') cb.disabled = all; }); }
 
     function updateWorksheetTypeControls() {
-        const selectedType = document.querySelector('input[name="worksheetType"]:checked').value;
+        const selectedType = selectedWorksheetType();
         exerciseControlsContainer.style.display = selectedType === 'oefeningen' ? 'block' : 'none';
-        showPreviewBtn.disabled = (selectedType === 'spiegelen');
+        showPreviewBtn.disabled = selectedType === 'spiegelen' && mirrorAxisColumn === null;
+        showPreviewBtn.textContent = showPreviewBtn.disabled ? 'Kies eerst de spiegelas in het raster' : '3. Bekijk het A4-werkblad →';
+        applyDefaultWorksheetText();
         
         isAxisSelectionMode = (selectedType === 'spiegelen');
 
@@ -231,23 +279,26 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     
     function generateWorksheetPreview() {
-        const type = document.querySelector('input[name="worksheetType"]:checked').value;
-        werkbladModal.style.display = 'flex';
+        const type = selectedWorksheetType();
+        updateWorksheetHeaderPreview();
+        setWorksheetPreviewMode(true);
         switch (type) {
             case 'oefeningen': drawExercisesPreview(); break;
             case 'natekenen': drawRedrawPreview(); break;
             case 'pixeltekening': drawPixelArtPreview(); break;
+            case 'spiegelen': drawMirrorPreview(); break;
         }
     }
 
     async function generateWorksheetPdf() {
-        const type = document.querySelector('input[name="worksheetType"]:checked').value;
+        const type = selectedWorksheetType();
         showMelding('Bezig met genereren van PDF...', 0);
         try {
             switch (type) {
                 case 'oefeningen': await generateExercisesPdf(); break;
                 case 'natekenen': await generateRedrawPdf(); break;
                 case 'pixeltekening': await generatePixelArtPdf(); break;
+                case 'spiegelen': await generateMirrorPdf(); break;
             }
         } catch (e) { console.error("PDF Generation Error:", e); showMelding('Fout bij het maken van de PDF.', 3000); } 
         finally { clearMelding(); }
@@ -289,40 +340,45 @@ document.addEventListener("DOMContentLoaded", () => {
         allExercises.forEach(ex => { const item = document.createElement('div'); item.style.cssText = 'display: flex; align-items: center; margin-bottom: 5px; flex-basis: 50%; box-sizing: border-box; padding-right: 10px;'; item.innerHTML = `<div style="width: 15px; height: 15px; background-color: ${ex.colorHex}; border: 1px solid #333; margin-right: 10px;"></div><span>${ex.problem} = </span>`; werkbladLegendContent.appendChild(item); });
     }
     function drawExercisesPreview() {
-        werkbladTitle.textContent = "Werkblad Voorbeeld"; werkbladLegendContainer.style.display = 'block'; werkbladLegendTitle.textContent = "Kleurcode:";
-        const contentWrapper = document.getElementById('werkblad-content'); const availableWidth = contentWrapper.clientWidth - 40;
-        werkbladCanvas.width = availableWidth; werkbladCanvas.height = (availableWidth / gridWidth) * gridHeight;
+        werkbladTitle.textContent = "Werkbladpreview"; werkbladLegendContainer.style.display = 'block'; werkbladLegendTitle.textContent = "Kleurcode:";
         const { legendData, distractorNumbers } = getWorksheetData();
-        const werkbladCellSize = werkbladCanvas.width / gridWidth;
+        const exerciseCount=[...legendData.values()].reduce((sum,list)=>sum+list.length,0),legendReserve=48+Math.ceil(exerciseCount/2)*27;
+        const metrics=previewPageMetrics(legendReserve),werkbladCellSize=Math.min(metrics.width/gridWidth,metrics.maxCanvasHeight/gridHeight);
+        werkbladCanvas.width = werkbladCellSize*gridWidth; werkbladCanvas.height = werkbladCellSize*gridHeight;
         werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
         drawGridLines(werkbladCtx, gridWidth, gridHeight, werkbladCellSize);
         werkbladCtx.textAlign = 'center'; werkbladCtx.textBaseline = 'middle'; werkbladCtx.fillStyle = 'black';
         const fontSize = Math.max(10, werkbladCellSize * 0.7); werkbladCtx.font = `${fontSize}px Arial`;
         const outcomePools = new Map();
         legendData.forEach((exercises, name) => outcomePools.set(name, exercises.map(e => e.outcome)));
+        const gridNumbers = Array.from({length:gridHeight},()=>Array(gridWidth).fill(''));
         for (let r = 0; r < gridHeight; r++) {
             for (let c = 0; c < gridWidth; c++) {
                 const colorName = drawingMatrix[r][c]; let displayedNumber;
                 if (colorName === "Achtergrond") { displayedNumber = distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : ''; } 
                 else { const pool = outcomePools.get(colorName); displayedNumber = pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?'; }
+                gridNumbers[r][c] = displayedNumber;
                 werkbladCtx.fillText(displayedNumber.toString(), c * werkbladCellSize + werkbladCellSize / 2, r * werkbladCellSize + werkbladCellSize / 2);
             }
         }
+        cachedExercisePreview = {legendData,distractorNumbers,gridNumbers};
         generateAndDisplayLegend(legendData);
     }
     async function generateExercisesPdf() {
         const { jsPDF } = window.jspdf; const doc = new jsPDF('p', 'mm', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth(); const pageHeight = doc.internal.pageSize.getHeight(); const margin = 10;
-        const { legendData, distractorNumbers } = getWorksheetData(); let allExercises = [];
+        const headerBottom = addPdfWorksheetHeader(doc, pageWidth, margin);
+        const previewData = cachedExercisePreview || (()=>{const data=getWorksheetData();return {...data,gridNumbers:null}})();
+        const { legendData, distractorNumbers, gridNumbers } = previewData; let allExercises = [];
         legendData.forEach((exercises, name) => { const colorInfo = getColorInfoByName(name); exercises.forEach(exercise => allExercises.push({ ...exercise, colorName: name, colorHex: colorInfo.hex })); });
-        const legendLineHeight = 8; const legendHeight = (Math.ceil(allExercises.length / 2) * legendLineHeight) + 30; const availableHeight = pageHeight - 2 * margin - legendHeight;
-        const pdfCellSize = Math.min((pageWidth - 2 * margin) / gridWidth, availableHeight / gridHeight); const textFontSize = Math.max(4, Math.min(12, pdfCellSize * 2.8));
+        const legendLineHeight = 8; const legendHeight = (Math.ceil(allExercises.length / 2) * legendLineHeight) + 30; const availableHeight = pageHeight - headerBottom - margin - legendHeight;
+        const pdfCellSize = Math.min((pageWidth - 2 * margin) / gridWidth, availableHeight / gridHeight); const gridPdfWidth=pdfCellSize*gridWidth,gridXOffset=(pageWidth-gridPdfWidth)/2; const textFontSize = Math.max(4, Math.min(12, pdfCellSize * 2.8));
         doc.setFontSize(textFontSize); const outcomePools = new Map();
-        legendData.forEach((exercises, name) => outcomePools.set(name, exercises.map(e => e.outcome))); let currentY = margin;
-        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; let num; if (colorName === "Achtergrond") { num = distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : ''; } else { const pool = outcomePools.get(colorName); num = pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?'; } const x = margin + c * pdfCellSize; const y = currentY + r * pdfCellSize; doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.25); doc.rect(x, y, pdfCellSize, pdfCellSize); doc.text(num.toString(), x + pdfCellSize / 2, y + pdfCellSize / 2, { align: 'center', baseline: 'middle' }); } }
+        legendData.forEach((exercises, name) => outcomePools.set(name, exercises.map(e => e.outcome))); let currentY = headerBottom;
+        for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; let num=gridNumbers?.[r]?.[c]; if(num===undefined||num===null){if (colorName === "Achtergrond") { num = distractorNumbers.length > 0 ? distractorNumbers[Math.floor(Math.random() * distractorNumbers.length)] : ''; } else { const pool = outcomePools.get(colorName); num = pool && pool.length > 0 ? pool[Math.floor(Math.random() * pool.length)] : '?'; }} const x = gridXOffset + c * pdfCellSize; const y = currentY + r * pdfCellSize; doc.setDrawColor(0, 0, 0); doc.setLineWidth(0.25); doc.rect(x, y, pdfCellSize, pdfCellSize); doc.text(num.toString(), x + pdfCellSize / 2, y + pdfCellSize / 2, { align: 'center', baseline: 'middle' }); } }
         currentY += gridHeight * pdfCellSize + 10;
         if (currentY > pageHeight - legendHeight) { doc.addPage(); currentY = margin; }
-        doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text("Oefeningen", margin, currentY); currentY += 10;
+        doc.setFontSize(14); doc.setFont('helvetica', 'bold'); doc.text("Oefeningen", pageWidth/2, currentY, {align:'center'}); currentY += 10;
         doc.setFontSize(12); doc.setFont('helvetica', 'normal');
         const initialY = currentY; const col2X = margin + (pageWidth / 2 - margin); const midpoint = Math.ceil(allExercises.length / 2);
         allExercises.forEach((exercise, index) => {
@@ -335,14 +391,13 @@ document.addEventListener("DOMContentLoaded", () => {
         doc.save(`reken-en-kleur-werkblad.pdf`);
     }
     function drawRedrawPreview() {
-        werkbladTitle.textContent = "Natekenen Voorbeeld";
+        werkbladTitle.textContent = "Werkbladpreview";
         werkbladLegendContainer.style.display = 'none';
-        const contentWrapper = document.getElementById('werkblad-content');
-        const availableWidth = (contentWrapper.clientWidth - 40) * 0.85;
-        const previewCellSize = availableWidth / gridWidth;
+        const metrics=previewPageMetrics(),availableWidth=metrics.width * .92;
         const spacing = 15;
+        const previewCellSize = Math.min(availableWidth/gridWidth,(metrics.maxCanvasHeight-spacing)/(gridHeight*2));
         const totalHeight = (previewCellSize * gridHeight * 2) + spacing;
-        werkbladCanvas.width = availableWidth;
+        werkbladCanvas.width = previewCellSize*gridWidth;
         werkbladCanvas.height = totalHeight;
         werkbladCtx.clearRect(0, 0, werkbladCanvas.width, werkbladCanvas.height);
         for (let r = 0; r < gridHeight; r++) { for (let c = 0; c < gridWidth; c++) { const colorName = drawingMatrix[r][c]; const colorInfo = getColorInfoByName(colorName); if (colorInfo) { werkbladCtx.fillStyle = colorInfo.hex; werkbladCtx.fillRect(c * previewCellSize, r * previewCellSize, previewCellSize, previewCellSize); } } }
@@ -358,9 +413,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
+        const headerBottom = addPdfWorksheetHeader(doc, pageWidth, margin);
         const spacing = 10;
         const singleDrawingMaxWidth = pageWidth - 2 * margin;
-        const singleDrawingMaxHeight = (pageHeight - 2 * margin - spacing) / 2;
+        const singleDrawingMaxHeight = (pageHeight - headerBottom - margin - spacing) / 2;
         const aspectRatio = gridWidth / gridHeight;
         let pdfDrawingWidth = singleDrawingMaxWidth;
         let pdfDrawingHeight = pdfDrawingWidth / aspectRatio;
@@ -370,7 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const xOffset = (pageWidth - pdfDrawingWidth) / 2;
         const imgData = canvas.toDataURL('image/png');
-        const yOffset1 = margin;
+        const yOffset1 = headerBottom;
         doc.addImage(imgData, 'PNG', xOffset, yOffset1, pdfDrawingWidth, pdfDrawingHeight);
         const yOffset2 = yOffset1 + pdfDrawingHeight + spacing;
         const pdfCellSize = pdfDrawingWidth / gridWidth;
@@ -413,14 +469,13 @@ document.addEventListener("DOMContentLoaded", () => {
         return data;
     }
     function drawPixelArtPreview() {
-        werkbladTitle.textContent = "Pixeltekening Voorbeeld";
+        werkbladTitle.textContent = "Werkbladpreview";
         werkbladLegendContainer.style.display = 'none';
         const data = generatePixelArtData();
-        const contentWrapper = document.getElementById('werkblad-content');
-        const availableWidth = contentWrapper.clientWidth - 40;
+        const metrics=previewPageMetrics(),availableWidth=metrics.width;
         const instructionWidth = availableWidth * 0.4;
         const gridWidthPx = availableWidth * 0.6;
-        const previewCellSize = gridWidthPx / gridWidth;
+        const previewCellSize = Math.min(gridWidthPx/gridWidth,metrics.maxCanvasHeight/gridHeight);
         const totalHeight = previewCellSize * gridHeight;
         werkbladCanvas.width = availableWidth;
         werkbladCanvas.height = totalHeight;
@@ -450,17 +505,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const pageWidth = doc.internal.pageSize.getWidth(); 
         const pageHeight = doc.internal.pageSize.getHeight(); 
         const margin = 10;
+        const headerBottom = addPdfWorksheetHeader(doc, pageWidth, margin);
         const data = generatePixelArtData();
         const instructionSquareSize = 5;
         const maxInstructions = Math.max(1, ...data.map(row => row.length));
         const instructionAreaWidth = maxInstructions * (instructionSquareSize + 1);
         const gridAreaWidth = pageWidth - instructionAreaWidth - 2 * margin;
-        const pdfCellSize = Math.min(gridAreaWidth / gridWidth, (pageHeight - 2 * margin) / gridHeight);
+        const pdfCellSize = Math.min(gridAreaWidth / gridWidth, (pageHeight - headerBottom - margin) / gridHeight);
+        const pixelContentWidth=instructionAreaWidth+pdfCellSize*gridWidth,pixelXOffset=(pageWidth-pixelContentWidth)/2;
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(instructionSquareSize * 2.8);
         for (let r = 0; r < gridHeight; r++) {
-            const y_row_top = margin + r * pdfCellSize;
-            let currentX = margin;
+            const y_row_top = headerBottom + r * pdfCellSize;
+            let currentX = pixelXOffset;
             const y_instruction_top = y_row_top + (pdfCellSize / 2) - (instructionSquareSize / 2);
             for (const inst of data[r]) {
                 const colorInfo = getColorInfoByName(inst.color);
@@ -476,13 +533,35 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentX += instructionSquareSize + 1;
             }
             for(let c = 0; c < gridWidth; c++) {
-                const gridX = margin + instructionAreaWidth + c * pdfCellSize;
+                const gridX = pixelXOffset + instructionAreaWidth + c * pdfCellSize;
                 doc.setDrawColor(0, 0, 0); 
                 doc.setLineWidth(0.25);
                 doc.rect(gridX, y_row_top, pdfCellSize, pdfCellSize);
             }
         }
         doc.save('werkblad-pixeltekening.pdf');
+    }
+
+    function drawMirrorPreview() {
+        werkbladTitle.textContent = 'Werkbladpreview'; werkbladLegendContainer.style.display = 'none';
+        const metrics=previewPageMetrics(),availableWidth=metrics.width*.92,previewCellSize=Math.min(availableWidth/gridWidth,metrics.maxCanvasHeight/gridHeight);
+        werkbladCanvas.width = availableWidth; werkbladCanvas.height = previewCellSize * gridHeight;
+        werkbladCtx.clearRect(0,0,werkbladCanvas.width,werkbladCanvas.height); werkbladCtx.fillStyle='#fff'; werkbladCtx.fillRect(0,0,werkbladCanvas.width,werkbladCanvas.height);
+        for(let r=0;r<gridHeight;r++)for(let c=0;c<gridWidth;c++){
+            if(c<mirrorAxisColumn){const colorInfo=getColorInfoByName(drawingMatrix[r][c]);if(colorInfo){werkbladCtx.fillStyle=colorInfo.hex;werkbladCtx.fillRect(c*previewCellSize,r*previewCellSize,previewCellSize,previewCellSize)}}
+        }
+        drawGridLines(werkbladCtx,gridWidth,gridHeight,previewCellSize); werkbladCtx.strokeStyle='#111';werkbladCtx.lineWidth=4;werkbladCtx.beginPath();werkbladCtx.moveTo(mirrorAxisColumn*previewCellSize,0);werkbladCtx.lineTo(mirrorAxisColumn*previewCellSize,werkbladCanvas.height);werkbladCtx.stroke();
+    }
+
+    async function generateMirrorPdf() {
+        const {jsPDF}=window.jspdf,doc=new jsPDF('p','mm','a4'),pageWidth=doc.internal.pageSize.getWidth(),pageHeight=doc.internal.pageSize.getHeight(),margin=10;
+        const headerBottom=addPdfWorksheetHeader(doc,pageWidth,margin),cell=Math.min((pageWidth-2*margin)/gridWidth,(pageHeight-headerBottom-margin)/gridHeight),xOffset=(pageWidth-cell*gridWidth)/2;
+        for(let r=0;r<gridHeight;r++)for(let c=0;c<gridWidth;c++){
+            const x=xOffset+c*cell,y=headerBottom+r*cell;
+            if(c<mirrorAxisColumn){const colorInfo=getColorInfoByName(drawingMatrix[r][c]);if(colorInfo){doc.setFillColor(colorInfo.hex);doc.rect(x,y,cell,cell,'F')}}
+            doc.setDrawColor(120);doc.setLineWidth(.18);doc.rect(x,y,cell,cell);
+        }
+        doc.setDrawColor(20);doc.setLineWidth(1);doc.line(xOffset+mirrorAxisColumn*cell,headerBottom,xOffset+mirrorAxisColumn*cell,headerBottom+gridHeight*cell);doc.save('werkblad-spiegelen.pdf');
     }
     
     async function downloadDrawingPdf() { 
@@ -535,6 +614,8 @@ document.addEventListener("DOMContentLoaded", () => {
             
             isAxisSelectionMode = false;
             canvas.style.cursor = 'crosshair';
+            showPreviewBtn.disabled = false;
+            showPreviewBtn.textContent = '3. Bekijk het A4-werkblad →';
             showMelding('Spiegelas geplaatst en rechterkant gewist.', 3000);
             redrawDrawing();
             saveState();
@@ -589,18 +670,24 @@ document.addEventListener("DOMContentLoaded", () => {
     backToThemesBtn.addEventListener('click', showThemes);
     window.addEventListener('click', (e) => { if (e.target == catalogModal) { closeCatalog(); } });
     showPreviewBtn.addEventListener('click', generateWorksheetPreview);
-    sluitWerkbladBtn.addEventListener('click', () => { werkbladModal.style.display = 'none'; });
+    sluitWerkbladBtn.addEventListener('click', () => setWorksheetPreviewMode(false));
+    werkbladBewerkenBtn.addEventListener('click', () => setWorksheetPreviewMode(false));
     werkbladDownloadPdfBtn.addEventListener('click', generateWorksheetPdf);
     werkbladDownloadPngBtn.addEventListener('click', () => { const link = document.createElement('a'); link.download = 'werkblad.png'; link.href = werkbladCanvas.toDataURL('image/png'); link.click(); });
+    worksheetTitleInput.addEventListener('input', updateWorksheetHeaderPreview);
+    worksheetInstructionInput.addEventListener('input', updateWorksheetHeaderPreview);
+    settingsTabButtons.forEach(btn=>btn.addEventListener('click',()=>showSettingsTab(btn.dataset.settingsTab)));
 
     // --- INITIALISATIE ---
     async function init() {
+        centerPanel.appendChild(werkbladModal);
         await loadCatalog();
         allTablesCheckbox.checked = false;
         populateColorPalette();
         updateOperationControls();
         updateWorksheetTypeControls(); 
         initializeDrawingCanvas();
+        showSettingsTab('drawing');
     }
 
     init();
