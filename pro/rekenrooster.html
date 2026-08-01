@@ -1,114 +1,53 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <title>Rekentabel Generator</title>
-    <meta name="google" content="notranslate">
-    <link rel="stylesheet" href="rekenrooster.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        .pro-header {
-            position: fixed; top: 0; left: 0; width: 100%;
-            background-color: #3f7fbf; padding: 8px 12px; color: #fff;
-            z-index: 1000; height: 48px;
-        }
-        .pro-header .back-link{
-            background: #5a9fd4; color: #fff; border: none; padding: 6px 10px;
-            border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none;
-            cursor: pointer; display: inline-block; white-space: nowrap;
-            /* float:left; verwijderd i.v.m. console-waarschuwing */
-        }
-        body { margin-top: 60px; }
-    </style>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rekenrooster Generator — Juf Zisa</title>
+  <link rel="stylesheet" href="rekenrooster.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header class="pro-header">
-    <a href="app.html" class="back-link">&larr; Terug naar menu</a>
-</header>
+<header class="app-header"><a class="menu-btn" href="app.html">← Keuzemenu</a><div><h1>Rekenrooster Generator</h1><p>Stel je rooster samen en bekijk meteen het werkblad.</p></div><span class="pro-pill">★ PRO</span></header>
+<div class="app-shell">
 
-<header>
-    <h1>Rekentabel Generator</h1>
-</header>
-
-<div id="main-content">
-    <div id="left-panel">
-        <div class="control-group">
-            <h3>Instellingen</h3>
-            <label>Bewerking(en):</label>
-            <div id="bewerking-keuze">
-                <label><input type="checkbox" name="bewerking" value="+"> Optellen (+)</label>
-                <label><input type="checkbox" name="bewerking" value="-"> Aftrekken (-)</label>
-                <label><input type="checkbox" name="bewerking" value="x"> Vermenigvuldigen (x)</label>
-            </div>
+  <aside class="settings"><h2>Maak je werkblad</h2>
+    <section class="step-card"><div class="step-title"><span class="step-number">1</span>Roosters en opdracht</div>
+      <div class="form-grid">
+        <div class="field"><label for="aantalTabellen">Aantal roosters</label><select id="aantalTabellen"><option value="1">1 rooster</option><option value="2">2 roosters</option><option value="3">3 roosters</option><option value="4" selected>4 roosters</option></select></div>
+        <div class="field"><label for="gridSize">Formaat</label><select id="gridSize"><option value="4">4 × 4</option><option value="5">5 × 5</option><option value="6">6 × 6</option></select></div>
+        <div class="field full" id="puzzelTypeField"><label for="puzzelType">Opdrachttype</label><select id="puzzelType"><option value="klassiek">Vul de uitkomsten in</option><option value="omgekeerd">Zoek de startgetallen</option></select></div>
+        <div class="field full"><label for="werkbladTitel">Titel op het werkblad</label><input id="werkbladTitel" type="text" value="Rekenen in een rooster"></div>
+      </div>
+    </section>
+    <section class="step-card"><div class="step-title"><span class="step-number">2</span>Inhoud van de roosters</div>
+      <div class="field full" id="brugVerdelingField"><label for="brugVerdeling">Hoe wil je de roosters instellen?</label><select id="brugVerdeling"><option value="zelfde">Alle roosters krijgen dezelfde instellingen</option><option value="perRooster">Ieder rooster apart instellen</option></select></div>
+      <div id="gezamenlijkeInstellingen">
+        <div class="field-label section-label">Bewerking</div>
+        <div class="choice-tabs operation-tabs">
+          <label class="choice-tab"><input type="radio" name="bewerking" value="+" checked><span>➕ Optellen</span></label>
+          <label class="choice-tab"><input type="radio" name="bewerking" value="-"><span>➖ Aftrekken</span></label>
+          <label class="choice-tab"><input type="radio" name="bewerking" value="mixpm"><span>🔀 Optellen én aftrekken</span></label>
+          <label class="choice-tab"><input type="radio" name="bewerking" value="x"><span>✖ Vermenigvuldigen</span></label>
+          <label class="choice-tab"><input type="radio" name="bewerking" value="mixall"><span>🎲 +, − én × op één blad</span></label>
         </div>
-        
-        <div class="control-group">
-            <label for="puzzelType">Soort Puzzel:</label>
-            <select id="puzzelType">
-                <option value="klassiek" selected>Klassiek (vul de uitkomst in)</option>
-                <option value="omgekeerd">Omgekeerd (vind het startgetal)</option>
-            </select>
+        <p class="operation-help" id="operationHint">Alle roosters op het werkblad bevatten optellingen.</p>
+        <div class="choice-tabs two number-kind" id="getalsoortTabs">
+          <label class="choice-tab"><input type="radio" name="getalsoort" value="natuurlijk" checked><span>Hele getallen</span></label>
+          <label class="choice-tab"><input type="radio" name="getalsoort" value="komma"><span>Kommagetallen</span></label>
         </div>
-
-        <div class="control-group">
-            <label for="aantalTabellen">Aantal rekentabellen:</label>
-            <div>
-                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="1" checked> 1</label>
-                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="2"> 2</label>
-                <label class="radio-inline"><input type="radio" name="aantalTabellen" value="4"> 4</label>
-            </div>
+        <div class="form-grid" style="margin-top:10px">
+          <div class="field" id="bereikField"><label for="numberRange">Getalbereik</label><select id="numberRange"><option value="10">Tot 10</option><option value="20">Tot 20</option><option value="100" selected>Tot 100</option><option value="1000">Tot 1.000</option><option value="10000">Tot 10.000</option></select></div>
+          <div class="field hidden" id="decimalenField"><label for="decimalen">Decimalen</label><select id="decimalen"><option value="1">1 cijfer na de komma</option><option value="2">2 cijfers na de komma</option></select></div>
+          <div class="field" id="brugField"><label for="brugKeuze">Brug</label><select id="brugKeuze"><option value="beide">Gemengd in elk rooster</option><option value="zonder">Zonder brug</option><option value="met">Met brug</option></select></div>
         </div>
-
-        <div class="control-group">
-            <label for="gridSize">Formaat:</label>
-            <select id="gridSize">
-                <option value="4">4x4 Rooster</option>
-                <option value="5">5x5 Rooster</option>
-                <option value="6">6x6 Rooster</option>
-            </select>
-        </div>
-
-        <div class="control-group" id="getalbereik-group">
-            <label for="numberRange">Max Getal (voor +/- startgetallen):</label>
-            <select id="numberRange">
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="100">100</option>
-                <option value="1000">1000</option>
-            </select>
-        </div>
-
-        <div class="control-group" id="tafels-group" style="display:none;">
-            <label>Tafels (voor x): <span id="tafelHint" style="font-weight: normal; font-size: 0.9em;"></span></label>
-            <div id="tafelKeuze"></div>
-        </div>
-
-        <div class="control-group">
-            <label for="legeVakken">Aantal lege vakken:</label>
-            <input type="range" id="legeVakken" min="1" max="10" value="4">
-            <span id="legeVakkenLabel">4</span>
-        </div>
-    </div>
-
-    <div id="center-panel">
-        <canvas id="roosterCanvas" width="500" height="500"></canvas>
-    </div>
-
-    <div id="right-panel-buttons">
-        <button id="genereerBtn">Nieuwe Puzzel</button>
-        <button id="oplossingBtn">Toon Oplossing</button>
-        <button id="downloadPngBtn">Download als PNG</button>
-        <button id="downloadPdfBtn">Download als PDF</button>
-    </div>
+      </div>
+      <p class="hint" id="bridgeHint">Elk rooster bevat oefeningen zonder én met brug.</p>
+      <div class="bridge-per-grid hidden" id="brugPerRooster"></div>
+      <div id="tafelsField" class="hidden"><div class="field-label" style="margin:10px 0 6px">Tafels voor vermenigvuldigroosters</div><div id="tafelKeuze" class="tafels"></div><p class="hint" id="tafelHint"></p></div>
+    </section>
+    <button class="primary-action" id="genereerBtn">▶ Maak nieuw werkblad</button>
+  </aside>
+  <main class="preview-zone"><div class="preview-toolbar"><strong>📄 Werkblad preview</strong><button class="tool-btn regen" id="regenBtn">↻ Nieuwe oefeningen</button><button class="tool-btn solution" id="oplossingBtn">👁 Toon oplossingen</button><button class="tool-btn png" id="downloadPngBtn">Afbeelding</button><button class="tool-btn pdf" id="downloadPdfBtn">↓ PDF werkblad</button><button class="tool-btn answer-pdf" id="downloadSolutionPdfBtn">✓ PDF oplossingen</button></div><div class="paper-wrap"><canvas id="roosterCanvas" width="1240" height="1754"></canvas></div></main>
 </div>
-
-<!-- Uniforme device- en guard-laag: ALTIJD in deze volgorde -->
-<script src="./device-id.js"></script>
-<script type="module" src="./guard.js"></script>
-
-<!-- Paginascript NA de guard, eenmalig laden -->
-<script src="rekenrooster.js"></script>
-</body>
-</html>
-
-
+<script src="./device-id.js"></script><script type="module" src="./guard.js"></script><script src="../rekenrooster.js"></script>
+</body></html>
