@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elementen ---
     const oefeningDiv = document.getElementById('oefening');
     const antwoordInput = document.getElementById('antwoord-input');
+    // Het spel heeft eigen grote cijfertoetsen. Voorkom daarom dat een iPad
+    // daarnaast ook nog zijn gewone schermtoetsenbord opent.
+    antwoordInput.readOnly = true;
+    antwoordInput.setAttribute('inputmode', 'none');
+    antwoordInput.addEventListener('focus', () => antwoordInput.blur());
     const toetsenbord = document.querySelector('.toetsenbord');
     const legePotImg = document.getElementById('lege-pot-overlay-img');
     const vollePotImg = document.getElementById('volle-pot-img');

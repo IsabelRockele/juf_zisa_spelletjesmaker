@@ -69,5 +69,14 @@ function improveSettingsScreen(){
   syncSelected();
   if(!startButton.closest('.zisa-start-step')){const wrapper=document.createElement('div');wrapper.className='zisa-start-step';const label=document.createElement('div');label.className='zisa-step-label';label.innerHTML=`<span class="zisa-step-number">${groups.length+1}</span><span>Klaar? Start het spel!</span>`;startButton.parentNode.insertBefore(wrapper,startButton);wrapper.append(label,startButton)}
 }
-function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation();improveSettingsScreen()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
+function suppressDuplicateTabletKeyboard(){
+  if(!document.querySelector('.toetsenbord,.numeric-keypad,.numpad,#toetsenbord'))return;
+  document.querySelectorAll('input[type="number"],input[type="text"],input[type="tel"]').forEach(input=>{
+    input.readOnly=true;
+    input.setAttribute('inputmode','none');
+    input.setAttribute('autocomplete','off');
+    input.addEventListener('focus',()=>input.blur());
+  });
+}
+function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation();improveSettingsScreen();suppressDuplicateTabletKeyboard()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
 check().then(ok=>{if(ok){readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview)setInterval(()=>join({code,deviceId}).catch(()=>location.href="../index.html"),120000)}});
