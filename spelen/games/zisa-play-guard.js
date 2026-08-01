@@ -41,5 +41,33 @@ function showHelp(){if(!help)return;let overlay=document.getElementById('zisaHel
 function replaceBackText(element,label){const cleanLabel=label.replace(/^←\s*/,'');const visibleLabel=element.querySelector('img')?cleanLabel:label;const visit=node=>{node.childNodes.forEach(child=>{if(child.nodeType===3&&child.nodeValue.trim().toLowerCase()==='terug')child.nodeValue=child.nodeValue.replace(/terug/i,visibleLabel);else if(child.nodeType===1)visit(child)})};visit(element);element.setAttribute('aria-label',cleanLabel);element.title=cleanLabel}
 function clarifyExistingBackButtons(){const label=startMatch?'← Ander leerjaar':'← Vorige stap';document.querySelectorAll('button,a').forEach(element=>{const text=element.textContent.replace(/\s+/g,' ').trim().toLowerCase();if(text==='terug')replaceBackText(element,label)})}
 function addZisaNavigation(){if(document.getElementById('zisaNavButton'))return;const grade=sessionStorage.getItem('zisa_play_grade')||startMatch?.[1]||'1';const teacher=sessionStorage.getItem('zisa_teacher_preview')==='1';const button=document.createElement('button');button.id='zisaNavButton';button.type='button';button.textContent='🏠 Ander spel kiezen';const panel=document.createElement('nav');panel.id='zisaNavPanel';panel.hidden=true;panel.innerHTML=`<strong>Wat wil je doen?</strong>${help?'<button type="button" class="primary" id="zisaShowHelp">🔊 Leg het spel uit</button>':''}<a href="start_leerjaar${grade}.html">🎮 Andere spellen van mijn leerjaar</a><a href="../index.html">🔢 Een ander leerjaar kiezen</a>${teacher?'<a href="../../pro/zisa-spelen.html">← Leerkracht: terug naar PRO</a>':''}`;document.body.append(button,panel);button.onclick=()=>panel.hidden=!panel.hidden;if(help)panel.querySelector('#zisaShowHelp').onclick=()=>{panel.hidden=true;showHelp()}}
-function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
+function improveSettingsScreen(){
+  const startButton=document.querySelector('#start-spel-knop,#startSpel,#startOefening,#startButton,#startKnop');
+  const choiceGroups=[...document.querySelectorAll('.keuze-blok')];
+  if(!startButton||(!choiceGroups.length&&!document.querySelector('.opties,.tafels-selectie')))return;
+  if(!document.querySelector('link[data-zisa-settings]')){const link=document.createElement('link');link.rel='stylesheet';link.href='kind-spelinstellingen.css?v=1';link.dataset.zisaSettings='1';document.head.append(link)}
+  document.body.classList.add('zisa-settings');
+  const pageText=(document.body.textContent+' '+[...document.images].map(image=>image.src).join(' ')).toLowerCase();
+  document.body.classList.add(pageText.includes('bibi')||pageText.includes('bijen')||pageText.includes('honing')?'zisa-theme-bibi':pageText.includes('karl')||pageText.includes('cactus')||pageText.includes('woestijn')?'zisa-theme-karl':'zisa-theme-zisa');
+  const groups=choiceGroups.length>1?choiceGroups:[...document.querySelectorAll('.keuze-blok .opties,.keuze-blok .tafels-selectie')];
+  const labelFor=group=>{
+    if(group.querySelector('[data-players]')||group.id==='player-options')return'Met hoeveel spelers?';
+    if(group.querySelector('[data-type],[data-operation]'))return'Wat wil je oefenen?';
+    if(group.querySelector('[data-tafel],.tafel'))return'Welke tafels kies je?';
+    if(group.querySelector('[data-max]'))return'Tot welk getal wil je splitsen?';
+    if(group.querySelector('[data-level],.level'))return group.querySelector('.level')?'Kies hoe moeilijk':'Tot welk getal wil je rekenen?';
+    return'Maak je keuze';
+  };
+  groups.forEach((group,index)=>{
+    if(group.querySelector(':scope > .zisa-step-label'))return;
+    const label=document.createElement('div');label.className='zisa-step-label';label.innerHTML=`<span class="zisa-step-number">${index+1}</span><span>${labelFor(group)}</span>`;
+    if(choiceGroups.length>1)group.prepend(label);else{const heading=group.previousElementSibling;if(heading&&/^H[1-4]$/.test(heading.tagName))heading.classList.add('zisa-replaced-heading');group.parentElement.insertBefore(label,group)}
+  });
+  const choiceButtons=document.querySelectorAll('button.keuze,button.tafel,button.level');
+  const syncSelected=()=>choiceButtons.forEach(button=>{const pressed=button.getAttribute('aria-pressed');if(pressed==='true')button.classList.add('selected');if(pressed==='false')button.classList.remove('selected')});
+  choiceButtons.forEach(button=>button.addEventListener('click',()=>setTimeout(syncSelected,0)));
+  syncSelected();
+  if(!startButton.closest('.zisa-start-step')){const wrapper=document.createElement('div');wrapper.className='zisa-start-step';const label=document.createElement('div');label.className='zisa-step-label';label.innerHTML=`<span class="zisa-step-number">${groups.length+1}</span><span>Klaar? Start het spel!</span>`;startButton.parentNode.insertBefore(wrapper,startButton);wrapper.append(label,startButton)}
+}
+function readyUi(){const build=()=>{clarifyExistingBackButtons();addZisaNavigation();improveSettingsScreen()};if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',build,{once:true});else build()}
 check().then(ok=>{if(ok){readyUi();if(help&&!sessionStorage.getItem('zisa_help_seen_'+file)){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>showHelp(),{once:true});else showHelp()}if(!isLocalPreview&&!isTeacherPreview)setInterval(()=>join({code,deviceId}).catch(()=>location.href="../index.html"),120000)}});

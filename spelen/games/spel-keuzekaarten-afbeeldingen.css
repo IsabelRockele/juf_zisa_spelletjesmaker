@@ -1,0 +1,23 @@
+.option-image {
+  position: relative;
+  overflow: hidden;
+  height: 230px;
+  padding: 12px;
+}
+
+.option-image img {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: calc(100% - 20px) !important;
+  max-height: calc(100% - 16px) !important;
+  margin: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+@media (orientation: landscape) and (max-height: 760px) {
+  .option-image { height: 185px; }
+}

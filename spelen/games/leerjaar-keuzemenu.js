@@ -1,5 +1,11 @@
 (() => {
   'use strict';
+  if(document.querySelector('.option-image')){
+    const imageStyles=document.createElement('link');
+    imageStyles.rel='stylesheet';
+    imageStyles.href='spel-keuzekaarten-afbeeldingen.css?v=2';
+    document.head.append(imageStyles);
+  }
   const speak = text => {
     if(!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
